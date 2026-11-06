@@ -19,7 +19,10 @@ import {
   saveConnectorSetOnInvestigator,
   saveConnectorsOnInvestigator,
 } from './connector_sets';
-import { createInvestigationJudges, createOrcaEvaluators } from './judges';
+import { createInvestigationJudges } from './judges';
+import { createOrcaEvaluators } from './orca/evaluators';
+import { addOrcaReport } from './orca/report';
+import { loadOrcaRubrics } from './orca/rubrics';
 import { orcaJudgeConnector } from './orca_judge';
 import { efficiencyEvaluators } from './efficiency_evaluators';
 import { INVESTIGATION_TIMEOUT_MS, runInvestigation, waitForInvestigationToEnd } from './task';
@@ -48,6 +51,8 @@ const suiteTags = [...tags.serverless.observability.complete];
 // How long an ORCA investigation that outlived its poll may take to end before its cutoff's key is
 // taken off the connector.
 const ORCA_SETTLE_MS = 2 * 60_000;
+// Writing an ORCA task's report.md after its investigation, retries included.
+const ORCA_REPORT_BUDGET_MS = 5 * 60_000;
 
 /** Registers a dataset with the native investigation task, RCA judges and execution checks. */
 export const registerInvestigationEvaluation = ({
@@ -116,10 +121,18 @@ export const registerInvestigationEvaluation = ({
           evaluationConnector: judgeConnector,
           log,
         };
+        // ORCA's agent writes its own report.md, so the model under test writes ours from the
+        // finished investigation.
+        const reportDeps = {
+          inferenceClient: inferenceClient.bindTo({ connectorId: connector.id }),
+          log,
+        };
         const judges = createInvestigationJudges(judgeDeps);
         const evaluators = [
           ...judges,
-          ...(orca ? createOrcaEvaluators(judgeDeps) : []),
+          ...(orca
+            ? createOrcaEvaluators(judgeDeps, { rubrics: await loadOrcaRubrics(evalsClient) })
+            : []),
           executionSuccessEvaluator,
           ...efficiencyEvaluators,
         ];
@@ -146,6 +159,8 @@ export const registerInvestigationEvaluation = ({
           : Math.ceil((dataset.examples.length * repetitions) / concurrency);
         const timeoutMs =
           rounds * (INVESTIGATION_TIMEOUT_MS + (orca ? ORCA_SETTLE_MS : 0) + 2 * 60_000) +
+          // A report.md is written after its cutoff's turn, so only the last one adds to the run.
+          (orca ? ORCA_REPORT_BUDGET_MS : 0) +
           5 * 60_000 +
           // Minting and checking each ORCA cutoff's key, and putting it on the connector.
           cutoffs.length * 60_000;
@@ -232,7 +247,9 @@ export const registerInvestigationEvaluation = ({
                     );
                   }
                   return output;
-                }),
+                  // The report reads only what the investigation recorded, so the next cutoff
+                  // need not wait for it.
+                }).then((output) => addOrcaReport(reportDeps, output)),
             });
           });
         } else {

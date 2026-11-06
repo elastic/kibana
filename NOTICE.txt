@@ -168,6 +168,16 @@ Licensed under the Apache License, Version 2.0, https://www.apache.org/licenses/
 Changes: ported from Python to TypeScript with its prompts, schemas and scoring unchanged.
 
 ---
+The ORCA report instructions in @kbn/evals-suite-nightshift-investigations
+(`orca/report_prompt/orca_instructions.text`) are adapted from the ORCA benchmark's task template
+`harbor-template/instruction.md.template` (https://github.com/ORCA-bench/ORCA-bench), from
+"ORCA: How Ready Are Language Model Agents for Oncall?" (arXiv:2607.28545).
+Copyright 2026 Traversal, Inc.
+Licensed under the Apache License, Version 2.0, https://www.apache.org/licenses/LICENSE-2.0
+Changes: only the report instructions are kept, and they ask for the report to be returned
+rather than written to /app/report.md.
+
+---
 This code includes a copy of the `normalize-path`
 https://github.com/jonschlinkert/normalize-path/blob/52c3a95ebebc2d98c1ad7606cbafa7e658656899/index.js
 
