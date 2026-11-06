@@ -9,13 +9,13 @@
 
 import { esql } from '@elastic/esql';
 import type { MetricsGridSettings } from '@kbn/discover-utils';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { ParsedMetricItem } from '../../../types';
-import { firstNonNullable } from '../first_null_nullable';
 import { createESQLQuery } from './create_esql_query';
 
 interface CreateExemplarsQueryParams {
   metricItem: ParsedMetricItem;
+  /** False when the chart does not run a time-series query, including `unsigned_long` and heatmaps. */
+  isSupported: boolean;
   whereStatements?: string[];
   metadataFields?: string[];
   originalSource?: string;
@@ -23,21 +23,19 @@ interface CreateExemplarsQueryParams {
 }
 
 /**
- * Builds the exemplar query for one metric chart, or `''` when the chart has no time-series query
- * or its field type is `unsigned_long`. Those charts are never queried: ES|QL rejects aggregations
- * such as `SUM(RATE())` on `unsigned_long`, and a failed fetch would show "Exemplars unavailable".
- * Uses the chart's `TS | STATS` query with no breakdown dimensions, so a grid split does not
- * change which exemplars are fetched.
+ * Builds the exemplar query for one metric chart, or `''` when `isSupported` is false or the chart
+ * has no time-series query. Uses the chart's `TS | STATS` query with no breakdown dimensions, so a
+ * grid split does not change which exemplars are fetched.
  */
 export function createExemplarsQuery({
   metricItem,
+  isSupported,
   whereStatements,
   metadataFields,
   originalSource,
   gridSettings,
 }: CreateExemplarsQueryParams): string {
-  // Same guard as the chart query in metrics_grid.tsx.
-  if (firstNonNullable(metricItem.fieldTypes) === ES_FIELD_TYPES.UNSIGNED_LONG) {
+  if (!isSupported) {
     return '';
   }
 

@@ -31,7 +31,7 @@ import {
   FEATURE_FLAGS,
 } from '../../../common/constants';
 import { useFeatureFlag } from '../../../hooks/use_feature_flag';
-import { EXEMPLARS_FETCH_FAILED_USER_MESSAGE } from '../../../common/utils/user_messages';
+import { getExemplarsFetchFailedUserMessage } from '../../../common/utils/user_messages';
 import { useFetchExemplars } from './hooks/use_fetch_exemplars';
 import { dismissAllFlyoutsExceptFor, METRICS_GRID_SETTINGS_DEFAULTS } from '@kbn/discover-utils';
 import {
@@ -303,16 +303,33 @@ describe('MetricsGrid', () => {
     );
   });
 
+  it('skips the exemplar fetch for an unsigned_long metric', () => {
+    renderMetricsGrid({
+      metricItems: [
+        {
+          ...metricItems[0],
+          fieldTypes: [ES_FIELD_TYPES.UNSIGNED_LONG],
+        },
+      ],
+    });
+
+    expect(useFetchExemplars).toHaveBeenCalledWith(expect.objectContaining({ isSupported: false }));
+  });
+
   it('adds an exemplars warning without failing the chart when the fetch fails', () => {
-    jest.mocked(useFetchExemplars).mockReturnValue({ exemplars: undefined, hasError: true });
+    const errorMessage = 'verification_exception: unknown setting [exemplars]';
+    jest
+      .mocked(useFetchExemplars)
+      .mockReturnValue({ exemplars: undefined, hasError: true, errorMessage });
 
     renderMetricsGrid();
 
+    expect(useFetchExemplars).toHaveBeenCalledWith(expect.objectContaining({ isSupported: true }));
     expect(Chart).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
         error: undefined,
-        userMessages: [EXEMPLARS_FETCH_FAILED_USER_MESSAGE],
+        userMessages: [getExemplarsFetchFailedUserMessage(errorMessage)],
         lensConfig: expect.objectContaining({
           dataset: expect.objectContaining({
             esql: expect.stringContaining('system.cpu.utilization'),
@@ -324,7 +341,10 @@ describe('MetricsGrid', () => {
   });
 
   it('keeps an existing chart warning when the exemplars fetch also fails', () => {
-    jest.mocked(useFetchExemplars).mockReturnValue({ exemplars: undefined, hasError: true });
+    const errorMessage = 'verification_exception: unknown setting [exemplars]';
+    jest
+      .mocked(useFetchExemplars)
+      .mockReturnValue({ exemplars: undefined, hasError: true, errorMessage });
     const messagesForCpu = [
       {
         uniqueId: 'cpu-message',
@@ -344,13 +364,15 @@ describe('MetricsGrid', () => {
     expect(Chart).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
-        userMessages: [...messagesForCpu, EXEMPLARS_FETCH_FAILED_USER_MESSAGE],
+        userMessages: [...messagesForCpu, getExemplarsFetchFailedUserMessage(errorMessage)],
       }),
       expect.anything()
     );
     expect(Chart).toHaveBeenNthCalledWith(
       2,
-      expect.objectContaining({ userMessages: [EXEMPLARS_FETCH_FAILED_USER_MESSAGE] }),
+      expect.objectContaining({
+        userMessages: [getExemplarsFetchFailedUserMessage(errorMessage)],
+      }),
       expect.anything()
     );
   });
@@ -1400,6 +1422,9 @@ describe('MetricsGrid', () => {
       );
 
       expect(createESQLQuery).toHaveBeenCalled();
+      expect(useFetchExemplars).toHaveBeenCalledWith(
+        expect.objectContaining({ isSupported: true })
+      );
       expect(Chart).toHaveBeenCalledWith(
         expect.objectContaining({
           disableClickFilter: false,
@@ -1460,6 +1485,9 @@ describe('MetricsGrid', () => {
       });
 
       expect(createESQLQuery).not.toHaveBeenCalled();
+      expect(useFetchExemplars).toHaveBeenCalledWith(
+        expect.objectContaining({ isSupported: false })
+      );
       expect(Chart).toHaveBeenCalledWith(
         expect.objectContaining({
           disableClickFilter: true,

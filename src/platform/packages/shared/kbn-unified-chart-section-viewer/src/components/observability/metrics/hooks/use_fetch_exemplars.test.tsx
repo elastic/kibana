@@ -102,6 +102,7 @@ const createParams = (
   metadataFields: TEST_METADATA_FIELDS,
   gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
   profileId: TEST_PROFILE_ID,
+  isSupported: true,
   isComponentVisible: true,
   ...overrides,
 });
@@ -172,6 +173,17 @@ describe('useFetchExemplars', () => {
     expect(result.current).toEqual(IDLE_FETCH);
   });
 
+  it('does not fetch when the chart is unsupported', async () => {
+    const params = createParams({ isSupported: false });
+
+    const { result } = renderHook(() => useFetchExemplars(params));
+
+    await flushAsync();
+    expect(mockCreateExemplarsQuery).not.toHaveBeenCalled();
+    expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
+    expect(result.current).toEqual(IDLE_FETCH);
+  });
+
   it('does not fetch when the chart query is empty', async () => {
     mockCreateExemplarsQuery.mockReturnValue('');
     const params = createParams();
@@ -228,6 +240,7 @@ describe('useFetchExemplars', () => {
     await flushAsync();
     expect(mockCreateExemplarsQuery).toHaveBeenCalledWith({
       metricItem: mockMetric,
+      isSupported: true,
       whereStatements: TEST_WHERE_STATEMENTS,
       metadataFields: TEST_METADATA_FIELDS,
       originalSource: 'remote:metrics-generic.otel-default',
@@ -290,6 +303,41 @@ describe('useFetchExemplars', () => {
     expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
   });
 
+  it('does not refetch when a replaced metric item builds the same query', async () => {
+    const params = createParams();
+    const { rerender } = renderHook((props: UseFetchExemplarsParams) => useFetchExemplars(props), {
+      initialProps: params,
+    });
+    await flushAsync();
+
+    rerender({
+      ...params,
+      metricItem: { ...mockMetric },
+      whereStatements: [...TEST_WHERE_STATEMENTS],
+      metadataFields: [...TEST_METADATA_FIELDS],
+    });
+    await flushAsync();
+
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+  });
+
+  it('refetches when the exemplar query changes', async () => {
+    const params = createParams();
+    const { rerender } = renderHook((props: UseFetchExemplarsParams) => useFetchExemplars(props), {
+      initialProps: params,
+    });
+    await flushAsync();
+
+    mockCreateExemplarsQuery.mockReturnValue(`${TEST_ESQL_QUERY}\n| KEEP value`);
+    rerender({
+      ...params,
+      metricItem: { ...mockMetric, metricName: 'other.metric' },
+    });
+    await flushAsync();
+
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
+  });
+
   it('returns undefined while the fetch is in flight', () => {
     mockExecuteEsqlQuery.mockReturnValue(new Promise(() => {}));
     const params = createParams();
@@ -326,7 +374,11 @@ describe('useFetchExemplars', () => {
         source: 'useFetchExemplars',
         labels: { profile_id: TEST_PROFILE_ID },
       });
-      expect(result.current).toEqual({ exemplars: undefined, hasError: true });
+      expect(result.current).toEqual({
+        exemplars: undefined,
+        hasError: true,
+        errorMessage: 'network failure',
+      });
     });
   });
 

@@ -7,10 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+jest.mock('./create_esql_query', () => ({
+  createESQLQuery: jest.fn(),
+}));
+
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { METRICS_GRID_SETTINGS_DEFAULTS } from '@kbn/discover-utils';
 import type { ParsedMetricItem } from '../../../types';
+import { createESQLQuery } from './create_esql_query';
 import { createExemplarsQuery } from './create_exemplars_query';
+
+const mockCreateESQLQuery = createESQLQuery as jest.MockedFunction<typeof createESQLQuery>;
 
 const mockMetric: ParsedMetricItem = {
   metricName: 'metrics.http.server.request.duration',
@@ -24,166 +31,76 @@ const mockMetric: ParsedMetricItem = {
   ],
 };
 
-const STATS_CLAUSE = 'STATS PERCENTILE(metrics.http.server.request.duration, 95) BY TBUCKET(100)';
+const CHART_QUERY = `
+TS metrics-generic.otel-default
+  | STATS PERCENTILE(metrics.http.server.request.duration, 95) BY TBUCKET(100)
+`.trim();
+
+const CHART_QUERY_WITH_NULLIFY = `
+SET unmapped_fields = "NULLIFY";
+${CHART_QUERY}
+`.trim();
 
 describe('createExemplarsQuery', () => {
+  beforeEach(() => {
+    mockCreateESQLQuery.mockReset();
+    mockCreateESQLQuery.mockReturnValue(CHART_QUERY);
+  });
+
   it('prefixes SET exemplars onto the chart time-series query', () => {
-    expect(createExemplarsQuery({ metricItem: mockMetric })).toBe(
+    expect(createExemplarsQuery({ metricItem: mockMetric, isSupported: true })).toBe(
       `
 SET exemplars = TRUE;
-TS metrics-generic.otel-default
-  | ${STATS_CLAUSE}
+${CHART_QUERY}
 `.trim()
     );
   });
 
-  it('keeps inherited WHERE clauses and nullifies unmapped fields when they name a user column', () => {
-    expect(
-      createExemplarsQuery({
-        metricItem: mockMetric,
-        whereStatements: [
-          ' attributes.http.route == "/orders" ',
-          '',
-          'attributes.http.response.status_code >= 500',
-          '  \n\t  ',
-        ],
-      })
-    ).toBe(
+  it('keeps a SET command already present on the chart query', () => {
+    mockCreateESQLQuery.mockReturnValue(CHART_QUERY_WITH_NULLIFY);
+
+    expect(createExemplarsQuery({ metricItem: mockMetric, isSupported: true })).toBe(
       `
 SET unmapped_fields = "NULLIFY";
 SET exemplars = TRUE;
-TS metrics-generic.otel-default
-  | WHERE attributes.http.route == "/orders"
-  | WHERE attributes.http.response.status_code >= 500
-  | ${STATS_CLAUSE}
+${CHART_QUERY}
 `.trim()
     );
   });
 
-  it('declares metadata fields the WHERE statements use', () => {
-    expect(
-      createExemplarsQuery({
-        metricItem: mockMetric,
-        whereStatements: ['_ignored IS NULL'],
-        metadataFields: ['_ignored'],
-      })
-    ).toBe(
-      `
-SET unmapped_fields = "NULLIFY";
-SET exemplars = TRUE;
-TS metrics-generic.otel-default METADATA _ignored
-  | WHERE _ignored IS NULL
-  | ${STATS_CLAUSE}
-`.trim()
-    );
-  });
+  it('forwards the chart query params and never passes breakdown dimensions', () => {
+    const whereStatements = ['attributes.http.route == "/orders"'];
+    const metadataFields = ['_ignored'];
+    const originalSource = 'remote:metrics-generic.otel-default';
+    const gridSettings = METRICS_GRID_SETTINGS_DEFAULTS;
 
-  it('queries a Prometheus remote-write source the same way as an OTel source', () => {
-    const prometheusMetric: ParsedMetricItem = {
-      ...mockMetric,
-      metricName: 'metrics.http_requests_total',
-      indexName: 'metrics-prometheus.remote_write-default',
-      metricTypes: ['counter'],
-      fieldTypes: [ES_FIELD_TYPES.LONG],
-      dimensionFields: [],
-    };
-
-    expect(createExemplarsQuery({ metricItem: prometheusMetric })).toBe(
-      `
-SET exemplars = TRUE;
-TS metrics-prometheus.remote_write-default
-  | STATS SUM(RATE(metrics.http_requests_total)) BY TBUCKET(100)
-`.trim()
-    );
-  });
-
-  it('uses a concrete user source, including a remote cluster prefix', () => {
-    expect(
-      createExemplarsQuery({
-        metricItem: mockMetric,
-        originalSource: 'remote:metrics-generic.otel-default',
-      })
-    ).toBe(
-      `
-SET exemplars = TRUE;
-TS remote:metrics-generic.otel-default
-  | ${STATS_CLAUSE}
-`.trim()
-    );
-  });
-
-  it('follows the cluster-qualified metric index when the typed source is a remote or wildcard-cluster pattern', () => {
-    const cases = [
-      {
-        originalSource: 'remote:metrics-*',
-        indexName: 'remote:metrics-generic.otel-default',
-      },
-      {
-        originalSource: '*:metrics-*',
-        indexName: 'other:metrics-generic.otel-default',
-      },
-    ];
-
-    for (const { originalSource, indexName } of cases) {
-      expect(
-        createExemplarsQuery({
-          metricItem: { ...mockMetric, indexName },
-          originalSource,
-        })
-      ).toBe(
-        `
-SET exemplars = TRUE;
-TS ${indexName}
-  | ${STATS_CLAUSE}
-`.trim()
-      );
-    }
-  });
-
-  it('applies the grid aggregation settings', () => {
-    expect(
-      createExemplarsQuery({
-        metricItem: mockMetric,
-        gridSettings: { ...METRICS_GRID_SETTINGS_DEFAULTS, histogramPercentile: 'p50' },
-      })
-    ).toContain('PERCENTILE(metrics.http.server.request.duration, 50)');
-  });
-
-  it('aggregates by the time bucket only, so a grid breakdown cannot change the fetch', () => {
-    const query = createExemplarsQuery({ metricItem: mockMetric });
-
-    expect(query).toContain('BY TBUCKET(100)');
-    expect(query).not.toContain('attributes.http.route');
-    expect(query).not.toContain('resource.attributes.service.name');
-  });
-
-  describe('returns an empty string so callers skip the fetch', () => {
-    it('when the metric has no field type', () => {
-      expect(
-        createExemplarsQuery({
-          metricItem: { ...mockMetric, fieldTypes: [] },
-        })
-      ).toBe('');
+    createExemplarsQuery({
+      metricItem: mockMetric,
+      isSupported: true,
+      whereStatements,
+      metadataFields,
+      originalSource,
+      gridSettings,
     });
 
-    it('when the metric has no instrument', () => {
-      expect(
-        createExemplarsQuery({
-          metricItem: { ...mockMetric, metricTypes: [] },
-        })
-      ).toBe('');
+    expect(mockCreateESQLQuery).toHaveBeenCalledWith({
+      metricItem: mockMetric,
+      splitAccessors: [],
+      whereStatements,
+      metadataFields,
+      originalSource,
+      gridSettings,
     });
+  });
 
-    it('when the metric field type is unsigned_long', () => {
-      expect(
-        createExemplarsQuery({
-          metricItem: {
-            ...mockMetric,
-            metricTypes: ['counter'],
-            fieldTypes: [ES_FIELD_TYPES.UNSIGNED_LONG],
-          },
-        })
-      ).toBe('');
-    });
+  it('returns an empty string when the chart query is empty', () => {
+    mockCreateESQLQuery.mockReturnValue('');
+
+    expect(createExemplarsQuery({ metricItem: mockMetric, isSupported: true })).toBe('');
+  });
+
+  it('returns an empty string without building a chart query when the chart is unsupported', () => {
+    expect(createExemplarsQuery({ metricItem: mockMetric, isSupported: false })).toBe('');
+    expect(mockCreateESQLQuery).not.toHaveBeenCalled();
   });
 });
