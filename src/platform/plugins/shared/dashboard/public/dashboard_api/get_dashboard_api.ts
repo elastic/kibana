@@ -42,7 +42,7 @@ import { initializeTrackContentfulRender } from './track_contentful_render';
 import { initializeTrackOverlay } from './track_overlay';
 import { initializeTrackPanel } from './track_panel';
 import type { DashboardRedirect } from '../dashboard_app/types';
-import { coreServices } from '../services/kibana_services';
+import { coreServices, embeddableService } from '../services/kibana_services';
 import type {
   DashboardApi,
   DashboardCreationOptions,
@@ -317,7 +317,11 @@ export function getDashboardApi({
       attributes: getState(),
     }),
     diffStates: (baseline: DashboardState, current: DashboardState) =>
-      diffDashboardStates(baseline, current, layoutManager.api.children$.getValue()),
+      diffDashboardStates(
+        baseline,
+        current,
+        async (type) => (await embeddableService.getEmbeddableDefinition(type))?.stateComparison
+      ),
     setState,
     runInteractiveSave: (redirectTo?: DashboardRedirect) => {
       trackOverlayApi.clearOverlays();

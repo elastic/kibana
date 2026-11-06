@@ -8,7 +8,8 @@
  */
 
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
-import { apiHasSerializableState, apiHasType, diffComparators } from '@kbn/presentation-publishing';
+import type { SerializedStateComparison } from '@kbn/presentation-publishing';
+import { areComparatorsEqual, diffComparators } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
 import { getLayoutChanges } from './layout_manager/are_layouts_equal';
 import { deserializeLayout } from './layout_manager/deserialize_layout';
@@ -28,6 +29,26 @@ interface LayoutItem {
 const getLayoutIds = (items: LayoutItem[] = []): string[] =>
   items.flatMap(({ id, panels }) => [...(id === undefined ? [] : [id]), ...getLayoutIds(panels)]);
 
+/** Resolves the stateless comparison rules registered for an embeddable type. */
+export type GetStateComparison = (type: string) => Promise<SerializedStateComparison | undefined>;
+
+const loadStateComparisons = async (
+  types: string[],
+  getStateComparison: GetStateComparison
+): Promise<Map<string, SerializedStateComparison | undefined>> => {
+  const entries = await Promise.all(
+    [...new Set(types)].map(async (type) => {
+      try {
+        return [type, await getStateComparison(type)] as const;
+      } catch (error) {
+        logger.warn(`Unable to load the state comparison for panel type "${type}".`, { error });
+        return [type, undefined] as const;
+      }
+    })
+  );
+  return new Map(entries);
+};
+
 const withComparisonIds = <Item extends LayoutItem>(
   items: Item[] | undefined,
   prefix: string
@@ -38,17 +59,16 @@ const withComparisonIds = <Item extends LayoutItem>(
     ...(item.panels && { panels: withComparisonIds(item.panels, `${prefix}${index}:`) }),
   }));
 
-const diffLayout = (
+const diffLayout = async (
   baseline: DashboardState,
   current: DashboardState,
-  children?: { [id: string]: unknown }
-): Partial<Pick<DashboardState, 'panels' | 'pinned_panels'>> => {
+  getStateComparison: GetStateComparison
+): Promise<Partial<Pick<DashboardState, 'panels' | 'pinned_panels'>>> => {
   const explicitIds = [
     ...getLayoutIds(baseline.panels),
     ...getLayoutIds(baseline.pinned_panels),
     ...getLayoutIds(current.panels),
     ...getLayoutIds(current.pinned_panels),
-    ...Object.keys(children ?? {}),
   ];
   let prefix = '__comparison:';
   while (explicitIds.some((id) => id.startsWith(prefix))) {
@@ -66,20 +86,29 @@ const diffLayout = (
   const getType = ({ layout }: typeof baselineLayout, panelId: string) =>
     (layout.panels[panelId] ?? layout.pinnedPanels[panelId])?.type;
 
+  const comparisons = await loadStateComparisons(
+    [
+      ...Object.values(currentLayout.layout.panels),
+      ...Object.values(currentLayout.layout.pinnedPanels),
+    ].map(({ type }) => type),
+    getStateComparison
+  );
+
   const isPanelChanged = (panelId: string) => {
     const currentType = getType(currentLayout, panelId);
     if (getType(baselineLayout, panelId) !== currentType) return true;
     const baselinePanel = baselineLayout.childState[panelId];
     const currentPanel = currentLayout.childState[panelId];
-    // live panel comparators skip ref_id since it is fixed for a loaded panel
     if (getRefId(baselinePanel) !== getRefId(currentPanel)) return true;
-    const child = children?.[panelId];
+    const comparison = currentType === undefined ? undefined : comparisons.get(currentType);
     try {
-      return apiHasSerializableState(child) &&
-        child.compareSerializedState &&
-        apiHasType(child) &&
-        child.type === currentType
-        ? !child.compareSerializedState(baselinePanel, currentPanel)
+      return comparison
+        ? !areComparatorsEqual(
+            comparison.comparators,
+            baselinePanel,
+            currentPanel,
+            comparison.defaultState
+          )
         : !deepEqual(baselinePanel, currentPanel);
     } catch (error) {
       logger.warn(`Unable to compare serialized state for dashboard panel "${panelId}".`, {
@@ -104,13 +133,14 @@ const diffLayout = (
 
 /**
  * The changes from `baseline` to `current`, in the same shape the unsaved-changes manager
- * produces. Pass the open dashboard's children so each panel uses its own comparators.
+ * produces. Panels are compared with the rules registered on their embeddable definition,
+ * or by value when their type has none.
  */
-export const diffDashboardStates = (
+export const diffDashboardStates = async (
   baseline: DashboardState,
   current: DashboardState,
-  children?: { [id: string]: unknown }
-): Partial<DashboardState> => {
+  getStateComparison: GetStateComparison
+): Promise<Partial<DashboardState>> => {
   // The current state only has time_range / project_routing while its restore flag is on, the
   // flag unsaved changes reads. Flag changes themselves are reported by the settings diff.
   const timeRestore = Boolean(current.time_range);
@@ -136,6 +166,6 @@ export const diffDashboardStates = (
       baseline,
       current
     ),
-    ...diffLayout(baseline, current, children),
+    ...(await diffLayout(baseline, current, getStateComparison)),
   };
 };

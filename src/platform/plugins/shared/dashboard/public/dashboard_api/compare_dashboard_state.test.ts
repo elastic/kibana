@@ -9,7 +9,7 @@
 
 import type { DashboardPanel, DashboardState } from '@kbn/as-code-dashboard-schema';
 import { getControlsSchema } from '@kbn/controls-schemas';
-import { EMPTY } from 'rxjs';
+import type { SerializedStateComparison, StateComparators } from '@kbn/presentation-publishing';
 import { logger } from '../services/logger';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
 import { diffDashboardStates } from './compare_dashboard_state';
@@ -22,17 +22,21 @@ const section = (collapsed: boolean) => ({
   panels: [],
 });
 
-const childApi = (
-  type: string,
-  compareSerializedState: (baseline: never, current: never) => boolean
-) => ({
-  type,
-  compareSerializedState,
-  serializeState: () => ({}),
-  applySerializedState: () => undefined,
-  anyStateChange$: EMPTY,
-  latestState$: EMPTY,
-});
+const comparison = (
+  compare: (baseline: never, current: never) => boolean
+): SerializedStateComparison => {
+  const comparators: StateComparators<{ whole_state?: unknown }> = {
+    whole_state: (_baselineValue, _currentValue, baseline, current) =>
+      compare(baseline as never, current as never),
+  };
+  return { comparators };
+};
+
+const diffStates = (
+  baseline: DashboardState,
+  current: DashboardState,
+  comparisons: Record<string, SerializedStateComparison> = {}
+) => diffDashboardStates(baseline, current, async (type) => comparisons[type]);
 
 const state = (overrides: Partial<DashboardState> = {}): DashboardState =>
   ({
@@ -43,19 +47,19 @@ const state = (overrides: Partial<DashboardState> = {}): DashboardState =>
   } as DashboardState);
 
 describe('diffDashboardStates', () => {
-  it('finds no changes between a closed and reopened section', () => {
-    expect(diffDashboardStates(state(), state({ panels: [section(false)] }))).toEqual({});
+  it('finds no changes between a closed and reopened section', async () => {
+    expect(await diffStates(state(), state({ panels: [section(false)] }))).toEqual({});
   });
 
-  it('returns the current panels when a section is closed', () => {
+  it('returns the current panels when a section is closed', async () => {
     const current = state({ panels: [section(true)] });
 
-    expect(diffDashboardStates(state(), current)).toEqual({ panels: current.panels });
+    expect(await diffStates(state(), current)).toEqual({ panels: current.panels });
   });
 
-  it('ignores fields the unsaved-changes manager does not compare', () => {
+  it('ignores fields the unsaved-changes manager does not compare', async () => {
     expect(
-      diffDashboardStates(
+      await diffStates(
         state(),
         state({
           access_control: { accessMode: 'read' },
@@ -64,92 +68,90 @@ describe('diffDashboardStates', () => {
     ).toEqual({});
   });
 
-  it('returns a changed title', () => {
-    expect(diffDashboardStates(state(), state({ title: 'Errors' }))).toEqual({ title: 'Errors' });
+  it('returns a changed title', async () => {
+    expect(await diffStates(state(), state({ title: 'Errors' }))).toEqual({ title: 'Errors' });
   });
 
-  it('returns all current options when one option changes', () => {
+  it('returns all current options when one option changes', async () => {
     const options = {
       ...DEFAULT_DASHBOARD_OPTIONS,
       use_margins: !DEFAULT_DASHBOARD_OPTIONS.use_margins,
     };
 
-    expect(diffDashboardStates(state(), state({ options }))).toEqual({ options });
+    expect(await diffStates(state(), state({ options }))).toEqual({ options });
   });
 
-  it('treats a missing ES|QL approximation as off', () => {
-    expect(diffDashboardStates(state(), state({ esql_approximation: false }))).toEqual({});
-    expect(diffDashboardStates(state(), state({ esql_approximation: true }))).toEqual({
+  it('treats a missing ES|QL approximation as off', async () => {
+    expect(await diffStates(state(), state({ esql_approximation: false }))).toEqual({});
+    expect(await diffStates(state(), state({ esql_approximation: true }))).toEqual({
       esql_approximation: true,
     });
   });
 
-  it('returns a changed project routing', () => {
+  it('returns a changed project routing', async () => {
     expect(
-      diffDashboardStates(
+      await diffStates(
         state({ project_routing: '_alias:_origin' }),
         state({ project_routing: '_alias:_origin' })
       )
     ).toEqual({});
     expect(
-      diffDashboardStates(
+      await diffStates(
         state({ project_routing: '_alias:_origin' }),
         state({ project_routing: '_alias:*' })
       )
     ).toEqual({ project_routing: '_alias:*' });
   });
 
-  it('compares the time range and refresh interval only with time restore on', () => {
+  it('compares the time range and refresh interval only with time restore on', async () => {
     const timeRange = { from: 'now-15m', to: 'now' };
     expect(
-      diffDashboardStates(
+      await diffStates(
         state({ refresh_interval: { pause: false, value: 60000 } }),
         state({ refresh_interval: { pause: true, value: 60000 } })
       )
     ).toEqual({});
     expect(
-      diffDashboardStates(
+      await diffStates(
         state({ time_range: timeRange, refresh_interval: { pause: false, value: 60000 } }),
         state({ time_range: timeRange, refresh_interval: { pause: true, value: 60000 } })
       )
     ).toEqual({ refresh_interval: { pause: true, value: 60000 } });
     expect(
-      diffDashboardStates(
+      await diffStates(
         state({ time_range: timeRange }),
         state({ time_range: { from: 'now-1h', to: 'now' } })
       )
     ).toEqual({ time_range: { from: 'now-1h', to: 'now' } });
   });
 
-  it('returns turning time restore on with the stored time range', () => {
+  it('returns turning time restore on with the stored time range', async () => {
     const timeRange = { from: 'now-15m', to: 'now' };
 
-    expect(diffDashboardStates(state(), state({ time_range: timeRange }))).toEqual({
+    expect(await diffStates(state(), state({ time_range: timeRange }))).toEqual({
       time_restore: true,
       time_range: timeRange,
     });
   });
 
-  it('returns only turning time restore off, like unsaved changes reads the current flag', () => {
+  it('returns only turning time restore off, like unsaved changes reads the current flag', async () => {
     const timeRange = { from: 'now-15m', to: 'now' };
 
     expect(
-      diffDashboardStates(
+      await diffStates(
         state({ time_range: timeRange, refresh_interval: { pause: false, value: 60000 } }),
         state()
       )
     ).toStrictEqual({ time_restore: false });
   });
 
-  it('returns only turning project routing restore off', () => {
-    expect(
-      diffDashboardStates(state({ project_routing: '_alias:_origin' }), state())
-    ).toStrictEqual({
+  it('returns only turning project routing restore off', async () => {
+    expect(await diffStates(state({ project_routing: '_alias:_origin' }), state())).toStrictEqual({
       project_routing_restore: false,
     });
   });
 
-  it('uses a panel comparator instead of the raw panel config', () => {
+  it('uses a panel comparator instead of the raw panel config', async () => {
     const baseline = state({
       panels: [
         {
@@ -171,11 +173,10 @@ describe('diffDashboardStates', () => {
       ],
     });
 
-    expect(diffDashboardStates(baseline, current)).toEqual({ panels: current.panels });
+    expect(await diffStates(baseline, current)).toEqual({ panels: current.panels });
     expect(
-      diffDashboardStates(baseline, current, {
-        'panel-1': childApi(
-          'lens',
+      await diffStates(baseline, current, {
+        lens: comparison(
           (
             left: { attributes?: { title?: string } } | undefined,
             right: { attributes?: { title?: string } } | undefined
@@ -185,11 +186,11 @@ describe('diffDashboardStates', () => {
     ).toEqual({});
   });
 
-  it('returns a removed description or title', () => {
-    expect(diffDashboardStates(state(), state({ description: undefined }))).toStrictEqual({
+  it('returns a removed description or title', async () => {
+    expect(await diffStates(state(), state({ description: undefined }))).toStrictEqual({
       description: undefined,
     });
-    expect(diffDashboardStates(state(), state({ title: '' }))).toStrictEqual({ title: '' });
+    expect(await diffStates(state(), state({ title: '' }))).toStrictEqual({ title: '' });
   });
 
   describe('panels', () => {
@@ -240,24 +241,24 @@ describe('diffDashboardStates', () => {
 
       it.each(idlessLayouts)(
         'compares identical ID-less %s layouts without mutation',
-        (_, layout) => {
+        async (_, layout) => {
           const baseline = state(layout('Count'));
           const current = state(layout('Count'));
           const originalBaseline = JSON.stringify(baseline);
           const originalCurrent = JSON.stringify(current);
 
-          expect(diffDashboardStates(baseline, baseline)).toStrictEqual({});
-          expect(diffDashboardStates(baseline, current)).toStrictEqual({});
+          expect(await diffStates(baseline, baseline)).toStrictEqual({});
+          expect(await diffStates(baseline, current)).toStrictEqual({});
           expect(JSON.stringify(baseline)).toBe(originalBaseline);
           expect(JSON.stringify(current)).toBe(originalCurrent);
         }
       );
 
-      it.each(idlessLayouts)('detects config changes in an ID-less %s', (_, layout, key) => {
+      it.each(idlessLayouts)('detects config changes in an ID-less %s', async (_, layout, key) => {
         const baseline = state(layout('Count'));
         const current = state(layout('Errors'));
 
-        const diff = diffDashboardStates(baseline, current);
+        const diff = await diffStates(baseline, current);
 
         expect(diff).toStrictEqual({ [key]: current[key] });
         expect(diff[key]).toBe(current[key]);
@@ -282,12 +283,15 @@ describe('diffDashboardStates', () => {
         ],
       ];
 
-      it.each(explicitLayouts)('treats different explicit %s IDs as a change', (_, layout, key) => {
-        const baseline = state(layout('first'));
-        const current = state(layout('second'));
+      it.each(explicitLayouts)(
+        'treats different explicit %s IDs as a change',
+        async (_, layout, key) => {
+          const baseline = state(layout('first'));
+          const current = state(layout('second'));
 
-        expect(diffDashboardStates(baseline, current)).toStrictEqual({ [key]: current[key] });
-      });
+          expect(await diffStates(baseline, current)).toStrictEqual({ [key]: current[key] });
+        }
+      );
 
       const collidingLayouts: LayoutCase[] = [
         [
@@ -324,26 +328,16 @@ describe('diffDashboardStates', () => {
         ],
       ];
 
-      it.each(collidingLayouts)('avoids collisions with explicit %s IDs', (_, layout, key) => {
-        const baseline = state(layout('Count'));
-        const current = state(layout('Errors'));
+      it.each(collidingLayouts)(
+        'avoids collisions with explicit %s IDs',
+        async (_, layout, key) => {
+          const baseline = state(layout('Count'));
+          const current = state(layout('Errors'));
 
-        expect(diffDashboardStates(baseline, state(layout('Count')))).toStrictEqual({});
-        expect(diffDashboardStates(baseline, current)).toStrictEqual({ [key]: current[key] });
-      });
-
-      it('does not use a live comparator for a generated panel ID', () => {
-        const baseline = state({ panels: [lensPanel({ config: { title: 'Count' } })] });
-        const current = state({ panels: [lensPanel({ config: { title: 'Errors' } })] });
-        const compareSerializedState = jest.fn(() => true);
-
-        expect(
-          diffDashboardStates(baseline, current, {
-            '__comparison:panel:0': childApi('lens', compareSerializedState),
-          })
-        ).toStrictEqual({ panels: current.panels });
-        expect(compareSerializedState).not.toHaveBeenCalled();
-      });
+          expect(await diffStates(baseline, state(layout('Count')))).toStrictEqual({});
+          expect(await diffStates(baseline, current)).toStrictEqual({ [key]: current[key] });
+        }
+      );
     });
 
     describe('comparator failures', () => {
@@ -355,7 +349,7 @@ describe('diffDashboardStates', () => {
         jest.restoreAllMocks();
       });
 
-      it('continues comparing pinned panels when a panel comparator throws', () => {
+      it('continues comparing pinned panels when a panel comparator throws', async () => {
         const baseline = state({
           panels: [lensPanel({ id: 'panel-1' })],
           pinned_panels: [pinnedPanel('Host', 'control-1')],
@@ -368,11 +362,11 @@ describe('diffDashboardStates', () => {
         const comparePinnedPanel = jest.fn(() => false);
 
         expect(
-          diffDashboardStates(baseline, current, {
-            'panel-1': childApi('lens', () => {
+          await diffStates(baseline, current, {
+            lens: comparison(() => {
               throw error;
             }),
-            'control-1': childApi('options_list_control', comparePinnedPanel),
+            options_list_control: comparison(comparePinnedPanel),
           })
         ).toStrictEqual({ panels: current.panels, pinned_panels: current.pinned_panels });
         expect(comparePinnedPanel).toHaveBeenCalledWith(
@@ -385,7 +379,7 @@ describe('diffDashboardStates', () => {
         );
       });
 
-      it('returns pinned panels when their comparator throws', () => {
+      it('returns pinned panels when their comparator throws', async () => {
         const baseline = state({
           pinned_panels: [pinnedPanel('Host', 'control-1')],
         });
@@ -395,8 +389,8 @@ describe('diffDashboardStates', () => {
         const error = new Error('Cannot compare control state');
 
         expect(
-          diffDashboardStates(baseline, current, {
-            'control-1': childApi('options_list_control', () => {
+          await diffStates(baseline, current, {
+            options_list_control: comparison(() => {
               throw error;
             }),
           })
@@ -408,24 +402,24 @@ describe('diffDashboardStates', () => {
       });
     });
 
-    it('returns the panels when a panel type changes', () => {
+    it('returns the panels when a panel type changes', async () => {
       const current = state({ panels: [lensPanel({ id: 'panel-1', type: 'visualization' })] });
 
       expect(
-        diffDashboardStates(state({ panels: [lensPanel({ id: 'panel-1' })] }), current, {
-          'panel-1': childApi('lens', ignoreConfig),
+        await diffStates(state({ panels: [lensPanel({ id: 'panel-1' })] }), current, {
+          lens: comparison(ignoreConfig),
         })
       ).toEqual({ panels: current.panels });
     });
 
-    it('returns the panels when a library panel points to another library item', () => {
+    it('returns the panels when a library panel points to another library item', async () => {
       const libraryPanel = (refId: string) =>
         lensPanel({ id: 'panel-1', config: { ref_id: refId } });
       const current = state({ panels: [libraryPanel('library-b')] });
 
       expect(
-        diffDashboardStates(state({ panels: [libraryPanel('library-a')] }), current, {
-          'panel-1': childApi('lens', ignoreConfig),
+        await diffStates(state({ panels: [libraryPanel('library-a')] }), current, {
+          lens: comparison(ignoreConfig),
         })
       ).toEqual({ panels: current.panels });
     });

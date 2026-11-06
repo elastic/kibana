@@ -63,18 +63,18 @@ describe('diffStates', () => {
     initialState: DEFAULT_DASHBOARD_STATE,
   });
 
-  test('finds no changes between states that differ only in what unsaved changes ignores', () => {
+  test('finds no changes between states that differ only in what unsaved changes ignores', async () => {
     expect(
-      api.diffStates(DEFAULT_DASHBOARD_STATE, {
+      await api.diffStates(DEFAULT_DASHBOARD_STATE, {
         ...DEFAULT_DASHBOARD_STATE,
         esql_approximation: false,
       })
     ).toEqual({});
   });
 
-  test('returns a changed setting', () => {
+  test('returns a changed setting', async () => {
     expect(
-      api.diffStates(DEFAULT_DASHBOARD_STATE, { ...DEFAULT_DASHBOARD_STATE, title: 'Logs' })
+      await api.diffStates(DEFAULT_DASHBOARD_STATE, { ...DEFAULT_DASHBOARD_STATE, title: 'Logs' })
     ).toEqual({ title: 'Logs' });
   });
 
@@ -145,7 +145,7 @@ describe('diffStates', () => {
       await dashboardApi.setState(change(internalApi.getLastSavedState()));
 
       const unsavedChanges = await firstValueFrom(internalApi.unsavedChanges$);
-      const diff = dashboardApi.diffStates(
+      const diff = await dashboardApi.diffStates(
         internalApi.getLastSavedState(),
         dashboardApi.getSerializedState().attributes
       );
