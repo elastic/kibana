@@ -11,87 +11,67 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { getScrollDimensions, isAtBottomOfPage } from '@kbn/core-chrome-layout-utils';
 
 import type { ActivePanelEvent, FlexPanelData } from '../../grid_panel';
-import type { FlexLayoutStateManager, RuntimeGridSettings } from '../../types';
+import type { FlexLayoutStateManager, GridSettings } from '../../types';
 import { updateClientY } from '../keyboard_utils';
 import { getSensorPosition, isKeyboardEvent, isMouseEvent, isTouchEvent } from '../sensors';
 import { KeyboardCode, type UserKeyboardEvent } from '../sensors/keyboard/types';
 import type { PointerPosition, UserInteractionEvent } from '../types';
 
-export const getDefaultResizeOptions = (runtimeSettings: RuntimeGridSettings) => ({
+export const getDefaultResizeOptions = () => ({
   minWidth: 1,
-  maxWidth: runtimeSettings.columnCount,
+  maxWidth: Number.MAX_VALUE,
   minHeight: 1,
   maxHeight: Number.MAX_VALUE,
 });
 
-const getColumnCountInPixels = ({
-  columnCount,
-  runtimeSettings,
-}: {
-  columnCount: number;
-  runtimeSettings: RuntimeGridSettings;
-}) =>
-  columnCount * runtimeSettings.columnPixelWidth + (columnCount - 1) * runtimeSettings.gutterSize;
-
 export const getRowCountInPixels = ({
   rowCount,
-  runtimeSettings,
+  gridSettings,
 }: {
   rowCount: number;
-  runtimeSettings: RuntimeGridSettings;
+  gridSettings: GridSettings;
 }) => {
   const safeRowCount = Math.min(rowCount, Number.MAX_VALUE); // Infinity * 0 = Nan which can cause problems.
-  return safeRowCount * runtimeSettings.rowHeight + (safeRowCount - 1) * runtimeSettings.gutterSize;
+  return safeRowCount * gridSettings.rowHeight + (safeRowCount - 1) * gridSettings.gutterSize;
 };
 
 // Calculates the preview rect coordinates for a resized panel
 export const getResizePreviewRect = ({
   activePanel,
   pointerPixel,
-  runtimeSettings,
+  gridSettings,
   resizeOptions,
   maxRight,
 }: {
   pointerPixel: PointerPosition;
   activePanel: ActivePanelEvent;
-  runtimeSettings: RuntimeGridSettings;
+  gridSettings: GridSettings;
   resizeOptions: FlexPanelData['resizeOptions'];
   maxRight: number;
 }) => {
   const panelRect = activePanel.panelDiv.getBoundingClientRect();
   const { minWidth, maxWidth, minHeight, maxHeight } = {
-    ...getDefaultResizeOptions(runtimeSettings),
+    ...getDefaultResizeOptions(),
     ...resizeOptions,
   };
-  console.log({
-    right: Math.max(
-      Math.min(
-        pointerPixel.clientX - activePanel.sensorOffsets.right, // actual width based on mouse position
-        panelRect.left + getColumnCountInPixels({ columnCount: maxWidth, runtimeSettings }), // max width of panel
-        // cannot extend width past the right edge of the grid layout
-        maxRight
-      ),
-      panelRect.left + getColumnCountInPixels({ columnCount: minWidth, runtimeSettings }) // min width of panel
-    ),
-  });
   return {
     left: panelRect.left,
     top: panelRect.top,
     bottom: Math.max(
       Math.min(
         pointerPixel.clientY - activePanel.sensorOffsets.bottom, // actual height based on mouse position
-        panelRect.top + getRowCountInPixels({ rowCount: maxHeight, runtimeSettings }) // max height of panel
+        panelRect.top + getRowCountInPixels({ rowCount: maxHeight, gridSettings }) // max height of panel
       ),
-      panelRect.top + getRowCountInPixels({ rowCount: minHeight, runtimeSettings }) // min height of panel
+      panelRect.top + getRowCountInPixels({ rowCount: minHeight, gridSettings }) // min height of panel
     ),
     right: Math.max(
       Math.min(
         pointerPixel.clientX - activePanel.sensorOffsets.right, // actual width based on mouse position
-        panelRect.left + getColumnCountInPixels({ columnCount: maxWidth, runtimeSettings }), // max width of panel
+        panelRect.left + maxWidth, // max width of panel
         // cannot extend width past the right edge of the grid layout
         maxRight
       ),
-      panelRect.left + getColumnCountInPixels({ columnCount: minWidth, runtimeSettings }) // min width of panel
+      panelRect.left + minWidth // min width of panel
     ),
   };
 };
@@ -136,8 +116,8 @@ export const getNextKeyboardPositionForPanel = (
 ) => {
   const {
     activePanelEvent$: { value: activePanel },
-    runtimeSettings$: {
-      value: { columnPixelWidth, rowHeight, gutterSize, keyboardDragTopLimit },
+    gridSettings$: {
+      value: { rowHeight, gutterSize, keyboardDragTopLimit },
     },
   } = gridLayoutStateManager;
 
@@ -146,8 +126,8 @@ export const getNextKeyboardPositionForPanel = (
 
   if (!panelPosition) return handlePosition;
 
-  const stepX = columnPixelWidth + gutterSize;
   const stepY = rowHeight + gutterSize;
+  const stepX = stepY;
   const gridPosition = gridLayoutStateManager.layoutRef.current?.getBoundingClientRect();
   const scrollContainer = gridLayoutStateManager.scrollContainer$.getValue();
 

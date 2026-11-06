@@ -31,7 +31,7 @@ export const ResizeHandle = React.memo(({ panelId }: { panelId: string }) => {
       if (!panel || panel.type !== 'panel' || !buttonRef.current) return;
 
       const { minWidth, maxWidth } = {
-        ...getDefaultResizeOptions(gridLayoutStateManager.runtimeSettings$.getValue()),
+        ...getDefaultResizeOptions(),
         ...panel.resizeOptions,
       };
       let direction = 'ew';

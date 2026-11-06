@@ -8,29 +8,16 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { isEqual, pick } from 'lodash';
+import { isEqual } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
 import type { Observable } from 'rxjs';
-import {
-  BehaviorSubject,
-  combineLatest,
-  debounceTime,
-  distinctUntilChanged,
-  filter,
-  map,
-} from 'rxjs';
+import { BehaviorSubject, combineLatest, distinctUntilChanged, filter, map } from 'rxjs';
 import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
 
 import { getScrollContainer } from '@kbn/core-chrome-layout-utils';
 
 import type { ActivePanelEvent } from './grid_panel';
-import type {
-  FlexLayoutData,
-  FlexLayoutStateManager,
-  GridAccessMode,
-  GridSettings,
-  RuntimeGridSettings,
-} from './types';
+import type { FlexLayoutData, FlexLayoutStateManager, GridAccessMode, GridSettings } from './types';
 
 export const useGridLayoutState = ({
   layout,
@@ -57,23 +44,14 @@ export const useGridLayoutState = ({
     if (accessMode !== accessMode$.getValue()) accessMode$.next(accessMode);
   }, [accessMode, accessMode$]);
 
-  const runtimeSettings$ = useMemo(
-    () =>
-      new BehaviorSubject<RuntimeGridSettings>({
-        ...gridSettings,
-        columnPixelWidth: 0,
-      }),
+  const gridSettings$ = useMemo(
+    () => new BehaviorSubject<GridSettings>(gridSettings),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
   useEffect(() => {
-    const runtimeSettings = runtimeSettings$.getValue();
-    if (!deepEqual(gridSettings, pick(runtimeSettings, ['gutterSize', 'rowHeight', 'columnCount'])))
-      runtimeSettings$.next({
-        ...gridSettings,
-        columnPixelWidth: runtimeSettings.columnPixelWidth,
-      });
-  }, [gridSettings, runtimeSettings$]);
+    if (!deepEqual(gridSettings, gridSettings$.getValue())) gridSettings$.next(gridSettings);
+  }, [gridSettings, gridSettings$]);
 
   const gridLayoutStateManager = useMemo(() => {
     const gridLayout$ = new BehaviorSubject<FlexLayoutData>(layout);
@@ -99,7 +77,7 @@ export const useGridLayoutState = ({
       activePanelEvent$,
       accessMode$,
       gridDimensions$,
-      runtimeSettings$,
+      gridSettings$,
       scrollContainer$,
       layoutUpdated$,
     };
@@ -108,40 +86,17 @@ export const useGridLayoutState = ({
 
   useEffect(() => {
     /**
-     * debounce width changes to avoid unnecessary column width recalculation.
-     */
-    const resizeSubscription = combineLatest([gridLayoutStateManager.gridDimensions$, accessMode$])
-      .pipe(debounceTime(250))
-      .subscribe(([dimensions, currentAccessMode]) => {
-        const currentRuntimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
-        const elementWidth = dimensions.width ?? 0;
-        const columnPixelWidth =
-          (elementWidth -
-            currentRuntimeSettings.gutterSize * (currentRuntimeSettings.columnCount - 1)) /
-          currentRuntimeSettings.columnCount;
-
-        if (columnPixelWidth !== currentRuntimeSettings.columnPixelWidth)
-          gridLayoutStateManager.runtimeSettings$.next({
-            ...currentRuntimeSettings,
-            columnPixelWidth,
-          });
-      });
-
-    /**
      * This subscription sets CSS variables that can be used by `layoutRef` and all of its children
      */
-    const cssVariableSubscription = gridLayoutStateManager.runtimeSettings$
+    const cssVariableSubscription = gridSettings$
       .pipe(distinctUntilChanged(deepEqual))
-      .subscribe(({ gutterSize, columnPixelWidth, rowHeight, columnCount }) => {
+      .subscribe(({ gutterSize, rowHeight }) => {
         if (!layoutRef.current) return;
         layoutRef.current.style.setProperty('--kbnFlexGutterSize', `${gutterSize}`);
         layoutRef.current.style.setProperty('--kbnFlexRowHeight', `${rowHeight}`);
-        layoutRef.current.style.setProperty('--kbnFlexColumnWidth', `${columnPixelWidth}`);
-        layoutRef.current.style.setProperty('--kbnFlexColumnCount', `${columnCount}`);
       });
 
     return () => {
-      resizeSubscription.unsubscribe();
       cssVariableSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

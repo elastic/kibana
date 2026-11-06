@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { skip } from 'rxjs';
+import { filter, map, pairwise, skip, startWith } from 'rxjs';
 
 import { css } from '@emotion/react';
 import { useGridLayoutContext } from '../use_grid_layout_context';
@@ -22,7 +22,13 @@ export const GridPanelDragPreview = React.memo(() => {
     () => {
       /** Update the styles of the drag preview via a subscription to prevent re-renders */
       const styleSubscription = gridLayoutStateManager.activePanelEvent$
-        .pipe(skip(1)) // skip the first emit because the drag preview is only rendered after a user action
+        .pipe(
+          skip(1),
+          pairwise(),
+          filter(([before]) => before !== undefined),
+          map(([, after]) => after),
+          startWith(undefined)
+        ) // skip the first emit because the drag preview is only rendered after a user action
         .subscribe((activePanel) => {
           if (activePanel?.type === 'resize' || !dragPreviewRef.current) return;
           const gridLayout = gridLayoutStateManager.gridLayout$.getValue();

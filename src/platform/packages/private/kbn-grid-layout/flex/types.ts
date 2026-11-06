@@ -22,8 +22,6 @@ export interface GridSettings {
   keyboardDragTopLimit: number;
 }
 
-export type RuntimeGridSettings = GridSettings & { columnPixelWidth: number };
-
 export type FlexLayoutPanel = FlexPanelData & { type: 'panel' };
 
 export interface FlexLayoutData {
@@ -36,7 +34,7 @@ export interface FlexLayoutStateManager {
   gridLayout$: BehaviorSubject<FlexLayoutData>;
   accessMode$: BehaviorSubject<GridAccessMode>;
   gridDimensions$: BehaviorSubject<ObservedSize>;
-  runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
+  gridSettings$: BehaviorSubject<GridSettings>;
 
   scrollContainer$: BehaviorSubject<ScrollContainer>;
 

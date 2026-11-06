@@ -197,6 +197,7 @@ const controlPanelStyles = {
   },
   formControl: ({ euiTheme }: UseEuiTheme) =>
     css({
+      '.controlFrame__dragHandle': { overflow: 'hidden' },
       '.euiFormControlLayout__prepend': {
         paddingLeft: 0,
         gap: 0,

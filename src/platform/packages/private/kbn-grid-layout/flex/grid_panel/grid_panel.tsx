@@ -42,10 +42,10 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
       .kbnFlexPanel--dragHandle,
       .kbnFlexPanel--resizeHandle {
         touch-action: none; // prevent scrolling on touch devices
-        scroll-margin-top: ${gridLayoutStateManager.runtimeSettings$.value.keyboardDragTopLimit}px;
+        scroll-margin-top: ${gridLayoutStateManager.gridSettings$.value.keyboardDragTopLimit}px;
       }
     `;
-  }, [panel$, gridLayoutStateManager.runtimeSettings$]);
+  }, [panel$, gridLayoutStateManager.gridSettings$]);
 
   useEffect(() => {
     return () => {
@@ -79,16 +79,13 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
 
           // if the current panel is active, give it fixed positioning depending on the interaction event
           const { position: draggingPosition } = activePanel;
-          const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
 
           ref.style.zIndex = `${euiTheme.levels.modal}`;
           if (activePanel.type === 'resize') {
             // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
             ref.style.flexGrow = '0';
-            ref.style.width = `${Math.max(
-              draggingPosition.right - draggingPosition.left,
-              runtimeSettings.columnPixelWidth
-            )}px`;
+            ref.style.flexShrink = '0';
+            ref.style.width = `${draggingPosition.right - draggingPosition.left}px`;
           } else {
             // if the current panel is being dragged, render it with a fixed position + size
             ref.style.position = 'fixed';
@@ -99,15 +96,23 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
             ref.style.height = `${draggingPosition.bottom - draggingPosition.top}px`;
           }
         } else {
-          ref.classList.remove('kbnFlexPanel--active');
-          ref.style.zIndex = `auto`;
-          // if the panel is not being dragged and/or resized, undo any fixed position styles
-          ref.style.position = '';
-          ref.style.left = ``;
-          ref.style.top = ``;
-          ref.style.flexGrow = currentPanel.grow ? '1' : '0';
-          ref.style.width = `${currentPanel.width}px`;
-          ref.style.order = `${currentPanel.order + 1}`;
+          if (activePanel?.type === 'resize') {
+            // pin siblings at their rendered width (not `flex-basis`, which would override `width`)
+            // so they can't grow or shrink and shift the resized panel while resizing
+            ref.style.width = `${ref.getBoundingClientRect().width}px`;
+            ref.style.flexGrow = '0';
+          } else {
+            ref.style.flexShrink = '';
+            ref.classList.remove('kbnFlexPanel--active');
+            ref.style.zIndex = `auto`;
+            // if the panel is not being dragged and/or resized, undo any fixed position styles
+            ref.style.position = '';
+            ref.style.left = ``;
+            ref.style.top = ``;
+            ref.style.flexGrow = currentPanel.grow ? '1' : '0';
+            ref.style.width = `${currentPanel.width}px`;
+            ref.style.order = `${currentPanel.order + 1}`;
+          }
         }
       });
 

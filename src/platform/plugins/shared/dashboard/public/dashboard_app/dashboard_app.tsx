@@ -185,7 +185,7 @@ export function DashboardApp({
   ) : (
     <div
       css={css({
-        '&:has(.kbnGridPanel--active) *': {
+        '&:has(.kbnFlexPanel--active) *': {
           // disable pointer events and user select on drag + resize
           userSelect: 'none',
           pointerEvents: 'none',

@@ -47,7 +47,7 @@ export const moveAction = (
   lastRequestedPanelPosition: MutableRefObject<FlexPanelData | undefined>
 ) => {
   const {
-    runtimeSettings$: { value: runtimeSettings },
+    gridSettings$: { value: gridSettings },
     activePanelEvent$,
     gridLayout$,
     panelRefs: { current: panelElements },
@@ -55,7 +55,7 @@ export const moveAction = (
   } = gridLayoutStateManager;
   const activePanel = activePanelEvent$.value;
   const currentLayout = gridLayout$.value;
-  if (!activePanel || !runtimeSettings || !currentLayout) {
+  if (!activePanel || !gridSettings || !currentLayout) {
     // if no interaction event return early
     return;
   }
@@ -64,7 +64,7 @@ export const moveAction = (
     return;
   }
 
-  const { gutterSize, rowHeight } = runtimeSettings;
+  const { gutterSize, rowHeight } = gridSettings;
   const isResize = activePanel.type === 'resize';
   const gridLayoutRect = gridLayoutElement?.getBoundingClientRect();
 
@@ -75,7 +75,7 @@ export const moveAction = (
       return getResizePreviewRect({
         activePanel,
         pointerPixel,
-        runtimeSettings,
+        gridSettings,
         resizeOptions,
         maxRight: maxRight - gutterSize,
       });
