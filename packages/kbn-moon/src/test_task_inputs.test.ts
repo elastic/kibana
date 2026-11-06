@@ -214,8 +214,8 @@ if (process.env.MOON_FIXTURE_ARGS_OUTPUT) fs.appendFileSync(process.env.MOON_FIX
         encoding: 'utf8',
         env: {
           ...process.env,
-          MOON_BASE: undefined,
-          MOON_HEAD: undefined,
+          MOON_BASE: 'main',
+          MOON_HEAD: 'HEAD',
           MOON_FIXTURE_OUTPUT: outputFile,
           MOON_FIXTURE_ARGS_OUTPUT: argsFile,
         },
@@ -241,8 +241,8 @@ if (process.env.MOON_FIXTURE_ARGS_OUTPUT) fs.appendFileSync(process.env.MOON_FIX
       encoding: 'utf8',
       env: {
         ...process.env,
-        MOON_BASE: undefined,
-        MOON_HEAD: undefined,
+        MOON_BASE: 'main',
+        MOON_HEAD: 'HEAD',
         MOON_FIXTURE_OUTPUT: outputFile,
       },
     });
