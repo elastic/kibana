@@ -91,7 +91,10 @@ export interface ReinforcementTaskOutput {
   tree_id: string;
   /** Investigator response the causal-path check reads. Falls back to the example input. */
   response?: string;
-  /** Every tree named on the last submit. Absent on a single-tree replay. */
+  /**
+   * Trees graded one by one: on a replay, the seeded tree plus every tree a submit names; on a
+   * Customer-0 run, every tree named on the last submit.
+   */
   trees?: Array<{
     tree_id: string;
     prior_mermaid?: string;

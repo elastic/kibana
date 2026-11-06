@@ -175,6 +175,56 @@ describe('restoreDecisionTree', () => {
       expect.objectContaining({ id: `${HEAD_ID}_v1`, document: { content: 'original' } })
     );
   });
+
+  it('waits for each delete to be searchable when there is nothing to put back', async () => {
+    const esClient = client({
+      get: jest.fn().mockResolvedValue({ found: true, _source: { content: 'replay head' } }),
+      search: jest.fn().mockResolvedValue(searchPage([1])),
+    });
+
+    await restoreDecisionTree(esClient, TREE_ID, []);
+
+    expect(esClient.delete.mock.calls.map(([request]) => [request.id, request.refresh])).toEqual([
+      [HEAD_ID, 'wait_for'],
+      [`${HEAD_ID}_v1`, 'wait_for'],
+    ]);
+    expect(esClient.index).not.toHaveBeenCalled();
+  });
+
+  it('ignores a document that is already gone', async () => {
+    const esClient = client({
+      get: jest.fn().mockResolvedValue({ found: true, _source: { content: 'replay head' } }),
+      delete: jest
+        .fn()
+        .mockRejectedValueOnce({ meta: { statusCode: 404, body: { result: 'not_found' } } })
+        .mockResolvedValue({}),
+      search: jest.fn().mockResolvedValue(searchPage([1])),
+    });
+    const snapshot = [{ id: HEAD_ID, source: { content: 'original' } }];
+
+    await restoreDecisionTree(esClient, TREE_ID, snapshot);
+
+    expect(esClient.delete).toHaveBeenCalledTimes(2);
+    expect(esClient.index).toHaveBeenCalledWith(
+      expect.objectContaining({ id: HEAD_ID, document: { content: 'original' } })
+    );
+  });
+
+  it('fails when a delete fails for a reason other than a missing document', async () => {
+    const forbidden = {
+      statusCode: 403,
+      meta: { body: { error: { type: 'security_exception' } } },
+    };
+    const esClient = client({
+      get: jest.fn().mockResolvedValue({ found: true, _source: { content: 'replay head' } }),
+      delete: jest.fn().mockRejectedValue(forbidden),
+    });
+
+    await expect(
+      restoreDecisionTree(esClient, TREE_ID, [{ id: HEAD_ID, source: { content: 'original' } }])
+    ).rejects.toBe(forbidden);
+    expect(esClient.index).not.toHaveBeenCalled();
+  });
 });
 
 describe('listDecisionTreeIds', () => {
@@ -371,6 +421,29 @@ describe('restoreDecisionTrees', () => {
     ).rejects.toBe(failure);
     expect(index.mock.calls.map(([request]) => request.id)).toEqual([
       'default:dtree_first',
+      'default:dtree_second',
+    ]);
+  });
+
+  it('keeps restoring after a failed delete and throws it at the end', async () => {
+    const failure = { statusCode: 503 };
+    const esClient = client({
+      get: replayHead(),
+      delete: jest.fn().mockRejectedValueOnce(failure).mockResolvedValue({}),
+      search: searchByType([]),
+    });
+    const snapshots = new Map([
+      ['symptom:first', [{ id: 'default:dtree_first', source: {} }]],
+      ['symptom:second', [{ id: 'default:dtree_second', source: {} }]],
+    ]);
+
+    await expect(
+      restoreDecisionTrees(esClient, snapshots, {
+        treeIds: ['symptom:first', 'symptom:second'],
+        conversationId: CONVERSATION_ID,
+      })
+    ).rejects.toBe(failure);
+    expect(esClient.index.mock.calls.map(([request]) => request.id)).toEqual([
       'default:dtree_second',
     ]);
   });

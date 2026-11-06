@@ -10,6 +10,7 @@ import {
   extractMermaid,
   parseMermaidDecisionTree,
   resolveEdgeRefs,
+  symptomSlugFromTreeId,
 } from '@kbn/nightshift-decision-trees';
 import type { DecisionEdgeRef, DecisionTreeView } from '@kbn/nightshift-decision-trees';
 import type { PathStep, SubmitArguments, TraversalSubmission } from './types';
@@ -25,20 +26,38 @@ const CONFIRMED_CAUSE_RE = /"status"\s*:\s*"confirmed"|\bstatus:\s*['"]?confirme
 /** True when the investigator response confirms a cause, so the submit must carry a causal path. */
 export const confirmsCause = (response: string): boolean => CONFIRMED_CAUSE_RE.test(response);
 
-/** Keeps the merges and traversals that name `treeId`, so one submit can be graded per tree. */
+/** The submit tool accepts a bare slug for the `symptom:<slug>` tree, so compare by slug. */
+const namesTree = (named: string | undefined, treeId: string): boolean =>
+  !named || symptomSlugFromTreeId(named) === symptomSlugFromTreeId(treeId);
+
+/**
+ * A submit naming no tree applies to every tree. One that names only other trees, like a retry of
+ * a tree rejected earlier, says nothing about `treeId`.
+ */
+const addressesTree = (submission: SubmitArguments, treeId: string): boolean => {
+  const entries = [...(submission.symptom_trees ?? []), ...(submission.traversals ?? [])];
+  return entries.length === 0 || entries.some((entry) => namesTree(entry.tree_id, treeId));
+};
+
+/**
+ * Keeps the submits that address `treeId`, narrowed to its merges and traversals, so the last
+ * submit graded for a tree is the last one that named it.
+ */
 export const submissionsForTree = (
   submissions: SubmitArguments[],
   treeId: string
 ): SubmitArguments[] =>
-  submissions.map((submission) => ({
-    ...submission,
-    symptom_trees: (submission.symptom_trees ?? []).filter(
-      (tree) => !tree.tree_id || tree.tree_id === treeId
-    ),
-    traversals: (submission.traversals ?? []).filter(
-      (traversal) => !traversal.tree_id || traversal.tree_id === treeId
-    ),
-  }));
+  submissions
+    .filter((submission) => addressesTree(submission, treeId))
+    .map((submission) => ({
+      ...submission,
+      symptom_trees: (submission.symptom_trees ?? []).filter((tree) =>
+        namesTree(tree.tree_id, treeId)
+      ),
+      traversals: (submission.traversals ?? []).filter((traversal) =>
+        namesTree(traversal.tree_id, treeId)
+      ),
+    }));
 
 /** Tree ids named on one submit call, in first-seen order. */
 export const treeIdsInSubmission = (submission: SubmitArguments | undefined): string[] => {
@@ -183,16 +202,14 @@ export const gradeSubmissions = ({
 
 const declaresMerge = (submission: SubmitArguments, treeId: string): boolean =>
   (submission.symptom_trees ?? []).some((tree) => {
-    if (tree.tree_id && tree.tree_id !== treeId) return false;
+    if (!namesTree(tree.tree_id, treeId)) return false;
     return (tree.merged_nodes ?? []).some(
       (merge) => (merge.from ?? []).length > 0 && Boolean(merge.into)
     );
   });
 
 const traversalsForTree = (submission: SubmitArguments, treeId: string): TraversalSubmission[] =>
-  (submission.traversals ?? []).filter(
-    (traversal) => !traversal.tree_id || traversal.tree_id === treeId
-  );
+  (submission.traversals ?? []).filter((traversal) => namesTree(traversal.tree_id, treeId));
 
 /** The submit has to name the path this round followed, and a causal path only when it confirmed one. */
 const traversalProblems = (
@@ -233,9 +250,7 @@ const mergeProblems = (
   const problems: string[] = [];
   if (!prior) {
     const declared = (submission.symptom_trees ?? []).some(
-      (tree) =>
-        (!tree.tree_id || tree.tree_id === submitted.tree_id) &&
-        (tree.merged_nodes ?? []).length > 0
+      (tree) => namesTree(tree.tree_id, submitted.tree_id) && (tree.merged_nodes ?? []).length > 0
     );
     return declared
       ? ['merged_nodes were declared, but this round has no prior tree to merge.']
@@ -246,7 +261,7 @@ const mergeProblems = (
   const absorbed = new Set<string>();
 
   for (const tree of submission.symptom_trees ?? []) {
-    if (tree.tree_id && tree.tree_id !== prior.tree_id) {
+    if (!namesTree(tree.tree_id, prior.tree_id)) {
       problems.push(
         `symptom_trees names ${tree.tree_id}, but this round's tree is ${prior.tree_id}.`
       );
@@ -278,7 +293,7 @@ const mergeProblems = (
 const pathProblems = (submission: SubmitArguments, submitted: DecisionTreeView): string[] => {
   const problems: string[] = [];
   for (const traversal of submission.traversals ?? []) {
-    if (traversal.tree_id && traversal.tree_id !== submitted.tree_id) {
+    if (!namesTree(traversal.tree_id, submitted.tree_id)) {
       problems.push(
         `traversals names ${traversal.tree_id}, but this round's tree is ${submitted.tree_id}.`
       );

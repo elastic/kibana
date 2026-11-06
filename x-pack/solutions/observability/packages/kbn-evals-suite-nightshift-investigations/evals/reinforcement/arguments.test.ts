@@ -6,7 +6,8 @@
  */
 
 import { parseMermaidDecisionTree } from '@kbn/nightshift-decision-trees';
-import { gradeSubmissions, parseSubmissions } from './arguments';
+import { gradeSubmissions, parseSubmissions, submissionsForTree } from './arguments';
+import type { SubmitArguments } from './types';
 
 const PRIOR = `flowchart TD
     S1([EQL SLO burn]) --> E1[Read errors]
@@ -274,5 +275,65 @@ describe('gradeSubmissions', () => {
 
     expect(score).toBe(0);
     expect(explanation).toContain('does not confirm a cause');
+  });
+});
+
+describe('submissionsForTree', () => {
+  const TREE_ID = 'symptom:eql-slo-burn-rate';
+  const OTHER_ID = 'symptom:es-proxy-errors';
+  const CONFIRMED = '{"status":"confirmed","candidate":"pod deleted"}';
+  const savedTree: SubmitArguments = {
+    symptom_trees: [{ tree_id: TREE_ID, merged_nodes: [{ from: ['E3'], into: 'E2' }] }],
+    traversals: [
+      {
+        tree_id: TREE_ID,
+        visited_path: ['S1', 'E1', 'D1', { id: 'E2', condition: 'yes' }],
+        causal_path: ['D1', { id: 'E2', condition: 'yes' }],
+      },
+    ],
+  };
+  const otherTree: SubmitArguments = {
+    symptom_trees: [{ tree_id: OTHER_ID }],
+    traversals: [{ tree_id: OTHER_ID, visited_path: ['S1', 'E1'] }],
+  };
+
+  it('grades a tree on the last submit that names it, not a retry of another tree', () => {
+    // The first submit saves this tree and is rejected for the other one, so the retry names only that.
+    const submissions = [
+      {
+        symptom_trees: [...(savedTree.symptom_trees ?? []), ...(otherTree.symptom_trees ?? [])],
+        traversals: [...(savedTree.traversals ?? []), ...(otherTree.traversals ?? [])],
+      },
+      otherTree,
+    ];
+
+    const { score, explanation } = gradeSubmissions({
+      submissions: submissionsForTree(submissions, TREE_ID),
+      prior,
+      submitted,
+      response: CONFIRMED,
+      requireMerge: true,
+    });
+
+    expect(explanation).not.toContain('no traversal');
+    expect(score).toBe(1);
+    expect(submissionsForTree(submissions, OTHER_ID)).toHaveLength(2);
+  });
+
+  it('keeps a submit that names the tree by its bare slug', () => {
+    const bareSlug: SubmitArguments = {
+      symptom_trees: [{ ...savedTree.symptom_trees?.[0], tree_id: 'eql-slo-burn-rate' }],
+      traversals: [{ ...savedTree.traversals?.[0], tree_id: 'eql-slo-burn-rate' }],
+    };
+
+    const { score } = gradeSubmissions({
+      submissions: submissionsForTree([bareSlug], TREE_ID),
+      prior,
+      submitted,
+      response: CONFIRMED,
+      requireMerge: true,
+    });
+
+    expect(score).toBe(1);
   });
 });

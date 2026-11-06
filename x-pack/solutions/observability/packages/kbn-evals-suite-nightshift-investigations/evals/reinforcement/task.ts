@@ -96,8 +96,8 @@ const isIndexNotFound = (error: unknown): boolean => {
   return statusCodeOf(error) === 404;
 };
 
-/** A missing head document is not a failed snapshot. */
-const isMissingHead = (error: unknown): boolean => {
+/** A missing document or index: nothing to snapshot or delete. */
+const isMissingDocument = (error: unknown): boolean => {
   const type = errorType(error);
   if (type === 'index_not_found_exception' || type === 'document_missing_exception') return true;
   return statusCodeOf(error) === 404 && type === undefined;
@@ -170,14 +170,17 @@ export const snapshotDecisionTree = async (
       docs.push({ id: headId(treeId), source: head._source });
     }
   } catch (error) {
-    if (!isMissingHead(error)) throw error;
+    if (!isMissingDocument(error)) throw error;
   }
 
   docs.push(...(await listVersionDocs(esClient, treeId)));
   return docs;
 };
 
-/** Deletes what the replay wrote for `treeId` and puts the previous documents back. */
+/**
+ * Deletes what the replay wrote for `treeId` and puts the previous documents back. Deletes wait for
+ * a refresh, so the next example's snapshot, which lists versions by search, cannot see them.
+ */
 export const restoreDecisionTree = async (
   esClient: Client,
   treeId: string,
@@ -186,9 +189,14 @@ export const restoreDecisionTree = async (
   const current = await snapshotDecisionTree(esClient, treeId);
   for (const doc of current) {
     try {
-      await esClient.delete({ index: DECISION_TREE_AI_INDEX_DEST, id: doc.id });
-    } catch {
-      // A concurrent delete already removed it.
+      await esClient.delete({
+        index: DECISION_TREE_AI_INDEX_DEST,
+        id: doc.id,
+        refresh: 'wait_for',
+      });
+    } catch (error) {
+      // A concurrent delete already removed it. Anything else would leave replay documents behind.
+      if (!isMissingDocument(error)) throw error;
     }
   }
   for (const doc of snapshot) {
@@ -420,12 +428,49 @@ const submittedTreeIds = (submissions: readonly SubmitArguments[]): string[] =>
     .filter((slug) => slug.length > 0)
     .map(symptomTreeId);
 
+const headContent = (treeId: string, docs: readonly IndexedTreeDoc[] | undefined) => {
+  const content = docs?.find((doc) => doc.id === headId(treeId))?.source.content;
+  return typeof content === 'string' ? content : undefined;
+};
+
+/**
+ * The seeded tree and every other tree the submissions name, each with its head before the replay
+ * and after it, so the grader checks every tree the replay touched. Must run before rollback.
+ */
+const replayTreesAfterRun = async (
+  esClient: Client,
+  example: ReinforcementExample,
+  submissions: readonly SubmitArguments[],
+  snapshots: ReadonlyMap<string, readonly IndexedTreeDoc[]>
+): Promise<NonNullable<ReinforcementTaskOutput['trees']>> => {
+  const { tree_id: seededId, markdown: seededMarkdown } = example.input.prior_tree;
+  const trees: NonNullable<ReinforcementTaskOutput['trees']> = [
+    {
+      tree_id: seededId,
+      prior_mermaid: seededMarkdown,
+      submitted_mermaid: (await readSubmittedMarkdown(esClient, seededId)) ?? seededMarkdown,
+    },
+  ];
+  const seededSlug = symptomSlugFromTreeId(seededId);
+  const otherIds = new Set(
+    submittedTreeIds(submissions).filter((id) => symptomSlugFromTreeId(id) !== seededSlug)
+  );
+  for (const treeId of otherIds) {
+    trees.push({
+      tree_id: treeId,
+      prior_mermaid: headContent(treeId, snapshots.get(treeId)),
+      submitted_mermaid: await readSubmittedMarkdown(esClient, treeId),
+    });
+  }
+  return trees;
+};
+
 /**
  * Replays one investigation round through the agent-optimize workflow as a `replay` run, so the
  * reinforcement agent builds the round from the supplied tool calls instead of reading a
- * conversation. Returns the submit arguments plus the tree it left behind, then rolls back only
- * the trees the replay owns: the seeded tree, every tree its submissions name, and every tree
- * committed under its conversation id.
+ * conversation. Returns the submit arguments plus the seeded tree and every tree the submissions
+ * name as the replay left them, then rolls back only the trees the replay owns: the seeded tree,
+ * every tree its submissions name, and every tree committed under its conversation id.
  */
 export const runReinforcementExample = async ({
   esClient,
@@ -497,7 +542,7 @@ export const runReinforcementExample = async ({
         }
       | undefined;
     submissions = parseSubmissions(output?.submissions_json);
-    const submittedMarkdown = (await readSubmittedMarkdown(esClient, treeId)) ?? priorMarkdown;
+    const trees = await replayTreesAfterRun(esClient, example, submissions, snapshots);
     const finished = sawTerminal;
     const reinforced = reinforce?.status === ExecutionStatus.COMPLETED && output?.skipped !== true;
     const submitRejected = output?.submit_rejected === true;
@@ -518,7 +563,8 @@ export const runReinforcementExample = async ({
               : `Workflow ${execution.status}; reinforce step ${reinforce?.status ?? 'missing'}`)
         : undefined,
       submissions,
-      submitted_mermaid: submittedMarkdown,
+      submitted_mermaid: trees[0].submitted_mermaid,
+      trees,
     };
   } finally {
     if (executionId && !sawTerminal) {

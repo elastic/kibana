@@ -9,6 +9,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
 import { ExecutionStatus } from '@kbn/workflows';
 import { NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { submitArgumentsEvaluator } from './evaluators';
 import { runReinforcementExample } from './task';
 import { reinforcementExamples } from './traces';
 
@@ -281,6 +282,62 @@ describe('runReinforcementExample', () => {
     );
     expect(docs.size).toBe(0);
     expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('Cancel failed'));
+  });
+
+  it('grades every tree a submit names, read before the rollback', async () => {
+    const negativeRound = reinforcementExamples[3];
+    const seededId = negativeRound.input.prior_tree.tree_id;
+    const editedCheckout = [
+      '```mermaid',
+      'flowchart TD',
+      '    S1([Checkout latency]) --> E1[Read traces]',
+      '    E1 --> X1((Escalate))',
+      '```',
+    ].join('\n');
+    const events: string[] = [];
+    const { esClient, docs } = fakeEsClient(events, { [OTHER_HEAD_ID]: otherTree });
+    const fetch = fakeFetch(events, {
+      readExecution: async () => {
+        docs.set(OTHER_HEAD_ID, { ...otherTree, content: editedCheckout });
+        // The seeded tree has a valid traversal. The other tree is edited without one.
+        return completedWith([
+          {
+            symptom_trees: [{ tree_id: 'checkout-high-latency' }],
+            traversals: [{ tree_id: seededId, visited_path: ['S1', 'E1'] }],
+          },
+        ]);
+      },
+    });
+
+    const output = await runReinforcementExample({
+      esClient,
+      fetch: fetch as unknown as HttpHandler,
+      connectorId: 'connector',
+      example: negativeRound,
+    });
+
+    expect(output.trees).toEqual([
+      {
+        tree_id: seededId,
+        prior_mermaid: negativeRound.input.prior_tree.markdown,
+        submitted_mermaid: negativeRound.input.prior_tree.markdown,
+      },
+      {
+        tree_id: 'symptom:checkout-high-latency',
+        prior_mermaid: 'checkout tree',
+        submitted_mermaid: editedCheckout,
+      },
+    ]);
+    expect(docs.get(OTHER_HEAD_ID)).toEqual(otherTree);
+
+    const graded = await submitArgumentsEvaluator.evaluate({
+      input: negativeRound.input,
+      output,
+      expected: undefined,
+      metadata: negativeRound.metadata,
+    });
+    expect(graded.explanation).toContain('no traversal for symptom:checkout-high-latency');
+    expect(graded.score).toBe(0);
   });
 
   describe('rollback', () => {
