@@ -48,6 +48,23 @@ export interface ClassicKpiAggregations {
   snoozed: { doc_count: number };
 }
 
+export interface ClassicHistogramRangeAggregation {
+  buckets: Array<{ doc_count: number }>;
+}
+
+export interface ClassicHistogramOverlapAggregations {
+  started?: ClassicHistogramRangeAggregation;
+  ended?: ClassicHistogramRangeAggregation;
+}
+
+export interface ClassicHistogramAggregations extends ClassicHistogramOverlapAggregations {
+  breakdown?: {
+    buckets: Array<
+      ClassicHistogramOverlapAggregations & { key: string | number; doc_count: number }
+    >;
+  };
+}
+
 export interface ClassicTagsAggregations {
   tags: estypes.AggregationsStringTermsAggregate;
 }
