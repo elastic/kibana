@@ -10,7 +10,7 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { QueryClient } from '@kbn/react-query';
-import type { BulkSnoozeSeriesActionItem } from '@kbn/alerting-v2-schemas';
+import { ALERT_EPISODE_STATUS, type BulkSnoozeSeriesActionItem } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisode } from '../queries/episodes_query';
 import type { EpisodeActionExtension, EpisodeDataSource } from '../types/episode_data_source';
 import type { EpisodeAction, EpisodeActionContext } from './types';
@@ -44,6 +44,19 @@ const supportsConditions = (episodes: AlertEpisode[], sourceSupports: boolean): 
     ep.source_id == null ? NATIVE_EPISODES_SUPPORT_CONDITIONAL_SNOOZE : sourceSupports
   );
 
+const getConditionalTabDisabledReason = (
+  episodes: AlertEpisode[],
+  sourceSupports: boolean
+): string | undefined => {
+  if (!supportsConditions(episodes, sourceSupports)) {
+    return i18n.CONDITIONAL_SNOOZE_UNSUPPORTED;
+  }
+  if (episodes.some((ep) => ep['episode.status'] === ALERT_EPISODE_STATUS.INACTIVE)) {
+    return i18n.CONDITIONAL_SNOOZE_ACTIVE_ONLY;
+  }
+  return undefined;
+};
+
 export const createSnoozeAction = (
   deps: SnoozeActionDeps,
   extension?: EpisodeActionExtension<EpisodeSnoozePayload>
@@ -60,19 +73,16 @@ export const createSnoozeAction = (
     ),
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
     const { additionalDataSource } = deps;
-    const canUseConditions = supportsConditions(
-      episodes,
-      additionalDataSource?.supportsConditionalSnooze ?? false
-    );
 
     const payload = await openSnoozeModal(deps, {
       dataSource: additionalDataSource,
       ruleTypeIds: additionalDataSource?.getRuleTypeIds?.(
         episodes.filter((ep) => ep.source_id != null)
       ),
-      conditionalTabDisabledReason: canUseConditions
-        ? undefined
-        : i18n.CONDITIONAL_SNOOZE_UNSUPPORTED,
+      conditionalTabDisabledReason: getConditionalTabDisabledReason(
+        episodes,
+        additionalDataSource?.supportsConditionalSnooze ?? false
+      ),
     });
     if (payload === undefined) return;
 

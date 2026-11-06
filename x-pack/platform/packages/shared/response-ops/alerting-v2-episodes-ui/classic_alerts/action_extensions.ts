@@ -180,8 +180,21 @@ export const classicActionExtensions: Array<EpisodeActionExtension<any>> = [
           errors.push(getErrorMessage(e));
         }
       } else {
+        const epsToUnmute = eps.filter((ep) => ep.is_muted === true);
+        let epsToSnooze = eps;
+
+        if (epsToUnmute.length > 0) {
+          try {
+            await bulkUnmuteAlerts({ http, rules: groupByRule(epsToUnmute) });
+          } catch (e) {
+            failed += epsToUnmute.length;
+            errors.push(getErrorMessage(e));
+            epsToSnooze = eps.filter((ep) => ep.is_muted !== true);
+          }
+        }
+
         const episodesByRuleId = new Map<string, AlertEpisode[]>();
-        for (const ep of eps) {
+        for (const ep of epsToSnooze) {
           const ruleId = getActionContext(ep).ruleId;
           const ruleEpisodes = episodesByRuleId.get(ruleId) ?? [];
           ruleEpisodes.push(ep);
