@@ -25,3 +25,4 @@ missed_influence: how much useful page content went unused. Look for page conten
 Base every judgement only on what is in the conversation. Do not credit a page for something the agent did that the page does not support. Do not reward or penalise formatting or style.
 
 Write each reasoning field as one or two short sentences in your own words. Name the pages by their ids. Summarise; do not quote the pages, the tool results or the answer.
+Refer to services, hosts and people by their role (for example "the affected service", "a host", "an operator"), not by name. Never write host or service names, IP addresses, user or person names, email addresses, URLs, file paths, account, resource or request IDs, API keys or tokens, even when they appear in the investigation. Page ids are the only identifiers you may write.

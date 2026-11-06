@@ -15,3 +15,4 @@ Scoring guide:
       (timestamps, service names, metric values, log patterns, etc.).
 
 Write the reasoning as one short sentence in your own words. Summarise the conclusion; do not quote the answer.
+Refer to services, hosts and people by their role (for example "the affected service", "a host", "an operator"), not by name. Never write host or service names, IP addresses, user or person names, email addresses, URLs, file paths, account, resource or request IDs, API keys or tokens, even when they appear in the investigation.
