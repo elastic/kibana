@@ -12,6 +12,7 @@ import { INTERIM_AUTHZ } from '../interim_authz';
 import { instantParam, listLimitParam } from '../utils/query_params';
 import { typeNameSchema } from '../utils/type_name_schema';
 import { withTimeRangeGuardrail } from '../utils/time_range_guardrail';
+import { createAbortSignal } from '../utils/create_abort_signal';
 
 export const listRoute = createEntityInventoryServerRoute({
   endpoint: 'GET /internal/entity_inventory/entities/{type}/list',
@@ -44,6 +45,7 @@ export const listRoute = createEntityInventoryServerRoute({
         type: path.type,
         window: { from: query.from, to: query.to },
         limit: query.limit,
+        signal: createAbortSignal(request.events.aborted$),
       });
     }
   ),

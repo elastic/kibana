@@ -349,6 +349,7 @@ describe('InventoryService.list', () => {
       { indexPattern: STATE_PATTERN, status: 503, reason: 'timeout_exception: timed out' },
     ]);
     expect(response.rows).toHaveLength(1);
+    expect(response).toMatchObject({ total: null, truncated: true });
   });
 
   it('merges rows across sources, newest last_seen first, with exact total and every column on every row', async () => {
@@ -424,6 +425,7 @@ describe('InventoryService.list', () => {
       },
     ]);
     expect(JSON.stringify(response.errors)).not.toContain('at ');
+    expect(response).toMatchObject({ total: null, truncated: true });
   });
 
   it('drops a plan whose pattern maps no @timestamp and one whose identity is unmapped', async () => {
@@ -448,6 +450,21 @@ describe('InventoryService.list', () => {
         reason: expect.stringContaining(`no index behind "${OTEL_PATTERN}" maps every field`),
       },
     ]);
+    // Neither query failed: the patterns read nothing usable, so the count of zero is exact.
+    expect(response).toMatchObject({ total: 0, truncated: false });
+  });
+
+  it('returns no rows and an exact zero total when no source has data in the window', async () => {
+    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    answerByPattern(esClient, {
+      [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, []),
+      [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, []),
+    });
+
+    const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
+
+    expect(response).toMatchObject({ rows: [], total: 0, truncated: false, errors: [] });
+    expect(response.columns).toHaveLength(13);
   });
 
   it('returns no rows and lists each failure when every query fails', async () => {
@@ -461,8 +478,8 @@ describe('InventoryService.list', () => {
 
     expect(response).toMatchObject({
       rows: [],
-      total: 0,
-      truncated: false,
+      total: null,
+      truncated: true,
       errors: [
         { indexPattern: STATE_PATTERN, status: 403, reason: 'security_exception: unauthorized' },
         { indexPattern: OTEL_PATTERN, status: null, reason: 'connect ECONNREFUSED' },
@@ -574,6 +591,26 @@ describe('InventoryService.list', () => {
     }
   );
 
+  it('passes the abort signal to every probe and list query', async () => {
+    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    answerByPattern(
+      esClient,
+      {
+        [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, []),
+        [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, []),
+      },
+      { timeSeries: [OTEL_PATTERN] }
+    );
+    const { signal } = new AbortController();
+
+    await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10, signal });
+
+    // Two probes, then FROM, TS and FROM list queries.
+    expect(esClient.esql.query).toHaveBeenCalledTimes(5);
+    const sentSignals = esClient.esql.query.mock.calls.map(([, options]) => options?.signal);
+    expect(sentSignals.every((sent) => sent === signal)).toBe(true);
+  });
+
   it('throws InventoryTypeDefinitionError when the definition cannot be turned into queries', async () => {
     const invalid = {
       ...k8sDeploymentDefinition,
@@ -581,7 +618,7 @@ describe('InventoryService.list', () => {
         sources: [{ indexPattern: STATE_PATTERN, attributes: [{ name: 'last_seen', field: 'x' }] }],
       },
     };
-    const { service, esClient } = createService([invalid]);
+    const { service, esClient, logger } = createService([invalid]);
     answerByPattern(esClient, {});
 
     await expect(
@@ -593,5 +630,9 @@ describe('InventoryService.list', () => {
         'Entity type "k8s.deployment" cannot be queried: attribute name "last_seen" is reserved'
       ),
     });
+    // A definition this plugin ships is a server bug, so it is logged at error level, not only answered with 400.
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Entity type "k8s.deployment" cannot be queried')
+    );
   });
 });

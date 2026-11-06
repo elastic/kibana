@@ -20,5 +20,10 @@ Contents: two data streams, three deployments (`checkout/cart-api`, `checkout/pa
 Only the fields used by `server/definitions/kubernetes/k8s_deployment.ts` are mapped, with
 `dynamic: false`.
 
+Both data streams are standard. The time-series case is not archived: a time-series data stream
+accepts only documents near the current time, so `api/tests/list_time_series.spec.ts` writes its
+own time-series data stream behind `metrics-k8sclusterreceiver.otel-*` with current timestamps and
+deletes it afterwards.
+
 TODO: regenerate from the generator (`node scripts/es_archiver.js save`) once it is available, and
 record the generator repo, commit, command and time span here.

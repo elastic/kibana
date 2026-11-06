@@ -6,7 +6,6 @@
  */
 
 import { tags } from '@kbn/scout-oblt';
-import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, INTERNAL_HEADERS } from '../fixtures';
 
@@ -33,10 +32,11 @@ apiTest.describe(
   'GET /internal/entity_inventory/entities/{type}/list',
   { tag: tags.stateful.classic },
   () => {
-    let adminCredentials: RoleApiCredentials;
+    let adminCookieHeader: Record<string, string>;
 
-    apiTest.beforeAll(async ({ requestAuth }) => {
-      adminCredentials = await requestAuth.getApiKey('admin');
+    // Internal routes are called by the browser with a session cookie, not an API key.
+    apiTest.beforeAll(async ({ samlAuth }) => {
+      ({ cookieHeader: adminCookieHeader } = await samlAuth.asInteractiveUser('admin'));
     });
 
     apiTest(
@@ -45,7 +45,7 @@ apiTest.describe(
         const response = await apiClient.get(
           `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-01T09:00:00.000Z&to=2026-11-01T11:00:00.000Z`,
           {
-            headers: { ...INTERNAL_HEADERS, ...adminCredentials.apiKeyHeader },
+            headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
             responseType: 'json',
           }
         );
@@ -80,7 +80,7 @@ apiTest.describe(
       const response = await apiClient.get(
         `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-01T09:00:00.000Z&to=2026-11-01T11:00:00.000Z`,
         {
-          headers: { ...INTERNAL_HEADERS, ...adminCredentials.apiKeyHeader },
+          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
           responseType: 'json',
         }
       );
@@ -112,7 +112,7 @@ apiTest.describe(
         const response = await apiClient.get(
           `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-01T09:00:00.000Z&to=2026-11-01T10:00:30.000Z`,
           {
-            headers: { ...INTERNAL_HEADERS, ...adminCredentials.apiKeyHeader },
+            headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
             responseType: 'json',
           }
         );
@@ -134,7 +134,7 @@ apiTest.describe(
       const response = await apiClient.get(
         `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-01T11:00:00%2B02:00&to=2026-11-01T13:00:00%2B02:00`,
         {
-          headers: { ...INTERNAL_HEADERS, ...adminCredentials.apiKeyHeader },
+          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
           responseType: 'json',
         }
       );
@@ -147,7 +147,7 @@ apiTest.describe(
       const response = await apiClient.get(
         `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-01T09:00:00.000Z&to=2026-11-01T11:00:00.000Z&limit=1`,
         {
-          headers: { ...INTERNAL_HEADERS, ...adminCredentials.apiKeyHeader },
+          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
           responseType: 'json',
         }
       );
@@ -164,7 +164,7 @@ apiTest.describe(
       const response = await apiClient.get(
         `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-01T09:00:00.000Z&to=2026-11-01T11:00:00.000Z&limit=3`,
         {
-          headers: { ...INTERNAL_HEADERS, ...adminCredentials.apiKeyHeader },
+          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
           responseType: 'json',
         }
       );
@@ -177,30 +177,11 @@ apiTest.describe(
       expect(truncated).toBe(false);
     });
 
-    apiTest('returns no rows and a zero total for a window with no data', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-10-01T09:00:00.000Z&to=2026-10-01T11:00:00.000Z`,
-        {
-          headers: { ...INTERNAL_HEADERS, ...adminCredentials.apiKeyHeader },
-          responseType: 'json',
-        }
-      );
-
-      expect(response).toHaveStatusCode(200);
-      const body: ListResponse = response.body;
-
-      expect(body.columns).toHaveLength(13);
-      expect(body.rows).toStrictEqual([]);
-      expect(body.total).toBe(0);
-      expect(body.truncated).toBe(false);
-      expect(body.errors).toStrictEqual([]);
-    });
-
     apiTest('accepts a window of exactly 72 hours', async ({ apiClient }) => {
       const response = await apiClient.get(
         `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-01T00:00:00.000Z&to=2026-11-04T00:00:00.000Z`,
         {
-          headers: { ...INTERNAL_HEADERS, ...adminCredentials.apiKeyHeader },
+          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
           responseType: 'json',
         }
       );
@@ -213,7 +194,7 @@ apiTest.describe(
       const response = await apiClient.get(
         `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-01T00:00:00.000Z&to=2026-11-04T00:00:01.000Z`,
         {
-          headers: { ...INTERNAL_HEADERS, ...adminCredentials.apiKeyHeader },
+          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
           responseType: 'json',
         }
       );
@@ -228,14 +209,14 @@ apiTest.describe(
       const equal = await apiClient.get(
         `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-01T09:00:00.000Z&to=2026-11-01T09:00:00.000Z`,
         {
-          headers: { ...INTERNAL_HEADERS, ...adminCredentials.apiKeyHeader },
+          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
           responseType: 'json',
         }
       );
       const reversed = await apiClient.get(
         `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-01T11:00:00.000Z&to=2026-11-01T09:00:00.000Z`,
         {
-          headers: { ...INTERNAL_HEADERS, ...adminCredentials.apiKeyHeader },
+          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
           responseType: 'json',
         }
       );
@@ -250,14 +231,14 @@ apiTest.describe(
       const missing = await apiClient.get(
         `${K8S_DEPLOYMENT_LIST_PATH}?to=2026-11-01T11:00:00.000Z`,
         {
-          headers: { ...INTERNAL_HEADERS, ...adminCredentials.apiKeyHeader },
+          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
           responseType: 'json',
         }
       );
       const malformed = await apiClient.get(
         `${K8S_DEPLOYMENT_LIST_PATH}?from=yesterday&to=2026-11-01T11:00:00.000Z`,
         {
-          headers: { ...INTERNAL_HEADERS, ...adminCredentials.apiKeyHeader },
+          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
           responseType: 'json',
         }
       );
@@ -271,14 +252,14 @@ apiTest.describe(
       const tooSmall = await apiClient.get(
         `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-01T09:00:00.000Z&to=2026-11-01T11:00:00.000Z&limit=0`,
         {
-          headers: { ...INTERNAL_HEADERS, ...adminCredentials.apiKeyHeader },
+          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
           responseType: 'json',
         }
       );
       const tooBig = await apiClient.get(
         `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-01T09:00:00.000Z&to=2026-11-01T11:00:00.000Z&limit=10000`,
         {
-          headers: { ...INTERNAL_HEADERS, ...adminCredentials.apiKeyHeader },
+          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
           responseType: 'json',
         }
       );
@@ -291,7 +272,7 @@ apiTest.describe(
       const response = await apiClient.get(
         'internal/entity_inventory/entities/K8S/list?from=2026-11-01T09:00:00.000Z&to=2026-11-01T11:00:00.000Z',
         {
-          headers: { ...INTERNAL_HEADERS, ...adminCredentials.apiKeyHeader },
+          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
           responseType: 'json',
         }
       );
@@ -304,7 +285,7 @@ apiTest.describe(
       const response = await apiClient.get(
         'internal/entity_inventory/entities/does.not.exist/list?from=2026-11-01T09:00:00.000Z&to=2026-11-01T11:00:00.000Z',
         {
-          headers: { ...INTERNAL_HEADERS, ...adminCredentials.apiKeyHeader },
+          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
           responseType: 'json',
         }
       );
@@ -321,7 +302,7 @@ apiTest.describe(
         const response = await apiClient.get(
           'internal/entity_inventory/entities/host/list?from=2026-11-01T09:00:00.000Z&to=2026-11-01T11:00:00.000Z',
           {
-            headers: { ...INTERNAL_HEADERS, ...adminCredentials.apiKeyHeader },
+            headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
             responseType: 'json',
           }
         );
@@ -335,13 +316,13 @@ apiTest.describe(
 
     apiTest(
       'rejects a viewer, which lacks the entity_inventory_read privilege',
-      async ({ apiClient, requestAuth }) => {
-        const viewerCredentials = await requestAuth.getApiKey('viewer');
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader: viewerCookieHeader } = await samlAuth.asInteractiveUser('viewer');
 
         const response = await apiClient.get(
           `${K8S_DEPLOYMENT_LIST_PATH}?from=2026-11-01T09:00:00.000Z&to=2026-11-01T11:00:00.000Z`,
           {
-            headers: { ...INTERNAL_HEADERS, ...viewerCredentials.apiKeyHeader },
+            headers: { ...INTERNAL_HEADERS, ...viewerCookieHeader },
             responseType: 'json',
           }
         );

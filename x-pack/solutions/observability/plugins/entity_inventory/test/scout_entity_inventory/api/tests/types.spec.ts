@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import { tags } from '@kbn/scout-oblt';
-import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, INTERNAL_HEADERS, TYPES_PATH } from '../fixtures';
 
-const SPACE_ID = 'entity-inventory-types';
+// Unique per run, so setup and teardown touch only the space this run created.
+const SPACE_ID = `entity-inventory-types-${randomUUID()}`;
 // The types this plugin registers. Built-ins such as `host` are left out even when they have a `dynamic` block.
 const INVENTORY_TYPES = ['k8s.deployment'];
 const K8S_DEPLOYMENT_IDENTITY_FIELDS = [
@@ -31,10 +32,11 @@ interface InventoryTypeResponse {
 }
 
 apiTest.describe('GET /internal/entity_inventory/types', { tag: tags.stateful.classic }, () => {
-  let adminCredentials: RoleApiCredentials;
+  let adminCookieHeader: Record<string, string>;
 
-  apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
-    adminCredentials = await requestAuth.getApiKey('admin');
+  // Internal routes are called by the browser with a session cookie, not an API key.
+  apiTest.beforeAll(async ({ samlAuth, apiServices }) => {
+    ({ cookieHeader: adminCookieHeader } = await samlAuth.asInteractiveUser('admin'));
     await apiServices.spaces.create({ id: SPACE_ID });
   });
 
@@ -44,7 +46,7 @@ apiTest.describe('GET /internal/entity_inventory/types', { tag: tags.stateful.cl
 
   apiTest('returns k8s.deployment with identity, columns and sources', async ({ apiClient }) => {
     const response = await apiClient.get(TYPES_PATH, {
-      headers: { ...INTERNAL_HEADERS, ...adminCredentials.apiKeyHeader },
+      headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
       responseType: 'json',
     });
 
@@ -61,7 +63,7 @@ apiTest.describe('GET /internal/entity_inventory/types', { tag: tags.stateful.cl
 
   apiTest('returns only the types this plugin registers', async ({ apiClient }) => {
     const response = await apiClient.get(TYPES_PATH, {
-      headers: { ...INTERNAL_HEADERS, ...adminCredentials.apiKeyHeader },
+      headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
       responseType: 'json',
     });
 
@@ -73,11 +75,11 @@ apiTest.describe('GET /internal/entity_inventory/types', { tag: tags.stateful.cl
 
   apiTest('returns the same types in a non-default space', async ({ apiClient }) => {
     const defaultSpaceResponse = await apiClient.get(TYPES_PATH, {
-      headers: { ...INTERNAL_HEADERS, ...adminCredentials.apiKeyHeader },
+      headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
       responseType: 'json',
     });
     const customSpaceResponse = await apiClient.get(`s/${SPACE_ID}/${TYPES_PATH}`, {
-      headers: { ...INTERNAL_HEADERS, ...adminCredentials.apiKeyHeader },
+      headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
       responseType: 'json',
     });
 
@@ -88,11 +90,11 @@ apiTest.describe('GET /internal/entity_inventory/types', { tag: tags.stateful.cl
 
   apiTest(
     'rejects a viewer, which lacks the entity_inventory_read privilege',
-    async ({ apiClient, requestAuth }) => {
-      const viewerCredentials = await requestAuth.getApiKey('viewer');
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader: viewerCookieHeader } = await samlAuth.asInteractiveUser('viewer');
 
       const response = await apiClient.get(TYPES_PATH, {
-        headers: { ...INTERNAL_HEADERS, ...viewerCredentials.apiKeyHeader },
+        headers: { ...INTERNAL_HEADERS, ...viewerCookieHeader },
         responseType: 'json',
       });
 

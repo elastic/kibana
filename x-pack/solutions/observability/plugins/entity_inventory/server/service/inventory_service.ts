@@ -100,22 +100,25 @@ export class InventoryService {
    * Throws `InventoryTypeNotFoundError` when this plugin registered no `dynamic` definition for the
    * type and `InventoryTypeDefinitionError` when the definition cannot be turned into queries. A
    * source whose probe failed runs no plan, and a query that fails or reads nothing usable is
-   * reported in `errors[]`; neither fails the request.
+   * reported in `errors[]`; neither fails the request. A failed probe or query makes `total` null
+   * and `truncated` true, since the entities of that source are unknown.
    */
-  list = async ({ type, window, limit }: ListRequest): Promise<ListResponse> => {
+  list = async ({ type, window, limit, signal }: ListRequest): Promise<ListResponse> => {
     const definition = await this.getManagedDefinition(type);
     const { plans, identity, columns, queries, probeErrors } = await this.planList(
       definition,
       window,
-      limit
+      limit,
+      signal
     );
 
     // Settled, not raced: one failing source must not hide the rows of the others.
     const outcomes = await Promise.allSettled(
-      queries.map((query) => executeEsql(this.esClient, query))
+      queries.map((query) => executeEsql(this.esClient, query, { signal }))
     );
 
     const errors: SourceError[] = [...probeErrors];
+    const failedQueries = outcomes.filter(({ status }) => status === 'rejected').length;
     const unavailableColumns: UnavailableColumn[] = [];
     const results = outcomes.flatMap((outcome, planIndex): PlanResult[] => {
       const plan = plans[planIndex];
@@ -142,12 +145,14 @@ export class InventoryService {
     const ordered = orderRows(merged.rows);
     const { total, truncated } = summarizeResults(results, limit, ordered.length);
     const rows = fillColumns(applyLimit(ordered, limit), columns);
+    // A plan that read nothing usable is not a failure: its pattern holds no data the user can read.
+    const incomplete = probeErrors.length > 0 || failedQueries > 0;
 
     return {
       columns: merged.columns,
       rows,
-      total,
-      truncated,
+      total: incomplete ? null : total,
+      truncated: truncated || incomplete,
       errors,
       unavailableColumns,
     };
@@ -187,18 +192,21 @@ export class InventoryService {
    * where the probe found a time-series index. The columns and queries come from every plan, so a
    * definition error never depends on a probe; a source whose probe failed keeps its columns but
    * runs no query, and is reported in `probeErrors`. Rethrows `InventoryDefinitionError` as
-   * `InventoryTypeDefinitionError`.
+   * `InventoryTypeDefinitionError` after logging it at error level: only this plugin's definitions
+   * are listed, so one that cannot be queried is a bug in the plugin, not in the request.
    */
   private planList = async (
     definition: RegisteredEntityDefinition,
     window: ListRequest['window'],
-    limit: number
+    limit: number,
+    signal: AbortSignal | undefined
   ): Promise<ListPlan> => {
     try {
       const { sources } = getDynamicBlock(definition);
       const probes = await probeSources(
         this.esClient,
-        sources.map(({ indexPattern }) => indexPattern)
+        sources.map(({ indexPattern }) => indexPattern),
+        { signal }
       );
       const probeErrors: SourceError[] = [];
       probes.forEach((probe, indexPattern) => {
@@ -232,7 +240,9 @@ export class InventoryService {
       if (error.name !== 'InventoryDefinitionError') {
         throw error;
       }
-      throw new InventoryTypeDefinitionError(definition.type, error.message);
+      const definitionError = new InventoryTypeDefinitionError(definition.type, error.message);
+      this.logger.error(definitionError.message);
+      throw definitionError;
     }
   };
 

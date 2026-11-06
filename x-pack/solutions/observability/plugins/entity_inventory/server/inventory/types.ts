@@ -12,4 +12,6 @@ export interface ListRequest {
   type: string;
   window: TimeWindow;
   limit: number;
+  /** Aborts the probes and list queries, for example when the client disconnects. */
+  signal?: AbortSignal;
 }
