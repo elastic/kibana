@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Client } from '@elastic/elasticsearch';
 import type { KbnClient, KbnClientResponse } from '@kbn/test';
 import type {
   AgentPolicy,
@@ -18,6 +19,7 @@ import type {
 } from '@kbn/fleet-plugin/common';
 import {
   AGENT_POLICY_API_ROUTES,
+  AGENTS_INDEX,
   PACKAGE_POLICY_API_ROUTES,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   API_VERSIONS,
@@ -210,7 +212,8 @@ export interface DeleteIndexedFleetEndpointPoliciesResponse {
  */
 export const deleteIndexedFleetEndpointPolicies = async (
   kbnClient: KbnClient,
-  indexData: IndexedFleetEndpointPolicyResponse
+  indexData: IndexedFleetEndpointPolicyResponse,
+  esClient?: Client
 ): Promise<DeleteIndexedFleetEndpointPoliciesResponse> => {
   const response: DeleteIndexedFleetEndpointPoliciesResponse = {
     integrationPolicies: undefined,
@@ -235,6 +238,16 @@ export const deleteIndexedFleetEndpointPolicies = async (
   }
 
   if (indexData.agentPolicies.length) {
+    // Package-policy deletion updates the agent policy and can rewrite `.fleet-agents`
+    // docs after the earlier agent delete. Fleet then rejects the policy delete while
+    // any active agent still references it, so clear those agents immediately before.
+    if (esClient) {
+      await clearActiveAgentsForPolicies(
+        esClient,
+        indexData.agentPolicies.map((agentPolicy) => agentPolicy.id)
+      );
+    }
+
     response.agentPolicies = [];
 
     for (const agentPolicy of indexData.agentPolicies) {
@@ -260,6 +273,72 @@ export const deleteIndexedFleetEndpointPolicies = async (
 
   return response;
 };
+
+const ACTIVE_AGENT_CLEAR_ATTEMPTS = 5;
+
+/**
+ * Fleet's agent-policy delete counts active agents on `.fleet-agents`. A concurrent
+ * policy update can lose the version conflict on deleteByQuery (`conflicts: 'proceed'`),
+ * so retry and then mark any remaining agents inactive.
+ */
+async function clearActiveAgentsForPolicies(esClient: Client, policyIds: string[]): Promise<void> {
+  if (policyIds.length === 0) {
+    return;
+  }
+
+  const assignedAgentsQuery = {
+    bool: {
+      filter: [{ term: { active: true } }, { terms: { policy_id: policyIds } }],
+    },
+  };
+
+  for (let attempt = 0; attempt < ACTIVE_AGENT_CLEAR_ATTEMPTS; attempt++) {
+    await esClient
+      .deleteByQuery({
+        index: AGENTS_INDEX,
+        ignore_unavailable: true,
+        refresh: true,
+        conflicts: 'proceed',
+        wait_for_completion: true,
+        query: { terms: { policy_id: policyIds } },
+      })
+      .catch(wrapErrorAndRejectPromise);
+
+    const remaining = await esClient.count({
+      index: AGENTS_INDEX,
+      ignore_unavailable: true,
+      query: assignedAgentsQuery,
+    });
+
+    if (remaining.count === 0) {
+      return;
+    }
+
+    await esClient
+      .updateByQuery({
+        index: AGENTS_INDEX,
+        ignore_unavailable: true,
+        refresh: true,
+        conflicts: 'proceed',
+        wait_for_completion: true,
+        query: assignedAgentsQuery,
+        script: { lang: 'painless', source: 'ctx._source.active = false' },
+      })
+      .catch(wrapErrorAndRejectPromise);
+
+    const afterDeactivate = await esClient.count({
+      index: AGENTS_INDEX,
+      ignore_unavailable: true,
+      query: assignedAgentsQuery,
+    });
+
+    if (afterDeactivate.count === 0) {
+      return;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+  }
+}
 
 const getDefaultEndpointPackageVersion = usageTracker.track(
   'getDefaultEndpointPackageVersion',
