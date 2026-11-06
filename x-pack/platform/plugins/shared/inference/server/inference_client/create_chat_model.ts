@@ -28,6 +28,7 @@ import type { TokenUsageLogger } from '../token_usage';
 
 export type CreateChatModelOptions = {
   request: KibanaRequest;
+  namespace?: string;
   actions: ActionsClientProvider;
   logger: Logger;
   chatModelOptions: Omit<InferenceChatModelBaseParams, 'connector' | 'logger'>;
@@ -74,6 +75,7 @@ export const createChatModel = async (
 ): Promise<InferenceChatModel> => {
   const {
     request,
+    namespace,
     featureId,
     actions,
     logger,
@@ -96,6 +98,7 @@ export const createChatModel = async (
   const client = createClient({
     actions,
     request,
+    namespace,
     anonymizationRulesPromise,
     regexWorker,
     esClient,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AWS_ONBOARDING_PACKAGE_NAMES } from '@kbn/fleet-plugin/common/constants';
 import type { AwsServiceMatrixEntry, DeploymentMethod, SignalType } from './aws_service_matrix';
 import {
   AWS_SERVICES_STATIC,
@@ -63,6 +64,12 @@ const MOCK_PACKAGES: Record<string, any> = {
 const BUILT_MATRIX = buildAwsServiceMatrix(MOCK_PACKAGES, AWS_SERVICES_STATIC);
 
 describe('AWS service matrix', () => {
+  it('should cover the packages Fleet marks as part of the AWS onboarding flow', () => {
+    expect([...new Set(AWS_SERVICES_STATIC.map((s) => s.packageName))].sort()).toEqual(
+      [...AWS_ONBOARDING_PACKAGE_NAMES].sort()
+    );
+  });
+
   it('should have at least 40 entries', () => {
     expect(BUILT_MATRIX.length).toBeGreaterThanOrEqual(40);
   });
@@ -448,6 +455,52 @@ describe('AWS service matrix', () => {
         },
       ]);
       expect(result.deploymentMethods).toEqual([{ method: 'agent_based', preferred: true }]);
+    });
+  });
+
+  describe('stream-level var_groups', () => {
+    const LOG_GROUP_SOURCE = {
+      name: 'log_group_source',
+      title: 'Log group',
+      required: true,
+      options: [{ name: 'log_group_arn', title: 'Log Group ARN', vars: ['log_group_arn'] }],
+    };
+    const dsId = MOCK_PACKAGES.aws.data_streams[0].path as string;
+    const packages = {
+      ...MOCK_PACKAGES,
+      aws: {
+        ...MOCK_PACKAGES.aws,
+        data_streams: MOCK_PACKAGES.aws.data_streams.map((ds: any) =>
+          ds.path === dsId
+            ? {
+                ...ds,
+                streams: [
+                  {
+                    input: 'aws-s3',
+                    enabled: true,
+                    vars: [{ name: 'log_group_arn', type: 'text' }],
+                    var_groups: [LOG_GROUP_SOURCE],
+                  },
+                ],
+              }
+            : ds
+        ),
+      },
+    };
+    const entry = buildAwsServiceMatrix(packages, AWS_SERVICES_STATIC).find((e) => e.id === dsId)!;
+
+    it('captures the groups per input on the data stream, the entry union and the DS view', () => {
+      expect(entry.varDefsByDataStream?.[dsId]?.varGroupsByInput).toEqual({
+        'aws-s3': [LOG_GROUP_SOURCE],
+      });
+      expect(entry.varGroupsByInput).toEqual({ 'aws-s3': [LOG_GROUP_SOURCE] });
+      expect(makeDsView(entry, dsId).varGroupsByInput).toEqual({ 'aws-s3': [LOG_GROUP_SOURCE] });
+    });
+
+    it('leaves varGroupsByInput undefined when no stream declares groups', () => {
+      const plain = BUILT_MATRIX.find((e) => e.id === dsId)!;
+      expect(plain.varGroupsByInput).toBeUndefined();
+      expect(plain.varDefsByDataStream?.[dsId]?.varGroupsByInput).toBeUndefined();
     });
   });
 

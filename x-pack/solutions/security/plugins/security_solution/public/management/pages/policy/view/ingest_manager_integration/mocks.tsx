@@ -9,7 +9,7 @@ import type { PropsWithChildren } from 'react';
 import React, { useEffect } from 'react';
 import type { Action, Reducer } from 'redux-v4';
 import type { RenderOptions } from '@testing-library/react';
-// eslint-disable-next-line import/no-extraneous-dependencies
+// eslint-disable-next-line @kbn/compat/import-no-extraneous-dependencies
 import { render as reactRender } from '@testing-library/react';
 import type { PackageInfo } from '@kbn/fleet-plugin/common/types';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';

@@ -64,8 +64,6 @@ import type {
 } from '@kbn/agent-builder-server/runner';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import type { TodoStateManager } from '@kbn/agent-builder-server/runner';
-import { createTodoStateManager } from '@kbn/agent-builder-server/runner';
 import type { AgentExecutionService, ExecutionRunAs } from '@kbn/agent-builder-server/execution';
 import { AGENT_BUILDER_DYNAMIC_TOOLS_SETTING_ID } from '../../../../common/constants';
 import { DEDUCTIVE_AGENT_ID, getDeductiveConfig } from '../run_agent/deductive/config';
@@ -145,7 +143,6 @@ export interface CreateScopedRunnerDeps {
   resultStore: WritableToolResultStore;
   skillsStore: WritableSkillsStore;
   attachmentStateManager: AttachmentStateManager;
-  todoStateManager: TodoStateManager;
   skillServiceStart: SkillServiceStart;
   pluginsServiceStart: PluginsServiceStart;
   toolManager: ToolManager;
@@ -192,7 +189,6 @@ export type CreateRunnerDeps = Omit<
   | 'resultStore'
   | 'skillsStore'
   | 'attachmentStateManager'
-  | 'todoStateManager'
   | 'modelProvider'
   | 'promptManager'
   | 'stateManager'
@@ -340,8 +336,6 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       getTypeDefinition: runnerDeps.attachmentsService.getTypeDefinition,
     });
 
-    const todoStateManager = createTodoStateManager(conversation?.state?.todos);
-
     const stateManager = createConversationStateManager(conversation);
     const promptManager = createPromptManager({ state: promptState });
     const toolManager = createToolManager();
@@ -388,7 +382,6 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       aiIndices: contextEngineEnabled,
       sml: experimentalEnabled,
       relevantSkills: experimentalEnabled,
-      todos: experimentalEnabled,
       // forcefully disabled until the UI is implemented
       bash: bashEnabled,
       apiDiscovery: apiDiscoveryEnabled,
@@ -421,7 +414,6 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       resultStore,
       skillsStore,
       attachmentStateManager,
-      todoStateManager,
       stateManager,
       promptManager,
       toolManager,
