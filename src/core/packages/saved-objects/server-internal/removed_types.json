@@ -20,6 +20,7 @@
   "maps-telemetry",
   "ml-telemetry",
   "nightshift-investigation",
+  "nightshift-secrets",
   "osquery-usage-metric",
   "search_playground",
   "server",

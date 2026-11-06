@@ -25,7 +25,7 @@ export const getRulesCount = async ({
   rulesClient: RulesClient;
   filter: string;
 }): Promise<number> => {
-  return withSecuritySpan('getRulesCount', async () => {
+  return withSecuritySpan('ruleManagement.getRulesCount', async () => {
     const { total } = await findRules({
       rulesClient,
       filter,
@@ -50,7 +50,7 @@ export const getRules = async ({
   page?: number;
   perPage?: number;
 }): Promise<RuleAlertType[]> =>
-  withSecuritySpan('getRules', async () => {
+  withSecuritySpan('ruleManagement.getRules', async () => {
     const rules = await findRules({
       rulesClient,
       filter,

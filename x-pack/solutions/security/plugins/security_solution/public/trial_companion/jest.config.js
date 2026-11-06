@@ -9,7 +9,6 @@ module.exports = {
   preset: '@kbn/jest',
   rootDir: '../../../../../../..',
   roots: ['<rootDir>/x-pack/solutions/security/plugins/security_solution/public/trial_companion'],
-  modulePathIgnorePatterns: ['__integration_tests__'],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/security/plugins/security_solution/public/trial_companion',
   coverageReporters: ['text', 'html'],

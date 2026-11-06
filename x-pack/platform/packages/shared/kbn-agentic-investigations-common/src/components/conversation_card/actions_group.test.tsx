@@ -32,23 +32,19 @@ const makeInvestigation = (overrides: Partial<Investigation> = {}): Investigatio
 const renderGroup = (
   investigation: Investigation,
   {
-    withRecommendedAction = true,
     canManageEscalations = false,
     canOpenInvestigationDetails,
   }: {
-    withRecommendedAction?: boolean;
     canManageEscalations?: boolean;
     canOpenInvestigationDetails?: boolean;
   } = {}
 ) => {
-  const onClickRecommendedAction = jest.fn();
   const onClickAction = jest.fn();
   const onOpenChat = jest.fn();
 
   renderWithKibanaRenderContext(
     <ConversationsActionsGroup
       investigation={investigation}
-      onClickRecommendedAction={withRecommendedAction ? onClickRecommendedAction : undefined}
       onClickAction={onClickAction}
       onCopyLink={jest.fn()}
       onOpenChat={onOpenChat}
@@ -57,7 +53,7 @@ const renderGroup = (
     />
   );
 
-  return { onClickRecommendedAction, onClickAction, onOpenChat };
+  return { onClickAction, onOpenChat };
 };
 
 const openMenu = () => fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
@@ -99,7 +95,7 @@ describe('ConversationsActionsGroup', () => {
     it('does not put the recommended action on the card', () => {
       renderGroup(makeInvestigation());
 
-      // The decision lives in the menu, so the card cannot submit one by mis-click.
+      // The decision lives in the details flyout, so the card cannot submit one by mis-click.
       expect(screen.queryByRole('button', { name: 'Revoke sessions' })).not.toBeInTheDocument();
     });
 
@@ -113,35 +109,12 @@ describe('ConversationsActionsGroup', () => {
   });
 
   describe('in the menu', () => {
-    it('offers the recommended action while a decision is still open', () => {
-      const { onClickRecommendedAction } = renderGroup(makeInvestigation());
-      openMenu();
-
-      fireEvent.click(screen.getByText('Revoke sessions'));
-
-      expect(onClickRecommendedAction).toHaveBeenCalledWith({ id: 'inv-1' });
-    });
-
-    it('labels an action-less proposal with the generic fallback', () => {
-      renderGroup(makeInvestigation({ primaryActionLabel: undefined }));
-      openMenu();
-
-      expect(screen.getByText('Review')).toBeInTheDocument();
-    });
-
-    it('omits the recommended action on a decided investigation', () => {
-      renderGroup(makeInvestigation({ recommendedAction: 'closed' }));
+    it('does not offer the recommended action, which is decided in the details flyout', () => {
+      renderGroup(makeInvestigation());
       openMenu();
 
       expect(screen.queryByText('Revoke sessions')).not.toBeInTheDocument();
       expect(screen.getByText('Copy link')).toBeInTheDocument();
-    });
-
-    it('omits the recommended action when no handler is wired', () => {
-      renderGroup(makeInvestigation(), { withRecommendedAction: false });
-      openMenu();
-
-      expect(screen.queryByText('Revoke sessions')).not.toBeInTheDocument();
     });
 
     it('no longer duplicates opening the chat, which is on the card', () => {

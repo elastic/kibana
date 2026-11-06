@@ -8,7 +8,6 @@
 export {
   type EsqlQuery,
   type QueriesGetResponse,
-  type QueriesOccurrencesGetResponse,
   type QueryFeature,
   type QueryLink,
   type QueryType,
@@ -35,6 +34,7 @@ export {
 } from './src/queries';
 
 export type {
+  EventDeactivation,
   EventLifecycleResponse,
   GeneratedSignificantEventQuery,
   LifecycleDetection,
@@ -51,7 +51,6 @@ export {
   type FeatureUpsert,
   type FeatureWithFilter,
   type IgnoredFeature,
-  CODE_ANALYSIS_FEATURE_TYPE,
   COMPUTED_FEATURE_TYPES,
   DATASET_ANALYSIS_FEATURE_TYPE,
   ERROR_LOGS_FEATURE_TYPE,
@@ -75,7 +74,27 @@ export {
   toBaseFeature,
 } from './src/feature';
 
+export { type AggregatedFeature, groupFeaturesAcrossSources } from './src/feature_aggregation';
+
 export { FeatureAccumulator } from './src/feature_accumulator';
+
+export {
+  type TopologyEdge,
+  type TopologyEdgeVariant,
+  type TopologyEdgeResolution,
+  type TopologyNode,
+  type TopologyNodeType,
+  type TopologyProvenance,
+  type TopologySnapshotProperties,
+  MAX_TOPOLOGY_PROVENANCE,
+  TOPOLOGY_EDGE_RESOLUTIONS,
+  TOPOLOGY_NODE_TYPES,
+  topologyEdgeSchema,
+  topologyEdgeVariantSchema,
+  topologyNodeSchema,
+  topologyProvenanceSchema,
+  topologySnapshotPropertiesSchema,
+} from './src/topology';
 
 export type { IterationResult } from './src/api/features';
 
@@ -134,6 +153,9 @@ export {
   significantEventStatusSchema,
   significantEventManualStatusSchema,
   SIGNIFICANT_EVENT_MANUAL_STATUS_OPTIONS,
+  operatorFallbackAssessmentNote,
+  MAX_DEACTIVATION_REASON_LENGTH,
+  INACTIVE_SERIES_LOOKBACK_HOURS,
   significantEventsTuningConfigSchema,
   validateSignificantEventsTuningConfig,
   resolveSignificantEventsTuningConfig,
@@ -146,6 +168,8 @@ export {
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
   ASSESSMENT_NOTE_ROLE_RULE,
+  NARRATIVE_AGREEMENT_RULE,
+  DISCOVERY_SEVERITY_APPLICATION_RULE,
   NO_RAW_SENSITIVE_VALUES_RULE,
   SUMMARY_ROLE_RULE,
   SYMPTOM_HYPOTHESIS_ROLE_RULE,

@@ -115,15 +115,24 @@ export class SubjectClaimsService {
     const ordered = [...claims.entries()].sort(([left], [right]) => left.localeCompare(right));
 
     const taken: string[] = [];
-    for (const [id, subject] of ordered) {
-      const outcome = await this.claimOne({ id, spaceId, conversationId, subject, isHolderOpen });
-      if ('heldBy' in outcome) {
-        await this.handOver({ spaceId, from: conversationId, to: outcome.heldBy, ids: taken });
-        return { claimed: false, heldBy: outcome.heldBy };
+    try {
+      for (const [id, subject] of ordered) {
+        const outcome = await this.claimOne({ id, spaceId, conversationId, subject, isHolderOpen });
+        if ('heldBy' in outcome) {
+          await this.handOver({ spaceId, from: conversationId, to: outcome.heldBy, ids: taken });
+          return { claimed: false, heldBy: outcome.heldBy };
+        }
+        if (outcome.taken) {
+          taken.push(id);
+        }
       }
-      if (outcome.taken) {
-        taken.push(id);
-      }
+    } catch (error) {
+      await this.deleteMatching([
+        { term: { spaceId } },
+        { term: { conversationId } },
+        { terms: { _id: taken } },
+      ]).catch(() => undefined);
+      throw error;
     }
     return { claimed: true };
   }
