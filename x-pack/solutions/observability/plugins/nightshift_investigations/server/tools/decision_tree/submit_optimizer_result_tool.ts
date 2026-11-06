@@ -186,6 +186,8 @@ interface SubmissionOutcome {
   persistedLearnings?: LearningRecord[];
   /** The version document still owed by a commit whose head was saved. */
   pendingVersion?: PendingVersionWrite;
+  /** This attempt created the tree, so no later attempt of the turn may promote it. */
+  createdTree?: boolean;
 }
 
 /** Which parts of a traversal this conversation has not counted yet. */
@@ -208,6 +210,8 @@ interface RetryState {
   persistedLearnings: Map<string, string>;
   /** Version documents owed by heads that were saved, by tree slug. */
   pendingVersions: Map<string, PendingVersionWrite>;
+  /** Tree slugs an earlier attempt created; they stay tentative for the rest of the turn. */
+  created: Set<string>;
 }
 
 /** A conversation that has not retried for this long is not coming back. */
@@ -221,6 +225,7 @@ const freshRetryState = (): RetryState => ({
   reinforcements: new Set(),
   persistedLearnings: new Map(),
   pendingVersions: new Map(),
+  created: new Set(),
 });
 
 const provenanceFieldsOf = (
@@ -387,6 +392,8 @@ export const createSubmitOptimizerResultTool = ({
       );
       const editWasRecorded = (treeId: string): boolean =>
         state.edits.has(symptomSlugFromTreeId(treeId));
+      const createdThisTurn = (treeId: string): boolean =>
+        state.created.has(symptomSlugFromTreeId(treeId));
       const countingFor = (traversal?: Traversal): TraversalCounting => {
         if (!traversal) {
           return { visit: false, reinforce: false };
@@ -419,6 +426,9 @@ export const createSubmitOptimizerResultTool = ({
         }
         if (outcome.pendingVersion) {
           state.pendingVersions.set(slug, outcome.pendingVersion);
+        }
+        if (outcome.createdTree) {
+          state.created.add(slug);
         }
       };
       const runPersist = async (
@@ -493,6 +503,7 @@ export const createSubmitOptimizerResultTool = ({
                 return persistTraversal({
                   traversal,
                   counting,
+                  createdThisTurn: createdThisTurn(submission.tree_id),
                   store,
                   author,
                   summary: params.summary,
@@ -509,6 +520,7 @@ export const createSubmitOptimizerResultTool = ({
                 },
                 traversal,
                 counting,
+                createdThisTurn: createdThisTurn(submission.tree_id),
                 session,
                 store,
                 author,
@@ -523,6 +535,7 @@ export const createSubmitOptimizerResultTool = ({
               submission,
               traversal,
               counting,
+              createdThisTurn: createdThisTurn(submission.tree_id),
               session,
               store,
               author,
@@ -543,6 +556,7 @@ export const createSubmitOptimizerResultTool = ({
               persistTraversal({
                 traversal,
                 counting: countingFor(traversal),
+                createdThisTurn: createdThisTurn(traversal.tree_id),
                 store,
                 author,
                 summary: params.summary,
@@ -832,6 +846,7 @@ const persistSubmission = async ({
   submission,
   traversal,
   counting,
+  createdThisTurn,
   session,
   store,
   author,
@@ -845,6 +860,8 @@ const persistSubmission = async ({
   traversal?: Traversal;
   /** Which parts of the traversal this conversation has not counted yet. */
   counting: TraversalCounting;
+  /** An earlier attempt of this turn created the tree. */
+  createdThisTurn: boolean;
   session: SandboxSession;
   store: DecisionTreeStore;
   author: string;
@@ -931,15 +948,18 @@ const persistSubmission = async ({
 
   // A traversal names the confirmed causal path outright. Without one, fall back to the old signal
   // until the turn prompts ask for traversals: a taken edge an existing tree did not have. Only an
-  // existing tree is promoted; a tree created this turn starts tentative either way.
+  // existing tree is promoted; a tree created this turn, on this or an earlier attempt, starts
+  // tentative either way.
   const reinforced =
     existing !== undefined &&
+    !createdThisTurn &&
     (traversal ? traversal.causal_path.length > 0 : hasNewlyTakenEdges(existing, newTree));
   const outcome: SubmissionOutcome = {
     tree_id: treeId,
     file_path: filePath,
     status: 'persisted',
     countedEdit: true,
+    createdTree: existing === undefined,
     countedVisit: counting.visit,
     countedReinforcement: counting.reinforce,
     persistedLearnings: learnings,
@@ -993,6 +1013,7 @@ const traversalDetail = (traversal: Traversal | undefined): string[] => [
 const persistTraversal = async ({
   traversal,
   counting,
+  createdThisTurn,
   store,
   author,
   summary,
@@ -1003,6 +1024,8 @@ const persistTraversal = async ({
 }: {
   traversal: Traversal;
   counting: TraversalCounting;
+  /** An earlier attempt of this turn created the tree, so it is not promoted. */
+  createdThisTurn: boolean;
   store: DecisionTreeStore;
   author: string;
   summary: string;
@@ -1033,7 +1056,7 @@ const persistTraversal = async ({
   const stored = storedCountsOf(existing);
   assertCausalPathMarked(stored.tree, traversal);
   applyTraversal(stored.tree, stored.counts, traversal, now, counting);
-  const reinforced = traversal.causal_path.length > 0;
+  const reinforced = !createdThisTurn && traversal.causal_path.length > 0;
 
   const outcome: SubmissionOutcome = {
     tree_id: treeId,

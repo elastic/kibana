@@ -1151,6 +1151,30 @@ describe('nightshift_submit_optimizer_result counts', () => {
     };
     const getProvenance = () => provenanceFields;
 
+    it('keeps a tree created by an earlier attempt of the turn tentative on the retry', async () => {
+      const store = createStore();
+      store.get.mockResolvedValueOnce(undefined).mockResolvedValue(stored(CAUSAL_TREE));
+      const { submit } = createTool({
+        store,
+        files: { [ABSOLUTE_PATH]: markdownFor(CAUSAL_TREE) },
+      });
+
+      // The new tree is created while the other tree is rejected, so the agent retries both.
+      await submit({ symptom_trees: [mainSubmission(), otherSubmission] });
+      await submit({
+        symptom_trees: [mainSubmission(), otherSubmission],
+        traversals: [traversal({ causal_path: MAIN_PATH })],
+      });
+
+      expect(store.commit).toHaveBeenCalledWith(expect.objectContaining({ reinforced: false }));
+      expect(store.updateCounts).toHaveBeenCalledWith(
+        expect.objectContaining({ treeId: TREE_ID, reinforced: false })
+      );
+      expect(store.updateCounts).not.toHaveBeenCalledWith(
+        expect.objectContaining({ reinforced: true })
+      );
+    });
+
     it('rejects a submit that lists one tree twice without committing either entry', async () => {
       const store = createStore(stored(FULL_TREE));
       const { submit } = createTool({
