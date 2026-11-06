@@ -164,6 +164,8 @@ function makeEcfReturn(
     isStaleByFamily?: Record<string, boolean>;
     currentConfigsByFamily?: ReturnType<typeof useEcfDeployment>['currentConfigsByFamily'];
     currentNamespaceByFamily?: ReturnType<typeof useEcfDeployment>['currentNamespaceByFamily'];
+    staleNamespaceByFamily?: Record<string, string>;
+    isUpdateOpenedByFamily?: Record<string, boolean>;
   } = {}
 ): ReturnType<typeof useEcfDeployment> {
   return {
@@ -201,7 +203,8 @@ function makeEcfReturn(
         crowdstrike: false,
       },
       staleReasonByFamily: { unified: undefined, otel: undefined, crowdstrike: undefined },
-      isUpdateOpenedByFamily: {},
+      staleNamespaceByFamily: overrides.staleNamespaceByFamily ?? {},
+      isUpdateOpenedByFamily: overrides.isUpdateOpenedByFamily ?? {},
       onLaunch: jest.fn(),
       onUpdateOpened: jest.fn(),
       onStackNameChange: jest.fn(),
@@ -1141,6 +1144,78 @@ describe('AuthenticateAndDeployStep', () => {
         expect.objectContaining({ family: 'unified', namespace: 'prod' }),
         expect.not.objectContaining({ namespace: expect.anything() }),
       ]);
+    });
+
+    describe('detection state of a stack that moved to a new namespace', () => {
+      const unifiedService = { ...ecfService, ecfLogType: 'cloudtrail' as const };
+      const setup = (ecfOverrides: Parameters<typeof makeEcfReturn>[0]) => {
+        const updateDetectAndReviewStep = jest.fn();
+        mockUseOnboardingSO.mockReturnValue({
+          createDeployment: jest.fn(),
+          updateDeployment: jest.fn().mockResolvedValue(true),
+          persistDeploymentId: jest.fn(),
+        });
+        mockUseSessionStorage.mockReturnValue([
+          {
+            globalRegion: 'us-east-1',
+            serviceVars: {},
+            instances: [
+              { instanceId: 'cloudtrail', serviceId: 'cloudtrail', name: 'T', isDuplicate: false },
+            ],
+          },
+          jest.fn(),
+        ]);
+        mockUseOnboardingFlow.mockReturnValue({
+          servicesStep: { selectedServiceIds: ['cloudtrail'] },
+          awsServicesMap: new Map([['cloudtrail', unifiedService]]),
+          detectAndReviewStep: {
+            onboardingDeploymentId: 'existing-dep-id',
+            serviceStatuses: { cloudtrail: 'receiving' },
+          },
+          updateDetectAndReviewStep,
+        });
+        mockUseEcfDeployment.mockReturnValue(
+          makeEcfReturn({
+            hasAnyEcf: true,
+            isDone: true,
+            launchedFamilies: ['unified'],
+            stackVersions: { unified: '1.2.3' },
+            ...ecfOverrides,
+          })
+        );
+        return updateDetectAndReviewStep;
+      };
+
+      it('starts detection over for the services of the updated stack', async () => {
+        const updateDetectAndReviewStep = setup({
+          isStaleByFamily: { unified: true, otel: false, crowdstrike: false },
+          staleNamespaceByFamily: { unified: 'staging' },
+          isUpdateOpenedByFamily: { unified: true },
+        });
+        const onContinue = jest.fn();
+        renderStep(onContinue);
+        fireEvent.click(screen.getByTestId('authenticateAndDeployStep-nextButton'));
+        await waitFor(() => expect(onContinue).toHaveBeenCalledTimes(1));
+
+        expect(updateDetectAndReviewStep).toHaveBeenCalledWith({
+          serviceStatuses: { cloudtrail: 'instantiating' },
+        });
+      });
+
+      it('keeps the detection state when the namespace did not change', async () => {
+        const updateDetectAndReviewStep = setup({
+          isStaleByFamily: { unified: true, otel: false, crowdstrike: false },
+          isUpdateOpenedByFamily: { unified: true },
+        });
+        const onContinue = jest.fn();
+        renderStep(onContinue);
+        fireEvent.click(screen.getByTestId('authenticateAndDeployStep-nextButton'));
+        await waitFor(() => expect(onContinue).toHaveBeenCalledTimes(1));
+
+        expect(updateDetectAndReviewStep).not.toHaveBeenCalledWith({
+          serviceStatuses: expect.anything(),
+        });
+      });
     });
 
     it('includes the current service settings in ecfStacks as serviceConfigs', async () => {

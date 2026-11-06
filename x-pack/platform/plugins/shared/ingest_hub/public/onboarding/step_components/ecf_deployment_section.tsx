@@ -160,7 +160,7 @@ interface UseEcfDeploymentResult {
   currentServiceIdsByFamily: Record<EcfTemplateFamily, string[]>;
   /** Current stack-relevant settings per family — used by the parent to write the settings snapshot to the SO on Next. */
   currentConfigsByFamily: Record<EcfTemplateFamily, EcfConfigSnapshot>;
-  /** The `DataStreamNamespace` each family's stack gets now, for the families that take one. */
+  /** The `DataStreamNamespace` each family's stack gets now (or keeps while it has no services), for the families that take one. */
   currentNamespaceByFamily: Partial<Record<EcfTemplateFamily, string>>;
   /** Advances the launchedServiceIds snapshot to the current selection for all stale families. Call on Next before persisting. */
   advanceStaleSnapshots: () => void;
@@ -270,12 +270,16 @@ export const useEcfDeployment = ({
   );
 
   // The stack's namespace is the global one, or the template default when none is set. Only the
-  // unified template takes the parameter.
+  // unified template takes the parameter. While none of its services is selected the stack is not
+  // being updated, so it keeps the namespace it was launched with.
   const currentNamespaceByFamily = useMemo(
     (): Partial<Record<EcfTemplateFamily, string>> => ({
-      unified: namespace || ECF_DEFAULT_NAMESPACE,
+      unified:
+        currentServiceIdsByFamily.unified.length > 0
+          ? namespace || ECF_DEFAULT_NAMESPACE
+          : launchedNamespaces.unified,
     }),
-    [namespace]
+    [namespace, currentServiceIdsByFamily, launchedNamespaces]
   );
 
   // The namespace a launched stack has to be updated to, per family, when it differs from the one

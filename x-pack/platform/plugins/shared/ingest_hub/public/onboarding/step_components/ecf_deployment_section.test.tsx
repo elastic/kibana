@@ -1262,6 +1262,27 @@ describe('useEcfDeployment staleness', () => {
         expect(setter.mock.calls.at(-1)?.[0].launchedNamespaces).toEqual({ unified: 'default' });
       });
 
+      it('keeps the launched namespace of a stack while none of its services is selected', () => {
+        mockGetEcfServiceConfigs.mockReturnValue([]);
+        makeSessionStorageMock({
+          launchedFamilies: ['unified'],
+          launchedServiceIds: { unified: ['cloudtrail'] },
+          launchedConfigs: snapshot([arnA]),
+          launchedNamespaces: { unified: 'prod' },
+        });
+        const { result } = renderHook(() =>
+          useEcfDeployment({
+            instances: [],
+            serviceVars: {},
+            globalRegion: 'us-east-1',
+            otlpEndpoint: undefined,
+            dataFormat: 'ecs' as const,
+            namespace: 'staging',
+          })
+        );
+        expect(result.current.currentNamespaceByFamily.unified).toBe('prod');
+      });
+
       it('treats a stack without a namespace snapshot as launched with the template default', () => {
         launched(undefined);
         expect(renderNamespaceHook('').result.current.sectionProps.isStaleByFamily.unified).toBe(

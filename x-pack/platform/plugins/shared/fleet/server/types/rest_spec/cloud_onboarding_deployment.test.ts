@@ -10,6 +10,7 @@ import {
   CloudOnboardingDeploymentSchemaV5,
   CloudOnboardingDeploymentSchemaV6,
   CloudOnboardingDeploymentSchemaV7,
+  CloudOnboardingDeploymentSchemaV8,
 } from '../models';
 
 import {
@@ -133,19 +134,6 @@ describe('ecfStacks namespace', () => {
     expect(() => validateStacks([{ ...stack, namespace: '' }])).toThrow();
     expect(() => validateStacks([{ ...stack, namespace: 'a'.repeat(101) }])).toThrow();
   });
-
-  it('is stored by the saved object model', () => {
-    expect(
-      CloudOnboardingDeploymentSchemaV5.validate({
-        provider: 'aws',
-        mechanisms: ['ecf'],
-        services: ['cloudtrail'],
-        status: 'succeeded',
-        attemptCount: 1,
-        ecfStacks: [{ ...stack, namespace: 'prod' }],
-      })
-    ).toEqual(expect.objectContaining({ ecfStacks: [{ ...stack, namespace: 'prod' }] }));
-  });
 });
 
 describe('saved object model versions', () => {
@@ -221,6 +209,46 @@ describe('saved object model versions', () => {
       CloudOnboardingDeploymentSchemaV6.validate({
         ...record,
         policySettings: { output_id: 'logstash-1' },
+      })
+    ).toThrow();
+  });
+});
+
+describe('ecfStacks namespace model version', () => {
+  const record = {
+    provider: 'aws',
+    mechanisms: ['ecf'],
+    services: ['cloudtrail'],
+    status: 'succeeded',
+    attemptCount: 1,
+  };
+  const stack = { family: 'unified', stackName: 'edot-cloud-forwarder', templateVersion: '1.10.0' };
+
+  it('V8 stores the namespace of an ECF stack', () => {
+    expect(
+      CloudOnboardingDeploymentSchemaV8.validate({
+        ...record,
+        ecfStacks: [{ ...stack, namespace: 'prod' }],
+      })
+    ).toEqual(expect.objectContaining({ ecfStacks: [{ ...stack, namespace: 'prod' }] }));
+  });
+
+  it('V8 rejects an empty namespace or one over 100 characters', () => {
+    for (const namespace of ['', 'a'.repeat(101)]) {
+      expect(() =>
+        CloudOnboardingDeploymentSchemaV8.validate({
+          ...record,
+          ecfStacks: [{ ...stack, namespace }],
+        })
+      ).toThrow();
+    }
+  });
+
+  it('V7 does not know the stack namespace, which is why it needs its own model version', () => {
+    expect(() =>
+      CloudOnboardingDeploymentSchemaV7.validate({
+        ...record,
+        ecfStacks: [{ ...stack, namespace: 'prod' }],
       })
     ).toThrow();
   });
