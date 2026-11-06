@@ -62,7 +62,7 @@ const build = ({
   } as unknown as Build);
 
 describe('countRecentCancelledBuilds', () => {
-  it('counts builds cancelled in the last day after running for a while', () => {
+  it('counts builds cancelled in the last 8 hours after running for a while', () => {
     const builds = [
       build({ createdMinutesAgo: 120 }),
       build({ createdMinutesAgo: 60 }),
@@ -72,9 +72,9 @@ describe('countRecentCancelledBuilds', () => {
     expect(countRecentCancelledBuilds(builds, PR, undefined, NOW)).toBe(2);
   });
 
-  it('ignores builds older than a day', () => {
+  it('ignores builds older than 8 hours', () => {
     expect(
-      countRecentCancelledBuilds([build({ createdMinutesAgo: 25 * 60 })], PR, undefined, NOW)
+      countRecentCancelledBuilds([build({ createdMinutesAgo: 9 * 60 })], PR, undefined, NOW)
     ).toBe(0);
   });
 
@@ -162,7 +162,7 @@ describe('postFrequentCancellationsTip', () => {
     jest.restoreAllMocks();
   });
 
-  it('posts the tip once three builds were cancelled in the last day', async () => {
+  it('posts the tip once three builds were cancelled in the last 8 hours', async () => {
     await postFrequentCancellationsTip();
 
     expect(BuildkiteClient).toHaveBeenCalledWith({ timeoutMs: 15_000 });

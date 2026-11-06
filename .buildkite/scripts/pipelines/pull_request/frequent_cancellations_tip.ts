@@ -14,7 +14,7 @@ export const FREQUENT_CANCELLATIONS_TIP_CONTEXT = 'frequent-cancellations-tip';
 
 const PIPELINE_SLUG = 'kibana-pull-request';
 const MIN_CANCELLED_BUILDS = 3;
-const WINDOW_MS = 24 * 60 * 60 * 1000;
+const WINDOW_MS = 8 * 60 * 60 * 1000;
 // Builds cancelled earlier than this had barely started, so they aren't worth a tip.
 const MIN_RUNTIME_MS = 10 * 60 * 1000;
 const BUILDS_TO_FETCH = 100;
@@ -33,7 +33,7 @@ const ranOnDraft = ({ env, meta_data: metaData }: Build): boolean =>
   env?.GITHUB_PR_DRAFT === 'true' || metaData?.['ingest:is_draft_pr'] === 'true';
 
 /**
- * Counts builds of a PR cancelled in the last day after running for a while. Draft builds and
+ * Counts builds of a PR cancelled in the last 8 hours after running for a while. Draft builds and
  * builds of, or cancelled by, bot fix commits don't count. `currentCommit` is the running build,
  * which isn't in `finishedBuilds` but may be the one that cancelled the latest of them.
  */
@@ -68,7 +68,7 @@ export const countRecentCancelledBuilds = (
 export const getFrequentCancellationsTipMessage = (user: string, cancelledBuilds: number): string =>
   '### 🌯 Save a burrito\n\n' +
   `@${user}, if you're still iterating on this PR, **consider converting it to draft**: ` +
-  `${cancelledBuilds} CI builds were cancelled in the last day before they finished. ` +
+  `${cancelledBuilds} CI builds were cancelled in the last few hours before they finished. ` +
   "Drafts don't run CI automatically, and you can comment `/ci` whenever you want a build.";
 
 const postTip = async (): Promise<void> => {
@@ -117,7 +117,7 @@ const postTip = async (): Promise<void> => {
   });
 };
 
-/** Posts a one-time tip on PRs where many running builds were cancelled in the last day. Never throws. */
+/** Posts a one-time tip on PRs where many running builds were recently cancelled. Never throws. */
 export const postFrequentCancellationsTip = async (): Promise<void> => {
   let timer: ReturnType<typeof setTimeout> | undefined;
   const timeout = new Promise<never>((_, reject) => {
