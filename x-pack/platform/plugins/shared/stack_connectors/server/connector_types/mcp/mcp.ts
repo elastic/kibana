@@ -42,6 +42,7 @@ import type {
 } from '@kbn/connector-specs';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { buildHeadersFromSecrets } from './auth_helpers';
+import { markConnectFailure, mcpCircuitBreaker } from './circuit_breaker';
 
 // TTL for list_tools cache: 15 minutes
 export const LIST_TOOLS_CACHE_TTL_MS = 15 * 60 * 1000;
@@ -153,17 +154,26 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     });
   }
 
+  private withBreaker<T>(fn: () => Promise<T>): Promise<T> {
+    return mcpCircuitBreaker.run(
+      { key: this.getLeaseKey(), connectorId: this.connector.id, logger: this.logger },
+      fn
+    );
+  }
+
   private buildClient(): Promise<McpClient> {
-    return clientTypes.mcp.build({
-      logger: this.logger,
-      config: {
-        serverUrl: this.config.serverUrl,
-        clientName: `kibana-mcp-connector-${this.connector.id}`,
-      },
-      networkSettings: this.networkSettings,
-      platform: this.platform,
-      credential: this.credential,
-    });
+    return markConnectFailure(
+      clientTypes.mcp.build({
+        logger: this.logger,
+        config: {
+          serverUrl: this.config.serverUrl,
+          clientName: `kibana-mcp-connector-${this.connector.id}`,
+        },
+        networkSettings: this.networkSettings,
+        platform: this.platform,
+        credential: this.credential,
+      })
+    );
   }
 
   /**
@@ -232,6 +242,10 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     _params: z.infer<typeof TestConnectorRequestSchema>,
     _connectorUsageCollector: ConnectorUsageCollector
   ): Promise<McpTestConnectorResponse> {
+    return this.withBreaker(() => this.runIsolatedTest());
+  }
+
+  private async runIsolatedTest(): Promise<McpTestConnectorResponse> {
     let client: McpClient;
     try {
       client = await this.buildClient();
@@ -277,7 +291,9 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
 
     connectorUsageCollector.addRequestBodyBytes(undefined, params);
 
-    const result = await this.withPooledClient('listTools', (client) => client.listTools());
+    const result = await this.withBreaker(() =>
+      this.withPooledClient('listTools', (client) => client.listTools())
+    );
     this.logger.debug(`Listed ${result.tools.length} tools from MCP server`);
     listToolsCache.set(cacheKey, result);
     return result;
@@ -292,10 +308,12 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
   ): Promise<CallToolResponse> {
     connectorUsageCollector.addRequestBodyBytes(undefined, params);
 
-    const result = await this.withPooledClient(
-      `callTool(${params.name})`,
-      (client) => client.callTool({ name: params.name, arguments: params.arguments }),
-      { redactToolError: true }
+    const result = await this.withBreaker(() =>
+      this.withPooledClient(
+        `callTool(${params.name})`,
+        (client) => client.callTool({ name: params.name, arguments: params.arguments }),
+        { redactToolError: true }
+      )
     );
     this.logger.debug(`Successfully called tool: ${params.name}`);
     return result;

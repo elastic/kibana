@@ -17,6 +17,8 @@ import { CONNECTOR_ID, SUB_ACTION } from '@kbn/connector-schemas/mcp/constants';
 import { clientTypes } from '@kbn/connector-specs/server';
 import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { buildHeadersFromSecrets } from './auth_helpers';
+import { McpError, McpErrorCode } from '@kbn/mcp-client';
+import { BREAKER_FAILURE_THRESHOLD, mcpCircuitBreaker } from './circuit_breaker';
 
 jest.mock('@kbn/connector-specs/server', () => ({
   clientTypes: {
@@ -111,6 +113,7 @@ describe('McpConnector', () => {
 
   afterEach(() => {
     pool.stop();
+    mcpCircuitBreaker.clear();
   });
 
   describe('sub-action registration', () => {
@@ -678,6 +681,81 @@ describe('McpConnector', () => {
 
       expect(addRequestBodyBytes).toHaveBeenCalledWith(undefined, listParams);
       expect(addRequestBodyBytes).toHaveBeenCalledWith(undefined, callParams);
+    });
+  });
+
+  describe('circuit breaker', () => {
+    it('opens the breaker after connect failures and fails fast for that connector', async () => {
+      mcpClientType.build.mockImplementation(() => Promise.reject(new Error('connect failed')));
+      const connector = createConnector();
+
+      for (let i = 0; i < BREAKER_FAILURE_THRESHOLD; i++) {
+        await expect(
+          connector.listTools({ forceRefresh: true }, connectorUsageCollector)
+        ).rejects.toThrow('connect failed');
+      }
+
+      expect(mcpClientType.build).toHaveBeenCalledTimes(BREAKER_FAILURE_THRESHOLD);
+
+      await expect(
+        connector.listTools({ forceRefresh: true }, connectorUsageCollector)
+      ).rejects.toThrow('is unavailable');
+      await expect(
+        connector.callTool({ name: 'test-tool', arguments: {} }, connectorUsageCollector)
+      ).rejects.toThrow('is unavailable');
+      await expect(connector.testConnector({}, connectorUsageCollector)).rejects.toThrow(
+        'is unavailable'
+      );
+      expect(mcpClientType.build).toHaveBeenCalledTimes(BREAKER_FAILURE_THRESHOLD);
+
+      const other = createConnector({
+        connector: { id: 'other-connector', type: CONNECTOR_ID },
+      });
+      await expect(
+        other.listTools({ forceRefresh: true }, connectorUsageCollector)
+      ).rejects.toThrow('connect failed');
+      expect(mcpClientType.build).toHaveBeenCalledTimes(BREAKER_FAILURE_THRESHOLD + 1);
+    });
+
+    it('does not open the breaker on request timeouts from a connected client', async () => {
+      fakeClient.callTool.mockRejectedValue(
+        new McpError(McpErrorCode.RequestTimeout, 'Request timed out')
+      );
+      const connector = createConnector();
+
+      for (let i = 0; i < BREAKER_FAILURE_THRESHOLD; i++) {
+        await expect(
+          connector.callTool({ name: 'test-tool', arguments: {} }, connectorUsageCollector)
+        ).rejects.toThrow('Request timed out');
+      }
+      expect(fakeClient.callTool).toHaveBeenCalledTimes(BREAKER_FAILURE_THRESHOLD);
+
+      await expect(
+        connector.listTools({ forceRefresh: true }, connectorUsageCollector)
+      ).resolves.toEqual({ tools: [] });
+      expect(fakeClient.listTools).toHaveBeenCalledTimes(1);
+      expect(mcpClientType.build).toHaveBeenCalledTimes(1);
+    });
+
+    it('opens the breaker when a pooled client dies and every rebuild fails', async () => {
+      const connectionLost = new McpError(McpErrorCode.ConnectionClosed, 'connection closed');
+      fakeClient.callTool.mockRejectedValue(connectionLost);
+      mcpClientType.shouldInvalidateOnError.mockImplementation((err) => err === connectionLost);
+      const connector = createConnector();
+      const callTool = () =>
+        connector.callTool({ name: 'test-tool', arguments: {} }, connectorUsageCollector);
+
+      await expect(callTool()).rejects.toThrow('connection closed');
+      expect(mcpClientType.build).toHaveBeenCalledTimes(1);
+
+      mcpClientType.build.mockImplementation(() => Promise.reject(new Error('connect failed')));
+      for (let i = 0; i < BREAKER_FAILURE_THRESHOLD; i++) {
+        await expect(callTool()).rejects.toThrow('connect failed');
+      }
+      expect(mcpClientType.build).toHaveBeenCalledTimes(1 + BREAKER_FAILURE_THRESHOLD);
+
+      await expect(callTool()).rejects.toThrow('is unavailable');
+      expect(mcpClientType.build).toHaveBeenCalledTimes(1 + BREAKER_FAILURE_THRESHOLD);
     });
   });
 });
