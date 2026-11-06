@@ -21,6 +21,11 @@ export const extendPageObjects = (
   config: ScoutTestConfig
 ): EdrRbacPageObjects => ({
   ...pageObjects,
-  endpointManagementNav: createLazyPageObject(EndpointManagementNavPage, page, config),
+  endpointManagementNav: createLazyPageObject(
+    EndpointManagementNavPage,
+    page,
+    config,
+    pageObjects.serverlessProjectChromePage
+  ),
   rolePrivilegeSummary: createLazyPageObject(RolePrivilegeSummaryPage, page),
 });

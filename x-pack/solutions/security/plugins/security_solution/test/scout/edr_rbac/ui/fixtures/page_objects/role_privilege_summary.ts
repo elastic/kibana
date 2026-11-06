@@ -24,6 +24,9 @@ export class RolePrivilegeSummaryPage {
 
   public async openSummary(): Promise<void> {
     await this.page.testSubj.click('viewPrivilegeSummaryButton');
+    // The summary renders into a flyout after the click, so settle on the Security category before
+    // anything reads the rows inside it.
+    await this.securityCategory.waitFor({ state: 'visible' });
   }
 
   /**
@@ -31,6 +34,9 @@ export class RolePrivilegeSummaryPage {
    * number rather than trusting a blanket "expand all".
    */
   public async expandAllRows(): Promise<number> {
+    // `all()` snapshots whatever is in the DOM at that instant. `openSummary` having settled on
+    // the rendered category is what makes that snapshot complete rather than partial — a partial
+    // one would leave rows collapsed and fail later on a row that is present but hidden.
     const rows = await this.page.testSubj.locator('expandPrivilegeSummaryRow').all();
 
     for (const row of rows) {
@@ -41,9 +47,12 @@ export class RolePrivilegeSummaryPage {
   }
 
   public spaceAvatar(spaceId: string): Locator {
-    return this.page.testSubj
-      .locator('privilegeSummaryFeatureCategory_securitySolution')
-      .locator(`[data-test-subj="space-avatar-${spaceId}"]`);
+    return this.securityCategory.locator(`[data-test-subj="space-avatar-${spaceId}"]`);
+  }
+
+  /** The accordion holding every Security sub-feature row. */
+  private get securityCategory(): Locator {
+    return this.page.testSubj.locator('privilegeSummaryFeatureCategory_securitySolution');
   }
 
   /** The privilege shown for one sub-feature, located by its displayed name. */

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SecurityPageName } from '@kbn/deeplinks-security';
 import { tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 import {
@@ -14,6 +15,12 @@ import {
   getSingleAreaRole,
   getBasePrivilegeOnlyRole,
 } from '../fixtures';
+
+/**
+ * A management area outside the Endpoint sub-features, so it stays reachable on the base privilege
+ * alone. Used only to confirm the link surface has rendered before asserting absence.
+ */
+const ALWAYS_GRANTED_LANDING_LINK_ID = SecurityPageName.entityAnalyticsManagement;
 
 /**
  * Current feature version only. A deprecated version's privileges are mapped onto the current
@@ -31,6 +38,8 @@ spaceTest.describe(
         const nav = pageObjects.endpointManagementNav;
 
         await browserAuth.loginWithCustomRole(getBasePrivilegeOnlyRole());
+        // `gotoSecurityRoot` settles on the navigation having rendered, so the expectations below
+        // cannot pass against a nav that has yet to populate.
         await nav.gotoSecurityRoot();
         await nav.openManagementGroup();
 
@@ -39,6 +48,10 @@ spaceTest.describe(
         }
 
         await nav.gotoManageLanding();
+
+        // Same reasoning on the second surface: `gotoManageLanding` only waits for `load`, and
+        // Security resolves its links afterwards.
+        await expect(nav.landingCard(ALWAYS_GRANTED_LANDING_LINK_ID)).toBeVisible();
 
         for (const linkId of ENDPOINT_MANAGEMENT_LINK_IDS) {
           await expect(nav.landingCard(linkId)).toBeHidden();
