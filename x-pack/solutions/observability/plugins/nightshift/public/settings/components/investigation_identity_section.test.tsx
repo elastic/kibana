@@ -26,6 +26,11 @@ jest.mock('../../data/service_accounts/use_investigator_service_account', () => 
   useInvestigatorServiceAccount: () => mockStatus,
 }));
 
+let mockDetection: { data?: Record<string, unknown> } = {};
+jest.mock('../../data/service_accounts/use_detection_engine_service_account', () => ({
+  useDetectionEngineServiceAccount: () => mockDetection,
+}));
+
 const status = (overrides: Record<string, unknown> = {}) => ({
   isLoading: false,
   data: {
@@ -60,6 +65,9 @@ const renderSection = () =>
 
 describe('InvestigationIdentitySection', () => {
   beforeEach(() => {
+    mockDetection = {
+      data: { serviceAccountId: 'uiam-detection-3', role: '_nightshift_detection' },
+    };
     mockUseDeveloperMode.mockReturnValue({
       isDeveloperMode: true,
       isSaving: false,
@@ -93,6 +101,9 @@ describe('InvestigationIdentitySection', () => {
     expect(section).toHaveTextContent('_nightshift_agent');
     expect(screen.getByTestId('nightshiftServiceAccountOthers')).toHaveTextContent(
       'nightshift_automations (uiam-automations-2) · _nightshift_automations'
+    );
+    expect(screen.getByTestId('nightshiftServiceAccountOthers')).toHaveTextContent(
+      'nightshift_detection (uiam-detection-3) · _nightshift_detection'
     );
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });

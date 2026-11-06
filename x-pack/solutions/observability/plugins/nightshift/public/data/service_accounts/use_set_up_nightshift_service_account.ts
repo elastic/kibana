@@ -15,7 +15,10 @@ import {
   NightshiftServiceAccountSetupError,
 } from '@kbn/nightshift-shared';
 import { useKibana } from '../../hooks/use_kibana';
-import { NIGHTSHIFT_ONBOARDING_QUERY_KEY } from '../query_keys';
+import {
+  DETECTION_ENGINE_SERVICE_ACCOUNT_QUERY_KEY,
+  NIGHTSHIFT_ONBOARDING_QUERY_KEY,
+} from '../query_keys';
 import { createBrowserServiceAccountsApi } from './browser_service_accounts_api';
 import { INVESTIGATOR_SERVICE_ACCOUNT_QUERY_KEY } from './use_investigator_service_account';
 
@@ -151,6 +154,7 @@ export const useSetUpNightshiftServiceAccount = (): UseMutationResult<
     },
     onSuccess: (status) => {
       queryClient.setQueryData(INVESTIGATOR_SERVICE_ACCOUNT_QUERY_KEY, status);
+      queryClient.invalidateQueries({ queryKey: DETECTION_ENGINE_SERVICE_ACCOUNT_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: NIGHTSHIFT_ONBOARDING_QUERY_KEY });
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.nightshift.serviceAccount.enabledToastTitle', {
@@ -162,6 +166,7 @@ export const useSetUpNightshiftServiceAccount = (): UseMutationResult<
     onError: (error) => {
       // A failed setup may have done part of its work; read the status again.
       queryClient.invalidateQueries({ queryKey: INVESTIGATOR_SERVICE_ACCOUNT_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: DETECTION_ENGINE_SERVICE_ACCOUNT_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: NIGHTSHIFT_ONBOARDING_QUERY_KEY });
       notifications.toasts.addError(toError(error, { isServerless }), {
         title: i18n.translate('xpack.nightshift.serviceAccount.setupErrorToastTitle', {
