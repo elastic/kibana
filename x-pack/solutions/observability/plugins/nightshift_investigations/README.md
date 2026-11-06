@@ -44,7 +44,7 @@ The Investigate/Ask selector does not select a different execution path.
 Attempts that continue an open investigation and starts with the `manual` trigger type do not count
 and are never blocked, even when the limit is reached. For an automatic attempt that would open a new
 investigation, the investigation client charges the automation budget, then the global
-automatic-investigation quota. Each charge is the check: the budget slot is reserved atomically, so
+investigation quota (see "Daily investigation limits" below). Each charge is the check: the budget slot is reserved atomically, so
 overlapping runs across Kibana instances cannot exceed the limit. An attempt denied by either limit
 creates no investigation and appears as skipped in automation history: with reason `daily_limit`
 when the automation limit denies it, and with reason `investigation_limit` when the global quota
@@ -202,7 +202,17 @@ If any of those subjects is part of an open investigation that the caller owns, 
 
 If none match, the start claims the subjects for a new investigation id. That way, of two concurrent starts for one subject, the second continues the first. Closed investigations never match. One start always lands on exactly one investigation.
 
-The daily quota for automatic starts (`trigger_type: automatic`) only counts starts that open a new investigation. It is checked after the subject matching and before the claim, so a follow-up on an open investigation is never denied, and a denied start claims nothing.
+#### Daily investigation limits
+
+The global investigation quota is registered by Significant Events and set on the Nightshift settings page. It has three deployment-wide limits per UTC day, each of which can be turned off:
+
+- automatic investigations (`trigger_type: automatic`, all automations combined), default 5;
+- manual investigations (`trigger_type: manual`: the start API behind the homepage and the CLI, and Slack mentions), default 5;
+- all investigations, default 10. It can be lower than the other two added up.
+
+A start is charged to the limit for its trigger type and to the limit for all investigations. A start denied by either limit leaves both counts unchanged and fails with 429, with a message naming the limit that was reached. The quota only counts starts that open a new investigation. It is checked after the subject matching and before the claim, so a follow-up on an open investigation is never denied, and a denied start claims nothing.
+
+A Slack mention of the Nightshift assistant or investigation agent that opens a new Agent Builder conversation is charged as a manual start, through an Agent Builder on-before-new-conversation hook (`registerOnBeforeNewConversation`). The hook runs after the caller is authorized to run the agent and before the conversation is written, and never for a replayed delivery. The slot is given back when the turn is refused before it writes anything (a failed or duplicate execution record, or a busy or conflicting conversation write); after any other failure it stays taken. A mention in a thread that already has a conversation is not charged. A denied mention is refused with 429, or with 503 when the quota check is unavailable, and leaves nothing behind.
 
 The start then runs the `system-nightshift-investigation` workflow with `investigation_id` and the new subjects, and returns `{ investigation_id }`. It does not write to the investigation itself. The workflow's `_ensure` step does all of that:
 

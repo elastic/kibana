@@ -1601,6 +1601,8 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/search-session @elastic/kibana-discover
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/security-rule @elastic/security-detection-engineering
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/significant-events-maintenance-state @elastic/nightshift
+/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/significant-events-run-quota-ledger @elastic/nightshift
+/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/significant-events-run-quota-settings @elastic/nightshift
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/space @elastic/kibana-security
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/synthetics-monitor @elastic/obs-signals-logs-team
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/synthetics-monitor-multi-space @elastic/obs-signals-logs-team

@@ -96,6 +96,7 @@ const subjectsClient = {
   findConversationIdsBySubjects: jest.fn(),
   listByConversationIds: jest.fn(),
   claimSubjects: jest.fn(),
+  releaseClaims: jest.fn(),
 };
 const agenticInvestigationsClient = { findOpenBySubjects: jest.fn(), get: jest.fn() };
 
@@ -246,6 +247,7 @@ beforeEach(() => {
   subjectsClient.findConversationIdsBySubjects.mockResolvedValue([]);
   subjectsClient.listByConversationIds.mockResolvedValue([]);
   subjectsClient.claimSubjects.mockResolvedValue({ claimed: true });
+  subjectsClient.releaseClaims.mockReset().mockResolvedValue(undefined);
   agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([]);
 });
 
@@ -303,7 +305,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       NIGHTSHIFT_DEFAULT_MODELS.investigation,
       mockRequest
     );
-    expect(investigationQuotaCallback).not.toHaveBeenCalled();
+    expect(investigationQuotaCallback).toHaveBeenCalledWith('manual');
   });
 
   it('keeps operator instructions outside the alert evidence and leaves default briefs unchanged', async () => {
@@ -1508,6 +1510,21 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
   });
 
+  it('denies a new manual investigation with the limit that was reached', async () => {
+    investigationQuotaCallback.mockResolvedValue({ allowed: false, deniedBy: 'all' });
+
+    await expect(
+      startFromApi(makeClient(), {
+        subject: { type: 'manual', id: 'question' },
+        trigger_type: 'manual',
+      })
+    ).rejects.toThrow('The daily limit for all investigations has been reached');
+
+    expect(investigationQuotaCallback).toHaveBeenCalledWith('manual');
+    expect(subjectsClient.claimSubjects).not.toHaveBeenCalled();
+    expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+  });
+
   describe('with an automation budget', () => {
     let repository: ReturnType<typeof createBudgetRepository>;
     const startWithBudget = (
@@ -1594,21 +1611,21 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
         expect(await usage()).toBe(0);
       });
 
-      it('keeps both slots when the claim attempt fails', async () => {
+      it('gives both slots back when the claim attempt fails', async () => {
         subjectsClient.claimSubjects.mockRejectedValue(new Error('claim conflict'));
 
         await expect(startWithBudget(1)).rejects.toThrow('claim conflict');
 
-        expect(release).not.toHaveBeenCalled();
-        expect(await usage()).toBe(1);
+        expect(release).toHaveBeenCalledTimes(1);
+        expect(await usage()).toBe(0);
       });
 
-      it('keeps the global slot when the start fails after claiming', async () => {
+      it('gives the global slot back when the start fails after claiming', async () => {
         mockManagement.runWorkflow.mockRejectedValueOnce(new Error('failed'));
 
         await expect(startWithBudget(1)).rejects.toThrow('failed');
 
-        expect(release).not.toHaveBeenCalled();
+        expect(release).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -1621,23 +1638,45 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
         'the agent installation',
         () => installInvestigationAgentMock.mockRejectedValueOnce(new Error('failed')),
       ],
-    ])('keeps the automation slot with the claim when %s fails', async (_step, fail) => {
+    ])('gives the automation slot back when %s fails', async (_step, fail) => {
       fail();
 
       await expect(startWithBudget(1)).rejects.toThrow('failed');
 
-      expect(await usage()).toBe(1);
+      expect(await usage()).toBe(0);
+      expect(subjectsClient.releaseClaims).toHaveBeenCalledTimes(1);
     });
 
-    it('counts once an investigation a retry opens on the claim of a failed start', async () => {
+    it('charges a retry of a failed start, which opens a new investigation', async () => {
       mockNewInvestigationId.mockReturnValueOnce('inv-failed');
       mockManagement.runWorkflow.mockRejectedValueOnce(new Error('failed'));
       await expect(startWithBudget(2)).rejects.toThrow('failed');
-      subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-failed' });
+      expect(subjectsClient.releaseClaims).toHaveBeenCalledWith('inv-failed');
 
-      await expect(startWithBudget(2)).resolves.toEqual({ investigation_id: 'inv-failed' });
+      mockNewInvestigationId.mockReturnValueOnce('inv-retry');
+      await expect(startWithBudget(2)).resolves.toEqual({ investigation_id: 'inv-retry' });
 
       expect(await usage()).toBe(1);
+    });
+
+    it('keeps the claims of the investigation a failed follow-up continues', async () => {
+      subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-holder' });
+      withConversations(makeConversation({ id: 'inv-holder' }));
+      mockManagement.runWorkflow.mockRejectedValueOnce(new Error('failed'));
+
+      await expect(startWithBudget(1)).rejects.toThrow('failed');
+
+      expect(subjectsClient.releaseClaims).not.toHaveBeenCalled();
+      expect(await usage()).toBe(0);
+    });
+
+    it('still fails with the launch error when releasing the claims fails', async () => {
+      mockManagement.runWorkflow.mockRejectedValueOnce(new Error('failed'));
+      subjectsClient.releaseClaims.mockRejectedValueOnce(new Error('claims unavailable'));
+
+      await expect(startWithBudget(1)).rejects.toThrow('failed');
+
+      expect(await usage()).toBe(0);
     });
 
     it('does not use the automation budget for a follow-up or a manual start', async () => {
