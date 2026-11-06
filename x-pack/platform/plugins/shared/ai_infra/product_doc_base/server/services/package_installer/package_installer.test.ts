@@ -730,6 +730,17 @@ describe('PackageInstaller', () => {
       expect(packageInstaller.installPackage).not.toHaveBeenCalled();
     });
 
+    it('installs when the installation at the selected version failed', async () => {
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
+        kibana: { status: 'error', version: '8.16' },
+      } as never);
+
+      await expect(packageInstaller.updateProductIfNeeded(params)).resolves.toBe(true);
+      expect(packageInstaller.installPackage).toHaveBeenCalledWith(
+        expect.objectContaining({ productName: 'kibana', productVersion: '8.16' })
+      );
+    });
+
     it('reinstalls a current version when forced and nobody refreshed it since the request', async () => {
       productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
         kibana: { status: 'installed', version: '8.16', updatedAt: '2026-09-17T09:00:00.000Z' },
@@ -861,6 +872,17 @@ describe('PackageInstaller', () => {
         artifactRepositoryUrl,
         inferenceId: defaultInferenceEndpoints.ELSER,
       });
+    });
+
+    it('returns products whose installation failed at the selected version', async () => {
+      fetchArtifactVersionsMock.mockResolvedValue(repositoryVersions({ kibana: ['8.16'] }));
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
+        kibana: { status: 'error', version: '8.16' },
+      } as Record<ProductName, ProductInstallState>);
+
+      await expect(
+        packageInstaller.getProductsToUpdate({ inferenceId: defaultInferenceEndpoints.ELSER })
+      ).resolves.toEqual(['kibana']);
     });
 
     it('returns every installed product when forceUpdate is set', async () => {
@@ -1046,6 +1068,20 @@ describe('PackageInstaller', () => {
       await packageInstaller.ensureOpenApiSpecUpToDate({ inferenceId: E5 });
 
       expect(downloadToDiskMock).not.toHaveBeenCalled();
+    });
+
+    it('reinstalls when the fallback version was recorded by a failed installation', async () => {
+      productDocClient.getOpenapiSpecInstallationStatus.mockResolvedValue({
+        status: 'error',
+        version: '8.15',
+      });
+
+      await packageInstaller.ensureOpenApiSpecUpToDate({ inferenceId: E5 });
+
+      expect(packageInstaller.installOpenAPISpec).toHaveBeenCalledWith({
+        version: '8.15',
+        inferenceId: E5,
+      });
     });
 
     it('reinstalls when a newer fallback version is published', async () => {

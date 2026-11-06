@@ -243,7 +243,11 @@ export class PackageInstaller {
         continue;
       }
       if (
-        !isInstalledVersionCurrent(productState.version, installableVersion) ||
+        !isInstalledVersionCurrent({
+          status: productState.status,
+          version: productState.version,
+          selectedVersion: installableVersion,
+        }) ||
         Boolean(forceUpdate)
       ) {
         this.log.info(
@@ -1423,7 +1427,7 @@ const isUpdateNeeded = ({
   forceUpdate?: boolean;
   since?: Date;
 }): boolean => {
-  if (!isInstalledVersionCurrent(version, selectedVersion)) {
+  if (!isInstalledVersionCurrent({ status, version, selectedVersion })) {
     return true;
   }
   if (!forceUpdate) {
@@ -1437,13 +1441,23 @@ const isUpdateNeeded = ({
   return !refreshedSinceRequest;
 };
 
-// A `latest-<timestamp>` version is the upload date of the artifact that was installed. Installs that
-// predate the per-inference-ID versioning recorded the newest upload across all variants, so an
-// installed version that is not older than the selected one already holds that artifact's content.
-const isInstalledVersionCurrent = (
-  installedVersion: string | undefined,
-  selectedVersion: string
-): boolean => {
+// Only a successful installation counts: a failed or interrupted one at the selected version is
+// retried. A `latest-<timestamp>` version is the upload date of the artifact that was installed.
+// Installs that predate the per-inference-ID versioning recorded the newest upload across all
+// variants, so an installed version that is not older than the selected one already holds that
+// artifact's content.
+const isInstalledVersionCurrent = ({
+  status,
+  version: installedVersion,
+  selectedVersion,
+}: {
+  status: InstallationStatus;
+  version?: string;
+  selectedVersion: string;
+}): boolean => {
+  if (status !== 'installed') {
+    return false;
+  }
   if (installedVersion === selectedVersion) {
     return true;
   }
