@@ -14,9 +14,12 @@ import type { DestinationApiKeyGenerationDeps } from '../destination_api_keys';
 import type { UnitDestination } from '@kbn/streams-schema';
 import {
   EMPTY_DESTINATION_CREATION_FORM,
+  EMPTY_ELASTICSEARCH_DESTINATION_FORM,
   REMOTE_ELASTICSEARCH_TYPE,
   type DestinationCreationFormData,
+  type ElasticsearchDestinationFormData,
 } from '../types';
+import { composeStaticIndexesForAll } from '../destination_models';
 import {
   createDestinationsMachineImplementations,
   destinationsStateMachine,
@@ -252,6 +255,53 @@ describe('destinationsStateMachine', () => {
     expect(apiKeyCalls().filter(([endpoint]: [string]) => endpoint.startsWith('DELETE'))).toEqual(
       []
     );
+  });
+
+  it.each<[string, Partial<ElasticsearchDestinationFormData>, string[]]>([
+    [
+      'Auto default',
+      {},
+      ['logs-*-*', 'metrics-*-*', 'traces-*-*', 'logs-*', 'metrics-*', 'traces-*'],
+    ],
+    [
+      'Auto custom logs and docs',
+      {
+        useCustomWritePatterns: true,
+        customSignals: ['logs', 'docs'],
+        logsIndex: 'logs-billing-*',
+        docsWritePatterns: ['logs-orders-*', 'metrics-orders-*'],
+      },
+      ['logs-billing-*', 'logs-orders-*', 'metrics-orders-*'],
+    ],
+    [
+      'Fixed shared name plus a docs index',
+      {
+        auto: false,
+        ...composeStaticIndexesForAll('billing-default'),
+        docsIndex: 'accounting-2026',
+      },
+      [
+        'logs-billing-default',
+        'metrics-billing-default',
+        'traces-billing-default',
+        'accounting-2026',
+      ],
+    ],
+    ['Fixed docs only', { auto: false, docsIndex: 'accounting-2026' }, ['accounting-2026']],
+  ])('scopes the destination key to the docs targets (%s)', async (_, elasticsearch, patterns) => {
+    await waitFor(actor, (snapshot) => snapshot.matches({ resolvedIndices: 'ready' }));
+    actor.send({ type: 'modal.openCreate' });
+    actor.send({
+      type: 'destination.create',
+      formData: {
+        ...EMPTY_DESTINATION_CREATION_FORM,
+        destinationName: 'Central',
+        elasticsearch: { ...EMPTY_ELASTICSEARCH_DESTINATION_FORM, ...elasticsearch },
+      },
+    });
+    await waitFor(actor, (snapshot) => snapshot.matches({ configuring: 'persisting' }));
+
+    expect(apiKeyCalls()[0][1].params.body.patterns).toEqual(patterns);
   });
 
   it('keeps a unit loaded from outside when a destination is deleted afterwards', async () => {

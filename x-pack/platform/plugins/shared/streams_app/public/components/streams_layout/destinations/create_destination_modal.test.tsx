@@ -34,8 +34,27 @@ const renderModal = () => {
   return { createDestination };
 };
 
+const docsPatternsInput = async () => {
+  await userEvent.click(screen.getByTestId('streamsCreateDestinationCustomWritePatterns'));
+  await userEvent.click(screen.getByTestId('streamsCreateDestinationCustomSignal-docs'));
+  return within(screen.getByTestId('streamsCreateDestination-docs-writePatterns')).getByTestId(
+    'comboBoxSearchInput'
+  );
+};
+
+const docsPills = () =>
+  within(screen.getByTestId('streamsCreateDestination-docs-writePatterns'))
+    .queryAllByTestId('euiComboBoxPill')
+    .map((pill) => pill.textContent);
+
 const setFieldValue = (testSubject: string, value: string) =>
   fireEvent.change(screen.getByTestId(testSubject), { target: { value } });
+
+const addDocsPattern = async (input: HTMLElement, value: string) => {
+  await userEvent.click(input);
+  await userEvent.paste(value);
+  await userEvent.keyboard('{Enter}');
+};
 
 describe('CreateDestinationModal', () => {
   it('only shows the errors of fields the user has left', async () => {
@@ -70,6 +89,107 @@ describe('CreateDestinationModal', () => {
         expect.anything()
       )
     );
+  });
+
+  describe('Documents', () => {
+    it('splits a pasted list into one entry per pattern and marks only the invalid one', async () => {
+      renderModal();
+      const input = await docsPatternsInput();
+
+      await userEvent.click(input);
+      await userEvent.paste('logs-a-*, Metrics-b-*');
+      await userEvent.keyboard('{Enter}');
+
+      expect(docsPills()).toEqual(['logs-a-*', 'Metrics-b-*']);
+      expect(
+        screen.getByText('Metrics-b-*: Write patterns must be lowercase.')
+      ).toBeInTheDocument();
+      expect(screen.queryByText('logs-a-*:', { exact: false })).not.toBeInTheDocument();
+    });
+
+    it('says how many write patterns a destination can have', async () => {
+      renderModal();
+      const input = await docsPatternsInput();
+
+      await userEvent.click(input);
+      await userEvent.paste(
+        Array.from({ length: 33 }, (_, index) => `logs-orders${index}-*`).join(',')
+      );
+      await userEvent.keyboard('{Enter}');
+
+      expect(
+        screen.getByText('A destination can have at most 32 write patterns across all signals.')
+      ).toBeInTheDocument();
+    });
+
+    it('adds each docs write pattern once, keeping the lowercase fix of an uppercase one', async () => {
+      renderModal();
+      const input = await docsPatternsInput();
+
+      await addDocsPattern(input, 'Logs-a-*');
+      await addDocsPattern(input, 'logs-a-*');
+      await addDocsPattern(input, 'logs-a-*');
+
+      expect(docsPills()).toEqual(['Logs-a-*', 'logs-a-*']);
+    });
+
+    it('keeps the docs index out of the shared Fixed name', async () => {
+      const { createDestination } = renderModal();
+
+      await userEvent.click(screen.getByLabelText('Fixed index per signal'));
+      expect(screen.getByText('Name all OTel signals')).toBeInTheDocument();
+      setFieldValue('streamsCreateDestination-docs-index', 'accounting-2026');
+      setFieldValue('streamsCreateDestinationIndex', 'billing-default');
+      await userEvent.click(screen.getByTestId('streamsCreateDestinationIndexNaming-perSignal'));
+      await userEvent.click(screen.getByTestId('streamsCreateDestinationIndexNaming-shared'));
+      setFieldValue('streamsCreateDestinationName', 'Central');
+      await userEvent.click(screen.getByTestId('streamsCreateDestinationSubmit'));
+
+      await waitFor(() =>
+        expect(createDestination).toHaveBeenCalledWith(
+          expect.objectContaining({
+            elasticsearch: expect.objectContaining({
+              logsIndex: 'logs-billing-default',
+              docsIndex: 'accounting-2026',
+            }),
+          }),
+          expect.anything()
+        )
+      );
+    });
+
+    it('clears the docs write patterns when the docs badge is turned off', async () => {
+      renderModal();
+      await addDocsPattern(await docsPatternsInput(), 'logs-a-*');
+      expect(docsPills()).toEqual(['logs-a-*']);
+
+      await userEvent.click(screen.getByTestId('streamsCreateDestinationCustomSignal-docs'));
+      await userEvent.click(screen.getByTestId('streamsCreateDestinationCustomSignal-docs'));
+
+      expect(docsPills()).toEqual([]);
+    });
+
+    it('clears the docs write patterns when the custom switch is turned off', async () => {
+      renderModal();
+      await addDocsPattern(await docsPatternsInput(), 'logs-a-*');
+
+      await userEvent.click(screen.getByTestId('streamsCreateDestinationCustomWritePatterns'));
+      await userEvent.click(screen.getByTestId('streamsCreateDestinationCustomWritePatterns'));
+      await userEvent.click(screen.getByTestId('streamsCreateDestinationCustomSignal-docs'));
+
+      expect(docsPills()).toEqual([]);
+    });
+
+    it('clears the docs index when the mode changes', async () => {
+      renderModal();
+      await userEvent.click(screen.getByLabelText('Fixed index per signal'));
+      setFieldValue('streamsCreateDestination-docs-index', 'accounting-2026');
+
+      await userEvent.click(screen.getByLabelText('Auto (default)'));
+      await userEvent.click(screen.getByLabelText('Fixed index per signal'));
+
+      expect(screen.getByTestId('streamsCreateDestination-docs-index')).toHaveValue('');
+    });
   });
 
   describe('remote Elasticsearch', () => {
