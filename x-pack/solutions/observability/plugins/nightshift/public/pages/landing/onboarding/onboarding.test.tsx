@@ -41,11 +41,11 @@ jest.mock('./intro_banner', () => ({ OnboardingIntroBanner: () => null }));
 jest.mock('./nightshift_setup_prompt', () => ({ NightshiftSetupPrompt: () => null }));
 jest.mock('./add_data_step', () => ({
   ...jest.requireActual('./add_data_step'),
-  OnboardingAddDataStep: () => null,
+  OnboardingAddDataStep: () => <div data-test-subj="addDataStepStub" />,
 }));
 jest.mock('./connect_sources_step', () => ({
   ...jest.requireActual('./connect_sources_step'),
-  OnboardingConnectSourcesStep: () => null,
+  OnboardingConnectSourcesStep: () => <div data-test-subj="connectSourcesStepStub" />,
 }));
 jest.mock('./first_investigation_step', () => ({
   OnboardingFirstInvestigationStep: () => null,
@@ -107,6 +107,7 @@ describe('NightshiftOnboarding', () => {
 
       expect(currentStep()).toBe('addData');
       expect(screen.getByTestId('nightshiftOnboardingStepTitle')).toHaveTextContent('Add data');
+      expect(screen.getByTestId('addDataStepStub')).toBeInTheDocument();
       expect(
         screen.queryByTestId('nightshiftOnboardingAddDataProceedButton')
       ).not.toBeInTheDocument();
@@ -132,6 +133,8 @@ describe('NightshiftOnboarding', () => {
       expect(screen.getByTestId('nightshiftOnboardingStepTitle')).toHaveTextContent(
         'Connect other sources'
       );
+      expect(screen.getByTestId('connectSourcesStepStub')).toBeInTheDocument();
+      expect(screen.queryByTestId('addDataStepStub')).not.toBeInTheDocument();
     });
   });
 

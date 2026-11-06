@@ -428,10 +428,10 @@ export function NightshiftOnboarding({
             <EuiLoadingSpinner size="l" />
           ) : step === 'enable' ? (
             <NightshiftSetupPrompt status={serviceAccount.data} />
-          ) : step === 'addData' || !execution ? (
-            <OnboardingAddDataStep />
           ) : step === 'connectSources' ? (
             <OnboardingConnectSourcesStep />
+          ) : step === 'addData' || !execution ? (
+            <OnboardingAddDataStep />
           ) : step === 'investigate' || !latestInvestigation ? (
             <OnboardingFirstInvestigationStep
               execution={execution}
