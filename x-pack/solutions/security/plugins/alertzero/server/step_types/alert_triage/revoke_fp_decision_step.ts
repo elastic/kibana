@@ -26,7 +26,8 @@ import { findAlertIdsByTag, openAlerts, statusCodeOf, tagAlerts } from './ports'
  *   picks them up again.
  *
  * Only alerts carrying the decision's tag are touched. It is safe to run again: a step that fails
- * is counted in `failures`, and the tag still marks what is left.
+ * is counted in `failures`, and the tag still marks what is left. A run that reaches the page limit
+ * with alerts left counts as a failure too, so run it again until `failures` is 0.
  *
  * The decision must belong to the space of the run: a decision of another space reads as
  * `not_found`, and the step touches neither it nor any alert. The decision is deleted whatever the
@@ -84,10 +85,14 @@ export const getTriageRevokeFpDecisionStepDefinition = () =>
       let reopened = 0;
       let released = 0;
       try {
+        let drained = false;
         for (let page = 0; page < MAX_REVOKE_PAGES; page++) {
           // The tag leaves the alerts on success, so each page is the next batch of what is left.
           const alertIds = await findAlertIdsByTag(contextManager, tag);
-          if (alertIds.length === 0) break;
+          if (alertIds.length === 0) {
+            drained = true;
+            break;
+          }
           if (isApproval) {
             await openAlerts(contextManager, alertIds);
             reopened += alertIds.length;
@@ -98,6 +103,14 @@ export const getTriageRevokeFpDecisionStepDefinition = () =>
             remove: isApproval ? [tag] : [tag, VERDICT_INCONCLUSIVE_TAG],
           });
           if (!isApproval) released += alertIds.length;
+        }
+        // The page limit ended the loop, so alerts may still carry the tag. Report it as a failure,
+        // so a run that stopped early is never read as a complete revoke.
+        if (!drained) {
+          failures++;
+          logger.warn(
+            `Stopped after ${MAX_REVOKE_PAGES} pages of alerts for decision ${id}; run the revoke again to put back the rest`
+          );
         }
       } catch (error) {
         failures++;
