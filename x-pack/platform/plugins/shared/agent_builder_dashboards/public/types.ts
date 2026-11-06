@@ -11,6 +11,7 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentBuilderDashboardsPluginPublicSetup {}
@@ -18,8 +19,9 @@ export interface AgentBuilderDashboardsPluginPublicSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentBuilderDashboardsPluginPublicStart {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AgentBuilderDashboardsPluginPublicSetupDependencies {}
+export interface AgentBuilderDashboardsPluginPublicSetupDependencies {
+  embeddable: EmbeddableSetup;
+}
 
 export interface AgentBuilderDashboardsPluginPublicStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
