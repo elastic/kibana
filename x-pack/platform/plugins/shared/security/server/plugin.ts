@@ -59,6 +59,7 @@ import { securityFeatures } from './features';
 import type { FipsServiceSetupInternal } from './fips';
 import { FipsService } from './fips';
 import { defineRoutes } from './routes';
+import { defineTemporaryBillingAccessRoute } from './routes/uiam/temporary_billing_access_route';
 import { setupSavedObjects } from './saved_objects';
 import type { CloudProjectContext, ServiceAccountsServiceStart } from './service_accounts';
 import {
@@ -134,6 +135,14 @@ export class SecurityPlugin
       throw new Error('Config is not available.');
     }
     return this.config;
+  };
+
+  private uiam?: UiamService;
+  private readonly getUiam = () => {
+    if (!this.uiam) {
+      throw new Error('UIAM service is not available.');
+    }
+    return this.uiam;
   };
 
   private session?: Session;
@@ -420,6 +429,8 @@ export class SecurityPlugin
         getAuthc: this.getAuthentication.bind(this),
         getSession: this.getSession,
         getServiceAccounts: this.getServiceAccountsService,
+        getUiam: this.getUiam,
+        organizationId,
         audit: this.auditSetup,
         config,
         logger: this.logger,
@@ -456,6 +467,15 @@ export class SecurityPlugin
       docLinks: core.docLinks,
       i18n: core.i18n,
     });
+
+    // TEMPORARY: QA verification of the UIAM billing access check. Remove before merging.
+    if (config.uiam?.enabled) {
+      defineTemporaryBillingAccessRoute({
+        router: core.http.createRouter(),
+        logger: this.initializerContext.logger.get('routes'),
+        getCoreSecurity: () => core.getStartServices().then(([coreStart]) => coreStart.security),
+      });
+    }
 
     return Object.freeze<SecurityPluginSetup>({
       audit: this.auditSetup,
@@ -540,6 +560,7 @@ export class SecurityPlugin
           kibanaVersion: this.initializerContext.env.packageInfo.version,
         })
       : undefined;
+    this.uiam = uiam;
 
     this.authenticationStart = this.authenticationService.start({
       audit: this.auditSetup!,

@@ -11,6 +11,16 @@ export {
   getUiamCredentialsFromRequest,
 } from './get_uiam_credentials';
 export { KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE } from './project_type';
+export {
+  UIAM_BILLING_DETAILS_READ_ACTION,
+  UIAM_BILLING_DETAILS_RESOURCE_TYPE,
+} from './authorization_types';
+export type {
+  UiamAuthorizationCheck,
+  UiamAuthorizationCheckResult,
+  UiamAuthorizationResource,
+  UiamAuthorizationResult,
+} from './authorization_types';
 export { isExternalApiKey } from './is_external_api_key';
 export {
   getRequestSpacePrefix,

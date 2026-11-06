@@ -34,6 +34,9 @@ export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract
         uiam: null,
       },
     },
+    authz: {
+      uiam: null,
+    },
     audit: {
       asScoped: () => {
         return { log: () => undefined, enabled: false, includeSavedObjectNames: false };
