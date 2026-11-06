@@ -10,12 +10,15 @@ import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { InstanceNamespaceField } from './instance_namespace_field';
+import { OutputField, type OutputFieldProps } from './output_field';
 
 interface SharedAdvancedSettingsProps {
   namespace: string;
   onNamespaceChange: (namespace: string) => void;
   /** Whether services are already deployed, which changes what a new namespace means. */
   hasDeployedServices: boolean;
+  /** The output field. It applies to agent-based deploys only, so managed and ECF leave it out. */
+  output?: OutputFieldProps;
 }
 
 /**
@@ -26,6 +29,7 @@ export function SharedAdvancedSettings({
   namespace,
   onNamespaceChange,
   hasDeployedServices,
+  output,
 }: SharedAdvancedSettingsProps) {
   return (
     <EuiFlexGrid columns={2} gutterSize="l" data-test-subj="sharedAdvancedSettings">
@@ -49,6 +53,11 @@ export function SharedAdvancedSettings({
           data-test-subj="sharedSettingsNamespace"
         />
       </EuiFlexItem>
+      {output && (
+        <EuiFlexItem>
+          <OutputField {...output} />
+        </EuiFlexItem>
+      )}
     </EuiFlexGrid>
   );
 }
