@@ -12,6 +12,42 @@ import { createTraceBasedEvaluator } from './factory';
 
 const VALID_SKILL_NAME = /^[a-zA-Z0-9_-]+$/;
 
+const FILESTORE_READ_TOOL = 'filestore.read';
+const LOAD_SKILL_TOOL = 'load_skill';
+
+/**
+ * LIKE patterns (raw, before ES|QL string escaping) that match a tool call's JSON arguments.
+ * The quote and slash anchors keep `foo` from matching `foo-bar` or `my-foo`.
+ * `skillName` must already be validated against VALID_SKILL_NAME.
+ */
+export const getSkillInvocationLikePatterns = (skillName: string) => ({
+  // filestore.read of the skill's SKILL.md
+  filestoreRead: `*/${skillName}/SKILL.md*`,
+  // load_skill accepts a bare name, a folder path or a SKILL.md path
+  loadSkill: [`*"${skillName}"*`, `*/${skillName}"*`, `*/${skillName}/SKILL.md"*`],
+});
+
+const toEsqlStringLiteral = (value: string): string => `"${value.replace(/"/g, '\\"')}"`;
+
+const buildSkillInvokedCondition = (skillName: string): string => {
+  const { filestoreRead, loadSkill } = getSkillInvocationLikePatterns(skillName);
+  const args = 'attributes.gen_ai.tool.call.arguments';
+  const loadSkillMatches = loadSkill
+    .map((pattern) => `${args} LIKE ${toEsqlStringLiteral(pattern)}`)
+    .join('\n          OR ');
+
+  return `(
+        attributes.gen_ai.tool.name == "${FILESTORE_READ_TOOL}"
+          AND ${args} LIKE ${toEsqlStringLiteral(filestoreRead)}
+      )
+      OR (
+        attributes.gen_ai.tool.name == "${LOAD_SKILL_TOOL}"
+          AND (
+          ${loadSkillMatches}
+          )
+      )`;
+};
+
 export function createSkillInvocationEvaluator({
   traceEsClient,
   log,
@@ -46,8 +82,7 @@ export function createSkillInvocationEvaluator({
   ),
   skill_invoked = COUNT(
     CASE(
-      attributes.gen_ai.tool.name == "filestore.read"
-        AND attributes.gen_ai.tool.call.arguments LIKE "*/${skillName}/SKILL.md*",
+      ${buildSkillInvokedCondition(skillName)},
       1,
       NULL
     )
