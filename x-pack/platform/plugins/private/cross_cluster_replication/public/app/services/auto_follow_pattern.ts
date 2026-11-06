@@ -82,21 +82,20 @@ export const getPreviewIndicesFromAutoFollowPattern = ({
 };
 
 export const getPrefixSuffixFromFollowPattern = (
-  followPattern: string
+  followPattern = '{{leader_index}}'
 ): {
-  followIndexPatternPrefix: string | undefined;
-  followIndexPatternSuffix: string | undefined;
+  followIndexPatternPrefix: string;
+  followIndexPatternSuffix: string;
 } => {
-  let followIndexPatternPrefix;
-  let followIndexPatternSuffix;
-
   const template = '{{leader_index}}';
   const index = followPattern.indexOf(template);
 
-  if (index >= 0) {
-    followIndexPatternPrefix = followPattern.slice(0, index);
-    followIndexPatternSuffix = followPattern.slice(index + template.length);
+  if (index < 0) {
+    return { followIndexPatternPrefix: '', followIndexPatternSuffix: '' };
   }
 
-  return { followIndexPatternPrefix, followIndexPatternSuffix };
+  return {
+    followIndexPatternPrefix: followPattern.slice(0, index),
+    followIndexPatternSuffix: followPattern.slice(index + template.length),
+  };
 };
