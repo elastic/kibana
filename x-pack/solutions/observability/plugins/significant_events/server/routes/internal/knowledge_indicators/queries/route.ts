@@ -483,30 +483,32 @@ const getDiscoveryQueriesRoute = createServerRoute({
 
 const generateQueriesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{sourceId}/queries/_generate',
-  params: z.object({
-    path: z.object({
-      sourceId: z.string().max(MAX_ID_LENGTH).describe('The source id'),
-    }),
-    body: z
-      .object({
-        connectorId: z
-          .string()
-          .max(MAX_ID_LENGTH)
-          .optional()
-          .describe(
-            'Optional chat model connector or inference endpoint ID. When omitted the Significant Events default is used.'
-          ),
-        runId: z.string().trim().min(1).max(MAX_ID_LENGTH).optional(),
-        parentWorkflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
-        maxExistingQueriesForContext: z
-          .number()
-          .int()
-          .min(0)
-          .max(MAX_EXISTING_QUERIES_FOR_CONTEXT)
-          .default(MAX_EXISTING_QUERIES_FOR_CONTEXT),
-      })
-      .nullish(),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        sourceId: z.string().max(MAX_ID_LENGTH).describe('The source id'),
+      }),
+      body: z
+        .object({
+          connectorId: z
+            .string()
+            .max(MAX_ID_LENGTH)
+            .optional()
+            .describe(
+              'Optional chat model connector or inference endpoint ID. When omitted the Significant Events default is used.'
+            ),
+          runId: z.string().trim().min(1).max(MAX_ID_LENGTH).optional(),
+          parentWorkflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
+          maxExistingQueriesForContext: z
+            .number()
+            .int()
+            .min(0)
+            .max(MAX_EXISTING_QUERIES_FOR_CONTEXT)
+            .default(MAX_EXISTING_QUERIES_FOR_CONTEXT),
+        })
+        .nullish(),
+    })
+  ),
   options: {
     access: 'internal',
     summary: 'Generate significant events queries',

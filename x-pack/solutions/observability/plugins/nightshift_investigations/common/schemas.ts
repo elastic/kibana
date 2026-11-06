@@ -233,16 +233,18 @@ const significantEventUuidSchema = z
  * rest of the payload, so enumerating every field here would be a hand-kept copy of another
  * plugin's contract. The bounds on key count and key length keep an open context bounded.
  */
-export const freeFormContextSchema = z
-  .looseObject({
-    event_uuid: significantEventUuidSchema.optional(),
-    event_id: z.string().trim().min(1).max(500).optional(),
-    source_workflow_execution_id: z.string().trim().min(1).max(500).optional(),
-  })
-  .refine((value) => Object.keys(value).length <= 50, { message: 'context exceeds 50 key limit' })
-  .refine((value) => Object.keys(value).every((key) => key.length <= 128), {
-    message: 'context has a key longer than 128 characters',
-  });
+export const freeFormContextSchema = lazySchema(() =>
+  z
+    .looseObject({
+      event_uuid: significantEventUuidSchema.optional(),
+      event_id: z.string().trim().min(1).max(500).optional(),
+      source_workflow_execution_id: z.string().trim().min(1).max(500).optional(),
+    })
+    .refine((value) => Object.keys(value).length <= 50, { message: 'context exceeds 50 key limit' })
+    .refine((value) => Object.keys(value).every((key) => key.length <= 128), {
+      message: 'context has a key longer than 128 characters',
+    })
+);
 
 export type InvestigationSubject = z.infer<typeof investigationSubjectSchema>;
 export type InvestigationNotificationDestination = z.infer<
