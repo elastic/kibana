@@ -51,7 +51,8 @@ export const countRecentCancelledBuilds = (
   }).length;
 
 export const getCancelledBuildsTipMessage = (user: string, cancelledBuilds: number): string =>
-  `👋 @${user}, if you're still iterating on this PR, **consider converting it to draft**: ` +
+  '### 🌯 Save a burrito\n\n' +
+  `@${user}, if you're still iterating on this PR, **consider converting it to draft**: ` +
   `${cancelledBuilds} CI builds were cancelled in the last day before they finished. ` +
   "Drafts don't run CI automatically, and you can comment `/ci` whenever you want a build.";
 
