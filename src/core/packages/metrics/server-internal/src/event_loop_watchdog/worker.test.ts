@@ -11,7 +11,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { WorkerLogger } from '@kbn/core-threads-server-internal';
 import { runWatchdogWorker } from './worker';
 import type { StatsLogMeta, WatchdogWorkerData } from './types';
-import { REPORT_REFILL_MS, SLOT_COUNT, Slot } from './constants';
+import { ONGOING_REPORT_AFTER_MS, REPORT_REFILL_MS, SLOT_COUNT, Slot } from './constants';
 
 const STATS_INTERVAL_MS = 60_000;
 
@@ -106,9 +106,51 @@ describe('runWatchdogWorker', () => {
           startedAt: blockStartedAt,
           phase: 'starting',
           suppressedBlocks: 0,
+          ongoing: false,
         },
       },
     });
+  });
+
+  it('logs a warning while a block is still ongoing, and counts the block once it ends', () => {
+    start();
+    const blockStartedAt = new Date(Date.now()).toISOString();
+    beat();
+    stall(ONGOING_REPORT_AFTER_MS - 25);
+    expect(logger.warn).not.toHaveBeenCalled();
+    stall(25);
+    expect(logger.warn).toHaveBeenCalledWith(
+      `Event loop blocked for ~${ONGOING_REPORT_AFTER_MS}ms so far`,
+      {
+        tags: ['event-loop-watchdog'],
+        kibana: {
+          event_loop_watchdog: {
+            blockedMs: ONGOING_REPORT_AFTER_MS,
+            startedAt: blockStartedAt,
+            phase: 'starting',
+            suppressedBlocks: 0,
+            ongoing: true,
+          },
+        },
+      }
+    );
+    stall(500);
+    resume();
+    expect(logger.warn).toHaveBeenCalledTimes(2);
+    expect(logger.warn).toHaveBeenLastCalledWith(
+      `Event loop blocked for ~${ONGOING_REPORT_AFTER_MS + 500}ms`,
+      {
+        tags: ['event-loop-watchdog'],
+        kibana: {
+          event_loop_watchdog: expect.objectContaining({
+            startedAt: blockStartedAt,
+            ongoing: false,
+          }),
+        },
+      }
+    );
+    jest.advanceTimersByTime(STATS_INTERVAL_MS);
+    expect(statsMeta().starting.blocks).toBe(1);
   });
 
   it('does not log heartbeat gaps below the threshold', () => {

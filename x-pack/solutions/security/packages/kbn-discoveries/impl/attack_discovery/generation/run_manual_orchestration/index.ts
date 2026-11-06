@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import type {
   AnalyticsServiceSetup,
   AuthenticatedUser,
@@ -38,6 +39,7 @@ import { shouldRunGate } from '../should_run_gate';
 import { buildExecutionSummaryLog } from './helpers/build_execution_summary_log';
 import { getStepStatuses } from './helpers/get_step_statuses';
 import { handleNoAlerts } from './helpers/handle_no_alerts';
+import { hasAlertsForGate } from './helpers/has_alerts_for_gate';
 import { mapFailedStepToTelemetry } from './helpers/map_failed_step_to_telemetry';
 import { PipelineStepError } from './helpers/pipeline_step_error';
 import { resolveFailedStep } from './helpers/resolve_failed_step';
@@ -91,6 +93,7 @@ export const runManualOrchestration = async ({
   sourceMetadata,
   spaceId,
   start,
+  telemetryMetadata,
   templateAlertLimit,
   trigger,
   workflowConfig,
@@ -132,6 +135,8 @@ export const runManualOrchestration = async ({
   sourceMetadata?: SourceMetadata;
   spaceId: string;
   start?: string;
+  /** Token-usage attribution for the generation model calls; see `ExecuteGenerationWorkflowParams`. */
+  telemetryMetadata?: TelemetryMetadata;
   /**
    * Set when the connector accepts only a prompt template. Retrieval and the
    * candidate set are capped at this many alerts so coverage counts match the
@@ -283,7 +288,20 @@ export const runManualOrchestration = async ({
     // final arbiter of the candidate set: it keeps a subset by `_id` (original
     // bytes pass through), may add net-new alerts (Skill toggle), and threads a
     // `conversation_id` for the report phase. Fail-closed: a gate failure throws.
-    if (shouldRunGate(trigger, workflowConfig.ground_truth_gate_enabled)) {
+    if (
+      shouldRunGate(trigger, workflowConfig.ground_truth_gate_enabled) &&
+      // Skip the gate's LLM calls when it has nothing to work on.
+      (await hasAlertsForGate({
+        alertsIndexPattern,
+        candidateCount: candidateCountBeforeGate,
+        end,
+        esClient,
+        executionUuid,
+        logger,
+        skillEnabled: workflowConfig.skill_enabled,
+        start,
+      }))
+    ) {
       timings.gateStart = Date.now();
       candidateResult = await runGatePhase({
         alertsIndexPattern,
@@ -393,6 +411,7 @@ export const runManualOrchestration = async ({
       sourceMetadata,
       spaceId,
       start,
+      ...(telemetryMetadata != null ? { telemetryMetadata } : {}),
       workflowConfig,
       workflowsManagementApi,
     });

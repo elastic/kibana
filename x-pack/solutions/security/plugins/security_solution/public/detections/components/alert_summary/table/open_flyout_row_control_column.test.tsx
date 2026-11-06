@@ -6,56 +6,44 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import type { Alert } from '@kbn/alerting-types';
 import {
   OpenFlyoutRowControlColumn,
   ROW_ACTION_FLYOUT_ICON_TEST_ID,
 } from './open_flyout_row_control_column';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { EasePanelKey } from '../../../../flyout/ease/constants/panel_keys';
 
-jest.mock('@kbn/expandable-flyout');
+const EASE_FLYOUT_TEST_ID = 'mockEaseFlyout';
+jest.mock('../flyout/ease_flyout', () => ({
+  EaseFlyout: ({ documentId, onClose }: { documentId: string; onClose: () => void }) => (
+    <button type="button" data-test-subj="mockEaseFlyout" onClick={onClose}>
+      {documentId}
+    </button>
+  ),
+}));
+
+const alert: Alert = {
+  _id: '_id',
+  _index: '_index',
+};
 
 describe('OpenFlyoutRowControlColumn', () => {
   it('should render button icon', () => {
-    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
-      openFlyout: jest.fn(),
-    });
-
-    const alert: Alert = {
-      _id: '_id',
-      _index: '_index',
-    };
-
-    const { getByTestId } = render(<OpenFlyoutRowControlColumn alert={alert} />);
+    const { getByTestId, queryByTestId } = render(<OpenFlyoutRowControlColumn alert={alert} />);
 
     expect(getByTestId(ROW_ACTION_FLYOUT_ICON_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(EASE_FLYOUT_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it('should open flyout after click', () => {
-    const openFlyout = jest.fn();
-    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
-      openFlyout,
-    });
+  it('should open the flyout after click and close it', () => {
+    const { getByTestId, queryByTestId } = render(<OpenFlyoutRowControlColumn alert={alert} />);
 
-    const alert: Alert = {
-      _id: '_id',
-      _index: '_index',
-    };
+    fireEvent.click(getByTestId(ROW_ACTION_FLYOUT_ICON_TEST_ID));
 
-    const { getByTestId } = render(<OpenFlyoutRowControlColumn alert={alert} />);
+    expect(getByTestId(EASE_FLYOUT_TEST_ID)).toHaveTextContent(alert._id);
 
-    getByTestId(ROW_ACTION_FLYOUT_ICON_TEST_ID).click();
+    fireEvent.click(getByTestId(EASE_FLYOUT_TEST_ID));
 
-    expect(openFlyout).toHaveBeenCalledWith({
-      right: {
-        id: EasePanelKey,
-        params: {
-          id: alert._id,
-          indexName: alert._index,
-        },
-      },
-    });
+    expect(queryByTestId(EASE_FLYOUT_TEST_ID)).not.toBeInTheDocument();
   });
 });
