@@ -60,6 +60,12 @@ export const APPLICATION_OVERVIEW_EBT_ELEMENTS = {
   USAGE_RETRY: 'overviewUsageRetry',
   BROWSER_SESSIONS_LINK: 'overviewBrowserSessionsLink',
   OS_SESSIONS_LINK: 'overviewOsSessionsLink',
+  BROWSER_FILTER: 'overviewBrowserFilter',
+  OS_FILTER: 'overviewOsFilter',
+  DEVICE_FILTER: 'overviewDeviceFilter',
+  COUNTRY_FILTER: 'overviewCountryFilter',
+  PAGE_FILTER: 'overviewPageFilter',
+  CLEAR_FILTERS: 'overviewClearFilters',
 } as const;
 
 export const ERRORS_EBT_ELEMENTS = {

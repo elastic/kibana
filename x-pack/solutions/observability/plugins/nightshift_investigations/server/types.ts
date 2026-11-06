@@ -46,6 +46,8 @@ export type InvestigationQuotaLimit = InvestigationQuotaTrigger | 'all';
 export interface InvestigationQuotaResult {
   allowed: boolean;
   deniedBy?: InvestigationQuotaLimit;
+  /** The configured value of the limit that denied the start, when the callback knows it. */
+  limit?: number;
   /** Gives back the slot an allowed start took, when the start does not open a new investigation. */
   release?: () => Promise<void>;
 }

@@ -160,9 +160,17 @@ describe('SignificantEventsPlugin setup', () => {
       ['manual_investigation', 'manual'],
       ['total_investigation', 'all'],
     ] as const)('reports a denial by %s as %s', async (deniedGroup, deniedBy) => {
-      consumeInvestigationRunQuotaMock.mockResolvedValue({ allowed: false, deniedBy: deniedGroup });
+      consumeInvestigationRunQuotaMock.mockResolvedValue({
+        allowed: false,
+        deniedBy: deniedGroup,
+        limit: 4,
+      });
 
-      await expect(setupCallback()('manual')).resolves.toEqual({ allowed: false, deniedBy });
+      await expect(setupCallback()('manual')).resolves.toEqual({
+        allowed: false,
+        deniedBy,
+        limit: 4,
+      });
     });
   });
 });

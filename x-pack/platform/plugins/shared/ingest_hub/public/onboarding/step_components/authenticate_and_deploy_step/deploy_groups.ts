@@ -8,6 +8,7 @@
 import { sendCreateAgentlessPolicy, sendGetPackageInfoByKey } from '@kbn/fleet-plugin/public';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import { getDefaultEnabledDataStreams } from '../../aws_service_matrix';
 import type {
   AuthenticateAndDeployStepState,
   ServiceChipState,
@@ -175,7 +176,7 @@ export async function deployGroup(
   const serviceVarsMap: Record<string, ServiceVars> = {};
   for (const { instance, service } of group.members) {
     serviceVarsMap[service.id] = storedServiceVars[instance.instanceId] ?? {
-      enabledDataStreams: service.dataStreams,
+      enabledDataStreams: getDefaultEnabledDataStreams(service),
       varsByDataStream: {},
     };
   }

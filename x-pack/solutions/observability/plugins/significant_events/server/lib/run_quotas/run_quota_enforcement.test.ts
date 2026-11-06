@@ -146,10 +146,10 @@ describe('run quota admission behavior', () => {
 
     await expect(
       consumeRunQuota({ internalRepository: repository.client, group: 'detection' })
-    ).resolves.toEqual({ allowed: true });
+    ).resolves.toEqual({ allowed: true, limit: 15 });
     await expect(
       consumeRunQuota({ internalRepository: repository.client, group: 'detection' })
-    ).resolves.toEqual({ allowed: true });
+    ).resolves.toEqual({ allowed: true, limit: 15 });
 
     await expect(repository.count('2026-08-31', 'detection')).resolves.toBe(2);
   });
@@ -171,7 +171,7 @@ describe('run quota admission behavior', () => {
       )
     );
 
-    expect(results).toEqual(Array.from({ length: 30 }, () => ({ allowed: true })));
+    expect(results).toEqual(Array.from({ length: 30 }, () => ({ allowed: true, limit: 0 })));
     await expect(repository.count('2026-08-31', 'ki_extraction')).resolves.toBe(30);
   });
 
@@ -185,13 +185,13 @@ describe('run quota admission behavior', () => {
 
     await expect(
       consumeRunQuota({ internalRepository: repository.client, group: 'detection' })
-    ).resolves.toEqual({ allowed: true });
+    ).resolves.toEqual({ allowed: true, limit: 2 });
     await expect(
       consumeRunQuota({ internalRepository: repository.client, group: 'detection' })
-    ).resolves.toEqual({ allowed: true });
+    ).resolves.toEqual({ allowed: true, limit: 2 });
     await expect(
       consumeRunQuota({ internalRepository: repository.client, group: 'detection' })
-    ).resolves.toEqual({ allowed: false });
+    ).resolves.toEqual({ allowed: false, limit: 2 });
 
     await expect(repository.count('2026-08-31', 'detection')).resolves.toBe(2);
   });
@@ -209,13 +209,13 @@ describe('run quota admission behavior', () => {
         internalRepository: repository.client,
         group: 'investigation',
       })
-    ).resolves.toEqual({ allowed: true });
+    ).resolves.toEqual({ allowed: true, limit: 1 });
     await expect(
       consumeRunQuota({
         internalRepository: repository.client,
         group: 'investigation',
       })
-    ).resolves.toEqual({ allowed: false });
+    ).resolves.toEqual({ allowed: false, limit: 1 });
 
     await expect(repository.count('2026-08-31', 'investigation')).resolves.toBe(1);
   });
@@ -230,10 +230,10 @@ describe('run quota admission behavior', () => {
 
     await expect(
       consumeRunQuota({ internalRepository: repository.client, group: 'investigation' })
-    ).resolves.toEqual({ allowed: true });
+    ).resolves.toEqual({ allowed: true, limit: 1 });
     await expect(
       consumeRunQuota({ internalRepository: repository.client, group: 'investigation' })
-    ).resolves.toEqual({ allowed: false });
+    ).resolves.toEqual({ allowed: false, limit: 1 });
   });
 
   it('counts investigations past their limits while investigation limits are off', async () => {
@@ -277,7 +277,7 @@ describe('run quota admission behavior', () => {
     await expect(repository.count('2026-08-31', 'investigation')).resolves.toBe(0);
     await expect(
       consumeRunQuota({ internalRepository: repository.client, group: 'investigation' })
-    ).resolves.toEqual({ allowed: true });
+    ).resolves.toEqual({ allowed: true, limit: 1 });
   });
 
   describe('investigation starts', () => {
@@ -346,6 +346,7 @@ describe('run quota admission behavior', () => {
       await expect(consume('manual_investigation')).resolves.toEqual({
         allowed: false,
         deniedBy: 'total_investigation',
+        limit: 2,
       });
       expect(await counts()).toEqual({ automatic: 1, manual: 1, total: 2 });
     });
@@ -357,6 +358,7 @@ describe('run quota admission behavior', () => {
       await expect(consume('manual_investigation')).resolves.toEqual({
         allowed: false,
         deniedBy: 'manual_investigation',
+        limit: 1,
       });
       expect(await counts()).toEqual({ automatic: 0, manual: 1, total: 1 });
     });
@@ -392,7 +394,7 @@ describe('run quota admission behavior', () => {
 
     await expect(
       consumeRunQuota({ internalRepository: repository.client, group: 'detection' })
-    ).resolves.toEqual({ allowed: true });
+    ).resolves.toEqual({ allowed: true, limit: 15 });
 
     await expect(repository.count('2026-08-31', 'detection')).resolves.toBe(1);
     await expect(repository.count('2026-09-01', 'detection')).resolves.toBe(0);
@@ -421,7 +423,7 @@ describe('run quota admission behavior', () => {
 
     await expect(
       consumeRunQuota({ internalRepository: repository.client, group: 'detection' })
-    ).resolves.toEqual({ allowed: true });
+    ).resolves.toEqual({ allowed: true, limit: 0 });
     await expect(repository.count('2026-08-31', 'detection')).resolves.toBe(10_001);
   });
 

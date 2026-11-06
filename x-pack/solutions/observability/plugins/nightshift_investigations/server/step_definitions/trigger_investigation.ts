@@ -329,6 +329,7 @@ export const triggerInvestigationStepDefinition = (
               slackThread: input.slack_thread,
               settingsLocator,
               kibanaUrl,
+              limit: error.limit,
               signal: context.abortSignal,
               logger: context.logger,
             });

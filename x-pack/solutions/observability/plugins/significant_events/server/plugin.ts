@@ -199,6 +199,7 @@ export class SignificantEventsPlugin
       return {
         allowed: false,
         deniedBy: result.deniedBy === 'total_investigation' ? 'all' : trigger,
+        limit: result.limit,
       };
     });
 

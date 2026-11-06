@@ -767,7 +767,7 @@ export class NightshiftInvestigationsClient {
           logger: this.logger,
         });
         if (!result.allowed) {
-          throw new InvestigationQuotaDeniedError(result.deniedBy ?? triggerType);
+          throw new InvestigationQuotaDeniedError(result.deniedBy ?? triggerType, result.limit);
         }
         release = result.release;
       },
