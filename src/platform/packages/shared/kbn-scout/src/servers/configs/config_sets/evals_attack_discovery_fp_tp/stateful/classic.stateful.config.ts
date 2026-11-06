@@ -8,7 +8,7 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
-import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/classic.stateful.config';
+import { servers as evalsSecurityConfig } from '../../evals_security/stateful/classic.stateful.config';
 import { serviceAccountsServerArgs } from '../../service_accounts/shared';
 
 /**
@@ -31,11 +31,11 @@ import { serviceAccountsServerArgs } from '../../service_accounts/shared';
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet evals_attack_discovery_fp_tp
  */
 export const servers: ScoutServerConfig = {
-  ...evalsTracingConfig,
+  ...evalsSecurityConfig,
   kbnTestServer: {
-    ...evalsTracingConfig.kbnTestServer,
+    ...evalsSecurityConfig.kbnTestServer,
     serverArgs: [
-      ...evalsTracingConfig.kbnTestServer.serverArgs,
+      ...evalsSecurityConfig.kbnTestServer.serverArgs,
       ...serviceAccountsServerArgs,
       '--xpack.alertzero.enabled=true',
       '--xpack.agenticInvestigations.enabled=true',

@@ -8,7 +8,7 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
-import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/classic.stateful.config';
+import { servers as evalsSecurityConfig } from '../../evals_security/stateful/classic.stateful.config';
 
 /**
  * Config set for the hunt-watch eval suite. The suite drives the managed Hunt Watch Worker
@@ -35,11 +35,11 @@ import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/clas
  * rather than globally.
  */
 export const servers: ScoutServerConfig = {
-  ...evalsTracingConfig,
+  ...evalsSecurityConfig,
   kbnTestServer: {
-    ...evalsTracingConfig.kbnTestServer,
+    ...evalsSecurityConfig.kbnTestServer,
     serverArgs: [
-      ...evalsTracingConfig.kbnTestServer.serverArgs,
+      ...evalsSecurityConfig.kbnTestServer.serverArgs,
       '--xpack.alertzero.enabled=true',
       '--xpack.agenticInvestigations.enabled=true',
       '--xpack.proposals.enabled=true',

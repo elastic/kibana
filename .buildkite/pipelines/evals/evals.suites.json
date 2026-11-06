@@ -212,7 +212,8 @@
       ],
       "ciLabels": [
         "evals:security-ai-rules"
-      ]
+      ],
+      "serverConfigSet": "evals_security"
     },
     {
       "id": "security-persona-matrix",
@@ -241,7 +242,7 @@
       "ciLabels": [
         "evals:security-persona-matrix-attack-discovery"
       ],
-      "serverConfigSet": "evals_tracing"
+      "serverConfigSet": "evals_security"
     },
     {
       "id": "endpoint",
@@ -295,7 +296,7 @@
       "ciLabels": [
         "evals:attack-discovery"
       ],
-      "serverConfigSet": "evals_tracing"
+      "serverConfigSet": "evals_security"
     },
     {
       "id": "attack-discovery-agent-builder",
@@ -377,7 +378,8 @@
       ],
       "ciLabels": [
         "evals:security-automatic-migrations"
-      ]
+      ],
+      "serverConfigSet": "evals_security"
     },
     {
       "id": "security-alerts-rag-regression",
@@ -390,7 +392,8 @@
       ],
       "ciLabels": [
         "evals:security-alerts-rag-regression"
-      ]
+      ],
+      "serverConfigSet": "evals_security"
     },
     {
       "id": "security-esql-generation-regression",
@@ -403,7 +406,8 @@
       ],
       "ciLabels": [
         "evals:security-esql-generation-regression"
-      ]
+      ],
+      "serverConfigSet": "evals_security"
     },
     {
       "id": "agent-builder-dashboards",
@@ -452,7 +456,8 @@
       ],
       "ciLabels": [
         "evals:security-alert-triage"
-      ]
+      ],
+      "serverConfigSet": "evals_security"
     },
     {
       "id": "security-alert-analysis-workflow",
@@ -465,7 +470,8 @@
       ],
       "ciLabels": [
         "evals:security-alert-analysis-workflow"
-      ]
+      ],
+      "serverConfigSet": "evals_security"
     },
     {
       "id": "security-alert-analysis-workflow-batch",
@@ -479,7 +485,8 @@
       "ciLabels": [
         "evals:security-alert-analysis-workflow-batch"
       ],
-      "stepTimeoutInMinutes": 120
+      "stepTimeoutInMinutes": 120,
+      "serverConfigSet": "evals_security"
     },
     {
       "id": "detection-watch-rule-creation",
@@ -550,7 +557,7 @@
       "ciLabels": [
         "evals:siem-readiness"
       ],
-      "serverConfigSet": "evals_tracing"
+      "serverConfigSet": "evals_security"
     },
     {
       "id": "automatic-import",

@@ -8,7 +8,7 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
-import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/classic.stateful.config';
+import { servers as evalsSecurityConfig } from '../../evals_security/stateful/classic.stateful.config';
 
 /**
  * Config set for the detection-watch-rule-creation eval suite. The suite measures the
@@ -27,11 +27,11 @@ import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/clas
  * load-bearing and must not be removed.
  */
 export const servers: ScoutServerConfig = {
-  ...evalsTracingConfig,
+  ...evalsSecurityConfig,
   kbnTestServer: {
-    ...evalsTracingConfig.kbnTestServer,
+    ...evalsSecurityConfig.kbnTestServer,
     serverArgs: [
-      ...evalsTracingConfig.kbnTestServer.serverArgs,
+      ...evalsSecurityConfig.kbnTestServer.serverArgs,
       '--xpack.alertzero.enabled=true',
       '--xpack.agenticInvestigations.enabled=true',
       '--xpack.proposals.enabled=true',
