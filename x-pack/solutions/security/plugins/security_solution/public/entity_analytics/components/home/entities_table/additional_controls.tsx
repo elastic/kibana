@@ -11,6 +11,7 @@ import numeral from '@elastic/numeral';
 import { FieldsSelectorModal } from './fields_selector_modal';
 import { useFieldsModal } from './hooks/use_fields_modal';
 import { DataViewContext } from '.';
+import { BaselinePrototypeControl } from '../../../baseline_prototype/baseline_prototype_control';
 
 const ENTITY_ANALYTICS_FIELDS_SELECTOR_OPEN_BUTTON = 'entityAnalyticsFieldsSelectorOpenButton';
 
@@ -112,6 +113,10 @@ export const AdditionalControls = ({
               defaultMessage="Fields"
             />
           </EuiButtonEmpty>
+        </EuiFlexItem>
+        {/* DESIGN PROTOTYPE, NOT FOR MERGE: the baseline prototype's rocket button. */}
+        <EuiFlexItem grow={false}>
+          <BaselinePrototypeControl />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
