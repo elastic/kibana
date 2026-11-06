@@ -152,6 +152,12 @@ export function initializeLayoutManager(
     distinctUntilChanged()
   );
 
+  /** Observable that publishes `true` while panels are being set or their APIs are not all available */
+  const panelsLoading$ = combineLatest([childrenStateLoading$, childrenLoading$]).pipe(
+    map(([childrenStateLoading, childrenLoading]) => childrenStateLoading || childrenLoading),
+    distinctUntilChanged()
+  );
+
   let lastSavedLayout = initialLayout;
   let lastSavedChildState = initialChildState;
 
@@ -593,6 +599,7 @@ export function initializeLayoutManager(
     },
     api: {
       layout$,
+      panelsLoading$,
       getLayout: (id: string) => {
         const layout = layout$.getValue();
         return layout.panels[id] ?? layout.pinnedPanels[id];

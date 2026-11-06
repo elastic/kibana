@@ -220,8 +220,15 @@ export type DashboardApi = CanExpandPanels &
     /**
      * The changes from `baseline` to `current`, computed like unsaved changes but for any two
      * states. Each panel is compared by this dashboard's panel with the same id. Empty when equal.
+     * Panels that have not loaded are compared by value, so the result is accurate only while
+     * `panelsLoading$` is false.
      */
     diffStates: (baseline: DashboardState, current: DashboardState) => Partial<DashboardState>;
+    /**
+     * Emits `true` while panels are being set or have not all loaded. Emits on subscribe.
+     * A panel that fails to load keeps it `true`.
+     */
+    panelsLoading$: Observable<boolean>;
     getDashboardPanelFromId: (id: string) => {
       type: string;
       grid?: GridData;
