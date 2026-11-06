@@ -537,3 +537,34 @@ export const LoadingToLoaded: Story = {
     },
   },
 };
+
+const favoriteVariantCases = [
+  { title: 'Star, not starred', variant: 'star', status: 'unfavorited' },
+  { title: 'Star, starred', variant: 'star', status: 'favorited' },
+  { title: 'Pin, not pinned', variant: 'pin', status: 'unfavorited' },
+  { title: 'Pin, pinned', variant: 'pin', status: 'favorited' },
+] as const;
+
+export const FavoriteVariants: Story = {
+  render: () => (
+    <div css={comparisonGrid}>
+      {favoriteVariantCases.map(({ title, variant, status }) => (
+        <AppHeaderView
+          key={title}
+          title={title}
+          favorite={{ variant, status, onToggle: action('favorite') }}
+          sticky={false}
+        />
+      ))}
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The favorite title action as `star` (default) and `pin`. Pick the variant whose ' +
+          'wording matches the app; an item shows one or the other, never both.',
+      },
+    },
+  },
+};
