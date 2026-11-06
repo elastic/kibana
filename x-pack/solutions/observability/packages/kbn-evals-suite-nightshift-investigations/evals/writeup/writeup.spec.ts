@@ -11,6 +11,7 @@ import { expect } from '@playwright/test';
 import { selectEvaluators, tags } from '@kbn/evals';
 import { evaluate } from '../../src/evaluate';
 import { loadWriteupDataset } from './datasets';
+import { goldensByCase, goldensDirFor, readGoldens } from './goldens';
 import { createWriteupEvaluators } from './evaluators';
 import { formatReport, toWriteupRows, type WriteupResults } from './report';
 import { WRITEUP_DATA_DIR, createGenerationCache, createWriteupTask, loadPromptArm } from './task';
@@ -50,6 +51,8 @@ evaluate.describe('Nightshift investigations: writeup', { tag: suiteTags }, () =
       log,
     }) => {
       const dataset = await loadWriteupDataset(evalsClient);
+      // Kept in the repository, not the stored dataset, so a golden change is reviewed as a diff.
+      const goldens = goldensByCase(readGoldens(goldensDirFor(dataset.name)), dataset.examples);
       const votes = parseVotes();
       // The checkout's prompt unless NIGHTSHIFT_WRITEUP_PROMPT names another (a git ref or a file).
       const arm = loadPromptArm(process.env.NIGHTSHIFT_WRITEUP_PROMPT);
@@ -70,6 +73,7 @@ evaluate.describe('Nightshift investigations: writeup', { tag: suiteTags }, () =
           evaluationConnector,
           log,
           votes,
+          goldens,
         })
       );
       const cache =
@@ -78,7 +82,8 @@ evaluate.describe('Nightshift investigations: writeup', { tag: suiteTags }, () =
         {
           name: 'Nightshift writeup',
           datasets: [dataset],
-          trustUpstreamDataset: Boolean(process.env.NIGHTSHIFT_DATASET_NAME),
+          // A stored dataset runs as stored; only a conversations file is upserted.
+          trustUpstreamDataset: !process.env.NIGHTSHIFT_WRITEUP_EXAMPLES_FILE,
           concurrency,
           metadata: {
             concurrency,
@@ -107,7 +112,7 @@ evaluate.describe('Nightshift investigations: writeup', { tag: suiteTags }, () =
         prompt: { label: arm.label, hash: arm.hash },
         ...(baseline ? { baseline: { label: baseline.label, hash: baseline.hash } } : {}),
         votes,
-        rows: toWriteupRows(experiment.runs, experiment.evaluationRuns),
+        rows: toWriteupRows(experiment.runs, experiment.evaluationRuns, goldens),
       };
       const { summary, report } = formatReport(results);
       const stamp = new Date().toISOString().replace(/[:.]/g, '-');

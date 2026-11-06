@@ -75,7 +75,8 @@ export interface WriteupResults {
  */
 export const toWriteupRows = (
   runs: Record<string, TaskRun>,
-  evaluationRuns: EvaluationRun[]
+  evaluationRuns: EvaluationRun[],
+  goldens?: ReadonlyMap<string, string>
 ): WriteupRow[] =>
   Object.entries(runs)
     .map(([runId, run]) => {
@@ -110,7 +111,7 @@ export const toWriteupRows = (
         unsupported_claims: faith?.unsupported_claims ?? [],
         vs_golden: tally(REPLY_VS_GOLDEN_EVALUATOR),
         vs_baseline: tally(REPLY_VS_BASELINE_EVALUATOR),
-        golden: expected.golden ?? null,
+        golden: goldens?.get(output.case_id) ?? expected.golden ?? null,
         recorded: { reply: expected.recorded_reply, gates: gates(expected.recorded_reply) },
         baseline: output.baseline
           ? {

@@ -6,7 +6,7 @@
  */
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { basename, join, resolve } from 'path';
+import { basename, dirname, join, resolve } from 'path';
 import { RunWithCommands } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { DEFAULT_RESULT_CAP, toWriteupConversation } from '../../evals/writeup/build';
@@ -15,6 +15,7 @@ import {
   toWriteupDataset,
   type WriteupConversation,
 } from '../../evals/writeup/datasets';
+import { formatGolden, goldenPath } from '../../evals/writeup/goldens';
 import { judgeAgreement } from '../../evals/writeup/judge_agreement';
 import type { WriteupResults } from '../../evals/writeup/report';
 
@@ -77,19 +78,22 @@ new RunWithCommands(
         or a file with it under "conversation". Tool results are clipped to --result-cap
         characters, so the dataset fits the 5 MiB dataset upsert.
 
-        --fixtures-dir writes one file per conversation, which is how the committed ORCA
-        conversations are kept. --out writes one conversations file, the form private writeup
-        data (Customer 0) is kept in outside the repository and passed to the eval with
-        NIGHTSHIFT_WRITEUP_EXAMPLES_FILE.
+        --out writes one conversations file: the form a stored dataset is uploaded from (with
+        NIGHTSHIFT_WRITEUP_EXAMPLES_FILE) and kept in GCS. Rebuilding an existing file keeps each
+        conversation's reply_types and follow_ups.
+
+        --goldens-dir writes the goldens as one Markdown file per round there instead of into the
+        conversations file, which is how the ORCA goldens are kept in the repository. Without it,
+        goldens stay in the file, as for private (Customer 0) data kept outside the repository.
 
         Examples:
-          node -r @kbn/setup-node-env <suite>/scripts/writeup build --fixtures-dir <suite>/evals/writeup/fixtures/orca --goldens goldens.json exports/*.json
+          node -r @kbn/setup-node-env <suite>/scripts/writeup build --out writeup_orca_v2.json --dataset nightshift/writeup-orca-v2 --goldens goldens.json --goldens-dir <suite>/evals/writeup/goldens/writeup_orca_v2 exports/*.json
           node -r @kbn/setup-node-env <suite>/scripts/writeup build --out ~/private/c0.json --dataset nightshift/writeup-c0 --rounds last --prototype-goldens data/goldens/last-round data/eval-traces/*.json
       `,
       flags: {
         string: [
           'out',
-          'fixtures-dir',
+          'goldens-dir',
           'dataset',
           'goldens',
           'prototype-goldens',
@@ -97,9 +101,9 @@ new RunWithCommands(
           'rounds',
         ],
         help: `
-          --out                 Write one conversations file here
-          --fixtures-dir        Write one file per conversation into this directory
-          --dataset             Dataset name for --out (must start with "nightshift/")
+          --out                 Write the conversations file here
+          --goldens-dir         Write goldens as Markdown files into this directory, not into --out
+          --dataset             Dataset name (must start with "nightshift/")
           --rounds              "all" (default) rewrites every round's reply; "last" only each final one
           --goldens             JSON of goldens by case id: { "<case_id>": [{ "round_index", "reply", "source" }] }
           --prototype-goldens   Directory of prototype last-round goldens (<case_id>.json)
@@ -110,23 +114,31 @@ new RunWithCommands(
         const files = flagsReader.getPositionals();
         if (!files.length) throw createFailError('Pass at least one conversation export');
         const out = flagsReader.string('out');
-        const fixturesDir = flagsReader.string('fixtures-dir');
-        if (Boolean(out) === Boolean(fixturesDir)) {
-          throw createFailError('Pass exactly one of --out or --fixtures-dir');
-        }
+        if (!out) throw createFailError('Pass --out');
+        const goldensDir = flagsReader.string('goldens-dir');
         const resultCap = Number(flagsReader.string('result-cap') ?? DEFAULT_RESULT_CAP);
         const goldensFile = flagsReader.string('goldens');
         const goldens: Record<string, Goldens> = goldensFile
           ? JSON.parse(readFileSync(goldensFile, 'utf8'))
           : {};
         const prototypeDir = flagsReader.string('prototype-goldens');
+        // Reply types and added follow-ups aren't in the export; keep the ones on file.
+        const previous = existsSync(out)
+          ? writeupFileSchema.parse(JSON.parse(readFileSync(out, 'utf8'))).conversations
+          : [];
 
         const conversations = files.map((file) => {
           const { caseId, rounds } = readExport(resolve(file));
-          return toWriteupConversation(caseId, rounds, {
+          const built = toWriteupConversation(caseId, rounds, {
             resultCap,
             goldens: goldensFor(caseId, rounds, goldens, prototypeDir),
           });
+          const kept = previous.find((c) => c.case_id === caseId);
+          return {
+            ...built,
+            ...(kept?.reply_types ? { reply_types: kept.reply_types } : {}),
+            ...(kept?.follow_ups ? { follow_ups: kept.follow_ups } : {}),
+          };
         });
         const file = writeupFileSchema.parse({
           dataset: flagsReader.string('dataset') ?? 'nightshift/writeup',
@@ -136,31 +148,23 @@ new RunWithCommands(
         // Fails here, rather than at eval time, when the data is over the upsert limit.
         const dataset = toWriteupDataset(file);
 
-        if (fixturesDir) {
-          mkdirSync(fixturesDir, { recursive: true });
-          for (const conversation of conversations) {
-            // Kibana's file casing check wants snake_case file names; the case ID keeps its dashes.
-            const path = join(fixturesDir, `${conversation.case_id.replace(/-/g, '_')}.json`);
-            // Reply types and added follow-ups aren't in the export; keep the ones on file.
-            const { reply_types: replyTypes, follow_ups: followUps } = existsSync(path)
-              ? (JSON.parse(readFileSync(path, 'utf8')) as Partial<typeof conversation>)
-              : {};
-            writeFileSync(
-              path,
-              `${JSON.stringify(
-                {
-                  ...conversation,
-                  ...(replyTypes ? { reply_types: replyTypes } : {}),
-                  ...(followUps ? { follow_ups: followUps } : {}),
-                },
-                null,
-                2
-              )}\n`
-            );
+        if (goldensDir) {
+          for (const conversation of file.conversations) {
+            for (const golden of conversation.goldens) {
+              const path = goldenPath(goldensDir, { ...golden, case_id: conversation.case_id });
+              mkdirSync(dirname(path), { recursive: true });
+              const question = conversation.rounds[golden.round_index].input.message;
+              writeFileSync(
+                path,
+                formatGolden({ ...golden, case_id: conversation.case_id, question })
+              );
+            }
           }
-        } else {
-          writeFileSync(out!, `${JSON.stringify(file, null, 2)}\n`);
         }
+        const written = goldensDir
+          ? { ...file, conversations: file.conversations.map((c) => ({ ...c, goldens: [] })) }
+          : file;
+        writeFileSync(out, `${JSON.stringify(written, null, 2)}\n`);
         const bytes = Buffer.byteLength(JSON.stringify(dataset.examples));
         log.success(
           `${conversations.length} conversations, ${dataset.examples.length} rounds to rewrite, ` +

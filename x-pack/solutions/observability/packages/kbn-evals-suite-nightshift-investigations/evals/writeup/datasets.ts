@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { readdirSync, readFileSync } from 'fs';
-import { join } from 'path';
+import assert from 'assert';
+import { createHash } from 'crypto';
+import { readFileSync } from 'fs';
+import stringify from 'safe-stable-stringify';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { EvaluationDataset, EvalsClient } from '@kbn/evals';
 import { DatasetTags } from '@kbn/evals-common';
@@ -18,9 +20,17 @@ import {
   type WriteupExample,
 } from './types';
 
-/** The committed synthetic conversations: ORCA investigations with scripted follow-ups. */
-export const ORCA_FIXTURES_DIR = join(__dirname, 'fixtures', 'orca');
-export const ORCA_WRITEUP_DATASET = 'nightshift/writeup';
+/**
+ * The default dataset: synthetic ORCA investigations with scripted follow-ups, stored in the golden
+ * cluster and kept in `gs://nightshift-datasets/investigation-engine/writeup/orca/v1/`. Its goldens
+ * are in the repository (see `goldens.ts`). A re-recording is a new version (`v2`), not an edit.
+ */
+export const ORCA_WRITEUP_RELEASE = {
+  id: '14f0c7de-46e9-5cbe-84ee-c2d8c46c8c4e',
+  name: 'nightshift/writeup-orca-v1',
+  examples: 20,
+  sha256: '88cc752ba98c42fd7362d54de9d52a060909dfcc802e78af8e8c7f52eca296f0',
+} as const;
 
 /** The dataset upsert route caps a request at 5 MiB; leave room for the envelope. */
 export const MAX_DATASET_BYTES = 4.5 * 1024 * 1024;
@@ -169,23 +179,64 @@ export const toWriteupDataset = (file: WriteupFile): EvaluationDataset<WriteupEx
 export const readWriteupFile = (path: string): WriteupFile =>
   writeupFileSchema.parse(JSON.parse(readFileSync(path, 'utf8')));
 
-/** The committed ORCA conversations, one JSON file each. */
-export const readOrcaWriteupFile = (dir = ORCA_FIXTURES_DIR): WriteupFile =>
-  writeupFileSchema.parse({
-    dataset: ORCA_WRITEUP_DATASET,
-    description:
-      'Synthetic ORCA investigations on the OpenTelemetry Demo shop, each with scripted follow-up ' +
-      "questions. Each round's final reply is rewritten under a given prompt and scored for how it's written up.",
-    tags: ['orca', 'synthetic'],
-    conversations: readdirSync(dir)
-      .filter((f) => f.endsWith('.json'))
-      .sort()
-      .map((f) => JSON.parse(readFileSync(join(dir, f), 'utf8'))),
-  });
+const storedExamplesSchema = lazySchema(() =>
+  z.array(writeupExampleSchema.extend({ id: z.string().min(1) })).min(1)
+);
+
+/** Identifies a stored dataset's examples, independent of object-key and example order. */
+export const getWriteupDatasetHash = (
+  examples: ReadonlyArray<WriteupExample & { id?: string }>
+): string => {
+  const ordered = examples
+    .map(({ id, input, output, metadata }) => ({ id, input, output, metadata }))
+    .sort((a, b) => a.metadata.case_id.localeCompare(b.metadata.case_id));
+  const serialized = stringify(ordered);
+  assert(serialized, 'Cannot serialize the writeup dataset');
+  return createHash('sha256').update(serialized).digest('hex');
+};
+
+type StoredDataset = NonNullable<Awaited<ReturnType<EvalsClient['getDatasetByName']>>>;
+
+const fromStored = (
+  dataset: StoredDataset,
+  examples: z.infer<typeof storedExamplesSchema>
+): EvaluationDataset<WriteupExample> => ({
+  name: dataset.name,
+  description: dataset.description,
+  tags: dataset.tags,
+  maturity: dataset.maturity,
+  examples,
+});
+
+/** Checks the stored ORCA dataset against the pinned release before any reply is generated. */
+export const validateOrcaWriteupDataset = (
+  dataset: StoredDataset,
+  release: { id: string; name: string; examples: number; sha256: string } = ORCA_WRITEUP_RELEASE
+): EvaluationDataset<WriteupExample> => {
+  const examples = storedExamplesSchema.parse(dataset.examples);
+  assertDistinctCaseIds(examples);
+  // Says what was found, so publishing a version is: store it, run once, pin what this prints.
+  const found = `found id ${dataset.id}, ${
+    examples.length
+  } examples, sha256 ${getWriteupDatasetHash(examples)}`;
+  assert(
+    dataset.id === release.id && dataset.name === release.name,
+    `Writeup dataset identity differs from the pinned release (${found})`
+  );
+  assert(
+    examples.length === release.examples,
+    `Writeup dataset must hold every pinned round (${found})`
+  );
+  assert(
+    getWriteupDatasetHash(examples) === release.sha256,
+    `Writeup dataset content differs from the pinned release; publish and review a new version (${found})`
+  );
+  return fromStored(dataset, examples);
+};
 
 /**
- * The writeup dataset to run: a stored dataset by name (`NIGHTSHIFT_DATASET_NAME`), a private
- * conversations file (`NIGHTSHIFT_WRITEUP_EXAMPLES_FILE`), or the committed ORCA conversations.
+ * The writeup dataset to run: a stored dataset by name (`NIGHTSHIFT_DATASET_NAME`), a conversations
+ * file (`NIGHTSHIFT_WRITEUP_EXAMPLES_FILE`), or the pinned ORCA release.
  */
 export const loadWriteupDataset = async (
   client: Pick<EvalsClient, 'getDatasetByName'>,
@@ -200,20 +251,12 @@ export const loadWriteupDataset = async (
     );
   }
   if (examplesFile) return toWriteupDataset(readWriteupFile(examplesFile));
-  if (!datasetName) return toWriteupDataset(readOrcaWriteupFile());
 
-  const dataset = await client.getDatasetByName(datasetName);
-  if (!dataset) throw new Error(`Writeup dataset not found: ${datasetName}`);
-  const examples = z
-    .array(writeupExampleSchema.extend({ id: z.string().min(1) }))
-    .min(1)
-    .parse(dataset.examples);
+  const name = datasetName ?? ORCA_WRITEUP_RELEASE.name;
+  const dataset = await client.getDatasetByName(name);
+  if (!dataset) throw new Error(`Writeup dataset not found: ${name}`);
+  if (!datasetName) return validateOrcaWriteupDataset(dataset);
+  const examples = storedExamplesSchema.parse(dataset.examples);
   assertDistinctCaseIds(examples);
-  return {
-    name: dataset.name,
-    description: dataset.description,
-    tags: dataset.tags,
-    maturity: dataset.maturity,
-    examples,
-  };
+  return fromStored(dataset, examples);
 };

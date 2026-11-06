@@ -9,12 +9,12 @@ import { mkdtempSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { toWriteupConversation } from './build';
-import { isLongReplyType } from './types';
 import {
-  ORCA_WRITEUP_DATASET,
+  ORCA_WRITEUP_RELEASE,
+  getWriteupDatasetHash,
   loadWriteupDataset,
-  readOrcaWriteupFile,
   toWriteupDataset,
+  validateOrcaWriteupDataset,
   toWriteupExamples,
   type WriteupConversation,
 } from './datasets';
@@ -237,32 +237,42 @@ describe('loadWriteupDataset', () => {
   });
 });
 
-describe('the committed ORCA conversations', () => {
-  const file = readOrcaWriteupFile();
-  const dataset = toWriteupDataset(file);
+describe('the pinned ORCA release', () => {
+  const examples = toWriteupExamples(toWriteupConversation('orca-x', exported)).map((e, i) => ({
+    ...e,
+    id: `e${i}`,
+  }));
+  const release = {
+    id: 'd1',
+    name: ORCA_WRITEUP_RELEASE.name,
+    examples: examples.length,
+    sha256: getWriteupDatasetHash(examples),
+  };
+  const stored = { id: 'd1', name: release.name, description: 'd', examples };
 
-  it('are synthetic, multi-round and fit one dataset upsert', () => {
-    expect(dataset.name).toBe(ORCA_WRITEUP_DATASET);
-    expect(file.conversations.length).toBeGreaterThanOrEqual(4);
-    for (const conversation of file.conversations) {
-      expect(conversation.case_id).toMatch(/^orca-/);
-      // The investigation, then at least one follow-up question.
-      expect(conversation.rounds.length).toBeGreaterThanOrEqual(2);
-    }
-  });
-
-  it('have a golden for every recorded round', () => {
-    expect(
-      dataset.examples
-        .filter((e) => e.output.recorded_reply && !e.output.golden)
-        .map((e) => e.metadata.case_id)
-    ).toEqual([]);
-  });
-
-  it('include requests for more, which no recorded round makes', () => {
-    const long = dataset.examples.filter((e) => isLongReplyType(e.metadata.reply_type ?? 'answer'));
-    expect(new Set(long.map((e) => e.metadata.reply_type))).toEqual(
-      new Set(['detail', 'list', 'method', 'visual'])
+  it('accepts the stored dataset it pins, in any example order', () => {
+    const dataset = validateOrcaWriteupDataset(
+      { ...stored, examples: [...examples].reverse() },
+      release
     );
+    expect(dataset.examples).toHaveLength(examples.length);
+  });
+
+  it('refuses a stored dataset whose content changed', () => {
+    const edited = examples.map((e, i) =>
+      i ? e : { ...e, output: { ...e.output, recorded_reply: 'Edited.' } }
+    );
+    expect(() => validateOrcaWriteupDataset({ ...stored, examples: edited }, release)).toThrow(
+      'differs from the pinned release'
+    );
+    expect(() => validateOrcaWriteupDataset({ ...stored, id: 'other' }, release)).toThrow(
+      'identity differs'
+    );
+  });
+
+  it('is what loads when no dataset or file is named', async () => {
+    const client = { getDatasetByName: jest.fn().mockResolvedValue(null) };
+    await expect(loadWriteupDataset(client, {})).rejects.toThrow(ORCA_WRITEUP_RELEASE.name);
+    expect(client.getDatasetByName).toHaveBeenCalledWith(ORCA_WRITEUP_RELEASE.name);
   });
 });

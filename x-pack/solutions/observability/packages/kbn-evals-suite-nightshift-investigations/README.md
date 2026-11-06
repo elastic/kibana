@@ -524,7 +524,7 @@ conversation actually got, and writes `report.md` and `results.json` under
 `data/nightshift_writeup/runs/`. The report quotes every reply next to its golden, lists
 unsupported claims, and names **ratchet** candidates: replies that pass every gate, score at least
 4 on faithfulness and win at least five of every six golden comparisons. A person reviews a
-candidate before it replaces its golden in the fixtures.
+candidate before it replaces its golden file.
 
 ### Before and after a prompt change
 
@@ -565,17 +565,43 @@ human review to catch a short reply that drops something the reader needs.
 
 ### Datasets
 
-The committed dataset, `nightshift/writeup`, holds five synthetic ORCA investigations
-(the OpenTelemetry Demo shop; the ORCA telemetry is CC BY 4.0) in
-[`evals/writeup/fixtures/orca/`](evals/writeup/fixtures/orca), one file each. Each ran on
-`main` with Sonnet 5 and then got two scripted follow-up questions, so every conversation has its
-first-round wrap-up and two question replies rewritten. Their goldens are seeded from variant B's brief
-of the reply each round got (an answer line and up to three points), as the prototype's were.
+The default dataset, `nightshift/writeup-orca-v1`, holds five synthetic ORCA investigations
+(the OpenTelemetry Demo shop; the ORCA telemetry is CC BY 4.0). Each ran on `main` with Sonnet 5
+and then got two scripted follow-up questions, so every conversation has its first-round wrap-up
+and two question replies rewritten. None of those questions asks for more, so each conversation
+also has a `follow_ups` entry: one request for a walk-through, a list, the queries, a chart or a
+timeline, asked after the last round. The context is real; only the question is added, so it has
+no recorded reply and no golden.
 
-None of those questions asks for more, so each file also has a `follow_ups` entry: one request for
-a walk-through, a list, the queries, a chart or a timeline, asked after the last round. The context
-is real; only the question is added, so it has no recorded reply and no golden. Rebuilding the
-fixtures keeps each file's `follow_ups` and `reply_types`.
+The conversations are stored in the golden cluster and kept in
+`gs://nightshift-datasets/investigation-engine/writeup/orca/v1/`. The eval reads the stored copy and
+checks it against the id, round count and sha256 pinned in `ORCA_WRITEUP_RELEASE`
+([`datasets.ts`](evals/writeup/datasets.ts)), so it never runs on data nobody reviewed. A
+re-recording, or a change to a conversation, is a new version (`v2`): upload it, pin it, and leave
+`v1` as it is.
+
+The goldens are in the repository, one Markdown file per round under
+[`evals/writeup/goldens/writeup_orca_v1/`](evals/writeup/goldens/writeup_orca_v1), so a change to
+one is a readable diff that goes through review. Each file has a small header, the question it
+answers quoted, and the reply. They are seeded from variant B's brief of the reply each round got
+(an answer line and up to three points), as the prototype's were. The eval fails if a golden's
+quoted question no longer matches the stored round.
+
+To publish a new version, build the conversations file and goldens, upload the file to GCS, and run
+the eval once from the file, which stores it in the golden cluster under its dataset name:
+
+```bash
+node -r @kbn/setup-node-env x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scripts/writeup build \
+  --out writeup_orca_v2.json --dataset nightshift/writeup-orca-v2 --goldens goldens.json \
+  --goldens-dir x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/evals/writeup/goldens/writeup_orca_v2 \
+  exports/*.json
+gcloud storage cp writeup_orca_v2.json gs://nightshift-datasets/investigation-engine/writeup/orca/v2/
+NIGHTSHIFT_DATASETS=writeup NIGHTSHIFT_WRITEUP_EXAMPLES_FILE=writeup_orca_v2.json \
+  node scripts/evals start --suite nightshift-investigations --profile dev-vault \
+  --model <model-endpoint-id> --judge <model-endpoint-id>
+```
+
+Then pin the stored dataset's id, example count and sha256 in `ORCA_WRITEUP_RELEASE`.
 
 Customer 0 conversations must not be committed. Keep them in a private conversations file and run
 it directly, or store it once as an evaluations dataset and select it by name:
@@ -597,8 +623,8 @@ NIGHTSHIFT_DATASETS=writeup NIGHTSHIFT_DATASET_NAME=nightshift/writeup-c0 \
 `--prototype-goldens <dir>` reads the prototype's last-round goldens, and `--goldens <file>` any
 others, keyed by case id. The dataset upsert route caps a dataset at 5 MiB, so `build` clips tool
 results to `--result-cap` characters (8,000 by default) and refuses data that would not fit;
-`--rounds last` rewrites only each conversation's final reply. To refresh the ORCA conversations,
-export them again and rebuild with `--fixtures-dir evals/writeup/fixtures/orca`.
+`--rounds last` rewrites only each conversation's final reply. Without `--goldens-dir`, goldens
+stay in the conversations file, which suits private data kept outside the repository.
 
 ## Deferred sandbox session isolation
 
@@ -766,7 +792,7 @@ against.
 | `NIGHTSHIFT_DATASETS`                | Comma-separated dataset ids (whitespace trimmed). Smoke dataset ids such as `synthetic-smoke` select seeded evals; `trace-only` selects the file-driven investigations; they can be combined, e.g. `synthetic-smoke,trace-only`. Unset or `all` runs every eval when sandbox credentials are present, except that a stored `NIGHTSHIFT_DATASET_NAME` defaults to trace-only when selection is unset. Without them, unset runs only smoke with a warning, while an explicit `all` or `trace-only` fails before any test runs, even when Scout is reused. `connector-probe` selects the [connector probes](#connector-probes) and `writeup` the [writeup eval](#writeup); unset and `all` never include either. `orcabench` selects the isolated ORCA dataset and cannot be combined with other ids; it requires an ORCA-configured Scout server. Unknown ids fail early. |
 | `NIGHTSHIFT_PROBE_EXAMPLES_FILE`     | Examples file for `connector-probe`; required when it is selected. See [connector probes](#connector-probes).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | `NIGHTSHIFT_PROBE_TIME_BUDGET_S`     | Seconds a probe may take before `within_time_budget` scores 0 (default 30).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `NIGHTSHIFT_WRITEUP_EXAMPLES_FILE`   | Private conversations file for `writeup`. See [writeup](#writeup).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `NIGHTSHIFT_WRITEUP_EXAMPLES_FILE`   | Conversations file for `writeup`, stored on the run. See [writeup](#writeup).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | `NIGHTSHIFT_WRITEUP_PROMPT`          | Git ref or prompt file the writeup eval tests instead of the checkout's investigator prompt.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | `NIGHTSHIFT_WRITEUP_BASELINE_PROMPT` | Git ref or prompt file the writeup eval also rewrites replies under, and compares head to head.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `NIGHTSHIFT_WRITEUP_VOTES`           | Pairwise votes per order for the writeup judges (default 2).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |

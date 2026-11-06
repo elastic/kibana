@@ -86,6 +86,8 @@ interface JudgeDeps {
   log?: Pick<ToolingLog, 'warning'>;
   /** Pairwise votes per order. */
   votes: number;
+  /** Goldens kept in the repository, by example case ID; they win over one stored in the dataset. */
+  goldens?: ReadonlyMap<string, string>;
 }
 
 const getModelFactory = (evaluationConnector: EvalConnector) => () => {
@@ -164,8 +166,8 @@ const pairEvaluator = (
 
 /** Pairwise against the round's approved golden reply; a tie counts half. */
 export const createReplyVsGoldenEvaluator = (deps: JudgeDeps) =>
-  pairEvaluator(deps, REPLY_VS_GOLDEN_EVALUATOR, (expected) => ({
-    text: expected.golden,
+  pairEvaluator(deps, REPLY_VS_GOLDEN_EVALUATOR, (expected, output) => ({
+    text: deps.goldens?.get(output.case_id) ?? expected.golden,
     missing: 'The round has no golden reply.',
   }));
 
