@@ -30,7 +30,6 @@ interface IUntypedManagedWorkflows {
 }
 
 interface IUntypedOwnerWorkflows {
-  uninstall: (id: string, options: ManagedWorkflowOperationOptions) => Promise<void>;
   disable: (id: string, options: ManagedWorkflowOperationOptions) => Promise<boolean>;
 }
 
@@ -48,7 +47,7 @@ interface IOwnerWorkflowParams {
   workflowId: string;
 }
 
-/** Installs and removes the workflows bound to the detection engine account of a space. */
+/** Installs and switches off the workflows bound to the detection engine account of a space. */
 export interface BoundWorkflowsInstaller {
   /**
    * Installs the space's copy of a bound workflow, rendered with the space's account. Installing
@@ -61,12 +60,6 @@ export interface BoundWorkflowsInstaller {
       values?: Record<string, string | number>;
     }
   ) => Promise<void>;
-  /**
-   * Removes the space's copy of a bound workflow with its run history. Goes through the owner, so
-   * it needs no `manage_security`: stopping background activity must not need permission to bind
-   * accounts.
-   */
-  uninstall: (params: IOwnerWorkflowParams) => Promise<void>;
   /**
    * Switches the space's copy of a bound workflow off through the owner, with no `manage_security`.
    * Resolves `false` when nothing was switched off, such as a missing or already disabled copy.
@@ -119,11 +112,6 @@ export function createBoundWorkflowsInstaller({
         workflowIdSuffix: spaceId,
         values: { serviceAccountId: accountId, ...values },
       });
-    },
-
-    async uninstall({ spaceId, workflowId }) {
-      const client = await getOwnerClient();
-      await client.uninstall(workflowId, { spaceId, workflowIdSuffix: spaceId });
     },
 
     async disable({ spaceId, workflowId }) {

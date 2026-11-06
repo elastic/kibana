@@ -39,9 +39,9 @@ export interface SignificantEventsScheduledWorkflowsService {
    *   enables them so Task Manager schedules their triggers.
    * - Updating while enabled re-renders the managed workflow templates with the
    *   new cadence and batch values, preserving enablement.
-   * - Disabling disables both workflows, cancels non-terminal scheduled
-   *   wrapper executions in that space, and uninstalls the per-space dynamic
-   *   workflow instances.
+   * - Disabling disables both workflows and cancels non-terminal scheduled
+   *   wrapper executions in that space. The per-space workflow documents stay,
+   *   disabled.
    */
   ensureWorkflow(params: {
     enabled: boolean;
@@ -235,14 +235,6 @@ export const createSignificantEventsScheduledWorkflowsService = ({
     );
   };
 
-  const uninstallScheduledWorkflows = async ({ spaceId }: { spaceId: string }) => {
-    await Promise.all(
-      SCHEDULED_DISCOVERY_WORKFLOW_IDS.map((workflowId) =>
-        installer.uninstall({ spaceId, workflowId })
-      )
-    );
-  };
-
   return {
     async ensureWorkflow({ enabled, request, spaceId, config }) {
       if (enabled) {
@@ -254,10 +246,9 @@ export const createSignificantEventsScheduledWorkflowsService = ({
 
       await disableScheduledWorkflows({ spaceId });
       await cancelRunningScheduledExecutions({ request, spaceId });
-      await uninstallScheduledWorkflows({ spaceId });
-      log.info(
-        `Disabled and uninstalled scheduled Significant Events discovery workflows in space ${spaceId}`
-      );
+      // The documents stay, switched off: deleting a bound workflow needs `manage_security`, and
+      // enabling again re-renders them with the settings.
+      log.info(`Disabled scheduled Significant Events discovery workflows in space ${spaceId}`);
     },
   };
 };

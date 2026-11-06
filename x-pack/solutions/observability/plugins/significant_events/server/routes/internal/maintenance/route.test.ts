@@ -6,6 +6,7 @@
  */
 
 import type { Boom } from '@hapi/boom';
+import { OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED } from '@kbn/management-settings-ids';
 import { NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import {
   canManageSecurity,
@@ -43,6 +44,32 @@ describe('resume route', () => {
     // The route wrapper turns a StatusError into a Boom error.
     expect((error as Boom).output.statusCode).toBe(403);
     expect(resume).not.toHaveBeenCalled();
+  });
+
+  it('installs the settings-backed workflows of a set-up space after resuming it', async () => {
+    jest.mocked(getDetectionEngineAccountId).mockResolvedValue('account-1');
+    jest.mocked(canManageSecurity).mockResolvedValue(true);
+    const uiSettingsClient = {
+      getAll: jest.fn().mockResolvedValue({
+        [OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED]: true,
+      }),
+    };
+    const continuousOnboardingWorkflowService = {
+      ensureWorkflow: jest.fn().mockResolvedValue(undefined),
+    };
+    resume.mockResolvedValueOnce({ state: 'enabled', partialFailures: [] });
+
+    await resumeRoute.handler({
+      ...params,
+      getScopedClients: jest.fn().mockResolvedValue({ licensing: {}, uiSettingsClient }),
+      continuousOnboardingWorkflowService,
+    } as unknown as HandlerParams);
+
+    expect(continuousOnboardingWorkflowService.ensureWorkflow).toHaveBeenCalledWith({
+      enabled: true,
+      request: params.request,
+      spaceId: 'space-a',
+    });
   });
 
   it('resumes a space that is not set up without asking for manage_security', async () => {
@@ -117,7 +144,7 @@ describe('pause, resume, and status routes', () => {
       getScopedClients: jest.fn().mockResolvedValue({ licensing }),
       maintenanceService: {
         pause: jest.fn(),
-        resume: jest.fn(),
+        resume: jest.fn().mockResolvedValue({ state: 'paused' }),
         getStatus: jest.fn(),
       },
     };

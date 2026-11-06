@@ -267,6 +267,35 @@ describe('SignificantEventsMaintenanceService', () => {
       );
     });
 
+    it('does not report a missing sync or cleanup document of a space that was never set up', async () => {
+      const { api } = makeManagementApi({ missingWorkflows: [cleanupDocumentId('default')] });
+      const { service } = makeService({ management: api });
+
+      await service.pause({ request: REQUEST });
+      const summary = await service.resume({ request: REQUEST });
+
+      expect(summary.state).toBe('enabled');
+      expect(summary.partialFailures).toEqual([]);
+    });
+
+    it('still reports a workflow that pause recorded and that has gone missing since', async () => {
+      const { api, getWorkflow } = makeManagementApi();
+      const { service } = makeService({ management: api });
+
+      await service.pause({ request: REQUEST });
+      getWorkflow.mockImplementation(async (id: string) =>
+        id === cleanupDocumentId('default') ? null : { id, enabled: false, definition: { id } }
+      );
+      const summary = await service.resume({ request: REQUEST });
+
+      expect(summary.partialFailures).toEqual([
+        expect.objectContaining({
+          target: `workflow:${cleanupDocumentId('default')}@default`,
+          error: 'workflow not found',
+        }),
+      ]);
+    });
+
     it('is a no-op when not paused', async () => {
       const { api, updateWorkflow } = makeManagementApi();
       const { service, v2RulesClient } = makeService({ management: api });
