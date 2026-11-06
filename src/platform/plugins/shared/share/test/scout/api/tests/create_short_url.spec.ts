@@ -92,6 +92,21 @@ apiTest.describe('POST /api/short_url', { tag: tags.deploymentAgnostic }, () => 
     expect(shortUrl.slug).toBe(slug);
   });
 
+  apiTest('returns 400 when the slug contains invalid characters', async ({ apiClient }) => {
+    const response = await apiClient.post(SHORT_URL_API_PATH, {
+      headers,
+      responseType: 'json',
+      body: {
+        locatorId: LEGACY_SHORT_URL_LOCATOR_ID,
+        params: {},
+        slug: 'pipe|is-not-allowed',
+      },
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toBe('Invalid [slug = pipe|is-not-allowed].');
+  });
+
   apiTest('returns 409 when the slug already exists', async ({ apiClient, shortUrlCleanup }) => {
     const slug = `test-slug-${randomUUID()}`;
     const request = () =>
