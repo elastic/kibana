@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -18,40 +18,57 @@ export const canAnimateRunningBorder = (): boolean =>
   !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /**
- * Pulses the cell's border while `isRunning`. Once the run ends it completes the current pulse,
- * so even a quick run shows one full pulse.
+ * Pulses the cell's border while `isRunning`, and once whenever `runCount` goes up, for runs that
+ * finish without ever running. Once a run ends it completes the current pulse, so even a quick run
+ * shows one full pulse.
  */
-export const RunningBorder = ({ isRunning }: { isRunning: boolean }) => {
+export const RunningBorder = ({
+  isRunning,
+  runCount,
+}: {
+  isRunning: boolean;
+  runCount?: number;
+}) => {
   const { euiTheme } = useEuiTheme();
   const ref = useRef<HTMLDivElement>(null);
   const animation = useRef<Animation>();
+  const lastRunCount = useRef(runCount);
 
-  useEffect(() => {
+  const pulse = useCallback((iterations: number) => {
     const element = ref.current;
     if (!element || !canAnimateRunningBorder()) return;
     const current = animation.current;
-
-    if (isRunning) {
-      if (current) {
-        current.effect?.updateTiming({ iterations: Infinity });
-        return;
-      }
-      const next = element.animate([{ opacity: 0 }, { opacity: 1 }, { opacity: 0 }], {
-        duration: PULSE_MS,
-        iterations: Infinity,
-        easing: 'ease-in-out',
-      });
-      next.onfinish = () => {
-        if (animation.current === next) animation.current = undefined;
-      };
-      animation.current = next;
+    if (current) {
+      if (iterations === Infinity) current.effect?.updateTiming({ iterations });
       return;
     }
+    const next = element.animate([{ opacity: 0 }, { opacity: 1 }, { opacity: 0 }], {
+      duration: PULSE_MS,
+      iterations,
+      easing: 'ease-in-out',
+    });
+    next.onfinish = () => {
+      if (animation.current === next) animation.current = undefined;
+    };
+    animation.current = next;
+  }, []);
 
+  useEffect(() => {
+    if (isRunning) {
+      pulse(Infinity);
+      return;
+    }
+    const current = animation.current;
     if (!current) return;
     const elapsed = Number(current.currentTime ?? 0);
     current.effect?.updateTiming({ iterations: Math.max(1, Math.ceil(elapsed / PULSE_MS)) });
-  }, [isRunning]);
+  }, [isRunning, pulse]);
+
+  useEffect(() => {
+    const previous = lastRunCount.current;
+    lastRunCount.current = runCount;
+    if (runCount !== undefined && runCount > (previous ?? 0)) pulse(1);
+  }, [runCount, pulse]);
 
   useEffect(() => () => animation.current?.cancel(), []);
 

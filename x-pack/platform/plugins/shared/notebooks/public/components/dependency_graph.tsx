@@ -50,6 +50,7 @@ import type { CellRuntime, ParamValue } from '../model/types';
 import { getCellDisplayName } from '../model/references';
 import { TYPE_ICONS, getStatusBorderColor, getTypeLabel } from './cell_display';
 import { useNotebook } from './notebook_context';
+import { RunningBorder } from './running_border';
 import { getResultSummary } from './result_preview';
 
 /** How a node relates to the selected node, if any. */
@@ -127,10 +128,8 @@ const getNodeSummary = (cell: CellDefinition, { error, output, durationMs }: Cel
 };
 
 /** How many times the cell has run, shown while the developer toolbar's performance check is on. */
-const RunCountBadge = ({ cellId }: { cellId: string }) => {
-  const { scheduler } = useNotebook();
+const RunCountBadge = ({ count }: { count: number }) => {
   const { euiTheme } = useEuiTheme();
-  const count = useStateFromPublishingSubject(scheduler.runCounts$)[cellId] ?? 0;
   return (
     <EuiNotificationBadge
       color="subdued"
@@ -151,11 +150,12 @@ const RunCountBadge = ({ cellId }: { cellId: string }) => {
 };
 
 const CellNode = ({ data: { cellId, width, highlight } }: NodeProps<CellFlowNode>) => {
-  const { store } = useNotebook();
+  const { store, scheduler } = useNotebook();
   const { performanceCheck$ } = useNotebookServices();
   const { euiTheme } = useEuiTheme();
   const cells = useStateFromPublishingSubject(store.cells$);
   const runtime = useStateFromPublishingSubject(store.getRuntime$(cellId));
+  const runCount = useStateFromPublishingSubject(scheduler.runCounts$)[cellId] ?? 0;
   const isPerformanceCheckOn = useStateFromPublishingSubject(performanceCheck$);
   const cell = cells[cellId];
   if (!cell) return null;
@@ -205,7 +205,8 @@ const CellNode = ({ data: { cellId, width, highlight } }: NodeProps<CellFlowNode
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiToolTip>
-      {isPerformanceCheckOn && <RunCountBadge cellId={cellId} />}
+      <RunningBorder isRunning={runtime.status === 'running'} runCount={runCount} />
+      {isPerformanceCheckOn && <RunCountBadge count={runCount} />}
       <Handle
         type="source"
         position={Position.Bottom}
