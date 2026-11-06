@@ -594,10 +594,11 @@ describe('EsServiceAccounts', () => {
       // Counted separately, since one rollback can strand more than one resource.
       expect(serviceAccountsMetrics.recordRollbackFailure).toHaveBeenCalledWith('token');
       expect(serviceAccountsMetrics.recordRollbackFailure).toHaveBeenCalledWith('account');
+      // The credential store's failure carries no status.
       expect(serviceAccountsMetrics.recordOperation).toHaveBeenCalledWith({
         operation: 'create',
         backend: 'stack',
-        errorType: expect.any(String),
+        errorType: '_OTHER',
       });
     });
 
@@ -634,6 +635,21 @@ describe('EsServiceAccounts', () => {
         expect.stringContaining('Failed to create service account [kibana/nightshift-relay]')
       );
       expect(credentialStore.set).not.toHaveBeenCalled();
+    });
+
+    it('counts a failed account write by the status Elasticsearch answered with', async () => {
+      esClient.asCurrentUser.transport.request
+        .mockResolvedValueOnce({})
+        .mockRejectedValueOnce(esError(400))
+        .mockResolvedValueOnce({}); // reconciliation read-back: nothing was committed
+
+      await expect(serviceAccounts.create(request, createParams)).rejects.toThrow();
+
+      expect(serviceAccountsMetrics.recordOperation).toHaveBeenCalledWith({
+        operation: 'create',
+        backend: 'stack',
+        errorType: '400',
+      });
     });
 
     // A rejected PUT does not prove Elasticsearch never committed it. Without the read-back the

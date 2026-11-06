@@ -5,13 +5,20 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import type { Meter } from '@opentelemetry/api';
 
 import { UIAM_ERROR_CODES } from '@kbn/core-security-server';
 
-import { getTokenExchangeErrorType, ServiceAccountsMetrics } from './metrics';
+import { ServiceAccountExchangeRefusedError } from './exchange_refused_error';
+import {
+  getOperationErrorType,
+  getTokenExchangeErrorType,
+  ServiceAccountsMetrics,
+} from './metrics';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
+import { securityMock } from '../mocks';
 
 const createMeter = () => {
   const instruments = new Map<string, { add: jest.Mock; record: jest.Mock }>();
@@ -145,11 +152,31 @@ describe('ServiceAccountsMetrics', () => {
       expect(duration()).toHaveBeenCalledWith(expect.any(Number), attributes);
     });
 
-    it('records the status of a refusal Kibana made in place of the exchange', async () => {
+    it('records an error code UIAM is not known to send as other', async () => {
+      await expect(
+        serviceAccountsMetrics.measureTokenExchange({ backend: 'uiam', trigger: 'initial' }, () =>
+          Promise.reject(exchangeError({ retryable: false, statusCode: 400, errorCode: '0xNEW' }))
+        )
+      ).rejects.toThrow();
+
+      expect(count()).toHaveBeenCalledWith(
+        1,
+        expect.objectContaining({ 'kibana.uiam.error.code': '_OTHER' })
+      );
+    });
+
+    it('records the reason and status of a refusal Kibana made in place of the exchange', async () => {
       await expect(
         serviceAccountsMetrics.measureTokenExchange(
           { backend: 'stack', trigger: 'self_call' },
-          () => Promise.reject(Boom.notFound('missing stored credential'))
+          () =>
+            Promise.reject(
+              new ServiceAccountExchangeRefusedError(
+                'account_not_found',
+                'missing stored credential',
+                404
+              )
+            )
         )
       ).rejects.toThrow('missing stored credential');
 
@@ -157,7 +184,7 @@ describe('ServiceAccountsMetrics', () => {
         'kibana.service_account.backend': 'stack',
         'kibana.service_account.token_exchange.trigger': 'self_call',
         outcome: 'failure',
-        'error.type': 'exchange_refused',
+        'error.type': 'account_not_found',
         'http.response.status_code': 404,
       });
     });
@@ -222,9 +249,44 @@ describe('getTokenExchangeErrorType', () => {
     );
   });
 
-  it('classifies a client error Kibana raised as a refusal, and anything else as other', () => {
+  it.each([
+    'account_id_invalid',
+    'account_not_found',
+    'account_replaced',
+    'credential_integrity',
+    'security_disabled',
+    'encryption_unavailable',
+  ] as const)('names the reason Kibana refused with: %s', (refusal) => {
+    expect(
+      getTokenExchangeErrorType(new ServiceAccountExchangeRefusedError(refusal, 'refused', 403))
+    ).toBe(refusal);
+  });
+
+  it('classifies a client error Kibana raised without a reason as a refusal, and anything else as other', () => {
     expect(getTokenExchangeErrorType(Boom.forbidden())).toBe('exchange_refused');
     expect(getTokenExchangeErrorType(Boom.internal())).toBe('_OTHER');
     expect(getTokenExchangeErrorType(new Error('unexpected'))).toBe('_OTHER');
+  });
+});
+
+describe('getOperationErrorType', () => {
+  it('names the status of a Boom error', () => {
+    expect(getOperationErrorType(Boom.conflict())).toBe('409');
+  });
+
+  it('names the status of an Elasticsearch error', () => {
+    const error = new errors.ResponseError(
+      securityMock.createApiResponse({ statusCode: 409, body: { error: 'conflict' } })
+    );
+    expect(getOperationErrorType(error)).toBe('409');
+  });
+
+  it.each([
+    ['a transport failure', new errors.ConnectionError('disconnected')],
+    ['an error with no status', new Error('unexpected')],
+    ['a value that is not an error', 'unexpected'],
+    ['no value', undefined],
+  ])('classifies %s as other', (_, error) => {
+    expect(getOperationErrorType(error)).toBe('_OTHER');
   });
 });

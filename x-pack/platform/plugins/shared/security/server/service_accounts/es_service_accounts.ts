@@ -41,6 +41,7 @@ import {
 } from './es_role_limits';
 import type { EsServiceAccountPrincipal } from './es_service_account_id';
 import { parseEsServiceAccountId } from './es_service_account_id';
+import { ServiceAccountExchangeRefusedError } from './exchange_refused_error';
 import type {
   CreateServiceAccountFakeRequestParams,
   ServiceAccountMintedToken,
@@ -1033,13 +1034,17 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     boundAt?: string
   ): Promise<ServiceAccountMintedToken> {
     if (!this.license.isEnabled()) {
-      throw Boom.forbidden(
-        'Cannot exchange a service account token: security features are disabled in Elasticsearch'
+      throw new ServiceAccountExchangeRefusedError(
+        'security_disabled',
+        'Cannot exchange a service account token: security features are disabled in Elasticsearch',
+        403
       );
     }
     if (!this.canEncrypt) {
-      throw Boom.forbidden(
-        'Cannot exchange a service account token: saved object encryption is not available. Set `xpack.encryptedSavedObjects.encryptionKey`.'
+      throw new ServiceAccountExchangeRefusedError(
+        'encryption_unavailable',
+        'Cannot exchange a service account token: saved object encryption is not available. Set `xpack.encryptedSavedObjects.encryptionKey`.',
+        403
       );
     }
 
@@ -1050,7 +1055,11 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       principal.name.length > SERVICE_ACCOUNT_NAME_MAX_LENGTH ||
       !SERVICE_ACCOUNT_NAME_REGEX.test(principal.name)
     ) {
-      throw Boom.badRequest('Invalid Elasticsearch service account ID.');
+      throw new ServiceAccountExchangeRefusedError(
+        'account_id_invalid',
+        'Invalid Elasticsearch service account ID.',
+        400
+      );
     }
 
     // Only the reads are wrapped. The refusals in between are Kibana's own, carry nothing from
@@ -1061,7 +1070,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     if (!credential) {
       const errorMessage = `Unable to exchange token for service account [${serviceAccountId}]: missing stored credential`;
       this.logger.error(errorMessage);
-      throw Boom.notFound(errorMessage);
+      throw new ServiceAccountExchangeRefusedError('account_not_found', errorMessage, 404);
     }
     const mismatches = [
       ['serviceAccountId', serviceAccountId, credential.serviceAccountId],
@@ -1080,7 +1089,11 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
           '; '
         )}).`
       );
-      throw Boom.forbidden('The stored service account credential is inconsistent.');
+      throw new ServiceAccountExchangeRefusedError(
+        'credential_integrity',
+        'The stored service account credential is inconsistent.',
+        403
+      );
     }
 
     // An account deleted and created again keeps its `{namespace}/{name}` id, so a binding left
@@ -1095,8 +1108,10 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
           `[${boundAt}], before the account was created at [${credential.createdAt}]. Bind the ` +
           'workload again to run it as this account.'
       );
-      throw Boom.forbidden(
-        'The workload was bound to an earlier service account with the same name.'
+      throw new ServiceAccountExchangeRefusedError(
+        'account_replaced',
+        'The workload was bound to an earlier service account with the same name.',
+        403
       );
     }
 

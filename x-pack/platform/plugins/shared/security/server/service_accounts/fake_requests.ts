@@ -285,7 +285,7 @@ export class ServiceAccountFakeRequests {
   async ensureFreshToken(
     request: KibanaRequest,
     maxAgeMs: number,
-    trigger: ServiceAccountRefreshTrigger = 'reauthenticate'
+    trigger: ServiceAccountRefreshTrigger
   ): Promise<string> {
     const entry = this.registry.get(request);
     if (!entry) {

@@ -1155,7 +1155,7 @@ describe('UiamServiceAccounts', () => {
 
         await expect(
           serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' })
-        ).rejects.toMatchObject({ output: { statusCode: 403 } });
+        ).rejects.toMatchObject({ refusal: 'security_disabled', output: { statusCode: 403 } });
 
         expect(mockUiam.exchangeServiceAccountToken).not.toHaveBeenCalled();
       });

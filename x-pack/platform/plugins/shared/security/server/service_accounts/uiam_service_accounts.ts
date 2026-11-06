@@ -25,6 +25,7 @@ import { ensureClusterPrivilege } from './cluster_privilege';
 import { parseCreateServiceAccountParams } from './create_params';
 import { ServiceAccountCredentialRefusedError } from './credential_refused_error';
 import { toDescriptionField } from './description_field';
+import { ServiceAccountExchangeRefusedError } from './exchange_refused_error';
 import type {
   CreateServiceAccountFakeRequestParams,
   ServiceAccountMintedToken,
@@ -454,8 +455,10 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
    */
   private async exchangeToken(serviceAccountId: string): Promise<ServiceAccountMintedToken> {
     if (!this.license.isEnabled()) {
-      throw Boom.forbidden(
-        'Cannot exchange a service account token: security features are disabled in Elasticsearch'
+      throw new ServiceAccountExchangeRefusedError(
+        'security_disabled',
+        'Cannot exchange a service account token: security features are disabled in Elasticsearch',
+        403
       );
     }
 

@@ -17,7 +17,10 @@ import {
 
 import { UIAM_ERROR_CODES } from '@kbn/core-security-server';
 
+import type { ServiceAccountExchangeRefusal } from './exchange_refused_error';
+import { ServiceAccountExchangeRefusedError } from './exchange_refused_error';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
+import { getErrorStatusCode } from '../errors';
 
 /**
  * Scope of every service account metric. Core's workload resolution metrics use the same scope, so
@@ -52,18 +55,31 @@ export type ServiceAccountAssumeErrorType =
   | 'account_mismatch'
   | ServiceAccountTokenExchangeErrorType;
 
+/** UIAM's answers about the account itself, keyed by its error code in `UIAM_ACCOUNT_ERROR_TYPES`. */
+type UiamAccountErrorType = 'account_not_found' | 'account_revoked' | 'account_access_denied';
+
 /**
- * Why a token exchange failed. `account_not_found`, `account_revoked` and `account_access_denied`
- * are UIAM's answers about the account itself. `exchange_unavailable` is a failure that may pass on
- * a retry, `exchange_rejected` an upstream refusal with no more specific reason, and
- * `exchange_refused` a refusal Kibana made before it called upstream.
+ * An upstream failure with no more specific reason. `exchange_unavailable` may pass on a retry,
+ * `exchange_rejected` will not.
+ */
+type UpstreamErrorType = 'exchange_unavailable' | 'exchange_rejected';
+
+/**
+ * Why a token exchange failed, grouped by who decided it:
+ *
+ * - {@link UiamAccountErrorType}: UIAM, about the account.
+ * - {@link ServiceAccountExchangeRefusal}: Kibana, before it called upstream. `account_not_found`
+ *   is in both groups, because Kibana holding no credential means the same as UIAM knowing no
+ *   account.
+ * - {@link UpstreamErrorType}: upstream, with no more specific reason.
+ * - `exchange_refused`: a client error Kibana raised without a refusal reason. Every refusal Kibana
+ *   makes has one, so this marks a new refusal that still needs one.
+ * - `_OTHER`: anything else.
  */
 export type ServiceAccountTokenExchangeErrorType =
-  | 'account_not_found'
-  | 'account_revoked'
-  | 'account_access_denied'
-  | 'exchange_unavailable'
-  | 'exchange_rejected'
+  | UiamAccountErrorType
+  | ServiceAccountExchangeRefusal
+  | UpstreamErrorType
   | 'exchange_refused'
   | '_OTHER';
 
@@ -76,11 +92,17 @@ const DURATION_BUCKET_BOUNDARIES = [
   10, 20,
 ];
 
-const UIAM_ACCOUNT_ERROR_TYPES: Readonly<Record<string, ServiceAccountTokenExchangeErrorType>> = {
+const UIAM_ACCOUNT_ERROR_TYPES: Readonly<Record<string, UiamAccountErrorType>> = {
   [UIAM_ERROR_CODES.ORGANIZATION_SERVICE_ACCOUNT_NOT_FOUND]: 'account_not_found',
   [UIAM_ERROR_CODES.ORGANIZATION_SERVICE_ACCOUNT_REVOKED]: 'account_revoked',
   [UIAM_ERROR_CODES.AUTHZ_DENY]: 'account_access_denied',
 };
+
+/**
+ * The UIAM error codes recorded as they are. Any other code is recorded as `_OTHER`, so an
+ * unexpected answer from UIAM cannot grow the attribute's cardinality.
+ */
+const KNOWN_UIAM_ERROR_CODES: ReadonlySet<string> = new Set(Object.values(UIAM_ERROR_CODES));
 
 /** Classifies a failed token exchange, or a refusal Kibana made in its place. */
 export const getTokenExchangeErrorType = (error: unknown): ServiceAccountTokenExchangeErrorType => {
@@ -91,6 +113,10 @@ export const getTokenExchangeErrorType = (error: unknown): ServiceAccountTokenEx
       return accountErrorType;
     }
     return error.retryable ? 'exchange_unavailable' : 'exchange_rejected';
+  }
+
+  if (error instanceof ServiceAccountExchangeRefusedError) {
+    return error.refusal;
   }
 
   if (Boom.isBoom(error) && error.output.statusCode < 500) {
@@ -111,9 +137,15 @@ const getStatusCode = (error: unknown): number | undefined => {
   return Boom.isBoom(error) ? error.output.statusCode : undefined;
 };
 
-/** The error type of a failed operation: its HTTP status when it has one, otherwise `_OTHER`. */
-export const getOperationErrorType = (error: unknown): string =>
-  Boom.isBoom(error) ? String(error.output.statusCode) : '_OTHER';
+/**
+ * The error type of a failed operation: its HTTP status when it has one, otherwise `_OTHER`. Reads
+ * the status of Elasticsearch errors too, which the stack backend lets through unwrapped.
+ */
+export const getOperationErrorType = (error: unknown): string => {
+  const statusCode =
+    typeof error === 'object' && error !== null ? getErrorStatusCode(error) : undefined;
+  return typeof statusCode === 'number' ? String(statusCode) : '_OTHER';
+};
 
 interface OperationParams {
   operation: ServiceAccountOperation;
@@ -275,7 +307,9 @@ export class ServiceAccountsMetrics {
         if (failure instanceof ServiceAccountTokenExchangeError) {
           attributes['kibana.service_account.token_exchange.retryable'] = failure.retryable;
           if (failure.errorCode !== undefined) {
-            attributes['kibana.uiam.error.code'] = failure.errorCode;
+            attributes['kibana.uiam.error.code'] = KNOWN_UIAM_ERROR_CODES.has(failure.errorCode)
+              ? failure.errorCode
+              : '_OTHER';
           }
         }
       }
