@@ -14,6 +14,7 @@ import {
   EMPTY_STEP_DURATIONS,
   formatStepDurationLabel,
   getDurationGutterWidth,
+  getStepDurationShare,
   getStepDurationTone,
 } from './build_step_durations';
 
@@ -454,6 +455,33 @@ describe('getStepDurationTone', () => {
   it('clamps ratio at 1 when totalMs exceeds denominator', () => {
     // totalMs > denominator can happen when children run in parallel.
     expect(getStepDurationTone(2000, 1000)).toBe('high');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getStepDurationShare
+// ---------------------------------------------------------------------------
+
+describe('getStepDurationShare', () => {
+  it('returns null when denominatorMs is 0 (run in flight)', () => {
+    expect(getStepDurationShare(1000, 0)).toBeNull();
+  });
+
+  it('returns the whole-number percentage of the run', () => {
+    expect(getStepDurationShare(500, 1000)).toBe(50);
+    expect(getStepDurationShare(1540, 1719)).toBe(90);
+  });
+
+  it('returns 100 when the step spans the whole run', () => {
+    expect(getStepDurationShare(1000, 1000)).toBe(100);
+  });
+
+  it('rounds a sub-percent share down to 0', () => {
+    expect(getStepDurationShare(3, 1000)).toBe(0);
+  });
+
+  it('returns null when the summed time exceeds the run (overlapping runs)', () => {
+    expect(getStepDurationShare(1800, 1000)).toBeNull();
   });
 });
 

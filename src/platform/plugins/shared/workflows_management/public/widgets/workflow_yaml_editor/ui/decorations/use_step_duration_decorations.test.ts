@@ -626,7 +626,28 @@ describe('useStepDurationDecorations', () => {
       expect(tipEl.textContent).toContain('3 completed runs');
     });
 
-    it('hides the hovered tooltip when a poll leaves its step with a single run', () => {
+    it('trims the hovered tooltip in place when a poll leaves its step with a single run', () => {
+      const editor = createMockEditor();
+      const extEditor = editor as ReturnType<typeof createMockEditor>;
+      const { store } = renderHookWithProviders(editor);
+
+      act(() => {
+        store.dispatch(setExecution(makeMultiRunExecution()));
+      });
+      hoverStepA(extEditor);
+
+      const tipEl = document.body.querySelector('div[style*="position: fixed"]') as HTMLElement;
+      expect(tipEl.textContent).toContain('2 completed runs');
+
+      act(() => {
+        store.dispatch(setExecution(makeExecution()));
+      });
+
+      expect(tipEl.style.display).toBe('block');
+      expect(tipEl.textContent).toBe('50% of total run time');
+    });
+
+    it('hides the hovered tooltip when a poll leaves its step with nothing to show', () => {
       const editor = createMockEditor();
       const extEditor = editor as ReturnType<typeof createMockEditor>;
       const { store } = renderHookWithProviders(editor);
@@ -639,8 +660,9 @@ describe('useStepDurationDecorations', () => {
       const tipEl = document.body.querySelector('div[style*="position: fixed"]') as HTMLElement;
       expect(tipEl.style.display).toBe('block');
 
+      // Single run and no execution duration: no repeated-step summary and no share.
       act(() => {
-        store.dispatch(setExecution(makeExecution()));
+        store.dispatch(setExecution(makeExecution(undefined, { duration: null })));
       });
 
       expect(tipEl.style.display).toBe('none');
@@ -680,25 +702,113 @@ describe('useStepDurationDecorations', () => {
       expect(tipEl.textContent).not.toContain('not loaded');
     });
 
-    it('does not show a tooltip for single-run steps', () => {
+    const getTipEl = () =>
+      document.body.querySelector('div[style*="position: fixed"]') as HTMLElement | null;
+
+    it('shows the share of the run for a single-run chip', () => {
       const editor = createMockEditor();
       const extEditor = editor as ReturnType<typeof createMockEditor>;
       const { store } = renderHookWithProviders(editor);
 
-      // Single run only.
+      // step-a: one 500ms run out of the 1000ms execution.
       act(() => {
         store.dispatch(setExecution(makeExecution()));
       });
+      hoverStepA(extEditor);
+
+      const tipEl = getTipEl();
+      expect(tipEl?.style.display).toBe('block');
+      expect(tipEl?.textContent).toBe('50% of total run time');
+    });
+
+    it('shows the share alongside the breakdown for a repeated step', () => {
+      const editor = createMockEditor();
+      const extEditor = editor as ReturnType<typeof createMockEditor>;
+      const { store } = renderHookWithProviders(editor);
 
       act(() => {
-        extEditor._fireMouseMove({
-          target: { type: GUTTER_LINE_DECORATIONS_TYPE, position: { lineNumber: 5 } },
-          event: { browserEvent: { clientX: 100, clientY: 100 } },
-        });
+        store.dispatch(setExecution(makeMultiRunExecution()));
       });
+      hoverStepA(extEditor);
 
-      const tipEl = document.body.querySelector('div[style*="position: fixed"]') as HTMLElement;
-      // Either there's no tip element yet, or it's hidden.
+      const tipEl = getTipEl();
+      expect(tipEl?.textContent).toContain('2 completed runs');
+      expect(tipEl?.textContent).toContain('100% of total run time');
+    });
+
+    it('reports a sub-percent share as <1%', () => {
+      const editor = createMockEditor();
+      const extEditor = editor as ReturnType<typeof createMockEditor>;
+      const { store } = renderHookWithProviders(editor);
+
+      act(() => {
+        store.dispatch(
+          setExecution(
+            makeExecution([
+              createMockStepExecutionDto({
+                stepId: 'step-a',
+                stepType: 'action',
+                executionTimeMs: 3,
+              }),
+            ])
+          )
+        );
+      });
+      hoverStepA(extEditor);
+
+      expect(getTipEl()?.textContent).toBe('<1% of total run time');
+    });
+
+    it('omits the share when overlapping runs add up to more than the run itself', () => {
+      const editor = createMockEditor();
+      const extEditor = editor as ReturnType<typeof createMockEditor>;
+      const { store } = renderHookWithProviders(editor);
+
+      // 400 + 600 + 800 = 1800ms of step time inside a 1000ms execution.
+      act(() => {
+        store.dispatch(
+          setExecution(
+            makeExecution([
+              createMockStepExecutionDto({
+                stepId: 'step-a',
+                stepType: 'action',
+                executionTimeMs: 400,
+              }),
+              createMockStepExecutionDto({
+                id: 'doc-2',
+                stepId: 'step-a',
+                stepType: 'action',
+                executionTimeMs: 600,
+              }),
+              createMockStepExecutionDto({
+                id: 'doc-3',
+                stepId: 'step-a',
+                stepType: 'action',
+                executionTimeMs: 800,
+              }),
+            ])
+          )
+        );
+      });
+      hoverStepA(extEditor);
+
+      const tipEl = getTipEl();
+      expect(tipEl?.textContent).toContain('3 completed runs');
+      expect(tipEl?.textContent).not.toContain('%');
+    });
+
+    it('does not show a tooltip for a single-run step while the run has no total duration yet', () => {
+      const editor = createMockEditor();
+      const extEditor = editor as ReturnType<typeof createMockEditor>;
+      const { store } = renderHookWithProviders(editor);
+
+      // In flight: no execution duration, so there is no share and nothing to show.
+      act(() => {
+        store.dispatch(setExecution(makeExecution(undefined, { duration: null })));
+      });
+      hoverStepA(extEditor);
+
+      const tipEl = getTipEl();
       expect(!tipEl || tipEl.style.display === 'none' || tipEl.style.display === '').toBe(true);
     });
 

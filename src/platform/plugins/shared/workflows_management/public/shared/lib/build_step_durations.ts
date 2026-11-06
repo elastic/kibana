@@ -123,6 +123,16 @@ export const getStepDurationTone = (totalMs: number, denominatorMs: number): Ste
   return 'none';
 };
 
+/**
+ * Returns the step's whole-number share (0–100) of the execution's duration, or null when a
+ * percentage would mislead: the run is still in flight (`denominatorMs` is 0), or the step's
+ * summed time exceeds the run's wall-clock because its runs overlapped.
+ */
+export const getStepDurationShare = (totalMs: number, denominatorMs: number): number | null => {
+  if (denominatorMs <= 0 || totalMs > denominatorMs) return null;
+  return Math.round((totalMs / denominatorMs) * 100);
+};
+
 // Per-character width estimate for the 11px tabular-nums chip font, plus 6px of horizontal
 // padding (3px each side) and the lane's 4px right padding. The floor/ceiling prevent the lane
 // from being either too narrow (clipping) or absurdly wide.
