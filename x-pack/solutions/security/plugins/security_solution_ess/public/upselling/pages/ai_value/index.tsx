@@ -10,8 +10,8 @@ import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@
 import { AssistantBeacon } from '@kbn/ai-assistant-icon';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { AppHeader } from '@kbn/app-header';
-import { useKibana } from '@kbn/security-solution-plugin/public/common/lib/kibana';
 import type { UpsellingPageProps } from '@kbn/security-solution-upselling/service';
+import { useKibana } from '../../../common/services';
 import { UpgradeActions } from '../attack_discovery/upgrade_actions';
 import * as i18n from './translations';
 
