@@ -153,7 +153,7 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
   // the padding leaves, so the end padding is solved for an end margin of `reservedEnd`: none while
   // centring leaves enough, growing while the cells shift toward the start, then exactly
   // `reservedEnd` once they shrink.
-  const reservedEnd = `(((${size.s} + ${size.xxxxl}) + (${size.m} + ${size.xxl} + ${size.m})) / 2)`;
+  const reservedEnd = `(((${size.s} + ${size.xxxxl}) + (${size.m} + ${size.xxl} + ${size.m})) / 2 - 2px)`;
   const sectionCss = css`
     padding-inline-end: max(
       ${size.base},
