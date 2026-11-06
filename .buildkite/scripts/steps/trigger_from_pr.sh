@@ -2,7 +2,10 @@
 
 set -euo pipefail
 
-echo "--- Entity Store Performance Tests Pipeline"
+# Usage: trigger_from_pr.sh <pipeline-slug>
+PIPELINE_SLUG="$1"
+
+echo "--- Trigger $PIPELINE_SLUG"
 
 # The Github env vars need to be passed along manually
 # GITHUB_PR_* is used to avoid any sensitive vars being passed along
@@ -18,7 +21,7 @@ KIBANA_BUILD_ID_ARG="${KIBANA_BUILD_ID:-}"
 # space-separated string argument that it will split. This matches the pattern
 # used in trigger_pr.sh. Values should not contain spaces.
 node .buildkite/scripts/steps/trigger_pipeline.ts \
-  kibana-entity-store-performance-from-pr \
+  "$PIPELINE_SLUG" \
   "$BUILDKITE_BRANCH" \
   "$BUILDKITE_COMMIT" \
   "$KIBANA_BUILD_ID_ARG" \

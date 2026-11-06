@@ -102,15 +102,6 @@ EOF
 
 # Set up misc keys
 {
-  EC_API_KEY="$(vault_get kibana-ci-cloud-deploy pr_deploy_api_key)"
-  export EC_API_KEY
-
-  PROJECT_API_KEY="$(vault_get kibana-ci-project-deploy pr_deploy_api_key)"
-  export PROJECT_API_KEY
-
-  PROJECT_API_DOMAIN="$(vault_get kibana-ci-project-deploy pr_deploy_domain)"
-  export PROJECT_API_DOMAIN
-
   DEPLOY_TAGGER_SLACK_WEBHOOK_URL=${DEPLOY_TAGGER_SLACK_WEBHOOK_URL:-"$(vault_get kibana-serverless-release-tools DEPLOY_TAGGER_SLACK_WEBHOOK_URL)"}
   export DEPLOY_TAGGER_SLACK_WEBHOOK_URL
 
@@ -185,21 +176,6 @@ EOF
   fi
 }
 
-# Set up GCS Service Account for CDN
-{
-  GCS_SA_CDN_EMAIL="$(vault_get gcs-sa-cdn-prod email)"
-  export GCS_SA_CDN_EMAIL
-
-  GCS_SA_CDN_BUCKET="$(vault_get gcs-sa-cdn-prod bucket)"
-  export GCS_SA_CDN_BUCKET
-
-  GCS_SA_CDN_URL="$(vault_get gcs-sa-cdn-prod cdn)"
-  export GCS_SA_CDN_URL
-
-  GCS_SA_CDN_AUDIENCE="$(vault_get gcs-sa-cdn-prod audience)"
-  export GCS_SA_CDN_AUDIENCE
-}
-
 # Set up the workflow step-schema CDN publisher key.
 {
   if [[ "$BUILDKITE_PIPELINE_SLUG" == "kibana-artifacts-container-image" && "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
@@ -243,24 +219,12 @@ EOF
   export GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES=1
 }
 
-# Acquire credentials for legacy vault if needed
-{
-  VAULT_ROLE_ID="$(vault_get kibana-buildkite-vault-credentials role-id)"
-  export VAULT_ROLE_ID
-  VAULT_SECRET_ID="$(vault_get kibana-buildkite-vault-credentials secret-id)"
-  export VAULT_SECRET_ID
-}
-
 # Set up EIS Cloud Connected Mode (CCM) API key
-# Note: This secret is in the legacy vault, requires approle authentication
 {
   if [[ "${FTR_EIS_CCM:-}" =~ ^(1|true)$ ]]; then
     echo "FTR_EIS_CCM was set - exposing EIS CCM API key"
-    VAULT_TOKEN_COPY="${VAULT_TOKEN:-}"
-    VAULT_TOKEN=$(VAULT_ADDR=$LEGACY_VAULT_ADDR vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
-    VAULT_ADDR=$LEGACY_VAULT_ADDR vault login -no-print "$VAULT_TOKEN"
-    export KIBANA_EIS_CCM_API_KEY="$(vault read -address=$LEGACY_VAULT_ADDR -field key secret/kibana-issues/dev/inference/kibana-eis-ccm)"
-    VAULT_TOKEN="$VAULT_TOKEN_COPY"
+    KIBANA_EIS_CCM_API_KEY="$(vault_get kibana-eis-ccm key)"
+    export KIBANA_EIS_CCM_API_KEY
   fi
 }
 
