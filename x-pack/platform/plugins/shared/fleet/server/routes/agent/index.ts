@@ -1672,7 +1672,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
       },
       summary: `Restart an agent`,
-      description: `Restart an Elastic Agent. The request fails when the agent is inactive, on a version earlier than 9.6.0, or enrolled in a hosted agent policy.`,
+      description: `Restart an Elastic Agent. The request fails when the agent is inactive, on a version earlier than 9.6.0, or enrolled in a hosted agent policy. It also fails with a 409 when the agent already has a pending restart action, unless \`force\` is set.`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
         availability: {
@@ -1693,6 +1693,10 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
             },
             400: {
               description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+            409: {
+              description: 'A conflict occurred: the agent already has a pending restart action.',
               body: genericErrorResponse,
             },
           },
@@ -1743,7 +1747,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
       },
       summary: `Bulk restart agents`,
-      description: `Restart multiple Elastic Agents. Agents that are enrolled in a hosted policy or are on a version earlier than 9.6.0 are excluded from the action and receive individual error results.`,
+      description: `Restart multiple Elastic Agents. Agents that are enrolled in a hosted policy, are on a version earlier than 9.6.0, or already have a pending restart action (unless \`force\` is set) are excluded from the action and receive individual error results.`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
         availability: {
