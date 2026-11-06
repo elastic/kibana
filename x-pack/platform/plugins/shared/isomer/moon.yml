@@ -42,6 +42,8 @@ dependsOn:
   - '@kbn/rison'
   - '@kbn/data-views-plugin'
   - '@kbn/field-formats-common'
+  - '@kbn/lens-common'
+  - '@kbn/lens-embeddable-utils'
 tags:
   - plugin
   - prod

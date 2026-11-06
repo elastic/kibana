@@ -30,6 +30,8 @@
     "@kbn/ui-theme",
     "@kbn/rison",
     "@kbn/data-views-plugin",
-    "@kbn/field-formats-common"
+    "@kbn/field-formats-common",
+    "@kbn/lens-common",
+    "@kbn/lens-embeddable-utils"
   ]
 }
