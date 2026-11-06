@@ -7,7 +7,10 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ConnectSourcesGrid } from '../../../components/entities/sandbox_connector/connect_sources_grid';
+import {
+  ConnectSourcesGrid,
+  isTelemetryType,
+} from '../../../components/entities/sandbox_connector/connect_sources_grid';
 import { AddDataCard } from '../../../components/entities/sandbox_connector/add_data_card';
 
 export const ADD_DATA_TITLE = i18n.translate('xpack.nightshift.onboarding.addData.title', {
@@ -18,7 +21,7 @@ export const ADD_DATA_TITLE = i18n.translate('xpack.nightshift.onboarding.addDat
 export function OnboardingAddDataStep(): React.ReactElement {
   return (
     <div data-test-subj="nightshiftOnboardingAddDataStep">
-      <ConnectSourcesGrid group="telemetry" trailing={<AddDataCard />} />
+      <ConnectSourcesGrid filter={isTelemetryType} trailing={<AddDataCard />} />
     </div>
   );
 }

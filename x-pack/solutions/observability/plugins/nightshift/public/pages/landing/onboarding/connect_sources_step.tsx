@@ -7,7 +7,10 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ConnectSourcesGrid } from '../../../components/entities/sandbox_connector/connect_sources_grid';
+import {
+  ConnectSourcesGrid,
+  isAdditionalType,
+} from '../../../components/entities/sandbox_connector/connect_sources_grid';
 
 export const CONNECT_SOURCES_TITLE = i18n.translate(
   'xpack.nightshift.onboarding.connectSources.title',
@@ -18,7 +21,7 @@ export const CONNECT_SOURCES_TITLE = i18n.translate(
 export function OnboardingConnectSourcesStep(): React.ReactElement {
   return (
     <div data-test-subj="nightshiftOnboardingConnectSourcesStep">
-      <ConnectSourcesGrid group="additional" />
+      <ConnectSourcesGrid filter={isAdditionalType} />
     </div>
   );
 }

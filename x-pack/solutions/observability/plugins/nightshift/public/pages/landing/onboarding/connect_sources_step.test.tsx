@@ -11,9 +11,14 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { CONNECT_SOURCES_TITLE, OnboardingConnectSourcesStep } from './connect_sources_step';
 
 jest.mock('../../../components/entities/sandbox_connector/connect_sources_grid', () => ({
-  ConnectSourcesGrid: ({ group, trailing }: { group: string; trailing?: React.ReactNode }) => (
-    <div data-test-subj={`grid-${group}`}>{trailing}</div>
-  ),
+  ...jest.requireActual('../../../components/entities/sandbox_connector/connect_sources_grid'),
+  ConnectSourcesGrid: ({
+    filter,
+    trailing,
+  }: {
+    filter: (id: string) => boolean;
+    trailing?: React.ReactNode;
+  }) => <div data-test-subj={`grid-${filter.name}`}>{trailing}</div>,
 }));
 
 describe('OnboardingConnectSourcesStep', () => {
@@ -28,6 +33,6 @@ describe('OnboardingConnectSourcesStep', () => {
       </I18nProvider>
     );
 
-    expect(screen.getByTestId('grid-additional')).toBeEmptyDOMElement();
+    expect(screen.getByTestId('grid-isAdditionalType')).toBeEmptyDOMElement();
   });
 });

@@ -11,9 +11,14 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { ADD_DATA_TITLE, OnboardingAddDataStep } from './add_data_step';
 
 jest.mock('../../../components/entities/sandbox_connector/connect_sources_grid', () => ({
-  ConnectSourcesGrid: ({ group, trailing }: { group: string; trailing?: React.ReactNode }) => (
-    <div data-test-subj={`grid-${group}`}>{trailing}</div>
-  ),
+  ...jest.requireActual('../../../components/entities/sandbox_connector/connect_sources_grid'),
+  ConnectSourcesGrid: ({
+    filter,
+    trailing,
+  }: {
+    filter: (id: string) => boolean;
+    trailing?: React.ReactNode;
+  }) => <div data-test-subj={`grid-${filter.name}`}>{trailing}</div>,
 }));
 jest.mock('../../../components/entities/sandbox_connector/add_data_card', () => ({
   AddDataCard: () => <div data-test-subj="addDataCardStub" />,
@@ -31,7 +36,7 @@ describe('OnboardingAddDataStep', () => {
       </I18nProvider>
     );
 
-    expect(screen.getByTestId('grid-telemetry')).toBeInTheDocument();
+    expect(screen.getByTestId('grid-isTelemetryType')).toBeInTheDocument();
     expect(screen.getByTestId('addDataCardStub')).toBeInTheDocument();
   });
 });

@@ -163,7 +163,7 @@ describe('NightshiftOnboarding', () => {
     };
 
     it('is optional while current and skippable while nothing is connected there', () => {
-      mockConnectors({ '.new_relic': 1, '.github': 0 }, { '.github': 1, '.http': 2 });
+      mockConnectors({ '.new_relic': 1, '.http': 2, '.github': 0 }, { '.github': 1 });
 
       goToSources();
 

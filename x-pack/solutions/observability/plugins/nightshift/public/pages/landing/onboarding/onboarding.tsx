@@ -47,7 +47,10 @@ import { OnboardingFirstInvestigationStep } from './first_investigation_step';
 import { OnboardingAutomationStep } from './automation_step';
 import { useOnboarding, useStartOnboardingSuggestions } from './use_onboarding';
 import { useConnectorsByType } from '../../../data/sandbox_connectors/use_connectors_by_type';
-import { isTelemetryConnectorType } from '../../../components/entities/sandbox_connector/connect_sources_grid';
+import {
+  isAdditionalType,
+  isTelemetryType,
+} from '../../../components/entities/sandbox_connector/connect_sources_grid';
 
 /** A step the user went back to; otherwise the step follows from the onboarding state. */
 type StepOverride = 'addData' | 'connectSources' | 'investigate' | undefined;
@@ -127,13 +130,13 @@ export function NightshiftOnboarding({
   const isConnected = execution != null;
   // A source is connected once a connector of a type offered on the step is assigned to the
   // agent: creating one from a card assigns it; a preconfigured one has to be assigned by hand.
-  const hasTelemetrySource = connectorGroups.some(
-    ({ actionType, assignedCount }) => isTelemetryConnectorType(actionType.id) && assignedCount > 0
-  );
-  // Connect other sources is optional: it can be skipped, or proceeded from once one is connected.
-  const hasAdditionalSource = connectorGroups.some(
-    ({ actionType, assignedCount }) => !isTelemetryConnectorType(actionType.id) && assignedCount > 0
-  );
+  const hasSourceOf = (isOfType: (actionTypeId: string) => boolean) =>
+    connectorGroups.some(
+      ({ actionType, assignedCount }) => isOfType(actionType.id) && assignedCount > 0
+    );
+  // Proceed on Add data needs a telemetry source; Connect other sources can be skipped without one.
+  const hasTelemetrySource = hasSourceOf(isTelemetryType);
+  const hasAdditionalSource = hasSourceOf(isAdditionalType);
 
   // A new execution (setup changed, or a retry) ends any detour.
   const [lastExecutionId, setLastExecutionId] = useState(execution?.execution_id);
@@ -264,6 +267,7 @@ export function NightshiftOnboarding({
         </EuiButton>
       )
     ) : step === 'connectSources' ? (
+      // The first pass starts looking for first investigations; a revisit just returns to them.
       <EuiButton
         fill={hasAdditionalSource}
         fullWidth
