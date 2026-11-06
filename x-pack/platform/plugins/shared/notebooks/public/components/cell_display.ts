@@ -15,6 +15,7 @@ export const TYPE_ICONS: Record<CellType, string> = {
   esql: 'database',
   chart: 'visBarVertical',
   custom: 'sparkles',
+  vega: 'chartArea',
   code: 'code',
   markdown: 'text',
   input: 'controls',
@@ -24,6 +25,7 @@ const TYPE_LABELS: Record<NewCellKind, string> = {
   esql: i18n.translate('xpack.notebook.cell.type.esql', { defaultMessage: 'ES|QL' }),
   chart: i18n.translate('xpack.notebook.cell.type.chart', { defaultMessage: 'Chart' }),
   custom: i18n.translate('xpack.notebook.cell.type.custom', { defaultMessage: 'Custom' }),
+  vega: i18n.translate('xpack.notebook.cell.type.vega', { defaultMessage: 'Vega' }),
   code: i18n.translate('xpack.notebook.cell.type.code', { defaultMessage: 'JavaScript' }),
   markdown: i18n.translate('xpack.notebook.cell.type.markdown', { defaultMessage: 'Markdown' }),
   'input:time': i18n.translate('xpack.notebook.cell.type.time', {

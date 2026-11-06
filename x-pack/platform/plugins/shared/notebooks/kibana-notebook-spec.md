@@ -64,6 +64,7 @@ type CellDefinition =
   | { id: string; name: string; type: 'esql'; runMode: RunMode; query: string }
   | { id: string; name: string; type: 'chart'; runMode: RunMode; sourceCell: string /* cell id */; lensAttributes: LensAttributes; height?: number }
   | { id: string; name: string; type: 'markdown'; content: string }
+  | { id: string; name: string; type: 'vega'; runMode: RunMode; sourceCell: string | null; spec: string /* JSON, max 100,000 chars */; height?: number }
   | { id: string; name: string; type: 'code'; runMode: RunMode; code: string /* JavaScript, max 100,000 chars */ }
   | { id: string; name: string; type: 'input'; input: InputDefinition };
 
@@ -77,7 +78,7 @@ Rules:
 
 - **Edges are never stored**; they are derived (see [References](#references-and-edges)).
 - `lensAttributes` are stored whole, with the injected `table` stripped before save.
-- Display cells (chart, custom) store `height` only when the user drags them taller than their default (300px, or 160px for metric charts); the default is the minimum, and the height is capped at 5000px.
+- Display cells (chart, custom, Vega) store `height` only when the user drags them taller than their default (300px, or 160px for metric charts); the default is the minimum, and the height is capped at 5000px.
 - Current input values are runtime-only; only `defaultValue` persists.
 - No `layout` field; the app builder (stretch) adds it in a later model version.
 - New notebooks are created with one pinned time input (`now-7d/d` → `now`).
@@ -100,6 +101,7 @@ Cells reference each other by name in text, Hex-style. Edges are derived from:
 - **ES|QL cell** → every named `?param` in `query` (extract via the ES|QL AST from `@kbn/esql-language`; regex fallback acceptable).
 - **Dropdown input** → named `?param`s in its `optionsQuery` (typically `?_tstart`/`?_tend`).
 - **Chart cell** → `sourceCell` (by **id**, chosen from a Source dropdown listing ES|QL cells by name).
+- **Vega cell** → `sourceCell`, like a chart cell.
 - **Markdown** → none (static). Stretch: `{{name}}` / `{{name.column}}` references parsed from `content`.
 - **Code cell** → every free identifier in `code` that matches an exposed name (input params, ES|QL cell names, other code cells' exports). A lightweight tokenizer skips comments, strings, template text, property access (`a.b`) and object keys; it is not a full parser.
 
@@ -164,6 +166,17 @@ Observable-style cells that run plain JavaScript in the page (POC: no sandbox, n
 - The body runs as an async function, so top-level `await` works. `console.log|info|warn|error|debug` calls are captured (and still forwarded to the browser console) and shown in a collapsible DevTools-style console under the editor; an error keeps the logs written before it. Export values are not displayed; the footer lists their names.
 - Code cells are notebook-only: they have no "Add to app" action, the default app skips them, and an app panel pointing at one renders nothing.
 - Edits run on Run/Cmd+Enter, like ES|QL. `memoKey = objectHash({ code, parents })`, where an input parent contributes its value and other parents their own `memoKey`.
+
+## Vega cells
+
+A Vega or Vega-Lite spec over an ES|QL cell's results.
+
+- **Language** is chosen by the spec's `$schema`: one mentioning `vega-lite` is compiled with `vega-lite`, anything else is Vega.
+- **Data**: the source cell's rows, as records keyed by column name, are the dataset `table`. A Vega-Lite spec without `data` reads it by default (`datasets.table`); a Vega spec gets a `table` entry added, or values filled into a `table` entry that has no `values`, `url` or `source`. A spec can still declare its own data.
+- Like charts, the cell never fetches: its run takes the source output. Spec edits save to the cell 400 ms after typing stops and re-render without propagating.
+- Rendering lazy-loads `vega`/`vega-lite` and evaluates expressions with `vega-interpreter`, so Kibana's CSP (no `unsafe-eval`) holds. The view is sized to the cell unless the spec sets `width` or `height`, and axes and legends take EUI text and border colours.
+- While the spec is empty, **Start from the results** writes a Vega-Lite bar chart of the first category column against the first numeric column (or a row count).
+- Vega cells can be added to apps.
 
 ## Running ES|QL
 

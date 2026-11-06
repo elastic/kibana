@@ -15,6 +15,7 @@ import type {
   ChartCellDefinition,
   CodeCellDefinition,
   CustomCellDefinition,
+  VegaCellDefinition,
   EsqlCellDefinition,
   InputCellDefinition,
 } from '../../common/types';
@@ -47,6 +48,7 @@ const EXECUTION_FIELDS: {
   esql: ['runMode'],
   chart: ['sourceCell', 'runMode'],
   custom: ['dataSource', 'sourceCell', 'runMode'],
+  vega: ['sourceCell', 'runMode'],
   code: ['runMode'],
   input: ['input', 'name'],
   markdown: [],
@@ -333,6 +335,7 @@ export class NotebookScheduler {
           : this.evaluateEsql({ ...cell, query }, forced, signal);
       }
       case 'chart':
+      case 'vega':
         return this.evaluateSourced(cell, forced);
       case 'code':
         return this.evaluateCode(cell, forced, signal);
@@ -460,9 +463,9 @@ export class NotebookScheduler {
     return Object.fromEntries(available.filter(([name]) => referenced.has(name)));
   }
 
-  /** Charts and custom cells take their source cell's table as their own output. */
+  /** Charts, custom and Vega cells take their source cell's table as their own output. */
   private evaluateSourced(
-    { id, sourceCell, runMode }: ChartCellDefinition | CustomCellDefinition,
+    { id, sourceCell, runMode }: ChartCellDefinition | CustomCellDefinition | VegaCellDefinition,
     forced: boolean
   ): void {
     const source = sourceCell === null ? undefined : this.runtime(sourceCell);

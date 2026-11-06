@@ -17,7 +17,7 @@ const getDescription = ({ key, isFixed }: CellOutput): string | undefined => {
   switch (key) {
     case 'table':
       return i18n.translate('xpack.notebook.output.tableDescription', {
-        defaultMessage: 'The results of this query. Charts and dropdowns can use them as data.',
+        defaultMessage: 'The results of the query.',
       });
     case 'value':
       return i18n.translate('xpack.notebook.output.valueDescription', {

@@ -152,7 +152,11 @@ export const buildGraph = (
       );
       return;
     }
-    if (cell.type === 'chart' || (cell.type === 'custom' && getOwnQuery(cell) === undefined)) {
+    if (
+      cell.type === 'chart' ||
+      cell.type === 'vega' ||
+      (cell.type === 'custom' && getOwnQuery(cell) === undefined)
+    ) {
       const { sourceCell } = cell;
       const source = sourceCell === null ? undefined : cells[sourceCell];
       if (sourceCell !== null && !source) addError(cell.id, 'The source cell no longer exists');

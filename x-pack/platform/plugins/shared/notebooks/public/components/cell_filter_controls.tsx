@@ -49,6 +49,10 @@ const FILTER_TYPES: ReadonlyArray<{ type: CellType; label: string }> = [
     label: i18n.translate('xpack.notebook.cellFilter.type.custom', { defaultMessage: 'Custom' }),
   },
   {
+    type: 'vega',
+    label: i18n.translate('xpack.notebook.cellFilter.type.vega', { defaultMessage: 'Vega' }),
+  },
+  {
     type: 'code',
     label: i18n.translate('xpack.notebook.cellFilter.type.code', {
       defaultMessage: 'JavaScript',

@@ -10,7 +10,11 @@ import { EuiResizableButton } from '@elastic/eui';
 import { css, type SerializedStyles } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { MAX_CELL_HEIGHT } from '../../common/constants';
-import type { ChartCellDefinition, CustomCellDefinition } from '../../common/types';
+import type {
+  ChartCellDefinition,
+  CustomCellDefinition,
+  VegaCellDefinition,
+} from '../../common/types';
 import { useNotebook } from './notebook_context';
 
 const KEYBOARD_STEP = 20;
@@ -101,7 +105,7 @@ interface CellResize {
 
 /** The cell's saved display height, which the user can drag taller but never below `defaultHeight`. */
 export const useCellResize = (
-  cell: ChartCellDefinition | CustomCellDefinition,
+  cell: ChartCellDefinition | CustomCellDefinition | VegaCellDefinition,
   defaultHeight: number
 ): CellResize => {
   const { store } = useNotebook();
@@ -113,7 +117,7 @@ export const useCellResize = (
 
   const save = (next: number) =>
     store.updateCell(cell.id, (current) =>
-      current.type === 'chart' || current.type === 'custom'
+      current.type === 'chart' || current.type === 'custom' || current.type === 'vega'
         ? { ...current, height: next === defaultHeight ? undefined : next }
         : current
     );

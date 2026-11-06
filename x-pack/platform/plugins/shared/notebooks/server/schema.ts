@@ -20,6 +20,7 @@ export const MAX_CELLS = 200;
 export const MAX_QUERY_LENGTH = 20_000;
 export const MAX_MARKDOWN_LENGTH = 100_000;
 export const MAX_CODE_LENGTH = 100_000;
+export const MAX_VEGA_SPEC_LENGTH = 100_000;
 export const MAX_LENS_ATTRIBUTES_LENGTH = 200_000;
 const MAX_ID_LENGTH = 256;
 const MAX_NAME_LENGTH = 256;
@@ -117,6 +118,14 @@ const cellSchema = schema.discriminatedUnion('type', [
     sourceCell: schema.nullable(idSchema),
     query: schema.maybe(querySchema),
     template: schema.string({ maxLength: CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH }),
+    height: cellHeightSchema,
+  }),
+  schema.object({
+    ...cellBaseProps,
+    type: schema.literal('vega'),
+    runMode: runModeSchema,
+    sourceCell: schema.nullable(idSchema),
+    spec: schema.string({ maxLength: MAX_VEGA_SPEC_LENGTH }),
     height: cellHeightSchema,
   }),
   schema.object({

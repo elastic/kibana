@@ -39,6 +39,7 @@ import {
 } from './notebook_context';
 import { FloatingRunControls } from './floating_run_controls';
 import { NotebookHeader } from './notebook_header';
+import { VegaCell } from './vega_cell';
 import { getCellElementId } from './cell_display';
 import { AppFlyout } from './app_flyout';
 import { GraphFlyout } from './graph_flyout';
@@ -51,6 +52,8 @@ const CellView = ({ cell }: { cell: CellDefinition }) => {
       return <ChartCell cell={cell} />;
     case 'custom':
       return <CustomCell cell={cell} />;
+    case 'vega':
+      return <VegaCell cell={cell} />;
     case 'code':
       return <CodeCell cell={cell} />;
     case 'markdown':

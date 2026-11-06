@@ -101,6 +101,15 @@ const everyVariant = toNotebook([
     runMode: 'auto',
     code: 'export const total = visits.length;',
   },
+  {
+    id: 'vega',
+    name: 'vega',
+    type: 'vega',
+    runMode: 'auto',
+    sourceCell: 'visits',
+    spec: '{"mark": "bar"}',
+    height: 320,
+  },
   { id: 'notes', name: 'notes', type: 'markdown', content: '# Instructions' },
 ]);
 

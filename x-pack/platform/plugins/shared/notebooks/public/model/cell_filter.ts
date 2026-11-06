@@ -27,6 +27,8 @@ const getSearchableText = (cell: CellDefinition): string[] => {
       return common;
     case 'custom':
       return [...common, cell.query ?? '', cell.template];
+    case 'vega':
+      return [...common, cell.spec];
     case 'code':
       return [...common, cell.code];
     case 'markdown':

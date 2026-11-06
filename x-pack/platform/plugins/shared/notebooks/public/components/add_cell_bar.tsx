@@ -89,6 +89,11 @@ const CELL_KIND_GROUPS: ReadonlyArray<{
         label: i18n.translate('xpack.notebook.addCell.custom', { defaultMessage: 'Custom' }),
       },
       {
+        kind: 'vega',
+        icon: 'chartArea',
+        label: i18n.translate('xpack.notebook.addCell.vega', { defaultMessage: 'Vega' }),
+      },
+      {
         kind: 'markdown',
         icon: 'text',
         label: i18n.translate('xpack.notebook.addCell.markdown', { defaultMessage: 'Markdown' }),
@@ -120,7 +125,7 @@ export const AddCellBar = ({
       .slice(0, index)
       .reverse()
       .find((id) => cells[id]?.type === 'esql');
-    const takesSource = kind === 'chart' || kind === 'custom';
+    const takesSource = kind === 'chart' || kind === 'custom' || kind === 'vega';
     const cell = createCell(kind, cells, takesSource ? previousEsql ?? null : null);
     addedCellIds.add(cell.id);
     store.addCell(cell, index);

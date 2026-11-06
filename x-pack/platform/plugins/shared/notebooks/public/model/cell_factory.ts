@@ -55,6 +55,11 @@ const BLUEPRINTS: Record<NewCellKind, CellBlueprint> = {
       template: '',
     }),
   },
+  vega: {
+    namePrefix: 'vega',
+    labelPrefix: i18n.translate('xpack.notebook.cell.label.vega', { defaultMessage: 'Vega' }),
+    build: (base, sourceCell) => ({ ...base, type: 'vega', runMode: 'auto', sourceCell, spec: '' }),
+  },
   code: {
     namePrefix: 'code',
     labelPrefix: i18n.translate('xpack.notebook.cell.label.code', {

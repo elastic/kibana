@@ -64,6 +64,7 @@ import { InputControl } from './input_cell';
 import { useNotebook } from './notebook_context';
 import { NotebookFlyout } from './notebook_flyout';
 import { PinnedTimePicker } from './notebook_header';
+import { VegaCanvas } from './vega_cell';
 import { ResultGrid } from './result_preview';
 
 const APP_ROW_HEIGHT = 40;
@@ -104,6 +105,8 @@ const PanelContent = ({ panelId, cell }: { panelId: string; cell: AppCellDefinit
       return <ChartPanelContent panelId={panelId} cell={cell} />;
     case 'custom':
       return <CustomCanvas cell={cell} />;
+    case 'vega':
+      return <VegaCanvas cell={cell} />;
     case 'esql':
       return <EsqlPanelContent cell={cell} />;
     case 'input':

@@ -57,6 +57,7 @@ const getBasePanelSize = (cell: AppCellDefinition): PanelSize => {
       return { width: DEFAULT_GRID_COLUMNS, height: 3 };
     case 'chart':
     case 'custom':
+    case 'vega':
       return { width: 6, height: 7 };
     case 'esql':
       return { width: DEFAULT_GRID_COLUMNS, height: 8 };
@@ -238,6 +239,7 @@ const SECTION_ORDER: ReadonlyArray<AppCellDefinition['type']> = [
   'input',
   'chart',
   'custom',
+  'vega',
   'esql',
 ];
 
@@ -258,7 +260,9 @@ export const generateDefaultApp = (
   const charted = new Set(
     ordered.flatMap((cell) => {
       const isSourced =
-        cell.type === 'chart' || (cell.type === 'custom' && getOwnQuery(cell) === undefined);
+        cell.type === 'chart' ||
+        cell.type === 'vega' ||
+        (cell.type === 'custom' && getOwnQuery(cell) === undefined);
       return isSourced && cell.sourceCell ? [cell.sourceCell] : [];
     })
   );

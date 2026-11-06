@@ -96,6 +96,18 @@ export interface CustomCellDefinition extends CellBase {
   height?: number;
 }
 
+/** A Vega or Vega-Lite chart of an ES|QL cell's results, which the spec reads as the `table` dataset. */
+export interface VegaCellDefinition extends CellBase {
+  type: 'vega';
+  runMode: RunMode;
+  /** Id of the ES|QL cell whose rows feed the chart; null until the user picks a source. */
+  sourceCell: string | null;
+  /** The spec as JSON; Vega-Lite when its `$schema` says so, otherwise Vega. */
+  spec: string;
+  /** Pixel height the user resized the chart to; never below the default. */
+  height?: number;
+}
+
 /**
  * JavaScript run in the page. Other cells' outputs it reads are injected as constants, and its
  * `export`s become outputs named as exported.
@@ -120,6 +132,7 @@ export type CellDefinition =
   | EsqlCellDefinition
   | ChartCellDefinition
   | CustomCellDefinition
+  | VegaCellDefinition
   | CodeCellDefinition
   | MarkdownCellDefinition
   | InputCellDefinition;
