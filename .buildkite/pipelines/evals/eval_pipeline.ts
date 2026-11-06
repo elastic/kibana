@@ -256,7 +256,7 @@ function buildEvalsYaml({
     .join('\n');
 
   return [
-    // No `steps:` line, so the chunk concatenates under the pipeline's one top-level `steps:`.
+    // `getPipeline()` strips `steps:` so fragments concatenate under one top-level `steps:`.
     `  - group: LLM Evals`,
     `    key: kibana-evals`,
     `    depends_on:`,
@@ -421,7 +421,7 @@ export function getEvalTriggerStep(githubPrLabels: string): string | null {
   const forwardLabelsEnv = toBuildkiteYamlString(forwardableLabels);
 
   return [
-    // No `steps:` line, so the chunk concatenates under the pipeline's one top-level `steps:`.
+    // `getPipeline()` strips `steps:` so fragments concatenate under one top-level `steps:`.
     `  - label: ':robot_face: Trigger LLM Evals'`,
     `    key: kibana-evals-trigger`,
     `    depends_on:`,
