@@ -95,6 +95,51 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('logs a task-yield event when a task yields', async () => {
+      const scheduledTask = await scheduleTask({
+        taskType: 'sampleTask',
+        params: { yieldExecution: true, yieldTimes: 1, yieldDelay: '10m' },
+      });
+      currentTaskId = scheduledTask.id;
+
+      const findEvents = async (action: string) => {
+        const response = await es.search({
+          index: '.kibana-event-log*',
+          query: {
+            bool: {
+              filter: [
+                { term: { 'event.provider': 'taskManager' } },
+                { term: { 'event.action': action } },
+                { term: { 'kibana.task.id': scheduledTask.id } },
+              ],
+            },
+          },
+          sort: [{ '@timestamp': 'asc' }],
+        });
+        return response.hits.hits.map((hit) => hit._source as Record<string, any>);
+      };
+
+      let yieldEvent: Record<string, any> | undefined;
+      await retry.try(async () => {
+        const events = await findEvents('task-yield');
+        expect(events.length).to.eql(1);
+        yieldEvent = events[0];
+      });
+      expect(yieldEvent!.kibana.task.type).to.eql('sampleTask');
+      expect(Date.parse(yieldEvent!.kibana.task.yield.deadline)).to.be.greaterThan(Date.now());
+      expect(yieldEvent!.message).to.contain('yielded until');
+
+      // the yield event belongs to the run that yielded
+      const [runStart] = await findEvents('task-run-start');
+      expect(yieldEvent!.kibana.task.execution.uuid).to.eql(runStart.kibana.task.execution.uuid);
+
+      // resuming produces a second task-run-start for the same task
+      await runTaskSoon({ id: scheduledTask.id });
+      await retry.try(async () => {
+        expect((await findEvents('task-run-start')).length).to.eql(2);
+      });
+    });
+
     it('logs custom fields from the task under kibana.task.data in the task-run event', async () => {
       const scheduledTask = await scheduleTask({
         taskType: 'sampleTask',

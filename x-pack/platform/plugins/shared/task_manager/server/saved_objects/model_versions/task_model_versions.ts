@@ -21,6 +21,7 @@ import {
   taskSchemaV12,
   taskSchemaV13,
   taskSchemaV14,
+  taskSchemaV15,
 } from '../schemas/task';
 
 import { InstanceTaskCost } from '../../task';
@@ -206,6 +207,13 @@ export const taskModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: taskSchemaV14.extends({}, { unknowns: 'ignore' }),
       create: taskSchemaV14,
+    },
+  },
+  '15': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: taskSchemaV15.extends({}, { unknowns: 'ignore' }),
+      create: taskSchemaV15,
     },
   },
 };

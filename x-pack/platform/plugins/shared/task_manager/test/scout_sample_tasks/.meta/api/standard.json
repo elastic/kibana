@@ -1,0 +1,21 @@
+{
+  "sha1": "f54275462182b3289ad28148bb35868982a353cf",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "eeb2690c4d4e256-8680f67fce17e97",
+      "title": "Task Manager yield execution keeps an ad-hoc task that yields and resumes the same task",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_sample_tasks/api/tests/yield_execution.spec.ts",
+        "line": 26,
+        "column": 94
+      }
+    }
+  ]
+}

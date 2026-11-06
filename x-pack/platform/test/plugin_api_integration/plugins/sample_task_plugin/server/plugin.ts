@@ -20,6 +20,7 @@ import type {
 import { DEFAULT_MAX_WORKERS } from '@kbn/task-manager-plugin/server/config';
 import {
   getDeleteTaskRunResult,
+  getYieldTaskRunResult,
   TaskCost,
   TaskPriority,
 } from '@kbn/task-manager-plugin/server/task';
@@ -55,6 +56,10 @@ export class SampleTaskManagerFixturePlugin
       //    waitForParams : boolean - should the task stall ands wait to receive params asynchronously before using the default params
       //    waitForEvent : string - if provided, the task will stall (after completing the run) and wait for an asyn event before completing
       //    addEventFields : object - if provided, the task will attach these fields to its task-run event log document
+      //    yieldExecution : boolean - if true, the task yields (keeps the same task id) while count <= yieldTimes
+      //    yieldTimes : number - how many runs should yield. Defaults to 1
+      //    yieldDelay : string - interval to wait before the yielded task is claimable again, e.g. '30s'
+      //    nextParams : object - params stored on the task when it yields
       createTaskRunner: ({ taskInstance, setCustomTaskRunEventFields }: RunContext) => ({
         async run() {
           const { params, state, id } = taskInstance;
@@ -94,6 +99,15 @@ export class SampleTaskManagerFixturePlugin
           // Stall task  run until a certain event is triggered
           if (runParams.waitForEvent) {
             await once(taskTestingEvents, runParams.waitForEvent);
+          }
+
+          const yieldTimes = runParams.yieldTimes ?? 1;
+          if (runParams.yieldExecution && count <= yieldTimes) {
+            return getYieldTaskRunResult({
+              state: { count },
+              ...(runParams.nextParams ? { params: runParams.nextParams } : {}),
+              ...(runParams.yieldDelay ? { delay: runParams.yieldDelay } : {}),
+            });
           }
 
           return {

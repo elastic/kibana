@@ -116,6 +116,11 @@ export const EventSchema = schema.maybe(
               })
             ),
             data: ecsFlattened(),
+            yield: schema.maybe(
+              schema.object({
+                deadline: ecsDate(),
+              })
+            ),
           })
         ),
         alerting: schema.maybe(

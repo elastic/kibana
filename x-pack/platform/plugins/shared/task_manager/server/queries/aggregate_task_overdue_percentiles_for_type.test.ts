@@ -45,6 +45,24 @@ describe('aggregateTaskOverduePercentilesForType', () => {
                     bool: {
                       must: [
                         {
+                          term: {
+                            'task.status': 'waiting',
+                          },
+                        },
+                        {
+                          range: {
+                            'task.runAt': {
+                              lte: 'now',
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      must: [
+                        {
                           bool: {
                             should: [
                               {

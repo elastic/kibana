@@ -164,3 +164,16 @@ export const taskSchemaV14 = taskSchemaV13.extends({
   ),
   encryptedCredential: schema.maybe(schema.string()),
 });
+
+export const taskSchemaV15 = taskSchemaV14.extends({
+  // Adds the 'waiting' status for yielded ad-hoc tasks
+  status: schema.oneOf([
+    schema.literal('idle'),
+    schema.literal('claiming'),
+    schema.literal('running'),
+    schema.literal('waiting'),
+    schema.literal('failed'),
+    schema.literal('unrecognized'),
+    schema.literal('dead_letter'),
+  ]),
+});

@@ -6,6 +6,7 @@
  */
 
 import _ from 'lodash';
+import type { Middleware } from '../lib/middleware';
 import { errors } from '@elastic/elasticsearch';
 import { secondsFromNow, secondsFromDate } from '../lib/intervals';
 import { asOk, asErr } from '../lib/result_type';
@@ -18,9 +19,10 @@ import {
 } from '.';
 import type { TaskEvent, TaskRun } from '../task_events';
 import { asTaskRunEvent, TaskPersistence, asTaskManagerStatEvent } from '../task_events';
-import type { ConcreteTaskInstance, TaskEventLogger } from '../task';
+import type { ConcreteTaskInstance, SuccessfulRunResult, TaskEventLogger } from '../task';
 import {
   getDeleteTaskRunResult,
+  getYieldTaskRunResult,
   TaskPriority,
   TaskStatus,
   TaskCost,
@@ -1240,6 +1242,286 @@ describe('TaskManagerRunner', () => {
         expect.stringContaining('does not allow priority overrides'),
         { tags: ['bar'] }
       );
+    });
+
+    test('logs a task-yield event with the deadline when an ad-hoc task yields', async () => {
+      const yielded = getYieldTaskRunResult({ state: {}, delay: '5m' });
+      const { instance, runner } = await readyToRunStageSetup({
+        instance: { status: TaskStatus.Running, startedAt: new Date() },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return yielded;
+              },
+            }),
+          },
+        },
+      });
+
+      await runner.run();
+
+      const events = (eventLoggerMock.logEvent as jest.Mock).mock.calls.map((call) => call[0]);
+      expect(events.map((event) => event.event.action)).toEqual([
+        'task-run-start',
+        'task-run',
+        'task-yield',
+      ]);
+      expect(events[1].message).toBe(`Task bar "${instance.id}" yielded.`);
+      expect(events[2]).toEqual({
+        event: { action: 'task-yield' },
+        kibana: {
+          task: {
+            id: instance.id,
+            type: 'bar',
+            scheduled: instance.scheduledAt.toISOString(),
+            execution: { uuid: TASK_EXECUTION_UUID },
+            yield: { deadline: (yielded.runAt as Date).toISOString() },
+          },
+        },
+        message: `Task bar "${instance.id}" yielded until ${(
+          yielded.runAt as Date
+        ).toISOString()}.`,
+      });
+    });
+
+    test('does not log a task-yield event when an ad-hoc task completes', async () => {
+      const { runner } = await readyToRunStageSetup({
+        instance: { status: TaskStatus.Running, startedAt: new Date() },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: {} };
+              },
+            }),
+          },
+        },
+      });
+
+      await runner.run();
+
+      const actions = (eventLoggerMock.logEvent as jest.Mock).mock.calls.map(
+        (call) => call[0].event.action
+      );
+      expect(actions).not.toContain('task-yield');
+    });
+
+    test('keeps an ad-hoc task that yields, resets attempts, and stores the handed-off params', async () => {
+      const onTaskEvent = jest.fn();
+      const yielded = getYieldTaskRunResult({
+        state: { phase: 'resume' },
+        params: { step: 2 },
+        delay: '5m',
+      });
+      const { instance, runner, store, usageCounter } = await readyToRunStageSetup({
+        onTaskEvent,
+        instance: {
+          attempts: 3,
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return yielded;
+              },
+            }),
+          },
+        },
+      });
+
+      await runner.run();
+
+      expect(store.remove).not.toHaveBeenCalled();
+      expect(store.partialUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          runAt: yielded.runAt,
+          state: { phase: 'resume' },
+          params: { step: 2 },
+          attempts: 0,
+          status: TaskStatus.Waiting,
+          startedAt: null,
+          retryAt: null,
+          ownerId: null,
+        }),
+        {
+          validate: true,
+          doc: instance,
+        }
+      );
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'taskManagerTaskYielded',
+        counterType: 'taskManagerTaskRunner',
+        incrementBy: 1,
+      });
+      expect(onTaskEvent).toHaveBeenCalledWith(
+        withAnyTiming(
+          asTaskRunEvent(
+            instance.id,
+            asOk({
+              task: instance,
+              persistence: TaskPersistence.NonRecurring,
+              result: TaskRunResult.SuccessRescheduled,
+              isExpired: false,
+            })
+          )
+        )
+      );
+    });
+
+    test('runs the handed-off params through the beforeSave middleware when an ad-hoc task yields', async () => {
+      const yielded = getYieldTaskRunResult({ state: {}, params: { step: 2 }, delay: '5m' });
+      const beforeSave = jest.fn(
+        async ({ taskInstance, ...opts }: Parameters<Middleware['beforeSave']>[0]) => ({
+          ...opts,
+          taskInstance: { ...taskInstance, params: { wrapped: taskInstance.params } },
+        })
+      );
+      const { instance, runner, store } = await readyToRunStageSetup({
+        beforeSave,
+        instance: {
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return yielded;
+              },
+            }),
+          },
+        },
+      });
+
+      await runner.run();
+
+      expect(beforeSave).toHaveBeenCalledWith({
+        taskInstance: expect.objectContaining({ id: instance.id, params: { step: 2 } }),
+      });
+      expect(store.partialUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: { wrapped: { step: 2 } },
+          status: TaskStatus.Waiting,
+        }),
+        {
+          validate: true,
+          doc: instance,
+        }
+      );
+    });
+
+    test('parks a yielded ad-hoc task instead of deleting it when the result has no runAt', async () => {
+      const { runner, store } = await readyToRunStageSetup({
+        instance: {
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: { phase: 'resume' }, shouldYieldTask: true as const };
+              },
+            }),
+          },
+        },
+      });
+
+      await runner.run();
+
+      expect(store.remove).not.toHaveBeenCalled();
+      expect(store.partialUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          state: { phase: 'resume' },
+          status: TaskStatus.Waiting,
+          runAt: expect.any(Date),
+        }),
+        expect.anything()
+      );
+    });
+
+    test('ignores returned params when the task does not yield', async () => {
+      const { runner, store } = await readyToRunStageSetup({
+        instance: {
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return {
+                  state: {},
+                  runAt: new Date(Date.now() + 60000),
+                  params: { injected: true },
+                } as unknown as SuccessfulRunResult;
+              },
+            }),
+          },
+        },
+      });
+
+      await runner.run();
+
+      expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+      expect(store.partialUpdate.mock.calls[0][0]).not.toHaveProperty('params');
+      expect(store.partialUpdate.mock.calls[0][0]).toEqual(
+        expect.objectContaining({ status: TaskStatus.Idle })
+      );
+    });
+
+    test('treats a yield from a recurring task as a failed run and keeps the schedule', async () => {
+      const id = _.random(1, 20).toString();
+      const onTaskEvent = jest.fn();
+      const { runner, store, logger } = await readyToRunStageSetup({
+        onTaskEvent,
+        instance: {
+          id,
+          schedule: { interval: '20m' },
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return getYieldTaskRunResult({ state: { phase: 'resume' } });
+              },
+            }),
+          },
+        },
+      });
+
+      await runner.run();
+
+      // the task survives and stays on its 20m schedule
+      expect(store.remove).not.toHaveBeenCalled();
+      expect(store.partialUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: TaskStatus.Idle,
+          schedule: { interval: '20m' },
+        }),
+        expect.anything()
+      );
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('yield is only supported for ad-hoc tasks'),
+        expect.anything()
+      );
+      // the run is reported as failed
+      const event = onTaskEvent.mock.calls
+        .map(([taskEvent]: [TaskEvent<unknown, unknown>]) => taskEvent)
+        .find((taskEvent) => taskEvent.id === id) as TaskRun;
+      expect(event.event.tag).toBe('err');
     });
 
     test('reschedules tasks that return a schedule', async () => {
@@ -4497,6 +4779,7 @@ describe('TaskManagerRunner', () => {
     onTaskEvent?: jest.Mock<(event: TaskEvent<unknown, unknown>) => void>;
     allowReadingInvalidState?: boolean;
     enrichFakeRequest?: jest.Mock;
+    beforeSave?: Middleware['beforeSave'];
   }
 
   function withAnyTiming(taskRun: TaskRun) {
@@ -4559,6 +4842,7 @@ describe('TaskManagerRunner', () => {
     const runner = new TaskManagerRunner({
       defaultMaxAttempts: 5,
       beforeRun: (context) => Promise.resolve(context),
+      beforeSave: opts.beforeSave ?? ((context) => Promise.resolve(context)),
       logger,
       store,
       instance,

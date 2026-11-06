@@ -31,6 +31,7 @@ export const EVENT_LOG_ACTIONS = {
   taskRunStart: 'task-run-start',
   taskRun: 'task-run',
   taskCancel: 'task-cancel',
+  taskYield: 'task-yield',
 };
 
 export enum EventLogOutcomes {
