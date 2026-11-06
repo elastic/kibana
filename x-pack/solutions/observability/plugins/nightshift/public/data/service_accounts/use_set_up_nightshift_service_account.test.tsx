@@ -98,7 +98,7 @@ describe('useSetUpNightshiftServiceAccount', () => {
     );
   });
 
-  it('binds the detection engine to its own account, before the agent is installed', async () => {
+  it('binds the detection engine to its own account, before the investigation entry point', async () => {
     httpGet.mockImplementation(async (url: string) =>
       url === '/internal/security/service_account'
         ? {
@@ -130,8 +130,27 @@ describe('useSetUpNightshiftServiceAccount', () => {
       { signal: null, params: { body: { serviceAccountId: 'uiam-detection' } } }
     );
     expect(significantEventsFetch.mock.invocationCallOrder[0]).toBeLessThan(
-      investigationsFetch.mock.invocationCallOrder.at(-1) ?? 0
+      investigationsFetch.mock.invocationCallOrder[0]
     );
+  });
+
+  it('leaves the investigation entry point unbound when the detection engine cannot be set up', async () => {
+    httpGet.mockResolvedValue({
+      serviceAccounts: ['agent', 'automations', 'detection'].map((kind) => ({
+        id: `uiam-${kind}`,
+        name: `nightshift_${kind}`,
+        roles: [`_nightshift_${kind}`],
+        enabled: true,
+        assumable: true,
+      })),
+    });
+    significantEventsFetch.mockRejectedValueOnce(new Error('role missing'));
+    const { result } = renderSetUp();
+
+    act(() => result.current.mutate());
+
+    await waitFor(() => expect(addError).toHaveBeenCalled());
+    expect(investigationsFetch).not.toHaveBeenCalled();
   });
 
   describe('automations the setup could not bind', () => {

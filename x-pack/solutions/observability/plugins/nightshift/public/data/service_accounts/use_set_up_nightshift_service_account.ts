@@ -94,7 +94,7 @@ const warnAboutUnboundAutomations = (
 /**
  * Enables Nightshift in the current space, in one step: finds the deployment's Nightshift service
  * accounts by name, or creates them, as the current user, binds the space's workflows to them,
- * sets the detection engine up on its own account, then installs the investigation agent. Every step is idempotent, so a retry after a partial
+ * sets the detection engine up on its own account first, then installs the investigation agent. Every step is idempotent, so a retry after a partial
  * failure completes the setup.
  */
 export const useSetUpNightshiftServiceAccount = (): UseMutationResult<
@@ -125,12 +125,9 @@ export const useSetUpNightshiftServiceAccount = (): UseMutationResult<
       const serviceAccountIds = await ensureNightshiftServiceAccounts(accountsApi, {
         isServerless,
       });
-      const status = await investigationsClient.fetch(
-        'POST /internal/nightshift/investigations/service_account/_enable',
-        { signal: null, params: { body: { serviceAccountIds } } }
-      );
       // The detection engine account is global like the other two, so a second space reuses it.
-      // It is bound before the agent is installed: a failure here leaves the prompt up for a retry.
+      // It is bound before the investigation entry point: once that is bound the status reads as
+      // set up and hides the prompt, so a failure after it would leave no way to retry.
       const detectionServiceAccountId = await ensureNightshiftServiceAccount(accountsApi, {
         kind: 'detection',
         isServerless,
@@ -141,6 +138,10 @@ export const useSetUpNightshiftServiceAccount = (): UseMutationResult<
           signal: null,
           params: { body: { serviceAccountId: detectionServiceAccountId } },
         }
+      );
+      const status = await investigationsClient.fetch(
+        'POST /internal/nightshift/investigations/service_account/_enable',
+        { signal: null, params: { body: { serviceAccountIds } } }
       );
       // The space's agent runs as the account the step above bound, so it is installed last.
       await investigationsClient.fetch('POST /internal/nightshift/onboarding/enable', {
