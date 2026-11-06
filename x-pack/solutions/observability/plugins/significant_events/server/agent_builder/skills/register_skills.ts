@@ -28,7 +28,7 @@ interface RegisterSignificantEventsSkillsOptions {
   streamsKIsOnboardingClient?: SignificantEventsKIsOnboardingClient;
   maintenanceService?: SignificantEventsMaintenanceService;
   getScopedClients: GetScopedClients;
-  server: Pick<SignificantEventsServer, 'security'>;
+  server: Pick<SignificantEventsServer, 'security' | 'inference' | 'core'>;
   logger: Logger;
   isAvailable: () => Promise<boolean>;
   /**

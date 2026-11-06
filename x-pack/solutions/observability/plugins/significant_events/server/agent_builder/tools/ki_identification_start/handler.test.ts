@@ -10,6 +10,7 @@ import { startKiIdentificationToolHandler } from './handler';
 import { KIsOnboardingStep } from '@kbn/significant-events-schema';
 import { SignificantEventsPausedError } from '../../../lib/errors/significant_events_paused_error';
 import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
+import type { SignificantEventsServer } from '../../../types';
 import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 
 describe('startKiIdentificationToolHandler', () => {
@@ -36,7 +37,22 @@ describe('startKiIdentificationToolHandler', () => {
       getState: jest.fn().mockResolvedValue(maintenanceState),
     } as unknown as SignificantEventsMaintenanceService;
 
+    const getConnectorById = jest
+      .fn()
+      .mockImplementation(async (connectorId: string) => ({ connectorId }));
+    const server = {
+      inference: { getConnectorById },
+      core: {
+        savedObjects: { getScopedClient: jest.fn() },
+        uiSettings: {
+          asScopedToClient: jest.fn(() => ({ get: jest.fn().mockResolvedValue(false) })),
+        },
+      },
+    } as unknown as Pick<SignificantEventsServer, 'inference' | 'core'>;
+
     return {
+      server,
+      getConnectorById,
       managementApi,
       streamsKIsOnboardingClient,
       maintenanceService,
@@ -45,12 +61,14 @@ describe('startKiIdentificationToolHandler', () => {
   };
 
   it('triggers onboarding workflow and returns tracking Kibana path', async () => {
-    const { managementApi, streamsKIsOnboardingClient, maintenanceService, request } = setup();
+    const { managementApi, streamsKIsOnboardingClient, maintenanceService, request, server } =
+      setup();
 
     const result = await startKiIdentificationToolHandler({
       sourceId: 'logs.nginx',
       sourceSlug: 'logs-nginx',
       steps: [KIsOnboardingStep.FeaturesIdentification, KIsOnboardingStep.QueriesGeneration],
+      server,
       streamsKIsOnboardingClient,
       maintenanceService,
       request,
@@ -79,7 +97,7 @@ describe('startKiIdentificationToolHandler', () => {
   });
 
   it('rejects with SignificantEventsPausedError while paused', async () => {
-    const { managementApi, streamsKIsOnboardingClient, maintenanceService, request } =
+    const { managementApi, streamsKIsOnboardingClient, maintenanceService, request, server } =
       setup('paused');
 
     await expect(
@@ -87,6 +105,7 @@ describe('startKiIdentificationToolHandler', () => {
         sourceId: 'logs.nginx',
         sourceSlug: 'logs-nginx',
         steps: [KIsOnboardingStep.FeaturesIdentification],
+        server,
         streamsKIsOnboardingClient,
         maintenanceService,
         request,
@@ -97,7 +116,8 @@ describe('startKiIdentificationToolHandler', () => {
   });
 
   it('throws the not-set-up error when the space has no bound workflow', async () => {
-    const { managementApi, streamsKIsOnboardingClient, maintenanceService, request } = setup();
+    const { managementApi, streamsKIsOnboardingClient, maintenanceService, request, server } =
+      setup();
     managementApi.getWorkflow.mockResolvedValue(null);
 
     await expect(
@@ -105,10 +125,70 @@ describe('startKiIdentificationToolHandler', () => {
         sourceId: 'logs.nginx',
         sourceSlug: 'logs-nginx',
         steps: [KIsOnboardingStep.FeaturesIdentification],
+        server,
         streamsKIsOnboardingClient,
         maintenanceService,
         request,
       })
     ).rejects.toThrow(/not set up/);
+  });
+
+  it('resolves requested connectors as the caller and starts the run with the resolved ids', async () => {
+    const {
+      managementApi,
+      getConnectorById,
+      streamsKIsOnboardingClient,
+      maintenanceService,
+      request,
+      server,
+    } = setup();
+
+    await startKiIdentificationToolHandler({
+      sourceId: 'logs.nginx',
+      sourceSlug: 'logs-nginx',
+      steps: [KIsOnboardingStep.FeaturesIdentification, KIsOnboardingStep.QueriesGeneration],
+      connectors: { features: 'features-connector', queries: 'queries-connector' },
+      server,
+      streamsKIsOnboardingClient,
+      maintenanceService,
+      request,
+    });
+
+    expect(getConnectorById).toHaveBeenCalledWith('features-connector', request);
+    expect(getConnectorById).toHaveBeenCalledWith('queries-connector', request);
+    expect(managementApi.runWorkflow).toHaveBeenCalledWith(
+      expect.anything(),
+      'default',
+      expect.objectContaining({ featuresConnectorId: 'features-connector' }),
+      request,
+      'nightshift-detection-engine'
+    );
+  });
+
+  it('refuses a connector the caller cannot use before the run starts', async () => {
+    const {
+      managementApi,
+      getConnectorById,
+      streamsKIsOnboardingClient,
+      maintenanceService,
+      request,
+      server,
+    } = setup();
+    getConnectorById.mockRejectedValue(new Error('Connector not found'));
+
+    await expect(
+      startKiIdentificationToolHandler({
+        sourceId: 'logs.nginx',
+        sourceSlug: 'logs-nginx',
+        steps: [KIsOnboardingStep.FeaturesIdentification],
+        connectors: { features: 'private-connector' },
+        server,
+        streamsKIsOnboardingClient,
+        maintenanceService,
+        request,
+      })
+    ).rejects.toThrow('Connector not found');
+
+    expect(managementApi.runWorkflow).not.toHaveBeenCalled();
   });
 });

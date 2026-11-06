@@ -56,7 +56,7 @@ export const createKiIdentificationStartTool = ({
   maintenanceService,
   getScopedClients,
 }: {
-  server: Pick<SignificantEventsServer, 'security'>;
+  server: Pick<SignificantEventsServer, 'security' | 'inference' | 'core'>;
   telemetry: EbtTelemetryClient;
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
   maintenanceService: SignificantEventsMaintenanceService;
@@ -95,6 +95,7 @@ export const createKiIdentificationStartTool = ({
         sourceSlug: source.slug,
         steps,
         connectors,
+        server,
         streamsKIsOnboardingClient,
         maintenanceService,
         request,
