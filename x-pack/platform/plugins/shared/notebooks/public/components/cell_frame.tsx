@@ -33,35 +33,12 @@ import type { CellRuntime } from '../model/types';
 import { TYPE_ICONS, getCellElementId, getStatusBorderColor, getTypeLabel } from './cell_display';
 import { AddToAppButton } from './add_to_app_button';
 import { CellFooter } from './cell_footer';
+import { flashWhenInView } from './focus_flash';
 import { RunButton } from './run_button';
 import { RunningBorder, canAnimateRunningBorder } from './running_border';
 import { useNotebook } from './notebook_context';
 
 const RUN_GUTTER_CLASS = 'notebookCellRunGutter';
-
-const FOCUS_FADE_DURATION_MS = 1500;
-const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
-
-const IN_VIEW_THRESHOLDS = [0.25, 0.5, 0.75, 1];
-
-/**
- * Calls `onInView` once the element shows at least half of itself, or fills half the viewport
- * when it is taller than that; returns a function that stops waiting.
- */
-const whenInView = (element: Element, onInView: () => void): (() => void) => {
-  const observer = new IntersectionObserver(
-    ([entry]) => {
-      const isInView =
-        entry.intersectionRatio >= 0.5 || entry.intersectionRect.height >= window.innerHeight / 2;
-      if (!isInView) return;
-      observer.disconnect();
-      onInView();
-    },
-    { threshold: IN_VIEW_THRESHOLDS }
-  );
-  observer.observe(element);
-  return () => observer.disconnect();
-};
 
 const ACTIONS_LABEL = i18n.translate('xpack.notebook.cell.actions', {
   defaultMessage: 'Cell actions',
@@ -103,18 +80,9 @@ export const CellFrame = ({
     let stopWaiting: (() => void) | undefined;
     const flash = () => {
       const panel = panelRef.current;
-      if (!panel || window.matchMedia(REDUCED_MOTION_QUERY).matches) return;
+      if (!panel) return;
       stopWaiting?.();
-      stopWaiting = whenInView(panel, () => {
-        const { border, glow } = flashColorsRef.current;
-        panel.animate(
-          [
-            { boxShadow: `${border}, 0 0 16px 4px ${glow}` },
-            { boxShadow: `${border}, 0 0 16px 4px transparent` },
-          ],
-          { duration: FOCUS_FADE_DURATION_MS, easing: 'ease-out' }
-        );
-      });
+      stopWaiting = flashWhenInView(panel, () => flashColorsRef.current);
     };
     if (addedCellIds.delete(cell.id)) flash();
     // Skip the current value so a re-subscription doesn't replay an old focus.

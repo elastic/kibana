@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useRef, useState, type Ref } from 'react';
+import React, { useEffect, useMemo, useRef, useState, type Ref } from 'react';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -16,7 +16,11 @@ import {
   EuiSuperUpdateButton,
   EuiText,
   EuiTextArea,
+  transparentize,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { filter, skip } from 'rxjs';
 import type { AppMenuConfig } from '@kbn/app-menu';
 import { AppMenu } from '@kbn/core-chrome-app-menu';
 import { i18n } from '@kbn/i18n';
@@ -27,6 +31,8 @@ import type { InputCellDefinition } from '../../common/types';
 import { findPinnedTimeCell } from '../model/cell_factory';
 import { buildGraph, getDescendants } from '../model/graph';
 import { useNotebookServices } from '../services';
+import { getCellElementId } from './cell_display';
+import { flashWhenInView } from './focus_flash';
 import { useNotebook, type SidePanel } from './notebook_context';
 import { NotebookSettingsFlyout } from './notebook_settings_flyout';
 import { RunAllButton } from './run_all_button';
@@ -84,6 +90,50 @@ export const PinnedTimePicker = ({ cell }: { cell: InputCellDefinition }) => {
         />
       </EuiFlexItem>
     </EuiFlexGroup>
+  );
+};
+
+/** The header's time picker, which stands in for the pinned time cell when the graph reveals it. */
+const RevealableTimePicker = ({ cell }: { cell: InputCellDefinition }) => {
+  const { focusedCell$ } = useNotebook();
+  const { euiTheme } = useEuiTheme();
+  const ref = useRef<HTMLDivElement>(null);
+  const glowRef = useRef('');
+  glowRef.current = transparentize(euiTheme.colors.primary, 0.6);
+
+  useEffect(() => {
+    let stopWaiting: (() => void) | undefined;
+    // Skip the current value so a re-subscription doesn't replay an old focus.
+    const subscription = focusedCell$
+      .pipe(
+        skip(1),
+        filter((cellId) => cellId === cell.id)
+      )
+      .subscribe(() => {
+        const element = ref.current;
+        if (!element) return;
+        element.focus({ preventScroll: true });
+        stopWaiting?.();
+        stopWaiting = flashWhenInView(element, () => ({ glow: glowRef.current }));
+      });
+    return () => {
+      subscription.unsubscribe();
+      stopWaiting?.();
+    };
+  }, [focusedCell$, cell.id]);
+
+  return (
+    <div
+      id={getCellElementId(cell.id)}
+      ref={ref}
+      tabIndex={-1}
+      css={css`
+        outline: none;
+        border-radius: ${euiTheme.border.radius.medium};
+      `}
+    >
+      <PinnedTimePicker cell={cell} />
+    </div>
   );
 };
 
@@ -241,7 +291,7 @@ export const NotebookHeader = ({
         )}
         {pinnedTime && (
           <EuiFlexItem grow={false}>
-            <PinnedTimePicker cell={pinnedTime} />
+            <RevealableTimePicker cell={pinnedTime} />
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>

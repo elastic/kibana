@@ -126,7 +126,11 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
       focusedCell$,
       revealCell: (cellId) => {
         const cell = store.getCell(cellId);
-        if (cell && !matchesCellFilter(cell, cellFilter$.getValue(), store.apps$.getValue())) {
+        if (
+          cell &&
+          !isPinnedTimeCell(cell) &&
+          !matchesCellFilter(cell, cellFilter$.getValue(), store.apps$.getValue())
+        ) {
           // The cell mounts after the filter clears, too late to see this focus, so it flashes as added.
           addedCellIds.add(cellId);
           cellFilter$.next(EMPTY_CELL_FILTER);
