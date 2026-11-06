@@ -124,6 +124,7 @@ import {
   isByReferenceAnnotationsLayer,
   isDataLayer,
   isNumericDynamicMetric,
+  isPointsLayer,
   isReferenceLayer,
   newLayerState,
   supportedDataLayer,
@@ -451,6 +452,10 @@ export const getXyVisualization = ({
 
     if (isAnnotationsLayer(layer)) {
       return getAnnotationsConfiguration({ state, frame, layer, isDarkMode });
+    }
+
+    if (isPointsLayer(layer)) {
+      return { groups: [], hidden: true };
     }
 
     const sortedAccessors: string[] = getSortedAccessors(
