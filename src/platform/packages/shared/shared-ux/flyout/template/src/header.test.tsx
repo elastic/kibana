@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { act, render, screen, within } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FlyoutTemplate } from './flyout_template';
 
@@ -409,14 +409,15 @@ describe('FlyoutTemplate header blocks', () => {
       </FlyoutTemplate>
     );
     const { rerender } = renderTemplate(ui(false));
-    const overflow = screen.getByTestId('flyoutHeaderBadgeOverflow');
+    const trigger = screen.getByRole('button', { name: 'Show 2 more badges' });
 
-    await userEvent.click(overflow);
-    expect(overflow).toHaveAttribute('aria-expanded', 'true');
+    await userEvent.click(trigger);
+    const panel = await screen.findByTestId('flyoutHeaderBadgeOverflowPanel');
+    await waitFor(() => expect(panel).toHaveAttribute('data-popover-open', 'true'));
 
     rerender(ui(true));
 
-    expect(overflow).toHaveAttribute('aria-expanded', 'false');
+    await waitFor(() => expect(panel).not.toHaveAttribute('data-popover-open', 'true'));
   });
 
   it('places the blocks inside the collapsible region', () => {
