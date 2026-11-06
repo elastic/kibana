@@ -62,7 +62,8 @@ describe('collectRuleUpdatedFields', () => {
     // An array stands in for any non-object value. The path is reported whole.
     const asValue = createRuleResponse({
       ...previous,
-      recovery: ['manual'] as unknown as typeof previous.recovery,
+      // @ts-expect-error: an array is not a valid recovery. It stands in for any non-object value.
+      recovery: ['manual'],
     });
 
     expect(collectRuleUpdatedFields(previous, asValue)).toEqual(['recovery']);
