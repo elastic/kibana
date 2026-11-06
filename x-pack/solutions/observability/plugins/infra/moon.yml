@@ -136,6 +136,7 @@ tags:
   - group-observability
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -144,6 +145,4 @@ fileGroups:
     - types/**/*
     - test/scout/api/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

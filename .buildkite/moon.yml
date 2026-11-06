@@ -27,6 +27,8 @@ tasks:
   # binary (its isolated npm workspace), not the repo-root scripts/jest.
   jest:
     command: .buildkite/node_modules/.bin/jest
+    tags:
+      - jest-unit-tests
     args:
       - '--config'
       - .buildkite/jest.config.cjs

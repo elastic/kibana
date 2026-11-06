@@ -61,6 +61,4 @@ fileGroups:
     - scripts/**/*.ts
     - __jest__/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

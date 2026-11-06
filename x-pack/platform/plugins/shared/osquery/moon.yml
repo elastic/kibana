@@ -87,6 +87,15 @@ fileGroups:
     - server/**/*
     - public/common/schemas/*/*.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
+  jestConfigs:
+    - '**/jest.config.{js,cjs,json}'
+    - '!**/__fixtures__/**'
+    - '!cypress/**/*'
+  jestIntegrationConfigs:
+    - '**/jest.integration.config.{js,cjs,json}'
+    - '!**/__fixtures__/**'
+    - '!cypress/**/*'
+  scoutConfigs:
+    - '**/test/scout*/**/*playwright.config.ts'
+    - '!cypress/**/*'
 tasks: {}
