@@ -16,7 +16,7 @@ import { stringify } from 'yaml';
 
 import { parseLinkHeader } from './parse_link_header.ts';
 import type { Artifact } from './types/artifact.ts';
-import type { Build, BuildStatus } from './types/build.ts';
+import type { Build, BuildState, BuildStatus } from './types/build.ts';
 import type { Job, JobState } from './types/job.ts';
 
 type ExecType =
@@ -183,6 +183,12 @@ export interface BuildkiteWaitStep {
   branches?: string;
 }
 
+const COMMIT_LENGTH_SHA_1: number = 40;
+const COMMIT_LENGTH_SHA_256: number = 64;
+
+export const isFullCommitSha = (commit: string): boolean =>
+  commit.length === COMMIT_LENGTH_SHA_1 || commit.length === COMMIT_LENGTH_SHA_256;
+
 export class BuildkiteClient {
   http: AxiosInstance;
   exec: ExecType;
@@ -265,6 +271,22 @@ export class BuildkiteClient {
       `v2/organizations/elastic/pipelines/${encodeURIComponent(
         pipelineSlug
       )}/builds?${params.toString()}`
+    );
+    return response.data as Build[];
+  };
+
+  getBuildsForCommit = async (
+    pipelineSlug: string,
+    commit: string,
+    state?: BuildState
+  ): Promise<Build[]> => {
+    if (!isFullCommitSha(commit)) {
+      throw new Error(`Invalid commit hash: ${commit}, this endpoint works with full SHAs only`);
+    }
+
+    const response = await this.http.get(
+      `v2/organizations/elastic/pipelines/${encodeURIComponent(pipelineSlug)}/builds`,
+      { params: { commit, state }, timeout: 30_000 }
     );
     return response.data as Build[];
   };
