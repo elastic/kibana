@@ -10,7 +10,7 @@ export function resolveLocalArtifactsPath(parsedUrl: URL): string {
   if (parsedUrl.protocol !== 'file:') {
     throw new Error(`Expected file URL, got ${parsedUrl.protocol}`);
   }
-  const filePath = parsedUrl.pathname;
+  const filePath = decodeURIComponent(parsedUrl.pathname);
   // On Windows, remove leading "/" (e.g., file:///C:/path should be C:/path)
   const normalizedPath =
     process.platform === 'win32' && filePath.startsWith('/') ? filePath.substring(1) : filePath;

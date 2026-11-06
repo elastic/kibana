@@ -39,6 +39,7 @@ import {
   ArtifactNotFoundError,
   resolveArtifactsFolderPath,
   removeArtifactFile,
+  isInArtifactsFolder,
   logArtifactsFolderUsage,
   purgeArtifactsFolder,
 } from './utils';
@@ -48,6 +49,7 @@ import {
   validateOpenApiArtifactArchive,
   fetchArtifactVersions,
   fetchSecurityLabsVersions,
+  fetchLocalRepositoryVersion,
   createIndex,
   populateIndex,
 } from './steps';
@@ -92,6 +94,7 @@ export class PackageInstaller {
   private readonly currentVersion: string;
   private readonly elserInferenceId: string;
   private readonly isServerless: boolean;
+  private repositoryVersion?: Promise<string | undefined>;
 
   constructor({
     artifactsFolder,
@@ -117,6 +120,42 @@ export class PackageInstaller {
   }
 
   /**
+   * Version of the artifact repository this node reads: the newest entry of a local (bundled)
+   * repository's index, undefined for remote repositories.
+   */
+  getRepositoryVersion(): Promise<string | undefined> {
+    if (!this.repositoryVersion) {
+      this.repositoryVersion = fetchLocalRepositoryVersion(
+        this.getArtifactRepositoryOptions()
+      ).catch((error) => {
+        this.repositoryVersion = undefined;
+        throw error;
+      });
+    }
+    return this.repositoryVersion;
+  }
+
+  /**
+   * Newest repository version (`LastModified` of a `latest-<LastModified>` version) that any product
+   * documentation or the OpenAPI spec of the inference ID was installed from, if any.
+   */
+  async getInstalledRepositoryVersion({
+    inferenceId,
+  }: {
+    inferenceId: string;
+  }): Promise<string | undefined> {
+    const [productStatuses, openapiStatus] = await Promise.all([
+      this.productDocClient.getInstallationStatusOrThrow({ inferenceId }),
+      this.productDocClient.getOpenapiSpecInstallationStatus({ inferenceId }),
+    ]);
+    const versions = [...Object.values(productStatuses), openapiStatus]
+      .filter(({ status }) => status === 'installed')
+      .map(({ version }) => extractLatestVersionLastModified(version))
+      .filter((version): version is string => Boolean(version));
+    return versions.length > 0 ? versions.sort().reverse()[0] : undefined;
+  }
+
+  /**
    * Deletes artifact files left behind by a previous process lifetime or a failed install.
    */
   async purgeArtifactsFolder(): Promise<void> {
@@ -128,8 +167,10 @@ export class PackageInstaller {
     await this.esClient.indices.delete({ index: indexName }, { ignore: [404] });
   }
 
+  // Only downloads in the artifacts folder are removed; an artifact read in place from a local
+  // repository (the serverless bundle) is left alone.
   private async cleanupArtifact(artifactFullPath: string | undefined): Promise<void> {
-    if (artifactFullPath) {
+    if (artifactFullPath && isInArtifactsFolder(this.artifactsFolderPath, artifactFullPath)) {
       await removeArtifactFile(artifactFullPath, this.log);
     }
     await logArtifactsFolderUsage(this.artifactsFolderPath, this.log);
@@ -892,7 +933,8 @@ export class PackageInstaller {
     const latest = availableVersions.sort().reverse()[0];
     const installedVersion = status.version;
 
-    if (!forceUpdate && installedVersion && installedVersion === latest) {
+    // Never downgrade: an older node's repository may lag behind what a newer one installed
+    if (!forceUpdate && installedVersion && installedVersion >= latest) {
       return;
     }
 
@@ -912,7 +954,7 @@ export class PackageInstaller {
     inferenceId?: string;
   }): Promise<void> {
     const effectiveInferenceId = inferenceId || this.elserInferenceId;
-    const selectedVersion = version || this.currentVersion;
+    const selectedVersion = version || (await this.selectDefaultOpenApiVersion());
     const stackVersion = await this.findInstallableOpenApiVersion({
       selectedVersion,
       inferenceId: effectiveInferenceId,
@@ -1189,6 +1231,18 @@ export class PackageInstaller {
     throw new Error(`No candidate versions available for product [${productName}]`);
   }
 
+  // Same selection as product installs: on serverless the newest `latest-<LastModified>` of the
+  // repository (the only version a bundled repository has), otherwise the stack version
+  private async selectDefaultOpenApiVersion(): Promise<string> {
+    if (!this.isServerless) {
+      return this.currentVersion;
+    }
+    const { openapi } = await this.fetchArtifactVersionsWithRetry();
+    return openapi?.length
+      ? selectVersion(this.currentVersion, openapi, true)
+      : this.currentVersion;
+  }
+
   private async findInstallableOpenApiVersion({
     selectedVersion,
     inferenceId,
@@ -1432,12 +1486,15 @@ const getPreviousVersions = (selectedVersion: string, availableVersions: string[
     .sort((a, b) => Semver.rcompare(Semver.coerce(a)!, Semver.coerce(b)!));
 };
 
+const extractLatestVersionLastModified = (version?: string): string | undefined =>
+  version?.match(/^latest-(.+)$/)?.[1];
+
 const extractLatestVersionTimestamp = (version: string): number | undefined => {
-  const latestWithTimestampMatch = version.match(/^latest-(.+)$/);
-  if (!latestWithTimestampMatch) {
+  const lastModified = extractLatestVersionLastModified(version);
+  if (!lastModified) {
     return undefined;
   }
-  const timestamp = Date.parse(latestWithTimestampMatch[1]);
+  const timestamp = Date.parse(lastModified);
   return Number.isNaN(timestamp) ? undefined : timestamp;
 };
 

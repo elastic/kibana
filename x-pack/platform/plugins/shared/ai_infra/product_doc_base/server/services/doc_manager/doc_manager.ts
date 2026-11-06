@@ -128,6 +128,10 @@ export class DocumentationManager implements DocumentationManagerAPI {
     }
   }
 
+  private getRepositoryVersion(): Promise<string | undefined> {
+    return this.packageInstaller?.getRepositoryVersion() ?? Promise.resolve(undefined);
+  }
+
   async update(options: DocUpdateOptions): Promise<void> {
     const { request, wait = false, inferenceId, forceUpdate } = options;
 
@@ -136,6 +140,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
       logger: this.logger,
       inferenceId,
       forceUpdate,
+      repositoryVersion: await this.getRepositoryVersion(),
     });
 
     if (request) {
@@ -302,6 +307,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
     this.logger.info(
       `Updating Security Labs content to latest version for Inference IDs: ${idsToUpdate}`
     );
+    const repositoryVersion = await this.getRepositoryVersion();
     await Promise.all(
       idsToUpdate.map((inferenceId) =>
         scheduleEnsureSecurityLabsUpToDateTask({
@@ -309,6 +315,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
           logger: this.logger,
           inferenceId,
           forceUpdate,
+          repositoryVersion,
         })
       )
     );
