@@ -32,22 +32,16 @@ import {
   QUICK_SNOOZE_POPOVER_APPLY,
   QUICK_SNOOZE_POPOVER_SUBTITLE,
   SnoozeFormBody,
+  toApiSnoozeConditions,
   useSnoozeForm,
   type AlertSnoozePayload,
 } from '@kbn/response-ops-alert-snooze';
-import type { SnoozeCondition } from '@kbn/response-ops-alerts-apis/types';
 import {
   useConditionFieldNames,
   type ConditionFieldsSource,
 } from '../hooks/use_condition_field_names';
+import type { EpisodeSnoozePayload } from '../types/episode_data_source';
 import * as i18n from '../actions/translations';
-
-/** An expiry (`null` for indefinite) plus the conditions that lift the snooze early. */
-export interface EpisodeSnoozePayload {
-  snoozedUntil: string | null;
-  conditions?: SnoozeCondition[];
-  conditionOperator?: 'any' | 'all';
-}
 
 export interface SnoozeModalDeps {
   http: HttpStart;
@@ -72,12 +66,13 @@ const toSnoozePayload = ({
   expiresAt,
   conditions,
   conditionOperator,
-}: AlertSnoozePayload): EpisodeSnoozePayload => ({
-  snoozedUntil: expiresAt ?? null,
-  // The panel's condition type is open ended; only the built-in ones are wired
-  // here, and they match the API shape.
-  ...(conditions?.length ? { conditions: conditions as SnoozeCondition[], conditionOperator } : {}),
-});
+}: AlertSnoozePayload): EpisodeSnoozePayload => {
+  const apiConditions = toApiSnoozeConditions(conditions);
+  return {
+    snoozedUntil: expiresAt ?? null,
+    ...(apiConditions.length ? { conditions: apiConditions, conditionOperator } : {}),
+  };
+};
 
 const SnoozeModal = ({
   http,

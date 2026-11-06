@@ -11,6 +11,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { TimeRange } from '@kbn/es-query';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { SnoozeCondition, SnoozeConditionOperator } from '@kbn/response-ops-alerts-apis/types';
 import type {
   AlertEpisode,
   EpisodesFilterState,
@@ -106,6 +107,13 @@ export interface SourceActionResult {
   failed: number;
   unchanged?: number;
   errors?: string[];
+}
+
+/** An expiry (`null` for indefinite) plus the conditions that lift the snooze early. */
+export interface EpisodeSnoozePayload {
+  snoozedUntil: string | null;
+  conditions?: SnoozeCondition[];
+  conditionOperator?: SnoozeConditionOperator;
 }
 
 /**

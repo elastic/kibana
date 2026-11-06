@@ -15,11 +15,14 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { QueryClient } from '@kbn/react-query';
-import type { EpisodeActionExtension, EpisodeDataSource } from '../types/episode_data_source';
+import type {
+  EpisodeActionExtension,
+  EpisodeDataSource,
+  EpisodeSnoozePayload,
+} from '../types/episode_data_source';
 import type { AlertEpisode } from '../queries/episodes_query';
 import { isSourceEpisode } from '../queries/episodes_query';
 import { withEpisodeWritePrivilege, type CanWriteEpisode } from '../utils/episode_write_privilege';
-import type { EpisodeSnoozePayload } from '../components/snooze_modal';
 import type { EpisodeAction } from './types';
 import { createAckAction } from './ack';
 import { createUnackAction } from './unack';
