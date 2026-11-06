@@ -35,7 +35,12 @@ interface ServiceLinkProps {
   serviceName: string;
   serviceOverflowCount?: number;
 }
-export function ServiceLink({ agentName, query, serviceName }: ServiceLinkProps) {
+export function ServiceLink({
+  agentName,
+  query,
+  serviceName,
+  serviceOverflowCount,
+}: ServiceLinkProps) {
   const apmRouter = useApmRouter();
 
   const serviceLink = isMobileAgentName(agentName)
@@ -60,7 +65,7 @@ export function ServiceLink({ agentName, query, serviceName }: ServiceLinkProps)
             iconType="warning"
           >
             <EuiText style={{ width: `${unit * 28}px` }} size="s">
-              <MaxGroupsMessage />
+              <MaxGroupsMessage serviceOverflowCount={serviceOverflowCount} />
             </EuiText>
           </PopoverTooltip>
         </EuiFlexItem>
