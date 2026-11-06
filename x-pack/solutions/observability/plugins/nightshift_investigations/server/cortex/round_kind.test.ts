@@ -6,7 +6,8 @@
  */
 
 import { buildAlertRecoveredFollowUpMessage } from '../client/build_investigation_message';
-import { classifyCortexRound } from './round_kind';
+import { FOLLOW_UP_PREAMBLE } from '../client/investigation_subjects';
+import { classifyCortexRound, extractUserText, shouldOptimizeRound } from './round_kind';
 
 describe('classifyCortexRound', () => {
   it('recognises the message Nightshift builds for a recovered alert', () => {
@@ -32,5 +33,68 @@ describe('classifyCortexRound', () => {
     expect(classifyCortexRound({ userMessage: 'Why is checkout slow?', roundIndex })).toBe(
       'initial'
     );
+  });
+});
+
+describe('extractUserText', () => {
+  it('returns a bare message as it is, without surrounding whitespace', () => {
+    expect(extractUserText('  check the cache  ')).toBe('check the cache');
+  });
+
+  it('drops the follow-up preamble and the trailing context and guidance', () => {
+    expect(
+      extractUserText(
+        `${FOLLOW_UP_PREAMBLE}\n\nlook at the DNS publisher\n\nAdditional Instructions:\nBe brief.\n\nAdditional context: {"a":1}`
+      )
+    ).toBe('look at the DNS publisher');
+  });
+});
+
+describe('shouldOptimizeRound', () => {
+  const correction = 'You never checked what the DNS publisher depends on.';
+
+  it.each([
+    ['initial', 2, 'Why is checkout slow?', false],
+    ['initial', 3, 'Why is checkout slow?', true],
+    ['follow_up', 0, 'thanks', false],
+    ['follow_up', 0, 'ok, that makes sense', false],
+    ['follow_up', 0, correction, true],
+    ['follow_up', 1, 'thanks', true],
+    ['alert_recovery', 0, 'An alert in this investigation has recovered.', true],
+  ] as const)('%s with %s sandbox calls and "%s" runs: %s', (roundKind, count, message, runs) => {
+    expect(
+      shouldOptimizeRound({ roundKind, sandboxToolCallCount: count, userMessage: message })
+    ).toBe(runs);
+  });
+
+  // Nightshift wraps a follow-up it starts, which alone is far longer than the length gate.
+  const wrapped = (text: string) =>
+    `${FOLLOW_UP_PREAMBLE}\n\n${text}\n\n\n\nAdditional context: {"is_follow_up":true,"source":"manual"}`;
+
+  it('measures what the user wrote, not the wrapper Nightshift adds around a follow-up', () => {
+    expect(
+      shouldOptimizeRound({
+        roundKind: 'follow_up',
+        sandboxToolCallCount: 0,
+        userMessage: wrapped('thanks'),
+      })
+    ).toBe(false);
+    expect(
+      shouldOptimizeRound({
+        roundKind: 'follow_up',
+        sandboxToolCallCount: 0,
+        userMessage: wrapped(correction),
+      })
+    ).toBe(true);
+  });
+
+  it('does not count surrounding whitespace towards the length of a follow-up', () => {
+    expect(
+      shouldOptimizeRound({
+        roundKind: 'follow_up',
+        sandboxToolCallCount: 0,
+        userMessage: `   thanks${' '.repeat(60)}`,
+      })
+    ).toBe(false);
   });
 });

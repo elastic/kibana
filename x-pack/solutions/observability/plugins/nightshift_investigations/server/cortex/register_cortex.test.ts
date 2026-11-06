@@ -216,13 +216,26 @@ describe('runCortexOptimize', () => {
   it('learns from a follow-up round that made fewer than three tool calls', async () => {
     await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, {
       calls: [],
-      userMessage: 'You never checked the session cache.',
+      userMessage: 'You never checked the session cache that checkout depends on.',
       roundIndex: 1,
     });
 
     expect(optimizeCortex).toHaveBeenCalledWith(
       expect.objectContaining({ roundKind: 'follow_up', toolCalls: [] })
     );
+  });
+
+  // Every later turn in the conversation is a follow-up, including "thanks". It has no tool calls
+  // and nothing to learn from, so it must not cost a model call.
+  it('skips a follow-up that is only a pleasantry', async () => {
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, {
+      calls: [],
+      userMessage: 'thanks',
+      roundIndex: 1,
+    });
+
+    expect(optimizeCortex).not.toHaveBeenCalled();
+    expect(createModelProvider).not.toHaveBeenCalled();
   });
 
   it('learns from an alert-recovery round that made fewer than three tool calls', async () => {
