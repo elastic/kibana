@@ -59,3 +59,29 @@ export const getDescriptionError = (description: string): string | undefined => 
     });
   }
 };
+
+/** The longest value Fleet stores for a setting of the onboarding record. */
+export const MAX_PROXY_URL_LENGTH = 1024;
+
+/** The proxy URL is optional. When set, it must be an `http` or `https` URL. */
+export const getProxyUrlError = (proxyUrl: string): string | undefined => {
+  const trimmed = proxyUrl.trim();
+  if (!trimmed) return undefined;
+  if (trimmed.length > MAX_PROXY_URL_LENGTH) {
+    return i18n.translate('xpack.ingestHub.integrationSettings.proxyUrl.tooLongError', {
+      defaultMessage: 'The proxy URL must be {max} characters or less.',
+      values: { max: MAX_PROXY_URL_LENGTH },
+    });
+  }
+  let protocol: string | undefined;
+  try {
+    protocol = new URL(trimmed).protocol;
+  } catch {
+    // Reported below.
+  }
+  if (protocol !== 'http:' && protocol !== 'https:') {
+    return i18n.translate('xpack.ingestHub.integrationSettings.proxyUrl.invalidError', {
+      defaultMessage: 'Enter a valid proxy URL starting with http:// or https://.',
+    });
+  }
+};

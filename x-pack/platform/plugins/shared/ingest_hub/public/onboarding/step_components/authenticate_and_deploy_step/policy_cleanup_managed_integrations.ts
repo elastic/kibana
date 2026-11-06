@@ -28,7 +28,11 @@ import {
   toOnboardingDeploymentQuery,
 } from './policy_cleanup';
 import type { BuildPolicyBodyOpts, PolicyCleanupOps } from './policy_cleanup';
-import { getPolicySettingsUpdate } from '../../common/policy_settings';
+import {
+  getPolicySettingsUpdate,
+  getPolicyVarSettings,
+  getPolicyVarSettingsUpdate,
+} from '../../common/policy_settings';
 
 export interface CleanupManagedIntegrationsOpts extends BuildPolicyBodyOpts {
   pendingCleanupPolicyIds: Record<string, string>;
@@ -190,7 +194,12 @@ export async function updateManagedIntegrationsPolicy(
   }
 
   const services = members.map(({ service }) => service);
-  const inputs = buildPackageInputs(services, serviceVarsMap, globalRegion);
+  const inputs = buildPackageInputs(
+    services,
+    serviceVarsMap,
+    globalRegion,
+    getPolicyVarSettings(policySettings, 'managed_integration')
+  );
 
   // Explicitly disable unrelated inputs (Fleet may enable them by manifest default).
   const pkgTemplates: Array<{
@@ -242,7 +251,8 @@ export async function updateManagedIntegrationsPolicy(
     undefined,
     cloudConnector
       ? undefined
-      : authenticateAndDeployStep.existingSecretRefs ?? detectSecretRefs(existingGetResult.item)
+      : authenticateAndDeployStep.existingSecretRefs ?? detectSecretRefs(existingGetResult.item),
+    getPolicyVarSettingsUpdate(policySettings, 'managed_integration', pkgVarNames)
   );
 
   await sendUpdateAgentlessPolicy(
