@@ -101,6 +101,7 @@ const stepUpdatesToEvents = (
             toolCallGroupId: step.tool_call_group_id,
             toolOrigin: step.tool_origin,
             toolType: step.tool_type,
+            intent: step.intent,
           })
         );
       }

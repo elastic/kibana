@@ -72,8 +72,8 @@ dependsOn:
   - '@kbn/core-http-browser-mocks'
   - '@kbn/core-application-browser'
   - '@kbn/security-solution-distribution-bar'
+  - '@kbn/security-solution-navigation'
   - '@kbn/test-jest-helpers'
-  - '@kbn/user-profile-components'
   - '@kbn/proposals-common'
   - '@kbn/proposals-plugin'
   - '@kbn/security-mitre-attack-common'
@@ -92,12 +92,15 @@ dependsOn:
   - '@kbn/telemetry-plugin'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/core-elasticsearch-server-mocks'
+  - '@kbn/core-test-helpers-kbn-server'
+  - '@kbn/workflows-execution-engine'
 tags:
   - plugin
   - prod
   - group-security
   - private
   - jest-unit-tests
+  - jest-integration-tests
 fileGroups:
   src:
     - common/**/*

@@ -34,7 +34,7 @@ import {
   isQueryESQLControl,
   isStaticESQLControl,
 } from '@kbn/esql-types';
-import { getESQLQueryVariables, hasStartEndParams } from '@kbn/esql-utils';
+import { castESQLValue, getESQLQueryVariables, hasStartEndParams } from '@kbn/esql-utils';
 import {
   apiHasSections,
   fetch$,
@@ -49,7 +49,6 @@ import {
 import { dataService } from '../../services/kibana_services';
 import { initializeTemporayStateManager } from '../data_controls/options_list_control/temporay_state_manager';
 import type { ESQLOptionsListRuntimeState } from './types';
-import { castESQLValue } from './utils/esql_type_utils';
 import { getControlsTimezone } from '../utils';
 
 function selectedOptionsComparatorFunction(a?: OptionsListSelection[], b?: OptionsListSelection[]) {

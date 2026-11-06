@@ -18,6 +18,20 @@ export const DIGITAL_EXPERIENCE_EBT_ACTIONS = {
   SELECT_COLUMNS: 'selectColumns',
   /** The user loads the list again after it failed. */
   RETRY_LOAD: 'retryLoad',
+  /** The user sets up sessions, or updates them. */
+  ENABLE_SESSIONS: 'enableSessions',
+  /** The user opens the sessions list narrowed to what they clicked, e.g. a browser. */
+  VIEW_SESSIONS: 'viewSessions',
+  /** The user opens the full list behind a summary, e.g. every error from the Overview. */
+  VIEW_ALL: 'viewAll',
+  /** The user opens a session's details. */
+  VIEW_SESSION: 'viewSession',
+  /** The user jumps from the session timeline to one of its page visits. */
+  SELECT_PAGE_VISIT: 'selectPageVisit',
+  /** The user leaves a session for the sessions list. */
+  BACK_TO_SESSIONS: 'backToSessions',
+  /** The user clears the list's search and filters. */
+  CLEAR_FILTERS: 'clearFilters',
 } as const;
 
 /*
@@ -28,6 +42,7 @@ export const DIGITAL_EXPERIENCE_EBT_ACTIONS = {
 /** Elements that more than one page shows. */
 export const DIGITAL_EXPERIENCE_EBT_ELEMENTS = {
   ENVIRONMENT_FILTER: 'environmentFilter',
+  INSTRUMENTATION_DOCS_LINK: 'instrumentationDocsLink',
 } as const;
 
 export const APPLICATIONS_LIST_EBT_ELEMENTS = {
@@ -42,4 +57,43 @@ export const APPLICATIONS_LIST_EBT_ELEMENTS = {
 
 export const APPLICATION_OVERVIEW_EBT_ELEMENTS = {
   RETRY: 'overviewRetry',
+  USAGE_RETRY: 'overviewUsageRetry',
+  BROWSER_SESSIONS_LINK: 'overviewBrowserSessionsLink',
+  OS_SESSIONS_LINK: 'overviewOsSessionsLink',
+  BROWSER_FILTER: 'overviewBrowserFilter',
+  OS_FILTER: 'overviewOsFilter',
+  DEVICE_FILTER: 'overviewDeviceFilter',
+  COUNTRY_FILTER: 'overviewCountryFilter',
+  PAGE_FILTER: 'overviewPageFilter',
+  CLEAR_FILTERS: 'overviewClearFilters',
+} as const;
+
+export const ERRORS_EBT_ELEMENTS = {
+  RETRY: 'errorsRetry',
+  ERROR: 'errorsError',
+  VIEW_ALL: 'errorsViewAll',
+} as const;
+
+export const NETWORK_EBT_ELEMENTS = {
+  RETRY: 'networkRetry',
+  RENDER_BLOCKING_FILTER: 'networkRenderBlockingFilter',
+} as const;
+
+export const SESSIONS_EBT_ELEMENTS = {
+  ENABLE: 'sessionsEnable',
+  UPDATE: 'sessionsUpdate',
+  RETRY: 'sessionsRetry',
+  SESSION_RETRY: 'sessionRetry',
+  SESSION_LINK: 'sessionLink',
+  ERRORS_FILTER: 'sessionsErrorsFilter',
+  DURATION_FILTER: 'sessionsDurationFilter',
+  BROWSER_FILTER: 'sessionsBrowserFilter',
+  OS_FILTER: 'sessionsOsFilter',
+  COUNTRY_FILTER: 'sessionsCountryFilter',
+  ENTRY_PAGE_FILTER: 'sessionsEntryPageFilter',
+  CLEAR_FILTERS: 'sessionsClearFilters',
+  WATERFALL_PAGE: 'sessionWaterfallPage',
+  DOCS_LINK: 'sessionsDocsLink',
+  COLUMN_SELECTOR: 'sessionsColumnSelector',
+  SESSION_NOT_FOUND_BACK: 'sessionNotFoundBack',
 } as const;
