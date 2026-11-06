@@ -88,6 +88,7 @@ export function registerUpdateApiKey(router: EntityStorePluginRouter) {
         'Tasks that could not be updated are listed in `failed`; call the endpoint again to retry them.',
       options: {
         tags: ['oas-tag:Security entity store'],
+        availability: { stability: 'stable', since: '9.6.0' },
       },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

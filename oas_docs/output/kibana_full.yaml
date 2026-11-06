@@ -90860,6 +90860,7 @@ paths:
           source: |
             POST kbn://api/security/entity_store/update_api_key
             {}
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
