@@ -26,7 +26,7 @@ dependsOn:
   - '@kbn/expandable-flyout'
 tags:
   - plugin
-  - prod
+  - dev
   - group-security
   - private
 fileGroups:

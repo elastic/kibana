@@ -158,6 +158,7 @@
     "xpack.reindexService": "platform/plugins/private/reindex_service",
     "xpack.remoteClusters": "platform/plugins/private/remote_clusters",
     "xpack.reporting": ["platform/plugins/private/reporting"],
+    "xpack.resolverTest": "solutions/security/test_plugins/resolver_test",
     "xpack.rollupJobs": ["platform/packages/private/rollup", "platform/plugins/private/rollup"],
     "xpack.runtimeFields": "platform/plugins/private/runtime_fields",
     "xpack.screenshotting": "platform/plugins/shared/screenshotting",
