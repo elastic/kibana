@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { debounceTime, merge, Observable } from 'rxjs';
+import { debounceTime, filter, merge, Observable, tap } from 'rxjs';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { UpdateOriginResponse } from '@kbn/agent-builder-common';
@@ -28,7 +28,6 @@ import {
 } from './apply_attachment';
 import { toShownVersionKey, type AppliedAttachmentsStore } from './applied_attachments_store';
 import { createAgentLiveUpdatesSubscription } from './agent_live_updates_subscription';
-import { createNewAttachmentIdRegenerationSubscription } from './new_attachment_id_regeneration_subscription';
 import { createOriginSyncSubscription } from './origin_sync_subscription';
 import { getLinkedAttachment } from './linked_attachment';
 import type { IdGenerator } from '..';
@@ -94,7 +93,6 @@ export const registerDashboardAppIntegration = ({
 
   // dashboard data this dashboard staged in the chat input, per attachment id
   const stagedAttachmentData = new Map<string, DashboardAttachmentData>();
-  let pendingSyncTimeout: ReturnType<typeof setTimeout> | undefined;
 
   // removes what this dashboard staged in the chat input, except the attachment `keepId`
   const unstage = (keepId?: string) => {
@@ -173,8 +171,8 @@ export const registerDashboardAppIntegration = ({
     updatePendingVersion(dashboard);
   };
 
-  const conversationChangesSubscription = agentBuilder.events.ui.activeConversation$.subscribe(
-    (change) => {
+  const conversationChanges$ = agentBuilder.events.ui.activeConversation$.pipe(
+    tap((change) => {
       if (!change) {
         state.versionedAttachments = [];
         state.liveUpdates.clear();
@@ -193,16 +191,22 @@ export const registerDashboardAppIntegration = ({
       state.versionedAttachments = conversation?.attachments?.filter(isDashboardAttachment) ?? [];
       state.liveUpdates.clear();
       state.conversationId = conversationId;
-      // we have to defer syncing until after the active conversation change has fully propagated, otherwise sidebarCallbacks from agent builder are null
-      if (pendingSyncTimeout !== undefined) {
-        clearTimeout(pendingSyncTimeout);
+      // once the draft is in the conversation, later changes are staged under a new id
+      if (state.versionedAttachments.some(({ id }) => id === draftAttachmentId.current)) {
+        draftAttachmentId.next();
       }
-      pendingSyncTimeout = setTimeout(() => {
-        pendingSyncTimeout = undefined;
-        syncWithConversation();
-      });
-    }
+    }),
+    filter(Boolean),
+    // syncing waits for the conversation change to propagate, otherwise agent builder's sidebar callbacks are null
+    debounceTime(0)
   );
+
+  // an apply ignores the state changes it causes, so compare again once it finished
+  const syncSubscription = merge(
+    conversationChanges$,
+    api.anyStateChange$.pipe(debounceTime(MANUAL_CHANGES_DEBOUNCE_MS)),
+    appliedAttachments.applyFinished$
+  ).subscribe(() => syncWithConversation());
 
   const agentLiveUpdatesSubscription = createAgentLiveUpdatesSubscription({
     agentBuilder,
@@ -214,11 +218,6 @@ export const registerDashboardAppIntegration = ({
     onOtherDashboardUpdated: notifyOtherDashboardUpdated,
   });
 
-  const newAttachmentIdRegenerationSubscription = createNewAttachmentIdRegenerationSubscription({
-    agentBuilder,
-    draftAttachmentId,
-  });
-
   const originSyncSubscription = createOriginSyncSubscription({
     api,
     store: appliedAttachments,
@@ -226,26 +225,11 @@ export const registerDashboardAppIntegration = ({
     updateOrigin: (id: string, origin: string) => getUpdateOrigin(id)?.(origin),
   });
 
-  // an apply ignores the state changes it causes, so compare again once it finished
-  const dashboardChangesSubscription = merge(
-    api.anyStateChange$.pipe(debounceTime(MANUAL_CHANGES_DEBOUNCE_MS)),
-    appliedAttachments.applyFinished$
-  ).subscribe(syncWithConversation);
-
   return () => {
     agentLiveUpdatesSubscription.unsubscribe();
-    newAttachmentIdRegenerationSubscription.unsubscribe();
     originSyncSubscription.unsubscribe();
-    conversationChangesSubscription.unsubscribe();
-    dashboardChangesSubscription.unsubscribe();
+    syncSubscription.unsubscribe();
     appliedAttachments.setShownVersions();
-    if (pendingSyncTimeout !== undefined) {
-      clearTimeout(pendingSyncTimeout);
-      pendingSyncTimeout = undefined;
-    }
-    state.versionedAttachments = [];
-    state.liveUpdates.clear();
-    state.conversationId = undefined;
     // the staged dashboard belongs to this dashboard, so drop it from the chat input when leaving;
     // attachments already sent stay in the conversation
     unstage();
