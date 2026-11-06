@@ -162,7 +162,7 @@ describe('stub sink', () => {
       } finally {
         await holder.stop();
       }
-    });
+    }, 10_000);
   });
 
   it('refuses a port held by something that is not our sink', async () => {

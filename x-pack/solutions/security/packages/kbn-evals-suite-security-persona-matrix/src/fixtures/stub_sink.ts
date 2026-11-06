@@ -49,6 +49,8 @@ const createSinkServer = (): http.Server =>
 /** True when something on the loopback port answers `GET /` with our marker header. */
 const isOurSink = (port: number): Promise<boolean> =>
   new Promise((resolve) => {
+    // Options-object form with a literal `path` is required by the js/kibana/unsafe-dynamic-http-path
+    // CodeQL query; do not turn this back into a URL string.
     const req = http.get(
       { host: SINK_HOST, port, path: '/', agent: false, timeout: PROBE_TIMEOUT_MS },
       (res) => {

@@ -14,24 +14,23 @@ import { PARITY_WORKFLOWS, VT_HASH_LOOKUP_WORKFLOW_ID } from './parity_workflows
 
 // This suite exercises the parity profile end to end, so force it before the
 // seed modules are loaded — regardless of the caller's SEED_PROFILE — and load
-// them inside isolateModules so they read the forced value. Nothing from
+// them inside isolateModulesAsync so they read the forced value. Nothing from
 // './chrysalis_seed' (or './persona_matrix_tools_seed', which imports it) may be
 // statically imported: the module validates SEED_PROFILE at initialization, and
-// a static import would evaluate it before the forced value below is set
-// (failing collection even when skipped). Restore the original value afterwards
-// so 'parity' cannot leak into sibling suites sharing this worker.
-const outerSeedProfile = process.env.SEED_PROFILE;
-process.env.SEED_PROFILE = 'parity';
+// a static import would evaluate it before the forced value is set. The forcing
+// and loading happen in beforeAll, and afterAll restores the original value so
+// 'parity' cannot leak into sibling suites sharing this worker.
+let outerSeedProfile: string | undefined;
 let chrysalisSeed: typeof import('./chrysalis_seed');
 let toolsSeed: typeof import('./persona_matrix_tools_seed');
-jest.isolateModules(() => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  chrysalisSeed = require('./chrysalis_seed');
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  toolsSeed = require('./persona_matrix_tools_seed');
+beforeAll(async () => {
+  outerSeedProfile = process.env.SEED_PROFILE;
+  process.env.SEED_PROFILE = 'parity';
+  await jest.isolateModulesAsync(async () => {
+    chrysalisSeed = await import('./chrysalis_seed');
+    toolsSeed = await import('./persona_matrix_tools_seed');
+  });
 });
-const { seedChrysalisAlerts, cleanupChrysalisAlerts, ALERT_INDEX } = chrysalisSeed!;
-const { seedPersonaMatrixTools, cleanupPersonaMatrixTools } = toolsSeed!;
 afterAll(() => {
   if (outerSeedProfile === undefined) {
     delete process.env.SEED_PROFILE;
@@ -48,6 +47,8 @@ const run = process.env.PERSONA_MATRIX_LIVE_ES ? it : it.skip;
 run(
   'dedicated Elasticsearch: foreign telemetry survives parity seed, lookup, cleanup, and reseed',
   async () => {
+    const { seedChrysalisAlerts, cleanupChrysalisAlerts, ALERT_INDEX } = chrysalisSeed;
+    const { seedPersonaMatrixTools, cleanupPersonaMatrixTools } = toolsSeed;
     const esClient = new EsClient({
       node: process.env.PERSONA_MATRIX_LIVE_ES,
       auth: {
@@ -130,7 +131,7 @@ run(
       });
       await seedChrysalisAlerts({ esClient, log });
       await seedPersonaMatrixTools({ kbnClient, log });
-      await chrysalisSeed!.assertParityDataGate({ esClient, log });
+      await chrysalisSeed.assertParityDataGate({ esClient, log });
       for (const id of ['vt.hash.lookup', 'check.on.call.schedule']) {
         const response = await esClient.esql.query({ query: queries[id] });
         console.log(`shim ${id} rows=${response.values.length}`);
