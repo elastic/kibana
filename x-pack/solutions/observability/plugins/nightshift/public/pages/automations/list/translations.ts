@@ -126,7 +126,7 @@ export const globalLimitLabels = {
     }),
   body: i18n.translate('xpack.nightshift.automations.globalLimitBannerBody', {
     defaultMessage:
-      'Further triggers will be skipped until the limit resets at midnight (UTC). Already started investigations will continue. You can still trigger investigations manually',
+      'Further triggers will be skipped until the limit resets at midnight (UTC). Already started investigations will continue.',
   }),
   getTotalTitle: (limit: number) =>
     i18n.translate('xpack.nightshift.automations.totalLimitBannerTitle', {

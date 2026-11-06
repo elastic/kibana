@@ -20,13 +20,14 @@ const EVENT = { type: 'significant_event' as const, id: 'event-1' };
 const setup = (startMs = Date.parse('2026-09-01T00:00:00.000Z')) => {
   const storage = createInMemoryStorage<SubjectClaimDocument>();
   let nowMs = startMs;
-  const service = new SubjectClaimsService({ storage, now: () => nowMs });
+  const wait = jest.fn().mockResolvedValue(undefined);
+  const service = new SubjectClaimsService({ storage, now: () => nowMs, wait });
   const advance = (ms: number) => {
     nowMs += ms;
   };
   const holderOf = (subject: typeof ALERT | typeof EVENT, spaceId = SPACE_ID) =>
     storage.entries.get(subjectClaimId(spaceId, subject))?.source.conversationId;
-  return { storage, service, advance, holderOf };
+  return { storage, service, advance, holderOf, wait };
 };
 
 const isOpen = (open: boolean) => jest.fn().mockResolvedValue(open);
@@ -242,6 +243,38 @@ describe('SubjectClaimsService', () => {
         isHolderOpen: isOpen(true),
       })
     ).resolves.toEqual({ claimed: false, heldBy: 'conv-1' });
+  });
+
+  it('waits for a concurrent claim that is not searchable yet and reports its holder', async () => {
+    const { storage, service, wait } = setup();
+    const id = subjectClaimId(SPACE_ID, ALERT);
+    const index = storage.index as jest.Mock;
+    const realIndex = index.getMockImplementation();
+    index.mockImplementationOnce(async (request) => {
+      storage.put(id, {
+        spaceId: SPACE_ID,
+        conversationId: 'conv-1',
+        subjectType: 'alert',
+        subjectId: 'alert-1',
+        claimedAt: new Date().toISOString(),
+      });
+      return realIndex?.(request);
+    });
+    // The concurrent claim only shows up in searches after an index refresh.
+    const search = storage.search as jest.Mock;
+    for (let read = 0; read < 3; read++) {
+      search.mockResolvedValueOnce({ hits: { hits: [] } });
+    }
+
+    await expect(
+      service.claim({
+        spaceId: SPACE_ID,
+        conversationId: 'conv-2',
+        subjects: [ALERT],
+        isHolderOpen: isOpen(true),
+      })
+    ).resolves.toEqual({ claimed: false, heldBy: 'conv-1' });
+    expect(wait.mock.calls).toEqual([[100], [200], [400]]);
   });
 
   it('claims on a fresh cluster whose claim index does not exist yet', async () => {

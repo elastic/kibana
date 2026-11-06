@@ -1609,21 +1609,21 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
         expect(await usage()).toBe(0);
       });
 
-      it('keeps both slots when the claim attempt fails', async () => {
+      it('gives both slots back when the claim attempt fails', async () => {
         subjectsClient.claimSubjects.mockRejectedValue(new Error('claim conflict'));
 
         await expect(startWithBudget(1)).rejects.toThrow('claim conflict');
 
-        expect(release).not.toHaveBeenCalled();
-        expect(await usage()).toBe(1);
+        expect(release).toHaveBeenCalledTimes(1);
+        expect(await usage()).toBe(0);
       });
 
-      it('keeps the global slot when the start fails after claiming', async () => {
+      it('gives the global slot back when the start fails after claiming', async () => {
         mockManagement.runWorkflow.mockRejectedValueOnce(new Error('failed'));
 
         await expect(startWithBudget(1)).rejects.toThrow('failed');
 
-        expect(release).not.toHaveBeenCalled();
+        expect(release).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -1636,15 +1636,15 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
         'the agent installation',
         () => installInvestigationAgentMock.mockRejectedValueOnce(new Error('failed')),
       ],
-    ])('keeps the automation slot with the claim when %s fails', async (_step, fail) => {
+    ])('gives the automation slot back when %s fails', async (_step, fail) => {
       fail();
 
       await expect(startWithBudget(1)).rejects.toThrow('failed');
 
-      expect(await usage()).toBe(1);
+      expect(await usage()).toBe(0);
     });
 
-    it('counts once an investigation a retry opens on the claim of a failed start', async () => {
+    it('does not charge a retry that continues the claim of a failed start', async () => {
       mockNewInvestigationId.mockReturnValueOnce('inv-failed');
       mockManagement.runWorkflow.mockRejectedValueOnce(new Error('failed'));
       await expect(startWithBudget(2)).rejects.toThrow('failed');
@@ -1652,7 +1652,7 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
 
       await expect(startWithBudget(2)).resolves.toEqual({ investigation_id: 'inv-failed' });
 
-      expect(await usage()).toBe(1);
+      expect(await usage()).toBe(0);
     });
 
     it('does not use the automation budget for a follow-up or a manual start', async () => {

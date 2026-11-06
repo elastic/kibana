@@ -28,7 +28,7 @@ export type InvestigationRunQuotaGroup = (typeof INVESTIGATION_RUN_QUOTA_GROUPS)
 export const isInvestigationRunQuotaGroup = (
   group: RunQuotaGroup
 ): group is InvestigationRunQuotaGroup =>
-  (INVESTIGATION_RUN_QUOTA_GROUPS as readonly RunQuotaGroup[]).includes(group);
+  INVESTIGATION_RUN_QUOTA_GROUPS.some((candidate) => candidate === group);
 
 export const MIN_RUN_LIMIT = 0;
 export const MAX_RUN_LIMIT = 10_000;

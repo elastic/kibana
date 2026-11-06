@@ -591,8 +591,9 @@ describe('RunLimitsSection', () => {
       'Automations reached a daily run limit of 30 for this deployment'
     );
     expect(callout).toHaveTextContent(
-      'Further triggers will be skipped until the limit resets at midnight (UTC). Already started investigations will continue. You can still trigger investigations manually'
+      'Further triggers will be skipped until the limit resets at midnight (UTC). Already started investigations will continue.'
     );
+    expect(callout).not.toHaveTextContent('You can still trigger investigations manually');
     fireEvent.click(screen.getByTestId('nightshiftRunLimitsOpenAutomations'));
 
     expect(navigateToUrl).toHaveBeenCalledWith('/app/nightshift/automations');

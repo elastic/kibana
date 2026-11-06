@@ -560,86 +560,95 @@ export class NightshiftInvestigationsClient {
       request: this.request,
     });
     const globalBudget = this.createGlobalBudget(trigger_type);
-    const { id: investigationId, recorded } = await this.resolveInvestigation({
-      conversations,
-      agenticInvestigations,
-      subjects,
-      newInvestigationId,
-      // Only a start that opens a new investigation counts against the daily quotas:
-      // a follow-up adds a round to an investigation that was already paid for.
-      assertCanOpenNew: async () => {
-        try {
-          await this.assertQuotaForNewInvestigation(trigger_type, automationBudget, globalBudget);
-        } catch (error) {
-          if (error instanceof InvestigationQuotaDeniedError) {
-            this.telemetry?.reportInvestigationSkipped({
-              trigger: automationId ? 'automation' : 'manual',
-              origin: subject.type,
-              ...(automationId ? { automation_id: automationId } : {}),
-              skip_reason: 'deployment_quota',
-            });
-          }
-          throw error;
-        }
-      },
-    });
-    const isFollowUp = investigationId !== newInvestigationId;
-    if (isFollowUp) {
+    // Both budgets give back only what this start charged, so releasing them again is harmless.
+    const releaseBudgets = async () => {
       await this.releaseBudget(globalBudget);
       await this.releaseBudget(automationBudget);
-    }
-
-    // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
-    // agent exists wherever an investigation runs. This narrower install stays because the run
-    // below executes the *stored* workflow definition, which predates that step until the managed
-    // install has upgraded it — and that install is fire-and-forget. Deliberately without the
-    // step's visibility retry: the workflow owns that, and this request path should not pay for it.
-    await this.installAgents(agentBuilder, spaceId);
-
-    const newSubjects = withoutRecordedSubjects(subjects, recorded);
-    const newAlertIds = new Set(newSubjects.map(({ id }) => id));
-
-    const roundMessage = isFollowUp
-      ? buildFollowUpMessage({
-          subject: resolvedSubject,
-          message: prepared.message,
-          alerts,
-          newAlerts: alerts.filter(({ id }) => newAlertIds.has(id)),
-        })
-      : prepared.message;
-    const inputs = {
-      message: buildInvestigationRoundMessage({
-        message: roundMessage,
-        instructions,
-        isSlackMessage: subject.type === 'slack_thread' && instructions !== undefined,
-      }),
-      // Kept as a workflow input for callers that read it off the run. Agent Builder titles the
-      // investigation from the first round instead.
-      ...(title ? { title } : {}),
-      ...(source_ids?.length ? { source_ids } : {}),
-      ...(connector_id?.trim() ? { connector_id: resolvedConnectorId } : {}),
-      investigation_id: investigationId,
-      subjects: newSubjects,
-      ...(parsedNotificationDestinations?.length
-        ? { notificationDestinations: parsedNotificationDestinations }
-        : {}),
-      context: {
-        ...prepared.context,
-        is_follow_up: isFollowUp,
-        source: resolvedSubject.type,
-        [`${resolvedSubject.type}_id`]: resolvedSubject.id,
-        trigger_type,
-        entry_point: entryPoint,
-        ...(resolvedSubject.summary ? { summary: resolvedSubject.summary } : {}),
-      },
     };
+    let investigationId: string;
+    let isFollowUp: boolean;
+    let executionId: string;
+    // A start that fails before its workflow launches runs nothing, so it gives its slots back.
+    try {
+      const { id: resolvedId, recorded } = await this.resolveInvestigation({
+        conversations,
+        agenticInvestigations,
+        subjects,
+        newInvestigationId,
+        // Only a start that opens a new investigation counts against the daily quotas:
+        // a follow-up adds a round to an investigation that was already paid for.
+        assertCanOpenNew: async () => {
+          try {
+            await this.assertQuotaForNewInvestigation(trigger_type, automationBudget, globalBudget);
+          } catch (error) {
+            if (error instanceof InvestigationQuotaDeniedError) {
+              this.telemetry?.reportInvestigationSkipped({
+                trigger: automationId ? 'automation' : 'manual',
+                origin: subject.type,
+                ...(automationId ? { automation_id: automationId } : {}),
+                skip_reason: 'deployment_quota',
+              });
+            }
+            throw error;
+          }
+        },
+      });
+      investigationId = resolvedId;
+      isFollowUp = investigationId !== newInvestigationId;
+      if (isFollowUp) {
+        await releaseBudgets();
+      }
 
-    const executionId = await this.runInvestigationWorkflow(
-      workflow,
-      spaceId,
-      inputs,
-      timeout_seconds
-    );
+      // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
+      // agent exists wherever an investigation runs. This narrower install stays because the run
+      // below executes the *stored* workflow definition, which predates that step until the managed
+      // install has upgraded it — and that install is fire-and-forget. Deliberately without the
+      // step's visibility retry: the workflow owns that, and this request path should not pay for it.
+      await this.installAgents(agentBuilder, spaceId);
+
+      const newSubjects = withoutRecordedSubjects(subjects, recorded);
+      const newAlertIds = new Set(newSubjects.map(({ id }) => id));
+
+      const roundMessage = isFollowUp
+        ? buildFollowUpMessage({
+            subject: resolvedSubject,
+            message: prepared.message,
+            alerts,
+            newAlerts: alerts.filter(({ id }) => newAlertIds.has(id)),
+          })
+        : prepared.message;
+      const inputs = {
+        message: buildInvestigationRoundMessage({
+          message: roundMessage,
+          instructions,
+          isSlackMessage: subject.type === 'slack_thread' && instructions !== undefined,
+        }),
+        // Kept as a workflow input for callers that read it off the run. Agent Builder titles the
+        // investigation from the first round instead.
+        ...(title ? { title } : {}),
+        ...(source_ids?.length ? { source_ids } : {}),
+        ...(connector_id?.trim() ? { connector_id: resolvedConnectorId } : {}),
+        investigation_id: investigationId,
+        subjects: newSubjects,
+        ...(parsedNotificationDestinations?.length
+          ? { notificationDestinations: parsedNotificationDestinations }
+          : {}),
+        context: {
+          ...prepared.context,
+          is_follow_up: isFollowUp,
+          source: resolvedSubject.type,
+          [`${resolvedSubject.type}_id`]: resolvedSubject.id,
+          trigger_type,
+          entry_point: entryPoint,
+          ...(resolvedSubject.summary ? { summary: resolvedSubject.summary } : {}),
+        },
+      };
+
+      executionId = await this.runInvestigationWorkflow(workflow, spaceId, inputs, timeout_seconds);
+    } catch (error) {
+      await releaseBudgets();
+      throw error;
+    }
 
     if (!isFollowUp) {
       await this.createAcceptedInvestigation({ conversations, investigationId, executionId });
@@ -867,9 +876,8 @@ export class NightshiftInvestigationsClient {
     }
 
     // Charged before the claim, so a denied start claims nothing. A start that then loses the
-    // claim to a concurrent one becomes a follow-up and releases both budgets. A start whose claim
-    // attempt fails keeps its slot, because a concurrent start may already have joined its claims
-    // or a failed rollback may have left them live.
+    // claim to a concurrent one becomes a follow-up and releases both budgets, and a start whose
+    // claim attempt fails gives them back through its caller.
     await assertCanOpenNew();
     const claim = await subjectsClient.claimSubjects({
       conversationId: newInvestigationId,

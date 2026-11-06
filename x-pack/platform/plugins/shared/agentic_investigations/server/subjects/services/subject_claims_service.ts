@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { setTimeout as delay } from 'timers/promises';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
@@ -30,7 +31,13 @@ import {
  */
 export const SUBJECT_CLAIM_PENDING_MS = 2 * 60 * 1000;
 
-const MAX_CLAIM_ATTEMPTS = 3;
+const MAX_CLAIM_ATTEMPTS = 5;
+/**
+ * Claims are read by search, which only sees a concurrent start's new claim after the next index
+ * refresh. Backing off between attempts gives that claim time to become searchable, so the
+ * start that lost the create follows up on it instead of failing.
+ */
+const CLAIM_RETRY_BASE_DELAY_MS = 100;
 const MAX_DELETE_PAGES = 100;
 const DELETE_PAGE_SIZE = 1000;
 
@@ -85,11 +92,19 @@ type ClaimOneOutcome = { taken: boolean } | { heldBy: string };
  */
 export class SubjectClaimsService {
   private readonly now: () => number;
+  private readonly wait: (ms: number) => Promise<unknown>;
   /** Every read of the claim index: a missing index has no hits, unallocated shards are retried. */
   private readonly search: SubjectClaimStorage['search'];
 
-  constructor(private readonly deps: { storage: SubjectClaimStorage; now?: () => number }) {
+  constructor(
+    private readonly deps: {
+      storage: SubjectClaimStorage;
+      now?: () => number;
+      wait?: (ms: number) => Promise<unknown>;
+    }
+  ) {
     this.now = deps.now ?? Date.now;
+    this.wait = deps.wait ?? delay;
     this.search = withTransientSearchRetry<SubjectClaimDocument>((...args) =>
       deps.storage.search(...args)
     );
@@ -208,6 +223,9 @@ export class SubjectClaimsService {
     };
 
     for (let attempt = 0; attempt < MAX_CLAIM_ATTEMPTS; attempt++) {
+      if (attempt > 0) {
+        await this.wait(CLAIM_RETRY_BASE_DELAY_MS * 2 ** (attempt - 1));
+      }
       const existing = await this.findVersioned(id);
       try {
         if (!existing) {

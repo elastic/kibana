@@ -33,7 +33,7 @@ const getExhaustionCopy = (
         }),
         text: i18n.translate('xpack.nightshift.settings.runLimits.exhaustionDescription', {
           defaultMessage:
-            'Further triggers will be skipped until the limit resets at midnight (UTC). Already started investigations will continue. You can still trigger investigations manually',
+            'Further triggers will be skipped until the limit resets at midnight (UTC). Already started investigations will continue.',
         }),
       };
     case 'manual_investigation':
