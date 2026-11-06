@@ -16,22 +16,33 @@ import { generateFakeToolCallId } from '../../../common';
 
 type ChunkOrTokenCountEvent = ChatCompletionChunkEvent | ChatCompletionTokenCountEvent;
 
+interface ToolCallState {
+  /** The id forwarded downstream for the call currently streamed at an index */
+  forwardedToolCallId: string;
+  /** The id the provider sent for that call, once known */
+  providerToolCallId?: string;
+  /** True while the call has a generated id and no provider id arrived for it yet */
+  awaitingProviderToolCallId: boolean;
+}
+
 /**
  * Normalizes the tool call deltas of a chunk stream, so that streaming consumers and the
  * message built from the same chunks see identical tool calls:
  * - a fully empty delta (no id, name nor arguments) for an index with no known id is dropped,
  *   otherwise it surfaces downstream as a tool call with an empty name
  * - the first delta of a call that has no id gets a generated one, since consumers require it
- * - when the first real id of an index that started without one arrives, it is dropped from the
- *   chunk so the call keeps a single id. A later, different id for that index is a new call.
+ * - when the first provider id of an index that started without one arrives, it is dropped from
+ *   the chunk so the call keeps a single id, and repeats of that provider id do the same. A
+ *   different provider id for that index is a new call.
+ * - a provider id that equals an id generated earlier is replaced by a new generated id, so two
+ *   calls never share an id
  */
 export const normalizeToolCallChunks = (): MonoTypeOperatorFunction<ChunkOrTokenCountEvent> => {
   return (source$) =>
     defer(() => {
-      // Latest id seen (or generated) for each tool call index
-      const indexToToolCallId = new Map<number, string>();
-      // Generated ids that have not been replaced by a real id yet
-      const pendingGeneratedIds = new Set<string>();
+      const indexToState = new Map<number, ToolCallState>();
+      const generatedToolCallIds = new Set<string>();
+      // Every id forwarded so far, generated or not
       const usedToolCallIds = new Set<string>();
 
       const generateToolCallId = (): string => {
@@ -39,6 +50,7 @@ export const normalizeToolCallChunks = (): MonoTypeOperatorFunction<ChunkOrToken
         while (usedToolCallIds.has(toolCallId)) {
           toolCallId = generateFakeToolCallId();
         }
+        generatedToolCallIds.add(toolCallId);
         usedToolCallIds.add(toolCallId);
         return toolCallId;
       };
@@ -51,19 +63,38 @@ export const normalizeToolCallChunks = (): MonoTypeOperatorFunction<ChunkOrToken
 
           const toolCalls = event.tool_calls.flatMap((toolCall) => {
             const { index, toolCallId, function: toolFunction } = toolCall;
-            const knownToolCallId = indexToToolCallId.get(index);
+            const state = indexToState.get(index);
 
             if (toolCallId) {
-              if (knownToolCallId && pendingGeneratedIds.has(knownToolCallId)) {
-                pendingGeneratedIds.delete(knownToolCallId);
+              if (state?.awaitingProviderToolCallId) {
+                state.awaitingProviderToolCallId = false;
+                state.providerToolCallId = toolCallId;
                 return [{ ...toolCall, toolCallId: '' }];
               }
-              indexToToolCallId.set(index, toolCallId);
-              usedToolCallIds.add(toolCallId);
-              return [toolCall];
+
+              if (state?.providerToolCallId === toolCallId) {
+                // Repeat of the id of the call being streamed: unchanged unless it was replaced
+                return [
+                  {
+                    ...toolCall,
+                    toolCallId: state.forwardedToolCallId === toolCallId ? toolCallId : '',
+                  },
+                ];
+              }
+
+              const forwardedToolCallId = generatedToolCallIds.has(toolCallId)
+                ? generateToolCallId()
+                : toolCallId;
+              usedToolCallIds.add(forwardedToolCallId);
+              indexToState.set(index, {
+                forwardedToolCallId,
+                providerToolCallId: toolCallId,
+                awaitingProviderToolCallId: false,
+              });
+              return [{ ...toolCall, toolCallId: forwardedToolCallId }];
             }
 
-            if (knownToolCallId) {
+            if (state) {
               return [toolCall];
             }
 
@@ -72,8 +103,10 @@ export const normalizeToolCallChunks = (): MonoTypeOperatorFunction<ChunkOrToken
             }
 
             const generatedToolCallId = generateToolCallId();
-            indexToToolCallId.set(index, generatedToolCallId);
-            pendingGeneratedIds.add(generatedToolCallId);
+            indexToState.set(index, {
+              forwardedToolCallId: generatedToolCallId,
+              awaitingProviderToolCallId: true,
+            });
             return [{ ...toolCall, toolCallId: generatedToolCallId }];
           });
 

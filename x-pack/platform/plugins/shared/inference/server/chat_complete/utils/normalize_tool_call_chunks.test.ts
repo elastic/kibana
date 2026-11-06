@@ -11,6 +11,7 @@ import type {
   ChatCompletionTokenCountEvent,
 } from '@kbn/inference-common';
 import { ChatCompletionEventType } from '@kbn/inference-common';
+import * as commonModule from '../../../common';
 import { normalizeToolCallChunks } from './normalize_tool_call_chunks';
 
 const chunk = (
@@ -120,6 +121,62 @@ describe('normalizeToolCallChunks', () => {
     ];
 
     expect(await normalize(events)).toEqual(events);
+  });
+
+  it('keeps one call when the first real id is repeated in later deltas', async () => {
+    const result = (await normalize([
+      chunk({ index: 0, toolCallId: '', name: 'myFunction', args: '{ "a": ' }),
+      chunk({ index: 0, toolCallId: 'real-id', name: '', args: '1, ' }),
+      chunk({ index: 0, toolCallId: 'real-id', name: '', args: '"b": 2 }' }),
+      chunk({ index: 0, toolCallId: 'other-id', name: 'secondFunction', args: '{}' }),
+    ])) as ChatCompletionChunkEvent[];
+
+    expect(result.map((event) => event.tool_calls[0].toolCallId)).toEqual([
+      expect.stringMatching(/.+/),
+      '',
+      '',
+      'other-id',
+    ]);
+  });
+
+  describe('when a real id equals an id generated earlier', () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('forwards a different id for the real one, in a later chunk', async () => {
+      jest.spyOn(commonModule, 'generateFakeToolCallId').mockReturnValueOnce('dup-id');
+
+      const result = (await normalize([
+        chunk({ index: 0, toolCallId: '', name: 'idlessFunction', args: '{}' }),
+        chunk({ index: 1, toolCallId: 'dup-id', name: 'realFunction', args: '{ ' }),
+        chunk({ index: 1, toolCallId: '', name: '', args: '}' }),
+        chunk({ index: 1, toolCallId: 'dup-id', name: '', args: '' }),
+      ])) as ChatCompletionChunkEvent[];
+
+      const [idless, real, continuation, repeat] = result.map((event) => event.tool_calls[0]);
+      expect(idless.toolCallId).toBe('dup-id');
+      expect(real.toolCallId).not.toBe('');
+      expect(real.toolCallId).not.toBe('dup-id');
+      expect(continuation.toolCallId).toBe('');
+      expect(repeat.toolCallId).toBe('');
+    });
+
+    it('forwards a different id for the real one, in the same chunk', async () => {
+      jest.spyOn(commonModule, 'generateFakeToolCallId').mockReturnValueOnce('dup-id');
+
+      const result = (await normalize([
+        chunk(
+          { index: 0, toolCallId: '', name: 'idlessFunction', args: '{}' },
+          { index: 1, toolCallId: 'dup-id', name: 'realFunction', args: '{}' }
+        ),
+      ])) as ChatCompletionChunkEvent[];
+
+      const ids = result[0].tool_calls.map((toolCall) => toolCall.toolCallId);
+      expect(ids[0]).toBe('dup-id');
+      expect(ids[1]).not.toBe('');
+      expect(new Set(ids).size).toBe(2);
+    });
   });
 
   it('passes token count events through', async () => {
