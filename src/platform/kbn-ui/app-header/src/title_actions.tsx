@@ -35,6 +35,19 @@ const REMOVE_FROM_STARRED_LABEL = i18n.translate('kbnUI.appHeader.favoriteRemove
   defaultMessage: 'Remove from Starred',
 });
 
+const PIN_LABEL = i18n.translate('kbnUI.appHeader.pinAddLabel', {
+  defaultMessage: 'Pin',
+});
+
+const UNPIN_LABEL = i18n.translate('kbnUI.appHeader.pinRemoveLabel', {
+  defaultMessage: 'Unpin',
+});
+
+const FAVORITE_LABELS = {
+  star: { add: ADD_TO_STARRED_LABEL, remove: REMOVE_FROM_STARRED_LABEL },
+  pin: { add: PIN_LABEL, remove: UNPIN_LABEL },
+} as const;
+
 const ENHANCE_LABEL = i18n.translate('kbnUI.appHeader.enhanceButtonLabel', {
   defaultMessage: 'Enhance',
 });
@@ -137,6 +150,7 @@ export const TitleActions = React.memo<TitleActionsProps>(
     const shareTooltipContent = asOptionalPlainText(shareAction?.tooltip?.content);
     const shareTooltipTitle = asOptionalPlainText(shareAction?.tooltip?.title);
     const hasCustomShareTooltip = !!shareTooltipContent || !!shareTooltipTitle;
+    const favoriteLabels = FAVORITE_LABELS[favorite?.variant ?? 'star'];
 
     return (
       <div css={styles.root} data-test-subj={APP_HEADER_TEST_SUBJECTS.titleActions}>
@@ -170,8 +184,9 @@ export const TitleActions = React.memo<TitleActionsProps>(
               status={favorite.status}
               onClick={favorite.onToggle}
               isDisabled={favorite.isDisabled}
-              addLabel={ADD_TO_STARRED_LABEL}
-              removeLabel={REMOVE_FROM_STARRED_LABEL}
+              icon={favorite.variant}
+              addLabel={favoriteLabels.add}
+              removeLabel={favoriteLabels.remove}
               data-test-subj={[
                 APP_HEADER_TEST_SUBJECTS.favoriteButton,
                 favorite.status === 'favorited' || favorite.status === 'removing'
