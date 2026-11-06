@@ -13,7 +13,7 @@ import type { VegaCellDefinition } from '../../common/types';
 import { createStarterSpec } from '../model/vega_spec';
 import { CellFrame } from './cell_frame';
 import { useCellResize } from './cell_resize';
-import { useNotebook } from './notebook_context';
+import { useEditOnAdd, useNotebook } from './notebook_context';
 import { VegaChart } from './vega_chart';
 import { VegaSpecFlyout, type VegaDraft } from './vega_spec_flyout';
 
@@ -119,6 +119,8 @@ export const VegaCell = ({ cell }: { cell: VegaCellDefinition }) => {
     setIsEditing(false);
     setPreview(undefined);
   }, []);
+
+  useEditOnAdd(id, () => setIsEditing(true));
 
   return (
     <CellFrame

@@ -30,7 +30,7 @@ import {
   type CustomCellDraft,
   type TemplatePreview,
 } from './custom_cell_flyout';
-import { useNotebook } from './notebook_context';
+import { useEditOnAdd, useNotebook } from './notebook_context';
 import { useCellResize } from './cell_resize';
 
 const IFRAME_TITLE = i18n.translate('xpack.notebook.customCell.iframeTitle', {
@@ -198,6 +198,8 @@ export const CustomCell = ({ cell }: { cell: CustomCellDefinition }) => {
     setIsEditing(false);
     setPreview(undefined);
   }, []);
+
+  useEditOnAdd(id, () => setIsEditing(true));
 
   const generateWithChat = useCallback(
     ({ template, ...data }: CustomCellDraft) => {

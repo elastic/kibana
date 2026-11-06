@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useEffect, useRef } from 'react';
 import type { BehaviorSubject } from 'rxjs';
 import type { CellFilter } from '../model/cell_filter';
 import type { NotebookStore } from '../model/notebook_store';
@@ -24,6 +24,8 @@ export interface NotebookContextValue {
   cellFilter$: BehaviorSubject<CellFilter>;
   /** Cells the user just added; each flashes once when it first renders, then leaves the set. */
   addedCellIds: Set<string>;
+  /** Cells the user just added from the add bar; each opens its edit flyout when it first renders, then leaves the set. */
+  editOnAddCellIds: Set<string>;
   /** What the panel beside the notebook shows, if it is open. */
   sidePanel$: BehaviorSubject<SidePanel | undefined>;
   /** The app the app panel shows; falls back to the first app when unset or deleted. */
@@ -40,4 +42,14 @@ export const useNotebook = (): NotebookContextValue => {
     throw new Error('useNotebook must be used inside NotebookContext');
   }
   return value;
+};
+
+/** Opens the cell's edit flyout once when the user has just added the cell. */
+export const useEditOnAdd = (cellId: string, openEditor: () => void): void => {
+  const { editOnAddCellIds } = useNotebook();
+  const openEditorRef = useRef(openEditor);
+  openEditorRef.current = openEditor;
+  useEffect(() => {
+    if (editOnAddCellIds.delete(cellId)) openEditorRef.current();
+  }, [editOnAddCellIds, cellId]);
 };

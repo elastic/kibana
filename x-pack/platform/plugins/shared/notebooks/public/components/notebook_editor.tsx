@@ -143,6 +143,7 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
       },
       cellFilter$,
       addedCellIds,
+      editOnAddCellIds: new Set<string>(),
       sidePanel$: new BehaviorSubject<SidePanel | undefined>(undefined),
       activeAppId$: new BehaviorSubject<string | undefined>(undefined),
     };

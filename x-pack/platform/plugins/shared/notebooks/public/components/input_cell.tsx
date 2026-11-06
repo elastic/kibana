@@ -22,7 +22,7 @@ import { getCellDisplayName } from '../model/references';
 import type { InputValue } from '../model/types';
 import { CellFrame } from './cell_frame';
 import { InputSettingsFlyout } from './input_settings_flyout';
-import { useNotebook } from './notebook_context';
+import { useEditOnAdd, useNotebook } from './notebook_context';
 
 const RANGE_DEBOUNCE_MS = 300;
 
@@ -159,6 +159,7 @@ export const InputCell = ({ cell }: { cell: InputCellDefinition }) => {
   const [isEditing, setIsEditing] = useState(false);
   const { input } = cell;
   const configurable = input.kind === 'dropdown' || input.kind === 'range' ? input : undefined;
+  useEditOnAdd(cell.id, () => setIsEditing(true));
 
   return (
     <CellFrame

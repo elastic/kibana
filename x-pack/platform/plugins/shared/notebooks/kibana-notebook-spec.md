@@ -244,7 +244,7 @@ Hex-inspired, EUI, single linear notebook view.
 - **Chart cell:** Source dropdown, chart-type picker, Edit button (Lens flyout), chart at a fixed, vertically resizable height.
 - **Input cell:** the control plus a config popover.
 - **Markdown cell:** rendered; click to edit.
-- **Adding cells:** "+ Add cell" hover bar between cells and at the end, with a type menu.
+- **Adding cells:** "+ Add cell" hover bar between cells and at the end, with a type menu. A new cell that has an edit flyout (chart, custom, Vega, dropdown and range inputs) opens it straight away; a new chart's flyout suggests a chart for its source. Duplicated cells and cells added from a flyout don't.
 
 ## Testing
 

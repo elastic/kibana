@@ -37,7 +37,7 @@ import {
 import { useNotebookServices } from '../services';
 import { CellFrame } from './cell_frame';
 import { useCellResize } from './cell_resize';
-import { useNotebook } from './notebook_context';
+import { useEditOnAdd, useNotebook } from './notebook_context';
 import { NotebookFlyout } from './notebook_flyout';
 
 const SOURCE_LABEL = i18n.translate('xpack.notebook.chartCell.source', {
@@ -245,6 +245,12 @@ export const ChartCell = ({ cell }: { cell: ChartCellDefinition }) => {
       update({ isSuggesting: false, error: error.message });
     }
   };
+
+  // A new chart has no suggestion yet, so the flyout suggests one for its draft source.
+  useEditOnAdd(id, async () => {
+    await openEditor();
+    if (sourceCell) await selectDraftSource(sourceCell);
+  });
 
   // The Lens panel rebuilds its store on every render, so it must not re-render on preview updates.
   const editPanel = useMemo(() => {

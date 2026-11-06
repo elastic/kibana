@@ -106,6 +106,15 @@ const ADD_CELL_LABEL = i18n.translate('xpack.notebook.addCell.button', {
   defaultMessage: 'Add cell',
 });
 
+/** Kinds whose cells have an edit flyout. */
+const EDITED_ON_ADD: ReadonlySet<NewCellKind> = new Set<NewCellKind>([
+  'chart',
+  'custom',
+  'vega',
+  'input:dropdown',
+  'input:range',
+]);
+
 export const AddCellBar = ({
   index,
   alwaysVisible,
@@ -113,7 +122,7 @@ export const AddCellBar = ({
   index: number;
   alwaysVisible?: boolean;
 }) => {
-  const { store, addedCellIds } = useNotebook();
+  const { store, addedCellIds, editOnAddCellIds } = useNotebook();
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -128,6 +137,7 @@ export const AddCellBar = ({
     const takesSource = kind === 'chart' || kind === 'custom' || kind === 'vega';
     const cell = createCell(kind, cells, takesSource ? previousEsql ?? null : null);
     addedCellIds.add(cell.id);
+    if (EDITED_ON_ADD.has(kind)) editOnAddCellIds.add(cell.id);
     store.addCell(cell, index);
   };
 
