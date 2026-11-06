@@ -16,25 +16,25 @@ const FILESTORE_READ_TOOL = 'filestore.read';
 const LOAD_SKILL_TOOL = 'load_skill';
 
 /**
- * LIKE patterns (raw, before ES|QL string escaping) that match a tool call's JSON arguments.
- * The quote and slash anchors keep `foo` from matching `foo-bar` or `my-foo`.
+ * Patterns (raw, before ES|QL string escaping) that match a tool call's JSON arguments.
  * `skillName` must already be validated against VALID_SKILL_NAME.
  */
-export const getSkillInvocationLikePatterns = (skillName: string) => ({
-  // filestore.read of the skill's SKILL.md
+export const getSkillInvocationPatterns = (skillName: string) => ({
+  // LIKE pattern for a filestore.read of the skill's SKILL.md
   filestoreRead: `*/${skillName}/SKILL.md*`,
-  // load_skill accepts a bare name, a folder path or a SKILL.md path
-  loadSkill: [`*"${skillName}"*`, `*/${skillName}"*`, `*/${skillName}/SKILL.md"*`],
+  // RLIKE (whole-string) pattern for load_skill, which accepts a name, a folder path or a
+  // SKILL.md path. Mirrors resolveSkill: surrounding whitespace is trimmed, a trailing
+  // `/SKILL.md` is dropped and a leading `/` is optional. The quote, slash and space boundaries
+  // keep `foo` from matching `foo-bar` or `my-foo`.
+  loadSkill: `.*[\\" /]${skillName}(/SKILL\\.md)?[\\" ].*`,
 });
 
-const toEsqlStringLiteral = (value: string): string => `"${value.replace(/"/g, '\\"')}"`;
+const toEsqlStringLiteral = (value: string): string =>
+  `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
 
 const buildSkillInvokedCondition = (skillName: string): string => {
-  const { filestoreRead, loadSkill } = getSkillInvocationLikePatterns(skillName);
+  const { filestoreRead, loadSkill } = getSkillInvocationPatterns(skillName);
   const args = 'attributes.gen_ai.tool.call.arguments';
-  const loadSkillMatches = loadSkill
-    .map((pattern) => `${args} LIKE ${toEsqlStringLiteral(pattern)}`)
-    .join('\n          OR ');
 
   return `(
         attributes.gen_ai.tool.name == "${FILESTORE_READ_TOOL}"
@@ -42,9 +42,7 @@ const buildSkillInvokedCondition = (skillName: string): string => {
       )
       OR (
         attributes.gen_ai.tool.name == "${LOAD_SKILL_TOOL}"
-          AND (
-          ${loadSkillMatches}
-          )
+          AND ${args} RLIKE ${toEsqlStringLiteral(loadSkill)}
       )`;
 };
 
