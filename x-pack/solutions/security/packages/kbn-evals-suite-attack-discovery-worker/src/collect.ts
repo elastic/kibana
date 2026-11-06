@@ -409,32 +409,6 @@ const buildReviewArtifact = async ({
   };
 };
 
-/**
- * Builds the artifact of a review the row dispatched itself (not through the runner's dispatch
- * step), like the seeded-false-positive row does: same shape, no dispatch step to read.
- */
-export const collectReviewArtifact = async ({
-  client,
-  review,
-  timedOutAfterMs,
-  fetch,
-  spaceId,
-}: {
-  client: AttackDiscoveryWorkerClient;
-  review: WorkflowExecutionDto;
-  timedOutAfterMs?: number;
-  fetch: HttpHandler;
-  spaceId: string;
-}): Promise<ReviewArtifact> =>
-  buildReviewArtifact({
-    client,
-    review,
-    timedOutAfterMs,
-    dispatch: undefined,
-    fetch,
-    spaceId,
-  });
-
 const outcomeEvents = (run: WorkflowExecutionDto): WorkerOutcomeEvent[] =>
   [REPORT_RUN_COMPLETED_STEP_ID, REPORT_WORKER_RUN_COMPLETED_STEP_ID].flatMap((stepId) =>
     stepsOf(run, stepId).map((step) => {

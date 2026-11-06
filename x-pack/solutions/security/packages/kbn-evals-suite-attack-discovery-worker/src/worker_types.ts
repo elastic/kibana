@@ -182,8 +182,6 @@ export interface WorkerArtifacts {
   fingerprintMatchFailed: boolean;
   dispatchedReviewExecutionIds: string[];
   reviews: ReviewArtifact[];
-  /** Set only on the seeded-false-positive row. Coverage checks treat it as external to the runner. */
-  seededDiscoveryId?: string;
   outcomes: WorkerOutcomeEvent[];
   /** Set when the runner reported that no batch produced an attack; see `GenerationFault`. */
   generationFault?: GenerationFault;

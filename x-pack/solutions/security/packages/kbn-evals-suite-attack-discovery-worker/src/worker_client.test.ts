@@ -86,57 +86,6 @@ describe('AttackDiscoveryWorkerClient timeouts', () => {
   });
 });
 
-describe('AttackDiscoveryWorkerClient.runReview', () => {
-  it('starts the review workflow with the attack id and title, then tracks and forgets it', async () => {
-    const fetch = jest.fn(async (path: string, init?: { body?: string }) => {
-      if (path.includes('/run')) return { workflowExecutionId: 'review-9' };
-      if (path.includes('/cancel')) return {};
-      return { id: 'review-9', status: 'completed', stepExecutions: [] };
-    });
-    const client = new AttackDiscoveryWorkerClient(fetch as unknown as HttpHandler, log);
-    const polled = await client.runReview({
-      spaceId: 's',
-      attackDiscoveryId: 'a'.repeat(64),
-      title: 'Encoded PowerShell command-and-control on WS-MGMT-201',
-      maxWaitMs: 0,
-    });
-    expect(polled.execution.id).toBe('review-9');
-    expect(polled.timedOutAfterMs).toBeUndefined();
-    const [path, init] = fetch.mock.calls.find(([p]) => String(p).includes('/run')) as [
-      string,
-      { body: string }
-    ];
-    expect(path).toBe('/s/s/api/workflows/workflow/system-security-attack-discovery-review/run');
-    expect(JSON.parse(init.body)).toEqual({
-      inputs: {
-        attack_discovery_id: 'a'.repeat(64),
-        title: 'Encoded PowerShell command-and-control on WS-MGMT-201',
-      },
-    });
-    // Settled, so teardown has nothing pending.
-    await client.cancelPending();
-    expect(fetch.mock.calls.some(([p]) => String(p).includes('/cancel'))).toBe(false);
-  });
-
-  it('keeps a review that has not settled pending, so teardown cancels it', async () => {
-    const fetch = jest.fn(async (path: string) => {
-      if (path.includes('/run')) return { workflowExecutionId: 'review-9' };
-      if (path.includes('/cancel')) return {};
-      return { id: 'review-9', status: 'running', stepExecutions: [] };
-    });
-    const client = new AttackDiscoveryWorkerClient(fetch as unknown as HttpHandler, log);
-    const polled = await client.runReview({
-      spaceId: 's',
-      attackDiscoveryId: 'a'.repeat(64),
-      title: 't',
-      maxWaitMs: 0,
-    });
-    expect(polled.timedOutAfterMs).toBe(0);
-    await client.cancelPending();
-    expect(fetch.mock.calls.some(([p]) => String(p).includes('/cancel'))).toBe(true);
-  });
-});
-
 const cancelFailing = (failing: Record<string, number>) => {
   const cancelled: string[] = [];
   const fetch = jest.fn(async (path: string) => {

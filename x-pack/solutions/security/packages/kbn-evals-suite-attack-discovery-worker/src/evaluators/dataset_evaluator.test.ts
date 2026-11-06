@@ -11,18 +11,14 @@ import type { DefaultEvaluators, EvalsExecutorClient, Evaluator } from '@kbn/eva
 import type { ToolingLog } from '@kbn/tooling-log';
 import { AUDIT_SCENARIOS } from '../audit_failure_classes/registry';
 import { buildWorkerRows } from '../../datasets/worker_rows';
-import { collectReviewArtifact, collectWorkerArtifacts } from '../collect';
+import { collectWorkerArtifacts } from '../collect';
 import type { CohortRouting } from '../cohort_routing';
 import { assertCleanSpace, cleanupSeed, seedScenario } from '../seed';
 import type { WorkerArtifacts, WorkerExample } from '../worker_types';
 import type { AttackDiscoveryWorkerClient } from '../worker_client';
 import { createEvaluateDataset } from './dataset_evaluator';
 
-jest.mock('../collect', () => ({
-  collectWorkerArtifacts: jest.fn(),
-  collectReviewArtifact: jest.fn(),
-  isReviewSettled: jest.fn(() => true),
-}));
+jest.mock('../collect', () => ({ collectWorkerArtifacts: jest.fn() }));
 jest.mock('../seed', () => ({
   assertCleanSpace: jest.fn(),
   seedScenario: jest.fn(),
@@ -38,7 +34,6 @@ jest.mock('../seed', () => ({
  */
 
 const collect = collectWorkerArtifacts as jest.MockedFunction<typeof collectWorkerArtifacts>;
-const collectReview = collectReviewArtifact as jest.MockedFunction<typeof collectReviewArtifact>;
 const seed = seedScenario as jest.MockedFunction<typeof seedScenario>;
 const cleanup = cleanupSeed as jest.MockedFunction<typeof cleanupSeed>;
 const assertClean = assertCleanSpace as jest.MockedFunction<typeof assertCleanSpace>;
@@ -252,9 +247,6 @@ const client = {
   run: jest.fn(async () => ({
     execution: { id: 'run-1', status: 'completed', stepExecutions: [] },
   })),
-  runReview: jest.fn(async () => ({
-    execution: { id: 'review-1', status: 'completed', stepExecutions: [] },
-  })),
   cancelPending: jest.fn(async () => undefined),
 } as unknown as AttackDiscoveryWorkerClient;
 
@@ -331,39 +323,6 @@ describe('createEvaluateDataset', () => {
       })
     );
     expect(cleanup).toHaveBeenCalledTimes(1);
-  });
-
-  it('dispatches the review workflow itself on the seeded false-positive row', async () => {
-    const seededDiscoveryId = 'a'.repeat(64);
-    seed.mockResolvedValue({
-      runMarker: 'marker',
-      spaceId: 'space',
-      goldIdBySeededId: new Map(),
-      alertCount: 4,
-      openAlertIds: SEEDED_IDS,
-      worldDocs: [],
-      seededDiscoveryId,
-    });
-    collect.mockResolvedValue(quietArtifacts());
-    collectReview.mockResolvedValue({
-      executionId: 'review-1',
-      attackDiscoveryId: seededDiscoveryId,
-      status: 'completed',
-      parked: false,
-      verdict: 'false_positive',
-      investigationOpened: true,
-      steps: [],
-      analysis: { connectorIds: ['reference-model'], inputTokens: 1, outputTokens: 1 },
-    });
-    await expect(evaluateRow('seeded-false-positive')).resolves.toBeUndefined();
-    expect(client.runReview).toHaveBeenCalledWith(
-      expect.objectContaining({ attackDiscoveryId: seededDiscoveryId })
-    );
-    expect(collectReview).toHaveBeenCalledWith(
-      expect.objectContaining({ spaceId: 'ad-worker-eval', fetch: expect.any(Function) })
-    );
-    // The row folds the seeded review in so the verdict checks score it; gold is false_positive.
-    expect(qualityMissWarning()).toBeUndefined();
   });
 
   it('passes a parked true positive on the attack row, ignoring the judges', async () => {

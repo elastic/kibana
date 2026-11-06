@@ -276,10 +276,7 @@ export const scoreOneReviewPerAttack: CodeScorer = (_expected, artifacts) => {
     ? artifacts.persistedAttackIds.length
     : artifacts.fingerprintReviewCount;
   if (unmatched === undefined) return missing('the number of unmatched attacks is unknown');
-  // The seeded discovery's review covers an attack the runner never persisted.
-  const attackIds = artifacts.reviews
-    .filter(({ attackDiscoveryId }) => attackDiscoveryId !== artifacts.seededDiscoveryId)
-    .map(({ attackDiscoveryId }) => attackDiscoveryId);
+  const attackIds = artifacts.reviews.map(({ attackDiscoveryId }) => attackDiscoveryId);
   const unidentified = attackIds.filter((id) => id === undefined).length;
   const distinct = new Set(attackIds.filter((id) => id !== undefined)).size;
   if (artifacts.dispatchedReviewExecutionIds.length !== unmatched) {

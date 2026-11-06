@@ -95,13 +95,18 @@ after a transport failure. What is guaranteed depends on whether the seed bulk s
   by a later round. A write that lands after the window is not removed there.
 
 A missing document or index counts as gone. Ids that remain, or a delete item that fails for another
-reason, are reported together with the seed error. A late write is reported by the next row's
-clean-space check, and after the last row by `createEvaluateDataset`, which asserts each row space
-is clean once the experiment ends. Fingerprints and
-discoveries are left alone on a failed seed: the workflow has not started, so there are none from
-it. After a row has run, `cleanupSeed` clears the alerts (matched exactly by its run marker), the
-space's fingerprints and its discoveries, and fails if a delete reports failures, version
-conflicts, a timeout, or fewer deletions than matches.
+reason, are reported together with the seed error. Fingerprints and discoveries are left alone on
+a failed seed: the workflow has not started, so there are none from it.
+
+After a row has run, `cleanupSeed` clears the alerts (matched exactly by its run marker), the
+space's fingerprints and its discoveries, then refreshes those indices and counts again. A delete
+that reports failures, version conflicts, a timeout or fewer deletions than matches, or a document
+still found by the recount, starts another round (5s pause, `CLEANUP_ROUNDS` = 6); what is left
+after the last round fails the row. Steps of a row can still write after its cleanup (the
+fingerprint match indexes without a refresh), so before each row the seed counts open alerts,
+fingerprints and open discoveries in the space, deletes any it finds with a warning, and fails the
+row only if they are still there after 6 checks. After the last row `createEvaluateDataset` asserts
+each row space is clean, strictly, with no delete.
 
 `src/config_load_path.test.ts` loads `playwright.config.ts` and fails if any module the Jest preset
 transforms without swc (`.yaml`, `.yml`, `.txt`, `.html`, `.peggy`, `.pegg`, `.text`, `.tex`, or a
@@ -133,16 +138,16 @@ Per-scenario gold:
 | `shared-ci-egress`                    | FP                                       |
 | `threshold-meta-alerts`               | FP                                       |
 | `positive-chain-with-noise`           | TP                                       |
-| `seeded-false-positive`               | FP (review of a seeded discovery)        |
 | `same-display-name-cross-account`     | inconclusive (TP also accepted)          |
+| `bait-false-positive`                 | FP, only if a discovery is written       |
 
-The `seeded-false-positive` row seeds an authored false-positive Attack Discovery straight into the
-space's attack discovery index, citing seeded benign SCCM alerts the world contradicts. The runner
-only reviews its own generation, so the row dispatches the review workflow itself
-(`client.runReview`) and folds the review artifact in; the seeded discovery's id rides on the
-artifacts (`seededDiscoveryId`) and is excluded from the runner's review-coverage checks, while
-`VerdictMatchesGold` and the other verdict checks score it like any other review. Generation must
-still report nothing over the benign alerts (gold `none`).
+`bait-false-positive` is a negative control built as bait: attack-shaped rule names (encoded
+PowerShell, an outbound PowerShell connection, a SYSTEM scheduled task) over Configuration Manager
+activity, with a world that shows the management agent as parent and the internal management server
+as the only destination. Generation gold is no discovery. When a model writes one anyway, the runner
+reviews it through the normal path and the review should call it a false positive. Whether a
+discovery appears depends on the model, so the verdict and negative-control scores on this row are
+reported, not gating.
 
 `same-display-name-cross-account` forbids no co-citation pair in its baseline run (the baseline only
 checks that a story is reported). The two groups are separated in the enriched variants, which keep

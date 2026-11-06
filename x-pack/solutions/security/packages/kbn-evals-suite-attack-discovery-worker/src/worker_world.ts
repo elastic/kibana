@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import {
+  BAIT_ENCODED_COMMAND_LINE,
+  BAIT_FALSE_POSITIVE_SCENARIO_ID,
+} from './audit_failure_classes/scenarios/bait_false_positive';
+
 /**
  * The world around the seeded alerts: the entity store records and raw endpoint events the
  * review (`attack_discovery_fp_tp_analysis`) reads next to the cited alerts.
@@ -19,7 +24,9 @@
  * - benign-batch: thin host records, management and service parents, one internal management
  *   destination (contradicts);
  * - threshold-meta-alerts: thin records, a task scheduler parent, the internal backup server as
- *   the destination (contradicts).
+ *   the destination (contradicts);
+ * - bait-false-positive: thin records, the alerts' encoded PowerShell and scheduled task under the
+ *   management agent, the internal management server as the only destination (contradicts).
  *
  * The cloud scenarios have no host, so the raw-event source can never hold hits for them and no
  * documents are seeded: their review stays `inconclusive` by construction. That is a gap in the
@@ -105,6 +112,36 @@ const BENIGN_HOST: HostWorld = {
   network: [MANAGEMENT_DESTINATION],
 };
 
+/** The bait alerts' encoded PowerShell and scheduled task, started by the management agent. */
+const MANAGED_BAIT_HOST: HostWorld = {
+  entity: { 'asset.criticality': 'medium_impact' },
+  processes: [
+    {
+      name: 'CcmExec.exe',
+      executable: 'C:\\Windows\\CCM\\CcmExec.exe',
+      commandLine: 'CcmExec.exe /runservice',
+      parent: 'services.exe',
+      user: 'SYSTEM',
+    },
+    {
+      name: 'powershell.exe',
+      executable: POWERSHELL,
+      commandLine: BAIT_ENCODED_COMMAND_LINE,
+      parent: 'CcmExec.exe',
+      user: 'SYSTEM',
+    },
+    {
+      name: 'schtasks.exe',
+      executable: 'C:\\Windows\\System32\\schtasks.exe',
+      commandLine:
+        'schtasks.exe /create /tn "Configuration Manager Health Evaluation" /tr C:\\Windows\\CCM\\ccmeval.exe /sc daily /ru SYSTEM /f',
+      parent: 'CcmExec.exe',
+      user: 'SYSTEM',
+    },
+  ],
+  network: [MANAGEMENT_DESTINATION, { ...MANAGEMENT_DESTINATION, process: 'powershell.exe' }],
+};
+
 const SCHEDULED_BACKUP_HOST: HostWorld = {
   entity: { 'asset.criticality': 'high_impact' },
   processes: [
@@ -172,8 +209,8 @@ const WORLDS: Readonly<Record<string, ScenarioWorld>> = {
     hosts: { 'SRV-FILE-02': SCHEDULED_BACKUP_HOST, 'SRV-APP-07': SCHEDULED_BACKUP_HOST },
     users: ['svc-backup', 'm.novak'],
   },
-  'seeded-false-positive': {
-    hosts: { 'WS-MGMT-201': BENIGN_HOST, 'WS-MGMT-202': BENIGN_HOST },
+  [BAIT_FALSE_POSITIVE_SCENARIO_ID]: {
+    hosts: { 'WS-MGMT-201': MANAGED_BAIT_HOST, 'WS-MGMT-202': MANAGED_BAIT_HOST },
     users: [],
   },
 };

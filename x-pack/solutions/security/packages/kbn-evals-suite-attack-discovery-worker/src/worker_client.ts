@@ -17,7 +17,6 @@ import {
 import {
   POLL_INTERVAL_MS,
   PUBLIC_API_VERSION,
-  REVIEW_WORKFLOW_ID,
   RUNNER_TIMEOUT_MS,
   RUNNER_WORKFLOW_ID,
 } from './constants';
@@ -168,46 +167,6 @@ export class AttackDiscoveryWorkerClient {
       this.forget(runnerExecutionId);
       this.forget(floorExecutionId);
     }
-    return polled;
-  }
-
-  /**
-   * Starts the standalone review workflow against one attack discovery and polls it until it ends
-   * or parks at the analyst gate. The review is manual-trigger standalone, so unlike the runner it
-   * can be started directly. `isDone` is passed by the caller because importing it here would be
-   * a cycle.
-   */
-  async runReview({
-    spaceId,
-    attackDiscoveryId,
-    title,
-    maxWaitMs,
-    isDone,
-  }: {
-    spaceId: string;
-    attackDiscoveryId: string;
-    title: string;
-    maxWaitMs: number;
-    isDone?: (execution: WorkflowExecutionDto) => boolean;
-  }): Promise<PolledExecution> {
-    const { workflowExecutionId } = await this.fetch<{ workflowExecutionId: string }>(
-      spacePath(spaceId, `/api/workflows/workflow/${encodeURIComponent(REVIEW_WORKFLOW_ID)}/run`),
-      {
-        method: 'POST',
-        headers: apiVersion(PUBLIC_API_VERSION),
-        body: JSON.stringify({
-          inputs: { attack_discovery_id: attackDiscoveryId, title },
-        }),
-      }
-    );
-    this.pendingExecutions.push({ spaceId, executionId: workflowExecutionId });
-    const polled = await this.poll({
-      spaceId,
-      executionId: workflowExecutionId,
-      maxWaitMs,
-      ...(isDone ? { isDone } : {}),
-    });
-    if (isTerminal(polled.execution.status)) this.forget(workflowExecutionId);
     return polled;
   }
 

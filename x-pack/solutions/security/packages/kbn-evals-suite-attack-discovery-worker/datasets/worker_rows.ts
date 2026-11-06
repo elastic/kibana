@@ -17,6 +17,8 @@ import type { WorkerExample, WorkerExpected } from '../src/worker_types';
  * The verdict gold reads the alerts as an analyst would:
  * - shared egress, benign batch and threshold alerts carry no attack: false positive;
  * - the ClickFix chain is an attack among noise: true positive;
+ * - the bait alerts look like an attack but the world shows management activity: a discovery
+ *   written over them is a false positive (reviewed only when generation writes one);
  * - the same display name in two accounts cannot be told apart from the alerts alone, so
  *   inconclusive is the answer, and true positive is accepted because one account is malicious.
  */
@@ -93,13 +95,13 @@ export const WORKER_SCENARIOS: ReadonlyArray<{
     },
   },
   {
-    scenarioId: 'seeded-false-positive',
-    title: 'Seeded false-positive discovery over benign SCCM alerts',
+    scenarioId: 'bait-false-positive',
+    title: 'Attack-shaped alerts over routine management activity',
     expected: {
       goldVerdict: 'false_positive',
       expectedDiscoveries: 'none',
       criteria: [
-        'The rationale recognizes the cited alerts as routine, vendor-signed SCCM endpoint management activity rather than command-and-control.',
+        'The rationale weighs the management-agent parent and the internal management destination against the attack-shaped rule names.',
       ],
       generationCriteria: [],
     },

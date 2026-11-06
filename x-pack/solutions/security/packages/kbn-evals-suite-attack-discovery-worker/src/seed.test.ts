@@ -13,6 +13,7 @@ import type { KbnRequest } from './kbn_request';
 import {
   assertCleanSpace,
   buildSeededAlert,
+  CLEANUP_ROUNDS,
   cleanupSeed,
   pauseEntityExtraction,
   prepareWorkerSpace,
@@ -44,7 +45,11 @@ const seeded: SeededScenario = {
 const esWith = (overrides: Record<string, unknown>): Client =>
   ({
     deleteByQuery: jest.fn(async () => ({})),
-    indices: { exists: jest.fn(async () => true), create: jest.fn(async () => ({})) },
+    indices: {
+      exists: jest.fn(async () => true),
+      create: jest.fn(async () => ({})),
+      refresh: jest.fn(async () => ({})),
+    },
     count: jest.fn(async () => ({ count: 0 })),
     mget: jest.fn(async ({ ids }: { ids: string[] }) => ({
       docs: ids.map((_id) => ({ _id, found: false })),
@@ -82,12 +87,12 @@ describe('assertCleanSpace', () => {
     );
   });
 
-  it('fails loudly when an open attack discovery is left over', async () => {
+  it('fails loudly when open attack discoveries are left over', async () => {
     const count = jest.fn(async ({ index }: { index: string }) => ({
-      count: index.startsWith('.adhoc.alerts-security.attack.discovery') ? 1 : 0,
+      count: index === attackDiscoveryIndexForSpace('s') ? 3 : 0,
     }));
     await expect(assertCleanSpace({ esClient: esWith({ count }), spaceId: 's' })).rejects.toThrow(
-      /0 open alerts, 0 attack fingerprints and 1 open attack discoveries/
+      /0 open alerts, 0 attack fingerprints and 3 open attack discoveries/
     );
   });
 });
@@ -121,31 +126,126 @@ describe('cleanupSeed', () => {
     expect(indices).toHaveLength(3);
   });
 
-  it('throws when a delete fails, after attempting the others', async () => {
+  it('retries a failed delete in the next round and passes once everything is gone', async () => {
+    const wait = jest.fn(async (_ms: number) => undefined);
     const deleteByQuery = jest
       .fn()
       .mockRejectedValueOnce(new Error('es unavailable'))
       .mockResolvedValue({});
-    await expect(cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded })).rejects.toThrow(
-      /Cleanup of space "space-a" failed/
+    await cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded, wait });
+    expect(deleteByQuery).toHaveBeenCalledTimes(6);
+    expect(wait).toHaveBeenCalledTimes(1);
+  });
+
+  it('runs another round when the recount finds a late write', async () => {
+    const wait = jest.fn(async (_ms: number) => undefined);
+    const deleteByQuery = jest.fn(async () => ({}));
+    const count = jest
+      .fn()
+      .mockImplementationOnce(async () => ({ count: 0 }))
+      .mockImplementationOnce(async () => ({ count: 1 }))
+      .mockImplementation(async () => ({ count: 0 }));
+    await cleanupSeed({ esClient: esWith({ deleteByQuery, count }), seeded, wait });
+    expect(deleteByQuery).toHaveBeenCalledTimes(6);
+    expect(wait).toHaveBeenCalledTimes(1);
+  });
+
+  it(`throws what is left after ${CLEANUP_ROUNDS} rounds`, async () => {
+    const wait = jest.fn(async (_ms: number) => undefined);
+    const deleteByQuery = jest.fn(async () => ({}));
+    const count = jest.fn(async ({ index }: { index: string }) => ({
+      count: index.startsWith('ai-index') ? 1 : 0,
+    }));
+    await expect(
+      cleanupSeed({ esClient: esWith({ deleteByQuery, count }), seeded, wait })
+    ).rejects.toThrow(
+      `Cleanup of space "space-a" failed after ${CLEANUP_ROUNDS} rounds: 1 fingerprints are still present`
     );
-    expect(deleteByQuery).toHaveBeenCalledTimes(3);
+    expect(deleteByQuery).toHaveBeenCalledTimes(3 * CLEANUP_ROUNDS);
+    expect(wait).toHaveBeenCalledTimes(CLEANUP_ROUNDS - 1);
+  });
+
+  it('throws every failed delete when one keeps failing', async () => {
+    const wait = jest.fn(async (_ms: number) => undefined);
+    const deleteByQuery = jest.fn(async ({ index }: { index: string }) => {
+      if (index.startsWith('ai-index')) throw new Error('es unavailable');
+      return {};
+    });
+    const error = await cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded, wait }).catch(
+      (e: unknown) => e
+    );
+    expect(error).toBeInstanceOf(AggregateError);
+    expect((error as AggregateError).message).toMatch(
+      /failed after 6 rounds: could not delete fingerprints: es unavailable/
+    );
+    expect(deleteByQuery).toHaveBeenCalledTimes(3 * CLEANUP_ROUNDS);
+  });
+
+  it('treats a failed refresh as a problem, not as clean', async () => {
+    const wait = jest.fn(async (_ms: number) => undefined);
+    const refresh = jest.fn(async () => {
+      throw new Error('refresh failed');
+    });
+    await expect(
+      cleanupSeed({
+        esClient: esWith({
+          indices: { exists: jest.fn(), create: jest.fn(), refresh },
+        }),
+        seeded,
+        wait,
+      })
+    ).rejects.toThrow(/could not recount the space: refresh failed/);
+    expect(refresh).toHaveBeenCalledTimes(CLEANUP_ROUNDS);
   });
 });
 
 describe('seedScenario', () => {
-  it('refuses to seed into a dirty space and writes nothing', async () => {
+  const wait = jest.fn(async (_ms: number) => undefined);
+  beforeEach(() => wait.mockClear());
+
+  it('refuses to seed into a space that stays dirty, and writes nothing', async () => {
     const bulk = jest.fn();
+    const deleteByQuery = jest.fn(async () => ({}));
     const count = jest.fn(async () => ({ count: 1 }));
+    const warning = jest.fn();
     await expect(
       seedScenario({
-        esClient: esWith({ bulk, count }),
-        log: { info: jest.fn() } as unknown as ToolingLog,
+        esClient: esWith({ bulk, count, deleteByQuery }),
+        log: { info: jest.fn(), warning } as unknown as ToolingLog,
         scenario: AUDIT_SCENARIOS[0],
         spaceId: 's',
+        wait,
       })
-    ).rejects.toThrow(/not clean/);
+    ).rejects.toThrow(/not clean before the row: 1 open alerts/);
     expect(bulk).not.toHaveBeenCalled();
+    expect(deleteByQuery).toHaveBeenCalledTimes(3 * (CLEANUP_ROUNDS - 1));
+    expect(warning).toHaveBeenCalledTimes(CLEANUP_ROUNDS - 1);
+  });
+
+  it('deletes leftovers with a warning and seeds once the space is clean', async () => {
+    const bulk = jest.fn(async () => ({ errors: false, items: [] }));
+    const search = jest.fn(async () => ({ hits: { hits: [] } }));
+    const deleteByQuery = jest.fn(async (_args: { index: string; query?: unknown }) => ({}));
+    const count = jest
+      .fn()
+      .mockImplementationOnce(async () => ({ count: 0 }))
+      .mockImplementationOnce(async () => ({ count: 1 }))
+      .mockImplementation(async () => ({ count: 0 }));
+    const warning = jest.fn();
+    await seedScenario({
+      esClient: esWith({ bulk, count, deleteByQuery, search }),
+      log: { info: jest.fn(), warning } as unknown as ToolingLog,
+      scenario: AUDIT_SCENARIOS[0],
+      spaceId: 's',
+      wait,
+    });
+    expect(warning).toHaveBeenCalledWith(expect.stringMatching(/1 attack fingerprints/));
+    expect(deleteByQuery.mock.calls.map(([{ index }]) => index)).toEqual([
+      alertsIndexForSpace('s'),
+      'ai-index-idx-security-attack-fingerprints',
+      attackDiscoveryIndexForSpace('s'),
+    ]);
+    expect(bulk).toHaveBeenCalled();
   });
 
   it('records the open alert ids of the space after seeding, mapped to scenario ids', async () => {
@@ -172,7 +272,7 @@ describe('seedScenario', () => {
 });
 
 describe('seedScenario world documents', () => {
-  const log = { info: jest.fn() } as unknown as ToolingLog;
+  const log = { info: jest.fn(), warning: jest.fn() } as unknown as ToolingLog;
   const scenarioById = (id: string) => {
     const found = AUDIT_SCENARIOS.find((scenario) => scenario.id === id);
     if (!found) throw new Error(`no scenario ${id}`);
@@ -207,7 +307,12 @@ describe('seedScenario world documents', () => {
   const bodies = (operations: Op[]) => operations.filter((_op, index) => index % 2 === 1);
   const actions = (operations: Op[]) => operations.filter((_op, index) => index % 2 === 0);
 
-  it.each(['positive-chain-with-noise', 'benign-batch', 'threshold-meta-alerts'])(
+  it.each([
+    'positive-chain-with-noise',
+    'benign-batch',
+    'threshold-meta-alerts',
+    'bait-false-positive',
+  ])(
     'writes entities and raw events for %s, and every endpoint alert carries a host.id they share',
     async (id) => {
       const { seededScenario, operations } = await seedWith(id);
@@ -251,46 +356,6 @@ describe('seedScenario world documents', () => {
     expect(seededScenario.worldDocs).toEqual([]);
   });
 
-  it('seeds the authored discovery for seeded-false-positive, cited alerts included', async () => {
-    const { seededScenario, operations } = await seedWith('seeded-false-positive');
-    const actionsList = actions(operations) as Array<
-      Record<string, { _index: string; _id: string }>
-    >;
-    const discoveryIndex = actionsList.findIndex(({ index }) =>
-      String(index?._index ?? '').startsWith('.adhoc.alerts-security.attack.discovery')
-    );
-    expect(discoveryIndex).toBeGreaterThanOrEqual(0);
-    expect(actionsList[discoveryIndex].index._id).toBe(seededScenario.seededDiscoveryId);
-    expect(actionsList[discoveryIndex].index._id).toMatch(/^[0-9a-f]{64}$/);
-    const doc = bodies(operations)[discoveryIndex] as Record<string, unknown>;
-    // Flat kibana.* keys, like the detection engine writes them.
-    expect(doc['kibana.alert.uuid']).toBe(seededScenario.seededDiscoveryId);
-    const cited = doc['kibana.alert.attack_discovery.alert_ids'] as string[];
-    expect(cited).toHaveLength(4);
-    const seededIds = actionsList
-      .map(({ index }) => index?._id)
-      .filter(
-        (id) =>
-          String(id ?? '').startsWith('adw-') &&
-          !String(id).includes('-world-') &&
-          String(
-            actionsList[actionsList.findIndex((a) => a.index?._id === id)]?.index?._index
-          ).startsWith('.alerts-security')
-      );
-    cited.forEach((id) => expect(seededIds).toContain(id));
-    // No other scenario seeds a discovery.
-    const quiet = await seedWith('benign-batch');
-    expect(quiet.seededScenario.seededDiscoveryId).toBeUndefined();
-    const quietActions = actions(quiet.operations) as Array<
-      Record<string, { _index: string; _id: string }>
-    >;
-    expect(
-      quietActions.some(({ index }) =>
-        String(index?._index ?? '').startsWith('.adhoc.alerts-security.attack.discovery')
-      )
-    ).toBe(false);
-  });
-
   it('puts the events inside the review window around the alerts', async () => {
     const { operations } = await seedWith('benign-batch');
     const docs = bodies(operations) as Array<Record<string, unknown>>;
@@ -331,7 +396,7 @@ describe('seedScenario world documents', () => {
 });
 
 describe('seedScenario partial failure', () => {
-  const log = { info: jest.fn() } as unknown as ToolingLog;
+  const log = { info: jest.fn(), warning: jest.fn() } as unknown as ToolingLog;
   const scenario = AUDIT_SCENARIOS[0];
   interface BulkArgs {
     refresh?: boolean | string;
@@ -592,39 +657,15 @@ describe('seedScenario partial failure', () => {
     expect((error as AggregateError).errors).toHaveLength(2);
   });
 
-  it('deletes nothing when the space is dirty, because the leftovers are not this seed', async () => {
+  it('removes no seed when the space stays dirty, because nothing was seeded', async () => {
     const bulk = jest.fn();
-    const deleteByQuery = jest.fn();
+    const deleteByQuery = jest.fn(async (_args: { index: string; query?: unknown }) => ({}));
     const count = jest.fn(async () => ({ count: 1 }));
     await expect(seed(esWith({ count, bulk, deleteByQuery }))).rejects.toThrow(/not clean/);
     expect(bulk).not.toHaveBeenCalled();
-    expect(deleteByQuery).not.toHaveBeenCalled();
-  });
-
-  it('removes the seeded discovery by id when the seed fails midway', async () => {
-    const seededScenario = AUDIT_SCENARIOS.find(({ id }) => id === 'seeded-false-positive');
-    if (!seededScenario) throw new Error('no seeded-false-positive scenario');
-    const deleteByQuery = jest.fn(async (_args: { index: string; query?: unknown }) => ({}));
-    const bulk = jest
-      .fn()
-      .mockResolvedValueOnce({ errors: true, items: [{ index: { error: { type: 'x' } } }] })
-      .mockResolvedValue({ errors: false, items: [] });
-    const mget = jest.fn(async ({ ids }: { ids: string[] }) => ({
-      docs: ids.map((_id) => ({ _id, found: false })),
-    }));
-    const error = await seedScenario({
-      esClient: esWith({ bulk, deleteByQuery, mget }),
-      log,
-      scenario: seededScenario,
-      spaceId: 's',
-      wait: async () => {},
-    }).catch((e: unknown) => e);
-    expect((error as Error).message).toMatch(/Seeding "seeded-false-positive" failed/);
-    const discoveryCall = deleteByQuery.mock.calls.find(
-      ([{ index }]) => index === attackDiscoveryIndexForSpace('s')
-    );
-    expect(discoveryCall?.[0].query).toBeDefined();
-    expect(JSON.stringify(discoveryCall?.[0].query)).toMatch(/[0-9a-f]{64}/);
+    expect(
+      deleteByQuery.mock.calls.some(([{ query }]) => JSON.stringify(query).includes('"tags"'))
+    ).toBe(false);
   });
 });
 
@@ -634,10 +675,11 @@ describe('cleanupSeed alert delete', () => {
     query?: unknown;
     ignore_unavailable?: boolean;
   }
+  const wait = jest.fn(async (_ms: number) => undefined);
 
   it('matches the alerts exactly by run marker, never by prefix', async () => {
     const deleteByQuery = jest.fn(async (_args: DeleteArgs) => ({}));
-    await cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded });
+    await cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded, wait });
     const call = deleteByQuery.mock.calls.find(
       ([{ index }]) => index === alertsIndexForSpace('space-a')
     );
@@ -646,27 +688,25 @@ describe('cleanupSeed alert delete', () => {
 
   it('tolerates a missing index', async () => {
     const deleteByQuery = jest.fn(async (_args: DeleteArgs) => ({}));
-    await cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded });
+    await cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded, wait });
     expect(deleteByQuery.mock.calls.every(([args]) => args.ignore_unavailable === true)).toBe(true);
   });
 
   it('throws when a delete reports failures, after attempting the others', async () => {
-    const deleteByQuery = jest
-      .fn()
-      .mockResolvedValueOnce({ failures: [{ cause: { type: 'x' } }] })
-      .mockResolvedValue({});
-    await expect(cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded })).rejects.toThrow(
-      /Cleanup of space "space-a" failed/
+    const deleteByQuery = jest.fn(async ({ index }: DeleteArgs) =>
+      index === alertsIndexForSpace('space-a') ? { failures: [{ cause: { type: 'x' } }] } : {}
     );
-    expect(deleteByQuery).toHaveBeenCalledTimes(3);
+    await expect(
+      cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded, wait })
+    ).rejects.toThrow(/Cleanup of space "space-a" failed/);
+    expect(deleteByQuery).toHaveBeenCalledTimes(3 * CLEANUP_ROUNDS);
   });
 
   it('throws when a delete reports version conflicts', async () => {
-    const deleteByQuery = jest
-      .fn()
-      .mockResolvedValueOnce({ version_conflicts: 2 })
-      .mockResolvedValue({});
-    const error = await cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded }).catch(
+    const deleteByQuery = jest.fn(async ({ index }: DeleteArgs) =>
+      index === alertsIndexForSpace('space-a') ? { version_conflicts: 2 } : {}
+    );
+    const error = await cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded, wait }).catch(
       (e: unknown) => e
     );
     expect(error).toBeInstanceOf(AggregateError);
@@ -674,11 +714,10 @@ describe('cleanupSeed alert delete', () => {
   });
 
   it('throws when a delete timed out', async () => {
-    const deleteByQuery = jest
-      .fn()
-      .mockResolvedValueOnce({ timed_out: true })
-      .mockResolvedValue({});
-    const error = await cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded }).catch(
+    const deleteByQuery = jest.fn(async ({ index }: DeleteArgs) =>
+      index === alertsIndexForSpace('space-a') ? { timed_out: true } : {}
+    );
+    const error = await cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded, wait }).catch(
       (e: unknown) => e
     );
     expect(error).toBeInstanceOf(AggregateError);
@@ -686,11 +725,10 @@ describe('cleanupSeed alert delete', () => {
   });
 
   it('throws when fewer documents were deleted than matched', async () => {
-    const deleteByQuery = jest
-      .fn()
-      .mockResolvedValueOnce({ deleted: 2, total: 3 })
-      .mockResolvedValue({});
-    const error = await cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded }).catch(
+    const deleteByQuery = jest.fn(async ({ index }: DeleteArgs) =>
+      index === alertsIndexForSpace('space-a') ? { deleted: 2, total: 3 } : {}
+    );
+    const error = await cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded, wait }).catch(
       (e: unknown) => e
     );
     expect(error).toBeInstanceOf(AggregateError);
@@ -706,13 +744,13 @@ describe('cleanupSeed alert delete', () => {
       total: 3,
     }));
     await expect(
-      cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded })
+      cleanupSeed({ esClient: esWith({ deleteByQuery }), seeded, wait })
     ).resolves.toBeUndefined();
   });
 });
 
 describe('Entity Store extraction pause', () => {
-  const log = { info: jest.fn() } as unknown as ToolingLog;
+  const log = { info: jest.fn(), warning: jest.fn() } as unknown as ToolingLog;
   const esClient = { indices: { exists: jest.fn(async () => true) } } as unknown as Client;
 
   /** Answers every setup call with success; the Entity Store status reads come from `statuses`. */
@@ -771,7 +809,7 @@ describe('Entity Store extraction pause', () => {
 });
 
 describe('eval space solution view', () => {
-  const log = { info: jest.fn() } as unknown as ToolingLog;
+  const log = { info: jest.fn(), warning: jest.fn() } as unknown as ToolingLog;
   const esClient = { indices: { exists: jest.fn(async () => true) } } as unknown as Client;
 
   const stackWith = (space: { statusCode: number; body: Record<string, unknown> }) => {
@@ -826,7 +864,7 @@ describe('eval space solution view', () => {
 });
 
 describe('seedScenario world verification', () => {
-  const log = { info: jest.fn() } as unknown as ToolingLog;
+  const log = { info: jest.fn(), warning: jest.fn() } as unknown as ToolingLog;
   const scenario = AUDIT_SCENARIOS.find(({ id }) => id === 'positive-chain-with-noise');
   const seed = (esOverrides: Record<string, unknown>) => {
     if (!scenario) throw new Error('no scenario');

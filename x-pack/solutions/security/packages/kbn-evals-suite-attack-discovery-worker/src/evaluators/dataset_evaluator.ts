@@ -19,12 +19,10 @@ import {
   getGoldForVariant,
   type AuditReferenceResolver,
 } from '../audit_failure_classes/registry';
-import { collectReviewArtifact, collectWorkerArtifacts, isReviewSettled } from '../collect';
+import { collectWorkerArtifacts } from '../collect';
 import type { CohortRouting } from '../cohort_routing';
-import { REVIEW_SETTLE_TIMEOUT_MS } from '../constants';
 import { errorMessage } from '../kibana_api';
 import { assertCleanSpace, cleanupSeed, seedScenario } from '../seed';
-import { SEEDED_FALSE_POSITIVE_TITLE } from '../audit_failure_classes/scenarios/seeded_false_positive';
 import type { AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput } from '../types';
 import type { AttackDiscoveryWorkerClient } from '../worker_client';
 import type { Stage, WorkerArtifacts, WorkerExample, WorkerExpected } from '../worker_types';
@@ -401,29 +399,6 @@ export const createEvaluateDataset =
           fetch,
           log,
         });
-        // Nothing in the runner reviews the seeded discovery, so the row reviews it itself. Its
-        // execution id stays out of `dispatchedReviewExecutionIds` so coverage counts stay the runner's.
-        if (seeded.seededDiscoveryId !== undefined) {
-          const { execution: review, timedOutAfterMs: reviewTimedOut } = await client.runReview({
-            spaceId,
-            attackDiscoveryId: seeded.seededDiscoveryId,
-            title: SEEDED_FALSE_POSITIVE_TITLE,
-            maxWaitMs: REVIEW_SETTLE_TIMEOUT_MS,
-            isDone: isReviewSettled,
-          });
-          const artifact = await collectReviewArtifact({
-            client,
-            review,
-            timedOutAfterMs: reviewTimedOut,
-            fetch,
-            spaceId,
-          });
-          artifacts = {
-            ...artifacts,
-            seededDiscoveryId: seeded.seededDiscoveryId,
-            reviews: [...artifacts.reviews, artifact],
-          };
-        }
       } catch (error) {
         errors.push(error);
       }

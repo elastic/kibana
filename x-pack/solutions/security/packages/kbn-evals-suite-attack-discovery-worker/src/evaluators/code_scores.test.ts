@@ -13,7 +13,6 @@ import {
   scoreDiscoveriesPersisted,
   scoreFingerprintsDispatched,
   scoreOutcomeReported,
-  scoreOneReviewPerAttack,
   scoreParkedAtGate,
   scoreReviewsSettled,
   scoreRunnerCompleted,
@@ -357,26 +356,6 @@ describe('scoreFingerprintsDispatched', () => {
 
   it('passes when every attack was dispatched and none matched', () => {
     expect(scoreFingerprintsDispatched(expected, reviewed()).score).toBe(1);
-  });
-});
-
-describe('scoreOneReviewPerAttack', () => {
-  it('excludes the seeded review from the runner review count', () => {
-    const seededDiscoveryId = 'a'.repeat(64);
-    const result = scoreOneReviewPerAttack(
-      expected,
-      artifacts({
-        persistedAttackIds: ['runner-attack'],
-        fingerprintReviewCount: 1,
-        dispatchedReviewExecutionIds: ['runner-review'],
-        seededDiscoveryId,
-        reviews: [
-          review({ executionId: 'runner-review', attackDiscoveryId: 'runner-attack' }),
-          review({ executionId: 'seeded-review', attackDiscoveryId: seededDiscoveryId }),
-        ],
-      })
-    );
-    expect(result.score).toBe(1);
   });
 });
 
