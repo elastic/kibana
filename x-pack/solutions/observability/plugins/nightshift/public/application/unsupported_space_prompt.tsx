@@ -9,6 +9,7 @@ import { EuiButton, EuiEmptyPrompt, EuiPageTemplate } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { NightshiftNavigationIcon } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { NIGHTSHIFT_APP_ROUTE } from '../../common/constants';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
@@ -26,7 +27,7 @@ export const UnsupportedSpacePrompt = () => {
     <EuiPageTemplate grow={false} panelled={false}>
       <EuiEmptyPrompt
         data-test-subj="nightshiftUnsupportedSpacePrompt"
-        iconType="spacesApp"
+        icon={<NightshiftNavigationIcon size="xxl" color="subdued" />}
         color="subdued"
         title={
           <h2>
