@@ -40,8 +40,12 @@ export class KibanaPage {
   }
 
   async waitForListViewTable() {
+    // Content List keeps its table mounted while refetching and marks it with
+    // `euiBasicTable-loading` so that class is excluded to avoid returning mid-fetch.
     await this.page.waitForSelector(
-      `${subj('table-is-ready')}, ${subj(CONTENT_LIST_TEST_SUBJECTS.table)}`,
+      `${subj('table-is-ready')}, ${subj(
+        CONTENT_LIST_TEST_SUBJECTS.table
+      )}:not(.euiBasicTable-loading)`,
       { state: 'visible' }
     );
   }
