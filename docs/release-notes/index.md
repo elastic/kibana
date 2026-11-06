@@ -407,6 +407,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix integration installs failing with `ambiguous_conflict` errors on dashboards when you install an integration into more than one {{kib}} space [#291648]({{kib-pull}}291648).
 * Fix integration packages that include more than one trained model installing only the first model [#290145]({{kib-pull}}290145).
 * Fix integration upgrades and reinstalls leaving duplicate or stale transforms in {{es}}, such as the Elastic Defend `endpoint.metadata_current` and `endpoint.metadata_united` transforms. {{fleet}} now also removes leftover transforms when you install or upgrade the package [#288902]({{kib-pull}}288902), [#288379]({{kib-pull}}288379).
+* Fix integration installs and upgrades failing, and rolling back, when {{es}} reports a transient version conflict while {{fleet}} re-creates the package's transforms. The rollback could leave those transforms missing [#301801]({{kib-pull}}301801).
 * Fix {{fleet}} keeping references to old secrets on integration policies after you rotate a credential, and including references to unused secrets in the agent policy [#287642]({{kib-pull}}287642).
 * Fix integration policies created in bulk storing secret values inline instead of in the secrets index [#282213]({{kib-pull}}282213).
 * Fix editing an integration policy that was created before its package added selectable configuration options, such as the AWS direct access keys and identity federation choices. {{fleet}} now selects the option that matches the existing settings instead of the first option, which could leave a required field empty and block saving. It also keeps that selection when you upgrade the package [#287389]({{kib-pull}}287389).
@@ -453,8 +454,10 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix updating an output or a {{fleet-server}} host through the API deleting stored secrets, such as an output's `ssl.key` or a Kafka password, when the request omits them or sends them as plain text. {{fleet}} now keeps the secrets that a request omits and stores plain-text values as secrets [#299235]({{kib-pull}}299235).
 * Fix the **Agent policies** page failing or timing out for agent policies with thousands of integration policies [#297979]({{kib-pull}}297979).
 * Fix downloading the agent policy as YAML failing with an `Unresolved alias` error when the policy repeats the same settings in more than one place [#280669]({{kib-pull}}280669).
+* Require the **Integrations** read privilege for the full agent policy APIs, and disable **View policy**, **View agent policy**, and the standalone enrollment option when you can't read integration policies [#301951]({{kib-pull}}301951).
 * Fix deleting an agent policy succeeding when {{fleet}} can't remove it from integration policies that other agent policies share. That left the integration policies pointing to a deleted agent policy and made the **Edit integration** page fail with `Agent policies not found`. The delete now fails with an error that lists each integration policy that failed. Removing the agent policy from shared integration policies also no longer depends on the Elastic Package Registry, so the delete no longer fails or takes minutes when the registry is unreachable [#300189]({{kib-pull}}300189), [#300384]({{kib-pull}}300384).
 * Fix bulk upgrades from the installed integrations page installing the bundled version instead of the latest version [#282829]({{kib-pull}}282829).
+* Reject {{fleet}} API requests that upgrade an integration or an integration policy across breaking changes with a `400` error, unless the request sets `acknowledge_breaking_changes: true` [#301973]({{kib-pull}}301973).
 * Fix agent upgrade requests and the observability onboarding flow hanging when the response that lists available agent versions from elastic.co stalls partway through. The timeout now covers the whole response [#292788]({{kib-pull}}292788), [#292736]({{kib-pull}}292736).
 * Fix the task that records agent status changes writing nothing when the {{es}} response exceeded the maximum response size on large deployments, or when an agent was missing its metadata [#286324]({{kib-pull}}286324).
 * Fix API key invalidation failing silently when {{fleet}} invalidates more than 10,000 keys at once, for example when you force-unenroll a large number of agents. {{fleet}} now invalidates keys in batches of 1,000 [#287252]({{kib-pull}}287252).
@@ -516,10 +519,12 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix an error in Discover when an {{esql}} query groups with `BY` by a field that a previous `STATS` command created as an aggregate, for example `STATS x = MAX(bytes) | STATS c = COUNT(*) BY x` [#290259]({{kib-pull}}290259).
 * Fix opening a group in the {{esql}} group-by layout in Discover for time series (`TS`) queries. The group failed to open because `TS` queries don't support some functions outside `STATS` [#280580]({{kib-pull}}280580).
 * Stop Discover from showing the group-by layout for an {{esql}} `STATS` query that groups by more than one field when a later `WHERE` command refers to a grouping column [#291115]({{kib-pull}}291115).
+* Fix the Discover data table showing only the **Summary** column after you switch from Classic to {{esql}} mode. It now shows the columns that your query returns [#302251]({{kib-pull}}302251).
 * Keep a renamed background search, or an extended search session expiration, when the session status updates at the same moment. Before, the change could be silently reverted [#296401]({{kib-pull}}296401).
 * Prevent creating two ad hoc data views with the same custom ID. **Use without saving** is now disabled when you enter a custom data view ID [#292738]({{kib-pull}}292738).
 * Fix the Discover field list showing stale field type icons after an index is recreated with a different mapping type for an existing field [#301198]({{kib-pull}}301198).
 * Fix being unable to exit inline editing of a Discover panel on a dashboard when the panel has a search error, because the **Discard** button didn't appear [#289918]({{kib-pull}}289918).
+* Fix {{esql}} controls that you create while you edit a Discover session panel that you added from the library not appearing on the dashboard when you select **Save and return**. The panel's query then referred to a variable that the dashboard didn't have [#301047]({{kib-pull}}301047).
 * Hide filter buttons in the data table for values that {{es}} ignored because they exceed `ignore_above`, since a filter on them can't match a document [#287807]({{kib-pull}}287807).
 * Fix search highlighting showing stray `@kibana-highlighted-field@` tag text when you search a multi-value field for a term such as `field` or `kibana` [#283345]({{kib-pull}}283345).
 * Keep focus on a field when you pin or unpin it in the document viewer **Table** tab, so focus follows the field to its new position [#220097]({{kib-pull}}220097).
@@ -553,6 +558,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 #### {{kib}} platform [kibana-9.6.0-fixes-kibana-platform]
 * Fix the date range picker calendar ignoring the `dateFormat:tz` and `dateFormat:dow` advanced settings. It could apply a range in the browser time zone instead of the time zone you set, and it ignored your first day of the week [#299851]({{kib-pull}}299851).
 * Fix the date range picker rejecting {{es}} date math that combines rounding with a further offset, such as `now/y+3M` [#287010]({{kib-pull}}287010).
+* Fix the time range selector tooltip showing the dates from when you set a relative range, such as **Last 15 minutes**, after you select **Refresh**. The selector now updates the dates on every refresh [#297346]({{kib-pull}}297346).
 * Fix the **Ingest your data** section appearing on the Analytics overview for roles that can't add data [#297717]({{kib-pull}}297717).
 * Fix Search apps, such as Search Home, Getting Started, and Playground, appearing in Observability spaces through global search and direct URLs [#290553]({{kib-pull}}290553).
 * Fix the space switcher disappearing from the {{kib}} header when the request that loads the current space fails, by retrying the request [#294584]({{kib-pull}}294584).
@@ -562,6 +568,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix file pickers across {{kib}} lacking an accessible name, so screen reader users can identify their purpose [#293281]({{kib-pull}}293281).
 * Prompt you before you leave the role management or the create and edit space screens with unsaved changes, so you don't lose your edits [#283525]({{kib-pull}}283525), [#283513]({{kib-pull}}283513).
 * Fix {{kib}} logging `version_conflict_engine_exception` errors on page loads that authenticate with basic credentials and no session cookie. {{kib}} activated the user profile twice at the same time. The errors were harmless because the retry succeeded [#291066]({{kib-pull}}291066).
+* Fix saving your user profile settings failing with a `400` error when your display language isn't enabled for the deployment [#302172]({{kib-pull}}302172).
 * Fix unexpected logouts after {{kib}} refreshes an expired access token [#286038]({{kib-pull}}286038).
 * Fix PKI sessions being invalidated when in-flight requests are cancelled over HTTP/2, which ended the session. This affects deployments that set `server.protocol: http2`, which is the default when TLS is turned on [#285153]({{kib-pull}}285153).
 * Hide the **Activate user** button in the deactivated-user callout for users with read-only security privileges, because the button did nothing [#289801]({{kib-pull}}289801).
@@ -586,6 +593,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix Agent Builder requests that use tools failing with an `INVALID_ARGUMENT` error when the Gemini connector sends them to Google Vertex AI [#300040]({{kib-pull}}300040).
 * Fix requests to Gemini models failing with a 400 error when an Agent Builder tool reuses a shared parameter definition, such as the time range in the dashboards tool [#295880]({{kib-pull}}295880).
 * Fix Agent Builder and Attack Discovery failing on Anthropic `chat_completion` endpoints because {{kib}} sent a `temperature` value that the model rejects [#281179]({{kib-pull}}281179).
+* Fix AI features failing with Claude models that reject forced tool use. {{kib}} now sends `tool_choice: auto` to these models, so the model decides whether to call a tool [#301398]({{kib-pull}}301398).
 * Fix workflow auto-complete suggesting only connectors. It now also suggests {{infer}} endpoints that you set in feature settings [#292431]({{kib-pull}}292431).
 * Fix the product documentation installer shutting {{kib}} down when it downloads a corrupt or incomplete artifact [#291142]({{kib-pull}}291142).
 * Fix the index data visualizer not showing the anomaly detection and data frame analytics job creation cards when you open the page from a link to a data view or Discover session [#298432]({{kib-pull}}298432).
@@ -667,21 +675,20 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix HTTP connector requests losing query parameters that you write directly in the request `path` [#282162]({{kib-pull}}282162).
 * Fix custom steps failing with HTTP `404` when {{kib}} uses a server base path [#283101]({{kib-pull}}283101).
 * Return a generic `404` error from all workflow operations when you request a workflow ID that you can't access, so the response doesn't reveal whether the ID exists [#299475]({{kib-pull}}299475).
+* Fix the workflow list and execution API endpoints returning a `500` error when `page * size` goes past 10000. They now return a `400` error, and `GET /api/workflows` caps `size` at 10000 [#301966]({{kib-pull}}301966).
+* Fix searching the workflow list for an exact workflow name returning every workflow that shares a word with it. The list now shows the exact match first, and results match all the words you enter [#302755]({{kib-pull}}302755).
+* Prevent deleting a workflow that runs as a service account while it has running or paused executions, so those executions couldn't resume. The request now fails with a `409` error [#303000]({{kib-pull}}303000).
 * Fix a workflow's schedule being updated in the space you are working in instead of the space the workflow belongs to [#287988]({{kib-pull}}287988).
 * Stop scheduled runs that were already queued from starting for a workflow that you disabled [#287986]({{kib-pull}}287986).
 * Fix workflows that you turned off disappearing from an agent's pre-execution workflow settings while the agent still ran them, so you couldn't remove them. They now show as `{name} (disabled)` [#286826]({{kib-pull}}286826).
 * Fix workflows that declare `inputs` at the top level, outside the manual trigger, showing no parameters when you use them as Agent Builder or MCP tools [#285149]({{kib-pull}}285149).
 * Stop requiring the `read` privilege to run a workflow, so you can let users run approved workflows without letting them read the definitions [#284822]({{kib-pull}}284822).
 
-% !!DEFERRED!! The following entries are not in build candidate 9.6.0-6bafad71 (Kibana commit 2bbc632e52c3). Re-check them against the next build candidate.
+% !!DEFERRED!! The following entries are not in build candidate 9.6.0-50a403e1 (Kibana commit b657b9dd6749). Re-check them against the next build candidate.
 % * Show a waiting `waitForInput` step in the workflow execution flyout with a **Provide action** link instead of a banner, and make the execution flyout resizable [#294078]({{kib-pull}}294078).
-% Not on the 9.6 branch (backport:skip, merged to main on Oct 28 with a v9.6.0 label). Check the label before you keep it.
-% * Require the **Integrations** read privilege for the full agent policy APIs, and disable **View policy**, **View agent policy**, and the standalone enrollment option when you can't read integration policies [#301951]({{kib-pull}}301951).
-% Merged to 9.6 after build candidate 9.6.0-6bafad71. Users with Agents **All** but no Integrations read lose the standalone enrollment instructions, so consider a breaking change entry if it ships.
-% * Cap `size` at 10000 on `GET /api/workflows`, and return a `400` error instead of a `500` error when `page * size` goes past 10000 on the workflow list and execution routes [#301966]({{kib-pull}}301966).
-% Not on the 9.6 branch yet (no backport).
+% Not on the 9.6 branch (backport:skip, merged to main on Oct 28 with a v9.6.0 label). Check the label before you keep it. Still absent from build candidate 9.6.0-50a403e1.
 % * Hide models outside your region preferences on the Feature settings page [#298958]({{kib-pull}}298958).
-% Not on the 9.6 branch (no backport). The PR carries release_note:bug.
+% Not on the 9.6 branch (backport:skip, merged to main on Oct 22 with a v9.6.0 label). The PR now carries release_note:fix. Still absent from build candidate 9.6.0-50a403e1.
 
 % The {{esql}} Data Federation bullet in the {{esql}} editor section summarizes these entries. Add PR links there if you want them.
 % * Support federated data sources in the alerting v2 threshold rule builder [#279142]({{kib-pull}}279142).
@@ -748,9 +755,21 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 % * Enable the endpoint response actions skill in Agent Builder by default [#299402]({{kib-pull}}299402).
 % * Update the Entity Analytics skill description and content [#301628]({{kib-pull}}301628).
 % * Allow closing a case when it has reached the user action limit [#301378]({{kib-pull}}301378).
+% * Resolve in-app proposal links against the {{kib}} base path [#300283]({{kib-pull}}300283).
+% * Keep a Hunt Watch report retryable when the dataset-match call fails [#302188]({{kib-pull}}302188).
+% * Resolve alerts when the Attack Discovery gate adds fewer than 10, and stop Attack Discovery generation when the model refuses with `content_filter` [#302303]({{kib-pull}}302303), [#302304]({{kib-pull}}302304).
+% * Link Alert Analysis conversations to their alerts [#302452]({{kib-pull}}302452).
+% * Release dead claims on verdicted alerts in the Alert Triage sweep, and stop reporting already-closed alerts as closed by an Alert Triage proposal [#302456]({{kib-pull}}302456), [#302574]({{kib-pull}}302574).
+% * Group only candidate values in Entity Store resolution matcher rules, and back off failing built-in resolution rules [#301739]({{kib-pull}}301739), [#302533]({{kib-pull}}302533).
+% * Update MITRE ATLAS to version 2026.09 [#302501]({{kib-pull}}302501).
+% * Return extracted observables when you attach alerts to a case [#302629]({{kib-pull}}302629).
+% * Fix the attack flyout not opening on the Notes Management page [#302875]({{kib-pull}}302875).
 
 % Removed from 9.6.0: other entries that the notes leave out.
 % * Fix the APM waterfall silently re-rooting on truncated traces [#284971]({{kib-pull}}284971). Observability solution.
+% * Fix Synthetics monitor status alerts showing the location ID instead of the location name when a pending alert recovers [#300220]({{kib-pull}}300220). Observability solution.
+% * Fix the Synthetics monitor health API logging users out when a monitor is shared to all spaces [#302177]({{kib-pull}}302177). Observability solution.
+% * Fix the Metrics charts in Discover failing with an `Unknown column` error when an {{esql}} `TS` query filters on a metadata field [#302705]({{kib-pull}}302705). Observability solution (Metrics experience, Team:obs-signals-metrics). Consider it if you want it under Discover.
 % * Fix the approximation badge rendering above the **Group by** button instead of in line with the toolbar controls in Discover [#300717]({{kib-pull}}300717). Same-release polish of the approximation badge that 9.6.0 adds in #291464.
 
 % Folded into the single Kibana Universal Alerting entry for 9.6.0. Add these back only if you want separate entries.
