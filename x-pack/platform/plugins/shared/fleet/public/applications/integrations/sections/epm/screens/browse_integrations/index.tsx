@@ -15,7 +15,12 @@ import type { CollectionVariant } from '../home/card_utils';
 import { COLLECTION_QUERYPARAM } from '../home/card_utils';
 import { CollectionFlyout } from '../home/components/collection_flyout';
 
-import { useAutomaticImportAuthz, useBreadcrumbs, useStartServices } from '../../../../hooks';
+import {
+  useAuthz,
+  useAutomaticImportAuthz,
+  useBreadcrumbs,
+  useStartServices,
+} from '../../../../hooks';
 import { NoEprCallout } from '../../components/no_epr_callout';
 import { categoryExists } from '../home';
 
@@ -64,6 +69,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
 
   const { canView: canReadAutomaticImportIntegrations, canCreate: canCreateAutomaticImport } =
     useAutomaticImportAuthz();
+  const canUploadPackages = useAuthz().integrations.uploadPackages;
 
   const useGetAllIntegrationsHook = canReadAutomaticImportIntegrations
     ? automaticImport?.hooks.useGetAllIntegrations ?? useEmptyAllIntegrations
@@ -257,10 +263,12 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
           onCategoryChange={onCategoryChange}
           showCreatedIntegrations={canReadAutomaticImportIntegrations}
           CreateIntegrationCardButton={
-            canCreateAutomaticImport
+            canCreateAutomaticImport || canUploadPackages
               ? automaticImport?.components.CreateIntegrationSideCardButton
               : undefined
           }
+          canCreateIntegration={canCreateAutomaticImport}
+          canUploadIntegrationPackage={canUploadPackages}
           hasCreatedIntegrations={hasCreatedIntegrations}
           createdIntegrationsCount={integrations.length}
           isLoadingCreatedIntegrations={isLoadingCreatedIntegrations}

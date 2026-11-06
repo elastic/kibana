@@ -10,9 +10,11 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 const mockUseAutomaticImportAuthz = jest.fn();
+const mockUseAuthz = jest.fn();
 jest.mock('../../hooks', () => ({
   useStartServices: () => ({ automaticImport: {} }),
   useBreadcrumbs: jest.fn(),
+  useAuthz: () => mockUseAuthz(),
   useAutomaticImportAuthz: () => mockUseAutomaticImportAuthz(),
   IntegrationsStateContextProvider: ({ children }: { children: React.ReactNode }) => (
     <>{children}</>
@@ -46,9 +48,13 @@ const renderAt = (path: string) =>
     </MemoryRouter>
   );
 
+const setUploadPackages = (uploadPackages: boolean) =>
+  mockUseAuthz.mockReturnValue({ integrations: { uploadPackages } });
+
 describe('EPMApp create integration routes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    setUploadPackages(true);
   });
 
   it('mounts the create integration screen on /create when the user can create', () => {
@@ -69,8 +75,27 @@ describe('EPMApp create integration routes', () => {
     expect(screen.getByTestId('epmHomePage')).toBeInTheDocument();
   });
 
-  it('falls back to the integrations home on /upload when the user cannot create', () => {
-    mockUseAutomaticImportAuthz.mockReturnValue({ canCreate: false });
+  it('mounts the upload screen on /upload for an Automatic Import read user who can upload packages', () => {
+    mockUseAutomaticImportAuthz.mockReturnValue({ canView: true, canCreate: false });
+
+    renderAt('/upload');
+
+    expect(screen.getByTestId('createIntegrationScreen')).toBeInTheDocument();
+    expect(screen.queryByTestId('epmHomePage')).not.toBeInTheDocument();
+  });
+
+  it('falls back to the integrations home on /upload when the user has no Automatic Import read', () => {
+    mockUseAutomaticImportAuthz.mockReturnValue({ canView: false, canCreate: false });
+
+    renderAt('/upload');
+
+    expect(screen.queryByTestId('createIntegrationScreen')).not.toBeInTheDocument();
+    expect(screen.getByTestId('epmHomePage')).toBeInTheDocument();
+  });
+
+  it('falls back to the integrations home on /upload when the user cannot upload packages', () => {
+    mockUseAutomaticImportAuthz.mockReturnValue({ canView: true, canCreate: true });
+    setUploadPackages(false);
 
     renderAt('/upload');
 
