@@ -13,6 +13,7 @@ import { isToolCallStep, ToolResultType } from '@kbn/agent-builder-common';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import type { CoreStart } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import { REPLAY_CONVERSATION_ID_PREFIX } from '@kbn/nightshift-decision-trees';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID } from '../agents/decision_tree_reinforcement';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
@@ -166,6 +167,14 @@ export const decisionTreeReinforceStepDefinition = ({
         tool_results: toolResults,
         replay,
       } = context.input;
+      // A replay skips the readability check below, so its id must not name a real investigation
+      // whose trees it would then be recorded as writing.
+      if (replay === true && !inputConversationId?.startsWith(REPLAY_CONVERSATION_ID_PREFIX)) {
+        context.logger.warn(
+          `Skipped decision tree reinforcement — a replayed round's conversation_id must start with ${REPLAY_CONVERSATION_ID_PREFIX}`
+        );
+        return { output: { message: '', skipped: true, submissions_json: '[]' } };
+      }
       const request = context.contextManager.getFakeRequest();
       // A replayed round has no conversation to read, so the loader builds it from the supplied
       // tool calls; the input conversation id still records provenance below.

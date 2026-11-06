@@ -34,6 +34,7 @@ export {
 } from './src/mermaid';
 
 export { decisionEdgeKey } from './src/edge_key';
+export { REPLAY_CONVERSATION_ID_PREFIX } from './src/replay';
 export {
   carryCounts,
   countsForTree,

@@ -23,6 +23,7 @@ import {
   decisionTreeReinforceStepDefinition,
   lastSubmitRejected,
 } from './decision_tree_reinforce';
+import { REPLAY_CONVERSATION_ID_PREFIX } from '@kbn/nightshift-decision-trees';
 
 describe('decisionTreeReinforceStepDefinition', () => {
   const fakeRequest = { headers: {} };
@@ -142,7 +143,7 @@ describe('decisionTreeReinforceStepDefinition', () => {
         createContext({
           prompt: 'Why is checkout slow?',
           response: 'Connection pool exhausted.',
-          conversation_id: 'synthetic-1',
+          conversation_id: `${REPLAY_CONVERSATION_ID_PREFIX}synthetic-1`,
           round_id: 'round-1',
           message: 'Task: create a new decision tree',
           turn_kind: 'initial_investigation',
@@ -166,6 +167,16 @@ describe('decisionTreeReinforceStepDefinition', () => {
           steps: [expect.objectContaining({ tool_call_id: 'toolu_1', results })],
         }),
       ]);
+    });
+
+    it('refuses a replay whose conversation id could name a real investigation', async () => {
+      const output = await runReplay({
+        replay: true,
+        conversation_id: 'b1946ac9-2f3a-4e5d-9c7b-0a1b2c3d4e5f',
+      });
+
+      expect(output).toEqual({ output: { message: '', skipped: true, submissions_json: '[]' } });
+      expect(runAgent).not.toHaveBeenCalled();
     });
 
     it('still skips the same unreadable conversation when the round is not a replay', async () => {
