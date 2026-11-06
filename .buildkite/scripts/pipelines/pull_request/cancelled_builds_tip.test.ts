@@ -17,12 +17,14 @@ import {
 
 const mockGetFinishedBuildsForBranch = jest.fn();
 const mockGetCurrentBuild = jest.fn();
+const mockGetBuild = jest.fn();
 const mockUpsertComment = jest.fn();
 
 jest.mock('#pipeline-utils', () => ({
   BuildkiteClient: jest.fn().mockImplementation(() => ({
     getFinishedBuildsForBranch: mockGetFinishedBuildsForBranch,
     getCurrentBuild: mockGetCurrentBuild,
+    getBuild: mockGetBuild,
   })),
   upsertComment: (...args: unknown[]) => mockUpsertComment(...args),
 }));
@@ -50,6 +52,7 @@ const build = ({
   jobs?: Array<{ state: string; finishedAt: number; softFailed?: boolean; retried?: boolean }>;
 }): Build =>
   ({
+    number: createdAt,
     commit,
     state,
     message,
@@ -174,6 +177,9 @@ describe('postCancelledBuildsTip', () => {
     };
     mockGetFinishedBuildsForBranch.mockResolvedValue(cancelledBuilds);
     mockGetCurrentBuild.mockResolvedValue(build({ commit: 'd', createdAt: 45, state: 'running' }));
+    mockGetBuild.mockImplementation(async (_, buildNumber: number) =>
+      cancelledBuilds.find(({ number }) => number === buildNumber)
+    );
   });
 
   afterAll(() => {
@@ -190,8 +196,38 @@ describe('postCancelledBuildsTip', () => {
     });
   });
 
-  it('does not post below the threshold', async () => {
+  it('lists builds without jobs and only fetches jobs for the superseded ones', async () => {
+    await postCancelledBuildsTip();
+
+    expect(mockGetFinishedBuildsForBranch).toHaveBeenCalledWith(
+      'kibana-pull-request',
+      'jane:feature',
+      100,
+      { excludeJobs: true }
+    );
+    expect(mockGetBuild.mock.calls.map(([, buildNumber]) => buildNumber)).toEqual([0, 15, 30]);
+  });
+
+  it('does not post below the threshold, without fetching any jobs', async () => {
     mockGetFinishedBuildsForBranch.mockResolvedValue(cancelledBuilds.slice(1));
+
+    await postCancelledBuildsTip();
+
+    expect(mockGetBuild).not.toHaveBeenCalled();
+    expect(mockUpsertComment).not.toHaveBeenCalled();
+  });
+
+  it('does not post when a superseded build had already failed', async () => {
+    mockGetBuild.mockImplementation(async (_, buildNumber: number) =>
+      buildNumber === 15
+        ? build({
+            commit: 'b',
+            createdAt: 15,
+            finishedAt: 30,
+            jobs: [{ state: 'failed', finishedAt: 25 }],
+          })
+        : cancelledBuilds.find(({ number }) => number === buildNumber)
+    );
 
     await postCancelledBuildsTip();
 

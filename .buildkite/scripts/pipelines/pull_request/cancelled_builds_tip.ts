@@ -19,6 +19,7 @@ const MIN_RUNTIME_MS = 10 * 60 * 1000;
 // A superseded build is cancelled within moments of its replacement being created.
 const SUPERSEDED_GRACE_MS = 5 * 60 * 1000;
 const BUILDS_TO_FETCH = 100;
+const MAX_BUILDS_TO_INSPECT = 10;
 const TIMEOUT_MS = 15_000;
 
 const isBotUser = (login: string): boolean =>
@@ -38,36 +39,47 @@ const hadFailedBefore = ({ jobs = [] }: Build, pushedAt: number): boolean =>
       state === 'failed' && !softFailed && !retried && (toMs(finishedAt) ?? Infinity) <= pushedAt
   );
 
-/** Counts builds of a PR that ran for a while and were then cancelled by a newer human push. */
-export const countBuildsCancelledByPushes = (
+interface SupersededBuild {
+  build: Build;
+  pushedAt: number;
+}
+
+const findBuildsSupersededByPushes = (
   builds: readonly Build[],
   prNumber: string
-): number => {
+): SupersededBuild[] => {
   const prBuilds = builds
     .filter((build) => build.pull_request?.id === prNumber)
     .sort((left, right) => Date.parse(left.created_at) - Date.parse(right.created_at));
 
-  return prBuilds.filter((build, index) => {
+  return prBuilds.flatMap((build, index) => {
     const startedAt = toMs(build.started_at);
     const finishedAt = toMs(build.finished_at);
     if (build.state !== 'canceled' || startedAt === null || finishedAt === null) {
-      return false;
+      return [];
     }
     if (finishedAt - startedAt < MIN_RUNTIME_MS) {
-      return false;
+      return [];
     }
 
     const successor = prBuilds
       .slice(index + 1)
       .find((candidate) => candidate.commit !== build.commit);
     if (!successor || isBotFixCommit(successor)) {
-      return false;
+      return [];
     }
 
     const pushedAt = Date.parse(successor.created_at);
-    return pushedAt <= finishedAt + SUPERSEDED_GRACE_MS && !hadFailedBefore(build, pushedAt);
-  }).length;
+    return pushedAt <= finishedAt + SUPERSEDED_GRACE_MS ? [{ build, pushedAt }] : [];
+  });
 };
+
+const countWithoutEarlierFailures = (superseded: readonly SupersededBuild[]): number =>
+  superseded.filter(({ build, pushedAt }) => !hadFailedBefore(build, pushedAt)).length;
+
+/** Counts builds of a PR that ran for a while and were then cancelled by a newer human push. */
+export const countBuildsCancelledByPushes = (builds: readonly Build[], prNumber: string): number =>
+  countWithoutEarlierFailures(findBuildsSupersededByPushes(builds, prNumber));
 
 export const getCancelledBuildsTipMessage = (user: string, cancelledBuilds: number): string =>
   `👋 @${user}, are you still iterating on this PR? ${cancelledBuilds} CI builds were cancelled by new pushes before they finished. ` +
@@ -95,15 +107,29 @@ const postTip = async (): Promise<void> => {
   }
 
   const buildkite = new BuildkiteClient();
+  // PR builds have hundreds of jobs each, so jobs are only fetched for the few builds that need them.
   const [finishedBuilds, currentBuild] = await Promise.all([
-    buildkite.getFinishedBuildsForBranch(PIPELINE_SLUG, BUILDKITE_BRANCH, BUILDS_TO_FETCH),
+    buildkite.getFinishedBuildsForBranch(PIPELINE_SLUG, BUILDKITE_BRANCH, BUILDS_TO_FETCH, {
+      excludeJobs: true,
+    }),
     buildkite.getCurrentBuild(),
   ]);
 
-  const cancelledBuilds = countBuildsCancelledByPushes(
+  const superseded = findBuildsSupersededByPushes(
     [...finishedBuilds, currentBuild],
     GITHUB_PR_NUMBER
+  ).slice(-MAX_BUILDS_TO_INSPECT);
+  if (superseded.length < MIN_CANCELLED_BUILDS) {
+    return;
+  }
+
+  const inspected = await Promise.all(
+    superseded.map(async ({ build, pushedAt }) => ({
+      build: await buildkite.getBuild(PIPELINE_SLUG, build.number),
+      pushedAt,
+    }))
   );
+  const cancelledBuilds = countWithoutEarlierFailures(inspected);
   if (cancelledBuilds < MIN_CANCELLED_BUILDS) {
     return;
   }

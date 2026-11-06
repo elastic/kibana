@@ -162,7 +162,8 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       return;
     }
 
-    await postCancelledBuildsTip();
+    // Runs alongside the pipeline generation below, so it doesn't delay the build.
+    const cancelledBuildsTip = postCancelledBuildsTip();
 
     // Scout-test-only diffs can't change OAS, API contracts, or Saved Objects, so skip those checks below.
     const prChanges = await getPrChangesCached();
@@ -193,6 +194,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     if (await doAllChangesMatch(/^renovate\.json$/)) {
       pipeline.push(renderSteps(renovateValidation(), { header: true }));
       console.warn('Isolated changes to renovate.json. Skipping main PR pipeline.');
+      await cancelledBuildsTip;
       emitPipeline(pipeline);
       return;
     }
@@ -775,6 +777,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     pipeline.push(renderSteps(postBuildSteps()));
 
     flushCancelOnGateFailureMetadata();
+    await cancelledBuildsTip;
     emitPipeline(pipeline);
   } catch (ex) {
     console.error('Error while generating the pipeline steps: ' + ex.message, ex);
