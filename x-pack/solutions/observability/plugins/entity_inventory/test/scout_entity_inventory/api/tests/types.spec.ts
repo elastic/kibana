@@ -89,14 +89,17 @@ apiTest.describe('GET /internal/entity_inventory/types', { tag: tags.stateful.cl
     expect(customSpaceResponse.body).toStrictEqual(defaultSpaceResponse.body);
   });
 
-  apiTest('a viewer can read the types', async ({ apiClient, requestAuth }) => {
-    const viewerCredentials = await requestAuth.getApiKey('viewer');
+  apiTest(
+    'rejects a viewer, which lacks the entity_inventory_read privilege',
+    async ({ apiClient, requestAuth }) => {
+      const viewerCredentials = await requestAuth.getApiKey('viewer');
 
-    const response = await apiClient.get(TYPES_PATH, {
-      headers: { ...INTERNAL_HEADERS, ...viewerCredentials.apiKeyHeader },
-      responseType: 'json',
-    });
+      const response = await apiClient.get(TYPES_PATH, {
+        headers: { ...INTERNAL_HEADERS, ...viewerCredentials.apiKeyHeader },
+        responseType: 'json',
+      });
 
-    expect(response).toHaveStatusCode(200);
-  });
+      expect(response).toHaveStatusCode(403);
+    }
+  );
 });
