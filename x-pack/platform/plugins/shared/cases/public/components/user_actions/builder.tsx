@@ -25,6 +25,12 @@ import { createExtendedFieldsUserActionBuilder } from './extended_fields';
 import { createTemplateUserActionBuilder } from './template';
 import { createWorkflowUserActionBuilder } from './workflow';
 import { createBulkAttachmentsUserActionBuilder } from './bulk_attachments';
+import {
+  createCreateTaskUserActionBuilder,
+  createUpdateTaskUserActionBuilder,
+  createDeleteTaskUserActionBuilder,
+  createApplyTaskTemplateUserActionBuilder,
+} from './tasks';
 
 export const builderMap: UserActionBuilderMap = {
   access: createAccessUserActionBuilder,
@@ -46,4 +52,8 @@ export const builderMap: UserActionBuilderMap = {
   template: createTemplateUserActionBuilder,
   workflow: createWorkflowUserActionBuilder,
   bulkAttachments: createBulkAttachmentsUserActionBuilder,
+  create_task: createCreateTaskUserActionBuilder,
+  update_task: createUpdateTaskUserActionBuilder,
+  delete_task: createDeleteTaskUserActionBuilder,
+  apply_task_template: createApplyTaskTemplateUserActionBuilder,
 };

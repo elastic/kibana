@@ -33,7 +33,14 @@ export async function deleteCases(
   clientArgs: CasesClientArgs
 ): Promise<void> {
   const {
-    services: { caseService, attachmentService, userActionService, alertsService },
+    services: {
+      caseService,
+      attachmentService,
+      userActionService,
+      alertsService,
+      taskService,
+      taskCommentService,
+    },
     logger,
     authorization,
     fileService,
@@ -83,6 +90,8 @@ export async function deleteCases(
         options: { refresh: 'wait_for' },
       }),
       alertsService.removeCaseIdsFromAllAlerts({ caseIds: ids }),
+      ...ids.map((id) => taskService.deleteTasksByCase(id)),
+      ...ids.map((id) => taskCommentService.deleteBy({ caseId: id })),
     ]);
 
     await userActionService.creator.bulkAuditLogCaseDeletion(

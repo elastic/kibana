@@ -44,6 +44,12 @@ import { TemplateUserActionSchema } from './template/v1';
 import { ExtendedFieldsUserActionSchema } from './extended_fields/v1';
 import { WorkflowUserActionSchema } from './workflow/v1';
 import { BulkAttachmentsUserActionSchema } from './bulk_attachments/v1';
+import {
+  CreateTaskUserActionSchema,
+  UpdateTaskUserActionSchema,
+  DeleteTaskUserActionSchema,
+  ApplyTaskTemplateUserActionSchema,
+} from './task/v1';
 
 export { UserActionTypes, UserActionActions } from './action/v1';
 export { StatusUserActionSchema } from './status/v1';
@@ -106,6 +112,10 @@ const BasicUserActionsSchema = z.union([
   TemplateUserActionSchema,
   WorkflowUserActionSchema,
   BulkAttachmentsUserActionSchema,
+  CreateTaskUserActionSchema,
+  UpdateTaskUserActionSchema,
+  DeleteTaskUserActionSchema,
+  ApplyTaskTemplateUserActionSchema,
 ]);
 
 const CommonUserActionsWithIdsSchema = z.union([BasicUserActionsSchema, CommentUserActionSchema]);
@@ -208,3 +218,9 @@ export type BulkAttachmentsUserAction = UserAction<z.infer<typeof BulkAttachment
 export type { BulkAttachmentsPayload } from './bulk_attachments/v1';
 export { WorkflowUserActionSchema, WorkflowOriginSchema } from './workflow/v1';
 export type { WorkflowPayload, WorkflowOrigin, WorkflowUserActionPayload } from './workflow/v1';
+export type CreateTaskUserAction = UserAction<z.infer<typeof CreateTaskUserActionSchema>>;
+export type UpdateTaskUserAction = UserAction<z.infer<typeof UpdateTaskUserActionSchema>>;
+export type DeleteTaskUserAction = UserAction<z.infer<typeof DeleteTaskUserActionSchema>>;
+export type ApplyTaskTemplateUserAction = UserAction<
+  z.infer<typeof ApplyTaskTemplateUserActionSchema>
+>;

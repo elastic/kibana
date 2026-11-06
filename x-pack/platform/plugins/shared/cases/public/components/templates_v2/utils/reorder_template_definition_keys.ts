@@ -25,6 +25,7 @@ export const TEMPLATE_DEFINITION_KEY_ORDER = [
   'category',
   'tags',
   'assignees',
+  'task_lists',
   'fields',
 ] as const;
 

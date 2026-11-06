@@ -62,6 +62,7 @@ function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
     attachments: { enabled: true },
     chat: { enabled: true },
     customStatuses: { enabled: false },
+    tasks: { enabled: true },
     ...overrides,
   };
 }
@@ -351,6 +352,9 @@ describe('Cases Plugin', () => {
               "enabled": true,
             },
             "stack": Object {
+              "enabled": true,
+            },
+            "tasks": Object {
               "enabled": true,
             },
             "templates": Object {

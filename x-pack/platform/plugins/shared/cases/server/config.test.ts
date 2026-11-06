@@ -146,6 +146,9 @@ describe('config validation', () => {
           "stack": Object {
             "enabled": true,
           },
+          "tasks": Object {
+            "enabled": true,
+          },
           "templates": Object {
             "enabled": true,
           },

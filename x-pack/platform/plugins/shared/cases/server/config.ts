@@ -186,6 +186,10 @@ export const ConfigSchema = schema.object({
   customStatuses: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
+  // Technical preview of case task lists.
+  tasks: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
   enabled: schema.boolean({ defaultValue: true }),
 });
 

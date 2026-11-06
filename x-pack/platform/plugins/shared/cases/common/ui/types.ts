@@ -101,6 +101,9 @@ export interface CasesUiConfigType {
   restrictedCases?: {
     enabled: boolean;
   };
+  tasks?: {
+    enabled: boolean;
+  };
 }
 
 export const UserActionTypeAll = 'all' as const;

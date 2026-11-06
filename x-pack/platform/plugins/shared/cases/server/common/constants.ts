@@ -58,6 +58,7 @@ export const LICENSING_CASE_ASSIGNMENT_FEATURE = 'Cases user usage';
  * The name of the licensing feature to notify for cases feature usage with the licensing plugin
  */
 export const LICENSING_CASE_OBSERVABLES_FEATURE = 'Cases observable assignment';
+export const LICENSING_CASE_TASKS_FEATURE = 'Cases tasks';
 
 /**
  * The Elasticsearch reserved role that bypasses restricted-case visibility on

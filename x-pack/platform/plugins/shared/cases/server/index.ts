@@ -37,6 +37,9 @@ export const config: PluginConfigDescriptor<ConfigType> = {
     customStatuses: {
       enabled: true,
     },
+    tasks: {
+      enabled: true,
+    },
   },
   deprecations: ({ renameFromRoot, unused }) => [
     renameFromRoot('xpack.case.enabled', 'xpack.cases.enabled', { level: 'critical' }),

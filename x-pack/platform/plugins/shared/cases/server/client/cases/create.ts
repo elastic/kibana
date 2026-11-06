@@ -67,6 +67,7 @@ import {
   ensureTemplateVersionIsPinned,
   resolveTemplateForCreate,
 } from './expand_template_defaults';
+import { seedTaskListsFromTemplate } from '../tasks/apply_task_list';
 import {
   CREATE_CASE_WITHOUT_TEMPLATE_COUNTER,
   CREATE_CASE_WITH_TEMPLATE_COUNTER,
@@ -91,6 +92,8 @@ export const create = async (
       notificationService,
       templatesService,
       fieldDefinitionsService,
+      taskService,
+      taskTemplateService,
     },
     user,
     logger,
@@ -148,6 +151,7 @@ export const create = async (
     // Resolved lazily and reused: template expansion needs it to decide whether to apply template
     // assignees, and the license-enforcement block below needs it again — resolve at most once.
     let hasPlatinumLicenseOrGreater: boolean | undefined;
+    let taskListIds: string[] = [];
     if (!clientArgs.config.templates.enabled) {
       // Without the templates feature there is no expansion to resolve a missing version, and a
       // stored template reference must always be version-pinned (close-time validation relies
@@ -163,6 +167,7 @@ export const create = async (
       });
       appliedTemplateName = resolvedTemplate.parsed.name;
       templateExtractObservables = resolvedTemplate.parsed.definition.settings?.extractObservables;
+      taskListIds = resolvedTemplate.parsed.definition.task_lists ?? [];
 
       const callerSentAssignees = query.assignees !== undefined;
 
@@ -578,6 +583,19 @@ export const create = async (
     });
 
     const createdCase = decodeOrThrowZod(CaseSchema)(res);
+
+    if (taskListIds.length > 0 && clientArgs.config.tasks.enabled && hasPlatinumLicenseOrGreater) {
+      await seedTaskListsFromTemplate({
+        caseId: createdCase.id,
+        owner: createdCase.owner,
+        taskListIds,
+        user,
+        logger,
+        taskService,
+        taskTemplateService,
+        userActionService,
+      });
+    }
 
     // workflow triggers never fire for restricted cases
     if (!isCaseRestricted(createdCase)) {

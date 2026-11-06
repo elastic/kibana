@@ -634,4 +634,16 @@ export const casesSchema: CasesTelemetrySchema = {
     obs: workflowsSolutionTelemetrySchema,
     main: workflowsSolutionTelemetrySchema,
   },
+  tasks: {
+    total: long,
+    byStatus: {
+      open: long,
+      inProgress: long,
+      completed: long,
+      cancelled: long,
+    },
+    casesWithTasks: long,
+    fromTaskList: long,
+    taskLists: long,
+  },
 };

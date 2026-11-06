@@ -831,6 +831,9 @@ export const mockCasesContract = (): CasesServerStart => ({
     customStatuses: {
       enabled: false,
     },
+    tasks: {
+      enabled: true,
+    },
   },
 });
 

@@ -25,6 +25,14 @@ export interface Buckets<T extends string | number = string | number> {
   buckets: Array<Bucket<T>>;
 }
 
+export interface TasksTelemetry {
+  total: number;
+  byStatus: { open: number; inProgress: number; completed: number; cancelled: number };
+  casesWithTasks: number;
+  fromTaskList: number;
+  taskLists: number;
+}
+
 export interface Cardinality {
   value: number;
 }
@@ -450,6 +458,7 @@ export interface CasesTelemetry {
     obs: WorkflowsSolutionTelemetry;
     main: WorkflowsSolutionTelemetry;
   };
+  tasks: TasksTelemetry;
 }
 
 export type CountSchema = MakeSchemaFrom<Count>;

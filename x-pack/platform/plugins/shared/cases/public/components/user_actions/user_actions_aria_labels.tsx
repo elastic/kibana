@@ -30,6 +30,10 @@ export const getUserActionAriaLabel = (type: keyof typeof UserActionTypes) => {
     template: i18n.APPLIED_TEMPLATE,
     workflow: i18n.WORKFLOW_RAN,
     bulkAttachments: i18n.ATTACHMENTS_REMOVED,
+    create_task: i18n.TASK,
+    update_task: i18n.TASK,
+    delete_task: i18n.TASK,
+    apply_task_template: i18n.TASK_TEMPLATE,
   };
 
   switch (type) {

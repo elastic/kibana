@@ -40,6 +40,8 @@ import { OldCustomFieldsAndTemplatesSection } from './old_custom_fields_and_temp
 import { WorkflowTags } from './workflow_tags';
 import { useAreWorkflowsAvailableForCases } from '../workflows/use_run_case_workflow';
 import * as observableTypesI18n from '../observable_types/translations';
+import { TaskListsSection } from '../task_lists/task_lists_section';
+import * as taskListsI18n from '../task_lists/translations';
 
 const contentWrapperCss = css`
   box-sizing: content-box;
@@ -71,6 +73,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
     hasMinimumLicensePermissionsForObservables,
     isObservablesFeatureEnabled,
     isExtractObservablesEnabled,
+    tasksAuthorized,
     configurationId,
     configurationVersion,
     closureType,
@@ -127,6 +130,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
   const showObservableTypesSection =
     hasMinimumLicensePermissionsForObservables && isObservablesFeatureEnabled;
   const showExtractObservablesSection = showObservableTypesSection && isExtractObservablesEnabled;
+  const showTaskListsSection = tasksAuthorized && permissions.settings;
 
   return (
     <>
@@ -305,6 +309,19 @@ export const ConfigureCases: React.FC = React.memo(() => {
                       onChange={onChangeWorkflowTags}
                     />
                   </SettingsSection>
+                )}
+
+                {showTaskListsSection && (
+                  <>
+                    <EuiHorizontalRule margin="l" />
+                    <SettingsSection
+                      data-test-subj="cases-redesign-task-lists-section"
+                      title={taskListsI18n.TITLE}
+                      description={taskListsI18n.DESCRIPTION}
+                    >
+                      <TaskListsSection />
+                    </SettingsSection>
+                  </>
                 )}
 
                 {/* Rendered for both templates-flag states: with templates v2 ON it is the

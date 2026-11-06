@@ -17,6 +17,8 @@ import { CaseViewTabs } from '../case_view_tabs';
 import { CaseViewActivity } from './activity/case_view_activity';
 import { CaseViewSimilarCases } from './case_view_similar_cases';
 import { CaseViewAttachments } from './case_view_attachments';
+import { CaseViewTasks } from '../../tasks/case_view_tasks';
+import { useCasesFeatures } from '../../../common/use_cases_features';
 import { filterCaseAttachmentsBySearchTerm } from './helpers';
 import { CaseViewSidebar } from './sidebar/case_view_sidebar';
 import { SidebarProvider, useSidebar } from './sidebar/sidebar_context';
@@ -47,11 +49,13 @@ const CaseViewTabContentInner: FC<CaseViewTabContentProps> = ({
   onUpdateField,
 }) => {
   const { urlParams } = useUrlParams();
+  const { tasksAuthorized } = useCasesFeatures();
   const rawTabId = urlParams?.tabId ?? CASE_VIEW_PAGE_TABS.ACTIVITY;
 
   const activeTabId: CASE_VIEW_PAGE_TABS =
     rawTabId === CASE_VIEW_PAGE_TABS.ACTIVITY ||
     rawTabId === CASE_VIEW_PAGE_TABS.SIMILAR_CASES ||
+    (rawTabId === CASE_VIEW_PAGE_TABS.TASKS && tasksAuthorized) ||
     ATTACHMENT_TAB_ALIASES.has(rawTabId)
       ? rawTabId
       : CASE_VIEW_PAGE_TABS.ACTIVITY;
@@ -92,6 +96,7 @@ const CaseViewTabContentInner: FC<CaseViewTabContentProps> = ({
           {activeTabId === CASE_VIEW_PAGE_TABS.SIMILAR_CASES && (
             <CaseViewSimilarCases caseData={caseWithFilteredAttachments} />
           )}
+          {activeTabId === CASE_VIEW_PAGE_TABS.TASKS && <CaseViewTasks caseId={caseData.id} />}
         </EuiFlexItem>
         {/* Hidden rather than unmounted when collapsed, so pending unconfirmed field edits
             survive a toggle the same way they already survive collapsing a single accordion. */}
