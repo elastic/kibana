@@ -52,8 +52,8 @@ jest.mock('./pre_build.ts', () => ({
   runPreBuild: mockRunPreBuild,
 }));
 
-jest.mock('./cancelled_builds_tip.ts', () => ({
-  postCancelledBuildsTip: jest.fn().mockResolvedValue(undefined),
+jest.mock('./frequent_cancellations_tip.ts', () => ({
+  postFrequentCancellationsTip: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('../../../pipelines/evals/eval_pipeline.ts', () => ({

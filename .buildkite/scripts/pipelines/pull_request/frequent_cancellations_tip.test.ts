@@ -10,11 +10,11 @@
 import type { Build } from '#pipeline-utils';
 import { BuildkiteClient } from '#pipeline-utils';
 import {
-  CANCELLED_BUILDS_TIP_CONTEXT,
+  FREQUENT_CANCELLATIONS_TIP_CONTEXT,
   countRecentCancelledBuilds,
-  getCancelledBuildsTipMessage,
-  postCancelledBuildsTip,
-} from './cancelled_builds_tip.ts';
+  getFrequentCancellationsTipMessage,
+  postFrequentCancellationsTip,
+} from './frequent_cancellations_tip.ts';
 
 const mockGetFinishedBuildsForBranch = jest.fn();
 const mockUpsertComment = jest.fn();
@@ -98,7 +98,7 @@ describe('countRecentCancelledBuilds', () => {
   });
 });
 
-describe('postCancelledBuildsTip', () => {
+describe('postFrequentCancellationsTip', () => {
   const ORIGINAL_ENV = process.env;
   const cancelledBuilds = [
     build({ createdMinutesAgo: 180 }),
@@ -126,7 +126,7 @@ describe('postCancelledBuildsTip', () => {
   });
 
   it('posts the tip once three builds were cancelled in the last day', async () => {
-    await postCancelledBuildsTip();
+    await postFrequentCancellationsTip();
 
     expect(BuildkiteClient).toHaveBeenCalledWith({ timeoutMs: 15_000 });
     expect(mockGetFinishedBuildsForBranch).toHaveBeenCalledWith(
@@ -136,8 +136,8 @@ describe('postCancelledBuildsTip', () => {
       { excludeJobs: true }
     );
     expect(mockUpsertComment).toHaveBeenCalledWith({
-      commentBody: getCancelledBuildsTipMessage('jane', 3),
-      commentContext: CANCELLED_BUILDS_TIP_CONTEXT,
+      commentBody: getFrequentCancellationsTipMessage('jane', 3),
+      commentContext: FREQUENT_CANCELLATIONS_TIP_CONTEXT,
       clearPrevious: false,
     });
   });
@@ -145,7 +145,7 @@ describe('postCancelledBuildsTip', () => {
   it('does not post below the threshold', async () => {
     mockGetFinishedBuildsForBranch.mockResolvedValue(cancelledBuilds.slice(1));
 
-    await postCancelledBuildsTip();
+    await postFrequentCancellationsTip();
 
     expect(mockUpsertComment).not.toHaveBeenCalled();
   });
@@ -157,7 +157,7 @@ describe('postCancelledBuildsTip', () => {
   ])('does nothing for %s', async (_, env) => {
     process.env = { ...process.env, ...env };
 
-    await postCancelledBuildsTip();
+    await postFrequentCancellationsTip();
 
     expect(mockGetFinishedBuildsForBranch).not.toHaveBeenCalled();
     expect(mockUpsertComment).not.toHaveBeenCalled();
@@ -167,7 +167,7 @@ describe('postCancelledBuildsTip', () => {
     mockGetFinishedBuildsForBranch.mockRejectedValue(new Error('boom'));
     jest.spyOn(console, 'error').mockImplementation(() => {});
 
-    await expect(postCancelledBuildsTip()).resolves.toBeUndefined();
+    await expect(postFrequentCancellationsTip()).resolves.toBeUndefined();
     expect(mockUpsertComment).not.toHaveBeenCalled();
   });
 });

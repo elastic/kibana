@@ -10,7 +10,7 @@
 import type { Build } from '#pipeline-utils';
 import { BuildkiteClient, upsertComment } from '#pipeline-utils';
 
-export const CANCELLED_BUILDS_TIP_CONTEXT = 'cancelled-builds-tip';
+export const FREQUENT_CANCELLATIONS_TIP_CONTEXT = 'frequent-cancellations-tip';
 
 const PIPELINE_SLUG = 'kibana-pull-request';
 const MIN_CANCELLED_BUILDS = 3;
@@ -51,7 +51,7 @@ export const countRecentCancelledBuilds = (
     );
   }).length;
 
-export const getCancelledBuildsTipMessage = (user: string, cancelledBuilds: number): string =>
+export const getFrequentCancellationsTipMessage = (user: string, cancelledBuilds: number): string =>
   '### 🌯 Save a burrito\n\n' +
   `@${user}, if you're still iterating on this PR, **consider converting it to draft**: ` +
   `${cancelledBuilds} CI builds were cancelled in the last day before they finished. ` +
@@ -91,14 +91,14 @@ const postTip = async (): Promise<void> => {
   }
 
   await upsertComment({
-    commentBody: getCancelledBuildsTipMessage(GITHUB_PR_USER, cancelledBuilds),
-    commentContext: CANCELLED_BUILDS_TIP_CONTEXT,
+    commentBody: getFrequentCancellationsTipMessage(GITHUB_PR_USER, cancelledBuilds),
+    commentContext: FREQUENT_CANCELLATIONS_TIP_CONTEXT,
     clearPrevious: false,
   });
 };
 
 /** Posts a one-time tip on PRs where many running builds were cancelled in the last day. Never throws. */
-export const postCancelledBuildsTip = async (): Promise<void> => {
+export const postFrequentCancellationsTip = async (): Promise<void> => {
   let timer: ReturnType<typeof setTimeout> | undefined;
   const timeout = new Promise<never>((_, reject) => {
     timer = setTimeout(() => reject(new Error(`timed out after ${TIMEOUT_MS}ms`)), TIMEOUT_MS);
@@ -108,7 +108,7 @@ export const postCancelledBuildsTip = async (): Promise<void> => {
   try {
     await Promise.race([postTip(), timeout]);
   } catch (error) {
-    console.error('Failed to post the cancelled builds tip, continuing', error);
+    console.error('Failed to post the frequent cancellations tip, continuing', error);
   } finally {
     clearTimeout(timer);
   }

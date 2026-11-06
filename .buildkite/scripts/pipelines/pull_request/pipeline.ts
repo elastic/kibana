@@ -16,7 +16,7 @@
         ] */
 
 import { runPreBuild } from './pre_build.ts';
-import { postCancelledBuildsTip } from './cancelled_builds_tip.ts';
+import { postFrequentCancellationsTip } from './frequent_cancellations_tip.ts';
 import { getEvalTriggerStep } from '../../../pipelines/evals/eval_pipeline.ts';
 import { loadBuildkiteJson } from '../../../pipeline-utils/load_buildkite_json.ts';
 import {
@@ -163,7 +163,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     }
 
     // Runs alongside the pipeline generation below, so it doesn't delay the build.
-    const cancelledBuildsTip = postCancelledBuildsTip();
+    const frequentCancellationsTip = postFrequentCancellationsTip();
 
     // Scout-test-only diffs can't change OAS, API contracts, or Saved Objects, so skip those checks below.
     const prChanges = await getPrChangesCached();
@@ -194,7 +194,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     if (await doAllChangesMatch(/^renovate\.json$/)) {
       pipeline.push(renderSteps(renovateValidation(), { header: true }));
       console.warn('Isolated changes to renovate.json. Skipping main PR pipeline.');
-      await cancelledBuildsTip;
+      await frequentCancellationsTip;
       emitPipeline(pipeline);
       return;
     }
@@ -777,7 +777,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     pipeline.push(renderSteps(postBuildSteps()));
 
     flushCancelOnGateFailureMetadata();
-    await cancelledBuildsTip;
+    await frequentCancellationsTip;
     emitPipeline(pipeline);
   } catch (ex) {
     console.error('Error while generating the pipeline steps: ' + ex.message, ex);
