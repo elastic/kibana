@@ -44,11 +44,47 @@ export const MAX_HITL_GRAPH_NODE_ID_LENGTH = 255 as const;
 /** Max length for keys in dynamic waitForInput response records. */
 export const MAX_HITL_RESPONSE_FIELD_KEY_LENGTH = 512 as const;
 
-/** Internal `stepExecution.input` field storing the external HITL resume token hash. */
+/**
+ * External HITL resume token hash. New waits store this on step `state`.
+ * Waits started by an older version stored it on step `input`.
+ */
 export const HITL_TOKEN_HASH_INPUT_FIELD = '_hitlTokenHash' as const;
 
-/** Internal `stepExecution.input` field storing the external HITL resume token expiry. */
+/**
+ * External HITL resume token expiry. New waits store this on step `state`.
+ * Waits started by an older version stored it on step `input`.
+ */
 export const HITL_TOKEN_EXPIRES_AT_INPUT_FIELD = '_hitlTokenExpiresAt' as const;
+
+export interface HitlExternalResumeTokenRecord {
+  hash: string;
+  expiresAt: string;
+}
+
+const readHitlTokenRecord = (value: unknown): HitlExternalResumeTokenRecord | undefined => {
+  if (value == null || typeof value !== 'object' || Array.isArray(value)) {
+    return undefined;
+  }
+  const record = value as Record<string, unknown>;
+  const hash = record[HITL_TOKEN_HASH_INPUT_FIELD];
+  const expiresAt = record[HITL_TOKEN_EXPIRES_AT_INPUT_FIELD];
+  if (typeof hash !== 'string' || hash.length === 0) {
+    return undefined;
+  }
+  if (typeof expiresAt !== 'string' || expiresAt.length === 0) {
+    return undefined;
+  }
+  return { hash, expiresAt };
+};
+
+/**
+ * Reads the external resume token. Step `state` wins. `input` is only the legacy location.
+ */
+export const readHitlExternalResumeToken = (step: {
+  state?: Record<string, unknown> | null;
+  input?: unknown;
+}): HitlExternalResumeTokenRecord | undefined =>
+  readHitlTokenRecord(step.state) ?? readHitlTokenRecord(step.input);
 
 /** Workflow context path: `context.hitl.externalFormLink`. */
 export const HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY = 'externalFormLink' as const;

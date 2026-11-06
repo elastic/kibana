@@ -80,6 +80,42 @@ describe('external resume service', () => {
     } as unknown as WorkflowsExecutionEnginePluginStart);
   });
 
+  it('resumes when the token is stored on step state', async () => {
+    workflowsService.getStepExecution.mockResolvedValue(
+      createStepExecution({
+        input: {
+          schema: {
+            type: 'object',
+            properties: {
+              severity: { type: 'string', title: 'Severity' },
+            },
+          },
+        },
+        state: {
+          [HITL_TOKEN_HASH_INPUT_FIELD]: TOKEN_HASH,
+          [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: FUTURE_DATE,
+        },
+      })
+    );
+
+    await resumeWorkflowExecutionExternallyWithInput(workflowsService, {
+      executionId: 'exec-1',
+      stepId: 'step-exec-1',
+      spaceId: 'default',
+      token: TOKEN,
+      input: { severity: 'high' },
+    });
+
+    const engine = await workflowsService.getWorkflowsExecutionEngine();
+    expect(engine.resumeWorkflowExecution).toHaveBeenCalledWith(
+      'exec-1',
+      'default',
+      { severity: 'high' },
+      undefined,
+      { resumedBy: 'external_resume:step-exec-1' }
+    );
+  });
+
   it('resumes a waiting waitForInput step with validated POST input', async () => {
     await resumeWorkflowExecutionExternallyWithInput(workflowsService, {
       executionId: 'exec-1',

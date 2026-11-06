@@ -1672,7 +1672,11 @@ describe('WorkflowExecutionQueryService', () => {
       expect(patches).not.toContain('noop');
       expect(claim).toEqual({
         ...audit,
-        strippedToken: { hash: 'fresh-hash', expiresAt: '2099-02-01T00:00:00.000Z' },
+        strippedToken: {
+          hash: 'fresh-hash',
+          expiresAt: '2099-02-01T00:00:00.000Z',
+          source: 'input',
+        },
       });
     });
 
