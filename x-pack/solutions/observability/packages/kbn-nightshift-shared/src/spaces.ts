@@ -20,3 +20,19 @@ export const isNightshiftSupportedSpace = (spaceId: string | undefined): boolean
 
 /** Shared wording for every server-side refusal outside the default space. */
 export const NIGHTSHIFT_UNSUPPORTED_SPACE_MESSAGE = `Nightshift is only available in the "${NIGHTSHIFT_SUPPORTED_SPACE_ID}" space.`;
+
+/**
+ * Whether a route endpoint must be refused outside the Nightshift space.
+ *
+ * Writes are gated, because they are what binds deployment-wide identities — service accounts,
+ * workflows and agents — to a space. Reads stay open everywhere, so a space set up on an earlier
+ * build can still be looked at, and `exemptPaths` keeps the few writes that undo such a setup
+ * reachable there as well.
+ */
+export const isNightshiftSpaceGatedEndpoint = (
+  endpoint: string,
+  exemptPaths: ReadonlySet<string> = new Set()
+): boolean => {
+  const [method, path] = endpoint.split(' ');
+  return method !== 'GET' && !exemptPaths.has(path);
+};

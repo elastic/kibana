@@ -22,7 +22,7 @@ const run = (id: string, resolved: CortexPage | undefined, version?: string) => 
     })),
   };
   const result = handler({
-    request: {},
+    request: { spaceId: 'default' },
     params: { path: { id }, query: { version } },
     isCortexEnabled: () => true,
     getCortexPageStore: () => store,

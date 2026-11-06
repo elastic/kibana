@@ -147,6 +147,7 @@ export {
 export { conditionToESQLFilterAst } from './src/condition_to_esql_filter';
 
 export {
+  isNightshiftSpaceGatedEndpoint,
   isNightshiftSupportedSpace,
   NIGHTSHIFT_SUPPORTED_SPACE_ID,
   NIGHTSHIFT_UNSUPPORTED_SPACE_MESSAGE,
