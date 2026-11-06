@@ -52,7 +52,9 @@ export const RuleSummaryFlyoutContainer = ({
   const { mutate: toggleRuleEnabled, isLoading: isToggling } = useToggleRuleEnabled();
   const { mutate: runRule } = useRunRule();
   const { mutate: updateRuleApiKey, isLoading: isUpdatingApiKey } = useBulkUpdateRuleApiKey();
-  const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal();
+  const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal({
+    canRestore: canWrite,
+  });
 
   const {
     rule: sourceRule,
@@ -110,7 +112,9 @@ export const RuleSummaryFlyoutContainer = ({
         onToggleEnabled={(r) => toggleRuleEnabled({ id: r.id, enabled: !r.enabled })}
         onRun={(r) => runRule({ id: r.id })}
         onUpdateApiKey={(r) => setRuleToUpdateApiKey(r)}
-        onViewChangeHistory={(r) => openChangeHistory({ id: r.id, name: r.metadata.name })}
+        onViewChangeHistory={(r) =>
+          openChangeHistory({ id: r.id, name: r.metadata.name, version: r.version })
+        }
       />
       {changeHistoryModal}
       {ruleToDelete && (

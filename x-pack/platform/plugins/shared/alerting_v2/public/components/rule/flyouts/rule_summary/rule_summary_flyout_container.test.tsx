@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { useFetchSourceRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_source_rule';
 import type { RuleApiResponse } from '../../../../services/rules_api';
@@ -95,15 +96,17 @@ type ContainerProps = React.ComponentProps<typeof RuleSummaryFlyoutContainer>;
 
 const renderContainer = (overrides: Partial<ContainerProps> = {}) =>
   render(
-    <I18nProvider>
-      <RuleSummaryFlyoutContainer
-        ruleId="rule-1"
-        onClose={jest.fn()}
-        onEdit={jest.fn()}
-        onClone={jest.fn()}
-        {...overrides}
-      />
-    </I18nProvider>
+    <QueryClientProvider client={new QueryClient()}>
+      <I18nProvider>
+        <RuleSummaryFlyoutContainer
+          ruleId="rule-1"
+          onClose={jest.fn()}
+          onEdit={jest.fn()}
+          onClone={jest.fn()}
+          {...overrides}
+        />
+      </I18nProvider>
+    </QueryClientProvider>
   );
 
 const mockFetchRuleResult = (

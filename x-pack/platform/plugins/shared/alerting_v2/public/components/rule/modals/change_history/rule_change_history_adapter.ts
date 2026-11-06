@@ -11,7 +11,7 @@ import type {
   ChangeHistoryListItem,
   ListChangeHistoryResult,
 } from '@kbn/change-history-ui';
-import type { RuleChangeHistoryListItem } from '@kbn/alerting-v2-schemas';
+import type { RuleChangeHistoryListItem, RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { RuleChangeHistoryApi } from '../../../../services/rule_change_history_api';
 
 const toChangeHistoryItem = (item: RuleChangeHistoryListItem): ChangeHistoryListItem => ({
@@ -28,14 +28,22 @@ const toChangeHistoryItem = (item: RuleChangeHistoryListItem): ChangeHistoryList
   isCurrent: item.is_current,
 });
 
+export interface RuleChangeHistoryAdapterOptions {
+  /** The rule version the caller last saw, sent as the restore's conflict guard. */
+  currentVersion?: number;
+  /** Called with the restored rule after a restore succeeds, e.g. to refetch rule queries. */
+  onRestored?: (rule: RuleResponse) => void;
+}
+
 /**
  * Builds the {@link ChangeHistoryAdapter} for alerting v2 rules from
- * the HTTP read API. Maps the API DTOs to the change-history UI
+ * the HTTP API. Maps the API DTOs to the change-history UI
  * row/detail types, and adapts 1-based pagination (the package uses a
  * 0-based `page.index`; the API is 1-based).
  */
 export const createRuleChangeHistoryAdapter = (
-  api: RuleChangeHistoryApi
+  api: RuleChangeHistoryApi,
+  { currentVersion, onRestored }: RuleChangeHistoryAdapterOptions = {}
 ): ChangeHistoryAdapter => ({
   listChanges: async ({ objectId, page, signal }): Promise<ListChangeHistoryResult> => {
     const { items, total } = await api.listRuleChanges({
@@ -57,5 +65,9 @@ export const createRuleChangeHistoryAdapter = (
       snapshot,
       reason,
     };
+  },
+  restoreChange: async ({ changeId, signal }): Promise<void> => {
+    const rule = await api.restoreRuleChange({ eventId: changeId, currentVersion, signal });
+    onRestored?.(rule);
   },
 });

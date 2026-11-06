@@ -18,6 +18,7 @@ const createApiMock = () =>
       action: 'rule_update',
       snapshot: {},
     }),
+    restoreRuleChange: jest.fn().mockResolvedValue({ id: 'rule-1', version: 3 }),
   } as unknown as jest.Mocked<RuleChangeHistoryApi>);
 
 describe('createRuleChangeHistoryAdapter', () => {
@@ -195,6 +196,36 @@ describe('createRuleChangeHistoryAdapter', () => {
       await expect(adapter.getChange({ objectId: 'rule-1', changeId: 'evt-1' })).rejects.toThrow(
         'nope'
       );
+    });
+  });
+
+  describe('restoreChange', () => {
+    it('restores the change by id with the version guard and reports the restored rule', async () => {
+      const api = createApiMock();
+      const onRestored = jest.fn();
+      const adapter = createRuleChangeHistoryAdapter(api, { currentVersion: 2, onRestored });
+      const signal = new AbortController().signal;
+
+      await adapter.restoreChange?.({ objectId: 'rule-1', changeId: 'evt-1', signal });
+
+      expect(api.restoreRuleChange).toHaveBeenCalledWith({
+        eventId: 'evt-1',
+        currentVersion: 2,
+        signal,
+      });
+      expect(onRestored).toHaveBeenCalledWith({ id: 'rule-1', version: 3 });
+    });
+
+    it('does not report a restore that failed', async () => {
+      const api = createApiMock();
+      api.restoreRuleChange.mockRejectedValueOnce(new Error('conflict'));
+      const onRestored = jest.fn();
+      const adapter = createRuleChangeHistoryAdapter(api, { onRestored });
+
+      await expect(
+        adapter.restoreChange?.({ objectId: 'rule-1', changeId: 'evt-1' })
+      ).rejects.toThrow('conflict');
+      expect(onRestored).not.toHaveBeenCalled();
     });
   });
 });
