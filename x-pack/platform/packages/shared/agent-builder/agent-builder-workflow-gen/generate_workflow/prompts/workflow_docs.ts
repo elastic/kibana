@@ -182,6 +182,10 @@ Use double curly braces for variable substitution:
 | \`env\` | Environment | \`{{ env.HOME }}\` |
 | \`now\` | Current timestamp | \`{{ now }}\` |
 
+\`now\` is a date object. Bare \`{{ now }}\` renders a human-readable form
+(\`Tue Sep 15 2026 18:47:47 GMT+0400 (Georgia Standard Time)\`) — fine in a log
+message, wrong for a machine-readable field. See [Date Filters](#date-filters).
+
 ### String Operations
 
 \`\`\`yaml
@@ -270,10 +274,10 @@ short_desc: "{{ description | truncate: 50 }}"
 
 | Filter | Description | Example |
 |--------|-------------|---------|
-| \`date\` | Format date | \`{{ "now" \\| date: "%Y-%m-%d" }}\` → \`2024-01-15\` |
-| \`date_to_string\` | Human-readable date | \`{{ date \\| date_to_string }}\` |
-| \`date_to_rfc822\` | RFC822 format | \`{{ date \\| date_to_rfc822 }}\` |
-| \`date_to_xmlschema\` | ISO 8601 format | \`{{ date \\| date_to_xmlschema }}\` |
+| \`date\` | Format date | \`{{ now \\| date: "%Y-%m-%d" }}\` → \`2026-09-15\` |
+| \`date_to_string\` | Human-readable date | \`{{ now \\| date_to_string }}\` |
+| \`date_to_rfc822\` | RFC822 format | \`{{ now \\| date_to_rfc822 }}\` |
+| \`date_to_xmlschema\` | ISO 8601 with offset | \`{{ now \\| date_to_xmlschema }}\` → \`2026-09-15T18:47:47+04:00\` |
 
 **Common date format codes:**
 
@@ -285,6 +289,23 @@ short_desc: "{{ description | truncate: 50 }}"
 | \`%H\` | Hour (00-23) | \`14\` |
 | \`%M\` | Minute (00-59) | \`30\` |
 | \`%S\` | Second (00-59) | \`45\` |
+
+**Timestamps in Elasticsearch documents:** add a time field only when the document
+records something that happened at a point in time (a poll result, a measurement, an
+alert) — not for static or reference data. Name it \`@timestamp\` and render it with
+\`date_to_xmlschema\` so dynamic mapping maps it as \`date\`:
+
+\`\`\`yaml
+document:
+  "@timestamp": "{{ now | date_to_xmlschema }}"
+  host: "{{ steps.fetch.output.data.hostname }}"
+  status: "{{ steps.fetch.output.data.status }}"
+  latency_ms: "{{ steps.fetch.output.data.latency }}"
+\`\`\`
+
+Never hardcode a \`Z\` suffix (\`date: "%Y-%m-%dT%H:%M:%SZ"\`) — the \`date\` filter
+formats in the server's local time zone, so \`Z\` labels a local time as UTC and
+records the wrong instant. For a custom layout, end it with \`%z\`.
 
 #### Encoding Filters
 
