@@ -7,12 +7,11 @@
 
 import { lazySchema, z } from '@kbn/zod/v4';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
-import { OVERVIEW_FILTER_MAX_LENGTHS } from '../../../common/overview_filters';
 import type { ApplicationOverviewResponse } from '../../../common/types/overview';
 import { APM_API_PRIVILEGE, DIGITAL_EXPERIENCE_API_PRIVILEGES } from '../../../common/feature';
 import { MAX_SERVICE_NAME_LENGTH } from '../../lib/constants';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
-import { START_AFTER_END_ISSUE, isStartBeforeEnd, timeRangeShape } from '../params';
+import { filteredTimeRangeQuery } from '../params';
 import { getOtelOverview } from './otel/get_otel_overview';
 
 export const APPLICATION_OVERVIEW_ENDPOINT =
@@ -30,17 +29,7 @@ export const overviewRouteRepository = createDigitalExperienceServerRoute({
       path: z.object({
         serviceName: z.string().min(1).max(MAX_SERVICE_NAME_LENGTH),
       }),
-      query: z
-        .object({
-          ...timeRangeShape(),
-          // Each narrows the Overview to one value; all values when left out.
-          browser: z.string().min(1).max(OVERVIEW_FILTER_MAX_LENGTHS.browser).optional(),
-          os: z.string().min(1).max(OVERVIEW_FILTER_MAX_LENGTHS.os).optional(),
-          device: z.string().min(1).max(OVERVIEW_FILTER_MAX_LENGTHS.device).optional(),
-          country: z.string().min(1).max(OVERVIEW_FILTER_MAX_LENGTHS.country).optional(),
-          pageUrl: z.string().min(1).max(OVERVIEW_FILTER_MAX_LENGTHS.pageUrl).optional(),
-        })
-        .refine(isStartBeforeEnd, START_AFTER_END_ISSUE),
+      query: filteredTimeRangeQuery(),
     })
   ),
   handler: async ({ params, context, request }): Promise<ApplicationOverviewResponse> => {

@@ -238,19 +238,20 @@ describe('OtelOverview', () => {
     ).toBeInTheDocument();
   });
 
-  it('asks for the selected filters', async () => {
+  it('asks for the selected filters, for the Overview, the usage and the top errors', async () => {
     mockFilters({ browser: 'Chrome', country: 'DE', pageUrl: 'https://shop.example.com/cart' });
     renderOverview();
 
-    await waitFor(() =>
-      expectFetchedWith({
-        start: timeRange.rangeFrom,
-        end: timeRange.rangeTo,
-        browser: 'Chrome',
-        country: 'DE',
-        pageUrl: 'https://shop.example.com/cart',
-      })
-    );
+    const query = {
+      start: timeRange.rangeFrom,
+      end: timeRange.rangeTo,
+      browser: 'Chrome',
+      country: 'DE',
+      pageUrl: 'https://shop.example.com/cart',
+    };
+    await waitFor(() => expectFetchedWith(query));
+    await waitFor(() => expectFetchedWith(query, USAGE_ENDPOINT));
+    await waitFor(() => expectFetchedWith(query, ERRORS_ENDPOINT));
   });
 
   it('lists the values of a filter with their page loads, and sets the one picked', async () => {
@@ -316,7 +317,7 @@ describe('OtelOverview', () => {
     await findPageLoads('1,533');
 
     expect(screen.getByTestId('digitalExperienceOverviewPageFilterNote')).toHaveTextContent(
-      'page loads and load time only'
+      'applies to page loads only'
     );
   });
 

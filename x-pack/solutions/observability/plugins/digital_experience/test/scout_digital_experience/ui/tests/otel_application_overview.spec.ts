@@ -137,6 +137,12 @@ test.describe(
         await expect(page).toHaveURL(/browser=Safari/);
       });
 
+      await test.step('narrows the pages, breakdowns and top errors too', async () => {
+        await expect(digitalExperience.otelOverviewBreakdowns).toContainText('Safari');
+        await expect(digitalExperience.otelOverviewBreakdowns).not.toContainText('Chrome');
+        await expect(digitalExperience.otelOverviewTopPages).not.toContainText('/products');
+      });
+
       await test.step('lists the values of the other filters among that browser only', async () => {
         await digitalExperience.overviewFilter('os').click();
 

@@ -26,6 +26,7 @@ import { useFormatters } from '../../../hooks/use_formatters';
 import { useOverviewFilters } from '../../../hooks/use_overview_filters';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import type { TimeRangeSelect } from '../../../utils/brush_time_range';
+import { withOverviewFilters } from '../../../utils/with_overview_filters';
 import { JsErrorsPanel } from '../../errors/components/js_errors_panel';
 import { ERRORS_FETCH_ERROR_TITLE } from '../../errors/errors_tab';
 import type { ApplicationErrors } from '../../errors/hooks/use_application_errors';
@@ -41,7 +42,7 @@ import { usePickerOptions } from './hooks/use_picker_options';
 
 const PAGE_FILTER_NOTE = i18n.translate('xpack.digitalExperience.overview.filters.pageNote', {
   defaultMessage:
-    'The page filter applies to page loads and load time only: web vitals, JS errors and HTTP requests carry no page URL yet.',
+    'The page filter applies to page loads only, with their load time, trend, pages and breakdowns: web vitals, JS errors, clicks and HTTP requests carry no page URL yet.',
 });
 
 const FETCH_ERROR_TITLE = i18n.translate('xpack.digitalExperience.overview.fetchErrorTitle', {
@@ -67,19 +68,22 @@ const TOP_ERRORS_ROWS = 5;
 const overviewRequestOf = (
   filters: OverviewFilters
 ): ApplicationRequest<ApplicationOverviewResponse> => {
-  return (apiClient, { signal, params: { path, query } }) => {
-    return apiClient.fetch('GET /internal/digital_experience/applications/{serviceName}/overview', {
-      signal,
-      params: { path, query: { ...query, ...filters } },
-    });
+  return (apiClient, options) => {
+    return apiClient.fetch(
+      'GET /internal/digital_experience/applications/{serviceName}/overview',
+      withOverviewFilters(options, filters)
+    );
   };
 };
 
-const usageRequest: ApplicationRequest<ApplicationUsageResponse> = (apiClient, options) => {
-  return apiClient.fetch(
-    'GET /internal/digital_experience/applications/{serviceName}/usage',
-    options
-  );
+/** The request for the pages, breakdowns and clicks narrowed by `filters`. */
+const usageRequestOf = (filters: OverviewFilters): ApplicationRequest<ApplicationUsageResponse> => {
+  return (apiClient, options) => {
+    return apiClient.fetch(
+      'GET /internal/digital_experience/applications/{serviceName}/usage',
+      withOverviewFilters(options, filters)
+    );
+  };
 };
 
 /** Shown while loading: no metric is a measured zero. */
@@ -198,8 +202,7 @@ function UsageAndErrorsPanels({
 
 /**
  * The Overview of one EDOT Browser application: its KPIs, Core Web Vitals and trends, then what
- * users load and do and their top errors, over the selected environment and time range. The
- * filters narrow the KPIs, Core Web Vitals and trends.
+ * users load and do and their top errors, over the selected environment, filters and time range.
  */
 export function OtelOverview({ serviceName }: { serviceName: string }) {
   const { setTimeRange } = useTimeRange();
@@ -207,9 +210,10 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
   const formatters = useFormatters();
   // Separate requests, so the KPIs never wait on the panels below and a failure replaces only its own.
   const overviewRequest = useMemo(() => overviewRequestOf(filters), [filters]);
+  const usageRequest = useMemo(() => usageRequestOf(filters), [filters]);
   const overview = useApplicationData(serviceName, overviewRequest);
   const usage = useApplicationData(serviceName, usageRequest);
-  const topErrors = useApplicationErrors(serviceName);
+  const topErrors = useApplicationErrors(serviceName, filters);
   // The pickers swap their lists for a spinner while loading, so they only load until they have one.
   const pickerOptions = usePickerOptions(serviceName, overview.response);
 

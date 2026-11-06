@@ -60,9 +60,11 @@ The EDOT Browser Overview can be narrowed by environment and by **Browser**, **O
   the alternatives the sessions transform reads (`SESSION_ATTRIBUTE_FIELDS` in
   `common/session_attribute_fields.ts`, shared by both) and take the first non-empty one, with a
   runtime field. The page is `attributes.url.full`.
-- **Scope:** browser, OS, device and country narrow every panel. Web vitals, errors and clicks carry
-  no page URL yet, and an HTTP request's `url.full` is the URL requested, so the page narrows the
-  page loads, their load time and the trend only; the page says so while a page is selected.
+- **Scope:** browser, OS, device and country narrow every panel of the Overview: the KPIs, Core Web
+  Vitals and trends (`/overview`), the pages, breakdowns and clicks (`/usage`) and the top errors
+  (`/errors`, whose tab has no filters). Web vitals, errors and clicks carry no page URL yet, and an
+  HTTP request's `url.full` is the URL requested, so the page narrows the page loads, with their
+  load time, trend, pages and breakdowns only; the page says so while a page is selected.
 
 ### Sessions (`/{serviceName}/sessions?source=otel`)
 
