@@ -62,7 +62,7 @@ yarn start                         # Kibana on localhost:5601
 
 Either way the profile also supplies this suite's `GCS_CREDENTIALS`, read from `gcsDatasetAccessCredentials` in the profile's config — from Vault for `dev-vault`, from `config.<profile>.json` otherwise, and `node scripts/evals init` can fill it in. Export the variable by hand only when running outside a profile, as [publishing](#publishing-the-synthetic-snapshot) does.
 
-For model and judge selection, `--grep` and repetitions, see [running evals locally](../../../../platform/packages/shared/kbn-evals/README.md#11-getting-started-locally). In CI the judge defaults to `eis-openai-gpt-6-sol`, the model the online evals judges use, unless a `models:judge:` label picks another; pass it locally with `--judge`. The suite overrides no other flags.
+For model and judge selection, `--grep` and repetitions, see [running evals locally](../../../../platform/packages/shared/kbn-evals/README.md#11-getting-started-locally). In CI, Customer-0's judge is pinned to `eis-openai-gpt-6-sol`, the model the online evals judges use, on every run; a `models:judge:` label doesn't change it. Pass it locally with `--judge`. The suite overrides no other flags.
 
 ## Trace-only investigations
 
@@ -566,8 +566,8 @@ The bound is planned in Elasticsearch, not in the investigation: one read key pe
 whose role filters `@timestamp` with document-level security, set on the `orcabench-es` connector,
 so the agent investigates unchanged and cannot see past its snapshot.
 
-ORCA's judges bind to `eis-openai-gpt-5-4`, not the agent connector. Customer-0 keeps the suite's
-evaluation connector. The model is the paper's judge model, but not its settings: the paper runs
+ORCA's judges bind to `eis-openai-gpt-5-4`, not the agent connector; Customer-0's bind to
+`eis-openai-gpt-6-sol`. ORCA's model is the paper's judge model, but not its settings: the paper runs
 GPT-5.4 at reasoning effort "high", temperature 1, and 128,000 max tokens. Our judges answer
 through a forced `score` tool call, so the inference adapter sends reasoning effort "none" to
 gpt-5 models, and temperature falls back to the provider default of 1. Until the judges can set
