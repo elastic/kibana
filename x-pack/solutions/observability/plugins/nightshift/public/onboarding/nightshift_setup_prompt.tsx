@@ -62,7 +62,7 @@ export const NightshiftSetupPrompt = ({
     <p>
       <FormattedMessage
         id="xpack.nightshift.setup.adminBody"
-        defaultMessage="Grant the Nightshift service accounts {accounts} {privilegesLink}, and install them in this space. They will perform investigations, automations and detection on behalf of users in this space. You can revoke privileges anytime in Settings."
+        defaultMessage="Grant the Nightshift service accounts {accounts} with {privilegesLink}, and install them in this space. They will perform investigations, automations and detection on behalf of users in this space. You can revoke privileges anytime in Settings."
         values={{
           accounts: (
             <>
