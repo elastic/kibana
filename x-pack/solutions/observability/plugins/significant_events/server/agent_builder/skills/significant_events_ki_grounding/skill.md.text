@@ -275,7 +275,7 @@ One sample per rule proves whether its failure is happening now. Apply `<query_r
   |---|---|---|
   | `spread` | every rule except an aggregate KI | the Profile step's `spread` on the KI's own `{failure}`, in its variant, over the Profile table's window; the rule's only `spread`, except the `off_topic` rule's second one (Definitions) |
   | `sample` | every rule | always `LIMIT 1`; an aggregate KI gets `LIMIT 2`; an authored KI limit of 3 or fewer rows stays instead of ours; `time_range.from` is the rule's `sample_from` (`<query_rules>` rule 3) |
-  | `re-sample` | once, when the sample row does not show the rule's failure (healthy, or `off_topic`) or the rule has a text field and the sample result has no usable column for it (Definitions) | `LIMIT 3`, a new query, not a re-run; row-level KIs only. Never after an empty or errored sample, an authored limit of 3 or less, or an authored projection without the text field |
+  | `re-sample` | once, when the sample row does not show the rule's failure (healthy, or `off_topic`) or the rule has a text field and the sample result has no usable column for it (Definitions) | `LIMIT 3`, a new query, not a re-run; row-level KIs only. Never after an empty or errored sample or an authored limit of 3 or less, and never just to get a text column that an authored projection omits |
   | `dimensions` | the rule's `affected` is above 0 and it has 2 or more candidates | one query over the candidates |
   | `examples` | the rule's `affected` is above 0, it is not `off_topic`, and has a usable text field | 3 messages |
   | `trend`, `baseline` | every rule, except an `off_topic` rule with no isolating observed-error condition | |
