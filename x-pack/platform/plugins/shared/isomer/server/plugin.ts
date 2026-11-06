@@ -86,6 +86,7 @@ export class IsomerPlugin
   private fieldFormats?: FieldFormatsStart;
   private embeddable?: EmbeddableStart;
   private uiSettings?: CoreStart['uiSettings'];
+  private elasticsearch?: CoreStart['elasticsearch'];
   private readonly registry = new MaterializerRegistry();
   private runtime?: Promise<KibanaIsomerRuntime>;
   private featureFlags?: CoreStart['featureFlags'];
@@ -121,6 +122,7 @@ export class IsomerPlugin
     this.fieldFormats = fieldFormats;
     this.embeddable = embeddable;
     this.uiSettings = core.uiSettings;
+    this.elasticsearch = core.elasticsearch;
     this.featureFlags = core.featureFlags;
     return {
       getRuntime: this.getRuntime,
@@ -143,8 +145,8 @@ export class IsomerPlugin
   };
 
   private readonly createClient = (scope: MaterializeScope): ScopedMaterializeClient => {
-    const { data, fieldFormats, uiSettings } = this;
-    if (!data || !fieldFormats || !uiSettings) {
+    const { data, fieldFormats, uiSettings, elasticsearch } = this;
+    if (!data || !fieldFormats || !uiSettings || !elasticsearch) {
       throw new Error('The isomer plugin materializes only after it starts.');
     }
     return createScopedMaterializeClient({
@@ -155,6 +157,18 @@ export class IsomerPlugin
       search: data.search.asScoped(scope.request),
       getKitServices: () =>
         createKitServices(uiSettings.asScopedToClient(scope.savedObjectsClient), fieldFormats),
+      getSelectionServices: async () => {
+        const esClient = elasticsearch.client.asScoped(scope.request).asCurrentUser;
+        const [dataViews, aggs] = await Promise.all([
+          data.indexPatterns.dataViewsServiceFactory(
+            scope.savedObjectsClient,
+            esClient,
+            scope.request
+          ),
+          data.search.aggs.asScopedToClient(scope.savedObjectsClient, esClient),
+        ]);
+        return { dataViews, aggs };
+      },
       validate: this.validateNode,
       kibanaVersion: this.kibanaVersion,
     });

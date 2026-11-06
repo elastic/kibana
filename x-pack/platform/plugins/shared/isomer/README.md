@@ -32,6 +32,16 @@ Every `materialize` call runs one pipeline, as the requesting user:
 - **`paletteColors(count, paletteId)`** returns a `@kbn/palettes` palette's colors for light and dark, falling back to Kibana's default palette.
 - **`colorMappingColors(categories, colorMapping)`** returns the color a Kibana color mapping gives each category, for light and dark, through `@kbn/coloring`'s `getColorFactory`, as Kibana's charts pick them.
 
+### Selections
+
+`filtersForSelection(event, node)` turns a `ChartEvent` on a node into the Kibana filters Kibana's value click and range select actions build, as the requesting user. It rebuilds the `Datatable` from the node's column sources and resolves each selected column:
+
+- **Data view tables** (`esaggs` columns): the column's agg config, created through the server aggs service from its data view, builds the filter with the agg type's own `createFilter`: terms, the Other bucket (excluding the other terms beside it), the missing bucket, histograms, ranges, date histograms and the rest.
+- **ES|QL tables**: date histogram and histogram columns filter to their bucket, other aggregated columns to field existence, and raw columns to their value when the index pattern's field can be filtered.
+- **Brushes** filter the brushed column's field to the brushed range.
+
+A `negate` selection negates every filter, and duplicates are dropped. Filters carry no display mapping (`meta.key`, `meta.value`), which Kibana's filter manager adds when a Kibana host adds them; ES|QL filters name the query's index pattern as their `meta.index`.
+
 ### Lens
 
 The plugin registers the `lens` materializer. It takes a Lens chart in Lens's API format (`@kbn/lens-embeddable-utils`), by value, or by reference: it loads the `lens` saved object and turns it into that format with Lens's registered embeddable `transformOut` (from the optional `embeddable` plugin).
