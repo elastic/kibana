@@ -7,10 +7,12 @@
 
 import type { Writable } from '@kbn/utility-types';
 import { SOURCE_TYPES } from '../constants';
+import { transformVectorStyleKeysOut } from './vector_style_keys';
 import type { ESQLSourceDescriptor, LayerDescriptor } from '../descriptor_types';
 
 export function transformLayersOut(layers: Writable<Partial<LayerDescriptor>>[]) {
-  return layers.map((layer) => {
+  return layers.map((originalLayer) => {
+    const layer = transformVectorStyleKeysOut(originalLayer);
     if ('sourceDescriptor' in layer && layer.sourceDescriptor) {
       const source = layer.sourceDescriptor as { type?: string };
       if (source.type === SOURCE_TYPES.ESQL) {
