@@ -29,6 +29,7 @@ import {
   rewriteFloorParentYaml,
   type FloorWorkflowState,
 } from './floor_parent';
+import { listActiveExecutionIds } from './floor_worker';
 import { apiVersion, errorMessage, httpStatus, sleep, spacePath } from './kibana_api';
 
 const CANCEL_SETTLE_TIMEOUT_MS = FLOOR_TICK_CANCEL_TIMEOUT_MS;
@@ -290,12 +291,18 @@ export class AttackDiscoveryWorkerClient {
       targetWorkflowId,
       inputs,
     });
+    // The floor cancels in progress and the rewrite changes what a tick runs, so an execution of
+    // either workflow that is still active would be cancelled or run on the wrong definition.
+    await this.assertNoActiveExecutions(spaceId, [floorWorkflowId, targetWorkflowId]);
 
     const errors: unknown[] = [];
     const started: string[] = [];
     let polled: PolledExecution | undefined;
+    // What the rewrite left stored; the restore only goes ahead while the floor is still this.
+    let rewritten: FloorWorkflowState | undefined;
     try {
       await this.putFloorYaml(spaceId, floorWorkflowId, rewrittenYaml);
+      rewritten = await readFloorWorkflow({ fetch: this.fetch, spaceId, floorWorkflowId });
       polled = await this.runFloorToChild({
         spaceId,
         floorWorkflowId,
@@ -317,6 +324,17 @@ export class AttackDiscoveryWorkerClient {
       errors.push(error);
     }
     try {
+      // The managed PUT is a blind write: without this check a concurrent edit made during the run
+      // would be overwritten by the restore.
+      if (rewritten) {
+        const current = await readFloorWorkflow({ fetch: this.fetch, spaceId, floorWorkflowId });
+        if (
+          current.version !== rewritten.version ||
+          !isDeepStrictEqual(current.definition, rewritten.definition)
+        ) {
+          throw new Error('floor changed concurrently during the floor-parent run; not restored');
+        }
+      }
       await this.putFloorYaml(spaceId, floorWorkflowId, before.yaml);
       const after = await readFloorWorkflow({ fetch: this.fetch, spaceId, floorWorkflowId });
       const drift = describeFloorDrift(before, after);
@@ -337,6 +355,19 @@ export class AttackDiscoveryWorkerClient {
     }
     if (!polled) throw new Error('Floor-parent run ended without a result.');
     return polled;
+  }
+
+  private async assertNoActiveExecutions(spaceId: string, workflowIds: string[]): Promise<void> {
+    for (const workflowId of new Set(workflowIds)) {
+      const active = await listActiveExecutionIds(this.fetch, spaceId, workflowId);
+      if (active.length > 0) {
+        throw new Error(
+          `Workflow "${workflowId}" has active executions (${active.join(
+            ', '
+          )}); a floor-parent run needs the floor and its child idle.`
+        );
+      }
+    }
   }
 
   private async putFloorYaml(

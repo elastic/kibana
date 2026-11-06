@@ -208,7 +208,17 @@ AD_WORKER_EVAL_COHORT=whole \
   review and literal inputs (`settings.run_as` and everything else unchanged), runs the floor, and
   restores and verifies the original YAML in a `finally`. This needs the `updateManaged` privilege.
   A concurrent edit of the same worker, or a worker disable/enable during a row, would race the
-  rewrite (a disable re-renders the YAML from the registry).
+  rewrite (a disable re-renders the YAML from the registry). The restore is guarded: the floor is
+  re-read first, and if its stored version or definition no longer matches what the rewrite left,
+  the run throws "floor changed concurrently ... not restored" instead of overwriting the edit.
+  Before the rewrite the floor and the review must have no active execution, or the run throws.
+- Every floor `PUT` re-schedules the floor's task and rotates its API key, so each seeded row
+  rotates it twice (rewrite and restore), and the key afterwards belongs to the eval user (the
+  caller of the `PUT`) until the worker is saved again by its real owner. This is documented, not
+  undone: the restore already re-saves the worker settings when it was enabled before the eval, but
+  that `PATCH` is made by the same eval user, so it cannot hand the key back to anyone else, and a
+  worker that was disabled before the eval has no scheduled task to own. Use a dedicated eval
+  space, as above.
 - `AD_WORKER_EVAL_SCENARIOS=seeded-false-positive` (comma-separated scenario ids) scores only those
   rows, for a focused run.
 - The Scout config set `evals_attack_discovery_worker` starts the stack with

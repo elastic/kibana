@@ -14,7 +14,7 @@ import { buildWorkerRows } from '../../datasets/worker_rows';
 import { collectReviewArtifact, collectWorkerArtifacts } from '../collect';
 import type { CohortRouting } from '../cohort_routing';
 import { assertCleanSpace, cleanupSeed, seedScenario } from '../seed';
-import type { WorkerArtifacts, WorkerExample } from '../worker_types';
+import type { ReviewArtifact, WorkerArtifacts, WorkerExample } from '../worker_types';
 import type { AttackDiscoveryWorkerClient } from '../worker_client';
 import { createEvaluateDataset } from './dataset_evaluator';
 
@@ -253,7 +253,12 @@ const client = {
     execution: { id: 'run-1', status: 'completed', stepExecutions: [] },
   })),
   runReview: jest.fn(async () => ({
-    execution: { id: 'review-1', status: 'completed', stepExecutions: [] },
+    execution: {
+      id: 'review-1',
+      workflowId: 'system-security-attack-discovery-review',
+      status: 'completed',
+      stepExecutions: [],
+    },
   })),
   cancelPending: jest.fn(async () => undefined),
 } as unknown as AttackDiscoveryWorkerClient;
@@ -367,6 +372,102 @@ describe('createEvaluateDataset', () => {
     );
     // The row folds the seeded review in so the verdict checks score it; gold is false_positive.
     expect(qualityMissWarning()).toBeUndefined();
+  });
+
+  describe('the seeded false-positive row', () => {
+    const seededDiscoveryId = 'a'.repeat(64);
+    const settledReview: ReviewArtifact = {
+      executionId: 'review-1',
+      attackDiscoveryId: seededDiscoveryId,
+      status: 'completed',
+      parked: false,
+      verdict: 'false_positive',
+      investigationOpened: true,
+      steps: [],
+      analysis: { connectorIds: ['reference-model'], inputTokens: 1, outputTokens: 1 },
+    };
+    const seedWithDiscovery = () =>
+      seed.mockResolvedValue({
+        runMarker: 'marker',
+        spaceId: 'space',
+        goldIdBySeededId: new Map(),
+        alertCount: 4,
+        openAlertIds: SEEDED_IDS,
+        worldDocs: [],
+        seededDiscoveryId,
+      });
+
+    it('fails the row when the floor ended without starting the review, and reads no artifact', async () => {
+      seedWithDiscovery();
+      collect.mockResolvedValue(quietArtifacts());
+      (client.runReview as jest.Mock).mockResolvedValueOnce({
+        execution: {
+          id: 'floor-1',
+          workflowId: 'floor-wf',
+          status: 'completed',
+          stepExecutions: [],
+        },
+      });
+      await expect(evaluateRow('seeded-false-positive')).rejects.toThrow(
+        /did not start the review.*execution floor-1.*"floor-wf"/
+      );
+      expect(collectReview).not.toHaveBeenCalled();
+      expect(cleanup).toHaveBeenCalledTimes(1);
+    });
+
+    it('gates the row on ReviewsSettled when the review ran out of time', async () => {
+      seedWithDiscovery();
+      collect.mockResolvedValue(quietArtifacts());
+      (client.runReview as jest.Mock).mockResolvedValueOnce({
+        execution: {
+          id: 'review-1',
+          workflowId: 'system-security-attack-discovery-review',
+          status: 'running',
+          stepExecutions: [],
+        },
+        timedOutAfterMs: 20 * 60_000,
+      });
+      collectReview.mockImplementation(async ({ timedOutAfterMs }) => ({
+        ...settledReview,
+        status: 'running',
+        timedOutAfterMs,
+      }));
+      await expect(evaluateRow('seeded-false-positive')).rejects.toThrow(
+        /ReviewsSettled.*timed out after 20m/s
+      );
+    });
+
+    it('reports a rejected review as a row error and still removes the seed', async () => {
+      seedWithDiscovery();
+      collect.mockResolvedValue(quietArtifacts());
+      (client.runReview as jest.Mock).mockRejectedValueOnce(new Error('floor PUT refused'));
+      await expect(evaluateRow('seeded-false-positive')).rejects.toThrow(
+        /seeded-false-positive failed: floor PUT refused/
+      );
+      expect(client.cancelPending).toHaveBeenCalled();
+      expect(cleanup).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps the seeded review out of the runner-dispatched review ids', async () => {
+      seedWithDiscovery();
+      collect.mockResolvedValue(
+        quietArtifacts({ dispatchedReviewExecutionIds: ['runner-review'] })
+      );
+      collectReview.mockResolvedValue(settledReview);
+      const seen: WorkerArtifacts[] = [];
+      const capture = {
+        name: 'Capture',
+        kind: 'CODE',
+        evaluate: async ({ output }: { output: WorkerArtifacts }) => {
+          seen.push(output);
+          return { score: 1 };
+        },
+      } as unknown as Evaluator<WorkerExample, WorkerArtifacts>;
+      await evaluateExamples([rowFor('seeded-false-positive')], [capture]);
+      expect(seen).toHaveLength(1);
+      expect(seen[0].dispatchedReviewExecutionIds).toEqual(['runner-review']);
+      expect(seen[0].reviews.map(({ executionId }) => executionId)).toEqual(['review-1']);
+    });
   });
 
   it('passes a parked true positive on the attack row, ignoring the judges', async () => {

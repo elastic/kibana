@@ -21,7 +21,7 @@ import {
 } from '../audit_failure_classes/registry';
 import { collectReviewArtifact, collectWorkerArtifacts, isReviewSettled } from '../collect';
 import type { CohortRouting } from '../cohort_routing';
-import { REVIEW_SETTLE_TIMEOUT_MS } from '../constants';
+import { REVIEW_SETTLE_TIMEOUT_MS, REVIEW_WORKFLOW_ID } from '../constants';
 import { errorMessage } from '../kibana_api';
 import { assertCleanSpace, cleanupSeed, seedScenario } from '../seed';
 import { SEEDED_FALSE_POSITIVE_TITLE } from '../audit_failure_classes/scenarios/seeded_false_positive';
@@ -412,6 +412,15 @@ export const createEvaluateDataset =
             maxWaitMs: REVIEW_SETTLE_TIMEOUT_MS,
             isDone: isReviewSettled,
           });
+          // The floor's own execution comes back when it ends without dispatching the review; its
+          // steps are not a review, so it must not be scored as one.
+          if (review.workflowId !== REVIEW_WORKFLOW_ID) {
+            throw new Error(
+              `The floor-parent run did not start the review "${REVIEW_WORKFLOW_ID}": execution ${
+                review.id
+              } is of workflow "${String(review.workflowId)}" (status ${review.status}).`
+            );
+          }
           const artifact = await collectReviewArtifact({
             client,
             review,

@@ -103,33 +103,41 @@ steps:
 const fakeKibana = ({
   childStatus = 'completed',
   putFailsOn,
-  restoreDrifts = false,
+  storeOnPut,
+  editOnRun,
+  active = {},
   children = [{ workflowId: 'system-security-attack-discovery-review', executionId: 'review-9' }],
   initialYaml = FLOOR_YAML,
   floorStatus = 'failed',
 }: {
   childStatus?: string;
   putFailsOn?: number;
-  restoreDrifts?: boolean;
+  /** What the server stores for the nth PUT, when it is not the body as sent (a drifting server). */
+  storeOnPut?: (putNumber: number, yaml: string) => string;
+  /** A write by someone else that lands while the floor runs (stored text, as the server keeps it). */
+  editOnRun?: (yaml: string) => string;
+  /** Ids of active executions per workflow id (the executions listing). */
+  active?: Record<string, string[]>;
   children?: Array<{ workflowId: string; executionId: string }>;
   initialYaml?: string;
   floorStatus?: string;
 } = {}) => {
   let yaml = initialYaml;
   let puts = 0;
+  // The server's own revision counter: it moves with every write, whoever makes it.
+  let version = 1;
   const cancelled = new Set<string>();
   const calls: Array<{ method: string; path: string; body?: string }> = [];
   const workflow = () => {
-    const definition = parse(yaml);
     return {
       yaml,
-      definition: restoreDrifts && puts >= 2 ? { ...definition, drift: true } : definition,
+      definition: parse(yaml),
       enabled: true,
       definitionHash: 'hash',
       // The managed version counter is the server's, and it moves with every write.
       managedVersion: 9,
       originManagedWorkflowId: 'system-security-floor-attack-discovery',
-      version: 1 + puts,
+      version,
     };
   };
   const fetch = jest.fn(async (path: string, init?: { method?: string; body?: string }) => {
@@ -138,10 +146,21 @@ const fakeKibana = ({
     if (method === 'PUT') {
       puts += 1;
       if (puts === putFailsOn) throw Object.assign(new Error('boom'), { status: 500 });
-      yaml = JSON.parse(init?.body ?? '{}').yaml as string;
-      return {};
+      const sent = JSON.parse(init?.body ?? '{}').yaml as string;
+      yaml = storeOnPut ? storeOnPut(puts, sent) : sent;
+      version += 1;
+      // The managed route answers with the updated workflow's metadata, not its definition.
+      return { id: 'floor', enabled: true, valid: true, validationErrors: [] };
     }
-    if (path.endsWith('/run')) return { workflowExecutionId: 'floor-1' };
+    const listed = /workflow\/([^/]+)\/executions$/.exec(path)?.[1];
+    if (listed) return { results: (active[listed] ?? []).map((id) => ({ id })) };
+    if (path.endsWith('/run')) {
+      if (editOnRun) {
+        yaml = editOnRun(yaml);
+        version += 1;
+      }
+      return { workflowExecutionId: 'floor-1' };
+    }
     if (path.endsWith('/children')) return children;
     if (path.endsWith('/cancel')) {
       cancelled.add(/executions\/([^/]+)\/cancel/.exec(path)?.[1] ?? '');
@@ -164,7 +183,7 @@ const fakeKibana = ({
     }
     return workflow();
   });
-  return { fetch, calls, storedYaml: () => yaml, cancelled };
+  return { fetch, calls, storedYaml: () => yaml, storedVersion: () => version, cancelled };
 };
 
 const FLOOR_PATH = '/s/s/api/workflows/workflow/floor';
@@ -255,11 +274,46 @@ describe('AttackDiscoveryWorkerClient.runReview', () => {
   });
 
   it('throws when the restored definition differs from the one read before the run', async () => {
-    const kibana = fakeKibana({ restoreDrifts: true });
+    // The server keeps a different definition than the one the restore sent.
+    const kibana = fakeKibana({
+      storeOnPut: (putNumber, sent) => (putNumber === 2 ? sent.replace('manual', 'auto') : sent),
+    });
     const client = new AttackDiscoveryWorkerClient(kibana.fetch as unknown as HttpHandler, log);
     await expect(review(client)).rejects.toThrow(
       /differs from before the run after the restore \(definition\)/
     );
+  });
+
+  it('does not restore over a floor that someone else edited during the run', async () => {
+    const edited = FLOOR_YAML.replace('manual', 'edited-by-someone-else');
+    const kibana = fakeKibana({ editOnRun: () => edited });
+    const client = new AttackDiscoveryWorkerClient(kibana.fetch as unknown as HttpHandler, log);
+    await expect(review(client)).rejects.toThrow(
+      /floor changed concurrently during the floor-parent run; not restored/
+    );
+    // Only the rewrite PUT happened: the edit is left as the other writer made it.
+    expect(kibana.calls.filter(({ method }) => method === 'PUT')).toHaveLength(1);
+    expect(kibana.storedYaml()).toBe(edited);
+  });
+
+  it('does not restore when only the version moved (an edit that stored the same definition)', async () => {
+    const kibana = fakeKibana({ editOnRun: (yaml) => yaml });
+    const client = new AttackDiscoveryWorkerClient(kibana.fetch as unknown as HttpHandler, log);
+    await expect(review(client)).rejects.toThrow(/floor changed concurrently/);
+    expect(kibana.calls.filter(({ method }) => method === 'PUT')).toHaveLength(1);
+  });
+
+  it.each([
+    ['the floor', 'floor'],
+    ['the review', 'system-security-attack-discovery-review'],
+  ])('refuses to rewrite while %s has an active execution', async (_label, workflowId) => {
+    const kibana = fakeKibana({ active: { [workflowId]: ['busy-1'] } });
+    const client = new AttackDiscoveryWorkerClient(kibana.fetch as unknown as HttpHandler, log);
+    await expect(review(client)).rejects.toThrow(
+      new RegExp(`"${workflowId}" has active executions \\(busy-1\\)`)
+    );
+    expect(kibana.calls.some(({ method }) => method === 'PUT')).toBe(false);
+    expect(kibana.calls.some(({ path }) => path.endsWith('/run'))).toBe(false);
   });
 
   it('throws naming the floor when the restore PUT fails', async () => {

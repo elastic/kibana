@@ -93,6 +93,8 @@ export const isFloorClean = (yaml: string): boolean =>
 export interface FloorWorkflowState {
   yaml: string;
   definition: unknown;
+  /** The stored workflow's own revision counter; it moves on every write. */
+  version?: number;
   enabled: boolean;
   definitionHash?: string;
   managedVersion?: number;
@@ -116,6 +118,7 @@ export const readFloorWorkflow = async ({
   return {
     yaml: stored.yaml,
     definition: stored.definition,
+    version: stored.version,
     enabled: stored.enabled === true,
     definitionHash: stored.definitionHash,
     managedVersion: stored.managedVersion,

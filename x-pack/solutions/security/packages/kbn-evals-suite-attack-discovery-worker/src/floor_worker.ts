@@ -275,7 +275,7 @@ export const WORKFLOW_CONCURRENCY_MAX = 1;
  */
 const ACTIVE_LIST_SIZE = WORKFLOW_CONCURRENCY_MAX * 2;
 
-const listActiveExecutionIds = async (
+export const listActiveExecutionIds = async (
   fetch: HttpHandler,
   spaceId: string,
   workflowId: string
