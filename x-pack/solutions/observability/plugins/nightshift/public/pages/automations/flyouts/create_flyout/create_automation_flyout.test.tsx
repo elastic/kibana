@@ -14,6 +14,9 @@ import { useCreateAutomation } from '../../../../data/automations/use_automation
 jest.mock('../../../../data/automations/use_automations', () => ({
   useCreateAutomation: jest.fn(),
 }));
+jest.mock('../../hooks/use_global_limit', () => ({
+  useGlobalLimit: () => ({ isReached: false }),
+}));
 jest.mock('../../../../data/rules/use_rule_catalog', () => ({
   useRuleCatalog: () => ({ data: [] }),
 }));
