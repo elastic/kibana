@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import { AGENT_STATUS_CHANGE_DATA_STREAM } from '@kbn/fleet-plugin/common/constants/agent';
+import { getSentinelVersionPolicyId } from '@kbn/fleet-plugin/common/services';
 
 import type { FtrProviderContextWithServices } from '../ftr_provider_context';
 import { cleanupAgentDocs, createAgentDoc } from '../helpers';
@@ -156,7 +157,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
       await createAgentDoc(
         providerContext,
         'agent-status-2',
-        `${policyId}#sentinel`,
+        getSentinelVersionPolicyId(policyId),
         '8.17.0',
         true,
         {

@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 
 import { AGENT_POLICY_VERSION_SEPARATOR } from '@kbn/fleet-plugin/common/constants';
+import { getSentinelVersionPolicyId } from '@kbn/fleet-plugin/common/services';
 import type { FtrProviderContextWithServices } from '../ftr_provider_context';
 import { cleanupAgentDocs, createAgentDoc } from '../helpers';
 
@@ -554,9 +555,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
         // The sentinel version is enabled in the config: the agent moves to `#sentinel`, not to a version
         await retry.tryForTime(30000, async () => {
           const agent = await getAgent('agent1');
-          expect(agent.policy_id).to.be(
-            `${normalPolicyId}${AGENT_POLICY_VERSION_SEPARATOR}sentinel`
-          );
+          expect(agent.policy_id).to.be(getSentinelVersionPolicyId(normalPolicyId));
         });
       } finally {
         // Cleanup

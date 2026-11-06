@@ -11,6 +11,7 @@ import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   AGENT_POLICY_VERSION_SEPARATOR,
 } from '@kbn/fleet-plugin/common/constants';
+import { getSentinelVersionPolicyId } from '@kbn/fleet-plugin/common/services';
 import type { FtrProviderContextWithServices } from '../ftr_provider_context';
 import { waitForPolicyBaseIdBackfill } from '../../fleet_api_integration/helpers';
 import { cleanupAgentDocs, createAgentDoc } from '../helpers';
@@ -45,7 +46,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
     let parentId: string;
     const variantId = () => `${parentId}${AGENT_POLICY_VERSION_SEPARATOR}9.4`;
     // The sentinel version is enabled in the config, so agents are moved to `#sentinel` instead of the parent
-    const sentinelId = () => `${parentId}${AGENT_POLICY_VERSION_SEPARATOR}sentinel`;
+    const sentinelId = () => getSentinelVersionPolicyId(parentId);
 
     async function indexVariantDoc() {
       await es.index({
