@@ -93,6 +93,8 @@ export const runCortexReplay = async ({
       status: seed.status,
       corroborations: seed.corroborations,
       conversationId: seed.conversation_id,
+      // A seeded page was written by its conversation, as the optimizer records for a real write.
+      ...(seed.conversation_id ? { authoredBy: [seed.conversation_id] } : {}),
     });
   }
 

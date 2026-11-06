@@ -65,12 +65,13 @@ describe('runCortexReplay', () => {
     expect(output.rounds[0].pages_after).toEqual([
       expect.objectContaining({ slug: 'checkout-api', status: 'tentative', corroborations: 0 }),
     ]);
-    // The second round rewrites a live page, which counts as a corroboration and promotes it.
+    // The follow-up rewrites the page its own conversation wrote, which changes the content but
+    // neither counts as a corroboration nor promotes it.
     expect(output.rounds[1].pages_after).toEqual([
       expect.objectContaining({
         slug: 'checkout-api',
-        status: 'established',
-        corroborations: 1,
+        status: 'tentative',
+        corroborations: 0,
         content: '## Dependencies\n- session-cache',
         conversation_id: 'conversation-synthetic-follow-up-missed-dependency',
       }),
@@ -93,7 +94,23 @@ describe('runCortexReplay', () => {
     expect(output.rounds[0].pages_before).toEqual(output.rounds[0].pages_after);
     expect(proposeEdits).toHaveBeenCalledWith(
       expect.objectContaining({
-        catalog: [expect.objectContaining({ id: 'cortex_service_orders-consumer' })],
+        catalog: [
+          expect.objectContaining({
+            id: 'cortex_service_orders-consumer',
+            authored_by: ['conversation-synthetic-recovery-refuted'],
+          }),
+        ],
+      })
+    );
+    // The recovery round reads the content of the page its own investigation wrote.
+    expect(proposeEdits).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pageBodies: [
+          expect.objectContaining({
+            slug: 'orders-consumer',
+            content: expect.stringContaining('slow disk'),
+          }),
+        ],
       })
     );
   });
