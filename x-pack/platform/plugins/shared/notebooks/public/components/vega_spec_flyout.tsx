@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiSelect,
   EuiSkeletonText,
   EuiSpacer,
   EuiText,
@@ -29,30 +30,63 @@ import { VegaSpecEditor } from '@kbn/vis-type-vega-plugin/public';
 import type { VegaCellDefinition } from '../../common/types';
 import { getCellDisplayName } from '../model/references';
 import { createStarterSpec, VEGA_TABLE_DATASET } from '../model/vega_spec';
+import type { NotebookStore } from '../model/notebook_store';
 import { useNotebook } from './notebook_context';
 import { NotebookFlyout } from './notebook_flyout';
 
+const SOURCE_LABEL = i18n.translate('xpack.notebook.vegaCell.source', {
+  defaultMessage: 'Source',
+});
+
+/** What the flyout edits, applied to the cell together. */
+export type VegaDraft = Pick<VegaCellDefinition, 'spec' | 'sourceCell'>;
+
 interface VegaSpecFlyoutProps {
   cell: VegaCellDefinition;
-  /** Shows a draft spec in the cell without applying it. */
-  onPreview: (spec: string) => void;
-  onApply: (spec: string) => void;
+  /** Shows a draft in the cell without applying it. */
+  onPreview: (draft: VegaDraft) => void;
+  onApply: (draft: VegaDraft) => void;
   onClose: () => void;
 }
 
-/** Edits a Vega cell's spec with Kibana's Vega editor, previewing drafts in the cell before applying them. */
+/** A starter chart of the source's results, for a blank spec. */
+const starterFor = (store: NotebookStore, sourceCell: string | null): string => {
+  const output = sourceCell ? store.getRuntime(sourceCell).output : undefined;
+  return output?.kind === 'table' ? createStarterSpec(output.table) : '';
+};
+
+/** Edits a Vega cell's source and spec with Kibana's Vega editor, previewing drafts in the cell before applying them. */
 export const VegaSpecFlyout = ({ cell, onPreview, onApply, onClose }: VegaSpecFlyoutProps) => {
   const { store } = useNotebook();
   const { euiTheme } = useEuiTheme();
   const cells = useStateFromPublishingSubject(store.cells$);
-  const runtime = useStateFromPublishingSubject(store.getRuntime$(cell.id));
+  const cellOrder = useStateFromPublishingSubject(store.cellOrder$);
   const titleId = useGeneratedHtmlId({ prefix: 'notebookVegaFlyoutTitle' });
-  const [draft, setDraft] = useState(() => {
-    if (cell.spec.trim() || runtime.output?.kind !== 'table') return cell.spec;
-    return createStarterSpec(runtime.output.table);
+  const [saved] = useState<VegaDraft>(() => ({ spec: cell.spec, sourceCell: cell.sourceCell }));
+  const [draft, setDraft] = useState<VegaDraft>(() => ({
+    ...saved,
+    spec: saved.spec.trim() ? saved.spec : starterFor(store, saved.sourceCell),
+  }));
+  const [previewed, setPreviewed] = useState(saved);
+  const source = draft.sourceCell ? cells[draft.sourceCell] : undefined;
+  const esqlCells = cellOrder.flatMap((cellId) => {
+    const other = cells[cellId];
+    return other?.type === 'esql' ? [other] : [];
   });
-  const [previewed, setPreviewed] = useState(cell.spec);
-  const source = cell.sourceCell ? cells[cell.sourceCell] : undefined;
+
+  const isSame = (left: VegaDraft, right: VegaDraft) =>
+    left.spec === right.spec && left.sourceCell === right.sourceCell;
+
+  const selectSource = (sourceCell: string | null) =>
+    setDraft((current) => ({
+      sourceCell,
+      spec: current.spec.trim() ? current.spec : starterFor(store, sourceCell),
+    }));
+
+  const preview = () => {
+    onPreview(draft);
+    setPreviewed(draft);
+  };
 
   const editorCss = css`
     display: flex;
@@ -61,11 +95,6 @@ export const VegaSpecFlyout = ({ cell, onPreview, onApply, onClose }: VegaSpecFl
     min-height: 0;
     padding: ${euiTheme.size.m} ${euiTheme.size.l};
   `;
-
-  const preview = () => {
-    onPreview(draft);
-    setPreviewed(draft);
-  };
 
   return (
     <NotebookFlyout
@@ -103,6 +132,21 @@ export const VegaSpecFlyout = ({ cell, onPreview, onApply, onClose }: VegaSpecFl
             )}
           </p>
         </EuiText>
+        <EuiSpacer size="m" />
+        <EuiSelect
+          compressed
+          fullWidth
+          prepend={SOURCE_LABEL}
+          aria-label={SOURCE_LABEL}
+          hasNoInitialSelection={!draft.sourceCell}
+          value={draft.sourceCell ?? ''}
+          options={esqlCells.map((esqlCell) => ({
+            value: esqlCell.id,
+            text: getCellDisplayName(esqlCell),
+          }))}
+          onChange={(event) => selectSource(event.target.value || null)}
+          data-test-subj="notebookVegaSource"
+        />
       </EuiFlyoutHeader>
 
       <div css={editorCss} data-test-subj="notebookVegaFlyoutBody">
@@ -116,7 +160,11 @@ export const VegaSpecFlyout = ({ cell, onPreview, onApply, onClose }: VegaSpecFl
             />
           }
         >
-          <VegaSpecEditor editorValue={draft} onChange={setDraft} actionsPlacement="toolbar" />
+          <VegaSpecEditor
+            editorValue={draft.spec}
+            onChange={(spec) => setDraft((current) => ({ ...current, spec }))}
+            actionsPlacement="toolbar"
+          />
         </Suspense>
       </div>
 
@@ -135,7 +183,7 @@ export const VegaSpecFlyout = ({ cell, onPreview, onApply, onClose }: VegaSpecFl
                 <EuiButton
                   color="success"
                   iconType="play"
-                  disabled={draft === previewed}
+                  disabled={isSame(draft, previewed)}
                   onClick={preview}
                   data-test-subj="notebookVegaRunPreview"
                 >
@@ -146,7 +194,7 @@ export const VegaSpecFlyout = ({ cell, onPreview, onApply, onClose }: VegaSpecFl
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  disabled={draft === cell.spec}
+                  disabled={isSame(draft, saved)}
                   onClick={() => onApply(draft)}
                   data-test-subj="notebookVegaApply"
                 >

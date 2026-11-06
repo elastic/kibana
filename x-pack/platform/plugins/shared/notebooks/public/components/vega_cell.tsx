@@ -6,58 +6,65 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiEmptyPrompt,
-  EuiFlexItem,
-  EuiSelect,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiEmptyPrompt, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { VegaCellDefinition } from '../../common/types';
-import { getCellDisplayName } from '../model/references';
 import { createStarterSpec } from '../model/vega_spec';
 import { CellFrame } from './cell_frame';
 import { useCellResize } from './cell_resize';
 import { useNotebook } from './notebook_context';
 import { VegaChart } from './vega_chart';
-import { VegaSpecFlyout } from './vega_spec_flyout';
+import { VegaSpecFlyout, type VegaDraft } from './vega_spec_flyout';
 
 const CELL_HEIGHT = 300;
 
-const SOURCE_LABEL = i18n.translate('xpack.notebook.vegaCell.source', {
-  defaultMessage: 'Source',
-});
-
-/** The chart, or a prompt explaining why there is none yet. */
-export const VegaCanvas = ({
-  cell,
-  preview,
-  onStart,
-}: {
+interface VegaCanvasProps {
   cell: VegaCellDefinition;
-  /** A draft spec shown in place of the cell's own. */
-  preview?: string;
+  /** A draft shown in place of the cell's own source and spec. */
+  preview?: VegaDraft;
   /** Offered while the spec is empty, to start from a chart of the results. */
   onStart?: (spec: string) => void;
-}) => {
-  const { store } = useNotebook();
-  const runtime = useStateFromPublishingSubject(store.getRuntime$(cell.id));
-  const table = runtime.output?.kind === 'table' ? runtime.output.table : undefined;
-  const spec = preview ?? cell.spec;
+}
 
-  if (cell.sourceCell === null) {
+/** The chart, or a prompt explaining why there is none yet. */
+export const VegaCanvas = ({ cell, preview, onStart }: VegaCanvasProps) => {
+  const sourceCell = preview ? preview.sourceCell : cell.sourceCell;
+  if (sourceCell === null) {
     return (
       <EuiEmptyPrompt
         titleSize="xs"
-        body={i18n.translate('xpack.notebook.vegaCell.noSource', {
-          defaultMessage: 'Pick the ES|QL cell whose results to chart.',
+        body={i18n.translate('xpack.notebook.vegaCell.editToPickSource', {
+          defaultMessage: 'Edit the cell to pick an ES|QL cell as its source.',
         })}
       />
     );
   }
+  // A draft source's results come from that cell; the cell's own run already holds its source's.
+  const resultsCellId = preview ? sourceCell : cell.id;
+  return (
+    <VegaResults
+      key={resultsCellId}
+      resultsCellId={resultsCellId}
+      spec={preview ? preview.spec : cell.spec}
+      onStart={onStart}
+    />
+  );
+};
+
+const VegaResults = ({
+  resultsCellId,
+  spec,
+  onStart,
+}: {
+  resultsCellId: string;
+  spec: string;
+  onStart?: (spec: string) => void;
+}) => {
+  const { store } = useNotebook();
+  const runtime = useStateFromPublishingSubject(store.getRuntime$(resultsCellId));
+  const table = runtime.output?.kind === 'table' ? runtime.output.table : undefined;
+
   if (!table) {
     return (
       <EuiEmptyPrompt
@@ -98,14 +105,12 @@ export const VegaCanvas = ({
 export const VegaCell = ({ cell }: { cell: VegaCellDefinition }) => {
   const { store, scheduler } = useNotebook();
   const runtime = useStateFromPublishingSubject(store.getRuntime$(cell.id));
-  const cells = useStateFromPublishingSubject(store.cells$);
-  const cellOrder = useStateFromPublishingSubject(store.cellOrder$);
   const { bodyCss, resizeHandle } = useCellResize(cell, CELL_HEIGHT);
   const [isEditing, setIsEditing] = useState(false);
-  const [preview, setPreview] = useState<string>();
+  const [preview, setPreview] = useState<VegaDraft>();
   const { id } = cell;
 
-  const update = (patch: Partial<Pick<VegaCellDefinition, 'spec' | 'sourceCell'>>) =>
+  const update = (patch: Partial<VegaDraft>) =>
     store.updateCell(id, (current) =>
       current.type === 'vega' ? { ...current, ...patch } : current
     );
@@ -114,11 +119,6 @@ export const VegaCell = ({ cell }: { cell: VegaCellDefinition }) => {
     setIsEditing(false);
     setPreview(undefined);
   }, []);
-
-  const esqlCells = cellOrder.flatMap((cellId) => {
-    const other = cells[cellId];
-    return other?.type === 'esql' ? [other] : [];
-  });
 
   return (
     <CellFrame
@@ -139,21 +139,6 @@ export const VegaCell = ({ cell }: { cell: VegaCellDefinition }) => {
         </EuiFlexItem>
       }
     >
-      <EuiSelect
-        compressed
-        fullWidth
-        prepend={SOURCE_LABEL}
-        aria-label={SOURCE_LABEL}
-        hasNoInitialSelection={!cell.sourceCell}
-        value={cell.sourceCell ?? ''}
-        options={esqlCells.map((esqlCell) => ({
-          value: esqlCell.id,
-          text: getCellDisplayName(esqlCell),
-        }))}
-        onChange={(event) => update({ sourceCell: event.target.value || null })}
-        data-test-subj="notebookVegaSource"
-      />
-      <EuiSpacer size="s" />
       <div css={bodyCss} data-test-subj="notebookVegaContainer">
         <VegaCanvas cell={cell} preview={preview} onStart={(spec) => update({ spec })} />
       </div>
@@ -161,8 +146,8 @@ export const VegaCell = ({ cell }: { cell: VegaCellDefinition }) => {
         <VegaSpecFlyout
           cell={cell}
           onPreview={setPreview}
-          onApply={(spec) => {
-            update({ spec });
+          onApply={(draft) => {
+            update(draft);
             closeEditor();
           }}
           onClose={closeEditor}
