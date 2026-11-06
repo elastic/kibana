@@ -304,6 +304,7 @@ export function StepConfigPanel({
   const nameEditBaselineRef = useRef('');
   const isEditingNameRef = useRef(false);
   const titleId = useGeneratedHtmlId({ prefix: 'workflowStepConfigTitle' });
+  const typeSubtitleId = useGeneratedHtmlId({ prefix: 'workflowStepConfigTypeSubtitle' });
   const settingsAccordionId = useGeneratedHtmlId({ prefix: 'workflowStepConfigSettings' });
   const [settingsOpen, setSettingsOpen] = useState(settingsAccordionOpenForPage);
   /** Field currently open in the expanded editor (depth ≤ 2). */
@@ -599,6 +600,7 @@ export function StepConfigPanel({
       role="dialog"
       aria-modal="false"
       aria-labelledby={titleId}
+      aria-describedby={typeSubtitleId}
       data-test-subj="workflowStepConfigPanel"
       onKeyDown={(e) => {
         if (e.key === 'Escape') {
@@ -635,9 +637,9 @@ export function StepConfigPanel({
           }}
         >
           {/*
-            Single-line header: icon · name · pencil · close. No catalog/type
-            subtitle — the user already picked this node, the chip carries the
-            provider, and the form fields / YAML view identify the step kind.
+            Header: icon · name · pencil · close, with the step type id under the name. The
+            icon is per provider family, so it does not tell `data.set` from `data.map`. The
+            friendly label is left out on purpose.
           */}
           <div
             css={{
@@ -821,6 +823,26 @@ export function StepConfigPanel({
                   </h2>
                 </EuiTitle>
               )}
+              {/* Outside the rename button: plain, selectable text. */}
+              <code
+                id={typeSubtitleId}
+                title={stepType}
+                data-test-subj="workflowStepConfigPanelTypeSubtitle"
+                css={{
+                  display: 'block',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  fontFamily: euiTheme.font.familyCode,
+                  fontSize: euiTheme.font.scale.xs * euiTheme.base,
+                  lineHeight: euiTheme.size.base,
+                  color: euiTheme.colors.textSubdued,
+                  background: 'transparent',
+                  padding: 0,
+                }}
+              >
+                {stepType}
+              </code>
             </div>
           </div>
         </div>

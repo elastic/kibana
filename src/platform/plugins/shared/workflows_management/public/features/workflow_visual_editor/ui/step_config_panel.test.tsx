@@ -246,12 +246,9 @@ describe('StepConfigPanel', () => {
   beforeEach(() => {
     resetStepConfigPanelSessionStateForTests();
   });
-  it('renders instance name as title without a catalog · type subtitle', () => {
+  it('renders the instance name as the title', () => {
     renderPanel();
     expect(screen.getByTestId('workflowStepConfigPanelTitle')).toHaveTextContent('notify');
-    expect(screen.queryByTestId('workflowStepConfigPanelSubtitle')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('workflowStepConfigPanelCatalog')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('workflowStepConfigPanelType')).not.toBeInTheDocument();
     expect(screen.queryByText(/Configure/)).not.toBeInTheDocument();
     expect(screen.queryByTestId('workflowStepConfigField-name')).not.toBeInTheDocument();
     expect(activateField('workflowStepConfigField-with.message')).toHaveValue(
@@ -300,7 +297,45 @@ describe('StepConfigPanel', () => {
       initialFragment: 'type: slack\nconnector-id: abc\nwith:\n  message: hi\n',
     });
     expect(screen.getByTestId('workflowStepConfigPanelTitle')).toHaveTextContent('Slack Message');
-    expect(screen.queryByTestId('workflowStepConfigPanelSubtitle')).not.toBeInTheDocument();
+    expect(screen.getByTestId('workflowStepConfigPanelTypeSubtitle')).toHaveTextContent(/^slack$/);
+  });
+
+  describe('step type subtitle', () => {
+    const subtitle = () => screen.getByTestId('workflowStepConfigPanelTypeSubtitle');
+
+    it('shows the raw type id under the name, without the friendly label', () => {
+      renderPanel({ actionLabel: 'Slack Message' });
+      expect(subtitle()).toHaveTextContent(/^slack$/);
+      expect(subtitle().tagName).toBe('CODE');
+      expect(subtitle()).toHaveAttribute('title', 'slack');
+    });
+
+    it('shows the id of a type the catalog does not know', () => {
+      renderPanel({ stepType: 'acme.doSomethingOdd' });
+      expect(subtitle()).toHaveTextContent(/^acme\.doSomethingOdd$/);
+    });
+
+    it('stays outside the rename button, so clicking it does not edit the name', () => {
+      renderPanel({ actionLabel: 'Slack Message' });
+      expect(screen.getByTestId('workflowStepConfigPanelTitle')).not.toContainElement(subtitle());
+      fireEvent.click(subtitle());
+      expect(screen.queryByTestId('workflowStepConfigPanelNameInput')).not.toBeInTheDocument();
+    });
+
+    it('stays visible while the name is being edited', () => {
+      renderPanel({ actionLabel: 'Slack Message' });
+      fireEvent.click(screen.getByTestId('workflowStepConfigPanelTitle'));
+      expect(screen.getByTestId('workflowStepConfigPanelNameInput')).toBeInTheDocument();
+      expect(subtitle()).toHaveTextContent(/^slack$/);
+    });
+
+    it('describes the panel, so the type is announced with the title', () => {
+      renderPanel({ actionLabel: 'Slack Message' });
+      expect(screen.getByTestId('workflowStepConfigPanel')).toHaveAttribute(
+        'aria-describedby',
+        subtitle().id
+      );
+    });
   });
 
   it('edits the step name inline in the header', () => {
