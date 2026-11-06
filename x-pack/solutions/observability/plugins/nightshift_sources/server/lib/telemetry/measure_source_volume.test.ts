@@ -96,7 +96,7 @@ describe('measureSourceVolume', () => {
 
   it('counts TS sources through FROM without including standard indices', async () => {
     const { esClient, measure } = setup({
-      esql: 'TS metrics-* METADATA _id | WHERE host.name == "a"',
+      esql: 'TS metrics-_index_mode-* METADATA _id | WHERE host.name == "a"',
     });
     esClient.esql.query.mockResolvedValue(countOf(42));
     esClient.indices.stats.mockResolvedValue(statefulStats(1000, 500_000));
@@ -105,7 +105,7 @@ describe('measureSourceVolume', () => {
     expect(esClient.esql.query).toHaveBeenCalledWith(
       expect.objectContaining({
         query:
-          'FROM metrics-* METADATA _id, _index_mode\n' +
+          'FROM metrics-_index_mode-* METADATA _id, _index_mode\n' +
           '| WHERE `_index_mode` == "time_series"\n' +
           '| WHERE host.name == "a"\n' +
           `| WHERE @timestamp >= "${window.start}" AND @timestamp <= "${window.end}"\n` +
