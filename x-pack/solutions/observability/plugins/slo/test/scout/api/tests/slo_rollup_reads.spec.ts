@@ -37,6 +37,7 @@ apiTest.describe(
   () => {
     let headers: Record<string, string>;
     let sloId: string;
+    let compositeId: string | undefined;
 
     apiTest.beforeAll(async ({ requestAuth, apiServices, esClient }) => {
       const { apiKeyHeader } = await requestAuth.getApiKey('admin');
@@ -53,13 +54,16 @@ apiTest.describe(
       const now = Date.now();
       await insertSloRollupDocs(
         esClient,
-        [INSTANCE_ID, OTHER_INSTANCE_ID].flatMap((instanceId) =>
+        [
+          { instanceId: INSTANCE_ID, good: 90 },
+          { instanceId: OTHER_INSTANCE_ID, good: 50 },
+        ].flatMap(({ instanceId, good }) =>
           [30, 40].map((minutesAgo) =>
             createRollupDoc({
               sloId,
               instanceId,
               timestamp: new Date(now - minutesAgo * MINUTE_MS).toISOString(),
-              good: 90,
+              good,
               total: 100,
             })
           )
@@ -69,7 +73,7 @@ apiTest.describe(
 
     apiTest.afterAll(async ({ apiServices, esClient }) => {
       await Promise.all([
-        apiServices.compositeSlo.deleteAll(),
+        compositeId ? apiServices.compositeSlo.delete(compositeId) : undefined,
         apiServices.slo.delete(sloId),
         cleanupSloRollupDocs(esClient, [sloId]),
       ]);
@@ -198,7 +202,8 @@ apiTest.describe(
           ],
         });
         expect(createResponse).toHaveStatusCode(200);
-        const { id: compositeId }: { id: string } = createResponse.body;
+        const { id }: { id: string } = createResponse.body;
+        compositeId = id;
 
         const response = await apiClient.post<
           InspectWrapped<FetchCompositeHistoricalSummaryResponse>
@@ -211,10 +216,11 @@ apiTest.describe(
         expect(response).toHaveStatusCode(200);
         const body = unwrapInspect(response.body);
         expect(body).toHaveLength(1);
-        const [{ compositeId: id, data }] = body;
-        expect(id).toBe(compositeId);
+        const [{ compositeId: returnedId, data }] = body;
+        expect(returnedId).toBe(compositeId);
         expect(data.length).toBeGreaterThan(0);
-        expect(data[data.length - 1].sliValue).toBeCloseTo(0.9, 5);
+        // (1 × 0.9 + 3 × 0.5) / 4
+        expect(data[data.length - 1].sliValue).toBeCloseTo(0.6, 5);
       }
     );
   }

@@ -20,21 +20,22 @@ apiTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let headers: Record<string, string>;
+    let compositeId: string;
 
     apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
       const { apiKeyHeader } = await requestAuth.getApiKey('admin');
       headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
-      await apiServices.compositeSlo.deleteAll();
-
       const createResponse = await apiServices.compositeSlo.create({
         ...DEFAULT_COMPOSITE_SLO,
         tags: [COMPOSITE_TAG],
       });
       expect(createResponse).toHaveStatusCode(200);
+      const { id }: { id: string } = createResponse.body;
+      compositeId = id;
     });
 
     apiTest.afterAll(async ({ apiServices }) => {
-      await apiServices.compositeSlo.deleteAll();
+      await apiServices.compositeSlo.delete(compositeId);
     });
 
     apiTest('GET suggestions returns the tags of the composite SLOs', async ({ apiClient }) => {
