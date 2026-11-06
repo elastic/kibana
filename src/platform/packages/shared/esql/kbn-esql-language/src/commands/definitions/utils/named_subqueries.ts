@@ -8,9 +8,7 @@
  */
 
 import { isBinaryExpression, isIdentifier, isSource, isSubQuery, Walker } from '@elastic/esql';
-import { uniqBy } from 'lodash';
 import type {
-  ESQLAstCommand,
   ESQLAstAllCommands,
   ESQLAstHeaderCommand,
   ESQLAstLetHeaderCommand,
@@ -70,12 +68,6 @@ export const getNamedSubqueriesAvailableTo = (
   return index < 0 ? [] : namedSubqueries.slice(0, index);
 };
 
-/** Returns the index sources of a source command, replacing LET references with the sources of their bodies. */
-export const resolveNamedSubquerySources = (
-  sourceCommand: ESQLAstCommand | undefined,
-  namedSubqueries: readonly NamedSubquery[]
-): ESQLSource[] => uniqBy(collectIndexSources(sourceCommand, namedSubqueries, new Set()), 'name');
-
 /** Returns the named subqueries referenced by the commands, directly or through other named subqueries. */
 export const getUsedNamedSubqueries = (
   commands: ESQLAstAllCommands[],
@@ -118,40 +110,6 @@ const toNamedSubquery = (command: ESQLAstLetHeaderCommand): NamedSubquery | unde
 
   return { name: left.name, identifier: left, query: right.child, command };
 };
-
-const collectIndexSources = (
-  sourceCommand: ESQLAstCommand | undefined,
-  namedSubqueries: readonly NamedSubquery[],
-  visitedBindings: Set<NamedSubquery>
-): ESQLSource[] =>
-  (sourceCommand?.args ?? []).flatMap((arg) => {
-    if (isSubQuery(arg)) {
-      return collectIndexSources(arg.child.commands[0], namedSubqueries, visitedBindings);
-    }
-
-    if (!isSource(arg) || arg.sourceType !== 'index') {
-      return [];
-    }
-
-    const namedSubquery = findNamedSubqueryForSource(arg, namedSubqueries);
-
-    if (!namedSubquery) {
-      return [arg];
-    }
-
-    // Shared dependencies only need to be expanded once.
-    if (visitedBindings.has(namedSubquery)) {
-      return [];
-    }
-
-    visitedBindings.add(namedSubquery);
-
-    return collectIndexSources(
-      namedSubquery.query.commands[0],
-      getNamedSubqueriesAvailableTo(namedSubqueries, namedSubquery),
-      visitedBindings
-    );
-  });
 
 const getReferencedNamedSubqueries = (
   commands: ESQLAstAllCommands[],

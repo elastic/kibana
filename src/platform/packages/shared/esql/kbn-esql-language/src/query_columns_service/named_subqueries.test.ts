@@ -9,6 +9,7 @@
 
 import { Parser } from '@elastic/esql';
 import type { ESQLCallbacks, ESQLFieldWithMetadata } from '@kbn/esql-types';
+import { METADATA_FIELDS } from '../commands/registry/options/metadata';
 import { QueryColumns } from '.';
 
 const sourceColumns: ESQLFieldWithMetadata[] = [
@@ -122,13 +123,7 @@ describe('named subquery columns', () => {
   });
 
   it('adds outer METADATA columns when named subqueries share dependencies', async () => {
-    const getColumnsFor = mockGetColumnsFor({
-      'FROM logs-*': sourceColumns,
-      'FROM logs-* METADATA _id': [
-        ...sourceColumns,
-        { name: '_id', type: 'keyword', userDefined: false },
-      ],
-    });
+    const getColumnsFor = mockGetColumnsFor({ 'FROM logs-*': sourceColumns });
 
     const columns = await getColumns(
       'LET base = (FROM logs-* | KEEP message); LET first = (FROM base, base); LET second = (FROM first, base); FROM first, second METADATA _id',
@@ -136,8 +131,41 @@ describe('named subquery columns', () => {
     );
 
     expect(columns.map(({ name }) => name)).toEqual(['message', '_id']);
-    expect(getColumnsFor).toHaveBeenCalledTimes(2);
+    expect(getColumnsFor).toHaveBeenCalledTimes(1);
     expect(getColumnsFor).toHaveBeenCalledWith({ query: 'FROM logs-*' });
-    expect(getColumnsFor).toHaveBeenCalledWith({ query: 'FROM logs-* METADATA _id' });
+  });
+
+  it.each([
+    'LET selected = (ROW value = 1); FROM selected METADATA _id',
+    'FROM (ROW value = 1) METADATA _id',
+  ])('adds METADATA columns without indices in %s', async (query) => {
+    const columns = await getColumns(query, mockGetColumnsFor({}));
+
+    expect(columns.map(({ name, type }) => ({ name, type }))).toEqual([
+      { name: 'value', type: 'integer' },
+      { name: '_id', type: 'keyword' },
+    ]);
+  });
+
+  it('expands METADATA wildcards only to metadata fields', async () => {
+    const getColumnsFor = mockGetColumnsFor({ 'FROM logs-*': sourceColumns });
+
+    const columns = await getColumns(
+      'LET selected = (FROM logs-* | KEEP message); FROM selected METADATA *',
+      getColumnsFor
+    );
+
+    expect(columns.map(({ name }) => name)).toEqual(['message', ...METADATA_FIELDS]);
+  });
+
+  it('keeps a subquery column named like a METADATA field', async () => {
+    const columns = await getColumns(
+      'LET selected = (ROW _id = 1); FROM selected METADATA _id',
+      mockGetColumnsFor({})
+    );
+
+    expect(columns.map(({ name, type }) => ({ name, type }))).toEqual([
+      { name: '_id', type: 'integer' },
+    ]);
   });
 });

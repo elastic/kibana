@@ -7,22 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { uniqBy } from 'lodash';
-import { isColumn, isOptionNode, isSource, isSubQuery } from '@elastic/esql';
-import type {
-  ESQLCommand,
-  ESQLAstQueryExpression,
-  ESQLCommandOption,
-  ESQLSource,
-} from '@elastic/esql/types';
+import { isOptionNode, isSource, isSubQuery } from '@elastic/esql';
+import type { ESQLCommand, ESQLAstQueryExpression, ESQLSource } from '@elastic/esql/types';
 import {
   findNamedSubqueryForSource,
   getNamedSubqueriesAvailableTo,
-  resolveNamedSubquerySources,
   type NamedSubquery,
 } from '../../definitions/utils/named_subqueries';
-import { matchesWildcardPattern } from '../../definitions/utils/regex';
 import { isTimeseriesSourceCommand } from '../../definitions/utils/timeseries_check';
 import { esqlCommandRegistry } from '..';
+import { getMetadataColumns } from '../options/metadata';
 import type { ESQLColumnData } from '../types';
 import { UnmappedFieldsStrategy } from '../types';
 import type { IAdditionalFields } from '../registry';
@@ -76,17 +70,15 @@ export const columnsAfter = async (
     );
   }
 
-  const metadataNeedsNamedSubquerySources =
-    sources.length === 0 && referencedNamedSubqueries.length > 0;
+  const results = await Promise.all(promises);
+  const columns = results.flat();
 
-  if (metadataNeedsNamedSubquerySources) {
-    promises.push(
-      getOuterMetadataColumns(command, metadataOptions, namedSubqueries, additionalFields.fromFrom)
-    );
+  // Without indices to ask, METADATA columns get the static types Elasticsearch gives them.
+  if (sources.length === 0) {
+    columns.push(...getMetadataColumns(metadataOptions));
   }
 
-  const results = await Promise.all(promises);
-  return uniqBy(results.flat(), 'name');
+  return uniqBy(columns, 'name');
 };
 
 const getNamedSubqueryColumns = (
@@ -116,34 +108,6 @@ const getNamedSubqueryColumns = (
   namedSubqueryColumns.set(namedSubquery, columns);
 
   return columns;
-};
-
-// Fetch metadata requested outside the LET from its underlying indices,
-// so it can be added to the LET's output without changing its pipeline.
-const getOuterMetadataColumns = async (
-  command: ESQLCommand,
-  metadataOptions: ESQLCommandOption[],
-  namedSubqueries: readonly NamedSubquery[],
-  fromFrom: IAdditionalFields['fromFrom']
-): Promise<ESQLColumnData[]> => {
-  if (metadataOptions.length === 0) {
-    return [];
-  }
-
-  const sources = resolveNamedSubquerySources(command, namedSubqueries);
-
-  if (sources.length === 0) {
-    return [];
-  }
-
-  const metadataPatterns = metadataOptions.flatMap(({ args }) =>
-    args.filter(isColumn).map(({ name }) => name)
-  );
-  const fields = await fromFrom({ ...command, args: [...sources, ...metadataOptions] });
-
-  return fields.filter(({ name }) =>
-    metadataPatterns.some((pattern) => matchesWildcardPattern(pattern, name))
-  );
 };
 
 async function processSubquery(
