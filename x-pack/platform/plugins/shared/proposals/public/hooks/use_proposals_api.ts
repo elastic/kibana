@@ -406,6 +406,5 @@ const useIsDecisionRunning = (
 export const useIsApprovingProposal = (id: string | undefined, decisionShown: boolean): boolean =>
   useIsDecisionRunning('approve', mutationKeys.proposals.approve, id, decisionShown);
 
-
 export const useIsDecliningProposal = (id: string | undefined, decisionShown: boolean): boolean =>
   useIsDecisionRunning('decline', mutationKeys.proposals.decline, id, decisionShown);

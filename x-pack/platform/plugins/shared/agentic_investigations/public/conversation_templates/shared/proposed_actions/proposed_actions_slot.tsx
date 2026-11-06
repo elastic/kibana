@@ -43,8 +43,10 @@ interface ProposedActionRowProps {
  * inside the list's `.map`.
  */
 const ProposedActionRow = ({ proposal, onDecisionError, basePath }: ProposedActionRowProps) => {
-  const { readOnly, isSubmitting, currentActorName, approve, dismiss } =
-    useProposalDecision(proposal.id, proposal);
+  const { readOnly, isSubmitting, currentActorName, approve, dismiss } = useProposalDecision(
+    proposal.id,
+    proposal
+  );
 
   return (
     <ProposedActionButton
