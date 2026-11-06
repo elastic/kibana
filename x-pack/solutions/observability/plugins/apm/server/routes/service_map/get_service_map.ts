@@ -21,6 +21,7 @@ import type { EnhancedServiceStatsOptions } from './get_enhanced_service_stats';
 import { getEnhancedServiceStats } from './get_enhanced_service_stats';
 import { fetchExitSpanSamplesFromTraceIds } from './fetch_exit_span_samples';
 import { getServiceCallGraph } from './get_service_call_graph';
+import { getServiceGroupingAttributes } from './get_service_grouping_attributes';
 import { matchCallGraphToServices } from './match_service_call_graph';
 
 export interface IEnvOptions {
@@ -118,6 +119,15 @@ export function getServiceMap(
           })
         : Promise.resolve(undefined);
 
+    const groupingAttributesPromise =
+      grouping.enabled && !options.serviceName
+        ? getServiceGroupingAttributes(options).catch((error) => {
+            logger.debug(`Unable to retrieve grouping attributes for service maps.`, { error });
+            return undefined;
+          })
+        : Promise.resolve(undefined);
+
+    // groupingAttributes is fetched for group selection. It stays off the response until then.
     const [connectionData, servicesData, anomalies, callGraph] = await Promise.all([
       getConnectionData(options),
       grouping.enabled
@@ -125,9 +135,10 @@ export function getServiceMap(
         : getServiceStats(options),
       anomaliesPromise,
       callGraphPromise,
+      groupingAttributesPromise,
     ]);
 
-    // Group selection will use this list. It stays off the response until then.
+    // Group selection will use the call graph. It stays off the response until then.
     if (callGraph) {
       try {
         matchCallGraphToServices({
