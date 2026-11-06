@@ -97,7 +97,7 @@ const codeSampleBody = ({ lang, source }: CodeSample) =>
 
 describe('AI index route examples', () => {
   it('covers every route that links an example file', () => {
-    expect(routesWithExamples).toHaveLength(7);
+    expect(routesWithExamples).toHaveLength(9);
   });
 
   describe.each(routesWithExamples)('$route', ({ validation, examples, handler }) => {
