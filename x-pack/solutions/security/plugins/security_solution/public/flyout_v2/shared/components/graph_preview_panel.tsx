@@ -15,6 +15,7 @@ import {
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useUpsellingComponent } from '../../../common/hooks/use_upselling';
+import type { GraphEntryPoint } from '../../../common/lib/telemetry';
 import { useGraphTelemetry } from '../hooks/use_graph_telemetry';
 import { ExpandablePanel } from './expandable_panel';
 import { GraphPreview } from './graph_preview';
@@ -23,6 +24,8 @@ import { GRAPH_PREVIEW_TECHNICAL_PREVIEW_TEST_ID, GRAPH_PREVIEW_TEST_ID } from '
 export type GraphPreviewData = React.ComponentProps<typeof GraphPreview>['data'];
 
 export interface GraphPreviewPanelProps {
+  /** Where the graph preview is shown, reported with its telemetry events. */
+  entryPoint: GraphEntryPoint;
   /** Callback invoked when the user opens the full graph visualization. When omitted, no expand link is shown. */
   onShowGraph?: () => void;
   /** Whether to show the graph preview panel header icon. */
@@ -39,6 +42,7 @@ export interface GraphPreviewPanelProps {
 
 /** Displays a graph preview panel or graph visualization upsell for the current document. */
 export const GraphPreviewPanel = ({
+  entryPoint,
   shouldShowGraph,
   isLoading,
   isError,
@@ -47,7 +51,7 @@ export const GraphPreviewPanel = ({
   showIcon,
 }: GraphPreviewPanelProps) => {
   const GraphVisualizationUpsell = useUpsellingComponent('graph_visualization');
-  const { reportPreviewExpanded } = useGraphTelemetry();
+  const { reportPreviewExpanded } = useGraphTelemetry(entryPoint);
   const onExpandGraph = useCallback(() => {
     reportPreviewExpanded();
     onShowGraph?.();

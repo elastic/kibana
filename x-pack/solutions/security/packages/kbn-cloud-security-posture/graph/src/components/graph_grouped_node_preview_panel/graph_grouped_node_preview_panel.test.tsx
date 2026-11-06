@@ -22,12 +22,15 @@ import {
   GROUPED_ITEMS_TYPE_TEST_ID,
   GROUPED_ITEM_TEST_ID,
   GROUPED_ITEM_ACTOR_TEST_ID,
+  GROUPED_ITEM_TITLE_TEST_ID_LINK,
+  GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID,
   GROUPED_ITEM_TARGET_TEST_ID,
   GROUPED_ITEM_TARGET_OVERFLOW_TEST_ID,
   PAGINATION_BUTTON_NEXT_TEST_ID,
 } from './test_ids';
 import { DOCUMENT_TYPE_EVENT } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { GROUPED_PREVIEW_PAGINATION_SETTINGS_KEY } from './use_pagination';
+import { GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID } from '../test_ids';
 import { getOrCreateFilterStore, destroyFilterStore } from '../filters/filter_store';
 
 // Mock the hook
@@ -911,6 +914,247 @@ describe('GraphGroupedNodePreviewPanel', () => {
         expect(screen.queryByTestId(LOADING_BODY_TEST_ID)).not.toBeInTheDocument();
         expect(screen.getByTestId(CONTENT_BODY_TEST_ID)).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('Telemetry', () => {
+    const mockOnTelemetryEvent = jest.fn();
+
+    const mockFetchedItems = (page: Array<EventItem | AlertItem>) =>
+      mockUseFetchDocumentDetails.mockReturnValue(
+        createMockHookResult({ data: { page, total: page.length } })
+      );
+
+    beforeEach(() => {
+      mockOnTelemetryEvent.mockClear();
+    });
+
+    describe('grouped_panel_opened', () => {
+      it('reports grouped_entity for a grouped entities panel', () => {
+        render(
+          <GraphGroupedNodePreviewPanel
+            {...defaultProps}
+            docMode="grouped-entities"
+            entityItems={[createEntityItem()]}
+            onTelemetryEvent={mockOnTelemetryEvent}
+          />
+        );
+
+        expect(mockOnTelemetryEvent).toHaveBeenCalledTimes(1);
+        expect(mockOnTelemetryEvent).toHaveBeenCalledWith({
+          type: 'grouped_panel_opened',
+          nodeType: 'grouped_entity',
+        });
+      });
+
+      it('reports grouped_event for a grouped events panel', () => {
+        mockFetchedItems([{ id: 'event-1', itemType: DOCUMENT_TYPE_EVENT, docId: 'doc-1' }]);
+
+        render(
+          <GraphGroupedNodePreviewPanel
+            {...defaultProps}
+            docMode="grouped-events"
+            onTelemetryEvent={mockOnTelemetryEvent}
+          />
+        );
+
+        expect(mockOnTelemetryEvent).toHaveBeenCalledTimes(1);
+        expect(mockOnTelemetryEvent).toHaveBeenCalledWith({
+          type: 'grouped_panel_opened',
+          nodeType: 'grouped_event',
+        });
+      });
+
+      it('reports once and not again on re-render', () => {
+        const entityItems = [createEntityItem()];
+        const { rerender } = render(
+          <GraphGroupedNodePreviewPanel
+            {...defaultProps}
+            entityItems={entityItems}
+            onTelemetryEvent={mockOnTelemetryEvent}
+          />
+        );
+
+        rerender(
+          <GraphGroupedNodePreviewPanel
+            {...defaultProps}
+            entityItems={[...entityItems, createEntityItem()]}
+            onTelemetryEvent={jest.fn()}
+          />
+        );
+        rerender(
+          <GraphGroupedNodePreviewPanel
+            {...defaultProps}
+            entityItems={entityItems}
+            onTelemetryEvent={mockOnTelemetryEvent}
+          />
+        );
+
+        expect(mockOnTelemetryEvent).toHaveBeenCalledTimes(1);
+      });
+
+      it('reports for an empty panel', () => {
+        render(
+          <GraphGroupedNodePreviewPanel
+            {...defaultProps}
+            docMode="grouped-entities"
+            entityItems={[]}
+            onTelemetryEvent={mockOnTelemetryEvent}
+          />
+        );
+
+        expect(screen.getByTestId(EMPTY_BODY_TEST_ID)).toBeInTheDocument();
+        expect(mockOnTelemetryEvent).toHaveBeenCalledTimes(1);
+        expect(mockOnTelemetryEvent).toHaveBeenCalledWith({
+          type: 'grouped_panel_opened',
+          nodeType: 'grouped_entity',
+        });
+      });
+
+      it('reports while the grouped events are still loading', () => {
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({
+            data: undefined as unknown as { page: (EventItem | AlertItem)[]; total: number },
+            isLoading: true,
+          })
+        );
+
+        render(
+          <GraphGroupedNodePreviewPanel
+            {...defaultProps}
+            docMode="grouped-events"
+            onTelemetryEvent={mockOnTelemetryEvent}
+          />
+        );
+
+        expect(mockOnTelemetryEvent).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('grouped_item_viewed', () => {
+      const entityItem: EntityItem = {
+        id: 'entity-viewed',
+        itemType: 'entity',
+        icon: 'storage',
+        label: 'Viewed Host',
+        entity: { type: 'host', name: 'viewed-host', availableInEntityStore: true },
+      };
+      const eventItem: EventItem = {
+        id: 'event-viewed',
+        itemType: DOCUMENT_TYPE_EVENT,
+        docId: 'event-doc',
+        index: 'event-index',
+        action: 'event-action',
+      };
+      const alertItem: AlertItem = {
+        id: 'alert-viewed',
+        itemType: 'alert',
+        docId: 'alert-doc',
+        index: 'alert-index',
+        action: 'alert-action',
+      };
+
+      const renderPanel = (
+        props: Partial<React.ComponentProps<typeof GraphGroupedNodePreviewPanel>>
+      ) =>
+        render(
+          <GraphGroupedNodePreviewPanel
+            {...defaultProps}
+            onTelemetryEvent={mockOnTelemetryEvent}
+            {...props}
+          />
+        );
+
+      const viewedEvents = () =>
+        mockOnTelemetryEvent.mock.calls
+          .map(([event]) => event)
+          .filter(({ type }) => type === 'grouped_item_viewed');
+
+      it('reports an entity opened through the row title link', async () => {
+        renderPanel({ docMode: 'grouped-entities', entityItems: [entityItem] });
+
+        await userEvent.click(screen.getByTestId(GROUPED_ITEM_TITLE_TEST_ID_LINK));
+
+        expect(viewedEvents()).toEqual([{ type: 'grouped_item_viewed', itemType: 'entity' }]);
+        expect(defaultProps.onShowEntity).toHaveBeenCalledWith({
+          engineType: undefined,
+          entityId: 'entity-viewed',
+          entityName: 'viewed-host',
+        });
+      });
+
+      it('reports an entity opened through the actions popover', async () => {
+        renderPanel({ docMode: 'grouped-entities', entityItems: [entityItem] });
+
+        await userEvent.click(screen.getByTestId(GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID));
+        await userEvent.click(
+          await screen.findByTestId(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID)
+        );
+
+        expect(viewedEvents()).toEqual([{ type: 'grouped_item_viewed', itemType: 'entity' }]);
+        expect(defaultProps.onShowEntity).toHaveBeenCalledWith({
+          engineType: undefined,
+          entityId: 'entity-viewed',
+          entityName: 'viewed-host',
+        });
+      });
+
+      it('reports an event opened through the row title link', async () => {
+        mockFetchedItems([eventItem]);
+        renderPanel({ docMode: 'grouped-events' });
+
+        await userEvent.click(screen.getByTestId(GROUPED_ITEM_TITLE_TEST_ID_LINK));
+
+        expect(viewedEvents()).toEqual([{ type: 'grouped_item_viewed', itemType: 'event' }]);
+        expect(defaultProps.onShowDocument).toHaveBeenCalledWith('event-doc', 'event-index', true);
+      });
+
+      it('reports an event opened through the actions popover', async () => {
+        mockFetchedItems([eventItem]);
+        renderPanel({ docMode: 'grouped-events' });
+
+        await userEvent.click(screen.getByTestId(GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID));
+        await userEvent.click(await screen.findByText('Show event details'));
+
+        expect(viewedEvents()).toEqual([{ type: 'grouped_item_viewed', itemType: 'event' }]);
+        expect(defaultProps.onShowDocument).toHaveBeenCalledWith('event-doc', 'event-index', true);
+      });
+
+      it('reports an alert opened through the row title link', async () => {
+        mockFetchedItems([alertItem]);
+        renderPanel({ docMode: 'grouped-events' });
+
+        await userEvent.click(screen.getByTestId(GROUPED_ITEM_TITLE_TEST_ID_LINK));
+
+        expect(viewedEvents()).toEqual([{ type: 'grouped_item_viewed', itemType: 'alert' }]);
+        expect(defaultProps.onShowDocument).toHaveBeenCalledWith('alert-doc', 'alert-index', false);
+      });
+
+      it('reports an alert opened through the actions popover', async () => {
+        mockFetchedItems([alertItem]);
+        renderPanel({ docMode: 'grouped-events' });
+
+        await userEvent.click(screen.getByTestId(GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID));
+        await userEvent.click(await screen.findByText('Show alert details'));
+
+        expect(viewedEvents()).toEqual([{ type: 'grouped_item_viewed', itemType: 'alert' }]);
+        expect(defaultProps.onShowDocument).toHaveBeenCalledWith('alert-doc', 'alert-index', false);
+      });
+
+      it('does not report a view when no item is opened', () => {
+        renderPanel({ docMode: 'grouped-entities', entityItems: [entityItem] });
+
+        expect(viewedEvents()).toEqual([]);
+      });
+    });
+
+    it('does not throw when onTelemetryEvent is omitted', async () => {
+      mockFetchedItems([{ id: 'event-1', itemType: DOCUMENT_TYPE_EVENT, docId: 'doc-1' }]);
+
+      render(<GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />);
+      await userEvent.click(screen.getByTestId(GROUPED_ITEM_TITLE_TEST_ID_LINK));
+
+      expect(defaultProps.onShowDocument).toHaveBeenCalledWith('doc-1', undefined, true);
     });
   });
 

@@ -36,6 +36,7 @@ import { useInvestigateInTimeline } from '../../../../../common/hooks/timeline/u
 import { normalizeTimeRange } from '../../../../../common/utils/normalize_time_range';
 import { useKibana, useToasts } from '../../../../../common/lib/kibana';
 import { useGraphTelemetry } from '../../../../shared/hooks/use_graph_telemetry';
+import { getGraphEntryPoint } from '../../../../shared/utils/get_graph_entry_point';
 import { extractTimelineCapabilities } from '../../../../../common/utils/timeline_capabilities';
 import { getScopeFlyoutTimeRange } from '../../../../../entity_analytics/common/scope_time_ranges';
 
@@ -77,7 +78,7 @@ interface GraphNodeCallbacks {
   onShowGrouped: (
     params: Omit<
       GraphGroupedNodePreviewPanelProps,
-      'showLoadingState' | 'onShowDocument' | 'onShowEntity'
+      'showLoadingState' | 'onShowDocument' | 'onShowEntity' | 'onTelemetryEvent'
     >
   ) => void;
   /**
@@ -166,7 +167,19 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
   }, [cps?.cpsManager]);
 
   const toasts = useToasts();
-  const { onTelemetryEvent } = useGraphTelemetry();
+  const entryPoint = getGraphEntryPoint({
+    mode: props.mode,
+    isAlert: props.mode === 'event' ? props.isAlert : undefined,
+    scopeId,
+  });
+  const { onTelemetryEvent, reportGraphOpened, reportDrillThrough } = useGraphTelemetry(entryPoint);
+
+  const hasReportedGraphOpened = useRef(false);
+  useEffect(() => {
+    if (hasReportedGraphOpened.current) return;
+    hasReportedGraphOpened.current = true;
+    reportGraphOpened();
+  }, [reportGraphOpened]);
 
   const { dataView, status } = useDataView(PageScope.default);
   const dataViewIndexPattern = dataView ? dataView.getIndexPattern() : undefined;
@@ -182,12 +195,14 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
 
       if ((docMode === 'single-event' || docMode === 'single-alert') && singleDocumentData) {
         onShowDocument(singleDocumentData.id, singleDocumentData.index, docMode === 'single-event');
+        reportDrillThrough(docMode === 'single-event' ? 'event' : 'alert');
       } else if (docMode === 'single-entity' && singleDocumentData && isEntityNodeEnriched(node)) {
         onShowEntity({
           engineType: singleDocumentData.entity?.engine_type,
           entityId: singleDocumentData.id,
           entityName: singleDocumentData.entity?.name,
         });
+        reportDrillThrough('entity');
       } else if (docMode === 'grouped-entities' && documentsData.length > 0) {
         const entityItems = documentsData
           .slice(0, MAX_DOCUMENTS_TO_LOAD)
@@ -226,7 +241,15 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
         });
       }
     },
-    [onShowDocument, onShowEntity, onShowGrouped, dataViewIndexPattern, toasts, graphScopeId]
+    [
+      onShowDocument,
+      onShowEntity,
+      onShowGrouped,
+      dataViewIndexPattern,
+      toasts,
+      graphScopeId,
+      reportDrillThrough,
+    ]
   );
 
   const { investigateInTimeline } = useInvestigateInTimeline();
@@ -266,8 +289,17 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
           kind: 'absolute',
         },
       });
+      reportDrillThrough('timeline');
     },
-    [investigateInTimeline, toasts]
+    [investigateInTimeline, toasts, reportDrillThrough]
+  );
+
+  const onOpenNetworkPreview = useCallback(
+    (ip: string) => {
+      onShowNetwork(ip);
+      reportDrillThrough('network');
+    },
+    [onShowNetwork, reportDrillThrough]
   );
 
   return (
@@ -308,7 +340,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
             showToggleSearch={true}
             onInvestigateInTimeline={openTimelineCallback}
             onOpenEventPreview={onOpenEventPreview}
-            onOpenNetworkPreview={onShowNetwork}
+            onOpenNetworkPreview={onOpenNetworkPreview}
             onTelemetryEvent={onTelemetryEvent}
           />
         </React.Suspense>

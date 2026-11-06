@@ -23,6 +23,8 @@ import { EventKind } from '../../main/constants/event_kinds';
 import { GraphVisualization } from './components/graph_visualization';
 import { useGraphPreview } from '../../main/hooks/use_graph_preview';
 import { useOpenFlyout } from '../../../shared/hooks/use_open_flyout';
+import { useGraphTelemetry } from '../../../shared/hooks/use_graph_telemetry';
+import { getGraphEntryPoint } from '../../../shared/utils/get_graph_entry_point';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { useDefaultDocumentFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
@@ -49,6 +51,7 @@ export const GraphDetails = memo(
     const eventId = hit.raw._id ?? '';
     const { timestamp, eventIds } = useGraphPreview({ hit });
     const isAlert = (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal;
+    const { onTelemetryEvent } = useGraphTelemetry(getGraphEntryPoint({ mode: 'event', isAlert }));
 
     const open = useOpenFlyout();
     const { historyKey } = useFlyoutSessionContext();
@@ -98,7 +101,7 @@ export const GraphDetails = memo(
       (
         params: Omit<
           GraphGroupedNodePreviewPanelProps,
-          'showLoadingState' | 'onShowDocument' | 'onShowEntity'
+          'showLoadingState' | 'onShowDocument' | 'onShowEntity' | 'onTelemetryEvent'
         >
       ) =>
         open(
@@ -106,6 +109,7 @@ export const GraphDetails = memo(
             {...params}
             onShowDocument={onShowDocument}
             onShowEntity={onShowEntity}
+            onTelemetryEvent={onTelemetryEvent}
           />,
           { ...defaultFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.INHERIT },
           {
@@ -117,7 +121,7 @@ export const GraphDetails = memo(
           },
           'inherit'
         ),
-      [defaultFlyoutProperties, historyKey, onShowDocument, onShowEntity, open]
+      [defaultFlyoutProperties, historyKey, onShowDocument, onShowEntity, onTelemetryEvent, open]
     );
 
     if (!eventId || !timestamp) {

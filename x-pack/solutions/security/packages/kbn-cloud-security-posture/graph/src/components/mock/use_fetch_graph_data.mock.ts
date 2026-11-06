@@ -435,7 +435,8 @@ export const useFetchGraphData = (params: UseFetchGraphDataParams) => {
     () => ({
       isLoading: false,
       isFetching: useFetchGraphDataMock?.isFetching ?? false,
-      isError: false,
+      isError: useFetchGraphDataMock?.isError ?? false,
+      error: useFetchGraphDataMock?.error,
       data: mockData,
       refresh: useFetchGraphDataMock?.refresh ?? (() => {}),
     }),

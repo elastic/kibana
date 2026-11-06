@@ -15,6 +15,28 @@ describe('graph telemetry events', () => {
     expect(defined).toEqual(Object.values(GraphEventTypes).sort());
   });
 
+  it('describes every property of every event variant', () => {
+    const [{ schema }] = graphTelemetryEvents;
+    expect(Object.keys(schema).sort()).toEqual(
+      [
+        'id',
+        'entryPoint',
+        'nodeType',
+        'action',
+        'state',
+        'change',
+        'timeRangeChanged',
+        'queryChanged',
+        'nodesAdded',
+        'nodesLimitReached',
+        'itemType',
+        'drillTarget',
+        'emptyReason',
+        'errorCategory',
+      ].sort()
+    );
+  });
+
   it('registers the graph events with the telemetry service', () => {
     graphTelemetryEvents.forEach((event) => {
       expect(telemetryEvents).toContain(event);
@@ -37,13 +59,17 @@ describe('graph telemetry events', () => {
     });
   });
 
-  it('only marks the toggle state as optional on the node action event', () => {
-    const nodeAction = graphTelemetryEvents.find(
-      ({ eventType }) => eventType === GraphEventTypes.NodeActionClicked
-    );
-    const optionalFields = Object.entries(nodeAction?.schema ?? {})
-      .filter(([, field]) => (field as { _meta: { optional?: boolean } })._meta.optional)
-      .map(([name]) => name);
-    expect(optionalFields).toEqual(['state']);
+  it('only requires the event id and entry point', () => {
+    const [{ schema }] = graphTelemetryEvents;
+    const requiredFields = Object.entries(schema)
+      .filter(([, field]) => !(field as { _meta: { optional?: boolean } })._meta.optional)
+      .map(([name]) => name)
+      .sort();
+    expect(requiredFields).toEqual(['entryPoint', 'id']);
+  });
+
+  it('uses a single entity_graph event type', () => {
+    expect(Object.values(GraphEventTypes)).toEqual(['entity_graph']);
+    expect(graphTelemetryEvents).toHaveLength(1);
   });
 });

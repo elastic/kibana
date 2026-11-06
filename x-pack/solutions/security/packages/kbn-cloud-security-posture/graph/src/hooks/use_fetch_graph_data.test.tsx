@@ -6,7 +6,9 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetchGraphData } from './use_fetch_graph_data';
+import { GraphFetchError } from './graph_fetch_error';
 
 const mockUseQuery = jest.fn((...args: unknown[]) => ({
   isLoading: true,
@@ -22,6 +24,10 @@ jest.mock('@kbn/react-query', () => {
   };
 });
 
+jest.mock('@kbn/kibana-react-plugin/public');
+
+const mockHttpPost = jest.fn();
+
 const defaultOptions = {
   enabled: true,
   refetchOnWindowFocus: true,
@@ -31,6 +37,7 @@ const defaultOptions = {
 describe('useFetchGraphData', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useKibana as jest.Mock).mockReturnValue({ services: { http: { post: mockHttpPost } } });
   });
 
   it('should pass default options when options are not provided', () => {
@@ -118,6 +125,57 @@ describe('useFetchGraphData', () => {
     expect(mockUseQuery.mock.calls[0][2]).toEqual({
       ...defaultOptions,
       keepPreviousData: true,
+    });
+  });
+
+  describe('when the request fails', () => {
+    const renderAndGetQueryFn = () => {
+      renderHook(() =>
+        useFetchGraphData({
+          req: {
+            query: {
+              originEventIds: [],
+              start: '2021-09-01T00:00:00.000Z',
+              end: '2021-09-01T23:59:59.999Z',
+            },
+          },
+        })
+      );
+      return mockUseQuery.mock.calls[0][1] as () => Promise<unknown>;
+    };
+
+    it('throws a GraphFetchError with the response message and HTTP status', async () => {
+      mockHttpPost.mockRejectedValue({
+        message: 'Service Unavailable',
+        body: { message: 'ES is down' },
+        response: { status: 503 },
+      });
+
+      const error = await renderAndGetQueryFn()().catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(GraphFetchError);
+      expect(error).toMatchObject({ message: 'ES is down', statusCode: 503 });
+    });
+
+    it('falls back to the error message and the body status code', async () => {
+      mockHttpPost.mockRejectedValue({
+        message: 'Bad Request',
+        body: { statusCode: 400 },
+      });
+
+      const error = await renderAndGetQueryFn()().catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(GraphFetchError);
+      expect(error).toMatchObject({ message: 'Bad Request', statusCode: 400 });
+    });
+
+    it('throws a GraphFetchError without a status code when there was no response', async () => {
+      mockHttpPost.mockRejectedValue(new TypeError('Failed to fetch'));
+
+      const error = await renderAndGetQueryFn()().catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(GraphFetchError);
+      expect(error).toMatchObject({ message: 'Failed to fetch', statusCode: undefined });
     });
   });
 });

@@ -14,12 +14,10 @@ import { GraphPreviewPanel } from './graph_preview_panel';
 import { GRAPH_PREVIEW_TEST_ID } from './test_ids';
 
 const mockReportPreviewExpanded = jest.fn();
+const mockUseGraphTelemetry = jest.fn();
 
 jest.mock('../hooks/use_graph_telemetry', () => ({
-  useGraphTelemetry: () => ({
-    onTelemetryEvent: jest.fn(),
-    reportPreviewExpanded: mockReportPreviewExpanded,
-  }),
+  useGraphTelemetry: (entryPoint: string) => mockUseGraphTelemetry(entryPoint),
 }));
 
 jest.mock('../../../common/hooks/use_upselling', () => ({
@@ -47,6 +45,7 @@ const renderPanel = (props: React.ComponentProps<typeof GraphPreviewPanel>) =>
 const TITLE_LINK_TEST_ID = `${GRAPH_PREVIEW_TEST_ID}TitleLink`;
 
 const defaultProps = {
+  entryPoint: 'alert_flyout' as const,
   showIcon: false,
   shouldShowGraph: true,
   isLoading: false,
@@ -56,6 +55,18 @@ const defaultProps = {
 describe('<GraphPreviewPanel />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseGraphTelemetry.mockReturnValue({
+      onTelemetryEvent: jest.fn(),
+      reportPreviewExpanded: mockReportPreviewExpanded,
+      reportGraphOpened: jest.fn(),
+      reportDrillThrough: jest.fn(),
+    });
+  });
+
+  it('reports through the entry point it was given', () => {
+    renderPanel({ ...defaultProps, entryPoint: 'entity_data_grid' });
+
+    expect(mockUseGraphTelemetry).toHaveBeenCalledWith('entity_data_grid');
   });
 
   it('reports the expand and then calls onShowGraph when the title link is clicked', () => {
