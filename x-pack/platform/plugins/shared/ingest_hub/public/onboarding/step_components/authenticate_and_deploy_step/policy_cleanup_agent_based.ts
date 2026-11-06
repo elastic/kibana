@@ -29,6 +29,7 @@ import {
   toOnboardingDeploymentQuery,
 } from './policy_cleanup';
 import type { BuildPolicyBodyOpts, PolicyCleanupOps } from './policy_cleanup';
+import { getPolicySettingsUpdate } from '../../common/policy_settings';
 
 export interface UpdateAgentBasedPolicyOpts extends BuildPolicyBodyOpts {
   selectedAgentPolicyIds: string[];
@@ -146,6 +147,7 @@ export async function updateAgentBasedPolicy(
     servicesMap,
     selectedAgentPolicyIds,
     agentCredentials,
+    policySettings,
   } = opts;
 
   const members = resolveSurvivingMembers(survivingInstanceIds, instances, servicesMap);
@@ -270,6 +272,8 @@ export async function updateAgentBasedPolicy(
     {
       name: policyName,
       namespace: policyNamespace,
+      // A setting set back to empty is sent as null, which clears what the policy had.
+      ...getPolicySettingsUpdate(policySettings, 'agent_based'),
       package: { name: packageName, version: pkgVersion },
       ...(vars ? { vars } : {}),
       inputs,
