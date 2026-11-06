@@ -201,6 +201,35 @@ describe('SharedSettingsSection', () => {
     });
   });
 
+  describe('proxy URL', () => {
+    it('is hidden unless the deployment method offers it', () => {
+      renderSection();
+
+      expect(screen.queryByTestId('sharedSettingsProxyUrl')).not.toBeInTheDocument();
+    });
+
+    it('reports edits', () => {
+      const onChange = jest.fn();
+      renderSection({ proxyUrl: { value: '', onChange } });
+
+      fireEvent.click(screen.getByTestId('sharedSettingsAdvancedToggle'));
+      fireEvent.change(screen.getByTestId('sharedSettingsProxyUrl'), {
+        target: { value: 'http://proxy:3128' },
+      });
+
+      expect(onChange).toHaveBeenCalledWith('http://proxy:3128');
+    });
+
+    it('opens the advanced options on its own while the URL is invalid', () => {
+      renderSection({
+        proxyUrl: { value: 'ftp://x', onChange: jest.fn(), error: 'Enter a valid proxy URL' },
+      });
+
+      expect(screen.getByTestId('sharedSettingsProxyUrl')).toBeVisible();
+      expect(screen.getByText('Enter a valid proxy URL')).toBeInTheDocument();
+    });
+  });
+
   describe('output', () => {
     const outputProps = (
       overrides: Partial<
