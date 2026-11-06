@@ -19,9 +19,28 @@ spaceTest.describe('Dashboard bwc urls', { tag: tags.stateful.classic }, () => {
   // Scout imports create new copies with fresh ids, so resolve the short url ids by title.
   let importedShortUrls: Array<{ id: string; type: string; title: string }> = [];
 
-  spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
+  spaceTest.beforeAll(async ({ apiServices, esClient, scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
     await apiServices.sampleData.install(LOGS_SAMPLE_DATA_SET_ID, scoutSpace.id);
+    // Wait until the sample data can answer the options list terms aggregation.
+    // Otherwise the control's suggestions request returns 400 and the dashboard never finishes rendering.
+    await expect
+      .poll(
+        async () => {
+          try {
+            await esClient.search({
+              index: 'kibana_sample_data_logs',
+              size: 0,
+              aggs: { options: { terms: { field: 'machine.os.keyword' } } },
+            });
+            return true;
+          } catch {
+            return false;
+          }
+        },
+        { timeout: 60_000 }
+      )
+      .toBe(true);
     importedShortUrls = await scoutSpace.savedObjects.load(BWC_SHORT_URLS_ARCHIVE);
   });
 
