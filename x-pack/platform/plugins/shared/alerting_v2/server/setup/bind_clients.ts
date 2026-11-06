@@ -45,8 +45,8 @@ export function bindClients({ bind }: ContainerModuleLoadOptions) {
   bind(AlertEventsClient).toSelf().inRequestScope();
   bind(EpisodesClient).toSelf().inRequestScope();
   bind(RulesClient).toSelf().inRequestScope();
-  bind(InternalRulesClientProvider).toSelf().inSingletonScope();
-  bind(InternalRulesClient).toSelf().inSingletonScope();
+  bind(InternalRulesClientProvider).toSelf();
+  bind(InternalRulesClient).toSelf();
   bind(ActionPolicyClient).toSelf().inRequestScope();
   bind(ActionPolicyExecutionHistoryClient).toSelf().inRequestScope();
   bind(ActionPolicyTestService).toSelf().inRequestScope();
@@ -78,17 +78,15 @@ export function bindClients({ bind }: ContainerModuleLoadOptions) {
     )
     .inRequestScope();
 
-  bind(ChangeHistoryClientToken)
-    .toResolvedValue(
-      (logger, env) =>
-        createChangeHistoryClient({
-          logger: logger.get('rule_changes_history'),
-          kibanaVersion: env.packageInfo.version,
-        }),
-      [Logger, PluginInitializer('env')]
-    )
-    .inSingletonScope();
-  bind(RuleChangesHistoryService).toSelf().inSingletonScope();
+  bind(ChangeHistoryClientToken).toResolvedValue(
+    (logger, env) =>
+      createChangeHistoryClient({
+        logger: logger.get('rule_changes_history'),
+        kibanaVersion: env.packageInfo.version,
+      }),
+    [Logger, PluginInitializer('env')]
+  );
+  bind(RuleChangesHistoryService).toSelf();
   bind(RuleChangesHistoryServiceToken).toService(RuleChangesHistoryService);
   bind(RuleChangesHistoryClient).toSelf().inRequestScope();
   bind(RuleChangesHistoryClientToken).toService(RuleChangesHistoryClient);

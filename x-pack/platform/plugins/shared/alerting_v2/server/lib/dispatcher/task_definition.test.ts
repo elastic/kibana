@@ -6,14 +6,14 @@
  */
 
 import { configSchema } from '../../config';
-import { createConfigService } from '../services/config_service/config_service.mock';
+import { createConfigServiceMock } from '../services/config_service/config_service.mock';
 import { DispatcherTaskDefinition } from './task_definition';
 
 describe('DispatcherTaskDefinition', () => {
   describe('resolveTimeout', () => {
     test('returns the configured dispatcher timeout', () => {
       const config = configSchema.validate({ dispatcher: { run: { timeout: '3m' } } });
-      expect(DispatcherTaskDefinition.resolveTimeout?.(createConfigService(config))).toBe('3m');
+      expect(DispatcherTaskDefinition.resolveTimeout?.(createConfigServiceMock(config))).toBe('3m');
     });
   });
 });

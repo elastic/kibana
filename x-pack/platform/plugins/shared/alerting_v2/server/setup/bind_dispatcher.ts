@@ -15,13 +15,16 @@ import { DispatcherService } from '../lib/dispatcher/dispatcher';
 import { DispatcherServiceInternalToken } from '../lib/dispatcher/tokens';
 
 export function bindDispatcher({ bind }: ContainerModuleLoadOptions) {
-  bind(DispatcherService).toSelf().inSingletonScope();
+  // core-di containers default to Singleton scope, so only non-singleton
+  // (request-scoped) lifetimes are annotated below.
+
+  bind(DispatcherService).toSelf();
   bind(DispatcherServiceInternalToken).toService(DispatcherService);
 
-  bind(DirectorService).toSelf().inSingletonScope();
-  bind(TransitionStrategyFactory).toSelf().inSingletonScope();
+  bind(DirectorService).toSelf();
+  bind(TransitionStrategyFactory).toSelf();
 
   // Binding order defines the multi-injection resolution order.
-  bind(TransitionStrategyToken).to(CountTimeframeStrategy).inSingletonScope();
-  bind(TransitionStrategyToken).to(BasicTransitionStrategy).inSingletonScope();
+  bind(TransitionStrategyToken).to(CountTimeframeStrategy);
+  bind(TransitionStrategyToken).to(BasicTransitionStrategy);
 }

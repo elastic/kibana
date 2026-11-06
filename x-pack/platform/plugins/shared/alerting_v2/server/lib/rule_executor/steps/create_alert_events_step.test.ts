@@ -8,7 +8,7 @@
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
 import { CreateAlertEventsStep } from './create_alert_events_step';
-import { createConfigService } from '../../services/config_service/config_service.mock';
+import { createConfigServiceMock } from '../../services/config_service/config_service.mock';
 import {
   collectStreamResults,
   createPipelineStream,
@@ -50,7 +50,7 @@ describe('CreateAlertEventsStep', () => {
     const logger = createLoggerService();
     mockLogger = logger.mockLogger;
 
-    return new CreateAlertEventsStep(logger.loggerService, createConfigService(config));
+    return new CreateAlertEventsStep(logger.loggerService, createConfigServiceMock(config));
   }
 
   beforeEach(() => {

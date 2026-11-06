@@ -10,7 +10,7 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { BULK_FILTER_MAX_RESOURCES, BULK_QUERY_SAMPLE_SIZE } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { createConfigService } from '../services/config_service/config_service.mock';
+import { createConfigServiceMock } from '../services/config_service/config_service.mock';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/errors';
@@ -174,7 +174,7 @@ describe('RulesClient', () => {
       taskManager,
       userService,
       'space-1',
-      createConfigService(config),
+      createConfigServiceMock(config),
       rulesSavedObjectService,
       ruleEventPublisher,
       loggerService,

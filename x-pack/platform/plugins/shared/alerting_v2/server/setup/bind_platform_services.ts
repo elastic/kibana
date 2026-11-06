@@ -49,23 +49,21 @@ import type { AlertingServerSetupDependencies } from '../types';
  * settings, event log, resources, privileges, and the task runner factory.
  */
 export function bindPlatformServices({ bind }: ContainerModuleLoadOptions) {
-  bind(ArtifactTypeRegistry).toSelf().inSingletonScope();
-  bind(SpacesService).toSelf().inSingletonScope();
+  bind(ArtifactTypeRegistry).toSelf();
+  bind(SpacesService).toSelf();
   bind(UserService).toSelf().inRequestScope();
   bind(ApiKeyService).toSelf().inRequestScope();
-  bind(AlertingRetryService).toSelf().inSingletonScope();
+  bind(AlertingRetryService).toSelf();
   bind(RetryServiceToken).toService(AlertingRetryService);
 
-  bind(LoggerService).toSelf().inSingletonScope();
+  bind(LoggerService).toSelf();
   bind(LoggerServiceToken).toService(LoggerService);
 
-  bind(UiSettingsClientToken)
-    .toResolvedValue(
-      (savedObjects, uiSettings) =>
-        uiSettings.globalAsScopedToClient(savedObjects.createInternalRepository()),
-      [CoreStart('savedObjects'), CoreStart('uiSettings')]
-    )
-    .inSingletonScope();
+  bind(UiSettingsClientToken).toResolvedValue(
+    (savedObjects, uiSettings) =>
+      uiSettings.globalAsScopedToClient(savedObjects.createInternalRepository()),
+    [CoreStart('savedObjects'), CoreStart('uiSettings')]
+  );
   bind(SettingsService).toSelf().inRequestScope();
   bind(SettingsServiceToken).toService(SettingsService);
 
@@ -77,22 +75,20 @@ export function bindPlatformServices({ bind }: ContainerModuleLoadOptions) {
     )
     .inRequestScope();
 
-  bind(EventLogService).toSelf().inSingletonScope();
+  bind(EventLogService).toSelf();
   bind(EventLogServiceToken).toService(EventLogService);
-  bind(EventLoggerToken)
-    .toResolvedValue(
-      (eventLog) => eventLog.getLogger({ event: { provider: ACTION_POLICY_EVENT_PROVIDER } }),
-      [PluginSetup<AlertingServerSetupDependencies['eventLog']>('eventLog')]
-    )
-    .inSingletonScope();
-  bind(WorkflowService).toSelf().inSingletonScope();
+  bind(EventLoggerToken).toResolvedValue(
+    (eventLog) => eventLog.getLogger({ event: { provider: ACTION_POLICY_EVENT_PROVIDER } }),
+    [PluginSetup<AlertingServerSetupDependencies['eventLog']>('eventLog')]
+  );
+  bind(WorkflowService).toSelf();
   bind(WorkflowServiceToken).toService(WorkflowService);
-  bind(LicenseService).toSelf().inSingletonScope();
+  bind(LicenseService).toSelf();
   bind(LicenseServiceToken).toService(LicenseService);
-  bind(EbtService).toSelf().inSingletonScope();
+  bind(EbtService).toSelf();
   bind(EbtServiceToken).toService(EbtService);
-  bind(ResourceManager).toSelf().inSingletonScope();
-  bind(ConfigService).toSelf().inSingletonScope();
+  bind(ResourceManager).toSelf();
+  bind(ConfigService).toSelf();
 
   // Task Manager is a dependency of this plugin, so it can begin polling and run
   // a task before this plugin's start lifecycle binds `CoreStart('injection')`.
@@ -108,25 +104,21 @@ export function bindPlatformServices({ bind }: ContainerModuleLoadOptions) {
 
   bind(TaskRunnerFactoryToken).toFactory(() => createTaskRunnerFactory({ injectionPromise }));
 
-  bind(WorkflowsManagementApiToken)
-    .toResolvedValue(
-      (wfm) => wfm.management,
-      [PluginSetup<AlertingServerSetupDependencies['workflowsManagement']>('workflowsManagement')]
-    )
-    .inSingletonScope();
+  bind(WorkflowsManagementApiToken).toResolvedValue(
+    (wfm) => wfm.management,
+    [PluginSetup<AlertingServerSetupDependencies['workflowsManagement']>('workflowsManagement')]
+  );
 
   // `cloud` is an optional plugin dependency. Expressing an optional single
   // dependency is idiomatic with `get(token, { optional: true })`, so this
   // binding intentionally stays on `toDynamicValue`.
-  bind(KibanaBaseUrlToken)
-    .toDynamicValue(({ get }) => {
-      const http = get(CoreStart('http'));
-      const cloud = get(PluginSetup<AlertingServerSetupDependencies['cloud']>('cloud'), {
-        optional: true,
-      });
-      return getKibanaBaseUrl(http, cloud);
-    })
-    .inSingletonScope();
+  bind(KibanaBaseUrlToken).toDynamicValue(({ get }) => {
+    const http = get(CoreStart('http'));
+    const cloud = get(PluginSetup<AlertingServerSetupDependencies['cloud']>('cloud'), {
+      optional: true,
+    });
+    return getKibanaBaseUrl(http, cloud);
+  });
 
   bind(MatcherSuggestionsService).toSelf().inRequestScope();
   bind(PrivilegeChecker).toSelf().inRequestScope();

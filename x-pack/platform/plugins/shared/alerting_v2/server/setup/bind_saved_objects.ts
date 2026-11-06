@@ -65,42 +65,29 @@ export function bindSavedObjects({ bind }: ContainerModuleLoadOptions) {
 
   bind(RulesSavedObjectService).toSelf().inRequestScope();
   bind(RulesSavedObjectServiceScopedToken).toService(RulesSavedObjectService);
-  bind(RulesSavedObjectServiceInternalToken)
-    .toResolvedValue(
-      (savedObjects, spacesService) =>
-        new RulesSavedObjectService(
-          savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE]),
-          spacesService
-        ),
-      [CoreStart('savedObjects'), SpacesService]
-    )
-    .inSingletonScope();
+  bind(RulesSavedObjectServiceInternalToken).toResolvedValue(
+    (savedObjects, spacesService) =>
+      new RulesSavedObjectService(
+        savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE]),
+        spacesService
+      ),
+    [CoreStart('savedObjects'), SpacesService]
+  );
 
-  bind(MaintenanceWindowSavedObjectsClientToken)
-    .toResolvedValue(
-      (savedObjects) =>
-        savedObjects.createInternalRepository([MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE]),
-      [CoreStart('savedObjects')]
-    )
-    .inSingletonScope();
+  bind(MaintenanceWindowSavedObjectsClientToken).toResolvedValue(
+    (savedObjects) => savedObjects.createInternalRepository([MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE]),
+    [CoreStart('savedObjects')]
+  );
 
-  bind(MaintenanceWindowServiceInternalToken)
-    .toResolvedValue(
-      (client, logger) => new MaintenanceWindowService(client, logger),
-      [MaintenanceWindowSavedObjectsClientToken, LoggerServiceToken]
-    )
-    .inSingletonScope();
+  bind(MaintenanceWindowServiceInternalToken).toResolvedValue(
+    (client, logger) => new MaintenanceWindowService(client, logger),
+    [MaintenanceWindowSavedObjectsClientToken, LoggerServiceToken]
+  );
 
-  bind(EncryptedSavedObjectsClientToken)
-    .toResolvedValue(
-      (eso) => eso.getClient({ includedHiddenTypes: [ACTION_POLICY_SAVED_OBJECT_TYPE] }),
-      [
-        PluginStart<AlertingServerStartDependencies['encryptedSavedObjects']>(
-          'encryptedSavedObjects'
-        ),
-      ]
-    )
-    .inSingletonScope();
+  bind(EncryptedSavedObjectsClientToken).toResolvedValue(
+    (eso) => eso.getClient({ includedHiddenTypes: [ACTION_POLICY_SAVED_OBJECT_TYPE] }),
+    [PluginStart<AlertingServerStartDependencies['encryptedSavedObjects']>('encryptedSavedObjects')]
+  );
 
   bind(ActionPolicySavedObjectsClientToken)
     .toResolvedValue(
@@ -114,22 +101,18 @@ export function bindSavedObjects({ bind }: ContainerModuleLoadOptions) {
 
   bind(ActionPolicySavedObjectService).toSelf().inRequestScope();
   bind(ActionPolicySavedObjectServiceScopedToken).toService(ActionPolicySavedObjectService);
-  bind(ActionPolicySavedObjectServiceInternalToken)
-    .toResolvedValue(
-      (savedObjects, spacesService, esoClient) =>
-        new ActionPolicySavedObjectService(
-          savedObjects.createInternalRepository([ACTION_POLICY_SAVED_OBJECT_TYPE]),
-          spacesService,
-          esoClient
-        ),
-      [CoreStart('savedObjects'), SpacesService, EncryptedSavedObjectsClientToken]
-    )
-    .inSingletonScope();
+  bind(ActionPolicySavedObjectServiceInternalToken).toResolvedValue(
+    (savedObjects, spacesService, esoClient) =>
+      new ActionPolicySavedObjectService(
+        savedObjects.createInternalRepository([ACTION_POLICY_SAVED_OBJECT_TYPE]),
+        spacesService,
+        esoClient
+      ),
+    [CoreStart('savedObjects'), SpacesService, EncryptedSavedObjectsClientToken]
+  );
 
-  bind(ApiKeyServiceSavedObjectsClientToken)
-    .toResolvedValue(
-      (savedObjects) => savedObjects.createInternalRepository([API_KEY_PENDING_INVALIDATION_TYPE]),
-      [CoreStart('savedObjects')]
-    )
-    .inSingletonScope();
+  bind(ApiKeyServiceSavedObjectsClientToken).toResolvedValue(
+    (savedObjects) => savedObjects.createInternalRepository([API_KEY_PENDING_INVALIDATION_TYPE]),
+    [CoreStart('savedObjects')]
+  );
 }

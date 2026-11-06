@@ -32,12 +32,10 @@ import {
  * of them, split by execution scope (internal, request-scoped, space-routed).
  */
 export function bindDataServices({ bind }: ContainerModuleLoadOptions) {
-  bind(EsServiceInternalToken)
-    .toResolvedValue(
-      (elasticsearch) => elasticsearch.client.asInternalUser,
-      [CoreStart('elasticsearch')]
-    )
-    .inSingletonScope();
+  bind(EsServiceInternalToken).toResolvedValue(
+    (elasticsearch) => elasticsearch.client.asInternalUser,
+    [CoreStart('elasticsearch')]
+  );
 
   bind(EsServiceScopedToken)
     .toResolvedValue(
@@ -58,7 +56,7 @@ export function bindDataServices({ bind }: ContainerModuleLoadOptions) {
 
   // Singleton so the feature flag is subscribed to once per process, and every
   // QueryService flavor plus the rule-executor step read the same resolved format.
-  bind(EsqlResponseFormatService).toSelf().inSingletonScope();
+  bind(EsqlResponseFormatService).toSelf();
   bind(EsqlResponseFormatServiceToken).toService(EsqlResponseFormatService);
 
   bind(QueryServiceScopedToken)
@@ -76,12 +74,10 @@ export function bindDataServices({ bind }: ContainerModuleLoadOptions) {
     )
     .inRequestScope();
 
-  bind(QueryServiceInternalToken)
-    .toResolvedValue(
-      (loggerService, esClient, format) => new QueryService(esClient, loggerService, format),
-      [LoggerServiceToken, EsServiceInternalToken, EsqlResponseFormatServiceToken]
-    )
-    .inSingletonScope();
+  bind(QueryServiceInternalToken).toResolvedValue(
+    (loggerService, esClient, format) => new QueryService(esClient, loggerService, format),
+    [LoggerServiceToken, EsServiceInternalToken, EsqlResponseFormatServiceToken]
+  );
 
   bind(StorageServiceScopedToken)
     .toResolvedValue(
@@ -90,10 +86,8 @@ export function bindDataServices({ bind }: ContainerModuleLoadOptions) {
     )
     .inRequestScope();
 
-  bind(StorageServiceInternalToken)
-    .toResolvedValue(
-      (loggerService, esClient) => new StorageService(esClient, loggerService),
-      [LoggerServiceToken, EsServiceInternalToken]
-    )
-    .inSingletonScope();
+  bind(StorageServiceInternalToken).toResolvedValue(
+    (loggerService, esClient) => new StorageService(esClient, loggerService),
+    [LoggerServiceToken, EsServiceInternalToken]
+  );
 }

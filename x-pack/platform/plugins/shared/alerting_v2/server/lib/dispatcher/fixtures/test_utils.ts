@@ -8,7 +8,7 @@
 import type { WorkflowDetailDto } from '@kbn/workflows';
 import { configSchema } from '../../../config';
 import type { ConfigService } from '../../services/config_service/config_service';
-import { createConfigService } from '../../services/config_service/config_service.mock';
+import { createConfigServiceMock } from '../../services/config_service/config_service.mock';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { buildAlertDetailsUrl } from '../alert_details_url';
@@ -57,7 +57,7 @@ export interface DispatcherConfigOverrides {
 export function createDispatcherConfigService(
   dispatcher: DispatcherConfigOverrides = {}
 ): ConfigService {
-  return createConfigService(configSchema.validate({ dispatcher }));
+  return createConfigServiceMock(configSchema.validate({ dispatcher }));
 }
 
 export function createDispatcherPipelineInput(

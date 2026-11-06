@@ -14,7 +14,7 @@ import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '../../../saved_objects';
 import type { PluginConfig } from '../../../config';
-import { createConfigService } from '../../services/config_service/config_service.mock';
+import { createConfigServiceMock } from '../../services/config_service/config_service.mock';
 import { ApiKeyInvalidationTaskRunner } from './task_runner';
 
 jest.mock('@kbn/task-manager-plugin/server', () => ({
@@ -45,7 +45,7 @@ describe('ApiKeyInvalidationTaskRunner', () => {
       savedObjectsClient,
       securityCore,
       securityStart,
-      createConfigService(config)
+      createConfigServiceMock(config)
     );
   });
 

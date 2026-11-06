@@ -20,7 +20,7 @@ import { buildGroupHash } from '../build_alert_events';
 import type { AlertEventDocument } from '../../../resources/datastreams/alert_events';
 import type { PipelineStateStream } from '../types';
 import type { PluginConfig } from '../../../config';
-import { createConfigService } from '../../services/config_service/config_service.mock';
+import { createConfigServiceMock } from '../../services/config_service/config_service.mock';
 import { ClassifyAbsentGroupsStep } from './classify_absent_groups_step';
 
 const createPluginConfigService = () => {
@@ -42,7 +42,7 @@ const createPluginConfigService = () => {
       },
     },
   };
-  return createConfigService(config);
+  return createConfigServiceMock(config);
 };
 
 const hashFor = (host: string): string =>

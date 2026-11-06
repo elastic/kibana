@@ -10,15 +10,17 @@ import { PluginStart } from '@kbn/core-di';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import type { Space } from '@kbn/spaces-plugin/common';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { SpacesPluginStart, SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { AlertingServerStartDependencies } from '../../../types';
 
 /**
  * Wraps the Spaces plugin so clients and services depend on a single alerting-owned
- * seam instead of reaching into `spaces.spacesService` directly.
+ * seam instead of reaching into `spaces.spacesService` directly. Implementing
+ * `Pick<SpacesServiceStart, ...>` makes any upstream signature drift on the
+ * re-exposed methods a compile error.
  */
 @injectable()
-export class SpacesService {
+export class SpacesService implements Pick<SpacesServiceStart, 'getSpaceId' | 'getActiveSpace'> {
   constructor(
     @inject(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'))
     private readonly spaces: SpacesPluginStart

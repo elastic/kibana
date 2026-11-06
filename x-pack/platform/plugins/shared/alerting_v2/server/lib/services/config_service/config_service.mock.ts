@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
 import type { PluginConfig } from '../../../config';
 import { ConfigService } from './config_service';
 
@@ -13,7 +13,5 @@ import { ConfigService } from './config_service';
  * Builds a real {@link ConfigService} backed by the given config, so tests
  * exercise the actual path-based `get` resolution.
  */
-export const createConfigService = (config: PluginConfig): ConfigService =>
-  new ConfigService({
-    get: () => config,
-  } as unknown as PluginInitializerContext<PluginConfig>['config']);
+export const createConfigServiceMock = (config: PluginConfig): ConfigService =>
+  new ConfigService(coreMock.createPluginInitializerContext<PluginConfig>(config).config);

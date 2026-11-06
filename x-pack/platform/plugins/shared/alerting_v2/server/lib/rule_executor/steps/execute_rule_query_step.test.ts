@@ -32,7 +32,7 @@ import type { PluginConfig } from '../../../config';
 import { NON_STREAMING_MAX_ROWS } from '../../services/query_service/formats';
 import type { EsqlResponseFormatName } from '../../services/query_service/formats';
 import { createEsqlResponseFormatService } from '../../services/esql_response_format_service/esql_response_format_service.mock';
-import { createConfigService } from '../../services/config_service/config_service.mock';
+import { createConfigServiceMock } from '../../services/config_service/config_service.mock';
 
 const DEFAULT_MAX_ALERTS_PER_RUN = 10000;
 
@@ -60,7 +60,7 @@ const createPluginConfigService = ({
     },
   };
 
-  return createConfigService(config);
+  return createConfigServiceMock(config);
 };
 
 describe('ExecuteRuleQueryStep', () => {

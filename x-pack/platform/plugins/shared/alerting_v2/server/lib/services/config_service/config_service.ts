@@ -7,6 +7,7 @@
 
 import { inject, injectable } from 'inversify';
 import { get } from 'lodash';
+import type { Get } from 'type-fest';
 import { PluginInitializer } from '@kbn/core-di-server';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import type { PluginConfig } from '../../../config';
@@ -14,22 +15,15 @@ import type { PluginConfig } from '../../../config';
 /**
  * Dot-notation paths into `T` (both intermediate objects and leaves). Recurses
  * only into plain record types, so schema leaves that happen to be class
- * instances (e.g. `ByteSizeValue`) are treated as leaves.
+ * instances (e.g. `ByteSizeValue`) are treated as leaves. Named to avoid the
+ * `@kbn/config` `ConfigPath` (a different concept), and kept instead of
+ * type-fest's `Paths` because the latter recurses into class instances.
  */
-type ConfigPath<T> = {
+type PluginConfigDotPath<T> = {
   [K in Extract<keyof T, string>]: T[K] extends Record<string, unknown>
-    ? K | `${K}.${ConfigPath<T[K]>}`
+    ? K | `${K}.${PluginConfigDotPath<T[K]>}`
     : K;
 }[Extract<keyof T, string>];
-
-/** The value type at dot-notation path `P` in `T`. */
-type ConfigValue<T, P extends string> = P extends `${infer K}.${infer Rest}`
-  ? K extends keyof T
-    ? ConfigValue<T[K], Rest>
-    : never
-  : P extends keyof T
-  ? T[P]
-  : never;
 
 /**
  * Resolves the alerting v2 plugin configuration once and exposes it through a
@@ -52,7 +46,7 @@ export class ConfigService {
    * Reads a config value by dot-notation path, e.g.
    * `get('retention.alertActions.dispatcher')` or `get('rules.run.alerts.max')`.
    */
-  public get<P extends ConfigPath<PluginConfig>>(path: P): ConfigValue<PluginConfig, P> {
-    return get(this.#config, path) as ConfigValue<PluginConfig, P>;
+  public get<P extends PluginConfigDotPath<PluginConfig>>(path: P): Get<PluginConfig, P> {
+    return get(this.#config, path) as Get<PluginConfig, P>;
   }
 }

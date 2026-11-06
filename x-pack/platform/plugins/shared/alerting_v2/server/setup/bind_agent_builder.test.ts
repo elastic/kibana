@@ -95,7 +95,7 @@ describe('bindAgentBuilder', () => {
   };
 
   beforeEach(() => {
-    container = new Container();
+    container = new Container({ defaultScope: 'Singleton' });
     agentBuilder = agentBuilderMocks.createSetup();
     agentBuilderSml = { registerType: jest.fn() };
     uiSettingsClient = { get: jest.fn().mockResolvedValue(true) };
@@ -125,7 +125,7 @@ describe('bindAgentBuilder', () => {
     container
       .bind(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'))
       .toConstantValue(spacesMock.createStart());
-    container.bind(SpacesService).toSelf().inSingletonScope();
+    container.bind(SpacesService).toSelf();
     container.bind(LoggerServiceToken).toConstantValue(loggerService);
     container.bind(UiSettingsClientToken).toConstantValue(uiSettingsClient as never);
     container.bind(WorkflowsManagementApiToken).toConstantValue(workflowsManagementApi as never);

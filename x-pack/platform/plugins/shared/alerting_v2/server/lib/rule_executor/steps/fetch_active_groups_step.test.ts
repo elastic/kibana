@@ -19,7 +19,7 @@ import { createLoggerService } from '../../services/logger_service/logger_servic
 import { createQueryService } from '../../services/query_service/query_service.mock';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { PluginConfig } from '../../../config';
-import { createConfigService } from '../../services/config_service/config_service.mock';
+import { createConfigServiceMock } from '../../services/config_service/config_service.mock';
 
 describe('FetchActiveGroupsStep', () => {
   function createStep(maxAlerts = 10000, maxGroupsPerExecution = 10000) {
@@ -47,7 +47,7 @@ describe('FetchActiveGroupsStep', () => {
     const step = new FetchActiveGroupsStep(
       logger.loggerService,
       internal.queryService,
-      createConfigService(config)
+      createConfigServiceMock(config)
     );
     return { step, internalEsClient: internal.mockEsClient, mockLogger: logger.mockLogger };
   }

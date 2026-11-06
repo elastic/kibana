@@ -16,7 +16,7 @@ import { createUserService } from '../services/user_service/user_service.mock';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { ArtifactTypeRegistry, registerBuiltinArtifactTypes } from '../artifact_types';
 import { RulesClient } from './rules_client';
-import { createConfigService } from '../services/config_service/config_service.mock';
+import { createConfigServiceMock } from '../services/config_service/config_service.mock';
 
 export function createRulesClient(): {
   rulesClient: RulesClient;
@@ -44,7 +44,7 @@ export function createRulesClient(): {
     taskManager,
     userService,
     'default',
-    createConfigService(config),
+    createConfigServiceMock(config),
     rulesSavedObjectService,
     ruleEventPublisher,
     loggerService,
