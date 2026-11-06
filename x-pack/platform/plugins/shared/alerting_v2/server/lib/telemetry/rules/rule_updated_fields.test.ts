@@ -58,17 +58,6 @@ describe('collectRuleUpdatedFields', () => {
     expect(collectRuleUpdatedFields(previous, next)).toEqual(['metadata.builder.type']);
   });
 
-  it('reports the path when an object and a non-object value trade places', () => {
-    // An array stands in for any non-object value. The path is reported whole.
-    const asValue = createRuleResponse({
-      ...previous,
-      recovery: ['manual'] as unknown as typeof previous.recovery,
-    });
-
-    expect(collectRuleUpdatedFields(previous, asValue)).toEqual(['recovery']);
-    expect(collectRuleUpdatedFields(asValue, previous)).toEqual(['recovery']);
-  });
-
   it('reports each leaf when an object and null trade places', () => {
     const cleared = createRuleResponse({
       ...previous,

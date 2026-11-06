@@ -37,15 +37,6 @@ const collectChangedPaths = (
   const nextObject = isPlainObject(next) ? next : undefined;
 
   if (previousObject || nextObject) {
-    const previousIsValue = previous != null && !previousObject;
-    const nextIsValue = next != null && !nextObject;
-    if (previousIsValue || nextIsValue) {
-      if (valuesDiffer(previous, next)) {
-        changed.push(path);
-      }
-      return;
-    }
-
     const keys = new Set([...Object.keys(previousObject ?? {}), ...Object.keys(nextObject ?? {})]);
     for (const key of [...keys].sort()) {
       collectChangedPaths(
