@@ -3039,6 +3039,8 @@
       "@kbn/workflows-extensions/*": ["./src/platform/plugins/shared/workflows_extensions/*"],
       "@kbn/workflows-extensions-example": ["./examples/workflows_extensions_example"],
       "@kbn/workflows-extensions-example/*": ["./examples/workflows_extensions_example/*"],
+      "@kbn/workflows-inbound-hub-test-plugin": ["./x-pack/platform/test/workflows_inbound_hub/plugins/inbound_hub_connector"],
+      "@kbn/workflows-inbound-hub-test-plugin/*": ["./x-pack/platform/test/workflows_inbound_hub/plugins/inbound_hub_connector/*"],
       "@kbn/workflows-library": ["./src/platform/packages/shared/kbn-workflows-library"],
       "@kbn/workflows-library/*": ["./src/platform/packages/shared/kbn-workflows-library/*"],
       "@kbn/workflows-management-plugin": ["./src/platform/plugins/shared/workflows_management"],
