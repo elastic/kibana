@@ -62,7 +62,7 @@ export function IconStops({
 }) {
   const styles = useMemoCss(mapColorStopsStyles);
   return iconStops
-    .map(({ stop, icon, iconSource }, index) => {
+    .map(({ stop, icon, icon_source: iconSource }, index) => {
       const iconInfo =
         iconSource === ICON_SOURCE.CUSTOM
           ? customIcons.find(({ symbolId }) => symbolId === icon)

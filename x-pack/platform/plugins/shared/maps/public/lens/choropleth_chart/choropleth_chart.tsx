@@ -12,7 +12,7 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { FormatFactory } from '@kbn/field-formats-plugin/common';
 import type { ViewMode } from '@kbn/presentation-publishing';
-import type { LayerDescriptor } from '../../../common';
+import type { VectorLayerDescriptor } from '../../../common';
 import {
   FIELD_ORIGIN,
   LAYER_TYPE,
@@ -21,7 +21,7 @@ import {
   COLOR_MAP_TYPE,
   VECTOR_STYLES,
 } from '../../../common';
-import { emsWorldLayerId } from '../../../common/constants';
+import { emsWorldLayerId, LAYER_STYLE_TYPE } from '../../../common/constants';
 import type { ChoroplethChartProps } from './types';
 import { getEmsSuggestion } from './get_ems_suggestion';
 import { PassiveMap } from '../passive_map';
@@ -61,7 +61,7 @@ export function ChoroplethChart({
 
   const emsLayerLabel = getEmsLayerLabel(emsLayerId, emsFileLayers);
 
-  const choroplethLayer = {
+  const choroplethLayer: VectorLayerDescriptor = {
     id: args.layerId,
     label: emsLayerLabel
       ? i18n.translate('xpack.maps.lens.choroplethChart.choroplethLayerLabel', {
@@ -102,8 +102,7 @@ export function ChoroplethChart({
       tooltipProperties: [emsField],
     },
     style: {
-      type: 'VECTOR',
-      // @ts-ignore missing style properties. Remove once 'VectorLayerDescriptor' type is updated
+      type: LAYER_STYLE_TYPE.VECTOR,
       properties: {
         [VECTOR_STYLES.FILL_COLOR]: {
           type: STYLE_TYPE.DYNAMIC,
@@ -130,7 +129,7 @@ export function ChoroplethChart({
       is_time_aware: false,
     },
     type: LAYER_TYPE.GEOJSON_VECTOR,
-  } as LayerDescriptor;
+  };
 
   return (
     <PassiveMap

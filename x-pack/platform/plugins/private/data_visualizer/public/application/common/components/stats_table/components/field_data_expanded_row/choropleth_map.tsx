@@ -65,7 +65,6 @@ export const getChoroplethTopValuesLayer = (
     } as EMSFileSourceDescriptor,
     style: {
       type: LAYER_STYLE_TYPE.VECTOR,
-      // @ts-ignore missing style properties. Remove once 'VectorLayerDescriptor' type is updated
       properties: {
         icon: { type: STYLE_TYPE.STATIC, options: { value: 'marker' } },
         fill_color: {

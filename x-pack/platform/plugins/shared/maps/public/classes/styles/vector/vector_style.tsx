@@ -204,7 +204,7 @@ export class VectorStyle implements IVectorStyle {
       type: LAYER_STYLE_TYPE.VECTOR,
       properties: { ...getDefaultStaticProperties(), ...properties },
       is_time_aware: isTimeAware,
-    } as NormalizedVectorStyleDescriptor;
+    };
   }
 
   static createDefaultStyleProperties(mapColors: string[]) {
