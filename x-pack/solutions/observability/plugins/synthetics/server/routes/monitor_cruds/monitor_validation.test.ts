@@ -14,8 +14,10 @@ import type {
   HTTPFields,
   HTTPSimpleFields,
   ICMPSimpleFields,
+  KerberosConfig,
   Metadata,
   MonitorFields,
+  NtlmConfig,
   TCPAdvancedFields,
   TCPFields,
   TCPSimpleFields,
@@ -26,6 +28,7 @@ import {
   ConfigKey,
   MonitorTypeEnum,
   FormMonitorType,
+  KerberosAuthType,
   ResponseBodyIndexPolicy,
   ScheduleUnit,
   SourceType,
@@ -544,6 +547,10 @@ describe('validateMonitor', () => {
   });
 
   describe('HTTP authentication mutual exclusivity', () => {
+    const privateLocation = { id: 'private-1', label: 'Private', isServiceManaged: false };
+    const KERBEROS_NTLM_PUBLIC_LOCATION_DETAILS =
+      'Kerberos and NTLM authentication are only supported on private locations. Remove the Elastic managed locations from this monitor, or choose a different authentication method.';
+
     it('validates an HTTP monitor using only Kerberos auth', () => {
       const testMonitor = {
         ...testHTTPFields,
@@ -578,6 +585,7 @@ describe('validateMonitor', () => {
         ...testHTTPFields,
         [ConfigKey.USERNAME]: '',
         [ConfigKey.PASSWORD]: '',
+        [ConfigKey.LOCATIONS]: [privateLocation],
         [ConfigKey.KERBEROS]: {
           enabled: true,
           auth_type: 'password',
@@ -600,6 +608,7 @@ describe('validateMonitor', () => {
         ...testHTTPFields,
         [ConfigKey.USERNAME]: '',
         [ConfigKey.PASSWORD]: '',
+        [ConfigKey.LOCATIONS]: [privateLocation],
         [ConfigKey.KERBEROS]: {
           enabled: true,
           auth_type: 'password',
@@ -626,6 +635,7 @@ describe('validateMonitor', () => {
         ...testHTTPFields,
         [ConfigKey.USERNAME]: '',
         [ConfigKey.PASSWORD]: '',
+        [ConfigKey.LOCATIONS]: [privateLocation],
         [ConfigKey.KERBEROS]: {
           enabled: true,
           auth_type: 'keytab',
@@ -652,6 +662,7 @@ describe('validateMonitor', () => {
         ...testHTTPFields,
         [ConfigKey.USERNAME]: '',
         [ConfigKey.PASSWORD]: '',
+        [ConfigKey.LOCATIONS]: [privateLocation],
         [ConfigKey.KERBEROS]: {
           enabled: true,
           auth_type: 'keytab',
@@ -695,8 +706,7 @@ describe('validateMonitor', () => {
       expect(result).toMatchObject({
         valid: false,
         reason: 'Monitor authentication configuration is invalid',
-        details:
-          'Kerberos host-file settings (config_path or keytab) are only supported on private locations. Use an inline krb5_conf on public locations, or a private location for keytab auth.',
+        details: KERBEROS_NTLM_PUBLIC_LOCATION_DETAILS,
       });
     });
 
@@ -722,8 +732,7 @@ describe('validateMonitor', () => {
       expect(result).toMatchObject({
         valid: false,
         reason: 'Monitor authentication configuration is invalid',
-        details:
-          'Kerberos host-file settings (config_path or keytab) are only supported on private locations. Use an inline krb5_conf on public locations, or a private location for keytab auth.',
+        details: KERBEROS_NTLM_PUBLIC_LOCATION_DETAILS,
       });
     });
 
@@ -761,6 +770,7 @@ describe('validateMonitor', () => {
         ...testHTTPFields,
         [ConfigKey.USERNAME]: '',
         [ConfigKey.PASSWORD]: '',
+        [ConfigKey.LOCATIONS]: [privateLocation],
         [ConfigKey.KERBEROS]: {
           enabled: true,
           auth_type: 'password',
@@ -788,6 +798,7 @@ describe('validateMonitor', () => {
         ...testHTTPFields,
         [ConfigKey.USERNAME]: '',
         [ConfigKey.PASSWORD]: '',
+        [ConfigKey.LOCATIONS]: [privateLocation],
         [ConfigKey.KERBEROS]: {
           enabled: true,
           auth_type: 'password',
@@ -815,6 +826,7 @@ describe('validateMonitor', () => {
         ...testHTTPFields,
         [ConfigKey.USERNAME]: '',
         [ConfigKey.PASSWORD]: '',
+        [ConfigKey.LOCATIONS]: [privateLocation],
         [ConfigKey.NTLM]: {
           enabled: true,
           username: 'ntlm-user',
@@ -832,6 +844,7 @@ describe('validateMonitor', () => {
         ...testHTTPFields,
         [ConfigKey.USERNAME]: '',
         [ConfigKey.PASSWORD]: '',
+        [ConfigKey.LOCATIONS]: [privateLocation],
         [ConfigKey.NTLM]: {
           enabled: true,
           username: '',
@@ -900,6 +913,105 @@ describe('validateMonitor', () => {
       expect(result).toMatchObject({
         valid: false,
         reason: 'Monitor authentication configuration is invalid',
+      });
+    });
+  });
+
+  describe('Kerberos and NTLM on Elastic managed locations', () => {
+    const publicLocation = { id: 'eu-west-1', label: 'EU West', isServiceManaged: true };
+    const privateLocation = { id: 'private-1', label: 'Private', isServiceManaged: false };
+    const PUBLIC_LOCATION_DETAILS =
+      'Kerberos and NTLM authentication are only supported on private locations. Remove the Elastic managed locations from this monitor, or choose a different authentication method.';
+
+    const kerberos: KerberosConfig = {
+      enabled: true,
+      auth_type: KerberosAuthType.PASSWORD,
+      realm: 'CORP.LOCAL',
+      username: 'svc',
+      password: 'secret',
+      keytab: '',
+      config_path: '',
+      krb5_conf: '[libdefaults]\n  default_realm = CORP.LOCAL\n',
+      service_name: '',
+      enable_krb5_fast: false,
+    };
+    const ntlm: NtlmConfig = {
+      enabled: true,
+      username: 'ntlm-user',
+      password: 'ntlm-pass',
+      domain: 'EXAMPLE',
+      workstation: '',
+    };
+
+    const authCases: Array<[string, Partial<HTTPFields>]> = [
+      ['Kerberos', { [ConfigKey.KERBEROS]: kerberos }],
+      ['NTLM', { [ConfigKey.NTLM]: ntlm }],
+    ];
+
+    const buildMonitor = (
+      auth: Partial<HTTPFields>,
+      locations: Array<{ id: string; label: string; isServiceManaged: boolean }>
+    ) =>
+      ({
+        ...testHTTPFields,
+        [ConfigKey.USERNAME]: '',
+        [ConfigKey.PASSWORD]: '',
+        ...auth,
+        [ConfigKey.LOCATIONS]: locations,
+      } as MonitorFields);
+
+    it.each(authCases)('invalidates %s on a public location', (_name, auth) => {
+      const result = validateMonitor(buildMonitor(auth, [publicLocation]), 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor authentication configuration is invalid',
+        details: PUBLIC_LOCATION_DETAILS,
+      });
+    });
+
+    it.each(authCases)(
+      'invalidates %s when a public location is mixed with a private one',
+      (_name, auth) => {
+        const result = validateMonitor(
+          buildMonitor(auth, [privateLocation, publicLocation]),
+          'default'
+        );
+        expect(result).toMatchObject({
+          valid: false,
+          reason: 'Monitor authentication configuration is invalid',
+          details: PUBLIC_LOCATION_DETAILS,
+        });
+      }
+    );
+
+    it.each(authCases)('validates %s on private locations only', (_name, auth) => {
+      const result = validateMonitor(buildMonitor(auth, [privateLocation]), 'default');
+      expect(result).toMatchObject({ valid: true, reason: '', details: '' });
+    });
+
+    it('ignores disabled Kerberos and NTLM blocks on a public location', () => {
+      const result = validateMonitor(
+        buildMonitor(
+          {
+            [ConfigKey.KERBEROS]: { ...kerberos, enabled: false, realm: '' },
+            [ConfigKey.NTLM]: { ...ntlm, enabled: false },
+          },
+          [publicLocation]
+        ),
+        'default'
+      );
+      expect(result).toMatchObject({ valid: true, reason: '', details: '' });
+    });
+
+    it.each(['', '   '])('invalidates Kerberos with the realm %j', (realm) => {
+      const result = validateMonitor(
+        buildMonitor({ [ConfigKey.KERBEROS]: { ...kerberos, realm } }, [privateLocation]),
+        'default'
+      );
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor authentication configuration is invalid',
+        details: 'Kerberos authentication requires a realm.',
       });
     });
   });

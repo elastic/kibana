@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ConfigKey } from '../types';
-import { FIELD } from './field_config';
+import { ConfigKey, HttpAuthMethod, MonitorTypeEnum } from '../types';
+import { FIELD, KERBEROS_NTLM_PRIVATE_LOCATIONS_ONLY } from './field_config';
 
 jest.mock('../../../../../utils/kibana_service', () => ({
   kibanaService: { coreStart: { docLinks: { links: {} } } },
@@ -42,4 +42,51 @@ describe('FIELD params validation', () => {
       expect(validParamNames(value)).toBe('Parameter names must be unique and cannot be empty');
     }
   );
+});
+
+describe('FIELD locations validation for Kerberos and NTLM', () => {
+  const managedLocation = { id: 'eu-west-1', label: 'EU West', isServiceManaged: true };
+  const privateLocation = { id: 'private-1', label: 'Private', isServiceManaged: false };
+
+  const validate = (authType: HttpAuthMethod, locations: unknown[]) => {
+    const rules = FIELD()[ConfigKey.LOCATIONS]?.validation?.([
+      MonitorTypeEnum.HTTP,
+      authType,
+    ])?.validate;
+    if (!rules || typeof rules === 'function' || !rules.privateLocationsForHttpAuth) {
+      throw new Error('Expected a privateLocationsForHttpAuth validator on the locations field');
+    }
+    return rules.privateLocationsForHttpAuth(locations, {} as never);
+  };
+
+  it.each([HttpAuthMethod.KERBEROS, HttpAuthMethod.NTLM])(
+    'rejects an Elastic managed location with %s auth',
+    (authType) => {
+      expect(validate(authType, [privateLocation, managedLocation])).toBe(
+        KERBEROS_NTLM_PRIVATE_LOCATIONS_ONLY
+      );
+    }
+  );
+
+  it.each([HttpAuthMethod.KERBEROS, HttpAuthMethod.NTLM])(
+    'accepts private locations with %s auth',
+    (authType) => {
+      expect(validate(authType, [privateLocation])).toBe(true);
+    }
+  );
+
+  it.each([HttpAuthMethod.NONE, HttpAuthMethod.BASIC])(
+    'accepts Elastic managed locations with %s auth',
+    (authType) => {
+      expect(validate(authType, [managedLocation])).toBe(true);
+    }
+  );
+});
+
+describe('FIELD Kerberos realm', () => {
+  // Uncontrolled fields only show their error text through `errors[fieldKey]`, which does not
+  // resolve a nested key such as `kerberos.realm`, so the field must be controlled.
+  it('is required and controlled so its error message renders', () => {
+    expect(FIELD()['kerberos.realm']).toMatchObject({ required: true, controlled: true });
+  });
 });

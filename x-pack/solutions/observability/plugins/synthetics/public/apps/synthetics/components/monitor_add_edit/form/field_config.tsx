@@ -119,6 +119,14 @@ export const API_PRIVATE_LOCATIONS_ONLY = i18n.translate(
   }
 );
 
+export const KERBEROS_NTLM_PRIVATE_LOCATIONS_ONLY = i18n.translate(
+  'xpack.synthetics.monitorConfig.locations.kerberosNtlmPrivateOnlyErrorMessage',
+  {
+    defaultMessage:
+      'Kerberos and NTLM authentication are only supported on private locations. Remove the Elastic managed locations or choose a different authentication method.',
+  }
+);
+
 const API_PRIVATE_LOCATION_REQUIRED = i18n.translate(
   'xpack.synthetics.monitorConfig.monitorType.api.privateLocationRequiredTooltip',
   {
@@ -495,8 +503,8 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage:
         'Where do you want to run this test from? Additional locations will increase your total cost.',
     }),
-    dependencies: [ConfigKey.MONITOR_TYPE],
-    validation: ([monitorType]) => ({
+    dependencies: [ConfigKey.MONITOR_TYPE, 'authType'],
+    validation: ([monitorType, authType]) => ({
       validate: {
         privateLocationsOnly: (value: FormLocation[]) => {
           if (!monitorTypeRequiresPrivateLocations(monitorType as string)) {
@@ -504,6 +512,14 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           }
           return value?.some((location) => location.isServiceManaged)
             ? API_PRIVATE_LOCATIONS_ONLY
+            : true;
+        },
+        privateLocationsForHttpAuth: (value: FormLocation[]) => {
+          if (authType !== HttpAuthMethod.KERBEROS && authType !== HttpAuthMethod.NTLM) {
+            return true;
+          }
+          return value?.some((location) => location.isServiceManaged)
+            ? KERBEROS_NTLM_PRIVATE_LOCATIONS_ONLY
             : true;
         },
       },
@@ -984,9 +1000,14 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
   },
   ['kerberos.realm']: {
     fieldKey: 'kerberos.realm',
+    required: true,
+    controlled: true,
     component: FieldText,
     label: i18n.translate('xpack.synthetics.monitorConfig.kerberosRealm.label', {
       defaultMessage: 'Realm',
+    }),
+    error: i18n.translate('xpack.synthetics.monitorConfig.kerberosRealm.error', {
+      defaultMessage: 'Realm is required',
     }),
     helpText: i18n.translate('xpack.synthetics.monitorConfig.kerberosRealm.helpText', {
       defaultMessage: 'The Kerberos realm, e.g. CORP.LOCAL.',

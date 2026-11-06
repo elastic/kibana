@@ -237,8 +237,31 @@ export function validateMonitor(
       };
     }
 
-    // Heartbeat: exactly one of config_path / krb5_conf when Kerberos is enabled.
+    // TODO: Elastic managed locations run a Heartbeat that predates Kerberos/NTLM support for
+    // HTTP monitors, so it would ignore these blocks and send the request unauthenticated.
+    // Lift this check once the synthetics service ships a Heartbeat that includes
+    // elastic/beats#51223.
+    if ((kerberos?.enabled || ntlm?.enabled) && hasPublicServiceLocation(monitorFields.locations)) {
+      return {
+        valid: false,
+        reason: INVALID_AUTH_CONFIGURATION_ERROR,
+        details: KERBEROS_NTLM_PUBLIC_LOCATION_DETAILS,
+        payload: monitorFields,
+      };
+    }
+
     if (kerberos?.enabled) {
+      // Heartbeat: `realm` is `validate:"required"` in the libbeat Kerberos config.
+      if (!kerberos.realm?.trim()) {
+        return {
+          valid: false,
+          reason: INVALID_AUTH_CONFIGURATION_ERROR,
+          details: INVALID_KERBEROS_REALM_DETAILS,
+          payload: monitorFields,
+        };
+      }
+
+      // Heartbeat: exactly one of config_path / krb5_conf when Kerberos is enabled.
       const hasPath = Boolean(kerberos.config_path?.trim());
       const hasInline = Boolean(kerberos.krb5_conf?.trim());
       if (hasPath === hasInline) {
@@ -269,19 +292,6 @@ export function validateMonitor(
             payload: monitorFields,
           };
         }
-      }
-
-      // Host-file paths (config_path / keytab) are not provisionable on managed public locations.
-      const usesHostFile =
-        hasPath ||
-        (kerberos.auth_type === KerberosAuthType.KEYTAB && Boolean(kerberos.keytab?.trim()));
-      if (usesHostFile && hasPublicServiceLocation(monitorFields.locations)) {
-        return {
-          valid: false,
-          reason: INVALID_AUTH_CONFIGURATION_ERROR,
-          details: INVALID_KERBEROS_HOST_FILE_PUBLIC_LOCATION_DETAILS,
-          payload: monitorFields,
-        };
       }
     }
 
@@ -754,11 +764,18 @@ const INVALID_KERBEROS_KEYTAB_CREDENTIALS_DETAILS = i18n.translate(
   }
 );
 
-const INVALID_KERBEROS_HOST_FILE_PUBLIC_LOCATION_DETAILS = i18n.translate(
-  'xpack.synthetics.server.monitors.invalidKerberosHostFilePublicLocationDetails',
+const INVALID_KERBEROS_REALM_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidKerberosRealmDetails',
+  {
+    defaultMessage: 'Kerberos authentication requires a realm.',
+  }
+);
+
+const KERBEROS_NTLM_PUBLIC_LOCATION_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.kerberosNtlmPublicLocationDetails',
   {
     defaultMessage:
-      'Kerberos host-file settings (config_path or keytab) are only supported on private locations. Use an inline krb5_conf on public locations, or a private location for keytab auth.',
+      'Kerberos and NTLM authentication are only supported on private locations. Remove the Elastic managed locations from this monitor, or choose a different authentication method.',
   }
 );
 
