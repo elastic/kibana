@@ -37,7 +37,6 @@ describe('installInvestigationAgent', () => {
           configuration: {
             tools: [],
             skill_ids: [],
-            connector_ids: [],
           },
         },
       });

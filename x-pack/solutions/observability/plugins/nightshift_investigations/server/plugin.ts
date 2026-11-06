@@ -123,6 +123,7 @@ import {
   NIGHTSHIFT_AUTOMATION_SO_TYPE,
 } from './saved_objects';
 import { createOnboardingClient } from './onboarding/onboarding_client';
+import { createLocalElasticsearchConnectorLifecycleListener } from './onboarding/local_elasticsearch_connector';
 import {
   createListSandboxConnectors,
   createListSandboxConnectorTypes,
@@ -169,6 +170,8 @@ export class NightshiftInvestigationsPlugin
   private uiSettings?: CoreStart['uiSettings'];
   private featureFlags?: CoreStart['featureFlags'];
   private actionsStart?: ActionsPluginStart;
+  private cloudSetup?: NightshiftInvestigationsSetupDeps['cloud'];
+  private esHosts: string[] = [];
   private securityStart?: NightshiftInvestigationsStartDeps['security'];
   private security?: CoreStart['security'];
   private coreStart?: CoreStart;
@@ -200,6 +203,15 @@ export class NightshiftInvestigationsPlugin
       new NightshiftSettingsLocatorDefinition()
     );
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
+    plugins.actions?.registerConnectorLifecycleListener(
+      createLocalElasticsearchConnectorLifecycleListener({
+        getInternalEsClient: async () => {
+          const [coreStart] = await core.getStartServices();
+          return coreStart.elasticsearch.client.asInternalUser;
+        },
+        logger: this.logger.get('local-elasticsearch-connector'),
+      })
+    );
     const isNightshiftEnabledSync = createIsNightshiftEnabledSync(core.getStartServices);
     plugins.alerting?.enableAlertStatusChanged({
       isEnabled: async () => isNightshiftEnabledSync(),
@@ -259,6 +271,10 @@ export class NightshiftInvestigationsPlugin
       }),
     });
 
+    this.cloudSetup = plugins.cloud;
+    core.elasticsearch.legacy.config$.subscribe((config) => {
+      this.esHosts = config.hosts;
+    });
     const onboardingClient = createOnboardingClient({
       getDeps: () => ({
         workflowsManagement: this.workflowsManagement,
@@ -266,6 +282,10 @@ export class NightshiftInvestigationsPlugin
         agentBuilder: this.agentBuilder,
         agentAvailability: this.getInvestigationAvailability(),
         assistantEnabled: this.assistantEnabled,
+        actions: this.actionsStart,
+        elasticsearch: this.elasticsearch,
+        cloud: this.cloudSetup,
+        esHosts: this.esHosts,
       }),
       logger: this.logger.get('onboarding'),
       ensureFailureSweep: this.ensureFailureSweep,

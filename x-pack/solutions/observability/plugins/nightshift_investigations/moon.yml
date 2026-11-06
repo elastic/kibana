@@ -78,6 +78,8 @@ dependsOn:
   - '@kbn/core-security-common'
   - '@kbn/eval-kql'
   - '@kbn/rrule'
+  - '@kbn/cloud-plugin'
+  - '@kbn/connector-specs'
   - '@kbn/inference-tracing'
 tags:
   - plugin
