@@ -1,6 +1,10 @@
 # FORK
 
-The FORK command creates multiple execution branches that operate on the same input data and combines the results into a single output table. A discriminator column (`_fork`) is added to identify which branch each row originated from. This enables hybrid search by combining and scoring results from multiple queries.
+The `FORK` processing command creates multiple execution branches that operate on the same input data and combines the results into a single output table.
+
+`FORK` adds a discriminator column (`_fork`) to identify which branch each row came from. Branches can output different columns. Columns with the same name must have the same data type across all branches; missing columns are filled with `null` values. Row order is preserved within each branch, but rows from different branches may be interleaved. Use `SORT _fork` to group results by branch.
+
+Together with the `FUSE` command, `FORK` enables hybrid search to combine and score results from multiple queries.
 
 ## Syntax
 
@@ -10,11 +14,11 @@ The FORK command creates multiple execution branches that operate on the same in
 
 #### <processing_commands>
 
-A set of processing commands to be executed in each branch. Each branch operates independently on the same input data.
+A group of processing commands that defines one execution branch. Each branch operates on the same input data. The `_fork` column takes values like `fork1`, `fork2`, and `fork3`, corresponding to the order in which branches are defined.
 
 ## Examples
 
-Selects employees with `emp_no` 10001 and 10002 in separate branches and combines the results, showing the branch origin in the `_fork` column.
+Run two branches and identify each row by branch:
 
 ```esql
 FROM employees
@@ -24,9 +28,54 @@ FROM employees
 | SORT emp_no
 ```
 
+emp_no:integer | _fork:keyword
+10001 | fork1
+10002 | fork2
+
+Return the total row count alongside the top five scored results:
+
+```esql
+FROM books METADATA _score
+| WHERE author:"Faulkner"
+| EVAL score = round(_score, 2)
+| FORK (SORT score DESC, author | LIMIT 5 | KEEP author, score)
+       (STATS total = COUNT(*))
+| SORT _fork, score DESC, author
+```
+
+author:text | score:double | _fork:keyword | total:long
+Colleen Faulkner | 2.18 | fork1 | null
+William Faulkner | 2.18 | fork1 | null
+Danny Faulkner | 2.02 | fork1 | null
+Paul Faulkner | 2.02 | fork1 | null
+William Faulkner | 2.02 | fork1 | null
+null | null | fork2 | 18
+
 ## Limitations
 
-- FORK supports at most 8 execution branches.
-- In versions older than 9.3.0, using remote cluster references with FORK is not supported.
-- Using more than one FORK command in a query is not supported.
-- FORK branches default to `LIMIT 1000` if no `LIMIT` is provided.
+- In Elastic Cloud Serverless and Elastic Stack 9.4 and later, `FORK` branches do not have an implicit `LIMIT 1000`.
+- In Elastic Stack 9.1 to 9.3, an implicit `LIMIT 1000` is added to each `FORK` branch.
+- In Elastic Cloud Serverless and Elastic Stack 9.6 and later, `FORK` supports at most 8 execution branches by default. The limit is the `esql.query.max_branch_count_per_merge` cluster setting.
+- In Elastic Stack 9.1 to 9.5, `FORK` supports at most 8 execution branches.
+- In Elastic Stack 9.1 to 9.5, using more than one `FORK` command in a query is not supported.
+- In Elastic Cloud Serverless and Elastic Stack 9.6 and later, multiple user-written `FORK` commands can't occur along the same uninterrupted pipeline. A query can contain multiple `FORK` commands when a view or multi-source `FROM` combines branches between them, or when separate source branches contain their own `FORK` commands.
+
+Consecutive `FORK` commands are not supported:
+
+```esql
+FROM employees
+| FORK (WHERE emp_no > 10000) (WHERE emp_no <= 10000)
+| FORK (WHERE salary > 50000) (WHERE salary <= 50000)
+```
+
+The following query is supported because the multi-source `FROM` combines its branches before the final `FORK`:
+
+```esql
+FROM (FROM employees | WHERE emp_no >= 10091 AND emp_no < 10093 | FORK (WHERE emp_no == 10091) (WHERE emp_no == 10092)),
+     (FROM employees | WHERE emp_no >= 10092 AND emp_no < 10094 | EVAL _fork = "fork1")
+| FORK (WHERE emp_no > 10091) (WHERE emp_no <= 10091)
+| KEEP _fork, emp_no
+| SORT _fork, emp_no
+```
+
+- In versions older than 9.3.0, using remote cluster references and `FORK` is not supported.

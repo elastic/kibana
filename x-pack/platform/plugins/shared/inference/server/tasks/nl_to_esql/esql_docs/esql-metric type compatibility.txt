@@ -1,8 +1,8 @@
 # METRIC TYPE COMPATIBILITY
 
-Metric type compatibility determines which time series aggregation functions can be used with a field based on the field's `metric_type` mapping.
+The inner function you pick depends on the field's `metric_type` mapping:
 
-- **Counters**: monotonically increasing values that reset on process restart. Use `RATE`, `INCREASE`, and the other counter-aware functions. These detect resets per time series and compute correct deltas.
+- **Counters**: monotonically increasing values that reset on process restart. Use `RATE`, `INCREASE`, and the other counter-aware functions.
 - **Gauges**: point-in-time values that can move up or down. Use `LAST_OVER_TIME`, `AVG_OVER_TIME`, `MAX_OVER_TIME`, and the other `*_OVER_TIME` variants.
 - **Histograms**: distributions stored as `exponential_histogram`, `tdigest`, or `histogram` fields. Apply a regular aggregation such as `SUM`, `AVG`, or `PERCENTILE` directly to the field, and `TS` implicitly merges the histograms per time series.
 
@@ -10,6 +10,7 @@ The following time series aggregation functions are supported:
 
 - `ABSENT_OVER_TIME`: Calculates the absence of a field over a time range.
 - `AVG_OVER_TIME`: Calculates the average over time of a numeric field.
+- `CHANGES`: Calculates the number of value changes in a time window.
 - `COUNT_OVER_TIME`: Calculates the count over time value of a field.
 - `COUNT_DISTINCT_OVER_TIME`: Calculates the count of distinct values over time for a field.
 - `DELTA`: Calculates the absolute change of a gauge field in a time window.
@@ -30,20 +31,19 @@ The following time series aggregation functions are supported:
 
 ## Syntax
 
-`<time_series_aggregation_function>(field)`
+Not applicable.
 
 ### Parameters
 
-#### field
-
-The field whose `metric_type` mapping determines which time series aggregation functions can be used.
+This page does not define parameters.
 
 ## Examples
 
+No examples are provided.
+
 ## Limitations
 
-Counter functions like `RATE` reject gauge fields.
-
-Applying a gauge-only function such as `AVG_OVER_TIME` to a counter is rarely the correct choice.
-
-Fields with the type `histogram` must first be cast using `::exponential_histogram` or `::tdigest`.
+- Counter functions like `RATE` reject gauge fields.
+- Gauge-only functions such as `AVG_OVER_TIME` are rarely appropriate for counter fields.
+- Fields with the type `histogram` must first be cast using `::exponential_histogram` or `::tdigest`.
+- `CHANGES` is planned and not generally available.
