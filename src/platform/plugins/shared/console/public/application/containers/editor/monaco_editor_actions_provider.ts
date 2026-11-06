@@ -825,6 +825,16 @@ export class MonacoEditorActionsProvider {
     position: monaco.Position,
     context: monaco.languages.CompletionContext
   ): Promise<monaco.languages.CompletionList> {
+    // Keystrokes land at the cursor, so the text after it is the only part of the line that can
+    // change while the awaits below (parser worker round trip) are pending. Body suggestions use
+    // this request-time remainder rather than re-reading the model, which would mangle template
+    // expansion and the replace range.
+    const lineContentAfterPosition = model.getValueInRange({
+      startLineNumber: position.lineNumber,
+      startColumn: position.column,
+      endLineNumber: position.lineNumber,
+      endColumn: model.getLineMaxColumn(position.lineNumber),
+    });
     // A triple-quoted string holds raw content (e.g. a Painless script), so Console has nothing
     // to suggest inside one. `triggerSuggestions` already suppresses its own auto-trigger there,
     // but this provider is also invoked directly (manual Ctrl+Space, Monaco trigger characters),
@@ -892,7 +902,7 @@ export class MonacoEditorActionsProvider {
         requestStartLineNumber,
         this,
         this.getRequestStartColumn(model, request, requestStartLineNumber),
-        { isInsideTripleQuotedString: insideTripleQuotes }
+        { isInsideTripleQuotedString: insideTripleQuotes, lineContentAfterPosition }
       );
       return {
         suggestions,
