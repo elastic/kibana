@@ -190,7 +190,7 @@ const BaseComponent = () => {
                   )}
                 </EuiFlexItem>,
               ]}
-            ></EuiPageHeader>
+            />
             <EuiSpacer size="m" />
           </>
         )}

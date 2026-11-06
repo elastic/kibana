@@ -20,7 +20,7 @@ import { useDownloadAIValueReport } from '../hooks/use_download_ai_value_report'
 import { SuperDatePicker } from '../../common/components/super_date_picker';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { MemoryRouter } from '@kbn/shared-ux-router';
-import { AI_VALUE_PATH } from '@kbn/security-solution-plugin/common/constants';
+import { AI_VALUE_PATH } from '../../../common/constants';
 
 jest.mock('../../common/hooks/search_bar/use_sync_timerange_url_param', () => ({
   useSyncTimerangeUrlParam: jest.fn(),
