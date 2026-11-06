@@ -9,12 +9,19 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createConversationNotFoundError } from '@kbn/agent-builder-common';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
+import { NO_CAUSAL_VERDICT } from '../decision_trees/causal_check';
 import { prepareReinforcementTurn } from '../decision_trees/register_decision_trees';
+import { createOptimizeModel } from '../lib/create_optimize_model';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
 import { decisionTreePrepareStepDefinition } from './decision_tree_prepare';
 
 jest.mock('../decision_trees/register_decision_trees', () => ({
   prepareReinforcementTurn: jest.fn(),
+}));
+
+jest.mock('../lib/create_optimize_model', () => ({
+  createOptimizeModel: jest.fn(),
+  createInvestigationMemoryTelemetry: jest.fn(() => ({})),
 }));
 
 const readTree = (slug: string) => ({
@@ -198,6 +205,112 @@ describe('decisionTreePrepareStepDefinition', () => {
       jest.mocked(prepareReinforcementTurn).mockResolvedValue({ skipped: true });
 
       await expect(run(investigatorRound)).resolves.toEqual(skipped);
+    });
+  });
+
+  describe("a follow-up's causal check", () => {
+    const output = jest.fn();
+    const followUp = {
+      ...investigatorRound,
+      prompt: 'It was the egress proxy, per our network team.',
+      response: 'Accepted: the egress proxy.',
+      connector_id: '',
+      round_connector_id: 'round-model',
+    };
+    const verdict = {
+      isFeedback: true,
+      causalConfirmed: false,
+      causalSummary: 'No tool result implicates the egress proxy.',
+      learning: 'Check egress before blaming the provider.',
+    };
+
+    beforeEach(() => {
+      conversationsGet.mockResolvedValue({ rounds: [savedRound('round-1')] });
+      jest.mocked(createOptimizeModel).mockResolvedValue({ inferenceClient: { output } } as never);
+      output.mockResolvedValue({
+        output: {
+          is_feedback_message: verdict.isFeedback,
+          causal_confirmed: verdict.causalConfirmed,
+          causal_summary: verdict.causalSummary,
+          learning: verdict.learning,
+        },
+      });
+    });
+
+    it("checks the round's message and answer on the round's model", async () => {
+      await run(followUp);
+
+      await expect(preparedWith().checkCausal!()).resolves.toEqual(verdict);
+      expect(createOptimizeModel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          requestedConnectorId: undefined,
+          roundConnectorId: 'round-model',
+        })
+      );
+      const [{ input }] = output.mock.calls[0];
+      expect(input).toContain('Human message: It was the egress proxy, per our network team.');
+      expect(input).toContain("Investigator's answer: Accepted: the egress proxy.");
+    });
+
+    it('omits the pre-follow-up hypotheses snapshot when the follow-up round is not saved yet', async () => {
+      conversationsGet.mockResolvedValue({
+        rounds: [{ ...savedRound('round-1'), started_at: '2026-11-02T10:00:00.000Z' }],
+        attachments: [
+          {
+            type: 'agentic_investigations_hypotheses',
+            versions: [
+              {
+                created_at: '2026-11-02T10:05:00.000Z',
+                data: {
+                  hypotheses: [{ candidate: 'egress proxy', status: 'confirmed', reason: 'claim' }],
+                },
+              },
+            ],
+          },
+        ],
+      });
+
+      await run(followUp);
+      await preparedWith().checkCausal!();
+
+      const [{ input }] = output.mock.calls[0];
+      expect(input).not.toContain('Hypotheses:');
+    });
+
+    // A lost verdict must not fail the reinforcement run, nor claim a cause.
+    it.each([
+      ['the model call fails', () => output.mockRejectedValue(new Error('connector down'))],
+      [
+        'no model is available',
+        () => jest.mocked(createOptimizeModel).mockResolvedValue(undefined),
+      ],
+    ])('has no verdict when %s', async (_case, arrange) => {
+      arrange();
+      await run(followUp);
+
+      await expect(preparedWith().checkCausal!()).resolves.toEqual(NO_CAUSAL_VERDICT);
+    });
+
+    it('reports the verdict with the prepared turn', async () => {
+      jest.mocked(prepareReinforcementTurn).mockResolvedValue({
+        skipped: false,
+        message: 'turn prompt',
+        treeCount: 1,
+        turnKind: 'feedback_reinforcement',
+        openedTreeIds: [],
+        verdict,
+      });
+
+      await expect(run(followUp)).resolves.toMatchObject({
+        output: {
+          causal_check: {
+            is_feedback: true,
+            causal_confirmed: false,
+            causal_summary: verdict.causalSummary,
+            learning: verdict.learning,
+          },
+        },
+      });
     });
   });
 
