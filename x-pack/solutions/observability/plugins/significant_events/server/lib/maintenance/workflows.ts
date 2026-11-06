@@ -8,6 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
+import type { ManagedWorkflowId } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SignificantEventsMaintenanceFailure } from '../../../common/maintenance/types';
 import {
@@ -17,9 +18,38 @@ import {
 import {
   buildCancelTargets,
   buildDisableTargets,
+  getManagedWorkflowTypeId,
   type MaintenanceWorkflowTarget,
 } from './managed_workflow_targets';
 import { toMessage } from './to_message';
+import type { SignificantEventsServer } from '../../types';
+import { SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER } from '../workflows/managed_workflow_owner';
+
+/** Switches off a workflow this plugin owns without a request. Resolves whether it did. */
+export type DisableManagedWorkflow = (params: {
+  id: ManagedWorkflowId;
+  spaceId: SpaceId;
+}) => Promise<boolean>;
+
+/**
+ * Builds the request-less disable for the owner plugin. A workflow bound to a service account
+ * refuses a plain update unless a user with `manage_security` makes it, and nobody is behind a
+ * flag-off pause; the owner's `disable` is the path the orphan sweep already takes.
+ */
+export const createDisableManagedWorkflow = (
+  server: SignificantEventsServer
+): DisableManagedWorkflow | undefined => {
+  const { workflowsExtensions } = server;
+  if (!workflowsExtensions) {
+    return undefined;
+  }
+  return async ({ id, spaceId }) => {
+    const client = await workflowsExtensions.initManagedWorkflowsClient(
+      SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER
+    );
+    return client.disable(id, { spaceId, workflowIdSuffix: spaceId });
+  };
+};
 
 export type ManagementApi = WorkflowsServerPluginSetup['management'];
 
@@ -32,17 +62,29 @@ export const mergeTargets = <T extends { id: string; spaceId: SpaceId }>(...list
   ...new Map(lists.flat().map((target) => [targetKey(target), target])).values(),
 ];
 
-const disableWorkflow = async (
-  mgmt: ManagementApi,
-  { id, spaceId }: MaintenanceWorkflowTarget,
-  request: KibanaRequest,
-  failures: SignificantEventsMaintenanceFailure[]
-): Promise<boolean> => {
+const disableWorkflow = async ({
+  mgmt,
+  workflowTarget,
+  request,
+  failures,
+  disableManaged,
+}: {
+  mgmt: ManagementApi;
+  workflowTarget: MaintenanceWorkflowTarget;
+  request: KibanaRequest;
+  failures: SignificantEventsMaintenanceFailure[];
+  disableManaged: DisableManagedWorkflow | undefined;
+}): Promise<boolean> => {
+  const { id, spaceId } = workflowTarget;
   const target = `workflow:${id}@${spaceId}`;
   try {
     const workflow = await mgmt.getClient(request).getWorkflow(id, spaceId);
     if (!workflow || !workflow.enabled) {
       return false;
+    }
+    const managedTypeId = getManagedWorkflowTypeId(workflowTarget);
+    if (managedTypeId && disableManaged) {
+      return await disableManaged({ id: managedTypeId, spaceId });
     }
     const result = await mgmt.updateWorkflow(id, { enabled: false }, spaceId, request);
     if (result.enabled !== false) {
@@ -94,11 +136,13 @@ export const sweepWorkflows = async ({
   spaceIds,
   request,
   failures,
+  disableManaged,
 }: {
   mgmt: ManagementApi | undefined;
   spaceIds: SpaceId[];
   request: KibanaRequest;
   failures: SignificantEventsMaintenanceFailure[];
+  disableManaged?: DisableManagedWorkflow;
 }): Promise<MaintenanceWorkflowTarget[]> => {
   if (!mgmt) {
     failures.push({
@@ -109,7 +153,9 @@ export const sweepWorkflows = async ({
   }
   const newlyDisabled: MaintenanceWorkflowTarget[] = [];
   for (const target of buildDisableTargets(spaceIds)) {
-    if (await disableWorkflow(mgmt, target, request, failures)) {
+    if (
+      await disableWorkflow({ mgmt, workflowTarget: target, request, failures, disableManaged })
+    ) {
       newlyDisabled.push(target);
     }
   }

@@ -8,12 +8,12 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import {
-  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
-import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { SCHEDULED_DISCOVERY_WORKFLOW_IDS } from '../maintenance/managed_workflow_targets';
+import type { BoundWorkflowsInstaller } from './bound_workflows_installer';
 import { pollUntil } from './poll_until';
 
 const RUNNING_EXECUTIONS_PAGE_SIZE = 1000;
@@ -39,9 +39,9 @@ export interface SignificantEventsScheduledWorkflowsService {
    *   enables them so Task Manager schedules their triggers.
    * - Updating while enabled re-renders the managed workflow templates with the
    *   new cadence and batch values, preserving enablement.
-   * - Disabling disables both workflows, cancels non-terminal scheduled
-   *   wrapper executions in that space, and uninstalls the per-space dynamic
-   *   workflow instances.
+   * - Disabling disables both workflows and cancels non-terminal scheduled
+   *   wrapper executions in that space. The per-space workflow documents stay,
+   *   disabled.
    */
   ensureWorkflow(params: {
     enabled: boolean;
@@ -54,11 +54,11 @@ export interface SignificantEventsScheduledWorkflowsService {
 export const createSignificantEventsScheduledWorkflowsService = ({
   logger,
   managementApi,
-  getManagedWorkflowsClient,
+  installer,
 }: {
   logger: Logger;
   managementApi: WorkflowsServerPluginSetup['management'];
-  getManagedWorkflowsClient: () => Promise<PluginScopedManagedWorkflowsApi>;
+  installer: BoundWorkflowsInstaller;
 }): SignificantEventsScheduledWorkflowsService => {
   const log = logger.get('significant-events-scheduled-workflows');
 
@@ -122,18 +122,19 @@ export const createSignificantEventsScheduledWorkflowsService = ({
   };
 
   const installOrUpdate = async ({
-    client,
+    request,
     spaceId,
     config,
   }: {
-    client: PluginScopedManagedWorkflowsApi;
+    request: KibanaRequest;
     spaceId: string;
     config: SignificantEventsScheduledWorkflowsConfig;
   }) => {
     await Promise.all([
-      client.install(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
+      installer.install({
+        request,
         spaceId,
-        workflowIdSuffix: spaceId,
+        workflowId: NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID,
         values: {
           detectionIntervalMinutes: config.detectionIntervalMinutes,
           detectionBucketIntervalMinutes: config.detectionBucketIntervalMinutes,
@@ -141,9 +142,10 @@ export const createSignificantEventsScheduledWorkflowsService = ({
           targetCoverageMinutes: config.targetCoverageMinutes,
         },
       }),
-      client.install(SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID, {
+      installer.install({
+        request,
         spaceId,
-        workflowIdSuffix: spaceId,
+        workflowId: NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW_ID,
         values: {
           reviewIntervalMinutes: config.reviewIntervalMinutes,
           discoveryBatchSize: config.discoveryBatchSize,
@@ -204,6 +206,15 @@ export const createSignificantEventsScheduledWorkflowsService = ({
     );
   };
 
+  // Through the owner: a plain update of a bound workflow needs `manage_security`.
+  const disableScheduledWorkflows = async ({ spaceId }: { spaceId: string }) => {
+    await Promise.all(
+      SCHEDULED_DISCOVERY_WORKFLOW_IDS.map((workflowId) =>
+        installer.disable({ spaceId, workflowId })
+      )
+    );
+  };
+
   const cancelRunningScheduledExecutions = async ({
     request,
     spaceId,
@@ -224,42 +235,20 @@ export const createSignificantEventsScheduledWorkflowsService = ({
     );
   };
 
-  const uninstallScheduledWorkflows = async ({
-    client,
-    spaceId,
-  }: {
-    client: PluginScopedManagedWorkflowsApi;
-    spaceId: string;
-  }) => {
-    await Promise.all([
-      client.uninstall(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
-        spaceId,
-        workflowIdSuffix: spaceId,
-      }),
-      client.uninstall(SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID, {
-        spaceId,
-        workflowIdSuffix: spaceId,
-      }),
-    ]);
-  };
-
   return {
     async ensureWorkflow({ enabled, request, spaceId, config }) {
-      const client = await getManagedWorkflowsClient();
-
       if (enabled) {
-        await installOrUpdate({ client, spaceId, config });
+        await installOrUpdate({ request, spaceId, config });
         await setAllEnabled({ enabled: true, request, spaceId });
         log.info(`Enabled scheduled Significant Events discovery workflows in space ${spaceId}`);
         return;
       }
 
-      await setAllEnabled({ enabled: false, request, spaceId });
+      await disableScheduledWorkflows({ spaceId });
       await cancelRunningScheduledExecutions({ request, spaceId });
-      await uninstallScheduledWorkflows({ client, spaceId });
-      log.info(
-        `Disabled and uninstalled scheduled Significant Events discovery workflows in space ${spaceId}`
-      );
+      // The documents stay, switched off: deleting a bound workflow needs `manage_security`, and
+      // enabling again re-renders them with the settings.
+      log.info(`Disabled scheduled Significant Events discovery workflows in space ${spaceId}`);
     },
   };
 };

@@ -8,9 +8,9 @@
  */
 
 import { parse } from 'yaml';
-import CONTINUOUS_ONBOARDING_YAML from './knowledge_indicators/continuous_onboarding.yaml';
-import ONBOARDING_YAML from './knowledge_indicators/onboarding.yaml';
-import SCHEDULED_REVIEW_YAML from './scheduled_review.yaml';
+import SCHEDULED_REVIEW_YAML from './bound_scheduled_review.yaml';
+import CONTINUOUS_ONBOARDING_YAML from './knowledge_indicators/bound_continuous_onboarding.yaml';
+import ONBOARDING_YAML from './knowledge_indicators/bound_onboarding.yaml';
 import DISCOVERY_YAML from './significant_events/discovery.yaml';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 
@@ -96,24 +96,23 @@ const evaluateStepCondition = (step: WorkflowStep, context: Record<string, unkno
 };
 
 describe('Significant Events run quota workflow contracts', () => {
-  it('propagates scheduled and manual origins from both managed drivers', () => {
-    const scheduledReviewWorker = findStep(definitions.scheduledReview, 'discover');
-    const continuousKiWorker = findStep(definitions.continuousOnboarding, 'schedule_onboarding');
+  it('propagates scheduled and manual origins from the scheduled review driver', () => {
+    const worker = findStep(definitions.scheduledReview, 'discover');
+    const rootTriggeredBy = worker.with?.inputs?.rootTriggeredBy;
 
-    for (const worker of [scheduledReviewWorker, continuousKiWorker]) {
-      const rootTriggeredBy = worker.with?.inputs?.rootTriggeredBy;
-      expect(rootTriggeredBy).toBe('${{ execution.triggeredBy }}');
-      expect(
-        evaluateExpression(rootTriggeredBy as string, {
-          execution: { triggeredBy: 'scheduled' },
-        })
-      ).toBe('scheduled');
-      expect(
-        evaluateExpression(rootTriggeredBy as string, {
-          execution: { triggeredBy: 'manual' },
-        })
-      ).toBe('manual');
-    }
+    expect(rootTriggeredBy).toBe('${{ execution.triggeredBy }}');
+    expect(
+      evaluateExpression(rootTriggeredBy as string, { execution: { triggeredBy: 'scheduled' } })
+    ).toBe('scheduled');
+    expect(
+      evaluateExpression(rootTriggeredBy as string, { execution: { triggeredBy: 'manual' } })
+    ).toBe('manual');
+  });
+
+  it('marks continuous onboarding runs as scheduled, since it refuses every other origin', () => {
+    const worker = findStep(definitions.continuousOnboarding, 'schedule_onboarding');
+
+    expect(worker.with?.body?.rootTriggeredBy).toBe('scheduled');
   });
 
   it('runs detection and KI extraction gates only for workers whose root origin is scheduled', () => {
@@ -146,11 +145,12 @@ describe('Significant Events run quota workflow contracts', () => {
 
   it('places discovery and KI gates before their expensive work', () => {
     expect(definitions.discovery.steps.slice(0, 3).map(({ name }) => name)).toEqual([
-      'bootstrap_cleanup_workflow',
       'check_budget',
       'exit_if_budget_denied',
+      'set_initial_vars',
     ]);
-    expect(definitions.onboarding.steps.slice(0, 2).map(({ name }) => name)).toEqual([
+    expect(definitions.onboarding.steps.slice(0, 3).map(({ name }) => name)).toEqual([
+      'refuse_direct_runs',
       'check_budget',
       'exit_if_budget_denied',
     ]);
