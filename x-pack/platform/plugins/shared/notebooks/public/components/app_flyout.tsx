@@ -233,7 +233,7 @@ const AppGridPanel = ({
         <span>
           <EuiToolTip content={REVEAL_PANEL_LABEL} disableScreenReaderOutput>
             <EuiButtonIcon
-              iconType="eye"
+              iconType="symlink"
               color="text"
               aria-label={REVEAL_PANEL_LABEL}
               onClick={() => onRevealCell(cell.id)}
