@@ -89,6 +89,36 @@ describe('WorkflowsPlugin', () => {
     expect(mockRegisterHitlLifecycleAuditor).toHaveBeenCalled();
   });
 
+  it.each([
+    [false, 0],
+    [true, 1],
+  ])(
+    'with workflowsManagement.pages.enabled %s, registers the workflow-page type %s times',
+    (pagesEnabled, registrations) => {
+      const initializerContext = coreMock.createPluginInitializerContext({
+        enabled: true,
+        logging: { console: false },
+        available: true,
+        library: { ttlMs: 600_000 },
+        pages: { enabled: pagesEnabled },
+      });
+      const coreSetup = coreMock.createSetup();
+      const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
+
+      new WorkflowsPlugin(initializerContext).setup(coreSetup, {
+        encryptedSavedObjects,
+        spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
+        workflowsExtensions: workflowsExtensionsMock.createSetup(),
+      });
+
+      const pageTypeCalls = coreSetup.savedObjects.registerType.mock.calls.filter(
+        ([type]) => type.name === 'workflow-page'
+      );
+      expect(pageTypeCalls).toHaveLength(registrations);
+      expect(encryptedSavedObjects.registerType).toHaveBeenCalledTimes(registrations);
+    }
+  );
+
   it('marks the workflows service as stopping on stop()', () => {
     const initializerContext = coreMock.createPluginInitializerContext({
       enabled: true,

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core/server';
 import {
   coreMock,
@@ -18,7 +17,7 @@ import {
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
-import { pageRef, WORKFLOW_CREATED_AT } from './fake_page_store.mock';
+import { pageRef } from './fake_page_store.mock';
 import { WORKFLOW_PAGE_SAVED_OBJECT_TYPE } from './page_saved_object';
 import type { WorkflowPageAuditLog } from './types';
 import { WorkflowPagePrivilegesError } from './workflow_page_privileges_error';
@@ -46,20 +45,13 @@ const createAuthz = (granted: WorkflowsManagementApiActions[]) => {
   return { authz, atSpace };
 };
 
-const setup = ({
-  authz,
-  flag = new BehaviorSubject(true),
-}: {
-  authz?: SecurityPluginStart['authz'];
-  flag?: BehaviorSubject<boolean>;
-} = {}) => {
+const setup = ({ authz }: { authz?: SecurityPluginStart['authz'] } = {}) => {
   const service = new WorkflowPagesService();
   const savedObjects = savedObjectsServiceMock.createSetupContract();
   const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
   service.setup({ savedObjects, encryptedSavedObjects });
 
   const core = coreMock.createStart();
-  core.featureFlags.getBooleanValue$.mockReturnValue(flag);
   const assertWorkflowAccess = jest.fn(async () => {});
   const getSpaceId = jest.fn((_request: KibanaRequest) => 'space-a');
   const start = service.start({
@@ -76,7 +68,7 @@ const setup = ({
     } as jest.Mocked<WorkflowPageAuditLog>,
     logger: loggingSystemMock.createLogger(),
   });
-  return { service, start, core, savedObjects, assertWorkflowAccess, getSpaceId, flag };
+  return { service, start, core, savedObjects, assertWorkflowAccess, getSpaceId };
 };
 
 describe('WorkflowPagesService', () => {
@@ -137,35 +129,6 @@ describe('WorkflowPagesService', () => {
       expect(core.savedObjects.getScopedClient).toHaveBeenCalledWith(request, {
         includedHiddenTypes: [WORKFLOW_PAGE_SAVED_OBJECT_TYPE],
       });
-    });
-  });
-
-  describe('feature flag', () => {
-    const syncPage = (start: ReturnType<typeof setup>['start']) =>
-      start.getSystemClient().syncWorkflowPages({
-        workflowId: 'workflow-1',
-        workflowCreatedAt: WORKFLOW_CREATED_AT,
-        spaceId: 'default',
-        definition: null,
-        valid: true,
-      });
-
-    it('follows the flag, and stops following it on stop', async () => {
-      const flag = new BehaviorSubject(false);
-      const { start, core, service } = setup({ flag });
-      const internalClient = core.savedObjects.getUnsafeInternalClient.mock.results[0].value;
-
-      await syncPage(start);
-      expect(internalClient.find).not.toHaveBeenCalled();
-
-      flag.next(true);
-      await syncPage(start).catch(() => undefined);
-      expect(internalClient.find).toHaveBeenCalledTimes(1);
-
-      service.stop();
-      flag.next(false);
-      await syncPage(start).catch(() => undefined);
-      expect(internalClient.find).toHaveBeenCalledTimes(2);
     });
   });
 });

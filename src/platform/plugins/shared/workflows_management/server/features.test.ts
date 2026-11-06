@@ -10,7 +10,7 @@
 import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
-import { WorkflowsManagementFeatureConfig } from './features';
+import { getWorkflowsManagementFeatureConfig, WorkflowsManagementFeatureConfig } from './features';
 import { WORKFLOW_PAGE_SAVED_OBJECT_TYPE } from './pages/page_saved_object';
 
 const getSubFeaturePrivilege = (id: string) =>
@@ -42,27 +42,37 @@ describe('WorkflowsManagementFeatureConfig', () => {
   });
 
   describe('workflow pages', () => {
-    it('lets page managers write pages without workflow update', () => {
-      const subPrivilege = getSubFeaturePrivilege('workflow_page_manage')!;
+    const getPrivileges = (pagesEnabled: boolean) =>
+      getWorkflowsManagementFeatureConfig({ pagesEnabled }).subFeatures!.flatMap((subFeature) =>
+        subFeature.privilegeGroups.flatMap((group) => group.privileges)
+      );
 
-      expect(subPrivilege.api).toEqual([WorkflowsManagementApiActions.managePages]);
-      expect(subPrivilege.savedObject).toEqual({
+    it('has no page privilege while pages are off', () => {
+      expect(getWorkflowsManagementFeatureConfig({ pagesEnabled: false })).toBe(
+        WorkflowsManagementFeatureConfig
+      );
+      expect(getPrivileges(false).map(({ id }) => id)).not.toContain('workflow_page_manage');
+    });
+
+    it('lets page managers write pages without workflow update', () => {
+      const pagePrivilege = getPrivileges(true).find(({ id }) => id === 'workflow_page_manage')!;
+
+      expect(pagePrivilege.api).toEqual([WorkflowsManagementApiActions.managePages]);
+      expect(pagePrivilege.savedObject).toEqual({
         all: [WORKFLOW_PAGE_SAVED_OBJECT_TYPE],
         read: [],
       });
-      expect(subPrivilege.includeIn).toBe('all');
+      expect(pagePrivilege.includeIn).toBe('all');
     });
 
     it('gives no other privilege access to pages', () => {
-      const others = WorkflowsManagementFeatureConfig.subFeatures!.flatMap((subFeature) =>
-        subFeature.privilegeGroups.flatMap((group) => group.privileges)
-      ).filter(({ id }) => id !== 'workflow_page_manage');
-
-      others.forEach(({ savedObject }) => {
-        expect([...savedObject.all, ...savedObject.read]).not.toContain(
-          WORKFLOW_PAGE_SAVED_OBJECT_TYPE
-        );
-      });
+      getPrivileges(true)
+        .filter(({ id }) => id !== 'workflow_page_manage')
+        .forEach(({ savedObject }) => {
+          expect([...savedObject.all, ...savedObject.read]).not.toContain(
+            WORKFLOW_PAGE_SAVED_OBJECT_TYPE
+          );
+        });
     });
   });
 });
