@@ -216,6 +216,46 @@ export const configSchema = schema.object(
       authenticate_background_task_utilization: schema.boolean({ defaultValue: true }),
       exclude_task_types: schema.arrayOf(schema.string(), { defaultValue: [] }),
     }),
+    /*
+     * Where tasks run, for the task types that can run outside Kibana's main process (they are
+     * registered as task type modules):
+     * - in_process: in this process (default).
+     * - child_process: in a process Kibana starts for each run, from the bundles built by
+     *   `node scripts/task_bundle` (or the distributable's `task_bundles`).
+     * - remote: in the task process at `remote.url`, started from the same bundles. A task type it does not
+     *   serve runs in this process.
+     * Kibana claims, validates and reschedules every task whatever the mode.
+     */
+    task_execution: schema.maybe(
+      schema.object(
+        {
+          mode: schema.oneOf(
+            [
+              schema.literal('in_process'),
+              schema.literal('child_process'),
+              schema.literal('remote'),
+            ],
+            { defaultValue: 'in_process' }
+          ),
+          /* child_process: where the bundles are; defaults to `task_bundles` or `target/task_bundles`. */
+          bundle_dir: schema.maybe(schema.string()),
+          /* remote: the task process, and the bearer token it was started with (`TASK_PROCESS_TOKEN`). */
+          remote: schema.maybe(
+            schema.object({
+              url: schema.string(),
+              token: schema.maybe(schema.string()),
+            })
+          ),
+        },
+        {
+          validate: ({ mode, remote }) => {
+            if (mode === 'remote' && !remote) {
+              return 'task_execution.remote.url is required when task_execution.mode is remote';
+            }
+          },
+        }
+      )
+    ),
     /* The threshold percenatge for workers experiencing version conflicts for shifting the polling interval. */
     version_conflict_threshold: schema.number({
       defaultValue: DEFAULT_VERSION_CONFLICT_THRESHOLD,

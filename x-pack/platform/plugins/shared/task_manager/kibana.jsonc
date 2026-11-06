@@ -10,6 +10,10 @@
     "id": "taskManager",
     "browser": false,
     "server": true,
+    "taskTypes": [
+      "server/task_types/delete_inactive_nodes.task.ts",
+      "server/task_types/mark_removed_tasks_as_unrecognized.task.ts"
+    ],
     "configPath": [
       "xpack",
       "task_manager"
