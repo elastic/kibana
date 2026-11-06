@@ -114,7 +114,7 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
     //
     // A fake request carrying a UIAM credential also stays on this branch regardless of
     // `cloneApiKey`. Fake requests have no principal (except for those minted by the service
-    // accounts backend). A UIAM service-account token on a fake request with no principal 
+    // accounts backend). A UIAM service-account token on a fake request with no principal
     // (like the Actions inbound events route scheduling on behalf of Relay) is indistinguishable
     // from a UIAM session token, and the ES grant fails for the former. Until all fake requests
     // carry a principal, the UIAM grant is the only one that works for every `essu_` bearer.
