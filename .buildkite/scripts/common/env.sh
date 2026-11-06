@@ -67,8 +67,13 @@ if [[ "$BUILDKITE_AGENT_GCP_REGION" ]]; then
 fi
 
 export GECKODRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache$CI_PROXY_CACHE_SUFFIX"
-export CHROMEDRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache$CI_PROXY_CACHE_SUFFIX"
+export SE_DRIVER_MIRROR_URL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache$CI_PROXY_CACHE_SUFFIX/chrome-for-testing"
 export CYPRESS_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache$CI_PROXY_CACHE_SUFFIX/cypress"
+
+# Selenium Manager resolves chromedriver at FTR session creation; the mirror above keeps that
+# fetch on the proxy cache. Stop it pulling its own browser so a missing Chrome on the agent
+# fails loudly instead of silently changing what we test.
+export SE_AVOID_BROWSER_DOWNLOAD=true
 
 export NODE_OPTIONS="--max-old-space-size=4096"
 
@@ -120,15 +125,6 @@ export GIT_BRANCH="${BUILDKITE_BRANCH:-}"
 
 export FLEET_PACKAGE_REGISTRY_PORT=6104
 export TEST_CORS_SERVER_PORT=6105
-
-# Mac agents currently don't have Chrome
-if [[ "$(which google-chrome-stable)" || "$(which google-chrome)" ]]; then
-  echo "Chrome detected, setting DETECT_CHROMEDRIVER_VERSION=true"
-  export DETECT_CHROMEDRIVER_VERSION=true
-  export CHROMEDRIVER_FORCE_DOWNLOAD=true
-else
-  echo "Chrome not detected, installing default chromedriver binary for the package version"
-fi
 
 export GCS_UPLOAD_PREFIX=FAKE_UPLOAD_PREFIX # TODO remove the need for this
 
