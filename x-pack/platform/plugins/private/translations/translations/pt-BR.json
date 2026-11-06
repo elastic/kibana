@@ -55481,7 +55481,6 @@
     "xpack.synthetics.monitorConfig.namespace.label": "Espaço de nome do fluxo de dados",
     "xpack.synthetics.monitorConfig.namespace.learnMore": "Saiba mais",
     "xpack.synthetics.monitorConfig.params.error": "Formato de JSON inválido",
-    "xpack.synthetics.monitorConfig.params.helpText": "Use JSON para definir parâmetros que possam ser referenciados no seu script com {paramsValue}",
     "xpack.synthetics.monitorConfig.params.label": "Parâmetros",
     "xpack.synthetics.monitorConfig.paramsAria.label": "Editor de código de parâmetros do monitor",
     "xpack.synthetics.monitorConfig.password.helpText": "Senha da autenticação no servidor.",
