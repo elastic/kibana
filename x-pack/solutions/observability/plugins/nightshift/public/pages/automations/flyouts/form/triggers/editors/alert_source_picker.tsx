@@ -7,7 +7,12 @@
 
 import React from 'react';
 import { EuiButtonGroup, EuiComboBox, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { CLASSIC_ALERT_SOURCE } from '@kbn/nightshift-investigations-plugin/common';
+import {
+  CLASSIC_ALERT_SOURCE,
+  EXTERNAL_ALERT_SOURCE,
+  SIGNIFICANT_EVENTS_ALERT_SOURCE,
+  UNIVERSAL_ALERT_SOURCE,
+} from '@kbn/nightshift-investigations-plugin/common';
 import type { TriggerFormValues } from '../../automation_form_values';
 import { alertSourceLabels } from '../translations';
 
@@ -15,8 +20,9 @@ type AlertTrigger = Extract<TriggerFormValues, { kind: 'alert' }>;
 
 const KNOWN_SOURCES = [
   { key: CLASSIC_ALERT_SOURCE, label: alertSourceLabels.classic },
-  { key: 'internal', label: alertSourceLabels.universalRules },
-  { key: 'elastic.significant_events', label: alertSourceLabels.significantEvents },
+  { key: UNIVERSAL_ALERT_SOURCE, label: alertSourceLabels.universalRules },
+  { key: SIGNIFICANT_EVENTS_ALERT_SOURCE, label: alertSourceLabels.significantEvents },
+  { key: EXTERNAL_ALERT_SOURCE, label: alertSourceLabels.external },
 ];
 
 const sourceLabel = (source: string) =>

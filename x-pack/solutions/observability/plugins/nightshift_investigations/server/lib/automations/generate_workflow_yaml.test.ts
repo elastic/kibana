@@ -412,6 +412,23 @@ describe('generateWorkflowYaml', () => {
           expect(v2Matches(row, sourceEvent('pagerduty'))).toBe(true);
         });
 
+        it('matches every source outside the first-party ones for external', () => {
+          const row: AlertRow = { kind: 'alert', alertSources: ['external'] };
+          expect(v2Matches(row, sourceEvent('pagerduty'))).toBe(true);
+          expect(v2Matches(row, sourceEvent('internal'))).toBe(false);
+          expect(v2Matches(row, sourceEvent('elastic.significant_events'))).toBe(false);
+        });
+
+        it('combines external with a first-party source, and excludes both together', () => {
+          const include: AlertRow = { kind: 'alert', alertSources: ['external', 'internal'] };
+          expect(v2Matches(include, sourceEvent('pagerduty'))).toBe(true);
+          expect(v2Matches(include, sourceEvent('internal'))).toBe(true);
+          expect(v2Matches(include, sourceEvent('elastic.significant_events'))).toBe(false);
+          const exclude: AlertRow = { ...include, alertSourceMode: 'exclude' };
+          expect(v2Matches(exclude, sourceEvent('pagerduty'))).toBe(false);
+          expect(v2Matches(exclude, sourceEvent('elastic.significant_events'))).toBe(true);
+        });
+
         it('combines the source filter with the rule filters', () => {
           const row: AlertRow = { kind: 'alert', tags: ['k8s'], alertSources: ['internal'] };
           expect(v2Matches(row, sourceEvent('internal'))).toBe(true);

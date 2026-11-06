@@ -8,7 +8,12 @@
 import { stringify } from 'yaml';
 import { IF_CONDITION_MAX_LENGTH } from '@kbn/workflows';
 import { DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID } from '../../../common';
-import { CLASSIC_ALERT_SOURCE } from '../../../common/automation_limits';
+import {
+  CLASSIC_ALERT_SOURCE,
+  EXTERNAL_ALERT_SOURCE,
+  SIGNIFICANT_EVENTS_ALERT_SOURCE,
+  UNIVERSAL_ALERT_SOURCE,
+} from '../../../common/automation_limits';
 import { parsePresetSchedule } from '../../../common/automation_schedule';
 import type { InvestigationNotificationDestination } from '../../../common';
 import type { NightshiftAutomationAttributes, NightshiftTriggerRow, OverlapPolicy } from './types';
@@ -553,10 +558,20 @@ function passesUniversal(row: AlertRow): boolean {
   return universalSources(row).length > 0;
 }
 
+// Keep in sync with the event.source values Kibana itself writes: any other source counts as external.
+const FIRST_PARTY_EVENT_SOURCES = [UNIVERSAL_ALERT_SOURCE, SIGNIFICANT_EVENTS_ALERT_SOURCE];
+
 function buildSourceCondition(row: AlertRow): string | undefined {
   const sources = universalSources(row);
   if (sources.length === 0) return undefined;
-  const clause = kqlOneOf('event.source', sources);
+  const eventSources = sources.filter((source) => source !== EXTERNAL_ALERT_SOURCE);
+  const clauses = [
+    ...(eventSources.length > 0 ? [kqlOneOf('event.source', eventSources)] : []),
+    ...(eventSources.length < sources.length
+      ? [`NOT ${kqlOneOf('event.source', FIRST_PARTY_EVENT_SOURCES)}`]
+      : []),
+  ];
+  const clause = clauses.length === 1 ? clauses[0] : `(${clauses.join(' OR ')})`;
   return row.alertSourceMode === 'exclude' ? `NOT ${clause}` : clause;
 }
 

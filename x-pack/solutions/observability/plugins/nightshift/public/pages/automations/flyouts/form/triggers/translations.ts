@@ -217,6 +217,9 @@ export const alertSourceLabels = {
     'xpack.nightshift.automations.flyout.alertSourceSignificantEvents',
     { defaultMessage: 'Significant events' }
   ),
+  external: i18n.translate('xpack.nightshift.automations.flyout.alertSourceExternal', {
+    defaultMessage: 'External sources',
+  }),
 };
 
 export const rulePickerLabels = {
