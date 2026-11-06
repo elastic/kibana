@@ -35,6 +35,7 @@ import type {
   WorkflowListDto,
   WorkflowStatsDto,
 } from '@kbn/workflows';
+import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { ManagedWorkflowId } from '@kbn/workflows/managed';
 import type {
   ExecuteManagedWorkflowOptions,
@@ -87,6 +88,11 @@ import {
   type ManagedInstallReadinessResult,
   waitForManagedWorkflowInstallReadiness,
 } from '../lib/wait_for_managed_workflow_install_readiness';
+import type { WorkflowPagesClient } from '../pages/workflow_pages_client';
+import type {
+  WorkflowPagesService,
+  WorkflowPagesServiceStart,
+} from '../pages/workflow_pages_service';
 import { ManagedWorkflowsService } from '../services/managed_workflows_service';
 import type { HitlStepClaim } from '../services/mark_step_as_responded_updater';
 import { WorkflowAccessControlService } from '../services/workflow_access_control';
@@ -172,6 +178,7 @@ export class WorkflowsService {
   private executionQueryService!: WorkflowExecutionQueryService;
   private searchService!: WorkflowSearchService;
   private crudService!: WorkflowCrudService;
+  private pages?: WorkflowPagesServiceStart;
   private accessControlService?: WorkflowAccessControlService;
   private managedWorkflowsService!: ManagedWorkflowsService;
   private readonly changeHistoryService: WorkflowChangeHistoryService;
@@ -189,8 +196,8 @@ export class WorkflowsService {
     public readonly plugins: WorkflowsServerPluginSetupDeps,
     private readonly logger: Logger,
     public readonly kibanaVersion: string,
-    /** `workflowsManagement.pages.enabled`. */
-    private readonly pagesEnabled = false
+    /** Set up by the plugin. Without it, workflows have no pages. */
+    private readonly pagesService?: WorkflowPagesService
   ) {
     this.changeHistoryService = new WorkflowChangeHistoryService(logger, kibanaVersion);
     this.initPromise = this.initialize(core);
@@ -269,7 +276,7 @@ export class WorkflowsService {
       getCoreStart: () => this.coreStart,
       licensing: pluginsStart.licensing,
       logger: this.logger,
-      pagesEnabled: this.pagesEnabled,
+      pagesEnabled: this.pagesService !== undefined,
     });
 
     const { workflowExecutionsDataClient, stepExecutionsDataClient } =
@@ -293,6 +300,20 @@ export class WorkflowsService {
 
     await this.initializeChangeHistoryService(coreStart);
 
+    this.pages = this.pagesService?.start({
+      core: coreStart,
+      encryptedSavedObjects: pluginsStart.encryptedSavedObjects,
+      authz: pluginsStart.security?.authz,
+      getSpaceId: (request) => this.plugins.spaces.spacesService.getSpaceId(request),
+      assertWorkflowAccess: async ({ workflowId, spaceId }, operation, request) => {
+        const workflow = await this.getWorkflow(workflowId, spaceId);
+        if (!workflow) throw new WorkflowNotFoundError(workflowId);
+        await (await this.getAccessControl()).assertAccess(workflow, operation, request);
+      },
+      audit: new WorkflowManagementAuditLog({ service: this }),
+      logger: this.logger.get('pages'),
+    });
+
     this.crudService = new WorkflowCrudService({
       authz: this.pluginsStart.security?.authz,
       getSpaceId: (request) => this.plugins.spaces.spacesService.getSpaceId(request),
@@ -308,6 +329,7 @@ export class WorkflowsService {
       changeHistoryService: this.changeHistoryService,
       workflowExecutionsDataClient: this.workflowExecutionsDataClient,
       stepExecutionsDataClient,
+      pagesSystemClient: this.pages?.getSystemClient(),
     });
 
     this.managedWorkflowsService = new ManagedWorkflowsService({
@@ -337,6 +359,13 @@ export class WorkflowsService {
   public async getPluginsStart(): Promise<WorkflowsServerPluginStartDeps> {
     await this.ensureInitialized();
     return this.pluginsStart;
+  }
+
+  /** Page operations for one request. Checks the caller's privileges and the workflow ACL. */
+  public async getPagesClient(request: KibanaRequest): Promise<WorkflowPagesClient> {
+    await this.ensureInitialized();
+    if (!this.pages) throw new Error('Workflow pages are not set up');
+    return this.pages.getClient({ request });
   }
 
   public async getAccessControl(): Promise<WorkflowAccessControlService> {

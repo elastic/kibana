@@ -4643,3 +4643,141 @@ describe('managed orphan cleanup without a request', () => {
     });
   });
 });
+
+describe('workflow page lifecycle', () => {
+  const pageYaml = [
+    'name: Page Workflow',
+    'enabled: true',
+    'triggers:',
+    '  - type: page',
+    '    title: Report',
+    'steps:',
+    '  - name: step-one',
+    '    type: console',
+    '    with:',
+    '      message: "hi"',
+  ].join('\n');
+
+  const setup = () => {
+    const pagesService = {
+      syncWorkflowPages: jest.fn().mockResolvedValue(undefined),
+      retireWorkflowPages: jest.fn().mockResolvedValue(undefined),
+    };
+    const { deps, client } = makeDeps(undefined, {
+      pagesSystemClient: pagesService as unknown as WorkflowCrudDeps['pagesSystemClient'],
+    });
+    return {
+      service: new WorkflowCrudService(deps),
+      client,
+      deps,
+      pagesService,
+      request: httpServerMock.createKibanaRequest(),
+    };
+  };
+
+  it('syncs the pages after a create', async () => {
+    const { service, client, pagesService, request } = setup();
+    client.search.mockResolvedValue({ hits: { hits: [] } });
+
+    const { id } = await service.createWorkflow({ yaml: pageYaml }, 'default', request);
+
+    expect(pagesService.syncWorkflowPages).toHaveBeenCalledWith({
+      workflowId: id,
+      workflowCreatedAt: expect.any(String),
+      spaceId: 'default',
+      definition: expect.objectContaining({
+        triggers: [expect.objectContaining({ type: 'page' })],
+      }),
+      valid: true,
+    });
+  });
+
+  it('keeps the created workflow when the page sync fails', async () => {
+    const { service, client, deps, pagesService, request } = setup();
+    client.search.mockResolvedValue({ hits: { hits: [] } });
+    pagesService.syncWorkflowPages.mockRejectedValue(new Error('boom'));
+
+    await expect(service.createWorkflow({ yaml: pageYaml }, 'default', request)).resolves.toEqual(
+      expect.objectContaining({ name: 'Page Workflow' })
+    );
+    expect(deps.logger.error).toHaveBeenCalled();
+  });
+
+  it('syncs the pages after an update, with the stored created_at', async () => {
+    const { service, client, pagesService, request } = setup();
+    client.search.mockResolvedValue({
+      hits: { hits: [occSearchHit('wf-1', { created_at: '2024-01-01T00:00:00.000Z' })] },
+    });
+
+    await service.updateWorkflow('wf-1', { tags: ['t'] } as any, 'default', request);
+
+    expect(pagesService.syncWorkflowPages).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflowId: 'wf-1',
+        workflowCreatedAt: '2024-01-01T00:00:00.000Z',
+        spaceId: 'default',
+      })
+    );
+  });
+
+  it.each([false, true])(
+    'syncs the pages of every bulk-written workflow (overwrite=%s)',
+    async (overwrite) => {
+      const { service, client, pagesService, request } = setup();
+      client.search.mockResolvedValue({
+        hits: {
+          hits: overwrite
+            ? [occSearchHit('existing', { created_at: '2024-01-01T00:00:00.000Z' })]
+            : [],
+        },
+      });
+      client.bulk.mockResolvedValue({ items: [{ create: { _id: 'new-workflow', status: 201 } }] });
+
+      await service.bulkCreateWorkflows(
+        [
+          { id: 'new-workflow', yaml: pageYaml },
+          ...(overwrite ? [{ id: 'existing', yaml: pageYaml }] : []),
+        ],
+        'default',
+        request,
+        { overwrite }
+      );
+
+      expect(pagesService.syncWorkflowPages).toHaveBeenCalledWith(
+        expect.objectContaining({ workflowId: 'new-workflow', spaceId: 'default' })
+      );
+      if (overwrite) {
+        // An import over a workflow keeps its created_at, so its page keeps its secret.
+        expect(pagesService.syncWorkflowPages).toHaveBeenCalledWith(
+          expect.objectContaining({
+            workflowId: 'existing',
+            workflowCreatedAt: '2024-01-01T00:00:00.000Z',
+          })
+        );
+      }
+    }
+  );
+
+  it('retires the pages of a deleted workflow', async () => {
+    const { service, client, pagesService, request } = setup();
+    client.search.mockResolvedValue({
+      hits: { hits: [occSearchHit('gone', { enabled: false, deleted_at: new Date() })] },
+    });
+
+    await service.deleteWorkflows(['gone'], 'default', {}, request);
+
+    expect(pagesService.retireWorkflowPages).toHaveBeenCalledWith({
+      workflowIds: ['gone'],
+      spaceId: 'default',
+    });
+  });
+
+  it('retires nothing when no workflow was deleted', async () => {
+    const { service, client, pagesService, request } = setup();
+    client.search.mockResolvedValue({ hits: { hits: [] } });
+
+    await service.deleteWorkflows(['unknown'], 'default', {}, request);
+
+    expect(pagesService.retireWorkflowPages).not.toHaveBeenCalled();
+  });
+});

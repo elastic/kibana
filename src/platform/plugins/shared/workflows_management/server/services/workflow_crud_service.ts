@@ -107,6 +107,17 @@ import { scheduleWorkflowTriggers } from '../task_defs/schedule_workflow_trigger
 import { syncSchedulerAfterSave } from '../task_defs/sync_scheduler_after_save';
 import { unscheduleWorkflowTasks } from '../task_defs/unschedule_workflow_tasks';
 
+interface DeleteWorkflowsOptions {
+  force?: boolean;
+  acknowledgeAclLoss?: boolean;
+}
+
+interface WorkflowDeletionOptions extends DeleteWorkflowsOptions {
+  profileId?: string;
+  request?: KibanaRequest;
+  isAdmin?: boolean;
+}
+
 // How many times to re-resolve a server-generated ID after losing a TOCTOU race
 // against `op_type: 'create'`. The id resolver itself walks up to MAX_COLLISION_RETRIES
 // candidates per call, so the practical ceiling is far higher than this number;
@@ -724,6 +735,8 @@ export class WorkflowCrudService {
       logger: this.deps.logger,
     });
 
+    await this.syncWorkflowPages([{ id, document: workflowData }]);
+
     return transformStorageDocumentToWorkflowDto(id, workflowData);
   }
 
@@ -926,6 +939,10 @@ export class WorkflowCrudService {
       );
     }
 
+    await this.syncWorkflowPages(
+      successfullyWritten.map((vw) => ({ id: vw.id, document: vw.workflowData }))
+    );
+
     return { created, failed };
   }
 
@@ -1043,6 +1060,8 @@ export class WorkflowCrudService {
       shouldUpdateScheduler,
     });
 
+    await this.syncWorkflowPages([{ id, document: finalData }]);
+
     return {
       response: {
         id,
@@ -1134,7 +1153,7 @@ export class WorkflowCrudService {
   async deleteWorkflows(
     ids: string[],
     spaceId: string,
-    options?: { force?: boolean; acknowledgeAclLoss?: boolean },
+    options?: DeleteWorkflowsOptions,
     request?: KibanaRequest
   ): Promise<DeleteWorkflowsResponse> {
     const profileId = request
@@ -1144,6 +1163,17 @@ export class WorkflowCrudService {
       options?.force === true &&
       (await isEntityAccessControlAdmin(this.deps.getCoreStart(), request, this.deps.authz));
     const deletionOptions = { ...options, profileId, request, isAdmin };
+    const result = await this.deleteWorkflowsWithBindings(ids, spaceId, deletionOptions);
+    await this.retireWorkflowPages(result.successfulIds ?? [], spaceId);
+    return result;
+  }
+
+  private async deleteWorkflowsWithBindings(
+    ids: string[],
+    spaceId: string,
+    deletionOptions: WorkflowDeletionOptions
+  ): Promise<DeleteWorkflowsResponse> {
+    const { profileId, request, isAdmin, force } = deletionOptions;
     const bindings = this.deps.getServiceAccountBindings?.();
     if (!bindings) return this.deleteWorkflowDocuments(ids, spaceId, deletionOptions);
     const result: DeleteWorkflowsResponse = {
@@ -1193,13 +1223,13 @@ export class WorkflowCrudService {
         }
         assertWorkflowOperation(
           versioned.source,
-          getWorkflowDeleteOperation(versioned.source, options?.force),
+          getWorkflowDeleteOperation(versioned.source, force),
           profileId,
           this.accessAuditContext(request, id, spaceId),
           isAdmin
         );
         const accountId = versioned.source.definition?.settings?.run_as;
-        if (batch && !accountId && !options?.force) {
+        if (batch && !accountId && !force) {
           unboundSoftDeletes.push({
             _id: id,
             _source: versioned.source,
@@ -1210,7 +1240,7 @@ export class WorkflowCrudService {
         }
         if (accountId) {
           await ensureWorkflowServiceAccountMutationAuthorized(this.deps.getCoreStart(), request);
-          if (options?.force) {
+          if (force) {
             const executions = await this.deps.executionQueryService.getWorkflowExecutions(
               { workflowId: id, statuses: [...NonTerminalExecutionStatuses], size: 1 },
               spaceId
@@ -1279,7 +1309,7 @@ export class WorkflowCrudService {
     }
     if (batch)
       await cleanupDeletedWorkflows(result.successfulIds ?? [], {
-        force: options?.force ?? false,
+        force: force ?? false,
         spaceId,
         taskScheduler: this.deps.getTaskScheduler(),
         workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
@@ -1287,6 +1317,47 @@ export class WorkflowCrudService {
         logger: this.deps.logger,
       });
     return result;
+  }
+
+  /**
+   * Creates and retires pages after a write. A failure only logs: the workflow write already
+   * happened, and the public route also checks that the workflow still has the page trigger.
+   */
+  private async syncWorkflowPages(
+    workflows: Array<{ id: string; document: WorkflowProperties }>
+  ): Promise<void> {
+    const { pagesSystemClient } = this.deps;
+    if (!pagesSystemClient) return;
+    await pMap(
+      workflows,
+      async ({ id, document }) => {
+        try {
+          await pagesSystemClient.syncWorkflowPages({
+            workflowId: id,
+            workflowCreatedAt: document.created_at,
+            spaceId: document.spaceId,
+            definition: document.definition,
+            valid: document.valid,
+          });
+        } catch (error) {
+          this.deps.logger.error(`Failed to sync the pages of workflow [${id}]`, { error });
+        }
+      },
+      { concurrency: 10 }
+    );
+  }
+
+  private async retireWorkflowPages(workflowIds: string[], spaceId: string): Promise<void> {
+    const { pagesSystemClient } = this.deps;
+    if (!pagesSystemClient || workflowIds.length === 0) return;
+    try {
+      await pagesSystemClient.retireWorkflowPages({ workflowIds, spaceId });
+    } catch (error) {
+      this.deps.logger.error(
+        `Failed to retire the pages of deleted workflows [${workflowIds.join(', ')}]`,
+        { error }
+      );
+    }
   }
 
   private accessAuditContext(
@@ -1326,13 +1397,7 @@ export class WorkflowCrudService {
   private async deleteWorkflowDocuments(
     ids: string[],
     spaceId: string,
-    options?: {
-      force?: boolean;
-      acknowledgeAclLoss?: boolean;
-      profileId?: string;
-      request?: KibanaRequest;
-      isAdmin?: boolean;
-    },
+    options?: WorkflowDeletionOptions,
     versionedWorkflow?: VersionedWorkflowDocument,
     guardedBatch?: OccWorkflowHit[],
     deferCleanup = false
