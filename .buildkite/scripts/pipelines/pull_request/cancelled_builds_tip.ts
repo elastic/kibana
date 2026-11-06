@@ -23,7 +23,8 @@ const TIMEOUT_MS = 15_000;
 const isBotUser = (login: string): boolean =>
   login.endsWith('[bot]') || login === 'kibanamachine' || login === 'elasticmachine';
 
-const isBotFixCommit = ({ message }: Build): boolean => message.startsWith('Changes from ');
+const isBotFixCommit = ({ message }: Build): boolean =>
+  Boolean(message?.startsWith('Changes from '));
 
 // Drafts only build when the author asks for it, through `/ci` or a draft CI label.
 const ranOnDraft = ({ env, meta_data: metaData }: Build): boolean =>
@@ -77,12 +78,12 @@ const postTip = async (): Promise<void> => {
   }
 
   // PR builds have hundreds of jobs each, and only build-level fields are needed here.
-  const finishedBuilds = await new BuildkiteClient().getFinishedBuildsForBranch(
-    PIPELINE_SLUG,
-    BUILDKITE_BRANCH,
-    BUILDS_TO_FETCH,
-    { excludeJobs: true }
-  );
+  // A hung request would keep the process alive, delaying the pipeline upload, so it needs its own timeout.
+  const finishedBuilds = await new BuildkiteClient({
+    timeoutMs: TIMEOUT_MS,
+  }).getFinishedBuildsForBranch(PIPELINE_SLUG, BUILDKITE_BRANCH, BUILDS_TO_FETCH, {
+    excludeJobs: true,
+  });
 
   const cancelledBuilds = countRecentCancelledBuilds(finishedBuilds, GITHUB_PR_NUMBER);
   if (cancelledBuilds < MIN_CANCELLED_BUILDS) {

@@ -8,6 +8,7 @@
  */
 
 import type { Build } from '#pipeline-utils';
+import { BuildkiteClient } from '#pipeline-utils';
 import {
   CANCELLED_BUILDS_TIP_CONTEXT,
   countRecentCancelledBuilds,
@@ -127,6 +128,7 @@ describe('postCancelledBuildsTip', () => {
   it('posts the tip once three builds were cancelled in the last day', async () => {
     await postCancelledBuildsTip();
 
+    expect(BuildkiteClient).toHaveBeenCalledWith({ timeoutMs: 15_000 });
     expect(mockGetFinishedBuildsForBranch).toHaveBeenCalledWith(
       'kibana-pull-request',
       'jane:feature',

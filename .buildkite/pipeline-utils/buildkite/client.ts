@@ -27,6 +27,7 @@ export interface BuildkiteClientConfig {
   baseUrl?: string;
   token?: string;
   exec?: ExecType;
+  timeoutMs?: number;
 }
 
 export type BuildkiteStep =
@@ -203,6 +204,7 @@ export class BuildkiteClient {
         Authorization: `Bearer ${BUILDKITE_TOKEN}`,
       },
       allowAbsoluteUrls: false,
+      timeout: config.timeoutMs,
     });
 
     this.exec = config.exec ?? execSync;
