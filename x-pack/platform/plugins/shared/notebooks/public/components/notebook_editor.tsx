@@ -145,12 +145,15 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
   const { euiTheme } = useEuiTheme();
   const { size } = euiTheme;
   // Keeps the cells' Run buttons (just outside each cell) and the floating controls (pinned to
-  // the page edge) clear of each other and of the cells, padding only when the page is too narrow.
-  const reservedEnd = `(${size.s} + ${size.xxxxl}) + (${size.m} + ${size.xxl} + ${size.m})`;
+  // the page edge) clear of each other and of the cells. The section centres its content in what
+  // the padding leaves, so the end padding is solved for an end margin of `reservedEnd`: none while
+  // centring leaves enough, growing while the cells shift toward the start, then exactly
+  // `reservedEnd` once they shrink.
+  const reservedEnd = `((${size.s} + ${size.xxxxl}) + (${size.m} + ${size.xxl} + ${size.m}))`;
   const sectionCss = css`
     padding-inline-end: max(
       ${size.base},
-      calc(${reservedEnd} - max(0px, (100% - ${PAGE_WIDTH}px) / 2))
+      min(${reservedEnd}, calc(2 * ${reservedEnd} + ${PAGE_WIDTH}px + ${size.base} - 100%))
     );
   `;
   const sidePanel = useStateFromPublishingSubject(notebook.sidePanel$);
