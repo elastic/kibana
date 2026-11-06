@@ -156,11 +156,15 @@ describe('createRetryTask', () => {
   let resolver: {
     removeIfExists: jest.Mock;
     getCheckTaskState: jest.Mock;
+    getTaskId: jest.Mock;
+    run: jest.Mock;
   };
 
   const getDeps = async () => ({ esClient, soClient });
 
   const CHECK_TASK_ID = `${BulkActionTaskType.REASSIGN_RETRY}:check:action1`;
+  const RETRY_TASK_ID = `${BulkActionTaskType.REASSIGN_RETRY}:action1`;
+  const CHECK_TASK_SCHEDULE = { interval: `${CHECK_TASK_INTERVAL_MINUTES}m` };
 
   const createTaskInstance = (
     overrides: Partial<ConcreteTaskInstance> = {}
@@ -188,7 +192,12 @@ describe('createRetryTask', () => {
     jest.clearAllMocks();
     loggerMock.clear(logger);
     jest.spyOn(appContextService, 'getLogger').mockReturnValue(logger);
-    resolver = { removeIfExists: jest.fn(), getCheckTaskState: jest.fn() };
+    resolver = {
+      removeIfExists: jest.fn(),
+      getCheckTaskState: jest.fn(),
+      getTaskId: jest.fn((actionId: string, type: string) => `${type}:${actionId}`),
+      run: jest.fn(),
+    };
     jest.spyOn(appContextService, 'getBulkActionsResolver').mockReturnValue(resolver as any);
     mockRecentBatch(false);
   });
@@ -243,47 +252,53 @@ describe('createRetryTask', () => {
   });
 
   describe('check task', () => {
-    it('removes itself once the checkpoint says every agent was processed', async () => {
-      const doRetry = jest.fn();
-
-      await createRetryTask(
+    it('asks task manager to delete it once the checkpoint says every agent was processed', async () => {
+      const result = await createRetryTask(
         createTaskInstance({ state: { nbAgentsProcessed: 100000 } }),
         getDeps,
-        doRetry
+        jest.fn()
       ).run();
 
-      expect(resolver.removeIfExists).toHaveBeenCalledWith(CHECK_TASK_ID);
-      expect(doRetry).not.toHaveBeenCalled();
+      // removing itself and then returning would make task manager update a document that no
+      // longer exists, which a recurring task's update does not treat as success
+      expect(resolver.removeIfExists).not.toHaveBeenCalled();
+      expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
+      expect(resolver.run).not.toHaveBeenCalled();
     });
 
     it('does not use action document counts to decide completion', async () => {
       // rollback writes its documents under its own action ids, so a runner can be mid-flight
       // with no documents at all under this action id
-      const doRetry = jest.fn().mockResolvedValue({ actionId: 'action1' });
-
-      await createRetryTask(
+      const result = await createRetryTask(
         createTaskInstance({ state: { nbAgentsProcessed: 20000 } }),
         getDeps,
-        doRetry
+        jest.fn()
       ).run();
 
-      expect(resolver.removeIfExists).not.toHaveBeenCalled();
-      expect(doRetry).toHaveBeenCalled();
+      expect(result).not.toEqual(expect.objectContaining({ shouldDeleteTask: true }));
+      expect(resolver.run).toHaveBeenCalled();
     });
 
     it('does not resume while a batch was written within the interval', async () => {
       mockRecentBatch(true);
-      const doRetry = jest.fn();
 
-      await createRetryTask(createTaskInstance(), getDeps, doRetry).run();
+      await createRetryTask(createTaskInstance(), getDeps, jest.fn()).run();
 
-      expect(doRetry).not.toHaveBeenCalled();
+      expect(resolver.run).not.toHaveBeenCalled();
       expect(resolver.removeIfExists).not.toHaveBeenCalled();
     });
 
-    it('does not resume while the runner keeps moving the checkpoint', async () => {
-      const doRetry = jest.fn();
+    it('returns the recurring schedule, so a legacy one-shot check task is adopted', async () => {
+      // such a task is Running while it is handled here, and bulkUpdateSchedules only updates
+      // Idle tasks, so ensureScheduled from the resumed runner cannot change its schedule
+      mockRecentBatch(true);
 
+      const result = await createRetryTask(createTaskInstance(), getDeps, jest.fn()).run();
+
+      expect(result).toEqual(expect.objectContaining({ schedule: CHECK_TASK_SCHEDULE }));
+    });
+
+    it('does not resume while the runner keeps moving the checkpoint', async () => {
       const result = await createRetryTask(
         createTaskInstance({
           state: {
@@ -293,15 +308,37 @@ describe('createRetryTask', () => {
           },
         }),
         getDeps,
-        doRetry
+        jest.fn()
       ).run();
 
-      expect(doRetry).not.toHaveBeenCalled();
+      expect(resolver.run).not.toHaveBeenCalled();
       expect(result).toEqual({
         state: expect.objectContaining({
           lastObservedCheckpointAt: '2026-10-16T18:48:34.000Z',
         }),
+        schedule: CHECK_TASK_SCHEDULE,
       });
+    });
+
+    it('does not resume a runner that has only just stamped its start', async () => {
+      // the runner stamps the checkpoint before its first batch, so a first batch slower than the
+      // interval is not mistaken for a dead runner and given a second runner alongside it
+      const result = await createRetryTask(
+        createTaskInstance({
+          state: { checkpointUpdatedAt: '2026-10-16T18:48:34.000Z', nbAgentsProcessed: 0 },
+        }),
+        getDeps,
+        jest.fn()
+      ).run();
+
+      expect(resolver.run).not.toHaveBeenCalled();
+      expect(result).toEqual(
+        expect.objectContaining({
+          state: expect.objectContaining({
+            lastObservedCheckpointAt: '2026-10-16T18:48:34.000Z',
+          }),
+        })
+      );
     });
 
     it('merges watcher fields onto the freshest state, not the claimed one', async () => {
@@ -311,8 +348,6 @@ describe('createRetryTask', () => {
         nbAgentsProcessed: 40000,
         checkpointUpdatedAt: '2026-10-16T18:50:00.000Z',
       });
-      const doRetry = jest.fn();
-
       const result = await createRetryTask(
         createTaskInstance({
           state: {
@@ -323,7 +358,7 @@ describe('createRetryTask', () => {
           },
         }),
         getDeps,
-        doRetry
+        jest.fn()
       ).run();
 
       expect(result).toEqual({
@@ -333,12 +368,11 @@ describe('createRetryTask', () => {
           checkpointUpdatedAt: '2026-10-16T18:50:00.000Z',
           lastObservedCheckpointAt: '2026-10-16T18:48:34.000Z',
         },
+        schedule: CHECK_TASK_SCHEDULE,
       });
     });
 
-    it('resumes the runner from the checkpoint when nothing progressed', async () => {
-      const doRetry = jest.fn().mockResolvedValue({ actionId: 'action1' });
-
+    it('hands the resume to the retry task rather than running it here', async () => {
       const result = await createRetryTask(
         createTaskInstance({
           state: {
@@ -348,65 +382,79 @@ describe('createRetryTask', () => {
           },
         }),
         getDeps,
-        doRetry
+        jest.fn()
       ).run();
 
-      expect(doRetry).toHaveBeenCalledWith(
-        esClient,
-        soClient,
+      // running it here would let the runner checkpoint while task manager persists the state
+      // returned below, losing that checkpoint
+      expect(resolver.run).toHaveBeenCalledWith(
         expect.objectContaining({ actionId: 'action1' }),
         expect.objectContaining({
           searchAfter: ['lastAgent'],
           retryCount: 1,
-          taskId: CHECK_TASK_ID,
-        })
+          taskId: RETRY_TASK_ID,
+        }),
+        BulkActionTaskType.REASSIGN_RETRY,
+        RETRY_TASK_ID
       );
-      expect(result).toEqual({ state: expect.objectContaining({ resumeCount: 1 }) });
+      expect(result).toEqual(
+        expect.objectContaining({ state: expect.objectContaining({ resumeCount: 1 }) })
+      );
     });
 
     it('keeps the original point in time when resuming, so the cursor stays meaningful', async () => {
       // the saved cursor's implicit _shard_doc tiebreaker only means anything inside the point in
       // time that produced it; a stall shorter than the keep alive leaves it usable
-      const doRetry = jest.fn().mockResolvedValue({ actionId: 'action1' });
-
       await createRetryTask(
         createTaskInstance({ state: { searchAfter: ['lastAgent'] } }),
         getDeps,
-        doRetry
+        jest.fn()
       ).run();
 
-      expect(doRetry).toHaveBeenCalledWith(
-        esClient,
-        soClient,
+      expect(resolver.run).toHaveBeenCalledWith(
         expect.anything(),
-        expect.objectContaining({ pitId: 'stale-pit', searchAfter: ['lastAgent'] })
+        expect.objectContaining({ pitId: 'stale-pit', searchAfter: ['lastAgent'] }),
+        expect.anything(),
+        RETRY_TASK_ID
+      );
+    });
+
+    it('prefers the checkpointed point in time over the one the action started with', async () => {
+      // Elasticsearch can hand back a new id on any search, and only the latest is valid
+      await createRetryTask(
+        createTaskInstance({ state: { searchAfter: ['lastAgent'], pitId: 'latest-pit' } }),
+        getDeps,
+        jest.fn()
+      ).run();
+
+      expect(resolver.run).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ pitId: 'latest-pit' }),
+        expect.anything(),
+        RETRY_TASK_ID
       );
     });
 
     it('drops the checkpoint for update tags, which must restart from scratch', async () => {
-      const doRetry = jest.fn().mockResolvedValue({ actionId: 'action1' });
-
       await createRetryTask(
         createTaskInstance({
           taskType: BulkActionTaskType.UPDATE_AGENT_TAGS_RETRY,
           state: { searchAfter: ['lastAgent'] },
         }),
         getDeps,
-        doRetry
+        jest.fn()
       ).run();
 
-      expect(doRetry).toHaveBeenCalledWith(
-        esClient,
-        soClient,
+      expect(resolver.run).toHaveBeenCalledWith(
         expect.anything(),
-        expect.objectContaining({ searchAfter: undefined, pitId: undefined })
+        expect.objectContaining({ searchAfter: undefined, pitId: undefined }),
+        expect.anything(),
+        expect.anything()
       );
     });
 
     it('treats a legacy check task with no isCheckTask param as a check task', async () => {
-      const doRetry = jest.fn();
-
-      await createRetryTask(
+      const result = await createRetryTask(
         createTaskInstance({
           params: {
             actionParams: { kuery: '', actionId: 'action1', total: 100000, batchSize: 10000 },
@@ -415,18 +463,16 @@ describe('createRetryTask', () => {
           state: { nbAgentsProcessed: 100000 },
         }),
         getDeps,
-        doRetry
+        jest.fn()
       ).run();
 
-      // it took the check branch (removed itself) rather than launching a runner
-      expect(resolver.removeIfExists).toHaveBeenCalledWith(CHECK_TASK_ID);
-      expect(doRetry).not.toHaveBeenCalled();
+      // it took the check branch (asked to be deleted) rather than launching a runner
+      expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
+      expect(resolver.run).not.toHaveBeenCalled();
     });
 
     it('falls back to the params checkpoint for a legacy check task', async () => {
       // tasks scheduled before this change kept the checkpoint in params and have empty state
-      const doRetry = jest.fn().mockResolvedValue({ actionId: 'action1' });
-
       await createRetryTask(
         createTaskInstance({
           params: {
@@ -436,23 +482,21 @@ describe('createRetryTask', () => {
           state: {},
         }),
         getDeps,
-        doRetry
+        jest.fn()
       ).run();
 
-      expect(doRetry).toHaveBeenCalledWith(
-        esClient,
-        soClient,
+      expect(resolver.run).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
           searchAfter: ['legacy'],
           nbAgentsProcessed: 30000,
-        })
+        }),
+        expect.anything(),
+        expect.anything()
       );
     });
 
     it('prefers the state checkpoint over the params one', async () => {
-      const doRetry = jest.fn().mockResolvedValue({ actionId: 'action1' });
-
       await createRetryTask(
         createTaskInstance({
           params: {
@@ -463,37 +507,37 @@ describe('createRetryTask', () => {
           state: { searchAfter: ['current'] },
         }),
         getDeps,
-        doRetry
+        jest.fn()
       ).run();
 
-      expect(doRetry).toHaveBeenCalledWith(
-        esClient,
-        soClient,
+      expect(resolver.run).toHaveBeenCalledWith(
         expect.anything(),
-        expect.objectContaining({ searchAfter: ['current'] })
+        expect.objectContaining({ searchAfter: ['current'] }),
+        expect.anything(),
+        expect.anything()
       );
     });
 
     it('stops resuming after MAX_CHECK_TASK_RESUMES attempts', async () => {
-      const doRetry = jest.fn();
-
-      await createRetryTask(
+      const result = await createRetryTask(
         createTaskInstance({ state: { resumeCount: MAX_CHECK_TASK_RESUMES } }),
         getDeps,
-        doRetry
+        jest.fn()
       ).run();
 
-      expect(doRetry).not.toHaveBeenCalled();
-      expect(resolver.removeIfExists).toHaveBeenCalledWith(CHECK_TASK_ID);
+      expect(resolver.run).not.toHaveBeenCalled();
+      expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
+      expect(resolver.removeIfExists).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('stalled after'));
     });
 
-    it('catches a rejection from the resumed runner', async () => {
-      const doRetry = jest.fn().mockRejectedValue(new Error('Request timed out'));
+    it('keeps watching when scheduling the resume fails', async () => {
+      resolver.run.mockRejectedValue(new Error('Request timed out'));
 
-      await createRetryTask(createTaskInstance(), getDeps, doRetry).run();
-      await new Promise(process.nextTick);
+      const result = await createRetryTask(createTaskInstance(), getDeps, jest.fn()).run();
 
+      // the watchdog survives, so the next tick can try again
+      expect(result).toEqual({ state: {}, schedule: CHECK_TASK_SCHEDULE });
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('Request timed out'),
         expect.anything()
@@ -509,7 +553,7 @@ describe('createRetryTask', () => {
         jest.fn()
       ).run();
 
-      expect(result).toEqual({ state: { resumeCount: 3 } });
+      expect(result).toEqual({ state: { resumeCount: 3 }, schedule: CHECK_TASK_SCHEDULE });
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('check task'),
         expect.anything()

@@ -275,6 +275,9 @@ export abstract class ActionRunner {
     try {
       await this.bulkActionsResolver!.updateCheckTaskState(this.checkTaskId, {
         searchAfter: this.retryParams.searchAfter,
+        // Checkpointed with the cursor: Elasticsearch can return a new point in time id on any
+        // search, and the cursor is only meaningful against the one that produced it.
+        pitId: this.retryParams.pitId,
         nbAgentsProcessed: this.nbAgentsProcessed,
       });
     } catch (error) {
@@ -284,6 +287,20 @@ export abstract class ActionRunner {
           `Could not update the checkpoint on check task ${this.checkTaskId}: ${error.message}`
         );
     }
+  }
+
+  /**
+   * Move the count and the cursor past a batch that has been processed, then checkpoint both.
+   *
+   * They move together, after the batch is processed, so a runner that dies mid-batch leaves a
+   * checkpoint pointing before it and both values describe the same point. Advancing one without
+   * the other would make a resume re-read a batch and double count it, or leave the count
+   * permanently short of `total` so completion is never recognised.
+   */
+  private async advanceCheckpoint(agents: Agent[]) {
+    this.nbAgentsProcessed += agents.length;
+    this.retryParams.searchAfter = agents[agents.length - 1].sort!;
+    await this.updateCheckpoint();
   }
 
   private async processBatch(agents: Agent[]): Promise<{ actionId: string }> {
@@ -353,6 +370,13 @@ export abstract class ActionRunner {
       });
     };
 
+    // Stamp the checkpoint before the first batch so the watchdog has a liveness signal from the
+    // moment the runner starts. Without it, a first batch slower than CHECK_TASK_INTERVAL_MINUTES
+    // looks identical to a dead runner: no checkpoint has moved and no action document has been
+    // written yet, so the watchdog would start a second runner alongside this one. Each stamp
+    // buys another interval, so a resume needs a whole interval with no batch completing.
+    await this.updateCheckpoint();
+
     const res = await getAgents();
     if (res.pit) {
       pitId = res.pit;
@@ -369,13 +393,7 @@ export abstract class ActionRunner {
 
     await this.processBatch(currentAgents);
     let allAgentsProcessed = currentAgents.length;
-    // The count and the cursor move together, after the batch is processed, so a runner that dies
-    // mid-batch leaves a checkpoint pointing before it and both values describe the same point.
-    // Advancing one without the other would make a resume re-read a batch and double count it, or
-    // leave the count permanently short of `total` so completion is never recognised.
-    this.nbAgentsProcessed += currentAgents.length;
-    this.retryParams.searchAfter = currentAgents[currentAgents.length - 1].sort!;
-    await this.updateCheckpoint();
+    await this.advanceCheckpoint(currentAgents);
 
     while (allAgentsProcessed < res.total) {
       const nextPage = await getAgents();
@@ -392,10 +410,7 @@ export abstract class ActionRunner {
       }
       await this.processBatch(currentAgents);
       allAgentsProcessed += currentAgents.length;
-      // updating check task with latest checkpoint (count and cursor, see above)
-      this.nbAgentsProcessed += currentAgents.length;
-      this.retryParams.searchAfter = currentAgents[currentAgents.length - 1].sort!;
-      await this.updateCheckpoint();
+      await this.advanceCheckpoint(currentAgents);
     }
 
     if (pitId) {

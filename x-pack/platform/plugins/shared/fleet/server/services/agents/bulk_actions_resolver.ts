@@ -42,8 +42,9 @@ const CHECK_TASK_ID_MARKER = `${CHECK_TASK_TYPE_SUFFIX}:`;
 
 /**
  * A check task scheduled before this was introduced has no `isCheckTask` param. `ensureScheduled`
- * updates an existing task's schedule but not its params, so such a task would be adopted as a
- * recurring task and then keep taking the ordinary retry branch forever. Fall back to its id.
+ * routes an id that already exists to `updateScheduleOfExistingTask`, which only updates the
+ * schedule (and only for an Idle task), never the params, so such a task would otherwise keep
+ * taking the ordinary retry branch forever. Fall back to its id.
  */
 export const isCheckTaskInstance = (taskInstance: ConcreteTaskInstance): boolean =>
   (taskInstance.params as BulkActionTaskParams)?.isCheckTask === true ||
@@ -53,6 +54,16 @@ export interface BulkActionTaskParams {
   actionParams: ActionParams;
   retryParams: RetryParams;
   isCheckTask?: boolean;
+}
+
+/**
+ * What the check task hands back to Task Manager. `shouldDeleteTask` is how a task asks to be
+ * removed (see `SuccessfulRunResult` in task_manager/server/task.ts).
+ */
+interface CheckTaskRunResult {
+  state: BulkActionCheckTaskState;
+  schedule?: IntervalSchedule;
+  shouldDeleteTask?: boolean;
 }
 
 type DoRetry = (
@@ -193,7 +204,7 @@ export class BulkActionsResolver {
    */
   public async updateCheckTaskState(
     taskId: string,
-    checkpoint: Pick<BulkActionCheckTaskState, 'searchAfter' | 'nbAgentsProcessed'>
+    checkpoint: Pick<BulkActionCheckTaskState, 'searchAfter' | 'pitId' | 'nbAgentsProcessed'>
   ) {
     const logger = appContextService.getLogger();
     if (!this.taskManager) {
@@ -280,29 +291,38 @@ const hasRecentActionDoc = async (
  */
 const runCheckTask = async (
   taskInstance: ConcreteTaskInstance,
-  esClient: ElasticsearchClient,
-  soClient: SavedObjectsClientContract,
-  doRetry: DoRetry
-): Promise<{ state: BulkActionCheckTaskState }> => {
+  esClient: ElasticsearchClient
+): Promise<CheckTaskRunResult> => {
   const logger = appContextService.getLogger();
   const state: BulkActionCheckTaskState = taskInstance.state ?? {};
   const { actionParams } = taskInstance.params as BulkActionTaskParams;
   const actionId = actionParams.actionId!;
 
   const resolver = await appContextService.getBulkActionsResolver();
-  const removeSelf = async () => {
-    await resolver?.removeIfExists(taskInstance.id);
-  };
+
+  // Task Manager deletes a task that asks for it, rather than the task deleting itself and then
+  // writing to a document that no longer exists: a recurring task's own update is not 404 aware,
+  // so self-removal would make every completed action log a task failure.
+  const deleteSelf = (): CheckTaskRunResult => ({ state, shouldDeleteTask: true });
 
   /**
-   * Task Manager writes the state returned here over the current task document, so echoing back
-   * the state claimed at the start of the run would rewind a checkpoint the live runner wrote in
-   * the meantime. Merge the watcher's own fields onto the freshest state instead.
+   * Task Manager writes the state returned here over the current task document, and its version
+   * conflict resolution also prefers the returned state, so a checkpoint the runner writes
+   * between this read and that write is lost. Reading as late as possible keeps the window to
+   * the tail of this run, and the resume is handed to a separate task rather than started here
+   * so that the window normally has no writer in it at all. A checkpoint lost this way costs one
+   * re-read batch on the next resume, which processBatch deduplicates and still counts.
+   *
+   * The schedule is returned on every path so that a check task created before this was a
+   * recurring task is adopted into the recurring cadence. Such a task is Running while it is
+   * handled here, and bulkUpdateSchedules only updates Idle tasks, so `ensureScheduled` from the
+   * resumed runner cannot do it.
    */
   const withWatcherFields = async (
     fields: Partial<BulkActionCheckTaskState>
-  ): Promise<{ state: BulkActionCheckTaskState }> => ({
+  ): Promise<CheckTaskRunResult> => ({
     state: { ...((await resolver?.getCheckTaskState(taskInstance.id)) ?? state), ...fields },
+    schedule: { interval: `${CHECK_TASK_INTERVAL_MINUTES}m` },
   });
 
   // The runner removes this task when it finishes, but that removal can itself fail, so the check
@@ -314,8 +334,7 @@ const runCheckTask = async (
     logger.debug(
       `Bulk action ${actionId} is complete (${state.nbAgentsProcessed}/${total} agents), removing check task ${taskInstance.id}`
     );
-    await removeSelf();
-    return { state };
+    return deleteSelf();
   }
 
   const checkpointMoved =
@@ -332,8 +351,7 @@ const runCheckTask = async (
     logger.warn(
       `Bulk action ${actionId} stalled after ${MAX_CHECK_TASK_RESUMES} resume attempts, giving up and removing check task ${taskInstance.id}`
     );
-    await removeSelf();
-    return { state };
+    return deleteSelf();
   }
 
   logger.info(
@@ -348,24 +366,29 @@ const runCheckTask = async (
     // A check task scheduled before this change kept its checkpoint in params rather than state.
     searchAfter: state.searchAfter ?? params.retryParams?.searchAfter,
     nbAgentsProcessed: state.nbAgentsProcessed ?? params.retryParams?.nbAgentsProcessed,
-    // The point in time the API handler opened is kept rather than cleared. A stall shorter than
-    // its keep alive leaves it valid, and the saved cursor's implicit `_shard_doc` tiebreaker is
-    // only meaningful inside the point in time that produced it. If it has expired the search
-    // 404s, and that handler clears it so the next run opens a fresh one.
+    // The point in time is taken from the checkpoint, not from the params: Elasticsearch may
+    // hand back a new id on any search, and only the latest one is guaranteed to be valid. It is
+    // kept rather than cleared because a stall shorter than its keep alive leaves it usable, and
+    // if it has expired the search 404s and that handler clears it so the next run opens a fresh
+    // one.
+    pitId: state.pitId ?? params.retryParams?.pitId,
   });
 
-  // Intentionally not awaited: the runner outlives this task's 1m timeout. The catch is what
-  // keeps a failure here from becoming an unhandled rejection.
-  doRetry(esClient, soClient, actionParams, {
-    ...retryParams,
-    retryCount: 1,
-    taskId: taskInstance.id,
-  }).catch((error) => {
-    logger.error(
-      `Resuming bulk action ${actionId} from check task ${taskInstance.id} failed: ${error.message}`,
-      { error }
-    );
-  });
+  // The runner is started by its own retry task rather than detached from this one. It outlives
+  // this task's timeout either way, but running it elsewhere keeps it from writing a checkpoint
+  // while Task Manager is persisting the state returned below, and gives the resume the same
+  // scheduling and failure handling as an ordinary retry.
+  if (!resolver) {
+    logger.warn(`Cannot resume bulk action ${actionId}, the bulk actions resolver is unavailable`);
+    return { state, schedule: { interval: `${CHECK_TASK_INTERVAL_MINUTES}m` } };
+  }
+  const retryTaskId = resolver.getTaskId(actionId, taskInstance.taskType);
+  await resolver.run(
+    actionParams,
+    { ...retryParams, retryCount: 1, taskId: retryTaskId },
+    taskInstance.taskType,
+    retryTaskId
+  );
 
   return await withWatcherFields({
     resumeCount,
@@ -385,14 +408,18 @@ export function createRetryTask(
 
       if (isCheckTaskInstance(taskInstance)) {
         try {
-          return await runCheckTask(taskInstance, esClient, soClient, doRetry);
+          return await runCheckTask(taskInstance, esClient);
         } catch (error) {
           // Never throw out of a recurring task: Task Manager would mark it failed and we would
-          // lose the only thing watching this action.
+          // lose the only thing watching this action. The schedule is returned here too, so a
+          // legacy one-shot check task is not deleted as finished after a failed run.
           logger.error(`Bulk action check task ${taskInstance.id} failed: ${error.message}`, {
             error,
           });
-          return { state: taskInstance.state ?? {} };
+          return {
+            state: taskInstance.state ?? {},
+            schedule: { interval: `${CHECK_TASK_INTERVAL_MINUTES}m` },
+          };
         }
       }
 

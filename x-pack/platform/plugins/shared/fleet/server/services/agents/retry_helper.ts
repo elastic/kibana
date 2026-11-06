@@ -37,6 +37,11 @@ export interface RetryParams {
  */
 export interface BulkActionCheckTaskState {
   searchAfter?: SortResults;
+  /**
+   * The point in time the cursor was taken under. Elasticsearch may return a new id on any
+   * search, and only the latest is guaranteed valid, so it is checkpointed with the cursor.
+   */
+  pitId?: string;
   nbAgentsProcessed?: number;
   checkpointUpdatedAt?: string;
   lastObservedCheckpointAt?: string;

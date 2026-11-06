@@ -142,10 +142,11 @@ describe('ActionRunner', () => {
       // the cursor matches the count: both describe "everything through batch 2 is done"
       expect(resolver.updateCheckTaskState).toHaveBeenLastCalledWith(CHECK_TASK_ID, {
         searchAfter: ['agent-3'],
+        pitId: 'stale-pit',
         nbAgentsProcessed: 4,
       });
-      // the first batch is checkpointed too
-      expect(resolver.updateCheckTaskState).toHaveBeenCalledTimes(2);
+      // the start stamp plus one checkpoint per batch
+      expect(resolver.updateCheckTaskState).toHaveBeenCalledTimes(3);
       // the check task is only removed once, on success
       expect(resolver.removeIfExists).toHaveBeenCalledTimes(1);
       expect(resolver.removeIfExists).toHaveBeenCalledWith(CHECK_TASK_ID);
@@ -218,8 +219,7 @@ describe('ActionRunner', () => {
         expect.anything(),
         expect.anything(),
         expect.anything(),
-        RETRY_TASK_ID,
-        undefined
+        RETRY_TASK_ID
       );
     });
   });
@@ -393,7 +393,43 @@ describe('ActionRunner', () => {
         soClient,
         expect.objectContaining({ pitKeepAlive: PIT_KEEP_ALIVE })
       );
-      expect(PIT_KEEP_ALIVE).toBe('10m');
+    });
+
+    it('checkpoints the point in time alongside the cursor', async () => {
+      mockAgentPages(1, 2);
+      mockedGetAgentsByKuery.mockImplementation(
+        async () =>
+          ({
+            agents: [createAgent('agent-0'), createAgent('agent-1')],
+            total: 2,
+            page: 1,
+            perPage: 2,
+            pit: 'rotated-pit',
+          } as Awaited<ReturnType<typeof getAgentsByKuery>>)
+      );
+
+      await createRunner({ total: 2 }).runActionAsyncWithRetry();
+
+      // Elasticsearch can hand back a new id on any search, and the cursor only means anything
+      // against the point in time that produced it
+      expect(resolver.updateCheckTaskState).toHaveBeenLastCalledWith(
+        CHECK_TASK_ID,
+        expect.objectContaining({ pitId: 'rotated-pit', searchAfter: ['agent-1'] })
+      );
+    });
+
+    it('stamps the checkpoint before the first batch, as a liveness signal', async () => {
+      mockAgentPages(2, 2);
+
+      await createRunner().runActionAsyncWithRetry();
+
+      // without it a first batch slower than the check interval looks exactly like a dead
+      // runner, and the watchdog would start a second runner alongside this one
+      expect(resolver.updateCheckTaskState).toHaveBeenNthCalledWith(
+        1,
+        CHECK_TASK_ID,
+        expect.objectContaining({ searchAfter: undefined, nbAgentsProcessed: 0 })
+      );
     });
 
     it('pages on a unique sort key, so a checkpoint survives a new point in time', async () => {
@@ -408,7 +444,6 @@ describe('ActionRunner', () => {
         soClient,
         expect.objectContaining({ sortField: ACTION_SORT_FIELD, sortOrder: ACTION_SORT_ORDER })
       );
-      expect(ACTION_SORT_FIELD).toBe('agent.id');
     });
   });
 
