@@ -9,36 +9,17 @@ import React, { useEffect, useRef } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-const ANGLE_PROPERTY = '--notebook-running-border-angle';
-const REVOLUTION_MS = 1500;
+const PULSE_MS = 1200;
 
 /** Whether the running border animates; when it doesn't, the static status border shows instead. */
 export const canAnimateRunningBorder = (): boolean =>
   typeof window !== 'undefined' &&
-  typeof CSS !== 'undefined' &&
-  'registerProperty' in CSS &&
   typeof Element.prototype.animate === 'function' &&
   !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-let isAngleRegistered = false;
-const registerAngleProperty = () => {
-  if (isAngleRegistered) return;
-  isAngleRegistered = true;
-  try {
-    CSS.registerProperty({
-      name: ANGLE_PROPERTY,
-      syntax: '<angle>',
-      inherits: false,
-      initialValue: '0deg',
-    });
-  } catch {
-    // Registering twice throws (e.g. after a hot reload); the existing registration is the same.
-  }
-};
-
 /**
- * An arc that sweeps around the cell's border while `isRunning`. Once the run ends it completes
- * the current revolution, so even a quick run shows one full turn.
+ * Pulses the cell's border while `isRunning`. Once the run ends it completes the current pulse,
+ * so even a quick run shows one full pulse.
  */
 export const RunningBorder = ({ isRunning }: { isRunning: boolean }) => {
   const { euiTheme } = useEuiTheme();
@@ -55,14 +36,11 @@ export const RunningBorder = ({ isRunning }: { isRunning: boolean }) => {
         current.effect?.updateTiming({ iterations: Infinity });
         return;
       }
-      registerAngleProperty();
-      const next = element.animate(
-        [
-          { [ANGLE_PROPERTY]: '0deg', opacity: 1 },
-          { [ANGLE_PROPERTY]: '360deg', opacity: 1 },
-        ],
-        { duration: REVOLUTION_MS, iterations: Infinity, easing: 'linear' }
-      );
+      const next = element.animate([{ opacity: 0 }, { opacity: 1 }, { opacity: 0 }], {
+        duration: PULSE_MS,
+        iterations: Infinity,
+        easing: 'ease-in-out',
+      });
       next.onfinish = () => {
         if (animation.current === next) animation.current = undefined;
       };
@@ -72,14 +50,11 @@ export const RunningBorder = ({ isRunning }: { isRunning: boolean }) => {
 
     if (!current) return;
     const elapsed = Number(current.currentTime ?? 0);
-    current.effect?.updateTiming({
-      iterations: Math.max(1, Math.ceil(elapsed / REVOLUTION_MS)),
-    });
+    current.effect?.updateTiming({ iterations: Math.max(1, Math.ceil(elapsed / PULSE_MS)) });
   }, [isRunning]);
 
   useEffect(() => () => animation.current?.cancel(), []);
 
-  const ring = 'linear-gradient(#000 0 0)';
   return (
     <div
       ref={ref}
@@ -89,17 +64,9 @@ export const RunningBorder = ({ isRunning }: { isRunning: boolean }) => {
         inset: 0;
         pointer-events: none;
         opacity: 0;
-        padding: ${euiTheme.border.width.thick};
         border-radius: ${euiTheme.border.radius.medium};
-        background: conic-gradient(
-          from var(${ANGLE_PROPERTY}),
-          transparent 0turn,
-          transparent 0.6turn,
-          ${euiTheme.colors.borderStrongPrimary} 1turn
-        );
-        mask: ${ring} content-box, ${ring};
-        mask-composite: exclude;
-        -webkit-mask-composite: xor;
+        box-shadow: inset 0 0 0 ${euiTheme.border.width.thick}
+          ${euiTheme.colors.borderStrongPrimary};
       `}
       data-test-subj="notebookCellRunningBorder"
     />
