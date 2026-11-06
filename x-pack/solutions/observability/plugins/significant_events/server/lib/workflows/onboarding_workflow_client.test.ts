@@ -47,14 +47,14 @@ const onboardingKeyOf = (sourceId: string): string =>
 
 const createClient = (overrides: Record<string, jest.Mock> = {}) => {
   const managementApi = createMockManagementApi(overrides);
-  const telemetry = { trackOnboardingScheduled: jest.fn() } as never;
+  const telemetry = { trackOnboardingScheduled: jest.fn() };
   const sourcesClientGet = jest.fn(async (sourceId: string) => ({
     source: { id: sourceId, slug: slugOf(sourceId), enabled: true, esql_updated_at: 'revision-2' },
   }));
   const getSourcesClient = jest.fn().mockResolvedValue({ get: sourcesClientGet });
   const client = new SignificantEventsKIsOnboardingClient({
     managementApi: managementApi as never,
-    telemetry,
+    telemetry: telemetry as never,
     getSourcesClient,
   });
   return { client, managementApi, telemetry };
