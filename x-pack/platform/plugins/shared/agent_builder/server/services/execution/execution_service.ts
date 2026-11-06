@@ -193,7 +193,8 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     // paid for. Given back below whenever the turn writes no conversation.
     const newConversation = resolvedConversation?.newConversation;
     const releaseNewConversation =
-      newConversation && !(await this.isIdempotentReplay({ executionClient, executionId, metadata }))
+      newConversation &&
+      !(await this.isIdempotentReplay({ executionClient, executionId, metadata }))
         ? await this.deps.callbackDeliveryService.runOnBeforeNewConversation(newConversation)
         : undefined;
 
@@ -1046,7 +1047,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     spaceId: string;
     request: KibanaRequest;
     conversationClient: ConversationClient;
-  }): Promise<{ conversationId?: string; agentId: string; newConversation?: OnBeforeNewConversationContext }> {
+  }): Promise<{
+    conversationId?: string;
+    agentId: string;
+    newConversation?: OnBeforeNewConversationContext;
+  }> {
     const { conversationId, origin } = params;
     const agentId = this.requestedAgentId(params);
 
