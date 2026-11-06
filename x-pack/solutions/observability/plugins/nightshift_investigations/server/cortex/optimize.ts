@@ -524,7 +524,12 @@ export const applyCortexEdits = async ({
         !alreadyTouched &&
         isIndependentInvestigation(existing);
       const corroborations = confirms ? existing.corroborations + 1 : existing?.corroborations;
-      touchedIds.add(id);
+      // Only a write that creates, revives or confirms the page uses up this run's one confirmation.
+      // A recovery round's revision of a live page does not, so a corroborate of it still applies
+      // whichever order the model lists the two edits in.
+      if (confirms || existing === undefined || existing.status === 'archived') {
+        touchedIds.add(id);
+      }
       const status = !existing
         ? 'tentative'
         : alreadyTouched || !confirms

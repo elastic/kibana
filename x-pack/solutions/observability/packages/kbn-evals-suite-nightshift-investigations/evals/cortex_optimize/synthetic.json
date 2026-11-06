@@ -266,8 +266,10 @@
       "output": {
         "must_capture": [],
         "must_not": [],
-        "effects": [{ "match": { "terms": ["slow disk"] }, "round": 0, "effect": "corroborated" }],
-        "max_pages_matching": [{ "match": { "terms": ["slow disk"] }, "max": 1 }]
+        "effects": [
+          { "match": { "terms": ["slow disk|disk is slow"] }, "round": 0, "effect": "corroborated" }
+        ],
+        "max_pages_matching": [{ "match": { "terms": ["slow disk|disk is slow"] }, "max": 1 }]
       },
       "metadata": { "case_id": "synthetic-recovery-confirmed", "kind": "alert_recovery" }
     },

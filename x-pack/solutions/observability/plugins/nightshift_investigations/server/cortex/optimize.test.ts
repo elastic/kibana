@@ -519,6 +519,47 @@ describe('applyCortexEdits', () => {
       });
     });
 
+    // The model may list the rewrite before the corroborate. A recovery rewrite does not confirm the
+    // page, so it must not use up the confirmation that the recovery's corroborate carries.
+    it.each([
+      ['rewrite first', ['upsert', 'corroborate']],
+      ['corroborate first', ['corroborate', 'upsert']],
+    ] as const)(
+      'applies both a rewrite and a corroborate in a recovery round, %s',
+      async (_name, actions) => {
+        const existing = cart();
+        const store = createStore({
+          list: jest.fn().mockResolvedValue({
+            pages: [existing],
+            stats: { total: 1, established: 0, total_corroborations: 0 },
+          }),
+          get: jest.fn().mockResolvedValue(existing),
+        });
+
+        await applyCortexEdits({
+          store,
+          telemetry: createTelemetry(),
+          logger: loggerMock.create(),
+          roundKind: 'alert_recovery',
+          provenance: { conversationId: 'conversation-1' },
+          edits: actions.map((action) => ({
+            action,
+            entity_type: 'service' as const,
+            slug: 'otel-demo-cart',
+            title: 'Cart',
+            ...(action === 'upsert' ? { content: 'Cart uses Redis and flagd.' } : {}),
+          })),
+        });
+
+        expect(store.upsert).toHaveBeenCalledWith(
+          expect.objectContaining({ content: 'Cart uses Redis and flagd.' })
+        );
+        expect(store.corroborate).toHaveBeenCalledWith('cortex_service_otel-demo-cart', {
+          conversationId: 'conversation-1',
+        });
+      }
+    );
+
     it('revives an archived page as tentative when a follow-up rewrites it', async () => {
       const store = await rewrite({
         existing: cart({ status: 'archived', corroborations: 3 }),
