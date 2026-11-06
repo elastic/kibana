@@ -37,12 +37,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await findings.vulnerabilitiesIndex.add(vulnerabilitiesLatestMock);
 
       await findings.navigateToLatestVulnerabilitiesPage();
+      await pageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitFor(
         'Findings table to be loaded',
         async () =>
           (await latestVulnerabilitiesTable.getRowsCount()) === vulnerabilitiesLatestMock.length
       );
-      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
