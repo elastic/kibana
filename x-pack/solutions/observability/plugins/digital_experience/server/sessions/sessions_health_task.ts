@@ -7,6 +7,7 @@
 
 import { schema, type TypeOf } from '@kbn/config-schema';
 import type { CoreSetup, Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server';
 import type {
   TaskManagerSetupContract,
@@ -157,6 +158,22 @@ export const registerSessionsHealthTask = ({
       }),
     },
   });
+};
+
+/** The error of the health task's last automatic update, if its last run had one. */
+export const getLastAutoUpdateError = async (
+  taskManager: TaskManagerStartContract
+): Promise<string | undefined> => {
+  try {
+    const { state } = await taskManager.get(SESSIONS_HEALTH_TASK_ID);
+    return (state as SessionsHealthTaskState).autoUpdateError;
+  } catch (error) {
+    // Not scheduled yet, so it hasn't failed either.
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return undefined;
+    }
+    throw error;
+  }
 };
 
 export const scheduleSessionsHealthTask = async ({

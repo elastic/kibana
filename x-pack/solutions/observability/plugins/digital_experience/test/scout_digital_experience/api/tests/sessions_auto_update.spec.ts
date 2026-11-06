@@ -32,7 +32,9 @@ const UPDATE_TIMEOUT_MS = 60_000;
 const UPDATE_POLL_MS = 1_000;
 
 /** Checkpoints are triggered with `_schedule_now`, so summarizing takes seconds, not minutes. */
-const RECOVERY_TIMEOUT_MS = 120_000;
+const RECOVERY_TIMEOUT_MS = 60_000;
+/** The deleted key case waits for three checkpoints, beyond the default test timeout. */
+const RECOVERY_TEST_TIMEOUT_MS = 4 * RECOVERY_TIMEOUT_MS;
 const RECOVERY_POLL_MS = 2_000;
 
 /** Raw EDOT Browser events of the deleted key case, under a service no other suite uses. */
@@ -186,6 +188,7 @@ apiTest.describe(
     apiTest(
       'keeps summarizing sessions after its API key is deleted, and enabling again restores automatic updates',
       async ({ apiClient, esClient }) => {
+        apiTest.setTimeout(RECOVERY_TEST_TIMEOUT_MS);
         // A fresh transform, whose first checkpoint covers everything up to the sync delay.
         await deleteSessionsData(esClient);
         await ingestPageView(esClient, SESSION_BEFORE_DELETE, Date.now() - 5 * 60_000);

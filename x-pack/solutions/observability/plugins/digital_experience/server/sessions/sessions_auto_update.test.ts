@@ -86,7 +86,7 @@ const createApiKeys = ({
     save: jest.fn(),
     delete: jest.fn(),
     invalidate: jest.fn(),
-    isValid: jest.fn().mockResolvedValue(valid),
+    isInvalidated: jest.fn().mockResolvedValue(!valid),
     clusterClientFor: jest.fn().mockResolvedValue(keyClient),
   };
   return { apiKeys, typed: apiKeys as unknown as SessionsApiKeys, keyClient };
@@ -219,7 +219,7 @@ describe('sessions auto update', () => {
       const { apiKeys, typed } = createApiKeys({ stored: keyOf('old') });
 
       expect(await withApiKeyStatus(status, typed, check)).toEqual({ ...status, autoUpdate: true });
-      expect(apiKeys.isValid).toHaveBeenCalledWith(keyOf('old'));
+      expect(apiKeys.isInvalidated).toHaveBeenCalledWith(keyOf('old'));
     });
 
     it('only turns automatic updates off for a deleted key, as the transforms keep running', async () => {
@@ -242,6 +242,30 @@ describe('sessions auto update', () => {
       });
     });
 
+    it('shows a failing automatic update as one a user must apply, without its details', async () => {
+      const { typed } = createApiKeys({ stored: keyOf('old') });
+
+      expect(
+        await withApiKeyStatus(status, typed, {
+          checkKey: true,
+          lastAutoUpdateError: 'security_exception: user [ana] lacks [manage_transform]',
+        })
+      ).toEqual({
+        ...status,
+        autoUpdate: false,
+        reason: expect.stringContaining('The last automatic update'),
+      });
+    });
+
+    it('ignores an old automatic update failure when no update is pending', async () => {
+      const { typed } = createApiKeys({ stored: keyOf('old') });
+      const current = { ...status, needsUpdate: false };
+
+      expect(
+        await withApiKeyStatus(current, typed, { checkKey: true, lastAutoUpdateError: 'boom' })
+      ).toEqual({ ...current, autoUpdate: true });
+    });
+
     it("doesn't check the key unless asked", async () => {
       const { apiKeys, typed } = createApiKeys({ stored: keyOf('old'), valid: false });
 
@@ -249,7 +273,7 @@ describe('sessions auto update', () => {
         ...status,
         autoUpdate: true,
       });
-      expect(apiKeys.isValid).not.toHaveBeenCalled();
+      expect(apiKeys.isInvalidated).not.toHaveBeenCalled();
     });
   });
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import type { SessionsStatus } from '../../../../common/sessions';
 import { useApiClient } from '../../../hooks/use_api_client';
@@ -52,17 +52,18 @@ export const useSessionsStatus = (): SessionsStatusState => {
     }
   }, [apiClient]);
 
-  const refreshStatus = useCallback(() => {
+  // A status fetched after enabling is newer than the one enabling answered with. Kept until then,
+  // so a refresh doesn't flash the status from before enabling.
+  useEffect(() => {
     setEnabledStatus(undefined);
-    refresh();
-  }, [refresh]);
+  }, [fetchedStatus]);
 
   return {
     status: enabledStatus ?? fetchedStatus,
     // Nothing has been fetched before the first request starts.
     loading: loading || (!enabledStatus && !fetchedStatus && !error),
     error,
-    refresh: refreshStatus,
+    refresh,
     enable,
     enabling,
     enableError,

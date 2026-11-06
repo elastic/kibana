@@ -32,6 +32,7 @@ import {
   sessionsApiKeySavedObjectType,
 } from './sessions/sessions_api_key';
 import {
+  getLastAutoUpdateError,
   registerSessionsHealthTask,
   scheduleSessionsHealthTask,
 } from './sessions/sessions_health_task';
@@ -71,6 +72,7 @@ export class Plugin
     const sessionsApiKeys = new SessionsApiKeys({
       logger: this.logger,
       encryptedSavedObjects: plugins.encryptedSavedObjects,
+      hasTaskManager: plugins.taskManager !== undefined,
       getStartServices: async () => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         return { core: coreStart, encryptedSavedObjects: pluginsStart.encryptedSavedObjects };
@@ -89,6 +91,10 @@ export class Plugin
         isUxEnabled: plugins.ux !== undefined,
         sessionsSettings: settings,
         sessionsApiKeys,
+        getSessionsAutoUpdateError: async () => {
+          const [, { taskManager }] = await core.getStartServices();
+          return taskManager ? getLastAutoUpdateError(taskManager) : undefined;
+        },
       },
       runDevModeChecks: this.initializerContext.env.mode.dev,
     });

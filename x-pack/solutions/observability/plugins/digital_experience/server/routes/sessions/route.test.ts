@@ -46,6 +46,7 @@ const status = {
 };
 
 const sessionsApiKeys = { available: true };
+const lastAutoUpdateError = 'unable to authenticate';
 
 const START = '2026-10-27T10:00:00.000Z';
 const END = '2026-10-28T10:00:00.000Z';
@@ -79,6 +80,7 @@ const runHandler = (
     logger,
     sessionsSettings: settings,
     sessionsApiKeys,
+    getSessionsAutoUpdateError: async () => lastAutoUpdateError,
   });
   return { result, coreContext, logger, request };
 };
@@ -185,6 +187,7 @@ describe('sessions routes', () => {
         // Only users who can grant a new key pay for checking it.
         expect(withApiKeyStatus).toHaveBeenCalledWith(enabled, sessionsApiKeys, {
           checkKey: canManage,
+          lastAutoUpdateError: 'unable to authenticate',
         });
       }
     );

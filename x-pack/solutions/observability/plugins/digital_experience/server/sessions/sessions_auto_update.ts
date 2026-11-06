@@ -130,6 +130,9 @@ const keyInUse = async (
   return key && status.authorization?.apiKeyId === key.id ? key : null;
 };
 
+const AUTO_UPDATE_FAILED_REASON =
+  'The last automatic update of the sessions transforms failed (see the Kibana server logs); enable sessions again to apply it.';
+
 const invalidKeyReason = (key: SessionsApiKey) =>
   `The API key [${key.name}] that Kibana updates the sessions transforms with was invalidated or has expired, so this update can't apply automatically; enable sessions again to apply it and grant a new key.`;
 
@@ -143,18 +146,29 @@ const invalidKeyReason = (key: SessionsApiKey) =>
 export const withApiKeyStatus = async (
   status: SessionsStatus,
   apiKeys: SessionsApiKeys,
-  { checkKey }: { checkKey: boolean }
+  {
+    checkKey,
+    lastAutoUpdateError,
+  }: {
+    checkKey: boolean;
+    /** The health task's last failed automatic update, so a failing one doesn't look pending. */
+    lastAutoUpdateError?: string;
+  }
 ): Promise<SessionsStatus> => {
   const key = await keyInUse(status, apiKeys);
   if (!key) {
     return status;
   }
-  if (checkKey && !(await apiKeys.isValid(key))) {
+  if (checkKey && (await apiKeys.isInvalidated(key))) {
     return {
       ...status,
       apiKeyInvalid: true,
       reason: status.needsUpdate ? invalidKeyReason(key) : status.reason,
     };
+  }
+  if (status.needsUpdate && lastAutoUpdateError) {
+    // The error itself can name users and indices, so it stays in the server logs.
+    return { ...status, reason: AUTO_UPDATE_FAILED_REASON };
   }
   return { ...status, autoUpdate: true };
 };

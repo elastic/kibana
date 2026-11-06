@@ -120,26 +120,7 @@ export function SessionsStatusCallout({
       </>
     );
   }
-  // Applied by a background task with the API key granted at setup; nothing to do but wait.
-  if (status.needsUpdate && status.autoUpdate) {
-    return (
-      <>
-        <KbnInfoCallout
-          data-test-subj="digitalExperienceSessionsUpdating"
-          size="s"
-          title={i18n.translate('xpack.digitalExperience.sessions.status.updatingTitle', {
-            defaultMessage: 'Sessions are being updated',
-          })}
-          text={i18n.translate('xpack.digitalExperience.sessions.status.updatingDescription', {
-            defaultMessage:
-              'Sessions were set up by an earlier version or with other settings. They update automatically within a few minutes, with the access granted when they were set up.',
-          })}
-        />
-        <EuiSpacer size="m" />
-      </>
-    );
-  }
-  if (status.needsUpdate) {
+  if (status.needsUpdate && !status.autoUpdate) {
     return (
       <>
         <KbnWarningCallout
@@ -204,6 +185,26 @@ export function SessionsStatusCallout({
       </>
     );
   }
+  // Applied by a background task with the API key granted at setup; nothing to do but wait. After
+  // a failing transform, as that one needs attention.
+  if (status.needsUpdate && status.autoUpdate) {
+    return (
+      <>
+        <KbnInfoCallout
+          data-test-subj="digitalExperienceSessionsUpdating"
+          size="s"
+          title={i18n.translate('xpack.digitalExperience.sessions.status.updatingTitle', {
+            defaultMessage: 'Sessions are being updated',
+          })}
+          text={i18n.translate('xpack.digitalExperience.sessions.status.updatingDescription', {
+            defaultMessage:
+              'Sessions were set up by an earlier version or with other settings. They update automatically within a few minutes, with the access granted when they were set up.',
+          })}
+        />
+        <EuiSpacer size="m" />
+      </>
+    );
+  }
   if (status.health === 'lagging') {
     return (
       <>
@@ -223,5 +224,11 @@ export function SessionsStatusCallout({
       </>
     );
   }
-  return null;
+  // A failed setup with nothing else to show, such as granting a new API key on a visit.
+  return enableError ? (
+    <>
+      <EnableError error={enableError} />
+      <EuiSpacer size="m" />
+    </>
+  ) : null;
 }

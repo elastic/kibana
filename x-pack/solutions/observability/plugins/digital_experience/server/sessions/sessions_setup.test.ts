@@ -397,6 +397,27 @@ describe('sessions setup', () => {
       expect(esClient.asSecondaryAuthUser.transform.putTransform).toHaveBeenCalled();
     });
 
+    it('keeps the previous version running until its replacement exists', async () => {
+      grantAll(esClient.asCurrentUser);
+      mockTransforms(esClient.asSecondaryAuthUser, [
+        managedTransform('digital-experience-sessions-0', {
+          version: 0,
+          destIndex: 'digital-experience-sessions-0',
+        }),
+      ]);
+      const { transform } = esClient.asSecondaryAuthUser;
+      transform.putTransform.mockRejectedValueOnce(esError(503));
+
+      await expect(enableSessions({ ...enableArgs(), settings: oneTransform })).rejects.toThrow();
+      // Still installed, so the update stays pending and the next attempt retries it.
+      expect(transform.deleteTransform).not.toHaveBeenCalled();
+
+      await enableSessions({ ...enableArgs(), settings: oneTransform });
+      expect(transform.putTransform.mock.invocationCallOrder[1]).toBeLessThan(
+        transform.deleteTransform.mock.invocationCallOrder[0]
+      );
+    });
+
     it('refuses to replace transforms from a newer version, before writing anything', async () => {
       grantAll(esClient.asCurrentUser);
       const newerId = `digital-experience-sessions-${SESSIONS_VERSION + 1}`;

@@ -221,28 +221,6 @@ export const installSessions = async ({
   }));
   const desiredIds = new Set(desired.map(({ transform_id: id }) => id));
 
-  // Same-version transforms share the dest index and write the same document ids, so a
-  // repartition keeps the index; an older version's dest index is dropped once.
-  const droppedDestIndices = new Set<string>();
-  for (const stale of installed.filter(({ id }) => !desiredIds.has(id))) {
-    const destIndex = stale.dest.index;
-    const dropDest =
-      (versionOf(stale) ?? 0) < SESSIONS_VERSION &&
-      destIndex != null &&
-      !droppedDestIndices.has(destIndex);
-    logger.info(
-      `Removing sessions transform [${stale.id}]${dropDest ? ' and its dest index' : ''}`
-    );
-    await client.transform.deleteTransform({
-      transform_id: stale.id,
-      force: true,
-      delete_dest_index: dropDest,
-    });
-    if (dropDest && destIndex != null) {
-      droppedDestIndices.add(destIndex);
-    }
-  }
-
   for (const transform of desired) {
     const transformId = transform.transform_id;
     if (!installed.some(({ id }) => id === transformId)) {
@@ -262,6 +240,30 @@ export const installSessions = async ({
         force: true,
         wait_for_completion: true,
       });
+    }
+  }
+
+  // Removed only once their replacements exist, so a failure before this point leaves the old
+  // transforms running and the update pending, for the next attempt. Same-version transforms
+  // share the dest index and write the same document ids, so a repartition keeps the index; an
+  // older version's dest index is dropped once.
+  const droppedDestIndices = new Set<string>();
+  for (const stale of installed.filter(({ id }) => !desiredIds.has(id))) {
+    const destIndex = stale.dest.index;
+    const dropDest =
+      (versionOf(stale) ?? 0) < SESSIONS_VERSION &&
+      destIndex != null &&
+      !droppedDestIndices.has(destIndex);
+    logger.info(
+      `Removing sessions transform [${stale.id}]${dropDest ? ' and its dest index' : ''}`
+    );
+    await client.transform.deleteTransform({
+      transform_id: stale.id,
+      force: true,
+      delete_dest_index: dropDest,
+    });
+    if (dropDest && destIndex != null) {
+      droppedDestIndices.add(destIndex);
     }
   }
 

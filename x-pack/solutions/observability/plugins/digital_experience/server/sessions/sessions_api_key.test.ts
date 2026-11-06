@@ -6,7 +6,13 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { errors } from '@elastic/elasticsearch';
+import {
+  coreMock,
+  elasticsearchServiceMock,
+  httpServerMock,
+  loggingSystemMock,
+} from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
   SESSIONS_API_KEY_NAME,
@@ -24,7 +30,19 @@ const key = {
   grantedAt: '2026-11-04T10:00:00.000Z',
 };
 
-const setup = ({ canEncrypt = true }: { canEncrypt?: boolean } = {}) => {
+const esError = (statusCode: number) =>
+  new errors.ResponseError({
+    statusCode,
+    body: {},
+    headers: {},
+    warnings: null,
+    meta: {} as never,
+  });
+
+const setup = ({
+  canEncrypt = true,
+  hasTaskManager = true,
+}: { canEncrypt?: boolean; hasTaskManager?: boolean } = {}) => {
   const core = coreMock.createStart();
   const esoStart = encryptedSavedObjectsMock.createStart();
   const esoClient = encryptedSavedObjectsMock.createClient();
@@ -34,6 +52,7 @@ const setup = ({ canEncrypt = true }: { canEncrypt?: boolean } = {}) => {
   const apiKeys = new SessionsApiKeys({
     logger,
     encryptedSavedObjects: encryptedSavedObjectsMock.createSetup({ canEncrypt }),
+    hasTaskManager,
     getStartServices: async () => ({ core, encryptedSavedObjects: esoStart }),
   });
   return { apiKeys, core, esoStart, esoClient, soClient, logger };
@@ -54,9 +73,10 @@ describe('SessionsApiKeys', () => {
     );
   });
 
-  it('is only available with an encryption key', () => {
+  it('is only available with an encryption key and the health task that uses the key', () => {
     expect(setup().apiKeys.available).toBe(true);
     expect(setup({ canEncrypt: false }).apiKeys.available).toBe(false);
+    expect(setup({ hasTaskManager: false }).apiKeys.available).toBe(false);
   });
 
   it('grants a key that can only read the source data and write the sessions index', async () => {
@@ -158,6 +178,22 @@ describe('SessionsApiKeys', () => {
       ids: ['key-1'],
     });
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('gone'));
+  });
+
+  it('only counts a key as invalidated when Elasticsearch refuses it', async () => {
+    const { apiKeys, core } = setup();
+    const keyClient = elasticsearchServiceMock.createScopedClusterClient();
+    jest.mocked(core.elasticsearch.client.asScoped).mockReturnValue(keyClient);
+    const authenticate = jest.mocked(keyClient.asCurrentUser.security.authenticate);
+
+    expect(await apiKeys.isInvalidated(key)).toBe(false);
+
+    authenticate.mockRejectedValueOnce(esError(401));
+    expect(await apiKeys.isInvalidated(key)).toBe(true);
+
+    // A timeout or an unavailable cluster says nothing about the key.
+    authenticate.mockRejectedValueOnce(esError(503));
+    expect(await apiKeys.isInvalidated(key)).toBe(false);
   });
 
   it('scopes a cluster client to the key', async () => {

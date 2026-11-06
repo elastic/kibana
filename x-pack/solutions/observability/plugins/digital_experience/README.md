@@ -134,8 +134,8 @@ Each enable records the username and time on the transforms (`_meta.enabled_by`,
 not. The status route reports who last enabled sessions, and the roles or API key the transforms
 run with, only to users who can set sessions up.
 
-When `xpack.encryptedSavedObjects.encryptionKey` is set, enabling also grants an API key on the
-user's behalf and the transforms run with that key instead of the user's own credentials. Its role
+When `xpack.encryptedSavedObjects.encryptionKey` is set and Task Manager is available (it runs the
+health task that uses the key), enabling also grants an API key on the user's behalf and the transforms run with that key instead of the user's own credentials. Its role
 descriptors only allow what transform secondary credentials need: `read` and `view_index_metadata`
 on `traces-*.otel-*` and `logs-*.otel-*`, and the `digital-experience-sessions-*` privileges above.
 Like any granted key, it keeps the access the user had when it was granted. The key is stored in an
@@ -189,7 +189,10 @@ newer Kibana: once per change, not on every run. When an update is needed (a new
 after a Kibana upgrade, or changed settings) and the transforms run with the stored API key, it
 applies the update with that same key, so they keep running with the same access, and writes a
 `digital_experience_sessions_auto_update` audit event naming the key and who granted it.
-`_meta.enabled_by` and `enabled_at` keep their enable-time values. A version update drops the old
+`_meta.enabled_by` and `enabled_at` keep their enable-time values. If the update fails, the next
+runs retry it, and status stops saying it applies by itself and asks a user with the manage
+sessions privilege to update sessions instead. New transforms are created before the ones they
+replace are removed, so a failure part-way leaves the old ones running. A version update drops the old
 sessions index and rebuilds it from up to 30 days of data. The task never updates transforms from a
 newer Kibana, and never updates a transform as the internal user: an update re-stamps the transform
 with the updater's privileges, which as the internal user would bypass the enabling user's index

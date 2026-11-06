@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import { omitBy, isUndefined } from 'lodash';
 import {
@@ -62,6 +62,9 @@ const HIDDEN_COLUMNS_STORAGE_KEY = 'xpack.digitalExperience.sessions.hiddenColum
 const LOADING_MESSAGE = i18n.translate('xpack.digitalExperience.sessions.loadingMessage', {
   defaultMessage: 'Loading sessions',
 });
+
+/** How often the status is checked again while sessions rebuild or update in the background. */
+const STATUS_REFRESH_MS = 30_000;
 
 const statusLoadingPrompt = (
   <EuiEmptyPrompt
@@ -171,10 +174,12 @@ function SessionsList({
   serviceName,
   source,
   rebuilding,
+  onRefreshStatus,
 }: {
   serviceName: string;
   source: ApplicationSource;
   rebuilding: boolean;
+  onRefreshStatus: () => void;
 }) {
   const apiClient = useApiClient();
   const formatters = useFormatters();
@@ -250,6 +255,19 @@ function SessionsList({
     [apiClient, serviceName, timeRange, state],
     { unsetValueOnError: true }
   );
+  // Refresh checks the status too, so a finished rebuild or update shows without reloading.
+  const refreshAll = useCallback(() => {
+    refresh();
+    onRefreshStatus();
+  }, [refresh, onRefreshStatus]);
+  // A finished rebuild has sessions the empty list was fetched without.
+  const wasRebuilding = useRef(rebuilding);
+  useEffect(() => {
+    if (wasRebuilding.current && !rebuilding) {
+      refresh();
+    }
+    wasRebuilding.current = rebuilding;
+  }, [rebuilding, refresh]);
   // Nothing has been fetched before the first request starts.
   const isLoading = loading || (!response && !error);
 
@@ -281,7 +299,7 @@ function SessionsList({
     <>
       <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
         <EuiFlexItem grow={false}>
-          <TimeRangePicker onRefresh={refresh} />
+          <TimeRangePicker onRefresh={refreshAll} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -379,8 +397,19 @@ export function SessionsTab({
 }) {
   const { application } = useKibanaServices();
   const canManage = canManageSessions(application.capabilities);
-  const { status, loading, error, refresh, enable, enabling, enableError } = useSessionsStatus();
+  const { status, error, refresh, enable, enabling, enableError } = useSessionsStatus();
   const enableProps = { canManage, onEnable: enable, enabling, enableError };
+
+  // Rebuilding and automatic updates finish in the background, so check back until they do.
+  const pending =
+    status?.rebuilding === true || (status?.needsUpdate === true && status.autoUpdate);
+  useEffect(() => {
+    if (!pending) {
+      return;
+    }
+    const interval = setInterval(refresh, STATUS_REFRESH_MS);
+    return () => clearInterval(interval);
+  }, [pending, refresh]);
 
   // A deleted API key doesn't stop the transforms, but updates no longer apply by themselves.
   // Someone who can set sessions up grants a new one by visiting, once per visit, as the Update
@@ -393,7 +422,8 @@ export function SessionsTab({
     }
   }, [status?.apiKeyInvalid, canManage, enable]);
 
-  if (error) {
+  // A failed background refresh keeps the last status.
+  if (error && !status) {
     return (
       <LoadErrorPrompt
         data-test-subj="digitalExperienceSessionsStatusError"
@@ -407,7 +437,7 @@ export function SessionsTab({
       />
     );
   }
-  if (loading || !status) {
+  if (!status) {
     return statusLoadingPrompt;
   }
   if (!status.installed) {
@@ -418,7 +448,12 @@ export function SessionsTab({
       {/* Clears the page header's tabs. */}
       <EuiSpacer size="m" />
       <SessionsStatusCallout status={status} {...enableProps} />
-      <SessionsList serviceName={serviceName} source={source} rebuilding={status.rebuilding} />
+      <SessionsList
+        serviceName={serviceName}
+        source={source}
+        rebuilding={status.rebuilding}
+        onRefreshStatus={refresh}
+      />
     </>
   );
 }

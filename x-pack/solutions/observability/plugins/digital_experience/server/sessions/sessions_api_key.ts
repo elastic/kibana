@@ -15,6 +15,7 @@ import type {
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { isResponseError } from '@kbn/es-errors';
 import type {
   EncryptedSavedObjectTypeRegistration,
   EncryptedSavedObjectsPluginSetup,
@@ -111,12 +112,17 @@ export class SessionsApiKeys {
         encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
       }>;
       encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
+      /** Whether the health task, which applies updates with the key, can run. */
+      hasTaskManager: boolean;
     }
   ) {}
 
-  /** Stored keys need an encryption key; without one, sessions keep using the user's access. */
+  /**
+   * A stored key only serves automatic updates, so it needs the health task and an encryption
+   * key; without either, sessions keep using the user's access.
+   */
   public get available(): boolean {
-    return this.deps.encryptedSavedObjects?.canEncrypt === true;
+    return this.deps.hasTaskManager && this.deps.encryptedSavedObjects?.canEncrypt === true;
   }
 
   /**
@@ -211,10 +217,22 @@ export class SessionsApiKeys {
     }
   }
 
-  /** Whether Elasticsearch still accepts the key: false once invalidated or expired. */
-  public async isValid(key: SessionsApiKey): Promise<boolean> {
-    const { core } = await this.deps.getStartServices();
-    return core.security.authc.apiKeys.validate({ id: key.id, api_key: key.apiKey });
+  /**
+   * Whether Elasticsearch refuses the key as invalidated or expired. Other failures, such as a
+   * timeout, say nothing about the key, so they don't count.
+   */
+  public async isInvalidated(key: SessionsApiKey): Promise<boolean> {
+    const client = await this.clusterClientFor(key);
+    try {
+      await client.asCurrentUser.security.authenticate();
+      return false;
+    } catch (error) {
+      if (isResponseError(error) && error.statusCode === 401) {
+        return true;
+      }
+      this.deps.logger.debug(`Could not check the sessions API key: ${error.message}`);
+      return false;
+    }
   }
 
   /**

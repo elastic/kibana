@@ -306,6 +306,57 @@ describe('SessionsTab', () => {
     expect(screen.queryByTestId('digitalExperienceSessionsUpdate')).not.toBeInTheDocument();
   });
 
+  it('warns about a failing transform before saying an update applies by itself', async () => {
+    respondWith({
+      sessionsStatus: status({
+        needsUpdate: true,
+        autoUpdate: true,
+        health: 'degraded',
+        reason: 'Transform failed: out of memory',
+      }),
+    });
+    renderTab();
+
+    expect(await screen.findByTestId('digitalExperienceSessionsDegraded')).toHaveTextContent(
+      'Transform failed: out of memory'
+    );
+    expect(screen.queryByTestId('digitalExperienceSessionsUpdating')).not.toBeInTheDocument();
+  });
+
+  it('shows why granting a new key by itself failed, even with nothing else to report', async () => {
+    respondWith({ sessionsStatus: status({ apiKeyInvalid: true }) });
+    const respond = mockFetch.getMockImplementation();
+    mockFetch.mockImplementation(async (endpoint: string, ...rest: unknown[]) => {
+      if (endpoint === ENABLE_ENDPOINT) {
+        throw new Error('Could not enable sessions.');
+      }
+      return respond?.(endpoint, ...rest);
+    });
+    renderTab();
+
+    expect(await screen.findByTestId('digitalExperienceSessionsEnableError')).toHaveTextContent(
+      'Could not enable sessions.'
+    );
+  });
+
+  it('checks the status again while sessions rebuild, without hiding the list', async () => {
+    const setIntervalSpy = jest.spyOn(window, 'setInterval');
+    respondWith({ sessionsStatus: status({ rebuilding: true }) });
+    renderTab();
+    expect(await screen.findByTestId('digitalExperienceSessionRow-session-1')).toBeInTheDocument();
+    const statusFetches = () =>
+      mockFetch.mock.calls.filter(([endpoint]) => endpoint === STATUS_ENDPOINT).length;
+    const [poll] = setIntervalSpy.mock.calls.find(([, delay]) => delay === 30_000) ?? [];
+    expect(poll).toBeDefined();
+
+    respondWith({ sessionsStatus: status({ rebuilding: false }) });
+    await act(async () => (poll as () => void)());
+
+    await waitFor(() => expect(statusFetches()).toBe(2));
+    expect(screen.getByTestId('digitalExperienceSessionRow-session-1')).toBeInTheDocument();
+    setIntervalSpy.mockRestore();
+  });
+
   it('shows a failing transform with its reason', async () => {
     respondWith({
       sessionsStatus: status({ health: 'degraded', reason: 'Transform failed: out of memory' }),

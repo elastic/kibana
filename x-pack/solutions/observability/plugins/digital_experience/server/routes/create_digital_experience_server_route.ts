@@ -22,6 +22,8 @@ export interface DigitalExperienceRouteHandlerResources extends DefaultRouteHand
   sessionsSettings: SessionsSettings;
   /** The API key the sessions transforms run with, when Kibana can store one. */
   sessionsApiKeys: SessionsApiKeys;
+  /** The health task's last failed automatic update of the sessions transforms, if any. */
+  getSessionsAutoUpdateError: () => Promise<string | undefined>;
 }
 
 const createServerRoute = createServerRouteFactory<

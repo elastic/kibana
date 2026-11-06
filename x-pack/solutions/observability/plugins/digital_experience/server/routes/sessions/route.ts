@@ -131,6 +131,7 @@ const statusRoute = createDigitalExperienceServerRoute({
     request,
     sessionsSettings,
     sessionsApiKeys,
+    getSessionsAutoUpdateError,
     logger,
   }): Promise<SessionsStatus> => {
     const { elasticsearch } = await context.core;
@@ -144,7 +145,7 @@ const statusRoute = createDigitalExperienceServerRoute({
           settings: sessionsSettings,
         }),
         sessionsApiKeys,
-        { checkKey: canManage }
+        { checkKey: canManage, lastAutoUpdateError: await getSessionsAutoUpdateError() }
       );
       return canManage ? status : withoutEnabler(status);
     } catch (error) {

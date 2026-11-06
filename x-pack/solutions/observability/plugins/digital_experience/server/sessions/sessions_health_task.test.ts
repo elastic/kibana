@@ -10,9 +10,11 @@ import type { RunContext, TaskDefinitionRegistry } from '@kbn/task-manager-plugi
 import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { SessionsStatus } from '../../common/sessions';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   SESSIONS_HEALTH_TASK_ID,
   SESSIONS_HEALTH_TASK_TYPE,
+  getLastAutoUpdateError,
   registerSessionsHealthTask,
   scheduleSessionsHealthTask,
 } from './sessions_health_task';
@@ -282,6 +284,27 @@ describe('sessions health task', () => {
     expect(transform.putTransform).not.toHaveBeenCalled();
     expect(transform.updateTransform).not.toHaveBeenCalled();
     expect(transform.startTransform).not.toHaveBeenCalled();
+  });
+});
+
+describe('getLastAutoUpdateError', () => {
+  it("reads the last automatic update error from the task's state", async () => {
+    const taskManager = taskManagerMock.createStart();
+    taskManager.get.mockResolvedValue({
+      state: { health: 'outdated', autoUpdateError: 'unable to authenticate' },
+    } as never);
+
+    expect(await getLastAutoUpdateError(taskManager)).toBe('unable to authenticate');
+    expect(taskManager.get).toHaveBeenCalledWith(SESSIONS_HEALTH_TASK_ID);
+  });
+
+  it('has none before the task is scheduled', async () => {
+    const taskManager = taskManagerMock.createStart();
+    taskManager.get.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError('task', SESSIONS_HEALTH_TASK_ID)
+    );
+
+    expect(await getLastAutoUpdateError(taskManager)).toBeUndefined();
   });
 });
 
