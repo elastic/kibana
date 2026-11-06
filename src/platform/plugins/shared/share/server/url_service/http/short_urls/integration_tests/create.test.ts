@@ -113,7 +113,7 @@ describe('POST /api/short_url', () => {
         ),
     });
 
-    await supertest(server.listener)
+    await supertest(httpSetup.server.listener)
       .post('/api/short_url')
       .send({
         locatorId: 'LEGACY_SHORT_URL_LOCATOR',
