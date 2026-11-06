@@ -10,10 +10,11 @@ import { lazySchema, z } from '@kbn/zod/v4';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { APM_API_PRIVILEGE, DIGITAL_EXPERIENCE_API_PRIVILEGES } from '../../common/feature';
+import type { OverviewFilters } from '../../common/overview_filters';
 import { MAX_SERVICE_NAME_LENGTH } from '../lib/constants';
 import { createDigitalExperienceTracedEsClient } from '../lib/create_digital_experience_traced_es_client';
 import type { DigitalExperienceRouteHandlerResources } from './create_digital_experience_server_route';
-import { timeRangeQuery } from './params';
+import { filteredTimeRangeQuery, timeRangeQuery } from './params';
 
 // The routes of one application's tabs (e.g. its errors) share the Overview route's params and
 // privileges.
@@ -25,6 +26,8 @@ export interface ApplicationSearchParams {
   end: number;
   /** Only this environment's data when set. */
   environment?: string;
+  /** Only the data of the selected browser, OS, device and country, and the page loads of the page. */
+  filters?: OverviewFilters;
 }
 
 /** A tab's search params and the client that runs its searches. */
@@ -46,6 +49,16 @@ export const applicationTabRouteParams = lazySchema(() => {
   });
 });
 
+/** The params of a tab's route that also takes the Overview's filters, to narrow its panels. */
+export const filteredApplicationTabRouteParams = lazySchema(() => {
+  return z.object({
+    path: z.object({
+      serviceName: z.string().min(1).max(MAX_SERVICE_NAME_LENGTH),
+    }),
+    query: filteredTimeRangeQuery(),
+  });
+});
+
 /**
  * The search params of a tab's route, the ISO range as epoch milliseconds, and the current user's
  * client, whose searches stop when the request is aborted.
@@ -53,13 +66,17 @@ export const applicationTabRouteParams = lazySchema(() => {
 export const toApplicationSearch = async ({
   params: {
     path: { serviceName },
-    query: { start, end, environment },
+    query: { start, end, environment, browser, os, device, country, pageUrl },
   },
   context,
   logger,
   request,
 }: Pick<DigitalExperienceRouteHandlerResources, 'context' | 'logger'> & {
-  params: z.infer<typeof applicationTabRouteParams>;
+  // The filters are those of `filteredApplicationTabRouteParams`; the other routes have none.
+  params: {
+    path: z.infer<typeof applicationTabRouteParams>['path'];
+    query: z.infer<typeof applicationTabRouteParams>['query'] & OverviewFilters;
+  };
   request: Pick<KibanaRequest, 'events'>;
 }): Promise<ApplicationSearch> => {
   const { elasticsearch } = await context.core;
@@ -68,6 +85,7 @@ export const toApplicationSearch = async ({
     start: Date.parse(start),
     end: Date.parse(end),
     environment,
+    filters: { browser, os, device, country, pageUrl },
     esClient: createDigitalExperienceTracedEsClient({
       client: elasticsearch.client.asCurrentUser,
       logger,

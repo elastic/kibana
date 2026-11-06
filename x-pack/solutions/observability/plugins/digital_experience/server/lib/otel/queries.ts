@@ -85,16 +85,29 @@ export const otelSearchDefaults = (index: string) => ({
   allow_partial_search_results: false,
 });
 
-/** Up to 100 environments for the picker, whatever the selected one, and `aggs` in that one. */
+/** The documents of the environment, and of the other `filters` when given. */
+export const inEnvironmentFilter = (
+  environment: string | undefined,
+  filters: estypes.QueryDslQueryContainer[] = []
+): estypes.QueryDslQueryContainer =>
+  filters.length > 0
+    ? { bool: { filter: [environmentFilter(ENVIRONMENT_FIELDS, environment), ...filters] } }
+    : environmentFilter(ENVIRONMENT_FIELDS, environment);
+
+/**
+ * Up to 100 environments for the picker, whatever the selected one, and `aggs` in that one, and in
+ * the documents of `filters` too.
+ */
 export const byEnvironment = <
   TAggs extends Record<string, estypes.AggregationsAggregationContainer>
 >(
   environment: string | undefined,
-  aggs: TAggs
+  aggs: TAggs,
+  filters: estypes.QueryDslQueryContainer[] = []
 ) => ({
   ...environmentTerms(MAX_ENVIRONMENTS),
   environmentNotDefined: { filter: environmentNotDefinedFilter(ENVIRONMENT_FIELDS) },
-  inEnvironment: { filter: environmentFilter(ENVIRONMENT_FIELDS, environment), aggs },
+  inEnvironment: { filter: inEnvironmentFilter(environment, filters), aggs },
 });
 
 /** One vital's samples (the filter's doc count) and stats, matching `cls` and `CLS` alike. */

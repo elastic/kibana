@@ -79,3 +79,48 @@ describe('usageSearch', () => {
     expect(selectors.aggs.tagName.terms).toEqual({ field: 'browser.tag_name', size: 1 });
   });
 });
+
+describe('usageSearch with filters', () => {
+  const FILTERS = { browser: 'Chrome', country: 'DE', pageUrl: 'https://shop.example.com/' };
+
+  it('defines the runtime fields the filters read', () => {
+    expect(Object.keys(usageSearch(PARAMS).runtime_mappings)).toEqual([
+      'digital_experience_filter_browser',
+      'digital_experience_filter_os',
+      'digital_experience_filter_device',
+      'digital_experience_filter_country',
+    ]);
+  });
+
+  it('narrows the pages, breakdowns and clicks to the selected browser, OS, device and country', () => {
+    const { filter } = inEnvironment(usageSearch({ ...PARAMS, filters: FILTERS }));
+
+    expect(filter).toEqual({
+      bool: {
+        filter: [
+          { match_all: {} },
+          { term: { digital_experience_filter_browser: 'Chrome' } },
+          { term: { digital_experience_filter_country: 'DE' } },
+        ],
+      },
+    });
+  });
+
+  it('narrows the page loads to the selected page, not the clicks', () => {
+    const { pageLoads, clicks } = inEnvironment(usageSearch({ ...PARAMS, filters: FILTERS })).aggs;
+
+    expect(pageLoads.filter.bool.filter).toEqual([
+      { term: { event_name: 'browser.navigation_timing' } },
+      { term: { 'attributes.url.full': 'https://shop.example.com/' } },
+    ]);
+    expect(clicks.filter).toEqual({
+      bool: { filter: [{ term: { event_name: 'browser.user_action.click' } }] },
+    });
+  });
+
+  it('is unchanged without a selection', () => {
+    expect(inEnvironment(usageSearch({ ...PARAMS, filters: {} })).filter).toEqual({
+      match_all: {},
+    });
+  });
+});

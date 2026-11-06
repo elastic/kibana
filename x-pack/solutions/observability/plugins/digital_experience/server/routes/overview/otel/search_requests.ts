@@ -6,12 +6,12 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { termsQuery } from '@kbn/es-query';
+import { termQuery, termsQuery } from '@kbn/es-query';
 import { OTEL_EVENT_NAME } from '@kbn/apm-types';
 import { CORE_WEB_VITAL } from '../../../../common/core_web_vitals';
 import { countOf, p75Of } from '../../../lib/helpers/aggregations';
 import { dateHistogram } from '../../../lib/helpers/time_series';
-import { environmentFilter } from '../../../lib/helpers/environment';
+import type { OverviewFilters } from '../../../../common/overview_filters';
 import {
   EVENT_EXCEPTION,
   EVENT_NAVIGATION_TIMING,
@@ -21,17 +21,23 @@ import {
   OTEL_TRACES_INDEX,
 } from '../../../../common/otel_data';
 import {
-  ENVIRONMENT_FIELDS,
   browserDocuments,
   byEnvironment,
   eventCount,
   failedRequests,
   httpRequestDocuments,
+  inEnvironmentFilter,
   otelSearchDefaults,
   requestsWithOutcome,
   serviceDocuments,
   webVital,
 } from '../../../lib/otel/queries';
+import {
+  documentFilters,
+  filterOptionsAggs,
+  filterRuntimeMappings,
+  pageLoadFilters,
+} from '../../../lib/otel/overview_filters';
 
 export interface OverviewSearchParams {
   serviceName: string;
@@ -39,6 +45,8 @@ export interface OverviewSearchParams {
   end: number;
   /** Only this environment's data when set. */
   environment?: string;
+  /** Only the data of the selected browser, OS, device and country, and the page loads of the page. */
+  filters?: OverviewFilters;
 }
 
 /**
@@ -47,14 +55,19 @@ export interface OverviewSearchParams {
  * Page loads count the navigation-timing events only, so soft navigations (`browser.navigation`)
  * and resource timings (`browser.resource_timing`), which carry timing attributes of their own, are
  * left out.
+ *
+ * The selected filters narrow the metrics only: the lists of the filters, and the environments of
+ * the picker, are over the whole range so that every value stays selectable.
  */
 export const logsSearch = ({
   serviceName,
   start,
   end,
   environment,
+  filters = {},
 }: OverviewSearchParams): estypes.SearchRequest => ({
   ...otelSearchDefaults(OTEL_LOGS_INDEX),
+  runtime_mappings: filterRuntimeMappings(),
   query: {
     bool: {
       filter: [
@@ -65,27 +78,42 @@ export const logsSearch = ({
       ],
     },
   },
-  aggs: byEnvironment(environment, {
-    pageLoads: {
-      ...eventCount(EVENT_NAVIGATION_TIMING),
-      aggs: {
-        // Page loads without a load event are counted but left out of the percentile.
-        loadTime: p75Of(NAVIGATION_TIMING_LOAD_EVENT_END),
-        loadTimeSamples: countOf(NAVIGATION_TIMING_LOAD_EVENT_END),
-        // The counts of the trend sum to the page loads, and both charts share its buckets.
-        trend: {
-          ...dateHistogram(start, end),
-          aggs: { loadTime: p75Of(NAVIGATION_TIMING_LOAD_EVENT_END) },
+  aggs: {
+    ...byEnvironment(
+      environment,
+      {
+        pageLoads: {
+          // The web vitals, errors and clicks carry no page URL yet, so only page loads have a page.
+          filter: {
+            bool: {
+              filter: [
+                ...termQuery(OTEL_EVENT_NAME, EVENT_NAVIGATION_TIMING),
+                ...pageLoadFilters(filters),
+              ],
+            },
+          },
+          aggs: {
+            // Page loads without a load event are counted but left out of the percentile.
+            loadTime: p75Of(NAVIGATION_TIMING_LOAD_EVENT_END),
+            loadTimeSamples: countOf(NAVIGATION_TIMING_LOAD_EVENT_END),
+            // The counts of the trend sum to the page loads, and both charts share its buckets.
+            trend: {
+              ...dateHistogram(start, end),
+              aggs: { loadTime: p75Of(NAVIGATION_TIMING_LOAD_EVENT_END) },
+            },
+          },
         },
+        jsErrors: eventCount(EVENT_EXCEPTION),
+        lcp: webVital(CORE_WEB_VITAL.lcp),
+        inp: webVital(CORE_WEB_VITAL.inp),
+        cls: webVital(CORE_WEB_VITAL.cls),
+        fcp: webVital(CORE_WEB_VITAL.fcp),
+        ttfb: webVital(CORE_WEB_VITAL.ttfb),
       },
-    },
-    jsErrors: eventCount(EVENT_EXCEPTION),
-    lcp: webVital(CORE_WEB_VITAL.lcp),
-    inp: webVital(CORE_WEB_VITAL.inp),
-    cls: webVital(CORE_WEB_VITAL.cls),
-    fcp: webVital(CORE_WEB_VITAL.fcp),
-    ttfb: webVital(CORE_WEB_VITAL.ttfb),
-  }),
+      documentFilters(filters)
+    ),
+    ...filterOptionsAggs(filters, environment),
+  },
 });
 
 /** The HTTP requests of one application and the failed ones, from the traces. */
@@ -94,8 +122,10 @@ export const spansSearch = ({
   start,
   end,
   environment,
+  filters = {},
 }: OverviewSearchParams): estypes.SearchRequest => ({
   ...otelSearchDefaults(OTEL_TRACES_INDEX),
+  runtime_mappings: filterRuntimeMappings(),
   query: {
     bool: {
       filter: [
@@ -105,10 +135,11 @@ export const spansSearch = ({
       ],
     },
   },
-  // Only the selected environment: the picker's environments come from the logs.
+  // Only the selected environment: the picker's environments come from the logs. The page filter
+  // is not applied: a request's `url.full` is the URL requested, not the page it was made from.
   aggs: {
     inEnvironment: {
-      filter: environmentFilter(ENVIRONMENT_FIELDS, environment),
+      filter: inEnvironmentFilter(environment, documentFilters(filters)),
       aggs: {
         requests: requestsWithOutcome(),
         failed: failedRequests(),

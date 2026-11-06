@@ -20,6 +20,12 @@ const NO_VITAL = { p75Ms: null, sampleCount: 0, ratings: null };
 
 const ALL_GOOD = { good: 1, needsImprovement: 0, poor: 0 };
 
+const NO_FILTER_VALUES = { browser: [], os: [], device: [], country: [], pageUrl: [] };
+
+const filterValues = (...values: Array<[key: string, count: number]>) => ({
+  values: { buckets: values.map(([key, count]) => ({ key, doc_count: count })) },
+});
+
 const terms = (...keys: string[]) => ({ buckets: keys.map((key) => ({ key })) });
 
 const trendBucket = (timestamp: number, pageLoads: number, loadTimeP75Ms: number | null) => ({
@@ -114,6 +120,7 @@ describe('getOtelOverview', () => {
         trend: [],
       },
       environments: ['production'],
+      filters: NO_FILTER_VALUES,
     });
   });
 
@@ -179,7 +186,48 @@ describe('getOtelOverview', () => {
         trend: [],
       },
       environments: [],
+      filters: NO_FILTER_VALUES,
     });
+  });
+
+  it('lists the values of every filter with their page loads', async () => {
+    const esClient = setup({
+      logs: {
+        ...logsAggregations(),
+        browserOptions: filterValues(['Chrome', 7], ['Firefox', 2]),
+        osOptions: filterValues(['macOS', 9]),
+        countryOptions: filterValues(['DE', 4]),
+        pageUrlOptions: filterValues(['https://shop.example.com/cart', 3]),
+      },
+      spans: spansAggregations(),
+    });
+
+    const { filters } = await getOtelOverview({ esClient, ...PARAMS });
+
+    expect(filters).toEqual({
+      browser: [
+        { key: 'Chrome', count: 7 },
+        { key: 'Firefox', count: 2 },
+      ],
+      os: [{ key: 'macOS', count: 9 }],
+      device: [],
+      country: [{ key: 'DE', count: 4 }],
+      pageUrl: [{ key: 'https://shop.example.com/cart', count: 3 }],
+    });
+  });
+
+  it('leaves out the values the routes would not accept back as a filter', async () => {
+    const esClient = setup({
+      logs: {
+        ...logsAggregations(),
+        browserOptions: filterValues(['x'.repeat(257), 5], ['Chrome', 2]),
+      },
+      spans: spansAggregations(),
+    });
+
+    const { filters } = await getOtelOverview({ esClient, ...PARAMS });
+
+    expect(filters.browser).toEqual([{ key: 'Chrome', count: 2 }]);
   });
 
   it('lists the environments of the application, "Not defined" first, whatever the selected one', async () => {

@@ -6,10 +6,11 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { APPLICATION_SOURCE } from '../../../../common/application_source';
 import { NO_WEB_VITALS } from '../../../../common/core_web_vitals';
+import type { OverviewFilters } from '../../../../common/overview_filters';
 import type {
   ApplicationOverview,
   ApplicationOverviewResponse,
@@ -21,19 +22,28 @@ import { APPLICATION_OVERVIEW_EBT_ELEMENTS, ERRORS_EBT_ELEMENTS } from '../../..
 import type { ApplicationData, ApplicationRequest } from '../../../hooks/use_application_data';
 import { useApplicationData } from '../../../hooks/use_application_data';
 import { useApplicationLinks } from '../../../hooks/use_application_links';
-import { useLastEnvironments } from '../../../hooks/use_last_environments';
+import { useFormatters } from '../../../hooks/use_formatters';
+import { useOverviewFilters } from '../../../hooks/use_overview_filters';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import type { TimeRangeSelect } from '../../../utils/brush_time_range';
+import { withOverviewFilters } from '../../../utils/with_overview_filters';
 import { JsErrorsPanel } from '../../errors/components/js_errors_panel';
 import { ERRORS_FETCH_ERROR_TITLE } from '../../errors/errors_tab';
 import type { ApplicationErrors } from '../../errors/hooks/use_application_errors';
 import { useApplicationErrors } from '../../errors/hooks/use_application_errors';
 import { BreakdownsPanel } from './components/breakdowns_panel';
 import { CoreWebVitalsPanel } from './components/core_web_vitals_panel';
+import { ClearOverviewFilters, OverviewFilterButtons } from './components/overview_filters';
 import { OverviewKpis } from './components/overview_kpis';
 import { OverviewTrends } from './components/overview_trends';
 import { TopClicksPanel } from './components/top_clicks_panel';
 import { TopPagesPanel } from './components/top_pages_panel';
+import { usePickerOptions } from './hooks/use_picker_options';
+
+const PAGE_FILTER_NOTE = i18n.translate('xpack.digitalExperience.overview.filters.pageNote', {
+  defaultMessage:
+    'The page filter applies to page loads only, with their load time, trend, pages and breakdowns: web vitals, JS errors, clicks and HTTP requests carry no page URL yet.',
+});
 
 const FETCH_ERROR_TITLE = i18n.translate('xpack.digitalExperience.overview.fetchErrorTitle', {
   defaultMessage: 'Could not load the Overview',
@@ -54,18 +64,26 @@ const EMPTY_USAGE: ApplicationUsageResponse = {
 /** The most frequent error groups on the Overview; the Errors tab lists the rest. */
 const TOP_ERRORS_ROWS = 5;
 
-const overviewRequest: ApplicationRequest<ApplicationOverviewResponse> = (apiClient, options) => {
-  return apiClient.fetch(
-    'GET /internal/digital_experience/applications/{serviceName}/overview',
-    options
-  );
+/** The request for the Overview narrowed by `filters`; a change of them is a new request. */
+const overviewRequestOf = (
+  filters: OverviewFilters
+): ApplicationRequest<ApplicationOverviewResponse> => {
+  return (apiClient, options) => {
+    return apiClient.fetch(
+      'GET /internal/digital_experience/applications/{serviceName}/overview',
+      withOverviewFilters(options, filters)
+    );
+  };
 };
 
-const usageRequest: ApplicationRequest<ApplicationUsageResponse> = (apiClient, options) => {
-  return apiClient.fetch(
-    'GET /internal/digital_experience/applications/{serviceName}/usage',
-    options
-  );
+/** The request for the pages, breakdowns and clicks narrowed by `filters`. */
+const usageRequestOf = (filters: OverviewFilters): ApplicationRequest<ApplicationUsageResponse> => {
+  return (apiClient, options) => {
+    return apiClient.fetch(
+      'GET /internal/digital_experience/applications/{serviceName}/usage',
+      withOverviewFilters(options, filters)
+    );
+  };
 };
 
 /** Shown while loading: no metric is a measured zero. */
@@ -184,24 +202,20 @@ function UsageAndErrorsPanels({
 
 /**
  * The Overview of one EDOT Browser application: its KPIs, Core Web Vitals and trends, then what
- * users load and do and their top errors, over the selected environment and time range.
+ * users load and do and their top errors, over the selected environment, filters and time range.
  */
 export function OtelOverview({ serviceName }: { serviceName: string }) {
   const { setTimeRange } = useTimeRange();
+  const { filters, setFilter, clearFilters, hasActiveFilters } = useOverviewFilters();
+  const formatters = useFormatters();
   // Separate requests, so the KPIs never wait on the panels below and a failure replaces only its own.
+  const overviewRequest = useMemo(() => overviewRequestOf(filters), [filters]);
+  const usageRequest = useMemo(() => usageRequestOf(filters), [filters]);
   const overview = useApplicationData(serviceName, overviewRequest);
   const usage = useApplicationData(serviceName, usageRequest);
-  const topErrors = useApplicationErrors(serviceName);
-
-  const overviewEnvironments = useMemo(() => {
-    return (
-      overview.response && {
-        serviceName: overview.response.overview.serviceName,
-        environments: overview.response.environments,
-      }
-    );
-  }, [overview.response]);
-  const environments = useLastEnvironments(serviceName, overviewEnvironments);
+  const topErrors = useApplicationErrors(serviceName, filters);
+  // The pickers swap their lists for a spinner while loading, so they only load until they have one.
+  const pickerOptions = usePickerOptions(serviceName, overview.response);
 
   const refreshAll = () => {
     overview.refresh();
@@ -213,10 +227,34 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
     <>
       <EuiSpacer size="m" />
       <ApplicationTabToolbar
-        environments={environments}
+        environments={pickerOptions?.environments}
         isLoading={overview.isLoading}
         onRefresh={refreshAll}
+        filters={
+          <OverviewFilterButtons
+            options={pickerOptions?.filters}
+            filters={filters}
+            setFilter={setFilter}
+            isLoading={overview.isLoading}
+            formatters={formatters}
+          />
+        }
+        afterFilters={
+          <ClearOverviewFilters hasActiveFilters={hasActiveFilters} onClear={clearFilters} />
+        }
       />
+      {filters.pageUrl && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText
+            size="xs"
+            color="subdued"
+            data-test-subj="digitalExperienceOverviewPageFilterNote"
+          >
+            {PAGE_FILTER_NOTE}
+          </EuiText>
+        </>
+      )}
       <EuiSpacer size="m" />
       {overview.error ? (
         <LoadErrorPrompt

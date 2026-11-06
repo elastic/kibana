@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { OverviewFilterOptions } from '../overview_filters';
 import type { HttpRequests, WebVitals } from './applications';
 
 /** One bucket of the Overview trend; both charts read the same buckets. */
@@ -45,4 +46,9 @@ export interface ApplicationOverviewResponse {
    * the route accepts are left out.
    */
   environments: string[];
+  /**
+   * The values of each filter with their page loads in the time range and environment, narrowed
+   * by the other selected filters; each filter lists its ten most used.
+   */
+  filters: OverviewFilterOptions;
 }

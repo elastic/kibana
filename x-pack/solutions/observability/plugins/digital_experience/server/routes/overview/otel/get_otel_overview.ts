@@ -10,6 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ApplicationOverviewResponse } from '../../../../common/types/overview';
 import { sortEnvironments } from '../../../lib/helpers/environment';
 import { pickerEnvironments } from '../../../lib/otel/environments';
+import { toFilterOptions } from '../../../lib/otel/overview_filters';
 import { OVERVIEW_SEARCH_SPAN_NAME } from '../constants';
 import type { OverviewSearchParams } from './search_requests';
 import { logsSearch, spansSearch } from './search_requests';
@@ -40,6 +41,7 @@ const searchOtelOverview = async ({
   return {
     overview: toOverview(searchParams.serviceName, logs, spans),
     environments: sortEnvironments(pickerEnvironments(logs)),
+    filters: toFilterOptions(logs),
   };
 };
 
