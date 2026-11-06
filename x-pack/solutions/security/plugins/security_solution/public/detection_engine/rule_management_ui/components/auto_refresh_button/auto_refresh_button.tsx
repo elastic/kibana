@@ -71,11 +71,16 @@ const AutoRefreshButtonComponent = ({
           iconType={'refreshTime'}
           onClick={togglePopover}
           disabled={isDisabled}
+          aria-label={
+            isRefreshOn
+              ? i18n.AUTO_REFRESH_BUTTON_ON_ARIA_LABEL
+              : i18n.AUTO_REFRESH_BUTTON_OFF_ARIA_LABEL
+          }
           css={css`
             margin-left: 10px;
           `}
         >
-          {isRefreshOn ? 'On' : 'Off'}
+          {isRefreshOn ? i18n.AUTO_REFRESH_BUTTON_ON : i18n.AUTO_REFRESH_BUTTON_OFF}
         </EuiButtonEmpty>
       }
     >

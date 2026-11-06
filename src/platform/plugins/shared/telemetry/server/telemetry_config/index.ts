@@ -13,5 +13,5 @@ export {
   type TelemetryFailureDetails,
 } from './get_telemetry_failure_details';
 export { getNotifyUserAboutOptInDefault } from './get_telemetry_notify_user_about_optin_default';
-export { getTelemetryOptIn } from './get_telemetry_opt_in';
+export { getTelemetryOptIn, TELEMETRY_OPT_IN_FEATURE_FLAG } from './get_telemetry_opt_in';
 export { getTelemetrySendUsageFrom } from './get_telemetry_send_usage_from';

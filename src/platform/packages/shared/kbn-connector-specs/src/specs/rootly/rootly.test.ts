@@ -8,7 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { getConnectorSpec } from '../../..';
+import { getConnectorSpec, getSandboxHosts } from '../../..';
 import { Rootly } from './rootly';
 import { RootlyCreateIncidentInputSchema, RootlyAddIncidentSubscribersInputSchema } from './types';
 
@@ -67,6 +67,10 @@ describe('Rootly', () => {
   it('marks the bearer auth type as sandbox capable', () => {
     const types = Rootly.auth?.types ?? [];
     expect(types).toEqual([expect.objectContaining({ type: 'bearer', supportsSandbox: true })]);
+  });
+
+  it('declares the Rootly API host as its only sandbox host', () => {
+    expect(getSandboxHosts(Rootly.sandbox, {})).toEqual(['api.rootly.com']);
   });
 
   describe('createIncident action', () => {

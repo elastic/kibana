@@ -59,7 +59,9 @@ export interface ProposalsPluginStart {
   getProposalPrivileges: () => ProposalPrivilegesChecker;
   /**
    * Proposes an action in a conversation as the user behind the request, for callers that propose
-   * without an agent run (for example a hook). Checks the user's proposal privilege.
+   * without an agent run (for example a hook). Checks the user's proposal privilege. The `origin`
+   * routes the proposal to that feature's queue, so a caller passes its own and never another
+   * feature's.
    */
   createProposal: ProposalCreator;
 }

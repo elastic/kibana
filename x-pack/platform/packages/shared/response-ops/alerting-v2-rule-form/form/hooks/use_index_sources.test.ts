@@ -45,7 +45,32 @@ describe('useIndexSources', () => {
     });
 
     expect(result.current.data).toEqual([{ label: 'logs-*' }, { label: 'metrics-*' }]);
-    expect(mockGetESQLSources).toHaveBeenCalledWith({ application, http }, undefined);
+    expect(mockGetESQLSources).toHaveBeenCalledWith(
+      { application, http },
+      undefined,
+      undefined,
+      undefined,
+      undefined
+    );
+  });
+
+  it('lists the sources with the given project routing', async () => {
+    mockGetESQLSources.mockResolvedValue([]);
+
+    const { result } = renderHook(
+      () => useIndexSources({ http, application, projectRouting: '_alias:*' }),
+      { wrapper: createQueryClientWrapper() }
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(mockGetESQLSources).toHaveBeenCalledWith(
+      { application, http },
+      undefined,
+      undefined,
+      undefined,
+      '_alias:*'
+    );
   });
 
   it('filters out hidden sources', async () => {
