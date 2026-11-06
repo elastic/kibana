@@ -9,14 +9,32 @@ import type { HttpSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { PropertySelectionHandler, SelectionOption } from '@kbn/workflows/types/latest';
 import { API_VERSIONS } from '../../../common/constants';
-import type { PrebuiltPackListItem } from '../../../common/prebuilt_packs';
+import {
+  PREBUILT_PACK_UNAVAILABLE_REASON,
+  type PrebuiltPackListItem,
+} from '../../../common/prebuilt_packs';
 import { failureReason } from './failure_reason';
 
-const toOption = (item: PrebuiltPackListItem): SelectionOption<string> => ({
-  value: item.asset_name,
-  label: item.asset_name,
+/**
+ * A shared package name only makes the name ambiguous: resolve still answers for the asset id
+ * when this space holds exactly one copy of that asset. Such a pack is stored by asset id.
+ */
+const isRunnableByAssetIdOnly = (item: PrebuiltPackListItem): boolean =>
+  item.unavailable_reason === PREBUILT_PACK_UNAVAILABLE_REASON.duplicateAssetName &&
+  item.copies === 1;
+
+/** The value resolve answers 200 for, or undefined when it answers 409 for every handle. */
+const storedValue = (item: PrebuiltPackListItem): string | undefined => {
+  if (!item.unavailable_reason) return item.asset_name;
+
+  return isRunnableByAssetIdOnly(item) ? item.asset_id : undefined;
+};
+
+const toOption = (item: PrebuiltPackListItem, value: string): SelectionOption<string> => ({
+  value,
+  label: value,
   // The space copy can be renamed (for example with an `-elastic` suffix); show it only then.
-  description: item.description ?? (item.name !== item.asset_name ? item.name : ''),
+  description: item.description ?? (item.name !== value ? item.name : ''),
   documentation: i18n.translate('xpack.osquery.workflows.selection.prebuiltPack.queryCount', {
     defaultMessage: '{count, plural, one {# query} other {# queries}}',
     values: { count: item.query_count },
@@ -35,8 +53,9 @@ const listPrebuiltPacks = async (http: HttpSetup): Promise<PrebuiltPackListItem[
 /**
  * Picker for `osquery.runPack` `prebuilt_pack`: lists the Elastic prebuilt packs loaded in this
  * space and stores the package name (for example `forensic-persistence`), which is the same in
- * every space, unlike the random id of each space copy. An asset id still resolves. A pack the
- * step could not resolve (resolve answers 409) is not offered and is explained instead.
+ * every space, unlike the random id of each space copy. An asset id still resolves. When several
+ * assets share a package name, the asset id is the stored value instead. A pack the step could
+ * not resolve (resolve answers 409) is not offered and is explained instead.
  */
 export const createPrebuiltPackSelection = (http: HttpSetup): PropertySelectionHandler<string> => {
   // A failed lookup must not look like "not loaded in this space", and an ambiguous pack must
@@ -50,15 +69,17 @@ export const createPrebuiltPackSelection = (http: HttpSetup): PropertySelectionH
         const packs = await listPrebuiltPacks(http);
         lookupErrors.delete(search);
 
-        return packs
-          .filter((pack) => !pack.unavailable_reason)
-          .filter(
-            (pack) =>
-              !search ||
-              pack.asset_name.toLowerCase().includes(search) ||
-              pack.name.toLowerCase().includes(search)
-          )
-          .map(toOption);
+        return packs.flatMap((pack) => {
+          const value = storedValue(pack);
+          if (!value) return [];
+          const matches =
+            !search ||
+            pack.asset_name.toLowerCase().includes(search) ||
+            pack.name.toLowerCase().includes(search) ||
+            value.toLowerCase().includes(search);
+
+          return matches ? [toOption(pack, value)] : [];
+        });
       } catch (error) {
         lookupErrors.set(
           search,
@@ -78,11 +99,17 @@ export const createPrebuiltPackSelection = (http: HttpSetup): PropertySelectionH
       if (!name) return null;
 
       try {
-        const pack = (await listPrebuiltPacks(http)).find(
-          (item) => item.asset_name === name || item.asset_id === name
-        );
+        const packs = await listPrebuiltPacks(http);
+        // An asset id is unique, a package name may not be: try the id first.
+        const pack =
+          packs.find((item) => item.asset_id === name) ??
+          packs.find((item) => item.asset_name === name);
         lookupErrors.delete(name);
         if (!pack) return null;
+
+        if (pack.asset_id === name && isRunnableByAssetIdOnly(pack)) {
+          return toOption(pack, pack.asset_id);
+        }
 
         if (pack.unavailable_reason) {
           lookupErrors.set(
@@ -96,7 +123,7 @@ export const createPrebuiltPackSelection = (http: HttpSetup): PropertySelectionH
           return null;
         }
 
-        return toOption(pack);
+        return toOption(pack, pack.asset_name);
       } catch (error) {
         lookupErrors.set(
           name,

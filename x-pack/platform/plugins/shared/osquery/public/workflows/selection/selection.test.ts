@@ -350,6 +350,67 @@ describe('osquery workflow step pickers', () => {
       });
     });
 
+    describe('when several assets share a package name', () => {
+      const twin = { ...persistence, asset_id: 'osquery_manager-3333', pack_id: 'so-3' };
+      const shared = [
+        { ...persistence, unavailable_reason: 'duplicate_asset_name' },
+        { ...twin, unavailable_reason: 'duplicate_asset_name' },
+      ];
+
+      it('offers each single-copy asset by its asset id', async () => {
+        http.get.mockResolvedValue({
+          data: [
+            ...shared,
+            { ...network, copies: 2, unavailable_reason: 'duplicate_asset_name' },
+          ],
+        });
+
+        const options = await createPrebuiltPackSelection(http).search(
+          '',
+          context('prebuilt_pack')
+        );
+
+        expect(options.map((o) => o.value)).toEqual([
+          'osquery_manager-1111',
+          'osquery_manager-3333',
+        ]);
+      });
+
+      it('resolves an explicit asset id and reports no error', async () => {
+        http.get.mockResolvedValue({ data: shared });
+        const selection = createPrebuiltPackSelection(http);
+
+        const option = await selection.resolve('osquery_manager-3333', context('prebuilt_pack'));
+        expect(option).toMatchObject({ value: 'osquery_manager-3333' });
+        const details = await selection.getDetails(
+          'osquery_manager-3333',
+          context('prebuilt_pack'),
+          option
+        );
+        expect(details.message).toMatch(/Runs this space's copy/);
+      });
+
+      it('still rejects the shared name, and an asset id with more than one copy', async () => {
+        http.get.mockResolvedValue({
+          data: [shared[0], { ...shared[1], copies: 2 }],
+        });
+        const selection = createPrebuiltPackSelection(http);
+
+        expect(
+          await selection.resolve('forensic-persistence', context('prebuilt_pack'))
+        ).toBeNull();
+        expect(
+          await selection.resolve('osquery_manager-3333', context('prebuilt_pack'))
+        ).toBeNull();
+        const details = await selection.getDetails(
+          'osquery_manager-3333',
+          context('prebuilt_pack'),
+          null
+        );
+        expect(details.message).toMatch(/more than one/i);
+      });
+    });
+
     it('resolves to null for a pack that is not loaded, and explains it', async () => {
       http.get.mockResolvedValue({ data: [network] });
       const selection = createPrebuiltPackSelection(http);
