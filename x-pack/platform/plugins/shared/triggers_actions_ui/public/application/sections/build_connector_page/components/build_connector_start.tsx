@@ -27,7 +27,7 @@ import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { CreateConnectorTypeRequest } from '@kbn/actions-plugin/common';
 import type { DynamicConnectorType } from '../../../lib/action_connector_api/dynamic_connector_types';
 import { AiAssistantPanel } from './ai_assistant_panel';
-import { YamlImportPanel } from './yaml_import_panel';
+import { OpenApiImportPanel } from './openapi_import_panel';
 
 interface Props {
   onApply: (definition: Partial<CreateConnectorTypeRequest> & { logoUrl?: string }) => void;
@@ -51,7 +51,7 @@ export const BuildConnectorStart: React.FC<Props> = ({
   editingDefinitionLoading = false,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const [showYamlImport, setShowYamlImport] = useState(false);
+  const [showOpenApiImport, setShowOpenApiImport] = useState(false);
 
   const iconBadgeStyles = css`
     display: flex;
@@ -139,18 +139,18 @@ export const BuildConnectorStart: React.FC<Props> = ({
             layout="horizontal"
             icon={<EuiIcon type="document" size="l" aria-hidden={true} />}
             title={i18n.translate(
-              'xpack.triggersActionsUI.sections.buildConnectorPage.importYaml',
+              'xpack.triggersActionsUI.sections.buildConnectorPage.importOpenApiTitle',
               {
-                defaultMessage: 'Import YAML',
+                defaultMessage: 'Import OpenAPI',
               }
             )}
             titleSize="xs"
             description={i18n.translate(
-              'xpack.triggersActionsUI.sections.buildConnectorPage.importYamlDescription',
-              { defaultMessage: 'Paste or upload an existing connector definition.' }
+              'xpack.triggersActionsUI.sections.buildConnectorPage.importOpenApiDescription',
+              { defaultMessage: 'Paste or upload an OpenAPI 3 YAML or JSON document.' }
             )}
-            onClick={() => setShowYamlImport((current) => !current)}
-            data-test-subj="build-connector-start-import-yaml"
+            onClick={() => setShowOpenApiImport((current) => !current)}
+            data-test-subj="build-connector-start-import-openapi"
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -171,20 +171,20 @@ export const BuildConnectorStart: React.FC<Props> = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {showYamlImport && (
+      {showOpenApiImport && (
         <>
           <EuiSpacer size="l" />
-          <EuiPanel hasBorder paddingSize="xl" data-test-subj="build-connector-start-yaml">
+          <EuiPanel hasBorder paddingSize="xl" data-test-subj="build-connector-start-openapi">
             <EuiTitle size="s">
               <h3>
                 {i18n.translate(
-                  'xpack.triggersActionsUI.sections.buildConnectorPage.importYamlTitle',
-                  { defaultMessage: 'Import YAML' }
+                  'xpack.triggersActionsUI.sections.buildConnectorPage.importOpenApiTitle',
+                  { defaultMessage: 'Import OpenAPI' }
                 )}
               </h3>
             </EuiTitle>
             <EuiSpacer size="m" />
-            <YamlImportPanel onApply={onApply} />
+            <OpenApiImportPanel onApply={onApply} />
           </EuiPanel>
         </>
       )}

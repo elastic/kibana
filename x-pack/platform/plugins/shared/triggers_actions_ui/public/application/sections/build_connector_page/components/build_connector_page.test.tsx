@@ -83,8 +83,24 @@ actions:
       url: "{{config.baseUrl}}/ping"
 `;
 
+const openApiDefinition = `openapi: 3.0.3
+info:
+  title: Acme API
+  version: 1.0.0
+servers:
+  - url: https://api.acme.com
+paths:
+  /ping:
+    get:
+      operationId: ping
+      summary: Ping Acme
+      responses:
+        '200':
+          description: OK
+`;
+
 const yamlEditor = () =>
-  within(screen.getByTestId('build-connector-start-yaml')).getByTestId('mockedCodeEditor');
+  within(screen.getByTestId('build-connector-start-openapi')).getByTestId('mockedCodeEditor');
 const bodyEditor = (actionIndex: number) =>
   within(screen.getByTestId(`buildConnectorAction-${actionIndex}-body`)).getByTestId(
     'mockedCodeEditor'
@@ -109,13 +125,13 @@ const typeYaml = async (yaml: string) => {
   if (screen.queryByTestId('build-connector-page-back-to-start')) {
     await userEvent.click(screen.getByTestId('build-connector-page-back-to-start'));
   }
-  await userEvent.click(await screen.findByTestId('build-connector-start-import-yaml'));
+  await userEvent.click(await screen.findByTestId('build-connector-start-import-openapi'));
   fireEvent.change(yamlEditor(), { target: { value: yaml } });
 };
 
 const applyYaml = async (yaml: string) => {
   await typeYaml(yaml);
-  await userEvent.click(screen.getByTestId('build-connector-yaml-apply-btn'));
+  await userEvent.click(screen.getByTestId('build-connector-openapi-apply-btn'));
   await waitFor(() => expect(screen.getByTestId('buildConnectorNameInput')).toHaveValue('Acme'));
 };
 
@@ -163,7 +179,7 @@ describe('BuildConnectorPage', () => {
     });
   });
 
-  it('shows AI first, with YAML and scratch as secondary paths', async () => {
+  it('shows AI first, with OpenAPI import and scratch as secondary paths', async () => {
     renderStartPage();
 
     expect(screen.getByTestId('build-connector-start')).toBeInTheDocument();
@@ -172,7 +188,7 @@ describe('BuildConnectorPage', () => {
     expect(screen.getByTestId('build-connector-ai-generate-btn')).toHaveTextContent(
       'Generate draft'
     );
-    expect(screen.getByTestId('build-connector-start-import-yaml')).toBeInTheDocument();
+    expect(screen.getByTestId('build-connector-start-import-openapi')).toBeInTheDocument();
     expect(screen.getByTestId('build-connector-start-scratch')).toBeInTheDocument();
     await waitFor(() =>
       expect(screen.queryByTestId('created-types-section')).not.toBeInTheDocument()
@@ -475,9 +491,9 @@ describe('BuildConnectorPage', () => {
 
   it('lets the user drag the YAML and JSON body editors taller', async () => {
     renderStartPage();
-    await userEvent.click(screen.getByTestId('build-connector-start-import-yaml'));
+    await userEvent.click(screen.getByTestId('build-connector-start-import-openapi'));
 
-    expect(screen.getByTestId('build-connector-yaml-editor-container')).toHaveStyle({
+    expect(screen.getByTestId('build-connector-openapi-editor-container')).toHaveStyle({
       resize: 'vertical',
     });
     await userEvent.click(screen.getByTestId('build-connector-start-scratch'));
@@ -566,20 +582,73 @@ describe('BuildConnectorPage', () => {
     });
   });
 
-  describe('YAML import', () => {
+  describe('OpenAPI import', () => {
+    it('fills a draft from a pasted OpenAPI document without saving', async () => {
+      renderStartPage();
+
+      await userEvent.click(screen.getByTestId('build-connector-start-import-openapi'));
+      fireEvent.change(yamlEditor(), { target: { value: openApiDefinition } });
+      await userEvent.click(screen.getByTestId('build-connector-openapi-apply-btn'));
+
+      expect(await screen.findByTestId('buildConnectorNameInput')).toHaveValue('Acme API');
+      expect(screen.getByTestId('buildConnectorIdInput')).toHaveValue('acme-api');
+      expect(screen.getByTestId('buildConnectorConfigFields-0-default')).toHaveValue(
+        'https://api.acme.com'
+      );
+      expect(screen.getByTestId('buildConnectorAction-0-name')).toHaveValue('ping');
+      expect(screen.getByTestId('buildConnectorAction-0-path')).toHaveValue('/ping');
+      expect(createConnectorType).not.toHaveBeenCalled();
+    });
+
+    it('loads an OpenAPI file into the editor', async () => {
+      renderStartPage();
+
+      await userEvent.click(screen.getByTestId('build-connector-start-import-openapi'));
+      const file = new File([openApiDefinition], 'acme.yaml', { type: 'text/yaml' });
+      Object.defineProperty(file, 'text', {
+        value: jest.fn().mockResolvedValue(openApiDefinition),
+      });
+      const input = screen.getByTestId('build-connector-openapi-file');
+      fireEvent.change(input, { target: { files: [file] } });
+
+      await waitFor(() => expect(yamlEditor()).toHaveValue(openApiDefinition));
+      expect(screen.getByTestId('build-connector-openapi-apply-btn')).toBeEnabled();
+    });
+
+    it('shows skipped operations before applying the draft', async () => {
+      renderStartPage();
+      const documentWithOptionalQuery = openApiDefinition.replace(
+        '  /ping:',
+        `  /search:\n    get:\n      parameters:\n        - name: q\n          in: query\n          schema:\n            type: string\n      responses:\n        '200':\n          description: OK\n  /ping:`
+      );
+
+      await userEvent.click(screen.getByTestId('build-connector-start-import-openapi'));
+      fireEvent.change(yamlEditor(), { target: { value: documentWithOptionalQuery } });
+
+      expect(await screen.findByTestId('build-connector-openapi-skipped')).toHaveTextContent(
+        '1 operation could not be imported'
+      );
+      expect(screen.getByTestId('build-connector-openapi-skipped')).toHaveTextContent(
+        'GET /search'
+      );
+      expect(screen.getByTestId('build-connector-openapi-apply-btn')).toBeEnabled();
+    });
+  });
+
+  describe('legacy connector YAML import', () => {
     it('shows an error and disables the YAML buttons while the YAML is invalid', async () => {
       renderPage();
 
       await typeYaml('id: [unclosed');
       expect(await screen.findByText(/Flow sequence/)).toBeInTheDocument();
-      expect(screen.getByTestId('build-connector-yaml-apply-btn')).toBeDisabled();
-      expect(screen.getByTestId('build-connector-yaml-beautify-btn')).toBeDisabled();
+      expect(screen.getByTestId('build-connector-openapi-apply-btn')).toBeDisabled();
+      expect(screen.getByTestId('build-connector-openapi-beautify-btn')).toBeDisabled();
 
       fireEvent.change(yamlEditor(), { target: { value: '- just\n- a list\n' } });
       expect(
         await screen.findByText('The YAML must describe a single connector type definition.')
       ).toBeInTheDocument();
-      expect(screen.getByTestId('build-connector-yaml-apply-btn')).toBeDisabled();
+      expect(screen.getByTestId('build-connector-openapi-apply-btn')).toBeDisabled();
     });
 
     it('rejects a definition whose config or input is a map instead of a list', async () => {
@@ -591,7 +660,7 @@ describe('BuildConnectorPage', () => {
           '"config" must be a list of fields, each with a name and a type (and optionally required, label and description).'
         )
       ).toBeInTheDocument();
-      expect(screen.getByTestId('build-connector-yaml-apply-btn')).toBeDisabled();
+      expect(screen.getByTestId('build-connector-openapi-apply-btn')).toBeDisabled();
 
       fireEvent.change(yamlEditor(), {
         target: { value: 'actions:\n  ping:\n    input:\n      message: string\n' },
@@ -615,7 +684,7 @@ describe('BuildConnectorPage', () => {
           '"actions.ping" has an unknown key "params". Allowed keys: description, scope, input, request.'
         )
       ).toBeInTheDocument();
-      expect(screen.getByTestId('build-connector-yaml-apply-btn')).toBeDisabled();
+      expect(screen.getByTestId('build-connector-openapi-apply-btn')).toBeDisabled();
 
       fireEvent.change(yamlEditor(), { target: { value: 'name: Acme\n' } });
       expect(
@@ -640,7 +709,7 @@ describe('BuildConnectorPage', () => {
       renderPage();
 
       await typeYaml('{id: .acme, displayName: Acme,   auth: {type: none}}');
-      await userEvent.click(screen.getByTestId('build-connector-yaml-beautify-btn'));
+      await userEvent.click(screen.getByTestId('build-connector-openapi-beautify-btn'));
 
       await waitFor(() =>
         expect(yamlEditor()).toHaveValue('id: .acme\ndisplayName: Acme\nauth:\n  type: none\n')

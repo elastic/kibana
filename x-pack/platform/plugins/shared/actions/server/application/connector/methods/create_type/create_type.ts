@@ -50,12 +50,14 @@ const executeRequest = async (
     }
     return value;
   };
-  const render = (template: string, encodePathValue = false) =>
+  const render = (template: string, encodeInput = false) =>
     template.replace(
       /{{\s*(config|input|secrets)\.([A-Za-z][A-Za-z0-9_]*)\s*}}/g,
       (_match, source: keyof typeof values, key: string) => {
         const value = resolveValue(source, key);
-        return encodePathValue ? encodeURIComponent(String(value)) : String(value);
+        return encodeInput && source === 'input'
+          ? encodeURIComponent(String(value))
+          : String(value);
       }
     );
   const renderBody = (value: unknown): unknown => {
@@ -80,7 +82,7 @@ const executeRequest = async (
     method: request.method,
     url: request.path
       ? appendPath(render(request.url), render(request.path, true))
-      : render(request.url),
+      : render(request.url, true),
     headers: Object.fromEntries(
       Object.entries(request.headers ?? {}).map(([header, value]) => [header, render(value)])
     ),

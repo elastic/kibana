@@ -163,6 +163,42 @@ describe('createConnectorType', () => {
     );
   });
 
+  it('encodes input values in a full URL with query parameters', async () => {
+    const createTypeFromSpec = jest.fn(() => ({ id: '.dynamic_type' })) as never;
+    createConnectorType({
+      actionTypeRegistry: { has: jest.fn(() => false) } as unknown as ActionTypeRegistry,
+      createTypeFromSpec,
+      registerType: jest.fn(),
+      request: {
+        ...request,
+        actions: {
+          search: {
+            ...request.actions.getItem,
+            input: [
+              { name: 'itemId', type: 'string', required: true },
+              { name: 'query', type: 'string', required: true },
+            ],
+            request: {
+              method: 'GET',
+              url: '{{config.baseUrl}}/items/{{input.itemId}}?q={{input.query}}',
+            },
+          },
+        },
+      },
+    });
+    const spec = (createTypeFromSpec as jest.Mock).mock.calls[0][0] as ConnectorSpec;
+    const client = { request: jest.fn().mockResolvedValue({ data: {} }) };
+
+    await spec.actions.search.handler(
+      { config: { baseUrl: 'https://example.test' }, secrets: {}, client } as never,
+      { itemId: 'a/b', query: 'a&b c' }
+    );
+
+    expect(client.request).toHaveBeenCalledWith(
+      expect.objectContaining({ url: 'https://example.test/items/a%2Fb?q=a%26b%20c' })
+    );
+  });
+
   it('preserves typed whole-value placeholders in JSON bodies and interpolates embedded values as strings', async () => {
     const createTypeFromSpec = jest.fn(() => ({ id: '.dynamic_type' })) as never;
     createConnectorType({
