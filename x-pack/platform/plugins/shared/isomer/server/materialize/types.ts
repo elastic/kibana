@@ -10,6 +10,11 @@ import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server
 import type { AggConfigSerialized } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { ChartDataResult, ToChartDataOptions } from './kit/chart_data';
+import type { ConcreteColor } from './kit/colors';
+import type { FormatMapping } from './kit/formats';
+import type { ChartColumnType } from './kit/types';
 import type { MaterializeContext, MaterializeInput } from '../../common';
 import type { ChartEvent, MaterializedNode, UnsupportedNode } from './nodes';
 
@@ -96,10 +101,16 @@ export interface MaterializeResults {
   nodes: MaterializedNode[];
 }
 
-/** Context a materializer maps with. */
+/** Helpers a materializer maps with, so every materializer formats and colors as Kibana does. */
 export interface MaterializeKit {
   /** The context supplied to `plan`. */
   context: MaterializeContext;
+  /** A Kibana field format as a portable format, or how its values arrive instead. */
+  toPortableFormat(format: SerializedFieldFormat | undefined, type: ChartColumnType): FormatMapping;
+  /** A Kibana `Datatable` as a chart's columnar `data`, with what didn't carry over as losses. */
+  toChartData(table: Datatable, options?: ToChartDataOptions): ChartDataResult;
+  /** The first `count` colors of a Kibana palette, for light and dark. Defaults to Kibana's default palette. */
+  paletteColors(count: number, paletteId?: string): ConcreteColor[];
 }
 
 /** The user-scoped services a by-reference load runs with. */

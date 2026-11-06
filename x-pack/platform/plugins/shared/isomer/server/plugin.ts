@@ -14,10 +14,12 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { KibanaIsomerRuntime } from '@kbn/isomer';
 import { firstValueFrom } from 'rxjs';
 import { MATERIALIZE_FEATURE_FLAG } from '../common/constants';
 import { createScopedMaterializeClient } from './materialize/materialize_client';
+import { createKitServices } from './materialize/kit/create_kit';
 import { MaterializerRegistry } from './materialize/registry';
 import { createNodeValidator } from './materialize/validate_node';
 import type { MaterializeScope, Materializer, ScopedMaterializeClient } from './materialize/types';
@@ -44,6 +46,7 @@ export interface AsScopedOptions {
 /** Plugins the Isomer plugin uses once it starts. */
 export interface IsomerPluginStartDependencies {
   data: DataPluginStart;
+  fieldFormats: FieldFormatsStart;
 }
 
 /** Start contract for the Isomer runtime and user-scoped materialization. */
@@ -76,6 +79,8 @@ export class IsomerPlugin
   private readonly logger: Logger;
   private readonly kibanaVersion: string;
   private data?: DataPluginStart;
+  private fieldFormats?: FieldFormatsStart;
+  private uiSettings?: CoreStart['uiSettings'];
   private readonly registry = new MaterializerRegistry();
   private runtime?: Promise<KibanaIsomerRuntime>;
   private featureFlags?: CoreStart['featureFlags'];
@@ -95,8 +100,10 @@ export class IsomerPlugin
     };
   }
 
-  start(core: CoreStart, { data }: IsomerPluginStartDependencies): IsomerPluginStart {
+  start(core: CoreStart, { data, fieldFormats }: IsomerPluginStartDependencies): IsomerPluginStart {
     this.data = data;
+    this.fieldFormats = fieldFormats;
+    this.uiSettings = core.uiSettings;
     this.featureFlags = core.featureFlags;
     return {
       getRuntime: this.getRuntime,
@@ -119,7 +126,8 @@ export class IsomerPlugin
   };
 
   private readonly createClient = (scope: MaterializeScope): ScopedMaterializeClient => {
-    if (!this.data) {
+    const { data, fieldFormats, uiSettings } = this;
+    if (!data || !fieldFormats || !uiSettings) {
       throw new Error('The isomer plugin materializes only after it starts.');
     }
     return createScopedMaterializeClient({
@@ -127,7 +135,9 @@ export class IsomerPlugin
       scope,
       isEnabled: this.isMaterializeEnabled,
       logger: this.logger.get('materialize'),
-      search: this.data.search.asScoped(scope.request),
+      search: data.search.asScoped(scope.request),
+      getKitServices: () =>
+        createKitServices(uiSettings.asScopedToClient(scope.savedObjectsClient), fieldFormats),
       validate: this.validateNode,
       kibanaVersion: this.kibanaVersion,
     });
