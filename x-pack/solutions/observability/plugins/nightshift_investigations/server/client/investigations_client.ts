@@ -568,7 +568,9 @@ export class NightshiftInvestigationsClient {
     let investigationId: string;
     let isFollowUp: boolean;
     let executionId: string;
-    // A start that fails before its workflow launches runs nothing, so it gives its slots back.
+    let claimedNew = false;
+    // A start that fails before its workflow launches runs nothing, so it gives its slots back and
+    // drops the claims it took: a retry then opens a new investigation, and is charged for it.
     try {
       const { id: resolvedId, recorded } = await this.resolveInvestigation({
         conversations,
@@ -595,6 +597,7 @@ export class NightshiftInvestigationsClient {
       });
       investigationId = resolvedId;
       isFollowUp = investigationId !== newInvestigationId;
+      claimedNew = !isFollowUp;
       if (isFollowUp) {
         await releaseBudgets();
       }
@@ -646,6 +649,9 @@ export class NightshiftInvestigationsClient {
 
       executionId = await this.runInvestigationWorkflow(workflow, spaceId, inputs, timeout_seconds);
     } catch (error) {
+      if (claimedNew) {
+        await this.releaseClaims(agenticInvestigations, newInvestigationId);
+      }
       await releaseBudgets();
       throw error;
     }
@@ -692,6 +698,21 @@ export class NightshiftInvestigationsClient {
     } catch (error) {
       this.logger.warn(
         `Could not create the conversation of investigation "${investigationId}" on start; its run creates it: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
+
+  private async releaseClaims(
+    agenticInvestigations: AgenticInvestigationsPluginStart,
+    investigationId: string
+  ): Promise<void> {
+    try {
+      await agenticInvestigations.getSubjectsClient(this.request).releaseClaims(investigationId);
+    } catch (error) {
+      this.logger.warn(
+        `Could not release the subject claims of investigation "${investigationId}": ${
           error instanceof Error ? error.message : String(error)
         }`
       );
@@ -876,8 +897,8 @@ export class NightshiftInvestigationsClient {
     }
 
     // Charged before the claim, so a denied start claims nothing. A start that then loses the
-    // claim to a concurrent one becomes a follow-up and releases both budgets, and a start whose
-    // claim attempt fails gives them back through its caller.
+    // claim to a concurrent one becomes a follow-up and releases both budgets. A failed claim
+    // attempt rolls back what it took, and the caller gives back both budgets.
     await assertCanOpenNew();
     const claim = await subjectsClient.claimSubjects({
       conversationId: newInvestigationId,

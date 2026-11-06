@@ -96,6 +96,7 @@ const subjectsClient = {
   findConversationIdsBySubjects: jest.fn(),
   listByConversationIds: jest.fn(),
   claimSubjects: jest.fn(),
+  releaseClaims: jest.fn(),
 };
 const agenticInvestigationsClient = { findOpenBySubjects: jest.fn(), get: jest.fn() };
 
@@ -246,6 +247,7 @@ beforeEach(() => {
   subjectsClient.findConversationIdsBySubjects.mockResolvedValue([]);
   subjectsClient.listByConversationIds.mockResolvedValue([]);
   subjectsClient.claimSubjects.mockResolvedValue({ claimed: true });
+  subjectsClient.releaseClaims.mockReset().mockResolvedValue(undefined);
   agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([]);
 });
 
@@ -1642,15 +1644,37 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
       await expect(startWithBudget(1)).rejects.toThrow('failed');
 
       expect(await usage()).toBe(0);
+      expect(subjectsClient.releaseClaims).toHaveBeenCalledTimes(1);
     });
 
-    it('does not charge a retry that continues the claim of a failed start', async () => {
+    it('charges a retry of a failed start, which opens a new investigation', async () => {
       mockNewInvestigationId.mockReturnValueOnce('inv-failed');
       mockManagement.runWorkflow.mockRejectedValueOnce(new Error('failed'));
       await expect(startWithBudget(2)).rejects.toThrow('failed');
-      subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-failed' });
+      expect(subjectsClient.releaseClaims).toHaveBeenCalledWith('inv-failed');
 
-      await expect(startWithBudget(2)).resolves.toEqual({ investigation_id: 'inv-failed' });
+      mockNewInvestigationId.mockReturnValueOnce('inv-retry');
+      await expect(startWithBudget(2)).resolves.toEqual({ investigation_id: 'inv-retry' });
+
+      expect(await usage()).toBe(1);
+    });
+
+    it('keeps the claims of the investigation a failed follow-up continues', async () => {
+      subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-holder' });
+      withConversations(makeConversation({ id: 'inv-holder' }));
+      mockManagement.runWorkflow.mockRejectedValueOnce(new Error('failed'));
+
+      await expect(startWithBudget(1)).rejects.toThrow('failed');
+
+      expect(subjectsClient.releaseClaims).not.toHaveBeenCalled();
+      expect(await usage()).toBe(0);
+    });
+
+    it('still fails with the launch error when releasing the claims fails', async () => {
+      mockManagement.runWorkflow.mockRejectedValueOnce(new Error('failed'));
+      subjectsClient.releaseClaims.mockRejectedValueOnce(new Error('claims unavailable'));
+
+      await expect(startWithBudget(1)).rejects.toThrow('failed');
 
       expect(await usage()).toBe(0);
     });

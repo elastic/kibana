@@ -23,6 +23,7 @@ const setup = ({
     findConversationIdsBySubjects: jest.fn().mockResolvedValue(['conv-1']),
     listByConversationIds: jest.fn().mockResolvedValue([]),
     claimSubjects: jest.fn().mockResolvedValue({ claimed: true }),
+    deleteClaimsByConversationIds: jest.fn().mockResolvedValue(1),
   };
   const deny = jest.fn().mockRejectedValue(new InvestigationsForbiddenError('Missing privilege'));
   const privileges = {
@@ -90,6 +91,15 @@ describe('createSubjectsClient', () => {
     });
   });
 
+  it('releases the claims of one investigation in the request space', async () => {
+    const { client, service, privileges } = setup();
+
+    await client.releaseClaims('conv-2');
+
+    expect(privileges.assertCanManage).toHaveBeenCalledWith(request);
+    expect(service.deleteClaimsByConversationIds).toHaveBeenCalledWith(['conv-2'], 'space-a');
+  });
+
   it('leaves out investigations the caller cannot read', async () => {
     const { client, service } = setup({ readableIds: ['conv-2'] });
     service.findConversationIdsBySubjects.mockResolvedValue(['conv-1', 'conv-2']);
@@ -121,8 +131,10 @@ describe('createSubjectsClient', () => {
     await expect(
       client.claimSubjects({ conversationId: 'c', subjects: [], isHolderOpen: jest.fn() })
     ).rejects.toBeInstanceOf(InvestigationsForbiddenError);
+    await expect(client.releaseClaims('c')).rejects.toBeInstanceOf(InvestigationsForbiddenError);
 
     expect(service.upsertSubjects).not.toHaveBeenCalled();
+    expect(service.deleteClaimsByConversationIds).not.toHaveBeenCalled();
     expect(service.listByConversationIds).not.toHaveBeenCalled();
     expect(service.claimSubjects).not.toHaveBeenCalled();
   });
