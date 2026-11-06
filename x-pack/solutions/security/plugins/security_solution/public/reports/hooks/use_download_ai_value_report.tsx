@@ -16,14 +16,10 @@ import type { TimeRange } from '../../common/store/inputs/model';
 import { useAIValueExportContext } from '../providers/ai_value/export_provider';
 
 interface UseDownloadAIValueReportParams {
-  anchorElement: HTMLElement | null;
   timeRange: TimeRange;
 }
 
-export const useDownloadAIValueReport = ({
-  anchorElement,
-  timeRange,
-}: UseDownloadAIValueReportParams) => {
+export const useDownloadAIValueReport = ({ timeRange }: UseDownloadAIValueReportParams) => {
   const { share: shareService, serverless, uiSettings } = useKibana().services;
   const isServerless = !!serverless;
   const aiValueExportContext = useAIValueExportContext();

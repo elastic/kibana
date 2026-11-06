@@ -74,13 +74,10 @@ const BaseComponent = () => {
   const { serverless } = useKibana().services;
   const isServerless = !!serverless;
 
-  const [exportButtonElement] = useState<HTMLAnchorElement | HTMLButtonElement | null>(null);
-
   // since we do not have a search bar in the AI Value page, we need to sync the timerange
   useSyncTimerangeUrlParam();
 
   const { toggleContextMenu, isExportEnabled } = useDownloadAIValueReport({
-    anchorElement: exportButtonElement,
     timeRange: timerange,
   });
 
