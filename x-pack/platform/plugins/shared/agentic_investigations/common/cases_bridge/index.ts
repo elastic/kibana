@@ -98,7 +98,10 @@ export interface OpenCaseResponse {
   case_title: string;
   incremental_id?: number | null;
   linked: LinkedInvestigationResult[];
+  /** True when the case was pushed to its connector when it opened. */
   pushed: boolean;
+  /** The connector the case pushes to; missing when it has none. */
+  connector_name?: string;
 }
 
 export interface LinkCaseResponse {

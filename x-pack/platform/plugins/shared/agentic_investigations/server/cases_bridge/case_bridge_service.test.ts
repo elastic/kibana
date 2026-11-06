@@ -51,6 +51,7 @@ const setup = () => {
       push: jest.fn(),
       bulkUpdate: jest.fn(),
     },
+    templates: { getTemplate: jest.fn().mockResolvedValue(undefined) },
     attachments: {
       bulkCreate: jest.fn().mockResolvedValue([]),
       bulkGet: jest.fn().mockResolvedValue({ attachments: [], errors: [] }),
@@ -89,6 +90,107 @@ const request = httpServerMock.createKibanaRequest();
 
 describe('CaseBridgeService', () => {
   describe('openCase', () => {
+    it("pushes once after linking, then turns on the template's automatic push", async () => {
+      const { service, casesClient } = setup();
+      const withConnector = {
+        ...createdCase,
+        connector: { id: 'snow-1', name: 'POC ServiceNow', type: '.servicenow' },
+        settings: {
+          syncAlerts: true,
+          externalSync: { autoPush: false, conflictStrategy: 'kibana' },
+        },
+      };
+      casesClient.cases.create.mockResolvedValueOnce(withConnector);
+      casesClient.cases.get.mockResolvedValueOnce({ ...withConnector, version: 'v3' });
+      casesClient.templates.getTemplate.mockResolvedValueOnce({
+        attributes: {
+          definition:
+            'connector:\n  id: snow-1\n  type: .servicenow\nsettings:\n  externalSync:\n    autoPush: true\n    conflictStrategy: kibana\n',
+        },
+      });
+
+      const result = await service.openCase(request, 'inv-1', {
+        title: 'Credential dumping on fin-ws-07',
+        visibility: 'public',
+        assignees: [],
+        linked_investigation_ids: [],
+        push: true,
+        template_id: 'system-ai-investigation',
+      });
+
+      // Opened with automatic push off: a listener push racing the link writes opened a
+      // second incident.
+      expect(casesClient.cases.create.mock.calls[0][0].settings).toEqual({
+        syncAlerts: true,
+        externalSync: { autoPush: false, conflictStrategy: 'kibana' },
+      });
+      expect(casesClient.cases.push).toHaveBeenCalledTimes(1);
+      expect(casesClient.attachments.bulkCreate.mock.invocationCallOrder[0]).toBeLessThan(
+        casesClient.cases.push.mock.invocationCallOrder[0]
+      );
+      expect(casesClient.cases.bulkUpdate).toHaveBeenCalledWith({
+        cases: [
+          {
+            id: 'case-1',
+            version: 'v3',
+            settings: {
+              syncAlerts: true,
+              externalSync: { autoPush: true, conflictStrategy: 'kibana' },
+            },
+          },
+        ],
+      });
+      expect(result).toMatchObject({ pushed: true, connector_name: 'POC ServiceNow' });
+    });
+
+    it('leaves automatic push off when the push fails, so the analyst pushes once from the case', async () => {
+      const { service, casesClient } = setup();
+      casesClient.cases.create.mockResolvedValueOnce({
+        ...createdCase,
+        connector: { id: 'snow-1', name: 'POC ServiceNow', type: '.servicenow' },
+      });
+      casesClient.cases.push.mockRejectedValueOnce(new Error('ServiceNow is down'));
+      casesClient.templates.getTemplate.mockResolvedValueOnce({
+        attributes: { definition: 'settings:\n  externalSync:\n    autoPush: true\n' },
+      });
+
+      const result = await service.openCase(request, 'inv-1', {
+        title: 'Credential dumping on fin-ws-07',
+        visibility: 'public',
+        assignees: [],
+        linked_investigation_ids: [],
+        push: true,
+        template_id: 'system-ai-investigation',
+      });
+
+      expect(result.pushed).toBe(false);
+      expect(casesClient.cases.bulkUpdate).not.toHaveBeenCalled();
+    });
+
+    it('with push off, neither pushes nor turns on automatic push', async () => {
+      const { service, casesClient } = setup();
+      casesClient.cases.create.mockResolvedValueOnce({
+        ...createdCase,
+        connector: { id: 'snow-1', name: 'POC ServiceNow', type: '.servicenow' },
+      });
+      casesClient.templates.getTemplate.mockResolvedValueOnce({
+        attributes: { definition: 'settings:\n  externalSync:\n    autoPush: true\n' },
+      });
+
+      const result = await service.openCase(request, 'inv-1', {
+        title: 'Credential dumping on fin-ws-07',
+        visibility: 'public',
+        assignees: [],
+        linked_investigation_ids: [],
+        push: false,
+        template_id: 'system-ai-investigation',
+      });
+
+      expect(casesClient.cases.push).not.toHaveBeenCalled();
+      expect(casesClient.cases.bulkUpdate).not.toHaveBeenCalled();
+      expect(result.pushed).toBe(false);
+    });
+
     it('opens a restricted AlertZero case and links each investigation by reference', async () => {
       const { service, casesClient, conversations } = setup();
 

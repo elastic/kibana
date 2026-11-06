@@ -24,6 +24,13 @@ export const ALERTZERO_THIN_AGENT_LABELS = ['security', 'alertzero', 'watch'] as
 
 export const ALERTZERO_THIN_AGENT_AVATAR_SYMBOL = 'AZ';
 
+/** Owned by Cases (`CASES_OUTCOMES_AI_INDEX_ID`); AlertZero doesn't depend on the Cases plugin. */
+export const CASES_OUTCOMES_AI_INDEX_ID = 'cases-outcomes';
+
+export const ALERTZERO_THIN_AGENT_INSTRUCTIONS =
+  'Before deciding, query prior case outcomes in the cases-outcomes AI index for the same rule, ' +
+  'host, or observable and weigh the human verdict.';
+
 /**
  * Thin AlertZero agent type: empty skill floor, elastic capabilities off.
  * Watch skills come from workflow metadata / `configuration_overrides.skill_ids`.
@@ -35,7 +42,10 @@ export const agentType = {
   description: ALERTZERO_THIN_AGENT_DESCRIPTION,
   avatar_icon: 'logoSecurity',
   baseConfiguration: {
-    // TODO - add custom instructions for this agent type
+    instructions: ALERTZERO_THIN_AGENT_INSTRUCTIONS,
+    // Closed Cases outcomes (Cases' managed AI index). Assigning it attaches the context engine's
+    // retrieval skill and query tools; without the context engine on, it is dropped.
+    ai_indices: [CASES_OUTCOMES_AI_INDEX_ID],
     tools: [],
     skill_ids: [],
     connector_ids: [],

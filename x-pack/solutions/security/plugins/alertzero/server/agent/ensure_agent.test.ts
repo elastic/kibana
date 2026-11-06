@@ -59,6 +59,13 @@ describe('thin agent', () => {
       },
     });
   });
+
+  it('reads prior case outcomes before deciding', () => {
+    expect(agentType.baseConfiguration).toMatchObject({
+      ai_indices: ['cases-outcomes'],
+      instructions: expect.stringContaining('query prior case outcomes'),
+    });
+  });
 });
 
 describe('ensureAgent', () => {

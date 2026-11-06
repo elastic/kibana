@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { parse as parseYaml } from 'yaml';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { CasesServerStart } from '@kbn/cases-plugin/server';
 import type { Case } from '@kbn/cases-plugin/common';
@@ -136,6 +137,9 @@ export class CaseBridgeService {
       typeof source.metadata?.verdict === 'string' ? source.metadata.verdict : undefined
     );
     const severity = toCaseSeverity(source.metadata?.severity);
+    const templateSync = body.template_id
+      ? await this.getTemplateExternalSync(casesClient, body.template_id)
+      : undefined;
 
     const createdCase = await casesClient.cases.create({
       title: body.title,
@@ -146,7 +150,16 @@ export class CaseBridgeService {
       tags: [ALERTZERO_CASE_TAG],
       owner: ALERTZERO_CASE_OWNER,
       connector: { id: 'none', name: 'none', type: '.none', fields: null },
-      settings: { syncAlerts: true },
+      // Automatic push stays off while the investigations are linked: an automatic push racing
+      // the link writes lost the case update and opened a second incident. The template's
+      // setting is turned back on after the one push below.
+      settings: {
+        syncAlerts: true,
+        externalSync: {
+          autoPush: false,
+          conflictStrategy: templateSync?.conflictStrategy ?? 'external',
+        },
+      },
       assignees: assigneeUids.map((uid) => ({ uid })),
       ...(severity ? { severity } : {}),
       ...(body.template_id ? { template: { id: body.template_id } } : {}),
@@ -179,7 +192,8 @@ export class CaseBridgeService {
 
     let pushed = false;
     const connectorId = createdCase.connector?.id;
-    if (body.push && connectorId && connectorId !== 'none') {
+    const hasConnector = connectorId != null && connectorId !== 'none';
+    if (body.push && hasConnector) {
       try {
         await casesClient.cases.push({
           caseId: createdCase.id,
@@ -197,6 +211,11 @@ export class CaseBridgeService {
         );
       }
     }
+    // Pushed: from now on the case pushes automatically when its template says so. Not after a
+    // failed push, so the analyst's own push from the case can't race an automatic one.
+    if (pushed && templateSync?.autoPush === true) {
+      await this.turnOnAutoPush(casesClient, createdCase.id, templateSync);
+    }
 
     return {
       case_id: createdCase.id,
@@ -204,7 +223,59 @@ export class CaseBridgeService {
       incremental_id: createdCase.incremental_id ?? null,
       linked,
       pushed,
+      ...(connectorId && connectorId !== 'none'
+        ? { connector_name: createdCase.connector.name }
+        : {}),
     };
+  }
+
+  private async turnOnAutoPush(
+    casesClient: CasesClient,
+    caseId: string,
+    externalSync: { autoPush: boolean; conflictStrategy: 'external' | 'kibana' }
+  ): Promise<void> {
+    // One retry: the push's own writes can still be settling when this reads the version.
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        const latest = await casesClient.cases.get({ id: caseId, includeComments: false });
+        await casesClient.cases.bulkUpdate({
+          cases: [
+            {
+              id: latest.id,
+              version: latest.version,
+              settings: { ...latest.settings, externalSync },
+            },
+          ],
+        });
+        return;
+      } catch (error) {
+        if (attempt === 2) {
+          this.deps.logger.warn(
+            `Case ${caseId} won't push automatically: turning it on failed: ${toMessage(error)}`
+          );
+        }
+      }
+    }
+  }
+
+  /** The template's sync settings, when it has them; a template that can't be read has none. */
+  private async getTemplateExternalSync(
+    casesClient: CasesClient,
+    templateId: string
+  ): Promise<{ autoPush: boolean; conflictStrategy: 'external' | 'kibana' } | undefined> {
+    try {
+      const template = await casesClient.templates.getTemplate(templateId);
+      const definition = template ? parseYaml(template.attributes.definition) : undefined;
+      const sync = definition?.settings?.externalSync;
+      return sync && typeof sync.autoPush === 'boolean'
+        ? {
+            autoPush: sync.autoPush,
+            conflictStrategy: sync.conflictStrategy === 'kibana' ? 'kibana' : 'external',
+          }
+        : undefined;
+    } catch {
+      return undefined;
+    }
   }
 
   async linkCase(
@@ -461,7 +532,9 @@ export class CaseBridgeService {
             ],
           })
           .catch((error) =>
-            this.deps.logger.debug(`Case ${caseId}: chat of ${id} not attached: ${toMessage(error)}`)
+            this.deps.logger.debug(
+              `Case ${caseId}: chat of ${id} not attached: ${toMessage(error)}`
+            )
           );
       } catch (error) {
         this.deps.logger.warn(

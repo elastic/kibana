@@ -31,6 +31,7 @@ import {
   EuiSelectable,
   EuiSpacer,
   EuiSuperSelect,
+  EuiSwitch,
   EuiText,
   EuiToolTip,
   type EuiBasicTableColumn,
@@ -56,6 +57,8 @@ interface TemplateSummary {
   id: string;
   name: string;
   description?: string;
+  /** The connector the template opens cases with, when it has one. */
+  connectorId?: string;
 }
 
 const NO_TEMPLATE = '__none__';
@@ -74,19 +77,52 @@ const useCaseTemplates = () => {
         })
         .catch(() => undefined);
       const response = await services.http.get<{
-        templates: Array<{ templateId?: string; id?: string; name?: string; description?: string }>;
+        templates: Array<{
+          templateId?: string;
+          id?: string;
+          name?: string;
+          description?: string;
+          definition?: { connector?: { id?: string; type?: string } };
+        }>;
       }>('/api/cases/templates', {
         query: { owner: ALERTZERO_CASE_OWNER, isEnabled: true, perPage: 100 },
         signal,
       });
       return response.templates.flatMap((template): TemplateSummary[] => {
         const id = template.templateId ?? template.id;
+        const connector = template.definition?.connector;
         return id && template.name
-          ? [{ id, name: template.name, description: template.description }]
+          ? [
+              {
+                id,
+                name: template.name,
+                description: template.description,
+                ...(connector?.id && connector.type !== '.none'
+                  ? { connectorId: connector.id }
+                  : {}),
+              },
+            ]
           : [];
       });
     },
     // A space without templates, or without the templates feature, still opens a case.
+    retry: false,
+  });
+};
+
+// The name shown in the Push switch. Users who can't read connectors still see the switch.
+const useConnectorName = (connectorId: string | undefined) => {
+  const { services } = useKibana<Services>();
+  return useQuery({
+    queryKey: ['agenticInvestigations', 'casesBridge', 'connector', connectorId],
+    enabled: connectorId != null,
+    queryFn: async ({ signal }) => {
+      const connector = await services.http.get<{ name?: string }>(
+        `/api/actions/connector/${encodeURIComponent(connectorId ?? '')}`,
+        { signal }
+      );
+      return connector.name ?? null;
+    },
     retry: false,
   });
 };
@@ -156,6 +192,7 @@ const CreateCaseMode: React.FC<{
   const [assigneeSearch, setAssigneeSearch] = useState('');
   const [assignees, setAssignees] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [linkIds, setLinkIds] = useState<string[]>([]);
+  const [push, setPush] = useState(true);
 
   const { data: currentUser } = useCurrentUserProfile();
   const { data: suggestions = [], isFetching: isSearchingAssignees } =
@@ -175,6 +212,12 @@ const CreateCaseMode: React.FC<{
     queryFn: ({ signal }) => listOpenInvestigations(services.http, { signal }),
   });
 
+  const selectedTemplate = templates.data?.find(({ id }) => id === templateId);
+  const pushConnectorId = selectedTemplate?.connectorId;
+  const connectorName = useConnectorName(pushConnectorId);
+  const connectorLabel = connectorName.data ?? OPEN_CASE.templateConnectorFallback;
+  const pushRequested = pushConnectorId != null && push;
+
   const submit = useMutation({
     mutationFn: () =>
       openCase(services.http, investigationId, {
@@ -182,7 +225,7 @@ const CreateCaseMode: React.FC<{
         visibility,
         assignees: assignees.flatMap(({ value }) => (value ? [value] : [])),
         linked_investigation_ids: linkIds,
-        push: false,
+        push: pushConnectorId != null && push,
         ...(templateId !== NO_TEMPLATE ? { template_id: templateId } : {}),
       }),
     onSuccess: (result) => {
@@ -197,12 +240,17 @@ const CreateCaseMode: React.FC<{
           <EuiText size="s">
             {failed > 0
               ? OPEN_CASE.partialToastText(failed)
+              : result.pushed && result.connector_name
+              ? OPEN_CASE.pushedToastText(result.linked.length, result.connector_name)
               : OPEN_CASE.successToastText(result.linked.length)}
+            {pushRequested && !result.pushed
+              ? ` ${OPEN_CASE.pushFailedToastText(result.connector_name ?? connectorLabel)}`
+              : null}
           </EuiText>,
           services
         ),
       };
-      if (failed > 0) {
+      if (failed > 0 || (pushRequested && !result.pushed)) {
         services.notifications.toasts.addWarning(toast);
       } else {
         services.notifications.toasts.addSuccess(toast);
@@ -264,7 +312,6 @@ const CreateCaseMode: React.FC<{
     ];
   }, [investigations.data, investigationId, sourceTitle, linkIds]);
 
-  const selectedTemplate = templates.data?.find(({ id }) => id === templateId);
   const isNameMissing = title.trim().length === 0;
 
   return (
@@ -294,6 +341,8 @@ const CreateCaseMode: React.FC<{
               onChange={(value) => {
                 setIsTemplateChosen(true);
                 setTemplateId(value);
+                // Each template's connector starts with push on, as the spec says.
+                setPush(true);
               }}
               data-test-subj="openCaseTemplate"
               options={[
@@ -319,6 +368,16 @@ const CreateCaseMode: React.FC<{
             <EuiPanel color="subdued" paddingSize="s" hasShadow={false}>
               <EuiText size="xs">{selectedTemplate.description}</EuiText>
             </EuiPanel>
+          ) : null}
+          {pushConnectorId != null ? (
+            <EuiFormRow fullWidth helpText={OPEN_CASE.pushHelp(connectorLabel)}>
+              <EuiSwitch
+                label={OPEN_CASE.pushLabel(connectorLabel)}
+                checked={push}
+                onChange={(event) => setPush(event.target.checked)}
+                data-test-subj="open-case-push-switch"
+              />
+            </EuiFormRow>
           ) : null}
           <EuiFormRow
             label={OPEN_CASE.visibilityLabel}

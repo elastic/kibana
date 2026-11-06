@@ -95,6 +95,32 @@ export const OPEN_CASE = {
       defaultMessage: '{count, plural, one {# investigation} other {# investigations}} linked.',
       values: { count },
     }),
+  pushedToastText: (count: number, connectorName: string) =>
+    i18n.translate('xpack.agenticInvestigations.openCase.pushedToastText', {
+      defaultMessage:
+        '{count, plural, one {# investigation} other {# investigations}} linked and pushed to {connectorName}.',
+      values: { count, connectorName },
+    }),
+  pushFailedToastText: (connectorName: string) =>
+    i18n.translate('xpack.agenticInvestigations.openCase.pushFailedToastText', {
+      defaultMessage: "The push to {connectorName} didn't go through. Push from the case.",
+      values: { connectorName },
+    }),
+  pushLabel: (connectorName: string) =>
+    i18n.translate('xpack.agenticInvestigations.openCase.pushLabel', {
+      defaultMessage: 'Push to {connectorName} when the case opens',
+      values: { connectorName },
+    }),
+  pushHelp: (connectorName: string) =>
+    i18n.translate('xpack.agenticInvestigations.openCase.pushHelp', {
+      defaultMessage:
+        'Creates an incident in {connectorName} as soon as the case opens. Status changes sync both ways.',
+      values: { connectorName },
+    }),
+  templateConnectorFallback: i18n.translate(
+    'xpack.agenticInvestigations.openCase.templateConnectorFallback',
+    { defaultMessage: "the template's connector" }
+  ),
   partialToastText: (failed: number) =>
     i18n.translate('xpack.agenticInvestigations.openCase.partialToastText', {
       defaultMessage:
