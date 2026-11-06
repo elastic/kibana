@@ -848,6 +848,147 @@ describe('PackageInstaller', () => {
         inferenceId: defaultInferenceEndpoints.ELSER,
       });
     });
+
+    it('skips when the repository has no OpenAPI version', async () => {
+      fetchArtifactVersionsMock.mockResolvedValue({ openapi: [] });
+      jest.spyOn(packageInstaller, 'installOpenAPISpec').mockResolvedValue(undefined);
+
+      await packageInstaller.ensureOpenApiSpecUpToDate({
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+
+      expect(packageInstaller.installOpenAPISpec).not.toHaveBeenCalled();
+      expect(checkArtifactAvailableMock).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('no version available'));
+    });
+  });
+
+  describe('ensureOpenApiSpecUpToDate with an unpublished selected artifact', () => {
+    const E5 = defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL;
+    const selectedArtifactUrl = `${artifactRepositoryUrl}/kb-product-doc-openapi-8.16--${E5}.zip`;
+    const fallbackArtifactUrl = `${artifactRepositoryUrl}/kb-product-doc-openapi-8.15--${E5}.zip`;
+
+    beforeEach(() => {
+      fetchArtifactVersionsMock.mockResolvedValue({ openapi: ['8.14', '8.15', '8.16'] });
+      checkArtifactAvailableMock.mockImplementation(async (url: string) => {
+        if (url !== fallbackArtifactUrl) {
+          throw new ArtifactNotFoundError(url);
+        }
+      });
+      jest.spyOn(packageInstaller, 'installOpenAPISpec').mockResolvedValue(undefined);
+    });
+
+    it('does not reinstall when the installable fallback version is already installed', async () => {
+      productDocClient.getOpenapiSpecInstallationStatus.mockResolvedValue({
+        status: 'installed',
+        version: '8.15',
+      });
+
+      await packageInstaller.ensureOpenApiSpecUpToDate({ inferenceId: E5 });
+
+      expect(checkArtifactAvailableMock).toHaveBeenCalledWith(selectedArtifactUrl, undefined);
+      expect(checkArtifactAvailableMock).toHaveBeenCalledWith(fallbackArtifactUrl, undefined);
+      expect(packageInstaller.installOpenAPISpec).not.toHaveBeenCalled();
+    });
+
+    it('installs the fallback version once and records it when it is not installed yet', async () => {
+      jest.restoreAllMocks();
+      productDocClient.getOpenapiSpecInstallationStatus.mockResolvedValue({
+        status: 'uninstalled',
+      });
+      esClient.bulk.mockResolvedValue({ errors: false } as never);
+      openZipArchiveMock.mockResolvedValue({
+        close: jest.fn(),
+        hasEntry: jest.fn().mockReturnValue(true),
+        getEntryPaths: jest
+          .fn()
+          .mockReturnValue([
+            'kibana/content/content-0.ndjson',
+            'elasticsearch/content/content-0.ndjson',
+          ]),
+        getEntryContent: jest.fn().mockImplementation(async (entryPath: string) => {
+          if (entryPath.endsWith('manifest.json')) {
+            return Buffer.from(JSON.stringify({ formatVersion: TEST_FORMAT_VERSION }), 'utf-8');
+          }
+          if (entryPath.endsWith('mappings.json')) {
+            return Buffer.from(JSON.stringify({ properties: {} }), 'utf-8');
+          }
+          return Buffer.from(JSON.stringify({ _inference_fields: {} }), 'utf-8');
+        }),
+      });
+      downloadToDiskMock.mockResolvedValue('/tmp/openapi-fallback.zip');
+
+      await packageInstaller.ensureOpenApiSpecUpToDate({ inferenceId: E5 });
+
+      expect(downloadToDiskMock).toHaveBeenCalledTimes(1);
+      expect(downloadToDiskMock.mock.calls[0][0]).toBe(fallbackArtifactUrl);
+      expect(productDocClient.setOpenapiSpecInstallationSuccessful).toHaveBeenCalledWith(
+        expect.objectContaining({ productVersion: '8.15', inferenceId: E5 })
+      );
+
+      // Next start: the recorded fallback version is current, nothing is downloaded again
+      downloadToDiskMock.mockClear();
+      productDocClient.getOpenapiSpecInstallationStatus.mockResolvedValue({
+        status: 'installed',
+        version: '8.15',
+      });
+
+      await packageInstaller.ensureOpenApiSpecUpToDate({ inferenceId: E5 });
+
+      expect(downloadToDiskMock).not.toHaveBeenCalled();
+    });
+
+    it('reinstalls when a newer fallback version is published', async () => {
+      productDocClient.getOpenapiSpecInstallationStatus.mockResolvedValue({
+        status: 'installed',
+        version: '8.14',
+      });
+
+      await packageInstaller.ensureOpenApiSpecUpToDate({ inferenceId: E5 });
+
+      expect(packageInstaller.installOpenAPISpec).toHaveBeenCalledWith({
+        version: '8.15',
+        inferenceId: E5,
+      });
+    });
+
+    it('installs the selected version once its artifact is published', async () => {
+      checkArtifactAvailableMock.mockResolvedValue(undefined);
+      productDocClient.getOpenapiSpecInstallationStatus.mockResolvedValue({
+        status: 'installed',
+        version: '8.15',
+      });
+
+      await packageInstaller.ensureOpenApiSpecUpToDate({ inferenceId: E5 });
+
+      expect(packageInstaller.installOpenAPISpec).toHaveBeenCalledWith({
+        version: '8.16',
+        inferenceId: E5,
+      });
+    });
+
+    it('logs and skips when no OpenAPI artifact exists for the inference ID', async () => {
+      checkArtifactAvailableMock.mockRejectedValue(new ArtifactNotFoundError('missing'));
+      productDocClient.getOpenapiSpecInstallationStatus.mockResolvedValue({
+        status: 'uninstalled',
+      });
+
+      await packageInstaller.ensureOpenApiSpecUpToDate({ inferenceId: E5 });
+
+      expect(packageInstaller.installOpenAPISpec).not.toHaveBeenCalled();
+      expect(productDocClient.setOpenapiSpecInstallationFailed).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(`no artifact available for inference ID [${E5}]`)
+      );
+    });
+
+    it('propagates artifact probe failures that are not a missing artifact', async () => {
+      checkArtifactAvailableMock.mockRejectedValue(new Error('network down'));
+
+      await expect(packageInstaller.ensureOpenApiSpecUpToDate({ inferenceId: E5 })).rejects.toThrow(
+        'network down'
+      );
+    });
   });
 
   describe('ensureOpenApiSpecUpToDate with a forced update', () => {

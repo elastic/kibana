@@ -439,7 +439,10 @@ export class PackageInstaller {
   }
 
   /**
-   * Installs the OpenAPI spec when the installed version differs from the version selected for this deployment.
+   * Installs the OpenAPI spec when the installed version differs from the version whose artifact is
+   * available for this inference ID: the version selected for this deployment, or the newest older
+   * one when the selected artifact is not published. Installs persist that version, so a fallback
+   * install is not repeated on every start.
    */
   async ensureOpenApiSpecUpToDate(params: {
     inferenceId: string;
@@ -452,25 +455,43 @@ export class PackageInstaller {
       this.fetchArtifactVersions(inferenceId),
       this.productDocClient.getOpenapiSpecInstallationStatus({ inferenceId }),
     ]);
-    const openAPISpecVersionToUpgradeTo = selectVersion(
+    const availableVersions = repositoryVersions.openapi;
+    if (!availableVersions.length) {
+      this.log.warn('Skipping update of the OpenAPI spec: no version available');
+      return;
+    }
+    const selectedVersion = selectVersion(
       this.currentVersion,
-      repositoryVersions.openapi,
+      availableVersions,
       this.isServerless
     );
+    let installableVersion: string;
+    try {
+      installableVersion = await this.findInstallableOpenApiVersion({
+        selectedVersion,
+        inferenceId,
+        availableVersions,
+      });
+    } catch (error) {
+      if (!isArtifactMissingError(error)) {
+        throw error;
+      }
+      this.log.warn(
+        `Skipping update of the OpenAPI spec: no artifact available for inference ID [${inferenceId}]`
+      );
+      return;
+    }
     if (
       isUpdateNeeded({
         status: openapiSpecInstallStatus.status,
         version: openapiSpecInstallStatus.version,
         updatedAt: openapiSpecInstallStatus.updatedAt,
-        selectedVersion: openAPISpecVersionToUpgradeTo,
+        selectedVersion: installableVersion,
         forceUpdate,
         since,
       })
     ) {
-      await this.installOpenAPISpec({
-        version: openAPISpecVersionToUpgradeTo,
-        inferenceId,
-      });
+      await this.installOpenAPISpec({ version: installableVersion, inferenceId });
     }
   }
 
@@ -1192,21 +1213,31 @@ export class PackageInstaller {
     throw new Error(`No candidate versions available for product [${productName}]`);
   }
 
+  /**
+   * The OpenAPI version whose artifact exists for this inference ID: `selectedVersion`, or else the
+   * newest older available version. Fallback versions come from `availableVersions` when given,
+   * otherwise from the repository listing (fetched lazily for an explicitly requested version).
+   */
   private async findInstallableOpenApiVersion({
     selectedVersion,
     inferenceId,
-    explicitVersionProvided,
+    explicitVersionProvided = false,
+    availableVersions,
   }: {
     selectedVersion: string;
     inferenceId: string;
-    explicitVersionProvided: boolean;
+    explicitVersionProvided?: boolean;
+    availableVersions?: string[];
   }): Promise<string> {
     const candidateVersions = [selectedVersion];
     let fallbackVersionsLoaded = false;
 
-    if (!explicitVersionProvided) {
-      const availableVersions = await this.fetchArtifactVersionsWithRetry(inferenceId);
-      candidateVersions.push(...getPreviousVersions(selectedVersion, availableVersions.openapi));
+    if (availableVersions) {
+      candidateVersions.push(...getPreviousVersions(selectedVersion, availableVersions));
+      fallbackVersionsLoaded = true;
+    } else if (!explicitVersionProvided) {
+      const repositoryVersions = await this.fetchArtifactVersionsWithRetry(inferenceId);
+      candidateVersions.push(...getPreviousVersions(selectedVersion, repositoryVersions.openapi));
       fallbackVersionsLoaded = true;
     }
 
@@ -1234,9 +1265,9 @@ export class PackageInstaller {
         lastMissingError = error as Error;
         if (explicitVersionProvided && !fallbackVersionsLoaded) {
           try {
-            const availableVersions = await this.fetchArtifactVersionsWithRetry(inferenceId);
+            const repositoryVersions = await this.fetchArtifactVersionsWithRetry(inferenceId);
             candidateVersions.push(
-              ...getPreviousVersions(selectedVersion, availableVersions.openapi)
+              ...getPreviousVersions(selectedVersion, repositoryVersions.openapi)
             );
           } catch (fetchError) {
             this.log.warn(
