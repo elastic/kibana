@@ -103,14 +103,15 @@ const styles = ({ euiTheme }: UseEuiTheme) => css`
   }
 
   .kbnFlexPanel--resizeHandle {
-    height: calc(100% - 1px);
+    height: 100%;
     width: ${euiTheme.size.m};
     right: 1px;
     top: 2px;
     &:hover {
-      border-radius: ${euiTheme.border.radius.control} ${euiTheme.border.radius.control};
-      border-right: var(--dashboardActivePanelBorderStyle);
-      border-width: thick;
+      border-radius: 0 ${euiTheme.border.radius.control} ${euiTheme.border.radius.control} 0;
+      border: var(--dashboardActivePanelBorderStyle);
+      border-left: none;
+    }
   }
 
   // styles for the panel grid size gauge that appears when resizing
