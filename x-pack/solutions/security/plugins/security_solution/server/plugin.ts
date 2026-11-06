@@ -1345,9 +1345,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.logger.debug('Stopping plugin');
     this.asyncTelemetryEventsSender.stop().catch(() => {});
     this.telemetryEventsSender.stop();
-    this.endpointAppContextService.stop();
+    // Watchers use endpoint services, so they must stop before those services drop their dependencies
     this.policyWatcher?.stop();
     this.telemetryWatcher?.stop();
+    this.endpointAppContextService.stop();
     this.completeExternalResponseActionsTask.stop().catch(() => {});
     this.siemMigrationsService.stop();
     securityWorkflowInsightsService.stop();
