@@ -65,6 +65,8 @@ export class McpCircuitBreaker {
   private readonly coolingMs: number;
   private readonly now: () => number;
   private readonly breakers: LRUCache<string, BreakerEntry>;
+  // Callers sharing one pooled build all reject with the same error: count it once.
+  private readonly countedErrors = new WeakSet<object>();
 
   constructor(options: CircuitBreakerOptions = {}) {
     this.failureThreshold = options.failureThreshold ?? BREAKER_FAILURE_THRESHOLD;
@@ -87,7 +89,10 @@ export class McpCircuitBreaker {
       return result;
     } catch (err) {
       if (isConnectionFailure(err)) {
-        this.recordFailure(ctx);
+        if (!this.countedErrors.has(err as object)) {
+          this.countedErrors.add(err as object);
+          this.recordFailure(ctx);
+        }
       } else {
         this.recordSuccess(ctx);
       }

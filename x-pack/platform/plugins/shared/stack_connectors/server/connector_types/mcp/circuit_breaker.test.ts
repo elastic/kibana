@@ -203,6 +203,17 @@ describe('McpCircuitBreaker', () => {
       );
     });
 
+    it('counts one failed build once when concurrent callers share the same error', async () => {
+      const breaker = createBreaker();
+      const err = await connectError();
+      const results = await Promise.allSettled(
+        [0, 1, 2, 3].map(() => breaker.run(ctx(), () => Promise.reject(err)))
+      );
+
+      expect(results.map((result) => result.status)).toEqual(Array(4).fill('rejected'));
+      await expectClosed(breaker);
+    });
+
     it('does not count user errors and resets an existing failure count', async () => {
       const breaker = createBreaker();
       await failConnect(breaker);
