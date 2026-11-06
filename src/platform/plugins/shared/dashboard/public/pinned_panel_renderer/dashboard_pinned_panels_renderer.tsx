@@ -10,13 +10,14 @@
 import { isEqual } from 'lodash';
 import React, { useCallback } from 'react';
 
-import { transparentize, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FlexLayout } from '@kbn/grid-layout';
-import { FlexLayoutData } from '@kbn/grid-layout/flex/types';
+import type { FlexLayoutData } from '@kbn/grid-layout';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
-import { DashboardLayout } from '../dashboard_api/layout_manager';
+import type { DashboardLayout } from '../dashboard_api/layout_manager';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../dashboard_api/use_dashboard_internal_api';
 import { DASHBOARD_MARGIN_SIZE } from '../dashboard_renderer/grid/constants';
@@ -30,7 +31,6 @@ export const DashboardPinnedPanelsRenderer = () => {
     dashboardInternalApi.pinnedLayout$,
     dashboardApi.viewMode$
   );
-  console.log({ flexLayout });
   const renderPanelContents = useCallback(
     (id: string, setDragHandles: (refs: Array<HTMLElement | null>) => void) => {
       const panels = dashboardApi.layout$.getValue().pinnedPanels;
@@ -57,7 +57,6 @@ export const DashboardPinnedPanelsRenderer = () => {
           width: panel.width,
         };
       });
-      console.log({ newLayout, updatedLayout });
       if (!isEqual(currLayout, updatedLayout)) {
         dashboardApi.layout$.next(updatedLayout);
       }

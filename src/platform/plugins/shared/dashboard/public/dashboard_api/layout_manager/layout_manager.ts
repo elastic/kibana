@@ -55,6 +55,7 @@ import {
 import { asyncForEach } from '@kbn/std';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { DashboardPanel, DashboardState } from '@kbn/as-code-dashboard-schema';
+import type { FlexLayoutData } from '@kbn/grid-layout';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../common/constants';
 import { dashboardClonePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
@@ -82,7 +83,6 @@ import {
   type DashboardLayoutPanel,
   type DashboardPinnablePanel,
 } from './types';
-import { FlexLayoutData } from '@kbn/grid-layout/flex/types';
 export function initializeLayoutManager(
   viewModeManager: ReturnType<typeof initializeViewModeManager>,
   initialPanels: DashboardState['panels'],
@@ -103,7 +103,6 @@ export function initializeLayoutManager(
   const layout$ = new BehaviorSubject<DashboardLayout>(initialLayout); // layout is the source of truth for which panels are in the dashboard.
   const gridLayout$ = new BehaviorSubject(transformDashboardLayoutToGridLayout(initialLayout, {})); // source of truth for rendering
   const pinnedLayout$ = new BehaviorSubject(transformPinnedPanelsToGridLayout(initialLayout));
-  console.log({ pinnedLayout$: pinnedLayout$.getValue() });
   const panelResizeSettings$: Observable<{ [panelType: string]: LayoutConstraints }> = layout$.pipe(
     map(({ panels }) => {
       return [...new Set(Object.values(panels).map((panel) => panel.type))];

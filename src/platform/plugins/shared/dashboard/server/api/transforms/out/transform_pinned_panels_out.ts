@@ -137,7 +137,6 @@ function transformPanels(
 ): { panels: DashboardPinnedPanelsState; warnings: Warnings } {
   const transformedPanels: DashboardPinnedPanelsState = [];
   const warnings: Warnings = [];
-  console.log({ containerReferences });
   panels.forEach((panel) => {
     const storedPanelReferences = getPanelReferences(containerReferences ?? [], panel);
 
@@ -153,12 +152,10 @@ function transformPanels(
           panel.id
         ) as DashboardPinnedPanel['config'];
       }
-      console.log('MADE IT HERE 1', { config, rest });
 
       if (schema) {
         config = schema.parse(config) as DashboardPinnedPanel['config'];
       }
-      console.log('OUT !!!!!!!', { rest });
 
       transformedPanels.push({
         ...pinnedControlSchema.parse(rest),

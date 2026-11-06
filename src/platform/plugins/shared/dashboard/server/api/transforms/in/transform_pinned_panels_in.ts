@@ -56,8 +56,6 @@ export function transformPinnedPanelsIn(pinnedPanels: PinnedPanelsState): {
               },
             };
           }
-
-          console.log('IN !!!!!!!', { transformedControlState });
         } else {
           transformedControlState = {
             ...transformedControlState,

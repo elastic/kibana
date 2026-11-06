@@ -28,7 +28,7 @@ import type { ControlRendererServices } from '../types';
 
 export interface FloatingActionsProps {
   children: ReactElement;
-  prependWrapperRef: React.RefObject<HTMLDivElement>;
+  prependWrapperRef?: React.RefObject<HTMLDivElement>;
   api?: unknown;
   uuid: string;
   viewMode?: ViewMode;

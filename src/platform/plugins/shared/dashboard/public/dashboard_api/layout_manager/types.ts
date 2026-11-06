@@ -7,11 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  // controls are currently the only pinnable panels, so that is why these types exist in `controls-schemas` for now
-  ControlWidth as PinnedPanelWidth,
-  PinnedControlLayoutState as PinnedPanelLayoutState,
-} from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { DashboardPanel, DashboardSection } from '@kbn/as-code-dashboard-schema';
 

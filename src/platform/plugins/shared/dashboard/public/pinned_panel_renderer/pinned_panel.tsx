@@ -8,7 +8,7 @@
  */
 
 import classNames from 'classnames';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   EuiFlexItem,
@@ -20,12 +20,17 @@ import {
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ControlLabelTooltip, useIndicateRelatedPanelsSelector } from '@kbn/controls-renderer';
+import {
+  ControlLabelTooltip,
+  FloatingActions,
+  useIndicateRelatedPanelsSelector,
+} from '@kbn/controls-renderer';
 import { apiPublishesLabel } from '@kbn/controls-renderer/src/utils';
-import { HasCustomPrepend } from '@kbn/controls-schemas';
-import { PublishesTooltipLabel } from '@kbn/controls-schemas/src/types';
+import type { HasCustomPrepend } from '@kbn/controls-schemas';
+import type { PublishesTooltipLabel } from '@kbn/controls-schemas/src/types';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { DefaultEmbeddableApi, EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   apiCanCancelRequests,
@@ -36,7 +41,6 @@ import {
 import { combineLatest, of, Subscription } from 'rxjs';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import { DragHandle } from './pinned_panel_drag_handle';
-import { FloatingActions } from './floating_actions';
 
 export const PinnedPanel = ({
   id,
@@ -49,7 +53,6 @@ export const PinnedPanel = ({
 }) => {
   const styles = useMemoCss(controlPanelStyles);
   const dashboardApi = useDashboardApi();
-  const prependWrapperRef = useRef<HTMLDivElement>(null);
 
   const [api, setApi] = useState<
     (DefaultEmbeddableApi & Partial<HasCustomPrepend> & Partial<PublishesTooltipLabel>) | null
@@ -64,11 +67,7 @@ export const PinnedPanel = ({
 
   const selectedPanel = useMemo(
     () =>
-      relatedPanelsIndicatorId
-        ? Object.entries(dashboardApi.children$.value).find(
-            ([key]) => key === relatedPanelsIndicatorId
-          )?.[1]
-        : undefined,
+      relatedPanelsIndicatorId ? dashboardApi.children$.value[relatedPanelsIndicatorId] : undefined,
     [dashboardApi.children$.value, relatedPanelsIndicatorId]
   );
   const indicatePanel = Boolean(
@@ -169,18 +168,12 @@ export const PinnedPanel = ({
   );
 
   return (
-    <EuiFlexItem
-      component="li"
-      grow={false}
-      data-test-subj="control-frame"
-      // css={css([isDragging && styles.draggingItem, styles.controlWidthStyles])}
-    >
+    <EuiFlexItem component="li" grow={false} data-test-subj="control-frame">
       <FloatingActions
         data-test-subj="control-frame-floating-actions"
         api={api}
         uuid={id}
         viewMode={viewMode}
-        // disabledActions={disabledActionIds}
       >
         <EuiFormRow
           data-test-subj="control-frame-title"
@@ -202,29 +195,25 @@ export const PinnedPanel = ({
             })}
             css={styles.formControl}
             prepend={
-              <>
-                {api?.CustomPrependComponent ? (
-                  <>
-                    <DragHandle
-                      isEditable={viewMode === 'edit'}
-                      controlTitle={'Test'}
-                      setDragHandles={setDragHandles}
-                    />
-                    <api.CustomPrependComponent />
-                  </>
-                ) : (
-                  <>
-                    <DragHandle
-                      isEditable={viewMode === 'edit'}
-                      controlTitle={panelLabel}
-                      highContrast={isIndicatingRelatedPanels}
-                      setDragHandles={setDragHandles}
-                    >
-                      {controlLabel}
-                    </DragHandle>
-                  </>
-                )}
-              </>
+              api?.CustomPrependComponent ? (
+                <>
+                  <DragHandle
+                    isEditable={isEditable}
+                    controlTitle={panelLabel}
+                    setDragHandles={setDragHandles}
+                  />
+                  <api.CustomPrependComponent />
+                </>
+              ) : (
+                <DragHandle
+                  isEditable={isEditable}
+                  controlTitle={panelLabel}
+                  highContrast={isIndicatingRelatedPanels}
+                  setDragHandles={setDragHandles}
+                >
+                  {controlLabel}
+                </DragHandle>
+              )
             }
           >
             <EmbeddableRenderer
@@ -249,11 +238,6 @@ export const PinnedPanel = ({
 };
 
 const controlPanelStyles = {
-  draggingItem: css({
-    opacity: 0,
-    visibility: 'hidden',
-  }),
-  // controlWidthStyles,
   tooltipStyles: {
     height: '100%',
   },
@@ -315,6 +299,3 @@ const controlPanelStyles = {
       },
     }),
 };
-function setPanelTooltipLabel(result: string) {
-  throw new Error('Function not implemented.');
-}

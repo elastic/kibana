@@ -78,7 +78,6 @@ export function getDashboardApi({
   changedBy?: readonly DashboardChangeSource[];
   viewMode?: ViewMode;
 }) {
-  console.log({ readResult });
   const fullScreenMode$ = new BehaviorSubject(creationOptions?.fullScreenMode ?? false);
   const isManaged = readResult?.meta.managed ?? false;
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);

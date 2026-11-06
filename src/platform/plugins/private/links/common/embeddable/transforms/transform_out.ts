@@ -31,15 +31,12 @@ export function transformOut(
       ? { links: latestState.links.map(({ order, id, ...link }) => link) }
       : {}),
   };
-  console.log('---- TRANSFORM LINKS OUT ');
   /** Inject saved object reference when by-reference */
   const savedObjectRef = [...(references ?? []), ...(containerReferences ?? [])].find(
     ({ name, type }) => name.includes('savedObjectRef') && type === LINKS_LIBRARY_TYPE
   );
-  console.log({ savedObjectRef, references, containerReferences });
   if (savedObjectRef) {
     const { links, ...rest } = state; // some by-ref panels had links serialized for some reason
-    console.log('afdjklasdfjklasdfjlkasdf', state, rest);
     return {
       ...rest,
       ref_id: savedObjectRef.id,
