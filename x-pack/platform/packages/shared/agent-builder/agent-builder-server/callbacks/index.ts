@@ -6,9 +6,9 @@
  */
 
 export type {
-  CallbackAdmissionCheck,
-  CallbackAdmissionContext,
-  CallbackAdmissionRelease,
+  OnBeforeNewConversationHook,
+  OnBeforeNewConversationContext,
+  OnBeforeNewConversationRelease,
   CallbackConversationResolver,
   CallbackConversationResolverContext,
   CallbackTransportDefinition,

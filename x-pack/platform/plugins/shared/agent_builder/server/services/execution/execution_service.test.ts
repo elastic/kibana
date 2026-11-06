@@ -167,7 +167,10 @@ describe('AgentExecutionService', () => {
     logger,
   });
   const resolveConversation = jest.spyOn(callbackDeliveryService, 'resolveConversation');
-  const admitNewConversation = jest.spyOn(callbackDeliveryService, 'admitNewConversation');
+  const runOnBeforeNewConversation = jest.spyOn(
+    callbackDeliveryService,
+    'runOnBeforeNewConversation'
+  );
 
   const service = createAgentExecutionService({
     logger,
@@ -1786,21 +1789,21 @@ describe('AgentExecutionService', () => {
         expect(mockExecutionClient.create).not.toHaveBeenCalled();
       });
 
-      it('admits a new conversation on the requested agent before recording the execution', async () => {
+      it('runs the hooks for a new conversation on the requested agent before recording the execution', async () => {
         await converse({ conversationId: undefined, origin });
 
-        expect(admitNewConversation).toHaveBeenCalledWith({
+        expect(runOnBeforeNewConversation).toHaveBeenCalledWith({
           origin,
           spaceId: 'default',
           request: expect.anything(),
           agentId: 'agent-1',
         });
-        expect(admitNewConversation.mock.invocationCallOrder[0]).toBeLessThan(
+        expect(runOnBeforeNewConversation.mock.invocationCallOrder[0]).toBeLessThan(
           mockExecutionClient.create.mock.invocationCallOrder[0]
         );
       });
 
-      it('does not admit a caller who may not run the agent', async () => {
+      it('does not run the hooks for a caller who may not run the agent', async () => {
         agentRegistry.get.mockImplementation(async (agentId, options) => {
           if (options?.access === 'use') {
             throw new Error('forbidden');
@@ -1809,10 +1812,10 @@ describe('AgentExecutionService', () => {
         });
 
         await expect(converse({ conversationId: undefined, origin })).rejects.toThrow('forbidden');
-        expect(admitNewConversation).not.toHaveBeenCalled();
+        expect(runOnBeforeNewConversation).not.toHaveBeenCalled();
       });
 
-      it('does not admit a replayed delivery', async () => {
+      it('does not run the hooks for a replayed delivery', async () => {
         mockExecutionClient.peek.mockResolvedValue({
           status: ExecutionStatus.scheduled,
           eventCount: 0,
@@ -1827,15 +1830,15 @@ describe('AgentExecutionService', () => {
           params: { agentId: 'agent-1', origin, nextInput: { message: 'Hello' } },
         });
 
-        expect(admitNewConversation).not.toHaveBeenCalled();
+        expect(runOnBeforeNewConversation).not.toHaveBeenCalled();
       });
 
       it.each([
-        ['gives the admission back when the opening message is refused', true],
-        ['keeps the admission when the opening message write may have landed', false],
+        ['gives back what the hooks took when the opening message is refused', true],
+        ['keeps what the hooks took when the opening message write may have landed', false],
       ])('%s', async (_name, refused) => {
         const release = jest.fn().mockResolvedValue(undefined);
-        admitNewConversation.mockResolvedValueOnce(release);
+        runOnBeforeNewConversation.mockResolvedValueOnce(release);
         conversationClient.create.mockRejectedValueOnce(
           refused
             ? createConversationWriteConflictError({ conversationId: 'conversation-1' })
@@ -1846,17 +1849,17 @@ describe('AgentExecutionService', () => {
         expect(release).toHaveBeenCalledTimes(refused ? 1 : 0);
       });
 
-      it('keeps the admission once the opening message is written', async () => {
+      it('keeps what the hooks took once the opening message is written', async () => {
         const release = jest.fn().mockResolvedValue(undefined);
-        admitNewConversation.mockResolvedValueOnce(release);
+        runOnBeforeNewConversation.mockResolvedValueOnce(release);
 
         await converse({ conversationId: undefined, origin });
 
         expect(release).not.toHaveBeenCalled();
       });
 
-      it('writes nothing when the admission is refused', async () => {
-        admitNewConversation.mockRejectedValueOnce(new Error('limit reached'));
+      it('writes nothing when a hook refuses the turn', async () => {
+        runOnBeforeNewConversation.mockRejectedValueOnce(new Error('limit reached'));
 
         await expect(converse({ conversationId: undefined, origin })).rejects.toThrow(
           'limit reached'
@@ -1866,13 +1869,13 @@ describe('AgentExecutionService', () => {
         expect(mockExecutionClient.create).not.toHaveBeenCalled();
       });
 
-      it('does not admit a turn that continues a conversation', async () => {
+      it('does not run the hooks for a turn that continues a conversation', async () => {
         resolveConversation.mockResolvedValueOnce({ conversationId: 'investigation-1' });
         conversationClient.get.mockResolvedValueOnce(boundConversation);
 
         await converse({ conversationId: undefined, origin });
 
-        expect(admitNewConversation).not.toHaveBeenCalled();
+        expect(runOnBeforeNewConversation).not.toHaveBeenCalled();
       });
     });
 

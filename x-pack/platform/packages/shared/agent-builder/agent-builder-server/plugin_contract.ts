@@ -10,7 +10,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentCreateRequest, ConversationTemplate } from '@kbn/agent-builder-common';
 import type { ConversationPublicClient } from './conversations';
 import type {
-  CallbackAdmissionCheck,
+  OnBeforeNewConversationHook,
   CallbackConversationResolver,
   CallbackTransportDefinition,
 } from './callbacks';
@@ -284,11 +284,11 @@ export interface CallbacksSetup {
    */
   registerConversationResolver(resolver: CallbackConversationResolver): void;
   /**
-   * Registers a check for an execution whose origin no conversation continues, run before the new
-   * conversation or its message is written. Checks run in registration order; one that throws
+   * Registers a hook for an execution whose origin no conversation continues, run before the new
+   * conversation or its message is written. Hooks run in registration order; one that throws
    * refuses the execution with its error.
    */
-  registerAdmissionCheck(check: CallbackAdmissionCheck): void;
+  registerOnBeforeNewConversation(hook: OnBeforeNewConversationHook): void;
   /** Registers a callback transport. The first registered transport that handles a URL delivers to it. */
   registerTransport(transport: CallbackTransportDefinition): void;
 }

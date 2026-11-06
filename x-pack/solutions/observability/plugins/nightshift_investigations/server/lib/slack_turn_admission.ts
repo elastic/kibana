@@ -8,7 +8,7 @@
 import { tooManyRequests } from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
 import { ConversationOriginType, createInternalError } from '@kbn/agent-builder-common';
-import type { CallbackAdmissionCheck } from '@kbn/agent-builder-server';
+import type { OnBeforeNewConversationHook } from '@kbn/agent-builder-server';
 import { NIGHTSHIFT_ASSISTANT_AGENT_ID, NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../common';
 import { evaluateInvestigationQuota } from '../client/evaluate_investigation_quota';
 import { InvestigationQuotaDeniedError, InvestigationUnavailableError } from '../client/errors';
@@ -55,7 +55,7 @@ export const createSlackTurnAdmissionCheck =
     /** The absolute Nightshift settings URL in a space, when it can be built. */
     getSettingsUrl: (spaceId: string) => string | undefined;
     logger: Logger;
-  }): CallbackAdmissionCheck =>
+  }): OnBeforeNewConversationHook =>
   async ({ origin, agentId, spaceId }) => {
     if (origin.type !== ConversationOriginType.Slack || !SLACK_AGENT_IDS.has(agentId)) {
       return;

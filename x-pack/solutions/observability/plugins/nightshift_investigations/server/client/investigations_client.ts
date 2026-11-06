@@ -22,7 +22,6 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart, ConversationPublicClient } from '@kbn/agent-builder-server';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
-import type { InvestigationSubjectKey } from '@kbn/agentic-investigations-plugin/common';
 import { isConversationNotFoundError } from '@kbn/agent-builder-common';
 import type {
   Investigation as SharedInvestigation,
@@ -651,11 +650,7 @@ export class NightshiftInvestigationsClient {
       executionId = await this.runInvestigationWorkflow(workflow, spaceId, inputs, timeout_seconds);
     } catch (error) {
       if (claimedNew) {
-        await this.releaseClaims(
-          agenticInvestigations,
-          newInvestigationId,
-          toSubjectKeys(subjects, newInvestigationId)
-        );
+        await this.releaseClaims(agenticInvestigations, newInvestigationId);
       }
       await releaseBudgets();
       throw error;
@@ -711,16 +706,10 @@ export class NightshiftInvestigationsClient {
 
   private async releaseClaims(
     agenticInvestigations: AgenticInvestigationsPluginStart,
-    investigationId: string,
-    subjects: InvestigationSubjectKey[]
+    investigationId: string
   ): Promise<void> {
-    if (subjects.length === 0) {
-      return;
-    }
     try {
-      await agenticInvestigations
-        .getSubjectsClient(this.request)
-        .releaseClaims(investigationId, subjects);
+      await agenticInvestigations.getSubjectsClient(this.request).releaseClaims(investigationId);
     } catch (error) {
       this.logger.warn(
         `Could not release the subject claims of investigation "${investigationId}": ${

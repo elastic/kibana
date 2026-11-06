@@ -249,19 +249,13 @@ export class SubjectsService {
   async releaseClaims({
     spaceId,
     conversationId,
-    subjects,
   }: {
     spaceId: string;
     conversationId: string;
-    subjects: InvestigationSubjectKey[];
   }): Promise<void> {
     assertBoundedId(spaceId, 'spaceId');
     assertBoundedId(conversationId, 'conversationId');
-    await this.deps.claims.release({
-      spaceId,
-      conversationId,
-      subjects: parseOrThrow(subjectKeysSchema, subjects),
-    });
+    await this.deps.claims.release({ spaceId, conversationId });
   }
 
   /** Maintenance: removes the subject claims the given investigations hold in the space. */

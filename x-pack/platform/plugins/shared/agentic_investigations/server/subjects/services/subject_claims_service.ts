@@ -153,34 +153,35 @@ export class SubjectClaimsService {
   }
 
   /**
-   * Releases the claims a new investigation took, for a start that failed before it ran. The
-   * start's own claims are deleted by id, since a search may not see them yet; a claim another
-   * investigation now holds is left alone. Claims handed over to the investigation go too.
+   * Releases the claims a new investigation holds, its own and any handed over to it, for a start
+   * that failed before it ran. Each claim is deleted only at the version read here, so one another
+   * start has taken over since is left alone.
    */
   async release({
     spaceId,
     conversationId,
-    subjects,
   }: {
     spaceId: string;
     conversationId: string;
-    subjects: InvestigationSubjectKey[];
   }): Promise<void> {
-    const ids = [...new Set(subjects.map((subject) => subjectClaimId(spaceId, subject)))];
-    const owned: string[] = [];
-    for (const id of ids) {
-      const existing = await this.findVersioned(id);
-      if (!existing || existing.claim.conversationId === conversationId) {
-        owned.push(id);
+    const response = await this.search({
+      track_total_hits: false,
+      size: DELETE_PAGE_SIZE,
+      seq_no_primary_term: true,
+      query: { bool: { filter: [{ term: { spaceId } }, { term: { conversationId } }] } },
+    });
+    for (const { _id: id, _seq_no: seqNo, _primary_term: primaryTerm } of response.hits.hits) {
+      if (id === undefined || seqNo === undefined || primaryTerm === undefined) {
+        continue;
+      }
+      try {
+        await this.deps.storage.delete({ id, if_seq_no: seqNo, if_primary_term: primaryTerm });
+      } catch (error) {
+        if (!isVersionConflict(error)) {
+          throw error;
+        }
       }
     }
-    if (owned.length > 0) {
-      await this.deps.storage.bulk({
-        operations: owned.map((id) => ({ delete: { _id: id } })),
-        throwOnFail: true,
-      });
-    }
-    await this.deleteByConversationIds([conversationId], spaceId);
   }
 
   /** The investigation (conversation id) holding the subject's claim in the space, open or closed. */

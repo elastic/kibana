@@ -10,9 +10,9 @@ import type { Logger } from '@kbn/core/server';
 import type { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server';
 import { isConversationNotFoundError } from '@kbn/agent-builder-common';
 import type {
-  CallbackAdmissionCheck,
-  CallbackAdmissionContext,
-  CallbackAdmissionRelease,
+  OnBeforeNewConversationHook,
+  OnBeforeNewConversationContext,
+  OnBeforeNewConversationRelease,
   CallbackConversationResolver,
   CallbackConversationResolverContext,
   CallbacksSetup,
@@ -40,7 +40,7 @@ export class CallbackDeliveryService {
   private readonly logger: Logger;
   private readonly transports: CallbackTransportDefinition[];
   private readonly conversationResolvers: CallbackConversationResolver[] = [];
-  private readonly admissionChecks: CallbackAdmissionCheck[] = [];
+  private readonly onBeforeNewConversationHooks: OnBeforeNewConversationHook[] = [];
 
   constructor({ actions, logger }: { actions: ActionsPluginSetup; logger: Logger }) {
     this.actions = actions;
@@ -53,8 +53,8 @@ export class CallbackDeliveryService {
       registerConversationResolver: (resolver) => {
         this.conversationResolvers.push(resolver);
       },
-      registerAdmissionCheck: (check) => {
-        this.admissionChecks.push(check);
+      registerOnBeforeNewConversation: (hook) => {
+        this.onBeforeNewConversationHooks.push(hook);
       },
       registerTransport: (transport) => {
         this.transports.push(transport);
@@ -101,19 +101,21 @@ export class CallbackDeliveryService {
   }
 
   /**
-   * Runs the registered admission checks in order; the first that throws refuses the execution and
-   * gives back what the checks before it took. Resolves to the release of everything the checks
-   * took, which never throws.
+   * Runs the registered on-before-new-conversation hooks in order; the first that throws refuses the
+   * execution and gives back what the hooks before it took. Resolves to the release of everything
+   * the hooks took, which never throws.
    */
-  async admitNewConversation(context: CallbackAdmissionContext): Promise<CallbackAdmissionRelease> {
-    const releases: CallbackAdmissionRelease[] = [];
+  async runOnBeforeNewConversation(
+    context: OnBeforeNewConversationContext
+  ): Promise<OnBeforeNewConversationRelease> {
+    const releases: OnBeforeNewConversationRelease[] = [];
     const releaseAll = async () => {
       for (const release of releases.splice(0).reverse()) {
         try {
           await release();
         } catch (error) {
           this.logger.warn(
-            `Could not release a callback admission: ${
+            `Could not release an on-before-new-conversation hook: ${
               error instanceof Error ? error.message : String(error)
             }`
           );
@@ -122,8 +124,8 @@ export class CallbackDeliveryService {
     };
 
     try {
-      for (const check of this.admissionChecks) {
-        const release = await check(context);
+      for (const hook of this.onBeforeNewConversationHooks) {
+        const release = await hook(context);
         if (release) {
           releases.push(release);
         }

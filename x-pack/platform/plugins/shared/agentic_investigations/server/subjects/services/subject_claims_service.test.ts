@@ -333,21 +333,16 @@ describe('SubjectClaimsService', () => {
     }
   });
 
-  it('releases the claims a failed start took, even before a search sees them', async () => {
-    const { storage, service, holderOf } = setup();
+  it('releases the claims a failed start took', async () => {
+    const { service, holderOf } = setup();
     await service.claim({
       spaceId: SPACE_ID,
       conversationId: 'conv-1',
       subjects: [ALERT, EVENT],
       isHolderOpen: isOpen(true),
     });
-    (storage.search as jest.Mock).mockResolvedValue({ hits: { hits: [] } });
 
-    await service.release({
-      spaceId: SPACE_ID,
-      conversationId: 'conv-1',
-      subjects: [ALERT, EVENT],
-    });
+    await service.release({ spaceId: SPACE_ID, conversationId: 'conv-1' });
 
     expect(holderOf(ALERT)).toBeUndefined();
     expect(holderOf(EVENT)).toBeUndefined();
@@ -368,28 +363,54 @@ describe('SubjectClaimsService', () => {
       isHolderOpen: isOpen(true),
     });
 
-    await service.release({
-      spaceId: SPACE_ID,
-      conversationId: 'conv-1',
-      subjects: [ALERT, EVENT],
-    });
+    await service.release({ spaceId: SPACE_ID, conversationId: 'conv-1' });
 
     expect(holderOf(ALERT)).toBe('conv-other');
     expect(holderOf(EVENT)).toBeUndefined();
   });
 
-  it('also releases a claim handed over to the failed investigation', async () => {
-    const { service, holderOf } = setup();
+  it('leaves a claim another start took over after the release read it', async () => {
+    const { storage, service, holderOf, advance } = setup();
     await service.claim({
       spaceId: SPACE_ID,
       conversationId: 'conv-1',
-      subjects: [EVENT],
+      subjects: [ALERT],
       isHolderOpen: isOpen(true),
     });
+    const id = subjectClaimId(SPACE_ID, ALERT);
+    const deleteMock = storage.delete as jest.Mock;
+    const deleteClaim = deleteMock.getMockImplementation();
+    deleteMock.mockImplementationOnce(async (request) => {
+      advance(SUBJECT_CLAIM_PENDING_MS);
+      await service.claim({
+        spaceId: SPACE_ID,
+        conversationId: 'conv-2',
+        subjects: [ALERT],
+        isHolderOpen: isOpen(false),
+      });
+      return deleteClaim?.(request);
+    });
 
-    await service.release({ spaceId: SPACE_ID, conversationId: 'conv-1', subjects: [ALERT] });
+    await service.release({ spaceId: SPACE_ID, conversationId: 'conv-1' });
 
-    expect(holderOf(EVENT)).toBeUndefined();
+    expect(storage.delete).toHaveBeenCalledWith(expect.objectContaining({ id }));
+    expect(holderOf(ALERT)).toBe('conv-2');
+  });
+
+  it('does not delete a claim it cannot read', async () => {
+    const { storage, service, holderOf } = setup();
+    await service.claim({
+      spaceId: SPACE_ID,
+      conversationId: 'conv-1',
+      subjects: [ALERT],
+      isHolderOpen: isOpen(true),
+    });
+    (storage.search as jest.Mock).mockResolvedValue({ hits: { hits: [] } });
+
+    await service.release({ spaceId: SPACE_ID, conversationId: 'conv-1' });
+
+    expect(storage.delete).not.toHaveBeenCalled();
+    expect(holderOf(ALERT)).toBe('conv-1');
   });
 
   it('deletes every claim in a space for maintenance', async () => {

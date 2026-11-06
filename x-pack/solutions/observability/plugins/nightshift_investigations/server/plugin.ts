@@ -302,7 +302,7 @@ export class NightshiftInvestigationsPlugin
         },
         logger: this.logger,
       });
-      plugins.agentBuilder.callbacks.registerAdmissionCheck(
+      plugins.agentBuilder.callbacks.registerOnBeforeNewConversation(
         createSlackTurnAdmissionCheck({
           getQuotaCallback: () => this.investigationQuotaCallback,
           getSettingsUrl: (spaceId) =>

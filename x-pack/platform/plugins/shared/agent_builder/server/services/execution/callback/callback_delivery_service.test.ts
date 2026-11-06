@@ -270,7 +270,7 @@ describe('resolveConversation', () => {
   });
 });
 
-describe('admitNewConversation', () => {
+describe('runOnBeforeNewConversation', () => {
   const context = {
     origin: { type: ConversationOriginType.Slack, external_conversation_id: 'thread-1' },
     spaceId: 'default',
@@ -278,30 +278,32 @@ describe('admitNewConversation', () => {
     agentId: 'agent-1',
   };
 
-  it('admits when no check is registered', async () => {
-    await expect(createCallbackDeliveryService().admitNewConversation(context)).resolves.toEqual(
-      expect.any(Function)
-    );
+  it('allows the turn when no hook is registered', async () => {
+    await expect(
+      createCallbackDeliveryService().runOnBeforeNewConversation(context)
+    ).resolves.toEqual(expect.any(Function));
   });
 
-  it('gives back what earlier checks took when a later check refuses', async () => {
+  it('gives back what earlier hooks took when a later hook refuses', async () => {
     const service = createCallbackDeliveryService();
     const release = jest.fn().mockResolvedValue(undefined);
-    service.setup().registerAdmissionCheck(jest.fn().mockResolvedValue(release));
-    service.setup().registerAdmissionCheck(jest.fn().mockRejectedValue(new Error('refused')));
+    service.setup().registerOnBeforeNewConversation(jest.fn().mockResolvedValue(release));
+    service
+      .setup()
+      .registerOnBeforeNewConversation(jest.fn().mockRejectedValue(new Error('refused')));
 
-    await expect(service.admitNewConversation(context)).rejects.toThrow('refused');
+    await expect(service.runOnBeforeNewConversation(context)).rejects.toThrow('refused');
     expect(release).toHaveBeenCalledTimes(1);
   });
 
-  it('releases every admission once, without throwing when a release fails', async () => {
+  it('releases what every hook took once, without throwing when a release fails', async () => {
     const service = createCallbackDeliveryService();
     const failing = jest.fn().mockRejectedValue(new Error('storage down'));
     const release = jest.fn().mockResolvedValue(undefined);
-    service.setup().registerAdmissionCheck(jest.fn().mockResolvedValue(release));
-    service.setup().registerAdmissionCheck(jest.fn().mockResolvedValue(failing));
+    service.setup().registerOnBeforeNewConversation(jest.fn().mockResolvedValue(release));
+    service.setup().registerOnBeforeNewConversation(jest.fn().mockResolvedValue(failing));
 
-    const releaseAll = await service.admitNewConversation(context);
+    const releaseAll = await service.runOnBeforeNewConversation(context);
     await expect(releaseAll()).resolves.toBeUndefined();
     await releaseAll();
 
@@ -309,27 +311,29 @@ describe('admitNewConversation', () => {
     expect(release).toHaveBeenCalledTimes(1);
   });
 
-  it('runs every registered check in order', async () => {
+  it('runs every registered hook in order', async () => {
     const service = createCallbackDeliveryService();
     const first = jest.fn().mockResolvedValue(undefined);
     const second = jest.fn().mockResolvedValue(undefined);
-    service.setup().registerAdmissionCheck(first);
-    service.setup().registerAdmissionCheck(second);
+    service.setup().registerOnBeforeNewConversation(first);
+    service.setup().registerOnBeforeNewConversation(second);
 
-    await service.admitNewConversation(context);
+    await service.runOnBeforeNewConversation(context);
 
     expect(first).toHaveBeenCalledWith(context);
     expect(second).toHaveBeenCalledWith(context);
     expect(first.mock.invocationCallOrder[0]).toBeLessThan(second.mock.invocationCallOrder[0]);
   });
 
-  it('propagates a refusal without running the next check', async () => {
+  it('propagates a refusal without running the next hook', async () => {
     const service = createCallbackDeliveryService();
     const next = jest.fn();
-    service.setup().registerAdmissionCheck(jest.fn().mockRejectedValue(new Error('refused')));
-    service.setup().registerAdmissionCheck(next);
+    service
+      .setup()
+      .registerOnBeforeNewConversation(jest.fn().mockRejectedValue(new Error('refused')));
+    service.setup().registerOnBeforeNewConversation(next);
 
-    await expect(service.admitNewConversation(context)).rejects.toThrow('refused');
+    await expect(service.runOnBeforeNewConversation(context)).rejects.toThrow('refused');
     expect(next).not.toHaveBeenCalled();
   });
 });

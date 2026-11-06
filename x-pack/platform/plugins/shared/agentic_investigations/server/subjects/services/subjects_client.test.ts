@@ -94,13 +94,12 @@ describe('createSubjectsClient', () => {
   it('releases the claims of one investigation in the request space', async () => {
     const { client, service, privileges } = setup();
 
-    await client.releaseClaims('conv-2', [{ type: 'alert', id: 'a-1' }]);
+    await client.releaseClaims('conv-2');
 
     expect(privileges.assertCanManage).toHaveBeenCalledWith(request);
     expect(service.releaseClaims).toHaveBeenCalledWith({
       spaceId: 'space-a',
       conversationId: 'conv-2',
-      subjects: [{ type: 'alert', id: 'a-1' }],
     });
   });
 
@@ -135,9 +134,7 @@ describe('createSubjectsClient', () => {
     await expect(
       client.claimSubjects({ conversationId: 'c', subjects: [], isHolderOpen: jest.fn() })
     ).rejects.toBeInstanceOf(InvestigationsForbiddenError);
-    await expect(client.releaseClaims('c', [])).rejects.toBeInstanceOf(
-      InvestigationsForbiddenError
-    );
+    await expect(client.releaseClaims('c')).rejects.toBeInstanceOf(InvestigationsForbiddenError);
 
     expect(service.upsertSubjects).not.toHaveBeenCalled();
     expect(service.releaseClaims).not.toHaveBeenCalled();
