@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { BasicPrettyPrinter, Builder, esql as esqlComposer, Parser } from '@elastic/esql';
+import { BasicPrettyPrinter, Builder, Parser } from '@elastic/esql';
 import type { ESQLCommand } from '@elastic/esql/types';
-import { getMappingConflicts } from '@kbn/ai-tools';
+import { esqlTimeRange, getMappingConflicts } from '@kbn/ai-tools';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { Feature, QueryFeature, QueryType } from '@kbn/significant-events-schema';
@@ -30,7 +30,6 @@ const PROBE_WINDOW_MINUTES = 10;
 const TARGET_VALIDATION_DOCS = 100_000;
 const MAX_LOOKBACK_MINUTES = 10_080;
 const PROBE_TIMEOUT_MS = 5_000;
-const TIME_FIELD = '@timestamp';
 const MINUTE_MS = 60_000;
 
 const getErrorMessage = (error: unknown): string =>
@@ -117,13 +116,7 @@ const addInlineTimeRange = ({
     return query;
   }
 
-  const timeField = esqlComposer.col(TIME_FIELD);
-  const rangeStart = esqlComposer.str(new Date(start).toISOString());
-  const rangeEnd = esqlComposer.str(new Date(end).toISOString());
-  const whereCommand = Builder.command({
-    name: 'where',
-    args: [esqlComposer.exp`${timeField} >= ${rangeStart} AND ${timeField} <= ${rangeEnd}`],
-  });
+  const whereCommand = Builder.command({ name: 'where', args: [esqlTimeRange(start, end)] });
   const commands = [...root.commands];
   commands.splice(sourceCommandIndex + 1, 0, whereCommand);
   return BasicPrettyPrinter.print(Builder.expression.query(commands as ESQLCommand[]));
