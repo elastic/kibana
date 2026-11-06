@@ -378,7 +378,7 @@ export const CellFilterControls = () => {
         responsive={false}
         css={css`
           position: absolute;
-          right: ${euiTheme.size.l};
+          right: ${euiTheme.size.m};
           bottom: 0;
         `}
         data-test-subj="notebookCellFilterControls"
