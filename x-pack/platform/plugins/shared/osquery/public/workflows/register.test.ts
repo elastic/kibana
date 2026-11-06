@@ -33,7 +33,7 @@ describe('registerOsqueryWorkflowSteps (public)', () => {
       'osquery.runPack',
     ]);
     expect(loaded.map((definition) => Object.keys(definition.editorHandlers?.input ?? {}))).toEqual(
-      [['saved_query'], []]
+      [['saved_query'], ['pack_id', 'prebuilt_pack']]
     );
   });
 

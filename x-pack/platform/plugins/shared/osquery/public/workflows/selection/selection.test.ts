@@ -7,6 +7,8 @@
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { SelectionContext } from '@kbn/workflows/types/latest';
+import { createPackSelection } from './pack_selection';
+import { createPrebuiltPackSelection } from './prebuilt_pack_selection';
 import { createSavedQuerySelection } from './saved_query_selection';
 
 const context = (propertyKey: string): SelectionContext => ({
@@ -148,6 +150,267 @@ describe('osquery workflow step pickers', () => {
       );
 
       expect(details.links?.[0].path).toBe('/s/my-space/app/osquery/saved_queries');
+    });
+  });
+
+  describe('createPackSelection', () => {
+    const pack = {
+      saved_object_id: 'pack-so-1',
+      name: 'My pack',
+      description: 'Does things',
+      queries: { a: { query: 'SELECT 1' }, b: { query: 'SELECT 2' } },
+    };
+
+    it('searches through core http with the public API version and stores the saved-object id', async () => {
+      http.get.mockResolvedValue({ data: [pack] });
+
+      const options = await createPackSelection(http).search(' my ', context('pack_id'));
+
+      expect(http.get).toHaveBeenCalledWith('/api/osquery/packs', {
+        version: '2023-10-31',
+        query: { page: 1, pageSize: 20, search: 'my*' },
+      });
+      expect(options).toEqual([
+        {
+          value: 'pack-so-1',
+          label: 'My pack',
+          description: 'Does things',
+          documentation: '2 queries',
+        },
+      ]);
+    });
+
+    it('lists without a search filter for an empty input', async () => {
+      http.get.mockResolvedValue({ data: [] });
+
+      await createPackSelection(http).search('', context('pack_id'));
+
+      expect((http.get.mock.calls[0] as unknown[])[1]).toEqual({
+        version: '2023-10-31',
+        query: { page: 1, pageSize: 20 },
+      });
+    });
+
+    it('counts the queries of a pack stored as an array', async () => {
+      http.get.mockResolvedValue({ data: [{ ...pack, queries: [{}] }] });
+
+      const [option] = await createPackSelection(http).search('', context('pack_id'));
+
+      expect(option.documentation).toBe('1 query');
+    });
+
+    it('resolves the saved-object id to the pack name', async () => {
+      http.get.mockResolvedValue({ data: { name: 'My pack', queries: {} } });
+
+      const option = await createPackSelection(http).resolve('pack/so 1', context('pack_id'));
+
+      expect(http.get).toHaveBeenCalledWith('/api/osquery/packs/pack%2Fso%201', {
+        version: '2023-10-31',
+      });
+      expect(option).toMatchObject({ value: 'pack/so 1', label: 'My pack' });
+    });
+
+    it('does not call the API for an empty value', async () => {
+      expect(await createPackSelection(http).resolve(' ', context('pack_id'))).toBeNull();
+      expect(http.get).not.toHaveBeenCalled();
+    });
+
+    it('resolves to null for an unknown id and says so in the details', async () => {
+      const selection = createPackSelection(http);
+      http.get.mockRejectedValue({ status: 404, body: { message: 'Not found' } });
+
+      expect(await selection.resolve('nope', context('pack_id'))).toBeNull();
+      const details = await selection.getDetails('nope', context('pack_id'), null);
+
+      expect(details.message).toMatch(/No pack with id "nope" in this space/);
+    });
+
+    it('reports a failed lookup instead of a missing pack, only for the value it failed on', async () => {
+      const selection = createPackSelection(http);
+      http.get.mockRejectedValueOnce({ status: 403, body: { message: 'Forbidden' } });
+
+      expect(await selection.resolve('denied', context('pack_id'))).toBeNull();
+      http.get.mockRejectedValueOnce({ status: 404, body: { message: 'Not found' } });
+      expect(await selection.resolve('other', context('pack_id'))).toBeNull();
+
+      const denied = await selection.getDetails('denied', context('pack_id'), null);
+      const other = await selection.getDetails('other', context('pack_id'), null);
+
+      expect(denied.message).toMatch(/Forbidden/);
+      expect(denied.message).not.toMatch(/No pack with id/);
+      expect(other.message).toMatch(/No pack with id/);
+    });
+
+    it('reports a failed search in the details too', async () => {
+      const selection = createPackSelection(http);
+      http.get.mockRejectedValue({ message: 'Network down' });
+
+      expect(await selection.search('x', context('pack_id'))).toEqual([]);
+
+      const details = await selection.getDetails('x', context('pack_id'), null);
+      expect(details.message).toMatch(/Network down/);
+    });
+
+    it('describes a found pack and links to packs with the space prefix', async () => {
+      const spacedHttp = httpServiceMock.createSetupContract({ basePath: '/s/my-space' });
+
+      const details = await createPackSelection(spacedHttp).getDetails(
+        'pack-so-1',
+        context('pack_id'),
+        {
+          value: 'pack-so-1',
+          label: 'My pack',
+        }
+      );
+
+      expect(details.message).toMatch(/My pack/);
+      expect(details.links?.[0].path).toBe('/s/my-space/app/osquery/packs');
+    });
+  });
+
+  describe('createPrebuiltPackSelection', () => {
+    const persistence = {
+      asset_id: 'osquery_manager-1111',
+      asset_name: 'forensic-persistence',
+      pack_id: 'so-1',
+      name: 'forensic-persistence-elastic',
+      query_count: 12,
+      copies: 1,
+    };
+    const network = {
+      asset_id: 'osquery_manager-2222',
+      asset_name: 'network-recon',
+      pack_id: 'so-2',
+      name: 'network-recon',
+      description: 'Network checks',
+      query_count: 1,
+      copies: 1,
+    };
+
+    it('lists the loaded prebuilt packs through the internal route and stores the package name', async () => {
+      http.get.mockResolvedValue({ data: [persistence, network] });
+
+      const options = await createPrebuiltPackSelection(http).search('', context('prebuilt_pack'));
+
+      expect(http.get).toHaveBeenCalledWith('/internal/osquery/packs/_prebuilt', {
+        version: '1',
+      });
+      expect(options).toEqual([
+        {
+          value: 'forensic-persistence',
+          label: 'forensic-persistence',
+          // Shown only because the space copy was renamed.
+          description: 'forensic-persistence-elastic',
+          documentation: '12 queries',
+        },
+        {
+          value: 'network-recon',
+          label: 'network-recon',
+          description: 'Network checks',
+          documentation: '1 query',
+        },
+      ]);
+    });
+
+    it('filters by package name or copy name, case-insensitively', async () => {
+      http.get.mockResolvedValue({ data: [persistence, network] });
+      const selection = createPrebuiltPackSelection(http);
+
+      expect(
+        (await selection.search(' PERSIST ', context('prebuilt_pack'))).map((o) => o.value)
+      ).toEqual(['forensic-persistence']);
+      expect(
+        (await selection.search('elastic', context('prebuilt_pack'))).map((o) => o.value)
+      ).toEqual(['forensic-persistence']);
+    });
+
+    it('does not offer a pack the step could not resolve', async () => {
+      http.get.mockResolvedValue({
+        data: [{ ...persistence, copies: 2, unavailable_reason: 'duplicate_copies' }, network],
+      });
+
+      const options = await createPrebuiltPackSelection(http).search('', context('prebuilt_pack'));
+
+      expect(options.map((o) => o.value)).toEqual(['network-recon']);
+    });
+
+    it('resolves a package name or an asset id to the option, with the name as value', async () => {
+      http.get.mockResolvedValue({ data: [persistence, network] });
+      const selection = createPrebuiltPackSelection(http);
+
+      expect(
+        await selection.resolve('forensic-persistence', context('prebuilt_pack'))
+      ).toMatchObject({
+        value: 'forensic-persistence',
+      });
+      expect(
+        await selection.resolve('osquery_manager-2222', context('prebuilt_pack'))
+      ).toMatchObject({
+        value: 'network-recon',
+      });
+    });
+
+    it('resolves to null for a pack that is not loaded, and explains it', async () => {
+      http.get.mockResolvedValue({ data: [network] });
+      const selection = createPrebuiltPackSelection(http);
+
+      expect(await selection.resolve('forensic-persistence', context('prebuilt_pack'))).toBeNull();
+      const details = await selection.getDetails(
+        'forensic-persistence',
+        context('prebuilt_pack'),
+        null
+      );
+
+      expect(details.message).toMatch(/not loaded in this space/);
+    });
+
+    it('does not call the API for an empty value', async () => {
+      expect(
+        await createPrebuiltPackSelection(http).resolve(' ', context('prebuilt_pack'))
+      ).toBeNull();
+      expect(http.get).not.toHaveBeenCalled();
+    });
+
+    it('explains an ambiguous pack instead of calling it not loaded', async () => {
+      http.get.mockResolvedValue({
+        data: [{ ...persistence, copies: 2, unavailable_reason: 'duplicate_copies' }],
+      });
+      const selection = createPrebuiltPackSelection(http);
+
+      expect(await selection.resolve('forensic-persistence', context('prebuilt_pack'))).toBeNull();
+      const details = await selection.getDetails(
+        'forensic-persistence',
+        context('prebuilt_pack'),
+        null
+      );
+
+      expect(details.message).toMatch(/more than one/i);
+      expect(details.message).not.toMatch(/not loaded/);
+    });
+
+    it('reports a failed lookup instead of a pack that is not loaded', async () => {
+      const selection = createPrebuiltPackSelection(http);
+      http.get.mockRejectedValue({ status: 403, body: { message: 'Forbidden' } });
+
+      expect(await selection.search('x', context('prebuilt_pack'))).toEqual([]);
+      expect(await selection.resolve('x', context('prebuilt_pack'))).toBeNull();
+
+      const details = await selection.getDetails('x', context('prebuilt_pack'), null);
+      expect(details.message).toMatch(/Forbidden/);
+      expect(details.message).not.toMatch(/not loaded/);
+    });
+
+    it('links to packs with the space prefix and describes a found pack', async () => {
+      const spacedHttp = httpServiceMock.createSetupContract({ basePath: '/s/my-space' });
+
+      const details = await createPrebuiltPackSelection(spacedHttp).getDetails(
+        'network-recon',
+        context('prebuilt_pack'),
+        { value: 'network-recon', label: 'network-recon' }
+      );
+
+      expect(details.message).toMatch(/network-recon/);
+      expect(details.links?.[0].path).toBe('/s/my-space/app/osquery/packs');
     });
   });
 });

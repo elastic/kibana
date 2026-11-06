@@ -8,10 +8,18 @@
 import type { HttpSetup } from '@kbn/core/public';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { runPackStepCommonDefinition } from '../../common/workflows/step_types/run_pack/run_pack_common';
+import { createPackSelection } from './selection/pack_selection';
+import { createPrebuiltPackSelection } from './selection/prebuilt_pack_selection';
 import { OsqueryStepIcon } from './step_icon';
 
-export const createRunPackStepDefinition = (_http: HttpSetup) =>
+export const createRunPackStepDefinition = (http: HttpSetup) =>
   createPublicStepDefinition({
     ...runPackStepCommonDefinition,
     icon: OsqueryStepIcon,
+    editorHandlers: {
+      input: {
+        pack_id: { selection: createPackSelection(http) },
+        prebuilt_pack: { selection: createPrebuiltPackSelection(http) },
+      },
+    },
   });
