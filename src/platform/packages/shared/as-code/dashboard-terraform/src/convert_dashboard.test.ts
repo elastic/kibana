@@ -306,6 +306,38 @@ describe('createDashboardConverter', () => {
     ]);
   });
 
+  it.each([
+    ['pie', 'pie_chart_config'],
+    ['waffle', 'waffle_config'],
+  ])(
+    'writes each %s metric and breakdown whole as the config_json of an object',
+    (type, configKey) => {
+      const metric = { operation: 'count', empty_as_null: false };
+      const groupBy = { operation: 'terms', fields: ['host.name'], limit: 5 };
+      const { body, droppedFields, skippedPanels } = convert({
+        title: 'Partition charts',
+        panels: [
+          {
+            type: 'vis',
+            grid: { x: 0, y: 0, w: 24, h: 10 },
+            config: {
+              type,
+              data_source: { type: 'data_view_spec', index_pattern: 'logs-*' },
+              metrics: [metric],
+              group_by: [groupBy],
+            },
+          },
+        ],
+      });
+
+      expect(skippedPanels).toEqual([]);
+      expect(droppedFields).toEqual([]);
+      const chart = at(body, 'panels', 0, 'vis_config', 'by_value', configKey);
+      expect(at(chart, 'metrics')).toEqual([{ config_json: JSON.stringify(metric) }]);
+      expect(at(chart, 'group_by')).toEqual([{ config_json: JSON.stringify(groupBy) }]);
+    }
+  );
+
   it('names skipped panels by title, and keeps converting the rest', () => {
     const { body, skippedPanels } = convert({
       title: 'With a panel the provider does not support',

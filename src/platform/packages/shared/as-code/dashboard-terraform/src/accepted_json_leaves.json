@@ -26,8 +26,6 @@
   "Kibana_HTTP_APIs_visMosaicChart.group_by[]",
   "Kibana_HTTP_APIs_visMosaicChart.metric",
   "Kibana_HTTP_APIs_visPieChart.data_source",
-  "Kibana_HTTP_APIs_visPieChart.group_by[]",
-  "Kibana_HTTP_APIs_visPieChart.metrics[]",
   "Kibana_HTTP_APIs_visRegionMapChart.data_source",
   "Kibana_HTTP_APIs_visRegionMapChart.metric",
   "Kibana_HTTP_APIs_visRegionMapChart.region",
@@ -38,7 +36,5 @@
   "Kibana_HTTP_APIs_visTreemapChart.group_by[]",
   "Kibana_HTTP_APIs_visTreemapChart.metrics[]",
   "Kibana_HTTP_APIs_visWaffleChart.data_source",
-  "Kibana_HTTP_APIs_visWaffleChart.group_by[]",
-  "Kibana_HTTP_APIs_visWaffleChart.metrics[]",
   "Kibana_HTTP_APIs_visXyLegend"
 ]

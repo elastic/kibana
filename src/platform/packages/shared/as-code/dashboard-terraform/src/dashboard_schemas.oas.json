@@ -13836,6 +13836,10 @@
         "description": "Pie chart state: standard query or ES|QL query",
         "title": "Pie Chart",
         "x-tf-union": {
+          "json_leaves": {
+            "group_by[]": "config_json",
+            "metrics[]": "config_json"
+          },
           "merge": true
         }
       },
@@ -16102,6 +16106,10 @@
         "description": "Waffle chart configuration: DSL or ES|QL query based",
         "title": "Waffle Chart",
         "x-tf-union": {
+          "json_leaves": {
+            "group_by[]": "config_json",
+            "metrics[]": "config_json"
+          },
           "merge": true
         }
       },

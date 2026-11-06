@@ -174,7 +174,11 @@ export const waffleConfigSchemaESQL = lazySchema(() =>
 export const waffleConfigSchema = lazySchema(() =>
   z.union([waffleConfigSchemaNoESQL, waffleConfigSchemaESQL]).meta({
     id: 'visWaffleChart',
-    ...tfUnion({ merge: true }), // ES|QL vs not, no variant key
+    // ES|QL vs not, no variant key. The provider holds each metric and breakdown as the config_json of an object.
+    ...tfUnion({
+      merge: true,
+      json_leaves: { 'group_by[]': 'config_json', 'metrics[]': 'config_json' },
+    }),
     title: 'Waffle Chart',
     description: 'Waffle chart configuration: DSL or ES|QL query based',
   })
