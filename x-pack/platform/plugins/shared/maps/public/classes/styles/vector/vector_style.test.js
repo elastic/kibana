@@ -48,11 +48,11 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
   };
   const customIcons = [];
   const properties = {
-    fillColor: {
+    fill_color: {
       type: STYLE_TYPE.STATIC,
       options: {},
     },
-    lineColor: {
+    line_color: {
       type: STYLE_TYPE.DYNAMIC,
       options: {
         field: {
@@ -61,7 +61,7 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
         },
       },
     },
-    iconSize: {
+    icon_size: {
       type: STYLE_TYPE.DYNAMIC,
       options: {
         minSize: 1,

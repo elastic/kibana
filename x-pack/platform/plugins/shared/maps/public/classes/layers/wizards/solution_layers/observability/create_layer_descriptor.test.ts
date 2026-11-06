@@ -85,7 +85,7 @@ describe('createLayerDescriptor', () => {
         isTimeAware: true,
         properties: {
           ...getDefaultStaticProperties(),
-          fillColor: {
+          fill_color: {
             options: {
               color: 'Green to Red',
               colorCategory: 'palette_0',
@@ -101,7 +101,7 @@ describe('createLayerDescriptor', () => {
             },
             type: 'DYNAMIC',
           },
-          lineColor: {
+          line_color: {
             options: {
               color: '#3d3d3d',
             },
@@ -200,7 +200,7 @@ describe('createLayerDescriptor', () => {
         isTimeAware: true,
         properties: {
           ...getDefaultStaticProperties(),
-          fillColor: {
+          fill_color: {
             options: {
               color: 'Green to Red',
               colorCategory: 'palette_0',
@@ -216,7 +216,7 @@ describe('createLayerDescriptor', () => {
             },
             type: 'DYNAMIC',
           },
-          iconSize: {
+          icon_size: {
             options: {
               field: {
                 name: 'avg_of_transaction.duration.us',
@@ -231,7 +231,7 @@ describe('createLayerDescriptor', () => {
             },
             type: 'DYNAMIC',
           },
-          lineColor: {
+          line_color: {
             options: {
               color: '#3d3d3d',
             },

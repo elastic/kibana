@@ -59,25 +59,25 @@ export const getMLAnomaliesTypicalLayer = (anomalies: AnomaliesTableData['anomal
     style: {
       type: 'VECTOR',
       properties: {
-        fillColor: {
+        fill_color: {
           type: 'STATIC',
           options: {
             color: '#98A2B2',
           },
         },
-        lineColor: {
+        line_color: {
           type: 'STATIC',
           options: {
             color: '#fff',
           },
         },
-        lineWidth: {
+        line_width: {
           type: 'STATIC',
           options: {
             size: 2,
           },
         },
-        iconSize: {
+        icon_size: {
           type: 'STATIC',
           options: {
             size: 6,
@@ -111,7 +111,7 @@ export const getMLAnomaliesActualLayer = (anomalies: any, euiTheme: EuiThemeComp
     style: {
       type: 'VECTOR',
       properties: {
-        fillColor: {
+        fill_color: {
           type: STYLE_TYPE.DYNAMIC,
           options: {
             customColorRamp: getMlSeverityColorRampValue(euiTheme),
@@ -125,19 +125,19 @@ export const getMLAnomaliesActualLayer = (anomalies: any, euiTheme: EuiThemeComp
             useCustomColorRamp: true,
           },
         },
-        lineColor: {
+        line_color: {
           type: 'STATIC',
           options: {
             color: '#fff',
           },
         },
-        lineWidth: {
+        line_width: {
           type: 'STATIC',
           options: {
             size: 2,
           },
         },
-        iconSize: {
+        icon_size: {
           type: 'STATIC',
           options: {
             size: 6,

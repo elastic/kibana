@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import type { Writable } from '@kbn/utility-types';
-import { LAYER_STYLE_TYPE, STYLE_TYPE, VECTOR_STYLES } from '../constants';
+import { LAYER_STYLE_TYPE, STYLE_TYPE, type VECTOR_STYLES } from '../constants';
 import type {
   ColorStylePropertyDescriptor,
   LayerDescriptor,
@@ -16,10 +16,10 @@ import type {
 import type { StoredMapAttributes } from '../../server';
 
 const COLOR_STYLES = [
-  VECTOR_STYLES.FILL_COLOR,
-  VECTOR_STYLES.LINE_COLOR,
-  VECTOR_STYLES.LABEL_COLOR,
-  VECTOR_STYLES.LABEL_BORDER_COLOR,
+  'fillColor', // legacy persisted key (pre snake_case rename)
+  'lineColor',
+  'labelColor',
+  'labelBorderColor',
 ];
 
 function migrateColorProperty(

@@ -41,7 +41,7 @@ export const mockLayerList = [
       type: 'VECTOR',
       properties: {
         icon: { type: 'STATIC', options: { value: 'marker' } },
-        fillColor: {
+        fill_color: {
           type: 'DYNAMIC',
           options: {
             color: 'Blue to Red',
@@ -55,23 +55,23 @@ export const mockLayerList = [
             useCustomColorRamp: false,
           },
         },
-        lineColor: {
+        line_color: {
           type: 'DYNAMIC',
           options: { color: '#3d3d3d', fieldMetaOptions: { isEnabled: true } },
         },
-        lineWidth: { type: 'STATIC', options: { size: 1 } },
-        iconSize: { type: 'STATIC', options: { size: 6 } },
-        iconOrientation: { type: 'STATIC', options: { orientation: 0 } },
-        labelText: { type: 'STATIC', options: { value: '' } },
-        labelColor: { type: 'STATIC', options: { color: '#000000' } },
-        labelPosition: { options: { position: 'CENTER' } },
-        labelSize: { type: 'STATIC', options: { size: 14 } },
-        labelBorderColor: { type: 'STATIC', options: { color: '#FFFFFF' } },
-        labelZoomRange: {
+        line_width: { type: 'STATIC', options: { size: 1 } },
+        icon_size: { type: 'STATIC', options: { size: 6 } },
+        icon_orientation: { type: 'STATIC', options: { orientation: 0 } },
+        label_text: { type: 'STATIC', options: { value: '' } },
+        label_color: { type: 'STATIC', options: { color: '#000000' } },
+        label_position: { options: { position: 'CENTER' } },
+        label_size: { type: 'STATIC', options: { size: 14 } },
+        label_border_color: { type: 'STATIC', options: { color: '#FFFFFF' } },
+        label_zoom_range: {
           options: { maxZoom: 24, minZoom: 0, useLayerZoomRange: true },
         },
-        symbolizeAs: { options: { value: 'circle' } },
-        labelBorderSize: { options: { size: 'SMALL' } },
+        symbolize_as: { options: { value: 'circle' } },
+        label_border_size: { options: { size: 'SMALL' } },
       },
       isTimeAware: true,
     },
@@ -111,7 +111,7 @@ export const mockLayerList = [
       type: 'VECTOR',
       properties: {
         icon: { type: 'STATIC', options: { value: 'marker' } },
-        fillColor: {
+        fill_color: {
           type: 'DYNAMIC',
           options: {
             color: 'Blue to Red',
@@ -125,23 +125,23 @@ export const mockLayerList = [
             useCustomColorRamp: false,
           },
         },
-        lineColor: {
+        line_color: {
           type: 'DYNAMIC',
           options: { color: '#3d3d3d', fieldMetaOptions: { isEnabled: true } },
         },
-        lineWidth: { type: 'STATIC', options: { size: 1 } },
-        iconSize: { type: 'STATIC', options: { size: 6 } },
-        iconOrientation: { type: 'STATIC', options: { orientation: 0 } },
-        labelText: { type: 'STATIC', options: { value: '' } },
-        labelColor: { type: 'STATIC', options: { color: '#000000' } },
-        labelPosition: { options: { position: 'CENTER' } },
-        labelSize: { type: 'STATIC', options: { size: 14 } },
-        labelBorderColor: { type: 'STATIC', options: { color: '#FFFFFF' } },
-        labelZoomRange: {
+        line_width: { type: 'STATIC', options: { size: 1 } },
+        icon_size: { type: 'STATIC', options: { size: 6 } },
+        icon_orientation: { type: 'STATIC', options: { orientation: 0 } },
+        label_text: { type: 'STATIC', options: { value: '' } },
+        label_color: { type: 'STATIC', options: { color: '#000000' } },
+        label_position: { options: { position: 'CENTER' } },
+        label_size: { type: 'STATIC', options: { size: 14 } },
+        label_border_color: { type: 'STATIC', options: { color: '#FFFFFF' } },
+        label_zoom_range: {
           options: { maxZoom: 24, minZoom: 0, useLayerZoomRange: true },
         },
-        symbolizeAs: { options: { value: 'circle' } },
-        labelBorderSize: { options: { size: 'SMALL' } },
+        symbolize_as: { options: { value: 'circle' } },
+        label_border_size: { options: { size: 'SMALL' } },
       },
       isTimeAware: true,
     },

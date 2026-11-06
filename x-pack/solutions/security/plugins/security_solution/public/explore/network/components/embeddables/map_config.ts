@@ -186,23 +186,23 @@ export const getSourceLayer = (
     style: {
       type: 'VECTOR',
       properties: {
-        fillColor: {
+        fill_color: {
           type: 'STATIC',
           options: {
             color: dependencies.euiTheme.colors.vis.euiColorVis4,
           },
         },
-        lineColor: {
+        line_color: {
           type: 'STATIC',
           options: { color: dependencies.euiTheme.colors.vis.euiColorVisBase0 },
         },
-        lineWidth: { type: 'STATIC', options: { size: 2 } },
-        iconSize: { type: 'STATIC', options: { size: 8 } },
-        iconOrientation: {
+        line_width: { type: 'STATIC', options: { size: 2 } },
+        icon_size: { type: 'STATIC', options: { size: 8 } },
+        icon_orientation: {
           type: 'STATIC',
           options: { orientation: 0 },
         },
-        symbolizeAs: {
+        symbolize_as: {
           options: { value: 'icon' },
         },
         icon: {
@@ -258,21 +258,21 @@ export const getDestinationLayer = (
     style: {
       type: 'VECTOR',
       properties: {
-        fillColor: {
+        fill_color: {
           type: 'STATIC',
           options: { color: dependencies.euiTheme.colors.vis.euiColorVis2 },
         },
-        lineColor: {
+        line_color: {
           type: 'STATIC',
           options: { color: dependencies.euiTheme.colors.vis.euiColorVisBase0 },
         },
-        lineWidth: { type: 'STATIC', options: { size: 2 } },
-        iconSize: { type: 'STATIC', options: { size: 8 } },
-        iconOrientation: {
+        line_width: { type: 'STATIC', options: { size: 2 } },
+        icon_size: { type: 'STATIC', options: { size: 8 } },
+        icon_orientation: {
           type: 'STATIC',
           options: { orientation: 0 },
         },
-        symbolizeAs: {
+        symbolize_as: {
           options: { value: 'icon' },
         },
         icon: {
@@ -334,15 +334,15 @@ export const getLineLayer = (
     style: {
       type: 'VECTOR',
       properties: {
-        fillColor: {
+        fill_color: {
           type: 'STATIC',
           options: { color: euiVisColorPalette[1] },
         },
-        lineColor: {
+        line_color: {
           type: 'STATIC',
           options: { color: euiVisColorPalette[1] },
         },
-        lineWidth: {
+        line_width: {
           type: 'DYNAMIC',
           options: {
             field: {
@@ -358,12 +358,12 @@ export const getLineLayer = (
             },
           },
         },
-        iconSize: { type: 'STATIC', options: { size: 10 } },
-        iconOrientation: {
+        icon_size: { type: 'STATIC', options: { size: 10 } },
+        icon_orientation: {
           type: 'STATIC',
           options: { orientation: 0 },
         },
-        symbolizeAs: {
+        symbolize_as: {
           options: { value: 'icon' },
         },
         icon: {

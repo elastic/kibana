@@ -106,7 +106,7 @@ export const getChoroplethAnomaliesLayer = (
       // @ts-ignore missing style properties. Remove once 'VectorLayerDescriptor' type is updated
       properties: {
         icon: { type: STYLE_TYPE.STATIC, options: { value: 'marker' } },
-        fillColor: {
+        fill_color: {
           type: STYLE_TYPE.DYNAMIC,
           options: {
             color: 'Blue to Red',
@@ -120,11 +120,11 @@ export const getChoroplethAnomaliesLayer = (
             useCustomColorRamp: false,
           },
         },
-        lineColor: {
+        line_color: {
           type: STYLE_TYPE.DYNAMIC,
           options: { fieldMetaOptions: { isEnabled: true } },
         },
-        lineWidth: { type: STYLE_TYPE.STATIC, options: { size: 1 } },
+        line_width: { type: STYLE_TYPE.STATIC, options: { size: 1 } },
       },
       isTimeAware: true,
     },

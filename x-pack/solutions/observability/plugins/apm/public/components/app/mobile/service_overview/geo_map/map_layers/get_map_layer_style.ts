@@ -32,7 +32,7 @@ export function getLayerStyle(
     type: 'VECTOR' as LAYER_STYLE_TYPE.VECTOR,
     properties: {
       icon: { type: STYLE_TYPE.STATIC, options: { value: 'marker' } },
-      fillColor: {
+      fill_color: {
         type: STYLE_TYPE.DYNAMIC,
         options: {
           color,
@@ -46,17 +46,17 @@ export function getLayerStyle(
           useCustomColorRamp: false,
         },
       },
-      lineColor: {
+      line_color: {
         type: STYLE_TYPE.DYNAMIC,
         options: { color: lineColor, fieldMetaOptions: { isEnabled: true } },
       },
-      lineWidth: { type: STYLE_TYPE.STATIC, options: { size: 1 } },
-      iconSize: { type: STYLE_TYPE.STATIC, options: { size: 6 } },
-      iconOrientation: {
+      line_width: { type: STYLE_TYPE.STATIC, options: { size: 1 } },
+      icon_size: { type: STYLE_TYPE.STATIC, options: { size: 6 } },
+      icon_orientation: {
         type: STYLE_TYPE.STATIC,
         options: { orientation: 0 },
       },
-      labelText: {
+      label_text: {
         type: STYLE_TYPE.DYNAMIC,
         options: {
           field: {
@@ -65,29 +65,29 @@ export function getLayerStyle(
           },
         },
       },
-      labelPosition: {
+      label_position: {
         options: {
           position: LABEL_POSITIONS.CENTER,
         },
       },
-      labelZoomRange: {
+      label_zoom_range: {
         options: {
           useLayerZoomRange: true,
           minZoom: 0,
           maxZoom: 24,
         },
       },
-      labelColor: {
+      label_color: {
         type: STYLE_TYPE.STATIC,
         options: { color: labelColor },
       },
-      labelSize: { type: STYLE_TYPE.STATIC, options: { size: 14 } },
-      labelBorderColor: {
+      label_size: { type: STYLE_TYPE.STATIC, options: { size: 14 } },
+      label_border_color: {
         type: STYLE_TYPE.STATIC,
         options: { color: labelOutlineColor },
       },
-      symbolizeAs: { options: { value: SYMBOLIZE_AS_TYPES.CIRCLE } },
-      labelBorderSize: { options: { size: LABEL_BORDER_SIZES.SMALL } },
+      symbolize_as: { options: { value: SYMBOLIZE_AS_TYPES.CIRCLE } },
+      label_border_size: { options: { size: LABEL_BORDER_SIZES.SMALL } },
     },
     isTimeAware: true,
   };

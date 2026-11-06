@@ -239,20 +239,20 @@ export enum ICON_SOURCE {
 }
 
 export enum VECTOR_STYLES {
-  SYMBOLIZE_AS = 'symbolizeAs',
-  FILL_COLOR = 'fillColor',
-  LINE_COLOR = 'lineColor',
-  LINE_WIDTH = 'lineWidth',
+  SYMBOLIZE_AS = 'symbolize_as',
+  FILL_COLOR = 'fill_color',
+  LINE_COLOR = 'line_color',
+  LINE_WIDTH = 'line_width',
   ICON = 'icon',
-  ICON_SIZE = 'iconSize',
-  ICON_ORIENTATION = 'iconOrientation',
-  LABEL_TEXT = 'labelText',
-  LABEL_ZOOM_RANGE = 'labelZoomRange',
-  LABEL_COLOR = 'labelColor',
-  LABEL_SIZE = 'labelSize',
-  LABEL_BORDER_COLOR = 'labelBorderColor',
-  LABEL_BORDER_SIZE = 'labelBorderSize',
-  LABEL_POSITION = 'labelPosition',
+  ICON_SIZE = 'icon_size',
+  ICON_ORIENTATION = 'icon_orientation',
+  LABEL_TEXT = 'label_text',
+  LABEL_ZOOM_RANGE = 'label_zoom_range',
+  LABEL_COLOR = 'label_color',
+  LABEL_SIZE = 'label_size',
+  LABEL_BORDER_COLOR = 'label_border_color',
+  LABEL_BORDER_SIZE = 'label_border_size',
+  LABEL_POSITION = 'label_position',
 }
 
 export enum SCALING_TYPES {

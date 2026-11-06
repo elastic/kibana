@@ -74,7 +74,7 @@ describe('createLayerDescriptor', () => {
           isTimeAware: true,
           properties: {
             ...getDefaultStaticProperties(),
-            fillColor: {
+            fill_color: {
               options: {
                 color: '#A6EDEA',
               },
@@ -86,25 +86,25 @@ describe('createLayerDescriptor', () => {
               },
               type: 'STATIC',
             },
-            iconSize: {
+            icon_size: {
               options: {
                 size: 8,
               },
               type: 'STATIC',
             },
-            lineColor: {
+            line_color: {
               options: {
                 color: '#FFFFFF',
               },
               type: 'STATIC',
             },
-            lineWidth: {
+            line_width: {
               options: {
                 size: 2,
               },
               type: 'STATIC',
             },
-            symbolizeAs: {
+            symbolize_as: {
               options: {
                 value: 'icon',
               },
@@ -153,7 +153,7 @@ describe('createLayerDescriptor', () => {
           isTimeAware: true,
           properties: {
             ...getDefaultStaticProperties(),
-            fillColor: {
+            fill_color: {
               options: {
                 color: '#61A2FF',
               },
@@ -165,25 +165,25 @@ describe('createLayerDescriptor', () => {
               },
               type: 'STATIC',
             },
-            iconSize: {
+            icon_size: {
               options: {
                 size: 8,
               },
               type: 'STATIC',
             },
-            lineColor: {
+            line_color: {
               options: {
                 color: '#FFFFFF',
               },
               type: 'STATIC',
             },
-            lineWidth: {
+            line_width: {
               options: {
                 size: 2,
               },
               type: 'STATIC',
             },
-            symbolizeAs: {
+            symbolize_as: {
               options: {
                 value: 'icon',
               },
@@ -229,13 +229,13 @@ describe('createLayerDescriptor', () => {
           isTimeAware: true,
           properties: {
             ...getDefaultStaticProperties(),
-            lineColor: {
+            line_color: {
               options: {
                 color: '#A6EDEA',
               },
               type: 'STATIC',
             },
-            lineWidth: {
+            line_width: {
               options: {
                 field: {
                   name: 'doc_count',
@@ -305,7 +305,7 @@ describe('createLayerDescriptor', () => {
           isTimeAware: true,
           properties: {
             ...getDefaultStaticProperties(),
-            fillColor: {
+            fill_color: {
               options: {
                 color: '#A6EDEA',
               },
@@ -317,25 +317,25 @@ describe('createLayerDescriptor', () => {
               },
               type: 'STATIC',
             },
-            iconSize: {
+            icon_size: {
               options: {
                 size: 8,
               },
               type: 'STATIC',
             },
-            lineColor: {
+            line_color: {
               options: {
                 color: '#FFFFFF',
               },
               type: 'STATIC',
             },
-            lineWidth: {
+            line_width: {
               options: {
                 size: 2,
               },
               type: 'STATIC',
             },
-            symbolizeAs: {
+            symbolize_as: {
               options: {
                 value: 'icon',
               },
@@ -384,31 +384,31 @@ describe('createLayerDescriptor', () => {
           isTimeAware: true,
           properties: {
             ...getDefaultStaticProperties(),
-            fillColor: {
+            fill_color: {
               options: {
                 color: '#61A2FF',
               },
               type: 'STATIC',
             },
-            iconSize: {
+            icon_size: {
               options: {
                 size: 8,
               },
               type: 'STATIC',
             },
-            lineColor: {
+            line_color: {
               options: {
                 color: '#FFFFFF',
               },
               type: 'STATIC',
             },
-            lineWidth: {
+            line_width: {
               options: {
                 size: 2,
               },
               type: 'STATIC',
             },
-            symbolizeAs: {
+            symbolize_as: {
               options: {
                 value: 'icon',
               },
@@ -454,13 +454,13 @@ describe('createLayerDescriptor', () => {
           isTimeAware: true,
           properties: {
             ...getDefaultStaticProperties(),
-            lineColor: {
+            line_color: {
               options: {
                 color: '#A6EDEA',
               },
               type: 'STATIC',
             },
-            lineWidth: {
+            line_width: {
               options: {
                 field: {
                   name: 'doc_count',
@@ -532,7 +532,7 @@ describe('createLayerDescriptor', () => {
           isTimeAware: true,
           properties: {
             ...getDefaultStaticProperties(),
-            fillColor: {
+            fill_color: {
               options: {
                 color: '#A6EDEA',
               },
@@ -544,25 +544,25 @@ describe('createLayerDescriptor', () => {
               },
               type: 'STATIC',
             },
-            iconSize: {
+            icon_size: {
               options: {
                 size: 8,
               },
               type: 'STATIC',
             },
-            lineColor: {
+            line_color: {
               options: {
                 color: '#FFFFFF',
               },
               type: 'STATIC',
             },
-            lineWidth: {
+            line_width: {
               options: {
                 size: 2,
               },
               type: 'STATIC',
             },
-            symbolizeAs: {
+            symbolize_as: {
               options: {
                 value: 'icon',
               },
@@ -611,31 +611,31 @@ describe('createLayerDescriptor', () => {
           isTimeAware: true,
           properties: {
             ...getDefaultStaticProperties(),
-            fillColor: {
+            fill_color: {
               options: {
                 color: '#61A2FF',
               },
               type: 'STATIC',
             },
-            iconSize: {
+            icon_size: {
               options: {
                 size: 8,
               },
               type: 'STATIC',
             },
-            lineColor: {
+            line_color: {
               options: {
                 color: '#FFFFFF',
               },
               type: 'STATIC',
             },
-            lineWidth: {
+            line_width: {
               options: {
                 size: 2,
               },
               type: 'STATIC',
             },
-            symbolizeAs: {
+            symbolize_as: {
               options: {
                 value: 'icon',
               },
@@ -681,13 +681,13 @@ describe('createLayerDescriptor', () => {
           isTimeAware: true,
           properties: {
             ...getDefaultStaticProperties(),
-            lineColor: {
+            line_color: {
               options: {
                 color: '#A6EDEA',
               },
               type: 'STATIC',
             },
-            lineWidth: {
+            line_width: {
               options: {
                 field: {
                   name: 'doc_count',

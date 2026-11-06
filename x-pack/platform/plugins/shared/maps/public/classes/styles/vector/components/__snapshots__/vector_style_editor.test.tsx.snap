@@ -20,7 +20,7 @@ exports[`should render 1`] = `
       }
     }
     disabled={false}
-    disabledBy="iconSize"
+    disabledBy="icon_size"
     fields={
       Array [
         Object {
@@ -40,7 +40,7 @@ exports[`should render 1`] = `
         "_options": Object {
           "color": "#16C5C0",
         },
-        "_styleName": "fillColor",
+        "_styleName": "fill_color",
       }
     }
     swatches={
@@ -79,7 +79,7 @@ exports[`should render 1`] = `
       }
     }
     disabled={false}
-    disabledBy="lineWidth"
+    disabledBy="line_width"
     fields={
       Array [
         Object {
@@ -99,7 +99,7 @@ exports[`should render 1`] = `
         "_options": Object {
           "color": "#009490",
         },
-        "_styleName": "lineColor",
+        "_styleName": "line_color",
       }
     }
     swatches={
@@ -140,7 +140,7 @@ exports[`should render 1`] = `
       }
     }
     disabled={false}
-    disabledBy="iconSize"
+    disabledBy="icon_size"
     fields={Array []}
     onDynamicStyleChange={[Function]}
     onStaticStyleChange={[Function]}
@@ -149,7 +149,7 @@ exports[`should render 1`] = `
         "_options": Object {
           "size": 1,
         },
-        "_styleName": "lineWidth",
+        "_styleName": "line_width",
       }
     }
   />
@@ -186,7 +186,7 @@ exports[`should render 1`] = `
         "_options": Object {
           "value": "",
         },
-        "_styleName": "labelText",
+        "_styleName": "label_text",
       }
     }
   />
@@ -195,7 +195,7 @@ exports[`should render 1`] = `
   />
   <LabelZoomRangeEditor
     disabled={true}
-    disabledBy="labelText"
+    disabledBy="label_text"
     handlePropertyChange={[Function]}
     styleProperty={
       LabelZoomRangeProperty {
@@ -206,7 +206,7 @@ exports[`should render 1`] = `
           "minZoom": 0,
           "useLayerZoomRange": true,
         },
-        "_styleName": "labelZoomRange",
+        "_styleName": "label_zoom_range",
       }
     }
   />
@@ -231,7 +231,7 @@ exports[`should render 1`] = `
       }
     }
     disabled={true}
-    disabledBy="labelText"
+    disabledBy="label_text"
     fields={
       Array [
         Object {
@@ -251,7 +251,7 @@ exports[`should render 1`] = `
         "_options": Object {
           "color": "#000000",
         },
-        "_styleName": "labelColor",
+        "_styleName": "label_color",
       }
     }
     swatches={
@@ -292,7 +292,7 @@ exports[`should render 1`] = `
       }
     }
     disabled={true}
-    disabledBy="labelText"
+    disabledBy="label_text"
     fields={Array []}
     onDynamicStyleChange={[Function]}
     onStaticStyleChange={[Function]}
@@ -301,7 +301,7 @@ exports[`should render 1`] = `
         "_options": Object {
           "size": 14,
         },
-        "_styleName": "labelSize",
+        "_styleName": "label_size",
       }
     }
   />
@@ -326,7 +326,7 @@ exports[`should render 1`] = `
       }
     }
     disabled={true}
-    disabledBy="labelText"
+    disabledBy="label_text"
     fields={
       Array [
         Object {
@@ -346,7 +346,7 @@ exports[`should render 1`] = `
         "_options": Object {
           "color": "#FFFFFF",
         },
-        "_styleName": "labelBorderColor",
+        "_styleName": "label_border_color",
       }
     }
     swatches={
@@ -371,7 +371,7 @@ exports[`should render 1`] = `
   />
   <VectorStyleLabelBorderSizeEditor
     disabled={true}
-    disabledBy="labelText"
+    disabledBy="label_text"
     handlePropertyChange={[Function]}
     styleProperty={
       LabelBorderSizeProperty {
@@ -379,12 +379,12 @@ exports[`should render 1`] = `
           "_options": Object {
             "size": 14,
           },
-          "_styleName": "labelSize",
+          "_styleName": "label_size",
         },
         "_options": Object {
           "size": "SMALL",
         },
-        "_styleName": "labelBorderSize",
+        "_styleName": "label_border_size",
       }
     }
   />
@@ -424,7 +424,7 @@ exports[`should render with no style fields 1`] = `
       }
     }
     disabled={false}
-    disabledBy="iconSize"
+    disabledBy="icon_size"
     fields={Array []}
     onDynamicStyleChange={[Function]}
     onStaticStyleChange={[Function]}
@@ -433,7 +433,7 @@ exports[`should render with no style fields 1`] = `
         "_options": Object {
           "color": "#16C5C0",
         },
-        "_styleName": "fillColor",
+        "_styleName": "fill_color",
       }
     }
     swatches={
@@ -472,7 +472,7 @@ exports[`should render with no style fields 1`] = `
       }
     }
     disabled={false}
-    disabledBy="lineWidth"
+    disabledBy="line_width"
     fields={Array []}
     onDynamicStyleChange={[Function]}
     onStaticStyleChange={[Function]}
@@ -481,7 +481,7 @@ exports[`should render with no style fields 1`] = `
         "_options": Object {
           "color": "#009490",
         },
-        "_styleName": "lineColor",
+        "_styleName": "line_color",
       }
     }
     swatches={
@@ -522,7 +522,7 @@ exports[`should render with no style fields 1`] = `
       }
     }
     disabled={false}
-    disabledBy="iconSize"
+    disabledBy="icon_size"
     fields={Array []}
     onDynamicStyleChange={[Function]}
     onStaticStyleChange={[Function]}
@@ -531,7 +531,7 @@ exports[`should render with no style fields 1`] = `
         "_options": Object {
           "size": 1,
         },
-        "_styleName": "lineWidth",
+        "_styleName": "line_width",
       }
     }
   />
@@ -557,7 +557,7 @@ exports[`should render with no style fields 1`] = `
         "_options": Object {
           "value": "",
         },
-        "_styleName": "labelText",
+        "_styleName": "label_text",
       }
     }
   />
@@ -566,7 +566,7 @@ exports[`should render with no style fields 1`] = `
   />
   <LabelZoomRangeEditor
     disabled={true}
-    disabledBy="labelText"
+    disabledBy="label_text"
     handlePropertyChange={[Function]}
     styleProperty={
       LabelZoomRangeProperty {
@@ -577,7 +577,7 @@ exports[`should render with no style fields 1`] = `
           "minZoom": 0,
           "useLayerZoomRange": true,
         },
-        "_styleName": "labelZoomRange",
+        "_styleName": "label_zoom_range",
       }
     }
   />
@@ -602,7 +602,7 @@ exports[`should render with no style fields 1`] = `
       }
     }
     disabled={true}
-    disabledBy="labelText"
+    disabledBy="label_text"
     fields={Array []}
     onDynamicStyleChange={[Function]}
     onStaticStyleChange={[Function]}
@@ -611,7 +611,7 @@ exports[`should render with no style fields 1`] = `
         "_options": Object {
           "color": "#000000",
         },
-        "_styleName": "labelColor",
+        "_styleName": "label_color",
       }
     }
     swatches={
@@ -652,7 +652,7 @@ exports[`should render with no style fields 1`] = `
       }
     }
     disabled={true}
-    disabledBy="labelText"
+    disabledBy="label_text"
     fields={Array []}
     onDynamicStyleChange={[Function]}
     onStaticStyleChange={[Function]}
@@ -661,7 +661,7 @@ exports[`should render with no style fields 1`] = `
         "_options": Object {
           "size": 14,
         },
-        "_styleName": "labelSize",
+        "_styleName": "label_size",
       }
     }
   />
@@ -686,7 +686,7 @@ exports[`should render with no style fields 1`] = `
       }
     }
     disabled={true}
-    disabledBy="labelText"
+    disabledBy="label_text"
     fields={Array []}
     onDynamicStyleChange={[Function]}
     onStaticStyleChange={[Function]}
@@ -695,7 +695,7 @@ exports[`should render with no style fields 1`] = `
         "_options": Object {
           "color": "#FFFFFF",
         },
-        "_styleName": "labelBorderColor",
+        "_styleName": "label_border_color",
       }
     }
     swatches={
@@ -720,7 +720,7 @@ exports[`should render with no style fields 1`] = `
   />
   <VectorStyleLabelBorderSizeEditor
     disabled={true}
-    disabledBy="labelText"
+    disabledBy="label_text"
     handlePropertyChange={[Function]}
     styleProperty={
       LabelBorderSizeProperty {
@@ -728,12 +728,12 @@ exports[`should render with no style fields 1`] = `
           "_options": Object {
             "size": 14,
           },
-          "_styleName": "labelSize",
+          "_styleName": "label_size",
         },
         "_options": Object {
           "size": "SMALL",
         },
-        "_styleName": "labelBorderSize",
+        "_styleName": "label_border_size",
       }
     }
   />

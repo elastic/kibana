@@ -52,8 +52,8 @@ export const getCustomColorRampStyleProperty = (euiTheme: EuiThemeComputed) => (
 export const getActualStyle = (euiTheme: EuiThemeComputed) => ({
   type: 'VECTOR',
   properties: {
-    fillColor: getCustomColorRampStyleProperty(euiTheme),
-    lineColor: getCustomColorRampStyleProperty(euiTheme),
+    fill_color: getCustomColorRampStyleProperty(euiTheme),
+    line_color: getCustomColorRampStyleProperty(euiTheme),
   },
   isTimeAware: false,
 });
@@ -61,25 +61,25 @@ export const getActualStyle = (euiTheme: EuiThemeComputed) => ({
 export const TYPICAL_STYLE = {
   type: 'VECTOR',
   properties: {
-    fillColor: {
+    fill_color: {
       type: 'STATIC',
       options: {
         color: '#98A2B2',
       },
     },
-    lineColor: {
+    line_color: {
       type: 'STATIC',
       options: {
         color: '#fff',
       },
     },
-    lineWidth: {
+    line_width: {
       type: 'STATIC',
       options: {
         size: 2,
       },
     },
-    iconSize: {
+    icon_size: {
       type: 'STATIC',
       options: {
         size: 6,
@@ -137,13 +137,13 @@ export function getInitialSourceIndexFieldLayers(
           style: {
             type: 'VECTOR',
             properties: {
-              fillColor: {
+              fill_color: {
                 type: 'STATIC',
                 options: {
                   color,
                 },
               },
-              lineColor: {
+              line_color: {
                 type: 'STATIC',
                 options: {
                   color,
