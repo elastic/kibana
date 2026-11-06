@@ -6,7 +6,8 @@
  */
 
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
-import { EuiFlexGroup, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiPageTemplate, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import useLatest from 'react-use/lib/useLatest';
 import { BehaviorSubject } from 'rxjs';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
@@ -62,6 +63,8 @@ const CellView = ({ cell }: { cell: CellDefinition }) => {
 const SCROLL_ATTEMPTS = 10;
 
 /** Scrolls to the cell, waiting a few frames for it to render if a filter change just showed it. */
+const PAGE_WIDTH = 1200;
+
 const scrollToCell = (cellId: string, attemptsLeft = SCROLL_ATTEMPTS): void => {
   const element = document.getElementById(getCellElementId(cellId));
   if (element) {
@@ -139,6 +142,17 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
   });
   const [isSaving, setIsSaving] = useState(false);
   const headerRunControls = useRef<HTMLDivElement>(null);
+  const { euiTheme } = useEuiTheme();
+  const { size } = euiTheme;
+  // Keeps the cells' Run buttons (just outside each cell) and the floating controls (pinned to
+  // the page edge) clear of each other and of the cells, padding only when the page is too narrow.
+  const reservedEnd = `(${size.s} + ${size.xxxxl}) + (${size.s} + ${size.xxl} + ${size.l})`;
+  const sectionCss = css`
+    padding-inline-end: max(
+      ${size.base},
+      calc(${reservedEnd} - max(0px, (100% - ${PAGE_WIDTH}px) / 2))
+    );
+  `;
   const sidePanel = useStateFromPublishingSubject(notebook.sidePanel$);
   useEffect(() => {
     notebook.scheduler.start();
@@ -178,9 +192,9 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
     <NotebookContext.Provider value={notebook}>
       {sidePanel === 'graph' && <GraphFlyout onClose={closeSidePanel} onSelectCell={focusCell} />}
       {sidePanel === 'app' && <AppFlyout onClose={closeSidePanel} onRevealCell={focusCell} />}
-      <EuiPageTemplate restrictWidth={1200} paddingSize="m">
+      <EuiPageTemplate restrictWidth={PAGE_WIDTH} paddingSize="m">
         <FloatingRunControls headerControls={headerRunControls} />
-        <EuiPageTemplate.Section paddingSize="m" grow={false}>
+        <EuiPageTemplate.Section paddingSize="m" grow={false} css={sectionCss}>
           <NotebookHeader
             runControlsRef={headerRunControls}
             onSave={onSave ? save : undefined}
@@ -189,7 +203,7 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
             onToggleSidePanel={toggleSidePanel}
           />
         </EuiPageTemplate.Section>
-        <EuiPageTemplate.Section paddingSize="m">
+        <EuiPageTemplate.Section paddingSize="m" css={sectionCss}>
           <CellList />
         </EuiPageTemplate.Section>
         <CellFilterControls />
