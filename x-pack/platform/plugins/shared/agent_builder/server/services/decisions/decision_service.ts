@@ -6,7 +6,15 @@
  */
 
 import type { ElasticsearchServiceStart, Logger } from '@kbn/core/server';
-import type { DecideParams, DecideResult, DecisionsStart } from '@kbn/agent-builder-server';
+import type {
+  DecideParams,
+  DecideResult,
+  DecisionAnswer,
+  DecisionAnswerFor,
+  DecisionAnswersFor,
+  DecisionQuestion,
+  DecisionsStart,
+} from '@kbn/agent-builder-server';
 import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
 import type { AgentBuilderConfig } from '../../config';
 import type { ModelProviderFactoryFn } from '../execution/runner/model_provider';
@@ -23,18 +31,23 @@ import {
  * then Agent Builder's fast model as the fallback.
  */
 export const createDecisionProviders = ({
-  config: { inferenceId, fastModelTimeoutMs, unavailableTtlMs },
+  config: { inferenceId, eisTimeoutMs, fastModelTimeoutMs, unavailableTtlMs },
   elasticsearch,
   createModelProvider,
 }: {
   config: Pick<
     AgentBuilderConfig['decisionModel'],
-    'inferenceId' | 'fastModelTimeoutMs' | 'unavailableTtlMs'
+    'inferenceId' | 'eisTimeoutMs' | 'fastModelTimeoutMs' | 'unavailableTtlMs'
   >;
   elasticsearch: ElasticsearchServiceStart;
   createModelProvider: ModelProviderFactoryFn;
 }): DecisionProvider[] => [
-  new EisDecisionProvider({ elasticsearch, inferenceId, unavailableTtlMs }),
+  new EisDecisionProvider({
+    elasticsearch,
+    inferenceId,
+    timeoutMs: eisTimeoutMs,
+    unavailableTtlMs,
+  }),
   new FastModelDecisionProvider({
     createModelProvider,
     timeoutMs: fastModelTimeoutMs,
@@ -49,30 +62,36 @@ export const createDecisionProviders = ({
 export class DecisionService implements DecisionsStart {
   private readonly logger: Logger;
   private readonly providers: DecisionProvider[];
-  private readonly timeoutMs: number;
 
-  constructor({
-    logger,
-    providers,
-    timeoutMs,
-  }: {
-    logger: Logger;
-    providers: DecisionProvider[];
-    /** The timeout of providers without their own. */
-    timeoutMs: number;
-  }) {
+  constructor({ logger, providers }: { logger: Logger; providers: DecisionProvider[] }) {
     this.logger = logger;
     this.providers = providers;
-    this.timeoutMs = timeoutMs;
   }
 
+  decide<const Q extends DecisionQuestion>(
+    params: DecideParams,
+    question: Q
+  ): Promise<DecideResult<{ answer: DecisionAnswerFor<Q> }>>;
+  decide<const Q extends [DecisionQuestion, DecisionQuestion, ...DecisionQuestion[]]>(
+    params: DecideParams,
+    ...questions: Q
+  ): Promise<DecideResult<{ answers: DecisionAnswersFor<Q> }>>;
   /** Runs the provider chain in a `decide` span that records which provider answered. */
-  decide = (params: DecideParams): Promise<DecideResult> =>
-    withActiveInferenceSpan(
+  decide(
+    params: DecideParams,
+    ...questions: DecisionQuestion[]
+  ): Promise<DecideResult<{ answer: DecisionAnswer } | { answers: DecisionAnswer[] }>> {
+    if (questions.length === 0) {
+      throw new Error('decide() needs at least one question');
+    }
+
+    return withActiveInferenceSpan(
       'decide',
       { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' } },
-      async (span) => {
-        const { result, providerId } = await this.run(params);
+      async (
+        span
+      ): Promise<DecideResult<{ answer: DecisionAnswer } | { answers: DecisionAnswer[] }>> => {
+        const { result, providerId } = await this.run(params, questions);
 
         span?.setAttributes({
           'elastic.decision.status': result.status,
@@ -84,18 +103,27 @@ export class DecisionService implements DecisionsStart {
             : {}),
         });
 
-        return result;
+        if (result.status !== 'decided') {
+          return result;
+        }
+
+        const { inferenceId, answers } = result;
+
+        return questions.length === 1
+          ? { status: 'decided', inferenceId, answer: answers[0] }
+          : { status: 'decided', inferenceId, answers };
       }
     );
+  }
 
-  private async run({
-    request,
-    input,
-    questions,
-    abortSignal,
-    timeoutMs = this.timeoutMs,
-  }: DecideParams): Promise<{ result: DecideResult; providerId?: DecisionProviderId }> {
-    const questionNames = Object.keys(questions).join(', ');
+  private async run(
+    { request, input, abortSignal }: DecideParams,
+    questions: DecisionQuestion[]
+  ): Promise<{
+    result: DecideResult<{ answers: DecisionAnswer[] }>;
+    providerId?: DecisionProviderId;
+  }> {
+    const questionTypes = questions.map(({ type }) => type).join(', ');
     let lastError: Error | undefined;
 
     for (const provider of this.providers) {
@@ -114,13 +142,12 @@ export class DecisionService implements DecisionsStart {
           request,
           input,
           questions,
-          timeoutMs,
           abortSignal,
         });
 
         this.logger.debug(
           () =>
-            `Decision [${questionNames}] from [${provider.id}:${inferenceId}] in ${
+            `Decision [${questionTypes}] from [${provider.id}:${inferenceId}] in ${
               Date.now() - startedAt
             }ms: ${JSON.stringify(answers)}`
         );
@@ -138,7 +165,7 @@ export class DecisionService implements DecisionsStart {
 
         lastError = error;
 
-        const message = `Decision [${questionNames}] failed on [${provider.id}] after ${
+        const message = `Decision [${questionTypes}] failed on [${provider.id}] after ${
           Date.now() - startedAt
         }ms: ${error.message}`;
 

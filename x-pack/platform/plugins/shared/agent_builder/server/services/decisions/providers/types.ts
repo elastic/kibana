@@ -13,18 +13,17 @@ export type DecisionProviderId = 'eis' | 'fast_model';
 export interface DecisionProviderParams {
   request: KibanaRequest;
   input: string;
-  questions: Record<string, DecisionQuestion>;
+  questions: readonly DecisionQuestion[];
   signal: AbortSignal;
 }
 
 export interface DecisionAttemptParams extends Omit<DecisionProviderParams, 'signal'> {
-  /** Used when the provider has no timeout of its own. */
-  timeoutMs: number;
   abortSignal?: AbortSignal;
 }
 
 export interface DecisionProviderResult {
-  answers: Record<string, DecisionAnswer>;
+  /** One answer per question, in the questions' order. */
+  answers: DecisionAnswer[];
   /** What answered, for logs: an inference endpoint, a model or a connector. */
   inferenceId: string;
 }

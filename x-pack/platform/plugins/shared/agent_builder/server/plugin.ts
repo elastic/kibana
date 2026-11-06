@@ -492,7 +492,7 @@ export class AgentBuilderPlugin
         createModelProvider: modelProviderFactory,
       },
       decisions: {
-        decide: decisions.decide,
+        decide: decisions.decide.bind(decisions),
       },
       conversations: {
         getScopedClient: async ({ request }) => {
