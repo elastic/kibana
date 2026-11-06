@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import { HYPOTHESES_ATTACHMENT_TYPE } from '@kbn/agentic-investigations-plugin/common';
 import type { NightshiftTelemetryClient } from '../telemetry';
 import { classifyOnlineEvalsRoundStepDefinition } from './classify_online_evals_round';
 
@@ -17,6 +18,22 @@ jest.mock('@kbn/workflows-extensions/server', () => ({
 const RUN_STARTED_AT = '2026-10-27T12:00:00.000Z';
 const BEFORE_RUN = '2026-10-27T11:00:00.000Z';
 const DURING_RUN = '2026-10-27T12:00:05.000Z';
+const END_OF_ROUND_1 = '2026-10-27T11:05:00.000Z';
+const END_OF_RUN = '2026-10-27T12:05:00.000Z';
+
+const hypotheses = (...versions: Array<[at: string, status: string]>) => [
+  {
+    type: HYPOTHESES_ATTACHMENT_TYPE,
+    versions: versions.map(([at, status]) => ({
+      created_at: at,
+      data: { hypotheses: [{ candidate: 'Gateway pool exhaustion', status }] },
+    })),
+  },
+];
+const recoveryRounds = [
+  { id: 'round-1', started_at: BEFORE_RUN, steps: [] },
+  { id: 'round-2', started_at: DURING_RUN, steps: [] },
+];
 
 const request = {} as KibanaRequest;
 const createContext = (input: Record<string, unknown>) =>
@@ -34,16 +51,18 @@ const createContext = (input: Record<string, unknown>) =>
 
 const setup = ({
   rounds = [{ id: 'round-1', started_at: DURING_RUN, steps: [] }],
+  attachments,
   paused = false,
   evalsAvailable = true,
   agentBuilderAvailable = true,
 }: {
   rounds?: Array<{ id: string; started_at: string; steps: unknown[] }>;
+  attachments?: ReturnType<typeof hypotheses>;
   paused?: boolean;
   evalsAvailable?: boolean;
   agentBuilderAvailable?: boolean;
 } = {}) => {
-  const get = jest.fn().mockResolvedValue({ id: 'inv-1', rounds });
+  const get = jest.fn().mockResolvedValue({ id: 'inv-1', rounds, attachments });
   const getScopedClient = jest.fn().mockResolvedValue({ get });
   const isPaused = jest.fn().mockReturnValue(paused);
   const reportOnlineEvalsStepFailed = jest.fn();
@@ -77,6 +96,7 @@ describe('classifyOnlineEvalsRoundStepDefinition', () => {
         should_score: true,
         round_kind: 'initial',
         round_id: 'round-1',
+        root_cause_outcome: 'unknown',
       },
     });
     expect(getScopedClient).toHaveBeenCalledWith({ request });
@@ -96,17 +116,32 @@ describe('classifyOnlineEvalsRoundStepDefinition', () => {
         should_score: false,
         round_kind: 'follow_up',
         round_id: 'round-2',
+        root_cause_outcome: 'unknown',
         skip_reason: 'follow_up_not_scored',
       },
     });
   });
 
-  it('skips an alert recovery until its verdict is recorded as a field', async () => {
+  it('scores an alert recovery that leaves the root cause confirmed', async () => {
     const { run } = setup({
-      rounds: [
-        { id: 'round-1', started_at: BEFORE_RUN, steps: [] },
-        { id: 'round-2', started_at: DURING_RUN, steps: [] },
-      ],
+      rounds: recoveryRounds,
+      attachments: hypotheses([END_OF_ROUND_1, 'confirmed'], [END_OF_RUN, 'confirmed']),
+    });
+
+    await expect(run({ follow_up: 'alert_recovered' })).resolves.toEqual({
+      output: {
+        should_score: true,
+        round_kind: 'alert_recovery',
+        round_id: 'round-2',
+        root_cause_outcome: 'unchanged',
+      },
+    });
+  });
+
+  it('skips an alert recovery that leaves no confirmed root cause to grade against', async () => {
+    const { run } = setup({
+      rounds: recoveryRounds,
+      attachments: hypotheses([END_OF_ROUND_1, 'confirmed'], [END_OF_RUN, 'dismissed']),
     });
 
     await expect(run({ follow_up: 'alert_recovered' })).resolves.toEqual({
@@ -114,7 +149,24 @@ describe('classifyOnlineEvalsRoundStepDefinition', () => {
         should_score: false,
         round_kind: 'alert_recovery',
         round_id: 'round-2',
-        skip_reason: 'recovery_verdict_unavailable',
+        root_cause_outcome: 'withdrawn',
+        skip_reason: 'recovery_unresolved',
+      },
+    });
+  });
+
+  it('scores an alert recovery the recorder wrote no hypotheses for, for the judges to decide', async () => {
+    const { run } = setup({
+      rounds: recoveryRounds,
+      attachments: hypotheses([END_OF_ROUND_1, 'investigating']),
+    });
+
+    await expect(run({ follow_up: 'alert_recovered' })).resolves.toEqual({
+      output: {
+        should_score: true,
+        round_kind: 'alert_recovery',
+        round_id: 'round-2',
+        root_cause_outcome: 'unknown',
       },
     });
   });
