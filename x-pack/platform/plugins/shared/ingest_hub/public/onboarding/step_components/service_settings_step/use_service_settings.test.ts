@@ -776,6 +776,39 @@ describe('getIncompleteInstances — required set follows the matrix view', () =
     }
   );
 
+  it('does not require a source for a never-configured data stream the manifest disables by default', () => {
+    // Bedrock: metrics streams on by default, the CloudWatch log stream off. Before the flyout is
+    // ever saved, the log stream must not count as active.
+    const optionalVar = (name: string) => ({
+      name,
+      type: 'text',
+      required: false,
+      show_user: true,
+    });
+    const logVars = {
+      'aws-cloudwatch': {
+        log_group_arn: optionalVar('log_group_arn'),
+        log_group_name: optionalVar('log_group_name'),
+      },
+    };
+    const bedrock = {
+      ...base,
+      dataStreams: ['guardrails', 'invocation'],
+      inputs: ['aws-cloudwatch'],
+      varDefsByInput: logVars,
+      varDefsByDataStream: {
+        guardrails: { inputs: ['aws-cloudwatch'], defaultEnabledInputs: ['aws-cloudwatch'] },
+        invocation: {
+          inputs: ['aws-cloudwatch'],
+          defaultEnabledInputs: [],
+          varDefsByInput: logVars,
+        },
+      },
+    } as unknown as AwsServiceMatrixEntry;
+
+    expect(getIncompleteInstances(instances, {}, new Map([['cloudtrail', bedrock]]))).toEqual([]);
+  });
+
   it('under ECF, ignores a stored input ECF cannot route and requires a supported one', () => {
     // WAF: agent-based allows CloudWatch, ECF routes S3 only (ecfInputs). A CloudWatch-only
     // selection left over from agent-based must not count as a complete ECF config.

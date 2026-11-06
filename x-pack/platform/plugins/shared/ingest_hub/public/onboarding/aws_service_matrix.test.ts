@@ -11,6 +11,7 @@ import {
   AWS_SERVICES_STATIC,
   applyDeploymentMethodView,
   buildAwsServiceMatrix,
+  getDefaultEnabledDataStreams,
   makeDsView,
 } from './aws_service_matrix';
 
@@ -853,6 +854,49 @@ describe('AWS service matrix', () => {
         AWS_SERVICES_STATIC.filter((e) => e.id === 'waf_otel') as any
       );
       expect(applyDeploymentMethodView(wafOtel, 'agent_based').settingsScope).toBe('ecf');
+    });
+  });
+
+  describe('getDefaultEnabledDataStreams', () => {
+    const multiStream = (overrides: Partial<AwsServiceMatrixEntry> = {}) =>
+      ({
+        id: 'svc',
+        dataStreams: ['metrics_ds', 's3_ds', 'cw_ds'],
+        defaultEnabledInputs: ['aws/metrics', 'aws-s3', 'aws-cloudwatch'],
+        varDefsByDataStream: {
+          metrics_ds: { inputs: ['aws/metrics'], defaultEnabledInputs: ['aws/metrics'] },
+          s3_ds: { inputs: ['aws-s3'], defaultEnabledInputs: ['aws-s3'] },
+          cw_ds: { inputs: ['aws-cloudwatch'], defaultEnabledInputs: [] },
+        },
+        ...overrides,
+      } as unknown as AwsServiceMatrixEntry);
+
+    it('keeps the only data stream of a single-stream service', () => {
+      const single = multiStream({ dataStreams: ['cw_ds'] });
+      expect(getDefaultEnabledDataStreams(single)).toEqual(['cw_ds']);
+    });
+
+    it('keeps only the data streams the manifest enables by default', () => {
+      expect(getDefaultEnabledDataStreams(multiStream())).toEqual(['metrics_ds', 's3_ds']);
+    });
+
+    it('returns none when the manifest disables every data stream, as the flyout shows', () => {
+      const allOff = multiStream({
+        varDefsByDataStream: {
+          s3_ds: { inputs: ['aws-s3'], defaultEnabledInputs: [] },
+          cw_ds: { inputs: ['aws-cloudwatch'], defaultEnabledInputs: [] },
+        } as unknown as AwsServiceMatrixEntry['varDefsByDataStream'],
+        dataStreams: ['s3_ds', 'cw_ds'],
+      });
+      expect(getDefaultEnabledDataStreams(allOff)).toEqual([]);
+    });
+
+    it('drops a stream whose defaults ECF cannot route in the ECF view', () => {
+      const ecfView = multiStream({
+        settingsScope: 'ecf',
+        defaultEnabledInputs: ['aws-s3'],
+      });
+      expect(getDefaultEnabledDataStreams(ecfView)).toEqual(['s3_ds']);
     });
   });
 });

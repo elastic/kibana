@@ -7,7 +7,7 @@
 
 import type { RenderIacTemplateIntegration } from '@kbn/fleet-plugin/public';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import { makeDsView } from '../../aws_service_matrix';
+import { getDefaultEnabledDataStreams, makeDsView } from '../../aws_service_matrix';
 import type { AuthenticateAndDeployStepState } from '../../onboarding_flow_context';
 import type { CredentialVarName, ExistingSecretRefs, SecretRefValue } from './secret_refs';
 import {
@@ -164,7 +164,8 @@ function resolveServiceVars(
   instanceId: string = service.id
 ): ServiceVars {
   const rawVars = storedServiceVars[instanceId] ?? storedServiceVars[service.id];
-  if (!rawVars) return { enabledDataStreams: service.dataStreams, varsByDataStream: {} };
+  if (!rawVars)
+    return { enabledDataStreams: getDefaultEnabledDataStreams(service), varsByDataStream: {} };
   // Guard against stale session state: filter out dsIds the current service no longer has.
   // If filtering removes every ID from a non-empty original the user hadn't explicitly cleared,
   // fall back to service defaults — an empty list is the "intentional opt-out" sentinel.
