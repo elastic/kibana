@@ -195,6 +195,9 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       savedSelections: packagePolicyInputStream.var_group_selections,
       isAgentlessEnabled,
       onSelectionsChange: updatePackagePolicyInputStream,
+      // Clear the plain-text vars of deselected options on a stream-level
+      // selection change, so stale values don't leak into the agent template
+      streamVars: packagePolicyInputStream.vars,
     });
 
     // Use stream-level selections, or fall back to package-level prop
