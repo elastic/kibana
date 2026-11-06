@@ -6,10 +6,10 @@
  */
 
 import {
-  managedTailSampling,
-  managedTailSamplingCreateSchema,
-  managedTailSamplingForwardCompatibilitySchema,
-} from './managed_tail_sampling';
+  tailSampling,
+  tailSamplingCreateSchema,
+  tailSamplingForwardCompatibilitySchema,
+} from './tail_sampling';
 
 const validAttributes = {
   enabled: true,
@@ -17,41 +17,39 @@ const validAttributes = {
   policiesHash: 'abc123',
 };
 
-describe('managedTailSampling saved object type', () => {
+describe('tailSampling saved object type', () => {
   it('is one hidden document for the whole project', () => {
-    expect(managedTailSampling.name).toBe('managed-tail-sampling');
-    expect(managedTailSampling.hidden).toBe(true);
-    expect(managedTailSampling.namespaceType).toBe('agnostic');
+    expect(tailSampling.name).toBe('tail-sampling');
+    expect(tailSampling.hidden).toBe(true);
+    expect(tailSampling.namespaceType).toBe('agnostic');
   });
 
   it('does not map any attribute', () => {
-    expect(managedTailSampling.mappings).toEqual({ dynamic: false, properties: {} });
+    expect(tailSampling.mappings).toEqual({ dynamic: false, properties: {} });
   });
 
   describe('create schema', () => {
     it('accepts a valid document with and without updatedBy', () => {
-      expect(() => managedTailSamplingCreateSchema.validate(validAttributes)).not.toThrow();
+      expect(() => tailSamplingCreateSchema.validate(validAttributes)).not.toThrow();
       expect(() =>
-        managedTailSamplingCreateSchema.validate({ ...validAttributes, updatedBy: 'elastic' })
+        tailSamplingCreateSchema.validate({ ...validAttributes, updatedBy: 'elastic' })
       ).not.toThrow();
     });
 
     it.each(['enabled', 'policiesJson', 'policiesHash'])('rejects a missing %s', (key) => {
       const { [key]: _removed, ...rest } = validAttributes as Record<string, unknown>;
-      expect(() => managedTailSamplingCreateSchema.validate(rest)).toThrow();
+      expect(() => tailSamplingCreateSchema.validate(rest)).toThrow();
     });
 
     it('rejects unknown keys', () => {
-      expect(() =>
-        managedTailSamplingCreateSchema.validate({ ...validAttributes, extra: 1 })
-      ).toThrow();
+      expect(() => tailSamplingCreateSchema.validate({ ...validAttributes, extra: 1 })).toThrow();
     });
   });
 
   describe('forwardCompatibility schema', () => {
     it('drops unknown keys written by a newer Kibana instead of throwing', () => {
       expect(
-        managedTailSamplingForwardCompatibilitySchema.validate({
+        tailSamplingForwardCompatibilitySchema.validate({
           ...validAttributes,
           fromNewerVersion: 'x',
         })
