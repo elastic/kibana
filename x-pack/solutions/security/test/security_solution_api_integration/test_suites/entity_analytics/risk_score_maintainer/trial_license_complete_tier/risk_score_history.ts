@@ -104,9 +104,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('@ess @serverless @skipInServerlessMKI Risk Score History API', () => {
     before(async () => {
-      // Installs the entity store, which runs maintainer setup and creates the risk score data stream.
-      await entityStoreUtils.installEntityStoreV2();
-      await maintainerRoutes.initMaintainers();
+      // The history route reads the risk score data stream. There are no source
+      // logs to extract, so do not wait for entity store entities. Install stops
+      // the maintainer before setup, so one synchronous run creates the stream.
+      await entityStoreUtils.installEntityStoreV2({
+        entityTypes: ['host'],
+        waitForEntities: false,
+      });
+      await maintainerRoutes.runMaintainerSync('risk-score');
       await seedRiskScoreDoc({
         timestamp: '2026-01-01T00:00:00.000Z',
         scoreNorm: 21,
