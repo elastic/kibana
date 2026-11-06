@@ -207,7 +207,7 @@ export class PackageInstaller {
   }): Promise<ProductName[]> {
     const { inferenceId, forceUpdate } = params;
     const [repositoryVersions, installStatuses] = await Promise.all([
-      fetchArtifactVersions(this.getArtifactRepositoryOptions()),
+      this.fetchArtifactVersions(inferenceId),
       this.productDocClient.getInstallationStatusOrThrow({ inferenceId }),
     ]);
     const toUpdate: ProductName[] = [];
@@ -236,7 +236,10 @@ export class PackageInstaller {
         );
         continue;
       }
-      if (productState.version !== installableVersion || Boolean(forceUpdate)) {
+      if (
+        !isInstalledVersionCurrent(productState.version, installableVersion) ||
+        Boolean(forceUpdate)
+      ) {
         this.log.info(
           `Updating product [${productName}] from version [${productState.version}] to version [${installableVersion}]`
         );
@@ -288,7 +291,7 @@ export class PackageInstaller {
   }): Promise<boolean> {
     const { productName, inferenceId } = params;
     const [repositoryVersions, inferenceInfo] = await Promise.all([
-      fetchArtifactVersions(this.getArtifactRepositoryOptions()),
+      this.fetchArtifactVersions(inferenceId ?? this.elserInferenceId),
       this.getInferenceInfo(inferenceId),
     ]);
     const availableVersions = repositoryVersions[productName];
@@ -322,7 +325,7 @@ export class PackageInstaller {
   }): Promise<boolean> {
     const { productName, inferenceId, since } = params;
     const [repositoryVersions, installStatuses] = await Promise.all([
-      fetchArtifactVersions(this.getArtifactRepositoryOptions()),
+      this.fetchArtifactVersions(inferenceId),
       this.productDocClient.getInstallationStatusOrThrow({ inferenceId }),
     ]);
     const availableVersions = repositoryVersions[productName];
@@ -373,7 +376,7 @@ export class PackageInstaller {
   }): Promise<boolean> {
     const { productName, inferenceId, forceUpdate, since } = params;
     const [repositoryVersions, installStatuses] = await Promise.all([
-      fetchArtifactVersions(this.getArtifactRepositoryOptions()),
+      this.fetchArtifactVersions(inferenceId),
       this.productDocClient.getInstallationStatusOrThrow({ inferenceId }),
     ]);
     const productState = installStatuses[productName];
@@ -446,7 +449,7 @@ export class PackageInstaller {
   }): Promise<void> {
     const { inferenceId, forceUpdate, since } = params;
     const [repositoryVersions, openapiSpecInstallStatus] = await Promise.all([
-      fetchArtifactVersions(this.getArtifactRepositoryOptions()),
+      this.fetchArtifactVersions(inferenceId),
       this.productDocClient.getOpenapiSpecInstallationStatus({ inferenceId }),
     ]);
     const openAPISpecVersionToUpgradeTo = selectVersion(
@@ -1202,7 +1205,7 @@ export class PackageInstaller {
     let fallbackVersionsLoaded = false;
 
     if (!explicitVersionProvided) {
-      const availableVersions = await this.fetchArtifactVersionsWithRetry();
+      const availableVersions = await this.fetchArtifactVersionsWithRetry(inferenceId);
       candidateVersions.push(...getPreviousVersions(selectedVersion, availableVersions.openapi));
       fallbackVersionsLoaded = true;
     }
@@ -1231,7 +1234,7 @@ export class PackageInstaller {
         lastMissingError = error as Error;
         if (explicitVersionProvided && !fallbackVersionsLoaded) {
           try {
-            const availableVersions = await this.fetchArtifactVersionsWithRetry();
+            const availableVersions = await this.fetchArtifactVersionsWithRetry(inferenceId);
             candidateVersions.push(
               ...getPreviousVersions(selectedVersion, availableVersions.openapi)
             );
@@ -1285,11 +1288,15 @@ export class PackageInstaller {
     );
   }
 
-  private async fetchArtifactVersionsWithRetry(retries = 3) {
+  private fetchArtifactVersions(inferenceId: string) {
+    return fetchArtifactVersions({ ...this.getArtifactRepositoryOptions(), inferenceId });
+  }
+
+  private async fetchArtifactVersionsWithRetry(inferenceId: string, retries = 3) {
     let lastError: Error | undefined;
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
-        return await fetchArtifactVersions(this.getArtifactRepositoryOptions());
+        return await this.fetchArtifactVersions(inferenceId);
       } catch (error) {
         lastError = error as Error;
         if (attempt < retries) {
@@ -1350,7 +1357,7 @@ const isUpdateNeeded = ({
   forceUpdate?: boolean;
   since?: Date;
 }): boolean => {
-  if (version !== selectedVersion) {
+  if (!isInstalledVersionCurrent(version, selectedVersion)) {
     return true;
   }
   if (!forceUpdate) {
@@ -1362,6 +1369,27 @@ const isUpdateNeeded = ({
     updatedAt !== undefined &&
     new Date(updatedAt).getTime() > since.getTime();
   return !refreshedSinceRequest;
+};
+
+// A `latest-<timestamp>` version is the upload date of the artifact that was installed. Installs that
+// predate the per-inference-ID versioning recorded the newest upload across all variants, so an
+// installed version that is not older than the selected one already holds that artifact's content.
+const isInstalledVersionCurrent = (
+  installedVersion: string | undefined,
+  selectedVersion: string
+): boolean => {
+  if (installedVersion === selectedVersion) {
+    return true;
+  }
+  const installedTimestamp = installedVersion
+    ? extractLatestVersionTimestamp(installedVersion)
+    : undefined;
+  const selectedTimestamp = extractLatestVersionTimestamp(selectedVersion);
+  return (
+    installedTimestamp !== undefined &&
+    selectedTimestamp !== undefined &&
+    installedTimestamp >= selectedTimestamp
+  );
 };
 
 const selectVersion = (

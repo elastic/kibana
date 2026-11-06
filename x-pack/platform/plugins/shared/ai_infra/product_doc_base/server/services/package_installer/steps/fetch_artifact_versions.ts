@@ -7,6 +7,7 @@
 
 import {
   DocumentationProduct,
+  getArtifactName,
   getSecurityLabsArtifactName,
   parseArtifactName,
   parseSecurityLabsArtifactName,
@@ -26,12 +27,22 @@ const normalizeArtifactKey = (artifactName: string): string => {
   return withExtension.toLowerCase();
 };
 
+/**
+ * Fetches the available artifact versions per product.
+ *
+ * Versioned (semver) entries are listed whatever the inference ID they were published for: the
+ * installer probes the artifact of the requested inference ID and falls back to previous versions.
+ * `latest` entries are versioned by the upload date of the artifact, so only the artifact published
+ * for `inferenceId` counts: a republish of another variant must not trigger a re-download.
+ */
 export const fetchArtifactVersions = async ({
   artifactRepositoryUrl,
   artifactRepositoryProxyUrl,
+  inferenceId,
 }: {
   artifactRepositoryUrl: string;
   artifactRepositoryProxyUrl?: string;
+  inferenceId: string;
 }): Promise<ArtifactAvailableVersions> => {
   const parsedUrl = new URL(artifactRepositoryUrl);
 
@@ -69,16 +80,22 @@ export const fetchArtifactVersions = async ({
         const artifactName = contentEntry.Key[0];
         const dateModified = contentEntry.LastModified?.[0];
         const parsed = parseArtifactName(artifactName);
-        if (parsed) {
-          const { productName, productVersion } = parsed;
-          record[productName]!.push(
-            // If productVersion is `latest`, we want to keep track of the date the artifact was uploaded to bucket
-            // as that's our versioning for latest updated
-            productVersion === LATEST_PRODUCT_VERSION
-              ? // so "latest" ->  "latest-2026-01-27T23:25:54.727Z"
-                `${productVersion}-${dateModified}`
-              : productVersion
-          );
+        if (!parsed) {
+          return;
+        }
+        const { productName, productVersion } = parsed;
+        if (productVersion !== LATEST_PRODUCT_VERSION) {
+          record[productName].push(productVersion);
+          return;
+        }
+        const expectedName = getArtifactName({
+          productName,
+          productVersion: LATEST_PRODUCT_VERSION,
+          inferenceId,
+        });
+        if (normalizeArtifactKey(artifactName) === expectedName) {
+          // "latest" -> "latest-2026-01-27T23:25:54.727Z": the upload date versions the artifact
+          record[productName].push(`${productVersion}-${dateModified}`);
         }
       });
 

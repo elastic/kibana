@@ -453,6 +453,38 @@ describe('PackageInstaller', () => {
       expect(packageInstaller.installPackage).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith('No version found for product [kibana]');
     });
+
+    it('lists the versions of the default ELSER inference ID when none is given', async () => {
+      fetchArtifactVersionsMock.mockResolvedValue({ kibana: ['8.16'] });
+      jest.spyOn(packageInstaller, 'installPackage').mockResolvedValue(undefined as never);
+
+      await packageInstaller.installProduct({ productName: 'kibana' });
+
+      expect(fetchArtifactVersionsMock).toHaveBeenCalledWith({
+        artifactRepositoryUrl,
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+    });
+
+    it('lists the versions of the given inference ID', async () => {
+      fetchArtifactVersionsMock.mockResolvedValue({ kibana: ['8.16'] });
+      esClient.inference.get.mockResolvedValue({
+        endpoints: [
+          { inference_id: '.jina-embeddings-v5-text-small', task_type: 'text_embedding' },
+        ],
+      } as never);
+      jest.spyOn(packageInstaller, 'installPackage').mockResolvedValue(undefined as never);
+
+      await packageInstaller.installProduct({
+        productName: 'kibana',
+        inferenceId: '.jina-embeddings-v5-text-small',
+      });
+
+      expect(fetchArtifactVersionsMock).toHaveBeenCalledWith({
+        artifactRepositoryUrl,
+        inferenceId: '.jina-embeddings-v5-text-small',
+      });
+    });
   });
 
   describe('purgeArtifactsFolder', () => {
@@ -478,6 +510,10 @@ describe('PackageInstaller', () => {
       } as never);
 
       await expect(packageInstaller.installProductIfNeeded(params)).resolves.toBe(true);
+      expect(fetchArtifactVersionsMock).toHaveBeenCalledWith({
+        artifactRepositoryUrl,
+        inferenceId: '.elser',
+      });
       expect(packageInstaller.installPackage).toHaveBeenCalledWith({
         productName: 'kibana',
         productVersion: '8.16',
@@ -572,6 +608,10 @@ describe('PackageInstaller', () => {
       } as never);
 
       await expect(packageInstaller.updateProductIfNeeded(params)).resolves.toBe(true);
+      expect(fetchArtifactVersionsMock).toHaveBeenCalledWith({
+        artifactRepositoryUrl,
+        inferenceId: '.elser',
+      });
       expect(packageInstaller.installPackage).toHaveBeenCalledWith({
         productName: 'kibana',
         productVersion: '8.16',
@@ -713,6 +753,10 @@ describe('PackageInstaller', () => {
       });
 
       expect(products).toEqual(['kibana']);
+      expect(fetchArtifactVersionsMock).toHaveBeenCalledWith({
+        artifactRepositoryUrl,
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
     });
 
     it('returns every installed product when forceUpdate is set', async () => {
@@ -781,6 +825,10 @@ describe('PackageInstaller', () => {
       });
 
       expect(packageInstaller.installOpenAPISpec).not.toHaveBeenCalled();
+      expect(fetchArtifactVersionsMock).toHaveBeenCalledWith({
+        artifactRepositoryUrl,
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
     });
 
     it('installs when the installed version differs from the selected version', async () => {
@@ -897,6 +945,7 @@ describe('PackageInstaller', () => {
       expect(fetchArtifactVersionsMock).toHaveBeenCalledWith({
         artifactRepositoryUrl,
         artifactRepositoryProxyUrl,
+        inferenceId: defaultInferenceEndpoints.ELSER,
       });
     });
 
@@ -1168,6 +1217,149 @@ describe('PackageInstaller', () => {
       await expect(
         packageInstaller.getProductsToUpdate({ inferenceId: EIS_ELSER })
       ).resolves.toEqual([]);
+    });
+
+    describe('re-download decision per inference ID', () => {
+      const JINA = defaultInferenceEndpoints.JINAv5;
+      const JINA_UPLOAD = 'latest-2026-10-12T20:25:34.221Z';
+      const LATER_UPLOAD = 'latest-2026-11-20T08:00:00.000Z';
+
+      it('lists the `latest` versions of the inference ID being updated', async () => {
+        fetchArtifactVersionsMock.mockResolvedValue({ kibana: [JINA_UPLOAD], openapi: [] });
+        productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
+          kibana: { status: 'installed', version: JINA_UPLOAD },
+        } as never);
+
+        await packageInstaller.getProductsToUpdate({ inferenceId: JINA });
+
+        expect(fetchArtifactVersionsMock).toHaveBeenCalledWith({
+          artifactRepositoryUrl,
+          inferenceId: JINA,
+        });
+      });
+
+      it('does not re-download when the artifact of the inference ID is unchanged', async () => {
+        fetchArtifactVersionsMock.mockResolvedValue({ kibana: [JINA_UPLOAD] });
+        productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
+          kibana: { status: 'installed', version: JINA_UPLOAD },
+        } as never);
+
+        await expect(packageInstaller.getProductsToUpdate({ inferenceId: JINA })).resolves.toEqual(
+          []
+        );
+        await expect(
+          packageInstaller.updateProductIfNeeded({
+            productName: 'kibana',
+            inferenceId: JINA,
+            since: new Date('2026-11-01T00:00:00.000Z'),
+          })
+        ).resolves.toBe(false);
+        expect(downloadToDiskMock).not.toHaveBeenCalled();
+      });
+
+      it('re-downloads when the artifact of the inference ID was republished', async () => {
+        fetchArtifactVersionsMock.mockResolvedValue({ kibana: [LATER_UPLOAD] });
+        productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
+          kibana: { status: 'installed', version: JINA_UPLOAD },
+        } as never);
+        esClient.inference.get.mockResolvedValue({
+          endpoints: [{ inference_id: JINA, task_type: 'text_embedding', service: 'elastic' }],
+        } as never);
+
+        await expect(packageInstaller.getProductsToUpdate({ inferenceId: JINA })).resolves.toEqual([
+          'kibana',
+        ]);
+        await expect(
+          packageInstaller.updateProductIfNeeded({
+            productName: 'kibana',
+            inferenceId: JINA,
+            since: new Date('2026-11-01T00:00:00.000Z'),
+          })
+        ).resolves.toBe(true);
+        expect(downloadToDiskMock).toHaveBeenCalledTimes(1);
+        expect(downloadToDiskMock.mock.calls[0][0]).toBe(
+          `${artifactRepositoryUrl}/kb-product-doc-kibana-latest--${JINA}.zip`
+        );
+        expect(productDocClient.setInstallationStarted).toHaveBeenCalledWith(
+          expect.objectContaining({ productVersion: LATER_UPLOAD, inferenceId: JINA })
+        );
+      });
+
+      it('does not re-download when the installed version was recorded from a newer variant upload', async () => {
+        fetchArtifactVersionsMock.mockResolvedValue({
+          kibana: [JINA_UPLOAD],
+          openapi: [JINA_UPLOAD],
+        });
+        productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
+          kibana: { status: 'installed', version: LATER_UPLOAD },
+        } as never);
+        productDocClient.getOpenapiSpecInstallationStatus.mockResolvedValue({
+          status: 'installed',
+          version: LATER_UPLOAD,
+        });
+        jest.spyOn(packageInstaller, 'installOpenAPISpec').mockResolvedValue(undefined);
+
+        await expect(packageInstaller.getProductsToUpdate({ inferenceId: JINA })).resolves.toEqual(
+          []
+        );
+        await expect(
+          packageInstaller.updateProductIfNeeded({
+            productName: 'kibana',
+            inferenceId: JINA,
+            since: new Date('2026-11-01T00:00:00.000Z'),
+          })
+        ).resolves.toBe(false);
+        await packageInstaller.ensureOpenApiSpecUpToDate({ inferenceId: JINA });
+        expect(downloadToDiskMock).not.toHaveBeenCalled();
+        expect(packageInstaller.installOpenAPISpec).not.toHaveBeenCalled();
+      });
+
+      it('still re-downloads a forced update of an unchanged artifact', async () => {
+        fetchArtifactVersionsMock.mockResolvedValue({ kibana: [JINA_UPLOAD] });
+        productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
+          kibana: {
+            status: 'installed',
+            version: JINA_UPLOAD,
+            updatedAt: '2026-10-13T00:00:00.000Z',
+          },
+        } as never);
+        jest.spyOn(packageInstaller, 'installPackage').mockResolvedValue(undefined as never);
+
+        await expect(
+          packageInstaller.getProductsToUpdate({ inferenceId: JINA, forceUpdate: true })
+        ).resolves.toEqual(['kibana']);
+        await expect(
+          packageInstaller.updateProductIfNeeded({
+            productName: 'kibana',
+            inferenceId: JINA,
+            forceUpdate: true,
+            since: new Date('2026-11-01T00:00:00.000Z'),
+          })
+        ).resolves.toBe(true);
+      });
+
+      it('reinstalls the OpenAPI spec only when the artifact of the inference ID was republished', async () => {
+        jest.spyOn(packageInstaller, 'installOpenAPISpec').mockResolvedValue(undefined);
+        productDocClient.getOpenapiSpecInstallationStatus.mockResolvedValue({
+          status: 'installed',
+          version: JINA_UPLOAD,
+        });
+
+        fetchArtifactVersionsMock.mockResolvedValue({ openapi: [JINA_UPLOAD] });
+        await packageInstaller.ensureOpenApiSpecUpToDate({ inferenceId: JINA });
+        expect(fetchArtifactVersionsMock).toHaveBeenCalledWith({
+          artifactRepositoryUrl,
+          inferenceId: JINA,
+        });
+        expect(packageInstaller.installOpenAPISpec).not.toHaveBeenCalled();
+
+        fetchArtifactVersionsMock.mockResolvedValue({ openapi: [LATER_UPLOAD] });
+        await packageInstaller.ensureOpenApiSpecUpToDate({ inferenceId: JINA });
+        expect(packageInstaller.installOpenAPISpec).toHaveBeenCalledWith({
+          version: LATER_UPLOAD,
+          inferenceId: JINA,
+        });
+      });
     });
 
     it('installs product documentation with an EIS endpoint', async () => {
