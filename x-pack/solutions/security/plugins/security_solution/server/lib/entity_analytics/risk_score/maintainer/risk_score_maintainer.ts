@@ -30,8 +30,8 @@ import {
   getDefaultRiskEngineConfiguration,
 } from '../../risk_engine/utils/saved_object_configuration';
 import {
-  buildScopedInternalSavedObjectsClientUnsafe,
-  buildInternalSavedObjectsClientUnsafe,
+  buildNamespacedInternalSavedObjectsClientUnsafe,
+  buildInternalSavedObjectsClientWithoutSpacesUnsafe,
 } from '../tasks/helpers';
 import { getIsIdBasedRiskScoringEnabled } from '../is_id_based_risk_scoring_enabled';
 import { getIndexPatternDataStream } from '../configurations';
@@ -95,8 +95,8 @@ interface InitializedRunContext {
   coreStart: CoreStart;
   pluginsStart: PluginsStart;
   esClient: CoreStart['elasticsearch']['client']['asInternalUser'];
-  soClient: ReturnType<typeof buildScopedInternalSavedObjectsClientUnsafe>;
-  internalSoClient: ReturnType<typeof buildInternalSavedObjectsClientUnsafe>;
+  soClient: ReturnType<typeof buildNamespacedInternalSavedObjectsClientUnsafe>;
+  internalSoClient: ReturnType<typeof buildInternalSavedObjectsClientWithoutSpacesUnsafe>;
   riskScoreDataClient: RiskScoreDataClient;
   lookupIndex: string;
 }
@@ -140,7 +140,7 @@ export const createRiskScoreMaintainer = ({
       const namespace = status.metadata.namespace;
       const [coreStart] = await getStartServices();
       const esClient = coreStart.elasticsearch.client.asInternalUser;
-      const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
+      const soClient = buildNamespacedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
 
       const riskScoreDataClient = new RiskScoreDataClient({
         logger,
@@ -382,8 +382,8 @@ const initializeRunContext = async ({
 }): Promise<InitializedRunContext> => {
   const [coreStart, pluginsStart] = await getStartServices();
   const esClient = coreStart.elasticsearch.client.asInternalUser;
-  const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
-  const internalSoClient = buildInternalSavedObjectsClientUnsafe({ coreStart });
+  const soClient = buildNamespacedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
+  const internalSoClient = buildInternalSavedObjectsClientWithoutSpacesUnsafe({ coreStart });
   const riskScoreDataClient = new RiskScoreDataClient({
     logger,
     kibanaVersion,
@@ -494,8 +494,8 @@ const loadRunConfiguration = async ({
   experimentalFeatures,
 }: {
   coreStart: CoreStart;
-  soClient: ReturnType<typeof buildScopedInternalSavedObjectsClientUnsafe>;
-  internalSoClient: ReturnType<typeof buildInternalSavedObjectsClientUnsafe>;
+  soClient: ReturnType<typeof buildNamespacedInternalSavedObjectsClientUnsafe>;
+  internalSoClient: ReturnType<typeof buildInternalSavedObjectsClientWithoutSpacesUnsafe>;
   esClient: CoreStart['elasticsearch']['client']['asInternalUser'];
   riskScoreDataClient: RiskScoreDataClient;
   namespace: string;
