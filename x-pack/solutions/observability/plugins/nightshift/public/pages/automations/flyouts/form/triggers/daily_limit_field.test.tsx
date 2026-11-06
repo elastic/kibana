@@ -56,16 +56,15 @@ describe('DailyLimitField', () => {
     expect(onChange).toHaveBeenCalledWith('15');
   });
 
-  it('keeps the per-automation callout when the form does not opt in to the deployment limit', () => {
+  it('shows no deployment limit callout for an automation that has no usage yet', () => {
     (useGlobalLimit as jest.Mock).mockReturnValue({ isReached: true, limit: 6 });
     render(
       <I18nProvider>
-        <DailyLimitField value="10" helpText="Help text" onChange={jest.fn()} usedToday={10} />
+        <DailyLimitField value="10" helpText="Help text" onChange={jest.fn()} />
       </I18nProvider>
     );
 
     expect(screen.queryByTestId('automationsGlobalLimitBanner')).not.toBeInTheDocument();
-    expect(screen.getByTestId('automationDailyLimitReachedCallout')).toBeInTheDocument();
   });
 
   it('replaces the per-automation callout with the deployment limit callout', () => {
@@ -76,13 +75,7 @@ describe('DailyLimitField', () => {
     });
     render(
       <I18nProvider>
-        <DailyLimitField
-          value="10"
-          helpText="Help text"
-          onChange={jest.fn()}
-          usedToday={10}
-          showGlobalLimit
-        />
+        <DailyLimitField value="10" helpText="Help text" onChange={jest.fn()} usedToday={10} />
       </I18nProvider>
     );
 
