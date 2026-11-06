@@ -242,7 +242,7 @@ const AppGridPanel = ({
           </EuiToolTip>
           <EuiToolTip content={REMOVE_PANEL_LABEL} disableScreenReaderOutput>
             <EuiButtonIcon
-              iconType="trash"
+              iconType="minusCircle"
               color="text"
               aria-label={REMOVE_PANEL_LABEL}
               onClick={removePanel}
