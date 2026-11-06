@@ -120,7 +120,7 @@ export function OnboardingStepsCard({
                       ? euiTheme.colors.backgroundLightSuccess
                       : isCurrent
                       ? euiTheme.colors.backgroundLightPrimary
-                      : euiTheme.colors.backgroundBaseSubdued};
+                      : euiTheme.colors.backgroundBaseDisabled};
                     color: ${isComplete
                       ? euiTheme.colors.textSuccess
                       : isCurrent
@@ -137,7 +137,7 @@ export function OnboardingStepsCard({
                       flex-grow: 1;
                       min-height: ${euiTheme.size.m};
                       width: ${euiTheme.border.width.thin};
-                      background: ${euiTheme.colors.borderBaseSubdued};
+                      background: ${euiTheme.colors.borderBasePlain};
                     `}
                   />
                 )}

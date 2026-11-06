@@ -123,7 +123,7 @@ describe('AddConnectorFlyout', () => {
   });
 
   it('creates a connector of the type and assigns it to the agent', async () => {
-    const { getAddConnectorFlyout, agents } = setup();
+    const { getAddConnectorFlyout, agents, toasts } = setup();
     await waitFor(() => expect(screen.getByTestId('.github-create')).toBeEnabled());
 
     fireEvent.click(screen.getByTestId('.github-create'));
@@ -141,6 +141,7 @@ describe('AddConnectorFlyout', () => {
         connectorId: 'gh',
       })
     );
+    expect(toasts.addSuccess).toHaveBeenCalledWith({ title: 'gh connected' });
     expect(screen.getByTestId('nightshiftAddConnectorFlyout')).toBeInTheDocument();
   });
 

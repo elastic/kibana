@@ -104,7 +104,18 @@ export function mockKibanaServices({
       : fetchConnectors()
   );
   const http = { delete: jest.fn().mockResolvedValue({}) };
-  const toasts = { addSuccess: jest.fn(), addError: jest.fn() };
+  const toasts = {
+    addSuccess: jest.fn(),
+    addError: jest.fn(),
+    get$: jest.fn(() => ({
+      subscribe: (observer: { next?: (value: unknown[]) => void } | ((value: unknown[]) => void)) => {
+        const next = typeof observer === 'function' ? observer : observer.next;
+        next?.([]);
+        return { unsubscribe: jest.fn() };
+      },
+    })),
+    remove: jest.fn(),
+  };
   const getAddConnectorFlyout = jest.fn(() => <div data-test-subj="addConnectorFlyoutStub" />);
   const getEditConnectorFlyout = jest.fn(() => <div data-test-subj="editConnectorFlyoutStub" />);
   const navigateToUrl = jest.fn();

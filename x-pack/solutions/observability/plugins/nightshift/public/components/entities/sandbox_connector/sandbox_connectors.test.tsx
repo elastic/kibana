@@ -92,7 +92,22 @@ const setup = ({
     services: {
       http,
       agentBuilder: { agents },
-      notifications: { toasts: { addError, addSuccess } },
+      notifications: {
+        toasts: {
+          addError,
+          addSuccess,
+          get$: jest.fn(() => ({
+            subscribe: (
+              observer: { next?: (value: unknown[]) => void } | ((value: unknown[]) => void)
+            ) => {
+              const next = typeof observer === 'function' ? observer : observer.next;
+              next?.([]);
+              return { unsubscribe: jest.fn() };
+            },
+          })),
+          remove: jest.fn(),
+        },
+      },
       application: {
         capabilities: {
           actions: capabilities,
