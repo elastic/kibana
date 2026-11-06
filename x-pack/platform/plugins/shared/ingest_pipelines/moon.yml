@@ -22,7 +22,6 @@ dependsOn:
   - '@kbn/licensing-plugin'
   - '@kbn/features-plugin'
   - '@kbn/security-plugin'
-  - '@kbn/file-upload-plugin'
   - '@kbn/es-ui-shared-plugin'
   - '@kbn/kibana-react-plugin'
   - '@kbn/management-plugin'

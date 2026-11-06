@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import fileSaver from 'file-saver';
 
+import { PARSE_CSV_MAX_FILE_BYTES } from '../../../../common/constants';
 import type { Processor } from '../../../../common/types';
 import { FieldCopyAction } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
@@ -62,8 +63,6 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
   };
 
   const processFile = async (csv: File, action: FieldCopyAction) => {
-    const maxBytes = services.fileUpload.getMaxBytes();
-
     if (csv.size === 0) {
       setErrorInfo({
         title: i18n.translate(
@@ -76,7 +75,7 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
           defaultMessage: 'The file provided is empty.',
         }),
       });
-    } else if (csv.size > maxBytes) {
+    } else if (csv.size > PARSE_CSV_MAX_FILE_BYTES) {
       setErrorInfo({
         title: i18n.translate(
           'xpack.ingestPipelines.createFromCsv.processFile.fileTooLargeErrorTitle',
@@ -88,7 +87,7 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
           'xpack.ingestPipelines.createFromCsv.processFile.fileTooLargeError',
           {
             defaultMessage: 'File is greater than allowed size of {maxBytes} bytes.',
-            values: { maxBytes },
+            values: { maxBytes: PARSE_CSV_MAX_FILE_BYTES },
           }
         ),
       });
@@ -97,7 +96,7 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
         setIsLoading(true);
         setIsUploaded(false);
 
-        const fileContents = await services.fileReader.readFile(csv, maxBytes);
+        const fileContents = await services.fileReader.readFile(csv, PARSE_CSV_MAX_FILE_BYTES);
         const success = await fetchPipelineFromMapping(fileContents, action);
 
         setIsLoading(false);
