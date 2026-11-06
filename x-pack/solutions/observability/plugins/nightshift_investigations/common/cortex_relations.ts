@@ -68,13 +68,19 @@ const sectionRange = (lines: string[], heading: RegExp): [number, number] | unde
   return [start + 1, end === -1 ? lines.length : start + 1 + end];
 };
 
+/** The kinds a telemetry store can only be related by: where a component's data goes or comes from. */
+const TELEMETRY_KINDS: ReadonlySet<CortexRelationKind> = new Set(['publishes_to', 'reads_from']);
+
 const NODE_LINE = /^\s*[-*]\s+`?([^`\s:]+)`?/;
 
 /**
  * Removes the relation lines that make an ontology page misleading, whatever the model wrote: an
  * edge from a component to itself, a repeat of an edge, the reverse of an edge already stated (one
- * edge per pair, the first wins), and an edge or node that names an excluded component, such as a
- * telemetry integration that only holds a component's logs and is not part of the system's graph.
+ * edge per pair, the first wins), and an edge that only records where an excluded component's
+ * telemetry is stored. An excluded component, such as a telemetry integration, is not part of the
+ * system's graph, so a component "publishing to" it or "reading from" it is dropped, but a
+ * `depends_on`, `calls` or `runs_on` edge to it is a real dependency and stays. An excluded node is
+ * dropped once no edge names it.
  */
 export const tidyCortexOntology = (
   content: string,
@@ -84,6 +90,7 @@ export const tidyCortexOntology = (
   const dropped: TidiedCortexOntology['dropped'] = [];
   const drop = new Set<number>();
 
+  const linked = new Set<string>();
   const relations = sectionRange(lines, /^##\s+relations\b/i);
   if (relations) {
     const seen = new Set<string>();
@@ -95,7 +102,7 @@ export const tidyCortexOntology = (
       }
       const [, from, to, kind] = edge;
       const reason: TidiedCortexOntology['dropped'][number]['reason'] | undefined =
-        excluded.has(from) || excluded.has(to)
+        (excluded.has(from) || excluded.has(to)) && TELEMETRY_KINDS.has(kind)
           ? 'excluded'
           : from === to
           ? 'self_edge'
@@ -111,6 +118,8 @@ export const tidyCortexOntology = (
       }
       seen.add(`${from}\u0000${to}\u0000${kind}`);
       pairs.add(`${from}\u0000${to}`);
+      linked.add(from);
+      linked.add(to);
     }
   }
 
@@ -118,7 +127,7 @@ export const tidyCortexOntology = (
   if (nodes) {
     for (let index = nodes[0]; index < nodes[1]; index++) {
       const node = NODE_LINE.exec(lines[index]);
-      if (node !== null && excluded.has(node[1])) {
+      if (node !== null && excluded.has(node[1]) && !linked.has(node[1])) {
         drop.add(index);
         dropped.push({ line: lines[index].trim(), reason: 'excluded' });
       }

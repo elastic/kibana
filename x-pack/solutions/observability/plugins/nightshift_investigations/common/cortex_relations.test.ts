@@ -129,6 +129,18 @@ describe('tidyCortexOntology', () => {
     expect(dropped.map(({ reason }) => reason)).toEqual(['excluded', 'excluded']);
   });
 
+  it('keeps a dependency on an excluded component and drops only its telemetry edges', () => {
+    const { content, dropped } = tidyCortexOntology(
+      page('fleet -> logging-telemetry : publishes_to', 'fleet -> logging-telemetry : depends_on'),
+      new Set(['logging-telemetry'])
+    );
+
+    expect(content).toContain('fleet -> logging-telemetry : depends_on');
+    expect(content).not.toContain('fleet -> logging-telemetry : publishes_to');
+    expect(content).toContain('- logging-telemetry');
+    expect(dropped.map(({ reason }) => reason)).toEqual(['excluded']);
+  });
+
   it('leaves text outside the Nodes and Relations sections alone', () => {
     const { content } = tidyCortexOntology(page('fleet -> fleet : calls'));
 

@@ -1338,6 +1338,23 @@ describe('applyCortexEdits ontology cleanup', () => {
     expect(writtenContent(store)).not.toContain('telemetry-connector');
   });
 
+  it('keeps edges to an integration that is not a telemetry store', async () => {
+    const { store } = await apply({
+      catalog: [
+        {
+          ...integrationPage,
+          id: 'cortex_integration_telemetry-connector',
+          title: 'orders database',
+          description: 'Postgres that the checkout flow reads orders from',
+        },
+      ],
+    });
+
+    expect(writtenContent(store)).toContain(
+      'warpstream-agent -> telemetry-connector : publishes_to'
+    );
+  });
+
   it('keeps a node that no page declares as an integration', async () => {
     const { store } = await apply({ catalog: [] });
 
@@ -1674,7 +1691,7 @@ describe('createLlmProposeCortexEdits prompt', () => {
 
     expect(system).toContain('page slug exactly as the catalog shows it');
     expect(system).toContain('"A reads_from B" as "A pulls data from B"');
-    expect(system).toContain('never add an integration or a telemetry connector as a node');
+    expect(system).toContain('never add a telemetry connector as a node');
     expect(system).toContain('State one edge per pair of components');
   });
 });

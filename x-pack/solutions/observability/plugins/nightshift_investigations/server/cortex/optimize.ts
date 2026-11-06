@@ -45,7 +45,9 @@ const MAX_TURNS_TOTAL_CHARS = 120_000;
 const MAX_TOOL_CALL_PARAM_ARRAY_ITEMS = 20;
 const MAX_PROPOSALS = 8;
 const MAX_PAGE_BODIES = 8;
-const MAX_PAGE_BODY_CHARS = 3_000;
+/** An integration page whose title or description says it holds telemetry rather than serves the system. */
+const TELEMETRY_STORE =
+  /\b(?:telemetry|logs?|logging|traces?|tracing|metrics|otel|observability)\b/i;
 /** A shorter slug would match unrelated words in the transcript. */
 const MIN_SLUG_CHARS_TO_MATCH = 4;
 
@@ -379,10 +381,7 @@ export const createLlmProposeCortexEdits = ({
             .join('\n');
 
     const pageBodyLines = pageBodies
-      .map(
-        ({ slug, entity_type: entityType, content }) =>
-          `### ${entityType}/${slug}\n${content.slice(0, MAX_PAGE_BODY_CHARS)}`
-      )
+      .map(({ slug, entity_type: entityType, content }) => `### ${entityType}/${slug}\n${content}`)
       .join('\n\n');
 
     const response = await inferenceClient.output({
@@ -414,7 +413,7 @@ Tool failures:
 - A tool failure is a call that returned an error, timed out, or came back empty because of how the call was made. Record it only when the same failure signature recurs in the tool calls or already appears on the page. Put it on the integration page of the system the tool talks to, under ## Tool failures, as one bullet: the failure signature, its durable cause, and what works instead. A single typo is not a failure signature: a failure that happened once and went away when the call was corrected (a misspelled function, a wrong argument) is recorded nowhere on the page, not under ## Tool failures and not as general advice under ## Common pitfalls.
 
 Relations:
-- Record how components relate on ontology pages: name each component by its page slug exactly as the catalog shows it, never a display name, and add one relation line per edge. Read "A depends_on B" as "A needs B", "A reads_from B" as "A pulls data from B", "A calls B" as "A sends requests to B" and "A publishes_to B" as "A pushes data to B"; the arrow always points from the component that acts to the one it acts on. Nodes are the system's own components, such as services, controllers, jobs and data stores; never add an integration or a telemetry connector as a node, since where a component's logs are stored is not a relation between components. State one edge per pair of components, in the direction its kind implies, and never its reverse. Also list a service's dependencies on its own page.
+- Record how components relate on ontology pages: name each component by its page slug exactly as the catalog shows it, never a display name, and add one relation line per edge. Read "A depends_on B" as "A needs B", "A reads_from B" as "A pulls data from B", "A calls B" as "A sends requests to B" and "A publishes_to B" as "A pushes data to B"; the arrow always points from the component that acts to the one it acts on. Nodes are the system's own components, such as services, controllers, jobs and data stores; never add a telemetry connector as a node or relate a component to it with publishes_to or reads_from, since where a component's logs are stored is not a relation between components. An integration the system depends on, such as a database or a queue, is a component and may appear. State one edge per pair of components, in the direction its kind implies, and never its reverse. Also list a service's dependencies on its own page.
 
 Rules:
 - Only propose facts that the transcript actually established. No speculation.
@@ -501,15 +500,22 @@ export const applyCortexEdits = async ({
   const isIndependentInvestigation = (page: CortexPageSummary): boolean =>
     roundKind === 'initial' &&
     !(provenance?.conversationId && page.authored_by?.includes(provenance.conversationId));
-  // Integrations hold where a component's telemetry lives; they are not components of the graph.
-  const integrationSlugs = new Set([
+  // An integration that only holds a component's telemetry is not a component of the graph, but one
+  // the system depends on (a database, a queue) is, so only the telemetry stores are excluded.
+  const telemetryIntegrationSlugs = new Set([
     ...pages
-      .filter(({ entity_type: entityType }) => entityType === 'integration')
+      .filter(
+        ({ entity_type: entityType, title, description }) =>
+          entityType === 'integration' && TELEMETRY_STORE.test(`${title} ${description ?? ''}`)
+      )
       .map((page) =>
         canonicalizeSlug(page.entity_type, slugFromCortexId(page.id, page.entity_type))
       ),
     ...edits
-      .filter(({ entity_type: entityType }) => entityType === 'integration')
+      .filter(
+        ({ entity_type: entityType, title, description }) =>
+          entityType === 'integration' && TELEMETRY_STORE.test(`${title} ${description ?? ''}`)
+      )
       .map((edit) => resolveSlug(edit, pages)),
   ]);
   // Pages are mutated one at a time, so a failure part way through leaves the earlier edits
@@ -587,7 +593,7 @@ export const applyCortexEdits = async ({
       let proposedContent =
         edit.content === undefined ? undefined : dropEmptySections(edit.content);
       if (edit.entity_type === 'ontology' && proposedContent !== undefined) {
-        const tidied = tidyCortexOntology(proposedContent, integrationSlugs);
+        const tidied = tidyCortexOntology(proposedContent, telemetryIntegrationSlugs);
         if (tidied.dropped.length > 0) {
           logger.info(
             `Dropped ${tidied.dropped.length} line(s) from ontology/${slug}: ${tidied.dropped
