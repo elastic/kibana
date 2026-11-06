@@ -14,8 +14,10 @@ import { ResourceTypes } from '@kbn/product-doc-common';
 import type { InternalServices } from '../types';
 import {
   INSTALL_TASK_TIMEOUT,
+  deferForRepositoryVersion,
   runTaskUnderInstallLock,
   scheduleRequestTask,
+  shouldDeferForRepositoryVersion,
   type InstallLockManager,
   type RequestTaskParams,
 } from './utils';
@@ -41,12 +43,24 @@ export const registerEnsureUpToDateTaskDefinition = ({
       timeout: INSTALL_TASK_TIMEOUT,
       maxAttempts: 5,
       createTaskRunner: ({ taskInstance }) => {
-        const { inferenceId, forceUpdate, requestedAt } =
+        const { inferenceId, forceUpdate, requestedAt, repositoryVersion } =
           taskInstance.params as EnsureUpToDateTaskParams;
         const since = new Date(requestedAt);
         return {
           async run() {
             const { packageInstaller, logger } = getServices();
+            if (
+              shouldDeferForRepositoryVersion({
+                requestedVersion: repositoryVersion,
+                localVersion: await packageInstaller.getRepositoryVersion(),
+                requestedAt,
+              })
+            ) {
+              logger.info(
+                `Deferring product documentation update for [${inferenceId}]: requested against artifact repository version [${repositoryVersion}], newer than this node's`
+              );
+              return deferForRepositoryVersion();
+            }
             return runTaskUnderInstallLock({
               lockManager,
               metadata: { taskType: ENSURE_DOC_UP_TO_DATE_TASK_TYPE, inferenceId },
@@ -100,24 +114,28 @@ export const registerEnsureUpToDateTaskDefinition = ({
 };
 
 /**
- * Schedules an update task for this request. A pending update with the same `forceUpdate` for the
- * inference ID is reused, so e.g. every node's startup does not queue its own update.
+ * Schedules an update task for this request. A pending update with the same `forceUpdate` and
+ * repository version for the inference ID is reused, so e.g. every node's startup does not queue its
+ * own update.
  */
 export const scheduleEnsureUpToDateTask = ({
   taskManager,
   logger,
   inferenceId,
   forceUpdate,
+  repositoryVersion,
 }: {
   taskManager: TaskManagerStartContract;
   logger: Logger;
   inferenceId: string;
   forceUpdate?: boolean;
+  repositoryVersion?: string;
 }): Promise<string> => {
   const params: EnsureUpToDateTaskParams = {
     inferenceId,
     forceUpdate,
     requestedAt: new Date().toISOString(),
+    repositoryVersion,
   };
   return scheduleRequestTask({
     taskManager,

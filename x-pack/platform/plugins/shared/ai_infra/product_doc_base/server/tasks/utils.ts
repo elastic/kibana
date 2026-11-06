@@ -37,7 +37,40 @@ export interface RequestTaskParams {
   inferenceId: string;
   /** Time of the request (ISO 8601); a later uninstall of the same resource supersedes the task */
   requestedAt: string;
+  /** Version of the local (bundled) artifact repository the request was made against */
+  repositoryVersion?: string;
 }
+
+// A request made against a newer bundle than this node's is retried until a node with that bundle
+// picks it up, unless the request is this old (rollback, node gone), when any node runs it.
+export const REPOSITORY_VERSION_RETRY_DELAY_MS = 30 * 1000;
+export const REPOSITORY_VERSION_DEFER_MAX_MS = 60 * 60 * 1000;
+
+/**
+ * Whether a run must be left to another node because the request was made against a newer local
+ * repository than this node's, e.g. a new pod's startup update during a rolling deployment.
+ */
+export const shouldDeferForRepositoryVersion = ({
+  requestedVersion,
+  localVersion,
+  requestedAt,
+  now = Date.now(),
+}: {
+  requestedVersion?: string;
+  localVersion?: string;
+  requestedAt?: string;
+  now?: number;
+}): boolean => {
+  if (!requestedVersion || !requestedAt || (localVersion && localVersion >= requestedVersion)) {
+    return false;
+  }
+  return now - new Date(requestedAt).getTime() < REPOSITORY_VERSION_DEFER_MAX_MS;
+};
+
+export const deferForRepositoryVersion = () => ({
+  state: {},
+  runAt: new Date(Date.now() + REPOSITORY_VERSION_RETRY_DELAY_MS),
+});
 
 // Task scope identifying the inference ID an install or update task works on
 export const getInferenceScope = (inferenceId: string): string =>
@@ -77,8 +110,9 @@ export const findTasks = async ({
 
 /**
  * Schedules a new task instance for a request, unless `reusePending` is set and a pending task of the
- * same type for the inference ID (optionally matching `matches`) exists, in which case that task is
- * reused. Failed leftovers of earlier requests are removed so the status only reflects the latest one.
+ * same type for the inference ID and repository version (optionally matching `matches`) exists, in
+ * which case that task is reused. Failed leftovers of earlier requests are removed so the status only
+ * reflects the latest one.
  */
 export const scheduleRequestTask = async <P extends RequestTaskParams>({
   taskManager,
@@ -99,7 +133,9 @@ export const scheduleRequestTask = async <P extends RequestTaskParams>({
   if (reusePending) {
     const [pending] = (
       await findTasks({ taskManager, taskType, inferenceId, statuses: PENDING_TASK_STATUSES })
-    ).filter(matches);
+    ).filter(
+      (task) => task.params?.repositoryVersion === params.repositoryVersion && matches(task)
+    );
     if (pending) {
       logger.debug(`Reusing pending task ${pending.id} (${taskType}) for [${inferenceId}]`);
       return pending.id;

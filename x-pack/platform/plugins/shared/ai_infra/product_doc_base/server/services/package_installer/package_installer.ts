@@ -48,6 +48,7 @@ import {
   validateOpenApiArtifactArchive,
   fetchArtifactVersions,
   fetchSecurityLabsVersions,
+  fetchLocalRepositoryVersion,
   createIndex,
   populateIndex,
 } from './steps';
@@ -92,6 +93,7 @@ export class PackageInstaller {
   private readonly currentVersion: string;
   private readonly elserInferenceId: string;
   private readonly isServerless: boolean;
+  private repositoryVersion?: Promise<string | undefined>;
 
   constructor({
     artifactsFolder,
@@ -114,6 +116,22 @@ export class PackageInstaller {
     this.log = logger;
     this.elserInferenceId = elserInferenceId || defaultInferenceEndpoints.ELSER;
     this.isServerless = isServerless ?? false;
+  }
+
+  /**
+   * Version of the artifact repository this node reads: the newest entry of a local (bundled)
+   * repository's index, undefined for remote repositories.
+   */
+  getRepositoryVersion(): Promise<string | undefined> {
+    if (!this.repositoryVersion) {
+      this.repositoryVersion = fetchLocalRepositoryVersion(
+        this.getArtifactRepositoryOptions()
+      ).catch((error) => {
+        this.repositoryVersion = undefined;
+        throw error;
+      });
+    }
+    return this.repositoryVersion;
   }
 
   /**

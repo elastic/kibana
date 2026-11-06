@@ -8,7 +8,72 @@
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { waitUntilTaskCompleted } from './utils';
+import {
+  REPOSITORY_VERSION_DEFER_MAX_MS,
+  shouldDeferForRepositoryVersion,
+  waitUntilTaskCompleted,
+} from './utils';
+
+describe('shouldDeferForRepositoryVersion', () => {
+  const now = Date.parse('2026-10-12T12:00:00.000Z');
+  const requestedAt = new Date(now - 60_000).toISOString();
+
+  it('defers a recent request against a newer repository than the local one', () => {
+    expect(
+      shouldDeferForRepositoryVersion({
+        requestedVersion: '2026-10-12T00:00:00.000Z',
+        localVersion: '2026-10-01T00:00:00.000Z',
+        requestedAt,
+        now,
+      })
+    ).toBe(true);
+    expect(
+      shouldDeferForRepositoryVersion({
+        requestedVersion: '2026-10-12T00:00:00.000Z',
+        localVersion: undefined,
+        requestedAt,
+        now,
+      })
+    ).toBe(true);
+  });
+
+  it('runs requests against the same or an older repository, or without a version', () => {
+    expect(
+      shouldDeferForRepositoryVersion({
+        requestedVersion: '2026-10-12T00:00:00.000Z',
+        localVersion: '2026-10-12T00:00:00.000Z',
+        requestedAt,
+        now,
+      })
+    ).toBe(false);
+    expect(
+      shouldDeferForRepositoryVersion({
+        requestedVersion: '2026-10-01T00:00:00.000Z',
+        localVersion: '2026-10-12T00:00:00.000Z',
+        requestedAt,
+        now,
+      })
+    ).toBe(false);
+    expect(
+      shouldDeferForRepositoryVersion({
+        localVersion: '2026-10-12T00:00:00.000Z',
+        requestedAt,
+        now,
+      })
+    ).toBe(false);
+  });
+
+  it('stops deferring once the request is old enough that no newer node may exist', () => {
+    expect(
+      shouldDeferForRepositoryVersion({
+        requestedVersion: '2026-10-12T00:00:00.000Z',
+        localVersion: '2026-10-01T00:00:00.000Z',
+        requestedAt: new Date(now - REPOSITORY_VERSION_DEFER_MAX_MS).toISOString(),
+        now,
+      })
+    ).toBe(false);
+  });
+});
 
 describe('waitUntilTaskCompleted', () => {
   it('resolves once the task is no longer found', async () => {

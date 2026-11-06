@@ -61,6 +61,7 @@ describe('DocumentationManager', () => {
     installSecurityLabs: jest.Mock;
     uninstallSecurityLabs: jest.Mock;
     getSecurityLabsStatus: jest.Mock;
+    getRepositoryVersion: jest.Mock;
   };
 
   let docManager: DocumentationManager;
@@ -86,6 +87,7 @@ describe('DocumentationManager', () => {
       installSecurityLabs: jest.fn().mockResolvedValue(undefined),
       uninstallSecurityLabs: jest.fn().mockResolvedValue(undefined),
       getSecurityLabsStatus: jest.fn().mockResolvedValue({ status: 'uninstalled' }),
+      getRepositoryVersion: jest.fn().mockResolvedValue('2026-10-12T20:25:34.000Z'),
     };
 
     docInstallClient = {
@@ -230,6 +232,7 @@ describe('DocumentationManager', () => {
         taskManager,
         logger,
         inferenceId: DEFAULT_INFERENCE_ID,
+        repositoryVersion: '2026-10-12T20:25:34.000Z',
       });
 
       expect(waitUntilTaskCompletedMock).not.toHaveBeenCalled();
@@ -491,12 +494,14 @@ describe('DocumentationManager', () => {
         taskManager,
         logger,
         inferenceId: defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
+        repositoryVersion: '2026-10-12T20:25:34.000Z',
       });
 
       expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledWith({
         taskManager,
         logger,
         inferenceId: defaultInferenceEndpoints.ELSER,
+        repositoryVersion: '2026-10-12T20:25:34.000Z',
       });
 
       expect(waitUntilTaskCompletedMock).not.toHaveBeenCalled();

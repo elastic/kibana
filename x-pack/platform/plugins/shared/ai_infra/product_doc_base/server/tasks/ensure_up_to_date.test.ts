@@ -31,8 +31,10 @@ describe('EnsureUpToDate task', () => {
   let getProductsToUpdate: jest.Mock;
   let ensureOpenApiSpecUpToDate: jest.Mock;
   let wasUninstalledSince: jest.Mock;
+  let getRepositoryVersion: jest.Mock;
   let withLock: jest.Mock;
   let logger: ReturnType<typeof loggerMock.create>;
+  let runTaskWith: (params: Record<string, unknown>) => Promise<unknown>;
   let runTask: () => Promise<unknown>;
 
   beforeEach(() => {
@@ -41,6 +43,7 @@ describe('EnsureUpToDate task', () => {
     getProductsToUpdate = jest.fn().mockResolvedValue(['kibana', 'security']);
     ensureOpenApiSpecUpToDate = jest.fn().mockResolvedValue(undefined);
     wasUninstalledSince = jest.fn().mockResolvedValue(false);
+    getRepositoryVersion = jest.fn().mockResolvedValue(undefined);
     withLock = jest.fn((_lockId: string, callback: () => Promise<void>) => callback());
     const taskManager = taskManagerMock.createSetup();
     registerEnsureUpToDateTaskDefinition({
@@ -54,20 +57,17 @@ describe('EnsureUpToDate task', () => {
             getProductsToUpdate,
             ensureOpenApiSpecUpToDate,
             wasUninstalledSince,
+            getRepositoryVersion,
           },
         } as unknown as InternalServices),
     });
     const definition =
       taskManager.registerTaskDefinitions.mock.calls[0][0][ENSURE_DOC_UP_TO_DATE_TASK_TYPE];
-    runTask = () =>
+    runTaskWith = (params) =>
       definition
-        .createTaskRunner({
-          taskInstance: {
-            params: { inferenceId: '.elser', forceUpdate: true, requestedAt },
-            state: {},
-          },
-        } as unknown as RunContext)
+        .createTaskRunner({ taskInstance: { params, state: {} } } as unknown as RunContext)
         .run();
+    runTask = () => runTaskWith({ inferenceId: '.elser', forceUpdate: true, requestedAt });
   });
 
   it('updates the planned products and then the OpenAPI spec under the shared lock', async () => {
@@ -155,6 +155,31 @@ describe('EnsureUpToDate task', () => {
     expect(getProductsToUpdate).not.toHaveBeenCalled();
     expect(result).toEqual({ state: {}, runAt: expect.any(Date) });
   });
+
+  it('defers a recent request made against a newer repository than this node has', async () => {
+    getRepositoryVersion.mockResolvedValue('2026-10-01T00:00:00.000Z');
+
+    const result = await runTaskWith({
+      inferenceId: '.elser',
+      requestedAt: new Date().toISOString(),
+      repositoryVersion: '2026-10-12T00:00:00.000Z',
+    });
+
+    expect(withLock).not.toHaveBeenCalled();
+    expect(result).toEqual({ state: {}, runAt: expect.any(Date) });
+  });
+
+  it('runs a request made against an older or the same repository', async () => {
+    getRepositoryVersion.mockResolvedValue('2026-10-12T00:00:00.000Z');
+
+    await runTaskWith({
+      inferenceId: '.elser',
+      requestedAt: new Date().toISOString(),
+      repositoryVersion: '2026-10-01T00:00:00.000Z',
+    });
+
+    expect(withLock).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('scheduleEnsureUpToDateTask', () => {
@@ -181,6 +206,43 @@ describe('scheduleEnsureUpToDateTask', () => {
       state: {},
       scope: ['productDoc', 'productDoc:inference:.multilingual-e5-small'],
     });
+  });
+
+  it('schedules a new task when the pending update was requested against another repository version', async () => {
+    const taskManager = taskManagerMock.createStart();
+    taskManager.fetch.mockResolvedValue({
+      docs: [
+        task({
+          id: 'old-bundle',
+          status: TaskStatus.Idle,
+          params: { repositoryVersion: '2026-10-01T00:00:00.000Z' },
+        }),
+      ],
+      versionMap: new Map(),
+    });
+    taskManager.schedule.mockResolvedValue(task({ id: 'new-bundle' }));
+
+    await expect(
+      scheduleEnsureUpToDateTask({
+        taskManager,
+        logger: loggerMock.create(),
+        inferenceId: '.elser',
+        repositoryVersion: '2026-10-12T00:00:00.000Z',
+      })
+    ).resolves.toBe('new-bundle');
+    expect(taskManager.schedule).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({ repositoryVersion: '2026-10-12T00:00:00.000Z' }),
+      })
+    );
+    await expect(
+      scheduleEnsureUpToDateTask({
+        taskManager,
+        logger: loggerMock.create(),
+        inferenceId: '.elser',
+        repositoryVersion: '2026-10-01T00:00:00.000Z',
+      })
+    ).resolves.toBe('old-bundle');
   });
 
   it('reuses a pending update with the same forceUpdate flag', async () => {

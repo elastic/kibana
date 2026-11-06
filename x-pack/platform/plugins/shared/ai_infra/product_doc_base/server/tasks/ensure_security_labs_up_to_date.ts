@@ -10,12 +10,15 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
 import type { InternalServices } from '../types';
 import {
+  deferForRepositoryVersion,
   isTaskCurrentlyRunningError,
   runTaskUnderInstallLock,
+  shouldDeferForRepositoryVersion,
   type InstallLockManager,
 } from './utils';
 
@@ -24,6 +27,13 @@ export const ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_TYPE =
 export const ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_ID = 'ProductDocBase:EnsureSecurityLabsUpToDate';
 export const ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_ID_MULTILINGUAL =
   'ProductDocBase:EnsureSecurityLabsUpToDateMultilingual';
+
+interface EnsureSecurityLabsUpToDateTaskParams {
+  inferenceId?: string;
+  forceUpdate?: boolean;
+  requestedAt?: string;
+  repositoryVersion?: string;
+}
 
 export const registerEnsureSecurityLabsUpToDateTaskDefinition = ({
   getServices,
@@ -42,10 +52,23 @@ export const registerEnsureSecurityLabsUpToDateTaskDefinition = ({
       createTaskRunner: (context) => {
         return {
           async run() {
-            const inferenceId =
-              context.taskInstance?.params?.inferenceId ?? defaultInferenceEndpoints.ELSER;
-            const forceUpdate = context.taskInstance?.params?.forceUpdate;
-            const { packageInstaller } = getServices();
+            const params = (context.taskInstance?.params ??
+              {}) as EnsureSecurityLabsUpToDateTaskParams;
+            const inferenceId = params.inferenceId ?? defaultInferenceEndpoints.ELSER;
+            const { forceUpdate, requestedAt, repositoryVersion } = params;
+            const { packageInstaller, logger } = getServices();
+            if (
+              shouldDeferForRepositoryVersion({
+                requestedVersion: repositoryVersion,
+                localVersion: await packageInstaller.getRepositoryVersion(),
+                requestedAt,
+              })
+            ) {
+              logger.info(
+                `Deferring Security Labs update for [${inferenceId}]: requested against artifact repository version [${repositoryVersion}], newer than this node's`
+              );
+              return deferForRepositoryVersion();
+            }
             return runTaskUnderInstallLock({
               lockManager,
               run: () => packageInstaller.ensureSecurityLabsUpToDate({ inferenceId, forceUpdate }),
@@ -59,26 +82,47 @@ export const registerEnsureSecurityLabsUpToDateTaskDefinition = ({
   });
 };
 
+/**
+ * Runs the singleton update task for the inference ID. Its params are only set when it is created, so
+ * one made against another repository version is replaced to carry this request's version.
+ */
 export const scheduleEnsureSecurityLabsUpToDateTask = async ({
   taskManager,
   logger,
   inferenceId,
   forceUpdate,
+  repositoryVersion,
 }: {
   taskManager: TaskManagerStartContract;
   logger: Logger;
   inferenceId: string;
   forceUpdate?: boolean;
+  repositoryVersion?: string;
 }) => {
   const taskId = isImpliedDefaultElserInferenceId(inferenceId)
     ? ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_ID
     : ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_ID_MULTILINGUAL;
+  const params: EnsureSecurityLabsUpToDateTaskParams = {
+    inferenceId,
+    forceUpdate,
+    requestedAt: new Date().toISOString(),
+    repositoryVersion,
+  };
 
   try {
+    const existing = await taskManager.get(taskId).catch((error) => {
+      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+        return undefined;
+      }
+      throw error;
+    });
+    if (existing && existing.params.repositoryVersion !== repositoryVersion) {
+      await taskManager.removeIfExists(taskId);
+    }
     await taskManager.ensureScheduled({
       id: taskId,
       taskType: ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_TYPE,
-      params: { inferenceId, forceUpdate },
+      params,
       state: {},
       scope: ['productDoc'],
     });

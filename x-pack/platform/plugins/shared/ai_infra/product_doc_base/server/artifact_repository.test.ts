@@ -12,6 +12,11 @@ import { pathToFileURL } from 'url';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { resolveArtifactRepositoryUrl } from './artifact_repository';
 import { DEFAULT_ARTIFACT_REPOSITORY_URL } from './config';
+import {
+  fetchArtifactVersions,
+  fetchLocalRepositoryVersion,
+} from './services/package_installer/steps/fetch_artifact_versions';
+import { checkArtifactAvailable } from './services/package_installer/utils/download';
 
 const REMOTE_URL = DEFAULT_ARTIFACT_REPOSITORY_URL;
 
@@ -66,6 +71,35 @@ describe('resolveArtifactRepositoryUrl', () => {
     Fs.writeFileSync(Path.join(bundledArtifactsPath, 'index.xml'), '<ListBucketResult />');
 
     expect(resolve(true, true, 'file:///custom/stub')).toBe('file:///custom/stub');
+  });
+
+  it('yields a repository URL the installer can read back from a path with spaces and percent signs', async () => {
+    const spacedPath = Path.join(bundledArtifactsPath, 'Kibana Test%20dir');
+    const key = 'kb-product-doc-kibana-latest--.jina-embeddings-v5-text-small.zip';
+    Fs.mkdirSync(spacedPath);
+    Fs.writeFileSync(Path.join(spacedPath, key), 'zip');
+    Fs.writeFileSync(
+      Path.join(spacedPath, 'index.xml'),
+      `<ListBucketResult><Contents><Key>${key}</Key><LastModified>2026-10-12T20:25:34.000Z</LastModified></Contents></ListBucketResult>`
+    );
+
+    const artifactRepositoryUrl = resolveArtifactRepositoryUrl({
+      config: { artifactRepositoryUrl: REMOTE_URL, useBundledArtifacts: true },
+      isServerless: true,
+      logger,
+      bundledArtifactsPath: spacedPath,
+    });
+
+    expect(artifactRepositoryUrl).toContain('Kibana%20Test%2520dir');
+    await expect(fetchArtifactVersions({ artifactRepositoryUrl })).resolves.toMatchObject({
+      kibana: ['latest-2026-10-12T20:25:34.000Z'],
+    });
+    await expect(fetchLocalRepositoryVersion({ artifactRepositoryUrl })).resolves.toBe(
+      '2026-10-12T20:25:34.000Z'
+    );
+    await expect(
+      checkArtifactAvailable(`${artifactRepositoryUrl}/${key}`)
+    ).resolves.toBeUndefined();
   });
 
   it('uses the remote repository outside serverless even when a bundle exists', () => {
