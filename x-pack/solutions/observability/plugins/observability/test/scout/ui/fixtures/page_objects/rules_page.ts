@@ -225,15 +225,6 @@ export class RulesPage {
     });
   }
 
-  async waitForLogsTableToLoad() {
-    const loadingIndicators = await this.eventLogTable
-      .getByRole('progressbar', { name: 'Loading' })
-      .all();
-    for await (const indicator of loadingIndicators) {
-      await expect(indicator).toBeHidden({ timeout: BIGGER_TIMEOUT });
-    }
-  }
-
   /**
    * Verifies the logs tab is active/selected
    */
@@ -249,17 +240,21 @@ export class RulesPage {
   }
 
   /**
-   * Gets the editable rules locator
+   * Gets the event log entries linking to a rule by its name
    */
-  public async getLogsTableRuleLinks(ruleName: string) {
-    return this.eventLogTable.getByRole('button', { name: ruleName }).all();
+  public getLogsTableRuleLinks(ruleName: string) {
+    return this.eventLogTable.getByRole('button', { name: ruleName });
   }
 
   /**
    * Clicks on a rule in the event logs table by its name
    */
-  async clickOnRuleInEventLogs(ruleLog: Locator) {
-    await ruleLog.click();
+  async clickOnRuleInEventLogs(ruleName: string) {
+    // eslint-disable-next-line playwright/no-nth-methods -- the rule has one event log row per execution; any of them opens the same rule
+    const ruleLink = this.getLogsTableRuleLinks(ruleName).first();
+    // The event log grid renders before its rows are fetched, so wait for the row itself
+    await expect(ruleLink).toBeVisible({ timeout: BIGGER_TIMEOUT });
+    await ruleLink.click();
     await this.page.testSubj.waitForSelector(LOGS_TAB_TEST_SUBJECTS.RULE_DETAILS, {
       timeout: BIGGER_TIMEOUT,
     });
