@@ -63,6 +63,7 @@ export interface RunHistorySnapshotOptions {
 export { HISTORY_SNAPSHOT_RESET_SCRIPT } from './constants';
 
 const POLL_INTERVAL_MS = 30 * 1000;
+const POLL_MIN_INTERVAL_MS = 5 * 1000;
 
 export interface HistorySnapshotClientDependencies {
   logger: Logger;
@@ -423,6 +424,7 @@ export class HistorySnapshotClient {
         taskId: run.esTaskId,
         deadline,
         pollIntervalMs: POLL_INTERVAL_MS,
+        minPollIntervalMs: POLL_MIN_INTERVAL_MS,
         logger: this.logger,
         signal: abortSignal,
       });

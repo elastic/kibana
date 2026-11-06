@@ -86,7 +86,10 @@ export interface PollTaskUntilOptions {
   taskId: TaskId;
   /** Epoch milliseconds after which polling stops and `pending` is returned. Omit to wait until the task finishes. */
   deadline?: number;
+  /** Longest wait between two polls. */
   pollIntervalMs: number;
+  /** First wait between polls. It doubles after each poll up to `pollIntervalMs`. Defaults to `pollIntervalMs`. */
+  minPollIntervalMs?: number;
   logger?: Logger;
   signal?: AbortSignal;
 }
@@ -108,9 +111,11 @@ export const pollTaskUntil = async <T>({
   taskId,
   deadline = Infinity,
   pollIntervalMs,
+  minPollIntervalMs = pollIntervalMs,
   logger,
   signal,
 }: PollTaskUntilOptions): Promise<PollTaskUntilResult<T>> => {
+  let waitMs = Math.min(minPollIntervalMs, pollIntervalMs);
   while (true) {
     if (signal?.aborted) {
       throw new Error('Task polling aborted');
@@ -152,7 +157,8 @@ export const pollTaskUntil = async <T>({
     if (remainingMs <= 0) {
       return { status: 'pending' };
     }
-    await sleep(Math.min(pollIntervalMs, remainingMs), undefined, { signal }).catch(() => {});
+    await sleep(Math.min(waitMs, remainingMs), undefined, { signal }).catch(() => {});
+    waitMs = Math.min(waitMs * 2, pollIntervalMs);
   }
 };
 
