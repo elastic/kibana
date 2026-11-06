@@ -24,6 +24,12 @@ export const LENS_DATAGRID_DENSITY = {
   EXPANDED: 'expanded',
 } as const;
 
+/**
+ * Rows per page a datatable can paginate by. The first is the default.
+ */
+export const LENS_DATATABLE_PAGE_SIZE_OPTIONS = [10, 20, 30, 50, 100] as const;
+export const LENS_DATATABLE_DEFAULT_PAGE_SIZE = LENS_DATATABLE_PAGE_SIZE_OPTIONS[0];
+
 export const LENS_EDIT_SORT_ACTION = 'sort';
 export const LENS_EDIT_RESIZE_ACTION = 'resize';
 export const LENS_TOGGLE_ACTION = 'toggle';

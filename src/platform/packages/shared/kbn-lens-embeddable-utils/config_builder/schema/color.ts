@@ -224,6 +224,10 @@ export const colorByValuePaletteSchema = lazySchema(() =>
         .meta({
           description: 'The name of the palette to apply across the value range.',
         }),
+      steps: z.number().int().min(1).optional().meta({
+        description:
+          "Number of color bands the palette is split into. Defaults to the chart's default band count.",
+      }),
     })
     .meta({
       id: 'visColorByValuePalette',

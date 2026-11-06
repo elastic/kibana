@@ -13,6 +13,7 @@
 
 import { orderBy } from 'lodash';
 import type { FormBasedPersistedState } from '@kbn/lens-common';
+import { LENS_XY_HIDE_ENDZONES_DEFAULT } from '@kbn/lens-common';
 import type { LensAttributes } from '../../../../types';
 import type { NormalizerConfig } from './normalize';
 import { mergeNormalizers } from './normalize';
@@ -297,7 +298,7 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
     }
 
     // The transform always emits these styling fields (overlays are always present in API output)
-    viz.hideEndzones ??= true;
+    viz.hideEndzones ??= LENS_XY_HIDE_ENDZONES_DEFAULT;
     viz.showCurrentTimeMarker ??= false;
 
     // Series-type-specific styling defaults the transform always emits when the series is present
