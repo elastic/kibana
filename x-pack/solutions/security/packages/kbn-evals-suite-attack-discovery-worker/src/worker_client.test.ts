@@ -105,6 +105,9 @@ const fakeKibana = ({
   putFailsOn,
   storeOnPut,
   editOnRun,
+  disableOnRun = false,
+  failFloorReadAfterPut,
+  failListing = false,
   active = {},
   children = [{ workflowId: 'system-security-attack-discovery-review', executionId: 'review-9' }],
   initialYaml = FLOOR_YAML,
@@ -116,6 +119,12 @@ const fakeKibana = ({
   storeOnPut?: (putNumber: number, yaml: string) => string;
   /** A write by someone else that lands while the floor runs (stored text, as the server keeps it). */
   editOnRun?: (yaml: string) => string;
+  /** The floor is disabled by someone else while it runs (`enabled` is not part of the YAML). */
+  disableOnRun?: boolean;
+  /** The first GET of the floor after the nth PUT fails (the read-back after the rewrite). */
+  failFloorReadAfterPut?: number;
+  /** Every executions listing fails. */
+  failListing?: boolean;
   /** Ids of active executions per workflow id (the executions listing). */
   active?: Record<string, string[]>;
   children?: Array<{ workflowId: string; executionId: string }>;
@@ -124,15 +133,22 @@ const fakeKibana = ({
 } = {}) => {
   let yaml = initialYaml;
   let puts = 0;
-  // The server's own revision counter: it moves with every write, whoever makes it.
+  // The server's revision counter. It moves only when the trimmed YAML text changes
+  // (`applyWorkflowVersion` in workflows_management), so a same-text write leaves it alone.
   let version = 1;
+  let enabled = true;
+  let floorReadFailed = false;
+  const store = (next: string) => {
+    if (next.trim() !== yaml.trim()) version += 1;
+    yaml = next;
+  };
   const cancelled = new Set<string>();
   const calls: Array<{ method: string; path: string; body?: string }> = [];
   const workflow = () => {
     return {
       yaml,
       definition: parse(yaml),
-      enabled: true,
+      enabled,
       definitionHash: 'hash',
       // The managed version counter is the server's, and it moves with every write.
       managedVersion: 9,
@@ -147,18 +163,16 @@ const fakeKibana = ({
       puts += 1;
       if (puts === putFailsOn) throw Object.assign(new Error('boom'), { status: 500 });
       const sent = JSON.parse(init?.body ?? '{}').yaml as string;
-      yaml = storeOnPut ? storeOnPut(puts, sent) : sent;
-      version += 1;
+      store(storeOnPut ? storeOnPut(puts, sent) : sent);
       // The managed route answers with the updated workflow's metadata, not its definition.
       return { id: 'floor', enabled: true, valid: true, validationErrors: [] };
     }
     const listed = /workflow\/([^/]+)\/executions$/.exec(path)?.[1];
+    if (listed && failListing) throw Object.assign(new Error('listing down'), { status: 503 });
     if (listed) return { results: (active[listed] ?? []).map((id) => ({ id })) };
     if (path.endsWith('/run')) {
-      if (editOnRun) {
-        yaml = editOnRun(yaml);
-        version += 1;
-      }
+      if (editOnRun) store(editOnRun(yaml));
+      if (disableOnRun) enabled = false;
       return { workflowExecutionId: 'floor-1' };
     }
     if (path.endsWith('/children')) return children;
@@ -181,9 +195,13 @@ const fakeKibana = ({
         stepExecutions: [],
       };
     }
+    if (failFloorReadAfterPut !== undefined && puts >= failFloorReadAfterPut && !floorReadFailed) {
+      floorReadFailed = true;
+      throw Object.assign(new Error('read-back failed'), { status: 502 });
+    }
     return workflow();
   });
-  return { fetch, calls, storedYaml: () => yaml, storedVersion: () => version, cancelled };
+  return { fetch, calls, storedYaml: () => yaml, edit: store, cancelled };
 };
 
 const FLOOR_PATH = '/s/s/api/workflows/workflow/floor';
@@ -296,11 +314,62 @@ describe('AttackDiscoveryWorkerClient.runReview', () => {
     expect(kibana.storedYaml()).toBe(edited);
   });
 
-  it('does not restore when only the version moved (an edit that stored the same definition)', async () => {
-    const kibana = fakeKibana({ editOnRun: (yaml) => yaml });
+  it('does not restore when the floor was disabled during the run', async () => {
+    const kibana = fakeKibana({ disableOnRun: true });
     const client = new AttackDiscoveryWorkerClient(kibana.fetch as unknown as HttpHandler, log);
-    await expect(review(client)).rejects.toThrow(/floor changed concurrently/);
+    await expect(review(client)).rejects.toThrow(/floor changed concurrently.*enabled/);
     expect(kibana.calls.filter(({ method }) => method === 'PUT')).toHaveLength(1);
+  });
+
+  it('restores over a floor whose text did not change, since the version did not move either', async () => {
+    const kibana = fakeKibana({ editOnRun: (yaml) => `${yaml}\n` });
+    const client = new AttackDiscoveryWorkerClient(kibana.fetch as unknown as HttpHandler, log);
+    await expect(review(client)).resolves.toBeDefined();
+    expect(kibana.storedYaml()).toBe(FLOOR_YAML);
+  });
+
+  it('restores after a failed read-back when the stored text is still the rewrite', async () => {
+    const kibana = fakeKibana({ failFloorReadAfterPut: 1 });
+    const client = new AttackDiscoveryWorkerClient(kibana.fetch as unknown as HttpHandler, log);
+    // The read-back failure is the run's error; the restore is verified by text, not blind.
+    await expect(review(client)).rejects.toThrow(/read-back failed/);
+    expect(kibana.calls.filter(({ method }) => method === 'PUT')).toHaveLength(2);
+    expect(kibana.storedYaml()).toBe(FLOOR_YAML);
+  });
+
+  it('does not restore blind when the read-back failed and the floor was edited since', async () => {
+    const edited = FLOOR_YAML.replace('manual', 'edited-by-someone-else');
+    const kibana = fakeKibana({ failFloorReadAfterPut: 1 });
+    let reads = 0;
+    const failing = jest.fn(async (path: string, init?: { method?: string; body?: string }) => {
+      // Someone else writes right as the read-back fails; the run never gets as far as its own route.
+      if (path === FLOOR_PATH && init?.method === 'GET' && ++reads === 2) kibana.edit(edited);
+      return kibana.fetch(path, init);
+    });
+    const client = new AttackDiscoveryWorkerClient(failing as unknown as HttpHandler, log);
+    const error = await review(client).then(
+      () => undefined,
+      (thrown: unknown) => thrown
+    );
+    expect((error as AggregateError).message).toMatch(/read-back failed/);
+    expect((error as AggregateError).message).toMatch(/floor changed concurrently/);
+    expect(kibana.calls.filter(({ method }) => method === 'PUT')).toHaveLength(1);
+  });
+
+  it('rejects, without a PUT, when the active-execution listing fails', async () => {
+    const kibana = fakeKibana({ failListing: true });
+    const client = new AttackDiscoveryWorkerClient(kibana.fetch as unknown as HttpHandler, log);
+    await expect(review(client)).rejects.toThrow(/Could not list the active executions/);
+    expect(kibana.calls.some(({ method }) => method === 'PUT')).toBe(false);
+  });
+
+  it('restores the floor when the review itself times out', async () => {
+    const kibana = fakeKibana({ childStatus: 'running', floorStatus: 'running' });
+    const client = new AttackDiscoveryWorkerClient(kibana.fetch as unknown as HttpHandler, log);
+    const polled = await review(client, 0);
+    expect(polled.timedOutAfterMs).toBe(0);
+    expect(kibana.calls.filter(({ method }) => method === 'PUT')).toHaveLength(2);
+    expect(kibana.storedYaml()).toBe(FLOOR_YAML);
   });
 
   it.each([

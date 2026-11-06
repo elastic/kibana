@@ -208,9 +208,12 @@ AD_WORKER_EVAL_COHORT=whole \
   review and literal inputs (`settings.run_as` and everything else unchanged), runs the floor, and
   restores and verifies the original YAML in a `finally`. This needs the `updateManaged` privilege.
   A concurrent edit of the same worker, or a worker disable/enable during a row, would race the
-  rewrite (a disable re-renders the YAML from the registry). The restore is guarded: the floor is
-  re-read first, and if its stored version or definition no longer matches what the rewrite left,
-  the run throws "floor changed concurrently ... not restored" instead of overwriting the edit.
+  rewrite (a disable re-renders the YAML from the registry). The restore is best-effort against that: the floor is
+  re-read first, and if its stored text, version, definition or `enabled` no longer match what the
+  rewrite left (or the read-back failed and the text matches neither the rewrite nor the original),
+  the run throws "floor changed concurrently ... not restored" instead of overwriting. This narrows
+  the race window but does not close it: the read and the `PUT` are separate requests and the
+  managed route takes no if-match, so a write landing between them is still overwritten.
   Before the rewrite the floor and the review must have no active execution, or the run throws.
 - Every floor `PUT` re-schedules the floor's task and rotates its API key, so each seeded row
   rotates it twice (rewrite and restore), and the key afterwards belongs to the eval user (the

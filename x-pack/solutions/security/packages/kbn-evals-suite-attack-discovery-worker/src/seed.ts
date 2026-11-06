@@ -848,9 +848,10 @@ const assertWorldSearchable = async ({
  * at an alias that no longer exists, and a later product Attack Discovery persist in this space
  * would fail until Kibana restarts. An empty index is harmless to the rows: `assertCleanSpace`
  * counts open discoveries, not indices, and this function is a no-op once the alias exists.
+ *
+ * The backing index name mirrors the rule registry's (`.internal${baseName}` plus `-000001`, in
+ * x-pack/platform/plugins/shared/rule_registry/server/rule_data_plugin_service/index_info.ts).
  */
-// Mirrors the rule registry's naming: `baseNameForBackingIndices` is `.internal${baseName}` and the
-// first backing index gets `-000001` (x-pack/platform/plugins/shared/rule_registry/server/rule_data_plugin_service/index_info.ts).
 const ADHOC_DEFAULT_BACKING_INDEX = `.internal${attackDiscoveryIndexForSpace('default')}-000001`;
 
 const ensureDiscoveryIndex = async ({

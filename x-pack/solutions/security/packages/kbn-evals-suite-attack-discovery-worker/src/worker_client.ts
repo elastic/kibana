@@ -264,7 +264,10 @@ export class AttackDiscoveryWorkerClient {
    * does not match is thrown, together with the run's own error if there was one.
    *
    * Only call this while no other floor run is active: the floor cancels in progress, and the
-   * rewritten YAML is what a scheduled tick would run too (the 24h interval keeps ticks out).
+   * rewritten YAML is what a scheduled tick would run too. After the one-time busy check, only the
+   * long schedule interval keeps a tick out (a PUT reschedules the task, it does not run it now).
+   * The restore re-reads the floor first, but read and PUT are separate requests and the managed
+   * route takes no precondition, so a concurrent edit is detected best-effort, not prevented.
    * When the floor ends without starting the target, the floor's own execution is returned.
    */
   async runViaFloorParent({
@@ -298,7 +301,7 @@ export class AttackDiscoveryWorkerClient {
     const errors: unknown[] = [];
     const started: string[] = [];
     let polled: PolledExecution | undefined;
-    // What the rewrite left stored; the restore only goes ahead while the floor is still this.
+    // What the rewrite left stored, when it could be read back.
     let rewritten: FloorWorkflowState | undefined;
     try {
       await this.putFloorYaml(spaceId, floorWorkflowId, rewrittenYaml);
@@ -324,16 +327,14 @@ export class AttackDiscoveryWorkerClient {
       errors.push(error);
     }
     try {
-      // The managed PUT is a blind write: without this check a concurrent edit made during the run
-      // would be overwritten by the restore.
-      if (rewritten) {
-        const current = await readFloorWorkflow({ fetch: this.fetch, spaceId, floorWorkflowId });
-        if (
-          current.version !== rewritten.version ||
-          !isDeepStrictEqual(current.definition, rewritten.definition)
-        ) {
-          throw new Error('floor changed concurrently during the floor-parent run; not restored');
-        }
+      // The managed PUT is a blind write. The floor must still be what this call left (or, when
+      // the rewrite PUT failed, what it found), or the restore would overwrite someone else's edit.
+      const current = await readFloorWorkflow({ fetch: this.fetch, spaceId, floorWorkflowId });
+      const changed = describeConcurrentChange({ current, rewritten, rewrittenYaml, before });
+      if (changed) {
+        throw new Error(
+          `floor changed concurrently during the floor-parent run; not restored (${changed})`
+        );
       }
       await this.putFloorYaml(spaceId, floorWorkflowId, before.yaml);
       const after = await readFloorWorkflow({ fetch: this.fetch, spaceId, floorWorkflowId });
@@ -503,6 +504,37 @@ export class AttackDiscoveryWorkerClient {
     }
   }
 }
+
+/**
+ * What about the floor read just before the restore is not what this run left, or undefined when
+ * it is. Without the post-rewrite state (its read failed), the stored text must be the one written
+ * (or the original, if the rewrite PUT never landed) and anything else fails closed. Text is what
+ * can be compared there: the server bumps `version` only when the trimmed YAML changes.
+ */
+const describeConcurrentChange = ({
+  current,
+  rewritten,
+  rewrittenYaml,
+  before,
+}: {
+  current: FloorWorkflowState;
+  rewritten: FloorWorkflowState | undefined;
+  rewrittenYaml: string;
+  before: FloorWorkflowState;
+}): string | undefined => {
+  const text = current.yaml.trim();
+  const differing = rewritten
+    ? [
+        ...(text === rewritten.yaml.trim() ? [] : ['yaml']),
+        ...(current.version === rewritten.version ? [] : ['version']),
+        ...(isDeepStrictEqual(current.definition, rewritten.definition) ? [] : ['definition']),
+        ...(current.enabled === rewritten.enabled ? [] : ['enabled']),
+      ]
+    : text === rewrittenYaml.trim() || text === before.yaml.trim()
+    ? []
+    : ['yaml'];
+  return differing.length > 0 ? differing.join(', ') : undefined;
+};
 
 /**
  * What differs between the floor as it was read before a floor-parent run and as it is after the
