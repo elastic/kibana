@@ -17,6 +17,8 @@ import { registerApiRoutes } from './routes';
 import { License } from './services';
 import type { IndexLifecycleManagementConfig } from './config';
 import { handleEsError } from './shared_imports';
+import { policyResourceProvider } from './housekeeping/resource_provider';
+import { missingRolloverAliasCheck } from './housekeeping/missing_rollover_alias_check';
 
 const indexLifecycleDataEnricher = async (
   indicesList: Index[],
@@ -50,7 +52,10 @@ export class IndexLifecycleManagementServerPlugin implements Plugin<void, void, 
     this.license = new License();
   }
 
-  setup({ http }: CoreSetup, { licensing, indexManagement, features }: Dependencies): void {
+  setup(
+    { http }: CoreSetup,
+    { licensing, indexManagement, features, housekeeping }: Dependencies
+  ): void {
     const router = http.createRouter();
     const config = this.config;
 
@@ -100,6 +105,9 @@ export class IndexLifecycleManagementServerPlugin implements Plugin<void, void, 
         indexManagement.indexDataEnricher.add(indexLifecycleDataEnricher);
       }
     }
+
+    housekeeping?.registerResourceProvider(policyResourceProvider);
+    housekeeping?.registerCheck(missingRolloverAliasCheck);
   }
 
   start() {}

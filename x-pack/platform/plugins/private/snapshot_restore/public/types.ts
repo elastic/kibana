@@ -5,7 +5,13 @@
  * 2.0.
  */
 
+import type { HousekeepingPublicStart } from '@kbn/housekeeping-plugin/public';
+
 export interface ClientConfigType {
   slm_ui: { enabled: boolean };
   ui: { enabled: boolean };
+}
+
+export interface StartDependencies {
+  housekeeping?: HousekeepingPublicStart;
 }

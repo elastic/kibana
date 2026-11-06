@@ -367,6 +367,7 @@ export const getNavigationTreeDefinition = ({
                   children: [
                     { link: 'management:license_management' },
                     { link: 'management:upgrade_assistant' },
+                    { link: 'management:housekeeping' },
                   ],
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.management.stack', {
                     defaultMessage: 'Stack',

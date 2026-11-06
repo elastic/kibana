@@ -15,6 +15,11 @@ import { wrapEsError } from './lib';
 import { handleEsError } from './shared_imports';
 import type { Dependencies } from './types';
 import type { SnapshotRestoreConfig } from './config';
+import {
+  repositoryResourceProvider,
+  slmPolicyResourceProvider,
+} from './housekeeping/resource_provider';
+import { snapshotRestoreChecks } from './housekeeping/checks';
 
 export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any> {
   private readonly logger: Logger;
@@ -28,7 +33,10 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
     this.license = new License();
   }
 
-  public setup({ http }: CoreSetup, { licensing, features, security, cloud }: Dependencies): void {
+  public setup(
+    { http }: CoreSetup,
+    { licensing, features, security, cloud, housekeeping }: Dependencies
+  ): void {
     const pluginConfig = this.context.config.get<SnapshotRestoreConfig>();
 
     const router = http.createRouter();
@@ -74,6 +82,15 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
         wrapEsError,
       },
     });
+
+    if (housekeeping) {
+      housekeeping.registerResourceProvider(repositoryResourceProvider);
+      // Policy pages only exist when the SLM UI is on.
+      if (pluginConfig.slm_ui.enabled) {
+        housekeeping.registerResourceProvider(slmPolicyResourceProvider);
+        snapshotRestoreChecks.forEach((check) => housekeeping.registerCheck(check));
+      }
+    }
   }
 
   public start() {}

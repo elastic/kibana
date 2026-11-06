@@ -1,0 +1,28 @@
+{
+  "type": "plugin",
+  "id": "@kbn/housekeeping-plugin",
+  "owner": [
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Finds broken references and unused resources in the cluster configuration. Plugins register what they own and what it points at.",
+  "plugin": {
+    "id": "housekeeping",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "housekeeping"
+    ],
+    "requiredPlugins": [
+      "management"
+    ],
+    "optionalPlugins": [
+      "share",
+      "console",
+      "features",
+      "agentBuilder"
+    ],
+    "requiredBundles": []
+  }
+}

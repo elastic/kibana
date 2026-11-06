@@ -104,6 +104,7 @@
     "lensFormulaDocs": "src/platform/packages/private/kbn-lens-formula-docs",
     "lists": "x-pack/solutions/security/packages/kbn-securitysolution-list-utils/src",
     "exceptionList-components": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src",
+    "housekeeping": "src/platform/plugins/shared/housekeeping",
     "management": [
       "src/platform/plugins/shared/management",
       "src/platform/packages/private/kbn-management",

@@ -16,6 +16,10 @@ const configSchema = schema.object(
       // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
       serverless: schema.boolean({ defaultValue: true }),
     }),
+    housekeeping: schema.object({
+      /** Days the ingest nodes must have been running before a pipeline counts as unused. */
+      unusedAfterDays: schema.number({ defaultValue: 7, min: 0 }),
+    }),
   },
   { defaultValue: undefined }
 );

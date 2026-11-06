@@ -1127,6 +1127,7 @@ packages:
   - 'src/platform/plugins/shared/field_formats'
   - 'src/platform/plugins/shared/files'
   - 'src/platform/plugins/shared/home'
+  - 'src/platform/plugins/shared/housekeeping'
   - 'src/platform/plugins/shared/inspector'
   - 'src/platform/plugins/shared/kibana_react'
   - 'src/platform/plugins/shared/kibana_utils'

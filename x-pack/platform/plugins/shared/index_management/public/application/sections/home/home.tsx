@@ -23,6 +23,15 @@ import { IndexDetailsPage } from './index_list/details_page';
 import { DataStreamList } from './data_stream_list';
 import { TemplateList } from './template_list';
 
+const INDEX_RESOURCE_TYPES = [
+  'index_template',
+  'legacy_index_template',
+  'component_template',
+  'data_stream',
+  'index',
+  'enrich_policy',
+];
+
 export const homeSections = [
   Section.Indices,
   Section.DataStreams,
@@ -42,7 +51,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
   history,
 }) => {
   const {
-    plugins: { console: consolePlugin },
+    plugins: { console: consolePlugin, housekeeping },
     privs,
   } = useAppContext();
 
@@ -108,6 +117,11 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         tabs={tabs}
         spacing="bleed"
         docLink={documentationService.getIdxMgmtDocumentationLink()}
+        menu={
+          housekeeping
+            ? { items: [housekeeping.getAppMenuItem({ resourceTypes: INDEX_RESOURCE_TYPES })] }
+            : undefined
+        }
       />
       <EuiSpacer size="l" />
 
