@@ -51,6 +51,13 @@ describe('toSOSettings', () => {
     expect(toSOSettings({ instances: [withExtras] })).toEqual({ instances: [duplicate] });
   });
 
+  it('returns the package policy settings that have a value', () => {
+    expect(toSOSettings({ policySettings: { output_id: 'logstash-1' } })).toEqual({
+      policySettings: { output_id: 'logstash-1' },
+    });
+    expect(toSOSettings({ policySettings: { output_id: '' } })).toEqual({});
+  });
+
   it('leaves out the instances when there are none, so a stored list is never cleared by an empty one', () => {
     expect(toSOSettings({ instances: [] })).toEqual({});
     expect(toSOSettings({ integrationName: 'my-aws' })).toEqual({ integrationName: 'my-aws' });
@@ -108,6 +115,7 @@ describe('toSOSettingsUpdate', () => {
       description: 'Production',
       namespace: null,
       dedicatedNamespaceTemplates: false,
+      policySettings: {},
     });
   });
 
@@ -116,6 +124,7 @@ describe('toSOSettingsUpdate', () => {
       description: null,
       namespace: 'prod',
       dedicatedNamespaceTemplates: false,
+      policySettings: {},
     });
   });
 
@@ -127,12 +136,14 @@ describe('toSOSettingsUpdate', () => {
       description: null,
       namespace: null,
       dedicatedNamespaceTemplates: false,
+      policySettings: {},
     });
     expect(toSOSettingsUpdate({ integrationName: 'my-aws' })).toEqual({
       integrationName: 'my-aws',
       description: null,
       namespace: null,
       dedicatedNamespaceTemplates: false,
+      policySettings: {},
     });
   });
 
@@ -141,6 +152,7 @@ describe('toSOSettingsUpdate', () => {
       description: 'x',
       namespace: null,
       dedicatedNamespaceTemplates: false,
+      policySettings: {},
     });
   });
 
@@ -152,6 +164,7 @@ describe('toSOSettingsUpdate', () => {
       description: null,
       namespace: null,
       dedicatedNamespaceTemplates: false,
+      policySettings: {},
       instances: [original, duplicate],
     });
   });
@@ -162,7 +175,17 @@ describe('toSOSettingsUpdate', () => {
       description: null,
       namespace: null,
       dedicatedNamespaceTemplates: false,
+      policySettings: {},
     });
+  });
+
+  it('sends the package policy settings, empty when none has a value so a cleared one is removed', () => {
+    expect(toSOSettingsUpdate({ policySettings: { output_id: 'logstash-1' } })).toEqual(
+      expect.objectContaining({ policySettings: { output_id: 'logstash-1' } })
+    );
+    expect(toSOSettingsUpdate({ policySettings: { output_id: '' } })).toEqual(
+      expect.objectContaining({ policySettings: {} })
+    );
   });
 });
 
@@ -191,5 +214,11 @@ describe('toSOMetadataUpdate', () => {
       integrationName: 'my-aws',
       description: 'Production',
     });
+  });
+
+  it('leaves out the package policy settings, which are saved only with a deploy', () => {
+    expect(
+      toSOMetadataUpdate({ integrationName: 'my-aws', policySettings: { output_id: 'logstash-1' } })
+    ).toEqual({ integrationName: 'my-aws', description: null });
   });
 });

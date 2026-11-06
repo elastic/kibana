@@ -16,6 +16,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import { isAgentBasedOnly } from '../aws_service_matrix';
+import { getEcfTemplateFamily } from '../ecf_cloudformation';
 import type { AwsServiceMatrixEntry, DeploymentMethod } from '../aws_service_matrix';
 import { DeploymentMethodCard } from './authenticate_and_deploy_step/deployment_method_card';
 import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/managed_integrations_section';
@@ -372,6 +373,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     sectionProps: ecfSectionProps,
     currentServiceIdsByFamily,
     currentConfigsByFamily,
+    currentNamespaceByFamily,
     advanceStaleSnapshots,
   } = useEcfDeployment({
     instances: isAgentBased ? [] : serviceSettings.instances,
@@ -379,6 +381,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     globalRegion,
     otlpEndpoint,
     dataFormat,
+    namespace: serviceSettings.namespace,
   });
 
   // ── ECF-only SO persistence ───────────────────────────────────────────────────
@@ -413,6 +416,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         const stackArn = ecfSectionProps.stackArns[family];
         const serviceIds = currentServiceIdsByFamily[family];
         const serviceConfigs = currentConfigsByFamily[family];
+        const namespace = currentNamespaceByFamily[family];
         return {
           family,
           stackName: ecfSectionProps.stackNames[family] || defaultNames[family],
@@ -420,6 +424,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           ...(stackArn ? { stackArn } : {}),
           serviceIds,
           serviceConfigs,
+          ...(namespace !== undefined ? { namespace } : {}),
         };
       })
       .filter((s): s is NonNullable<typeof s> => s !== null);
@@ -430,6 +435,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     ecfSectionProps.stackArns,
     currentServiceIdsByFamily,
     currentConfigsByFamily,
+    currentNamespaceByFamily,
   ]);
 
   const ecfStacksUnchanged = useMemo(
@@ -438,6 +444,26 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       JSON.stringify(ecfStacks) === JSON.stringify(detectAndReviewStep.ecfStacks),
     [ecfStacks, detectAndReviewStep.ecfStacks]
   );
+
+  // A stack that moves to a new namespace has to show data there, so the instances of its services
+  // start detection over instead of keeping a "receiving" earned in the old namespace.
+  const resetStatusesOfStacksChangingNamespace = useCallback(() => {
+    const movedFamilies = Object.keys(ecfSectionProps.staleNamespaceByFamily ?? {}).filter(
+      (family) =>
+        ecfSectionProps.isStaleByFamily[family as keyof typeof ecfSectionProps.isStaleByFamily] &&
+        ecfSectionProps.isUpdateOpenedByFamily[
+          family as keyof typeof ecfSectionProps.isUpdateOpenedByFamily
+        ]
+    );
+    if (movedFamilies.length === 0) return;
+    const statuses: Record<string, 'instantiating'> = {};
+    for (const { instanceId, serviceId } of serviceSettings.instances) {
+      const entry = awsServicesMap?.get(serviceId);
+      const family = entry && getEcfTemplateFamily(entry);
+      if (family && movedFamilies.includes(family)) statuses[instanceId] = 'instantiating';
+    }
+    if (Object.keys(statuses).length > 0) updateDetectAndReviewStep({ serviceStatuses: statuses });
+  }, [ecfSectionProps, serviceSettings.instances, awsServicesMap, updateDetectAndReviewStep]);
 
   // ── handleNext sub-handlers ───────────────────────────────────────────────────
 
@@ -507,6 +533,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     } else {
       setIsSavingSO(false);
     }
+    resetStatusesOfStacksChangingNamespace();
     advanceStaleSnapshots();
     onContinue();
     // persistDeploymentId after navigate: onContinue pushes a stale location snapshot, so
@@ -523,6 +550,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     awsServicesMap,
     globalRegion,
     dataFormat,
+    resetStatusesOfStacksChangingNamespace,
     advanceStaleSnapshots,
     onContinue,
     createDeployment,
@@ -533,9 +561,15 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
   // Mixed (MI + ECF): SO was created by handleDeploy with both mechanisms; update ecfStacks now.
   const handleMixedEcfNext = useCallback(async () => {
+    resetStatusesOfStacksChangingNamespace();
     advanceStaleSnapshots();
+    const shouldWriteEcfStacks =
+      !ecfStacksUnchanged && !!detectAndReviewStep.onboardingDeploymentId;
+    // Before navigating, so detection polls the stacks' new namespace from the start rather than
+    // finding the old one's data and marking the reset services receiving again.
+    if (shouldWriteEcfStacks) updateDetectAndReviewStep({ ecfStacks });
     onContinue();
-    if (!ecfStacksUnchanged && detectAndReviewStep.onboardingDeploymentId) {
+    if (shouldWriteEcfStacks && detectAndReviewStep.onboardingDeploymentId) {
       await updateDeployment(detectAndReviewStep.onboardingDeploymentId, {
         ecfStacks,
         serviceVars: toSOServiceVars(serviceVars, awsServicesMap ?? new Map()) as Record<
@@ -543,7 +577,6 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           Record<string, unknown>
         >,
       });
-      updateDetectAndReviewStep({ ecfStacks });
     }
     // A previously-failed service that was deselected from Step 1 never acquired a policy ID,
     // so policyIdsByInstance has no stale entry — it can slip through isAlreadyDeployed and
@@ -575,6 +608,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     deployGroups,
     failedInstances,
     selectedServiceIds,
+    resetStatusesOfStacksChangingNamespace,
     advanceStaleSnapshots,
     removeDeployInstances,
     onContinue,

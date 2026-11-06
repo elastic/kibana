@@ -13,6 +13,7 @@ import {
 } from '@kbn/fleet-plugin/public';
 
 import { getEffectiveNamespace } from '../../common/effective_namespace';
+import { getDefaultEnabledDataStreams } from '../../aws_service_matrix';
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
 import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './package_inputs';
 import {
@@ -29,6 +30,7 @@ import {
   toOnboardingDeploymentQuery,
 } from './policy_cleanup';
 import type { BuildPolicyBodyOpts, PolicyCleanupOps } from './policy_cleanup';
+import { getPolicySettingsUpdate } from '../../common/policy_settings';
 
 export interface UpdateAgentBasedPolicyOpts extends BuildPolicyBodyOpts {
   selectedAgentPolicyIds: string[];
@@ -146,6 +148,7 @@ export async function updateAgentBasedPolicy(
     servicesMap,
     selectedAgentPolicyIds,
     agentCredentials,
+    policySettings,
   } = opts;
 
   const members = resolveSurvivingMembers(survivingInstanceIds, instances, servicesMap);
@@ -207,7 +210,7 @@ export async function updateAgentBasedPolicy(
   const serviceVarsMap: Record<string, ServiceVars> = {};
   for (const { instance, service } of members) {
     serviceVarsMap[service.id] = storedServiceVars[instance.instanceId] ?? {
-      enabledDataStreams: service.dataStreams,
+      enabledDataStreams: getDefaultEnabledDataStreams(service),
       varsByDataStream: {},
     };
   }
@@ -270,6 +273,8 @@ export async function updateAgentBasedPolicy(
     {
       name: policyName,
       namespace: policyNamespace,
+      // A setting set back to empty is sent as null, which clears what the policy had.
+      ...getPolicySettingsUpdate(policySettings, 'agent_based'),
       package: { name: packageName, version: pkgVersion },
       ...(vars ? { vars } : {}),
       inputs,

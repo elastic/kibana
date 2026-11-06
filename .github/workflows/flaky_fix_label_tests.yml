@@ -1,4 +1,4 @@
-name: Test flaky fix labeling
+name: Test flaky fix scripts
 
 on:
   pull_request:
@@ -6,6 +6,9 @@ on:
       - '.github/scripts/label_flaky_fix_pr.ts'
       - '.github/scripts/label_flaky_fix_pr_test.ts'
       - '.github/scripts/team_labels.ts'
+      - '.github/scripts/prefetch_pr_context.js'
+      - '.github/scripts/flaky_fix_retrospective_context.js'
+      - '.github/scripts/flaky_fix_retrospective_context.test.js'
       - '.github/workflows/flaky_fix_label_tests.yml'
       - '.nvmrc'
 
@@ -18,7 +21,7 @@ concurrency:
 
 jobs:
   test:
-    name: Test flaky fix labeling
+    name: Test flaky fix scripts
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -36,3 +39,6 @@ jobs:
 
       - name: Run labeling tests
         run: node --test .github/scripts/label_flaky_fix_pr_test.ts
+
+      - name: Run retrospective context tests
+        run: node --test .github/scripts/flaky_fix_retrospective_context.test.js

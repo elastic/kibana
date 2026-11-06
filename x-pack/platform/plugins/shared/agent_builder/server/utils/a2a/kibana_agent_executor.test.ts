@@ -76,6 +76,19 @@ describe('KibanaAgentExecutor', () => {
     );
   });
 
+  it('runs the agent in non-interactive mode', async () => {
+    const execution = createExecutionMock();
+    const executor = createExecutor(execution);
+    const eventBus = createEventBusMock();
+    const requestContext = new RequestContext(createUserMessage(), 'task-1', 'ctx-1');
+
+    await executor.execute(requestContext, eventBus);
+
+    expect(execution.executeAgent).toHaveBeenCalledWith(
+      expect.objectContaining({ interactive: { enabled: false } })
+    );
+  });
+
   it('persists the A2A contextId as execution metadata, for both blocking and non-blocking requests', async () => {
     const execution = createExecutionMock();
     const executor = createExecutor(execution);
