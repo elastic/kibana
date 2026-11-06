@@ -16,7 +16,7 @@ import type {
   AiIndexTrace,
 } from '../../common/http_api/ai_indices';
 
-export const aiIndicesIndexName = '.contextengine-ai-indices';
+export const aiIndicesIndexName = '.context-engine-ai-indices';
 
 // Only for managed entries: ids are registered in code so they are bounded, and a colon is
 // safe because neither a space id nor an AI index id may contain one.

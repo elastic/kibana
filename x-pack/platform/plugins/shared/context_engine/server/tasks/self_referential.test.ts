@@ -24,6 +24,7 @@ describe('isSelfReferentialTarget', () => {
   });
 
   it('matches the AI index registry system index', () => {
+    expect(isSelfReferentialTarget('.context-engine-ai-indices')).toBe(true);
     expect(isSelfReferentialTarget('.contextengine-ai-indices')).toBe(true);
   });
 

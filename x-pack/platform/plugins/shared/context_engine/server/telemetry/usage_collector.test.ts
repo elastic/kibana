@@ -25,7 +25,7 @@ const KI_COLUMNS = [
 ];
 
 const hit = (source: Record<string, unknown>) => ({
-  _index: '.contextengine-ai-indices',
+  _index: '.context-engine-ai-indices',
   _source: source,
 });
 
