@@ -1088,6 +1088,105 @@ describe('authorship and recovery context', () => {
   });
 });
 
+describe('applyCortexEdits ontology cleanup', () => {
+  const ontologyContent = [
+    '## Nodes',
+    '- warpstream-agent',
+    '- autoops-bootstrap',
+    '- telemetry-connector',
+    '',
+    '## Relations',
+    '```',
+    'autoops-bootstrap -> warpstream-agent : calls',
+    'warpstream-agent -> telemetry-connector : publishes_to',
+    'warpstream-agent -> autoops-bootstrap : depends_on',
+    'warpstream-agent -> warpstream-agent : calls',
+    '```',
+  ].join('\n');
+
+  const integrationPage = {
+    id: 'cortex_integration_telemetry-connector',
+    title: 'telemetry-connector',
+    entity_type: 'integration' as const,
+    status: 'established' as const,
+    corroborations: 2,
+    updated_at: '2026-03-02T09:00:00.000Z',
+  };
+
+  const apply = async ({
+    catalog,
+    extraEdits = [],
+  }: {
+    catalog: Array<typeof integrationPage>;
+    extraEdits?: Parameters<typeof applyCortexEdits>[0]['edits'];
+  }) => {
+    const logger = loggerMock.create();
+    const store = createStore({
+      list: jest.fn().mockResolvedValue({
+        pages: catalog,
+        stats: { total: catalog.length, established: 0, total_corroborations: 0 },
+      }),
+    });
+    await applyCortexEdits({
+      store,
+      telemetry: createTelemetry(),
+      logger,
+      edits: [
+        {
+          action: 'upsert',
+          entity_type: 'ontology',
+          slug: 'autoops-kafka-ingestion',
+          title: 'AutoOps Kafka ingestion',
+          content: ontologyContent,
+        },
+        ...extraEdits,
+      ],
+    });
+    return { store, logger };
+  };
+
+  const writtenContent = (store: CortexPageStore): string =>
+    (store.upsert as jest.Mock).mock.calls.find(
+      ([page]) => page.slug === 'autoops-kafka-ingestion'
+    )[0].content;
+
+  it('drops edges to an integration page, self edges and reversed pairs before writing', async () => {
+    const { store, logger } = await apply({ catalog: [integrationPage] });
+
+    const content = writtenContent(store);
+    expect(content).toContain('autoops-bootstrap -> warpstream-agent : calls');
+    expect(content).not.toContain('telemetry-connector');
+    expect(content).not.toContain('warpstream-agent -> autoops-bootstrap');
+    expect(content).not.toContain('warpstream-agent -> warpstream-agent');
+    expect(logger.info.mock.calls.flat().join('\n')).toContain('excluded');
+  });
+
+  it('also excludes an integration that the same run creates', async () => {
+    const { store } = await apply({
+      catalog: [],
+      extraEdits: [
+        {
+          action: 'upsert',
+          entity_type: 'integration',
+          slug: 'telemetry-connector',
+          title: 'telemetry-connector',
+          content: '## Overview\nTelemetry cluster.',
+        },
+      ],
+    });
+
+    expect(writtenContent(store)).not.toContain('telemetry-connector');
+  });
+
+  it('keeps a node that no page declares as an integration', async () => {
+    const { store } = await apply({ catalog: [] });
+
+    expect(writtenContent(store)).toContain(
+      'warpstream-agent -> telemetry-connector : publishes_to'
+    );
+  });
+});
+
 describe('applyCortexEdits non-temporal check', () => {
   it('skips an upsert that carries a date, an id or a count and applies the rest', async () => {
     const logger = loggerMock.create();
@@ -1409,5 +1508,7 @@ describe('createLlmProposeCortexEdits prompt', () => {
 
     expect(system).toContain('page slug exactly as the catalog shows it');
     expect(system).toContain('"A reads_from B" as "A pulls data from B"');
+    expect(system).toContain('never add an integration or a telemetry connector as a node');
+    expect(system).toContain('State one edge per pair of components');
   });
 });

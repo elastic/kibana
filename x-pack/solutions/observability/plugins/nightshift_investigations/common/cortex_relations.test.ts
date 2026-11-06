@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parseCortexRelations } from './cortex_relations';
+import { parseCortexRelations, tidyCortexOntology } from './cortex_relations';
 
 describe('parseCortexRelations', () => {
   it('reads the edges of a fenced Relations block', () => {
@@ -57,5 +57,89 @@ describe('parseCortexRelations', () => {
 
   it('returns nothing when the page has no Relations section', () => {
     expect(parseCortexRelations('## Nodes\n- a')).toEqual([]);
+  });
+});
+
+describe('tidyCortexOntology', () => {
+  const page = (...edges: string[]) =>
+    [
+      '## Nodes',
+      '- fleet',
+      '- external-dns-projects',
+      '- logging-telemetry',
+      '',
+      '## Relations',
+      '```',
+      ...edges,
+      '```',
+      '',
+      '## Concepts',
+      '- A concept that mentions fleet -> external-dns-projects : depends_on in prose.',
+    ].join('\n');
+
+  it('leaves a clean page unchanged', () => {
+    const content = page('fleet -> external-dns-projects : depends_on');
+
+    expect(tidyCortexOntology(content)).toEqual({ content, dropped: [] });
+  });
+
+  it('drops an edge from a component to itself', () => {
+    const { content, dropped } = tidyCortexOntology(page('fleet -> fleet : calls'));
+
+    expect(content).not.toContain('fleet -> fleet');
+    expect(dropped).toEqual([{ line: 'fleet -> fleet : calls', reason: 'self_edge' }]);
+  });
+
+  it('drops a repeated edge and keeps the first', () => {
+    const { content, dropped } = tidyCortexOntology(
+      page(
+        'fleet -> external-dns-projects : depends_on',
+        'fleet -> external-dns-projects : depends_on'
+      )
+    );
+
+    expect(content.match(/fleet -> external-dns-projects : depends_on/g)).toHaveLength(2);
+    expect(dropped.map(({ reason }) => reason)).toEqual(['duplicate']);
+  });
+
+  it('keeps one edge per pair, the first, when the reverse is also stated', () => {
+    const { content, dropped } = tidyCortexOntology(
+      page(
+        'external-dns-projects -> fleet : publishes_to',
+        'fleet -> external-dns-projects : depends_on'
+      )
+    );
+
+    expect(content).toContain('external-dns-projects -> fleet : publishes_to');
+    expect(content).not.toContain('fleet -> external-dns-projects : depends_on\n```');
+    expect(dropped).toEqual([
+      { line: 'fleet -> external-dns-projects : depends_on', reason: 'mirrored' },
+    ]);
+  });
+
+  it('drops the edges and the node line of an excluded component', () => {
+    const { content, dropped } = tidyCortexOntology(
+      page('fleet -> logging-telemetry : publishes_to', 'fleet -> external-dns-projects : calls'),
+      new Set(['logging-telemetry'])
+    );
+
+    expect(content).not.toContain('- logging-telemetry');
+    expect(content).not.toContain('fleet -> logging-telemetry');
+    expect(content).toContain('fleet -> external-dns-projects : calls');
+    expect(dropped.map(({ reason }) => reason)).toEqual(['excluded', 'excluded']);
+  });
+
+  it('leaves text outside the Nodes and Relations sections alone', () => {
+    const { content } = tidyCortexOntology(page('fleet -> fleet : calls'));
+
+    expect(content).toContain(
+      'A concept that mentions fleet -> external-dns-projects : depends_on'
+    );
+  });
+
+  it('keeps a line whose kind is unknown, since the parser ignores it anyway', () => {
+    const content = page('fleet -> external-dns-projects : likes');
+
+    expect(tidyCortexOntology(content).content).toBe(content);
   });
 });

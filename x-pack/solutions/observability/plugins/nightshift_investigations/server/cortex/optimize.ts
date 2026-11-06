@@ -16,7 +16,7 @@ import {
   type CortexPageSummary,
   type CortexRoundKind,
 } from '../../common/cortex';
-import { CORTEX_RELATION_KINDS } from '../../common/cortex_relations';
+import { CORTEX_RELATION_KINDS, tidyCortexOntology } from '../../common/cortex_relations';
 import type { AppliedCortexEdit, CortexTelemetry } from '../telemetry';
 import { isReinforcementOwnedSlug } from '../../common/decision_trees';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
@@ -305,7 +305,7 @@ Tool failures:
 - A tool failure is a call that returned an error, timed out, or came back empty because of how the call was made. Record it only when the same failure signature recurs in the tool calls or already appears on the page. Put it on the integration page of the system the tool talks to, under ## Tool failures, as one bullet: the failure signature, its durable cause, and what works instead. A single typo is not a failure signature.
 
 Relations:
-- Record how components relate on ontology pages: name each component by its page slug exactly as the catalog shows it, never a display name, and add one relation line per edge. Read "A depends_on B" as "A needs B", "A reads_from B" as "A pulls data from B", "A calls B" as "A sends requests to B" and "A publishes_to B" as "A pushes data to B"; the arrow always points from the component that acts to the one it acts on. Also list a service's dependencies on its own page.
+- Record how components relate on ontology pages: name each component by its page slug exactly as the catalog shows it, never a display name, and add one relation line per edge. Read "A depends_on B" as "A needs B", "A reads_from B" as "A pulls data from B", "A calls B" as "A sends requests to B" and "A publishes_to B" as "A pushes data to B"; the arrow always points from the component that acts to the one it acts on. Nodes are the system's own components, such as services, controllers, jobs and data stores; never add an integration or a telemetry connector as a node, since where a component's logs are stored is not a relation between components. State one edge per pair of components, in the direction its kind implies, and never its reverse. Also list a service's dependencies on its own page.
 
 Rules:
 - Only propose facts that the transcript actually established. No speculation.
@@ -387,6 +387,17 @@ export const applyCortexEdits = async ({
   // A run confirms a page at most once, and never one it created: promotion needs a confirmation
   // from a later run.
   const touchedIds = new Set<string>();
+  // Integrations hold where a component's telemetry lives; they are not components of the graph.
+  const integrationSlugs = new Set([
+    ...pages
+      .filter(({ entity_type: entityType }) => entityType === 'integration')
+      .map((page) =>
+        canonicalizeSlug(page.entity_type, slugFromCortexId(page.id, page.entity_type))
+      ),
+    ...edits
+      .filter(({ entity_type: entityType }) => entityType === 'integration')
+      .map((edit) => resolveSlug(edit, pages)),
+  ]);
   // Pages are mutated one at a time, so a failure part way through leaves the earlier edits
   // persisted. Reporting from `finally` keeps the counts honest for those partial runs.
   try {
@@ -446,11 +457,28 @@ export const applyCortexEdits = async ({
         continue;
       }
 
+      // An ontology page is a graph of the system's components. The model keeps adding edges that
+      // are not part of it (a component "publishing to" the telemetry integration that holds its
+      // logs, a component related to itself, both directions of one pair), so those lines are
+      // removed here rather than trusted to the prompt.
+      let proposedContent = edit.content;
+      if (edit.entity_type === 'ontology' && proposedContent !== undefined) {
+        const tidied = tidyCortexOntology(proposedContent, integrationSlugs);
+        if (tidied.dropped.length > 0) {
+          logger.info(
+            `Dropped ${tidied.dropped.length} line(s) from ontology/${slug}: ${tidied.dropped
+              .map(({ line, reason }) => `${reason} "${line}"`)
+              .join('; ')}`
+          );
+        }
+        proposedContent = tidied.content;
+      }
+
       // A page that names a date, an id or a count of events describes one occurrence, which is stale
       // once it ends. The other edits in the run still apply. Details that can only go stale when the
       // system changes, such as how many replicas run, are reported but do not cost the page.
       const violations = lintCortexContent(
-        [slug, edit.title, edit.description ?? '', edit.content ?? ''].join('\n')
+        [slug, edit.title, edit.description ?? '', proposedContent ?? ''].join('\n')
       );
       const blocking = violations.filter((violation) => violation.blocking);
       if (blocking.length > 0) {
@@ -495,7 +523,7 @@ export const applyCortexEdits = async ({
           ? 'tentative'
           : existing.status
         : statusAfterCorroboration(existing.status, corroborations ?? 0);
-      const afterContent = edit.content ?? existing?.content ?? '';
+      const afterContent = proposedContent ?? existing?.content ?? '';
       const written = await store.upsert({
         entityType: edit.entity_type,
         slug,

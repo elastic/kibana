@@ -51,3 +51,82 @@ export const parseCortexRelations = (content: string): CortexRelation[] => {
     return [{ from: edge[1], to: edge[2], kind: edge[3] }];
   });
 };
+
+export interface TidiedCortexOntology {
+  content: string;
+  /** Each line that was removed, with why. */
+  dropped: Array<{ line: string; reason: 'self_edge' | 'duplicate' | 'mirrored' | 'excluded' }>;
+}
+
+const sectionRange = (lines: string[], heading: RegExp): [number, number] | undefined => {
+  const start = lines.findIndex((line) => heading.test(line));
+  if (start === -1) {
+    return undefined;
+  }
+  const rest = lines.slice(start + 1);
+  const end = rest.findIndex((line) => /^##?\s/.test(line));
+  return [start + 1, end === -1 ? lines.length : start + 1 + end];
+};
+
+const NODE_LINE = /^\s*[-*]\s+`?([^`\s:]+)`?/;
+
+/**
+ * Removes the relation lines that make an ontology page misleading, whatever the model wrote: an
+ * edge from a component to itself, a repeat of an edge, the reverse of an edge already stated (one
+ * edge per pair, the first wins), and an edge or node that names an excluded component, such as a
+ * telemetry integration that only holds a component's logs and is not part of the system's graph.
+ */
+export const tidyCortexOntology = (
+  content: string,
+  excluded: ReadonlySet<string> = new Set()
+): TidiedCortexOntology => {
+  const lines = content.split('\n');
+  const dropped: TidiedCortexOntology['dropped'] = [];
+  const drop = new Set<number>();
+
+  const relations = sectionRange(lines, /^##\s+relations\b/i);
+  if (relations) {
+    const seen = new Set<string>();
+    const pairs = new Set<string>();
+    for (let index = relations[0]; index < relations[1]; index++) {
+      const edge = RELATION_LINE.exec(lines[index]);
+      if (edge === null || !isRelationKind(edge[3])) {
+        continue;
+      }
+      const [, from, to, kind] = edge;
+      const reason: TidiedCortexOntology['dropped'][number]['reason'] | undefined =
+        excluded.has(from) || excluded.has(to)
+          ? 'excluded'
+          : from === to
+          ? 'self_edge'
+          : seen.has(`${from}\u0000${to}\u0000${kind}`)
+          ? 'duplicate'
+          : pairs.has(`${to}\u0000${from}`)
+          ? 'mirrored'
+          : undefined;
+      if (reason) {
+        drop.add(index);
+        dropped.push({ line: lines[index].trim(), reason });
+        continue;
+      }
+      seen.add(`${from}\u0000${to}\u0000${kind}`);
+      pairs.add(`${from}\u0000${to}`);
+    }
+  }
+
+  const nodes = sectionRange(lines, /^##\s+nodes\b/i);
+  if (nodes) {
+    for (let index = nodes[0]; index < nodes[1]; index++) {
+      const node = NODE_LINE.exec(lines[index]);
+      if (node !== null && excluded.has(node[1])) {
+        drop.add(index);
+        dropped.push({ line: lines[index].trim(), reason: 'excluded' });
+      }
+    }
+  }
+
+  return {
+    content: lines.filter((_, index) => !drop.has(index)).join('\n'),
+    dropped,
+  };
+};
