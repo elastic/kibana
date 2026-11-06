@@ -226,22 +226,22 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
   apiTest(
     'a pack that sets both or neither of pack_id and prebuilt_pack is rejected when saved',
     async ({ apiClient }) => {
-      for (const pack of [`pack_id: ${packId}\n      prebuilt_pack: ${PREBUILT_PACK}`, '']) {
-        const yaml = `name: osq-wf-pack-invalid\nenabled: true\ntriggers:\n  - type: manual\nsteps:\n${runPackStep(
-          pack
-        )}`;
-        const response = await apiClient.post('api/workflows', {
-          headers: { 'kbn-xsrf': 'true', ...adminHeaders },
-          body: { workflows: [{ yaml }] },
-          responseType: 'json',
-        });
+      const workflows = workflowsClient(apiClient, adminHeaders);
+      for (const [name, pack] of [
+        ['osq-wf-pack-both', `pack_id: ${packId}\n      prebuilt_pack: ${PREBUILT_PACK}`],
+        ['osq-wf-pack-neither', ''],
+      ]) {
+        // Bulk create still saves the workflow, flagged invalid and without the reason.
+        const created = await workflows.save(name, runPackStep(pack));
+        expect(created.valid).toBe(false);
+        await workflows.delete(created.id);
 
-        const body = JSON.stringify(response.body);
-        expect(body).toContain('pack_id');
-        expect(body).toMatch(/exactly one of pack_id or prebuilt_pack/i);
-        // Nothing valid was created, so there is nothing to clean up.
-        const created: Array<{ valid?: boolean }> = response.body.created ?? [];
-        expect(created.some((workflow) => workflow.valid === true)).toBe(false);
+        const validation = await workflows.validate(name, runPackStep(pack));
+        expect(validation.valid).toBe(false);
+        const errors = validation.diagnostics
+          .filter((diagnostic) => diagnostic.severity === 'error')
+          .map((diagnostic) => diagnostic.message);
+        expect(errors.join('\n')).toMatch(/exactly one of pack_id or prebuilt_pack/i);
       }
     }
   );

@@ -31,6 +31,19 @@ export interface WorkflowExecution {
   stepExecutions: StepExecution[];
 }
 
+export interface CreatedWorkflow {
+  id: string;
+  valid: boolean;
+}
+
+export interface WorkflowValidation {
+  valid: boolean;
+  diagnostics: Array<{ severity: string; message: string; path?: Array<string | number> }>;
+}
+
+const manualWorkflowYaml = (name: string, stepsYaml: string) =>
+  `name: ${name}\nenabled: true\ntriggers:\n  - type: manual\nsteps:\n${stepsYaml}`;
+
 /** Workflows created and not yet deleted, so a failed test still gets them removed. */
 const pendingDeletions = new Map<string, () => Promise<unknown>>();
 
@@ -86,10 +99,10 @@ export const workflowsClient = (
   };
 
   const getExecution = async (executionId: string): Promise<WorkflowExecution> => {
-    const response = await apiClient.get(
-      api(`/executions/${executionId}?includeOutput=true`),
-      { headers: allHeaders, responseType: 'json' }
-    );
+    const response = await apiClient.get(api(`/executions/${executionId}?includeOutput=true`), {
+      headers: allHeaders,
+      responseType: 'json',
+    });
     expect(response).toHaveStatusCode(200);
 
     return response.body as WorkflowExecution;
@@ -114,22 +127,49 @@ export const workflowsClient = (
     return execution;
   };
 
+  /**
+   * Saves a manual workflow with the given steps YAML. Bulk create saves an invalid workflow too
+   * (as `valid: false`, without diagnostics), so every created id is queued for deletion.
+   */
+  const save = async (name: string, stepsYaml: string): Promise<CreatedWorkflow> => {
+    const response = await apiClient.post(api(''), {
+      headers: allHeaders,
+      body: { workflows: [{ yaml: manualWorkflowYaml(name, stepsYaml) }] },
+      responseType: 'json',
+    });
+    expect(response).toHaveStatusCode(200);
+    const created: CreatedWorkflow[] = response.body.created ?? [];
+    created.forEach(({ id }) => pendingDeletions.set(id, () => remove(id)));
+    expect(created).toHaveLength(1);
+
+    return created[0];
+  };
+
   return {
-    /** Creates a manual workflow with the given steps YAML and returns its id. */
+    /** Creates a valid manual workflow with the given steps YAML and returns its id. */
     create: async (name: string, stepsYaml: string): Promise<string> => {
-      const yaml = `name: ${name}\nenabled: true\ntriggers:\n  - type: manual\nsteps:\n${stepsYaml}`;
-      const response = await apiClient.post(api(''), {
-        headers: allHeaders,
-        body: { workflows: [{ yaml }] },
+      const created = await save(name, stepsYaml);
+      expect(created.valid).toBe(true);
+
+      return created.id;
+    },
+
+    save,
+
+    /** Validates a manual workflow without saving it: the diagnostics bulk create omits. */
+    validate: async (name: string, stepsYaml: string): Promise<WorkflowValidation> => {
+      const response = await apiClient.post(api('/validate'), {
+        headers: {
+          ...allHeaders,
+          'elastic-api-version': '1',
+          'x-elastic-internal-origin': 'kibana',
+        },
+        body: { yaml: manualWorkflowYaml(name, stepsYaml) },
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
-      const [created] = response.body.created;
-      expect(created.valid).toBe(true);
 
-      pendingDeletions.set(created.id, () => remove(created.id));
-
-      return created.id as string;
+      return response.body as WorkflowValidation;
     },
 
     delete: async (workflowId: string) => {
