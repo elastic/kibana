@@ -70,6 +70,17 @@ const KI_DOCS = {
     content: 'Billing retries use exponential backoff.',
     tags: ['billing', 'memory-only'],
   },
+  fact: {
+    type: 'fact.note',
+    title: 'Dreamed billing note',
+    content: 'Billing retries use exponential backoff.',
+    tags: ['billing', 'memory-only'],
+  },
+  entity: {
+    type: 'entity.customer',
+    title: 'Customer 825464',
+    tags: ['memory-only'],
+  },
   other: {
     type: 'hidden',
     title: 'Billing secret',
@@ -151,7 +162,7 @@ const OTHER_INDEX_ROLE: KibanaRole = {
 const registerAiIndex = (
   id: string,
   dest: { type: 'index' | 'data_stream'; value: string },
-  dreaming?: { enabled: boolean; facts: Array<{ type: string }> }
+  dreaming?: { enabled: boolean; facts: Array<{ type: string; description?: string }> }
 ) => ({
   id,
   description: `Scout describe fixture ${id}`,
@@ -162,7 +173,10 @@ const registerAiIndex = (
 });
 
 // Takes memories without scheduling a dreaming workflow.
-const MEMORY_DREAMING_CONFIG = { enabled: false, facts: [{ type: 'note' }] };
+const MEMORY_DREAMING_CONFIG = {
+  enabled: false,
+  facts: [{ type: 'note', description: 'A detail worth keeping' }],
+};
 
 // The `agent_builder` Scout config set pins `contextEngine:enabled=true` through
 // `uiSettings.overrides`. Memory remains runtime-configurable so this suite enables only the
@@ -320,7 +334,7 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
   });
 
   apiTest(
-    'describes memory capability and excludes stored memory from ordinary counts',
+    'describes memory capability and excludes stored and dreamed memory from ordinary counts',
     async ({ apiClient }) => {
       const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
         headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
@@ -336,6 +350,7 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
           'memory.session_fact',
           'Use platform.context_engine.remember to write memory.',
           'Use platform.context_engine.forget with a memory id to tombstone memory.',
+          '"fact.note": 1 - A detail worth keeping',
         ])
       );
       expect(sectionLines(block, 'Knowledge item types')).toStrictEqual([
@@ -363,7 +378,7 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
         `FROM ${INDEX_A} METADATA _id, _index, _score\n` +
           '| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"\n' +
           '| WHERE expires_at IS NULL OR expires_at > NOW()\n' +
-          '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")\n' +
+          '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact" AND NOT type LIKE "fact.*" AND NOT type LIKE "entity.*")\n' +
           '| FORK\n'
       )
     ).toBe(true);

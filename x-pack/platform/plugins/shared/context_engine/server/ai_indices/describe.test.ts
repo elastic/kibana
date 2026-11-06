@@ -70,6 +70,7 @@ describe('describeAiIndex', () => {
         { type: 'detection rule', count: 2 },
       ],
       tagCounts: [{ tag: 'billing, invoices', count: 3 }],
+      factTypeCounts: [],
     });
   });
 
@@ -85,6 +86,7 @@ describe('describeAiIndex', () => {
       dest: aiIndex.dest,
       spaceId: 'marketing',
       fields,
+      countFactTypes: false,
     });
     expect(response).toBe(
       [
@@ -163,7 +165,11 @@ describe('describeAiIndex', () => {
       semanticFields: [],
       omittedFieldCount: 0,
     });
-    describeAiIndexAggregationsMock.mockResolvedValue({ kiTypeCounts: [], tagCounts: [] });
+    describeAiIndexAggregationsMock.mockResolvedValue({
+      kiTypeCounts: [],
+      tagCounts: [],
+      factTypeCounts: [],
+    });
 
     const response = await describeAiIndex(params);
 
@@ -178,9 +184,12 @@ describe('describeAiIndex', () => {
       kiTypeCounts: [
         { type: 'memory.session', count: 2 },
         { type: 'memory.session_fact', count: 7 },
+        { type: 'fact.preference', count: 4 },
+        { type: 'entity.customer', count: 1 },
         { type: 'document', count: 3 },
       ],
       tagCounts: [],
+      factTypeCounts: [],
     });
 
     const response = await describeAiIndex({
@@ -195,14 +204,18 @@ describe('describeAiIndex', () => {
     expect(response).toContain('\nKnowledge item types\n"document": 3\n');
     expect(response).not.toContain('"memory.session": 2');
     expect(response).not.toContain('"memory.session_fact": 7');
+    expect(response).not.toContain('"entity.customer"');
     expect(response).toContain(
-      '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")'
+      [
+        'Unless the task specifically calls for memory, exclude memory types, and the facts and entities dreaming writes, from ordinary KI retrieval:',
+        '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact" AND NOT type LIKE "fact.*" AND NOT type LIKE "entity.*")',
+      ].join('\n')
     );
     expect(response).toContain(
       [
-        'For cross-session recall, search granular facts with hybrid retrieval:',
+        'For cross-session recall, search session facts and long-term facts together with hybrid retrieval, so memories dreaming has not reached yet are found too:',
         'FROM ai-index-idx-support* METADATA _id, _index, _score',
-        '| WHERE type == "memory.session_fact"',
+        '| WHERE type == "memory.session_fact" OR type LIKE "fact.*"',
         '| INLINE STATS latest_at = MAX(@timestamp) BY id',
         '| WHERE @timestamp == latest_at',
         '  AND (governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active")',
@@ -217,6 +230,71 @@ describe('describeAiIndex', () => {
       'Select the latest revision before filtering deleted or expired memories'
     );
     expect(response.endsWith(memoryAwareExampleQueriesBlock)).toBe(true);
+  });
+
+  it('lists the configured fact types with their descriptions and counts, and how to read facts', async () => {
+    describeAiIndexAggregationsMock.mockResolvedValue({
+      kiTypeCounts: [],
+      tagCounts: [],
+      factTypeCounts: [{ type: 'fact.known_issue', count: 3 }],
+    });
+
+    const response = await describeAiIndex({
+      ...params,
+      aiIndex: {
+        ...aiIndex,
+        dreaming: {
+          enabled: true,
+          facts: [
+            { type: 'known_issue', description: 'A problem confirmed to affect customers' },
+            { type: 'policy' },
+          ],
+        },
+      },
+      includeMemory: true,
+    });
+
+    expect(describeAiIndexAggregationsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ countFactTypes: true })
+    );
+    expect(response).toContain(
+      [
+        'Dreaming turns memories into long-term facts, each typed fact.<fact type> and written to stand on its own. Fact types, with how many facts each has:',
+        '"fact.known_issue": 3 - A problem confirmed to affect customers',
+        '"fact.policy": 0',
+        'Facts of one type, newest first:',
+        'FROM ai-index-idx-support* METADATA _id',
+        '| WHERE type == "fact.<fact type>"',
+      ].join('\n')
+    );
+    expect(response).toContain(
+      [
+        'The most recent facts:',
+        'FROM ai-index-idx-support* METADATA _id',
+        '| WHERE type LIKE "fact.*"',
+      ].join('\n')
+    );
+  });
+
+  it('leaves facts out of the memory section when no fact types are configured', async () => {
+    const response = await describeAiIndex({
+      ...params,
+      aiIndex: {
+        ...aiIndex,
+        dreaming: { enabled: true, entities: { nodes: [{ type: 'customer' }] } },
+      },
+      includeMemory: true,
+    });
+
+    expect(describeAiIndexAggregationsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ countFactTypes: false })
+    );
+    expect(response).toContain('\nMemory\n');
+    expect(response).not.toContain('Fact types');
+    expect(response).not.toContain('type LIKE "fact.*"\n');
+    expect(response).toContain(
+      'For cross-session recall, search granular facts with hybrid retrieval:\nFROM ai-index-idx-support* METADATA _id, _index, _score\n| WHERE type == "memory.session_fact"\n'
+    );
   });
 
   it('omits memory capability when dreaming is not set up', async () => {
