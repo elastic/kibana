@@ -11,6 +11,7 @@ import {
   Controls,
   Handle,
   MarkerType,
+  Panel,
   Position,
   ReactFlow,
   type Edge,
@@ -35,6 +36,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { CellDefinition } from '../../common/types';
+import { useNotebookServices } from '../services';
 import {
   buildGraphView,
   CELL_NODE_SIZE,
@@ -227,6 +229,25 @@ const SourceNode = ({ data: { label, width, highlight } }: NodeProps<SourceFlowN
 const NODE_TYPES: NodeTypes = { cell: CellNode, source: SourceNode };
 
 /** The notebook's cells and data sources as a top-to-bottom dependency graph. */
+/** Placeholder until the performance check exists: shows whether the developer toolbar turned it on. */
+const PerformanceCheckStatus = () => {
+  const { performanceCheck$ } = useNotebookServices();
+  const enabled = useStateFromPublishingSubject(performanceCheck$);
+  return (
+    <Panel position="top-left">
+      <EuiText size="xs" color="subdued" data-test-subj="notebookPerformanceCheckStatus">
+        {enabled
+          ? i18n.translate('xpack.notebook.performanceCheck.on', {
+              defaultMessage: 'Performance check: on',
+            })
+          : i18n.translate('xpack.notebook.performanceCheck.off', {
+              defaultMessage: 'Performance check: off',
+            })}
+      </EuiText>
+    </Panel>
+  );
+};
+
 export const DependencyGraph = ({
   onSelectCell,
 }: {
@@ -343,6 +364,7 @@ export const DependencyGraph = ({
         >
           <Background />
           <Controls showInteractive={false} showFitView={false} />
+          <PerformanceCheckStatus />
         </ReactFlow>
       )}
     </div>
