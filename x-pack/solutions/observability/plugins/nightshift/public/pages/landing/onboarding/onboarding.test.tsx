@@ -227,7 +227,8 @@ describe('NightshiftOnboarding', () => {
 
       fireEvent.click(screen.getByTestId('nightshiftOnboardingStepLink-connectSources'));
       expect(currentStep()).toBe('connectSources');
-      expect(linkedSteps()).toEqual(['addData', 'investigate', 'automate']);
+      // Later steps are not links, even though a run and an investigation exist.
+      expect(linkedSteps()).toEqual(['addData']);
       expect(screen.queryByText('Back to suggestions')).not.toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('nightshiftOnboardingConnectSourcesProceedButton'));

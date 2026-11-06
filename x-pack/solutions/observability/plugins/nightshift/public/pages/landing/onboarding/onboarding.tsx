@@ -220,7 +220,7 @@ export function NightshiftOnboarding({
     const index = ONBOARDING_STEP_IDS.indexOf(id);
     return index < currentIndex ? 'complete' : index > currentIndex ? 'disabled' : 'current';
   };
-  const backTo = (id: 'addData' | 'connectSources') =>
+  const backTo = (id: 'addData' | 'connectSources' | 'investigate') =>
     statusOf(id) === 'complete' ? () => setStepOverride(id) : undefined;
 
   const steps: Record<OnboardingStepId, OnboardingStepState> = {
@@ -233,8 +233,7 @@ export function NightshiftOnboarding({
     },
     investigate: {
       status: statusOf('investigate'),
-      onClick:
-        isConnected && step !== 'investigate' ? () => setStepOverride('investigate') : undefined,
+      onClick: backTo('investigate'),
       hint:
         step === 'investigate' && execution?.status === 'running'
           ? i18n.translate('xpack.nightshift.onboarding.steps.analyzingHint', {
@@ -242,13 +241,7 @@ export function NightshiftOnboarding({
             })
           : undefined,
     },
-    automate: {
-      status: statusOf('automate'),
-      onClick:
-        latestInvestigation && isConnected && step !== 'automate'
-          ? () => setStepOverride(undefined)
-          : undefined,
-    },
+    automate: { status: statusOf('automate') },
   };
 
   const stepAction =
