@@ -1703,6 +1703,22 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
         options: {
           oasOperationObject: () => ({
+            requestBody: {
+              content: {
+                'application/json': {
+                  examples: {
+                    restartAgentRequest: {
+                      value: {},
+                    },
+                    forceRestartAgentRequest: {
+                      value: {
+                        force: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
             responses: {
               200: {
                 content: {
@@ -1724,6 +1740,22 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
                       badRequestResponse: {
                         value: {
                           message: 'Bad Request',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              409: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      pendingRestartResponse: {
+                        value: {
+                          statusCode: 409,
+                          error: 'Conflict',
+                          message:
+                            'Agent agent-1 already has a pending restart action a1b2c3d4-e5f6-7890-abcd-ef1234567890. Use force to restart anyway.',
                         },
                       },
                     },
