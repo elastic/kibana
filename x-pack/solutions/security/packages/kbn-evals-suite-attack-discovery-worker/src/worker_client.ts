@@ -162,9 +162,10 @@ export class AttackDiscoveryWorkerClient {
    * Runs the floor worker through the normal route, follows it to the child it dispatches
    * (`childWorkflowId`) and polls that child until `isDone` accepts it or it ends. Finding the
    * child and polling it share one deadline of `maxWaitMs`; once the child has ended, the floor
-   * gets a further `FLOOR_IDLE_WAIT_MS` to settle, so a call takes at most the sum. A timeout or an execution with no steps is returned, not thrown, so the row is scored (and fails
-   * by name) instead of vanishing from the results. When the floor ends without starting the
-   * child, the floor's own execution is returned. Every execution started is pushed to `started`.
+   * gets a further `FLOOR_IDLE_WAIT_MS` to settle, so a call takes at most the sum. A timeout or
+   * an execution with no steps is returned, not thrown, so the row is scored (and fails by name)
+   * instead of vanishing from the results. When the floor ends without starting the child, the
+   * floor's own execution is returned. Every execution started is pushed to `started`.
    */
   private async runFloorToChild({
     spaceId,
@@ -457,7 +458,8 @@ export class AttackDiscoveryWorkerClient {
    * Cancels what is still running, including reviews parked on the analyst gate. Every execution
    * is attempted. A 404 (already gone) is ignored; any other failure is thrown after all attempts
    * finish, naming each execution id and HTTP status (an `AggregateError` when several failed),
-   * because a review that could not be cancelled stays parked.
+   * because a review that could not be cancelled stays parked. Those executions stay pending, so
+   * a later call retries them.
    */
   async cancelPending(): Promise<void> {
     await this.cancelEntries(this.pendingExecutions.splice(0));
@@ -517,7 +519,8 @@ export class AttackDiscoveryWorkerClient {
     );
     const failures = results.flatMap((result, index) => {
       if (result.status !== 'rejected' || httpStatus(result.reason) === 404) return [];
-      const { executionId } = pending[index];
+      const { spaceId, executionId } = pending[index];
+      this.track(spaceId, executionId);
       const message = `Could not cancel execution ${executionId} (HTTP ${
         httpStatus(result.reason) ?? 'unknown'
       }): ${errorMessage(result.reason)}`;

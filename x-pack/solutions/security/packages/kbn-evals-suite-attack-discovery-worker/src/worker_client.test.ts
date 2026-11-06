@@ -683,6 +683,21 @@ describe('AttackDiscoveryWorkerClient.cancelPending', () => {
     expect(cancelled.sort()).toEqual(['a', 'b', 'c']);
   });
 
+  it('keeps an execution whose cancel failed pending, so the next call retries only it', async () => {
+    const failing: Record<string, number> = { b: 500 };
+    const { client, cancelled } = cancelFailing(failing);
+    await expect(client.cancelPending()).rejects.toThrow(
+      /Could not cancel execution b \(HTTP 500\)/
+    );
+    cancelled.length = 0;
+    delete failing.b;
+    await expect(client.cancelPending()).resolves.toBeUndefined();
+    expect(cancelled).toEqual(['b']);
+    cancelled.length = 0;
+    await client.cancelPending();
+    expect(cancelled).toEqual([]);
+  });
+
   it('ignores a 404', async () => {
     const { client, cancelled } = cancelFailing({ b: 404 });
     await expect(client.cancelPending()).resolves.toBeUndefined();
