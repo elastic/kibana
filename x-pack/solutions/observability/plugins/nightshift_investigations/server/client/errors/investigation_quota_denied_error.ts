@@ -8,8 +8,12 @@
 export class InvestigationQuotaDeniedError extends Error {
   public readonly statusCode = 429;
 
-  constructor() {
-    super('The daily investigation limit has been reached');
+  constructor(public readonly limit?: number) {
+    super(
+      limit === undefined
+        ? 'The daily investigation limit has been reached'
+        : `The daily investigation limit of ${limit} has been reached`
+    );
     this.name = 'InvestigationQuotaDeniedError';
   }
 }

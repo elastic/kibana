@@ -19,13 +19,19 @@ import type { AttackSignals, Disposition, InvestigationMeta, StoredFingerprint }
 import { FingerprintIndexUnscopedError } from './fingerprint_index_unscoped_error';
 import {
   FINGERPRINT_TTL_MS,
+  INVESTIGATION_PENDING_MS,
   STORED_ALERT_ID_CAP,
+  analyzedIdsOf,
   bestStoredForGroup,
   chainSpan,
+  matchedFingerprints,
   clusterNewAttacks,
   disposition,
   fingerprintId,
+  investigationIdFromAttackId,
+  investigationStillPending,
   hostUserPair,
+  sharedIds,
   uniqueSorted,
 } from './cluster';
 
@@ -81,6 +87,20 @@ export interface MatchAttachment {
   investigation_id: string;
   journal_alerts_retired: boolean;
   tag_correlated_alerts: boolean;
+  tag_fp_chain_alerts: boolean;
+  /** The Investigation was not readable yet, so this attach writes the alert ids. */
+  fingerprint_pending: boolean;
+  /** True only for a confirmed 404. A failed read must not retarget the fingerprint. */
+  retarget_if_missing: boolean;
+  /** Written when the attach gives up because the Investigation changed under it. */
+  own_fingerprint_id: string;
+  host_entity_ids: string[];
+  user_entity_ids: string[];
+  entity_pairs: string[];
+  tactics: string[];
+  first_alert_at: string;
+  last_alert_at: string;
+  expires_at: string;
 }
 
 export interface MatchAttackFingerprintsOutput {
@@ -328,6 +348,8 @@ const toStored = (hit: {
     id: typeof source.id === 'string' ? source.id : hit._id ?? '',
     investigationId,
     alertIds: asStringList(attributes.alert_ids),
+    analyzedAlertIds:
+      'analyzed_alert_ids' in attributes ? asStringList(attributes.analyzed_alert_ids) : undefined,
     hostEntityIds: asStringList(attributes.host_entity_ids),
     userEntityIds: asStringList(attributes.user_entity_ids),
     entityPairs: asStringList(attributes.entity_pairs),
@@ -470,6 +492,8 @@ const fingerprintDocument = (
       investigation_id: investigationId,
       attack_discovery_id: attack.attackId,
       alert_ids: uniqueSorted(attack.alertIds).slice(0, STORED_ALERT_ID_CAP),
+      // Frozen at creation. Later extensions of alert_ids do not grow this set.
+      analyzed_alert_ids: uniqueSorted(attack.alertIds).slice(0, STORED_ALERT_ID_CAP),
       alert_count: attack.alertIds.length,
       host_entity_ids: uniqueSorted(attack.hostEntityIds).slice(0, STORED_ALERT_ID_CAP),
       user_entity_ids: uniqueSorted(attack.userEntityIds).slice(0, STORED_ALERT_ID_CAP),
@@ -526,7 +550,13 @@ const createFingerprint = async (
   }
 };
 
-const extensionDoc = (current: StoredFingerprint, span: AttackSignals, now: Date) => {
+const extensionDoc = (
+  current: StoredFingerprint,
+  span: AttackSignals,
+  now: Date,
+  limitToAnalyzed: boolean,
+  withholdAlertIds: boolean
+) => {
   const lastMs = span.lastAlertAt === undefined ? Number.NaN : Date.parse(span.lastAlertAt);
   const expiresAt = new Date(
     (Number.isNaN(lastMs) ? now.getTime() : lastMs) + FINGERPRINT_TTL_MS
@@ -542,9 +572,17 @@ const extensionDoc = (current: StoredFingerprint, span: AttackSignals, now: Date
     .filter((value): value is string => value !== undefined && value.length > 0)
     .sort()
     .at(-1);
-  const alertIds = uniqueSorted([...current.alertIds, ...span.alertIds]);
+  // A closed false positive only records alerts the review already judged.
+  // A pending Investigation has not been created yet, so this attack's alert ids
+  // stay off the fingerprint until the attach sees the conversation.
+  const incoming = withholdAlertIds
+    ? []
+    : limitToAnalyzed
+    ? sharedIds(span.alertIds, analyzedIdsOf(current))
+    : span.alertIds;
+  const alertIds = uniqueSorted([...current.alertIds, ...incoming]);
   const storedIds = new Set(current.alertIds);
-  const added = uniqueSorted(span.alertIds).filter((id) => !storedIds.has(id)).length;
+  const added = uniqueSorted(incoming).filter((id) => !storedIds.has(id)).length;
   return {
     expires_at: nextExpires,
     attributes: {
@@ -594,13 +632,60 @@ const readStoredFingerprint = async (
  * still find this fingerprint. A conflicting update is re-read and merged again, so
  * one extension cannot erase another. A failed update still attaches the attack.
  */
-const extendFingerprint = async (
+const retargetStoredFingerprint = async (
   esClient: ElasticsearchClient,
   stored: StoredFingerprint,
   group: readonly AttackSignals[],
   now: Date,
   abortSignal: AbortSignal | undefined,
   logger: StepHandlerContext['logger']
+): Promise<'updated' | 'noop' | 'failed'> => {
+  const span = chainSpan(group);
+  try {
+    const response = await esClient.update(
+      {
+        index: ATTACK_FINGERPRINT_INDEX,
+        id: stored.id,
+        retry_on_conflict: 3,
+        script: {
+          lang: 'painless',
+          source: RETARGET_FINGERPRINT_SCRIPT,
+          params: {
+            expected: {
+              investigation_id: stored.investigationId,
+              pending_ms: INVESTIGATION_PENDING_MS,
+            },
+            next: {
+              written_at: now.toISOString(),
+              investigation_id: investigationIdFromAttackId(span.attackId),
+              attack_discovery_id: span.attackId,
+              expires_at: fingerprintExpiresAt(span, now),
+              last_alert_at: span.lastAlertAt ?? '',
+            },
+            alerts: { values: uniqueSorted(span.alertIds).slice(0, STORED_ALERT_ID_CAP) },
+          },
+        },
+      },
+      { signal: abortSignal }
+    );
+    return response.result === 'noop' ? 'noop' : 'updated';
+  } catch (error) {
+    logger.warn(
+      `Attack fingerprint retarget failed for ${stored.investigationId}: ${errorText(error)}`
+    );
+    return 'failed';
+  }
+};
+
+const extendFingerprint = async (
+  esClient: ElasticsearchClient,
+  stored: StoredFingerprint,
+  group: readonly AttackSignals[],
+  now: Date,
+  abortSignal: AbortSignal | undefined,
+  logger: StepHandlerContext['logger'],
+  limitToAnalyzed: boolean,
+  withholdAlertIds: boolean
 ): Promise<void> => {
   const span = chainSpan(group);
   let current = stored;
@@ -613,7 +698,7 @@ const extendFingerprint = async (
           ...(current.seqNo !== undefined && current.primaryTerm !== undefined
             ? { if_seq_no: current.seqNo, if_primary_term: current.primaryTerm }
             : {}),
-          doc: extensionDoc(current, span, now),
+          doc: extensionDoc(current, span, now, limitToAnalyzed, withholdAlertIds),
         },
         { signal: abortSignal }
       );
@@ -665,7 +750,7 @@ const readInvestigation = async (
     logger.warn(
       `Attack fingerprint could not read Investigation ${investigationId}: ${errorText(error)}`
     );
-    return undefined;
+    return { unreadable: true };
   }
 };
 
@@ -780,43 +865,120 @@ const assertFingerprintWritesAllowed = async (
   }
 };
 
+/**
+ * Succeeds only while the document still points at the Investigation the caller
+ * read, and only once that fingerprint is at least 15 minutes old. A second
+ * attack that timed out against the same fingerprint no-ops and starts its own
+ * review. Hosts, users, and tactics stay as stored. The same script is inlined
+ * in attack_discovery_attach.yaml.
+ */
+const RETARGET_FINGERPRINT_SCRIPT = `
+  if (ctx._source.attributes == null || ctx._source.attributes.investigation_id != params.expected.investigation_id) {
+    ctx.op = 'noop';
+  } else if (ctx._source['@timestamp'] != null && ZonedDateTime.parse(params.next.written_at).toInstant().toEpochMilli() - ZonedDateTime.parse(ctx._source['@timestamp']).toInstant().toEpochMilli() < params.expected.pending_ms) {
+    ctx.op = 'noop';
+  } else {
+    ctx._source['@timestamp'] = params.next.written_at;
+    ctx._source.attributes.investigation_id = params.next.investigation_id;
+    ctx._source.attributes.attack_discovery_id = params.next.attack_discovery_id;
+    ctx._source.attributes.alert_ids = params.alerts.values;
+    ctx._source.attributes.analyzed_alert_ids = params.alerts.values;
+    ctx._source.attributes.alert_count = params.alerts.values.size();
+    if (params.next.expires_at != null && params.next.expires_at.length() > 0) {
+      ctx._source.expires_at = params.next.expires_at;
+    }
+    if (params.next.last_alert_at != null && params.next.last_alert_at.length() > 0) {
+      ctx._source.attributes.last_alert_at = params.next.last_alert_at;
+    }
+  }
+`;
+
+/** A 404, or a failed read of a fingerprint still inside 15 minutes. */
+const fingerprintStillPending = (
+  meta: InvestigationMeta | undefined,
+  stored: StoredFingerprint,
+  now: Date
+): boolean =>
+  meta === undefined || (meta.unreadable === true && investigationStillPending(stored, now));
+
+/** A failed read still waits, but only a confirmed 404 may retarget the fingerprint. */
+const confirmedMissing = (meta: InvestigationMeta | undefined, pending: boolean): boolean =>
+  pending && meta === undefined;
+
+const fingerprintExpiresAt = (attack: AttackSignals, now: Date): string => {
+  const last = attack.lastAlertAt === undefined ? Number.NaN : Date.parse(attack.lastAlertAt);
+  return new Date((Number.isNaN(last) ? now.getTime() : last) + FINGERPRINT_TTL_MS).toISOString();
+};
+
+interface AttachmentFlags {
+  tagCorrelatedAlerts: boolean;
+  journalAlertsRetired: boolean;
+  tagFpChainAlerts: boolean;
+  fingerprintPending: boolean;
+  retargetIfMissing: boolean;
+  analyzedAlertIds?: readonly string[];
+}
+
 const attachmentOf = (
   attack: AttackSignals,
   investigationId: string,
-  tag: boolean,
-  retireAlerts: boolean
+  spaceId: string,
+  now: Date,
+  flags: AttachmentFlags
 ): MatchAttachment => ({
   attack_discovery_id: attack.attackId.slice(0, 512),
   title: attack.title.slice(0, 1024),
-  alert_ids: attack.alertIds.slice(0, MAX_ALERT_IDS),
+  // A false-positive continuation retires only the alerts the review judged.
+  alert_ids: (flags.analyzedAlertIds === undefined
+    ? attack.alertIds
+    : sharedIds(attack.alertIds, flags.analyzedAlertIds)
+  ).slice(0, MAX_ALERT_IDS),
   summary_markdown: attack.summaryMarkdown.slice(0, 8000),
   investigation_id: investigationId.slice(0, 256),
-  journal_alerts_retired: retireAlerts,
-  tag_correlated_alerts: tag,
+  journal_alerts_retired: flags.journalAlertsRetired,
+  tag_correlated_alerts: flags.tagCorrelatedAlerts,
+  tag_fp_chain_alerts: flags.tagFpChainAlerts,
+  fingerprint_pending: flags.fingerprintPending,
+  retarget_if_missing: flags.retargetIfMissing,
+  own_fingerprint_id: fingerprintId(spaceId, attack, investigationIdFromAttackId(attack.attackId)),
+  host_entity_ids: uniqueSorted(attack.hostEntityIds).slice(0, STORED_ALERT_ID_CAP),
+  user_entity_ids: uniqueSorted(attack.userEntityIds).slice(0, STORED_ALERT_ID_CAP),
+  entity_pairs: uniqueSorted(attack.entityPairs ?? []).slice(0, STORED_ALERT_ID_CAP),
+  tactics: uniqueSorted(attack.tactics).slice(0, STORED_ALERT_ID_CAP),
+  first_alert_at: attack.firstAlertAt ?? '',
+  last_alert_at: attack.lastAlertAt ?? '',
+  expires_at: fingerprintExpiresAt(attack, now),
 });
 
 const applyDecision = (
   group: readonly AttackSignals[],
   decision: Disposition,
   reviews: MatchReview[],
-  attachments: MatchAttachment[]
+  attachments: MatchAttachment[],
+  fingerprintPending: boolean,
+  retargetIfMissing: boolean,
+  spaceId: string,
+  now: Date,
+  analyzedAlertIds?: readonly string[]
 ): void => {
   if (decision.kind === 'attach') {
     for (const member of group) {
       attachments.push(
-        attachmentOf(
-          member,
-          decision.investigationId,
-          decision.tagCorrelatedAlerts,
-          decision.journalAlertsRetired
-        )
+        attachmentOf(member, decision.investigationId, spaceId, now, {
+          tagCorrelatedAlerts: decision.tagCorrelatedAlerts,
+          journalAlertsRetired: decision.journalAlertsRetired,
+          tagFpChainAlerts: decision.tagFpChainAlerts,
+          fingerprintPending,
+          retargetIfMissing,
+          analyzedAlertIds: decision.tagFpChainAlerts ? analyzedAlertIds : undefined,
+        })
       );
     }
     return;
   }
 
-  // The review tags the later attacks' alerts with its own when the verdict
-  // escalates. A false positive leaves the whole batch untagged.
+  // The review retires this batch, including a false positive under `az:ad_fp_chain`.
+  // These same-run attaches do not tag.
   reviews.push(
     reviewOf(
       group[0],
@@ -827,7 +989,15 @@ const applyDecision = (
     )
   );
   for (const member of group.slice(1)) {
-    attachments.push(attachmentOf(member, decision.investigationId, false, false));
+    attachments.push(
+      attachmentOf(member, decision.investigationId, spaceId, now, {
+        tagCorrelatedAlerts: false,
+        journalAlertsRetired: false,
+        tagFpChainAlerts: false,
+        fingerprintPending: false,
+        retargetIfMissing: false,
+      })
+    );
   }
 };
 
@@ -877,9 +1047,9 @@ export const matchAttackFingerprints = async ({
   );
 
   const investigationIds = uniqueSorted(
-    groups
-      .map((group) => bestStoredForGroup(group, stored)?.investigationId)
-      .filter((id): id is string => id !== undefined)
+    groups.flatMap((group) =>
+      matchedFingerprints(group, stored).map((item) => item.investigationId)
+    )
   );
   const investigations = new Map<string, InvestigationMeta | undefined>();
   await mapPool(investigationIds, ENRICH_CONCURRENCY, async (id) => {
@@ -890,7 +1060,7 @@ export const matchAttackFingerprints = async ({
   const attachments: MatchAttachment[] = [];
   for (const group of groups) {
     const span = chainSpan(group);
-    const match = bestStoredForGroup(group, stored);
+    const match = bestStoredForGroup(group, stored, investigations, now);
     let decision = disposition(
       span,
       match,
@@ -899,8 +1069,51 @@ export const matchAttackFingerprints = async ({
       now
     );
 
+    let attachedTo: StoredFingerprint | undefined;
+    let fingerprintPending = false;
+    let retargetIfMissing = false;
     if (decision.kind === 'attach' && match !== undefined) {
-      await extendFingerprint(esClient, match, group, now, abortSignal, logger);
+      attachedTo = match;
+      // Missing, or unreadable, and still inside the 15-minute window. The attach
+      // adds this attack's alert ids after the Investigation appears. Only a
+      // confirmed 404 may retarget the fingerprint if the wait then fails.
+      const matchedMeta = investigations.get(match.investigationId);
+      fingerprintPending = fingerprintStillPending(matchedMeta, match, now);
+      retargetIfMissing = confirmedMissing(matchedMeta, fingerprintPending);
+      await extendFingerprint(
+        esClient,
+        match,
+        group,
+        now,
+        abortSignal,
+        logger,
+        decision.tagFpChainAlerts,
+        fingerprintPending
+      );
+    } else if (decision.retargetFingerprint === true && match !== undefined) {
+      const outcome = await retargetStoredFingerprint(
+        esClient,
+        match,
+        group,
+        now,
+        abortSignal,
+        logger
+      );
+      // The loser, or a failed write, still needs a fingerprint of its own.
+      // The winner already rewrote the shared document.
+      if (outcome !== 'updated') {
+        await createFingerprint(
+          esClient,
+          group,
+          spaceId,
+          decision.investigationId,
+          parentRunId,
+          now,
+          abortSignal,
+          logger,
+          decision.investigationId
+        );
+      }
     } else {
       const written = await createFingerprint(
         esClient,
@@ -931,7 +1144,19 @@ export const matchAttackFingerprints = async ({
             : decision;
         if (adopted.kind === 'attach' && conflicting !== undefined) {
           decision = adopted;
-          await extendFingerprint(esClient, conflicting, group, now, abortSignal, logger);
+          attachedTo = conflicting;
+          fingerprintPending = fingerprintStillPending(meta, conflicting, now);
+          retargetIfMissing = confirmedMissing(meta, fingerprintPending);
+          await extendFingerprint(
+            esClient,
+            conflicting,
+            group,
+            now,
+            abortSignal,
+            logger,
+            adopted.tagFpChainAlerts,
+            fingerprintPending
+          );
         } else {
           if (adopted.kind === 'review_linked') {
             decision = adopted;
@@ -951,7 +1176,17 @@ export const matchAttackFingerprints = async ({
       }
     }
 
-    applyDecision(group, decision, reviews, attachments);
+    applyDecision(
+      group,
+      decision,
+      reviews,
+      attachments,
+      fingerprintPending,
+      retargetIfMissing,
+      spaceId,
+      now,
+      attachedTo === undefined ? undefined : analyzedIdsOf(attachedTo)
+    );
   }
 
   return { reviews, attachments };

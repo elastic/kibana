@@ -81,7 +81,7 @@ describe('Significant Events run quota routes', () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-09-03T08:30:00.000Z'));
     jest.mocked(assertCanManageRunQuotas).mockReset().mockResolvedValue(undefined);
     jest.mocked(canManageRunQuotas).mockReset().mockResolvedValue(false);
-    jest.mocked(consumeRunQuota).mockReset().mockResolvedValue({ allowed: true });
+    jest.mocked(consumeRunQuota).mockReset().mockResolvedValue({ allowed: true, limit: 15 });
     jest
       .mocked(createRunQuotaInternalRepository)
       .mockReset()
@@ -119,6 +119,9 @@ describe('Significant Events run quota routes', () => {
   it('accepts only non-empty bounded settings updates', () => {
     expect(putRoute.params.safeParse({ body: { enabled: true } }).success).toBe(true);
     expect(putRoute.params.safeParse({ body: { limits: { detection: 0 } } }).success).toBe(true);
+    expect(putRoute.params.safeParse({ body: { limits: { investigation: null } } }).success).toBe(
+      true
+    );
     expect(putRoute.params.safeParse({ body: { activateLimits: { detection: 15 } } }).success).toBe(
       true
     );
@@ -137,11 +140,13 @@ describe('Significant Events run quota routes', () => {
       { limits: { detection: -1 } },
       { limits: { detection: 10_001 } },
       { limits: { detection: 1.5 } },
+      { limits: { investigation: 0 } },
       { limits: { memory: 1 } },
       { activateLimits: {} },
       { activateLimits: { detection: 0 } },
       { activateLimits: { memory: 1 } },
       { enabled: true, activateLimits: { detection: 15 } },
+      { activateLimits: { detection: 15 }, limits: { detection: 5 } },
     ]) {
       expect(putRoute.params.safeParse({ body }).success).toBe(false);
     }
@@ -251,6 +256,36 @@ describe('Significant Events run quota routes', () => {
     });
   });
 
+  it('stores an unlimited investigation limit as zero and leaves an omitted one untouched', async () => {
+    jest.mocked(patchRunQuotaSettings).mockResolvedValue(defaultSettings);
+    mockLedgerCounts({ detection: 0, investigation: 0, ki_extraction: 0 });
+
+    await putRoute.handler({
+      ...handlerParams,
+      params: { body: { limits: { investigation: null } } },
+    } as never);
+    expect(patchRunQuotaSettings).toHaveBeenLastCalledWith(repository, {
+      limits: { investigation: 0 },
+    });
+
+    await putRoute.handler({
+      ...handlerParams,
+      params: { body: { limits: { detection: 5 } } },
+    } as never);
+    expect(patchRunQuotaSettings).toHaveBeenLastCalledWith(repository, {
+      limits: { detection: 5 },
+    });
+
+    await putRoute.handler({
+      ...handlerParams,
+      params: { body: { activateLimits: { detection: 5 }, limits: { investigation: null } } },
+    } as never);
+    expect(patchRunQuotaSettings).toHaveBeenLastCalledWith(repository, {
+      activateLimits: { detection: 5 },
+      limits: { investigation: 0 },
+    });
+  });
+
   it.each<RunQuotaConsumeRequest>([
     { group: 'detection' },
     { group: 'ki_extraction' },
@@ -261,7 +296,7 @@ describe('Significant Events run quota routes', () => {
         ...handlerParams,
         params: { body },
       } as never)
-    ).resolves.toEqual({ allowed: true });
+    ).resolves.toEqual({ allowed: true, limit: 15 });
 
     expect(consumeRunQuota).toHaveBeenCalledWith({
       internalRepository: repository,

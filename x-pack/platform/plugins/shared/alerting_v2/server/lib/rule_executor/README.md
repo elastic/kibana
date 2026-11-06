@@ -61,6 +61,7 @@ RuleExecutionPipeline
    +--> DirectorStep
    +--> SuppressRedundantNoDataEventsStep
    +--> StoreAlertEventsStep
+   +--> PublishAlertStatusChangesStep
 ```
 
 ## The most important design detail: streaming
@@ -190,7 +191,8 @@ Step order is defined in `setup/bind_rule_executor.ts`.
 | 7 | `ClassifyAbsentGroupsStep` | Forward every breach batch unchanged while accumulating the full-run breach set. Once the stream drains, run the data-presence and recovery queries once and emit recovery / `no_data` / continued-`breached` events for the active groups absent from that set, as a single final batch. No-op for `signal` rules and when `recovery.strategy` is `'manual'` and `no_data.strategy` is `'ignore'`. |
 | 8 | `DirectorStep` | Enrich alert-type events with episode state (1:1 — never drops events) and thread the prior state it loaded onto `state.previousAlertStateByGroupHash`. |
 | 9 | `SuppressRedundantNoDataEventsStep` | Write policy: drop director-enriched `no_data` events that carry no lifecycle change for a group already held in no-data (previous persisted event was `no_data` and episode id / `alert.status` / `status_count` are unchanged), so a held group writes one transition marker instead of one event per run. `breached` / `recovered` are never dropped. Pass-through when no prior state was threaded (`signal` rules). |
-| 10 | `StoreAlertEventsStep` | Persist the batch into `.rule-events`. |
+| 10 | `StoreAlertEventsStep` | Persist the batch into `.rule-events` and thread the acknowledged events onto `state.storedAlertEvents`. |
+| 11 | `PublishAlertStatusChangesStep` | Publish the batch's alert status changes (recorded by the director) whose events were stored, once per run, for the `alerting.alertStatusChanged` workflow trigger. Nothing is published until an integration opts in. |
 
 The rule executor runs whenever the plugin is enabled (`xpack.alerting_v2.enabled`). The `alerting:v2:enabled` advanced setting gates only the user-facing surface (UI + APIs), not core engine execution, so rules keep producing events even while the UI and APIs stay hidden. This is intentional: Kibana cannot subscribe to UI setting changes, and a bail-out inside the executor would also stop internally created rules that must always run. The setting's description tells users to disable their rules before turning it off.
 
@@ -441,6 +443,7 @@ bind(RuleExecutionStepsToken).to(MyNewStep).inSingletonScope();
 bind(RuleExecutionStepsToken).to(ClassifyAbsentGroupsStep).inRequestScope();
 bind(RuleExecutionStepsToken).to(DirectorStep).inSingletonScope();
 bind(RuleExecutionStepsToken).to(StoreAlertEventsStep).inSingletonScope();
+bind(RuleExecutionStepsToken).to(PublishAlertStatusChangesStep).inRequestScope();
 ```
 
 Binding order is execution order. Match neighboring scope conventions unless you have a clear reason not to.
