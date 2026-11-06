@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { SPACES_EXTENSION_ID } from '@kbn/core/server';
 import type { CoreStart, KibanaRequest, Logger, SavedObjectsServiceSetup } from '@kbn/core/server';
 import type {
   EncryptedSavedObjectsPluginSetup,
@@ -60,7 +61,12 @@ export class WorkflowPagesService {
   start(deps: WorkflowPagesServiceStartDeps): WorkflowPagesServiceStart {
     const { core, encryptedSavedObjects, authz, getSpaceId, assertWorkflowAccess, audit, logger } =
       deps;
-    const internalClient = core.savedObjects.getUnsafeInternalClient({ includedHiddenTypes });
+    // Every call passes its namespace. The spaces extension would check the space against a
+    // fake request without credentials, and Elasticsearch rejects that `_has_privileges` call.
+    const internalClient = core.savedObjects.getUnsafeInternalClient({
+      includedHiddenTypes,
+      excludedExtensions: [SPACES_EXTENSION_ID],
+    });
     const encryptedClient = encryptedSavedObjects.getClient({ includedHiddenTypes });
     const systemClient = new WorkflowPagesSystemClientImpl({
       logger,
