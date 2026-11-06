@@ -10,11 +10,12 @@ import type { SourceChangeEvent } from '@kbn/nightshift-sources-plugin/server';
 import type { SignificantEventsPluginStartDependencies } from '../../types';
 import type { SignificantEventsMaintenanceService } from '../maintenance/maintenance_service';
 import type { ContinuousOnboardingWorkflowService } from '../workflows/continuous_onboarding_workflow';
+import { canManageSecurity } from '../service_accounts/detection_engine_account';
 import { getContinuousOnboardingTarget } from './get_continuous_onboarding_target';
 import { setContinuousOnboardingEnabled } from './set_continuous_onboarding_enabled';
 
 interface StartServices {
-  coreStart: Pick<CoreStart, 'savedObjects' | 'uiSettings'>;
+  coreStart: Pick<CoreStart, 'savedObjects' | 'uiSettings' | 'elasticsearch'>;
   pluginsStart: Pick<SignificantEventsPluginStartDependencies, 'nightshiftSources'>;
 }
 
@@ -62,6 +63,16 @@ export const syncContinuousOnboarding = async ({
     total,
   });
   if (enabled === undefined) {
+    return;
+  }
+
+  // Installing and switching on a workflow bound to the detection engine account needs the
+  // caller's `manage_security`, which a source author usually lacks. Say so instead of failing
+  // the toggle and rolling it back: an administrator turns continuous extraction on.
+  if (enabled && !(await canManageSecurity({ core: coreStart, request: event.request }))) {
+    logger.warn(
+      'Continuous onboarding was not turned on after the first source was created: it needs a user with the manage_security privilege. Turn it on from an administrator account.'
+    );
     return;
   }
 

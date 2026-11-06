@@ -11,6 +11,8 @@ import type {
   DetectionEngineEnableBody,
   DetectionEngineServiceAccountStatus,
 } from '../../../../common';
+import { StatusError } from '../../../lib/errors/status_error';
+import { reconcileSettingsBackedWorkflows } from '../../../lib/workflows/reconcile_settings_backed_workflows';
 import { createDetectionEngineSetupService } from '../../../lib/service_accounts/service_account_setup';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
@@ -48,21 +50,45 @@ const enableServiceAccountRoute = createServerRoute({
     server,
     getScopedClients,
     getSpaceId,
+    maintenanceService,
+    continuousOnboardingWorkflowService,
+    significantEventsScheduledWorkflowsService,
   }): Promise<{ spaceId: string } & DetectionEngineEnableBody> => {
-    const { licensing } = await getScopedClients({ request });
+    const { licensing, uiSettingsClient } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
 
-    return createDetectionEngineSetupService({
+    const spaceId = await getSpaceId(request);
+    const result = await createDetectionEngineSetupService({
       core: server.core,
       spaces: server.spaces,
       workflowsExtensions: server.workflowsExtensions,
       workflowsManagement: server.workflowsManagement,
+      getMaintenanceState: (stateRequest) => maintenanceService.getState({ request: stateRequest }),
       isServerless: server.isServerless,
     }).enable({
       request,
-      spaceId: await getSpaceId(request),
+      spaceId,
       serviceAccountId: params.body.serviceAccountId,
     });
+
+    // Not while paused: Pause turned the settings off and Resume restores them.
+    if ((await maintenanceService.getState({ request })) === 'enabled') {
+      await reconcileSettingsBackedWorkflows({
+        uiSettingsClient,
+        continuousOnboardingService: continuousOnboardingWorkflowService,
+        scheduledDiscoveryService: significantEventsScheduledWorkflowsService,
+        request,
+        spaceId,
+      }).catch((error) => {
+        throw new StatusError(
+          `The space is bound, but installing its continuous onboarding or scheduled discovery workflows failed: ${
+            error instanceof Error ? error.message : String(error)
+          }. Call _enable again to retry.`,
+          500
+        );
+      });
+    }
+    return result;
   },
 });
 

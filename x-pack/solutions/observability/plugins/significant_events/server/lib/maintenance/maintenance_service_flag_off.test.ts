@@ -11,9 +11,9 @@ import {
   OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
 } from '@kbn/management-settings-ids';
-import { SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { MAINTENANCE_FEATURE_FLAG_ACTOR } from '../../../common/maintenance/actors';
-import { GLOBAL_MAINTENANCE_WORKFLOW_IDS } from './managed_workflow_targets';
+import { GLOBAL_CORE_WORKFLOW_IDS } from './managed_workflow_targets';
 import {
   REQUEST,
   SYSTEM_REQUEST,
@@ -47,7 +47,7 @@ describe('SignificantEventsMaintenanceService', () => {
       await service.pauseOnFlagOff();
 
       expect(updateWorkflow).toHaveBeenCalledWith(
-        `${SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`,
+        `${NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`,
         { enabled: false },
         'space-a',
         SYSTEM_REQUEST
@@ -60,7 +60,7 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(internalRuleBackedRules.bulkDisableRules).toHaveBeenCalledWith({ ids: ['rule-1'] });
       // The shared workflows belong to every space and stay enabled.
       const disabledIds = updateWorkflow.mock.calls.map(([id]) => id);
-      for (const sharedId of GLOBAL_MAINTENANCE_WORKFLOW_IDS) {
+      for (const sharedId of GLOBAL_CORE_WORKFLOW_IDS) {
         expect(disabledIds).not.toContain(sharedId);
       }
       // Each space is paused through a document of its own, holding only its own targets.
@@ -221,7 +221,7 @@ describe('SignificantEventsMaintenanceService', () => {
         expect(document.lastSummary?.partialFailures).toEqual([]);
       }
       expect(updateWorkflow).toHaveBeenCalledWith(
-        `${SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`,
+        `${NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`,
         { enabled: false },
         'space-a',
         SYSTEM_REQUEST

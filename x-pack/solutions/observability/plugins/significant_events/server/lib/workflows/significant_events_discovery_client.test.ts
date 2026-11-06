@@ -8,7 +8,10 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema';
 import { ExecutionStatus } from '@kbn/workflows';
-import { SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  NIGHTSHIFT_BOUND_ORCHESTRATOR_WORKFLOW_ID,
+  NIGHTSHIFT_DETECTION_ENGINE_TRIGGER_SOURCE,
+} from '@kbn/workflows/managed';
 import { installDiscoveryAgents } from '../../agent_builder/agents/discovery';
 import { SignificantEventsDiscoveryClient } from './significant_events_discovery_client';
 
@@ -25,7 +28,7 @@ const statusRequest = httpServerMock.createKibanaRequest();
 const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => {
   const api = {
     getWorkflow: jest.fn().mockResolvedValue({
-      id: SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID,
+      id: NIGHTSHIFT_BOUND_ORCHESTRATOR_WORKFLOW_ID,
       name: 'sigevents-orchestrator',
       enabled: true,
       definition: {},
@@ -77,10 +80,11 @@ describe('SignificantEventsDiscoveryClient', () => {
         managementApi.runWorkflow.mock.invocationCallOrder[0]
       );
       expect(managementApi.runWorkflow).toHaveBeenCalledWith(
-        expect.objectContaining({ id: SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID }),
+        expect.objectContaining({ id: NIGHTSHIFT_BOUND_ORCHESTRATOR_WORKFLOW_ID }),
         'space-a',
         { connector_id: 'canonical-connector' },
-        request
+        request,
+        NIGHTSHIFT_DETECTION_ENGINE_TRIGGER_SOURCE
       );
     });
 
@@ -214,10 +218,11 @@ describe('SignificantEventsDiscoveryClient', () => {
       });
 
       expect(managementApi.runWorkflow).toHaveBeenCalledWith(
-        expect.objectContaining({ id: SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID }),
+        expect.objectContaining({ id: NIGHTSHIFT_BOUND_ORCHESTRATOR_WORKFLOW_ID }),
         'space-a',
         { connector_id: 'canonical-connector' },
-        expect.anything()
+        expect.anything(),
+        NIGHTSHIFT_DETECTION_ENGINE_TRIGGER_SOURCE
       );
     });
   });
@@ -277,7 +282,7 @@ describe('SignificantEventsDiscoveryClient', () => {
       expect(result).toEqual({
         status: SignificantEventsWorkflowStatus.Failed,
         executionId: 'exec-1',
-        error: 'Workflow system-significant-events-orchestrator timed out',
+        error: `Workflow ${NIGHTSHIFT_BOUND_ORCHESTRATOR_WORKFLOW_ID}-space-a timed out`,
       });
     });
   });

@@ -79,7 +79,7 @@ export async function canManageSecurity({
   core,
   request,
 }: {
-  core: CoreStart;
+  core: Pick<CoreStart, 'elasticsearch'>;
   request: KibanaRequest;
 }): Promise<boolean> {
   const { has_all_requested: allowed } = await core.elasticsearch.client
@@ -149,4 +149,36 @@ export async function asDetectionEngineAccount<T>({
     );
   }
   return fn(request);
+}
+
+/**
+ * Refuses a service account that is not the space's detection engine account. A user's request
+ * passes: only service accounts are held to the space's account, so another Nightshift account
+ * cannot act for this engine, and a space that is not set up refuses every service account.
+ */
+export async function assertServiceAccountActsForSpace({
+  core,
+  request,
+  spaceId,
+}: {
+  core: CoreStart;
+  request: KibanaRequest;
+  spaceId: string;
+}): Promise<void> {
+  const principal = core.security.authc.getPrincipal(request);
+  if (principal?.type !== 'service_account') {
+    return;
+  }
+  const accountId = await getDetectionEngineAccountId({ core, spaceId });
+  if (accountId === undefined) {
+    throw createNotSetUpError({
+      serviceAccountsEnabled: core.security.serviceAccounts.isEnabled(),
+    });
+  }
+  if (principal.serviceAccountId !== accountId) {
+    throw new StatusError(
+      `Service account [${principal.serviceAccountId}] is not the detection engine account of this space`,
+      403
+    );
+  }
 }

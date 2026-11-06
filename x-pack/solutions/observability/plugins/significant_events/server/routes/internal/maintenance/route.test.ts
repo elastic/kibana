@@ -5,75 +5,78 @@
  * 2.0.
  */
 
+import type { Boom } from '@hapi/boom';
+import { OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED } from '@kbn/management-settings-ids';
 import { NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import {
+  canManageSecurity,
+  getDetectionEngineAccountId,
+} from '../../../lib/service_accounts/detection_engine_account';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { internalMaintenanceRoutes } from './route';
 
 jest.mock('../../utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
 }));
+jest.mock('../../../lib/service_accounts/detection_engine_account');
 
-const route =
-  internalMaintenanceRoutes['POST /internal/significant_events/maintenance/cleanup/_bootstrap'];
-type HandlerParams = Parameters<typeof route.handler>[0];
+const resumeRoute =
+  internalMaintenanceRoutes['POST /internal/significant_events/maintenance/_resume'];
+type HandlerParams = Parameters<typeof resumeRoute.handler>[0];
 
-describe('cleanup workflow bootstrap route', () => {
+describe('resume route', () => {
+  const resume = jest.fn().mockResolvedValue({ state: 'enabled' });
+  const params = {
+    request: { spaceId: 'space-a' },
+    server: { core: { security: { authc: { getCurrentUser: () => ({ username: 'marco' }) } } } },
+    getScopedClients: jest.fn().mockResolvedValue({ licensing: {} }),
+    maintenanceService: { resume },
+  } as unknown as HandlerParams;
+
   beforeEach(() => jest.clearAllMocks());
 
-  const createHandlerParams = (ensureEnabled = jest.fn().mockResolvedValue(undefined)) => {
-    const request = {};
-    const licensing = {};
-    const server = {};
-    const logger = { warn: jest.fn() };
-    const maintenanceService = { getState: jest.fn().mockResolvedValue('enabled') };
-    const getSpaceId = jest.fn().mockResolvedValue('space-a');
+  it('refuses a caller without manage_security in a space that runs as the service account', async () => {
+    jest.mocked(getDetectionEngineAccountId).mockResolvedValue('account-1');
+    jest.mocked(canManageSecurity).mockResolvedValue(false);
 
-    return {
-      request,
-      licensing,
-      server,
-      logger,
-      ensureEnabled,
-      handlerParams: {
-        request,
-        server,
-        logger,
-        maintenanceService,
-        getSpaceId,
-        cleanupWorkflowService: { ensureEnabled },
-        getScopedClients: jest.fn().mockResolvedValue({ licensing }),
-      } as unknown as HandlerParams,
+    const error = await resumeRoute.handler(params).catch((caught: unknown) => caught);
+
+    // The route wrapper turns a StatusError into a Boom error.
+    expect((error as Boom).output.statusCode).toBe(403);
+    expect(resume).not.toHaveBeenCalled();
+  });
+
+  it('installs the settings-backed workflows of a set-up space after resuming it', async () => {
+    jest.mocked(getDetectionEngineAccountId).mockResolvedValue('account-1');
+    jest.mocked(canManageSecurity).mockResolvedValue(true);
+    const uiSettingsClient = {
+      getAll: jest.fn().mockResolvedValue({
+        [OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED]: true,
+      }),
     };
-  };
+    const continuousOnboardingWorkflowService = {
+      ensureWorkflow: jest.fn().mockResolvedValue(undefined),
+    };
+    resume.mockResolvedValueOnce({ state: 'enabled', partialFailures: [] });
 
-  it('requires Nightshift manage and enables cleanup in the current space', async () => {
-    const params = createHandlerParams();
+    await resumeRoute.handler({
+      ...params,
+      getScopedClients: jest.fn().mockResolvedValue({ licensing: {}, uiSettingsClient }),
+      continuousOnboardingWorkflowService,
+    } as unknown as HandlerParams);
 
-    await expect(route.handler(params.handlerParams)).resolves.toEqual({ success: true });
-
-    expect(route.security.authz).toEqual({
-      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
-    });
-    expect(assertSignificantEventsAccess).toHaveBeenCalledWith({
-      server: params.server,
-      licensing: params.licensing,
-    });
-    expect(params.ensureEnabled).toHaveBeenCalledWith({
+    expect(continuousOnboardingWorkflowService.ensureWorkflow).toHaveBeenCalledWith({
+      enabled: true,
       request: params.request,
       spaceId: 'space-a',
     });
   });
 
-  it('returns success when cleanup enablement fails', async () => {
-    const params = createHandlerParams(
-      jest.fn().mockRejectedValue(new Error('workflow unavailable'))
-    );
+  it('resumes a space that is not set up without asking for manage_security', async () => {
+    jest.mocked(getDetectionEngineAccountId).mockResolvedValue(undefined);
 
-    await expect(route.handler(params.handlerParams)).resolves.toEqual({ success: true });
-
-    expect(params.logger.warn).toHaveBeenCalledWith(
-      'Failed to ensure Significant Events cleanup workflow is enabled: workflow unavailable'
-    );
+    await expect(resumeRoute.handler(params)).resolves.toEqual({ state: 'enabled' });
+    expect(canManageSecurity).not.toHaveBeenCalled();
   });
 });
 
@@ -83,7 +86,26 @@ describe('reset route', () => {
 
   beforeEach(() => jest.clearAllMocks());
 
+  it('refuses a caller without manage_security in a space that runs as the service account', async () => {
+    jest.mocked(getDetectionEngineAccountId).mockResolvedValue('account-1');
+    jest.mocked(canManageSecurity).mockResolvedValue(false);
+    const reset = jest.fn();
+
+    const error = await resetRoute
+      .handler({
+        request: { spaceId: 'space-a' },
+        server: { core: {} },
+        maintenanceService: { reset },
+        getScopedClients: jest.fn().mockResolvedValue({ licensing: {} }),
+      } as unknown as Parameters<typeof resetRoute.handler>[0])
+      .catch((caught: unknown) => caught);
+
+    expect((error as Boom).output.statusCode).toBe(403);
+    expect(reset).not.toHaveBeenCalled();
+  });
+
   it('requires Nightshift manage and configure and delegates with the authenticated user', async () => {
+    jest.mocked(getDetectionEngineAccountId).mockResolvedValue(undefined);
     const request = {};
     const licensing = {};
     const reset = jest.fn().mockResolvedValue({ state: 'enabled' });
@@ -122,7 +144,7 @@ describe('pause, resume, and status routes', () => {
       getScopedClients: jest.fn().mockResolvedValue({ licensing }),
       maintenanceService: {
         pause: jest.fn(),
-        resume: jest.fn(),
+        resume: jest.fn().mockResolvedValue({ state: 'paused' }),
         getStatus: jest.fn(),
       },
     };
