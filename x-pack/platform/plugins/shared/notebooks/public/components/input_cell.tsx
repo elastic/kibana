@@ -135,7 +135,7 @@ const TimeControl = ({ cell }: { cell: InputCellDefinition }) => {
       onTimeChange={({ start, end }) => setValue({ kind: 'time', range: { from: start, to: end } })}
       onRefresh={() => scheduler.refresh([cell.id])}
       showUpdateButton="iconOnly"
-      updateButtonProps={{ toolTipProps: { content: TIME_REFRESH_TOOLTIP } }}
+      updateButtonProps={{ fill: false, toolTipProps: { content: TIME_REFRESH_TOOLTIP } }}
     />
   );
 };

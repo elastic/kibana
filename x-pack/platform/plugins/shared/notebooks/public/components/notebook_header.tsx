@@ -82,6 +82,7 @@ export const PinnedTimePicker = ({ cell }: { cell: InputCellDefinition }) => {
       <EuiFlexItem grow={false}>
         <EuiSuperUpdateButton
           iconOnly
+          fill={false}
           size="s"
           isDisabled={!hasDependents}
           onClick={() => scheduler.refresh([cell.id])}

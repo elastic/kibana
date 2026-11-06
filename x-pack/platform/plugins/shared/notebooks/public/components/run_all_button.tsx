@@ -44,7 +44,7 @@ export const RunAllButton = () => {
   };
 
   return (
-    <EuiSplitButton size="s" color="primary" fill>
+    <EuiSplitButton size="s" color="primary">
       <EuiSplitButton.ActionPrimary
         iconType="play"
         onClick={() => scheduler.runAll()}

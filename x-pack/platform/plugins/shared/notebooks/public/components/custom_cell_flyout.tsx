@@ -624,7 +624,6 @@ export const CustomCellFlyout = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  fill
                   disabled={isEqual(draft, saved)}
                   onClick={() => onApply(draft)}
                   data-test-subj="notebookCustomApply"

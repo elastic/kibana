@@ -551,7 +551,6 @@ const NoApps = () => {
       actions={[
         <EuiButton
           key="generate"
-          fill
           size="s"
           iconType="sparkles"
           onClick={() =>

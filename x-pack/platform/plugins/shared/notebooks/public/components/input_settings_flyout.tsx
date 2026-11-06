@@ -497,7 +497,6 @@ export const InputSettingsFlyout = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              fill
               isDisabled={!isComplete(draft) || isQueryStale}
               onClick={() => {
                 onApply(draft);

@@ -108,7 +108,7 @@ export const FloatingIconButton = ({
   onClick: () => void;
   isDisabled?: boolean;
   isPressed?: boolean;
-  /** Filled primary, like the header's run and refresh buttons. */
+  /** Primary, like the header's run and refresh buttons. */
   isPrimary?: boolean;
   dataTestSubj: string;
 }) => {
@@ -118,7 +118,7 @@ export const FloatingIconButton = ({
       <EuiButtonIcon
         iconType={iconType}
         color={isPrimary ? 'primary' : 'text'}
-        display={isPrimary ? 'fill' : 'empty'}
+        display={isPrimary ? 'base' : 'empty'}
         size="m"
         aria-label={label}
         aria-pressed={isPressed}
