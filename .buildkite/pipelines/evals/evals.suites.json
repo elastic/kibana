@@ -144,6 +144,7 @@
       "slackChannel": "#nightshift-alerts",
       "configPath": "x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/playwright.config.ts",
       "serverConfigSet": "evals_nightshift_investigations",
+      "defaultJudge": "eis-openai-gpt-6-sol",
       "scoutArch": "serverless",
       "scoutDomain": "observability_complete",
       "scoutHook": "x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scout/scout_hook.sh",
