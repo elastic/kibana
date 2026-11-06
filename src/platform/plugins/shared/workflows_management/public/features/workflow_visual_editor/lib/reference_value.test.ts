@@ -10,6 +10,7 @@
 import type { DataReferenceCatalog, DataReferenceItem } from './build_data_reference_catalog';
 import {
   isContainerReference,
+  isSingleValueReference,
   lookupReferenceTypeLabel,
   normalizeReferenceForm,
   parseWholeReference,
@@ -162,6 +163,26 @@ describe('normalizeReferenceForm', () => {
   it('leaves plain text alone', () => {
     expect(normalizeReferenceForm('escalated')).toBe('escalated');
     expect(normalizeReferenceForm('')).toBe('');
+  });
+});
+
+describe('isSingleValueReference', () => {
+  it('is true for a known text, number, yes/no or date', () => {
+    expect(isSingleValueReference('consts.name', 'string')).toBe(true);
+    expect(isSingleValueReference('consts.count', 'integer')).toBe(true);
+    expect(isSingleValueReference('consts.on', 'boolean')).toBe(true);
+    expect(isSingleValueReference('now', 'date')).toBe(true);
+  });
+
+  it('is false for a list or record, which a field can take whole', () => {
+    expect(isSingleValueReference('consts.tags', 'string[]')).toBe(false);
+    expect(isSingleValueReference('consts.doc', 'object')).toBe(false);
+  });
+
+  it('is false for anything the catalog does not know, or a filter has reshaped', () => {
+    expect(isSingleValueReference('inputs.x')).toBe(false);
+    expect(isSingleValueReference('inputs.x', 'unknown')).toBe(false);
+    expect(isSingleValueReference('consts.name | split: ","', 'string')).toBe(false);
   });
 });
 

@@ -70,10 +70,18 @@ import { VariantField } from './variant_field';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { resolveCatalogDisplayName } from '../../../shared/utils/catalog_display_name';
 import type { StepScopeSchemas } from '../lib/build_data_reference_catalog';
-import { buildDataReferenceCatalog } from '../lib/build_data_reference_catalog';
-import { isTagValue } from '../lib/list_value';
+import {
+  buildDataReferenceCatalog,
+  formatDataReferenceToken,
+} from '../lib/build_data_reference_catalog';
+import { isTagValue, toTags } from '../lib/list_value';
 import { findReferenceTokens } from '../lib/reference_tokens';
 import type { ReferenceForm } from '../lib/reference_value';
+import {
+  isSingleValueReference,
+  lookupReferenceTypeLabel,
+  parseWholeReference,
+} from '../lib/reference_value';
 import {
   fieldLabelDivergesFromKey,
   getStepFormSchema,
@@ -1492,6 +1500,28 @@ function StepFieldRow({
     setForcedData(true);
     onChange(next);
   };
+  // The whole-list side means "this reference is the list". A field that needs a list (no single
+  // value allowed) cannot take a single value that way, so a pick known to be one value is added
+  // as an entry instead (`["{{ x }}"]`), after the entries already there, and the field goes back
+  // to its entries. Lists, and references of unknown type, are written as the whole list.
+  const handleWholeListChange = (next: string | undefined) => {
+    const picked = next === undefined ? undefined : parseWholeReference(next);
+    if (
+      !picked ||
+      field.acceptsSingle === true ||
+      !isSingleValueReference(
+        picked.expression,
+        lookupReferenceTypeLabel(referenceCatalog, picked.expression)
+      )
+    ) {
+      handleDataChange(next);
+      return;
+    }
+    setForcedData(false);
+    const entries = valueIsReference ? [] : toTags(value);
+    const entry = formatDataReferenceToken(picked.expression);
+    onChange(entries.includes(entry) ? entries : [...entries, entry]);
+  };
   // A list whose items aren't text (objects, numbers) stays in the JSON editor, as before.
   const listIsTags = field.kind === 'list' && isTagValue(value);
   // A JSON field takes Fixed | Data only when its schema says it usually holds a reference.
@@ -1690,7 +1720,7 @@ function StepFieldRow({
               catalog={referenceCatalog}
               value={value}
               form={referenceForm}
-              onChange={handleDataChange}
+              onChange={handleWholeListChange}
               isInvalid={isInvalid}
               onBlur={accuseIfInvalid}
               ariaLabel={field.label}

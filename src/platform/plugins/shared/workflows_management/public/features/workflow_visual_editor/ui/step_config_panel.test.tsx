@@ -1566,6 +1566,72 @@ with:
       );
     });
 
+    describe('the whole-list side of a list field', () => {
+      const definition = {
+        version: '1',
+        name: 'demo',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        consts: { owner: 'ana', tags: ['a', 'b'] },
+        steps: [{ name: 'l', type: 'lister', with: {} }],
+      } as unknown as WorkflowYaml;
+      // `tags` is array-only; `index` also accepts a single value.
+      const pickWhole = (withBlock: string, field: string, token: string) => {
+        const view = renderPanel({
+          stepType: 'lister',
+          connectors: listConnectors,
+          workflowDefinition: definition,
+          initialFragment: `name: l\ntype: lister\nwith:${withBlock}\n`,
+        });
+        const testId = `workflowStepConfigField-with.${field}`;
+        fireEvent.click(screen.getByTestId(`${testId}-source-data`));
+        fireEvent.focusIn(screen.getByTestId(`${testId}-pick`));
+        act(() => {
+          insertIntoActiveDataReferenceTarget(token);
+        });
+        return { ...view, testId };
+      };
+
+      it('adds a known single value as an entry, after the entries already there, when the field needs a list', () => {
+        const { onFragmentChange, testId } = pickWhole(
+          '\n  tags: [a, b]',
+          'tags',
+          '{{ consts.owner }}'
+        );
+        const saved = lastFragment(onFragmentChange);
+        expect(saved).toMatch(/- a\n\s+- b\n\s+- "\{\{ consts\.owner \}\}"/);
+        expect(saved).not.toContain('${{');
+        // Back on the entries, where the reference reads as a pill.
+        expect(within(screen.getByTestId(testId)).getByText('consts.owner')).toBeInTheDocument();
+      });
+
+      it('does not add an entry that is already there', () => {
+        const { onFragmentChange } = pickWhole(
+          '\n  tags:\n    - "{{ consts.owner }}"\n    - plain',
+          'tags',
+          '{{ consts.owner }}'
+        );
+        const saved = lastFragment(onFragmentChange);
+        expect(saved.match(/consts\.owner/g) ?? []).toHaveLength(1);
+        expect(saved).toContain('- plain');
+      });
+
+      it('writes a known list as the whole value', () => {
+        const { onFragmentChange } = pickWhole('\n  tags: [a]', 'tags', '{{ consts.tags }}');
+        expect(lastFragment(onFragmentChange)).toMatch(/tags: \$\{\{ consts\.tags \}\}/);
+      });
+
+      it('writes a reference of unknown type as the whole value, as before', () => {
+        const { onFragmentChange } = pickWhole('\n  tags: [a]', 'tags', '{{ inputs.unknown }}');
+        expect(lastFragment(onFragmentChange)).toMatch(/tags: \$\{\{ inputs\.unknown \}\}/);
+      });
+
+      it('still writes a single value as the value when the field accepts one', () => {
+        const { onFragmentChange } = pickWhole('\n  index: logs-*', 'index', '{{ consts.owner }}');
+        expect(lastFragment(onFragmentChange)).toMatch(/index: \$\{\{ consts\.owner \}\}/);
+      });
+    });
+
     describe('a stored text-form reference', () => {
       const constsDefinition = {
         version: '1',

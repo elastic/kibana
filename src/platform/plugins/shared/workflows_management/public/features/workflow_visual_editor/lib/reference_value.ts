@@ -59,6 +59,13 @@ export const tokenForInsert = (
     ? toValueFormToken(picked)
     : picked;
 
+const SINGLE_VALUE_ICON_TYPES: ReadonlySet<string> = new Set([
+  'string',
+  'number',
+  'boolean',
+  'date',
+]);
+
 /**
  * True when a reference is known to hold a list or record. A filter (`| json`, `| join`) already
  * shapes the data into something else, so those don't count.
@@ -66,6 +73,16 @@ export const tokenForInsert = (
 export const isContainerReference = (expression: string, typeLabel?: string): boolean => {
   const iconType = toReferenceIconType(typeLabel ?? 'unknown');
   return (iconType === 'array' || iconType === 'object') && !expression.includes('|');
+};
+
+/**
+ * True when a reference is known to hold one value (text, number, yes/no or date). A field that
+ * needs a list takes it as an entry rather than as the whole value. A filter reshapes the data
+ * in ways we don't model, so those don't count.
+ */
+export const isSingleValueReference = (expression: string, typeLabel?: string): boolean => {
+  const iconType = toReferenceIconType(typeLabel ?? 'unknown');
+  return SINGLE_VALUE_ICON_TYPES.has(iconType) && !expression.includes('|');
 };
 
 /**
