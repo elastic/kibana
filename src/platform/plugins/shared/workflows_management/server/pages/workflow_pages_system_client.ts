@@ -59,8 +59,6 @@ export interface WorkflowPagesSystemClientDeps {
   logger: Logger;
   /** False without an encryption key. No page is created and every page is offline. */
   canEncrypt: boolean;
-  /** The `workflows.pages.enabled` feature flag. */
-  isEnabled: () => boolean;
   /** Internal client with the page type. */
   savedObjectsClient: SavedObjectsClientContract;
 }
@@ -75,7 +73,7 @@ export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient 
     definition,
     valid,
   }: Parameters<WorkflowPagesSystemClient['syncWorkflowPages']>[0]): Promise<void> {
-    if (!valid || !this.deps.isEnabled()) {
+    if (!valid) {
       return;
     }
     const wanted = getWantedPageIds(spaceId, definition);

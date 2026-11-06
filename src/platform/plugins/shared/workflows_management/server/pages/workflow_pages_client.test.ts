@@ -40,7 +40,6 @@ const setup = async ({
   const systemClient = new WorkflowPagesSystemClientImpl({
     logger: loggingSystemMock.createLogger(),
     canEncrypt: true,
-    isEnabled: () => true,
     savedObjectsClient: internalClient,
   });
   if (withPage) {

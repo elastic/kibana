@@ -20,14 +20,13 @@ import {
 import { computePageSecretHash } from './page_secret';
 import { WorkflowPagesSystemClientImpl } from './workflow_pages_system_client';
 
-const setup = ({ canEncrypt = true, enabled = true } = {}) => {
+const setup = ({ canEncrypt = true } = {}) => {
   const store = createFakeStore();
   const savedObjectsClient = store.createClient();
   const logger = loggingSystemMock.createLogger();
   const client = new WorkflowPagesSystemClientImpl({
     logger,
     canEncrypt,
-    isEnabled: () => enabled,
     savedObjectsClient,
   });
   const sync = (
@@ -125,13 +124,6 @@ describe('WorkflowPagesSystemClient', () => {
     it('never gives a global workflow a page', async () => {
       const { savedObjectsClient, sync } = setup();
       await sync(pageDefinition(), { spaceId: '*' });
-      expect(savedObjectsClient.create).not.toHaveBeenCalled();
-    });
-
-    it('does nothing while the feature flag is off', async () => {
-      const { savedObjectsClient, sync } = setup({ enabled: false });
-      await sync(pageDefinition());
-      expect(savedObjectsClient.find).not.toHaveBeenCalled();
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
     });
 

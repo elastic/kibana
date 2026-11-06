@@ -7,17 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Subscription } from 'rxjs';
 import type { CoreStart, KibanaRequest, Logger, SavedObjectsServiceSetup } from '@kbn/core/server';
 import type {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
-import {
-  WORKFLOWS_PAGES_ENABLED_FLAG,
-  WorkflowsManagementOperationPrivileges,
-} from '@kbn/workflows';
+import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import { registerWorkflowPageType, WORKFLOW_PAGE_SAVED_OBJECT_TYPE } from './page_saved_object';
 import type { AssertWorkflowAccess, WorkflowPageAuditLog, WorkflowPageOperation } from './types';
 import type { WorkflowPagesClient } from './workflow_pages_client';
@@ -52,11 +48,9 @@ export interface WorkflowPagesServiceStart {
   getSystemClient(): WorkflowPagesSystemClient;
 }
 
-/** Owns the `workflow-page` saved objects. */
+/** Owns the `workflow-page` saved objects. The plugin creates it only with `workflowsManagement.pages.enabled`. */
 export class WorkflowPagesService {
   private canEncrypt = false;
-  private enabled = false;
-  private flagSubscription?: Subscription;
 
   setup({ savedObjects, encryptedSavedObjects }: WorkflowPagesServiceSetupDeps): void {
     this.canEncrypt = encryptedSavedObjects.canEncrypt;
@@ -66,19 +60,11 @@ export class WorkflowPagesService {
   start(deps: WorkflowPagesServiceStartDeps): WorkflowPagesServiceStart {
     const { core, encryptedSavedObjects, authz, getSpaceId, assertWorkflowAccess, audit, logger } =
       deps;
-    // Follows the flag for the plugin lifetime, so turning it off stops the lifecycle at once.
-    this.flagSubscription = core.featureFlags
-      .getBooleanValue$(WORKFLOWS_PAGES_ENABLED_FLAG, false)
-      .subscribe((value) => {
-        this.enabled = value;
-      });
-
     const internalClient = core.savedObjects.getUnsafeInternalClient({ includedHiddenTypes });
     const encryptedClient = encryptedSavedObjects.getClient({ includedHiddenTypes });
     const systemClient = new WorkflowPagesSystemClientImpl({
       logger,
       canEncrypt: this.canEncrypt,
-      isEnabled: () => this.enabled,
       savedObjectsClient: internalClient,
     });
 
@@ -127,9 +113,5 @@ export class WorkflowPagesService {
       },
       getSystemClient: () => systemClient,
     };
-  }
-
-  stop(): void {
-    this.flagSubscription?.unsubscribe();
   }
 }

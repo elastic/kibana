@@ -9,7 +9,7 @@
 
 import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
+import type { KibanaFeatureConfig, SubFeaturePrivilegeConfig } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import {
   WORKFLOWS_MANAGEMENT_FEATURE_ID,
@@ -115,19 +115,6 @@ export const WorkflowsManagementFeatureConfig: KibanaFeatureConfig = {
               api: [WorkflowsManagementApiActions.cancelExecution],
               ui: [WorkflowsManagementUiActions.cancelExecution],
             },
-            {
-              id: 'workflow_page_manage',
-              name: i18n.translate(
-                'workflows.featureRegistry.manageWorkflowPagesSubFeaturePrivilege',
-                {
-                  defaultMessage: 'Manage Pages',
-                }
-              ),
-              includeIn: 'all',
-              savedObject: { all: [WORKFLOW_PAGE_SAVED_OBJECT_TYPE], read: [] },
-              api: [WorkflowsManagementApiActions.managePages],
-              ui: [WorkflowsManagementUiActions.managePages],
-            },
           ],
         },
       ],
@@ -182,4 +169,45 @@ export const WorkflowsManagementFeatureConfig: KibanaFeatureConfig = {
       ],
     },
   ],
+};
+
+const workflowPageManagePrivilege: SubFeaturePrivilegeConfig = {
+  id: 'workflow_page_manage',
+  name: i18n.translate('workflows.featureRegistry.manageWorkflowPagesSubFeaturePrivilege', {
+    defaultMessage: 'Manage Pages',
+  }),
+  includeIn: 'all',
+  savedObject: { all: [WORKFLOW_PAGE_SAVED_OBJECT_TYPE], read: [] },
+  api: [WorkflowsManagementApiActions.managePages],
+  ui: [WorkflowsManagementUiActions.managePages],
+};
+
+/**
+ * Returns the feature config, with the page privilege only while `workflowsManagement.pages.enabled`
+ * is on. A shipped privilege id is hard to remove, so it waits for pages to graduate.
+ * TODO: merge the privilege into `WorkflowsManagementFeatureConfig` when pages graduate.
+ */
+export const getWorkflowsManagementFeatureConfig = ({
+  pagesEnabled,
+}: {
+  pagesEnabled: boolean;
+}): KibanaFeatureConfig => {
+  const [actions, ...otherSubFeatures] = WorkflowsManagementFeatureConfig.subFeatures ?? [];
+  if (!pagesEnabled || !actions) {
+    return WorkflowsManagementFeatureConfig;
+  }
+  const [group, ...otherGroups] = actions.privilegeGroups;
+  return {
+    ...WorkflowsManagementFeatureConfig,
+    subFeatures: [
+      {
+        ...actions,
+        privilegeGroups: [
+          { ...group, privileges: [...group.privileges, workflowPageManagePrivilege] },
+          ...otherGroups,
+        ],
+      },
+      ...otherSubFeatures,
+    ],
+  };
 };
