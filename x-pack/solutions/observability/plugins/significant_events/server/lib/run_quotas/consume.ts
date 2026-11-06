@@ -32,12 +32,12 @@ export const consumeRunQuota = async ({
     group,
     mutation: (ledger) => {
       if (isRunQuotaReached({ group, enabled: settings.enabled, limit, count: ledger.count })) {
-        return { result: { allowed: false } };
+        return { result: { allowed: false, limit } };
       }
 
       return {
         attributes: { count: ledger.count + 1 },
-        result: { allowed: true },
+        result: { allowed: true, limit },
       };
     },
   });

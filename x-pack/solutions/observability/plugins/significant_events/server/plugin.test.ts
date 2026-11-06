@@ -65,7 +65,7 @@ const createSetupDeps = ({
 describe('SignificantEventsPlugin setup', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    consumeRunQuotaMock.mockResolvedValue({ allowed: true });
+    consumeRunQuotaMock.mockResolvedValue({ allowed: true, limit: 3 });
   });
 
   it('supports the investigations plugin being absent', () => {
@@ -142,7 +142,7 @@ describe('SignificantEventsPlugin setup', () => {
 
     const result = await callback();
 
-    expect(result).toEqual({ allowed: true, release: expect.any(Function) });
+    expect(result).toEqual({ allowed: true, limit: 3, release: expect.any(Function) });
     expect(createRunQuotaInternalRepositoryMock).toHaveBeenCalledWith(server);
     expect(consumeRunQuotaMock).toHaveBeenCalledWith({
       internalRepository,

@@ -191,13 +191,14 @@ export class SignificantEventsPlugin
       }
       const internalRepository = createRunQuotaInternalRepository(this.server);
       const date = dayKey(resolveDailyWindow());
-      const { allowed } = await consumeRunQuota({
+      const { allowed, limit } = await consumeRunQuota({
         internalRepository,
         group: 'investigation',
         date,
       });
       return {
         allowed,
+        limit,
         release: () => releaseRunQuota({ internalRepository, group: 'investigation', date }),
       };
     });

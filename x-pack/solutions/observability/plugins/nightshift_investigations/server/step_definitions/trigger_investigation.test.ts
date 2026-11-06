@@ -462,7 +462,7 @@ describe('investigation quota notice', () => {
   beforeEach(() => jest.mocked(notifyInvestigationQuotaReached).mockClear());
 
   it('tells the Slack thread when the global limit denies the start', async () => {
-    const error = new InvestigationQuotaDeniedError();
+    const error = new InvestigationQuotaDeniedError(5);
     const soClient = savedObjectsClientMock.create();
     const { definition, getActions } = createDefinition(
       jest.fn().mockRejectedValue(error),
@@ -480,6 +480,7 @@ describe('investigation quota notice', () => {
         spaceId: 'test-space',
         slackThread,
         kibanaUrl: 'https://kibana.example.com',
+        limit: 5,
       })
     );
     expect(params.getSoClient()).toBe(soClient);

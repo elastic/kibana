@@ -92,4 +92,6 @@ export type RunQuotaConsumeRequest =
 
 export interface RunQuotaConsumeResponse {
   allowed: boolean;
+  /** Configured daily limit for this group at the time of the check. */
+  limit: number;
 }
