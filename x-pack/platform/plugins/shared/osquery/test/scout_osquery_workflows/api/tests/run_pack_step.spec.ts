@@ -226,9 +226,8 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
         expect(body).toContain('pack_id');
         expect(body).toMatch(/exactly one of pack_id or prebuilt_pack/i);
         // Nothing valid was created, so there is nothing to clean up.
-        expect(response.body.created ?? []).not.toContainEqual(
-          expect.objectContaining({ valid: true })
-        );
+        const created: Array<{ valid?: boolean }> = response.body.created ?? [];
+        expect(created.some((workflow) => workflow.valid === true)).toBe(false);
       }
     }
   );
