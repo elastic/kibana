@@ -22,6 +22,7 @@ import {
   getRestrictedSourceIndices,
   getSessionsStatus,
   indexPatternCovers,
+  installSessions,
   lagSecondsOf,
 } from './sessions_setup';
 import { SessionsNewerVersionError } from './sessions_newer_version_error';
@@ -192,6 +193,29 @@ describe('sessions setup', () => {
       expect(client.transform.putTransform).toHaveBeenCalledWith(
         expect.objectContaining({ _meta: stamped })
       );
+    });
+
+    it('installs with the given credentials and enable stamp, without checking privileges', async () => {
+      mockTransforms(esClient.asSecondaryAuthUser, []);
+
+      await installSessions({
+        esClient,
+        logger,
+        settings: oneTransform,
+        enabled: { enabledBy: 'ana', enabledAt: '2026-10-01T00:00:00.000Z' },
+      });
+
+      expect(esClient.asCurrentUser.security.hasPrivileges).not.toHaveBeenCalled();
+      expect(esClient.asCurrentUser.security.getUserPrivileges).not.toHaveBeenCalled();
+      expect(esClient.asSecondaryAuthUser.transform.putTransform).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _meta: expect.objectContaining({
+            enabled_by: 'ana',
+            enabled_at: '2026-10-01T00:00:00.000Z',
+          }),
+        })
+      );
+      expect(esClient.asCurrentUser.indices.create).toHaveBeenCalledWith({ index: SESSIONS_INDEX });
     });
 
     it('installs pipeline, template and transform as the requesting user', async () => {
@@ -373,6 +397,27 @@ describe('sessions setup', () => {
       expect(esClient.asSecondaryAuthUser.transform.putTransform).toHaveBeenCalled();
     });
 
+    it('keeps the previous version running until its replacement exists', async () => {
+      grantAll(esClient.asCurrentUser);
+      mockTransforms(esClient.asSecondaryAuthUser, [
+        managedTransform('digital-experience-sessions-0', {
+          version: 0,
+          destIndex: 'digital-experience-sessions-0',
+        }),
+      ]);
+      const { transform } = esClient.asSecondaryAuthUser;
+      transform.putTransform.mockRejectedValueOnce(esError(503));
+
+      await expect(enableSessions({ ...enableArgs(), settings: oneTransform })).rejects.toThrow();
+      // Still installed, so the update stays pending and the next attempt retries it.
+      expect(transform.deleteTransform).not.toHaveBeenCalled();
+
+      await enableSessions({ ...enableArgs(), settings: oneTransform });
+      expect(transform.putTransform.mock.invocationCallOrder[1]).toBeLessThan(
+        transform.deleteTransform.mock.invocationCallOrder[0]
+      );
+    });
+
     it('refuses to replace transforms from a newer version, before writing anything', async () => {
       grantAll(esClient.asCurrentUser);
       const newerId = `digital-experience-sessions-${SESSIONS_VERSION + 1}`;
@@ -541,8 +586,48 @@ describe('sessions setup', () => {
         expect.objectContaining({
           enabledBy: 'bob',
           enabledAt: ENABLED_AT,
-          authorization: { roles: ['dex_admin'], apiKeyName: null, serviceAccount: null },
+          authorization: {
+            roles: ['dex_admin'],
+            apiKeyId: null,
+            apiKeyName: null,
+            serviceAccount: null,
+          },
         })
+      );
+    });
+
+    it('reports the API key the transforms run with', async () => {
+      mockTransforms(client, [
+        {
+          ...managedTransform(SESSIONS_TRANSFORM_ID),
+          authorization: { api_key: { id: 'key-1', name: 'Digital Experience sessions' } },
+        },
+      ] as never);
+      mockStats(client, [idleStats(SESSIONS_TRANSFORM_ID)]);
+
+      const status = await getSessionsStatus(client, { settings: oneTransform, now: NOW });
+
+      expect(status.authorization).toEqual({
+        roles: null,
+        apiKeyId: 'key-1',
+        apiKeyName: 'Digital Experience sessions',
+        serviceAccount: null,
+      });
+      expect(status.autoUpdate).toBe(false);
+    });
+
+    it('reports rebuilding until a current transform completes its first checkpoint', async () => {
+      mockTransforms(client, [managedTransform(SESSIONS_TRANSFORM_ID)]);
+      mockStats(client, [
+        idleStats(SESSIONS_TRANSFORM_ID, 30, { checkpointing: { last: { checkpoint: 0 } } }),
+      ]);
+      expect(await getSessionsStatus(client, { settings: oneTransform, now: NOW })).toEqual(
+        expect.objectContaining({ rebuilding: true })
+      );
+
+      mockStats(client, [idleStats(SESSIONS_TRANSFORM_ID)]);
+      expect(await getSessionsStatus(client, { settings: oneTransform, now: NOW })).toEqual(
+        expect.objectContaining({ rebuilding: false })
       );
     });
 

@@ -10,7 +10,8 @@ import { errors } from '@elastic/elasticsearch';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { getSession } from '../../sessions/get_session';
 import { listSessions } from '../../sessions/list_sessions';
-import { enableSessions, getSessionsStatus } from '../../sessions/sessions_setup';
+import { enableSessionsForUser, withApiKeyStatus } from '../../sessions/sessions_auto_update';
+import { getSessionsStatus } from '../../sessions/sessions_setup';
 import { SessionsNewerVersionError } from '../../sessions/sessions_newer_version_error';
 import { SessionsPrivilegesError } from '../../sessions/sessions_privileges_error';
 import { SessionsRestrictedReadError } from '../../sessions/sessions_restricted_read_error';
@@ -24,9 +25,9 @@ import {
 
 jest.mock('../../sessions/get_session');
 jest.mock('../../sessions/list_sessions');
+jest.mock('../../sessions/sessions_auto_update');
 jest.mock('../../sessions/sessions_setup', () => ({
   ...jest.requireActual('../../sessions/sessions_setup'),
-  enableSessions: jest.fn(),
   getSessionsStatus: jest.fn(),
 }));
 
@@ -43,6 +44,9 @@ const status = {
   needsUpdate: false,
   reason: null,
 };
+
+const sessionsApiKeys = { available: true };
+const lastAutoUpdateError = 'unable to authenticate';
 
 const START = '2026-10-27T10:00:00.000Z';
 const END = '2026-10-28T10:00:00.000Z';
@@ -68,14 +72,17 @@ const runHandler = (
   const handler = sessionsRouteRepository[endpoint].handler as unknown as (
     resources: unknown
   ) => Promise<unknown>;
+  const request = { authzResult };
   const result = handler({
     params,
     context: { core: Promise.resolve(coreContext) },
-    request: { authzResult },
+    request,
     logger,
     sessionsSettings: settings,
+    sessionsApiKeys,
+    getSessionsAutoUpdateError: async () => lastAutoUpdateError,
   });
-  return { result, coreContext, logger };
+  return { result, coreContext, logger, request };
 };
 
 /** The client error a handler threw: status code, message and attributes. */
@@ -105,6 +112,8 @@ const querySchemaOf = () =>
 describe('sessions routes', () => {
   beforeEach(() => {
     jest.mocked(getSessionsStatus).mockResolvedValue(status as never);
+    jest.mocked(withApiKeyStatus).mockImplementation(async (s) => s);
+    jest.mocked(enableSessionsForUser).mockResolvedValue(null);
   });
 
   afterEach(() => {
@@ -175,8 +184,26 @@ describe('sessions routes', () => {
         });
 
         expect(await result).toEqual(body);
+        // Only users who can grant a new key pay for checking it.
+        expect(withApiKeyStatus).toHaveBeenCalledWith(enabled, sessionsApiKeys, {
+          checkKey: canManage,
+          lastAutoUpdateError: 'unable to authenticate',
+        });
       }
     );
+
+    it('adds what the stored API key means for the status', async () => {
+      jest
+        .mocked(withApiKeyStatus)
+        .mockImplementation(async (s) => ({ ...s, needsUpdate: true, autoUpdate: true }));
+      const { result } = runHandler(SESSIONS_STATUS_ENDPOINT, {
+        authzResult: { manage_digital_experience_sessions: true },
+      });
+
+      expect(await result).toEqual(
+        expect.objectContaining({ needsUpdate: true, autoUpdate: true })
+      );
+    });
 
     it('answers 500 without the Elasticsearch details when the status read fails', async () => {
       jest.mocked(getSessionsStatus).mockRejectedValue(esError(500));
@@ -193,15 +220,17 @@ describe('sessions routes', () => {
   });
 
   describe('enable', () => {
-    it('enables sessions as the current user, records them, audits it and returns the status', async () => {
-      const { result, coreContext } = runHandler(SESSIONS_ENABLE_ENDPOINT);
+    it('enables sessions for the current user, records them, audits it and returns the status', async () => {
+      const { result, coreContext, request } = runHandler(SESSIONS_ENABLE_ENDPOINT);
       // The handler reads the user after awaiting the request context.
       coreContext.security.authc.getCurrentUser.mockReturnValue({ username: 'ana' } as never);
 
       expect(await result).toEqual(status);
-      expect(enableSessions).toHaveBeenCalledWith(
+      expect(enableSessionsForUser).toHaveBeenCalledWith(
         expect.objectContaining({
           esClient: coreContext.elasticsearch.client,
+          apiKeys: sessionsApiKeys,
+          request,
           settings,
           enabledBy: 'ana',
         })
@@ -213,6 +242,23 @@ describe('sessions routes', () => {
             action: 'digital_experience_sessions_enable',
             outcome: 'success',
           }),
+        })
+      );
+    });
+
+    it('names the new API key in the audit event', async () => {
+      jest
+        .mocked(enableSessionsForUser)
+        .mockResolvedValue({ name: 'Digital Experience sessions' } as never);
+      const { result, coreContext } = runHandler(SESSIONS_ENABLE_ENDPOINT);
+      coreContext.security.authc.getCurrentUser.mockReturnValue({ username: 'ana' } as never);
+
+      await result;
+
+      expect(coreContext.security.audit.logger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message:
+            'User [ana] enabled Digital Experience sessions with a new API key [Digital Experience sessions]',
         })
       );
     });
@@ -237,7 +283,7 @@ describe('sessions routes', () => {
         { installedVersion: 2, currentVersion: 1 },
       ],
     ])('answers %s with its reason, and audits the failure', async (_name, error, code, data) => {
-      jest.mocked(enableSessions).mockRejectedValue(error);
+      jest.mocked(enableSessionsForUser).mockRejectedValue(error);
       const { result, coreContext } = runHandler(SESSIONS_ENABLE_ENDPOINT);
 
       expect(await clientErrorOf(result)).toEqual({
@@ -251,7 +297,9 @@ describe('sessions routes', () => {
     });
 
     it('answers other failures with a 500 that hides the Elasticsearch details', async () => {
-      jest.mocked(enableSessions).mockRejectedValue(new Error('security_exception: user [ana]'));
+      jest
+        .mocked(enableSessionsForUser)
+        .mockRejectedValue(new Error('security_exception: user [ana]'));
       const { result, logger } = runHandler(SESSIONS_ENABLE_ENDPOINT);
 
       const error = await clientErrorOf(result);
