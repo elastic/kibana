@@ -14,6 +14,7 @@ import type {
   Doc,
 } from './cluster_client_adapter';
 import {
+  classifyBulkCreateErrors,
   ClusterClientAdapter,
   EVENT_BUFFER_LENGTH,
   getQueryBody,
@@ -82,7 +83,114 @@ describe('indexDocument', () => {
     const expectedMessage = `error writing bulk events: "expected failure"; docs: [{"create":{}},{"message":"foo"}]`;
     expect(logger.error).toHaveBeenCalledWith(expectedMessage);
   });
+
+  test('should not log an error when all bulk failures are duplicate fixed-id docs', async () => {
+    clusterClient.bulk.mockResponse({
+      took: 1,
+      errors: true,
+      items: [createdItem('auto-id'), duplicateItem('abc'), duplicateItem('def')],
+    });
+    clusterClientAdapter.indexDocument({ body: { message: 'foo' }, index: 'event-log' });
+
+    await retryUntil('duplicates logged', () => {
+      return logger.debug.mock.calls.some(([message]) => `${message}`.startsWith('Skipped'));
+    });
+
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Skipped 2 event log documents that already exist; the bulk request was likely retried'
+    );
+  });
+
+  test('should log only the non-duplicate bulk failures', async () => {
+    clusterClient.bulk.mockResponse({
+      took: 1,
+      errors: true,
+      items: [createdItem('auto-id'), duplicateItem('abc'), mappingErrorItem('ghi')],
+    });
+    clusterClientAdapter.indexDocument({ body: { message: 'foo' }, index: 'event-log' });
+
+    await retryUntil('bulk error logged', () => {
+      return logger.error.mock.calls.length !== 0;
+    });
+
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    const error = logger.error.mock.calls[0][0] as Error;
+    expect(error.message).toBe('Error writing some bulk events');
+    expect(error.stack).toContain('mapper_parsing_exception');
+    expect(error.stack).not.toContain('version_conflict_engine_exception');
+    expect(error.stack).not.toContain('auto-id');
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Skipped 1 event log documents that already exist; the bulk request was likely retried'
+    );
+  });
 });
+
+describe('classifyBulkCreateErrors', () => {
+  test('ignores successful items and counts duplicate fixed-id conflicts', () => {
+    const result = classifyBulkCreateErrors([
+      createdItem('auto-id'),
+      duplicateItem('abc'),
+      duplicateItem('def'),
+    ]);
+
+    expect(result).toEqual({ failedItems: [], duplicateCount: 2 });
+  });
+
+  test('returns non-duplicate failures', () => {
+    const mappingError = mappingErrorItem('ghi');
+    const otherConflict: BulkItem = {
+      create: {
+        _index: 'kibana-event-log-ds',
+        _id: 'jkl',
+        status: 429,
+        error: { type: 'es_rejected_execution_exception', reason: 'rejected' },
+      },
+    };
+
+    const result = classifyBulkCreateErrors([
+      createdItem('auto-id'),
+      duplicateItem('abc'),
+      mappingError,
+      otherConflict,
+    ]);
+
+    expect(result).toEqual({ failedItems: [mappingError, otherConflict], duplicateCount: 1 });
+  });
+});
+
+type BulkItem = estypes.BulkResponse['items'][number];
+
+function createdItem(id: string): BulkItem {
+  return {
+    create: { _index: 'kibana-event-log-ds', _id: id, result: 'created', status: 201 },
+  };
+}
+
+function duplicateItem(id: string): BulkItem {
+  return {
+    create: {
+      _index: 'kibana-event-log-ds',
+      _id: id,
+      status: 409,
+      error: {
+        type: 'version_conflict_engine_exception',
+        reason: `[${id}]: version conflict, document already exists (current version [1])`,
+      },
+    },
+  };
+}
+
+function mappingErrorItem(id: string): BulkItem {
+  return {
+    create: {
+      _index: 'kibana-event-log-ds',
+      _id: id,
+      status: 400,
+      error: { type: 'mapper_parsing_exception', reason: 'failed to parse' },
+    },
+  };
+}
 
 describe('shutdown()', () => {
   test('should work if no docs have been written', async () => {
