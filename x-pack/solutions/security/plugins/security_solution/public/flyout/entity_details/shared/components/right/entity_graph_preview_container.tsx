@@ -28,7 +28,7 @@ export interface EntityGraphPreviewContainerProps
 export const EntityGraphPreviewContainer = memo(
   ({ entityId, scopeId, onShowGraph, showIcon }: EntityGraphPreviewContainerProps) => {
     const shouldShowGraph = useShouldShowGraph();
-    const entryPoint = getGraphEntryPoint({ mode: 'entity', scopeId });
+    const entryPoint = getGraphEntryPoint({ mode: 'entity' });
     const timeRange = getScopeFlyoutTimeRange(scopeId) ?? DEFAULT_PREVIEW_TIME_RANGE;
 
     const { isLoading, isError, data } = useFetchGraphData({

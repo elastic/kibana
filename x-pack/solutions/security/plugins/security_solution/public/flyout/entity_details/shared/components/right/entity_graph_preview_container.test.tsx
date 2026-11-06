@@ -156,11 +156,12 @@ describe('<EntityGraphPreviewContainer />', () => {
     expect(mockUseGraphTelemetry).toHaveBeenCalledWith('entity_flyout');
   });
 
-  it('reports through the entity_data_grid entry point when opened from the entities table', async () => {
+  it('reports through the entity_flyout entry point for the entities table scope too', async () => {
     const { findByTestId } = renderContainer({ scopeId: ENTITY_ANALYTICS_TABLE_ID });
     await findByTestId(GRAPH_PREVIEW_TEST_ID);
 
-    expect(mockUseGraphTelemetry).toHaveBeenCalledWith('entity_data_grid');
+    expect(mockUseGraphTelemetry).toHaveBeenCalledWith('entity_flyout');
+    expect(mockUseGraphTelemetry).not.toHaveBeenCalledWith('entity_data_grid');
   });
 
   it('tracks ui metric when graph is available', async () => {

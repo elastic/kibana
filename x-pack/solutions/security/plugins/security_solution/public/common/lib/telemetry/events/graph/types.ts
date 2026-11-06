@@ -69,7 +69,11 @@ export const GRAPH_GROUPED_ITEM_TYPE: Record<GraphGroupedItemType, GraphGroupedI
   alert: 'alert',
 };
 
-/** Where the user opened the graph from. */
+/**
+ * Where the user opened the graph from. `entity_data_grid` is the Entity Analytics entities grid
+ * row action (the actions column); `entity_flyout` is an entity flyout opened from anywhere,
+ * including by clicking the entity name in that grid.
+ */
 export type GraphEntryPoint =
   | 'alert_flyout'
   | 'event_flyout'

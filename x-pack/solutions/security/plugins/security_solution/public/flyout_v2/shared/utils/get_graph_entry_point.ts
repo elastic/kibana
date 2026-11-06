@@ -6,31 +6,25 @@
  */
 
 import type { GraphEntryPoint } from '../../../common/lib/telemetry';
-import { ENTITY_ANALYTICS_TABLE_ID } from '../../../entity_analytics/components/home/constants';
-import { SCOPE_FLYOUT_TIME_RANGES } from '../../../entity_analytics/common/scope_time_ranges';
 
 export interface GetGraphEntryPointParams {
   mode: 'event' | 'entity';
+  /** Whether the source document is an alert; only event mode reads it. */
   isAlert?: boolean;
-  /** Scope the enclosing flyout was opened from; only entity mode reads it. */
-  scopeId?: string;
 }
 
-const ENTITIES_TABLE_SCOPE_IDS: ReadonlySet<string> = new Set([
-  ENTITY_ANALYTICS_TABLE_ID,
-  ...Object.keys(SCOPE_FLYOUT_TIME_RANGES),
-]);
-
-/** Derives where the user opened the graph from: an alert, an event, an entity flyout or the entities table. */
+/**
+ * Derives where the user opened the graph from: an alert flyout, an event flyout or, for an entity
+ * graph, an entity flyout. The entities grid row action is the one other way into an entity graph;
+ * it cannot be told apart from a flyout by scope id, so the code that opens it passes
+ * `entity_data_grid` explicitly.
+ */
 export const getGraphEntryPoint = ({
   mode,
   isAlert,
-  scopeId,
 }: GetGraphEntryPointParams): GraphEntryPoint => {
   if (mode === 'event') {
     return isAlert ? 'alert_flyout' : 'event_flyout';
   }
-  return scopeId !== undefined && ENTITIES_TABLE_SCOPE_IDS.has(scopeId)
-    ? 'entity_data_grid'
-    : 'entity_flyout';
+  return 'entity_flyout';
 };

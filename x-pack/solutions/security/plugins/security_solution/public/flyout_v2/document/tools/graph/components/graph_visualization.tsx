@@ -36,6 +36,7 @@ import { useInvestigateInTimeline } from '../../../../../common/hooks/timeline/u
 import { normalizeTimeRange } from '../../../../../common/utils/normalize_time_range';
 import { useKibana, useToasts } from '../../../../../common/lib/kibana';
 import { useGraphTelemetry } from '../../../../shared/hooks/use_graph_telemetry';
+import type { GraphEntryPoint } from '../../../../../common/lib/telemetry';
 import { getGraphEntryPoint } from '../../../../shared/utils/get_graph_entry_point';
 import { extractTimelineCapabilities } from '../../../../../common/utils/timeline_capabilities';
 import { getScopeFlyoutTimeRange } from '../../../../../entity_analytics/common/scope_time_ranges';
@@ -117,6 +118,8 @@ interface EntityGraphVisualizationProps extends GraphNodeCallbacks {
   graphScopeId?: string;
   /** Entity Store v2 entity ID (`entity.id`) to center the graph on */
   entityId: string;
+  /** Where the graph was opened from. Defaults to the entity flyout. */
+  entryPoint?: GraphEntryPoint;
 }
 
 export type GraphVisualizationProps = EventGraphVisualizationProps | EntityGraphVisualizationProps;
@@ -167,11 +170,12 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
   }, [cps?.cpsManager]);
 
   const toasts = useToasts();
-  const entryPoint = getGraphEntryPoint({
-    mode: props.mode,
-    isAlert: props.mode === 'event' ? props.isAlert : undefined,
-    scopeId,
-  });
+  const entryPoint =
+    (props.mode === 'entity' ? props.entryPoint : undefined) ??
+    getGraphEntryPoint({
+      mode: props.mode,
+      isAlert: props.mode === 'event' ? props.isAlert : undefined,
+    });
   const { onTelemetryEvent, reportGraphOpened, reportDrillThrough } = useGraphTelemetry(entryPoint);
 
   const hasReportedGraphOpened = useRef(false);

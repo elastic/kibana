@@ -14,6 +14,7 @@ import { useGraphTelemetry } from '../../../../shared/hooks/use_graph_telemetry'
 import { useOpenFlyout } from '../../../../shared/hooks/use_open_flyout';
 import { GraphVisualization } from '../../../../document/tools/graph/components/graph_visualization';
 import { GraphView } from '.';
+import type { GraphViewProps } from '.';
 
 jest.mock('../../../../shared/hooks/use_graph_telemetry');
 jest.mock('../../../../shared/hooks/use_open_flyout');
@@ -24,7 +25,10 @@ jest.mock('../../../../document/tools/graph/components/graph_visualization', () 
 const mockOnTelemetryEvent = jest.fn();
 const mockOpen = jest.fn();
 
-const renderGraphView = (scopeId: string) =>
+const renderGraphView = (
+  scopeId: string,
+  extraProps: Partial<Pick<GraphViewProps, 'entryPoint'>> = {}
+) =>
   render(
     <TestProviders>
       <GraphView
@@ -32,6 +36,7 @@ const renderGraphView = (scopeId: string) =>
         scopeId={scopeId}
         entityName="entity-name"
         onShowEntity={jest.fn()}
+        {...extraProps}
       />
     </TestProviders>
   );
@@ -61,17 +66,32 @@ describe('<GraphView />', () => {
     jest.mocked(useOpenFlyout).mockReturnValue(mockOpen);
   });
 
-  it('reports grouped panel telemetry with the entity flyout entry point', () => {
+  it('reports grouped panel telemetry with the entity flyout entry point by default', () => {
     renderGraphView('some-flyout-scope');
 
     expect(useGraphTelemetry).toHaveBeenCalledWith('entity_flyout');
     expect(openGroupedPanel().props.onTelemetryEvent).toBe(mockOnTelemetryEvent);
   });
 
-  it('reports grouped panel telemetry with the data grid entry point when opened from the entities table', () => {
+  it('keeps the entity flyout entry point when the scope is the entities table scope', () => {
     renderGraphView(ENTITY_ANALYTICS_TABLE_ID);
 
+    expect(useGraphTelemetry).toHaveBeenCalledWith('entity_flyout');
+    expect(useGraphTelemetry).not.toHaveBeenCalledWith('entity_data_grid');
+    expect(jest.mocked(GraphVisualization).mock.calls[0][0]).toEqual(
+      expect.objectContaining({ entryPoint: 'entity_flyout' })
+    );
+    expect(openGroupedPanel().props.onTelemetryEvent).toBe(mockOnTelemetryEvent);
+  });
+
+  it('uses the given entry point for the grouped panel telemetry and the graph it renders', () => {
+    renderGraphView(ENTITY_ANALYTICS_TABLE_ID, { entryPoint: 'entity_data_grid' });
+
     expect(useGraphTelemetry).toHaveBeenCalledWith('entity_data_grid');
+    expect(useGraphTelemetry).not.toHaveBeenCalledWith('entity_flyout');
+    expect(jest.mocked(GraphVisualization).mock.calls[0][0]).toEqual(
+      expect.objectContaining({ mode: 'entity', entryPoint: 'entity_data_grid' })
+    );
     expect(openGroupedPanel().props.onTelemetryEvent).toBe(mockOnTelemetryEvent);
   });
 });

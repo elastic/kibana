@@ -511,6 +511,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
           entityId: entity.entityId,
           entityName: entity.entityName ?? '',
           scopeId,
+          entryPoint: 'entity_data_grid',
           onShowEntity: ({ engineType, entityId: relatedId, entityName: relatedName }) => {
             openEntityFlyout({
               engineType,

@@ -38,7 +38,7 @@ export interface GraphViewTabProps {
  */
 export const GraphViewTab: FC<GraphViewTabProps> = memo(({ entityId, scopeId }) => {
   const { openPreviewPanel } = useExpandableFlyoutApi();
-  const entryPoint = getGraphEntryPoint({ mode: 'entity', scopeId });
+  const entryPoint = getGraphEntryPoint({ mode: 'entity' });
 
   const onShowDocument = useCallback(
     (id: string, indexName?: string, isEvent?: boolean) => {

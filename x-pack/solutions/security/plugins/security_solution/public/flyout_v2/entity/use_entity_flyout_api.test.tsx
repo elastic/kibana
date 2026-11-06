@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isValidElement, type ReactNode } from 'react';
 import { renderHook } from '@testing-library/react';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { EntityType } from '../../../common/entity_analytics/types';
@@ -59,6 +60,17 @@ jest.mock('../shared/url_state/flyout_v2_url_writer', () => ({
 
 const mockOpenSystemFlyout = jest.fn();
 const mockReportEvent = jest.fn();
+
+const unwrapChildren = (node: ReactNode): ReactNode =>
+  isValidElement<{ children?: ReactNode }>(node) ? node.props.children : undefined;
+
+/** Props of the content handed to the system flyout: session provider > suspense > the lazy content. */
+const getOpenedContentProps = (): { entryPoint?: string } => {
+  const content = unwrapChildren(
+    unwrapChildren(jest.mocked(flyoutProviders).mock.calls[0][0].children)
+  );
+  return isValidElement<{ entryPoint?: string }>(content) ? content.props : {};
+};
 
 const managedUser = { _id: 'managed-user-id', _index: 'managed-user-index' };
 
@@ -603,6 +615,35 @@ describe('useEntityFlyoutApi', () => {
       entityName: 'entity-name',
     });
     expect(mockBuildOnClose).toHaveBeenCalledWith(null);
+  });
+
+  it('openEntityGraphView hands the entry point to the graph view it renders', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    result.current.openEntityGraphView({
+      entityId: 'entity-1',
+      scopeId: 'scope-1',
+      entityName: 'entity-name',
+      onShowEntity: jest.fn(),
+      entryPoint: 'entity_data_grid',
+    });
+
+    expect(getOpenedContentProps()).toEqual(
+      expect.objectContaining({ entityId: 'entity-1', entryPoint: 'entity_data_grid' })
+    );
+  });
+
+  it('openEntityGraphView leaves the entry point unset when none is given', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    result.current.openEntityGraphView({
+      entityId: 'entity-1',
+      scopeId: 'scope-1',
+      entityName: 'entity-name',
+      onShowEntity: jest.fn(),
+    });
+
+    const props = getOpenedContentProps();
+    expect(props).toEqual(expect.objectContaining({ entityId: 'entity-1' }));
+    expect(props.entryPoint).toBeUndefined();
   });
 
   it('openEntityResolution writes an entityResolution descriptor and clears the param on close', () => {

@@ -33,6 +33,7 @@ import {
   FLYOUT_SESSION_KIND,
   FLYOUT_SURFACE,
   FLYOUT_TOOL,
+  type GraphEntryPoint,
 } from '../../../../../common/lib/telemetry';
 
 const TITLE = ENTITY_GRAPH_VIEW_TITLE;
@@ -52,6 +53,8 @@ export interface GraphViewProps {
   }) => void;
   /** Opens the originating entity flyout as a child (via the header title button). */
   onShowOriginatingEntity?: () => void;
+  /** Where the graph was opened from, for telemetry. Defaults to the entity flyout. */
+  entryPoint?: GraphEntryPoint;
 }
 
 /**
@@ -60,12 +63,20 @@ export interface GraphViewProps {
  * `overlays.openSystemFlyout` instead of the legacy expandable flyout API.
  */
 export const GraphView = memo(
-  ({ entityId, scopeId, entityName, onShowEntity, onShowOriginatingEntity }: GraphViewProps) => {
+  ({
+    entityId,
+    scopeId,
+    entityName,
+    onShowEntity,
+    onShowOriginatingEntity,
+    entryPoint: openedFrom,
+  }: GraphViewProps) => {
     const open = useOpenFlyout();
     const { historyKey } = useFlyoutSessionContext();
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
     const { openDocumentFlyoutFromIndexAsChild, openNetworkFlyoutAsChild } = useFlyoutApi();
-    const { onTelemetryEvent } = useGraphTelemetry(getGraphEntryPoint({ mode: 'entity', scopeId }));
+    const entryPoint = openedFrom ?? getGraphEntryPoint({ mode: 'entity' });
+    const { onTelemetryEvent } = useGraphTelemetry(entryPoint);
 
     const onShowDocument = useCallback(
       (documentId: string, indexName?: string, isEvent?: boolean) =>
@@ -138,6 +149,7 @@ export const GraphView = memo(
             mode="entity"
             scopeId={scopeId}
             entityId={entityId}
+            entryPoint={entryPoint}
             onShowDocument={onShowDocument}
             onShowEntity={onShowEntity}
             onShowNetwork={onShowNetwork}

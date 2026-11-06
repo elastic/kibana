@@ -61,12 +61,12 @@ describe('<GraphViewTab />', () => {
     });
   });
 
-  it('puts the data grid entry point in the grouped panel params when opened from the entities table', () => {
+  it('puts the entity flyout entry point in the grouped panel params for the entities table scope too', () => {
     openGroupedPanel(ENTITY_ANALYTICS_TABLE_ID);
 
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
       id: GraphGroupedNodePreviewPanelKey,
-      params: expect.objectContaining({ entryPoint: 'entity_data_grid' }),
+      params: expect.objectContaining({ entryPoint: 'entity_flyout' }),
     });
   });
 });

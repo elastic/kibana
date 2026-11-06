@@ -173,10 +173,18 @@ describe('GraphVisualization', () => {
       expect(mockUseGraphTelemetry).toHaveBeenCalledWith('entity_flyout');
     });
 
-    it('uses the entity_data_grid entry point for an entity opened from the entities table', () => {
+    it('keeps the entity_flyout entry point when the scope is the entities table scope', () => {
       render(<GraphVisualization {...ENTITY_PROPS} scopeId={ENTITY_ANALYTICS_TABLE_ID} />);
 
+      expect(mockUseGraphTelemetry).toHaveBeenCalledWith('entity_flyout');
+      expect(mockUseGraphTelemetry).not.toHaveBeenCalledWith('entity_data_grid');
+    });
+
+    it('uses the entry point the entity graph was opened from when one is given', () => {
+      render(<GraphVisualization {...ENTITY_PROPS} entryPoint="entity_data_grid" />);
+
       expect(mockUseGraphTelemetry).toHaveBeenCalledWith('entity_data_grid');
+      expect(mockUseGraphTelemetry).not.toHaveBeenCalledWith('entity_flyout');
     });
   });
 
