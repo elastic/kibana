@@ -9,21 +9,36 @@ import { schema } from '@kbn/config-schema';
 
 import { clientAuth } from '../../../common/types';
 
+import { FLEET_SCHEMA_NAME_MAX_LENGTH } from '../../constants';
+
 // Flat oneOf with null as an explicit alternative — nested oneOf prevents null from
 // matching in @kbn/config-schema, so null must be a sibling alternative, not wrapped.
 const nullableSecretRefSchema = schema.oneOf([
   schema.literal(null),
-  schema.object({ id: schema.string() }),
+  schema.object({
+    id: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.fleet_server_hosts.secret_ref.id',
+    }),
+  }),
   schema.string(),
 ]);
 
 export const FleetServerHostBaseSchema = schema.object({
-  name: schema.maybe(schema.string()),
+  name: schema.maybe(
+    schema.displayName.warn({
+      minLength: 0,
+      maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH,
+      label: 'fleet.fleet_server_hosts.name',
+    })
+  ),
   host_urls: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 10 })),
   is_default: schema.maybe(schema.boolean({ defaultValue: false })),
   is_internal: schema.maybe(schema.boolean()),
   allow_edit: schema.maybe(schema.arrayOf(schema.string({ maxLength: 100 }), { maxSize: 100 })),
-  proxy_id: schema.nullable(schema.string()),
+  proxy_id: schema.nullable(
+    schema.savedObjectId.warn({ minLength: 0, label: 'fleet.fleet_server_hosts.proxy_id' })
+  ),
   secrets: schema.maybe(
     schema.object({
       ssl: schema.maybe(
@@ -63,13 +78,22 @@ export const FleetServerHostBaseSchema = schema.object({
 });
 
 export const FleetServerHostSchema = FleetServerHostBaseSchema.extends({
-  id: schema.string(),
-  name: schema.string(),
+  id: schema.savedObjectId.warn({ minLength: 0, label: 'fleet.fleet_server_hosts.id' }),
+  name: schema.displayName.warn({
+    minLength: 0,
+    maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH,
+    label: 'fleet.fleet_server_hosts.name',
+  }),
   host_urls: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 10 }),
   is_default: schema.boolean({ defaultValue: false }),
   is_internal: schema.maybe(schema.boolean()),
   is_preconfigured: schema.boolean({ defaultValue: false }),
-  proxy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  proxy_id: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.savedObjectId.warn({ minLength: 0, label: 'fleet.fleet_server_hosts.proxy_id' }),
+    ])
+  ),
 });
 
 export const FleetServerHostResponseSchema = schema.object({
@@ -78,19 +102,29 @@ export const FleetServerHostResponseSchema = schema.object({
 
 export const PostFleetServerHostRequestSchema = {
   body: FleetServerHostSchema.extends({
-    id: schema.maybe(schema.string()),
+    id: schema.maybe(
+      schema.savedObjectId.warn({ minLength: 0, label: 'fleet.fleet_server_hosts.create.id' })
+    ),
   }),
 };
 
 export const GetOneFleetServerHostRequestSchema = {
   params: schema.object({
-    itemId: schema.string({ meta: { description: 'The ID of the Fleet Server host' } }),
+    itemId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.fleet_server_hosts.get.itemId',
+      meta: { description: 'The ID of the Fleet Server host' },
+    }),
   }),
 };
 
 export const PutFleetServerHostRequestSchema = {
   params: schema.object({
-    itemId: schema.string({ meta: { description: 'The ID of the Fleet Server host' } }),
+    itemId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.fleet_server_hosts.update.itemId',
+      meta: { description: 'The ID of the Fleet Server host' },
+    }),
   }),
   body: FleetServerHostBaseSchema,
 };

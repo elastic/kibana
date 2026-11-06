@@ -26,6 +26,7 @@ import type { SignificantSecurityEventAttachmentData } from '../../../../../comm
 import type { SeverityLevel } from '../../../../../common/attachment_enums';
 import { splitRemoteCluster, stripBackingPrefix } from '../../../../../common/remote_cluster';
 import type { HuntCoordinatorCoreResult } from '../hunt_coordinator';
+import { HostOrigins, toEntityOrigin } from './host_origin';
 
 /**
  * Full SSE attachment payload produced by this mapper. Derived from the
@@ -302,7 +303,31 @@ const buildEntities = (
     (entity) => `${entity.field}|${entity.value}`
   );
 
-  return { entities: taken, truncated, originalCount };
+  const origins = hostOrigins(result, onlyTechniqueId);
+  const entities = taken.map((entity): SseEntityRef => {
+    const origin = entity.field === 'host.name' ? origins.originOf(entity.value) : undefined;
+    return origin ? { ...entity, ...origin } : entity;
+  });
+  return { entities, truncated, originalCount };
+};
+
+/**
+ * Where each host entity was seen, merged over every place this entry names it: Tier 1's
+ * assets and the scoped behaviors' rows. `takeAlternating` keeps one copy of a host both
+ * tiers name, so the origin is merged here rather than read off whichever copy survived.
+ */
+const hostOrigins = (result: HuntCoordinatorCoreResult, onlyTechniqueId?: string): HostOrigins => {
+  const origins = new HostOrigins();
+  for (const host of result.tier1.affected_assets.hosts) {
+    origins.add(host.name, toEntityOrigin(host));
+  }
+  for (const behavior of scopedBehaviors(result, onlyTechniqueId)) {
+    const byName = new Map(
+      (behavior.affected_host_origins ?? []).map((origin) => [origin.name, toEntityOrigin(origin)])
+    );
+    for (const host of behavior.affected_hosts ?? []) origins.add(host, byName.get(host));
+  }
+  return origins;
 };
 
 /**
@@ -682,13 +707,13 @@ const buildChrome = ({
     // it it carries. `per_index` holds the required/optional split either way.
     evidenceFor.push(
       behavior
-        ? `Tier 1 matched ${huntResult.tier1.counts.total_hits} event(s) for this report in the hunt window, at least one in a required index; ${tier1RefCount} are referenced here (see hunt_result.tier1.per_index for the required/optional split).`
-        : `Tier 1 matched ${huntResult.tier1.counts.total_hits} event(s) in the hunt window, at least one in a required index (see hunt_result.tier1.per_index for the required/optional split).`
+        ? `IOC Hunt matched ${huntResult.tier1.counts.total_hits} event(s) for this report in the hunt window, at least one in a required index; ${tier1RefCount} are referenced here (see hunt_result.tier1.per_index for the required/optional split).`
+        : `IOC Hunt matched ${huntResult.tier1.counts.total_hits} event(s) in the hunt window, at least one in a required index (see hunt_result.tier1.per_index for the required/optional split).`
     );
   }
   if (huntResult.hit_sources.includes('tier2') && behavior?.execution?.hit) {
     evidenceFor.push(
-      `Tier 2 executed ${behavior.technique_id} with ${behavior.execution.row_count} required-index row(s).`
+      `Behavior Hunt executed ${behavior.technique_id} with ${behavior.execution.row_count} required-index row(s).`
     );
   }
   if (evidenceFor.length === 0 && huntResult.has_confirmed_hit) {
@@ -714,7 +739,7 @@ const buildChrome = ({
   );
   if (executedClean.length > 0) {
     evidenceAgainst.push(
-      `Tier 2 executed ${
+      `Behavior Hunt executed ${
         executedClean.length
       } proposed technique(s) with no required-index rows: ${executedClean
         .map((proposed) => proposed.technique_id)

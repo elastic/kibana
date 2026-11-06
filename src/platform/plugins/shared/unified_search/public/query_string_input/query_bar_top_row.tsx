@@ -330,6 +330,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
     isApproximate: boolean;
     onChange: (isApproximate: boolean) => void;
     additionalText?: string;
+    additionalDisabledText?: string;
     disabled?: boolean;
     disabledReason?: string;
   };
@@ -604,6 +605,11 @@ export const QueryBarTopRow = React.memo(
       );
     });
 
+    // A submit (e.g. a manual Refresh) refetches the data without changing the date range props,
+    // so tell the DateRangePicker to re-resolve relative bounds (e.g. `now-15m`) against the new
+    // "now" and keep the dates it displays in step with the data.
+    const [submitEpoch, setSubmitEpoch] = useState(0);
+
     const onSubmit = useCallback(
       (
         { query, dateRange }: { query?: Query | QT; dateRange: TimeRange },
@@ -613,6 +619,7 @@ export const QueryBarTopRow = React.memo(
           timeHistory.add(dateRange);
         }
 
+        setSubmitEpoch((epoch) => epoch + 1);
         propsOnSubmit({ query, dateRange }, trigger);
       },
       [timeHistory, propsOnSubmit]
@@ -1074,6 +1081,7 @@ export const QueryBarTopRow = React.memo(
               onSettingsChange={onDateRangePickerSettingsChange}
               onRefresh={propsOnRefreshChange ? onDateRangePickerRefresh : undefined}
               refreshEpoch={autoRefreshEpoch}
+              resolveEpoch={submitEpoch}
               inputDateFormats={inputDateFormats}
               timeZone={uiSettings.get('dateFormat:tz')}
               calendarOptions={calendarOptions}
@@ -1300,6 +1308,7 @@ export const QueryBarTopRow = React.memo(
                   isApproximate={props.esqlApproximation.isApproximate}
                   onChange={props.esqlApproximation.onChange}
                   additionalText={props.esqlApproximation.additionalText}
+                  additionalDisabledText={props.esqlApproximation.additionalDisabledText}
                   disabled={props.esqlApproximation.disabled}
                   disabledReason={props.esqlApproximation.disabledReason}
                 />
@@ -1563,6 +1572,7 @@ export const QueryBarTopRow = React.memo(
                     isApproximate={props.esqlApproximation.isApproximate}
                     onChange={props.esqlApproximation.onChange}
                     additionalText={props.esqlApproximation.additionalText}
+                    additionalDisabledText={props.esqlApproximation.additionalDisabledText}
                     disabled={props.esqlApproximation.disabled}
                     disabledReason={props.esqlApproximation.disabledReason}
                   />

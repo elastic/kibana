@@ -43,6 +43,5 @@ module.exports = {
   rules: {
     // `react-hooks/*` rules run in oxlint (.oxlint/react.mts); the plugin stays registered so
     // `eslint-disable` directives naming them resolve.
-    'react/prefer-stateless-function': ['error', { ignorePureComponents: true }],
   },
 }

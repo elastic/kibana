@@ -17,7 +17,7 @@ import {
   type FetchLike,
 } from '@kbn/mcp-client';
 import type { BuildContext, ClientTypeSpec } from '../../clients/client_type_spec';
-import { createFetchResource, type McpFetchResource } from './fetch_resource';
+import { createFetchResource, McpFetchTimeoutError, type McpFetchResource } from './fetch_resource';
 import { McpConnectionTransportError } from './mcp_connection_transport_error';
 
 export { McpConnectionTransportError };
@@ -26,6 +26,14 @@ const DEFAULT_MCP_CLIENT_NAME = 'kibana-mcp';
 const DEFAULT_MCP_CLIENT_VERSION = '1.0.0';
 const USER_ERROR_HTTP_STATUS_CODES = new Set([401, 403]);
 const TERMINAL_UNDICI_CODES = new Set(['UND_ERR_SOCKET', 'UND_ERR_CLOSED', 'UND_ERR_DESTROYED']);
+// Connect-level failures of a later request: the pooled client points at an unreachable server.
+const CONNECT_FAILURE_CODES = new Set([
+  'ECONNREFUSED',
+  'EHOSTUNREACH',
+  'ENETUNREACH',
+  'EAI_AGAIN',
+  'UND_ERR_CONNECT_TIMEOUT',
+]);
 const SOCKET_HANG_UP = 'socket hang up';
 // Thrown by the SDK protocol layer once its transport is gone.
 const SDK_NOT_CONNECTED_MESSAGE = 'Not connected';
@@ -278,25 +286,47 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
 
   shouldInvalidateOnError(err: unknown): boolean {
     return matchesErrorOrCause(err, (current) => {
+      if (current instanceof McpFetchTimeoutError) {
+        return true;
+      }
       if (current instanceof UnauthorizedError) {
         return true;
       }
       // The SDK dropped its transport: pending requests fail with ConnectionClosed and later
       // requests with "Not connected". Nothing reconnects a pooled client, so drop it.
+      // RequestTimeout leaves the transport open but the session is dead, so drop it too.
       if (current instanceof McpNotConnectedError) {
         return true;
       }
       if (current instanceof McpError) {
-        return current.code === McpErrorCode.ConnectionClosed;
+        return (
+          current.code === McpErrorCode.ConnectionClosed ||
+          current.code === McpErrorCode.RequestTimeout
+        );
       }
       if (current instanceof Error && current.message === SDK_NOT_CONNECTED_MESSAGE) {
         return true;
       }
       if (current instanceof StreamableHTTPError) {
-        return current.code === 401 || current.code === 403 || current.code === 404;
+        return (
+          current.code === 401 ||
+          current.code === 403 ||
+          current.code === 404 ||
+          (current.code !== undefined && current.code >= 500)
+        );
+      }
+      // Connect-phase wrappers. Failed builds are never cached, but callers still use this
+      // predicate to classify a connection failure.
+      if (current instanceof McpConnectionHttpError) {
+        return USER_ERROR_HTTP_STATUS_CODES.has(current.httpStatus) || current.httpStatus >= 500;
+      }
+      if (current instanceof McpConnectionTransportError) {
+        return true;
       }
       const code = getErrorCode(current);
-      return code !== undefined && TERMINAL_UNDICI_CODES.has(code);
+      return (
+        code !== undefined && (TERMINAL_UNDICI_CODES.has(code) || CONNECT_FAILURE_CODES.has(code))
+      );
     });
   },
 });

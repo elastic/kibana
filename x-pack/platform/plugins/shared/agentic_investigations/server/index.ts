@@ -16,6 +16,7 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 
 export type { AgenticInvestigationsPluginSetup, AgenticInvestigationsPluginStart } from './types';
 export type { SubjectsClient } from './subjects/services/subjects_client';
+export type { FindingsWriter } from './findings/findings_writer';
 export type { DeleteInvestigationDataAcrossSpacesResult } from './investigations/services/delete_investigation_data_across_spaces';
 export type {
   DeleteInvestigationDataResult,

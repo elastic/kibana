@@ -36,3 +36,11 @@ export const AVAILABILITY = { since: '9.4.0', stability: 'stable' } as const;
 export const MAX_ARRAY_PARAM_SIZE = 1000;
 
 export const MAX_EXECUTION_FIELD_NAME_LENGTH = 1024;
+
+/** Datemath bounds such as `now-30d/d` or an ISO timestamp. */
+export const MAX_DATEMATH_LENGTH = 64;
+
+/** Free-text filter values such as user names, tags, and concurrency group keys. */
+export const MAX_FILTER_VALUE_LENGTH = 1024;
+
+export const MAX_SEARCH_QUERY_LENGTH = 4096;

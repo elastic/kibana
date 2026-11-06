@@ -1,0 +1,156 @@
+{
+  "operations": {
+    "getFunction": [
+      {
+        "method": "get",
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/functions/{functionName}",
+        "source": "web"
+      }
+    ],
+    "getFunctionApp": [
+      {
+        "method": "get",
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}",
+        "source": "web"
+      }
+    ],
+    "invoke": [
+      {
+        "method": "get",
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}",
+        "source": "web"
+      }
+    ],
+    "listFunctionApps": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "$skiptoken"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "nextLink"
+          },
+          "style": "next_url"
+        },
+        "path": "/subscriptions/{subscriptionId}/providers/Microsoft.Web/sites",
+        "source": "web"
+      },
+      {
+        "method": "get",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "$skiptoken"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "nextLink"
+          },
+          "style": "next_url"
+        },
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites",
+        "source": "web"
+      }
+    ],
+    "listFunctionKeys": [
+      {
+        "method": "post",
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/functions/{functionName}/listkeys",
+        "source": "web"
+      }
+    ],
+    "listFunctions": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "$skiptoken"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "nextLink"
+          },
+          "style": "next_url"
+        },
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/functions",
+        "source": "web"
+      }
+    ],
+    "listHostKeys": [
+      {
+        "method": "post",
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/host/default/listkeys",
+        "source": "web"
+      }
+    ],
+    "listSyncFunctionTriggers": [
+      {
+        "method": "post",
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/listsyncfunctiontriggerstatus",
+        "source": "web"
+      }
+    ],
+    "restartFunctionApp": [
+      {
+        "method": "post",
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/restart",
+        "source": "web"
+      }
+    ],
+    "startFunctionApp": [
+      {
+        "method": "post",
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/start",
+        "source": "web"
+      }
+    ],
+    "stopFunctionApp": [
+      {
+        "method": "post",
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/stop",
+        "source": "web"
+      }
+    ]
+  },
+  "sources": {
+    "web": {
+      "apiVersion": "2024-11-01",
+      "fetchedAt": "2026-10-07T20:19:20.106Z",
+      "format": "swagger",
+      "url": "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/web/resource-manager/Microsoft.Web/AppService/stable/2024-11-01/WebApps.json"
+    }
+  },
+  "unmatched": {
+    "invoke": [
+      {
+        "method": "delete",
+        "path": "/{route}",
+        "reason": "The HTTP trigger is served by the function app itself at https://{defaultHostName}/{route} (https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-http-webhook-trigger#customize-the-http-endpoint), which no Azure Resource Manager spec describes"
+      },
+      {
+        "method": "patch",
+        "path": "/{route}",
+        "reason": "The HTTP trigger is served by the function app itself at https://{defaultHostName}/{route} (https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-http-webhook-trigger#customize-the-http-endpoint), which no Azure Resource Manager spec describes"
+      },
+      {
+        "method": "post",
+        "path": "/{route}",
+        "reason": "The HTTP trigger is served by the function app itself at https://{defaultHostName}/{route} (https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-http-webhook-trigger#customize-the-http-endpoint), which no Azure Resource Manager spec describes"
+      },
+      {
+        "method": "put",
+        "path": "/{route}",
+        "reason": "The HTTP trigger is served by the function app itself at https://{defaultHostName}/{route} (https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-http-webhook-trigger#customize-the-http-endpoint), which no Azure Resource Manager spec describes"
+      },
+      {
+        "method": "post",
+        "path": "/api/{functionName}",
+        "reason": "The HTTP trigger is served by the function app itself at https://{defaultHostName}/{route} (https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-http-webhook-trigger#customize-the-http-endpoint), which no Azure Resource Manager spec describes"
+      }
+    ]
+  }
+}

@@ -597,8 +597,6 @@ export type TimelineEventInput =
  */
 export interface ActiveExecution {
   execution_id: string;
-  trigger_event_id: string;
-  started_at: string;
 }
 
 /**

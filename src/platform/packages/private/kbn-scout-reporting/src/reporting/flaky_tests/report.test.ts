@@ -389,9 +389,8 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       {
         key: 'boom',
         message: 'boom',
-        failuresCount: 30,
-        buildsCount: 30,
-        byPipeline: [{ pipeline: 'kibana-on-merge', failuresCount: 30 }],
+        buildsCount: 2,
+        byPipeline: [{ pipeline: 'kibana-on-merge', buildsCount: 2, buildIds: ['b1', 'b2'] }],
         branches: ['main'],
         targets: ['unknown'],
         firstFailedAt: new Date('2026-09-01T00:00:00.000Z'),
@@ -688,9 +687,17 @@ describe('ScoutFlakyTests.writeToFile / fromFile', () => {
     );
   });
 
+  it('fails clearly on a report written with another schema version', () => {
+    const oldPath = path.join(tmpDir, 'old.json');
+    fs.writeFileSync(oldPath, JSON.stringify({ schemaVersion: 1 }));
+    expect(() => ScoutFlakyTests.fromFile(oldPath)).toThrow(
+      `Flaky tests file ${oldPath} has schema version 1, expected 2; regenerate it with \`node scripts/scout discover-flaky-tests\``
+    );
+  });
+
   it('round-trips a report through JSON, creating parent directories', () => {
     const report = FlakyTestReportSchema.parse({
-      schemaVersion: 1,
+      schemaVersion: 2,
       generatedAt: '2026-09-07T00:00:00.000Z',
       window: { lookbackDays: 7, from: '2026-08-31T00:00:00.000Z', to: '2026-09-07T00:00:00.000Z' },
       scope: { pipelines: ['kibana-on-merge'], branches: [], frameworks: ['jest'] },
