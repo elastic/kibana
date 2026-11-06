@@ -62,6 +62,7 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/llm-tasks-plugin'
   - '@kbn/product-doc-base-plugin'
+  - '@kbn/product-doc-common'
   - '@kbn/core-spaces-common'
   - '@kbn/usage-collection-plugin'
   - '@kbn/agent-builder-browser'

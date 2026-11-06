@@ -15,9 +15,11 @@ import type {
   UninstallResponse,
   ProductDocInstallParams,
   DefaultInferenceIdResponse,
+  ProductDocUpdateAvailabilityResponse,
 } from '../../../common/http_api/installation';
 import {
   INSTALLATION_STATUS_API_PATH,
+  UPDATE_AVAILABILITY_API_PATH,
   INSTALL_ALL_API_PATH,
   UNINSTALL_ALL_API_PATH,
   UPDATE_ALL_API_PATH,
@@ -40,7 +42,10 @@ export class InstallationService {
     const response = await this.http.get<
       InstallationStatusResponse | SecurityLabsInstallStatusResponse
     >(INSTALLATION_STATUS_API_PATH, {
-      query: { inferenceId, ...(resourceType ? { resourceType } : {}) },
+      query: {
+        inferenceId,
+        ...(resourceType ? { resourceType } : {}),
+      },
     });
 
     return response;
@@ -86,6 +91,14 @@ export class InstallationService {
       }
     );
     return response.inferenceId;
+  }
+
+  async getUpdateAvailability(params: {
+    inferenceId: string;
+  }): Promise<ProductDocUpdateAvailabilityResponse> {
+    return this.http.get<ProductDocUpdateAvailabilityResponse>(UPDATE_AVAILABILITY_API_PATH, {
+      query: { inferenceId: params.inferenceId },
+    });
   }
 
   /**

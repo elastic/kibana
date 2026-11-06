@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export { downloadToDisk, checkArtifactAvailable, ArtifactNotFoundError } from './download';
+export {
+  downloadToDisk,
+  checkArtifactAvailable,
+  ArtifactNotFoundError,
+  type DownloadToDiskResult,
+} from './download';
 export {
   resolveArtifactsFolderPath,
   removeArtifactFile,

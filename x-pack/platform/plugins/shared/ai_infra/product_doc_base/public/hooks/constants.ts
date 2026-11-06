@@ -10,6 +10,7 @@
  */
 export const REACT_QUERY_KEYS = {
   GET_PRODUCT_DOC_STATUS: 'productDocBase.status',
+  GET_PRODUCT_DOC_UPDATE_AVAILABILITY: 'productDocBase.updateAvailability',
   INSTALL_PRODUCT_DOC: 'productDocBase.install',
   UNINSTALL_PRODUCT_DOC: 'productDocBase.uninstall',
 } as const;

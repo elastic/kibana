@@ -34,12 +34,15 @@ export type { ProductDocumentationAttributes } from './src/documents';
 export { resolveContentTitle, stripSiteSuffix } from './src/content_title';
 export {
   eisInferenceIdCandidates,
+  getDefaultInferenceIndexKey,
   getProductDocInferenceIdCandidates,
   isEisAvailable,
   isEisAvailableFromInferenceGet,
+  planDefaultInferenceMigration,
   productDocInferenceIdCandidates,
   resolveDefaultInferenceId,
   resolveDefaultInferenceIdFromInferenceGet,
   resolveInstalledProductDocInferenceId,
 } from './src/default_inference_id';
+export type { DefaultInferenceMigration } from './src/default_inference_id';
 export { summarizeBulkErrors } from './src/summarize_bulk_errors';

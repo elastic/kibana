@@ -257,7 +257,7 @@ export const productDocsBaseInstallationSuite = ({}: {}, { getService }: FtrProv
         }
       });
 
-      it('updates the product docs for all previously installed Inference IDs if inferenceIds is omitted', async () => {
+      it('updates the current default and omits the replaced ELSER docs when inferenceIds is omitted', async () => {
         const updatedResponse = await supertest
           .post('/internal/product_doc_base/update_all')
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
@@ -268,8 +268,27 @@ export const productDocsBaseInstallationSuite = ({}: {}, { getService }: FtrProv
           .set('kbn-xsrf', 'foo')
           .expect(200);
         const updatedBody = updatedResponse.body;
-        expect(updatedBody[defaultInferenceEndpoints.ELSER].installed).to.be(true);
+        // Jina is the default when its EIS endpoint exists, so a blanket update replaces ELSER.
         expect(updatedBody[defaultInferenceEndpoints.JINAv5].installed).to.be(true);
+        expect(updatedBody[defaultInferenceEndpoints.ELSER]).to.be(undefined);
+      });
+
+      // forceUpdate reinstalls the targeted model and holds the install lock. Run it before
+      // uninstall so the Jina uninstall does not wait until the suite times out.
+      it('updates the product docs for a specific inferenceId', async () => {
+        const updatedResponse = await supertest
+          .post('/internal/product_doc_base/update_all')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .send({
+            forceUpdate: true,
+            inferenceIds: [defaultInferenceEndpoints.JINAv5],
+          })
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+        const updatedBody = updatedResponse.body;
+        expect(updatedBody[defaultInferenceEndpoints.JINAv5].installed).to.be(true);
+        expect(updatedBody[defaultInferenceEndpoints.ELSER]).to.be(undefined);
       });
 
       it('uninstalls the Jina product docs', async () => {
@@ -312,49 +331,31 @@ export const productDocsBaseInstallationSuite = ({}: {}, { getService }: FtrProv
         });
       });
 
-      it('still retains the ELSER product docs after Jina uninstall', async () => {
+      it('leaves the replaced ELSER product docs uninstalled after Jina uninstall', async () => {
         const statusResponse = await getProductDocStatus(
           supertest,
           defaultInferenceEndpoints.ELSER
         );
         const statusBody = statusResponse.body;
         expect(statusBody.overall).to.eql(
-          'installed',
+          'uninstalled',
           `Expected overall product doc installation status for inferenceId [${
             defaultInferenceEndpoints.ELSER
-          }] to be 'installed', got ${JSON.stringify(statusBody, null, 2)}`
+          }] to be 'uninstalled', got ${JSON.stringify(statusBody, null, 2)}`
         );
         expect(statusBody.inferenceId).to.be(defaultInferenceEndpoints.ELSER);
         products.forEach((product) => {
           expect(statusBody.perProducts[product as DocumentationProduct].status).to.eql(
-            'installed',
+            'uninstalled',
             `Expected product doc installation status for inferenceId [${
               defaultInferenceEndpoints.ELSER
-            }] for [${product}] to be 'installed', got ${JSON.stringify(
+            }] for [${product}] to be 'uninstalled', got ${JSON.stringify(
               statusBody.perProducts[product as DocumentationProduct],
               null,
               2
             )}`
           );
         });
-      });
-
-      // After uninstall. forceUpdate reinstalls ELSER and holds the install lock; running it
-      // before uninstall made the Jina uninstall wait until the suite timed out.
-      it('updates the product docs for a specific inferenceId', async () => {
-        const updatedResponse = await supertest
-          .post('/internal/product_doc_base/update_all')
-          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-          .send({
-            forceUpdate: true,
-            inferenceIds: [defaultInferenceEndpoints.ELSER],
-          })
-          .set('kbn-xsrf', 'foo')
-          .expect(200);
-        const updatedBody = updatedResponse.body;
-        expect(updatedBody[defaultInferenceEndpoints.ELSER].installed).to.be(true);
-        expect(updatedBody[defaultInferenceEndpoints.JINAv5]).to.be(undefined);
       });
     });
   });

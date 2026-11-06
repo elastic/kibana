@@ -52,6 +52,10 @@ export function useInstallProductDoc(
           queryKey: [REACT_QUERY_KEYS.GET_PRODUCT_DOC_STATUS],
           refetchType: 'all',
         });
+        queryClient.invalidateQueries({
+          queryKey: [REACT_QUERY_KEYS.GET_PRODUCT_DOC_UPDATE_AVAILABILITY],
+          refetchType: 'all',
+        });
         onSuccess?.();
       },
       onError,

@@ -34,11 +34,20 @@ jest.mock('fs', () => ({
   }),
 }));
 
+jest.mock('fs/promises', () => ({
+  ...jest.requireActual('fs/promises'),
+  stat: jest.fn(),
+}));
+
 jest.mock('stream/promises', () => ({
   pipeline: jest.fn(),
 }));
 
 const fetchMock = jest.spyOn(global, 'fetch');
+
+const mockResponseHeaders = (headers: Record<string, string> = {}) => ({
+  get: (name: string) => headers[name.toLowerCase()] ?? null,
+});
 
 describe('downloadToDisk', () => {
   const mockFileUrl = 'http://example.com/file.txt';
@@ -47,6 +56,9 @@ describe('downloadToDisk', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(Fs.stat).mockResolvedValue({
+      mtime: new Date('2026-01-27T23:25:54.000Z'),
+    } as Awaited<ReturnType<typeof Fs.stat>>);
   });
 
   it('passes a proxy dispatcher to fetch when a proxy URL is configured', async () => {
@@ -61,6 +73,7 @@ describe('downloadToDisk', () => {
       ok: true,
       status: 200,
       body: mockResponseBody,
+      headers: mockResponseHeaders(),
     } as unknown as Response);
 
     const artifactRepositoryProxyUrl = 'http://proxy.example.com:3128';
@@ -85,19 +98,48 @@ describe('downloadToDisk', () => {
       ok: true,
       status: 200,
       body: mockResponseBody,
+      headers: mockResponseHeaders(),
     } as unknown as Response);
 
-    await downloadToDisk(mockFileUrl, mockFilePathAtVolume);
+    const result = await downloadToDisk(mockFileUrl, mockFilePathAtVolume);
 
     expect(fetchMock).toHaveBeenCalledWith(mockFileUrl, {});
+    expect(result).toEqual({ artifactFullPath: 'artifacts/package_installer/file.txt' });
   });
 
-  it('should copy a file from a local file URL', async () => {
+  it('returns the Last-Modified header as an ISO timestamp', async () => {
+    const mockResponseBody = new ReadableStream({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode('test content'));
+        controller.close();
+      },
+    });
+
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      body: mockResponseBody,
+      headers: mockResponseHeaders({
+        'last-modified': 'Tue, 27 Jan 2026 23:25:54 GMT',
+      }),
+    } as unknown as Response);
+
+    await expect(downloadToDisk(mockFileUrl, mockFilePathAtVolume)).resolves.toEqual({
+      artifactFullPath: 'artifacts/package_installer/file.txt',
+      lastModified: '2026-01-27T23:25:54.000Z',
+    });
+  });
+
+  it('should copy a file from a local file URL and use the file mtime', async () => {
     const mockLocalFileUrl = 'file:///local/path/to/file.txt';
 
-    await downloadToDisk(mockLocalFileUrl, mockFilePathAtVolume);
+    await expect(downloadToDisk(mockLocalFileUrl, mockFilePathAtVolume)).resolves.toEqual({
+      artifactFullPath: 'artifacts/package_installer/file.txt',
+      lastModified: '2026-01-27T23:25:54.000Z',
+    });
 
     expect(createReadStream).toHaveBeenCalledWith(mockLocalPath);
+    expect(Fs.stat).toHaveBeenCalledWith(mockLocalPath);
   });
 
   it('should handle errors during the download process', async () => {
@@ -115,6 +157,7 @@ describe('downloadToDisk', () => {
       status: 404,
       statusText: 'Not Found',
       body: new ReadableStream(),
+      headers: mockResponseHeaders(),
     } as unknown as Response);
 
     await expect(downloadToDisk(mockFileUrl, mockFilePathAtVolume)).rejects.toBeInstanceOf(
@@ -127,6 +170,7 @@ describe('downloadToDisk', () => {
       ok: false,
       status: 503,
       statusText: 'Service Unavailable',
+      headers: mockResponseHeaders(),
     } as unknown as Response);
 
     await expect(downloadToDisk(mockFileUrl, mockFilePathAtVolume)).rejects.toThrow(

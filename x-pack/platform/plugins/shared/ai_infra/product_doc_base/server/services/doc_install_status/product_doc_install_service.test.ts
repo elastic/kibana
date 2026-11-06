@@ -73,6 +73,30 @@ describe('ProductDocInstallClient', () => {
       expect(installStatus.security.updatedAt).toBeUndefined();
     });
 
+    it('exposes the artifact last-modified time when present', async () => {
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          createObj({
+            product_name: 'kibana',
+            product_version: '8.15',
+            installation_status: 'installed',
+            artifact_last_modified: '2026-01-27T23:25:54.000Z',
+          }),
+        ],
+        total: 1,
+        per_page: 100,
+        page: 1,
+      });
+
+      const installStatus = await service.getInstallationStatus({ inferenceId });
+
+      expect(installStatus.kibana).toEqual({
+        status: 'installed',
+        version: '8.15',
+        artifactLastModified: '2026-01-27T23:25:54.000Z',
+      });
+    });
+
     it('propagates read failures from getInstallationStatusOrThrow', async () => {
       soClient.find.mockRejectedValue(new Error('es unavailable'));
 
@@ -166,6 +190,32 @@ describe('ProductDocInstallClient', () => {
       expect(installStatus.security).toEqual({
         status: 'installed',
         version: '9.2',
+      });
+    });
+  });
+
+  describe('getSecurityLabsInstallationStatus', () => {
+    it('exposes when the Security Labs status was last written', async () => {
+      soClient.get.mockResolvedValue({
+        id: 'security-labs',
+        type: 'type',
+        references: [],
+        updated_at: '2026-09-17T10:00:00.000Z',
+        attributes: {
+          product_name: 'security',
+          product_version: '2026.09.17',
+          installation_status: 'installed',
+          resource_type: ResourceTypes.securityLabs,
+          inference_id: inferenceId,
+          artifact_last_modified: '2026-01-27T23:25:54.000Z',
+        },
+      });
+
+      await expect(service.getSecurityLabsInstallationStatus({ inferenceId })).resolves.toEqual({
+        status: 'installed',
+        version: '2026.09.17',
+        updatedAt: '2026-09-17T10:00:00.000Z',
+        artifactLastModified: '2026-01-27T23:25:54.000Z',
       });
     });
   });
@@ -274,6 +324,45 @@ describe('ProductDocInstallClient', () => {
           installation_status: 'uninstalled',
           inference_id: inferenceId,
           resource_type: ResourceTypes.productDoc,
+        })
+      );
+    });
+
+    it('stores the artifact last-modified time on successful product doc install', async () => {
+      soClient.update.mockResolvedValueOnce({} as any);
+
+      await service.setInstallationSuccessful({
+        productName: 'kibana',
+        indexName: '.kibana-product-doc-kibana',
+        inferenceId,
+        artifactLastModified: '2026-01-27T23:25:54.000Z',
+      });
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.stringContaining('kb-product-doc-kibana'),
+        expect.objectContaining({
+          installation_status: 'installed',
+          artifact_last_modified: '2026-01-27T23:25:54.000Z',
+        })
+      );
+    });
+
+    it('clears a previous artifact last-modified time when the download has none', async () => {
+      soClient.update.mockResolvedValueOnce({} as any);
+
+      await service.setSecurityLabsInstallationSuccessful({
+        version: '2026.09.17',
+        indexName: '.kibana-security-labs',
+        inferenceId,
+      });
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.any(String),
+        expect.objectContaining({
+          installation_status: 'installed',
+          artifact_last_modified: '',
         })
       );
     });

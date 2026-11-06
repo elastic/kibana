@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { DocumentationProduct } from '@kbn/product-doc-common';
+import {
+  DocumentationProduct,
+  resolveDefaultInferenceIdFromInferenceGet,
+} from '@kbn/product-doc-common';
 import {
   RETRIEVE_ELASTIC_DOC_FUNCTION_NAME,
-  getInferenceIdFromWriteIndex,
+  resolveObservabilityProductDocInferenceId,
 } from '@kbn/observability-ai-assistant-plugin/server';
-import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { FunctionRegistrationParameters } from '.';
 
 export async function registerDocumentationFunction({
@@ -19,11 +21,16 @@ export async function registerDocumentationFunction({
   pluginsStart: { llmTasks },
 }: FunctionRegistrationParameters) {
   const esClient = (await resources.context.core).elasticsearch.client;
-  const inferenceId =
-    (await getInferenceIdFromWriteIndex(esClient, resources.logger)) ??
-    defaultInferenceEndpoints.ELSER;
-  const isProductDocAvailable =
-    (await llmTasks.retrieveDocumentationAvailable({ inferenceId })) ?? false;
+  const getDefaultInferenceId = () =>
+    resolveDefaultInferenceIdFromInferenceGet(() => esClient.asInternalUser.inference.get({}));
+  const installedInferenceId = await resolveObservabilityProductDocInferenceId({
+    esClient,
+    logger: resources.logger,
+    isDocumentationAvailable: async (candidateInferenceId) =>
+      Boolean(await llmTasks.retrieveDocumentationAvailable({ inferenceId: candidateInferenceId })),
+  });
+  const inferenceId = installedInferenceId ?? (await getDefaultInferenceId());
+  const isProductDocAvailable = Boolean(installedInferenceId);
 
   functions.registerFunction(
     {

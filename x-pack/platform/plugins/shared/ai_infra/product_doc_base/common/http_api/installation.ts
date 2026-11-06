@@ -9,6 +9,7 @@ import type { ProductName, ResourceType } from '@kbn/product-doc-common';
 import type { ProductInstallState, InstallationStatus } from '../install_status';
 
 export const INSTALLATION_STATUS_API_PATH = '/internal/product_doc_base/status';
+export const UPDATE_AVAILABILITY_API_PATH = '/internal/product_doc_base/update_availability';
 export const INSTALL_ALL_API_PATH = '/internal/product_doc_base/install';
 export const UNINSTALL_ALL_API_PATH = '/internal/product_doc_base/uninstall';
 export const UPDATE_ALL_API_PATH = '/internal/product_doc_base/update_all';
@@ -21,6 +22,24 @@ export interface InstallationStatusResponse {
   /** Resource type for this installation status */
   resourceType?: ResourceType;
   openApiStatus?: OpenAPISpecInstallStatusResponse;
+}
+
+/**
+ * Repository artifact check for GenAI Settings. Separate from installation status so
+ * status polling does not list artifacts on every request.
+ */
+export interface ProductDocUpdateAvailabilityResponse {
+  inferenceId: string;
+  isUpdateAvailable: boolean;
+  /** ISO 8601 LastModified of the newer repository artifact, when an update is available. */
+  availableArtifactLastModified?: string;
+  /** Major.minor stack version of that artifact, when it is a versioned zip rather than `latest`. */
+  availableStackVersion?: string;
+  /**
+   * Repository LastModified for an installed zip that has no stored date.
+   * Keyed by product so the version line can show the installed release.
+   */
+  installedArtifactLastModifiedByProduct?: Partial<Record<ProductName, string>>;
 }
 
 export interface PerformInstallResponse {
@@ -57,7 +76,13 @@ export interface BaseInstallStatusResponse<T extends ResourceType> {
   version?: string;
   latestVersion?: string;
   isUpdateAvailable?: boolean;
+  /** ISO 8601 LastModified of the newer repository artifact, when an update is available. */
+  availableArtifactLastModified?: string;
   failureReason?: string;
+  /** Last time the status was written, ISO 8601. When status is `installed`, this is the installation time. */
+  updatedAt?: string;
+  /** ISO 8601 last-modified time of the installed artifact, when known. */
+  artifactLastModified?: string;
 }
 
 export type OpenAPISpecInstallStatusResponse = BaseInstallStatusResponse<'openapi_spec'>;

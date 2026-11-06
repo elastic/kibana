@@ -20,12 +20,19 @@ jest.mock('fs');
 
 const fetchMock = jest.spyOn(global, 'fetch');
 
+const LAST_MODIFIED = '2024-10-09T15:01:03.137Z';
+const LAST_MODIFIED_SECOND_PRECISION = '2024-10-09T15:01:03.000Z';
+
 const createResponse = ({
   artifactNames,
   truncated = false,
+  lastModified = LAST_MODIFIED,
+  lastModifiedByArtifact,
 }: {
   artifactNames: string[];
   truncated?: boolean;
+  lastModified?: string;
+  lastModifiedByArtifact?: Record<string, string>;
 }) => {
   return `
   <ListBucketResult xmlns="http://doc.s3.amazonaws.com/2006-03-01">
@@ -39,7 +46,7 @@ const createResponse = ({
         <Key>${artifactName}</Key>
         <Generation>1728486063097626</Generation>
         <MetaGeneration>1</MetaGeneration>
-        <LastModified>2024-10-09T15:01:03.137Z</LastModified>
+        <LastModified>${lastModifiedByArtifact?.[artifactName] ?? lastModified}</LastModified>
         <ETag>"e0584955969eccf2a16b8829f768cb1f"</ETag>
         <Size>36781438</Size>
       </Contents>`
@@ -121,12 +128,16 @@ describe('fetchArtifactVersions', () => {
       expect.any(Function)
     );
 
-    expect(result).toEqual({
+    expect(result.versions).toEqual({
       elasticsearch: ['8.16'],
       kibana: ['8.16'],
       observability: [],
       openapi: [],
       security: [],
+    });
+    expect(result.lastModifiedByProductVersion).toEqual({
+      kibana: { '8.16': LAST_MODIFIED_SECOND_PRECISION },
+      elasticsearch: { '8.16': LAST_MODIFIED_SECOND_PRECISION },
     });
   });
 
@@ -163,14 +174,20 @@ describe('fetchArtifactVersions', () => {
     ];
     mockResponse(createResponse({ artifactNames }));
 
-    const versions = await fetchArtifactVersions({ artifactRepositoryUrl });
+    const result = await fetchArtifactVersions({ artifactRepositoryUrl });
 
-    expect(versions).toEqual(
+    expect(result.versions).toEqual(
       expectVersions({
         kibana: ['8.16'],
         elasticsearch: ['8.16'],
         openapi: [],
       })
+    );
+    expect(result.lastModifiedByProductVersion.kibana?.['8.16']).toBe(
+      LAST_MODIFIED_SECOND_PRECISION
+    );
+    expect(result.lastModifiedByProductVersion.elasticsearch?.['8.16']).toBe(
+      LAST_MODIFIED_SECOND_PRECISION
     );
   });
 
@@ -184,15 +201,62 @@ describe('fetchArtifactVersions', () => {
     ];
     mockResponse(createResponse({ artifactNames }));
 
-    const versions = await fetchArtifactVersions({ artifactRepositoryUrl });
+    const result = await fetchArtifactVersions({ artifactRepositoryUrl });
 
-    expect(versions).toEqual(
+    expect(result.versions).toEqual(
       expectVersions({
         kibana: ['8.15', '8.16', '8.17'],
         elasticsearch: ['8.16', '9.0'],
         openapi: [],
       })
     );
+  });
+
+  it('records LastModified for latest version entries', async () => {
+    mockResponse(
+      createResponse({
+        artifactNames: [getArtifactName({ productName: 'kibana', productVersion: 'latest' })],
+        lastModified: '2026-01-27T23:25:54.727Z',
+      })
+    );
+
+    const result = await fetchArtifactVersions({
+      artifactRepositoryUrl,
+      inferenceId: defaultInferenceEndpoints.ELSER,
+    });
+
+    const version = 'latest-2026-01-27T23:25:54.727Z';
+    expect(result.versions.kibana).toEqual([version]);
+    // Stored/compared at second precision (HTTP Last-Modified has no milliseconds).
+    expect(result.lastModifiedByProductVersion.kibana?.[version]).toBe('2026-01-27T23:25:54.000Z');
+  });
+
+  it('uses the requested inference ID LastModified when the same version exists for another model', async () => {
+    const jinaId = defaultInferenceEndpoints.JINAv5;
+    const elserArtifact = getArtifactName({ productName: 'kibana', productVersion: '9.6' });
+    const jinaArtifact = getArtifactName({
+      productName: 'kibana',
+      productVersion: '9.6',
+      inferenceId: jinaId,
+    });
+    mockResponse(
+      createResponse({
+        artifactNames: [jinaArtifact, elserArtifact],
+        lastModifiedByArtifact: {
+          [jinaArtifact]: '2026-09-28T21:00:47.024Z',
+          // Newer ELSER upload of the same stack version must not look like a Jina update.
+          [elserArtifact]: '2026-10-05T03:32:24.501Z',
+        },
+      })
+    );
+
+    const result = await fetchArtifactVersions({
+      artifactRepositoryUrl,
+      inferenceId: jinaId,
+    });
+
+    expect(result.versions.kibana).toEqual(['9.6']);
+    expect(result.lastModifiedByProductVersion.kibana?.['9.6']).toBe('2026-09-28T21:00:47.000Z');
   });
 
   it('throws an error if the response is truncated', async () => {
@@ -245,14 +309,20 @@ describe('fetchSecurityLabsVersions', () => {
         artifactRepositoryUrl,
         inferenceId: defaultInferenceEndpoints.ELSER,
       })
-    ).resolves.toEqual([ELSER_VERSION]);
+    ).resolves.toEqual({
+      versions: [ELSER_VERSION],
+      lastModifiedByVersion: { [ELSER_VERSION]: LAST_MODIFIED_SECOND_PRECISION },
+    });
 
     await expect(
       fetchSecurityLabsVersions({
         artifactRepositoryUrl,
         inferenceId: defaultInferenceEndpoints.JINAv5,
       })
-    ).resolves.toEqual([JINA_VERSION]);
+    ).resolves.toEqual({
+      versions: [JINA_VERSION],
+      lastModifiedByVersion: { [JINA_VERSION]: LAST_MODIFIED_SECOND_PRECISION },
+    });
   });
 
   it('returns all unsuffixed ELSER versions when multiple exist', async () => {
@@ -274,7 +344,13 @@ describe('fetchSecurityLabsVersions', () => {
         artifactRepositoryUrl,
         inferenceId: defaultInferenceEndpoints.ELSER,
       })
-    ).resolves.toEqual([OLDER_ELSER_VERSION, ELSER_VERSION]);
+    ).resolves.toEqual({
+      versions: [OLDER_ELSER_VERSION, ELSER_VERSION],
+      lastModifiedByVersion: {
+        [OLDER_ELSER_VERSION]: LAST_MODIFIED_SECOND_PRECISION,
+        [ELSER_VERSION]: LAST_MODIFIED_SECOND_PRECISION,
+      },
+    });
   });
 
   it('returns an empty list when no artifact matches the inference ID', async () => {
@@ -294,6 +370,6 @@ describe('fetchSecurityLabsVersions', () => {
         artifactRepositoryUrl,
         inferenceId: defaultInferenceEndpoints.ELSER,
       })
-    ).resolves.toEqual([]);
+    ).resolves.toEqual({ versions: [], lastModifiedByVersion: {} });
   });
 });

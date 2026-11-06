@@ -25,8 +25,10 @@ import {
   scheduleEnsureSecurityLabsUpToDateTask,
   getInstallAllTaskStatus,
   waitUntilTaskCompleted,
+  INSTALL_TASK_WAIT_TIMEOUT_MS,
 } from '../../tasks';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { ResourceTypes } from '@kbn/product-doc-common';
 import { PRODUCT_DOC_INSTALL_LOCK_ID } from '../install_lock';
 
 const scheduleInstallAllTaskMock = scheduleInstallAllTask as jest.MockedFn<
@@ -96,6 +98,7 @@ describe('DocumentationManager', () => {
           defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
           defaultInferenceEndpoints.ELSER,
         ]),
+      getPreviouslyInstalledSecurityLabsInferenceIds: jest.fn().mockResolvedValue([]),
     } as unknown as jest.Mocked<ProductDocInstallClient>;
 
     withLock = jest.fn((_lockId: string, callback: () => Promise<unknown>) => callback());
@@ -288,6 +291,7 @@ describe('DocumentationManager', () => {
         inferenceId: defaultInferenceEndpoints.JINAv5,
         force: false,
       });
+      expect(scheduleUninstallAllTaskMock).not.toHaveBeenCalled();
       expect(waitUntilTaskCompletedMock).not.toHaveBeenCalled();
       expect(scheduleEnsureUpToDateTaskMock).not.toHaveBeenCalled();
     });
@@ -321,6 +325,7 @@ describe('DocumentationManager', () => {
         inferenceId: defaultInferenceEndpoints.JINAv5,
         force: false,
       });
+      expect(scheduleUninstallAllTaskMock).not.toHaveBeenCalled();
       expect(scheduleEnsureUpToDateTaskMock).not.toHaveBeenCalled();
     });
 
@@ -477,13 +482,27 @@ describe('DocumentationManager', () => {
   describe('#updateAll', () => {
     beforeEach(() => {
       getInstallAllTaskStatusMock.mockResolvedValue('none');
+      licensing.getLicense.mockResolvedValue(
+        licensingMock.createLicense({ license: { type: 'enterprise' } })
+      );
 
       docInstallClient.getInstallationStatus.mockResolvedValue({
         kibana: { status: 'uninstalled' },
       } as Awaited<ReturnType<ProductDocInstallClient['getInstallationStatus']>>);
     });
 
-    it('calls `scheduleEnsureUpToDateTask` for each inferenceId', async () => {
+    it('calls `scheduleEnsureUpToDateTask` for each inferenceId when the default is unchanged', async () => {
+      esClient.inference.get.mockResolvedValue({
+        endpoints: [
+          {
+            inference_id: defaultInferenceEndpoints.ELSER,
+            task_type: 'text_embedding',
+            service: 'elasticsearch',
+            service_settings: {},
+          },
+        ],
+      });
+
       await docManager.updateAll();
 
       expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledTimes(2);
@@ -498,8 +517,280 @@ describe('DocumentationManager', () => {
         logger,
         inferenceId: defaultInferenceEndpoints.ELSER,
       });
-
+      expect(scheduleInstallAllTaskMock).not.toHaveBeenCalled();
+      expect(scheduleUninstallAllTaskMock).not.toHaveBeenCalled();
       expect(waitUntilTaskCompletedMock).not.toHaveBeenCalled();
+    });
+
+    it('deletes ELSER documentation and installs Jina when the default inference changed', async () => {
+      docInstallClient.getInstallationStatus
+        .mockResolvedValueOnce({
+          kibana: { status: 'uninstalled' },
+        } as Awaited<ReturnType<ProductDocInstallClient['getInstallationStatus']>>)
+        .mockResolvedValue({
+          kibana: { status: 'installed' },
+        } as Awaited<ReturnType<ProductDocInstallClient['getInstallationStatus']>>);
+
+      await docManager.updateAll();
+
+      expect(scheduleInstallAllTaskMock).toHaveBeenCalledWith({
+        taskManager,
+        logger,
+        inferenceId: defaultInferenceEndpoints.JINAv5,
+        force: false,
+      });
+      expect(scheduleUninstallAllTaskMock).toHaveBeenCalledWith({
+        taskManager,
+        logger,
+        inferenceId: defaultInferenceEndpoints.ELSER,
+        resourceType: ResourceTypes.productDoc,
+      });
+      expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledTimes(1);
+      expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledWith({
+        taskManager,
+        logger,
+        inferenceId: defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
+      });
+      expect(scheduleEnsureUpToDateTaskMock).not.toHaveBeenCalledWith(
+        expect.objectContaining({ inferenceId: defaultInferenceEndpoints.JINAv5 })
+      );
+      expect(scheduleEnsureUpToDateTaskMock).not.toHaveBeenCalledWith(
+        expect.objectContaining({ inferenceId: defaultInferenceEndpoints.ELSER })
+      );
+    });
+
+    it('removes ELSER without reinstalling when Jina documentation is already installed', async () => {
+      docInstallClient.getPreviouslyInstalledInferenceIds.mockResolvedValue([
+        defaultInferenceEndpoints.JINAv5,
+        defaultInferenceEndpoints.ELSER,
+        defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
+      ]);
+
+      docInstallClient.getInstallationStatus.mockResolvedValue({
+        kibana: { status: 'installed' },
+      } as Awaited<ReturnType<ProductDocInstallClient['getInstallationStatus']>>);
+
+      await docManager.updateAll();
+
+      expect(scheduleInstallAllTaskMock).not.toHaveBeenCalled();
+      expect(scheduleUninstallAllTaskMock).toHaveBeenCalledWith({
+        taskManager,
+        logger,
+        inferenceId: defaultInferenceEndpoints.ELSER,
+        resourceType: ResourceTypes.productDoc,
+      });
+      expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledTimes(1);
+      expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledWith({
+        taskManager,
+        logger,
+        inferenceId: defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
+      });
+      expect(scheduleEnsureUpToDateTaskMock).not.toHaveBeenCalledWith(
+        expect.objectContaining({ inferenceId: defaultInferenceEndpoints.JINAv5 })
+      );
+      expect(scheduleEnsureUpToDateTaskMock).not.toHaveBeenCalledWith(
+        expect.objectContaining({ inferenceId: defaultInferenceEndpoints.ELSER })
+      );
+    });
+
+    it('still updates the current default when a user forces an update', async () => {
+      docInstallClient.getPreviouslyInstalledInferenceIds.mockResolvedValue([
+        defaultInferenceEndpoints.JINAv5,
+        defaultInferenceEndpoints.ELSER,
+        defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
+      ]);
+      docInstallClient.getInstallationStatus.mockResolvedValue({
+        kibana: { status: 'installed' },
+      } as Awaited<ReturnType<ProductDocInstallClient['getInstallationStatus']>>);
+
+      await docManager.updateAll({
+        forceUpdate: true,
+        inferenceIds: [defaultInferenceEndpoints.JINAv5],
+      });
+
+      expect(scheduleInstallAllTaskMock).not.toHaveBeenCalled();
+      expect(scheduleUninstallAllTaskMock).toHaveBeenCalledWith({
+        taskManager,
+        logger,
+        inferenceId: defaultInferenceEndpoints.ELSER,
+        resourceType: ResourceTypes.productDoc,
+      });
+      expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledWith({
+        taskManager,
+        logger,
+        inferenceId: defaultInferenceEndpoints.JINAv5,
+        forceUpdate: true,
+      });
+    });
+
+    it('does not switch models when the default inference ID cannot be resolved', async () => {
+      esClient.inference.get.mockRejectedValue(new Error('inference unavailable'));
+
+      await docManager.updateAll();
+
+      expect(scheduleInstallAllTaskMock).not.toHaveBeenCalled();
+      expect(scheduleUninstallAllTaskMock).not.toHaveBeenCalled();
+      expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledWith({
+        taskManager,
+        logger,
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+    });
+
+    it('does not remove ELSER when only a custom inference ID is updated', async () => {
+      await docManager.updateAll({
+        inferenceIds: [defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL],
+      });
+
+      expect(scheduleInstallAllTaskMock).not.toHaveBeenCalled();
+      expect(scheduleUninstallAllTaskMock).not.toHaveBeenCalled();
+      expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledTimes(1);
+      expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledWith({
+        taskManager,
+        logger,
+        inferenceId: defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
+      });
+    });
+
+    it('keeps ELSER installed and still updates it when the Jina install does not complete', async () => {
+      await docManager.updateAll();
+
+      expect(scheduleInstallAllTaskMock).toHaveBeenCalled();
+      expect(scheduleUninstallAllTaskMock).not.toHaveBeenCalled();
+      expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledWith(
+        expect.objectContaining({ inferenceId: defaultInferenceEndpoints.ELSER })
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          `Product documentation for [${defaultInferenceEndpoints.JINAv5}] is not installed`
+        )
+      );
+    });
+
+    it('keeps updating ELSER and warns when the new default cannot be installed', async () => {
+      licensing.getLicense.mockResolvedValue(
+        licensingMock.createLicense({ license: { type: 'basic' } })
+      );
+
+      await docManager.updateAll();
+
+      expect(scheduleInstallAllTaskMock).not.toHaveBeenCalled();
+      expect(scheduleUninstallAllTaskMock).not.toHaveBeenCalled();
+      expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledTimes(2);
+      expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledWith({
+        taskManager,
+        logger,
+        inferenceId: defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
+      });
+      expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledWith({
+        taskManager,
+        logger,
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+      expect(scheduleEnsureUpToDateTaskMock).not.toHaveBeenCalledWith(
+        expect.objectContaining({ inferenceId: defaultInferenceEndpoints.JINAv5 })
+      );
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('invalid license'));
+    });
+
+    it('shares one wait budget between the migration install and the updates', async () => {
+      const MINUTE = 60 * 1000;
+      let now = 1_000_000;
+      const nowSpy = jest.spyOn(Date, 'now').mockImplementation(() => now);
+      // Each wait consumes up to 30 minutes of the fake clock
+      waitUntilTaskCompletedMock.mockImplementation(async ({ timeout = 0 }) => {
+        now += Math.min(timeout, 30 * MINUTE);
+      });
+      docInstallClient.getInstallationStatus
+        .mockResolvedValueOnce({
+          kibana: { status: 'uninstalled' },
+        } as Awaited<ReturnType<ProductDocInstallClient['getInstallationStatus']>>)
+        .mockResolvedValue({
+          kibana: { status: 'installed' },
+        } as Awaited<ReturnType<ProductDocInstallClient['getInstallationStatus']>>);
+
+      try {
+        await docManager.updateAll({ wait: true });
+      } finally {
+        nowSpy.mockRestore();
+      }
+
+      const timeouts = waitUntilTaskCompletedMock.mock.calls.map(([args]) => args.timeout);
+      expect(timeouts).toEqual([
+        INSTALL_TASK_WAIT_TIMEOUT_MS,
+        INSTALL_TASK_WAIT_TIMEOUT_MS - 30 * MINUTE,
+      ]);
+    });
+  });
+
+  describe('#updateSecurityLabsAll', () => {
+    beforeEach(() => {
+      licensing.getLicense.mockResolvedValue(
+        licensingMock.createLicense({ license: { type: 'enterprise' } })
+      );
+      docInstallClient.getPreviouslyInstalledSecurityLabsInferenceIds.mockResolvedValue([
+        defaultInferenceEndpoints.ELSER,
+      ]);
+    });
+
+    it('deletes ELSER Security Labs content and installs Jina when the default changed', async () => {
+      packageInstaller.getSecurityLabsStatus
+        .mockResolvedValueOnce({ status: 'uninstalled' })
+        .mockResolvedValue({ status: 'installed' });
+
+      await docManager.updateSecurityLabsAll();
+
+      expect(packageInstaller.installSecurityLabs).toHaveBeenCalledWith({
+        inferenceId: defaultInferenceEndpoints.JINAv5,
+        version: undefined,
+      });
+      expect(packageInstaller.uninstallSecurityLabs).toHaveBeenCalledWith({
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+      expect(scheduleEnsureSecurityLabsUpToDateTaskMock).toHaveBeenCalledTimes(1);
+      expect(scheduleEnsureSecurityLabsUpToDateTaskMock).toHaveBeenCalledWith({
+        taskManager,
+        logger,
+        inferenceId: defaultInferenceEndpoints.JINAv5,
+      });
+    });
+
+    it('keeps ELSER Security Labs content when the new default is not installed afterwards', async () => {
+      packageInstaller.getSecurityLabsStatus.mockResolvedValue({ status: 'error' });
+
+      await docManager.updateSecurityLabsAll();
+
+      expect(packageInstaller.installSecurityLabs).toHaveBeenCalledWith({
+        inferenceId: defaultInferenceEndpoints.JINAv5,
+        version: undefined,
+      });
+      expect(packageInstaller.uninstallSecurityLabs).not.toHaveBeenCalled();
+      expect(scheduleEnsureSecurityLabsUpToDateTaskMock).toHaveBeenCalledWith({
+        taskManager,
+        logger,
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          `Security Labs content for [${defaultInferenceEndpoints.JINAv5}] is not installed`
+        )
+      );
+    });
+
+    it('keeps ELSER Security Labs content when the new default cannot be installed', async () => {
+      licensing.getLicense.mockResolvedValue(
+        licensingMock.createLicense({ license: { type: 'basic' } })
+      );
+
+      await docManager.updateSecurityLabsAll();
+
+      expect(packageInstaller.installSecurityLabs).not.toHaveBeenCalled();
+      expect(packageInstaller.uninstallSecurityLabs).not.toHaveBeenCalled();
+      expect(scheduleEnsureSecurityLabsUpToDateTaskMock).toHaveBeenCalledWith({
+        taskManager,
+        logger,
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
     });
   });
 
