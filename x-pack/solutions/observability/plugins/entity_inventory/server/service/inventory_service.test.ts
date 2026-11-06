@@ -84,7 +84,7 @@ describe('InventoryService.listTypes', () => {
     expect(types.map(({ type }) => type)).toEqual([hostLikeFixture.type]);
   });
 
-  it('omits definitions with a dynamic block that this plugin did not register', async () => {
+  it('includes definitions with a dynamic block whoever registered them', async () => {
     const builtIn = {
       ...k8sNodeFixture,
       type: 'host',
@@ -99,7 +99,11 @@ describe('InventoryService.listTypes', () => {
 
     const { types } = await service.listTypes();
 
-    expect(types.map(({ type }) => type)).toEqual([hostLikeFixture.type]);
+    expect(types.map(({ type }) => type)).toEqual([
+      builtIn.type,
+      integration.type,
+      hostLikeFixture.type,
+    ]);
   });
 
   it('skips and warns on a definition that fails column derivation', async () => {
@@ -566,18 +570,6 @@ describe('InventoryService.list', () => {
       [k8sNodeWithoutDynamic],
       'its entity definition has no dynamic block',
     ],
-    [
-      'a type another plugin registered',
-      'host',
-      [
-        {
-          ...hostLikeFixture,
-          type: 'host',
-          managedBy: { kind: 'plugin' as const, id: 'entityStore' },
-        },
-      ],
-      'its entity definition was registered by another plugin',
-    ],
   ])(
     'throws InventoryTypeNotFoundError for %s without querying',
     async (_label, type, definitions, reason) => {
@@ -631,7 +623,7 @@ describe('InventoryService.list', () => {
         'Entity type "k8s.deployment" cannot be queried: attribute name "last_seen" is reserved'
       ),
     });
-    // A definition this plugin ships is a server bug, so it is logged at error level, not only answered with 400.
+    // A registered definition that cannot be queried is a server bug, so it is logged at error level, not only answered with 400.
     expect(logger.error).toHaveBeenCalledWith(
       expect.stringContaining('Entity type "k8s.deployment" cannot be queried')
     );

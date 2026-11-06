@@ -367,14 +367,12 @@ apiTest.describe(
     });
 
     apiTest(
-      'answers 404 for a type whose definition another plugin registered',
+      'lists a type with a dynamic block that another plugin registered',
       async ({ apiClient }) => {
         const response = await postList(apiClient, WINDOW, listPath('host'));
 
-        expect(response).toHaveStatusCode(404);
-        expect(response.body.message).toBe(
-          'Entity type "host" is not available in the entity inventory: its entity definition was registered by another plugin'
-        );
+        expect(response).toHaveStatusCode(200);
+        expect(Array.isArray(response.body.rows)).toBe(true);
       }
     );
 

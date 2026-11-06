@@ -14,7 +14,7 @@ The routes exist only when the plugin is enabled. Both are internal: send `x-ela
 
 ### `GET /internal/entity_inventory/types`
 
-No body and no parameters. It returns one entry per definition this plugin registers (`managedBy: { kind: 'plugin', id: 'entityInventory' }`) that has a `dynamic` block. Definitions registered by anything else are left out, even with a `dynamic` block, such as the entity store's built-in `host`. Example response for `k8s.deployment`:
+No body and no parameters. It returns one entry per registered definition that has a `dynamic` block, whoever registered it, so the entity store's built-in `host` is listed beside this plugin's own types. Example response for `k8s.deployment`:
 
 ```json
 {
@@ -93,7 +93,7 @@ Errors that fail the request:
 
 | request | status |
 | --- | --- |
-| The type has no entity definition, has no `dynamic` block, or another plugin registered it | 404 |
+| The type has no entity definition, or has no `dynamic` block | 404 |
 | `type` is not a valid type name | 400 |
 | `from` or `to` is missing or not an ISO 8601 instant, or `from >= to` | 400 |
 | The window is longer than 72 hours | 400 |

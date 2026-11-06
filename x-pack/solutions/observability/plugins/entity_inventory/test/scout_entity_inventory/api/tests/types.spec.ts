@@ -12,8 +12,8 @@ import { apiTest, INTERNAL_HEADERS, TYPES_PATH } from '../fixtures';
 
 // Unique per run, so setup and teardown touch only the space this run created.
 const SPACE_ID = `entity-inventory-types-${randomUUID()}`;
-// The types this plugin registers. Built-ins such as `host` are left out even when they have a `dynamic` block.
-const INVENTORY_TYPES = ['k8s.deployment'];
+// Every registered type with a `dynamic` block: the entity store's built-in `host` and this plugin's own.
+const INVENTORY_TYPES = ['host', 'k8s.deployment'];
 const K8S_DEPLOYMENT_IDENTITY_FIELDS = [
   'k8s.cluster.name',
   'k8s.namespace.name',
@@ -64,7 +64,7 @@ apiTest.describe(
       expect(k8sDeployment?.sources).toHaveLength(2);
     });
 
-    apiTest('returns only the types this plugin registers', async ({ apiClient }) => {
+    apiTest('returns every type with a dynamic block', async ({ apiClient }) => {
       const response = await apiClient.get(TYPES_PATH, {
         headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
         responseType: 'json',
@@ -73,7 +73,7 @@ apiTest.describe(
       expect(response).toHaveStatusCode(200);
       const { types }: { types: InventoryTypeResponse[] } = response.body;
 
-      expect(types.map(({ type }) => type)).toStrictEqual(INVENTORY_TYPES);
+      expect(types.map(({ type }) => type).sort()).toStrictEqual(INVENTORY_TYPES);
     });
 
     apiTest('returns the same types in a non-default space', async ({ apiClient }) => {
