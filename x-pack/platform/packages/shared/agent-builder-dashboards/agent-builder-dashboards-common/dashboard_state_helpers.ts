@@ -8,9 +8,10 @@
 export const DEFAULT_TIME_RANGE = { from: 'now-24h', to: 'now' } as const;
 
 /**
- * Default values for all dashboard state fields except project_routing and refresh_interval.
- * A missing refresh_interval keeps the dashboard's own, because the timefilter clamps any
- * default below its minimum refresh interval and would report it as an unsaved change.
+ * Default values for all dashboard state fields except project_routing, time_range and
+ * refresh_interval. A missing time_range or refresh_interval keeps the dashboard's own; a
+ * refresh_interval default would be clamped by the timefilter to its minimum and reported as
+ * an unsaved change.
  */
 export const EMPTY_DASHBOARD_STATE = Object.freeze({
   title: '',
