@@ -11,10 +11,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { AuditEvent } from '@kbn/security-plugin-types-server';
 import type { WorkflowPageAccess } from '../../../pages/page_saved_object';
-import type {
-  WorkflowPageAuditLog,
-  WorkflowPageAuditParams,
-} from '../../../pages/workflow_pages_service';
+import type { WorkflowPageAuditLog, WorkflowPageAuditParams } from '../../../pages/types';
 import type { WorkflowsService } from '../../workflows_management_service';
 
 /**

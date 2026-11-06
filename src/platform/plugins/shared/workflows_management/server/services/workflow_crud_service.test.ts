@@ -4698,7 +4698,7 @@ describe('workflow page lifecycle', () => {
       retireWorkflowPages: jest.fn().mockResolvedValue(undefined),
     };
     const { deps, client } = makeDeps(undefined, {
-      pagesService: pagesService as unknown as WorkflowCrudDeps['pagesService'],
+      pagesSystemClient: pagesService as unknown as WorkflowCrudDeps['pagesSystemClient'],
     });
     return {
       service: new WorkflowCrudService(deps),

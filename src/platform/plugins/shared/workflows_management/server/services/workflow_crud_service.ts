@@ -1324,13 +1324,13 @@ export class WorkflowCrudService {
   private async syncWorkflowPages(
     workflows: Array<{ id: string; document: WorkflowProperties }>
   ): Promise<void> {
-    const { pagesService } = this.deps;
-    if (!pagesService) return;
+    const { pagesSystemClient } = this.deps;
+    if (!pagesSystemClient) return;
     await pMap(
       workflows,
       async ({ id, document }) => {
         try {
-          await pagesService.syncWorkflowPages({
+          await pagesSystemClient.syncWorkflowPages({
             workflowId: id,
             spaceId: document.spaceId,
             definition: document.definition,
@@ -1345,10 +1345,10 @@ export class WorkflowCrudService {
   }
 
   private async retireWorkflowPages(workflowIds: string[], spaceId: string): Promise<void> {
-    const { pagesService } = this.deps;
-    if (!pagesService || workflowIds.length === 0) return;
+    const { pagesSystemClient } = this.deps;
+    if (!pagesSystemClient || workflowIds.length === 0) return;
     try {
-      await pagesService.retireWorkflowPages({ workflowIds, spaceId });
+      await pagesSystemClient.retireWorkflowPages({ workflowIds, spaceId });
     } catch (error) {
       this.deps.logger.error(
         `Failed to retire the pages of deleted workflows [${workflowIds.join(', ')}]`,
