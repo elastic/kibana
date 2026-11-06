@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/logging-mocks'
   - '@kbn/scout-oblt'
   - '@kbn/server-route-repository'
+  - '@kbn/zod'
 tags:
   - plugin
   - prod
@@ -32,6 +33,7 @@ tags:
   - scout-tests
 fileGroups:
   src:
+    - common/**/*
     - server/**/*
     - test/scout*/**/*
     - '!target/**/*'

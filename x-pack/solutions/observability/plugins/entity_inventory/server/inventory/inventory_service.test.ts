@@ -26,11 +26,11 @@ const createService = (definitions: RegisteredDefinitions) => {
   return { service, list, logger };
 };
 
-describe('InventoryService.getTypes', () => {
+describe('InventoryService.listTypes', () => {
   it('returns type, name, description, identity fields, columns and sources for k8s.deployment', async () => {
     const { service } = createService([k8sDeploymentDefinition]);
 
-    const { types } = await service.getTypes();
+    const { types } = await service.listTypes();
 
     expect(types).toEqual([
       {
@@ -75,7 +75,7 @@ describe('InventoryService.getTypes', () => {
     const { dynamic, ...withoutDynamic } = k8sNodeFixture;
     const { service } = createService([withoutDynamic, hostLikeFixture]);
 
-    const { types } = await service.getTypes();
+    const { types } = await service.listTypes();
 
     expect(types.map(({ type }) => type)).toEqual([hostLikeFixture.type]);
   });
@@ -94,7 +94,7 @@ describe('InventoryService.getTypes', () => {
     };
     const { service, logger } = createService([invalid, hostLikeFixture]);
 
-    const { types } = await service.getTypes();
+    const { types } = await service.listTypes();
 
     expect(types.map(({ type }) => type)).toEqual([hostLikeFixture.type]);
     expect(logger.warn).toHaveBeenCalledTimes(1);
@@ -107,7 +107,7 @@ describe('InventoryService.getTypes', () => {
     });
     const { service, logger } = createService([k8sDeploymentDefinition]);
 
-    await expect(service.getTypes()).rejects.toThrow('column derivation crashed');
+    await expect(service.listTypes()).rejects.toThrow('column derivation crashed');
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
@@ -115,6 +115,6 @@ describe('InventoryService.getTypes', () => {
     const { service, list } = createService([]);
     list.mockRejectedValue(new Error('registry unavailable'));
 
-    await expect(service.getTypes()).rejects.toThrow('registry unavailable');
+    await expect(service.listTypes()).rejects.toThrow('registry unavailable');
   });
 });

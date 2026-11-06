@@ -20,7 +20,7 @@ export class InventoryService {
    * Returns one entry per registered definition that has a `dynamic` block, in registry order.
    * Skips a definition that throws `InventoryDefinitionError` after logging a warning, and rethrows any other error.
    */
-  getTypes = async (): Promise<GetTypesResponse> => {
+  listTypes = async (): Promise<GetTypesResponse> => {
     const definitions = await this.definitionsClient.list();
     const types = definitions.flatMap((definition) => {
       if (!definition.dynamic) {

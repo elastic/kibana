@@ -13,11 +13,11 @@ import { typesRoute } from './types_route';
 const route = typesRoute['GET /internal/entity_inventory/types'];
 
 describe('typesRoute', () => {
-  it('returns getTypes output', async () => {
+  it('returns listTypes output', async () => {
     const response: GetTypesResponse = { types: [] };
-    const getTypes = jest.fn().mockResolvedValue(response);
+    const listTypes = jest.fn().mockResolvedValue(response);
     const request = httpServerMock.createKibanaRequest();
-    const getInventoryService = jest.fn().mockResolvedValue({ getTypes });
+    const getInventoryService = jest.fn().mockResolvedValue({ listTypes });
 
     const result = await route.handler({
       request,
@@ -31,12 +31,13 @@ describe('typesRoute', () => {
     expect(result).toBe(response);
   });
 
-  it('declares internal access and opts out of authz with a reason', () => {
-    expect(route).toEqual(
-      expect.objectContaining({ options: expect.objectContaining({ access: 'internal' }) })
-    );
-    expect(route.security.authz).toEqual(
-      expect.objectContaining({ enabled: false, reason: expect.stringContaining('#6244') })
-    );
+  it('declares internal access', () => {
+    expect(route.options).toEqual(expect.objectContaining({ access: 'internal' }));
+  });
+
+  it('requires the entity inventory read privilege', () => {
+    expect(route.security).toEqual({
+      authz: { requiredPrivileges: ['entity_inventory_read'] },
+    });
   });
 });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ENTITY_INVENTORY_API_PRIVILEGES } from '../../common/privileges';
+import type { GetTypesResponse } from '../inventory/types';
 import { createEntityInventoryServerRoute } from './create_server_route';
 
 export const typesRoute = createEntityInventoryServerRoute({
@@ -17,13 +19,11 @@ export const typesRoute = createEntityInventoryServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'Interim: this route is internal, reads only code-registered definitions, and the plugin is off by default. The privilege model is tracked in elastic/observability-dev#6244.',
+      requiredPrivileges: [ENTITY_INVENTORY_API_PRIVILEGES.read],
     },
   },
-  handler: async ({ request, getInventoryService }) => {
+  handler: async ({ request, getInventoryService }): Promise<GetTypesResponse> => {
     const inventoryService = await getInventoryService(request);
-    return inventoryService.getTypes();
+    return inventoryService.listTypes();
   },
 });
