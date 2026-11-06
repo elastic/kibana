@@ -24,7 +24,7 @@ export const createKiIdentificationManagementSkill = ({
   maintenanceService,
   getScopedClients,
 }: {
-  server: Pick<SignificantEventsServer, 'security'>;
+  server: Pick<SignificantEventsServer, 'security' | 'inference' | 'core'>;
   telemetry: EbtTelemetryClient;
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
   maintenanceService: SignificantEventsMaintenanceService;
