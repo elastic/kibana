@@ -73,7 +73,7 @@ apiTest.describe('automatic_import Data Stream API (reader)', { tag: tags.statef
   );
 
   apiTest(
-    'PATCH /data_streams/{id}: returns 403 for reader user',
+    'PUT /data_streams/{id}/edits: returns 403 for reader user',
     async ({ apiClient, apiServices }) => {
       const dsId = 'scout_pipeline_reader_ds';
       await apiServices.autoImport.createIntegrationWithDataStream(
@@ -83,9 +83,9 @@ apiTest.describe('automatic_import Data Stream API (reader)', { tag: tags.statef
         'Scout Pipeline Reader DS'
       );
 
-      const response = await apiClient.patch(`${dsBasePath}/${dsId}`, {
+      const response = await apiClient.put(`${dsBasePath}/${dsId}/edits`, {
         headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-        body: { ingest_pipeline: { processors: [] } },
+        body: { ingest_pipeline: { processors: [] }, changes: [], version: 'WzEsMV0=' },
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(403);

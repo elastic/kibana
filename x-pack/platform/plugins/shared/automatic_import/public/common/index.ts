@@ -16,7 +16,7 @@ export { useDeleteDataStream } from './hooks/use_delete_data_stream';
 export { useDeleteIntegration } from './hooks/use_delete_integration';
 export { useGetDataStreamResults } from './hooks/use_get_data_stream_results';
 export { useReanalyzeDataStream } from './hooks/use_reanalyze_data_stream';
-export { useUpdateDataStreamPipeline } from './hooks/use_update_data_stream_pipeline';
+export { useApplyDataStreamEdits } from './hooks/use_apply_data_stream_edits';
 
 export {
   INDEX_VALIDATION_FAILED,
@@ -37,7 +37,7 @@ export {
   getAllIntegrations,
   getIntegrationById,
   deleteIntegration,
-  updateDataStreamPipeline,
+  applyDataStreamEdits,
 } from './lib/api';
 export { getIntegrationNameFromResponse } from './lib/api_parsers';
 
@@ -45,8 +45,7 @@ export type {
   RequestDeps,
   CreateUpdateIntegrationRequest,
   UploadSamplesRequest,
-  GetDataStreamResultsResponse,
-  UpdateDataStreamPipelineRequest,
+  ApplyDataStreamEditsRequest,
   DeleteIntegrationRequest,
 } from './lib/api';
 

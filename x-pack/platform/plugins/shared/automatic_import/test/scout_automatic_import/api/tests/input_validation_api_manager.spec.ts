@@ -20,7 +20,7 @@
  *
  * Payload size / abuse guards (see OpenAPI + Zod in `common/model/`): e.g. upload `samples` max
  * 1000 lines; create `dataStreams` max 50; approve `categories` required, min 1 / max 50;
- * PATCH pipeline string max 10MB and object `processors` max 10000 (validated in `data_stream_routes`).
+ * PUT .../edits pipeline string max 10MB, object `processors` max 10000, and `changes` max 1000.
  */
 
 import { tags } from '@kbn/scout';
@@ -301,6 +301,37 @@ apiTest.describe(
       expect(response).toHaveStatusCode(400);
       expectZodBadRequest(response.body);
     });
+
+    apiTest('PUT .../edits: rejects more than 1000 field type changes', async ({ apiClient }) => {
+      const response = await apiClient.put(`${dsBasePath}/${VALIDATION_DS_ID}/edits`, {
+        headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+        body: {
+          ingest_pipeline: { processors: [] },
+          changes: Array.from({ length: 1001 }, (_, i) => ({ name: `field_${i}`, type: 'long' })),
+          version: 'WzEsMV0=',
+        },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(400);
+      expectZodBadRequest(response.body);
+    });
+
+    apiTest(
+      'PUT .../edits: rejects a non-boolean acknowledge_breaking_changes',
+      async ({ apiClient }) => {
+        const response = await apiClient.put(`${dsBasePath}/${VALIDATION_DS_ID}/edits`, {
+          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
+          body: {
+            ingest_pipeline: { processors: [] },
+            version: 'WzEsMV0=',
+            acknowledge_breaking_changes: 'yes',
+          },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(400);
+        expectZodBadRequest(response.body);
+      }
+    );
 
     apiTest('PUT /integrations: rejects more than 50 data streams', async ({ apiClient }) => {
       const integrationId = 'scout_oversized_ds_list';

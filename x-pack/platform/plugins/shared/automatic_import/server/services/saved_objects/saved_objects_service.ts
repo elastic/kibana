@@ -20,7 +20,12 @@ import type {
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { Pipeline } from '@kbn/ingest-pipelines-plugin/common/types';
 import type { estypes } from '@elastic/elasticsearch';
-import type { IntegrationAttributes, DataStreamAttributes } from './schemas/types';
+import type {
+  IntegrationAttributes,
+  DataStreamAttributes,
+  FieldTypeOverride,
+  ApprovedFieldType,
+} from './schemas/types';
 import {
   DATA_STREAM_SAVED_OBJECT_TYPE,
   INTEGRATION_SAVED_OBJECT_TYPE,
@@ -44,9 +49,14 @@ export interface FieldMappingEntry {
 export interface UpdateDataStreamParams {
   integrationId: string;
   dataStreamId: string;
+  expectedVersion?: string;
   ingestPipeline?: Pipeline;
   pipelineDocs?: Array<NonNullable<estypes.IngestSimulateDocumentResult['doc']>['_source']>;
   fieldMapping?: FieldMappingEntry[];
+  /** Only used when `ingestPipeline` is set; omitting it clears stored field type edits. */
+  fieldTypeOverrides?: FieldTypeOverride[];
+  /** Left unchanged when omitted. */
+  approvedFieldTypes?: ApprovedFieldType[];
   status: keyof typeof TASK_STATUSES;
 }
 
@@ -558,6 +568,23 @@ export class AutomaticImportSavedObjectService {
     }
   }
 
+  /** Stores the field types that an approval shipped for a data stream. */
+  public async updateDataStreamApprovedFieldTypes(
+    dataStreamId: string,
+    integrationId: string,
+    approvedFieldTypes: ApprovedFieldType[]
+  ): Promise<void> {
+    const compositeId = this.getDataStreamCompositeId(integrationId, dataStreamId);
+    const updatedAttributes: Partial<DataStreamAttributes> = {
+      approved_field_types: approvedFieldTypes,
+    };
+    await this.savedObjectsClient.update(
+      DATA_STREAM_SAVED_OBJECT_TYPE,
+      compositeId,
+      updatedAttributes
+    );
+  }
+
   /**
    * Updates only the phase of a data stream's job_info.
    * @param dataStreamId - The ID of the data stream
@@ -646,6 +673,7 @@ export class AutomaticImportSavedObjectService {
           job_type: jobType,
           status: TASK_STATUSES.pending,
         },
+        approved_field_types: [],
       };
 
       await this.savedObjectsClient.update(
@@ -669,8 +697,17 @@ export class AutomaticImportSavedObjectService {
       throw new Error('Task was cancelled');
     }
 
-    const { integrationId, dataStreamId, ingestPipeline, pipelineDocs, fieldMapping, status } =
-      updateDataStreamParams;
+    const {
+      integrationId,
+      dataStreamId,
+      expectedVersion,
+      ingestPipeline,
+      pipelineDocs,
+      fieldMapping,
+      fieldTypeOverrides,
+      approvedFieldTypes,
+      status,
+    } = updateDataStreamParams;
 
     if (!integrationId) {
       throw new Error('Integration ID is required');
@@ -700,6 +737,9 @@ export class AutomaticImportSavedObjectService {
 
       const updatedDataStreamData: DataStreamAttributes = {
         ...dataStream.attributes,
+        // Reanalysis omits edits and intentionally resets them with the generated results.
+        ...(ingestPipeline ? { field_type_overrides: fieldTypeOverrides ?? [] } : {}),
+        ...(approvedFieldTypes ? { approved_field_types: approvedFieldTypes } : {}),
         result: updatedResult,
         job_info: {
           ...dataStream.attributes.job_info,
@@ -712,7 +752,8 @@ export class AutomaticImportSavedObjectService {
       await this.savedObjectsClient.update(
         DATA_STREAM_SAVED_OBJECT_TYPE,
         compositeId,
-        updatedDataStreamData
+        updatedDataStreamData,
+        expectedVersion ? { version: expectedVersion } : undefined
       );
     } catch (error) {
       this.logger.error(`Failed to update data stream ${dataStreamId}: ${error}`);

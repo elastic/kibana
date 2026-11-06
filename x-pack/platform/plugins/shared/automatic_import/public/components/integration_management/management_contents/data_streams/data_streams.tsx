@@ -18,6 +18,7 @@ import { useUIState } from '../../contexts';
 import { CreateDataStreamFlyout } from './create_data_stream_flyout';
 import * as i18n from './translations';
 import { useGetIntegrationById } from '../../../../common';
+import { getDataStreamEditState } from '../../../../../common';
 import { DataStreamsTable } from './data_streams_table/data_steams_table';
 import { EditPipelineFlyout } from './edit_pipeline_flyout';
 import { useTelemetry } from '../../../telemetry_context';
@@ -36,11 +37,24 @@ export const DataStreams = React.memo<{
     closeEditPipelineFlyout,
   } = useUIState();
   const { integrationId } = useParams<{ integrationId?: string }>();
-  const { integration } = useGetIntegrationById(integrationId);
+  const {
+    integration,
+    isLoading: isIntegrationLoading,
+    isError: isIntegrationError,
+  } = useGetIntegrationById(integrationId);
   const { reportDataStreamFlyoutOpened } = useTelemetry();
   const { form } = useIntegrationForm();
 
   const hasDataStreams = (integration?.dataStreams?.length ?? 0) > 0;
+
+  const editState = selectedDataStream
+    ? getDataStreamEditState({
+        integration,
+        dataStream: selectedDataStream,
+        isLoading: isIntegrationLoading,
+        isError: isIntegrationError,
+      })
+    : 'error';
 
   const handleOpenCreateDataStreamFlyout = useCallback(async () => {
     const { areFieldsValid } = await form.validateFields(INTEGRATION_DETAILS_REQUIRED_FIELDS);
@@ -120,6 +134,7 @@ export const DataStreams = React.memo<{
           integrationId={integrationId}
           dataStream={selectedDataStream}
           onClose={closeEditPipelineFlyout}
+          editState={editState}
         />
       )}
     </>

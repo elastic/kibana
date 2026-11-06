@@ -7,17 +7,31 @@
 
 import type { EuiTokenProps } from '@elastic/eui';
 import ipaddr from 'ipaddr.js';
+import { mergeObjectElements } from '../../../../../common';
 
 const TYPE_TO_ICON_MAP: Record<string, EuiTokenProps['iconType']> = {
   string: 'tokenString',
   keyword: 'tokenKeyword',
+  constant_keyword: 'tokenConstant',
+  wildcard: 'tokenString',
+  text: 'tokenString',
+  match_only_text: 'tokenString',
   number: 'tokenNumber',
+  byte: 'tokenNumber',
+  short: 'tokenNumber',
+  integer: 'tokenNumber',
   long: 'tokenNumber',
+  unsigned_long: 'tokenNumber',
+  half_float: 'tokenNumber',
   float: 'tokenNumber',
+  double: 'tokenNumber',
   date: 'tokenDate',
+  date_nanos: 'tokenDate',
   ip: 'tokenIP',
   geo_point: 'tokenGeo',
-  object: 'tokenQuestion',
+  version: 'tokenTag',
+  object: 'tokenObject',
+  group: 'tokenObject',
   nested: 'tokenNested',
   boolean: 'tokenBoolean',
 } as const;
@@ -39,7 +53,9 @@ export const getFieldType = (value: unknown): string => {
   if (value === null || value === undefined) return 'null';
   if (typeof value === 'number') return Number.isInteger(value) ? 'long' : 'float';
   if (typeof value === 'boolean') return 'boolean';
-  if (Array.isArray(value)) return 'nested';
+  if (Array.isArray(value)) {
+    return getFieldType(value.find((element) => element != null));
+  }
   if (typeof value === 'object') return 'object';
   if (typeof value === 'string') {
     const looksLikeIPv4 = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(value);
@@ -52,6 +68,28 @@ export const getFieldType = (value: unknown): string => {
     if (/^\d{4}-\d{2}-\d{2}/.test(value)) return 'date';
   }
   return 'string';
+};
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  value !== null && typeof value === 'object' && !Array.isArray(value);
+
+/**
+ * Normalize pipeline sample docs. Some code paths persist ingest `_source`
+ * objects; others persist the simulate wrapper `{ _source }` or `{ doc: { _source } }`.
+ */
+export const unwrapPipelineDocument = (
+  document: Record<string, unknown> | undefined
+): Record<string, unknown> | undefined => {
+  if (!document) {
+    return undefined;
+  }
+  if (isPlainObject(document._source)) {
+    return document._source;
+  }
+  if (isPlainObject(document.doc) && isPlainObject(document.doc._source)) {
+    return document.doc._source;
+  }
+  return document;
 };
 
 // Diff function based on longest common subsequence used in Git diff algorithm
@@ -82,17 +120,30 @@ export const diffPipelineLines = (
   };
 };
 
+interface FlattenedField {
+  field: string;
+  value: string;
+  type: string;
+}
+
+/**
+ * Flattens a document into dotted field names. Arrays of objects are merged into one object
+ * before flattening, the same way field mappings are generated.
+ */
 export const flattenPipelineObject = (
   obj: Record<string, unknown>,
   parentKey = ''
-): Array<{ field: string; value: string; type: string }> => {
-  const result: Array<{ field: string; value: string; type: string }> = [];
+): FlattenedField[] => {
+  const result: FlattenedField[] = [];
 
   for (const [key, value] of Object.entries(obj)) {
     const fieldName = parentKey ? `${parentKey}.${key}` : key;
+    const mergedElements = Array.isArray(value) ? mergeObjectElements(value) : undefined;
 
-    if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
-      result.push(...flattenPipelineObject(value as Record<string, unknown>, fieldName));
+    if (isPlainObject(value)) {
+      result.push(...flattenPipelineObject(value, fieldName));
+    } else if (mergedElements) {
+      result.push(...flattenPipelineObject(mergedElements, fieldName));
     } else {
       result.push({
         field: fieldName,
@@ -104,3 +155,26 @@ export const flattenPipelineObject = (
 
   return result;
 };
+
+export interface FlyoutFooterState {
+  isResetDisabled: boolean;
+  isSaveDisabled: boolean;
+  saveTestSubj: string;
+}
+
+/** Save and Reset apply to the field types and the ingest pipeline together. */
+export const getFlyoutFooterState = ({
+  isTableTab,
+  isDirty,
+  isBusy,
+  pipelineText,
+}: {
+  isTableTab: boolean;
+  isDirty: boolean;
+  isBusy: boolean;
+  pipelineText: string;
+}): FlyoutFooterState => ({
+  isResetDisabled: isBusy || !isDirty,
+  isSaveDisabled: isBusy || !isDirty || !pipelineText.trim(),
+  saveTestSubj: isTableTab ? 'mappingEditorApplyButton' : 'editPipelineFlyoutSaveButton',
+});

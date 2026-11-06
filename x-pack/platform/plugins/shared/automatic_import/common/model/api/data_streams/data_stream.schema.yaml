@@ -4,80 +4,6 @@ info:
   version: "1"
 paths:
   /internal/automatic_import/integrations/{integration_id}/data_streams/{data_stream_id}:
-    patch:
-      summary: Updates ingest pipeline for a data stream.
-      operationId: UpdateDataStreamPipeline
-      x-codegen-enabled: true
-      x-internal: true
-      description: >-
-        Updates the ingest pipeline for an existing data stream, simulates it using stored samples, and returns refreshed results.
-      tags:
-        - Automatic Import Integrations
-      parameters:
-        - name: integration_id
-          in: path
-          required: true
-          description: The integration identifier
-          schema:
-            $ref: "../../../model/primitive.schema.yaml#/components/schemas/SafeIdentifier"
-        - name: data_stream_id
-          in: path
-          required: true
-          description: The data stream identifier
-          schema:
-            $ref: "../../../model/primitive.schema.yaml#/components/schemas/SafeIdentifier"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              required:
-                - ingest_pipeline
-              properties:
-                ingest_pipeline:
-                  description: >-
-                    JSON string (max 10MiB) or pipeline object. When an object, `processors` is capped at 10000 entries.
-                  oneOf:
-                    - type: string
-                      maxLength: 10485760
-                    - type: object
-                      additionalProperties: true
-                      properties:
-                        processors:
-                          type: array
-                          maxItems: 10000
-                          items:
-                            type: object
-                            additionalProperties: true
-      responses:
-        200:
-          description: The updated data stream results are returned successfully.
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                required:
-                  - ingest_pipeline
-                  - results
-                properties:
-                  ingest_pipeline:
-                    type: object
-                    additionalProperties: true
-                  results:
-                    type: array
-                    maxItems: 10000
-                    items:
-                      type: object
-                      additionalProperties: true
-        400:
-          description: The pipeline is invalid or samples are missing.
-        404:
-          description: Indicates the data stream id was not found.
-        500:
-          description: An internal server error occurred.
     delete:
       summary: Deletes a data stream by its id.
       operationId: DeleteDataStream
@@ -232,26 +158,98 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: false
-                required:
-                  - ingest_pipeline
-                  - results
-                properties:
-                  ingest_pipeline:
-                    description: The ingest pipeline as a JSON string up to 10MiB.
-                    $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyIngestPipeline"
-                  results:
-                    description: Results array as JSON objects.
-                    type: array
-                    maxItems: 10000
-                    items:
-                      type: object
-                      additionalProperties: true
+                $ref: "#/components/schemas/DataStreamResults"
         400:
           description: The data stream has not completed successfully.
         404:
           description: Indicates the data stream id was not found.
+        500:
+          description: An internal server error occurred.
+  /internal/automatic_import/integrations/{integration_id}/data_streams/{data_stream_id}/edits:
+    put:
+      summary: Applies ingest pipeline and field type edits to a data stream.
+      operationId: ApplyDataStreamEdits
+      x-codegen-enabled: true
+      x-internal: true
+      description: >-
+        Applies the edited ingest pipeline and field type changes together. Generated convert
+        processors are rebuilt from the field types, the pipeline is simulated on the stored samples,
+        and the result is saved. With `dry_run`, the result is returned without saving.
+      tags:
+        - Automatic Import Integrations
+      parameters:
+        - name: integration_id
+          in: path
+          required: true
+          description: The integration identifier
+          schema:
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/SafeIdentifier"
+        - name: data_stream_id
+          in: path
+          required: true
+          description: The data stream identifier
+          schema:
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/SafeIdentifier"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - ingest_pipeline
+                - version
+              properties:
+                ingest_pipeline:
+                  description: >-
+                    JSON string (max 10MiB) or pipeline object. When an object, `processors` is capped at 10000 entries.
+                  oneOf:
+                    - type: string
+                      maxLength: 10485760
+                    - type: object
+                      additionalProperties: true
+                      properties:
+                        processors:
+                          type: array
+                          maxItems: 10000
+                          items:
+                            type: object
+                            additionalProperties: true
+                changes:
+                  description: Field type changes. Setting a field back to its original type removes the change.
+                  type: array
+                  maxItems: 1000
+                  items:
+                    $ref: "#/components/schemas/FieldTypeChange"
+                version:
+                  type: string
+                  minLength: 1
+                  maxLength: 1024
+                  description: Saved Object version returned by the latest results request.
+                dry_run:
+                  type: boolean
+                  description: Returns the result without saving it.
+                acknowledge_breaking_changes:
+                  type: boolean
+                  description: >-
+                    Saves even when the pipeline no longer produces fields from an approved version.
+                    Without it, such a save fails and returns `removed_approved_fields`.
+      responses:
+        200:
+          description: The edits were saved or previewed, or the failing fields and samples are returned.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/DataStreamEditsResult"
+                  - $ref: "#/components/schemas/DataStreamEditsFailure"
+        400:
+          description: >-
+            The pipeline or a field type change is invalid, field types were changed after the data
+            stream was approved, or samples are missing.
+        409:
+          description: The data stream changed after it was opened.
         500:
           description: An internal server error occurred.
   /internal/automatic_import/integrations/{integration_id}/data_streams/{data_stream_id}/reanalyze:
@@ -311,3 +309,281 @@ paths:
           description: The data stream is not found.
         500:
           description: An internal server error occurred.
+components:
+  schemas:
+    FieldMapping:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - type
+        - is_ecs
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 1024
+        type:
+          type: string
+          minLength: 1
+          maxLength: 1024
+        is_ecs:
+          type: boolean
+    FieldTypeOverride:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - type
+        - original_type
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 1024
+        type:
+          $ref: "#/components/schemas/SupportedFieldType"
+        original_type:
+          type: string
+          minLength: 1
+          maxLength: 1024
+    ApprovedFieldType:
+      type: object
+      description: A field that shipped in an approved version. Its type can't change.
+      additionalProperties: false
+      required:
+        - name
+        - type
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 1024
+        type:
+          type: string
+          minLength: 1
+          maxLength: 1024
+    DataStreamResults:
+      type: object
+      additionalProperties: false
+      required:
+        - ingest_pipeline
+        - results
+        - field_mapping
+        - field_type_overrides
+        - approved_field_types
+        - data_stream_approved
+        - version
+      properties:
+        ingest_pipeline:
+          type: object
+          additionalProperties: true
+        results:
+          type: array
+          maxItems: 100
+          items:
+            type: object
+            additionalProperties: true
+        field_mapping:
+          type: array
+          maxItems: 10000
+          items:
+            $ref: "#/components/schemas/FieldMapping"
+        field_type_overrides:
+          type: array
+          maxItems: 1000
+          items:
+            $ref: "#/components/schemas/FieldTypeOverride"
+        approved_field_types:
+          type: array
+          maxItems: 10000
+          items:
+            $ref: "#/components/schemas/ApprovedFieldType"
+        data_stream_approved:
+          type: boolean
+          description: The data stream is part of the last approved version, so its field types can't be edited.
+        version:
+          type: string
+          minLength: 1
+          maxLength: 1024
+    DataStreamEditsResult:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+        - ingest_pipeline
+        - results
+        - field_mapping
+        - field_type_overrides
+        - approved_field_types
+        - data_stream_approved
+        - dropped_field_types
+        - removed_approved_fields
+        - version
+      properties:
+        status:
+          type: string
+          description: saved when the edits were stored, preview for a dry run.
+          enum:
+            - saved
+            - preview
+        ingest_pipeline:
+          type: object
+          additionalProperties: true
+        results:
+          type: array
+          maxItems: 100
+          items:
+            type: object
+            additionalProperties: true
+        field_mapping:
+          type: array
+          maxItems: 10000
+          items:
+            $ref: "#/components/schemas/FieldMapping"
+        field_type_overrides:
+          type: array
+          maxItems: 1000
+          items:
+            $ref: "#/components/schemas/FieldTypeOverride"
+        approved_field_types:
+          type: array
+          maxItems: 10000
+          items:
+            $ref: "#/components/schemas/ApprovedFieldType"
+        data_stream_approved:
+          type: boolean
+          description: The data stream is part of the last approved version, so its field types can't be edited.
+        dropped_field_types:
+          description: Fields whose type edits were removed because the pipeline no longer produces them.
+          type: array
+          maxItems: 1000
+          items:
+            type: string
+        removed_approved_fields:
+          $ref: "#/components/schemas/RemovedApprovedFields"
+        version:
+          type: string
+          minLength: 1
+          maxLength: 1024
+    DataStreamEditsFailure:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+        - field_errors
+      properties:
+        status:
+          type: string
+          enum:
+            - failure
+        field_errors:
+          type: array
+          maxItems: 1000
+          items:
+            $ref: "#/components/schemas/FieldTypeError"
+        pipeline_errors:
+          $ref: "#/components/schemas/PipelineErrors"
+        removed_approved_fields:
+          $ref: "#/components/schemas/RemovedApprovedFields"
+    RemovedApprovedFields:
+      description: >-
+        Fields from an approved version that the edited pipeline no longer produces for the sample
+        documents. Saving them is a possible breaking change and needs `acknowledge_breaking_changes`.
+      type: array
+      maxItems: 10000
+      items:
+        type: string
+    PipelineErrors:
+      type: object
+      additionalProperties: false
+      description: Set when more samples fail with the edited pipeline than with the saved one.
+      required:
+        - failed_samples
+        - baseline_failed_samples
+        - error_groups
+      properties:
+        failed_samples:
+          type: integer
+        baseline_failed_samples:
+          type: integer
+        error_groups:
+          type: array
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/PipelineErrorGroup"
+    PipelineErrorGroup:
+      type: object
+      additionalProperties: false
+      required:
+        - error
+        - count
+        - example_sample
+      properties:
+        error:
+          type: string
+        count:
+          type: integer
+        example_sample:
+          type: string
+        processor_tag:
+          type: string
+          description: The tag of the processor that failed on the example sample, when it has one.
+    SupportedFieldType:
+      type: string
+      description: A field type that can be chosen in the mapping editor.
+      enum:
+        - keyword
+        - constant_keyword
+        - wildcard
+        - text
+        - match_only_text
+        - byte
+        - short
+        - integer
+        - long
+        - unsigned_long
+        - half_float
+        - float
+        - double
+        - date
+        - date_nanos
+        - boolean
+        - ip
+        - version
+    FieldTypeChange:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - type
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 1024
+        type:
+          type: string
+          minLength: 1
+          maxLength: 1024
+          description: >-
+            The new field type, or the field's original type to remove the change.
+            Original types that are not in SupportedFieldType are allowed only as a revert.
+    FieldTypeError:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        issue:
+          type: string
+          description: A known rule that failed, such as out_of_range, object_value, or convert_failed.
+        failing_documents:
+          type: integer
+        total_documents:
+          type: integer
+        approved_type:
+          type: string
+          description: The field's type in an approved version, when the error comes from keeping it.

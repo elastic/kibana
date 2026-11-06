@@ -6,9 +6,15 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { changelogEntrySchema, integrationSchemaV3 } from './integration_schema';
-import type { dataStreamSchemaV1 } from './data_stream_schema';
+import type { changelogEntrySchema, integrationSchemaV4 } from './integration_schema';
+import type {
+  approvedFieldTypeSchema,
+  dataStreamSchemaV2,
+  fieldTypeOverrideSchema,
+} from './data_stream_schema';
 
-export type IntegrationAttributes = TypeOf<typeof integrationSchemaV3>;
-export type DataStreamAttributes = TypeOf<typeof dataStreamSchemaV1>;
+export type IntegrationAttributes = TypeOf<typeof integrationSchemaV4>;
+export type DataStreamAttributes = TypeOf<typeof dataStreamSchemaV2>;
+export type FieldTypeOverride = TypeOf<typeof fieldTypeOverrideSchema>;
+export type ApprovedFieldType = TypeOf<typeof approvedFieldTypeSchema>;
 export type ChangelogEntry = TypeOf<typeof changelogEntrySchema>;

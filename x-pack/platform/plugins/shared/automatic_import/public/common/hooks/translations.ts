@@ -29,12 +29,15 @@ export const SAVE_INTEGRATION_SUCCESS = i18n.translate(
   }
 );
 
-export const SAVE_PIPELINE_SUCCESS = i18n.translate('xpack.automaticImport.savePipeline.success', {
-  defaultMessage: 'Pipeline saved successfully',
-});
+export const SAVE_EDITS_SUCCESS = i18n.translate(
+  'xpack.automaticImport.saveDataStreamEdits.success',
+  {
+    defaultMessage: 'Data stream changes saved',
+  }
+);
 
-export const SAVE_PIPELINE_ERROR = i18n.translate('xpack.automaticImport.savePipeline.error', {
-  defaultMessage: 'Failed to save pipeline',
+export const SAVE_EDITS_ERROR = i18n.translate('xpack.automaticImport.saveDataStreamEdits.error', {
+  defaultMessage: 'Failed to save data stream changes',
 });
 
 export const SAVE_INTEGRATION_SUCCESS_DESCRIPTION = (integrationId: string) =>
