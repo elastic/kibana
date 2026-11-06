@@ -9,6 +9,7 @@ import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import {
   asDetectionEngineAccount,
+  assertServiceAccountActsForSpace,
   getDetectionEngineAccountId,
   isDetectionEngineSetUp,
 } from './detection_engine_account';
@@ -144,5 +145,50 @@ describe('asDetectionEngineAccount', () => {
       })
     ).rejects.toMatchObject({ statusCode: 403 });
     expect(fn).not.toHaveBeenCalled();
+  });
+});
+
+describe('assertServiceAccountActsForSpace', () => {
+  const run = (core: CoreStart) =>
+    assertServiceAccountActsForSpace({
+      core,
+      request: httpServerMock.createKibanaRequest(),
+      spaceId: SPACE_ID,
+    });
+
+  it('lets the space account through', async () => {
+    const { core } = createCore({
+      boundAccountId: ACCOUNT_ID,
+      principal: { type: 'service_account', serviceAccountId: ACCOUNT_ID },
+    });
+
+    await expect(run(core)).resolves.toBeUndefined();
+  });
+
+  it('refuses with 403 the account of another space', async () => {
+    const { core } = createCore({
+      boundAccountId: ACCOUNT_ID,
+      principal: { type: 'service_account', serviceAccountId: 'account-of-another-space' },
+    });
+
+    await expect(run(core)).rejects.toMatchObject({ statusCode: 403 });
+  });
+
+  it('refuses with 503 every service account in a space that is not set up', async () => {
+    const { core } = createCore({
+      principal: { type: 'service_account', serviceAccountId: ACCOUNT_ID },
+    });
+
+    await expect(run(core)).rejects.toMatchObject({ statusCode: 503 });
+  });
+
+  it('does not hold a user to the space account', async () => {
+    const { core, getWorkloadBinding } = createCore({
+      boundAccountId: ACCOUNT_ID,
+      principal: { type: 'user' },
+    });
+
+    await expect(run(core)).resolves.toBeUndefined();
+    expect(getWorkloadBinding).not.toHaveBeenCalled();
   });
 });
