@@ -16,6 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { KbnWarningCallout } from '@kbn/ui-callout';
+import type { CellStatus } from '../model/types';
 
 const PREVIEW_ROWS = 100;
 
@@ -63,6 +64,30 @@ export const ResultGrid = ({ table, height }: { table: Datatable; height?: strin
     />
   );
 };
+
+/** Holds the results summary's place until the query has results. */
+export const ResultPlaceholder = ({ id, status }: { id: string; status?: CellStatus }) => (
+  <EuiAccordion
+    id={`notebookResult-${id}`}
+    isDisabled
+    buttonContent={
+      status === 'running'
+        ? i18n.translate('xpack.notebook.resultPreview.running', {
+            defaultMessage: 'Running…',
+          })
+        : status === 'error'
+        ? i18n.translate('xpack.notebook.resultPreview.failed', {
+            defaultMessage: 'No results',
+          })
+        : i18n.translate('xpack.notebook.resultPreview.noResults', {
+            defaultMessage: 'No results yet',
+          })
+    }
+    data-test-subj="notebookResultPlaceholder"
+  >
+    {null}
+  </EuiAccordion>
+);
 
 export const ResultPreview = ({
   id,

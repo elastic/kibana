@@ -12,7 +12,7 @@ import type { EsqlCellDefinition } from '../../common/types';
 import { CellFrame } from './cell_frame';
 import { useNotebook } from './notebook_context';
 import { LazyEsqlEditor } from './lazy_esql_editor';
-import { ResultPreview } from './result_preview';
+import { ResultPlaceholder, ResultPreview } from './result_preview';
 
 export const EsqlCell = ({ cell }: { cell: EsqlCellDefinition }) => {
   const { store, scheduler } = useNotebook();
@@ -51,16 +51,16 @@ export const EsqlCell = ({ cell }: { cell: EsqlCellDefinition }) => {
           dataTestSubj={`notebookEsqlEditor-${cell.name}`}
         />
       </Suspense>
-      {output?.kind === 'table' && (
-        <>
-          <EuiSpacer size="s" />
-          <ResultPreview
-            id={cell.id}
-            table={output.table}
-            truncated={output.truncated}
-            durationMs={runtime.durationMs}
-          />
-        </>
+      <EuiSpacer size="s" />
+      {output?.kind === 'table' ? (
+        <ResultPreview
+          id={cell.id}
+          table={output.table}
+          truncated={output.truncated}
+          durationMs={runtime.durationMs}
+        />
+      ) : (
+        <ResultPlaceholder id={cell.id} status={runtime.status} />
       )}
     </CellFrame>
   );
