@@ -64,7 +64,8 @@ export const getUnifiedSearchComparators = (
       toStoredFilters(b, logger) ?? [],
       COMPARE_ALL_OPTIONS
     ),
-  query: (a, b) => (isEmptyQuery(a) && isEmptyQuery(b)) || fastIsEqual(a, b),
+  // two explicit queries also differ by language, since switching the language of an empty query is a change
+  query: (a, b) => (a && b ? fastIsEqual(a, b) : isEmptyQuery(a) && isEmptyQuery(b)),
   refresh_interval: (a, b) => (isTimeRestore() ? fastIsEqual(a, b) : true),
   time_range: (a, b) =>
     !isTimeRestore() || (areTimesEqual(a?.from, b?.from) && areTimesEqual(a?.to, b?.to)),

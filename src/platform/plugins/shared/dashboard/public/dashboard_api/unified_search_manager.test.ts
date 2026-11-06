@@ -160,7 +160,10 @@ describe('initializeUnifiedSearchManager', () => {
     test('treats a missing query and an empty query as equal', () => {
       expect(compareQuery(undefined, emptyQuery)).toBe(true);
       expect(compareQuery(emptyQuery, undefined)).toBe(true);
-      expect(compareQuery(emptyQuery, { language: 'lucene', expression: '' })).toBe(true);
+    });
+
+    test('reports a change when the language of an empty query changes', () => {
+      expect(compareQuery(emptyQuery, { language: 'lucene', expression: '' })).toBe(false);
     });
 
     test('reports a change when only one query has an expression', () => {
