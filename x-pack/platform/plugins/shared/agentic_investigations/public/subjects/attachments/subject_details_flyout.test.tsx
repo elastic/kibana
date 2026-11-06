@@ -111,4 +111,42 @@ describe('SubjectDetailsFlyout', () => {
 
     expect(container).toBeEmptyDOMElement();
   });
+
+  it('shows the flyout registered for the alert source, handing it the alert and its details link', () => {
+    const snapshot = { source: 'elastic.example', data: { event_id: 'event-1' } };
+    const onClose = jest.fn();
+    const Registered = jest.fn(({ alertId }: { alertId: string }) => (
+      <div data-test-subj="registeredFlyoutStub">{alertId}</div>
+    ));
+    const getAlertFlyout = jest.fn(() => Registered);
+
+    renderFlyout({
+      alertId: 'episode-1',
+      source: 'elastic.example',
+      snapshot,
+      detailsHref: '/app/observability/alerts/episode-1',
+      onClose,
+      services: { ...episodeServices, getAlertFlyout },
+    });
+
+    expect(getAlertFlyout).toHaveBeenCalledWith('elastic.example', snapshot);
+    expect(screen.getByTestId('registeredFlyoutStub')).toHaveTextContent('episode-1');
+    expect(Registered.mock.calls[0][0]).toEqual({
+      alertId: 'episode-1',
+      snapshot,
+      detailsHref: '/app/observability/alerts/episode-1',
+      onClose,
+    });
+    expect(screen.queryByTestId('episodeFlyoutStub')).not.toBeInTheDocument();
+  });
+
+  it('falls back to the episode flyout when no flyout is registered for the source', () => {
+    renderFlyout({
+      alertId: 'episode-1',
+      source: 'universal',
+      services: { ...episodeServices, getAlertFlyout: () => undefined },
+    });
+
+    expect(screen.getByTestId('episodeFlyoutStub')).toHaveTextContent('episode-1');
+  });
 });

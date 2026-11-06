@@ -147,6 +147,31 @@ export const CloudOnboardingDeploymentSchemaV6 = CloudOnboardingDeploymentSchema
   updatedBy: schema.maybe(schema.string({ maxLength: 1024 })),
 });
 
+// ── V7: policySettings ───────────────────────────────────────────────────────
+// Package policy settings shared by every policy of the deployment (e.g. output_id), kept as one
+// open record so a new setting needs no schema change. Not in mappings.properties (dynamic: false),
+// so no mapping change is needed.
+const POLICY_SETTINGS_MAX_KEYS = 20;
+
+// Bounded so the open record cannot store an arbitrary payload: package policy settings are short
+// strings, or null for one cleared back to its Fleet default.
+export const PolicySettingsRecordSchema = (meta?: { description: string; availability: object }) =>
+  schema.recordOf(
+    schema.string({ maxLength: 256 }),
+    schema.nullable(schema.string({ maxLength: 1024 })),
+    {
+      validate: (settings) =>
+        Object.keys(settings).length > POLICY_SETTINGS_MAX_KEYS
+          ? `must not have more than ${POLICY_SETTINGS_MAX_KEYS} settings`
+          : undefined,
+      ...(meta ? { meta } : {}),
+    }
+  );
+
+export const CloudOnboardingDeploymentSchemaV7 = CloudOnboardingDeploymentSchemaV6.extends({
+  policySettings: schema.maybe(PolicySettingsRecordSchema()),
+});
+
 // ── V1 ───────────────────────────────────────────────────────────────────────
 export const CloudOnboardingDeploymentSchemaV1 = schema.object({
   provider: ProviderSchema,

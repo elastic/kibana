@@ -41,6 +41,9 @@ export function useOutputs(
   const canUseOutputPerIntegration =
     licenseService.hasAtLeast(LICENCE_FOR_OUTPUT_PER_INTEGRATION) &&
     !packagePolicy.supports_agentless;
+  // `hasAtLeast` is also falsy while the license is not known (not received yet, or the licensing
+  // request failed), so a falsy `canUseOutputPerIntegration` alone does not mean the license is too low.
+  const isLicenseKnown = !!licenseService.getLicenseInformation()?.isAvailable;
   const { data: outputsData, isLoading } = useGetOutputs();
   const allowedOutputTypes = getAllowedOutputTypesForPackagePolicy(packagePolicy);
   const allowedOutputs = useMemo(() => {
@@ -75,6 +78,7 @@ export function useOutputs(
   return {
     isLoading,
     canUseOutputPerIntegration,
+    isLicenseKnown,
     allowedOutputs,
     inheritedOutputName,
   };
