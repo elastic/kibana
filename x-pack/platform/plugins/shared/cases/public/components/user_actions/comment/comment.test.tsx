@@ -36,8 +36,11 @@ import { AttachmentActionType } from '../../../client/attachment_framework/types
 import { UnifiedAttachmentTypeRegistry } from '../../../client/attachment_framework/unified_attachment_registry';
 import { getCommentAttachmentType } from '../../attachments/comment';
 import { getStackAlertAttachmentType } from '../../attachments/alert';
+import { getConversationAttachmentType } from '../../attachments/conversation';
 import { toStringArray } from '../../../../common/utils/attachments';
+import type { AttachmentUIV2 } from '../../../../common/ui/types';
 import {
+  AGENT_BUILDER_CONVERSATION_ATTACHMENT_TYPE,
   SECURITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_ENDPOINT_ATTACHMENT_TYPE,
   STACK_ALERT_ATTACHMENT_TYPE,
@@ -621,6 +624,45 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByTestId('alerts-user-action-alert-comment-id')).toHaveTextContent(
         'added 2 alerts from Awesome rule'
       );
+    });
+
+    it('does not rebuild a conversation from the payload, since it may be one the user cannot open', () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getConversationAttachmentType());
+      const conversation = {
+        type: AGENT_BUILDER_CONVERSATION_ATTACHMENT_TYPE,
+        attachmentId: 'conversation-1',
+        metadata: { title: 'Private triage' },
+        owner: 'securitySolution',
+      };
+      const userAction = getUserAction('comment', UserActionActions.create, {
+        commentId: 'conversation-attachment-1',
+        payload: { comment: conversation },
+      });
+      const build = (attachments: AttachmentUIV2[]) =>
+        createCommentUserActionBuilder({
+          ...builderArgs,
+          unifiedAttachmentTypeRegistry,
+          attachments,
+          userAction,
+        }).build();
+
+      expect(build([])).toEqual([]);
+      expect(
+        build([
+          {
+            ...conversation,
+            id: 'conversation-attachment-1',
+            createdAt: alertComment.createdAt,
+            createdBy: alertComment.createdBy,
+            pushedAt: null,
+            pushedBy: null,
+            updatedAt: null,
+            updatedBy: null,
+            version: alertComment.version,
+          } as AttachmentUIV2,
+        ])
+      ).toHaveLength(1);
     });
   });
 
