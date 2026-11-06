@@ -149,6 +149,18 @@ export class IsomerPlugin
     if (!data || !fieldFormats || !uiSettings || !elasticsearch) {
       throw new Error('The isomer plugin materializes only after it starts.');
     }
+    const dataServices = async () => {
+      const esClient = elasticsearch.client.asScoped(scope.request).asCurrentUser;
+      const [dataViews, aggs] = await Promise.all([
+        data.indexPatterns.dataViewsServiceFactory(
+          scope.savedObjectsClient,
+          esClient,
+          scope.request
+        ),
+        data.search.aggs.asScopedToClient(scope.savedObjectsClient, esClient),
+      ]);
+      return { dataViews, aggs };
+    };
     return createScopedMaterializeClient({
       registry: this.registry,
       scope,
@@ -157,18 +169,14 @@ export class IsomerPlugin
       search: data.search.asScoped(scope.request),
       getKitServices: () =>
         createKitServices(uiSettings.asScopedToClient(scope.savedObjectsClient), fieldFormats),
-      getSelectionServices: async () => {
-        const esClient = elasticsearch.client.asScoped(scope.request).asCurrentUser;
-        const [dataViews, aggs] = await Promise.all([
-          data.indexPatterns.dataViewsServiceFactory(
-            scope.savedObjectsClient,
-            esClient,
-            scope.request
-          ),
-          data.search.aggs.asScopedToClient(scope.savedObjectsClient, esClient),
+      getAggsServices: async () => {
+        const [services, searchSource] = await Promise.all([
+          dataServices(),
+          data.search.searchSource.asScoped(scope.request),
         ]);
-        return { dataViews, aggs };
+        return { ...services, searchSource };
       },
+      getSelectionServices: dataServices,
       validate: this.validateNode,
       kibanaVersion: this.kibanaVersion,
     });
