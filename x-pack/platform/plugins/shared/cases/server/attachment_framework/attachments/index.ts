@@ -12,3 +12,4 @@ export { fileAttachmentType } from './file';
 export { dashboardAttachmentType } from './dashboard';
 export { mapAttachmentType } from './map';
 export { discoverSessionAttachmentType } from './discover_session';
+export { createConversationAttachmentType } from './conversation';

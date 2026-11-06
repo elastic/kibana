@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/server';
 import type { UserProfileService } from '../../services';
 import type { CasesWorkflowRunService } from '../../workflows/execution/service';
 import type { CasesWorkflowRunContext } from '../../client/workflows/operations';
@@ -38,6 +39,7 @@ import { getFieldDefinitionRoutes } from './field_definitions';
 import { createRunWorkflowRoute } from './internal/run_workflow';
 import { getTaskRoutes } from './tasks';
 import { getTaskTemplateRoutes } from './task_templates';
+import { createBulkGetAgentBuilderConversationsRoute } from './internal/bulk_get_agent_builder_conversations';
 
 export const getInternalRoutes = (
   userProfileService: UserProfileService,
@@ -46,7 +48,8 @@ export const getInternalRoutes = (
     service: CasesWorkflowRunService;
     getSpaceId: (request: KibanaRequest) => string;
     getWorkflowRunContext: (request: KibanaRequest) => Promise<CasesWorkflowRunContext>;
-  }
+  },
+  getAgentBuilder?: () => Promise<AgentBuilderPluginStart>
 ) =>
   [
     bulkCreateAttachmentsRoute,
@@ -76,4 +79,5 @@ export const getInternalRoutes = (
     ...(workflowRun ? [createRunWorkflowRoute(workflowRun)] : []),
     ...getTaskRoutes(config),
     ...getTaskTemplateRoutes(config),
+    ...(getAgentBuilder ? [createBulkGetAgentBuilderConversationsRoute({ getAgentBuilder })] : []),
   ] as CaseRoute[];

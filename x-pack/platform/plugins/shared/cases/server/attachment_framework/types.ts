@@ -102,6 +102,15 @@ export interface UnifiedAttachmentType
   workflowSchema?: z.ZodObject | false;
   workflow?: AttachmentWorkflowDefinition;
   relatedAttachments?: RelatedAttachmentsDefinition;
+  /**
+   * Runs after schema validation and before persistence. Lets a reference type
+   * verify the requester can read the referenced object and fill server-owned
+   * metadata. Throw a Boom error to reject the attachment.
+   */
+  resolve?: (
+    payload: UnifiedAttachmentPayload,
+    context: { request: KibanaRequest }
+  ) => Promise<UnifiedAttachmentPayload>;
 }
 
 export interface UnifiedAttachmentTypeSetup
@@ -115,6 +124,7 @@ export interface UnifiedAttachmentTypeSetup
   workflowSchema?: z.ZodObject | false;
   workflow?: AttachmentWorkflowDefinition;
   relatedAttachments?: RelatedAttachmentsDefinition;
+  resolve?: UnifiedAttachmentType['resolve'];
 }
 
 export interface AttachmentFramework {

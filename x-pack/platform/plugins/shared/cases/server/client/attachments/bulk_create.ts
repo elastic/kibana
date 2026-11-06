@@ -23,7 +23,7 @@ import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
 import { createCaseEntity } from '../../authorization/utils';
 import type { BulkCreateArgs } from './types';
-import { validateUnifiedAttachments } from './validators';
+import { resolveUnifiedAttachment, validateUnifiedAttachments } from './validators';
 import { validateMaxUserActions } from '../../common/validators';
 import { emitAttachmentsAddedEvent } from './trigger_utils';
 import { extractAndAddObservables } from './extract_observables';
@@ -41,33 +41,32 @@ const createAttachments = async (
     logger,
     authorization,
     unifiedAttachmentTypeRegistry,
+    request,
     services: { caseService, userActionService },
   } = clientArgs;
 
   try {
-    const decodedAttachments = decodeWithExcessOrThrowZod(
-      BulkCreateUnifiedAttachmentsRequestSchema
-    )(attachments);
+    const rawAttachments = decodeWithExcessOrThrowZod(BulkCreateUnifiedAttachmentsRequestSchema)(
+      attachments
+    );
 
     await validateMaxUserActions({
       caseId,
       userActionService,
-      userActionsToAdd: decodedAttachments.length,
+      userActionsToAdd: rawAttachments.length,
     });
 
-    decodedAttachments.forEach((attachment) => {
+    rawAttachments.forEach((attachment) => {
       validateUnifiedAttachments({
         query: attachment,
         unifiedAttachmentTypeRegistry,
       });
     });
 
-    const [attachmentsWithIds, entities]: [
+    const [rawAttachmentsWithIds, entities]: [
       Array<{ id: string } & UnifiedAttachmentPayload>,
       OwnerEntity[]
-    ] = decodedAttachments.reduce<
-      [Array<{ id: string } & UnifiedAttachmentPayload>, OwnerEntity[]]
-    >(
+    ] = rawAttachments.reduce<[Array<{ id: string } & UnifiedAttachmentPayload>, OwnerEntity[]]>(
       ([a, e], attachment) => {
         const savedObjectID = SavedObjectsUtils.generateId();
         return [
@@ -86,6 +85,14 @@ const createAttachments = async (
       operation: Operations.bulkCreateAttachments,
       entities: [...entities, createCaseEntity(theCase)],
     });
+
+    const attachmentsWithIds = await Promise.all(
+      rawAttachmentsWithIds.map(async ({ id, ...query }) => ({
+        id,
+        ...(await resolveUnifiedAttachment({ query, unifiedAttachmentTypeRegistry, request })),
+      }))
+    );
+    const decodedAttachments = attachmentsWithIds.map(({ id, ...attachment }) => attachment);
 
     const model = await CaseCommentModel.create(caseId, clientArgs);
 

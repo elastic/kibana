@@ -33,6 +33,8 @@ export const AIOPS_CHANGE_POINT_CHART_ATTACHMENT_TYPE = 'aiops.change_point_char
 export const AIOPS_PATTERN_ANALYSIS_ATTACHMENT_TYPE = 'aiops.pattern_analysis';
 export const AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE = 'aiops.log_rate_analysis';
 
+export const AGENT_BUILDER_CONVERSATION_ATTACHMENT_TYPE = 'agentBuilder.conversation';
+
 export const DASHBOARD_ATTACHMENT_TYPE = 'dashboard';
 export const DISCOVER_SESSION_ATTACHMENT_TYPE = 'discoverSession';
 export const MAP_ATTACHMENT_TYPE = 'map';

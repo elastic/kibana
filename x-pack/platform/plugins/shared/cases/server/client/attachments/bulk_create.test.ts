@@ -20,7 +20,13 @@ import {
   createCaseServiceMock,
   createUserActionServiceMock,
 } from '../../services/mocks';
-import { commentAttachmentType } from '../../attachment_framework/attachments';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/server';
+import { AGENT_BUILDER_CONVERSATION_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import {
+  commentAttachmentType,
+  createConversationAttachmentType,
+} from '../../attachment_framework/attachments';
+import { createCaseEntity } from '../../authorization/utils';
 import { extractAndAddObservables } from './extract_observables';
 
 jest.mock('./extract_observables');
@@ -71,6 +77,38 @@ describe('bulkCreate', () => {
       // @ts-expect-error: legacy v1 shape is no longer accepted, client is unified-only
       bulkCreate({ attachments: [v1Comment], caseId }, clientArgs)
     ).rejects.toThrow();
+  });
+
+  it('rejects the whole batch when a type resolve hook rejects an attachment', async () => {
+    registerCommentType();
+    // No entry for the id: Agent Builder hides conversations the requester cannot open.
+    const bulkGet = jest.fn().mockResolvedValue(new Map());
+    const agentBuilder = {
+      conversations: { getScopedClient: jest.fn().mockResolvedValue({ bulkGet }) },
+    } as unknown as AgentBuilderPluginStart;
+    clientArgs.unifiedAttachmentTypeRegistry.register(
+      createConversationAttachmentType(async () => agentBuilder)
+    );
+    userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseId]: 0 });
+    caseService.getCase.mockResolvedValue({ ...mockCases[0], id: caseId });
+
+    await expect(
+      bulkCreate(
+        {
+          attachments: [
+            comment,
+            {
+              type: AGENT_BUILDER_CONVERSATION_ATTACHMENT_TYPE,
+              attachmentId: 'conversation-1',
+              owner: SECURITY_SOLUTION_OWNER,
+            },
+          ],
+          caseId,
+        },
+        clientArgs
+      )
+    ).rejects.toThrow("Conversation conversation-1 was not found or you don't have access to it.");
+    expect(attachmentService.bulkCreate).not.toHaveBeenCalled();
   });
 
   it(`throws error when attachments are more than ${MAX_BULK_CREATE_ATTACHMENTS}`, async () => {
@@ -257,7 +295,7 @@ describe('bulkCreate', () => {
       expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledTimes(1);
       expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
         expect.objectContaining({
-          entities: [{ owner: theCase.attributes.owner, id: caseId }],
+          entities: [createCaseEntity(theCase)],
         })
       );
     });

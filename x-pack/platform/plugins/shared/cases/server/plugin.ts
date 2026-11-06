@@ -56,6 +56,7 @@ import {
   LICENSING_CASE_TASKS_FEATURE,
 } from './common/constants';
 import { registerInternalAttachments } from './internal_attachments';
+import { createConversationAttachmentType } from './attachment_framework/attachments';
 import { registerCaseFileKinds } from './files';
 import type { ConfigType } from './config';
 import { registerConnectorTypes } from './connectors';
@@ -258,6 +259,23 @@ export class CasePlugin
         }
       : undefined;
 
+    const getAgentBuilder =
+      plugins.agentBuilder && this.caseConfig.chat.enabled
+        ? async () => {
+            const [, pluginsStart] = await core.getStartServices();
+            if (!pluginsStart.agentBuilder) {
+              throw new Error('agentBuilder plugin start contract is not available');
+            }
+            return pluginsStart.agentBuilder;
+          }
+        : undefined;
+
+    if (getAgentBuilder) {
+      this.unifiedAttachmentTypeRegistry.register(
+        createConversationAttachmentType(getAgentBuilder)
+      );
+    }
+
     registerRoutes({
       router,
       routes: [
@@ -271,7 +289,8 @@ export class CasePlugin
           this.caseConfig,
           workflowRunService && getWorkflowRunContext
             ? { service: workflowRunService, getSpaceId, getWorkflowRunContext }
-            : undefined
+            : undefined,
+          getAgentBuilder
         ),
       ],
       logger: this.logger,

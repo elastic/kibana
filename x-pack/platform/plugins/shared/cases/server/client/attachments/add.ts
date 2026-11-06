@@ -20,7 +20,7 @@ import { toUnifiedAttachment } from '../../services/attachments/operations/utils
 import type { AttachmentSavedObjectTransformedV2 } from '../../common/types/attachments_v2';
 import { createCaseEntity } from '../../authorization/utils';
 import type { AddArgs } from './types';
-import { validateUnifiedAttachments } from './validators';
+import { resolveUnifiedAttachment, validateUnifiedAttachments } from './validators';
 import { validateMaxUserActions } from '../../common/validators';
 import { extractAndAddObservables } from './extract_observables';
 import { emitAttachmentsAddedEvent } from './trigger_utils';
@@ -38,11 +38,12 @@ const createAttachment = async (
     logger,
     authorization,
     unifiedAttachmentTypeRegistry,
+    request,
     services: { caseService, userActionService },
   } = clientArgs;
 
   try {
-    const query = decodeWithExcessOrThrowZod(UnifiedAttachmentPayloadSchema)(comment);
+    const decoded = decodeWithExcessOrThrowZod(UnifiedAttachmentPayloadSchema)(comment);
 
     await validateMaxUserActions({ caseId, userActionService, userActionsToAdd: 1 });
 
@@ -55,15 +56,20 @@ const createAttachment = async (
       entities: [
         {
           id: savedObjectID,
-          owner: query.owner,
+          owner: decoded.owner,
         },
         createCaseEntity(theCase),
       ],
     });
 
     validateUnifiedAttachments({
-      query,
+      query: decoded,
       unifiedAttachmentTypeRegistry,
+    });
+    const query = await resolveUnifiedAttachment({
+      query: decoded,
+      unifiedAttachmentTypeRegistry,
+      request,
     });
 
     const createdDate = new Date().toISOString();
