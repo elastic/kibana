@@ -1,0 +1,43 @@
+version: "1"
+name: Publish case outcomes
+description: >
+  When a case closes, publishes what the analysts decided (close reason, verdicts, closing notes,
+  rules, and observables) as a knowledge indicator in the cases-outcomes AI index, so agents can
+  weigh it on the next similar alert. When the case reopens, removes it. Restricted cases are never
+  published, and neither are cases in a space that turned publishing off in Cases settings.
+enabled: true
+tags:
+  - cases
+  - knowledge
+settings:
+  concurrency:
+    key: "{{ workflow.id }}:{{ event.caseId }}"
+    strategy: cancel-in-progress
+    max: 1
+triggers:
+  - type: cases.caseStatusUpdated
+    on:
+      condition: 'event.status: "closed" or event.previousStatus: "closed"'
+steps:
+  - name: outcome
+    type: cases.getCaseOutcome
+    with:
+      case_id: "{{ event.caseId }}"
+  - name: publish
+    type: context-engine.createKi
+    if: "${{ steps.outcome.output.publish == true }}"
+    with:
+      ai_index_id: cases-outcomes
+      ki_id: "{{ steps.outcome.output.ki_id }}"
+      ki: "${{ steps.outcome.output.ki }}"
+      refresh: true
+  # Removing an outcome that was never published fails; that's expected, so the run goes on.
+  - name: retract
+    type: context-engine.deleteKi
+    if: "${{ steps.outcome.output.retract == true }}"
+    on-failure:
+      continue: true
+    with:
+      ai_index_id: cases-outcomes
+      ki_id: "{{ steps.outcome.output.ki_id }}"
+      refresh: true
