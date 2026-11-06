@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { lastValueFrom, of } from 'rxjs';
+import { delay, lastValueFrom, of, toArray } from 'rxjs';
 import type {
   ChatCompletionChunkEvent,
   ChatCompletionTokenCountEvent,
@@ -223,6 +223,62 @@ describe('chunksIntoMessage', () => {
         },
       ],
       type: ChatCompletionEventType.ChatCompletionMessage,
+    });
+  });
+
+  it('forwards the same tool call ids it puts in the message, and drops empty deltas', async () => {
+    const events = await lastValueFrom(
+      chunksIntoMessage({
+        toolOptions: {
+          toolChoice: ToolChoiceType.auto,
+          tools: {
+            myFunction: {
+              description: 'myFunction',
+              schema: { type: 'object', properties: {} },
+            },
+          },
+        },
+        logger,
+      })(
+        fromEvents(
+          {
+            content: '',
+            type: ChatCompletionEventType.ChatCompletionChunk,
+            tool_calls: [
+              { function: { name: 'myFunction', arguments: '{ ' }, index: 0, toolCallId: '' },
+            ],
+          },
+          {
+            content: '',
+            type: ChatCompletionEventType.ChatCompletionChunk,
+            tool_calls: [{ function: { name: '', arguments: '' }, index: 3, toolCallId: '' }],
+          },
+          {
+            content: '',
+            type: ChatCompletionEventType.ChatCompletionChunk,
+            tool_calls: [{ function: { name: '', arguments: '}' }, index: 0, toolCallId: '' }],
+          }
+          // like a real stream, emits after both consumers of the shared stream have subscribed
+        ).pipe(delay(0))
+      ).pipe(toArray())
+    );
+
+    const forwardedChunks = events.filter(
+      (event): event is ChatCompletionChunkEvent =>
+        event.type === ChatCompletionEventType.ChatCompletionChunk
+    );
+    const message = events.find(
+      (event) => event.type === ChatCompletionEventType.ChatCompletionMessage
+    );
+
+    const forwardedToolCalls = forwardedChunks.flatMap((chunk) => chunk.tool_calls);
+    expect(forwardedToolCalls.map((toolCall) => toolCall.index)).toEqual([0, 0]);
+    const [{ toolCallId }] = forwardedToolCalls;
+    expect(toolCallId).not.toBe('');
+    expect(message).toEqual({
+      type: ChatCompletionEventType.ChatCompletionMessage,
+      content: '',
+      toolCalls: [{ function: { name: 'myFunction', arguments: {} }, toolCallId }],
     });
   });
 

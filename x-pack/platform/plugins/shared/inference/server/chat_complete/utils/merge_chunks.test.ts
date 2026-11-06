@@ -6,6 +6,7 @@
  */
 
 import { ChatCompletionEventType } from '@kbn/inference-common';
+import * as commonModule from '../../../common';
 import { mergeChunks } from './merge_chunks';
 
 describe('mergeChunks', () => {
@@ -418,24 +419,282 @@ describe('mergeChunks', () => {
     });
   });
 
-  it('throws an error when a tool call has no toolCallId and no previous chunk set it for that index', async () => {
-    expect(() => {
-      mergeChunks([
-        {
-          content: '',
-          type: ChatCompletionEventType.ChatCompletionChunk,
-          tool_calls: [
-            {
-              function: {
-                name: 'myFunction',
-                arguments: '{ "foo": "bar" }',
-              },
-              index: 0,
-              toolCallId: '', // Empty toolCallId without a previous chunk setting it
+  it('merges a single chunk that omits toolCallId (e.g. Gemini-via-EIS sends full args in one chunk with empty id/name)', async () => {
+    const message = mergeChunks([
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [
+          {
+            function: {
+              name: '',
+              arguments: '{"criteria":["foo"]}',
             },
-          ],
+            index: 0,
+            toolCallId: '',
+          },
+        ],
+      },
+    ]);
+
+    expect(message).toEqual({
+      content: '',
+      tool_calls: [
+        {
+          function: {
+            name: '',
+            arguments: '{"criteria":["foo"]}',
+          },
+          toolCallId: expect.stringMatching(/.+/),
         },
-      ]);
-    }).toThrow('Tool call key is missing for index 0');
+      ],
+    });
+  });
+
+  it('accumulates continuation chunks for an index when no chunk ever carries the toolCallId', async () => {
+    const message = mergeChunks([
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [
+          {
+            function: { name: 'myFunction', arguments: '{ ' },
+            index: 0,
+            toolCallId: '',
+          },
+        ],
+      },
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [
+          {
+            function: { name: '', arguments: '"foo": "bar" }' },
+            index: 0,
+            toolCallId: '',
+          },
+        ],
+      },
+    ]);
+
+    expect(message).toEqual({
+      content: '',
+      tool_calls: [
+        {
+          function: {
+            name: 'myFunction',
+            arguments: '{ "foo": "bar" }',
+          },
+          toolCallId: expect.stringMatching(/.+/),
+        },
+      ],
+    });
+  });
+
+  it('gives every call that never receives a toolCallId a distinct, non-empty id', async () => {
+    const message = mergeChunks([
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [
+          { function: { name: 'firstFunction', arguments: '{}' }, index: 0, toolCallId: '' },
+          { function: { name: 'secondFunction', arguments: '{}' }, index: 1, toolCallId: '' },
+        ],
+      },
+    ]);
+
+    const ids = message.tool_calls.map((call) => call.toolCallId);
+    expect(ids).toHaveLength(2);
+    expect(ids.every((id) => id !== '')).toBe(true);
+    expect(new Set(ids).size).toBe(2);
+  });
+
+  it('never gives a generated id that equals a real toolCallId in the same message', async () => {
+    const generateSpy = jest
+      .spyOn(commonModule, 'generateFakeToolCallId')
+      .mockReturnValueOnce('real-id')
+      .mockReturnValueOnce('generated-id');
+
+    const message = mergeChunks([
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [
+          { function: { name: 'idlessFunction', arguments: '{}' }, index: 0, toolCallId: '' },
+          { function: { name: 'realFunction', arguments: '{}' }, index: 1, toolCallId: 'real-id' },
+        ],
+      },
+    ]);
+
+    expect(message.tool_calls.map((call) => call.toolCallId)).toEqual(['generated-id', 'real-id']);
+    generateSpy.mockRestore();
+  });
+
+  it('skips a fully empty delta at an index with no known toolCallId (e.g. GPT-OSS-120B via EIS)', async () => {
+    const message = mergeChunks([
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [
+          {
+            function: { name: 'myFunction', arguments: '{ "foo": "bar" }' },
+            index: 0,
+            toolCallId: '001',
+          },
+        ],
+      },
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [{ function: { name: '', arguments: '' }, index: 3, toolCallId: '' }],
+      },
+    ]);
+
+    expect(message).toEqual({
+      content: '',
+      tool_calls: [
+        {
+          function: { name: 'myFunction', arguments: '{ "foo": "bar" }' },
+          toolCallId: '001',
+        },
+      ],
+    });
+  });
+
+  it('does not create a phantom tool call when only fully empty deltas are received', async () => {
+    const message = mergeChunks([
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [{ function: { name: '', arguments: '' }, index: 1, toolCallId: '' }],
+      },
+    ]);
+
+    expect(message).toEqual({ content: '', tool_calls: [] });
+  });
+
+  it('does not merge an id-less call with a call whose real toolCallId looks like a fallback key', async () => {
+    const message = mergeChunks([
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [
+          {
+            function: { name: 'idlessFunction', arguments: '{ "a": 1 }' },
+            index: 0,
+            toolCallId: '',
+          },
+        ],
+      },
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [
+          {
+            function: { name: 'realFunction', arguments: '{ "b": 2 }' },
+            index: 1,
+            toolCallId: '__index_0',
+          },
+        ],
+      },
+    ]);
+
+    expect(message).toEqual({
+      content: '',
+      tool_calls: [
+        {
+          function: { name: 'idlessFunction', arguments: '{ "a": 1 }' },
+          toolCallId: expect.not.stringMatching(/^(__index_0)?$/),
+        },
+        { function: { name: 'realFunction', arguments: '{ "b": 2 }' }, toolCallId: '__index_0' },
+      ],
+    });
+  });
+
+  it('merges an id-less prefix with the continuation that carries the first real toolCallId', async () => {
+    const message = mergeChunks([
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [
+          { function: { name: 'myFunction', arguments: '{ "a": ' }, index: 0, toolCallId: '' },
+        ],
+      },
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [{ function: { name: '', arguments: '1 }' }, index: 0, toolCallId: '001' }],
+      },
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [{ function: { name: '', arguments: '' }, index: 0, toolCallId: '' }],
+      },
+    ]);
+
+    expect(message).toEqual({
+      content: '',
+      tool_calls: [
+        { function: { name: 'myFunction', arguments: '{ "a": 1 }' }, toolCallId: '001' },
+      ],
+    });
+  });
+
+  it('keeps tool calls in first-seen order when an id-less call is re-keyed by a later real id', async () => {
+    const message = mergeChunks([
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [
+          { function: { name: 'firstFunction', arguments: '{}' }, index: 0, toolCallId: '' },
+        ],
+      },
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [
+          { function: { name: 'secondFunction', arguments: '{}' }, index: 1, toolCallId: '002' },
+        ],
+      },
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [{ function: { name: '', arguments: '' }, index: 0, toolCallId: '001' }],
+      },
+    ]);
+
+    expect(message.tool_calls.map((call) => call.toolCallId)).toEqual(['001', '002']);
+  });
+
+  it('uses the real toolCallId when it arrives after a fully empty delta for the same index', async () => {
+    const message = mergeChunks([
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [{ function: { name: '', arguments: '' }, index: 1, toolCallId: '' }],
+      },
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [
+          { function: { name: 'myFunction', arguments: '{ ' }, index: 1, toolCallId: '002' },
+        ],
+      },
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [{ function: { name: '', arguments: '"a": 1 }' }, index: 1, toolCallId: '' }],
+      },
+    ]);
+
+    expect(message).toEqual({
+      content: '',
+      tool_calls: [
+        {
+          function: { name: 'myFunction', arguments: '{ "a": 1 }' },
+          toolCallId: '002',
+        },
+      ],
+    });
   });
 });
