@@ -10,6 +10,7 @@
 import Path from 'path';
 import Fs from 'fs';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { getPackages, getPluginPackagesFilter } from '@kbn/repo-packages';
 import { discoverPlugins } from './plugin_discovery';
 
 describe('plugin_discovery', () => {
@@ -143,6 +144,25 @@ describe('plugin_discovery', () => {
     it('should discover more plugins when testPlugins=true', () => {
       expect(pluginsWithTest.length).toBeGreaterThanOrEqual(pluginsWithoutTest.length);
     });
+
+    it('only discovers relocated test plugins when requested', () => {
+      for (const id of ['analyticsFtrHelpers', 'applicationUsageTest']) {
+        expect(pluginsWithTest.some((plugin) => plugin.id === id)).toBe(true);
+        expect(pluginsWithoutTest.some((plugin) => plugin.id === id)).toBe(false);
+      }
+    });
+  });
+
+  it('keeps relocated server-only plugins out of default discovery', () => {
+    const statusPlugin = getPackages(REPO_ROOT).find(
+      (pkg) => pkg.manifest.id === '@kbn/status-plugin-a-plugin'
+    );
+    if (!statusPlugin) {
+      throw new Error('statusPluginA test fixture was not found');
+    }
+
+    expect(getPluginPackagesFilter({ server: true })(statusPlugin)).toBe(false);
+    expect(getPluginPackagesFilter({ server: true, testPlugins: true })(statusPlugin)).toBe(true);
   });
 
   describe('discoverPlugins with devOnly', () => {

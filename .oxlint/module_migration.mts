@@ -24,7 +24,9 @@ const USES_ELASTIC_APM_AGENT = [
   /kbn-cli-dev-mode[\/\\]/,
   /kbn-docs-utils[\/\\]/,
   /src[\/\\]platform[\/\\]test[\/\\]/,
+  /src[\/\\]platform[\/\\]test_plugins[\/\\]/,
   /x-pack[\/\\]platform[\/\\]test[\/\\]/,
+  /x-pack[\/\\]platform[\/\\]test_plugins[\/\\]/,
 
   // Shared packages with APM tracing
   /kbn-langchain[\/\\]server[\/\\]tracers[\/\\]/,
