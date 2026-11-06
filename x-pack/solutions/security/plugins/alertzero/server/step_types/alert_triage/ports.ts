@@ -686,7 +686,7 @@ export interface DecisionCandidatesPage {
 }
 
 /**
- * One page of the open, untriaged alerts of the look-back that a decision may match, oldest first,
+ * One page of the open (not acknowledged), untriaged alerts of the look-back that a decision may match, oldest first,
  * so the alerts closest to ageing out are matched first. They are the alerts the planner would
  * consider, not only the ones it picks, so a match never has to wait for a batch. Alerts already
  * tagged by a decision match are left out. Only the fields a key reads are fetched. A page is at
@@ -715,7 +715,9 @@ export const fetchDecisionCandidates = async (
       query: {
         bool: {
           filter: [
-            { terms: { [ALERT_FIELDS.status]: [...OPEN_ALERT_STATUSES] } },
+            // Only `open`: an analyst who acknowledged an alert has taken it, so a decision must not
+            // close it or keep it out of analysis.
+            { term: { [ALERT_FIELDS.status]: 'open' } },
             { range: { [ALERT_FIELDS.timestamp]: { gte: new Date(windowStart).toISOString() } } },
             ...severityFilter(filters.minSeverity),
             ...(after

@@ -679,6 +679,16 @@ describe('fetchDecisionCandidates', () => {
     expect(query).toContain('az:would_skip:');
   });
 
+  it('reads only open alerts, so an acknowledged alert is never closed or skipped by a decision', async () => {
+    const { run: fetch, callKibanaApi } = run([]);
+
+    await fetch();
+
+    const { filter } = callKibanaApi.mock.calls[0][0].body.query.bool;
+    expect(filter).toContainEqual({ term: { 'kibana.alert.workflow_status': 'open' } });
+    expect(JSON.stringify(filter)).not.toContain('acknowledged');
+  });
+
   it('leaves out an alert a decision closed even in on mode, so a reopened alert stays open', async () => {
     const callKibanaApi = jest
       .fn()
