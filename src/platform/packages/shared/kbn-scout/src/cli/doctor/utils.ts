@@ -58,3 +58,32 @@ export const getScoutServerPids = async () => {
       : [];
   });
 };
+
+/** Ancestors of a pid, nearest first, so what holds a port can be traced back to what started it */
+export const getAncestorPids = async (pid: string): Promise<string[]> => {
+  const output = await tryExec('ps', ['-ax', '-o', 'pid=,ppid=']);
+  const parents = new Map<string, string>();
+  for (const line of (output ?? '').split('\n')) {
+    const [child, parent] = line.trim().split(/\s+/);
+    if (child && parent) parents.set(child, parent);
+  }
+  const ancestors: string[] = [];
+  // launchd and the kernel are everyone's ancestors, so they say nothing about who started what
+  for (
+    let current = parents.get(pid);
+    current && current !== '0' && current !== '1' && !ancestors.includes(current);
+    current = parents.get(current)
+  ) {
+    ancestors.push(current);
+  }
+  return ancestors;
+};
+
+/** The directory a process was started in, so servers from another checkout can be named as such */
+export const getProcessCwd = async (pid: string): Promise<string | undefined> => {
+  const output = await tryExec('lsof', ['-a', '-p', pid, '-d', 'cwd', '-Fn']);
+  return output
+    ?.split('\n')
+    .find((line) => line.startsWith('n'))
+    ?.slice(1);
+};

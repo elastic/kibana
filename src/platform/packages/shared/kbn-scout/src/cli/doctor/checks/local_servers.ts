@@ -11,7 +11,7 @@ import Net from 'net';
 import type { DoctorCheck, Fix } from '../types';
 import { fail, pass } from '../types';
 import { defaultConfig } from '../../../servers/configs/config_sets/default/stateful/base.config';
-import { getScoutServerPids, tryExec } from '../utils';
+import { getAncestorPids, getProcessCwd, getScoutServerPids, tildify, tryExec } from '../utils';
 
 const canListen = (port: number, host: string) =>
   new Promise<boolean>((resolve) => {
@@ -46,26 +46,42 @@ const stopScoutServersFix = async (pids: string[]): Promise<Fix> => {
 // serverless containers publish their ports through Docker, which must not be killed
 const isDocker = (command?: string) => /^(com\.docker|docker)/.test(command ?? '');
 
+/**
+ * Of the Scout servers running anywhere on the machine, the ones that started what holds the
+ * port. A start-server in another checkout, or one started for another target, holds ports of
+ * its own, and stopping it would leave this one taken.
+ */
+const getOwningScoutServers = async (ownerPid: string, scoutServerPids: string[]) => {
+  if (!scoutServerPids.length) {
+    return [];
+  }
+  const lineage = new Set([ownerPid, ...(await getAncestorPids(ownerPid))]);
+  return scoutServerPids.filter((pid) => lineage.has(pid));
+};
+
 const portCheck = (name: string, port: number): DoctorCheck => ({
   title: `${name} port ${port}`,
   run: async () => {
     const owner = await getPortOwner(port);
-    if (!owner && (await isPortFree(port))) {
-      return pass(`${name} port ${port} is free`);
+    if (!owner) {
+      return (await isPortFree(port))
+        ? pass(`${name} port ${port} is free`)
+        : fail(`${name} port ${port} is used`);
     }
 
-    const scoutServerPids = await getScoutServerPids();
-    if (scoutServerPids.length) {
+    // what holds the port decides, so the fix offered is one that actually frees it
+    const owning = await getOwningScoutServers(owner.pid, await getScoutServerPids());
+    if (owning.length) {
+      const cwd = await getProcessCwd(owning[0]);
       return fail(
-        `${name} port ${port} is used by Scout servers (PID ${scoutServerPids.join(', ')})`,
+        `${name} port ${port} is used by Scout servers (PID ${owning.join(', ')})${
+          cwd ? ` in ${tildify(cwd)}` : ''
+        }`,
         {
           hint: 'stops the running Scout servers',
-          fix: await stopScoutServersFix(scoutServerPids),
+          fix: await stopScoutServersFix(owning),
         }
       );
-    }
-    if (!owner) {
-      return fail(`${name} port ${port} is used`);
     }
     return fail(
       `${name} port ${port} is used by ${owner.command} (PID ${owner.pid})`,
