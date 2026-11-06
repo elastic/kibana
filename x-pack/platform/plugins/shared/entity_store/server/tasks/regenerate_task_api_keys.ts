@@ -13,6 +13,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
+import { stableStringify } from '@kbn/std';
 import { ALL_ENTITY_TYPES, EXTRACTION_MODE } from '../../common/domain/definitions/entity_schema';
 import { getErrorMessage } from '../../common';
 import { getHistorySnapshotTaskId } from './config';
@@ -91,8 +92,11 @@ export async function regenerateEntityStoreTaskApiKeys({
   // 1. Get info about all the tasks that need to be updated
   const tasksResult = await taskManager.bulkGet(getEntityStoreTaskIds(namespace));
 
-  // 2. Group the tasks by their interval so we can update them in batches
-  const tasksByInterval = new Map<string, ConcreteTaskInstance[]>();
+  // 2. Group the tasks by their schedule so we can update them in batches
+  const tasksBySchedule = new Map<
+    string,
+    { schedule: NonNullable<ConcreteTaskInstance['schedule']>; tasks: ConcreteTaskInstance[] }
+  >();
   tasksResult.forEach((lookup) => {
     if (lookup.tag === 'err') {
       const { id, error } = lookup.error;
@@ -104,22 +108,27 @@ export async function regenerateEntityStoreTaskApiKeys({
     }
 
     const task = lookup.value;
-    const interval = task.schedule?.interval;
-    if (!interval) {
-      failed.push({ id: task.id, message: 'The task does not have an interval schedule' });
+    const { schedule } = task;
+    if (!schedule) {
+      failed.push({ id: task.id, message: 'The task does not have a recurring schedule' });
       return;
     }
-    tasksByInterval.set(interval, [...(tasksByInterval.get(interval) ?? []), task]);
+
+    const key = stableStringify(schedule);
+    const value = tasksBySchedule.get(key) ?? { schedule, tasks: [] };
+    value.tasks.push(task);
+    tasksBySchedule.set(key, value);
   });
 
-  // 3. Update the tasks in batches by their interval
-  // bulkUpdateSchedules` takes one schedule per call so each call passes all tasks with the same interval.
+  // 3. Update the tasks in batches by their schedule
+  // `bulkUpdateSchedules` takes one schedule per call, so each call passes the schedule its tasks
+  // already have: only the key changes.
   await Promise.all(
-    [...tasksByInterval.entries()].map(async ([interval, tasks]) => {
+    [...tasksBySchedule.values()].map(async ({ schedule, tasks }) => {
       try {
         const result = await taskManager.bulkUpdateSchedules(
           tasks.map(({ id }) => id),
-          { interval },
+          schedule,
           { request, regenerateApiKey: true, cloneApiKey: true, includeRunningTasks: true }
         );
 
@@ -141,9 +150,9 @@ export async function regenerateEntityStoreTaskApiKeys({
           );
       } catch (error) {
         logger.error(
-          `Failed to regenerate API keys of ${
-            tasks.length
-          } task(s) with interval "${interval}": ${getErrorMessage(error)}`
+          `Failed to regenerate API keys of ${tasks.length} task(s) with schedule ${stableStringify(
+            schedule
+          )}: ${getErrorMessage(error)}`
         );
         tasks.forEach(({ id }) => failed.push({ id, message: getErrorMessage(error) }));
       }

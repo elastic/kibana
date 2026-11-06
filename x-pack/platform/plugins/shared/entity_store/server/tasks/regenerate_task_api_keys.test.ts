@@ -23,8 +23,14 @@ const NAMESPACE = 'default';
 
 const getAllMock = entityMaintainersRegistry.getAll as jest.Mock;
 
+const createTaskWithSchedule = (
+  id: string,
+  schedule: unknown,
+  status = 'idle'
+): ConcreteTaskInstance => ({ id, status, schedule } as unknown as ConcreteTaskInstance);
+
 const createTask = (id: string, interval: string, status = 'idle'): ConcreteTaskInstance =>
-  ({ id, status, schedule: { interval } } as unknown as ConcreteTaskInstance);
+  createTaskWithSchedule(id, { interval }, status);
 
 const found = (task: ConcreteTaskInstance) => ({ tag: 'ok' as const, value: task });
 
@@ -182,20 +188,74 @@ describe('regenerateEntityStoreTaskApiKeys', () => {
     ]);
   });
 
-  it('reports a task without an interval schedule', async () => {
-    taskManager.bulkGet.mockResolvedValue([
-      found({ id: 'a', status: 'idle', schedule: undefined } as unknown as ConcreteTaskInstance),
-    ]);
+  it('reports a task without a recurring schedule', async () => {
+    taskManager.bulkGet.mockResolvedValue([found(createTaskWithSchedule('a', undefined))]);
 
     const result = await run();
 
     expect(result.failed).toEqual([
-      { id: 'a', message: 'The task does not have an interval schedule' },
+      { id: 'a', message: 'The task does not have a recurring schedule' },
     ]);
     expect(taskManager.bulkUpdateSchedules).not.toHaveBeenCalled();
   });
 
-  it('keeps going when one interval group fails entirely', async () => {
+  describe('rrule schedules', () => {
+    const dailyAtNine = { rrule: { freq: 3, interval: 1, tzid: 'UTC', byhour: [9] } };
+    // The same schedule with its keys written in a different order.
+    const dailyAtNineReordered = { rrule: { byhour: [9], tzid: 'UTC', interval: 1, freq: 3 } };
+
+    it('re-keys a task with its own rrule schedule, apart from interval tasks', async () => {
+      const tasks = [
+        createTask('interval-task', '1m'),
+        createTaskWithSchedule('rrule-task', dailyAtNine),
+      ];
+      taskManager.bulkGet.mockResolvedValue(tasks.map(found));
+      taskManager.bulkUpdateSchedules.mockImplementation(async (ids) => ({
+        tasks: tasks.filter(({ id }) => ids.includes(id)),
+        errors: [],
+      }));
+
+      const result = await run();
+
+      expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledTimes(2);
+      expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith(
+        ['interval-task'],
+        { interval: '1m' },
+        expect.anything()
+      );
+      expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith(
+        ['rrule-task'],
+        dailyAtNine,
+        expect.anything()
+      );
+      expect(result.updated.sort()).toEqual(['interval-task', 'rrule-task']);
+      expect(result.failed).toEqual([]);
+    });
+
+    it('updates tasks with the same rrule together, whatever the order of its keys', async () => {
+      const tasks = [
+        createTaskWithSchedule('a', dailyAtNine),
+        createTaskWithSchedule('b', dailyAtNineReordered),
+      ];
+      taskManager.bulkGet.mockResolvedValue(tasks.map(found));
+      taskManager.bulkUpdateSchedules.mockImplementation(async (ids) => ({
+        tasks: tasks.filter(({ id }) => ids.includes(id)),
+        errors: [],
+      }));
+
+      const result = await run();
+
+      expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith(
+        ['a', 'b'],
+        expect.anything(),
+        expect.anything()
+      );
+      expect(result.updated.sort()).toEqual(['a', 'b']);
+    });
+  });
+
+  it('keeps going when one schedule group fails entirely', async () => {
     taskManager.bulkGet.mockResolvedValue([
       found(createTask('a', '1m')),
       found(createTask('b', '12h')),
