@@ -32,7 +32,8 @@ export const PRODUCT_DOC_ARTIFACTS_BUCKET_URL =
 export const PRODUCT_DOC_BUNDLED_ARTIFACTS_DIR =
   'node_modules/@kbn/product-doc-base-plugin/target/bundled_artifacts';
 
-const PRODUCT_DOC_INFERENCE_ID = defaultInferenceEndpoints.JINAv5;
+// Inference IDs serverless resolves the default to; the ELSER one maps to the unsuffixed artifacts
+const BUNDLED_INFERENCE_IDS = [defaultInferenceEndpoints.JINAv5, defaultInferenceEndpoints.ELSER];
 const PRODUCT_DOC_LATEST_VERSION = 'latest';
 const PRODUCT_DOC_PRODUCTS: ProductName[] = [
   ...Object.values(DocumentationProduct),
@@ -87,41 +88,41 @@ const fetchBucketListing = async (
 };
 
 const selectProductDocArtifacts = (listing: BucketObject[]): BucketObject[] =>
-  PRODUCT_DOC_PRODUCTS.map((productName) => {
-    const key = getArtifactName({
-      productName,
-      productVersion: PRODUCT_DOC_LATEST_VERSION,
-      inferenceId: PRODUCT_DOC_INFERENCE_ID,
+  BUNDLED_INFERENCE_IDS.flatMap((inferenceId) =>
+    PRODUCT_DOC_PRODUCTS.map((productName) => {
+      const key = getArtifactName({
+        productName,
+        productVersion: PRODUCT_DOC_LATEST_VERSION,
+        inferenceId,
+      });
+      const object = listing.find((entry) => entry.key === key);
+      if (!object) {
+        throw new Error(
+          `Product documentation artifact [${key}] not found in [${PRODUCT_DOC_ARTIFACTS_BUCKET_URL}]`
+        );
+      }
+      return object;
+    })
+  );
+
+const selectSecurityLabsArtifacts = (listing: BucketObject[]): BucketObject[] =>
+  BUNDLED_INFERENCE_IDS.map((inferenceId) => {
+    const candidates = listing.flatMap((object) => {
+      const parsed = parseSecurityLabsArtifactName(object.key);
+      if (!parsed) {
+        return [];
+      }
+      const expectedKey = getSecurityLabsArtifactName({ version: parsed.version, inferenceId });
+      return object.key === expectedKey ? [{ ...object, version: parsed.version }] : [];
     });
-    const object = listing.find((entry) => entry.key === key);
-    if (!object) {
+    const newest = candidates.sort((a, b) => b.version.localeCompare(a.version))[0];
+    if (!newest) {
       throw new Error(
-        `Product documentation artifact [${key}] not found in [${PRODUCT_DOC_ARTIFACTS_BUCKET_URL}]`
+        `No Security Labs artifact for [${inferenceId}] found in [${PRODUCT_DOC_ARTIFACTS_BUCKET_URL}]`
       );
     }
-    return object;
+    return { key: newest.key, lastModified: newest.lastModified };
   });
-
-const selectSecurityLabsArtifact = (listing: BucketObject[]): BucketObject => {
-  const candidates = listing.flatMap((object) => {
-    const parsed = parseSecurityLabsArtifactName(object.key);
-    if (!parsed) {
-      return [];
-    }
-    const expectedKey = getSecurityLabsArtifactName({
-      version: parsed.version,
-      inferenceId: PRODUCT_DOC_INFERENCE_ID,
-    });
-    return object.key === expectedKey ? [{ ...object, version: parsed.version }] : [];
-  });
-  const newest = candidates.sort((a, b) => b.version.localeCompare(a.version))[0];
-  if (!newest) {
-    throw new Error(
-      `No Security Labs artifact for [${PRODUCT_DOC_INFERENCE_ID}] found in [${PRODUCT_DOC_ARTIFACTS_BUCKET_URL}]`
-    );
-  }
-  return { key: newest.key, lastModified: newest.lastModified };
-};
 
 // Mirrors the GCS ListBucketResult format the plugin parses for remote repositories
 const renderIndexXml = (objects: BucketObject[]): string =>
@@ -156,7 +157,10 @@ export const BundleProductDocArtifacts: Task = {
       log,
       config.resolveFromRepo('build', 'product_doc_artifacts_listing.xml')
     );
-    const artifacts = [...selectProductDocArtifacts(listing), selectSecurityLabsArtifact(listing)];
+    const artifacts = [
+      ...selectProductDocArtifacts(listing),
+      ...selectSecurityLabsArtifacts(listing),
+    ];
 
     const [firstPlatform, ...otherPlatforms] = serverlessPlatforms;
     const bundleDir = build.resolvePathForPlatform(

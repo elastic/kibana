@@ -32,11 +32,18 @@ jest.mock('../../lib', () => {
 const mockedDownloadToDisk = downloadToDisk as jest.MockedFunction<typeof downloadToDisk>;
 
 const LISTING_URL = `${PRODUCT_DOC_ARTIFACTS_BUCKET_URL}/?max-keys=1000`;
-const INFERENCE_SUFFIX = '--.jina-embeddings-v5-text-small.zip';
-const PRODUCT_KEYS = ['kibana', 'elasticsearch', 'observability', 'security', 'openapi'].map(
-  (product) => `kb-product-doc-${product}-latest${INFERENCE_SUFFIX}`
+const JINA_SUFFIX = '--.jina-embeddings-v5-text-small';
+const E5_SUFFIX = '--.multilingual-e5-small-elasticsearch';
+const PRODUCTS = ['kibana', 'elasticsearch', 'observability', 'security', 'openapi'];
+// Jina (suffixed) and EIS ELSER (unsuffixed) variants, in bundling order
+const PRODUCT_KEYS = [JINA_SUFFIX, ''].flatMap((suffix) =>
+  PRODUCTS.map((product) => `kb-product-doc-${product}-latest${suffix}.zip`)
 );
-const NEWEST_SECURITY_LABS_KEY = `security-labs-2026.07.28-052323${INFERENCE_SUFFIX}`;
+const NEWEST_SECURITY_LABS_KEYS = [
+  `security-labs-2026.07.28-052323${JINA_SUFFIX}.zip`,
+  'security-labs-2026.07.28-052323.zip',
+];
+const BUNDLED_KEYS = [...PRODUCT_KEYS, ...NEWEST_SECURITY_LABS_KEYS];
 
 const contents = (key: string, lastModified: string) =>
   `<Contents><Key>${key}</Key><LastModified>${lastModified}</LastModified></Contents>`;
@@ -47,15 +54,16 @@ const listingXml = (entries: string[], { truncated = false } = {}) =>
   )}</ListBucketResult>`;
 
 const fullListing = listingXml([
-  contents(
-    'kb-product-doc-kibana-9.7--.jina-embeddings-v5-text-small.zip',
-    '2026-01-01T00:00:00.000Z'
+  contents(`kb-product-doc-kibana-9.7${JINA_SUFFIX}.zip`, '2026-01-01T00:00:00.000Z'),
+  contents(`kb-product-doc-kibana-latest${E5_SUFFIX}.zip`, '2026-01-02T00:00:00.000Z'),
+  ...PRODUCT_KEYS.map((key, i) =>
+    contents(key, `2026-10-12T20:25:${String(i).padStart(2, '0')}.000Z`)
   ),
-  contents('kb-product-doc-kibana-latest.zip', '2026-01-02T00:00:00.000Z'),
-  ...PRODUCT_KEYS.map((key, i) => contents(key, `2026-10-12T20:25:3${i}.000Z`)),
-  contents(`security-labs-2026.07.10-152831${INFERENCE_SUFFIX}`, '2026-07-10T15:30:00.000Z'),
-  contents(NEWEST_SECURITY_LABS_KEY, '2026-07-28T05:25:00.000Z'),
-  contents('security-labs-2026.08.01-000000.zip', '2026-08-01T00:00:00.000Z'),
+  contents(`security-labs-2026.07.10-152831${JINA_SUFFIX}.zip`, '2026-07-10T15:30:00.000Z'),
+  contents('security-labs-2025.12.12.zip', '2025-12-12T00:00:00.000Z'),
+  contents('security-labs-2026.07.28.zip', '2026-07-28T05:26:00.000Z'),
+  ...NEWEST_SECURITY_LABS_KEYS.map((key) => contents(key, '2026-07-28T05:25:00.000Z')),
+  contents(`security-labs-2026.08.01-000000${E5_SUFFIX}.zip`, '2026-08-01T00:00:00.000Z'),
 ]);
 
 describe('BundleProductDocArtifacts', () => {
@@ -105,7 +113,7 @@ describe('BundleProductDocArtifacts', () => {
     expect(mockedDownloadToDisk).not.toHaveBeenCalled();
   });
 
-  it('downloads the latest product docs and newest Security Labs artifact from the storage bucket with retries', async () => {
+  it('downloads the latest product docs and newest Security Labs artifact of each bundled inference id from the storage bucket with retries', async () => {
     mockDownloads(fullListing);
 
     await BundleProductDocArtifacts.run(config, log, build);
@@ -113,8 +121,7 @@ describe('BundleProductDocArtifacts', () => {
     const urls = mockedDownloadToDisk.mock.calls.map(([{ url }]) => url);
     expect(urls).toEqual([
       LISTING_URL,
-      ...PRODUCT_KEYS.map((key) => `${PRODUCT_DOC_ARTIFACTS_BUCKET_URL}/${key}`),
-      `${PRODUCT_DOC_ARTIFACTS_BUCKET_URL}/${NEWEST_SECURITY_LABS_KEY}`,
+      ...BUNDLED_KEYS.map((key) => `${PRODUCT_DOC_ARTIFACTS_BUCKET_URL}/${key}`),
     ]);
     for (const [options] of mockedDownloadToDisk.mock.calls) {
       expect(options).toMatchObject({ maxAttempts: 3, skipChecksumCheck: true });
@@ -128,9 +135,7 @@ describe('BundleProductDocArtifacts', () => {
 
     for (const platform of SERVERLESS_PLATFORMS) {
       const dir = platformDir(platform.toString());
-      expect(Fs.readdirSync(dir).sort()).toEqual(
-        [...PRODUCT_KEYS, NEWEST_SECURITY_LABS_KEY, 'index.xml'].sort()
-      );
+      expect(Fs.readdirSync(dir).sort()).toEqual([...BUNDLED_KEYS, 'index.xml'].sort());
       expect(Fs.readFileSync(Path.resolve(dir, PRODUCT_KEYS[0]), 'utf8')).toBe(
         `zip:${PRODUCT_KEYS[0]}`
       );
@@ -142,7 +147,7 @@ describe('BundleProductDocArtifacts', () => {
     mockDownloads(
       listingXml([
         ...PRODUCT_KEYS.slice(1).map((key) => contents(key, '2026-10-12T20:25:34.000Z')),
-        contents(NEWEST_SECURITY_LABS_KEY, '2026-07-28T05:25:00.000Z'),
+        ...NEWEST_SECURITY_LABS_KEYS.map((key) => contents(key, '2026-07-28T05:25:00.000Z')),
       ])
     );
 
@@ -152,16 +157,17 @@ describe('BundleProductDocArtifacts', () => {
     expect(mockedDownloadToDisk).toHaveBeenCalledTimes(1);
   });
 
-  it('fails when no Security Labs artifact for the inference id is in the bucket', async () => {
+  it('fails when no Security Labs artifact for a bundled inference id is in the bucket', async () => {
     mockDownloads(
       listingXml([
         ...PRODUCT_KEYS.map((key) => contents(key, '2026-10-12T20:25:34.000Z')),
-        contents('security-labs-2026.08.01-000000.zip', '2026-08-01T00:00:00.000Z'),
+        contents(NEWEST_SECURITY_LABS_KEYS[0], '2026-07-28T05:25:00.000Z'),
+        contents(`security-labs-2026.08.01-000000${E5_SUFFIX}.zip`, '2026-08-01T00:00:00.000Z'),
       ])
     );
 
     await expect(BundleProductDocArtifacts.run(config, log, build)).rejects.toThrow(
-      'No Security Labs artifact for [.jina-embeddings-v5-text-small] found'
+      'No Security Labs artifact for [.elser-2-elasticsearch] found'
     );
   });
 
