@@ -96,7 +96,7 @@ describe('notifyInvestigationQuotaReached', () => {
     );
     const { text } = execute.mock.calls[0][0].params.subActionParams;
     expect(text).toBe(
-      `The daily limit of 5 for automatic investigations has been reached. An admin can raise the limit in <${settingsUrl}|Nightshift settings>.`
+      `Elastic nightshift has reached today's limit of 5 automatic investigations across all automations. New investigations resume at 00:00 UTC, or an admin can raise the limit in <${settingsUrl}|settings>.`
     );
   });
 
@@ -176,10 +176,10 @@ describe('getNightshiftSettingsUrl', () => {
       getNightshiftSettingsUrl({ locator: settingsLocator, spaceId: 'default', kibanaUrl: 'nope' })
     ).toBeUndefined();
     expect(getInvestigationQuotaReachedMessage()).toBe(
-      'The daily limit for automatic investigations has been reached. An admin can raise the limit in the Nightshift settings.'
+      "Elastic nightshift has reached today's limit for automatic investigations across all automations. New investigations resume at 00:00 UTC, or an admin can raise the limit in settings."
     );
     expect(getInvestigationQuotaReachedMessage({ limit: 5 })).toBe(
-      'The daily limit of 5 for automatic investigations has been reached. An admin can raise the limit in the Nightshift settings.'
+      "Elastic nightshift has reached today's limit of 5 automatic investigations across all automations. New investigations resume at 00:00 UTC, or an admin can raise the limit in settings."
     );
   });
 });

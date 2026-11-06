@@ -26,11 +26,13 @@ export const getInvestigationQuotaReachedMessage = ({
 } = {}): string => {
   const quotaReached =
     limit === undefined
-      ? 'The daily limit for automatic investigations has been reached.'
-      : `The daily limit of ${limit} for automatic investigations has been reached.`;
-  return settingsUrl
-    ? `${quotaReached} An admin can raise the limit in <${settingsUrl}|Nightshift settings>.`
-    : `${quotaReached} An admin can raise the limit in the Nightshift settings.`;
+      ? "Elastic nightshift has reached today's limit for automatic investigations across all automations."
+      : `Elastic nightshift has reached today's limit of ${limit} automatic investigations across all automations.`;
+  const settings =
+    settingsUrl !== undefined
+      ? `<${settingsUrl}|settings>`
+      : 'settings';
+  return `${quotaReached} New investigations resume at 00:00 UTC, or an admin can raise the limit in ${settings}.`;
 };
 
 /** Absolute settings URL in the workflow's space, or undefined when it can't be built. */
