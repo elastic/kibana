@@ -10,7 +10,7 @@ import { K8S_ARCHIVE } from './constants';
 
 /**
  * Loads the `k8s_deployment` archive once per worker before any spec runs. The `types` route reads
- * no data; the archive is there for the `_list` and `_count` specs that build on this suite.
+ * no data; the `list` spec reads it.
  */
 export const apiTest = baseApiTest.extend<{}, { seedK8sDeployments: void }>({
   seedK8sDeployments: [
