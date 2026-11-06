@@ -9,7 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EntityDefinitionsClient, RegisteredEntityDefinition } from '@kbn/entity-store/server';
 import { isEqual, pick } from 'lodash';
 import { MANAGED_BY } from '../definitions/constants';
-import { InventoryTypeDefinitionError, InventoryTypeNotFoundError } from './errors';
+import { InventoryTypeDefinitionError, InventoryTypeNotFoundError } from '../inventory/errors';
 import {
   applyLimit,
   applyValueLabels,
@@ -19,10 +19,11 @@ import {
   mergeRows,
   orderRows,
   planRowLimit,
+  probeSources,
   summarizeResults,
   toSourceError,
-} from './executor';
-import type { EsqlQueryResult, PlanResult, SourceError } from './executor';
+} from '../inventory/executor';
+import type { PlanResult, SourceError } from '../inventory/executor';
 import {
   ENTITY_ID_COLUMN,
   buildColumns,
@@ -30,16 +31,15 @@ import {
   getDynamicBlock,
   planSources,
   resolveIdentityPlan,
-} from './generator';
-import type { GeneratedQuery, IdentityPlan, OutputColumn, QueryPlan } from './generator';
+} from '../inventory/generator';
+import type { GeneratedQuery, IdentityPlan, OutputColumn, QueryPlan } from '../inventory/generator';
 import type {
   GetTypesResponse,
   InventoryType,
-  ListQueryReport,
   ListRequest,
   ListResponse,
   UnavailableColumn,
-} from './types';
+} from '../inventory/types';
 
 /** Everything the list queries are generated from. */
 interface ListPlan {
@@ -47,19 +47,9 @@ interface ListPlan {
   identity: IdentityPlan;
   columns: OutputColumn[];
   queries: GeneratedQuery[];
+  /** One entry per source whose probe failed; its plans are left out of `plans` and `queries`. */
+  probeErrors: SourceError[];
 }
-
-const toQueryReport = (
-  { indexPattern }: QueryPlan,
-  { esql, params }: GeneratedQuery,
-  outcome: PromiseSettledResult<EsqlQueryResult>
-): ListQueryReport => {
-  if (outcome.status === 'rejected') {
-    return { indexPattern, esql, params, took: null, documentsFound: null, rowCount: null };
-  }
-  const { took, documentsFound, rowCount } = outcome.value.stats;
-  return { indexPattern, esql, params, took, documentsFound, rowCount };
-};
 
 const toUnavailableColumns = (
   { index, indexPattern }: QueryPlan,
@@ -88,7 +78,7 @@ export class InventoryService {
   listTypes = async (): Promise<GetTypesResponse> => {
     const definitions = await this.definitionsClient.list();
     const types = definitions.flatMap((definition) => {
-      if (!definition.dynamic || !isEqual(definition.managedBy, MANAGED_BY)) {
+      if (!this.hasDynamicDefinition(definition) || !this.isManagedByInventory(definition)) {
         return [];
       }
       try {
@@ -105,26 +95,29 @@ export class InventoryService {
   };
 
   /**
-   * Lists the entities of a type seen in the window: one `FROM` query per source over every index
-   * behind its pattern, run concurrently and merged by `entity.id`, newest `last_seen` first.
+   * Lists the entities of a type seen in the window: probes every source pattern, then runs one
+   * query per plan concurrently (a `TS` plan beside the `FROM` plan of a source that has a
+   * time-series index) and merges the rows by `entity.id`, newest `last_seen` first.
    * Throws `InventoryTypeNotFoundError` when this plugin registered no `dynamic` definition for the
    * type and `InventoryTypeDefinitionError` when the definition cannot be turned into queries. A
-   * query that fails or reads nothing usable is reported in `errors[]` and never fails the request.
+   * source whose probe failed runs no plan, and a query that fails or reads nothing usable is
+   * reported in `errors[]`; neither fails the request.
    */
   list = async ({ type, window, limit }: ListRequest): Promise<ListResponse> => {
     const startedAt = Date.now();
-    const definition = await this.definitionsClient.get(type);
-    if (!definition?.dynamic || !isEqual(definition.managedBy, MANAGED_BY)) {
-      throw new InventoryTypeNotFoundError(type);
-    }
-    const { plans, identity, columns, queries } = this.planList(definition, window, limit);
+    const definition = await this.getManagedDefinition(type);
+    const { plans, identity, columns, queries, probeErrors } = await this.planList(
+      definition,
+      window,
+      limit
+    );
 
     // Settled, not raced: one failing source must not hide the rows of the others.
     const outcomes = await Promise.allSettled(
       queries.map((query) => executeEsql(this.esClient, query))
     );
 
-    const errors: SourceError[] = [];
+    const errors: SourceError[] = [...probeErrors];
     const unavailableColumns: UnavailableColumn[] = [];
     const results = outcomes.flatMap((outcome, planIndex): PlanResult[] => {
       const plan = plans[planIndex];
@@ -160,33 +153,86 @@ export class InventoryService {
       total,
       truncated,
       took: Date.now() - startedAt,
-      queries: plans.map((plan, planIndex) =>
-        toQueryReport(plan, queries[planIndex], outcomes[planIndex])
-      ),
       errors,
       unavailableColumns,
     };
   };
 
+  private hasDynamicDefinition = (definition: RegisteredEntityDefinition): boolean =>
+    Boolean(definition.dynamic);
+
+  private isManagedByInventory = (definition: RegisteredEntityDefinition): boolean =>
+    isEqual(definition.managedBy, MANAGED_BY);
+
   /**
-   * Plans one full-pattern `FROM` query per source; the probe is not run, so no source gets a `TS`
-   * plan. Rethrows `InventoryDefinitionError` as `InventoryTypeDefinitionError`.
+   * Returns the definition of `type` when this plugin registered it with a `dynamic` block.
+   * Throws `InventoryTypeNotFoundError` with one of three reasons: the entity store has no
+   * definition for the type, the definition has no `dynamic` block, or the definition's `managedBy`
+   * differs from `MANAGED_BY`.
    */
-  private planList = (
+  private getManagedDefinition = async (type: string): Promise<RegisteredEntityDefinition> => {
+    const definition = await this.definitionsClient.get(type);
+    if (!definition) {
+      throw new InventoryTypeNotFoundError(type, 'no entity definition is registered for it');
+    }
+    if (!this.hasDynamicDefinition(definition)) {
+      throw new InventoryTypeNotFoundError(type, 'its entity definition has no dynamic block');
+    }
+    if (!this.isManagedByInventory(definition)) {
+      throw new InventoryTypeNotFoundError(
+        type,
+        'its entity definition was registered by another plugin'
+      );
+    }
+    return definition;
+  };
+
+  /**
+   * Probes every source pattern, then plans one `FROM` query per source and a `TS` query before it
+   * where the probe found a time-series index. The columns and queries come from every plan, so a
+   * definition error never depends on a probe; a source whose probe failed keeps its columns but
+   * runs no query, and is reported in `probeErrors`. Rethrows `InventoryDefinitionError` as
+   * `InventoryTypeDefinitionError`.
+   */
+  private planList = async (
     definition: RegisteredEntityDefinition,
     window: ListRequest['window'],
     limit: number
-  ): ListPlan => {
+  ): Promise<ListPlan> => {
     try {
       const { sources } = getDynamicBlock(definition);
-      const plans = planSources(
+      const probes = await probeSources(
+        this.esClient,
+        sources.map(({ indexPattern }) => indexPattern)
+      );
+      const probeErrors: SourceError[] = [];
+      probes.forEach((probe, indexPattern) => {
+        if (probe.failed) {
+          probeErrors.push({ indexPattern, status: probe.status, reason: probe.reason });
+        }
+      });
+      const failedPatterns = new Set(probeErrors.map(({ indexPattern }) => indexPattern));
+
+      const allPlans = planSources(
         definition,
-        sources.map(() => ({ hasTimeSeries: false }))
+        sources.map(({ indexPattern }) => {
+          const probe = probes.get(indexPattern);
+          return { hasTimeSeries: probe !== undefined && !probe.failed && probe.hasTimeSeries };
+        })
       );
       const identity = resolveIdentityPlan(definition);
-      const columns = buildColumns(definition, plans, identity);
-      const queries = generateListQueries(definition, plans, window, planRowLimit(limit));
-      return { plans, identity, columns, queries };
+      const columns = buildColumns(definition, allPlans, identity);
+      const allQueries = generateListQueries(definition, allPlans, window, planRowLimit(limit));
+      const runnable = allPlans.flatMap((plan, position) =>
+        failedPatterns.has(plan.indexPattern) ? [] : [{ plan, query: allQueries[position] }]
+      );
+      return {
+        plans: runnable.map(({ plan }) => plan),
+        identity,
+        columns,
+        queries: runnable.map(({ query }) => query),
+        probeErrors,
+      };
     } catch (error) {
       if (error.name !== 'InventoryDefinitionError') {
         throw error;

@@ -6,7 +6,7 @@
  */
 
 import type { InventoryRow, Provenance, SourceError, TypedOutputColumn } from './executor';
-import type { NamedParams, OutputColumnKind, TimeWindow } from './generator';
+import type { OutputColumnKind, TimeWindow } from './generator';
 
 export interface InventoryTypeColumn {
   name: string;
@@ -40,18 +40,6 @@ export interface ListRequest {
   limit: number;
 }
 
-/** One generated list query with its parameters and what Elasticsearch reported for it. */
-export interface ListQueryReport {
-  indexPattern: string;
-  esql: string;
-  params: NamedParams;
-  /** Cluster time in milliseconds; null when the query failed or Elasticsearch did not report it. */
-  took: number | null;
-  documentsFound: number | null;
-  /** Rows the query returned; null when it failed. */
-  rowCount: number | null;
-}
-
 /** An attribute column one source cannot fill because no index behind its pattern maps the field. */
 export interface UnavailableColumn {
   column: string;
@@ -71,7 +59,6 @@ export interface ListResponse {
   truncated: boolean;
   /** End-to-end time in milliseconds, not the sum of the queries' cluster time. */
   took: number;
-  queries: ListQueryReport[];
   errors: SourceError[];
   unavailableColumns: UnavailableColumn[];
 }

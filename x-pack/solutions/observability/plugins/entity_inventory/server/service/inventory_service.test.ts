@@ -8,12 +8,12 @@
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { EntityDefinitionsClient } from '@kbn/entity-store/server';
 import { k8sDeploymentDefinition } from '../definitions/kubernetes/k8s_deployment';
-import { hostLikeFixture, k8sNodeFixture } from './__fixtures__/definitions';
-import { buildColumns } from './generator';
+import { hostLikeFixture, k8sNodeFixture } from '../inventory/__fixtures__/definitions';
+import { buildColumns } from '../inventory/generator';
 import { InventoryService } from './inventory_service';
 
-jest.mock('./generator', () => {
-  const actual = jest.requireActual('./generator');
+jest.mock('../inventory/generator', () => {
+  const actual = jest.requireActual('../inventory/generator');
   return { ...actual, buildColumns: jest.fn(actual.buildColumns) };
 });
 
@@ -234,13 +234,39 @@ const otelRow = (deployment: string, lastSeen: string): Row => ({
 
 type EsqlResponse = ReturnType<typeof esqlResponse>;
 
-// Answers each plan's query by its index pattern; a `{ throws }` answer is thrown as the client would.
+const isProbe = (query: string) => query.includes('| LIMIT 0');
+const patternOf = (query: string) => (query.includes(STATE_PATTERN) ? STATE_PATTERN : OTEL_PATTERN);
+
+// A probe answer: `@timestamp` typed `date` when a time-series index exists behind the pattern.
+const probeResponse = (hasTimeSeries: boolean) => ({
+  columns: [{ name: '@timestamp', type: hasTimeSeries ? 'date' : 'null' }],
+  values: [],
+  is_partial: false,
+  took: 1,
+  documents_found: 0,
+});
+
+interface AnswerOptions {
+  timeSeries?: string[];
+  probeFails?: Record<string, { throws: Error }>;
+}
+
+// Answers each probe by its pattern (no time-series index unless listed) and each plan's query by
+// its index pattern; a `{ throws }` answer is thrown as the client would.
 const answerByPattern = (
   esClient: ReturnType<typeof createService>['esClient'],
-  answers: Record<string, EsqlResponse | { throws: Error }>
+  answers: Record<string, EsqlResponse | { throws: Error }>,
+  { timeSeries = [], probeFails = {} }: AnswerOptions = {}
 ) => {
   esClient.esql.query.mockImplementation(async ({ query }) => {
-    const answer = answers[query.includes(STATE_PATTERN) ? STATE_PATTERN : OTEL_PATTERN];
+    const pattern = patternOf(query);
+    if (isProbe(query)) {
+      if (pattern in probeFails) {
+        throw probeFails[pattern].throws;
+      }
+      return probeResponse(timeSeries.includes(pattern));
+    }
+    const answer = answers[pattern];
     if ('throws' in answer) {
       throw answer.throws;
     }
@@ -257,39 +283,72 @@ const esError = (status: number, type: string, reason: string) => ({
 const { dynamic: _nodeDynamic, ...k8sNodeWithoutDynamic } = k8sNodeFixture;
 
 describe('InventoryService.list', () => {
-  it('runs one FROM query per source over the whole pattern, with no probe and no TS query', async () => {
+  it('probes each source pattern once, then runs one FROM query per source', async () => {
     const { service, esClient } = createService([k8sDeploymentDefinition]);
     answerByPattern(esClient, {
       [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, []),
       [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, []),
     });
 
-    const { queries } = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
+    await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
 
-    const sent = esClient.esql.query.mock.calls.map(([body]) => body);
-    expect(sent.map(({ query }) => query.split('\n')[1])).toEqual([
+    const sent = esClient.esql.query.mock.calls.map(([body]) => body.query);
+    expect(sent.filter(isProbe).map(patternOf)).toEqual([STATE_PATTERN, OTEL_PATTERN]);
+    const listQueries = esClient.esql.query.mock.calls
+      .map(([body]) => body)
+      .filter(({ query }) => !isProbe(query));
+    expect(listQueries.map(({ query }) => query.split('\n')[1])).toEqual([
       `FROM ${STATE_PATTERN}`,
       `FROM ${OTEL_PATTERN}`,
     ]);
-    sent.forEach(({ query, params }) => {
-      expect(query).not.toContain('_index_mode');
+    listQueries.forEach(({ query, params }) => {
       expect(query).toContain('| LIMIT 11');
       expect(params).toEqual([{ from: WINDOW.from }, { to: WINDOW.to }]);
     });
-    expect(queries).toEqual([
-      expect.objectContaining({
-        indexPattern: STATE_PATTERN,
-        took: 4,
-        documentsFound: 0,
-        rowCount: 0,
-      }),
-      expect.objectContaining({
-        indexPattern: OTEL_PATTERN,
-        took: 4,
-        documentsFound: 0,
-        rowCount: 0,
-      }),
+  });
+
+  it('adds a TS plan before the FROM plan of a source whose probe found a time-series index', async () => {
+    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    answerByPattern(
+      esClient,
+      {
+        [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, []),
+        [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, []),
+      },
+      { timeSeries: [OTEL_PATTERN] }
+    );
+
+    await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
+
+    const listQueries = esClient.esql.query.mock.calls
+      .map(([body]) => body.query)
+      .filter((query) => !isProbe(query));
+    expect(listQueries.map((query) => query.split('\n')[1])).toEqual([
+      `FROM ${STATE_PATTERN}`,
+      `TS ${OTEL_PATTERN}`,
+      `FROM ${OTEL_PATTERN} METADATA _index_mode`,
     ]);
+  });
+
+  it('reports a failed probe in errors and runs no plan of that source', async () => {
+    const { service, esClient } = createService([k8sDeploymentDefinition]);
+    answerByPattern(
+      esClient,
+      {
+        [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, []),
+        [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, [
+          otelRow('cart-api', '2026-11-01T10:02:00.000Z'),
+        ]),
+      },
+      { probeFails: { [STATE_PATTERN]: esError(503, 'timeout_exception', 'timed out') } }
+    );
+
+    const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
+
+    expect(response.errors).toEqual([
+      { indexPattern: STATE_PATTERN, status: 503, reason: 'timeout_exception: timed out' },
+    ]);
+    expect(response.rows).toHaveLength(1);
   });
 
   it('merges rows across sources, newest last_seen first, with exact total and every column on every row', async () => {
@@ -332,21 +391,22 @@ describe('InventoryService.list', () => {
     expect(response).not.toHaveProperty('documentFilterWarnings');
   });
 
-  it('starts every query before any resolves', async () => {
+  it('starts every list query before any resolves', async () => {
     const { service, esClient } = createService([k8sDeploymentDefinition]);
     const pending: Array<() => void> = [];
-    esClient.esql.query.mockImplementation(
-      ({ query }) =>
-        new Promise((resolve) => {
-          const names = query.includes(STATE_PATTERN) ? STATE_COLUMNS : OTEL_COLUMNS;
-          pending.push(() => resolve(esqlResponse(names, [])));
-        })
+    esClient.esql.query.mockImplementation(({ query }) =>
+      isProbe(query)
+        ? Promise.resolve(probeResponse(false))
+        : new Promise((resolve) => {
+            const names = query.includes(STATE_PATTERN) ? STATE_COLUMNS : OTEL_COLUMNS;
+            pending.push(() => resolve(esqlResponse(names, [])));
+          })
     );
 
     const listing = service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
     await new Promise(setImmediate);
 
-    expect(esClient.esql.query).toHaveBeenCalledTimes(2);
+    expect(pending).toHaveLength(2);
     pending.forEach((resolve) => resolve());
     await expect(listing).resolves.toMatchObject({ rows: [], total: 0 });
   });
@@ -368,7 +428,6 @@ describe('InventoryService.list', () => {
         reason: 'verification_exception: Unknown column [x]',
       },
     ]);
-    expect(response.queries[0]).toMatchObject({ took: null, documentsFound: null, rowCount: null });
     expect(JSON.stringify(response.errors)).not.toContain('at ');
   });
 
@@ -485,8 +544,18 @@ describe('InventoryService.list', () => {
   });
 
   it.each([
-    ['an unknown type', 'k8s.unknown', [k8sDeploymentDefinition]],
-    ['a type without a dynamic block', k8sNodeFixture.type, [k8sNodeWithoutDynamic]],
+    [
+      'an unknown type',
+      'k8s.unknown',
+      [k8sDeploymentDefinition],
+      'no entity definition is registered for it',
+    ],
+    [
+      'a type without a dynamic block',
+      k8sNodeFixture.type,
+      [k8sNodeWithoutDynamic],
+      'its entity definition has no dynamic block',
+    ],
     [
       'a type another plugin registered',
       'host',
@@ -497,15 +566,17 @@ describe('InventoryService.list', () => {
           managedBy: { kind: 'plugin' as const, id: 'entityStore' },
         },
       ],
+      'its entity definition was registered by another plugin',
     ],
   ])(
     'throws InventoryTypeNotFoundError for %s without querying',
-    async (_label, type, definitions) => {
+    async (_label, type, definitions, reason) => {
       const { service, esClient } = createService(definitions);
 
       await expect(service.list({ type, window: WINDOW, limit: 10 })).rejects.toMatchObject({
         name: 'InventoryTypeNotFoundError',
         statusCode: 404,
+        message: `Entity type "${type}" is not available in the entity inventory: ${reason}`,
       });
       expect(esClient.esql.query).not.toHaveBeenCalled();
     }
@@ -519,6 +590,7 @@ describe('InventoryService.list', () => {
       },
     };
     const { service, esClient } = createService([invalid]);
+    answerByPattern(esClient, {});
 
     await expect(
       service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 })
@@ -529,6 +601,5 @@ describe('InventoryService.list', () => {
         'Entity type "k8s.deployment" cannot be queried: attribute name "last_seen" is reserved'
       ),
     });
-    expect(esClient.esql.query).not.toHaveBeenCalled();
   });
 });

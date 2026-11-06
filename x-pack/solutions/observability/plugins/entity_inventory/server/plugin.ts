@@ -16,7 +16,7 @@ import type {
 import type { EntityStoreSetupContract, EntityStoreStartContract } from '@kbn/entity-store/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { ENTITY_DEFINITIONS } from './definitions';
-import { InventoryService } from './inventory/inventory_service';
+import { InventoryService } from './service/inventory_service';
 import { entityInventoryRouteRepository } from './routes';
 import type { EntityInventoryConfig } from './config';
 import type {

@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
-import type { InventoryService } from '../inventory/inventory_service';
+import type { InventoryService } from '../service/inventory_service';
 
 export type GetInventoryService = (request: KibanaRequest) => Promise<InventoryService>;
 

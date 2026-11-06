@@ -9,8 +9,10 @@
 export class InventoryTypeNotFoundError extends Error {
   readonly statusCode = 404;
 
-  constructor(type: string) {
-    super(`Entity type "${type}" is not available in the entity inventory`);
+  constructor(type: string, reason?: string) {
+    super(
+      `Entity type "${type}" is not available in the entity inventory${reason ? `: ${reason}` : ''}`
+    );
     this.name = 'InventoryTypeNotFoundError';
   }
 }

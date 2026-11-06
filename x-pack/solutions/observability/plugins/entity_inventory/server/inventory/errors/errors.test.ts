@@ -17,6 +17,15 @@ describe('inventory errors', () => {
     });
   });
 
+  it('InventoryTypeNotFoundError appends the reason when given one', () => {
+    expect(
+      new InventoryTypeNotFoundError('k8s.pod', 'its entity definition has no dynamic block')
+        .message
+    ).toBe(
+      'Entity type "k8s.pod" is not available in the entity inventory: its entity definition has no dynamic block'
+    );
+  });
+
   it('InventoryRequestError keeps the message and carries 400', () => {
     const error = new InventoryRequestError('limit must be at most 1000');
     expect(error).toMatchObject({

@@ -7,9 +7,9 @@
 
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { GetTypesResponse } from '../inventory/types';
-import { INTERIM_AUTHZ } from './interim_authz';
-import { typesRoute } from './types_route';
+import type { GetTypesResponse } from '../../inventory/types';
+import { INTERIM_AUTHZ } from '../interim_authz';
+import { typesRoute } from './route';
 
 const route = typesRoute['GET /internal/entity_inventory/types'];
 
