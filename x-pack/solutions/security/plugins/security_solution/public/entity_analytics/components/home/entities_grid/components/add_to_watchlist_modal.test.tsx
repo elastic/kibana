@@ -214,9 +214,15 @@ describe('AddToWatchlistModal', () => {
     mockTableData({
       visibleRecords: [{ ...WATCHLISTS[0], source: 'Index, Index, Manual' }],
     });
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
     renderModal();
     expect(screen.getAllByText('Index')).toHaveLength(2);
     expect(screen.getByText('Manual')).toBeInTheDocument();
+    // React only warns about repeated keys, so the warning is the failure.
+    expect(consoleError.mock.calls.some(([message]) => String(message).includes('same key'))).toBe(
+      false
+    );
+    consoleError.mockRestore();
   });
 
   it('sorts names without regard to case', () => {

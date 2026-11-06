@@ -15,6 +15,7 @@ import {
   getMergedRowsByEntity,
   isFilteringByGroupValue,
   withEntityAliases,
+  buildResolvedEntityRowSteps,
   OWN_WATCHLISTS_FIELD,
   WATCHLISTS_FIELD,
   withResolvedEntityValues,
@@ -47,6 +48,20 @@ describe('buildResolvedEntityValuesQuery', () => {
     const { runQuery, queries } = recordQueries();
     await withResolvedEntityValues([row('host:a'), row('host:b')], ARGS, runQuery);
     expect(queries[0]).toMatchSnapshot();
+  });
+});
+
+describe('buildResolvedEntityRowSteps', () => {
+  it("saves the main entity's own watchlists before the group's replace them", () => {
+    const steps = buildResolvedEntityRowSteps({ concreteEntityIndexName: 'index' });
+
+    const saved = steps.findIndex(
+      (step) => step === `| EVAL ${OWN_WATCHLISTS_FIELD} = ${WATCHLISTS_FIELD}`
+    );
+    const replaced = steps.findIndex((step) => step.includes(`${WATCHLISTS_FIELD} = MV_DEDUPE`));
+
+    expect(saved).toBeGreaterThan(-1);
+    expect(replaced).toBeGreaterThan(saved);
   });
 });
 
@@ -90,6 +105,24 @@ describe('withResolvedEntityValues', () => {
 
     expect(grouped[WATCHLISTS_FIELD]).toEqual(['wl-1', 'wl-2']);
     expect(grouped[OWN_WATCHLISTS_FIELD]).toEqual(['wl-1']);
+  });
+
+  it("keeps the own watchlists a row already has, which were read in the query, and not the group's", async () => {
+    // The query put the group's watchlists on the row, and kept A's own beside them.
+    const runQuery = jest.fn(async () => [row('host:a', { [WATCHLISTS_FIELD]: ['wl-1', 'wl-2'] })]);
+
+    const [grouped, noOwn] = await withResolvedEntityValues(
+      [
+        row('host:a', { [WATCHLISTS_FIELD]: ['wl-1', 'wl-2'], [OWN_WATCHLISTS_FIELD]: ['wl-1'] }),
+        row('host:a', { [WATCHLISTS_FIELD]: ['wl-1', 'wl-2'], [OWN_WATCHLISTS_FIELD]: null }),
+      ],
+      ARGS,
+      runQuery
+    );
+
+    expect(grouped[OWN_WATCHLISTS_FIELD]).toEqual(['wl-1']);
+    // A main entity on no watchlist stays on none, though its aliases are.
+    expect(noOwn[OWN_WATCHLISTS_FIELD]).toBeNull();
   });
 
   it('leaves the own watchlists out of a row that has no group', async () => {
