@@ -61,8 +61,41 @@ apiTest.describe(
           datasetsPrivilages: { 'logs-*-*': { canRead: true, canMonitor: false } },
           canViewIntegrations: false,
         });
-        // Reading without monitor is not enough to see any statistics.
-        expect(response.body.dataStreamsStats).toStrictEqual([]);
+        expect(response.body.dataStreamsStats).toStrictEqual(
+          expect.arrayContaining(
+            DATA_STREAMS.map((name) =>
+              expect.objectContaining({
+                name,
+                userPrivileges: expect.objectContaining({ canMonitor: false }),
+              })
+            )
+          )
+        );
+        const testedDataStreamStats = response.body.dataStreamsStats
+          .filter(({ name }: { name: string }) => DATA_STREAMS.includes(name))
+          .map(
+            ({
+              name,
+              size,
+              sizeBytes,
+              totalDocs,
+            }: {
+              name: string;
+              size?: string;
+              sizeBytes?: number;
+              totalDocs?: number;
+            }) => ({ name, size, sizeBytes, totalDocs })
+          );
+        expect(testedDataStreamStats).toStrictEqual(
+          expect.arrayContaining(
+            DATA_STREAMS.map((name) => ({
+              name,
+              size: undefined,
+              sizeBytes: undefined,
+              totalDocs: undefined,
+            }))
+          )
+        );
       }
     );
   }
