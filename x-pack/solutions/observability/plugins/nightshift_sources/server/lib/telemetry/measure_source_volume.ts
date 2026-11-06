@@ -33,11 +33,13 @@ const buildCountSourceQuery = (esql: string): string => {
 
   const source = BasicPrettyPrinter.command(sourceCommand).replace(/^TS(?=\s)/, 'FROM');
   const metadata = sourceCommand.args.find(
-    (argument) => argument.type === 'option' && argument.name === 'metadata'
+    (argument) =>
+      !Array.isArray(argument) && argument.type === 'option' && argument.name === 'metadata'
   );
   const hasIndexModeMetadata =
     metadata?.args.some(
-      (argument) => argument.type === 'column' && argument.name === INDEX_MODE_FIELD
+      (argument) =>
+        !Array.isArray(argument) && argument.type === 'column' && argument.name === INDEX_MODE_FIELD
     ) ?? false;
   const metadataSeparator = metadata ? ', ' : ' METADATA ';
   const from = hasIndexModeMetadata ? source : `${source}${metadataSeparator}${INDEX_MODE_FIELD}`;
