@@ -17,7 +17,7 @@ import type { LinkNode, MarkdownNode, UnsupportedNode } from '@kbn/isomer-compon
 export type { UnsupportedNode } from '@kbn/isomer-components';
 
 /** Where a materialized node came from, so a host can materialize it again. Never rendered. */
-interface MaterializedNodeSource {
+export interface MaterializedNodeSource {
   kind: 'kibana-panel';
   kibanaVersion: string;
   /** The saved object type whose materializer produced the node. */
@@ -34,7 +34,7 @@ interface MaterializedNodeSource {
 }
 
 /** Something a materializer or the pipeline dropped, approximated or pre-rendered. */
-interface MaterializeLoss {
+export interface MaterializeLoss {
   /** The path in the source config that was changed. */
   path: string;
   /** How the source content was represented in the output. */
@@ -44,7 +44,9 @@ interface MaterializeLoss {
 }
 
 /** A chart or layout node from the charts pack, with the provenance and losses its core carries. */
-interface MaterializedChartNode extends PrimitiveNode {
+export interface MaterializedChartNode extends PrimitiveNode {
+  /** Each primitive's own fields, which the charts pack's schemas define. */
+  [field: string]: unknown;
   /** The title shown for this node. */
   title?: string;
   /** The Kibana object that produced this node. */
@@ -54,13 +56,13 @@ interface MaterializedChartNode extends PrimitiveNode {
 }
 
 /** Components pack nodes that panels whose config is their content map onto. */
-type MaterializedComponentNode = MarkdownNode | LinkNode;
+export type MaterializedComponentNode = MarkdownNode | LinkNode;
 
 /** What `materialize` returns: always a node that renders. */
 export type MaterializedNode = MaterializedChartNode | MaterializedComponentNode | UnsupportedNode;
 
 /** A cell value in a chart node's `data.rows`. `null` is not `0`. */
-type ChartCell = number | string | boolean | null | ChartCell[];
+export type ChartCell = number | string | boolean | null | ChartCell[];
 
 /** A gesture on a chart node, referring to rows and columns of the node's own `data`. */
 export type ChartEvent = { node: string } & (
@@ -78,3 +80,17 @@ export type ChartEvent = { node: string } & (
   };
 
 /** The Isomer primitive type used for unsupported materialization results. */
+export const UNSUPPORTED_NODE_TYPE = 'unsupported';
+
+/** Whether `node` is an `unsupported` placeholder. */
+export const isUnsupportedNode = (node: PrimitiveNode): node is UnsupportedNode =>
+  node.type === UNSUPPORTED_NODE_TYPE;
+
+const COMPONENT_NODE_TYPES: ReadonlySet<string> = new Set<MaterializedComponentNode['type']>([
+  'markdown',
+  'link',
+]);
+
+/** Whether `node` is a charts pack node, which carries provenance and losses. */
+export const isChartNode = (node: MaterializedNode): node is MaterializedChartNode =>
+  !isUnsupportedNode(node) && !COMPONENT_NODE_TYPES.has(node.type);

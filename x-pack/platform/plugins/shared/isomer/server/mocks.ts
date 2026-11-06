@@ -6,6 +6,7 @@
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { IsomerPlugin } from './plugin';
 import type { IsomerPluginSetup, IsomerPluginStart } from './plugin';
 import type { ScopedMaterializeClient } from './materialize/types';
@@ -31,7 +32,9 @@ const createScopedClient = (): jest.Mocked<ScopedMaterializeClient> => ({
 const createStartContract = (): jest.Mocked<IsomerPluginStart> => {
   const plugin = new IsomerPlugin(coreMock.createPluginInitializerContext({}));
   plugin.setup(coreMock.createSetup());
-  const { getRuntime } = plugin.start(coreMock.createStart());
+  const { getRuntime } = plugin.start(coreMock.createStart(), {
+    data: dataPluginMock.createStartContract(),
+  });
   const scopedClient = createScopedClient();
   return {
     getRuntime: jest.fn(getRuntime),

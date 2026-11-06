@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/data-plugin'
   - '@kbn/expressions-plugin'
+  - '@kbn/esql-utils'
 tags:
   - plugin
   - prod
