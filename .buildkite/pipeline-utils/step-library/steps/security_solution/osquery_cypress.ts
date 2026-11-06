@@ -8,19 +8,19 @@
  */
 
 import { commandStep } from '../../helpers.ts';
-import { mainTargetBranchOnly, highMemoryTestDefaults } from '../../presets.ts';
+import { mainTargetBranchOnly, testDefaults } from '../../presets.ts';
 import type { Step } from '../../types.ts';
 
 export const osqueryCypressSteps = (): readonly Step[] => [
   commandStep({
-    ...highMemoryTestDefaults,
+    ...testDefaults,
     command: '.buildkite/scripts/steps/functional/osquery_cypress.sh',
     label: 'Osquery Cypress Tests',
     key: 'osquery-cypress',
     parallelism: 4,
   }),
   commandStep({
-    ...highMemoryTestDefaults,
+    ...testDefaults,
     command: '.buildkite/scripts/steps/functional/security_serverless_osquery.sh',
     label: 'Osquery Cypress Tests on Serverless',
     key: 'osquery-serverless',
