@@ -10,11 +10,27 @@
     <LastModified>2025-04-30T10:36:00.000Z</LastModified>
   </Contents>
   <Contents>
+    <Key>kb-product-doc-kibana-0.0--.jina-embeddings-v5-text-small.zip</Key>
+    <LastModified>2025-04-30T10:36:00.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-kibana-latest--.jina-embeddings-v5-text-small.zip</Key>
+    <LastModified>2025-04-30T10:36:00.000Z</LastModified>
+  </Contents>
+  <Contents>
     <Key>kb-product-doc-elasticsearch-0.0.zip</Key>
     <LastModified>2025-04-30T10:36:00.000Z</LastModified>
   </Contents>
   <Contents>
     <Key>kb-product-doc-elasticsearch-latest.zip</Key>
+    <LastModified>2025-04-30T10:36:00.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-elasticsearch-0.0--.jina-embeddings-v5-text-small.zip</Key>
+    <LastModified>2025-04-30T10:36:00.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-elasticsearch-latest--.jina-embeddings-v5-text-small.zip</Key>
     <LastModified>2025-04-30T10:36:00.000Z</LastModified>
   </Contents>
   <Contents>
@@ -26,11 +42,27 @@
     <LastModified>2025-04-30T10:36:00.000Z</LastModified>
   </Contents>
   <Contents>
+    <Key>kb-product-doc-observability-0.0--.jina-embeddings-v5-text-small.zip</Key>
+    <LastModified>2025-04-30T10:36:00.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-observability-latest--.jina-embeddings-v5-text-small.zip</Key>
+    <LastModified>2025-04-30T10:36:00.000Z</LastModified>
+  </Contents>
+  <Contents>
     <Key>kb-product-doc-security-0.0.zip</Key>
     <LastModified>2025-04-30T10:36:00.000Z</LastModified>
   </Contents>
   <Contents>
     <Key>kb-product-doc-security-latest.zip</Key>
+    <LastModified>2025-04-30T10:36:00.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-security-0.0--.jina-embeddings-v5-text-small.zip</Key>
+    <LastModified>2025-04-30T10:36:00.000Z</LastModified>
+  </Contents>
+  <Contents>
+    <Key>kb-product-doc-security-latest--.jina-embeddings-v5-text-small.zip</Key>
     <LastModified>2025-04-30T10:36:00.000Z</LastModified>
   </Contents>
 </ListBucketResult>

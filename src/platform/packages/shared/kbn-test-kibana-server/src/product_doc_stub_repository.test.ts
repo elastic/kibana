@@ -13,6 +13,7 @@ import { fileURLToPath } from 'url';
 import { PRODUCT_DOC_STUB_REPOSITORY_URL } from './product_doc_stub_repository';
 
 const PRODUCTS = ['kibana', 'elasticsearch', 'observability', 'security'];
+const JINA_INFERENCE_ID = '.jina-embeddings-v5-text-small';
 
 describe('PRODUCT_DOC_STUB_REPOSITORY_URL', () => {
   const repositoryPath = fileURLToPath(PRODUCT_DOC_STUB_REPOSITORY_URL);
@@ -30,10 +31,12 @@ describe('PRODUCT_DOC_STUB_REPOSITORY_URL', () => {
     }
   });
 
-  it('lists a versioned and a latest artifact per product', () => {
+  it('lists a versioned and a latest artifact per product for ELSER and Jina', () => {
     for (const product of PRODUCTS) {
       expect(keys).toContain(`kb-product-doc-${product}-0.0.zip`);
       expect(keys).toContain(`kb-product-doc-${product}-latest.zip`);
+      expect(keys).toContain(`kb-product-doc-${product}-0.0--${JINA_INFERENCE_ID}.zip`);
+      expect(keys).toContain(`kb-product-doc-${product}-latest--${JINA_INFERENCE_ID}.zip`);
     }
   });
 
