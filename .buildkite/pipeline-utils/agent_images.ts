@@ -86,7 +86,7 @@ const expandAgentQueue = (queueName: string = 'n2-4-spot', diskSizeGb?: number) 
     'asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c,southamerica-east1-a,southamerica-east1-b,southamerica-east1-c';
   const additionalProps =
     {
-      spot: { preemptible: true, spotZones: zonesToUse },
+      spot: { preemptible: true, spotZones: zonesToUse, diskType: 'pd-balanced' },
       virt: { enableNestedVirtualization: true, spotZones: zonesToUse },
     }[addition] || {};
 
