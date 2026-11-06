@@ -10,7 +10,7 @@ xpack.entityInventory.enabled: true
 
 ## Routes
 
-The route exists only when the plugin is enabled.
+The routes exist only when the plugin is enabled. Both are internal: send `x-elastic-internal-origin: kibana`, and `kbn-xsrf` on `POST`.
 
 ### `GET /internal/entity_inventory/types`
 
@@ -58,9 +58,54 @@ No body and no parameters. It returns one entry per definition this plugin regis
 }
 ```
 
+### `POST /internal/entity_inventory/entities/{type}/_list`
+
+Returns one row per entity of `type` seen in the window, merged across the type's sources, newest `last_seen` first.
+
+Body, strict (an unknown key such as `documentFilter` is a 400):
+
+| key | | |
+| --- | --- | --- |
+| `from`, `to` | required | ISO 8601 instants with `Z` or a numeric offset; `from` must be earlier than `to`; at most 72 hours apart |
+| `limit` | optional | integer 1–9,999, default 9,999 |
+
+Response:
+
+| key | |
+| --- | --- |
+| `columns` | `{ name, kind, type }` in column order: `entity.id`, the identity fields, the attributes in source order, `last_seen`. `type` comes from the first plan that returned the column with a type other than `null`. |
+| `rows` | At most `limit`, ordered by `last_seen` descending, ties by `entity.id`. Every row carries every column, null where no source produced a value. |
+| `provenance` | For each returned row's `entity.id`, the index pattern that supplied each attribute value. |
+| `total` | The exact number of entities in the window, or null when a plan was cut (returned `limit + 1` rows), Elasticsearch answered with a partial result, or a probe or plan query failed. |
+| `truncated` | True when rows were left out, or whenever `total` is null. |
+| `took` | Wall time of the request in milliseconds, probes included. |
+| `queries` | One entry per plan query sent, in plan order: `indexPattern`, `engine` (`TS` or `FROM`), `esql`, `params`, and Elasticsearch's `took`, `documentsFound` and `rowCount`. A failed query has null `took` and `documentsFound` and `rowCount` 0. Probes are not listed. |
+| `errors` | `{ indexPattern, status, reason }` per source problem; never a stack. |
+| `unavailableColumns` | `{ column, indexPattern, field }` for an attribute no index behind that source's pattern maps; its value is null. |
+
+Anything about one source degrades the result and is reported in `errors`; it never fails the request:
+
+- A probe that fails for a reason other than verification: none of the source's plans run, `total` is null.
+- A plan query that fails: the other plans still return rows, `total` is null.
+- A plan that reads nothing usable, because no readable index behind its pattern maps `@timestamp` or its identity fields are unmapped: the plan is dropped. That is not a failure, so `total` stays exact. A user who can read none of the source indices gets `rows: []`, every plan in `errors`, `total: 0` and `truncated: false`.
+
+Errors that fail the request:
+
+| request | status |
+| --- | --- |
+| The type has no entity definition, has no `dynamic` block, or another plugin registered it | 404 |
+| `type` is not a valid type name | 400 |
+| `from` or `to` is missing or not an ISO 8601 instant, or `from >= to` | 400 |
+| The window is longer than 72 hours | 400 |
+| `limit` is not an integer in 1–9,999 | 400 |
+| An unknown body key | 400 |
+| The definition cannot be turned into queries | 400 |
+
+The 72-hour cap is interim, until the queries are measured on large clusters. It is applied by `withTimeRangeGuardrail` in `server/routes/utils/time_range_guardrail.ts`, which wraps the handler and answers with the same 400 shape as any other bad window; to lift it, remove that file and unwrap the handler.
+
 ### Access control (interim)
 
-Every inventory route requires the `entity_inventory_read` API privilege (`ENTITY_INVENTORY_API_PRIVILEGES.read` in `common/privileges.ts`). The plugin registers no Kibana feature yet, so no role grants that privilege and nothing appears in the role editor or the space feature settings: `superuser` gets through, every other role gets 403. [elastic/observability-dev#6244](https://github.com/elastic/observability-dev/issues/6244) will register an `entityInventory` feature that grants it.
+Kibana checks no privilege on the inventory routes: they declare `INTERIM_AUTHZ` (`server/routes/interim_authz.ts`), which is `AuthzDisabled.delegateToESClient`. Every probe and plan query runs with the request-scoped Elasticsearch client, so Elasticsearch enforces the user's index privileges: an index the user cannot read is left out like one that does not exist, and a source with none readable is reported in `errors`. This is acceptable for now because the routes are internal and the plugin is off by default. `types` reads definitions, not indices, so any authenticated user gets the same types. [elastic/observability-dev#6244](https://github.com/elastic/observability-dev/issues/6244) replaces this with the inventory's privilege model.
 
 Errors thrown by the inventory service reach clients through `server/routes/create_server_route.ts`: `InventoryTypeNotFoundError` becomes 404, `InventoryRequestError` and `InventoryTypeDefinitionError` become 400, each with the error message only. Any other error is rethrown unchanged.
 
