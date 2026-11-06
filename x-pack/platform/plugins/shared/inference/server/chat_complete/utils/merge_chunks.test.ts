@@ -489,4 +489,79 @@ describe('mergeChunks', () => {
       ],
     });
   });
+
+  it('skips a fully empty delta at an index with no known toolCallId (e.g. GPT-OSS-120B via EIS)', async () => {
+    const message = mergeChunks([
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [
+          {
+            function: { name: 'myFunction', arguments: '{ "foo": "bar" }' },
+            index: 0,
+            toolCallId: '001',
+          },
+        ],
+      },
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [{ function: { name: '', arguments: '' }, index: 3, toolCallId: '' }],
+      },
+    ]);
+
+    expect(message).toEqual({
+      content: '',
+      tool_calls: [
+        {
+          function: { name: 'myFunction', arguments: '{ "foo": "bar" }' },
+          toolCallId: '001',
+        },
+      ],
+    });
+  });
+
+  it('does not create a phantom tool call when only fully empty deltas are received', async () => {
+    const message = mergeChunks([
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [{ function: { name: '', arguments: '' }, index: 1, toolCallId: '' }],
+      },
+    ]);
+
+    expect(message).toEqual({ content: '', tool_calls: [] });
+  });
+
+  it('uses the real toolCallId when it arrives after a fully empty delta for the same index', async () => {
+    const message = mergeChunks([
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [{ function: { name: '', arguments: '' }, index: 1, toolCallId: '' }],
+      },
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [
+          { function: { name: 'myFunction', arguments: '{ ' }, index: 1, toolCallId: '002' },
+        ],
+      },
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [{ function: { name: '', arguments: '"a": 1 }' }, index: 1, toolCallId: '' }],
+      },
+    ]);
+
+    expect(message).toEqual({
+      content: '',
+      tool_calls: [
+        {
+          function: { name: 'myFunction', arguments: '{ "a": 1 }' },
+          toolCallId: '002',
+        },
+      ],
+    });
+  });
 });

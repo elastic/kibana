@@ -20,10 +20,12 @@ interface UnvalidatedMessage {
  * - `toolCallId` and `function.name` appear in the first chunk and should be set once
  * - `function.arguments` is streamed across multiple chunks and should be accumulated
  * - When `toolCallId` is empty, it's a continuation chunk for the most recent tool call at that index
- * - When no chunk for an index ever carries a `toolCallId` (e.g. Gemini-via-EIS emits a
- *   single delta with empty id/name and full args), a per-index synthetic key is used so the
- *   tool call still merges cleanly. Real `toolCallId`s, when present, still take precedence and
- *   disambiguate tool calls that share an index but have different ids.
+ * - A delta with no `toolCallId` and no id previously established for its index is handled as follows:
+ *   - fully empty (no name, no arguments, e.g. GPT-OSS-120B via EIS): skipped, it carries no data
+ *   - otherwise (e.g. Gemini-via-EIS emits a single delta with empty id/name and full args): a
+ *     per-index synthetic key is used so the tool call still merges cleanly
+ * - Real `toolCallId`s, when present, still take precedence and disambiguate tool calls that
+ *   share an index but have different ids.
  */
 const mergeToolCalls = (chunks: ChatCompletionChunkEvent[]): UnvalidatedToolCall[] => {
   // Map to store tool calls by their unique identifier
@@ -40,10 +42,14 @@ const mergeToolCalls = (chunks: ChatCompletionChunkEvent[]): UnvalidatedToolCall
         indexToToolCallId.set(toolCall.index, toolCall.toolCallId);
       }
 
-      const key =
-        toolCall.toolCallId ||
-        indexToToolCallId.get(toolCall.index) ||
-        syntheticKeyForIndex(toolCall.index);
+      const knownKey = toolCall.toolCallId || indexToToolCallId.get(toolCall.index);
+
+      // An empty delta with no known id would otherwise become a phantom tool call with an empty name
+      if (!knownKey && !toolCall.function.name && !toolCall.function.arguments) {
+        return;
+      }
+
+      const key = knownKey || syntheticKeyForIndex(toolCall.index);
 
       const existingToolCall = toolCallsMap.get(key);
       const updatedToolCall: UnvalidatedToolCall = {
