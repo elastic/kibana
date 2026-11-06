@@ -18,6 +18,7 @@ describe('resolveEvalSelection', () => {
     ])('runs every eval with credentials (%s)', (_label, value) => {
       expect(resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: value })).toEqual({
         runOrca: false,
+        runOrcaRegrade: false,
         runSmoke: true,
         runInvestigations: true,
         runConnectorProbes: false,
@@ -29,6 +30,7 @@ describe('resolveEvalSelection', () => {
     it('falls back to smoke without credentials', () => {
       expect(resolveEvalSelection({})).toEqual({
         runOrca: false,
+        runOrcaRegrade: false,
         runSmoke: true,
         runInvestigations: false,
         runConnectorProbes: false,
@@ -42,6 +44,7 @@ describe('resolveEvalSelection', () => {
     for (const value of ['all', ' all ', 'synthetic-smoke,all']) {
       expect(resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: value })).toMatchObject({
         runOrca: false,
+        runOrcaRegrade: false,
         runSmoke: true,
         runInvestigations: true,
         smokeDatasetsRequest: undefined,
@@ -52,6 +55,7 @@ describe('resolveEvalSelection', () => {
   it('runs only the investigation eval for trace-only', () => {
     expect(resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: 'trace-only' })).toEqual({
       runOrca: false,
+      runOrcaRegrade: false,
       runSmoke: false,
       runInvestigations: true,
       runConnectorProbes: false,
@@ -63,6 +67,7 @@ describe('resolveEvalSelection', () => {
   it('runs only the named smoke datasets, trimmed, and needs no credentials', () => {
     expect(resolveEvalSelection({ NIGHTSHIFT_DATASETS: ' synthetic-smoke ' })).toEqual({
       runOrca: false,
+      runOrcaRegrade: false,
       runSmoke: true,
       runInvestigations: false,
       runConnectorProbes: false,
@@ -76,6 +81,7 @@ describe('resolveEvalSelection', () => {
       resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: 'synthetic-smoke, trace-only' })
     ).toEqual({
       runOrca: false,
+      runOrcaRegrade: false,
       runSmoke: true,
       runInvestigations: true,
       runConnectorProbes: false,
@@ -89,6 +95,7 @@ describe('resolveEvalSelection', () => {
       resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: 'connector-probe' })
     ).toEqual({
       runOrca: false,
+      runOrcaRegrade: false,
       runSmoke: false,
       runInvestigations: false,
       runConnectorProbes: true,
@@ -156,6 +163,7 @@ describe('ORCA selection', () => {
     (selection) => {
       expect(resolveEvalSelection({ ...orcaEnv, ...selection })).toMatchObject({
         runOrca: true,
+        runOrcaRegrade: false,
         runSmoke: false,
         runInvestigations: false,
         runConnectorProbes: false,
@@ -174,5 +182,34 @@ describe('ORCA selection', () => {
     expect(() =>
       resolveEvalSelection({ ...orcaEnv, NIGHTSHIFT_DATASETS: 'trace-only,orcabench' })
     ).toThrow('own Scout server');
+  });
+});
+
+describe('ORCA re-grade selection', () => {
+  it('runs only the re-grade, without sandbox credentials', () => {
+    expect(
+      resolveEvalSelection({
+        NIGHTSHIFT_DATASETS: 'orcabench-regrade',
+        NIGHTSHIFT_ORCA_REGRADE_EXPERIMENT: 'experiment',
+      })
+    ).toEqual({
+      runSmoke: false,
+      runInvestigations: false,
+      runOrca: false,
+      runOrcaRegrade: true,
+      runConnectorProbes: false,
+      smokeDatasetsRequest: undefined,
+      fellBackToSmoke: false,
+    });
+  });
+  it('needs the experiment to re-grade', () => {
+    expect(() => resolveEvalSelection({ NIGHTSHIFT_DATASETS: 'orcabench-regrade' })).toThrow(
+      'NIGHTSHIFT_ORCA_REGRADE_EXPERIMENT'
+    );
+  });
+  it('runs on its own', () => {
+    expect(() =>
+      resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: 'trace-only,orcabench-regrade' })
+    ).toThrow('on its own');
   });
 });

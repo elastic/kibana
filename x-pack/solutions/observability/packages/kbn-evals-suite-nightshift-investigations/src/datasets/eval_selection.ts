@@ -15,12 +15,19 @@ export const INVESTIGATION_DATASET_ID = 'trace-only';
  */
 export const CONNECTOR_PROBE_DATASET_ID = 'connector-probe';
 
+/**
+ * `NIGHTSHIFT_DATASETS` id that re-grades a stored ORCA experiment, named by
+ * `NIGHTSHIFT_ORCA_REGRADE_EXPERIMENT`, with ORCA's graders. It starts no investigation.
+ */
+export const ORCA_REGRADE_DATASET_ID = 'orcabench-regrade';
+
 const EVAL_IDS: readonly string[] = [INVESTIGATION_DATASET_ID, CONNECTOR_PROBE_DATASET_ID];
 
 export interface EvalSelection {
   runSmoke: boolean;
   runInvestigations: boolean;
   runOrca: boolean;
+  runOrcaRegrade: boolean;
   runConnectorProbes: boolean;
   /** Smoke dataset ids for `selectDatasets`; `undefined` runs them all. Unused when `runSmoke` is false. */
   smokeDatasetsRequest: string | undefined;
@@ -32,6 +39,25 @@ export interface EvalSelection {
 export const resolveEvalSelection = (
   env: Record<string, string | undefined> = process.env
 ): EvalSelection => {
+  if (env.NIGHTSHIFT_DATASETS?.trim() === ORCA_REGRADE_DATASET_ID) {
+    if (!env.NIGHTSHIFT_ORCA_REGRADE_EXPERIMENT?.trim()) {
+      throw new Error(
+        `NIGHTSHIFT_DATASETS=${ORCA_REGRADE_DATASET_ID} requires NIGHTSHIFT_ORCA_REGRADE_EXPERIMENT, the experiment to re-grade`
+      );
+    }
+    return {
+      runSmoke: false,
+      runInvestigations: false,
+      runOrca: false,
+      runOrcaRegrade: true,
+      runConnectorProbes: false,
+      smokeDatasetsRequest: undefined,
+      fellBackToSmoke: false,
+    };
+  }
+  if (env.NIGHTSHIFT_DATASETS?.split(',').some((id) => id.trim() === ORCA_REGRADE_DATASET_ID)) {
+    throw new Error(`Run ${ORCA_REGRADE_DATASET_ID} on its own`);
+  }
   const orca = env.EVAL_SHARD_ID === 'orcabench' || env.NIGHTSHIFT_DATASETS?.trim() === 'orcabench';
   if (orca) {
     if (!env.SANDBOX_API_KEY) throw new Error('ORCA investigations require SANDBOX_API_KEY');
@@ -44,6 +70,7 @@ export const resolveEvalSelection = (
       runSmoke: false,
       runInvestigations: false,
       runOrca: true,
+      runOrcaRegrade: false,
       runConnectorProbes: false,
       smokeDatasetsRequest: undefined,
       fellBackToSmoke: false,
@@ -72,6 +99,7 @@ export const resolveEvalSelection = (
     if (requested) requiresSandbox('all');
     return {
       runOrca: false,
+      runOrcaRegrade: false,
       runSmoke: true,
       runInvestigations: hasSandbox,
       runConnectorProbes: false,
@@ -88,6 +116,7 @@ export const resolveEvalSelection = (
 
   return {
     runOrca: false,
+    runOrcaRegrade: false,
     runSmoke: smokeIds.length > 0,
     runInvestigations,
     runConnectorProbes,
