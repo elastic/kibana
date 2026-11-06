@@ -48,6 +48,7 @@ import {
 import { OnboardingFirstInvestigationStep } from './first_investigation_step';
 import { OnboardingAutomationStep } from './automation_step';
 import { useOnboarding, useStartOnboardingSuggestions } from './use_onboarding';
+import { useFetchAutomations } from '../data/automations/use_automations';
 
 /** A step the user went back to; otherwise the step follows from the onboarding state. */
 type StepOverride = 'connect' | 'investigate' | undefined;
@@ -80,6 +81,10 @@ const INVESTIGATE_SECTION_TITLE = i18n.translate(
   { defaultMessage: 'Try your first investigation' }
 );
 
+const AUTOMATE_SECTION_TITLE = i18n.translate('xpack.nightshift.onboarding.automate.trialTitle', {
+  defaultMessage: 'Your first investigation',
+});
+
 const backButtonStyles = css`
   width: 100%;
 `;
@@ -109,6 +114,8 @@ export function NightshiftOnboarding({
   const serviceAccount = useInvestigatorServiceAccount();
   const startSuggestions = useStartOnboardingSuggestions();
   const [stepOverride, setStepOverride] = useState<StepOverride>();
+  const automations = useFetchAutomations({ enabled: automationsHref != null });
+  const hasAutomation = (automations.data?.automations.length ?? 0) > 0;
 
   const execution = data?.execution;
   // Step 1 is done once the space is bound to its service accounts and the agent is installed:
@@ -225,7 +232,7 @@ export function NightshiftOnboarding({
           : undefined,
     },
     automate: {
-      status: step === 'automate' ? 'current' : 'disabled',
+      status: hasAutomation ? 'complete' : step === 'automate' ? 'current' : 'disabled',
       onClick:
         latestInvestigation && isConnected && step !== 'automate'
           ? () => setStepOverride(undefined)
@@ -319,14 +326,21 @@ export function NightshiftOnboarding({
         <EuiButton
           fullWidth
           size="s"
-          iconType="sortRight"
-          iconSide="right"
+          fill={hasAutomation}
+          iconType={hasAutomation ? 'check' : 'sortRight'}
+          iconSide={hasAutomation ? 'left' : 'right'}
           onClick={onFinish}
-          data-test-subj="nightshiftOnboardingFinishButton"
+          data-test-subj={
+            hasAutomation ? 'nightshiftOnboardingDoneButton' : 'nightshiftOnboardingFinishButton'
+          }
         >
-          {i18n.translate('xpack.nightshift.onboarding.doItLaterButton', {
-            defaultMessage: "I'll do it later",
-          })}
+          {hasAutomation
+            ? i18n.translate('xpack.nightshift.onboarding.doneButton', {
+                defaultMessage: 'Done',
+              })
+            : i18n.translate('xpack.nightshift.onboarding.doItLaterButton', {
+                defaultMessage: "I'll do it later",
+              })}
         </EuiButton>
         <EuiButtonEmpty
           size="s"
@@ -346,6 +360,8 @@ export function NightshiftOnboarding({
       ? CONNECT_SUB_STEP_TITLES[connectSubStep]
       : step === 'investigate'
       ? INVESTIGATE_SECTION_TITLE
+      : step === 'automate'
+      ? AUTOMATE_SECTION_TITLE
       : undefined;
 
   return (
@@ -369,7 +385,7 @@ export function NightshiftOnboarding({
       )}
       {sectionTitle && (
         <>
-          <EuiTitle size="s">
+          <EuiTitle size={step === 'automate' ? 'xs' : 's'}>
             <h3 data-test-subj="nightshiftOnboardingStepTitle">{sectionTitle}</h3>
           </EuiTitle>
           <EuiSpacer size="m" />
@@ -402,7 +418,8 @@ export function NightshiftOnboarding({
           ) : (
             <OnboardingAutomationStep
               investigation={latestInvestigation}
-              automationsHref={automationsHref}
+              automations={automations.data?.automations ?? []}
+              automationsAvailable={automationsHref != null}
               onInvestigationClick={openInvestigation}
             />
           )}
