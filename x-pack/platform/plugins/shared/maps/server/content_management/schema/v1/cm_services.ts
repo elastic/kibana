@@ -19,7 +19,7 @@ export const mapSavedObjectSchema = savedObjectSchema(mapAttributesSchema);
 export const searchOptionsSchema = lazySchema(() =>
   z
     .object({
-      only_title: z.boolean().optional(),
+      onlyTitle: z.boolean().optional(),
     })
     .strict()
     .optional()
@@ -28,7 +28,7 @@ export const searchOptionsSchema = lazySchema(() =>
 export const mapsSearchOptionsSchema = lazySchema(() =>
   z
     .object({
-      only_title: z.boolean().optional(),
+      onlyTitle: z.boolean().optional(),
     })
     .strict()
     .optional()

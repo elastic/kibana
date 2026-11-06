@@ -13,7 +13,7 @@ export const hasLibraryItemWithTitle = async (title: string) => {
       text: `"${title}"`,
       limit: 10,
     },
-    { only_title: true }
+    { onlyTitle: true }
   );
 
   return hits.some((obj) => obj.attributes.title.toLowerCase() === title.toLowerCase());
