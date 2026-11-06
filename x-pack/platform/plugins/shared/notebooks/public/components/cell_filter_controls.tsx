@@ -98,6 +98,7 @@ export const FloatingIconButton = ({
   onClick,
   isDisabled,
   isPressed,
+  isPrimary,
   dataTestSubj,
 }: {
   iconType: string;
@@ -106,13 +107,16 @@ export const FloatingIconButton = ({
   onClick: () => void;
   isDisabled?: boolean;
   isPressed?: boolean;
+  /** Filled primary, like the header's run and refresh buttons. */
+  isPrimary?: boolean;
   dataTestSubj: string;
 }) => (
   <EuiPanel hasShadow paddingSize="none" grow={false}>
     <EuiToolTip content={tooltip} position="left" disableScreenReaderOutput>
       <EuiButtonIcon
         iconType={iconType}
-        color="text"
+        color={isPrimary ? 'primary' : 'text'}
+        display={isPrimary ? 'fill' : 'empty'}
         size="m"
         aria-label={label}
         aria-pressed={isPressed}

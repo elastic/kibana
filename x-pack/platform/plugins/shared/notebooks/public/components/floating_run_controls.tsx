@@ -68,6 +68,7 @@ const FloatingRefreshButton = ({ cell }: { cell: InputCellDefinition }) => {
       tooltip={tooltip}
       isDisabled={!hasDependents}
       onClick={() => scheduler.refresh([cell.id])}
+      isPrimary
       dataTestSubj="notebookFloatingRefresh"
     />
   );
@@ -113,6 +114,7 @@ export const FloatingRunControls = ({
               iconType="play"
               label={RUN_ALL_LABEL}
               onClick={() => scheduler.runAll()}
+              isPrimary
               dataTestSubj="notebookFloatingRunAll"
             />
           </EuiFlexItem>
