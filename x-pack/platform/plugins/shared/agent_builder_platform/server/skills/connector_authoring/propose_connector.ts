@@ -66,7 +66,7 @@ export const createProposeConnectorTool = ({
     const { attachments } = context;
 
     const actionsStart = await getActionsStart();
-    const registeredTypes = actionsStart.listTypes(AgentBuilderConnectorFeatureId);
+    const registeredTypes = actionsStart.listTypes(AgentBuilderConnectorFeatureId, true);
     const actionType = registeredTypes.find((t) => t.id === input.connector_type);
 
     if (!actionType || !isConnectorTypeAvailable(actionType)) {

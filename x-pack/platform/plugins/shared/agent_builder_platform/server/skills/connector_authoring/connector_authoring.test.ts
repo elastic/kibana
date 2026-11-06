@@ -60,23 +60,32 @@ const makeActionsStart = (
     isDeprecated?: boolean;
     enabledInConfig?: boolean;
     enabledInLicense?: boolean;
+    supportedFeatureIds?: string[];
+    isDynamic?: boolean;
   }>
 ): ActionsPluginStart =>
   ({
-    listTypes: jest.fn().mockReturnValue(
-      types.map((t) => ({
-        id: t.id,
-        name: t.name,
-        description: t.description ?? '',
-        minimumLicenseRequired: t.minimumLicenseRequired ?? 'basic',
-        isExperimental: t.isExperimental ?? false,
-        isSystemActionType: t.isSystemActionType ?? false,
-        isDeprecated: t.isDeprecated ?? false,
-        enabled: true,
-        enabledInConfig: t.enabledInConfig ?? true,
-        enabledInLicense: t.enabledInLicense ?? true,
-        supportedFeatureIds: ['agentBuilder'],
-      }))
+    listTypes: jest.fn((featureId?: string, includeDynamicTypes?: boolean) =>
+      types
+        .filter(
+          (t) =>
+            !featureId ||
+            (t.supportedFeatureIds ?? ['agentBuilder']).includes(featureId) ||
+            (includeDynamicTypes && t.isDynamic)
+        )
+        .map((t) => ({
+          id: t.id,
+          name: t.name,
+          description: t.description ?? '',
+          minimumLicenseRequired: t.minimumLicenseRequired ?? 'basic',
+          isExperimental: t.isExperimental ?? false,
+          isSystemActionType: t.isSystemActionType ?? false,
+          isDeprecated: t.isDeprecated ?? false,
+          enabled: true,
+          enabledInConfig: t.enabledInConfig ?? true,
+          enabledInLicense: t.enabledInLicense ?? true,
+          supportedFeatureIds: t.supportedFeatureIds ?? ['agentBuilder'],
+        }))
     ),
   } as unknown as ActionsPluginStart);
 
@@ -138,7 +147,7 @@ describe('connector-authoring inline tools', () => {
         total: number;
       };
       expect(data.total).toBe(1);
-      expect(actionsStart.listTypes).toHaveBeenCalledWith(AgentBuilderConnectorFeatureId);
+      expect(actionsStart.listTypes).toHaveBeenCalledWith(AgentBuilderConnectorFeatureId, true);
       expect(data.connector_types[0]).toEqual(
         expect.objectContaining({
           connector_type: '.github',
@@ -216,6 +225,41 @@ describe('connector-authoring inline tools', () => {
       );
     });
 
+    it('lists saved builder types without listing other workflow-only types', async () => {
+      getConnectorSpecMock.mockReturnValue(undefined);
+      const actionsStart = makeActionsStart([
+        {
+          id: '.jsonplaceholder',
+          name: 'JSONPlaceholder',
+          supportedFeatureIds: ['alerting', 'workflows'],
+          isDynamic: true,
+        },
+        {
+          id: '.workflow_only',
+          name: 'Workflow only',
+          supportedFeatureIds: ['workflows'],
+        },
+        { id: '.github', name: 'GitHub' },
+      ]);
+      const tool = createListConnectorTypesTool({ getActionsStart: async () => actionsStart });
+
+      const result = (await tool.handler(
+        { search: 'JSONPLACEHOLDER' },
+        {} as ToolHandlerContext
+      )) as ToolHandlerStandardReturn;
+      const data = result.results[0].data as {
+        connector_types: Array<Record<string, unknown>>;
+      };
+
+      expect(data.connector_types).toEqual([
+        expect.objectContaining({
+          connector_type: '.jsonplaceholder',
+          name: 'JSONPlaceholder',
+          available_in_chat: false,
+        }),
+      ]);
+    });
+
     it('marks the MCP connector as available in chat despite having no connector-specs entry', async () => {
       getConnectorSpecMock.mockReturnValue(undefined);
 
@@ -263,6 +307,35 @@ describe('connector-authoring inline tools', () => {
   });
 
   describe('propose_connector', () => {
+    it('creates a setup card for a saved builder type', async () => {
+      getConnectorSpecMock.mockReturnValue(undefined);
+      const actionsStart = makeActionsStart([
+        {
+          id: '.jsonplaceholder',
+          name: 'JSONPlaceholder',
+          supportedFeatureIds: ['alerting', 'workflows'],
+          isDynamic: true,
+        },
+      ]);
+      const tool = createProposeConnectorTool({ getActionsStart: async () => actionsStart });
+      const { context, attachments } = createTestContext();
+
+      const result = (await tool.handler(
+        { connector_type: '.jsonplaceholder' },
+        context
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results[0].type).toBe(ToolResultType.other);
+      const stored = attachments.get(
+        (result.results[0].data as { attachment_id: string }).attachment_id
+      );
+      expect(stored?.data.data).toMatchObject({
+        connector_type: '.jsonplaceholder',
+        connector_type_name: 'JSONPlaceholder',
+      });
+      expect(actionsStart.listTypes).toHaveBeenCalledWith(AgentBuilderConnectorFeatureId, true);
+    });
+
     it('creates a connector_setup attachment for a known connector type', async () => {
       getConnectorSpecMock.mockReturnValue(githubSpec as never);
 

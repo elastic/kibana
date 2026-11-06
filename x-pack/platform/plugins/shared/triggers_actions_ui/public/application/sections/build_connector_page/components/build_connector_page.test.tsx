@@ -665,9 +665,7 @@ describe('BuildConnectorPage', () => {
       expect(screen.getByTestId('buildConnectorAction-0-url')).toHaveValue(
         '{{config.baseUrl}}/ping'
       );
-      expect(fetchConnectorTypeLogo).toHaveBeenCalledWith(
-        expect.objectContaining({ url: 'https://docs.example.com/favicon.ico' })
-      );
+      expect(fetchConnectorTypeLogo).not.toHaveBeenCalled();
       expect(screen.getByTestId('buildConnectorLogoUrlInput')).toHaveValue('');
       expect(screen.queryByTestId('buildConnectorAction-1')).not.toBeInTheDocument();
       expect(createConnectorType).not.toHaveBeenCalled();

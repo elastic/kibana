@@ -53,15 +53,15 @@ Never ask the user to paste API keys, tokens, passwords, or webhook URLs into th
 
 ## Available Tools
 
-- **list_connector_types** — Enumerate the connector types that can be set up, with their ids, descriptions, auth methods, and the sub-actions you'd be able to call afterwards. Call this BEFORE \`propose_connector\`.
+- **list_connector_types** — Enumerate the connector types that can be set up, with their ids, descriptions, auth methods, and the sub-actions you'd be able to call afterwards. Pass \`search\` when the user names a type, especially one they just saved. Call this BEFORE \`propose_connector\`.
 - **propose_connector** — Render an inline setup card for a chosen connector type. Returns an \`attachment_id\` for \`<render_attachment>\`.
-- **draft_connector_type** — Generate a validated draft from a public API documentation URL after the user confirms. Returns an \`attachment_id\` for a card that opens the prefilled builder.
+- **draft_connector_type** — Ask for approval in a confirmation card, then generate a validated draft from a public API documentation URL. Returns an \`attachment_id\` for a card that opens the prefilled builder.
 
 ## Workflow
 
 1. **Clarify intent.** Confirm what the user wants the agent to be able to do (e.g. "investigate issues in your GitHub repos"). If it's ambiguous which system they mean, ask a brief question.
 
-2. **Choose the path.** If the user wants to set up a connector, call \`list_connector_types\` and match the names, descriptions, and \`tool_actions\`. Never invent a type id. If the user asks for a new service-specific type, or no listed type fits, explain that a new type needs a draft from public API documentation. Ask: "No existing connector type fits. May I draft a new type from [documentation URL] for you to review?" Then stop and wait for a clear yes. A request to create a connector or a provided URL alone is not confirmation. If the user declines, do not call \`draft_connector_type\`. After confirmation, call \`draft_connector_type\` with the public documentation URL. On draft success, emit \`<render_attachment id="ATTACHMENT_ID" />\` on its own line and tell the user to review the prefilled form before saving. Builder types support Alerting and Workflows; do not promise that the agent can call the new type from chat. If drafting fails or no documentation URL is available, explain that a superuser can use **Build a connector** in Stack Management → Connectors and give this link: [Open Connectors](/app/management/insightsAndAlerting/triggersActionsConnectors/connectors). Do not claim that \`propose_connector\` can create a new type, and do not suggest only a Workflow when the user asked for a connector type. Stop this workflow after the draft card or link.
+2. **Choose the path.** If the user wants to set up a connector, call \`list_connector_types\` and match the names, descriptions, and \`tool_actions\`. Never invent a type id. If the user asks for a new service-specific type, or no listed type fits, explain that a new type needs a draft from public API documentation. When the documentation URL is known, call \`draft_connector_type\` with it. The tool shows a confirmation card with Generate draft and Cancel buttons before any draft is made. Do not ask for a separate yes or no in chat. If the user cancels, stop. On draft success, emit \`<render_attachment id="ATTACHMENT_ID" />\` on its own line and tell the user to review the prefilled form before saving. Builder types support Alerting and Workflows; do not promise that the agent can call the new type from chat. If drafting fails or no documentation URL is available, explain that a superuser can use **Build a connector** in Stack Management → Connectors and give this link: [Open Connectors](/app/management/insightsAndAlerting/triggersActionsConnectors/connectors). Do not claim that \`propose_connector\` can create a new type, and do not suggest only a Workflow when the user asked for a connector type. Stop this workflow after the draft card or link.
 
 3. **Mention what they'll need.** Briefly tell the user what the connector enables and, when \`auth_methods\` is non-empty, what kind of credential they'll provide (e.g. "GitHub uses a token or OAuth"). Some registry-only connectors return an empty \`auth_methods\` list — in that case say they'll configure credentials in the setup form. Do not collect credentials in chat.
 
@@ -83,9 +83,8 @@ User: "All our services live in one GitHub monorepo."
 
 User: "I need a connector type for https://jsonplaceholder.typicode.com/."
 
-1. Ask: "May I draft a new JSONPlaceholder connector type from https://jsonplaceholder.typicode.com/ for you to review?"
-2. Wait for the user's confirmation. On "yes", call \`draft_connector_type\` with \`{ "documentation_url": "https://jsonplaceholder.typicode.com/" }\`.
-3. Render the returned attachment on its own line and ask the user to review the draft in Build a connector before saving.
+1. Call \`draft_connector_type\` with \`{ "documentation_url": "https://jsonplaceholder.typicode.com/" }\`. The tool asks for approval in a confirmation card.
+2. If approved, render the returned attachment on its own line and ask the user to review the draft in Build a connector before saving.
   `),
     getInlineTools: () => [
       createListConnectorTypesTool({ getActionsStart }),

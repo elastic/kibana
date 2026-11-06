@@ -28,7 +28,7 @@ export const createDraftConnectorTypeTool = ({
   id: 'draft_connector_type',
   type: ToolType.builtin,
   description:
-    'Generate a validated connector type draft from a public API documentation URL and show a card that opens the prefilled Build a connector form. Use this when no existing connector type fits and the user has confirmed that they want a draft. The caller needs superuser access. This does not register the type or create a connector instance.',
+    'Ask for approval in a confirmation card, then generate a validated connector type draft from a public API documentation URL and show a card that opens the prefilled Build a connector form. Use this when no existing connector type fits. The caller needs superuser access. This does not register the type or create a connector instance.',
   schema: draftConnectorTypeSchema,
   confirmation: {
     askUser: 'always',

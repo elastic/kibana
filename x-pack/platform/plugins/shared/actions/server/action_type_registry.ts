@@ -41,6 +41,7 @@ interface ListOpts {
   featureId?: string;
   exposeValidation?: boolean;
   sandboxCapableOnly?: boolean;
+  includeDynamicTypes?: boolean;
 }
 
 export class ActionTypeRegistry {
@@ -310,11 +311,16 @@ export class ActionTypeRegistry {
    * Returns a list of registered action types [{ id, name, enabled }], filtered by featureId if provided.
    */
   public list(
-    { featureId, exposeValidation, sandboxCapableOnly }: ListOpts = { exposeValidation: false }
+    { featureId, exposeValidation, sandboxCapableOnly, includeDynamicTypes }: ListOpts = {
+      exposeValidation: false,
+    }
   ): CommonActionType[] {
     return Array.from(this.actionTypes)
-      .filter(([_, actionType]) => {
-        return featureId ? actionType.supportedFeatureIds.includes(featureId) : true;
+      .filter(([actionTypeId, actionType]) => {
+        return featureId
+          ? actionType.supportedFeatureIds.includes(featureId) ||
+              (includeDynamicTypes && this.dynamicConnectorTypeIds.has(actionTypeId))
+          : true;
       })
       .filter(([_, actionType]) =>
         sandboxCapableOnly ? isSandboxCapableConnectorType(actionType) : true

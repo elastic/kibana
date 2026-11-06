@@ -209,7 +209,10 @@ export interface PluginStartContract {
 
   getAllTypes: ActionTypeRegistry['getAllTypes'];
 
-  listTypes(featureId?: string): ReturnType<ActionTypeRegistry['list']>;
+  listTypes(
+    featureId?: string,
+    includeDynamicTypes?: boolean
+  ): ReturnType<ActionTypeRegistry['list']>;
 
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
 
@@ -947,8 +950,12 @@ export class ActionsPlugin
         return this.actionTypeRegistry!.isActionExecutable(actionId, actionTypeId, options);
       },
       getAllTypes: actionTypeRegistry!.getAllTypes.bind(actionTypeRegistry),
-      listTypes: (featureId?: string) => {
-        return this.actionTypeRegistry!.list({ featureId, exposeValidation: true });
+      listTypes: (featureId?: string, includeDynamicTypes?: boolean) => {
+        return this.actionTypeRegistry!.list({
+          featureId,
+          exposeValidation: true,
+          includeDynamicTypes,
+        });
       },
       getActionsAuthorizationWithRequest(request: KibanaRequest) {
         return instantiateAuthorization(request);

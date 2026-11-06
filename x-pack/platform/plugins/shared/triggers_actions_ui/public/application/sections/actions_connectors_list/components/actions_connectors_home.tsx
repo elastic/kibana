@@ -13,7 +13,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { createConnectorTypeRequestSchema } from '@kbn/actions-plugin/common';
 import { lazySchema, z } from '@kbn/zod/v4';
-import { EuiCallOut, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
 import {
@@ -291,9 +292,8 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
 
       {skippedPreconfiguredConnectorIds.length > 0 && (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount={false}
-            color="warning"
             size="s"
             data-test-subj="preconfiguredSkippedBanner"
             title={

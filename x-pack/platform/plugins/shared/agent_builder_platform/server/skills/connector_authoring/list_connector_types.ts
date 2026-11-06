@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
@@ -64,15 +64,23 @@ const projectConnectorType = (actionType: ActionType): ListedConnectorType => {
   };
 };
 
-const listConnectorTypesSchema = z.object({}).describe('No parameters.');
+const listConnectorTypesSchema = lazySchema(() =>
+  z.object({
+    search: z
+      .string()
+      .max(128)
+      .optional()
+      .describe('Optional type id or name to filter the list, e.g. `jsonplaceholder`.'),
+  })
+);
 
 export type ListConnectorTypesInput = z.infer<typeof listConnectorTypesSchema>;
 
 /**
  * Inline tool that enumerates the connector types the agent can create from chat.
  *
- * Lists Agent Builder connector types from the Actions registry (same source as
- * the Connectors UI), enriched from `@kbn/connector-specs` when a spec exists.
+ * Lists Agent Builder and dynamic builder connector types from the Actions registry
+ * (same source as the Connectors UI), enriched from `@kbn/connector-specs` when a spec exists.
  * Filtered by {@link isConnectorTypeAvailable}. Call before `propose_connector`.
  *
  * Types without a spec (and that aren't MCP) are still listed — they may be
@@ -87,16 +95,23 @@ export const createListConnectorTypesTool = ({
   id: 'list_connector_types',
   type: ToolType.builtin,
   description:
-    'List the connector types that can be created from chat, returning each type id, display name, description, required license, supported auth methods, the sub-actions the agent could call afterwards, and `available_in_chat`. Call this BEFORE `propose_connector` so the draft references a connector type id that actually exists. Pick the `connector_type` value verbatim from the result — never invent one. When `available_in_chat` is false, the connector type can still be set up, but the agent has no way to call it from chat afterwards (it can be used from a Workflow instead) — tell the user this before proposing it.',
+    'List the connector types that can be created from chat, returning each type id, display name, description, required license, supported auth methods, the sub-actions the agent could call afterwards, and `available_in_chat`. Pass `search` when the user names a type, so the result is short. Call this BEFORE `propose_connector` so the draft references a connector type id that actually exists. Pick the `connector_type` value verbatim from the result — never invent one. When `available_in_chat` is false, the connector type can still be set up, but the agent has no way to call it from chat afterwards (it can be used from a Workflow instead) — tell the user this before proposing it.',
   schema: listConnectorTypesSchema,
   confirmation: { askUser: 'never' },
-  handler: async () => {
+  handler: async ({ search }) => {
     try {
+      const searchTerm = search?.toLowerCase();
       const actionsStart = await getActionsStart();
       const connectorTypes = actionsStart
-        .listTypes(AgentBuilderConnectorFeatureId)
+        .listTypes(AgentBuilderConnectorFeatureId, true)
         .filter((t) => isConnectorTypeAvailable(t))
         .map(projectConnectorType)
+        .filter(
+          ({ connector_type: id, name }) =>
+            !searchTerm ||
+            id.toLowerCase().includes(searchTerm) ||
+            name.toLowerCase().includes(searchTerm)
+        )
         .sort((a, b) => a.name.localeCompare(b.name));
 
       return {
