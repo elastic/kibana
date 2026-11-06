@@ -1951,7 +1951,7 @@ describe('UiamService', () => {
       );
     });
 
-    it('reproduces a 404 when the account is missing', async () => {
+    it('resolves `null` for a 404, logging it at debug only', async () => {
       fetchSpy.mockResolvedValue({
         ok: false,
         status: 404,
@@ -1965,12 +1965,14 @@ describe('UiamService', () => {
         }),
       });
 
-      await expect(uiamService.getServiceAccount('missing')).rejects.toMatchObject({
-        output: { statusCode: 404 },
-      });
+      await expect(uiamService.getServiceAccount('missing')).resolves.toBeNull();
+      expect(uiamServiceLogger.error).not.toHaveBeenCalled();
+      expect(uiamServiceLogger.debug).toHaveBeenCalledWith(
+        'Service account [missing] was not found.'
+      );
     });
 
-    it('rethrows the answer for an unknown account, logging it at debug only', async () => {
+    it('resolves `null` for the 403 UIAM sends for an unknown account, logging it at debug only', async () => {
       fetchSpy.mockResolvedValue({
         ok: false,
         status: 403,
@@ -1984,13 +1986,11 @@ describe('UiamService', () => {
         }),
       });
 
-      await expect(uiamService.getServiceAccount('missing')).rejects.toMatchObject({
-        output: { statusCode: 403 },
-      });
+      await expect(uiamService.getServiceAccount('missing')).resolves.toBeNull();
       expect(uiamServiceLogger.error).not.toHaveBeenCalled();
       expect(uiamServiceLogger.warn).not.toHaveBeenCalled();
       expect(uiamServiceLogger.debug).toHaveBeenCalledWith(
-        'Service account missing was not found.'
+        'Service account [missing] was not found.'
       );
     });
 

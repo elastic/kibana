@@ -116,16 +116,6 @@ export interface ServiceAccountBoundWorkload {
   href?: string;
 }
 
-/** Parameters for naming the account a workload is bound to, optionally pinned to one. @public */
-export interface ServiceAccountWorkloadSummaryParams extends ServiceAccountWorkloadCoordinates {
-  /**
-   * Resolve `null` if the verified binding points to another account. Pass the account a past run
-   * of the workload recorded, so that the summary names that account only while the workload is
-   * still bound to it.
-   */
-  expectedServiceAccountId?: string;
-}
-
 /** Parameters for minting credentials for a workload, optionally pinned to an account. @public */
 export interface ServiceAccountWorkloadRequestParams extends ServiceAccountWorkloadCoordinates {
   /** Reject before minting if the verified binding points to another account. */

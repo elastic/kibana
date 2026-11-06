@@ -380,16 +380,16 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
 
     this.logger.debug(`Attempting to get service account ${id}`);
 
-    let account: UiamServiceAccountDetails;
+    let account: UiamServiceAccountDetails | null;
     try {
       account = await this.uiam.getServiceAccount(id);
     } catch (e) {
-      const notFound = getNotFound(id, e);
-      if (notFound) {
-        throw notFound;
-      }
-      this.logger.error(`Failed to get service account: ${getDetailedErrorMessage(e)}`);
+      this.logger.error(`Failed to get service account [${id}]: ${getDetailedErrorMessage(e)}`);
       throw e;
+    }
+
+    if (!account) {
+      throw Boom.notFound(`Service account [${id}] was not found`);
     }
 
     // UIAM keeps a revoked account around for a while, but it is gone as far as Kibana is
@@ -413,16 +413,16 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
-    let account: UiamServiceAccountDetails;
+    let account: UiamServiceAccountDetails | null;
     try {
       account = await this.uiam.getServiceAccount(id);
     } catch (e) {
-      // The same two answers that `get` reports as a 404.
-      if (getNotFound(id, e) || (Boom.isBoom(e) && e.output.statusCode === 404)) {
-        return null;
-      }
-      this.logger.error(`Failed to get service account: ${getDetailedErrorMessage(e)}`);
+      this.logger.error(`Failed to get service account [${id}]: ${getDetailedErrorMessage(e)}`);
       throw e;
+    }
+
+    if (!account) {
+      return null;
     }
 
     if (account.revoked) {

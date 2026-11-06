@@ -30,7 +30,6 @@ export type {
   ServiceAccountWorkloadRef,
   ServiceAccountWorkloadCoordinates,
   ServiceAccountWorkloadRequestParams,
-  ServiceAccountWorkloadSummaryParams,
   ServiceAccountBoundWorkload,
   ServiceAccountSummary,
 } from './src/service_accounts';

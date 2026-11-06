@@ -87,13 +87,15 @@ describe('createPluginScopedServiceAccounts', () => {
 
     it('names the bound account with the plugin id first', async () => {
       const summary = { id: 'sa-1', name: 'Nightshift', enabled: true, assumable: true };
-      const params = { ...WORKLOAD_IN_SPACE, expectedServiceAccountId: 'sa-1' };
       delegate.getWorkloadServiceAccountSummary.mockResolvedValue(summary);
 
-      await expect(scopedTo('alerting').getWorkloadServiceAccountSummary(params)).resolves.toBe(
-        summary
+      await expect(
+        scopedTo('alerting').getWorkloadServiceAccountSummary(WORKLOAD_IN_SPACE)
+      ).resolves.toBe(summary);
+      expect(delegate.getWorkloadServiceAccountSummary).toHaveBeenCalledWith(
+        'alerting',
+        WORKLOAD_IN_SPACE
       );
-      expect(delegate.getWorkloadServiceAccountSummary).toHaveBeenCalledWith('alerting', params);
     });
 
     it('runs a scoped request with the plugin id first', async () => {

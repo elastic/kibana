@@ -17,7 +17,6 @@ import type {
   ServiceAccountWorkloadCoordinates,
   ServiceAccountWorkloadRequestParams,
   ServiceAccountWorkloadRef,
-  ServiceAccountWorkloadSummaryParams,
   ServiceAccountSummary,
 } from '@kbn/core-security-common';
 
@@ -138,16 +137,20 @@ export interface CoreServiceAccountsService {
    * Returns the name and status of the account a workload is bound to, so that a user who can see
    * the workload can see which account it runs as without having to manage service accounts.
    *
-   * Resolves `null` when the workload has no binding, when the binding names another account than
-   * `expectedServiceAccountId`, or when the account no longer exists. Rejects when the workload
-   * type was not registered by the calling plugin, the workload ID is malformed, the stored binding
-   * fails its integrity check, the account cannot be read, or bindings are unavailable.
+   * Resolves `null` when the workload has no binding, or when the account no longer exists.
+   * Rejects when the workload type was not registered by the calling plugin, the workload ID is
+   * malformed, the stored binding fails its integrity check, the account cannot be read, or
+   * bindings are unavailable.
+   *
+   * It always names the account the workload is bound to now. To name the account a past run of
+   * the workload recorded, compare that account's id with the summary's `id`, and show the name
+   * only when they match.
    *
    * Kibana reads the account as itself, so this performs no user authorization. Before calling it
    * on a user's behalf, the calling plugin must confirm that the user can see the workload.
    */
   getWorkloadServiceAccountSummary(
-    params: ServiceAccountWorkloadSummaryParams
+    params: ServiceAccountWorkloadCoordinates
   ): Promise<ServiceAccountSummary | null>;
 
   /**

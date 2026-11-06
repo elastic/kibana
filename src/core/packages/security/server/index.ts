@@ -45,7 +45,6 @@ export type {
   ServiceAccountWorkloadRef,
   ServiceAccountWorkloadCoordinates,
   ServiceAccountWorkloadRequestParams,
-  ServiceAccountWorkloadSummaryParams,
   ServiceAccountBoundWorkload,
   ServiceAccountSummary,
 } from '@kbn/core-security-common';

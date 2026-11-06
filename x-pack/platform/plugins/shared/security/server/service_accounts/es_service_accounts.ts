@@ -762,6 +762,9 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       return null;
     }
 
+    // `kibana_system` cannot read the account's tokens, so unlike `get` this cannot confirm that
+    // the token Kibana minted still exists. The stored credential is the best answer available,
+    // and the same one `list` gives.
     const assumable = (await this.credentialStore.findExisting([id])).has(id);
     return { id: account.id, name: account.name, enabled: account.enabled, assumable };
   }

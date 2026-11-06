@@ -545,33 +545,11 @@ describe('ServiceAccountWorkloadBindings', () => {
       expect(backend.getSummary).toHaveBeenCalledWith('service-account-id');
     });
 
-    it('names the account when it is the one the caller expected', async () => {
-      await expect(
-        bindings.getServiceAccountSummary(PLUGIN_ID, {
-          ...WORKLOAD_IN_SPACE,
-          expectedServiceAccountId: 'service-account-id',
-        })
-      ).resolves.toEqual(summary);
-      expect(store.getVerified).toHaveBeenCalledWith(COORDINATES);
-    });
-
     it('resolves `null` without reading an account when the workload is unbound', async () => {
       store.getVerified.mockResolvedValue(null);
 
       await expect(
         bindings.getServiceAccountSummary(PLUGIN_ID, WORKLOAD_IN_SPACE)
-      ).resolves.toBeNull();
-      expect(backend.getSummary).not.toHaveBeenCalled();
-    });
-
-    // A past run records the account it ran as. Once the workload is bound to another, the summary
-    // must not name either: the recorded id is not one Core verified.
-    it('resolves `null` without reading an account when the binding names another one', async () => {
-      await expect(
-        bindings.getServiceAccountSummary(PLUGIN_ID, {
-          ...WORKLOAD_IN_SPACE,
-          expectedServiceAccountId: 'another-account',
-        })
       ).resolves.toBeNull();
       expect(backend.getSummary).not.toHaveBeenCalled();
     });

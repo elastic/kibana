@@ -16,7 +16,6 @@ import type {
   ServiceAccountWorkloadCoordinates,
   ServiceAccountWorkloadRef,
   ServiceAccountWorkloadRequestParams,
-  ServiceAccountWorkloadSummaryParams,
 } from '@kbn/core-security-server';
 import type {
   AuditLogger,
@@ -68,7 +67,7 @@ export interface ServiceAccountWorkloadBindingsApi {
 
   getServiceAccountSummary(
     pluginId: string,
-    params: ServiceAccountWorkloadSummaryParams
+    params: ServiceAccountWorkloadCoordinates
   ): Promise<ServiceAccountSummary | null>;
 
   withScopedRequest<T>(
@@ -270,21 +269,10 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
    */
   async getServiceAccountSummary(
     pluginId: string,
-    { expectedServiceAccountId, ...params }: ServiceAccountWorkloadSummaryParams
+    params: ServiceAccountWorkloadCoordinates
   ): Promise<ServiceAccountSummary | null> {
     const binding = await this.getBinding(pluginId, params);
-    if (!binding) {
-      return null;
-    }
-
-    if (
-      expectedServiceAccountId !== undefined &&
-      binding.serviceAccountId !== expectedServiceAccountId
-    ) {
-      return null;
-    }
-
-    return await this.backend.getSummary(binding.serviceAccountId);
+    return binding ? await this.backend.getSummary(binding.serviceAccountId) : null;
   }
 
   async withScopedRequest<T>(

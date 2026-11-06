@@ -970,12 +970,13 @@ describe('UiamServiceAccounts', () => {
       expect(mockUiam.getServiceAccount).not.toHaveBeenCalled();
     });
 
-    it('propagates a 404 when UIAM has no such account', async () => {
-      mockUiam.getServiceAccount.mockRejectedValue(Boom.notFound('Not found'));
+    it('answers 404 when UIAM has no such account', async () => {
+      mockUiam.getServiceAccount.mockResolvedValue(null);
 
       await expect(
         serviceAccounts.get(createMockRequest('Bearer essu_my_token'), 'service-account-id')
       ).rejects.toMatchObject({ output: { statusCode: 404 } });
+      expect(logger.error).not.toHaveBeenCalled();
     });
 
     it('reports the description UIAM holds for the account', async () => {
@@ -987,15 +988,6 @@ describe('UiamServiceAccounts', () => {
       await expect(
         serviceAccounts.get(createMockRequest('Bearer essu_my_token'), 'service-account-id')
       ).resolves.toMatchObject({ description: 'Relays the nightshift alerts.' });
-    });
-
-    it('answers 404 for the 403 UIAM sends for an account it does not know', async () => {
-      mockUiam.getServiceAccount.mockRejectedValue(uiamRefusal('0xEDF789', 403));
-
-      await expect(
-        serviceAccounts.get(createMockRequest('Bearer essu_my_token'), 'service-account-id')
-      ).rejects.toMatchObject({ output: { statusCode: 404 } });
-      expect(logger.error).not.toHaveBeenCalled();
     });
 
     it('propagates any other UIAM refusal unchanged', async () => {
@@ -1046,13 +1038,7 @@ describe('UiamServiceAccounts', () => {
     });
 
     it('resolves `null` when UIAM has no such account', async () => {
-      mockUiam.getServiceAccount.mockRejectedValue(Boom.notFound('Not found'));
-
-      await expect(serviceAccounts.getSummary('service-account-id')).resolves.toBeNull();
-    });
-
-    it('resolves `null` for the 403 UIAM sends for an account it does not know', async () => {
-      mockUiam.getServiceAccount.mockRejectedValue(uiamRefusal('0xEDF789', 403));
+      mockUiam.getServiceAccount.mockResolvedValue(null);
 
       await expect(serviceAccounts.getSummary('service-account-id')).resolves.toBeNull();
       expect(logger.error).not.toHaveBeenCalled();

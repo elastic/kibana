@@ -14,7 +14,6 @@ import type {
   ServiceAccountWorkloadCoordinates,
   ServiceAccountWorkloadRequestParams,
   ServiceAccountWorkloadRef,
-  ServiceAccountWorkloadSummaryParams,
   ServiceAccountSummary,
 } from '@kbn/core-security-common';
 
@@ -114,7 +113,7 @@ export interface ServiceAccountsServiceContract
    */
   getWorkloadServiceAccountSummary(
     pluginId: string,
-    params: ServiceAccountWorkloadSummaryParams
+    params: ServiceAccountWorkloadCoordinates
   ): Promise<ServiceAccountSummary | null>;
 
   /**
