@@ -38,7 +38,6 @@ export {
   type ToolCallWithIntent,
 } from './messages';
 export {
-  toolsToLangchain,
   toolToLangchain,
   INTENT_PARAM,
   toolIdentifierFromToolCall,
@@ -46,7 +45,6 @@ export {
   createToolIdMappings,
   reverseMap,
   type ToolIdMapping,
-  type ToolsAndMappings,
   type BuildToolContentParams,
   type BuildToolContentFn,
 } from './tools';

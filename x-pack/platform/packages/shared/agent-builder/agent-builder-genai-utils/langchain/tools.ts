@@ -10,7 +10,6 @@ import { z } from '@kbn/zod/v4';
 import type { StructuredTool } from '@langchain/core/tools';
 import { tool as toTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/logging';
-import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ChatAgentEvent, ToolResult } from '@kbn/agent-builder-common';
 import { ChatEventType } from '@kbn/agent-builder-common';
 import type {
@@ -19,28 +18,12 @@ import type {
   ExecutableTool,
   RunToolReturn,
   ToolEventHandlerFn,
-  ToolProvider,
 } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { isDynamicToolEvent, isDynamicToolRunReturn } from '@kbn/agent-builder-server/runner';
 import type { ToolCall } from './messages';
 
 export type ToolIdMapping = Map<string, string>;
-
-export interface ToolsAndMappings {
-  /**
-   * The tools in langchain format
-   */
-  tools: StructuredTool[];
-  /**
-   * ID mapping that can be used to retrieve the agentBuilder tool id from the langchain tool id.
-   */
-  idMappings: ToolIdMapping;
-  /**
-   * ID mapping to get the langchain tool fron agentBuilder id map
-   */
-  agentBuilderToLangchainIdMap: ToolIdMapping;
-}
 
 /**
  * Name of the optional parameter injected into every tool schema (when `addIntentParam` is set),
@@ -50,38 +33,6 @@ export const INTENT_PARAM = '_intent';
 
 const INTENT_PARAM_DESCRIPTION =
   'Clear, concise description of what you are doing by calling this tool';
-
-export const toolsToLangchain = async ({
-  request,
-  tools,
-  logger,
-  sendEvent,
-  addIntentParam = false,
-}: {
-  request: KibanaRequest;
-  tools: ToolProvider | ExecutableTool[];
-  logger: Logger;
-  sendEvent?: AgentEventEmitterFn;
-  addIntentParam?: boolean;
-}): Promise<ToolsAndMappings> => {
-  const allTools = Array.isArray(tools) ? tools : await tools.list({ request });
-  const agentBuilderToLangchainIdMap = createToolIdMappings(allTools);
-
-  const convertedTools = await Promise.all(
-    allTools.map((tool) => {
-      const toolId = agentBuilderToLangchainIdMap.get(tool.id);
-      return toolToLangchain({ tool, logger, toolId, sendEvent, addIntentParam });
-    })
-  );
-
-  const reverseMappings = reverseMap(agentBuilderToLangchainIdMap);
-
-  return {
-    tools: convertedTools,
-    idMappings: reverseMappings,
-    agentBuilderToLangchainIdMap,
-  };
-};
 
 export const sanitizeToolId = (toolId: string): string => {
   return toolId.replaceAll('.', '_').replace(/[^a-zA-Z0-9_-]/g, '');
