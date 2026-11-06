@@ -80,7 +80,7 @@ function normalizeBuildkiteKey(value: string): string {
     .replace(/^-|-$/g, '');
 }
 
-function parseGithubPrLabels(raw: string): string[] {
+export function parseGithubPrLabels(raw: string): string[] {
   try {
     const parsed = JSON.parse(raw) as unknown;
     if (Array.isArray(parsed)) {
@@ -178,7 +178,7 @@ function isPreemptibleEnabled(): boolean {
 /**
  * YAML double-quoted scalar with `$` escaped to `$$` so Buildkite upload won't interpolate it.
  */
-function toBuildkiteYamlString(value: string): string {
+export function toBuildkiteYamlString(value: string): string {
   return JSON.stringify(value).replace(/\$/g, '$$$$');
 }
 

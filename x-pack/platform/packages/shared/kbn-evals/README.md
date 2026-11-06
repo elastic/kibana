@@ -335,6 +335,26 @@ EVAL_INCLUDE_EIS_MODELS=1
 EVAL_SLACK_NOTIFICATION_CHANNEL=#my-test-channel
 ```
 
+#### Nightshift evals (`elastic/nightshift-evals`)
+
+A second, separate path runs the tasks of the `nightshift-evals` repo, from PR labels or on demand. It runs next to the
+suites above and does not change how they are selected. Kibana runs from source, so there is
+no Kibana build step.
+
+| Label                      | Effect                                                              |
+| -------------------------- | ------------------------------------------------------------------- |
+| `nightshift-evals:<task>`  | Run a task from the repo's `ci/tasks.yaml`                          |
+| `nightshift-evals:all`     | Run every task                                                      |
+| `models:eis/<model-id>`    | One run per model. Without one, Kibana's default model is used      |
+
+Only `eis/*` model labels count here. The result shows as a `nightshift-evals` commit status
+and as one PR comment per task. The pipelines are `kibana-nightshift-evals-pr`
+and `kibana-nightshift-evals-on-demand`.
+
+For on-demand builds, set `NIGHTSHIFT_EVAL_TASK` (a task id, a comma list, or `all`) and
+`EVAL_MODEL_GROUPS`. Optional: `NIGHTSHIFT_EVAL_ARGS` (extra `eval` flags) and
+`NIGHTSHIFT_EVALS_REF` (a branch or SHA of nightshift-evals, default `main`).
+
 ---
 
 ## 2. Creating a new evaluation suite
