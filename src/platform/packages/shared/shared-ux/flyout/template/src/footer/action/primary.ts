@@ -15,13 +15,13 @@ import { resolveTooltipButtonProps, withTooltip } from './tooltip';
 
 /** Declarative `FlyoutTemplate.Footer.PrimaryAction`. */
 export const PrimaryAction = primaryActionPart.createComponent<FlyoutFooterPrimaryActionProps>({
-  resolve: ({ label, tooltip, ...buttonProps }) =>
+  resolve: ({ label, tooltip, color = 'primary', ...buttonProps }) =>
     withTooltip(
       React.createElement(
         EuiButton,
         {
           ...resolveTooltipButtonProps(buttonProps, tooltip),
-          color: 'primary',
+          color,
           size: 'm',
           fill: true,
         },

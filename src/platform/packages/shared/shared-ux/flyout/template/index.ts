@@ -31,6 +31,7 @@ export type {
   FlyoutBodySubsectionProps,
   FlyoutBodyAccordionProps,
   FlyoutFooterProps,
+  FlyoutFooterPrimaryActionColor,
   FlyoutFooterPrimaryActionProps,
   FlyoutFooterSecondaryActionProps,
   FlyoutFooterPrimaryActionMenuProps,

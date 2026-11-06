@@ -9,7 +9,7 @@
 </FlyoutTemplate.Footer>
 ```
 
-- `FlyoutTemplate.Footer.PrimaryAction` — rendered as a filled `EuiButton`.
+- `FlyoutTemplate.Footer.PrimaryAction` — rendered as a filled `EuiButton`, `primary` or `danger` colored.
 - `FlyoutTemplate.Footer.SecondaryAction` — rendered as an `EuiButtonEmpty`.
 - `FlyoutTemplate.Footer.PrimaryActionMenu` — rendered as a filled `EuiButton` that opens an `EuiContextMenu` in a popover above the footer. See [Primary action menu](#primary-action-menu) below.
 
@@ -21,7 +21,13 @@ All three `label` props are `string`, not `ReactNode`.
 
 `PrimaryAction` and `SecondaryAction` accept `label`, `onClick`, an optional `id`, any `data-*` attributes, and the remaining `EuiButton` props, such as `iconType`, `iconSide`, `isLoading`, `isDisabled`, `contentProps`, and `textProps`. The `id` is forwarded to the button element.
 
-Both are typed from EUI's button-only props, so an action always renders a button and cannot take anchor props. The template controls appearance and sizing, so `children`, `color`, `element`, `fill`, `fullWidth`, `size`, and `buttonRef` are not accepted, and `SecondaryAction` does not take `flush`. `PrimaryAction` also takes `minWidth`, which `EuiButtonEmpty` does not support.
+Both are typed from EUI's button-only props, so an action always renders a button and cannot take anchor props. The template controls appearance and sizing, so `children`, `element`, `fill`, `fullWidth`, `size`, and `buttonRef` are not accepted, and `SecondaryAction` does not take `flush`. `PrimaryAction` also takes `minWidth`, which `EuiButtonEmpty` does not support.
+
+`PrimaryAction` takes a `color` of `primary` (the default) or `danger`. Use `danger` for a destructive action, such as deleting or cancelling something. No other colors are accepted, and `SecondaryAction` takes no `color`.
+
+```tsx
+<FlyoutTemplate.Footer.PrimaryAction label="Delete rule" color="danger" onClick={onDelete} />
+```
 
 An optional `tooltip` wraps the button in an `EuiToolTip`, for example to explain why the button is disabled. A natively disabled button fires no pointer events, so its tooltip could never open. For that reason, a disabled action with a tooltip sets `hasAriaDisabled` to true by default.
 

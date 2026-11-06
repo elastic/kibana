@@ -10,6 +10,7 @@
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { EuiButton } from '@elastic/eui';
 import { FlyoutTemplate } from './flyout_template';
 
 const noop = () => {};
@@ -71,6 +72,57 @@ describe('FlyoutTemplate footer', () => {
 
     expect(screen.getByTestId('primarySave')).toHaveAttribute('data-foo', 'primaryFoo');
     expect(screen.getByTestId('primaryContent')).toBeInTheDocument();
+  });
+
+  it.each([
+    { color: undefined, expected: 'primary' as const },
+    { color: 'primary' as const, expected: 'primary' as const },
+    { color: 'danger' as const, expected: 'danger' as const },
+  ])(
+    'renders PrimaryAction with the $expected color when color is $color',
+    ({ color, expected }) => {
+      renderTemplate(
+        <>
+          <EuiButton fill color={expected} data-test-subj="reference">
+            Reference
+          </EuiButton>
+          <FlyoutTemplate onClose={noop} session="never">
+            <FlyoutTemplate.Body>
+              <span>content</span>
+            </FlyoutTemplate.Body>
+            <FlyoutTemplate.Footer>
+              <FlyoutTemplate.Footer.PrimaryAction
+                label="Save"
+                onClick={noop}
+                color={color}
+                data-test-subj="primarySave"
+              />
+            </FlyoutTemplate.Footer>
+          </FlyoutTemplate>
+        </>
+      );
+
+      const { backgroundColor } = window.getComputedStyle(screen.getByTestId('reference'));
+      expect(backgroundColor).not.toBe('');
+      expect(screen.getByTestId('primarySave')).toHaveStyle({ backgroundColor });
+    }
+  );
+
+  it('renders danger and primary PrimaryActions with different colors', () => {
+    renderTemplate(
+      <>
+        <EuiButton fill color="primary" data-test-subj="primaryReference">
+          Primary
+        </EuiButton>
+        <EuiButton fill color="danger" data-test-subj="dangerReference">
+          Danger
+        </EuiButton>
+      </>
+    );
+
+    expect(window.getComputedStyle(screen.getByTestId('dangerReference')).backgroundColor).not.toBe(
+      window.getComputedStyle(screen.getByTestId('primaryReference')).backgroundColor
+    );
   });
 
   it('forwards a custom data attribute and an EuiButtonEmpty prop through SecondaryAction', () => {
