@@ -11,12 +11,27 @@ import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
+import { SERVICE_SETTINGS_SESSION_KEY } from '../service_settings_step/use_service_settings';
 import { useOnboardingSO } from './use_onboarding_so';
 import type { DeployGroup } from './deploy_groups';
 import {
   applyDedicatedNamespaceTemplates,
   getGlobalNamespacePackages,
 } from './apply_dedicated_templates';
+
+/**
+ * Whether the switch was turned off since this run started. The apply runs in the background, and
+ * the user can go back and turn it off before it finishes. Step 2 saves that choice as off at once,
+ * so a callback that saves it as on afterwards would bring it back when the deployment is reopened.
+ */
+const wasSwitchTurnedOff = (): boolean => {
+  try {
+    const stored = window.sessionStorage.getItem(SERVICE_SETTINGS_SESSION_KEY);
+    return stored !== null && JSON.parse(stored)?.dedicatedNamespaceTemplates === false;
+  } catch {
+    return false;
+  }
+};
 
 interface UseApplyDedicatedTemplatesParams {
   /** Whether the switch is on. */
@@ -93,7 +108,9 @@ export const useApplyDedicatedTemplates = ({
     if (failedPackages.length === 0) {
       // Saved here, where the saved namespace is the one just applied, so the two cannot disagree.
       // A first deploy has no record yet; the deploy creates it with the switch.
-      if (deploymentId) updateDeployment(deploymentId, { dedicatedNamespaceTemplates: true });
+      if (deploymentId && !wasSwitchTurnedOff()) {
+        updateDeployment(deploymentId, { dedicatedNamespaceTemplates: true });
+      }
       return;
     }
     // Forget the request so a later change of the settings tries again.

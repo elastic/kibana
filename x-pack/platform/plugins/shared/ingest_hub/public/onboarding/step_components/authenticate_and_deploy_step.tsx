@@ -337,7 +337,9 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
   const applyDedicatedTemplates = useApplyDedicatedTemplates({
     enabled: !!serviceSettings.dedicatedNamespaceTemplates,
-    isDeployDone: isAgentBased ? isAgentDone : isMiDone,
+    // A deploy attempted here. "Done" alone also turns true for an existing deployment once its
+    // drift check settles, which is only a reopen and must not write the shared list.
+    isDeployDone: isAgentBased ? agentDeployAttempted && isAgentDone : deployAttempted && isMiDone,
     groups: isAgentBased ? agentTargets : deployGroups,
     globalNamespace: serviceSettings.namespace?.trim() ?? '',
   });

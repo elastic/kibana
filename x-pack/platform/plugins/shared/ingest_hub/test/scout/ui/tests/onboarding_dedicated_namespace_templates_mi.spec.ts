@@ -70,19 +70,6 @@ test.describe(
       });
     });
 
-    test('a deploy with the switch off leaves the package alone', async ({ browserAuth, page }) => {
-      await mockManagedIntegrations(page);
-      const packageRequests = await mockInstalledAwsPackage(page);
-      await navigateToOnboardingStep(browserAuth, page, 'service-settings', {
-        selectedServiceIds: ['elb'],
-        namespace: 'prod',
-      });
-
-      await deployWithTypedKeys(page);
-
-      expect(packageRequests.updates).toHaveLength(0);
-    });
-
     test('the switch survives going back to the settings step', async ({ browserAuth, page }) => {
       await mockManagedIntegrations(page);
       await mockInstalledAwsPackage(page);

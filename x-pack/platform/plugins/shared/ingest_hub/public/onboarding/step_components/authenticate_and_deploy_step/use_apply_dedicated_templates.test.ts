@@ -9,6 +9,7 @@ import { renderHook, act } from '@testing-library/react';
 
 import type { DeployGroup } from './deploy_groups';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
+import { SERVICE_SETTINGS_SESSION_KEY } from '../service_settings_step/use_service_settings';
 import { useApplyDedicatedTemplates } from './use_apply_dedicated_templates';
 import { applyDedicatedNamespaceTemplates } from './apply_dedicated_templates';
 
@@ -55,6 +56,7 @@ const render = (props: Partial<Parameters<typeof useApplyDedicatedTemplates>[0]>
 
 describe('useApplyDedicatedTemplates', () => {
   beforeEach(() => {
+    window.sessionStorage.clear();
     jest.resetAllMocks();
     mockApply.mockResolvedValue({
       failedPackages: [],
@@ -166,6 +168,22 @@ describe('useApplyDedicatedTemplates', () => {
     expect(mockUpdateDeployment).toHaveBeenCalledWith('dep-1', {
       dedicatedNamespaceTemplates: true,
     });
+  });
+
+  it('does not bring the switch back on when it was turned off while this was running', async () => {
+    const { result } = render();
+    // Back to the settings step, which saves the switch as off at once, before the apply finishes.
+    window.sessionStorage.setItem(
+      SERVICE_SETTINGS_SESSION_KEY,
+      JSON.stringify({ dedicatedNamespaceTemplates: false })
+    );
+
+    await act(async () => {
+      await result.current();
+    });
+
+    expect(mockApply).toHaveBeenCalled();
+    expect(mockUpdateDeployment).not.toHaveBeenCalled();
   });
 
   it('does not save the switch when a package could not be updated', async () => {

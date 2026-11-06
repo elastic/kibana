@@ -30,7 +30,7 @@ import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { supportsNamespace } from './instance_namespace_field';
-import { followsGlobalNamespace } from '../../common/effective_namespace';
+import { deploysAsPolicy, followsGlobalNamespace } from '../../common/effective_namespace';
 import { ecfFamilySupportsNamespace } from '../../ecf_cloudformation';
 import { getRegionFieldName, hasConfigurableFlyoutFields } from './field_config';
 import type { ServiceInstance } from './use_service_settings';
@@ -115,14 +115,15 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
       (s) => s !== 'error' && s !== 'timeout'
     );
 
-  // ECF has no package policy to opt a namespace in for. Until the services are known the switch
-  // stays available rather than flickering off.
+  // ECF has no package policy to opt a namespace in for. Whether a service deploys as a policy
+  // depends on the method: agent-based deploys every service as one, even an ECF-only one. Until
+  // the services are known the switch stays available rather than flickering off.
   const isDedicatedTemplatesUnavailable =
     awsServicesMap !== undefined &&
     instances.length > 0 &&
     !instances.some((inst) => {
       const service = awsServicesMap.get(inst.serviceId);
-      return !!service && supportsNamespace(service);
+      return !!service && deploysAsPolicy(service, deploymentMethod);
     });
 
   // Only the unified stack takes the namespace, so only its launch changes what a new value means.
