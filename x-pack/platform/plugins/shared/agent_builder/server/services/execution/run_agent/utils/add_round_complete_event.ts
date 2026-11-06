@@ -171,8 +171,7 @@ export const addRoundCompleteEvent = ({
 
 /**
  * The round's full steps: the final graph `steps` channel plus what LangGraph never saw (progress on
- * a call interrupted by a prompt, an unconsumed `todo_write`), minus the runtime-only browser /
- * dedicated-lifecycle calls.
+ * a call interrupted by a prompt), minus the runtime-only browser / dedicated-lifecycle calls.
  */
 const resolveRoundSteps = ({
   tracker,
@@ -216,7 +215,7 @@ const resumeRound = ({
   );
 
   // The resume execution (exec_k): the steps this execution owns — the resolved paused calls (with
-  // only the progression observed since the pause), the new steps and a rewritten todos step.
+  // only the progression observed since the pause) and the new steps.
   const followUpRound = createRound({
     steps: tracker.executionProjection(finalGraphState),
     events,

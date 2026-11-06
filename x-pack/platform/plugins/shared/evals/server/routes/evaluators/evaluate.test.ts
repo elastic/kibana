@@ -227,7 +227,7 @@ describe('POST /internal/evals/_evaluate', () => {
     expect(results[1].error?.message).toBe('e2 exploded');
   });
 
-  it('returns two ok results, reuses one trace accessor, and caches inference client by connector', async () => {
+  it('returns two ok results, reuses one trace accessor, and binds each evaluator its own inference client', async () => {
     const round = {
       input: { message: 'What is the payment status?' },
       response: { message: 'Payment service is healthy.' },
@@ -335,10 +335,12 @@ describe('POST /internal/evals/_evaluate', () => {
         status: 'ok',
       }),
     ]);
-    expect(getClient).toHaveBeenCalledTimes(1);
+    // One client per evaluator, so each counts only its own model calls.
+    expect(getClient).toHaveBeenCalledTimes(2);
     expect(getClient).toHaveBeenCalledWith({
       request: expect.any(Object),
       bindTo: { connectorId: 'connector-123' },
+      callbacks: expect.any(Object),
     });
     expect(firstEvaluate).toHaveBeenCalledWith(
       expect.objectContaining({

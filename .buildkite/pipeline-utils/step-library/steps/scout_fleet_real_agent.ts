@@ -8,7 +8,7 @@
  */
 
 import { commandStep } from '../helpers.ts';
-import { retry, spotAgent, spotZones } from '../presets.ts';
+import { pdBalanced, retry, spotAgent, spotZones } from '../presets.ts';
 import type { Step } from '../types.ts';
 
 export const scoutFleetRealAgentSteps = (): readonly Step[] => [
@@ -16,7 +16,7 @@ export const scoutFleetRealAgentSteps = (): readonly Step[] => [
     command: '.buildkite/scripts/steps/test/scout_fleet_real_agent.sh',
     label: 'Scout Fleet Real Agent',
     key: 'scout-fleet-real-agent',
-    agents: spotAgent('n2-highmem-4', spotZones.centralFCA),
+    agents: { ...spotAgent('n2-highmem-4', spotZones.centralFCA), ...pdBalanced },
     depends_on: ['build'],
     // One stack with a Docker Fleet Server and Docker Elastic Agents.
     timeout_in_minutes: 60,
