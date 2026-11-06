@@ -11,6 +11,6 @@
     "server": true,
     "configPath": ["xpack", "notebook"],
     "requiredPlugins": ["data", "esql", "features", "lens"],
-    "optionalPlugins": ["customContent"]
+    "optionalPlugins": ["customContent", "developerToolbar"]
   }
 }

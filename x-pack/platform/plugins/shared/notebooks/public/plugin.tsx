@@ -5,20 +5,31 @@
  * 2.0.
  */
 
-import type { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
+import React, { Suspense, lazy } from 'react';
+import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { CustomContentPublicStart } from '@kbn/custom-content-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { APP_ID, APP_ROUTE, PLUGIN_NAME } from '../common/constants';
+import { createPerformanceCheck$, type DeveloperToolbarStart } from './performance_check';
 
 export interface NotebookStartDependencies {
   data: DataPublicPluginStart;
   lens: LensPublicStart;
   customContent?: CustomContentPublicStart;
+  developerToolbar?: DeveloperToolbarStart;
 }
 
+const LazyPerformanceCheckToggle = lazy(async () => {
+  const { PerformanceCheckToggle } = await import('./components/performance_check_toggle');
+  return { default: PerformanceCheckToggle };
+});
+
 export class NotebookPlugin implements Plugin<void, void, {}, NotebookStartDependencies> {
+  private readonly performanceCheck$ = createPerformanceCheck$();
+  private unregisterToolbarItem?: () => void;
+
   public setup(core: CoreSetup<NotebookStartDependencies>): void {
     core.application.register({
       id: APP_ID,
@@ -32,12 +43,28 @@ export class NotebookPlugin implements Plugin<void, void, {}, NotebookStartDepen
           core.getStartServices(),
           import('./application'),
         ]);
-        return renderApp({ coreStart, plugins, params });
+        return renderApp({
+          coreStart,
+          plugins,
+          params,
+          performanceCheck$: this.performanceCheck$,
+        });
       },
     });
   }
 
-  public start(): void {}
+  public start(_core: CoreStart, { developerToolbar }: NotebookStartDependencies): void {
+    this.unregisterToolbarItem = developerToolbar?.registerItem({
+      id: 'Notebook Performance Check',
+      children: (
+        <Suspense fallback={null}>
+          <LazyPerformanceCheckToggle enabled$={this.performanceCheck$} />
+        </Suspense>
+      ),
+    });
+  }
 
-  public stop(): void {}
+  public stop(): void {
+    this.unregisterToolbarItem?.();
+  }
 }

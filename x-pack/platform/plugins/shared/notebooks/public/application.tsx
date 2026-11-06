@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import type { BehaviorSubject } from 'rxjs';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { PLUGIN_NAME } from '../common/constants';
@@ -20,10 +21,12 @@ export const renderApp = ({
   coreStart,
   plugins,
   params,
+  performanceCheck$,
 }: {
   coreStart: CoreStart;
   plugins: NotebookStartDependencies;
   params: AppMountParameters;
+  performanceCheck$: BehaviorSubject<boolean>;
 }): (() => void) => {
   const { docTitle } = coreStart.chrome;
   docTitle.change(PLUGIN_NAME);
@@ -32,7 +35,7 @@ export const renderApp = ({
   const root = createRoot(params.element);
   root.render(
     coreStart.rendering.addContext(
-      <NotebookServicesProvider services={{ core: coreStart, plugins }}>
+      <NotebookServicesProvider services={{ core: coreStart, plugins, performanceCheck$ }}>
         <Router history={params.history}>
           <Routes>
             <Route exact path="/new">

@@ -6,12 +6,15 @@
  */
 
 import React, { createContext, useContext, type PropsWithChildren } from 'react';
+import type { BehaviorSubject } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import type { NotebookStartDependencies } from './plugin';
 
 export interface NotebookServices {
   core: CoreStart;
   plugins: NotebookStartDependencies;
+  /** Set from the developer toolbar; turns on the notebook performance check. */
+  performanceCheck$: BehaviorSubject<boolean>;
 }
 
 const ServicesContext = createContext<NotebookServices | null>(null);
