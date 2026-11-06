@@ -129,6 +129,8 @@ import {
 } from './lib/list_sandbox_connectors';
 import { createCustomContextClient } from './custom_context';
 import { createSandboxAllowlistClient } from './sandbox_allowlist';
+import { createSlackTurnAdmissionCheck } from './lib/slack_turn_admission';
+import { getNightshiftSettingsUrl } from './lib/notifications/notify_investigation_quota_reached';
 import type {
   InvestigationQuotaCallback,
   NightshiftInvestigationsServerSetup,
@@ -300,6 +302,18 @@ export class NightshiftInvestigationsPlugin
         },
         logger: this.logger,
       });
+      plugins.agentBuilder.callbacks.registerOnBeforeNewConversation(
+        createSlackTurnAdmissionCheck({
+          getQuotaCallback: () => this.investigationQuotaCallback,
+          getSettingsUrl: (spaceId) =>
+            getNightshiftSettingsUrl({
+              locator: settingsLocator,
+              spaceId,
+              kibanaUrl: core.http.basePath.publicBaseUrl,
+            }),
+          logger: this.logger,
+        })
+      );
       const config = this.ctx.config.get();
       const nightshiftAgentOptions: NightshiftAgentTypeOptions = {
         sandboxEnabled: plugins.sandbox?.isAvailable ?? false,
