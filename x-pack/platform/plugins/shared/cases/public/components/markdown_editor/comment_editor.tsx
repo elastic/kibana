@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useFilesContext } from '@kbn/shared-ux-file-context';
 import React, { forwardRef } from 'react';
+import { type MarkdownValueControl, type MarkdownEditorRef, type EditorBaseProps } from './types';
 import { PastableMarkdownEditor } from './pastable_editor';
-import { type MarkdownEditorRef, type EditorBaseProps } from './types';
 import { MarkdownEditor } from './editor';
 import { isOwner } from './utils';
 import { useCasesContext } from '../cases_context/use_cases_context';
 
 /** Shared props required by both editor variants */
 interface Props extends EditorBaseProps {
-  field: FieldHook<string>;
+  field: MarkdownValueControl;
   caseId?: string;
   onChange: (value: string) => void;
   value: string;
@@ -59,7 +58,12 @@ export const CommentEditor = forwardRef<MarkdownEditorRef, Props>((props, ref) =
     );
   }
 
-  return <MarkdownEditor {...props} ref={ref} onChange={props.onChange} value={props.value} />;
+  // `field` and `caseId` are only meaningful to the pastable editor; keep them off the DOM.
+  const { field, caseId, ...editorProps } = props;
+
+  return (
+    <MarkdownEditor {...editorProps} ref={ref} onChange={props.onChange} value={props.value} />
+  );
 });
 
 CommentEditor.displayName = 'CommentEditor';
