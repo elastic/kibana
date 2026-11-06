@@ -399,6 +399,26 @@ describe('FlyoutTemplate header blocks', () => {
     expect(screen.getByText('Badge 6')).toBeInTheDocument();
   });
 
+  it('closes the overflow popover when the collapsed prop hides the header content', async () => {
+    const ui = (collapsed: boolean) => (
+      <FlyoutTemplate onClose={noop} session="never" data-test-subj="myFlyout">
+        <FlyoutTemplate.Header title="Alert details" collapsed={collapsed}>
+          {badges(6)}
+        </FlyoutTemplate.Header>
+        {body}
+      </FlyoutTemplate>
+    );
+    const { rerender } = renderTemplate(ui(false));
+    const overflow = screen.getByTestId('flyoutHeaderBadgeOverflow');
+
+    await userEvent.click(overflow);
+    expect(overflow).toHaveAttribute('aria-expanded', 'true');
+
+    rerender(ui(true));
+
+    expect(overflow).toHaveAttribute('aria-expanded', 'false');
+  });
+
   it('places the blocks inside the collapsible region', () => {
     renderHeader(
       <>
