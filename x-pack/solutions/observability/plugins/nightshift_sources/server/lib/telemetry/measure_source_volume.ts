@@ -6,12 +6,14 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import { BasicPrettyPrinter, Parser } from '@elastic/esql';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isResponseError, type ElasticsearchErrorDetails } from '@kbn/es-errors';
 import { getSourceLocalIndexExpressions, getSourceReadTargets } from '@kbn/nightshift-shared';
 import type { SourceVolume } from './source_volume_event';
 
 const COUNT_TIMEOUT_MS = 60_000;
+const INDEX_MODE_FIELD = '_index_mode';
 
 export interface MeasurementWindow {
   start: string;
@@ -22,10 +24,30 @@ interface MeteringStatsResponse {
   indices?: Array<{ num_docs: number; size_in_bytes: number }>;
 }
 
-// Inline, not a request `filter`, which applies above a view's output and blocks pushdown.
-// Newlines: a trailing `//` comment would swallow a pipe on the same line.
+const buildCountSourceQuery = (esql: string): string => {
+  const { root } = Parser.parse(esql);
+  const [sourceCommand, ...processingCommands] = root.commands;
+  if (sourceCommand?.name !== 'ts') {
+    return esql;
+  }
+
+  const source = BasicPrettyPrinter.command(sourceCommand).replace(/^TS(?=\s)/, 'FROM');
+  const metadataSeparator = source.includes(' METADATA ') ? ', ' : ' METADATA ';
+  const from = source.includes(INDEX_MODE_FIELD)
+    ? source
+    : `${source}${metadataSeparator}${INDEX_MODE_FIELD}`;
+  return [
+    from,
+    `| WHERE \`${INDEX_MODE_FIELD}\` == "time_series"`,
+    ...processingCommands.map((command) => `| ${BasicPrettyPrinter.command(command)}`),
+  ].join('\n');
+};
+
+// Inline for pushdown; newlines prevent trailing comments from swallowing appended commands.
 const buildCountQuery = (esql: string, { start, end }: MeasurementWindow): string =>
-  `${esql}\n| WHERE @timestamp >= "${start}" AND @timestamp <= "${end}"\n| STATS doc_count = COUNT(*)`;
+  `${buildCountSourceQuery(
+    esql
+  )}\n| WHERE @timestamp >= "${start}" AND @timestamp <= "${end}"\n| STATS doc_count = COUNT(*)`;
 
 const esErrorType = (error: errors.ResponseError): string | undefined =>
   (error.body as ElasticsearchErrorDetails | undefined)?.error?.type;

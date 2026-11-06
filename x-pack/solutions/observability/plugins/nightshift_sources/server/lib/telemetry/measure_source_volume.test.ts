@@ -92,6 +92,27 @@ describe('measureSourceVolume', () => {
     );
   });
 
+  it('counts TS sources through FROM without including standard indices', async () => {
+    const { esClient, measure } = setup({
+      esql: 'TS metrics-* METADATA _id | WHERE host.name == "a"',
+    });
+    esClient.esql.query.mockResolvedValue(countOf(42));
+    esClient.indices.stats.mockResolvedValue(statefulStats(1000, 500_000));
+
+    await expect(measure()).resolves.toMatchObject({ doc_count: 42 });
+    expect(esClient.esql.query).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query:
+          'FROM metrics-* METADATA _id, _index_mode\n' +
+          '| WHERE `_index_mode` == "time_series"\n' +
+          '| WHERE host.name == "a"\n' +
+          `| WHERE @timestamp >= "${window.start}" AND @timestamp <= "${window.end}"\n` +
+          '| STATS doc_count = COUNT(*)',
+      }),
+      expect.anything()
+    );
+  });
+
   it('sizes exact expressions with serverless metering stats', async () => {
     const { esClient, measure } = setup({
       esql: 'FROM <logs-{now/d}>,-logs-archive-*',
