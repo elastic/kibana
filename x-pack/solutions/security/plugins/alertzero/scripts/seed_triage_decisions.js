@@ -43,6 +43,17 @@
  * sweep tags the approved ones `az:would_close:*` and the model gives its own verdict, so the
  * alerts where the two disagree show how good a key is. It costs about three batch analyses.
  *
+ * UI mode (`--ui first|matching|mixed`) writes alerts only, with no decision, for a manual test that
+ * goes through the UI: a real model analyses the alerts, an analyst approves the proposal, and the
+ * approval stores the decision. Run the three phases in order, with a sweep between them:
+ *
+ *   first     6 low alerts of a benign vendor updater (pattern U) in one rule
+ *   matching  6 more alerts of the same pattern U
+ *   mixed     3 alerts of pattern U (match), and 5 near misses that must NOT match: the same
+ *             executable with another signer, the same executable started by another parent, a
+ *             high severity alert of pattern U, the same pattern in another rule, and another
+ *             executable
+ *
  * Local stacks only: it uses the development login (`ES_USERNAME` / `ES_PASSWORD`, default
  * elastic / changeme).
  */
@@ -72,6 +83,7 @@ const KEYS_PER_RULE = Number(flag('--keys-per-rule', '40'));
 const DECISION_SHARE = Number(flag('--decision-share', '0.5'));
 const HOT_KEYS = Number(flag('--hot-keys', '3'));
 const PROBE = args.includes('--probe');
+const UI_PHASE = flag('--ui', '');
 const ALERTS_INDEX = `.alerts-security.alerts-${SPACE}`;
 const DECISIONS_INDEX = HUNT_COVERAGE_AI_INDEX_DEST.value;
 const AUTH = `${process.env.ES_USERNAME ?? 'elastic'}:${process.env.ES_PASSWORD ?? 'changeme'}`;
@@ -211,7 +223,16 @@ const clean = async () => {
     'POST',
     `/${DECISIONS_INDEX}/_delete_by_query?refresh=true&conflicts=proceed`,
     {
-      query: { term: { 'attributes.investigation_id': 'triage-decisions-fixture' } },
+      // UI mode decisions are written by a real approval, so they carry the UI rules, not the fixture investigation.
+      query: {
+        bool: {
+          should: [
+            { term: { 'attributes.investigation_id': 'triage-decisions-fixture' } },
+            { terms: { 'attributes.rule_id': [UI_RULE.ruleUuid, UI_OTHER_RULE.ruleUuid] } },
+          ],
+          minimum_should_match: 1,
+        },
+      },
     }
   ).catch((error) => {
     if (String(error).includes('index_not_found_exception')) return { deleted: 0 };
@@ -548,8 +569,100 @@ const probe = async () => {
   console.log(`Wrote ${alertRows.length} alerts and ${decisionRows.length} decisions.`);
 };
 
+// ── UI mode ───────────────────────────────────────────────────────────────────
+
+const UI_RULE = {
+  ruleUuid: '7c1f0c9e-5a3b-4f6e-9a21-0000000b0001',
+  ruleName: 'Triage UI test: vendor updater runs',
+};
+const UI_OTHER_RULE = {
+  ruleUuid: '7c1f0c9e-5a3b-4f6e-9a21-0000000b0002',
+  ruleName: 'Triage UI test: vendor updater runs (copy)',
+};
+const UI_UPDATER = 'C:\\Program Files\\Acme\\Updater\\acme-update.exe';
+// Pattern U: the strict key is the rule, the executable, the signer and the parent executable.
+const uiAlert = (overrides = {}) => {
+  const executable = overrides.executable ?? UI_UPDATER;
+  const { extra, ...rest } = overrides;
+  return {
+    ...UI_RULE,
+    executable,
+    subject: 'Acme Corp',
+    severity: 'low',
+    ...rest,
+    extra: {
+      'process.command_line': `"${executable}" --scheduled-check`,
+      'process.parent.name': 'services.exe',
+      'process.parent.executable': 'C:\\Windows\\System32\\services.exe',
+      'user.name': 'SYSTEM',
+      ...extra,
+    },
+  };
+};
+
+const UI_PHASES = {
+  first: [{ label: 'pattern U (benign updater)', count: 6, alert: uiAlert() }],
+  matching: [{ label: 'pattern U again', count: 6, alert: uiAlert() }],
+  mixed: [
+    { label: 'pattern U: must match', count: 3, alert: uiAlert() },
+    {
+      label: 'same executable, other signer: must not match',
+      count: 1,
+      alert: uiAlert({
+        subject: 'Unknown Publisher',
+        extra: { 'process.code_signature.trusted': false },
+      }),
+    },
+    {
+      label: 'same executable, other parent: must not match',
+      count: 1,
+      alert: uiAlert({
+        extra: {
+          'process.parent.name': 'cmd.exe',
+          'process.parent.executable': 'C:\\Windows\\System32\\cmd.exe',
+        },
+      }),
+    },
+    {
+      label: 'pattern U, high severity: matches but is not closable',
+      count: 1,
+      alert: uiAlert({ severity: 'high' }),
+    },
+    {
+      label: 'pattern U in another rule: must not match',
+      count: 1,
+      alert: uiAlert(UI_OTHER_RULE),
+    },
+    {
+      label: 'another executable: must not match',
+      count: 1,
+      alert: uiAlert({
+        executable: 'C:\\Program Files\\Acme\\Updater\\acme-helper.exe',
+        subject: 'Acme Corp',
+      }),
+    },
+  ],
+};
+
+const uiSeed = async () => {
+  const phase = UI_PHASES[UI_PHASE];
+  if (!phase) throw new Error(`--ui takes one of: ${Object.keys(UI_PHASES).join(', ')}`);
+  await assertAlertsIndex();
+  const rows = phase.flatMap(({ label, count, alert }) => {
+    console.log(`  ${String(count).padStart(2)} ${alert.severity.padEnd(6)} ${label}`);
+    return Array.from({ length: count }, () => {
+      const { uuid, doc } = alertDocument(alert);
+      return { id: uuid, doc };
+    });
+  });
+  await bulk(ALERTS_INDEX, 'create', rows);
+  await es('POST', `/${ALERTS_INDEX}/_refresh`);
+  console.log(`Wrote ${rows.length} open alerts. No decision was written.`);
+};
+
 const run = () => {
   if (CLEAN) return clean();
+  if (UI_PHASE) return uiSeed();
   if (PROBE) return probe();
   return SCALE > 0 ? scale() : seed();
 };
