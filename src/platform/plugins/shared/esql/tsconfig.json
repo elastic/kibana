@@ -57,6 +57,7 @@
     "@kbn/code-editor",
     "@kbn/es-errors",
     "@kbn/es-types",
+    "@kbn/zod",
   ],
   "exclude": [
     "target/**/*",
