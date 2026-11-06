@@ -143,8 +143,12 @@ export const createContinuousOnboardingWorkflowService = ({
       }
 
       // Disabling: stop scheduling new runs and drain in-flight work. The document
-      // stays: uninstalling force-deletes it, which purges its execution history.
-      await setManagedEnabled({ enabled: false, workflowId, spaceId, request });
+      // stays: uninstalling force-deletes it, which purges its execution history. Switched off
+      // through the owner, because a plain update of a bound workflow needs `manage_security`.
+      await installer.disable({
+        spaceId,
+        workflowId: NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+      });
 
       if (skipExecutionDrain) {
         log.info(`Disabled continuous KI onboarding workflow scheduling in space ${spaceId}`);

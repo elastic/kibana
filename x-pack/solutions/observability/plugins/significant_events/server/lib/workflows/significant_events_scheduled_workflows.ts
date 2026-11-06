@@ -206,6 +206,15 @@ export const createSignificantEventsScheduledWorkflowsService = ({
     );
   };
 
+  // Through the owner: a plain update of a bound workflow needs `manage_security`.
+  const disableScheduledWorkflows = async ({ spaceId }: { spaceId: string }) => {
+    await Promise.all(
+      SCHEDULED_DISCOVERY_WORKFLOW_IDS.map((workflowId) =>
+        installer.disable({ spaceId, workflowId })
+      )
+    );
+  };
+
   const cancelRunningScheduledExecutions = async ({
     request,
     spaceId,
@@ -226,16 +235,10 @@ export const createSignificantEventsScheduledWorkflowsService = ({
     );
   };
 
-  const uninstallScheduledWorkflows = async ({
-    request,
-    spaceId,
-  }: {
-    request: KibanaRequest;
-    spaceId: string;
-  }) => {
+  const uninstallScheduledWorkflows = async ({ spaceId }: { spaceId: string }) => {
     await Promise.all(
       SCHEDULED_DISCOVERY_WORKFLOW_IDS.map((workflowId) =>
-        installer.uninstall({ request, spaceId, workflowId })
+        installer.uninstall({ spaceId, workflowId })
       )
     );
   };
@@ -249,9 +252,9 @@ export const createSignificantEventsScheduledWorkflowsService = ({
         return;
       }
 
-      await setAllEnabled({ enabled: false, request, spaceId });
+      await disableScheduledWorkflows({ spaceId });
       await cancelRunningScheduledExecutions({ request, spaceId });
-      await uninstallScheduledWorkflows({ request, spaceId });
+      await uninstallScheduledWorkflows({ spaceId });
       log.info(
         `Disabled and uninstalled scheduled Significant Events discovery workflows in space ${spaceId}`
       );

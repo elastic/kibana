@@ -92,6 +92,7 @@ const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => {
 const createMockInstaller = () => ({
   install: jest.fn().mockResolvedValue(undefined),
   uninstall: jest.fn().mockResolvedValue(undefined),
+  disable: jest.fn().mockResolvedValue(true),
 });
 
 describe('scheduled Significant Events managed workflows', () => {
@@ -352,24 +353,25 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
       },
     });
 
-    expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
-      `${SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`,
-      { enabled: false },
-      'space-a',
-      request
-    );
+    // Through the owner: a plain update of a bound workflow needs `manage_security`.
+    expect(managedWorkflowsClient.disable).toHaveBeenCalledWith({
+      spaceId: 'space-a',
+      workflowId: SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+    });
+    expect(managedWorkflowsClient.disable).toHaveBeenCalledWith({
+      spaceId: 'space-a',
+      workflowId: SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
+    });
     expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith(
       'running-detection-execution',
       'space-a',
       request
     );
     expect(managedWorkflowsClient.uninstall).toHaveBeenCalledWith({
-      request,
       spaceId: 'space-a',
       workflowId: SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
     });
     expect(managedWorkflowsClient.uninstall).toHaveBeenCalledWith({
-      request,
       spaceId: 'space-a',
       workflowId: SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
     });

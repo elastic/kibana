@@ -79,7 +79,7 @@ export async function canManageSecurity({
   core,
   request,
 }: {
-  core: CoreStart;
+  core: Pick<CoreStart, 'elasticsearch'>;
   request: KibanaRequest;
 }): Promise<boolean> {
   const { has_all_requested: allowed } = await core.elasticsearch.client

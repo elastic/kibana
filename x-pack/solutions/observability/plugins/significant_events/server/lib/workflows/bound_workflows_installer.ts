@@ -27,11 +27,11 @@ interface IUntypedManagedWorkflows {
     id: string,
     options: ManagedWorkflowServiceInstallOptions
   ) => Promise<void>;
-  uninstall: (
-    pluginId: string,
-    id: string,
-    options: ManagedWorkflowOperationOptions
-  ) => Promise<void>;
+}
+
+interface IUntypedOwnerWorkflows {
+  uninstall: (id: string, options: ManagedWorkflowOperationOptions) => Promise<void>;
+  disable: (id: string, options: ManagedWorkflowOperationOptions) => Promise<boolean>;
 }
 
 interface IBoundWorkflowParams {
@@ -39,6 +39,12 @@ interface IBoundWorkflowParams {
   request: KibanaRequest;
   spaceId: string;
   /** The managed workflow type id; the installed document is `<id>-<spaceId>`. */
+  workflowId: string;
+}
+
+interface IOwnerWorkflowParams {
+  spaceId: string;
+  /** The managed workflow type id; the document is `<id>-<spaceId>`. */
   workflowId: string;
 }
 
@@ -55,8 +61,17 @@ export interface BoundWorkflowsInstaller {
       values?: Record<string, string | number>;
     }
   ) => Promise<void>;
-  /** Removes the space's copy of a bound workflow with its run history. */
-  uninstall: (params: IBoundWorkflowParams) => Promise<void>;
+  /**
+   * Removes the space's copy of a bound workflow with its run history. Goes through the owner, so
+   * it needs no `manage_security`: stopping background activity must not need permission to bind
+   * accounts.
+   */
+  uninstall: (params: IOwnerWorkflowParams) => Promise<void>;
+  /**
+   * Switches the space's copy of a bound workflow off through the owner, with no `manage_security`.
+   * Resolves `false` when nothing was switched off, such as a missing or already disabled copy.
+   */
+  disable: (params: IOwnerWorkflowParams) => Promise<boolean>;
 }
 
 /** Creates the installer over the Workflows extensions start contract. */
@@ -78,6 +93,17 @@ export function createBoundWorkflowsInstaller({
       .managedWorkflows as unknown as IUntypedManagedWorkflows;
   };
 
+  // The request-less lifecycle API of the owner: no caller, so nothing to check `manage_security` on.
+  const getOwnerClient = async () => {
+    const { workflowsExtensions } = await getStartDeps();
+    if (!workflowsExtensions) {
+      throw new Error('Workflows are not available');
+    }
+    return (await workflowsExtensions.initManagedWorkflowsClient(
+      SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER
+    )) as unknown as IUntypedOwnerWorkflows;
+  };
+
   return {
     async install({ request, spaceId, workflowId, serviceAccountId, values }) {
       const { core } = await getStartDeps();
@@ -95,12 +121,14 @@ export function createBoundWorkflowsInstaller({
       });
     },
 
-    async uninstall({ request, spaceId, workflowId }) {
-      const client = await getClient(request);
-      await client.uninstall(SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER, workflowId, {
-        spaceId,
-        workflowIdSuffix: spaceId,
-      });
+    async uninstall({ spaceId, workflowId }) {
+      const client = await getOwnerClient();
+      await client.uninstall(workflowId, { spaceId, workflowIdSuffix: spaceId });
+    },
+
+    async disable({ spaceId, workflowId }) {
+      const client = await getOwnerClient();
+      return client.disable(workflowId, { spaceId, workflowIdSuffix: spaceId });
     },
   };
 }

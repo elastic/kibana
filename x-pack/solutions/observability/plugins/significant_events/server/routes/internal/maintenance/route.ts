@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { KibanaRequest } from '@kbn/core/server';
 import {
   NIGHTSHIFT_API_PRIVILEGES,
   NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
@@ -19,6 +20,7 @@ import {
   getDetectionEngineAccountId,
 } from '../../../lib/service_accounts/detection_engine_account';
 import { StatusError } from '../../../lib/errors/status_error';
+import type { SignificantEventsServer } from '../../../types';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 
@@ -52,6 +54,31 @@ const pauseRoute = createServerRoute({
   },
 });
 
+/**
+ * Switching a workflow on that is bound to the space's account needs `manage_security`. Refuse up
+ * front: otherwise every bound workflow fails to come back and the space reads as enabled.
+ */
+const assertCanSwitchBoundWorkflowsOn = async ({
+  server,
+  request,
+  action,
+}: {
+  server: SignificantEventsServer;
+  request: KibanaRequest;
+  action: 'Resuming' | 'Resetting';
+}): Promise<void> => {
+  if (
+    (await getDetectionEngineAccountId({ core: server.core, spaceId: request.spaceId })) !==
+      undefined &&
+    !(await canManageSecurity({ core: server.core, request }))
+  ) {
+    throw new StatusError(
+      `${action} a space that runs as the detection engine service account requires the manage_security cluster privilege.`,
+      403
+    );
+  }
+};
+
 const resumeRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/maintenance/_resume',
   options: {
@@ -75,18 +102,7 @@ const resumeRoute = createServerRoute({
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
 
-    // Switching a workflow on that is bound to the space's account needs `manage_security`. Refuse
-    // up front: otherwise every bound workflow fails to come back and the space reads as enabled.
-    const spaceId = request.spaceId;
-    if (
-      (await getDetectionEngineAccountId({ core: server.core, spaceId })) !== undefined &&
-      !(await canManageSecurity({ core: server.core, request }))
-    ) {
-      throw new StatusError(
-        'Resuming a space that runs as the detection engine service account requires the manage_security cluster privilege.',
-        403
-      );
-    }
+    await assertCanSwitchBoundWorkflowsOn({ server, request, action: 'Resuming' });
 
     const updatedBy = server.core.security.authc.getCurrentUser(request)?.username;
     return maintenanceService.resume({ request, updatedBy });
@@ -117,6 +133,8 @@ const resetRoute = createServerRoute({
   }): Promise<SignificantEventsMaintenanceSummary> => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
+
+    await assertCanSwitchBoundWorkflowsOn({ server, request, action: 'Resetting' });
 
     const updatedBy = server.core.security.authc.getCurrentUser(request)?.username;
     return maintenanceService.reset({ request, updatedBy });
