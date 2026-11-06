@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { Conversation } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/logging';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import {
@@ -29,8 +28,10 @@ import {
   toFeatureSummary,
   toFeatureProjection,
 } from './reconcile_features';
-import { executeFeatureIdentificationAgent } from './identify_features_via_agent';
-import { FeatureNotEnabledError } from '../../errors/feature_not_enabled_error';
+import {
+  buildFeatureIdentificationMessage,
+  readFeatureIdentificationResult,
+} from './identify_features_via_agent';
 
 export { findSimilarFeatures } from './feature_similarity_search';
 
@@ -237,74 +238,33 @@ export function buildTelemetry(
 }
 
 // ---------------------------------------------------------------------------
-// Single inferred-features iteration (internal)
+// Agent input: everything the identification agent is asked, built before the agent runs
 // ---------------------------------------------------------------------------
 
-interface RunInferredIterationOptions {
+export interface BuildFeatureIdentificationInputOptions {
   kiClient: KnowledgeIndicatorClient;
   sourceId: string;
-  runId: string;
-  allFeatures: Feature[];
-  discoveredFeatures: Feature[];
-  excludedFeatures: Feature[];
   documents: InferenceDocument[];
-  totalFilters: number;
-  filtersCapped: boolean;
-  hasFilteredDocuments: boolean;
-  agentBuilder: AgentBuilderPluginStart;
-  request: KibanaRequest;
-  connectorId: string;
   logger: Logger;
-  signal: AbortSignal;
   tuning: IterationTuningParams;
-  iteration: number;
 }
 
-interface InferredIterationResult {
-  docsCount: number;
-  docIds: string[];
-  totalFilters: number;
-  filtersCapped: boolean;
-  hasFilteredDocuments: boolean;
-  outcome:
-    | { state: 'failure' }
-    | {
-        state: 'success';
-        tokensUsed: ChatCompletionTokenCount;
-        newFeatures: FeatureUpsert[];
-        updatedFeatures: FeatureUpsert[];
-        ignoredFeatures: IgnoredFeature[];
-        codeIgnoredCount: number;
-        remappedCount: number;
-      };
-}
-
-async function runInferredIteration({
+export async function buildFeatureIdentificationInput({
   kiClient,
   sourceId,
-  runId,
-  allFeatures,
-  discoveredFeatures,
-  excludedFeatures,
   documents,
-  totalFilters,
-  filtersCapped,
-  hasFilteredDocuments,
-  agentBuilder,
-  request,
-  connectorId,
   logger,
-  signal,
   tuning,
-  iteration,
-}: RunInferredIterationOptions): Promise<InferredIterationResult> {
+}: BuildFeatureIdentificationInputOptions): Promise<{ message: string }> {
   const {
     maxExcludedFeaturesInPrompt,
     maxPreviouslyIdentifiedFeatures = DEFAULT_MAX_PREVIOUSLY_IDENTIFIED_FEATURES,
   } = tuning;
 
-  const docsCount = documents.length;
-  const docIds = documents.map((doc) => doc._id).filter((id): id is string => id != null);
+  const [{ hits: allFeatures }, { hits: excludedFeatures }] = await Promise.all([
+    kiClient.getFeatures(sourceId),
+    kiClient.getExcludedFeatures(sourceId),
+  ]);
 
   const allKnownFeatures = allFeatures.filter((f) => !isComputedFeature(f));
   const topRanked = selectPreviouslyIdentifiedFeatures(
@@ -322,31 +282,86 @@ async function runInferredIteration({
     .slice(0, maxExcludedFeaturesInPrompt)
     .map(toFeatureProjection);
 
-  let rawFeatures: BaseFeature[];
-  let ignoredFeatures: IgnoredFeature[];
-  let tokensUsed: ChatCompletionTokenCount;
-
-  try {
-    const result = await executeFeatureIdentificationAgent({
-      agentBuilder,
-      request,
-      connectorId,
+  return {
+    message: buildFeatureIdentificationMessage({
       sourceId,
       sampleDocuments: documents,
       excludedFeatures: excludedSummaries,
       previouslyIdentifiedFeatures: topRanked.map(toFeatureProjection),
       knownFeatureIds,
-      interactionId: runId,
-      signal,
-      logger,
-    });
+    }),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Single inferred-features iteration (internal)
+// ---------------------------------------------------------------------------
+
+interface RunInferredIterationOptions {
+  runId: string;
+  allFeatures: Feature[];
+  discoveredFeatures: Feature[];
+  excludedFeatures: Feature[];
+  documents: InferenceDocument[];
+  totalFilters: number;
+  filtersCapped: boolean;
+  hasFilteredDocuments: boolean;
+  agentConversation: Pick<Conversation, 'rounds'> | undefined;
+  logger: Logger;
+}
+
+interface InferredIterationResult {
+  docsCount: number;
+  docIds: string[];
+  totalFilters: number;
+  filtersCapped: boolean;
+  hasFilteredDocuments: boolean;
+  outcome:
+    | { state: 'failure' }
+    | {
+        state: 'success';
+        tokensUsed: ChatCompletionTokenCount;
+        agentDurationMs: number;
+        newFeatures: FeatureUpsert[];
+        updatedFeatures: FeatureUpsert[];
+        ignoredFeatures: IgnoredFeature[];
+        codeIgnoredCount: number;
+        remappedCount: number;
+      };
+}
+
+async function runInferredIteration({
+  runId,
+  allFeatures,
+  discoveredFeatures,
+  excludedFeatures,
+  documents,
+  totalFilters,
+  filtersCapped,
+  hasFilteredDocuments,
+  agentConversation,
+  logger,
+}: RunInferredIterationOptions): Promise<InferredIterationResult> {
+  const docsCount = documents.length;
+  const docIds = documents.map((doc) => doc._id).filter((id): id is string => id != null);
+
+  const allKnownFeatures = allFeatures.filter((f) => !isComputedFeature(f));
+
+  let rawFeatures: BaseFeature[];
+  let ignoredFeatures: IgnoredFeature[];
+  let tokensUsed: ChatCompletionTokenCount;
+  let agentDurationMs: number;
+
+  try {
+    if (!agentConversation) {
+      throw new Error('Feature identification agent step produced no conversation');
+    }
+    const result = readFeatureIdentificationResult({ conversation: agentConversation, logger });
     rawFeatures = result.features;
     ignoredFeatures = result.ignoredFeatures;
     tokensUsed = result.tokensUsed;
+    agentDurationMs = result.durationMs;
   } catch (error) {
-    if (signal.aborted) {
-      throw error;
-    }
     const errorMsg = error instanceof Error ? error.message : String(error);
     logger.warn(`Feature identification agent failed: ${errorMsg}`);
     return {
@@ -379,6 +394,7 @@ async function runInferredIteration({
     outcome: {
       state: 'success',
       tokensUsed,
+      agentDurationMs,
       newFeatures,
       updatedFeatures,
       ignoredFeatures,
@@ -393,13 +409,11 @@ async function runInferredIteration({
 // ---------------------------------------------------------------------------
 
 export interface IdentifyInferredFeaturesOptions {
-  esClient: ElasticsearchClient;
   kiClient: KnowledgeIndicatorClient;
-  agentBuilder?: AgentBuilderPluginStart;
-  request: KibanaRequest;
+  /** The conversation the `ai.agent` step stored. Absent when that step failed. */
+  agentConversation: Pick<Conversation, 'rounds'> | undefined;
   connectorId: string;
   logger: Logger;
-  signal: AbortSignal;
   sourceId: string;
   runId: string;
   documents: InferenceDocument[];
@@ -407,7 +421,6 @@ export interface IdentifyInferredFeaturesOptions {
   filtersCapped: boolean;
   hasFilteredDocuments: boolean;
   iteration?: number;
-  tuning: IterationTuningParams;
   trackFeaturesIdentified?: (data: FeaturesIdentifiedTelemetry) => void;
 }
 
@@ -420,13 +433,10 @@ export interface IdentifyInferredFeaturesResult {
 }
 
 export async function identifyInferredFeatures({
-  esClient,
   kiClient,
-  agentBuilder,
-  request,
+  agentConversation,
   connectorId,
   logger,
-  signal,
   sourceId,
   runId,
   documents,
@@ -434,15 +444,8 @@ export async function identifyInferredFeatures({
   filtersCapped,
   hasFilteredDocuments,
   iteration = 1,
-  tuning,
   trackFeaturesIdentified,
 }: IdentifyInferredFeaturesOptions): Promise<IdentifyInferredFeaturesResult> {
-  if (!agentBuilder) {
-    throw new FeatureNotEnabledError(
-      'Feature identification requires Agent Builder, which is not available'
-    );
-  }
-
   const [{ hits: allFeatures }, { hits: excludedFeatures }] = await Promise.all([
     kiClient.getFeatures(sourceId),
     kiClient.getExcludedFeatures(sourceId),
@@ -453,8 +456,6 @@ export async function identifyInferredFeatures({
   const startedAt = Date.now();
 
   const iterationResult = await runInferredIteration({
-    kiClient,
-    sourceId,
     runId,
     allFeatures,
     discoveredFeatures,
@@ -463,18 +464,15 @@ export async function identifyInferredFeatures({
     totalFilters,
     filtersCapped,
     hasFilteredDocuments,
-    agentBuilder,
-    request,
-    connectorId,
+    agentConversation,
     logger,
-    signal,
-    tuning,
-    iteration,
   });
 
   const { docsCount, docIds, outcome } = iterationResult;
 
-  const durationMs = Date.now() - startedAt;
+  // The agent ran as its own workflow step, so its round time is added to this step's own.
+  const durationMs =
+    Date.now() - startedAt + (outcome.state === 'success' ? outcome.agentDurationMs : 0);
 
   const telemetryCtx: TelemetryContext = {
     run_id: runId,

@@ -5,36 +5,19 @@
  * 2.0.
  */
 
-import { firstValueFrom, toArray } from 'rxjs';
 import type { Logger } from '@kbn/logging';
-import type { KibanaRequest } from '@kbn/core/server';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
-import {
-  AgentExecutionMode,
-  CONVERSATION_TITLE_MAX_LENGTH,
-  ConversationAccessControlMode,
-  isRoundCompleteEvent,
-  isToolResultEvent,
-} from '@kbn/agent-builder-common';
+import { isToolCallStep } from '@kbn/agent-builder-common';
+import type { Conversation } from '@kbn/agent-builder-common';
 import type { GeneratedSignificantEventQuery } from '@kbn/significant-events-schema';
-import {
-  NIGHTSHIFT_KI_QUERY_GENERATION_USAGE_ID,
-  NIGHTSHIFT_USAGE_PARENT_ID,
-  NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
-  NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
-} from '@kbn/nightshift-shared';
 import { EMPTY_TOKENS, buildKIQueryGenerationUserMessage } from '@kbn/nightshift-ai';
 import type { ExistingQuerySummary } from '@kbn/nightshift-ai';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
-import { KI_QUERY_GENERATION_AGENT_ID } from '../../agent_builder/agents/ki_query_generation';
 import {
   SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
   type AcceptedQuery,
 } from '../../agent_builder/skills/ki_query_generation';
 import { chatTokenCountFromModelUsage } from './features/chat_token_count';
-
-const QUERY_GENERATION_MAX_DURATION_MS = 300_000;
 
 interface FinalizedValidationData {
   slug: string;
@@ -52,75 +35,47 @@ const isFinalizedValidationData = (data: unknown): data is FinalizedValidationDa
   'finalized_queries' in data &&
   Array.isArray(data.finalized_queries);
 
-export interface ExecuteKIQueryGenerationAgentOptions {
-  agentBuilder: AgentBuilderPluginStart;
-  request: KibanaRequest;
-  connectorId: string;
-  interactionId: string;
+export interface BuildKIQueryGenerationMessageOptions {
   source: NightshiftSource;
   existingQueries: ExistingQuerySummary[];
   maxExistingQueriesForContext: number;
-  signal?: AbortSignal;
-  logger: Logger;
 }
 
-export async function executeKIQueryGenerationAgent({
-  agentBuilder,
-  request,
-  connectorId,
-  interactionId,
+export function buildKIQueryGenerationMessage({
   source,
   existingQueries,
   maxExistingQueriesForContext,
-  signal,
-  logger,
-}: ExecuteKIQueryGenerationAgentOptions): Promise<{
-  queries: GeneratedSignificantEventQuery[];
-  tokensUsed: ChatCompletionTokenCount;
-}> {
-  const userMessage = buildKIQueryGenerationUserMessage(
+}: BuildKIQueryGenerationMessageOptions): string {
+  return buildKIQueryGenerationUserMessage(
     { slug: source.slug, description: source.description },
     existingQueries,
     maxExistingQueriesForContext
   );
+}
 
-  const conversationClient = await agentBuilder.conversations.getScopedClient({ request });
-  const conversation = await conversationClient.create({
-    agentId: KI_QUERY_GENERATION_AGENT_ID,
-    title: `KI query generation: ${source.slug}`.slice(0, CONVERSATION_TITLE_MAX_LENGTH),
-    accessControl: { access_mode: ConversationAccessControlMode.Public },
-  });
-
-  const timeoutSignal = AbortSignal.timeout(QUERY_GENERATION_MAX_DURATION_MS);
-  const executionSignal = signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal;
-  const { events$ } = await agentBuilder.execution.executeAgent({
-    mode: AgentExecutionMode.conversation,
-    request,
-    abortSignal: executionSignal,
-    useTaskManager: false,
-    params: {
-      agentId: KI_QUERY_GENERATION_AGENT_ID,
-      connectorId,
-      conversationId: conversation.id,
-      storeConversation: true,
-      nextInput: { message: userMessage },
-      telemetryMetadata: {
-        pluginId: NIGHTSHIFT_KI_QUERY_GENERATION_USAGE_ID,
-        aggregateBy: NIGHTSHIFT_USAGE_PARENT_ID,
-        productSolution: NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
-        productFeature: NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
-        interactionId,
-      },
-    },
-  });
-
-  const events = await firstValueFrom(events$.pipe(toArray()));
-
-  const validationResultEvent = events
-    .filter(isToolResultEvent)
-    .filter((event) => event.data.tool_id === SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID)
+/**
+ * Reads what the query generation agent finalized from the conversation the `ai.agent` step
+ * stored. The step runs the agent, this reads its last `validate_queries` result.
+ */
+export function readKIQueryGenerationResult({
+  conversation,
+  source,
+  logger,
+}: {
+  conversation: Pick<Conversation, 'rounds'>;
+  source: NightshiftSource;
+  logger: Logger;
+}): {
+  queries: GeneratedSignificantEventQuery[];
+  tokensUsed: ChatCompletionTokenCount;
+  durationMs: number;
+} {
+  const round = conversation.rounds.at(-1);
+  const validationStep = round?.steps
+    .filter(isToolCallStep)
+    .filter((step) => step.tool_id === SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID)
     .at(-1);
-  const finalizedData = validationResultEvent?.data.results
+  const finalizedData = validationStep?.results
     .map(({ data }) => data)
     .find(isFinalizedValidationData);
 
@@ -133,10 +88,7 @@ export async function executeKIQueryGenerationAgent({
     );
   }
 
-  const roundEvent = events.find(isRoundCompleteEvent);
-  const rawQueries = finalizedData.finalized_queries;
-
-  const queries: GeneratedSignificantEventQuery[] = rawQueries.map((q) => ({
+  const queries: GeneratedSignificantEventQuery[] = finalizedData.finalized_queries.map((q) => ({
     type: q.type,
     title: q.title,
     description: q.description,
@@ -148,11 +100,11 @@ export async function executeKIQueryGenerationAgent({
     features: q.features,
   }));
 
-  const tokensUsed: ChatCompletionTokenCount = chatTokenCountFromModelUsage(
-    roundEvent?.data.round.model_usage
-  ) ?? { ...EMPTY_TOKENS };
+  const tokensUsed: ChatCompletionTokenCount = chatTokenCountFromModelUsage(round?.model_usage) ?? {
+    ...EMPTY_TOKENS,
+  };
 
   logger.debug(`KI query generation agent returned ${queries.length} queries for "${source.slug}"`);
 
-  return { queries, tokensUsed };
+  return { queries, tokensUsed, durationMs: round?.time_to_last_token ?? 0 };
 }

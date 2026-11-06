@@ -5,37 +5,36 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { Logger } from '@kbn/core/server';
+import type { Conversation } from '@kbn/agent-builder-common';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { SignificantEventsQueriesGenerationResult } from '@kbn/significant-events-schema';
 import type { EbtTelemetryClient } from '../telemetry/ebt';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
-import { executeKIQueryGenerationAgent } from './identify_ki_queries_via_agent';
+import {
+  buildKIQueryGenerationMessage,
+  readKIQueryGenerationResult,
+} from './identify_ki_queries_via_agent';
 
-export interface GenerateKIQueriesParams {
+export interface BuildKIQueryGenerationInputParams {
   source: NightshiftSource;
   connectorId?: string;
-  runId: string;
   maxExistingQueriesForContext: number;
 }
 
-export interface GenerateKIQueriesDependencies {
+export interface BuildKIQueryGenerationInputDependencies {
   kiClient: KnowledgeIndicatorClient;
-  agentBuilder: AgentBuilderPluginStart;
   resolveModel: (requestedId?: string) => Promise<string>;
-  request: KibanaRequest;
   logger: Logger;
-  signal: AbortSignal;
-  telemetry: EbtTelemetryClient;
 }
 
-export async function generateKIQueries(
-  params: GenerateKIQueriesParams,
-  deps: GenerateKIQueriesDependencies
-): Promise<SignificantEventsQueriesGenerationResult & { connectorId: string }> {
-  const { source, connectorId: connectorIdOverride, runId, maxExistingQueriesForContext } = params;
-  const { kiClient, agentBuilder, resolveModel, request, logger, signal, telemetry } = deps;
+/** Everything the query generation agent is asked, built before the agent runs. */
+export async function buildKIQueryGenerationInput(
+  params: BuildKIQueryGenerationInputParams,
+  deps: BuildKIQueryGenerationInputDependencies
+): Promise<{ connectorId: string; message: string }> {
+  const { source, connectorId: connectorIdOverride, maxExistingQueriesForContext } = params;
+  const { kiClient, resolveModel, logger } = deps;
 
   const connectorId = await resolveModel(connectorIdOverride);
 
@@ -51,19 +50,37 @@ export async function generateKIQueries(
     esql: query.esql.query,
   }));
 
-  const startedAt = Date.now();
-  const { queries, tokensUsed } = await executeKIQueryGenerationAgent({
-    agentBuilder,
-    request,
+  return {
     connectorId,
-    interactionId: runId,
+    message: buildKIQueryGenerationMessage({
+      source,
+      existingQueries,
+      maxExistingQueriesForContext,
+    }),
+  };
+}
+
+export interface CollectGeneratedKIQueriesParams {
+  source: NightshiftSource;
+  connectorId: string;
+  /** The conversation the `ai.agent` step stored. */
+  agentConversation: Pick<Conversation, 'rounds'>;
+}
+
+export interface CollectGeneratedKIQueriesDependencies {
+  logger: Logger;
+  telemetry: EbtTelemetryClient;
+}
+
+export function collectGeneratedKIQueries(
+  { source, connectorId, agentConversation }: CollectGeneratedKIQueriesParams,
+  { logger, telemetry }: CollectGeneratedKIQueriesDependencies
+): SignificantEventsQueriesGenerationResult & { connectorId: string } {
+  const { queries, tokensUsed, durationMs } = readKIQueryGenerationResult({
+    conversation: agentConversation,
     source,
-    existingQueries,
-    maxExistingQueriesForContext,
-    signal,
-    logger: logger.get('significant_events_queries_generation'),
+    logger,
   });
-  const durationMs = Date.now() - startedAt;
 
   telemetry.trackSignificantEventsQueriesGenerated({
     count: queries.length,

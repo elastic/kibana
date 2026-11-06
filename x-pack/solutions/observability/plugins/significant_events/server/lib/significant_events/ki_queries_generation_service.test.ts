@@ -5,24 +5,18 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import { ConversationRoundStepType } from '@kbn/agent-builder-common';
+import type { Conversation } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { EbtTelemetryClient } from '../telemetry/ebt';
+import { SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID } from '../../agent_builder/skills/ki_query_generation';
 import {
-  generateKIQueries,
-  type GenerateKIQueriesDependencies,
+  buildKIQueryGenerationInput,
+  collectGeneratedKIQueries,
+  type BuildKIQueryGenerationInputDependencies,
 } from './ki_queries_generation_service';
-import { executeKIQueryGenerationAgent } from './identify_ki_queries_via_agent';
-
-jest.mock('./identify_ki_queries_via_agent', () => ({
-  executeKIQueryGenerationAgent: jest.fn(),
-}));
-
-const executeKIQueryGenerationAgentMock = executeKIQueryGenerationAgent as jest.MockedFunction<
-  typeof executeKIQueryGenerationAgent
->;
 
 const source = {
   id: 'source-1',
@@ -31,108 +25,94 @@ const source = {
   view_name: '$.nightshift.sources.default.checkout',
 } as NightshiftSource;
 
-const makeDeps = (
-  overrides: Partial<GenerateKIQueriesDependencies> = {}
-): GenerateKIQueriesDependencies => ({
-  kiClient: {
-    getSourceToQueryLinksMap: jest.fn().mockResolvedValue({
-      'source-1': [
-        {
-          query: {
-            id: 'query-1',
-            title: 'Error rate',
-            type: 'stats',
-            severity_score: 65,
-            description: 'Tracks error rate',
-            esql: {
-              query:
-                'FROM $.nightshift.sources.default.checkout | STATS errors = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)',
+describe('buildKIQueryGenerationInput', () => {
+  const makeDeps = (
+    overrides: Partial<BuildKIQueryGenerationInputDependencies> = {}
+  ): BuildKIQueryGenerationInputDependencies => ({
+    kiClient: {
+      getSourceToQueryLinksMap: jest.fn().mockResolvedValue({
+        'source-1': [
+          {
+            query: {
+              id: 'query-1',
+              title: 'Error rate',
+              type: 'stats',
+              severity_score: 65,
+              description: 'Tracks error rate',
+              esql: { query: 'FROM $.nightshift.sources.default.checkout | STATS COUNT(*)' },
             },
           },
-        },
-      ],
-    }),
-  } as unknown as GenerateKIQueriesDependencies['kiClient'],
-  agentBuilder: {} as AgentBuilderPluginStart,
-  resolveModel: jest.fn(async (connectorId?: string) => connectorId ?? 'default-connector'),
-  request: {} as GenerateKIQueriesDependencies['request'],
-  logger: loggerMock.create(),
-  signal: new AbortController().signal,
-  telemetry: {
-    trackSignificantEventsQueriesGenerated: jest.fn(),
-  } as unknown as EbtTelemetryClient,
-  ...overrides,
-});
-
-describe('generateKIQueries', () => {
-  let logger: jest.Mocked<Logger>;
-
-  beforeEach(() => {
-    logger = loggerMock.create();
-    executeKIQueryGenerationAgentMock.mockReset();
-    executeKIQueryGenerationAgentMock.mockResolvedValue({
-      queries: [
-        {
-          type: 'match',
-          title: 'Detects failures',
-          description: 'A query',
-          esql: { query: 'FROM logs | WHERE message == "fail"' },
-          evidence: ['evidence'],
-          features: [],
-          severity_score: 70,
-        },
-      ],
-      tokensUsed: { prompt: 10, completion: 20, total: 30, cached: 0 },
-    });
+        ],
+      }),
+    } as unknown as BuildKIQueryGenerationInputDependencies['kiClient'],
+    resolveModel: jest.fn(async (connectorId?: string) => connectorId ?? 'default-connector'),
+    logger: loggerMock.create(),
+    ...overrides,
   });
 
-  it('returns generated queries and reports telemetry', async () => {
+  it('returns the canonical connector and a message carrying the existing queries', async () => {
+    const resolveModel = jest.fn().mockResolvedValue('canonical-connector');
+
+    const { connectorId, message } = await buildKIQueryGenerationInput(
+      { source, connectorId: 'connector-alias', maxExistingQueriesForContext: 10 },
+      makeDeps({ resolveModel })
+    );
+
+    expect(resolveModel).toHaveBeenCalledWith('connector-alias');
+    expect(connectorId).toBe('canonical-connector');
+    expect(message).toContain('Error rate');
+  });
+});
+
+describe('collectGeneratedKIQueries', () => {
+  it('returns the finalized queries and reports telemetry with the agent round duration', () => {
     const telemetry = {
       trackSignificantEventsQueriesGenerated: jest.fn(),
     } as unknown as EbtTelemetryClient;
-
-    const result = await generateKIQueries(
-      {
-        source,
-        connectorId: 'test-connector',
-        runId: 'run-1',
-        maxExistingQueriesForContext: 10,
-      },
-      makeDeps({ telemetry, logger })
-    );
-
-    expect(result).toEqual({
-      queries: [
+    const agentConversation = {
+      rounds: [
         {
-          type: 'match',
-          title: 'Detects failures',
-          description: 'A query',
-          esql: { query: 'FROM logs | WHERE message == "fail"' },
-          evidence: ['evidence'],
-          features: [],
-          severity_score: 70,
+          time_to_last_token: 4200,
+          model_usage: { input_tokens: 10, output_tokens: 20 },
+          steps: [
+            {
+              type: ConversationRoundStepType.toolCall,
+              tool_id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
+              tool_call_id: 'validate-1',
+              params: {},
+              results: [
+                {
+                  type: ToolResultType.other,
+                  data: {
+                    slug: 'checkout',
+                    finalized: true,
+                    finalized_queries: [
+                      {
+                        type: 'match',
+                        title: 'Detects failures',
+                        description: 'A query',
+                        esql: { query: 'FROM logs | WHERE message == "fail"' },
+                        evidence: ['evidence'],
+                        features: [],
+                        severity_score: 70,
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          ],
         },
       ],
-      tokensUsed: { prompt: 10, completion: 20, total: 30, cached: 0 },
-      connectorId: 'test-connector',
-    });
-    expect(executeKIQueryGenerationAgentMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        interactionId: 'run-1',
-        source,
-        maxExistingQueriesForContext: 10,
-        existingQueries: [
-          {
-            id: 'query-1',
-            title: 'Error rate',
-            type: 'stats',
-            severity_score: 65,
-            description: 'Tracks error rate',
-            esql: 'FROM $.nightshift.sources.default.checkout | STATS errors = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)',
-          },
-        ],
-      })
+    } as unknown as Pick<Conversation, 'rounds'>;
+
+    const result = collectGeneratedKIQueries(
+      { source, connectorId: 'test-connector', agentConversation },
+      { logger: loggerMock.create(), telemetry }
     );
+
+    expect(result.connectorId).toBe('test-connector');
+    expect(result.queries).toHaveLength(1);
     expect(telemetry.trackSignificantEventsQueriesGenerated).toHaveBeenCalledWith(
       expect.objectContaining({
         count: 1,
@@ -140,26 +120,8 @@ describe('generateKIQueries', () => {
         source_id: 'source-1',
         input_tokens_used: 10,
         output_tokens_used: 20,
+        duration_ms: 4200,
       })
-    );
-  });
-
-  it('uses the canonical connector returned by model resolution', async () => {
-    const resolveModel = jest.fn().mockResolvedValue('canonical-connector');
-
-    await generateKIQueries(
-      {
-        source,
-        connectorId: 'connector-alias',
-        runId: 'run-1',
-        maxExistingQueriesForContext: 50,
-      },
-      makeDeps({ resolveModel, logger })
-    );
-
-    expect(resolveModel).toHaveBeenCalledWith('connector-alias');
-    expect(executeKIQueryGenerationAgentMock).toHaveBeenCalledWith(
-      expect.objectContaining({ connectorId: 'canonical-connector' })
     );
   });
 });

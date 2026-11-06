@@ -10,7 +10,10 @@
 import { parse } from 'yaml';
 import { SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW } from '.';
 import BOUND_INVESTIGATION_COMPLETED_YAML from './bound_investigation_completed.yaml';
-import { SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW } from './knowledge_indicators';
+import {
+  SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW,
+  SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW,
+} from './knowledge_indicators';
 import BOUND_ORCHESTRATOR_YAML from './significant_events/bound_orchestrator.yaml';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 
@@ -74,6 +77,9 @@ const discovery = parse(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.yaml) as ParsedWor
 const orchestrator = parse(BOUND_ORCHESTRATOR_YAML) as ParsedWorkflow;
 const queriesGeneration = parse(
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW.yaml
+) as ParsedWorkflow;
+const featuresIdentification = parse(
+  SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW.yaml
 ) as ParsedWorkflow;
 const investigationCompleted = parse(BOUND_INVESTIGATION_COMPLETED_YAML) as
   | ParsedWorkflow & {
@@ -176,10 +182,21 @@ describe('significant events persistence workflow contracts', () => {
     });
   });
 
-  it('sends the workflow execution id when generating KI queries', () => {
-    expect(requireStep(queriesGeneration, 'generate_queries').with?.body?.runId).toBe(
-      '${{ execution.id }}'
-    );
+  it('attributes KI agent calls to Nightshift', () => {
+    expect(requireStep(featuresIdentification, 'identify_agent')).toMatchObject({
+      type: 'ai.agent',
+      'plugin-id': 'nightshift_ki_extraction',
+      'aggregate-by': 'nightshift',
+      'product-solution': 'observability',
+      'product-feature': 'nightshift',
+    });
+    expect(requireStep(queriesGeneration, 'generate_agent')).toMatchObject({
+      type: 'ai.agent',
+      'plugin-id': 'nightshift_ki_query_generation',
+      'aggregate-by': 'nightshift',
+      'product-solution': 'observability',
+      'product-feature': 'nightshift',
+    });
   });
 
   it('stamps discovery detections only from reported completed outcomes', () => {
