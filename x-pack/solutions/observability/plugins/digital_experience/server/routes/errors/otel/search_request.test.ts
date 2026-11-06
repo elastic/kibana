@@ -51,3 +51,24 @@ describe('errorsSearch', () => {
     expect(groupAggs.lastSeen).toEqual({ max: { field: '@timestamp' } });
   });
 });
+
+describe('errorsSearch with filters', () => {
+  const FILTERS = { browser: 'Chrome', pageUrl: 'https://shop.example.com/' };
+
+  it('narrows the groups to the selected browser, not the picker environments or the page', () => {
+    const request = errorsSearch({ ...PARAMS, filters: FILTERS });
+
+    expect(Object.keys(request.runtime_mappings)).toContain('digital_experience_filter_browser');
+    expect(request.aggs.inEnvironment.filter).toEqual({
+      bool: {
+        filter: [{ match_all: {} }, { term: { digital_experience_filter_browser: 'Chrome' } }],
+      },
+    });
+    expect(request.aggs.environments).toBeDefined();
+    expect(JSON.stringify(request)).not.toContain('shop.example.com');
+  });
+
+  it('is unchanged without a selection', () => {
+    expect(errorsSearch(PARAMS).aggs.inEnvironment.filter).toEqual({ match_all: {} });
+  });
+});
