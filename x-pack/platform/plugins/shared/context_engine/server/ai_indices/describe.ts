@@ -20,6 +20,7 @@ export interface DescribeAiIndexParams {
   esClient: ElasticsearchClient;
   aiIndex: AiIndexHttpItem;
   spaceId: string;
+  userId?: string;
   includeMemory: boolean;
 }
 
@@ -108,12 +109,13 @@ const renderSections = (sections: string[][]): string =>
 
 /**
  * Free-form context block for an agent: registry entry, what backing indices expose, and how to
- * query them. Read as current user; counts are space-filtered.
+ * query them. Read as current user; counts are space-filtered, and user-filtered when `userId` is set.
  */
 export const describeAiIndex = async ({
   esClient,
   aiIndex,
   spaceId,
+  userId,
   includeMemory,
 }: DescribeAiIndexParams): Promise<string> => {
   const target = aiIndex.dest.value;
@@ -125,6 +127,7 @@ export const describeAiIndex = async ({
     esClient,
     dest: aiIndex.dest,
     spaceId,
+    userId,
     fields: allFields,
   });
 

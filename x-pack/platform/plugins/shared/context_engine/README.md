@@ -189,7 +189,8 @@ privileges. Callers also need, on every backing index (`ai-index-*`):
 - `read` to query, or Elasticsearch returns 403;
 - `view_index_metadata` to describe (`_mapping` and `_field_caps`), or
   Elasticsearch returns 403. The counts aggregation also needs `read`; without
-  it the two counts sections are omitted and the rest of the block is returned.
+  it the two counts sections are omitted and the rest of the block is returned;
+- `read` and `write` to create, update, or delete a knowledge indicator.
 
 Two things decide what a caller can see: the space filter Kibana adds, and the
 caller's own Elasticsearch permissions on the backing indices. Nothing checks

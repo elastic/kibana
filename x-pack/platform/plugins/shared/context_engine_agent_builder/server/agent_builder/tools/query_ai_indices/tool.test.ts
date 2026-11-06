@@ -14,6 +14,7 @@ import {
   MAX_AI_INDEX_QUERY_LIMIT,
   MAX_AI_INDEX_QUERY_PARAMS,
   MAX_AI_INDEX_QUERY_PARAM_VALUE_LENGTH,
+  MAX_AI_INDEX_USER_ID_LENGTH,
 } from '@kbn/context-engine-plugin/common/constants';
 import { CONTEXT_ENGINE_READ_DENIED_MESSAGE } from '../ai_index_read_service';
 import { createAiIndexToolDepsMock } from '../ai_index_read_service.mock';
@@ -42,20 +43,31 @@ describe('query_ai_indices tool', () => {
   describe('schema', () => {
     const { schema } = createQueryAiIndicesTool(createAiIndexToolDepsMock().deps);
 
-    it('accepts query, params and limit only', () => {
+    it('accepts query, params, limit and user_id only', () => {
       const parsed = schema.parse({
         query: 'FROM ai-index-runbooks',
         params: { kind: 'dashboard', n: 1, flag: true },
         limit: 10,
+        user_id: 'alice',
       });
 
       expect(parsed).toEqual({
         query: 'FROM ai-index-runbooks',
         params: { kind: 'dashboard', n: 1, flag: true },
         limit: 10,
+        user_id: 'alice',
       });
       expect(schema.shape).not.toHaveProperty('time_range');
       expect(schema.shape).not.toHaveProperty('filter');
+    });
+
+    it('bounds user_id', () => {
+      const query = 'FROM ai-index-runbooks';
+
+      expect(schema.safeParse({ query, user_id: '' }).success).toBe(false);
+      expect(
+        schema.safeParse({ query, user_id: 'u'.repeat(MAX_AI_INDEX_USER_ID_LENGTH + 1) }).success
+      ).toBe(false);
     });
 
     it('defaults the limit', () => {
@@ -96,7 +108,7 @@ describe('query_ai_indices tool', () => {
     readService.query.mockResolvedValue({ columns, values });
 
     const result = await createQueryAiIndicesTool(deps).handler(
-      { query: 'FROM ai-index-runbooks | LIMIT 5', limit: 5 },
+      { query: 'FROM ai-index-runbooks | LIMIT 5', limit: 5, user_id: 'alice' },
       agentBuilderMocks.tools.createHandlerContext()
     );
 
@@ -104,6 +116,7 @@ describe('query_ai_indices tool', () => {
       query: 'FROM ai-index-runbooks | LIMIT 5',
       params: undefined,
       limit: 5,
+      user_id: 'alice',
     });
     // Not esqlResults: UI would replay query without server-side space filter.
     expect(result).toEqual({

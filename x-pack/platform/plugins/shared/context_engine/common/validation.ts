@@ -12,6 +12,7 @@ import {
   MAX_AI_INDEX_QUERY_PARAM_KEY_LENGTH,
   MAX_AI_INDEX_QUERY_PARAM_VALUE_LENGTH,
   MAX_AI_INDEX_QUERY_PARAMS,
+  MAX_AI_INDEX_USER_ID_LENGTH,
   MIN_FEEDBACK_ANALYSIS_INTERVAL_MINUTES,
 } from './constants';
 import type { QueryAiIndicesRequest } from './http_api/ai_indices';
@@ -139,11 +140,21 @@ export const validateQueryAiIndicesRequest = ({
   query,
   params,
   limit,
+  user_id: userId,
 }: QueryAiIndicesRequest): string | undefined => {
   if (query.length === 0 || query.length > MAX_AI_INDEX_QUERY_LENGTH) {
     return i18n.translate('xpack.contextEngine.aiIndexQuery.error.invalidQueryLength', {
       defaultMessage: 'query must be between 1 and {max} characters.',
       values: { max: MAX_AI_INDEX_QUERY_LENGTH },
+    });
+  }
+  if (
+    userId !== undefined &&
+    (userId.length === 0 || userId.length > MAX_AI_INDEX_USER_ID_LENGTH)
+  ) {
+    return i18n.translate('xpack.contextEngine.aiIndexQuery.error.invalidUserIdLength', {
+      defaultMessage: 'user_id must be between 1 and {max} characters.',
+      values: { max: MAX_AI_INDEX_USER_ID_LENGTH },
     });
   }
   if (limit !== undefined) {

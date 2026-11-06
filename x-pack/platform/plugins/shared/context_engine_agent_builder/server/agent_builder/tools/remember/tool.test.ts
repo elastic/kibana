@@ -268,6 +268,82 @@ describe('remember tool', () => {
     });
   });
 
+  it('stamps user_id on a new memory', async () => {
+    await run({ ...params, user_id: 'alice' }, 'conversation-1');
+
+    expect(index).toHaveBeenCalledWith(
+      expect.objectContaining({ document: expect.objectContaining({ user_id: 'alice' }) }),
+      indexWriteOptions
+    );
+  });
+
+  it('keeps the stored user_id when revising without one', async () => {
+    search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _index: 'ai-index-idx-support',
+            _seq_no: 7,
+            _primary_term: 2,
+            _source: {
+              '@timestamp': '2026-09-01T00:00:00.000Z',
+              id: 'memory-1',
+              user_id: 'alice',
+              type: 'memory.session_fact',
+              title: 'Old title',
+              description: 'Old description',
+              content: 'Old content',
+              updated_at: '2026-09-01T00:00:00.000Z',
+            },
+          },
+        ],
+      },
+    });
+
+    await run({ ...params, id: 'memory-1' }, 'conversation-1');
+
+    expect(index).toHaveBeenCalledWith(
+      expect.objectContaining({ document: expect.objectContaining({ user_id: 'alice' }) }),
+      indexWriteOptions
+    );
+  });
+
+  it('rejects a revise that changes user_id', async () => {
+    search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _index: 'ai-index-idx-support',
+            _seq_no: 7,
+            _primary_term: 2,
+            _source: {
+              '@timestamp': '2026-09-01T00:00:00.000Z',
+              id: 'memory-1',
+              user_id: 'alice',
+              type: 'memory.session_fact',
+              title: 'Old title',
+              description: 'Old description',
+              content: 'Old content',
+              updated_at: '2026-09-01T00:00:00.000Z',
+            },
+          },
+        ],
+      },
+    });
+
+    const result = await run({ ...params, id: 'memory-1', user_id: 'bob' }, 'conversation-1');
+
+    expect(index).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      results: [
+        {
+          type: ToolResultType.error,
+          data: { message: "Failed to store memory: Memory 'memory-1' cannot change its user_id." },
+        },
+      ],
+    });
+  });
+
   it('normalizes a caller-supplied expiration to UTC', async () => {
     await run({ ...params, expires_at: '2026-10-01T03:00:00+03:00' }, 'conversation-1');
 
