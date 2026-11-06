@@ -219,7 +219,14 @@ node scripts/evals doctor --fix
 
 ```bash
 node scripts/evals compare <run-id-a> <run-id-b>
+node scripts/evals compare <run-id-a> <run-id-b> --repetition-policy pool
 ```
+
+| Flag                  | Description                                                                                                                                  |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--repetition-policy` | `mean` (default) or `median` compares one score per example, aggregated over its repetitions. `pool` pairs every repetition by its index. |
+
+Rows marked `N*` have examples with a different number of valid repetitions in the two runs, or null scores. See the evals plugin README for the details.
 
 ### `env` -- List environment variables
 

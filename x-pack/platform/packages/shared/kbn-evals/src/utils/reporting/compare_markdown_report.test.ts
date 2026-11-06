@@ -20,6 +20,13 @@ const makeResult = (overrides: Partial<ComparisonResult> = {}): ComparisonResult
   direction: 'maximize',
   metricType: 'continuous_bounded',
   hypothesisTest: { id: 'wilcoxon_signed_rank', method: 'exact', statistic: 5 },
+  usedTarget: 10,
+  usedBaseline: 10,
+  missingTarget: 0,
+  missingBaseline: 0,
+  stabilityTarget: 0,
+  stabilityBaseline: 0,
+  repetitionWarning: false,
   ...overrides,
 });
 
@@ -166,6 +173,32 @@ describe('formatMarkdownCompareReport', () => {
     expect(output).not.toContain('Refresh baseline');
   });
 
+  it('shows the stability and marks rows with uneven repetitions', () => {
+    const report = (results: ComparisonResult[]) =>
+      formatMarkdownCompareReport({
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
+        results,
+      });
+    const even = makeResult({
+      evaluatorName: 'Even',
+      stabilityTarget: 0.06,
+      stabilityBaseline: 0.03,
+    });
+
+    const lines = report([
+      even,
+      makeResult({ evaluatorName: 'Uneven', repetitionWarning: true }),
+    ]).split('\n');
+    expect(lines).toContain(
+      '> **Warning**: in rows marked N*, some examples have a different number of valid repetitions in the two runs, or null scores.'
+    );
+    expect(lines.find((line) => line.includes('| Even |'))).toMatch(
+      /\| Even \| 10 \|.*\| 0\.06 \/ 0\.03 \|$/
+    );
+    expect(lines.find((line) => line.includes('| Uneven |'))).toContain('| Uneven | 10* |');
+  });
+
   describe('skipped pairs', () => {
     it('shows a note when skippedMissingPairs > 0', () => {
       const output = formatMarkdownCompareReport({
@@ -175,7 +208,7 @@ describe('formatMarkdownCompareReport', () => {
         skippedMissingPairs: 5,
       });
 
-      expect(output).toContain('5 unpaired (ran in only one experiment)');
+      expect(output).toContain('5 unpaired');
       expect(output).toContain('Comparison may be incomplete');
     });
 
@@ -200,7 +233,7 @@ describe('formatMarkdownCompareReport', () => {
         skippedNullScores: 2,
       });
 
-      expect(output).toContain('4 unpaired (ran in only one experiment)');
+      expect(output).toContain('4 unpaired');
       expect(output).toContain('2 null scores');
     });
 
