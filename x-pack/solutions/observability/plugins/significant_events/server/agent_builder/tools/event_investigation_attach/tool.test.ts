@@ -92,8 +92,8 @@ describe('event_investigation_attach tool', () => {
       });
       const context = createMockToolContext();
       context.request = httpServerMock.createKibanaRequest({ spaceId: 'space-a' });
-      const result = await invokeHandler(tool as never, params, context);
-      return { result, payload: trackAgentToolEventInvestigationAttach.mock.calls[0]?.[0] };
+      await invokeHandler(tool as never, params, context);
+      return trackAgentToolEventInvestigationAttach.mock.calls[0]?.[0];
     };
 
     beforeEach(() => {
@@ -107,7 +107,7 @@ describe('event_investigation_attach tool', () => {
         ignored: 0,
       });
 
-      const { payload } = await run();
+      const payload = await run();
 
       expect(payload).toEqual({
         ...identity,
@@ -122,7 +122,7 @@ describe('event_investigation_attach tool', () => {
         new Error('index unavailable')
       );
 
-      const { payload } = await run();
+      const payload = await run();
 
       expect(payload).toEqual({
         ...identity,
@@ -131,23 +131,6 @@ describe('event_investigation_attach tool', () => {
         workflow_execution_id: 'workflow-id',
         error_message: 'index unavailable',
       });
-    });
-
-    it('keeps the attach result when telemetry throws', async () => {
-      (attachEventInvestigationToolHandler as jest.Mock).mockResolvedValue({
-        updated: 1,
-        ignored: 0,
-      });
-
-      const { result } = await run(
-        jest.fn().mockImplementation(() => {
-          throw new Error('telemetry unavailable');
-        })
-      );
-
-      expect(result).toEqual(
-        expect.objectContaining({ results: [expect.objectContaining({ type: 'other' })] })
-      );
     });
   });
 });

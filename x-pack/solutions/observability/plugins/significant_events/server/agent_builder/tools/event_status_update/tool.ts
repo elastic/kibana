@@ -96,7 +96,7 @@ export function createEventStatusUpdateTool({
           track: () =>
             telemetry.trackAgentToolEventStatusUpdate({
               ...existingAlertIdentity({ eventId: toolParams.event_id, spaceId: request.spaceId }),
-              success: true,
+              success: data.updated === 1 || data.reason !== 'not_found',
               event_id: toolParams.event_id,
               status: toolParams.status,
             }),

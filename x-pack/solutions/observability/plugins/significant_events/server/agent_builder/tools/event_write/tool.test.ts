@@ -835,7 +835,7 @@ describe('events_write tool', () => {
     );
   });
 
-  it('reports group_hash only on create and no fingerprint for an unstored id', async () => {
+  it('reports only persisted alert identities and the creation group_hash', async () => {
     const { event_id: _eventId, ...newItem } = input;
     (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
       {
@@ -849,14 +849,15 @@ describe('events_write tool', () => {
       { index: 1, event_id: 'event-2', status: 'active', written: true, created: false },
       {
         index: 2,
-        event_id: 'generated-1',
+        event_id: 'generated-2',
         written: false,
-        skipped: true,
-        reason: 'unchanged_outcome',
+        reason: 'bulk_error',
+        error: { type: 'rule_events_write_error', reason: 'busy' },
       },
       {
         index: 3,
-        event_id: 'generated-2',
+        event_id: 'closed-event',
+        existing_event_id: 'closed-event',
         written: false,
         reason: 'bulk_error',
         error: { type: 'rule_events_write_error', reason: 'busy' },
@@ -881,11 +882,11 @@ describe('events_write tool', () => {
     });
     expect(payloads[1]).toMatchObject({ ...identity, fingerprint: 'event-2' });
     expect(payloads[1]).not.toHaveProperty('group_hash');
-    [payloads[2], payloads[3]].forEach((payload) => {
-      expect(payload).toMatchObject(identity);
-      expect(payload).not.toHaveProperty('fingerprint');
-      expect(payload).not.toHaveProperty('group_hash');
-    });
+    expect(payloads[2]).toMatchObject(identity);
+    expect(payloads[2]).not.toHaveProperty('fingerprint');
+    expect(payloads[2]).not.toHaveProperty('group_hash');
+    expect(payloads[3]).toMatchObject({ ...identity, fingerprint: 'closed-event' });
+    expect(payloads[3]).not.toHaveProperty('group_hash');
   });
 
   it('returns a classified validation error', async () => {

@@ -55,6 +55,7 @@ export const eventsWriteResultEventId = (
     // An unchanged outcome carries `status` only when the event is stored.
     return result.status === undefined ? callerEventId : result.event_id;
   }
-  // A superseded write lost to another version of a stored event.
-  return result.reason === 'superseded' ? result.event_id : callerEventId;
+  return result.reason === 'superseded'
+    ? result.event_id
+    : result.existing_event_id ?? callerEventId;
 };

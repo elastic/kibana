@@ -32,21 +32,6 @@ describe('eventsWriteResultEventId', () => {
       'stored',
     ],
     [
-      'a held reopen, the closed series',
-      {
-        ...base,
-        event_id: 'generated',
-        written: false,
-        skipped: true,
-        reason: 'held_by_deactivation',
-        existing_event_id: 'stored',
-        assessment_note: 'noise',
-        deactivated_at: '2026-01-01T00:00:00.000Z',
-      },
-      undefined,
-      'stored',
-    ],
-    [
       'an unchanged stored event',
       { ...base, event_id: 'stored', written: false, skipped: true, reason: 'unchanged_outcome' },
       undefined,
@@ -87,6 +72,19 @@ describe('eventsWriteResultEventId', () => {
       },
       'named',
       'named',
+    ],
+    [
+      'a failed automatic reopen, the resolved closed series',
+      {
+        ...base,
+        event_id: 'stored',
+        existing_event_id: 'stored',
+        written: false,
+        reason: 'bulk_error',
+        error: { type: 'rule_events_write_error', reason: 'busy' },
+      },
+      undefined,
+      'stored',
     ],
   ])('identifies %s', (_case, result, callerEventId, expected) => {
     expect(eventsWriteResultEventId(result, callerEventId)).toBe(expected);

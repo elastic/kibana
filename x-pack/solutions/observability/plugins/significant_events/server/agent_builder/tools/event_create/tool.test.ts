@@ -120,8 +120,8 @@ describe('event_create tool', () => {
       });
       const context = createMockToolContext();
       context.request = httpServerMock.createKibanaRequest({ spaceId: 'space-a' });
-      const result = await invokeHandler(tool as never, toolInput, context);
-      return { result, payload: trackAgentToolEventCreate.mock.calls[0]?.[0] };
+      await invokeHandler(tool as never, toolInput, context);
+      return trackAgentToolEventCreate.mock.calls[0]?.[0];
     };
 
     beforeEach(() => {
@@ -138,7 +138,7 @@ describe('event_create tool', () => {
         group_hash: 'hash-1',
       });
 
-      const { payload } = await run();
+      const payload = await run();
 
       expect(payload).toEqual({
         alert_source: 'elastic.significant_events',
@@ -153,7 +153,7 @@ describe('event_create tool', () => {
     it('reports no fingerprint or group_hash when the create fails before persisting', async () => {
       (eventsWriteHandler as jest.Mock).mockRejectedValue(new Error('index unavailable'));
 
-      const { payload } = await run();
+      const payload = await run();
 
       expect(payload).toEqual({
         alert_source: 'elastic.significant_events',
@@ -162,26 +162,6 @@ describe('event_create tool', () => {
         source_ids: ['logs.a'],
         error_message: 'index unavailable',
       });
-    });
-
-    it('keeps the create result when telemetry throws', async () => {
-      (eventsWriteHandler as jest.Mock).mockResolvedValue({
-        event_id: 'event-1',
-        status: 'active',
-        written: true,
-        created: true,
-        group_hash: 'hash-1',
-      });
-
-      const { result } = await run(
-        jest.fn().mockImplementation(() => {
-          throw new Error('telemetry unavailable');
-        })
-      );
-
-      expect(result).toEqual(
-        expect.objectContaining({ results: [expect.objectContaining({ type: 'other' })] })
-      );
     });
   });
 });

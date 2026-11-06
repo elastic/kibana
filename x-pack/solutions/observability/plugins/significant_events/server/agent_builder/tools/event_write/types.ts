@@ -102,6 +102,7 @@ export interface EventsWriteNoOpResult {
 export interface EventsWriteFailureResult {
   index: number;
   event_id: string;
+  existing_event_id?: string;
   /** Absent: a rejected item never reached the lifecycle. */
   status?: SignificantEvent['status'];
   written: false;

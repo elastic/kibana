@@ -1532,6 +1532,22 @@ describe('eventsWriteBulkHandler — reopening a closed series', () => {
     expect(written.signals?.map((signal) => signal.metadata?.rule_uuid)).toEqual(['rule-a']);
   });
 
+  it('preserves the resolved closed series identity when its reopen write fails', async () => {
+    alertEventsClient.createAlertEvent.mockRejectedValue(new Error('rule-events unavailable'));
+
+    const results = await eventsWriteBulkHandler({
+      eventSearchClient: clientWithClosedSeries(),
+      inputs: [reopeningBreachFor('rule-a')],
+    });
+
+    expect(results[0]).toMatchObject({
+      written: false,
+      event_id: closedEventId,
+      existing_event_id: closedEventId,
+      reason: 'bulk_error',
+    });
+  });
+
   it('reopens a closed series that holds more rules than the batch', async () => {
     const closed = closedSeries({
       signals: [

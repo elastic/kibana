@@ -57,11 +57,9 @@ interface AgentToolKnowledgeIndicatorIdentificationStartedProps {
   error_message?: string;
 }
 
-/** Joins to `.rule-events` on `space_id` + `source` + fingerprint; a failed operation may have no row. */
+/** Identity used to join telemetry to `.rule-events`; a failed operation may have no row. */
 interface ExistingAlertIdentityProps {
-  /** The alert's `.rule-events` `source`. */
   alert_source: string;
-  /** Caller-visible series identity before Alerting v2 hashes it with space and source. */
   fingerprint: string;
   space_id: string;
 }
