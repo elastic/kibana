@@ -195,14 +195,18 @@ describe('nightshift agent optimize workflow', () => {
     expect(ensure?.with?.agent_id).toBe('significant-events.decision-tree-reinforcement');
   });
 
-  // The round's place in its conversation is what tells a first round from a follow-up.
-  it('hands the turn preparation the conversation and the round', () => {
+  // The round's place in its conversation is what tells a first round from a follow-up. The
+  // message, the answer and the round's model are only for a follow-up's causal check.
+  it('hands the turn preparation the conversation, the round, and what the causal check reads', () => {
     const prepare = workflow.steps.find((step) => step.name === 'prepare_turn');
     expect(prepare?.with).toMatchObject({
       conversation_id: '{{ inputs.conversation_id }}',
       round_id: '{{ inputs.round_id }}',
+      prompt: '{{ inputs.prompt }}',
+      response: '{{ inputs.response }}',
+      connector_id: '{{ inputs.connector_id }}',
+      round_connector_id: '{{ inputs.round_connector_id }}',
     });
-    expect(prepare?.with).not.toHaveProperty('response');
   });
 
   // The agent replays the investigator's round as tool messages, so it needs the calls, their

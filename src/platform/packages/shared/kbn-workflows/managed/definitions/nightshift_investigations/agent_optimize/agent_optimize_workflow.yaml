@@ -149,9 +149,16 @@ steps:
   # cannot abort the investigation, so swallowing a failure here would report a green round
   # that silently reinforced nothing. The reinforcement agent runs in its own conversation,
   # so a failure is visible without taking the investigation down with it.
+  #
+  # A follow-up with trees to edit gets one causal check here, on the model the round used. A
+  # failed or timed-out check only means the follow-up extends the tree without claiming a cause.
   - name: prepare_turn
     type: nightshift.decisionTreePrepare
     with:
+      prompt: '{{ inputs.prompt }}'
+      response: '{{ inputs.response }}'
+      connector_id: '{{ inputs.connector_id }}'
+      round_connector_id: '{{ inputs.round_connector_id }}'
       conversation_id: '{{ inputs.conversation_id }}'
       round_id: '{{ inputs.round_id }}'
       agent_id: '{{ inputs.agent_id }}'

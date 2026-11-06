@@ -639,6 +639,7 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           decisionTreePrepareStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
+            getInference: () => this.inference,
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
             logger: this.logger.get('decision_trees'),

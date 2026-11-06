@@ -20,6 +20,7 @@ import {
   parseAccessedTreesMarker,
   type InvestigationToolCall,
 } from './accessed_trees';
+import { NO_CAUSAL_VERDICT, type CausalCheckResult } from './causal_check';
 import { createLearningStore } from './learning_store';
 import { materializeDecisionTrees } from './materialize';
 import { createDecisionTreeStore } from './store';
@@ -101,6 +102,7 @@ export const prepareReinforcementTurn = async ({
   spaceId,
   signal,
   toolCalls = [],
+  checkCausal,
 }: {
   turnKind: DecisionTreeTurnKind;
   investigationId: string;
@@ -112,6 +114,11 @@ export const prepareReinforcementTurn = async ({
   spaceId: string;
   signal?: AbortSignal;
   toolCalls?: InvestigationToolCall[];
+  /**
+   * The follow-up's causal check. Called only when a follow-up has trees to edit, so a round that
+   * reinforces nothing costs no model call. Without it, a follow-up extends and claims no cause.
+   */
+  checkCausal?: () => Promise<CausalCheckResult>;
 }): Promise<
   | {
       skipped: false;
@@ -119,6 +126,8 @@ export const prepareReinforcementTurn = async ({
       treeCount: number;
       turnKind: DecisionTreeTurnKind;
       openedTreeIds: string[];
+      /** Set for a follow-up: what its causal check found. */
+      verdict?: CausalCheckResult;
     }
   | { skipped: true }
 > => {
@@ -145,11 +154,13 @@ export const prepareReinforcementTurn = async ({
     return { skipped: true };
   }
 
+  const verdict = isFollowUp ? (checkCausal ? await checkCausal() : NO_CAUSAL_VERDICT) : undefined;
   const message = buildReinforcementPrompt({
     trees: editable,
     learnings,
     connectorNames,
     turnKind,
+    causalConfirmed: verdict?.causalConfirmed ?? false,
   });
   return {
     skipped: false,
@@ -159,5 +170,6 @@ export const prepareReinforcementTurn = async ({
     openedTreeIds: editable
       .filter((tree) => openedIds.has(tree.tree_id))
       .map((tree) => tree.tree_id),
+    ...(verdict ? { verdict } : {}),
   };
 };
