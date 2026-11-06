@@ -135,6 +135,11 @@ import type {
   UploadAssetCriticalityRecordsResponse,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
 import type {
+  ListManualWatchlistEntitiesRequestQueryInput,
+  ListManualWatchlistEntitiesRequestParamsInput,
+  ListManualWatchlistEntitiesResponse,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/entities/list_manual.gen';
+import type {
   ListPrivMonUsersRequestQueryInput,
   ListPrivMonUsersResponse,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/users/list.gen';
@@ -1166,6 +1171,39 @@ List all entity source configurations.
     );
   },
   /**
+      * Lists the entities that were assigned to the watchlist by hand, one page at a time.
+An entity that is only on the watchlist through a rule or a CSV upload is not listed.
+An entity assigned by hand that also matches a rule is listed, and its `sources` say so.
+
+      */
+  async listManualWatchlistEntities<TResponseType extends ScoutResponseType = 'json'>(
+    props: ListManualWatchlistEntitiesProps,
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, ListManualWatchlistEntitiesResponse>>
+  > {
+    const basePath =
+      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
+    const path = `${basePath}${replaceParams(
+      '/internal/entity_analytics/watchlists/{watchlist_id}/entities/manual',
+      encodePathParams(props.params)
+    )}`;
+
+    return apiClient.get<ScoutResponseBody<TResponseType, ListManualWatchlistEntitiesResponse>>(
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: options.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
+  },
+  /**
       * **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
 Returns a list of all privileged users currently being monitored. Supports optional KQL filtering.
@@ -1807,6 +1845,10 @@ export interface GetWatchlistEntitySourceProps {
 }
 export interface ListEntitySourcesProps {
   query: ListEntitySourcesRequestQueryInput;
+}
+export interface ListManualWatchlistEntitiesProps {
+  query: ListManualWatchlistEntitiesRequestQueryInput;
+  params: ListManualWatchlistEntitiesRequestParamsInput;
 }
 export interface ListPrivMonUsersProps {
   query: ListPrivMonUsersRequestQueryInput;

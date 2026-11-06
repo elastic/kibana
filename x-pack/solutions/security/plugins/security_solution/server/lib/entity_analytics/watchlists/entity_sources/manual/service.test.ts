@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createManualEntityService } from './service';
+import { createManualEntityService, listManualWatchlistEntities } from './service';
 import { MANUAL_SOURCE_ID } from './constants';
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
@@ -267,6 +267,90 @@ describe('manual entity service', () => {
         total: 1,
         items: [{ euid: 'user:known', status: 'failure', error: 'Store search failed' }],
       });
+    });
+  });
+  describe('listManualWatchlistEntities', () => {
+    const search = (hits: unknown[], total: number | { value: number } = hits.length) => {
+      const { esClient } = createService();
+      esClient.search.mockResolvedValue({ hits: { total, hits } } as never);
+      return esClient;
+    };
+
+    it('reads the manual entities of the watchlist, a page at a time, by name', async () => {
+      const esClient = search([]);
+
+      await listManualWatchlistEntities(esClient, watchlist, { page: 3, perPage: 25 });
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: 'test-index',
+          from: 50,
+          size: 25,
+          ignore_unavailable: true,
+          track_total_hits: true,
+          query: {
+            bool: {
+              filter: [
+                { term: { 'watchlist.id': 'test-id' } },
+                { term: { 'labels.source_ids': MANUAL_SOURCE_ID } },
+              ],
+            },
+          },
+          sort: [
+            { 'entity.name': { order: 'asc', unmapped_type: 'keyword' } },
+            { 'entity.id': { order: 'asc', unmapped_type: 'keyword' } },
+          ],
+        })
+      );
+    });
+
+    it('returns each entity with its sources, and the total and page asked for', async () => {
+      const esClient = search(
+        [
+          {
+            _source: {
+              entity: { id: 'user:jane', name: 'jane', type: 'user' },
+              labels: { sources: ['manual', 'index'] },
+            },
+          },
+          { _source: { entity: { id: 'host:web-01' }, labels: { sources: ['manual'] } } },
+        ],
+        { value: 12 }
+      );
+
+      const result = await listManualWatchlistEntities(esClient, watchlist, {
+        page: 1,
+        perPage: 10,
+      });
+
+      expect(result).toEqual({
+        entities: [
+          { euid: 'user:jane', name: 'jane', type: 'user', sources: ['manual', 'index'] },
+          { euid: 'host:web-01', sources: ['manual'] },
+        ],
+        total: 12,
+        page: 1,
+        per_page: 10,
+      });
+    });
+
+    it('lists nothing for a watchlist with no manual entities, or no index yet', async () => {
+      const esClient = search([], 0);
+
+      expect(
+        await listManualWatchlistEntities(esClient, watchlist, { page: 1, perPage: 10 })
+      ).toEqual({ entities: [], total: 0, page: 1, per_page: 10 });
+    });
+
+    it('skips a document without an entity id', async () => {
+      const esClient = search([{ _source: { labels: { sources: ['manual'] } } }]);
+
+      const { entities } = await listManualWatchlistEntities(esClient, watchlist, {
+        page: 1,
+        perPage: 10,
+      });
+
+      expect(entities).toEqual([]);
     });
   });
 });

@@ -65,6 +65,10 @@ import type { GetAssetCriticalityRecordRequestQueryInput } from '@kbn/security-s
 import type { GetRiskScoreHistoryRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/risk_score_history_route.gen';
 import type { GetWatchlistRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/management/get.gen';
 import type { GetWatchlistEntitySourceRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/data_source/get.gen';
+import type {
+  ListManualWatchlistEntitiesRequestQueryInput,
+  ListManualWatchlistEntitiesRequestParamsInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/entities/list_manual.gen';
 import type { ListPrivMonUsersRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/users/list.gen';
 import type {
   ListWatchlistEntitySourcesRequestQueryInput,
@@ -622,6 +626,31 @@ List all entity source configurations.
       .query(props.query);
   },
   /**
+      * Lists the entities that were assigned to the watchlist by hand, one page at a time.
+An entity that is only on the watchlist through a rule or a CSV upload is not listed.
+An entity assigned by hand that also matches a rule is listed, and its `sources` say so.
+
+      */
+  listManualWatchlistEntities(
+    props: ListManualWatchlistEntitiesProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .get(
+        getRouteUrlForSpace(
+          replaceParams(
+            '/internal/entity_analytics/watchlists/{watchlist_id}/entities/manual',
+            props.params
+          ),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
       * **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
 Returns a list of all privileged users currently being monitored. Supports optional KQL filtering.
@@ -1026,6 +1055,10 @@ export interface GetWatchlistEntitySourceProps {
 }
 export interface ListEntitySourcesProps {
   query: ListEntitySourcesRequestQueryInput;
+}
+export interface ListManualWatchlistEntitiesProps {
+  query: ListManualWatchlistEntitiesRequestQueryInput;
+  params: ListManualWatchlistEntitiesRequestParamsInput;
 }
 export interface ListPrivMonUsersProps {
   query: ListPrivMonUsersRequestQueryInput;
