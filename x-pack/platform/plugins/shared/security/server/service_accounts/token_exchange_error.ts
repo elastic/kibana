@@ -15,6 +15,11 @@ export interface ServiceAccountTokenExchangeErrorOptions {
    * what tells an account that is gone apart from one that was refused.
    */
   statusCode?: number;
+  /**
+   * The error code upstream answered with, when it gave one. UIAM's codes name the reason, such as
+   * a revoked account, and are as safe to log as the status.
+   */
+  errorCode?: string;
 }
 
 /** Describes whether a failed service account token exchange can be retried. */
@@ -22,10 +27,11 @@ export class ServiceAccountTokenExchangeError extends Error {
   public readonly retryable: boolean;
   public readonly retryAfterMs: number;
   public readonly statusCode?: number;
+  public readonly errorCode?: string;
 
   constructor(
     cause: Error,
-    { retryable, retryAfterMs = 0, statusCode }: ServiceAccountTokenExchangeErrorOptions
+    { retryable, retryAfterMs = 0, statusCode, errorCode }: ServiceAccountTokenExchangeErrorOptions
   ) {
     super(
       statusCode === undefined
@@ -37,5 +43,6 @@ export class ServiceAccountTokenExchangeError extends Error {
     this.retryable = retryable;
     this.retryAfterMs = retryAfterMs;
     this.statusCode = statusCode;
+    this.errorCode = errorCode;
   }
 }

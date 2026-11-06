@@ -12,6 +12,7 @@ import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { brandSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { ServiceAccountCredentialRefusedError } from './credential_refused_error';
+import type { ServiceAccountTokenExchangeTrigger } from './metrics';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
 
 /**
@@ -63,7 +64,12 @@ export interface ServiceAccountMintedToken {
 export interface ServiceAccountMintOptions {
   /** See {@link CreateServiceAccountFakeRequestParams.boundAt}. */
   boundAt?: string;
+  /** Why the credential is minted. Backends record it on their token exchange metrics. */
+  trigger: ServiceAccountTokenExchangeTrigger;
 }
+
+/** Why a bound request's credential is replaced. */
+export type ServiceAccountRefreshTrigger = Exclude<ServiceAccountTokenExchangeTrigger, 'initial'>;
 
 export interface CreateServiceAccountFakeRequestParams {
   /** The ID of the service account the request should be bound to. */
@@ -199,7 +205,7 @@ export class ServiceAccountFakeRequests {
 
     const { token, expiresAt } = await this.mintWithInterceptor(
       serviceAccountId,
-      { boundAt },
+      { boundAt, trigger: 'initial' },
       mintInterceptor
     );
 
@@ -274,9 +280,13 @@ export class ServiceAccountFakeRequests {
    * the current token is older, a replacement is minted (single-flight) and the request's
    * `authorization` header is updated in place. Throws when the request is not bound to a service
    * account, when its lease has expired, when minting fails, or while mint failures are being
-   * backed off.
+   * backed off. `trigger` says why the caller needs the token, for the token exchange metrics.
    */
-  async ensureFreshToken(request: KibanaRequest, maxAgeMs: number): Promise<string> {
+  async ensureFreshToken(
+    request: KibanaRequest,
+    maxAgeMs: number,
+    trigger: ServiceAccountRefreshTrigger
+  ): Promise<string> {
     const entry = this.registry.get(request);
     if (!entry) {
       throw new Error('The provided request is not bound to a service account.');
@@ -309,7 +319,7 @@ export class ServiceAccountFakeRequests {
 
     entry.inflight = this.mintWithInterceptor(
       entry.serviceAccountId,
-      { boundAt: entry.boundAt },
+      { boundAt: entry.boundAt, trigger },
       entry.mintInterceptor,
       {
         onExchangeFailure: (error) => {
@@ -408,7 +418,7 @@ export class ServiceAccountFakeRequests {
     let token: string;
     try {
       // The reuse window has elapsed, and the token's lifetime is insufficient or unknown.
-      token = await this.ensureFreshToken(request, 0);
+      token = await this.ensureFreshToken(request, 0, 'self_call');
     } catch (err) {
       if (this.registry.get(request) !== entry || entry.nonRetryableError) {
         throw new ServiceAccountCredentialRefusedError();

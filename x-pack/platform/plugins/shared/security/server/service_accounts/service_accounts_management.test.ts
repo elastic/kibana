@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
 import type { KibanaRequest } from '@kbn/core/server';
@@ -21,11 +22,18 @@ import type {
 } from '@kbn/security-plugin-types-server';
 
 import type { WorkloadBindingStore } from './bindings';
+import { serviceAccountsMetrics } from './metrics';
 import { ServiceAccountsManagement } from './service_accounts_management';
 import { serviceAccountsServiceMock } from './service_accounts_service.mock';
 import type { ServiceAccountsBackend } from './types';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { auditLoggerMock, auditServiceMock } from '../audit/mocks';
+import { securityMock } from '../mocks';
+
+jest.mock('./metrics', () => ({
+  ...jest.requireActual('./metrics'),
+  serviceAccountsMetrics: { recordOperation: jest.fn() },
+}));
 
 const SERVICE_ACCOUNT_ID = 'service-account-id';
 
@@ -389,6 +397,68 @@ describe('ServiceAccountsManagement', () => {
 
       expect(store.findByServiceAccountId).not.toHaveBeenCalled();
       expect(backend.delete).toHaveBeenCalledWith(request, SERVICE_ACCOUNT_ID);
+    });
+
+    describe('metrics', () => {
+      beforeEach(() => {
+        jest.mocked(serviceAccountsMetrics.recordOperation).mockClear();
+      });
+
+      it('counts a delete', async () => {
+        await management.delete(request, SERVICE_ACCOUNT_ID, { force: false });
+
+        expect(serviceAccountsMetrics.recordOperation).toHaveBeenCalledWith({
+          operation: 'delete',
+          backend: 'uiam',
+        });
+      });
+
+      it('counts a delete that bound workloads stopped under its own error type', async () => {
+        const bound = binding();
+        store.findByServiceAccountId.mockResolvedValue([bound]);
+        store.getVerified.mockResolvedValue(bound);
+
+        await management.delete(request, SERVICE_ACCOUNT_ID, { force: false });
+
+        expect(serviceAccountsMetrics.recordOperation).toHaveBeenCalledWith({
+          operation: 'delete',
+          backend: 'uiam',
+          errorType: 'bound_workloads',
+        });
+      });
+
+      it('counts a failed delete with its status', async () => {
+        backend.delete.mockRejectedValue(Boom.notFound());
+
+        await expect(
+          management.delete(request, SERVICE_ACCOUNT_ID, { force: true })
+        ).rejects.toMatchObject({ output: { statusCode: 404 } });
+
+        expect(serviceAccountsMetrics.recordOperation).toHaveBeenCalledWith({
+          operation: 'delete',
+          backend: 'uiam',
+          errorType: '404',
+        });
+      });
+
+      // The stack backend lets Elasticsearch's own errors through unwrapped.
+      it('counts a delete that Elasticsearch failed with its status', async () => {
+        backend.delete.mockRejectedValue(
+          new errors.ResponseError(
+            securityMock.createApiResponse({ statusCode: 409, body: { error: 'conflict' } })
+          )
+        );
+
+        await expect(
+          management.delete(request, SERVICE_ACCOUNT_ID, { force: true })
+        ).rejects.toThrow();
+
+        expect(serviceAccountsMetrics.recordOperation).toHaveBeenCalledWith({
+          operation: 'delete',
+          backend: 'uiam',
+          errorType: '409',
+        });
+      });
     });
 
     it('rejects with a 403 before reading bindings when the caller lacks `manage_security`', async () => {
