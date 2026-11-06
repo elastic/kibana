@@ -491,14 +491,22 @@ export const createInvestigatorServiceAccountService = ({
   };
 
   // The shared task retains the last enabling admin's credentials.
-  const removeSourceVolumeTaskIfUnused = async (): Promise<void> => {
+  const hasInstalledNightshiftSpace = async (): Promise<boolean> => {
     const states = await listInstalledWorkflowStates();
-    if (
-      states.some((state) => state.workflowId === getBoundInvestigationWorkflowId(state.spaceId))
-    ) {
+    return states.some(
+      (state) => state.workflowId === getBoundInvestigationWorkflowId(state.spaceId)
+    );
+  };
+
+  const removeSourceVolumeTaskIfUnused = async (request: KibanaRequest): Promise<void> => {
+    if (await hasInstalledNightshiftSpace()) {
       return;
     }
     await removeSourceVolumeTask();
+    if (await hasInstalledNightshiftSpace()) {
+      await scheduleSourceVolumeTask(request);
+      return;
+    }
     logger.info('No space has Nightshift set up; removed the source volume telemetry task');
   };
 
@@ -607,8 +615,8 @@ export const createInvestigatorServiceAccountService = ({
         }
       );
     }
-    await removeSourceVolumeTaskIfUnused().catch((error) => {
-      logger.error(`Failed to remove the source volume telemetry task: ${error.message}`);
+    await removeSourceVolumeTaskIfUnused(request).catch((error) => {
+      logger.error(`Failed to reconcile the source volume telemetry task: ${error.message}`);
     });
     return getStatus(request, spaceId);
   };

@@ -474,6 +474,28 @@ describe('createInvestigatorServiceAccountService', () => {
     expect(removeSourceVolumeTask).not.toHaveBeenCalled();
   });
 
+  it('restores the task when another space appears during removal', async () => {
+    const {
+      service,
+      listInstalledWorkflowStates,
+      scheduleSourceVolumeTask,
+      removeSourceVolumeTask,
+    } = setup();
+    listInstalledWorkflowStates
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([
+        { workflowId: getBoundInvestigationWorkflowId('marketing'), spaceId: 'marketing' },
+      ]);
+
+    await service.disable(request, SPACE_ID);
+
+    expect(removeSourceVolumeTask).toHaveBeenCalledTimes(1);
+    expect(scheduleSourceVolumeTask).toHaveBeenCalledWith(request);
+    expect(removeSourceVolumeTask.mock.invocationCallOrder[0]).toBeLessThan(
+      scheduleSourceVolumeTask.mock.invocationCallOrder[0]
+    );
+  });
+
   it('enables and disables the space when the telemetry task cannot be changed', async () => {
     const { service, scheduleSourceVolumeTask, removeSourceVolumeTask } = setup();
     scheduleSourceVolumeTask.mockRejectedValue(new Error('grant failed'));
