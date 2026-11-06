@@ -12,7 +12,7 @@ import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { PickableConfig } from './configs';
 
-const STATE_FILE = Path.resolve(REPO_ROOT, '.scout/pins.json');
+const STATE_FILE = Path.resolve(REPO_ROOT, '.scout/pick/pins.json');
 
 /** What the picker needs to run a config without loading all Scout configs */
 export type PinnedConfig = Pick<

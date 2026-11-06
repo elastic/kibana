@@ -758,12 +758,11 @@ usually declares fewer. Targets that run some but not all of the chosen specs sa
   serverless · search      only 1 of 2 specs
 ```
 
-Tags are read from the committed test config manifests (`**/test/scout/.meta/*.json`), which a
-scheduled job keeps up to date. A spec that was added or edited since that job last ran isn't
-covered by them, so Scout asks Playwright to list the config instead and caches the answer under
-`.scout/cache/` until you edit the config again. That takes a few seconds the first time; configs
-the manifests already cover stay instant. Configs with no manifest at all are marked
-`no manifest yet` in the lists.
+Tags come from the committed test config manifests (`**/test/scout/.meta/*.json`), which a
+scheduled job keeps up to date. Editing a spec doesn't discard them, since tags change far less
+often than test bodies. A spec the manifests don't list at all, a new one for instance, can't be
+narrowed: every target of the config is offered with a warning, and configs with no manifest are
+marked `no manifest yet` in the lists.
 
 There are two ways to get the servers:
 
@@ -777,14 +776,15 @@ Servers already running for the chosen target are detected and reused. Servers r
 *different* target are offered for shutdown first, since they hold the ports the new ones need.
 
 After a run you can rerun the same tests, **rerun only the ones that failed** (with servers kept
-running), toggle headed mode and log verbosity, or pick something else. `Esc` goes back a question
-at a time, `Ctrl+C` stops the tests without closing the session.
+running), toggle headed mode and log verbosity, or pick something else. Headed mode and verbosity
+are settings there rather than questions, so a run starts with test results only and nothing to
+answer. `Esc` goes back a question at a time, `Ctrl+C` stops the tests without closing the session.
 
 In any list: type to filter, `↑`/`↓` to move, `Enter` to confirm, and in multi-select `Space` to
-toggle and `Ctrl+A` to select all. Questions with a single answer are skipped, and answers that
-rarely change are remembered.
+toggle and `Ctrl+A` to select all. Questions with a single answer are skipped, and your settings
+carry over to the next run.
 
-Pins, the last run and your settings are stored in `KIBANA_REPO_ROOT/.scout/pins.json`, so they are
+Pins, the last run and your settings are stored in `KIBANA_REPO_ROOT/.scout/pick/pins.json`, so they are
 per checkout -- a separate git worktree starts with its own pins. The command needs an interactive
 terminal and relies on `ps` to find running servers, so it is macOS and Linux only.
 

@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Fs from 'fs';
+import Path from 'path';
 import chalk from 'chalk';
 import execa from 'execa';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { SCOUT_SERVERS_ROOT } from '@kbn/scout-info';
 import type { ScoutTestTarget } from '@kbn/scout-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { describeServerSet, describeTarget } from './labels';
@@ -25,6 +29,15 @@ export interface RunningServers {
 export type ServersMode = 'running' | 'with-run';
 
 const STOP_TIMEOUT_MS = 120_000;
+
+const SERVERS_CONFIG_FILE = Path.join(SCOUT_SERVERS_ROOT, 'local.json');
+
+/**
+ * The file the tests read to reach the servers, written once when they boot. A start-server
+ * process alone doesn't mean they are reachable: it may belong to another checkout, or it may
+ * still be starting. Without the file the run fails deep inside a Playwright fixture instead.
+ */
+const hasServersConfig = () => Fs.existsSync(SERVERS_CONFIG_FILE);
 
 const getFlag = (args: string[], name: string) => {
   const index = args.findIndex((arg) => arg === `--${name}` || arg.startsWith(`--${name}=`));
@@ -111,7 +124,8 @@ const stopServers = async (servers: RunningServers[]) => {
 
 const findServers = async (config: PinnedConfig, target: ScoutTestTarget) => {
   const servers = await getRunningServers();
-  return { servers, matching: servers.find((server) => isServingConfig(server, config, target)) };
+  const matching = servers.find((server) => isServingConfig(server, config, target));
+  return { servers, matching, usable: matching && hasServersConfig() ? matching : undefined };
 };
 
 const askAboutServers = async (
@@ -119,20 +133,33 @@ const askAboutServers = async (
   config: PinnedConfig,
   target: ScoutTestTarget
 ): Promise<ServersMode | undefined> => {
-  const { servers, matching } = await findServers(config, target);
-  if (matching) {
-    log.write(chalk.dim(`Using the Scout servers running for this target (PID ${matching.pid})`));
+  const { servers, matching, usable } = await findServers(config, target);
+  if (usable) {
+    log.write(chalk.dim(`Using the Scout servers running for this target (PID ${usable.pid})`));
     return 'running';
+  }
+  if (matching) {
+    log.write(
+      chalk.yellow(
+        `Scout servers for this target are running (PID ${matching.pid}), but ${Path.relative(
+          REPO_ROOT,
+          SERVERS_CONFIG_FILE
+        )} is missing, so the tests can't reach them. They are either still starting or they ` +
+          `belong to another checkout.`
+      )
+    );
   }
   if (servers.length) {
     // servers for this target would fail to start on the ports they hold
-    log.write(
-      chalk.yellow(
-        `Scout servers are running for ${describeServers(
-          servers
-        )}, these tests need ${describeTarget(target)} · ${describeServerSet(config.configSet)}`
-      )
-    );
+    if (!matching) {
+      log.write(
+        chalk.yellow(
+          `Scout servers are running for ${describeServers(
+            servers
+          )}, these tests need ${describeTarget(target)} · ${describeServerSet(config.configSet)}`
+        )
+      );
+    }
     const stop = await select('Stop them?', [
       { label: 'Yes, stop them', value: true },
       { label: 'Cancel', value: false },
@@ -171,10 +198,20 @@ const askAboutServers = async (
     if (!ready) {
       return undefined;
     }
-    if ((await findServers(config, target)).matching) {
+    const found = await findServers(config, target);
+    if (found.usable) {
       return 'running';
     }
-    log.write(chalk.yellow(`No Scout servers for ${describeTarget(target)} found yet`));
+    log.write(
+      chalk.yellow(
+        found.matching
+          ? `Scout servers are up but still starting, ${Path.relative(
+              REPO_ROOT,
+              SERVERS_CONFIG_FILE
+            )} is not written yet`
+          : `No Scout servers for ${describeTarget(target)} found yet`
+      )
+    );
   }
 };
 

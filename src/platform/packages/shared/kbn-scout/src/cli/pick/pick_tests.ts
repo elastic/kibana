@@ -19,7 +19,7 @@ import { readState, toPinned, updateState } from './pins';
 import { getShownPrompts, GoBack, multiSelect, select } from './prompt';
 import type { RunningServers } from './servers';
 import { getRunningServers, isServingConfig } from './servers';
-import { getTargetCoverage } from './targets';
+import { getTargetCoverage, isManifestOutdated, MANIFEST_UPDATE_CMD } from './targets';
 
 export interface Selection {
   config: PinnedConfig;
@@ -106,8 +106,7 @@ type Step =
   | 'changed'
   | 'scope'
   | 'specs'
-  | 'target'
-  | 'output';
+  | 'target';
 
 /** Picks what to run; Scout configs are only loaded when pinned ones are not enough */
 export const pickTests = async (log: ToolingLog): Promise<Selection> => {
@@ -135,7 +134,7 @@ export const pickTests = async (log: ToolingLog): Promise<Selection> => {
   let target: ScoutTestTarget | undefined;
   let pin = false;
   let runLast = false;
-  let { verbose } = state;
+  const verbose = state.verbose ?? false;
 
   const getConfig = () => {
     if (!config) {
@@ -283,11 +282,19 @@ export const pickTests = async (log: ToolingLog): Promise<Selection> => {
       return 'target';
     },
     target: async () => {
-      const { tags, counts, total, known } = await getTargetCoverage(log, getConfig(), specs);
+      const { tags, counts, total, known } = getTargetCoverage(getConfig(), specs);
       if (!known) {
         log.write(
-          chalk.yellow("Can't tell which targets these tests declare, showing all of the config")
+          chalk.yellow('No manifest entry for these specs yet, showing every target of the config')
         );
+        log.write(chalk.dim(`Write one with: ${MANIFEST_UPDATE_CMD}`));
+      } else if (await isManifestOutdated(getConfig().path)) {
+        log.write(
+          chalk.yellow(
+            'The manifest predates the latest change to this config, its tags may be stale'
+          )
+        );
+        log.write(chalk.dim(`Refresh it with: ${MANIFEST_UPDATE_CMD}`));
       }
       const choices = tags.map((tag) => {
         const value = ScoutTestTarget.fromTag(tag);
@@ -300,15 +307,6 @@ export const pickTests = async (log: ToolingLog): Promise<Selection> => {
         };
       });
       target = await select('Target', choices);
-      return 'output';
-    },
-    output: async () => {
-      verbose =
-        state.verbose ??
-        (await select('Output', [
-          { label: 'Test results', value: false },
-          { label: 'Everything', value: true, hint: 'server and debug logs' },
-        ]));
       return undefined;
     },
   };
@@ -326,7 +324,7 @@ export const pickTests = async (log: ToolingLog): Promise<Selection> => {
     return {
       ...last,
       target: ScoutTestTarget.fromTag(last.target),
-      verbose: verbose ?? false,
+      verbose,
       headed,
     };
   }
@@ -337,7 +335,6 @@ export const pickTests = async (log: ToolingLog): Promise<Selection> => {
   updateState({
     ...(pin ? { pins: [...pins, picked] } : {}),
     last: { config: picked, specs, target: target.tag },
-    verbose,
   });
-  return { config: picked, specs, target, verbose: verbose ?? false, headed };
+  return { config: picked, specs, target, verbose, headed };
 };

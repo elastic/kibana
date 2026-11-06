@@ -83,7 +83,10 @@ const findMergeBase = async () => {
 let mergeBase: Promise<string> | undefined;
 const getMergeBase = () => (mergeBase ??= findMergeBase());
 
-const getChanged = async (pathspec: string[]): Promise<string[]> => {
+/** Everything changed on this branch or not committed yet */
+export const getChangedFiles = async (): Promise<string[]> => {
+  // fixtures, es_archives and other test data decide what a run does, so only docs are left out
+  const pathspec = [':!*.md'];
   const [changed, untracked] = await Promise.all([
     getMergeBase().then((base) => git(['diff', '--name-only', base, '--', ...pathspec])),
     // `git status` finds untracked files faster than `git ls-files --others`
@@ -95,15 +98,6 @@ const getChanged = async (pathspec: string[]): Promise<string[]> => {
     Fs.existsSync(Path.resolve(REPO_ROOT, file))
   );
 };
-
-/** Everything changed on this branch or not committed yet */
-export const getChangedFiles = (): Promise<string[]> =>
-  // fixtures, es_archives and other test data decide what a run does, so only docs are left out
-  getChanged([':!*.md']);
-
-/** Of the given files, the ones changed on this branch or not committed yet */
-export const getChangedSince = async (files: string[]): Promise<string[]> =>
-  files.length ? getChanged(files) : [];
 
 export interface ChangedConfig {
   config: PickableConfig;
