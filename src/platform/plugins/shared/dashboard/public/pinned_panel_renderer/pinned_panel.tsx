@@ -291,12 +291,12 @@ const controlPanelStyles = {
       },
       '&.controlFrame__formControlLayout--selected': {
         outline: `${euiTheme.border.width.thick} solid ${euiTheme.colors.primary}`,
-        backgroundColor: transparentize(euiTheme.colors.primary, 0.1),
+        backgroundColor: euiTheme.colors.backgroundLightPrimary,
         '& div, & button': {
           backgroundColor: 'transparent',
         },
         '&.controlFrame__formControlLayout--edit .euiFormControlLayout__prepend:hover': {
-          backgroundColor: transparentize(euiTheme.colors.primary, 0.1),
+          backgroundColor: euiTheme.colors.backgroundLightPrimary,
         },
       },
       '.controlPanel--label': {
