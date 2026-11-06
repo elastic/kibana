@@ -18,6 +18,7 @@ const storageSettings = {
     properties: {
       spaceId: types.keyword({}),
       conversationId: types.keyword({}),
+      caseId: types.keyword({}),
       title: types.text({}),
       comment: types.text({}),
 

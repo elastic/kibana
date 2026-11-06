@@ -14,7 +14,7 @@ export async function plugin(initializerContext: PluginInitializerContext) {
   return new ProposalsPlugin(initializerContext);
 }
 
-export type { ProposalsPluginSetup, ProposalsPluginStart } from './types';
+export type { ProposalCreateExtension, ProposalsPluginSetup, ProposalsPluginStart } from './types';
 
 // The errors a caller of the service has to recognise: `get` and `getLatestRevision` throw
 // `ProposalNotFoundError` for an id nothing is under, `create` throws

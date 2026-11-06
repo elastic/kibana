@@ -491,13 +491,13 @@ export class AgentBuilderPlugin
         createModelProvider: modelProviderFactory,
       },
       conversations: {
-        getScopedClient: async ({ request }) => {
+        getScopedClient: async ({ request, source = 'server_api' }) => {
           const client = await conversations.getScopedClient({ request });
           const agentRegistry = await agents.getRegistry({ request });
           return createConversationPublicClient({
             client,
             agentRegistry,
-            source: 'server_api',
+            source,
             getClientAsOwner: (owner) =>
               conversations.getScopedClientAsUser({
                 request,
