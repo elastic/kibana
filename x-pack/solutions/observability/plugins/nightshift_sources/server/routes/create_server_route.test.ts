@@ -42,4 +42,22 @@ describe('createNightshiftSourcesServerRoute', () => {
       'listed'
     );
   });
+
+  // So a space set up on an earlier build can still get rid of the sources it was left with.
+  it('leaves the source delete and disable open in any space, and still gates the update', async () => {
+    const remove = jest.fn().mockResolvedValue('deleted');
+    const disable = jest.fn().mockResolvedValue('disabled');
+    const update = jest.fn();
+
+    await expect(
+      call('DELETE /internal/nightshift/sources/{sourceId}', remove, 'marketing')
+    ).resolves.toBe('deleted');
+    await expect(
+      call('POST /internal/nightshift/sources/{sourceId}/_disable', disable, 'marketing')
+    ).resolves.toBe('disabled');
+    await expect(
+      call('PUT /internal/nightshift/sources/{sourceId}', update, 'marketing')
+    ).rejects.toThrow(/only available in the "default" space/);
+    expect(update).not.toHaveBeenCalled();
+  });
 });

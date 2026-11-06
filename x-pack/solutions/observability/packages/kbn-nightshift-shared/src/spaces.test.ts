@@ -24,7 +24,7 @@ describe('isNightshiftSpaceGatedEndpoint', () => {
   });
 
   it('leaves an exempt write open, so a space set up earlier can be taken down', () => {
-    const exempt = new Set(['/internal/nightshift/investigations/service_account/_disable']);
+    const exempt = new Set(['POST /internal/nightshift/investigations/service_account/_disable']);
 
     expect(
       isNightshiftSpaceGatedEndpoint(

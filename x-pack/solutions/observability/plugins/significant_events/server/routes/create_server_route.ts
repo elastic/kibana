@@ -35,9 +35,9 @@ const isStatusErrorLike = (error: unknown): error is StatusError =>
  * can be taken back down: pausing maintenance stops the work it was left with, and the reset
  * deletes what it was left with.
  */
-const SPACE_GATE_EXEMPT_PATHS: ReadonlySet<string> = new Set([
-  '/internal/significant_events/maintenance/_pause',
-  '/internal/significant_events/maintenance/_reset',
+const SPACE_GATE_EXEMPT_ENDPOINTS: ReadonlySet<string> = new Set([
+  'POST /internal/significant_events/maintenance/_pause',
+  'POST /internal/significant_events/maintenance/_reset',
 ]);
 
 const createPlainSignificantEventsServerRoute =
@@ -50,7 +50,7 @@ export const createServerRoute: CreateServerRouteFactory<
   // Applied here rather than route by route, so a new write route is gated by default: these
   // routes install enabled workflows and write per-space state, and Nightshift only runs in the
   // default space. Reads stay open everywhere.
-  const gated = isNightshiftSpaceGatedEndpoint(config.endpoint, SPACE_GATE_EXEMPT_PATHS);
+  const gated = isNightshiftSpaceGatedEndpoint(config.endpoint, SPACE_GATE_EXEMPT_ENDPOINTS);
 
   return createPlainSignificantEventsServerRoute({
     ...config,

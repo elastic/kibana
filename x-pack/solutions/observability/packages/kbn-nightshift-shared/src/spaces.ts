@@ -26,13 +26,13 @@ export const NIGHTSHIFT_UNSUPPORTED_SPACE_MESSAGE = `Nightshift is only availabl
  *
  * Writes are gated, because they are what binds deployment-wide identities — service accounts,
  * workflows and agents — to a space. Reads stay open everywhere, so a space set up on an earlier
- * build can still be looked at, and `exemptPaths` keeps the few writes that undo such a setup
- * reachable there as well.
+ * build can still be looked at, and `exemptEndpoints` — `'<METHOD> <path>'`, the same shape as
+ * `endpoint` — keeps the few writes that undo such a setup reachable there as well.
  */
 export const isNightshiftSpaceGatedEndpoint = (
   endpoint: string,
-  exemptPaths: ReadonlySet<string> = new Set()
+  exemptEndpoints: ReadonlySet<string> = new Set()
 ): boolean => {
-  const [method, path] = endpoint.split(' ');
-  return method !== 'GET' && !exemptPaths.has(path);
+  const [method] = endpoint.split(' ');
+  return method !== 'GET' && !exemptEndpoints.has(endpoint);
 };

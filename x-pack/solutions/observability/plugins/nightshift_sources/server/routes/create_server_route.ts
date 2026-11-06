@@ -20,6 +20,16 @@ export type NightshiftSourcesRouteHandlerResources = {
   getSourcesClient: GetSourcesClient;
 } & DefaultRouteHandlerResources;
 
+/**
+ * The writes that stay reachable outside the default space, so a space set up on an earlier build
+ * can be taken back down: disabling a source stops its rules, and deleting it removes the source
+ * and its view. Both run the source-change hook, which refuses other spaces on its own.
+ */
+const SPACE_GATE_EXEMPT_ENDPOINTS: ReadonlySet<string> = new Set([
+  'DELETE /internal/nightshift/sources/{sourceId}',
+  'POST /internal/nightshift/sources/{sourceId}/_disable',
+]);
+
 const createPlainNightshiftSourcesServerRoute =
   createServerRouteFactory<NightshiftSourcesRouteHandlerResources>();
 
@@ -33,7 +43,7 @@ export const createNightshiftSourcesServerRoute: CreateServerRouteFactory<
   NightshiftSourcesRouteHandlerResources,
   undefined
 > = ({ handler, ...config }) => {
-  const gated = isNightshiftSpaceGatedEndpoint(config.endpoint);
+  const gated = isNightshiftSpaceGatedEndpoint(config.endpoint, SPACE_GATE_EXEMPT_ENDPOINTS);
 
   return createPlainNightshiftSourcesServerRoute({
     ...config,
