@@ -60,9 +60,7 @@ export const emitLifecycleEventRoute = createNightshiftInvestigationsServerRoute
       ? getEmitterWorkflowExecutionIdFromRequest(request)
       : undefined;
     const correlation = executionId
-      ? await client
-          .getLifecycleCorrelation(params.path.id, executionId)
-          .catch(rethrowInvestigationClientError)
+      ? await client.getLifecycleCorrelation(params.path.id, executionId)
       : {};
     const base = {
       investigation_id: params.path.id,

@@ -1164,12 +1164,22 @@ export class NightshiftInvestigationsClient {
     return { execution, inputs };
   }
 
-  /** Pipeline keys persisted in the investigation run context for lifecycle telemetry joins. */
+  /** Pipeline join keys from the run context; best-effort so a lifecycle event still emits when the read fails. */
   async getLifecycleCorrelation(
     investigationId: string,
     executionId: string
   ): Promise<LifecycleCorrelation> {
-    const { inputs } = await this.readInvestigationExecution(investigationId, executionId);
+    let inputs: Record<string, unknown> | undefined;
+    try {
+      ({ inputs } = await this.readInvestigationExecution(investigationId, executionId));
+    } catch (error) {
+      this.logger.warn(
+        `Could not read lifecycle correlation for investigation "${investigationId}" execution "${executionId}": ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return {};
+    }
     const context = isPlainObject(inputs?.context) ? inputs.context : undefined;
     const eventId = asLifecycleCorrelationId(context?.event_id);
     const sourceWorkflowExecutionId = asLifecycleCorrelationId(

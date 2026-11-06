@@ -63,7 +63,35 @@ describe('attachInvestigationToEvent', () => {
     const written = getWritten(alertEventsClient);
 
     expect(written.investigations).toEqual([investigation]);
-    expect(written.workflow_execution_id).toBe(investigation.workflow_execution_id);
+  });
+
+  it('stamps the version with the attaching workflow, not the attached investigation', async () => {
+    const existing = createEvent({ workflow_execution_id: 'discovery-1' });
+    const { client, alertEventsClient } = createClients(existing);
+
+    await attachInvestigationToEvent({
+      eventSearchClient: client as never,
+      alertEventsClient: alertEventsClient as never,
+      eventId: 'agent-event-1',
+      investigation: createInvestigation({ workflow_execution_id: 'inv-1' }),
+      workflowExecutionId: 'subscriber-1',
+    });
+
+    expect(getWritten(alertEventsClient).workflow_execution_id).toBe('subscriber-1');
+  });
+
+  it('clears prior provenance when a standalone caller attaches', async () => {
+    const existing = createEvent({ workflow_execution_id: 'discovery-1' });
+    const { client, alertEventsClient } = createClients(existing);
+
+    await attachInvestigationToEvent({
+      eventSearchClient: client as never,
+      alertEventsClient: alertEventsClient as never,
+      eventId: 'agent-event-1',
+      investigation: createInvestigation({ workflow_execution_id: 'inv-1' }),
+    });
+
+    expect(getWritten(alertEventsClient)).not.toHaveProperty('workflow_execution_id');
   });
 
   it('attaches an investigation to a legacy event with longer narratives', async () => {

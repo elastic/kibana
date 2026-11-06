@@ -64,7 +64,11 @@ describe('event_investigation_attach tool', () => {
       expect.objectContaining({ request: expect.anything() })
     );
     expect(attachEventInvestigationToolHandler).toHaveBeenCalledWith(
-      expect.objectContaining({ logger })
+      expect.objectContaining({
+        logger,
+        investigationWorkflowExecutionId: 'workflow-id',
+        workflowExecutionId: 'attaching-workflow-id',
+      })
     );
     expect(telemetry.trackAgentToolEventInvestigationAttach).toHaveBeenCalledWith({
       success: true,

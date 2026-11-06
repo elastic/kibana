@@ -2784,6 +2784,13 @@ describe('NightshiftInvestigationsClient.getLifecycleCorrelation()', () => {
       source_workflow_execution_id: 'discovery-execution-1',
     });
   });
+
+  it('returns no keys and warns when the execution cannot be read', async () => {
+    mockManagement.getWorkflowExecution.mockRejectedValue(new Error('store unavailable'));
+
+    await expect(makeClient().getLifecycleCorrelation('inv-1', 'exec-1')).resolves.toEqual({});
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('store unavailable'));
+  });
 });
 
 describe('NightshiftInvestigationsClient notification destinations', () => {

@@ -119,9 +119,10 @@ export const createEventInvestigationAttachTool = ({
         const data = await attachEventInvestigationToolHandler({
           eventSearchClient: await getEventSearchClient(),
           eventId: toolParams.event_id,
-          workflowExecutionId: toolParams.workflow_execution_id,
+          investigationWorkflowExecutionId: toolParams.workflow_execution_id,
           startedAt: toolParams.started_at,
           completedAt: toolParams.completed_at,
+          workflowExecutionId: context.workflowExecutionId,
           alertEventsClient: await getAlertEventsClient(),
           emitTrigger,
           logger,

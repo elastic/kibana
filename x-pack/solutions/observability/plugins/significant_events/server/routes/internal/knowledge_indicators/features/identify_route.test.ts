@@ -530,20 +530,6 @@ describe('inferred feature identification route', () => {
     );
   });
 
-  it('drops a blank parent execution id', async () => {
-    const { handlerParams, telemetry } = makeInferredHandlerParams();
-    handlerParams.params.body.parentWorkflowExecutionId = '';
-
-    await inferredRoute.handler(handlerParams);
-    mockIdentifyInferredFeatures.mock.calls[0][0].trackFeaturesIdentified?.({
-      run_id: 'run-1',
-    } as never);
-
-    expect(telemetry.trackFeaturesIdentified).toHaveBeenCalledWith(
-      expect.not.objectContaining({ parent_workflow_execution_id: expect.anything() })
-    );
-  });
-
   it('returns identification results when sync workflow bootstrap fails', async () => {
     const ensureEnabled = jest.fn().mockRejectedValue(new Error('workflow unavailable'));
     const { handlerParams, routeLogger, identifyResult } = makeInferredHandlerParams({

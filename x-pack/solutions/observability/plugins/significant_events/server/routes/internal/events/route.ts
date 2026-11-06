@@ -23,6 +23,7 @@ import { z, isoDateTime } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
+import { getWorkflowExecutionIdFromRequest } from '../../../lib/telemetry/ebt/workflow_execution_id';
 import {
   cleanupStaleEvents,
   type CleanupStaleEventsResult,
@@ -359,6 +360,7 @@ const eventsAttachInvestigationRoute = createServerRoute({
       eventSearchClient: await getEventSearchClient(),
       eventId: params.path.id,
       investigation: params.body,
+      workflowExecutionId: getWorkflowExecutionIdFromRequest(request),
       alertEventsClient: await getAlertEventsClient(),
       emitTrigger,
       logger,
@@ -427,6 +429,7 @@ const eventsTriggerInvestigationRoute = createServerRoute({
           workflow_execution_id: executionId,
           started_at: new Date().toISOString(),
         },
+        workflowExecutionId: getWorkflowExecutionIdFromRequest(request),
         alertEventsClient: await getAlertEventsClient(),
         emitTrigger,
         logger,

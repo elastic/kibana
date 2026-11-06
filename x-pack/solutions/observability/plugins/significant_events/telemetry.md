@@ -35,8 +35,8 @@ artifacts between them by `source_id`/`source_ids`: onboarding produces source-s
 detection/discovery consume those source-scoped KIs. Link discovery to a triggered investigation by
 the event's stable `event_id`. An automatic trigger from discovery also puts the discovery
 execution ID in the investigation context as `source_workflow_execution_id`. A manual trigger
-sends none: the alert's latest version may name an attached investigation rather than the run
-that produced it.
+sends none. Attaching an investigation stamps the new alert version with the attaching workflow's
+execution ID; the investigation's own ID lives only in `investigations[]`.
 
 `detection-scan` belongs to the detection workflow. Detection and discovery can share an
 orchestrator ancestor through `executionChain`, but their immediate execution IDs remain distinct.

@@ -19,6 +19,7 @@ export const attachInvestigationToEvent = async ({
   eventId,
   investigation,
   alertEventsClient,
+  workflowExecutionId,
   emitTrigger,
   logger,
 }: {
@@ -26,6 +27,8 @@ export const attachInvestigationToEvent = async ({
   eventId: string;
   investigation: SignificantEventInvestigation;
   alertEventsClient: AlertEventsClientApi;
+  /** Execution of the workflow writing this version, not the investigation being attached. */
+  workflowExecutionId?: string;
   emitTrigger?: TriggerEmitter;
   logger?: Logger;
 }): Promise<{ updated: number; ignored: number }> => {
@@ -60,12 +63,11 @@ export const attachInvestigationToEvent = async ({
   }
 
   const now = new Date().toISOString();
-  const updatedEvent = {
-    ...latest,
-    '@timestamp': now,
-    investigations,
-    workflow_execution_id: investigation.workflow_execution_id,
-  };
+  const updatedEvent = { ...latest, '@timestamp': now, investigations };
+  delete updatedEvent.workflow_execution_id;
+  if (workflowExecutionId) {
+    updatedEvent.workflow_execution_id = workflowExecutionId;
+  }
 
   await alertEventsClient.createAlertEvent(toRuleEvent(updatedEvent));
 

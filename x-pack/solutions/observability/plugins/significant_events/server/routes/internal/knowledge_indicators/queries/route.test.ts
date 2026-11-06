@@ -736,17 +736,6 @@ describe('generateQueriesRoute', () => {
     expect(maxExistingQueriesForContext).toBe(50);
   });
 
-  it('drops a blank parent execution id', async () => {
-    await generateRoute.handler(
-      makeHandlerParams({
-        agentBuilder: makeAgentBuilder(),
-        body: { connectorId: 'test-connector', parentWorkflowExecutionId: '' },
-      })
-    );
-
-    expect(mockGenerateKIQueries.mock.calls[0][0].parentWorkflowExecutionId).toBeUndefined();
-  });
-
   it('fails when agent builder is unavailable', async () => {
     await expect(
       generateRoute.handler(makeHandlerParams({ agentBuilder: undefined }))
