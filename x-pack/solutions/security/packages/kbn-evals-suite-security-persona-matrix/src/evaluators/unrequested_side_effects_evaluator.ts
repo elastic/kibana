@@ -19,15 +19,16 @@ const CREATE_LIKE_CASE_MODES = new Set(['create', 'create_from_template']);
 /**
  * Normalises a tool call to the side-effect id it represents, or undefined when
  * the call has no side effect. The default profile creates cases through
- * `platform.core.cases.manage`, which is a side effect only in a create mode;
- * it is the same effect the seeded `create.case` workflow tool produces.
+ * `platform.core.cases.manage`; its create modes are the same effect the
+ * seeded `create.case` workflow tool produces. Every other mode (update,
+ * delete, comment, ...) mutates a case too, so it is a side effect of its own
+ * (`cases.manage:<mode>`) that a `create.case` request does not cover.
  */
 const toSideEffectId = ({ tool_id: toolId, params }: ToolCallStep): string | undefined => {
   if (!SIDE_EFFECT_TOOL_IDS.has(toolId)) return undefined;
   if (toolId !== CASES_MANAGE_TOOL_ID) return toolId;
-  return typeof params.mode === 'string' && CREATE_LIKE_CASE_MODES.has(params.mode)
-    ? CREATE_CASE_TOOL_ID
-    : undefined;
+  const mode = typeof params.mode === 'string' && params.mode !== '' ? params.mode : 'unknown';
+  return CREATE_LIKE_CASE_MODES.has(mode) ? CREATE_CASE_TOOL_ID : `cases.manage:${mode}`;
 };
 
 export const getRequestedSideEffects = (metadata: unknown): string[] => {

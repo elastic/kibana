@@ -23,6 +23,11 @@ export type AdFailureClass =
   | 'never_materialized'
   | 'other';
 
+// Terminal generation statuses of the generate API (mirrors the AD suite's
+// client). A run that ends in one of these with nothing to show, and without an
+// error string, produced no discovery document at all.
+const TERMINAL_GENERATION_STATUSES = new Set(['succeeded', 'failed', 'canceled', 'dismissed']);
+
 const TRUNCATION_REASON = /unexpected end of json|truncated|unterminated/i;
 const MAX_ATTEMPTS_REASON = /max(?:imum)? (?:generation )?attempts/i;
 
@@ -53,7 +58,11 @@ export const classifyAdFailure = (
   if (Array.isArray(output?.insights) && output.insights.length > 0) return 'none';
 
   const status = isRecord(output?.raw) ? output?.raw.status : undefined;
-  return status === 'timed_out' ? 'poll_timeout' : 'other';
+  if (status === 'timed_out') return 'poll_timeout';
+  if (typeof status === 'string' && TERMINAL_GENERATION_STATUSES.has(status)) {
+    return 'never_materialized';
+  }
+  return 'other';
 };
 
 export const createAdFailureClassEvaluator = (): Evaluator<

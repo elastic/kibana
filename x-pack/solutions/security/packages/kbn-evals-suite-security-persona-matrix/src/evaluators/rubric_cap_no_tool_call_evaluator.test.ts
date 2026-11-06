@@ -6,7 +6,7 @@
  */
 
 import { createRubricCapNoToolCallEvaluator } from './rubric_cap_no_tool_call_evaluator';
-import { buildOutput, toolCall } from './test_output_builders';
+import { buildOutput, toolCall } from '../__fixtures__/task_output_builders';
 
 const run = (steps: unknown[]) =>
   createRubricCapNoToolCallEvaluator().evaluate({

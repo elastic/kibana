@@ -6,7 +6,7 @@
  */
 
 import { createStalledAfterLoadSkillEvaluator } from './stalled_after_load_skill_evaluator';
-import { buildOutput, toolCall } from './test_output_builders';
+import { buildOutput, toolCall } from '../__fixtures__/task_output_builders';
 
 const run = (output: unknown) =>
   createStalledAfterLoadSkillEvaluator().evaluate({

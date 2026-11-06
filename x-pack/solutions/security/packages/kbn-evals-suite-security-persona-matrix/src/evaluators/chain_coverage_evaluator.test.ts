@@ -100,6 +100,23 @@ describe('ChainCoverage evaluator', () => {
     expect(result.metadata).toMatchObject({ recall: 2 / 8, precision: 0 });
   });
 
+  it('pins that a multi-chain discovery lowers precision even when every chain is covered', async () => {
+    // Four discoveries each merging two chains cover all 8 chains (recall 1) but
+    // none maps to exactly one chain, so precision is 0 and the label fails.
+    const insights = [0, 2, 4, 6].map((index) =>
+      discovery(
+        `{{ host.name ${KILL_CHAIN_HOSTS[index]} }} and {{ host.name ${
+          KILL_CHAIN_HOSTS[index + 1]
+        } }}`
+      )
+    );
+    const result = await run({ insights });
+
+    expect(result.score).toBe(1);
+    expect(result.label).toBe('fail');
+    expect(result.metadata).toMatchObject({ recall: 1, precision: 0, discoveries: 4 });
+  });
+
   it('reads snake_case wire docs including the entity summary', async () => {
     const result = await run({
       insights: [

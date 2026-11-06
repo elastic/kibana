@@ -58,6 +58,13 @@ const getChainsMentioned = (discovery: unknown): Set<string> => {
   return chains;
 };
 
+/**
+ * Score is recall over the 8 kill chains; the pass label also needs precision
+ * >= 0.8. Precision counts a discovery only when it names exactly one chain no
+ * earlier discovery claimed, so a discovery that merges several chains counts
+ * AGAINST precision even though its chains still count toward recall. This
+ * matches the reference benchmark, which expects one chain per discovery.
+ */
 export const createChainCoverageEvaluator = (): Evaluator<
   AttackDiscoveryDatasetExample,
   AttackDiscoveryTaskOutput

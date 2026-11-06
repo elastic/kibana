@@ -7,19 +7,14 @@
 
 import { tags } from '@kbn/scout';
 import { restoreAlertsSnapshot } from '@kbn/security-evals-alerts-snapshot';
-import type { Evaluator, TaskOutput } from '@kbn/evals';
 import { evaluate } from '@kbn/evals-suite-attack-discovery/src/evaluate';
 import { resolveConcurrency } from '@kbn/evals-suite-attack-discovery/src/evaluate_dataset';
 import { runAttackDiscovery } from '@kbn/evals-suite-attack-discovery/src/task/run_attack_discovery';
-import { createAttackDiscoveryBasicEvaluator } from '@kbn/evals-suite-attack-discovery/src/evaluators/attack_discovery_basic_evaluator';
-import { createAttackDiscoveryCriteriaEvaluator } from '@kbn/evals-suite-attack-discovery/src/evaluators/attack_discovery_criteria_evaluator';
-import { createAttackDiscoveryRubricEvaluator } from '@kbn/evals-suite-attack-discovery/src/evaluators/attack_discovery_rubric_evaluator';
-import type {
-  AttackDiscoveryDatasetExample,
-  AttackDiscoveryTaskOutput,
-} from '@kbn/evals-suite-attack-discovery/src/types';
-import { createAdFailureClassEvaluator } from '../src/evaluators/ad_failure_class_evaluator';
-import { createChainCoverageEvaluator } from '../src/evaluators/chain_coverage_evaluator';
+import type { AttackDiscoveryTaskOutput } from '@kbn/evals-suite-attack-discovery/src/types';
+import {
+  CHRYSALIS_AD_DATASET_NAME,
+  createChrysalisAdExperimentEvaluators,
+} from '../src/attack_discovery_experiment';
 
 const CHRYSALIS_95_SNAPSHOT = {
   bucket: 'security-ai-datasets',
@@ -59,7 +54,7 @@ evaluate.describe(
         log.info(`[attack-discovery] corpus ready: ${count} alerts (reference: 95)`);
 
         const dataset = {
-          name: 'Attack Discovery Chrysalis kill-chains (generate API)',
+          name: CHRYSALIS_AD_DATASET_NAME,
           description:
             'Deduped 95-alert Attack Discovery corpus restored from the shared GCS snapshot ' +
             '(security-ai-datasets/attack-discovery/oh-my-malware-95-deduped) and evaluated ' +
@@ -79,29 +74,13 @@ evaluate.describe(
           ],
         };
 
-        // Mirrors the attack-discovery suite's own experiment configuration so the
-        // existing evaluator and experiment names are unchanged; the two deterministic
-        // evaluators are appended.
-        const evaluationInferenceClient = inferenceClient.bindTo({
-          connectorId: evaluationConnector.id,
+        const experimentEvaluators = createChrysalisAdExperimentEvaluators({
+          evaluators,
+          evaluationInferenceClient: inferenceClient.bindTo({
+            connectorId: evaluationConnector.id,
+          }),
+          log,
         });
-        const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
-          evaluators.traceBasedEvaluators;
-
-        const experimentEvaluators: Array<
-          Evaluator<AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput>
-        > = [
-          createAttackDiscoveryBasicEvaluator(),
-          createAttackDiscoveryCriteriaEvaluator({ evaluators }),
-          createAttackDiscoveryRubricEvaluator({ inferenceClient: evaluationInferenceClient, log }),
-          toolCalls as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,
-          latency as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,
-          inputTokens as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,
-          outputTokens as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,
-          cachedTokens as Evaluator<AttackDiscoveryDatasetExample, TaskOutput>,
-          createChainCoverageEvaluator(),
-          createAdFailureClassEvaluator(),
-        ];
 
         await executorClient.runExperiment(
           {

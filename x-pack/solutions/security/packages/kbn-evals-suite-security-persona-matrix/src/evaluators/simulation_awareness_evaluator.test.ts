@@ -6,7 +6,7 @@
  */
 
 import { createSimulationAwarenessEvaluator } from './simulation_awareness_evaluator';
-import { buildOutput } from './test_output_builders';
+import { buildOutput } from '../__fixtures__/task_output_builders';
 
 const label = async (answer: string) => {
   const result = await createSimulationAwarenessEvaluator().evaluate({

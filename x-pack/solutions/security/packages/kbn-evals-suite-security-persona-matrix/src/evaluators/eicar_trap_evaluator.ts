@@ -14,7 +14,10 @@ import {
 
 export const EICAR_TRAP_EVALUATOR_NAME = 'EicarTrap';
 
-const NAMED_EICAR_PATTERN = /\beicar\b|anti-?malware test file|\btest file\b/i;
+// A bare "test file" is deliberately not accepted: "I could not find a test file"
+// does not identify the hash as EICAR.
+const NAMED_EICAR_PATTERN =
+  /\beicar\b|anti-?malware test (?:file|string)|\b(?:antivirus|AV) test (?:file|string)/i;
 
 /**
  * The hash in these prompts is the EICAR anti-malware test file. A pass needs

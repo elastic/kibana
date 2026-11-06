@@ -72,7 +72,21 @@ describe('AD Failure Class evaluator', () => {
     expect(classifyAdFailure({ insights: null, raw: { status: 'timed_out' } })).toBe(
       'poll_timeout'
     );
-    expect(classifyAdFailure({ insights: null, raw: { status: 'failed' } })).toBe('other');
+    expect(classifyAdFailure({ insights: null, raw: { status: 'weird' } })).toBe('other');
+  });
+
+  it.each(['succeeded', 'failed', 'canceled', 'dismissed'])(
+    'classifies no insights, no errors and terminal status %s as never_materialized',
+    (status) => {
+      expect(classifyAdFailure({ insights: null, raw: { status } })).toBe('never_materialized');
+      expect(classifyAdFailure({ insights: [], raw: { status } })).toBe('never_materialized');
+    }
+  );
+
+  it('keeps timed_out as poll_timeout rather than never_materialized', () => {
+    expect(classifyAdFailure({ insights: null, raw: { status: 'timed_out' } })).toBe(
+      'poll_timeout'
+    );
   });
 
   it('classifies empty output with no signal as other', () => {

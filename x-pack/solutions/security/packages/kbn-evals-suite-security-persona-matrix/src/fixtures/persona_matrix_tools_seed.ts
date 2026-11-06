@@ -11,6 +11,9 @@ import { PARITY_WORKFLOWS, PARITY_CASE_TAG, type ParityWorkflow } from './parity
 import { CHRYSALIS_PARITY_AGENT } from './chrysalis_parity_agent';
 import { seedProfile } from './chrysalis_seed';
 import type { AgentProfile } from '../agent_profile';
+import { STUB_CONNECTOR_ID } from './stub_connector';
+
+export { STUB_CONNECTOR_ID };
 
 /**
  * Seeds two real, registered Agent Builder tools (`virustotal_lookup` and
@@ -149,6 +152,9 @@ const createdToolIds = new Set<string>();
  */
 const createdWorkflowIds = new Set<string>();
 
+/** True when THIS process created the stub connector (a pre-existing one survives cleanup). */
+let createdStubConnector = false;
+
 /** True when THIS process created the parity agent (400 "already exists" otherwise). */
 let createdParityAgent = false;
 
@@ -173,6 +179,51 @@ async function createToolIfMissing({
     const status = (error as { status?: number })?.status;
     if (status === 409 || errText.includes('already exists')) {
       log.info(`[persona-matrix] tool '${body.id}' already exists, reusing`);
+      return;
+    }
+    throw error;
+  }
+}
+
+const STUB_CONNECTOR_PATH = `/api/actions/connector/${STUB_CONNECTOR_ID}`;
+
+/**
+ * Local sink for the stub connector. Credentials are stripped: `resolveUrl`
+ * keeps `user:pass@`, and the connector is created with `hasAuth: false`.
+ * The workflow `http` step appends its `path` to this URL, so the request
+ * lands on the stack's own Kibana (a 404 there is expected and harmless) and
+ * never leaves the stack.
+ */
+const getStubConnectorUrl = (kbnClient: KbnClient): string => {
+  const url = new URL(kbnClient.resolveUrl('/api/status'));
+  url.username = '';
+  url.password = '';
+  return url.toString();
+};
+
+/**
+ * A workflow step `type: http` with a `connector-id` executes on an `.http`
+ * connector (the execution engine's connector step splits the step type and
+ * looks the saved object up by id), so the stub must be `.http`, not a Slack
+ * connector. Idempotent: an existing connector with the id is reused.
+ */
+async function createStubConnectorIfMissing({ kbnClient, log }: SeedToolsOptions): Promise<void> {
+  try {
+    await kbnClient.request({
+      method: 'POST',
+      path: STUB_CONNECTOR_PATH,
+      body: {
+        name: 'persona-matrix local sink (stub)',
+        connector_type_id: '.http',
+        config: { url: getStubConnectorUrl(kbnClient), hasAuth: false },
+        secrets: {},
+      },
+    });
+    createdStubConnector = true;
+    log.info(`[persona-matrix] created stub connector '${STUB_CONNECTOR_ID}'`);
+  } catch (error) {
+    if (isAlreadyExists(error)) {
+      log.info(`[persona-matrix] stub connector '${STUB_CONNECTOR_ID}' already exists, reusing`);
       return;
     }
     throw error;
@@ -336,6 +387,8 @@ export async function seedPersonaMatrixTools({
   log,
   profile = 'default',
 }: SeedToolsOptions & { profile?: AgentProfile }): Promise<void> {
+  await createStubConnectorIfMissing({ kbnClient, log });
+
   await createToolIfMissing({
     kbnClient,
     log,
@@ -440,6 +493,20 @@ export async function cleanupPersonaMatrixTools({
         const status = (error as { status?: number })?.status;
         if (status !== 404) {
           log.warning(`[persona-matrix] failed to delete workflow '${id}': ${error}`);
+        }
+      });
+  }
+
+  if (createdStubConnector) {
+    await kbnClient
+      .request({ method: 'DELETE', path: STUB_CONNECTOR_PATH })
+      .then(() => {
+        createdStubConnector = false;
+      })
+      .catch((error) => {
+        const status = (error as { status?: number })?.status;
+        if (status !== 404) {
+          log.warning(`[persona-matrix] failed to delete stub connector: ${error}`);
         }
       });
   }
