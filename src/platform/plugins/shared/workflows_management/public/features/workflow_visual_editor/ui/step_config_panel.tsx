@@ -1704,6 +1704,7 @@ function StepFieldRow({
               onChange={onChange}
               options={field.options}
               acceptsSingle={field.acceptsSingle === true}
+              catalog={referenceCatalog}
               ariaLabel={field.label}
               isInvalid={isInvalid}
               onBlur={accuseIfInvalid}

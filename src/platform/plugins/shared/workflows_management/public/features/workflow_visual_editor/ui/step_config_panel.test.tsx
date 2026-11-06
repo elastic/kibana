@@ -1535,6 +1535,37 @@ with:
       );
     });
 
+    it('draws a reference tag as a pill with the type the workflow gives it, and writes it back as stored', () => {
+      const definition = {
+        version: '1',
+        name: 'demo',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        consts: { owner: 'ana' },
+        steps: [{ name: 'l', type: 'lister', with: {} }],
+      } as unknown as WorkflowYaml;
+      const { onFragmentChange } = renderPanel({
+        stepType: 'lister',
+        connectors: listConnectors,
+        workflowDefinition: definition,
+        initialFragment:
+          'name: l\ntype: lister\nwith:\n  tags:\n    - "{{ consts.owner }}"\n    - plain\n',
+      });
+      const field = within(screen.getByTestId('workflowStepConfigField-with.tags'));
+
+      expect(field.getByText('consts.owner')).toBeInTheDocument();
+      expect(screen.getByTestId('workflowStepConfigField-with.tags')).not.toHaveTextContent('{{');
+      expect(field.getAllByTestId('euiComboBoxPill')[0]).toHaveAttribute(
+        'title',
+        'consts.owner\nstring · written as text'
+      );
+
+      addTag('workflowStepConfigField-with.tags', 'extra');
+      expect(lastFragment(onFragmentChange)).toMatch(
+        /- "\{\{ consts\.owner \}\}"\n\s+- plain\n\s+- extra/
+      );
+    });
+
     describe('a stored text-form reference', () => {
       const constsDefinition = {
         version: '1',

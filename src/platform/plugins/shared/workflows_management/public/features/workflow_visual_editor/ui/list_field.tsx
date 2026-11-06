@@ -7,10 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FieldIcon } from '@kbn/react-field';
+import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
 import { fromTags, toTags } from '../lib/list_value';
+import { findReferenceTokens } from '../lib/reference_tokens';
+
+/**
+ * A tag that is exactly one reference is drawn like a chip elsewhere: the type icon, then the
+ * expression without its braces, with how it is written on hover. The tag itself stays the raw
+ * text; it is the option's `key`, because `{{ x }}` and `${{ x }}` read the same but differ.
+ * Anything else is just its text.
+ *
+ * The hover note is the pill's native `title`: a combo box pill ignores `toolTipContent` (that is
+ * for the rows of the dropdown list), and `title` also keeps the full expression readable when
+ * the pill truncates it.
+ */
+const toOption = (tag: string, catalog: DataReferenceCatalog): EuiComboBoxOptionOption => {
+  const [token] = findReferenceTokens(tag, { catalog });
+  if (!token?.isWhole) return { label: tag };
+  return {
+    label: token.expression,
+    key: tag,
+    prepend: (
+      <span aria-hidden css={{ display: 'inline-flex', flex: '0 0 auto' }}>
+        <FieldIcon type={token.iconType} color="gray" size="s" shape="square" />
+      </span>
+    ),
+    title: `${token.expression}\n${token.hover}`,
+  };
+};
 
 /**
  * One value or a few, as tags. Typing one value keeps it a plain value (when the schema allows
@@ -22,6 +51,7 @@ export function ListField({
   onChange,
   options,
   acceptsSingle,
+  catalog,
   ariaLabel,
   isInvalid,
   onBlur,
@@ -32,6 +62,8 @@ export function ListField({
   /** Allowed values, for enum lists; omit for free text. */
   readonly options?: readonly string[];
   readonly acceptsSingle: boolean;
+  /** Gives a reference tag its type. */
+  readonly catalog: DataReferenceCatalog;
   readonly ariaLabel: string;
   readonly isInvalid: boolean;
   readonly onBlur: () => void;
@@ -56,8 +88,8 @@ export function ListField({
             })
       }
       options={options?.map((label) => ({ label }))}
-      selectedOptions={tags.map((label) => ({ label }))}
-      onChange={(selected) => commit(selected.map((option) => option.label))}
+      selectedOptions={tags.map((tag) => toOption(tag, catalog))}
+      onChange={(selected) => commit(selected.map((option) => option.key ?? option.label))}
       onCreateOption={
         options
           ? undefined
