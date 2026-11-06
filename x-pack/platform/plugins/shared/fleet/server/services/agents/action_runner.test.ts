@@ -12,7 +12,12 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { Agent } from '../../types';
 import { appContextService } from '../app_context';
 
-import { ActionRunner, PIT_KEEP_ALIVE } from './action_runner';
+import {
+  ACTION_SORT_FIELD,
+  ACTION_SORT_ORDER,
+  ActionRunner,
+  PIT_KEEP_ALIVE,
+} from './action_runner';
 import { BulkActionTaskType } from './bulk_action_types';
 import { getAgentActions } from './actions';
 import { getAgentsByKuery, openPointInTime } from './crud';
@@ -296,6 +301,64 @@ describe('ActionRunner', () => {
       );
     });
 
+    it('restarts from the beginning when Elasticsearch rejects the saved cursor', async () => {
+      mockAgentPages(2, 2);
+      // a checkpoint taken under the pre-upgrade sort has one value per old sort clause, so it
+      // no longer fits the sort this runner uses and Elasticsearch rejects it
+      const runner = createRunner(
+        {},
+        { searchAfter: ['2026-01-01', 'host-a', 12345], nbAgentsProcessed: 40 }
+      );
+      runner.processAgentsError = new EsErrors.ResponseError({
+        statusCode: 400,
+        body: { error: { type: 'illegal_argument_exception' } },
+        warnings: [],
+        meta: {} as any,
+      });
+
+      await runner.runActionAsyncWithRetry();
+
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('rejected the saved checkpoint')
+      );
+      // cursor and count restart together, otherwise the count would never match the total
+      expect(resolver.run).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ searchAfter: undefined, nbAgentsProcessed: 0 }),
+        TASK_TYPE,
+        RETRY_TASK_ID
+      );
+      // the stored checkpoint is cleared too, so the check task cannot hand it back
+      expect(resolver.updateCheckTaskState).toHaveBeenLastCalledWith(
+        CHECK_TASK_ID,
+        expect.objectContaining({ searchAfter: undefined, nbAgentsProcessed: 0 })
+      );
+    });
+
+    it('keeps the count on a 400 raised before any cursor was saved', async () => {
+      mockAgentPages(2, 2);
+      const runner = createRunner({}, { searchAfter: undefined, nbAgentsProcessed: 40 });
+      runner.processAgentsError = new EsErrors.ResponseError({
+        statusCode: 400,
+        body: { error: { type: 'parsing_exception' } },
+        warnings: [],
+        meta: {} as any,
+      });
+
+      await runner.runActionAsyncWithRetry();
+
+      // no cursor to blame, so this is an ordinary failure and the action is not restarted
+      expect(logger.error).not.toHaveBeenCalledWith(
+        expect.stringContaining('rejected the saved checkpoint')
+      );
+      expect(resolver.run).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ nbAgentsProcessed: 40 }),
+        TASK_TYPE,
+        RETRY_TASK_ID
+      );
+    });
+
     it('cleans up both tasks and stops once the retry budget is spent', async () => {
       mockAgentPages(2, 2);
       const runner = createRunner({}, { retryCount: MAX_RETRY_COUNT });
@@ -331,6 +394,21 @@ describe('ActionRunner', () => {
         expect.objectContaining({ pitKeepAlive: PIT_KEEP_ALIVE })
       );
       expect(PIT_KEEP_ALIVE).toBe('10m');
+    });
+
+    it('pages on a unique sort key, so a checkpoint survives a new point in time', async () => {
+      mockAgentPages(2, 2);
+
+      await createRunner().runActionAsyncWithRetry();
+
+      // the default enrolled_at + hostname sort is not unique, so it depends on the point in
+      // time's implicit _shard_doc tiebreaker to separate agents that tie on both
+      expect(mockedGetAgentsByKuery).toHaveBeenCalledWith(
+        esClient,
+        soClient,
+        expect.objectContaining({ sortField: ACTION_SORT_FIELD, sortOrder: ACTION_SORT_ORDER })
+      );
+      expect(ACTION_SORT_FIELD).toBe('agent.id');
     });
   });
 

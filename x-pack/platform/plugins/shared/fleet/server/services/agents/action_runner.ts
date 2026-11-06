@@ -31,6 +31,17 @@ import { CHECK_TASK_INTERVAL_MINUTES, getRetryParams, MAX_RETRY_COUNT } from './
  */
 export const PIT_KEEP_ALIVE = '10m';
 
+/**
+ * Sort the runner pages with. `agent.id` is a keyword present and unique on every
+ * `.fleet-agents` document, so this is a total order and a saved cursor keeps the same meaning
+ * in any point in time. The default `enrolled_at` + hostname sort is not unique, so it leans on
+ * the point in time's implicit `_shard_doc` tiebreaker, which is only meaningful inside the
+ * point in time that produced it: a checkpoint resumed under a fresh one could then skip agents
+ * that tie on both fields. The order itself does not matter here, only that it is total.
+ */
+export const ACTION_SORT_FIELD = 'agent.id';
+export const ACTION_SORT_ORDER = 'asc' as const;
+
 export interface ActionParams {
   kuery: string;
   showInactive?: boolean;
@@ -153,6 +164,26 @@ export abstract class ActionRunner {
                 `404 error from Elasticsearch during action ${this.actionParams.actionId}, retrying without the expired point in time: ${error.message}`
               );
               this.retryParams = { ...this.retryParams, pitId: undefined };
+            }
+            // A 400 while a cursor is in hand means Elasticsearch rejected the `search_after`
+            // value. The cursor holds one value per sort clause, so a checkpoint taken under a
+            // different sort no longer fits — an action that was in flight while Kibana was
+            // upgraded to a version that changed ACTION_SORT_FIELD. It cannot be translated, so
+            // the action restarts from the beginning, and the count restarts with it to stay
+            // consistent with the cursor. Agents already actioned are actioned again.
+            if (
+              isResponseError(error) &&
+              error.statusCode === 400 &&
+              this.retryParams.searchAfter
+            ) {
+              logger.error(
+                `Elasticsearch rejected the saved checkpoint of action ${this.actionParams.actionId}, restarting it from the beginning: ${error.message}`
+              );
+              this.retryParams = { ...this.retryParams, searchAfter: undefined };
+              this.nbAgentsProcessed = 0;
+              // Clear the stored checkpoint too, so the check task does not hand the rejected
+              // cursor back to the next run if this one dies before its first batch.
+              await this.updateCheckpoint();
             }
             if (this.retryParams.retryCount) {
               logger.error(
@@ -316,6 +347,8 @@ export abstract class ActionRunner {
         perPage,
         pitId,
         pitKeepAlive: PIT_KEEP_ALIVE,
+        sortField: ACTION_SORT_FIELD,
+        sortOrder: ACTION_SORT_ORDER,
         searchAfter: this.retryParams.searchAfter,
       });
     };
