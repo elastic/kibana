@@ -94,13 +94,23 @@ const styles = ({ euiTheme }: UseEuiTheme) => css`
   .kbnFlexPanel--dragPreview,
   .kbnFlexSection--dragPreview {
     border-radius: ${euiTheme.border.radius.control} ${euiTheme.border.radius.control};
-
     background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.2)};
   }
 
   .kbnFlexPanel--active {
     outline: var(--dashboardActivePanelBorderStyle);
     border-radius: ${euiTheme.border.radius.control} ${euiTheme.border.radius.control};
+  }
+
+  .kbnFlexPanel--resizeHandle {
+    height: calc(100% - 1px);
+    width: ${euiTheme.size.m};
+    right: 1px;
+    top: 2px;
+    &:hover {
+      border-radius: ${euiTheme.border.radius.control} ${euiTheme.border.radius.control};
+      border-right: var(--dashboardActivePanelBorderStyle);
+      border-width: thick;
   }
 
   // styles for the panel grid size gauge that appears when resizing
