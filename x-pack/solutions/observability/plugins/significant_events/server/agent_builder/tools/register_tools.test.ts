@@ -32,7 +32,7 @@ import type { SignificantEventsServer } from '../../types';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 
 const createMockServer = (
-  featurePrivilege: NightshiftFeaturePrivilege = 'all'
+  featurePrivilege: NightshiftFeaturePrivilege = 'all_and_manage_engines'
 ): Pick<SignificantEventsServer, 'isServerless' | 'core' | 'security'> => ({
   ...createSignificantEventsServer({ featurePrivilege }),
   isServerless: false,
@@ -133,7 +133,7 @@ describe('registerAgentBuilderTools', () => {
     }
   });
 
-  it('hides the source change tools from users without the manage privilege', async () => {
+  it('hides the source change tools from users without the manage and configure privileges', async () => {
     const agentBuilder = agentBuilderMocks.createSetup();
     const { getScopedClients } = createMockGetScopedClients();
     jest.mocked(assertSignificantEventsAccess).mockResolvedValue(undefined);
@@ -141,7 +141,7 @@ describe('registerAgentBuilderTools', () => {
     registerAgentBuilderTools({
       agentBuilder,
       getScopedClients,
-      server: createMockServer('read') as SignificantEventsServer,
+      server: createMockServer('all') as SignificantEventsServer,
       logger: loggerMock.create(),
       telemetry,
       maintenanceService,

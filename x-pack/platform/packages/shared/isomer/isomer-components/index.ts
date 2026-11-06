@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { componentsPack, componentsPrimitives } from './src/pack';
+export { type ComponentsNode, componentsPack, componentsPrimitives } from './src/pack';
 export type { ComponentsRenderContext } from './src/lib';
 export { CODE_COPY_ENHANCEMENT } from './src/primitives/code';
 export { TABLE_SORT_ENHANCEMENT } from './src/primitives/table';

@@ -133,6 +133,7 @@ fileGroups:
     - server/**/*
     - .storybook/**/*
     - test/scout/**/*
+    - test/scout_streams_v2/**/*
     - '!target/**/*'
     - '!.storybook/**/*.js'
 tasks: {}

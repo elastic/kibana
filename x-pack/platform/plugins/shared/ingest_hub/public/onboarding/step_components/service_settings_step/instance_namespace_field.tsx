@@ -16,7 +16,10 @@ import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 
 const INHERITED_NAMESPACE_PLACEHOLDER = 'default';
 
-/** Namespace only applies to services deployed as a policy; ECF has no namespace. */
+/**
+ * Whether a service can have a namespace of its own. Only a service deployed as a policy can: an
+ * ECF stack has one namespace for all its services, so there only the global namespace applies.
+ */
 export const supportsNamespace = (service: AwsServiceMatrixEntry): boolean =>
   !service.deploymentMethods.every((dm) => dm.method === 'ecf');
 
@@ -28,8 +31,11 @@ export const getNamespaceError = (namespace: string): string | undefined => {
 interface InstanceNamespaceFieldProps {
   namespace: string;
   onChange: (namespace: string) => void;
-  /** Extra note under the field, e.g. what a change means for services that are already deployed. */
-  note?: string;
+  /**
+   * Extra notes under the field, e.g. what a change means for services that are already deployed.
+   * Each one is its own paragraph.
+   */
+  note?: string | string[];
   /**
    * For a duplicate, whose empty namespace is the global one, so the tooltip says so instead of
    * describing the default or the agent policy's namespace.
@@ -54,6 +60,7 @@ export const InstanceNamespaceField = ({
 }: InstanceNamespaceFieldProps) => {
   const { services } = useKibana<CoreStart>();
   const error = getNamespaceError(namespace);
+  const notes = [note ?? []].flat().filter(Boolean);
 
   return (
     <>
@@ -80,9 +87,11 @@ export const InstanceNamespaceField = ({
         }
         data-test-subj={dataTestSubj}
       />
-      {note && (
+      {notes.length > 0 && (
         <EuiText size="xs" color="subdued" data-test-subj={`${dataTestSubj}-note`}>
-          {note}
+          {notes.map((text) => (
+            <p key={text}>{text}</p>
+          ))}
         </EuiText>
       )}
     </>
