@@ -73,6 +73,7 @@
     "@kbn/cell-actions",
     "@kbn/alerts-ui-shared",
     "@kbn/share-plugin",
-    "@kbn/deeplinks-analytics"
+    "@kbn/deeplinks-analytics",
+    "@kbn/triggers-actions-ui-types"
   ]
 }
