@@ -26,6 +26,8 @@ import {
   isEndpointManagementPath,
   isManageLandingPath,
   isRuleChangesHistoryPath,
+  isRuleCreationPath,
+  isRuleEditPath,
   isRulesAddPath,
   isRulesManagementPath,
   isExceptionsPath,
@@ -71,6 +73,8 @@ export const GlobalHeader = React.memo(() => {
   const changesHistoryPath = isRuleChangesHistoryPath(pathname);
   const rulesManagementPath = isRulesManagementPath(pathname);
   const rulesAddPath = isRulesAddPath(pathname);
+  const ruleCreationPath = isRuleCreationPath(pathname);
+  const ruleEditPath = isRuleEditPath(pathname);
   const exceptionsPath = isExceptionsPath(pathname);
   const onboardingPath = isOnboardingPath(pathname);
   // Cloud Security Posture pages own "Add integrations" in their own app header.
@@ -87,15 +91,17 @@ export const GlobalHeader = React.memo(() => {
       return;
     }
 
-    // The Rules, Add Elastic rules, Shared Exception Lists, Exception list details, Cloud Security
-    // Posture, Endpoint management and Manage page app headers render their own actions (ML job
-    // settings, Add integrations), so clear the global header action menu there to avoid
-    // duplicating them.
+    // The Rules, Add Elastic rules, Create new rule, Edit rule settings, Shared Exception Lists,
+    // Exception list details, Cloud Security Posture, Endpoint management and Manage page app
+    // headers render their own actions (ML job settings, Add integrations), so clear the global
+    // header action menu there to avoid duplicating them.
     // Onboarding is a page without the global header action menu
     if (
       changesHistoryPath ||
       rulesManagementPath ||
       rulesAddPath ||
+      ruleCreationPath ||
+      ruleEditPath ||
       exceptionsPath ||
       onboardingPath ||
       cloudSecurityPosturePath ||
@@ -131,6 +137,8 @@ export const GlobalHeader = React.memo(() => {
     changesHistoryPath,
     rulesManagementPath,
     rulesAddPath,
+    ruleCreationPath,
+    ruleEditPath,
     exceptionsPath,
     onboardingPath,
     cloudSecurityPosturePath,

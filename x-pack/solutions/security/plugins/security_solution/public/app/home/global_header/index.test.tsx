@@ -195,6 +195,8 @@ describe('global header', () => {
     '/rules/monitoring',
     '/rules/updates',
     '/rules/add_rules',
+    '/rules/create',
+    '/rules/id/123/edit',
     '/exceptions',
     '/exceptions/details/list-1',
     '/get_started',

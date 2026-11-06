@@ -28,6 +28,7 @@ import {
   MANAGE_PATH,
   RULES_ADD_PATH,
   RULES_CHANGES_HISTORY_PATH,
+  RULES_CREATE_PATH,
   RULES_PATH,
   THREAT_INTELLIGENCE_PATH,
   ONBOARDING_PATH,
@@ -214,6 +215,26 @@ export const isRulesAddPath = (pathname: string): boolean =>
 export const isRuleChangesHistoryPath = (pathname: string): boolean =>
   !!matchPath(pathname, {
     path: RULES_CHANGES_HISTORY_PATH,
+    exact: true,
+    strict: false,
+  });
+
+/**
+ * Matches the Create new rule page, whose app header owns the page actions.
+ */
+export const isRuleCreationPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: RULES_CREATE_PATH,
+    exact: true,
+    strict: false,
+  });
+
+/**
+ * Matches the Edit rule settings page, whose app header owns the page actions.
+ */
+export const isRuleEditPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: `${RULES_PATH}/id/:detailName/edit`,
     exact: true,
     strict: false,
   });
