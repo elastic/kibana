@@ -161,10 +161,10 @@ describe('osquery workflow step pickers', () => {
       queries: { a: { query: 'SELECT 1' }, b: { query: 'SELECT 2' } },
     };
 
-    it('searches through core http with the public API version and stores the saved-object id', async () => {
+    it('searches through core http with the public API version and stores the pack name', async () => {
       http.get.mockResolvedValue({ data: [pack] });
 
-      const options = await createPackSelection(http).search(' my ', context('pack_id'));
+      const options = await createPackSelection(http).search(' my ', context('pack'));
 
       expect(http.get).toHaveBeenCalledWith('/api/osquery/packs', {
         version: '2023-10-31',
@@ -172,7 +172,7 @@ describe('osquery workflow step pickers', () => {
       });
       expect(options).toEqual([
         {
-          value: 'pack-so-1',
+          value: 'My pack',
           label: 'My pack',
           description: 'Does things',
           documentation: '2 queries',
@@ -184,8 +184,8 @@ describe('osquery workflow step pickers', () => {
       http.get.mockResolvedValue({ data: [] });
       const selection = createPackSelection(http);
 
-      await selection.search('alpha|beta', context('pack_id'));
-      await selection.search('"(*)"', context('pack_id'));
+      await selection.search('alpha|beta', context('pack'));
+      await selection.search('"(*)"', context('pack'));
 
       expect((http.get.mock.calls[0] as unknown[])[1]).toEqual({
         version: '2023-10-31',
@@ -201,7 +201,7 @@ describe('osquery workflow step pickers', () => {
     it('lists without a search filter for an empty input', async () => {
       http.get.mockResolvedValue({ data: [] });
 
-      await createPackSelection(http).search('', context('pack_id'));
+      await createPackSelection(http).search('', context('pack'));
 
       expect((http.get.mock.calls[0] as unknown[])[1]).toEqual({
         version: '2023-10-31',
@@ -212,74 +212,119 @@ describe('osquery workflow step pickers', () => {
     it('counts the queries of a pack stored as an array', async () => {
       http.get.mockResolvedValue({ data: [{ ...pack, queries: [{}] }] });
 
-      const [option] = await createPackSelection(http).search('', context('pack_id'));
+      const [option] = await createPackSelection(http).search('', context('pack'));
 
       expect(option.documentation).toBe('1 query');
     });
 
-    it('resolves the saved-object id to the pack name', async () => {
-      http.get.mockResolvedValue({ data: { name: 'My pack', queries: {} } });
+    it('resolves a pack name by exact match through a quoted search', async () => {
+      http.get.mockResolvedValue({ data: [pack] });
 
-      const option = await createPackSelection(http).resolve('pack/so 1', context('pack_id'));
+      const option = await createPackSelection(http).resolve(' My pack ', context('pack'));
 
-      expect(http.get).toHaveBeenCalledWith('/api/osquery/packs/pack%2Fso%201', {
+      expect(http.get).toHaveBeenCalledWith('/api/osquery/packs', {
         version: '2023-10-31',
+        query: { page: 1, pageSize: 100, search: '"My pack"' },
       });
-      expect(option).toMatchObject({ value: 'pack/so 1', label: 'My pack' });
+      expect(option).toMatchObject({ value: 'My pack', label: 'My pack' });
+    });
+
+    it('ignores fuzzy search hits whose name is not exactly the value', async () => {
+      http.get.mockResolvedValue({
+        data: [{ ...pack, name: 'My pack 2' }, pack, { ...pack, name: 'my pack' }],
+      });
+
+      const option = await createPackSelection(http).resolve('My pack', context('pack'));
+
+      expect(option).toMatchObject({ value: 'My pack' });
+    });
+
+    it('resolves to null when only fuzzy hits come back and says no pack has the name', async () => {
+      const selection = createPackSelection(http);
+      http.get.mockResolvedValue({ data: [{ ...pack, name: 'My pack 2' }] });
+
+      expect(await selection.resolve('My pack', context('pack'))).toBeNull();
+      const details = await selection.getDetails('My pack', context('pack'), null);
+
+      expect(details.message).toBe('No pack named "My pack" in this space.');
+    });
+
+    it('resolves to null for duplicates and says the name is ambiguous', async () => {
+      const selection = createPackSelection(http);
+      http.get.mockResolvedValue({
+        data: [pack, { ...pack, saved_object_id: 'pack-so-2' }],
+      });
+
+      expect(await selection.resolve('My pack', context('pack'))).toBeNull();
+      const details = await selection.getDetails('My pack', context('pack'), null);
+
+      expect(details.message).toContain('More than one pack has this name');
+    });
+
+    it('escapes quotes and backslashes in the search phrase', async () => {
+      http.get.mockResolvedValue({ data: [] });
+
+      await createPackSelection(http).resolve('a"b', context('pack'));
+      await createPackSelection(http).resolve('a\\b', context('pack'));
+
+      expect((http.get.mock.calls[0] as unknown[])[1]).toEqual({
+        version: '2023-10-31',
+        query: { page: 1, pageSize: 100, search: '"a\\"b"' },
+      });
+      expect((http.get.mock.calls[1] as unknown[])[1]).toEqual({
+        version: '2023-10-31',
+        query: { page: 1, pageSize: 100, search: '"a\\\\b"' },
+      });
     });
 
     it('does not call the API for an empty value', async () => {
-      expect(await createPackSelection(http).resolve(' ', context('pack_id'))).toBeNull();
+      expect(await createPackSelection(http).resolve(' ', context('pack'))).toBeNull();
       expect(http.get).not.toHaveBeenCalled();
-    });
-
-    it('resolves to null for an unknown id and says so in the details', async () => {
-      const selection = createPackSelection(http);
-      http.get.mockRejectedValue({ status: 404, body: { message: 'Not found' } });
-
-      expect(await selection.resolve('nope', context('pack_id'))).toBeNull();
-      const details = await selection.getDetails('nope', context('pack_id'), null);
-
-      expect(details.message).toMatch(/No pack with id "nope" in this space/);
     });
 
     it('reports a failed lookup instead of a missing pack, only for the value it failed on', async () => {
       const selection = createPackSelection(http);
       http.get.mockRejectedValueOnce({ status: 403, body: { message: 'Forbidden' } });
 
-      expect(await selection.resolve('denied', context('pack_id'))).toBeNull();
-      http.get.mockRejectedValueOnce({ status: 404, body: { message: 'Not found' } });
-      expect(await selection.resolve('other', context('pack_id'))).toBeNull();
+      expect(await selection.resolve('denied', context('pack'))).toBeNull();
+      http.get.mockResolvedValueOnce({ data: [] });
+      expect(await selection.resolve('other', context('pack'))).toBeNull();
 
-      const denied = await selection.getDetails('denied', context('pack_id'), null);
-      const other = await selection.getDetails('other', context('pack_id'), null);
+      const denied = await selection.getDetails('denied', context('pack'), null);
+      const other = await selection.getDetails('other', context('pack'), null);
 
       expect(denied.message).toMatch(/Forbidden/);
-      expect(denied.message).not.toMatch(/No pack with id/);
-      expect(other.message).toMatch(/No pack with id/);
+      expect(denied.message).not.toMatch(/No pack named/);
+      expect(other.message).toMatch(/No pack named "other" in this space/);
+    });
+
+    it('reports a 404 on lookup as a failed lookup', async () => {
+      const selection = createPackSelection(http);
+      http.get.mockRejectedValue({ status: 404, body: { message: 'Not found' } });
+
+      expect(await selection.resolve('nope', context('pack'))).toBeNull();
+      const details = await selection.getDetails('nope', context('pack'), null);
+
+      expect(details.message).toMatch(/Could not load packs/);
     });
 
     it('reports a failed search in the details too', async () => {
       const selection = createPackSelection(http);
       http.get.mockRejectedValue({ message: 'Network down' });
 
-      expect(await selection.search('x', context('pack_id'))).toEqual([]);
+      expect(await selection.search('x', context('pack'))).toEqual([]);
 
-      const details = await selection.getDetails('x', context('pack_id'), null);
+      const details = await selection.getDetails('x', context('pack'), null);
       expect(details.message).toMatch(/Network down/);
     });
 
     it('describes a found pack and links to packs with the space prefix', async () => {
       const spacedHttp = httpServiceMock.createSetupContract({ basePath: '/s/my-space' });
 
-      const details = await createPackSelection(spacedHttp).getDetails(
-        'pack-so-1',
-        context('pack_id'),
-        {
-          value: 'pack-so-1',
-          label: 'My pack',
-        }
-      );
+      const details = await createPackSelection(spacedHttp).getDetails('My pack', context('pack'), {
+        value: 'My pack',
+        label: 'My pack',
+      });
 
       expect(details.message).toMatch(/My pack/);
       expect(details.links?.[0].path).toBe('/s/my-space/app/osquery/packs');

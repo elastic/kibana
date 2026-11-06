@@ -16,6 +16,7 @@ import {
 import { runPackStepDefinition } from './run_pack_step';
 import { apiError, createContextManager, createLogger, resultEdges } from '../../test_helpers';
 
+const FIND_PACKS = 'GET /api/osquery/packs';
 const READ_PACK = 'GET /api/osquery/packs/pack-so-id';
 const RESOLVE = 'GET /internal/osquery/packs/_resolve_prebuilt/forensic-persistence';
 const AGENTS = 'GET /internal/osquery/fleet_wrapper/agents';
@@ -61,8 +62,12 @@ const counters = (actionId: string, overrides: Record<string, number> = {}) => (
 
 type Routes = Parameters<typeof createContextManager>[0];
 
-const start = (routes: Routes, input: Record<string, unknown> = { pack_id: 'pack-so-id' }) => {
+const start = (routes: Routes, input: Record<string, unknown> = { pack: 'My pack' }) => {
   const contextManager = createContextManager({
+    [FIND_PACKS]: () => ({
+      total: 1,
+      data: [{ saved_object_id: 'pack-so-id', name: 'My pack' }],
+    }),
     [READ_PACK]: () => PACK,
     [RESOLVE]: () => ({ pack_id: 'pack-so-id' }),
     [LIST]: () => ({ data: { items: [] } }),
@@ -123,7 +128,7 @@ const pastDeadline = () => new Date(Date.now() - 1000).toISOString();
 
 describe('osquery.runPack step', () => {
   describe('start', () => {
-    it('sends exactly one POST with only pack_id and the target, never a query or alert_ids', async () => {
+    it('sends exactly one POST with the resolved pack_id and the target, never a query or alert_ids', async () => {
       const { contextManager, result } = start({});
 
       const { state } = (await result) as { state: Record<string, any> };
@@ -170,7 +175,7 @@ describe('osquery.runPack step', () => {
     it('sends policy targeting as agent_policy_ids', async () => {
       const { contextManager, result } = start(
         { [AGENTS]: () => ({ total: 3 }) },
-        { pack_id: 'pack-so-id', agent_ids: undefined, agent_policy_ids: ['pol-1'] }
+        { pack: 'My pack', agent_ids: undefined, agent_policy_ids: ['pol-1'] }
       );
 
       await result;
@@ -181,17 +186,17 @@ describe('osquery.runPack step', () => {
       });
     });
 
-    it('checks the target, then the pack, then live query read access, then dispatches', async () => {
+    it('checks the target, then finds and reads the pack, then live query read access, then dispatches', async () => {
       const { contextManager, result } = start(
         { [AGENTS]: () => ({ total: 3 }) },
-        { pack_id: 'pack-so-id', agent_ids: undefined, agent_policy_ids: ['pol-1'] }
+        { pack: 'My pack', agent_ids: undefined, agent_policy_ids: ['pol-1'] }
       );
 
       await result;
 
       expect(
         contextManager.callKibanaApi.mock.calls.map(([call]) => `${call.method} ${call.path}`)
-      ).toEqual([AGENTS, READ_PACK, LIST, POST]);
+      ).toEqual([AGENTS, FIND_PACKS, READ_PACK, LIST, POST]);
     });
 
     it('passes the step logger to the target resolution', async () => {
@@ -206,7 +211,7 @@ describe('osquery.runPack step', () => {
             },
           }),
         },
-        { pack_id: 'pack-so-id', agent_ids: undefined, agent_platforms: ['linux'] }
+        { pack: 'My pack', agent_ids: undefined, agent_platforms: ['linux'] }
       );
 
       await result;
@@ -229,7 +234,7 @@ describe('osquery.runPack step', () => {
 
     it('sets the deadline from wait_timeout and keeps max_rows in state', async () => {
       const before = Date.now();
-      const { result } = start({}, { pack_id: 'pack-so-id', wait_timeout: '10m', max_rows: 7 });
+      const { result } = start({}, { pack: 'My pack', wait_timeout: '10m', max_rows: 7 });
 
       const { state } = (await result) as { state: { deadline: string; max_rows: number } };
 
@@ -242,29 +247,43 @@ describe('osquery.runPack step', () => {
     describe('before dispatch', () => {
       it.each<[string, Routes, Record<string, unknown>, string]>([
         [
-          'both pack_id and prebuilt_pack',
+          'both pack and prebuilt_pack',
           {},
-          { pack_id: 'pack-so-id', prebuilt_pack: 'forensic-persistence' },
+          { pack: 'My pack', prebuilt_pack: 'forensic-persistence' },
           'INVALID_INPUT',
         ],
-        ['neither pack_id nor prebuilt_pack', {}, { pack_id: undefined }, 'INVALID_INPUT'],
+        ['neither pack nor prebuilt_pack', {}, { pack: undefined }, 'INVALID_INPUT'],
+        ['an unknown key (alert_ids)', {}, { pack: 'My pack', alert_ids: ['a'] }, 'INVALID_INPUT'],
         [
-          'an unknown key (alert_ids)',
+          'an unknown pack name',
+          { [FIND_PACKS]: () => ({ total: 0, data: [] }) },
           {},
-          { pack_id: 'pack-so-id', alert_ids: ['a'] },
-          'INVALID_INPUT',
+          'PACK_NOT_FOUND',
         ],
-        ['an unknown pack_id', { [READ_PACK]: () => apiError(404) }, {}, 'PACK_NOT_FOUND'],
+        [
+          'a pack name shared by two packs',
+          {
+            [FIND_PACKS]: () => ({
+              total: 2,
+              data: [
+                { saved_object_id: 'so-1', name: 'My pack' },
+                { saved_object_id: 'so-2', name: 'My pack' },
+              ],
+            }),
+          },
+          {},
+          'PACK_AMBIGUOUS',
+        ],
         [
           'a prebuilt pack not loaded',
           { [RESOLVE]: () => apiError(404) },
-          { pack_id: undefined, prebuilt_pack: 'forensic-persistence' },
+          { pack: undefined, prebuilt_pack: 'forensic-persistence' },
           'PREBUILT_PACK_NOT_LOADED',
         ],
         [
           'an ambiguous prebuilt name',
           { [RESOLVE]: () => apiError(409) },
-          { pack_id: undefined, prebuilt_pack: 'forensic-persistence' },
+          { pack: undefined, prebuilt_pack: 'forensic-persistence' },
           'PREBUILT_PACK_AMBIGUOUS',
         ],
         [
@@ -301,7 +320,7 @@ describe('osquery.runPack step', () => {
         ],
       ])('dispatches nothing for %s', async (_name, routes, input, code) => {
         const { contextManager, result } = start(routes, {
-          pack_id: 'pack-so-id',
+          pack: 'My pack',
           ...input,
         });
 
@@ -322,7 +341,7 @@ describe('osquery.runPack step', () => {
       it('makes no call at all for an invalid input', async () => {
         const { contextManager, result } = start(
           {},
-          { pack_id: 'pack-so-id', prebuilt_pack: 'forensic-persistence' }
+          { pack: 'My pack', prebuilt_pack: 'forensic-persistence' }
         );
 
         await result.catch(() => undefined);
@@ -333,7 +352,7 @@ describe('osquery.runPack step', () => {
       it('does not read the pack when the target cannot be resolved', async () => {
         const { contextManager, result } = start(
           { [AGENTS]: () => ({ total: TARGET_AGENT_LIMIT + 1 }) },
-          { pack_id: 'pack-so-id', agent_ids: undefined, agent_policy_ids: ['pol-1'] }
+          { pack: 'My pack', agent_ids: undefined, agent_policy_ids: ['pol-1'] }
         );
 
         await expect(result).rejects.toMatchObject({ details: { code: 'TARGET_LIMIT_EXCEEDED' } });
@@ -611,13 +630,13 @@ describe('osquery.runPack step', () => {
   });
 
   describe('input schema', () => {
-    it('requires exactly one of pack_id and prebuilt_pack', () => {
+    it('requires exactly one of pack and prebuilt_pack', () => {
       const schema = runPackStepDefinition.inputSchema;
 
-      expect(schema.safeParse({ pack_id: 'p', agent_ids: ['a'] }).success).toBe(true);
+      expect(schema.safeParse({ pack: 'p', agent_ids: ['a'] }).success).toBe(true);
       expect(schema.safeParse({ prebuilt_pack: 'p', agent_ids: ['a'] }).success).toBe(true);
       expect(schema.safeParse({ agent_ids: ['a'] }).success).toBe(false);
-      expect(schema.safeParse({ pack_id: 'p', prebuilt_pack: 'q', agent_ids: ['a'] }).success).toBe(
+      expect(schema.safeParse({ pack: 'p', prebuilt_pack: 'q', agent_ids: ['a'] }).success).toBe(
         false
       );
     });

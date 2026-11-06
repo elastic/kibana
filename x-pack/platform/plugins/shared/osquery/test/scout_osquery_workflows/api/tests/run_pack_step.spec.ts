@@ -109,7 +109,7 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
       const workflows = workflowsClient(apiClient, adminHeaders);
       const workflowId = await workflows.create(
         'osq-wf-pack-partial',
-        runPackStep(`pack_id: ${packId}`, '      max_rows: 1')
+        runPackStep(`pack: osq-wf-pack`, '      max_rows: 1')
       );
       const executionId = await workflows.run(workflowId);
       const state = await workflows.waitForDispatch(executionId, 'p');
@@ -154,7 +154,7 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
       expect(byId.users).toMatchObject({ status: 'failed', rows: [], row_count: 0 });
       expect(byId.users.agents).toMatchObject({ total: 1, responded: 1, failed: 1 });
 
-      // One POST: one action document, from `pack_id` alone.
+      // One POST: one action document, from the pack name alone.
       const [action, ...others] = await findPackActionDocs(systemEs, packId);
       expect(others).toHaveLength(0);
       expect(action.action_id).toBe(state.action_id);
@@ -171,7 +171,7 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
     const workflows = workflowsClient(apiClient, adminHeaders);
     const workflowId = await workflows.create(
       'osq-wf-pack-success',
-      runPackStep(`pack_id: ${packId}`)
+      runPackStep(`pack: osq-wf-pack`)
     );
     const executionId = await workflows.run(workflowId);
     const state = await workflows.waitForDispatch(executionId, 'p');
@@ -193,7 +193,7 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
     const workflows = workflowsClient(apiClient, adminHeaders);
     const workflowId = await workflows.create(
       'osq-wf-pack-timed-out',
-      runPackStep(`pack_id: ${packId}`, '      wait_timeout: 15s')
+      runPackStep(`pack: osq-wf-pack`, '      wait_timeout: 15s')
     );
     const executionId = await workflows.run(workflowId);
     await workflows.waitForDispatch(executionId, 'p');
@@ -210,7 +210,7 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
     const workflows = workflowsClient(apiClient, adminHeaders);
     const workflowId = await workflows.create(
       'osq-wf-pack-failed',
-      runPackStep(`pack_id: ${packId}`)
+      runPackStep(`pack: osq-wf-pack`)
     );
     const executionId = await workflows.run(workflowId);
     const state = await workflows.waitForDispatch(executionId, 'p');
@@ -224,11 +224,11 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
   });
 
   apiTest(
-    'a pack that sets both or neither of pack_id and prebuilt_pack is rejected when saved',
+    'a pack that sets both or neither of pack and prebuilt_pack is rejected when saved',
     async ({ apiClient }) => {
       const workflows = workflowsClient(apiClient, adminHeaders);
       for (const [name, pack] of [
-        ['osq-wf-pack-both', `pack_id: ${packId}\n      prebuilt_pack: ${PREBUILT_PACK}`],
+        ['osq-wf-pack-both', `pack: osq-wf-pack\n      prebuilt_pack: ${PREBUILT_PACK}`],
         ['osq-wf-pack-neither', ''],
       ]) {
         // Bulk create still saves the workflow, flagged invalid and without the reason.
@@ -241,18 +241,18 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
         const errors = validation.diagnostics
           .filter((diagnostic) => diagnostic.severity === 'error')
           .map((diagnostic) => diagnostic.message);
-        expect(errors.join('\n')).toMatch(/exactly one of pack_id or prebuilt_pack/i);
+        expect(errors.join('\n')).toMatch(/exactly one of pack or prebuilt_pack/i);
       }
     }
   );
 
   apiTest(
-    'PACK_NOT_FOUND for an unknown pack_id, before anything is dispatched',
+    'PACK_NOT_FOUND for an unknown pack name, before anything is dispatched',
     async ({ apiClient }) => {
       const workflows = workflowsClient(apiClient, adminHeaders);
       const workflowId = await workflows.create(
         'osq-wf-pack-not-found',
-        runPackStep('pack_id: osq-wf-does-not-exist')
+        runPackStep('pack: osq-wf-does-not-exist')
       );
       const execution = await workflows.waitForEnd(await workflows.run(workflowId));
 
@@ -299,7 +299,7 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
       const workflows = workflowsClient(apiClient, adminHeaders);
       const workflowId = await workflows.create(
         'osq-wf-pack-placeholder',
-        runPackStep(`pack_id: ${placeholderPackId}`)
+        runPackStep(`pack: osq-wf-pack-placeholder`)
       );
       const execution = await workflows.waitForEnd(await workflows.run(workflowId));
 
@@ -319,7 +319,7 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
       const workflows = workflowsClient(apiClient, apiKeyHeader);
       const workflowId = await workflows.create(
         'osq-wf-pack-no-packs-read',
-        runPackStep(`pack_id: ${packId}`)
+        runPackStep(`pack: osq-wf-pack`)
       );
       const execution = await workflows.waitForEnd(await workflows.run(workflowId));
 
@@ -342,7 +342,7 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
       const workflows = workflowsClient(apiClient, apiKeyHeader);
       const workflowId = await workflows.create(
         'osq-wf-pack-no-read',
-        runPackStep(`pack_id: ${packId}`)
+        runPackStep(`pack: osq-wf-pack`)
       );
       const execution = await workflows.waitForEnd(await workflows.run(workflowId));
 

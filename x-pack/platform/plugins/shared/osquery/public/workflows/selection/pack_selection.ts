@@ -10,12 +10,11 @@ import { i18n } from '@kbn/i18n';
 import type { PropertySelectionHandler, SelectionOption } from '@kbn/workflows/types/latest';
 import { API_VERSIONS } from '../../../common/constants';
 import { sanitizeSearch } from '../../common/sanitize_search';
-import { failureReason, isNotFound } from './failure_reason';
+import { failureReason } from './failure_reason';
 
 const PAGE_SIZE = 20;
 
 interface PackItem {
-  saved_object_id: string;
   name: string;
   description?: string;
   queries?: Record<string, unknown> | unknown[];
@@ -25,7 +24,7 @@ const queryCount = (queries: PackItem['queries']) =>
   Array.isArray(queries) ? queries.length : Object.keys(queries ?? {}).length;
 
 const toOption = (item: PackItem): SelectionOption<string> => ({
-  value: item.saved_object_id,
+  value: item.name,
   label: item.name,
   description: item.description ?? '',
   documentation: i18n.translate('xpack.osquery.workflows.selection.pack.queryCount', {
@@ -39,15 +38,18 @@ const requestFailed = () =>
     defaultMessage: 'The pack request failed.',
   });
 
+/** Enough to hold every pack whose name or description contains the exact name. */
+const RESOLVE_PAGE_SIZE = 100;
+
 /**
- * Picker for `osquery.runPack` `pack_id`: shows pack names, stores the pack's saved-object id,
- * which is what the live-query route takes. Prebuilt packs have their own picker
- * (`prebuilt_pack`) because their space copies get a random id.
+ * Picker for `osquery.runPack` `pack`: stores the pack name, which the step resolves in the
+ * workflow's space (like `runQuery`'s `saved_query`), so a workflow keeps working across spaces
+ * and re-imports. Prebuilt packs have their own picker (`prebuilt_pack`).
  */
 export const createPackSelection = (http: HttpSetup): PropertySelectionHandler<string> => {
   // A failed lookup (403, network) must not look like "no such pack". Autocomplete still returns
   // no options; the validation message explains why. Keyed by the looked-up value because the
-  // validator resolves every runPack step's `pack_id` in parallel.
+  // validator resolves every runPack step's `pack` in parallel.
   const lookupErrors = new Map<string, string>();
 
   return {
@@ -75,23 +77,34 @@ export const createPackSelection = (http: HttpSetup): PropertySelectionHandler<s
       }
     },
     resolve: async (value) => {
-      const id = value.trim();
-      if (!id) return null;
+      const name = value.trim();
+      if (!name) return null;
 
       try {
-        const { data } = await http.get<{ data: Omit<PackItem, 'saved_object_id'> }>(
-          `/api/osquery/packs/${encodeURIComponent(id)}`,
-          { version: API_VERSIONS.public.v1 }
-        );
-        lookupErrors.delete(id);
-
-        return toOption({ ...data, saved_object_id: id });
-      } catch (error) {
-        if (isNotFound(error)) {
-          lookupErrors.delete(id);
-        } else {
-          lookupErrors.set(id, failureReason(error, requestFailed()));
+        // The route has no exact-name filter: search the quoted name, keep exact matches only.
+        const { data } = await http.get<{ data?: PackItem[] }>('/api/osquery/packs', {
+          version: API_VERSIONS.public.v1,
+          query: {
+            page: 1,
+            pageSize: RESOLVE_PAGE_SIZE,
+            search: `"${name.replace(/["\\]/g, '\\$&')}"`,
+          },
+        });
+        const matches = (data ?? []).filter((pack) => pack.name === name);
+        lookupErrors.delete(name);
+        if (matches.length > 1) {
+          lookupErrors.set(
+            name,
+            i18n.translate('xpack.osquery.workflows.selection.pack.ambiguous', {
+              defaultMessage:
+                'More than one pack has this name in this space, so the step cannot tell which to run. Rename the duplicates.',
+            })
+          );
         }
+
+        return matches.length === 1 ? toOption(matches[0]) : null;
+      } catch (error) {
+        lookupErrors.set(name, failureReason(error, requestFailed()));
 
         return null;
       }
@@ -112,8 +125,8 @@ export const createPackSelection = (http: HttpSetup): PropertySelectionHandler<s
               values: { reason: lookupError },
             })
           : i18n.translate('xpack.osquery.workflows.selection.pack.notFound', {
-              defaultMessage: 'No pack with id "{id}" in this space.',
-              values: { id: value },
+              defaultMessage: 'No pack named "{name}" in this space.',
+              values: { name: value },
             }),
         links: [
           {

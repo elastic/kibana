@@ -18,7 +18,7 @@ export const createRunPackStepDefinition = (http: HttpSetup) =>
     icon: OsqueryStepIcon,
     editorHandlers: {
       input: {
-        pack_id: { selection: createPackSelection(http) },
+        pack: { selection: createPackSelection(http) },
         prebuilt_pack: { selection: createPrebuiltPackSelection(http) },
       },
     },

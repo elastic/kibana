@@ -35,6 +35,73 @@ const isStatus = (error: unknown, status: number): error is KibanaApiCallError =
 const notFoundReason = (error: KibanaApiCallError): unknown =>
   (error.body as { attributes?: { reason?: unknown } } | undefined)?.attributes?.reason;
 
+interface FindPacksResponse {
+  total?: number;
+  data?: Array<{ saved_object_id: string; name: string }>;
+}
+
+const FIND_PAGE_SIZE = 100;
+const FIND_MAX_PAGES = 10;
+
+/**
+ * Finds the pack named exactly `name` in the workflow's space, by name like `runQuery`'s
+ * `saved_query`: a saved-object id is random per space and changes on re-import. The packs find
+ * route only offers a fuzzy `simple_query_string` over name and description, so this searches
+ * for the quoted name and keeps exact matches only. Names are unique per space (create and
+ * rename answer 409), but a saved-objects import can bypass that, hence the ambiguity check.
+ */
+const resolvePackIdByName = async (
+  contextManager: KibanaApiCaller,
+  name: string
+): Promise<string> => {
+  // Templates are rendered after schema validation, so the value can still be empty here.
+  if (name.trim() === '') {
+    throw stepError(
+      PreDispatchErrorCode.PACK_NOT_FOUND,
+      'pack is empty after rendering the workflow templates.',
+      'NotFoundError'
+    );
+  }
+
+  const phrase = `"${name.replace(/["\\]/g, '\\$&')}"`;
+  const ids: string[] = [];
+  try {
+    for (let page = 1; page <= FIND_MAX_PAGES; page++) {
+      const { body } = await contextManager.callKibanaApi<FindPacksResponse>({
+        method: 'GET',
+        path: '/api/osquery/packs',
+        query: { search: phrase, page, pageSize: FIND_PAGE_SIZE },
+        headers: PUBLIC_API_HEADERS,
+      });
+      const data = body.data ?? [];
+      for (const pack of data) {
+        if (pack.name === name) ids.push(pack.saved_object_id);
+      }
+
+      if (data.length < FIND_PAGE_SIZE || page * FIND_PAGE_SIZE >= (body.total ?? 0)) break;
+    }
+  } catch (error) {
+    throw toPreDispatchReadError(`Finding the pack "${name}"`, error);
+  }
+
+  if (ids.length === 0) {
+    throw stepError(
+      PreDispatchErrorCode.PACK_NOT_FOUND,
+      `No pack is named "${name}" in this space.`,
+      'NotFoundError'
+    );
+  }
+
+  if (ids.length > 1) {
+    throw stepError(
+      PreDispatchErrorCode.PACK_AMBIGUOUS,
+      `More than one pack is named "${name}" in this space. Rename the duplicates.`
+    );
+  }
+
+  return ids[0];
+};
+
 const resolvePrebuiltPackId = async (
   contextManager: KibanaApiCaller,
   assetIdOrName: string
@@ -88,18 +155,14 @@ const resolvePrebuiltPackId = async (
  */
 export const resolvePack = async (
   contextManager: KibanaApiCaller,
-  input: { pack_id?: string; prebuilt_pack?: string }
+  input: { pack?: string; prebuilt_pack?: string }
 ): Promise<ResolvedPack> => {
   const packId =
-    input.pack_id ?? (await resolvePrebuiltPackId(contextManager, input.prebuilt_pack as string));
-
-  if (packId.trim() === '') {
-    throw stepError(
-      PreDispatchErrorCode.PACK_NOT_FOUND,
-      'pack_id is empty after rendering the workflow templates.',
-      'NotFoundError'
-    );
-  }
+    input.pack !== undefined
+      ? await resolvePackIdByName(contextManager, input.pack)
+      : await resolvePrebuiltPackId(contextManager, input.prebuilt_pack as string);
+  // Messages name the pack the way the workflow does, not by its saved-object id.
+  const label = input.pack ?? (input.prebuilt_pack as string);
 
   let queries: NonNullable<NonNullable<ReadPackResponse['data']>['queries']>;
   try {
@@ -113,12 +176,12 @@ export const resolvePack = async (
     if (isStatus(error, 404)) {
       throw stepError(
         PreDispatchErrorCode.PACK_NOT_FOUND,
-        `Pack "${packId}" was not found in this space.`,
+        `Pack "${label}" was not found in this space.`,
         'NotFoundError'
       );
     }
 
-    throw toPreDispatchReadError(`Reading the pack "${packId}"`, error);
+    throw toPreDispatchReadError(`Reading the pack "${label}"`, error);
   }
 
   const ecsKeysByQuery: Record<string, string[]> = {};
@@ -127,7 +190,7 @@ export const resolvePack = async (
     if (hasPlaceholders(packQuery.query ?? '')) {
       throw stepError(
         PreDispatchErrorCode.SAVED_QUERY_HAS_PLACEHOLDERS,
-        `Query "${name}" of pack "${packId}" contains {{…}} placeholders, which workflow steps never substitute.`
+        `Query "${name}" of pack "${label}" contains {{…}} placeholders, which workflow steps never substitute.`
       );
     }
 
@@ -137,7 +200,7 @@ export const resolvePack = async (
   if (Object.keys(ecsKeysByQuery).length === 0) {
     throw stepError(
       PreDispatchErrorCode.REQUEST_REJECTED,
-      `Pack "${packId}" has no enabled queries, so there is nothing to run.`
+      `Pack "${label}" has no enabled queries, so there is nothing to run.`
     );
   }
 

@@ -16,8 +16,8 @@ import {
 const target = { agent_ids: ['agent-1'] };
 
 describe('runPackInputSchema', () => {
-  it('accepts pack_id with one targeting mode', () => {
-    expect(runPackInputSchema.safeParse({ pack_id: 'abc', ...target }).success).toBe(true);
+  it('accepts pack with one targeting mode', () => {
+    expect(runPackInputSchema.safeParse({ pack: 'abc', ...target }).success).toBe(true);
   });
 
   it('accepts prebuilt_pack with one targeting mode and the shared options', () => {
@@ -31,38 +31,42 @@ describe('runPackInputSchema', () => {
     ).toBe(true);
   });
 
-  it('rejects both pack_id and prebuilt_pack', () => {
+  it('rejects both pack and prebuilt_pack', () => {
     const result = runPackInputSchema.safeParse({
-      pack_id: 'abc',
+      pack: 'abc',
       prebuilt_pack: 'forensic-persistence',
       ...target,
     });
 
     expect(result.success).toBe(false);
     expect(JSON.stringify(result.error?.issues)).toContain(
-      'Set exactly one of pack_id or prebuilt_pack'
+      'Set exactly one of pack or prebuilt_pack'
     );
   });
 
-  it('rejects neither pack_id nor prebuilt_pack', () => {
+  it('rejects neither pack nor prebuilt_pack', () => {
     const result = runPackInputSchema.safeParse({ ...target });
 
     expect(result.success).toBe(false);
     expect(JSON.stringify(result.error?.issues)).toContain(
-      'Set exactly one of pack_id or prebuilt_pack'
+      'Set exactly one of pack or prebuilt_pack'
     );
   });
 
-  it('rejects empty pack_id and prebuilt_pack', () => {
-    expect(runPackInputSchema.safeParse({ pack_id: '', ...target }).success).toBe(false);
+  it('rejects the old pack_id key', () => {
+    expect(runPackInputSchema.safeParse({ pack_id: 'abc', ...target }).success).toBe(false);
+  });
+
+  it('rejects empty pack and prebuilt_pack', () => {
+    expect(runPackInputSchema.safeParse({ pack: '', ...target }).success).toBe(false);
     expect(runPackInputSchema.safeParse({ prebuilt_pack: '', ...target }).success).toBe(false);
   });
 
   it('requires exactly one targeting mode', () => {
-    expect(runPackInputSchema.safeParse({ pack_id: 'abc' }).success).toBe(false);
+    expect(runPackInputSchema.safeParse({ pack: 'abc' }).success).toBe(false);
     expect(
       runPackInputSchema.safeParse({
-        pack_id: 'abc',
+        pack: 'abc',
         agent_ids: ['agent-1'],
         agent_platforms: ['linux'],
       }).success
@@ -72,7 +76,7 @@ describe('runPackInputSchema', () => {
   it.each(['query', 'queries', 'alert_ids', 'case_ids', 'saved_query', 'saved_query_id'])(
     'rejects the unknown key %s',
     (key) => {
-      expect(runPackInputSchema.safeParse({ pack_id: 'abc', ...target, [key]: 'x' }).success).toBe(
+      expect(runPackInputSchema.safeParse({ pack: 'abc', ...target, [key]: 'x' }).success).toBe(
         false
       );
     }
@@ -80,14 +84,14 @@ describe('runPackInputSchema', () => {
 
   it('rejects wait_timeout above 30m and max_rows out of range', () => {
     expect(
-      runPackInputSchema.safeParse({ pack_id: 'abc', ...target, wait_timeout: '31m' }).success
+      runPackInputSchema.safeParse({ pack: 'abc', ...target, wait_timeout: '31m' }).success
     ).toBe(false);
-    expect(runPackInputSchema.safeParse({ pack_id: 'abc', ...target, max_rows: 0 }).success).toBe(
+    expect(runPackInputSchema.safeParse({ pack: 'abc', ...target, max_rows: 0 }).success).toBe(
       false
     );
-    expect(
-      runPackInputSchema.safeParse({ pack_id: 'abc', ...target, max_rows: 10001 }).success
-    ).toBe(false);
+    expect(runPackInputSchema.safeParse({ pack: 'abc', ...target, max_rows: 10001 }).success).toBe(
+      false
+    );
   });
 });
 
@@ -133,6 +137,7 @@ describe('runPackOutputSchema', () => {
 describe('contract', () => {
   it('declares the pack pre-dispatch codes and keeps RESULTS_UNREADABLE', () => {
     expect(PreDispatchErrorCode.PACK_NOT_FOUND).toBe('PACK_NOT_FOUND');
+    expect(PreDispatchErrorCode.PACK_AMBIGUOUS).toBe('PACK_AMBIGUOUS');
     expect(PreDispatchErrorCode.PREBUILT_PACK_NOT_LOADED).toBe('PREBUILT_PACK_NOT_LOADED');
     expect(PreDispatchErrorCode.PREBUILT_PACK_AMBIGUOUS).toBe('PREBUILT_PACK_AMBIGUOUS');
     expect(OutputErrorCode.RESULTS_UNREADABLE).toBe('RESULTS_UNREADABLE');
