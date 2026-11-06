@@ -12,7 +12,12 @@ import { I18nProvider } from '@kbn/i18n-react';
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({ services: { docLinks: undefined } }),
 }));
+const mockUseOutputs = jest.fn();
 jest.mock('@kbn/fleet-plugin/public', () => ({
+  useOutputs: (...args: unknown[]) => mockUseOutputs(...args),
+  PackagePolicyOutputSelect: jest.requireActual(
+    '@kbn/fleet-plugin/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_output_select'
+  ).PackagePolicyOutputSelect,
   NamespaceComboBox: ({
     namespace,
     onNamespaceChange,
@@ -61,6 +66,15 @@ const renderSection = (props: Partial<React.ComponentProps<typeof SharedSettings
 };
 
 describe('SharedSettingsSection', () => {
+  beforeEach(() => {
+    mockUseOutputs.mockReturnValue({
+      isLoading: false,
+      canUseOutputPerIntegration: true,
+      allowedOutputs: [{ id: 'logstash-1', name: 'My Logstash' }],
+      inheritedOutputName: 'Default',
+    });
+  });
+
   it('shows the integration name and the description', () => {
     renderSection({ integrationName: 'my-aws', description: 'Production' });
 
@@ -166,6 +180,156 @@ describe('SharedSettingsSection', () => {
 
       fireEvent.click(screen.getByTestId('sharedSettingsAdvancedToggle'));
       expect(screen.queryByTestId('sharedSettingsNamespace-note')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('output', () => {
+    const outputProps = (
+      overrides: Partial<
+        NonNullable<React.ComponentProps<typeof SharedSettingsSection>['output']>
+      > = {}
+    ) => ({
+      value: '',
+      onChange: jest.fn(),
+      packageName: 'aws',
+      inputTypes: ['aws-s3'],
+      areInputTypesLoaded: true,
+      isInheritedOutputDefault: true,
+      ...overrides,
+    });
+
+    it('is hidden unless the deployment is agent-based', () => {
+      renderSection();
+
+      expect(screen.queryByTestId('sharedSettingsOutput')).not.toBeInTheDocument();
+    });
+
+    it('offers the inherited output and the allowed ones', () => {
+      renderSection({ output: outputProps() });
+
+      const select = screen.getByTestId('sharedSettingsOutput');
+      expect(select).toHaveValue('');
+      expect(
+        screen.getByText('Inherited from agent policy (currently Default)')
+      ).toBeInTheDocument();
+      expect(screen.getByText('My Logstash')).toBeInTheDocument();
+    });
+
+    it('does not name the inherited output when the agent policies may set their own', () => {
+      renderSection({ output: outputProps({ isInheritedOutputDefault: false }) });
+
+      expect(screen.getByText('Inherited from agent policy')).toBeInTheDocument();
+      expect(
+        screen.queryByText('Inherited from agent policy (currently Default)')
+      ).not.toBeInTheDocument();
+    });
+
+    it('offers the outputs the input types of the selected services accept', () => {
+      renderSection({ output: outputProps({ inputTypes: ['otelcol'] }) });
+
+      expect(mockUseOutputs).toHaveBeenCalledWith(
+        { inputs: [{ type: 'otelcol', enabled: true }] },
+        'aws'
+      );
+    });
+
+    it('falls back to the inherited output when the chosen one is no longer allowed', () => {
+      const onChange = jest.fn();
+      // e.g. an OTel service was added after a Logstash output was chosen.
+      mockUseOutputs.mockReturnValue({
+        isLoading: false,
+        canUseOutputPerIntegration: true,
+        allowedOutputs: [{ id: 'es-1', name: 'Elasticsearch' }],
+        inheritedOutputName: 'Default',
+      });
+      renderSection({ output: outputProps({ value: 'logstash-1', onChange }) });
+
+      expect(onChange).toHaveBeenCalledWith('');
+    });
+
+    it('keeps the chosen output while the outputs are loading', () => {
+      const onChange = jest.fn();
+      mockUseOutputs.mockReturnValue({
+        isLoading: true,
+        canUseOutputPerIntegration: true,
+        allowedOutputs: [],
+        inheritedOutputName: undefined,
+      });
+      renderSection({ output: outputProps({ value: 'logstash-1', onChange }) });
+
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('keeps the chosen output while the manifests of the selected services are loading', () => {
+      const onChange = jest.fn();
+      // Without the manifests only Beats outputs are allowed, which would drop a valid OTLP choice.
+      mockUseOutputs.mockReturnValue({
+        isLoading: false,
+        canUseOutputPerIntegration: true,
+        allowedOutputs: [{ id: 'es-1', name: 'Elasticsearch' }],
+        inheritedOutputName: 'Default',
+      });
+      renderSection({
+        output: outputProps({
+          value: 'otlp-1',
+          onChange,
+          inputTypes: [],
+          areInputTypesLoaded: false,
+        }),
+      });
+
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('reports the chosen output', () => {
+      const onChange = jest.fn();
+      renderSection({ output: outputProps({ onChange }) });
+
+      fireEvent.change(screen.getByTestId('sharedSettingsOutput'), {
+        target: { value: 'logstash-1' },
+      });
+
+      expect(onChange).toHaveBeenCalledWith('logstash-1');
+    });
+
+    it('is hidden when the license does not allow an output per integration', () => {
+      mockUseOutputs.mockReturnValue({
+        isLoading: false,
+        canUseOutputPerIntegration: false,
+        allowedOutputs: [],
+        inheritedOutputName: undefined,
+      });
+      renderSection({ output: outputProps() });
+
+      expect(screen.queryByTestId('sharedSettingsOutput')).not.toBeInTheDocument();
+    });
+
+    it('keeps a stored output while the license is not known', () => {
+      const onChange = jest.fn();
+      mockUseOutputs.mockReturnValue({
+        isLoading: false,
+        canUseOutputPerIntegration: false,
+        isLicenseKnown: false,
+        allowedOutputs: [],
+        inheritedOutputName: undefined,
+      });
+      renderSection({ output: outputProps({ value: 'logstash-1', onChange }) });
+
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('clears a stored output below the license, where the field cannot reset it', () => {
+      const onChange = jest.fn();
+      mockUseOutputs.mockReturnValue({
+        isLoading: false,
+        canUseOutputPerIntegration: false,
+        isLicenseKnown: true,
+        allowedOutputs: [],
+        inheritedOutputName: undefined,
+      });
+      renderSection({ output: outputProps({ value: 'logstash-1', onChange }) });
+
+      expect(onChange).toHaveBeenCalledWith('');
     });
   });
 });

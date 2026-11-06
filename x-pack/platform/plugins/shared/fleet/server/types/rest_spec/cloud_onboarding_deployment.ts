@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH } from '../../../common/constants';
+import { PolicySettingsRecordSchema } from '../models/cloud_onboarding_deployment';
 
 // --- Shared primitives ---
 
@@ -95,6 +96,12 @@ const RequestServiceVarsSchema = schema.recordOf(
   ServiceVarsEntrySchema,
   { meta: { description: 'Per-service config keyed by instance ID.' } }
 );
+
+// The field shipped after the routes (`since: '9.5.0'`), so it carries its own availability.
+const POLICY_SETTINGS_AVAILABILITY = { stability: 'experimental' as const, since: '9.7.0' };
+
+const PolicySettingsSchema = (description: string) =>
+  PolicySettingsRecordSchema({ description, availability: POLICY_SETTINGS_AVAILABILITY });
 
 const InstanceSchema = schema.object({
   instanceId: schema.string({
@@ -205,6 +212,11 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
       'Service instances, including duplicates, from the last deployment. Used to restore the service list when an onboarding is resumed.'
     )
   ),
+  policySettings: schema.maybe(
+    PolicySettingsSchema(
+      'Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).'
+    )
+  ),
   namespace: schema.maybe(
     schema.string({
       meta: {
@@ -267,7 +279,7 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
       maxSize: 1000,
       meta: {
         description:
-          'Package policy IDs created for this deployment (managed_integration and agent_based).',
+          'Integration policy IDs created for this deployment (managed_integration and agent_based).',
       },
     })
   ),
@@ -352,6 +364,11 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
     instances: schema.maybe(
       InstancesSchema(
         'Service instances, including duplicates, being deployed. Used to restore the service list when the onboarding is resumed.'
+      )
+    ),
+    policySettings: schema.maybe(
+      PolicySettingsSchema(
+        'Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).'
       )
     ),
     namespace: schema.maybe(
@@ -449,7 +466,7 @@ const CloudOnboardingDeploymentListItemSchema = CloudOnboardingDeploymentItemSch
       maxSize: 100,
       meta: {
         description:
-          'Packages of the deployment instance package policies with their deployed versions. Empty for ECF-only deployment instances.',
+          'Packages of the deployment instance integration policies with their deployed versions. Empty for ECF-only deployment instances.',
       },
     }
   ),
@@ -592,6 +609,11 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
         'Service instances, including duplicates, from the last deployment. Replaces the stored list, so instances removed since the last deployment are dropped.'
       )
     ),
+    policySettings: schema.maybe(
+      PolicySettingsSchema(
+        'Integration policy settings that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`). Replaces the stored settings; omit it to keep them.'
+      )
+    ),
     services: schema.maybe(
       schema.arrayOf(schema.string({ minLength: 1, maxLength: 256 }), {
         minSize: 1,
@@ -639,7 +661,7 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
         maxSize: 1000,
         meta: {
           description:
-            'Package policy IDs created for this deployment (managed_integration and agent_based).',
+            'Integration policy IDs created for this deployment (managed_integration and agent_based).',
         },
       })
     ),

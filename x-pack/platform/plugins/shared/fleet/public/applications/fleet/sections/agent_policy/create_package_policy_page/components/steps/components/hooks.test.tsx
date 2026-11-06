@@ -119,6 +119,7 @@ describe('useOutputs', () => {
     const testRenderer = createFleetTestRendererMock();
     mockedUseLicence.mockReturnValue({
       hasAtLeast: () => true,
+      getLicenseInformation: () => ({ isAvailable: true }),
     } as unknown as LicenseService);
     mockApiCallsWithOutputs(testRenderer.startServices.http);
 
@@ -137,6 +138,7 @@ describe('useOutputs', () => {
     const testRenderer = createFleetTestRendererMock();
     mockedUseLicence.mockReturnValue({
       hasAtLeast: () => true,
+      getLicenseInformation: () => ({ isAvailable: true }),
     } as unknown as LicenseService);
     mockApiCallsWithOnlyInternalOutputs(testRenderer.startServices.http);
 
@@ -149,11 +151,51 @@ describe('useOutputs', () => {
     expect(result.current.allowedOutputs).toHaveLength(0);
   });
 
+  describe('isLicenseKnown', () => {
+    const renderWithLicense = (license: Partial<LicenseService>) => {
+      const testRenderer = createFleetTestRendererMock();
+      mockedUseLicence.mockReturnValue(license as unknown as LicenseService);
+      mockApiCallsWithOutputs(testRenderer.startServices.http);
+
+      return testRenderer.renderHook(() => useOutputs(packagePolicy, 'test-package'));
+    };
+
+    it('is true when the license is below the one required', () => {
+      const { result } = renderWithLicense({
+        hasAtLeast: () => false,
+        getLicenseInformation: () => ({ isAvailable: true } as any),
+      });
+
+      expect(result.current.canUseOutputPerIntegration).toBe(false);
+      expect(result.current.isLicenseKnown).toBe(true);
+    });
+
+    it('is false before the license is received', () => {
+      const { result } = renderWithLicense({
+        hasAtLeast: () => undefined as any,
+        getLicenseInformation: () => null,
+      });
+
+      expect(result.current.canUseOutputPerIntegration).toBeFalsy();
+      expect(result.current.isLicenseKnown).toBe(false);
+    });
+
+    it('is false when the license is unavailable', () => {
+      const { result } = renderWithLicense({
+        hasAtLeast: () => false,
+        getLicenseInformation: () => ({ isAvailable: false } as any),
+      });
+
+      expect(result.current.isLicenseKnown).toBe(false);
+    });
+  });
+
   describe('inheritedOutputName', () => {
     const renderUseOutputs = (agentPolicies?: Array<{ data_output_id?: string | null }>) => {
       const testRenderer = createFleetTestRendererMock();
       mockedUseLicence.mockReturnValue({
         hasAtLeast: () => true,
+        getLicenseInformation: () => ({ isAvailable: true }),
       } as unknown as LicenseService);
       mockApiCallsWithOutputs(testRenderer.startServices.http);
 

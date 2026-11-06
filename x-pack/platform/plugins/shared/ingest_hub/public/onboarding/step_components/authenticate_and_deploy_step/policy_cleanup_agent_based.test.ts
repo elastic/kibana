@@ -269,6 +269,36 @@ describe('updateAgentBasedPolicy — payload shape', () => {
     expect(mockUpdatePackagePolicy.mock.calls[0][1].namespace).toBe('prod');
   });
 
+  describe('output', () => {
+    const updateWithOutput = async (outputId: string | undefined) => {
+      mockGetPackageInfo.mockResolvedValue({
+        data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },
+      });
+      await cleanupAgentBasedPolicies({
+        ...BASE_OPTS,
+        policySettings: outputId === undefined ? {} : { output_id: outputId },
+        instances: [instance],
+        servicesMap: new Map([['vpcflow', vpcflow]]),
+        pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+        currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+        selectedAgentPolicyIds: ['agent-policy-1'],
+      });
+      return mockUpdatePackagePolicy.mock.calls[0][1];
+    };
+
+    it('sends the chosen output', async () => {
+      expect((await updateWithOutput('logstash-1')).output_id).toBe('logstash-1');
+    });
+
+    it('clears an override when the inherited output is chosen', async () => {
+      expect((await updateWithOutput('')).output_id).toBeNull();
+    });
+
+    it('leaves the policy output as it is when none was ever chosen', async () => {
+      expect(await updateWithOutput(undefined)).not.toHaveProperty('output_id');
+    });
+  });
+
   it('prefers a duplicate’s own namespace over the global one', async () => {
     mockGetPackageInfo.mockResolvedValue({
       data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },

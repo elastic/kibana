@@ -65,6 +65,16 @@ describe('hydrateOnboardingSession', () => {
     ).toEqual(expect.objectContaining({ namespace: 'prod' }));
   });
 
+  it('restores the package policy settings into the service settings state', async () => {
+    mockSendGet.mockResolvedValue({
+      item: makeItem({ policySettings: { output_id: 'logstash-1' } }),
+    });
+    await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
+    expect(
+      JSON.parse(sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.serviceSettingsStep`)!)
+    ).toEqual(expect.objectContaining({ policySettings: { output_id: 'logstash-1' } }));
+  });
+
   it('leaves the integration name unset for onboardings saved without one, so a default is prefilled', async () => {
     mockSendGet.mockResolvedValue({ item: makeItem() });
     await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);

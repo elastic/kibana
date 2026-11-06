@@ -57,7 +57,17 @@ export interface AuthenticateAndDeployStepState {
   existingSecretRefs?: ExistingSecretRefs;
 }
 
-export type ServiceChipState = 'instantiating' | 'detecting' | 'receiving' | 'error' | 'timeout';
+/**
+ * `unverified`: the agent runs but sends to another cluster (a remote Elasticsearch output), so no
+ * data check here can confirm it.
+ */
+export type ServiceChipState =
+  | 'instantiating'
+  | 'detecting'
+  | 'receiving'
+  | 'unverified'
+  | 'error'
+  | 'timeout';
 
 export interface DetectAndReviewStepState {
   isDeploying: boolean;
