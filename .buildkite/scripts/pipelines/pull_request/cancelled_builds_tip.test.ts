@@ -10,163 +10,104 @@
 import type { Build } from '#pipeline-utils';
 import {
   CANCELLED_BUILDS_TIP_CONTEXT,
-  countBuildsCancelledByPushes,
+  countRecentCancelledBuilds,
   getCancelledBuildsTipMessage,
   postCancelledBuildsTip,
 } from './cancelled_builds_tip.ts';
 
 const mockGetFinishedBuildsForBranch = jest.fn();
-const mockGetCurrentBuild = jest.fn();
-const mockGetBuild = jest.fn();
 const mockUpsertComment = jest.fn();
 
 jest.mock('#pipeline-utils', () => ({
   BuildkiteClient: jest.fn().mockImplementation(() => ({
     getFinishedBuildsForBranch: mockGetFinishedBuildsForBranch,
-    getCurrentBuild: mockGetCurrentBuild,
-    getBuild: mockGetBuild,
   })),
   upsertComment: (...args: unknown[]) => mockUpsertComment(...args),
 }));
 
 const PR = '1234';
-const minutes = (value: number) => new Date(Date.UTC(2026, 10, 6, 9, value)).toISOString();
+const NOW = Date.UTC(2026, 10, 6, 12, 0);
+const minutesAgo = (value: number) => new Date(NOW - value * 60 * 1000).toISOString();
 
 const build = ({
-  commit,
-  createdAt,
-  finishedAt,
+  createdMinutesAgo = 60,
+  ranMinutes = 20,
   state = 'canceled',
   message = 'Address review comments',
-  authorName = 'Jane Doe',
   prNumber = PR,
-  jobs = [],
+  draft = false,
 }: {
-  commit: string;
-  createdAt: number;
-  finishedAt?: number;
+  createdMinutesAgo?: number;
+  ranMinutes?: number;
   state?: string;
   message?: string;
-  authorName?: string;
   prNumber?: string;
-  jobs?: Array<{ state: string; finishedAt: number; softFailed?: boolean; retried?: boolean }>;
-}): Build =>
+  draft?: boolean;
+} = {}): Build =>
   ({
-    number: createdAt,
-    commit,
     state,
     message,
-    jobs: jobs.map(
-      ({ state: jobState, finishedAt: jobFinishedAt, softFailed = false, retried = false }) => ({
-        state: jobState,
-        soft_failed: softFailed,
-        retried,
-        finished_at: minutes(jobFinishedAt),
-      })
-    ),
-    author: { name: authorName, email: `${authorName}@example.com` },
-    created_at: minutes(createdAt),
-    started_at: minutes(createdAt),
-    finished_at: finishedAt === undefined ? null : minutes(finishedAt),
+    env: { GITHUB_PR_DRAFT: String(draft) },
+    meta_data: {},
+    created_at: minutesAgo(createdMinutesAgo),
+    started_at: minutesAgo(createdMinutesAgo),
+    finished_at: minutesAgo(createdMinutesAgo - ranMinutes),
     pull_request: { id: prNumber, base: 'main', repository: 'elastic/kibana' },
   } as unknown as Build);
 
-describe('countBuildsCancelledByPushes', () => {
-  it('counts builds cancelled by a newer push after running for a while', () => {
+describe('countRecentCancelledBuilds', () => {
+  it('counts builds cancelled in the last day after running for a while', () => {
     const builds = [
-      build({ commit: 'a', createdAt: 0, finishedAt: 20 }),
-      build({ commit: 'b', createdAt: 20, finishedAt: 45 }),
-      build({ commit: 'c', createdAt: 45, state: 'running' }),
+      build({ createdMinutesAgo: 120 }),
+      build({ createdMinutesAgo: 60 }),
+      build({ state: 'passed' }),
     ];
 
-    expect(countBuildsCancelledByPushes(builds, PR)).toBe(2);
+    expect(countRecentCancelledBuilds(builds, PR, NOW)).toBe(2);
+  });
+
+  it('ignores builds older than a day', () => {
+    expect(countRecentCancelledBuilds([build({ createdMinutesAgo: 25 * 60 })], PR, NOW)).toBe(0);
   });
 
   it('ignores builds cancelled within their first 10 minutes', () => {
-    const builds = [
-      build({ commit: 'a', createdAt: 0, finishedAt: 4 }),
-      build({ commit: 'b', createdAt: 4, state: 'running' }),
-    ];
-
-    expect(countBuildsCancelledByPushes(builds, PR)).toBe(0);
+    expect(countRecentCancelledBuilds([build({ ranMinutes: 9 })], PR, NOW)).toBe(0);
   });
 
-  it('ignores builds replaced by a kibanamachine fix commit', () => {
-    const builds = [
-      build({ commit: 'a', createdAt: 0, finishedAt: 20 }),
-      build({
-        commit: 'b',
-        createdAt: 20,
-        state: 'running',
-        message: 'Changes from node scripts/eslint --fix',
-        authorName: 'kibanamachine',
-      }),
-    ];
+  it('ignores builds that ran while the PR was a draft', () => {
+    const fromMetaData = { ...build(), env: {}, meta_data: { 'ingest:is_draft_pr': 'true' } };
 
-    expect(countBuildsCancelledByPushes(builds, PR)).toBe(0);
+    expect(
+      countRecentCancelledBuilds([build({ draft: true }), fromMetaData as Build], PR, NOW)
+    ).toBe(0);
   });
 
-  it('ignores builds that had already failed before the newer push', () => {
-    const builds = [
-      build({
-        commit: 'a',
-        createdAt: 0,
-        finishedAt: 20,
-        jobs: [{ state: 'failed', finishedAt: 15 }],
-      }),
-      build({ commit: 'b', createdAt: 20, state: 'running' }),
-    ];
-
-    expect(countBuildsCancelledByPushes(builds, PR)).toBe(0);
-  });
-
-  it('still counts builds whose only failures were soft-failed or retried', () => {
-    const builds = [
-      build({
-        commit: 'a',
-        createdAt: 0,
-        finishedAt: 20,
-        jobs: [
-          { state: 'failed', finishedAt: 10, softFailed: true },
-          { state: 'failed', finishedAt: 12, retried: true },
-          { state: 'canceled', finishedAt: 20 },
-        ],
-      }),
-      build({ commit: 'b', createdAt: 20, state: 'running' }),
-    ];
-
-    expect(countBuildsCancelledByPushes(builds, PR)).toBe(1);
-  });
-
-  it('ignores builds cancelled without a newer push, such as manual cancellations', () => {
-    const builds = [
-      build({ commit: 'a', createdAt: 0, finishedAt: 20 }),
-      build({ commit: 'b', createdAt: 60, state: 'running' }),
-    ];
-
-    expect(countBuildsCancelledByPushes(builds, PR)).toBe(0);
+  it('ignores builds of bot fix commits', () => {
+    expect(
+      countRecentCancelledBuilds(
+        [build({ message: 'Changes from node scripts/eslint --fix' })],
+        PR,
+        NOW
+      )
+    ).toBe(0);
   });
 
   it('ignores builds of other PRs on the same branch name', () => {
-    const builds = [
-      build({ commit: 'a', createdAt: 0, finishedAt: 20, prNumber: '999' }),
-      build({ commit: 'b', createdAt: 20, state: 'running', prNumber: '999' }),
-    ];
-
-    expect(countBuildsCancelledByPushes(builds, PR)).toBe(0);
+    expect(countRecentCancelledBuilds([build({ prNumber: '999' })], PR, NOW)).toBe(0);
   });
 });
 
 describe('postCancelledBuildsTip', () => {
   const ORIGINAL_ENV = process.env;
   const cancelledBuilds = [
-    build({ commit: 'a', createdAt: 0, finishedAt: 15 }),
-    build({ commit: 'b', createdAt: 15, finishedAt: 30 }),
-    build({ commit: 'c', createdAt: 30, finishedAt: 45 }),
+    build({ createdMinutesAgo: 180 }),
+    build({ createdMinutesAgo: 120 }),
+    build({ createdMinutesAgo: 60 }),
   ];
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(Date, 'now').mockReturnValue(NOW);
     process.env = {
       ...ORIGINAL_ENV,
       BUILDKITE_PIPELINE_SLUG: 'kibana-pull-request',
@@ -176,27 +117,14 @@ describe('postCancelledBuildsTip', () => {
       GITHUB_PR_DRAFT: 'false',
     };
     mockGetFinishedBuildsForBranch.mockResolvedValue(cancelledBuilds);
-    mockGetCurrentBuild.mockResolvedValue(build({ commit: 'd', createdAt: 45, state: 'running' }));
-    mockGetBuild.mockImplementation(async (_, buildNumber: number) =>
-      cancelledBuilds.find(({ number }) => number === buildNumber)
-    );
   });
 
   afterAll(() => {
     process.env = ORIGINAL_ENV;
+    jest.restoreAllMocks();
   });
 
-  it('posts the tip once three builds were cancelled by pushes', async () => {
-    await postCancelledBuildsTip();
-
-    expect(mockUpsertComment).toHaveBeenCalledWith({
-      commentBody: getCancelledBuildsTipMessage('jane', 3),
-      commentContext: CANCELLED_BUILDS_TIP_CONTEXT,
-      clearPrevious: false,
-    });
-  });
-
-  it('lists builds without jobs and only fetches jobs for the superseded ones', async () => {
+  it('posts the tip once three builds were cancelled in the last day', async () => {
     await postCancelledBuildsTip();
 
     expect(mockGetFinishedBuildsForBranch).toHaveBeenCalledWith(
@@ -205,29 +133,15 @@ describe('postCancelledBuildsTip', () => {
       100,
       { excludeJobs: true }
     );
-    expect(mockGetBuild.mock.calls.map(([, buildNumber]) => buildNumber)).toEqual([0, 15, 30]);
+    expect(mockUpsertComment).toHaveBeenCalledWith({
+      commentBody: getCancelledBuildsTipMessage('jane', 3),
+      commentContext: CANCELLED_BUILDS_TIP_CONTEXT,
+      clearPrevious: false,
+    });
   });
 
-  it('does not post below the threshold, without fetching any jobs', async () => {
+  it('does not post below the threshold', async () => {
     mockGetFinishedBuildsForBranch.mockResolvedValue(cancelledBuilds.slice(1));
-
-    await postCancelledBuildsTip();
-
-    expect(mockGetBuild).not.toHaveBeenCalled();
-    expect(mockUpsertComment).not.toHaveBeenCalled();
-  });
-
-  it('does not post when a superseded build had already failed', async () => {
-    mockGetBuild.mockImplementation(async (_, buildNumber: number) =>
-      buildNumber === 15
-        ? build({
-            commit: 'b',
-            createdAt: 15,
-            finishedAt: 30,
-            jobs: [{ state: 'failed', finishedAt: 25 }],
-          })
-        : cancelledBuilds.find(({ number }) => number === buildNumber)
-    );
 
     await postCancelledBuildsTip();
 
