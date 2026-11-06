@@ -29,7 +29,7 @@ import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extens
 import type { IWorkflowChangeHistoryService } from './workflow_change_history_types';
 import type { WorkflowExecutionQueryService } from './workflow_execution_query_service';
 import type { WorkflowValidationService } from './workflow_validation_service';
-import type { WorkflowPagesService } from '../pages/workflow_pages_service';
+import type { WorkflowPagesSystemClient } from '../pages/workflow_pages_system_client';
 import type { WorkflowStorage } from '../storage/workflow_storage';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 
@@ -54,7 +54,7 @@ export interface WorkflowCrudDeps extends WorkflowStorageDeps {
   workflowExecutionsDataClient: WorkflowExecutionsDataClient;
   stepExecutionsDataClient: StepExecutionsDataClient;
   /** Keeps the `workflow-page` saved objects in step with the page triggers. */
-  pagesService?: WorkflowPagesService;
+  pagesSystemClient?: WorkflowPagesSystemClient;
 }
 
 /** Deps for WorkflowSearchService. */

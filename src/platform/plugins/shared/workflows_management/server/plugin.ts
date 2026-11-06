@@ -32,7 +32,7 @@ import {
 import { ExecutionDataViewsBootstrap } from './execution_data_views_bootstrap';
 import { WorkflowsManagementFeatureConfig } from './features';
 import { createWorkflowsInboxProvider } from './inbox/workflows_inbox_provider';
-import { registerWorkflowPageType } from './pages/page_saved_object';
+import { WorkflowPagesService } from './pages/workflow_pages_service';
 import { registerConnectorEventTriggers } from './triggers/register_connector_event_triggers';
 import type {
   WorkflowsRequestHandlerContext,
@@ -62,6 +62,7 @@ export class WorkflowsPlugin
   private executionDataViewsBootstrap: ExecutionDataViewsBootstrap | null = null;
   private audit: WorkflowManagementAuditLog | null = null;
   private unregisterHitlLifecycleAuditor: (() => void) | null = null;
+  private readonly pagesService = new WorkflowPagesService();
 
   constructor(initializerContext: PluginInitializerContext<WorkflowsManagementConfig>) {
     this.logger = initializerContext.logger.get();
@@ -79,7 +80,7 @@ export class WorkflowsPlugin
 
     plugins.features?.registerKibanaFeature(WorkflowsManagementFeatureConfig);
 
-    registerWorkflowPageType({
+    this.pagesService.setup({
       savedObjects: core.savedObjects,
       encryptedSavedObjects: plugins.encryptedSavedObjects,
     });
@@ -91,7 +92,7 @@ export class WorkflowsPlugin
       plugins,
       this.logger,
       this.kibanaVersion,
-      this.config.pages.enabled
+      this.pagesService
     );
     this.workflowsService = workflowsService;
 
@@ -244,6 +245,7 @@ export class WorkflowsPlugin
   }
 
   public stop() {
+    this.pagesService.stop();
     this.unregisterHitlLifecycleAuditor?.();
     this.unregisterHitlLifecycleAuditor = null;
     this.workflowsService?.setStopping(true);
