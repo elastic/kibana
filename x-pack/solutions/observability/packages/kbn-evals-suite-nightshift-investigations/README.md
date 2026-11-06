@@ -302,7 +302,9 @@ NIGHTSHIFT_DATASETS=golden \
 ```
 
 Both datasets query the Customer-0 cluster live, so they run with the `default`
-[connector set](#connector-sets).
+[connector set](#connector-sets). Selecting them without it fails before any test runs, since
+without a connector the investigations would run without telemetry and score low instead of
+failing.
 
 ## Connector sets
 

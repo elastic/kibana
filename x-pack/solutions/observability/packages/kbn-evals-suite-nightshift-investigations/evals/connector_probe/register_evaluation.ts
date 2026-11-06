@@ -40,6 +40,8 @@ export const registerConnectorProbeEvaluation = ({
   trustUpstreamDataset?: boolean;
 }): void => {
   evaluate.describe(`Nightshift assistant: ${name}`, { tag: suiteTags }, () => {
+    // Scout retries a failed test once on CI; a probe dataset must not run and score twice.
+    evaluate.describe.configure({ retries: 0 });
     evaluate(
       'answers telemetry probes through the Elasticsearch connector',
       async ({

@@ -157,11 +157,13 @@ describe('resolveEvalSelection', () => {
 });
 
 describe('stored dataset selection', () => {
+  const storedEnv = { ...WITH_SANDBOX, NIGHTSHIFT_CONNECTOR_SET: 'default' };
+
   it.each([
     ['stored-investigations', ['golden']],
     ['stored-connector-probes', ['connector-elastic']],
   ])('runs only the stored datasets of the %s shard', (shardId, storedDatasetIds) => {
-    expect(resolveEvalSelection({ ...WITH_SANDBOX, EVAL_SHARD_ID: shardId })).toEqual({
+    expect(resolveEvalSelection({ ...storedEnv, EVAL_SHARD_ID: shardId })).toEqual({
       runOrca: false,
       runSmoke: false,
       runInvestigations: false,
@@ -188,7 +190,7 @@ describe('stored dataset selection', () => {
 
   it('selects stored datasets by id locally, alongside smoke datasets', () => {
     expect(
-      resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: 'synthetic-smoke,golden' })
+      resolveEvalSelection({ ...storedEnv, NIGHTSHIFT_DATASETS: 'synthetic-smoke,golden' })
     ).toMatchObject({
       runSmoke: true,
       runInvestigations: false,
@@ -210,6 +212,22 @@ describe('stored dataset selection', () => {
       'NIGHTSHIFT_DATASETS=golden selects golden, which runs investigation evals'
     );
   });
+
+  it.each([{}, { NIGHTSHIFT_CONNECTOR_SET: 'orcabench' }])(
+    'rejects a stored shard or id without the default connector set, so it cannot run blind: %j',
+    (connectorSet) => {
+      expect(() =>
+        resolveEvalSelection({
+          ...WITH_SANDBOX,
+          ...connectorSet,
+          EVAL_SHARD_ID: 'stored-investigations',
+        })
+      ).toThrow('The stored-investigations shard queries Customer-0 live and requires');
+      expect(() =>
+        resolveEvalSelection({ ...WITH_SANDBOX, ...connectorSet, NIGHTSHIFT_DATASETS: 'golden' })
+      ).toThrow('NIGHTSHIFT_DATASETS=golden queries Customer-0 live and requires');
+    }
+  );
 });
 
 describe('ORCA selection', () => {

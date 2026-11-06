@@ -33,6 +33,22 @@ export interface EvalSelection {
   fellBackToSmoke: boolean;
 }
 
+/**
+ * Stored datasets query Customer-0 live. Without the `default` connector set the investigator has no
+ * Elasticsearch connector, so the run would score low instead of failing.
+ */
+const assertDefaultConnectorSet = (
+  env: Record<string, string | undefined>,
+  selected: string
+): void => {
+  if (env.NIGHTSHIFT_CONNECTOR_SET !== 'default') {
+    throw new Error(
+      `${selected} queries Customer-0 live and requires a Scout server started with the default ` +
+        'connector set (nightshift.telemetry in the evals config, or NIGHTSHIFT_ES_URL and NIGHTSHIFT_ES_API_KEY)'
+    );
+  }
+};
+
 /** Resolves which evals run from `NIGHTSHIFT_DATASETS` and the presence of sandbox credentials. */
 export const resolveEvalSelection = (
   env: Record<string, string | undefined> = process.env
@@ -60,6 +76,7 @@ export const resolveEvalSelection = (
     if (!env.SANDBOX_API_KEY) {
       throw new Error(`The ${env.EVAL_SHARD_ID} shard requires SANDBOX_API_KEY`);
     }
+    assertDefaultConnectorSet(env, `The ${env.EVAL_SHARD_ID} shard`);
     return {
       runSmoke: false,
       runInvestigations: false,
@@ -111,6 +128,9 @@ export const resolveEvalSelection = (
   if (runConnectorProbes) requiresSandbox(CONNECTOR_PROBE_DATASET_ID);
   const storedDatasetIds = ids.filter((id) => STORED_DATASET_IDS.includes(id));
   storedDatasetIds.forEach(requiresSandbox);
+  if (storedDatasetIds.length > 0) {
+    assertDefaultConnectorSet(env, `NIGHTSHIFT_DATASETS=${requested}`);
+  }
 
   return {
     runOrca: false,

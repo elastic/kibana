@@ -69,6 +69,12 @@ if [[ "$suite_count" -eq 0 ]]; then
   exit 1
 fi
 
+# Fail once here, before any suite step is uploaded, rather than in each suite's fanout.
+if [[ -n "${EVAL_SHARD_IDS:-}" && "$suite_count" -gt 1 ]]; then
+  echo "EVAL_SHARD_IDS applies to every requested suite; request exactly one suite with it"
+  exit 1
+fi
+
 echo "--- Uploading on-demand eval steps (${suite_count} suite(s))"
 cat "$FANOUT_PIPELINE_FILE"
 if ! buildkite-agent pipeline upload "$FANOUT_PIPELINE_FILE"; then
