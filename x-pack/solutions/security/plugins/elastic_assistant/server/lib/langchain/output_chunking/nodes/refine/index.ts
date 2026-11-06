@@ -100,7 +100,12 @@ export const getRefineNode = <T extends GraphInsightTypes>({
       // and, fed back on the next (continuation) call, trips input-side content
       // filters on some models (claude-5.5-opus). Keep the accumulated partial
       // for the next attempt instead of combining the prose:
-      if (!partialResponseContainsJson(partialResponse)) {
+      if (
+        !partialResponseContainsJson({
+          partialResponse,
+          accumulatedJson: combinedRefinements,
+        })
+      ) {
         combinedResponse = combinedRefinements;
         throw new Error(
           'response contains no JSON to continue from (the response may have stopped before the JSON section)'

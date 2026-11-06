@@ -14,41 +14,113 @@
 import { partialResponseContainsJson } from '.';
 
 describe('partialResponseContainsJson', () => {
-  it('returns true for a partial JSON object', () => {
-    expect(partialResponseContainsJson('{"insights": [{"title": "Chain')).toBe(true);
+  describe('first response (nothing accumulated)', () => {
+    const accumulatedJson = '';
+
+    it('returns true for a JSON object', () => {
+      expect(
+        partialResponseContainsJson({
+          partialResponse: '{"insights": [{"title": "Chain',
+          accumulatedJson,
+        })
+      ).toBe(true);
+    });
+
+    it('returns true for a JSON array', () => {
+      expect(
+        partialResponseContainsJson({ partialResponse: '  [{"a": 1}]', accumulatedJson })
+      ).toBe(true);
+    });
+
+    it('returns false for reasoning prose that opens with a markdown heading', () => {
+      expect(
+        partialResponseContainsJson({
+          partialResponse:
+            '## Reasoning\n\n**Shared entities: confirmed.** All 4 alerts share {{ host.name wks-alice-01 }}.',
+          accumulatedJson,
+        })
+      ).toBe(false);
+    });
+
+    it('returns false for reasoning prose that opens with a bold label', () => {
+      expect(
+        partialResponseContainsJson({
+          partialResponse: '**Step 1: Schema compliance.** No stray fields.',
+          accumulatedJson,
+        })
+      ).toBe(false);
+    });
+
+    it('returns false for unheaded reasoning prose', () => {
+      expect(
+        partialResponseContainsJson({
+          partialResponse: 'The alerts share a host and a user, so they form one chain.',
+          accumulatedJson,
+        })
+      ).toBe(false);
+    });
+
+    it('returns false for a numbered list of reasoning', () => {
+      expect(
+        partialResponseContainsJson({
+          partialResponse: '1. Shared entities: all alerts share wks-alice-01.',
+          accumulatedJson,
+        })
+      ).toBe(false);
+    });
+
+    it('returns false for an empty partial', () => {
+      expect(partialResponseContainsJson({ partialResponse: '', accumulatedJson })).toBe(false);
+    });
   });
 
-  it('returns true for a continuation fragment that starts mid-document', () => {
-    // a truncated document continued from an arbitrary byte offset:
-    expect(partialResponseContainsJson('tle": "PowerShell Stager",\n      "alertIds": [')).toBe(
-      true
-    );
-  });
+  describe('continuation (JSON already accumulated)', () => {
+    const accumulatedJson = '{"insights": [{"title": "Chain", "detailsMarkdown": "The attacker';
 
-  it('returns true for plain text inside a JSON string value', () => {
-    // a long detailsMarkdown value continued mid-string, before its closing quote:
-    expect(
-      partialResponseContainsJson(
-        ' and beacons to the C2 server over an encrypted channel before exfiltrating data'
-      )
-    ).toBe(true);
-  });
+    it('returns true for a fragment that starts mid-document', () => {
+      expect(
+        partialResponseContainsJson({
+          partialResponse: 'tle": "PowerShell Stager",\n      "alertIds": [',
+          accumulatedJson,
+        })
+      ).toBe(true);
+    });
 
-  it('returns false for reasoning prose that opens with a markdown heading', () => {
-    expect(
-      partialResponseContainsJson(
-        '## Reasoning\n\n**Shared entities: confirmed.** All 4 alerts share {{ host.name wks-alice-01 }}.'
-      )
-    ).toBe(false);
-  });
+    it('returns true for a fragment that opens with bold markdown inside an open string', () => {
+      expect(
+        partialResponseContainsJson({
+          partialResponse: '**det** and beacons to the C2 server"}]}',
+          accumulatedJson,
+        })
+      ).toBe(true);
+    });
 
-  it('returns false for reasoning prose that opens with a bold label', () => {
-    expect(partialResponseContainsJson('**Step 1: Schema compliance.** No stray fields.')).toBe(
-      false
-    );
-  });
+    it('returns true for a fragment that opens with a markdown heading inside an open string', () => {
+      expect(
+        partialResponseContainsJson({
+          partialResponse: '# Impact\n- host isolated"}]}',
+          accumulatedJson,
+        })
+      ).toBe(true);
+    });
 
-  it('returns false for an empty partial', () => {
-    expect(partialResponseContainsJson('')).toBe(false);
+    it('returns false for reasoning prose that opens with a heading or bold label', () => {
+      expect(
+        partialResponseContainsJson({
+          partialResponse: '## Reasoning\n\nThe alerts share a host.',
+          accumulatedJson,
+        })
+      ).toBe(false);
+      expect(
+        partialResponseContainsJson({
+          partialResponse: '**Step 1: Schema compliance.** No stray fields.',
+          accumulatedJson,
+        })
+      ).toBe(false);
+    });
+
+    it('returns false for an empty partial', () => {
+      expect(partialResponseContainsJson({ partialResponse: '', accumulatedJson })).toBe(false);
+    });
   });
 });
