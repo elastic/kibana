@@ -9,76 +9,12 @@
 
 require('@kbn/swc-register').install();
 
-const { getPackages } = require('@kbn/repo-packages');
-const { REPO_ROOT } = require('@kbn/repo-info');
 const { TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB } = require('@kbn/scout-info');
 
 const SCOUT_TEST_FILE_GLOBS = [
   `${TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB}/**/*.ts`,
   'packages/**/test/scout{_*,}/**/*.ts',
   'src/dev/build/test/scout{_*,}/**/*.ts',
-];
-
-/** Packages which should not be included within production code. */
-const DEV_PACKAGE_DIRS = getPackages(REPO_ROOT).flatMap((pkg) =>
-  pkg.isDevOnly() ? pkg.normalizedRepoRelativeDir : []
-);
-
-/** Directories (at any depth) which include dev-only code. */
-const DEV_DIRECTORIES = [
-  '.storybook',
-  '__tests__',
-  '__test__',
-  '__jest__',
-  '__fixtures__',
-  '__mocks__',
-  '__stories__',
-  'e2e',
-  'cypress',
-  'fixtures',
-  'ftr_e2e',
-  'integration_tests',
-  'manual_tests',
-  'mock',
-  'mocks',
-  'storybook',
-  'scripts',
-  'test',
-  'test-d',
-  'test_utils',
-  'test_utilities',
-  'test_helpers',
-  'tests_client_integration',
-  'tsd_tests',
-];
-
-/** File patterns for dev-only code. */
-const DEV_FILE_PATTERNS = [
-  '*.mock.{js,ts,tsx}',
-  '*.test.{js,ts,tsx}',
-  '*.test.helpers.{js,ts,tsx}',
-  '*.stories.{js,ts,tsx}',
-  '*.story.{js,ts,tsx}',
-  '*.stub.{js,ts,tsx}',
-  'mock.{js,ts,tsx}',
-  '_stubs.{js,ts,tsx}',
-  '{testHelpers,test_helper,test_utils}.{js,ts,tsx}',
-  '{postcss,webpack,cypress}.config.{js,ts}',
-];
-
-/** Glob patterns which describe dev-only code. */
-const DEV_PATTERNS = [
-  ...DEV_PACKAGE_DIRS.map((pkg) => `${pkg}/**/*`),
-  ...DEV_DIRECTORIES.map((dir) => `{packages,src,x-pack}/**/${dir}/**/*`),
-  ...DEV_FILE_PATTERNS.map((file) => `{packages,src,x-pack}/**/${file}`),
-  'src/platform/packages/shared/kbn-interpreter/tasks/**/*',
-  'src/dev/**/*',
-  'x-pack/{dev-tools,tasks,test,build_chromium}/**/*',
-  'x-pack/performance/**/*',
-  'src/setup_node_env/index.js',
-  'src/cli/dev.js',
-  'src/platform/packages/shared/esql/kbn-esql-language/scripts/**/*',
-  'src/platform/kbn-ui/_tooling/**/*',
 ];
 
 module.exports = {
@@ -110,35 +46,6 @@ module.exports = {
     {
       files: ['{src,x-pack,packages}/**/*.{js,mjs,ts,tsx}'],
       plugins: ['formatjs'],
-    },
-
-    /**
-     * Single package.json rules, it tells eslint to ignore the child package.json files
-     * and look for dependencies declarations in the single and root level package.json
-     */
-    {
-      files: ['{src,x-pack,packages}/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'import/no-extraneous-dependencies': [
-          'error',
-          { devDependencies: false, peerDependencies: true, packageDir: __dirname },
-        ],
-      },
-      overrides: [
-        {
-          /* Files that ARE allowed to use devDependencies. Matched here rather than through the
-           * rule's `devDependencies` globs, which the rule recompiles for every linted file. */
-          files: DEV_PATTERNS,
-          // the rule matched its globs without `dot`, so dot paths other than `.storybook` stay out
-          excludedFiles: ['**/.!(storybook)', '**/.!(storybook)/**'],
-          rules: {
-            'import/no-extraneous-dependencies': [
-              'error',
-              { devDependencies: true, peerDependencies: true, packageDir: __dirname },
-            ],
-          },
-        },
-      ],
     },
 
     /**
@@ -193,15 +100,6 @@ module.exports = {
       files: ['x-pack/platform/plugins/shared/fleet/**/*.{js,mjs,ts,tsx}'],
       // `testing-library/*` rules run in oxlint (.oxlint/testing_library.mts); registered for `eslint-disable` directives.
       plugins: ['testing-library'],
-      rules: {
-        'import/order': [
-          'warn',
-          {
-            groups: ['builtin', 'external', 'internal', 'parent'],
-            'newlines-between': 'always-and-inside-groups',
-          },
-        ],
-      },
     },
 
     /**
@@ -361,14 +259,6 @@ module.exports = {
       },
       rules: {
         complexity: 'error',
-        'import/order': [
-          'error',
-          {
-            groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
-            'newlines-between': 'always',
-          },
-        ],
-
         'no-duplicate-imports': 'off',
         // rely on typescript
         'no-undef': 'off',
@@ -433,38 +323,6 @@ module.exports = {
       // All files
       files: ['x-pack/solutions/search/plugins/enterprise_search/**/*.{ts,tsx}'],
       rules: {
-        'import/order': [
-          'error',
-          {
-            groups: ['unknown', ['builtin', 'external'], 'internal', 'parent', 'sibling', 'index'],
-            pathGroups: [
-              {
-                pattern:
-                  '{../../../../../../,../../../../../,../../../../,../../../,../../,../,./}{common/,*}__mocks__{*,/**}',
-                group: 'unknown',
-              },
-              {
-                pattern: '{**,.}/*.mock',
-                group: 'unknown',
-              },
-              {
-                pattern: 'react*',
-                group: 'external',
-                position: 'before',
-              },
-              {
-                pattern: '{@elastic/**,@kbn/**,src/**}',
-                group: 'internal',
-              },
-            ],
-            pathGroupsExcludedImportTypes: [],
-            alphabetize: {
-              order: 'asc',
-              caseInsensitive: true,
-            },
-            'newlines-between': 'always-and-inside-groups',
-          },
-        ],
         'react-hooks/exhaustive-deps': 'off',
       },
     },
@@ -472,38 +330,6 @@ module.exports = {
     /**
      * Canvas overrides
      */
-    {
-      files: ['x-pack/platform/plugins/private/canvas/**/*.js'],
-      rules: {
-        // module importing
-        'import/order': [
-          'error',
-          {
-            groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
-          },
-        ],
-      },
-    },
-    {
-      files: [
-        'x-pack/platform/plugins/private/canvas/gulpfile.js',
-        'x-pack/platform/plugins/private/canvas/scripts/*.js',
-        'x-pack/platform/plugins/private/canvas/tasks/*.js',
-        'x-pack/platform/plugins/private/canvas/tasks/**/*.js',
-        'x-pack/platform/plugins/private/canvas/__tests__/**/*.js',
-        'x-pack/platform/plugins/private/canvas/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*.js',
-      ],
-      rules: {
-        'import/no-extraneous-dependencies': [
-          'error',
-          {
-            devDependencies: true,
-            peerDependencies: true,
-            packageDir: __dirname,
-          },
-        ],
-      },
-    },
     {
       files: ['x-pack/platform/plugins/private/canvas/canvas_plugin_src/**/*.js'],
       globals: { canvas: true },
@@ -541,58 +367,6 @@ module.exports = {
     /**
      * Platform Security Team overrides
      */
-    {
-      files: [
-        'src/platform/plugins/private/interactive_setup/**/*.{js,mjs,ts,tsx}',
-
-        'packages/kbn-mock-idp-plugin/**/*.{js,mjs,ts,tsx}',
-        'src/platform/packages/private/kbn-mock-idp-utils/**/*.{js,mjs,ts,tsx}',
-        'src/platform/packages/shared/kbn-security-hardening/**/*.{js,mjs,ts,tsx}',
-        'src/platform/packages/shared/kbn-user-profile-components/**/*.{js,mjs,ts,tsx}',
-
-        'x-pack/platform/plugins/shared/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/test/encrypted_saved_objects_api_integration/**/*.{js,mjs,ts,tsx}',
-
-        'x-pack/platform/plugins/shared/security/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/packages/private/security/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/packages/shared/security/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/test/security_api_integration/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/test/security_functional/**/*.{js,mjs,ts,tsx}',
-
-        'x-pack/platform/plugins/shared/spaces/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/test/spaces_api_integration/**/*.{js,mjs,ts,tsx}',
-      ],
-      rules: {
-        'import/order': [
-          // This rule sorts import declarations
-          'error',
-          {
-            groups: [
-              'unknown',
-              ['builtin', 'external'],
-              'internal',
-              ['parent', 'sibling', 'index'],
-            ],
-            pathGroups: [
-              {
-                pattern: '{**,.}/*.test.mocks',
-                group: 'unknown',
-              },
-              {
-                pattern: '{@kbn/**,src/**,kibana{,/**}}',
-                group: 'internal',
-              },
-            ],
-            pathGroupsExcludedImportTypes: [],
-            alphabetize: {
-              order: 'asc',
-              caseInsensitive: true,
-            },
-            'newlines-between': 'always',
-          },
-        ],
-      },
-    },
     {
       files: [
         'src/platform/plugins/private/interactive_setup/**/*.{ts,tsx}',
@@ -639,33 +413,6 @@ module.exports = {
         'no-undef': 'off',
         'react/display-name': 'error',
         'react/jsx-no-literals': 'error',
-        'import/order': [
-          // This rule sorts import declarations
-          'error',
-          {
-            groups: [
-              'unknown',
-              ['builtin', 'external'],
-              'internal',
-              ['parent', 'sibling', 'index'],
-            ],
-            pathGroups: [
-              {
-                pattern: '{**,.}/*.test.mocks',
-                group: 'unknown',
-              },
-              {
-                pattern: '{@kbn/**,src/**,kibana{,/**}}',
-                group: 'internal',
-              },
-            ],
-            pathGroupsExcludedImportTypes: [],
-            alphabetize: {
-              order: 'asc',
-              caseInsensitive: true,
-            },
-          },
-        ],
       },
     },
     /**
