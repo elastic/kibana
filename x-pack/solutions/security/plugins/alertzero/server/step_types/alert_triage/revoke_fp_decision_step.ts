@@ -16,12 +16,19 @@ import {
 } from '../../alert_triage/constants';
 import { FP_DECISION_ID_PREFIX } from '../../alert_triage/fp_decisions';
 import { tagInChunks } from '../../alert_triage/plan_sweep';
-import { findAlertIdsByTag, openAlerts, statusCodeOf, tagAlerts } from './ports';
+import {
+  findAlertIdsByTag,
+  findClosedAlertIds,
+  openAlerts,
+  statusCodeOf,
+  tagAlerts,
+} from './ports';
 
 /**
  * Takes a decision back. The decision is soft-deleted first, as the Context Engine does, so no
  * later sweep matches it, and then its alerts are put back:
- * - an approved decision's alerts are reopened and lose `az:closed_by_decision:<id>`;
+ * - an approved decision's alerts that are still closed are reopened, and all of them lose
+ *   `az:closed_by_decision:<id>`. An alert an analyst moved on (acknowledged, closed again) keeps its status;
  * - a dismissal's alerts lose `az:inconclusive` and `az:skipped_by_decision:<id>`, so the sweep
  *   picks them up again.
  *
@@ -94,8 +101,11 @@ export const getTriageRevokeFpDecisionStepDefinition = () =>
             break;
           }
           if (isApproval) {
-            await openAlerts(contextManager, alertIds);
-            reopened += alertIds.length;
+            // The tag stays on an alert an analyst reopened, so only alerts that are still closed
+            // are reopened; the rest keep the analyst's later status and only lose the tag.
+            const stillClosed = await findClosedAlertIds(contextManager, alertIds);
+            if (stillClosed.length > 0) await openAlerts(contextManager, stillClosed);
+            reopened += stillClosed.length;
           }
           await tagInChunks(write, {
             alertIds,
