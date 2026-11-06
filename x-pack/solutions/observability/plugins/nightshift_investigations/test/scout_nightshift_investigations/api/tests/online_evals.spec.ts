@@ -22,10 +22,11 @@ import {
   listScoringRuns,
   startAnsweringLlm,
   startInvestigation,
+  POLL_TIMEOUT_MS,
   uniqueId,
   waitForFinishedRuns,
 } from '../fixtures';
-import type { WorkflowRun } from '../fixtures';
+import type { WorkflowExecution } from '../fixtures';
 
 /**
  * A Nightshift operator: Agent Builder `all` is what the start route requires, and starts run the
@@ -50,19 +51,20 @@ const NIGHTSHIFT_OPERATOR_ROLE: KibanaRole = {
 const CLASSIFY_STEP = 'classify_for_online_evals';
 const SCORE_STEP = 'score_reference_free';
 const REFERENCE_FREE_JUDGE_COUNT = 3;
-/** An investigation run, then its scoring run. */
-const ONE_RUN_TIMEOUT_MS = 240_000;
-/** Two investigation runs, the first with its scoring run. */
-const TWO_RUNS_TIMEOUT_MS = 300_000;
+/**
+ * Every test waits on at most two runs, each up to the poll timeout, so a slow run fails on the
+ * poll's message with the runs it last saw rather than on the test timeout.
+ */
+const TEST_TIMEOUT_MS = 2 * POLL_TIMEOUT_MS + 60_000;
 
 const setFlags = (apiServices: ApiServicesFixture, flags: Record<string, boolean | null>) =>
   apiServices.core.settings({ 'feature_flags.overrides': flags });
 
 /**
  * Online evals on completed investigations. The agent and the judges run against an LLM endpoint
- * that answers every call with the same text, so investigations complete without a real model.
- * The judges can't grade that text, so the assertions are on which runs start and what their
- * steps report, never on the scores.
+ * that answers every call the same way without reading it, so investigations complete without a
+ * real model. The assertions are on which runs start and what their steps report, never on the
+ * scores.
  */
 apiTest.describe('Nightshift online evals', { tag: tags.stateful.classic }, () => {
   let cookieHeader: Record<string, string>;
@@ -90,7 +92,7 @@ apiTest.describe('Nightshift online evals', { tag: tags.stateful.classic }, () =
     kbnClient: KbnClient,
     id: string,
     count = 1
-  ): Promise<WorkflowRun> => {
+  ): Promise<WorkflowExecution> => {
     const runs = await waitForFinishedRuns(
       `investigation runs of ${id}`,
       () => listInvestigationRuns(kbnClient, id),
@@ -113,21 +115,25 @@ apiTest.describe('Nightshift online evals', { tag: tags.stateful.classic }, () =
     for (const id of investigationIds.splice(0)) {
       await cancelRunsOf(kbnClient, id);
     }
+    // Every scoring run, not only this suite's: a leftover run from any test holds the
+    // investigation's scoring queue, and other suites start none while scoring is paused.
     await cancelScoringRuns(kbnClient);
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
     llm?.close();
+    // Back to the config set's values: `null` would remove those too, leaving Nightshift off and
+    // scoring unpaused for the next suite.
     await setFlags(apiServices, {
-      [NIGHTSHIFT_ENABLED_FLAG]: null,
-      [NIGHTSHIFT_ONLINE_EVALS_PAUSED_FLAG]: null,
+      [NIGHTSHIFT_ENABLED_FLAG]: true,
+      [NIGHTSHIFT_ONLINE_EVALS_PAUSED_FLAG]: true,
     });
   });
 
   apiTest(
     "scores a new investigation's first round once, with the reference-free judges",
     async ({ apiClient, kbnClient }) => {
-      apiTest.setTimeout(ONE_RUN_TIMEOUT_MS);
+      apiTest.setTimeout(TEST_TIMEOUT_MS);
       const id = await start(apiClient, uniqueId('scout-online-evals'));
 
       const run = await waitForInvestigationRun(kbnClient, id);
@@ -145,6 +151,7 @@ apiTest.describe('Nightshift online evals', { tag: tags.stateful.classic }, () =
       expect(await getStepOutput(kbnClient, scoringRuns[0].id, SCORE_STEP)).toMatchObject({
         scored: true,
         evaluator_count: REFERENCE_FREE_JUDGE_COUNT,
+        failed_count: 0,
       });
     }
   );
@@ -152,7 +159,7 @@ apiTest.describe('Nightshift online evals', { tag: tags.stateful.classic }, () =
   apiTest(
     'starts no scoring run for a follow-up, such as a question',
     async ({ apiClient, kbnClient }) => {
-      apiTest.setTimeout(TWO_RUNS_TIMEOUT_MS);
+      apiTest.setTimeout(TEST_TIMEOUT_MS);
       const subjectId = uniqueId('scout-online-evals');
       const id = await start(apiClient, subjectId);
       await waitForInvestigationRun(kbnClient, id);
@@ -174,9 +181,10 @@ apiTest.describe('Nightshift online evals', { tag: tags.stateful.classic }, () =
   apiTest(
     'leaves the investigation completed when every judge fails',
     async ({ apiClient, kbnClient }) => {
-      apiTest.setTimeout(ONE_RUN_TIMEOUT_MS);
+      apiTest.setTimeout(TEST_TIMEOUT_MS);
       llm?.close();
-      llm = await startAnsweringLlm({ failJudges: true });
+      const failingLlm = await startAnsweringLlm({ failJudges: true });
+      llm = failingLlm;
       try {
         const id = await start(apiClient, uniqueId('scout-online-evals'));
 
@@ -191,6 +199,8 @@ apiTest.describe('Nightshift online evals', { tag: tags.stateful.classic }, () =
           evaluator_count: REFERENCE_FREE_JUDGE_COUNT,
           failed_count: REFERENCE_FREE_JUDGE_COUNT,
         });
+        // The judges failed on the rejected calls, not before reaching the model.
+        expect(failingLlm.rejectedJudgeCalls()).toBeGreaterThanOrEqual(REFERENCE_FREE_JUDGE_COUNT);
       } finally {
         llm.close();
         llm = await startAnsweringLlm();
@@ -201,7 +211,7 @@ apiTest.describe('Nightshift online evals', { tag: tags.stateful.classic }, () =
   apiTest(
     'starts no scoring run while the kill switch is on',
     async ({ apiClient, kbnClient, apiServices }) => {
-      apiTest.setTimeout(ONE_RUN_TIMEOUT_MS);
+      apiTest.setTimeout(TEST_TIMEOUT_MS);
       await setFlags(apiServices, { [NIGHTSHIFT_ONLINE_EVALS_PAUSED_FLAG]: true });
       try {
         const id = await start(apiClient, uniqueId('scout-online-evals'));

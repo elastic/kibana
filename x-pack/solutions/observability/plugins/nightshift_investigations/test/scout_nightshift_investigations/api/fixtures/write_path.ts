@@ -18,20 +18,23 @@ import { COMMON_HEADERS } from './constants';
 const START_PATH = 'internal/nightshift/investigations';
 const SLACK_THREAD_PATH = 'internal/nightshift/investigations/_slack_thread';
 const SHARED_INVESTIGATIONS_PATH = 'internal/investigations/investigations';
-const WORKFLOWS_PATH = '/api/workflows';
+export const WORKFLOWS_PATH = '/api/workflows';
 const WORKFLOWS_API_VERSION = '2023-10-31';
-const INVESTIGATION_WORKFLOW_ID = 'system-nightshift-investigation';
+export const INVESTIGATION_WORKFLOW_ID = 'system-nightshift-investigation';
 
 const SHARED_API_HEADERS = { ...COMMON_HEADERS, 'elastic-api-version': '1' } as const;
-const WORKFLOWS_HEADERS = { ...COMMON_HEADERS, 'elastic-api-version': WORKFLOWS_API_VERSION };
+export const WORKFLOWS_HEADERS = {
+  ...COMMON_HEADERS,
+  'elastic-api-version': WORKFLOWS_API_VERSION,
+};
 
 const POLL_INTERVAL_MS = 1_000;
-const POLL_TIMEOUT_MS = 150_000;
+export const POLL_TIMEOUT_MS = 150_000;
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /** Polls `read` until `done` accepts its result, failing with `label` after the timeout. */
-const pollUntil = async <T>(
+export const pollUntil = async <T>(
   label: string,
   read: () => Promise<T>,
   done: (value: T) => boolean
@@ -218,12 +221,12 @@ export const cancelWorkflowRuns = async (
   });
 };
 
-interface WorkflowExecution {
+export interface WorkflowExecution {
   id: string;
   status: string;
 }
 
-const TERMINAL_STATUSES = ['completed', 'failed', 'cancelled', 'timed_out', 'skipped'];
+export const TERMINAL_STATUSES = ['completed', 'failed', 'cancelled', 'timed_out', 'skipped'];
 
 /**
  * Cancels the investigation's runs, so a follow-up queued behind a run stuck on the unresponsive
