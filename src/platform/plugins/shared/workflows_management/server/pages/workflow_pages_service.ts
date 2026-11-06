@@ -48,7 +48,7 @@ export interface WorkflowPagesServiceStart {
   getSystemClient(): WorkflowPagesSystemClient;
 }
 
-/** Owns the `workflow-page` saved objects. The plugin creates it only with `workflowsManagement.pages.enabled`. */
+/** Owns the `workflow-page` saved objects. Exists only with `workflowsManagement.pages.enabled`. */
 export class WorkflowPagesService {
   private canEncrypt = false;
 
