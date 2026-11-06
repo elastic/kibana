@@ -82,6 +82,22 @@ export const getMissingSessionsPrivileges = async (
 };
 
 const READ_PRIVILEGES = new Set(['read', 'all']);
+/** Index privileges known not to read documents. Any other, such as an action pattern, may. */
+const NON_READ_PRIVILEGES = new Set([
+  'view_index_metadata',
+  'read_view_metadata',
+  'monitor',
+  'manage',
+  'maintenance',
+  'auto_configure',
+  'create_index',
+  'delete_index',
+  'create',
+  'create_doc',
+  'index',
+  'delete',
+  'write',
+]);
 
 const asArray = <T>(value: T | T[] | undefined): T[] =>
   value === undefined ? [] : Array.isArray(value) ? value : [value];
@@ -162,8 +178,11 @@ const isUnrestrictedReadOf = (entry: IndexPrivileges, pattern: string): boolean 
   !isFiltered(entry) &&
   asArray(entry.names).some((name) => indexPatternCovers(name, pattern));
 
+const mayGrantRead = (entry: IndexPrivileges): boolean =>
+  entry.privileges.some((privilege) => !NON_READ_PRIVILEGES.has(privilege));
+
 const mayFilterReadOf = (entry: IndexPrivileges, pattern: string): boolean =>
-  grantsRead(entry) &&
+  mayGrantRead(entry) &&
   isFiltered(entry) &&
   asArray(entry.names).some((name) => indexPatternsOverlap(name, pattern));
 

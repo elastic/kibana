@@ -534,12 +534,36 @@ describe('sessions setup', () => {
       expect((await getRestrictedSourceIndices(client)).indices).toEqual([]);
     });
 
-    it('ignores filters on privileges that do not include read, and FLS that grants every field', async () => {
+    it('ignores filters on privileges that do not read documents, and FLS that grants every field', async () => {
       mockReadPrivileges(client, [
-        { privileges: ['view_index_metadata'], query: ['{"match_all":{}}'] },
+        { privileges: ['view_index_metadata', 'monitor'], query: ['{"match_all":{}}'] },
         { names: ['logs-*.otel-*'], field_security: [{ grant: ['*'] }] },
       ]);
       expect((await getRestrictedSourceIndices(client)).indices).toEqual([]);
+    });
+
+    it('refuses a filtered read granted through an action pattern or another privilege', async () => {
+      mockReadPrivileges(client, [
+        {
+          names: ['traces-*.otel-*'],
+          privileges: ['indices:data/read/*', 'view_index_metadata'],
+          query: ['{"match_all":{}}'],
+        },
+        {
+          names: ['logs-*.otel-*'],
+          privileges: ['read_failure_store'],
+          field_security: [{ grant: ['@timestamp'] }],
+        },
+      ]);
+      expect((await getRestrictedSourceIndices(client)).indices).toEqual(SOURCE_INDICES);
+    });
+
+    it('does not count an action pattern as proof of unrestricted read', async () => {
+      mockReadPrivileges(client, [
+        { query: ['{"match_all":{}}'] },
+        { names: ['*'], privileges: ['indices:data/read/*'] },
+      ]);
+      expect((await getRestrictedSourceIndices(client)).indices).toEqual(SOURCE_INDICES);
     });
 
     it('ignores filters on indices the source patterns cannot match', async () => {
