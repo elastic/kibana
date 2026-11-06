@@ -42,6 +42,7 @@ import {
 import type { Environment } from '../../../common/environment_rt';
 import type { ServiceMapEmbeddableState } from '../../../common/embeddable/service_map_embeddable_schema';
 import type { EmbeddableDeps } from '../types';
+import { TimeRangeMetadataContextProvider } from '../../context/time_range_metadata/time_range_metadata_context';
 import { useSuggestions } from './use_suggestions';
 import { useAdHocApmDataView } from '../../hooks/use_adhoc_apm_data_view';
 import type { ConnectionFilter } from '../../components/app/service_map/apply_service_map_visibility';
@@ -763,14 +764,24 @@ export function ServiceMapEditorFlyout({
           </EuiFormRow>
         </EuiForm>
         {filterCountsEnabled && (
-          <FlyoutFilterOptionCountsResolver
-            environment={environment}
-            kuery={previewKuery}
+          // `useServiceMap` reads its data source from the nearest provider, so this one has to use
+          // the same range and kuery as the counts, which the flyout's context doesn't know about
+          <TimeRangeMetadataContextProvider
+            uiSettings={deps.coreStart.uiSettings}
             start={start}
             end={end}
-            serviceName={serviceName}
-            onResolve={setFilterOptionCounts}
-          />
+            kuery={previewKuery}
+            useSpanName={false}
+          >
+            <FlyoutFilterOptionCountsResolver
+              environment={environment}
+              kuery={previewKuery}
+              start={start}
+              end={end}
+              serviceName={serviceName}
+              onResolve={setFilterOptionCounts}
+            />
+          </TimeRangeMetadataContextProvider>
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

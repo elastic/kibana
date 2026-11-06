@@ -154,6 +154,7 @@
         },
         {
           "id": "orcabench",
+          "judge": "eis-openai-gpt-5-4",
           "specFiles": ["evals/investigation/orcabench.spec.ts"]
         }
       ]
