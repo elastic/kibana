@@ -38,6 +38,10 @@ import {
   createPersonaMatrixToolCallsEvaluator,
 } from './evaluators/trace_evaluators';
 import type { PersonaMatrixChatClient } from './chat_client';
+import {
+  capJudgePayload,
+  getJudgePayloadCapOptionsFromEnv,
+} from './judge_payload_cap';
 
 /**
  * Dataset-level expected output the framework evaluators read via `expected`.
@@ -649,6 +653,7 @@ export function createEvaluatePersonaMatrixDataset({
           `${shardedExamples.length}/${dataset.examples.length} examples`
       );
     }
+    const judgeCapOptions = getJudgePayloadCapOptionsFromEnv();
 
     const skillInvokedEvaluator = createPersonaMatrixSkillInvokedEvaluator({
       traceEsClient,
@@ -789,6 +794,26 @@ export function createEvaluatePersonaMatrixDataset({
                 }
               : taskOutput;
 
+          // The judges read a size-capped copy; `taskOutput` itself (the golden transcript) stays
+          // verbatim, and anything trimmed is reported on the returned output.
+          const { output: judgeOutput, report: judgePayloadTrim } = capJudgePayload(
+            judgedOutput,
+            judgeCapOptions
+          );
+          if (judgePayloadTrim.trimmed.length || judgePayloadTrim.overBudget) {
+            log.info(
+              `[persona-matrix][judge-cap] ${example.id ?? question}: judge payload ${
+                judgePayloadTrim.charsBefore
+              } -> ${judgePayloadTrim.charsAfter} chars, trimmed ${
+                judgePayloadTrim.trimmed.length
+              } tool result(s)${
+                judgePayloadTrim.overBudget
+                  ? ' (STILL OVER BUDGET: non-result fields alone exceed it)'
+                  : ''
+              }`
+            );
+          }
+
           // The judges already retry internally; if they still fail, degrade this
           // example's qualitative scores to "unavailable" (the quantitative
           // evaluators handle a missing analysis) rather than discarding the
@@ -799,7 +824,7 @@ export function createEvaluatePersonaMatrixDataset({
                 evaluators.correctnessAnalysis().evaluate({
                   input,
                   expected,
-                  output: judgedOutput,
+                  output: judgeOutput,
                   metadata: example.metadata,
                 })
               ),
@@ -807,7 +832,7 @@ export function createEvaluatePersonaMatrixDataset({
                 evaluators.groundednessAnalysis().evaluate({
                   input,
                   expected,
-                  output: judgedOutput,
+                  output: judgeOutput,
                   metadata: example.metadata,
                 })
               ),
@@ -815,7 +840,7 @@ export function createEvaluatePersonaMatrixDataset({
                 criteriaJudge.evaluate({
                   input,
                   expected,
-                  output: judgedOutput,
+                  output: judgeOutput,
                   metadata: example.metadata,
                 })
               ),
@@ -847,6 +872,9 @@ export function createEvaluatePersonaMatrixDataset({
             groundednessAnalysis: groundednessResult?.metadata,
             criteriaAnalysis:
               criteriaSettled.status === 'fulfilled' ? criteriaSettled.value : undefined,
+            ...(judgePayloadTrim.trimmed.length || judgePayloadTrim.overBudget
+              ? { judgePayloadTrim }
+              : {}),
           } as TaskOutput;
         },
       },
