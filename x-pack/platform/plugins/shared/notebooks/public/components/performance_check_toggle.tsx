@@ -17,7 +17,7 @@ const LABEL = i18n.translate('xpack.notebook.performanceCheck.label', {
 });
 
 const TOOLTIP = i18n.translate('xpack.notebook.performanceCheck.tooltip', {
-  defaultMessage: 'Click to toggle the notebook performance check.',
+  defaultMessage: 'Toggle notebook performance UI',
 });
 
 const ARIA_LABEL = i18n.translate('xpack.notebook.performanceCheck.toggle', {
