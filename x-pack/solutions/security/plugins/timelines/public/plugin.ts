@@ -7,7 +7,6 @@
 
 import type { Store, Unsubscribe } from 'redux-v4';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { getLastUpdated } from '@kbn/securitysolution-timeline-components';
 import type { TimelinesStartPlugins, TimelinesUIStart } from './types';
 import { useAddToTimeline, useAddToTimelineSensor } from './hooks/use_add_to_timeline';
 import type { HoverActionsConfig } from './components/hover_actions';
@@ -36,7 +35,6 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       getTimelineReducer: () => {
         return timelineReducer;
       },
-      getLastUpdated,
       getUseAddToTimeline: () => {
         return useAddToTimeline;
       },
