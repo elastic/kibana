@@ -12,7 +12,7 @@ import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import type { MaterializeContext } from '../../../common';
 import type { MaterializeKit } from '../types';
 import { toChartData } from './chart_data';
-import { paletteColors } from './colors';
+import { colorMappingColors, paletteColors } from './colors';
 import type { FormatSettings } from './formats';
 import { createFormatMapper } from './formats';
 
@@ -46,5 +46,6 @@ export const createMaterializeKit = (
     toPortableFormat: (format, type) => mapFormat(format, type, context.timeZone),
     toChartData: (table, options) => toChartData(table, mapFormat, context.timeZone, options),
     paletteColors,
+    colorMappingColors,
   };
 };
