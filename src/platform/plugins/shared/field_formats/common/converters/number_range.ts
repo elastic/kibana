@@ -21,6 +21,8 @@ export class NumberRangeFormat extends FieldFormat {
     defaultMessage: 'Number range',
   });
   static fieldType = KBN_FIELD_TYPES.NUMBER_RANGE;
+  // For number ranges in Lens charts built from ES|QL, hidden from the data view format editors
+  static hidden = true;
 
   // ES|QL returns ranges (e.g. double_range) as "500.0..550.0", shown as "500 – 550".
   // Bounds use the default number format, which also caps float noise like 0.35000000000000003
