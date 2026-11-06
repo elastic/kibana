@@ -7,7 +7,13 @@
 
 import { isEqual } from 'lodash';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
-import { getLeafPanels, getSectionTitles } from '../dashboard_panels';
+import {
+  getLeafPanels,
+  getPanelContainers,
+  getPanelQueries,
+  getPanelQueryKey,
+  getSectionTitles,
+} from '../dashboard_panels';
 import type { DashboardAgentEvaluator } from '../types';
 import { skippedResult } from '../evaluator_utils';
 import { findAskUserQuestionPrompt, getLastWrittenDashboardId } from '../extract_dashboard';
@@ -22,11 +28,19 @@ const getDashboardSettings = ({
   filters,
 }: DashboardAttachmentData) => ({ title, description, timeRange, pinnedPanels, filters });
 
+const getPanelPlacements = (dashboard: DashboardAttachmentData) =>
+  new Map(
+    getPanelContainers(dashboard).flatMap(({ sectionTitle, panels }) =>
+      panels.map(({ id, grid }) => [id, { sectionTitle, grid }] as const)
+    )
+  );
+
 /**
  * An answer to the mode question that names specific charts must change those
- * charts and nothing else: the question asked first, every other panel, the section layout, the dashboard
- * text, controls, filters and time range exactly as seeded, and each named
- * chart actually edited. Any change outside the request scores 0.
+ * charts and nothing else: the question asked first, every other panel, the
+ * layout, the dashboard text, controls, filters and time range exactly as
+ * seeded, and each named chart edited with its queries kept. Any change outside
+ * the request scores 0.
  */
 export const enhanceScopeEvaluator: DashboardAgentEvaluator = {
   name: ENHANCE_SCOPE_EVALUATOR_NAME,
@@ -62,6 +76,21 @@ export const enhanceScopeEvaluator: DashboardAgentEvaluator = {
       (id) =>
         panelsAfter.has(id) && isEqual(panelsBefore.get(id)?.config, panelsAfter.get(id)?.config)
     );
+    const placementsBefore = getPanelPlacements(before);
+    const placementsAfter = getPanelPlacements(dashboard);
+    const movedTargets = scope.panelIds.filter(
+      (id) => panelsAfter.has(id) && !isEqual(placementsBefore.get(id), placementsAfter.get(id))
+    );
+    const requeriedTargets = scope.panelIds.filter((id) => {
+      const panelBefore = panelsBefore.get(id);
+      const panelAfter = panelsAfter.get(id);
+      return (
+        panelBefore !== undefined &&
+        panelAfter !== undefined &&
+        getPanelQueryKey(getPanelQueries(panelBefore)) !==
+          getPanelQueryKey(getPanelQueries(panelAfter))
+      );
+    });
     const askedQuestion = findAskUserQuestionPrompt(output.openingPrompts ?? []) !== undefined;
 
     const failures = [
@@ -70,6 +99,10 @@ export const enhanceScopeEvaluator: DashboardAgentEvaluator = {
         `changed panels outside the request: ${changedOutsideScope.join(', ')}`,
       addedPanels.length > 0 && `added panels: ${addedPanels.join(', ')}`,
       deletedTargets.length > 0 && `deleted the requested panels: ${deletedTargets.join(', ')}`,
+      movedTargets.length > 0 &&
+        `moved or resized the requested panels: ${movedTargets.join(', ')}`,
+      requeriedTargets.length > 0 &&
+        `changed the queries of the requested panels: ${requeriedTargets.join(', ')}`,
       !isEqual(getSectionTitles(before), getSectionTitles(dashboard)) && 'changed the sections',
       !isEqual(getDashboardSettings(before), getDashboardSettings(dashboard)) &&
         'changed the dashboard title, description, controls, filters, or time range',
