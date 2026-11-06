@@ -290,6 +290,7 @@ describe('AlertsListPage', () => {
       order: 1,
       displayName: 'Test Action',
       iconType: 'star',
+      enforcesOwnPrivileges: false,
       isCompatible: jest.fn(() => true),
       execute: jest.fn(async () => {}),
     };
@@ -526,6 +527,7 @@ describe('query invalidation', () => {
       order: 1,
       displayName: 'Test Action',
       iconType: 'star',
+      enforcesOwnPrivileges: false,
       isCompatible: jest.fn(() => true),
       execute: jest.fn(async ({ onSuccess }: EpisodeActionContext) => {
         capturedOnSuccess = onSuccess;
@@ -672,6 +674,7 @@ describe('privilege gating', () => {
     order: 10,
     displayName: 'Acknowledge',
     iconType: 'checkCircle',
+    enforcesOwnPrivileges: false,
     isCompatible: () => true,
     execute: jest.fn(async () => {}),
   };
@@ -729,7 +732,7 @@ describe('privilege gating', () => {
     await waitForRows();
 
     expect(mockCreateEpisodeActions).toHaveBeenCalledWith(
-      expect.objectContaining({ canWriteEpisodes: true })
+      expect.objectContaining({ canWriteNativeEpisodes: true })
     );
     expect(getRowControlIds()).toEqual([
       'ALERTING_V2_ACK_EPISODE',
@@ -749,7 +752,7 @@ describe('privilege gating', () => {
     await waitForRows();
 
     expect(mockCreateEpisodeActions).toHaveBeenCalledWith(
-      expect.objectContaining({ canWriteEpisodes: false })
+      expect.objectContaining({ canWriteNativeEpisodes: false })
     );
   });
 

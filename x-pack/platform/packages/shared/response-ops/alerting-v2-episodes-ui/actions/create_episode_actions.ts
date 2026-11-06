@@ -61,27 +61,21 @@ export interface EpisodeActionsDeps {
    */
   isAlertEventsHistoryAvailable?: () => boolean;
   additionalDataSource?: EpisodeDataSource;
-  /**
-   * Whether the user may modify universal alerts. Rows owned by `additionalDataSource` answer to
-   * `canWriteSourceEpisode` instead.
-   */
-  canWriteEpisodes?: boolean;
+  canWriteNativeEpisodes?: boolean;
   /**
    * Whether the user may modify a given row owned by `additionalDataSource`, as resolved by that
-   * source's `useWriteAccess`. Falls back to `canWriteEpisodes`.
+   * source's `useWriteAccess`.
    */
   canWriteSourceEpisode?: CanWriteEpisode;
 }
 
 export const createEpisodeActions = (deps: EpisodeActionsDeps): EpisodeAction[] => {
-  const { additionalDataSource, canWriteEpisodes = false, canWriteSourceEpisode } = deps;
+  const { additionalDataSource, canWriteNativeEpisodes = false, canWriteSourceEpisode } = deps;
   const ext = (id: string) =>
     additionalDataSource?.actionExtensions?.find((e) => e.actionId === id);
   const actionDeps = { http: deps.http, notifications: deps.notifications };
   const canWriteEpisode = (episode: AlertEpisode): boolean =>
-    isSourceEpisode(episode)
-      ? canWriteSourceEpisode?.(episode) ?? canWriteEpisodes
-      : canWriteEpisodes;
+    isSourceEpisode(episode) ? canWriteSourceEpisode?.(episode) ?? false : canWriteNativeEpisodes;
 
   return [
     createAckAction(actionDeps, ext('ALERTING_V2_ACK_EPISODE')),

@@ -23,26 +23,28 @@ import { createAddToCaseAction } from './add_to_case';
 import { ADD_TO_CASE_EPISODE_ACTION_ID } from './add_to_case_action_id';
 import { createEpisodeActions } from './create_episode_actions';
 
+const writeAll = { canWriteNativeEpisodes: true, canWriteSourceEpisode: () => true };
+
 const buildActions = ({
   additionalDataSource,
   includeHistory = true,
   isAlertEventsHistoryAvailable = true,
-  canWriteEpisodes = true,
+  canWriteNativeEpisodes,
   canWriteSourceEpisode,
 }: {
   additionalDataSource?: EpisodeDataSource;
   includeHistory?: boolean;
   isAlertEventsHistoryAvailable?: boolean;
-  canWriteEpisodes?: boolean;
-  canWriteSourceEpisode?: CanWriteEpisode;
-} = {}) =>
+  canWriteNativeEpisodes: boolean;
+  canWriteSourceEpisode: CanWriteEpisode;
+}) =>
   createEpisodeActions({
     http: httpServiceMock.createStartContract(),
     overlays: overlayServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
     rendering: renderingServiceMock.create(),
     application: applicationServiceMock.createStartContract(),
-    canWriteEpisodes,
+    canWriteNativeEpisodes,
     canWriteSourceEpisode,
     userProfile: userProfileServiceMock.createStart(),
     docLinks: docLinksServiceMock.createStartContract(),
@@ -62,7 +64,7 @@ const buildActions = ({
 
 describe('createEpisodeActions', () => {
   it('returns all 10 actions sorted by order asc', () => {
-    const actions = buildActions();
+    const actions = buildActions(writeAll);
     expect(actions.map((a) => a.id)).toEqual([
       'ALERTING_V2_ACK_EPISODE',
       'ALERTING_V2_UNACK_EPISODE',
@@ -78,17 +80,17 @@ describe('createEpisodeActions', () => {
   });
 
   it('omits alert events history when the surface does not provide its resolver', () => {
-    expect(buildActions({ includeHistory: false }).map((action) => action.id)).not.toContain(
-      'ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER'
-    );
+    expect(
+      buildActions({ ...writeAll, includeHistory: false }).map((action) => action.id)
+    ).not.toContain('ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER');
   });
 
   it('disables alert events history when Discover is unavailable', () => {
     const episode = { 'episode.id': 'e1' } as AlertEpisode;
-    const available = buildActions().find(
+    const available = buildActions(writeAll).find(
       ({ id }) => id === 'ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER'
     );
-    const unavailable = buildActions({ isAlertEventsHistoryAvailable: false }).find(
+    const unavailable = buildActions({ ...writeAll, isAlertEventsHistoryAvailable: false }).find(
       ({ id }) => id === 'ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER'
     );
 
@@ -106,11 +108,13 @@ describe('createEpisodeActions', () => {
       kibanaServices: {},
     });
     const actions = buildActions({
+      ...writeAll,
       additionalDataSource: {
         id: 'host',
         label: 'Host',
         queryKeyPrefix: ['host'],
         fetchEpisodes: async () => [],
+        useWriteAccess: () => () => true,
         createActions: () => [addToCaseAction],
       },
     });
@@ -140,6 +144,7 @@ describe('write privilege', () => {
     label: 'Classic',
     queryKeyPrefix: ['classic'],
     fetchEpisodes: async () => [],
+    useWriteAccess: () => () => true,
     actionExtensions: [
       {
         actionId: 'ALERTING_V2_ACK_EPISODE',
@@ -153,7 +158,10 @@ describe('write privilege', () => {
     actions.find(({ id }) => id === 'ALERTING_V2_ACK_EPISODE');
 
   it('hides mutating actions from a read-only user', () => {
-    const actions = buildActions({ canWriteEpisodes: false });
+    const actions = buildActions({
+      canWriteNativeEpisodes: false,
+      canWriteSourceEpisode: () => false,
+    });
 
     expect(ackAction(actions)?.isCompatible({ episodes: [nativeEpisode] })).toBe(false);
     expect(
@@ -165,7 +173,7 @@ describe('write privilege', () => {
 
   it('keeps source rows writable when only the source grants write privilege', () => {
     const actions = buildActions({
-      canWriteEpisodes: false,
+      canWriteNativeEpisodes: false,
       additionalDataSource: createSource(),
       canWriteSourceEpisode: () => true,
     });
@@ -176,7 +184,7 @@ describe('write privilege', () => {
 
   it('keeps source rows read-only when only the universal privilege is granted', () => {
     const actions = buildActions({
-      canWriteEpisodes: true,
+      canWriteNativeEpisodes: true,
       additionalDataSource: createSource(),
       canWriteSourceEpisode: () => false,
     });
@@ -188,7 +196,7 @@ describe('write privilege', () => {
   it('resolves source rows individually', () => {
     const otherSourceEpisode = { 'episode.id': 'e3', source_id: 'classic' } as AlertEpisode;
     const actions = buildActions({
-      canWriteEpisodes: false,
+      canWriteNativeEpisodes: false,
       additionalDataSource: createSource(),
       canWriteSourceEpisode: (episode) => episode['episode.id'] === 'e2',
     });
@@ -196,22 +204,11 @@ describe('write privilege', () => {
     expect(ackAction(actions)?.isCompatible({ episodes: [sourceEpisode] })).toBe(true);
     expect(ackAction(actions)?.isCompatible({ episodes: [otherSourceEpisode] })).toBe(false);
   });
-
-  it('lets a source that declares no write access inherit the universal privilege', () => {
-    const writable = buildActions({ canWriteEpisodes: true, additionalDataSource: createSource() });
-    const readOnly = buildActions({
-      canWriteEpisodes: false,
-      additionalDataSource: createSource(),
-    });
-
-    expect(ackAction(writable)?.isCompatible({ episodes: [sourceEpisode] })).toBe(true);
-    expect(ackAction(readOnly)?.isCompatible({ episodes: [sourceEpisode] })).toBe(false);
-  });
 });
 
 describe('enforcesOwnPrivileges', () => {
   it('is only set on open in Discover among the built-in actions', () => {
-    const ids = buildActions()
+    const ids = buildActions(writeAll)
       .filter((action) => action.enforcesOwnPrivileges === true)
       .map((action) => action.id);
 

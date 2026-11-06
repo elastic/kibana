@@ -138,10 +138,9 @@ export interface EpisodeDataSource {
   createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
   /**
    * Resolves which of this source's alerts the user may modify. Called as a React hook, so it can
-   * fetch authorization that is not exposed as a UI capability. Defaults to the universal
-   * capability.
+   * fetch authorization that is not exposed as a UI capability.
    */
-  useWriteAccess?: (services: EpisodeWriteAccessServices) => CanWriteEpisode;
+  useWriteAccess: (services: EpisodeWriteAccessServices) => CanWriteEpisode;
   severityExtensions?: SeverityExtension[];
   getRuleDetailsHref?: (ruleId: string) => string | null;
 }

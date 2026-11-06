@@ -85,7 +85,6 @@ dependsOn:
   - '@kbn/alerts-ui-shared'
   - '@kbn/share-plugin'
   - '@kbn/deeplinks-analytics'
-  - '@kbn/triggers-actions-ui-types'
 tags:
   - shared-browser
   - package

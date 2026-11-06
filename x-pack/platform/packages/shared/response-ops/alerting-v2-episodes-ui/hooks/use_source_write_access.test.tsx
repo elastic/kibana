@@ -20,12 +20,12 @@ const services = {
   notifications: notificationServiceMock.createStartContract(),
 };
 
-const createSource = (useWriteAccess?: EpisodeDataSource['useWriteAccess']): EpisodeDataSource => ({
+const createSource = (useWriteAccess: EpisodeDataSource['useWriteAccess']): EpisodeDataSource => ({
   id: 'v1',
   label: 'Classic',
   queryKeyPrefix: ['v1'],
   fetchEpisodes: async () => [],
-  ...(useWriteAccess ? { useWriteAccess } : {}),
+  useWriteAccess,
 });
 
 const renderWithSource = (dataSource?: EpisodeDataSource) => {
@@ -37,12 +37,8 @@ const renderWithSource = (dataSource?: EpisodeDataSource) => {
 };
 
 describe('useSourceWriteAccess', () => {
-  it('defers to the universal capability without a data source', () => {
+  it('resolves nothing without a data source', () => {
     expect(renderWithSource()).toBeUndefined();
-  });
-
-  it('defers to the universal capability when the source declares no write access', () => {
-    expect(renderWithSource(createSource())).toBeUndefined();
   });
 
   it('delegates to the source write access hook', () => {

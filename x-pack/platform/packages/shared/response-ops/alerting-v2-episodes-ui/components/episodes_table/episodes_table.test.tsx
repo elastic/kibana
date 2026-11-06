@@ -247,7 +247,7 @@ describe('EpisodesTable', () => {
     renderTable();
 
     expect(jest.mocked(createEpisodeActions)).toHaveBeenCalledWith(
-      expect.objectContaining({ canWriteEpisodes: true })
+      expect.objectContaining({ canWriteNativeEpisodes: true })
     );
   });
 
@@ -256,7 +256,7 @@ describe('EpisodesTable', () => {
     renderTable({}, { canWriteAlerts: false });
 
     expect(jest.mocked(createEpisodeActions)).toHaveBeenCalledWith(
-      expect.objectContaining({ canWriteEpisodes: false })
+      expect.objectContaining({ canWriteNativeEpisodes: false })
     );
   });
 
@@ -265,7 +265,7 @@ describe('EpisodesTable', () => {
     renderTable({}, {});
 
     expect(jest.mocked(createEpisodeActions)).toHaveBeenCalledWith(
-      expect.objectContaining({ canWriteEpisodes: undefined })
+      expect.objectContaining({ canWriteNativeEpisodes: undefined })
     );
   });
 

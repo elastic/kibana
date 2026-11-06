@@ -19,6 +19,7 @@ const makeAction = (overrides: Partial<EpisodeAction> = {}): EpisodeAction => ({
   order: 10,
   displayName: 'Acknowledge',
   iconType: 'checkCircle',
+  enforcesOwnPrivileges: false,
   isCompatible: ({ episodes }) => episodes.length > 0,
   execute: jest.fn(async () => {}),
   ...overrides,

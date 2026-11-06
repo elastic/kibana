@@ -9,18 +9,18 @@ import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_
 import type { CanWriteEpisode } from '../utils/episode_write_privilege';
 import type { EpisodeWriteAccessServices } from '../types/episode_data_source';
 
-const useUniversalWriteAccess = (): CanWriteEpisode | undefined => undefined;
+const useNoSourceWriteAccess = (): CanWriteEpisode | undefined => undefined;
 
 /**
  * Resolves which of the additional data source's alerts the user may modify. Returns `undefined`
- * when there is no source, or when it defers to the universal alerts write capability.
+ * when there is no source.
  */
 export const useSourceWriteAccess = (
   services: EpisodeWriteAccessServices
 ): CanWriteEpisode | undefined => {
   const dataSource = useAdditionalEpisodesDataSource();
   const useWriteAccess: (services: EpisodeWriteAccessServices) => CanWriteEpisode | undefined =
-    dataSource?.useWriteAccess ?? useUniversalWriteAccess;
+    dataSource?.useWriteAccess ?? useNoSourceWriteAccess;
 
   return useWriteAccess(services);
 };

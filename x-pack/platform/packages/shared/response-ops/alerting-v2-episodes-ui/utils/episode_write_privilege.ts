@@ -18,7 +18,7 @@ export const withEpisodeWritePrivilege = (
   action: EpisodeAction,
   canWriteEpisode: CanWriteEpisode
 ): EpisodeAction => {
-  if (action.enforcesOwnPrivileges === true) {
+  if (action.enforcesOwnPrivileges) {
     return action;
   }
 

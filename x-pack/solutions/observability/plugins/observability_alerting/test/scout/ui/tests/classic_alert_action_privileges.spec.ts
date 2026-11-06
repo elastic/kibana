@@ -213,14 +213,13 @@ test.describe(
       await expectClassicWriteActions(pageObjects.observabilityAlerting, STACK_RULE_NAME);
     });
 
-    test('write capability for another rule type family leaves the alert read-only', async ({
+    test('write capability on any classic alerts feature applies to every classic alert', async ({
       browserAuth,
       pageObjects,
     }) => {
       await browserAuth.loginWithCustomRole(OBSERVABILITY_READ_STACK_WRITE_ROLE);
-      const { observabilityAlerting } = pageObjects;
-      await gotoSeededClassicAlert(observabilityAlerting, v1RuleId, V1_RULE_NAME);
-      await expectNoClassicWriteActions(observabilityAlerting, V1_RULE_NAME);
+      await gotoSeededClassicAlert(pageObjects.observabilityAlerting, v1RuleId, V1_RULE_NAME);
+      await expectClassicWriteActions(pageObjects.observabilityAlerting, V1_RULE_NAME);
     });
 
     test('read-only user only sees the read-safe view-in-app action', async ({

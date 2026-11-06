@@ -73,7 +73,7 @@ export const useEpisodeActions = ({
         spaces: services.spaces,
         queryClient,
         additionalDataSource,
-        canWriteEpisodes: canWriteAlerts,
+        canWriteNativeEpisodes: canWriteAlerts,
         canWriteSourceEpisode,
         isRuleAvailable: (ruleId) => Boolean(rulesCache[ruleId]),
         getDiscoverHref: ({ episodeIsoTimestamp, ruleId }) =>

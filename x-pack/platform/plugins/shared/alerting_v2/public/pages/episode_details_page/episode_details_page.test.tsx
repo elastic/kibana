@@ -268,6 +268,7 @@ beforeEach(() => {
       order: 10,
       displayName: 'Acknowledge',
       iconType: 'checkCircle',
+      enforcesOwnPrivileges: false,
       isCompatible: () => true,
       execute: jest.fn(async () => {}),
     },
@@ -276,6 +277,7 @@ beforeEach(() => {
       order: 40,
       displayName: 'Edit tags',
       iconType: 'tag',
+      enforcesOwnPrivileges: false,
       isCompatible: () => true,
       execute: jest.fn(async () => {}),
     },
@@ -570,6 +572,7 @@ describe('EpisodeDetailsPage', () => {
         order: 10,
         displayName: 'Acknowledge',
         iconType: 'checkCircle',
+        enforcesOwnPrivileges: false,
         isCompatible: () => true,
         execute,
       },
@@ -595,6 +598,7 @@ describe('EpisodeDetailsPage', () => {
       order: 10,
       displayName: 'Acknowledge',
       iconType: 'checkCircle',
+      enforcesOwnPrivileges: false,
       isCompatible: () => true,
       execute: jest.fn(async () => {}),
     };
@@ -617,7 +621,7 @@ describe('EpisodeDetailsPage', () => {
       await openAppMenuOverflow();
 
       expect(mockCreateEpisodeActions).toHaveBeenCalledWith(
-        expect.objectContaining({ canWriteEpisodes: true })
+        expect.objectContaining({ canWriteNativeEpisodes: true })
       );
       expect(
         await screen.findByTestId('episodeActionsBar-primary-ALERTING_V2_ACK_EPISODE')
@@ -639,7 +643,7 @@ describe('EpisodeDetailsPage', () => {
         )
       ).toBeInTheDocument();
       expect(mockCreateEpisodeActions).toHaveBeenCalledWith(
-        expect.objectContaining({ canWriteEpisodes: false })
+        expect.objectContaining({ canWriteNativeEpisodes: false })
       );
     });
   });
