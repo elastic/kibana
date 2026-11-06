@@ -73,8 +73,9 @@ export interface ListResponse {
   rows: InventoryRow[];
   /** For each returned row's `entity.id`, the index pattern that supplied each attribute value. */
   provenance: Provenance;
-  /** Exact entity count in the window, or null when a plan was cut or partial. */
+  /** Exact entity count in the window, or null when a plan was cut, partial or failed. */
   total: number | null;
+  /** True only when the row limit left rows out; a failed or partial plan is reported in `errors`. */
   truncated: boolean;
   /** Wall time of the whole request in milliseconds, probes included. */
   took: number;

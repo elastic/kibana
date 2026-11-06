@@ -105,10 +105,10 @@ describe('summarizeResults', () => {
     });
   });
 
-  it('has no total and is truncated when a plan was partial', () => {
+  it('has no total and is not truncated when a plan was partial', () => {
     expect(summarizeResults([result(1), result(1, true)], 5, 2)).toEqual({
       total: null,
-      truncated: true,
+      truncated: false,
     });
   });
 });

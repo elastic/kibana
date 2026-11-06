@@ -77,7 +77,7 @@ Response:
 | `rows` | At most `limit`, ordered by `last_seen` descending, ties by `entity.id`. Every row carries every column, null where no source produced a value. |
 | `provenance` | For each returned row's `entity.id`, the index pattern that supplied each attribute value. |
 | `total` | The exact number of entities in the window, or null when a plan was cut (returned `limit + 1` rows), Elasticsearch answered with a partial result, or a probe or plan query failed. |
-| `truncated` | True when rows were left out, or whenever `total` is null. |
+| `truncated` | True only when the row limit left rows out: a plan was cut, or the merge holds more than `limit` rows. A failed or partial plan does not set it, since narrowing the request would not fix it; it is reported in `errors` and nulls `total`. |
 | `took` | Wall time of the request in milliseconds, probes included. |
 | `queries` | One entry per plan query sent, in plan order: `indexPattern`, `engine` (`TS` or `FROM`), `esql`, `params`, and Elasticsearch's `took`, `documentsFound` and `rowCount`. A failed query has null `took` and `documentsFound` and `rowCount` 0. Probes are not listed. |
 | `errors` | `{ indexPattern, status, reason }` per source problem; never a stack. |
@@ -87,6 +87,7 @@ Anything about one source degrades the result and is reported in `errors`; it ne
 
 - A probe that fails for a reason other than verification: none of the source's plans run, `total` is null.
 - A plan query that fails: the other plans still return rows, `total` is null.
+- A plan whose response is partial (`is_partial`, some shards or clusters did not answer): its rows are kept, it is reported in `errors`, `total` is null.
 - A plan that reads nothing usable, because no readable index behind its pattern maps `@timestamp` or its identity fields are unmapped: the plan is dropped. That is not a failure, so `total` stays exact. A user who can read none of the source indices gets `rows: []`, every plan in `errors`, `total: 0` and `truncated: false`.
 
 Errors that fail the request:
@@ -206,13 +207,13 @@ The executor reads the type of the `@timestamp` column to decide whether the sou
 | `value_labels.ts` | Maps an attribute's raw values to its `valueLabels` per plan, before the merge; an unmapped value passes through stringified. |
 | `merge.ts` | One row per `entity.id` across plans: attributes from the row with the newest `last_seen`, identity fields and `entity.id` first non-null, `last_seen` newest, a null never replacing a value; `provenance` names the source pattern behind each attribute value; column types come from the first plan that returned the column. |
 | `plan_result.ts` | Reads from a plan's column types whether it is usable and which of its attribute fields no index maps. |
-| `output.ts` | Orders by `last_seen` descending with ties on `entity.id`, takes the limit from the front, sets each plan's `LIMIT` one above the request, derives `total` and `truncated` from plan cuts and partial results (there is no count query), and fills every row with every column. |
+| `output.ts` | Orders by `last_seen` descending with ties on `entity.id`, takes the limit from the front, sets each plan's `LIMIT` one above the request, derives `total` from plan cuts and partial results and `truncated` from plan cuts and the limit (there is no count query), and fills every row with every column. |
 
 No metadata API is called and no concrete index is named: the executor learns everything from ES\|QL results.
 
 **Probe.** One probe per distinct pattern, concurrently: `TS <pattern> | KEEP @timestamp | LIMIT 0`. `@timestamp` of any type other than `null` means a time-series index exists and the source gets a `TS` plan. `null`, no column, or a verification error (a concrete index that is not time series, a name that does not exist) means none. Any other failure is a source error and no plan of the source runs: the `FROM` plan excludes time-series indices, so reading the failure as "none" would silently leave them out. The decision reads the error type, never the message. Elasticsearch drops indices the user cannot read like indices that do not exist.
 
-**Reading results.** Every query runs with `unmapped_fields="nullify"`, so a field no index maps comes back as a column of type `null`. `last_seen` of type `null` means no readable index maps `@timestamp` and the plan is unusable. A plan is also unusable when no identity composition has every field mapped; a field the id evaluation overwrites, in practice `entity.id`, which the evaluation types `keyword` even when unmapped, is read from `raw:entity.id`, its value as the documents supplied it, which the response does not carry. An attribute of type `null` is an unavailable field, not fatal. A plan that returns its full limit is cut; `total` is the merged row count, exact, only when no plan is cut or partial, otherwise null, and `truncated` is true whenever rows were left out.
+**Reading results.** Every query runs with `unmapped_fields="nullify"`, so a field no index maps comes back as a column of type `null`. `last_seen` of type `null` means no readable index maps `@timestamp` and the plan is unusable. A plan is also unusable when no identity composition has every field mapped; a field the id evaluation overwrites, in practice `entity.id`, which the evaluation types `keyword` even when unmapped, is read from `raw:entity.id`, its value as the documents supplied it, which the response does not carry. An attribute of type `null` is an unavailable field, not fatal. A plan that returns its full limit is cut; `total` is the merged row count, exact, only when no plan is cut or partial, otherwise null, and `truncated` is true only when the row limit left rows out. A failed probe or query and a partial result (`is_partial`) also make `total` null without setting `truncated`; each is reported in `errors[]`, and a partial plan's rows are kept.
 
 Nothing is cached yet.
 

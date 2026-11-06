@@ -56,6 +56,10 @@ interface ListPlan {
   probeErrors: SourceError[];
 }
 
+// The `errors[]` reason for a plan whose response has `is_partial: true`.
+const PARTIAL_RESULT_REASON =
+  'partial result: some shards or clusters did not answer, so rows may be missing';
+
 const toUnavailableColumns = (
   { index, indexPattern }: QueryPlan,
   unavailableFields: string[],
@@ -134,10 +138,11 @@ export class InventoryService {
    * time-series index) and merges the rows by `entity.id`, newest `last_seen` first.
    * Throws `InventoryTypeNotFoundError` when no `dynamic` definition is registered for the type and `InventoryTypeDefinitionError` when the definition cannot be turned into queries. A
    * source whose probe failed runs no plan, and a query that fails or reads nothing usable is
-   * reported in `errors[]`; neither fails the request. A failed probe or query makes `total` null
-   * and `truncated` true, since the entities of that source are unknown. `queries[]` lists every
-   * plan query sent, `provenance` covers the returned rows only, and `took` is the wall time of
-   * the whole call.
+   * reported in `errors[]`; neither fails the request. A partial result is also reported in
+   * `errors[]` and its rows are kept. A failed probe or query or a partial result makes `total`
+   * null, since the entities of that source are unknown; `truncated` is true only when the row
+   * limit left rows out. `queries[]` lists every plan query sent, `provenance` covers the returned
+   * rows only, and `took` is the wall time of the whole call.
    */
   list = async ({ type, window, limit, signal }: ListRequest): Promise<ListResponse> => {
     const startedAt = Date.now();
@@ -165,6 +170,13 @@ export class InventoryService {
       }
       const { columns: resultColumns, rows, isPartial } = outcome.value;
       const result: PlanResult = { plan, columns: resultColumns, rows, isPartial };
+      if (isPartial) {
+        errors.push({
+          indexPattern: plan.indexPattern,
+          status: null,
+          reason: PARTIAL_RESULT_REASON,
+        });
+      }
       const { usable, reason, unavailableFields } = interpretPlanResult(result, identity, columns);
       if (!usable) {
         errors.push({
@@ -190,7 +202,7 @@ export class InventoryService {
       rows,
       provenance: restrictProvenance(merged.provenance, rows),
       total: incomplete ? null : total,
-      truncated: truncated || incomplete,
+      truncated,
       took: Date.now() - startedAt,
       queries: outcomes.map((outcome, planIndex) =>
         toQueryDiagnostic(plans[planIndex], queries[planIndex], outcome)
