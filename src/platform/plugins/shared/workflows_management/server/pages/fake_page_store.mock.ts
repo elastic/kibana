@@ -34,11 +34,24 @@ export const createFakeStore = () => {
     return { ...rest, attributes: visible as WorkflowPageAttributes };
   };
 
-  const createClient = (user?: string, denied = false) =>
-    ({
+  /**
+   * Pass `spaceId` for a request-scoped client. Like the spaces extension, it then uses that
+   * space and rejects a `namespace` option.
+   */
+  const createClient = (user?: string, denied = false, spaceId?: string) => {
+    const ns = (options?: { namespace?: string }): string | undefined => {
+      if (spaceId === undefined) return options?.namespace;
+      if (options?.namespace) {
+        throw new Error(
+          'Namespace cannot be specified by the caller when the spaces extension is enabled.'
+        );
+      }
+      return spaceId === 'default' ? undefined : spaceId;
+    };
+    return {
       get: jest.fn(async (_type: string, id: string, options?: { namespace?: string }) => {
         if (denied) throw SavedObjectsErrorHelpers.decorateForbiddenError(new Error('forbidden'));
-        const doc = docs.get(key(id, options?.namespace));
+        const doc = docs.get(key(id, ns(options)));
         if (!doc) throw notFound(id);
         return strip(doc);
       }),
@@ -49,7 +62,8 @@ export const createFakeStore = () => {
           options: { id: string; namespace?: string; overwrite?: boolean }
         ) => {
           if (denied) throw SavedObjectsErrorHelpers.decorateForbiddenError(new Error('forbidden'));
-          const k = key(options.id, options.namespace);
+          const namespace = ns(options);
+          const k = key(options.id, namespace);
           if (docs.has(k) && !options.overwrite) {
             throw SavedObjectsErrorHelpers.createConflictError(type, options.id);
           }
@@ -59,7 +73,7 @@ export const createFakeStore = () => {
             type,
             attributes,
             references: [],
-            namespace: options.namespace,
+            namespace,
             version: nextVersion(),
             created_at: now,
             created_by: user,
@@ -78,7 +92,7 @@ export const createFakeStore = () => {
           options?: { namespace?: string; version?: string }
         ) => {
           if (denied) throw SavedObjectsErrorHelpers.decorateForbiddenError(new Error('forbidden'));
-          const k = key(id, options?.namespace);
+          const k = key(id, ns(options));
           const doc = docs.get(k);
           if (!doc) throw notFound(id);
           if (options?.version && options.version !== doc.version) {
@@ -96,7 +110,7 @@ export const createFakeStore = () => {
       bulkDelete: jest.fn(
         async (objects: Array<{ id: string }>, options?: { namespace?: string }) => ({
           statuses: objects.map(({ id }) => {
-            const existed = docs.delete(key(id, options?.namespace));
+            const existed = docs.delete(key(id, ns(options)));
             return existed
               ? { id, type: WORKFLOW_PAGE_SAVED_OBJECT_TYPE, success: true }
               : {
@@ -122,7 +136,8 @@ export const createFakeStore = () => {
           page: 1,
         };
       }),
-    } as unknown as jest.Mocked<SavedObjectsClientContract>);
+    } as unknown as jest.Mocked<SavedObjectsClientContract>;
+  };
 
   const encryptedClient = {
     getDecryptedAsInternalUser: jest.fn(

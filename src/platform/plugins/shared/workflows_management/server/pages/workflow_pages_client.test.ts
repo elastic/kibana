@@ -33,10 +33,12 @@ const setup = async ({
   deniedScoped = false,
   privileges = { readPage: true, managePage: true } as Record<WorkflowPageOperation, boolean>,
   withPage = true,
+  spaceId = pageRef.spaceId,
 } = {}) => {
+  const spaceRef = { ...pageRef, spaceId };
   const store = createFakeStore();
   const internalClient = store.createClient();
-  const scopedClient = store.createClient('profile-alice', deniedScoped);
+  const scopedClient = store.createClient('profile-alice', deniedScoped, spaceId);
   const systemClient = new WorkflowPagesSystemClientImpl({
     logger: loggingSystemMock.createLogger(),
     canEncrypt: true,
@@ -44,9 +46,9 @@ const setup = async ({
   });
   if (withPage) {
     await systemClient.syncWorkflowPages({
-      workflowId: ref.workflowId,
+      workflowId: spaceRef.workflowId,
       workflowCreatedAt: WORKFLOW_CREATED_AT,
-      spaceId: ref.spaceId,
+      spaceId: spaceRef.spaceId,
       definition: pageDefinition(),
       valid: true,
     });
@@ -61,7 +63,7 @@ const setup = async ({
   const request: KibanaRequest = httpServerMock.createKibanaRequest();
   const client = new WorkflowPagesClientImpl({
     request,
-    spaceId: ref.spaceId,
+    spaceId,
     privileges,
     canEncrypt,
     internalClient,
@@ -71,6 +73,7 @@ const setup = async ({
     audit,
   });
   return {
+    ref: spaceRef,
     client,
     systemClient,
     store,
@@ -78,7 +81,7 @@ const setup = async ({
     audit,
     request,
     assertWorkflowAccess,
-    storedPage: () => getStoredPage(store),
+    storedPage: () => getStoredPage(store, spaceRef),
   };
 };
 
@@ -227,6 +230,23 @@ describe('WorkflowPagesClient', () => {
       await expect(client.get(key)).resolves.toEqual(
         expect.objectContaining({ access: { level: 'secret_link' }, online: false })
       );
+    });
+  });
+
+  describe('in a non-default space', () => {
+    it('reads, rotates, and updates the page through the scoped client', async () => {
+      const { client, systemClient, ref: teamRef } = await setup({ spaceId: 'team-a' });
+
+      await client.setAccess(key, { level: 'secret_link' });
+      const rotated = await client.rotateSecret(key);
+      await client.setEnabled(key, false);
+      await client.setEnabled(key, true);
+
+      await expect(client.get(key)).resolves.toEqual(
+        expect.objectContaining({ online: true, enabled: true })
+      );
+      await expect(client.getSecret(key)).resolves.toBe(rotated);
+      await expect(systemClient.verifyPageSecret(teamRef, rotated)).resolves.toBe(true);
     });
   });
 
