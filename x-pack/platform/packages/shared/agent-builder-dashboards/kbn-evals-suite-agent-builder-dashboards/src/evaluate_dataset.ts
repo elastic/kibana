@@ -8,7 +8,7 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { Conversation } from '@kbn/agent-builder-common';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
+import { DASHBOARD_ATTACHMENT_TYPE, isSection } from '@kbn/agent-builder-dashboards-common';
 import {
   createTrajectoryEvaluator,
   getStringMeta,
@@ -252,6 +252,30 @@ export function createEvaluateDataset({
       'Scoped enhance example; this evaluator scores the whole dashboard.'
     );
 
+  // On a scoped enhance, chart presentation is scored on the named panels only.
+  const namedPanelsWhenScoped = (evaluator: DashboardAgentEvaluator): DashboardAgentEvaluator =>
+    positiveOnly({
+      ...evaluator,
+      evaluate: async (params) => {
+        const scope = params.expected?.scopedEnhance;
+        const { dashboard } = params.output;
+        if (!scope || !dashboard) {
+          return evaluator.evaluate(params);
+        }
+        const named = new Set(scope.panelIds);
+        const panels = dashboard.panels.flatMap((widget) => {
+          if (isSection(widget)) {
+            return widget.panels.filter(({ id }) => named.has(id));
+          }
+          return named.has(widget.id) ? [widget] : [];
+        });
+        return evaluator.evaluate({
+          ...params,
+          output: { ...params.output, dashboard: { ...dashboard, panels } },
+        });
+      },
+    });
+
   // Quality evaluators score 0..1 and get low-score logging; trace-based
   // evaluators report counts and seconds, so a "low" value means nothing there.
   const qualityEvaluators = [
@@ -261,8 +285,8 @@ export function createEvaluateDataset({
     wholeDashboardOnly(dashboardLayoutRulesEvaluator),
     wholeDashboardOnly(dashboardCompositionOrderEvaluator),
     wholeDashboardOnly(dashboardTitlesEvaluator),
-    wholeDashboardOnly(dashboardChartStylingEvaluator),
-    wholeDashboardOnly(dashboardColorFormatEvaluator),
+    namedPanelsWhenScoped(dashboardChartStylingEvaluator),
+    namedPanelsWhenScoped(dashboardColorFormatEvaluator),
     wholeDashboardOnly(dashboardControlsEvaluator),
     wholeDashboardOnly(dashboardControlSourcingEvaluator),
     wholeDashboardOnly(createControlQueriesEvaluator(esClient)),
