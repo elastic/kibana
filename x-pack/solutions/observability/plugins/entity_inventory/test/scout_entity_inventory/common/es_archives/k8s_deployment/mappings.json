@@ -174,9 +174,6 @@
                   "type": "keyword",
                   "time_series_dimension": true
                 },
-                "uid": {
-                  "type": "keyword"
-                },
                 "available": {
                   "type": "long",
                   "time_series_metric": "gauge"

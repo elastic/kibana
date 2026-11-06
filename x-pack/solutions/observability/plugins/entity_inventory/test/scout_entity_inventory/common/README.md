@@ -27,7 +27,9 @@ Time-series case, in namespace `streaming` on 2026-11-05, apart from the windows
   data stream. A time-series data stream sets its time bounds around the current time when it is
   created and rejects fixed archive timestamps; a plain index takes explicit
   `index.time_series.start_time`/`end_time` (2026-11-05 here), so the archive stays loadable.
-  `tsds-shared` (newer values) and `tsds-only`.
+  `tsds-shared` (newer values) and `tsds-only`. It does not map `k8s.deployment.uid`, although its
+  documents carry it, so the `TS` plan reports `resource_id` in `unavailableColumns` and `tsds-only`
+  has a null `resource_id`.
 - `metrics-k8sclusterreceiver.otel-default`: `tsds-shared` (older values) and `standard-only`.
 
 Elasticsearch refuses a regular index whose name matches a template that creates data streams, and
