@@ -28,8 +28,9 @@ export function ProxyUrlField({ value, onChange, error }: ProxyUrlFieldProps) {
         defaultMessage: 'Proxy URL',
       })}
       helpText={i18n.translate('xpack.ingestHub.integrationSettings.proxyUrl.helpText', {
-        defaultMessage:
-          'URL to proxy connections, in the form http[s]://<user>:<password>@<server name/ip>:<port>.',
+        defaultMessage: 'URL to proxy connections, in the form {format}.',
+        // A value, not part of the message: ICU would parse the angle brackets as tags.
+        values: { format: 'http[s]://<user>:<password>@<server name/ip>:<port>' },
       })}
       isInvalid={!!error}
       error={error}
