@@ -77,6 +77,9 @@ export function generateWorkflowYaml({
   const schedule = automation.trigger.rows.find((row) => row.kind === 'schedule');
   const classicRows = alertRows.filter(passesClassic);
   const universalRows = universalAlerts ? alertRows.filter(passesUniversal) : [];
+  if (alertRows.some((row) => !passesClassic(row) && !(universalAlerts && passesUniversal(row)))) {
+    throw new Error('The selected alert sources have no available trigger. Select another source.');
+  }
   const hasMultipleTriggers =
     Number(classicRows.length > 0) +
       Number(universalRows.length > 0) +
@@ -577,8 +580,12 @@ function buildCondition(rows: AlertRow[], statusCondition: string, withSources: 
     .map((row) => buildRowCondition(row, statusCondition, withSources))
     .filter(Boolean);
   if (rowConditions.length === 0) return '';
-  if (rowConditions.length === 1) return rowConditions[0];
-  return rowConditions.map((c) => `(${c})`).join(' OR ');
+  const condition =
+    rowConditions.length === 1 ? rowConditions[0] : rowConditions.map((c) => `(${c})`).join(' OR ');
+  if (condition.length > IF_CONDITION_MAX_LENGTH) {
+    throw new Error('The alert source filters are too long. Remove some sources.');
+  }
+  return condition;
 }
 
 const ALERT_STATUS_CONDITION = '(event.alert.status: "active" OR event.alert.status: "recovered")';

@@ -469,6 +469,26 @@ describe('generateWorkflowYaml', () => {
           ).toEqual(['alerting.alertStatusChanged']);
         });
 
+        it('rejects a source filter that leaves no trigger when universal alerting is off', () => {
+          const automation = baseAutomation();
+          automation.trigger.rows = [{ kind: 'alert', alertSources: ['internal'] }];
+          expect(() =>
+            generateWorkflowYaml({ automationId: 'auto-123', automation, universalAlerts: false })
+          ).toThrow('no available trigger');
+        });
+
+        it('rejects source filters longer than a trigger condition allows', () => {
+          const alertSources = Array.from(
+            { length: 30 },
+            (_, i) => `source-${i}-${'x'.repeat(90)}`
+          );
+          const automation = baseAutomation();
+          automation.trigger.rows = [{ kind: 'alert', alertSources }];
+          expect(() => generateWorkflowYaml({ automationId: 'auto-123', automation })).toThrow(
+            'too long'
+          );
+        });
+
         it('emits the universal trigger only when a universal source passes the filter', () => {
           expect(triggerTypes({ kind: 'alert', alertSources: ['classic'] })).toEqual([
             'alerting.v1.alertStatusChanged',
