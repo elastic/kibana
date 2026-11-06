@@ -178,6 +178,9 @@ describe('getNightshiftSettingsUrl', () => {
     expect(getInvestigationQuotaReachedMessage()).toBe(
       "Elastic nightshift has reached today's limit for automatic investigations across all automations. New investigations resume at 00:00 UTC, or an admin can raise the limit in settings."
     );
+    expect(getInvestigationQuotaReachedMessage({ limit: 1 })).toBe(
+      "Elastic nightshift has reached today's limit of 1 automatic investigation across all automations. New investigations resume at 00:00 UTC, or an admin can raise the limit in settings."
+    );
     expect(getInvestigationQuotaReachedMessage({ limit: 5 })).toBe(
       "Elastic nightshift has reached today's limit of 5 automatic investigations across all automations. New investigations resume at 00:00 UTC, or an admin can raise the limit in settings."
     );
