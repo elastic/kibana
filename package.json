@@ -1931,7 +1931,6 @@
     "@kbn/json-ast": "workspace:*",
     "@kbn/kbn-client": "workspace:*",
     "@kbn/kbn-genai-cli": "workspace:*",
-    "@kbn/kbn-tp-custom-visualizations-plugin": "workspace:*",
     "@kbn/kibana-manifest-schema": "workspace:*",
     "@kbn/lazy-object": "workspace:*",
     "@kbn/lens-test-helpers": "workspace:*",
