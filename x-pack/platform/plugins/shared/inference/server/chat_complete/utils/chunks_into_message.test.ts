@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { lastValueFrom, of } from 'rxjs';
+import { lastValueFrom, of, toArray } from 'rxjs';
 import type {
   ChatCompletionChunkEvent,
   ChatCompletionTokenCountEvent,
@@ -361,6 +361,56 @@ describe('chunksIntoMessage', () => {
           },
           toolCallId: '002',
         },
+      ],
+      type: ChatCompletionEventType.ChatCompletionMessage,
+    });
+  });
+
+  it('emits unique tool call indexes on chunks when the provider reuses the same index', async () => {
+    const toolCallChunk = (
+      toolCallId: string,
+      name: string,
+      args: string
+    ): ChatCompletionChunkEvent => ({
+      content: '',
+      type: ChatCompletionEventType.ChatCompletionChunk,
+      tool_calls: [{ index: 0, toolCallId, function: { name, arguments: args } }],
+    });
+
+    const events = await lastValueFrom(
+      chunksIntoMessage({
+        logger,
+        toolOptions: {
+          toolChoice: ToolChoiceType.auto,
+          tools: {
+            myFunction: {
+              description: 'myFunction',
+              schema: { type: 'object', properties: { foo: { type: 'string' } } },
+            },
+          },
+        },
+      })(
+        fromEvents(
+          toolCallChunk('001', 'myFunction', ''),
+          toolCallChunk('', '', '{"foo":"bar"}'),
+          toolCallChunk('002', 'myFunction', ''),
+          toolCallChunk('', '', '{"foo":"baz"}')
+        )
+      ).pipe(toArray())
+    );
+
+    const chunkIndexes = events.flatMap((event) =>
+      event.type === ChatCompletionEventType.ChatCompletionChunk
+        ? event.tool_calls.map((toolCall) => toolCall.index)
+        : []
+    );
+    expect(chunkIndexes).toEqual([0, 0, 1, 1]);
+
+    expect(events[events.length - 1]).toEqual({
+      content: '',
+      toolCalls: [
+        { function: { name: 'myFunction', arguments: { foo: 'bar' } }, toolCallId: '001' },
+        { function: { name: 'myFunction', arguments: { foo: 'baz' } }, toolCallId: '002' },
       ],
       type: ChatCompletionEventType.ChatCompletionMessage,
     });
