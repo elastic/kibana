@@ -46555,6 +46555,12 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              forceRestartAgentRequest:
+                value:
+                  force: true
+              restartAgentRequest:
+                value: {}
             schema:
               additionalProperties: false
               default: null
@@ -46606,6 +46612,12 @@ paths:
         '409':
           content:
             application/json:
+              examples:
+                pendingRestartResponse:
+                  value:
+                    error: Conflict
+                    message: Agent agent-1 already has a pending restart action a1b2c3d4-e5f6-7890-abcd-ef1234567890. Use force to restart anyway.
+                    statusCode: 409
               schema:
                 additionalProperties: false
                 description: Generic Error
