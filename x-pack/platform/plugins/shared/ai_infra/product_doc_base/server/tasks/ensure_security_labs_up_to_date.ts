@@ -10,13 +10,14 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
 import type { InternalServices } from '../types';
 import {
   deferForRepositoryVersion,
+  getInferenceScope,
   isTaskCurrentlyRunningError,
+  removeSupersededTasks,
   runTaskUnderInstallLock,
   shouldDeferForRepositoryVersion,
   type InstallLockManager,
@@ -83,9 +84,20 @@ export const registerEnsureSecurityLabsUpToDateTaskDefinition = ({
 };
 
 /**
- * Runs the singleton update task for the inference ID. Its params are only set when it is created, so
- * one made against another repository version is replaced to carry this request's version.
+ * One update task per inference ID and repository version: `ensureScheduled` keeps it idempotent, a
+ * run in progress against another version is never deleted, and tasks are one-shot so they are
+ * removed by Task Manager on completion. Waiting tasks of older versions are superseded.
  */
+export const getEnsureSecurityLabsUpToDateTaskId = (
+  inferenceId: string,
+  repositoryVersion?: string
+): string => {
+  const baseId = isImpliedDefaultElserInferenceId(inferenceId)
+    ? ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_ID
+    : ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_ID_MULTILINGUAL;
+  return repositoryVersion ? `${baseId}:${repositoryVersion}` : baseId;
+};
+
 export const scheduleEnsureSecurityLabsUpToDateTask = async ({
   taskManager,
   logger,
@@ -99,9 +111,7 @@ export const scheduleEnsureSecurityLabsUpToDateTask = async ({
   forceUpdate?: boolean;
   repositoryVersion?: string;
 }) => {
-  const taskId = isImpliedDefaultElserInferenceId(inferenceId)
-    ? ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_ID
-    : ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_ID_MULTILINGUAL;
+  const taskId = getEnsureSecurityLabsUpToDateTaskId(inferenceId, repositoryVersion);
   const params: EnsureSecurityLabsUpToDateTaskParams = {
     inferenceId,
     forceUpdate,
@@ -110,21 +120,19 @@ export const scheduleEnsureSecurityLabsUpToDateTask = async ({
   };
 
   try {
-    const existing = await taskManager.get(taskId).catch((error) => {
-      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-        return undefined;
-      }
-      throw error;
+    await removeSupersededTasks({
+      taskManager,
+      logger,
+      taskType: ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_TYPE,
+      inferenceId,
+      repositoryVersion,
     });
-    if (existing && existing.params.repositoryVersion !== repositoryVersion) {
-      await taskManager.removeIfExists(taskId);
-    }
     await taskManager.ensureScheduled({
       id: taskId,
       taskType: ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_TYPE,
       params,
       state: {},
-      scope: ['productDoc'],
+      scope: ['productDoc', getInferenceScope(inferenceId)],
     });
 
     await taskManager.runSoon(taskId);

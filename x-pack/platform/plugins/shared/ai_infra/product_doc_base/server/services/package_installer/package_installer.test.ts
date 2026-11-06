@@ -39,10 +39,15 @@ import { installClientMock } from '../doc_install_status/service.mock';
 import type { ProductInstallState } from '../../../common/install_status';
 import { PackageInstaller } from './package_installer';
 import { ArtifactNotFoundError } from './utils/download';
+import { resolveArtifactsFolderPath } from './utils/artifacts_folder';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 
 const artifactsFolder = '/lost';
+const artifactsFolderPath = resolveArtifactsFolderPath(artifactsFolder);
+const downloadedPath = (artifactName: string) => `${artifactsFolderPath}/${artifactName}`;
+const bundledPath = (artifactName: string) =>
+  `/usr/share/kibana/node_modules/@kbn/product-doc-base-plugin/target/bundled_artifacts/${artifactName}`;
 const artifactRepositoryUrl = 'https://repository.com';
 const artifactRepositoryProxyUrl = 'http://proxy.example.com:3128';
 const kibanaVersion = '8.16.3';
@@ -110,15 +115,39 @@ describe('PackageInstaller', () => {
     it('deletes the downloaded artifact after a successful install', async () => {
       openZipArchiveMock.mockResolvedValue({ close: jest.fn() });
       loadMappingFileMock.mockResolvedValue({ properties: {} });
-      downloadToDiskMock.mockResolvedValue('/data/lost/kb-product-doc-kibana-8.16.zip');
+      downloadToDiskMock.mockResolvedValue(downloadedPath('kb-product-doc-kibana-8.16.zip'));
 
       await packageInstaller.installPackage({ productName: 'kibana', productVersion: '8.16' });
 
       expect(removeArtifactFileMock).toHaveBeenCalledWith(
-        expect.stringContaining('kb-product-doc-kibana-8.16.zip'),
+        downloadedPath('kb-product-doc-kibana-8.16.zip'),
         logger
       );
       expect(logArtifactsFolderUsageMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('reads an artifact of a local repository in place and leaves it after the install', async () => {
+      const bundled = bundledPath('kb-product-doc-kibana-8.16.zip');
+      openZipArchiveMock.mockResolvedValue({ close: jest.fn() });
+      loadMappingFileMock.mockResolvedValue({ properties: {} });
+      downloadToDiskMock.mockResolvedValue(bundled);
+
+      await packageInstaller.installPackage({ productName: 'kibana', productVersion: '8.16' });
+
+      expect(openZipArchiveMock).toHaveBeenCalledWith(bundled);
+      expect(removeArtifactFileMock).not.toHaveBeenCalled();
+      expect(logArtifactsFolderUsageMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not delete an artifact outside the artifacts folder when the install fails', async () => {
+      downloadToDiskMock.mockResolvedValue(bundledPath('kb-product-doc-kibana-8.16.zip'));
+      openZipArchiveMock.mockRejectedValue(new Error('corrupt archive'));
+
+      await expect(
+        packageInstaller.installPackage({ productName: 'kibana', productVersion: '8.16' })
+      ).rejects.toThrow('corrupt archive');
+
+      expect(removeArtifactFileMock).not.toHaveBeenCalled();
     });
 
     it('deletes the existing index only after the archive has been downloaded and validated', async () => {
@@ -226,7 +255,7 @@ describe('PackageInstaller', () => {
     });
 
     it('deletes the downloaded artifact when the install fails', async () => {
-      downloadToDiskMock.mockResolvedValue('/data/lost/kb-product-doc-kibana-8.16.zip');
+      downloadToDiskMock.mockResolvedValue(downloadedPath('kb-product-doc-kibana-8.16.zip'));
       openZipArchiveMock.mockRejectedValue(new Error('corrupt archive'));
 
       await expect(
@@ -234,7 +263,7 @@ describe('PackageInstaller', () => {
       ).rejects.toThrow('corrupt archive');
 
       expect(removeArtifactFileMock).toHaveBeenCalledWith(
-        expect.stringContaining('kb-product-doc-kibana-8.16.zip'),
+        downloadedPath('kb-product-doc-kibana-8.16.zip'),
         logger
       );
     });
@@ -1086,6 +1115,76 @@ describe('PackageInstaller', () => {
     });
   });
 
+  describe('ensureSecurityLabsUpToDate', () => {
+    beforeEach(() => {
+      jest.spyOn(packageInstaller, 'installSecurityLabs').mockResolvedValue(undefined);
+    });
+
+    it('installs the newest repository version when it is newer than the installed one', async () => {
+      productDocClient.getSecurityLabsInstallationStatus.mockResolvedValue({
+        status: 'installed',
+        version: '2026.07.10-152831',
+      });
+      fetchSecurityLabsVersionsMock.mockResolvedValue(['2026.07.10-152831', '2026.07.28-052323']);
+
+      await packageInstaller.ensureSecurityLabsUpToDate({ inferenceId: '.elser' });
+
+      expect(packageInstaller.installSecurityLabs).toHaveBeenCalledWith({
+        version: '2026.07.28-052323',
+        inferenceId: '.elser',
+      });
+    });
+
+    it('never downgrades to an older repository version unless forced', async () => {
+      productDocClient.getSecurityLabsInstallationStatus.mockResolvedValue({
+        status: 'installed',
+        version: '2026.07.28-052323',
+      });
+      fetchSecurityLabsVersionsMock.mockResolvedValue(['2026.07.10-152831']);
+
+      await packageInstaller.ensureSecurityLabsUpToDate({ inferenceId: '.elser' });
+      expect(packageInstaller.installSecurityLabs).not.toHaveBeenCalled();
+
+      await packageInstaller.ensureSecurityLabsUpToDate({
+        inferenceId: '.elser',
+        forceUpdate: true,
+      });
+      expect(packageInstaller.installSecurityLabs).toHaveBeenCalledWith({
+        version: '2026.07.10-152831',
+        inferenceId: '.elser',
+      });
+    });
+  });
+
+  describe('getInstalledRepositoryVersion', () => {
+    it('returns the newest LastModified any installed latest artifact came from', async () => {
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
+        kibana: { status: 'installed', version: 'latest-2026-10-01T00:00:00.000Z' },
+        elasticsearch: { status: 'installed', version: 'latest-2026-10-12T20:25:34.000Z' },
+        security: { status: 'uninstalled', version: 'latest-2026-10-20T00:00:00.000Z' },
+        observability: { status: 'installed', version: '9.7' },
+      } as unknown as Record<ProductName, ProductInstallState>);
+      productDocClient.getOpenapiSpecInstallationStatus.mockResolvedValue({
+        status: 'installed',
+        version: 'latest-2026-10-05T00:00:00.000Z',
+      });
+
+      await expect(
+        packageInstaller.getInstalledRepositoryVersion({ inferenceId: '.elser' })
+      ).resolves.toBe('2026-10-12T20:25:34.000Z');
+    });
+
+    it('is undefined when nothing was installed from a latest artifact', async () => {
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
+        kibana: { status: 'installed', version: '9.7' },
+      } as unknown as Record<ProductName, ProductInstallState>);
+
+      await expect(
+        packageInstaller.getInstalledRepositoryVersion({ inferenceId: '.elser' })
+      ).resolves.toBeUndefined();
+    });
+  });
+
   describe('installSecurityLabs status preservation', () => {
     beforeEach(() => {
       fetchSecurityLabsVersionsMock.mockResolvedValue(['2025.12.12']);
@@ -1341,7 +1440,7 @@ describe('PackageInstaller', () => {
 
     it('deletes the downloaded artifact and logs the folder usage after installing', async () => {
       openZipArchiveMock.mockResolvedValueOnce(getOpenApiArchive());
-      downloadToDiskMock.mockResolvedValue('/data/lost/kb-product-doc-openapi-8.16.zip');
+      downloadToDiskMock.mockResolvedValue(downloadedPath('kb-product-doc-openapi-8.16.zip'));
 
       await packageInstaller.installOpenAPISpec({
         version: '8.16',
@@ -1349,10 +1448,22 @@ describe('PackageInstaller', () => {
       });
 
       expect(removeArtifactFileMock).toHaveBeenCalledWith(
-        expect.stringContaining('kb-product-doc-openapi-8.16.zip'),
+        downloadedPath('kb-product-doc-openapi-8.16.zip'),
         logger
       );
       expect(logArtifactsFolderUsageMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('leaves an OpenAPI artifact of a local repository in place', async () => {
+      openZipArchiveMock.mockResolvedValueOnce(getOpenApiArchive());
+      downloadToDiskMock.mockResolvedValue(bundledPath('kb-product-doc-openapi-8.16.zip'));
+
+      await packageInstaller.installOpenAPISpec({
+        version: '8.16',
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+
+      expect(removeArtifactFileMock).not.toHaveBeenCalled();
     });
 
     it('does not fetch artifact versions when explicit version is directly installable', async () => {

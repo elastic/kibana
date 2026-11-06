@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import type { ConcreteTaskInstance, RunContext } from '@kbn/task-manager-plugin/server';
+import {
+  TaskStatus,
+  type ConcreteTaskInstance,
+  type RunContext,
+} from '@kbn/task-manager-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { LockAcquisitionError } from '@kbn/lock-manager';
 import type { InternalServices } from '../types';
@@ -92,14 +95,12 @@ describe('EnsureSecurityLabsUpToDate task', () => {
 });
 
 describe('scheduleEnsureSecurityLabsUpToDateTask', () => {
-  const notFound = SavedObjectsErrorHelpers.createGenericNotFoundError(
-    'task',
-    ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_ID
-  );
+  const task = (fields: Partial<ConcreteTaskInstance>) => fields as ConcreteTaskInstance;
+  const versionedId = `${ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_ID}:2026-10-12T00:00:00.000Z`;
 
-  it('creates the singleton task with the request time and repository version', async () => {
+  it('ensures a one-shot task per repository version carrying the request time and version', async () => {
     const taskManager = taskManagerMock.createStart();
-    taskManager.get.mockRejectedValue(notFound);
+    taskManager.fetch.mockResolvedValue({ docs: [], versionMap: new Map() });
 
     await scheduleEnsureSecurityLabsUpToDateTask({
       taskManager,
@@ -108,67 +109,76 @@ describe('scheduleEnsureSecurityLabsUpToDateTask', () => {
       repositoryVersion: '2026-10-12T00:00:00.000Z',
     });
 
+    expect(taskManager.ensureScheduled).toHaveBeenCalledWith({
+      id: versionedId,
+      taskType: ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_TYPE,
+      params: {
+        inferenceId: '.elser',
+        forceUpdate: undefined,
+        requestedAt: expect.any(String),
+        repositoryVersion: '2026-10-12T00:00:00.000Z',
+      },
+      state: {},
+      scope: ['productDoc', 'productDoc:inference:default'],
+    });
+    expect(taskManager.runSoon).toHaveBeenCalledWith(versionedId);
+    expect(taskManager.get).not.toHaveBeenCalled();
+    expect(taskManager.removeIfExists).not.toHaveBeenCalled();
+    expect(taskManager.bulkRemove).not.toHaveBeenCalled();
+  });
+
+  it('keeps the plain singleton id for a remote repository', async () => {
+    const taskManager = taskManagerMock.createStart();
+
+    await scheduleEnsureSecurityLabsUpToDateTask({
+      taskManager,
+      logger: loggerMock.create(),
+      inferenceId: '.elser',
+    });
+
+    expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
+      expect.objectContaining({ id: ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_ID })
+    );
+    expect(taskManager.fetch).not.toHaveBeenCalled();
+  });
+
+  it('supersedes waiting tasks of older repository versions without touching a running one', async () => {
+    const taskManager = taskManagerMock.createStart();
+    taskManager.fetch.mockResolvedValue({
+      docs: [
+        task({
+          id: `${ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_ID}:2026-10-01T00:00:00.000Z`,
+          status: TaskStatus.Idle,
+          params: { repositoryVersion: '2026-10-01T00:00:00.000Z' },
+        }),
+      ],
+      versionMap: new Map(),
+    });
+
+    await scheduleEnsureSecurityLabsUpToDateTask({
+      taskManager,
+      logger: loggerMock.create(),
+      inferenceId: '.elser',
+      repositoryVersion: '2026-10-12T00:00:00.000Z',
+    });
+
+    expect(taskManager.fetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.objectContaining({
+          bool: expect.objectContaining({
+            filter: expect.arrayContaining([
+              { terms: { 'task.status': [TaskStatus.Idle, TaskStatus.Claiming] } },
+            ]),
+          }),
+        }),
+      })
+    );
+    expect(taskManager.bulkRemove).toHaveBeenCalledWith([
+      `${ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_ID}:2026-10-01T00:00:00.000Z`,
+    ]);
     expect(taskManager.removeIfExists).not.toHaveBeenCalled();
     expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_ID,
-        params: {
-          inferenceId: '.elser',
-          forceUpdate: undefined,
-          requestedAt: expect.any(String),
-          repositoryVersion: '2026-10-12T00:00:00.000Z',
-        },
-      })
+      expect.objectContaining({ id: versionedId })
     );
-    expect(taskManager.runSoon).toHaveBeenCalledWith(ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_ID);
-  });
-
-  it('replaces an existing task made against another repository version', async () => {
-    const taskManager = taskManagerMock.createStart();
-    taskManager.get.mockResolvedValue({
-      params: { repositoryVersion: '2026-10-01T00:00:00.000Z' },
-    } as unknown as ConcreteTaskInstance);
-
-    await scheduleEnsureSecurityLabsUpToDateTask({
-      taskManager,
-      logger: loggerMock.create(),
-      inferenceId: '.elser',
-      repositoryVersion: '2026-10-12T00:00:00.000Z',
-    });
-
-    expect(taskManager.removeIfExists).toHaveBeenCalledWith(
-      ENSURE_SECURITY_LABS_UP_TO_DATE_TASK_ID
-    );
-    expect(taskManager.ensureScheduled).toHaveBeenCalledTimes(1);
-  });
-
-  it('keeps an existing task made against the same repository version', async () => {
-    const taskManager = taskManagerMock.createStart();
-    taskManager.get.mockResolvedValue({
-      params: { repositoryVersion: '2026-10-12T00:00:00.000Z' },
-    } as unknown as ConcreteTaskInstance);
-
-    await scheduleEnsureSecurityLabsUpToDateTask({
-      taskManager,
-      logger: loggerMock.create(),
-      inferenceId: '.elser',
-      repositoryVersion: '2026-10-12T00:00:00.000Z',
-    });
-
-    expect(taskManager.removeIfExists).not.toHaveBeenCalled();
-    expect(taskManager.runSoon).toHaveBeenCalledTimes(1);
-  });
-
-  it('propagates read failures other than not found', async () => {
-    const taskManager = taskManagerMock.createStart();
-    taskManager.get.mockRejectedValue(new Error('es unavailable'));
-
-    await expect(
-      scheduleEnsureSecurityLabsUpToDateTask({
-        taskManager,
-        logger: loggerMock.create(),
-        inferenceId: '.elser',
-      })
-    ).rejects.toThrow('es unavailable');
   });
 });

@@ -15,6 +15,7 @@ import type { InternalServices } from '../types';
 import {
   INSTALL_TASK_TIMEOUT,
   deferForRepositoryVersion,
+  isStaleRepositoryRequest,
   runTaskUnderInstallLock,
   scheduleRequestTask,
   shouldDeferForRepositoryVersion,
@@ -60,6 +61,19 @@ export const registerEnsureUpToDateTaskDefinition = ({
                 `Deferring product documentation update for [${inferenceId}]: requested against artifact repository version [${repositoryVersion}], newer than this node's`
               );
               return deferForRepositoryVersion();
+            }
+            if (
+              isStaleRepositoryRequest({
+                requestedVersion: repositoryVersion,
+                installedVersion: await packageInstaller.getInstalledRepositoryVersion({
+                  inferenceId,
+                }),
+              })
+            ) {
+              logger.info(
+                `Skipping product documentation update for [${inferenceId}]: requested against artifact repository version [${repositoryVersion}], older than the installed one`
+              );
+              return { state: {} };
             }
             return runTaskUnderInstallLock({
               lockManager,

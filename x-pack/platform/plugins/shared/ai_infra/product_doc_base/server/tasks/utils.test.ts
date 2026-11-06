@@ -6,13 +6,94 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { loggerMock } from '@kbn/logging-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { TaskStatus, type ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import {
   REPOSITORY_VERSION_DEFER_MAX_MS,
+  isStaleRepositoryRequest,
+  removeSupersededTasks,
   shouldDeferForRepositoryVersion,
   waitUntilTaskCompleted,
 } from './utils';
+
+const task = (fields: Partial<ConcreteTaskInstance>) => fields as ConcreteTaskInstance;
+
+describe('isStaleRepositoryRequest', () => {
+  it('is stale only when documentation was installed from a newer repository than requested', () => {
+    expect(
+      isStaleRepositoryRequest({
+        requestedVersion: '2026-10-01T00:00:00.000Z',
+        installedVersion: '2026-10-12T00:00:00.000Z',
+      })
+    ).toBe(true);
+    expect(
+      isStaleRepositoryRequest({
+        requestedVersion: '2026-10-12T00:00:00.000Z',
+        installedVersion: '2026-10-12T00:00:00.000Z',
+      })
+    ).toBe(false);
+    expect(
+      isStaleRepositoryRequest({
+        requestedVersion: '2026-10-12T00:00:00.000Z',
+        installedVersion: '2026-10-01T00:00:00.000Z',
+      })
+    ).toBe(false);
+    expect(isStaleRepositoryRequest({ installedVersion: '2026-10-12T00:00:00.000Z' })).toBe(false);
+    expect(isStaleRepositoryRequest({ requestedVersion: '2026-10-12T00:00:00.000Z' })).toBe(false);
+  });
+});
+
+describe('removeSupersededTasks', () => {
+  const schedule = (repositoryVersion?: string) =>
+    removeSupersededTasks({
+      taskManager,
+      logger: loggerMock.create(),
+      taskType: 'ProductDocBase:EnsureUpToDate',
+      inferenceId: '.elser',
+      repositoryVersion,
+    });
+  let taskManager: ReturnType<typeof taskManagerMock.createStart>;
+
+  beforeEach(() => {
+    taskManager = taskManagerMock.createStart();
+    taskManager.fetch.mockResolvedValue({
+      docs: [
+        task({ id: 'older', params: { repositoryVersion: '2026-10-01T00:00:00.000Z' } }),
+        task({ id: 'same', params: { repositoryVersion: '2026-10-12T00:00:00.000Z' } }),
+        task({ id: 'newer', params: { repositoryVersion: '2026-10-20T00:00:00.000Z' } }),
+        task({ id: 'remote', params: {} }),
+      ],
+      versionMap: new Map(),
+    });
+  });
+
+  it('removes only waiting tasks requested against an older repository version', async () => {
+    await schedule('2026-10-12T00:00:00.000Z');
+
+    expect(taskManager.fetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            filter: [
+              { term: { 'task.taskType': 'ProductDocBase:EnsureUpToDate' } },
+              { term: { 'task.scope': 'productDoc:inference:default' } },
+              { terms: { 'task.status': [TaskStatus.Idle, TaskStatus.Claiming] } },
+            ],
+          },
+        },
+      })
+    );
+    expect(taskManager.bulkRemove).toHaveBeenCalledWith(['older']);
+  });
+
+  it('does nothing for requests without a repository version', async () => {
+    await schedule(undefined);
+
+    expect(taskManager.fetch).not.toHaveBeenCalled();
+    expect(taskManager.bulkRemove).not.toHaveBeenCalled();
+  });
+});
 
 describe('shouldDeferForRepositoryVersion', () => {
   const now = Date.parse('2026-10-12T12:00:00.000Z');

@@ -72,6 +72,18 @@ export const deferForRepositoryVersion = () => ({
   runAt: new Date(Date.now() + REPOSITORY_VERSION_RETRY_DELAY_MS),
 });
 
+/**
+ * Whether a request is stale: made against an older repository than one the documentation was
+ * already installed from, so running it would downgrade the documentation.
+ */
+export const isStaleRepositoryRequest = ({
+  requestedVersion,
+  installedVersion,
+}: {
+  requestedVersion?: string;
+  installedVersion?: string;
+}): boolean => Boolean(requestedVersion && installedVersion && installedVersion > requestedVersion);
+
 // Task scope identifying the inference ID an install or update task works on
 export const getInferenceScope = (inferenceId: string): string =>
   `productDoc:inference:${isImpliedDefaultElserInferenceId(inferenceId) ? 'default' : inferenceId}`;
@@ -150,6 +162,13 @@ export const scheduleRequestTask = async <P extends RequestTaskParams>({
   if (failed.length > 0) {
     await taskManager.bulkRemove(failed.map(({ id }) => id));
   }
+  await removeSupersededTasks({
+    taskManager,
+    logger,
+    taskType,
+    inferenceId,
+    repositoryVersion: params.repositoryVersion,
+  });
   const { id } = await taskManager.schedule({
     taskType,
     params: { ...params },
@@ -158,6 +177,46 @@ export const scheduleRequestTask = async <P extends RequestTaskParams>({
   });
   logger.info(`Task ${id} (${taskType}) scheduled for [${inferenceId}]`);
   return id;
+};
+
+/**
+ * Removes tasks of `taskType` for the inference ID that are still waiting to run and were requested
+ * against an older repository version than `repositoryVersion`: run later on an older node they would
+ * reinstall that older bundle. Running tasks are left alone; the runner's stale check covers them.
+ */
+export const removeSupersededTasks = async ({
+  taskManager,
+  logger,
+  taskType,
+  inferenceId,
+  repositoryVersion,
+}: {
+  taskManager: TaskManagerStartContract;
+  logger: Logger;
+  taskType: string;
+  inferenceId: string;
+  repositoryVersion?: string;
+}): Promise<void> => {
+  if (!repositoryVersion) {
+    return;
+  }
+  const superseded = (
+    await findTasks({
+      taskManager,
+      taskType,
+      inferenceId,
+      statuses: [TaskStatus.Idle, TaskStatus.Claiming],
+    })
+  ).filter(
+    ({ params }) => params?.repositoryVersion && params.repositoryVersion < repositoryVersion
+  );
+  if (superseded.length === 0) {
+    return;
+  }
+  await taskManager.bulkRemove(superseded.map(({ id }) => id));
+  logger.info(
+    `Removed ${superseded.length} pending ${taskType} task(s) for [${inferenceId}] requested against an older artifact repository version than [${repositoryVersion}]`
+  );
 };
 
 export type RequestTaskStatus = 'pending' | 'failed' | 'none';
