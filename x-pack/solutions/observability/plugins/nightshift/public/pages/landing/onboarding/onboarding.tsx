@@ -81,10 +81,9 @@ const INVESTIGATE_SECTION_TITLE = i18n.translate(
   { defaultMessage: 'Try your first investigation' }
 );
 
-const AUTOMATE_SECTION_TITLE = i18n.translate(
-  'xpack.nightshift.onboarding.automate.trialTitle',
-  { defaultMessage: 'Your first investigation' }
-);
+const AUTOMATE_SECTION_TITLE = i18n.translate('xpack.nightshift.onboarding.automate.trialTitle', {
+  defaultMessage: 'Your first investigation',
+});
 
 const backButtonStyles = css`
   width: 100%;
