@@ -85,7 +85,6 @@ export const knownModels: ModelDefinition[] = [
     family: ModelFamily.GPT,
     contextWindow: 1000000,
   },
-  // GPT-6 family. The `-pro` variants (`gpt-6-sol-pro`, …) share the window and resolve by substring.
   {
     id: 'gpt-6-sol',
     provider: ModelProvider.OpenAI,
