@@ -59,6 +59,8 @@ describe('NightshiftSetupPrompt', () => {
 
     expect(screen.getByText('One-time admin setup required for this space')).toBeInTheDocument();
     expect(screen.getByText('nightshift_agent')).toBeInTheDocument();
+    expect(screen.getByText('nightshift_automations')).toBeInTheDocument();
+    expect(screen.getByText('nightshift_detection')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftSetupPrivilegesLink')).toHaveAttribute('target', '_blank');
     fireEvent.click(screen.getByTestId('nightshiftSetUpServiceAccount'));
     expect(mockMutate).toHaveBeenCalledTimes(1);

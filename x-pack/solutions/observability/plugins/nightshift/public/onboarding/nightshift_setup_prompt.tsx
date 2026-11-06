@@ -43,8 +43,10 @@ export const NightshiftSetupPrompt = ({
   const { application } = useKibana().services;
   const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
   const setUp = useSetUpNightshiftServiceAccount();
-  // The account is found or created by name; the backend assigns its id on setup.
-  const account = getNightshiftServiceAccountName('agent');
+  // The accounts are found or created by name; the backend assigns their ids on setup.
+  const accounts = (['agent', 'automations', 'detection'] as const).map(
+    getNightshiftServiceAccountName
+  );
   const serviceAccountsOff = status?.serviceAccountsEnabled === false;
   const canEnable = canManage && !serviceAccountsOff && status?.canModifyBoundWorkflows === true;
 
@@ -60,9 +62,18 @@ export const NightshiftSetupPrompt = ({
     <p>
       <FormattedMessage
         id="xpack.nightshift.setup.adminBody"
-        defaultMessage="Grant the agent a {account} account with {privilegesLink}, and install it in this space. It will perform investigations and actions on behalf of users in this space. You can revoke privileges anytime in Settings."
+        defaultMessage="Grant the Nightshift service accounts {accounts} {privilegesLink}, and install them in this space. They will perform investigations, automations and detection on behalf of users in this space. You can revoke privileges anytime in Settings."
         values={{
-          account: <EuiCode>{account}</EuiCode>,
+          accounts: (
+            <>
+              {accounts.map((account, index) => (
+                <React.Fragment key={account}>
+                  {index > 0 ? ', ' : null}
+                  <EuiCode>{account}</EuiCode>
+                </React.Fragment>
+              ))}
+            </>
+          ),
           privilegesLink: (
             <EuiLink
               href={NIGHTSHIFT_SERVICE_ACCOUNT_PRIVILEGES_HREF}

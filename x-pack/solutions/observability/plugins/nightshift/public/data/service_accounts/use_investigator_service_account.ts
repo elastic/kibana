@@ -16,6 +16,7 @@ import {
 } from '@kbn/react-query';
 import type { InvestigatorServiceAccountStatus } from '@kbn/nightshift-investigations-plugin/common';
 import {
+  ensureNightshiftServiceAccount,
   ensureNightshiftServiceAccounts,
   NightshiftServiceAccountSetupError,
 } from '@kbn/nightshift-shared';
@@ -123,7 +124,7 @@ export const useInvestigatorServiceAccount = (): UseQueryResult<
 /**
  * Enables Nightshift in the current space, in one step: finds the deployment's Nightshift service
  * accounts by name, or creates them, as the current user, binds the space's workflows to them,
- * then installs the investigation agent. Both halves are idempotent, so a retry after a partial
+ * sets the detection engine up on its own account, then installs the investigation agent. Both halves are idempotent, so a retry after a partial
  * failure completes the setup.
  */
 export const useSetUpNightshiftServiceAccount = (): UseMutationResult<
@@ -134,6 +135,7 @@ export const useSetUpNightshiftServiceAccount = (): UseMutationResult<
   const {
     notifications,
     nightshiftInvestigations,
+    significantEvents,
     http,
     security,
     isServerless = false,
@@ -146,13 +148,29 @@ export const useSetUpNightshiftServiceAccount = (): UseMutationResult<
       if (!investigationsClient) {
         throw new Error('Nightshift investigations plugin is unavailable');
       }
-      const serviceAccountIds = await ensureNightshiftServiceAccounts(
-        createBrowserServiceAccountsApi({ http, serviceAccounts: security.serviceAccounts }),
-        { isServerless }
-      );
+      const accountsApi = createBrowserServiceAccountsApi({
+        http,
+        serviceAccounts: security.serviceAccounts,
+      });
+      const serviceAccountIds = await ensureNightshiftServiceAccounts(accountsApi, {
+        isServerless,
+      });
       const status = await investigationsClient.fetch(
         'POST /internal/nightshift/investigations/service_account/_enable',
         { signal: null, params: { body: { serviceAccountIds } } }
+      );
+      // The detection engine account is global like the other two, so a second space reuses it.
+      // It is bound before the agent is installed: a failure here leaves the prompt up for a retry.
+      const detectionServiceAccountId = await ensureNightshiftServiceAccount(accountsApi, {
+        kind: 'detection',
+        isServerless,
+      });
+      await significantEvents.significantEventsRepositoryClient.fetch(
+        'POST /internal/significant_events/service_account/_enable',
+        {
+          signal: null,
+          params: { body: { serviceAccountId: detectionServiceAccountId } },
+        }
       );
       // The space's agent runs as the account the step above bound, so it is installed last.
       await investigationsClient.fetch('POST /internal/nightshift/onboarding/enable', {

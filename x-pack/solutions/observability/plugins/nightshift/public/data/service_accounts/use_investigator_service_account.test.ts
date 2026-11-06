@@ -17,6 +17,7 @@ import {
 jest.mock('../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 jest.mock('@kbn/nightshift-shared', () => ({
   ...jest.requireActual('@kbn/nightshift-shared'),
+  ensureNightshiftServiceAccount: jest.fn().mockResolvedValue('kibana/nightshift_detection'),
   ensureNightshiftServiceAccounts: jest
     .fn()
     .mockResolvedValue({ agent: 'kibana/nightshift_agent', automations: 'kibana/auto' }),
@@ -59,6 +60,7 @@ describe('useSetUpNightshiftServiceAccount', () => {
       services: {
         notifications: { toasts: { addSuccess, addError: jest.fn() } },
         nightshiftInvestigations: { investigationsClient: { fetch } },
+        significantEvents: { significantEventsRepositoryClient: { fetch: jest.fn() } },
         http: {},
         security: { serviceAccounts: {} },
         isServerless: false,
