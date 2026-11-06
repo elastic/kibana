@@ -64,6 +64,22 @@ describe('bound detection engine workflows', () => {
     }
   );
 
+  // A manual run could supply any event and attach it as the service account. The engine sets
+  // `triggeredBy` to the id of the trigger that fired.
+  it('investigation completed refuses every run but its two lifecycle triggers', () => {
+    const { steps, triggers }: IParsedWorkflow = parse(BOUND_INVESTIGATION_COMPLETED_YAML);
+
+    expect(triggers?.map(({ type }) => type)).toEqual([
+      'nightshift-investigations.completed',
+      'nightshift-investigations.failed',
+    ]);
+    expect(steps[0]).toMatchObject({ name: 'refuse_direct_runs', type: 'if' });
+    expect(steps[0].condition).toBe(
+      'not execution.triggeredBy : ("nightshift-investigations.completed" or "nightshift-investigations.failed")'
+    );
+    expect(steps[0].steps?.[0].type).toBe('workflow.fail');
+  });
+
   it.each(startedBySchedule)('%s has no manual trigger', (_name, yaml) => {
     const { triggers }: IParsedWorkflow = parse(yaml);
 
