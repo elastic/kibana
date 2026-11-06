@@ -90,6 +90,7 @@ async function hasNoResults({
   query,
   rangeFilter,
   timeRange,
+  searchSessionId,
 }: {
   abortSignal: AbortSignal;
   dataView: DataView;
@@ -97,6 +98,7 @@ async function hasNoResults({
   query?: Query | AggregateQuery;
   rangeFilter: Filter;
   timeRange?: TimeRange;
+  searchSessionId?: string;
 }): Promise<boolean> {
   const searchSource = await dataService.search.searchSource.create();
   searchSource.setField('size', 0);
@@ -123,6 +125,7 @@ async function hasNoResults({
   const resp = await lastValueFrom(
     searchSource.fetch$({
       abortSignal,
+      sessionId: searchSessionId,
       legacyHitsTotal: false,
     })
   );

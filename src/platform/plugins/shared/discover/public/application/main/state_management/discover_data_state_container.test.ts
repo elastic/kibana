@@ -66,6 +66,56 @@ describe('test getDataStateContainer', () => {
     expect(dataState.data$.totalHits$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
   });
 
+  describe('replay cache', () => {
+    const cachedTimeRange = {
+      from: '2021-08-31T20:00:00.000Z',
+      to: '2021-08-31T21:00:00.000Z',
+      mode: 'absolute' as const,
+    };
+    const cachedReplay = {
+      hit: true as const,
+      sessionId: 'cached-session',
+      timeRange: cachedTimeRange,
+      lastFetched: '2021-08-31T21:00:00.000Z',
+    };
+
+    const setup = async () => {
+      const toolkit = getDiscoverInternalStateMock({ persistedDataViews: [dataViewMock] });
+      await toolkit.initializeTabs();
+      const tabId = toolkit.getCurrentTab().id;
+      const { replayCache, search, query } = toolkit.services.data;
+      jest.mocked(search.session.start).mockReturnValue('new-session');
+      jest.mocked(replayCache.get).mockReturnValue(cachedReplay);
+
+      return { toolkit, tabId, search, query };
+    };
+
+    test('initial fetch replays the cached session and time range', async () => {
+      const { toolkit, tabId, search } = await setup();
+
+      await toolkit.initializeSingleTab({ tabId });
+
+      expect(search.session.continue).toHaveBeenCalledWith('cached-session');
+      expect(toolkit.getCurrentTab().dataRequestParams).toMatchObject({
+        searchSessionId: 'cached-session',
+        timeRangeAbsolute: cachedTimeRange,
+      });
+    });
+
+    test('refresh after a replay starts a new session with the current time range', async () => {
+      const { toolkit, tabId, query } = await setup();
+      const { dataStateContainer } = await toolkit.initializeSingleTab({ tabId });
+
+      dataStateContainer.fetch();
+      await waitFor(() => expect(mockFetchDocuments).toHaveBeenCalledTimes(2));
+
+      expect(toolkit.getCurrentTab().dataRequestParams).toMatchObject({
+        searchSessionId: 'new-session',
+        timeRangeAbsolute: query.timefilter.timefilter.getAbsoluteTime(),
+      });
+    });
+  });
+
   test('fetch clears skipInitialFetch so later query switches do not return to the empty state', async () => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     const tabId = stateContainer.getCurrentTab().id;

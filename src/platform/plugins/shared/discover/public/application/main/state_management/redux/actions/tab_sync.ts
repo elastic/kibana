@@ -8,6 +8,7 @@
  */
 
 import { combineLatest, merge, skip, startWith } from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import {
   connectToQueryState,
   noSearchSessionStorageCapabilityMessage,
@@ -44,7 +45,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
   function initializeAndSyncThunkFn(
     dispatch,
     getState,
-    { services, runtimeStateManager, urlStateStorage, getInternalState$ }
+    { services, runtimeStateManager, urlStateStorage, getInternalState$, searchSessionManager }
   ) {
     const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
     const dataStateContainer = tabRuntimeState.dataStateContainer$.getValue();
@@ -276,13 +277,27 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
         runtimeStateManager,
       }),
       {
-        isDisabled: () =>
-          services.capabilities.discover_v2.storeSearchSession
+        isDisabled: () => {
+          if (searchSessionManager.isCurrentSessionReplayed()) {
+            return {
+              disabled: true,
+              reasonText: i18n.translate(
+                'discover.replayCache.backgroundSearchDisabledDescription',
+                {
+                  defaultMessage:
+                    'Refresh the results before saving this search in the background.',
+                }
+              ),
+            };
+          }
+
+          return services.capabilities.discover_v2.storeSearchSession
             ? { disabled: false }
             : {
                 disabled: true,
                 reasonText: noSearchSessionStorageCapabilityMessage,
-              },
+              };
+        },
       }
     );
 

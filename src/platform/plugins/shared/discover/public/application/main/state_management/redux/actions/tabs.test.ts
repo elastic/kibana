@@ -290,6 +290,26 @@ describe('tabs actions', () => {
   });
 
   describe('updateTabs', () => {
+    it('forgets the cached session of the closed tab only', async () => {
+      const { internalState, searchSessionManager, getCurrentTab, addNewTab, initializeSingleTab } =
+        await setup();
+      const forgetTab = jest.spyOn(searchSessionManager, 'forgetTab');
+      const firstTab = getCurrentTab();
+      await initializeSingleTab({ tabId: firstTab.id });
+      const secondTab = {
+        ...DEFAULT_TAB_STATE,
+        ...createTabItem(selectAllTabs(internalState.getState())),
+      };
+      await addNewTab({ tab: secondTab });
+      await initializeSingleTab({ tabId: secondTab.id });
+
+      await internalState.dispatch(
+        internalStateActions.updateTabs({ items: [secondTab], selectedItem: secondTab })
+      );
+
+      expect(forgetTab.mock.calls).toEqual([[firstTab.id]]);
+    });
+
     it('copies profile state when duplicating a tab', async () => {
       const { internalState, getCurrentTab } = await setup();
       const currentTab = getCurrentTab();

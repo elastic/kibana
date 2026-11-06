@@ -63,6 +63,25 @@ describe('tab_sync actions', () => {
   });
 
   describe('initializeAndSync', () => {
+    it('disables background saving while the current session is replayed', async () => {
+      const { services, searchSessionManager, tabId, initializeSingleTab } = await setup();
+      services.capabilities.discover_v2.storeSearchSession = true;
+      await initializeSingleTab({ tabId });
+
+      const enableStorage = jest.mocked(services.data.search.session.enableStorage);
+      const [, storageConfig] = enableStorage.mock.calls[enableStorage.mock.calls.length - 1];
+      const isCurrentSessionReplayed = jest.spyOn(searchSessionManager, 'isCurrentSessionReplayed');
+
+      isCurrentSessionReplayed.mockReturnValue(true);
+      expect(storageConfig?.isDisabled?.()).toEqual({
+        disabled: true,
+        reasonText: 'Refresh the results before saving this search in the background.',
+      });
+
+      isCurrentSessionReplayed.mockReturnValue(false);
+      expect(storageConfig?.isDisabled?.()).toEqual({ disabled: false });
+    });
+
     it('should initialize and sync tab state', async () => {
       const previousUnsubscribeFn = jest.fn();
       const { tabId, initializeSingleTab, runtimeStateManager } = await setup();

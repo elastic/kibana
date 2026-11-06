@@ -136,6 +136,7 @@ export async function getMinMax({
   timeRange,
   esqlVariables,
   esqlPreFilter,
+  searchSessionId,
 }: {
   abortSignal: AbortSignal;
   dataView: DataView;
@@ -145,6 +146,7 @@ export async function getMinMax({
   timeRange?: TimeRange;
   esqlVariables?: ESQLControlVariable[];
   esqlPreFilter?: { bool: BoolQuery };
+  searchSessionId?: string;
 }): Promise<{ min: number | undefined; max: number | undefined }> {
   if (query && 'esql' in query) {
     const result = await getESQLSingleColumnValues({
@@ -203,7 +205,9 @@ export async function getMinMax({
   };
   searchSource.setField('aggs', aggs);
 
-  const resp = await lastValueFrom(searchSource.fetch$({ abortSignal }));
+  const resp = await lastValueFrom(
+    searchSource.fetch$({ abortSignal, sessionId: searchSessionId })
+  );
   return {
     min:
       (resp.rawResponse?.aggregations?.minAgg as estypes.AggregationsSingleMetricAggregateBase)

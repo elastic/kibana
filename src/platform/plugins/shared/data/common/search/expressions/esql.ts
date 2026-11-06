@@ -13,6 +13,7 @@ import type { ISearchMethods } from '@kbn/search-types';
 import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { Filter } from '@kbn/es-query';
+import { getAbsoluteTimeRange } from '../../query';
 import { getSideEffectFunction, type KibanaContext } from '..';
 
 declare global {
@@ -150,12 +151,16 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           }
         : undefined;
 
+      const forceNow = new Date(input?.now ?? Date.now());
+      const absoluteTimeRange =
+        input?.timeRange && getAbsoluteTimeRange(input.timeRange, { forceNow });
+
       const { datatable } = await searchService.esql(
         {
           query,
           locale,
           kibanaQueryContext: {
-            timeRange: input?.timeRange,
+            timeRange: absoluteTimeRange,
             timeField,
             kibanaFilters: [
               ...(ignoreGlobalFilters ? [] : input?.filters ?? []),

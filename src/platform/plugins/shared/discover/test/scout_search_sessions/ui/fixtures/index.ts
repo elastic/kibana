@@ -43,6 +43,13 @@ export const spaceTest = dataSpaceTest.extend<
 });
 
 export {
+  DISCOVER_SEARCH_REQUESTS,
+  RELATIVE_TIME_DEFAULTS,
+  refetchDiscover,
+  waitForDiscoverResults,
+} from './replay_cache';
+
+export {
   getSessionCookieHeader,
   findLoadedDashboardId,
   BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT,
