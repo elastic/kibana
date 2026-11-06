@@ -33,7 +33,11 @@ export interface FakeAgent {
   hostname: string;
   /** Fleet `local_metadata.os.platform`: the distribution for Linux, e.g. `ubuntu`. */
   platform: string;
+  /** Spaces the agent is visible in (Fleet space awareness). Defaults to `default`. */
+  namespaces?: string[];
 }
+
+const spacePrefix = (spaceId?: string) => (spaceId ? `/s/${spaceId}` : '');
 
 export const createSystemIndicesClient = async (
   esClient: Client,
@@ -122,7 +126,7 @@ export const indexFakeAgents = async (
         type: 'PERMANENT',
         policy_id: policyId,
         policy_revision_idx: 1,
-        namespaces: ['default'],
+        namespaces: agent.namespaces ?? ['default'],
         enrolled_at: now,
         last_checkin: now,
         last_checkin_status: 'online',
@@ -289,11 +293,12 @@ export interface PackQuery {
 export const createPack = async (
   kbnClient: KbnClient,
   name: string,
-  queries: Record<string, PackQuery>
+  queries: Record<string, PackQuery>,
+  spaceId?: string
 ): Promise<string> => {
   const { data } = await kbnClient.request<{ data: { saved_object_id: string } }>({
     method: 'POST',
-    path: '/api/osquery/packs',
+    path: `${spacePrefix(spaceId)}/api/osquery/packs`,
     headers: API_VERSION,
     body: { name, enabled: false, queries },
   });
@@ -301,10 +306,10 @@ export const createPack = async (
   return data.data.saved_object_id;
 };
 
-export const deletePack = async (kbnClient: KbnClient, packId: string) => {
+export const deletePack = async (kbnClient: KbnClient, packId: string, spaceId?: string) => {
   await kbnClient.request({
     method: 'DELETE',
-    path: `/api/osquery/packs/${packId}`,
+    path: `${spacePrefix(spaceId)}/api/osquery/packs/${packId}`,
     headers: API_VERSION,
     ignoreErrors: [404],
   });
@@ -327,25 +332,50 @@ export const findPackActionDocs = async (
 };
 
 /**
- * Deletes the space copies of the Elastic prebuilt packs. `POST /internal/osquery/assets/update`
- * copies every prebuilt pack into the space as a saved object, which would make a second run
- * start with the packs already loaded and leak them into other specs.
+ * Creates a space for a test that changes space-wide state, such as loading the Elastic prebuilt
+ * packs, so it never touches packs that already exist in other spaces. Deleting the space
+ * (`deleteTestSpace`) removes every saved object the test created in it.
  */
-export const deleteLoadedPrebuiltPacks = async (kbnClient: KbnClient): Promise<void> => {
+export const createTestSpace = async (kbnClient: KbnClient, spaceId: string): Promise<void> => {
+  await kbnClient.request({
+    method: 'POST',
+    path: '/api/spaces/space',
+    body: { id: spaceId, name: spaceId },
+    ignoreErrors: [409],
+  });
+};
+
+export const deleteTestSpace = async (kbnClient: KbnClient, spaceId: string): Promise<void> => {
+  await kbnClient.request({
+    method: 'DELETE',
+    path: `/api/spaces/space/${spaceId}`,
+    ignoreErrors: [404],
+  });
+};
+
+/**
+ * Deletes the copies of the Elastic prebuilt packs loaded in a test-owned space. Only call it
+ * for a space the test created: `POST /internal/osquery/assets/update` copies every prebuilt
+ * pack into the space, and other spaces may hold copies a user loaded on purpose.
+ */
+export const deleteLoadedPrebuiltPacks = async (
+  kbnClient: KbnClient,
+  spaceId: string
+): Promise<void> => {
   const { data } = await kbnClient.request<{ data: Array<{ pack_id: string }> }>({
     method: 'GET',
-    path: '/internal/osquery/packs/_prebuilt',
+    path: `${spacePrefix(spaceId)}/internal/osquery/packs/_prebuilt`,
     headers: { 'elastic-api-version': '1', 'x-elastic-internal-origin': 'kibana' },
   });
   for (const { pack_id: packId } of data.data) {
-    await deletePack(kbnClient, packId);
+    await deletePack(kbnClient, packId, spaceId);
   }
 };
 
-export const loadPrebuiltPacks = async (kbnClient: KbnClient): Promise<void> => {
+export const loadPrebuiltPacks = async (kbnClient: KbnClient, spaceId: string): Promise<void> => {
   await kbnClient.request({
     method: 'POST',
-    path: '/internal/osquery/assets/update',
+    path: `${spacePrefix(spaceId)}/internal/osquery/assets/update`,
     headers: { 'elastic-api-version': '1', 'x-elastic-internal-origin': 'kibana' },
   });
 };

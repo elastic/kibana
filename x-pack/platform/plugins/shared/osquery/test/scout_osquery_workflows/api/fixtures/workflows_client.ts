@@ -52,16 +52,24 @@ export const deleteLeftoverWorkflows = async (): Promise<void> => {
   await Promise.all(deletions.map((remove) => remove().catch(() => undefined)));
 };
 
-/** Creates and runs workflows as the identity behind `headers` (an API key or a cookie). */
-export const workflowsClient = (apiClient: ApiClientFixture, headers: Record<string, string>) => {
+/**
+ * Creates and runs workflows as the identity behind `headers` (an API key or a cookie), in the
+ * default space or in `spaceId`.
+ */
+export const workflowsClient = (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  spaceId?: string
+) => {
   const allHeaders = { 'kbn-xsrf': 'true', ...headers };
+  const api = (path: string) => `${spaceId ? `s/${spaceId}/` : ''}api/workflows${path}`;
   // Without `force` the delete is soft: the workflow stays and its id is not reusable.
   // A force delete answers 409 while the engine is still finishing its writes for a run that just
   // reached a terminal status (running-execution check, version conflicts), so retry briefly.
   const remove = async (workflowId: string) => {
     for (let attempt = 1; ; attempt++) {
       const response = await apiClient.delete(
-        `api/workflows/workflow/${workflowId}?force=true&acknowledgeAclLoss=true`,
+        api(`/workflow/${workflowId}?force=true&acknowledgeAclLoss=true`),
         { headers: allHeaders, responseType: 'json' }
       );
       if (response.statusCode < 300 || response.statusCode === 404) return;
@@ -79,7 +87,7 @@ export const workflowsClient = (apiClient: ApiClientFixture, headers: Record<str
 
   const getExecution = async (executionId: string): Promise<WorkflowExecution> => {
     const response = await apiClient.get(
-      `api/workflows/executions/${executionId}?includeOutput=true`,
+      api(`/executions/${executionId}?includeOutput=true`),
       { headers: allHeaders, responseType: 'json' }
     );
     expect(response).toHaveStatusCode(200);
@@ -110,7 +118,7 @@ export const workflowsClient = (apiClient: ApiClientFixture, headers: Record<str
     /** Creates a manual workflow with the given steps YAML and returns its id. */
     create: async (name: string, stepsYaml: string): Promise<string> => {
       const yaml = `name: ${name}\nenabled: true\ntriggers:\n  - type: manual\nsteps:\n${stepsYaml}`;
-      const response = await apiClient.post('api/workflows', {
+      const response = await apiClient.post(api(''), {
         headers: allHeaders,
         body: { workflows: [{ yaml }] },
         responseType: 'json',
@@ -131,7 +139,7 @@ export const workflowsClient = (apiClient: ApiClientFixture, headers: Record<str
     },
 
     run: async (workflowId: string): Promise<string> => {
-      const response = await apiClient.post(`api/workflows/workflow/${workflowId}/run`, {
+      const response = await apiClient.post(api(`/workflow/${workflowId}/run`), {
         headers: allHeaders,
         body: { inputs: {} },
         responseType: 'json',

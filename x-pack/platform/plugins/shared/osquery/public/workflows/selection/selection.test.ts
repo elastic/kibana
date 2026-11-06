@@ -359,10 +359,7 @@ describe('osquery workflow step pickers', () => {
 
       it('offers each single-copy asset by its asset id', async () => {
         http.get.mockResolvedValue({
-          data: [
-            ...shared,
-            { ...network, copies: 2, unavailable_reason: 'duplicate_asset_name' },
-          ],
+          data: [...shared, { ...network, copies: 2, unavailable_reason: 'duplicate_asset_name' }],
         });
 
         const options = await createPrebuiltPackSelection(http).search(

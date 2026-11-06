@@ -14,6 +14,7 @@ import {
   createOsqueryAgentPolicy,
   createPack,
   createSystemIndicesClient,
+  createTestSpace,
   deleteAgentPolicy,
   deleteAnsweredQueries,
   deleteDispatchedActions,
@@ -22,6 +23,7 @@ import {
   deleteLoadedPrebuiltPacks,
   deletePack,
   deleteSystemIndicesUser,
+  deleteTestSpace,
   findPackActionDocs,
   indexFakeAgents,
   loadPrebuiltPacks,
@@ -31,7 +33,17 @@ import {
   type FakeAgent,
 } from '../fixtures';
 
-const AGENT: FakeAgent = { id: 'osq-wf-rp-agent', hostname: 'rp-host', platform: 'ubuntu' };
+/**
+ * Loading the prebuilt packs is space-wide, so that case runs in a space this spec owns: it never
+ * sees or deletes prebuilt packs a user (or another spec) loaded in the default space.
+ */
+const PREBUILT_SPACE = 'osq-wf-run-pack-prebuilt';
+const AGENT: FakeAgent = {
+  id: 'osq-wf-rp-agent',
+  hostname: 'rp-host',
+  platform: 'ubuntu',
+  namespaces: ['default', PREBUILT_SPACE],
+};
 const PREBUILT_PACK = 'forensic-persistence';
 
 const runPackStep = (pack: string, extra = '') => `  - name: p
@@ -69,8 +81,9 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
     placeholderPackId = await createPack(kbnClient, 'osq-wf-pack-placeholder', {
       host: { query: "SELECT '{{host.name}}' AS name", interval: 3600 },
     });
-    // A previous run (or another spec) may have left the prebuilt packs loaded in this space.
-    await deleteLoadedPrebuiltPacks(kbnClient);
+    await createTestSpace(kbnClient, PREBUILT_SPACE);
+    // The space is ours: a previous, interrupted run may have left prebuilt copies in it.
+    await deleteLoadedPrebuiltPacks(kbnClient, PREBUILT_SPACE);
     ({ apiKeyHeader: adminHeaders } = await requestAuth.getApiKeyForAdmin());
   });
 
@@ -81,7 +94,8 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
   apiTest.afterAll(async ({ esClient, kbnClient }) => {
     await deleteAnsweredQueries(esClient);
     await deleteDispatchedActions(systemEs, takeDispatchedActionIds());
-    await deleteLoadedPrebuiltPacks(kbnClient);
+    // Deleting the space removes the prebuilt copies loaded in it.
+    await deleteTestSpace(kbnClient, PREBUILT_SPACE);
     await deletePack(kbnClient, packId);
     await deletePack(kbnClient, placeholderPackId);
     await deleteFakeAgents(systemEs, [AGENT.id]);
@@ -252,28 +266,22 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
   apiTest(
     'PREBUILT_PACK_NOT_LOADED until prebuilt packs are loaded in the space',
     async ({ apiClient, kbnClient }) => {
-      const workflows = workflowsClient(apiClient, adminHeaders);
+      const workflows = workflowsClient(apiClient, adminHeaders, PREBUILT_SPACE);
       const workflowId = await workflows.create(
         'osq-wf-prebuilt',
         runPackStep(`prebuilt_pack: ${PREBUILT_PACK}`, '      wait_timeout: 10s')
       );
 
-      try {
-        const before = await workflows.waitForEnd(await workflows.run(workflowId));
-        expect(before.status).toBe('failed');
-        expect(stepOf(before, 'p').error?.details?.code).toBe('PREBUILT_PACK_NOT_LOADED');
+      const before = await workflows.waitForEnd(await workflows.run(workflowId));
+      expect(before.status).toBe('failed');
+      expect(stepOf(before, 'p').error?.details?.code).toBe('PREBUILT_PACK_NOT_LOADED');
 
-        await loadPrebuiltPacks(kbnClient);
+      await loadPrebuiltPacks(kbnClient, PREBUILT_SPACE);
 
-        const executionId = await workflows.run(workflowId);
-        const state = await workflows.waitForDispatch(executionId, 'p');
-        expect(state.queries.length).toBeGreaterThan(0);
-        await workflows.waitForEnd(executionId);
-      } finally {
-        // The load copies every prebuilt pack into the space: remove them again.
-        await deleteLoadedPrebuiltPacks(kbnClient);
-      }
-
+      const executionId = await workflows.run(workflowId);
+      const state = await workflows.waitForDispatch(executionId, 'p');
+      expect(state.queries.length).toBeGreaterThan(0);
+      await workflows.waitForEnd(executionId);
       await workflows.delete(workflowId);
     }
   );
