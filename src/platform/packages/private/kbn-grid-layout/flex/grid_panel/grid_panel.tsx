@@ -99,8 +99,10 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
           if (activePanel?.type === 'resize') {
             // pin siblings at their rendered width (not `flex-basis`, which would override `width`)
             // so they can't grow or shrink and shift the resized panel while resizing
-            ref.style.width = `${ref.getBoundingClientRect().width}px`;
+            const pinnedWidth = activePanel.panelWidths?.[currentPanel.id];
+            if (pinnedWidth !== undefined) ref.style.width = `${pinnedWidth}px`;
             ref.style.flexGrow = '0';
+            ref.style.flexShrink = '0';
           } else {
             ref.style.flexShrink = '';
             ref.classList.remove('kbnFlexPanel--active');

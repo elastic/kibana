@@ -30,6 +30,15 @@ export const startAction = (
 
   startingLayout = gridLayoutStateManager.gridLayout$.getValue();
   const panelRect = panelRef.getBoundingClientRect();
+  // measure every panel in a single read pass, before any styles change, so only one layout is forced
+  const panelWidths =
+    type === 'resize'
+      ? Object.fromEntries(
+          Object.entries(gridLayoutStateManager.panelRefs.current).flatMap(([id, element]) =>
+            element ? [[id, element.getBoundingClientRect().width]] : []
+          )
+        )
+      : undefined;
   gridLayoutStateManager.activePanelEvent$.next({
     type,
     id: panelId,
@@ -37,6 +46,7 @@ export const startAction = (
     sensorType: getSensorType(e),
     position: panelRect,
     sensorOffsets: getSensorOffsets(e, panelRect),
+    panelWidths,
   });
 };
 
