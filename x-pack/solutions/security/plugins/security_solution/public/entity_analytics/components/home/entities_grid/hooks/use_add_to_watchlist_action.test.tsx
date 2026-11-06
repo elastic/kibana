@@ -81,6 +81,35 @@ describe('useAddToWatchlistAction', () => {
     );
   });
 
+  describe('on a grouped row, whose watchlists field holds the whole group', () => {
+    const openFor = (groupedRow: Record<string, unknown>) => {
+      const { result } = renderHook(() => useAddToWatchlistAction(), { wrapper });
+      act(() => result.current.onAddToWatchlist?.(groupedRow));
+      render(<>{result.current.addToWatchlistModal}</>, { wrapper });
+      return mockModal.mock.calls[0][0].assignedWatchlistIds;
+    };
+
+    it("offers what the main entity is on itself, not the group's", () => {
+      expect(
+        openFor({
+          'entity.id': 'user:a',
+          'entity.attributes.watchlists': ['wl-1', 'wl-2'],
+          own_watchlists: ['wl-1'],
+        })
+      ).toEqual(['wl-1']);
+    });
+
+    it('treats a main entity that is on no watchlist as on none, though its aliases are', () => {
+      expect(
+        openFor({
+          'entity.id': 'user:a',
+          'entity.attributes.watchlists': ['wl-1', 'wl-2'],
+          own_watchlists: undefined,
+        })
+      ).toEqual([]);
+    });
+  });
+
   it('does not open the modal for a row without an entity id', () => {
     const { result } = renderHook(() => useAddToWatchlistAction(), { wrapper });
     act(() => result.current.onAddToWatchlist?.({}));

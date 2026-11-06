@@ -15,6 +15,8 @@ import {
   getMergedRowsByEntity,
   isFilteringByGroupValue,
   withEntityAliases,
+  OWN_WATCHLISTS_FIELD,
+  WATCHLISTS_FIELD,
   withResolvedEntityValues,
 } from './resolved_entities';
 
@@ -74,6 +76,32 @@ describe('withResolvedEntityValues', () => {
       }),
       row('host:b', { 'entity.name': 'b', 'asset.criticality': 'low_impact' }),
     ]);
+  });
+
+  it("keeps the main entity's own watchlists beside the group's", async () => {
+    // A is on watchlist 1 itself; its aliases put the group on watchlists 1 and 2.
+    const runQuery = jest.fn(async () => [row('host:a', { [WATCHLISTS_FIELD]: ['wl-1', 'wl-2'] })]);
+
+    const [grouped] = await withResolvedEntityValues(
+      [row('host:a', { [WATCHLISTS_FIELD]: ['wl-1'] })],
+      ARGS,
+      runQuery
+    );
+
+    expect(grouped[WATCHLISTS_FIELD]).toEqual(['wl-1', 'wl-2']);
+    expect(grouped[OWN_WATCHLISTS_FIELD]).toEqual(['wl-1']);
+  });
+
+  it('leaves the own watchlists out of a row that has no group', async () => {
+    const runQuery = jest.fn(async () => []);
+
+    const [alone] = await withResolvedEntityValues(
+      [row('host:b', { [WATCHLISTS_FIELD]: ['wl-1'] })],
+      ARGS,
+      runQuery
+    );
+
+    expect(OWN_WATCHLISTS_FIELD in alone).toBe(false);
   });
 
   it('reads the groups of every row in one query', async () => {

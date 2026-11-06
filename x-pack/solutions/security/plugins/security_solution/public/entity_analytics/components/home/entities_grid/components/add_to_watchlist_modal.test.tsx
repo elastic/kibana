@@ -210,6 +210,37 @@ describe('AddToWatchlistModal', () => {
     );
   });
 
+  it('shows every source when two share a label', () => {
+    mockTableData({
+      visibleRecords: [{ ...WATCHLISTS[0], source: 'Index, Index, Manual' }],
+    });
+    renderModal();
+    expect(screen.getAllByText('Index')).toHaveLength(2);
+    expect(screen.getByText('Manual')).toBeInTheDocument();
+  });
+
+  it('sorts names without regard to case', () => {
+    mockTableData({
+      visibleRecords: [
+        { id: 'z', name: 'Zeta', entityCount: 1, riskModifier: 1 },
+        { id: 'a', name: 'alpha', entityCount: 1, riskModifier: 1 },
+        { id: 'b', name: 'Beta', entityCount: 1, riskModifier: 1 },
+      ],
+    });
+    renderModal();
+
+    fireEvent.click(screen.getByRole('button', { name: /Watchlist Name/ }));
+
+    const order = screen
+      .getAllByTestId(/eaGridAddToWatchlistSelect-/)
+      .map((button) => button.getAttribute('data-test-subj'));
+    expect(order).toEqual([
+      'eaGridAddToWatchlistSelect-a',
+      'eaGridAddToWatchlistSelect-b',
+      'eaGridAddToWatchlistSelect-z',
+    ]);
+  });
+
   it('opens the create watchlist flyout from the toolbar button', () => {
     renderModal();
     fireEvent.click(screen.getByTestId('eaGridAddToWatchlistCreate'));

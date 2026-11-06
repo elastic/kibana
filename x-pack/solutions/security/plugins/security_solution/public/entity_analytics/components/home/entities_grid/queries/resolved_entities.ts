@@ -36,6 +36,11 @@ import type { EsqlRunner } from './types';
 
 export const SOURCE_FIELD = 'entity.source';
 export const WATCHLISTS_FIELD = 'entity.attributes.watchlists';
+/**
+ * Where a grouped row keeps the watchlists of its main entity alone: `WATCHLISTS_FIELD` holds the
+ * group's, so a row action that acts on the main entity reads this one.
+ */
+export const OWN_WATCHLISTS_FIELD = 'own_watchlists';
 const FIRST_SEEN_FIELD = 'entity.lifecycle.first_seen';
 const LAST_SEEN_FIELD = '`@timestamp`';
 
@@ -130,7 +135,7 @@ export const withResolvedEntityValues = async (
   const valuesById = new Map(groups.map((group) => [getEntityId(group), group]));
   return rows.map((row) => {
     const values = valuesById.get(getEntityId(row));
-    return values ? { ...row, ...values } : row;
+    return values ? { ...row, ...values, [OWN_WATCHLISTS_FIELD]: row[WATCHLISTS_FIELD] } : row;
   });
 };
 

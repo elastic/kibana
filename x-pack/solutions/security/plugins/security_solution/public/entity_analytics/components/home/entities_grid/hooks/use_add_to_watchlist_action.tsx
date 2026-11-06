@@ -13,10 +13,9 @@ import { GET_WATCHLISTS_QUERY_KEY } from '../../../../api/hooks/use_get_watchlis
 import { useWatchlistsPrivileges } from '../../../../api/hooks/use_watchlists_privileges';
 import { AddToWatchlistModal } from '../components/add_to_watchlist_modal';
 import type { Row } from '../common';
+import { OWN_WATCHLISTS_FIELD, WATCHLISTS_FIELD } from '../queries/resolved_entities';
 import { getEntityId } from '../common';
 import { useInvalidateEntityGrid } from './use_invalidate_entity_grid';
-
-const WATCHLISTS_FIELD = 'entity.attributes.watchlists';
 
 interface Target {
   entityId: string;
@@ -42,7 +41,11 @@ export const useAddToWatchlistAction = () => {
     if (!entityId) return;
     setTarget({
       entityId,
-      assignedWatchlistIds: toEntitySourceArray(row[WATCHLISTS_FIELD]),
+      // A grouped row's own field holds the whole group's watchlists, but the action acts on the
+      // main entity alone, so what is already added is the main entity's own.
+      assignedWatchlistIds: toEntitySourceArray(
+        OWN_WATCHLISTS_FIELD in row ? row[OWN_WATCHLISTS_FIELD] : row[WATCHLISTS_FIELD]
+      ),
     });
   }, []);
 

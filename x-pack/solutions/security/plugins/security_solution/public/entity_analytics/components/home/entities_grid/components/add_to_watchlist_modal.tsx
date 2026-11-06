@@ -129,6 +129,9 @@ const compareBy = (field: SortField, direction: 'asc' | 'desc') => {
     // Missing values go last whichever way the column is sorted.
     if (left == null) return 1;
     if (right == null) return -1;
+    if (typeof left === 'string' && typeof right === 'string') {
+      return left.localeCompare(right) * factor;
+    }
     return (left < right ? -1 : left > right ? 1 : 0) * factor;
   };
 };
@@ -149,8 +152,9 @@ const COLUMN_OVERRIDES: Record<string, Partial<EuiBasicTableColumn<WatchlistTabl
         // Table cells are flex containers: one block keeps the sources stacked, and its minimum
         // width stops a narrow window from breaking them mid-word.
         <div style={{ minInlineSize: '11em' }}>
-          {value.split(', ').map((source) => (
-            <div key={source}>{source}</div>
+          {value.split(', ').map((source, index) => (
+            // Two sources can share a label (every index source is "Index").
+            <div key={`${source}-${index}`}>{source}</div>
           ))}
         </div>
       ) : (
