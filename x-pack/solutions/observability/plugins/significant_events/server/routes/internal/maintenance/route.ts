@@ -20,6 +20,7 @@ import {
   getDetectionEngineAccountId,
 } from '../../../lib/service_accounts/detection_engine_account';
 import { StatusError } from '../../../lib/errors/status_error';
+import { reconcileSettingsBackedWorkflows } from '../../../lib/workflows/reconcile_settings_backed_workflows';
 import type { SignificantEventsServer } from '../../../types';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
@@ -98,14 +99,42 @@ const resumeRoute = createServerRoute({
     server,
     getScopedClients,
     maintenanceService,
+    continuousOnboardingWorkflowService,
+    significantEventsScheduledWorkflowsService,
   }): Promise<SignificantEventsMaintenanceSummary> => {
-    const { licensing } = await getScopedClients({ request });
+    const { licensing, uiSettingsClient } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
 
     await assertCanSwitchBoundWorkflowsOn({ server, request, action: 'Resuming' });
 
     const updatedBy = server.core.security.authc.getCurrentUser(request)?.username;
-    return maintenanceService.resume({ request, updatedBy });
+    const summary = await maintenanceService.resume({ request, updatedBy });
+
+    // A space set up while paused has no bound documents for the settings Resume turns back on,
+    // and one rebound while paused still has the previous account's. Resume only re-enables what
+    // Pause recorded, so install them from the restored settings here.
+    if (
+      summary.state === 'enabled' &&
+      (await getDetectionEngineAccountId({ core: server.core, spaceId: request.spaceId })) !==
+        undefined
+    ) {
+      await reconcileSettingsBackedWorkflows({
+        uiSettingsClient,
+        continuousOnboardingService: continuousOnboardingWorkflowService,
+        scheduledDiscoveryService: significantEventsScheduledWorkflowsService,
+        request,
+        spaceId: request.spaceId,
+      }).catch((error) => {
+        summary.partialFailures.push({
+          target: 'workflows',
+          spaceId: request.spaceId,
+          error: `Installing continuous onboarding or scheduled discovery failed: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        });
+      });
+    }
+    return summary;
   },
 });
 

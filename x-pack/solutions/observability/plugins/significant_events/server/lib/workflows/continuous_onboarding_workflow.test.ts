@@ -107,8 +107,8 @@ describe('createContinuousOnboardingWorkflowService', () => {
   let logger: Logger;
   let getWorkflow: jest.Mock;
   let managementApi: jest.Mocked<WorkflowsServerPluginSetup['management']>;
-  let installer: { install: jest.Mock; uninstall: jest.Mock; disable: jest.Mock };
-  let managedWorkflowsClient: { install: jest.Mock; uninstall: jest.Mock };
+  let installer: { install: jest.Mock; disable: jest.Mock };
+  let managedWorkflowsClient: { install: jest.Mock };
 
   beforeEach(() => {
     logger = {
@@ -129,11 +129,9 @@ describe('createContinuousOnboardingWorkflowService', () => {
     } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>;
     managedWorkflowsClient = {
       install: jest.fn().mockResolvedValue(undefined),
-      uninstall: jest.fn().mockResolvedValue(undefined),
     };
     installer = {
       install: jest.fn().mockResolvedValue(undefined),
-      uninstall: jest.fn().mockResolvedValue(undefined),
       disable: jest.fn().mockResolvedValue(true),
     };
   });
@@ -203,7 +201,6 @@ describe('createContinuousOnboardingWorkflowService', () => {
     expect(managementApi.updateWorkflow).not.toHaveBeenCalled();
     expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith('exec-1', spaceId, request);
     expect(installer.install).not.toHaveBeenCalled();
-    expect(managedWorkflowsClient.uninstall).not.toHaveBeenCalled();
   });
 
   it('can disable future schedules without draining executions', async () => {

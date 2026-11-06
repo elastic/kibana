@@ -91,7 +91,6 @@ const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => {
 
 const createMockInstaller = () => ({
   install: jest.fn().mockResolvedValue(undefined),
-  uninstall: jest.fn().mockResolvedValue(undefined),
   disable: jest.fn().mockResolvedValue(true),
 });
 
@@ -318,7 +317,7 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
     expect(managementApi.updateWorkflow).not.toHaveBeenCalled();
   });
 
-  it('disables, drains, and uninstalls per-space scheduled workflows', async () => {
+  it('disables and drains per-space scheduled workflows and keeps their documents', async () => {
     const managementApi = createMockManagementApi({
       getWorkflow: jest.fn().mockResolvedValue({ enabled: true }),
       getWorkflowExecutions: jest
@@ -367,13 +366,7 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
       'space-a',
       request
     );
-    expect(managedWorkflowsClient.uninstall).toHaveBeenCalledWith({
-      spaceId: 'space-a',
-      workflowId: SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-    });
-    expect(managedWorkflowsClient.uninstall).toHaveBeenCalledWith({
-      spaceId: 'space-a',
-      workflowId: SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
-    });
+    // Deleting a bound workflow needs `manage_security`, so the documents stay, disabled.
+    expect(managedWorkflowsClient.disable).toHaveBeenCalledTimes(2);
   });
 });
