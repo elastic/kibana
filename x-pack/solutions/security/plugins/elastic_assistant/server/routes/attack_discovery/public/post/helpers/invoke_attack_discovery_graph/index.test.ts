@@ -18,11 +18,17 @@ import { getAttackDiscoveryPrompts } from '../../../../../../lib/attack_discover
 import { throwIfErrorCountsExceeded } from '../throw_if_error_counts_exceeded';
 import { throwIfInvalidAnonymization } from '../throw_if_invalid_anonymization';
 
-jest.mock('@kbn/langchain/server', () => ({
-  ActionsClientLlm: jest.fn(),
-  InferenceClientLlm: jest.fn(),
-  getLangSmithTracer: jest.fn().mockReturnValue([]),
-}));
+jest.mock('@kbn/langchain/server', () => {
+  const { isModelRefusalError, throwIfModelRefusal } = jest.requireActual('@kbn/langchain/server');
+
+  return {
+    ActionsClientLlm: jest.fn(),
+    InferenceClientLlm: jest.fn(),
+    getLangSmithTracer: jest.fn().mockReturnValue([]),
+    isModelRefusalError,
+    throwIfModelRefusal,
+  };
+});
 
 jest.mock('../../../../../../lib/attack_discovery/graphs/default_attack_discovery_graph', () => ({
   getDefaultAttackDiscoveryGraph: jest.fn(),

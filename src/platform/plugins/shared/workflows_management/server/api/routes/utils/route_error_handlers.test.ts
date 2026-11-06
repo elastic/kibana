@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { WorkflowDisabledError } from '@kbn/workflows/common/errors';
@@ -80,6 +81,30 @@ describe('handleRouteError', () => {
     expect(response.badRequest).toHaveBeenCalledWith({
       body: {
         message: WORKFLOW_HISTORY_PAGINATION_EXCEEDED_MESSAGE,
+      },
+    });
+  });
+
+  it('returns bad request without the ES request body when the result window is exceeded', () => {
+    const response = httpServerMock.createResponseFactory();
+    const error = new errors.ResponseError({
+      statusCode: 400,
+      body: {
+        error: {
+          type: 'search_phase_execution_exception',
+          reason: 'Result window is too large, from + size must be less than or equal to: [10000]',
+        },
+      },
+      headers: {},
+      warnings: [],
+      meta: {} as any,
+    });
+
+    handleRouteError(response, error);
+
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: {
+        message: 'Pagination exceeds the maximum result window. Use a smaller page or size.',
       },
     });
   });

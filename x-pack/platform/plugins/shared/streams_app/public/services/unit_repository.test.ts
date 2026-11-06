@@ -7,6 +7,7 @@
 
 import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import type { StreamsUnit } from '@kbn/streams-schema';
+import { disconnectRouteFromTarget } from './unit_connections';
 import { createDefaultUnit, createUnitRepository } from './unit_repository';
 
 const createNotFoundError = (): Error =>
@@ -75,6 +76,106 @@ describe('unit repository', () => {
         path: { id: STREAMS_DEFAULT_UNIT_ID },
         body: storedUnit,
       },
+      signal: null,
+    });
+  });
+
+  it('drops unconnected routing rules before saving', async () => {
+    const fetch = jest.fn().mockResolvedValue({ acknowledged: true });
+    const repository = createUnitRepository({ streamsRepositoryClient: { fetch } as never });
+    const routedUnit: StreamsUnit.GetResponse = {
+      ...storedUnit,
+      unit: {
+        ...storedUnit.unit,
+        pipelines: [
+          {
+            id: 'main',
+            supported_telemetry: ['logs'],
+            config: [
+              { name: 'sources', value: ['otlp-input'] },
+              {
+                name: 'routes',
+                value: [{ when: 'true', destinations: [] }, { destinations: ['es-prod'] }],
+              },
+            ],
+          },
+        ],
+      },
+    };
+    const savedUnit: StreamsUnit.GetResponse = {
+      ...routedUnit,
+      unit: {
+        ...routedUnit.unit,
+        pipelines: [
+          {
+            id: 'main',
+            supported_telemetry: ['logs'],
+            config: [
+              { name: 'sources', value: ['otlp-input'] },
+              { name: 'routes', value: [{ destinations: ['es-prod'] }] },
+            ],
+          },
+        ],
+      },
+    };
+
+    await expect(repository.persist(routedUnit)).resolves.toEqual(savedUnit);
+    expect(fetch).toHaveBeenCalledWith('PUT /internal/streams/unit/{id}', {
+      params: { path: { id: STREAMS_DEFAULT_UNIT_ID }, body: savedUnit },
+      signal: null,
+    });
+  });
+
+  it('narrows a routing pipeline to the signals of its remaining routes when a disconnected rule is saved', async () => {
+    const fetch = jest.fn().mockResolvedValue({ acknowledged: true });
+    const repository = createUnitRepository({ streamsRepositoryClient: { fetch } as never });
+    const routedUnit: StreamsUnit.GetResponse = {
+      ...storedUnit,
+      unit: {
+        ...storedUnit.unit,
+        destinations: [
+          { id: 'es-prod', type: 'debug', supported_telemetry: ['logs'] },
+          { id: 'es-traces', type: 'debug', supported_telemetry: ['traces'] },
+        ],
+        pipelines: [
+          {
+            id: 'main',
+            supported_telemetry: ['logs', 'traces'],
+            config: [
+              { name: 'sources', value: ['otlp-input'] },
+              {
+                name: 'routes',
+                value: [
+                  { telemetry: ['traces'], destinations: ['es-traces'] },
+                  { telemetry: ['logs'], destinations: ['es-prod'] },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    };
+    const staged = disconnectRouteFromTarget(
+      routedUnit,
+      { pipelineId: 'main', ruleIndex: 0 },
+      { kind: 'destination', id: 'es-traces' }
+    );
+    expect(staged.unit.pipelines[0]?.supported_telemetry).toEqual(['logs', 'traces']);
+
+    const saved = await repository.persist(staged);
+
+    expect(saved.unit.pipelines).toEqual([
+      {
+        id: 'main',
+        supported_telemetry: ['logs'],
+        config: [
+          { name: 'sources', value: ['otlp-input'] },
+          { name: 'routes', value: [{ telemetry: ['logs'], destinations: ['es-prod'] }] },
+        ],
+      },
+    ]);
+    expect(fetch).toHaveBeenCalledWith('PUT /internal/streams/unit/{id}', {
+      params: { path: { id: STREAMS_DEFAULT_UNIT_ID }, body: saved },
       signal: null,
     });
   });

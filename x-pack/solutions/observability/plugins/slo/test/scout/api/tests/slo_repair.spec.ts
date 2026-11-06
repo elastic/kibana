@@ -24,8 +24,8 @@ apiTest.describe(
     let headers: Record<string, string>;
     let transformHelper: SloTransformAssertions;
 
-    apiTest.beforeAll(async ({ apiClient, esClient, samlAuth, requestAuth, sloHostsDataForge }) => {
-      await sloHostsDataForge.setup();
+    apiTest.beforeAll(async ({ apiClient, apiServices, esClient, samlAuth, requestAuth }) => {
+      await apiServices.slo.deleteAllSLOs();
       const { apiKeyHeader } = await requestAuth.getApiKey('admin');
       headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
       transformHelper = createSloTransformAssertions(apiClient, esClient, async () =>
@@ -33,8 +33,8 @@ apiTest.describe(
       );
     });
 
-    apiTest.afterAll(async ({ sloHostsDataForge }) => {
-      await sloHostsDataForge.teardown();
+    apiTest.afterAll(async ({ apiServices }) => {
+      await apiServices.slo.deleteAllSLOs();
     });
 
     apiTest(

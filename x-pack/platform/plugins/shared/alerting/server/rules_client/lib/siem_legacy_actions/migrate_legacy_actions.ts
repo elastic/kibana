@@ -11,7 +11,11 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 import type { SavedObject } from '@kbn/core/server';
 import type { RulesClientContext } from '../..';
 import type { RawRuleAction, RawRule } from '../../../types';
-import { transformAndDeleteLegacyActions } from './transform_and_delete_legacy_actions';
+import {
+  deleteMigratedSidecars,
+  deleteNotificationRulesOfRules,
+  findAndTransformLegacyActions,
+} from './transform_and_delete_legacy_actions';
 
 interface BulkMigrateLegacyActionsParams {
   context: RulesClientContext;
@@ -21,11 +25,14 @@ interface BulkMigrateLegacyActionsParams {
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
- * migrates SIEM legacy actions and merges rule actions and references
+ * migrates SIEM legacy actions and merges rule actions and references.
+ * The migrated legacy objects are NOT deleted here: once the returned rules are saved, the caller must call
+ * `deleteLegacyActionsForRules` with the ids of the rules that saved successfully. Deleting earlier loses the
+ * actions when the save fails, for example on a version conflict.
  * @param context RulesClient context
  * @param rules Rules to check for legacy actions
  * @param skipActionsValidation Skip validating actions after transformation
- * @returns IDs of rules that had actions migrated
+ * @returns IDs of rules that had actions migrated, to be cleaned up after they are saved
  */
 export const bulkMigrateLegacyActions = async ({
   context,
@@ -37,11 +44,17 @@ export const bulkMigrateLegacyActions = async ({
     const siemRulesMap: Map<string, SavedObject<RawRule>> = new Map();
     siemRules.forEach((rule) => siemRulesMap.set(rule.id, rule));
 
-    const transformed = await transformAndDeleteLegacyActions(
-      context,
-      siemRules,
-      skipActionsValidation
-    );
+    const {
+      transformedActionsByRuleId: transformed,
+      sidecarIdsToDeleteNow,
+      ruleIdsToDeleteNotificationRulesOf,
+    } = await findAndTransformLegacyActions(context, siemRules, skipActionsValidation);
+
+    // nothing is waiting to be saved from these, so they can be deleted now
+    await Promise.all([
+      deleteMigratedSidecars(context, sidecarIdsToDeleteNow),
+      deleteNotificationRulesOfRules(context, ruleIdsToDeleteNotificationRulesOf),
+    ]);
 
     Object.keys(transformed).forEach((ruleId) => {
       const rule = siemRulesMap.get(ruleId);
@@ -72,9 +85,11 @@ export const bulkMigrateLegacyActions = async ({
       // put frequencies into existing actions
       // the situation when both action in rule and legacy exist should be rare one
       // but if it happens, we put frequency in existing actions per-action level
+      // an action that has a frequency already keeps it: a migration retried after a failed cleanup
+      // must not overwrite the frequencies saved since the first one
       const existingActionsWithFrequencies: RawRuleAction[] = actions.map((action) => ({
         ...action,
-        frequency: {
+        frequency: action.frequency ?? {
           summary: true,
           notifyWhen: rule.attributes.notifyWhen ?? 'onActiveAlert',
           throttle: rule.attributes.throttle ?? null,

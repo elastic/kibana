@@ -81,12 +81,12 @@ export const createSourceDeleteTool = ({
   availability: createSignificantEventsAvailability({
     server,
     logger,
-    requireManagePrivilege: true,
+    requireSourceChangePrivilege: true,
   }),
   handler: async ({ source: slugOrId }, { request }) =>
     runSourceTool({
       action: 'delete source',
-      privilege: 'manage',
+      privilege: 'changeSources',
       request,
       getScopedClients,
       server,
