@@ -95,8 +95,6 @@ export class CycleHookRuntime {
    * registered before it: that one can only run at cycle 0, and the early hook then takes its turn
    * there. Early calls run one after another; `dispatch` waits for them and lands their notes at
    * the hooks' positions. `summary` is the compaction summary the first model call will use.
-   *
-   * All of it is traced under one `cycle_hooks` span, which stays open until the early calls end.
    */
   async start(seedSteps: ConversationRoundStep[] = [], summary?: CompactionSummary): Promise<void> {
     const { execution } = this.deps;
