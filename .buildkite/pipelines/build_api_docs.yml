@@ -10,7 +10,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     timeout_in_minutes: 70
 
   - command: .buildkite/scripts/steps/api_docs/build_api_docs.sh
@@ -21,7 +21,7 @@ steps:
       provider: gcp
       machineType: n2-highmem-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     key: build_api_docs
     timeout_in_minutes: 50
     retry:
