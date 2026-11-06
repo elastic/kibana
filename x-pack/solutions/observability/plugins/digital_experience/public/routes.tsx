@@ -67,6 +67,12 @@ const digitalExperienceRoutes = {
             // Kept in the URL by `useSessionsListQuery`, so a link or reload shows the same list.
             params: t.type({ query: sessionsListQueryRt }),
           },
+          '/{serviceName}/errors': {
+            element: <ApplicationRoute tab="errors" />,
+          },
+          '/{serviceName}/network': {
+            element: <ApplicationRoute tab="network" />,
+          },
           '/{serviceName}': {
             element: <ApplicationRoute tab="overview" />,
           },

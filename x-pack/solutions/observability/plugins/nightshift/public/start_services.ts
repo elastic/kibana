@@ -6,7 +6,7 @@
  */
 
 import type { AppUpdater, ChromeStart, PluginInitializerContext } from '@kbn/core/public';
-import { catchError, from, map, of, Subscription, type BehaviorSubject } from 'rxjs';
+import { catchError, from, map, of, Subscription, tap, type BehaviorSubject } from 'rxjs';
 import type { FocusedSignificantEventService } from './chat/focused_significant_event_service';
 import type { NightshiftStartDependencies } from './types';
 
@@ -17,12 +17,14 @@ export const startNightshiftServices = ({
   context,
   chrome,
   focusedSignificantEventService,
+  onAvailabilityChange,
 }: {
   pluginsStart: NightshiftStartDependencies;
   appUpdater$: BehaviorSubject<AppUpdater>;
   context: PluginInitializerContext;
   chrome: ChromeStart;
   focusedSignificantEventService: FocusedSignificantEventService;
+  onAvailabilityChange: (isAvailable: boolean) => void;
 }): Subscription => {
   const subscription = new Subscription();
 
@@ -43,6 +45,7 @@ export const startNightshiftServices = ({
             .error(`Failed to fetch Significant Events availability: ${error}`);
           return of(false);
         }),
+        tap(onAvailabilityChange),
         map(
           (isAvailable): AppUpdater =>
             (app) => ({
