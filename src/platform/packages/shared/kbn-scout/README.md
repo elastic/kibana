@@ -782,7 +782,8 @@ are settings there rather than questions, so a run starts with test results only
 answer. `Esc` goes back a question at a time, `Ctrl+C` stops the tests without closing the session.
 
 In any list: type to filter, `↑`/`↓` to move, `Enter` to confirm, and in multi-select `Space` to
-toggle and `Ctrl+A` to select all. Questions with a single answer are skipped, and your settings
+toggle and `Ctrl+A` to select all. In the spec list, the specs you changed are marked `changed`
+and start selected, whichever way you got to the config. Questions with a single answer are skipped, and your settings
 carry over to the next run.
 
 Pins, the last run and your settings are stored in `KIBANA_REPO_ROOT/.scout/pick/pins.json`, so they are

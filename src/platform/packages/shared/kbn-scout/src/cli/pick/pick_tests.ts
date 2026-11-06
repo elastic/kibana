@@ -12,11 +12,24 @@ import chalk from 'chalk';
 import { ScoutTestTarget } from '@kbn/scout-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ChangedConfig, PickableConfig } from './configs';
-import { getChangedConfigs, getChangedFiles, getConfigs, getSpecs } from './configs';
+import {
+  getChangedConfigs,
+  getChangedFiles,
+  getChangedSpecs,
+  getConfigs,
+  getSpecs,
+} from './configs';
 import { describeRun, describeServerSet, describeTarget, formatConfig, plural } from './labels';
 import type { PinnedConfig } from './pins';
 import { readState, toPinned, updateState } from './pins';
-import { getShownPrompts, GoBack, multiSelect, select } from './prompt';
+import {
+  forgetAnswer,
+  forgetAnswers,
+  getShownPrompts,
+  GoBack,
+  multiSelect,
+  select,
+} from './prompt';
 import type { RunningServers } from './servers';
 import { getRunningServers, isServingConfig } from './servers';
 import { getTargetCoverage, isManifestOutdated, MANIFEST_UPDATE_CMD } from './targets';
@@ -85,15 +98,20 @@ const runSteps = async <S extends string>(
       }
       if (next === first) {
         asked.length = 0;
+        forgetAnswers();
       }
       step = next;
     } catch (error) {
       if (!(error instanceof GoBack)) {
         throw error;
       }
+      // the question Esc goes back to is about to be asked again
+      forgetAnswer();
       step = asked.pop() ?? step;
     }
   }
+  // what follows the questions, the run and the menu after it, is not a step to go back to
+  forgetAnswers();
 };
 
 type Step =
@@ -267,9 +285,16 @@ export const pickTests = async (log: ToolingLog): Promise<Selection> => {
     },
     specs: async () => {
       const configDir = Path.dirname(getConfig().path);
+      // the ones you are working on are the ones you most likely came here to run
+      const changed = await getChangedSpecs(configSpecs);
       specs = await multiSelect(
         'Specs',
-        configSpecs.map((spec) => ({ label: Path.relative(configDir, spec), value: spec }))
+        configSpecs.map((spec) => ({
+          label: Path.relative(configDir, spec),
+          value: spec,
+          // preselected, so Enter runs what you edited and Space adds the rest
+          ...(changed.has(spec) ? { hint: chalk.yellow('changed'), checked: true } : {}),
+        }))
       );
       return 'target';
     },

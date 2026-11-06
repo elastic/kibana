@@ -34,6 +34,23 @@ export class GoBack extends Error {}
 let shownPrompts = 0;
 export const getShownPrompts = () => shownPrompts;
 
+/**
+ * The questions answered so far, so each prompt can name the one Esc goes back to. Only
+ * answered prompts count: a question skipped because it had a single answer, or one left by
+ * pressing Esc, is not somewhere Esc can return to.
+ */
+const answered: string[] = [];
+
+/** Called when Esc goes back to the last question, which is about to be asked again */
+export const forgetAnswer = () => {
+  answered.pop();
+};
+
+/** Called when the questions start over, so Esc stops naming one of the old ones */
+export const forgetAnswers = () => {
+  answered.length = 0;
+};
+
 const plain = stripVTControlCharacters;
 
 const matches = ({ label, hint }: Choice<unknown>, query: string) => {
@@ -66,6 +83,8 @@ const prompt = <T>({ message, choices, multiple = false }: PromptOptions<T>): Pr
   }
 
   shownPrompts++;
+  const back = answered[answered.length - 1];
+  const escHint = back ? `esc back to ${plain(back).replace(/\?$/, '')}` : 'esc back';
   return new Promise((resolve, reject) => {
     let query = '';
     let cursor = 0;
@@ -114,8 +133,8 @@ const prompt = <T>({ message, choices, multiple = false }: PromptOptions<T>): Pr
           : []),
         chalk.dim(
           multiple
-            ? '  ↑↓ move · space select · ctrl+a select all · enter confirm · esc back'
-            : '  ↑↓ move · enter select · esc back'
+            ? `  ↑↓ move · space select · ctrl+a select all · enter confirm · ${escHint}`
+            : `  ↑↓ move · enter select · ${escHint}`
         ),
       ];
 
@@ -135,6 +154,7 @@ const prompt = <T>({ message, choices, multiple = false }: PromptOptions<T>): Pr
 
     const finish = (picked: Array<Choice<T>>) => {
       close();
+      answered.push(message);
       printAnswer(message, picked);
       resolve(picked.map(({ value }) => value));
     };

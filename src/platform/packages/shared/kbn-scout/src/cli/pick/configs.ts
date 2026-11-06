@@ -103,6 +103,12 @@ export const getChangedFiles = async (): Promise<string[]> => {
   );
 };
 
+/** Of a config's specs, the ones changed on this branch or not committed yet */
+export const getChangedSpecs = async (specs: string[]): Promise<Set<string>> => {
+  const changed = new Set(await getChangedFiles());
+  return new Set(specs.filter((spec) => changed.has(spec)));
+};
+
 export interface ChangedConfig {
   config: PickableConfig;
   specs: string[];
