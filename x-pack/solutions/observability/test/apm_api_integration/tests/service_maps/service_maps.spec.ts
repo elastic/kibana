@@ -128,18 +128,8 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
             });
           });
           it('returns the correct anomaly stats', () => {
-            const dataWithAnomalies = getElements(response).filter(
-              (el) => !isEmpty((el.data as ServiceConnectionNode).serviceAnomalyStats)
-            );
-            expect(dataWithAnomalies).not.to.be.empty();
             // The set of nodes comes from a sampled set of traces, so which services are present
             // varies between runs. Assert the stats by service identity instead of count/position.
-            const statsByService = new Map(
-              dataWithAnomalies.map(({ data }) => {
-                const node = data as ServiceConnectionNode;
-                return [node['service.name'], node.serviceAnomalyStats];
-              })
-            );
             const expectedStats = {
               'opbeans-dotnet': {
                 actualValue: 868025.86875,
@@ -166,12 +156,19 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
                 transactionType: 'request',
               },
             };
-            Object.entries(expectedStats).forEach(([serviceName, { actualValue, ...stats }]) => {
-              const actual = statsByService.get(serviceName);
-              if (actual) {
-                expect(omit(actual, 'actualValue')).to.eql(stats);
-                expect(actual.actualValue).to.be.within(actualValue - 0.001, actualValue + 0.001);
-              }
+            const sampledNodes = getElements(response)
+              .map(({ data }) => data as ServiceConnectionNode)
+              .filter((node) => Object.keys(expectedStats).includes(node['service.name']));
+            expect(sampledNodes).not.to.be.empty();
+
+            sampledNodes.forEach((node) => {
+              const { actualValue, ...stats } =
+                expectedStats[node['service.name'] as keyof typeof expectedStats];
+              expect(omit(node.serviceAnomalyStats, 'actualValue')).to.eql(stats);
+              expect(node.serviceAnomalyStats?.actualValue).to.be.within(
+                actualValue - 0.001,
+                actualValue + 0.001
+              );
             });
           });
 
