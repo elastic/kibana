@@ -12,7 +12,7 @@ import { CHRYSALIS_PARITY_AGENT } from './chrysalis_parity_agent';
 import { seedProfile } from './chrysalis_seed';
 import type { AgentProfile } from '../agent_profile';
 import { STUB_CONNECTOR_ID } from './stub_connector';
-import { SINK_ORIGIN, startStubSink, type StubSink } from './stub_sink';
+import { SINK_ORIGIN, startStubSink } from './stub_sink';
 
 export { STUB_CONNECTOR_ID };
 
@@ -153,9 +153,6 @@ const createdToolIds = new Set<string>();
  */
 const createdWorkflowIds = new Set<string>();
 
-/** The local sink this process started, if it did not find one already running. */
-let stubSink: StubSink | undefined;
-
 /**
  * True only when the connector at STUB_CONNECTOR_ID is known to be an `.http`
  * connector aimed at the local sink, either because this process just created it
@@ -245,13 +242,14 @@ async function isExistingStubTrustworthy({ kbnClient, log }: SeedToolsOptions): 
  * the base URL is a loopback catch-all sink (`stub_sink.ts`) that answers 200
  * for every path; the request never leaves the machine.
  *
- * The connector is left in place by cleanup: its id is fixed and it is harmless.
+ * The sink is started once per process and never closed by callers (see
+ * `startStubSink`). The connector is left in place by cleanup: its id is fixed and it is harmless.
  * An existing connector at the id is inspected before it is reused.
  */
 async function createStubConnectorIfMissing({ kbnClient, log }: SeedToolsOptions): Promise<void> {
   stubConnectorVerified = false;
   try {
-    stubSink = await startStubSink();
+    await startStubSink();
   } catch (error) {
     log.warning(
       `[persona-matrix] stub sink unavailable, WorkflowValidity will skip runs: ${error}`
@@ -549,11 +547,10 @@ export async function cleanupPersonaMatrixTools({
       });
   }
 
-  // The stub connector stays: its id is fixed and it is harmless. Only the
-  // sink this process started is stopped.
-  const sink = stubSink;
-  stubSink = undefined;
-  await sink?.close();
+  // The stub connector and the sink stay. The connector id is fixed and the sink
+  // is shared by every worker on the host, so a per-worker cleanup must not close
+  // it: that would break workers still running. It is unref'd and dies with the
+  // process.
 
   if (createdParityAgent) {
     await kbnClient

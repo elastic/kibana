@@ -21,6 +21,7 @@ export interface StubSink {
   origin: string;
   /** False when an already-running sink was reused; `close` is then a no-op. */
   owned: boolean;
+  /** For tests only: production callers never close the shared sink. */
   close: () => Promise<void>;
 }
 
@@ -64,7 +65,18 @@ const isOurSink = (origin: string): Promise<boolean> =>
  *
  * Idempotent across workers and runs: when the port is taken by our own sink it
  * is reused (and not closed by this caller); when it is taken by anything else
- * the call rejects. The server is unref'd so it never keeps a process alive.
+ * the call rejects.
+ *
+ * Callers never close the sink. It is shared by every worker on the host, and
+ * the first worker to finish would pull it out from under the rest. The server
+ * is unref'd, so it never keeps a process alive and dies with its owner.
+ *
+ * Marker-header trust: the reuse check only proves the holder of the port
+ * answered with `x-persona-matrix-sink: 1`. It does not prove the holder is our
+ * process; any local process can send that header. That is acceptable because
+ * the sink is loopback-only and only the stub connector is aimed at it: the
+ * worst a spoofing process can do is receive (or answer) the stub's requests,
+ * which carry no credentials.
  */
 export const startStubSink = async ({
   port = SINK_PORT,

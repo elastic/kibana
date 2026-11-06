@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parse } from 'yaml';
+import { parse, stringify } from 'yaml';
 import type { HttpHandler } from '@kbn/core/public';
 import type { Evaluator } from '@kbn/evals';
 import { STUB_CONNECTOR_ID } from '../fixtures/stub_connector';
@@ -28,6 +28,12 @@ export type WorkflowValidityOutcome =
 const API_VERSION = '2023-10-31';
 // `POST /api/workflows/validate` is an internal route.
 const INTERNAL_API_VERSION = '1';
+const API_VERSION_HEADER = 'elastic-api-version';
+// The fixture `fetch` (`httpHandlerFromKbnClient`) ignores `options.version`, so
+// the version is sent as an explicit header. Without it an internal route answers
+// 400 under `--dev`.
+const PUBLIC_HEADERS = { [API_VERSION_HEADER]: API_VERSION };
+const INTERNAL_HEADERS = { [API_VERSION_HEADER]: INTERNAL_API_VERSION };
 const VALIDATE_PATH = '/api/workflows/validate';
 const WORKFLOWS_PATH = '/api/workflows/workflow';
 const EXECUTIONS_PATH = '/api/workflows/executions';
@@ -134,9 +140,18 @@ const errorMessage = (error: unknown): string =>
 
 const CONNECTOR_ID_KEY = 'connector-id';
 // Step types that cannot reach beyond the stack. `http` is further restricted
-// to the stub connector; `data.*` are in-process transforms.
-const SAFE_STEP_TYPES = new Set(['console', 'wait', 'if', 'foreach']);
-const DATA_STEP_PREFIX = 'data.';
+// to the stub connector; the `data.*` entries are in-process transforms. The set
+// is explicit so a new `data.*` step type is skipped until it is reviewed.
+const SAFE_STEP_TYPES = new Set([
+  'console',
+  'wait',
+  'if',
+  'foreach',
+  'data.set',
+  'data.map',
+  'data.filter',
+  'data.dedupe',
+]);
 // Arrays under these keys hold steps (`parallel.branches[].steps` reaches
 // `steps` through the branch record).
 const STEP_ARRAY_KEYS = new Set(['steps', 'else', 'fallback']);
@@ -156,12 +171,6 @@ const ROOT_METADATA_KEYS = new Set([
   'outputs',
 ]);
 
-const containsKey = (node: unknown, key: string): boolean => {
-  if (Array.isArray(node)) return node.some((child) => containsKey(child, key));
-  if (!isRecord(node)) return false;
-  return Object.entries(node).some(([k, v]) => k === key || containsKey(v, key));
-};
-
 export interface StepAudit {
   /** Steps that must not run, as `<name>:<type>` plus the reason. */
   unsafe: string[];
@@ -173,8 +182,11 @@ export interface StepAudit {
  * Step-type allowlist over every step, however deeply nested (`steps`, `else`,
  * `fallback`, `branches[].steps`, any other array of typed records). A workflow
  * is safe to run only when it contains nothing but: `http` steps bound to the
- * stub connector id with no `url` anywhere under them, `console`, `data.*`,
- * `wait`, `if` and `foreach`. Every other type, including `kibana.request`,
+ * stub connector id whose `with` sets no `url`, `console`, `data.set`,
+ * `data.map`, `data.filter`, `data.dedupe`, `wait`, `if` and `foreach`.
+ * The `.http` params schema is strict and `url` is the only field that replaces
+ * the connector's base URL: `path` is joined onto it, `headers` do not change
+ * the connection target, and a `url` inside `with.body` is request payload. Every other type, including `kibana.request`,
  * `workflow.execute*`, HITL steps and connector-typed steps such as `slack`,
  * is unsafe. Anything not recognisably a step in a step position is unsafe too.
  */
@@ -194,15 +206,15 @@ export const auditSteps = (root: Record<string, unknown>): StepAudit => {
     if (type === 'http') {
       if (step[CONNECTOR_ID_KEY] !== STUB_CONNECTOR_ID) {
         unsafe.push(`${label} (connector-id is not the stub connector)`);
-      } else if (containsKey(step, 'url')) {
+      } else if (step.with !== undefined && !isRecord(step.with)) {
+        // A templated `with` could resolve to an object that carries `url`.
+        unsafe.push(`${label} (with is not a mapping)`);
+      } else if (isRecord(step.with) && 'url' in step.with) {
         unsafe.push(`${label} (sets a url)`);
       } else {
         usesStubConnector = true;
       }
-    } else if (
-      type === undefined ||
-      !(SAFE_STEP_TYPES.has(type) || type.startsWith(DATA_STEP_PREFIX))
-    ) {
+    } else if (type === undefined || !SAFE_STEP_TYPES.has(type)) {
       unsafe.push(`${label} (step type is not allowed)`);
     } else if (CONNECTOR_ID_KEY in step) {
       unsafe.push(`${label} (references a connector)`);
@@ -237,6 +249,12 @@ export const auditSteps = (root: Record<string, unknown>): StepAudit => {
 };
 
 type ParsedWorkflow = { ok: true; root: Record<string, unknown> } | { ok: false; reason: string };
+
+const MANUAL_TRIGGERS = [{ type: 'manual' }];
+
+const hasNonManualTrigger = (root: Record<string, unknown>): boolean =>
+  Array.isArray(root.triggers) &&
+  root.triggers.some((trigger) => !isRecord(trigger) || trigger.type !== 'manual');
 
 const parseWorkflow = (yaml: string): ParsedWorkflow => {
   try {
@@ -275,6 +293,9 @@ const defaultSleep = (ms: number) => new Promise<void>((resolve) => setTimeout(r
  * the seed could not verify is `run_skipped_unverified_stub`. A skipped
  * workflow never hits the create route; it is only sent to the validate route
  * so the metadata can say whether it was valid YAML (`valid_not_run`).
+ * A workflow with any non-`manual` trigger is created with its triggers replaced
+ * by a single manual one (`triggers_rewritten`), so enabling it cannot schedule
+ * or event-fire runs beyond the one this evaluator starts.
  * An execution still running at timeout is cancelled and given a moment to
  * settle before the delete, which is retried with backoff.
  */
@@ -307,6 +328,7 @@ export const createWorkflowValidityEvaluator = ({
       execution_status?: string;
       final_execution_status?: string;
       skipped_steps?: string[];
+      triggers_rewritten?: boolean;
       valid_not_run?: boolean;
       validate_error?: string;
       parse_error?: string;
@@ -339,6 +361,7 @@ export const createWorkflowValidityEvaluator = ({
         path: executionPath(runId),
         method: 'GET',
         version: API_VERSION,
+        headers: PUBLIC_HEADERS,
       });
       return typeof execution?.status === 'string' ? execution.status : undefined;
     };
@@ -364,6 +387,7 @@ export const createWorkflowValidityEvaluator = ({
           path: VALIDATE_PATH,
           method: 'POST',
           version: INTERNAL_API_VERSION,
+          headers: INTERNAL_HEADERS,
           body: JSON.stringify({ yaml }),
         });
         detail.valid_not_run = validation?.valid === true;
@@ -378,13 +402,21 @@ export const createWorkflowValidityEvaluator = ({
     // Last status seen for the run; a run is cancelled unless it is known terminal.
     let lastStatus: string | undefined;
     try {
+      // A scheduled or event trigger would fire the workflow on its own once it is
+      // enabled; only the evaluator's explicit run may execute it.
+      let createYaml = yaml;
+      if (hasNonManualTrigger(parsed.root)) {
+        createYaml = stringify({ ...parsed.root, triggers: MANUAL_TRIGGERS });
+        detail.triggers_rewritten = true;
+      }
       detail.stage = 'create';
       detail.outcome = 'create_failed';
       const created = await fetch<{ id?: string; enabled?: boolean }>({
         path: WORKFLOWS_PATH,
         method: 'POST',
         version: API_VERSION,
-        body: JSON.stringify({ yaml }),
+        headers: PUBLIC_HEADERS,
+        body: JSON.stringify({ yaml: createYaml }),
       });
       if (typeof created?.id !== 'string') {
         throw new Error('create response carried no workflow id');
@@ -400,6 +432,7 @@ export const createWorkflowValidityEvaluator = ({
           path: workflowPath,
           method: 'PUT',
           version: API_VERSION,
+          headers: PUBLIC_HEADERS,
           body: JSON.stringify({ enabled: true }),
         });
       }
@@ -408,6 +441,7 @@ export const createWorkflowValidityEvaluator = ({
         path: `${workflowPath}/run`,
         method: 'POST',
         version: API_VERSION,
+        headers: PUBLIC_HEADERS,
         body: JSON.stringify({ inputs: {} }),
       });
       if (typeof started?.workflowExecutionId !== 'string') {
@@ -452,6 +486,7 @@ export const createWorkflowValidityEvaluator = ({
             path: `${executionPath(runId)}/cancel`,
             method: 'POST',
             version: API_VERSION,
+            headers: PUBLIC_HEADERS,
           });
         } catch (error) {
           detail.cancel_error = errorMessage(error);
@@ -480,6 +515,7 @@ export const createWorkflowValidityEvaluator = ({
               path: `${WORKFLOWS_PATH}/${encodeURIComponent(workflowId)}`,
               method: 'DELETE',
               version: API_VERSION,
+              headers: PUBLIC_HEADERS,
               query: { force: true, acknowledgeAclLoss: true },
             });
             delete detail.delete_error;

@@ -9,12 +9,14 @@ import type { KbnClient } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { CHRYSALIS_PARITY_AGENT } from './chrysalis_parity_agent';
 
+const mockSinkClose = jest.fn(async () => {});
+
 jest.mock('./stub_sink', () => ({
   SINK_ORIGIN: 'http://127.0.0.1:38465',
   startStubSink: jest.fn(async () => ({
     origin: 'http://127.0.0.1:38465',
     owned: true,
-    close: async () => {},
+    close: mockSinkClose,
   })),
 }));
 
@@ -439,6 +441,16 @@ describe('persona_matrix_tools_seed', () => {
   });
 
   describe('cleanupPersonaMatrixTools', () => {
+    it('never closes the sink: other workers share it and it dies with the process', async () => {
+      mockSinkClose.mockClear();
+      const mod = await load();
+      const client = createClient();
+      await mod.seedPersonaMatrixTools({ kbnClient: asKbn(client), log });
+      await mod.cleanupPersonaMatrixTools({ kbnClient: asKbn(client), log });
+      await mod.cleanupPersonaMatrixTools({ kbnClient: asKbn(client), log });
+      expect(mockSinkClose).not.toHaveBeenCalled();
+    });
+
     it('deletes only the tools, workflows and agent created in this run, plus tagged cases', async () => {
       const mod = await load('parity');
       const client = createClient({ caseIds: ['case-1', 'case-2'] });

@@ -9,6 +9,7 @@ import {
   createWorkflowValidityEvaluator,
   extractWorkflowYaml,
 } from './workflow_validity_evaluator';
+import { parse } from 'yaml';
 import { buildOutput } from '../__fixtures__/task_output_builders';
 import { STUB_CONNECTOR_ID } from '../fixtures/stub_connector';
 
@@ -20,7 +21,24 @@ interface Call {
   method?: string;
   body?: string;
   query?: Record<string, unknown>;
+  headers?: Record<string, string>;
 }
+
+const INTERNAL_VERSION = '1';
+const PUBLIC_VERSION = '2023-10-31';
+
+/** The fixture fetch ignores `version`, so each call must carry the header itself. */
+const expectVersionHeaders = (calls: Call[]) => {
+  expect(calls.length).toBeGreaterThan(0);
+  calls.forEach((call) => {
+    const expected = call.path === '/api/workflows/validate' ? INTERNAL_VERSION : PUBLIC_VERSION;
+    expect({ path: call.path, method: call.method, headers: call.headers }).toEqual({
+      path: call.path,
+      method: call.method,
+      headers: { 'elastic-api-version': expected },
+    });
+  });
+};
 
 const setup = ({
   workflow = { id: 'wf-1', enabled: true } as Record<string, unknown>,
@@ -197,6 +215,75 @@ describe('WorkflowValidity', () => {
     expect(calls.indexOf(put as Call)).toBeLessThan(
       calls.findIndex((call) => call.path.endsWith('/run'))
     );
+  });
+
+  it('sends elastic-api-version on create, enable, run, poll and delete', async () => {
+    const { evaluator, calls } = setup({ workflow: { id: 'wf-1', enabled: false } });
+    await run(evaluator, `\`\`\`yaml\n${YAML}\`\`\``);
+    expect(calls.map((call) => call.method)).toEqual(
+      expect.arrayContaining(['POST', 'PUT', 'GET', 'DELETE'])
+    );
+    expectVersionHeaders(calls);
+  });
+
+  it('sends elastic-api-version on cancel and the settle poll too', async () => {
+    const { evaluator, calls } = setup({ statuses: ['running'] });
+    await run(evaluator, `\`\`\`yaml\n${YAML}\`\`\``);
+    expect(calls.some((call) => call.path.endsWith('/cancel'))).toBe(true);
+    expectVersionHeaders(calls);
+  });
+
+  describe('trigger rewrite', () => {
+    const withTriggers = (triggers: string) =>
+      `name: demo\nenabled: true\n${triggers}steps:\n  - name: a\n    type: console\n    with:\n      message: hi\n`;
+    const createBody = (calls: Call[]) =>
+      JSON.parse(
+        calls.find((call) => call.method === 'POST' && call.path === '/api/workflows/workflow')
+          ?.body as string
+      ) as { yaml: string };
+
+    it('replaces a scheduled trigger with a manual one before create', async () => {
+      const { evaluator, calls } = setup();
+      const result = await run(
+        evaluator,
+        `\`\`\`yaml\n${withTriggers(
+          'triggers:\n  - type: scheduled\n    with:\n      every: 1m\n'
+        )}\`\`\``
+      );
+      expect(result.metadata).toMatchObject({ outcome: 'completed', triggers_rewritten: true });
+      const { yaml } = createBody(calls);
+      expect(parse(yaml)).toMatchObject({
+        name: 'demo',
+        triggers: [{ type: 'manual' }],
+        steps: [{ name: 'a', type: 'console' }],
+      });
+      expect(yaml).not.toContain('scheduled');
+    });
+
+    it('rewrites a mixed trigger list that holds any non-manual trigger', async () => {
+      const { evaluator, calls } = setup();
+      const result = await run(
+        evaluator,
+        `\`\`\`yaml\n${withTriggers('triggers:\n  - type: manual\n  - type: alert\n')}\`\`\``
+      );
+      expect(result.metadata).toMatchObject({ triggers_rewritten: true });
+      expect(parse(createBody(calls).yaml).triggers).toEqual([{ type: 'manual' }]);
+    });
+
+    it('leaves a manual-only workflow byte-for-byte untouched and unflagged', async () => {
+      const { evaluator, calls } = setup();
+      const result = await run(evaluator, `\`\`\`yaml\n${YAML}\`\`\``);
+      expect(createBody(calls).yaml).toBe(YAML.trim());
+      expect(result.metadata).not.toHaveProperty('triggers_rewritten');
+    });
+
+    it('leaves a workflow with no triggers key untouched', async () => {
+      const { evaluator, calls } = setup();
+      const yaml = withTriggers('');
+      const result = await run(evaluator, `\`\`\`yaml\n${yaml}\`\`\``);
+      expect(createBody(calls).yaml).toBe(yaml.trim());
+      expect(result.metadata).not.toHaveProperty('triggers_rewritten');
+    });
   });
 
   it('scores 0.5 for a run that ends failed', async () => {
@@ -381,17 +468,35 @@ describe('WorkflowValidity', () => {
       expect(ranWorkflow(calls)).toBe(true);
     });
 
-    it('allows console, data.*, wait, if, foreach and nested stub http steps', async () => {
+    it('allows console, data.set/map/filter/dedupe, wait, if, foreach and nested stub http steps', async () => {
       const { evaluator, calls } = setup();
       const steps = [
         '  - name: c\n    type: console\n    with:\n      message: hi',
         '  - name: d\n    type: data.set\n    with:\n      x: 1',
         '  - name: d2\n    type: data.map\n    with:\n      items: []',
+        '  - name: d3\n    type: data.filter\n    with:\n      items: []',
+        '  - name: d4\n    type: data.dedupe\n    with:\n      items: []',
         '  - name: w\n    type: wait\n    with:\n      duration: 1s',
         `  - name: i\n    type: if\n    condition: "true"\n    steps:\n      - name: n\n        type: http\n        connector-id: ${STUB_CONNECTOR_ID}\n        with:\n          path: /x\n    else:\n      - name: e\n        type: console\n        with:\n          message: no`,
         `  - name: f\n    type: foreach\n    foreach: "{{ inputs.xs }}"\n    steps:\n      - name: n2\n        type: http\n        connector-id: ${STUB_CONNECTOR_ID}\n        with:\n          path: /y`,
       ].join('\n');
       const result = await run(evaluator, fenced(yamlWith(steps)));
+      expect(result.metadata).toMatchObject({ outcome: 'completed' });
+      expect(ranWorkflow(calls)).toBe(true);
+    });
+
+    it('still runs a stub http step whose body carries a field named url', async () => {
+      const { evaluator, calls } = setup();
+      const result = await run(
+        evaluator,
+        fenced(
+          yamlWith(
+            stubStep(
+              '      body:\n        url: https://example.com/not-a-host\n        nested:\n          url: x\n'
+            )
+          )
+        )
+      );
       expect(result.metadata).toMatchObject({ outcome: 'completed' });
       expect(ranWorkflow(calls)).toBe(true);
     });
@@ -436,8 +541,12 @@ describe('WorkflowValidity', () => {
         `  - name: a\n    type: http\n    connector-id: ${STUB_CONNECTOR_ID}\n    with:\n      url: https://example.com/hook\n      path: /x`,
       ],
       [
-        'a stub http step with a url nested anywhere under it',
-        `  - name: a\n    type: http\n    connector-id: ${STUB_CONNECTOR_ID}\n    with:\n      path: /x\n      fetcher:\n        redirect:\n          url: https://example.com`,
+        'a data step outside the explicit allowlist',
+        '  - name: a\n    type: data.unknown\n    with:\n      x: 1',
+      ],
+      [
+        'a stub http step whose with is not a mapping',
+        `  - name: a\n    type: http\n    connector-id: ${STUB_CONNECTOR_ID}\n    with: "{{ inputs.params }}"`,
       ],
       [
         'an external http step nested in a foreach',
@@ -475,8 +584,10 @@ describe('WorkflowValidity', () => {
             method: 'POST',
             path: '/api/workflows/validate',
             version: '1',
+            headers: { 'elastic-api-version': '1' },
           })
         );
+        expectVersionHeaders(calls);
       });
     });
 
