@@ -78,6 +78,7 @@ describe('createAgentCoreMemoryStore', () => {
       /^AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE\/20261001\/us-east-1\/bedrock-agentcore\/aws4_request/
     );
     expect(body).toEqual({
+      clientToken: expect.any(String),
       records: [
         {
           content: { text: JSON.stringify(memory) },

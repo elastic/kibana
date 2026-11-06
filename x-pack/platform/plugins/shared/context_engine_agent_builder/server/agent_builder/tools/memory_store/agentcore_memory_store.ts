@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import aws from 'aws4';
 import { KiNotFoundError } from '@kbn/context-engine-plugin/server/ai_indices/errors';
 import {
@@ -96,7 +97,11 @@ const assertBatchSucceeded = ({ failedRecords = [] }: AgentCoreBatchResult, kiId
   }
 };
 
-/** Stores and searches memories as AgentCore Memory records, one namespace per space and AI index. */
+/**
+ * Stores and searches memories as AgentCore Memory records, one namespace per space and AI index.
+ * The Memory resource must declare `ki_id` and `lifecycle_status` (STRING) and `expires_at_ms`
+ * (NUMBER) as indexed keys, or AgentCore rejects the metadata filters.
+ */
 export const createAgentCoreMemoryStore =
   ({ region, memoryId, accessKeyId, secretAccessKey, namespacePrefix }: AgentCoreStoreOptions) =>
   ({ aiIndexId, spaceId }: MemoryStoreScope): MemoryStore & MemorySearch => {
@@ -150,7 +155,11 @@ export const createAgentCoreMemoryStore =
               },
             })
           : await request<AgentCoreBatchResult>('POST', `${memoryPath}/memoryRecords/batchCreate`, {
-              body: { records: [{ ...record, requestIdentifier: kiId }] },
+              // The AWS SDKs fill in this idempotency token; the service rejects creates without it.
+              body: {
+                clientToken: randomUUID(),
+                records: [{ ...record, requestIdentifier: kiId }],
+              },
             });
         assertBatchSucceeded(result, kiId);
       },
