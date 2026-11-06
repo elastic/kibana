@@ -15,7 +15,7 @@ import { withTimeRangeGuardrail } from '../utils/time_range_guardrail';
 import { createAbortSignal } from '../utils/create_abort_signal';
 
 export const listRoute = createEntityInventoryServerRoute({
-  endpoint: 'POST /internal/entity_inventory/entities/{type}/list',
+  endpoint: 'POST /internal/entity_inventory/entities/{type}/_list',
   params: lazySchema(() =>
     z.object({
       path: z.object({ type: typeNameSchema }),
@@ -25,6 +25,7 @@ export const listRoute = createEntityInventoryServerRoute({
           to: instantParam,
           limit: listLimitParam,
         })
+        .strict()
         .refine(({ from, to }) => Date.parse(from) < Date.parse(to), {
           message: 'from must be earlier than to',
         }),

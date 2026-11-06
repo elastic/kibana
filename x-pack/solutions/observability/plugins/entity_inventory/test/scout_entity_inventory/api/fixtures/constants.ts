@@ -13,6 +13,9 @@ export const K8S_TSDS_INDEX = 'metrics-k8sclusterreceiver.otel-tsds';
 export const K8S_TSDS_INDEX_TEMPLATE = 'entity-inventory-scout-k8s-tsds-index';
 
 export const TYPES_PATH = 'internal/entity_inventory/types';
+export const LIST_PATH = 'internal/entity_inventory/entities/{type}/_list';
+
+export const listPath = (type: string): string => LIST_PATH.replace('{type}', type);
 
 export const INTERNAL_HEADERS = {
   'x-elastic-internal-origin': 'kibana',

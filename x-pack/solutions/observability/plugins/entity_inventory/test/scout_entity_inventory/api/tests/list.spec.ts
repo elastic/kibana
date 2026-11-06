@@ -8,10 +8,10 @@
 import type { ApiClientFixture } from '@kbn/scout-oblt';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import { apiTest, INTERNAL_HEADERS } from '../fixtures';
+import { apiTest, INTERNAL_HEADERS, listPath } from '../fixtures';
 
 // The archive writes every deployment at 10:00:00 and 10:01:00 on 2026-11-01.
-const K8S_DEPLOYMENT_LIST_PATH = 'internal/entity_inventory/entities/k8s.deployment/list';
+const K8S_DEPLOYMENT_LIST_PATH = listPath('k8s.deployment');
 const WINDOW = { from: '2026-11-01T09:00:00.000Z', to: '2026-11-01T11:00:00.000Z' };
 
 const CART_API_ID = 'k8s.deployment:scout-cluster/checkout/cart-api';
@@ -42,7 +42,7 @@ interface ListResponse {
 }
 
 apiTest.describe(
-  'POST /internal/entity_inventory/entities/{type}/list',
+  'POST /internal/entity_inventory/entities/{type}/_list',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let adminCookieHeader: Record<string, string>;
@@ -267,18 +267,14 @@ apiTest.describe(
     });
 
     apiTest('rejects a malformed type in the path with 400', async ({ apiClient }) => {
-      const response = await postList(apiClient, WINDOW, 'internal/entity_inventory/entities/K8S/list');
+      const response = await postList(apiClient, WINDOW, listPath('K8S'));
 
       expect(response).toHaveStatusCode(400);
       expect(response.body.message).toContain('type must start with a lowercase letter');
     });
 
     apiTest('answers 404 for a type with no entity definition', async ({ apiClient }) => {
-      const response = await postList(
-        apiClient,
-        WINDOW,
-        'internal/entity_inventory/entities/does.not.exist/list'
-      );
+      const response = await postList(apiClient, WINDOW, listPath('does.not.exist'));
 
       expect(response).toHaveStatusCode(404);
       expect(response.body.message).toBe(
@@ -289,11 +285,7 @@ apiTest.describe(
     apiTest(
       'answers 404 for a type whose definition another plugin registered',
       async ({ apiClient }) => {
-        const response = await postList(
-          apiClient,
-          WINDOW,
-          'internal/entity_inventory/entities/host/list'
-        );
+        const response = await postList(apiClient, WINDOW, listPath('host'));
 
         expect(response).toHaveStatusCode(404);
         expect(response.body.message).toBe(
