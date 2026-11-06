@@ -37,7 +37,6 @@ import { useResolveTimeField } from '../../use_resolve_time_field';
 import { useDataFields } from '../../../../form/hooks/use_data_fields';
 import { useIndexSources } from '../../../../form/hooks/use_index_sources';
 import type { RuleBuilderStepProps } from '../types';
-import { useBuilderState } from '../builder_state_context';
 import type {
   ThresholdFormValues,
   StatDefinition,
@@ -80,13 +79,13 @@ import {
 } from './translations';
 import { getInvalidExpressionReferences } from './validate_metric_references';
 
-export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
+export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<ThresholdFormValues>> = ({
   state,
   dispatch,
   services,
+  builderState: thresholdValues,
+  setBuilderState: onThresholdValuesChange,
 }) => {
-  const { state: thresholdValues, setState: onThresholdValuesChange } =
-    useBuilderState<ThresholdFormValues>();
   const thresholdValuesRef = useRef(thresholdValues);
   thresholdValuesRef.current = thresholdValues;
   const { setValue, watch } = useFormContext<FormValues>();

@@ -26,8 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { recoveryStrategy } from '@kbn/alerting-v2-schemas';
 import type { FormValues } from '../../../../form/types';
-import type { CustomRecoveryRenderProps } from '../../types';
-import { useBuilderState } from '../builder_state_context';
+import type { RuleBuilderRecoveryStepProps } from '../types';
 import type { ThresholdFormValues, RecoveryCondition, RecoveryConfig } from './form_types';
 import {
   Comparator,
@@ -39,12 +38,11 @@ import {
 import { COMPARATOR_OPTIONS, CONDITION_OPERATOR_OPTIONS } from './translations';
 import { buildRecoveryBlock } from './build_esql';
 
-export const BuilderRecoveryForm: React.FC<CustomRecoveryRenderProps> = () => {
-  const {
-    state: builderState,
-    setState: onBuilderStateChange,
-    initStateOnMount,
-  } = useBuilderState<ThresholdFormValues>();
+export const BuilderRecoveryForm: React.FC<RuleBuilderRecoveryStepProps<ThresholdFormValues>> = ({
+  builderState,
+  setBuilderState: onBuilderStateChange,
+  initBuilderState: initStateOnMount,
+}) => {
   const { setValue, getValues } = useFormContext<FormValues>();
   const initializedRef = useRef(false);
   const recoverySyncStartedRef = useRef(false);

@@ -76,8 +76,18 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
     capturedComposeProps = props;
     return <div data-test-subj="mockComposeDiscoverFlyout" />;
   },
-  registerRuleBuilder: jest.fn(),
-  getRuleBuilderCreateOptions: () => [],
+  RuleBuilderRegistry: class {
+    public register() {}
+    public has() {
+      return false;
+    }
+    public get() {
+      return undefined;
+    }
+    public getCreateOptions() {
+      return [];
+    }
+  },
 }));
 
 const mockCreateActionPolicyFormFlyout = () => null;

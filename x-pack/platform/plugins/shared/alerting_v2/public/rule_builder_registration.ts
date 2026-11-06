@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import type { RuleBuilderDefinition } from '@kbn/alerting-v2-rule-form';
+import type {
+  RuleBuilderDefinition,
+  RuleBuilderRegistryContract,
+} from '@kbn/alerting-v2-rule-form';
 
 const queued: RuleBuilderDefinition[] = [];
 const registeredTypes = new Set<string>(['threshold']);
-let registerFn: ((definition: RuleBuilderDefinition) => void) | undefined;
-let applying: Promise<void> | undefined;
+let registry: RuleBuilderRegistryContract | undefined;
+let applying: Promise<RuleBuilderRegistryContract> | undefined;
 
 const normalizeRuleBuilder = (definition: RuleBuilderDefinition): RuleBuilderDefinition => {
   const type = definition.type.trim();
@@ -26,24 +29,34 @@ const normalizeRuleBuilder = (definition: RuleBuilderDefinition): RuleBuilderDef
 export const queueRuleBuilderRegistration = (definition: RuleBuilderDefinition): void => {
   const normalized = normalizeRuleBuilder(definition);
   registeredTypes.add(normalized.type);
-  if (registerFn) {
-    registerFn(normalized);
+  if (registry) {
+    registry.register(normalized);
     return;
   }
   queued.push(normalized);
 };
 
-export const applyRuleBuilderRegistrations = (): Promise<void> => {
+export const attachRuleBuilderRegistry = (
+  next: RuleBuilderRegistryContract
+): RuleBuilderRegistryContract => {
+  if (registry) {
+    return registry;
+  }
+  while (queued.length > 0) {
+    const definition = queued.shift();
+    if (definition) {
+      next.register(definition);
+    }
+  }
+  registry = next;
+  return next;
+};
+
+export const applyRuleBuilderRegistrations = (): Promise<RuleBuilderRegistryContract> => {
   if (!applying) {
-    applying = import('@kbn/alerting-v2-rule-form').then(({ registerRuleBuilder }) => {
-      registerFn = registerRuleBuilder;
-      while (queued.length > 0) {
-        const definition = queued.shift();
-        if (definition) {
-          registerRuleBuilder(definition);
-        }
-      }
-    });
+    applying = import('./rule_builder_registry').then(
+      ({ ruleBuilderRegistry }) => ruleBuilderRegistry
+    );
   }
   return applying;
 };

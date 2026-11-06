@@ -15,11 +15,30 @@ import type { RuleFormServices } from '../../../form/contexts/rule_form_context'
 
 export type BuilderState = unknown;
 
-export interface RuleBuilderStepProps {
+/** `origin: 'init'` marks a programmatic seed. Dirty-tracking callers must not treat it as a user edit. */
+export interface BuilderStateUpdateOptions {
+  origin?: 'init';
+}
+
+export interface BuilderStateProps<TState = BuilderState> {
+  builderState: TState;
+  setBuilderState: (state: TState, options?: BuilderStateUpdateOptions) => void;
+  /**
+   * Seeds builder state without marking the flyout dirty. Call only from a
+   * mount-time effect — user edits must use `setBuilderState`.
+   */
+  initBuilderState: (state: TState) => void;
+}
+
+export interface RuleBuilderStepProps<TState = BuilderState> extends BuilderStateProps<TState> {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
 }
+
+export interface RuleBuilderRecoveryStepProps<TState = BuilderState>
+  extends CustomRecoveryRenderProps,
+    BuilderStateProps<TState> {}
 
 export interface RuleBuilderCreateOption {
   title: string;
@@ -35,8 +54,8 @@ export interface RuleBuilderDefinition<TState = BuilderState> {
   stepTitle: string;
   createOption?: RuleBuilderCreateOption;
   createDefaultState: () => TState;
-  renderStep: (props: RuleBuilderStepProps) => React.ReactNode;
-  renderRecoveryStep?: (props: CustomRecoveryRenderProps) => React.ReactNode;
+  renderStep: (props: RuleBuilderStepProps<TState>) => React.ReactNode;
+  renderRecoveryStep?: (props: RuleBuilderRecoveryStepProps<TState>) => React.ReactNode;
   validate?: (state: ComposeDiscoverState, builderState?: TState) => boolean;
   parseState?: (query: string, recoveryQuery?: string) => TState | null;
 }

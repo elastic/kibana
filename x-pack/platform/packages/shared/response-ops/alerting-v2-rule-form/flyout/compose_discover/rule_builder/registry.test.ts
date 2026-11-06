@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  getRuleBuilderCreateOptions,
-  registerRuleBuilder,
-  RULE_BUILDER_REGISTRY,
-} from './registry';
+import { RuleBuilderRegistry, thresholdRuleBuilder } from './registry';
 import {
   Aggregation,
   Comparator,
@@ -28,9 +24,9 @@ const makeValues = (overrides: Partial<ThresholdFormValues> = {}): ThresholdForm
   ...overrides,
 });
 
-describe('RULE_BUILDER_REGISTRY', () => {
-  it('exposes a threshold create card', () => {
-    expect(RULE_BUILDER_REGISTRY.threshold.createOption).toEqual(
+describe('RuleBuilderRegistry', () => {
+  it('seeds every instance with the threshold create card', () => {
+    expect(new RuleBuilderRegistry().get('threshold')?.createOption).toEqual(
       expect.objectContaining({
         title: 'Threshold rule',
         flyoutTitle: 'Create Threshold rule',
@@ -42,8 +38,10 @@ describe('RULE_BUILDER_REGISTRY', () => {
   });
 
   it('orders create cards and rejects a duplicate type', () => {
+    const registry = new RuleBuilderRegistry();
+
     expect(() =>
-      registerRuleBuilder({
+      registry.register({
         type: ' ',
         stepTitle: 'Empty',
         createDefaultState: () => ({}),
@@ -51,7 +49,7 @@ describe('RULE_BUILDER_REGISTRY', () => {
       })
     ).toThrow(/non-empty/);
 
-    registerRuleBuilder({
+    registry.register({
       type: '  later-builder  ',
       stepTitle: 'Later',
       createOption: {
@@ -66,24 +64,36 @@ describe('RULE_BUILDER_REGISTRY', () => {
       renderStep: () => null,
     });
 
-    expect(getRuleBuilderCreateOptions().map((option) => option.type)).toEqual([
+    expect(registry.getCreateOptions().map((option) => option.type)).toEqual([
       'threshold',
       'later-builder',
     ]);
     expect(() =>
-      registerRuleBuilder({
+      registry.register({
         type: 'threshold',
         stepTitle: 'Again',
         createDefaultState: () => ({}),
         renderStep: () => null,
       })
     ).toThrow(/already registered/);
-    delete RULE_BUILDER_REGISTRY['later-builder'];
+  });
+
+  it('keeps registrations scoped to the instance they were made on', () => {
+    const registry = new RuleBuilderRegistry();
+    registry.register({
+      type: 'scoped-builder',
+      stepTitle: 'Scoped',
+      createDefaultState: () => ({}),
+      renderStep: () => null,
+    });
+
+    expect(registry.has('scoped-builder')).toBe(true);
+    expect(new RuleBuilderRegistry().has('scoped-builder')).toBe(false);
   });
 });
 
 describe('threshold builder validate', () => {
-  const { validate } = RULE_BUILDER_REGISTRY.threshold;
+  const { validate } = thresholdRuleBuilder;
 
   it('is valid when there are no evaluations', () => {
     expect(validate!(STATE, makeValues())).toBe(true);

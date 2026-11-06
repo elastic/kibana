@@ -112,17 +112,8 @@ const thresholdDefinition = defineBuilder<ThresholdFormValues>({
     })),
     groupByFields: [],
   }),
-  renderStep: (props) =>
-    React.createElement(RuleBuilderAlertConditionStep, {
-      state: props.state,
-      dispatch: props.dispatch,
-      services: props.services,
-    }),
-  renderRecoveryStep: (props) =>
-    React.createElement(BuilderRecoveryForm, {
-      state: props.state,
-      dispatch: props.dispatch,
-    }),
+  renderStep: (props) => React.createElement(RuleBuilderAlertConditionStep, props),
+  renderRecoveryStep: (props) => React.createElement(BuilderRecoveryForm, props),
   validate: (_state, builderState) =>
     // No builder state means the step cannot be valid yet (unlike ES|QL mode, which can proceed
     // on queryCommitted alone before builder state is initialized).
@@ -130,24 +121,50 @@ const thresholdDefinition = defineBuilder<ThresholdFormValues>({
   parseState: parseThresholdEsql,
 });
 
-export const RULE_BUILDER_REGISTRY: Record<string, RuleBuilderDefinition> = {
-  threshold: thresholdDefinition,
-};
+export const thresholdRuleBuilder: RuleBuilderDefinition = thresholdDefinition;
 
-export const registerRuleBuilder = (definition: RuleBuilderDefinition): void => {
-  const type = definition.type.trim();
-  if (!type) {
-    throw new Error('Rule builder type must be a non-empty string');
-  }
-  if (RULE_BUILDER_REGISTRY[type]) {
-    throw new Error(`Rule builder "${type}" is already registered`);
-  }
-  RULE_BUILDER_REGISTRY[type] = type === definition.type ? definition : { ...definition, type };
-};
+export interface RuleBuilderCreateCard extends RuleBuilderCreateOption {
+  type: string;
+}
 
-export const getRuleBuilderCreateOptions = (): Array<RuleBuilderCreateOption & { type: string }> =>
-  Object.values(RULE_BUILDER_REGISTRY)
-    .flatMap((definition) =>
-      definition.createOption ? [{ type: definition.type, ...definition.createOption }] : []
-    )
-    .sort((a, b) => a.order - b.order || a.type.localeCompare(b.type));
+export interface RuleBuilderRegistryContract {
+  register(definition: RuleBuilderDefinition): void;
+  has(type: string): boolean;
+  get(type: string): RuleBuilderDefinition | undefined;
+  getCreateOptions(): RuleBuilderCreateCard[];
+}
+
+export class RuleBuilderRegistry implements RuleBuilderRegistryContract {
+  private readonly definitions = new Map<string, RuleBuilderDefinition>();
+
+  constructor() {
+    this.register(thresholdDefinition);
+  }
+
+  public register(definition: RuleBuilderDefinition): void {
+    const type = definition.type.trim();
+    if (!type) {
+      throw new Error('Rule builder type must be a non-empty string');
+    }
+    if (this.definitions.has(type)) {
+      throw new Error(`Rule builder "${type}" is already registered`);
+    }
+    this.definitions.set(type, type === definition.type ? definition : { ...definition, type });
+  }
+
+  public has(type: string): boolean {
+    return this.definitions.has(type.trim());
+  }
+
+  public get(type: string): RuleBuilderDefinition | undefined {
+    return this.definitions.get(type.trim());
+  }
+
+  public getCreateOptions(): RuleBuilderCreateCard[] {
+    return [...this.definitions.values()]
+      .flatMap((definition) =>
+        definition.createOption ? [{ type: definition.type, ...definition.createOption }] : []
+      )
+      .sort((a, b) => a.order - b.order || a.type.localeCompare(b.type));
+  }
+}

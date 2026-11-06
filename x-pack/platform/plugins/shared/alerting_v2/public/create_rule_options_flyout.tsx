@@ -27,6 +27,7 @@ import { PluginStart } from '@kbn/core-di';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { untilPluginStartServicesReady, type AlertingV2KibanaServices } from './kibana_services';
 import { applyRuleBuilderRegistrations } from './rule_builder_registration';
+import { ruleBuilderRegistry } from './rule_builder_registry';
 import { RuleCreateOptionsFlyout } from './components/rule_create_options/rule_create_options_flyout';
 import { RulesApi } from './services/rules_api';
 import { CREATE_WITH_AGENT_INITIAL_PROMPT, AGENT_BUILDER_NEW_CONVERSATION_PATH } from './constants';
@@ -321,6 +322,7 @@ const CreateRuleOptionsFlyoutInner = ({
           stackedOnPicker
           services={services}
           builderType={step.type === 'builder' ? step.builderType : undefined}
+          ruleBuilderRegistry={ruleBuilderRegistry}
           onCreateRule={handleCreateRule}
           isSaving={isSaving}
           initialQuery={query}

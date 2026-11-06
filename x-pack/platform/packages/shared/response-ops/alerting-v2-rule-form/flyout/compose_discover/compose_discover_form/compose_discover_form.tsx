@@ -13,6 +13,7 @@ import { EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type {
   ComposeDiscoverState,
   ComposeDiscoverAction,
+  CustomRecoveryRenderProps,
   StepDefinition,
   StepRenderProps,
 } from '../types';
@@ -20,7 +21,8 @@ import { isAlertConditionStepId } from '../types';
 import { getStepIds, getBuilderStepIds } from '../use_compose_discover_state';
 import type { FormValues, RecoveryStrategy } from '../../../form/types';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
-import { RULE_BUILDER_REGISTRY } from '../rule_builder';
+import type { RuleBuilderDefinition } from '../rule_builder';
+import { BuilderRecoveryStepHost, BuilderStepHost } from '../rule_builder/builder_step_host';
 import { ScheduleField } from '../../../form/fields/schedule_field';
 import { LookbackWindowField } from '../../../form/fields/lookback_window_field';
 import { AlertConditionStep } from './alert_condition_step';
@@ -39,6 +41,7 @@ interface Props {
   onKindChange: (kind: 'signal' | 'alert') => void;
   isEditing: boolean;
   builderType?: string;
+  builderDefinition?: RuleBuilderDefinition;
 }
 
 const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
@@ -112,9 +115,12 @@ interface ResolvedSteps {
   renderCustomRecovery?: StepRenderProps['renderCustomRecovery'];
 }
 
-export const getSteps = (isAlert: boolean, builderType?: string): ResolvedSteps => {
+export const getSteps = (
+  isAlert: boolean,
+  builderType?: string,
+  definition?: RuleBuilderDefinition
+): ResolvedSteps => {
   const ids = builderType ? getBuilderStepIds(isAlert) : getStepIds(isAlert);
-  const definition = builderType ? RULE_BUILDER_REGISTRY[builderType] : undefined;
 
   const steps = ids.map((id) => {
     const base = STEP_REGISTRY[id];
@@ -130,12 +136,14 @@ export const getSteps = (isAlert: boolean, builderType?: string): ResolvedSteps 
       const builderStep: StepDefinition = {
         ...builderBase,
         title: definition.stepTitle,
-        render: (props) =>
-          definition.renderStep({
-            state: props.state,
-            dispatch: props.dispatch,
-            services: props.services,
-          }),
+        render: (props) => (
+          <BuilderStepHost
+            definition={definition}
+            state={props.state}
+            dispatch={props.dispatch}
+            services={props.services}
+          />
+        ),
         ...(builderValidate
           ? {
               validate: (_methods, s, _services, bs) => builderValidate(s, bs),
@@ -151,7 +159,12 @@ export const getSteps = (isAlert: boolean, builderType?: string): ResolvedSteps 
    * Pass a component (or registry render function). RecoveryConditionStep mounts
    * it with createElement so hook-using recovery content keeps its own fiber.
    */
-  const renderCustomRecovery = definition?.renderRecoveryStep ?? EsqlRecoveryContent;
+  const renderCustomRecovery =
+    definition && definition.renderRecoveryStep
+      ? (props: CustomRecoveryRenderProps) => (
+          <BuilderRecoveryStepHost definition={definition} {...props} />
+        )
+      : EsqlRecoveryContent;
 
   return { steps, renderCustomRecovery };
 };
@@ -164,11 +177,12 @@ export const ComposeDiscoverForm = ({
   onKindChange,
   isEditing,
   builderType,
+  builderDefinition,
 }: Props) => {
   const isAlert = useWatch<FormValues, 'kind'>({ name: 'kind' }) === 'alert';
   const { steps, renderCustomRecovery } = useMemo(
-    () => getSteps(isAlert, builderType),
-    [isAlert, builderType]
+    () => getSteps(isAlert, builderType, builderDefinition),
+    [isAlert, builderType, builderDefinition]
   );
   const currentStep = steps[state.step];
   const isAlertConditionStep = isAlertConditionStepId(currentStep.id);
