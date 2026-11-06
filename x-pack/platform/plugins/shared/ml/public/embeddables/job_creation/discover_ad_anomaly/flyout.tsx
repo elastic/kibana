@@ -32,7 +32,7 @@ import { useAnomalyData } from './use_anomaly_data';
 
 const TITLE_ID = 'mlDiscoverADAnomalyFlyoutTitle';
 const CHART_ID = 'mlDiscoverADAnomalyCharts';
-// The width changes while the flyout is resized, which is not worth loading the charts again for
+// The width changes while the flyout is resized, which is not worth drawing the charts again for
 const MIN_WIDTH_CHANGE_PX = 20;
 // Narrower than this, the columns of the anomalies table are squashed
 const TABLE_MIN_WIDTH = 1000;
@@ -69,6 +69,8 @@ export const DiscoverADAnomalyFlyout: FC<Props> = ({
       },
     },
   } = useMlKibana();
+  // The data is loaded for the first width, and drawn again at the width the flyout or browser is resized to
+  const [loadWidth, setLoadWidth] = useState(0);
   const [chartWidth, setChartWidth] = useState(0);
   // As the Anomaly Explorer's table and charts default to
   const { val: severity } = useDefaultSeverity();
@@ -76,7 +78,7 @@ export const DiscoverADAnomalyFlyout: FC<Props> = ({
     jobId,
     timestamp,
     endTimestamp,
-    chartWidth,
+    chartWidth: loadWidth,
     severity,
   });
 
@@ -93,6 +95,7 @@ export const DiscoverADAnomalyFlyout: FC<Props> = ({
   );
 
   const onResize = useCallback(({ width }: { width: number }) => {
+    setLoadWidth((current) => current || Math.floor(width));
     setChartWidth((current) =>
       current === 0 || Math.abs(current - width) > MIN_WIDTH_CHANGE_PX ? Math.floor(width) : current
     );
@@ -143,6 +146,8 @@ export const DiscoverADAnomalyFlyout: FC<Props> = ({
                     chartsData && tableData && jobs && mlLocator ? (
                       <>
                         <ExplorerAnomaliesContainer
+                          // The charts are drawn at the width they have when mounted
+                          key={chartWidth}
                           id={CHART_ID}
                           chartsData={chartsData}
                           showCharts

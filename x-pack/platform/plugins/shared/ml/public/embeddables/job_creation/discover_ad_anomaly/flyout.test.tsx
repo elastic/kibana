@@ -5,11 +5,32 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render, screen } from '@testing-library/react';
+import React, { useEffect } from 'react';
+import { act, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { DiscoverADAnomalyFlyout } from './flyout';
 import { useAnomalyData } from './use_anomaly_data';
+
+let mockResize: (size: { width: number; height: number }) => void = () => {};
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  EuiResizeObserver: ({
+    onResize,
+    children,
+  }: {
+    onResize: typeof mockResize;
+    children: (ref: () => void) => React.ReactNode;
+  }) => {
+    mockResize = onResize;
+    return children(() => {});
+  },
+}));
+
+const mockChartsMounted = jest.fn();
+const MockCharts = () => {
+  useEffect(() => mockChartsMounted(), []);
+  return <div data-test-subj="charts" />;
+};
 
 jest.mock('./use_anomaly_data', () => ({
   useAnomalyData: jest.fn(),
@@ -31,7 +52,7 @@ jest.mock('./ai_summary', () => ({
   AiSummary: () => <div data-test-subj="aiSummary" />,
 }));
 jest.mock('../../../application/explorer/explorer_charts/explorer_anomalies_container', () => ({
-  ExplorerAnomaliesContainer: () => <div data-test-subj="charts" />,
+  ExplorerAnomaliesContainer: () => <MockCharts />,
 }));
 jest.mock('../../../application/components/anomalies_table/anomalies_table', () => ({
   AnomaliesTable: () => <div data-test-subj="table" />,
@@ -94,5 +115,29 @@ describe('DiscoverADAnomalyFlyout', () => {
 
     renderIt(false);
     expect(screen.queryByTestId('aiSummary')).not.toBeInTheDocument();
+  });
+
+  it('loads the data for the first width, and draws the charts again when resized', () => {
+    (useAnomalyData as jest.Mock).mockReturnValue(loaded);
+    renderIt();
+    act(() => mockResize({ width: 600, height: 400 }));
+    mockChartsMounted.mockClear();
+    (useAnomalyData as jest.Mock).mockClear();
+
+    act(() => mockResize({ width: 900, height: 400 }));
+
+    expect(useAnomalyData).toHaveBeenLastCalledWith(expect.objectContaining({ chartWidth: 600 }));
+    expect(mockChartsMounted).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not draw the charts again for a small change in width', () => {
+    (useAnomalyData as jest.Mock).mockReturnValue(loaded);
+    renderIt();
+    act(() => mockResize({ width: 600, height: 400 }));
+    mockChartsMounted.mockClear();
+
+    act(() => mockResize({ width: 610, height: 400 }));
+
+    expect(mockChartsMounted).not.toHaveBeenCalled();
   });
 });

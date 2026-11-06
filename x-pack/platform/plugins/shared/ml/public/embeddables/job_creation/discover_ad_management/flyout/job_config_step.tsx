@@ -12,7 +12,6 @@ import moment from 'moment';
 import type { estypes } from '@elastic/elasticsearch';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiButtonGroup,
   EuiCheckbox,
   EuiFieldText,
@@ -332,7 +331,7 @@ export const JobConfigStep: FC<Props> = ({ suggestion, indexPattern, creator, on
               <p>
                 <FormattedMessage
                   id="xpack.ml.discoverADManagement.createdDescription"
-                  defaultMessage="{jobId} is analyzing the data from {start} to {end}. Anomalies appear in the results as they are found."
+                  defaultMessage="{jobId} is analyzing the data from {start} to {end}."
                   values={{
                     jobId: <strong>{jobId}</strong>,
                     start: formatTime(createStatus.timeRange.start),
@@ -377,18 +376,6 @@ export const JobConfigStep: FC<Props> = ({ suggestion, indexPattern, creator, on
                   defaultMessage="Add results to chart"
                 />
               </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                onClick={onClose}
-                data-test-subj="mlDiscoverADManagementDone"
-              >
-                <FormattedMessage
-                  id="xpack.ml.discoverADManagement.doneButton"
-                  defaultMessage="Close"
-                />
-              </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
         </>

@@ -46,7 +46,11 @@ describe('SelectedJob', () => {
     mockJobsSummary.mockReset();
     mockJobsSummary.mockResolvedValue([{ id: 'mine', description: 'Watches the logs' }]);
     mockGetTime.mockReturnValue({ from: 'now-7d', to: 'now' });
-    mockGetUrl.mockResolvedValue('/app/ml/explorer?job=mine');
+    mockGetUrl.mockImplementation(async (params: { page?: string; appId?: string }) =>
+      params.page === 'explorer'
+        ? '/app/ml/explorer?job=mine'
+        : `/app/management/ml/${params.appId}`
+    );
   });
 
   it('shows nothing when there is no job selected', () => {
@@ -121,6 +125,40 @@ describe('SelectedJob', () => {
       expect(await screen.findByText('mine')).toBeInTheDocument();
       expect(
         screen.queryByTestId('mlDiscoverADManagementSelectedJobExplorer')
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('managing the job', () => {
+    it('links to the jobs list filtered to the job, in a new tab', async () => {
+      setSelectedJobId('selected-*', 'mine');
+      renderIt();
+
+      const button = await screen.findByTestId('mlDiscoverADManagementSelectedJobManage');
+
+      expect(button).toHaveTextContent('Manage job');
+      expect(button).toHaveAttribute(
+        'href',
+        "/app/management/ml/anomaly_detection?_a=(jobs:(queryText:'id:mine'))"
+      );
+      expect(button).toHaveAttribute('target', '_blank');
+    });
+
+    it('is not shown without a job', () => {
+      renderIt();
+      expect(
+        screen.queryByTestId('mlDiscoverADManagementSelectedJobManage')
+      ).not.toBeInTheDocument();
+    });
+
+    it('is not shown when the page url could not be made', async () => {
+      mockGetUrl.mockRejectedValue(new Error('boom'));
+      setSelectedJobId('selected-*', 'mine');
+      renderIt();
+
+      expect(await screen.findByText('mine')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('mlDiscoverADManagementSelectedJobManage')
       ).not.toBeInTheDocument();
     });
   });
