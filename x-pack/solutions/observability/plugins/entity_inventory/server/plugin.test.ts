@@ -60,9 +60,12 @@ describe('EntityInventoryPlugin setup', () => {
         ENTITY_DEFINITIONS.length
       } entity definitions: ${ENTITY_DEFINITIONS.map(({ type }) => type).join(', ')}`
     );
+    expect(logger.debug).not.toHaveBeenCalledWith(
+      expect.stringContaining('Entity inventory registered')
+    );
   });
 
-  it('logs nothing when every definition registers', () => {
+  it('logs the registered types at debug and no error when every definition registers', () => {
     const registerEntityDefinition = jest.fn().mockReturnValue({ ok: true });
     const { plugin, logger } = buildPlugin();
 
@@ -71,5 +74,10 @@ describe('EntityInventoryPlugin setup', () => {
     });
 
     expect(logger.error).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      `Entity inventory registered ${
+        ENTITY_DEFINITIONS.length
+      } entity definitions: ${ENTITY_DEFINITIONS.map(({ type }) => type).join(', ')}`
+    );
   });
 });

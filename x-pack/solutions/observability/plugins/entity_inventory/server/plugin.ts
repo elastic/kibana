@@ -60,7 +60,8 @@ export class EntityInventoryPlugin
   /**
    * Registers every definition in `ENTITY_DEFINITIONS` with the entity store. The registry logs and
    * skips a definition it rejects and never throws, so a bad definition costs that one type and
-   * leaves the rest registered; only the count is logged here, never the reason again.
+   * leaves the rest registered. Logs the registered types at debug, or the count and types of the
+   * rejected ones as an error; never the rejection reason, which the registry already logged.
    */
   private registerEntityDefinitions = (entityStore: EntityStoreSetupContract): void => {
     const rejected = ENTITY_DEFINITIONS.filter(
@@ -72,7 +73,13 @@ export class EntityInventoryPlugin
           ENTITY_DEFINITIONS.length
         } entity definitions: ${rejected.map(({ type }) => type).join(', ')}`
       );
+      return;
     }
+    this.logger.debug(
+      `Entity inventory registered ${
+        ENTITY_DEFINITIONS.length
+      } entity definitions: ${ENTITY_DEFINITIONS.map(({ type }) => type).join(', ')}`
+    );
   };
 
   private logRegisteredEntityDefinitions = async (
