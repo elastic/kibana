@@ -126,6 +126,50 @@ export const deleteV1PrivilegeAlerts = async (
   );
 };
 
+export const ES_QUERY_RULE_TYPE_ID = '.es-query';
+
+/** AAD alias used by stack rule type alerts, which `.es-query` writes to whatever its consumer. */
+export const STACK_ALERTS_INDEX_PATTERN = '.alerts-stack.alerts-default';
+
+export const waitForStackRuleAlert = async (esClient: EsClient, ruleId: string): Promise<void> => {
+  const timeoutMs = 90_000;
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const result = await esClient.search(
+      {
+        index: STACK_ALERTS_INDEX_PATTERN,
+        query: { term: { 'kibana.alert.rule.uuid': ruleId } },
+        _source: false,
+      },
+      { ignore: [404] }
+    );
+    const hits = 'hits' in result ? result.hits?.hits ?? [] : [];
+    if (hits.length > 0) {
+      await esClient.indices.refresh({ index: STACK_ALERTS_INDEX_PATTERN }, { ignore: [404] });
+      return;
+    }
+    await sleep(1_000);
+  }
+  throw new Error(
+    `stack alert for rule ${ruleId} did not appear in ${STACK_ALERTS_INDEX_PATTERN} within ${timeoutMs}ms`
+  );
+};
+
+export const deleteStackPrivilegeAlerts = async (
+  esClient: EsClient,
+  ruleId: string
+): Promise<void> => {
+  await esClient.deleteByQuery(
+    {
+      index: STACK_ALERTS_INDEX_PATTERN,
+      refresh: true,
+      conflicts: 'proceed',
+      query: { term: { 'kibana.alert.rule.uuid': ruleId } },
+    },
+    { ignore: [404] }
+  );
+};
+
 export const deleteV1PrivilegeRule = async (
   kbnClient: KbnClient,
   ruleId: string
