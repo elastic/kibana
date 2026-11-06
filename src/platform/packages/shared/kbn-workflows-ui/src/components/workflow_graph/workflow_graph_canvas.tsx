@@ -220,10 +220,6 @@ const getHomeFrameBounds = (
   return boundsFromNodes(leading.length > 0 ? leading : nodes) ?? fallback;
 };
 
-/** Inner glyph radius for Kibana button-group (8) chrome (~6px hardcoded). */
-const BUTTON_GROUP_INNER_RADIUS = 6;
-const buttonGroupInnerIconCss = { borderRadius: BUTTON_GROUP_INNER_RADIUS };
-
 function CanvasZoomControls({
   onResetView,
   onFitView,
@@ -282,7 +278,6 @@ function CanvasZoomControls({
             onClick={handleZoomIn}
             data-test-subj="workflowCanvas-zoom-in"
             title=""
-            css={buttonGroupInnerIconCss}
           />
         </EuiToolTip>
         <EuiToolTip content={zoomOutLabel} position="right" disableScreenReaderOutput>
@@ -293,7 +288,6 @@ function CanvasZoomControls({
             onClick={handleZoomOut}
             data-test-subj="workflowCanvas-zoom-out"
             title=""
-            css={buttonGroupInnerIconCss}
           />
         </EuiToolTip>
         <EuiToolTip content={resetZoomLabel} position="right" disableScreenReaderOutput>
@@ -304,7 +298,6 @@ function CanvasZoomControls({
             onClick={onResetView}
             data-test-subj="workflowCanvas-reset-zoom"
             title=""
-            css={buttonGroupInnerIconCss}
           />
         </EuiToolTip>
         <EuiToolTip content={fitViewLabel} position="right" disableScreenReaderOutput>
@@ -315,7 +308,6 @@ function CanvasZoomControls({
             onClick={onFitView}
             data-test-subj="workflowCanvas-fit-view"
             title=""
-            css={buttonGroupInnerIconCss}
           />
         </EuiToolTip>
       </EuiButtonGroup>
@@ -375,7 +367,6 @@ function CanvasMinimap({
               onClick={() => setIsExpanded(true)}
               data-test-subj="workflowCanvas-expand-minimap"
               title=""
-              css={buttonGroupInnerIconCss}
             />
           </EuiToolTip>
         </EuiButtonGroup>
@@ -401,7 +392,6 @@ function CanvasMinimap({
             onClick={() => setIsExpanded(false)}
             data-test-subj="workflowCanvas-collapse-minimap"
             title=""
-            css={buttonGroupInnerIconCss}
           />
         </EuiToolTip>
       </div>
