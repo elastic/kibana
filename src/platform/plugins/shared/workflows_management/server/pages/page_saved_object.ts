@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { v5 as uuidv5 } from 'uuid';
 import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import type {
@@ -76,14 +77,18 @@ export type PartiallyUpdatableWorkflowPageAttributes = Partial<
   Pick<WorkflowPageAttributes, 'access' | 'enabled'>
 >;
 
+/** Fixed namespace for the page id, so one page of one workflow always gets the same id. */
+const PAGE_ID_NAMESPACE = '0d8a6f0e-5c2b-4c3e-9a51-7f3c2d1b8e64';
+
 /**
- * Workflow ids are unique across spaces and never contain `:`, and page ids never do
- * either, so the id needs no space and splits back into one workflow and one page.
+ * ESO accepts only UUID ids for encrypted types, so the id is a UUIDv5 of the workflow and
+ * the page. Workflow ids are unique across spaces, so the id needs no space.
  */
 export const getWorkflowPageSavedObjectId = ({
   workflowId,
   pageId,
-}: Pick<WorkflowPageRef, 'workflowId' | 'pageId'>): string => `${workflowId}:${pageId}`;
+}: Pick<WorkflowPageRef, 'workflowId' | 'pageId'>): string =>
+  uuidv5(`${workflowId}:${pageId}`, PAGE_ID_NAMESPACE);
 
 /**
  * Updates the attributes that are neither encrypted nor in AAD.

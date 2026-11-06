@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { SPACES_EXTENSION_ID } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import {
   coreMock,
@@ -72,6 +73,14 @@ const setup = ({ authz }: { authz?: SecurityPluginStart['authz'] } = {}) => {
 };
 
 describe('WorkflowPagesService', () => {
+  it('builds the internal client without the spaces extension', () => {
+    const { core } = setup();
+    expect(core.savedObjects.getUnsafeInternalClient).toHaveBeenCalledWith({
+      includedHiddenTypes: [WORKFLOW_PAGE_SAVED_OBJECT_TYPE],
+      excludedExtensions: [SPACES_EXTENSION_ID],
+    });
+  });
+
   it('registers the page type at setup', () => {
     const { savedObjects } = setup();
     expect(savedObjects.registerType).toHaveBeenCalledWith(

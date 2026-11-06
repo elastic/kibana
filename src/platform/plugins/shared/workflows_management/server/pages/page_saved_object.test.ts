@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { SavedObjectsUtils } from '@kbn/core/server';
 import { savedObjectsClientMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import type { WorkflowPageAttributes } from './page_saved_object';
@@ -39,8 +40,12 @@ describe('workflow-page saved object', () => {
     });
   });
 
-  it('builds the id from the workflow and the page', () => {
-    expect(getWorkflowPageSavedObjectId({ workflowId: 'w', pageId: 'default' })).toBe('w:default');
+  it('builds a UUID id, which ESO requires for encrypted types', () => {
+    expect(
+      SavedObjectsUtils.isRandomId(
+        getWorkflowPageSavedObjectId({ workflowId: 'w', pageId: 'default' })
+      )
+    ).toBe(true);
   });
 
   it('builds a stable id from the workflow and the page', () => {
