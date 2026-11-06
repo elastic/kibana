@@ -10,6 +10,7 @@
 import type { AclState, StoredAcl } from './acl';
 import {
   compareLevels,
+  isGeneralAccessLevel,
   lowestAllowed,
   maxLevel,
   type AclLevel,
@@ -66,12 +67,12 @@ export const evaluateAcl = ({
   principal,
   recovery = false,
 }: EvaluateAclParams): AclDecision => {
-  const state = getAclState(policy, acl);
+  const state = getAclState(acl);
 
   let level: AclLevel = 'none';
   let isOwner = false;
   if (state === 'absent') {
-    level = policy.generalAccess.default;
+    level = policy.defaultGeneralAccessLevel;
   } else if (state === 'valid' && acl) {
     level = getGeneralAccess(policy, acl);
     if (principal) {
@@ -137,13 +138,13 @@ export const generalAccessPermits = (
     return false;
   }
 
-  const state = getAclState(policy, acl);
+  const state = getAclState(acl);
   if (state === 'invalid') {
     return false;
   }
 
   const generalAccess =
-    state === 'absent' || !acl ? policy.generalAccess.default : getGeneralAccess(policy, acl);
+    state === 'absent' || !acl ? policy.defaultGeneralAccessLevel : getGeneralAccess(policy, acl);
   return compareLevels(generalAccess, operationLevel) >= 0;
 };
 
@@ -152,23 +153,24 @@ export const generalAccessPermits = (
  * or named entries.
  */
 export const isRestricted = (policy: AccessPolicy, acl: StoredAcl | undefined) =>
-  getAclState(policy, acl) === 'valid' && !!acl && isRestrictedAcl(policy, acl);
+  getAclState(acl) === 'valid' && !!acl && isRestrictedAcl(policy, acl);
 
 /**
  * Returns the state of a stored ACL. Kibana always writes the version, the owner, and general
  * access, so the ACL is valid only when all three are complete: every version value is `1`, the
- * owner has exactly one known kind and at least one ID, and general access has a value the type
- * allows. Anything else is damaged data, which never falls back to a public default.
+ * owner has exactly one known kind and at least one ID, and general access has a value that
+ * general access can take. Anything else is damaged data, which never falls back to a public
+ * default. The state doesn't depend on the type's policy, so a narrower policy keeps stored ACLs
+ * valid.
  */
-export const getAclState = (policy: AccessPolicy, acl: StoredAcl | undefined): AclState => {
+export const getAclState = (acl: StoredAcl | undefined): AclState => {
   if (!acl) {
     return 'absent';
   }
 
   const hasVersion = acl.version.length > 0 && acl.version.every((value) => value === 1);
   const hasOwner = getPrincipalKind(acl.owner.type) !== undefined && acl.owner.id.length > 0;
-  const hasGeneralAccess =
-    lowestAllowed(acl.general_access, policy.generalAccess.allowed) !== undefined;
+  const hasGeneralAccess = acl.general_access.some(isGeneralAccessLevel);
   return hasVersion && hasOwner && hasGeneralAccess ? 'valid' : 'invalid';
 };
 
@@ -186,11 +188,11 @@ const KNOWN_PRINCIPAL_TYPES: ReadonlySet<string> = new Set(PRINCIPAL_TYPES);
 const isPrincipalType = (value: string): value is PrincipalType => KNOWN_PRINCIPAL_TYPES.has(value);
 
 const getGeneralAccess = (policy: AccessPolicy, acl: StoredAcl): GeneralAccessLevel =>
-  lowestAllowed(acl.general_access, policy.generalAccess.allowed) ?? 'none';
+  lowestAllowed(acl.general_access, policy.generalAccessLevels) ?? 'none';
 
 const isRestrictedAcl = (policy: AccessPolicy, acl: StoredAcl) =>
   acl.entries.length > 0 ||
-  compareLevels(getGeneralAccess(policy, acl), policy.generalAccess.default) < 0;
+  compareLevels(getGeneralAccess(policy, acl), policy.defaultGeneralAccessLevel) < 0;
 
 const matchesPrincipal = (
   component: { type: readonly string[]; id: readonly string[] },

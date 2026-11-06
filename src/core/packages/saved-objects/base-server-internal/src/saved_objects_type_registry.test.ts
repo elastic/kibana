@@ -315,7 +315,8 @@ describe('SavedObjectTypeRegistry', () => {
               namespaceType: 'multiple-isolated',
               accessPolicy: {
                 ...FIXTURE_POLICY,
-                generalAccess: { default: 'view', allowed: ['none', 'edit'] },
+                generalAccessLevels: ['none', 'edit'],
+                defaultGeneralAccessLevel: 'view',
               },
             })
           )

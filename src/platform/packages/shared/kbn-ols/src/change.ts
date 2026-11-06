@@ -111,7 +111,7 @@ export const prepareInitialAcl = ({
 
   const generalAccess = validateGeneralAccess(
     policy,
-    requested?.general_access ?? policy.generalAccess.default
+    requested?.general_access ?? policy.defaultGeneralAccessLevel
   );
   const entries = validateEntries(policy, requested?.entries ?? [], principal).map((entry) => ({
     ...entry,
@@ -222,7 +222,10 @@ const prepareClaim = (
     next: {
       version: 1,
       owner: principal,
-      general_access: validateGeneralAccess(policy, generalAccess ?? policy.generalAccess.default),
+      general_access: validateGeneralAccess(
+        policy,
+        generalAccess ?? policy.defaultGeneralAccessLevel
+      ),
       entries: [],
     },
     grantsToCheck: [],
@@ -282,13 +285,13 @@ export const readAclParts = (policy: AccessPolicy, acl: StoredAcl): AclParts => 
 
   return {
     ...(owner && { owner }),
-    general_access: lowestAllowed(acl.general_access, policy.generalAccess.allowed) ?? 'none',
+    general_access: lowestAllowed(acl.general_access, policy.generalAccessLevels) ?? 'none',
     entries: [...entries.values()],
   };
 };
 
 const validateGeneralAccess = (policy: AccessPolicy, level: GeneralAccessLevel) => {
-  if (!policy.generalAccess.allowed.includes(level)) {
+  if (!policy.generalAccessLevels.includes(level)) {
     throw new AclChangeError('bad_request', `General access "${level}" is not allowed.`);
   }
   return level;
@@ -333,8 +336,8 @@ const validateEntries = (
 const wouldRestrict = (policy: AccessPolicy, requested: AclInput) =>
   (requested.entries?.length ?? 0) > 0 ||
   compareLevels(
-    requested.general_access ?? policy.generalAccess.default,
-    policy.generalAccess.default
+    requested.general_access ?? policy.defaultGeneralAccessLevel,
+    policy.defaultGeneralAccessLevel
   ) < 0;
 
 const requireOperation = (decision: AclDecision, operation: string) => {

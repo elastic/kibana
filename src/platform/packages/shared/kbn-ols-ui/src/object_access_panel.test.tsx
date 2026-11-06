@@ -30,7 +30,8 @@ const COPY: AccessCopy = { objectNoun: 'connector', generalAccess: {}, entryLeve
 
 const POLICY: AccessPolicyResponse = {
   enabled: true,
-  general_access: { default: 'use', allowed: ['none', 'view', 'use', 'edit'] },
+  general_access_levels: ['none', 'view', 'use', 'edit'],
+  default_general_access_level: 'use',
   entry_levels: ['use', 'edit'],
   operations: {
     view: { level: 'view' },

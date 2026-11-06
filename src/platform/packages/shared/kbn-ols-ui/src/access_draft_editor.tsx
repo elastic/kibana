@@ -107,7 +107,7 @@ export const AccessDraftEditor = ({
         </>
       ) : null}
       <GeneralAccessSelect
-        allowed={policy.general_access.allowed}
+        allowed={policy.general_access_levels}
         value={value.general_access}
         onChange={(generalAccess) => onChange({ ...value, general_access: generalAccess })}
         copy={copy}

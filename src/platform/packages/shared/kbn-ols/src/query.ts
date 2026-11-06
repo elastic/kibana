@@ -8,7 +8,13 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { compareLevels, type AclLevel, type EntryLevel } from './levels';
+import {
+  ACL_LEVELS,
+  compareLevels,
+  isGeneralAccessLevel,
+  type AclLevel,
+  type EntryLevel,
+} from './levels';
 import type { AccessPolicy } from './policy';
 import { PRINCIPAL_TYPES, type Principal, type PrincipalType } from './principals';
 
@@ -48,9 +54,9 @@ export const buildAclReadFilter = ({
     }
 
     const ordinary: estypes.QueryDslQueryContainer[] = [
-      { bool: { filter: [validClause(policy)], should: grants, minimum_should_match: 1 } },
+      { bool: { filter: [validClause()], should: grants, minimum_should_match: 1 } },
     ];
-    if (compareLevels(policy.generalAccess.default, level) >= 0) {
+    if (compareLevels(policy.defaultGeneralAccessLevel, level) >= 0) {
       ordinary.push(ABSENT_CLAUSE);
     }
 
@@ -96,15 +102,15 @@ const ABSENT_CLAUSE: estypes.QueryDslQueryContainer = {
 
 /**
  * The ACL core is complete: every indexed version value is exactly `1`, the owner has exactly one
- * known kind and at least one ID, and general access has a value the type allows. It matches
- * `getAclState` returning `valid`.
+ * known kind and at least one ID, and general access has a value that general access can take,
+ * whatever the type's policy. It matches `getAclState` returning `valid`.
  */
-const validClause = (policy: AccessPolicy): estypes.QueryDslQueryContainer => ({
+const validClause = (): estypes.QueryDslQueryContainer => ({
   bool: {
     filter: [
       { term: { 'acl.version': 1 } },
       { exists: { field: 'acl.owner.id' } },
-      { terms: { 'acl.general_access': [...policy.generalAccess.allowed] } },
+      { terms: { 'acl.general_access': ACL_LEVELS.filter(isGeneralAccessLevel) } },
     ],
     must_not: [{ range: { 'acl.version': { lt: 1 } } }, { range: { 'acl.version': { gt: 1 } } }],
     should: PRINCIPAL_TYPES.map((kind) => ({
@@ -122,7 +128,7 @@ const validClause = (policy: AccessPolicy): estypes.QueryDslQueryContainer => ({
  * value does and no allowed value falls short.
  */
 const generalAccessClause = (policy: AccessPolicy, level: EntryLevel) => {
-  const { atLeast, below } = partitionLevels(policy.generalAccess.allowed, level);
+  const { atLeast, below } = partitionLevels(policy.generalAccessLevels, level);
   return atLeast.length > 0
     ? {
         bool: {

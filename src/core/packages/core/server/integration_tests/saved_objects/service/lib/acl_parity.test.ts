@@ -8,7 +8,13 @@
  */
 
 import { URL } from 'url';
-import { buildAclReadFilter, evaluateAcl, normalizeAclSource } from '@kbn/ols';
+import {
+  buildAclReadFilter,
+  compareLevels,
+  evaluateAcl,
+  normalizeAclSource,
+  type EntryLevel,
+} from '@kbn/ols';
 import {
   ACL_SHAPE_FIXTURES,
   FIXTURE_POLICY,
@@ -26,10 +32,16 @@ import {
 } from '@kbn/core-test-helpers-kbn-server';
 
 const TYPE = 'acl_parity';
+/**
+ * Levels a fixture's expectations are checked at. `manage` stands for access management.
+ */
+const FIXTURE_LEVELS: EntryLevel[] = ['view', 'use', 'edit', 'manage'];
 const indexableFixtures = ACL_SHAPE_FIXTURES.map((fixture, index) => ({
   ...fixture,
+  policy: fixture.policy ?? FIXTURE_POLICY,
   id: `fixture-${index}`,
 })).filter(({ indexable }) => indexable);
+const fixturePolicies = [...new Set(indexableFixtures.map(({ policy }) => policy))];
 
 /**
  * Proves that the read filter and the point evaluator agree on every stored ACL shape, as
@@ -96,55 +108,63 @@ describe('ACL read filter and evaluator parity', () => {
     }
   });
 
-  for (const probe of Object.keys(FIXTURE_PROBES) as FixtureProbe[]) {
-    it(`finds exactly the objects the evaluator allows, for the ${probe} probe`, async () => {
-      const principal = FIXTURE_PROBES[probe];
-      const { hits } = await esClient.search({
-        index: MAIN_SAVED_OBJECT_INDEX,
-        size: 100,
-        _source: false,
-        query: {
-          bool: {
-            filter: [
-              { term: { type: TYPE } },
-              buildAclReadFilter({
-                policy: FIXTURE_POLICY,
-                principal,
-                level: 'view',
-                recoverySpaces: [],
-                ordinarySpaces: ['default'],
-              }),
-            ],
-          },
-        },
-      });
-      const found = new Set(hits.hits.map(({ _id }) => _id?.replace(`${TYPE}:`, '')));
+  for (const [policyIndex, policy] of fixturePolicies.entries()) {
+    for (const probe of Object.keys(FIXTURE_PROBES) as FixtureProbe[]) {
+      for (const level of FIXTURE_LEVELS) {
+        it(`finds exactly the objects the evaluator allows, for policy ${policyIndex}, the ${probe} probe, and ${level}`, async () => {
+          const principal = FIXTURE_PROBES[probe];
+          const operation = level === 'manage' ? 'manage_access' : level;
+          const { hits } = await esClient.search({
+            index: MAIN_SAVED_OBJECT_INDEX,
+            size: 100,
+            _source: false,
+            query: {
+              bool: {
+                filter: [
+                  { term: { type: TYPE } },
+                  buildAclReadFilter({
+                    policy,
+                    principal,
+                    level,
+                    recoverySpaces: [],
+                    ordinarySpaces: ['default'],
+                  }),
+                ],
+              },
+            },
+          });
+          const found = new Set(hits.hits.map(({ _id }) => _id?.replace(`${TYPE}:`, '')));
 
-      for (const { id, name, access } of indexableFixtures) {
-        const { _source: source } = await esClient.get<Record<string, unknown>>({
-          index: MAIN_SAVED_OBJECT_INDEX,
-          id: `${TYPE}:${id}`,
-        });
-        const fromRawSource = evaluateAcl({
-          policy: FIXTURE_POLICY,
-          acl: normalizeAclSource(source),
-          principal,
-        }).operations.has('view');
-        const fromRepository = evaluateAcl({
-          policy: FIXTURE_POLICY,
-          acl: (await repository.get(TYPE, id)).acl,
-          principal,
-        }).operations.has('view');
+          for (const { id, name, access } of indexableFixtures.filter(
+            (fixture) => fixture.policy === policy
+          )) {
+            const { _source: source } = await esClient.get<Record<string, unknown>>({
+              index: MAIN_SAVED_OBJECT_INDEX,
+              id: `${TYPE}:${id}`,
+            });
+            const fromRawSource = evaluateAcl({
+              policy,
+              acl: normalizeAclSource(source),
+              principal,
+            }).operations.has(operation);
+            const fromRepository = evaluateAcl({
+              policy,
+              acl: (await repository.get(TYPE, id)).acl,
+              principal,
+            }).operations.has(operation);
 
-        const expected = access.includes(probe);
-        expect({ name, filter: found.has(id), fromRawSource, fromRepository }).toEqual({
-          name,
-          filter: expected,
-          fromRawSource: expected,
-          fromRepository: expected,
+            const probeLevel = access[probe];
+            const expected = !!probeLevel && compareLevels(probeLevel, level) >= 0;
+            expect({ name, filter: found.has(id), fromRawSource, fromRepository }).toEqual({
+              name,
+              filter: expected,
+              fromRawSource: expected,
+              fromRepository: expected,
+            });
+          }
         });
       }
-    });
+    }
   }
 
   it('fails explicitly, rather than unfiltered, when expensive queries are disallowed', async () => {

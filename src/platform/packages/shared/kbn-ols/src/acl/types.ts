@@ -60,8 +60,9 @@ export interface StoredAcl {
    */
   owner: { type: string[]; id: string[] };
   /**
-   * Every stored general access value. The lowest one the type allows applies, and the ACL is
-   * damaged when there is none.
+   * Every stored general access value. The ACL is damaged unless at least one value is a level
+   * that general access can take. The lowest value the type allows then applies, or `none` when
+   * the type allows none of them.
    */
   general_access: string[];
   /** Every stored entry. */
@@ -86,7 +87,7 @@ export interface StoredAclEntry {
 }
 
 /**
- * State of a stored ACL: missing or holding only empty values (`absent`), complete and enforced
- * (`valid`), or damaged (`invalid`). A damaged ACL grants no ordinary access.
+ * State of a stored ACL: no field holds a value, only `null`, `[]`, or `{}` (`absent`), complete
+ * and enforced (`valid`), or damaged (`invalid`). A damaged ACL grants no ordinary access.
  */
 export type AclState = 'absent' | 'valid' | 'invalid';

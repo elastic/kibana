@@ -354,7 +354,8 @@ const ErrorCallout = ({
  * Turns the API's policy into the model's shape, so that the model's rules read stored ACLs.
  */
 const toModelPolicy = (policy: AccessPolicyResponse) => ({
-  generalAccess: policy.general_access,
+  generalAccessLevels: policy.general_access_levels,
+  defaultGeneralAccessLevel: policy.default_general_access_level,
   entryLevels: policy.entry_levels,
   operations: Object.fromEntries(
     Object.entries(policy.operations).map(([name, { level }]) => [name, { level, privileges: {} }])

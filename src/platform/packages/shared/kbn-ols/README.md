@@ -30,14 +30,17 @@ type doesn't know are ignored.
 
 ## Access policies
 
-Every type that adopts OLS declares one access policy. It says which general access values the type supports and
-which one new objects get, which levels entries can grant, and which level each operation needs. For example, a type
+Every type that adopts OLS declares one access policy. It says which levels general access can take
+(`generalAccessLevels`), which one new objects and objects without an ACL get (`defaultGeneralAccessLevel`), which
+levels entries can grant (`entryLevels`), and which level each operation needs. The default is required, because it
+decides access to every existing object when a type adopts OLS. For example, a type
 whose objects everyone can edit by default (`edit`), whose owners can let others only use them (`use`) or nothing at
 all (`none`), and whose entries grant `use`:
 
 ```ts
 const policy: AccessPolicy = {
-  generalAccess: { default: 'edit', allowed: ['none', 'use', 'edit'] },
+  generalAccessLevels: ['none', 'use', 'edit'],
+  defaultGeneralAccessLevel: 'edit',
   entryLevels: ['use'],
   operations: {
     view: { level: 'view', privileges: {} },
@@ -87,7 +90,7 @@ way.
 
 An ACL is in one of three states (`AclState`):
 
-- `absent`: there is no ACL, or it holds only empty values. The type's default general access applies.
+- `absent`: no ACL field holds a value (only `null`, `[]`, or `{}`). The type's default general access applies.
 - `valid`: the ACL has a supported version, an owner, and general access, as every ACL Kibana writes does, and it
   is enforced.
 - `invalid`: the ACL is damaged, for example it has an unsupported version or no owner, and grants no ordinary
@@ -102,18 +105,21 @@ The version, the owner, and general access decide who controls the object, and K
 stored ACL with anything else in them didn't come from Kibana, so it counts as damaged. Entries only ever add access,
 so an unreadable entry just grants nothing.
 
-- **State.** An ACL where no field holds a value is `absent`. Otherwise, it is `valid` when all of these hold, and
-  `invalid` when any doesn't:
+- **State.** An ACL where no field holds a value is `absent`. An empty string is a value. Otherwise, the ACL is
+  `valid` when all of these hold, and `invalid` when any doesn't:
   - It has at least one version value, and every one is `1`.
   - The owner has exactly one known kind, once unknown kinds are ignored, and at least one ID.
-  - General access has at least one value the type allows.
+  - General access has at least one value that general access can take (`isGeneralAccessLevel`): `none`, `view`,
+    `use`, or `edit`.
 
-  An invalid ACL grants nothing at all, not even ownership. A recovery administrator repairs it by transferring
-  ownership, which writes a complete ACL.
+  These checks don't depend on the type's policy, so a type that later stops allowing a general access value
+  doesn't make its stored ACLs invalid. An invalid ACL grants nothing at all, not even ownership. A recovery
+  administrator repairs it by transferring ownership, which writes a complete ACL.
 - **Values are text.** Numbers and booleans are read as text, the way Elasticsearch indexes them into `keyword`
   fields: an owner ID stored as `1` matches a principal whose ID is `"1"`, and a general access of `true` is an
   unknown value.
-- **General access.** Values the type doesn't allow are ignored, and the lowest allowed one applies.
+- **General access.** Values the type doesn't allow are ignored, and the lowest allowed one applies. When the type
+  allows none of them, general access is `none`: the object becomes private, and the owner and entries still apply.
 - **Owner IDs.** Every stored owner ID counts, so an owner with several IDs makes each of them an owner. This is the
   one place where several values don't fall back to the most restrictive reading: a search matches a document when
   any stored ID matches, and a search filter can't cheaply tell one stored ID from several, so reading a single
@@ -121,7 +127,8 @@ so an unreadable entry just grants nothing.
   produce such an ACL.
 - **Entries.** Unknown kinds and levels the type doesn't allow for entries are ignored. An entry with exactly one
   known kind and at least one allowed level grants the lowest of those levels to each of its IDs. Any other entry
-  grants nothing, and the rest of the ACL still applies.
+  grants nothing, and the rest of the ACL still applies. When several entries grant to the same principal, the
+  highest of their grants applies.
 - **Kinds match exactly.** A principal only matches its own kind, so a service account never matches a user whose
   ID has the same text.
 - **Entries stay separate.** A kind, an ID, and a level from different entries never combine into a grant.
@@ -134,8 +141,13 @@ so an unreadable entry just grants nothing.
 `src/__fixtures__` holds test-only data. The package build drops that folder, and the entry point doesn't export it.
 
 `ACL_SHAPE_FIXTURES` lists stored shapes, from an empty object to dotted keys and owners with two principal kinds.
-Each fixture says whether Elasticsearch accepts the document, which state the ACL is in, and which test principals
-(`FIXTURE_PROBES`) can view and use the object under `FIXTURE_POLICY`.
+Each fixture says whether Elasticsearch accepts the document, which state the ACL is in, and the highest level each
+test principal (`FIXTURE_PROBES`) can act at. Levels include every level below them, the owner of a valid ACL acts
+at `manage`, and a principal that can't even view the object is left out.
+
+Most fixtures use `FIXTURE_POLICY`, where entries grant only `use`. A few use `FIXTURE_POLICY_ALL_LEVELS`, where
+`view`, `use`, and `edit` all differ, to cover the rules that need several levels: duplicate entries, and the lowest
+of several allowed entry levels.
 
 The expectations are written by hand, and that's the point: they are the contract. Both the code that evaluates one
 object and the query that filters a search must produce exactly these answers, so a list can never show an object

@@ -8,9 +8,20 @@
  */
 
 import { evaluateAcl, generalAccessPermits, isRestricted } from './evaluate';
-import { ACL_SHAPE_FIXTURES, FIXTURE_POLICY, FIXTURE_PROBES } from './__fixtures__';
+import {
+  ACL_SHAPE_FIXTURES,
+  FIXTURE_POLICY,
+  FIXTURE_PROBES,
+  type FixtureProbe,
+} from './__fixtures__';
+import { compareLevels, type EntryLevel } from './levels';
 import { normalizeAclSource } from './normalize';
 import type { StoredAcl } from './acl';
+
+/**
+ * Levels a fixture's expectations are checked at. `manage` stands for access management.
+ */
+const FIXTURE_LEVELS: EntryLevel[] = ['view', 'use', 'edit', 'manage'];
 
 const OWNER = FIXTURE_PROBES.owner;
 const GRANTEE = FIXTURE_PROBES.grantee;
@@ -25,19 +36,26 @@ const acl = (overrides: Partial<StoredAcl> = {}): StoredAcl => ({
 
 describe('evaluateAcl', () => {
   describe('stored shapes', () => {
-    for (const fixture of ACL_SHAPE_FIXTURES) {
-      it(fixture.name, () => {
-        const storedAcl = normalizeAclSource(fixture.source);
-        for (const [probe, principal] of Object.entries(FIXTURE_PROBES)) {
-          const decision = evaluateAcl({ policy: FIXTURE_POLICY, acl: storedAcl, principal });
-          const expected = fixture.access.includes(probe as keyof typeof FIXTURE_PROBES);
-
-          expect({ probe, state: decision.state }).toEqual({ probe, state: fixture.state });
-          expect({ probe, view: decision.operations.has('view') }).toEqual({
-            probe,
-            view: expected,
+    for (const { name, source, policy = FIXTURE_POLICY, state, access } of ACL_SHAPE_FIXTURES) {
+      it(name, () => {
+        const storedAcl = normalizeAclSource(source);
+        for (const probe of Object.keys(FIXTURE_PROBES) as FixtureProbe[]) {
+          const decision = evaluateAcl({
+            policy,
+            acl: storedAcl,
+            principal: FIXTURE_PROBES[probe],
           });
-          expect({ probe, use: decision.operations.has('use') }).toEqual({ probe, use: expected });
+          const probeLevel = access[probe];
+
+          expect({ probe, state: decision.state }).toEqual({ probe, state });
+          for (const level of FIXTURE_LEVELS) {
+            const operation = level === 'manage' ? 'manage_access' : level;
+            expect({ probe, level, allowed: decision.operations.has(operation) }).toEqual({
+              probe,
+              level,
+              allowed: !!probeLevel && compareLevels(probeLevel, level) >= 0,
+            });
+          }
         }
       });
     }
@@ -97,7 +115,11 @@ describe('evaluateAcl', () => {
 
   it('does not let recovery manage an object without an ACL', () => {
     const decision = evaluateAcl({
-      policy: { ...FIXTURE_POLICY, generalAccess: { default: 'none', allowed: ['none'] } },
+      policy: {
+        ...FIXTURE_POLICY,
+        generalAccessLevels: ['none'],
+        defaultGeneralAccessLevel: 'none',
+      },
       principal: GRANTEE,
       recovery: true,
     });

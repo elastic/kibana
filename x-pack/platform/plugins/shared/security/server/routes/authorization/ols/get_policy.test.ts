@@ -43,7 +43,8 @@ describe('GET /internal/security/ols/{type}/_policy', () => {
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({
       enabled: true,
-      general_access: FIXTURE_POLICY.generalAccess,
+      general_access_levels: FIXTURE_POLICY.generalAccessLevels,
+      default_general_access_level: FIXTURE_POLICY.defaultGeneralAccessLevel,
       entry_levels: FIXTURE_POLICY.entryLevels,
       operations: {
         view: { level: 'view' },

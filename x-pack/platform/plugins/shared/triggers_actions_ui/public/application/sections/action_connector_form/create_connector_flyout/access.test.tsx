@@ -29,7 +29,8 @@ const POLICY_PATH = '/internal/security/ols/action/_policy';
 
 const POLICY: AccessPolicyResponse = {
   enabled: true,
-  general_access: { default: 'use', allowed: ['none', 'use', 'edit'] },
+  general_access_levels: ['none', 'use', 'edit'],
+  default_general_access_level: 'use',
   entry_levels: ['use'],
   operations: { view: { level: 'view' }, use: { level: 'use' }, edit: { level: 'edit' } },
 };

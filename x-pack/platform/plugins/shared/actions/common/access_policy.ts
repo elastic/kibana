@@ -15,7 +15,8 @@ import type { AccessPolicy } from '@kbn/ols';
  * Each operation is also capped by the feature privileges it lists, the same ones Actions checks.
  */
 export const CONNECTOR_ACCESS_POLICY: AccessPolicy = {
-  generalAccess: { default: 'edit', allowed: ['none', 'use', 'edit'] },
+  generalAccessLevels: ['none', 'use', 'edit'],
+  defaultGeneralAccessLevel: 'edit',
   entryLevels: ['use'],
   operations: {
     view: { level: 'view', privileges: { savedObject: [{ type: 'action', operation: 'get' }] } },

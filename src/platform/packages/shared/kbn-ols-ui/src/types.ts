@@ -23,7 +23,8 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
  */
 export interface AccessPolicyResponse {
   enabled: boolean;
-  general_access: { default: GeneralAccessLevel; allowed: GeneralAccessLevel[] };
+  general_access_levels: GeneralAccessLevel[];
+  default_general_access_level: GeneralAccessLevel;
   entry_levels: EntryLevel[];
   operations: Record<string, { level: EntryLevel }>;
 }

@@ -60,7 +60,8 @@ describe('buildAclReadFilter', () => {
   it('leaves out objects without an ACL when the default does not reach the level', () => {
     const restrictive = {
       ...policy,
-      generalAccess: { default: 'none', allowed: ['none'] },
+      generalAccessLevels: ['none'],
+      defaultGeneralAccessLevel: 'none',
     } as const;
     const serialized = JSON.stringify(
       buildAclReadFilter({

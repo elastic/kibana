@@ -35,7 +35,8 @@ import { authorizationMock } from '../index.mock';
 const TYPE = 'widget';
 
 const POLICY: AccessPolicy = {
-  generalAccess: { default: 'edit', allowed: ['none', 'use', 'edit'] },
+  generalAccessLevels: ['none', 'use', 'edit'],
+  defaultGeneralAccessLevel: 'edit',
   entryLevels: ['use'],
   operations: {
     view: { level: 'view', privileges: { savedObject: [{ type: TYPE, operation: 'get' }] } },

@@ -18,7 +18,8 @@ import type { AccessDraft, AccessPolicyResponse, SuggestedUser } from './types';
 
 const POLICY: AccessPolicyResponse = {
   enabled: true,
-  general_access: { default: 'use', allowed: ['none', 'view', 'use', 'edit'] },
+  general_access_levels: ['none', 'view', 'use', 'edit'],
+  default_general_access_level: 'use',
   entry_levels: ['use', 'edit'],
   operations: { view: { level: 'view' }, use: { level: 'use' }, edit: { level: 'edit' } },
 };

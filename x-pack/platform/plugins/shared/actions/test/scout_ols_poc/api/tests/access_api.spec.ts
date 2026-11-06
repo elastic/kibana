@@ -331,7 +331,8 @@ apiTest.describe('Connector access API', { tag: '@local-stateful-classic' }, () 
     expect(policy).toHaveStatusCode(200);
     expect(policy.body).toMatchObject({
       enabled: true,
-      general_access: { default: 'edit', allowed: ['none', 'use', 'edit'] },
+      general_access_levels: ['none', 'use', 'edit'],
+      default_general_access_level: 'edit',
       entry_levels: ['use'],
     });
 
