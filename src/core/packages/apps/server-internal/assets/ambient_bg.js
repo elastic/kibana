@@ -23,8 +23,8 @@
   };
   var LIGHT = {
     feather: 720,     // POC: wider than the blob radius so corners fade instead of a flat disk
-    opacity: 0.35,
-    color: '#6E7D96'  // closer to the light page than charcoal
+    opacity: 0.6,     // POC: needs design input; the non-plateau falloff caps most dots well below this
+    color: '#56647C'  // POC: needs design input; darker slate so dots read on the light page
   };
   // Blob anchors: r = radius factor, x/y = anchor as fraction of viewport.
   var PRESET = { tl: { r: 0.62, x: 0, y: 0 }, br: { r: 0.58, x: 1, y: 1 } };
