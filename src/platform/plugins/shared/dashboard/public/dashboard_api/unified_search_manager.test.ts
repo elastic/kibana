@@ -8,9 +8,13 @@
  */
 
 import { BehaviorSubject, Subject, take } from 'rxjs';
+import { areComparatorsEqual } from '@kbn/presentation-publishing';
 import { getSampleDashboardState } from '../mocks';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
-import { initializeUnifiedSearchManager } from './unified_search_manager';
+import {
+  getUnifiedSearchComparators,
+  initializeUnifiedSearchManager,
+} from './unified_search_manager';
 
 describe('initializeUnifiedSearchManager', () => {
   describe('startComparing', () => {
@@ -144,6 +148,29 @@ describe('initializeUnifiedSearchManager', () => {
           from: 'now-30m',
         });
       });
+    });
+  });
+  describe('getUnifiedSearchComparators', () => {
+    const { query: queryComparator } = getUnifiedSearchComparators(() => false);
+    const compareQuery = (last: DashboardState['query'], current: DashboardState['query']) =>
+      areComparatorsEqual({ query: queryComparator }, { query: last }, { query: current });
+    const emptyQuery: DashboardState['query'] = { language: 'kql', expression: '' };
+    const kqlQuery: DashboardState['query'] = { language: 'kql', expression: 'status: active' };
+
+    test('treats a missing query and an empty query as equal', () => {
+      expect(compareQuery(undefined, emptyQuery)).toBe(true);
+      expect(compareQuery(emptyQuery, undefined)).toBe(true);
+      expect(compareQuery(emptyQuery, { language: 'lucene', expression: '' })).toBe(true);
+    });
+
+    test('reports a change when only one query has an expression', () => {
+      expect(compareQuery(undefined, kqlQuery)).toBe(false);
+      expect(compareQuery(emptyQuery, kqlQuery)).toBe(false);
+    });
+
+    test('compares queries with expressions deeply', () => {
+      expect(compareQuery(kqlQuery, { ...kqlQuery })).toBe(true);
+      expect(compareQuery(kqlQuery, { ...kqlQuery, expression: 'status: inactive' })).toBe(false);
     });
   });
   describe('getState', () => {

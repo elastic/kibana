@@ -34,6 +34,17 @@ export interface HasSerializableState<SerializedState extends object = object> {
    * Applies a serialized state snapshot owned by the parent container.
    */
   applySerializedState: (state: SerializedState) => MaybePromise<void>;
+
+  /**
+   * Compares two serialized snapshots with the same comparators unsaved changes uses.
+   * The baseline does not have to be the last saved state.
+   * Returns true when the two states are equal (no changes), false when they differ.
+   * Optional so APIs without it still count as serializable.
+   */
+  compareSerializedState?: (
+    baseline: Partial<SerializedState> | undefined,
+    current: Partial<SerializedState> | undefined
+  ) => boolean;
 }
 
 export const apiHasSerializableState = (api: unknown | null): api is HasSerializableState => {

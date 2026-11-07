@@ -176,6 +176,24 @@ describe('projectRouting', () => {
     manager!.api.setProjectRouting('_alias:*');
   });
 
+  test('Should not detect a change after turning projectRoutingRestore on and saving', async () => {
+    const { manager, projectRoutingRestore$ } = initManager(false);
+    manager!.api.setProjectRouting('_alias:_origin');
+    const lastSavedState$ = createLastSavedState();
+    const changes: Array<Partial<DashboardState>> = [];
+    const subscription = manager!.internalApi
+      .startComparing(lastSavedState$)
+      .subscribe((nextChanges) => changes.push(nextChanges));
+    await new Promise((resolve) => setTimeout(resolve, 150));
+
+    projectRoutingRestore$.next(true);
+    lastSavedState$.next({ ...lastSavedState$.value, project_routing: '_alias:_origin' });
+    await new Promise((resolve) => setTimeout(resolve, 150));
+
+    expect(changes[changes.length - 1]).toStrictEqual({});
+    subscription.unsubscribe();
+  });
+
   test('Should return undefined when CPS is not enabled', () => {
     // Mock cpsService as disabled (no cpsManager)
     const originalCpsManager = cpsService?.cpsManager;
