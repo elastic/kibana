@@ -28,6 +28,18 @@ export const CUSTOMER0_CUSTOM_CONTEXT: readonly string[] = [
 export const RETROSPECTIVE_GUARDRAIL_CONTEXT =
   "Evaluation guardrail: this alert fired in the past and has since been resolved. Investigate it as if it is the alert's timestamp now, using only evidence that existed then. Bound every telemetry query to end no later than one hour after the alert's timestamp. Do not read human discussion of this incident (Slack or chat threads, including replies under the alert, incident or ticket records, status-page post-mortems, post-incident reviews), and do not use GitHub issues, pull requests, commits or comments created after the alert's timestamp. Code, commits, deploys and config changes from before the alert are fair game.";
 
+/** ORCA's environment is built on the upstream demo at this commit (paper, Appendix I). */
+export const ORCA_DEMO_COMMIT = 'fc77a6cbc0bf36ff52f21e4d59fa7b8a0f5d6733';
+
+/**
+ * Source code for ORCA tasks, as the paper's agents get it. They find it checked out next to the
+ * telemetry; here it is the same public repository at the same commit, pointed to the way the
+ * customer0 space points at Elastic's repositories.
+ */
+export const ORCA_CUSTOM_CONTEXT: readonly string[] = [
+  `Source code: the system is the OpenTelemetry Astronomy Shop demo, and its source is public: github.com/open-telemetry/opentelemetry-demo at commit ${ORCA_DEMO_COMMIT} (blobless clone in the sandbox with \`git clone --filter=blob:none\`, then \`git checkout ${ORCA_DEMO_COMMIT}\`; find files with \`git ls-tree\`/\`git grep\`, don't guess paths).`,
+];
+
 /**
  * The custom context snippets an investigation dataset runs with. Stored datasets are not named
  * `nightshift/customer0…`, so they are recognized by their `customer0` tag.
@@ -38,21 +50,25 @@ export const getDatasetCustomContext = ({
 }: {
   name: string;
   tags?: readonly string[];
-}): readonly string[] =>
-  name.startsWith('nightshift/customer0') || tags.includes('customer0')
-    ? [...CUSTOMER0_CUSTOM_CONTEXT, RETROSPECTIVE_GUARDRAIL_CONTEXT]
-    : [];
+}): readonly string[] => {
+  if (name.startsWith('nightshift/customer0') || tags.includes('customer0')) {
+    return [...CUSTOMER0_CUSTOM_CONTEXT, RETROSPECTIVE_GUARDRAIL_CONTEXT];
+  }
+  return name.startsWith('nightshift/orca-') ? ORCA_CUSTOM_CONTEXT : [];
+};
 
-/** Replaces the space's custom context with exactly these snippets. */
+/** Replaces the space's custom context with exactly these snippets; `basePath` selects the space. */
 export const replaceCustomContext = async (
   fetch: HttpHandler,
-  snippets: readonly string[]
+  snippets: readonly string[],
+  basePath = ''
 ): Promise<void> => {
-  const current = await fetch<GetCustomContextResponse>(CUSTOM_CONTEXT_API_PATH);
+  const path = `${basePath}${CUSTOM_CONTEXT_API_PATH}`;
+  const current = await fetch<GetCustomContextResponse>(path);
   if (snippets.length === 0 && current.snippets.length === 0) return;
   const body: PutCustomContextRequest = {
     snippets: snippets.map((text) => ({ text })),
     version: current.version,
   };
-  await fetch(CUSTOM_CONTEXT_API_PATH, { method: 'PUT', body: JSON.stringify(body) });
+  await fetch(path, { method: 'PUT', body: JSON.stringify(body) });
 };
