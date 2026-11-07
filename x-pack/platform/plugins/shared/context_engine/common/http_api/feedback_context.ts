@@ -28,7 +28,7 @@ export interface SignalPatternGroup {
   example?: {
     query?: string;
     error?: string;
-    row_count: number;
+    row_count?: number;
     conversation_id?: string;
   };
 }
