@@ -8,7 +8,6 @@
 export { type MlSeverityType, ML_ANOMALY_SEVERITY } from './anomaly_severity';
 export { ML_ANOMALY_THRESHOLD } from './anomaly_threshold';
 export { ML_SEVERITY_COLORS } from './severity_colors';
-export { getMlSeverityColorRampValue, type ColorRampStop } from './severity_ramp';
 
 export {
   mlJobAggregations,
@@ -101,11 +100,6 @@ export {
 
 export { getFormattedSeverityScore } from './get_formatted_severity_score';
 export { getSeverity } from './get_severity';
-export {
-  useSeverityColor,
-  getThemeResolvedSeverityColor,
-  getThemeResolvedSeverityStrokeColor,
-} from './use_severity_color';
 export { getSeverityColor } from './get_severity_color';
 export { getSeverityType } from './get_severity_type';
 
