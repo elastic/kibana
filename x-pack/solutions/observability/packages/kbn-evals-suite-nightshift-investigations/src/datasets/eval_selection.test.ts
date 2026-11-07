@@ -21,6 +21,7 @@ describe('resolveEvalSelection', () => {
         runSmoke: true,
         runInvestigations: true,
         runConnectorProbes: false,
+        runWriteup: false,
         smokeDatasetsRequest: undefined,
         fellBackToSmoke: false,
       });
@@ -32,6 +33,7 @@ describe('resolveEvalSelection', () => {
         runSmoke: true,
         runInvestigations: false,
         runConnectorProbes: false,
+        runWriteup: false,
         smokeDatasetsRequest: undefined,
         fellBackToSmoke: true,
       });
@@ -55,6 +57,7 @@ describe('resolveEvalSelection', () => {
       runSmoke: false,
       runInvestigations: true,
       runConnectorProbes: false,
+      runWriteup: false,
       smokeDatasetsRequest: undefined,
       fellBackToSmoke: false,
     });
@@ -66,6 +69,7 @@ describe('resolveEvalSelection', () => {
       runSmoke: true,
       runInvestigations: false,
       runConnectorProbes: false,
+      runWriteup: false,
       smokeDatasetsRequest: 'synthetic-smoke',
       fellBackToSmoke: false,
     });
@@ -79,6 +83,7 @@ describe('resolveEvalSelection', () => {
       runSmoke: true,
       runInvestigations: true,
       runConnectorProbes: false,
+      runWriteup: false,
       smokeDatasetsRequest: 'synthetic-smoke',
       fellBackToSmoke: false,
     });
@@ -92,6 +97,7 @@ describe('resolveEvalSelection', () => {
       runSmoke: false,
       runInvestigations: false,
       runConnectorProbes: true,
+      runWriteup: false,
       smokeDatasetsRequest: undefined,
       fellBackToSmoke: false,
     });
@@ -100,7 +106,37 @@ describe('resolveEvalSelection', () => {
   it('never selects the connector probes for all', () => {
     expect(resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: 'all' })).toMatchObject({
       runConnectorProbes: false,
+      runWriteup: false,
     });
+  });
+
+  it('runs the writeup eval on its own, without sandbox credentials', () => {
+    expect(resolveEvalSelection({ NIGHTSHIFT_DATASETS: 'writeup' })).toEqual({
+      runOrca: false,
+      runSmoke: false,
+      runInvestigations: false,
+      runConnectorProbes: false,
+      runWriteup: true,
+      smokeDatasetsRequest: undefined,
+      fellBackToSmoke: false,
+    });
+  });
+
+  it('never selects the writeup eval for unset or all', () => {
+    for (const value of [undefined, 'all']) {
+      expect(resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: value })).toMatchObject({
+        runWriteup: false,
+      });
+    }
+  });
+
+  it('keeps a stored dataset name for the writeup eval when it is selected', () => {
+    expect(
+      resolveEvalSelection({
+        NIGHTSHIFT_DATASET_NAME: 'stored',
+        NIGHTSHIFT_DATASETS: 'writeup',
+      })
+    ).toMatchObject({ runInvestigations: false, runWriteup: true });
   });
 
   it('rejects connector-probe without credentials', () => {
@@ -159,6 +195,7 @@ describe('ORCA selection', () => {
         runSmoke: false,
         runInvestigations: false,
         runConnectorProbes: false,
+        runWriteup: false,
       });
     }
   );
