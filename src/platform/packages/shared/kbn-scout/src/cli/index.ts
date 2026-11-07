@@ -8,6 +8,7 @@
  */
 import { RunWithCommands } from '@kbn/dev-cli-runner';
 import { cli as reportingCLI } from '@kbn/scout-reporting';
+import { pickCmd } from './pick';
 import { updateTestConfigManifests } from './manifests';
 import { startServerCmd } from './start_server';
 import { runTestsCmd } from './run_tests';
@@ -24,6 +25,7 @@ export async function run() {
       description: 'Scout CLI',
     },
     [
+      pickCmd,
       startServerCmd,
       runTestsCmd,
       runPlaywrightTestCheckCmd,
