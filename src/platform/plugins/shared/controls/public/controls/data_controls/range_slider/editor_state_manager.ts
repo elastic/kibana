@@ -8,20 +8,20 @@
  */
 
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
-import type { StateComparators } from '@kbn/presentation-publishing/state_manager';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 import { DEFAULT_RANGE_SLIDER_STATE } from '@kbn/controls-constants';
+import { rangeSliderEditorComparators } from '../../../../common/state_comparison';
 
 export type EditorState = Pick<RangeSliderControlState, 'step'>;
-
-export const editorComparators: StateComparators<EditorState> = {
-  step: (a, b) => (a ?? DEFAULT_RANGE_SLIDER_STATE.step) === (b ?? DEFAULT_RANGE_SLIDER_STATE.step),
-};
 
 const defaultEditorState = {
   step: DEFAULT_RANGE_SLIDER_STATE.step,
 };
 
 export const initializeEditorStateManager = (initialState: EditorState) => {
-  return initializeStateManager<EditorState>(initialState, defaultEditorState, editorComparators);
+  return initializeStateManager<EditorState>(
+    initialState,
+    defaultEditorState,
+    rangeSliderEditorComparators
+  );
 };

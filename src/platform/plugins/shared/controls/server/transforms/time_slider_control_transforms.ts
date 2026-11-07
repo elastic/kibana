@@ -15,11 +15,13 @@ import {
 } from '@kbn/controls-schemas';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
+import { timeSliderStateComparison } from '../../common/state_comparison';
 
 export const registerTimeSliderControlTransforms = (embeddable: EmbeddableSetup) => {
   embeddable.registerEmbeddableServerDefinition(TIME_SLIDER_CONTROL, {
     title: 'Time slider control',
     getSchema: () => timeSliderControlSchema,
+    stateComparison: timeSliderStateComparison,
     getTransforms: () => ({
       transformOut: <
         StoredStateType extends Partial<

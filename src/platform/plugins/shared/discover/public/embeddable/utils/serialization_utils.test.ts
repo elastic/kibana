@@ -637,6 +637,31 @@ describe('Serialization utils', () => {
           ref_id: 'test-id',
         });
       });
+
+      test.each([
+        { selectedTabId: 'tab-1', isSelectedTabImplicit: true, expected: undefined },
+        { selectedTabId: 'tab-1', isSelectedTabImplicit: false, expected: 'tab-1' },
+        { selectedTabId: 'tab-2', isSelectedTabImplicit: true, expected: 'tab-2' },
+      ])(
+        'serializes selected_tab_id as $expected for $selectedTabId when implicit is $isSelectedTabImplicit',
+        ({ selectedTabId, isSelectedTabImplicit, expected }) => {
+          const serializedState = serializeState({
+            uuid,
+            initialState: {
+              tabs: [mockTab('tab-1', 'Tab 1'), mockTab('tab-2', 'Tab 2')],
+            },
+            savedSearch: savedSearch as Parameters<typeof serializeState>[0]['savedSearch'],
+            serializeTitles: jest.fn(),
+            serializeTimeRange: jest.fn(),
+            serializeDynamicActions: jest.fn(),
+            savedObjectId: 'test-id',
+            selectedTabId,
+            isSelectedTabImplicit,
+          });
+
+          expect(serializedState).toMatchObject({ ref_id: 'test-id', selected_tab_id: expected });
+        }
+      );
     });
   });
 

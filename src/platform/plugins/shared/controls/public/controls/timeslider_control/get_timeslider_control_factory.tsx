@@ -31,10 +31,8 @@ import type { TimeSlice, TimeSliderControlState } from '@kbn/controls-schemas';
 import { TimeSliderPopoverButton } from './components/time_slider_popover_button';
 import { TimeSliderPopoverContent } from './components/time_slider_popover_content';
 import { TimeSliderPrepend } from './components/time_slider_prepend';
-import {
-  initTimeRangePercentage,
-  timeRangePercentageComparators,
-} from './init_time_range_percentage';
+import { timeSliderStateComparison } from '../../../common/state_comparison';
+import { initTimeRangePercentage } from './init_time_range_percentage';
 import { initTimeRangeSubscription } from './init_time_range_subscription';
 import {
   FROM_INDEX,
@@ -55,6 +53,7 @@ export const getTimesliderControlFactory = (): EmbeddablePublicDefinition<
 > => {
   return {
     type: TIME_SLIDER_CONTROL,
+    stateComparison: timeSliderStateComparison,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
 
@@ -239,13 +238,7 @@ export const getTimesliderControlFactory = (): EmbeddablePublicDefinition<
             map(() => undefined)
           )
         ),
-        getComparators: () => {
-          return {
-            ...timeRangePercentageComparators,
-            width: 'skip',
-            is_anchored: 'referenceEquality',
-          };
-        },
+        getComparators: () => timeSliderStateComparison.comparators,
         applySerializedState: (nextState) => {
           timeRangePercentage.reinitializeState(nextState);
           setIsAnchored(nextState.is_anchored ?? DEFAULT_TIME_SLIDER_STATE.is_anchored);

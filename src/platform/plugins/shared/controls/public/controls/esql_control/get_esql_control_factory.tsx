@@ -29,17 +29,19 @@ import {
   initializeRelatedPanels,
   initializeStateApi,
   useStateFromPublishingSubject,
+  type SerializedStateComparison,
   type StateComparators,
 } from '@kbn/presentation-publishing';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 
 import { uiActionsService } from '../../services/kibana_services';
-import { defaultControlLabelComparators, initializeLabelManager } from '../control_labels';
+import { esqlControlStateComparison } from '../../../common/state_comparison';
+import { initializeLabelManager } from '../control_labels';
 import { OptionsListControl } from '../data_controls/options_list_control/components/options_list_control';
 import { OptionsListControlContext } from '../data_controls/options_list_control/options_list_context_provider';
 import { VariableControlsStrings } from './constants';
 import { panelIsRelatedByEsqlVariable } from './panel_is_related_by_esql_variable';
-import { getSelectionComparators, initializeESQLControlManager } from './esql_control_manager';
+import { initializeESQLControlManager } from './esql_control_manager';
 import {
   type ESQLControlApi,
   type ESQLOptionsListComponentApi,
@@ -48,14 +50,20 @@ import {
 import { getTooltipTitle } from './utils/get_tooltip_title';
 import { getPlacementHints, LAYOUT_CONSTRAINTS } from '../constants';
 
+type ESQLControlSerializedState<State extends OptionsListESQLControlState> = State extends {
+  control_type: 'STATIC_VALUES';
+}
+  ? StaticESQLControl
+  : QueryESQLControl;
+
 export const getESQLControlFactory = <
   State extends OptionsListESQLControlState = OptionsListESQLControlState
->(): EmbeddablePublicDefinition<
-  State extends { control_type: 'STATIC_VALUES' } ? StaticESQLControl : QueryESQLControl,
-  ESQLControlApi<State>
-> => {
+>(): EmbeddablePublicDefinition<ESQLControlSerializedState<State>, ESQLControlApi<State>> => {
   return {
     type: ESQL_CONTROL,
+    stateComparison: esqlControlStateComparison as SerializedStateComparison<
+      ESQLControlSerializedState<State>
+    >,
     getPlacementHints,
     layoutConstraints: LAYOUT_CONSTRAINTS,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
@@ -96,8 +104,9 @@ export const getESQLControlFactory = <
         anyStateChange$: merge(labelManager.anyStateChange$, selections.anyStateChange$),
         getComparators: () => {
           return {
-            ...getSelectionComparators(state.control_type),
-            ...defaultControlLabelComparators,
+            ...esqlControlStateComparison.comparators,
+            // control_type and display_settings cannot change after the control is created
+            control_type: 'skip',
             display_settings: 'skip',
           } as StateComparators<typeof initialState>;
         },

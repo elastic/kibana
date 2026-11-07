@@ -9,8 +9,6 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiListGroup, EuiPanel } from '@elastic/eui';
-import deepEqual from 'fast-deep-equal';
-import { isUndefined, omitBy } from 'lodash';
 import React, { createContext, useMemo } from 'react';
 import { BehaviorSubject, map, merge, skip } from 'rxjs';
 
@@ -23,13 +21,12 @@ import {
   getViewModeSubject,
   initializeStateApi,
   initializeTitleManager,
-  titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
 
 import type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } from '../../common';
-import { DISPLAY_NAME, LINKS_EMBEDDABLE_TYPE } from '../../common';
+import { DISPLAY_NAME, LINKS_EMBEDDABLE_TYPE, linksStateComparison } from '../../common';
 import {
   DASHBOARD_LINK_TYPE,
   LINKS_HORIZONTAL_LAYOUT,
@@ -51,6 +48,7 @@ export const getLinksEmbeddableFactory = () => {
   const linksEmbeddableFactory: EmbeddablePublicDefinition<LinksEmbeddableState, LinksApi> = {
     type: LINKS_EMBEDDABLE_TYPE,
     getPlacementHints,
+    stateComparison: linksStateComparison,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const refId = (initialState as LinksByReferenceState).ref_id;
       const intialLinksState = refId
@@ -103,29 +101,10 @@ export const getLinksEmbeddableFactory = () => {
             map(() => undefined)
           )
         ),
-        getComparators: () => {
-          return {
-            ...titleComparators,
-            layout: isByReference ? 'skip' : 'referenceEquality',
-            links: isByReference
-              ? 'skip'
-              : (aLinks, bLinks) => {
-                  if (aLinks?.length !== bLinks?.length) {
-                    return false;
-                  }
-
-                  const hasLinkDifference = (aLinks ?? []).some((linkFromA, index) => {
-                    const linkFromB = bLinks?.[index];
-                    return !deepEqual(
-                      omitBy(linkFromA, isUndefined),
-                      omitBy(linkFromB, isUndefined)
-                    );
-                  });
-                  return !hasLinkDifference;
-                },
-            ref_id: 'skip',
-          };
-        },
+        getComparators: () => ({
+          ...linksStateComparison.comparators,
+          ref_id: 'skip',
+        }),
         applySerializedState: async (nextState) => {
           titleManager.reinitializeState(nextState);
           if (!refId) {
