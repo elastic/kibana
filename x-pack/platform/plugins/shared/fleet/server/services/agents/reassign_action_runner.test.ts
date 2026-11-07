@@ -1,0 +1,175 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+
+import type { Agent } from '../../types';
+import { appContextService } from '../app_context';
+import { agentPolicyService } from '../agent_policy';
+
+import { ReassignActionRunner } from './reassign_action_runner';
+import { BulkActionTaskType } from './bulk_action_types';
+import { createAgentAction, createErrorActionResults, getAgentActions } from './actions';
+import { bulkUpdateAgents, getAgentsByKuery, openPointInTime } from './crud';
+import { getAgentPolicyRestrictions, isAgentlessAgent, isHostedAgent } from './hosted_agent';
+
+jest.mock('./crud');
+jest.mock('./actions');
+jest.mock('./hosted_agent');
+jest.mock('../agent_policy', () => ({
+  agentPolicyService: { get: jest.fn() },
+}));
+jest.mock('../spaces/agent_namespaces', () => ({
+  agentsKueryNamespaceFilter: jest.fn().mockResolvedValue(undefined),
+  buildFilterWithNamespace: jest.fn((_namespaceFilter: string, kuery: string) => kuery),
+}));
+
+const mockedGetAgentsByKuery = getAgentsByKuery as jest.MockedFunction<typeof getAgentsByKuery>;
+const mockedGetAgentActions = getAgentActions as jest.MockedFunction<typeof getAgentActions>;
+const mockedBulkUpdateAgents = bulkUpdateAgents as jest.MockedFunction<typeof bulkUpdateAgents>;
+const mockedCreateAgentAction = createAgentAction as jest.MockedFunction<typeof createAgentAction>;
+
+const TARGET_POLICY_ID = 'policy-2';
+const ACTION_ID = 'action1';
+const RETRY_TASK_ID = `${BulkActionTaskType.REASSIGN_RETRY}:${ACTION_ID}`;
+
+const logger = loggerMock.create();
+
+/** Four agents, the first two already sitting on the policy the action reassigns to. */
+const AGENTS = [
+  { id: 'agent-0', policy_id: TARGET_POLICY_ID },
+  { id: 'agent-1', policy_id: TARGET_POLICY_ID },
+  { id: 'agent-2', policy_id: 'policy-1' },
+  { id: 'agent-3', policy_id: 'policy-1' },
+].map(
+  ({ id, policy_id: policyId }) =>
+    ({ id, policy_id: policyId, policy_base_id: policyId, sort: [id] } as unknown as Agent)
+);
+
+describe('ReassignActionRunner', () => {
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const soClient = savedObjectsClientMock.create();
+
+  let resolver: {
+    getTaskId: jest.Mock;
+    getCheckTaskId: jest.Mock;
+    run: jest.Mock;
+    removeIfExists: jest.Mock;
+    updateCheckTaskState: jest.Mock;
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    loggerMock.clear(logger);
+    jest.spyOn(appContextService, 'getLogger').mockReturnValue(logger);
+    jest
+      .spyOn(appContextService, 'getInternalUserSOClientForSpaceId')
+      .mockReturnValue(soClient as never);
+    resolver = {
+      getTaskId: jest.fn((actionId: string, type: string) => `${type}:${actionId}`),
+      getCheckTaskId: jest.fn((actionId: string, type: string) => `${type}:check:${actionId}`),
+      run: jest.fn(async (_params, _retry, _taskType, taskId) => taskId),
+      removeIfExists: jest.fn(),
+      updateCheckTaskState: jest.fn(),
+    };
+    jest.spyOn(appContextService, 'getBulkActionsResolver').mockReturnValue(resolver as never);
+
+    (openPointInTime as jest.Mock).mockResolvedValue('fresh-pit');
+    (getAgentPolicyRestrictions as jest.Mock).mockResolvedValue({});
+    (isHostedAgent as jest.Mock).mockReturnValue(false);
+    (isAgentlessAgent as jest.Mock).mockReturnValue(false);
+    (agentPolicyService.get as jest.Mock).mockResolvedValue({
+      id: TARGET_POLICY_ID,
+      space_ids: ['default'],
+    });
+    mockedGetAgentsByKuery.mockResolvedValue({
+      agents: AGENTS,
+      total: AGENTS.length,
+      page: 1,
+      perPage: AGENTS.length,
+    } as Awaited<ReturnType<typeof getAgentsByKuery>>);
+    (createErrorActionResults as jest.Mock).mockResolvedValue(undefined);
+    mockedBulkUpdateAgents.mockResolvedValue(undefined as never);
+    mockedCreateAgentAction.mockResolvedValue({} as never);
+    mockedGetAgentActions.mockResolvedValue([]);
+  });
+
+  const createRunner = () =>
+    new ReassignActionRunner(
+      esClient,
+      soClient,
+      {
+        kuery: '',
+        actionId: ACTION_ID,
+        batchSize: AGENTS.length,
+        total: AGENTS.length,
+        newAgentPolicyId: TARGET_POLICY_ID,
+      },
+      { retryCount: 1, taskId: RETRY_TASK_ID, pitId: 'stale-pit' }
+    );
+
+  it('reassigns the eligible agents of a batch and rejects the rest', async () => {
+    await createRunner().runActionAsyncWithRetry();
+
+    expect(mockedBulkUpdateAgents).toHaveBeenCalledWith(
+      esClient,
+      [
+        expect.objectContaining({ agentId: 'agent-2' }),
+        expect.objectContaining({ agentId: 'agent-3' }),
+      ],
+      expect.anything()
+    );
+  });
+
+  it('completes a replayed batch whose remaining agents are all already assigned', async () => {
+    // the earlier run finished this batch: it reassigned agent-2 and agent-3 and wrote error
+    // results for agent-0 and agent-1, which is why only the two eligible ids are in the document
+    mockedGetAgentActions.mockResolvedValue([
+      { agents: ['agent-2', 'agent-3'], type: 'POLICY_REASSIGN' },
+    ] as never);
+
+    const runner = createRunner();
+    await runner.runActionAsyncWithRetry();
+
+    // per-agent filtering leaves only the two already assigned agents, and reassignBatch throws
+    // AgentAlreadyAssignedError on them; replaying that would spend the whole retry budget on
+    // this batch and never reach the agents behind it
+    expect(mockedBulkUpdateAgents).not.toHaveBeenCalled();
+    expect(resolver.run).not.toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      BulkActionTaskType.REASSIGN_RETRY,
+      RETRY_TASK_ID
+    );
+    // the batch still counts, or the count would never reach the total
+    expect(resolver.updateCheckTaskState).toHaveBeenLastCalledWith(
+      `${BulkActionTaskType.REASSIGN_RETRY}:check:${ACTION_ID}`,
+      expect.objectContaining({ nbAgentsProcessed: AGENTS.length })
+    );
+  });
+
+  it('retries a batch that was not replayed and has nothing to reassign', async () => {
+    // no document covers any of these agents, so there is no evidence an earlier run already
+    // decided they were not actionable
+    mockedGetAgentsByKuery.mockResolvedValue({
+      agents: AGENTS.slice(0, 2),
+      total: 2,
+      page: 1,
+      perPage: 2,
+    } as Awaited<ReturnType<typeof getAgentsByKuery>>);
+
+    await createRunner().runActionAsyncWithRetry();
+
+    expect(resolver.run).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      BulkActionTaskType.REASSIGN_RETRY,
+      RETRY_TASK_ID
+    );
+  });
+});

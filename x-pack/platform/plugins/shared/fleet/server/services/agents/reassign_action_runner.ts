@@ -33,6 +33,15 @@ export class ReassignActionRunner extends ActionRunner {
     return await reassignBatch(this.esClient, this.actionParams! as any, agents, {});
   }
 
+  /**
+   * `reassignBatch` throws when no agent in the batch can be reassigned — every one is already on
+   * the target policy, hosted, or agentless-restricted. `AgentAlreadyAssignedError` extends
+   * `AgentReassignmentError`, so this covers both.
+   */
+  protected isBatchWithoutActionableAgents(error: Error): boolean {
+    return error instanceof AgentReassignmentError;
+  }
+
   protected getTaskType() {
     return BulkActionTaskType.REASSIGN_RETRY;
   }
