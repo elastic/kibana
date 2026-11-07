@@ -232,6 +232,7 @@ packages:
   - 'examples/locator_examples'
   - 'examples/locator_explorer'
   - 'examples/partial_results_example'
+  - 'examples/plugin_initialize_example'
   - 'examples/portable_dashboards_example'
   - 'examples/preboot_example'
   - 'examples/pubsub-example-topic'
