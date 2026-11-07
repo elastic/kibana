@@ -292,7 +292,7 @@ describe('renderMatrixHtml', () => {
     expect(html).toContain('score 6.10');
     // The aggregate still appears exactly once: the summary table cell.
     expect(html).not.toContain('score 8.48');
-    expect(html.match(/8\.48/g)).toHaveLength(1);
+    expect(html.match(/✓<\/span> 8\.48/g)).toHaveLength(1);
   });
 
   it('renders think/skill step tags in a reserved column with inline code chips in the body', () => {
