@@ -7,6 +7,9 @@
 
 import type {
   ChatCompleteAPI,
+  ChatCompleteCompositeResponse,
+  ChatCompleteOptions,
+  ChatCompletionEvent,
   OutputAPI,
   OutputCompositeResponse,
   OutputOptions,
@@ -16,17 +19,103 @@ import {
   ChatCompletionEventType,
   MessageRole,
   OutputEventType,
+  createForcedToolChoiceUnsupportedError,
+  hasForcedToolChoice,
   isToolValidationError,
+  isUnsupportedToolChoiceError,
+  recordToolChoiceRejection,
+  shouldForceToolChoice,
+  toAutoToolChoiceRequest,
   withoutTokenCountEvents,
 } from '@kbn/inference-common';
-import { isObservable, map } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { catchError, defer, isObservable, map, throwError } from 'rxjs';
 import { ensureMultiTurn } from '../utils/ensure_multi_turn';
 
 type DefaultOutputOptions = OutputOptions<string, ToolSchema | undefined, boolean>;
 
-export function createOutputApi(chatCompleteApi: ChatCompleteAPI): OutputAPI;
+interface ToolChoiceFallbackLogger {
+  warn: (message: string) => void;
+}
 
-export function createOutputApi(chatCompleteApi: ChatCompleteAPI) {
+/**
+ * Calls `chatComplete`, falling back to `tool_choice: auto` when the model rejects the forced
+ * `tool_choice` used for structured output. Mirrors `InferenceChatModel` (same shared helpers),
+ * so both entry points share one decision (`shouldForceToolChoice`) and one rejection memo.
+ */
+const callWithToolChoiceFallback = (
+  chatCompleteApi: ChatCompleteAPI,
+  request: ChatCompleteOptions,
+  logger?: ToolChoiceFallbackLogger
+): ChatCompleteCompositeResponse<ChatCompleteOptions> => {
+  const call = chatCompleteApi as (options: ChatCompleteOptions) => any;
+  const target = { connectorId: request.connectorId, model: request.modelName };
+
+  if (!hasForcedToolChoice(request)) {
+    return call(request);
+  }
+  if (!shouldForceToolChoice(target)) {
+    return call(toAutoToolChoiceRequest(request));
+  }
+
+  const modelLabel = request.modelName ?? request.connectorId;
+  const onRejected = (error: unknown) => {
+    recordToolChoiceRejection(target);
+    logger?.warn(
+      `Model "${modelLabel}" (connector ${
+        request.connectorId
+      }) rejected forced tool_choice ${JSON.stringify(
+        request.toolChoice
+      )}, retrying with tool_choice "auto": ${error instanceof Error ? error.message : error}`
+    );
+  };
+  const toFinalError = (error: unknown) =>
+    isUnsupportedToolChoiceError(error)
+      ? createForcedToolChoiceUnsupportedError(modelLabel, error)
+      : error;
+
+  if (request.stream) {
+    return defer((): Observable<ChatCompletionEvent> => {
+      let hasEmitted = false;
+      return call(request).pipe(
+        map((event) => {
+          hasEmitted = true;
+          return event;
+        }),
+        catchError((error: unknown) => {
+          // never restart a stream that already produced output
+          if (hasEmitted || !isUnsupportedToolChoiceError(error)) {
+            return throwError(() => error);
+          }
+          onRejected(error);
+          return call(toAutoToolChoiceRequest(request)).pipe(
+            catchError((retryError: unknown) => throwError(() => toFinalError(retryError)))
+          );
+        })
+      );
+    });
+  }
+
+  return call(request).catch((error: unknown) => {
+    if (!isUnsupportedToolChoiceError(error)) {
+      throw error;
+    }
+    onRejected(error);
+    return call(toAutoToolChoiceRequest(request)).catch((retryError: unknown) => {
+      throw toFinalError(retryError);
+    });
+  });
+};
+
+export function createOutputApi(
+  chatCompleteApi: ChatCompleteAPI,
+  logger?: ToolChoiceFallbackLogger
+): OutputAPI;
+
+export function createOutputApi(
+  chatCompleteApi: ChatCompleteAPI,
+  logger?: ToolChoiceFallbackLogger
+) {
   return function callOutputApi({
     id,
     connectorId,
@@ -55,29 +144,33 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI) {
       },
     ]);
 
-    const response = chatCompleteApi({
-      connectorId,
-      stream,
-      modelName,
-      functionCalling,
-      abortSignal,
-      maxRetries,
-      retryConfiguration,
-      metadata,
-      system,
-      messages,
-      ...(schema
-        ? {
-            tools: {
-              structuredOutput: {
-                description: `Use the following schema to respond to the user's request in structured data, so it can be parsed and handled.`,
-                schema,
+    const response = callWithToolChoiceFallback(
+      chatCompleteApi,
+      {
+        connectorId,
+        stream,
+        modelName,
+        functionCalling,
+        abortSignal,
+        maxRetries,
+        retryConfiguration,
+        metadata,
+        system,
+        messages,
+        ...(schema
+          ? {
+              tools: {
+                structuredOutput: {
+                  description: `Use the following schema to respond to the user's request in structured data, so it can be parsed and handled.`,
+                  schema,
+                },
               },
-            },
-            toolChoice: { function: 'structuredOutput' as const },
-          }
-        : {}),
-    });
+              toolChoice: { function: 'structuredOutput' as const },
+            }
+          : {}),
+      },
+      logger
+    );
 
     if (isObservable(response)) {
       return response.pipe(

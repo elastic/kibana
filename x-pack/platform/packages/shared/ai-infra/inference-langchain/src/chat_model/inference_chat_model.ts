@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { trace } from '@opentelemetry/api';
+import type { Logger } from '@kbn/logging';
 import { z as z4 } from '@kbn/zod/v4';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import {
@@ -44,6 +46,12 @@ import {
   isToolValidationError,
   getConnectorDefaultModel,
   getConnectorProvider,
+  createForcedToolChoiceUnsupportedError,
+  hasForcedToolChoice,
+  isUnsupportedToolChoiceError,
+  recordToolChoiceRejection,
+  shouldForceToolChoice,
+  toAutoToolChoiceRequest,
 } from '@kbn/inference-common';
 import type { ToolChoice } from './types';
 import { toAsyncIterator, wrapInferenceError } from './utils';
@@ -71,6 +79,7 @@ export interface InferenceChatModelParams extends BaseChatModelParams {
   cacheControl?: ChatCompleteCacheControl;
   sessionId?: string;
   reasoning?: ChatCompletionReasoning;
+  logger?: Logger;
 }
 
 export interface InferenceChatModelCallOptions extends BaseChatModelCallOptions {
@@ -106,8 +115,7 @@ type InvocationParams = Omit<ChatCompleteOptions, 'messages' | 'system' | 'strea
 export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOptions> {
   private readonly chatComplete: ChatCompleteAPI;
   private readonly connector: InferenceConnector;
-  // @ts-ignore unused for now
-  private readonly logger: Logger;
+  private readonly logger?: Logger;
   private readonly telemetryMetadata?: ConnectorTelemetryMetadata;
 
   protected temperature?: number;
@@ -126,6 +134,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     this.chatComplete = args.chatComplete;
     this.connector = args.connector;
     this.telemetryMetadata = args.telemetryMetadata;
+    this.logger = args.logger;
 
     this.temperature = args.temperature;
     this.functionCallingMode = args.functionCallingMode;
@@ -245,6 +254,112 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     });
   };
 
+  private get modelLabel() {
+    return this.model ?? getConnectorDefaultModel(this.connector) ?? this.connector.connectorId;
+  }
+
+  private get toolChoiceTarget() {
+    return { connectorId: this.connector.connectorId, model: this.model };
+  }
+
+  /**
+   * Some providers (e.g. Anthropic models served via EIS) reject a forced `tool_choice`
+   * (named tool or `required`) with a 400. When that happens we retry once with `tool_choice: auto`,
+   * keeping the tools and instructing the model to call the tool, and remember the rejection for
+   * this connector/model so later requests skip the doomed forced attempt. Callers that need a
+   * tool call (e.g. `withStructuredOutput`) validate the response, so a missing or invalid call
+   * is still surfaced as an error by them.
+   */
+  private shouldSendAutoToolChoice(request: ChatCompleteOptions) {
+    return hasForcedToolChoice(request) && !shouldForceToolChoice(this.toolChoiceTarget);
+  }
+
+  private shouldFallbackToAutoToolChoice(request: ChatCompleteOptions, error: unknown) {
+    return hasForcedToolChoice(request) && isUnsupportedToolChoiceError(error);
+  }
+
+  private onToolChoiceRejected(request: ChatCompleteOptions, error: unknown) {
+    recordToolChoiceRejection(this.toolChoiceTarget);
+    const reason = error instanceof Error ? error.message : String(error);
+    this.logger?.warn(
+      `Model "${this.modelLabel}" (connector ${
+        this.connector.connectorId
+      }) rejected forced tool_choice ${JSON.stringify(
+        request.toolChoice
+      )}, retrying with tool_choice "auto": ${reason}`
+    );
+    trace.getActiveSpan()?.setAttributes({
+      'inference.tool_choice_fallback': true,
+      'inference.tool_choice_original': JSON.stringify(request.toolChoice),
+    });
+  }
+
+  private toForcedToolChoiceUnsupportedError(error: unknown) {
+    return createForcedToolChoiceUnsupportedError(this.modelLabel, error);
+  }
+
+  private async completeWithToolChoiceFallback(
+    request: ChatCompleteOptions & { stream: false }
+  ): Promise<ChatCompleteResponse> {
+    if (this.shouldSendAutoToolChoice(request)) {
+      return await this.completionWithRetry(toAutoToolChoiceRequest(request));
+    }
+
+    try {
+      return await this.completionWithRetry(request);
+    } catch (e) {
+      if (!this.shouldFallbackToAutoToolChoice(request, e)) {
+        throw e;
+      }
+      this.onToolChoiceRejected(request, e);
+    }
+
+    try {
+      return await this.completionWithRetry(toAutoToolChoiceRequest(request));
+    } catch (retryError) {
+      throw isUnsupportedToolChoiceError(retryError)
+        ? this.toForcedToolChoiceUnsupportedError(retryError)
+        : retryError;
+    }
+  }
+
+  private async *streamWithToolChoiceFallback(request: ChatCompleteOptions & { stream: true }) {
+    if (this.shouldSendAutoToolChoice(request)) {
+      const response$ = await this.completionWithRetry(toAutoToolChoiceRequest(request));
+      for await (const event of toAsyncIterator(response$)) {
+        yield event;
+      }
+      return;
+    }
+
+    let hasEmitted = false;
+    try {
+      const response$ = await this.completionWithRetry(request);
+      for await (const event of toAsyncIterator(response$)) {
+        hasEmitted = true;
+        yield event;
+      }
+      return;
+    } catch (e) {
+      // never restart a stream that already produced output, it would duplicate content
+      if (hasEmitted || !this.shouldFallbackToAutoToolChoice(request, e)) {
+        throw e;
+      }
+      this.onToolChoiceRejected(request, e);
+    }
+
+    try {
+      const response$ = await this.completionWithRetry(toAutoToolChoiceRequest(request));
+      for await (const event of toAsyncIterator(response$)) {
+        yield event;
+      }
+    } catch (retryError) {
+      throw isUnsupportedToolChoiceError(retryError)
+        ? this.toForcedToolChoiceUnsupportedError(retryError)
+        : retryError;
+    }
+  }
+
   async _generate(
     baseMessages: BaseMessage[],
     options: this['ParsedCallOptions'],
@@ -255,7 +370,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     let response: ChatCompleteResponse;
 
     try {
-      response = await this.completionWithRetry({
+      response = await this.completeWithToolChoiceFallback({
         ...this.invocationParams(options),
         system,
         messages,
@@ -301,15 +416,14 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     runManager?: CallbackManagerForLLMRun
   ): AsyncGenerator<ChatGenerationChunk> {
     const { system, messages } = messagesToInference(baseMessages);
-    const response$ = await this.completionWithRetry({
+    const request = {
       ...this.invocationParams(options),
       system,
       messages,
       stream: true as const,
-    });
+    };
 
-    const responseIterator = toAsyncIterator(response$);
-    for await (const event of responseIterator) {
+    for await (const event of this.streamWithToolChoiceFallback(request)) {
       if (isChatCompletionChunkEvent(event)) {
         const chunk = completionChunkToLangchain(event);
         const generationChunk = new ChatGenerationChunk({
@@ -403,11 +517,17 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     const outputParser = RunnableLambda.from<AIMessageChunk, RunOutput>(
       async (input: AIMessageChunk): Promise<RunOutput> => {
         if (!input.tool_calls || input.tool_calls.length === 0) {
-          throw new Error('No tool calls found in the response.');
+          throw new OutputParserException(
+            'No tool calls found in the response.',
+            JSON.stringify(input.content)
+          );
         }
         const toolCall = input.tool_calls.find((tc) => tc.name === functionName);
         if (!toolCall) {
-          throw new Error(`No tool call found with name ${functionName}.`);
+          throw new OutputParserException(
+            `No tool call found with name ${functionName}.`,
+            JSON.stringify(input.tool_calls)
+          );
         }
         if (!isInteropZodSchema(schema)) {
           return toolCall.args as RunOutput;

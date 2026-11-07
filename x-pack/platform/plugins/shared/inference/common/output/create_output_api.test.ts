@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { firstValueFrom, isObservable, of, toArray } from 'rxjs';
+import { concat, firstValueFrom, isObservable, of, throwError, toArray } from 'rxjs';
 import type { ChatCompleteResponse, ChatCompletionEvent } from '@kbn/inference-common';
-import { ChatCompletionEventType } from '@kbn/inference-common';
+import {
+  ChatCompletionEventType,
+  createInferenceProviderError,
+  createInferenceRequestError,
+  resetToolChoiceRejections,
+} from '@kbn/inference-common';
 import { createOutputApi } from './create_output_api';
 import { createToolValidationError } from '../chat_complete/errors';
 
@@ -242,5 +247,135 @@ describe('createOutputApi', () => {
         },
       })
     );
+  });
+
+  describe('when the model rejects a forced tool_choice', () => {
+    const FORCED_ERROR =
+      'status [400] Bad Request: [tool_choice: type "tool" and "any" are not supported for this model.]';
+    const schema = { type: 'object', properties: { a: { type: 'string' } } } as const;
+    const okResponse = {
+      content: '',
+      toolCalls: [
+        { toolCallId: 'x', function: { name: 'structuredOutput', arguments: { a: 'b' } } },
+      ],
+    };
+    const call = (api: ReturnType<typeof createOutputApi>, extra: object = {}) =>
+      api({
+        id: 'id',
+        connectorId: '.c1',
+        modelName: 'm1',
+        input: 'in',
+        schema,
+        ...extra,
+      } as any);
+
+    beforeEach(() => resetToolChoiceRejections());
+
+    it('retries with tool_choice auto, warns, and returns the output', async () => {
+      const logger = { warn: jest.fn() };
+      chatComplete
+        .mockRejectedValueOnce(createInferenceRequestError(FORCED_ERROR, 400))
+        .mockResolvedValueOnce(okResponse);
+
+      const response = await call(createOutputApi(chatComplete as any, logger));
+
+      expect(response).toEqual(expect.objectContaining({ output: { a: 'b' } }));
+      expect(chatComplete).toHaveBeenCalledTimes(2);
+      expect(chatComplete.mock.calls[0][0].toolChoice).toEqual({ function: 'structuredOutput' });
+      expect(chatComplete.mock.calls[1][0].toolChoice).toBe('auto');
+      expect(chatComplete.mock.calls[1][0].system).toContain('structuredOutput');
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+    });
+
+    it('remembers the rejection per connector+model', async () => {
+      chatComplete
+        .mockRejectedValueOnce(createInferenceRequestError(FORCED_ERROR, 400))
+        .mockResolvedValue(okResponse);
+      const api = createOutputApi(chatComplete as any);
+
+      await call(api);
+      await call(api);
+
+      expect(chatComplete).toHaveBeenCalledTimes(3);
+      expect(chatComplete.mock.calls[2][0].toolChoice).toBe('auto');
+
+      await call(api, { modelName: 'other' });
+      expect(chatComplete.mock.calls[3][0].toolChoice).toEqual({ function: 'structuredOutput' });
+    });
+
+    it('does not fall back on a non-400 status or an unrelated 400', async () => {
+      chatComplete.mockRejectedValueOnce(
+        createInferenceProviderError(FORCED_ERROR, { status: 500 })
+      );
+      await expect(call(createOutputApi(chatComplete as any))).rejects.toThrow('tool_choice');
+      chatComplete.mockRejectedValueOnce(createInferenceRequestError('bad schema', 400));
+      await expect(call(createOutputApi(chatComplete as any))).rejects.toThrow('bad schema');
+      expect(chatComplete).toHaveBeenCalledTimes(2);
+    });
+
+    it('throws an explicit error when the auto retry is rejected too', async () => {
+      chatComplete.mockRejectedValue(createInferenceRequestError(FORCED_ERROR, 400));
+
+      await expect(call(createOutputApi(chatComplete as any))).rejects.toThrow(
+        'forced tool_choice unsupported'
+      );
+      expect(chatComplete).toHaveBeenCalledTimes(2);
+    });
+
+    it('passes an unrelated error from the auto retry through unchanged', async () => {
+      chatComplete
+        .mockRejectedValueOnce(createInferenceRequestError(FORCED_ERROR, 400))
+        .mockRejectedValueOnce(createInferenceProviderError('rate limited', { status: 429 }));
+
+      await expect(call(createOutputApi(chatComplete as any))).rejects.toThrow('rate limited');
+    });
+
+    it('does nothing without a schema', async () => {
+      chatComplete.mockRejectedValue(createInferenceRequestError(FORCED_ERROR, 400));
+
+      await expect(
+        createOutputApi(chatComplete as any)({
+          id: 'id',
+          connectorId: '.c1',
+          input: 'in',
+        } as any)
+      ).rejects.toThrow('tool_choice');
+      expect(chatComplete).toHaveBeenCalledTimes(1);
+    });
+
+    it('falls back in stream mode when nothing was emitted yet', async () => {
+      chatComplete
+        .mockReturnValueOnce(throwError(() => createInferenceRequestError(FORCED_ERROR, 400)))
+        .mockReturnValueOnce(
+          of({
+            type: ChatCompletionEventType.ChatCompletionMessage,
+            content: '',
+            toolCalls: okResponse.toolCalls,
+          })
+        );
+
+      const events = await firstValueFrom(
+        (call(createOutputApi(chatComplete as any), { stream: true }) as any).pipe(toArray())
+      );
+
+      expect(events).toEqual([expect.objectContaining({ type: 'complete', output: { a: 'b' } })]);
+      expect(chatComplete.mock.calls[1][0].toolChoice).toBe('auto');
+    });
+
+    it('does not retry a stream that failed after emitting', async () => {
+      chatComplete.mockReturnValueOnce(
+        concat(
+          of({ type: ChatCompletionEventType.ChatCompletionChunk, content: 'p', tool_calls: [] }),
+          throwError(() => createInferenceRequestError(FORCED_ERROR, 400))
+        )
+      );
+
+      await expect(
+        firstValueFrom(
+          (call(createOutputApi(chatComplete as any), { stream: true }) as any).pipe(toArray())
+        )
+      ).rejects.toThrow('tool_choice');
+      expect(chatComplete).toHaveBeenCalledTimes(1);
+    });
   });
 });
