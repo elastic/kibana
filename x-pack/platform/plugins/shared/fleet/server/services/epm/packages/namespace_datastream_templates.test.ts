@@ -326,6 +326,33 @@ describe('handleNamespaceTemplateRestoreAfterPackageInstall', () => {
       })
     );
   });
+
+  it('skips a namespace template Elasticsearch rejects, and throws the rejection when strict', async () => {
+    mockedGetInstallation.mockResolvedValue({
+      namespace_customization_enabled_for: ['production'],
+      installed_es: [],
+    } as any);
+    const rejected = new errors.ResponseError({
+      body: {
+        error: {
+          type: 'illegal_argument_exception',
+          reason: 'invalid composite mappings for [logs-nginx.access@namespace.production]',
+        },
+      },
+      statusCode: 400,
+      headers: {},
+      warnings: [],
+      meta: {} as any,
+    });
+    const esClient = makeEsClientWithTemplate();
+    esClient.indices.putIndexTemplate.mockRejectedValue(rejected);
+    const args = { soClient, esClient, packageName: 'nginx', packageInfo, dataStreams };
+
+    await expect(handleNamespaceTemplateRestoreAfterPackageInstall(args)).resolves.toBeUndefined();
+    await expect(
+      handleNamespaceTemplateRestoreAfterPackageInstall({ ...args, strict: true })
+    ).rejects.toBe(rejected);
+  });
 });
 
 // ---------------------------------------------------------------------------

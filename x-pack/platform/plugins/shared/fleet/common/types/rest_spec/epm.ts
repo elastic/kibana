@@ -108,6 +108,8 @@ export interface UpdatePackageRequest {
     keepPoliciesUpToDate?: boolean;
     namespace_customization_enabled_for?: string[];
     namespace_customization_settings?: { [namespace: string]: { ilm_policy?: string } };
+    /** Store the package's logs data streams in the `logsdb_columnar` index mode. */
+    logsdb_columnar?: boolean;
   };
 }
 
