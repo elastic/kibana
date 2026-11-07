@@ -102,6 +102,35 @@ describe('attackDiscoveryGeneratorSkill', () => {
       expect(attackDiscoveryGeneratorSkill.content).toContain('enumerate the tools available');
     });
 
+    it('short-circuits retrieval when alerts are already provided', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        '### Provided-alerts short-circuit (no retrieval work)'
+      );
+    });
+
+    it('forbids speculative platform.core.get_document_by_id calls on held alerts', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        'Do not call `platform.core.get_document_by_id`'
+      );
+    });
+
+    it('discourages platform.core.generate_esql in favor of the default query tool', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        'Do not call `platform.core.generate_esql`'
+      );
+      expect(attackDiscoveryGeneratorSkill.content).toMatch(
+        /security\.attack-discovery\.get_default_esql_query/
+      );
+    });
+
+    it('bids a single bounded corroboration pass', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain('One corroboration pass, bounded');
+    });
+
+    it('forbids post-run tool calls before rendering the report', () => {
+      expect(attackDiscoveryGeneratorSkill.content).toContain('No post-run calls');
+    });
+
     it('does not hard-code a specific threat-intel tool id', () => {
       expect(attackDiscoveryGeneratorSkill.content).not.toMatch(/platform\.threat_intel\./);
     });
