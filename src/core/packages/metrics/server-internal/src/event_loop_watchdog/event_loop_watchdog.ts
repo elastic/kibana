@@ -42,6 +42,8 @@ export class EventLoopWatchdog {
   private shared?: BigInt64Array;
   private runningSinceUs = 0;
   private profilingEnabled = false;
+  /** Set when the worker ran out of memory while profiling was on. */
+  private profilingStoppedByOom = false;
 
   constructor(private readonly params: EventLoopWatchdogParams) {}
 
@@ -61,8 +63,8 @@ export class EventLoopWatchdog {
     // Stamp before the worker starts, so its first poll doesn't see a stale heartbeat.
     Atomics.store(shared, Slot.heartbeat, BigInt(monotonicUs()));
     Atomics.store(shared, Slot.runningSince, BigInt(this.runningSinceUs));
-    Atomics.store(shared, Slot.profiling, this.profilingEnabled ? 1n : 0n);
     this.shared = shared;
+    this.writeProfilingSlot();
     this.heartbeatTimer = setInterval(
       () => Atomics.store(shared, Slot.heartbeat, BigInt(monotonicUs())),
       HEARTBEAT_INTERVAL_MS
@@ -88,6 +90,15 @@ export class EventLoopWatchdog {
       unref: true,
       // Never stays off while the flag is on: restarts back off to ManagedWorker's 1 minute cap.
       restart: { maxAttempts: Infinity },
+      onExit: ({ reason }) => {
+        if (reason === 'oom' && this.profilingEnabled && !this.profilingStoppedByOom) {
+          this.profilingStoppedByOom = true;
+          this.writeProfilingSlot();
+          logger.error(
+            'Event loop watchdog worker ran out of memory while profiling was on; profiling stays off until Kibana restarts'
+          );
+        }
+      },
       // Can't fire with unlimited restarts; keeps the heartbeat from outliving a future limit.
       onExhausted: () => this.clearHeartbeat(),
     });
@@ -139,8 +150,13 @@ export class EventLoopWatchdog {
    */
   public setProfiling(enabled: boolean): void {
     this.profilingEnabled = enabled;
+    this.writeProfilingSlot();
+  }
+
+  private writeProfilingSlot(): void {
+    const on = this.profilingEnabled && !this.profilingStoppedByOom;
     if (this.shared) {
-      Atomics.store(this.shared, Slot.profiling, enabled ? 1n : 0n);
+      Atomics.store(this.shared, Slot.profiling, on ? 1n : 0n);
     }
   }
 

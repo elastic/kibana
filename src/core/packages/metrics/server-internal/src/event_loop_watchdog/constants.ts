@@ -31,6 +31,9 @@ export const ONGOING_REPEAT_MS = 3_000;
 /** ...and every REPORT_REFILL_MS after that. */
 export const ONGOING_FAST_REPEATS_UNTIL_MS = 12_000;
 
+/** CPU profiler sampling interval in microseconds: about 99 Hz. */
+export const SAMPLING_INTERVAL_US = 10_101;
+
 /** Kibana is considered running this long after its overall status first becomes available... */
 export const RUNNING_GRACE_MS = 30_000;
 /** ...or this long after the watchdog service starts, whichever comes first. */
