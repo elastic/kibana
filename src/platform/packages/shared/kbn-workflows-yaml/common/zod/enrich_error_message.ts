@@ -309,6 +309,7 @@ function getStepTypeAtYamlPath(pathToStep: PropertyKey[], yamlDocument: Document
 // Keep enriched marker messages readable: `steps` is a discriminated union of
 // every connector registered in Kibana (~200 options).
 const MAX_UNION_OPTIONS_RENDERED = 10;
+const MAX_OBJECT_PROPS_RENDERED = 5;
 
 function analyzeUnionSchema(unionSchema: z.ZodUnion<any>): string[] {
   const { options } = unionSchema;
@@ -342,9 +343,15 @@ function analyzeUnionOption(option: z.ZodType): string {
     const requiredProps = Object.keys(shape)
       .filter((key) => !isOptionalSchema(shape[key]))
       .sort();
+    const optionalProps = Object.keys(shape)
+      .filter((key) => isOptionalSchema(shape[key]))
+      .sort();
 
     if (requiredProps.length > 0) {
-      return `object with: ${requiredProps.join(', ')}`;
+      const labels = [...requiredProps, ...optionalProps.map((key) => `${key}?`)];
+      const shown = labels.slice(0, MAX_OBJECT_PROPS_RENDERED);
+      const suffix = labels.length > MAX_OBJECT_PROPS_RENDERED ? '...' : '';
+      return `object with: ${shown.join(', ')}${suffix}`;
     }
 
     const allProps = Object.keys(shape).sort();
@@ -419,7 +426,7 @@ function generateSchemaErrorMessage(fieldName: string, schema: z.ZodType): strin
 }
 
 function generateUnionErrorMessage(fieldName: string, unionSchema: z.ZodUnion<any>): string | null {
-  const optionDescriptions = analyzeUnionSchema(unionSchema);
+  const optionDescriptions = [...new Set(analyzeUnionSchema(unionSchema))];
   if (optionDescriptions.length === 0) {
     return null;
   }
