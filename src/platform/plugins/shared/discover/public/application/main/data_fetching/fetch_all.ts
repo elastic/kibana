@@ -14,6 +14,7 @@ import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DataViewSource, type EsqlSource } from '@kbn/data-source';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
   checkHitCount,
@@ -36,6 +37,7 @@ import type { RecordsFetchResponse } from '../../types';
 import type { DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
 import type { InternalStateStore, TabState } from '../state_management/redux';
+import { isReplayedLoad } from '../state_management/utils/is_replayed_load';
 import type { ScopedProfilesManager } from '../../../context_awareness';
 import type { ScopedDiscoverEBTManager } from '../../../ebt_manager';
 
@@ -151,10 +153,13 @@ export function fetchAll(
           dataSource: fetchedDataSource,
           approximationApplied,
         }) => {
-          fetchAllRequestsOnlyTracker.reportEvent({
-            requestAdapter: inspectorAdapters.requests,
-            approximationApplied,
-          });
+          // A replay doesn't query Elasticsearch, so its timing would skew the metrics
+          if (!isReplayedLoad(currentTab.dataRequestParams)) {
+            fetchAllRequestsOnlyTracker.reportEvent({
+              requestAdapter: inspectorAdapters.requests,
+              approximationApplied,
+            });
+          }
 
           if (isEsqlQuery) {
             const fetchStatus =
@@ -212,6 +217,20 @@ export function fetchAll(
       // In the case that the request was aborted (e.g. a refresh), swallow the abort error
       .catch((e) => {
         if (!abortController.signal.aborted) throw e;
+
+        if (abortController.signal.reason === AbortReason.CANCELED) {
+          dataSubjects.documents$.next({
+            ...dataSubjects.documents$.getValue(),
+            fetchStatus: FetchStatus.COMPLETE,
+          });
+
+          if (isEsqlQuery) {
+            dataSubjects.totalHits$.next({
+              ...dataSubjects.totalHits$.getValue(),
+              fetchStatus: FetchStatus.COMPLETE,
+            });
+          }
+        }
       })
       // Only the document query should send its errors to main$, to cause the full Discover app
       // to get into an error state. The other queries will not cause all of Discover to error out
@@ -279,6 +298,7 @@ export async function fetchMoreDocuments(params: CommonFetchParams): Promise<voi
       dataView,
       services,
       sort: sort as SortOrder[],
+      inputTimeRange: getCurrentTab().dataRequestParams.timeRangeAbsolute,
     });
 
     // Fetch more documents

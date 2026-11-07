@@ -14,6 +14,7 @@ import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { reduce } from 'rxjs';
 import type { SearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { fetchAll, fetchMoreDocuments } from './fetch_all';
 import type {
@@ -287,6 +288,53 @@ describe('test fetchAll', () => {
     ]);
   });
 
+  test('finishes loading when ES|QL is canceled before returning results', async () => {
+    const query = { esql: 'from foo' };
+    deps.internalState.dispatch(
+      internalStateActions.updateAppState({
+        tabId: deps.getCurrentTab().id,
+        appState: { query },
+      })
+    );
+    mockfetchEsql.mockRejectedValue(new Error('The query was canceled'));
+
+    const fetching = fetchAll(deps);
+    deps.abortController.abort(AbortReason.CANCELED);
+    await fetching;
+
+    expect(subjects.documents$.getValue()).toEqual({
+      fetchStatus: FetchStatus.COMPLETE,
+      query,
+    });
+    expect(subjects.totalHits$.getValue()).toEqual({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: undefined,
+    });
+    expect(subjects.main$.getValue().fetchStatus).toBe(FetchStatus.COMPLETE);
+  });
+
+  test('does not finish loading when the ES|QL search is replaced', async () => {
+    const query = { esql: 'from foo' };
+    deps.internalState.dispatch(
+      internalStateActions.updateAppState({
+        tabId: deps.getCurrentTab().id,
+        appState: { query },
+      })
+    );
+    mockfetchEsql.mockRejectedValue(new Error('The query was replaced'));
+
+    fetchAll(deps);
+    deps.abortController.abort(AbortReason.REPLACED);
+    await waitForNextTick();
+
+    expect(subjects.documents$.getValue()).toEqual({
+      fetchStatus: FetchStatus.LOADING,
+      query,
+    });
+    expect(subjects.totalHits$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
+    expect(subjects.main$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
+  });
+
   describe('fetchMoreDocuments', () => {
     const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
     const initialRecords = [records[0], records[1]];
@@ -294,9 +342,19 @@ describe('test fetchAll', () => {
 
     const interceptedWarnings = [searchResponseIncompleteWarningLocalCluster];
 
-    test('should add more records', async () => {
+    test('should add more records using the original absolute time range', async () => {
       const collectDocuments = subjectCollector(subjects.documents$);
       const collectMain = subjectCollector(subjects.main$);
+      const timeRangeAbsolute = {
+        from: '2026-01-01T12:00:00.000Z',
+        to: '2026-01-01T13:00:00.000Z',
+      };
+      deps.internalState.dispatch(
+        internalStateActions.setDataRequestParams({
+          tabId: deps.getCurrentTab().id,
+          dataRequestParams: { ...deps.getCurrentTab().dataRequestParams, timeRangeAbsolute },
+        })
+      );
       mockFetchDocuments.mockResolvedValue({ records: moreRecords, interceptedWarnings });
       subjects.documents$.next({
         fetchStatus: FetchStatus.COMPLETE,
@@ -305,6 +363,10 @@ describe('test fetchAll', () => {
       fetchMoreDocuments(deps);
       await waitForNextTick();
 
+      expect(deps.services.data.query.timefilter.timefilter.createFilter).toHaveBeenLastCalledWith(
+        searchSource.getField('index'),
+        timeRangeAbsolute
+      );
       expect(await collectDocuments()).toEqual([
         { fetchStatus: FetchStatus.UNINITIALIZED },
         {

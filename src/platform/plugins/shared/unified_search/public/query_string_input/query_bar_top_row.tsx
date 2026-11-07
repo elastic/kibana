@@ -61,7 +61,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SearchSessionState, getQueryLog } from '@kbn/data-plugin/public';
-import type { PersistedLog, TimeHistoryContract } from '@kbn/data-plugin/public';
+import type { ISessionService, PersistedLog, TimeHistoryContract } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { FilterableSource } from '@kbn/data-source';
 import type { ESQLControlVariable, ESQLQueryStats } from '@kbn/esql-types';
@@ -528,8 +528,18 @@ export const QueryBarTopRow = React.memo(
         })
       )
     );
+    const backgroundSearchAvailability = getBackgroundSearchAvailability(
+      data.search.session,
+      props.useBackgroundSearchButton
+    );
     const canSendToBackground =
-      backgroundSearchState === SearchSessionState.Loading && !isSendingToBackground;
+      backgroundSearchState === SearchSessionState.Loading &&
+      !isSendingToBackground &&
+      !backgroundSearchAvailability.disabled;
+
+    const sendToBackgroundTooltipProps = backgroundSearchAvailability.disabled
+      ? { content: backgroundSearchAvailability.reasonText }
+      : { content: strings.getSendToBackgroundLabel(), disableScreenReaderOutput: true };
 
     const queryLanguage = props.query && isOfQueryType(props.query) && props.query.language;
     const queryRef = useRef<Query | QT | undefined>(props.query);
@@ -1116,10 +1126,7 @@ export const QueryBarTopRow = React.memo(
               isLoading={isSendingToBackground}
               isDisabled={!canSendToBackground}
               onClick={onClickSendToBackground}
-              tooltipProps={{
-                content: strings.getSendToBackgroundLabel(),
-                disableScreenReaderOutput: true,
-              }}
+              tooltipProps={sendToBackgroundTooltipProps}
               aria-label={strings.getSendToBackgroundLabel()}
               iconType="backgroundTask"
               data-test-subj="queryCancelButton-secondary-button"
@@ -1234,10 +1241,7 @@ export const QueryBarTopRow = React.memo(
             isLoading={isSendingToBackground}
             isDisabled={!canSendToBackground || Boolean(props.disableSubmitAction)}
             onClick={onClickSendToBackground}
-            tooltipProps={{
-              content: strings.getSendToBackgroundLabel(),
-              disableScreenReaderOutput: true,
-            }}
+            tooltipProps={sendToBackgroundTooltipProps}
             aria-label={strings.getSendToBackgroundLabel()}
             data-test-subj="querySubmitButton-secondary-button"
           />
@@ -1605,4 +1609,15 @@ const getSplitButtonSecondaryActionClassName = (
       ...(fill && { color: getEuiFilledButtonColorValues(euiThemeContext, color).color }),
     },
   });
+};
+
+const getBackgroundSearchAvailability = (
+  session: ISessionService,
+  useBackgroundSearchButton?: boolean
+) => {
+  if (!useBackgroundSearchButton) {
+    return { disabled: false } as const;
+  }
+
+  return session.getSearchSessionIndicatorUiConfig().isDisabled();
 };

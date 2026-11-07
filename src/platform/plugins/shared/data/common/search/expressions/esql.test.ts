@@ -134,6 +134,26 @@ describe('getEsqlFn', () => {
     });
   });
 
+  it('resolves the relative time range using now from the expression context', async () => {
+    const mockSearchService = getMockSearchService();
+
+    await createEsqlFn(mockSearchService).fn(
+      {
+        type: 'kibana_context',
+        timeRange: { from: 'now-15m', to: 'now' },
+        now: Date.parse('2024-01-02T12:00:00.000Z'),
+      },
+      { query: 'FROM index', timeField: '@timestamp' },
+      createExecutionContext()
+    );
+
+    const [params] = mockSearchService.esql.mock.calls[0];
+    expect(params.kibanaQueryContext?.timeRange).toEqual({
+      from: '2024-01-02T11:45:00.000Z',
+      to: '2024-01-02T12:00:00.000Z',
+    });
+  });
+
   it('passes the time range, timeField, and control variables in kibanaQueryContext', async () => {
     const mockSearchService = getMockSearchService();
     const timeRange = { from: '2024-01-01T00:00:00.000Z', to: '2024-01-02T00:00:00.000Z' };

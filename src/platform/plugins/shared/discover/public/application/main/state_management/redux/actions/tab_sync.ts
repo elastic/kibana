@@ -8,6 +8,7 @@
  */
 
 import { combineLatest, merge, skip, startWith } from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import {
   connectToQueryState,
   noSearchSessionStorageCapabilityMessage,
@@ -31,6 +32,7 @@ import { createUrlSyncObservables } from '../../utils/create_url_sync_observable
 import { createTabPersistableStateObservable } from '../../utils/create_tab_persistable_state_observable';
 import { createSearchSessionRestorationDataProvider } from '../../utils/create_search_session_restoration_data_provider';
 import { getFieldsToReset } from '../../utils/profile_app_state_defaults';
+import { isReplayedLoad } from '../../utils/is_replayed_load';
 import {
   createDataViewDataSource,
   DataSourceType,
@@ -276,13 +278,27 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
         runtimeStateManager,
       }),
       {
-        isDisabled: () =>
-          services.capabilities.discover_v2.storeSearchSession
+        isDisabled: () => {
+          if (isReplayedLoad(getCurrentTab().dataRequestParams)) {
+            return {
+              disabled: true,
+              reasonText: i18n.translate(
+                'discover.replayCache.backgroundSearchDisabledDescription',
+                {
+                  defaultMessage:
+                    'Refresh the results before saving this search in the background.',
+                }
+              ),
+            };
+          }
+
+          return services.capabilities.discover_v2.storeSearchSession
             ? { disabled: false }
             : {
                 disabled: true,
                 reasonText: noSearchSessionStorageCapabilityMessage,
-              },
+              };
+        },
       }
     );
 

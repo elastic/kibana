@@ -547,6 +547,63 @@ describe('QueryBarTopRowTopRow', () => {
         expect(button).toBeEnabled();
       });
     });
+
+    describe('when the app disables background search', () => {
+      const reasonText = 'Search storage is disabled by the app.';
+
+      beforeEach(() => {
+        jest.useFakeTimers();
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      const renderLoadingQueryBar = (onCancel?: () => void) => {
+        const stateSubject = new Subject<SearchSessionState>();
+        const data = dataPluginMock.createStartContract();
+        data.search.session = getSessionServiceMock({ state$: stateSubject.asObservable() });
+        jest.mocked(data.search.session.getSearchSessionIndicatorUiConfig).mockReturnValue({
+          isDisabled: () => ({ disabled: true, reasonText }),
+        });
+
+        const renderResult = render(
+          wrapQueryBarTopRowInContext(
+            {
+              query: kqlQuery,
+              showQueryInput: false,
+              isDirty: false,
+              indexPatterns: [stubIndexPattern],
+              timeHistory: mockTimeHistory,
+              isLoading: true,
+              onCancel,
+              useBackgroundSearchButton: true,
+            },
+            { servicesOverride: { data } }
+          )
+        );
+        act(() => stateSubject.next(SearchSessionState.Loading));
+        act(() => jest.advanceTimersByTime(500));
+
+        return renderResult;
+      };
+
+      // With onCancel the query bar shows the cancel split button, without it the submit one.
+      it.each([
+        { button: 'queryCancelButton-secondary-button', onCancel: jest.fn() },
+        { button: 'querySubmitButton-secondary-button', onCancel: undefined },
+      ])('keeps $button disabled and shows the reason', async ({ button, onCancel }) => {
+        const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+        const { getByTestId } = renderLoadingQueryBar(onCancel);
+        const secondaryButton = getByTestId(button);
+
+        expect(secondaryButton).toBeDisabled();
+        await user.hover(secondaryButton);
+
+        act(() => jest.advanceTimersByTime(500));
+        expect(screen.getByRole('tooltip')).toHaveTextContent(reasonText);
+      });
+    });
   });
 
   it('Should create a unique PersistedLog based on the appName and query language', async () => {

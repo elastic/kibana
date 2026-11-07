@@ -63,6 +63,44 @@ describe('tab_sync actions', () => {
   });
 
   describe('initializeAndSync', () => {
+    it('disables background saving while the current session is replayed', async () => {
+      const { services, internalState, tabId, initializeSingleTab } = await setup();
+      services.capabilities.discover_v2.storeSearchSession = true;
+      await initializeSingleTab({ tabId });
+
+      const enableStorage = jest.mocked(services.data.search.session.enableStorage);
+      const [, storageConfig] = enableStorage.mock.calls[enableStorage.mock.calls.length - 1];
+      const { dataRequestParams } = selectTab(internalState.getState(), tabId);
+
+      internalState.dispatch(
+        internalStateActions.setDataRequestParams({
+          tabId,
+          dataRequestParams: {
+            ...dataRequestParams,
+            replayCacheLastFetched: '2026-01-01T12:00:00.000Z',
+          },
+        })
+      );
+      expect(storageConfig?.isDisabled?.()).toEqual({
+        disabled: true,
+        reasonText: 'Refresh the results before saving this search in the background.',
+      });
+
+      internalState.dispatch(internalStateActions.cancelFetchData({ tabId }));
+      expect(storageConfig?.isDisabled?.()).toEqual({
+        disabled: true,
+        reasonText: 'Refresh the results before saving this search in the background.',
+      });
+
+      internalState.dispatch(
+        internalStateActions.setDataRequestParams({
+          tabId,
+          dataRequestParams: { ...dataRequestParams, replayCacheLastFetched: undefined },
+        })
+      );
+      expect(storageConfig?.isDisabled?.()).toEqual({ disabled: false });
+    });
+
     it('should initialize and sync tab state', async () => {
       const previousUnsubscribeFn = jest.fn();
       const { tabId, initializeSingleTab, runtimeStateManager } = await setup();

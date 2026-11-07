@@ -34,6 +34,7 @@ import {
 import { PROFILE_STATE_URL_KEY } from '../../../../common/constants';
 import { TEST_PROFILE_STATE_DEF } from '../../../context_awareness/__mocks__/profile_state';
 import * as resolveEsqlSourceModule from '../data_fetching/resolve_esql_source';
+import { ScopedDiscoverEBTManager } from '../../../ebt_manager/scoped_discover_ebt_manager';
 
 jest.mock('../data_fetching/fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue({ records: [] }),
@@ -64,6 +65,85 @@ describe('test getDataStateContainer', () => {
     expect(dataState.data$.main$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
     expect(dataState.data$.documents$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
     expect(dataState.data$.totalHits$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
+  });
+
+  describe('replay cache', () => {
+    const cachedTimeRange = {
+      from: '2021-08-31T20:00:00.000Z',
+      to: '2021-08-31T21:00:00.000Z',
+      mode: 'absolute' as const,
+    };
+    const cachedReplay = {
+      hit: true as const,
+      sessionId: 'cached-session',
+      timeRange: cachedTimeRange,
+      lastFetched: '2021-08-31T21:00:00.000Z',
+    };
+
+    const setup = async () => {
+      const toolkit = getDiscoverInternalStateMock({ persistedDataViews: [dataViewMock] });
+      await toolkit.initializeTabs();
+      const tabId = toolkit.getCurrentTab().id;
+      const { replayCache, search, query } = toolkit.services.data;
+      jest.mocked(search.session.start).mockReturnValue('new-session');
+      jest.mocked(replayCache.get).mockReturnValue(cachedReplay);
+
+      return { toolkit, tabId, search, query };
+    };
+
+    test('initial fetch replays the cached session and time range', async () => {
+      const { toolkit, tabId, search } = await setup();
+
+      await toolkit.initializeSingleTab({ tabId });
+
+      expect(search.session.continue).toHaveBeenCalledWith('cached-session');
+      expect(toolkit.getCurrentTab().dataRequestParams).toMatchObject({
+        searchSessionId: 'cached-session',
+        timeRangeAbsolute: cachedTimeRange,
+        replayCacheLastFetched: cachedReplay.lastFetched,
+      });
+    });
+
+    test('refresh after a replay starts a new session with the current time range', async () => {
+      const { toolkit, tabId, query } = await setup();
+      const { dataStateContainer } = await toolkit.initializeSingleTab({ tabId });
+
+      expect(toolkit.getCurrentTab().dataRequestParams.replayCacheLastFetched).toBe(
+        cachedReplay.lastFetched
+      );
+
+      dataStateContainer.fetch();
+      await waitFor(() => expect(mockFetchDocuments).toHaveBeenCalledTimes(2));
+
+      expect(toolkit.getCurrentTab().dataRequestParams).toMatchObject({
+        searchSessionId: 'new-session',
+        timeRangeAbsolute: query.timefilter.timefilter.getAbsoluteTime(),
+        replayCacheLastFetched: undefined,
+      });
+    });
+
+    test('reports the load performance only when the load is not a replay', async () => {
+      const { toolkit, tabId } = await setup();
+      const reportedEvents: string[] = [];
+      const trackSpy = jest
+        .spyOn(ScopedDiscoverEBTManager.prototype, 'trackQueryPerformanceEvent')
+        .mockImplementation(({ eventName }) => ({
+          reportEvent: () => {
+            reportedEvents.push(eventName);
+          },
+        }));
+      const { dataStateContainer } = await toolkit.initializeSingleTab({ tabId });
+      await waitFor(() =>
+        expect(dataStateContainer.data$.main$.getValue().fetchStatus).toBe(FetchStatus.COMPLETE)
+      );
+
+      dataStateContainer.fetch();
+      await waitFor(() => expect(reportedEvents).toContain('discoverFetchAll'));
+
+      // Only the refresh reports: the replay before it came from the client cache
+      expect(reportedEvents).toEqual(['discoverFetchAllRequestsOnly', 'discoverFetchAll']);
+      trackSpy.mockRestore();
+    });
   });
 
   test('fetch clears skipInitialFetch so later query switches do not return to the empty state', async () => {

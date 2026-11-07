@@ -91,3 +91,98 @@ describe('DiscoverSearchSessionManager', () => {
     });
   });
 });
+
+describe('DiscoverSearchSessionManager replay cache', () => {
+  const timeRangeAbsolute = { from: '2021-08-31T21:00:00.000Z', to: '2021-08-31T22:00:00.000Z' };
+  const cachedTimeRange = {
+    from: '2021-08-31T20:00:00.000Z',
+    to: '2021-08-31T21:00:00.000Z',
+    mode: 'absolute' as const,
+  };
+  const cachedReplay = {
+    hit: true as const,
+    sessionId: 'cached',
+    timeRange: cachedTimeRange,
+    lastFetched: '2021-08-31T21:00:00.000Z',
+  };
+  const params = { tabId: 'tab', initial: true, contextKey: 'context' };
+
+  const setup = () => {
+    const searchSessionMock = createSearchSessionMock();
+    searchSessionMock.session.start.mockReturnValue('new');
+    searchSessionMock.timefilter.getAbsoluteTime.mockReturnValue(timeRangeAbsolute);
+
+    return searchSessionMock;
+  };
+
+  test('replays the cached session and time range on an initial load', () => {
+    const { session, replayCache, searchSessionManager } = setup();
+    replayCache.get.mockReturnValue(cachedReplay);
+
+    expect(searchSessionManager.getTabSearchSession(params)).toEqual({
+      searchSessionId: 'cached',
+      isSearchSessionRestored: false,
+      timeRangeAbsolute: cachedTimeRange,
+      replayCacheLastFetched: cachedReplay.lastFetched,
+    });
+    expect(replayCache.get).toHaveBeenCalledWith('discover:tab', 'context');
+    expect(session.continue).toHaveBeenCalledWith('cached');
+    expect(session.start).not.toHaveBeenCalled();
+  });
+
+  test.each([
+    { load: 'an initial load with nothing cached', cached: { hit: false as const }, initial: true },
+    { load: 'a load after the initial one', cached: cachedReplay, initial: false },
+  ])('starts and caches a new session on $load', ({ cached, initial }) => {
+    const { replayCache, searchSessionManager } = setup();
+    replayCache.get.mockReturnValue(cached);
+
+    expect(searchSessionManager.getTabSearchSession({ ...params, initial })).toEqual({
+      searchSessionId: 'new',
+      isSearchSessionRestored: false,
+      timeRangeAbsolute,
+    });
+    expect(replayCache.set).toHaveBeenCalledWith('discover:tab', {
+      sessionId: 'new',
+      timeRange: { ...timeRangeAbsolute, mode: 'absolute' },
+      contextKey: 'context',
+    });
+  });
+
+  test('reads the time range of a new session after starting it', () => {
+    const { session, timefilter, searchSessionManager } = setup();
+    const staleTimeRange = { from: '2021-08-31T20:30:00.000Z', to: '2021-08-31T21:30:00.000Z' };
+    timefilter.getAbsoluteTime.mockReturnValue(staleTimeRange);
+    session.start.mockImplementation(() => {
+      timefilter.getAbsoluteTime.mockReturnValue(timeRangeAbsolute);
+
+      return 'new';
+    });
+
+    expect(searchSessionManager.getTabSearchSession(params).timeRangeAbsolute).toEqual(
+      timeRangeAbsolute
+    );
+  });
+
+  test('restores the session from the URL and discards the cached tab', () => {
+    const { history, replayCache, searchSessionManager } = setup();
+    replayCache.get.mockReturnValue(cachedReplay);
+    history.push('/?searchSessionId=id_from_url');
+
+    expect(searchSessionManager.getTabSearchSession(params)).toEqual({
+      searchSessionId: 'id_from_url',
+      isSearchSessionRestored: true,
+      timeRangeAbsolute,
+    });
+    expect(replayCache.set).not.toHaveBeenCalled();
+    expect(replayCache.delete).toHaveBeenCalledWith('discover:tab');
+  });
+
+  test('forgetTab discards the cached session of the tab', () => {
+    const { replayCache, searchSessionManager } = setup();
+
+    searchSessionManager.forgetTab('tab');
+
+    expect(replayCache.delete).toHaveBeenCalledWith('discover:tab');
+  });
+});
