@@ -38,6 +38,103 @@ import { CPS_USAGE_OVERRIDES_BADGE } from './constants';
 import { uiActions, core } from '../../kibana_services';
 import { ACTION_EDIT_PANEL } from '../edit_panel_action/constants';
 
+const getOverrideValues = (embeddable: unknown): ProjectRoutingOverrides => {
+  if (apiPublishesProjectRoutingOverrides(embeddable)) {
+    return embeddable.projectRoutingOverrides$.getValue();
+  }
+  return undefined;
+};
+
+const CpsUsageOverridesBadgeMenuItem = ({
+  context,
+  dataTestSubj,
+}: {
+  context: EmbeddableApiContext;
+  dataTestSubj?: string;
+}) => {
+  const { embeddable } = context;
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const { euiTheme } = useEuiTheme();
+  const overrideValues = getOverrideValues(embeddable);
+  if (!overrideValues || overrideValues.length === 0) throw new IncompatibleActionError();
+
+  const isViewMode =
+    apiCanAccessViewMode(embeddable) && getInheritedViewMode(embeddable) === 'view';
+
+  return (
+    <EuiPopover
+      button={
+        <EuiBadge
+          iconType="crossProjectSearch"
+          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+          onClickAriaLabel={strings.badgeLabel}
+          data-test-subj={dataTestSubj}
+        >
+          {strings.badgeLabel}
+        </EuiBadge>
+      }
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
+      anchorPosition="downCenter"
+      panelStyle={{ minWidth: 250 }}
+      panelPaddingSize="none"
+      aria-label={strings.badgeLabel}
+    >
+      <div css={{ padding: euiTheme.size.m }}>
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem>
+            <EuiText size="s" css={{ fontWeight: euiTheme.font.weight.semiBold }}>
+              {strings.badgeLabel}
+            </EuiText>
+          </EuiFlexItem>
+          {!isViewMode && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                onClick={async () => {
+                  setIsPopoverOpen(false);
+                  try {
+                    const action = await uiActions.getAction(ACTION_EDIT_PANEL);
+                    if (action) {
+                      await action.execute({
+                        ...context,
+                        trigger: triggers[ON_OPEN_PANEL_MENU],
+                      });
+                    }
+                  } catch (error) {
+                    core.notifications.toasts.addError(error, {
+                      title: strings.error,
+                    });
+                  }
+                }}
+                size="xs"
+                flush="right"
+              >
+                {strings.editButton}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+        {overrideValues.map((override, index) => (
+          <div key={index} css={{ marginTop: index > 0 ? euiTheme.size.s : 0 }}>
+            {override.name && (
+              <EuiText
+                size="xs"
+                css={{
+                  marginBottom: euiTheme.size.xs,
+                  fontWeight: euiTheme.font.weight.semiBold,
+                }}
+              >
+                {override.name}
+              </EuiText>
+            )}
+            <EuiCodeBlock paddingSize="s">{override.value}</EuiCodeBlock>
+          </div>
+        ))}
+      </div>
+    </EuiPopover>
+  );
+};
+
 export class CpsUsageOverridesBadge
   implements Action<EmbeddableApiContext>, FrequentCompatibilityChangeAction<EmbeddableApiContext>
 {
@@ -46,102 +143,14 @@ export class CpsUsageOverridesBadge
   public order = 8;
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
-    const overrideValues = this.getOverrideValues(embeddable);
+    const overrideValues = getOverrideValues(embeddable);
     if (!overrideValues || overrideValues.length === 0) {
       throw new IncompatibleActionError();
     }
     return strings.displayName;
   }
 
-  public readonly MenuItem = ({
-    context,
-    dataTestSubj,
-  }: {
-    context: EmbeddableApiContext;
-    dataTestSubj?: string;
-  }) => {
-    const { embeddable } = context;
-    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-    const { euiTheme } = useEuiTheme();
-    const overrideValues = this.getOverrideValues(embeddable);
-    if (!overrideValues || overrideValues.length === 0) throw new IncompatibleActionError();
-
-    const isViewMode =
-      apiCanAccessViewMode(embeddable) && getInheritedViewMode(embeddable) === 'view';
-
-    return (
-      <EuiPopover
-        button={
-          <EuiBadge
-            iconType="crossProjectSearch"
-            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-            onClickAriaLabel={strings.badgeLabel}
-            data-test-subj={dataTestSubj}
-          >
-            {strings.badgeLabel}
-          </EuiBadge>
-        }
-        isOpen={isPopoverOpen}
-        closePopover={() => setIsPopoverOpen(false)}
-        anchorPosition="downCenter"
-        panelStyle={{ minWidth: 250 }}
-        panelPaddingSize="none"
-        aria-label={strings.badgeLabel}
-      >
-        <div css={{ padding: euiTheme.size.m }}>
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem>
-              <EuiText size="s" css={{ fontWeight: euiTheme.font.weight.semiBold }}>
-                {strings.badgeLabel}
-              </EuiText>
-            </EuiFlexItem>
-            {!isViewMode && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  onClick={async () => {
-                    setIsPopoverOpen(false);
-                    try {
-                      const action = await uiActions.getAction(ACTION_EDIT_PANEL);
-                      if (action) {
-                        await action.execute({
-                          ...context,
-                          trigger: triggers[ON_OPEN_PANEL_MENU],
-                        });
-                      }
-                    } catch (error) {
-                      core.notifications.toasts.addError(error, {
-                        title: strings.error,
-                      });
-                    }
-                  }}
-                  size="xs"
-                  flush="right"
-                >
-                  {strings.editButton}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-          {overrideValues.map((override, index) => (
-            <div key={index} css={{ marginTop: index > 0 ? euiTheme.size.s : 0 }}>
-              {override.name && (
-                <EuiText
-                  size="xs"
-                  css={{
-                    marginBottom: euiTheme.size.xs,
-                    fontWeight: euiTheme.font.weight.semiBold,
-                  }}
-                >
-                  {override.name}
-                </EuiText>
-              )}
-              <EuiCodeBlock paddingSize="s">{override.value}</EuiCodeBlock>
-            </div>
-          ))}
-        </div>
-      </EuiPopover>
-    );
-  };
+  public readonly MenuItem = CpsUsageOverridesBadgeMenuItem;
 
   public async execute(_context: ActionExecutionMeta & EmbeddableApiContext) {
     return;
@@ -162,15 +171,8 @@ export class CpsUsageOverridesBadge
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
-    const values = this.getOverrideValues(embeddable);
+    const values = getOverrideValues(embeddable);
     return values !== undefined && values.length > 0;
-  }
-
-  private getOverrideValues(embeddable: unknown): ProjectRoutingOverrides {
-    if (apiPublishesProjectRoutingOverrides(embeddable)) {
-      return embeddable.projectRoutingOverrides$.getValue();
-    }
-    return undefined;
   }
 }
 

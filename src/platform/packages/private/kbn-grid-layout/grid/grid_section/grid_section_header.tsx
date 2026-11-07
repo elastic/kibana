@@ -53,9 +53,10 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
   );
 
   useEffect(() => {
+    const headerRefs = gridLayoutStateManager.headerRefs.current;
     return () => {
       // remove reference on unmount
-      delete gridLayoutStateManager.headerRefs.current[sectionId];
+      delete headerRefs[sectionId];
     };
   }, [sectionId, gridLayoutStateManager]);
 
