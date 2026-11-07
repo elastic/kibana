@@ -16,6 +16,34 @@ import { createMemoryPageStore, epochSecondsToIso, type MemoryPageWrite } from '
 const SPACE_A = 'space-a';
 const SPACE_B = 'space-b';
 const NOW_SECONDS = 1_800_000_000;
+const ELSER_INFERENCE_ID = '.elser-2-elasticsearch';
+const MODEL_IMPORT_TIMEOUT = 240_000;
+const SETUP_TIMEOUT = 720_000;
+
+const warmUpInferenceEndpoint = (client: Client) =>
+  client.inference.inference(
+    { inference_id: ELSER_INFERENCE_ID, input: 'warm up the managed semantic_text endpoint' },
+    { requestTimeout: MODEL_IMPORT_TIMEOUT }
+  );
+
+const reimportTruncatedModels = async (client: Client) => {
+  const { trained_model_configs: configs } = await client.ml.getTrainedModels({
+    model_id: '.elser_model_2*',
+    include: 'definition_status',
+    allow_no_match: true,
+  });
+  const truncated = configs.filter(({ fully_defined }) => fully_defined === false);
+
+  for (const { model_id: modelId } of truncated) {
+    await client.ml.deleteTrainedModel({ model_id: modelId, force: true });
+    await client.ml.putTrainedModel(
+      { model_id: modelId, input: { field_names: ['text_field'] } },
+      { requestTimeout: MODEL_IMPORT_TIMEOUT }
+    );
+  }
+
+  return truncated.length > 0;
+};
 
 const createPage = (slug: string, overrides: Partial<MemoryPageWrite> = {}): MemoryPageWrite => ({
   slug,
@@ -44,9 +72,23 @@ describe('Nightshift Semantic Memory with Elasticsearch', () => {
       license: 'trial',
     });
     await esServer.start();
-    esClient = esServer.getClient();
+    esClient = esServer.getClient().child({ requestTimeout: 120_000 });
+
+    // Every write runs inference, so a truncated ELSER download must fail here, not on a write.
+    try {
+      await warmUpInferenceEndpoint(esClient);
+    } catch (error) {
+      if (!(await reimportTruncatedModels(esClient))) {
+        throw error;
+      }
+      await warmUpInferenceEndpoint(esClient);
+    }
 
     await esClient.indices.delete({ index: MEMORY_INDEX, ignore_unavailable: true });
+  }, SETUP_TIMEOUT);
+
+  afterEach(async () => {
+    await esClient?.indices.delete({ index: MEMORY_INDEX, ignore_unavailable: true });
   });
 
   afterAll(async () => {
@@ -85,9 +127,6 @@ describe('Nightshift Semantic Memory with Elasticsearch', () => {
     await expect(
       esClient.cluster.getComponentTemplate({ name: 'ai-index@custom' })
     ).rejects.toThrow();
-
-    // Start the lifecycle test from an empty, auto-created index.
-    await esClient.indices.delete({ index: MEMORY_INDEX });
   });
 
   it('exercises page lifecycle, isolation, and counter OCC on the semantic index', async () => {
@@ -219,6 +258,5 @@ describe('Nightshift Semantic Memory with Elasticsearch', () => {
     expect((await storeB.get(pageB.id))?.title).toBe('Payments database recovery');
   });
 
-  // Semantic/RRF retrieval requires a configured inference endpoint and is intentionally
-  // separate coverage. These writes omit context so this test never downloads or provisions a model.
+  // Semantic/RRF retrieval is intentionally separate coverage.
 });
