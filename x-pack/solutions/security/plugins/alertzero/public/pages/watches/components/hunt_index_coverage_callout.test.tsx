@@ -100,6 +100,13 @@ describe('HuntIndexCoverageCallout', () => {
     );
   });
 
+  it('tells serverless admins the space project routing must include a linked project', () => {
+    renderCallout(coverage({ is_serverless: true }));
+    expect(screen.getByTestId('alertZeroHuntIndexCoverageCallout')).toHaveTextContent(
+      "A <project>:<pattern> entry is searched only when this space's project routing includes that project."
+    );
+  });
+
   it('is hidden for an unavailable source', () => {
     renderCallout(coverage({ source: 'unavailable', unavailable_reason: 'role_unreadable' }));
     expect(screen.queryByTestId('alertZeroHuntIndexCoverageCallout')).not.toBeInTheDocument();
