@@ -320,6 +320,7 @@ export const basicCaseMetrics: SingleCaseMetrics = {
     closeDate: basicClosedAt,
     statusInfo: {
       inProgressDuration: 20,
+      pausedDuration: 0,
       openDuration: 10,
       reopenDates: [],
     },
@@ -704,6 +705,22 @@ export const getUserAction = (
         ...commonProperties,
         type: UserActionTypes.description,
         payload: { description: 'a desc' },
+        ...overrides,
+      };
+    case UserActionTypes.sync:
+      return {
+        ...commonProperties,
+        type: UserActionTypes.sync,
+        payload: {
+          sync: {
+            connectorName: externalService.connectorName,
+            externalId: externalService.externalId,
+            externalTitle: externalService.externalTitle,
+            externalUrl: externalService.externalUrl,
+            updatedFields: ['title', 'status'],
+            conflictedFields: [],
+          },
+        },
         ...overrides,
       };
     case UserActionTypes.pushed:

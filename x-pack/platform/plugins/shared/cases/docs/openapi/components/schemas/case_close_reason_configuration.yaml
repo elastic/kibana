@@ -1,0 +1,19 @@
+type: object
+description: Whether closing a case asks for a close reason, and which reasons it offers.
+properties:
+  show:
+    type: boolean
+    description: Whether closing a case asks for a close reason.
+  source:
+    type: string
+    description: Where the offered reasons come from.
+    enum:
+      - alerts
+      - cases
+      - both
+  values:
+    type: array
+    description: The close reasons offered for cases.
+    maxItems: 50
+    items:
+      type: string

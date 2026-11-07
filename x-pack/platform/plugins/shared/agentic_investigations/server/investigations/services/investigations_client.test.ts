@@ -11,6 +11,7 @@ import type { InvestigationsPrivilegesChecker } from './check_investigations_pri
 import { createInvestigationsClient } from './investigations_client';
 import { InvestigationsForbiddenError } from './investigations_forbidden_error';
 import type { InvestigationsQueryService } from './investigations_query_service';
+import type { WorkerCaseService } from '../../cases_bridge/worker_case_service';
 
 const request = httpServerMock.createKibanaRequest();
 
@@ -32,13 +33,42 @@ const setup = (privileges: Partial<InvestigationsPrivilegesChecker> = {}) => {
     assertCanManage: jest.fn().mockResolvedValue(undefined),
     ...privileges,
   };
+  const conversation = {
+    id: 'conv-1',
+    agent_id: 'agent-1',
+    template_id: 'investigation',
+    title: 'Alert Triage',
+    metadata: { status: 'open' },
+  };
+  const conversations = {
+    create: jest.fn().mockResolvedValue(conversation),
+    patchMetadata: jest.fn().mockResolvedValue({
+      conversation: { ...conversation, metadata: { status: 'closed' } },
+      changedFields: ['status'],
+    }),
+  };
+  const getConversationClient = jest.fn().mockResolvedValue(conversations);
+  const workerCases = {
+    onInvestigationCreated: jest.fn().mockResolvedValue(undefined),
+    onInvestigationPatched: jest.fn().mockResolvedValue(undefined),
+  };
   const client = createInvestigationsClient({
     getQueryService: () => queryService as unknown as InvestigationsQueryService,
     getSpaceId: () => 'space-1',
     privileges: checker,
     deleteAllInSpace,
+    getConversationClient,
+    getWorkerCases: () => workerCases as unknown as WorkerCaseService,
   })(request);
-  return { client, queryService, deleteAllInSpace, checker };
+  return {
+    client,
+    queryService,
+    deleteAllInSpace,
+    checker,
+    conversations,
+    getConversationClient,
+    workerCases,
+  };
 };
 
 describe('createInvestigationsClient', () => {
@@ -102,5 +132,79 @@ describe('createInvestigationsClient', () => {
 
     await expect(client.deleteAllInSpace()).rejects.toBeInstanceOf(InvestigationsForbiddenError);
     expect(deleteAllInSpace).not.toHaveBeenCalled();
+  });
+
+  describe('create', () => {
+    it('creates from the investigation template with the step source, as ai.conversation.create does', async () => {
+      const { client, conversations, getConversationClient } = setup();
+
+      const result = await client.create(
+        { title: 'Alert Triage', metadata: { status: 'open' }, template_id: 'investigation' },
+        { source: 'workflow' }
+      );
+
+      expect(getConversationClient).toHaveBeenCalledWith(request, 'workflow');
+      expect(conversations.create).toHaveBeenCalledWith(
+        expect.objectContaining({ templateId: 'investigation', title: 'Alert Triage' })
+      );
+      expect(result).toEqual({
+        conversation_id: 'conv-1',
+        agent_id: 'agent-1',
+        template_id: 'investigation',
+        metadata: { status: 'open' },
+      });
+    });
+
+    it('returns the case the setting opened, with the Worker as its actor', async () => {
+      const { client, workerCases } = setup();
+      workerCases.onInvestigationCreated.mockResolvedValue('case-1');
+      const actionSource = { type: 'workflow' as const, id: 'wf', name: 'Worker', run_id: 'run' };
+
+      const result = await client.create({ title: 'Alert Triage' }, { actionSource });
+
+      expect(workerCases.onInvestigationCreated).toHaveBeenCalledWith(
+        request,
+        expect.objectContaining({ id: 'conv-1' }),
+        actionSource
+      );
+      expect(result.case_id).toBe('case-1');
+      expect(result.metadata.case_id).toBe('case-1');
+    });
+  });
+
+  describe('patchMetadata', () => {
+    it('patches and hands the changed fields to the case mirror', async () => {
+      const { client, conversations, workerCases } = setup();
+
+      const result = await client.patchMetadata({
+        conversation_id: 'conv-1',
+        updates: { status: 'closed' },
+      });
+
+      expect(conversations.patchMetadata).toHaveBeenCalledWith('conv-1', { status: 'closed' });
+      expect(workerCases.onInvestigationPatched).toHaveBeenCalledWith(
+        request,
+        expect.objectContaining({ id: 'conv-1' }),
+        ['status'],
+        undefined
+      );
+      expect(result).toEqual({
+        conversation_id: 'conv-1',
+        changed_fields: ['status'],
+        metadata: { status: 'closed' },
+      });
+    });
+
+    it('skips the mirror when nothing changed', async () => {
+      const { client, conversations, workerCases } = setup();
+      conversations.patchMetadata.mockResolvedValue({
+        conversation: { id: 'conv-1', metadata: {} },
+        changedFields: [],
+      });
+
+      await client.patchMetadata({ conversation_id: 'conv-1', updates: { status: 'open' } });
+
+      expect(workerCases.onInvestigationPatched).not.toHaveBeenCalled();
+    });
   });
 });

@@ -693,12 +693,14 @@ export const toMetadata = (
   const summary = optionalText(metadata?.summary);
   const verdict = optionalText(metadata?.verdict);
   const assignees = optionalTextList(metadata?.assignees);
+  const caseId = optionalText(metadata?.case_id);
   return {
     status: metadata?.status === 'closed' ? 'closed' : 'open',
     ...(isInvestigationSeverity(severity) && { severity }),
     ...(summary !== undefined && { summary }),
     ...(verdict !== undefined && { verdict }),
     ...(assignees !== undefined && { assignees }),
+    ...(caseId !== undefined && { case_id: caseId }),
   };
 };
 

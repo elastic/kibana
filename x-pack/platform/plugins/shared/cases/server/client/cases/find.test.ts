@@ -17,6 +17,7 @@ import {
   MAX_REPORTERS_FILTER_LENGTH,
   MAX_TAGS_FILTER_LENGTH,
 } from '../../../common/constants';
+import { getBuiltInStatuses } from '../../../common/utils/statuses';
 import { flattenCaseSavedObject } from '../../common/utils';
 import { mockCases } from '../../mocks';
 import {
@@ -136,6 +137,66 @@ describe('find', () => {
       });
       await find(findRequest, clientArgs, casesClientMock);
       await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
+    });
+  });
+
+  describe('paused cases', () => {
+    const clientArgs = createCasesClientMockArgs();
+    const onHold = {
+      key: 'on_hold',
+      label: 'On hold',
+      category: 'in-progress',
+      order: 3,
+      isDefault: false,
+      disabled: false,
+      pausesTimeTracking: true,
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.services.caseService.findCasesGroupedByID.mockResolvedValue({
+        page: 1,
+        perPage: 10,
+        total: 0,
+        casesMap: new Map(),
+      });
+      clientArgs.services.caseService.getCaseStatusStats.mockResolvedValue({
+        open: 1,
+        'in-progress': 2,
+        closed: 3,
+      });
+      clientArgs.services.caseService.countCases.mockResolvedValue(2);
+    });
+
+    afterAll(() => {
+      casesClientMock.configure.get = jest.fn().mockResolvedValue(configureMock);
+    });
+
+    it('counts the cases in statuses that pause time tracking', async () => {
+      casesClientMock.configure.get = jest
+        .fn()
+        .mockResolvedValue([{ customFields: [], statuses: [...getBuiltInStatuses(), onHold] }]);
+
+      const res = await find(createCasesClientMockFindRequest(), clientArgs, casesClientMock);
+
+      expect(res.count_paused_cases).toBe(2);
+
+      const filter = JSON.stringify(
+        clientArgs.services.caseService.countCases.mock.calls[0][0].searchOptions.filter
+      );
+      expect(filter).toContain('cases.attributes.status_key');
+      expect(filter).toContain('on_hold');
+    });
+
+    it('does not count or report paused cases when no status pauses time tracking', async () => {
+      casesClientMock.configure.get = jest
+        .fn()
+        .mockResolvedValue([{ customFields: [], statuses: getBuiltInStatuses() }]);
+
+      const res = await find(createCasesClientMockFindRequest(), clientArgs, casesClientMock);
+
+      expect(res.count_paused_cases).toBeUndefined();
+      expect(clientArgs.services.caseService.countCases).not.toHaveBeenCalled();
     });
   });
 

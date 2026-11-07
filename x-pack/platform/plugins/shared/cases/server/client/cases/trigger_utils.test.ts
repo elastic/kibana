@@ -41,6 +41,7 @@ describe('emitObservablesAddedEvent', () => {
       observableIds: ['obs-1', 'obs-2', 'obs-3'],
       // index-aligned: observableTypeKeys[i] is the type of observableIds[i]; repeats are preserved
       observableTypeKeys: ['observable-type-url', 'observable-type-ipv4', 'observable-type-url'],
+      restricted: false,
     });
 
     const [[, payload]] = (clientArgs.casesEventBus.emitObservablesAdded as jest.Mock).mock.calls;
@@ -59,6 +60,7 @@ describe('emitObservablesAddedEvent', () => {
       owner: 'securitySolution',
       observableIds: ['obs-1'],
       observableTypeKeys: ['observable-type-ipv4'],
+      restricted: false,
     });
   });
 

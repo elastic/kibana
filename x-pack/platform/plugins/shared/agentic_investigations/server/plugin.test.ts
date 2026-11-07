@@ -46,16 +46,38 @@ jest.mock('./investigations/routes/register_routes', () => ({
   registerInvestigationRoutes: jest.fn(),
 }));
 
-const createContext = ({ escalationsEnabled = true }: { escalationsEnabled?: boolean } = {}) =>
+// The cases bridge defaults on in config and replaces escalations, so the escalation tests turn
+// it off explicitly.
+const createContext = ({
+  escalationsEnabled = true,
+  casesEnabled = false,
+}: { escalationsEnabled?: boolean; casesEnabled?: boolean } = {}) =>
   ({
     logger: { get: () => loggerMock.create() },
     config: {
-      get: () => ({ enabled: true, escalations: { enabled: escalationsEnabled } }),
+      get: () => ({
+        enabled: true,
+        escalations: { enabled: escalationsEnabled },
+        cases: { enabled: casesEnabled },
+      }),
     },
   } as unknown as ConstructorParameters<typeof AgenticInvestigationsPlugin>[0]);
 
-const setupPlugin = ({ escalationsEnabled }: { escalationsEnabled?: boolean } = {}) => {
-  const plugin = new AgenticInvestigationsPlugin(createContext({ escalationsEnabled }));
+const setupPlugin = ({
+  escalationsEnabled,
+  casesEnabled,
+  withCases = casesEnabled,
+}: { escalationsEnabled?: boolean; casesEnabled?: boolean; withCases?: boolean } = {}) => {
+  const cases = withCases
+    ? {
+        attachmentFramework: { registerAttachment: jest.fn() },
+        registerSystemTemplate: jest.fn(),
+        config: { agentic: { enabled: true } },
+      }
+    : undefined;
+  const plugin = new AgenticInvestigationsPlugin(
+    createContext({ escalationsEnabled, casesEnabled })
+  );
   const coreSetup = coreMock.createSetup();
   const features = { registerKibanaFeature: jest.fn() };
 
@@ -75,10 +97,11 @@ const setupPlugin = ({ escalationsEnabled }: { escalationsEnabled?: boolean } = 
       agentBuilderPlatform: {},
       agentBuilder,
       workflowsExtensions,
+      cases,
     } as never
   );
 
-  return { plugin, coreSetup, features, agentBuilder, workflowsExtensions };
+  return { plugin, coreSetup, features, agentBuilder, workflowsExtensions, cases };
 };
 
 const startPlugin = (plugin: AgenticInvestigationsPlugin) => {
@@ -93,6 +116,7 @@ const startPlugin = (plugin: AgenticInvestigationsPlugin) => {
         create: jest.fn(),
         addAccessControlEntries: jest.fn(),
         removeAccessControlEntries: jest.fn(),
+        updateAccessControlAsOwner: jest.fn(),
         patchMetadata: jest.fn(),
         update: jest.fn(),
       }),
@@ -193,6 +217,54 @@ describe('AgenticInvestigationsPlugin', () => {
       expect(JSON.stringify(feature)).not.toMatch(/escalations/i);
     });
 
+    it('registers no escalations sub-feature or routes when the cases bridge is on', () => {
+      const { features } = setupPlugin({ escalationsEnabled: true, casesEnabled: true });
+      const feature = registeredFeature(features, AGENTIC_INVESTIGATIONS_PLUGIN_ID);
+
+      expect(feature.subFeatures).toHaveLength(1);
+      expect(JSON.stringify(feature)).not.toMatch(/escalations/i);
+      expect(registerEscalationRoutes).toHaveBeenCalledWith(
+        expect.objectContaining({ escalationsEnabled: false })
+      );
+    });
+
+    it('keeps escalations when the cases bridge is on but Cases is unavailable', () => {
+      const { features } = setupPlugin({
+        escalationsEnabled: true,
+        casesEnabled: true,
+        withCases: false,
+      });
+      const feature = registeredFeature(features, AGENTIC_INVESTIGATIONS_PLUGIN_ID);
+
+      expect(JSON.stringify(feature)).toMatch(/escalations/i);
+      expect(registerEscalationRoutes).toHaveBeenCalledWith(
+        expect.objectContaining({ escalationsEnabled: true })
+      );
+    });
+
+    it('registers the investigation link attachment type with Cases when the bridge is on', () => {
+      const { cases } = setupPlugin({ casesEnabled: true });
+
+      expect(cases?.attachmentFramework.registerAttachment).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'agentic.investigation' })
+      );
+    });
+
+    it('ships the AI investigation template for Security cases when the bridge is on', () => {
+      const { cases } = setupPlugin({ casesEnabled: true });
+
+      expect(cases?.registerSystemTemplate).toHaveBeenCalledWith(
+        'securitySolution',
+        expect.objectContaining({
+          name: 'AI investigation',
+          taskList: expect.objectContaining({
+            tasks: expect.arrayContaining([{ title: 'Record the outcome', required: true }]),
+          }),
+          statuses: [expect.objectContaining({ key: 'awaiting_analyst', pausesTimeTracking: true })],
+        })
+      );
+    });
+
     it('tells the escalation routes whether escalations are enabled', () => {
       setupPlugin({ escalationsEnabled: false });
 
@@ -222,6 +294,9 @@ describe('AgenticInvestigationsPlugin', () => {
         AttachImpactStepId,
         GetImpactStepId,
         ReopenInvestigationStepId,
+        'investigations.create',
+        'investigations.patch',
+        'investigations.setHypotheses',
         AppendWorkflowExecutionIdStepId,
       ]);
     });

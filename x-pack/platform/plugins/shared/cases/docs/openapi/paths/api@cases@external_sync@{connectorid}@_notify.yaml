@@ -1,0 +1,116 @@
+post:
+  summary: Notify cases that an external incident changed
+  description: >
+    Technical preview. Called by a Jira webhook or Automation rule, or a ServiceNow business rule, when an
+    incident changes. Queues a sync of every case pushed to the incident through the connector, which runs as
+    the service account bound to the connector. The body only identifies the incident; the incident itself is
+    read through the connector. Requires the `xpack.cases.bidirectionalSync.enabled` setting and an Enterprise
+    license.
+    You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
+    You must also have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases.
+  operationId: notifyExternalSyncDefaultSpace
+  tags:
+    - cases
+  parameters:
+    - $ref: '../components/parameters/connector_id.yaml'
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          oneOf:
+            - title: Jira issue change
+              type: object
+              required:
+                - issue
+              properties:
+                issue:
+                  type: object
+                  required:
+                    - id
+                  properties:
+                    id:
+                      description: The Jira issue ID the case was pushed to.
+                      oneOf:
+                        - type: string
+                        - type: integer
+                    fields:
+                      type: object
+                      properties:
+                        updated:
+                          description: When the issue was last updated.
+                          type: string
+                timestamp:
+                  description: The webhook timestamp, in milliseconds since the epoch. Used when `issue.fields.updated` is missing.
+                  type: integer
+            - title: ServiceNow record change
+              type: object
+              required:
+                - sys_id
+              properties:
+                sys_id:
+                  description: The ServiceNow record the case was pushed to.
+                  type: string
+                sys_updated_on:
+                  description: When the record was last updated.
+                  type: string
+        examples:
+          jira:
+            value:
+              issue:
+                id: '10042'
+                fields:
+                  updated: '2026-10-30T12:00:00.000+0000'
+          servicenow:
+            value:
+              sys_id: 9c573169c611228700193229fff72400
+              sys_updated_on: '2026-10-30 12:00:00'
+  responses:
+    '202':
+      description: The sync of the cases pushed to the incident was queued.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - id
+              - accepted_at
+              - cases
+            properties:
+              id:
+                description: The ID of the queued event.
+                type: string
+              accepted_at:
+                description: When the event was queued.
+                type: string
+              cases:
+                description: The number of cases pushed to the incident through the connector.
+                type: integer
+    '400':
+      description: The body is not an incident change for the connector type, the connector cannot be synced from, or service accounts are disabled.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response401:
+              $ref: '../components/examples/response_401.yaml'
+    '404':
+      description: No case was pushed to the incident through the connector.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+    '409':
+      description: No service account is bound to the sync of the connector.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'

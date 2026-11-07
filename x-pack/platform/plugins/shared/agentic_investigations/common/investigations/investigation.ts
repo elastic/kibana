@@ -110,6 +110,8 @@ export interface InvestigationMetadata {
   verdict?: string;
   /** User profile uids of the assignees. Absent when nobody is assigned. */
   assignees?: string[];
+  /** The case this investigation is linked to, when one was opened for it. */
+  case_id?: string;
 }
 
 /** What the investigation is about, one entry per subject. */

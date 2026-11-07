@@ -14,8 +14,9 @@
  */
 
 import { omit, unset } from 'lodash';
+import { nodeBuilder } from '@kbn/es-query';
 import type { CaseAttributes, ExternalService, CaseConnector } from '../../../common/types/domain';
-import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
+import { CaseSeverity, CaseStatuses, CaseAccessMode } from '../../../common/types/domain';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_EXTENDED_FIELDS,
@@ -310,15 +311,20 @@ describe('CasesService', () => {
                   "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
+                  "pause_reason": null,
+                  "paused_at": null,
+                  "resume_to_status_key": null,
                   "settings": Object {
                     "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "low",
                   "status": "open",
+                  "status_key": null,
                   "tags": Array [
                     "defacement",
                   ],
+                  "time_paused": 0,
                   "title": "Super Bad Security Issue",
                   "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
@@ -1926,15 +1932,20 @@ describe('CasesService', () => {
                   "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
+                  "pause_reason": null,
+                  "paused_at": null,
+                  "resume_to_status_key": null,
                   "settings": Object {
                     "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "medium",
                   "status": "open",
+                  "status_key": null,
                   "tags": Array [
                     "defacement",
                   ],
+                  "time_paused": 0,
                   "title": "Super Bad Security Issue",
                   "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
@@ -2436,6 +2447,7 @@ describe('CasesService', () => {
     const attributesToValidateIfMissing = omit(
       caseTransformedAttributesProps,
       'status',
+      'status_key',
       'severity',
       'connector',
       'external_service',
@@ -2452,7 +2464,19 @@ describe('CasesService', () => {
       'time_to_acknowledge',
       'time_to_resolve',
       'time_to_investigate',
+      'paused_at',
+      'time_paused',
+      'pause_reason',
+      'resume_to_status_key',
       'template',
+      'access',
+      // Optional, nullable case fields: an old case has none of them.
+      'close_reason',
+      'human_verdict',
+      'ai_verdict',
+      'source',
+      'room_conversation_id',
+      'room_owner_uid',
       CASE_EXTENDED_FIELDS,
       CASE_EXTENDED_FIELDS_LABELS,
       CASE_EXTENDED_FIELDS_CONTROLS
@@ -2609,15 +2633,20 @@ describe('CasesService', () => {
               "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
+              "pause_reason": null,
+              "paused_at": null,
+              "resume_to_status_key": null,
               "settings": Object {
                 "extractObservables": false,
                 "syncAlerts": true,
               },
               "severity": "low",
               "status": "open",
+              "status_key": null,
               "tags": Array [
                 "defacement",
               ],
+              "time_paused": 0,
               "title": "Super Bad Security Issue",
               "total_observables": 0,
               "updated_at": "2019-11-25T21:54:48.952Z",
@@ -2715,15 +2744,20 @@ describe('CasesService', () => {
                 "incremental_id": undefined,
                 "observables": Array [],
                 "owner": "securitySolution",
+                "pause_reason": null,
+                "paused_at": null,
+                "resume_to_status_key": null,
                 "settings": Object {
                   "extractObservables": false,
                   "syncAlerts": true,
                 },
                 "severity": "low",
                 "status": "open",
+                "status_key": null,
                 "tags": Array [
                   "defacement",
                 ],
+                "time_paused": 0,
                 "title": "Super Bad Security Issue",
                 "total_observables": 0,
                 "updated_at": "2019-11-25T21:54:48.952Z",
@@ -2742,15 +2776,19 @@ describe('CasesService', () => {
       });
     });
 
-    describe('getCaseStatuses', () => {
-      it('reads only the status field, as a status name, leaving out cases not found', async () => {
+    describe('getCaseStatusesAndAccess', () => {
+      it('reads only the status, access and assignees, leaving out cases not found', async () => {
         unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
           saved_objects: [
             {
               id: 'case-1',
               type: CASE_SAVED_OBJECT,
               references: [],
-              attributes: { status: CasePersistedStatus.CLOSED },
+              attributes: {
+                status: CasePersistedStatus.CLOSED,
+                access: { mode: CaseAccessMode.RESTRICTED },
+                assignees: [{ uid: 'profile-1' }],
+              },
             },
             {
               id: 'case-2',
@@ -2762,13 +2800,49 @@ describe('CasesService', () => {
           ],
         });
 
-        const statuses = await service.getCaseStatuses({ caseIds: ['case-1', 'case-2'] });
+        const result = await service.getCaseStatusesAndAccess({ caseIds: ['case-1', 'case-2'] });
 
         expect(unsecuredSavedObjectsClient.bulkGet).toHaveBeenCalledWith([
-          { type: CASE_SAVED_OBJECT, id: 'case-1', fields: ['status'] },
-          { type: CASE_SAVED_OBJECT, id: 'case-2', fields: ['status'] },
+          { type: CASE_SAVED_OBJECT, id: 'case-1', fields: ['status', 'access', 'assignees'] },
+          { type: CASE_SAVED_OBJECT, id: 'case-2', fields: ['status', 'access', 'assignees'] },
         ]);
-        expect(statuses).toEqual(new Map([['case-1', CaseStatuses.closed]]));
+        expect(result).toEqual(
+          new Map([
+            [
+              'case-1',
+              {
+                status: CaseStatuses.closed,
+                access: { mode: CaseAccessMode.RESTRICTED },
+                assignees: [{ uid: 'profile-1' }],
+              },
+            ],
+          ])
+        );
+      });
+    });
+
+    describe('findCaseIds', () => {
+      it('returns the IDs and total of the cases matching the filter', async () => {
+        unsecuredSavedObjectsClient.find.mockResolvedValue({
+          saved_objects: [
+            { id: 'case-1', type: CASE_SAVED_OBJECT, references: [], attributes: {}, score: 0 },
+          ],
+          total: 3,
+          per_page: 1,
+          page: 1,
+        });
+        const filter = nodeBuilder.is(`${CASE_SAVED_OBJECT}.attributes.owner`, 'securitySolution');
+
+        const result = await service.findCaseIds({ filter, perPage: 1 });
+
+        expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith({
+          type: CASE_SAVED_OBJECT,
+          filter,
+          fields: ['owner'],
+          perPage: 1,
+          page: 1,
+        });
+        expect(result).toEqual({ ids: ['case-1'], total: 3 });
       });
     });
 
@@ -2842,15 +2916,20 @@ describe('CasesService', () => {
                   "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
+                  "pause_reason": null,
+                  "paused_at": null,
+                  "resume_to_status_key": null,
                   "settings": Object {
                     "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "low",
                   "status": "open",
+                  "status_key": null,
                   "tags": Array [
                     "defacement",
                   ],
+                  "time_paused": 0,
                   "title": "Super Bad Security Issue",
                   "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
@@ -2939,15 +3018,20 @@ describe('CasesService', () => {
                   "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
+                  "pause_reason": null,
+                  "paused_at": null,
+                  "resume_to_status_key": null,
                   "settings": Object {
                     "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "low",
                   "status": "open",
+                  "status_key": null,
                   "tags": Array [
                     "defacement",
                   ],
+                  "time_paused": 0,
                   "title": "Super Bad Security Issue",
                   "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
@@ -3059,15 +3143,20 @@ describe('CasesService', () => {
                   "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
+                  "pause_reason": null,
+                  "paused_at": null,
+                  "resume_to_status_key": null,
                   "settings": Object {
                     "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "low",
                   "status": "open",
+                  "status_key": null,
                   "tags": Array [
                     "defacement",
                   ],
+                  "time_paused": 0,
                   "title": "Super Bad Security Issue",
                   "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
@@ -3119,15 +3208,20 @@ describe('CasesService', () => {
                   "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
+                  "pause_reason": null,
+                  "paused_at": null,
+                  "resume_to_status_key": null,
                   "settings": Object {
                     "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "low",
                   "status": "open",
+                  "status_key": null,
                   "tags": Array [
                     "defacement",
                   ],
+                  "time_paused": 0,
                   "title": "Super Bad Security Issue",
                   "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
@@ -3225,15 +3319,20 @@ describe('CasesService', () => {
               "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
+              "pause_reason": null,
+              "paused_at": null,
+              "resume_to_status_key": null,
               "settings": Object {
                 "extractObservables": false,
                 "syncAlerts": true,
               },
               "severity": "low",
               "status": "open",
+              "status_key": null,
               "tags": Array [
                 "defacement",
               ],
+              "time_paused": 0,
               "title": "Super Bad Security Issue",
               "total_observables": 0,
               "updated_at": "2019-11-25T21:54:48.952Z",
@@ -3347,15 +3446,20 @@ describe('CasesService', () => {
                   "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
+                  "pause_reason": null,
+                  "paused_at": null,
+                  "resume_to_status_key": null,
                   "settings": Object {
                     "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "low",
                   "status": "open",
+                  "status_key": null,
                   "tags": Array [
                     "defacement",
                   ],
+                  "time_paused": 0,
                   "title": "Super Bad Security Issue",
                   "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
@@ -4136,6 +4240,123 @@ describe('CasesService', () => {
         expect(dispatchedDoc.attributes.status).toBe(CasePersistedStatus.OPEN);
         expect(dispatchedDoc.attributes.severity).toBe(CasePersistedSeverity.LOW);
         expect(dispatchedDoc.attributes.external_service).not.toHaveProperty('connector_id');
+      });
+    });
+
+    describe('restricted cases', () => {
+      it('patchCase: cascades deletion across every analytics index when the case becomes restricted', async () => {
+        const persistedSO = createCaseSavedObjectResponse();
+        const externalModelOriginalCase = transformSavedObjectToExternalModel(persistedSO);
+
+        unsecuredSavedObjectsClient.update.mockResolvedValue({
+          id: persistedSO.id,
+          type: CASE_SAVED_OBJECT,
+          attributes: { access: { mode: CaseAccessMode.RESTRICTED } },
+          references: persistedSO.references,
+          version: 'WzEsMV0=',
+        });
+
+        const { svc, analyticsV2Writer, analyticsV2ActivityWriter, analyticsV2AttachmentsWriter } =
+          makeServiceWithMockWriter();
+        await svc.patchCase({
+          caseId: persistedSO.id,
+          updatedAttributes: { access: { mode: CaseAccessMode.RESTRICTED } },
+          originalCase: externalModelOriginalCase,
+          version: 'WzAsMV0=',
+          refresh: false,
+        });
+
+        expect(analyticsV2Writer.upsertCase).not.toHaveBeenCalled();
+        expect(analyticsV2Writer.deleteCase).toHaveBeenCalledWith(persistedSO.id);
+        expect(analyticsV2ActivityWriter.bulkDeleteActionsByCaseIds).toHaveBeenCalledWith([
+          persistedSO.id,
+        ]);
+        expect(analyticsV2AttachmentsWriter.bulkDeleteAttachmentsByCaseIds).toHaveBeenCalledWith([
+          persistedSO.id,
+        ]);
+      });
+
+      it('patchCase: upserts normally when the case returns to default access', async () => {
+        const persistedSO = createCaseSavedObjectResponse();
+        persistedSO.attributes.access = { mode: CaseAccessMode.RESTRICTED };
+        const externalModelOriginalCase = transformSavedObjectToExternalModel(persistedSO);
+
+        unsecuredSavedObjectsClient.update.mockResolvedValue({
+          id: persistedSO.id,
+          type: CASE_SAVED_OBJECT,
+          attributes: { access: { mode: CaseAccessMode.DEFAULT } },
+          references: persistedSO.references,
+          version: 'WzEsMV0=',
+        });
+
+        const { svc, analyticsV2Writer } = makeServiceWithMockWriter();
+        await svc.patchCase({
+          caseId: persistedSO.id,
+          updatedAttributes: { access: { mode: CaseAccessMode.DEFAULT } },
+          originalCase: externalModelOriginalCase,
+          version: 'WzAsMV0=',
+          refresh: false,
+        });
+
+        expect(analyticsV2Writer.deleteCase).not.toHaveBeenCalled();
+        expect(analyticsV2Writer.upsertCase).toHaveBeenCalledTimes(1);
+        expect(analyticsV2Writer.upsertCase.mock.calls[0][0].attributes.access).toEqual({
+          mode: CaseAccessMode.DEFAULT,
+        });
+      });
+
+      it('patchCases: partitions restricted cases into deletions and the rest into upserts', async () => {
+        const defaultSO = createCaseSavedObjectResponse();
+        const restrictedSO = { ...createCaseSavedObjectResponse(), id: 'restricted-case' };
+
+        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [
+            {
+              id: defaultSO.id,
+              type: CASE_SAVED_OBJECT,
+              attributes: { title: 'Updated' },
+              references: defaultSO.references,
+              version: 'WzEsMV0=',
+            },
+            {
+              id: 'restricted-case',
+              type: CASE_SAVED_OBJECT,
+              attributes: { access: { mode: CaseAccessMode.RESTRICTED } },
+              references: restrictedSO.references,
+              version: 'WzEsMV0=',
+            },
+          ],
+        });
+
+        const { svc, analyticsV2Writer, analyticsV2ActivityWriter, analyticsV2AttachmentsWriter } =
+          makeServiceWithMockWriter();
+        await svc.patchCases({
+          cases: [
+            {
+              caseId: defaultSO.id,
+              updatedAttributes: { title: 'Updated' },
+              originalCase: transformSavedObjectToExternalModel(defaultSO),
+              version: 'WzAsMV0=',
+            },
+            {
+              caseId: 'restricted-case',
+              updatedAttributes: { access: { mode: CaseAccessMode.RESTRICTED } },
+              originalCase: transformSavedObjectToExternalModel(restrictedSO),
+              version: 'WzAsMV0=',
+            },
+          ],
+          refresh: false,
+        });
+
+        const [mirrors] = analyticsV2Writer.bulkUpsertCases.mock.calls[0];
+        expect(mirrors.map((so: { id: string }) => so.id)).toEqual([defaultSO.id]);
+        expect(analyticsV2Writer.bulkDeleteCases).toHaveBeenCalledWith(['restricted-case']);
+        expect(analyticsV2ActivityWriter.bulkDeleteActionsByCaseIds).toHaveBeenCalledWith([
+          'restricted-case',
+        ]);
+        expect(analyticsV2AttachmentsWriter.bulkDeleteAttachmentsByCaseIds).toHaveBeenCalledWith([
+          'restricted-case',
+        ]);
       });
     });
   });

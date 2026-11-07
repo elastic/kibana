@@ -29,6 +29,13 @@ import {
   modelVersion9,
   modelVersion10,
   modelVersion11,
+  modelVersion12,
+  modelVersion13,
+  modelVersion14,
+  modelVersion15,
+  modelVersion16,
+  modelVersion17,
+  modelVersion18,
 } from './model_versions';
 import { handleImport } from '../import_export/import';
 import type { ConfigType } from '../../config';
@@ -46,6 +53,13 @@ export const createCaseSavedObjectType = (
   mappings: {
     dynamic: false,
     properties: {
+      access: {
+        properties: {
+          mode: {
+            type: 'keyword',
+          },
+        },
+      },
       assignees: {
         properties: {
           uid: {
@@ -178,6 +192,21 @@ export const createCaseSavedObjectType = (
       status: {
         type: 'short',
       },
+      status_key: {
+        type: 'keyword',
+      },
+      paused_at: {
+        type: 'date',
+      },
+      time_paused: {
+        type: 'long',
+      },
+      pause_reason: {
+        type: 'keyword',
+      },
+      resume_to_status_key: {
+        type: 'keyword',
+      },
       tags: {
         type: 'keyword',
       },
@@ -208,11 +237,40 @@ export const createCaseSavedObjectType = (
           extractObservables: {
             type: 'boolean',
           },
+          externalSync: {
+            properties: {
+              autoPush: {
+                type: 'boolean',
+              },
+            },
+          },
         },
       },
       extract_observables_source: {
         type: 'keyword',
         ignore_above: 1024,
+      },
+      close_reason: {
+        type: 'keyword',
+      },
+      human_verdict: {
+        type: 'keyword',
+      },
+      source: {
+        type: 'keyword',
+      },
+      room_conversation_id: {
+        type: 'keyword',
+      },
+      pending_decisions: {
+        type: 'integer',
+      },
+      ai_verdict: {
+        properties: {
+          verdict: {
+            type: 'keyword',
+          },
+        },
       },
       severity: {
         type: 'short',
@@ -321,6 +379,13 @@ export const createCaseSavedObjectType = (
     9: modelVersion9,
     10: modelVersion10,
     11: modelVersion11,
+    12: modelVersion12,
+    13: modelVersion13,
+    14: modelVersion14,
+    15: modelVersion15,
+    16: modelVersion16,
+    17: modelVersion17,
+    18: modelVersion18,
   },
   management: {
     importableAndExportable: true,

@@ -111,6 +111,29 @@ describe('bulkGet', () => {
       });
     });
 
+    it('reports a restricted case the caller cannot see as a not-found error', async () => {
+      clientArgs.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [caseSO],
+      });
+      clientArgs.authorization.getAndEnsureAuthorizedEntities.mockResolvedValue({
+        authorized: [caseSO],
+        unauthorized: [],
+      });
+      clientArgs.authorization.isCaseVisible.mockReturnValueOnce(false);
+
+      const res = await bulkGet({ ids: [caseSO.id] }, clientArgs);
+
+      expect(res.cases.length).toBe(0);
+      expect(res.errors).toEqual([
+        {
+          caseId: caseSO.id,
+          error: 'Not Found',
+          message: `Saved object [cases/${caseSO.id}] not found`,
+          status: 404,
+        },
+      ]);
+    });
+
     it('constructs the case error correctly in case of an SO decorated error', async () => {
       clientArgs.services.caseService.getCases.mockResolvedValue({
         saved_objects: [

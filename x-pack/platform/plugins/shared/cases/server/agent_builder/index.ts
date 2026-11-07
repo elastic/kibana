@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
+import type { CoreSetup } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
-import type { CasesClient } from '../client';
 import type { CasesServerStartDependencies } from '../types';
 import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
 import { searchCasesTool } from './tools/search_cases';
@@ -22,6 +21,9 @@ import { casesAnalyticsSkill } from './skills/cases_analytics_skill';
 import { createCaseAttachmentType } from './attachments/case_attachment_type';
 import { createCasesAttachmentType } from './attachments/cases_attachment_type';
 import { createCasesToolAvailability } from './utils/get_cases_tool_availability';
+import { tasksTool } from './tools/tasks_tool';
+import { confirmedActionsTool } from './tools/confirmed_actions_tool';
+import type { GetCasesClientWithOptionsFn } from './utils/agent_cases_client';
 
 /**
  * Registers all Cases agent builder tools:
@@ -33,6 +35,10 @@ import { createCasesToolAvailability } from './utils/get_cases_tool_availability
  * 5. `platform.core.cases.observables` — add, update, delete observables
  * 6. `platform.core.cases.find_templates` — read-only, only when templates are enabled: look up
  *    case templates by name to resolve a `case_template_id`
+ * 7. `platform.core.cases.tasks` — task lists and tasks (read, write, work, run a task's workflow),
+ *    only when tasks are enabled
+ * 8. `platform.core.cases.confirmed_actions` — close, visibility, restricted assignees, sync, push;
+ *    Agent Builder asks the user before each call. Only when agentic cases are enabled.
  *
  * Also registers the `cases-management` skill, and — only when Cases-as-Data v2
  * is enabled — the `cases-analytics` skill (ES|QL analytics + visualizations over
@@ -41,23 +47,33 @@ import { createCasesToolAvailability } from './utils/get_cases_tool_availability
  */
 export function registerCasesAgentBuilderTools(
   agentBuilder: AgentBuilderPluginSetup,
-  getCasesClient: (request: KibanaRequest) => Promise<CasesClient>,
+  getCasesClient: GetCasesClientWithOptionsFn,
   coreSetup: CoreSetup<CasesServerStartDependencies>,
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry,
   {
     analyticsV2Enabled,
     attachmentsEnabled,
     templatesEnabled,
-  }: { analyticsV2Enabled: boolean; attachmentsEnabled: boolean; templatesEnabled: boolean },
+    tasksEnabled = false,
+    agenticEnabled = false,
+  }: {
+    analyticsV2Enabled: boolean;
+    attachmentsEnabled: boolean;
+    templatesEnabled: boolean;
+    /** Task lists are on (`xpack.cases.tasks.enabled`): registers the tasks tool. */
+    tasksEnabled?: boolean;
+    /** Agentic cases are on: registers the confirmed actions tool. */
+    agenticEnabled?: boolean;
+  },
   logger: Logger
 ): void {
   const availability = createCasesToolAvailability(coreSetup, logger);
   agentBuilder.tools.register({
-    ...searchCasesTool(coreSetup, getCasesClient),
+    ...searchCasesTool(coreSetup, getCasesClient, agenticEnabled),
     availability,
   });
   agentBuilder.tools.register({
-    ...manageCasesTool(getCasesClient, templatesEnabled),
+    ...manageCasesTool(getCasesClient, templatesEnabled, agenticEnabled),
     availability,
   });
   agentBuilder.tools.register({ ...getAttachmentsTool(getCasesClient), availability });
@@ -71,7 +87,20 @@ export function registerCasesAgentBuilderTools(
   if (templatesEnabled) {
     agentBuilder.tools.register({ ...findTemplatesTool(getCasesClient), availability });
   }
-  agentBuilder.skills.register({ ...buildCasesSkill(templatesEnabled), availability });
+  // Tasks tool only with agentic cases on too, so flags off leaves main's tool list unchanged.
+  if (tasksEnabled && agenticEnabled) {
+    agentBuilder.tools.register({ ...tasksTool(getCasesClient), availability });
+  }
+  if (agenticEnabled) {
+    agentBuilder.tools.register({ ...confirmedActionsTool(getCasesClient), availability });
+  }
+  agentBuilder.skills.register({
+    ...buildCasesSkill(templatesEnabled, {
+      tasksEnabled: tasksEnabled && agenticEnabled,
+      agenticEnabled,
+    }),
+    availability,
+  });
   // Only expose the analytics skill when the analytics indices exist.
   if (analyticsV2Enabled) {
     agentBuilder.skills.register({ ...casesAnalyticsSkill, availability });

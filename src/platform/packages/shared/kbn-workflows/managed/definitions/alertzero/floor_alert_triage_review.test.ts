@@ -541,7 +541,7 @@ describe('floor_alert_triage_review — re-tag failure tracking', () => {
 // or the run aborts and any step after the patch (e.g. the outcome comment) never runs.
 // ---------------------------------------------------------------------------
 describe('floor_alert_triage_review — ai.conversation.metadata.patch failure handling', () => {
-  const patchSteps = allSteps.filter((step) => step.type === 'ai.conversation.metadata.patch');
+  const patchSteps = allSteps.filter((step) => step.type === 'investigations.patch');
 
   it('finds every conversation-close step this workflow defines', () => {
     expect(patchSteps.map((step) => step.name).sort()).toEqual([
@@ -747,7 +747,7 @@ describe('floor_alert_triage_review — proposal outcomes', () => {
   it('leaves the Investigation open on an unexpected outcome', () => {
     expect(
       flatten(stepByName('handle_unknown_outcome')?.steps ?? []).some(
-        (step) => step.type === 'ai.conversation.metadata.patch'
+        (step) => step.type === 'investigations.patch'
       )
     ).toBe(false);
   });

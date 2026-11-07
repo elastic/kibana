@@ -9,6 +9,7 @@ import { chunk } from 'lodash';
 import Boom from '@hapi/boom';
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
+import { escapeKuery } from '@kbn/es-query';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
@@ -1060,6 +1061,71 @@ export class AttachmentGetter {
     }
 
     return statsMap;
+  }
+
+  /** Distinct attachments of one unified type per case, for list columns such as linked investigations. */
+  public async getUnifiedAttachmentCountsByType({
+    caseIds,
+    attachmentType,
+  }: {
+    caseIds: string[];
+    attachmentType: string;
+  }): Promise<Map<string, number>> {
+    if (caseIds.length === 0) {
+      return new Map();
+    }
+
+    interface CountAggs {
+      refs: {
+        caseIds: {
+          buckets: Array<{
+            key: string;
+            reverse: { attachments: { value: number } };
+          }>;
+        };
+      };
+    }
+
+    const res = await this.context.unsecuredSavedObjectsClient.find<unknown, CountAggs>({
+      hasReference: caseIds.map((id) => ({ type: CASE_SAVED_OBJECT, id })),
+      hasReferenceOperator: 'OR',
+      type: CASE_ATTACHMENT_SAVED_OBJECT,
+      filter: `${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.type: "${escapeKuery(attachmentType)}"`,
+      perPage: 0,
+      aggs: {
+        refs: {
+          nested: { path: `${CASE_ATTACHMENT_SAVED_OBJECT}.references` },
+          aggregations: {
+            caseIds: {
+              terms: {
+                field: `${CASE_ATTACHMENT_SAVED_OBJECT}.references.id`,
+                size: caseIds.length,
+                include: caseIds,
+              },
+              aggregations: {
+                reverse: {
+                  reverse_nested: {},
+                  aggregations: {
+                    attachments: {
+                      cardinality: {
+                        field: `${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.attachmentId`,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return new Map(
+      (res.aggregations?.refs.caseIds.buckets ?? []).map((bucket) => [
+        bucket.key,
+        bucket.reverse.attachments.value,
+      ])
+    );
   }
 
   private async getUnifiedAttachmentStatsByCaseId(

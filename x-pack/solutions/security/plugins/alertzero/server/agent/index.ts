@@ -13,6 +13,7 @@ export {
   ALERTZERO_THIN_AGENT_LABELS,
   ALERTZERO_THIN_AGENT_AVATAR_SYMBOL,
   agentType,
+  getAgentType,
   registerAgentType,
   createAgentRequest,
 } from './agent';

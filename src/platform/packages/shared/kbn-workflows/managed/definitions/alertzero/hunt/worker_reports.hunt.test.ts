@@ -577,8 +577,8 @@ describe('Continuous Threat Hunt managed versions', () => {
       8,
     ],
     [ALERTZERO_HUNT_WORKFLOW.id, ALERTZERO_HUNT_WORKFLOW.version, 6],
-    [ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW.id, ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW.version, 4],
-    [ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW.id, ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW.version, 3],
+    [ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW.id, ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW.version, 5],
+    [ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW.id, ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW.version, 4],
   ])('bumps %s to the version that carries its reports', (_id, version, expected) => {
     expect(version).toBe(expected);
   });

@@ -674,6 +674,26 @@ describe('updateAlertsStatus', () => {
     });
   });
 
+  describe('removeCaseIdFromAlertsOrThrow', () => {
+    const caseId = 'test-case';
+    const alerts = [{ id: 'test-id', index: 'test-index' }];
+
+    it('removes the case id from alerts', async () => {
+      await alertService.removeCaseIdFromAlertsOrThrow({ alerts, caseId });
+
+      expect(alertsClient.removeCaseIdFromAlerts).toHaveBeenCalledWith({ alerts, caseId });
+    });
+
+    it('propagates alerts client failures', async () => {
+      // failure scenario: the restrict flow must abort when the alert update fails
+      alertsClient.removeCaseIdFromAlerts.mockRejectedValueOnce(new Error('An error'));
+
+      await expect(alertService.removeCaseIdFromAlertsOrThrow({ alerts, caseId })).rejects.toThrow(
+        'Failed to remove case test-case from alerts: Error: An error'
+      );
+    });
+  });
+
   describe('removeCaseIdsFromAllAlerts', () => {
     const caseIds = ['test-case-1', 'test-case-2'];
 

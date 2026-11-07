@@ -128,6 +128,7 @@
     "@kbn/app-menu",
     "@kbn/ai-assistant-common",
     "@kbn/management-settings-ids",
+    "@kbn/context-engine-plugin",
     "@kbn/core-http-common",
     "@kbn/workflows-ui",
   ],

@@ -22,6 +22,7 @@ import type { CasesClientArgs } from '..';
 import { createCaseError, createCaseErrorFromSOError, isSOError } from '../../common/error';
 import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
+import { createCaseEntity } from '../../authorization/utils';
 import { createFileEntities, deleteFiles } from '../files';
 
 /**
@@ -32,7 +33,14 @@ export async function deleteCases(
   clientArgs: CasesClientArgs
 ): Promise<void> {
   const {
-    services: { caseService, attachmentService, userActionService, alertsService },
+    services: {
+      caseService,
+      attachmentService,
+      userActionService,
+      alertsService,
+      taskService,
+      taskCommentService,
+    },
     logger,
     authorization,
     fileService,
@@ -52,7 +60,7 @@ export async function deleteCases(
         );
       }
 
-      entities.set(theCase.id, { id: theCase.id, owner: theCase.attributes.owner });
+      entities.set(theCase.id, createCaseEntity(theCase));
     }
 
     const fileEntities = await getFileEntities(ids, fileService);
@@ -82,6 +90,8 @@ export async function deleteCases(
         options: { refresh: 'wait_for' },
       }),
       alertsService.removeCaseIdsFromAllAlerts({ caseIds: ids }),
+      ...ids.map((id) => taskService.deleteTasksByCase(id)),
+      ...ids.map((id) => taskCommentService.deleteBy({ caseId: id })),
     ]);
 
     await userActionService.creator.bulkAuditLogCaseDeletion(

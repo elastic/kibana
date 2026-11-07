@@ -1,0 +1,9 @@
+type: string
+description: The analyst's or agent's verdict on the case.
+enum:
+  - true_positive
+  - false_positive
+  - benign_positive
+  - suspicious
+  - undetermined
+example: true_positive

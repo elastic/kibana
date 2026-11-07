@@ -6,6 +6,8 @@
  */
 
 import type { UserActionType } from '../../../common/types/domain';
+import { AccessUserActionBuilder } from './builders/access';
+import { AiVerdictUserActionBuilder, HumanVerdictUserActionBuilder } from './builders/verdict';
 import { CreateCaseUserActionBuilder } from './builders/create_case';
 import { TitleUserActionBuilder } from './builders/title';
 import { CommentUserActionBuilder } from './builders/comment';
@@ -19,15 +21,26 @@ import type { UserActionBuilder } from './abstract_builder';
 import { SeverityUserActionBuilder } from './builders/severity';
 import { AssigneesUserActionBuilder } from './builders/assignees';
 import { NoopUserActionBuilder } from './builders/noop';
+import {
+  ApplyTaskTemplateUserActionBuilder,
+  CreateTaskUserActionBuilder,
+  DeleteTaskUserActionBuilder,
+  UpdateTaskUserActionBuilder,
+} from './builders/tasks';
 import { CategoryUserActionBuilder } from './builders/category';
 import { CustomFieldsUserActionBuilder } from './builders/custom_fields';
 import { ObservablesUserActionBuilder } from './builders/observables';
 import { ExtendedFieldsUserActionBuilder } from './builders/extended_fields';
 import { TemplateUserActionBuilder } from './builders/template';
 import { WorkflowUserActionBuilder } from './builders/workflow';
+import { SyncUserActionBuilder } from './builders/sync';
+import { DecisionUserActionBuilder } from './builders/decision';
 import { BulkAttachmentsUserActionBuilder } from './builders/bulk_attachments';
 
 const builderMap = {
+  access: AccessUserActionBuilder,
+  ai_verdict: AiVerdictUserActionBuilder,
+  human_verdict: HumanVerdictUserActionBuilder,
   assignees: AssigneesUserActionBuilder,
   title: TitleUserActionBuilder,
   create_case: CreateCaseUserActionBuilder,
@@ -46,7 +59,13 @@ const builderMap = {
   extended_fields: ExtendedFieldsUserActionBuilder,
   template: TemplateUserActionBuilder,
   workflow: WorkflowUserActionBuilder,
+  sync: SyncUserActionBuilder,
+  decision: DecisionUserActionBuilder,
   bulkAttachments: BulkAttachmentsUserActionBuilder,
+  create_task: CreateTaskUserActionBuilder,
+  update_task: UpdateTaskUserActionBuilder,
+  delete_task: DeleteTaskUserActionBuilder,
+  apply_task_template: ApplyTaskTemplateUserActionBuilder,
 };
 
 export class BuilderFactory {

@@ -78,6 +78,7 @@ export * from './configuration';
 export * from './files';
 export * from './telemetry';
 export * from './workflows';
+export * from './external_sync';
 
 export { getSpaceUrlPrefix } from './helpers';
 
@@ -155,7 +156,19 @@ export const deleteAllCaseItems = async (es: Client) => {
     deleteMappings(es),
     deleteTemplates(es),
     deleteFieldDefinitions(es),
+    deleteTasks(es),
   ]);
+};
+
+export const deleteTasks = async (es: Client): Promise<void> => {
+  await es.deleteByQuery({
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    q: 'type:cases-tasks OR type:cases-task-templates OR type:cases-task-comments',
+    wait_for_completion: true,
+    refresh: true,
+    body: {},
+    conflicts: 'proceed',
+  });
 };
 
 export const deleteCasesUserActions = async (es: Client): Promise<void> => {
@@ -1212,4 +1225,24 @@ export const deleteActivityAnalytics = async (es: Client): Promise<void> => {
     refresh: true,
     conflicts: 'proceed',
   });
+};
+
+export const syncCase = async ({
+  supertest,
+  caseId,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null } | null;
+}): Promise<Case> => {
+  const apiCall = supertest.post(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}/_sync`);
+
+  void setupAuth({ apiCall, headers: {}, auth });
+
+  const { body: res } = await apiCall.set('kbn-xsrf', 'true').send().expect(expectedHttpCode);
+
+  return res;
 };

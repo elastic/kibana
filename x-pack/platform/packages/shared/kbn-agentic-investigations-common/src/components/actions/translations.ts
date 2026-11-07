@@ -22,6 +22,15 @@ export const ACTIONS_TRANSLATIONS = Object.freeze({
     openEscalation: i18n.translate('xpack.agenticInvestigations.baseActions.openEscalation', {
       defaultMessage: 'Open an escalation',
     }),
+    openCase: i18n.translate('xpack.agenticInvestigations.baseActions.openCase', {
+      defaultMessage: 'Open a case…',
+    }),
+    addToExistingCase: i18n.translate('xpack.agenticInvestigations.baseActions.addToExistingCase', {
+      defaultMessage: 'Add to existing case…',
+    }),
+    viewCase: i18n.translate('xpack.agenticInvestigations.baseActions.viewCase', {
+      defaultMessage: 'View case',
+    }),
     attachToEscalation: i18n.translate(
       'xpack.agenticInvestigations.baseActions.attachToEscalation',
       {

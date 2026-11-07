@@ -32,6 +32,7 @@ export function createMockClientArgs() {
       caseService,
     },
     logger,
+    config: { customStatuses: { enabled: false } },
   };
 
   return { mockServices: clientArgs, clientArgs: clientArgs as unknown as CasesClientArgs };

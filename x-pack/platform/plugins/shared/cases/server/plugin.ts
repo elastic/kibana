@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import {
   type IContextProvider,
   type KibanaRequest,
@@ -21,6 +22,7 @@ import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
+import { CASES_MANAGED_WORKFLOW_PLUGIN_ID } from '@kbn/workflows/managed';
 import {
   APP_ID,
   CASE_ATTACHMENT_SAVED_OBJECT,
@@ -29,6 +31,8 @@ import {
   CASE_SAVED_OBJECT,
   CASE_TEMPLATE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
+  CASE_TASK_TEMPLATE_SAVED_OBJECT,
+  CASE_CONFIGURE_SAVED_OBJECT,
   registerOwnerPrefix,
 } from '../common/constants';
 
@@ -48,13 +52,19 @@ import { registerRoutes } from './routes/api/register_routes';
 import { getExternalRoutes } from './routes/api/get_external_routes';
 import { createCasesTelemetry, scheduleCasesTelemetryTask } from './telemetry';
 import { getInternalRoutes } from './routes/api/get_internal_routes';
+import { subscribeRoomAccessToCaseUpdates } from './agentic/room_access_subscriber';
 import { UnifiedAttachmentTypeRegistry } from './attachment_framework/unified_attachment_registry';
 import { UserProfileService } from './services';
 import {
   LICENSING_CASE_ASSIGNMENT_FEATURE,
   LICENSING_CASE_OBSERVABLES_FEATURE,
+  LICENSING_CASE_TASKS_FEATURE,
 } from './common/constants';
 import { registerInternalAttachments } from './internal_attachments';
+import {
+  createCaseLinkAttachmentType,
+  createConversationAttachmentType,
+} from './attachment_framework/attachments';
 import { registerCaseFileKinds } from './files';
 import type { ConfigType } from './config';
 import { registerConnectorTypes } from './connectors';
@@ -78,8 +88,22 @@ import { registerCaseWorkflowSteps } from './workflows';
 import { registerCasesAgentBuilderTools } from './agent_builder';
 import { registerCaseWorkflowTriggers } from './workflows/triggers';
 import { registerCasesWorkflowEventBridge } from './workflows/triggers/event_bridge';
+import { registerAutoPushListener } from './external_sync/auto_push_listener';
+import { externalIncidentUpdatedTopic } from './external_sync/external_incident_topic';
+import { registerExternalIncidentConsumer } from './external_sync/external_incident_consumer';
+import { registerExternalSyncWorkloadType } from './external_sync/service_account';
+import { getExternalSyncRoutes } from './routes/api/external_sync';
+import { LicensingService } from './services/licensing';
 import { CasesWorkflowRunService } from './workflows/execution/service';
 import { initUiSettings } from './ui_settings';
+import { installCasesManagedWorkflows, registerCasesOutcomesAiIndex } from './knowledge/register';
+import { createIsContextEngineEnabled } from './knowledge/is_context_engine_enabled';
+import { getCaseOutcomeStepDefinition } from './workflows/steps/get_case_outcome';
+import { createPriorOutcomesRoute } from './routes/api/internal/get_prior_outcomes';
+import { subscribeRetractOutcomeOnRestrict } from './knowledge/retract_on_restrict';
+import type { SystemTemplateDefinition } from './system_templates';
+import { SystemTemplateRegistry, ensureSystemTemplates } from './system_templates';
+import { createEnsureSystemTemplatesRoute } from './routes/api/internal/ensure_system_templates';
 
 export class CasePlugin
   implements
@@ -105,6 +129,8 @@ export class CasePlugin
   private casesEventBus?: CasesEventBus;
   private readonly closeReasonValidators: Map<string, CloseReasonValidator> = new Map();
   private casesAnalyticsV2Service?: CasesAnalyticsV2Service;
+  private workflowsManagement?: WorkflowsServerPluginSetup['management'];
+  private readonly systemTemplates = new SystemTemplateRegistry();
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.caseConfig = initializerContext.config.get<ConfigType>();
@@ -172,6 +198,24 @@ export class CasePlugin
 
     this.casesEventBus = new CasesEventBus(this.logger);
 
+    // Registered even when the sync is off, so existing bindings can still be listed and removed.
+    registerExternalSyncWorkloadType(core.security.serviceAccounts);
+
+    if (this.caseConfig.bidirectionalSync.enabled) {
+      core.pubsub.registerTopic(externalIncidentUpdatedTopic);
+      registerExternalIncidentConsumer({
+        pubsub: core.pubsub,
+        logger: this.logger,
+        getServices: async () => {
+          const [coreStart] = await core.getStartServices();
+          return {
+            serviceAccounts: coreStart.security.serviceAccounts,
+            getCasesClient: this.getCasesClientWithRequest(coreStart, 'external_sync'),
+          };
+        },
+      });
+    }
+
     registerSavedObjects({
       core,
       logger: this.logger,
@@ -232,6 +276,9 @@ export class CasePlugin
 
       return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     };
+    this.workflowsManagement = this.caseConfig.runWorkflows.enabled
+      ? plugins.workflowsManagement?.management
+      : undefined;
     const workflowRunService =
       this.caseConfig.runWorkflows.enabled && plugins.workflowsManagement
         ? new CasesWorkflowRunService({
@@ -257,6 +304,36 @@ export class CasePlugin
         }
       : undefined;
 
+    const getAgentBuilder =
+      plugins.agentBuilder && this.caseConfig.chat.enabled
+        ? async () => {
+            const [, pluginsStart] = await core.getStartServices();
+            if (!pluginsStart.agentBuilder) {
+              throw new Error('agentBuilder plugin start contract is not available');
+            }
+            return pluginsStart.agentBuilder;
+          }
+        : undefined;
+
+    if (getAgentBuilder) {
+      this.unifiedAttachmentTypeRegistry.register(
+        createConversationAttachmentType(getAgentBuilder)
+      );
+    }
+
+    if (this.caseConfig.agentic.enabled) {
+      this.unifiedAttachmentTypeRegistry.register(
+        createCaseLinkAttachmentType(async (request) => {
+          const [coreStart] = await core.getStartServices();
+          return this.getCasesClientWithRequest(coreStart, 'rest_api')(request);
+        })
+      );
+    }
+    const getActionsClient = async (request: KibanaRequest) => {
+      const [, pluginsStart] = await core.getStartServices();
+      return pluginsStart.actions.getActionsClientWithRequest(request);
+    };
+
     registerRoutes({
       router,
       routes: [
@@ -270,8 +347,69 @@ export class CasePlugin
           this.caseConfig,
           workflowRunService && getWorkflowRunContext
             ? { service: workflowRunService, getSpaceId, getWorkflowRunContext }
-            : undefined
+            : undefined,
+          getAgentBuilder,
+          async (request, actionSource) => {
+            const [coreStart] = await core.getStartServices();
+            return this.getCasesClientWithRequest(coreStart, 'rest_api')(request, { actionSource });
+          }
         ),
+        ...(this.caseConfig.templates.enabled
+          ? [
+              createEnsureSystemTemplatesRoute({
+                getSpaceId,
+                ensureForSpace: async (spaceId, owner, { addStatuses }) => {
+                  const [coreStart] = await core.getStartServices();
+                  return this.ensureSystemTemplates(coreStart, spaceId, owner, addStatuses);
+                },
+              }),
+            ]
+          : []),
+        ...(this.isKnowledgeEnabled() && plugins.contextEngine
+          ? [
+              createPriorOutcomesRoute({
+                getSpaceId,
+                isAvailable: async (request, spaceId) => {
+                  const [coreStart, pluginsStart] = await core.getStartServices();
+                  if (!(await createIsContextEngineEnabled(async () => coreStart)(spaceId))) {
+                    return false;
+                  }
+                  const authz = pluginsStart.security?.authz;
+                  if (!authz || !authz.mode.useRbacForRequest(request)) {
+                    return true;
+                  }
+                  const { hasAllRequested } = await authz.checkPrivilegesDynamicallyWithRequest(
+                    request
+                  )({ kibana: [authz.actions.api.get('contextEngine:read')] });
+                  return hasAllRequested;
+                },
+                getQuery: async (request) => {
+                  const [coreStart, pluginsStart] = await core.getStartServices();
+                  if (!pluginsStart.contextEngine) {
+                    throw new Error('The context engine is not available');
+                  }
+                  const readService = pluginsStart.contextEngine.getAiIndexDataReadService({
+                    esClient: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+                    request,
+                  });
+                  return (params) => readService.query(params);
+                },
+              }),
+            ]
+          : []),
+        ...(this.caseConfig.bidirectionalSync.enabled
+          ? getExternalSyncRoutes({
+              getStartServices: async () => {
+                const [coreStart] = await core.getStartServices();
+                return {
+                  pubsub: coreStart.pubsub,
+                  serviceAccounts: coreStart.security.serviceAccounts,
+                };
+              },
+              getActionsClient,
+              getSpaceId,
+            })
+          : []),
       ],
       logger: this.logger,
       kibanaVersion: this.kibanaVersion,
@@ -280,6 +418,7 @@ export class CasePlugin
 
     plugins.licensing.featureUsage.register(LICENSING_CASE_ASSIGNMENT_FEATURE, 'platinum');
     plugins.licensing.featureUsage.register(LICENSING_CASE_OBSERVABLES_FEATURE, 'platinum');
+    plugins.licensing.featureUsage.register(LICENSING_CASE_TASKS_FEATURE, 'platinum');
 
     const getCasesClient = (
       clientSource: CasesClientSource
@@ -288,11 +427,6 @@ export class CasePlugin
         const [coreStart] = await core.getStartServices();
         return this.getCasesClientWithRequest(coreStart, clientSource)(request, options);
       };
-    };
-
-    const getActionsClient = async (request: KibanaRequest) => {
-      const [, pluginsStart] = await core.getStartServices();
-      return pluginsStart.actions.getActionsClientWithRequest(request);
     };
 
     const serverlessProjectType = this.isServerless
@@ -318,9 +452,26 @@ export class CasePlugin
       this.unifiedAttachmentTypeRegistry,
       this.caseConfig.attachments?.enabled === true,
       this.caseConfig.templates?.enabled === true,
-      () => core.getStartServices()
+      () => core.getStartServices(),
+      this.caseConfig.bidirectionalSync?.enabled === true
     );
     registerCaseWorkflowTriggers(plugins.workflowsExtensions);
+
+    // Closed cases publish their outcome to the context engine (technical preview).
+    if (this.isKnowledgeEnabled() && plugins.contextEngine) {
+      registerCasesOutcomesAiIndex(plugins.contextEngine);
+      // Without an owner registered at setup, the workflows plugin removes the installed workflow
+      // as an orphan.
+      plugins.workflowsExtensions?.registerManagedWorkflowOwner(CASES_MANAGED_WORKFLOW_PLUGIN_ID);
+      plugins.workflowsExtensions?.registerStepDefinition(
+        getCaseOutcomeStepDefinition({
+          getCasesClient: getCasesClient('workflow'),
+          isContextEngineEnabled: createIsContextEngineEnabled(
+            async () => (await core.getStartServices())[0]
+          ),
+        })
+      );
+    }
 
     const isCasesAgentBuilderAllowed =
       !this.isServerless ||
@@ -336,6 +487,8 @@ export class CasePlugin
           analyticsV2Enabled: this.caseConfig.analyticsV2.enabled,
           attachmentsEnabled: this.caseConfig.attachments?.enabled === true,
           templatesEnabled: this.caseConfig.templates?.enabled === true,
+          tasksEnabled: this.caseConfig.tasks.enabled,
+          agenticEnabled: this.caseConfig.agentic.enabled,
         },
         this.logger
       );
@@ -354,11 +507,67 @@ export class CasePlugin
       registerOwnerPrefix: (owner: string, prefix: string) => {
         registerOwnerPrefix(owner, prefix);
       },
+      registerSystemTemplate: (owner: string, definition: SystemTemplateDefinition) => {
+        this.systemTemplates.register(owner, definition);
+      },
     };
+  }
+
+  private isKnowledgeEnabled(): boolean {
+    return this.caseConfig.agentic.enabled && this.caseConfig.knowledge.enabled;
+  }
+
+  private ensureSystemTemplates(
+    core: CoreStart,
+    spaceId: string,
+    owner?: string,
+    addStatuses = true
+  ) {
+    return ensureSystemTemplates({
+      repository: core.savedObjects.createInternalRepository([
+        CASE_TEMPLATE_SAVED_OBJECT,
+        CASE_TASK_TEMPLATE_SAVED_OBJECT,
+        CASE_CONFIGURE_SAVED_OBJECT,
+      ]),
+      spaceId,
+      templates: this.systemTemplates.list(owner),
+      customStatusesEnabled: this.caseConfig.customStatuses.enabled,
+      addStatuses,
+      logger: this.logger,
+    });
+  }
+
+  private async ensureSystemTemplatesInAllSpaces(core: CoreStart) {
+    const { saved_objects: spaces } = await core.savedObjects
+      .createInternalRepository(['space'])
+      .find({ type: 'space', perPage: 1000, fields: ['name'] });
+    const spaceIds = spaces.length > 0 ? spaces.map(({ id }) => id) : [DEFAULT_SPACE_ID];
+    for (const spaceId of spaceIds) {
+      try {
+        await this.ensureSystemTemplates(core, spaceId);
+      } catch (error) {
+        this.logger.warn(
+          `Failed to add shipped case templates to space ${spaceId}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+    }
   }
 
   public start(core: CoreStart, plugins: CasesServerStartDependencies): CasesServerStart {
     this.logger.debug(`Starting Case Workflow`);
+
+    if (this.caseConfig.templates.enabled && this.systemTemplates.list().length > 0) {
+      // Never blocks start; spaces created later get the templates from the ensure route.
+      void this.ensureSystemTemplatesInAllSpaces(core).catch((error) =>
+        this.logger.warn(
+          `Failed to add shipped case templates: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        )
+      );
+    }
 
     if (plugins.taskManager) {
       scheduleCasesTelemetryTask(plugins.taskManager, this.logger);
@@ -485,6 +694,43 @@ export class CasePlugin
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     registerCasesWorkflowEventBridge(this.casesEventBus!, plugins.workflowsExtensions, this.logger);
 
+    if (this.isKnowledgeEnabled() && plugins.contextEngine && plugins.workflowsExtensions) {
+      void installCasesManagedWorkflows({
+        workflowsExtensions: plugins.workflowsExtensions,
+        logger: this.logger,
+      });
+    }
+    if (this.isKnowledgeEnabled() && plugins.contextEngine && this.casesEventBus) {
+      subscribeRetractOutcomeOnRestrict({
+        eventBus: this.casesEventBus,
+        getEsClient: async (request) => core.elasticsearch.client.asScoped(request).asCurrentUser,
+        logger: this.logger,
+      });
+    }
+
+    if (this.caseConfig.agentic.enabled && this.caseConfig.chat.enabled && plugins.agentBuilder) {
+      subscribeRoomAccessToCaseUpdates({
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        eventBus: this.casesEventBus!,
+        agentBuilder: plugins.agentBuilder,
+        logger: this.logger,
+      });
+    }
+
+    if (this.caseConfig.bidirectionalSync.enabled && this.casesEventBus != null) {
+      const licensingService = new LicensingService(
+        plugins.licensing.license$,
+        plugins.licensing.featureUsage.notifyUsage
+      );
+      registerAutoPushListener({
+        casesEventBus: this.casesEventBus,
+        getCasesClient: this.getCasesClientWithRequest(core, 'external_sync'),
+        isAtLeastEnterprise: () => licensingService.isAtLeastEnterprise(),
+        logger: this.logger,
+        pushRestrictedCases: this.caseConfig.agentic.enabled,
+      });
+    }
+
     this.clientFactory.initialize({
       // securityPluginSetup will be set to a defined value in the setup() function
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -511,6 +757,8 @@ export class CasePlugin
       usageCounter: this.usageCounter!,
       config: this.caseConfig,
       casesEventBus: this.casesEventBus,
+      workflowsManagement: this.workflowsManagement,
+      agentBuilder: this.caseConfig.chat.enabled ? plugins.agentBuilder : undefined,
       closeReasonValidator:
         this.closeReasonValidators.size > 0
           ? (closeReason, owner, request) => {

@@ -34,7 +34,7 @@ import type {
   User,
   AttachmentAttributesV2,
 } from '../../../common/types/domain';
-import { caseStatuses } from '../../../common/types/domain';
+import { caseStatuses, CaseAccessMode } from '../../../common/types/domain';
 import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
@@ -92,6 +92,7 @@ import {
   OwnerSchema,
 } from '../../common/types/case';
 import type {
+  CaseStatusAndAccess,
   GetCaseIdsByAlertIdArgs,
   GetCaseIdsByAlertIdAggs,
   CasesMapWithPageInfo,
@@ -451,7 +452,7 @@ export class CasesService {
      * `statsOptions.filter` in place of `caseOptions.filter` — the caller passes a filter with
      * the status clause stripped so all three status counts are always populated.
      */
-    statsOptions?: { filter?: KueryNode };
+    statsOptions?: { filter?: KueryNode; pausingStatusKeys?: string[] };
   }): Promise<CasesMapWithPageInfo & { searchStats?: CasesSearchStats }> {
     const caseIdsByAttachmentSearch = await this.getCaseIdsByAttachmentSearch(
       namespaces,
@@ -507,6 +508,7 @@ export class CasesService {
               searchQuery,
               statsOptions.filter ? toElasticsearchQuery(statsOptions.filter) : undefined
             ),
+            pausingStatusKeys: statsOptions.pausingStatusKeys,
             ...(hasRuntimeMappings ? { runtimeMappings } : {}),
           })
         : undefined,
@@ -567,10 +569,12 @@ export class CasesService {
     namespaces,
     query,
     runtimeMappings,
+    pausingStatusKeys = [],
   }: {
     namespaces: string[];
     query?: estypes.QueryDslQueryContainer;
     runtimeMappings?: estypes.MappingRuntimeFields;
+    pausingStatusKeys?: string[];
   }): Promise<CasesSearchStats> {
     const response = await this.searchCases({
       type: [CASE_SAVED_OBJECT],
@@ -593,6 +597,13 @@ export class CasesService {
             field: `${CASE_SAVED_OBJECT}.duration`,
           },
         },
+        ...(pausingStatusKeys.length > 0
+          ? {
+              paused: {
+                filter: { terms: { [`${CASE_SAVED_OBJECT}.status_key`]: pausingStatusKeys } },
+              },
+            }
+          : {}),
       },
     });
 
@@ -600,6 +611,7 @@ export class CasesService {
       | {
           statuses?: { buckets: Array<{ key: string; doc_count: number }> };
           mttr?: { value: number | null };
+          paused?: { doc_count: number };
         }
       | undefined;
 
@@ -612,6 +624,7 @@ export class CasesService {
         closed: statusBuckets?.get(CasePersistedStatus.CLOSED) ?? 0,
       },
       mttr: aggregations?.mttr?.value ?? null,
+      ...(pausingStatusKeys.length > 0 ? { paused: aggregations?.paused?.doc_count ?? 0 } : {}),
     };
   }
 
@@ -653,6 +666,20 @@ export class CasesService {
       'in-progress': statusBuckets?.get(CasePersistedStatus.IN_PROGRESS) ?? 0,
       closed: statusBuckets?.get(CasePersistedStatus.CLOSED) ?? 0,
     };
+  }
+
+  public async countCases({
+    searchOptions,
+  }: {
+    searchOptions: SavedObjectFindOptionsKueryNode;
+  }): Promise<number> {
+    const cases = await this.unsecuredSavedObjectsClient.find({
+      ...searchOptions,
+      type: CASE_SAVED_OBJECT,
+      perPage: 0,
+    });
+
+    return cases.total;
   }
 
   private static getStatusBuckets(
@@ -832,22 +859,60 @@ export class CasesService {
   /**
    * The status of each case found, reading only the status field; cases not found are left out.
    */
-  public async getCaseStatuses({ caseIds }: GetCasesArgs): Promise<Map<string, CaseStatuses>> {
+  /**
+   * Status, access and assignees of each case found, reading only those fields. Cases not found
+   * are left out.
+   */
+  public async getCaseStatusesAndAccess({
+    caseIds,
+  }: GetCasesArgs): Promise<Map<string, CaseStatusAndAccess>> {
     try {
-      this.log.debug(`Attempting to GET the status of cases ${caseIds.join(', ')}`);
+      this.log.debug(`Attempting to GET the status and access of cases ${caseIds.join(', ')}`);
       const { saved_objects: cases } = await this.unsecuredSavedObjectsClient.bulkGet<
-        Pick<CasePersistedAttributes, 'status'>
-      >(caseIds.map((id) => ({ type: CASE_SAVED_OBJECT, id, fields: ['status'] })));
+        Pick<CasePersistedAttributes, 'status' | 'access' | 'assignees'>
+      >(
+        caseIds.map((id) => ({
+          type: CASE_SAVED_OBJECT,
+          id,
+          fields: ['status', 'access', 'assignees'],
+        }))
+      );
 
       return new Map(
-        cases.flatMap((theCase): Array<[string, CaseStatuses]> => {
+        cases.flatMap((theCase): Array<[string, CaseStatusAndAccess]> => {
           if (isSavedObjectErrorResult(theCase)) return [];
-          const status = STATUS_ESMODEL_TO_EXTERNAL[theCase.attributes.status];
-          return status ? [[theCase.id, status]] : [];
+          const { status, access, assignees } = theCase.attributes;
+          return [
+            [
+              theCase.id,
+              { status: STATUS_ESMODEL_TO_EXTERNAL[status], access, assignees: assignees ?? [] },
+            ],
+          ];
         })
       );
     } catch (error) {
-      this.log.error(`Error on GET the status of cases ${caseIds.join(', ')}: ${error}`);
+      this.log.error(`Error on GET the status and access of cases ${caseIds.join(', ')}: ${error}`);
+      throw error;
+    }
+  }
+
+  /** IDs of the cases matching `filter`, reading no attributes beyond the owner. */
+  public async findCaseIds({
+    filter,
+    perPage,
+  }: {
+    filter: KueryNode;
+    perPage: number;
+  }): Promise<{ ids: string[]; total: number }> {
+    try {
+      this.log.debug(`Attempting to find case IDs`);
+      const { saved_objects: cases, total } = await this.unsecuredSavedObjectsClient.find<
+        Pick<CasePersistedAttributes, 'owner'>
+      >({ type: CASE_SAVED_OBJECT, filter, fields: ['owner'], perPage, page: 1 });
+
+      return { ids: cases.map(({ id }) => id), total };
+    } catch (error) {
+      this.log.error(`Error on find case IDs: ${error}`);
       throw error;
     }
   }
@@ -1244,7 +1309,7 @@ export class CasesService {
       // external_service.connector_id). Convert to the persisted model first —
       // using it raw silently drops status/severity for untouched fields and
       // injects connector_id into the strict mapping.
-      this.analyticsV2Writer.upsertCase({
+      const postPatchCase = {
         ...originalCase,
         attributes: {
           ...transformAttributesToESModel(originalCase.attributes ?? {}).attributes,
@@ -1252,7 +1317,19 @@ export class CasesService {
         } as CasePersistedAttributes,
         version: updatedCase.version ?? originalCase.version,
         references: builtReferences ?? [],
-      });
+      };
+
+      if (postPatchCase.attributes.access?.mode === CaseAccessMode.RESTRICTED) {
+        // A restricted case is removed from every analytics index, reusing the
+        // same cascade the case-deletion path uses. Unrestricting re-projects:
+        // the upsert below covers the case doc and the client flow re-emits
+        // activity and attachments.
+        this.analyticsV2Writer.deleteCase(caseId);
+        this.analyticsV2ActivityWriter.bulkDeleteActionsByCaseIds([caseId]);
+        this.analyticsV2AttachmentsWriter.bulkDeleteAttachmentsByCaseIds([caseId]);
+      } else {
+        this.analyticsV2Writer.upsertCase(postPatchCase);
+      }
 
       const res = transformUpdateResponseToExternalModel(updatedCase);
       const decodeRes = decodeOrThrowZod(PartialCaseTransformedAttributesSchema)(
@@ -1314,8 +1391,10 @@ export class CasesService {
       // Cases-as-data v2: synthesize the post-update SO for each
       // successfully-patched case (`originalCase + new attributes`) and
       // dispatch as one bulk write. Same fan-out-collapse rationale as
-      // `bulkCreateCases`.
+      // `bulkCreateCases`. Cases that are restricted post-update are removed
+      // from every analytics index instead (same cascade as case deletion).
       const analyticsV2Mirrors: Array<SavedObject<CasePersistedAttributes>> = [];
+      const restrictedCaseIds: string[] = [];
 
       const res = updatedCases.saved_objects.reduce((acc, theCase) => {
         if (isSavedObjectErrorResult(theCase)) {
@@ -1327,15 +1406,21 @@ export class CasesService {
         // external-model base to the persisted model before spreading the patch.
         const ctx = updateContextById.get(theCase.id);
         if (ctx) {
-          analyticsV2Mirrors.push({
-            ...ctx.originalCase,
-            attributes: {
-              ...transformAttributesToESModel(ctx.originalCase.attributes ?? {}).attributes,
-              ...ctx.esAttributes,
-            } as CasePersistedAttributes,
-            version: theCase.version ?? ctx.originalCase.version,
-            references: ctx.references ?? [],
-          });
+          const postPatchAttributes = {
+            ...transformAttributesToESModel(ctx.originalCase.attributes ?? {}).attributes,
+            ...ctx.esAttributes,
+          } as CasePersistedAttributes;
+
+          if (postPatchAttributes.access?.mode === CaseAccessMode.RESTRICTED) {
+            restrictedCaseIds.push(theCase.id);
+          } else {
+            analyticsV2Mirrors.push({
+              ...ctx.originalCase,
+              attributes: postPatchAttributes,
+              version: theCase.version ?? ctx.originalCase.version,
+              references: ctx.references ?? [],
+            });
+          }
         }
 
         const so = Object.assign(theCase, transformUpdateResponseToExternalModel(theCase));
@@ -1350,6 +1435,12 @@ export class CasesService {
       }, [] as Array<SavedObjectsUpdateResponse<CaseTransformedAttributes> | SOWithErrors<CaseTransformedAttributes>>);
 
       this.analyticsV2Writer.bulkUpsertCases(analyticsV2Mirrors);
+
+      if (restrictedCaseIds.length > 0) {
+        this.analyticsV2Writer.bulkDeleteCases(restrictedCaseIds);
+        this.analyticsV2ActivityWriter.bulkDeleteActionsByCaseIds(restrictedCaseIds);
+        this.analyticsV2AttachmentsWriter.bulkDeleteAttachmentsByCaseIds(restrictedCaseIds);
+      }
 
       return Object.assign(updatedCases, {
         saved_objects: res,

@@ -12,6 +12,8 @@ export interface CaseTooltipContentProps {
   title: string;
   description: string;
   status: CaseStatuses;
+  /** Label of an admin-defined status, when the case is on one */
+  statusLabel?: string;
   totalComments: number;
   createdAt: string;
   createdBy: { username?: string; fullName?: string };

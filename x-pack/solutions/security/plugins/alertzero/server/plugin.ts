@@ -67,7 +67,7 @@ import type { HuntServices } from './services/watches/hunt';
 import { listActionsTool } from './agent_builder_tools/list_actions_tool';
 import { isSpaceSupported } from './lib/is_space_supported';
 import { createAssertAlertZeroAccess } from './agent_builder_tools/assert_alertzero_access';
-import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
+import { ensureAgent, ensureAgentSafe, getAgentType, registerAgentType } from './agent';
 import { createActionDiscoverySkill } from './agent_builder/skills/action_discovery';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
 import type { StoryProposal } from './services/investigation_summary/format_story';
@@ -116,6 +116,7 @@ export class AlertZeroPlugin
   private workersService?: WorkersService;
   private conversationProposalsService?: ConversationProposalsService;
   private proposals?: AlertZeroStartDependencies['proposals'];
+  private agenticInvestigations?: AlertZeroStartDependencies['agenticInvestigations'];
   private agentBuilderConversations?: NonNullable<
     AlertZeroStartDependencies['agentBuilder']
   >['conversations'];
@@ -225,7 +226,9 @@ export class AlertZeroPlugin
         const [core, { security, spaces }] = await coreSetup.getStartServices();
         return { core, security, spaces, isServerless: this.isServerless };
       });
-      registerAgentType(agentBuilder);
+      registerAgentType(agentBuilder, {
+        casesOutcomes: agenticInvestigations.isCasesBridgeEnabled?.() ?? false,
+      });
       registerAttachments(agentBuilder);
       // Registered in setup so the builtin tool is available to Agent Builder before
       // the first agent run; the handler resolves the service lazily like the routes do.
@@ -331,6 +334,8 @@ export class AlertZeroPlugin
       getConversationProposalsService: () => this.requireConversationProposalsService(),
       getActionsService: () => this.requireActionsService(),
       getAgentBuilderConversations: () => this.requireAgentBuilderConversations(),
+      getInvestigationsClient: (request) =>
+        this.agenticInvestigations?.getInvestigationsClient(request),
       getAgentBuilderAttachments: () => this.requireAgentBuilderAttachments(),
       getHuntServices: () => this.requireHuntServices(),
       getScanFailuresService: () => this.requireScanFailuresService(),
@@ -392,6 +397,7 @@ export class AlertZeroPlugin
       return this.alertZeroStartContract();
     }
     void ensureAgentSafe({ agentBuilder, spaceId: DEFAULT_SPACE_ID, logger: this.logger });
+    this.agenticInvestigations = agenticInvestigations;
 
     const management = this.workflowsManagementApi
       ? new WatchWorkflowsManagementClientImpl(this.workflowsManagementApi)
@@ -400,6 +406,8 @@ export class AlertZeroPlugin
       workflowsExtensions: plugins.workflowsExtensions,
       logger: this.logger,
       ensureAgentForSpace: (spaceId) => ensureAgent({ agentBuilder, spaceId }),
+      // The deterministic demo (POC Phase 5) only exists where "Open a case" does.
+      includeDemoWorkflows: agenticInvestigations.isCasesBridgeEnabled?.() ?? false,
     }).catch((error) => {
       this.logger.error(
         `AlertZero managed workflow initialization failed: ${
@@ -453,7 +461,7 @@ export class AlertZeroPlugin
         ensureAgentForSpace: (spaceId) =>
           ensureAgentSafe({ agentBuilder, spaceId, logger: this.logger }),
         agentBuilder,
-        agentTypes: [agentType],
+        agentTypes: [getAgentType({ casesOutcomes: agenticInvestigations.isCasesBridgeEnabled?.() ?? false })],
       },
       async (request, registration, options) => {
         const client = await plugins.workflowsExtensions.getClient(request);

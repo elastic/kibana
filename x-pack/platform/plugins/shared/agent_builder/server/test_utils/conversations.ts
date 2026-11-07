@@ -77,6 +77,7 @@ export const createConversationClientMock = (): ConversationClientMock => {
     search: jest.fn(),
     delete: jest.fn(),
     updateAccessControl: jest.fn(),
+    getOwnerWithoutAccessCheck: jest.fn(),
     addAccessControlEntries: jest.fn(),
     removeAccessControlEntries: jest.fn(),
     applyTemplate: jest.fn(),

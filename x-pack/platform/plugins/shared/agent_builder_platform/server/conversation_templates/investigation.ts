@@ -9,7 +9,7 @@ import type { ConversationTemplate } from '@kbn/agent-builder-common';
 
 export const investigationTemplate: ConversationTemplate = {
   id: 'investigation',
-  version: 5,
+  version: 6,
   name: 'Investigation',
   description: 'Use for investigations',
   fields: {
@@ -60,6 +60,13 @@ export const investigationTemplate: ConversationTemplate = {
       input_type: 'TEXT_ARRAY',
       required: false,
       description: 'Workflow executions that have worked on this investigation.',
+    },
+    case_id: {
+      input_type: 'TEXT',
+      required: false,
+      description:
+        'The Kibana case this investigation is linked to. Closing that case closes this investigation.',
+      max_length: 512,
     },
   },
 };

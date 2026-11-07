@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type {
   KibanaRequest,
   SavedObjectsServiceStart,
@@ -39,6 +41,8 @@ import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { FilesStart } from '@kbn/files-plugin/server';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import { KIBANA_SYSTEM_USERNAME } from '../../common/constants';
+import { SUPERUSER_ROLE_NAME } from '../common/constants';
+import { RESTRICTED_CASE_ACCESS_DENIED_COUNTER } from './usage_counters';
 import { Authorization } from '../authorization/authorization';
 import {
   CaseConfigureService,
@@ -49,6 +53,9 @@ import {
   AlertService,
   TemplatesService,
   FieldDefinitionsService,
+  CaseTaskService,
+  CaseTaskTemplateService,
+  CaseTaskCommentService,
 } from '../services';
 
 import { AuthorizationAuditLogger } from '../authorization';
@@ -120,6 +127,9 @@ interface CasesClientFactoryArgs {
    * unconditionally.
    */
   analyticsV2DataViewRefresher: CasesAnalyticsV2DataViewRefresher;
+  workflowsManagement?: WorkflowsServerPluginSetup['management'];
+  /** Present when Agent Builder is installed and Cases chat is on; the case room uses it. */
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 interface CreateCasesClientParams {
@@ -186,7 +196,8 @@ export class CasesClientFactory {
     this.validateInitialization();
 
     const auditLogger = this.options.securityPluginSetup.audit.asScoped(request);
-    const auth = await this.createAuthorization(request);
+    const userInfo = await this.getUserInfo(request);
+    const auth = await this.createAuthorization(request, userInfo.profile_uid, clientSource);
     const unsecuredSavedObjectsClient = this.getUnsecuredSavedObjectsClient(
       request,
       savedObjectsService
@@ -205,8 +216,6 @@ export class CasesClientFactory {
       auth,
       actionSource: actionSource ?? getDefaultActionSource(request),
     });
-
-    const userInfo = await this.getUserInfo(request);
 
     const spaceId =
       this.options.spacesPluginStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
@@ -236,6 +245,8 @@ export class CasesClientFactory {
       request,
       closeReasonValidator: boundCloseReasonValidator,
       clientSource,
+      workflowsManagement: this.options.workflowsManagement,
+      agentBuilder: this.options.agentBuilder,
     };
   }
 
@@ -245,9 +256,14 @@ export class CasesClientFactory {
     }
   }
 
-  private async createAuthorization(request: KibanaRequest): Promise<Authorization> {
+  private async createAuthorization(
+    request: KibanaRequest,
+    profileUid?: string,
+    clientSource?: CasesClientSource
+  ): Promise<Authorization> {
     this.validateInitialization();
     const auditLogger = this.options.securityPluginSetup.audit.asScoped(request);
+    const { usageCounter } = this.options;
     return Authorization.create({
       request,
       securityAuth: this.options.securityPluginStart?.authz,
@@ -255,7 +271,26 @@ export class CasesClientFactory {
       features: this.options.featuresPluginStart,
       auditLogger: new AuthorizationAuditLogger(auditLogger),
       logger: this.logger,
+      profileUid,
+      isSuperuser: this.isSuperuser(request),
+      restrictedCasesEnabled: this.options.config.restrictedCases.enabled,
+      onRestrictedCaseDenied: () =>
+        usageCounter?.incrementCounter({
+          counterName: RESTRICTED_CASE_ACCESS_DENIED_COUNTER,
+          counterType: `cases_client.${clientSource ?? 'rest_api'}`,
+        }),
     });
+  }
+
+  private isSuperuser(request: KibanaRequest): boolean {
+    this.validateInitialization();
+    try {
+      const user = this.options.securityServiceStart.authc.getCurrentUser(request);
+      return user?.roles.includes(SUPERUSER_ROLE_NAME) ?? false;
+    } catch (error) {
+      this.logger.debug(`Failed to retrieve user roles for superuser check: ${error}`);
+      return false;
+    }
   }
 
   private getUnsecuredSavedObjectsClient(
@@ -398,6 +433,15 @@ export class CasesClientFactory {
       attachmentService,
       licensingService,
       notificationService,
+      taskService: new CaseTaskService({ log: this.logger, unsecuredSavedObjectsClient }),
+      taskTemplateService: new CaseTaskTemplateService({
+        log: this.logger,
+        unsecuredSavedObjectsClient,
+      }),
+      taskCommentService: new CaseTaskCommentService({
+        log: this.logger,
+        unsecuredSavedObjectsClient,
+      }),
     };
   }
 

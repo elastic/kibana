@@ -42,6 +42,15 @@ describe('update_case common step definition', () => {
     ).toBe(true);
   });
 
+  it('accepts a configured status key and a pause reason in updates', () => {
+    expect(
+      InputSchema.safeParse({
+        case_id: caseIdFixture,
+        updates: { status_key: 'on_hold', pause_reason: 'Awaiting vendor' },
+      }).success
+    ).toBe(true);
+  });
+
   it('rejects update case input without updates', () => {
     expect(
       InputSchema.safeParse({

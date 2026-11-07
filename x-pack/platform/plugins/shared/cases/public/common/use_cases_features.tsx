@@ -9,7 +9,9 @@ import { useMemo } from 'react';
 import type { SingleCaseMetricsFeature } from '../../common/ui';
 import { getCaseSettings } from '../../common/utils/case_settings';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
+import { useCasesConfig } from './lib/kibana';
 import { useLicense } from './use_license';
+import { KibanaServices } from './lib/kibana';
 
 export interface UseCasesFeatures {
   isSyncAlertsEnabled: boolean;
@@ -17,9 +19,18 @@ export interface UseCasesFeatures {
   connectorsAuthorized: boolean;
   caseAssignmentAuthorized: boolean;
   pushToServiceAuthorized: boolean;
+  /**
+   * True when restricted (assignee-only) cases are available: the technical
+   * preview flag is on and the license is Platinum or higher. Membership is
+   * the assignees list, which requires user profiles — the same bar as case
+   * assignment.
+   */
+  restrictedCasesAuthorized: boolean;
   metricsFeatures: SingleCaseMetricsFeature[];
   isObservablesFeatureEnabled: boolean;
   isExtractObservablesEnabled: boolean;
+  /** Case tasks: feature flag on and Platinum or above. */
+  tasksAuthorized: boolean;
   /**
    * True when at least one case setting is available to toggle (alert syncing, observable
    * extraction, or metrics). Mirrors the switches rendered by `CaseSettingsPopover`. When false
@@ -37,6 +48,7 @@ export const useCasesFeatures = (caseOwner?: string): UseCasesFeatures => {
     permissions: { assign },
   } = useCasesContext();
   const { isAtLeastGold, isAtLeastPlatinum } = useLicense();
+  const { restrictedCasesEnabled } = useCasesConfig();
   const hasLicenseGreaterThanPlatinum = isAtLeastPlatinum();
   const hasLicenseWithAtLeastGold = isAtLeastGold();
   const casesFeatures = useMemo(() => {
@@ -53,10 +65,13 @@ export const useCasesFeatures = (caseOwner?: string): UseCasesFeatures => {
       metricsFeatures,
       caseAssignmentAuthorized: hasLicenseGreaterThanPlatinum && assign,
       pushToServiceAuthorized: hasLicenseGreaterThanPlatinum,
+      restrictedCasesAuthorized: restrictedCasesEnabled && hasLicenseGreaterThanPlatinum,
       observablesAuthorized,
       connectorsAuthorized: hasLicenseWithAtLeastGold,
       isObservablesFeatureEnabled: observablesEnabled,
       isExtractObservablesEnabled: extractObservables,
+      tasksAuthorized:
+        hasLicenseGreaterThanPlatinum && KibanaServices.getConfig()?.tasks?.enabled === true,
       hasCaseSettings:
         isSyncAlertsEnabled ||
         (observablesAuthorized && extractObservables) ||
@@ -70,6 +85,7 @@ export const useCasesFeatures = (caseOwner?: string): UseCasesFeatures => {
     hasLicenseGreaterThanPlatinum,
     assign,
     hasLicenseWithAtLeastGold,
+    restrictedCasesEnabled,
   ]);
 
   return casesFeatures;

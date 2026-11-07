@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
-import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
 
 import { basicCase } from './mock';
-import { TestProviders, mockedTestProvidersOwner } from '../common/mock';
+import { TestProviders } from '../common/mock';
 import { useToasts } from '../common/lib/kibana';
 import { useGetCaseFiles } from './use_get_case_files';
-import { constructFileKindIdByOwner } from '../../common/files';
+import * as api from './api';
 
+jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
 const hookParams = {
@@ -24,40 +24,37 @@ const hookParams = {
   searchTerm: 'foobar',
 };
 
-const expectedCallParams = {
-  kind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
-  page: hookParams.page + 1,
-  name: `*${hookParams.searchTerm}*`,
-  perPage: hookParams.perPage,
-  meta: { caseIds: [hookParams.caseId] },
-};
-
 describe('useGetCaseFiles', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('calls filesClient.list with correct arguments', async () => {
-    const filesClient = createMockFilesClient();
+  it('calls getCaseFiles with correct arguments', async () => {
+    const spy = jest.spyOn(api, 'getCaseFiles').mockResolvedValue({ files: [], total: 0 });
 
     renderHook(() => useGetCaseFiles(hookParams), {
-      wrapper: (props) => <TestProviders {...props} filesClient={filesClient} />,
+      wrapper: (props) => <TestProviders {...props} />,
     });
 
-    await waitFor(() => expect(filesClient.list).toHaveBeenCalledWith(expectedCallParams));
+    await waitFor(() =>
+      expect(spy).toHaveBeenCalledWith({
+        caseId: hookParams.caseId,
+        page: hookParams.page + 1,
+        perPage: hookParams.perPage,
+        searchTerm: hookParams.searchTerm,
+        signal: expect.any(AbortSignal),
+      })
+    );
   });
 
-  it('shows an error toast when filesClient.list throws', async () => {
-    const filesClient = createMockFilesClient();
+  it('shows an error toast when getCaseFiles throws', async () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
-    filesClient.list = jest.fn().mockImplementation(() => {
-      throw new Error('Something went wrong');
-    });
+    jest.spyOn(api, 'getCaseFiles').mockRejectedValue(new Error('Something went wrong'));
 
     renderHook(() => useGetCaseFiles(hookParams), {
-      wrapper: (props) => <TestProviders {...props} filesClient={filesClient} />,
+      wrapper: (props) => <TestProviders {...props} />,
     });
 
     await waitFor(() => {

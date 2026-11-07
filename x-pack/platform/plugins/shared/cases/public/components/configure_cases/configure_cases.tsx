@@ -12,31 +12,48 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHorizontalRule,
   EuiLink,
   EuiPageBody,
   EuiPanel,
   EuiSpacer,
   EuiSwitch,
+  EuiText,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 
-import { useKibana } from '../../common/lib/kibana';
+import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import { useCasesConfig, useKibana } from '../../common/lib/kibana';
 import { CasesPageBody } from '../app/cases_page_body';
+import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
+import { CaseStatusesSection } from './statuses';
+import * as statusesI18n from './statuses/translations';
 import { Connectors } from './connectors';
+import { SyncSettings } from '../edit_connector/sync_settings';
+import { FieldSyncTable } from './field_sync_table';
+import { ExternalFieldMappingTable } from './external_field_mapping_table';
+import { EXTERNAL_SYNC_FREE_FORM_CONNECTOR_TYPES } from '../../../common/utils/external_sync_fields';
 import * as configureCasesI18n from './translations';
 import { useConfigureCasesController } from './use_configure_cases_controller';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesBreadcrumbs } from '../use_breadcrumbs';
 import { CasesDeepLinkId } from '../../common/navigation';
+import { ConnectorTypes } from '../../../common/types/domain';
 import { ObservableTypes } from '../observable_types';
 import { AutomaticClosureSwitch } from './automatic_closure_switch';
+import { KnowledgeSection, KNOWLEDGE_DESCRIPTION, KNOWLEDGE_TITLE } from './knowledge_section';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { SettingsSection } from './settings_section';
 import { ConfigureCasesAppHeader } from './configure_cases_app_header';
 import { OldCustomFieldsAndTemplatesSection } from './old_custom_fields_and_templates_section';
 import { WorkflowTags } from './workflow_tags';
 import { useAreWorkflowsAvailableForCases } from '../workflows/use_run_case_workflow';
 import * as observableTypesI18n from '../observable_types/translations';
+import { TaskListsSection } from '../task_lists/task_lists_section';
+import * as taskListsI18n from '../task_lists/translations';
 
 const contentWrapperCss = css`
   box-sizing: content-box;
@@ -57,8 +74,9 @@ type LegacyFlyoutType = 'customField' | 'template';
 export const ConfigureCases: React.FC = React.memo(() => {
   useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure);
   const { euiTheme } = useEuiTheme();
-  const { permissions } = useCasesContext();
-  const { docLinks } = useKibana().services;
+  const { permissions, owner } = useCasesContext();
+  const { docLinks, uiSettings } = useKibana().services;
+  const { customStatusesEnabled, knowledgeEnabled } = useCasesConfig();
 
   const workflowsAvailableForCases = useAreWorkflowsAvailableForCases();
 
@@ -67,6 +85,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
     hasMinimumLicensePermissionsForObservables,
     isObservablesFeatureEnabled,
     isExtractObservablesEnabled,
+    tasksAuthorized,
+    isExternalSyncEnabled,
     configurationId,
     configurationVersion,
     closureType,
@@ -76,6 +96,9 @@ export const ConfigureCases: React.FC = React.memo(() => {
     templates,
     observableTypes,
     extractObservables,
+    externalSync,
+    externalSyncFields,
+    externalSyncFieldMappings,
     workflowTags,
     isPersistingConfiguration,
     isLoadingCaseConfiguration,
@@ -96,17 +119,48 @@ export const ConfigureCases: React.FC = React.memo(() => {
     onChangeConnector,
     onChangeClosureType,
     onChangeExtractObservables,
+    onChangeKnowledgePublishOutcomes,
+    publishOutcomes,
+    onChangeExternalSync,
+    onChangeExternalSyncFields,
+    onChangeExternalSyncFieldMappings,
     onChangeWorkflowTags,
     ConnectorAddFlyout,
     ConnectorEditFlyout,
     onEditObservableType,
     onDeleteObservableType,
     AddOrEditObservableTypeFlyout,
+    statuses,
+    onAddStatus,
+    onEditStatus,
+    onMoveStatus,
+    onSetDefaultStatus,
+    onToggleStatusDisabled,
+    AddOrEditStatusFlyout,
+    pauseReasons,
+    onAddOnHoldStatus,
+    onAddPauseReason,
+    onEditPauseReason,
+    onMovePauseReason,
+    onRemovePauseReason,
+    AddOrEditPauseReasonFlyout,
   } = useConfigureCasesController<LegacyFlyoutType>();
+
+  const showStatusesSection = customStatusesEnabled && permissions.settings;
 
   const showObservableTypesSection =
     hasMinimumLicensePermissionsForObservables && isObservablesFeatureEnabled;
   const showExtractObservablesSection = showObservableTypesSection && isExtractObservablesEnabled;
+  const showTaskListsSection = tasksAuthorized && permissions.settings;
+  // Security only: AlertZero cases are the outcomes agents learn from today.
+  const showKnowledgeSection = knowledgeEnabled && owner[0] === SECURITY_SOLUTION_OWNER;
+  const contextEngineEnabled = uiSettings.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID, false);
+  const syncControlsDisabled =
+    isPersistingConfiguration ||
+    isLoadingCaseConfiguration ||
+    isFetchingCaseConfiguration ||
+    isConfigurationFetchError ||
+    !permissions.settings;
 
   return (
     <>
@@ -156,6 +210,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
                       }
                       handleShowEditFlyout={onClickUpdateConnector}
                       hideTitle
+                      hideMappings={isExternalSyncEnabled}
                       isLoading={isLoadingAny}
                       mappings={mappings}
                       onChangeConnector={onChangeConnector}
@@ -163,6 +218,64 @@ export const ConfigureCases: React.FC = React.memo(() => {
                       updateConnectorDisabled={updateConnectorDisabled || !permissions.settings}
                       onAddNewConnector={onAddNewConnector}
                     />
+                    {isExternalSyncEnabled && (
+                      <div data-test-subj="cases-external-sync-section">
+                        <EuiSpacer size="l" />
+                        {connector.type !== ConnectorTypes.none ? (
+                          <>
+                            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                              <EuiFlexItem grow={false}>
+                                <EuiTitle size="xs">
+                                  <h3>{configureCasesI18n.EXTERNAL_SYNC_TITLE(connector.name)}</h3>
+                                </EuiTitle>
+                              </EuiFlexItem>
+                              <EuiFlexItem grow={false}>
+                                <ExperimentalBadge data-test-subj="external-sync-tech-preview-badge" />
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
+                            <EuiSpacer size="xs" />
+                            <EuiText size="s" color="subdued">
+                              <p>{configureCasesI18n.EXTERNAL_SYNC_DESC(connector.name)}</p>
+                            </EuiText>
+                            <EuiSpacer size="m" />
+                            <SyncSettings
+                              value={externalSync}
+                              disabled={syncControlsDisabled}
+                              onChange={onChangeExternalSync}
+                            />
+                            <EuiSpacer size="l" />
+                            <FieldSyncTable
+                              connector={connector}
+                              mappings={mappings}
+                              rules={externalSyncFields}
+                              disabled={syncControlsDisabled}
+                              onChange={onChangeExternalSyncFields}
+                            />
+                            {EXTERNAL_SYNC_FREE_FORM_CONNECTOR_TYPES.has(connector.type) && (
+                              <>
+                                <EuiSpacer size="l" />
+                                <ExternalFieldMappingTable
+                                  connector={connector}
+                                  owner={owner[0]}
+                                  mappings={mappings}
+                                  value={externalSyncFieldMappings}
+                                  disabled={syncControlsDisabled}
+                                  onChange={onChangeExternalSyncFieldMappings}
+                                />
+                              </>
+                            )}
+                          </>
+                        ) : (
+                          <EuiText
+                            size="s"
+                            color="subdued"
+                            data-test-subj="external-sync-no-connector"
+                          >
+                            {configureCasesI18n.EXTERNAL_SYNC_NO_CONNECTOR}
+                          </EuiText>
+                        )}
+                      </div>
+                    )}
                   </SettingsSection>
                 )}
 
@@ -180,6 +293,62 @@ export const ConfigureCases: React.FC = React.memo(() => {
                         isPersistingConfiguration || isLoadingConnectors || !permissions.settings
                       }
                       onChangeClosureType={onChangeClosureType}
+                    />
+                  </SettingsSection>
+                )}
+
+                {showKnowledgeSection && (
+                  <>
+                    <EuiHorizontalRule margin="l" />
+                    <SettingsSection
+                      data-test-subj="cases-knowledge-section"
+                      title={KNOWLEDGE_TITLE}
+                      description={KNOWLEDGE_DESCRIPTION}
+                    >
+                      <KnowledgeSection
+                        publishOutcomes={publishOutcomes}
+                        onChange={onChangeKnowledgePublishOutcomes}
+                        contextEngineEnabled={contextEngineEnabled}
+                        disabled={
+                          isPersistingConfiguration ||
+                          isLoadingCaseConfiguration ||
+                          isFetchingCaseConfiguration ||
+                          isConfigurationFetchError ||
+                          !permissions.settings
+                        }
+                      />
+                    </SettingsSection>
+                  </>
+                )}
+
+                {showStatusesSection && <EuiHorizontalRule margin="l" />}
+
+                {showStatusesSection && (
+                  <SettingsSection
+                    data-test-subj="cases-statuses-section"
+                    title={
+                      <>
+                        {statusesI18n.TITLE}
+                        <ExperimentalBadge data-test-subj="cases-statuses-experimental-badge" />
+                      </>
+                    }
+                    description={statusesI18n.DESCRIPTION}
+                  >
+                    <CaseStatusesSection
+                      statuses={statuses}
+                      disabled={isLoadingCaseConfiguration || isConfigurationFetchError}
+                      isLoading={isLoadingCaseConfiguration}
+                      onAddStatus={onAddStatus}
+                      onEditStatus={onEditStatus}
+                      onMoveStatus={onMoveStatus}
+                      onSetDefaultStatus={onSetDefaultStatus}
+                      onToggleStatusDisabled={onToggleStatusDisabled}
+                      pauseReasons={pauseReasons}
+                      onAddOnHoldStatus={onAddOnHoldStatus}
+                      onAddPauseReason={onAddPauseReason}
+                      onEditPauseReason={onEditPauseReason}
+                      onMovePauseReason={onMovePauseReason}
+                      onRemovePauseReason={onRemovePauseReason}
                     />
                   </SettingsSection>
                 )}
@@ -255,6 +424,19 @@ export const ConfigureCases: React.FC = React.memo(() => {
                   </SettingsSection>
                 )}
 
+                {showTaskListsSection && (
+                  <>
+                    <EuiHorizontalRule margin="l" />
+                    <SettingsSection
+                      data-test-subj="cases-redesign-task-lists-section"
+                      title={taskListsI18n.TITLE}
+                      description={taskListsI18n.DESCRIPTION}
+                    >
+                      <TaskListsSection />
+                    </SettingsSection>
+                  </>
+                )}
+
                 {/* Rendered for both templates-flag states: with templates v2 ON it is the
                     read-mostly "legacy" section behind a local-storage switch; with templates
                     v2 OFF it is the only custom-fields / templates management UI (the v2
@@ -284,6 +466,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
             {ConnectorAddFlyout}
             {ConnectorEditFlyout}
             {AddOrEditObservableTypeFlyout}
+            {AddOrEditStatusFlyout}
+            {AddOrEditPauseReasonFlyout}
           </div>
         </EuiPageBody>
       </CasesPageBody>

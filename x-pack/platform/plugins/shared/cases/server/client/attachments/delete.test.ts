@@ -6,7 +6,9 @@
  */
 
 import { Operations } from '../../authorization';
-import { mockCaseComments } from '../../mocks';
+import { createCaseEntity } from '../../authorization/utils';
+import { CaseAccessMode } from '../../../common/types/domain';
+import { mockCaseComments, mockCases } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import { deleteComment, deleteAll } from './delete';
 import { toAttachmentForDeletion } from './test_utils/deletion';
@@ -29,6 +31,8 @@ describe('delete', () => {
     clientArgs.services.attachmentService.bulkDelete.mockImplementation(
       async ({ savedObjectIds }) => savedObjectIds
     );
+    // the parent case is read and authorized so restricted cases stay hidden from non-assignees
+    clientArgs.services.caseService.getCase.mockResolvedValue(mockCases[0]);
   });
 
   describe('deleteComment', () => {
@@ -55,6 +59,43 @@ describe('delete', () => {
 
       expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
         expect.objectContaining({ operation: Operations.deleteComment })
+      );
+    });
+
+    it('authorizes the parent case so a restricted case stays hidden from non-assignees', async () => {
+      await deleteComment({ caseID: 'mock-id-1', savedObjectId: 'mock-comment-1' }, clientArgs);
+
+      expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
+        entities: [createCaseEntity(mockCases[0])],
+        operation: Operations.deleteComment,
+      });
+    });
+
+    it('deletes nothing when the parent case is not visible to the caller', async () => {
+      // failure scenario: a non-assignee targets an attachment of a restricted case
+      clientArgs.authorization.ensureAuthorized
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(new Error('Saved object [cases/mock-id-1] not found'));
+
+      await expect(
+        deleteComment({ caseID: 'mock-id-1', savedObjectId: 'mock-comment-1' }, clientArgs)
+      ).rejects.toThrow('Saved object [cases/mock-id-1] not found');
+
+      expect(clientArgs.services.attachmentService.bulkDelete).not.toHaveBeenCalled();
+    });
+
+    it('emits a restricted-flagged attachmentsDeleted for a restricted case', async () => {
+      clientArgs.services.caseService.getCase.mockResolvedValue({
+        ...mockCases[0],
+        attributes: { ...mockCases[0].attributes, access: { mode: CaseAccessMode.RESTRICTED } },
+      });
+
+      await deleteComment({ caseID: 'mock-id-1', savedObjectId: 'mock-comment-1' }, clientArgs);
+
+      expect(clientArgs.services.attachmentService.bulkDelete).toHaveBeenCalled();
+      expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledWith(
+        clientArgs.request,
+        expect.objectContaining({ caseId: 'mock-id-1', restricted: true })
       );
     });
 

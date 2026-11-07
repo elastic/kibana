@@ -116,7 +116,7 @@ describe('floor_alert_triage_batch — compute_fp_candidates', () => {
 });
 
 describe('floor_alert_triage_batch — Investigations', () => {
-  const creates = allSteps.filter((step) => step.type === 'ai.conversation.create');
+  const creates = allSteps.filter((step) => step.type === 'investigations.create');
 
   // A conversation exists for a new proposal, a failure, or a batch with alerts in no proposal and
   // no proposal to hold them. Otherwise those alerts go into the Investigation of the first proposal.
@@ -167,9 +167,7 @@ describe('floor_alert_triage_batch — Investigations', () => {
     );
     // Only the batch Investigation without a proposal is closed; a failure Investigation stays open.
     expect(
-      allSteps
-        .filter((step) => step.type === 'ai.conversation.metadata.patch')
-        .map((step) => step.name)
+      allSteps.filter((step) => step.type === 'investigations.patch').map((step) => step.name)
     ).toEqual(['close_batch_investigation']);
   });
 
@@ -1107,7 +1105,7 @@ describe('floor_alert_triage_batch — ai.conversation.metadata.patch failure ha
   // The reviews close theirs and a failure Investigation stays open for follow-up. The batch closes
   // only the Investigation it made for a batch with no proposal, and a failed close must not fail the run.
   it('closes only the Investigation of a batch with no proposal, without failing the run', () => {
-    const closes = allSteps.filter((step) => step.type === 'ai.conversation.metadata.patch');
+    const closes = allSteps.filter((step) => step.type === 'investigations.patch');
     expect(closes.map((step) => step.name)).toEqual(['close_batch_investigation']);
     expect(closes[0]['on-failure']).toEqual({ continue: true });
   });
@@ -1332,7 +1330,7 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
     it('leaves the proposal Investigation open when the review failed', () => {
       expect(
         flatten(stepByName('handle_review_failed')?.steps ?? []).some(
-          (step) => step.type === 'ai.conversation.metadata.patch'
+          (step) => step.type === 'investigations.patch'
         )
       ).toBe(false);
     });

@@ -44,6 +44,18 @@ describe('Cases metrics', () => {
     ).toBeInTheDocument();
   });
 
+  it('renders the paused stat only when a status pauses time tracking', async () => {
+    const { rerender } = renderWithTestingProviders(<CasesMetrics {...props} />);
+
+    expect(screen.queryByTestId('pausedStatsHeader')).not.toBeInTheDocument();
+
+    rerender(<CasesMetrics {...props} countPausedCases={7} />);
+
+    expect(
+      within(await screen.findByTestId('pausedStatsHeader')).getByText('7')
+    ).toBeInTheDocument();
+  });
+
   it('renders a dash when mttr is null', async () => {
     renderWithTestingProviders(<CasesMetrics {...props} mttr={null} />);
 

@@ -16,6 +16,7 @@ import {
   useEuiTheme,
   EuiTextTruncate,
 } from '@elastic/eui';
+import { useCaseBridge, useInvestigationCaseId } from '../case_bridge/case_bridge_context';
 import { type Investigation } from '../../types';
 import { toPlainSummary } from '../../utils/to_plain_summary';
 import type { BaseActionsProps } from '../actions';
@@ -94,6 +95,8 @@ export const ConversationCard = memo<ConversationCardProps>(
     renderInFlightStatus,
   }) => {
     const { euiTheme } = useEuiTheme();
+    const caseBridge = useCaseBridge();
+    const caseId = useInvestigationCaseId(investigation);
 
     return (
       <StyledEuiPanel
@@ -128,10 +131,25 @@ export const ConversationCard = memo<ConversationCardProps>(
               direction="row"
             >
               <EuiFlexItem grow={false}>
-                <ConversationMetaInfo
-                  timestamp={investigation.createdAt}
-                  inFlightStatus={renderInFlightStatus?.(investigation)}
-                />
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <ConversationMetaInfo
+                      timestamp={investigation.createdAt}
+                      inFlightStatus={renderInFlightStatus?.(investigation)}
+                    />
+                  </EuiFlexItem>
+                  {caseBridge && caseId ? (
+                    <EuiFlexItem
+                      grow={false}
+                      data-test-subj="conversationCardCaseBadge"
+                      // The badge links to the case; the card's own click opens the flyout.
+                      onClick={(event: React.MouseEvent) => event.stopPropagation()}
+                      onKeyDown={(event: React.KeyboardEvent) => event.stopPropagation()}
+                    >
+                      {caseBridge.renderCaseBadge({ caseId })}
+                    </EuiFlexItem>
+                  ) : null}
+                </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem
                 grow={false}

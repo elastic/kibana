@@ -35,6 +35,7 @@ import { useCasesColumnsConfiguration } from '../all_cases/hooks/use_cases_colum
 import { useGlobalInlineFields } from '../all_cases/hooks/use_global_inline_fields';
 import { getFieldColumns } from '../all_cases/utils/get_field_columns';
 import { useCasesConfig } from '../../common/lib/kibana';
+import { useCaseStatuses } from '../status/use_case_statuses';
 import * as i18n from './translations';
 
 type SimilarCasesColumns =
@@ -82,6 +83,7 @@ export const useSimilarCasesColumns = ({
   const casesColumnsConfig = useCasesColumnsConfiguration(false);
   const { templatesEnabled } = useCasesConfig();
   const { globalInlineFields } = useGlobalInlineFields({ enabled: templatesEnabled });
+  const { getStatus } = useCaseStatuses();
 
   const columnsDict: Record<string, SimilarCasesColumns> = useMemo(
     () => ({
@@ -251,9 +253,9 @@ export const useSimilarCasesColumns = ({
         field: casesColumnsConfig.status.field,
         name: casesColumnsConfig.status.name,
         sortable: true,
-        render: (status: CaseUI['status']) => {
+        render: (status: CaseUI['status'], theCase: SimilarCaseUI) => {
           if (status != null) {
-            return <Status status={status} />;
+            return <Status status={status} label={getStatus(theCase.statusKey, status).label} />;
           }
           return getEmptyCellValue();
         },
@@ -277,7 +279,7 @@ export const useSimilarCasesColumns = ({
         minWidth: '6em',
       },
     }),
-    [casesColumnsConfig, connectors, userProfiles]
+    [casesColumnsConfig, connectors, userProfiles, getStatus]
   );
 
   const allColumnsDict = useMemo(

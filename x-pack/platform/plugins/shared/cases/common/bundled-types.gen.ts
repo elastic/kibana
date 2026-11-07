@@ -17,6 +17,91 @@
 import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 /**
+  * The access control for the case. A restricted case and everything attached to it is visible only to its assignees. Requires the `xpack.cases.restrictedCases.enabled` setting and a Platinum license.
+
+  */
+export const CaseAccess = lazySchema(() =>
+  z.object({
+    /**
+     * Whether the case is visible to everyone with access to its owner (`default`) or only to its assignees (`restricted`).
+     */
+    mode: z
+      .enum(['default', 'restricted'])
+      .describe(
+        'Whether the case is visible to everyone with access to its owner (`default`) or only to its assignees (`restricted`).'
+      ),
+  })
+);
+export type CaseAccess = z.infer<typeof CaseAccess>;
+
+/**
+ * Where the case came from.
+ */
+export const CaseSource = lazySchema(() =>
+  z.enum(['user', 'alertzero', 'rule', 'workflow', 'agent', 'api'])
+);
+export type CaseSource = z.infer<typeof CaseSource>;
+export type CaseSourceEnum = typeof CaseSource.enum;
+export const CaseSourceEnum = CaseSource.enum;
+
+/**
+ * The analyst's or agent's verdict on the case.
+ */
+export const CaseVerdict = lazySchema(() =>
+  z.enum(['true_positive', 'false_positive', 'benign_positive', 'suspicious', 'undetermined'])
+);
+export type CaseVerdict = z.infer<typeof CaseVerdict>;
+export type CaseVerdictEnum = typeof CaseVerdict.enum;
+export const CaseVerdictEnum = CaseVerdict.enum;
+
+/**
+ * The verdict an agent reached, with its confidence and who set it.
+ */
+export const CaseAiVerdict = lazySchema(() =>
+  z
+    .object({
+      verdict: CaseVerdict,
+      /**
+       * How confident the agent is in the verdict, from 0 to 1.
+       */
+      confidence: z
+        .number()
+        .min(0)
+        .max(1)
+        .nullable()
+        .optional()
+        .describe('How confident the agent is in the verdict, from 0 to 1.'),
+      /**
+       * The agent's summary behind the verdict, when it gave one.
+       */
+      summary: z
+        .string()
+        .nullable()
+        .optional()
+        .describe("The agent's summary behind the verdict, when it gave one."),
+      /**
+       * Who set the verdict.
+       */
+      actor: z
+        .object({
+          type: z.string(),
+          id: z.string().nullable().optional(),
+          name: z.string().nullable().optional(),
+          run_id: z.string().nullable().optional(),
+        })
+        .nullable()
+        .optional()
+        .describe('Who set the verdict.'),
+      /**
+       * When the verdict was last set.
+       */
+      updated_at: isoDateTime().nullable().optional().describe('When the verdict was last set.'),
+    })
+    .nullable()
+);
+export type CaseAiVerdict = z.infer<typeof CaseAiVerdict>;
+
+/**
  * An array containing users that are assigned to the case.
  */
 export const Assignees = lazySchema(() =>
@@ -379,6 +464,18 @@ export type OwnerEnum = typeof Owner.enum;
 export const OwnerEnum = Owner.enum;
 
 /**
+  * Technical preview. Controls automatic synchronization between the case and the external incident created by its connector. On a configuration these are the defaults of the configuration's connector and apply to new cases that use it. When `autoPush` is true, changes to the case are pushed to the external system without a manual push. `conflictStrategy` decides which side wins when a field changed on both sides since the last push: `external` applies the external value, `kibana` keeps the case value.
+
+  */
+export const ExternalSyncSettings = lazySchema(() =>
+  z.object({
+    autoPush: z.boolean(),
+    conflictStrategy: z.enum(['external', 'kibana']),
+  })
+);
+export type ExternalSyncSettings = z.infer<typeof ExternalSyncSettings>;
+
+/**
  * An object that contains the case settings.
  */
 export const Settings = lazySchema(() =>
@@ -396,6 +493,18 @@ export const Settings = lazySchema(() =>
       .optional()
       .describe(
         "When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. For owners that do not support observable extraction (currently Observability), an omitted value resolves to `false` regardless of the space configuration.\n"
+      ),
+    externalSync: ExternalSyncSettings.optional(),
+    /**
+     * Whether Elastic AI Agent replies in the case's room when someone mentions it. Off when omitted.
+     */
+    agent: z
+      .object({
+        enabled: z.boolean().optional(),
+      })
+      .optional()
+      .describe(
+        "Whether Elastic AI Agent replies in the case's room when someone mentions it. Off when omitted."
       ),
   })
 );
@@ -440,6 +549,9 @@ export type CaseExtendedFields = z.infer<typeof CaseExtendedFields>;
  */
 export const CreateCaseRequest = lazySchema(() =>
   z.object({
+    access: CaseAccess.optional(),
+    source: CaseSource.optional(),
+    ai_verdict: CaseAiVerdict.optional(),
     assignees: Assignees.optional(),
     connector: z.union([
       ConnectorPropertiesNone,
@@ -738,8 +850,16 @@ export type CaseStatus = z.infer<typeof CaseStatus>;
 export type CaseStatusEnum = typeof CaseStatus.enum;
 export const CaseStatusEnum = CaseStatus.enum;
 
+/**
+  * The key of the configured status the case is in. Configured statuses are grouped under the built-in statuses, which `status` continues to report. Null for cases last updated before statuses were configured. Technical preview.
+
+  */
+export const CaseStatusKey = lazySchema(() => z.string().nullable());
+export type CaseStatusKey = z.infer<typeof CaseStatusKey>;
+
 export const CaseResponseProperties = lazySchema(() =>
   z.object({
+    access: CaseAccess.optional(),
     assignees: Assignees.optional(),
     /**
      * The case category.
@@ -857,6 +977,92 @@ export const CaseResponseProperties = lazySchema(() =>
     settings: Settings,
     severity: CaseSeverity,
     status: CaseStatus,
+    status_key: CaseStatusKey.optional(),
+    /**
+     * Why the case was closed. Set when the case closes with a reason and cleared when it reopens.
+     */
+    close_reason: z
+      .string()
+      .nullable()
+      .optional()
+      .describe(
+        'Why the case was closed. Set when the case closes with a reason and cleared when it reopens.'
+      ),
+    /**
+     * The analyst's verdict. Set from the close reason when the case closes; editable.
+     */
+    human_verdict: z
+      .enum(['true_positive', 'false_positive', 'benign_positive', 'suspicious', 'undetermined'])
+      .nullable()
+      .optional()
+      .describe("The analyst's verdict. Set from the close reason when the case closes; editable."),
+    ai_verdict: CaseAiVerdict.optional(),
+    source: CaseSource.optional(),
+    /**
+     * The Agent Builder conversation that is the case's room, created the first time someone opens the room.
+     */
+    room_conversation_id: z
+      .string()
+      .nullable()
+      .optional()
+      .describe(
+        "The Agent Builder conversation that is the case's room, created the first time someone opens the room."
+      ),
+    /**
+     * The user profile ID of the person who opened the room and owns its conversation. They can't be removed from the case's assignees while the room exists.
+     */
+    room_owner_uid: z
+      .string()
+      .nullable()
+      .optional()
+      .describe(
+        "The user profile ID of the person who opened the room and owns its conversation. They can't be removed from the case's assignees while the room exists."
+      ),
+    /**
+     * How many proposals on the case are still awaiting a decision.
+     */
+    pending_decisions: z
+      .number()
+      .int()
+      .min(0)
+      .nullable()
+      .optional()
+      .describe('How many proposals on the case are still awaiting a decision.'),
+    /**
+     * Set while the case is in a status that pauses time tracking.
+     */
+    paused_at: isoDateTime()
+      .nullable()
+      .optional()
+      .describe('Set while the case is in a status that pauses time tracking.'),
+    /**
+     * Seconds the case has spent in statuses that pause time tracking, left out of `duration`, `time_to_investigate`, and `time_to_resolve`.
+     */
+    time_paused: z
+      .number()
+      .int()
+      .optional()
+      .describe(
+        'Seconds the case has spent in statuses that pause time tracking, left out of `duration`, `time_to_investigate`, and `time_to_resolve`.'
+      ),
+    /**
+     * The reason picked when the case was paused.
+     */
+    pause_reason: z
+      .string()
+      .nullable()
+      .optional()
+      .describe('The reason picked when the case was paused.'),
+    /**
+     * The status key the case was paused from; moving the case back to it resumes time tracking.
+     */
+    resume_to_status_key: z
+      .string()
+      .nullable()
+      .optional()
+      .describe(
+        'The status key the case was paused from; moving the case back to it resumes time tracking.'
+      ),
     tags: z.array(z.string()),
     title: z.string(),
     totalAlerts: z.number().int(),
@@ -919,6 +1125,7 @@ export const UpdateCaseRequest = lazySchema(() =>
     cases: z
       .array(
         z.object({
+          access: CaseAccess.optional(),
           assignees: Assignees.optional(),
           category: CaseCategory.optional(),
           connector: z
@@ -1013,9 +1220,57 @@ export const UpdateCaseRequest = lazySchema(() =>
           settings: Settings.optional(),
           severity: CaseSeverity.optional(),
           status: CaseStatus.optional(),
+          /**
+      * The key of a configured status to move the case to. The `status` field is derived from the configured status's category and must match it when both are provided. Requires `xpack.cases.customStatuses.enabled`. Technical preview.
+
+      */
+          status_key: z
+            .string()
+            .max(50)
+            .optional()
+            .describe(
+              "The key of a configured status to move the case to. The `status` field is derived from the configured status's category and must match it when both are provided. Requires `xpack.cases.customStatuses.enabled`. Technical preview.\n"
+            ),
+          /**
+      * One of the configured pause reasons. Required when the target status pauses time tracking and the case is not already paused; rejected when the target status does not.
+
+      */
+          pause_reason: z
+            .string()
+            .max(50)
+            .optional()
+            .describe(
+              'One of the configured pause reasons. Required when the target status pauses time tracking and the case is not already paused; rejected when the target status does not.\n'
+            ),
           tags: CaseTags.optional(),
           title: CaseTitle.optional(),
           closeReason: CaseCloseSyncReason.optional(),
+          /**
+           * The analyst's verdict. Set from the close reason when the case closes; editable.
+           */
+          human_verdict: z
+            .enum([
+              'true_positive',
+              'false_positive',
+              'benign_positive',
+              'suspicious',
+              'undetermined',
+            ])
+            .nullable()
+            .optional()
+            .describe(
+              "The analyst's verdict. Set from the close reason when the case closes; editable."
+            ),
+          ai_verdict: CaseAiVerdict.optional(),
+          /**
+           * When closing, whether the investigations linked to the case close with it. Not persisted; defaults to true.
+           */
+          closeLinkedInvestigations: z
+            .boolean()
+            .optional()
+            .describe(
+              'When closing, whether the investigations linked to the case close with it. Not persisted; defaults to true.'
+            ),
           /**
       * The current version of the case. To determine this value, use the get case or search cases (`_find`) APIs.
 
@@ -1097,6 +1352,7 @@ export const RelatedCase = lazySchema(() =>
      */
     description: z.string().describe('The case description.'),
     status: CaseStatus,
+    status_key: CaseStatusKey.optional(),
     /**
      * When the case was created.
      */
@@ -1131,6 +1387,139 @@ export const ConnectorTypes = lazySchema(() =>
 export type ConnectorTypes = z.infer<typeof ConnectorTypes>;
 export type ConnectorTypesEnum = typeof ConnectorTypes.enum;
 export const ConnectorTypesEnum = ConnectorTypes.enum;
+
+/**
+  * Technical preview. How one case field moves between the case and the external incident. `direction` is `both`, `push` (case to external only), `pull` (external to case only), or `off`. `status` supports only `pull` and `off`. Pulling `tags` and `comments` requires a connector that exposes them (Jira); other connectors leave them unchanged. `conflictStrategy` overrides the case's conflict strategy for this field when both sides changed.
+
+  */
+export const ExternalSyncFieldRule = lazySchema(() =>
+  z.object({
+    field: z.enum(['title', 'description', 'status', 'tags', 'comments']),
+    direction: z.enum(['both', 'push', 'pull', 'off']),
+    conflictStrategy: z.enum(['external', 'kibana']).optional(),
+  })
+);
+export type ExternalSyncFieldRule = z.infer<typeof ExternalSyncFieldRule>;
+
+/**
+  * Technical preview. Carries one external field of the configuration's connector onto a global case field. `externalField` is the field key as the external system reports it; `caseField` is the storage key of a global field definition. `direction` and `conflictStrategy` behave as for the built-in field rules. Supported for Jira and ServiceNow connectors, up to 20 mappings per connector.
+
+  */
+export const ExternalSyncFieldMapping = lazySchema(() =>
+  z.object({
+    externalField: z.string(),
+    caseField: z.string(),
+    direction: z.enum(['both', 'push', 'pull', 'off']),
+    conflictStrategy: z.enum(['external', 'kibana']).optional(),
+  })
+);
+export type ExternalSyncFieldMapping = z.infer<typeof ExternalSyncFieldMapping>;
+
+/**
+  * The statuses available for cases. Each entry belongs to one of the built-in statuses, its category, which drives every status-dependent behavior such as alert synchronization and closure. An empty array means only the built-in statuses are available. Requires `xpack.cases.customStatuses.enabled`. Technical preview.
+
+  */
+export const CaseStatusesConfiguration = lazySchema(() =>
+  z
+    .array(
+      z.object({
+        /**
+         * The identifier used as `status_key` on cases. It cannot be changed after creation. The built-in statuses use `open`, `in-progress`, and `closed`.
+         */
+        key: z
+          .string()
+          .max(50)
+          .describe(
+            'The identifier used as `status_key` on cases. It cannot be changed after creation. The built-in statuses use `open`, `in-progress`, and `closed`.'
+          ),
+        /**
+         * The label shown on cases.
+         */
+        label: z.string().max(50).describe('The label shown on cases.'),
+        category: CaseStatus,
+        /**
+         * The display position of the status.
+         */
+        order: z.number().int().describe('The display position of the status.'),
+        /**
+         * Whether updates that only specify `status` move cases in this category to this status. Exactly one status per category must be the default.
+         */
+        isDefault: z
+          .boolean()
+          .describe(
+            'Whether updates that only specify `status` move cases in this category to this status. Exactly one status per category must be the default.'
+          ),
+        /**
+         * Disabled statuses cannot be applied but keep their label on cases that already use them.
+         */
+        disabled: z
+          .boolean()
+          .describe(
+            'Disabled statuses cannot be applied but keep their label on cases that already use them.'
+          ),
+        /**
+      * Time a case spends in this status is left out of its `duration`, `time_to_investigate`, `time_to_resolve`, and the all-cases MTTR. Only allowed on statuses in the `open` and `in-progress` categories, and never on a category's default status. Moving a case to such a status requires `pause_reason`.
+
+      */
+        pausesTimeTracking: z
+          .boolean()
+          .optional()
+          .default(false)
+          .describe(
+            "Time a case spends in this status is left out of its `duration`, `time_to_investigate`, `time_to_resolve`, and the all-cases MTTR. Only allowed on statuses in the `open` and `in-progress` categories, and never on a category's default status. Moving a case to such a status requires `pause_reason`.\n"
+          ),
+      })
+    )
+    .max(30)
+);
+export type CaseStatusesConfiguration = z.infer<typeof CaseStatusesConfiguration>;
+
+/**
+  * The reasons an analyst can pick from when moving a case to a status that pauses time tracking. At least one is required while any enabled status pauses time tracking. Requires `xpack.cases.customStatuses.enabled`. Technical preview.
+
+  */
+export const PauseReasonsConfiguration = lazySchema(() => z.array(z.string().max(50)).max(10));
+export type PauseReasonsConfiguration = z.infer<typeof PauseReasonsConfiguration>;
+
+/**
+ * Whether closing a case asks for a close reason, and which reasons it offers.
+ */
+export const CaseCloseReasonConfiguration = lazySchema(() =>
+  z.object({
+    /**
+     * Whether closing a case asks for a close reason.
+     */
+    show: z.boolean().optional().describe('Whether closing a case asks for a close reason.'),
+    /**
+     * Where the offered reasons come from.
+     */
+    source: z
+      .enum(['alerts', 'cases', 'both'])
+      .optional()
+      .describe('Where the offered reasons come from.'),
+    /**
+     * The close reasons offered for cases.
+     */
+    values: z.array(z.string()).max(50).optional().describe('The close reasons offered for cases.'),
+  })
+);
+export type CaseCloseReasonConfiguration = z.infer<typeof CaseCloseReasonConfiguration>;
+
+/**
+  * Technical preview. Whether closed cases publish their outcome (close reason, verdicts, and the rules, hosts, users, and observables involved) as a knowledge indicator to the `cases-outcomes` AI index of the context engine. Restricted cases are never published, and reopening a case removes its outcome. Missing means publishing is on.
+
+  */
+export const CaseKnowledgeConfiguration = lazySchema(() =>
+  z.object({
+    /**
+     * Whether closed cases publish their outcome to the context engine.
+     */
+    publishOutcomes: z
+      .boolean()
+      .describe('Whether closed cases publish their outcome to the context engine.'),
+  })
+);
+export type CaseKnowledgeConfiguration = z.infer<typeof CaseKnowledgeConfiguration>;
 
 /**
   * The words and phrases that help categorize templates. It can be an empty array.
@@ -1351,7 +1740,30 @@ export const SetCaseConfigurationRequest = lazySchema(() =>
       .describe(
         "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. For owners that do not support observable extraction (currently Observability), setting this to `true` has no effect on case creation; new cases for those owners always use `false`.\n"
       ),
+    externalSync: ExternalSyncSettings.optional(),
+    /**
+     * Technical preview. Per-field sync directions and conflict rules of the configuration's connector.
+     */
+    externalSyncFields: z
+      .array(ExternalSyncFieldRule)
+      .optional()
+      .describe(
+        "Technical preview. Per-field sync directions and conflict rules of the configuration's connector."
+      ),
+    /**
+     * Technical preview. External fields of the configuration's connector carried onto global case fields.
+     */
+    externalSyncFieldMappings: z
+      .array(ExternalSyncFieldMapping)
+      .optional()
+      .describe(
+        "Technical preview. External fields of the configuration's connector carried onto global case fields."
+      ),
     owner: Owner,
+    statuses: CaseStatusesConfiguration.optional(),
+    pauseReasons: PauseReasonsConfiguration.optional(),
+    closeReason: CaseCloseReasonConfiguration.optional(),
+    knowledge: CaseKnowledgeConfiguration.optional(),
     templates: Templates.optional(),
     /**
       * Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
@@ -1473,6 +1885,29 @@ export const UpdateCaseConfigurationRequest = lazySchema(() =>
       .optional()
       .describe(
         'Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.\n'
+      ),
+    statuses: CaseStatusesConfiguration.optional(),
+    pauseReasons: PauseReasonsConfiguration.optional(),
+    closeReason: CaseCloseReasonConfiguration.optional(),
+    knowledge: CaseKnowledgeConfiguration.optional(),
+    externalSync: ExternalSyncSettings.optional(),
+    /**
+     * Technical preview. Per-field sync directions and conflict rules of the configuration's connector.
+     */
+    externalSyncFields: z
+      .array(ExternalSyncFieldRule)
+      .optional()
+      .describe(
+        "Technical preview. Per-field sync directions and conflict rules of the configuration's connector."
+      ),
+    /**
+     * Technical preview. External fields of the configuration's connector carried onto global case fields.
+     */
+    externalSyncFieldMappings: z
+      .array(ExternalSyncFieldMapping)
+      .optional()
+      .describe(
+        "Technical preview. External fields of the configuration's connector carried onto global case fields."
       ),
     templates: Templates.optional(),
     /**
@@ -2127,6 +2562,7 @@ export const CaseResponseGetCase = lazySchema(() =>
     settings: Settings,
     severity: CaseSeverity,
     status: CaseStatus,
+    status_key: CaseStatusKey.optional(),
     tags: z.array(z.string()),
     title: z.string(),
     totalAlerts: z.number().int(),
@@ -2940,9 +3376,57 @@ export type PayloadSeverity = z.infer<typeof PayloadSeverity>;
 export const PayloadStatus = lazySchema(() =>
   z.object({
     status: CaseStatus.optional(),
+    /**
+     * The key of the configured status the case was moved to.
+     */
+    status_key: z
+      .string()
+      .optional()
+      .describe('The key of the configured status the case was moved to.'),
+    /**
+     * The reason picked when the status pauses time tracking.
+     */
+    pause_reason: z
+      .string()
+      .optional()
+      .describe('The reason picked when the status pauses time tracking.'),
   })
 );
 export type PayloadStatus = z.infer<typeof PayloadStatus>;
+
+export const PayloadSync = lazySchema(() =>
+  z.object({
+    /**
+     * Technical preview. The case was reconciled from its external incident.
+     */
+    sync: z
+      .object({
+        connector_name: z.string(),
+        external_id: z.string(),
+        external_title: z.string(),
+        external_url: z.string(),
+        /**
+         * Case fields updated from the external incident.
+         */
+        updated_fields: z
+          .array(z.string())
+          .describe('Case fields updated from the external incident.'),
+        /**
+         * Case fields kept because they changed in Kibana and the conflict strategy is `kibana`.
+         */
+        conflicted_fields: z
+          .array(z.string())
+          .describe(
+            'Case fields kept because they changed in Kibana and the conflict strategy is `kibana`.'
+          ),
+        external_updated_at: z.string().optional(),
+        external_updated_by: z.string().optional(),
+      })
+      .optional()
+      .describe('Technical preview. The case was reconciled from its external incident.'),
+  })
+);
+export type PayloadSync = z.infer<typeof PayloadSync>;
 
 export const PayloadTags = lazySchema(() =>
   z.object({
@@ -3098,6 +3582,7 @@ export const UserActionsFindResponseProperties = lazySchema(() =>
       PayloadSettings,
       PayloadSeverity,
       PayloadStatus,
+      PayloadSync,
       PayloadTags,
       PayloadTitle,
       PayloadUserComment,

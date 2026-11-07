@@ -21,6 +21,7 @@
     "@kbn/licensing-types",
     "@kbn/cloud-plugin",
     "@kbn/kibana-react-plugin",
+    "@kbn/rison",
     "@kbn/alertzero-common",
     "@kbn/agentic-investigations-plugin",
     "@kbn/zod",

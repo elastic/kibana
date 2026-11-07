@@ -8,6 +8,8 @@
 import {
   agentBuilderDefaultAgentId,
   createConversationAlreadyExistsError,
+  createConversationNotFoundError,
+  createInternalError,
   DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
 import type { ConversationWriteSource } from '@kbn/agent-builder-common';
@@ -32,10 +34,16 @@ export const createConversationPublicClient = ({
   client,
   agentRegistry,
   source,
+  getClientAsOwner,
 }: {
   client: ConversationClient;
   agentRegistry: AgentRegistry;
   source: ConversationPublicClientSource;
+  /**
+   * Builds a client acting as a conversation's owner. Only the plugin start contract passes it;
+   * without it `updateAccessControlAsOwner` is unavailable.
+   */
+  getClientAsOwner?: (owner: { id?: string; username: string }) => Promise<ConversationClient>;
 }): ConversationPublicClient => {
   return {
     get: client.get.bind(client),
@@ -95,6 +103,20 @@ export const createConversationPublicClient = ({
     },
     update: async ({ id, title }) => {
       return await client.update({ id, title }, { access: 'owner', retryOnConflict: true, source });
+    },
+    updateAccessControlAsOwner: async (conversationId, accessControl, options) => {
+      if (!getClientAsOwner) {
+        throw createInternalError('updateAccessControlAsOwner is not available on this client');
+      }
+      const owner = await client.getOwnerWithoutAccessCheck(conversationId);
+      if (!owner) {
+        throw createConversationNotFoundError({ conversationId });
+      }
+      const ownerClient = await getClientAsOwner(owner);
+      await ownerClient.updateAccessControl(conversationId, accessControl, {
+        source,
+        ...(options?.actor ? { activity: { actor: options.actor } } : {}),
+      });
     },
   };
 };

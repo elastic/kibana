@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { createElement, useMemo } from 'react';
 import type { EuiCommentProps, EuiThemeComputed } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
@@ -22,6 +22,9 @@ import type { RelatedRemovalOptions } from '../../../client/attachment_framework
 import type { CasesPermissions } from '../../../../common/ui/types';
 import { isUserActionTypeSupported } from '../helpers';
 import { builderMap } from '../builder';
+import { createCommonUpdateUserActionBuilder } from '../common';
+import { OPENED_FROM_ALERTZERO } from '../translations';
+import { getAlertZeroOpening } from './merge_alertzero_opening';
 
 interface UseBuildUserActionsArgs {
   caseUserActions: UserActionUI[];
@@ -44,6 +47,8 @@ interface UseBuildUserActionsArgs {
     successToasterTitle: string,
     options?: RelatedRemovalOptions
   ) => void;
+  /** Render an AlertZero case's opening and its first investigation links as one event. */
+  mergeAlertZeroOpening?: boolean;
 }
 
 export const useBuildUserActions = ({
@@ -63,15 +68,41 @@ export const useBuildUserActions = ({
   euiTheme,
   handleOutlineComment,
   handleDeleteComment,
+  mergeAlertZeroOpening = false,
 }: UseBuildUserActionsArgs): EuiCommentProps[] => {
   return useMemo(() => {
     if (!caseUserActions) {
       return [];
     }
 
+    const opening = mergeAlertZeroOpening
+      ? getAlertZeroOpening(caseUserActions, caseData)
+      : undefined;
+
     return caseUserActions.reduce<EuiCommentProps[]>((userActions, userAction, index) => {
       if (!isUserActionTypeSupported(userAction.type)) {
         return userActions;
+      }
+
+      if (opening?.mergedUserActionIds.has(userAction.id)) {
+        return userActions;
+      }
+
+      if (opening?.createUserActionId === userAction.id) {
+        return [
+          ...userActions,
+          ...createCommonUpdateUserActionBuilder({
+            userAction,
+            userProfiles,
+            handleOutlineComment,
+            label: createElement(
+              'span',
+              { 'data-test-subj': 'case-view-opened-from-alertzero' },
+              OPENED_FROM_ALERTZERO(opening.linkedCount)
+            ),
+            icon: 'dot',
+          }).build(),
+        ];
       }
 
       const builder = builderMap[userAction.type];
@@ -118,5 +149,6 @@ export const useBuildUserActions = ({
     euiTheme,
     handleOutlineComment,
     handleDeleteComment,
+    mergeAlertZeroOpening,
   ]);
 };

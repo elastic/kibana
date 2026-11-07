@@ -19,6 +19,7 @@ import {
 import type { EuiBadgeProps } from '@elastic/eui';
 import type { Investigation } from '../../types';
 import { ConversationHeaderBlocks } from './header_blocks';
+import { useCaseBridge, useInvestigationCaseId } from '../case_bridge/case_bridge_context';
 import { SEVERITY_COLORS, SEVERITY_LABELS } from './severity';
 
 // Unknown severity values render as-is in a hollow badge.
@@ -64,6 +65,8 @@ export const ConversationDetailsFlyoutHeader = ({
   titleNode,
 }: ConversationDetailsFlyoutHeaderProps) => {
   const { title, createdAt, severity } = investigation;
+  const caseBridge = useCaseBridge();
+  const caseId = useInvestigationCaseId(investigation);
 
   return (
     <>
@@ -99,6 +102,11 @@ export const ConversationDetailsFlyoutHeader = ({
               </EuiText>
             </EuiFlexItem>
             {liveStateNode && <EuiFlexItem grow={false}>{liveStateNode}</EuiFlexItem>}
+            {caseBridge && caseId ? (
+              <EuiFlexItem grow={false} data-test-subj="investigationFlyoutCaseBadge">
+                {caseBridge.renderCaseBadge({ caseId })}
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

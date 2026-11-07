@@ -17,6 +17,7 @@ import { toUnifiedAttachment } from '../../services/attachments/operations/utils
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
+import { createCaseEntity } from '../../authorization/utils';
 import type { UpdateArgs } from './types';
 import { validateMaxUserActions } from '../../common/validators';
 import { validateUnifiedAttachments } from './validators';
@@ -26,7 +27,7 @@ const replaceAttachment = async (
   clientArgs: CasesClientArgs
 ): Promise<CaseCommentModel> => {
   const {
-    services: { attachmentService, userActionService },
+    services: { attachmentService, caseService, userActionService },
     logger,
     authorization,
     unifiedAttachmentTypeRegistry,
@@ -49,16 +50,24 @@ const replaceAttachment = async (
       unifiedAttachmentTypeRegistry,
     });
 
-    const myComment = await attachmentService.getter.get({
-      savedObjectId: queryCommentId,
-    });
+    const [myComment, theCase] = await Promise.all([
+      attachmentService.getter.get({
+        savedObjectId: queryCommentId,
+      }),
+      // the parent case is authorized alongside the attachment so a restricted
+      // case the caller may not see yields a not-found outcome
+      caseService.getCase({ id: caseID }),
+    ]);
 
     if (myComment == null) {
       throw Boom.notFound(`This attachment ${queryCommentId} does not exist anymore.`);
     }
 
     await authorization.ensureAuthorized({
-      entities: [{ owner: myComment.attributes.owner, id: myComment.id }],
+      entities: [
+        { owner: myComment.attributes.owner, id: myComment.id },
+        createCaseEntity(theCase),
+      ],
       operation: Operations.updateComment,
     });
 

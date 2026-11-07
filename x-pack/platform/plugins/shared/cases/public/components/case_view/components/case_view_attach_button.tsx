@@ -8,11 +8,16 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import { SECURITY_TIMELINE_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
+import {
+  AGENT_BUILDER_CONVERSATION_ATTACHMENT_TYPE,
+  SECURITY_TIMELINE_ATTACHMENT_TYPE,
+} from '../../../../common/constants/attachments';
 import type { CaseUI } from '../../../../common/ui/types';
 import { UploadFileModal } from '../../attachments/file/upload_file_modal';
 import { getFilesFromComments } from '../../attachments/file/utils';
 import { AttachSavedObjectModalLazy } from '../../attachments/common/saved_object/attach_saved_object_modal_lazy';
+import { AttachConversationModalLazy } from '../../attachments/conversation/attach_conversation_modal_lazy';
+import { useAgentBuilderAvailability } from '../../../agent_builder/use_agent_builder_availability';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useTimelineContext } from '../../timeline_context/use_timeline_context';
 import { useCasesConfig, KibanaServices } from '../../../common/lib/kibana';
@@ -32,17 +37,18 @@ export interface CaseViewAttachButtonProps {
   fill?: boolean;
 }
 
-type ActiveModal = 'file' | 'timeline' | 'savedObject' | null;
+type ActiveModal = 'file' | 'timeline' | 'savedObject' | 'conversation' | null;
 
 const CaseViewAttachButtonComponent: React.FC<CaseViewAttachButtonProps> = ({
   caseData,
   attachLocation,
   fill = false,
 }) => {
-  const { permissions, owner } = useCasesContext();
+  const { permissions, owner, unifiedAttachmentTypeRegistry } = useCasesContext();
   const timelineContext = useTimelineContext();
   const SelectTimelineModal = timelineContext?.components?.SelectTimelineModal;
-  const { attachmentsEnabled } = useCasesConfig();
+  const { attachmentsEnabled, chatEnabled } = useCasesConfig();
+  const { isAgentBuilderAvailable } = useAgentBuilderAvailability();
   const { mutate: createAttachments } = useCreateAttachments();
   const { showSuccessToast } = useCasesToast();
   const refreshCaseViewPage = useRefreshCaseViewPage();
@@ -76,6 +82,18 @@ const CaseViewAttachButtonComponent: React.FC<CaseViewAttachButtonProps> = ({
 
   // Gated by feature flag AND presence of the timeline integration
   const showTimeline = attachmentsEnabled && Boolean(SelectTimelineModal);
+
+  const openConversation = useCallback(() => {
+    trackAttachMenuItemClicked('conversation');
+    closePopover();
+    setActiveModal('conversation');
+  }, [closePopover, trackAttachMenuItemClicked]);
+
+  const showConversation =
+    attachmentsEnabled &&
+    chatEnabled &&
+    isAgentBuilderAvailable &&
+    unifiedAttachmentTypeRegistry.has(AGENT_BUILDER_CONVERSATION_ATTACHMENT_TYPE);
 
   const onSelectTimeline = useCallback(
     ({ savedObjectId, title }: { savedObjectId: string; title: string }) => {
@@ -144,10 +162,27 @@ const CaseViewAttachButtonComponent: React.FC<CaseViewAttachButtonProps> = ({
                 },
               ]
             : []),
+          ...(showConversation
+            ? [
+                {
+                  name: i18n.ATTACH_MENU_CONVERSATION,
+                  onClick: openConversation,
+                  'data-test-subj': 'case-view-attach-menu-conversation',
+                },
+              ]
+            : []),
         ],
       },
     ],
-    [openFile, openTimeline, showTimeline, openSavedObject, attachmentsFlagEnabled]
+    [
+      openFile,
+      openTimeline,
+      showTimeline,
+      openSavedObject,
+      attachmentsFlagEnabled,
+      showConversation,
+      openConversation,
+    ]
   );
 
   if (!permissions.createComment) {
@@ -187,6 +222,9 @@ const CaseViewAttachButtonComponent: React.FC<CaseViewAttachButtonProps> = ({
       )}
       {activeModal === 'savedObject' && (
         <AttachSavedObjectModalLazy caseData={caseData} onClose={closeModal} />
+      )}
+      {activeModal === 'conversation' && (
+        <AttachConversationModalLazy caseData={caseData} onClose={closeModal} />
       )}
     </>
   );

@@ -28,10 +28,14 @@ export const NONE_TEMPLATE_CONNECTOR: CaseConnectorWithoutName = {
   fields: null,
 };
 
-/** Both settings keys, defaulting to `false` — the always-present `settings` block shape. */
+/**
+ * Both boolean keys, defaulting to `false` — the always-present `settings` block shape. `externalSync`
+ * is written only when set, so templates that never touched it keep the sync defaults.
+ */
 export const getExplicitTemplateSettings = (settings?: TemplateSettings): TemplateSettings => ({
   syncAlerts: settings?.syncAlerts ?? false,
   extractObservables: settings?.extractObservables ?? false,
+  ...(settings?.externalSync && { externalSync: settings.externalSync }),
 });
 
 export interface TemplateSettingsAndConnector {
@@ -102,6 +106,7 @@ export const normalizeTemplateSettings = (
   if (settings.syncAlerts !== undefined) normalized.syncAlerts = settings.syncAlerts;
   if (settings.extractObservables !== undefined)
     normalized.extractObservables = settings.extractObservables;
+  if (settings.externalSync !== undefined) normalized.externalSync = settings.externalSync;
   return Object.keys(normalized).length === 0 ? undefined : normalized;
 };
 

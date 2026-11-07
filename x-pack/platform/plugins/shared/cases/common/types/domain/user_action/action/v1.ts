@@ -12,6 +12,7 @@ import { z } from '@kbn/zod/v4';
  * user_actions/_find api. These values should not be removed only new values can be added.
  */
 export const UserActionTypes = {
+  access: 'access',
   assignees: 'assignees',
   comment: 'comment',
   connector: 'connector',
@@ -33,6 +34,14 @@ export const UserActionTypes = {
   template: 'template',
   workflow: 'workflow',
   bulkAttachments: 'bulkAttachments',
+  create_task: 'create_task',
+  update_task: 'update_task',
+  delete_task: 'delete_task',
+  apply_task_template: 'apply_task_template',
+  sync: 'sync',
+  ai_verdict: 'ai_verdict',
+  human_verdict: 'human_verdict',
+  decision: 'decision',
 } as const;
 
 type UserActionActionTypeKeys = keyof typeof UserActionTypes;

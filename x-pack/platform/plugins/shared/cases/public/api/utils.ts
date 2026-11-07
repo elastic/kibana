@@ -148,6 +148,7 @@ export const convertAllCasesToCamel = (snakeCases: CasesSearchResponse): CasesFi
   countOpenCases: snakeCases.count_open_cases,
   countInProgressCases: snakeCases.count_in_progress_cases,
   countClosedCases: snakeCases.count_closed_cases,
+  countPausedCases: snakeCases.count_paused_cases,
   page: snakeCases.page,
   perPage: snakeCases.per_page,
   total: snakeCases.total,

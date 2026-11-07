@@ -165,7 +165,7 @@ steps:
   # without an investigation there is nowhere to propose, so the review fails and the
   # indicator stays pending.
   - name: create_investigation
-    type: ai.conversation.create
+    type: investigations.create
     if: "${{ steps.gap.output.ready == true }}"
     with:
       title: "Detection coverage: {% if steps.gap.output.technique != null and steps.gap.output.technique != '' %}{{ steps.gap.output.technique }} {% endif %}{{ steps.gap.output.description | truncate: 80 }}"
@@ -281,7 +281,7 @@ steps:
                       status: processed
 
               - name: close_investigation_declined
-                type: ai.conversation.metadata.patch
+                type: investigations.patch
                 with:
                   conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
                   updates:
@@ -1015,7 +1015,7 @@ steps:
       - match: approved
         steps:
           - name: close_investigation_resolved
-            type: ai.conversation.metadata.patch
+            type: investigations.patch
             with:
               conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
               updates:
@@ -1037,7 +1037,7 @@ steps:
       - match: dismissed
         steps:
           - name: close_investigation_dismissed
-            type: ai.conversation.metadata.patch
+            type: investigations.patch
             with:
               conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
               updates:
@@ -1077,7 +1077,7 @@ steps:
                   Nothing was proposed. The investigation is closed and the gap will not be checked again.
 
           - name: close_investigation_no_rule
-            type: ai.conversation.metadata.patch
+            type: investigations.patch
             with:
               conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
               updates:
@@ -1117,7 +1117,7 @@ steps:
                   Nothing was proposed. The gap stays pending, and the next sweep tries again.
 
           - name: close_investigation_retry
-            type: ai.conversation.metadata.patch
+            type: investigations.patch
             with:
               conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
               updates:

@@ -93,13 +93,78 @@ describe('bulkCreate', () => {
       expect(clientArgs.casesEventBus.emitCaseCreated).toHaveBeenNthCalledWith(
         1,
         clientArgs.request,
-        { caseId: 'mock-id-1', owner: caseSO.attributes.owner }
+        { caseId: 'mock-id-1', owner: caseSO.attributes.owner, restricted: false }
       );
       expect(clientArgs.casesEventBus.emitCaseCreated).toHaveBeenNthCalledWith(
         2,
         clientArgs.request,
-        { caseId: 'mock-id-2', owner: caseSO.attributes.owner }
+        { caseId: 'mock-id-2', owner: caseSO.attributes.owner, restricted: false }
       );
+    });
+  });
+
+  describe('restricted case access', () => {
+    const actorUid = 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0';
+    let clientArgs: ReturnType<typeof createCasesClientMockArgs>;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, restrictedCases: { enabled: true } };
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSO],
+      });
+    });
+
+    it('persists the access field and auto-assigns the creator', async () => {
+      await bulkCreate(
+        { cases: getCases({ assignees: undefined, access: { mode: 'restricted' } }) },
+        clientArgs,
+        casesClientMock
+      );
+
+      const { cases } = clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0];
+      expect(cases[0].access).toEqual({ mode: 'restricted' });
+      expect(cases[0].assignees).toEqual([{ uid: actorUid }]);
+    });
+
+    it('ignores the access field when the feature is disabled', async () => {
+      clientArgs.config = { ...clientArgs.config, restrictedCases: { enabled: false } };
+
+      await bulkCreate(
+        { cases: getCases({ access: { mode: 'restricted' } }) },
+        clientArgs,
+        casesClientMock
+      );
+
+      const { cases } = clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0];
+      expect(cases[0].access).toBeUndefined();
+    });
+
+    it('throws when creating a restricted case without a platinum license', async () => {
+      clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(false);
+
+      await expect(
+        bulkCreate(
+          { cases: getCases({ assignees: undefined, access: { mode: 'restricted' } }) },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow(
+        'In order to restrict a case, you must be subscribed to an Elastic Platinum license'
+      );
+    });
+
+    it('refuses a restricted case that would end without assignees when the creator has no profile', async () => {
+      clientArgs.user = { ...clientArgs.user, profile_uid: undefined };
+
+      await expect(
+        bulkCreate(
+          { cases: getCases({ assignees: undefined, access: { mode: 'restricted' } }) },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('A restricted case must have at least one assignee');
     });
   });
 
@@ -236,6 +301,7 @@ describe('bulkCreate', () => {
               },
               "severity": "low",
               "status": "open",
+              "status_key": null,
               "tags": Array [
                 "defacement",
               ],
@@ -284,6 +350,7 @@ describe('bulkCreate', () => {
               },
               "severity": "critical",
               "status": "open",
+              "status_key": null,
               "tags": Array [
                 "defacement",
               ],
@@ -368,6 +435,7 @@ describe('bulkCreate', () => {
               },
               "severity": "low",
               "status": "open",
+              "status_key": "open",
               "tags": Array [],
               "title": "My Case",
               "total_observables": 0,
@@ -410,6 +478,7 @@ describe('bulkCreate', () => {
               },
               "severity": "critical",
               "status": "open",
+              "status_key": "open",
               "tags": Array [],
               "title": "My Case",
               "total_observables": 0,

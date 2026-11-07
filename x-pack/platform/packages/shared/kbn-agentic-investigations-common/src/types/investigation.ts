@@ -67,6 +67,8 @@ export interface Investigation {
   recordId?: string;
   /** The underlying Agent Builder conversation id, required for escalation linking. */
   conversationId?: string;
+  /** The case this investigation is linked to, when one was opened for it. */
+  caseId?: string;
   /** Leading proposal CTA label for Brief cards */
   primaryActionLabel?: string;
   events: TimelineEvent[];

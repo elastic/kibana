@@ -34,6 +34,15 @@ const configSchema = schema.object({
   escalations: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
+  /**
+   * Opening a case from an investigation (AlertZero's "Open a case"). When on, it replaces
+   * escalations: the escalations sub-feature, routes, page, and template UI are not registered,
+   * exactly as when \`escalations.enabled\` is false. Existing escalation conversations stay readable
+   * in Agent Builder. Needs the Cases plugin.
+   */
+  cases: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
 });
 
 export type AgenticInvestigationsConfig = TypeOf<typeof configSchema>;
@@ -42,5 +51,6 @@ export const config: PluginConfigDescriptor<AgenticInvestigationsConfig> = {
   schema: configSchema,
   exposeToBrowser: {
     escalations: { enabled: true },
+    cases: { enabled: true },
   },
 };

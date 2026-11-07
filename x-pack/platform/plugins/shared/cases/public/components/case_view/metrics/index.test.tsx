@@ -115,8 +115,8 @@ describe('CaseViewMetrics', () => {
 
   it('should render status metrics with default value of a dash', () => {
     renderCaseMetrics({ metrics: {} });
-    // \u2014 is the unicode for a long dash
-    expect(screen.getAllByText('\u2014')).toHaveLength(3);
+    // \u2014 is the unicode for a long dash; open, in progress, paused, and reopened
+    expect(screen.getAllByText('\u2014')).toHaveLength(4);
   });
 
   it('should not render if no features are returned', () => {
@@ -132,6 +132,7 @@ describe('CaseViewMetrics', () => {
           closeDate: new Date(2).toISOString(),
           statusInfo: {
             inProgressDuration: 20,
+            pausedDuration: 0,
             openDuration: 10,
             reopenDates: [new Date(1).toISOString()],
           },
@@ -151,6 +152,7 @@ describe('CaseViewMetrics', () => {
           closeDate: new Date(2).toISOString(),
           statusInfo: {
             inProgressDuration: 20,
+            pausedDuration: 0,
             openDuration: 10,
             reopenDates: [],
           },

@@ -6,8 +6,14 @@
  */
 
 import { useMemo } from 'react';
+import {
+  AI_VERDICT_COLUMN,
+  INVESTIGATIONS_COLUMN,
+  SOURCE_COLUMN,
+  ALERTS,
+  EVENTS,
+} from '../../../common/translations';
 import * as i18n from '../translations';
-import { ALERTS, EVENTS } from '../../../common/translations';
 import { useCasesFeatures } from '../../../common/use_cases_features';
 import { useCasesConfig } from '../../../common/lib/kibana';
 import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
@@ -28,7 +34,7 @@ export const useCasesColumnsConfiguration = (
   isSelectorView?: boolean
 ): CasesColumnsConfiguration => {
   const { caseAssignmentAuthorized } = useCasesFeatures();
-  const { templatesEnabled } = useCasesConfig();
+  const { templatesEnabled, agenticEnabled } = useCasesConfig();
   const {
     data: { customFields },
   } = useGetCaseConfiguration();
@@ -118,6 +124,28 @@ export const useCasesColumnsConfiguration = (
         canDisplay: canDisplayDefault,
         isCheckedDefault: true,
       },
+      ...(agenticEnabled
+        ? {
+            source: {
+              field: 'source',
+              name: SOURCE_COLUMN,
+              canDisplay: canDisplayDefault && !isSelectorView,
+              isCheckedDefault: true,
+            },
+            aiVerdict: {
+              field: 'aiVerdict',
+              name: AI_VERDICT_COLUMN,
+              canDisplay: canDisplayDefault && !isSelectorView,
+              isCheckedDefault: true,
+            },
+            linkedInvestigations: {
+              field: 'linkedInvestigations',
+              name: INVESTIGATIONS_COLUMN,
+              canDisplay: canDisplayDefault && !isSelectorView,
+              isCheckedDefault: true,
+            },
+          }
+        : {}),
     };
 
     if (templatesEnabled) {
@@ -149,5 +177,6 @@ export const useCasesColumnsConfiguration = (
     customFields,
     globalInlineFields,
     isSelectorView,
+    agenticEnabled,
   ]);
 };

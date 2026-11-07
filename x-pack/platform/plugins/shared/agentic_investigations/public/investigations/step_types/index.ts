@@ -14,4 +14,13 @@ export const registerInvestigationPublicStepDefinitions = (
   workflowsExtensions.registerStepDefinition(() =>
     import('./reopen_investigation_step').then((m) => m.reopenInvestigationPublicStepDefinition)
   );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./write_investigation_steps').then((m) => m.createInvestigationPublicStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./write_investigation_steps').then((m) => m.patchInvestigationPublicStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./write_investigation_steps').then((m) => m.setHypothesesPublicStepDefinition)
+  );
 };

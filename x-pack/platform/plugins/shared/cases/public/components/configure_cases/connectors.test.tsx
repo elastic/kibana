@@ -59,6 +59,29 @@ describe('Connectors', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('hides the mapping block when hideMappings is true', () => {
+    renderWithTestingProviders(
+      <Connectors
+        {...props}
+        selectedConnector={{ id: 'servicenow-1', type: ConnectorTypes.serviceNowITSM }}
+        hideMappings
+      />
+    );
+
+    expect(screen.queryByTestId('field-mapping-text')).not.toBeInTheDocument();
+  });
+
+  it('shows the mapping block by default for a selected connector', () => {
+    renderWithTestingProviders(
+      <Connectors
+        {...props}
+        selectedConnector={{ id: 'servicenow-1', type: ConnectorTypes.serviceNowITSM }}
+      />
+    );
+
+    expect(screen.getByTestId('field-mapping-text')).toBeInTheDocument();
+  });
+
   it('shows the connectors form row', () => {
     renderWithTestingProviders(<Connectors {...props} />);
 

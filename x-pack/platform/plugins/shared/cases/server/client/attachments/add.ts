@@ -18,8 +18,9 @@ import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { toUnifiedAttachment } from '../../services/attachments/operations/utils';
 import type { AttachmentSavedObjectTransformedV2 } from '../../common/types/attachments_v2';
+import { createCaseEntity } from '../../authorization/utils';
 import type { AddArgs } from './types';
-import { validateUnifiedAttachments } from './validators';
+import { resolveUnifiedAttachment, validateUnifiedAttachments } from './validators';
 import { validateMaxUserActions } from '../../common/validators';
 import { extractAndAddObservables } from './extract_observables';
 import { emitAttachmentsAddedEvent } from './trigger_utils';
@@ -37,28 +38,38 @@ const createAttachment = async (
     logger,
     authorization,
     unifiedAttachmentTypeRegistry,
-    services: { userActionService },
+    request,
+    services: { caseService, userActionService },
   } = clientArgs;
 
   try {
-    const query = decodeWithExcessOrThrowZod(UnifiedAttachmentPayloadSchema)(comment);
+    const decoded = decodeWithExcessOrThrowZod(UnifiedAttachmentPayloadSchema)(comment);
 
     await validateMaxUserActions({ caseId, userActionService, userActionsToAdd: 1 });
 
     const savedObjectID = SavedObjectsUtils.generateId();
+    // the parent case is authorized alongside the new attachment so a
+    // restricted case the caller may not see yields a not-found outcome
+    const theCase = await caseService.getCase({ id: caseId });
     await authorization.ensureAuthorized({
       operation: Operations.createComment,
       entities: [
         {
           id: savedObjectID,
-          owner: query.owner,
+          owner: decoded.owner,
         },
+        createCaseEntity(theCase),
       ],
     });
 
     validateUnifiedAttachments({
-      query,
+      query: decoded,
       unifiedAttachmentTypeRegistry,
+    });
+    const query = await resolveUnifiedAttachment({
+      query: decoded,
+      unifiedAttachmentTypeRegistry,
+      request,
     });
 
     const createdDate = new Date().toISOString();
@@ -75,10 +86,15 @@ const createAttachment = async (
     }
 
     const {
-      attributes: { owner, settings },
+      attributes: { owner, settings, access },
     } = model.savedObject;
 
-    emitAttachmentsAddedEvent(clientArgs, { id: caseId, owner }, [savedObjectID], query.type);
+    emitAttachmentsAddedEvent(
+      clientArgs,
+      { id: caseId, owner, access },
+      [savedObjectID],
+      query.type
+    );
     // This call never throws — failures are logged and do not abort the attachment creation.
     const caseWithObservables = await extractAndAddObservables(
       caseId,

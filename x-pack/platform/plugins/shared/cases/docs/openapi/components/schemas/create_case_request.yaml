@@ -10,6 +10,12 @@ required:
   - tags
   - title
 properties:
+  access:
+    $ref: 'case_access.yaml'
+  source:
+    $ref: 'case_source.yaml'
+  ai_verdict:
+    $ref: 'case_ai_verdict.yaml'
   assignees:
     $ref: 'assignees.yaml'
   connector:

@@ -20,7 +20,13 @@ import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { create } from './create';
-import { CaseSeverity, ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
+import {
+  CaseAccessMode,
+  CaseSeverity,
+  CaseStatuses,
+  ConnectorTypes,
+  CustomFieldTypes,
+} from '../../../common/types/domain';
 
 import type { CaseCustomFields } from '../../../common/types/domain';
 import { omit } from 'lodash';
@@ -57,7 +63,143 @@ describe('create', () => {
       expect(clientArgs.casesEventBus.emitCaseCreated).toHaveBeenCalledWith(clientArgs.request, {
         caseId: caseSO.id,
         owner: caseSO.attributes.owner,
+        restricted: false,
       });
+    });
+
+    it('emits a restricted-flagged caseCreated event for a restricted case', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, restrictedCases: { enabled: true } };
+
+      clientArgs.services.caseService.createCase.mockResolvedValue({
+        ...caseSO,
+        attributes: { ...caseSO.attributes, access: { mode: CaseAccessMode.RESTRICTED } },
+      });
+
+      await create(
+        { ...theCase, access: { mode: CaseAccessMode.RESTRICTED } },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.casesEventBus.emitCaseCreated).toHaveBeenCalledWith(clientArgs.request, {
+        caseId: caseSO.id,
+        owner: caseSO.attributes.owner,
+        restricted: true,
+      });
+    });
+  });
+
+  describe('restricted case access', () => {
+    const actorUid = 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0';
+    let clientArgs: ReturnType<typeof createCasesClientMockArgs>;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, restrictedCases: { enabled: true } };
+      clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+    });
+
+    it('persists the access field and auto-assigns the creator', async () => {
+      await create(
+        {
+          ...theCase,
+          assignees: [{ uid: 'someone-else' }],
+          access: { mode: CaseAccessMode.RESTRICTED },
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      const attributes = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
+      expect(attributes.access).toEqual({ mode: CaseAccessMode.RESTRICTED });
+      expect(attributes.assignees).toEqual([{ uid: 'someone-else' }, { uid: actorUid }]);
+    });
+
+    it('throws when creating a restricted case without a platinum license', async () => {
+      clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(false);
+
+      await expect(
+        create(
+          // no assignees so the access license gate is the one that fires
+          { ...omit(theCase, 'assignees'), access: { mode: CaseAccessMode.RESTRICTED } },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow(
+        'In order to restrict a case, you must be subscribed to an Elastic Platinum license'
+      );
+    });
+
+    it('ignores the access field when the feature is disabled', async () => {
+      clientArgs.config = { ...clientArgs.config, restrictedCases: { enabled: false } };
+
+      await create(
+        { ...theCase, access: { mode: CaseAccessMode.RESTRICTED } },
+        clientArgs,
+        casesClientMock
+      );
+
+      const attributes = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
+      expect(attributes.access).toBeUndefined();
+    });
+
+    it('does not auto-assign the creator for a default access case', async () => {
+      await create(
+        { ...theCase, assignees: [], access: { mode: CaseAccessMode.DEFAULT } },
+        clientArgs,
+        casesClientMock
+      );
+
+      const attributes = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
+      expect(attributes.access).toEqual({ mode: CaseAccessMode.DEFAULT });
+      expect(attributes.assignees).toEqual([]);
+    });
+
+    it('refuses a restricted case that would end without assignees when the creator has no profile', async () => {
+      clientArgs.user = { ...clientArgs.user, profile_uid: undefined };
+
+      await expect(
+        create(
+          { ...theCase, assignees: [], access: { mode: CaseAccessMode.RESTRICTED } },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('A restricted case must have at least one assignee');
+    });
+  });
+
+  describe('Status key', () => {
+    const clientArgs = createCasesClientMockArgs();
+    clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('lands new cases on the default open status when custom statuses are enabled', async () => {
+      clientArgs.config = { ...clientArgs.config, customStatuses: { enabled: true } };
+
+      await create(theCase, clientArgs, casesClientMock);
+
+      expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attributes: expect.objectContaining({ status: CaseStatuses.open, status_key: 'open' }),
+        })
+      );
+    });
+
+    it('does not write a status key when custom statuses are disabled', async () => {
+      clientArgs.config = { ...clientArgs.config, customStatuses: { enabled: false } };
+
+      await create(theCase, clientArgs, casesClientMock);
+
+      expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attributes: expect.not.objectContaining({ status_key: expect.anything() }),
+        })
+      );
     });
   });
 
@@ -2592,6 +2734,78 @@ describe('create', () => {
         ).rejects.toThrow('Excess keys are not allowed');
         expect(clientArgs.services.caseService.createCase).not.toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('externalSync defaulting from the connector sync settings', () => {
+    const externalSyncCasesClient = createCasesClientMock();
+    externalSyncCasesClient.configure.get = jest
+      .fn()
+      .mockResolvedValue([{ owner: theCase.owner, customFields: [] }]);
+    const externalSync = { autoPush: true, conflictStrategy: 'kibana' as const };
+    const jiraCase = {
+      ...theCase,
+      connector: { id: 'jira-1', name: 'Jira', type: ConnectorTypes.jira, fields: null },
+    };
+
+    const createClientArgsWithConnectorSync = (attributes?: Record<string, unknown>) => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+      clientArgs.services.connectorMappingsService.find.mockResolvedValue({
+        saved_objects: attributes != null ? [{ id: 'mapping-1', attributes }] : [],
+        total: attributes != null ? 1 : 0,
+        page: 1,
+        per_page: 1,
+      } as never);
+      return clientArgs;
+    };
+
+    it('inherits externalSync from the case connector when omitted', async () => {
+      const clientArgs = createClientArgsWithConnectorSync({ externalSync });
+
+      await create(jiraCase, clientArgs, externalSyncCasesClient);
+
+      expect(clientArgs.services.connectorMappingsService.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          options: expect.objectContaining({ hasReference: { type: 'action', id: 'jira-1' } }),
+        })
+      );
+      const createCaseCall = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
+      expect(createCaseCall.settings.externalSync).toEqual(externalSync);
+    });
+
+    it('uses explicit externalSync over the connector defaults', async () => {
+      const clientArgs = createClientArgsWithConnectorSync({ externalSync });
+      const explicit = { autoPush: false, conflictStrategy: 'external' as const };
+
+      await create(
+        { ...jiraCase, settings: { ...jiraCase.settings, externalSync: explicit } },
+        clientArgs,
+        externalSyncCasesClient
+      );
+
+      expect(clientArgs.services.connectorMappingsService.find).not.toHaveBeenCalled();
+      const createCaseCall = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
+      expect(createCaseCall.settings.externalSync).toEqual(explicit);
+    });
+
+    it('leaves externalSync unset when the connector has no sync settings', async () => {
+      const clientArgs = createClientArgsWithConnectorSync();
+
+      await create(jiraCase, clientArgs, externalSyncCasesClient);
+
+      const createCaseCall = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
+      expect(createCaseCall.settings.externalSync).toBeUndefined();
+    });
+
+    it('does not look up sync settings for a case without a connector', async () => {
+      const clientArgs = createClientArgsWithConnectorSync({ externalSync });
+
+      await create(theCase, clientArgs, externalSyncCasesClient);
+
+      expect(clientArgs.services.connectorMappingsService.find).not.toHaveBeenCalled();
+      const createCaseCall = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
+      expect(createCaseCall.settings.externalSync).toBeUndefined();
     });
   });
 });

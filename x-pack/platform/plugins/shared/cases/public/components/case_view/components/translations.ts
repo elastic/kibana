@@ -30,6 +30,13 @@ export const ATTACH_MENU_SAVED_OBJECT = i18n.translate(
   }
 );
 
+export const ATTACH_MENU_CONVERSATION = i18n.translate(
+  'xpack.cases.caseView.attach.menu.conversation',
+  {
+    defaultMessage: 'Conversation',
+  }
+);
+
 export const ATTACH_TIMELINE_SUCCESS_TITLE = (objectTitle: string): string =>
   i18n.translate('xpack.cases.caseView.attach.timeline.successAddedToCase', {
     defaultMessage: 'Added timeline {objectTitle} to case',

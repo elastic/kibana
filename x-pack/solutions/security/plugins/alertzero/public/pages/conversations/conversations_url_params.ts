@@ -7,6 +7,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { GROUP_BY_PARAM, parseGroupBy, type QueueGroupBy } from './queue/group_by';
 
 export const SELECTED_CONVERSATION_ID_PARAM = 'selectedConversationId';
 export const SELECTED_PROPOSAL_ID_PARAM = 'selectedProposalId';
@@ -19,6 +20,9 @@ export interface ConversationsUrlParams {
   selectConversation: (id: string, proposalId?: string) => void;
   /** Closes the flyout, leaving a history entry so Back reopens it. */
   clearSelectedConversation: () => void;
+  /** How the queue groups its cards; the default (`type`) is left out of the URL. */
+  groupBy: QueueGroupBy;
+  setGroupBy: (groupBy: QueueGroupBy) => void;
 }
 
 /**
@@ -78,10 +82,29 @@ export const useConversationsUrlParams = (): ConversationsUrlParams => {
     [navigate]
   );
 
+  const groupBy = useMemo(
+    () => parseGroupBy(new URLSearchParams(search).get(GROUP_BY_PARAM)),
+    [search]
+  );
+
+  const setGroupBy = useCallback(
+    (next: QueueGroupBy) =>
+      navigate((params) => {
+        if (next === 'type') {
+          params.delete(GROUP_BY_PARAM);
+        } else {
+          params.set(GROUP_BY_PARAM, next);
+        }
+      }),
+    [navigate]
+  );
+
   return {
     selectedConversationId,
     selectedProposalId,
     selectConversation,
     clearSelectedConversation,
+    groupBy,
+    setGroupBy,
   };
 };

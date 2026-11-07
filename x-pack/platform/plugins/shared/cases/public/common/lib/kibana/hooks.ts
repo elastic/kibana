@@ -51,12 +51,23 @@ export const useCasesConfig = () => {
       chatEnabled: config?.chat?.enabled ?? false,
       templatesEnabled: config?.templates?.enabled ?? false,
       runWorkflowsEnabled: config?.runWorkflows?.enabled ?? false,
+      customStatusesEnabled: config?.customStatuses?.enabled ?? false,
+      restrictedCasesEnabled: config?.restrictedCases?.enabled ?? false,
+      bidirectionalSyncEnabled: config?.bidirectionalSync?.enabled ?? false,
+      agenticEnabled: config?.agentic?.enabled ?? false,
+      knowledgeEnabled:
+        (config?.agentic?.enabled ?? false) && (config?.knowledge?.enabled ?? false),
     }),
     [
       config?.attachments?.enabled,
       config?.chat?.enabled,
       config?.templates?.enabled,
       config?.runWorkflows?.enabled,
+      config?.customStatuses?.enabled,
+      config?.restrictedCases?.enabled,
+      config?.bidirectionalSync?.enabled,
+      config?.agentic?.enabled,
+      config?.knowledge?.enabled,
     ]
   );
 };

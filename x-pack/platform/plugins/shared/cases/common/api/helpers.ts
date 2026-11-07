@@ -9,6 +9,7 @@ import {
   CASE_DETAILS_URL,
   INTERNAL_CASE_METRICS_DETAILS_URL,
   CASE_PUSH_URL,
+  CASE_SYNC_URL,
   CASE_CONFIGURE_DETAILS_URL,
   CASE_ALERTS_URL,
   CASE_ATTACHMENT_DETAILS_URL,
@@ -19,6 +20,7 @@ import {
   INTERNAL_CONNECTORS_URL,
   INTERNAL_CASE_USERS_URL,
   INTERNAL_DELETE_FILE_ATTACHMENTS_URL,
+  INTERNAL_CASE_FILES_URL,
   CASE_FIND_ATTACHMENTS_URL,
   INTERNAL_PUT_CUSTOM_FIELDS_URL,
   INTERNAL_CASE_OBSERVABLES_URL,
@@ -27,6 +29,14 @@ import {
   INTERNAL_CASE_OBSERVABLES_DELETE_URL,
   INTERNAL_CASE_OBSERVABLES_BULK_DELETE_URL,
   INTERNAL_CASE_WORKFLOW_RUN_URL,
+  CASE_TASKS_URL,
+  CASE_TASK_DETAILS_URL,
+  CASE_TASK_RUN_WORKFLOW_URL,
+  CASE_TASK_REFRESH_WORKFLOW_URL,
+  CASE_TASKS_APPLY_TEMPLATE_URL,
+  CASE_TASK_TEMPLATE_DETAILS_URL,
+  CASE_TASK_COMMENTS_URL,
+  CASE_TASK_COMMENT_DETAILS_URL,
 } from '../constants';
 
 export const getCaseDetailsUrl = (id: string): string => {
@@ -61,6 +71,10 @@ export const getCasePushUrl = (caseId: string, connectorId: string): string => {
   return CASE_PUSH_URL.replace('{case_id}', caseId).replace('{connector_id}', connectorId);
 };
 
+export const getCaseSyncUrl = (caseId: string): string => {
+  return CASE_SYNC_URL.replace('{case_id}', caseId);
+};
+
 export const getCaseConfigurationDetailsUrl = (configureID: string): string => {
   return CASE_CONFIGURE_DETAILS_URL.replace('{configuration_id}', configureID);
 };
@@ -83,6 +97,10 @@ export const getCaseUsersUrl = (id: string): string => {
 
 export const getCasesDeleteFileAttachmentsUrl = (id: string): string => {
   return INTERNAL_DELETE_FILE_ATTACHMENTS_URL.replace('{case_id}', id);
+};
+
+export const getCaseFilesUrl = (id: string): string => {
+  return INTERNAL_CASE_FILES_URL.replace('{case_id}', id);
 };
 
 export const getCustomFieldReplaceUrl = (caseId: string, customFieldId: string): string => {
@@ -120,4 +138,40 @@ export const getCaseSimilarCasesUrl = (caseId: string) => {
 
 export const getRunCaseWorkflowUrl = (workflowId: string): string => {
   return INTERNAL_CASE_WORKFLOW_RUN_URL.replace('{workflow_id}', workflowId);
+};
+
+export const getCaseTasksUrl = (caseId: string): string => {
+  return CASE_TASKS_URL.replace('{case_id}', caseId);
+};
+
+export const getCaseTaskDetailsUrl = (caseId: string, taskId: string): string => {
+  return CASE_TASK_DETAILS_URL.replace('{case_id}', caseId).replace('{task_id}', taskId);
+};
+
+export const getCaseTaskRunWorkflowUrl = (caseId: string, taskId: string): string =>
+  CASE_TASK_RUN_WORKFLOW_URL.replace('{case_id}', caseId).replace('{task_id}', taskId);
+
+export const getCaseTaskRefreshWorkflowUrl = (caseId: string, taskId: string): string =>
+  CASE_TASK_REFRESH_WORKFLOW_URL.replace('{case_id}', caseId).replace('{task_id}', taskId);
+
+export const getCaseTasksApplyTemplateUrl = (caseId: string): string => {
+  return CASE_TASKS_APPLY_TEMPLATE_URL.replace('{case_id}', caseId);
+};
+
+export const getTaskTemplateDetailsUrl = (templateId: string): string => {
+  return CASE_TASK_TEMPLATE_DETAILS_URL.replace('{template_id}', templateId);
+};
+
+export const getTaskCommentsUrl = (caseId: string, taskId: string): string => {
+  return CASE_TASK_COMMENTS_URL.replace('{case_id}', caseId).replace('{task_id}', taskId);
+};
+
+export const getTaskCommentDetailsUrl = (
+  caseId: string,
+  taskId: string,
+  commentId: string
+): string => {
+  return CASE_TASK_COMMENT_DETAILS_URL.replace('{case_id}', caseId)
+    .replace('{task_id}', taskId)
+    .replace('{comment_id}', commentId);
 };

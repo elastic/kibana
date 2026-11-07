@@ -7,15 +7,40 @@
 
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KueryNode } from '@kbn/es-query';
 import Boom from '@hapi/boom';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { Space, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { CASE_SAVED_OBJECT } from '../../common/constants';
+import type { CaseAccess, CaseAssignees } from '../../common/types/domain';
+import { CaseAccessMode } from '../../common/types/domain';
 import type { AuthFilterHelpers, OwnerEntity } from './types';
-import { getOwnersFilter, groupByAuthorization } from './utils';
+import {
+  combineFilterWithAuthorizationFilter,
+  getCaseAccessFilter,
+  getHiddenCasesFilter,
+  getOwnersFilter,
+  groupByAuthorization,
+} from './utils';
 import type { OperationDetails } from '.';
 import { AuthorizationAuditLogger } from '.';
 import { createCaseError } from '../common/error';
+
+/**
+ * Audit-log error carrying the real denial reason for a restricted case. The
+ * error returned to the caller is a plain not-found so the case's existence is
+ * not revealed.
+ */
+class RestrictedCaseAccessError extends Error {
+  constructor() {
+    super('Access to a restricted case was denied because the user is not an assignee');
+    this.name = 'RestrictedCaseAccessDenied';
+  }
+}
+
+const createRestrictedCaseNotFoundError = (id: string) =>
+  Boom.notFound(`Saved object [${CASE_SAVED_OBJECT}/${id}] not found`);
 
 /**
  * This class handles ensuring that the user making a request has the correct permissions
@@ -26,22 +51,38 @@ export class Authorization {
   private readonly securityAuth: SecurityPluginStart['authz'] | undefined;
   private readonly featureCaseOwners: Set<string>;
   private readonly auditLogger: AuthorizationAuditLogger;
+  private readonly profileUid?: string;
+  private readonly isSuperuser: boolean;
+  private readonly restrictedCasesEnabled: boolean;
+  private readonly onRestrictedCaseDenied?: () => void;
 
   private constructor({
     request,
     securityAuth,
     caseOwners,
     auditLogger,
+    profileUid,
+    isSuperuser,
+    restrictedCasesEnabled,
+    onRestrictedCaseDenied,
   }: {
     request: KibanaRequest;
     securityAuth?: SecurityPluginStart['authz'];
     caseOwners: Set<string>;
     auditLogger: AuthorizationAuditLogger;
+    profileUid?: string;
+    isSuperuser: boolean;
+    restrictedCasesEnabled: boolean;
+    onRestrictedCaseDenied?: () => void;
   }) {
     this.request = request;
     this.securityAuth = securityAuth;
     this.featureCaseOwners = caseOwners;
     this.auditLogger = auditLogger;
+    this.profileUid = profileUid;
+    this.isSuperuser = isSuperuser;
+    this.restrictedCasesEnabled = restrictedCasesEnabled;
+    this.onRestrictedCaseDenied = onRestrictedCaseDenied;
   }
 
   /**
@@ -54,6 +95,10 @@ export class Authorization {
     features,
     auditLogger,
     logger,
+    profileUid,
+    isSuperuser = false,
+    restrictedCasesEnabled = false,
+    onRestrictedCaseDenied,
   }: {
     request: KibanaRequest;
     securityAuth?: SecurityPluginStart['authz'];
@@ -61,6 +106,11 @@ export class Authorization {
     features: FeaturesPluginStart;
     auditLogger: AuthorizationAuditLogger;
     logger: Logger;
+    profileUid?: string;
+    isSuperuser?: boolean;
+    restrictedCasesEnabled?: boolean;
+    /** Telemetry hook invoked when a restricted case is refused to a non-assignee. */
+    onRestrictedCaseDenied?: () => void;
   }): Promise<Authorization> {
     const getSpace = async (): Promise<Space | undefined> => {
       return spaces?.spacesService.getActiveSpace(request);
@@ -88,11 +138,73 @@ export class Authorization {
       });
     }
 
-    return new Authorization({ request, securityAuth, caseOwners, auditLogger });
+    return new Authorization({
+      request,
+      securityAuth,
+      caseOwners,
+      auditLogger,
+      profileUid,
+      isSuperuser,
+      restrictedCasesEnabled,
+      onRestrictedCaseDenied,
+    });
   }
 
   private shouldCheckAuthorization(): boolean {
     return this.securityAuth?.mode?.useRbacForRequest(this.request) ?? false;
+  }
+
+  /**
+   * Restricted-case visibility is enforced only when the feature is enabled
+   * and RBAC applies to the request; superusers bypass it entirely.
+   */
+  private shouldEnforceRestrictedCases(): boolean {
+    return this.restrictedCasesEnabled && !this.isSuperuser && this.shouldCheckAuthorization();
+  }
+
+  /**
+   * Whether the caller holds the reserved superuser role (stateful only).
+   * Superusers bypass restricted-case rules such as the last-assignee guard.
+   */
+  public isSuperuserRequest(): boolean {
+    return this.isSuperuser;
+  }
+
+  /**
+   * Returns true when the caller may see the given case. A restricted case is
+   * visible only to its assignees (callers without a user profile are never
+   * assignees) and superusers.
+   */
+  public isCaseVisible({
+    access,
+    assignees,
+  }: {
+    access?: CaseAccess;
+    assignees?: CaseAssignees;
+  }): boolean {
+    if (!this.shouldEnforceRestrictedCases() || access?.mode !== CaseAccessMode.RESTRICTED) {
+      return true;
+    }
+
+    if (this.profileUid == null) {
+      return false;
+    }
+
+    return (assignees ?? []).some(({ uid }) => uid === this.profileUid);
+  }
+
+  /** Whether restricted cases are hidden from this caller unless they are an assignee. */
+  public enforcesRestrictedCases(): boolean {
+    return this.shouldEnforceRestrictedCases();
+  }
+
+  /**
+   * Matches the restricted cases this caller may not see, or undefined when restricted cases
+   * aren't enforced for them. For finds over saved objects that point at cases, such as tasks,
+   * which can't carry the case access clause themselves.
+   */
+  public getHiddenCasesFilter(): KueryNode | undefined {
+    return this.shouldEnforceRestrictedCases() ? getHiddenCasesFilter(this.profileUid) : undefined;
   }
 
   /**
@@ -118,6 +230,21 @@ export class Authorization {
       this.logSavedObjects({ entities, operation: operations, error });
       throw error;
     }
+
+    // The privilege check passed; now refuse restricted cases the caller may
+    // not see. The audit log records the real reason, the caller gets a plain
+    // not-found so the case's existence is not revealed.
+    const invisibleEntity = entities.find((entity) => !this.isCaseVisible(entity));
+    if (invisibleEntity !== undefined) {
+      this.logSavedObjects({
+        entities: [invisibleEntity],
+        operation: operations,
+        error: new RestrictedCaseAccessError(),
+      });
+      this.onRestrictedCaseDenied?.();
+      throw createRestrictedCaseNotFoundError(invisibleEntity.id);
+    }
+
     this.logSavedObjects({ entities, operation: operations });
   }
 
@@ -250,8 +377,14 @@ export class Authorization {
         );
       }
 
+      const ownersFilter = getOwnersFilter(operation.savedObjectType, authorizedOwners);
+      const filter =
+        operation.savedObjectType === CASE_SAVED_OBJECT && this.shouldEnforceRestrictedCases()
+          ? combineFilterWithAuthorizationFilter(getCaseAccessFilter(this.profileUid), ownersFilter)
+          : ownersFilter;
+
       return {
-        filter: getOwnersFilter(operation.savedObjectType, authorizedOwners),
+        filter,
         authorizedOwners,
         ensureSavedObjectsAreAuthorized: (entities: OwnerEntity[]) => {
           for (const entity of entities) {

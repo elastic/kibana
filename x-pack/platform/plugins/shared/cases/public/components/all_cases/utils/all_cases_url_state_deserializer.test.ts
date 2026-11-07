@@ -23,10 +23,12 @@ describe('allCasesUrlStateDeserializer', () => {
     expect(allCasesUrlStateDeserializer(defaultMap)).toMatchInlineSnapshot(`
       Object {
         "filterOptions": Object {
+          "access": Array [],
           "assignees": Array [],
           "category": Array [],
           "extendedFieldFilters": Array [],
           "from": "now-30d",
+          "needsDecision": Array [],
           "owner": Array [],
           "reporters": Array [],
           "search": "",
@@ -42,7 +44,9 @@ describe('allCasesUrlStateDeserializer', () => {
             "cases.ef_all_values",
           ],
           "severity": Array [],
+          "source": Array [],
           "status": Array [],
+          "statusKey": Array [],
           "tags": Array [],
           "to": "now",
         },

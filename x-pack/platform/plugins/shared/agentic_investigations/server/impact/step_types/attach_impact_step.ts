@@ -23,12 +23,14 @@ export const getAttachImpactStepDefinition = ({
   privileges,
   getAttachmentClient,
   getConversationClient,
+  onFindingsWritten,
 }: {
   getImpactService: () => ImpactService;
   resolveUser: ResolveUser;
   privileges: InvestigationsPrivilegesChecker;
   getAttachmentClient: (request: KibanaRequest) => Promise<AttachmentPublicClient>;
   getConversationClient: (request: KibanaRequest) => Promise<ConversationPublicClient>;
+  onFindingsWritten?: (request: KibanaRequest, conversationId: string) => Promise<void>;
 }) =>
   createServerStepDefinition({
     ...attachImpactStepCommonDefinition,
@@ -62,6 +64,7 @@ export const getAttachImpactStepDefinition = ({
         context.logger.debug(
           `Attached impact ${impact.id} to conversation ${impact.conversationId}`
         );
+        await onFindingsWritten?.(request, input.conversationId);
 
         return {
           output: {

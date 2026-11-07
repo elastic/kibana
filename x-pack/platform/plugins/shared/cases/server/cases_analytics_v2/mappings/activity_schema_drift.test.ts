@@ -229,6 +229,44 @@ const PER_TYPE_FIXTURES: {
     { action: 'create' }
   ),
   delete_case: makeUserActionSO('delete_case', {}, { action: 'delete' }),
+  access: makeUserActionSO('access', { access: { mode: 'restricted' } }, { action: 'update' }),
+  ai_verdict: makeUserActionSO(
+    'ai_verdict',
+    {
+      ai_verdict: {
+        verdict: 'true_positive',
+        confidence: 0.92,
+        actor: { type: 'agent', id: 'agent-1', name: 'Elastic AI Agent', run_id: 'conv-1' },
+        updated_at: '2026-11-06T00:00:00.000Z',
+      },
+    },
+    { action: 'update' }
+  ),
+  human_verdict: makeUserActionSO(
+    'human_verdict',
+    { human_verdict: 'false_positive' },
+    { action: 'update' }
+  ),
+  decision: makeUserActionSO(
+    'decision',
+    { decision: { proposal_id: 'proposal-1', title: 'Close 1 alert', outcome: 'approved' } },
+    { action: 'update' }
+  ),
+  sync: makeUserActionSO(
+    'sync',
+    {
+      sync: {
+        connector_name: 'ServiceNow',
+        external_id: '123',
+        external_title: 'INC01',
+        external_url: 'https://example.com/INC01',
+        updated_fields: ['title', 'status'],
+        conflicted_fields: [],
+        external_updated_by: 'admin',
+      },
+    },
+    { action: 'update' }
+  ),
   category: makeUserActionSO('category', { category: 'malware' }, { action: 'update' }),
   customFields: makeUserActionSO(
     'customFields',
@@ -264,6 +302,28 @@ const PER_TYPE_FIXTURES: {
     { bulkAttachments: { attachmentType: 'security.alert', count: 3 } },
     { action: 'delete' }
   ),
+  create_task: makeUserActionSO('create_task', {
+    task: { id: 'task-1', title: 'Block sender', status: 'open', priority: 'high', assignees: [] },
+  }),
+  update_task: makeUserActionSO(
+    'update_task',
+    {
+      task_id: 'task-1',
+      task_title: 'Block sender',
+      changed_fields: [{ field: 'status', old_value: 'open', new_value: 'completed' }],
+    },
+    { action: 'update' }
+  ),
+  delete_task: makeUserActionSO(
+    'delete_task',
+    { task_id: 'task-1', task_title: 'Block sender', subtasks_deleted: 0 },
+    { action: 'delete' }
+  ),
+  apply_task_template: makeUserActionSO('apply_task_template', {
+    template_id: 'tpl-1',
+    template_name: 'Phishing',
+    tasks_created: 3,
+  }),
 };
 
 // ----- Layer 1: doc-builder output ⊆ activity mapping (per-type) -----

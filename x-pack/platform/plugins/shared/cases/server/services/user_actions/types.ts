@@ -24,9 +24,14 @@ import type {
   CaseSeverity,
   CaseStatuses,
   User,
+  CaseAccess,
+  CaseAiVerdict,
+  CaseVerdict,
   CaseAssignees,
   CaseCustomFields,
+  ExternalSyncSettings,
   ActionSource,
+  SyncUserActionPayload,
 } from '../../../common/types/domain';
 import type { CasesActivityV2WriterContract } from '../../cases_analytics_v2';
 import type {
@@ -51,6 +56,12 @@ import type {
 export type AttachmentSavedObjectType =
   | typeof CASE_COMMENT_SAVED_OBJECT
   | typeof CASE_ATTACHMENT_SAVED_OBJECT;
+import type {
+  CreateTaskUserActionPayload,
+  UpdateTaskUserActionPayload,
+  DeleteTaskUserActionPayload,
+  ApplyTaskTemplateUserActionPayload,
+} from '../../../common/types/domain/user_action/task/v1';
 
 export interface BuilderParameters {
   title: {
@@ -63,6 +74,8 @@ export interface BuilderParameters {
     parameters: {
       payload: {
         status: CaseStatuses;
+        status_key?: string;
+        pause_reason?: string;
         closeReason?: string;
         syncAlerts?: boolean;
         syncedAlertCount?: number;
@@ -78,6 +91,15 @@ export interface BuilderParameters {
   assignees: {
     parameters: { payload: { assignees: CaseAssignees } };
   };
+  access: {
+    parameters: { payload: { access: CaseAccess } };
+  };
+  ai_verdict: {
+    parameters: { payload: { ai_verdict: CaseAiVerdict | null } };
+  };
+  human_verdict: {
+    parameters: { payload: { human_verdict: CaseVerdict | null } };
+  };
   pushed: {
     parameters: {
       payload: {
@@ -86,7 +108,15 @@ export interface BuilderParameters {
     };
   };
   settings: {
-    parameters: { payload: { settings: { syncAlerts?: boolean; extractObservables?: boolean } } };
+    parameters: {
+      payload: {
+        settings: {
+          syncAlerts?: boolean;
+          extractObservables?: boolean;
+          externalSync?: ExternalSyncSettings;
+        };
+      };
+    };
   };
   comment: {
     parameters: {
@@ -130,10 +160,32 @@ export interface BuilderParameters {
   workflow: {
     parameters: { payload: WorkflowUserActionPayload };
   };
+  sync: {
+    parameters: { payload: SyncUserActionPayload };
+  };
+  decision: {
+    parameters: {
+      payload: {
+        decision: { proposal_id: string; title: string; outcome: 'approved' | 'dismissed' };
+      };
+    };
+  };
   bulkAttachments: {
     parameters: {
       payload: { bulkAttachments: BulkAttachmentsPayload };
     };
+  };
+  create_task: {
+    parameters: { payload: CreateTaskUserActionPayload };
+  };
+  update_task: {
+    parameters: { payload: UpdateTaskUserActionPayload };
+  };
+  delete_task: {
+    parameters: { payload: DeleteTaskUserActionPayload };
+  };
+  apply_task_template: {
+    parameters: { payload: ApplyTaskTemplateUserActionPayload };
   };
 }
 

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { isEmpty, uniqBy } from 'lodash';
+import Boom from '@hapi/boom';
+import { isEmpty, isEqual, uniqBy } from 'lodash';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { Logger } from '@kbn/logging';
@@ -20,6 +21,8 @@ import type {
   CaseAssignees,
   CaseAttributes,
   CaseCustomField,
+  CaseStatusesConfiguration,
+  CaseVerdict,
   ConnectorMappings,
   ConnectorMappingSource,
   ConnectorMappingTarget,
@@ -27,6 +30,7 @@ import type {
   ExternalService,
   Observable,
   User,
+  ExternalSyncFieldMappings,
 } from '../../../common/types/domain';
 import type { Template } from '../../../common/types/domain/template/latest';
 import {
@@ -35,6 +39,12 @@ import {
   UserActionActions,
   UserActionTypes,
 } from '../../../common/types/domain';
+import {
+  findStatusByKey,
+  getBuiltInStatuses,
+  getDefaultStatus,
+  getEffectiveStatuses,
+} from '../../../common/utils/statuses';
 import type {
   AttachmentRequestV2,
   CasePostRequest,
@@ -45,8 +55,13 @@ import type {
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { isCommentUserAction, isPushedUserAction } from '../../../common/utils/user_actions';
 import type { CasesClientGetAlertsResponse } from '../alerts/types';
-import type { ExternalServiceComment, ExternalServiceIncident } from './types';
+import type {
+  ExternalServiceComment,
+  ExternalServiceIncident,
+  ExternalServiceParams,
+} from './types';
 import type { CasesConnectorsMap } from '../../connectors';
+import { isRecord } from '../../connectors/utils';
 import { getCaseViewPath } from '../../common/utils';
 import {
   isCommentAttachmentType,
@@ -58,6 +73,12 @@ import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import { getFieldSnakeKey } from '../../../common/utils/template_fields';
 import * as i18n from './translations';
+import type { ResolvedExternalSyncFieldRules } from '../../../common/utils/external_sync_fields';
+import {
+  pushesToExternal,
+  resolveExternalSyncFieldRules,
+} from '../../../common/utils/external_sync_fields';
+import { isExternalSyncComment } from '../../../common/utils/external_sync_comments';
 
 interface CreateIncidentArgs {
   theCase: Case;
@@ -68,6 +89,10 @@ interface CreateIncidentArgs {
   spaceId: string;
   userProfiles?: Map<string, UserProfile>;
   publicBaseUrl?: IBasePath['publicBaseUrl'];
+  /** Space-level field directions; defaults push every mapped field. */
+  fieldRules?: ResolvedExternalSyncFieldRules;
+  /** Global case fields carried onto external fields through the connector's free-form channel. */
+  fieldMappings?: ExternalSyncFieldMappings;
 }
 
 export const dedupAssignees = (assignees?: CaseAssignees): CaseAssignees | undefined => {
@@ -80,6 +105,76 @@ export const dedupAssignees = (assignees?: CaseAssignees): CaseAssignees | undef
 
 export const getCloseReasonIfValid = (closeReason?: string): string | undefined =>
   closeReason != null && closeReason.trim().length > 0 ? closeReason : undefined;
+
+const CLOSE_REASON_TO_VERDICT: Record<string, CaseVerdict> = {
+  true_positive: 'true_positive',
+  false_positive: 'false_positive',
+  benign_positive: 'benign_positive',
+};
+
+/**
+ * The human verdict a close reason implies, or null when the reason isn't a verdict (duplicate,
+ * automated closure, other, or a case-defined reason).
+ */
+export const getVerdictFromCloseReason = (closeReason: string): CaseVerdict | null =>
+  CLOSE_REASON_TO_VERDICT[closeReason] ?? null;
+
+/**
+ * The verdicts a request sets that differ from the stored ones. A missing stored value counts as
+ * null, so an explicit verdict on a case from before the field existed is kept.
+ */
+export const getChangedVerdicts = (
+  originalCase: Pick<CaseAttributes, 'human_verdict' | 'ai_verdict'>,
+  requested: Partial<Pick<CaseAttributes, 'human_verdict' | 'ai_verdict'>>
+): Partial<Pick<CaseAttributes, 'human_verdict' | 'ai_verdict'>> => ({
+  ...(requested.human_verdict !== undefined &&
+  requested.human_verdict !== (originalCase.human_verdict ?? null)
+    ? { human_verdict: requested.human_verdict }
+    : {}),
+  ...(requested.ai_verdict !== undefined &&
+  !isEqual(requested.ai_verdict, originalCase.ai_verdict ?? null)
+    ? { ai_verdict: requested.ai_verdict }
+    : {}),
+});
+
+/**
+ * The outcome fields a status change writes: closing with a reason keeps the reason on the case
+ * and sets the human verdict from it (unless the request sets one); reopening clears both, since
+ * they describe a close that no longer stands.
+ */
+export const getOutcomeFieldsForStatusChange = ({
+  originalCase,
+  status,
+  closeReason,
+  requestedHumanVerdict,
+}: {
+  originalCase: Pick<CaseAttributes, 'status' | 'close_reason' | 'human_verdict'>;
+  status?: CaseStatuses;
+  closeReason?: string;
+  requestedHumanVerdict?: CaseVerdict | null;
+}): Partial<Pick<CaseAttributes, 'close_reason' | 'human_verdict'>> => {
+  if (status === CaseStatuses.closed && closeReason != null) {
+    return {
+      close_reason: closeReason,
+      ...(requestedHumanVerdict === undefined
+        ? { human_verdict: getVerdictFromCloseReason(closeReason) }
+        : {}),
+    };
+  }
+
+  const isReopening =
+    status != null && status !== CaseStatuses.closed && originalCase.status === CaseStatuses.closed;
+  if (isReopening) {
+    return {
+      ...(originalCase.close_reason != null ? { close_reason: null } : {}),
+      ...(originalCase.human_verdict != null && requestedHumanVerdict === undefined
+        ? { human_verdict: null }
+        : {}),
+    };
+  }
+
+  return {};
+};
 
 type LatestPushInfo = { index: number; pushedInfo: ExternalService | null } | null;
 
@@ -253,14 +348,21 @@ export const createIncident = async ({
   userProfiles,
   spaceId,
   publicBaseUrl,
+  fieldRules = resolveExternalSyncFieldRules(),
+  fieldMappings = [],
 }: CreateIncidentArgs): Promise<ExternalServiceIncident> => {
   const latestPushInfo = getLatestPushInfo(connector.id, userActions);
   const externalId = latestPushInfo?.pushedInfo?.external_id ?? null;
 
-  const externalServiceFields =
-    casesConnectors.get(connector.actionTypeId)?.format(theCase, alerts) ?? {};
+  const casesConnector = casesConnectors.get(connector.actionTypeId);
+  const externalServiceFields = casesConnector?.format(theCase, alerts) ?? {};
 
-  const connectorMappings = casesConnectors.get(connector.actionTypeId)?.getMapping() ?? [];
+  const connectorMappings = (casesConnector?.getMapping() ?? []).map((mapping) =>
+    (mapping.source === 'title' || mapping.source === 'description') &&
+    !pushesToExternal(fieldRules[mapping.source].direction)
+      ? { ...mapping, target: 'not_mapped' as const }
+      : mapping
+  );
   const descriptionWithKibanaInformation = addKibanaInformationToDescription(
     theCase,
     spaceId,
@@ -268,26 +370,76 @@ export const createIncident = async ({
     publicBaseUrl
   );
 
-  const comments = formatComments({
-    userActions,
-    latestPushInfo,
-    theCase,
-    userProfiles,
-    spaceId,
-    publicBaseUrl,
-  });
+  const comments = pushesToExternal(fieldRules.comments.direction)
+    ? formatComments({
+        userActions,
+        latestPushInfo,
+        theCase,
+        userProfiles,
+        spaceId,
+        publicBaseUrl,
+      })
+    : [];
 
   const mappedIncident = mapCaseFieldsToExternalSystemFields(
     { title: theCase.title, description: descriptionWithKibanaInformation },
     connectorMappings
   );
 
-  const incident = {
+  const incident: ExternalServiceParams = {
     ...mappedIncident,
     ...externalServiceFields,
     externalId,
   };
+
+  // Tags are written by the connector's format(), not the mapping, so they are removed after the fact.
+  const tagsTarget = connectorMappings.find((mapping) => mapping.source === 'tags')?.target;
+  if (
+    tagsTarget != null &&
+    tagsTarget !== 'not_mapped' &&
+    !pushesToExternal(fieldRules.tags.direction)
+  ) {
+    delete incident[tagsTarget];
+  }
+
+  const freeFormFieldsKey = casesConnector?.freeFormFieldsKey;
+  const mappedFields = collectMappedFieldsToPush(theCase, fieldMappings);
+  if (freeFormFieldsKey != null && Object.keys(mappedFields).length > 0) {
+    incident[freeFormFieldsKey] = mergeFreeFormFields(incident[freeFormFieldsKey], mappedFields);
+  }
+
   return { incident, comments };
+};
+
+const collectMappedFieldsToPush = (
+  theCase: Case,
+  fieldMappings: ExternalSyncFieldMappings
+): Record<string, string> => {
+  const values: Record<string, string> = {};
+  for (const mapping of fieldMappings) {
+    const value = theCase.extended_fields?.[mapping.caseField];
+    if (pushesToExternal(mapping.direction) && value != null && value !== '') {
+      values[mapping.externalField] = value;
+    }
+  }
+  return values;
+};
+
+/**
+ * The connector fields hold the free-form channel as a JSON string typed by the user; mapped
+ * values are merged on top and the result is kept as a string for the connector schema.
+ */
+export const mergeFreeFormFields = (existing: unknown, extra: Record<string, string>): string => {
+  const base = typeof existing === 'string' ? parseJson(existing) : existing;
+  return JSON.stringify({ ...(isRecord(base) ? base : {}), ...extra });
+};
+
+const parseJson = (value: string): unknown => {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return undefined;
+  }
 };
 
 export const mapCaseFieldsToExternalSystemFields = (
@@ -334,8 +486,12 @@ export const formatComments = ({
   );
 
   const commentsToBeUpdated = theCase.comments?.filter(
-    // Push only user-authored comments — legacy `user` and unified `comment`.
-    (comment) => isCommentAttachmentType(comment.type) && commentsIdsToBeUpdated.has(comment.id)
+    // Push only user-authored comments — legacy `user` and unified `comment` — and never
+    // send back a comment that was imported from the external incident.
+    (comment) =>
+      isCommentAttachmentType(comment.type) &&
+      commentsIdsToBeUpdated.has(comment.id) &&
+      !isExternalSyncComment(comment)
   );
 
   let comments: ExternalServiceComment[] = [];
@@ -449,6 +605,179 @@ const validOrUndefined = (value: string | undefined | null): string | undefined 
   return value;
 };
 
+/**
+ * The statuses a case of this owner can be in. With the flag off the stored list is ignored so
+ * cases keep landing on the built-in statuses.
+ */
+export const getConfiguredStatuses = ({
+  configuration,
+  customStatusesEnabled,
+}: {
+  configuration?: { statuses?: CaseStatusesConfiguration };
+  customStatusesEnabled: boolean;
+}): CaseStatusesConfiguration =>
+  customStatusesEnabled ? getEffectiveStatuses(configuration?.statuses) : getBuiltInStatuses();
+
+/**
+ * Turns the `status` and `status_key` of a request into what gets persisted: `status` always
+ * holds the category; `status_key` is only written while custom statuses are enabled.
+ */
+export const resolveStatusForUpdate = ({
+  status,
+  statusKey,
+  statuses,
+  customStatusesEnabled,
+}: {
+  status?: CaseStatuses;
+  statusKey?: string;
+  statuses: CaseStatusesConfiguration;
+  customStatusesEnabled: boolean;
+}): { status: CaseStatuses; status_key?: string } | undefined => {
+  if (statusKey != null) {
+    if (!customStatusesEnabled) {
+      throw Boom.badRequest('Custom statuses are not enabled');
+    }
+
+    const configured = findStatusByKey(statuses, statusKey);
+
+    if (configured == null || configured.disabled) {
+      throw Boom.badRequest(`Unknown status key: ${statusKey}`);
+    }
+
+    if (status != null && status !== configured.category) {
+      throw Boom.badRequest(
+        `The status "${status}" does not match the category of the status key "${statusKey}"`
+      );
+    }
+
+    return { status: configured.category, status_key: statusKey };
+  }
+
+  if (status == null) {
+    return;
+  }
+
+  if (!customStatusesEnabled) {
+    return { status };
+  }
+
+  return { status, status_key: getDefaultStatus(statuses, status)?.key ?? status };
+};
+
+export type PauseFields = Pick<
+  CaseAttributes,
+  'paused_at' | 'time_paused' | 'pause_reason' | 'resume_to_status_key'
+>;
+
+/**
+ * Starts, continues, or ends the pause that goes with a status change. Time in a status that
+ * pauses time tracking accumulates into `time_paused`, which the closing metrics subtract.
+ *
+ * - Moving to a pausing status requires a configured reason and remembers where the case came
+ *   from so Resume can take it back.
+ * - Moving between two pausing statuses keeps the pause running; a new reason replaces the old.
+ * - Leaving a pausing status, including by closing, adds the interval to `time_paused`.
+ * - Reopening a closed case starts over with no paused time, like the other timing metrics.
+ */
+export const getPauseFieldsForUpdate = ({
+  originalCase,
+  targetStatusKey,
+  targetCategory,
+  pauseReason,
+  statuses,
+  pauseReasons,
+  customStatusesEnabled,
+  stateTransitionTimestamp,
+}: {
+  originalCase: Pick<
+    CaseAttributes,
+    'status' | 'status_key' | 'paused_at' | 'time_paused' | 'pause_reason'
+  >;
+  /** The resolved `status_key` of the update, undefined when the status does not change */
+  targetStatusKey?: string;
+  targetCategory?: CaseStatuses;
+  pauseReason?: string;
+  statuses: CaseStatusesConfiguration;
+  pauseReasons: string[];
+  customStatusesEnabled: boolean;
+  stateTransitionTimestamp: string;
+}): Partial<PauseFields> | undefined => {
+  if (!customStatusesEnabled) {
+    if (pauseReason != null) {
+      throw Boom.badRequest('Custom statuses are not enabled');
+    }
+    return;
+  }
+
+  const assertKnownReason = (reason: string) => {
+    if (!pauseReasons.includes(reason)) {
+      throw Boom.badRequest(`Unknown pause reason: ${reason}`);
+    }
+  };
+
+  const wasPaused = originalCase.paused_at != null;
+  const target = targetStatusKey != null ? findStatusByKey(statuses, targetStatusKey) : undefined;
+
+  if (target == null) {
+    if (pauseReason == null) {
+      return;
+    }
+    if (!wasPaused) {
+      throw Boom.badRequest(
+        'A pause reason can only be set when moving a case to a status that pauses time tracking'
+      );
+    }
+    assertKnownReason(pauseReason);
+    return { pause_reason: pauseReason };
+  }
+
+  if (target.pausesTimeTracking) {
+    if (pauseReason != null) {
+      assertKnownReason(pauseReason);
+    }
+    if (wasPaused) {
+      return pauseReason != null ? { pause_reason: pauseReason } : undefined;
+    }
+    if (pauseReason == null) {
+      throw Boom.badRequest(`A pause reason is required when moving a case to "${target.label}"`);
+    }
+    return {
+      paused_at: stateTransitionTimestamp,
+      pause_reason: pauseReason,
+      resume_to_status_key:
+        originalCase.status_key ??
+        getDefaultStatus(statuses, originalCase.status)?.key ??
+        originalCase.status,
+    };
+  }
+
+  if (pauseReason != null) {
+    throw Boom.badRequest(`The status "${target.label}" does not pause time tracking`);
+  }
+
+  const reopened =
+    originalCase.status === CaseStatuses.closed && targetCategory !== CaseStatuses.closed;
+
+  if (wasPaused) {
+    const pausedFor = Math.max(
+      Math.floor(
+        (new Date(stateTransitionTimestamp).getTime() -
+          new Date(originalCase.paused_at as string).getTime()) /
+          1000
+      ),
+      0
+    );
+    return {
+      paused_at: null,
+      pause_reason: null,
+      resume_to_status_key: null,
+      time_paused: reopened ? 0 : (originalCase.time_paused ?? 0) + pausedFor,
+    };
+  }
+
+  return reopened && (originalCase.time_paused ?? 0) > 0 ? { time_paused: 0 } : undefined;
+};
+
 export const getClosedInfoForUpdate = ({
   user,
   status,
@@ -533,11 +862,14 @@ export const getTimingMetricsForUpdate = ({
   createdAt,
   inProgressAt,
   stateTransitionTimestamp,
+  timePaused = 0,
 }: {
   status?: CaseStatuses;
   createdAt: string;
   stateTransitionTimestamp: string;
   inProgressAt?: string | null;
+  /** Seconds spent in statuses that pause time tracking, left out of the closing metrics */
+  timePaused?: number | null;
 }):
   | Partial<Pick<CaseAttributes, 'time_to_acknowledge' | 'time_to_investigate' | 'time_to_resolve'>>
   | undefined => {
@@ -573,9 +905,11 @@ export const getTimingMetricsForUpdate = ({
           inProgressAtMillis
         )
       ) {
-        const timeToResolve = calculateTimeDifferenceInSeconds(
-          stateTransitionTimestampMillis,
-          createdAtMillis
+        const paused = Math.max(timePaused ?? 0, 0);
+        const timeToResolve = Math.max(
+          calculateTimeDifferenceInSeconds(stateTransitionTimestampMillis, createdAtMillis) -
+            paused,
+          0
         );
 
         const timeToAcknowledge =
@@ -585,7 +919,13 @@ export const getTimingMetricsForUpdate = ({
 
         const timeToInvestigate =
           inProgressAtMillis != null
-            ? calculateTimeDifferenceInSeconds(stateTransitionTimestampMillis, inProgressAtMillis)
+            ? Math.max(
+                calculateTimeDifferenceInSeconds(
+                  stateTransitionTimestampMillis,
+                  inProgressAtMillis
+                ) - paused,
+                0
+              )
             : 0;
 
         return {
@@ -615,9 +955,11 @@ const calculateTimeDifferenceInSeconds = (endTime: number, startTime: number) =>
 export const getDurationInSeconds = ({
   closedAt,
   createdAt,
+  timePaused = 0,
 }: {
   closedAt: string;
   createdAt: CaseAttributes['created_at'];
+  timePaused?: number | null;
 }) => {
   try {
     if (createdAt != null && closedAt != null) {
@@ -625,7 +967,8 @@ export const getDurationInSeconds = ({
       const closedAtMillis = new Date(closedAt).getTime();
 
       if (!isNaN(createdAtMillis) && !isNaN(closedAtMillis) && closedAtMillis >= createdAtMillis) {
-        return { duration: Math.floor((closedAtMillis - createdAtMillis) / 1000) };
+        const elapsed = Math.floor((closedAtMillis - createdAtMillis) / 1000);
+        return { duration: Math.max(elapsed - Math.max(timePaused ?? 0, 0), 0) };
       }
     }
   } catch (err) {
@@ -637,13 +980,15 @@ export const getDurationForUpdate = ({
   status,
   closedAt,
   createdAt,
+  timePaused,
 }: {
   closedAt: string;
   createdAt: CaseAttributes['created_at'];
   status?: CaseStatuses;
+  timePaused?: number | null;
 }): Pick<CaseAttributes, 'duration'> | undefined => {
   if (status && status === CaseStatuses.closed) {
-    return getDurationInSeconds({ createdAt, closedAt });
+    return getDurationInSeconds({ createdAt, closedAt, timePaused });
   }
 
   if (status && (status === CaseStatuses.open || status === CaseStatuses['in-progress'])) {

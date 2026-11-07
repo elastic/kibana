@@ -33,6 +33,8 @@ import { initialData, useGetCases } from '../../containers/use_get_cases';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { useCasesConfig } from '../../common/lib/kibana';
+import { useGetAttachmentCounts } from '../../containers/use_get_attachment_counts';
+import { LINKED_INVESTIGATION_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { getAllPermissionsExceptFrom } from '../../utils/permissions';
 import { useIsLoadingCases } from './hooks/use_is_loading_cases';
 import { useAllCasesState } from './hooks/use_all_cases_state';
@@ -86,7 +88,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       getAttachments,
     });
 
-    const { templatesEnabled } = useCasesConfig();
+    const { templatesEnabled, agenticEnabled } = useCasesConfig();
     const { globalInlineFields } = useGlobalInlineFields({ enabled: templatesEnabled });
     const userPickerFields = useMemo(
       () => globalInlineFields.filter((field) => field.control === FieldType.USER_PICKER),
@@ -241,6 +243,13 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       [deselectCases, setQueryParams]
     );
 
+    const pageCaseIds = useMemo(() => data.cases.map(({ id }) => id), [data.cases]);
+    const { data: linkedInvestigationCounts } = useGetAttachmentCounts({
+      caseIds: pageCaseIds,
+      attachmentType: LINKED_INVESTIGATION_ATTACHMENT_TYPE,
+      enabled: agenticEnabled && !isSelectorView,
+    });
+
     const { columns, isLoadingColumns, rowHeader } = useCasesColumns({
       filterStatus: filterOptions.status ?? [],
       userProfiles: userProfiles ?? new Map(),
@@ -250,6 +259,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       disableActions: selectedCases.length > 0,
       selectedColumns,
       disabledCases,
+      linkedInvestigationCounts,
     });
 
     const activeFilterDimensions = useMemo(
@@ -332,6 +342,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           countClosedCases={data.countClosedCases}
           countOpenCases={data.countOpenCases}
           countInProgressCases={data.countInProgressCases}
+          countPausedCases={data.countPausedCases ?? null}
           onFilterChanged={onFilterChangedCallback}
           availableSolutions={hasOwner ? [] : availableSolutions}
           hiddenStatuses={hiddenStatuses}
@@ -362,6 +373,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
               countOpenCases={data.countOpenCases}
               countInProgressCases={data.countInProgressCases}
               countClosedCases={data.countClosedCases}
+              countPausedCases={data.countPausedCases}
               mttr={data.mttr}
               isLoading={isLoadingCases}
             />

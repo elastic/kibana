@@ -8557,6 +8557,32 @@
                     }
                   }
                 },
+                "customStatuses": {
+                  "properties": {
+                    "open": {
+                      "type": "long"
+                    },
+                    "inProgress": {
+                      "type": "long"
+                    },
+                    "closed": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "pausedCases": {
+                  "properties": {
+                    "open": {
+                      "type": "long"
+                    },
+                    "inProgress": {
+                      "type": "long"
+                    },
+                    "closed": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "syncAlertsOn": {
                   "type": "long"
                 },
@@ -8661,6 +8687,12 @@
                 },
                 "totalWithConnectors": {
                   "type": "long"
+                },
+                "totalRestrictedCases": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of cases restricted to their assignees"
+                  }
                 },
                 "latestDates": {
                   "properties": {
@@ -8835,6 +8867,12 @@
                   "_meta": {
                     "description": "Number of cases with maximum observables"
                   }
+                },
+                "totalRestrictedCases": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of cases restricted to their assignees"
+                  }
                 }
               }
             },
@@ -8996,6 +9034,12 @@
                   "_meta": {
                     "description": "Number of cases with maximum observables"
                   }
+                },
+                "totalRestrictedCases": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of cases restricted to their assignees"
+                  }
                 }
               }
             },
@@ -9156,6 +9200,12 @@
                   "type": "long",
                   "_meta": {
                     "description": "Number of cases with maximum observables"
+                  }
+                },
+                "totalRestrictedCases": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of cases restricted to their assignees"
                   }
                 }
               }
@@ -9545,6 +9595,58 @@
                     },
                     "required": {
                       "type": "long"
+                    }
+                  }
+                },
+                "customStatuses": {
+                  "properties": {
+                    "configurations": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of configurations with at least one custom status"
+                      }
+                    },
+                    "statuses": {
+                      "properties": {
+                        "open": {
+                          "type": "long"
+                        },
+                        "inProgress": {
+                          "type": "long"
+                        },
+                        "closed": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "pausing": {
+                      "properties": {
+                        "configurations": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of configurations with at least one enabled status that pauses time tracking"
+                          }
+                        },
+                        "statuses": {
+                          "properties": {
+                            "open": {
+                              "type": "long"
+                            },
+                            "inProgress": {
+                              "type": "long"
+                            },
+                            "closed": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "customizedReasons": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of configurations whose pause reasons differ from the defaults"
+                          }
+                        }
+                      }
                     }
                   }
                 }

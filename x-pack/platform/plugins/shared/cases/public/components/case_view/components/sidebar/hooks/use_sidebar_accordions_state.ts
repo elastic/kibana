@@ -10,6 +10,7 @@ import { LOCAL_STORAGE_KEYS } from '../../../../../../common/constants';
 import { useCasesLocalStorage } from '../../../../../common/use_cases_local_storage';
 
 export type SidebarAccordionId =
+  | 'verdict'
   | 'attributes'
   | 'legacyCustomFields'
   | 'templateFields'
@@ -18,6 +19,7 @@ export type SidebarAccordionId =
 export type SidebarAccordionsState = Record<SidebarAccordionId, boolean>;
 
 const DEFAULT_ACCORDIONS_STATE: SidebarAccordionsState = {
+  verdict: true,
   attributes: true,
   legacyCustomFields: false,
   templateFields: true,

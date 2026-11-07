@@ -10,7 +10,8 @@ import type { UserActionAttributes, CaseStatuses } from '../../../../common/type
 
 export function createStatusChangeSavedObject(
   status: CaseStatuses,
-  createdAt: Date
+  createdAt: Date,
+  statusKey?: string
 ): SavedObject<UserActionAttributes> {
   return {
     references: [],
@@ -27,6 +28,7 @@ export function createStatusChangeSavedObject(
       action: 'update',
       payload: {
         status,
+        ...(statusKey != null ? { status_key: statusKey } : {}),
       },
       type: 'status',
       comment_id: null,

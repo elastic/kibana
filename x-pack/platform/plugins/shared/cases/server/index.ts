@@ -25,10 +25,28 @@ export const config: PluginConfigDescriptor<ConfigType> = {
     runWorkflows: {
       enabled: true,
     },
+    restrictedCases: {
+      enabled: true,
+    },
+    bidirectionalSync: {
+      enabled: true,
+    },
+    agentic: {
+      enabled: true,
+    },
+    knowledge: {
+      enabled: true,
+    },
     attachments: {
       enabled: true,
     },
     chat: {
+      enabled: true,
+    },
+    customStatuses: {
+      enabled: true,
+    },
+    tasks: {
       enabled: true,
     },
   },
@@ -47,7 +65,12 @@ export const plugin = async (initializerContext: PluginInitializerContext) => {
   return new CasePlugin(initializerContext);
 };
 
-export type { CasesServerSetup, CasesServerStart, CloseReasonValidator } from './types';
+export type {
+  CasesServerSetup,
+  CasesServerStart,
+  CloseReasonValidator,
+  SystemTemplateDefinition,
+} from './types';
 export type {
   AttachmentDeleteTarget,
   GetRelatedAttachments,
@@ -60,3 +83,8 @@ export type {
   WorkflowAttachmentTarget,
   WorkflowAttachmentValidationContext,
 } from './attachment_framework/types';
+export type {
+  DecisionOutcome,
+  RecordDecisionParams,
+  SetPendingDecisionsParams,
+} from './client/cases/decisions';

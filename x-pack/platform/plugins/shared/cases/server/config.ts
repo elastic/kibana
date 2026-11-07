@@ -156,6 +156,13 @@ export const ConfigSchema = schema.object({
       min: 1,
     }),
   }),
+  // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
+  // Technical preview flag for restricted (assignee-only) cases. When off, the
+  // `access` field is ignored on write, hidden in responses, and no visibility
+  // rules are enforced.
+  restrictedCases: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
   stack: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
@@ -172,6 +179,33 @@ export const ConfigSchema = schema.object({
   // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
   // Temporary feature flag for running workflows from Cases.
   runWorkflows: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
+  // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
+  // Technical preview: admin-defined statuses grouped under the three built-in ones.
+  customStatuses: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
+  // Technical preview of case task lists.
+  tasks: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
+  // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
+  // Technical preview: automatic push and pull-based sync with Jira and ServiceNow.
+  bidirectionalSync: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
+  // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
+  // Technical preview: cases that work with agentic investigations. Gates the close reason and
+  // verdicts in the UI, the case source marker, and the Related tab's extension sections. The
+  // fields themselves are always in the schema, because model versions can't be flag-gated.
+  agentic: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
+  // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
+  // Technical preview: closed cases publish their outcome to the context engine's `cases-outcomes`
+  // AI index, and the case view shows prior outcomes of similar cases. Needs `agentic` too.
+  knowledge: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
   enabled: schema.boolean({ defaultValue: true }),

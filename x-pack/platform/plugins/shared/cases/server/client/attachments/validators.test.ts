@@ -16,7 +16,8 @@ import {
 } from '../../../common/constants';
 import { CommentAttachmentPayloadSchema } from '../../../common/types/domain/attachment/comment/v2';
 import { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
-import { validateUnifiedAttachments } from './validators';
+import { httpServerMock } from '@kbn/core/server/mocks';
+import { resolveUnifiedAttachment, validateUnifiedAttachments } from './validators';
 
 describe('validateUnifiedAttachments', () => {
   const validCommentPayload = {
@@ -260,5 +261,37 @@ describe('validateUnifiedAttachments', () => {
         })
       ).toThrow(/cannot be attached to a case with owner cases/);
     });
+  });
+});
+
+describe('resolveUnifiedAttachment', () => {
+  const request = httpServerMock.createKibanaRequest();
+  const query = { type: COMMENT_ATTACHMENT_TYPE, owner: 'cases', data: { content: 'hello' } };
+
+  it('returns the payload unchanged when the type has no resolve hook', async () => {
+    const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+    unifiedAttachmentTypeRegistry.register({
+      id: COMMENT_ATTACHMENT_TYPE,
+      schema: CommentAttachmentPayloadSchema,
+    });
+
+    await expect(
+      resolveUnifiedAttachment({ query, unifiedAttachmentTypeRegistry, request })
+    ).resolves.toBe(query);
+  });
+
+  it('returns the hook result and passes the request through', async () => {
+    const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+    const resolve = jest.fn().mockResolvedValue({ ...query, metadata: { resolved: true } });
+    unifiedAttachmentTypeRegistry.register({
+      id: COMMENT_ATTACHMENT_TYPE,
+      schema: CommentAttachmentPayloadSchema,
+      resolve,
+    });
+
+    await expect(
+      resolveUnifiedAttachment({ query, unifiedAttachmentTypeRegistry, request })
+    ).resolves.toEqual({ ...query, metadata: { resolved: true } });
+    expect(resolve).toHaveBeenCalledWith(query, { request });
   });
 });

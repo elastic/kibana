@@ -206,7 +206,7 @@ const STATUS_ROUTE_PATH = /\/internal\/investigations\/investigations\/(.+)\/sta
 
 const closeKindOf = (step: YamlStep): CloseKind | undefined => {
   if (
-    step.type === 'ai.conversation.metadata.patch' &&
+    step.type === 'investigations.patch' &&
     (step.with?.updates as Record<string, unknown> | undefined)?.status === 'closed'
   ) {
     return 'patch';

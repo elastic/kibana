@@ -16,6 +16,8 @@ properties:
         - id
         - version
       properties:
+        access:
+          $ref: 'case_access.yaml'
         assignees:
           $ref: 'assignees.yaml'
         category:
@@ -83,12 +85,42 @@ properties:
           $ref: 'case_severity.yaml'
         status:
           $ref: 'case_status.yaml'
+        status_key:
+          type: string
+          description: >
+            The key of a configured status to move the case to. The `status` field is derived from
+            the configured status's category and must match it when both are provided.
+            Requires `xpack.cases.customStatuses.enabled`. Technical preview.
+          maxLength: 50
+          example: awaiting_customer
+        pause_reason:
+          type: string
+          maxLength: 50
+          description: >
+            One of the configured pause reasons. Required when the target status pauses time
+            tracking and the case is not already paused; rejected when the target status does not.
+          example: Awaiting vendor
         tags:
           $ref: 'case_tags.yaml'
         title:
           $ref: 'case_title.yaml'
         closeReason:
           $ref: 'case_close_sync_reason.yaml'
+        human_verdict:
+          type: string
+          nullable: true
+          enum:
+            - true_positive
+            - false_positive
+            - benign_positive
+            - suspicious
+            - undetermined
+          description: The analyst's verdict. Set from the close reason when the case closes; editable.
+        ai_verdict:
+          $ref: 'case_ai_verdict.yaml'
+        closeLinkedInvestigations:
+          type: boolean
+          description: When closing, whether the investigations linked to the case close with it. Not persisted; defaults to true.
         version:
           description: >
             The current version of the case.

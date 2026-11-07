@@ -17,6 +17,7 @@ import {
   type SeveritySlotRenderProps,
   type TitleSlotRenderProps,
 } from '@kbn/agentic-investigations-common';
+import { CaseBridgeForInvestigation } from '../../../cases_bridge/host_components';
 import { INVESTIGATION_TEMPLATE_ID, isInvestigationTitlePending } from '../../../../common';
 import { EscalationModalBoundary } from '../../shared/escalation_modal/escalation_modal_boundary';
 import {
@@ -50,6 +51,7 @@ export const investigationTemplate: TemplateDefinition = {
     startDeps,
     services,
     escalationsEnabled,
+    casesBridgeEnabled,
     makeLazyWithProviders,
     groupedAttachments,
     renderAssignees,
@@ -72,6 +74,27 @@ export const investigationTemplate: TemplateDefinition = {
           React.createElement(ConnectedEscalationModal, props)
         );
       return GatedEscalationModal;
+    });
+
+    const LazyOpenCaseModal = makeLazyWithProviders<EscalationModalRenderProps>(async () => {
+      const [{ OpenCaseModal }, { PrivilegeGate }] = await Promise.all([
+        import('../../../cases_bridge/open_case_modal/open_case_modal'),
+        import('../../shared/privileges/privilege_gate'),
+      ]);
+      const GatedOpenCaseModal: React.FC<EscalationModalRenderProps> = (props) =>
+        React.createElement(
+          PrivilegeGate,
+          { privilege: 'manageInvestigations' },
+          React.createElement(OpenCaseModal, props)
+        );
+      return GatedOpenCaseModal;
+    });
+
+    const LazyOpenCasesGate = makeLazyWithProviders<React.PropsWithChildren>(async () => {
+      const { PrivilegeGate } = await import('../../shared/privileges/privilege_gate');
+      const OpenCasesGate: React.FC<React.PropsWithChildren> = ({ children }) =>
+        React.createElement(PrivilegeGate, { privilege: 'openCases' }, children);
+      return OpenCasesGate;
     });
 
     const LazyManageEscalationsGate = makeLazyWithProviders<React.PropsWithChildren>(async () => {
@@ -247,8 +270,16 @@ export const investigationTemplate: TemplateDefinition = {
       briefCard: InvestigationBriefCardWithFallback,
       // The flyout's Copy link button confirms success itself; only a failure needs a toast.
       onCopyLink: (url) => copyLink(core.notifications.toasts, url),
-      // Without escalations the footer has no "Open escalation" button.
-      renderEscalationModal: escalationsEnabled
+      // Without escalations the footer has no "Open escalation" button. With the cases bridge the
+      // same footer action opens a case instead.
+      renderEscalationModal: casesBridgeEnabled
+        ? (props) =>
+            React.createElement(
+              EscalationModalBoundary,
+              null,
+              React.createElement(LazyOpenCaseModal, props)
+            )
+        : escalationsEnabled
         ? (props) =>
             React.createElement(
               EscalationModalBoundary,
@@ -256,13 +287,24 @@ export const investigationTemplate: TemplateDefinition = {
               React.createElement(LazyEscalationModal, props)
             )
         : undefined,
-      wrapEscalationButton: escalationsEnabled
+      wrapEscalationButton: casesBridgeEnabled
+        ? (button) =>
+            React.createElement(
+              React.Suspense,
+              { fallback: null },
+              React.createElement(LazyOpenCasesGate, null, button)
+            )
+        : escalationsEnabled
         ? (button) =>
             React.createElement(
               React.Suspense,
               { fallback: null },
               React.createElement(LazyManageEscalationsGate, null, button)
             )
+        : undefined,
+      wrapWithCaseBridge: casesBridgeEnabled
+        ? ({ caseIds, children }) =>
+            React.createElement(CaseBridgeForInvestigation, { caseIds, children })
         : undefined,
       // Listing and deciding proposals needs the proposals plugin, which is optional here.
       renderProposedActions: proposals

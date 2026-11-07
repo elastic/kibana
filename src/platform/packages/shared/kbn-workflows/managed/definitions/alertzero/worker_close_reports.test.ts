@@ -76,7 +76,7 @@ ${closeSteps}
 `;
     const close = `
           - name: close_investigation
-            type: ai.conversation.metadata.patch
+            type: investigations.patch
             with:
               conversation_id: "{{ inputs.conversation_id }}"
               updates:

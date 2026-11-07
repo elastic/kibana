@@ -33,6 +33,7 @@ import { registerStepDefinitions } from './step_types';
 import { createProposalsStorageClient } from './storage/proposals_storage';
 import { createProposalTool } from './tools/create_proposal_tool';
 import type {
+  ProposalCreateExtension,
   ProposalsPluginSetup,
   ProposalsPluginStart,
   ProposalsSetupDependencies,
@@ -57,6 +58,7 @@ export class ProposalsPlugin
   private spaces?: ProposalsStartDependencies['spaces'];
   private resolveUser?: ResolveProposalUser;
   private resolveWorkerUser?: ResolveWorkerUser;
+  private createExtension?: ProposalCreateExtension;
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
@@ -127,7 +129,14 @@ export class ProposalsPlugin
       resolveUser: (request) => this.requireUserResolver()(request),
     });
 
-    return {};
+    return {
+      registerCreateExtension: (extension) => {
+        if (this.createExtension) {
+          throw new Error('A proposal create extension is already registered');
+        }
+        this.createExtension = extension;
+      },
+    };
   }
 
   start(coreStart: CoreStart, plugins: ProposalsStartDependencies): ProposalsPluginStart {
@@ -156,6 +165,7 @@ export class ProposalsPlugin
       getWorkflowsApi: () => this.requireWorkflowsApi(),
       getAttachmentsClient: (request) =>
         plugins.agentBuilder.attachments.getScopedClient({ request }),
+      getCreateExtension: () => this.createExtension,
       // A gateless proposal is created and decided by the service itself, so
       // the attribution the gate workflow used to resolve is resolved here.
       resolveUser: (request) => this.requireUserResolver()(request),

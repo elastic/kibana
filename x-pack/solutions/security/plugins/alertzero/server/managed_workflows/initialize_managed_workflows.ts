@@ -11,6 +11,7 @@ import {
   ALERTZERO_ACTION_WORKFLOW_IDS,
   ALERTZERO_ALERT_TRIAGE_WORKFLOW_IDS,
   ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
+  ALERTZERO_DEMO_WORKFLOW_IDS,
   ALERTZERO_FORENSICS_WORKFLOW_IDS,
   ALERTZERO_HUNT_CHILD_WORKFLOW_IDS,
   ALERTZERO_INVESTIGATION_SUMMARY_WORKFLOW_IDS,
@@ -36,10 +37,13 @@ export const initializeManagedWorkflows = async ({
   workflowsExtensions,
   logger,
   ensureAgentForSpace,
+  includeDemoWorkflows = false,
 }: {
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   logger: Logger;
   ensureAgentForSpace?: (spaceId: string) => Promise<void>;
+  /** POC Phase 5: the deterministic demo investigation and its action. */
+  includeDemoWorkflows?: boolean;
 }): Promise<PluginScopedManagedWorkflowsApi> => {
   const client = await workflowsExtensions.initManagedWorkflowsClient(
     ALERTZERO_MANAGED_WORKFLOW_OWNER_ID
@@ -57,7 +61,8 @@ export const initializeManagedWorkflows = async ({
     ...ALERTZERO_HUNT_CHILD_WORKFLOW_IDS,
     ...ALERTZERO_PROPOSAL_WORKFLOW_IDS,
     ...ALERTZERO_INVESTIGATION_SUMMARY_WORKFLOW_IDS,
-  ] as const;
+    ...(includeDemoWorkflows ? ALERTZERO_DEMO_WORKFLOW_IDS : []),
+  ];
 
   // One failed install must not stop the others, so each result is recorded instead of thrown.
   const globalWorkflowInstalls = await pMap(

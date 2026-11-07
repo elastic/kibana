@@ -404,7 +404,7 @@ steps:
   # accepted unrecoverable case on failure: the Investigation stays open with
   # its pending state visible, and recovery is manual.
   - name: close_if_settled
-    type: ai.conversation.metadata.patch
+    type: investigations.patch
     if: "${{ variables.settled == true }}"
     with:
       conversation_id: "{{ inputs.investigationConversationId }}"

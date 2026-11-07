@@ -26,12 +26,13 @@ const { maxLengthField } = fieldValidators;
 
 export type CaseFormFieldsSchemaProps = Omit<
   CasePostRequest,
-  'connector' | 'settings' | 'owner' | 'customFields'
+  'connector' | 'settings' | 'owner' | 'customFields' | 'access'
 > & {
   connectorId: string;
   fields: ConnectorTypeFields['fields'];
   syncAlerts: boolean;
   extractObservables: boolean;
+  restricted?: boolean;
   customFields: Record<string, string | boolean>;
   templateId?: string;
   templateVersion?: number;
@@ -101,6 +102,9 @@ export const schema: FormSchema<CaseFormFieldsSchemaProps> = {
   syncAlerts: {
     helpText: i18n.SYNC_ALERTS_HELP,
     defaultValue: true,
+  },
+  restricted: {
+    defaultValue: false,
   },
   extractObservables: {
     helpText: i18n.EXTRACT_OBSERVABLES_HELP,

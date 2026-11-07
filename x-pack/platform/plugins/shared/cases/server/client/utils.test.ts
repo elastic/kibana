@@ -26,6 +26,7 @@ import {
 import { CasePersistedSeverity, CasePersistedStatus } from '../common/types/case';
 import type { CustomFieldsConfiguration } from '../../common/types/domain';
 import { CaseSeverity, CaseStatuses, CustomFieldTypes } from '../../common/types/domain';
+import { getBuiltInStatuses } from '../../common/utils/statuses';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
 describe('utils', () => {
@@ -341,6 +342,12 @@ describe('utils', () => {
   });
 
   describe('constructQueryOptions', () => {
+    it('lists only cases with a pending decision when needsDecision is set', () => {
+      const { filter } = constructQueryOptions({ needsDecision: true });
+      expect(toKqlExpression(filter!)).toBe('cases.attributes.pending_decisions > 0');
+      expect(constructQueryOptions({ needsDecision: false }).filter).toBeUndefined();
+    });
+
     it('creates a filter with the tags', () => {
       const { filter } = constructQueryOptions({ tags: ['tag1', 'tag2'] });
       expect(filter).toMatchInlineSnapshot(`
@@ -383,6 +390,71 @@ describe('utils', () => {
           "type": "function",
         }
       `);
+    });
+
+    it('creates a filter with the status keys', () => {
+      expect(constructQueryOptions({ status_key: ['awaiting_customer', 'closed'] }).filter)
+        .toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.attributes.status_key",
+                },
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "awaiting_customer",
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.attributes.status_key",
+                },
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "closed",
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+          ],
+          "function": "or",
+          "type": "function",
+        }
+      `);
+    });
+
+    it('matches cases without a status key on the default status of their category', () => {
+      const filter = constructQueryOptions({
+        status_key: ['open', 'awaiting_customer'],
+        statuses: [
+          ...getBuiltInStatuses(),
+          {
+            key: 'awaiting_customer',
+            label: 'Awaiting customer',
+            category: CaseStatuses['in-progress'],
+            order: 3,
+            isDefault: false,
+            disabled: false,
+          },
+        ],
+      }).filter as KueryNode;
+
+      expect(toKqlExpression(filter)).toBe(
+        '((cases.attributes.status_key: open OR (cases.attributes.status: 0 AND NOT cases.attributes.status_key: *)) OR cases.attributes.status_key: awaiting_customer)'
+      );
     });
 
     it('creates a filter with the reporters', () => {

@@ -68,6 +68,26 @@ describe('CaseSettingsSchema', () => {
     expect(result.success).toBe(true);
     expect(result.data).toStrictEqual({ syncAlerts: false, extractObservables: false });
   });
+
+  it('accepts externalSync settings and strips their unknown fields', () => {
+    const result = CaseSettingsSchema.safeParse({
+      syncAlerts: true,
+      externalSync: { autoPush: true, conflictStrategy: 'kibana', foo: 'bar' },
+    });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual({
+      syncAlerts: true,
+      externalSync: { autoPush: true, conflictStrategy: 'kibana' },
+    });
+  });
+
+  it('rejects an unknown externalSync conflict strategy', () => {
+    const result = CaseSettingsSchema.safeParse({
+      syncAlerts: true,
+      externalSync: { autoPush: true, conflictStrategy: 'newest' },
+    });
+    expect(result.success).toBe(false);
+  });
 });
 
 describe('CaseAttributesSchema', () => {
@@ -176,6 +196,28 @@ describe('CaseAttributesSchema', () => {
       template: { id: 'template-id', version: 1 },
       [CASE_EXTENDED_FIELDS]: { field1: 'foo' },
     });
+  });
+
+  it('zod: accepts optional access and rejects an invalid access mode', () => {
+    const valid = CaseAttributesSchema.safeParse({
+      ...defaultRequest,
+      access: { mode: 'restricted' },
+    });
+    expect(valid.success).toBe(true);
+    expect(valid.data?.access).toStrictEqual({ mode: 'restricted' });
+
+    const invalid = CaseAttributesSchema.safeParse({
+      ...defaultRequest,
+      access: { mode: 'hidden' },
+    });
+    expect(invalid.success).toBe(false);
+  });
+
+  it('strips unknown access attributes', () => {
+    expect(
+      CaseAttributesSchema.parse({ ...defaultRequest, access: { mode: 'restricted', foo: 'bar' } })
+        .access
+    ).toStrictEqual({ mode: 'restricted' });
   });
 });
 

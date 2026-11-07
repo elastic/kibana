@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { UserActionTypes } from '../action/v1';
+import { AccessUserActionPayloadSchema } from '../access/v1';
+import { AiVerdictUserActionPayloadSchema } from '../verdict/v1';
+import { CaseSourceSchema } from '../../case/v1';
 import { AssigneesUserActionPayloadSchema } from '../assignees/v1';
 import { CategoryUserActionPayloadSchema } from '../category/v1';
 import {
@@ -19,18 +22,23 @@ import { SettingsUserActionPayloadSchema } from '../settings/v1';
 import { TagsUserActionPayloadSchema } from '../tags/v1';
 import { TitleUserActionPayloadSchema } from '../title/v1';
 
-const CommonPayloadAttributesSchema = z.object({
-  assignees: AssigneesUserActionPayloadSchema.shape.assignees,
-  description: DescriptionUserActionPayloadSchema.shape.description,
-  status: z.string(),
-  severity: z.string(),
-  tags: TagsUserActionPayloadSchema.shape.tags,
-  title: TitleUserActionPayloadSchema.shape.title,
-  settings: SettingsUserActionPayloadSchema.shape.settings,
-  owner: z.string(),
-  category: CategoryUserActionPayloadSchema.shape.category.optional(),
-  customFields: CustomFieldsUserActionPayloadSchema.shape.customFields.optional(),
-});
+const CommonPayloadAttributesSchema = lazySchema(() =>
+  z.object({
+    assignees: AssigneesUserActionPayloadSchema.shape.assignees,
+    description: DescriptionUserActionPayloadSchema.shape.description,
+    status: z.string(),
+    severity: z.string(),
+    tags: TagsUserActionPayloadSchema.shape.tags,
+    title: TitleUserActionPayloadSchema.shape.title,
+    settings: SettingsUserActionPayloadSchema.shape.settings,
+    owner: z.string(),
+    category: CategoryUserActionPayloadSchema.shape.category.optional(),
+    customFields: CustomFieldsUserActionPayloadSchema.shape.customFields.optional(),
+    access: AccessUserActionPayloadSchema.shape.access.optional(),
+    source: CaseSourceSchema.optional(),
+    ai_verdict: AiVerdictUserActionPayloadSchema.shape.ai_verdict.optional(),
+  })
+);
 
 export const CreateCaseUserActionSchema = z.object({
   type: z.literal(UserActionTypes.create_case),

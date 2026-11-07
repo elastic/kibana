@@ -762,7 +762,7 @@ describe('Attack Discovery worker chain', () => {
     it.each([
       ['resolve_investigation_id', 'data.set'],
       ['resolve_display_text', 'kibana.request'],
-      ['open_investigation', 'ai.conversation.create'],
+      ['open_investigation', 'investigations.create'],
       ['verify_investigation', 'ai.conversation.metadata.read'],
       ['attach_discovery', 'ai.attachment.add'],
       ['attach_alerts', 'foreach'],
@@ -775,15 +775,15 @@ describe('Attack Discovery worker chain', () => {
       ['resolve_analysis', 'data.set'],
       ['attach_verdict', 'ai.attachment.add'],
       ['refresh_verdict', 'ai.attachment.update'],
-      ['close_investigation_false_positive', 'ai.conversation.metadata.patch'],
+      ['close_investigation_false_positive', 'investigations.patch'],
       ['close_attack_false_positive', 'security.setAttackStatus'],
-      ['record_analysis_failure', 'ai.conversation.metadata.patch'],
+      ['record_analysis_failure', 'investigations.patch'],
       ['escalation_gate', 'workflow.execute'],
-      ['record_gate_failed', 'ai.conversation.metadata.patch'],
+      ['record_gate_failed', 'investigations.patch'],
       ['read_proposal_decision', 'kibana.request'],
-      ['close_investigation_declined', 'ai.conversation.metadata.patch'],
+      ['close_investigation_declined', 'investigations.patch'],
       ['close_attack_declined', 'security.setAttackStatus'],
-      ['record_decision_lapsed', 'ai.conversation.metadata.patch'],
+      ['record_decision_lapsed', 'investigations.patch'],
     ] as const)('implements %s as a real %s step', (name, type) => {
       expect(stepIn(reviewSteps, name)?.type).toBe(type);
     });
@@ -3253,7 +3253,7 @@ describe('Attack Discovery worker chain', () => {
     it('records a failed gate and lets the review continue', () => {
       expect(stepIn(reviewSteps, 'escalation_gate')?.['on-failure']).toEqual({ continue: true });
       const marker = stepIn(reviewSteps, 'record_gate_failed');
-      expect(marker?.type).toBe('ai.conversation.metadata.patch');
+      expect(marker?.type).toBe('investigations.patch');
       expect(marker?.if).toBe(
         '${{ steps.resolve_escalation.output.escalate == true and steps.escalation_gate.error != blank }}'
       );
@@ -3926,8 +3926,8 @@ describe('Attack Discovery worker chain', () => {
         );
       });
 
-      it('bumps the review to version 26 so its verdicts no longer name the decider', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.version).toBe(26);
+      it('bumps the review to version 27 so its verdicts no longer name the decider', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.version).toBe(27);
       });
     });
 

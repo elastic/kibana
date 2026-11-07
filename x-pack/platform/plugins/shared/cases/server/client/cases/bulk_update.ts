@@ -18,6 +18,8 @@ import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { isEqual } from 'lodash';
 
 import { nodeBuilder } from '@kbn/es-query';
+import { throwIfUnassigningRoomOwner } from './room';
+import { throwIfClosingWithOpenRequiredTasks } from './required_tasks';
 
 import type { AlertService, CasesService, CaseUserActionService } from '../../services';
 import type { UpdateAlertStatusRequest } from '../alerts/types';
@@ -37,17 +39,22 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
+  MAX_ASSIGNEES_PER_CASE,
   MAX_USER_ACTIONS_PER_CASE,
   SECURITY_ATTACK_ATTACHMENT_TYPE,
 } from '../../../common/constants';
 import type { Owner } from '../../../common/constants/types';
 import { Operations } from '../../authorization';
+import { createCaseEntity } from '../../authorization/utils';
 import { createCaseError, isSOError } from '../../common/error';
 import {
   createAlertUpdateStatusRequest,
   createAttackUpdateStatusRequest,
   flattenCaseSavedObject,
+  getAlertInfoFromComments,
+  isCaseRestricted,
 } from '../../common/utils';
+import type { AlertInfo } from '../../common/types';
 import {
   isAlertAttachmentType,
   isAttackAttachmentType,
@@ -59,24 +66,36 @@ import {
   dedupAssignees,
   fillMissingCustomFields,
   getCloseReasonIfValid,
+  getOutcomeFieldsForStatusChange,
+  getChangedVerdicts,
   getClosedInfoForUpdate,
+  getConfiguredStatuses,
   getDurationForUpdate,
   getInProgressInfoForUpdate,
+  getPauseFieldsForUpdate,
   getTimingMetricsForUpdate,
   getUserProfilesSafe,
+  resolveStatusForUpdate,
 } from './utils';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
+import type { CaseUpdateOrigin } from '../../events/types';
 import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
 import type {
   CaseAttributes,
   User,
   CaseAssignees,
   AttachmentAttributes,
+  CaseStatusesConfiguration,
   CustomFieldsConfiguration,
 } from '../../../common/types/domain';
-import { CaseStatuses, AttachmentType, UserActionTypes } from '../../../common/types/domain';
+import {
+  CaseAccessMode,
+  CaseStatuses,
+  AttachmentType,
+  UserActionTypes,
+} from '../../../common/types/domain';
 import {
   validateCustomFields,
   validateCaseExtendedFields,
@@ -105,7 +124,10 @@ import {
 } from '../../common/utils/pair_field_representations';
 import {
   APPLY_TEMPLATE_COUNTER,
+  CASE_RESTRICTED_COUNTER,
+  CASE_UNRESTRICTED_COUNTER,
   CLEAR_TEMPLATE_COUNTER,
+  RESTRICT_ALERT_UPDATE_FAILED_COUNTER,
   incrementCasesClientCounter,
 } from '../usage_counters';
 /**
@@ -205,13 +227,200 @@ function notifyPlatinumUsage(
   licensingService: LicensingService,
   requests: UpdateRequestWithOriginalCase[]
 ) {
-  const requestsUpdatingAssignees = requests.filter(
-    ({ updateReq }) => updateReq.assignees !== undefined
+  const requestsUpdatingAssigneesOrAccess = requests.filter(
+    ({ updateReq }) => updateReq.assignees !== undefined || updateReq.access !== undefined
   );
 
-  if (requestsUpdatingAssignees.length > 0) {
+  if (requestsUpdatingAssigneesOrAccess.length > 0) {
     licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
   }
+}
+
+/**
+ * Removes `access` from patch requests when the restricted-cases feature is
+ * disabled (the field is ignored on write), and drops `access: { mode:
+ * 'default' }` aimed at a case with no stored access field, so restating the
+ * implicit default is not recorded as a change.
+ */
+function normalizeAccessInRequests(
+  requests: CasePatchRequest[],
+  casesMap: Map<string, CaseSavedObjectTransformed>,
+  restrictedCasesEnabled: boolean
+): CasePatchRequest[] {
+  return requests.map((reqCase) => {
+    if (reqCase.access === undefined) {
+      return reqCase;
+    }
+
+    const storedAccess = casesMap.get(reqCase.id)?.attributes.access;
+    const isNoOpDefault =
+      storedAccess === undefined && reqCase.access.mode === CaseAccessMode.DEFAULT;
+
+    if (!restrictedCasesEnabled || isNoOpDefault) {
+      const { access, ...rest } = reqCase;
+      return rest;
+    }
+
+    return reqCase;
+  });
+}
+
+/**
+ * Throws when a request changes a case's access without a Platinum license.
+ * Restricted-case membership is the assignees list, which requires user
+ * profiles — the same licensing bar as case assignment.
+ */
+function throwIfAccessChangeWithoutValidLicense(
+  requests: UpdateRequestWithOriginalCase[],
+  hasPlatinumLicenseOrGreater: boolean
+) {
+  if (hasPlatinumLicenseOrGreater) {
+    return;
+  }
+
+  const requestsUpdatingAccess = requests.filter(({ updateReq }) => updateReq.access !== undefined);
+
+  if (requestsUpdatingAccess.length > 0) {
+    const ids = requestsUpdatingAccess.map(({ updateReq }) => updateReq.id);
+    throw Boom.forbidden(
+      `In order to change the access of cases, you must be subscribed to an Elastic Platinum license, ids: [${ids.join(
+        ', '
+      )}]`
+    );
+  }
+}
+
+/**
+ * The actor restricting a case is added to its assignees so they cannot lock
+ * themselves out. So is the person who owns the case's room: Agent Builder always
+ * lets a conversation's owner in, so they must be inside the case's access too.
+ * This is a deliberate system action: it does not require the assign privilege,
+ * unlike caller-provided assignee changes.
+ */
+function addActorToAssigneesOnRestrict(requests: UpdateRequestWithOriginalCase[], user: User) {
+  for (const { updateReq, originalCase } of requests) {
+    if (updateReq.access?.mode !== CaseAccessMode.RESTRICTED) {
+      continue;
+    }
+
+    const finalAssignees = updateReq.assignees ?? originalCase.attributes.assignees;
+    const missing = [user.profile_uid, originalCase.attributes.room_owner_uid].filter(
+      (uid, index, all): uid is string =>
+        uid != null &&
+        all.indexOf(uid) === index &&
+        !finalAssignees.some((assignee) => assignee.uid === uid)
+    );
+
+    if (missing.length > 0) {
+      if (finalAssignees.length + missing.length > MAX_ASSIGNEES_PER_CASE) {
+        throw Boom.badRequest(
+          `Cannot restrict case ${updateReq.id}: the assignees limit of ${MAX_ASSIGNEES_PER_CASE} prevents adding you and the room's owner as assignees.`
+        );
+      }
+
+      // keep the user action and the persisted payload uid-only
+      updateReq.assignees = [
+        ...finalAssignees.map(({ uid }) => ({ uid })),
+        ...missing.map((uid) => ({ uid })),
+      ];
+    }
+  }
+}
+
+/**
+ * A restricted case must always keep at least one assignee — the assignees
+ * list is its visibility boundary. Only a superuser may leave a restricted
+ * case without assignees (the recovery path when all assignees have left).
+ */
+function throwIfRestrictedCaseWithoutAssignees({
+  requests,
+  isSuperuser,
+}: {
+  requests: UpdateRequestWithOriginalCase[];
+  isSuperuser: boolean;
+}) {
+  if (isSuperuser) {
+    return;
+  }
+
+  const violatingRequests = requests.filter(({ updateReq, originalCase }) => {
+    const finalMode =
+      updateReq.access?.mode ?? originalCase.attributes.access?.mode ?? CaseAccessMode.DEFAULT;
+
+    if (finalMode !== CaseAccessMode.RESTRICTED) {
+      return false;
+    }
+
+    const finalAssignees = updateReq.assignees ?? originalCase.attributes.assignees;
+    return finalAssignees.length === 0;
+  });
+
+  if (violatingRequests.length > 0) {
+    const ids = violatingRequests.map(({ updateReq }) => updateReq.id);
+    throw Boom.badRequest(
+      `A restricted case must have at least one assignee, ids: [${ids.join(', ')}]`
+    );
+  }
+}
+
+/**
+ * Keeps `kibana.alert.case_ids` consistent with the case's access mode: the
+ * case id is stripped from every attached alert when a case becomes restricted
+ * and re-added when it returns to default. Runs BEFORE the case is persisted
+ * and propagates failures — a restricted case must never persist while alerts
+ * still reference it. The alert attachments remain the source of truth, so a
+ * partial update is recovered by retrying either direction.
+ */
+async function syncAlertCaseIdsForAccessChanges({
+  casesToUpdate,
+  caseService,
+  alertsService,
+}: {
+  casesToUpdate: UpdateRequestWithOriginalCase[];
+  caseService: CasesService;
+  alertsService: AlertService;
+}): Promise<void> {
+  const accessChanges = casesToUpdate.filter(({ updateReq }) => updateReq.access !== undefined);
+
+  if (accessChanges.length === 0) {
+    return;
+  }
+
+  // Also returns attack attachments; getAlertInfoFromComments below keeps only the alerts.
+  const alertComments = await getSyncableComments({ casesToSync: accessChanges, caseService });
+  const alertsByCaseId = new Map<string, AlertInfo[]>();
+
+  for (const comment of alertComments.saved_objects) {
+    const caseId = getID(comment, CASE_SAVED_OBJECT);
+
+    if (caseId == null) {
+      continue;
+    }
+
+    const alerts = getAlertInfoFromComments([comment.attributes]);
+
+    if (alerts.length > 0) {
+      alertsByCaseId.set(caseId, [...(alertsByCaseId.get(caseId) ?? []), ...alerts]);
+    }
+  }
+
+  if (alertsByCaseId.size === 0) {
+    return;
+  }
+
+  const restrictingCaseIds = new Set(
+    accessChanges
+      .filter(({ updateReq }) => updateReq.access?.mode === CaseAccessMode.RESTRICTED)
+      .map(({ updateReq }) => updateReq.id)
+  );
+
+  await Promise.all(
+    Array.from(alertsByCaseId.entries()).map(([caseId, alerts]) =>
+      restrictingCaseIds.has(caseId)
+        ? alertsService.removeCaseIdFromAlertsOrThrow({ alerts, caseId })
+        : alertsService.bulkUpdateCases({ alerts, caseIds: [caseId] })
+    )
+  );
 }
 
 /**
@@ -419,7 +628,7 @@ function partitionPatchRequest(
     } else if (foundCase.version !== reqCase.version) {
       conflictedCases.push(reqCase);
       // let's try to authorize the conflicted case even though we'll fail after afterwards just in case
-      casesToAuthorize.set(foundCase.id, { id: foundCase.id, owner: foundCase.attributes.owner });
+      casesToAuthorize.set(foundCase.id, createCaseEntity(foundCase));
     } else if (
       reqCase.status != null &&
       foundCase.attributes.status !== reqCase.status &&
@@ -427,9 +636,9 @@ function partitionPatchRequest(
     ) {
       // Track cases that are closed and a user is attempting to reopen
       reopenedCases.push(reqCase);
-      casesToAuthorize.set(foundCase.id, { id: foundCase.id, owner: foundCase.attributes.owner });
+      casesToAuthorize.set(foundCase.id, createCaseEntity(foundCase));
     } else {
-      casesToAuthorize.set(foundCase.id, { id: foundCase.id, owner: foundCase.attributes.owner });
+      casesToAuthorize.set(foundCase.id, createCaseEntity(foundCase));
     }
     if (reqCase.assignees) {
       if (
@@ -456,7 +665,7 @@ function partitionPatchRequest(
 /**
  * Fields that are allowed to be present when users reopen cases
  */
-const REOPEN_ONLY_CASE_FIELDS = new Set(['id', 'version', 'status']);
+const REOPEN_ONLY_CASE_FIELDS = new Set(['id', 'version', 'status', 'status_key']);
 
 /**
  * Fields that are allowed to be present when case is reassigned
@@ -574,10 +783,16 @@ const incrementTemplateUsageStats = async (
  *
  * @ignore
  */
+export interface BulkUpdateCasesClientOptions {
+  /** Marks the emitted `caseUpdated` events so listeners can tell an update applied from the external incident apart from a user edit. */
+  origin?: CaseUpdateOrigin;
+}
+
 export const bulkUpdate = async (
   cases: CasesPatchRequest,
   clientArgs: CasesClientArgs,
-  casesClient: CasesClient
+  casesClient: CasesClient,
+  options: BulkUpdateCasesClientOptions = {}
 ): Promise<CasesPatchResponse> => {
   const {
     services: {
@@ -598,8 +813,8 @@ export const bulkUpdate = async (
 
   try {
     const rawQuery = decodeWithExcessOrThrowZod(CasesPatchRequestSchema)(cases);
-    const query = emptyCasesAssigneesSanitizer(rawQuery);
-    const caseIds = query.cases.map((q) => q.id);
+    const sanitizedQuery = emptyCasesAssigneesSanitizer(rawQuery);
+    const caseIds = sanitizedQuery.cases.map((q) => q.id);
     const myCases = await caseService.getCases({
       caseIds,
     });
@@ -614,13 +829,63 @@ export const bulkUpdate = async (
       return acc;
     }, new Map<string, CaseSavedObjectTransformed>());
 
+    const configurations = await casesClient.configure.get();
+    const customStatusesEnabled = clientArgs.config.customStatuses.enabled;
+    const statusesByOwner = new Map(
+      configurations.map((conf) => [
+        conf.owner,
+        getConfiguredStatuses({ configuration: conf, customStatusesEnabled }),
+      ])
+    );
+    const pauseReasonsByOwner = new Map(
+      configurations.map((conf) => [conf.owner, conf.pauseReasons ?? []])
+    );
+
+    // Resolve the requested status before partitioning so reopen detection and every
+    // status-dependent step below see the category. A `status` equal to the case's current
+    // category is left alone so legacy clients don't move cases off a custom status.
+    const query = {
+      ...sanitizedQuery,
+      cases: sanitizedQuery.cases.map((reqCase) => {
+        const foundCase = casesMap.get(reqCase.id);
+        const { status_key: statusKey, ...reqCaseWithoutStatusKey } = reqCase;
+
+        if (
+          !foundCase ||
+          isSOError(foundCase) ||
+          (statusKey == null &&
+            (reqCase.status == null || reqCase.status === foundCase.attributes.status))
+        ) {
+          return reqCase;
+        }
+
+        return {
+          ...reqCaseWithoutStatusKey,
+          ...resolveStatusForUpdate({
+            status: reqCase.status,
+            statusKey,
+            statuses:
+              statusesByOwner.get(foundCase.attributes.owner) ??
+              getConfiguredStatuses({ customStatusesEnabled }),
+            customStatusesEnabled,
+          }),
+        };
+      }),
+    };
+
+    const requestCases = normalizeAccessInRequests(
+      query.cases,
+      casesMap,
+      clientArgs.config.restrictedCases.enabled
+    );
+
     const { nonExistingCases, conflictedCases, casesToAuthorize, reopenedCases, changedAssignees } =
-      partitionPatchRequest(casesMap, query.cases);
+      partitionPatchRequest(casesMap, requestCases);
 
     const operationsToAuthorize = getOperationsToAuthorize({
       reopenedCases,
       changedAssignees,
-      allCases: query.cases,
+      allCases: requestCases,
     });
 
     await authorization.ensureAuthorized({
@@ -644,12 +909,14 @@ export const bulkUpdate = async (
       );
     }
 
-    const configurations = await casesClient.configure.get();
     const customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration> = new Map(
       configurations.map((conf) => [conf.owner, conf.customFields])
     );
 
-    const casesToUpdate: UpdateRequestWithOriginalCase[] = query.cases.reduce(
+    const agenticEnabled = clientArgs.config.agentic.enabled;
+    const closeLinkedInvestigationsByCaseId = new Map<string, boolean>();
+
+    const casesToUpdate: UpdateRequestWithOriginalCase[] = requestCases.reduce(
       (acc: UpdateRequestWithOriginalCase[], updateCase) => {
         const originalCase = casesMap.get(updateCase.id);
 
@@ -657,13 +924,42 @@ export const bulkUpdate = async (
           return acc;
         }
 
-        const fieldsToUpdate = getCaseToUpdate(originalCase.attributes, updateCase);
+        // Request-only: never compared with or written to the stored case. The verdicts are
+        // ignored on write while agentic cases are disabled.
+        const {
+          closeLinkedInvestigations,
+          human_verdict: requestedHumanVerdict,
+          ai_verdict: requestedAiVerdict,
+          ...updateCaseWithoutTransient
+        } = updateCase;
+        if (agenticEnabled && closeLinkedInvestigations != null) {
+          closeLinkedInvestigationsByCaseId.set(updateCase.id, closeLinkedInvestigations);
+        }
+
+        const fieldsToUpdate = getCaseToUpdate(originalCase.attributes, updateCaseWithoutTransient);
         const closeReason = getCloseReasonIfValid(updateCase.closeReason);
         // Explicitly add the closing reason if it exists in the request
-        const fieldsToUpdateIncludingCloseReason =
-          fieldsToUpdate.status === CaseStatuses.closed && closeReason != null
+        const fieldsToUpdateIncludingCloseReason = {
+          ...(fieldsToUpdate.status === CaseStatuses.closed && closeReason != null
             ? { ...fieldsToUpdate, closeReason }
-            : fieldsToUpdate;
+            : fieldsToUpdate),
+          ...(agenticEnabled
+            ? {
+                ...getOutcomeFieldsForStatusChange({
+                  originalCase: originalCase.attributes,
+                  status: fieldsToUpdate.status as CaseStatuses | undefined,
+                  closeReason,
+                  requestedHumanVerdict,
+                }),
+                // Compared here rather than in getCaseToUpdate, which skips a value whose stored
+                // counterpart is missing (cases from before these fields existed).
+                ...getChangedVerdicts(originalCase.attributes, {
+                  human_verdict: requestedHumanVerdict,
+                  ai_verdict: requestedAiVerdict,
+                }),
+              }
+            : {}),
+        };
 
         const { id, version, ...restFields } = fieldsToUpdateIncludingCloseReason;
 
@@ -684,6 +980,12 @@ export const bulkUpdate = async (
 
     throwIfUpdateOwner(casesToUpdate);
     throwIfUpdateAssigneesWithoutValidLicense(casesToUpdate, hasPlatinumLicense);
+    throwIfAccessChangeWithoutValidLicense(casesToUpdate, hasPlatinumLicense);
+    addActorToAssigneesOnRestrict(casesToUpdate, user);
+    throwIfRestrictedCaseWithoutAssignees({
+      requests: casesToUpdate,
+      isSuperuser: authorization.isSuperuserRequest(),
+    });
 
     // Validate close reasons
     await Promise.all(
@@ -695,7 +997,9 @@ export const bulkUpdate = async (
 
         const syncAlertsAfterUpdate =
           updateReq.settings?.syncAlerts ?? originalCase.attributes.settings.syncAlerts;
-        if (!syncAlertsAfterUpdate) {
+        // With agentic cases on, the close reason is kept on the case itself, so it is valid
+        // without synced alerts; it just isn't copied to any alert.
+        if (!syncAlertsAfterUpdate && !agenticEnabled) {
           throw Boom.badRequest(
             `Cannot provide a close reason for case ${updateReq.id} when sync alerts is disabled.`
           );
@@ -712,6 +1016,15 @@ export const bulkUpdate = async (
     );
 
     await validateCustomFieldsInRequest({ casesToUpdate, customFieldsConfigurationMap });
+
+    await throwIfClosingWithOpenRequiredTasks({ casesToUpdate, clientArgs, hasPlatinumLicense });
+
+    await throwIfUnassigningRoomOwner(casesToUpdate, async (uid) => {
+      const profile = (
+        await getUserProfilesSafe(clientArgs.securityStartPlugin, new Set([uid]), clientArgs.logger)
+      )?.get(uid);
+      return profile?.user.full_name || profile?.user.username;
+    });
 
     // Pre-resolve global fields once per owner to avoid N SO queries inside Promise.all.
     // Owners are collected for both cases that include extended_fields in the request and
@@ -875,6 +1188,9 @@ export const bulkUpdate = async (
       user,
       casesToUpdate,
       customFieldsConfigurationMap,
+      statusesByOwner,
+      pauseReasonsByOwner,
+      customStatusesEnabled,
       linkMapsByOwner,
       logger,
       usageCounter: clientArgs.usageCounter,
@@ -967,6 +1283,17 @@ export const bulkUpdate = async (
       }
     }
 
+    try {
+      await syncAlertCaseIdsForAccessChanges({ casesToUpdate, caseService, alertsService });
+    } catch (error) {
+      if (
+        casesToUpdate.some(({ updateReq }) => updateReq.access?.mode === CaseAccessMode.RESTRICTED)
+      ) {
+        incrementCasesClientCounter(clientArgs, RESTRICT_ALERT_UPDATE_FAILED_COUNTER);
+      }
+      throw error;
+    }
+
     const updatedCases = await patchCases({ caseService, patchCasesPayload });
 
     // If a status update occurred and the case is synced then we need to update all alerts' status
@@ -1055,6 +1382,16 @@ export const bulkUpdate = async (
       builtUserActions,
     });
 
+    // Re-project analytics for cases that returned to default access: their
+    // analytics docs were deleted on restrict, and the reconciliation runners
+    // only walk recent writes, so the history would never return on its own.
+    for (const { updateReq } of casesToUpdate) {
+      if (updateReq.access?.mode === CaseAccessMode.DEFAULT) {
+        userActionService.reprojectCaseActivity(updateReq.id);
+        attachmentService.reprojectCaseAttachments(updateReq.id);
+      }
+    }
+
     const casesAndAssigneesToNotifyForAssignment = getCasesAndAssigneesToNotifyForAssignment(
       updatedCases,
       casesMap,
@@ -1072,6 +1409,23 @@ export const bulkUpdate = async (
 
     incrementCasesClientCounter(clientArgs, APPLY_TEMPLATE_COUNTER, appliedCases);
     incrementCasesClientCounter(clientArgs, CLEAR_TEMPLATE_COUNTER, clearedCases);
+
+    const persistedCaseIds = new Set(updatedCasesResponse.map(({ id }) => id));
+    const countPersistedAccessChanges = (mode: CaseAccessMode) =>
+      casesToUpdate.filter(
+        ({ updateReq }) => persistedCaseIds.has(updateReq.id) && updateReq.access?.mode === mode
+      ).length;
+
+    incrementCasesClientCounter(
+      clientArgs,
+      CASE_RESTRICTED_COUNTER,
+      countPersistedAccessChanges(CaseAccessMode.RESTRICTED)
+    );
+    incrementCasesClientCounter(
+      clientArgs,
+      CASE_UNRESTRICTED_COUNTER,
+      countPersistedAccessChanges(CaseAccessMode.DEFAULT)
+    );
 
     await incrementTemplateUsageStats(casesPerTemplateId, templatesService, logger);
 
@@ -1095,13 +1449,18 @@ export const bulkUpdate = async (
 
     for (const updatedCase of updatedCasesResponse) {
       const updatedFields = updatedFieldsByCaseId.get(updatedCase.id);
+      const closeLinkedInvestigations = closeLinkedInvestigationsByCaseId.get(updatedCase.id);
+      // Restricted cases emit too, so in-process listeners (auto-push, linked investigations)
+      // see them. The Workflows bridge drops restricted events; see event_bridge.ts.
       clientArgs.casesEventBus?.emitCaseUpdated(
         clientArgs.request,
         {
           caseId: updatedCase.id,
           owner: updatedCase.owner as Owner,
-
+          restricted: isCaseRestricted(updatedCase),
           ...(updatedFields != null ? { updatedFields } : {}),
+          ...(options.origin != null ? { origin: options.origin } : {}),
+          ...(closeLinkedInvestigations != null ? { closeLinkedInvestigations } : {}),
         },
         { previousCase: casesMap.get(updatedCase.id), updatedCase }
       );
@@ -1125,7 +1484,7 @@ export const bulkUpdate = async (
 const normalizeCaseAttributes = (
   updateCaseAttributes: Omit<
     CasePatchRequest,
-    'id' | 'version' | 'owner' | 'assignees' | 'closeReason'
+    'id' | 'version' | 'owner' | 'assignees' | 'closeReason' | 'pause_reason'
   >,
   customFieldsConfiguration?: CustomFieldsConfiguration
 ) => {
@@ -1170,6 +1529,9 @@ const createPatchCasesPayload = async ({
   casesToUpdate,
   user,
   customFieldsConfigurationMap,
+  statusesByOwner,
+  pauseReasonsByOwner,
+  customStatusesEnabled,
   linkMapsByOwner,
   logger,
   usageCounter,
@@ -1180,6 +1542,9 @@ const createPatchCasesPayload = async ({
   casesToUpdate: UpdateRequestWithOriginalCase[];
   user: User;
   customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration>;
+  statusesByOwner: Map<string, CaseStatusesConfiguration>;
+  pauseReasonsByOwner: Map<string, string[]>;
+  customStatusesEnabled: boolean;
   linkMapsByOwner: Map<string, ActiveLinkMaps>;
   logger: CasesClientArgs['logger'];
   usageCounter: CasesClientArgs['usageCounter'];
@@ -1221,6 +1586,7 @@ const createPatchCasesPayload = async ({
         owner,
         assignees,
         closeReason: _closeReason,
+        pause_reason: pauseReason,
         ...updateCaseAttributes
       } = updateReq;
 
@@ -1353,6 +1719,26 @@ const createPatchCasesPayload = async ({
         );
       }
 
+      const pauseFields = getPauseFieldsForUpdate({
+        originalCase: originalCase.attributes,
+        targetStatusKey: trimmedCaseAttributes.status_key,
+        targetCategory: trimmedCaseAttributes.status ?? originalCase.attributes.status,
+        pauseReason,
+        statuses:
+          statusesByOwner.get(originalCase.attributes.owner) ??
+          getConfiguredStatuses({ customStatusesEnabled }),
+        pauseReasons: pauseReasonsByOwner.get(originalCase.attributes.owner) ?? [],
+        customStatusesEnabled,
+        stateTransitionTimestamp: updatedDt,
+      });
+      const timePaused = pauseFields?.time_paused ?? originalCase.attributes.time_paused ?? 0;
+      if (pauseFields?.paused_at !== undefined) {
+        usageCounter?.incrementCounter({
+          counterName: pauseFields.paused_at != null ? 'CasesStatusPaused' : 'CasesStatusResumed',
+          incrementBy: 1,
+        });
+      }
+
       return {
         caseId,
         originalCase,
@@ -1363,6 +1749,7 @@ const createPatchCasesPayload = async ({
         updatedAttributes: {
           ...trimmedCaseAttributes,
           ...(dedupedAssignees && { assignees: dedupedAssignees }),
+          ...pauseFields,
           ...getClosedInfoForUpdate({
             user,
             closedDate: updatedDt,
@@ -1372,6 +1759,7 @@ const createPatchCasesPayload = async ({
             status: trimmedCaseAttributes.status,
             closedAt: updatedDt,
             createdAt: originalCase.attributes.created_at,
+            timePaused,
           }),
           ...getInProgressInfoForUpdate({
             status: trimmedCaseAttributes.status,
@@ -1383,6 +1771,7 @@ const createPatchCasesPayload = async ({
             stateTransitionTimestamp: updatedDt,
             createdAt: originalCase.attributes.created_at,
             inProgressAt: originalCase.attributes.in_progress_at,
+            timePaused,
           }),
           updated_at: updatedDt,
           updated_by: user,

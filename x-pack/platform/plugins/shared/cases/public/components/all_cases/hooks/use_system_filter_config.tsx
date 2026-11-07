@@ -14,6 +14,10 @@ import { SolutionFilter } from '../components/solution_filter';
 import { StatusFilter } from '../components/status_filter';
 import * as i18n from '../translations';
 import { SeverityFilter } from '../components/severity_filter';
+import { AccessFilter } from '../components/access_filter';
+import { SourceFilter } from '../components/source_filter';
+import { NeedsDecisionFilter } from '../components/needs_decision_filter';
+import { FILTER_FROM_ALERTZERO, FILTER_NEEDS_DECISION } from '../../../common/translations';
 import { AssigneesFilterPopover } from '../components/assignees_filter';
 import type { CurrentUserProfile } from '../../types';
 import type { FilterChangeHandler, FilterConfig, FilterConfigRenderParams } from '../types';
@@ -21,10 +25,16 @@ import type { FilterChangeHandler, FilterConfig, FilterConfigRenderParams } from
 interface UseFilterConfigProps {
   availableSolutions: string[];
   caseAssignmentAuthorized: boolean;
+  restrictedCasesAuthorized: boolean;
+  /** Agentic cases on: offers the "Opened from AlertZero" filter. */
+  agenticEnabled?: boolean;
+  /** Decisions on cases are on (the plugin that adds them says so): offers "Needs decision". */
+  decisionsEnabled?: boolean;
   categories: string[];
   countClosedCases: number | null;
   countInProgressCases: number | null;
   countOpenCases: number | null;
+  countPausedCases?: number | null;
   currentUserProfile: CurrentUserProfile;
   hiddenStatuses?: CaseStatuses[];
   isLoading: boolean;
@@ -36,10 +46,14 @@ interface UseFilterConfigProps {
 export const getSystemFilterConfig = ({
   availableSolutions,
   caseAssignmentAuthorized,
+  restrictedCasesAuthorized,
+  agenticEnabled = false,
+  decisionsEnabled = false,
   categories,
   countClosedCases,
   countInProgressCases,
   countOpenCases,
+  countPausedCases,
   currentUserProfile,
   hiddenStatuses,
   isLoading,
@@ -84,16 +98,19 @@ export const getSystemFilterConfig = ({
       getEmptyOptions: () => {
         return {
           status: [],
+          statusKey: [],
         };
       },
       render: ({ filterOptions }: FilterConfigRenderParams) => (
         <StatusFilter
           selectedOptionKeys={filterOptions?.status}
+          selectedStatusKeys={filterOptions?.statusKey}
           onChange={onSystemFilterChange}
           hiddenStatuses={hiddenStatuses}
           countClosedCases={countClosedCases}
           countInProgressCases={countInProgressCases}
           countOpenCases={countOpenCases}
+          countPausedCases={countPausedCases}
         />
       ),
     },
@@ -165,6 +182,51 @@ export const getSystemFilterConfig = ({
       ),
     },
     {
+      key: 'access',
+      label: i18n.ACCESS,
+      isActive: true,
+      isAvailable: restrictedCasesAuthorized && !isSelectorView,
+      getEmptyOptions: () => {
+        return {
+          access: [],
+        };
+      },
+      render: ({ filterOptions }: FilterConfigRenderParams) => (
+        <AccessFilter selectedOptionKeys={filterOptions.access} onChange={onSystemFilterChange} />
+      ),
+    },
+    {
+      key: 'source',
+      label: FILTER_FROM_ALERTZERO,
+      isActive: true,
+      isAvailable: agenticEnabled && !isSelectorView,
+      getEmptyOptions: () => {
+        return {
+          source: [],
+        };
+      },
+      render: ({ filterOptions }: FilterConfigRenderParams) => (
+        <SourceFilter selectedOptionKeys={filterOptions.source} onChange={onSystemFilterChange} />
+      ),
+    },
+    {
+      key: 'needsDecision',
+      label: FILTER_NEEDS_DECISION,
+      isActive: true,
+      isAvailable: agenticEnabled && decisionsEnabled && !isSelectorView,
+      getEmptyOptions: () => {
+        return {
+          needsDecision: [],
+        };
+      },
+      render: ({ filterOptions }: FilterConfigRenderParams) => (
+        <NeedsDecisionFilter
+          selectedOptionKeys={filterOptions.needsDecision}
+          onChange={onSystemFilterChange}
+        />
+      ),
+    },
+    {
       key: 'owner',
       label: i18n.SOLUTION,
       isActive: true,
@@ -188,10 +250,14 @@ export const getSystemFilterConfig = ({
 export const useSystemFilterConfig = ({
   availableSolutions,
   caseAssignmentAuthorized,
+  restrictedCasesAuthorized,
+  agenticEnabled,
+  decisionsEnabled,
   categories,
   countClosedCases,
   countInProgressCases,
   countOpenCases,
+  countPausedCases,
   currentUserProfile,
   hiddenStatuses,
   isLoading,
@@ -202,10 +268,14 @@ export const useSystemFilterConfig = ({
   const filterConfig = getSystemFilterConfig({
     availableSolutions,
     caseAssignmentAuthorized,
+    restrictedCasesAuthorized,
+    agenticEnabled,
+    decisionsEnabled,
     categories,
     countClosedCases,
     countInProgressCases,
     countOpenCases,
+    countPausedCases,
     currentUserProfile,
     hiddenStatuses,
     isLoading,

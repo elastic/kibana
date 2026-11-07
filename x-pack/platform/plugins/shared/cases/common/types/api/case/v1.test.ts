@@ -23,6 +23,8 @@ import {
   MAX_TAGS_PER_CASE,
   MAX_TEMPLATE_DEFINITION_LENGTH,
   MAX_TITLE_LENGTH,
+  MAX_CASE_STATUSES,
+  MAX_CASE_STATUS_KEY_LENGTH,
 } from '../../../constants';
 import { DeepStrict } from '@kbn/zod-helpers';
 import { parseErrors } from '../../../test_helpers/zod_schema_test_utils';
@@ -533,5 +535,74 @@ describe('CaseUpdateRequestTemplateSchema', () => {
 
   it('rejects a missing id', () => {
     expect(CaseUpdateRequestTemplateSchema.safeParse({ version: 1 }).success).toBe(false);
+  });
+});
+
+describe('status_key', () => {
+  describe('CasesFindRequestSchema', () => {
+    it('accepts a single status key', () => {
+      const request = { status_key: 'awaiting_customer', owner: 'cases' };
+
+      expect(CasesFindRequestSchema.parse(request)).toStrictEqual(request);
+    });
+
+    it('accepts an array of status keys', () => {
+      const request = { status_key: ['awaiting_customer', 'closed'], owner: 'cases' };
+
+      expect(CasesFindRequestSchema.parse(request)).toStrictEqual(request);
+    });
+
+    it(`rejects more than ${MAX_CASE_STATUSES} status keys`, () => {
+      expect(
+        parseErrors(CasesFindRequestSchema, {
+          status_key: new Array(MAX_CASE_STATUSES + 1).fill('open'),
+        })
+      ).not.toEqual([]);
+    });
+  });
+
+  describe('CasePatchRequestSchema', () => {
+    const defaultRequest = { id: 'basic-case-id', version: 'WzQ3LDFd' };
+
+    it('accepts a status key', () => {
+      const request = { ...defaultRequest, status_key: 'awaiting_customer' };
+
+      expect(CasePatchRequestSchema.parse(request)).toStrictEqual(request);
+    });
+
+    it('rejects a status key with invalid characters', () => {
+      expect(
+        parseErrors(CasePatchRequestSchema, { ...defaultRequest, status_key: 'Awaiting Customer' })
+      ).toContain(`Key must be lower case, a-z, 0-9, '_', and '-' are allowed`);
+    });
+
+    it(`rejects a status key longer than ${MAX_CASE_STATUS_KEY_LENGTH} characters`, () => {
+      expect(
+        parseErrors(CasePatchRequestSchema, {
+          ...defaultRequest,
+          status_key: 'a'.repeat(MAX_CASE_STATUS_KEY_LENGTH + 1),
+        })
+      ).not.toEqual([]);
+    });
+  });
+});
+
+describe('access', () => {
+  it('CasePostRequestSchema accepts an optional access object and rejects an invalid access mode', () => {
+    expect(
+      CasePostRequestSchema.parse({ ...validPostRequest, access: { mode: 'restricted' } })
+    ).toStrictEqual({ ...validPostRequest, access: { mode: 'restricted' } });
+
+    expect(
+      CasePostRequestSchema.safeParse({ ...validPostRequest, access: { mode: 'hidden' } }).success
+    ).toBe(false);
+  });
+
+  it('CasesFindRequestSchema accepts access as a single mode or an array of modes', () => {
+    expect(CasesFindRequestSchema.safeParse({ access: 'restricted' }).success).toBe(true);
+    expect(CasesFindRequestSchema.safeParse({ access: ['default', 'restricted'] }).success).toBe(
+      true
+    );
+    expect(CasesFindRequestSchema.safeParse({ access: 'hidden' }).success).toBe(false);
   });
 });

@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Redirect } from 'react-router-dom';
+import { encode } from '@kbn/rison';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { AgenticInvestigationsPublicPluginStart } from '@kbn/agentic-investigations-plugin/public';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { useAlertZeroInvestigationsCapabilities } from './hooks/use_alertzero_investigations_capabilities';
 import { EscalationsPage } from './pages/escalations';
@@ -20,7 +24,30 @@ import { LandingPage } from './pages/landing_page';
  */
 const EscalationsRoute: React.FC = () => {
   const { showEscalations } = useAlertZeroInvestigationsCapabilities();
+  const {
+    services: { agenticInvestigations },
+  } = useKibana<{ agenticInvestigations?: AgenticInvestigationsPublicPluginStart }>();
+  if (agenticInvestigations?.isCasesBridgeEnabled) {
+    return <EscalationsRedirectToCases />;
+  }
   return showEscalations ? <EscalationsPage /> : <Redirect to="/" />;
+};
+
+/**
+ * Escalations retired: every escalation now opens a case. Old links land on the cases list,
+ * filtered to cases opened from AlertZero.
+ */
+const EscalationsRedirectToCases: React.FC = () => {
+  const {
+    services: { application },
+  } = useKibana<CoreStart>();
+  useEffect(() => {
+    void application.navigateToApp('securitySolutionUI', {
+      path: `/cases?cases=${encodeURIComponent(encode({ source: ['alertzero'] }))}`,
+      replace: true,
+    });
+  }, [application]);
+  return null;
 };
 
 /**

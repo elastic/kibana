@@ -34,6 +34,8 @@ interface GetMenuArgs {
   onOpenDeleteModal: () => void;
   /** When provided, adds a "Run workflow" item gated on `canRunWorkflow`. */
   runWorkflow?: { canRunWorkflow: boolean; onOpen: () => void };
+  /** When provided, adds the "Room" item that opens and closes the case's room. */
+  room?: { label: string; onToggle: () => void };
 }
 
 export const getMenu = ({
@@ -47,8 +49,21 @@ export const getMenu = ({
   onCopyId,
   onOpenDeleteModal,
   runWorkflow,
+  room,
 }: GetMenuArgs): AppHeaderMenu => {
   const items = [
+    ...(room
+      ? [
+          {
+            id: 'caseRoom',
+            label: room.label,
+            iconType: 'comment' as const,
+            run: () => room.onToggle(),
+            testId: 'case-view-room-button',
+            order: 50,
+          },
+        ]
+      : []),
     {
       id: 'refreshCase',
       label: i18n.CASE_REFRESH,

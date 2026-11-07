@@ -39,6 +39,7 @@ const makeClient = (overrides: Record<string, jest.Mock> = {}) => ({
   get: jest.fn().mockResolvedValue(MOCK_CONVERSATION_PUBLIC),
   addAccessControlEntries: jest.fn().mockResolvedValue({}),
   removeAccessControlEntries: jest.fn().mockResolvedValue({}),
+  updateAccessControlAsOwner: jest.fn(),
   patchMetadata: jest.fn().mockResolvedValue({ conversation: MOCK_CONVERSATION_PUBLIC }),
   ...overrides,
 });

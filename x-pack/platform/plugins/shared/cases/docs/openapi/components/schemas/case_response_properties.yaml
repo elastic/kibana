@@ -25,6 +25,8 @@ required:
   - updated_by
   - version
 properties:
+  access:
+    $ref: 'case_access.yaml'
   assignees:
     $ref: 'assignees.yaml'
   category:
@@ -135,6 +137,59 @@ properties:
     $ref: 'case_severity.yaml'
   status:
     $ref: 'case_status.yaml'
+  status_key:
+    $ref: 'case_status_key.yaml'
+  close_reason:
+    type: string
+    nullable: true
+    description: Why the case was closed. Set when the case closes with a reason and cleared when it reopens.
+  human_verdict:
+    type: string
+    nullable: true
+    enum:
+      - true_positive
+      - false_positive
+      - benign_positive
+      - suspicious
+      - undetermined
+    description: The analyst's verdict. Set from the close reason when the case closes; editable.
+  ai_verdict:
+    $ref: 'case_ai_verdict.yaml'
+  source:
+    $ref: 'case_source.yaml'
+  room_conversation_id:
+    type: string
+    nullable: true
+    description: The Agent Builder conversation that is the case's room, created the first time someone opens the room.
+  room_owner_uid:
+    type: string
+    nullable: true
+    description: The user profile ID of the person who opened the room and owns its conversation. They can't be removed from the case's assignees while the room exists.
+  pending_decisions:
+    type: integer
+    minimum: 0
+    nullable: true
+    description: How many proposals on the case are still awaiting a decision.
+  paused_at:
+    type: string
+    format: date-time
+    nullable: true
+    description: Set while the case is in a status that pauses time tracking.
+    example: 2026-10-01T15:05:00.000Z
+  time_paused:
+    type: integer
+    description: Seconds the case has spent in statuses that pause time tracking, left out of `duration`, `time_to_investigate`, and `time_to_resolve`.
+    example: 86400
+  pause_reason:
+    type: string
+    nullable: true
+    description: The reason picked when the case was paused.
+    example: Awaiting vendor
+  resume_to_status_key:
+    type: string
+    nullable: true
+    description: The status key the case was paused from; moving the case back to it resumes time tracking.
+    example: in-progress
   tags:
     type: array
     items:

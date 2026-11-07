@@ -24,6 +24,13 @@ export const ALERTZERO_THIN_AGENT_LABELS = ['security', 'alertzero', 'watch'] as
 
 export const ALERTZERO_THIN_AGENT_AVATAR_SYMBOL = 'AZ';
 
+/** Owned by Cases (`CASES_OUTCOMES_AI_INDEX_ID`); AlertZero doesn't depend on the Cases plugin. */
+export const CASES_OUTCOMES_AI_INDEX_ID = 'cases-outcomes';
+
+export const ALERTZERO_THIN_AGENT_INSTRUCTIONS =
+  'Before deciding, query prior case outcomes in the cases-outcomes AI index for the same rule, ' +
+  'host, or observable and weigh the human verdict.';
+
 /**
  * Thin AlertZero agent type: empty skill floor, elastic capabilities off.
  * Watch skills come from workflow metadata / `configuration_overrides.skill_ids`.
@@ -43,8 +50,28 @@ export const agentType = {
   },
 } as const satisfies AgentTypeDefinition;
 
-export const registerAgentType = (agentBuilder: AgentBuilderPluginSetup): void => {
-  agentBuilder.agents.registerType(agentType);
+/**
+ * With the Cases bridge on (POC), the agent also reads closed Cases outcomes (Cases' managed AI
+ * index). Assigning it attaches the context engine's retrieval skill and query tools; without
+ * the context engine on, it is dropped. With the bridge off the type is main's.
+ */
+export const getAgentType = ({ casesOutcomes }: { casesOutcomes: boolean }) =>
+  casesOutcomes
+    ? ({
+        ...agentType,
+        baseConfiguration: {
+          ...agentType.baseConfiguration,
+          instructions: ALERTZERO_THIN_AGENT_INSTRUCTIONS,
+          ai_indices: [CASES_OUTCOMES_AI_INDEX_ID],
+        },
+      } satisfies AgentTypeDefinition)
+    : agentType;
+
+export const registerAgentType = (
+  agentBuilder: AgentBuilderPluginSetup,
+  { casesOutcomes = false }: { casesOutcomes?: boolean } = {}
+): void => {
+  agentBuilder.agents.registerType(getAgentType({ casesOutcomes }));
 };
 
 export const createAgentRequest = (): AgentCreateRequest => ({

@@ -17,15 +17,28 @@ import { createTagsUserActionBuilder } from './tags';
 import { createTitleUserActionBuilder } from './title';
 import { createCaseUserActionBuilder } from './create_case';
 import type { UserActionBuilderMap } from './types';
+import { createAccessUserActionBuilder } from './access';
+import { createAiVerdictUserActionBuilder, createHumanVerdictUserActionBuilder } from './verdict';
 import { createCategoryUserActionBuilder } from './category';
 import { createCustomFieldsUserActionBuilder } from './custom_fields/custom_fields';
 import { createObservablesUserActionBuilder } from './observables';
 import { createExtendedFieldsUserActionBuilder } from './extended_fields';
 import { createTemplateUserActionBuilder } from './template';
 import { createWorkflowUserActionBuilder } from './workflow';
+import { createSyncUserActionBuilder } from './sync';
+import { createDecisionUserActionBuilder } from './decision';
 import { createBulkAttachmentsUserActionBuilder } from './bulk_attachments';
+import {
+  createCreateTaskUserActionBuilder,
+  createUpdateTaskUserActionBuilder,
+  createDeleteTaskUserActionBuilder,
+  createApplyTaskTemplateUserActionBuilder,
+} from './tasks';
 
 export const builderMap: UserActionBuilderMap = {
+  access: createAccessUserActionBuilder,
+  ai_verdict: createAiVerdictUserActionBuilder,
+  human_verdict: createHumanVerdictUserActionBuilder,
   create_case: createCaseUserActionBuilder,
   connector: createConnectorUserActionBuilder,
   tags: createTagsUserActionBuilder,
@@ -43,5 +56,11 @@ export const builderMap: UserActionBuilderMap = {
   extended_fields: createExtendedFieldsUserActionBuilder,
   template: createTemplateUserActionBuilder,
   workflow: createWorkflowUserActionBuilder,
+  sync: createSyncUserActionBuilder,
+  decision: createDecisionUserActionBuilder,
   bulkAttachments: createBulkAttachmentsUserActionBuilder,
+  create_task: createCreateTaskUserActionBuilder,
+  update_task: createUpdateTaskUserActionBuilder,
+  delete_task: createDeleteTaskUserActionBuilder,
+  apply_task_template: createApplyTaskTemplateUserActionBuilder,
 };

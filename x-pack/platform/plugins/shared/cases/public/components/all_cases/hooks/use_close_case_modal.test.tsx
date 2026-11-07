@@ -121,7 +121,7 @@ describe('useCloseCaseModal', () => {
       await userEvent.click(screen.getByText(i18n.CLOSE_CASE_MODAL_CONFIRM));
 
       await waitFor(() => {
-        expect(onCloseCase).toHaveBeenCalledWith(undefined);
+        expect(onCloseCase).toHaveBeenCalledWith(undefined, undefined);
       });
 
       rerender();
@@ -152,7 +152,7 @@ describe('useCloseCaseModal', () => {
       await userEvent.click(screen.getByText(i18n.CLOSE_CASE_MODAL_CONFIRM));
 
       await waitFor(() => {
-        expect(onCloseCase).toHaveBeenCalledWith('duplicate');
+        expect(onCloseCase).toHaveBeenCalledWith('duplicate', undefined);
       });
     });
 
@@ -189,7 +189,7 @@ describe('useCloseCaseModal', () => {
       await userEvent.click(screen.getByText(i18n.CLOSE_CASE_MODAL_CONFIRM));
 
       await waitFor(() => {
-        expect(onCloseCase).toHaveBeenCalledWith(undefined);
+        expect(onCloseCase).toHaveBeenCalledWith(undefined, undefined);
       });
     });
 

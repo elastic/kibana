@@ -107,7 +107,7 @@ describe('Rule Tuning and Rule Coverage metadata patches', () => {
       allSteps(stepsOf(definition))
         .filter(
           (step) =>
-            step.type === 'ai.conversation.metadata.patch' &&
+            step.type === 'investigations.patch' &&
             'verdict' in ((step.with?.updates as Record<string, unknown> | undefined) ?? {})
         )
         .map(({ name }) => `${definition.id}: ${name}`)
@@ -1122,9 +1122,9 @@ describe('Rule Coverage outcome reports', () => {
 describe('Rule Tuning and Rule Coverage managed versions', () => {
   it.each([
     [ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.id, ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.version, 34],
-    [ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.id, ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.version, 36],
+    [ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.id, ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.version, 37],
     [ALERTZERO_COVERAGE_WORKER_WORKFLOW.id, ALERTZERO_COVERAGE_WORKER_WORKFLOW.version, 6],
-    [ALERTZERO_COVERAGE_REVIEW_WORKFLOW.id, ALERTZERO_COVERAGE_REVIEW_WORKFLOW.version, 8],
+    [ALERTZERO_COVERAGE_REVIEW_WORKFLOW.id, ALERTZERO_COVERAGE_REVIEW_WORKFLOW.version, 9],
   ])('bumps %s to the version that carries its reports', (_id, version, expected) => {
     expect(version).toBe(expected);
   });

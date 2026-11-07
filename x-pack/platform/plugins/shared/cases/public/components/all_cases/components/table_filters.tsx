@@ -30,11 +30,14 @@ import { SortFilter } from './sort_filter';
 import { useCasesConfig } from '../../../common/lib/kibana';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import { useGlobalInlineFields } from '../hooks/use_global_inline_fields';
+import { decisionsAvailability } from '../../../client/case_view_sections';
 
 export interface CasesTableFiltersProps {
   countClosedCases: number | null;
   countInProgressCases: number | null;
   countOpenCases: number | null;
+  /** Cases in a status that pauses time tracking; null when none is configured */
+  countPausedCases?: number | null;
   onFilterChanged: (filterOptions: Partial<FilterOptions>) => void;
   hiddenStatuses?: CaseStatuses[];
   availableSolutions: string[];
@@ -65,6 +68,7 @@ const CasesTableFiltersComponent = ({
   countClosedCases,
   countOpenCases,
   countInProgressCases,
+  countPausedCases,
   onFilterChanged,
   hiddenStatuses,
   availableSolutions,
@@ -86,7 +90,8 @@ const CasesTableFiltersComponent = ({
 }: CasesTableFiltersProps) => {
   const { data: tags = [], isLoading: isLoadingTags } = useGetTags();
   const { data: categories = [], isLoading: isLoadingCategories } = useGetCategories();
-  const { caseAssignmentAuthorized } = useCasesFeatures();
+  const { caseAssignmentAuthorized, restrictedCasesAuthorized } = useCasesFeatures();
+  const { agenticEnabled } = useCasesConfig();
   const {
     data: { customFields },
     isFetching: isLoadingCasesConfiguration,
@@ -131,10 +136,14 @@ const CasesTableFiltersComponent = ({
   const { systemFilterConfig } = useSystemFilterConfig({
     availableSolutions,
     caseAssignmentAuthorized,
+    restrictedCasesAuthorized,
+    agenticEnabled,
+    decisionsEnabled: decisionsAvailability.isEnabled(),
     categories,
     countClosedCases,
     countInProgressCases,
     countOpenCases,
+    countPausedCases,
     currentUserProfile,
     hiddenStatuses,
     isLoading: isLoadingFilters,

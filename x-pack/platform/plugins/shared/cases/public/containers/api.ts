@@ -7,6 +7,7 @@
 
 import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
+import type { FileJSON } from '@kbn/shared-ux-file-types';
 import type { CaseCustomField, UnifiedAttachments, User } from '../../common/types/domain';
 import type { Case, Cases } from '../../common';
 import type {
@@ -29,6 +30,7 @@ import type {
   UpdateSummary,
   CasesPatchResponse,
   BulkDeleteAttachmentsRequest,
+  taskApiV1,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -53,9 +55,11 @@ import {
   getCaseDetailsUrl,
   getCaseDetailsMetricsUrl,
   getCasePushUrl,
+  getCaseSyncUrl,
   getCaseFindUserActionsUrl,
   getCaseConnectorsUrl,
   getCaseUsersUrl,
+  getCaseFilesUrl,
   getCaseUserActionStatsUrl,
   getCustomFieldReplaceUrl,
   getCaseCreateObservableUrl,
@@ -64,6 +68,14 @@ import {
   getCaseBulkDeleteObservablesUrl,
   getCaseSimilarCasesUrl,
   getCaseBulkDeleteAttachmentsUrl,
+  getCaseTasksUrl,
+  getCaseTaskDetailsUrl,
+  getCaseTaskRunWorkflowUrl,
+  getCaseTaskRefreshWorkflowUrl,
+  getCaseTasksApplyTemplateUrl,
+  getTaskTemplateDetailsUrl,
+  getTaskCommentsUrl,
+  getTaskCommentDetailsUrl,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -74,7 +86,11 @@ import {
   INTERNAL_GET_CASE_CATEGORIES_URL,
   CASES_INTERNAL_URL,
   INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL,
+  CASES_TASK_TEMPLATES_URL,
 } from '../../common/constants';
+import type { CaseTask } from '../../common/types/domain/task/v1';
+import type { CaseTaskTemplate } from '../../common/types/domain/task_template/v1';
+import type { CaseTaskComment } from '../../common/types/domain/task_comment/v1';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
 import { KibanaServices } from '../common/lib/kibana';
@@ -117,6 +133,7 @@ import {
 } from './utils';
 import { decodeCasesSearchResponse, decodeCasesSimilarResponse } from '../api/decoders';
 import { DEFAULT_FROM_DATE, DEFAULT_TO_DATE } from './constants';
+import { decisionsAvailability } from '../client/case_view_sections';
 
 export const resolveCase = async ({
   caseId,
@@ -302,9 +319,11 @@ export const getCases = async ({
     assignees: [],
     reporters: [],
     status: [],
+    statusKey: [],
     tags: [],
     owner: [],
     category: [],
+    access: [],
     customFields: {},
     extendedFieldFilters: [],
     from: DEFAULT_FROM_DATE,
@@ -329,6 +348,7 @@ export const getCases = async ({
       filterOptions: filterOptions.severity,
       optionToBeRemoved: 'all',
     }),
+    ...(filterOptions.statusKey.length > 0 ? { status_key: filterOptions.statusKey } : {}),
     ...constructAssigneesFilter(filterOptions.assignees),
     ...constructReportersFilter(filterOptions.reporters),
     ...(filterOptions.tags.length > 0 ? { tags: filterOptions.tags } : {}),
@@ -336,6 +356,14 @@ export const getCases = async ({
     ...(filterOptions.searchFields.length > 0 ? { searchFields: filterOptions.searchFields } : {}),
     ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
     ...(filterOptions.category.length > 0 ? { category: filterOptions.category } : {}),
+    ...(filterOptions.access.length > 0 ? { access: filterOptions.access } : {}),
+    ...(filterOptions.source && filterOptions.source.length > 0
+      ? { source: filterOptions.source }
+      : {}),
+    // Off with the decisions setting, even when a saved list state still has it on.
+    ...(filterOptions.needsDecision?.includes('true') && decisionsAvailability.isEnabled()
+      ? { needsDecision: true }
+      : {}),
     ...constructCustomFieldsFilter(filterOptions.customFields),
     ...(filterOptions.extendedFieldFilters && filterOptions.extendedFieldFilters.length > 0
       ? { extendedFieldFilters: filterOptions.extendedFieldFilters }
@@ -397,6 +425,7 @@ export const patchCase = async ({
     | 'customFields'
     | 'extended_fields'
     | 'template'
+    | 'access'
   >;
   version: string;
   signal?: AbortSignal;
@@ -678,6 +707,29 @@ export const getCaseUsers = async ({
   });
 };
 
+export const getCaseFiles = async ({
+  caseId,
+  page,
+  perPage,
+  searchTerm,
+  signal,
+}: {
+  caseId: string;
+  page: number;
+  perPage: number;
+  searchTerm?: string;
+  signal?: AbortSignal;
+}): Promise<{ files: FileJSON[]; total: number }> => {
+  return KibanaServices.get().http.fetch<{ files: FileJSON[]; total: number }>(
+    getCaseFilesUrl(caseId),
+    {
+      method: 'GET',
+      query: { page, perPage, ...(searchTerm ? { searchTerm } : {}) },
+      signal,
+    }
+  );
+};
+
 export const postObservable = async (
   request: AddObservableRequest,
   caseId: string,
@@ -753,4 +805,127 @@ export const getSimilarCases = async ({
   );
 
   return convertSimilarCasesToCamel(decodeCasesSimilarResponse(response));
+};
+
+export const getCaseTasks = async (
+  caseId: string,
+  signal?: AbortSignal
+): Promise<taskApiV1.TasksResponse> =>
+  KibanaServices.get().http.fetch<taskApiV1.TasksResponse>(getCaseTasksUrl(caseId), {
+    method: 'GET',
+    signal,
+  });
+
+export const createTask = async (
+  caseId: string,
+  request: taskApiV1.TaskCreateRequest
+): Promise<CaseTask> =>
+  KibanaServices.get().http.fetch<CaseTask>(getCaseTasksUrl(caseId), {
+    method: 'POST',
+    body: JSON.stringify(request),
+  });
+
+export const updateTask = async (
+  caseId: string,
+  taskId: string,
+  request: taskApiV1.TaskPatchRequest
+): Promise<CaseTask> =>
+  KibanaServices.get().http.fetch<CaseTask>(getCaseTaskDetailsUrl(caseId, taskId), {
+    method: 'PATCH',
+    body: JSON.stringify(request),
+  });
+
+export const deleteTask = async (caseId: string, taskId: string): Promise<void> =>
+  KibanaServices.get().http.fetch(getCaseTaskDetailsUrl(caseId, taskId), { method: 'DELETE' });
+
+export const runTaskWorkflow = async (caseId: string, taskId: string): Promise<CaseTask> =>
+  KibanaServices.get().http.fetch<CaseTask>(getCaseTaskRunWorkflowUrl(caseId, taskId), {
+    method: 'POST',
+  });
+
+export const refreshTaskWorkflow = async (caseId: string, taskId: string): Promise<CaseTask> =>
+  KibanaServices.get().http.fetch<CaseTask>(getCaseTaskRefreshWorkflowUrl(caseId, taskId), {
+    method: 'POST',
+  });
+
+export const applyTaskTemplate = async (
+  caseId: string,
+  templateId: string
+): Promise<taskApiV1.TasksResponse> =>
+  KibanaServices.get().http.fetch<taskApiV1.TasksResponse>(getCaseTasksApplyTemplateUrl(caseId), {
+    method: 'POST',
+    body: JSON.stringify({ template_id: templateId } as taskApiV1.ApplyTaskTemplateRequest),
+  });
+
+export const getTaskTemplates = async (
+  owners: string[],
+  signal?: AbortSignal
+): Promise<taskApiV1.TaskTemplatesResponse> =>
+  KibanaServices.get().http.fetch<taskApiV1.TaskTemplatesResponse>(CASES_TASK_TEMPLATES_URL, {
+    method: 'GET',
+    query: { owner: owners },
+    signal,
+  });
+
+export const createTaskTemplate = async (
+  request: taskApiV1.TaskTemplateCreateRequest
+): Promise<CaseTaskTemplate> =>
+  KibanaServices.get().http.fetch<CaseTaskTemplate>(CASES_TASK_TEMPLATES_URL, {
+    method: 'POST',
+    body: JSON.stringify(request),
+  });
+
+export const updateTaskTemplate = async (
+  templateId: string,
+  request: taskApiV1.TaskTemplatePatchRequest
+): Promise<CaseTaskTemplate> =>
+  KibanaServices.get().http.fetch<CaseTaskTemplate>(getTaskTemplateDetailsUrl(templateId), {
+    method: 'PATCH',
+    body: JSON.stringify(request),
+  });
+
+export const deleteTaskTemplate = async (templateId: string): Promise<void> =>
+  KibanaServices.get().http.fetch(getTaskTemplateDetailsUrl(templateId), { method: 'DELETE' });
+
+export const getTaskComments = async (
+  caseId: string,
+  taskId: string,
+  signal?: AbortSignal
+): Promise<taskApiV1.TaskCommentsResponse> =>
+  KibanaServices.get().http.fetch<taskApiV1.TaskCommentsResponse>(
+    getTaskCommentsUrl(caseId, taskId),
+    { method: 'GET', signal }
+  );
+
+export const addTaskComment = async (
+  caseId: string,
+  taskId: string,
+  request: taskApiV1.TaskCommentCreateRequest
+): Promise<CaseTaskComment> =>
+  KibanaServices.get().http.fetch<CaseTaskComment>(getTaskCommentsUrl(caseId, taskId), {
+    method: 'POST',
+    body: JSON.stringify(request),
+  });
+
+export const deleteTaskComment = async (
+  caseId: string,
+  taskId: string,
+  commentId: string
+): Promise<void> =>
+  KibanaServices.get().http.fetch(getTaskCommentDetailsUrl(caseId, taskId, commentId), {
+    method: 'DELETE',
+  });
+export const syncCase = async ({
+  caseId,
+  signal,
+}: {
+  caseId: string;
+  signal?: AbortSignal;
+}): Promise<CaseUI> => {
+  const response = await KibanaServices.get().http.fetch<Case>(getCaseSyncUrl(caseId), {
+    method: 'POST',
+    signal,
+  });
+
+  return convertCaseToCamelCase(decodeCaseResponse(response));
 };

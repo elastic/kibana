@@ -6,20 +6,56 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
 import { getDefaultClosingReasonLabel } from '@kbn/response-ops-detections-close-reason';
+import { useCasesConfig } from '../../common/lib/kibana';
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { StatusUserAction, CaseStatuses } from '../../../common/types/domain';
 import type { UserActionBuilder } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import { statuses } from '../status';
+import { useCaseStatuses } from '../status/use_case_statuses';
 import * as i18n from './translations';
 
 const isStatusValid = (status: string): status is CaseStatuses => Object.hasOwn(statuses, status);
 
+const StatusBadge: React.FC<{ status: CaseStatuses; statusKey?: string }> = ({
+  status,
+  statusKey,
+}) => {
+  const { getStatus } = useCaseStatuses();
+
+  return <Status status={status} label={getStatus(statusKey, status).label} />;
+};
+StatusBadge.displayName = 'StatusBadge';
+
+/**
+ * A close reason kept on the case itself (agentic cases), with no alerts synced. Hidden with the
+ * flag off so existing status rows render as they always have.
+ */
+const CaseCloseReasonBadge: React.FC<{ userActionId: string; closeReason: string }> = ({
+  userActionId,
+  closeReason,
+}) => {
+  const { agenticEnabled } = useCasesConfig();
+  if (!agenticEnabled) {
+    return null;
+  }
+  return (
+    <EuiFlexItem grow={false}>
+      <EuiBadge data-test-subj={`${userActionId}-user-action-close-reason-badge`}>
+        {getDefaultClosingReasonLabel(closeReason)}
+      </EuiBadge>
+    </EuiFlexItem>
+  );
+};
+CaseCloseReasonBadge.displayName = 'CaseCloseReasonBadge';
+
 const getLabelTitle = (userAction: SnakeToCamelCase<StatusUserAction>) => {
   const status = userAction.payload.status ?? '';
+  const statusKey = userAction.payload.statusKey;
+  const pauseReason = userAction.payload.pauseReason;
   const closeReason = userAction.payload.closeReason;
   const syncedAlertCount = userAction.payload.syncedAlertCount;
 
@@ -35,8 +71,18 @@ const getLabelTitle = (userAction: SnakeToCamelCase<StatusUserAction>) => {
       >
         <EuiFlexItem grow={false}>{i18n.MARKED_CASE_AS}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <Status status={status} />
+          <StatusBadge status={status} statusKey={statusKey} />
         </EuiFlexItem>
+        {pauseReason != null && (
+          <EuiFlexItem grow={false} data-test-subj={`${userAction.id}-user-action-pause-reason`}>
+            <EuiText size="s" color="subdued">
+              {`· ${pauseReason}`}
+            </EuiText>
+          </EuiFlexItem>
+        )}
+        {closeReason != null && !shouldRenderSyncDetails && (
+          <CaseCloseReasonBadge userActionId={userAction.id} closeReason={closeReason} />
+        )}
         {shouldRenderSyncDetails && (
           <>
             <EuiFlexItem grow={false}>

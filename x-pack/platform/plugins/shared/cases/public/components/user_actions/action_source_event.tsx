@@ -10,6 +10,7 @@ import type { EuiCommentProps } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ActionSource } from '../../../common/types/domain';
+import { openConversationInChat } from '../../agent_builder/open_conversation_in_chat';
 import { isHeaderActionSource } from '../../../common/types/domain';
 import { useKibana } from '../../common/lib/kibana';
 import { getActionSourceKindLabel } from './translations';
@@ -101,15 +102,11 @@ const ActionSourceEvent: React.FC<ActionSourceEventProps> = ({ event, source }) 
   >(
     (clickEvent) => {
       clickEvent.preventDefault();
-      const openChat = agentBuilder?.openChat;
-      if (!canOpenConversation || runId == null || openChat == null) {
+      if (!canOpenConversation || runId == null) {
         return;
       }
 
-      openChat({
-        agentId: source.id,
-        conversationId: runId,
-      });
+      openConversationInChat(agentBuilder, { agentId: source.id, conversationId: runId });
     },
     [agentBuilder, canOpenConversation, runId, source.id]
   );

@@ -24,6 +24,8 @@ import { userProfilesMap } from '../../../containers/user_profiles/api.mock';
 import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
 import { coreMock } from '@kbn/core/public/mocks';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
+import { KibanaServices } from '../../../common/lib/kibana';
+import type { CaseUI } from '../../../../common/ui/types';
 
 jest.mock('../../../containers/configure/use_get_case_configuration');
 
@@ -187,6 +189,51 @@ describe('useCasesColumns ', () => {
         "rowHeader": "title",
       }
     `);
+  });
+
+  describe('Investigations column', () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    const getInvestigationsColumn = (agentic: boolean, counts?: Record<string, number>) => {
+      const actualConfig = KibanaServices.getConfig();
+      jest
+        .spyOn(KibanaServices, 'getConfig')
+        .mockReturnValue({ ...actualConfig, agentic: { enabled: agentic } } as ReturnType<
+          typeof KibanaServices.getConfig
+        >);
+      const { result } = renderHook(
+        () =>
+          useCasesColumns({
+            ...useCasesColumnsProps,
+            selectedColumns: [
+              ...DEFAULT_SELECTED_COLUMNS,
+              { field: 'linkedInvestigations', name: 'Investigations', isChecked: true },
+            ],
+            linkedInvestigationCounts: counts,
+          }),
+        { wrapper: (props) => <TestProviders {...props} /> }
+      );
+      return result.current.columns.find(
+        (column) => 'field' in column && column.field === 'linkedInvestigations'
+      );
+    };
+
+    it('shows how many investigations each case links, and an empty cell for none', () => {
+      const column = getInvestigationsColumn(true, { 'case-1': 2 });
+      expect(column).toBeDefined();
+      expect(column && 'sortable' in column ? column.sortable : undefined).toBeFalsy();
+
+      const render = (column as { render: (value: unknown, item: CaseUI) => React.ReactNode })
+        .render;
+      renderWithTestingProviders(<>{render(undefined, { id: 'case-1' } as CaseUI)}</>);
+      expect(screen.getByTestId('case-table-column-investigations-case-1')).toHaveTextContent('2');
+    });
+
+    it('is not offered when agentic cases are off', () => {
+      expect(getInvestigationsColumn(false, { 'case-1': 2 })).toBeUndefined();
+    });
   });
 
   it('only returns selected columns', async () => {

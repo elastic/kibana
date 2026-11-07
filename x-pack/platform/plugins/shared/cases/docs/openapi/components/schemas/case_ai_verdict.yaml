@@ -1,0 +1,41 @@
+type: object
+nullable: true
+description: The verdict an agent reached, with its confidence and who set it.
+required:
+  - verdict
+properties:
+  verdict:
+    $ref: 'case_verdict.yaml'
+  confidence:
+    type: number
+    minimum: 0
+    maximum: 1
+    nullable: true
+    description: How confident the agent is in the verdict, from 0 to 1.
+  summary:
+    type: string
+    nullable: true
+    description: The agent's summary behind the verdict, when it gave one.
+  actor:
+    type: object
+    nullable: true
+    description: Who set the verdict.
+    required:
+      - type
+    properties:
+      type:
+        type: string
+      id:
+        type: string
+        nullable: true
+      name:
+        type: string
+        nullable: true
+      run_id:
+        type: string
+        nullable: true
+  updated_at:
+    type: string
+    format: date-time
+    nullable: true
+    description: When the verdict was last set.

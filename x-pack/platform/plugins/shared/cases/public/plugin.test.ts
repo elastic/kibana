@@ -126,6 +126,12 @@ describe('Cases Ui Plugin', () => {
           "attachmentFramework": Object {
             "registerAttachment": [Function],
           },
+          "caseView": Object {
+            "registerSection": [Function],
+          },
+          "decisions": Object {
+            "setEnabled": [Function],
+          },
         }
       `);
     });
@@ -295,6 +301,9 @@ describe('Cases Ui Plugin', () => {
           attachmentsEnabled: false,
           chatEnabled: false,
           runWorkflowsEnabled: true,
+          customStatusesEnabled: false,
+          bidirectionalSyncEnabled: false,
+          agenticEnabled: false,
         },
         helpers: {
           canUseCases: expect.any(Function),

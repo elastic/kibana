@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
+import type { InvestigationsClient } from '@kbn/agentic-investigations-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { AttachmentsStart, ConversationsStart } from '@kbn/agent-builder-server';
 import type { AlertZeroRouter, AlertZeroSpaceIdResolver } from '../types';
@@ -37,6 +39,8 @@ export interface RouteDependencies {
   getConversationProposalsService: () => ConversationProposalsService;
   getActionsService: () => ActionsService;
   getAgentBuilderConversations: () => ConversationsStart;
+  /** The investigations writer; undefined when Agentic Investigations hasn't started. */
+  getInvestigationsClient: (request: KibanaRequest) => InvestigationsClient | undefined;
   getAgentBuilderAttachments: () => AttachmentsStart;
   getHuntServices: () => HuntServices;
   getScanFailuresService: () => ScanFailuresService;

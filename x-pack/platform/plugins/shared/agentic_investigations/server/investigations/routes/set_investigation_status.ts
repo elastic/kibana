@@ -18,6 +18,7 @@ export const registerSetInvestigationStatusRoute = ({
   router,
   logger,
   getInvestigationStatusService,
+  onInvestigationClosed,
 }: InvestigationRouteDependencies) => {
   router.versioned
     .put({
@@ -43,6 +44,17 @@ export const registerSetInvestigationStatusRoute = ({
             request.params.id,
             request.body
           );
+          if (request.body.status === 'closed' && onInvestigationClosed) {
+            try {
+              await onInvestigationClosed(request, request.params.id);
+            } catch (error) {
+              logger.warn(
+                `Investigation ${request.params.id} closed, but its case wasn't updated: ${
+                  error instanceof Error ? error.message : String(error)
+                }`
+              );
+            }
+          }
           return response.ok({ body: result });
         } catch (error) {
           return handleInvestigationRouteError(error, response, logger);

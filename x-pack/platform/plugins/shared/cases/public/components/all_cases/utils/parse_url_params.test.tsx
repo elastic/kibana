@@ -25,18 +25,22 @@ describe('parseUrlParams', () => {
   it('parses the default filter options and query params correctly', () => {
     expect(parseUrlParams(defaultValuesAsURL)).toMatchInlineSnapshot(`
       Object {
+        "access": Array [],
         "assignees": Array [],
         "category": Array [],
         "customFields": Object {},
         "extendedFieldFilters": Array [],
         "from": "now-30d",
+        "needsDecision": Array [],
         "page": 1,
         "perPage": 10,
         "search": "",
         "severity": Array [],
         "sortField": "createdAt",
         "sortOrder": "desc",
+        "source": Array [],
         "status": Array [],
+        "statusKey": Array [],
         "tags": Array [],
         "to": "now",
       }

@@ -15,7 +15,7 @@ import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { getEbtOwner } from './get_ebt_owner';
 
 export type AttachLocation = 'activity' | 'attachments';
-export type AttachMenuItemType = 'file' | 'timeline' | 'saved_object';
+export type AttachMenuItemType = 'file' | 'timeline' | 'saved_object' | 'conversation';
 
 /**
  * Events Based Tracking for clicking the Case View attach button

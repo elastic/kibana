@@ -21,10 +21,20 @@ import {
   type CasesTimelineIntegration,
 } from '../../timeline_context';
 import { SECURITY_TIMELINE_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
+import { UnifiedAttachmentTypeRegistry } from '../../../client/attachment_framework/unified_attachment_registry';
+import { registerInternalAttachments } from '../../attachments';
+import { useAgentBuilderAvailability } from '../../../agent_builder/use_agent_builder_availability';
 
 jest.mock('../../attachments/file/upload_file_modal', () => ({
   UploadFileModal: () => <div data-test-subj="upload-file-modal-mock" />,
 }));
+
+jest.mock('../../attachments/conversation/attach_conversation_modal_lazy', () => ({
+  AttachConversationModalLazy: () => <div data-test-subj="attach-conversation-modal-mock" />,
+}));
+
+jest.mock('../../../agent_builder/use_agent_builder_availability');
+const useAgentBuilderAvailabilityMock = useAgentBuilderAvailability as jest.Mock;
 
 const mockTrackAttachButtonClicked = jest.fn();
 const mockTrackAttachMenuItemClicked = jest.fn();
@@ -39,8 +49,14 @@ const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
 jest.mock('../use_on_refresh_case_view_page');
 
 const getConfigMock = jest.spyOn(KibanaServices, 'getConfig');
-const getCasesConfig = (attachmentsEnabled: boolean): ReturnType<typeof KibanaServices.getConfig> =>
-  ({ attachments: { enabled: attachmentsEnabled } } as ReturnType<typeof KibanaServices.getConfig>);
+const getCasesConfig = (
+  attachmentsEnabled: boolean,
+  chatEnabled = false
+): ReturnType<typeof KibanaServices.getConfig> =>
+  ({
+    attachments: { enabled: attachmentsEnabled },
+    chat: { enabled: chatEnabled },
+  } as ReturnType<typeof KibanaServices.getConfig>);
 
 const SelectTimelineModalMock: React.FC<{
   onSelect: (args: { savedObjectId: string; title: string }) => void;
@@ -83,6 +99,7 @@ describe('CaseViewAttachButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     getConfigMock.mockReturnValue(getCasesConfig(false));
+    useAgentBuilderAvailabilityMock.mockReturnValue({ isAgentBuilderAvailable: true });
     useCreateAttachmentsMock.mockReturnValue({
       isLoading: false,
       mutate: createAttachmentsMutate,
@@ -150,6 +167,49 @@ describe('CaseViewAttachButton', () => {
       }
     );
     expect(screen.queryByTestId('case-view-attach-button')).not.toBeInTheDocument();
+  });
+
+  describe('Conversation option', () => {
+    const registryWithConversation = new UnifiedAttachmentTypeRegistry();
+    registerInternalAttachments(registryWithConversation, { hasAgentBuilderPluginEnabled: true });
+
+    const renderButton = (registry = registryWithConversation) =>
+      renderWithTestingProviders(
+        <CaseViewAttachButton caseData={basicCase} attachLocation="activity" />,
+        { wrapperProps: { unifiedAttachmentTypeRegistry: registry } }
+      );
+
+    it('shows the option, tracks the click, and opens the modal when everything is enabled', async () => {
+      getConfigMock.mockReturnValue(getCasesConfig(true, true));
+      renderButton();
+      await user.click(await screen.findByTestId('case-view-attach-button'));
+      await user.click(await screen.findByTestId('case-view-attach-menu-conversation'));
+
+      expect(mockTrackAttachMenuItemClicked).toHaveBeenCalledWith('conversation');
+      await screen.findByTestId('attach-conversation-modal-mock');
+    });
+
+    it('is hidden when the chat flag is off', async () => {
+      getConfigMock.mockReturnValue(getCasesConfig(true, false));
+      renderButton();
+      await user.click(await screen.findByTestId('case-view-attach-button'));
+      expect(screen.queryByTestId('case-view-attach-menu-conversation')).not.toBeInTheDocument();
+    });
+
+    it('is hidden when Agent Builder is not available to the user', async () => {
+      getConfigMock.mockReturnValue(getCasesConfig(true, true));
+      useAgentBuilderAvailabilityMock.mockReturnValue({ isAgentBuilderAvailable: false });
+      renderButton();
+      await user.click(await screen.findByTestId('case-view-attach-button'));
+      expect(screen.queryByTestId('case-view-attach-menu-conversation')).not.toBeInTheDocument();
+    });
+
+    it('is hidden when the conversation type is not registered', async () => {
+      getConfigMock.mockReturnValue(getCasesConfig(true, true));
+      renderButton(new UnifiedAttachmentTypeRegistry());
+      await user.click(await screen.findByTestId('case-view-attach-button'));
+      expect(screen.queryByTestId('case-view-attach-menu-conversation')).not.toBeInTheDocument();
+    });
   });
 
   describe('Timeline option', () => {

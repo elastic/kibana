@@ -37,6 +37,24 @@ const withDeprecatedAttachmentIds = <Payload extends { ids: string[] }>(payload:
 /**
  * Registers bridge listeners that forward Cases domain events to workflows_extensions.
  */
+/**
+ * Restricted cases emit Cases events so in-process listeners (auto-push, linked investigations)
+ * see them, but no restricted-case data may reach a workflow: the event payload and the run would
+ * reveal the case to people who aren't its assignees. The in-process-only fields are stripped
+ * from what is forwarded.
+ */
+const isRestrictedEvent = (payload: { restricted?: boolean }): boolean =>
+  payload.restricted === true;
+
+const toWorkflowPayload = <
+  Payload extends { restricted?: boolean; closeLinkedInvestigations?: boolean }
+>(
+  payload: Payload
+): Omit<Payload, 'restricted' | 'closeLinkedInvestigations'> => {
+  const { restricted, closeLinkedInvestigations, ...rest } = payload;
+  return rest;
+};
+
 export function registerCasesWorkflowEventBridge(
   casesEventBus: CasesEventBus,
   workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined,
@@ -49,21 +67,47 @@ export function registerCasesWorkflowEventBridge(
   const forward = createWorkflowTriggerForwarder(workflowsExtensions, logger);
 
   casesEventBus.onCaseCreated((event) => {
-    void forward(CaseCreatedTriggerId, event.payload, event.request);
+    if (isRestrictedEvent(event.payload)) {
+      return;
+    }
+    void forward(CaseCreatedTriggerId, toWorkflowPayload(event.payload), event.request);
   });
 
   casesEventBus.onCaseUpdated((event, { previousCase, updatedCase }) => {
-    void forward(CaseUpdatedTriggerId, event.payload, event.request);
+    if (isRestrictedEvent(event.payload)) {
+      return;
+    }
+    const workflowPayload = toWorkflowPayload(event.payload);
+    void forward(CaseUpdatedTriggerId, workflowPayload, event.request);
 
-    const { updatedFields, ...reducedPayload } = event.payload;
-    if (updatedFields && previousCase && updatedCase && updatedFields.includes('status')) {
+    const { updatedFields, ...reducedPayload } = workflowPayload;
+    if (
+      updatedFields &&
+      previousCase &&
+      updatedCase &&
+      (updatedFields.includes('status') || updatedFields.includes('status_key'))
+    ) {
       const status = updatedCase.status;
       const previousStatus = previousCase.attributes.status;
+      const statusKey = updatedCase.status_key ?? undefined;
+      const previousStatusKey = previousCase.attributes.status_key ?? undefined;
 
-      if (status && previousStatus && status !== previousStatus) {
+      // A move between two statuses of the same category is still a status change to a workflow.
+      if (
+        status &&
+        previousStatus &&
+        (status !== previousStatus || statusKey !== previousStatusKey)
+      ) {
         void forward(
           CaseStatusUpdatedTriggerId,
-          { ...reducedPayload, status, previousStatus },
+          {
+            ...reducedPayload,
+            status,
+            previousStatus,
+            statusKey,
+            previousStatusKey,
+            paused: updatedCase.paused_at != null,
+          },
           event.request
         );
       }
@@ -87,15 +131,22 @@ export function registerCasesWorkflowEventBridge(
   });
 
   casesEventBus.onObservablesAdded((event) => {
-    void forward(ObservablesAddedTriggerId, event.payload, event.request);
+    if (isRestrictedEvent(event.payload)) {
+      return;
+    }
+    void forward(ObservablesAddedTriggerId, toWorkflowPayload(event.payload), event.request);
   });
 
   casesEventBus.onAttachmentsAdded((event) => {
-    const enhancedAttachmentType = normalizeAttachmentType(event.payload.attachmentType);
+    if (isRestrictedEvent(event.payload)) {
+      return;
+    }
+    const workflowPayload = toWorkflowPayload(event.payload);
+    const enhancedAttachmentType = normalizeAttachmentType(workflowPayload.attachmentType);
     void forward(
       AttachmentsAddedTriggerId,
       withDeprecatedAttachmentIds({
-        ...event.payload,
+        ...workflowPayload,
         attachmentType: enhancedAttachmentType,
       }),
       event.request
@@ -103,7 +154,7 @@ export function registerCasesWorkflowEventBridge(
 
     // if it's comments, also emit the comments added trigger
     if (enhancedAttachmentType === 'comment') {
-      const { attachmentType, ids, ...payload } = event.payload;
+      const { attachmentType, ids, ...payload } = workflowPayload;
       void forward(
         CommentsAddedTriggerId,
         {
@@ -116,10 +167,13 @@ export function registerCasesWorkflowEventBridge(
   });
 
   casesEventBus.onAttachmentsDeleted((event) => {
+    if (isRestrictedEvent(event.payload)) {
+      return;
+    }
     void forward(
       AttachmentsDeletedTriggerId,
       withDeprecatedAttachmentIds({
-        ...event.payload,
+        ...toWorkflowPayload(event.payload),
         attachmentType: normalizeAttachmentType(event.payload.attachmentType),
       }),
       event.request

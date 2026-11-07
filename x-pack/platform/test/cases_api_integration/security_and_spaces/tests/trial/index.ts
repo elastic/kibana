@@ -35,6 +35,8 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./cases/post_case'));
     loadTestFile(require.resolve('./cases/create_case_from_template'));
     loadTestFile(require.resolve('./cases/patch_case'));
+    // Inbound sync runs as a service account, which needs the security plugin.
+    loadTestFile(require.resolve('./cases/external_sync_notify'));
     // Public API — the fields a caller may apply to a case's `extended_fields`.
     loadTestFile(require.resolve('./cases/applicable_fields'));
     loadTestFile(require.resolve('./configure'));
@@ -47,6 +49,8 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./user_profiles/get_current'));
     // case observables are only available with a license above basic
     loadTestFile(require.resolve('./internal/observables'));
+    // case tasks are only available with a license above basic
+    loadTestFile(require.resolve('./internal/tasks'));
     // end-to-end observable extraction via the attachment bulkCreate side effect
     loadTestFile(require.resolve('./internal/extract_observables'));
 

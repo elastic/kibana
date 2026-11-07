@@ -16,6 +16,18 @@ export const CREATE_CASE_WITH_TEMPLATE_COUNTER = 'create_case_with_template';
 export const CREATE_CASE_WITHOUT_TEMPLATE_COUNTER = 'create_case_without_template';
 export const APPLY_TEMPLATE_COUNTER = 'apply_template';
 export const CLEAR_TEMPLATE_COUNTER = 'clear_template';
+export const SYNC_CASE_APPLIED_COUNTER = 'sync_case_applied';
+export const SYNC_CASE_NO_CHANGES_COUNTER = 'sync_case_no_changes';
+
+/**
+ * Restricted-cases counters. The calling source (API, workflow, UI, …) is
+ * recorded by the `cases_client.<source>` counter type.
+ */
+export const CASE_RESTRICTED_COUNTER = 'case_restricted';
+export const CASE_UNRESTRICTED_COUNTER = 'case_unrestricted';
+export const CREATE_RESTRICTED_CASE_COUNTER = 'create_restricted_case';
+export const RESTRICT_ALERT_UPDATE_FAILED_COUNTER = 'case_restrict_alert_update_failed';
+export const RESTRICTED_CASE_ACCESS_DENIED_COUNTER = 'restricted_case_access_denied';
 
 type CasesClientCounterArgs = Pick<CasesClientArgs, 'usageCounter' | 'clientSource' | 'logger'>;
 

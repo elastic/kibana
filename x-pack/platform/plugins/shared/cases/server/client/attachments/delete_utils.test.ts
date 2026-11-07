@@ -87,6 +87,7 @@ describe('deleteCaseAttachments', () => {
   beforeEach(() => {
     jest.resetAllMocks();
 
+    clientArgs.services.caseService.getCase.mockResolvedValue(mockCases[0]);
     clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
       new Map()
     );

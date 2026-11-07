@@ -1,0 +1,71 @@
+version: "1"
+name: "AlertZero demo: close alerts"
+description: >
+  POC only, hidden. The action behind the demo investigation's proposal: closes
+  the given alerts with the investigation's verdict as the reason. A separate
+  action so the shipped false-positive close (whose reason feeds rule tuning)
+  stays as it is.
+enabled: true
+tags:
+  - alertzero
+  - poc-demo
+consts:
+  actionMetadata:
+    name: Close alerts with the verdict
+    category: investigate
+    description: Closes the specified alerts with workflow_status=closed and the verdict as workflow_reason.
+    impact: medium
+    reversible: true
+    approvalPolicy: always-gate
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        actionInput:
+          type: object
+          properties:
+            alertIds:
+              type: array
+              maxItems: 100
+              items:
+                type: string
+            reason:
+              type: string
+              enum:
+                - true_positive
+                - false_positive
+                - benign_positive
+          required:
+            - alertIds
+            - reason
+      required:
+        - actionInput
+      additionalProperties: false
+outputs:
+  - name: closed_count
+    type: number
+steps:
+  - name: close_alerts
+    type: kibana.SetAlertsStatus
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+    with:
+      status: closed
+      reason: "{{ inputs.actionInput.reason }}"
+      conflicts: proceed
+      query:
+        bool:
+          filter:
+            terms:
+              _id: "${{ inputs.actionInput.alertIds }}"
+          must_not:
+            term:
+              kibana.alert.workflow_status: closed
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      closed_count: "${{ steps.close_alerts.output.updated }}"

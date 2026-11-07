@@ -196,6 +196,11 @@ export function transformESModelToCase(
 
   const severity = SEVERITY_ESMODEL_TO_EXTERNAL[caseAttributes.severity] ?? CaseSeverity.LOW;
   const status = STATUS_ESMODEL_TO_EXTERNAL[caseAttributes.status] ?? CaseStatuses.open;
+  const status_key = caseAttributes.status_key ?? null;
+  const paused_at = caseAttributes.paused_at ?? null;
+  const time_paused = caseAttributes.time_paused ?? 0;
+  const pause_reason = caseAttributes.pause_reason ?? null;
+  const resume_to_status_key = caseAttributes.resume_to_status_key ?? null;
   const category = !caseAttributes.category ? null : caseAttributes.category;
   const customFields = !caseAttributes.customFields
     ? []
@@ -206,6 +211,12 @@ export function transformESModelToCase(
   const settings = {
     syncAlerts: caseAttributes.settings?.syncAlerts ?? false,
     extractObservables: caseAttributes.settings?.extractObservables ?? false,
+    ...(caseAttributes.settings?.externalSync && {
+      externalSync: caseAttributes.settings.externalSync,
+    }),
+    ...(caseAttributes.settings?.agent && {
+      agent: caseAttributes.settings.agent,
+    }),
   };
 
   const version = encodeHitVersion(hit);
@@ -219,6 +230,11 @@ export function transformESModelToCase(
     ...caseAttributes,
     severity,
     status,
+    status_key,
+    paused_at,
+    time_paused,
+    pause_reason,
+    resume_to_status_key,
     connector,
     external_service: externalService,
     category,
@@ -287,6 +303,11 @@ export function transformSavedObjectToExternalModel(
   const severity =
     SEVERITY_ESMODEL_TO_EXTERNAL[caseSavedObjectAttributes.severity] ?? CaseSeverity.LOW;
   const status = STATUS_ESMODEL_TO_EXTERNAL[caseSavedObjectAttributes.status] ?? CaseStatuses.open;
+  const status_key = caseSavedObjectAttributes.status_key ?? null;
+  const paused_at = caseSavedObjectAttributes.paused_at ?? null;
+  const time_paused = caseSavedObjectAttributes.time_paused ?? 0;
+  const pause_reason = caseSavedObjectAttributes.pause_reason ?? null;
+  const resume_to_status_key = caseSavedObjectAttributes.resume_to_status_key ?? null;
   const category = !caseSavedObjectAttributes.category ? null : caseSavedObjectAttributes.category;
   const customFields = !caseSavedObjectAttributes.customFields
     ? []
@@ -297,6 +318,12 @@ export function transformSavedObjectToExternalModel(
   const settings = {
     syncAlerts: caseSavedObjectAttributes.settings?.syncAlerts ?? false,
     extractObservables: caseSavedObjectAttributes.settings?.extractObservables ?? false,
+    ...(caseSavedObjectAttributes.settings?.externalSync && {
+      externalSync: caseSavedObjectAttributes.settings.externalSync,
+    }),
+    ...(caseSavedObjectAttributes.settings?.agent && {
+      agent: caseSavedObjectAttributes.settings.agent,
+    }),
   };
 
   const extended_fields =
@@ -310,6 +337,11 @@ export function transformSavedObjectToExternalModel(
       ...caseSavedObjectAttributes,
       severity,
       status,
+      status_key,
+      paused_at,
+      time_paused,
+      pause_reason,
+      resume_to_status_key,
       connector,
       external_service: externalService,
       category,

@@ -169,6 +169,7 @@ export const conversationToInvestigation = (conversation: Conversation): Investi
     // `summary` is the long form; `description` is the single-line one. Prefer the richer field and
     // fall back, because a template only requires `status`.
     summary: readString(metadata.summary) ?? readString(metadata.description),
+    caseId: readString(metadata.case_id),
     pendingProposalCount: 0,
     events: toTimelineEvents(conversation.events),
   };

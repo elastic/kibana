@@ -19,11 +19,32 @@ describe('runActivityReconciliation', () => {
   const setup = (actions: Parameters<typeof stubFindOnePage>[1] = []) => {
     const client = savedObjectsClientMock.create();
     stubFindOnePage(client, actions);
+    // no restricted parent cases unless a test overrides this
+    client.bulkGet.mockResolvedValue({ saved_objects: [] });
     return { client, activityWriter: makeActivityWriterMock() };
   };
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('filters out activity whose parent case is restricted', async () => {
+    const { client, activityWriter } = setup([
+      makeUserAction('ua-A', { createdAt: '2026-05-05T00:00:00.000Z' }),
+    ]);
+    // the fixture's parent case is `case-1` in the default space
+    client.bulkGet.mockResolvedValue({
+      saved_objects: [{ id: 'case-1', attributes: { access: { mode: 'restricted' } } }] as never,
+    });
+
+    await runActivityReconciliation({
+      savedObjectsClient: client,
+      activityWriter,
+      logger,
+      lastRunAt: '2026-05-04T00:00:00.000Z',
+    });
+
+    expect(activityWriter.bulkUpsertActionsAwait).toHaveBeenCalledWith([]);
   });
 
   it('re-emits every user action created since lastRunAt in a single bulk', async () => {

@@ -35,6 +35,8 @@ export interface Props {
   disabled: boolean;
   handleShowEditFlyout: () => void;
   hideTitle?: boolean;
+  /** The field sync table shows the same targets, so the static mapping block steps aside. */
+  hideMappings?: boolean;
   isLoading: boolean;
   mappings: CaseConnectorMapping[];
   onChangeConnector: (id: string) => void;
@@ -48,6 +50,7 @@ const ConnectorsComponent: React.FC<Props> = ({
   disabled,
   handleShowEditFlyout,
   hideTitle = false,
+  hideMappings = false,
   isLoading,
   mappings,
   onChangeConnector,
@@ -128,7 +131,7 @@ const ConnectorsComponent: React.FC<Props> = ({
           <DeprecatedCallout />
         </>
       )}
-      {selectedConnector.type !== ConnectorTypes.none && (
+      {selectedConnector.type !== ConnectorTypes.none && !hideMappings && (
         <>
           <EuiSpacer size="m" />
           <Mapping

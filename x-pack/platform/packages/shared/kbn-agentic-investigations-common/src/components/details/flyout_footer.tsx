@@ -8,6 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { AiButtonEmpty } from '@kbn/ui-ai-components';
+import { useCaseBridge, useInvestigationCaseId } from '../case_bridge/case_bridge_context';
 import type { Investigation } from '../../types';
 import { type CardActionType } from '../actions';
 import {
@@ -57,18 +58,36 @@ export const ConversationDetailsFlyoutFooter = ({
 }: ConversationDetailsFlyoutFooterProps) => {
   const [modalAction, setModalAction] = useState<CardActionType | null>(null);
   const closeModal = useCallback(() => setModalAction(null), []);
-  const canRenderEscalationButton = Boolean(onOpenEscalation);
+  const caseBridge = useCaseBridge();
+  const caseId = useInvestigationCaseId(investigation);
+  const canRenderEscalationButton = Boolean(onOpenEscalation) || Boolean(caseBridge && caseId);
 
+  // With the cases bridge: View case once the investigation has one, Open a case before that.
   const escalationButton = (
     <EuiFlexItem grow={false}>
-      <EuiButton
-        color="primary"
-        iconType="document"
-        onClick={() => setModalAction('createEscalation')}
-        size="s"
-      >
-        {ACTIONS_TRANSLATIONS.buttons.openEscalation}
-      </EuiButton>
+      {caseBridge && caseId ? (
+        <EuiButton
+          color="primary"
+          iconType="casesApp"
+          onClick={() => caseBridge.onViewCase(caseId)}
+          size="s"
+          data-test-subj="investigationFlyoutViewCase"
+        >
+          {ACTIONS_TRANSLATIONS.buttons.viewCase}
+        </EuiButton>
+      ) : (
+        <EuiButton
+          color="primary"
+          iconType={caseBridge ? 'casesApp' : 'document'}
+          onClick={() => setModalAction('createEscalation')}
+          size="s"
+          data-test-subj={caseBridge ? 'investigationFlyoutOpenCase' : undefined}
+        >
+          {caseBridge
+            ? ACTIONS_TRANSLATIONS.buttons.openCase
+            : ACTIONS_TRANSLATIONS.buttons.openEscalation}
+        </EuiButton>
+      )}
     </EuiFlexItem>
   );
 
@@ -92,7 +111,9 @@ export const ConversationDetailsFlyoutFooter = ({
           </EuiFlexItem>
         )}
         {canRenderEscalationButton &&
-          (wrapEscalationButton ? wrapEscalationButton(escalationButton) : escalationButton)}
+          (wrapEscalationButton && !(caseBridge && caseId)
+            ? wrapEscalationButton(escalationButton)
+            : escalationButton)}
       </EuiFlexGroup>
 
       <InvestigationActionModals

@@ -6,7 +6,7 @@
  */
 
 import type { AttachmentAttributesV2, Case } from '../../../common/types/domain';
-import { AttachmentType } from '../../../common/types/domain';
+import { AttachmentType, CaseAccessMode } from '../../../common/types/domain';
 import { SECURITY_ALERT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { mockCaseComments, mockCaseUnifiedAttachments } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
@@ -27,6 +27,29 @@ describe('emitAttachmentsAddedEvent', () => {
       ids: ['attachment-1', 'attachment-2'],
       attachmentType: 'comment',
       owner: 'securitySolution',
+      restricted: false,
+    });
+  });
+
+  it('emits a restricted-flagged event for a restricted case', () => {
+    const clientArgs = createCasesClientMockArgs();
+    emitAttachmentsAddedEvent(
+      clientArgs,
+      {
+        id: 'case-1',
+        owner: 'securitySolution',
+        access: { mode: CaseAccessMode.RESTRICTED },
+      } as unknown as Case,
+      ['attachment-1'],
+      'comment'
+    );
+
+    expect(clientArgs.casesEventBus.emitAttachmentsAdded).toHaveBeenCalledWith(clientArgs.request, {
+      caseId: 'case-1',
+      ids: ['attachment-1'],
+      attachmentType: 'comment',
+      owner: 'securitySolution',
+      restricted: true,
     });
   });
 });
@@ -36,14 +59,34 @@ describe('emitAttachmentsDeletedEvents', () => {
 
   it('does not emit when there are no attachments', () => {
     const clientArgs = createCasesClientMockArgs();
-    emitAttachmentsDeletedEvents(clientArgs, 'case-1', []);
+    emitAttachmentsDeletedEvents(clientArgs, { id: 'case-1' }, []);
 
     expect(clientArgs.casesEventBus.emitAttachmentsDeleted).not.toHaveBeenCalled();
   });
 
+  it('emits a restricted-flagged event for a restricted case', () => {
+    const clientArgs = createCasesClientMockArgs();
+    emitAttachmentsDeletedEvents(
+      clientArgs,
+      { id: 'case-1', access: { mode: CaseAccessMode.RESTRICTED } },
+      [userComment]
+    );
+
+    expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledWith(
+      clientArgs.request,
+      {
+        caseId: 'case-1',
+        ids: ['mock-comment-1'],
+        attachmentType: 'user',
+        owner: 'securitySolution',
+        restricted: true,
+      }
+    );
+  });
+
   it('emits one event per attachment type', () => {
     const clientArgs = createCasesClientMockArgs();
-    emitAttachmentsDeletedEvents(clientArgs, 'case-1', [
+    emitAttachmentsDeletedEvents(clientArgs, { id: 'case-1' }, [
       userComment,
       alertComment,
       secondAlertComment,
@@ -69,7 +112,7 @@ describe('emitAttachmentsDeletedEvents', () => {
 
   it('flattens multi-alert attachments into index-aligned alert ids and indices', () => {
     const clientArgs = createCasesClientMockArgs();
-    emitAttachmentsDeletedEvents(clientArgs, 'case-1', [
+    emitAttachmentsDeletedEvents(clientArgs, { id: 'case-1' }, [
       {
         ...alertComment,
         attributes: {
@@ -91,7 +134,7 @@ describe('emitAttachmentsDeletedEvents', () => {
 
   it('includes alert references for unified alert attachments', () => {
     const clientArgs = createCasesClientMockArgs();
-    emitAttachmentsDeletedEvents(clientArgs, 'case-1', [
+    emitAttachmentsDeletedEvents(clientArgs, { id: 'case-1' }, [
       {
         id: 'unified-alert-1',
         attributes: {
@@ -118,7 +161,7 @@ describe('emitAttachmentsDeletedEvents', () => {
 
   it('includes event references for event attachments', () => {
     const clientArgs = createCasesClientMockArgs();
-    emitAttachmentsDeletedEvents(clientArgs, 'case-1', [
+    emitAttachmentsDeletedEvents(clientArgs, { id: 'case-1' }, [
       {
         id: 'event-attachment-1',
         attributes: {

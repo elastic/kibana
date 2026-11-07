@@ -55,7 +55,7 @@ export interface CasesColumnSelection {
 
 type SupportedFilterOptionsInURL = Pick<
   FilterOptions,
-  'search' | 'severity' | 'status' | 'tags' | 'assignees' | 'category'
+  'search' | 'severity' | 'status' | 'statusKey' | 'tags' | 'assignees' | 'category'
 >;
 
 export interface AllCasesTableState {

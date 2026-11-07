@@ -171,6 +171,25 @@ describe('getCasesTelemetryData', () => {
             },
           ],
         },
+        customStatuses: {
+          buckets: [
+            {
+              key: 'awaiting_customer',
+              doc_count: 3,
+              status: { buckets: [{ key: CasePersistedStatus.IN_PROGRESS, doc_count: 3 }] },
+            },
+            {
+              key: 'triage',
+              doc_count: 2,
+              status: {
+                buckets: [
+                  { key: CasePersistedStatus.IN_PROGRESS, doc_count: 1 },
+                  { key: CasePersistedStatus.OPEN, doc_count: 1 },
+                ],
+              },
+            },
+          ],
+        },
         totalsByOwner: {
           buckets: [
             {
@@ -385,6 +404,16 @@ describe('getCasesTelemetryData', () => {
             inProgress: 0,
             open: 2,
           },
+          customStatuses: {
+            closed: 0,
+            inProgress: 4,
+            open: 1,
+          },
+          pausedCases: {
+            closed: 0,
+            inProgress: 0,
+            open: 0,
+          },
           syncAlertsOff: 1,
           syncAlertsOn: 1,
           extractObservablesOff: 1,
@@ -404,6 +433,7 @@ describe('getCasesTelemetryData', () => {
           totalUsers: 1,
           totalWithAlerts: 41,
           totalWithConnectors: 4,
+          totalRestrictedCases: 0,
           assignees: {
             total: 5,
             totalWithZero: 100,
@@ -434,6 +464,7 @@ describe('getCasesTelemetryData', () => {
             total: 1,
           },
           totalWithMaxObservables: 1,
+          totalRestrictedCases: 0,
         },
         obs: {
           assignees: {
@@ -447,6 +478,7 @@ describe('getCasesTelemetryData', () => {
             total: 1,
           },
           totalWithMaxObservables: 1,
+          totalRestrictedCases: 0,
           ...solutionAttachmentFrameworkStats,
           total: 1,
           daily: 3,
@@ -471,6 +503,7 @@ describe('getCasesTelemetryData', () => {
             total: 1,
           },
           totalWithMaxObservables: 1,
+          totalRestrictedCases: 0,
           ...solutionAttachmentFrameworkStats,
           total: 1,
           daily: 3,
@@ -583,6 +616,13 @@ describe('getCasesTelemetryData', () => {
                     "path": "cases.attributes.observables",
                   },
                 },
+                "restrictedCases": Object {
+                  "filter": Object {
+                    "term": Object {
+                      "cases.attributes.access.mode": "restricted",
+                    },
+                  },
+                },
                 "status": Object {
                   "terms": Object {
                     "field": "cases.attributes.status",
@@ -627,6 +667,24 @@ describe('getCasesTelemetryData', () => {
                     "to": "now",
                   },
                 ],
+              },
+            },
+            "customStatuses": Object {
+              "aggs": Object {
+                "status": Object {
+                  "terms": Object {
+                    "field": "cases.attributes.status",
+                  },
+                },
+              },
+              "terms": Object {
+                "exclude": Array [
+                  "open",
+                  "in-progress",
+                  "closed",
+                ],
+                "field": "cases.attributes.status_key",
+                "size": 100,
               },
             },
             "extractObservables": Object {
@@ -704,6 +762,13 @@ describe('getCasesTelemetryData', () => {
                     "path": "cases.attributes.observables",
                   },
                 },
+                "restrictedCases": Object {
+                  "filter": Object {
+                    "term": Object {
+                      "cases.attributes.access.mode": "restricted",
+                    },
+                  },
+                },
                 "status": Object {
                   "terms": Object {
                     "field": "cases.attributes.status",
@@ -747,6 +812,27 @@ describe('getCasesTelemetryData', () => {
               },
               "nested": Object {
                 "path": "cases.attributes.observables",
+              },
+            },
+            "pausedCases": Object {
+              "aggs": Object {
+                "status": Object {
+                  "terms": Object {
+                    "field": "cases.attributes.status",
+                  },
+                },
+              },
+              "filter": Object {
+                "exists": Object {
+                  "field": "cases.attributes.paused_at",
+                },
+              },
+            },
+            "restrictedCases": Object {
+              "filter": Object {
+                "term": Object {
+                  "cases.attributes.access.mode": "restricted",
+                },
               },
             },
             "securitySolution": Object {
@@ -812,6 +898,13 @@ describe('getCasesTelemetryData', () => {
                   },
                   "nested": Object {
                     "path": "cases.attributes.observables",
+                  },
+                },
+                "restrictedCases": Object {
+                  "filter": Object {
+                    "term": Object {
+                      "cases.attributes.access.mode": "restricted",
+                    },
                   },
                 },
                 "status": Object {

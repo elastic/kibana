@@ -23,8 +23,10 @@ import type {
 export interface RegisterTemplateOptions {
   core: CoreStart;
   startDeps: TemplateStartDependencies;
-  /** `xpack.agenticInvestigations.escalations.enabled`. */
+  /** `xpack.agenticInvestigations.escalations.enabled`, off when the cases bridge is on. */
   escalationsEnabled: boolean;
+  /** `xpack.agenticInvestigations.cases.enabled`, with the Cases plugin available. */
+  casesBridgeEnabled: boolean;
   groupedAttachments: FlyoutGroupedAttachmentsRegistry;
   /** Read at render time: a solution registers the opener from its own start, after this plugin's. */
   getImpactEntityOpener: TemplateRegistrationContext['getImpactEntityOpener'];
@@ -40,6 +42,7 @@ export const registerTemplate = ({
   core,
   startDeps,
   escalationsEnabled,
+  casesBridgeEnabled,
   groupedAttachments,
   getImpactEntityOpener,
   templates,
@@ -114,6 +117,7 @@ export const registerTemplate = ({
     startDeps,
     services,
     escalationsEnabled,
+    casesBridgeEnabled,
     makeLazyWithProviders,
     groupedAttachments,
     renderAssignees,

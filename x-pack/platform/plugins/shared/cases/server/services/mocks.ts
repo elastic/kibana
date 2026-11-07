@@ -16,6 +16,9 @@ import type {
   AttachmentService,
   TemplatesService,
   FieldDefinitionsService,
+  CaseTaskService,
+  CaseTaskTemplateService,
+  CaseTaskCommentService,
 } from '.';
 import type { AttachmentGetter } from './attachments/operations/get';
 import type { DeleteAttachmentArgs } from './attachments/types';
@@ -49,6 +52,9 @@ export type LicensingServiceMock = jest.Mocked<LicensingService>;
 export type NotificationServiceMock = jest.Mocked<EmailNotificationService>;
 export type TemplatesServiceMock = jest.Mocked<TemplatesService>;
 export type FieldDefinitionsServiceMock = jest.Mocked<FieldDefinitionsService>;
+export type CaseTaskServiceMock = jest.Mocked<CaseTaskService>;
+export type CaseTaskTemplateServiceMock = jest.Mocked<CaseTaskTemplateService>;
+export type CaseTaskCommentServiceMock = jest.Mocked<CaseTaskCommentService>;
 
 export const createCaseServiceMock = (): CaseServiceMock => {
   const service: PublicMethodsOf<CaseServiceMock> = lazyObject({
@@ -57,7 +63,8 @@ export const createCaseServiceMock = (): CaseServiceMock => {
     getAllCaseComments: jest.fn(),
     getCase: jest.fn(),
     getCases: jest.fn(),
-    getCaseStatuses: jest.fn(),
+    getCaseStatusesAndAccess: jest.fn(),
+    findCaseIds: jest.fn(),
     getCaseIdsByAlertId: jest.fn(),
     getResolveCase: jest.fn(),
     getTags: jest.fn(),
@@ -69,6 +76,7 @@ export const createCaseServiceMock = (): CaseServiceMock => {
     findCasesGroupedByID: jest.fn(),
     searchCasesGroupedByID: jest.fn(),
     getCaseStatusStats: jest.fn(),
+    countCases: jest.fn(),
     executeAggregations: jest.fn(),
     bulkDeleteCaseEntities: jest.fn(),
     getCategories: jest.fn(),
@@ -146,6 +154,7 @@ export const createUserActionServiceMock = (): CaseUserActionServiceMock => {
     getMultipleCasesUserActionsTotal: jest.fn(),
     getCaseUserActionStats: jest.fn(),
     getUsers: jest.fn(),
+    reprojectCaseActivity: jest.fn(),
   });
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
@@ -163,6 +172,7 @@ export const createAlertServiceMock = (): AlertServiceMock => {
     ensureDocumentsExist: jest.fn(),
     confirmAlertIndices: jest.fn(),
     removeCaseIdFromAlerts: jest.fn(),
+    removeCaseIdFromAlertsOrThrow: jest.fn(),
     removeCaseIdsFromAllAlerts: jest.fn(),
   });
 
@@ -179,6 +189,7 @@ const createAttachmentGetterServiceMock = (): AttachmentGetterServiceMock => {
     getAllDocumentsAttachedToCase: jest.fn(),
     getUnifiedAttachmentsByTypes: jest.fn().mockResolvedValue([]),
     getCaseAttatchmentStats: jest.fn(),
+    getUnifiedAttachmentCountsByType: jest.fn(),
     getAttachmentIdsForCases: jest.fn(),
     getFileAttachmentsForDeletion: jest.fn(),
     getCaseAttachmentsForDeletion: jest.fn(),
@@ -207,6 +218,7 @@ export const createAttachmentServiceMock = (): AttachmentServiceMock => {
     countAlertsAttachedToCase: jest.fn(),
     countAlertsWithinCase: jest.fn(),
     countPersistableStateAndExternalReferenceAttachments: jest.fn(),
+    reprojectCaseAttachments: jest.fn(),
   });
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
@@ -270,4 +282,46 @@ export const createFieldDefinitionsServiceMock = (): FieldDefinitionsServiceMock
   });
 
   return service as unknown as FieldDefinitionsServiceMock;
+};
+
+export const createCaseTaskServiceMock = (): CaseTaskServiceMock => {
+  const service: PublicMethodsOf<CaseTaskService> = lazyObject({
+    createTask: jest.fn(),
+    bulkCreateTasks: jest.fn(),
+    getTask: jest.fn(),
+    getTasksByCase: jest.fn(),
+    // No tasks by default, so the close-time required-task check passes in unrelated tests.
+    findTasks: jest.fn().mockResolvedValue({ tasks: [], total: 0 }),
+    updateTask: jest.fn(),
+    deleteTask: jest.fn(),
+    deleteTasksByCase: jest.fn(),
+    reorderTasks: jest.fn(),
+  });
+
+  return service as unknown as CaseTaskServiceMock;
+};
+
+export const createCaseTaskTemplateServiceMock = (): CaseTaskTemplateServiceMock => {
+  const service: PublicMethodsOf<CaseTaskTemplateService> = lazyObject({
+    createTemplate: jest.fn(),
+    getTemplate: jest.fn(),
+    findTemplates: jest.fn(),
+    updateTemplate: jest.fn(),
+    deleteTemplate: jest.fn(),
+  });
+
+  return service as unknown as CaseTaskTemplateServiceMock;
+};
+
+export const createCaseTaskCommentServiceMock = (): CaseTaskCommentServiceMock => {
+  const service: PublicMethodsOf<CaseTaskCommentService> = lazyObject({
+    create: jest.fn(),
+    get: jest.fn(),
+    getByTask: jest.fn(),
+    countByCase: jest.fn(),
+    delete: jest.fn(),
+    deleteBy: jest.fn(),
+  });
+
+  return service as unknown as CaseTaskCommentServiceMock;
 };

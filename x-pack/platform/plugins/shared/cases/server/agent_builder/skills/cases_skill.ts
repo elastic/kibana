@@ -9,7 +9,7 @@ import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definitio
 import { platformCoreTools, platformCoreCasesTools } from '@kbn/agent-builder-common';
 
 const SKILL_DESCRIPTION =
-  'Manage investigation and incident cases across Elastic Security, Observability, and Stack Management. Covers creating, updating, searching, and enriching cases with comments, alerts, events, and observables (IOCs).';
+  'Manage investigation and incident cases across Elastic Security, Observability, and Stack Management. Covers creating, updating, searching, and enriching cases with comments, alerts, events, and observables (IOCs). Restricted cases are visible only to their assignees.';
 
 const EXTENDED_FIELDS_SECTION = `
 ## Extended fields (template fields)
@@ -44,11 +44,69 @@ Example:
 \`\`\`
 `;
 
-const buildManageModesCell = (isTemplatesEnabled: boolean) => {
+const buildManageModesCell = (isTemplatesEnabled: boolean, agenticEnabled: boolean) => {
   const base =
     '`create`, `create_from_template`, `update`, `update_bulk`, `delete`, `assign`, `unassign`, `add_tags`, `set_custom_field`';
-  return isTemplatesEnabled ? `${base}, \`set_extended_fields\`` : base;
+  const withLinks = agenticEnabled
+    ? `${base}, \`set_status\`, \`link_cases\`, \`unlink_case\`, \`link_investigation\`, \`unlink_investigation\``
+    : base;
+  return isTemplatesEnabled ? `${withLinks}, \`set_extended_fields\`` : withLinks;
 };
+
+interface CasesSkillOptions {
+  tasksEnabled?: boolean;
+  agenticEnabled?: boolean;
+}
+
+const TASKS_ROW = `
+| \`${platformCoreCasesTools.tasks}\` | \`list\`, \`find_task_lists\`, \`add_task_list\`, \`create_tasks\`, \`update_task\`, \`complete_task\`, \`reorder\`, \`run_workflow\` |`;
+
+const CONFIRMED_ACTIONS_ROW = `
+| \`${platformCoreCasesTools.confirmedActions}\` | \`close\`, \`set_visibility\`, \`change_assignees\` (restricted cases), \`sync\`, \`push\`. The user confirms each call in the chat. |`;
+
+const STATUS_SECTION = `
+## Statuses and paused time
+
+Read a case's status with \`${platformCoreTools.cases}\` mode \`status\`: its status, the category it belongs to (open, in progress, or closed), whether time tracking is paused and for how long, and the statuses it can move to. Move it with \`${platformCoreCasesTools.manage}\` mode \`set_status\` and a \`status_key\` from that list. Statuses marked \`pauses\` pause time tracking and need a \`pause_reason\`, one of the \`pause_reasons\` the status mode returns; moving to a status that doesn't pause resumes it. To find cases in a status, pass \`status_key\` to search. Closing is different: see "Changes the user confirms".
+`;
+
+const TASKS_SECTION = `
+## Task lists
+
+Read a case's tasks with \`${platformCoreCasesTools.tasks}\` mode \`list\`. It also returns the required tasks that are still open: a case can't close until those are done.
+
+Write tasks two ways: add a task list (\`find_task_lists\`, then \`add_task_list\`), or write one from scratch with \`create_tasks\`. Only people and task lists attach workflows to tasks; you run them. Edit, assign, mark required, and reorder with \`update_task\` and \`reorder\`.
+
+When the user asks you to work through the tasks:
+1. List the open tasks.
+2. Do the ones your tools can do: look up alerts and cases, summarize, add comments or evidence, link cases and investigations. Mark each one done with \`complete_task\` as soon as it is done.
+3. For a task that names a workflow (\`workflow_id\`), call \`run_workflow\`. The task completes only when the run succeeds; if it fails or is still running, say so and leave it open.
+4. Leave the rest for people, and say which tasks you left and why (for example, it needs a decision, or access you don't have).
+
+Never mark a task done that you didn't do.
+`;
+
+const AGENTIC_SECTION = `
+## Who can see a case
+
+A restricted case is visible only to its assignees: they are its members. A new case may be created restricted (\`create\` with \`access: { mode: "restricted" }\`). Restricting or unrestricting an existing case, and changing the assignees of a restricted case, go through \`${platformCoreCasesTools.confirmedActions}\` (\`set_visibility\`, \`change_assignees\`). Search and get never return a restricted case the user can't see: say the case wasn't found, never guess that a hidden case exists.
+
+## External incident and sync
+
+Read the sync state with \`${platformCoreTools.cases}\` mode \`sync_state\`: the connector, the external incident, when it last synced, and the sync settings. Sync now or push with \`${platformCoreCasesTools.confirmedActions}\` (\`sync\`, \`push\`): both send data outside Elastic.
+
+## Related cases, investigations, and conversations
+
+Read a case's Related list with \`${platformCoreTools.cases}\` mode \`related\`: linked cases, cases that share its alerts or observables, and its linked investigations. Link and unlink cases with \`${platformCoreCasesTools.manage}\` (\`link_cases\`, \`unlink_case\`): a link is a reference both cases list, nothing is merged or copied, and it gives nobody access. Link and unlink AlertZero investigations with \`link_investigation\` and \`unlink_investigation\`; a linked investigation links back to the case. Attach this conversation, or another one by id, with \`${platformCoreCasesTools.manageAttachments}\` mode \`attach_conversation\`.
+
+## Changes the user confirms
+
+Closing a case, restricting or unrestricting it, changing the assignees of a restricted case, syncing, and pushing all use \`${platformCoreCasesTools.confirmedActions}\`. Before you call it, say in one sentence what will change (for example, "I'll close case #42 as false positive; its two linked investigations close too."). The chat then asks the user to confirm; if they decline, stop and say nothing changed. Never try these through \`update\`, \`assign\`, or \`set_status\`: those calls are refused. Everything else you do directly, always with the user's own permissions, and the case activity shows you as the actor.
+
+## In a case room
+
+A case room is the case's own chat. The case comes with each message as an attachment, so you already know which case you're in: use its id and don't ask for the owner, which is the case's. Keep replies short; people can post a reply to the case themselves.
+`;
 
 const FIND_TEMPLATES_ROW = `
 | \`${platformCoreCasesTools.findTemplates}\` | Look up case templates by name to resolve a \`case_template_id\` |`;
@@ -64,7 +122,10 @@ const FIND_TEMPLATES_SECTION = `
 - \`total\` greater than 1, or the only match has \`nameMatch: false\` (it only matched a field/description, not the name): list the candidates (name + description) and ask the user which one they meant — never auto-pin a field-only match or a lone last-page row.
 `;
 
-export const buildCasesSkill = (isTemplatesEnabled: boolean) =>
+export const buildCasesSkill = (
+  isTemplatesEnabled: boolean,
+  { tasksEnabled = false, agenticEnabled = false }: CasesSkillOptions = {}
+) =>
   defineSkillType({
     id: 'cases-management',
     name: 'cases-management',
@@ -79,19 +140,26 @@ You have full read **and write** access to Elastic cases across Security, Observ
 |------|------------|
 | \`${
       platformCoreTools.cases
-    }\` | get by ID, bulk get, search/filter, find similar, find by alert ID |
-| \`${platformCoreCasesTools.manage}\` | ${buildManageModesCell(isTemplatesEnabled)} |
+    }\` | get by ID, bulk get, search/filter, find similar, find by alert ID${
+      agenticEnabled ? ', `status`, `related`, `sync_state`' : ''
+    } |
+| \`${platformCoreCasesTools.manage}\` | ${buildManageModesCell(
+      isTemplatesEnabled,
+      agenticEnabled
+    )} |
 | \`${
       platformCoreCasesTools.getAttachments
     }\` | Retrieves all comments, alerts, and events for a case |
 | \`${
       platformCoreCasesTools.manageAttachments
-    }\` | \`add_comment\`, \`add_alerts\`, \`add_events\`, \`add_attachments\`, \`delete_attachments\` |
+    }\` | \`add_comment\`, \`add_alerts\`, \`add_events\`, \`add_attachments\`, \`delete_attachments\`, \`attach_conversation\` (keeps the current chat on the case) |
 | \`${platformCoreCasesTools.observables}\` | \`add\`, \`update\`, \`delete\` (IOCs) |${
       isTemplatesEnabled ? FIND_TEMPLATES_ROW : ''
-    }${isTemplatesEnabled ? FIND_TEMPLATES_SECTION : ''}${
-      isTemplatesEnabled ? EXTENDED_FIELDS_SECTION : ''
-    }
+    }${tasksEnabled ? TASKS_ROW : ''}${agenticEnabled ? CONFIRMED_ACTIONS_ROW : ''}${
+      isTemplatesEnabled ? FIND_TEMPLATES_SECTION : ''
+    }${agenticEnabled ? STATUS_SECTION : ''}${tasksEnabled ? TASKS_SECTION : ''}${
+      agenticEnabled ? AGENTIC_SECTION : ''
+    }${isTemplatesEnabled ? EXTENDED_FIELDS_SECTION : ''}
 
 ## Solution context — highest-priority rule
 
@@ -125,7 +193,11 @@ Examples:
 | \`observability\` | APM errors, SLO violations, metric thresholds, log anomalies | Rarely relevant — do not proactively suggest | complete service outage |
 | \`cases\` | General-purpose, no domain assumptions | Rarely relevant | — |
 
-Domain note: \`assignees\` are user profile UIDs, not usernames. \`status\` flow: \`open\` → \`in-progress\` → \`closed\`.
+Domain note: \`assignees\` are user profile UIDs, not usernames. \`status\` flow: \`open\` → \`in-progress\` → \`closed\`. Teams may define their own statuses inside those categories: a case's \`status_key\` names the configured status and \`status\` its category. To move a case to a configured status, set \`status_key\` in \`updates\`. A status that pauses time tracking requires \`pause_reason\`, one of the pause reasons from Case settings; the update is rejected with 400 without it or with a reason that is not configured. Setting \`status_key\` to a status that does not pause (or \`resume_to_status_key\` from the case) resumes it.
+
+## Restricted cases
+
+A case with \`access.mode: "restricted"\` is visible only to its assignees. Restricted cases never appear in search results for non-assignees, and getting one by id returns not-found — tell the user the case was not found rather than speculating about hidden cases. Restricting a case (create or update with \`access\`) requires a Platinum license; the acting user is added as an assignee automatically so they keep access.
 
 ## Bulk and batch
 
@@ -197,5 +269,7 @@ To remove attachments, use \`delete_attachments\` and pass each attachment's \`i
       platformCoreCasesTools.manageAttachments,
       platformCoreCasesTools.observables,
       ...(isTemplatesEnabled ? [platformCoreCasesTools.findTemplates] : []),
+      ...(tasksEnabled ? [platformCoreCasesTools.tasks] : []),
+      ...(agenticEnabled ? [platformCoreCasesTools.confirmedActions] : []),
     ],
   });

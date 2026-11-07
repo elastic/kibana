@@ -157,6 +157,65 @@ describe('lifespan', () => {
       expect(reopenDates).toEqual([]);
     });
 
+    describe('paused duration', () => {
+      const pausing = new Set(['on_hold']);
+
+      it('is zero when no status pauses time tracking', () => {
+        jest.setSystemTime(new Date(10));
+
+        expect(
+          getStatusInfo(
+            [createStatusChangeSavedObject(CaseStatuses['in-progress'], new Date(2), 'on_hold')],
+            new Date(0)
+          ).pausedDuration
+        ).toBe(0);
+      });
+
+      it('counts the time spent in a pausing status and keeps it in the in-progress duration', () => {
+        jest.setSystemTime(new Date(10));
+
+        const { pausedDuration, inProgressDuration, openDuration } = getStatusInfo(
+          [
+            createStatusChangeSavedObject(CaseStatuses['in-progress'], new Date(2), 'on_hold'),
+            createStatusChangeSavedObject(CaseStatuses['in-progress'], new Date(6), 'in-progress'),
+          ],
+          new Date(0),
+          pausing
+        );
+
+        expect(pausedDuration).toBe(4);
+        expect(inProgressDuration).toBe(8);
+        expect(openDuration).toBe(2);
+      });
+
+      it('keeps counting up to now while the case is still paused', () => {
+        jest.setSystemTime(new Date(10));
+
+        expect(
+          getStatusInfo(
+            [createStatusChangeSavedObject(CaseStatuses.open, new Date(3), 'on_hold')],
+            new Date(0),
+            pausing
+          ).pausedDuration
+        ).toBe(7);
+      });
+
+      it('stops counting when the case is closed from a pausing status', () => {
+        jest.setSystemTime(new Date(100));
+
+        expect(
+          getStatusInfo(
+            [
+              createStatusChangeSavedObject(CaseStatuses['in-progress'], new Date(2), 'on_hold'),
+              createStatusChangeSavedObject(CaseStatuses.closed, new Date(5), 'closed'),
+            ],
+            new Date(0),
+            pausing
+          ).pausedDuration
+        ).toBe(3);
+      });
+    });
+
     it('does not add the current time to a duration when the case is closed', () => {
       jest.setSystemTime(new Date(12));
 

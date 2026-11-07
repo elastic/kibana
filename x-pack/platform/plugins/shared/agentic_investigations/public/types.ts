@@ -11,6 +11,7 @@ import type {
 } from '@kbn/agentic-investigations-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import type { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { ComponentType } from 'react';
 import type { ProposalsPublicPluginStart } from '@kbn/proposals-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -25,10 +26,14 @@ import type { InvestigationCardProps } from './conversation_templates/templates/
 
 export interface AgenticInvestigationsPublicSetupDependencies {
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
+  /** The investigation link attachment and the case view sections, when the cases bridge is on. */
+  cases?: CasesPublicSetup;
 }
 
 export interface AgenticInvestigationsPublicStartDependencies {
   agentBuilder?: AgentBuilderPluginStart;
+  /** Case lookups for the "Case #N" links and the add-to-existing-case list. */
+  cases?: CasesPublicStart;
   proposals?: ProposalsPublicPluginStart;
   /** Locators that link alert subjects to their details pages. */
   share?: SharePluginStart;
@@ -48,6 +53,8 @@ export interface AgenticInvestigationsPublicStartDependencies {
 export interface AgenticInvestigationsPublicConfig {
   /** Escalations are AlertZero-only for now; off on Observability serverless. */
   escalations: { enabled: boolean };
+  /** Open a case from an investigation; replaces escalations when on. */
+  cases?: { enabled: boolean };
 }
 
 export interface AgenticInvestigationsPublicPluginSetup {
@@ -95,4 +102,11 @@ export interface AgenticInvestigationsPublicPluginStart {
    * that lists investigations from the query API itself. Loaded on first render.
    */
   InvestigationCard: ComponentType<InvestigationCardProps>;
+  /**
+   * True when investigations open cases instead of escalations. AlertZero reads it to hide the
+   * Escalations page and send its old URL to the cases list.
+   */
+  isCasesBridgeEnabled: boolean;
+  /** Whether the user can create Security cases, for gating Open a case where the host renders it. */
+  canCreateCases: () => boolean;
 }

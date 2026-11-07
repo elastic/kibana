@@ -41,6 +41,10 @@ const StatusInfoSchema = z.object({
    */
   inProgressDuration: z.number(),
   /**
+   * Duration the case was in statuses that pause time tracking, in milliseconds
+   */
+  pausedDuration: z.number(),
+  /**
    * The ISO string representation of the dates the case was reopened
    */
   reopenDates: z.array(z.string().max(50)),

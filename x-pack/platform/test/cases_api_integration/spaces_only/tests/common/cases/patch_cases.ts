@@ -28,6 +28,18 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllCaseItems(es);
     });
 
+    it('rejects a status key while custom statuses are disabled', async () => {
+      const postedCase = await createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1);
+      await updateCase({
+        supertest: supertestWithoutAuth,
+        params: {
+          cases: [{ id: postedCase.id, version: postedCase.version, status_key: 'open' }],
+        },
+        expectedHttpCode: 400,
+        auth: authSpace1,
+      });
+    });
+
     it('should patch a case in space1', async () => {
       const postedCase = await createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1);
       const patchedCases = await updateCase({

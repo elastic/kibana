@@ -42,7 +42,10 @@ const fileKindHttpTags = (owner: Owner): FileKind['http'] => {
     create: buildPrivileges(owner, HttpApiPrivilegeOperation.Create),
     download: buildPrivileges(owner, HttpApiPrivilegeOperation.Read),
     getById: buildPrivileges(owner, HttpApiPrivilegeOperation.Read),
-    list: buildPrivileges(owner, HttpApiPrivilegeOperation.Read),
+    // `list` is deliberately not granted: the files plugin's per-kind list
+    // route returns every case file in the space without proving access to any
+    // case. Case files are listed through the Cases-owned internal route,
+    // which authorizes the parent case first.
   };
 };
 

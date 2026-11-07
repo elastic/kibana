@@ -72,7 +72,12 @@ const setup = (serverless: boolean) => {
     spaces,
     agentBuilder,
     proposals: {},
-    agenticInvestigations: { registerImpactEntityOpener: jest.fn(), InvestigationCard: () => null },
+    agenticInvestigations: {
+      registerImpactEntityOpener: jest.fn(),
+      InvestigationCard: () => null,
+      isCasesBridgeEnabled: false,
+      canCreateCases: () => false,
+    },
   });
   if (serverless) contract.setServerlessTierAvailable(true);
   return { plugin, agentBuilder, license$, setting$, contract };

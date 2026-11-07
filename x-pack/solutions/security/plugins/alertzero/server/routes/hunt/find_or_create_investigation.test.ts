@@ -33,7 +33,10 @@ const output: FindOrCreateInvestigationResponse = {
   created: true,
 };
 
-const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
+const makeDeps = ({
+  spaceId = 'default',
+  investigations,
+}: { spaceId?: string; investigations?: Record<string, jest.Mock> } = {}) => {
   const addVersion = jest.fn();
   const router = { versioned: { post: jest.fn().mockReturnValue({ addVersion }) } };
   const logger = loggingSystemMock.createLogger();
@@ -49,6 +52,7 @@ const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
       ({ getScopedClient } as unknown as ReturnType<
         RouteDependencies['getAgentBuilderConversations']
       >),
+    getInvestigationsClient: () => investigations,
     reportTelemetryEvent,
   } as unknown as RouteDependencies);
 
@@ -118,6 +122,30 @@ describe('registerFindOrCreateInvestigationRoute', () => {
 
     expect(response.notFound).toHaveBeenCalled();
     expect(runFindOrCreateInvestigationMock).not.toHaveBeenCalled();
+  });
+
+  it('creates and reopens through the investigations client when there is one', async () => {
+    const investigations = {
+      create: jest.fn().mockResolvedValue({ conversation_id: 'investigation-1' }),
+      patchMetadata: jest.fn().mockResolvedValue({ changed_fields: ['status'] }),
+    };
+    const { handler, context } = makeDeps({ investigations });
+
+    await handler(context, requestFor(), httpServerMock.createResponseFactory());
+    const { conversationClient } = runFindOrCreateInvestigationMock.mock.calls[0][1];
+    await conversationClient.create({
+      id: 'investigation-1',
+      agentId: 'agent',
+      title: 'Report',
+      templateId: 'investigation',
+      accessControl: { access_mode: 'public' as never, entries: [] },
+    });
+    const reopened = await conversationClient.patchMetadata('investigation-1', { status: 'open' });
+
+    expect(investigations.create).toHaveBeenCalledWith(
+      expect.objectContaining({ conversation_id: 'investigation-1', template_id: 'investigation' })
+    );
+    expect(reopened).toEqual({ changedFields: ['status'] });
   });
 
   it('reports a reopen as the Hunt Worker reopening its own Investigation', async () => {

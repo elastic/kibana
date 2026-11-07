@@ -41,6 +41,8 @@ export interface TemplateRegistrationContext {
   services: TemplateServices;
   /** When false, no template offers escalation actions. */
   escalationsEnabled: boolean;
+  /** When true, investigations offer Open a case and View case instead of escalation actions. */
+  casesBridgeEnabled: boolean;
   makeLazyWithProviders: MakeLazyWithProviders;
   groupedAttachments: FlyoutGroupedAttachmentsRegistry;
   renderAssignees: RenderAssignees;

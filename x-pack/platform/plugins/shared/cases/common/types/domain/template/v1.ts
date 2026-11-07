@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, isoDateTime } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import {
   MAX_TEMPLATE_KEY_LENGTH,
   MAX_TEMPLATE_NAME_LENGTH,
@@ -13,19 +13,25 @@ import {
   MAX_TEMPLATE_TAG_LENGTH,
   MAX_TAGS_PER_TEMPLATE,
   MAX_TITLE_LENGTH,
+  MAX_TASK_LISTS_PER_TEMPLATE,
 } from '../../../constants';
 import { FieldSchema, isRefField } from './fields';
+import { CaseAccessSchema } from '../case/v1';
 import { CaseConnectorWithoutNameSchema } from '../connector/v1';
 import { CaseUserProfilesSchema } from '../user/v1';
+import { ExternalSyncSettingsSchema } from '../external_sync/v1';
 
 /** Template tag: non-empty and length-bounded, mirroring the client-side metadata validation. */
 const TemplateTagSchema = z.string().min(1).max(MAX_TEMPLATE_TAG_LENGTH);
 
-/** Default case settings a template applies when creating a case; both optional and independent. */
-export const TemplateSettingsSchema = z.object({
-  syncAlerts: z.boolean().optional(),
-  extractObservables: z.boolean().optional(),
-});
+/** Default case settings a template applies when creating a case; all optional and independent. */
+export const TemplateSettingsSchema = lazySchema(() =>
+  z.object({
+    syncAlerts: z.boolean().optional(),
+    extractObservables: z.boolean().optional(),
+    externalSync: ExternalSyncSettingsSchema.optional(),
+  })
+);
 
 export type TemplateSettings = z.infer<typeof TemplateSettingsSchema>;
 
@@ -172,6 +178,10 @@ export const ParsedTemplateDefinitionSchema = z.object({
   connector: CaseConnectorWithoutNameSchema.optional(),
   /** Default case settings (syncAlerts / extractObservables) applied when creating a case. */
   settings: TemplateSettingsSchema.optional(),
+  /** Default access control applied when creating a case; requires Platinum, skipped silently below it. */
+  access: CaseAccessSchema.optional(),
+  /** Ids of task lists whose tasks are added to a case created from this template. */
+  task_lists: z.array(z.string().min(1)).max(MAX_TASK_LISTS_PER_TEMPLATE).optional(),
   fields: z.array(FieldSchema).refine(
     (fields) => {
       const fieldNames = new Set(
