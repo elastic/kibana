@@ -11,10 +11,11 @@ import { oneLine } from '../../lib';
 
 const SEPARATOR = ' · ';
 
-export const actionsMarkdownRenderer = ({ buttons }: ActionsNode) =>
-  md.paragraph(
-    ...buttons.flatMap(({ label, url }, index) => [
-      ...(index > 0 ? [SEPARATOR] : []),
-      md.link(oneLine(label), url),
-    ])
-  );
+/** The buttons with a `url` as links; app buttons need a host to resolve them. */
+export const actionsMarkdownRenderer = ({ buttons }: ActionsNode) => {
+  const links = buttons.flatMap(({ label, url }) => (url ? [md.link(oneLine(label), url)] : []));
+
+  return links.length > 0
+    ? md.paragraph(...links.flatMap((link, index) => [...(index > 0 ? [SEPARATOR] : []), link]))
+    : [];
+};

@@ -25,33 +25,46 @@ const absoluteHref = (href: string | null | undefined): string | null => {
 /** The node's `url`, which every surface can link to without a host. */
 export const staticLinkUrl = ({ url }: LinkNode): string | null => absoluteHref(url);
 
+/** The URL React links to for an app path, through the host's `resolveKibanaPath`. */
+export const reactAppHref = (
+  target: { app: string; path?: string },
+  context: ComponentsRenderContext
+): string | null => {
+  const resolved = context.resolveKibanaPath?.(appLinkPath(target));
+  return resolved ? sanitizeNavigationHref(resolved) : null;
+};
+
+/**
+ * The URL Slack links to for an app path: joined onto the render's `baseUrl`, keeping its base path
+ * and space. `slackLinkUrl` alone would resolve `/app/…` onto the origin and drop both.
+ */
+export const slackAppHref = (
+  target: { app: string; path?: string },
+  baseUrl: string | undefined
+): string | null => {
+  if (baseUrl === undefined) {
+    return null;
+  }
+  const base = new URL(baseUrl);
+  const prefix = `${base.origin}${base.pathname.replace(/\/+$/, '')}`;
+  // Parsing percent-encodes what Slack won't take as written, such as a space in a Discover query.
+  return slackLinkUrl(new URL(`${prefix}${appLinkPath(target)}`).href);
+};
+
 /** The URL React links to: `url`, or the app path through the host's `resolveKibanaPath`. */
 export const reactLinkHref = (node: LinkNode, context: ComponentsRenderContext): string | null => {
   const { app, path, url } = node;
   if (url !== undefined) {
     return staticLinkUrl(node);
   }
-  if (app === undefined) {
-    return null;
-  }
-  const resolved = context.resolveKibanaPath?.(appLinkPath({ app, path }));
-  return resolved ? sanitizeNavigationHref(resolved) : null;
+  return app === undefined ? null : reactAppHref({ app, path }, context);
 };
 
-/**
- * The URL Slack links to: `url`, or `app` joined onto the render's `baseUrl`, keeping its base path
- * and space. `slackLinkUrl` alone would resolve `/app/…` onto the origin and drop both.
- */
+/** The URL Slack links to: `url`, or the app path joined onto the render's `baseUrl`. */
 export const slackLinkHref = (node: LinkNode, baseUrl: string | undefined): string | null => {
   const { app, path, url } = node;
   if (url !== undefined) {
     return slackLinkUrl(url);
   }
-  if (app === undefined || baseUrl === undefined) {
-    return null;
-  }
-  const base = new URL(baseUrl);
-  const prefix = `${base.origin}${base.pathname.replace(/\/+$/, '')}`;
-  // Parsing percent-encodes what Slack won't take as written, such as a space in a Discover query.
-  return slackLinkUrl(new URL(`${prefix}${appLinkPath({ app, path })}`).href);
+  return app === undefined ? null : slackAppHref({ app, path }, baseUrl);
 };
