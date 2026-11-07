@@ -75,7 +75,9 @@ You can test connectors as you're creating or editing the connector in {{kib}}. 
 :screenshot:
 :::
 
-Email actions have the following configuration properties.
+{applies_to}`serverless: ga` {applies_to}`stack: ga 9.5+` To check that your connector can send mail, enter at least one recipient in **To**, **Cc**, or **Bcc**. {{kib}} sends the fixed subject and message `This is a test email from Kibana`. The test form shows a **Fixed test message** callout instead of the **Subject** and **Message** fields, and the email has no {{kib}} footer. The run connector API sends the same fixed content. For an example, refer to [Test connectors](docs-content://explore-analyze/alerting/alerts/testing-connectors.md#_troubleshooting_connectors_with_the_kbn_action_tool).
+
+Email actions in rules have the following configuration properties.
 
 To, CC, BCC
 :   Each item is a list of addresses. Addresses can be specified in `user@host-name` format, in `name <user@host-name>` format, or using [Mustache templates](docs-content://explore-analyze/alerts-cases/watcher/how-watcher-works.md#templates). One of To, CC, or BCC must contain an entry.

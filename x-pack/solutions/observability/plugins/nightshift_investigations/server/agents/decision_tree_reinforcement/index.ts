@@ -8,9 +8,11 @@
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { AgentBaseConfiguration, AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import { buildReinforcementSystemPrompt } from '@kbn/nightshift-decision-trees';
-import { NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  NIGHTSHIFT_BOUND_DECISION_TREE_HYDRATE_WORKFLOW_ID,
+  getNightshiftBoundHookWorkflowId,
+} from '@kbn/workflows/managed';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
-import type { ResolveHookWorkflowId } from '../investigation';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../../tools/sandbox_bash/str_replace_tool';
 import { SANDBOX_WRITE_FILE_TOOL_ID } from '../../tools/sandbox_bash/write_file_tool';
 import {
@@ -56,28 +58,23 @@ const getBaseConfiguration = (hydrateWorkflowId: string): AgentBaseConfiguration
  * edits them with the sandbox file tools before `nightshift_submit_optimizer_result` validates
  * and persists the result. The learning tools are added per turn, on follow-up turns only.
  */
-export const getDecisionTreeReinforcementAgentType = ({
-  resolveHookWorkflowId,
-}: {
-  /** See the investigation agent's option of the same name. */
-  resolveHookWorkflowId?: ResolveHookWorkflowId;
-} = {}): AgentTypeDefinition => ({
+export const getDecisionTreeReinforcementAgentType = (): AgentTypeDefinition => ({
   id: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_TYPE_ID,
   name: DECISION_TREE_REINFORCEMENT_AGENT_NAME,
   description: DECISION_TREE_REINFORCEMENT_AGENT_DESCRIPTION,
   avatar_icon: 'logoElastic',
-  // Static unless the hook varies by space.
-  baseConfiguration: resolveHookWorkflowId
-    ? async (ctx) =>
-        getBaseConfiguration(
-          await resolveHookWorkflowId(NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID, ctx)
-        )
-    : getBaseConfiguration(NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID),
+  // The hydrate hook is the space's bound entry point, so the configuration is per space.
+  baseConfiguration: async (ctx) =>
+    getBaseConfiguration(
+      getNightshiftBoundHookWorkflowId(
+        NIGHTSHIFT_BOUND_DECISION_TREE_HYDRATE_WORKFLOW_ID,
+        ctx.spaceId
+      )
+    ),
 });
 
 export const registerDecisionTreeReinforcementAgentType = (
-  agentBuilder: AgentBuilderPluginSetup,
-  options: Parameters<typeof getDecisionTreeReinforcementAgentType>[0] = {}
+  agentBuilder: AgentBuilderPluginSetup
 ): void => {
-  agentBuilder.agents.registerType(getDecisionTreeReinforcementAgentType(options));
+  agentBuilder.agents.registerType(getDecisionTreeReinforcementAgentType());
 };

@@ -10,7 +10,7 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE } from '@kbn/management-settings-ids';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
-import { test } from '../fixtures';
+import { mockNightshiftSetUp, test } from '../fixtures';
 
 const NIGHTSHIFT_PAGE_LOAD_TIMEOUT = 60_000;
 
@@ -40,7 +40,8 @@ test.describe(
       });
     });
 
-    test.beforeEach(async ({ browserAuth, kbnClient }) => {
+    test.beforeEach(async ({ browserAuth, kbnClient, page }) => {
+      await mockNightshiftSetUp(page);
       await kbnClient.uiSettings.update({
         [OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE]: false,
       });
@@ -73,12 +74,40 @@ test.describe(
 
       await page.getByTestId('nightshiftSettingsTab-investigations').click();
       await expect(page).toHaveURL(/\/app\/nightshift\/settings\/investigations/);
-      await expect(page.getByTestId('nightshiftRunLimitEnabledSwitch-investigation')).toBeVisible();
+      await expect(page.getByTestId('nightshiftRunLimitsEnabledSwitch')).toBeVisible();
     });
 
     test('opens Detections on Events and hides Signals outside developer mode', async ({
       page,
     }) => {
+      // This navigation test exercises the normal workspace. Keep it independent from sources
+      // left in the shared Scout space now that an empty catalog opens detection onboarding.
+      await page.route('**/internal/nightshift/sources?*', async (route) => {
+        await route.fulfill({
+          status: 200,
+          json: {
+            sources: [
+              {
+                id: 'scout-navigation-source',
+                title: 'Scout navigation source',
+                tags: [],
+                esql: 'FROM logs*',
+                type: 'logs',
+                slug: 'scout-navigation-source',
+                view_name: '$.nightshift.sources.default.scout-navigation-source',
+                enabled: true,
+                created_by: 'elastic',
+                created_at: '2026-10-30T00:00:00.000Z',
+                updated_at: '2026-10-30T00:00:00.000Z',
+                esql_updated_at: '2026-10-30T00:00:00.000Z',
+              },
+            ],
+            total: 1,
+            page: 1,
+            per_page: 100,
+          },
+        });
+      });
       await page.gotoApp('nightshift/detections');
       await expect(page).toHaveURL(/\/app\/nightshift\/detections\/events/, {
         timeout: NIGHTSHIFT_PAGE_LOAD_TIMEOUT,

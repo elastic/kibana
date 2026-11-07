@@ -75,14 +75,16 @@ import {
 } from './external_resume/external_resume_service';
 import { withHitlClaim } from './hitl_claim_release';
 import type { GetExecutionStepExecutionsResult } from './lib/get_execution_step_executions';
+import type { LoadAlertDocumentsRequest, LoadedAlertDocuments } from './lib/load_alert_documents';
+import { loadAlertDocuments } from './lib/load_alert_documents';
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
+import type { TriggerSelectionKind } from './routes/executions/utils/parse_trigger_selections';
 import {
   ALL_TRIGGER_SELECTION_KINDS,
   preprocessTriggerInputs,
 } from './routes/executions/utils/preprocess_trigger_inputs';
-import type { TriggerSelectionKind } from './routes/executions/utils/preprocess_trigger_inputs';
 import type { WorkflowManagementAuditLog } from './routes/utils/workflow_audit_logging';
 import { WorkflowRequiresDelegatedIdentityError } from './workflow_requires_delegated_identity_error';
 import type { WorkflowsManagementClient } from './workflows_management_client';
@@ -786,6 +788,26 @@ export class WorkflowsManagementApi {
       request
     );
     return executeResponse.workflowExecutionId;
+  }
+
+  /**
+   * Loads alert documents in the same shape alert-triggered workflows receive, so steps that load
+   * alerts themselves see identical documents. Reads run as the user behind `request`.
+   */
+  public async loadAlertDocuments({
+    request,
+    ...loadRequest
+  }: LoadAlertDocumentsRequest & { request: KibanaRequest }): Promise<LoadedAlertDocuments> {
+    const [coreStart, { alerting }] = await Promise.all([
+      this.workflowsService.getCoreStart(),
+      this.workflowsService.getPluginsStart(),
+    ]);
+    return loadAlertDocuments({
+      ...loadRequest,
+      esClient: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+      ruleTypes: alerting?.listTypes() ?? new Map(),
+      logger: this.logger,
+    });
   }
 
   /**

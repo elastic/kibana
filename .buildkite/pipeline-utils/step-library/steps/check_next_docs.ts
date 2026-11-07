@@ -8,7 +8,7 @@
  */
 
 import { commandStep } from '../helpers.ts';
-import { onDemandAgent, retry } from '../presets.ts';
+import { retry, spotAgent, spotZones } from '../presets.ts';
 import type { Step } from '../types.ts';
 
 export const checkNextDocs = (): readonly Step[] => [
@@ -16,8 +16,7 @@ export const checkNextDocs = (): readonly Step[] => [
     command: '.buildkite/scripts/steps/next_docs/build_and_validate_docs.sh',
     label: 'Build and Validate Next Docs',
     key: 'check_next_docs',
-    // Preemptible, with no zone restriction.
-    agents: { ...onDemandAgent('n2-standard-4'), preemptible: true },
+    agents: spotAgent('n2-standard-4', spotZones.n2),
     timeout_in_minutes: 30,
     retry: retry.agentLoss,
   }),

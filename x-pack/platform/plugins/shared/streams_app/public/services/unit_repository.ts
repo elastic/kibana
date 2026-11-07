@@ -11,7 +11,12 @@ import { isHttpFetchError } from '@kbn/server-route-repository-client';
 import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import type { StreamsUnit } from '@kbn/streams-schema';
-import { DEFAULT_SUPPORTED_TELEMETRY, PIPELINE_ENTRY } from './unit_pipeline';
+import {
+  DEFAULT_SUPPORTED_TELEMETRY,
+  PIPELINE_ENTRY,
+  withoutUnconnectedRoutes,
+} from './unit_pipeline';
+import { withPublishedTelemetry } from './unit_connections';
 
 export type Unit = StreamsUnit.GetResponse;
 
@@ -85,7 +90,10 @@ export const createUnitRepository = ({
       throw error;
     }
   },
-  persist: async (unit, secrets) => {
+  persist: async (stagedUnit, secrets) => {
+    // Rules the canvas left unconnected cannot be stored, so they are dropped on save,
+    // and routing pipelines are narrowed to the signals their remaining routes export.
+    const unit = withPublishedTelemetry(withoutUnconnectedRoutes(stagedUnit));
     const response = await streamsRepositoryClient.fetch('PUT /internal/streams/unit/{id}', {
       params: {
         path: { id: unitId },

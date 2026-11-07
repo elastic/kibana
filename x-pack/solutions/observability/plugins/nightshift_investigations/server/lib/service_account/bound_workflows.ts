@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import type { NIGHTSHIFT_BOUND_HOOK_TARGETS } from '@kbn/workflows/managed';
 import {
   NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_DECISION_TREE_HYDRATE_WORKFLOW_ID,
-  NIGHTSHIFT_BOUND_HOOK_TARGETS,
   NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 
 export type BoundHookId = keyof typeof NIGHTSHIFT_BOUND_HOOK_TARGETS;
@@ -24,18 +25,8 @@ export const BOUND_WORKFLOW_IDS = [
   NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_DECISION_TREE_HYDRATE_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,
 ] as const;
 
 export type BoundWorkflowId = (typeof BOUND_WORKFLOW_IDS)[number];
-
-const BOUND_HOOK_BY_TARGET = new Map<string, BoundHookId>(
-  Object.entries(NIGHTSHIFT_BOUND_HOOK_TARGETS).map(([boundId, target]) => [
-    target,
-    boundId as BoundHookId,
-  ])
-);
-
-/** The bound entry point for a global hook workflow, if it has one. */
-export const getBoundHookIdFor = (hookWorkflowId: string): BoundHookId | undefined =>
-  BOUND_HOOK_BY_TARGET.get(hookWorkflowId);

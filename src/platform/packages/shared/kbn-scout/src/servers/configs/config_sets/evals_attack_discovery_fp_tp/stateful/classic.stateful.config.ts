@@ -15,12 +15,13 @@ import { serviceAccountsServerArgs } from '../../service_accounts/shared';
  * Config set for the attack-discovery-fp-tp eval suite. The analysis workflow's `ai.agent`
  * step runs the `alertzero-thin-agent` and resolves its connector from the
  * `alertzero_frontier` inference feature; both exist only when alertzero is enabled. The
- * step additionally requires the Workflows UI and agent settings, and the
- * `ai.conversation.metadata.read` step requires Agent Builder experimental features.
+ * step additionally requires the Workflows UI and agent settings.
  *
- * `agenticInvestigations` and `proposals` are both **required** plugins of alertzero and both
- * default to `enabled: false`. Without either flag Kibana cascade-disables alertzero entirely,
- * so the feature is never registered and the suite's inference override is ignored.
+ * `agentBuilder:experimentalFeatures` stays at its product default (off), so the eval runs the
+ * same internal-tool surface production does. Turning it on registers `write_todos` and
+ * `search_relevant_skills`, which an agent with no tools must not call.
+ *
+ * `alertzero`, `agenticInvestigations` and `proposals` are all on by default in stateful.
  *
  * Since #295215 alertzero installs no managed workflows unless service accounts are enabled.
  *
@@ -34,12 +35,8 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...evalsTracingConfig.kbnTestServer.serverArgs,
       ...serviceAccountsServerArgs,
-      '--xpack.alertzero.enabled=true',
-      '--xpack.agenticInvestigations.enabled=true',
-      '--xpack.proposals.enabled=true',
       '--uiSettings.overrides.workflows:ui:enabled=true',
       '--uiSettings.overrides.workflows:aiAgent:enabled=true',
-      '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
     ],
   },
 };
