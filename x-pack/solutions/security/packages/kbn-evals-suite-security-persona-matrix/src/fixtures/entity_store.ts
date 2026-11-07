@@ -46,6 +46,11 @@ const getEntityStoreStatus = async (kbnClient: KbnClient): Promise<string | unde
  * nothing installs it on a fresh stack, so the suite does it itself. Idempotent
  * and safe to call when the store is already installed (the endpoint answers
  * 200 with the existing state).
+ *
+ * The install deliberately sends an empty body, so the route installs ALL
+ * entity types rather than the lead-generation sibling's ['user','host','service']
+ * subset: the matrix expects the full availability surface across future
+ * examples, and installing extra engine types is idempotent and harmless.
  */
 export const ensureEntityStoreRunning = async ({
   kbnClient,
@@ -83,8 +88,14 @@ export const ensureEntityStoreRunning = async ({
   }
 
   const deadline = Date.now() + timeoutMs;
+  // Failed status polls are not fatal (Kibana can briefly 503 mid-install), but
+  // the timeout message keeps the last failure so a dead endpoint is diagnosable.
+  let lastStatusError: string | undefined;
   while (Date.now() < deadline) {
-    const status = await getEntityStoreStatus(kbnClient).catch(() => undefined);
+    const status = await getEntityStoreStatus(kbnClient).catch((err: Error) => {
+      lastStatusError = err.message;
+      return undefined;
+    });
     if (status === 'error') {
       throw new Error('[persona-matrix] Entity Store is in error state');
     }
@@ -96,6 +107,7 @@ export const ensureEntityStoreRunning = async ({
   }
 
   throw new Error(
-    `[persona-matrix] timed out after ${timeoutMs}ms waiting for Entity Store status=running`
+    `[persona-matrix] timed out after ${timeoutMs}ms waiting for Entity Store status=running` +
+      ` (last status error: ${lastStatusError ?? 'none'})`
   );
 };
