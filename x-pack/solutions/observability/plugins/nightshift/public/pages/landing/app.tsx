@@ -34,10 +34,7 @@ import {
   type InvestigationViewSource,
 } from '../../common/ebt_events';
 import { RETRY_BUTTON_LABEL } from '../../common/messages';
-import {
-  buildInvestigationsPath,
-  DEFAULT_INVESTIGATIONS_TIME_RANGE,
-} from '../../data/investigations/investigations_url';
+import { DEFAULT_INVESTIGATIONS_TIME_RANGE } from '../../data/investigations/investigations_url';
 import { useFetchInvestigations } from '../../data/investigations/use_fetch_investigations';
 import { useInvestigationSections } from '../../data/investigations/use_investigation_sections';
 import {
@@ -133,32 +130,6 @@ export function NightshiftApp({
   const trendInProgress = useFetchInvestigations({
     inProgress: true,
   });
-  const investigationsAppRoot = useMemo(
-    () =>
-      application
-        .getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/' })
-        .replace(/\/$/, ''),
-    [application]
-  );
-
-  // Header control: Investigations with the current Home search + time range.
-  const viewAllInvestigationsHref = useMemo(
-    () =>
-      `${investigationsAppRoot}${buildInvestigationsPath({
-        query: debouncedSearchQuery ?? '',
-        severity: [],
-        state: [],
-        rangeFrom: timeRange.rangeFrom,
-        rangeTo: timeRange.rangeTo,
-      })}`,
-    [
-      debouncedSearchQuery,
-      investigationsAppRoot,
-      timeRange.rangeFrom,
-      timeRange.rangeTo,
-    ]
-  );
-
   // Prefer the dedicated open-date fetch; also fold in Home section rows so tiles
   // never miss investigations that are already on the page.
   const trendInvestigations = useMemo(() => {
@@ -441,7 +412,6 @@ export function NightshiftApp({
       <NightshiftHeader
         isLoading={isInitialLoading}
         hasActiveInvestigations={hasActiveInvestigations}
-        viewAllInvestigationsHref={viewAllInvestigationsHref}
       />
 
       <EuiSpacer size="l" />
@@ -475,7 +445,6 @@ export function NightshiftApp({
             start={timeRange.rangeFrom}
             end={timeRange.rangeTo}
             onChange={handleTimeRangeChange}
-            showRefreshButton
             data-test-subj="nightshiftHomepageTimePicker"
           />
         </EuiFlexItem>
@@ -498,9 +467,6 @@ export function NightshiftApp({
         sections={sections}
         selectedInvestigationId={selectedInvestigationId}
         onInvestigationClick={handleInvestigationClick}
-        searchQuery={debouncedSearchQuery}
-        rangeFrom={timeRange.rangeFrom}
-        rangeTo={timeRange.rangeTo}
       />
     </EuiFlexGroup>
   );

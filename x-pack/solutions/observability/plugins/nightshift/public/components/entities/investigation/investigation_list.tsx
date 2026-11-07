@@ -11,7 +11,6 @@ import React, {
   useCallback,
   useEffect,
   useImperativeHandle,
-  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -26,7 +25,6 @@ import {
 } from '@elastic/eui';
 import { notFound } from '@elastic/eui-illustrations';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
-import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import type { Severity } from '@kbn/nightshift-investigations-plugin/common';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -35,11 +33,6 @@ import type {
   InvestigationSectionId,
   InvestigationSectionState,
 } from '../../../data/investigations/use_investigation_sections';
-import {
-  buildInvestigationsPath,
-  DEFAULT_INVESTIGATIONS_TIME_RANGE,
-  sectionIdToInvestigationsFilters,
-} from '../../../data/investigations/investigations_url';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
   getInvestigationSectionAnchorId,
@@ -57,15 +50,16 @@ const NO_INVESTIGATIONS_FOUND_HINT = i18n.translate(
 /**
  * Per space: the base path carries the space prefix (`/s/<space id>`).
  * `.v2` resets older keys that omitted `closed`, which left Closed open on first load.
+ * Closed itself is no longer persisted — it always starts collapsed each visit.
  */
 const getCollapsedSectionsStorageKey = (basePath: string): string =>
   `nightshift.investigations.collapsedSections.v2:${basePath || 'default'}`;
 
 /**
- * Closed starts collapsed; severity / in-progress start open. Stored ids are the ones the
- * user collapsed (for default-open sections) or left collapsed (Closed stays here until opened).
+ * Severity / in-progress / recent start open. Stored ids are sections the user collapsed.
+ * Closed is session-only (see `isClosedOpen`) so it never sticks open across visits.
  */
-const DEFAULT_COLLAPSED_SECTIONS: InvestigationSectionId[] = ['closed'];
+const DEFAULT_COLLAPSED_SECTIONS: InvestigationSectionId[] = [];
 
 /** How long a section the user was sent to keeps its highlighted border. */
 const SECTION_HIGHLIGHT_MS = 700;
@@ -79,11 +73,6 @@ export interface InvestigationListProps {
   sections: InvestigationSectionState[];
   selectedInvestigationId?: string;
   onInvestigationClick?: (investigation: InvestigationSummary) => void;
-  /** Current Home search query, carried into View all investigations links. */
-  searchQuery?: string;
-  /** Current Home time range, carried into View all investigations links. */
-  rangeFrom?: string;
-  rangeTo?: string;
   /** Replaces the default empty copy when every section is empty. */
   emptyContent?: React.ReactNode;
 }
@@ -94,36 +83,19 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
       sections,
       selectedInvestigationId,
       onInvestigationClick,
-      searchQuery = '',
-      rangeFrom = DEFAULT_INVESTIGATIONS_TIME_RANGE.from,
-      rangeTo = DEFAULT_INVESTIGATIONS_TIME_RANGE.to,
       emptyContent,
     },
     ref
   ): React.ReactElement {
     const { euiTheme } = useEuiTheme();
     const visibleSections = sections.filter(isInvestigationSectionVisible);
-    const { application, http } = useKibana().services;
-    const viewAllHrefFor = useMemo(() => {
-      const base = application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/' });
-      // getUrlForApp with path '/' ends with /app/nightshift/ — strip trailing slash for join.
-      const appRoot = base.replace(/\/$/, '');
-      return (id: InvestigationSectionId): string => {
-        const filters = sectionIdToInvestigationsFilters(id);
-        return `${appRoot}${buildInvestigationsPath({
-          query: searchQuery,
-          severity: filters.severity,
-          state: filters.state,
-          rangeFrom,
-          rangeTo,
-        })}`;
-      };
-    }, [application, rangeFrom, rangeTo, searchQuery]);
+    const { http } = useKibana().services;
 
-    // Default-open sections store collapses; Closed starts in the default collapsed list.
+    // Default-open sections store collapses. Closed is always collapsed on load.
     const [collapsedSections = DEFAULT_COLLAPSED_SECTIONS, setCollapsedSections] = useLocalStorage<
       InvestigationSectionId[]
     >(getCollapsedSectionsStorageKey(http.basePath.get()), DEFAULT_COLLAPSED_SECTIONS);
+    const [isClosedOpen, setIsClosedOpen] = useState(false);
 
     // EUI's accordion can hold on to an older `onToggle`, and the setter's updater form would then
     // read an older list, so the next list is built from the latest one instead.
@@ -144,9 +116,25 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
       return () => window.clearTimeout(timeoutId);
     }, [highlightedSection]);
 
+    const isSectionOpen = useCallback(
+      (id: InvestigationSectionId): boolean => {
+        if (id === 'closed') {
+          return isClosedOpen;
+        }
+        return !collapsedSections.includes(id);
+      },
+      [collapsedSections, isClosedOpen]
+    );
+
     const setSectionOpen = useCallback(
       (id: InvestigationSectionId, isOpen: boolean) => {
-        const others = collapsedSectionsRef.current.filter((collapsedId) => collapsedId !== id);
+        if (id === 'closed') {
+          setIsClosedOpen(isOpen);
+          return;
+        }
+        const others = collapsedSectionsRef.current.filter(
+          (collapsedId) => collapsedId !== id && collapsedId !== 'closed'
+        );
         const next = isOpen ? others : [...others, id];
         collapsedSectionsRef.current = next;
         setCollapsedSections(next);
@@ -260,11 +248,9 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
               onRetry={section.refetch}
               selectedInvestigationId={selectedInvestigationId}
               onInvestigationClick={onInvestigationClick}
-              isOpen={!collapsedSections.includes(section.id)}
+              isOpen={isSectionOpen(section.id)}
               onToggle={(isOpen) => setSectionOpen(section.id, isOpen)}
               isHighlighted={section.id === highlightedSection}
-              // Recently opened is a Home-only slice — no Investigations deep link.
-              viewAllHref={section.id === 'recent' ? undefined : viewAllHrefFor(section.id)}
             />
           </EuiFlexItem>
         ))}

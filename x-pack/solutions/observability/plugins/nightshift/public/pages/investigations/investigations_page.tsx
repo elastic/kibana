@@ -16,7 +16,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
-  EuiIcon,
   EuiSpacer,
   EuiText,
   EuiTextBlockTruncate,
@@ -80,11 +79,6 @@ const STATE_FILTER_LABELS: Record<InvestigationsStateFilter, string> = {
   }),
 };
 
-const STATE_FILTER_ICON_COLOR: Record<InvestigationsStateFilter, 'primary' | 'success'> = {
-  open: 'primary',
-  closed: 'success',
-};
-
 /** List state only — `in_progress` is a Home label; those rows are Open here. */
 const investigationState = (
   investigation: InvestigationSummary
@@ -95,6 +89,7 @@ const investigationState = (
   return 'open';
 };
 
+/** Same badge colors as the State column in the table. */
 const stateLabel = (
   state: InvestigationsStateFilter
 ): { label: string; color: 'default' | 'success' } => {
@@ -415,7 +410,7 @@ export function InvestigationsPage(): React.ReactElement {
               counts={undefined}
               getLabel={(value) => STATE_FILTER_LABELS[value]}
               getPrepend={(value) => (
-                <EuiIcon type="dot" color={STATE_FILTER_ICON_COLOR[value]} aria-hidden={true} />
+                <EuiBadge color={stateLabel(value).color} aria-hidden />
               )}
               onChange={(state) => replaceUrl({ ...urlState, state })}
               testSubject="nightshiftInvestigationsPageState"

@@ -14,7 +14,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLink,
   EuiPanel,
   EuiScreenReaderOnly,
   EuiSkeletonText,
@@ -58,8 +57,6 @@ export interface InvestigationSectionProps {
   onToggle?: (isOpen: boolean) => void;
   /** Briefly draws the section's border in its severity colour, after a jump lands on it. */
   isHighlighted?: boolean;
-  /** Opens the Investigations section with this group's filter (and current Home search). */
-  viewAllHref?: string;
 }
 
 /** Set on a section by the list, to the height of the sticky page header that would cover it. */
@@ -222,11 +219,6 @@ const SectionBlock = ({
     </div>
   );
 };
-
-const viewAllInvestigationsLabel = i18n.translate(
-  'xpack.nightshift.investigations.sectionViewAllLabel',
-  { defaultMessage: 'View all' }
-);
 
 const SectionHeading = ({
   presentation: { id, title, severity },
@@ -432,7 +424,6 @@ export const InvestigationSection = ({
   isOpen = true,
   onToggle,
   isHighlighted = false,
-  viewAllHref,
 }: InvestigationSectionProps): React.ReactElement | null => {
   const { euiTheme } = useEuiTheme();
   const presentation = getSectionPresentation(id);
@@ -535,8 +526,6 @@ export const InvestigationSection = ({
           arrowDisplay="none"
           onToggle={onToggle}
           paddingSize="none"
-          // Hover lives on the trigger wrapper (button + View all), not the button alone — otherwise
-          // the highlight stops short of the optionalAction and leaves a seam.
           css={css`
             .euiAccordion__triggerWrapper {
               &:hover,
@@ -545,35 +534,6 @@ export const InvestigationSection = ({
               }
             }
           `}
-          // Sibling of the toggle button so the link is not nested inside it.
-          // Sits on the right of the header row (EUI places optionalAction after the growing button).
-          extraAction={
-            viewAllHref ? (
-              <EuiLink
-                href={viewAllHref}
-                data-test-subj={`nightshiftInvestigationSectionViewAll-${id}`}
-                aria-label={i18n.translate(
-                  'xpack.nightshift.investigations.sectionViewAllAriaLabel',
-                  {
-                    defaultMessage: 'Open {sectionTitle} investigations in Investigations',
-                    values: { sectionTitle: presentation.title },
-                  }
-                )}
-                css={css`
-                  margin-right: ${euiTheme.size.base};
-                  font-size: ${euiTheme.size.m};
-                  text-decoration: none;
-
-                  &:hover,
-                  &:focus {
-                    text-decoration: none;
-                  }
-                `}
-              >
-                {viewAllInvestigationsLabel}
-              </EuiLink>
-            ) : undefined
-          }
           buttonContent={
             <SectionHeading
               presentation={presentation}

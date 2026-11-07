@@ -18,9 +18,6 @@ jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       http: { basePath: { get: () => mockBasePath } },
-      application: {
-        getUrlForApp: () => '/app/nightshift/',
-      },
       agenticInvestigations: {
         InvestigationCard: ({ investigation: item }: { investigation: InvestigationSummary }) => (
           <div data-test-subj="investigationCard">{item.title}</div>
@@ -131,20 +128,6 @@ describe('InvestigationList', () => {
     expect(screen.queryByText('No investigations found')).not.toBeInTheDocument();
   });
 
-  it('hides View all on Recently opened and keeps it on other sections', () => {
-    renderSections([
-      makeSection('recent', { investigations: [investigation], total: 1 }),
-      makeSection('in-progress', { investigations: [investigation], total: 1 }),
-    ]);
-
-    expect(
-      screen.queryByTestId('nightshiftInvestigationSectionViewAll-recent')
-    ).not.toBeInTheDocument();
-    expect(
-      screen.getByTestId('nightshiftInvestigationSectionViewAll-in-progress')
-    ).toBeInTheDocument();
-  });
-
   it('renders Recently opened above in progress, and Closed after the open buckets', () => {
     renderSections([
       makeSection('recent', { investigations: [investigation], total: 1 }),
@@ -197,9 +180,9 @@ describe('InvestigationList', () => {
       expect(toggle('closed')).toHaveAttribute('aria-expanded', 'false');
     });
 
-    it('starts Closed collapsed even when an older storage key omitted it', () => {
+    it('starts Closed collapsed even when storage previously left it open', () => {
       window.localStorage.setItem(
-        'nightshift.investigations.collapsedSections:default',
+        'nightshift.investigations.collapsedSections.v2:default',
         JSON.stringify([])
       );
 
@@ -208,6 +191,20 @@ describe('InvestigationList', () => {
         makeSection('closed', { investigations: [investigation], total: 1 }),
       ]);
 
+      expect(toggle('closed')).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('collapses Closed again on remount after the user opens it', () => {
+      const sections = [
+        makeSection('critical', { investigations: [investigation], total: 1 }),
+        makeSection('closed', { investigations: [investigation], total: 1 }),
+      ];
+      renderSections(sections);
+      fireEvent.click(toggle('closed'));
+      expect(toggle('closed')).toHaveAttribute('aria-expanded', 'true');
+      cleanup();
+
+      renderSections(sections);
       expect(toggle('closed')).toHaveAttribute('aria-expanded', 'false');
     });
 
