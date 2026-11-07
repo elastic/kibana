@@ -157,7 +157,6 @@ tags:
   - dev
   - group-platform
   - shared
-  - jest-unit-tests
 fileGroups:
   src:
     - index.d.ts
@@ -169,4 +168,47 @@ fileGroups:
     - '!*/plugins/**/*'
     - '!*/packages/**/*'
     - '!*/*/packages/**/*'
-tasks: {}
+tasks:
+  test-source-upstream:
+    inputs:
+      - '!agent_builder_sml/plugins/sml_test_types/**/*'
+      - '!alerting_api_integration/common/plugins/aad/**/*'
+      - '!alerting_api_integration/common/plugins/actions_simulators/**/*'
+      - '!alerting_api_integration/common/plugins/alerts/**/*'
+      - '!alerting_api_integration/common/plugins/alerts_restricted/**/*'
+      - '!alerting_api_integration/common/plugins/task_manager_fixture/**/*'
+      - '!alerting_api_integration/packages/helpers/**/*'
+      - '!cases_api_integration/common/plugins/cases/**/*'
+      - '!cases_api_integration/common/plugins/observability/**/*'
+      - '!cases_api_integration/common/plugins/security_solution/**/*'
+      - '!cloud_integration/plugins/saml_provider/**/*'
+      - '!encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/**/*'
+      - '!functional_cors/plugins/kibana_cors_test/**/*'
+      - '!functional_embedded/plugins/iframe_embedded/**/*'
+      - '!functional_execution_context/plugins/alerts/**/*'
+      - '!functional_with_es_ssl/plugins/alerts/**/*'
+      - '!functional_with_es_ssl/plugins/cases/**/*'
+      - '!licensing_plugin/plugins/test_feature_usage/**/*'
+      - '!plugin_api_integration/plugins/elasticsearch_client/**/*'
+      - '!plugin_api_integration/plugins/event_log/**/*'
+      - '!plugin_api_integration/plugins/feature_usage_test/**/*'
+      - '!plugin_api_integration/plugins/sample_task_plugin/**/*'
+      - '!plugin_api_perf/plugins/task_manager_performance/**/*'
+      - '!reporting_api_integration/plugins/reporting_fixture/**/*'
+      - '!reporting_api_integration/plugins/reporting_test_routes/**/*'
+      - '!saved_object_api_integration/common/plugins/saved_object_test_plugin/**/*'
+      - '!search_inference_endpoints/plugins/search_inference_endpoints_fixture/**/*'
+      - '!security_api_integration/packages/helpers/**/*'
+      - '!security_api_integration/plugins/audit_log/**/*'
+      - '!security_api_integration/plugins/features_provider/**/*'
+      - '!security_api_integration/plugins/oidc_provider/**/*'
+      - '!security_api_integration/plugins/saml_provider/**/*'
+      - '!security_api_integration/plugins/service_accounts/**/*'
+      - '!security_api_integration/plugins/user_profiles_consumer/**/*'
+      - '!security_functional/plugins/test_endpoints/**/*'
+      - '!spaces_api_integration/common/plugins/access_control_test_plugin/**/*'
+      - '!spaces_api_integration/common/plugins/spaces_test_plugin/**/*'
+      - '!task_manager/plugins/service_accounts/**/*'
+      - '!ui_capabilities/common/plugins/foo_plugin/**/*'
+      - '!usage_collection/plugins/application_usage_test/**/*'
+      - '!usage_collection/plugins/stack_management_usage_test/**/*'

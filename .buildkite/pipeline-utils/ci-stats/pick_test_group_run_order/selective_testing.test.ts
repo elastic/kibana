@@ -45,10 +45,10 @@ describe('filterJestIntegrationConfigsByAffected', () => {
     const result = filterJestIntegrationConfigsByAffected(
       configs,
       context(['affected/'], ['affected/one/example.test.ts']),
-      {
+      () => ({
         modeledConfigs: new Set(configs),
         affectedConfigs: new Set([configs[0]]),
-      }
+      })
     );
     expect(result).toEqual(configs);
   });
@@ -146,10 +146,10 @@ describe('filterJestUnitConfigsByAffected', () => {
     const result = filterJestUnitConfigsByAffected(
       configs,
       context(['affected/'], ['affected/one/example.test.ts']),
-      {
+      () => ({
         modeledConfigs: new Set(configs),
         affectedConfigs: new Set([configs[0]]),
-      }
+      })
     );
     expect(result).toEqual(configs);
   });
@@ -160,10 +160,10 @@ describe('filterJestUnitConfigsByAffected', () => {
       'other/jest.config.js',
       'nested/jest.config.js||shard=1/2',
     ];
-    const result = filterJestUnitConfigsByAffected(configs, context(['nested/']), {
+    const result = filterJestUnitConfigsByAffected(configs, context(['nested/']), () => ({
       modeledConfigs: new Set(['affected/jest.config.js', 'other/jest.config.js']),
       affectedConfigs: new Set(['affected/jest.config.js']),
-    });
+    }));
 
     expect(result).toEqual(['nested/jest.config.js||shard=1/2']);
   });
@@ -171,31 +171,70 @@ describe('filterJestUnitConfigsByAffected', () => {
   it('keeps package-selected configs when Moon misses a modeled config', () => {
     const configs = ['modeled/jest.config.js'];
     expect(
-      filterJestUnitConfigsByAffected(configs, context(['modeled/']), {
+      filterJestUnitConfigsByAffected(configs, context(['modeled/']), () => ({
         modeledConfigs: new Set(configs),
         affectedConfigs: new Set(),
-      })
+      }))
     ).toEqual(configs);
   });
 
   it('does not select unmodeled configs when no package has a Jest-relevant change', () => {
     const configs = ['modeled/jest.config.js', 'nested/jest.config.js'];
     expect(
-      filterJestUnitConfigsByAffected(configs, context([]), {
+      filterJestUnitConfigsByAffected(configs, context([]), () => ({
         modeledConfigs: new Set(['modeled/jest.config.js']),
         affectedConfigs: new Set(),
-      })
+      }))
     ).toEqual([]);
   });
 
-  it('keeps critical changes as a full Jest run even when Moon finds no affected task', () => {
+  it('keeps critical changes as a full Jest run without querying Moon', () => {
+    const configs = ['affected/jest.config.js', 'other/jest.config.js'];
+    const queryMoon = jest.fn();
+    expect(
+      filterJestUnitConfigsByAffected(configs, context([], ['CRITICAL_UNIT']), queryMoon)
+    ).toEqual(configs);
+    expect(queryMoon).not.toHaveBeenCalled();
+  });
+
+  it('logs shard-collapsed Moon and package differences as one JSON line', () => {
+    const log = jest.spyOn(console, 'log').mockImplementation(() => {});
+    const configs = [
+      'affected/jest.config.js',
+      'moon/jest.config.js||shard=1/2',
+      'moon/jest.config.js||shard=2/2',
+      'unmodeled/jest.config.js',
+    ];
+    filterJestUnitConfigsByAffected(configs, context(['affected/', 'unmodeled/']), () => ({
+      modeledConfigs: new Set(['affected/jest.config.js', 'moon/jest.config.js']),
+      affectedConfigs: new Set(['moon/jest.config.js']),
+    }));
+    expect(log).toHaveBeenCalledWith(
+      'Moon Jest unit shadow selection: 2 selected, 2 Moon-only, 1 package-only'
+    );
+    expect(log).toHaveBeenCalledWith(
+      `Moon Jest unit shadow diff: ${JSON.stringify({
+        moonOnly: ['moon/jest.config.js'],
+        packageOnly: ['affected/jest.config.js'],
+        unmodeled: ['unmodeled/jest.config.js'],
+      })}`
+    );
+    log.mockRestore();
+  });
+
+  it('falls back to package selection when the Moon query throws', () => {
+    const error = jest.spyOn(console, 'error').mockImplementation(() => {});
     const configs = ['affected/jest.config.js', 'other/jest.config.js'];
     expect(
-      filterJestUnitConfigsByAffected(configs, context([], ['CRITICAL_UNIT']), {
-        modeledConfigs: new Set(configs),
-        affectedConfigs: new Set(),
+      filterJestUnitConfigsByAffected(configs, context(['affected/']), () => {
+        throw new Error('moon failed');
       })
-    ).toEqual(configs);
+    ).toEqual(['affected/jest.config.js']);
+    expect(error).toHaveBeenCalledWith(
+      'Moon Jest unit comparison failed; using package selection',
+      expect.any(Error)
+    );
+    error.mockRestore();
   });
 
   it('logs critical matches, including glob matches, without including unrelated changes', () => {

@@ -118,4 +118,17 @@ fileGroups:
     - test/scout_osquery_workflows/**/*
     - common/schemas/*/*.json
     - '!target/**/*'
-tasks: {}
+  jestConfigs:
+    - '!cypress/**/*'
+  scoutConfigs:
+    - '!cypress/**/*'
+tasks:
+  test-source-upstream:
+    inputs:
+      - '!cypress/**/*'
+  jest:
+    inputs:
+      - '!cypress/**/*'
+  scoutConfigs:
+    inputs:
+      - '!cypress/**/*'

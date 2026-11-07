@@ -9,7 +9,7 @@
 
 import { execFileSync } from 'node:child_process';
 
-import { queryMoonJestUnitSelection, queryMoonTestSelection } from './moon_test_tasks.ts';
+import { queryMoonTestSelection, queryMoonTestSelections } from './moon_test_tasks.ts';
 
 jest.mock('node:child_process', () => ({ execFileSync: jest.fn() }));
 jest.mock('./strategy_moon.ts', () => ({
@@ -17,39 +17,54 @@ jest.mock('./strategy_moon.ts', () => ({
 }));
 jest.mock('../get_kibana_dir.ts', () => ({ getKibanaDir: () => '/repo' }));
 
-describe('queryMoonJestUnitSelection', () => {
+describe('queryMoonTestSelections', () => {
   beforeEach(() => jest.mocked(execFileSync).mockReset());
 
-  it('queries affected Jest tasks with the same changed files used by CI', () => {
+  it('queries Jest unit and integration tasks together with the changed files used by CI', () => {
     jest
       .mocked(execFileSync)
       .mockReturnValueOnce(
         JSON.stringify({
           tasks: {
-            foo: { jest: { args: ['scripts/moon_jest.js', 'foo/jest.config.js', '--'] } },
+            foo: {
+              jest: { args: ['scripts/moon_jest.js', 'foo/jest.config.js', '--'] },
+              jestIntegrationConfigs: { args: ['foo/jest.integration.config.js'] },
+            },
             bar: { jest: { args: ['scripts/moon_jest.js', 'bar/jest.config.mjs', '--'] } },
           },
         })
       )
       .mockReturnValueOnce(
         JSON.stringify({
-          tasks: { foo: { jest: { args: ['scripts/moon_jest.js', 'foo/jest.config.js', '--'] } } },
+          tasks: {
+            foo: {
+              jest: { args: ['scripts/moon_jest.js', 'foo/jest.config.js', '--'] },
+              jestIntegrationConfigs: { args: ['foo/jest.integration.config.js'] },
+            },
+          },
         })
-      )
-      .mockReturnValueOnce(JSON.stringify({ projects: [{ id: 'foo', source: 'foo' }] }))
-      .mockReturnValueOnce(JSON.stringify(['foo/jest.config.js']));
+      );
 
-    const selection = queryMoonJestUnitSelection(['foo/src/index.ts']);
-
-    expect(selection.modeledConfigs).toEqual(
-      new Set(['foo/jest.config.js', 'bar/jest.config.mjs'])
+    const selections = queryMoonTestSelections(
+      ['foo/src/index.ts'],
+      ['jest-unit-tests', 'jest-integration-tests']
     );
-    expect(selection.affectedConfigs).toEqual(new Set(['foo/jest.config.js']));
+
+    expect(selections.get('jest-unit-tests')).toEqual({
+      modeledConfigs: new Set(['foo/jest.config.js', 'bar/jest.config.mjs']),
+      affectedConfigs: new Set(['foo/jest.config.js']),
+    });
+    expect(selections.get('jest-integration-tests')).toEqual({
+      modeledConfigs: new Set(['foo/jest.integration.config.js']),
+      affectedConfigs: new Set(['foo/jest.integration.config.js']),
+    });
+    // Jest selection needs neither project sources nor the config narrowing script.
+    expect(execFileSync).toHaveBeenCalledTimes(2);
     expect(jest.mocked(execFileSync).mock.calls[1][1]).toEqual([
       'query',
       'tasks',
       '--tags',
-      '^jest-unit-tests$',
+      '^(jest-unit-tests|jest-integration-tests)$',
       '--affected',
       '--downstream',
       'deep',
@@ -57,20 +72,26 @@ describe('queryMoonJestUnitSelection', () => {
     expect(jest.mocked(execFileSync).mock.calls[1][2]).toMatchObject({
       input: JSON.stringify({ files: ['foo/src/index.ts'] }),
     });
-    expect(jest.mocked(execFileSync).mock.calls[3][2]).toMatchObject({
-      input: JSON.stringify({
-        projects: [{ sourceRoot: 'foo', configs: ['foo/jest.config.js'] }],
-        changedFiles: ['foo/src/index.ts'],
-        kind: 'jest-unit',
-      }),
-    });
   });
 
-  it.each([
-    ['jest-integration-tests', 'jestIntegrationConfigs', 'foo/jest.integration.config.mjs'],
-    ['scout-tests', 'scoutConfigs', 'foo/test/scout/ui/custom.playwright.config.ts'],
-  ] as const)('reads %s configs directly from %s task args', (tag, taskId, config) => {
-    const taskQuery = JSON.stringify({ tasks: { foo: { [taskId]: { args: [config] } } } });
+  it('throws when a Jest unit task has no config separator', () => {
+    const taskQuery = JSON.stringify({
+      tasks: { foo: { jest: { args: ['scripts/moon_jest.js', 'foo/jest.config.js'] } } },
+    });
+    jest.mocked(execFileSync).mockReturnValueOnce(taskQuery).mockReturnValueOnce(taskQuery);
+
+    expect(() => queryMoonTestSelections(['foo/src/index.ts'], ['jest-unit-tests'])).toThrow(
+      'Moon project foo has no Jest config separator'
+    );
+  });
+});
+
+describe('queryMoonTestSelection', () => {
+  beforeEach(() => jest.mocked(execFileSync).mockReset());
+
+  it('narrows Scout configs through project sources and the selection script', () => {
+    const config = 'foo/test/scout/ui/custom.playwright.config.ts';
+    const taskQuery = JSON.stringify({ tasks: { foo: { scoutConfigs: { args: [config] } } } });
     jest
       .mocked(execFileSync)
       .mockReturnValueOnce(taskQuery)
@@ -78,9 +99,16 @@ describe('queryMoonJestUnitSelection', () => {
       .mockReturnValueOnce(JSON.stringify({ projects: [{ id: 'foo', source: 'foo' }] }))
       .mockReturnValueOnce(JSON.stringify([config]));
 
-    const selection = queryMoonTestSelection(['foo/src/index.ts'], tag);
+    const selection = queryMoonTestSelection(['foo/src/index.ts'], 'scout-tests');
 
     expect(selection.modeledConfigs).toEqual(new Set([config]));
     expect(selection.affectedConfigs).toEqual(new Set([config]));
+    expect(jest.mocked(execFileSync).mock.calls[3][2]).toMatchObject({
+      input: JSON.stringify({
+        projects: [{ sourceRoot: 'foo', configs: [config] }],
+        changedFiles: ['foo/src/index.ts'],
+        kind: 'scout',
+      }),
+    });
   });
 });

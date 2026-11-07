@@ -21,11 +21,8 @@ import { loadRunOrderConfig } from './env_config.ts';
 import { ftrManifest } from './ftr_manifests.ts';
 import { discoverJestIntegrationConfigs, discoverJestUnitConfigs } from './jest_configs.ts';
 import { recordOnMergeShadow } from './on_merge_shadow.ts';
-import {
-  queryMoonJestUnitSelection,
-  queryMoonTestSelection,
-} from '../../affected-packages/moon_test_tasks.ts';
-import type { MoonTestSelection } from '../../affected-packages/moon_test_tasks.ts';
+import { queryMoonTestSelections } from '../../affected-packages/moon_test_tasks.ts';
+import type { MoonTestSelection, MoonTestTag } from '../../affected-packages/moon_test_tasks.ts';
 import { getRunGroup, getRunGroups, labelJestSubgroups } from './run_groups.ts';
 import { getFtrSkipModules } from './selective_ftr.ts';
 import { isScoutPathOnlyDiff } from './selective_scout.ts';
@@ -125,30 +122,20 @@ export async function pickTestGroupRunOrder() {
 
     const selectiveCtx = await resolveSelectiveTestingContext(selectiveChangedFiles);
     if (selectiveCtx !== null) {
+      const queryMoon = createMoonJestQuery(selectiveChangedFiles, [
+        ...(unitIncluded ? (['jest-unit-tests'] as const) : []),
+        ...(integrationIncluded ? (['jest-integration-tests'] as const) : []),
+      ]);
       if (unitIncluded) {
-        try {
-          const moonSelection = queryMoonJestUnitSelection(selectiveChangedFiles);
-          jestUnitConfigs = filterJestUnitConfigsByAffected(
-            jestUnitConfigs,
-            selectiveCtx,
-            moonSelection
-          );
-        } catch (error) {
-          console.error('Moon Jest unit comparison failed; using package selection', error);
-          jestUnitConfigs = filterJestUnitConfigsByAffected(jestUnitConfigs, selectiveCtx);
-        }
+        jestUnitConfigs = filterJestUnitConfigsByAffected(jestUnitConfigs, selectiveCtx, () =>
+          queryMoon('jest-unit-tests')
+        );
       }
       if (integrationIncluded) {
-        let moonSelection: MoonTestSelection | undefined;
-        try {
-          moonSelection = queryMoonTestSelection(selectiveChangedFiles, 'jest-integration-tests');
-        } catch (error) {
-          console.error('Moon Jest integration comparison failed; using package selection', error);
-        }
         jestIntegrationConfigs = filterJestIntegrationConfigsByAffected(
           jestIntegrationConfigs,
           selectiveCtx,
-          moonSelection
+          () => queryMoon('jest-integration-tests')
         );
       }
     }
@@ -269,6 +256,24 @@ export async function pickTestGroupRunOrder() {
 /**
  * Throws an error if the variable's value is missing at runtime.
  */
+/** Queries every requested Moon Jest tag once, on first use, and logs how long it took. */
+function createMoonJestQuery(
+  changedFiles: string[],
+  tags: readonly MoonTestTag[]
+): (tag: MoonTestTag) => MoonTestSelection {
+  let selections: Map<MoonTestTag, MoonTestSelection> | undefined;
+  return (tag) => {
+    if (!selections) {
+      const start = Date.now();
+      selections = queryMoonTestSelections(changedFiles, tags);
+      console.log(`Moon Jest shadow query took ${((Date.now() - start) / 1000).toFixed(1)}s`);
+    }
+    const selection = selections.get(tag);
+    if (!selection) throw new Error(`Moon returned no selection for ${tag}`);
+    return selection;
+  };
+}
+
 function requireVariable(value: string | undefined, envName: string): string {
   if (!value) {
     throw new Error(`Missing required environment variable "${envName}"`);

@@ -52,4 +52,17 @@ fileGroups:
     - test/**/*
     - '!target/**/*'
     - '!test/plugins/**/*'
-tasks: {}
+  jestConfigs:
+    - '!test/plugins/test_endpoints/**/*'
+  scoutConfigs:
+    - '!test/plugins/test_endpoints/**/*'
+tasks:
+  test-source-upstream:
+    inputs:
+      - '!test/plugins/test_endpoints/**/*'
+  jest:
+    inputs:
+      - '!test/plugins/test_endpoints/**/*'
+  scoutConfigs:
+    inputs:
+      - '!test/plugins/test_endpoints/**/*'

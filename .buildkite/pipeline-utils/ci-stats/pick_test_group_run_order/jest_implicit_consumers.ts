@@ -14,6 +14,8 @@
  *   publishers (alerting, actions, fleet, …) sit upstream so includeDownstream skips them.
  * - kbn-plugin-helpers: build integration tests exercise generate_plugin from
  *   @kbn/plugin-generator, which does not depend on @kbn/plugin-helpers.
+ *
+ * Moon models the same rules in each consumer's moon.extend.yml; keep both in sync.
  */
 
 import { minimatch } from 'minimatch';
