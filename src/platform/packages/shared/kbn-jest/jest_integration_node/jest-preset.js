@@ -23,9 +23,9 @@ module.exports = {
   // An array of regexp pattern strings that are matched against, matched files will skip transformation:
   transformIgnorePatterns: [
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '[/\\\\]node_modules(?![\\/\\\\](@apidevtools/json-schema-ref-parser|langchain|langsmith|gpt-tokenizer|flat|@langchain|eventsource-parser|exit-hook|zod/v4|ansi-styles|inversify|@inversifyjs|uuid|globby|unicorn-magic|is-path-inside|slash|@sindresorhus/merge-streams|jsondiffpatch|query-string|decode-uri-component|split-on-first|filter-obj|ccount|character-entities[^/\\\\]*|decode-named-character-reference|devlop|escape-string-regexp|longest-streak|markdown-table|mdast-util-[^/\\\\]*|micromark[^/\\\\]*|unist-util-[^/\\\\]*|zwitch|cbor2|@cto.af/wtf8))[/\\\\].+\\.js$',
-    '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|@langchain|zod/v4))/dist/[/\\\\].+\\.js$',
-    '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|@langchain|zod/v4))/dist/util/[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](@apidevtools/json-schema-ref-parser|langchain|langsmith|gpt-tokenizer|flat|@langchain|eventsource-parser|exit-hook|zod/v4|ansi-styles|inversify|@inversifyjs|uuid|globby|unicorn-magic|is-path-inside|slash|@sindresorhus/merge-streams|jsondiffpatch|query-string|decode-uri-component|split-on-first|filter-obj|ccount|character-entities[^/\\\\]*|decode-named-character-reference|devlop|escape-string-regexp|longest-streak|markdown-table|mdast-util-[^/\\\\]*|micromark[^/\\\\]*|unist-util-[^/\\\\]*|zwitch|cbor2|@cto.af/wtf8|get-port|http-proxy-agent|https-proxy-agent|proxy|agent-base|proxy-agent-negotiate))[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|@langchain|zod/v4|get-port|http-proxy-agent|https-proxy-agent|proxy|agent-base|proxy-agent-negotiate))/dist/[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|@langchain|zod/v4|get-port|http-proxy-agent|https-proxy-agent|proxy|agent-base|proxy-agent-negotiate))/dist/util/[/\\\\].+\\.js$',
   ],
   setupFilesAfterEnv: [
     '<rootDir>/src/platform/packages/shared/kbn-jest/src/setup/disallow_code_generation.js',
