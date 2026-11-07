@@ -276,6 +276,7 @@ export const getNavigationTreeDefinition = ({
                       link: 'monitoring',
                     },
                     { badgeType: 'new', link: 'management:queryActivity' },
+                    { link: 'management:taskManager' },
                   ],
                   title: i18n.translate(
                     'xpack.enterpriseSearch.searchNav.management.clusterPerformance',

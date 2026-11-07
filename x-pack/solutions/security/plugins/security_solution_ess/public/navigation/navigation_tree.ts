@@ -230,6 +230,7 @@ export const createNavigationTree = (
             children: [
               { link: 'monitoring' },
               { link: 'management:queryActivity', badgeType: 'new' },
+              { link: 'management:taskManager' },
             ],
           },
           {

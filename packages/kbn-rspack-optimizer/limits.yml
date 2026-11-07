@@ -207,6 +207,7 @@ pageLoadAssetSize:
   streamsApp: 55882
   subscriptionStatus: 5000
   synthetics: 20839
+  taskManagerUi: 1500
   telemetry: 20586
   telemetryManagementSection: 1738
   timelines: 1409
