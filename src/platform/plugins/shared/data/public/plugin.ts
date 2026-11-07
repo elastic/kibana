@@ -35,6 +35,7 @@ import {
   setUiSettings,
   setTheme,
 } from './services';
+import { getEsqlQueryProfileViewDescription } from './utils/esql_query_profile';
 import { getTableViewDescription } from './utils/table_inspector_view';
 import type { NowProviderInternalContract } from './now_provider';
 import { NowProvider } from './now_provider';
@@ -95,6 +96,13 @@ export class DataPublicPlugin
         uiSettings: startServices().core.uiSettings,
         fieldFormats: startServices().self.fieldFormats,
         isFilterable: startServices().self.datatableUtilities.isFilterable,
+      }))
+    );
+
+    inspector.registerView(
+      getEsqlQueryProfileViewDescription(() => ({
+        search: startServices().self.search,
+        http: startServices().core.http,
       }))
     );
 

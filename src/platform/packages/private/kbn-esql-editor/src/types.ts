@@ -27,6 +27,18 @@ import type {
   EsqlView,
 } from '@kbn/esql-types';
 import type { ESQLDependencies } from '@kbn/code-editor';
+import type { EditorCommandHeat } from './query_heat/query_heat';
+
+/** How the profile of the latest run is going. */
+export type ProfileModeStatus = 'idle' | 'profiling' | 'error';
+
+/** Turns query profiling on and off from the editor footer. */
+export interface ProfileModeControl {
+  isOn: boolean;
+  onChange: (isOn: boolean) => void;
+  /** Shown on the button: a spinner while profiling, and a warning when it failed. */
+  status?: ProfileModeStatus;
+}
 
 export interface DataErrorsControl {
   enabled: boolean;
@@ -98,6 +110,18 @@ export interface ESQLEditorProps {
   enableCreateView?: boolean;
   /** Stats about the last request made */
   queryStats?: ESQLQueryStats;
+  /** Called when the duration in the editor footer is clicked. */
+  onQueryDurationClick?: () => void;
+  /**
+   * Shows a toggle in the footer for profiling queries. While it is on, the host profiles each run
+   * and passes where the query spent its time back as `commandHeat`.
+   */
+  profileMode?: ProfileModeControl;
+  /**
+   * Where the query spent its time, command by command, from a query profile. It is shown next to
+   * the commands while the query text still equals the text it was measured on.
+   */
+  commandHeat?: EditorCommandHeat;
   /** Callback invoked when the ES|QL docs flyout (opened from the help menu) toggles visibility */
   onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
   /**

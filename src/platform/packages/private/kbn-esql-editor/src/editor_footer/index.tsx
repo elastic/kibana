@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { Interpolation, Theme } from '@emotion/react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -20,7 +20,7 @@ import React, { memo, useCallback, useState } from 'react';
 import type { MonacoMessage } from '@kbn/code-editor';
 import type { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
 import type { ESQLQueryStats as QueryStats } from '@kbn/esql-types';
-import type { DataErrorsControl, ESQLEditorDeps } from '../types';
+import type { DataErrorsControl, ESQLEditorDeps, ProfileModeControl } from '../types';
 import type { EsqlStarredQueriesService } from './esql_starred_queries_service';
 import { HistoryPanelSlide } from './history_panel_slide';
 import { HistoryAndStarredQueriesTabs } from './history_starred_queries';
@@ -51,6 +51,8 @@ interface EditorFooterProps {
   dataErrorsControl?: DataErrorsControl;
   starredQueriesService: EsqlStarredQueriesService | null;
   queryStats?: QueryStats;
+  onQueryDurationClick?: () => void;
+  profileMode?: ProfileModeControl;
   hideQueryHistory?: boolean;
   onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
   enableCreateView?: boolean;
@@ -80,6 +82,8 @@ export const EditorFooter = memo(function EditorFooter({
   dataErrorsControl,
   starredQueriesService,
   queryStats,
+  onQueryDurationClick,
+  profileMode,
   hideQueryHistory,
   onESQLDocsFlyoutVisibilityChanged,
   enableCreateView,
@@ -114,7 +118,44 @@ export const EditorFooter = memo(function EditorFooter({
         >
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center">
-              {queryStats && <ESQLQueryStats queryStats={queryStats} />}
+              {queryStats && (
+                <ESQLQueryStats queryStats={queryStats} onDurationClick={onQueryDurationClick} />
+              )}
+              {profileMode && (
+                <EuiToolTip
+                  position="top"
+                  content={
+                    profileMode.status === 'error'
+                      ? i18n.translate('esqlEditor.query.profileModeErrorTooltip', {
+                          defaultMessage:
+                            'The profile of the last run could not be loaded, so there is nothing to show next to the query',
+                        })
+                      : profileMode.status === 'profiling'
+                      ? i18n.translate('esqlEditor.query.profileModeProfilingTooltip', {
+                          defaultMessage: 'Profiling the last run in the background',
+                        })
+                      : i18n.translate('esqlEditor.query.profileModeTooltip', {
+                          defaultMessage:
+                            'Profiles each run in the background and shows where the query spent its time next to its commands',
+                        })
+                  }
+                >
+                  <EuiButtonEmpty
+                    size="xs"
+                    color={profileMode.status === 'error' ? 'warning' : 'text'}
+                    iconType={profileMode.status === 'error' ? 'warning' : 'timeline'}
+                    isLoading={profileMode.status === 'profiling'}
+                    isSelected={profileMode.isOn}
+                    aria-pressed={profileMode.isOn}
+                    onClick={() => profileMode.onChange(!profileMode.isOn)}
+                    data-test-subj="ESQLEditor-profileMode"
+                  >
+                    {i18n.translate('esqlEditor.query.profileModeLabel', {
+                      defaultMessage: 'Profile',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiToolTip>
+              )}
               {errors && errors.length > 0 && (
                 <ErrorsWarningsFooterPopover
                   isPopoverOpen={isErrorPopoverOpen}

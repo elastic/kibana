@@ -89,7 +89,7 @@ export const DiscoverTopNavMenu = ({
   topNavBadges,
   topNavMenu,
   shareAction,
-}: DiscoverTopNavHookResult) => {
+}: Omit<DiscoverTopNavHookResult, 'openInspector'>) => {
   const { topNavBadges$, topNavMenu$, topNavShare$ } = useContext(discoverTopNavMenuContext);
 
   useLayoutEffect(() => {

@@ -180,6 +180,12 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
    */
   esqlVariablesConfig?: QueryBarTopRowProps['esqlVariablesConfig'];
   esqlQueryStats?: ESQLQueryStats;
+  /** Called when the ES|QL editor duration is clicked. */
+  onQueryDurationClick?: QueryBarTopRowProps['onQueryDurationClick'];
+  /** Where the query spent its time, shown next to the commands of an ES|QL query. */
+  esqlCommandHeat?: QueryBarTopRowProps['esqlCommandHeat'];
+  /** A toggle in the editor footer for profiling ES|QL queries. */
+  esqlProfileMode?: QueryBarTopRowProps['esqlProfileMode'];
 
   /** Optional configurations for the lookup join index editor */
   onOpenQueryInNewTab?: QueryBarTopRowProps['onOpenQueryInNewTab'];
@@ -872,6 +878,9 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           onVisorInitialStateChange={this.props.onVisorInitialStateChange}
           esqlVariablesConfig={this.props.esqlVariablesConfig}
           esqlQueryStats={this.props.esqlQueryStats}
+          onQueryDurationClick={this.props.onQueryDurationClick}
+          esqlCommandHeat={this.props.esqlCommandHeat}
+          esqlProfileMode={this.props.esqlProfileMode}
           onOpenQueryInNewTab={this.props.onOpenQueryInNewTab}
           useBackgroundSearchButton={this.props.useBackgroundSearchButton}
           enableDateRangePicker={this.props.enableDateRangePicker}

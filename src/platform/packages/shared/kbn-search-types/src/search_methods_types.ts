@@ -275,6 +275,12 @@ export interface IEsqlSearchParams extends BaseSearchParams {
   columnMetadata?: boolean;
 
   /**
+   * When true, Elasticsearch includes a `profile` object on the response.
+   * Use this for an explicit debug view. It is extra work on the cluster.
+   */
+  profile?: boolean;
+
+  /**
    * When true, ES|QL queries use approximate execution for faster, estimated results.
    */
   approximation?: boolean;

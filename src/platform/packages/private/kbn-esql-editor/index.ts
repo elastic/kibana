@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { DataErrorsControl, VisorNlResultHandler } from './src/types';
+export type {
+  DataErrorsControl,
+  ProfileModeControl,
+  ProfileModeStatus,
+  VisorNlResultHandler,
+} from './src/types';
+export type { EditorCommandHeat, EditorCommandHeatEntry } from './src/query_heat/query_heat';
 export type { ESQLEditorProps, ESQLEditorApi } from './src/esql_editor';
 export type { RestorableStateProviderApi } from '@kbn/restorable-state';
 import { ESQLEditor } from './src/esql_editor';
