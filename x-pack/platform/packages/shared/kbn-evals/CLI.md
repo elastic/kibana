@@ -218,8 +218,18 @@ node scripts/evals doctor --fix
 ### `compare` -- Compare eval runs
 
 ```bash
-node scripts/evals compare <run-id-a> <run-id-b>
+node scripts/evals compare <target-run-id> <baseline-run-id>
+node scripts/evals compare <run-id> --baseline-branch main --suite <suite-id> --fail-on-regression
 ```
+
+| Flag                           | Description                                                                                                  |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| `--fail-on-regression`         | Exit 1 if any evaluator is significantly worse (direction-aware), 2 if the gate was inconclusive or not evaluated |
+| `--regression-evaluators a,b`  | Only these evaluators can trip the gate (default: all)                                                       |
+| `--min-pairs <n>`              | Evaluators with fewer pairs are reported as "insufficient pairs" and cannot trip the gate (default: 10)      |
+| `--no-multiplicity-correction` | Judge significance on raw p-values; by default p-values are Holm-Bonferroni adjusted across all comparisons |
+
+Exit codes with `--fail-on-regression`: 0 = passed, 1 = significant regression or an unexpected error (bad flags, Kibana unreachable; read the log line), 2 = inconclusive or not evaluated (no baseline, no scores or pairs, nothing checkable, no evaluator matched). See the [README](./README.md#14-comparing-experiments-and-gating-on-regressions) for details.
 
 ### `env` -- List environment variables
 

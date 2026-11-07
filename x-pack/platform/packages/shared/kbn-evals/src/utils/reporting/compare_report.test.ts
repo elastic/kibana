@@ -7,6 +7,7 @@
 
 import type { ComparisonResult } from '@kbn/evals-common';
 import { formatCompareReport } from './compare_report';
+import { applyHolmCorrection } from './holm_correction';
 
 const makeResult = (overrides: Partial<ComparisonResult> = {}): ComparisonResult => ({
   datasetId: 'ds-1',
@@ -218,5 +219,44 @@ describe('formatCompareReport', () => {
 
     expect(tableOutput).toContain('(4 target only, 1 baseline only)');
     expect(tableOutput).toContain('McNemar');
+  });
+
+  it('adds an adjusted p-value column and counts significance on it when corrected', () => {
+    const results = Array.from({ length: 10 }, (_, i) =>
+      makeResult({ evaluatorName: `Eval${i}`, pValue: i === 0 ? 0.03 : 0.9 })
+    );
+
+    const raw = formatCompareReport({
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
+      results,
+    });
+    const corrected = formatCompareReport({
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
+      results: applyHolmCorrection(results),
+    });
+
+    expect(raw.significantCount).toBe(1);
+    expect(raw.tableOutput).not.toContain('Adj. p-value');
+    expect(corrected.significantCount).toBe(0);
+    expect(corrected.tableOutput).toContain('Adj. p-value');
+    expect(corrected.header[2]).toContain('Holm-Bonferroni adjusted p < 0.05');
+  });
+
+  it('sizes the Holm family by rows with a finite p-value, not by every row', () => {
+    const results = [
+      makeResult({ evaluatorName: 'A', pValue: 0.01 }),
+      makeResult({ evaluatorName: 'B', pValue: 0.5 }),
+      makeResult({ evaluatorName: 'C', pValue: null }),
+    ];
+
+    const report = formatCompareReport({
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
+      results: applyHolmCorrection(results),
+    });
+
+    expect(report.header[2]).toContain('across 2 comparisons');
   });
 });

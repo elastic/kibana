@@ -335,6 +335,31 @@ EVAL_INCLUDE_EIS_MODELS=1
 EVAL_SLACK_NOTIFICATION_CHANNEL=#my-test-channel
 ```
 
+### 1.4 Comparing experiments and gating on regressions
+
+`node scripts/evals compare <target> <baseline>` (or `<target> --baseline-branch main --suite <suite-id>`) pairs the scores of two experiments and runs one paired test per dataset and evaluator: McNemar for pass/fail scores, Wilcoxon signed-rank otherwise, and a paired t-test for continuous scores once there are enough pairs. Each evaluator's direction (higher-is-better, lower-is-better or neutral) decides whether a change counts as an improvement or a regression.
+
+**Multiplicity correction (default).** A comparison tests many evaluators at once, so at α = 0.05 a few false "significant" flags are expected by chance. By default the p-values of all comparisons in the run (every dataset × evaluator with a p-value) are adjusted with the Holm-Bonferroni step-down procedure. Reports show both the raw `p-value` and the `Adj. p-value`; the `Sig` / `Significant` column, the outcome and the regression gate use the adjusted value. Pass `--no-multiplicity-correction` to judge on raw p-values (the adjusted column is then omitted).
+
+**Regression gate.** `compare` never fails on its own. Add `--fail-on-regression` to make it exit non-zero when any gated evaluator shows a statistically significant change in the worse direction:
+
+| Flag                           | Description                                                                                                                                                                                  |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--fail-on-regression`         | Exit with a failure if an evaluator is significantly worse (adjusted p < 0.05, unless `--no-multiplicity-correction`). Improvements, non-significant drops and neutral evaluators never trip. |
+| `--regression-evaluators a,b`  | Comma-separated evaluator names that can trip the gate (default: all). Names absent from the comparison log a warning; if none match, the run fails rather than pass vacuously.              |
+| `--min-pairs <n>`              | Minimum paired scores for an evaluator to be gated (default: 10). Evaluators below it are listed as `insufficient pairs`, can't trip the gate, and are called out in a warning: they were not checked. |
+| `--no-multiplicity-correction` | Use raw p-values instead of Holm-Bonferroni adjusted ones.                                                                                                                                   |
+
+Exit codes (with `--fail-on-regression`):
+
+- **0, passed**: at least one evaluator comparison was actually checked and none got significantly worse. The `Regression gate passed` line says how many were checked. Any `insufficient pairs` or `no usable p-value` warning means those evaluators were not checked, not that they passed.
+- **1, significant regression or an unexpected error**: `Regression gate tripped`, listing each regressed dataset / evaluator with delta, raw (and adjusted) p-value, the test used and the number of pairs. Unexpected errors (bad flags, Kibana unreachable) also exit 1, so read the log line to tell the two apart.
+- **2, inconclusive or not evaluated**: the gate could not rule regressions in or out, so it fails instead of passing silently. This happens when no baseline is found on `--baseline-branch`, when there are no scores, no overlapping datasets or no paired scores to compare, when the comparison returns no results, when `--regression-evaluators` matches no evaluator, and when nothing was checkable (every row has too few pairs or no usable p-value, or only neutral evaluators are in scope).
+
+Without `--fail-on-regression`, `compare` keeps its old behavior: a missing baseline or empty comparison logs a warning and exits 0, and missing scores, datasets or pairs remain plain errors (exit 1).
+
+The gate decision is a pure function (`evaluateRegressionGate` in `src/utils/reporting/regression_gate.ts`); the Holm adjustment is in `holm_correction.ts`.
+
 ---
 
 ## 2. Creating a new evaluation suite

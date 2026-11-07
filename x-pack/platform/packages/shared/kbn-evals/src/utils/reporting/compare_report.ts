@@ -8,7 +8,9 @@
 import chalk from 'chalk';
 import { table } from 'table';
 import { isImproved } from '@kbn/evals-common';
-import type { Direction, ComparisonResult } from '@kbn/evals-common';
+import type { Direction } from '@kbn/evals-common';
+import { countHolmFamily, getEffectivePValue } from './holm_correction';
+import type { CorrectableComparisonResult } from './holm_correction';
 import { formatDiscordantPairs, getTestLabel } from './test_label';
 
 const DEFAULT_SIGNIFICANCE_THRESHOLD = 0.05;
@@ -61,7 +63,7 @@ export function formatCompareReport({
 }: {
   targetExperimentId: string;
   baselineExperimentId: string;
-  results: ComparisonResult[];
+  results: CorrectableComparisonResult[];
   significanceThreshold?: number;
 }): {
   header: string[];
@@ -74,9 +76,13 @@ export function formatCompareReport({
       a.datasetName.localeCompare(b.datasetName) || a.evaluatorName.localeCompare(b.evaluatorName)
   );
 
-  const significantCount = sortedResults.filter(
-    (result) => result.pValue !== null && result.pValue < significanceThreshold
-  ).length;
+  const isSignificant = (result: CorrectableComparisonResult): boolean => {
+    const pValue = getEffectivePValue(result);
+    return pValue !== null && pValue < significanceThreshold;
+  };
+  const multiplicityCorrected = sortedResults.some((result) => result.adjustedPValue !== undefined);
+
+  const significantCount = sortedResults.filter(isSignificant).length;
 
   const tableHeaders = [
     'Evaluator',
@@ -86,17 +92,17 @@ export function formatCompareReport({
     'Diff',
     'Test',
     'p-value',
+    ...(multiplicityCorrected ? ['Adj. p-value'] : []),
     'Significant',
   ];
   const rowsByDataset = new Map<string, string[][]>();
 
   sortedResults.forEach((result) => {
     const delta = result.meanTarget - result.meanBaseline;
-    const isSignificant = result.pValue !== null && result.pValue < significanceThreshold;
     const significanceLabel =
-      result.pValue === null
+      getEffectivePValue(result) === null
         ? chalk.gray('n/a')
-        : isSignificant
+        : isSignificant(result)
         ? chalk.bold.green('yes')
         : chalk.gray('no');
 
@@ -109,6 +115,7 @@ export function formatCompareReport({
       formatDifference(delta, result.direction) + formatDiscordantPairs(result.hypothesisTest),
       getTestLabel(result.hypothesisTest.id),
       formatPValue(result.pValue),
+      ...(multiplicityCorrected ? [formatPValue(result.adjustedPValue ?? null)] : []),
       significanceLabel,
     ]);
     rowsByDataset.set(result.datasetName, rows);
@@ -117,7 +124,11 @@ export function formatCompareReport({
   const header = [
     `Target: ${targetExperimentId}`,
     `Baseline: ${baselineExperimentId}`,
-    `Significance threshold: p < ${significanceThreshold}`,
+    multiplicityCorrected
+      ? `Significance threshold: Holm-Bonferroni adjusted p < ${significanceThreshold} (across ${countHolmFamily(
+          sortedResults
+        )} comparisons)`
+      : `Significance threshold: p < ${significanceThreshold}`,
   ];
   const summary = `Significant differences: ${significantCount}/${sortedResults.length}`;
   const tableOutput = [...rowsByDataset.entries()]
