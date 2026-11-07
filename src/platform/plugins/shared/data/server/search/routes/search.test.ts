@@ -100,6 +100,26 @@ describe('Search service', () => {
     });
   });
 
+  it('handler passes pollLength as a search option, not as part of the request', async () => {
+    const mockContext = {
+      search: {
+        search: jest.fn().mockReturnValue(from(Promise.resolve({ id: 'yay', rawResponse: {} }))),
+      },
+    };
+
+    const mockRequest = httpServerMock.createKibanaRequest({
+      body: { params: {}, pollLength: '30s' },
+      params: { strategy: 'foo', id: 'yay' },
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    await runMockSearch(mockContext, mockRequest, mockResponse);
+
+    const [[request, options]] = mockContext.search.search.mock.calls;
+    expect(request).toStrictEqual({ id: 'yay', params: {} });
+    expect(options).toEqual(expect.objectContaining({ strategy: 'foo', pollLength: '30s' }));
+  });
+
   it('handler returns an error response if the search throws a painless error', async () => {
     const rejectedValue = from(
       Promise.reject(mockEsError('search_phase_execution_exception', 400, searchPhaseException))

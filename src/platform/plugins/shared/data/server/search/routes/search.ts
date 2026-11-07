@@ -61,6 +61,7 @@ export function registerSearchRoute(
                 requestHash: schema.maybe(schema.string()),
                 projectRouting: schema.maybe(schema.string()),
                 approximation: schema.maybe(schema.boolean()),
+                pollLength: schema.maybe(schema.string({ maxLength: 32 })),
               },
               { unknowns: 'allow' }
             ),
@@ -78,6 +79,7 @@ export function registerSearchRoute(
           requestHash,
           projectRouting,
           approximation,
+          pollLength,
           ...searchRequest
         } = request.body;
 
@@ -115,6 +117,7 @@ export function registerSearchRoute(
                   requestHash,
                   projectRouting,
                   approximation,
+                  pollLength,
                 }
               )
               .pipe(first())

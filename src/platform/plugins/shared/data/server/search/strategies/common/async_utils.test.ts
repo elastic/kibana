@@ -95,6 +95,20 @@ describe('request utils', () => {
       expect(params).toHaveProperty('wait_for_completion_timeout');
     });
 
+    test('Uses `pollLength` from options as `wait_for_completion_timeout`', async () => {
+      const mockConfig = getMockSearchConfig({});
+      const params = getCommonDefaultAsyncGetParams(mockConfig, { pollLength: '30s' });
+      expect(params).toHaveProperty('wait_for_completion_timeout', '30s');
+    });
+
+    test('Prefers `pollLength` from options over `pollLength` from config', async () => {
+      const mockConfig = getMockSearchConfig({
+        asyncSearch: { pollLength: moment.duration(5, 's') },
+      });
+      const params = getCommonDefaultAsyncGetParams(mockConfig, { pollLength: '30s' });
+      expect(params).toHaveProperty('wait_for_completion_timeout', '30s');
+    });
+
     test('Uses `keep_alive` if `sessionId` is not provided', async () => {
       const mockConfig = getMockSearchConfig({
         sessions: {
