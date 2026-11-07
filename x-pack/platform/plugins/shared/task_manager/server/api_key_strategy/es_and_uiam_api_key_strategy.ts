@@ -111,15 +111,25 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
     //
     // A UIAM service account takes the same branch, cloned or not. Elasticsearch can't grant a
     // key for it, so the UIAM key is its only credential and a failed grant fails the request.
+    //
+    // A fake request carrying a UIAM credential also stays on this branch regardless of
+    // `cloneApiKey`. Fake requests have no principal (except for those minted by the service
+    // accounts backend). A UIAM service-account token on a fake request with no principal
+    // (like the Actions inbound events route scheduling on behalf of Relay) is indistinguishable
+    // from a UIAM session token, and the ES grant fails for the former. Until all fake requests
+    // carry a principal, the UIAM grant is the only one that works for every `essu_` bearer.
     const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
     const isUiamRequest = !!authorizationHeader && isUiamCredential(authorizationHeader);
     const principal = security.authc.getPrincipal(request);
     const isUiamServiceAccount =
       principal?.type === 'service_account' && principal.variant === 'uiam';
     const uiamOnlyRequest =
-      ((isUiamRequest && cloneApiKey) || isUiamServiceAccount) && opts?.onEsKey !== true;
+      ((isUiamRequest && (cloneApiKey || request.isFakeRequest)) || isUiamServiceAccount) &&
+      opts?.onEsKey !== true;
 
     if (uiamOnlyRequest) {
+      // The UIAM key is the only credential the task gets on this branch, so a refused grant
+      // must surface UIAM's own error to the caller rather than the generic one below.
       const uiamOnlyKeys = await this.grantUiamApiKeys(
         taskInstances,
         request,
@@ -127,7 +137,7 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
         apiKeyCreatedByUser,
         isUiamRequest,
         opts?.onApiKeyCreated,
-        isUiamServiceAccount
+        true
       );
 
       const uiamOnlyResult = new Map<string, ApiKeySOFields>();
