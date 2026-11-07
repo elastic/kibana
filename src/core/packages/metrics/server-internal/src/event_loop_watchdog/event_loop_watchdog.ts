@@ -41,6 +41,7 @@ export class EventLoopWatchdog {
   private stopping?: Promise<void>;
   private shared?: BigInt64Array;
   private runningSinceUs = 0;
+  private profilingEnabled = false;
 
   constructor(private readonly params: EventLoopWatchdogParams) {}
 
@@ -60,6 +61,7 @@ export class EventLoopWatchdog {
     // Stamp before the worker starts, so its first poll doesn't see a stale heartbeat.
     Atomics.store(shared, Slot.heartbeat, BigInt(monotonicUs()));
     Atomics.store(shared, Slot.runningSince, BigInt(this.runningSinceUs));
+    Atomics.store(shared, Slot.profiling, this.profilingEnabled ? 1n : 0n);
     this.shared = shared;
     this.heartbeatTimer = setInterval(
       () => Atomics.store(shared, Slot.heartbeat, BigInt(monotonicUs())),
@@ -128,6 +130,17 @@ export class EventLoopWatchdog {
       // Also stamp the heartbeat, so a block that starts right after this is measured from a
       // heartbeat that's already running, not one up to an interval older.
       Atomics.store(this.shared, Slot.heartbeat, BigInt(this.runningSinceUs));
+    }
+  }
+
+  /**
+   * Updates the profiling flag for the running worker. The setting is retained when the worker
+   * stops and applied if it starts again.
+   */
+  public setProfiling(enabled: boolean): void {
+    this.profilingEnabled = enabled;
+    if (this.shared) {
+      Atomics.store(this.shared, Slot.profiling, enabled ? 1n : 0n);
     }
   }
 

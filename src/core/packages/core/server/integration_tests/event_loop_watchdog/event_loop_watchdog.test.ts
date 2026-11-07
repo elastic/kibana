@@ -241,6 +241,20 @@ describe('event loop watchdog in a child process', () => {
     });
   }, 120_000);
 
+  it('passes profiling toggles to the running worker without restarting it', async () => {
+    const result = await runHarness('profiling_toggle');
+    expectCleanExit(result);
+    expect(result.workerLogLines.map(({ message }) => message)).toEqual([
+      'profiling 1',
+      'profiling 0',
+      'profiling 1',
+    ]);
+    const readyLines = result.mainLogLines.filter(({ message }) =>
+      message.startsWith('Worker event-loop-watchdog ready ')
+    );
+    expect(readyLines).toHaveLength(1);
+  }, 120_000);
+
   it('detects ongoing event loop blocks once short-block notifications exceed the rate limit', async () => {
     const blockWarnings = (lines: WorkerLogLine[], ongoing: boolean) =>
       lines.filter((line) => blockOf(line)?.ongoing === ongoing);

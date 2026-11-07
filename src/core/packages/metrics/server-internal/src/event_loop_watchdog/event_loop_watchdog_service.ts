@@ -18,6 +18,7 @@ import {
   firstValueFrom,
   map,
   merge,
+  of,
   skipWhile,
   take,
   timer,
@@ -36,7 +37,7 @@ import { RUNNING_FALLBACK_MS, RUNNING_GRACE_MS } from './constants';
 
 /** Feature flag that turns the event loop watchdog on and off at runtime. */
 export const EVENT_LOOP_WATCHDOG_FEATURE_FLAG = 'core.eventLoopWatchdog.enabled';
-/** Per-role CPU profiling flags. */
+/** Per-role CPU profiling flags; profiling also requires the watchdog flag. */
 export const EVENT_LOOP_WATCHDOG_PROFILING_FEATURE_FLAGS = {
   background_tasks: 'core.eventLoopWatchdog.profiling.backgroundTasks.enabled',
   ui: 'core.eventLoopWatchdog.profiling.ui.enabled',
@@ -112,6 +113,9 @@ export class EventLoopWatchdogService {
     if (!watchdog) {
       throw new Error('EventLoopWatchdogService#setup() must be called before #start()');
     }
+    // Flag values arrive asynchronously and in any order. The worker uses the current profiling
+    // state at launch; later changes take effect without restarting it.
+    const profiling = this.followProfilingFlags(featureFlags, watchdog);
     // `enabled` is the flag's fallback: it applies where no provider or override sets the flag.
     this.subscription = featureFlags
       .getBooleanValue$(EVENT_LOOP_WATCHDOG_FEATURE_FLAG, this.enabledFallback)
@@ -143,7 +147,7 @@ export class EventLoopWatchdogService {
         },
       });
 
-    this.subscription.add(this.followProfilingFlags(featureFlags));
+    this.subscription.add(profiling);
 
     // Startup ends once Kibana is first available plus a grace period, or after a while regardless.
     const available$ = (this.overall$ ?? EMPTY).pipe(
@@ -166,34 +170,35 @@ export class EventLoopWatchdogService {
     await this.watchdog?.stop();
   }
 
-  /** Role-specific profiling flags default to off. */
+  /**
+   * Role-specific profiling flags default to off. Changing a flag updates profiling without
+   * restarting the watchdog worker.
+   */
   private followProfilingFlags(
-    featureFlags: EventLoopWatchdogStartDeps['featureFlags']
+    featureFlags: EventLoopWatchdogStartDeps['featureFlags'],
+    watchdog: EventLoopWatchdog
   ): Subscription {
     const flags$ = Object.entries(EVENT_LOOP_WATCHDOG_PROFILING_FEATURE_FLAGS)
       .filter(([role]) => this.nodeRoles.includes(role))
-      .map(([, flag]) => featureFlags.getBooleanValue$(flag, false));
+      .map(([, flag]) =>
+        featureFlags.getBooleanValue$(flag, false).pipe(
+          // A failed flag counts as off; the node's other profiling flag keeps applying.
+          catchError((error) => {
+            this.logFailure('error', `Profiling flag ${flag} failed, treating it as off`, error);
+            return of(false);
+          })
+        )
+      );
     return combineLatest(flags$)
       .pipe(
         map((values) => values.some(Boolean)),
         distinctUntilChanged(),
-        // Nodes whose profiling flags have never been on log nothing.
+        // Profiling starts off, so nodes whose profiling flags have never been on log nothing.
         skipWhile((enabled) => !enabled)
       )
-      .subscribe({
-        next: (enabled) => {
-          // Temporary: replaced by the profiling log line once enabled in the worker itself
-          this.logger.info(
-            `Event loop watchdog profiling flag ${enabled ? 'on' : 'off'} for this node`
-          );
-        },
-        error: (error) => {
-          this.logFailure(
-            'error',
-            'Event loop watchdog profiling flag failed, treating it as off',
-            error
-          );
-        },
+      .subscribe((enabled) => {
+        watchdog.setProfiling(enabled);
+        this.logger.info(`Event loop watchdog profiling ${enabled ? 'on' : 'off'} for this node`);
       });
   }
 

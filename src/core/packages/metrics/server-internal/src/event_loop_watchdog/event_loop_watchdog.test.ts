@@ -163,6 +163,36 @@ describe('EventLoopWatchdog', () => {
     expect(slots()[Slot.runningSince]).toBeGreaterThan(0n);
   });
 
+  it('starts with CPU profiling disabled', () => {
+    create().start();
+    expect(slots()[Slot.profiling]).toBe(0n);
+  });
+
+  it('updates CPU profiling state without restarting the worker', () => {
+    const watchdog = create();
+    watchdog.start();
+    watchdog.setProfiling(true);
+    expect(slots()[Slot.profiling]).toBe(1n);
+    watchdog.setProfiling(false);
+    expect(slots()[Slot.profiling]).toBe(0n);
+    expect(createWorker).toHaveBeenCalledTimes(1);
+    expect(worker.stop).not.toHaveBeenCalled();
+  });
+
+  it('carries profiling over to a worker started later', async () => {
+    const watchdog = create();
+    watchdog.setProfiling(true);
+    watchdog.start();
+    expect(slots()[Slot.profiling]).toBe(1n);
+    const stopped = watchdog.stop();
+    watchdog.setProfiling(false);
+    watchdog.setProfiling(true);
+    resolveStop();
+    await stopped;
+    watchdog.start();
+    expect(slots(1)[Slot.profiling]).toBe(1n);
+  });
+
   it('stops the heartbeat and the worker', async () => {
     const watchdog = create();
     watchdog.start();

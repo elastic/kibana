@@ -127,6 +127,19 @@ const scenarios: Record<string, () => Promise<void>> = {
     await waitForLogLine('(oom,', 60_000);
     await watchdog.stop();
   },
+  // Leave time between toggles for the running worker to observe each profiling-state change.
+  profiling_toggle: async () => {
+    const watchdog = create(Path.resolve(__dirname, 'profiling_slot_entry.ts'));
+    watchdog.setProfiling(true);
+    watchdog.start();
+    await waitForLogLine('ready', 30_000);
+    for (const enabled of [false, true]) {
+      await sleep(BLOCK_GAP_MS);
+      watchdog.setProfiling(enabled);
+    }
+    await sleep(BLOCK_GAP_MS);
+    await watchdog.stop();
+  },
   // Short blocks use up the warning burst, with one more whose warning is suppressed, then a block
   // that never ends: the test kills the process once the worker reports it.
   permanent_block: async () => {

@@ -45,7 +45,9 @@ export const Slot = {
   heartbeat: 0,
   /** When Kibana was considered running (0 while starting); blocks before it are `starting`. */
   runningSince: 1,
+  /** 1 while CPU profiling is on for one of this node's roles, 0 otherwise. */
+  profiling: 2,
 } as const;
-export const SLOT_COUNT = 2;
+export const SLOT_COUNT = 3;
 
 export const monotonicUs = (): number => Number(process.hrtime.bigint() / 1000n);
