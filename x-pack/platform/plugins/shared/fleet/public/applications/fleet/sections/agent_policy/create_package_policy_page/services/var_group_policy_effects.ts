@@ -251,6 +251,55 @@ export function registerPolicyUpdateHandler(handler: PolicyUpdateHandler): void 
 }
 
 /**
+ * Builds a stream-vars update that clears the plain-text values of a stream-level
+ * var_group's deselected options.
+ *
+ * Stream-level var_groups are new, so clearing on a selection change cannot disturb
+ * existing behaviour; package-level credential groups keep today's secret-ref-only
+ * clearing in `updateCloudConnectorPolicy`.
+ *
+ * Vars shared with the newly selected option are kept. Vars holding secret references
+ * are cleared too — they must never leak into the agent template. Non-string values
+ * (booleans, numbers, arrays) are left untouched. Returns undefined when nothing
+ * needs clearing.
+ */
+export function buildStreamVarGroupVarsUpdate(
+  streamVars: PackagePolicyConfigRecord | undefined,
+  varGroup: RegistryVarGroup,
+  previousOptionName: string | undefined,
+  newOptionName: string
+): PackagePolicyConfigRecord | undefined {
+  if (!streamVars || previousOptionName === newOptionName) return undefined;
+
+  const selectedOption = varGroup.options.find((option) => option.name === newOptionName);
+  if (!selectedOption) return undefined;
+
+  const selectedVars = new Set(selectedOption.vars);
+  const deselectedVarNames = new Set<string>();
+  for (const option of varGroup.options) {
+    if (option.name === newOptionName) continue;
+    for (const name of option.vars) {
+      if (!selectedVars.has(name)) {
+        deselectedVarNames.add(name);
+      }
+    }
+  }
+  if (deselectedVarNames.size === 0) return undefined;
+
+  let changed = false;
+  const updated = { ...streamVars };
+  for (const name of deselectedVarNames) {
+    const entry = updated[name];
+    if (!entry) continue;
+    if ((typeof entry.value === 'string' && entry.value !== '') || isSecretRef(entry.value)) {
+      updated[name] = { ...entry, value: '' };
+      changed = true;
+    }
+  }
+  return changed ? updated : undefined;
+}
+
+/**
  * Compute all policy effects based on the current var_group selections.
  * Aggregates results from all registered handlers (e.g., setting
  * supports_cloud_connector and supports_cloud_connectors var).

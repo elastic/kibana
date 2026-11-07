@@ -11,6 +11,7 @@ import type { RegistryVarGroup } from '../../../../types';
 import {
   updateCloudConnectorPolicy,
   buildVarGroupPolicyUpdates,
+  buildStreamVarGroupVarsUpdate,
   registerPolicyUpdateHandler,
 } from './var_group_policy_effects';
 import type { VarGroupSelection } from './var_group_helpers';
@@ -469,6 +470,202 @@ describe('var_group_policy_effects', () => {
       expect(result).toEqual({
         supports_cloud_connector: true,
         cloud_connector_id: undefined,
+      });
+    });
+  });
+
+  describe('buildStreamVarGroupVarsUpdate', () => {
+    const createMockStreamVarGroups = (): RegistryVarGroup[] => [
+      {
+        name: 'log_group_source',
+        title: 'Log Group Source',
+        selector_title: 'Select log group source',
+        options: [
+          { name: 'log_group_arn', title: 'Log Group ARN', vars: ['log_group_arn'] },
+          { name: 'log_group_name', title: 'Log Group Name', vars: ['log_group_name'] },
+          {
+            name: 'log_group_name_prefix',
+            title: 'Log Group Name Prefix',
+            vars: ['log_group_name_prefix'],
+          },
+        ],
+      },
+    ];
+
+    it('should clear the plain-text var of the deselected option and keep the rest', () => {
+      const varGroup = createMockStreamVarGroups()[0];
+      const streamVars = {
+        log_group_arn: { value: 'arn:aws:logs:us-east-1:123456789012:log-group:my-group' },
+        log_group_name: { value: 'my-group' },
+        other_var: { value: 'keep' },
+      };
+
+      const result = buildStreamVarGroupVarsUpdate(
+        streamVars,
+        varGroup,
+        'log_group_arn',
+        'log_group_name'
+      );
+
+      expect(result).toEqual({
+        log_group_arn: { value: '' },
+        log_group_name: { value: 'my-group' },
+        other_var: { value: 'keep' },
+      });
+    });
+
+    it('should keep vars shared by the deselected and selected options', () => {
+      const varGroup: RegistryVarGroup = {
+        name: 'log_group_source',
+        title: 'Log Group Source',
+        selector_title: 'Select log group source',
+        options: [
+          { name: 'log_group_arn', title: 'Log Group ARN', vars: ['log_group_arn', 'region'] },
+          { name: 'log_group_name', title: 'Log Group Name', vars: ['log_group_name', 'region'] },
+        ],
+      };
+      const streamVars = {
+        log_group_arn: { value: 'arn:aws:logs:us-east-1:123456789012:log-group:my-group' },
+        log_group_name: { value: '' },
+        region: { value: 'us-east-1' },
+      };
+
+      const result = buildStreamVarGroupVarsUpdate(
+        streamVars,
+        varGroup,
+        'log_group_arn',
+        'log_group_name'
+      );
+
+      expect(result).toEqual({
+        log_group_arn: { value: '' },
+        log_group_name: { value: '' },
+        region: { value: 'us-east-1' },
+      });
+    });
+
+    it('should return undefined when the selection does not change', () => {
+      const varGroup = createMockStreamVarGroups()[0];
+      const streamVars = {
+        log_group_arn: { value: 'arn:aws:logs:us-east-1:123456789012:log-group:my-group' },
+      };
+
+      const result = buildStreamVarGroupVarsUpdate(
+        streamVars,
+        varGroup,
+        'log_group_arn',
+        'log_group_arn'
+      );
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when deselected vars are already empty or absent', () => {
+      const varGroup = createMockStreamVarGroups()[0];
+      const streamVars = {
+        log_group_arn: { value: '' },
+        log_group_name: { value: 'my-group' },
+      };
+
+      const result = buildStreamVarGroupVarsUpdate(
+        streamVars,
+        varGroup,
+        'log_group_arn',
+        'log_group_name'
+      );
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should clear secret-ref values of deselected options', () => {
+      const varGroup = createMockStreamVarGroups()[0];
+      const streamVars = {
+        log_group_arn: {
+          value: { isSecretRef: true, id: 'secret-1' },
+          type: 'password',
+        },
+        log_group_name: { value: '' },
+      };
+
+      const result = buildStreamVarGroupVarsUpdate(
+        streamVars,
+        varGroup,
+        'log_group_arn',
+        'log_group_name'
+      );
+
+      expect(result).toEqual({
+        log_group_arn: { value: '', type: 'password' },
+        log_group_name: { value: '' },
+      });
+    });
+
+    it('should leave non-string values of deselected options untouched', () => {
+      const varGroup: RegistryVarGroup = {
+        name: 'log_group_source',
+        title: 'Log Group Source',
+        selector_title: 'Select log group source',
+        options: [
+          {
+            name: 'log_group_arn',
+            title: 'Log Group ARN',
+            vars: ['log_group_arn', 'use_tls'],
+          },
+          { name: 'log_group_name', title: 'Log Group Name', vars: ['log_group_name'] },
+        ],
+      };
+      const streamVars = {
+        log_group_arn: { value: 'arn:aws:logs:us-east-1:123456789012:log-group:my-group' },
+        log_group_name: { value: '' },
+        use_tls: { value: true, type: 'bool' },
+      };
+
+      const result = buildStreamVarGroupVarsUpdate(
+        streamVars,
+        varGroup,
+        'log_group_arn',
+        'log_group_name'
+      );
+
+      expect(result).toEqual({
+        log_group_arn: { value: '' },
+        log_group_name: { value: '' },
+        use_tls: { value: true, type: 'bool' },
+      });
+    });
+
+    it('should return undefined when streamVars is undefined', () => {
+      const varGroup = createMockStreamVarGroups()[0];
+
+      const result = buildStreamVarGroupVarsUpdate(
+        undefined,
+        varGroup,
+        'log_group_arn',
+        'log_group_name'
+      );
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should clear vars of all deselected options, not just the previously selected one', () => {
+      const varGroup = createMockStreamVarGroups()[0];
+      const streamVars = {
+        log_group_arn: { value: 'arn:aws:logs:us-east-1:123456789012:log-group:my-group' },
+        log_group_name: { value: 'my-group' },
+        log_group_name_prefix: { value: '' },
+      };
+
+      const result = buildStreamVarGroupVarsUpdate(
+        streamVars,
+        varGroup,
+        'log_group_arn',
+        'log_group_name_prefix'
+      );
+
+      expect(result).toEqual({
+        log_group_arn: { value: '' },
+        log_group_name: { value: '' },
+        log_group_name_prefix: { value: '' },
       });
     });
   });

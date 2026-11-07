@@ -259,6 +259,23 @@ const mockVarGroups: RegistryVarGroup[] = [
   },
 ];
 
+const mockStreamVarGroups: RegistryVarGroup[] = [
+  {
+    name: 'log_group_source',
+    title: 'Log Group Source',
+    selector_title: 'Select log group source',
+    options: [
+      { name: 'log_group_arn', title: 'Log Group ARN', vars: ['log_group_arn'] },
+      { name: 'log_group_name', title: 'Log Group Name', vars: ['log_group_name'] },
+      {
+        name: 'log_group_name_prefix',
+        title: 'Log Group Name Prefix',
+        vars: ['log_group_name_prefix'],
+      },
+    ],
+  },
+];
+
 describe('useVarGroupSelections', () => {
   let mockOnSelectionsChange: jest.Mock;
 
@@ -545,6 +562,57 @@ describe('useVarGroupSelections', () => {
 
       expect(mockOnSelectionsChange).toHaveBeenCalledWith({
         var_group_selections: { auth_method: 'oauth' },
+      });
+    });
+
+    it('should clear deselected stream vars when streamVars is provided', () => {
+      const savedSelections = { log_group_source: 'log_group_arn' };
+      const streamVars = {
+        log_group_arn: { value: 'arn:aws:logs:us-east-1:123456789012:log-group:my-group' },
+        log_group_name: { value: '' },
+      };
+
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: mockStreamVarGroups,
+          savedSelections,
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+          streamVars,
+        })
+      );
+
+      act(() => {
+        result.current.handleSelectionChange('log_group_source', 'log_group_name');
+      });
+
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith({
+        var_group_selections: { log_group_source: 'log_group_name' },
+        vars: {
+          log_group_arn: { value: '' },
+          log_group_name: { value: '' },
+        },
+      });
+    });
+
+    it('should not include vars when streamVars is not provided', () => {
+      const savedSelections = { log_group_source: 'log_group_arn' };
+
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: mockStreamVarGroups,
+          savedSelections,
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+        })
+      );
+
+      act(() => {
+        result.current.handleSelectionChange('log_group_source', 'log_group_name');
+      });
+
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith({
+        var_group_selections: { log_group_source: 'log_group_name' },
       });
     });
   });

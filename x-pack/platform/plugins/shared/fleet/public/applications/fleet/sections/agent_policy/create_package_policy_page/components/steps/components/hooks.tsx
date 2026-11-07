@@ -9,7 +9,11 @@ import { useMemo, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { LICENCE_FOR_OUTPUT_PER_INTEGRATION } from '../../../../../../../../../common/constants';
-import type { AgentPolicy, NewPackagePolicy } from '../../../../../../../../../common/types';
+import type {
+  AgentPolicy,
+  NewPackagePolicy,
+  PackagePolicyConfigRecord,
+} from '../../../../../../../../../common/types';
 import type { RegistryVarGroup } from '../../../../../../types';
 import { getAllowedOutputTypesForPackagePolicy } from '../../../../../../../../../common/services/output_helpers';
 import { inferVarGroupSelections } from '../../../../../../../../../common/services';
@@ -19,7 +23,10 @@ import {
   computeDefaultVarGroupSelections,
   type VarGroupSelection,
 } from '../../../services/var_group_helpers';
-import { buildVarGroupPolicyUpdates } from '../../../services/var_group_policy_effects';
+import {
+  buildVarGroupPolicyUpdates,
+  buildStreamVarGroupVarsUpdate,
+} from '../../../services/var_group_policy_effects';
 
 export function useDataStreamId() {
   const history = useHistory();
@@ -110,6 +117,14 @@ interface UseVarGroupSelectionsParams {
    */
   packagePolicy?: NewPackagePolicy;
   /**
+   * Optional: current stream vars, for stream-level var_groups only. When
+   * provided, a selection change also clears the plain-text vars of the
+   * deselected options, so stale values don't stay in the policy and leak
+   * into the agent template. Package-level (and input-level) call sites do
+   * not pass this, so their behaviour is unchanged.
+   */
+  streamVars?: PackagePolicyConfigRecord;
+  /**
    * Optional: options to hide per var group (e.g. options unsupported by the
    * policy template the form is scoped to). Hidden options are excluded when
    * computing default selections.
@@ -136,6 +151,7 @@ export function useVarGroupSelections({
   isAgentlessEnabled,
   onSelectionsChange,
   packagePolicy,
+  streamVars,
   hideInVarGroupOptions,
   isEditPage = false,
 }: UseVarGroupSelectionsParams) {
@@ -193,13 +209,30 @@ export function useVarGroupSelections({
           ? buildVarGroupPolicyUpdates(packagePolicy, newSelections, varGroups)
           : null;
 
+      // Stream-level var_groups only: clear the plain-text vars of the deselected
+      // options so stale values don't stay in the policy and leak into the agent
+      // template. Package-level groups keep today's behaviour.
+      let clearedStreamVars: PackagePolicyConfigRecord | undefined;
+      if (streamVars && varGroups) {
+        const varGroup = varGroups.find((group) => group.name === groupName);
+        if (varGroup) {
+          clearedStreamVars = buildStreamVarGroupVarsUpdate(
+            streamVars,
+            varGroup,
+            selections[groupName],
+            optionName
+          );
+        }
+      }
+
       // Apply selections and any policy effects together
       onSelectionsChange({
         var_group_selections: newSelections,
         ...(policyEffects || {}),
+        ...(clearedStreamVars ? { vars: clearedStreamVars } : {}),
       });
     },
-    [savedSelections, onSelectionsChange, packagePolicy, varGroups]
+    [savedSelections, selections, onSelectionsChange, packagePolicy, varGroups, streamVars]
   );
 
   return { selections, handleSelectionChange };
