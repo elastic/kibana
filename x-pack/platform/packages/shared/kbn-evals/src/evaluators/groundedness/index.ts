@@ -132,6 +132,18 @@ export function createQuantitativeGroundednessEvaluator(): Evaluator {
       const score = calculateGroundednessScore(groundednessAnalysis);
       const summaryText = groundednessAnalysis.summary_verdict;
 
+      if (score === null) {
+        // The judge answered without a per-claim analysis, so the verdict cannot be
+        // corroborated or scored. Recording that as 0.0 would be a fabricated
+        // "maximally ungrounded" judgement, so the cell is reported as unscored.
+        return {
+          score: null,
+          label: 'unavailable',
+          explanation: `Groundedness judge returned ${summaryText} with no per-claim analysis`,
+          metadata: { ...(metadata ?? {}), groundednessAnalysis },
+        };
+      }
+
       return {
         score,
         label: summaryText,
