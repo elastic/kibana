@@ -11,7 +11,7 @@ import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import {
   SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
@@ -69,7 +69,7 @@ export interface SignificantEventsKIsOnboardingInputs {
 
 /**
  * Flat scalar payload actually passed to the workflow engine's manual trigger,
- * matching the `inputs` keys declared in kbn-workflows/managed/definitions/significant_events/knowledge_indicators/onboarding.yaml. Nested
+ * matching the `inputs` keys declared in kbn-workflows/managed/definitions/significant_events/knowledge_indicators/bound_onboarding.yaml. Nested
  * {@link SignificantEventsKIsOnboardingInputs} are flattened into this shape in `run()`.
  */
 interface OnboardingWorkflowInputPayload {
@@ -96,7 +96,7 @@ interface OnboardingWorkflowInputPayload {
 
 /**
  * Raw, flat `context.output` emitted by a completed onboarding workflow
- * execution (see the `output_result` step in kbn-workflows/managed/definitions/significant_events/knowledge_indicators/onboarding.yaml).
+ * execution (see the `output_result` step in kbn-workflows/managed/definitions/significant_events/knowledge_indicators/bound_onboarding.yaml).
  * Mapped into the nested {@link SignificantEventsKIsOnboardingOutput} shape on read.
  */
 interface OnboardingWorkflowOutputContext {
@@ -285,8 +285,8 @@ export class SignificantEventsKIsOnboardingClient {
   }) {
     this.workflowExecutionService = new WorkflowExecutionService({
       managementApi,
-      workflowId: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
-      workflowSpaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      workflowId: NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
+      boundToSpace: true,
     });
     this.subWorkflowExecutionServices = [
       {
@@ -341,7 +341,7 @@ export class SignificantEventsKIsOnboardingClient {
     this.telemetry.trackOnboardingScheduled({
       source_id: inputs.sourceId,
       execution_id: executionId,
-      workflow_id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
+      workflow_id: NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
       space_id: request.spaceId,
       skip_features: inputs.features.skip,
       skip_queries: inputs.queries.skip,
@@ -448,7 +448,7 @@ export class SignificantEventsKIsOnboardingClient {
       }
       statuses[source.id] = WorkflowExecutionService.toStatusResult({
         execution,
-        workflowId: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
+        workflowId: NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
       });
     }
 

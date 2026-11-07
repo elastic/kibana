@@ -8,12 +8,10 @@
  */
 
 import { parse } from 'yaml';
-import {
-  SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW,
-  SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW,
-  SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW,
-} from '.';
+import { SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW } from '.';
+import BOUND_INVESTIGATION_COMPLETED_YAML from './bound_investigation_completed.yaml';
 import { SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW } from './knowledge_indicators';
+import BOUND_ORCHESTRATOR_YAML from './significant_events/bound_orchestrator.yaml';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 
 interface WorkflowJsonSchema {
@@ -73,21 +71,16 @@ const requireStep = (workflow: ParsedWorkflow, name: string): WorkflowStep => {
 };
 
 const discovery = parse(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.yaml) as ParsedWorkflow;
-const orchestrator = parse(SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW.yaml) as ParsedWorkflow;
+const orchestrator = parse(BOUND_ORCHESTRATOR_YAML) as ParsedWorkflow;
 const queriesGeneration = parse(
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW.yaml
 ) as ParsedWorkflow;
-const investigationCompleted = parse(SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW.yaml) as
+const investigationCompleted = parse(BOUND_INVESTIGATION_COMPLETED_YAML) as
   | ParsedWorkflow & {
       triggers: Array<{ type: string; on?: { condition?: string } }>;
     };
 
 describe('significant events persistence workflow contracts', () => {
-  it('bumps managed workflow versions for the bulk persistence contract', () => {
-    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(28);
-    expect(SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW.version).toBe(4);
-  });
-
   it('accepts every non-written events_write result reason in the discovery output schema', () => {
     const schema = requireStep(discovery, 'run_discovery_agent').with?.schema;
     const properties = schema?.properties;
@@ -127,17 +120,6 @@ describe('significant events persistence workflow contracts', () => {
     expect(
       requireStep(discovery, 'run_discovery_agent')['connector-id-by-feature']
     ).toBeUndefined();
-  });
-
-  it('bootstraps per-space cleanup before discovery work', () => {
-    expect(discovery.steps[0]).toMatchObject({
-      name: 'bootstrap_cleanup_workflow',
-      type: 'kibana.request',
-      with: {
-        path: '/s/{{ workflow.spaceId }}/internal/significant_events/maintenance/cleanup/_bootstrap',
-      },
-      'on-failure': { continue: true },
-    });
   });
 
   it('marks discovery-triggered investigations as automatic', () => {

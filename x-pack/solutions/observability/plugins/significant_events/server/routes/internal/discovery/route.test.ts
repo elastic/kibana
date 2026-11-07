@@ -6,6 +6,7 @@
  */
 
 import { MAX_ID_LENGTH, NightshiftModelNotFoundError } from '@kbn/significant-events-schema';
+import { createNotSetUpError } from '../../../lib/service_accounts/detection_engine_account';
 import { internalDiscoveryRoutes } from './route';
 
 jest.mock('../../utils/assert_significant_events_access', () => ({
@@ -107,5 +108,14 @@ it('maps an unknown connector to a 400 response', async () => {
 
   await expect(route.handler(handlerParams)).rejects.toMatchObject({
     output: { statusCode: 400 },
+  });
+});
+
+it('maps a space that is not set up to a 503 response', async () => {
+  const { handlerParams } = makeHandlerParams();
+  mockResolveNightshiftModelForRequest.mockRejectedValueOnce(createNotSetUpError());
+
+  await expect(route.handler(handlerParams)).rejects.toMatchObject({
+    output: { statusCode: 503 },
   });
 });

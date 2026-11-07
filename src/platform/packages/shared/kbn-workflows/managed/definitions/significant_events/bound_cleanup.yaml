@@ -1,8 +1,8 @@
 # Significant Events cleanup workflow.
 #
-# One instance is installed per Kibana space on the first discovery execution
-# in that space. It then runs daily to close open events whose backing rules no
-# longer exist.
+# One instance is installed per Kibana space by the space's Nightshift setup, bound to the
+# detection engine service account. It runs daily as that account to close open events whose
+# backing rules no longer exist.
 
 version: '1'
 name: 'Significant Events Cleanup'
@@ -14,6 +14,7 @@ tags:
   - significant-events
   - cleanup
 settings:
+  run_as: __SERVICE_ACCOUNT_ID__
   # Max duration of one sweep — independent of the schedule interval below.
   timeout: '60m'
   # Only one instance of this workflow runs at a time; overlapping triggers are dropped.
@@ -25,8 +26,20 @@ triggers:
   - type: scheduled
     with:
       every: '24h'
-  - type: manual
 steps:
+  # Only the schedule starts this workflow. Anyone allowed to run workflows could otherwise run
+  # cleanup as the service account. Only server code sets `triggeredBy`.
+  - name: refuse_direct_runs
+    type: if
+    condition: 'not execution.triggeredBy : "scheduled"'
+    steps:
+      - name: refuse
+        type: workflow.fail
+        with:
+          message: >-
+            This workflow runs cleanup as the Nightshift service account on its schedule and
+            cannot be run directly. This run was started by {{ execution.triggeredBy }}.
+
   - name: cleanup_stale_events
     type: kibana.request
     with:

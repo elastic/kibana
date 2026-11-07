@@ -37,7 +37,12 @@ import {
   type LoadedMaintenanceState,
 } from './state_store';
 import { toMessage } from './to_message';
-import { mergeTargets, restoreWorkflowsAfterReset, sweepWorkflows } from './workflows';
+import {
+  createDisableManagedWorkflow,
+  mergeTargets,
+  restoreWorkflowsAfterReset,
+  sweepWorkflows,
+} from './workflows';
 
 /** The toggles of `toggles` that `removed` does not list, per toggle kind. */
 const subtractToggles = (
@@ -227,7 +232,13 @@ export const createResetRunner = ({
     try {
       await persistPausedIntent({ spaceId, existing, actor: updatedBy, operation: 'reset' });
       togglesBefore = await featureSettings.readTogglesOn({ request, spaceIds: [spaceId] });
-      newlyDisabled = await sweepWorkflows({ mgmt, spaceIds: [spaceId], request, failures });
+      newlyDisabled = await sweepWorkflows({
+        mgmt,
+        spaceIds: [spaceId],
+        request,
+        failures,
+        disableManaged: createDisableManagedWorkflow(server),
+      });
       settingsStillOn = await featureSettings.reassertFeatureSettingsOff({
         request,
         spaceIds: [spaceId],

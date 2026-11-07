@@ -6,7 +6,7 @@
  */
 
 import { omit } from 'lodash';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   MAX_ID_LENGTH,
   KIsOnboardingStep,
@@ -61,45 +61,61 @@ const onboardingExecuteRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
-    body: z.discriminatedUnion('action', [
-      z.object({
-        action: z.literal('schedule').describe('Schedule a new onboarding workflow run'),
-        from: timestampFromString,
-        to: timestampFromString,
-        steps: z
-          .array(z.enum(KIsOnboardingStep))
-          .optional()
-          .default([KIsOnboardingStep.FeaturesIdentification, KIsOnboardingStep.QueriesGeneration])
-          .describe(
-            'Optional list of steps to perform as part of source onboarding in the specified sequence. By default it will execute all steps.'
-          ),
-        connectors: z
-          .object({
-            features: z
-              .string()
-              .max(MAX_ID_LENGTH)
-              .optional()
-              .describe(
-                'Chat model connector or inference endpoint ID for feature identification.'
-              ),
-            queries: z
-              .string()
-              .max(MAX_ID_LENGTH)
-              .optional()
-              .describe('Chat model connector or inference endpoint ID for query generation.'),
-          })
-          .optional()
-          .describe(
-            'Optional per-step model overrides. When omitted the Significant Events defaults are used.'
-          ),
-      }),
-      z.object({
-        action: z.literal('cancel').describe('Cancel an in-progress onboarding workflow'),
-      }),
-    ]),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
+      body: z.discriminatedUnion('action', [
+        z.object({
+          action: z.literal('schedule').describe('Schedule a new onboarding workflow run'),
+          from: timestampFromString,
+          to: timestampFromString,
+          recencyThresholdHours: z
+            .number()
+            .positive()
+            .optional()
+            .describe(
+              'Hours within which identified features count as recent and are not refreshed.'
+            ),
+          rootTriggeredBy: z
+            .literal('scheduled')
+            .optional()
+            .describe('Set by the continuous onboarding workflow, which runs on a schedule.'),
+          steps: z
+            .array(z.enum(KIsOnboardingStep))
+            .optional()
+            .default([
+              KIsOnboardingStep.FeaturesIdentification,
+              KIsOnboardingStep.QueriesGeneration,
+            ])
+            .describe(
+              'Optional list of steps to perform as part of source onboarding in the specified sequence. By default it will execute all steps.'
+            ),
+          connectors: z
+            .object({
+              features: z
+                .string()
+                .max(MAX_ID_LENGTH)
+                .optional()
+                .describe(
+                  'Chat model connector or inference endpoint ID for feature identification.'
+                ),
+              queries: z
+                .string()
+                .max(MAX_ID_LENGTH)
+                .optional()
+                .describe('Chat model connector or inference endpoint ID for query generation.'),
+            })
+            .optional()
+            .describe(
+              'Optional per-step model overrides. When omitted the Significant Events defaults are used.'
+            ),
+        }),
+        z.object({
+          action: z.literal('cancel').describe('Cancel an in-progress onboarding workflow'),
+        }),
+      ]),
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -154,11 +170,20 @@ const onboardingExecuteRoute = createServerRoute({
 
       const inputs: SignificantEventsKIsOnboardingInputs = {
         sourceId: source.id,
+        // Only the continuous onboarding workflow, which runs as the service account, may mark a
+        // run as scheduled; a user could otherwise spend the scheduled extraction quota.
+        ...(body.rootTriggeredBy &&
+          server.core.security.authc.getPrincipal(request)?.type === 'service_account' && {
+            rootTriggeredBy: body.rootTriggeredBy,
+          }),
         sourceSlug: source.slug,
         features: {
           skip: skipFeatures,
           start: body.from,
           end: body.to,
+          ...(body.recencyThresholdHours !== undefined && {
+            recencyThresholdHours: body.recencyThresholdHours,
+          }),
           ...(featuresConnectorId && { connectorId: featuresConnectorId }),
         },
         queries: {

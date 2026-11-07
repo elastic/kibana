@@ -28,6 +28,8 @@ const RUN_AS_LINE_TOKEN = '  __WORKER_RUN_AS_LINE__:\n';
  */
 const EMPTY_ONLY_RUN_AS_SETTINGS = /settings:\n {2}__WORKER_RUN_AS_LINE__:\n(?=\S|$)/g;
 
+// TODO: `renderRunAs` and `removeRunAs` in `../../render_bound_yaml` are now a shared util for
+// the `run_as` placeholder; consider moving these workers onto it instead of this local copy.
 const renderRunAs = (yaml: string, serviceAccountId: string | undefined): string => {
   if (serviceAccountId) {
     return yaml.replaceAll(RUN_AS_LINE_TOKEN, `  run_as: ${JSON.stringify(serviceAccountId)}\n`);

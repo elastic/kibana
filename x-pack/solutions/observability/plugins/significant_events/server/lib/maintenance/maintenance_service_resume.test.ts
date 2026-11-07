@@ -11,8 +11,8 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
 } from '@kbn/management-settings-ids';
 import {
-  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import {
   REQUEST,
@@ -98,7 +98,7 @@ describe('SignificantEventsMaintenanceService', () => {
       };
       expect(
         clearWrite.disabledWorkflows.some(({ id }) =>
-          id.startsWith(SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID)
+          id.startsWith(NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID)
         )
       ).toBe(false);
 
@@ -113,7 +113,7 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(
         updateWorkflow.mock.calls.some(
           ([id, update]) =>
-            id.startsWith(SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID) &&
+            id.startsWith(NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID) &&
             update.enabled === true
         )
       ).toBe(false);
@@ -146,7 +146,7 @@ describe('SignificantEventsMaintenanceService', () => {
       });
       expect(
         pauseWrite.disabledWorkflows.some((workflow) =>
-          workflow.id.startsWith(SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID)
+          workflow.id.startsWith(NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID)
         )
       ).toBe(false);
 
@@ -168,7 +168,7 @@ describe('SignificantEventsMaintenanceService', () => {
         .filter((call) => call[1]?.enabled === true)
         .map((call) => call[0] as string);
       expect(
-        reEnabledIds.some((id) => id.startsWith(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID))
+        reEnabledIds.some((id) => id.startsWith(NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID))
       ).toBe(false);
       // Non-settings-backed workflows still come back.
       expect(reEnabledIds).toContain(cleanupDocumentId('default'));
@@ -210,7 +210,7 @@ describe('SignificantEventsMaintenanceService', () => {
         .map((call) => call[0] as string);
       expect(
         reEnabledIds.some((id) =>
-          id.startsWith(SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID)
+          id.startsWith(NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID)
         )
       ).toBe(false);
     });
@@ -265,6 +265,35 @@ describe('SignificantEventsMaintenanceService', () => {
         OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
         true
       );
+    });
+
+    it('does not report a missing sync or cleanup document of a space that was never set up', async () => {
+      const { api } = makeManagementApi({ missingWorkflows: [cleanupDocumentId('default')] });
+      const { service } = makeService({ management: api });
+
+      await service.pause({ request: REQUEST });
+      const summary = await service.resume({ request: REQUEST });
+
+      expect(summary.state).toBe('enabled');
+      expect(summary.partialFailures).toEqual([]);
+    });
+
+    it('still reports a workflow that pause recorded and that has gone missing since', async () => {
+      const { api, getWorkflow } = makeManagementApi();
+      const { service } = makeService({ management: api });
+
+      await service.pause({ request: REQUEST });
+      getWorkflow.mockImplementation(async (id: string) =>
+        id === cleanupDocumentId('default') ? null : { id, enabled: false, definition: { id } }
+      );
+      const summary = await service.resume({ request: REQUEST });
+
+      expect(summary.partialFailures).toEqual([
+        expect.objectContaining({
+          target: `workflow:${cleanupDocumentId('default')}@default`,
+          error: 'workflow not found',
+        }),
+      ]);
     });
 
     it('is a no-op when not paused', async () => {
@@ -484,7 +513,7 @@ describe('SignificantEventsMaintenanceService', () => {
         ])
       );
 
-      const scheduledDocId = `${SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID}-default`;
+      const scheduledDocId = `${NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID}-default`;
       const scheduledEnableCalls = updateWorkflow.mock.calls.filter(
         (call) => call[0] === scheduledDocId && call[1]?.enabled === true
       );

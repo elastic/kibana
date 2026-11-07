@@ -5,9 +5,9 @@
 #   1. Fetches eligible sources from the _eligible API endpoint. The enabled
 #      flag and interval come from the space's continuous onboarding Advanced
 #      Settings.
-#   2. Starts the managed onboarding workflow for ALL candidate sources via
-#      workflow.executeAsync (features AND queries generation), confirming each
-#      reaches in_progress before moving to the next.
+#   2. Starts onboarding for ALL candidate sources through the Kibana onboarding
+#      route (features AND queries generation), confirming each reaches
+#      in_progress before moving to the next.
 #   3. Polls each source sequentially until it reaches a terminal state
 #      (completed/failed), then captures the result.
 #
@@ -15,11 +15,11 @@
 # constants in significant_events/common/constants.ts, see
 # continuous_onboarding_workflow.test.ts.
 #
-# This is a per-space managed workflow installed by the significant_events
-# plugin. It is installed when continuous onboarding is first enabled in a space
-# and only disabled when it is turned off, so its execution history is kept.
-# Every request is prefixed with the space the
-# workflow runs in.
+# Installed per space, bound to the detection engine service account
+# (`system-sources-ki-continuous-onboarding-bound`), by the space's service
+# account setup. The continuous onboarding setting and Pause/Resume enable and
+# disable it. The onboarding runs it starts inherit its service account. Every
+# request is prefixed with the space the workflow runs in.
 
 version: '1'
 name: 'Continuous KI Onboarding'
@@ -35,6 +35,8 @@ consts:
   maxScheduledStreams: 5
   lookbackHours: 24
 settings:
+  # Rendered with the detection engine service account of the space.
+  run_as: __SERVICE_ACCOUNT_ID__
   # Timeout is 1 minute shorter than the schedule to avoid overlapping runs.
   timeout: '34m'
   # Only one instance of this workflow runs at a time; overlapping triggers are dropped.
@@ -46,20 +48,21 @@ triggers:
   - type: scheduled
     with:
       every: '35m'
-  - type: manual
-    inputs:
-      - name: maxScheduledStreams
-        type: number
-        default: 5
-        description: 'Max streams to schedule per run; remaining eligible streams are skipped.'
-      - name: lookbackHours
-        type: number
-        default: 24
-        description: 'Hours of data to sample when identifying KIs.'
-      - name: extractionIntervalHours
-        type: number
-        description: 'Override for the min hours between extractions per stream. When omitted the Advanced Setting is used.'
 steps:
+  # Only the schedule starts this workflow. Anyone allowed to run workflows could otherwise run
+  # extraction as the service account. Only server code sets `triggeredBy`.
+  - name: refuse_direct_runs
+    type: if
+    condition: 'not execution.triggeredBy : "scheduled"'
+    steps:
+      - name: refuse
+        type: workflow.fail
+        with:
+          message: >-
+            This workflow runs continuous extraction as the Nightshift service account on its
+            schedule and cannot be run directly. This run was started by {{
+            execution.triggeredBy }}.
+
   # Step 1: Fetch eligible streams from the classification endpoint.
   - name: get_eligible
     type: kibana.request
@@ -88,27 +91,25 @@ steps:
         iteration-on-failure:
           continue: true
         steps:
-          # Start the managed onboarding workflow directly (fire-and-forget).
-          # Both features identification and queries generation run; status is
+          # Onboarding is started by Kibana, which is the only caller the bound onboarding
+          # workflow accepts. Both features identification and queries generation run; status is
           # tracked via the _status endpoint below.
           - name: schedule_onboarding
-            type: workflow.executeAsync
+            type: kibana.request
             with:
-              workflow-id: 'system-streams-ki-onboarding'
-              inputs:
-                sourceId: '${{ foreach.item.sourceId }}'
-                sourceSlug: '${{ foreach.item.sourceSlug }}'
-                sourceRevision: '${{ foreach.item.sourceRevision }}'
-                skipFeatures: false
-                skipQueries: false
-                rootTriggeredBy: '${{ execution.triggeredBy }}'
-                # Align the feature-recency guard with the user's onboarding
-                # interval so features refresh on the same cadence eligibility uses.
-                featuresRecencyThresholdHours: '${{ steps.get_eligible.output.settings.intervalHours }}'
-                # onboarding expects epoch ms; the eligibility endpoint returns
-                # ISO timestamps, so convert here (date '%s' yields epoch seconds).
-                featuresStart: "${{ steps.get_eligible.output.timeRange.from | date: '%s' | times: 1000 }}"
-                featuresEnd: "${{ steps.get_eligible.output.timeRange.to | date: '%s' | times: 1000 }}"
+              method: POST
+              path: '/s/{{ workflow.spaceId }}/internal/streams/{{ foreach.item.sourceId }}/onboarding/_execute'
+              headers:
+                x-elastic-internal-origin: 'kibana'
+              body:
+                action: schedule
+                rootTriggeredBy: scheduled
+                # Align the feature-recency guard with the user's onboarding interval so features
+                # refresh on the same cadence eligibility uses.
+                recencyThresholdHours: '${{ steps.get_eligible.output.settings.intervalHours }}'
+                # The eligibility endpoint returns ISO timestamps.
+                from: '${{ steps.get_eligible.output.timeRange.from }}'
+                to: '${{ steps.get_eligible.output.timeRange.to }}'
           - name: await_in_progress
             type: while
             condition: "${{ steps.verify_status.output.status == 'not_started' }}"

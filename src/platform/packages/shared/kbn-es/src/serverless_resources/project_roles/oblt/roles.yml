@@ -182,6 +182,31 @@ _nightshift_automations:
       resources:
         - '*'
   run_as: []
+_nightshift_detection:
+  description: 'Privileges for the service account the Nightshift detection engine runs as. Assigned by Kibana; do not assign to users.'
+  metadata:
+    _public: true
+    _reserved: true
+  cluster:
+    - 'monitor_inference'
+    - 'read_project_routing'
+  indices:
+    - names:
+        - '/~(([.]|ilm-history-).*)/'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+        - 'read_view_metadata'
+      allow_restricted_indices: false
+  applications:
+    - application: 'kibana-.kibana'
+      privileges:
+        - 'feature_nightshift.minimal_all'
+        - 'feature_agentBuilder.read'
+        - 'feature_actions.read'
+      resources:
+        - '*'
+  run_as: []
 
 # admin role defined in elasticsearch controller
 admin:

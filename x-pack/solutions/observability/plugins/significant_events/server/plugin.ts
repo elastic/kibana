@@ -34,8 +34,7 @@ import {
 import type { Subscription } from 'rxjs';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
-import { SIGNIFICANT_EVENTS_SOURCE_RECONCILIATION_WORKFLOW_ID } from '@kbn/workflows/managed';
-import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
+import { NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import {
   createSourceKnowledgeStateClient,
   sourceKnowledgeStateSavedObjectType,
@@ -104,11 +103,7 @@ import {
   createContinuousOnboardingWorkflowService,
   type ContinuousOnboardingWorkflowService,
 } from './lib/workflows/continuous_onboarding_workflow';
-import {
-  createCleanupWorkflowService,
-  type CleanupWorkflowService,
-} from './lib/workflows/cleanup_workflow';
-import { createSyncWorkflowService, type SyncWorkflowService } from './lib/workflows/sync_workflow';
+import { createBoundWorkflowsInstaller } from './lib/workflows/bound_workflows_installer';
 import {
   createSignificantEventsScheduledWorkflowsService,
   type SignificantEventsScheduledWorkflowsService,
@@ -131,13 +126,17 @@ import {
 import { createSignificantEventsAvailability } from './agent_builder/tools/significant_events_availability';
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
 import { isSignificantEventsAvailable } from './routes/utils/assert_significant_events_access';
+import { SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER } from './lib/workflows/managed_workflow_owner';
+import {
+  assertServiceAccountActsForSpace,
+  registerDetectionEngineWorkloadType,
+} from './lib/service_accounts/detection_engine_account';
 import { getRequestAbortSignal } from './routes/utils/get_request_abort_signal';
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 import { WorkflowExecutionService } from './lib/workflows/workflow_execution_service';
 import { createSourceChangeListener } from './routes/internal/knowledge_indicators/reconcile_source_catalog';
 import { syncContinuousOnboarding } from './lib/continuous_onboarding/sync_continuous_onboarding';
 
-const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significantEvents';
 const SLACK_CONNECTOR_RECONCILE_INTERVAL_MS = 60_000;
 const RULE_CREATION_APP = 'nightshift';
 
@@ -202,6 +201,8 @@ export class SignificantEventsPlugin
         limit: result.limit,
       };
     });
+
+    registerDetectionEngineWorkloadType(core);
 
     core.dataStreams.registerDataStream(detectionsDataStream);
     core.dataStreams.registerDataStream(knowledgeIndicatorsDataStream);
@@ -453,8 +454,6 @@ export class SignificantEventsPlugin
     }
 
     let continuousOnboardingWorkflowService: ContinuousOnboardingWorkflowService | undefined;
-    let syncWorkflowService: SyncWorkflowService | undefined;
-    let cleanupWorkflowService: CleanupWorkflowService | undefined;
     let significantEventsScheduledWorkflowsService:
       | SignificantEventsScheduledWorkflowsService
       | undefined;
@@ -489,32 +488,28 @@ export class SignificantEventsPlugin
         );
       };
 
+      const boundWorkflowsInstaller = createBoundWorkflowsInstaller({
+        getStartDeps: async () => {
+          const [coreStart, pluginsStart] = await core.getStartServices();
+          return { core: coreStart, workflowsExtensions: pluginsStart.workflowsExtensions };
+        },
+      });
+
       if (streamsKIsOnboardingClient) {
         continuousOnboardingWorkflowService = createContinuousOnboardingWorkflowService({
           logger: this.logger,
           managementApi,
           streamsKIsOnboardingClient,
+          installer: boundWorkflowsInstaller,
           getManagedWorkflowsClient,
         });
       }
-
-      syncWorkflowService = createSyncWorkflowService({
-        logger: this.logger,
-        managementApi,
-        getManagedWorkflowsClient,
-      });
-
-      cleanupWorkflowService = createCleanupWorkflowService({
-        logger: this.logger,
-        managementApi: plugins.workflowsManagement.management,
-        getManagedWorkflowsClient,
-      });
 
       significantEventsScheduledWorkflowsService = createSignificantEventsScheduledWorkflowsService(
         {
           logger: this.logger,
           managementApi: plugins.workflowsManagement.management,
-          getManagedWorkflowsClient,
+          installer: boundWorkflowsInstaller,
         }
       );
     }
@@ -545,8 +540,8 @@ export class SignificantEventsPlugin
     const sourceReconciliation = plugins.workflowsManagement?.management
       ? new WorkflowExecutionService<{ sourceId: string; sourceSlug: string }>({
           managementApi: plugins.workflowsManagement.management,
-          workflowId: SIGNIFICANT_EVENTS_SOURCE_RECONCILIATION_WORKFLOW_ID,
-          workflowSpaceId: GLOBAL_WORKFLOW_SPACE_ID,
+          workflowId: NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID,
+          boundToSpace: true,
         })
       : undefined;
     plugins.nightshiftSources.onSourceChange(
@@ -560,12 +555,6 @@ export class SignificantEventsPlugin
             inputs: { sourceId, sourceSlug },
             request,
           });
-        },
-        ensurePeriodicReconciliation: async (request) => {
-          // Keep periodic repair available even when continuous onboarding is switched off.
-          if ((await this.maintenanceService?.getState({ request })) !== 'paused') {
-            await syncWorkflowService?.ensureEnabled({ request, spaceId: request.spaceId });
-          }
         },
         syncContinuousOnboarding: (event) =>
           syncContinuousOnboarding({
@@ -597,10 +586,18 @@ export class SignificantEventsPlugin
       dependencies: {
         server: this.server,
         telemetry: telemetryClient,
-        getScopedClients: this.getScopedClients,
+        // Routes refuse a service account that is not the space's detection engine account. The
+        // clients the Agent Builder tools get stay unguarded: those run as the caller's account.
+        getScopedClients: async ({ request }: { request: KibanaRequest }) => {
+          const [coreStart] = await core.getStartServices();
+          await assertServiceAccountActsForSpace({
+            core: coreStart,
+            request,
+            spaceId: request.spaceId,
+          });
+          return this.getScopedClients!({ request });
+        },
         continuousOnboardingWorkflowService,
-        syncWorkflowService,
-        cleanupWorkflowService,
         significantEventsScheduledWorkflowsService,
         workflowClients,
         maintenanceService: this.maintenanceService,

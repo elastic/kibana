@@ -14,8 +14,8 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
 } from '@kbn/management-settings-ids';
 import {
-  SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { GetScopedClients } from '../../routes/types';
@@ -42,11 +42,11 @@ export const SYSTEM_REQUEST = expect.objectContaining({
 
 /** The per-space continuous onboarding document of a space. */
 export const continuousDocumentId = (spaceId: string): string =>
-  `${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-${spaceId}`;
+  `${NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-${spaceId}`;
 
 /** The per-space cleanup document of a space: scheduled, and not backed by a Settings toggle. */
 export const cleanupDocumentId = (spaceId: string): string =>
-  `${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID}-${spaceId}`;
+  `${NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID}-${spaceId}`;
 
 /** The space a saved-objects call was scoped to; it travels as `this` (see `mock.contexts`). */
 interface SoCallContext {

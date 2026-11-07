@@ -20,7 +20,10 @@ import {
 } from '../../../common/maintenance/state_machine';
 import type { SignificantEventsServer } from '../../types';
 import type { PausedFeatureSettings } from './feature_settings';
-import type { MaintenanceWorkflowTarget } from './managed_workflow_targets';
+import {
+  isInstalledWorkflowDocumentId,
+  type MaintenanceWorkflowTarget,
+} from './managed_workflow_targets';
 import {
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID,
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
@@ -196,11 +199,16 @@ const normalizePausedSettings = (
       }
     : undefined;
 
-/** Brands SO-loaded workflow targets once at the SO → domain boundary. */
+/**
+ * Brand SO-loaded workflow targets once at the SO → domain boundary. Targets recorded for
+ * workflows this version no longer installs are dropped: there is no migration, and the sweep
+ * would only produce "not found" failures for them.
+ */
 const brandDisabledWorkflows = (
   spaceId: SpaceId,
   workflows: SignificantEventsMaintenanceStateAttributes['disabledWorkflows'] | undefined
-): MaintenanceWorkflowTarget[] => brandOwnTargets(spaceId, workflows);
+): MaintenanceWorkflowTarget[] =>
+  brandOwnTargets(spaceId, workflows).filter(({ id }) => isInstalledWorkflowDocumentId(id));
 
 /** Reads and writes the maintenance saved object of each space. */
 export interface IMaintenanceStateStore {

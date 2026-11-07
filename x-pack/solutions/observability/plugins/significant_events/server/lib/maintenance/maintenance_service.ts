@@ -33,7 +33,10 @@ import {
   isContinuousOnboardingWorkflowId,
   shouldRestoreSettingsBackedWorkflow,
 } from './feature_settings';
-import type { MaintenanceWorkflowTarget } from './managed_workflow_targets';
+import {
+  buildSetupEnabledTargets,
+  type MaintenanceWorkflowTarget,
+} from './managed_workflow_targets';
 import { createResetRunner } from './reset_maintenance';
 import type { MaintenanceAccess } from './maintenance_access';
 import { createMaintenanceSystemRequest } from './system_request';
@@ -52,7 +55,13 @@ import {
   type LoadedMaintenanceState,
   type MaintenanceRuleTarget,
 } from './state_store';
-import { reEnableWorkflow, sweepWorkflows, mergeTargets, targetKey } from './workflows';
+import {
+  createDisableManagedWorkflow,
+  reEnableWorkflow,
+  sweepWorkflows,
+  mergeTargets,
+  targetKey,
+} from './workflows';
 
 /**
  * `mode` is how the snapshot is treated, not where the pause came from: `pause` records a
@@ -355,7 +364,13 @@ export const createSignificantEventsMaintenanceService = ({
   }> => {
     const failures: SignificantEventsMaintenanceFailure[] = [];
     const mgmt = server.workflowsManagement?.management;
-    const newlyDisabled = await sweepWorkflows({ mgmt, spaceIds: [spaceId], request, failures });
+    const newlyDisabled = await sweepWorkflows({
+      mgmt,
+      spaceIds: [spaceId],
+      request,
+      failures,
+      disableManaged: createDisableManagedWorkflow(server),
+    });
 
     const newlyDisabledRules = (
       await disableBackedRules(requestForSpace(request, spaceId), access, spaceId, failures)
@@ -639,7 +654,14 @@ export const createSignificantEventsMaintenanceService = ({
         const { spaceId } = request;
         const existing = await readState(spaceId);
         const currentState = normalizeState(existing?.state);
-        const recordedWorkflows = existing?.disabledWorkflows ?? [];
+        // Space setup switches sync and cleanup on, unless the space is paused. One set up while
+        // paused has them off and unrecorded, so Resume covers them too.
+        const recordedWorkflows = mergeTargets(
+          existing?.disabledWorkflows ?? [],
+          currentState === 'paused' ? buildSetupEnabledTargets(spaceId) : []
+        );
+        // A setup target of a space that was never set up has no document: that is not a failure.
+        const recordedKeys = new Set((existing?.disabledWorkflows ?? []).map(targetKey));
         const recordedRules = existing?.disabledRules ?? [];
         const hasRetryInventory =
           recordedWorkflows.length > 0 ||
@@ -672,7 +694,13 @@ export const createSignificantEventsMaintenanceService = ({
             if (!shouldAttemptWorkflow(workflow)) {
               continue;
             }
-            const outcome = await reEnableWorkflow({ mgmt, workflow, request, failures });
+            const outcome = await reEnableWorkflow({
+              mgmt,
+              workflow,
+              request,
+              failures,
+              reportMissing: recordedKeys.has(targetKey(workflow)),
+            });
             if (outcome === 'toggled') {
               workflowsToggled += 1;
             } else if (outcome === 'failed') {

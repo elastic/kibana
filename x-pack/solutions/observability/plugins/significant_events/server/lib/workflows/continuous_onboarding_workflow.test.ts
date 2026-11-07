@@ -8,7 +8,7 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import {
-  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   getManagedWorkflowDefinition,
 } from '@kbn/workflows/managed';
 import {
@@ -23,14 +23,14 @@ import type { SignificantEventsKIsOnboardingClient } from './onboarding_workflow
 // definition (kbn-workflows/managed/definitions/significant_events/knowledge_indicators/continuous_onboarding.yaml).
 // These tests keep that YAML in sync with the constants in common/constants.ts.
 const definition = getManagedWorkflowDefinition(
-  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID
+  NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID
 );
 
 const getWorkflowYaml = (): string => {
-  if (!definition || !('yaml' in definition) || typeof definition.yaml !== 'string') {
-    throw new Error('Continuous onboarding managed workflow definition is missing inline YAML');
+  if (!definition || !('yamlTemplate' in definition) || !definition.yamlTemplate) {
+    throw new Error('Continuous onboarding managed workflow definition is missing its template');
   }
-  return definition.yaml;
+  return definition.yamlTemplate({ serviceAccountId: 'sa-1' });
 };
 
 const WORKFLOW_YAML = getWorkflowYaml();
@@ -56,26 +56,9 @@ describe('continuous_onboarding.yaml stays in sync with constants', () => {
     assertYamlContains(`every: '${COORDINATOR_INTERVAL_MINUTES}m'`);
   });
 
-  it('uses the correct maxScheduledStreams input', () => {
-    assertYamlContains(
-      `name: maxScheduledStreams\n        type: number\n        default: ${MAX_SCHEDULED_STREAMS}`
-    );
-  });
-
-  it('uses the correct lookbackHours input', () => {
-    assertYamlContains(`name: lookbackHours\n        type: number\n        default: 24`);
-  });
-
   it('declares consts that match the input defaults', () => {
     assertYamlContains(`maxScheduledStreams: ${MAX_SCHEDULED_STREAMS}`);
     assertYamlContains('lookbackHours: 24');
-  });
-
-  it('declares extractionIntervalHours as an optional input without default', () => {
-    assertYamlContains('name: extractionIntervalHours\n        type: number\n        description:');
-    expect(WORKFLOW_YAML).not.toMatch(
-      /- name: extractionIntervalHours\n\s+type: number\n\s+default:/m
-    );
   });
 
   it('does not declare the removed excludedStreamPatterns input', () => {
@@ -97,23 +80,18 @@ describe('continuous_onboarding.yaml stays in sync with constants', () => {
     );
   });
 
-  it('starts onboarding via workflow.executeAsync for the managed onboarding workflow', () => {
-    assertYamlContains('type: workflow.executeAsync');
-    assertYamlContains("workflow-id: 'system-streams-ki-onboarding'");
+  it('starts onboarding through the Kibana route, since the bound onboarding workflow refuses workflow-step callers', () => {
+    assertYamlContains('onboarding/_execute');
+    expect(WORKFLOW_YAML).not.toContain('workflow.executeAsync');
   });
 
-  it('runs both features identification and queries generation', () => {
-    assertYamlContains('skipFeatures: false');
-    assertYamlContains('skipQueries: false');
+  it('runs as the bound service account', () => {
+    assertYamlContains('run_as: "sa-1"');
   });
 
-  it('converts the eligibility sampling window from ISO to epoch ms', () => {
-    assertYamlContains(
-      `featuresStart: "\${{ steps.get_eligible.output.timeRange.from | date: '%s' | times: 1000 }}"`
-    );
-    assertYamlContains(
-      `featuresEnd: "\${{ steps.get_eligible.output.timeRange.to | date: '%s' | times: 1000 }}"`
-    );
+  it('passes the eligibility sampling window to the route', () => {
+    assertYamlContains("from: '${{ steps.get_eligible.output.timeRange.from }}'");
+    assertYamlContains("to: '${{ steps.get_eligible.output.timeRange.to }}'");
   });
 
   it('polls the onboarding status endpoint to await completion', () => {
@@ -124,13 +102,13 @@ describe('continuous_onboarding.yaml stays in sync with constants', () => {
 describe('createContinuousOnboardingWorkflowService', () => {
   const request = {} as KibanaRequest;
   const spaceId = 'space-a';
-  const workflowDocumentId = `${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-${spaceId}`;
-  const managedWorkflowOptions = { spaceId, workflowIdSuffix: spaceId };
+  const workflowDocumentId = `${NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-${spaceId}`;
 
   let logger: Logger;
   let getWorkflow: jest.Mock;
   let managementApi: jest.Mocked<WorkflowsServerPluginSetup['management']>;
-  let managedWorkflowsClient: { install: jest.Mock; uninstall: jest.Mock };
+  let installer: { install: jest.Mock; disable: jest.Mock };
+  let managedWorkflowsClient: { install: jest.Mock };
 
   beforeEach(() => {
     logger = {
@@ -151,7 +129,10 @@ describe('createContinuousOnboardingWorkflowService', () => {
     } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>;
     managedWorkflowsClient = {
       install: jest.fn().mockResolvedValue(undefined),
-      uninstall: jest.fn().mockResolvedValue(undefined),
+    };
+    installer = {
+      install: jest.fn().mockResolvedValue(undefined),
+      disable: jest.fn().mockResolvedValue(true),
     };
   });
 
@@ -162,6 +143,7 @@ describe('createContinuousOnboardingWorkflowService', () => {
       streamsKIsOnboardingClient: {
         cancelAllRunning: jest.fn().mockResolvedValue(0),
       } as unknown as SignificantEventsKIsOnboardingClient,
+      installer,
       getManagedWorkflowsClient: jest.fn().mockResolvedValue(managedWorkflowsClient),
     });
 
@@ -170,10 +152,11 @@ describe('createContinuousOnboardingWorkflowService', () => {
 
     await createService().ensureWorkflow({ enabled: true, request, spaceId });
 
-    expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
-      SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-      managedWorkflowOptions
-    );
+    expect(installer.install).toHaveBeenCalledWith({
+      request,
+      spaceId,
+      workflowId: NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+    });
     expect(getWorkflow).toHaveBeenCalledWith(workflowDocumentId, spaceId);
     expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
       workflowDocumentId,
@@ -195,12 +178,11 @@ describe('createContinuousOnboardingWorkflowService', () => {
   });
 
   it('throws when disabling fails', async () => {
-    getWorkflow.mockResolvedValue({ enabled: true });
-    managementApi.updateWorkflow.mockRejectedValue(new Error('update failed'));
+    installer.disable.mockRejectedValue(new Error('disable failed'));
 
     await expect(
       createService().ensureWorkflow({ enabled: false, request, spaceId })
-    ).rejects.toThrow('update failed');
+    ).rejects.toThrow('disable failed');
   });
 
   it('disables and drains the space document but keeps it when turned off', async () => {
@@ -211,15 +193,14 @@ describe('createContinuousOnboardingWorkflowService', () => {
 
     await createService().ensureWorkflow({ enabled: false, request, spaceId });
 
-    expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
-      workflowDocumentId,
-      { enabled: false },
+    // Through the owner: a plain update of a bound workflow needs `manage_security`.
+    expect(installer.disable).toHaveBeenCalledWith({
       spaceId,
-      request
-    );
+      workflowId: NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+    });
+    expect(managementApi.updateWorkflow).not.toHaveBeenCalled();
     expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith('exec-1', spaceId, request);
-    expect(managedWorkflowsClient.install).not.toHaveBeenCalled();
-    expect(managedWorkflowsClient.uninstall).not.toHaveBeenCalled();
+    expect(installer.install).not.toHaveBeenCalled();
   });
 
   it('can disable future schedules without draining executions', async () => {
@@ -232,12 +213,12 @@ describe('createContinuousOnboardingWorkflowService', () => {
       skipExecutionDrain: true,
     });
 
-    expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
-      workflowDocumentId,
-      { enabled: false },
+    // Through the owner: a plain update of a bound workflow needs `manage_security`.
+    expect(installer.disable).toHaveBeenCalledWith({
       spaceId,
-      request
-    );
+      workflowId: NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+    });
+    expect(managementApi.updateWorkflow).not.toHaveBeenCalled();
     expect(managementApi.getWorkflowExecutions).not.toHaveBeenCalled();
   });
 });

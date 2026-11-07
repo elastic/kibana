@@ -8,8 +8,8 @@
  */
 
 import { parse } from 'yaml';
+import ONBOARDING_YAML from './knowledge_indicators/bound_onboarding.yaml';
 import FEATURES_IDENTIFICATION_YAML from './knowledge_indicators/features_identification.yaml';
-import ONBOARDING_YAML from './knowledge_indicators/onboarding.yaml';
 
 interface WorkflowStep {
   name: string;

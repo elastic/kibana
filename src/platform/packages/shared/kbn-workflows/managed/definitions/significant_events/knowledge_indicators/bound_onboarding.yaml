@@ -1,6 +1,8 @@
 # KI Onboarding Workflow
 #
-# Orchestrates the full KI onboarding pipeline for a source:
+# Installed per space, bound to the detection engine service account, by the space's setup. Only
+# the detection engine starts it. It runs as the account and hands that identity to the features
+# identification and queries generation workflows it calls. The pipeline for a source:
 #   1. Features recency check (auto-skips identification if features are recent)
 #   2. Features identification (optional, skippable)
 #   3. Queries generation (conditional — skipped when no new features were found)
@@ -15,6 +17,8 @@ tags:
   - knowledge-indicators
   - onboarding
 settings:
+  # Replaced with the bound service account when the workflow is installed in a space.
+  run_as: __SERVICE_ACCOUNT_ID__
   timeout: "30m"
   concurrency:
     key: "nightshift-source-onboarding-{{ inputs.sourceSlug }}:{{ inputs.sourceId }}"
@@ -109,6 +113,21 @@ triggers:
         required: false
         description: "Root workflow trigger type propagated by a managed driver."
 steps:
+  # Only the detection engine may start this workflow: it checks the caller's privileges before
+  # starting a run. Anyone allowed to run workflows could otherwise run KI onboarding as the
+  # service account. Only server code sets `triggeredBy`.
+  - name: refuse_direct_runs
+    type: if
+    condition: 'not execution.triggeredBy : "nightshift-detection-engine"'
+    steps:
+      - name: refuse
+        type: workflow.fail
+        with:
+          message: >-
+            This workflow runs KI onboarding as the Nightshift service account. Start KI
+            extraction from Nightshift instead. This run was started by
+            {{ execution.triggeredBy }}.
+
   - name: check_budget
     type: kibana.request
     if: '${{ inputs.rootTriggeredBy == "scheduled" }}'
@@ -197,6 +216,8 @@ steps:
         type: workflow.execute
         with:
           workflow-id: "system-streams-ki-features-identification"
+          # The child runs as the service account this workflow is bound to.
+          run-as-mode: inherit
           inputs:
             sourceId: "${{ inputs.sourceId }}"
             sourceSlug: "${{ inputs.sourceSlug }}"
@@ -246,6 +267,8 @@ steps:
         type: workflow.execute
         with:
           workflow-id: "system-streams-ki-queries-generation"
+          # The child runs as the service account this workflow is bound to.
+          run-as-mode: inherit
           inputs:
             sourceId: "${{ inputs.sourceId }}"
             sourceSlug: "${{ inputs.sourceSlug }}"

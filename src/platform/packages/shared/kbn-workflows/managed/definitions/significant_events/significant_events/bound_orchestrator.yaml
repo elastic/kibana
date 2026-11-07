@@ -1,0 +1,65 @@
+# Installed per space, bound to the detection engine service account, by the space's setup. Only the
+# detection engine starts it. Detection and discovery run as the account.
+version: "1"
+name: "Significant Events Orchestrator"
+description: "Sequences detection and discovery. Each workflow handles its own idle-skip logic."
+enabled: true
+tags:
+  - observability
+  - streams
+  - significant-events
+  - orchestrator
+settings:
+  # Replaced with the bound service account when the workflow is installed in a space.
+  run_as: __SERVICE_ACCOUNT_ID__
+  # detection (≤5m) + discovery (≤45m) + 5m buffer
+  timeout: "55m"
+  concurrency:
+    key: "significant-events-orchestrator"
+    strategy: drop
+    max: 1
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        connector_id:
+          type: string
+          maxLength: 255
+          description: "Optional chat model connector or inference endpoint ID for discovery."
+      additionalProperties: false
+steps:
+  # Only the detection engine may start this workflow: it checks the caller's privileges before
+  # starting a run. Anyone allowed to run workflows could otherwise run discovery as the service
+  # account. Only server code sets `triggeredBy`.
+  - name: refuse_direct_runs
+    type: if
+    condition: 'not execution.triggeredBy : "nightshift-detection-engine"'
+    steps:
+      - name: refuse
+        type: workflow.fail
+        with:
+          message: >-
+            This workflow runs detection and discovery as the Nightshift service account. Start
+            discovery from Nightshift instead. This run was started by {{ execution.triggeredBy }}.
+
+  - name: detect
+    type: workflow.execute
+    with:
+      workflow-id: "system-significant-events-detection"
+      # Detection runs as the service account this workflow is bound to.
+      run-as-mode: inherit
+    # Sub-workflows exit cancelled (idle) or may fail transiently, so always continue: detection
+    # failure never blocks discovery and vice-versa. Set on the steps, not on the workflow, because
+    # a workflow-level `continue` would also swallow the failure of `refuse_direct_runs`.
+    on-failure:
+      continue: true
+
+  - name: discover
+    type: workflow.execute
+    with:
+      workflow-id: "system-significant-events-discovery"
+      run-as-mode: inherit
+      inputs:
+        connector_id: "{{ inputs.connector_id }}"
+    on-failure:
+      continue: true

@@ -9,11 +9,10 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   getManagedWorkflowDefinition,
-  SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID as SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW_ID as SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { parse } from 'yaml';
 import { createSignificantEventsScheduledWorkflowsService } from './significant_events_scheduled_workflows';
@@ -52,7 +51,7 @@ const getParsedWorkflowYaml = (id: string, values: Record<string, unknown>): Par
   if (!definition || !('yamlTemplate' in definition) || !definition.yamlTemplate) {
     throw new Error(`Managed workflow definition ${id} is missing a yamlTemplate`);
   }
-  return parse(definition.yamlTemplate(values)) as ParsedWorkflow;
+  return parse(definition.yamlTemplate({ serviceAccountId: 'sa-1', ...values })) as ParsedWorkflow;
 };
 
 const getParsedStaticWorkflowYaml = (id: string): ParsedWorkflow => {
@@ -90,12 +89,9 @@ const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => {
   return { ...api, getClient: jest.fn(() => api) };
 };
 
-const createMockManagedWorkflowsClient = () => ({
+const createMockInstaller = () => ({
   install: jest.fn().mockResolvedValue(undefined),
-  uninstall: jest.fn().mockResolvedValue(undefined),
-  ready: jest.fn().mockResolvedValue(undefined),
-  getWorkflowStatus: jest.fn(),
-  execute: jest.fn(),
+  disable: jest.fn().mockResolvedValue(true),
 });
 
 describe('scheduled Significant Events managed workflows', () => {
@@ -137,6 +133,7 @@ describe('scheduled Significant Events managed workflows', () => {
     const defaultsStep = findStep(defaults.steps, 'detect');
     expect(defaultsStep?.with).toEqual({
       'workflow-id': SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
+      'run-as-mode': 'inherit',
       inputs: {
         lookback: 'now-40m',
         bucketInterval: '1m',
@@ -151,6 +148,7 @@ describe('scheduled Significant Events managed workflows', () => {
     const tunedStep = findStep(tuned.steps, 'detect');
     expect(tunedStep?.with).toEqual({
       'workflow-id': SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
+      'run-as-mode': 'inherit',
       inputs: {
         lookback: 'now-150m',
         bucketInterval: '5m',
@@ -184,6 +182,7 @@ describe('scheduled Significant Events managed workflows', () => {
     const discover = findStep(drainLoop?.steps ?? [], 'discover');
     expect(discover?.with).toEqual({
       'workflow-id': SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
+      'run-as-mode': 'inherit',
       inputs: {
         detectionBatchMax: 7,
         flakyRuleDetectionThreshold: 12,
@@ -221,12 +220,12 @@ describe('scheduled Significant Events managed workflows', () => {
 describe('SignificantEventsScheduledWorkflowsService', () => {
   it('lazily installs and enables per-space scheduled workflows', async () => {
     const managementApi = createMockManagementApi();
-    const managedWorkflowsClient = createMockManagedWorkflowsClient();
+    const managedWorkflowsClient = createMockInstaller();
     const request = httpServerMock.createKibanaRequest();
     const service = createSignificantEventsScheduledWorkflowsService({
       logger: loggerMock.create(),
       managementApi: managementApi as never,
-      getManagedWorkflowsClient: jest.fn().mockResolvedValue(managedWorkflowsClient),
+      installer: managedWorkflowsClient,
     });
 
     await service.ensureWorkflow({
@@ -247,34 +246,30 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
       },
     });
 
-    expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
-      SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-      {
-        spaceId: 'space-a',
-        workflowIdSuffix: 'space-a',
-        values: {
-          detectionIntervalMinutes: 30,
-          detectionBucketIntervalMinutes: 1,
-          detectionLookbackMinutes: 40,
-          targetCoverageMinutes: 30,
-        },
-      }
-    );
-    expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
-      SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
-      {
-        spaceId: 'space-a',
-        workflowIdSuffix: 'space-a',
-        values: {
-          reviewIntervalMinutes: 10,
-          discoveryBatchSize: 3,
-          maxReviewPasses: 3,
-          flakyRuleDetectionThreshold: 10,
-          flakyRuleProbeAfterMinutes: 360,
-          flakyRuleExemptSeverityScore: 80,
-        },
-      }
-    );
+    expect(managedWorkflowsClient.install).toHaveBeenCalledWith({
+      request,
+      spaceId: 'space-a',
+      workflowId: SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+      values: {
+        detectionIntervalMinutes: 30,
+        detectionBucketIntervalMinutes: 1,
+        detectionLookbackMinutes: 40,
+        targetCoverageMinutes: 30,
+      },
+    });
+    expect(managedWorkflowsClient.install).toHaveBeenCalledWith({
+      request,
+      spaceId: 'space-a',
+      workflowId: SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
+      values: {
+        reviewIntervalMinutes: 10,
+        discoveryBatchSize: 3,
+        maxReviewPasses: 3,
+        flakyRuleDetectionThreshold: 10,
+        flakyRuleProbeAfterMinutes: 360,
+        flakyRuleExemptSeverityScore: 80,
+      },
+    });
     expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
       `${SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`,
       { enabled: true },
@@ -287,21 +282,17 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
       'space-a',
       request
     );
-    expect(managementApi.getWorkflow).not.toHaveBeenCalledWith(
-      `${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID}-space-a`,
-      'space-a'
-    );
   });
 
   it('updates template values without toggling workflows that are already enabled', async () => {
     const managementApi = createMockManagementApi({
       getWorkflow: jest.fn().mockResolvedValue({ enabled: true }),
     });
-    const managedWorkflowsClient = createMockManagedWorkflowsClient();
+    const managedWorkflowsClient = createMockInstaller();
     const service = createSignificantEventsScheduledWorkflowsService({
       logger: loggerMock.create(),
       managementApi: managementApi as never,
-      getManagedWorkflowsClient: jest.fn().mockResolvedValue(managedWorkflowsClient),
+      installer: managedWorkflowsClient,
     });
 
     await service.ensureWorkflow({
@@ -326,7 +317,7 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
     expect(managementApi.updateWorkflow).not.toHaveBeenCalled();
   });
 
-  it('disables, drains, and uninstalls per-space scheduled workflows', async () => {
+  it('disables and drains per-space scheduled workflows and keeps their documents', async () => {
     const managementApi = createMockManagementApi({
       getWorkflow: jest.fn().mockResolvedValue({ enabled: true }),
       getWorkflowExecutions: jest
@@ -335,12 +326,12 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
         .mockResolvedValueOnce({ results: [], total: 0 })
         .mockResolvedValue({ results: [], total: 0 }),
     });
-    const managedWorkflowsClient = createMockManagedWorkflowsClient();
+    const managedWorkflowsClient = createMockInstaller();
     const request = httpServerMock.createKibanaRequest();
     const service = createSignificantEventsScheduledWorkflowsService({
       logger: loggerMock.create(),
       managementApi: managementApi as never,
-      getManagedWorkflowsClient: jest.fn().mockResolvedValue(managedWorkflowsClient),
+      installer: managedWorkflowsClient,
     });
 
     await service.ensureWorkflow({
@@ -361,34 +352,21 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
       },
     });
 
-    expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
-      `${SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`,
-      { enabled: false },
-      'space-a',
-      request
-    );
+    // Through the owner: a plain update of a bound workflow needs `manage_security`.
+    expect(managedWorkflowsClient.disable).toHaveBeenCalledWith({
+      spaceId: 'space-a',
+      workflowId: SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+    });
+    expect(managedWorkflowsClient.disable).toHaveBeenCalledWith({
+      spaceId: 'space-a',
+      workflowId: SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
+    });
     expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith(
       'running-detection-execution',
       'space-a',
       request
     );
-    expect(managedWorkflowsClient.uninstall).toHaveBeenCalledWith(
-      SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-      { spaceId: 'space-a', workflowIdSuffix: 'space-a' }
-    );
-    expect(managedWorkflowsClient.uninstall).toHaveBeenCalledWith(
-      SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
-      { spaceId: 'space-a', workflowIdSuffix: 'space-a' }
-    );
-    expect(managementApi.getWorkflow).not.toHaveBeenCalledWith(
-      `${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID}-space-a`,
-      'space-a'
-    );
-    expect(managementApi.getWorkflowExecutions).not.toHaveBeenCalledWith(
-      expect.objectContaining({
-        workflowId: `${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID}-space-a`,
-      }),
-      'space-a'
-    );
+    // Deleting a bound workflow needs `manage_security`, so the documents stay, disabled.
+    expect(managedWorkflowsClient.disable).toHaveBeenCalledTimes(2);
   });
 });
