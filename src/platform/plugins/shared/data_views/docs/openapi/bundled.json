@@ -3357,7 +3357,7 @@
           },
           "override": {
             "type": "boolean",
-            "description": "Override an existing data view if a data view with the provided title already exists.",
+            "description": "Overwrite a data view with the same name or ID. The name is `data_view.name`, or `data_view.title` if the name is omitted or empty; it's matched against the stored names of data views in the current space. A name match deletes the existing data view from all spaces and creates a replacement in `data_view.namespaces`, or in the current space if that's omitted or empty. If no name matches, an ID match keeps the existing spaces unless a non-empty `data_view.namespaces` is provided. Unless `data_view.id` is provided, a new ID is generated, which can break existing references.\n",
             "default": false
           }
         }
