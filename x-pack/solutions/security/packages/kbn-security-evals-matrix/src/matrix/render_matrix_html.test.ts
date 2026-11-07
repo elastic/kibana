@@ -165,6 +165,50 @@ describe('renderMatrixHtml', () => {
     expect(html).toContain('🔍 Step trace');
   });
 
+  it('renders step, tool, token and latency counts in the trace card meta line', () => {
+    const traces: MatrixTraceData = {
+      'test-model:alert': {
+        question: 'What is this alert?',
+        toolTrail: ['security.security_labs_search'],
+        steps: [{ type: 'tool', toolId: 'security.security_labs_search' }],
+        stepCount: 1,
+        toolCount: 1,
+        inputTokens: 12345,
+        outputTokens: 678,
+        latencyMs: 16340.4,
+      },
+    };
+
+    const html = renderMatrixHtml(mockMatrix, mockConfig, {}, traces);
+    expect(html).toContain('12k in / 678 out tokens');
+    expect(html).toContain('16.3s');
+    expect(html).toContain('security.security_labs_search');
+  });
+
+  it('omits the token and latency parts when the trace carries none', () => {
+    const traces: MatrixTraceData = {
+      'test-model:alert': { question: 'q', stepCount: 0, toolCount: 0 },
+    };
+
+    const html = renderMatrixHtml(mockMatrix, mockConfig, {}, traces);
+    expect(html).not.toContain('out tokens');
+  });
+
+  it('says the trace fetch failed instead of implying the agent called no tools', () => {
+    const traces: MatrixTraceData = {
+      'test-model:alert': {
+        question: 'What is this alert?',
+        stepCount: 0,
+        toolCount: 0,
+        traceFetchFailed: true,
+      },
+    };
+
+    const html = renderMatrixHtml(mockMatrix, mockConfig, {}, traces);
+    expect(html).toContain('Trace fetch failed');
+    expect(html).not.toContain('No final answer message captured');
+  });
+
   describe('untrusted model output in answers', () => {
     const renderAnswer = (answer: string) =>
       renderMatrixHtml(
@@ -987,5 +1031,133 @@ describe('round 8 regression: self-judged disclosure on not-recommended cells', 
     };
     const html = renderMatrixHtml(matrix, mockConfig);
     expect(html).toContain('fail (self-judged)');
+  });
+});
+
+describe('dataset-keyed direct traces', () => {
+  it('resolves each datasetIds column to its own trace when example ids collide', () => {
+    const cfg = {
+      ...mockConfig,
+      columns: [{ ...mockConfig.columns[0], datasetIds: ['dataset-a'], suites: ['suite-1'] }],
+    };
+    const traces = {
+      'test-model:direct:suite-1|dataset-b:0': {
+        suiteId: 'suite-1',
+        datasetId: 'dataset-b',
+        question: 'dataset-b question',
+      },
+      'test-model:direct:suite-1|dataset-a:0': {
+        suiteId: 'suite-1',
+        datasetId: 'dataset-a',
+        question: 'dataset-a question',
+      },
+    } as never;
+    const html = renderMatrixHtml(mockMatrix, cfg, {}, traces);
+    expect(html).toContain('dataset-a question');
+    expect(html).not.toContain('dataset-b question');
+  });
+
+  it('renders a span-less trace as unavailable with its own message', () => {
+    const traces = {
+      'test-model:suite-1': { suiteId: 'suite-1', traceEmpty: true, stepCount: 0 },
+    } as never;
+    const html = renderMatrixHtml(mockMatrix, mockConfig, {}, traces);
+    expect(html).toContain('its trace holds no spans');
+  });
+});
+
+describe('one card per run for datasetIds and suite-only columns', () => {
+  const singleColumnMatrix: Matrix = {
+    ...mockMatrix,
+    columns: [mockMatrix.columns[0]],
+    displayColumns: [mockMatrix.displayColumns[0], mockMatrix.displayColumns[2]],
+  };
+  const cardLabels = (html: string): string[] =>
+    [...html.matchAll(/<span class="skill-chip">([^<]*)<\/span>/g)].map((m) => m[1]);
+  const trace = (suiteId: string, datasetId: string | undefined, question: string) => ({
+    suiteId,
+    ...(datasetId ? { datasetId } : {}),
+    question,
+    answer: `answer to ${question}`,
+    scores: { Correctness: 0.5 },
+  });
+
+  it('renders every direct trace of a datasetIds column in natural sort order', () => {
+    const cfg = {
+      ...mockConfig,
+      columns: [{ ...mockConfig.columns[0], datasetIds: ['dataset-a'], suites: ['suite-1'] }],
+    };
+    const traces = {
+      'test-model:direct:suite-1|dataset-a:10': trace('suite-1', 'dataset-a', 'q ten'),
+      'test-model:direct:suite-1|dataset-a:2': trace('suite-1', 'dataset-a', 'q two'),
+      'test-model:direct:suite-1|dataset-a:1': trace('suite-1', 'dataset-a', 'q one'),
+    } as never;
+    const html = renderMatrixHtml(singleColumnMatrix, cfg, {}, traces);
+    expect(cardLabels(html)).toEqual(['1', '2', '10']);
+    expect(html.match(/<details class="prompt">/g)).toHaveLength(3);
+    // Each card carries its own per-example score from its trace's evaluator scores.
+    expect(html.match(/score 5\.00/g)).toHaveLength(3);
+  });
+
+  it("does not render another dataset's direct trace in a datasetIds column", () => {
+    const cfg = {
+      ...mockConfig,
+      columns: [{ ...mockConfig.columns[0], datasetIds: ['dataset-a'], suites: ['suite-1'] }],
+    };
+    const traces = {
+      'test-model:direct:suite-1|dataset-a:0': trace('suite-1', 'dataset-a', 'in-scope question'),
+      'test-model:direct:suite-1|dataset-b:0': trace('suite-1', 'dataset-b', 'other-dataset q'),
+      'test-model:direct:suite-2|dataset-a:0': trace('suite-2', 'dataset-a', 'other-suite q'),
+    } as never;
+    const html = renderMatrixHtml(singleColumnMatrix, cfg, {}, traces);
+    expect(html).toContain('in-scope question');
+    expect(html).not.toContain('other-dataset q');
+    expect(html).not.toContain('other-suite q');
+    expect(html.match(/<details class="prompt">/g)).toHaveLength(1);
+  });
+
+  it('renders a single unavailable card, not the suite-level trace, when no direct trace matches', () => {
+    const cfg = {
+      ...mockConfig,
+      columns: [{ ...mockConfig.columns[0], datasetIds: ['dataset-a'], suites: ['suite-1'] }],
+    };
+    const traces = {
+      'test-model:suite-1': trace('suite-1', 'dataset-b', 'suite-level question'),
+      'test-model:direct:suite-1|dataset-b:0': trace('suite-1', 'dataset-b', 'other-dataset q'),
+    } as never;
+    const html = renderMatrixHtml(singleColumnMatrix, cfg, {}, traces);
+    expect(html).not.toContain('suite-level question');
+    expect(html).not.toContain('other-dataset q');
+    expect(html.match(/<details class="prompt">/g)).toHaveLength(1);
+    expect(html).toContain('Trace unavailable.');
+  });
+
+  it('enumerates direct traces for a suite-only column', () => {
+    const traces = {
+      'test-model:suite-1': trace('suite-1', undefined, 'q first'),
+      'test-model:direct:suite-1:example-2': trace('suite-1', undefined, 'q first'),
+      'test-model:direct:suite-1:example-10': trace('suite-1', undefined, 'q tenth'),
+      'test-model:direct:suite-2:example-1': trace('suite-2', undefined, 'other-suite q'),
+    } as never;
+    const html = renderMatrixHtml(singleColumnMatrix, mockConfig, {}, traces);
+    expect(cardLabels(html)).toEqual(['example-2', 'example-10']);
+    expect(html).not.toContain('other-suite q');
+  });
+
+  it('keeps a suite-only column from duplicating runs a sibling datasetIds column claims', () => {
+    const cfg = {
+      ...mockConfig,
+      columns: [
+        { ...mockConfig.columns[0], id: 'alert', datasetIds: ['dataset-a'], suites: ['suite-1'] },
+        { ...mockConfig.columns[1], id: 'threat', suites: ['suite-1'] },
+      ],
+    };
+    const traces = {
+      'test-model:direct:suite-1|dataset-a:0': trace('suite-1', 'dataset-a', 'claimed question'),
+      'test-model:direct:suite-1|dataset-b:0': trace('suite-1', 'dataset-b', 'unclaimed question'),
+    } as never;
+    const html = renderMatrixHtml(mockMatrix, cfg, {}, traces);
+    expect(html.match(/<div class="question">claimed question</g)).toHaveLength(1);
+    expect(html.match(/<div class="question">unclaimed question</g)).toHaveLength(1);
   });
 });

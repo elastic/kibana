@@ -10,8 +10,10 @@ import {
   API_VERSIONS,
   EVALS_EXAMPLE_SCORES_URL,
   EVALS_EXPERIMENTS_URL,
+  EVALS_TRACE_URL,
   GetEvaluationExperimentsResponse,
   GetExampleScoresResponse,
+  GetTraceResponse,
   MAX_SCORES_PER_QUERY,
   type EvaluationExperimentSummary,
   type EvaluationScoreDocument,
@@ -122,6 +124,16 @@ export class MatrixEvalsClient extends EvalsClient {
       // swallowing here would record a permanently missing trace instead.
       throw error;
     }
+  }
+
+  /** One OTel trace's spans. Rethrows so the caller's bounded retry can absorb transient errors. */
+  async getTrace(traceId: string): Promise<GetTraceResponse> {
+    const { data } = await this.matrixKbnClient.request({
+      path: EVALS_TRACE_URL.replace('{traceId}', encodeURIComponent(traceId)),
+      method: 'GET',
+      headers: VERSIONED_HEADERS,
+    });
+    return GetTraceResponse.parse(data);
   }
 }
 

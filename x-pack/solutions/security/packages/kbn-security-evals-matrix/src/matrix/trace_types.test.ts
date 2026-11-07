@@ -79,3 +79,33 @@ describe('directTraceKey / parseDirectTraceKey', () => {
     expect(parseDirectTraceKey('m:direct:%zz:example-1')).toBeUndefined();
   });
 });
+
+describe('directTraceKey with a dataset id', () => {
+  it('round-trips the dataset id and keeps two datasets under one example id distinct', () => {
+    const a = directTraceKey('m', 'suite-1', '0', 'dataset-a');
+    const b = directTraceKey('m', 'suite-1', '0', 'dataset-b');
+    expect(a).not.toBe(b);
+    expect(parseDirectTraceKey(a)).toEqual({
+      modelId: 'm',
+      suiteId: 'suite-1',
+      datasetId: 'dataset-a',
+      exampleId: '0',
+    });
+  });
+
+  it('percent-encodes separators in suite and dataset ids', () => {
+    const key = directTraceKey('m', 'suite|1:x', '0', 'ds|a:b');
+    expect(parseDirectTraceKey(key)).toEqual({
+      modelId: 'm',
+      suiteId: 'suite|1:x',
+      datasetId: 'ds|a:b',
+      exampleId: '0',
+    });
+  });
+
+  it('negative control: without a dataset id the key keeps the suite-only form', () => {
+    const key = directTraceKey('m', 'suite-1', 'example-1');
+    expect(key).toBe('m:direct:suite-1:example-1');
+    expect(parseDirectTraceKey(key)?.datasetId).toBeUndefined();
+  });
+});
