@@ -11,7 +11,7 @@ import React from 'react';
 
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 
-import { UserProfile, useUserProfileForm } from './user_profile';
+import { UserProfile, useUserProfileForm, validateAvatarInitials } from './user_profile';
 import { UserProfileAPIClient } from '..';
 import type { UserProfileData } from '../../../common';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
@@ -131,6 +131,23 @@ describe('useUserProfileForm', () => {
 
     expect(result.current.values.user.full_name).toEqual('Another Name');
     expect(result.current.values.data?.avatar.initials).toEqual('AN');
+  });
+
+  describe('validateAvatarInitials', () => {
+    it('requires initials', () => {
+      expect(validateAvatarInitials('')).toEqual('Add initials');
+    });
+
+    it.each(['AB', '\u{1F44D}\u{1F3FD}\u{1F44D}\u{1F3FD}', 'A\u{1F44D}', '\u0915\u094D\u0937'])(
+      'accepts %s',
+      (initials) => {
+        expect(validateAvatarInitials(initials)).toBeUndefined();
+      }
+    );
+
+    it('rejects more than 2 characters', () => {
+      expect(validateAvatarInitials('ABC')).toEqual('Enter no more than 2 characters.');
+    });
   });
 
   it('should save user and user profile when submitting form', async () => {
