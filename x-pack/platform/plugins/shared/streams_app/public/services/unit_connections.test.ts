@@ -1146,6 +1146,43 @@ describe('routing rule connections', () => {
     }
   );
 
+  it('rewrites a rule inside its own routes entry when the pipeline has several', () => {
+    const split = unitWith([
+      {
+        id: 'main',
+        supported_telemetry: ['logs'],
+        config: [
+          { name: 'sources', value: ['otlp-input'] },
+          { name: 'routes', value: [{ when: 'a', destinations: ['es-logs'] }] },
+          {
+            name: 'routes',
+            value: [{ when: 'b', destinations: ['es-logs'] }, { destinations: ['debug-out'] }],
+          },
+        ],
+      },
+    ]);
+
+    const unhooked = disconnectLine(split, rule('main', 1), destination('es-logs'));
+    expect(pipelineConfig(unhooked, 'main')).toEqual([
+      { name: 'sources', value: ['otlp-input'] },
+      { name: 'routes', value: [{ when: 'a', destinations: ['es-logs'] }] },
+      {
+        name: 'routes',
+        value: [{ when: 'b', destinations: [] }, { destinations: ['debug-out'] }],
+      },
+    ]);
+
+    const reconnected = connectLine(unhooked, rule('main', 1), destination('es-metrics'));
+    expect(pipelineConfig(reconnected, 'main')).toEqual([
+      { name: 'sources', value: ['otlp-input'] },
+      { name: 'routes', value: [{ when: 'a', destinations: ['es-logs'] }] },
+      {
+        name: 'routes',
+        value: [{ when: 'b', destinations: ['es-metrics'] }, { destinations: ['debug-out'] }],
+      },
+    ]);
+  });
+
   describe('signals a rule carries', () => {
     const unitWithSignals = (
       pipelines: Unit['unit']['pipelines'],

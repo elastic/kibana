@@ -42,6 +42,7 @@ import {
   pipelineUsesRoutes,
   pruneUnit,
   readEntryIds,
+  mapRouteAt,
   readRouteAt,
   readRoutes,
   replaceUnit,
@@ -109,19 +110,6 @@ const withIdentifiers = (
       : [...config, { name, value }];
   }
   return config.map((entry) => (entry.name === name ? { ...entry, value } : entry));
-};
-
-const withRoutes = (config: PipelineConfig, routes: readonly RouteRule[]): PipelineConfig => {
-  if (routes.length === 0) {
-    return config.filter((entry) => entry.name !== PIPELINE_ENTRY.routes);
-  }
-  const exists = config.some((entry) => entry.name === PIPELINE_ENTRY.routes);
-  if (!exists) {
-    return [...config, { name: PIPELINE_ENTRY.routes, value: [...routes] }];
-  }
-  return config.map((entry) =>
-    entry.name === PIPELINE_ENTRY.routes ? { ...entry, value: [...routes] } : entry
-  );
 };
 
 const removeDestinationFromRoutes = (
@@ -779,13 +767,13 @@ export const addTestRoutingToLine = (
   ) {
     return unit;
   }
-  return writePipeline(
-    routable,
-    pipelineIndex,
-    withRoutes(withIdentifiers(pipeline.config, PIPELINE_ENTRY.destinations, []), [
-      { when: TEST_ROUTING_CONDITION, destinations: [destinationId] },
-    ])
-  );
+  return writePipeline(routable, pipelineIndex, [
+    ...withIdentifiers(pipeline.config, PIPELINE_ENTRY.destinations, []),
+    {
+      name: PIPELINE_ENTRY.routes,
+      value: [{ when: TEST_ROUTING_CONDITION, destinations: [destinationId] }],
+    },
+  ]);
 };
 
 /**
@@ -1024,18 +1012,15 @@ const withRuleTargets = (
       ? withIdentifiers(pipeline.config, PIPELINE_ENTRY.destinations, ids)
       : undefined;
   }
-  return withRoutes(
-    pipeline.config,
-    readRoutes(pipeline.config).flatMap((route, index) => {
-      if (index !== ruleIndex) {
-        return [route];
-      }
-      const currentKind = isDelegatingRoute(route)
-        ? LINE_TARGET_KIND.pipeline
-        : LINE_TARGET_KIND.destination;
-      return [routeWithTargets(route, targets[0]?.kind ?? currentKind, ids)];
-    })
-  );
+  if (readRoutes(pipeline.config)[ruleIndex] === undefined) {
+    return undefined;
+  }
+  return mapRouteAt(pipeline, ruleIndex, (route) => {
+    const currentKind = isDelegatingRoute(route)
+      ? LINE_TARGET_KIND.pipeline
+      : LINE_TARGET_KIND.destination;
+    return routeWithTargets(route, targets[0]?.kind ?? currentKind, ids);
+  }).config;
 };
 
 /**

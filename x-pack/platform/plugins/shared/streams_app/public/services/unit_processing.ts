@@ -17,6 +17,7 @@ import {
   PIPELINE_ENTRY,
   allocateComponentId,
   intersectSignals,
+  mapRouteAt,
   pipelineForwards,
   readEntryIds,
   readRouteAt,
@@ -187,32 +188,6 @@ const setPipelineProcessors = (pipeline: UnitPipeline, ids: readonly string[]): 
   return {
     ...pipeline,
     config: [...others.slice(0, insertAt), entry, ...others.slice(insertAt)],
-  };
-};
-
-/** Rewrites the route at a slot's `routeIndex`, which counts across all `routes` entries. */
-const mapRouteAt = (
-  pipeline: UnitPipeline,
-  routeIndex: number,
-  update: (route: RouteRule) => RouteRule
-): UnitPipeline => {
-  let offset = 0;
-  return {
-    ...pipeline,
-    config: pipeline.config.map((entry): PipelineConfigEntry => {
-      if (entry.name !== PIPELINE_ENTRY.routes) {
-        return entry;
-      }
-      const local = routeIndex - offset;
-      offset += entry.value.length;
-      if (local < 0 || local >= entry.value.length) {
-        return entry;
-      }
-      return {
-        ...entry,
-        value: entry.value.map((route, index) => (index === local ? update(route) : route)),
-      };
-    }),
   };
 };
 

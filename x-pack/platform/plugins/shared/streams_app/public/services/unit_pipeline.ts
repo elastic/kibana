@@ -75,6 +75,36 @@ export const readRouteAt = (
   return undefined;
 };
 
+/**
+ * Rewrites the route at `routeIndex`, which counts across all `routes`
+ * entries, in the entry it sits in, so every entry keeps its own rules and
+ * telemetry selector. A pipeline without that route comes back unchanged.
+ */
+export const mapRouteAt = (
+  pipeline: UnitPipeline,
+  routeIndex: number,
+  update: (route: RouteRule) => RouteRule
+): UnitPipeline => {
+  let offset = 0;
+  return {
+    ...pipeline,
+    config: pipeline.config.map((entry): PipelineConfigEntry => {
+      if (entry.name !== PIPELINE_ENTRY.routes) {
+        return entry;
+      }
+      const local = routeIndex - offset;
+      offset += entry.value.length;
+      if (local < 0 || local >= entry.value.length) {
+        return entry;
+      }
+      return {
+        ...entry,
+        value: entry.value.map((route, index) => (index === local ? update(route) : route)),
+      };
+    }),
+  };
+};
+
 export const pipelineHasSources = (config: PipelineConfig): boolean =>
   config.some((entry) => entry.name === PIPELINE_ENTRY.sources);
 
