@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { CONTEXT_ENGINE_SETUP_AGENT_ID } from '../../common/constants';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import { IMPROVEMENT_ACTIONS } from '../../common/http_api/improvement_actions';
 import type { SignalTag } from '../../common/http_api/signals';
@@ -79,7 +79,7 @@ describe('buildFeedbackContext', () => {
     const context = await build();
 
     expect(context).toMatchObject({
-      agent_id: agentBuilderDefaultAgentId,
+      agent_id: CONTEXT_ENGINE_SETUP_AGENT_ID,
       run: { signal_window: WINDOW, signal_spaces: ['default'], signal_count: 40 },
       has_signals: true,
     });
@@ -129,7 +129,7 @@ describe('buildFeedbackContext', () => {
   it('falls back to the defaults for an index that was never configured for analysis', async () => {
     const context = await build();
 
-    expect(context.agent_id).toBe(agentBuilderDefaultAgentId);
+    expect(context.agent_id).toBe(CONTEXT_ENGINE_SETUP_AGENT_ID);
     expect(context.output_schema).toMatchObject({
       properties: {
         improvements: { items: { properties: { action: { enum: [...IMPROVEMENT_ACTIONS] } } } },
@@ -156,7 +156,7 @@ describe('buildFeedbackContext', () => {
     expect(context.briefing).toContain('observation only');
   });
 
-  it('reports no signals when nothing was classified as a problem, so no LLM call is made', async () => {
+  it('reports no signals when nothing was classified as a problem', async () => {
     selectSignalsMock.mockResolvedValue({
       patterns: [],
       spaces: ['default'],
@@ -179,6 +179,63 @@ describe('buildFeedbackContext', () => {
     });
 
     expect((await build()).has_signals).toBe(false);
+  });
+
+  describe('whether there is anything to analyze', () => {
+    const withoutSignals = () =>
+      selectSignalsMock.mockResolvedValue({
+        patterns: [],
+        spaces: [],
+        signalCount: 0,
+        window: WINDOW,
+      });
+
+    const withoutKis = () =>
+      getKisMock.mockResolvedValue({
+        kis: [],
+        summary: { total: 0, counts_by_type: [] },
+      } as unknown as Awaited<ReturnType<typeof getKis>>);
+
+    it('still analyzes an index nobody has queried', async () => {
+      // The setup is what a run reads when the traffic says nothing, and an index nobody has hit
+      // yet is when a bad one is cheapest to fix.
+      withoutSignals();
+
+      const context = await build();
+
+      expect(context.has_signals).toBe(false);
+      expect(context.can_analyze).toBe(true);
+    });
+
+    it('analyzes on indicators alone, with no signals and nothing configured', async () => {
+      withoutSignals();
+
+      const context = await build(buildAiIndex({ sources: [], automations: [] }));
+
+      expect(context.can_analyze).toBe(true);
+    });
+
+    it('analyzes on automations alone', async () => {
+      withoutSignals();
+      withoutKis();
+
+      const context = await build(
+        buildAiIndex({ sources: [], automations: [{ type: 'workflow', value: 'wf-1' }] })
+      );
+
+      expect(context.can_analyze).toBe(true);
+    });
+
+    it('skips an index with nothing configured and nothing observed', async () => {
+      // Not an empty window but an empty index: no signals, no indicators, no sources, no
+      // automations. There is nothing for a run to read, so the agent is not worth the call.
+      withoutSignals();
+      withoutKis();
+
+      const context = await build(buildAiIndex({ sources: [], automations: [] }));
+
+      expect(context.can_analyze).toBe(false);
+    });
   });
 
   it('carries the shape of prior improvements into the briefing, and the query to read them', async () => {

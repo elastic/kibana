@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export const CONTEXT_ENGINE_SETUP_AGENT_ID = 'platform.context_engine.setup' as const;
+// Owned by `contextEngine`: this plugin depends on it, not the other way around, and the
+// feedback-analysis default needs the same id.
+export { CONTEXT_ENGINE_SETUP_AGENT_ID } from '@kbn/context-engine-plugin/common/constants';

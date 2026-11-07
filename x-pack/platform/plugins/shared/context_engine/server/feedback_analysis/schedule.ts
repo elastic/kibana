@@ -16,21 +16,40 @@ import {
 import type { AiIndexFeedbackAnalysis } from '../../common/http_api/ai_indices';
 import { parseIntervalMinutes } from '../../common/validation';
 
-/** 64 bits of SHA-256, hex-encoded: fixed width, and wide enough not to collide across spaces. */
 const SPACE_HASH_LENGTH = 16;
 
 /**
- * The one workflows management call this plugin makes, declared structurally rather than imported:
+ * The workflows management calls this plugin makes, declared structurally rather than imported:
  * workflows management reaches back here through Agent Builder, so depending on its contract would
- * close a project reference cycle.
+ * close a project reference cycle. Only the fields that are read are named.
  */
-export interface WorkflowEnablementApi {
+export interface WorkflowsManagementPort {
   updateWorkflow(
     workflowId: string,
     workflow: { enabled: boolean },
     spaceId: string,
     request: KibanaRequest
   ): Promise<unknown>;
+
+  getWorkflowExecution(
+    workflowExecutionId: string,
+    spaceId: string
+  ): Promise<{ status: string } | null>;
+}
+
+/**
+ * Raised when a requested run collided with one already in flight for the same AI index.
+ *
+ * Not a failure of the request so much as an answer to it: the analysis the caller wanted is
+ * happening, just not because of them.
+ */
+export class FeedbackAnalysisAlreadyRunningError extends Error {
+  constructor(aiIndexId: string) {
+    super(
+      `Feedback analysis is already running for AI index [${aiIndexId}]. Its improvements appear when that run finishes.`
+    );
+    this.name = 'FeedbackAnalysisAlreadyRunningError';
+  }
 }
 
 export interface ReconcileScheduleParams {
@@ -50,9 +69,25 @@ export interface FeedbackAnalysisScheduleService {
   /** Brings the managed workflow for one AI index in line with its configuration. */
   reconcile(params: ReconcileScheduleParams): Promise<void>;
 
+  /**
+   * Runs one analysis immediately, off-schedule, and returns the execution id.
+   *
+   * Only possible while analysis is enabled: disabling uninstalls the per-index workflow, so with
+   * it off there is no instance to execute. The caller checks the configuration and explains that,
+   * rather than offering an action that would fail here.
+   *
+   * Throws {@link FeedbackAnalysisAlreadyRunningError} when a run for this index is already in
+   * flight, which the workflow's own concurrency settings decide rather than this code.
+   *
+   * Takes no space: the instance lives where it was installed, not where the request came from.
+   */
+  run(params: { aiIndexId: string; spaceId: string; request: KibanaRequest }): Promise<string>;
+
   /** Tears the schedule down when the AI index it analyzes is deleted. */
   remove(params: { aiIndexId: string; spaceId: string }): Promise<void>;
 }
+
+const DROPPED_EXECUTION_STATUS = 'skipped';
 
 export const createFeedbackAnalysisScheduleService = ({
   logger,
@@ -62,21 +97,10 @@ export const createFeedbackAnalysisScheduleService = ({
   logger: Logger;
   getManagedWorkflowsClient: () => Promise<PluginScopedManagedWorkflowsApi>;
   /** Optional at the plugin boundary, so a deployment without it cannot schedule analysis. */
-  workflowsManagement?: WorkflowEnablementApi;
+  workflowsManagement?: WorkflowsManagementPort;
 }): FeedbackAnalysisScheduleService => {
   const log = logger.get('feedback_analysis_schedule');
 
-  /**
-   * A managed workflow document id is `<definition id>-<suffix>` and is the ES `_id`, which is
-   * unique per index regardless of the document's `spaceId`. An AI index id is only unique within
-   * its space, so the suffix has to carry the space too or the same id in two spaces shares one
-   * document: the second install silently keeps the first space's `spaceId`, and either space's
-   * delete tears down the other's schedule.
-   *
-   * The space is hashed rather than appended: both ids allow hyphens, so `<space>-<aiIndexId>`
-   * would make `('a-b', 'c')` and `('a', 'b-c')` collide, and space ids have no length cap while
-   * the `_id` does.
-   */
   const workflowIdSuffixFor = (aiIndexId: string, spaceId: string) =>
     `${aiIndexId}-${createHash('sha256')
       .update(spaceId)
@@ -85,6 +109,22 @@ export const createFeedbackAnalysisScheduleService = ({
 
   const workflowDocumentIdFor = (aiIndexId: string, spaceId: string) =>
     `${CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID}-${workflowIdSuffixFor(aiIndexId, spaceId)}`;
+
+  const wasDropped = async (executionId: string, spaceId: string): Promise<boolean> => {
+    if (!workflowsManagement) {
+      return false;
+    }
+
+    try {
+      const execution = await workflowsManagement.getWorkflowExecution(executionId, spaceId);
+      return execution?.status === DROPPED_EXECUTION_STATUS;
+    } catch (error) {
+      log.warn(
+        `Could not tell whether feedback analysis run '${executionId}' started: ${error.message}`
+      );
+      return false;
+    }
+  };
 
   const intervalMinutesFor = (feedbackAnalysis: AiIndexFeedbackAnalysis): number => {
     const interval = feedbackAnalysis.schedule?.interval ?? DEFAULT_FEEDBACK_ANALYSIS_INTERVAL;
@@ -144,6 +184,32 @@ export const createFeedbackAnalysisScheduleService = ({
       log.info(
         `Scheduled feedback analysis for AI index '${aiIndexId}' in space '${spaceId}' every ${intervalMinutes}m, running as the user who enabled it`
       );
+    },
+
+    async run({ aiIndexId, spaceId, request }) {
+      const client = await getManagedWorkflowsClient();
+      const executionId = await client.execute(
+        request,
+        CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
+        {
+          spaceId,
+          workflowIdSuffix: workflowIdSuffixFor(aiIndexId, spaceId),
+          triggeredBy: 'manual',
+        }
+      );
+
+      if (await wasDropped(executionId, spaceId)) {
+        log.debug(
+          () =>
+            `Dropped an off-schedule feedback analysis run for AI index '${aiIndexId}': one is already running`
+        );
+        throw new FeedbackAnalysisAlreadyRunningError(aiIndexId);
+      }
+
+      log.info(
+        `Started an off-schedule feedback analysis run for AI index '${aiIndexId}' in space '${spaceId}'`
+      );
+      return executionId;
     },
 
     async remove({ aiIndexId, spaceId }) {

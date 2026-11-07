@@ -14,6 +14,7 @@ import type {
 } from './types';
 import { registerContextEngineAgentBuilderIntegration } from './register_agent_builder_integration';
 import { registerContextEngineInferenceFeatures } from './register_inference_features';
+import { createWorkflowProvider } from './workflow_provider';
 
 export class ContextEngineAgentBuilderPlugin
   implements
@@ -42,6 +43,12 @@ export class ContextEngineAgentBuilderPlugin
     if (setupDeps.searchInferenceEndpoints) {
       registerContextEngineInferenceFeatures(setupDeps.searchInferenceEndpoints);
     }
+
+    // Closes the dependency inversion in `ContextEnginePluginSetup.registerWorkflowProvider`: this
+    // plugin is the one place that may depend on both Context Engine and workflows.
+    setupDeps.contextEngine.registerWorkflowProvider(
+      createWorkflowProvider(setupDeps.workflowsManagement.management)
+    );
 
     return {};
   }
