@@ -213,10 +213,11 @@ export type AlertingV2ErrorCode = (typeof ALERTING_ERROR_CODES)[keyof typeof ALE
  * Naming convention: `<DOMAIN>_<WHAT_HAPPENED>`.
  *
  * The domain matches the subsystem that owns the failure, so an operator can
- * filter a whole area with a prefix: `RULE_*` (rule executor / rules client),
- * `DIRECTOR_*`, `DISPATCH_*`, `POLICY_*`, `EXECUTION_HISTORY_*`, `EVENTS_*`,
- * `STORAGE_*`, `QUERY_*`, `RESOURCES_*`, `RETRY_*`, `MAINTENANCE_WINDOW_*`,
- * `SAVED_OBJECTS_*`, `AGENT_BUILDER_*`, `TASKS_*`, `TELEMETRY_*`.
+ * filter a whole area with a prefix: `ROUTES_*`, `RULE_*` (rule executor /
+ * rules client), `DIRECTOR_*`, `DISPATCH_*`, `POLICY_*` / `ACTION_POLICY_*`,
+ * `EXECUTION_HISTORY_*`, `EVENTS_*`, `STORAGE_*`, `QUERY_*`, `RESOURCES_*`,
+ * `RETRY_*`, `MAINTENANCE_WINDOW_*`, `SAVED_OBJECTS_*`, `AGENT_BUILDER_*`,
+ * `TASKS_*`, `TELEMETRY_*`.
  *
  * The suffix encodes the outcome, from a closed vocabulary:
  * - `warn` (degraded but continued): `_FAILED`, `_SKIPPED`, `_TIMED_OUT`,
