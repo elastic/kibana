@@ -10,7 +10,12 @@
 import type { FC } from 'react';
 import React from 'react';
 import classNames from 'classnames';
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiPageTemplate, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import {
+  KBN_RECESSED_GLASS_CLASS,
+  kbnRecessedGlassCss,
+} from '@kbn/css-utils/public/recessed_glass_css';
 
 import { withSolutionNav } from '@kbn/shared-ux-page-solution-nav';
 import type { KibanaPageTemplateProps as Props } from '@kbn/shared-ux-page-kibana-template-types';
@@ -36,6 +41,7 @@ export const KibanaPageTemplateInner: FC<Props> = ({
   emptyPageBody,
   ...rest
 }) => {
+  const euiThemeContext = useEuiTheme();
   let header;
 
   if (isEmptyState && pageHeader && !children) {
@@ -46,6 +52,9 @@ export const KibanaPageTemplateInner: FC<Props> = ({
       <EuiPageTemplate.EmptyPrompt
         iconType={iconType}
         iconColor="" // This is likely a solution or app logo, so keep it multi-color
+        // POC: lifts the prompt off the recessed glass empty-state surface; shadow requires no border.
+        hasShadow
+        hasBorder={false}
         title={title}
         body={body}
         actions={rightSideItems}
@@ -75,7 +84,10 @@ export const KibanaPageTemplateInner: FC<Props> = ({
     sideBar = <EuiPageTemplate.Sidebar {...sideBarProps}>{pageSideBar}</EuiPageTemplate.Sidebar>;
   }
 
-  const classes = getClasses(undefined, className);
+  const classes = getClasses(
+    undefined,
+    classNames(className, { [KBN_RECESSED_GLASS_CLASS]: isEmptyState })
+  );
 
   return (
     <EuiPageTemplate
@@ -86,6 +98,9 @@ export const KibanaPageTemplateInner: FC<Props> = ({
       offset={0}
       minHeight={header ? 'var(--kbn-application--content-height)' : 0}
       grow={header ? false : undefined}
+      // POC: empty states sit on the recessed glass surface; unpanelled so sections stay transparent.
+      css={isEmptyState ? css(kbnRecessedGlassCss(euiThemeContext)) : undefined}
+      panelled={isEmptyState ? false : undefined}
       {...rest}
     >
       {sideBar}

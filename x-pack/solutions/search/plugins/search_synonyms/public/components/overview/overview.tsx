@@ -30,6 +30,7 @@ export const SearchSynonymsOverview = () => {
   } = useKibana();
   const { data: synonymsData, isInitialLoading, isError, error } = useFetchSynonymsSets();
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
+  const isEmpty = !isInitialLoading && synonymsData?._meta.totalItemCount === 0;
   useSynonymsBreadcrumbs();
 
   const embeddableConsole = useMemo(
@@ -62,6 +63,7 @@ export const SearchSynonymsOverview = () => {
       data-test-subj="searchSynonymsOverviewPage"
       solutionNav={searchNavigation?.useClassicNavigation(history)}
       color="primary"
+      isEmptyState={isEmpty}
     >
       {!isInitialLoading && !isError && synonymsData?._meta.totalItemCount !== 0 && (
         <AppHeader
@@ -96,7 +98,7 @@ export const SearchSynonymsOverview = () => {
         {!isInitialLoading && synonymsData && synonymsData._meta.totalItemCount > 0 && (
           <SynonymSets />
         )}
-        {!isInitialLoading && synonymsData && synonymsData._meta.totalItemCount === 0 && (
+        {isEmpty && (
           <EuiFlexGroup
             justifyContent="center"
             alignItems="center"

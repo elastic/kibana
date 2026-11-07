@@ -22,6 +22,9 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
     <EuiEmptyPrompt
       layout="horizontal"
       color="plain"
+      // POC: lifts the prompt off the recessed glass empty-state surface; shadow requires no border.
+      hasShadow
+      hasBorder={false}
       icon={
         <EuiIllustration
           type={highFive}
