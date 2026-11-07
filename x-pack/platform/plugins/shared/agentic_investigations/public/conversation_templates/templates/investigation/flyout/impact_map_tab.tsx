@@ -30,7 +30,7 @@ import type { InvestigationImpactMapResponse } from '../../../../../common';
 import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
 import type { ImpactMapRenderer } from '../../../../types';
 
-const MAP_HEIGHT = 480;
+const MAP_HEIGHT = 520;
 
 const DEFAULT_TITLE = i18n.translate('xpack.agenticInvestigations.impactMap.defaultTitle', {
   defaultMessage: 'Impact map',
@@ -113,7 +113,13 @@ const ImpactMapPanel: React.FC<{
   const updatedAt = new Date(impactMap.updated_at ?? impactMap.created_at);
 
   return (
-    <EuiPanel hasBorder paddingSize="m" data-test-subj="agenticInvestigationsImpactMap">
+    <EuiPanel
+      hasBorder={false}
+      hasShadow={false}
+      paddingSize="none"
+      color="transparent"
+      data-test-subj="agenticInvestigationsImpactMap"
+    >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="xs">
@@ -143,6 +149,9 @@ const ImpactMapPanel: React.FC<{
       <div
         css={css`
           height: ${MAP_HEIGHT}px;
+          border: ${euiTheme.border.thin};
+          border-radius: ${euiTheme.border.radius.medium};
+          overflow: hidden;
         `}
       >
         <Renderer impactMap={impactMap} />
@@ -156,7 +165,10 @@ const ImpactMapPanel: React.FC<{
               data-test-subj="agenticInvestigationsImpactMapFullScreen"
               css={css`
                 position: fixed;
-                inset: 0;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
                 z-index: ${euiTheme.levels.modal};
                 display: flex;
                 flex-direction: column;
@@ -190,9 +202,17 @@ const ImpactMapPanel: React.FC<{
                 css={css`
                   flex: 1;
                   min-height: 0;
+                  position: relative;
                 `}
               >
-                <Renderer impactMap={impactMap} />
+                <div
+                  css={css`
+                    position: absolute;
+                    inset: 0;
+                  `}
+                >
+                  <Renderer impactMap={impactMap} />
+                </div>
               </div>
             </div>
           </EuiFocusTrap>

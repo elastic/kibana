@@ -78,8 +78,8 @@ const LEGEND = {
 function ImpactMapLegend({ criticalPathColor }: { criticalPathColor: string }) {
   const { euiTheme } = useEuiTheme();
   return (
-    <EuiPanel paddingSize="s" hasShadow={false} hasBorder data-test-subj="impactServiceMapLegend">
-      <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+    <EuiPanel paddingSize="xs" hasShadow={false} hasBorder data-test-subj="impactServiceMapLegend">
+      <EuiFlexGroup gutterSize="m" wrap alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiHealth color={getSeverityColor(IMPACT_SEVERITY_SCORES.rootCause)}>
             <EuiText size="xs">{LEGEND.rootCause}</EuiText>
@@ -128,7 +128,9 @@ const useServiceAgentNames = (impactMap: ImpactMapRendererProps['impactMap']) =>
     const dependencyTypes = new Set(
       impactMap.entity_types.filter(({ kind }) => kind === 'dependency').map(({ id }) => id)
     );
-    return impactMap.entities.filter(({ type_id: t }) => !dependencyTypes.has(t)).map(({ id }) => id);
+    return impactMap.entities
+      .filter(({ type_id: t }) => !dependencyTypes.has(t))
+      .map(({ id }) => id);
   }, [impactMap]);
 
   useEffect(() => {
@@ -204,7 +206,7 @@ export function ImpactServiceMap({ impactMap }: ImpactMapRendererProps) {
           onNodesChange={onNodesChange}
           nodeTypes={nodeTypes}
           fitView
-          fitViewOptions={{ padding: 0.2 }}
+          fitViewOptions={{ padding: 0.12, maxZoom: 1.5 }}
           minZoom={0.1}
           maxZoom={3}
           nodesDraggable
@@ -215,7 +217,7 @@ export function ImpactServiceMap({ impactMap }: ImpactMapRendererProps) {
         >
           <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
           <Controls showInteractive={false} />
-          <Panel position="top-right">
+          <Panel position="top-left">
             <ImpactMapLegend criticalPathColor={criticalPathColor} />
           </Panel>
         </ReactFlow>
