@@ -1,0 +1,23 @@
+version: '2'
+id: aws-role-blast-radius
+name: AWS IAM role blast radius
+description: >
+  Everything an AWS IAM role can reach through configuration, from the entity store alone:
+  roles it may assume, instances it may connect to, the roles those instances run as, and the
+  buckets those roles may access. One hop specification repeated up to the hop budget.
+seed:
+  type: role
+  description: The IAM role ARN, for example arn:aws:iam::123456789012:role/okta-prod-admin
+hops:
+  - name: aws_asset_relationships
+    relationships:
+      - can_assume
+      - can_connect
+      - runs_as
+      - grants_access_to
+    payload_fields:
+      - entity.name
+      - entity.sub_type
+    source_type: asset
+    target_type: asset
+    repeat: 6
