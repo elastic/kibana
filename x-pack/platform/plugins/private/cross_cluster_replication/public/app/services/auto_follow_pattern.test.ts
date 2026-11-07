@@ -81,5 +81,17 @@ describe('Auto-follo pattern service', () => {
       expect(result.followIndexPatternPrefix).toEqual('prefix_');
       expect(result.followIndexPatternSuffix).toEqual('_suffix');
     });
+
+    it('should return an empty prefix and suffix when the pattern has no {{leader_index}} template', () => {
+      const result = getPrefixSuffixFromFollowPattern('no-template');
+      expect(result.followIndexPatternPrefix).toBe('');
+      expect(result.followIndexPatternSuffix).toBe('');
+    });
+
+    it('should return an empty prefix and suffix when the follow pattern is not defined', () => {
+      const result = getPrefixSuffixFromFollowPattern(undefined);
+      expect(result.followIndexPatternPrefix).toBe('');
+      expect(result.followIndexPatternSuffix).toBe('');
+    });
   });
 });

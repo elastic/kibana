@@ -84,6 +84,43 @@ describe('<AutoFollowPatternList />', () => {
     });
   });
 
+  describe('when an auto-follow pattern has no follow index pattern', () => {
+    let actions: AutoFollowPatternListSetupResult['actions'];
+
+    beforeEach(async () => {
+      // Patterns created through the ES API may omit `follow_index_pattern`
+      httpRequestsMockHelpers.setLoadAutoFollowPatternsResponse({
+        patterns: [
+          {
+            name: 'no-follow-pattern',
+            active: true,
+            remoteCluster: getRandomString(),
+            leaderIndexPatterns: ['leader-*'],
+          },
+        ],
+      });
+
+      ({ user, actions } = setup());
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
+    });
+
+    test('should list the pattern instead of showing an error', () => {
+      expect(screen.queryByText('Error loading auto-follow patterns')).not.toBeInTheDocument();
+
+      const table = new EuiTableTestHarness('autoFollowPatternListTable');
+      expect(table.getCellValues()[0][1]).toBe('no-follow-pattern');
+    });
+
+    test('should show the default prefix and suffix values in the detail panel', async () => {
+      await actions.clickAutoFollowPatternAt(0);
+
+      expect(screen.getByTestId('patternPrefix').textContent).toEqual('No prefix');
+      expect(screen.getByTestId('patternSuffix').textContent).toEqual('No suffix');
+    });
+  });
+
   describe('when there are multiple pages of auto-follow patterns', () => {
     let actions: AutoFollowPatternListSetupResult['actions'];
 

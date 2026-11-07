@@ -59,8 +59,8 @@ const getFilteredPatterns = (
       const {
         name = '',
         remoteCluster = '',
-        followIndexPatternPrefix = '',
-        followIndexPatternSuffix = '',
+        followIndexPatternPrefix,
+        followIndexPatternSuffix,
       } = autoFollowPattern;
 
       const inName = name.toLowerCase().includes(normalizedSearchText);
