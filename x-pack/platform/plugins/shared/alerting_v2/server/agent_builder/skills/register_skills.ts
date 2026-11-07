@@ -13,7 +13,6 @@ import {
 } from '@kbn/alerting-v2-constants';
 import type { AttachActionPolicyToolDeps } from '../tools/attach_action_policy';
 import type { AttachRuleToolDeps } from '../tools/attach_rule';
-import type { FindActionPoliciesToolDeps } from '../tools/find_action_policies';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
 import type { ManageRuleToolDeps } from '../tools/manage_rule';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
@@ -23,7 +22,6 @@ import { createRuleAuthoringSkill } from './rule_authoring_skill';
 export type RegisterSkillsDeps = ManageRuleToolDeps &
   AttachRuleToolDeps &
   ManageActionPolicyToolDeps &
-  FindActionPoliciesToolDeps &
   AttachActionPolicyToolDeps & {
     availability: AvailabilityConfig;
   };
