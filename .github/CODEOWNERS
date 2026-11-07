@@ -955,6 +955,7 @@ src/platform/plugins/shared/workflows_execution_engine @elastic/workflows-eng
 src/platform/plugins/shared/workflows_extensions @elastic/workflows-eng
 src/platform/plugins/shared/workflows_management @elastic/workflows-eng
 src/platform/test
+src/platform/test_plugins/kbn_tp_custom_visualizations @elastic/kibana-dashboards
 src/platform/test/analytics/plugins/analytics_ftr_helpers @elastic/kibana-core
 src/platform/test/analytics/plugins/analytics_plugin_a @elastic/kibana-core
 src/platform/test/common/plugins/newsfeed @elastic/kibana-core
@@ -982,7 +983,6 @@ src/platform/test/plugin_functional/plugins/data_search @elastic/kibana-discover
 src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/hardening @elastic/kibana-security
 src/platform/test/plugin_functional/plugins/kbn_top_nav @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations @elastic/kibana-dashboards
 src/platform/test/plugin_functional/plugins/rendering_plugin @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/saved_object_export_transforms @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/saved_object_import_warnings @elastic/kibana-core
@@ -1708,7 +1708,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /x-pack/platform/test/fixtures/es_archives/lens @elastic/kibana-dashboards
 /x-pack/platform/test/examples/embedded_lens @elastic/kibana-dashboards
 /src/platform/test/plugin_functional/test_suites/custom_visualizations @elastic/kibana-dashboards
-/src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations @elastic/kibana-dashboards
+/src/platform/test_plugins/kbn_tp_custom_visualizations @elastic/kibana-dashboards
 /x-pack/platform/test/functional/fixtures/kbn_archives/visualize @elastic/kibana-dashboards
 /x-pack/platform/test/functional/fixtures/kbn_archives/lens @elastic/kibana-dashboards
 /src/platform/test/functional/page_objects/legacy/data_table_vis.ts @elastic/kibana-dashboards
