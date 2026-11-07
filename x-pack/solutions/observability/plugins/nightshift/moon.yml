@@ -59,6 +59,7 @@ dependsOn:
   - '@kbn/investigation-output'
   - '@kbn/agentic-investigations-plugin'
   - '@kbn/agentic-investigations-common'
+  - '@kbn/alerting-v2-episodes-ui'
   - '@kbn/kibana-react-plugin'
   - '@kbn/lens-embeddable-utils'
   - '@kbn/lens-plugin'
