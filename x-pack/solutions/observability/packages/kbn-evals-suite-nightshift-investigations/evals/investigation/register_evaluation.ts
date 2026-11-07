@@ -20,7 +20,10 @@ import { evaluate } from '../../src/evaluate';
 import { loadInvestigationDataset } from './datasets';
 import { getDatasetCustomContext, replaceCustomContext } from './custom_context';
 import { saveConnectorSetOnInvestigator, saveConnectorsOnInvestigator } from './connector_sets';
-import { createInvestigationJudges, createOrcaEvaluators } from './judges';
+import { createInvestigationJudges } from './judges';
+import { createOrcaEvaluators } from './orca/evaluators';
+import { addOrcaReport } from './orca/report';
+import { loadOrcaRubrics } from './orca/rubrics';
 import { orcaJudgeConnector } from './orca_judge';
 import { efficiencyEvaluators } from './efficiency_evaluators';
 import { INVESTIGATION_TIMEOUT_MS, runInvestigation } from './task';
@@ -47,6 +50,8 @@ import {
 const suiteTags = [...tags.serverless.observability.complete];
 // `xpack.spaces.maxSpaces` on Serverless, the default space included.
 const SERVERLESS_MAX_SPACES = 100;
+// Writing an ORCA task's report.md after its investigation, retries included.
+const ORCA_REPORT_BUDGET_MS = 5 * 60_000;
 
 /** Registers a dataset with the native investigation task, RCA judges and execution checks. */
 export const registerInvestigationEvaluation = ({
@@ -123,10 +128,18 @@ export const registerInvestigationEvaluation = ({
           evaluationConnector: judgeConnector,
           log,
         };
+        // ORCA's agent writes its own report.md, so the model under test writes ours from the
+        // finished investigation.
+        const reportDeps = {
+          inferenceClient: inferenceClient.bindTo({ connectorId: connector.id }),
+          log,
+        };
         const judges = createInvestigationJudges(judgeDeps);
         const evaluators = [
           ...judges,
-          ...(orca ? createOrcaEvaluators(judgeDeps) : []),
+          ...(orca
+            ? createOrcaEvaluators(judgeDeps, { rubrics: await loadOrcaRubrics(evalsClient) })
+            : []),
           executionSuccessEvaluator,
           ...efficiencyEvaluators,
         ];
@@ -140,7 +153,7 @@ export const registerInvestigationEvaluation = ({
         const concurrency = Math.min(orca ? 8 : 16, requestedConcurrency);
         const timeoutMs =
           Math.ceil((dataset.examples.length * repetitions) / concurrency) *
-            (INVESTIGATION_TIMEOUT_MS + 2 * 60_000) +
+            (INVESTIGATION_TIMEOUT_MS + (orca ? ORCA_REPORT_BUDGET_MS : 0) + 2 * 60_000) +
           5 * 60_000 +
           // Minting, checking and setting up each ORCA cutoff's key and space.
           cutoffGroups.length * 60_000;
@@ -244,10 +257,12 @@ export const registerInvestigationEvaluation = ({
                 concurrency,
                 ...(orca ? { telemetry_cutoffs: cutoffGroups.length } : {}),
               },
-              task: (example) =>
-                runInvestigation(fetch, example, connector, {
+              task: async (example) => {
+                const output = await runInvestigation(fetch, example, connector, {
                   basePath: basePathByCase.get(example.metadata.case_id),
-                }),
+                });
+                return orca ? addOrcaReport(reportDeps, output) : output;
+              },
             },
             evaluators
           );
