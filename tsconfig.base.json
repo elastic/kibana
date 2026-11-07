@@ -1067,6 +1067,8 @@
       "@kbn/data-federation-plugin/*": ["./x-pack/platform/plugins/private/data_federation/*"],
       "@kbn/data-forge": ["./x-pack/platform/packages/shared/kbn-data-forge"],
       "@kbn/data-forge/*": ["./x-pack/platform/packages/shared/kbn-data-forge/*"],
+      "@kbn/data-grid": ["./src/platform/packages/shared/kbn-data-grid"],
+      "@kbn/data-grid/*": ["./src/platform/packages/shared/kbn-data-grid/*"],
       "@kbn/data-grid-in-table-search": ["./src/platform/packages/shared/kbn-data-grid-in-table-search"],
       "@kbn/data-grid-in-table-search/*": ["./src/platform/packages/shared/kbn-data-grid-in-table-search/*"],
       "@kbn/data-lifecycle-phases": ["./x-pack/platform/packages/shared/kbn-data-lifecycle-phases"],

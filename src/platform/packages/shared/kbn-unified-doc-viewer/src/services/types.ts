@@ -92,6 +92,11 @@ export interface DocViewRenderProps {
   docViewsRegistry?: DocViewsRegistry | ((prevRegistry: DocViewsRegistry) => DocViewsRegistry);
   decreaseAvailableHeightBy?: number;
   hideFilteringOnComputedColumns?: boolean;
+  /**
+   * Renders the fields table with `@kbn/data-grid` instead of EuiDataGrid.
+   * Set from the `discover.kbnDataGridEnabled` feature flag.
+   */
+  isKbnDataGridEnabled?: boolean;
 }
 
 export type DocViewerComponent = React.FC<DocViewRenderProps>;

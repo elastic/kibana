@@ -31,7 +31,6 @@ import {
 } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { createRestorableStateProvider } from '@kbn/restorable-state';
 
 import { getUnifiedDocViewerServices } from '../../plugin';
 import {
@@ -47,28 +46,12 @@ import {
 } from './table_filters';
 import { FieldRow } from './field_row';
 import { TableGrid } from './table_grid';
-
-export interface DocViewerTableRestorableState {
-  // Main search input value
-  searchTerm: string;
-  // Array of field type filters (date, keyword, text, etc.)
-  fieldTypeFilters: string[];
-  // Whether null values are hidden in the table
-  hideNullValues: boolean;
-  // Whether to show only selected fields in the table
-  showOnlySelectedFields: boolean;
-  // Array of pinned field names
-  pinnedFields: string[];
-  // Current vertical scroll position
-  scrollTop: number;
-}
-
-export const {
-  withRestorableState,
-  useRestorableState,
-  useRestorableRef,
+import {
   useRestorableLocalStorage,
-} = createRestorableStateProvider<DocViewerTableRestorableState>();
+  useRestorableState,
+  withRestorableState,
+} from './restorable_state';
+import { FieldsDataGrid } from './fields_data_grid';
 
 interface ItemsEntry {
   pinnedRows: FieldRow[];
@@ -115,12 +98,13 @@ const InternalDocViewerTable = ({
   onAddColumn,
   onRemoveColumn,
   hideFilteringOnComputedColumns,
+  isKbnDataGridEnabled,
 }: DocViewRenderProps) => {
   const styles = useMemoCss(componentStyles);
 
   const isEsqlMode = Array.isArray(textBasedHits);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
-  const { fieldFormats, storage, uiSettings } = getUnifiedDocViewerServices();
+  const { fieldFormats, storage, uiSettings, toasts } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
 
@@ -409,21 +393,38 @@ const InternalDocViewerTable = ({
         </EuiSelectableMessage>
       ) : (
         <EuiFlexItem grow={Boolean(containerHeight)} css={styles.fieldsGridWrapper}>
-          <TableGrid
-            id={`fields-table-${hit.id}`}
-            containerWidth={containerWidth}
-            rows={rows}
-            isEsqlMode={isEsqlMode}
-            filter={filter}
-            onAddColumn={onAddColumn}
-            onRemoveColumn={onRemoveColumn}
-            columns={columns}
-            onFindSearchTermMatch={tableFiltersCallbacks.onFindSearchTermMatch}
-            searchTerm={searchTerm}
-            pinnedFields={pinnedFields}
-            onTogglePinned={onTogglePinned}
-            hideFilteringOnComputedColumns={hideFilteringOnComputedColumns}
-          />
+          {isKbnDataGridEnabled ? (
+            <FieldsDataGrid
+              key={`fields-table-${hit.id}`}
+              rows={rows}
+              isEsqlMode={isEsqlMode}
+              toasts={toasts}
+              filter={filter}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
+              columns={columns}
+              onFindSearchTermMatch={tableFiltersCallbacks.onFindSearchTermMatch}
+              searchTerm={searchTerm}
+              onTogglePinned={onTogglePinned}
+              hideFilteringOnComputedColumns={hideFilteringOnComputedColumns}
+            />
+          ) : (
+            <TableGrid
+              id={`fields-table-${hit.id}`}
+              containerWidth={containerWidth}
+              rows={rows}
+              isEsqlMode={isEsqlMode}
+              filter={filter}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
+              columns={columns}
+              onFindSearchTermMatch={tableFiltersCallbacks.onFindSearchTermMatch}
+              searchTerm={searchTerm}
+              pinnedFields={pinnedFields}
+              onTogglePinned={onTogglePinned}
+              hideFilteringOnComputedColumns={hideFilteringOnComputedColumns}
+            />
+          )}
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
