@@ -28,7 +28,7 @@ import {
   tailLog,
   isEdotDockerRunning,
 } from './services';
-import { probeHttp } from './profiles';
+import { probeHttp, redactUrlCredentials } from './profiles';
 
 const SCOUT_LOCAL_CONFIG = '.scout/servers/local.json';
 const SCOUT_READY_POLL_INTERVAL_MS = 3000;
@@ -176,7 +176,7 @@ export const ensureEdot = async ({
   log.info('[edot] Starting EDOT collector (backgrounded)...');
 
   if (elasticsearchHost) {
-    log.info(`[edot] EDOT collector will export to: ${elasticsearchHost}`);
+    log.info(`[edot] EDOT collector will export to: ${redactUrlCredentials(elasticsearchHost)}`);
   }
   startService(repoRoot, 'edot', 'node', ['scripts/edot_collector.js'], log, {
     envHash: edotEnvHash(elasticsearchHost),

@@ -33,6 +33,22 @@ export const isDevVaultProfile = (profile?: string): boolean =>
 
 export const stripTrailingSlash = (url: string): string => url.replace(/\/$/, '');
 
+/** Drops `user:pass@` from a URL for logging; the host stays. Unparseable input is never echoed. */
+export const redactUrlCredentials = (value: string): string => {
+  try {
+    const url = new URL(value);
+    // `user:pass@host:9200` parses with `user:` as the scheme, leaving the password in the string.
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+      return '[unparseable URL]';
+    }
+    url.username = '';
+    url.password = '';
+    return url.toString();
+  } catch {
+    return '[unparseable URL]';
+  }
+};
+
 export const probeHttp = async (url: string): Promise<boolean> => {
   try {
     await fetch(url, { signal: AbortSignal.timeout(2000) });
