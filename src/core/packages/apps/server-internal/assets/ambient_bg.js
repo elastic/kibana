@@ -67,18 +67,18 @@
     if (this._mq.addEventListener) this._mq.addEventListener('change', this._onMQ);
     else this._mq.addListener(this._onMQ);
 
-    this._ro = new ResizeObserver(function () { if (self._reduce) self._draw(0); });
+    this._ro = new ResizeObserver(function () { if (self._isStatic()) self._draw(0); });
     this._ro.observe(this);
 
     this._scheme = window.matchMedia('(prefers-color-scheme: dark)');
     this._syncTheme();
-    this._onScheme = function () { self._syncTheme(); if (self._reduce) self._draw(0); };
+    this._onScheme = function () { self._syncTheme(); if (self._isStatic()) self._draw(0); };
     if (this._scheme.addEventListener) this._scheme.addEventListener('change', this._onScheme);
     else this._scheme.addListener(this._onScheme);
     this._themeObs = new MutationObserver(function () {
       var prev = self._dark;
       self._syncTheme();
-      if (self._reduce && prev !== self._dark) self._draw(0);
+      if (self._isStatic() && prev !== self._dark) self._draw(0);
     });
     this._themeObs.observe(document.documentElement, { attributes: true, attributeFilter: ['style', 'class'] });
 
@@ -101,7 +101,12 @@
   };
 
   P.attributeChangedCallback = function () {
-    if (this._reduce && this._canvas) this._draw(0);
+    if (this._isStatic() && this._canvas) this._draw(0);
+  };
+
+  // POC: `static` attribute renders a single frame (same as reduced motion), e.g. behind the loaded app.
+  P._isStatic = function () {
+    return this._reduce || this.hasAttribute('static');
   };
 
   P._palette = function () {
@@ -137,7 +142,7 @@
   P._restart = function () {
     cancelAnimationFrame(this._raf);
     this._raf = 0;
-    if (this._reduce) { this._draw(0); return; } // static frame
+    if (this._isStatic()) { this._draw(0); return; } // static frame
     var self = this;
     this._last = performance.now();
     var loop = function (now) {

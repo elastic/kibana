@@ -76,6 +76,13 @@ export const ChromeLayoutComponent = ({ children, ...props }: ChromeLayoutCompon
           Slots above z-index 0 paint over it; transparent nav and chrome gutters show through. */}
       {React.createElement('elastic-ambient-bg', {
         'data-test-subj': 'chromeAmbientBg',
+        static: '',
+        // POC: needs design input — quiets the top-left blob behind the nav/header after load.
+        style: {
+          maskImage: 'linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.3) 25%, black 60%)',
+          WebkitMaskImage:
+            'linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.3) 25%, black 60%)',
+        },
       })}
       {banner}
       {header}
