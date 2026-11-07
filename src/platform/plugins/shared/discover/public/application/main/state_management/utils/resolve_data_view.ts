@@ -11,7 +11,8 @@ import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { ToastsStart } from '@kbn/core/public';
 import type { DiscoverServices } from '../../../../build_services';
-import type { RuntimeStateManager } from '../redux';
+import { isDataViewSource } from '../../../../../common/data_sources';
+import type { DiscoverAppState, RuntimeStateManager } from '../redux';
 
 interface DataViewData {
   /**
@@ -237,4 +238,36 @@ export const loadAndResolveDataView = async ({
   }
 
   return { fallback, dataView };
+};
+
+/**
+ * The data view a tab asks for when it opens: the URL data source takes precedence over the saved
+ * tab, which overrides the tab's initial state.
+ */
+export const getInitialDataViewTarget = ({
+  dataSource,
+  initialDataViewIdOrSpec,
+  currentDataView,
+}: {
+  dataSource: DiscoverAppState['dataSource'];
+  initialDataViewIdOrSpec: string | DataViewSpec | undefined;
+  currentDataView: DataView | undefined;
+}): { dataViewId: string | undefined; initialAdHocDataViewSpec: DataViewSpec | undefined } => {
+  let dataViewId: string | undefined;
+  let initialAdHocDataViewSpec: DataViewSpec | undefined;
+
+  if (typeof initialDataViewIdOrSpec === 'string') {
+    dataViewId = initialDataViewIdOrSpec;
+  } else {
+    initialAdHocDataViewSpec = initialDataViewIdOrSpec;
+    dataViewId = initialAdHocDataViewSpec?.id;
+  }
+
+  dataViewId = currentDataView?.id ?? dataViewId;
+
+  if (isDataViewSource(dataSource)) {
+    dataViewId = dataSource.dataViewId;
+  }
+
+  return { dataViewId, initialAdHocDataViewSpec };
 };

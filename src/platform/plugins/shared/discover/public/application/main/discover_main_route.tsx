@@ -23,6 +23,8 @@ import {
   internalStateActions,
   InternalStateProvider,
   RuntimeStateManagerProvider,
+  selectTab,
+  TabInitializationStatus,
   useInternalStateDispatch,
   useInternalStateSelector,
 } from './state_management/redux';
@@ -126,10 +128,6 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     }
   );
 
-  const [dataAvailabilityState, loadDataAvailability] = useAsyncFunction(() =>
-    dispatch(internalStateActions.loadDataAvailabilityOnce())
-  );
-
   const [tabsInitializationState, initializeTabs] = useAsyncFunction(
     async ({
       discoverSessionId,
@@ -169,10 +167,11 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   );
 
   useEffect(() => {
-    loadDataAvailability();
-    // Start loading the list early so classic tabs can reuse the request when they initialize.
+    // Start the checks and the list early so tabs can reuse the requests when they initialize.
+    dispatch(internalStateActions.loadESDataAvailabilityOnce());
+    dispatch(internalStateActions.loadDataViewAvailabilityOnce());
     dispatch(internalStateActions.loadDataViewListOnce());
-  }, [dispatch, loadDataAvailability]);
+  }, [dispatch]);
 
   useEffect(() => {
     if (!rootProfileState.rootProfileLoading) {
@@ -230,10 +229,11 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   ]);
 
   const areTabsInitializing = useInternalStateSelector((state) => state.tabs.areInitializing);
+  const initializationState = useInternalStateSelector((state) => state.initializationState);
+  const showsWelcomePage = useInternalStateSelector(selectShowsWelcomePage);
   const isLoading =
     rootProfileState.rootProfileLoading ||
     profileInitializationState.loading ||
-    dataAvailabilityState.loading ||
     tabsInitializationState.loading ||
     areTabsInitializing;
 
@@ -241,19 +241,16 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     return <BrandedLoadingIndicator />;
   }
 
-  const error =
-    profileInitializationState.error ||
-    dataAvailabilityState.error ||
-    tabsInitializationState.error;
+  const error = profileInitializationState.error || tabsInitializationState.error;
 
   if (error) {
     return <InitializationError error={error} />;
   }
 
-  if (!dataAvailabilityState.value.hasESData && !dataAvailabilityState.value.hasDataView) {
+  if (showsWelcomePage) {
     return (
       <NoDataPage
-        {...dataAvailabilityState.value}
+        {...initializationState}
         onDataViewCreated={() => {
           // This is unused if there is no ES data
         }}
@@ -296,4 +293,14 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
       </DiscoverTopNavMenuProvider>
     </ChartPortalsRenderer>
   );
+};
+
+// A tab reports no data only after checking ES data, so `hasESData` is known when this applies.
+const selectShowsWelcomePage = (state: DiscoverInternalState) => {
+  const currentTab = selectTab(state, state.tabs.unsafeCurrentId);
+  const isCurrentTabWithoutData =
+    currentTab?.initializationState.initializationStatus === TabInitializationStatus.NoData;
+  const { hasESData, hasDataView } = state.initializationState;
+
+  return isCurrentTabWithoutData && !hasESData && !hasDataView;
 };

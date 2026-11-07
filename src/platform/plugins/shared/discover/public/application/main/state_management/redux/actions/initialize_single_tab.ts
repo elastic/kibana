@@ -8,13 +8,13 @@
  */
 
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { EsqlSource } from '@kbn/data-source';
 import { isEmptyEsqlQuery, isOfAggregateQueryType } from '@kbn/es-query';
-import type { AggregateQuery, Query } from '@kbn/es-query';
-import { cloneDeep, isEqual, isObject, pick } from 'lodash';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { cloneDeep, isEqual, pick } from 'lodash';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import type { EsqlSource } from '@kbn/data-source';
 import { internalStateSlice, type TabActionPayload } from '../internal_state';
 import {
   getConfiguredDefaultEsqlQuery,
@@ -24,10 +24,10 @@ import {
 import { TabInitializationStatus, type DiscoverAppState } from '..';
 import type { DiscoverDataStateContainer } from '../../discover_data_state_container';
 import { appendAdHocDataViews, loadDataViewListOnce } from './data_views';
+import { loadDataViewAvailabilityOnce, loadESDataAvailabilityOnce } from './data_availability';
 import { setDataSource, setDataView } from './tab_state_data_view';
 import { type AppStateUrl, cleanupUrlState } from '../../utils/cleanup_url_state';
-import { loadAndResolveDataView } from '../../utils/resolve_data_view';
-import { isDataViewSource } from '../../../../../../common/data_sources';
+import { getInitialDataViewTarget, loadAndResolveDataView } from '../../utils/resolve_data_view';
 import { isRefreshIntervalValid, isTimeRangeValid } from '../../../../../utils/validate_time';
 import { getValidFilters } from '../../../../../utils/get_valid_filters';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
@@ -163,56 +163,8 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       defaultProfileEsqlQuery,
       locationStateHasDataViewSpec,
     });
-    const initialQuery = restoredQuery ?? configuredEsqlQuery;
-    const isEsqlMode = isOfAggregateQueryType(initialQuery);
-    const needsDataView = !isNonEmptyEsqlQuery(initialQuery);
 
-    if (needsDataView) {
-      await dispatch(loadDataViewListOnce());
-    }
-
-    const initialDataViewIdOrSpec = tabInitialInternalState?.serializedSearchSource?.index;
-    const initialAdHocDataViewSpec = isObject(initialDataViewIdOrSpec)
-      ? initialDataViewIdOrSpec
-      : undefined;
-
-    const persistedTabDataView = persistedTabSearchSource?.getField('index');
-    const initialDataViewId =
-      typeof initialDataViewIdOrSpec === 'string'
-        ? initialDataViewIdOrSpec
-        : initialAdHocDataViewSpec?.id;
-    const dataViewId = isDataViewSource(urlAppState?.dataSource)
-      ? urlAppState?.dataSource.dataViewId
-      : persistedTabDataView?.id ?? initialDataViewId;
-
-    const tabHasInitialAdHocDataViewSpec =
-      dataViewId && initialAdHocDataViewSpec?.id === dataViewId;
-    const peristedTabHasAdHocDataView = Boolean(
-      persistedTabDataView && !persistedTabDataView.isPersisted()
-    );
-
-    const { initializationState, defaultProfileAdHocDataViewIds } = getState();
-    const profileDataViews = runtimeStateManager.adHocDataViews$
-      .getValue()
-      .filter(({ id }) => id && defaultProfileAdHocDataViewIds.includes(id));
-
-    const profileDataViewsExist = profileDataViews.length > 0;
-    const canAccessWithoutPersistedDataView =
-      isEsqlMode ||
-      tabHasInitialAdHocDataViewSpec ||
-      peristedTabHasAdHocDataView ||
-      profileDataViewsExist ||
-      locationStateHasDataViewSpec;
-
-    if (!initializationState.hasDataView && !canAccessWithoutPersistedDataView) {
-      return { showNoDataPage: true };
-    }
-
-    /**
-     * Tab initialization
-     */
-
-    const resolveEsqlQuerySource = (esql: string) =>
+    const resolveOpeningEsqlSource = (esql: string) =>
       resolveEsqlSource({
         esql,
         services,
@@ -223,48 +175,98 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
           services.data.query.timefilter.timefilter.getTime(),
       });
 
-    // Decide the query the tab opens with, then resolve its data source once from it.
-    const resolveOpeningState = async (): Promise<{
-      query: Query | AggregateQuery | undefined;
-      dataView: DataView;
-      esqlSource?: EsqlSource;
-    }> => {
-      if (isNonEmptyEsqlQuery(initialQuery)) {
-        return { query: initialQuery, ...(await resolveEsqlQuerySource(initialQuery.esql)) };
+    let openingQuery = restoredQuery ?? configuredEsqlQuery;
+    let dataView: DataView;
+    let esqlSource: EsqlSource | undefined;
+
+    if (isNonEmptyEsqlQuery(openingQuery)) {
+      ({ dataView, esqlSource } = await resolveOpeningEsqlSource(openingQuery.esql));
+    } else {
+      // Without an ES|QL query, a data view is needed to open the tab or derive its default query.
+      const isEsqlMode = isOfAggregateQueryType(openingQuery);
+      const currentDataView = persistedTabSearchSource?.getField('index');
+      const { dataViewId, initialAdHocDataViewSpec } = getInitialDataViewTarget({
+        dataSource: urlAppState?.dataSource,
+        initialDataViewIdOrSpec: tabInitialInternalState?.serializedSearchSource?.index,
+        currentDataView,
+      });
+      const hasDataView = await dispatch(loadDataViewAvailabilityOnce());
+
+      if (!hasDataView) {
+        const hasESData = await dispatch(loadESDataAvailabilityOnce());
+
+        if (!hasESData) {
+          return { showNoDataPage: true };
+        }
+
+        // Without persisted data views, the tab can still open an ad hoc data view it was given.
+        const { defaultProfileAdHocDataViewIds } = getState();
+        const hasInitialAdHocDataView = dataViewId && initialAdHocDataViewSpec?.id === dataViewId;
+        const hasCurrentAdHocDataView = currentDataView?.isPersisted() === false;
+        const hasProfileDataView = runtimeStateManager.adHocDataViews$
+          .getValue()
+          .some(({ id }) => id && defaultProfileAdHocDataViewIds.includes(id));
+        const canOpenWithoutDataViews =
+          isEsqlMode ||
+          locationStateHasDataViewSpec ||
+          hasInitialAdHocDataView ||
+          hasCurrentAdHocDataView ||
+          hasProfileDataView;
+
+        if (!canOpenWithoutDataViews) {
+          return { showNoDataPage: true };
+        }
       }
 
-      // Classic and empty ES|QL tabs use this data view; a new tab otherwise derives its
-      // default query from it, which can be ES|QL. For empty ES|QL, updateTabs stores the
-      // previous tab's view on initialInternalState so dataViewId above is set.
-      const { dataView } = await loadAndResolveDataView({
+      await dispatch(loadDataViewListOnce());
+
+      ({ dataView } = await loadAndResolveDataView({
         dataViewId,
         locationDataViewSpec: dataViewSpec,
         initialAdHocDataViewSpec,
-        currentDataView: persistedTabDataView,
+        currentDataView,
         isEsqlMode,
         services,
         savedDataViews: getState().savedDataViews,
         runtimeStateManager,
+      }));
+
+      openingQuery ??= getDefaultQuery({
+        initialUrlState: urlAppState,
+        hasGlobalState,
+        persistedTab,
+        services,
+        dataView,
+        defaultProfileEsqlQuery,
+        locationStateHasDataViewSpec,
       });
-      const query =
-        initialQuery ??
-        getDefaultQuery({
-          initialUrlState: urlAppState,
-          hasGlobalState,
-          persistedTab,
-          services,
-          dataView,
-          defaultProfileEsqlQuery,
-          locationStateHasDataViewSpec,
-        });
 
-      if (isNonEmptyEsqlQuery(query)) {
-        return { query, ...(await resolveEsqlQuerySource(query.esql)) };
+      // A new tab can derive an ES|QL query from the data view.
+      if (isNonEmptyEsqlQuery(openingQuery)) {
+        ({ dataView, esqlSource } = await resolveOpeningEsqlSource(openingQuery.esql));
       }
-      return { query, dataView };
-    };
+    }
 
-    const { query: openingQuery, dataView, esqlSource } = await resolveOpeningState();
+    const readsIndex = esqlSource && Boolean(getIndexPatternFromESQLQuery(esqlSource.query));
+    const needsEsqlAvailabilityCheck =
+      esqlSource && (!esqlSource.areColumnsAvailable || !readsIndex);
+
+    if (needsEsqlAvailabilityCheck) {
+      const esDataRequest = dispatch(loadESDataAvailabilityOnce());
+      const dataViewRequest = dispatch(loadDataViewAvailabilityOnce());
+      const availabilityRequests = [esDataRequest, dataViewRequest];
+
+      // Either positive result allows opening; onboarding requires both checks to finish negative.
+      const firstAvailabilityResult = await Promise.race(availabilityRequests);
+
+      if (!firstAvailabilityResult) {
+        const [hasESData, hasDataView] = await Promise.all(availabilityRequests);
+
+        if (!hasESData && !hasDataView) {
+          return { showNoDataPage: true };
+        }
+      }
+    }
 
     if (!esqlSource && !dataView.isPersisted()) {
       dispatch(appendAdHocDataViews(dataView));
