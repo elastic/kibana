@@ -8,7 +8,11 @@
  */
 
 import { randomBytes } from 'node:crypto';
-import { HITL_TOKEN_EXPIRES_AT_INPUT_FIELD, HITL_TOKEN_HASH_INPUT_FIELD } from '@kbn/workflows';
+import {
+  HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,
+  HITL_TOKEN_HASH_INPUT_FIELD,
+  readHitlExternalResumeToken,
+} from '@kbn/workflows';
 import { computeTokenHmac } from '@kbn/workflows/server';
 import { computeHitlWaitDeadlineMs } from './hitl_timeout_helpers';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
@@ -51,32 +55,61 @@ export function mintHitlExternalResumeToken({
   };
 }
 
+/**
+ * Writes the resume token onto step state, keeping fields already stored there
+ * (the rendered timeout). An Elasticsearch doc merge drops a nested field only
+ * when the update sets it to null, so invalidation uses null rather than omitting the key.
+ */
+export function persistHitlExternalResumeToken(
+  stepExecutionRuntime: StepExecutionRuntime,
+  token: { tokenHash: string; expiresAt: string }
+): void {
+  const state = stepExecutionRuntime.getCurrentStepState() ?? {};
+  stepExecutionRuntime.setCurrentStepState({
+    ...state,
+    [HITL_TOKEN_HASH_INPUT_FIELD]: token.tokenHash,
+    [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: token.expiresAt,
+  });
+}
+
+/**
+ * Nulls legacy token fields on a step input. A partial document update keeps omitted keys.
+ */
 export function removeHitlExternalResumeTokenFields(
   input: Record<string, unknown>
 ): Record<string, unknown> {
-  const nextInput = { ...input };
-  delete nextInput[HITL_TOKEN_HASH_INPUT_FIELD];
-  delete nextInput[HITL_TOKEN_EXPIRES_AT_INPUT_FIELD];
-  return nextInput;
+  return {
+    ...input,
+    [HITL_TOKEN_HASH_INPUT_FIELD]: null,
+    [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: null,
+  };
 }
+
+const readStepInput = (stepExecutionRuntime: StepExecutionRuntime): unknown =>
+  stepExecutionRuntime.stepExecution?.input ??
+  (typeof stepExecutionRuntime.getCurrentStepResult === 'function'
+    ? stepExecutionRuntime.getCurrentStepResult()?.input
+    : undefined);
 
 export function invalidateHitlExternalResumeTokenIfPresent(
   stepExecutionRuntime: StepExecutionRuntime
 ): void {
-  const stepInput =
-    stepExecutionRuntime.stepExecution?.input ??
-    (typeof stepExecutionRuntime.getCurrentStepResult === 'function'
-      ? stepExecutionRuntime.getCurrentStepResult()?.input
-      : undefined);
-
-  if (stepInput == null || typeof stepInput !== 'object') {
-    return;
+  const state = stepExecutionRuntime.getCurrentStepState() ?? {};
+  if (readHitlExternalResumeToken({ state })) {
+    stepExecutionRuntime.setCurrentStepState({
+      ...state,
+      [HITL_TOKEN_HASH_INPUT_FIELD]: null,
+      [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: null,
+    });
   }
 
+  const stepInput = readStepInput(stepExecutionRuntime);
+  if (stepInput == null || typeof stepInput !== 'object' || Array.isArray(stepInput)) {
+    return;
+  }
   const input = stepInput as Record<string, unknown>;
-  if (!(HITL_TOKEN_HASH_INPUT_FIELD in input) && !(HITL_TOKEN_EXPIRES_AT_INPUT_FIELD in input)) {
+  if (!readHitlExternalResumeToken({ input })) {
     return;
   }
-
   stepExecutionRuntime.setInput(removeHitlExternalResumeTokenFields(input));
 }

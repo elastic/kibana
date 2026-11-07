@@ -176,8 +176,10 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
 
     let suspended = false;
     try {
-      input = await this.getInput();
-      this.stepExecutionRuntime.setInput(input);
+      if (!this.stepExecutionRuntime.isInputSet) {
+        input = await this.getInput();
+        this.stepExecutionRuntime.setInput(input);
+      }
       const result = await this._run(input);
 
       // Layer 2: Enforce output size limit before storing in execution state.

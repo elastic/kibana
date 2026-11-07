@@ -8,12 +8,7 @@
  */
 
 import { timingSafeEqual } from 'node:crypto';
-import {
-  ExecutionStatus,
-  HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,
-  HITL_TOKEN_HASH_INPUT_FIELD,
-  isHitlWaitStepType,
-} from '@kbn/workflows';
+import { ExecutionStatus, isHitlWaitStepType, readHitlExternalResumeToken } from '@kbn/workflows';
 import type { ResumeWorkflowExecutionResponseDto, WorkflowStepExecutionDto } from '@kbn/workflows';
 import {
   WorkflowExecutionInvalidStatusError,
@@ -245,14 +240,14 @@ async function resolveExternalResumeContext(
     throw new ExternalResumeError('This workflow response link is no longer valid', 409);
   }
 
-  const stepInput = getStepInputRecord(stepExecution.input);
-  const expiresAt = stepInput[HITL_TOKEN_EXPIRES_AT_INPUT_FIELD];
+  const storedToken = readHitlExternalResumeToken(stepExecution);
+  const expiresAt = storedToken?.expiresAt;
   const expiresAtMs = typeof expiresAt === 'string' ? Date.parse(expiresAt) : NaN;
   if (!Number.isFinite(expiresAtMs) || expiresAtMs <= Date.now()) {
     throw new ExternalResumeError('Link expired or already used', 401);
   }
 
-  const storedHash = stepInput[HITL_TOKEN_HASH_INPUT_FIELD];
+  const storedHash = storedToken?.hash;
   if (typeof storedHash !== 'string') {
     throw new ExternalResumeError('Invalid resume token', 401);
   }
