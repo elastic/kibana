@@ -48,7 +48,7 @@ export const m365_defenderEvaluations = {
       esql: `| EVAL
   user.id = CASE(
     user.id IS NOT NULL, user.id,
-    data_stream.dataset == "m365_defender.event" AND m365_defender.event.additional_fields.SourceAccountSid IS NOT NULL, m365_defender.event.additional_fields.SourceAccountSid,
+    data_stream.dataset == "m365_defender.event" AND FIELD_EXTRACT(m365_defender.event.additional_fields, "SourceAccountSid") IS NOT NULL, FIELD_EXTRACT(m365_defender.event.additional_fields, "SourceAccountSid"),
     data_stream.dataset == "m365_defender.event" AND m365_defender.event.initiating_process.account_sid IS NOT NULL, m365_defender.event.initiating_process.account_sid,
     null
   ),
@@ -81,7 +81,7 @@ export const m365_defenderEvaluations = {
       esql: `| EVAL
   host.target.id = CASE(
     host.target.id IS NOT NULL, host.target.id,
-    data_stream.dataset == "m365_defender.event" AND event.action IN ("samr-query", "dns-query") AND m365_defender.event.additional_fields.DestinationComputerObjectGuid IS NOT NULL, m365_defender.event.additional_fields.DestinationComputerObjectGuid,
+    data_stream.dataset == "m365_defender.event" AND event.action IN ("samr-query", "dns-query") AND FIELD_EXTRACT(m365_defender.event.additional_fields, "DestinationComputerObjectGuid") IS NOT NULL, FIELD_EXTRACT(m365_defender.event.additional_fields, "DestinationComputerObjectGuid"),
     data_stream.dataset IN ("m365_defender.alert", "m365_defender.incident") AND host.id IS NOT NULL, host.id,
     data_stream.dataset == "m365_defender.event" AND user.name IS NOT NULL AND event.action NOT IN ("samr-query", "dns-query", "logonsuccess", "logonfailed") AND host.id IS NOT NULL, host.id,
     null

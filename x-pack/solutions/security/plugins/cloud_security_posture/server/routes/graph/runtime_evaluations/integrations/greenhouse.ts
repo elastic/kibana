@@ -71,7 +71,7 @@ export const greenhouseEvaluations = {
   ),
   entity.target.name = CASE(
     entity.target.name IS NOT NULL, entity.target.name,
-    data_stream.dataset == "greenhouse.audit" AND greenhouse.audit.event.meta.name IS NOT NULL, TO_STRING(greenhouse.audit.event.meta.name),
+    data_stream.dataset == "greenhouse.audit" AND FIELD_EXTRACT(greenhouse.audit.event.meta, "name") IS NOT NULL, FIELD_EXTRACT(greenhouse.audit.event.meta, "name"),
     data_stream.dataset == "greenhouse.audit" AND greenhouse.audit.event.target_type IS NOT NULL AND greenhouse.audit.event.target_id IS NULL, greenhouse.audit.event.target_type,
     null
   ),
