@@ -72,6 +72,12 @@ interface CasesAnalyticsV2ServiceDeps {
    * periodic ticks always use 0 (no throttle).
    */
   resetPageDelayMs: number;
+  /**
+   * Resolved value of `xpack.cases.incrementalId.enabled`. Without it no case
+   * is ever numbered, so the incremental id backfill would re-read every case
+   * on each start and repair nothing.
+   */
+  incrementalIdEnabled: boolean;
 }
 
 /**
@@ -150,6 +156,7 @@ export class CasesAnalyticsV2Service {
   private readonly enableAdminRoutes: boolean;
   private readonly resetTaskTimeoutMinutes: number;
   private readonly resetPageDelayMs: number;
+  private readonly incrementalIdEnabled: boolean;
   /**
    * Active writer. Starts as `V2_NOOP_WRITER` so calls before `start()`
    * (or when v2 is disabled) silently no-op. Replaced with a real
@@ -240,6 +247,7 @@ export class CasesAnalyticsV2Service {
     this.enableAdminRoutes = deps.enableAdminRoutes;
     this.resetTaskTimeoutMinutes = deps.resetTaskTimeoutMinutes;
     this.resetPageDelayMs = deps.resetPageDelayMs;
+    this.incrementalIdEnabled = deps.incrementalIdEnabled;
   }
 
   /**
@@ -279,9 +287,11 @@ export class CasesAnalyticsV2Service {
           writer: this.writerProxy,
           activityWriter: this.activityWriterProxy,
           attachmentsWriter: this.attachmentsWriterProxy,
+          casesWriterEnabled: this.writer !== V2_NOOP_WRITER,
           deletedSpacesSweepEnabled: this.spacesEnabled,
         };
       },
+      incrementalIdBackfillEnabled: this.incrementalIdEnabled,
     });
 
     // Register the one-shot reset task type. Scheduling an instance
