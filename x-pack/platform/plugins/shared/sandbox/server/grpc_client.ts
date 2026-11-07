@@ -576,9 +576,16 @@ export class SandboxApiClient {
       let outcome: { error: grpc.ServiceError } | { response: TResponse } | undefined;
       let settled = false;
 
-      const settle = (code: number, trailers?: grpc.Metadata, details?: string) => {
+      const settle = (statusEventCode: number, trailers?: grpc.Metadata, details?: string) => {
         if (settled) return;
         settled = true;
+        // grpc-js turns an OK status that carries no message into an UNIMPLEMENTED error for the
+        // callback and then still emits the OK status. The call failed, so report the error's code,
+        // not the status event's.
+        const code =
+          outcome && 'error' in outcome && typeof outcome.error.code === 'number'
+            ? outcome.error.code
+            : statusEventCode;
         const info: SandboxRpcInfo = {
           // A response without initial metadata, such as a trailers-only error, carries the id in
           // the trailers.

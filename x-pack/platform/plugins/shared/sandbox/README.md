@@ -34,24 +34,22 @@ The plugin writes one debug line for every RPC as well, but it knows only the co
 ### Log fields
 
 `sandboxRpcLogMeta(rpc)` returns the fields below. sandbox-api logs the same fields with the same
-values for the same call, except the proxy's request id, which it logs as `sandbox.proxy_request_id`
-(see below). The `rpc.*` fields follow the OpenTelemetry semantic conventions, where the
+values for the same call. The `rpc.*` fields follow the OpenTelemetry semantic conventions, where the
 status code is `rpc.status_code` since 1.45.0 (1.43.0, the version of
 `@opentelemetry/semantic-conventions` Kibana pins, still calls it `rpc.response.status_code`).
-`http.request.id` and `event.duration` are ECS fields.
+`event.duration` is an ECS field.
 
-| Field                     | Value                                                                       |
-| ------------------------- | --------------------------------------------------------------------------- |
-| `http.request.id`         | The proxy's request id from the response. Omitted when no response arrived. |
-| `sandbox.conversation_id` | `<space>__<conversation>`, the `x-conversation-id` header                   |
-| `rpc.method`              | `sandbox.SandboxService/RunCommand`, `.../ReadFiles`, ...                   |
-| `rpc.status_code`         | gRPC status name, for example `OK`, `UNAVAILABLE`                           |
-| `event.duration`          | nanoseconds, measured client-side                                           |
+| Field                      | Value                                                                       |
+| -------------------------- | --------------------------------------------------------------------------- |
+| `sandbox.conversation_id`  | `<space>__<conversation>`, the `x-conversation-id` header                   |
+| `sandbox.proxy_request_id` | The proxy's request id from the response. Omitted when no response arrived. |
+| `rpc.method`               | `sandbox.SandboxService/RunCommand`, `.../ReadFiles`, ...                   |
+| `rpc.status_code`          | gRPC status name, for example `OK`, `UNAVAILABLE`                           |
+| `event.duration`           | nanoseconds, measured client-side                                           |
 
-Kibana's audit pipeline on Serverless writes its own request id to `http.request.id`, so an audit
-event must carry the proxy's id under another name. `nightshift_investigations` uses
-`sandbox.proxy_request_id`, and sandbox-api logs the proxy's id under that name, not as
-`http.request.id`.
+The proxy's request id is not `http.request.id`: Kibana's audit pipeline on Serverless writes its own
+request id to that field. Every record of a call (Kibana's debug log, Kibana's audit event and
+sandbox-api's logs) carries it as `sandbox.proxy_request_id`, so one search finds them all.
 
 ### Pod eviction
 

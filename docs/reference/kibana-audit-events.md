@@ -421,16 +421,18 @@ Across the `service_account_create`, `service_account_workload_bind`, `service_a
 
 ### Category: process and file
 
+#### Type: access
+
 | **Action** | **Outcome** | **Description** |
 | --- | --- | --- |
-| `sandbox_rpc` | `success` | Sandbox RPC [method] finished with gRPC status OK. Logged once for each call a plugin makes to the sandbox, after it finishes. `event.category` is `process` for `RunCommand` and `file` for the file calls. Refer to [Trace a sandbox call](#sandbox-rpc-details). |
+| `sandbox_rpc` {applies_to}`serverless: preview` | `success` | Sandbox RPC [method] finished with gRPC status OK. Logged once for each call a plugin makes to the sandbox, after it finishes. `event.category` is `process` for `RunCommand` and `file` for the file calls. Refer to [Trace a sandbox call](#sandbox-rpc-details). |
 | | `failure` | Sandbox RPC [method] finished with gRPC status [status], for example `UNAVAILABLE`. A call that fails without reaching the sandbox, such as a refused connection, is also logged. |
 
 #### Trace a sandbox call [sandbox-rpc-details]
 
 A `sandbox_rpc` event describes one call from a plugin to the sandbox, not the command or file operation inside it. It records no command, environment variable value, file path or file content.
 
-* **Who issued the call:** `kibana.sandbox_caller` names the plugin, the kind of caller (a tool, a workflow step, or the findings recorder), its ID, and the run it belongs to. A call made while handling a request names the user, or the service account that runs the investigation. A call made by a workflow step has no request, so it has no user: the event carries `kibana.space_id` and the workflow run in `kibana.sandbox_caller.execution_id` instead.
+* **Who issued the call:** `kibana.sandbox_caller` names the plugin, the kind of caller (a tool, a workflow step, or the findings recorder), its ID, and the run it belongs to. The event names the user, or the service account that runs the investigation, in `user.id` and `user.name`. A call made by a workflow step names the user or service account the workflow runs as, taken from the request the step runs with. A workflow without such a request leaves them out. Either way the event carries `kibana.space_id`, and the workflow run in `kibana.sandbox_caller.execution_id`.
 * **Find the same call elsewhere:** The proxy's request ID is in `sandbox.proxy_request_id`, which the sandbox service logs under the same name. It is not in `http.request.id`, because {{serverless-full}} writes {{kib}}'s own request ID there. `sandbox.conversation_id` identifies the conversation in the same way on both sides.
 
 

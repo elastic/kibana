@@ -57,23 +57,26 @@ export class SandboxRpcError extends Error {
 
 /**
  * The log fields for one sandbox RPC. Kibana, the proxy and sandbox-api log the same fields with
- * the same values, which is what joins their records, except the proxy's request id: sandbox-api
- * logs it as `sandbox.proxy_request_id`, the name the audit event uses, not as `http.request.id`. The `rpc.*` fields follow the OpenTelemetry
- * semantic conventions, where the status code is `rpc.status_code` since 1.45.0 (1.43.0, the version
- * of `@opentelemetry/semantic-conventions` Kibana pins, still calls it `rpc.response.status_code`);
- * `http.request.id` and `event.duration` are ECS fields.
+ * the same values, which is what joins their records. The proxy's request id is
+ * `sandbox.proxy_request_id` in all of them, the name Kibana's audit event uses: it cannot be
+ * `http.request.id` there, because Serverless writes Kibana's own request id to that field. The
+ * `rpc.*` fields follow the OpenTelemetry semantic conventions, where the status code is
+ * `rpc.status_code` since 1.45.0 (1.43.0, the version of `@opentelemetry/semantic-conventions`
+ * Kibana pins, still calls it `rpc.response.status_code`); `event.duration` is an ECS field.
  *
- * | Field                     | Value                                                | sandbox-api source                  |
- * | ------------------------- | ---------------------------------------------------- | ----------------------------------- |
- * | `http.request.id`         | proxy request id from the response (omitted if none) | `x-cloud-request-id` request header |
- * | `sandbox.conversation_id` | `<space>__<conversation>`                            | `x-conversation-id` request header  |
- * | `rpc.method`              | `sandbox.SandboxService/RunCommand`, ...             | fully-qualified gRPC method         |
- * | `rpc.status_code`         | gRPC status name, for example `OK`, `UNAVAILABLE`    | gRPC status name                    |
- * | `event.duration`          | nanoseconds, measured client-side                    | nanoseconds, server-side            |
+ * | Field                      | Value                                                | sandbox-api source                  |
+ * | -------------------------- | ---------------------------------------------------- | ----------------------------------- |
+ * | `sandbox.conversation_id`  | `<space>__<conversation>`                            | `x-conversation-id` request header  |
+ * | `sandbox.proxy_request_id` | proxy request id from the response (omitted if none) | `x-cloud-request-id` request header |
+ * | `rpc.method`               | `sandbox.SandboxService/RunCommand`, ...             | fully-qualified gRPC method         |
+ * | `rpc.status_code`          | gRPC status name, for example `OK`, `UNAVAILABLE`    | gRPC status name                    |
+ * | `event.duration`           | nanoseconds, measured client-side                    | nanoseconds, server-side            |
  */
 export const sandboxRpcLogMeta = (rpc: SandboxRpcInfo) => ({
-  ...(rpc.requestId ? { http: { request: { id: rpc.requestId } } } : {}),
-  sandbox: { conversation_id: rpc.conversationId },
+  sandbox: {
+    conversation_id: rpc.conversationId,
+    ...(rpc.requestId ? { proxy_request_id: rpc.requestId } : {}),
+  },
   rpc: {
     method: rpc.method,
     status_code: rpc.statusCode,

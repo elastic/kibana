@@ -42,6 +42,11 @@ export type SandboxCaller =
       stepId: string;
       /** This run of the workflow. */
       workflowExecutionId?: string;
+      /**
+       * The fake request the step runs with. When the workflow runs as a service account or a
+       * user, it is what lets the audit event name them, as it does for a tool call.
+       */
+      request?: KibanaRequest;
     }
   | {
       /** The pass over an investigation's workspace that proposes its findings. */
@@ -92,7 +97,7 @@ const category = (method: string): 'process' | 'file' =>
  *
  * The proxy's request id is `sandbox.proxy_request_id`, not `http.request.id`. On Serverless the
  * audit pipeline writes Kibana's own request id to `http.request.id` and would overwrite it.
- * sandbox-api logs it under the same name, so one search finds both sides of a call.
+ * Kibana's debug log and sandbox-api use the same name, so one search finds every record of a call.
  */
 const auditEvent = (rpc: SandboxRpcInfo, caller: SandboxCaller, spaceId?: string) => {
   const outcome: 'success' | 'failure' = rpc.statusCode === 'OK' ? 'success' : 'failure';
@@ -197,8 +202,9 @@ export const auditedSandboxSession = ({
 
 /**
  * Adds auditing to the sandbox start contract. A request-scoped audit logger attaches the user, or
- * the service account that runs an investigation, to every event; a workflow step has no request,
- * so its events carry the space and the workflow instead.
+ * the service account that runs an investigation, to every event. A workflow step has a request only
+ * when its workflow has a fake request to act as; otherwise its events carry the space and the
+ * workflow instead.
  */
 export const createAuditedSandboxStart = ({
   sandboxStart,
@@ -219,7 +225,10 @@ export const createAuditedSandboxStart = ({
   getSessionForSpace: (spaceId, sessionId, caller) =>
     auditedSandboxSession({
       session: sandboxStart.getSessionForSpace(spaceId, sessionId),
-      audit: audit.withoutRequest,
+      audit:
+        caller.type === 'workflow_step' && caller.request
+          ? audit.asScoped(caller.request)
+          : audit.withoutRequest,
       caller,
       spaceId,
       logger,
