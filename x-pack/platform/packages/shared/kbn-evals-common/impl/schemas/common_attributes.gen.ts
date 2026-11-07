@@ -230,6 +230,28 @@ export const EvaluatorStats = lazySchema(() =>
     evaluator_model: Model.optional().describe(
       'Model this evaluator judged with. Absent for code evaluators, which invoke no model.'
     ),
+    /**
+     * Score documents written for this evaluator, including ones whose score came back null (e.g. every judge in a multi-judge evaluator failed). `stats.count` only reflects non-null scores, so this can exceed it. Absent on responses from pre-upgrade Kibana versions.
+     */
+    judges_attempted: z
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe(
+        'Score documents written for this evaluator, including ones whose score came back null (e.g. every judge in a multi-judge evaluator failed). `stats.count` only reflects non-null scores, so this can exceed it. Absent on responses from pre-upgrade Kibana versions.'
+      ),
+    /**
+     * Score documents attempted for this evaluator but excluded from `stats` because the score was null. Absent on responses from pre-upgrade Kibana versions.
+     */
+    judges_null_scored: z
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe(
+        'Score documents attempted for this evaluator but excluded from `stats` because the score was null. Absent on responses from pre-upgrade Kibana versions.'
+      ),
     stats: z.object({
       mean: z.number(),
       median: z.number(),

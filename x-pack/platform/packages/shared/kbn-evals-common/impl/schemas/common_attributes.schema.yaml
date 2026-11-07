@@ -334,6 +334,21 @@ components:
           description: >-
             Model this evaluator judged with. Absent for code evaluators, which
             invoke no model.
+        judges_attempted:
+          type: integer
+          minimum: 0
+          description: >-
+            Score documents written for this evaluator, including ones whose score
+            came back null (e.g. every judge in a multi-judge evaluator failed).
+            `stats.count` only reflects non-null scores, so this can exceed it.
+            Absent on responses from pre-upgrade Kibana versions.
+        judges_null_scored:
+          type: integer
+          minimum: 0
+          description: >-
+            Score documents attempted for this evaluator but excluded from `stats`
+            because the score was null. Absent on responses from pre-upgrade
+            Kibana versions.
         stats:
           type: object
           properties:

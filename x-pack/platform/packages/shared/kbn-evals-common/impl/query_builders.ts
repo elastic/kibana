@@ -313,6 +313,12 @@ export const buildStatsAggregation = () => ({
       by_evaluator: {
         terms: { field: 'evaluator.name', size: 1000 },
         aggs: {
+          // The bucket's own `doc_count` already counts every score document for this
+          // evaluator, including ones whose `evaluator.score` is null (e.g. every judge
+          // in a multi-judge evaluator failed) — `terms` buckets on `evaluator.name`, which
+          // every score document has, regardless of score. `score_stats.count` only counts
+          // documents with a non-null score, so the gap between the bucket's `doc_count` and
+          // `score_stats.count` is how many attempts were silently dropped from the mean.
           score_stats: { extended_stats: { field: 'evaluator.score' } },
           score_median: { percentiles: { field: 'evaluator.score', percents: [50] } },
           evaluator_kind: { terms: { field: 'evaluator.kind', size: 1 } },
@@ -725,6 +731,8 @@ interface StatsAggregations {
       by_evaluator?: {
         buckets?: Array<{
           key: string;
+          /** Every score document for this evaluator, scored or null — see parseStatsAggregationResponse. */
+          doc_count?: number;
           score_stats?: {
             avg?: number;
             std_deviation?: number;
@@ -750,6 +758,15 @@ export interface ExperimentDetailEvaluatorStat {
   example_count: number;
   /** Model this evaluator judged with; absent for code evaluators. */
   evaluator_model?: { id: string; family: string | undefined; provider: string | undefined };
+  /**
+   * Score documents written for this evaluator, including ones whose score came back
+   * null (e.g. every judge in a multi-judge evaluator failed). `stats.count` only
+   * reflects non-null scores, so `judges_attempted - stats.count` is how many attempts
+   * were dropped from the mean without changing its denominator.
+   */
+  judges_attempted: number;
+  /** Score documents attempted but not counted in `stats` because the score was null. */
+  judges_null_scored: number;
   stats: {
     mean: number;
     median: number;
@@ -779,6 +796,8 @@ export const parseStatsAggregationResponse = (
     return evaluatorBuckets.map((evaluatorBucket) => {
       const scoreStats = evaluatorBucket.score_stats;
       const median = evaluatorBucket.score_median?.values?.['50.0'];
+      const scoredCount = scoreStats?.count ?? 0;
+      const attemptedCount = evaluatorBucket.doc_count ?? scoredCount;
       // A code evaluator invokes no model, so a stray one on legacy documents is not reported.
       const isCodeEvaluator = firstBucket(evaluatorBucket.evaluator_kind) === 'code';
       const modelBucket = isCodeEvaluator
@@ -802,13 +821,15 @@ export const parseStatsAggregationResponse = (
             provider: modelProvider,
           },
         }),
+        judges_attempted: attemptedCount,
+        judges_null_scored: Math.max(attemptedCount - scoredCount, 0),
         stats: {
           mean: scoreStats?.avg ?? 0,
           median: median ?? 0,
           std_dev: scoreStats?.std_deviation ?? 0,
           min: scoreStats?.min ?? 0,
           max: scoreStats?.max ?? 0,
-          count: scoreStats?.count ?? 0,
+          count: scoredCount,
         },
       };
     });

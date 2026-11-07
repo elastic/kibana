@@ -137,6 +137,8 @@ describe('GET /internal/evals/experiments/{experimentId}', () => {
       evaluator_name: 'correctness',
       example_count: 5,
       evaluator_model: { id: 'claude-3', family: 'claude-3', provider: 'anthropic' },
+      judges_attempted: 10,
+      judges_null_scored: 0,
       stats: {
         mean: 0.85,
         median: 0.9,
