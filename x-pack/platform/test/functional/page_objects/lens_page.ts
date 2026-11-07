@@ -1076,7 +1076,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async switchToVisualizationSubtype(subType: string, layerIndex: number = 0) {
-      if (!(await testSubjects.exists(`lns-layerPanel-${layerIndex} > lnsStackingOptionsButton`))) {
+      if (
+        !(await testSubjects.waitForExists(
+          `lns-layerPanel-${layerIndex} > lnsStackingOptionsButton`
+        ))
+      ) {
         throw new Error('No subtype available for the current visualization');
       }
       await testSubjects.click(`lns-layerPanel-${layerIndex} > lnsStackingOptionsButton`);
