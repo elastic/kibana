@@ -173,7 +173,7 @@ When the dashboard trigger fires:
    - \`attachmentLabel\` — short title tailored to the request.
    - \`severity_count\` (recommended) — \`{ Critical, High, Moderate, Low, Unknown }\` with non-negative integer counts bucketed from tool output. If only a sample is available, set \`distribution_note\` stating so.
    - \`anomaly_highlights\` (optional) — array of \`{ title, body? }\` for notable signals derived from tool output.
-   - \`entities\` — array of \`{ entity_type, entity_id, entity_name?, source?, risk_score_norm?, risk_level?, criticality?, first_seen?, last_seen? }\`, ordered by importance. Use \`@timestamp\` as \`last_seen\` (always present — \`entity.lifecycle.last_activity\` can be absent for fresh entities).
+   - \`entities\` — array of \`{ entity_type, entity_id, entity_name?, source?, risk_score_norm?, risk_level?, criticality?, first_seen?, last_seen? }\`, ordered by importance. Use \`entity.lifecycle.last_seen\` as \`last_seen\`, or \`@timestamp\` when it is absent. Do not use \`entity.lifecycle.last_activity\`: only some integrations set it.
    - \`time_range_label\` — only when the user named an explicit time window. Never use generic filler ("Current", "Now", "Today", "All time").
    - \`summary\` (optional) — 1–3 sentences interpreting the snapshot.
    - \`watchlist_id\` / \`watchlist_name\` (optional) — when the user's filters scoped a watchlist.
