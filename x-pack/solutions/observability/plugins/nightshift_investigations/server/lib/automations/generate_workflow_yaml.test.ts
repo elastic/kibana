@@ -481,7 +481,7 @@ describe('generateWorkflowYaml', () => {
         with: {
           automation_id: 'auto-123',
           subject_type: 'manual',
-          subject_id: 'manual',
+          subject_id: 'scheduled-auto-123-{{ event.scheduledFor | default: execution.id }}',
           title: 'Test automation',
           summary: 'Test automation',
           trigger_type: 'automatic',
@@ -562,7 +562,7 @@ describe('generateWorkflowYaml', () => {
       expect(new Set([scheduled.name, alert.name, slack.name]).size).toBe(3);
       expect(scheduled.with).toMatchObject({
         subject_type: 'manual',
-        subject_id: 'manual',
+        subject_id: 'scheduled-auto-123-{{ event.scheduledFor | default: execution.id }}',
         timeout_seconds: 120,
       });
       expect(alert.with).toMatchObject({
