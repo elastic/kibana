@@ -6,10 +6,14 @@
  */
 
 import type { ReactNode } from 'react';
-import React from 'react';
-import { EuiSwitch, useEuiFontSize, useEuiTheme } from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiButtonIcon, EuiPopover, EuiSwitch, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ShowHiddenSwitch } from '../hidden_data';
+
+const OPTIONS_LABEL = i18n.translate('xpack.boost.targetListHeader.options', {
+  defaultMessage: 'List options',
+});
 
 const SHOW_UNMATCHED_LABEL = i18n.translate('xpack.boost.targetListHeader.showUnmatched', {
   defaultMessage: 'Show unmatched',
@@ -19,38 +23,40 @@ const SHOW_UNMATCHED_LABEL = i18n.translate('xpack.boost.targetListHeader.showUn
 // space above it.
 export const TARGET_LIST_HEADER_HEIGHT = 40;
 
+interface ListOption {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  /** Why the switch is off, if it is, which its tooltip says. */
+  disabledReason?: string;
+}
+
 interface TargetListHeaderProps {
   /** The list's heading. */
   children: ReactNode;
-  /** A switch before the one for hidden data sources that keeps names the pattern doesn't match listed. */
-  unmatched: {
-    checked: boolean;
-    onChange: (checked: boolean) => void;
-    disabled: boolean;
-  };
-  /** Whether the lists show hidden data sources. */
-  includesHidden: boolean;
-  onIncludesHiddenChange: (includesHidden: boolean) => void;
-  /** Whether the switch is off, such as until a profile is selected. */
-  isShowHiddenDisabled: boolean;
+  /** Whether the list's options are off, such as until a profile is selected. */
+  isDisabled: boolean;
+  /** Whether names the pattern doesn't match stay listed. */
+  unmatched: ListOption;
+  /** Whether hidden data sources are listed. */
+  hidden: ListOption;
 }
 
 /**
- * The row atop a rule's list of targets: its heading, then the switches that show what the pattern
- * doesn't match and hidden data sources at the end.
+ * The row atop a rule's list of targets: its heading, then a button for the list's options at the
+ * end, which keeps the switches that show what the pattern doesn't match and hidden data sources out
+ * of the way of the list. The list itself shows which are on: it marks the names that match apart
+ * from the rest, badges hidden ones, and counts hidden ones it leaves out.
  */
 export const TargetListHeader = ({
   children,
+  isDisabled,
   unmatched,
-  includesHidden,
-  onIncludesHiddenChange,
-  isShowHiddenDisabled,
+  hidden,
 }: TargetListHeaderProps) => {
   const { euiTheme } = useEuiTheme();
-  const { fontSize } = useEuiFontSize('xs');
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    // The row draws a border under the heading and switches. A margin rather than padding, so the
-    // border stops at the panel's padding.
     <div
       css={{
         display: 'flex',
@@ -58,36 +64,53 @@ export const TargetListHeader = ({
         justifyContent: 'space-between',
         gap: euiTheme.size.m,
         minBlockSize: euiTheme.size.xl,
-        margin: `${euiTheme.size.s} ${euiTheme.size.base} 0`,
-        boxShadow: `inset 0 -${euiTheme.border.width.thin} 0 ${euiTheme.border.color}`,
+        padding: `${euiTheme.size.s} ${euiTheme.size.base} 0`,
       }}
     >
       {children}
-      <div css={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.m }}>
-        {/* Like the switch for hidden data sources, its label is subdued unless it's off. */}
-        <EuiSwitch
-          compressed
-          label={SHOW_UNMATCHED_LABEL}
-          labelProps={{
-            css: {
-              fontSize,
-              color: unmatched.disabled ? undefined : euiTheme.colors.textSubdued,
-            },
-          }}
-          checked={unmatched.checked}
-          disabled={unmatched.disabled}
-          onChange={(event) => unmatched.onChange(event.target.checked)}
-          data-test-subj="boostRuleShowUnmatched"
-        />
-        <ShowHiddenSwitch
-          checked={includesHidden}
-          onChange={onIncludesHiddenChange}
-          disabled={isShowHiddenDisabled}
-          labelSize="xs"
-          isSubdued
-          data-test-subj="boostRuleShowHidden"
-        />
-      </div>
+      <EuiPopover
+        button={
+          // Its label is also its name, so screen readers don't hear it twice.
+          <EuiToolTip content={OPTIONS_LABEL} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="ellipsis"
+              size="xs"
+              color="text"
+              aria-label={OPTIONS_LABEL}
+              isDisabled={isDisabled}
+              onClick={() => setIsOpen((wasOpen) => !wasOpen)}
+              data-test-subj="boostRuleListOptions"
+            />
+          </EuiToolTip>
+        }
+        isOpen={isOpen && !isDisabled}
+        closePopover={() => setIsOpen(false)}
+        anchorPosition="downRight"
+        panelPaddingSize="s"
+        aria-label={OPTIONS_LABEL}
+      >
+        {/* Each switch says why it's off, if it is, on hover. */}
+        <div css={{ display: 'flex', flexDirection: 'column', gap: euiTheme.size.s }}>
+          <EuiToolTip content={unmatched.disabledReason} position="left">
+            <EuiSwitch
+              compressed
+              label={SHOW_UNMATCHED_LABEL}
+              checked={unmatched.checked}
+              disabled={unmatched.disabledReason !== undefined}
+              onChange={(event) => unmatched.onChange(event.target.checked)}
+              data-test-subj="boostRuleShowUnmatched"
+            />
+          </EuiToolTip>
+          <EuiToolTip content={hidden.disabledReason} position="left">
+            <ShowHiddenSwitch
+              checked={hidden.checked}
+              onChange={hidden.onChange}
+              disabled={hidden.disabledReason !== undefined}
+              data-test-subj="boostRuleShowHidden"
+            />
+          </EuiToolTip>
+        </div>
+      </EuiPopover>
     </div>
   );
 };

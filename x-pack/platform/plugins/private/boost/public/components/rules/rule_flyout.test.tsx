@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, renderHook, screen, within } from '@testing-library/react';
 import { useEuiTheme } from '@elastic/eui';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
@@ -89,6 +90,18 @@ const renderFlyout = (flyoutRule = rule) => {
   // Clicking another field blurs the picker. Tab stays in the picker while it highlights an option.
   const blur = () => userEvent.click(screen.getByTestId('boostRulePriority'));
   return { getInput, blur };
+};
+
+// The list's switches are in its options popover, which typing elsewhere closes.
+const getListOption = async (testSubj: string): Promise<HTMLElement> => {
+  if (!screen.queryByTestId(testSubj)) {
+    await userEvent.click(screen.getByTestId('boostRuleListOptions'));
+    await waitForEuiPopoverOpen();
+  }
+  return screen.getByTestId(testSubj);
+};
+const clickListOption = async (testSubj: string) => {
+  await userEvent.click(await getListOption(testSubj));
 };
 
 describe('RuleFlyout profile picker', () => {
@@ -522,12 +535,16 @@ describe('RuleFlyout pattern matches', () => {
 
   it('lists every index until something is typed, and then filters it to what matches', async () => {
     renderNewRule();
-    expect(getCount()).toHaveTextContent(/^2 indices$/);
+    // It only counts matches.
+    expect(getCount()).toHaveTextContent(/^0 matches$/);
     expect(getListed()).toEqual(['catalog-fall', 'products']);
 
     await userEvent.type(getPattern(), 'catalog-*');
     expect(getCount()).toHaveTextContent(/^1 exact match$/);
     expect(getListed()).toEqual(['catalog-fall']);
+
+    await userEvent.type(getPattern(), 'zzz');
+    expect(getCount()).toHaveTextContent(/^0 matches$/);
 
     await userEvent.clear(getPattern());
     expect(getListed()).toEqual(['catalog-fall', 'products']);
@@ -535,11 +552,16 @@ describe('RuleFlyout pattern matches', () => {
 
   it('keeps unmatched names listed beside the matches once asked', async () => {
     renderNewRule();
-    // Everything is listed until something is typed.
-    expect(screen.getByTestId('boostRuleShowUnmatched')).toBeDisabled();
+    // Everything is listed until something is typed, as its tooltip says.
+    const showUnmatched = await getListOption('boostRuleShowUnmatched');
+    expect(showUnmatched).toBeDisabled();
+    await userEvent.hover(screen.getByText('Show unmatched'));
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      "The list isn't filtered until you enter a name or pattern."
+    );
 
     await userEvent.type(getPattern(), 'catalog-*');
-    await userEvent.click(screen.getByTestId('boostRuleShowUnmatched'));
+    await clickListOption('boostRuleShowUnmatched');
 
     expect(getListed()).toEqual(['catalog-fall', 'products']);
     // Still counting what matches.
@@ -624,7 +646,7 @@ describe('RuleFlyout pattern matches', () => {
     renderNewRule();
 
     await userEvent.type(getPattern(), 'catalog-*');
-    await userEvent.click(screen.getByTestId('boostRuleShowUnmatched'));
+    await clickListOption('boostRuleShowUnmatched');
 
     const [catalogFall, products] = screen.getAllByTestId('boostRuleAvailableTarget');
     expect(within(catalogFall).getByTitle('Exact match')).toBeInTheDocument();
@@ -665,7 +687,7 @@ describe('RuleFlyout pattern matches', () => {
 
     await userEvent.type(getPattern(), 'nothing-*');
 
-    expect(getCount()).toHaveTextContent(/^No matches$/);
+    expect(getCount()).toHaveTextContent(/^0 matches$/);
     expect(screen.getByTestId('boostRulePatternMatches')).toHaveTextContent('No matches detected');
   });
 
@@ -684,7 +706,7 @@ describe('RuleFlyout pattern matches', () => {
     renderNewRule();
 
     await userEvent.type(getPattern(), 'p');
-    await userEvent.click(screen.getByTestId('boostRuleShowUnmatched'));
+    await clickListOption('boostRuleShowUnmatched');
     await userEvent.type(getPattern(), 'rod');
 
     expect(getListed()).toEqual(['catalog-fall', 'products']);
@@ -707,7 +729,7 @@ describe('RuleFlyout pattern matches', () => {
     );
   });
 
-  it('disables both switches until a profile is selected', () => {
+  it("disables the list's options until a profile is selected", () => {
     render(
       <IntlProvider locale="en">
         <RuleFlyout onClose={jest.fn()} />
@@ -717,8 +739,16 @@ describe('RuleFlyout pattern matches', () => {
     expect(screen.getByTestId('boostRulePatternMatchesEmpty')).toHaveTextContent(
       'Select a boost profile to choose targets.'
     );
-    expect(screen.getByTestId('boostRuleShowUnmatched')).toBeDisabled();
-    expect(screen.getByTestId('boostRuleShowHidden')).toBeDisabled();
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(/^0 matches$/);
+    expect(screen.getByTestId('boostRuleListOptions')).toBeDisabled();
+  });
+
+  it("says why hidden indices can't be shown when there are none", async () => {
+    renderNewRule();
+
+    expect(await getListOption('boostRuleShowHidden')).toBeDisabled();
+    await userEvent.hover(screen.getByText('Show hidden'));
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('There are no hidden indices.');
   });
 
   it('explains why the field is disabled before a profile is selected', async () => {
@@ -831,7 +861,7 @@ describe('RuleFlyout choosing from the list', () => {
     expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(/^1 exact match$/);
 
     // Shown beside the match, another name replaces it.
-    await userEvent.click(screen.getByTestId('boostRuleShowUnmatched'));
+    await clickListOption('boostRuleShowUnmatched');
     await choose('products');
     expect(getField()).toHaveValue('products');
 
@@ -865,7 +895,7 @@ describe('RuleFlyout choosing from the list', () => {
     expect(mutation.mutate).not.toHaveBeenCalled();
 
     // The field's commas make it invalid, so it has no matches to filter the list by.
-    await userEvent.click(screen.getByTestId('boostRuleShowUnmatched'));
+    await clickListOption('boostRuleShowUnmatched');
     await choose('products');
     await save();
     expect(mutation.mutate).toHaveBeenCalledWith(
@@ -896,8 +926,6 @@ describe('RuleFlyout hidden data sources', () => {
 
   it('counts hidden matches, but only lists them once they are shown', async () => {
     renderNewRule();
-    // Until something is typed, it counts what it lists.
-    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(/^2 indices$/);
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), '*');
 
@@ -908,21 +936,18 @@ describe('RuleFlyout hidden data sources', () => {
     // After the others, so it adds to them.
     expect(matches.getByTestId('boostRuleHiddenNotShown')).toHaveTextContent(/^\+1 hidden index$/);
 
-    await userEvent.click(screen.getByTestId('boostRuleShowHidden'));
+    await clickListOption('boostRuleShowHidden');
 
     expect(matches.getByText('.catalog-archive')).toBeInTheDocument();
     expect(matches.getByTestId('boostHiddenBadge')).toBeInTheDocument();
     expect(matches.queryByTestId('boostRuleHiddenNotShown')).not.toBeInTheDocument();
     expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(/^3 exact matches$/);
-
-    await userEvent.clear(screen.getByTestId('boostRulePattern'));
-    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(/^3 indices$/);
   });
 
   it('only counts hidden matches among unmatched names, as the filtered list does', async () => {
     renderNewRule();
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'products');
-    await userEvent.click(screen.getByTestId('boostRuleShowUnmatched'));
+    await clickListOption('boostRuleShowUnmatched');
 
     // The hidden index doesn't match, so it isn't counted.
     expect(screen.queryByTestId('boostRuleHiddenNotShown')).not.toBeInTheDocument();
@@ -948,7 +973,7 @@ describe('RuleFlyout hidden data sources', () => {
     renderNewRule();
     expect(screen.queryByText('.catalog-archive')).not.toBeInTheDocument();
 
-    await userEvent.click(screen.getByTestId('boostRuleShowHidden'));
+    await clickListOption('boostRuleShowHidden');
     const row = screen
       .getAllByTestId('boostRuleAvailableTarget')
       .find(({ textContent }) => textContent?.startsWith('.catalog-archive')) as HTMLElement;

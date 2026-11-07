@@ -218,6 +218,8 @@ export const RulesTable = ({
     {
       field: 'target',
       name: TARGETS_LABEL,
+      // Fits most names and patterns, leaving the rest to the rule and profile names.
+      width: '12em',
       sortable: true,
       render: (_target: string, rule: RuleRow) => getRuleTargets(rule),
     },

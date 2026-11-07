@@ -10,7 +10,6 @@ import React, { useState } from 'react';
 import { EuiIcon, EuiPanel, EuiSelectable, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { BoostDataSource, BoostProfileType } from '../../../common/types';
-import { formatDataSourceCount } from '../format';
 import { formatHiddenTargets } from '../hidden_data';
 import { SupersedingRule, TargetName, getSupersedingDescription } from './target_name';
 import { TARGET_LIST_HEADER_HEIGHT, TargetListHeader } from './target_list_header';
@@ -44,6 +43,20 @@ const ALL_LABELS: Readonly<Record<BoostProfileType, string>> = {
 const SELECT_PROFILE_MESSAGE = i18n.translate('xpack.boost.patternMatches.selectProfile', {
   defaultMessage: 'Select a boost profile to choose targets.',
 });
+
+// Why the list's switches are off, when they are.
+const UNFILTERED_REASON = i18n.translate('xpack.boost.patternMatches.unfilteredReason', {
+  defaultMessage: "The list isn't filtered until you enter a name or pattern.",
+});
+
+const NO_HIDDEN_REASONS: Readonly<Record<BoostProfileType, string>> = {
+  indices: i18n.translate('xpack.boost.patternMatches.noHiddenIndicesReason', {
+    defaultMessage: 'There are no hidden indices.',
+  }),
+  data_streams: i18n.translate('xpack.boost.patternMatches.noHiddenDataStreamsReason', {
+    defaultMessage: 'There are no hidden data streams.',
+  }),
+};
 
 const NO_DATA_SOURCES: Readonly<Record<BoostProfileType, string>> = {
   indices: i18n.translate('xpack.boost.patternMatches.noIndices', {
@@ -191,28 +204,22 @@ export const PatternMatches = ({
     (hasExactMatches ? exactMatches : partialMatches).map((target) => [target.name, target])
   );
   const matchKind: MatchKind = hasExactMatches ? 'exact' : 'partial';
-  const shownDataSourceCount = includesHidden
-    ? dataSources.length
-    : dataSources.filter(({ hidden }) => !hidden).length;
 
   // How many the pattern matches, which only counts exact matches, hidden ones included, as the
-  // rule applies to them all the same, shown or not, or how many it partly matches until then. Or,
-  // until something is typed, how many data sources the list shows.
+  // rule applies to them all the same, shown or not, or how many it partly matches until then. It
+  // only ever counts matches, so it's 0 until something is typed, rather than counting a list whose
+  // length depends on whether hidden data sources are shown.
   const getCount = (): string => {
-    if (!type) {
-      return formatDataSourceCount(targetType, 0);
-    }
-    if (!pattern) {
-      return formatDataSourceCount(targetType, shownDataSourceCount);
-    }
-    if (hasExactMatches) {
+    if (type && hasExactMatches) {
       return formatMatchCount('exact', exactMatches.length);
     }
-    return partialMatches.length > 0
-      ? formatMatchCount('partial', partialMatches.length)
-      : i18n.translate('xpack.boost.patternMatches.noMatchCount', {
-          defaultMessage: 'No matches',
-        });
+    if (type && partialMatches.length > 0) {
+      return formatMatchCount('partial', partialMatches.length);
+    }
+    return i18n.translate('xpack.boost.patternMatches.matchCount', {
+      defaultMessage: '{count, plural, one {# match} other {# matches}}',
+      values: { count: 0 },
+    });
   };
 
   const renderEmpty = (message: string) => (
@@ -429,16 +436,19 @@ export const PatternMatches = ({
     >
       {/* Off until a profile is selected. Showing unmatched names is also off until something is
           typed, since everything is listed until then, and showing hidden ones while there's nothing
-          hidden to show, unless it's on already. */}
+          hidden to show, unless either is on already. */}
       <TargetListHeader
+        isDisabled={!type}
         unmatched={{
           checked: showsUnmatched,
           onChange: setShowsUnmatched,
-          disabled: !type || (!pattern && !showsUnmatched),
+          disabledReason: !pattern && !showsUnmatched ? UNFILTERED_REASON : undefined,
         }}
-        includesHidden={includesHidden}
-        onIncludesHiddenChange={onIncludesHiddenChange}
-        isShowHiddenDisabled={!type || (!hasHidden && !includesHidden)}
+        hidden={{
+          checked: includesHidden,
+          onChange: onIncludesHiddenChange,
+          disabledReason: !hasHidden && !includesHidden ? NO_HIDDEN_REASONS[targetType] : undefined,
+        }}
       >
         {/* Announced as it changes, since it follows what's typed in another field. */}
         <EuiText
