@@ -796,6 +796,15 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'SET_SOURCE_WRITE_BLOCK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
+      if (res.right === 'relocation_already_migrated') {
+        // Another node already published this index's aliases. The copy, the
+        // document transform, and the alias update are done. Sibling migrators
+        // were unblocked by the action before this transition.
+        return {
+          ...stateP,
+          controlState: 'DONE',
+        };
+      }
       // If the write block is successfully in place, proceed to the next step.
       return {
         ...stateP,
@@ -885,6 +894,9 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'READY_TO_REINDEX_SYNC') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
+      if (res.right.relocationFinished) {
+        return { ...stateP, controlState: 'DONE' };
+      }
       if (Option.isSome(stateP.sourceIndex) && Option.isSome(stateP.sourceIndexMappings)) {
         // this migrator's source index exist, reindex its entries
         return {
