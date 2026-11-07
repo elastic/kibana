@@ -27,6 +27,7 @@ describe('ToggleAlertFlyoutButtonComponent', () => {
       expect(
         forNearestButton(getByText)(ToggleFlyoutTranslations.openAlertContextPanelLabel)
       ).toBeEnabled();
+      expect(getByText('Manage rules')).toBeInTheDocument();
     });
 
     it("does not contain a tooltip explaining why the user can't create alerts", async () => {
