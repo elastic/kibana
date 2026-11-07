@@ -472,6 +472,50 @@ describe('percentile', () => {
       expect(newAggs[1].functions[0].getArgument('orderBy')?.[0]).toBe(`5.${percentile}`);
     });
 
+    it('should update order-by references for any multi-terms columns', () => {
+      const field1 = 'foo';
+      const percentile = faker.number.int(100);
+
+      const aggs = [
+        makeEsAggBuilder('aggMultiTerms', {
+          id: '1',
+          enabled: true,
+          schema: 'metric',
+          fields: [field1, 'baz'],
+          orderBy: '3',
+          timeShift: undefined,
+        }),
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: '2',
+          enabled: true,
+          schema: 'metric',
+          field: field1,
+          percentile,
+          timeShift: undefined,
+        }),
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: '3',
+          enabled: true,
+          schema: 'metric',
+          field: field1,
+          percentile: percentile + 1,
+          timeShift: undefined,
+        }),
+      ];
+
+      const { esAggsIdMap, aggsToIdsMap } = buildMapsFromAggBuilders(aggs);
+
+      const { aggs: newAggs } = percentileOperation.optimizeEsAggs!(
+        aggs,
+        esAggsIdMap,
+        aggsToIdsMap
+      );
+
+      expect(newAggs.length).toBe(2);
+
+      expect(newAggs[0].functions[0].getArgument('orderBy')?.[0]).toBe(`2.${percentile + 1}`);
+    });
+
     it("shouldn't touch non-percentile aggs or single percentiles with no siblings", () => {
       const aggs = [
         makeEsAggBuilder('aggSinglePercentile', {
