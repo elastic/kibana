@@ -44,6 +44,7 @@ import {
 } from '@kbn/alerting-v2-episodes-ui/utils/with_episode_action_state';
 import { isRuleLoaded } from '@kbn/alerting-v2-episodes-ui/types/rule_state';
 import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
+import { useSourceWriteAccess } from '@kbn/alerting-v2-episodes-ui/hooks/use_source_write_access';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import { AlertEpisodeOverviewListSection } from '@kbn/alerting-v2-episodes-ui/components/details/overview_list_section';
 import { AlertEpisodeRuleOverviewPanelSection } from '@kbn/alerting-v2-episodes-ui/components/details/rule_overview_panel_section';
@@ -63,10 +64,6 @@ import {
   getDiscoverHrefForAlertEventsHistory,
   getDiscoverHrefForRuleAndAlertTimestamp,
 } from '@kbn/alerting-v2-episodes-ui/utils/discover_href_for_alert';
-import {
-  filterAlertActionsByPrivilege,
-  ALERT_ACTIONS_PRIVILEGE,
-} from '@kbn/alerting-v2-episodes-ui/utils/filter_alert_actions_by_privilege';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 import { useAlertingLocators } from '../../application/locator_context';
 import type { AlertsKibanaServices } from '../../alerts_kibana_services';
@@ -107,9 +104,12 @@ export function EpisodeDetailsPage({
   const { services } = useKibana<AlertsKibanaServices>();
   const { episodesLocators, rulesLocators } = useAlertingLocators();
   const queryClient = useQueryClient();
-  const alertsCapability = useService(UserCapabilities).canWrite('alerts')
-    ? ALERT_ACTIONS_PRIVILEGE.all
-    : ALERT_ACTIONS_PRIVILEGE.read;
+  const canWriteAlerts = useService(UserCapabilities).canWrite('alerts');
+  const canWriteSourceEpisode = useSourceWriteAccess({
+    application: services.application,
+    http: services.http,
+    notifications: services.notifications,
+  });
   const { data, http, spaces } = services;
 
   const largeMediaQuery = useEuiMinBreakpoint('m');
@@ -234,47 +234,46 @@ export function EpisodeDetailsPage({
 
   const episodeActions: EpisodeAction[] = useMemo(
     () =>
-      filterAlertActionsByPrivilege(
-        createEpisodeActions({
-          http: services.http,
-          overlays: services.overlays,
-          notifications: services.notifications,
-          rendering: services.rendering,
-          application: services.application,
-          userProfile: services.userProfile,
-          docLinks: services.docLinks,
-          expressions: services.expressions,
-          spaces: services.spaces,
-          queryClient,
-          isRuleAvailable: (selectedRuleId) =>
-            isRuleLoaded(ruleState) && ruleState.rule.id === selectedRuleId,
-          getDiscoverHref: ({ episodeIsoTimestamp: ts }) =>
-            getDiscoverHrefForRuleAndAlertTimestamp({
-              share: services.share,
-              capabilities: services.application.capabilities,
-              uiSettings: services.uiSettings,
-              ruleEsql: showRuleDependentUi ? getBreachEsqlQuery(ruleState.rule.query) : undefined,
-              alertIsoTimestamp: ts,
-            }),
-          getAlertEventsHistoryHref: ({ episodeId: selectedEpisodeId, episodeStart, spaceId }) =>
-            getDiscoverHrefForAlertEventsHistory({
-              share: services.share,
-              capabilities: services.application.capabilities,
-              uiSettings: services.uiSettings,
-              episodeId: selectedEpisodeId,
-              episodeStart,
-              spaceId,
-            }),
-          isAlertEventsHistoryAvailable: () =>
-            canOpenDiscover({
-              share: services.share,
-              capabilities: services.application.capabilities,
-              uiSettings: services.uiSettings,
-            }),
-        }),
-        alertsCapability
-      ),
-    [services, queryClient, showRuleDependentUi, ruleState, alertsCapability]
+      createEpisodeActions({
+        http: services.http,
+        overlays: services.overlays,
+        notifications: services.notifications,
+        rendering: services.rendering,
+        application: services.application,
+        userProfile: services.userProfile,
+        docLinks: services.docLinks,
+        expressions: services.expressions,
+        spaces: services.spaces,
+        queryClient,
+        canWriteNativeEpisodes: canWriteAlerts,
+        canWriteSourceEpisode,
+        isRuleAvailable: (selectedRuleId) =>
+          isRuleLoaded(ruleState) && ruleState.rule.id === selectedRuleId,
+        getDiscoverHref: ({ episodeIsoTimestamp: ts }) =>
+          getDiscoverHrefForRuleAndAlertTimestamp({
+            share: services.share,
+            capabilities: services.application.capabilities,
+            uiSettings: services.uiSettings,
+            ruleEsql: showRuleDependentUi ? getBreachEsqlQuery(ruleState.rule.query) : undefined,
+            alertIsoTimestamp: ts,
+          }),
+        getAlertEventsHistoryHref: ({ episodeId: selectedEpisodeId, episodeStart, spaceId }) =>
+          getDiscoverHrefForAlertEventsHistory({
+            share: services.share,
+            capabilities: services.application.capabilities,
+            uiSettings: services.uiSettings,
+            episodeId: selectedEpisodeId,
+            episodeStart,
+            spaceId,
+          }),
+        isAlertEventsHistoryAvailable: () =>
+          canOpenDiscover({
+            share: services.share,
+            capabilities: services.application.capabilities,
+            uiSettings: services.uiSettings,
+          }),
+      }),
+    [services, queryClient, showRuleDependentUi, ruleState, canWriteAlerts, canWriteSourceEpisode]
   );
 
   const applicableActions = useMemo(() => {

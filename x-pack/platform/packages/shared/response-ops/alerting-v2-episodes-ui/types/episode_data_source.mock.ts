@@ -14,5 +14,6 @@ export const createTestEpisodeSource = (
   label: 'test-source',
   queryKeyPrefix: ['test-source'],
   fetchEpisodes: jest.fn().mockResolvedValue([]),
+  useWriteAccess: () => () => true,
   ...overrides,
 });

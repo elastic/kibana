@@ -252,6 +252,19 @@ export class ObservabilityAlertingPage {
     }).toPass();
   }
 
+  /** Row control for an episode action, whether the row renders it inline or in its overflow menu. */
+  episodeRowAction(actionId: string): Locator {
+    return this.page.testSubj
+      .locator(`unifiedDataTable_rowControl_${actionId}`)
+      .or(this.page.testSubj.locator(`unifiedDataTable_rowMenu_${actionId}`));
+  }
+
+  /** Opens the row's overflow actions menu, which holds the actions that do not fit inline. */
+  async openEpisodeRowActionsMenu(ruleName: string): Promise<void> {
+    const [row] = await this.episodeRows(ruleName).all();
+    await row.locator(this.rowActionsMenuButton).click();
+  }
+
   /** Selects every row on the page and waits until the selection toolbar reports the expected count. */
   async selectAllRows(expectedCount: number): Promise<void> {
     await expect(async () => {

@@ -111,6 +111,7 @@ export const InvestigateEpisodeMenuItem = ({
 export const createInvestigateEpisodeAction = (): EpisodeAction => ({
   id: INVESTIGATE_EPISODE_ACTION_ID,
   order: 35,
+  enforcesOwnPrivileges: false,
   isWorkflowAction: true,
   displayName: i18n.translate('xpack.observabilityAlerting.actions.investigateDisplayName', {
     defaultMessage: 'Investigate',
