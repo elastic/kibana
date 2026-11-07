@@ -7,11 +7,13 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiHealth, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { formatEventsRate } from '../../../../../services/unit_stats_client/format_stats';
+import {
+  formatDuration,
+  formatEventsRate,
+} from '../../../../../services/unit_stats_client/format_stats';
 import { useDestinationStats } from '../../../../unit_stats/state_management/use_stats_manager';
-import { getDestinationFlowStatus } from './destination_stats_status';
 import { StatsProblemIcon } from './stats_problem_icon';
 
 interface DestinationNodeStatsProps {
@@ -20,14 +22,18 @@ interface DestinationNodeStatsProps {
 }
 
 /**
- * The footer of a destination node. It is its own component, so a stats update re-renders only
- * this row, and never the node or the graph. It always reserves its row, so the card does not
- * change size when the first result arrives.
+ * The footer of a destination node: the rate and the latency, for example `8.1k/s | 175ms`. A value
+ * that is missing shows a dash, so a destination with no data shows `- | -`, and a rate of exactly 0
+ * shows `0/s`. It is its own component, so a stats update re-renders only this row, and never the
+ * node or the graph. It always reserves its row, so the card does not change size when the first
+ * result arrives. Until then, and when the stats could not be loaded, it shows no numbers, so a
+ * load or a failure never looks like a measured value.
  */
 export function DestinationNodeStats({ destinationId, indexCount }: DestinationNodeStatsProps) {
   const { euiTheme } = useEuiTheme();
   const entry = useDestinationStats(destinationId);
-  const status = getDestinationFlowStatus(entry);
+  const hasValues =
+    entry?.status === 'ready' || entry?.status === 'noData' || entry?.status === 'stale';
 
   return (
     <div
@@ -41,30 +47,27 @@ export function DestinationNodeStats({ destinationId, indexCount }: DestinationN
         min-height: ${euiTheme.size.l};
       `}
     >
-      {status === 'live' && (
+      {hasValues && (
         <>
-          <EuiHealth color="success" textSize="xs" data-test-subj="streamsCanvasDestinationLive">
-            {i18n.translate('xpack.streams.canvas.destinationNode.liveStatus', {
-              defaultMessage: 'Live',
-            })}
-          </EuiHealth>
           <EuiText size="xs" data-test-subj="streamsCanvasDestinationRate">
-            {formatEventsRate(entry?.stats?.eventsRate ?? null)}
+            {formatEventsRate(entry.stats?.eventsRate ?? null)}
+          </EuiText>
+          <EuiText
+            size="xs"
+            color="subdued"
+            data-test-subj="streamsCanvasDestinationLatency"
+            // The border divides the rate and the latency, so no separator character is needed.
+            css={css`
+              padding-inline-start: ${euiTheme.size.s};
+              border-inline-start: ${euiTheme.border.width.thin} solid
+                ${euiTheme.colors.borderBaseSubdued};
+            `}
+          >
+            {formatDuration(entry.stats?.latencyAverage ?? null)}
           </EuiText>
         </>
       )}
-      {status === 'notFlowing' && (
-        <EuiHealth
-          color="subdued"
-          textSize="xs"
-          data-test-subj="streamsCanvasDestinationNotFlowing"
-        >
-          {i18n.translate('xpack.streams.canvas.destinationNode.notFlowingStatus', {
-            defaultMessage: 'Data not flowing in',
-          })}
-        </EuiHealth>
-      )}
-      {entry?.status === 'stale' && status !== 'unknown' && (
+      {entry?.status === 'stale' && (
         <StatsProblemIcon problem="stale" dataTestSubj="streamsCanvasDestinationStale" />
       )}
       {entry?.status === 'error' && entry.error && (
@@ -79,7 +82,7 @@ export function DestinationNodeStats({ destinationId, indexCount }: DestinationN
           size="xs"
           color="subdued"
           data-test-subj="streamsCanvasDestinationIndexCount"
-          // Pushed to the right edge, so the status and rate sit on the left and the row uses the width.
+          // Pushed to the right edge, so the rate and latency sit on the left and the row uses the width.
           css={css`
             margin-left: auto;
           `}

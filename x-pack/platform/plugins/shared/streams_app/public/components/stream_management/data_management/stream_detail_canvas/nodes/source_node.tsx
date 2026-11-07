@@ -21,6 +21,8 @@ import { ConnectionHandle } from './connection_handle';
 import type { SourceNode as SourceNodeType } from '../types';
 import { SOURCE_NODE_WIDTH } from '../canvas_constants';
 import { getNodeCardStyles } from './node_card_styles';
+import { SourceNodeStats } from './source_node_stats';
+import { SOURCE_TYPES_WITH_STATS } from './source_stats_status';
 import { DESTINATION_SIGNAL_LABELS } from '../../../../streams_layout/destinations/destination_type_config';
 
 export function SourceNode({ data, selected, dragging }: NodeProps<SourceNodeType>) {
@@ -91,6 +93,9 @@ export function SourceNode({ data, selected, dragging }: NodeProps<SourceNodeTyp
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
+        {data.sourceId && data.sourceType && SOURCE_TYPES_WITH_STATS.includes(data.sourceType) && (
+          <SourceNodeStats sourceId={data.sourceId} />
+        )}
       </EuiPanel>
       <ConnectionHandle
         id={data.sourceId}

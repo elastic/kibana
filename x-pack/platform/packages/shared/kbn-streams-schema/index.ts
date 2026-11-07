@@ -34,6 +34,7 @@ export {
   streamsUnitStatsRequestSchema,
   streamsUnitStatsResponseSchema,
   streamsUnitStatsSeriesSchema,
+  streamsUnitStatsSourceResultSchema,
   streamsUnitUiMetadataSchema,
   streamsUnitUpsertRequestSchema,
 } from './src/models/unit';
