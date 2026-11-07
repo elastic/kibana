@@ -297,6 +297,49 @@ describe('Detection Rule Creation worker', () => {
       expect(capped).toContain('maximum alerts per execution');
     });
 
+    // A backtest that errored is inconclusive. The proposal says so and points to the
+    // investigation, where the error is posted, unless that post failed.
+    it('calls a backtest that errored inconclusive and points to the investigation', () => {
+      const comment = String(inputsOf(stepByName('propose_creation')).comment);
+      const render = (posted: Record<string, unknown>) =>
+        createWorkflowLiquidEngine().parseAndRenderSync(comment, {
+          steps: {
+            draft_creation: { output: { structured_output: { rule: {} } } },
+            preview_creation: { output: { succeeded: false, error_text: 'boom; ' } },
+            post_backtest_error: posted,
+          },
+        });
+
+      const errored = render({});
+      expect(errored).toContain('Inconclusive: the backtest could not run');
+      expect(errored).toContain('The error is in the investigation.');
+      expect(errored).not.toContain('boom');
+      expect(render({ error: { message: 'failed' } })).not.toContain('in the investigation');
+    });
+
+    // The error is posted to the investigation only when the proposal has no explanation
+    // of its own for the failed backtest, in a block the error cannot close.
+    it('posts the backtest error to the investigation, in a block it cannot close', () => {
+      const post = stepByName('post_backtest_error');
+      expect(post?.['on-failure']).toEqual({ continue: true });
+
+      const posts = (preview: Record<string, unknown>) =>
+        evaluate(String(post?.if), {
+          steps: { draft_ready: { output: { ok: true } }, preview_creation: { output: preview } },
+        });
+      expect(posts({ error_text: 'boom; ' })).toBe(true);
+      expect(posts({ error_text: 'boom; ', no_matching_indices: true })).toBe(false);
+      expect(posts({ error_text: 'boom; ', unreadable_indices: 'custom-*' })).toBe(false);
+
+      const message = createWorkflowLiquidEngine().parseAndRenderSync(String(post?.with?.message), {
+        steps: {
+          draft_creation: { output: { structured_output: { rule: {} } } },
+          preview_creation: { output: { error_text: 'a; ~~~ b; ' } },
+        },
+      });
+      expect(message).toContain('a; ~ ~ ~ b\n~~~');
+    });
+
     // The draft carries no index list, so the sources the preview checks for `read`
     // come from the query's FROM clause, whatever its case, spacing or METADATA.
     it.each([
