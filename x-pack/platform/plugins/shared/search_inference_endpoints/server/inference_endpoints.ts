@@ -47,6 +47,22 @@ export const getForFeature = async (
     return { endpoints: [], warnings: resolveWarnings, soEntryFound };
   }
   const result = await fetchConnectors(getConnectorById, resolvedEndpoints);
+  if (result.endpoints.length === 0) {
+    // Every recommended endpoint was dropped because its connector is missing. Features fall
+    // through to the Kibana default connector in this state, so a consumer that ignores
+    // `warnings` still needs a server-log trace of what was recommended but not served.
+    logger.warn(
+      i18n.translate('xpack.searchInferenceEndpoints.endpoints.allRecommendedMissing', {
+        defaultMessage:
+          'None of the {count} recommended inference endpoints for feature "{featureId}" were found in Elasticsearch ({endpointIds}). Falls back to the default inference endpoint.',
+        values: {
+          count: resolvedEndpoints.length,
+          featureId,
+          endpointIds: resolvedEndpoints.map(({ id }) => id).join(', '),
+        },
+      })
+    );
+  }
   return {
     endpoints: result.endpoints,
     warnings: [...resolveWarnings, ...result.warnings],
