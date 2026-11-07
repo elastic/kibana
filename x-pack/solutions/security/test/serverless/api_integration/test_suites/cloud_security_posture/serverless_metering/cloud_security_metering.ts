@@ -87,7 +87,7 @@ export default function (providerContext: FtrProviderContext) {
       mockUsageApiServer.close();
     });
 
-    it('Should intercept usage API request for CSPM', async () => {
+    it('Should not report CSPM usage records when CSPM metering is disabled (default)', async () => {
       await createPackagePolicy(
         supertestWithoutAuth,
         agentPolicyId,
@@ -99,30 +99,26 @@ export default function (providerContext: FtrProviderContext) {
         roleAuthc,
         internalRequestHeader
       );
-      const billableFindings = getMockFindings({
+      const billableFindingsCSPM = getMockFindings({
         postureType: 'cspm',
         isBillableAsset: true,
         numberOfFindings: 5,
       });
 
-      const notBillableFindings = getMockFindings({
-        postureType: 'cspm',
-        isBillableAsset: false,
-        numberOfFindings: 10,
+      const billableFindingsKSPM = getMockFindings({
+        postureType: 'kspm',
+        isBillableAsset: true,
+        numberOfFindings: 3,
       });
 
-      await findingsIndex.addBulk([...billableFindings, ...notBillableFindings]);
+      await findingsIndex.addBulk([...billableFindingsCSPM, ...billableFindingsKSPM]);
 
-      let interceptedRequestBody: UsageRecord[] = [];
       await retry.try(async () => {
-        if (interceptedRequestBody.length > 0) {
-          interceptedRequestBody = getInterceptedRequestPayload();
-          expect(interceptedRequestBody.length).to.greaterThan(0);
-          const usageSubTypes = interceptedRequestBody.map((record) => record.usage.sub_type);
-          expect(usageSubTypes).to.contain('cspm');
-          expect(interceptedRequestBody[0].usage.type).to.be('cloud_security');
-          expect(interceptedRequestBody[0].usage.quantity).to.be(billableFindings.length);
-        }
+        const interceptedRequestBody = getInterceptedRequestPayload();
+        const usageSubTypes = interceptedRequestBody.map((record) => record.usage.sub_type);
+
+        expect(usageSubTypes).to.contain('kspm');
+        expect(usageSubTypes).not.to.contain('cspm');
       });
     });
 
@@ -200,7 +196,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    it('Should intercept usage API request with all integrations usage records', async () => {
+    it('Should intercept usage API request with all metered integrations usage records', async () => {
       // Create one package policy - it takes care forCSPM, KSMP and CNVM
       await createPackagePolicy(
         supertestWithoutAuth,
@@ -260,16 +256,14 @@ export default function (providerContext: FtrProviderContext) {
         interceptedRequestBody = getInterceptedRequestPayload();
         const usageSubTypes = interceptedRequestBody.map((record) => record.usage.sub_type);
 
-        expect(usageSubTypes).to.contain('cspm');
         expect(usageSubTypes).to.contain('kspm');
         expect(usageSubTypes).to.contain('cnvm');
+        expect(usageSubTypes).not.to.contain('cspm');
         const totalUsageQuantity = interceptedRequestBody.reduce(
           (acc, record) => acc + record.usage.quantity,
           0
         );
-        expect(totalUsageQuantity).to.be(
-          billableFindingsCSPM.length + billableFindingsKSPM.length + billableFindingsCNVM.length
-        );
+        expect(totalUsageQuantity).to.be(billableFindingsKSPM.length + billableFindingsCNVM.length);
       });
     });
   });
