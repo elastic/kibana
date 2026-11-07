@@ -374,9 +374,10 @@ describe('Index Management extensions', () => {
       );
 
       await waitFor(() => expect(onClose).toHaveBeenCalled());
-      expect(core.notifications.toasts.addError).toHaveBeenCalledWith(expect.any(Error), {
-        title: 'Unable to load search boost',
-      });
+      expect(core.notifications.toasts.addDanger).toHaveBeenCalledWith(
+        expect.objectContaining({ title: 'Unable to load search boost' }),
+        expect.anything()
+      );
     });
 
     it("doesn't offer to edit the rule without the privilege to", () => {

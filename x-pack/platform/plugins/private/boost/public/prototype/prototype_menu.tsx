@@ -19,17 +19,20 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { HttpStart, NotificationsStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import { HeaderActionButton } from '@kbn/core-chrome-browser-components';
 import { i18n } from '@kbn/i18n';
 import { BOOST_RESTORE_API_PATH } from '../../common/constants';
 import type { PrototypeSettings } from '../../common/prototype_settings';
 import { ConfirmModal } from '../components/confirm_modal';
+import type { ErrorDetailsServices } from '../components/error_details';
+import { notifyRequestError } from '../components/error_details';
 import { setPrototypeSettings, usePrototypeSettings } from './prototype_settings';
 
 interface PrototypeMenuProps {
   http: HttpStart;
-  notifications: NotificationsStart;
+  /** Core's services that report errors. */
+  services: ErrorDetailsServices;
   onRestored: () => void;
 }
 
@@ -38,7 +41,7 @@ const PROTOTYPE_MENU_LABEL = i18n.translate('xpack.boost.prototype.menuLabel', {
 });
 
 /** Global header menu of prototype-only actions. */
-export const PrototypeMenu = ({ http, notifications, onRestored }: PrototypeMenuProps) => {
+export const PrototypeMenu = ({ http, services, onRestored }: PrototypeMenuProps) => {
   const popoverId = useGeneratedHtmlId({ prefix: 'boostPrototypeMenu' });
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -52,10 +55,14 @@ export const PrototypeMenu = ({ http, notifications, onRestored }: PrototypeMenu
 
   const changeSettings = (changes: Partial<PrototypeSettings>) =>
     setPrototypeSettings(changes).catch((error) =>
-      notifications.toasts.addError(error, {
+      notifyRequestError(services, error, {
         title: i18n.translate('xpack.boost.prototype.settingsErrorTitle', {
           defaultMessage: 'Unable to change prototype settings',
         }),
+        description: i18n.translate('xpack.boost.prototype.settingsErrorDescription', {
+          defaultMessage: 'An error prevented the prototype settings from changing.',
+        }),
+        onRetry: () => changeSettings(changes),
       })
     );
 
@@ -65,10 +72,14 @@ export const PrototypeMenu = ({ http, notifications, onRestored }: PrototypeMenu
       await http.post(BOOST_RESTORE_API_PATH);
       onRestored();
     } catch (error) {
-      notifications.toasts.addError(error, {
+      notifyRequestError(services, error, {
         title: i18n.translate('xpack.boost.prototype.restoreErrorTitle', {
           defaultMessage: 'Unable to restore prototype defaults',
         }),
+        description: i18n.translate('xpack.boost.prototype.restoreErrorDescription', {
+          defaultMessage: 'An error prevented the prototype defaults from being restored.',
+        }),
+        onRetry: () => void onConfirmRestore(),
       });
       setIsRestoring(false);
       setIsModalVisible(false);

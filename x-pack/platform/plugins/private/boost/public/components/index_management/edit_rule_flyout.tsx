@@ -7,12 +7,14 @@
 
 import React, { useEffect } from 'react';
 import type { IHttpFetchError } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { getDefaultRuleType } from '../../../common/presets';
 import type { BoostRule } from '../../../common/types';
 import { useBoostServices } from '../../hooks/use_boost_services';
 import { useBoostState } from '../../hooks/use_boost_state';
 import { ProjectDefaultFlyout } from '../project_defaults/project_default_flyout';
 import { RuleFlyout } from '../rules/rule_flyout';
+import { notifyRequestError } from '../error_details';
 import { EXPLANATION_ERROR_LABEL } from './explanation_status';
 
 interface EditRuleFlyoutProps {
@@ -22,15 +24,23 @@ interface EditRuleFlyoutProps {
   onClose: () => void;
 }
 
-/** Says why a flyout that couldn't load what it edits closes, and closes it. */
+/**
+ * Says why a flyout that couldn't load what it edits closes, and closes it. Opening it again tries
+ * again, so its details have nothing to try again.
+ */
 export const useCloseOnError = (error: IHttpFetchError | null, onClose: () => void) => {
-  const { notifications } = useBoostServices();
+  const services = useBoostServices();
   useEffect(() => {
     if (error) {
-      notifications.toasts.addError(error, { title: EXPLANATION_ERROR_LABEL });
+      notifyRequestError(services, error, {
+        title: EXPLANATION_ERROR_LABEL,
+        description: i18n.translate('xpack.boost.indexManagement.loadErrorDescription', {
+          defaultMessage: 'An error prevented search boost from loading.',
+        }),
+      });
       onClose();
     }
-  }, [error, notifications, onClose]);
+  }, [error, services, onClose]);
 };
 
 /**

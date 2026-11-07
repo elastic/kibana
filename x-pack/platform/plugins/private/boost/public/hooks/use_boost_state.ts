@@ -25,6 +25,7 @@ import type {
 } from '../../common/types';
 import type { RequestErrorDescription } from '../request_error';
 import { describeRequestError } from '../request_error';
+import { notifyRequestError } from '../components/error_details';
 import { useBoostServices } from './use_boost_services';
 
 const BOOST_STATE_QUERY_KEY = ['boost', 'state'] as const;
@@ -58,12 +59,19 @@ export const useRefetchBoostState = () => {
   return () => queryClient.invalidateQueries({ queryKey: BOOST_STATE_QUERY_KEY });
 };
 
-/** Mutations respond with the full updated state, which replaces the cached state. */
+/** What a mutation's error toast says, and the name its details list it under. */
+type MutationErrorText = Omit<Parameters<typeof notifyRequestError>[2], 'onRetry'>;
+
+/**
+ * Mutations respond with the full updated state, which replaces the cached state. One that fails
+ * says why in a toast, whose details have nothing to try again: the form stays open to save again.
+ */
 const useBoostMutation = <TVariables>(
   request: (http: HttpStart, variables: TVariables) => Promise<BoostState>,
-  errorTitle: string
+  describeError: (variables: TVariables) => MutationErrorText
 ) => {
-  const { http, notifications } = useBoostServices();
+  const services = useBoostServices();
+  const { http } = services;
   const queryClient = useQueryClient();
 
   return useMutation<BoostState, IHttpFetchError, TVariables>({
@@ -73,7 +81,7 @@ const useBoostMutation = <TVariables>(
       // What applies to each index or data stream may have changed with it.
       queryClient.invalidateQueries({ queryKey: BOOST_EXPLAIN_QUERY_KEY });
     },
-    onError: (error) => notifications.toasts.addError(error, { title: errorTitle }),
+    onError: (error, variables) => notifyRequestError(services, error, describeError(variables)),
   });
 };
 
@@ -81,8 +89,14 @@ export const useCreateProfile = () =>
   useBoostMutation(
     (http, profile: BoostProfileInput) =>
       http.post<BoostState>(BOOST_PROFILES_API_PATH, { body: JSON.stringify(profile) }),
-    i18n.translate('xpack.boost.createProfileErrorTitle', {
-      defaultMessage: 'Unable to create boost profile',
+    ({ name }) => ({
+      title: i18n.translate('xpack.boost.createProfileErrorTitle', {
+        defaultMessage: 'Unable to create boost profile "{name}"',
+        values: { name },
+      }),
+      description: i18n.translate('xpack.boost.createProfileErrorDescription', {
+        defaultMessage: 'An error prevented this profile from being created.',
+      }),
     })
   );
 
@@ -92,8 +106,14 @@ export const useUpdateProfile = () =>
       http.put<BoostState>(`${BOOST_PROFILES_API_PATH}/${encodeURIComponent(profile.name)}`, {
         body: JSON.stringify(profile),
       }),
-    i18n.translate('xpack.boost.updateProfileErrorTitle', {
-      defaultMessage: 'Unable to save boost profile',
+    ({ name }) => ({
+      title: i18n.translate('xpack.boost.updateProfileErrorTitle', {
+        defaultMessage: 'Unable to save boost profile "{name}"',
+        values: { name },
+      }),
+      description: i18n.translate('xpack.boost.updateProfileErrorDescription', {
+        defaultMessage: 'An error prevented changes to this profile from being saved.',
+      }),
     })
   );
 
@@ -168,8 +188,14 @@ export const useCreateRule = () =>
   useBoostMutation(
     (http, rule: BoostRuleInput) =>
       http.post<BoostState>(BOOST_RULES_API_PATH, { body: JSON.stringify(rule) }),
-    i18n.translate('xpack.boost.createRuleErrorTitle', {
-      defaultMessage: 'Unable to create boost rule',
+    ({ name }) => ({
+      title: i18n.translate('xpack.boost.createRuleErrorTitle', {
+        defaultMessage: 'Unable to create boost rule "{name}"',
+        values: { name },
+      }),
+      description: i18n.translate('xpack.boost.createRuleErrorDescription', {
+        defaultMessage: 'An error prevented this rule from being created.',
+      }),
     })
   );
 
@@ -179,8 +205,14 @@ export const useUpdateRule = () =>
       http.put<BoostState>(`${BOOST_RULES_API_PATH}/${encodeURIComponent(rule.name)}`, {
         body: JSON.stringify(rule),
       }),
-    i18n.translate('xpack.boost.updateRuleErrorTitle', {
-      defaultMessage: 'Unable to save boost rule',
+    ({ name }) => ({
+      title: i18n.translate('xpack.boost.updateRuleErrorTitle', {
+        defaultMessage: 'Unable to save boost rule "{name}"',
+        values: { name },
+      }),
+      description: i18n.translate('xpack.boost.updateRuleErrorDescription', {
+        defaultMessage: 'An error prevented changes to this rule from being saved.',
+      }),
     })
   );
 
@@ -191,8 +223,18 @@ export const useUpdateDefaultRule = () =>
       http.put<BoostState>(`${BOOST_DEFAULT_RULES_API_PATH}/${encodeURIComponent(type)}`, {
         body: JSON.stringify({ boost_profile: profileName }),
       }),
-    i18n.translate('xpack.boost.updateDefaultRuleErrorTitle', {
-      defaultMessage: 'Unable to save project default',
+    ({ type }) => ({
+      title:
+        type === 'data_streams'
+          ? i18n.translate('xpack.boost.updateDefaultRuleErrorTitle.dataStreams', {
+              defaultMessage: 'Unable to save the project default for data streams',
+            })
+          : i18n.translate('xpack.boost.updateDefaultRuleErrorTitle.indices', {
+              defaultMessage: 'Unable to save the project default for indices',
+            }),
+      description: i18n.translate('xpack.boost.updateDefaultRuleErrorDescription', {
+        defaultMessage: 'An error prevented this project default from being saved.',
+      }),
     })
   );
 

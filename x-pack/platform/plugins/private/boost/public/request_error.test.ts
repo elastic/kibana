@@ -8,22 +8,22 @@
 import { describeRequestError } from './request_error';
 
 describe('describeRequestError', () => {
-  it("says what the server said, after the response's status", () => {
+  it("says the response's status, and what the server said", () => {
     const error = Object.assign(new Error('Gateway Timeout'), {
       body: { message: "Elasticsearch didn't respond in time." },
       response: { status: 504, statusText: 'Gateway Timeout' },
     });
 
     expect(describeRequestError(error)).toEqual({
+      status: '504 Gateway Timeout',
       message: "Elasticsearch didn't respond in time.",
-      details: "504 Gateway Timeout\nElasticsearch didn't respond in time.",
     });
   });
 
   it("says the request's own message without a response, such as offline", () => {
     expect(describeRequestError(new Error('Failed to fetch'))).toEqual({
+      status: undefined,
       message: 'Failed to fetch',
-      details: 'Failed to fetch',
     });
   });
 });

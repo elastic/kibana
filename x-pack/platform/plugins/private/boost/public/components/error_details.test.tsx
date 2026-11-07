@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createErrorToastServices, openErrorDetails } from '../test_helpers/error_toast_services';
-import { showErrorToast } from './error_details';
+import { notifyRequestError, showErrorToast } from './error_details';
 
 describe('showErrorToast', () => {
   afterEach(() => {
@@ -59,5 +59,22 @@ describe('showErrorToast', () => {
     expect(mocks.close).toHaveBeenCalledTimes(2);
     expect(mocks.notifications.toasts.remove).toHaveBeenCalledWith(mocks.toast);
     expect(onRetry).toHaveBeenCalled();
+  });
+
+  it("closes with its one button when there's nothing to try again from here", async () => {
+    const mocks = createErrorToastServices();
+    notifyRequestError(mocks.services, new Error('Failed to fetch'), {
+      title: 'Unable to save boost rule "catalogs"',
+      description: 'An error prevented changes to this rule from being saved.',
+    });
+
+    const { modal } = openErrorDetails(mocks);
+    // Without a response, there's no status, only the reason, and nothing to name.
+    const [header, row] = within(modal.getByRole('table')).getAllByRole('row');
+    expect(header).toHaveTextContent(/^ErrorReason$/);
+    expect(row).toHaveTextContent(/^—Failed to fetch$/);
+    expect(modal.queryByRole('button', { name: 'Try again' })).not.toBeInTheDocument();
+    await userEvent.click(modal.getByRole('button', { name: 'Close' }));
+    expect(mocks.close).toHaveBeenCalled();
   });
 });

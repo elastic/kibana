@@ -20,7 +20,7 @@ export const mountPrototypeMenu = (element: HTMLElement, core: CoreStart): (() =
     <KibanaRenderContextProvider {...core}>
       <PrototypeMenu
         http={core.http}
-        notifications={core.notifications}
+        services={core}
         onRestored={() => {
           resetNewNavBadge();
           window.location.reload();

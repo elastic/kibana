@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { describeRequestError } from '../../request_error';
 import type { ErrorDetailsServices } from '../error_details';
-import { RequestErrorDetails, showErrorToast } from '../error_details';
+import { notifyRequestError } from '../error_details';
 
 /**
- * Says a rule couldn't be deleted. The toast's title says so, and its details say why, with what
- * the server said, and a button that tries again.
+ * Says a rule couldn't be deleted. The toast's title names it, and its details say why, with a
+ * button that tries again.
  */
 export const notifyRuleDeletionError = (
   services: ErrorDetailsServices,
@@ -21,19 +19,14 @@ export const notifyRuleDeletionError = (
   error: Error,
   onRetry: () => void
 ): void => {
-  showErrorToast(services, {
+  notifyRequestError(services, error, {
     title: i18n.translate('xpack.boost.ruleDeletion.failedTitle', {
       defaultMessage: 'Unable to delete boost rule "{name}"',
       values: { name },
     }),
-    details: (
-      <RequestErrorDetails
-        description={i18n.translate('xpack.boost.ruleDeletion.failedDescription', {
-          defaultMessage: 'An error prevented this rule from being deleted. You can try again.',
-        })}
-        details={describeRequestError(error).details}
-      />
-    ),
+    description: i18n.translate('xpack.boost.ruleDeletion.failedDescription', {
+      defaultMessage: 'An error prevented this rule from being deleted. You can try again.',
+    }),
     onRetry,
   });
 };

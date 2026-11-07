@@ -14,8 +14,8 @@ import {
 import { notifyProfileDeletion } from './profile_deletion_notice';
 
 const TIMEOUT = {
+  status: '504 Gateway Timeout',
   message: "Elasticsearch didn't respond in time.",
-  details: "504 Gateway Timeout\nElasticsearch didn't respond in time.",
 };
 
 describe('notifyProfileDeletion', () => {
@@ -66,8 +66,10 @@ describe('notifyProfileDeletion', () => {
       )
     ).toBeInTheDocument();
     const [header, row] = within(modal.getByRole('table')).getAllByRole('row');
-    expect(header).toHaveTextContent('Boost ruleError');
-    expect(row).toHaveTextContent("archivesElasticsearch didn't respond in time.");
+    expect(header).toHaveTextContent('Boost ruleErrorReason');
+    expect(row).toHaveTextContent(
+      "archives504 Gateway TimeoutElasticsearch didn't respond in time."
+    );
 
     await userEvent.click(modal.getByRole('button', { name: 'Try again' }));
     expect(onRetry).toHaveBeenCalledWith(['archives']);
@@ -85,9 +87,10 @@ describe('notifyProfileDeletion', () => {
 
     const { toastInput, modal } = openErrorDetails(mocks);
     expect(toastInput.text).toBe('Deleted the rule that used it, but not the profile.');
-    expect(modal.getByTestId('boostErrorDetailsCode')).toHaveTextContent(
-      "504 Gateway Timeout Elasticsearch didn't respond in time."
-    );
+    // The title names it, so the table doesn't.
+    const [header, row] = within(modal.getByRole('table')).getAllByRole('row');
+    expect(header).toHaveTextContent(/^ErrorReason$/);
+    expect(row).toHaveTextContent(/^504 Gateway TimeoutElasticsearch didn't respond in time\.$/);
     await userEvent.click(modal.getByRole('button', { name: 'Try again' }));
     expect(onRetry).toHaveBeenCalledWith([]);
   });

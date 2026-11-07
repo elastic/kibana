@@ -10,11 +10,17 @@ import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { BOOST_PROFILES_API_PATH, BOOST_RULES_API_PATH } from '../../common/constants';
-import { useDeleteProfileAndRules, useDeleteRule } from './use_boost_state';
+import { useDeleteProfileAndRules, useDeleteRule, useUpdateRule } from './use_boost_state';
 
 const mockDelete = jest.fn();
+const mockPut = jest.fn();
+const mockAddDanger = jest.fn();
 jest.mock('./use_boost_services', () => ({
-  useBoostServices: () => ({ http: { delete: mockDelete } }),
+  useBoostServices: () => ({
+    http: { delete: mockDelete, put: mockPut },
+    notifications: { toasts: { addDanger: mockAddDanger } },
+    uiSettings: { get: () => 300000 },
+  }),
 }));
 
 // An error like Kibana's HTTP client throws for an error response.
@@ -66,8 +72,8 @@ describe('useDeleteProfileAndRules', () => {
         {
           kind: 'rule',
           name: 'archives',
+          status: '504 Gateway Timeout',
           message: "Elasticsearch didn't respond in time.",
-          details: "504 Gateway Timeout\nElasticsearch didn't respond in time.",
         },
       ],
     });
@@ -101,8 +107,8 @@ describe('useDeleteProfileAndRules', () => {
         {
           kind: 'profile',
           name: 'catalog-search',
+          status: '504 Gateway Timeout',
           message: "Elasticsearch didn't respond in time.",
-          details: "504 Gateway Timeout\nElasticsearch didn't respond in time.",
         },
       ],
     });
@@ -121,5 +127,26 @@ describe('useDeleteRule', () => {
     const error = httpError(504, "Elasticsearch didn't respond in time.");
     mockDelete.mockRejectedValueOnce(error);
     await expect(result.current.deleteRule('catalogs')).rejects.toBe(error);
+  });
+});
+
+describe('useUpdateRule', () => {
+  it('says which rule failed to save, with nothing to try again, as its form stays open', async () => {
+    mockPut.mockRejectedValueOnce(httpError(504, "Elasticsearch didn't respond in time."));
+    const { result } = renderHook(() => useUpdateRule(), { wrapper });
+
+    await expect(
+      result.current.mutateAsync({
+        name: 'catalogs',
+        index_patterns: ['catalog-*'],
+        boost_profile: 'catalog-search',
+        priority: 1,
+      })
+    ).rejects.toThrow();
+
+    expect(mockAddDanger).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Unable to save boost rule "catalogs"', text: undefined }),
+      { toastLifeTimeMs: 300000 }
+    );
   });
 });

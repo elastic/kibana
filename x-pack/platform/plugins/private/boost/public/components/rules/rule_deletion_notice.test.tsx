@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
   createErrorToastServices,
@@ -33,9 +34,10 @@ describe('notifyRuleDeletionError', () => {
     expect(
       modal.getByText('An error prevented this rule from being deleted. You can try again.')
     ).toBeInTheDocument();
-    expect(modal.getByTestId('boostErrorDetailsCode')).toHaveTextContent(
-      "504 Gateway Timeout Elasticsearch didn't respond in time."
-    );
+    // The title names it, so the table doesn't.
+    const [header, row] = within(modal.getByRole('table')).getAllByRole('row');
+    expect(header).toHaveTextContent(/^ErrorReason$/);
+    expect(row).toHaveTextContent(/^504 Gateway TimeoutElasticsearch didn't respond in time\.$/);
     await userEvent.click(modal.getByRole('button', { name: 'Try again' }));
     expect(onRetry).toHaveBeenCalled();
   });
