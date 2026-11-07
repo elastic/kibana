@@ -53,13 +53,23 @@ Do **NOT** use this skill for:
 | \`security.remove_watchlist_rule_based_data_source\` | required | Remove the rule-based data source of a given type. |
 | \`security.list_watchlist_data_sources\` | none | List every source (rule-based + managed integration) on a watchlist — check before \`set\`, list the candidate sources that could explain an entity's presence, spot a broken \`index\` source. |
 
+## Reply contract (what the reply must contain)
+
+The tools are only half the answer — the reply has to carry the facts the user needs, and a reply that omits them reads as if the work was not done. Apply these rules to every turn of this skill:
+
+- **Enumerating watchlists** — always give the **name and the id** of each watchlist returned by \`security.list_watchlists\`, including inside a table. Never list names alone — the id is in the same tool result, so there is nothing extra to look up.
+- **Setting a rule-based data source** — state the sync cadence explicitly in the confirmation reply: the watchlist now updates **automatically, roughly every 10 minutes**. "Re-evaluated automatically as entities start or stop matching" without the cadence is not the required reply.
+- **Removing a rule-based data source** — same cadence, stated the other way round: matching entities are cleaned up on the next sync, roughly every 10 minutes.
+- **One-time adds** (\`security.add_entities_to_watchlist\`) — say in prose that this is a **one-time** add that will not pick up new matches later, and name \`security.set_watchlist_rule_based_data_source\` as the standing query to set up if the user wants membership kept in sync going forward. Do not call that tool for a one-time request.
+- **Create-and-populate in one request** — \`security.create_watchlist\` is confirmation-gated, so the add cannot happen in the same turn: stop after the create and say in prose that the entities will be added as a follow-up once the watchlist exists. Never claim they were already added.
+
 ## Example flows
 
 ### Enumerate
 User: "What watchlists do we have?"
 
 1. Call \`security.list_watchlists\` (no arguments; pass \`nameContains\` only if the user named part of one).
-2. Summarize in prose — name, risk modifier, and description per watchlist; use a short markdown table when 4+ are returned. This is read-only; no confirmation and no rich attachment.
+2. Summarize in prose — **name and id**, risk modifier, and description per watchlist; use a short markdown table when 4+ are returned (keep the id column in that table). This is read-only; no confirmation and no rich attachment.
 
 ### Create
 User: "Create a watchlist called Compromised Accounts for users we suspect have been compromised."
@@ -85,9 +95,10 @@ User: "Delete the Compromised Accounts watchlist."
 ### Create and populate (headline flow)
 User: "Create a watchlist called Compromised Accounts and add users user:jsmith123 and user:rjones456."
 
-1. Call \`security.create_watchlist\` with \`{ name: "Compromised Accounts" }\`. Confirm and create.
-2. With the new watchlist's id from step 1, call \`security.add_entities_to_watchlist\` with \`{ watchlistId: "<id from step 1>", entityIds: ["user:jsmith123", "user:rjones456"] }\`. Confirm and add.
-3. Summarize both outcomes: the watchlist was created and N of M entities were added (mention \`not_found\`, \`failed\`, or \`unresolvedReferences\` if any).
+1. Call \`security.create_watchlist\` with \`{ name: "Compromised Accounts" }\`. The create is confirmation-gated, so the watchlist does not exist yet and its id is not known — do not call \`security.add_entities_to_watchlist\` in this turn.
+2. Say in prose that the two entities will be added as a follow-up once the watchlist is created — do not claim they were already added, and do not fabricate an id.
+3. On the next turn, with the watchlist's id, call \`security.add_entities_to_watchlist\` with \`{ watchlistId: "<id from step 1>", entityIds: ["user:jsmith123", "user:rjones456"] }\`. Confirm and add.
+4. Summarize both outcomes: the watchlist was created and N of M entities were added (mention \`not_found\`, \`failed\`, or \`unresolvedReferences\` if any).
 
 ### Query-then-add flow (one-time)
 User: "Add all critical-risk users to the Privileged Users watchlist."
@@ -95,7 +106,7 @@ User: "Add all critical-risk users to the Privileged Users watchlist."
 1. Call \`security.get_watchlist_id\` with \`{ identifier: "Privileged Users" }\` to resolve the id.
 2. Call \`security.search_entities\` with \`{ entityTypes: ["user"], riskLevels: ["Critical"] }\` to find the candidate entities. Collect each result's \`entity.id\` field.
 3. Call \`security.add_entities_to_watchlist\` with \`{ watchlistId: "<id from step 1>", entityIds: <ids from step 2> }\`. Confirm; the prompt names the watchlist and shows the entity-id preview.
-4. Summarize: how many entities were added, how many failed, how many were not found, and any \`unresolvedReferences\` the user still needs to pick. This is a **one-time, point-in-time** add — it does not track new critical-risk users going forward. If the user wants that, see the rule-based data source flow below.
+4. Summarize: how many entities were added, how many failed, how many were not found, and any \`unresolvedReferences\` the user still needs to pick. Say in prose that this is a **one-time** add — it does not pick up new critical-risk users going forward — and that \`security.set_watchlist_rule_based_data_source\` is the standing query to set up if they want those users kept in sync automatically. Name the tool; do not call it for this one-time request.
 
 ### Rule-based data source
 Sets up (or replaces) the automatic rule — a KQL query against the entity store, or a correlated index — that keeps membership in sync going forward, as opposed to a one-time add.
@@ -108,7 +119,7 @@ User: "Any time a host running Ubuntu shows up, add it to the Server Fleet watch
 1. Call \`security.get_watchlist_id\` with \`{ identifier: "Server Fleet" }\` to resolve the id.
 2. (Optional but recommended) Call \`security.list_watchlist_data_sources\` with \`{ watchlistId: "<id>" }\` to see whether a \`store\` source already exists — if so, the confirmation will show current → new instead of a fresh creation.
 3. "Ubuntu" maps to \`host.os.name\`, a standard ECS field on the entity store's own well-known schema — there's nothing customer-specific to ask about, unlike a bespoke index/field in the user's own data (see the next example). Call \`security.set_watchlist_rule_based_data_source\` with \`{ type: "store", watchlistId: "<id>", queryRule: "host.os.name: Ubuntu*" }\`. Note the trailing, **unquoted** \`*\`: \`host.os.name\` values look like "Ubuntu 22.04.3 LTS", so an exact match on \`"Ubuntu"\` would silently match nothing — and a *quoted* \`"Ubuntu*"\` is parsed as that literal string (asterisk included), not a wildcard, so it would also silently match nothing.
-4. On accept, tell the user the watchlist now updates automatically (within about 10 minutes) as hosts start or stop matching.
+4. On accept, tell the user the watchlist now updates **automatically, roughly every 10 minutes**, as hosts start or stop matching — state the cadence, not just "automatically".
 
 #### Example: the source/condition is customer-specific — ask first
 User: "Add users to Departing Employees based on our HR index where the employee is listed as having their contract terminated."
@@ -119,7 +130,7 @@ Neither "our HR index" nor "contract terminated" names an actual index pattern o
 2. User replies: "The index is \`hr-workday-*\`, and terminated employees have \`employment.status\` set to \`Terminated\`."
 3. Call \`security.get_watchlist_id\` with \`{ identifier: "Departing Employees" }\` to resolve the id.
 4. Now that both specifics are concrete, call \`security.set_watchlist_rule_based_data_source\` with \`{ type: "index", watchlistId: "<id>", indexPattern: "hr-workday-*", identifierField: "user.name", queryRule: "employment.status: \\"Terminated\\"" }\` — \`identifierField\` is \`user.name\`/\`user.email\` since this watchlist tracks users; ask which the HR index actually carries if that's unclear.
-5. On accept, tell the user the watchlist now updates automatically as employees are marked terminated in that index.
+5. On accept, tell the user the watchlist now updates **automatically, roughly every 10 minutes**, as employees are marked terminated in that index — same cadence as any other rule-based source.
 
 ### Deciding one-time vs. rule-based
 - "Add X to the watchlist" / a specific, named set of entities, with no mention of staying in sync → one-time: \`security.add_entities_to_watchlist\` (optionally preceded by \`security.search_entities\` to resolve the set).
@@ -131,7 +142,7 @@ User: "Stop automatically adding Ubuntu hosts to the Server Fleet watchlist."
 
 1. Call \`security.get_watchlist_id\` with \`{ identifier: "Server Fleet" }\` to resolve the id.
 2. Call \`security.remove_watchlist_rule_based_data_source\` with \`{ watchlistId: "<id>", type: "store" }\`. Confirm.
-3. On accept, clarify that hosts added by this query will be automatically removed from the watchlist on the next sync (within about 10 minutes) — same cadence as they were added. This does not affect entities added manually or via another source. There is no tool to remove them immediately; \`security.remove_entities_from_watchlist\` only targets manual assignments and will report these as \`not_found\` until the automatic cleanup runs.
+3. On accept, clarify that hosts added by this query will be automatically removed from the watchlist on the next sync — **roughly every 10 minutes**, the same cadence they were added with. This does not affect entities added manually or via another source. There is no tool to remove them immediately; \`security.remove_entities_from_watchlist\` only targets manual assignments and will report these as \`not_found\` until the automatic cleanup runs.
 
 ### Remove (manual entity)
 User: "Remove user:jsmith123 from the Privileged Users watchlist."
