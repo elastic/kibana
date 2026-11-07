@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/field-formats-plugin'
   - '@kbn/datemath'
+  - '@kbn/es-date-rounding'
   - '@kbn/es-query'
   - '@kbn/inspector-plugin'
   - '@kbn/usage-collection-plugin'

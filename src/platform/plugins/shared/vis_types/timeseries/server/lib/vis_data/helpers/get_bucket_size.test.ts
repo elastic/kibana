@@ -30,10 +30,9 @@ describe('getBucketSize', () => {
 
   test('returns auto calculated buckets', () => {
     const result = getBucketSize(req, 'auto', capabilities, 100);
-    const expectedValue = 86400; // 24h
 
-    expect(result).toHaveProperty('bucketSize', expectedValue);
-    expect(result).toHaveProperty('intervalString', `${expectedValue}s`);
+    expect(result).toHaveProperty('bucketSize', 604800);
+    expect(result).toHaveProperty('intervalString', '1w');
   });
 
   test('returns overridden buckets (1s)', () => {
@@ -67,14 +66,35 @@ describe('getBucketSize', () => {
   test('returns overridden buckets (>=5d)', () => {
     const result = getBucketSize(req, '>=5d', capabilities, 100);
 
-    expect(result).toHaveProperty('bucketSize', 432000);
-    expect(result).toHaveProperty('intervalString', '5d');
+    expect(result).toHaveProperty('bucketSize', 604800);
+    expect(result).toHaveProperty('intervalString', '1w');
   });
 
   test('returns overridden buckets for 1 bar and >=1d interval', () => {
     const result = getBucketSize(req, '>=1d', capabilities, 1);
 
-    expect(result).toHaveProperty('bucketSize', 2592000);
-    expect(result).toHaveProperty('intervalString', '2592000s');
+    expect(result).toHaveProperty('bucketSize', 31536000);
+    expect(result).toHaveProperty('intervalString', '1y');
+  });
+
+  test('keeps the validated width when rollup coarsens the auto interval', () => {
+    const shortReq = {
+      body: {
+        timerange: {
+          min: '2017-01-01T00:00:00.000Z',
+          max: '2017-01-01T01:00:00.000Z',
+        },
+      },
+    } as VisTypeTimeseriesVisDataRequest;
+    const rollup = {
+      timezone: 'UTC',
+      maxBucketsLimit: 200000,
+      getValidTimeInterval: jest.fn(() => '1h'),
+    } as unknown as SearchCapabilities;
+
+    const result = getBucketSize(shortReq, 'auto', rollup, 100);
+
+    expect(result).toHaveProperty('intervalString', '1h');
+    expect(result).toHaveProperty('bucketSize', 3600);
   });
 });

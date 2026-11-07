@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { getAbsoluteTimeRange, calcAutoIntervalNear } from '@kbn/data-plugin/common';
+import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
+import { ianaTimeZone, pickDateRounding } from '@kbn/es-date-rounding';
 import type { TimeRange } from '@kbn/es-query';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import moment from 'moment';
@@ -69,9 +70,23 @@ export const formulaIntervalFn: ExpressionFunctionFormulaInterval = {
 
   fn(_input, args, { getSearchContext }) {
     const { timeRange, now } = getSearchContext();
-    return timeRange && args.targetBars
-      ? calcAutoIntervalNear(args.targetBars, getTimeRangeAsNumber(timeRange, now)).asMilliseconds()
-      : 0;
+    if (!timeRange || !args.targetBars) {
+      return 0;
+    }
+    const absoluteTimeRange = getAbsoluteTimeRange(
+      timeRange,
+      now != null ? { forceNow: new Date(now) } : {}
+    );
+    const from = moment(absoluteTimeRange.from).valueOf();
+    const to = moment(absoluteTimeRange.to).valueOf();
+    if (!Number.isFinite(from) || !Number.isFinite(to) || from >= to) {
+      return 0;
+    }
+    return pickDateRounding(args.targetBars, {
+      from,
+      to,
+      timeZone: ianaTimeZone('UTC'),
+    }).nominalMs;
   },
 };
 

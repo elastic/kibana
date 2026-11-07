@@ -290,7 +290,7 @@ export function getUiSettings(
       value: DEFAULT_HISTOGRAM_BAR_TARGET,
       description: i18n.translate('data.advancedSettings.histogram.barTargetText', {
         defaultMessage:
-          'Attempt to generate around this many buckets when using "auto" interval in date and numeric histograms',
+          'Attempt to generate at most this many buckets when using "auto" interval in date histograms (the same N as ES|QL BUCKET). Numeric histograms still target around this many buckets.',
       }),
       schema: schema.number(),
     },

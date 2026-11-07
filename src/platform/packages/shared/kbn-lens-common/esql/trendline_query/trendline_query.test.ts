@@ -18,20 +18,20 @@ import {
 describe('appendTimeBucketToEsqlQuery', () => {
   it('appends BY when query has STATS without BY', () => {
     expect(appendTimeBucketToEsqlQuery('FROM index | STATS AVG(price)', 'timestamp')).toBe(
-      'FROM index | STATS AVG(price) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
+      'FROM index | STATS AVG(price) BY BUCKET(timestamp, 100, ?_tstart, ?_tend)'
     );
   });
 
   it('appends to existing BY clause', () => {
     expect(
       appendTimeBucketToEsqlQuery('FROM index | STATS AVG(price) BY category', 'timestamp')
-    ).toBe('FROM index | STATS AVG(price) BY category, BUCKET(timestamp, 75, ?_tstart, ?_tend)');
+    ).toBe('FROM index | STATS AVG(price) BY category, BUCKET(timestamp, 100, ?_tstart, ?_tend)');
   });
 
   it('normalizes keyword casing in output', () => {
     expect(
       appendTimeBucketToEsqlQuery('FROM index | stats avg(price) by region', '@timestamp')
-    ).toBe('FROM index | STATS AVG(price) BY region, BUCKET(@timestamp, 75, ?_tstart, ?_tend)');
+    ).toBe('FROM index | STATS AVG(price) BY region, BUCKET(@timestamp, 100, ?_tstart, ?_tend)');
   });
 
   it('handles WHERE clause before STATS', () => {
@@ -41,7 +41,7 @@ describe('appendTimeBucketToEsqlQuery', () => {
         'timestamp'
       )
     ).toBe(
-      'FROM index | WHERE status >= ?_tstart AND status <= ?_tend | STATS MEDIAN(bytes) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
+      'FROM index | WHERE status >= ?_tstart AND status <= ?_tend | STATS MEDIAN(bytes) BY BUCKET(timestamp, 100, ?_tstart, ?_tend)'
     );
   });
 
@@ -58,16 +58,18 @@ describe('appendTimeBucketToEsqlQuery', () => {
   });
 
   it('adds BUCKET when one exists for a different field', () => {
-    const query = 'FROM index | STATS COUNT(*) BY BUCKET(other_field, 75, ?_tstart, ?_tend)';
+    const query = 'FROM index | STATS COUNT(*) BY BUCKET(other_field, 100, ?_tstart, ?_tend)';
     const result = appendTimeBucketToEsqlQuery(query, 'timestamp');
     expect(result).toBe(
-      'FROM index | STATS COUNT(*) BY BUCKET(other_field, 75, ?_tstart, ?_tend), BUCKET(timestamp, 75, ?_tstart, ?_tend)'
+      'FROM index | STATS COUNT(*) BY BUCKET(other_field, 100, ?_tstart, ?_tend), BUCKET(timestamp, 100, ?_tstart, ?_tend)'
     );
   });
 
   it('uses AVG(field) instead of COUNT(*) when metricFields are provided and query has no STATS', () => {
     const result = appendTimeBucketToEsqlQuery('FROM index', 'timestamp', ['bytes']);
-    expect(result).toBe('FROM index | STATS AVG(bytes) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)');
+    expect(result).toBe(
+      'FROM index | STATS AVG(bytes) BY BUCKET(timestamp, 100, ?_tstart, ?_tend)'
+    );
   });
 
   it('uses AVG for multiple metric fields when query has no STATS', () => {
@@ -76,14 +78,14 @@ describe('appendTimeBucketToEsqlQuery', () => {
       'response_time',
     ]);
     expect(result).toBe(
-      'FROM index | STATS AVG(bytes), AVG(response_time) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
+      'FROM index | STATS AVG(bytes), AVG(response_time) BY BUCKET(timestamp, 100, ?_tstart, ?_tend)'
     );
   });
 
   it('escapes dotted metric field names in AVG', () => {
     const result = appendTimeBucketToEsqlQuery('FROM index', 'timestamp', ['order.bytes']);
     expect(result).toBe(
-      'FROM index | STATS AVG(`order.bytes`) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
+      'FROM index | STATS AVG(`order.bytes`) BY BUCKET(timestamp, 100, ?_tstart, ?_tend)'
     );
   });
 
@@ -92,7 +94,7 @@ describe('appendTimeBucketToEsqlQuery', () => {
       'bytes',
     ]);
     expect(result).toBe(
-      'FROM index | KEEP bytes, timestamp | STATS AVG(bytes) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
+      'FROM index | KEEP bytes, timestamp | STATS AVG(bytes) BY BUCKET(timestamp, 100, ?_tstart, ?_tend)'
     );
   });
 
@@ -100,18 +102,20 @@ describe('appendTimeBucketToEsqlQuery', () => {
     const result = appendTimeBucketToEsqlQuery('FROM index | STATS SUM(bytes)', 'timestamp', [
       'bytes',
     ]);
-    expect(result).toBe('FROM index | STATS SUM(bytes) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)');
+    expect(result).toBe(
+      'FROM index | STATS SUM(bytes) BY BUCKET(timestamp, 100, ?_tstart, ?_tend)'
+    );
   });
 
   it('falls back to COUNT(*) when metricFields is empty and query has no STATS', () => {
     const result = appendTimeBucketToEsqlQuery('FROM index', 'timestamp', []);
-    expect(result).toBe('FROM index | STATS COUNT(*) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)');
+    expect(result).toBe('FROM index | STATS COUNT(*) BY BUCKET(timestamp, 100, ?_tstart, ?_tend)');
   });
 
   it('adds group by fields before BUCKET when query has no STATS', () => {
     const result = appendTimeBucketToEsqlQuery('FROM index', 'timestamp', ['bytes'], ['host']);
     expect(result).toBe(
-      'FROM index | STATS AVG(bytes) BY host, BUCKET(timestamp, 75, ?_tstart, ?_tend)'
+      'FROM index | STATS AVG(bytes) BY host, BUCKET(timestamp, 100, ?_tstart, ?_tend)'
     );
   });
 
@@ -123,7 +127,7 @@ describe('appendTimeBucketToEsqlQuery', () => {
       ['@timestamp']
     );
     expect(result).toBe(
-      'FROM index | STATS AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)'
+      'FROM index | STATS AVG(bytes) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)'
     );
   });
 
@@ -131,7 +135,7 @@ describe('appendTimeBucketToEsqlQuery', () => {
     const query =
       'TS metrics-* | STATS total = AVG(cpu) BY host | STATS MAX(total) BY TBUCKET(100)';
     expect(appendTimeBucketToEsqlQuery(query, '@timestamp')).toBe(
-      'TS metrics-* | STATS total = AVG(cpu) BY host, TBUCKET(75) | STATS MAX(total) BY TBUCKET(100), `TBUCKET(75)`'
+      'TS metrics-* | STATS total = AVG(cpu) BY host, TBUCKET(100) | STATS MAX(total) BY TBUCKET(100), `TBUCKET(100)`'
     );
   });
 
@@ -140,7 +144,7 @@ describe('appendTimeBucketToEsqlQuery', () => {
   it('preserves a dotted time field through KEEP commands with backtick escaping', () => {
     const result = appendTimeBucketToEsqlQuery('FROM index | KEEP bytes', 'order.date', ['bytes']);
     expect(result).toBe(
-      'FROM index | KEEP bytes, `order.date` | STATS AVG(bytes) BY BUCKET(`order.date`, 75, ?_tstart, ?_tend)'
+      'FROM index | KEEP bytes, `order.date` | STATS AVG(bytes) BY BUCKET(`order.date`, 100, ?_tstart, ?_tend)'
     );
   });
 });

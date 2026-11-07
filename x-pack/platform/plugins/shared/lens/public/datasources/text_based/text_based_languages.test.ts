@@ -492,7 +492,7 @@ describe('Textbased Data Source', () => {
       });
 
       expect(newState.layers.trendline.query?.esql).toBe(
-        'FROM kibana_sample_data_logs | STATS AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)'
+        'FROM kibana_sample_data_logs | STATS AVG(bytes) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)'
       );
       expect(
         newState.layers.trendline.columns.find(
@@ -525,7 +525,7 @@ describe('Textbased Data Source', () => {
             columns: [
               {
                 columnId: 'trendline-time-accessor',
-                fieldName: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+                fieldName: 'BUCKET(@timestamp, 100, ?_tstart, ?_tend)',
                 meta: { type: 'date' },
               },
             ],

@@ -193,13 +193,13 @@ describe('Metric', () => {
 
       const trendlineLayer = lensState.state.datasourceStates.textBased?.layers[trendlineLayerId];
       expect(trendlineLayer?.query?.esql).toBe(
-        'FROM kibana_sample_data_flights | WHERE timestamp >= ?_tstart AND timestamp < ?_tend | STATS `Total Flights` = COUNT(*) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
+        'FROM kibana_sample_data_flights | WHERE timestamp >= ?_tstart AND timestamp < ?_tend | STATS `Total Flights` = COUNT(*) BY BUCKET(timestamp, 100, ?_tstart, ?_tend)'
       );
       expect(trendlineLayer?.query?.esql).not.toContain('FORK');
       expect(
         trendlineLayer?.columns.find(({ columnId }) => columnId === trendlineTimeAccessor)
           ?.fieldName
-      ).toBe('BUCKET(timestamp, 75, ?_tstart, ?_tend)');
+      ).toBe('BUCKET(timestamp, 100, ?_tstart, ?_tend)');
     });
   });
 
