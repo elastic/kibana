@@ -17,6 +17,34 @@ export const DEFAULT_MAX_STEP_SIZE = '10mb';
 export const STEP_SIZE_LIMIT_EXCEEDED = 'StepSizeLimitExceeded';
 
 /**
+ * Resolves max-step-size in bytes.
+ * Order: step YAML > workflow settings > plugin config > {@link DEFAULT_MAX_STEP_SIZE}.
+ * Returns 0 when the configured value parses to 0 (limit disabled).
+ */
+export function resolveMaxStepSizeBytes(params: {
+  stepMaxStepSize?: string;
+  workflowMaxStepSize?: string;
+  pluginMaxResponseSize?: number | { getValueInBytes: () => number };
+}): number {
+  try {
+    if (params.stepMaxStepSize) {
+      return parseByteSize(params.stepMaxStepSize);
+    }
+    if (params.workflowMaxStepSize) {
+      return parseByteSize(params.workflowMaxStepSize);
+    }
+    if (params.pluginMaxResponseSize != null) {
+      return typeof params.pluginMaxResponseSize === 'number'
+        ? params.pluginMaxResponseSize
+        : params.pluginMaxResponseSize.getValueInBytes();
+    }
+    return parseByteSize(DEFAULT_MAX_STEP_SIZE);
+  } catch {
+    return parseByteSize(DEFAULT_MAX_STEP_SIZE);
+  }
+}
+
+/**
  * Normalizes a thrown step error into an {@link ExecutionError} for persistence.
  *
  * Behaves like {@link ExecutionError.fromError} for everything except {@link KibanaApiCallError},

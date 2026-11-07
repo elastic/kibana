@@ -344,6 +344,12 @@ export interface StepHandlerContext<TInput = z.ZodType, TConfig = z.ZodObject> {
   input: z.infer<TInput>;
 
   /**
+   * Resolved `max-step-size` for this step in bytes (step YAML, then workflow
+   * settings, then plugin config, then 10mb). Used to cap I/O before output is built.
+   */
+  maxStepSizeBytes?: number;
+
+  /**
    * The config provided to the step based on configSchema
    */
   config: z.infer<TConfig>;

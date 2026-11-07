@@ -175,6 +175,83 @@ describe('PollPolicyStepHandler', () => {
       expect(mocks.stepExecutionRuntime.enterWaitUntil).not.toHaveBeenCalled();
     });
 
+    it('resumed invocation: { output: null } finalizes the step', async () => {
+      const pollHandler = jest.fn().mockResolvedValue({ output: null });
+      const startedAt = new Date(Date.now() - 10_000).toISOString();
+      const initialState = {
+        [DURABLE_STEP_STATE_KEY]: {
+          startCalled: true,
+          pollState: {
+            attempt: 3,
+            nextPollAt: startedAt,
+          },
+          customState: { actionId: 'abc' },
+        },
+      };
+      const mocks = createHandlerTestMocks(initialState);
+      const stepDefinition = {
+        poll: pollHandler,
+        policy: { strategy: 'fixed' as const, intervalMs: 5_000 },
+      };
+      const handler = buildPollHandler(stepDefinition, mocks);
+
+      const result = await handler.run({}, {}, pollNode.configuration);
+      expect(result).toEqual({
+        input: {},
+        output: null,
+        error: undefined,
+      });
+      expect(mocks.stepExecutionRuntime.enterWaitUntil).not.toHaveBeenCalled();
+    });
+
+    it('resumed invocation: { error } finalizes the step', async () => {
+      const pollHandler = jest.fn().mockResolvedValue({ error: new Error('Command is required') });
+      const startedAt = new Date(Date.now() - 10_000).toISOString();
+      const initialState = {
+        [DURABLE_STEP_STATE_KEY]: {
+          startCalled: true,
+          pollState: {
+            attempt: 3,
+            nextPollAt: startedAt,
+          },
+          customState: { actionId: 'abc' },
+        },
+      };
+      const mocks = createHandlerTestMocks(initialState);
+      const stepDefinition = {
+        poll: pollHandler,
+        policy: { strategy: 'fixed' as const, intervalMs: 5_000 },
+      };
+      const handler = buildPollHandler(stepDefinition, mocks);
+
+      const result = await handler.run({}, {}, pollNode.configuration);
+      expect(result.output).toBeUndefined();
+      expect(result.error).toMatchObject({ message: 'Command is required' });
+      expect(mocks.stepExecutionRuntime.enterWaitUntil).not.toHaveBeenCalled();
+    });
+
+    it('start: { output: null } finalizes the step without polling', async () => {
+      const start = jest.fn().mockResolvedValue({ output: null });
+      const pollHandler = jest.fn();
+      const stepDefinition = {
+        start,
+        poll: pollHandler,
+        policy: { strategy: 'fixed' as const, intervalMs: 5_000 },
+        ceilings: { maxAttempts: 10, maxWaitMs: 60_000 },
+      };
+      const mocks = createHandlerTestMocks();
+      const handler = buildPollHandler(stepDefinition, mocks);
+
+      const result = await handler.run({}, {}, pollNode.configuration);
+      expect(result).toEqual({
+        input: {},
+        output: null,
+        error: undefined,
+      });
+      expect(pollHandler).not.toHaveBeenCalled();
+      expect(mocks.stepExecutionRuntime.enterWaitUntil).not.toHaveBeenCalled();
+    });
+
     it('keeps previous author state when poll handler returns undefined', async () => {
       const pollHandler = jest.fn().mockResolvedValue(undefined);
       const startedAt = new Date(Date.now() - 2_000).toISOString();

@@ -21,4 +21,5 @@ export {
   CONSOLE_LANG_ID,
   CONSOLE_OUTPUT_LANG_ID,
   PROMQL_LANG_ID,
+  SHELL_LANG_ID,
 } from '@kbn/monaco';

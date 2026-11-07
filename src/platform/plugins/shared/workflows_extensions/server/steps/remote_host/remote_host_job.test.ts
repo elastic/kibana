@@ -1,0 +1,473 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { ConnectorCallContext } from './execute_in_connector';
+import { execScript, uploadFile } from './execute_in_connector';
+import {
+  getWorkdir,
+  killJob,
+  parseJobStatus,
+  parseScriptOutput,
+  pollJob,
+  RemoteHostUnreachableError,
+  startJob,
+  wrapUserScript,
+} from './remote_host_job';
+
+jest.mock('./execute_in_connector', () => ({
+  executeSubAction: jest.fn(),
+  execScript: jest.fn(),
+  uploadFile: jest.fn(),
+  downloadFile: jest.fn(),
+}));
+
+const mockedExecScript = execScript as jest.MockedFunction<typeof execScript>;
+const mockedUploadFile = uploadFile as jest.MockedFunction<typeof uploadFile>;
+
+const ctx = {
+  connectorId: 'conn-1',
+  request: {} as ConnectorCallContext['request'],
+  actionsStart: {} as ConnectorCallContext['actionsStart'],
+} as ConnectorCallContext;
+
+const b64 = (value: string): string => Buffer.from(value).toString('base64');
+
+const statusJson = (payload: {
+  status: 'running' | 'terminated' | 'lost';
+  exitCode?: number;
+  stdout?: string;
+  stderr?: string;
+  stdoutOffset?: number;
+  stderrOffset?: number;
+  output?: string;
+  pid?: number;
+}): string =>
+  JSON.stringify({
+    status: payload.status,
+    exitCode: payload.exitCode ?? 0,
+    stdout: b64(payload.stdout ?? ''),
+    stderr: b64(payload.stderr ?? ''),
+    stdoutOffset: payload.stdoutOffset ?? 0,
+    stderrOffset: payload.stderrOffset ?? 0,
+    output: payload.output ? b64(payload.output) : '',
+    ...(payload.pid != null ? { pid: payload.pid } : {}),
+  });
+
+describe('wrapUserScript', () => {
+  it('sets STEP_OUTPUT to the workdir output file and includes the user command', () => {
+    const wrapped = wrapUserScript('hostname -f', false);
+
+    expect(wrapped).toContain('export STEP_OUTPUT="$WORKDIR/output.txt"');
+    expect(wrapped).toContain('touch "$STEP_OUTPUT"');
+    expect(wrapped).toContain('hostname -f');
+    expect(wrapped).not.toContain('env.sh');
+  });
+
+  it('sources env.sh when env vars are present', () => {
+    expect(wrapUserScript('echo hi', true)).toContain('. "$WORKDIR/env.sh"');
+  });
+
+  it('cds into cwd before the user command', () => {
+    expect(wrapUserScript('echo hi', false, '/opt/app')).toContain("cd '/opt/app' || exit 1");
+  });
+
+  it('single-quotes cwd so it is never expanded by the remote shell', () => {
+    const wrapped = wrapUserScript('echo hi', false, "$(touch /tmp/pwn)'`id`");
+
+    expect(wrapped).toContain("cd '$(touch /tmp/pwn)'\\''`id`' || exit 1");
+  });
+});
+
+describe('parseScriptOutput', () => {
+  it('returns null for undefined', () => {
+    expect(parseScriptOutput(undefined)).toBeNull();
+  });
+
+  it('returns null for an empty string', () => {
+    expect(parseScriptOutput('')).toBeNull();
+  });
+
+  it('parses valid JSON', () => {
+    expect(parseScriptOutput('{"hostname":"box"}')).toEqual({ hostname: 'box' });
+  });
+
+  it('returns the raw string when JSON parsing fails', () => {
+    expect(parseScriptOutput('not-json')).toBe('not-json');
+  });
+});
+
+describe('parseJobStatus', () => {
+  it('decodes a terminated status JSON line', () => {
+    const result = parseJobStatus(
+      statusJson({
+        status: 'terminated',
+        exitCode: 0,
+        stdout: 'hello',
+        stderr: 'warn',
+        stdoutOffset: 5,
+        stderrOffset: 4,
+        output: '{"ok":true}',
+      })
+    );
+
+    expect(result).toEqual({
+      status: 'terminated',
+      stdout: 'hello',
+      stderr: 'warn',
+      stdoutOffset: 5,
+      stderrOffset: 4,
+      exitCode: 0,
+      output: '{"ok":true}',
+    });
+  });
+
+  it('uses the last line when stdout has leading noise', () => {
+    const result = parseJobStatus(
+      `debug: ignored\n${statusJson({ status: 'running', stdout: 'partial' })}`
+    );
+
+    expect(result.status).toBe('running');
+    expect(result.stdout).toBe('partial');
+    expect(result.output).toBeUndefined();
+  });
+
+  it('throws when stdout is empty', () => {
+    expect(() => parseJobStatus('')).toThrow('empty stdout');
+  });
+
+  it('throws when the last line is not JSON', () => {
+    expect(() => parseJobStatus('STATUS=DONE')).toThrow('invalid JSON');
+  });
+
+  it('keeps a lost status and the pid', () => {
+    const result = parseJobStatus(
+      statusJson({
+        status: 'lost',
+        pid: 4242,
+        stdout: 'partial',
+        stderr: 'killed',
+        stdoutOffset: 7,
+        stderrOffset: 6,
+      })
+    );
+
+    expect(result).toEqual({
+      status: 'lost',
+      stdout: 'partial',
+      stderr: 'killed',
+      stdoutOffset: 7,
+      stderrOffset: 6,
+      exitCode: 0,
+      output: undefined,
+      pid: 4242,
+    });
+  });
+});
+
+describe('startJob', () => {
+  const REMOTE_ROOT = '/tmp/wf_remote_host_1000';
+  const launcherScript = (): string =>
+    mockedExecScript.mock.calls.map(([, script]) => script).find((s) => s.includes('TIMEOUT=20')) ??
+    '';
+
+  /** The prepare script creates the job dir and prints the root. Other execs get `result`. */
+  const mockLauncherResult = (result: { stdout: string; stderr: string; code: number }) => {
+    mockedExecScript.mockImplementation(async (_ctx, script) =>
+      script.includes('mkdir -m 700') ? { stdout: `${REMOTE_ROOT}\n`, stderr: '', code: 0 } : result
+    );
+  };
+
+  beforeEach(() => {
+    mockedUploadFile.mockReset();
+    mockedExecScript.mockReset();
+    mockedUploadFile.mockResolvedValue(undefined);
+    mockLauncherResult({
+      stdout: statusJson({ status: 'running' }),
+      stderr: '',
+      code: 0,
+    });
+  });
+
+  it('uploads the wrapped script, waits up to 2s, and hands off when still running', async () => {
+    const result = await startJob(ctx, 'echo hi');
+
+    expect(result).toMatchObject({
+      jobId: expect.any(String),
+      status: 'running',
+      stdoutOffset: 0,
+      stderrOffset: 0,
+    });
+    expect(mockedUploadFile).toHaveBeenCalledWith(ctx, {
+      remotePath: `${REMOTE_ROOT}/${result.jobId}/script.sh`,
+      content: expect.stringContaining('echo hi'),
+    });
+    expect(mockedExecScript).toHaveBeenCalledWith(ctx, expect.stringContaining('TIMEOUT=20'));
+    expect(mockedExecScript).toHaveBeenCalledWith(ctx, expect.stringContaining('set -m'));
+    expect(mockedExecScript).toHaveBeenCalledWith(
+      ctx,
+      expect.stringContaining('command -v setsid')
+    );
+    const workdir = `${REMOTE_ROOT}/${result.jobId}`;
+    expect(mockedExecScript).toHaveBeenCalledWith(
+      ctx,
+      expect.stringContaining(
+        `setsid bash -c 'echo $$ > "${workdir}/pid.txt"; WORKDIR="${workdir}"`
+      )
+    );
+    expect(mockedExecScript).toHaveBeenCalledWith(
+      ctx,
+      expect.stringContaining(
+        `else\n  bash -c 'echo $$ > "${workdir}/pid.txt"; WORKDIR="${workdir}"`
+      )
+    );
+  });
+
+  it('checks the recorded PID before reading the exit code', async () => {
+    const result = await startJob(ctx, 'echo hi');
+    const script = launcherScript();
+    const pidCheck = script.indexOf('kill -0 "$PID"');
+    const exitCodeCheck = script.indexOf(`elif [ -f "${REMOTE_ROOT}/${result.jobId}/code.txt" ]`);
+
+    expect(pidCheck).toBeGreaterThan(-1);
+    expect(exitCodeCheck).toBeGreaterThan(pidCheck);
+    expect(script).toContain('"status":"lost"');
+  });
+
+  it('creates a private job directory before uploading anything', async () => {
+    await startJob(ctx, 'echo hi', { A: 'b' });
+
+    const prepare = mockedExecScript.mock.calls[0][1];
+    expect(prepare).toContain('umask 077');
+    expect(prepare).toContain('mkdir -m 700');
+    expect(mockedExecScript.mock.invocationCallOrder[0]).toBeLessThan(
+      mockedUploadFile.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('kills the process group of a lost job', async () => {
+    await startJob(ctx, 'echo hi');
+
+    const script = launcherScript();
+    const lostBranch = script.slice(script.indexOf('LOST_PID=null'));
+    expect(lostBranch.indexOf('kill -9 -"$LOST_PID"')).toBeGreaterThan(-1);
+  });
+
+  it('keeps terminal job state readable instead of deleting it during the status read', async () => {
+    await startJob(ctx, 'echo hi', undefined, undefined, 1024);
+
+    const script = launcherScript();
+    expect(script).not.toContain('rm -rf');
+  });
+
+  it('sweeps stale job directories when preparing a new job', async () => {
+    await startJob(ctx, 'echo hi');
+
+    const prepare = mockedExecScript.mock.calls[0][1];
+    expect(prepare).toContain('-mtime +2');
+  });
+
+  it('cleans up the workdir when the upload fails', async () => {
+    mockedUploadFile.mockRejectedValue(new Error('scp failed'));
+
+    await expect(startJob(ctx, 'echo hi')).rejects.toThrow('scp failed');
+
+    const lastScript = mockedExecScript.mock.calls.at(-1)?.[1];
+    expect(lastScript).toContain('rm -rf');
+  });
+
+  it('rejects an unexpected job root from the remote host', async () => {
+    mockedExecScript.mockResolvedValue({ stdout: '/etc\n', stderr: '', code: 0 });
+
+    await expect(startJob(ctx, 'echo hi')).rejects.toThrow('unexpected path');
+    expect(mockedUploadFile).not.toHaveBeenCalled();
+  });
+
+  it('caps STEP_OUTPUT reads at maxBytes before encoding', async () => {
+    await startJob(ctx, 'echo hi', undefined, undefined, 1024);
+
+    expect(mockedExecScript).toHaveBeenCalledWith(
+      ctx,
+      expect.stringContaining('STEP_OUTPUT exceeds max-step-size')
+    );
+    expect(mockedExecScript).toHaveBeenCalledWith(ctx, expect.stringContaining('-gt 1024'));
+  });
+
+  it('does not cap STEP_OUTPUT when maxBytes is 0', async () => {
+    await startJob(ctx, 'echo hi', undefined, undefined, 0);
+
+    expect(mockedExecScript).toHaveBeenCalledWith(
+      ctx,
+      expect.not.stringContaining('STEP_OUTPUT exceeds max-step-size')
+    );
+  });
+
+  it('uploads env.sh with base64-encoded values', async () => {
+    const result = await startJob(ctx, 'echo hi', { APP_DIR: '/opt/app' });
+
+    const encoded = Buffer.from('/opt/app').toString('base64');
+    expect(mockedUploadFile).toHaveBeenCalledWith(ctx, {
+      remotePath: `${REMOTE_ROOT}/${result.jobId}/env.sh`,
+      content: `export APP_DIR\nAPP_DIR=$(printf '%s' '${encoded}' | base64 -d; echo x)\nAPP_DIR=\${APP_DIR%x}`,
+    });
+  });
+
+  it('never embeds raw env values in env.sh', async () => {
+    const value = 'a\nEOF\ntouch /tmp/pwn';
+    await startJob(ctx, 'echo hi', { APP_DIR: value });
+
+    const { content } = mockedUploadFile.mock.calls[0][1];
+    expect(content).not.toContain('EOF');
+    expect(content).not.toContain('touch /tmp/pwn');
+  });
+
+  it('throws on invalid env keys', async () => {
+    await expect(startJob(ctx, 'echo hi', { 'FOO; rm': 'x' })).rejects.toThrow(
+      'Invalid environment variable name: FOO; rm'
+    );
+    expect(mockedUploadFile).not.toHaveBeenCalled();
+  });
+
+  it('returns terminated status when the command finishes within 2s', async () => {
+    mockLauncherResult({
+      stdout: statusJson({
+        status: 'terminated',
+        stdout: 'hello',
+        output: '{"ok":true}',
+      }),
+      stderr: '',
+      code: 0,
+    });
+
+    const result = await startJob(ctx, 'echo hi');
+
+    expect(result.status).toBe('terminated');
+    expect(result.stdout).toBe('hello');
+    expect(result.output).toBe('{"ok":true}');
+  });
+
+  it('throws when the launcher exits non-zero', async () => {
+    mockLauncherResult({ stdout: '', stderr: 'boom', code: 1 });
+
+    await expect(startJob(ctx, 'echo hi')).rejects.toThrow('Failed to start remote command: boom');
+  });
+});
+
+describe('pollJob', () => {
+  beforeEach(() => {
+    mockedExecScript.mockReset();
+  });
+
+  it('parses a running status payload', async () => {
+    mockedExecScript.mockResolvedValue({
+      stdout: statusJson({ status: 'running', stdout: 'out', stdoutOffset: 3 }),
+      stderr: '',
+      code: 0,
+    });
+
+    const result = await pollJob(ctx, { jobId: 'job-1', stdoutOffset: 0, stderrOffset: 0 });
+
+    expect(result.status).toBe('running');
+    expect(result.stdout).toBe('out');
+    expect(result.stdoutOffset).toBe(3);
+    const script = mockedExecScript.mock.calls[0][1];
+    const pidCheck = script.indexOf('kill -0 "$PID"');
+    const exitCodeCheck = script.indexOf(`elif [ -f "${getWorkdir('job-1')}/code.txt" ]`);
+
+    expect(script).toContain(`${getWorkdir('job-1')}/code.txt`);
+    expect(script).toContain('"status":"lost"');
+    expect(pidCheck).toBeGreaterThan(-1);
+    expect(exitCodeCheck).toBeGreaterThan(pidCheck);
+  });
+
+  it('parses a lost status when the PID is gone', async () => {
+    mockedExecScript.mockResolvedValue({
+      stdout: statusJson({ status: 'lost', pid: 42, stderr: 'Killed', stdout: 'partial' }),
+      stderr: '',
+      code: 0,
+    });
+
+    const result = await pollJob(ctx, { jobId: 'job-1', stdoutOffset: 0, stderrOffset: 0 });
+
+    expect(result).toMatchObject({
+      status: 'lost',
+      pid: 42,
+      stderr: 'Killed',
+      stdout: 'partial',
+    });
+  });
+
+  it('caps STEP_OUTPUT reads at maxBytes before encoding', async () => {
+    mockedExecScript.mockResolvedValue({
+      stdout: statusJson({ status: 'running' }),
+      stderr: '',
+      code: 0,
+    });
+
+    await pollJob(ctx, { jobId: 'job-1', stdoutOffset: 0, stderrOffset: 0 }, 2048);
+
+    expect(mockedExecScript).toHaveBeenCalledWith(ctx, expect.stringContaining('-gt 2048'));
+  });
+
+  it('throws when the status script exits non-zero', async () => {
+    mockedExecScript.mockResolvedValue({ stdout: '', stderr: 'nope', code: 1 });
+
+    await expect(
+      pollJob(ctx, { jobId: 'job-1', stdoutOffset: 0, stderrOffset: 0 })
+    ).rejects.toThrow('Failed to poll remote command: nope');
+  });
+
+  it('throws RemoteHostUnreachableError when SSH itself fails', async () => {
+    mockedExecScript.mockResolvedValue({
+      stdout: '',
+      stderr: 'Connection timed out',
+      code: 255,
+    });
+
+    await expect(
+      pollJob(ctx, { jobId: 'job-1', stdoutOffset: 0, stderrOffset: 0 })
+    ).rejects.toBeInstanceOf(RemoteHostUnreachableError);
+    await expect(
+      pollJob(ctx, { jobId: 'job-1', stdoutOffset: 0, stderrOffset: 0 })
+    ).rejects.toThrow('Connection timed out');
+  });
+
+  it.each([
+    'user@host: Permission denied (publickey).',
+    'Host key verification failed.',
+    '@@@ WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED! @@@',
+  ])('does not treat a permanent SSH refusal as unreachable: %s', async (stderr) => {
+    mockedExecScript.mockResolvedValue({ stdout: '', stderr, code: 255 });
+
+    const promise = pollJob(ctx, { jobId: 'job-1', stdoutOffset: 0, stderrOffset: 0 });
+    await expect(promise).rejects.toThrow(stderr);
+    await expect(promise).rejects.not.toBeInstanceOf(RemoteHostUnreachableError);
+  });
+});
+
+describe('killJob', () => {
+  beforeEach(() => {
+    mockedExecScript.mockReset();
+    mockedExecScript.mockResolvedValue({ stdout: '', stderr: '', code: 0 });
+  });
+
+  it('runs the kill script for the job workdir', async () => {
+    await killJob(ctx, 'job-1');
+
+    expect(mockedExecScript).toHaveBeenCalledWith(
+      ctx,
+      expect.stringContaining(`${getWorkdir('job-1')}/pid.txt`)
+    );
+  });
+
+  it('throws when the kill script exits non-zero', async () => {
+    mockedExecScript.mockResolvedValue({ stdout: '', stderr: 'denied', code: 1 });
+
+    await expect(killJob(ctx, 'job-1')).rejects.toThrow('Failed to cancel remote command: denied');
+  });
+});
