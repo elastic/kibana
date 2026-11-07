@@ -8,17 +8,14 @@
  */
 
 import { gateStep } from '../helpers.ts';
-import { hyperdiskBalanced, retry, spotAgent, spotZones } from '../presets.ts';
+import { withHyperdisk, retry, spotAgent, spotZones } from '../presets.ts';
 import type { Step } from '../types.ts';
 
 export const localCheck = (): readonly Step[] => [
   gateStep({
     command: '.buildkite/scripts/steps/checks/local_check.sh',
     label: 'Local Check',
-    agents: {
-      ...spotAgent('n4-standard-16', spotZones.n4),
-      ...hyperdiskBalanced,
-    },
+    agents: withHyperdisk(spotAgent('n4-standard-16', spotZones.n4)),
     key: 'check',
     timeout_in_minutes: 35,
     retry: retry.agentLoss,

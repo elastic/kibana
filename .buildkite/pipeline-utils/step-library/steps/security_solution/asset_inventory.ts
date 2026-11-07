@@ -8,19 +8,19 @@
  */
 
 import { commandStep } from '../../helpers.ts';
-import { mainTargetBranchOnly, securitySolutionCypressDefaults } from '../../presets.ts';
+import { mainTargetBranchOnly, testDefaults } from '../../presets.ts';
 import type { Step } from '../../types.ts';
 
 export const assetInventorySteps = (): readonly Step[] => [
   commandStep({
-    ...securitySolutionCypressDefaults,
+    ...testDefaults,
     command: '.buildkite/scripts/steps/functional/asset_inventory.sh',
     label: 'Asset Inventory Cypress Tests',
     key: 'asset-inventory',
     parallelism: 1,
   }),
   commandStep({
-    ...securitySolutionCypressDefaults,
+    ...testDefaults,
     command: '.buildkite/scripts/steps/functional/asset_inventory.sh',
     label: 'Asset Inventory Cypress Tests on Serverless',
     key: 'asset-inventory-serverless',

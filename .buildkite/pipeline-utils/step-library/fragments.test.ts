@@ -37,7 +37,10 @@ describe('pull_request fragments', () => {
   if (unported.length > 0) {
     it.each(unported)('%s', matchesSnapshot);
   }
-  (skipPorted ? it.skip : it).each(table(true))('%s', matchesSnapshot);
+  const ported = table(true);
+  if (ported.length > 0) {
+    (skipPorted ? it.skip : it).each(ported)('%s', matchesSnapshot);
+  }
 
   it('registers every YAML fragment that still exists', () => {
     const dir = path.join(root, '.buildkite/pipelines/pull_request');
