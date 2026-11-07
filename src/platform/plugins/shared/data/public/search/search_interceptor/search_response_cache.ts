@@ -105,7 +105,9 @@ export class SearchResponseCache {
           if (this.responseCache.get(key) !== cacheItem) return;
 
           const { isRunning } = response;
+          // TODO: avoid stringiying. Get the size some other way!
           const newSize = new Blob([JSON.stringify(response)]).size;
+
           if (this.byteToMb(newSize) < this.maxCacheSizeMB) {
             this.cacheSize += newSize - cacheItem.size;
             cacheItem.size = newSize;
