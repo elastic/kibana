@@ -45,14 +45,18 @@ export const registerInvestigationEvaluation = ({
   loadDataset = loadInvestigationDataset,
   trustUpstreamDataset = Boolean(process.env.NIGHTSHIFT_DATASET_NAME),
   orca = false,
+  // Only the default loader can return the bundled synthetic examples.
+  bundledSynthetic: bundledSyntheticDataset = !process.env.NIGHTSHIFT_EXAMPLES_FILE &&
+    !process.env.NIGHTSHIFT_DATASET_NAME,
   metadata: experimentMetadata = {},
 }: {
   name: string;
   loadDataset?: (
-    client: Pick<EvalsClient, 'getDatasetByName' | 'upsertDataset'>
+    client: Pick<EvalsClient, 'getDatasetByName' | 'listDatasets' | 'upsertDataset'>
   ) => Promise<EvaluationDataset<InvestigationExample>>;
   trustUpstreamDataset?: boolean;
   orca?: boolean;
+  bundledSynthetic?: boolean;
   metadata?: Record<string, string | number>;
 }): void => {
   evaluate.describe(`Nightshift investigations: ${name}`, { tag: suiteTags }, () => {
@@ -82,8 +86,7 @@ export const registerInvestigationEvaluation = ({
         }
         const dataset = await loadDataset(evalsClient);
         // The bundled synthetic examples supply their own evidence and must not query a cluster.
-        const bundledSynthetic =
-          !orca && !process.env.NIGHTSHIFT_EXAMPLES_FILE && !process.env.NIGHTSHIFT_DATASET_NAME;
+        const bundledSynthetic = !orca && bundledSyntheticDataset;
         // Customer-0 judges use the suite's evaluation connector. ORCA judges use a fixed model,
         // not the agent under test.
         const judgeConnector = orca ? orcaJudgeConnector(evaluationConnector) : evaluationConnector;
