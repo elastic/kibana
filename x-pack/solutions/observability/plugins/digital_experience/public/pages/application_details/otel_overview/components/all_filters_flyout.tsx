@@ -24,17 +24,14 @@ import {
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import {
-  FILTER_VALUE_CAP,
-  formatFilterValues,
-  toggleFilterValue,
-} from '../../../../../common/filter_values';
+import { FILTER_VALUE_CAP, toggleFilterValue } from '../../../../../common/filter_values';
 import {
   OVERVIEW_FILTER_NAMES,
   type OverviewFilterName,
   type OverviewFilterOptions,
   type OverviewFilters,
 } from '../../../../../common/overview_filters';
+import { encodeOverviewFilters } from '../../../../../common/overview_filters_param';
 import { FacetOptionRow } from '../../../../components/facet_option_row';
 import { FilterLimitNote } from '../../../../components/filter_limit_note';
 import { facetRows } from '../../../../components/multi_facet_filter';
@@ -50,9 +47,7 @@ const TITLE = i18n.translate('xpack.digitalExperience.overview.filtersFlyout.tit
 });
 
 const isSameSelection = (a: OverviewFilters, b: OverviewFilters): boolean =>
-  OVERVIEW_FILTER_NAMES.every(
-    (name) => formatFilterValues(a[name] ?? []) === formatFilterValues(b[name] ?? [])
-  );
+  encodeOverviewFilters(a) === encodeOverviewFilters(b);
 
 /**
  * Every filter of the Overview with its values, to include or exclude several at once. The picks

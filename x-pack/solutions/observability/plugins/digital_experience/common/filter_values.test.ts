@@ -7,113 +7,10 @@
 
 import {
   FILTER_VALUE_CAP,
-  filterParamIssue,
-  formatFilterValues,
-  parseFilterValues,
   partitionFilterValues,
   singleIncludedValue,
   toggleFilterValue,
 } from './filter_values';
-
-describe('parseFilterValues', () => {
-  it('has no values for an unset or empty param', () => {
-    expect(parseFilterValues(undefined)).toEqual([]);
-    expect(parseFilterValues('')).toEqual([]);
-    expect(parseFilterValues(',,')).toEqual([]);
-  });
-
-  it('reads a plain value as included, like the Sessions list params', () => {
-    expect(parseFilterValues('Mobile Safari')).toEqual([
-      { value: 'Mobile Safari', exclude: false },
-    ]);
-  });
-
-  it('reads a comma-separated list, with `!` before the excluded values', () => {
-    expect(parseFilterValues('Firefox,!Chrome,Safari')).toEqual([
-      { value: 'Firefox', exclude: false },
-      { value: 'Chrome', exclude: true },
-      { value: 'Safari', exclude: false },
-    ]);
-  });
-
-  it('reads an escaped comma, `!` and backslash as part of the value', () => {
-    expect(parseFilterValues('https://shop.example.com/a\\,b,\\!bang,back\\\\slash')).toEqual([
-      { value: 'https://shop.example.com/a,b', exclude: false },
-      { value: '!bang', exclude: false },
-      { value: 'back\\slash', exclude: false },
-    ]);
-  });
-
-  it('reads a `!` inside a value as part of it', () => {
-    expect(parseFilterValues('Wow!')).toEqual([{ value: 'Wow!', exclude: false }]);
-  });
-
-  it('drops duplicates, keeping the first', () => {
-    expect(parseFilterValues('Chrome,!Chrome,Chrome')).toEqual([
-      { value: 'Chrome', exclude: false },
-    ]);
-  });
-
-  it('keeps at most the cap', () => {
-    const raw = Array.from({ length: FILTER_VALUE_CAP + 5 }, (_, index) => `v${index}`).join(',');
-
-    expect(parseFilterValues(raw)).toHaveLength(FILTER_VALUE_CAP);
-  });
-
-  it('keeps a trailing backslash as it is', () => {
-    expect(parseFilterValues('path\\')).toEqual([{ value: 'path\\', exclude: false }]);
-  });
-});
-
-describe('filterParamIssue', () => {
-  it('has no issue with a param that reads back as written', () => {
-    [
-      'Chrome',
-      'Firefox,!Chrome,Safari',
-      'https://shop.example.com/a\\,b,\\!bang,back\\\\slash',
-      'Wow!',
-      Array.from({ length: FILTER_VALUE_CAP }, (_, index) => `v${index}`).join(','),
-    ].forEach((raw) => expect(filterParamIssue(raw)).toBeUndefined());
-  });
-
-  it('names what a param has that the parser would repair', () => {
-    expect(filterParamIssue('path\\')).toMatch(/backslash/);
-    expect(filterParamIssue('a,,b')).toMatch(/empty/);
-    expect(filterParamIssue('a,')).toMatch(/empty/);
-    expect(filterParamIssue('!')).toMatch(/empty/);
-    expect(filterParamIssue('Chrome,Chrome')).toMatch(/twice/);
-    expect(filterParamIssue('Chrome,!Chrome')).toMatch(/twice/);
-    expect(
-      filterParamIssue(Array.from({ length: FILTER_VALUE_CAP + 1 }, (_, i) => `v${i}`).join(','))
-    ).toMatch(new RegExp(`at most ${FILTER_VALUE_CAP}`));
-  });
-});
-
-describe('formatFilterValues', () => {
-  it('has an empty param for no values', () => {
-    expect(formatFilterValues([])).toBe('');
-  });
-
-  it('writes the excluded values with `!`', () => {
-    expect(
-      formatFilterValues([
-        { value: 'Firefox', exclude: false },
-        { value: 'Chrome', exclude: true },
-      ])
-    ).toBe('Firefox,!Chrome');
-  });
-
-  it('round-trips values with a comma, a leading `!` and a backslash', () => {
-    const values = [
-      { value: 'https://shop.example.com/a,b', exclude: false },
-      { value: '!bang', exclude: true },
-      { value: '!also', exclude: false },
-      { value: 'back\\slash', exclude: true },
-    ];
-
-    expect(parseFilterValues(formatFilterValues(values))).toEqual(values);
-  });
-});
 
 describe('toggleFilterValue', () => {
   const chrome = { value: 'Chrome', exclude: false };
@@ -145,15 +42,20 @@ describe('toggleFilterValue', () => {
 });
 
 describe('singleIncludedValue', () => {
-  it('returns the value of a param with exactly one included value', () => {
-    expect(singleIncludedValue('Firefox')).toBe('Firefox');
-    expect(singleIncludedValue('a\\,b')).toBe('a,b');
+  it('returns the value of a filter with exactly one included value', () => {
+    expect(singleIncludedValue([{ value: 'a,b', exclude: false }])).toBe('a,b');
   });
 
   it('returns nothing for no value, several values or an exclusion', () => {
     expect(singleIncludedValue(undefined)).toBeUndefined();
-    expect(singleIncludedValue('Firefox,Chrome')).toBeUndefined();
-    expect(singleIncludedValue('!Chrome')).toBeUndefined();
+    expect(singleIncludedValue([])).toBeUndefined();
+    expect(
+      singleIncludedValue([
+        { value: 'Firefox', exclude: false },
+        { value: 'Chrome', exclude: false },
+      ])
+    ).toBeUndefined();
+    expect(singleIncludedValue([{ value: 'Chrome', exclude: true }])).toBeUndefined();
   });
 });
 

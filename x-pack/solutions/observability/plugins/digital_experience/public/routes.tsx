@@ -46,7 +46,7 @@ const digitalExperienceRoutes = {
         rangeTo: t.string,
         environment: t.string,
         sourceFilter: applicationSourceRt,
-        // The Overview's filters, percentile and KQL; the Sessions tab shares some filters.
+        // The Overview's filters, percentile and KQL.
         ...overviewQueryProps,
       }),
     }),

@@ -7,6 +7,8 @@
 
 import { NEVER } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { encode } from '@kbn/rison';
+import { encodeOverviewFilters } from '../../../common/overview_filters_param';
 import type { ApplicationOverviewResponse } from '../../../common/types/overview';
 import { getOtelOverview } from './otel/get_otel_overview';
 import { APPLICATION_OVERVIEW_ENDPOINT, overviewRouteRepository } from './route';
@@ -25,6 +27,9 @@ const RESPONSE = {
 
 const esClient = { search: jest.fn() };
 
+const include = (...values: string[]) => values.map((value) => ({ value, exclude: false }));
+const exclude = (...values: string[]) => values.map((value) => ({ value, exclude: true }));
+
 const runHandler = ({
   serviceName = 'shop',
   query = { start: START, end: END },
@@ -32,7 +37,7 @@ const runHandler = ({
   serviceName?: string;
   // As the schema parses it: the percentile is a number by now.
   query?: { start: string; end: string; environment?: string; percentile?: number } & Partial<
-    Record<'browser' | 'os' | 'device' | 'country' | 'pageUrl' | 'kuery', string>
+    Record<'filters' | 'kuery', string>
   >;
 } = {}) => {
   const handler = overviewRouteRepository[APPLICATION_OVERVIEW_ENDPOINT].handler as unknown as (
@@ -114,11 +119,13 @@ describe('GET /internal/digital_experience/applications/{serviceName}/overview',
       query: {
         start: START,
         end: END,
-        browser: 'Chrome,!Safari',
-        os: 'macOS',
-        device: 'iPhone',
-        country: 'DE',
-        pageUrl: 'https://shop.example.com/a\\,b',
+        filters: encodeOverviewFilters({
+          browser: [...include('Chrome'), ...exclude('Safari')],
+          os: include('macOS'),
+          device: include('iPhone'),
+          country: include('DE'),
+          pageUrl: include('https://shop.example.com/a,b'),
+        }),
       },
     });
 
@@ -139,11 +146,7 @@ describe('GET /internal/digital_experience/applications/{serviceName}/overview',
 
     await runHandler();
 
-    expect(mockedOtel).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        filters: { browser: [], os: [], device: [], country: [], pageUrl: [] },
-      })
-    );
+    expect(mockedOtel).toHaveBeenLastCalledWith(expect.objectContaining({ filters: {} }));
   });
 
   it('passes the percentile, and none when it is left out', async () => {
@@ -216,8 +219,12 @@ describe('GET /internal/digital_experience/applications/{serviceName}/overview',
   });
 
   it('accepts each filter value up to its length, and rejects an empty or longer one', () => {
-    const withFilter = (name: string, raw: string) =>
-      querySchema().safeParse({ start: START, end: END, [name]: raw }).success;
+    const withFilter = (name: string, value: string) =>
+      querySchema().safeParse({
+        start: START,
+        end: END,
+        filters: encodeOverviewFilters({ [name]: include(value) }),
+      }).success;
     const lengths = { browser: 256, os: 256, device: 256, country: 16, pageUrl: 1024 };
 
     Object.entries(lengths).forEach(([name, length]) => {
@@ -227,32 +234,35 @@ describe('GET /internal/digital_experience/applications/{serviceName}/overview',
     });
   });
 
-  it('accepts several values of a filter, each up to its length, in a param of up to 2048', () => {
-    const withBrowser = (raw: string) =>
-      querySchema().safeParse({ start: START, end: END, browser: raw }).success;
+  it('accepts several values of a filter, included and excluded', () => {
+    const withFilters = (filters: string | undefined) =>
+      querySchema().safeParse({ start: START, end: END, filters }).success;
 
-    expect(withBrowser('Chrome,!Safari,Firefox')).toBe(true);
-    expect(withBrowser(`${'a'.repeat(256)},${'b'.repeat(256)}`)).toBe(true);
-    expect(withBrowser(`${'a'.repeat(256)},${'b'.repeat(257)}`)).toBe(false);
-    expect(withBrowser('x,'.repeat(1025))).toBe(false);
+    expect(
+      withFilters(
+        encodeOverviewFilters({
+          browser: [...include('Chrome', 'Firefox'), ...exclude('Safari')],
+          os: exclude('Linux'),
+        })
+      )
+    ).toBe(true);
+    expect(withFilters(undefined)).toBe(true);
   });
 
-  it('rejects a filter param that would be repaired instead of answering with another filter', () => {
-    const withBrowser = (raw: string) =>
-      querySchema().safeParse({ start: START, end: END, browser: raw }).success;
-    const eleven = Array.from({ length: 11 }, (_, index) => `b${index}`).join(',');
-    const ten = Array.from({ length: 10 }, (_, index) => `b${index}`).join(',');
+  it('rejects a filters param that would be repaired instead of answering with other filters', () => {
+    const withFilters = (filters: string) =>
+      querySchema().safeParse({ start: START, end: END, filters }).success;
+    const phrases = (...params: string[]) => ({
+      meta: { key: 'browser', type: 'phrases', params, negate: false },
+    });
+    const ten = Array.from({ length: 10 }, (_, index) => `b${index}`);
 
-    expect(withBrowser(ten)).toBe(true);
-    expect(withBrowser(eleven)).toBe(false);
-    expect(withBrowser('Chrome,Chrome')).toBe(false);
-    expect(withBrowser('Chrome,!Chrome')).toBe(false);
-    expect(withBrowser('Chrome,,Safari')).toBe(false);
-    expect(withBrowser('Chrome,')).toBe(false);
-    expect(withBrowser('!')).toBe(false);
-    expect(withBrowser('Chrome\\')).toBe(false);
-    expect(withBrowser('Chrome\\\\')).toBe(true);
-    expect(withBrowser('a\\,b')).toBe(true);
+    expect(withFilters(encode([phrases(...ten)]))).toBe(true);
+    expect(withFilters(encode([phrases(...ten, 'b10')]))).toBe(false);
+    expect(withFilters(encode([phrases('Chrome', 'Chrome')]))).toBe(false);
+    expect(withFilters('')).toBe(false);
+    expect(withFilters('not rison ((')).toBe(false);
+    expect(withFilters(encode([{ meta: { key: 'user.email', type: 'phrase' } }]))).toBe(false);
   });
 
   it('accepts the percentiles the Overview offers only, and reads them as numbers', () => {

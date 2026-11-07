@@ -12,12 +12,12 @@ import { SHARED_FILTER_NAMES } from '../utils/overview_filters_query';
 import type { SharedFilterName } from '../utils/overview_filters_query';
 import { filterValueRt } from '../utils/sessions_list_query';
 import type { SessionsListUrlQuery } from '../utils/sessions_list_query';
-import { useDigitalExperienceParams } from './use_digital_experience_params';
+import { useOverviewFilters } from './use_overview_filters';
 
 type SharedFilters = Pick<SessionsListUrlQuery, SharedFilterName>;
 
 /** What the Sessions list accepts of each shared filter. */
-const SESSIONS_FILTER_RTS = {
+export const SESSIONS_FILTER_RTS = {
   browser: filterValueRt(SESSIONS_LIST_MAX_FACET_LENGTHS.browser),
   os: filterValueRt(SESSIONS_LIST_MAX_FACET_LENGTHS.os),
   country: filterValueRt(SESSIONS_LIST_MAX_FACET_LENGTHS.country),
@@ -29,16 +29,16 @@ const SESSIONS_FILTER_RTS = {
  * when it is exactly one included value, and not when it has several values or an exclusion.
  */
 export const useSharedFilters = (): SharedFilters => {
-  const { query } = useDigitalExperienceParams('/');
+  const { filters } = useOverviewFilters();
 
   return useMemo(() => {
-    const filters: SharedFilters = {};
+    const shared: SharedFilters = {};
     for (const name of SHARED_FILTER_NAMES) {
-      const value = singleIncludedValue(query[name]);
+      const value = singleIncludedValue(filters[name]);
       if (value !== undefined && SESSIONS_FILTER_RTS[name].is(value)) {
-        filters[name] = value;
+        shared[name] = value;
       }
     }
-    return filters;
-  }, [query]);
+    return shared;
+  }, [filters]);
 };

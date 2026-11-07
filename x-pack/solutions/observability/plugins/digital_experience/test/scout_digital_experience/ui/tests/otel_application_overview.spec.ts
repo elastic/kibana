@@ -6,10 +6,17 @@
  */
 
 import AxeBuilder from '@axe-core/playwright';
-import type { Locator } from '@kbn/scout-oblt';
+import type { Locator, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
+
+/** The `filters` param of the URL: Kibana filters as rison, `negate:!t` for an excluded value. */
+const filtersParam = (page: ScoutPage) => new URL(page.url()).searchParams.get('filters') ?? '';
+
+/** The rison of one filter on `key` with these `params`, included (or excluded when `negate`). */
+const filtersWith = (key: string, params: string, negate = false) =>
+  new RegExp(`key:${key},negate:!${negate ? 't' : 'f'},params:${params}`);
 
 const WIDE_VIEWPORT = { width: 1800, height: 900 };
 // Narrower than the room the whole row of filters takes, but wide enough for the query bar, the
@@ -143,7 +150,9 @@ test.describe(
         await expect(digitalExperience.otelOverviewPageLoads).toContainText(
           testData.OTEL_SHOP_SAFARI_PAGE_LOADS
         );
-        await expect(page).toHaveURL(/browser=Safari/);
+        await expect
+          .poll(() => filtersParam(page))
+          .toMatch(filtersWith('browser', '\\(query:Safari\\)'));
       });
 
       await test.step('narrows the pages, breakdowns and top errors too', async () => {
@@ -185,11 +194,15 @@ test.describe(
         await digitalExperience.errorsViewAll.click();
 
         await expect(page).toHaveURL(/\/otel-shop\/errors/);
-        await expect(page).toHaveURL(/browser=Safari/);
+        await expect
+          .poll(() => filtersParam(page))
+          .toMatch(filtersWith('browser', '\\(query:Safari\\)'));
         await expect(digitalExperience.errorsPanel).not.toContainText('x is undefined');
 
         await digitalExperience.overviewTab.click();
-        await expect(page).toHaveURL(/browser=Safari/);
+        await expect
+          .poll(() => filtersParam(page))
+          .toMatch(filtersWith('browser', '\\(query:Safari\\)'));
       });
 
       await test.step('carries over to the Sessions tab and back', async () => {
@@ -198,7 +211,9 @@ test.describe(
         await expect(page).toHaveURL(/browser=Safari/);
 
         await digitalExperience.overviewTab.click();
-        await expect(page).toHaveURL(/browser=Safari/);
+        await expect
+          .poll(() => filtersParam(page))
+          .toMatch(filtersWith('browser', '\\(query:Safari\\)'));
         await expect(digitalExperience.otelOverviewPageLoads).toContainText(
           testData.OTEL_SHOP_SAFARI_PAGE_LOADS
         );
@@ -210,7 +225,7 @@ test.describe(
         await expect(digitalExperience.otelOverviewPageLoads).toContainText(
           testData.OTEL_SHOP_PAGE_LOADS
         );
-        await expect(page).not.toHaveURL(/browser=/);
+        await expect.poll(() => filtersParam(page)).toBe('');
       });
     });
 
@@ -237,7 +252,9 @@ test.describe(
         await expect(digitalExperience.overviewPill('browser', 'Safari')).toContainText(
           'Browser: not Safari'
         );
-        await expect(page).toHaveURL(/browser=(!|%21)Safari/);
+        await expect
+          .poll(() => filtersParam(page))
+          .toMatch(filtersWith('browser', '\\(query:Safari\\)', true));
       });
 
       await test.step('lists the excluded value still, so it can be included again', async () => {
@@ -261,7 +278,7 @@ test.describe(
         await expect(digitalExperience.otelOverviewPageLoads).toContainText(
           testData.OTEL_SHOP_PAGE_LOADS
         );
-        await expect(page).not.toHaveURL(/browser=/);
+        await expect.poll(() => filtersParam(page)).toBe('');
         await digitalExperience.excludeOverviewFilter('browser', 'Safari');
         await expect(digitalExperience.otelOverviewPageLoads).toContainText(withoutSafari);
       });
@@ -274,7 +291,9 @@ test.describe(
         await digitalExperience.overviewFlyoutOption('browser', 'Safari').click();
         await digitalExperience.overviewFlyoutOption('browser', 'Chrome').click();
         await digitalExperience.overviewFlyoutOption('os', 'macOS').click();
-        await expect(page).toHaveURL(/browser=(!|%21)Safari/);
+        await expect
+          .poll(() => filtersParam(page))
+          .toMatch(filtersWith('browser', '\\(query:Safari\\)', true));
         await digitalExperience.overviewFiltersApply.click();
 
         await expect(digitalExperience.overviewFiltersFlyout).toBeHidden();
@@ -289,15 +308,17 @@ test.describe(
           'Browser: Chrome'
         );
         await expect(digitalExperience.overviewPill('os', 'macOS')).toContainText('OS: macOS');
-        await expect(page).toHaveURL(/browser=Safari(,|%2C)Chrome/);
-        await expect(page).toHaveURL(/os=macOS/);
+        await expect
+          .poll(() => filtersParam(page))
+          .toMatch(filtersWith('browser', '!\\(Safari,Chrome\\)'));
+        await expect.poll(() => filtersParam(page)).toMatch(filtersWith('os', '\\(query:macOS\\)'));
       });
 
       await test.step('removes a value with its pill', async () => {
         await digitalExperience.overviewPill('os', 'macOS').getByRole('button').click();
 
         await expect(digitalExperience.overviewPill('os', 'macOS')).toBeHidden();
-        await expect(page).not.toHaveURL(/os=/);
+        await expect.poll(() => filtersParam(page)).not.toContain('key:os');
         await expect(digitalExperience.overviewPill('browser', 'Chrome')).toBeVisible();
       });
 
@@ -309,7 +330,7 @@ test.describe(
         await expect(digitalExperience.otelOverviewPageLoads).toContainText(
           testData.OTEL_SHOP_PAGE_LOADS
         );
-        await expect(page).not.toHaveURL(/browser=|os=/);
+        await expect.poll(() => filtersParam(page)).toBe('');
       });
     });
 
@@ -390,7 +411,7 @@ test.describe(
         await expect(digitalExperience.otelOverviewPageLoads).toContainText(
           testData.OTEL_SHOP_PAGE_LOADS
         );
-        await expect(page).not.toHaveURL(/kuery=|os=/);
+        await expect(page).not.toHaveURL(/kuery=/);
       });
     });
 
@@ -401,7 +422,9 @@ test.describe(
       await digitalExperience.gotoApplication(testData.OTEL_APPS.shop, {
         ...testData.TIME_RANGE,
         source: 'otel',
-        pageUrl: 'https://otel-shop.example.com/',
+        // A link written by hand: one phrase filter, as Kibana filters in rison.
+        filters:
+          "!((meta:(key:pageUrl,negate:!f,params:(query:'https://otel-shop.example.com/'),type:phrase)))",
       });
       // The page narrows the page loads, so only the end of the loading is waited for.
       await expect(digitalExperience.otelOverviewPageLoads).not.toContainText('--');

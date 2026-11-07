@@ -11,11 +11,8 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import type { estypes } from '@elastic/elasticsearch';
 import { APM_API_PRIVILEGE, DIGITAL_EXPERIENCE_API_PRIVILEGES } from '../../common/feature';
-import {
-  parseOverviewFilterParams,
-  type OverviewSearchParams,
-  type OverviewFilters,
-} from '../../common/overview_filters';
+import type { OverviewSearchParams, OverviewFilters } from '../../common/overview_filters';
+import { readOverviewFilters } from '../../common/overview_filters_param';
 import { MAX_SERVICE_NAME_LENGTH } from '../lib/constants';
 import { createDigitalExperienceTracedEsClient } from '../lib/create_digital_experience_traced_es_client';
 import { kueryToQuery } from '../lib/helpers/kuery';
@@ -84,7 +81,7 @@ export const documentFilteredApplicationTabRouteParams = lazySchema(() => {
 export const toApplicationSearch = async ({
   params: {
     path: { serviceName },
-    query: { start, end, environment, browser, os, device, country, pageUrl, kuery },
+    query: { start, end, environment, filters, kuery },
   },
   context,
   logger,
@@ -103,7 +100,7 @@ export const toApplicationSearch = async ({
     start: Date.parse(start),
     end: Date.parse(end),
     environment,
-    filters: parseOverviewFilterParams({ browser, os, device, country, pageUrl }),
+    filters: readOverviewFilters(filters),
     kuery: kueryToQuery(kuery),
     esClient: createDigitalExperienceTracedEsClient({
       client: elasticsearch.client.asCurrentUser,

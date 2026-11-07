@@ -7,7 +7,8 @@
 
 import { lazySchema, z } from '@kbn/zod/v4';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
-import { OVERVIEW_PERCENTILES, parseOverviewFilterParams } from '../../../common/overview_filters';
+import { OVERVIEW_PERCENTILES } from '../../../common/overview_filters';
+import { readOverviewFilters } from '../../../common/overview_filters_param';
 import type { ApplicationOverviewResponse } from '../../../common/types/overview';
 import { APM_API_PRIVILEGE, DIGITAL_EXPERIENCE_API_PRIVILEGES } from '../../../common/feature';
 import { MAX_SERVICE_NAME_LENGTH } from '../../lib/constants';
@@ -45,7 +46,7 @@ export const overviewRouteRepository = createDigitalExperienceServerRoute({
   ),
   handler: async ({ params, context, request }): Promise<ApplicationOverviewResponse> => {
     const { serviceName } = params.path;
-    const { environment, browser, os, device, country, pageUrl, percentile, kuery } = params.query;
+    const { environment, filters, percentile, kuery } = params.query;
     const start = Date.parse(params.query.start);
     const end = Date.parse(params.query.end);
 
@@ -59,7 +60,7 @@ export const overviewRouteRepository = createDigitalExperienceServerRoute({
       start,
       end,
       environment,
-      filters: parseOverviewFilterParams({ browser, os, device, country, pageUrl }),
+      filters: readOverviewFilters(filters),
       percentile,
       kuery: kueryToQuery(kuery),
       signal,

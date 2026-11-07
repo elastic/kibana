@@ -6,60 +6,41 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { formatFilterValues, parseFilterValues } from '../../common/filter_values';
 import type { FilterValue } from '../../common/filter_values';
-import { OVERVIEW_FILTER_NAMES } from '../../common/overview_filters';
 import type {
   OverviewFilterName,
-  OverviewFilterParams,
   OverviewFilters,
+  OverviewSearchParams,
 } from '../../common/overview_filters';
+import { encodeOverviewFilters, readOverviewFilters } from '../../common/overview_filters_param';
 import { useDigitalExperienceParams } from './use_digital_experience_params';
 import { useUpdateUrlQuery } from './use_update_url_query';
 
 /**
- * The Overview's filters from the URL (`browser`, `os`, `device`, `country` and `pageUrl`), as the
- * values they select and as the params the route takes, and setters that change only them; the
- * other params, e.g. the time range, stay.
+ * The Overview's filters from the URL's `filters` param (Kibana filters as rison, see
+ * `overview_filters_param.ts`), as the values they select and as the param the routes take, and
+ * setters that change only them; the other params, e.g. the time range, stay.
  */
 export const useOverviewFilters = () => {
   const { query } = useDigitalExperienceParams('/');
   const updateUrlQuery = useUpdateUrlQuery();
 
   const filters = useMemo<OverviewFilters>(
-    () =>
-      Object.fromEntries(
-        OVERVIEW_FILTER_NAMES.flatMap((name) => {
-          // An empty param, e.g. `?browser=`, counts as unset.
-          const values = parseFilterValues(query[name]);
-          return values.length > 0 ? [[name, values]] : [];
-        })
-      ),
-    [query]
+    () => readOverviewFilters(query.filters),
+    [query.filters]
   );
 
-  // Written out from the values read, so the routes, which reject a param the parser would repair
-  // (a repeated value, one past the cap), get the filter the URL means even when a link says it badly.
-  const params = useMemo<OverviewFilterParams>(
-    () =>
-      Object.fromEntries(
-        Object.entries(filters).map(([name, values]) => [name, formatFilterValues(values)])
-      ),
-    [filters]
-  );
+  // Written out from the values read, so a request gets the same param for the same filters.
+  const params = useMemo<Pick<OverviewSearchParams, 'filters'>>(() => {
+    const encoded = encodeOverviewFilters(filters);
+    return encoded ? { filters: encoded } : {};
+  }, [filters]);
 
   /** Sets the values of the filters in `patch` at once, and removes a filter given none. */
   const setFilters = useCallback(
     (patch: OverviewFilters) =>
-      updateUrlQuery(
-        Object.fromEntries(
-          Object.entries(patch).map(([name, values]) => [
-            name,
-            formatFilterValues(values) || undefined,
-          ])
-        )
-      ),
-    [updateUrlQuery]
+      updateUrlQuery({ filters: encodeOverviewFilters({ ...filters, ...patch }) }),
+    [filters, updateUrlQuery]
   );
 
   const setFilter = useCallback(
@@ -67,11 +48,7 @@ export const useOverviewFilters = () => {
     [setFilters]
   );
 
-  const clearFilters = useCallback(
-    () =>
-      updateUrlQuery(Object.fromEntries(OVERVIEW_FILTER_NAMES.map((name) => [name, undefined]))),
-    [updateUrlQuery]
-  );
+  const clearFilters = useCallback(() => updateUrlQuery({ filters: undefined }), [updateUrlQuery]);
 
   return {
     filters,

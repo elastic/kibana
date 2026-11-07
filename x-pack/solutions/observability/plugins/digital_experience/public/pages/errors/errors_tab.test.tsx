@@ -11,6 +11,7 @@ import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import type { OverviewFilters } from '../../../common/overview_filters';
+import { encodeOverviewFilters } from '../../../common/overview_filters_param';
 import type { ApplicationErrorsResponse } from '../../../common/types/errors';
 import { useEnvironment } from '../../hooks/use_environment';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
@@ -56,14 +57,14 @@ const setFilters = jest.fn();
 
 /** The Overview's filters and KQL query in the URL, as the hooks return them. */
 const mockSearch = ({
-  params = {},
   filters = {},
   kuery,
 }: {
-  params?: Record<string, string>;
   filters?: OverviewFilters;
   kuery?: string;
 } = {}) => {
+  const encoded = encodeOverviewFilters(filters);
+  const params = encoded ? { filters: encoded } : {};
   jest.mocked(useOverviewSearchParams).mockReturnValue(kuery ? { ...params, kuery } : params);
   jest.mocked(useOverviewKuery).mockReturnValue({ kuery, setKuery: jest.fn() });
   jest.mocked(useOverviewFilters).mockReturnValue({
@@ -133,7 +134,6 @@ describe('ErrorsTab', () => {
 
   it('asks for the errors of the filters and the KQL query of the URL, without the page', async () => {
     mockSearch({
-      params: { browser: 'Chrome,!Safari', pageUrl: 'https://shop.example.com/' },
       filters: {
         browser: [
           { value: 'Chrome', exclude: false },
@@ -155,7 +155,12 @@ describe('ErrorsTab', () => {
               start: timeRange.rangeFrom,
               end: timeRange.rangeTo,
               environment: 'production',
-              browser: 'Chrome,!Safari',
+              filters: encodeOverviewFilters({
+                browser: [
+                  { value: 'Chrome', exclude: false },
+                  { value: 'Safari', exclude: true },
+                ],
+              }),
               kuery: 'user_agent.name: Chrome',
             },
           },
@@ -166,7 +171,6 @@ describe('ErrorsTab', () => {
 
   it('shows what narrows the errors, so it can be removed, but not the page, which does not', async () => {
     mockSearch({
-      params: { browser: 'Chrome', pageUrl: 'https://shop.example.com/' },
       filters: {
         browser: [{ value: 'Chrome', exclude: false }],
         pageUrl: [{ value: 'https://shop.example.com/', exclude: false }],

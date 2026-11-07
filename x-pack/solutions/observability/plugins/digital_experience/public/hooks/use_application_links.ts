@@ -6,26 +6,39 @@
  */
 
 import { useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { pick } from 'lodash';
+import qs from 'query-string';
 import { DIGITAL_EXPERIENCE_FEATURE_ID } from '../../common/feature';
+import type { OverviewFilters } from '../../common/overview_filters';
+import { encodeOverviewFilters } from '../../common/overview_filters_param';
 import type { ApplicationSource } from '../../common/types/applications';
+import { SHARED_FILTER_NAMES } from '../utils/overview_filters_query';
 import type { SessionsListUrlQuery } from '../utils/sessions_list_query';
 import { useDigitalExperienceParams } from './use_digital_experience_params';
-import { useSharedFilters } from './use_shared_filters';
+import { SESSIONS_FILTER_RTS, useSharedFilters } from './use_shared_filters';
 import { useDigitalExperienceRouter } from './use_digital_experience_router';
 import { useKibanaServices } from './use_kibana_services';
 import { useListQuery } from './use_list_query';
 
-/** The Overview's own params in the URL: its filters, KQL query and percentile. */
-const OVERVIEW_QUERY_KEYS = [
-  'browser',
-  'os',
-  'device',
-  'country',
-  'pageUrl',
-  'kuery',
-  'percentile',
-] as const;
+/** The Overview's own params in the URL besides its filters: the KQL query and percentile. */
+const OVERVIEW_QUERY_KEYS = ['kuery', 'percentile'] as const;
+
+/**
+ * What the Sessions list selects of the filters it shares with the Overview (`browser`, `os` and
+ * `country`, one value each), as the Overview's filters; none unless the URL is a Sessions one.
+ */
+const sessionsFiltersOf = (search: string): OverviewFilters => {
+  const query = qs.parse(search);
+  const filters: OverviewFilters = {};
+  for (const name of SHARED_FILTER_NAMES) {
+    const value = query[name];
+    if (typeof value === 'string' && SESSIONS_FILTER_RTS[name].is(value)) {
+      filters[name] = [{ value, exclude: false }];
+    }
+  }
+  return filters;
+};
 
 export interface ApplicationLinks {
   overviewHref: string;
@@ -52,13 +65,21 @@ export const useApplicationLinks = (
   const listQuery = useListQuery();
   const sharedFilters = useSharedFilters();
   const { query: urlQuery } = useDigitalExperienceParams('/');
+  const { search } = useLocation();
 
   return useMemo(() => {
     const toHref = (path: string) =>
       application.getUrlForApp(DIGITAL_EXPERIENCE_FEATURE_ID, { path });
     // The tabs of the Overview's family keep all of its filters and query, so they narrow the
     // errors, and they are still there on the way back.
-    const tabQuery = { ...listQuery, ...pick(urlQuery, OVERVIEW_QUERY_KEYS), source };
+    // On the Sessions tab there are no Overview filters, but the ones it shares carry back.
+    const filters = urlQuery.filters ?? encodeOverviewFilters(sessionsFiltersOf(search));
+    const tabQuery = {
+      ...listQuery,
+      ...pick(urlQuery, OVERVIEW_QUERY_KEYS),
+      ...(filters ? { filters } : {}),
+      source,
+    };
     const query = { ...listQuery, ...sharedFilters, source };
     const overviewPath = router.link('/{serviceName}', {
       path: { serviceName },
@@ -88,5 +109,5 @@ export const useApplicationLinks = (
           })
         ),
     };
-  }, [application, router, listQuery, sharedFilters, urlQuery, serviceName, source]);
+  }, [application, router, listQuery, sharedFilters, urlQuery, search, serviceName, source]);
 };

@@ -12,7 +12,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { BrushEndListener, SettingsProps } from '@elastic/charts';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import { getCoreVitalsComponent } from '@kbn/observability-plugin/public';
-import { formatFilterValues } from '../../../../common/filter_values';
+import { encodeOverviewFilters } from '../../../../common/overview_filters_param';
 import type { FilterValue } from '../../../../common/filter_values';
 import type { OverviewFilters, OverviewPercentile } from '../../../../common/overview_filters';
 import type { ApplicationErrorsResponse } from '../../../../common/types/errors';
@@ -180,8 +180,8 @@ const include = (...values: string[]): FilterValue[] =>
 const exclude = (...values: string[]): FilterValue[] =>
   values.map((value) => ({ value, exclude: true }));
 
-// What the URL holds: the filters' params and the KQL query, as the hooks return them together.
-let filterParams: Record<string, string> = {};
+// What the URL holds: the filters param and the KQL query, as the hooks return them together.
+let filterParams: { filters?: string } = {};
 let currentKuery: string | undefined;
 
 const mockSearchParams = () =>
@@ -190,9 +190,8 @@ const mockSearchParams = () =>
     .mockReturnValue(currentKuery ? { ...filterParams, kuery: currentKuery } : filterParams);
 
 const mockFilters = (filters: OverviewFilters) => {
-  filterParams = Object.fromEntries(
-    Object.entries(filters).map(([name, values]) => [name, formatFilterValues(values)])
-  );
+  const encoded = encodeOverviewFilters(filters);
+  filterParams = encoded ? { filters: encoded } : {};
   mockSearchParams();
   return jest.mocked(useOverviewFilters).mockReturnValue({
     filters,
@@ -297,9 +296,11 @@ describe('OtelOverview', () => {
     const query = {
       start: timeRange.rangeFrom,
       end: timeRange.rangeTo,
-      browser: 'Chrome,!Safari',
-      country: 'DE',
-      pageUrl: 'https://shop.example.com/cart',
+      filters: encodeOverviewFilters({
+        browser: [...include('Chrome'), ...exclude('Safari')],
+        country: include('DE'),
+        pageUrl: include('https://shop.example.com/cart'),
+      }) ?? '',
     };
     await waitFor(() => expectFetchedWith(query));
     await waitFor(() => expectFetchedWith(query, USAGE_ENDPOINT));
@@ -309,8 +310,10 @@ describe('OtelOverview', () => {
         {
           start: timeRange.rangeFrom,
           end: timeRange.rangeTo,
-          browser: 'Chrome,!Safari',
-          country: 'DE',
+          filters: encodeOverviewFilters({
+            browser: [...include('Chrome'), ...exclude('Safari')],
+            country: include('DE'),
+          }) ?? '',
         },
         ERRORS_ENDPOINT
       )

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parseFilterValues, type FilterValue } from './filter_values';
+import type { FilterValue } from './filter_values';
 import { SESSIONS_LIST_MAX_FACET_LENGTHS, type FacetBucket } from './sessions';
 
 /** The filters of the Overview, in display order. */
@@ -20,20 +20,14 @@ export type OverviewFilterName = (typeof OVERVIEW_FILTER_NAMES)[number];
  */
 export type OverviewFilters = Partial<Record<OverviewFilterName, FilterValue[]>>;
 
-/** The filters as the URL and the route carry them: one param each, see `parseFilterValues`. */
-export type OverviewFilterParams = Partial<Record<OverviewFilterName, string>>;
-
-/** What narrows the Overview's data in a request: the filters' params and the KQL query. */
-export type OverviewSearchParams = OverviewFilterParams & { kuery?: string };
-
-/** The filters a param holds, each with the values `parseFilterValues` reads from it. */
-export const parseOverviewFilterParams = (params: OverviewFilterParams): OverviewFilters => ({
-  browser: parseFilterValues(params.browser),
-  os: parseFilterValues(params.os),
-  device: parseFilterValues(params.device),
-  country: parseFilterValues(params.country),
-  pageUrl: parseFilterValues(params.pageUrl),
-});
+/**
+ * What narrows the Overview's data in a request: the filters as one `filters` param (see
+ * `overview_filters_param.ts`) and the KQL query.
+ */
+export interface OverviewSearchParams {
+  filters?: string;
+  kuery?: string;
+}
 
 /**
  * The longest value of each filter. The values travel in the URL and the request, and a longer
@@ -46,9 +40,6 @@ export const OVERVIEW_FILTER_MAX_LENGTHS = {
   country: SESSIONS_LIST_MAX_FACET_LENGTHS.country,
   pageUrl: 1024,
 } as const satisfies Record<OverviewFilterName, number>;
-
-/** The longest param of a filter, which holds up to `FILTER_VALUE_CAP` values and their marks. */
-export const OVERVIEW_FILTER_PARAM_MAX_LENGTH = 2048;
 
 /** How many values each filter lists, the most used first; the same as the Sessions facets. */
 export const OVERVIEW_FILTER_SIZE = 10;

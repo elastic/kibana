@@ -7,6 +7,17 @@
 
 import { NEVER } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { encode } from '@kbn/rison';
+import { encodeOverviewFilters } from '../../common/overview_filters_param';
+
+const include = (...values: string[]) => values.map((value) => ({ value, exclude: false }));
+const exclude = (...values: string[]) => values.map((value) => ({ value, exclude: true }));
+const phrases = (key: string, params: string[]) => ({
+  meta: { key, type: 'phrases', params, negate: false },
+});
+const phrase = (key: string, query: string, negate = false) => ({
+  meta: { key, type: 'phrase', params: { query }, negate },
+});
 
 const START = '2021-01-18T12:00:00.000Z';
 const END = '2021-01-18T13:00:00.000Z';
@@ -43,8 +54,7 @@ export const applicationRouteTestCases = ({
     start: string;
     end: string;
     environment?: string;
-    browser?: string;
-    pageUrl?: string;
+    filters?: string;
     kuery?: string;
   }) => {
     return (route().handler as (resources: unknown) => Promise<unknown>)({
@@ -132,8 +142,10 @@ export const applicationRouteTestCases = ({
       await runHandler({
         start: START,
         end: END,
-        browser: 'Chrome,!Safari',
-        pageUrl: 'https://shop.test/',
+        filters: encodeOverviewFilters({
+          browser: [...include('Chrome'), ...exclude('Safari')],
+          ...(takesPage ? { pageUrl: include('https://shop.test/') } : {}),
+        }),
       });
       expect(getData).toHaveBeenLastCalledWith(
         expect.objectContaining({
@@ -142,20 +154,14 @@ export const applicationRouteTestCases = ({
               { value: 'Chrome', exclude: false },
               { value: 'Safari', exclude: true },
             ],
-            os: [],
-            device: [],
-            country: [],
-            pageUrl: [{ value: 'https://shop.test/', exclude: false }],
+            ...(takesPage ? { pageUrl: [{ value: 'https://shop.test/', exclude: false }] } : {}),
           },
         })
       );
 
       await runHandler({ start: START, end: END });
       expect(getData).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          filters: { browser: [], os: [], device: [], country: [], pageUrl: [] },
-          kuery: undefined,
-        })
+        expect.objectContaining({ filters: {}, kuery: undefined })
       );
     });
 
@@ -171,34 +177,65 @@ export const applicationRouteTestCases = ({
     });
 
     it('bounds the filters and the query like the Overview route', () => {
-      const query = (filters: Record<string, string>) => ({ start: START, end: END, ...filters });
+      const query = (params: Record<string, string>) => ({ start: START, end: END, ...params });
+      const filters = (name: string, value: string) =>
+        encodeOverviewFilters({ [name]: include(value) }) ?? '';
 
-      expect(schemaOf('query').safeParse(query({ browser: 'Chrome,!Safari' })).success).toBe(true);
-      expect(schemaOf('query').safeParse(query({ browser: '' })).success).toBe(false);
-      expect(schemaOf('query').safeParse(query({ browser: 'x'.repeat(257) })).success).toBe(false);
-      expect(schemaOf('query').safeParse(query({ country: 'x'.repeat(17) })).success).toBe(false);
+      expect(
+        schemaOf('query').safeParse(query({ filters: filters('browser', 'Chrome') })).success
+      ).toBe(true);
+      expect(schemaOf('query').safeParse(query({ filters: '' })).success).toBe(false);
+      expect(schemaOf('query').safeParse(query({ filters: 'not rison ((' })).success).toBe(false);
+      expect(
+        schemaOf('query').safeParse(query({ filters: filters('browser', 'x'.repeat(257)) })).success
+      ).toBe(false);
+      expect(
+        schemaOf('query').safeParse(query({ filters: filters('country', 'x'.repeat(17)) })).success
+      ).toBe(false);
       expect(schemaOf('query').safeParse(query({ kuery: '' })).success).toBe(false);
       expect(schemaOf('query').safeParse(query({ kuery: 'x'.repeat(2049) })).success).toBe(false);
     });
 
+    it('rejects a filters param that would need repairing', () => {
+      const withFilters = (filters: string) =>
+        schemaOf('query').safeParse({ start: START, end: END, filters }).success;
+
+      expect(withFilters(encode([phrases('browser', ['Chrome', 'Chrome'])]))).toBe(false);
+      expect(
+        withFilters(encode([phrase('browser', 'Chrome'), phrase('browser', 'Chrome', true)]))
+      ).toBe(false);
+      expect(
+        withFilters(
+          encode([
+            phrases(
+              'browser',
+              Array.from({ length: 11 }, (_, index) => `b${index}`)
+            ),
+          ])
+        )
+      ).toBe(false);
+    });
+
     if (takesPage) {
       it('bounds the page like the Overview route', () => {
-        const query = (pageUrl: string) => ({ start: START, end: END, pageUrl });
+        const query = (pageUrl: string) => ({
+          start: START,
+          end: END,
+          filters: encodeOverviewFilters({ pageUrl: include(pageUrl) }),
+        });
 
         expect(schemaOf('query').safeParse(query('x'.repeat(1024))).success).toBe(true);
         expect(schemaOf('query').safeParse(query('x'.repeat(1025))).success).toBe(false);
       });
     } else {
-      it('leaves the page out, as its documents have no page URL', () => {
-        const result = schemaOf('query').safeParse({
-          start: START,
-          end: END,
-          browser: 'Chrome',
-          pageUrl: 'https://shop.test/',
-        });
+      it('rejects a page filter, as its documents have no page URL', () => {
+        const withFilters = (filters: string) =>
+          schemaOf('query').safeParse({ start: START, end: END, filters }).success;
 
-        expect(result.data).toEqual(expect.objectContaining({ browser: 'Chrome' }));
-        expect(result.data).not.toHaveProperty('pageUrl');
+        expect(withFilters(encodeOverviewFilters({ browser: include('Chrome') }) ?? '')).toBe(true);
+        expect(
+          withFilters(encodeOverviewFilters({ pageUrl: include('https://shop.test/') }) ?? '')
+        ).toBe(false);
       });
     }
   }

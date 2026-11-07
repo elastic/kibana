@@ -6,8 +6,8 @@
  */
 
 import { useMemo } from 'react';
-import { omit } from 'lodash';
 import type { OverviewSearchParams } from '../../../../common/overview_filters';
+import { omitOverviewFilters } from '../../../../common/overview_filters_param';
 import type { ApplicationErrorsResponse } from '../../../../common/types/errors';
 import type { ApplicationData, ApplicationRequest } from '../../../hooks/use_application_data';
 import { useApplicationData } from '../../../hooks/use_application_data';
@@ -20,8 +20,12 @@ export type ApplicationErrors = ApplicationData<ApplicationErrorsResponse>;
 const errorsRequestOf = (
   searchParams: OverviewSearchParams
 ): ApplicationRequest<ApplicationErrorsResponse> => {
-  // The page does not apply to errors: they carry no page URL yet.
-  const errorsParams = omit(searchParams, 'pageUrl');
+  // The page does not apply to errors: they carry no page URL yet, and the route rejects it.
+  const { filters, ...rest } = searchParams;
+  const errorFilters = omitOverviewFilters(filters, ['pageUrl']);
+  const errorsParams: OverviewSearchParams = errorFilters
+    ? { ...rest, filters: errorFilters }
+    : rest;
   return (apiClient, options) => {
     return apiClient.fetch(
       'GET /internal/digital_experience/applications/{serviceName}/errors',
