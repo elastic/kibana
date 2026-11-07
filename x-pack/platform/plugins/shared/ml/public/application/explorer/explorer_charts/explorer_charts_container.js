@@ -100,6 +100,7 @@ function ExplorerChartContainer({
   isInteractive,
   tooManyBucketsCalloutMsg,
   showSelectedInterval,
+  colorSelectedIntervalBySeverity,
   chartsService,
   showFilterIcons,
 }) {
@@ -346,6 +347,7 @@ function ExplorerChartContainer({
                   severity={severity}
                   tooltipService={tooltipService}
                   showSelectedInterval={showSelectedInterval}
+                  colorSelectedIntervalBySeverity={colorSelectedIntervalBySeverity}
                   onPointerUpdate={handleCursorUpdate}
                   chartTheme={chartTheme}
                   cursor$={chartsService.activeCursor.activeCursor$}
@@ -370,6 +372,7 @@ function ExplorerChartContainer({
                   severity={severity}
                   tooltipService={tooltipService}
                   showSelectedInterval={showSelectedInterval}
+                  colorSelectedIntervalBySeverity={colorSelectedIntervalBySeverity}
                   onPointerUpdate={handleCursorUpdate}
                   chartTheme={chartTheme}
                   cursor$={chartsService.activeCursor.activeCursor$}
@@ -404,6 +407,7 @@ export const ExplorerChartsContainerUI = ({
   isInteractive = true,
   tooManyBucketsCalloutMsg,
   showSelectedInterval,
+  colorSelectedIntervalBySeverity,
   chartsService,
   showFilterIcons = true,
 }) => {
@@ -474,6 +478,7 @@ export const ExplorerChartsContainerUI = ({
                   isInteractive={isInteractive}
                   tooManyBucketsCalloutMsg={tooManyBucketsCalloutMsg}
                   showSelectedInterval={showSelectedInterval}
+                  colorSelectedIntervalBySeverity={colorSelectedIntervalBySeverity}
                   chartsService={chartsService}
                   showFilterIcons={showFilterIcons}
                 />

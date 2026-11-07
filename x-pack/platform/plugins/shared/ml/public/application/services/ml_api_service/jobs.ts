@@ -32,6 +32,7 @@ import type {
   BulkUpdateProjectRoutingResponse,
   ResetJobsResponse,
 } from '@kbn/ml-common-types/job_service';
+import type { SuggestJobsResponse } from '../../../../common/types/job_suggestions';
 import type { ExistingJobsAndGroups } from '../job_service';
 import type { JobAction } from '../../../../common/constants/job_actions';
 import { useMlKibana } from '../../contexts/kibana';
@@ -415,6 +416,54 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       method: 'POST',
       body,
       version: '1',
+    });
+  },
+
+  suggestJobs(
+    {
+      index,
+      start,
+      end,
+      maxSuggestions,
+    }: {
+      index: string;
+      start?: number;
+      end?: number;
+      maxSuggestions?: number;
+    },
+    signal?: AbortSignal
+  ) {
+    const body = JSON.stringify({ index, start, end, maxSuggestions });
+    return httpService.http<SuggestJobsResponse>({
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/suggest_jobs`,
+      method: 'POST',
+      body,
+      version: '1',
+      signal,
+    });
+  },
+
+  summarizeAnomaly(
+    {
+      jobId,
+      start,
+      end,
+    }: {
+      jobId: string;
+      /** Start of the time range of the anomaly, in epoch ms */
+      start: number;
+      /** End of the time range of the anomaly, in epoch ms */
+      end: number;
+    },
+    signal?: AbortSignal
+  ) {
+    const body = JSON.stringify({ jobId, start, end });
+    return httpService.http<{ summary: string }>({
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/summarize_anomaly`,
+      method: 'POST',
+      body,
+      version: '1',
+      signal,
     });
   },
 
