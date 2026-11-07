@@ -8,7 +8,6 @@
 import type { Filter, Query } from '@kbn/es-query';
 import type { GraphTelemetryEvent, GraphNodeAction } from './graph_telemetry';
 import {
-  didAddNodes,
   getEmptyStateReason,
   getFiltersChangedEvent,
   getSearchSubmittedEvent,
@@ -127,32 +126,6 @@ describe('isExpansionAction', () => {
       expect(isExpansionAction(action)).toBe(false);
     }
   );
-});
-
-describe('didAddNodes', () => {
-  it('is true when next contains ids that previous does not', () => {
-    expect(didAddNodes(new Set(['a']), new Set(['a', 'b', 'c']))).toBe(true);
-  });
-
-  it('is false when next is a strict subset of previous', () => {
-    expect(didAddNodes(new Set(['a', 'b']), new Set(['a']))).toBe(false);
-  });
-
-  it('is false for identical sets', () => {
-    expect(didAddNodes(new Set(['a', 'b']), new Set(['a', 'b']))).toBe(false);
-  });
-
-  it('is true when an id was added even if another disappeared', () => {
-    expect(didAddNodes(new Set(['a', 'b']), new Set(['a', 'c']))).toBe(true);
-  });
-
-  it('is true when previous is empty and next is not', () => {
-    expect(didAddNodes(new Set<string>(), new Set(['a']))).toBe(true);
-  });
-
-  it('is false when both are empty', () => {
-    expect(didAddNodes(new Set<string>(), new Set<string>())).toBe(false);
-  });
 });
 
 describe('getEmptyStateReason', () => {

@@ -44,7 +44,7 @@ export type {
   GraphFetchErrorCategory,
   GraphGroupedItemType,
 } from './graph_telemetry';
-export { isExpansionAction, didAddNodes, getEmptyStateReason } from './graph_telemetry';
+export { isExpansionAction, getEmptyStateReason } from './graph_telemetry';
 export {
   isEntityNode,
   getNodeDocumentMode,

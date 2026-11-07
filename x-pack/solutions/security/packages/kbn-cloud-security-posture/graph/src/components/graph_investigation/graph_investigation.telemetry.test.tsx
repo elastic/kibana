@@ -159,6 +159,34 @@ const withExtraNodes = (ids: string[]) => ({
   ],
 });
 
+// Mimics the server answering with the same graph under regenerated ids (`unknown-<uuid>` target
+// ids and group hashes change on every response), plus `extraNodeCount` additional nodes.
+const withRegeneratedIds = (uuid: string, extraNodeCount = 0) => {
+  const regeneratedId = (id: string) => `unknown-${uuid}-${id}`;
+  return {
+    ...singleActorMockData,
+    nodes: [
+      ...singleActorMockData.nodes.map((node) => ({
+        ...node,
+        id: regeneratedId(node.id),
+        ...('parentId' in node && typeof node.parentId === 'string'
+          ? { parentId: regeneratedId(node.parentId) }
+          : {}),
+      })),
+      ...Array.from({ length: extraNodeCount }, (_, index) => ({
+        ...singleActorMockData.nodes[1],
+        id: `unknown-${uuid}-extra-${index}`,
+      })),
+    ],
+    edges: singleActorMockData.edges.map((edge) => ({
+      ...edge,
+      id: regeneratedId(edge.id),
+      source: regeneratedId(edge.source),
+      target: regeneratedId(edge.target),
+    })),
+  };
+};
+
 const withOnlyEntityNodes = {
   ...singleActorMockData,
   nodes: singleActorMockData.nodes.slice(1, 3),
@@ -380,7 +408,7 @@ describe('GraphInvestigation telemetry', () => {
       ]);
     });
 
-    it('reports no added nodes when the fetch returns the same node ids', async () => {
+    it('reports no added nodes when the fetch returns the same number of nodes', async () => {
       const onTelemetryEvent = jest.fn();
       const { container, setFetchState } = renderGraph(
         { data: singleActorMockData },
@@ -393,6 +421,38 @@ describe('GraphInvestigation telemetry', () => {
 
       expect(getExpansionResults(onTelemetryEvent)).toEqual([
         expect.objectContaining({ nodesAdded: false, nodesLimitReached: false }),
+      ]);
+    });
+
+    it('reports no added nodes when every id changes but the number of nodes does not', async () => {
+      const onTelemetryEvent = jest.fn();
+      const { container, setFetchState } = renderGraph(
+        { data: singleActorMockData },
+        { onTelemetryEvent }
+      );
+
+      await clickNodeAction(container, ACTOR_NODE_ID, GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
+      act(() => setFetchState({ isFetching: true, data: singleActorMockData }));
+      act(() => setFetchState({ isFetching: false, data: withRegeneratedIds('3f2a9c1e') }));
+
+      expect(getExpansionResults(onTelemetryEvent)).toEqual([
+        expect.objectContaining({ nodesAdded: false }),
+      ]);
+    });
+
+    it('reports added nodes when one more node is returned even if other ids changed', async () => {
+      const onTelemetryEvent = jest.fn();
+      const { container, setFetchState } = renderGraph(
+        { data: singleActorMockData },
+        { onTelemetryEvent }
+      );
+
+      await clickNodeAction(container, ACTOR_NODE_ID, GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
+      act(() => setFetchState({ isFetching: true, data: singleActorMockData }));
+      act(() => setFetchState({ isFetching: false, data: withRegeneratedIds('7b81d4f0', 1) }));
+
+      expect(getExpansionResults(onTelemetryEvent)).toEqual([
+        expect.objectContaining({ nodesAdded: true }),
       ]);
     });
 
@@ -516,7 +576,7 @@ describe('GraphInvestigation telemetry', () => {
       ]);
     });
 
-    it('compares against the nodes from before the first overlapping toggle', async () => {
+    it('compares against the node count from before the first overlapping toggle', async () => {
       const onTelemetryEvent = jest.fn();
       const { container, setFetchState } = renderGraph(
         { data: singleActorMockData },

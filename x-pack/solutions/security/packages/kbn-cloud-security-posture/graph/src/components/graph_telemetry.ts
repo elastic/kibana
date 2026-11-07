@@ -126,17 +126,6 @@ export const isExpansionAction = (action: GraphNodeAction): action is GraphExpan
   action === 'show_actions_on' ||
   action === 'show_related_events';
 
-/** Tells whether `nextIds` contains an id that `previousIds` does not. */
-export const didAddNodes = (
-  previousIds: ReadonlySet<string>,
-  nextIds: ReadonlySet<string>
-): boolean => {
-  for (const id of nextIds) {
-    if (!previousIds.has(id)) return true;
-  }
-  return false;
-};
-
 /** Distinguishes an empty graph caused by narrowing the search from one with no data at all. */
 export const getEmptyStateReason = ({
   hasActiveFilters,

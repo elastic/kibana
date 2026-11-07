@@ -70,7 +70,6 @@ import type {
   GraphToggleState,
 } from '../graph_telemetry';
 import {
-  didAddNodes,
   getEmptyStateReason,
   getFiltersChangedEvent,
   getSearchSubmittedEvent,
@@ -81,7 +80,8 @@ interface PendingExpansion {
   action: GraphExpansionAction;
   nodeType: GraphNodeType;
   state: GraphToggleState;
-  previousNodeIds: ReadonlySet<string>;
+  /** Number of nodes in the graph when the toggle was clicked. */
+  previousNodeCount: number;
   /** Set once the fetch triggered by the toggle has been seen in flight. */
   fetchObserved: boolean;
 }
@@ -445,7 +445,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     const [kquery, setKQuery] = useState<Query>(EMPTY_QUERY);
     const wasLoadedAndEmptyRef = useRef(false);
     const pendingExpansionRef = useRef<PendingExpansion | undefined>();
-    const latestNodesRef = useRef<ReadonlyArray<{ id: string }> | undefined>();
+    const latestNodeCountRef = useRef(0);
 
     const onFiltersUpdated = useCallback(
       (filters: Filter[]) => {
@@ -576,7 +576,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     ]);
 
     useEffect(() => {
-      latestNodesRef.current = data?.nodes;
+      latestNodeCountRef.current = data?.nodes.length ?? 0;
     }, [data?.nodes]);
 
     useEffect(() => {
@@ -590,14 +590,13 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
 
       pendingExpansionRef.current = undefined;
       if (isError) return;
-
-      const nextNodeIds = new Set(data?.nodes.map(({ id }) => id));
       onTelemetryEvent?.({
         type: 'expansion_result',
         action: pending.action,
         nodeType: pending.nodeType,
         state: pending.state,
-        nodesAdded: didAddNodes(pending.previousNodeIds, nextNodeIds),
+        // Node ids are not stable across responses, so only the node count is comparable.
+        nodesAdded: (data?.nodes.length ?? 0) > pending.previousNodeCount,
         nodesLimitReached: data?.messages?.includes(ApiMessageCode.ReachedNodesLimit) ?? false,
       });
     }, [data, isFetching, isError, onTelemetryEvent]);
@@ -613,8 +612,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               action,
               nodeType,
               state,
-              previousNodeIds:
-                pending?.previousNodeIds ?? new Set(latestNodesRef.current?.map(({ id }) => id)),
+              previousNodeCount: pending?.previousNodeCount ?? latestNodeCountRef.current,
               fetchObserved: pending?.fetchObserved ?? false,
             };
           }
