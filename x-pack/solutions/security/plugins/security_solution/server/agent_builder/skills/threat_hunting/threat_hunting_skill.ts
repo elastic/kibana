@@ -81,7 +81,16 @@ The following embedded query templates provide common hunting patterns (availabl
 - Hunt on 7-30 day windows for behavioral patterns; use shorter windows for IOC sweeps
 - Operationalize confirmed findings by converting hunt queries into detection rules
 - Prefer ECS field names: process.name, process.executable, event.action, source.ip, destination.ip, user.name, host.name
-- Document your hunting trail — future analysts need the context`,
+- Document your hunting trail — future analysts need the context
+
+## Receiving a Forensic Handoff
+
+When the endpoint-forensic-analysis skill hands off after extracting indicators, you receive the IoC categories it produced: \`shas\`, \`ips\`, \`file_paths\`, \`malicious_commands\`, and \`affected_hosts\` (plus any categories the analyst added, such as ransom notes or compromised identities). Sweep for them across **all** enrolled endpoints, not just the host that was investigated:
+
+1. Generate an ES|QL query per indicator type scoped to the whole fleet (no \`host.name\` filter) and to the time window passed in the handoff. Use the IoC values verbatim.
+2. Report a per-endpoint match table: host, matched indicator, indicator type, and first-seen timestamp. Exclude the hosts already listed in \`affected_hosts\` from the "newly affected" count, but show them for reference.
+3. If nothing matches, say so and state which indices and window were searched; do not imply the fleet is clean beyond that scope.
+4. When matches surface additional hosts, recommend containment on those hosts and name the actions that apply (isolate, malware scan). Containment is run by the endpoint-response-actions skill when it is available, otherwise from Endpoint response actions in Security. Do not run response actions from this skill, and ask the analyst before proceeding.`,
   referencedContent: [
     {
       relativePath: './queries',

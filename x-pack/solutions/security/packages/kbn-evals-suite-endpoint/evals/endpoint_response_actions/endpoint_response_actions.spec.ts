@@ -400,4 +400,95 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
       });
     }
   );
+
+  // ---------------------------------------------------------------------------
+  // Scenario 9: Several hosts and actions are dispatched one at a time
+  // ---------------------------------------------------------------------------
+  evaluate(
+    'dispatches multi-host requests one call at a time',
+    async ({ evaluateResponseActionsDataset }) => {
+      await evaluateResponseActionsDataset({
+        dataset: {
+          name: 'endpoint-response-actions: sequential multi-host dispatch',
+          description:
+            'Validates that a request spanning several hosts and actions is dispatched as ' +
+            'separate tool calls, one per host per action, each pausing on its own ' +
+            'confirmation card, rather than batched or issued together.',
+          examples: [
+            {
+              input: {
+                question:
+                  'Contain this incident: isolate eval-host-isolate, then isolate eval-host-release.',
+              },
+              output: {
+                criteria: [
+                  `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
+                  'Called endpoint-response-actions.isolate_host for "eval-host-isolate" first, and the output lists exactly one isolate_host call under pending_confirmations (the second host was not dispatched in the same round)',
+                  'Told the analyst that eval-host-release will be handled after the first confirmation, or otherwise indicated the actions run one at a time',
+                  'Did not claim either host was already isolated before the analyst confirmed',
+                ],
+                tool_sequence: ['endpoint-response-actions.isolate_host'],
+              },
+              metadata: {
+                golden_id: 'era-011-sequential-multi-host',
+                row_type: 'happy',
+                forbidden_tools: [
+                  'endpoint-response-actions.unisolate_host',
+                  'endpoint-response-actions.scan_host',
+                ],
+              },
+            },
+          ],
+        },
+      });
+    }
+  );
+
+  // ---------------------------------------------------------------------------
+  // Scenario 10: Closing incident summary after containment
+  // ---------------------------------------------------------------------------
+  evaluate(
+    'closes containment with an incident summary built from tool results',
+    async ({ evaluateResponseActionsDataset }) => {
+      await evaluateResponseActionsDataset({
+        dataset: {
+          name: 'endpoint-response-actions: closing incident summary',
+          description:
+            'Validates that, after containment, the agent closes with a summary of hosts, ' +
+            'dispatched actions with IDs and final status, declined actions, and outstanding ' +
+            'items — and only states a status it got from a tool result.',
+          examples: [
+            {
+              input: {
+                question:
+                  'Containment is done for this incident. I confirmed isolating eval-host-isolate (action ID 8d043de1-a9ea-4dc9-ae41-2a5ff7dc693e) and I declined the isolation of eval-host-release. Give me the closing incident summary.',
+              },
+              output: {
+                criteria: [
+                  `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
+                  'Called endpoint-response-actions.get_response_action_status with action ID 8d043de1-a9ea-4dc9-ae41-2a5ff7dc693e to obtain the final status instead of assuming it',
+                  'The summary names both hosts (eval-host-isolate and eval-host-release)',
+                  'The summary lists the isolate action for eval-host-isolate with its action ID and a status that matches the tool result (or says the status could not be confirmed if the lookup found nothing)',
+                  'The summary reports the eval-host-release isolation as declined/cancelled and does not describe it as performed',
+                  'The summary has an outstanding-items part (for example unconfirmed or pending actions, or hosts left uncontained)',
+                  'Did not dispatch a new isolate, release, or scan action to build the summary',
+                ],
+                tool_sequence: ['endpoint-response-actions.get_response_action_status'],
+              },
+              metadata: {
+                golden_id: 'era-012-closing-incident-summary',
+                row_type: 'happy',
+                forbidden_tools: [
+                  'endpoint-response-actions.isolate_host',
+                  'endpoint-response-actions.unisolate_host',
+                  'endpoint-response-actions.scan_host',
+                  'endpoint-response-actions.get_running_processes',
+                ],
+              },
+            },
+          ],
+        },
+      });
+    }
+  );
 });
