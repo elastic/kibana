@@ -45,7 +45,7 @@ export interface KeyCounts {
   strictKeysSingleAlert: number;
   wideKeys: number;
   wideKeysSingleAlert: number;
-  /** Confident false positives with no strict key: they group by rule and detection only. */
+  /** Confident false positives whose wide key has no condition: they group by rule and detection only. */
   fpCandidatesOnFallback: number;
 }
 
@@ -76,16 +76,15 @@ export const planKeyTags = ({
   const strictAlerts = new Map<string, string[]>();
   const wideAlerts = new Map<string, string[]>();
   const groups = new Map<string, KeyTagGroup>();
-  const withoutStrict = new Set<string>();
+  const ruleOnly = new Set<string>();
 
   for (const { id, doc } of alerts) {
-    const { strict, wide } = buildPatternKeys(doc);
+    const { strict, wide, wideIsRuleOnly } = buildPatternKeys(doc);
     const wideHash = hashKey(spaceId, wide);
     add(wideAlerts, wideHash, id);
     const tags = [`${TRIAGE_WIDE_KEY_TAG_PREFIX}${wideHash}`];
-    if (strict === undefined) {
-      withoutStrict.add(id);
-    } else {
+    if (wideIsRuleOnly) ruleOnly.add(id);
+    if (strict !== undefined) {
       const strictHash = hashKey(spaceId, strict);
       add(strictAlerts, strictHash, id);
       tags.unshift(`${TRIAGE_STRICT_KEY_TAG_PREFIX}${strictHash}`);
@@ -104,7 +103,7 @@ export const planKeyTags = ({
       strictKeysSingleAlert: strict.single,
       wideKeys: wide.keys,
       wideKeysSingleAlert: wide.single,
-      fpCandidatesOnFallback: fpCandidateIds.filter((id) => withoutStrict.has(id)).length,
+      fpCandidatesOnFallback: fpCandidateIds.filter((id) => ruleOnly.has(id)).length,
     },
   };
 };

@@ -9,7 +9,12 @@ import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { ALERT_FETCH_LIMIT, BATCH_ALERT_CAP, RULE_FETCH_LIMIT } from '../../alert_triage/constants';
 import { LOADED_ALERT_FIELDS } from '../../alert_triage/loaded_alert_fields';
 import {
+  closeStillOpenAlertsAsFalsePositive,
+  countClosedByDecision,
+  fetchDecisionCandidates,
+  type DecisionCursor,
   fetchTriageAlerts,
+  findKeyTagsWithVerdicts,
   listLiveExecutionIds,
   loadAlertsByIds,
   readKeyHistory,
@@ -135,6 +140,56 @@ describe('listLiveExecutionIds', () => {
     await expect(listLiveExecutionIds({ callKibanaApi }, 'batch', logger)).resolves.toBeUndefined();
 
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('HTTP 403: Forbidden'));
+  });
+});
+
+describe('findKeyTagsWithVerdicts', () => {
+  const answer = (keys: string[]) => ({
+    status: 200,
+    headers: {},
+    body: { aggregations: { keys: { buckets: keys.map((key) => ({ key })) } } },
+  });
+
+  it('asks for alerts that carry a key tag and a verdict tag, and returns only the key tags', async () => {
+    const callKibanaApi = jest.fn().mockResolvedValue(answer(['k1']));
+
+    const found = await findKeyTagsWithVerdicts(
+      { callKibanaApi },
+      ['k1', 'k2'],
+      ['az:true_positive']
+    );
+
+    expect([...found]).toEqual(['k1']);
+    const { body } = callKibanaApi.mock.calls[0][0];
+    expect(body.query.bool.filter).toEqual([
+      { terms: { 'kibana.alert.workflow_tags': ['k1', 'k2'] } },
+      { terms: { 'kibana.alert.workflow_tags': ['az:true_positive'] } },
+    ]);
+    expect(body.aggs.keys.terms).toEqual(
+      expect.objectContaining({ include: ['k1', 'k2'], size: 2 })
+    );
+  });
+
+  it('searches many keys in chunks and joins the answers', async () => {
+    const keys = Array.from({ length: 1200 }, (_, index) => `k${index}`);
+    const callKibanaApi = jest
+      .fn()
+      .mockResolvedValueOnce(answer(['k1']))
+      .mockResolvedValueOnce(answer(['k600']))
+      .mockResolvedValueOnce(answer([]));
+
+    const found = await findKeyTagsWithVerdicts({ callKibanaApi }, keys, ['az:inconclusive']);
+
+    expect(callKibanaApi).toHaveBeenCalledTimes(3);
+    expect([...found]).toEqual(['k1', 'k600']);
+  });
+
+  it('fails instead of reporting no verdicts when the response has no aggregation', async () => {
+    const callKibanaApi = jest.fn().mockResolvedValue({ status: 200, headers: {}, body: {} });
+
+    await expect(
+      findKeyTagsWithVerdicts({ callKibanaApi }, ['k1'], ['az:inconclusive'])
+    ).rejects.toThrow('Key verdicts missing');
   });
 });
 
@@ -512,5 +567,210 @@ describe('fetchTriageAlerts', () => {
     await expect(
       fetchTriageAlerts({ callKibanaApi }, 'alert_analysis:', Date.parse('2026-10-12'), NO_FILTERS)
     ).rejects.toThrow('Per-rule alerts missing');
+  });
+});
+
+describe('fetchDecisionCandidates', () => {
+  const run = (hits: unknown[], filters: Partial<TriageFilters> = {}, after?: DecisionCursor) => {
+    const callKibanaApi = jest
+      .fn()
+      .mockResolvedValue({ status: 200, headers: {}, body: { hits: { hits } } });
+    return {
+      callKibanaApi,
+      run: () =>
+        fetchDecisionCandidates(
+          { callKibanaApi },
+          'alert_analysis:',
+          Date.parse('2026-10-12'),
+          { ...NO_FILTERS, ...filters },
+          { after }
+        ),
+    };
+  };
+
+  it('returns each hit as an id, the fields a key reads and its severity', async () => {
+    const { run: fetch } = run([
+      { _id: 'a', _source: { 'kibana.alert.severity': 'low', process: { executable: 'x' } } },
+      { _id: 'b', _source: { process: { executable: 'y' } } },
+    ]);
+
+    const { candidates, after } = await fetch();
+
+    expect(candidates).toEqual([
+      { id: 'a', doc: expect.objectContaining({ process: { executable: 'x' } }), severity: 'low' },
+      { id: 'b', doc: expect.objectContaining({ process: { executable: 'y' } }) },
+    ]);
+    expect(after).toBeUndefined();
+  });
+
+  const fullPage = (timestampOf: (i: number) => number) =>
+    Array.from({ length: ALERT_FETCH_LIMIT }, (_unused, i) => ({
+      _id: `a${i}`,
+      _source: {},
+      sort: [timestampOf(i), `uuid-${i}`],
+    }));
+
+  it('hands back the cursor of a full page: the last timestamp and the ids read at it', async () => {
+    const { after } = await run(fullPage((i) => (i < ALERT_FETCH_LIMIT - 2 ? i : 9_999_999))).run();
+
+    expect(after).toEqual({
+      timestamp: 9_999_999,
+      seenIds: [`a${ALERT_FETCH_LIMIT - 2}`, `a${ALERT_FETCH_LIMIT - 1}`],
+    });
+  });
+
+  it('reads the next page from the cursor without `search_after`, which the alerts route drops', async () => {
+    const after = { timestamp: 5000, seenIds: ['a1', 'a2'] };
+    const next = run([], {}, after);
+
+    await next.run();
+
+    const { body } = next.callKibanaApi.mock.calls[0][0];
+    expect(body.search_after).toBeUndefined();
+    expect(body.query.bool.filter).toContainEqual({
+      range: { '@timestamp': { gte: 5000, format: 'epoch_millis' } },
+    });
+    expect(body.query.bool.must_not).toContainEqual({ ids: { values: ['a1', 'a2'] } });
+  });
+
+  it('keeps the ids read before when a whole page sits inside one timestamp', async () => {
+    const previous = { timestamp: 7000, seenIds: ['before'] };
+    const { after } = await run(
+      fullPage(() => 7000),
+      {},
+      previous
+    ).run();
+
+    expect(after?.timestamp).toBe(7000);
+    expect(after?.seenIds).toHaveLength(ALERT_FETCH_LIMIT + 1);
+    expect(after?.seenIds).toContain('before');
+  });
+
+  it('has no cursor on a short page', async () => {
+    const { after } = await run(fullPage((i) => i).slice(0, 5)).run();
+
+    expect(after).toBeUndefined();
+  });
+
+  it('searches oldest first with a tiebreaker, and reads only the fields it needs', async () => {
+    const { run: fetch, callKibanaApi } = run([]);
+
+    await fetch();
+
+    expect(callKibanaApi).toHaveBeenCalledTimes(1);
+    const { body } = callKibanaApi.mock.calls[0][0];
+    expect(body.size).toBe(ALERT_FETCH_LIMIT);
+    expect(body.sort).toEqual([{ '@timestamp': 'asc' }, { 'kibana.alert.uuid': 'asc' }]);
+    expect(body._source).toEqual(
+      expect.arrayContaining(['kibana.alert.severity', 'process.executable'])
+    );
+    expect(body._source).not.toContain('message');
+  });
+
+  it('leaves out alerts already triaged, claimed, or tagged by a decision', async () => {
+    const { run: fetch, callKibanaApi } = run([]);
+
+    await fetch();
+
+    const query = JSON.stringify(callKibanaApi.mock.calls[0][0].body.query);
+    expect(query).toContain('az:true_positive');
+    expect(query).toContain('alert_analysis:');
+    expect(query).toContain('az:would_close:');
+    expect(query).toContain('az:would_skip:');
+  });
+
+  it('reads only open alerts, so an acknowledged alert is never closed or skipped by a decision', async () => {
+    const { run: fetch, callKibanaApi } = run([]);
+
+    await fetch();
+
+    const { filter } = callKibanaApi.mock.calls[0][0].body.query.bool;
+    expect(filter).toContainEqual({ term: { 'kibana.alert.workflow_status': 'open' } });
+    expect(JSON.stringify(filter)).not.toContain('acknowledged');
+  });
+
+  it('leaves out an alert a decision closed even in on mode, so a reopened alert stays open', async () => {
+    const callKibanaApi = jest
+      .fn()
+      .mockResolvedValue({ status: 200, headers: {}, body: { hits: { hits: [] } } });
+
+    await fetchDecisionCandidates(
+      { callKibanaApi },
+      'alert_analysis:',
+      Date.parse('2026-10-12'),
+      NO_FILTERS,
+      { includeTaggedByShadow: true }
+    );
+
+    const mustNot = JSON.stringify(callKibanaApi.mock.calls[0][0].body.query.bool.must_not);
+    expect(mustNot).toContain('az:closed_by_decision:');
+    expect(mustNot).not.toContain('az:would_close:');
+  });
+});
+
+describe('closeStillOpenAlertsAsFalsePositive', () => {
+  const closeWith = (body: Record<string, unknown>) => {
+    const callKibanaApi = jest.fn().mockResolvedValue({ status: 200, headers: {}, body });
+    return {
+      callKibanaApi,
+      run: () => closeStillOpenAlertsAsFalsePositive({ callKibanaApi }, ['a', 'b']),
+    };
+  };
+
+  it('closes only the given alerts that are still open, with the reason the closure action records', async () => {
+    const { run, callKibanaApi } = closeWith({ updated: 2, failures: [] });
+
+    await run();
+
+    expect(callKibanaApi).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: '/api/detection_engine/signals/status',
+        body: {
+          query: {
+            bool: {
+              filter: [
+                { ids: { values: ['a', 'b'] } },
+                { term: { 'kibana.alert.workflow_status': 'open' } },
+              ],
+            },
+          },
+          status: 'closed',
+          reason: 'false_positive',
+        },
+      })
+    );
+  });
+
+  it('returns how many alerts it closed, fewer than asked when an analyst moved some on', async () => {
+    await expect(closeWith({ updated: 1, failures: [] }).run()).resolves.toBe(1);
+  });
+
+  it('throws on a failure, so a partial close is never reported as done', async () => {
+    await expect(closeWith({ updated: 2, failures: [{ cause: 'x' }] }).run()).rejects.toThrow(
+      'not fully applied'
+    );
+  });
+});
+
+describe('countClosedByDecision', () => {
+  it.each([
+    [{ value: 7 }, 7],
+    [12, 12],
+    [undefined, 0],
+  ])('reads the total %p as %p', async (total, expected) => {
+    const callKibanaApi = jest
+      .fn()
+      .mockResolvedValue({ status: 200, headers: {}, body: { hits: { total } } });
+
+    const count = await countClosedByDecision(
+      { callKibanaApi },
+      'fp-decision-1',
+      Date.parse('2026-10-27')
+    );
+
+    expect(count).toBe(expected);
+    expect(JSON.stringify(callKibanaApi.mock.calls[0][0].body.query)).toContain(
+      'az:closed_by_decision:fp-decision-1'
+    );
   });
 });

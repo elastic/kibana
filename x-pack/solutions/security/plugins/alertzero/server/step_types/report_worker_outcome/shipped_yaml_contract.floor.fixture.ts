@@ -6,6 +6,7 @@
  */
 
 import {
+  ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
   ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW_ID,
   ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
@@ -18,6 +19,30 @@ import { CHANGED_STATUS, INVESTIGATION_ID } from './shipped_yaml_contract.test_h
  * passes, the way the engine would have them.
  */
 export const SHIPPED_YAML_CONTRACTS: WorkerWorkflowContract[] = [
+  {
+    contexts: ['ok', 'failed'].map((status) => ({
+      steps: {
+        match_fp_decisions: {
+          output: {
+            candidates: 120,
+            capped: 0,
+            close_failures: 0,
+            closed: 0,
+            skipped: 0,
+            decisions_matched: 3,
+            excluded_by_severity: 4,
+            status,
+            tag_failures: 0,
+            would_close: 30,
+            would_skip: 2,
+          },
+        },
+      },
+      variables: {},
+    })),
+    workerId: SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+    workflowId: ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
+  },
   {
     contexts: [
       {

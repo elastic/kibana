@@ -149,6 +149,20 @@ export interface AlertZeroAlertTriageBatchGroupedPayload extends AlertZeroEnvelo
   wide_keys_single_alert: number;
 }
 
+export interface AlertZeroAlertTriageDecisionsMatchedPayload extends AlertZeroEnvelope {
+  candidates: number;
+  capped: number;
+  close_failures: number;
+  closed: number;
+  skipped: number;
+  decisions_matched: number;
+  excluded_by_severity: number;
+  match_failed: boolean;
+  tag_failures: number;
+  would_close: number;
+  would_skip: number;
+}
+
 export interface AlertZeroAlertTriageClosureResolvedPayload extends AlertZeroEnvelope {
   alerts_proposed: number;
   alerts_retag_failed: number;
@@ -230,6 +244,7 @@ export interface AlertZeroTelemetryEventPayloads {
   [ALERTZERO_TELEMETRY_EVENTS.WorkerRunCompleted]: AlertZeroWorkerRunCompletedPayload;
   [ALERTZERO_TELEMETRY_EVENTS.AlertTriageBatchClassified]: AlertZeroAlertTriageBatchClassifiedPayload;
   [ALERTZERO_TELEMETRY_EVENTS.AlertTriageBatchGrouped]: AlertZeroAlertTriageBatchGroupedPayload;
+  [ALERTZERO_TELEMETRY_EVENTS.AlertTriageDecisionsMatched]: AlertZeroAlertTriageDecisionsMatchedPayload;
   [ALERTZERO_TELEMETRY_EVENTS.AlertTriageClosureResolved]: AlertZeroAlertTriageClosureResolvedPayload;
   [ALERTZERO_TELEMETRY_EVENTS.RuleTuningReviewCompleted]: AlertZeroRuleTuningReviewCompletedPayload;
   [ALERTZERO_TELEMETRY_EVENTS.RuleCoverageReviewCompleted]: AlertZeroRuleCoverageReviewCompletedPayload;
@@ -600,6 +615,37 @@ export const ALERTZERO_ALERT_TRIAGE_BATCH_GROUPED_EVENT: EventTypeOpts<AlertZero
     },
   };
 
+export const ALERTZERO_ALERT_TRIAGE_DECISIONS_MATCHED_EVENT: EventTypeOpts<AlertZeroAlertTriageDecisionsMatchedPayload> =
+  {
+    eventType: ALERTZERO_TELEMETRY_EVENTS.AlertTriageDecisionsMatched,
+    schema: {
+      ...ENVELOPE_SCHEMA,
+      candidates: countField('Open, untriaged alerts the sweep checked against the decisions'),
+      capped: countField(
+        'Matches left for the normal path because a decision reached its daily cap'
+      ),
+      close_failures: countField('Decisions whose alerts could not all be closed'),
+      closed: countField('Alerts closed by a decision. 0 unless the deployment runs in on mode'),
+      skipped: countField(
+        'Alerts a dismissed pattern kept out of analysis. 0 unless the deployment runs in on mode'
+      ),
+      decisions_matched: countField('Distinct decisions that matched at least one alert'),
+      excluded_by_severity: countField(
+        'Alerts of a matched pattern that their severity keeps with a human. Unknown severity counts here'
+      ),
+      match_failed: flagField(
+        'Whether the match failed. A failed match leaves every alert for analysis'
+      ),
+      tag_failures: countField('Decisions whose alerts could not be tagged'),
+      would_close: countField(
+        'Alerts an approved decision matched, whether they were closed or only tagged'
+      ),
+      would_skip: countField(
+        'Alerts a dismissed pattern matched. In shadow mode they are only tagged'
+      ),
+    },
+  };
+
 export const ALERTZERO_ALERT_TRIAGE_CLOSURE_RESOLVED_EVENT: EventTypeOpts<AlertZeroAlertTriageClosureResolvedPayload> =
   {
     eventType: ALERTZERO_TELEMETRY_EVENTS.AlertTriageClosureResolved,
@@ -793,6 +839,7 @@ export const ALERTZERO_TELEMETRY_EVENT_TYPES = [
   ALERTZERO_WORKER_RUN_COMPLETED_EVENT,
   ALERTZERO_ALERT_TRIAGE_BATCH_CLASSIFIED_EVENT,
   ALERTZERO_ALERT_TRIAGE_BATCH_GROUPED_EVENT,
+  ALERTZERO_ALERT_TRIAGE_DECISIONS_MATCHED_EVENT,
   ALERTZERO_ALERT_TRIAGE_CLOSURE_RESOLVED_EVENT,
   ALERTZERO_RULE_TUNING_REVIEW_COMPLETED_EVENT,
   ALERTZERO_RULE_COVERAGE_REVIEW_COMPLETED_EVENT,

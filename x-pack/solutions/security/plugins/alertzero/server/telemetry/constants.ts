@@ -20,6 +20,7 @@ export const ALERTZERO_TELEMETRY_EVENTS = {
   WorkerRunCompleted: `${ALERTZERO_TELEMETRY_PREFIX}_worker_run_completed`,
   AlertTriageBatchClassified: `${ALERTZERO_TELEMETRY_PREFIX}_alert_triage_batch_classified`,
   AlertTriageBatchGrouped: `${ALERTZERO_TELEMETRY_PREFIX}_alert_triage_batch_grouped`,
+  AlertTriageDecisionsMatched: `${ALERTZERO_TELEMETRY_PREFIX}_alert_triage_decisions_matched`,
   AlertTriageClosureResolved: `${ALERTZERO_TELEMETRY_PREFIX}_alert_triage_closure_resolved`,
   RuleTuningReviewCompleted: `${ALERTZERO_TELEMETRY_PREFIX}_rule_tuning_review_completed`,
   RuleCoverageReviewCompleted: `${ALERTZERO_TELEMETRY_PREFIX}_rule_coverage_review_completed`,

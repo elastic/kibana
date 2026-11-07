@@ -70,7 +70,7 @@ export const buildVarietySummary = (docs: readonly AlertDocument[], kind: Propos
   const lines = [parts.join(' · ')];
   if (kind === 'pooled') {
     lines.push('These alerts matched no other alert of their batch, so they are pooled.');
-  } else if (docs.length > 0 && docs.every((doc) => buildPatternKeys(doc).strict === undefined)) {
+  } else if (docs.length > 0 && docs.every((doc) => buildPatternKeys(doc).wideIsRuleOnly)) {
     lines.push('These alerts have no program, file or registry field, so they group by rule only.');
   }
   return lines.join('\n');
