@@ -47,8 +47,6 @@ export const CUSTOMER0_REINFORCEMENT_TIMEOUT_MS = 45 * 60_000;
 const MAX_WAIT_MS = 20 * 60_000;
 /** How long to wait for the post-execution execution to be searchable after the investigation. */
 const EXECUTION_LOOKUP_MS = 30_000;
-/** Kibana and Elasticsearch clocks can disagree by a few seconds. */
-const TREE_WRITE_SKEW_MS = 30_000;
 const POLL_INTERVAL_MS = 5_000;
 /** How long a cancelled replay may take to stop before its trees are restored anyway. */
 const CANCEL_WAIT_MS = 60_000;
@@ -603,7 +601,11 @@ const readExecution = async (
 interface StoredTree {
   content?: string;
   '@timestamp'?: string;
-  attributes?: { version?: number | string };
+  attributes?: {
+    version?: number | string;
+    conversation_id?: string;
+    counts_conversation_id?: string;
+  };
 }
 
 const readTreeDoc = async (esClient: Client, id: string): Promise<StoredTree | undefined> => {
@@ -618,43 +620,45 @@ const readTreeDoc = async (esClient: Client, id: string): Promise<StoredTree | u
   }
 };
 
-const writtenThisRun = (timestamp: string | undefined, startedAtMs: number): boolean => {
-  const writtenAt = timestamp ? Date.parse(timestamp) : Number.NaN;
-  return Number.isFinite(writtenAt) && writtenAt >= startedAtMs - TREE_WRITE_SKEW_MS;
-};
-
-/** The newest version written before this run, which a run that committed several times skips past. */
+/** The newest version another conversation committed, skipping every commit this run made. */
 const versionBeforeRun = async (
   esClient: Client,
   treeId: string,
   headVersion: number,
-  startedAtMs: number
+  conversationId: string
 ): Promise<StoredTree | undefined> => {
   for (let version = headVersion - 1; version >= 1; version--) {
     const doc = await readTreeDoc(esClient, versionId(treeId, version));
-    if (!doc || !writtenThisRun(doc['@timestamp'], startedAtMs)) return doc;
+    if (doc?.attributes?.conversation_id !== conversationId) return doc;
   }
   return undefined;
 };
 
-/** Prior is the tree before this run's first commit when it committed, otherwise the existing head. */
+/**
+ * Trees the run wrote, by commit provenance, plus every tree its last submit names. A tree only a
+ * rejected earlier submit named is left out. Prior is the tree before this run's first commit when
+ * it committed, otherwise the existing head.
+ */
 const treesAfterRun = async (
   esClient: Client,
-  treeIds: string[],
-  startedAtMs: number
+  submissions: readonly SubmitArguments[],
+  conversationId: string
 ): Promise<NonNullable<ReinforcementTaskOutput['trees']>> => {
+  const lastSubmitted = new Set(submittedTreeIds(submissions.slice(-1)));
   const trees: NonNullable<ReinforcementTaskOutput['trees']> = [];
-  for (const treeId of treeIds) {
+  for (const treeId of submittedTreeIds(submissions)) {
     const head = await readTreeDoc(esClient, headId(treeId));
+    const committed = head?.attributes?.conversation_id === conversationId;
+    const counted = head?.attributes?.counts_conversation_id === conversationId;
+    if (!lastSubmitted.has(treeId) && !committed && !counted) continue;
     const version = Number(head?.attributes?.version);
-    const wrote = writtenThisRun(head?.['@timestamp'], startedAtMs);
     const previous =
-      wrote && version > 1
-        ? await versionBeforeRun(esClient, treeId, version, startedAtMs)
+      committed && version > 1
+        ? await versionBeforeRun(esClient, treeId, version, conversationId)
         : undefined;
     trees.push({
       tree_id: treeId,
-      prior_mermaid: wrote ? previous?.content : head?.content,
+      prior_mermaid: committed ? previous?.content : head?.content,
       submitted_mermaid: head?.content,
     });
   }
@@ -834,7 +838,7 @@ export const runCustomer0Reinforcement = async ({
       }
     | undefined;
   const submissions = parseSubmissions(output?.submissions_json);
-  const trees = await treesAfterRun(esClient, submittedTreeIds(submissions), startedAtMs);
+  const trees = await treesAfterRun(esClient, submissions, conversationId);
   const reinforced = reinforce?.status === ExecutionStatus.COMPLETED && output?.skipped !== true;
   const submitRejected = output?.submit_rejected === true;
   const failed = execution.status !== ExecutionStatus.COMPLETED || !reinforced || submitRejected;
