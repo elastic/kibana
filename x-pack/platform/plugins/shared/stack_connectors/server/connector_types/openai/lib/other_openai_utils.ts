@@ -49,6 +49,63 @@ export const getRequestWithStreamOption = (
   return body;
 };
 
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const deepMergeDefaults = (
+  defaults: Record<string, unknown>,
+  overrides: Record<string, unknown>
+): Record<string, unknown> => {
+  const merged: Record<string, unknown> = { ...defaults };
+  for (const [key, value] of Object.entries(overrides)) {
+    if (key === '__proto__') continue;
+    // An explicitly-undefined request value (e.g. `temperature: undefined`) means "not set", so it
+    // must not erase the default. An explicit `null` is a real value and still wins.
+    if (value === undefined) continue;
+    const base = merged[key];
+    merged[key] =
+      isPlainObject(base) && isPlainObject(value) ? deepMergeDefaults(base, value) : value;
+  }
+  return merged;
+};
+
+/**
+ * Deep-merges the connector's `extraBody` config into a request body object. Values in the
+ * request body win, so `extraBody` only adds provider-specific parameters such as
+ * `chat_template_kwargs` that Kibana never sets.
+ */
+export const mergeExtraBody = <T extends object>(
+  body: T,
+  extraBody?: Record<string, unknown>
+): T => {
+  if (!extraBody || Object.keys(extraBody).length === 0) {
+    return body;
+  }
+  return deepMergeDefaults(extraBody, body as Record<string, unknown>) as T;
+};
+
+/**
+ * String variant of {@link mergeExtraBody} for the stringified bodies used by runApi/streamApi.
+ * Non-JSON bodies are returned unchanged.
+ */
+export const mergeExtraBodyIntoJson = (
+  body: string,
+  extraBody?: Record<string, unknown>
+): string => {
+  if (!extraBody || Object.keys(extraBody).length === 0) {
+    return body;
+  }
+  try {
+    const jsonBody = JSON.parse(body);
+    if (isPlainObject(jsonBody)) {
+      return JSON.stringify(mergeExtraBody(jsonBody, extraBody));
+    }
+  } catch (err) {
+    // not JSON, send as-is
+  }
+  return body;
+};
+
 // PKI utils
 /**
  * Input interface for SSL overrides.

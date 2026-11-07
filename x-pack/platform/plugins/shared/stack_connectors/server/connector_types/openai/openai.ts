@@ -55,7 +55,12 @@ import {
   pipeStreamingResponse,
   sanitizeRequest,
 } from './lib/utils';
-import { getPKISSLOverrides, pkiErrorHandler } from './lib/other_openai_utils';
+import {
+  getPKISSLOverrides,
+  mergeExtraBody,
+  mergeExtraBodyIntoJson,
+  pkiErrorHandler,
+} from './lib/other_openai_utils';
 
 export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   private url: string;
@@ -64,11 +69,13 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   private openAI: OpenAI;
   private headers: Record<string, string>;
   private sslOverrides?: SSLSettings;
+  private extraBody?: Record<string, unknown>;
 
   constructor(params: ServiceParams<Config, Secrets>) {
     super(params);
     this.url = this.config.apiUrl;
     this.provider = this.config.apiProvider;
+    this.extraBody = 'extraBody' in this.config ? this.config.extraBody : undefined;
     // apiKey could be undefined if PKI, use mock value when this is the case
     this.key = 'apiKey' in this.secrets && this.secrets.apiKey ? this.secrets.apiKey : '';
     this.headers = {
@@ -239,7 +246,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     const sanitizedBody = sanitizeRequest(
       this.provider,
       this.url,
-      body,
+      mergeExtraBodyIntoJson(body, this.extraBody),
       ...('defaultModel' in this.config ? [this.config.defaultModel] : [])
     );
 
@@ -296,7 +303,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     const executeBody = getRequestWithStreamOption(
       this.provider,
       this.url,
-      body,
+      mergeExtraBodyIntoJson(body, this.extraBody),
       stream,
       ...('defaultModel' in this.config ? [this.config.defaultModel] : [])
     );
@@ -423,12 +430,15 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       } else if ('defaultModel' in this.config && this.config.defaultModel) {
         model = this.config.defaultModel;
       }
-      const requestBody: ChatCompletionCreateParamsStreaming = {
-        ...rest,
-        stream: true,
-        messages,
-        model,
-      };
+      const requestBody: ChatCompletionCreateParamsStreaming = mergeExtraBody(
+        {
+          ...rest,
+          stream: true,
+          messages,
+          model,
+        },
+        this.extraBody
+      );
 
       connectorUsageCollector.addRequestBodyBytes(undefined, requestBody);
       const stream = await this.openAI.chat.completions.create(requestBody, {
