@@ -16,13 +16,14 @@ import type { PersistenceAPI } from './types';
  * @param name {string}
  * @returns {SavedObject|undefined}
  */
-export async function findByName(client: PersistenceAPI, name: string) {
+export async function findByName(client: PersistenceAPI, name: string, namespaces?: string[]) {
   if (name) {
     const savedObjects = await client.find({
       perPage: 10,
       search: `"${name}"`,
       searchFields: ['name.keyword'],
       fields: ['name'],
+      namespaces: namespaces?.length ? namespaces : undefined,
     });
 
     return savedObjects ? savedObjects[0] : undefined;
