@@ -81,10 +81,20 @@ export const defineInferenceFeaturesRoutes = ({
         });
 
         const body: InferenceFeaturesResponse = {
-          features: visibleFeatures.map((feature) => ({
-            ...feature,
-            recommendedEndpoints: feature.recommendedEndpoints.map(({ id }) => id),
-          })),
+          features: visibleFeatures.map(({ recommendedEndpoints, ...feature }) => {
+            const recommendedEndpointParameters = Object.fromEntries(
+              recommendedEndpoints.flatMap(({ id, parameters }) =>
+                parameters ? [[id, parameters]] : []
+              )
+            );
+            return {
+              ...feature,
+              recommendedEndpoints: recommendedEndpoints.map(({ id }) => id),
+              ...(Object.keys(recommendedEndpointParameters).length > 0 && {
+                recommendedEndpointParameters,
+              }),
+            };
+          }),
         };
 
         return response.ok({
