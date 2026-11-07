@@ -20,10 +20,13 @@ export async function insertSloSummaryDocs(esClient: EsClient, docs: unknown[]):
   });
 }
 
-export async function cleanupSloSummaryDocs(esClient: EsClient): Promise<void> {
+export async function cleanupSloSummaryDocs(
+  esClient: EsClient,
+  query: QueryDslQueryContainer = { match_all: {} }
+): Promise<void> {
   await esClient.deleteByQuery({
     index: SUMMARY_DESTINATION_INDEX_NAME,
-    query: { match_all: {} },
+    query,
     refresh: true,
     conflicts: 'proceed',
   });

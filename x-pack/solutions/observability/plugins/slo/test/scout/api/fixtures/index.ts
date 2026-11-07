@@ -66,7 +66,12 @@ export {
   SLO_OVERVIEW_EMBEDDABLE_ID,
 } from './constants';
 export { createSloPipelineAssertions, type SloPipelineAssertions } from './slo_pipeline_assertions';
-export { mergeSloApiHeaders, sloApiPathWithQuery } from './slo_api_http';
+export {
+  mergeSloApiHeaders,
+  sloApiPathWithQuery,
+  unwrapInspect,
+  type InspectWrapped,
+} from './slo_api_http';
 export {
   cleanupSloSummaryDocs,
   countSloSummaryDocs,
@@ -74,6 +79,12 @@ export {
   refreshSloSummaryIndex,
 } from './slo_summary_index_test_helpers';
 export { pollUntilTrue } from './slo_poll';
+export {
+  cleanupSloRollupDocs,
+  countSloRollupDocs,
+  createRollupDoc,
+  insertSloRollupDocs,
+} from './slo_rollup_index_test_helpers';
 export {
   createSloTransformAssertions,
   type SloTransformAssertions,

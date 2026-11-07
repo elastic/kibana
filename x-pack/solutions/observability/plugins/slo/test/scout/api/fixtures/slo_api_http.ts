@@ -17,6 +17,15 @@ export function mergeSloApiHeaders(apiKeyHeader: Record<string, string>): Record
   };
 }
 
+/**
+ * SLO routes wrap array responses as `{ _wrapped, _inspect }` when ES query inspection is
+ * enabled, which is always the case when Kibana runs in dev mode (local Scout servers).
+ */
+export type InspectWrapped<T extends object[]> = T | { _wrapped: T; _inspect: object[] };
+
+export const unwrapInspect = <T extends object[]>(body: InspectWrapped<T>): T =>
+  '_wrapped' in body ? body._wrapped : body;
+
 export function sloApiPathWithQuery(
   path: string,
   query?: Record<string, string | number | boolean | undefined>
