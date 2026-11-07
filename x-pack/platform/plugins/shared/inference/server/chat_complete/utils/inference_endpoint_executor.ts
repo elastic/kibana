@@ -10,6 +10,9 @@ import type OpenAI from 'openai';
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ChatCompleteMetadata, ConnectorTelemetryMetadata } from '@kbn/inference-common';
+import { createInferenceProviderError, DEFAULT_FIRST_BYTE_TIMEOUT_MS } from '@kbn/inference-common';
+
+const DEFAULT_TOTAL_TIMEOUT_MS = 180_000;
 
 export const pickConnectorTelemetryForConnector = ({
   pluginId,
@@ -23,7 +26,13 @@ export interface InferenceEndpointInvokeOptions {
   body: Record<string, unknown>;
   signal?: AbortSignal;
   metadata?: ChatCompleteMetadata;
+  /** Total budget for the inference call, forwarded to the endpoint as the ES `timeout` param. */
   timeout?: number;
+  /**
+   * How long to wait for response headers before failing with a retryable provider error (504).
+   * Defaults to {@link DEFAULT_FIRST_BYTE_TIMEOUT_MS}, or to `timeout` when the caller sets one.
+   */
+  firstByteTimeoutMs?: number;
 }
 
 export interface InferenceEndpointExecutor {
@@ -34,14 +43,26 @@ export const createInferenceEndpointExecutor = ({
   inferenceId,
   esClient,
   stream = true,
+  firstByteTimeoutMs: defaultFirstByteTimeoutMs = DEFAULT_FIRST_BYTE_TIMEOUT_MS,
 }: {
   inferenceId: string;
   esClient: ElasticsearchClient;
   /** When `false`, call the endpoint without `_stream` and wait for the full response. */
   stream?: boolean;
+  /** Default time to wait for response headers on streaming calls. */
+  firstByteTimeoutMs?: number;
 }): InferenceEndpointExecutor => {
   return {
-    async invoke({ body, signal, metadata, timeout = 180_000 }): Promise<Readable> {
+    async invoke({
+      body,
+      signal,
+      metadata,
+      timeout: requestedTimeout,
+      firstByteTimeoutMs: firstByteOverride,
+    }): Promise<Readable> {
+      const timeout = requestedTimeout ?? DEFAULT_TOTAL_TIMEOUT_MS;
+      // an explicit `timeout` has always bounded the header wait, so it keeps doing so
+      const firstByteTimeoutMs = firstByteOverride ?? requestedTimeout ?? defaultFirstByteTimeoutMs;
       const { pluginId, productSolution, productFeature, interactionId, traceId, userId, spaceId } =
         metadata?.connectorTelemetry ?? {};
       const path = `/_inference/chat_completion/${encodeURIComponent(inferenceId)}`;
@@ -55,10 +76,12 @@ export const createInferenceEndpointExecutor = ({
         ...(userId ? { 'X-Elastic-User-Id': userId } : undefined),
         ...(spaceId ? { 'X-Elastic-Space-Id': spaceId } : undefined),
       };
-      // timeout for the inference call performed by the endpoint
+      // total budget for the inference call performed by the endpoint
       const querystring = { timeout: `${Math.ceil(timeout / 60000)}m` };
 
       if (!stream) {
+        // The full completion is only sent once it is ready, so there is no earlier signal to
+        // bound: `timeout` limits the whole wait and the first-byte timeout does not apply.
         try {
           const completion = await esClient.transport.request<OpenAI.ChatCompletion>(
             { method: 'POST', path, querystring, body },
@@ -72,24 +95,44 @@ export const createInferenceEndpointExecutor = ({
           if (error instanceof errors.ResponseError && isErrorBody(error.meta.body)) {
             return toEventStream([{ ...error.meta.body, status: error.statusCode }]);
           }
+          if (error instanceof errors.TimeoutError) {
+            // same stall as on the streaming path: surface it as retryable
+            throw createInferenceProviderError(
+              `Inference endpoint sent no response within ${timeout}ms`,
+              { status: 504 }
+            );
+          }
           throw error;
         }
       }
 
-      const response = await esClient.transport.request(
-        { method: 'POST', path: `${path}/_stream`, querystring, body },
-        {
-          asStream: true,
-          requestTimeout: timeout,
-          headers: {
-            ...headers,
-            // asStream bypasses the transport's decompression step, so explicitly request
-            // an uncompressed response to avoid receiving raw gzipped bytes as SSE events.
-            'accept-encoding': 'identity',
-          },
-          ...(signal ? { signal } : {}),
-        }
-      );
+      const response = await esClient.transport
+        .request(
+          { method: 'POST', path: `${path}/_stream`, querystring, body },
+          {
+            asStream: true,
+            // the transport clears this timer once response headers arrive, so it bounds the
+            // time to first byte rather than the whole stream
+            requestTimeout: firstByteTimeoutMs,
+            headers: {
+              ...headers,
+              // asStream bypasses the transport's decompression step, so explicitly request
+              // an uncompressed response to avoid receiving raw gzipped bytes as SSE events.
+              'accept-encoding': 'identity',
+            },
+            ...(signal ? { signal } : {}),
+          }
+        )
+        .catch((error: unknown) => {
+          if (error instanceof errors.TimeoutError) {
+            // a provider error with a 5xx status is retried by the 'auto' retry filter
+            throw createInferenceProviderError(
+              `Inference endpoint sent no response within ${firstByteTimeoutMs}ms`,
+              { status: 504 }
+            );
+          }
+          throw error;
+        });
       return response as unknown as Readable;
     },
   };
