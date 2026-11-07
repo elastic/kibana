@@ -104,7 +104,8 @@ evaluate.describe('PCI DSS v4.0.1 Compliance', { tag: tags.stateful.classic }, (
         name: 'pci-compliance: requirement 4.1 weak TLS',
         description:
           'Validates the agent surfaces legacy TLS/SSL and unencrypted HTTP connections as ' +
-          'PCI DSS requirement 4.1 violations. Expected: RED. ' +
+          'PCI DSS v4.0.1 requirement 4.2.1 violations (the requirement the question calls 4.1). ' +
+          'Expected: RED. ' +
           'Violations: 203.0.113.51 (TLS 1.0), 203.0.113.52 (TLS 1.1), 198.51.100.10 (HTTP/no TLS).',
         examples: [
           {
@@ -113,7 +114,7 @@ evaluate.describe('PCI DSS v4.0.1 Compliance', { tag: tags.stateful.classic }, (
             },
             output: {
               criteria: [
-                'Called the pci_compliance tool in check mode for requirement 4.1 (or requirement 4).',
+                'Called the pci_compliance tool in check mode for the weak-TLS requirement — requirement 4.2.1 in PCI DSS v4.0.1, which the question calls 4.1. Passing the legacy id 4.1, the parent requirement 4, or requirement 4.2.1 all satisfy this.',
                 'Identified TLS 1.0 connections (destination 203.0.113.51) as a violation.',
                 'Identified TLS 1.1 connections (destination 203.0.113.52) as a violation.',
                 'Identified plain HTTP traffic (destination 198.51.100.10, no TLS) as a violation.',
