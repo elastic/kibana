@@ -75,6 +75,8 @@ const appServices = {
   http: httpServiceMock.createStartContract({ basePath: '/mock' }),
   config: {
     enableManageProcessors: true,
+    canManage: true,
+    canRead: true,
   },
 };
 
