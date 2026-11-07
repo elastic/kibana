@@ -32,6 +32,7 @@ import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
 import { MCP_CLIENT_VERSION, MAX_RETRIES } from '@kbn/connector-schemas/mcp/constants';
 import { buildHeadersFromSecrets } from './auth_helpers';
 import { buildCustomFetch } from './build_custom_fetch';
+import { markConnectFailure, mcpCircuitBreaker } from './circuit_breaker';
 import { retryWithRecovery, type RetryOptions } from './retry_utils';
 
 // TTL for list_tools cache: 15 minutes
@@ -58,6 +59,8 @@ export const listToolsCache = new LRUCache<string, ListToolsResponse>({
  * - Connections are established automatically on-demand (lazy connection):
  *   - When calling listTools() or callTool(), the connector will auto-connect if not already connected.
  * - Connections are disconnected after each operation completes to ensure proper cleanup.
+ * - Connect failures are counted per connector in a circuit breaker (see `circuit_breaker.ts`).
+ *   After repeated failures, operations fail fast and are not retried by Task Manager.
  * - The connector owns one undici dispatcher (see `buildCustomFetch`). The client, its transport
  *   and the dispatcher are released after each operation, on success and on failure.
  */
@@ -141,6 +144,21 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
   }
 
   /**
+   * Key of the circuit breaker state: same identity as the listTools cache, so editing the connector
+   * (url, headers, auth) starts with a closed breaker.
+   */
+  private getBreakerKey(): string {
+    return this.getListToolsCacheKey();
+  }
+
+  private withBreaker<T>(fn: () => Promise<T>): Promise<T> {
+    return mcpCircuitBreaker.run(
+      { key: this.getBreakerKey(), connectorId: this.connector.id, logger: this.logger },
+      fn
+    );
+  }
+
+  /**
    * Test the connector by attempting to connect to the MCP server.
    * Disconnects after the test to clean up resources.
    * Note: Test operations always disconnect to ensure clean test state.
@@ -150,7 +168,7 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<{ connected: boolean; capabilities?: unknown }> {
     try {
-      const result = await this.mcpClient.connect();
+      const result = await this.withBreaker(() => markConnectFailure(this.mcpClient.connect()));
 
       if (result.connected) {
         this.logger.info(`MCP connector test successful. Connected: ${result.connected}`);
@@ -253,7 +271,7 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
       },
     };
 
-    await retryWithRecovery(() => this.mcpClient.connect(), retryOptions);
+    await markConnectFailure(retryWithRecovery(() => this.mcpClient.connect(), retryOptions));
   }
 
   /**
@@ -284,16 +302,18 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     try {
       connectorUsageCollector.addRequestBodyBytes(undefined, params);
 
-      // Ensure we're connected before listing tools (with automatic retry/recovery)
-      await this.ensureConnected('listTools');
+      return await this.withBreaker(async () => {
+        // Ensure we're connected before listing tools (with automatic retry/recovery)
+        await this.ensureConnected('listTools');
 
-      const result = await this.mcpClient.listTools();
-      this.logger.debug(`Listed ${result.tools.length} tools from MCP server`);
+        const result = await this.mcpClient.listTools();
+        this.logger.debug(`Listed ${result.tools.length} tools from MCP server`);
 
-      // Cache the result
-      listToolsCache.set(cacheKey, result);
+        // Cache the result
+        listToolsCache.set(cacheKey, result);
 
-      return result;
+        return result;
+      });
     } catch (error) {
       // On error, ensure connection state is cleaned up
       await this.handleConnectionError(error, 'listTools');
@@ -315,18 +335,20 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     try {
       connectorUsageCollector.addRequestBodyBytes(undefined, params);
 
-      // Ensure we're connected before calling tools (with automatic retry/recovery)
-      await this.ensureConnected('callTool');
+      return await this.withBreaker(async () => {
+        // Ensure we're connected before calling tools (with automatic retry/recovery)
+        await this.ensureConnected('callTool');
 
-      const callParams: CallToolParams = {
-        name: params.name,
-        arguments: params.arguments,
-      };
+        const callParams: CallToolParams = {
+          name: params.name,
+          arguments: params.arguments,
+        };
 
-      const result = await this.mcpClient.callTool(callParams);
-      this.logger.debug(`Successfully called tool: ${params.name}`);
+        const result = await this.mcpClient.callTool(callParams);
+        this.logger.debug(`Successfully called tool: ${params.name}`);
 
-      return result;
+        return result;
+      });
     } catch (error) {
       // On error, ensure connection state is cleaned up
       await this.handleConnectionError(error, `callTool(${params.name})`);
