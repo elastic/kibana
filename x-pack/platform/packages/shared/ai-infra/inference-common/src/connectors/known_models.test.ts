@@ -256,6 +256,50 @@ describe('getModelDefinition', () => {
     });
   });
 
+  describe('Other providers — EIS trial-tier models', () => {
+    it('resolves the EIS model_id form of trial-served models', () => {
+      expect(getModelDefinition('.moonshot-kimi-k3-chat_completion')).toMatchObject({
+        id: 'moonshot-kimi-k3',
+        contextWindow: 1048576,
+      });
+      expect(getModelDefinition('.zai-glm-5.2-chat_completion')).toMatchObject({
+        id: 'zai-glm-5.2',
+        contextWindow: 1048576,
+      });
+      expect(getModelDefinition('.zai-glm-5.3-chat_completion')).toMatchObject({
+        id: 'zai-glm-5.3',
+        contextWindow: 1048576,
+      });
+      expect(getModelDefinition('.nvidia-nemotron-3.5-super-vl-chat_completion')).toMatchObject({
+        id: 'nvidia-nemotron-3.5-super-vl',
+        contextWindow: 262144,
+      });
+      expect(getModelDefinition('.nvidia-nemotron-3-nano-chat_completion')).toMatchObject({
+        id: 'nvidia-nemotron-3-nano',
+        contextWindow: 262144,
+      });
+      expect(getModelDefinition('.qwen-3.8-2.4t-a95b-chat_completion')).toMatchObject({
+        id: 'qwen-3.8-2.4t-a95b',
+        contextWindow: 1000000,
+      });
+    });
+
+    it('resolves the vendor-native form of trial-served models via aliases', () => {
+      expect(getModelDefinition('kimi-k3')).toMatchObject({
+        id: 'moonshot-kimi-k3',
+        contextWindow: 1048576,
+      });
+      expect(getModelDefinition('glm-5.2')).toMatchObject({
+        id: 'zai-glm-5.2',
+        contextWindow: 1048576,
+      });
+      expect(getModelDefinition('nemotron-3.5-lightning')).toMatchObject({
+        id: 'nvidia-nemotron-3.5-lightning',
+        contextWindow: 262144,
+      });
+    });
+  });
+
   it('returns undefined for an unknown model id', () => {
     expect(getModelDefinition('unknown-model-id')).toBeUndefined();
   });
