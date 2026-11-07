@@ -254,7 +254,7 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
   }
 
   validateKey(key: string, value: any) {
-    if (!this.props[key]) {
+    if (!Object.prototype.hasOwnProperty.call(this.props, key)) {
       throw new Error(`${key} is not a valid part of this schema`);
     }
     const { value: validatedValue, error } = this.props[key].getSchema().validate(value);
