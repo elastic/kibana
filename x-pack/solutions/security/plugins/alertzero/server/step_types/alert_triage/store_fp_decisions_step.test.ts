@@ -39,12 +39,15 @@ const setup = ({
   enabled = true,
   bulkResponse = { errors: false, items: [] as unknown[] },
   searchFails = false,
+  closedAsOther = [],
 }: {
   alerts: Array<{ _id: string; _source: Record<string, unknown> }>;
   keysWithVerdicts?: string[];
   enabled?: boolean;
   bulkResponse?: { errors: boolean; items: unknown[] };
   searchFails?: boolean;
+  /** Ids of alerts an analyst closed with a reason other than false positive. */
+  closedAsOther?: string[];
 }) => {
   const callKibanaApi = jest.fn(async ({ body }: { body: { aggs?: unknown; query?: unknown } }) => {
     if (body.aggs) {
@@ -56,6 +59,9 @@ const setup = ({
           },
         },
       };
+    }
+    if (JSON.stringify(body.query).includes('workflow_reason')) {
+      return { body: { hits: { hits: alerts.filter(({ _id }) => closedAsOther.includes(_id)) } } };
     }
     return { body: { hits: { hits: alerts } } };
   });
@@ -87,6 +93,44 @@ const written = (bulk: jest.Mock) =>
   (bulk.mock.calls[0] as unknown as [{ operations: Array<Record<string, any>> }])[0].operations;
 
 describe('triage store decisions step', () => {
+  it('leaves alerts an analyst closed as a true positive out of the evidence', async () => {
+    const { run, bulk } = setup({
+      alerts: alertsOf([['a.exe', 3]]),
+      closedAsOther: ['a.exe-0'],
+    });
+
+    const { output } = await run({});
+
+    expect(output).toEqual(expect.objectContaining({ keys_below_minimum: 1, written: 0 }));
+    expect(bulk).not.toHaveBeenCalled();
+  });
+
+  it('blocks a pattern when one of its alerts was closed as a true positive, whatever the other evidence', async () => {
+    const { run, bulk } = setup({
+      alerts: alertsOf([['a.exe', 4]]),
+      closedAsOther: ['a.exe-0'],
+    });
+
+    const { output } = await run({});
+
+    expect(output).toEqual(
+      expect.objectContaining({ keys_with_other_verdicts: 1, written: 0, skip_reason: 'none' })
+    );
+    expect(bulk).not.toHaveBeenCalled();
+  });
+
+  it('does not look at close reasons for a dismissal, which needs no evidence', async () => {
+    const { run, bulk, callKibanaApi } = setup({
+      alerts: alertsOf([['a.exe', 1]]),
+      closedAsOther: ['a.exe-0'],
+    });
+
+    await run({ outcome: 'dismissed' });
+
+    expect(JSON.stringify(callKibanaApi.mock.calls)).not.toContain('workflow_reason');
+    expect(bulk).toHaveBeenCalled();
+  });
+
   it('stores one decision per exact pattern with enough approved alerts, under an id from the key', async () => {
     const { run, bulk } = setup({
       alerts: alertsOf([
