@@ -80,11 +80,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
         `--elasticsearch.hosts=https://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
-        `--plugin-path=${join(__dirname, 'plugins/alerts')}`,
+        `--plugin-path=${join(
+          __dirname,
+          '../../plugins/private/test/response_ops/functional_with_es_ssl/alerts'
+        )}`,
         `--plugin-path=${join(__dirname, 'plugins/cases')}`,
         `--plugin-path=${join(
           __dirname,
-          '../alerting_api_integration/common/plugins/actions_simulators'
+          '../../plugins/private/test/response_ops/alerting_api_integration/actions_simulators'
         )}`,
         `--xpack.trigger_actions_ui.enableExperimental=${JSON.stringify([
           'stackAlertsPage',

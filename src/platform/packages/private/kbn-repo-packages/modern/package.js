@@ -195,6 +195,7 @@ class Package {
     const testPlugin =
       dir.startsWith('src/platform/test/') ||
       dir.startsWith('x-pack/platform/test/') ||
+      dir.startsWith('x-pack/platform/plugins/private/test/') ||
       dir.startsWith('x-pack/solutions/search/test/') ||
       dir.startsWith('x-pack/solutions/observability/test/') ||
       dir.startsWith('x-pack/solutions/security/test/');
