@@ -9,8 +9,7 @@ import type { AppHeaderMenu } from '@kbn/app-header';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { AlertEpisode } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
-import { useInvestigateAlert } from '@kbn/observability-plugin/public';
-import { getAlertIdFromEpisode } from './investigate_episode_action';
+import { getAlertIdFromEpisode, useInvestigateAlert } from '@kbn/observability-plugin/public';
 
 /** Adds investigation controls to the Universal alert details header. */
 export const useInvestigateEpisodeHeaderMenuItems = (

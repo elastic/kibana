@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -20,16 +20,6 @@ import type { AppHeaderMenu } from '@kbn/app-header';
 import { css } from '@emotion/react';
 import deepEqual from 'fast-deep-equal';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useService } from '@kbn/core-di-browser';
-import {
-  EpisodeDataSourceProvider,
-  useAdditionalEpisodesDataSource,
-} from '@kbn/alerting-v2-episodes-ui/context/episode_data_source_context';
-import {
-  AlertHostProvider,
-  type AlertHostContextValue,
-} from '@kbn/alerting-v2-episodes-ui/context/alert_host_context';
-import type { EpisodeDataSource } from '@kbn/alerting-v2-episodes-ui/types/episode_data_source';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
 import { ALERT_EPISODES_LIST_PAGE_SIZE } from '@kbn/alerting-v2-episodes-ui/constants';
 import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
@@ -48,10 +38,6 @@ import { useEpisodesListUrlState } from './hooks/use_episodes_list_url_state';
 import { DEFAULT_EPISODES_LIST_FILTER } from './utils/episodes_list_url_state';
 import { getQueryFilterState } from './utils/episodes_query_filter';
 import { useManageRulesHref } from '../../application/manage_rules_href_context';
-import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary/rule_summary_flyout_container';
-import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
-import { CLASSIC_ALERTS_DATA_SOURCE } from '../../alert_sources';
-import { UserCapabilities } from '../../services/user_capabilities';
 
 /*
  * The table has a fixed height, independent of the KPIs and the histogram above it, so the grid
@@ -69,26 +55,9 @@ const getAlertsListMenu = ({ manageRulesHref }: { manageRulesHref: string }): Ap
   },
 });
 
-export interface AlertsListPageProps {
-  dataSource?: EpisodeDataSource;
-}
-
-export const AlertsListPage = ({
-  dataSource = CLASSIC_ALERTS_DATA_SOURCE,
-}: AlertsListPageProps = {}) => {
-  const queryV2Source = useService(UserCapabilities).canRead('alerts');
-  return (
-    <EpisodeDataSourceProvider dataSource={dataSource} queryV2Source={queryV2Source}>
-      <AlertsListPageContent />
-    </EpisodeDataSourceProvider>
-  );
-};
-
-const AlertsListPageContent = () => {
+export const AlertsListPage = () => {
   const services = useKibana<AlertsKibanaServices>().services;
-  const { rulesLocators, episodesLocators } = useAlertingLocators();
-  const additionalDataSource = useAdditionalEpisodesDataSource();
-  const canWriteAlerts = useService(UserCapabilities).canWrite('alerts');
+  const { rulesLocators } = useAlertingLocators();
   const invalidateEpisodeQueries = useInvalidateEpisodeQueries();
   const { euiTheme } = useEuiTheme();
   const largeMediaQuery = useEuiMinBreakpoint('m');
@@ -125,48 +94,6 @@ const AlertsListPageContent = () => {
     setRowHeight,
     onResize,
   } = useEpisodesTableConfig(services.storage);
-
-  const [ruleIdToView, setRuleIdToView] = useState<string | null>(null);
-  const [sourceRuleInfoToView, setSourceRuleInfoToView] = useState<
-    { category?: string } | undefined
-  >();
-  const closeRuleFlyout = useCallback(() => setRuleIdToView(null), []);
-  const openRuleFlyout = useCallback((ruleId: string, sourceRuleInfo?: { category?: string }) => {
-    setRuleIdToView(ruleId);
-    setSourceRuleInfoToView(sourceRuleInfo);
-  }, []);
-  const {
-    flyout: composeFlyout,
-    confirmationModal,
-    openEditFlyout,
-    openCloneFlyout,
-  } = useComposeDiscoverFlyout();
-
-  const getRuleDetailsHref = useCallback(
-    (ruleId: string, isSourceRule?: boolean): string | undefined => {
-      if (isSourceRule) {
-        const sourceHref = additionalDataSource?.getRuleDetailsHref?.(ruleId);
-        return sourceHref ? services.http.basePath.prepend(sourceHref) : undefined;
-      }
-      return rulesLocators.getRedirectUrl({ ruleId });
-    },
-    [rulesLocators, additionalDataSource, services.http.basePath]
-  );
-  const getEpisodeDetailsHref = useCallback(
-    (episodeId: string) => episodesLocators.getRedirectUrl({ episodeId }),
-    [episodesLocators]
-  );
-
-  const hostValue: AlertHostContextValue = useMemo(
-    () => ({
-      getRuleDetailsHref,
-      getEpisodeDetailsHref,
-      openRuleFlyout,
-      closeRuleFlyout,
-      canWriteAlerts,
-    }),
-    [getRuleDetailsHref, getEpisodeDetailsHref, openRuleFlyout, closeRuleFlyout, canWriteAlerts]
-  );
 
   const {
     data: episodesData,
@@ -235,7 +162,7 @@ const AlertsListPageContent = () => {
 
   const alertsMenu = useMemo(() => getAlertsListMenu({ manageRulesHref }), [manageRulesHref]);
 
-  const content = (
+  return (
     <div
       data-test-subj="alertingV2AlertsListPage"
       css={css`
@@ -340,29 +267,5 @@ const AlertsListPageContent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
-  );
-
-  return (
-    <AlertHostProvider value={hostValue}>
-      {content}
-      {ruleIdToView ? (
-        <RuleSummaryFlyoutContainer
-          ruleId={ruleIdToView}
-          sourceRuleInfo={sourceRuleInfoToView}
-          cachedRule={rulesCache[ruleIdToView]}
-          onClose={closeRuleFlyout}
-          onEdit={(rule) => {
-            setRuleIdToView(null);
-            openEditFlyout(rule);
-          }}
-          onClone={(rule) => {
-            setRuleIdToView(null);
-            openCloneFlyout(rule);
-          }}
-        />
-      ) : null}
-      {composeFlyout}
-      {confirmationModal}
-    </AlertHostProvider>
   );
 };

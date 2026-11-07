@@ -10,7 +10,12 @@ import type { AlertEpisode } from '@kbn/alerting-v2-episodes-ui/queries/episodes
 import { useInvestigateAlert } from '@kbn/observability-plugin/public';
 import { useInvestigateEpisodeHeaderMenuItems } from './use_investigate_episode_header_menu_items';
 
-jest.mock('@kbn/observability-plugin/public', () => ({ useInvestigateAlert: jest.fn() }));
+jest.mock('@kbn/observability-plugin/public', () => ({
+  ...jest.requireActual(
+    '@kbn/observability-plugin/public/episode_actions/investigate_episode_action'
+  ),
+  useInvestigateAlert: jest.fn(),
+}));
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({ services: { application: { navigateToUrl: mockNavigateToUrl } } }),
 }));

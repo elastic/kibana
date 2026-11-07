@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { screen } from '@elastic/eui/lib/test/rtl';
 import { render } from '../../../../utils/test_helper';
 import { SectionContainer } from './section_container';
 
@@ -41,6 +42,25 @@ describe('SectionContainer', () => {
     expect(
       component.getByText('An error happened when trying to fetch data. Please try again')
     ).toBeInTheDocument();
+  });
+
+  it('wraps the content in a bordered panel by default', () => {
+    render(
+      <SectionContainer title="Foo" hasError={false}>
+        <div>I am a very nice component</div>
+      </SectionContainer>
+    );
+    expect(screen.getByTestSubject('o11ySectionContainerPanel')).toBeInTheDocument();
+  });
+
+  it('renders the content without a panel when hasInnerPanel is false', () => {
+    const component = render(
+      <SectionContainer title="Foo" hasError={false} hasInnerPanel={false}>
+        <div>I am a very nice component</div>
+      </SectionContainer>
+    );
+    expect(component.getByText('I am a very nice component')).toBeInTheDocument();
+    expect(screen.queryByTestSubject('o11ySectionContainerPanel')).not.toBeInTheDocument();
   });
 
   it('renders section with experimental badge', () => {

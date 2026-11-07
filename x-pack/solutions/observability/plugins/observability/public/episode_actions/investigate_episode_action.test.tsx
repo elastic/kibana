@@ -8,13 +8,13 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { AlertEpisode } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
-import { useInvestigateAlert } from '@kbn/observability-plugin/public/hooks/use_investigate_alert';
+import { useInvestigateAlert } from '../hooks/use_investigate_alert';
 import {
   createInvestigateEpisodeAction,
   INVESTIGATE_EPISODE_ACTION_ID,
 } from './investigate_episode_action';
 
-jest.mock('@kbn/observability-plugin/public/hooks/use_investigate_alert');
+jest.mock('../hooks/use_investigate_alert');
 
 const mockUseInvestigateAlert = jest.mocked(useInvestigateAlert);
 

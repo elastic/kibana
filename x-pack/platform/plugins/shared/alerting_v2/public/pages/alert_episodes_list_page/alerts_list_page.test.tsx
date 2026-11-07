@@ -241,9 +241,9 @@ const getCapturedBulkActions = (): CustomBulkActions => {
   return lastCall.customBulkActions as CustomBulkActions;
 };
 
-const renderPage = () => {
+const renderPage = ({ canWriteAlerts }: { canWriteAlerts?: boolean } = {}) => {
   return render(
-    <ListPageTestProviders locators={mockLocators}>
+    <ListPageTestProviders locators={mockLocators} canWriteAlerts={canWriteAlerts}>
       <AlertsListPage />
     </ListPageTestProviders>
   );
@@ -732,7 +732,7 @@ describe('privilege gating', () => {
   it('hides mutating episode actions when the user only has read privilege', async () => {
     mockCapabilities = READ_ONLY_CAPABILITIES;
 
-    renderPage();
+    renderPage({ canWriteAlerts: false });
     await waitForRows();
 
     expect(getRowControlIds()).toEqual([OPEN_IN_DISCOVER_EPISODE_ACTION_ID]);
@@ -740,82 +740,6 @@ describe('privilege gating', () => {
       OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
     ]);
     expect(getFlyoutActionIds()).toContain('ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER');
-  });
-});
-
-describe('rule summary flyout', () => {
-  beforeEach(async () => {
-    jest.clearAllMocks();
-    mockCapabilities = WRITE_CAPABILITIES;
-    mockCreateEpisodeActions.mockReturnValue([]);
-    jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
-    jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
-    mockHttp.post.mockResolvedValue({ rules: [] });
-    renderPage();
-    await waitFor(() => {
-      const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
-      expect(lastCall?.rows?.length).toBeGreaterThan(0);
-    });
-  });
-
-  /**
-   * The table is stubbed, so the rule cell is never rendered. Build the element the page would
-   * hand to the grid for the rule column and read the props off it instead.
-   */
-  const getRuleCellProps = () => {
-    const renderer = mockUnifiedDataTable.mock.calls.at(-1)![0].externalCustomRenderers!['rule.id'];
-    const element = renderer({ columnId: 'rule.id' } as any) as React.ReactElement;
-    return element.props as { onRuleNameClick: (ruleId: string) => void };
-  };
-
-  const openRuleFlyout = async () => {
-    const { onRuleNameClick } = getRuleCellProps();
-    await act(async () => {
-      onRuleNameClick('rule1');
-    });
-  };
-
-  const getExpandedDoc = () => mockUnifiedDataTable.mock.calls.at(-1)![0].expandedDoc;
-
-  const expandEpisode = async () => {
-    const { setExpandedDoc } = mockUnifiedDataTable.mock.calls.at(-1)![0];
-    await act(async () => {
-      setExpandedDoc!({ id: 'ep1', raw: {}, flattened: { 'episode.id': 'ep1' } });
-    });
-  };
-
-  it('opens the rule summary flyout for the clicked rule', async () => {
-    await openRuleFlyout();
-
-    expect(screen.getByTestId('mockRuleSummaryFlyout-rule1')).toBeInTheDocument();
-  });
-
-  it('closes the flyout without touching the table state', async () => {
-    await openRuleFlyout();
-
-    await userEvent.click(screen.getByTestId('mockRuleSummaryFlyoutClose'));
-
-    expect(screen.queryByTestId('mockRuleSummaryFlyout-rule1')).not.toBeInTheDocument();
-    expect(mockUnifiedDataTable.mock.calls.at(-1)![0].rows?.length).toBeGreaterThan(0);
-  });
-
-  it('collapses an expanded episode when the rule flyout opens', async () => {
-    await expandEpisode();
-    expect(getExpandedDoc()).toBeDefined();
-
-    await openRuleFlyout();
-
-    expect(getExpandedDoc()).toBeUndefined();
-    expect(screen.getByTestId('mockRuleSummaryFlyout-rule1')).toBeInTheDocument();
-  });
-
-  it('closes the rule flyout when an episode is expanded', async () => {
-    await openRuleFlyout();
-
-    await expandEpisode();
-
-    expect(screen.queryByTestId('mockRuleSummaryFlyout-rule1')).not.toBeInTheDocument();
-    expect(getExpandedDoc()).toBeDefined();
   });
 });
 
