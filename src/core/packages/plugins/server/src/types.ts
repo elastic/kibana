@@ -23,6 +23,7 @@ import type { NodeInfo } from '@kbn/core-node-server';
 import type { ElasticsearchConfigType } from '@kbn/core-elasticsearch-server-internal';
 import type { SavedObjectsConfigType } from '@kbn/core-saved-objects-base-server-internal';
 import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
+import type { MetaSetting } from '@kbn/config/src/meta_settings';
 import type { SharedGlobalConfigKeys } from './shared_global_config';
 type Maybe<T> = T | undefined;
 
@@ -127,6 +128,42 @@ export interface PluginConfigDescriptor<T = any> {
    * {@link MakeUsageFromSchema}
    */
   exposeToUsage?: MakeUsageFromSchema<T>;
+  /**
+   * Meta settings to apply to the plugin configuration.
+   * Defines the overrides to apply to the config based on whether a meta setting is valid.
+   *
+   * This is useful to group multiple configs under a single meta setting.
+   *
+   * @example
+   * ```typescript
+   * export const config: PluginConfigDescriptor<MyConfigType> = {
+   *   ... // other config properties
+   *   metaSettings: {
+   *     'observability.techPreviewMode': {
+   *       schema: schema.literal(true),
+   *       // If observability.techPreviewMode: true, apply the following overrides:
+   *       config: {
+   *         myPlugin: {
+   *          experimentalFeatureA: true,
+   *          someValueToTweak: 10,
+   *          classicBehavior: false,
+   *         },
+   *         // It also works with a mix of flat and nested config objects:
+   *         'uiSettings.overrides': {
+   *           'o11y:myFeature': true,
+   *         },
+   *         'feature_flags.overrides': {
+   *           'taskManager.anotherExperimentalFeature': true,
+   *         },
+   *       },
+   *       // The priority is used to determine the order in which the meta settings should be applied.
+   *       // Lower priority goes first, as it allows other higher-priority definitions to override the config.
+   *       priority: 100,
+   *     },
+   *   },
+   * };
+   */
+  metaSettings?: Record<string, MetaSetting>;
 }
 
 /**
