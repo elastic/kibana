@@ -92,6 +92,7 @@ export enum FIELD_FORMAT_IDS {
   TRUNCATE = 'truncate',
   URL = 'url',
   HISTOGRAM = 'histogram',
+  NUMBER_RANGE = 'number_range',
 }
 
 /** @public */

@@ -14,6 +14,7 @@ import {
   getDataMinMax,
   remapStopsByNewInterval,
   getSortPredicate,
+  sortRowsByRangeLowerBound,
 } from './helpers';
 
 describe('applyPaletteParams', () => {
@@ -224,5 +225,43 @@ describe('getSortPredicate', () => {
       },
     } as DatatableColumn;
     expect(getSortPredicate(column, 'asc')).toEqual('alphaAsc');
+  });
+
+  it('should return dataIndex for number_range columns, as their rows are sorted beforehand', () => {
+    const column = {
+      id: 'range',
+      name: 'bucket',
+      meta: { type: 'number_range' },
+    } as DatatableColumn;
+    expect(getSortPredicate(column, 'asc')).toEqual('dataIndex');
+  });
+});
+
+describe('sortRowsByRangeLowerBound', () => {
+  const rows = [{ bucket: '50.0..100.0' }, { bucket: '0.0..50.0' }, { bucket: '100.0..150.0' }];
+  const column = {
+    id: 'bucket',
+    name: 'bucket',
+    meta: { type: 'number_range' },
+  } as DatatableColumn;
+
+  it('should sort by the range lower bound in descending order', () => {
+    expect(sortRowsByRangeLowerBound(rows, column, 'desc')).toEqual([
+      { bucket: '100.0..150.0' },
+      { bucket: '50.0..100.0' },
+      { bucket: '0.0..50.0' },
+    ]);
+  });
+
+  it('should sort by the range lower bound in ascending order', () => {
+    expect(sortRowsByRangeLowerBound(rows, column, 'asc')).toEqual([
+      { bucket: '0.0..50.0' },
+      { bucket: '50.0..100.0' },
+      { bucket: '100.0..150.0' },
+    ]);
+  });
+
+  it('should keep the rows as they are without a sort predicate', () => {
+    expect(sortRowsByRangeLowerBound(rows, column)).toEqual(rows);
   });
 });
