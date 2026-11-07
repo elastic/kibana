@@ -139,7 +139,7 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
           {!isGroupNode && rowIsExpanded && hasAllParentsExpanded && (
             <EuiFlexItem role="gridcell">
               {rowVisibleCells.map((cell) => (
-                <TableCellRender key={cell.id} cell={cell} />
+                <TableCellRender key={cell.id} cell={cell} virtualRowIndex={virtualRow.index} />
               ))}
             </EuiFlexItem>
           )}

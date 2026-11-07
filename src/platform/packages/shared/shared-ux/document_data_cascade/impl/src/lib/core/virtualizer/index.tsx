@@ -19,7 +19,12 @@ import React, {
   useSyncExternalStore,
 } from 'react';
 import { type Row } from '@tanstack/react-table';
-import { useVirtualizer, defaultRangeExtractor, type VirtualItem } from '@tanstack/react-virtual';
+import {
+  useVirtualizer,
+  defaultRangeExtractor,
+  measureElement,
+  type VirtualItem,
+} from '@tanstack/react-virtual';
 import type { GroupNode } from '../../../store_provider';
 import {
   createChildVirtualizerController,
@@ -51,6 +56,11 @@ export interface CascadeVirtualizerProps<G extends GroupNode>
   estimatedRowHeight?: number;
   initialAnchorItemIndex?: number;
   /**
+   * Pixel offset within the {@link initialAnchorItemIndex} item that the scroll position is
+   * restored to, so that a position captured in the middle of an item is restored exactly.
+   */
+  initialAnchorItemOffset?: number;
+  /**
    * When true (default), creates a {@link ChildVirtualizerController}
    * that child virtualizers can connect to. Set to false when this
    * virtualizer is itself a child managed by a controller.
@@ -75,6 +85,17 @@ export interface CascadeVirtualizerProps<G extends GroupNode>
    * Only meaningful when {@link isRoot} is true.
    */
   initialPersistedAnchors?: Record<string, number | null>;
+  /**
+   * Pre-seeds the anchors of cells that had no connection when the restored state was
+   * captured; they are restored when the cells reconnect, without being awaited.
+   * Only meaningful when {@link isRoot} is true.
+   */
+  initialRetainedAnchors?: Record<string, number | null>;
+  /**
+   * Restarts scroll restoration (to {@link initialAnchorItemIndex}) whenever it changes,
+   * e.g. when a child virtualizer's connection identity changes.
+   */
+  scrollRestorationKey?: string;
 }
 
 export interface UseVirtualizedRowScrollStateStoreOptions {
@@ -169,7 +190,7 @@ export interface CascadeVirtualizerReturnValue
   virtualizedRowsSizeCache: Map<string, number>;
   scrollToVirtualizedIndex: (
     offset: number,
-    options: {
+    options?: {
       adjustments?: number;
       behavior?: Exclude<ScrollBehavior, 'instant'>;
     }
@@ -197,9 +218,16 @@ interface UseCascadeVirtualizer {
   <G extends GroupNode>(props: CascadeVirtualizerProps<G>): CascadeVirtualizerReturnValue;
 }
 
+const NO_ROW_INDEXES: ReadonlyArray<number> = [];
+
 export interface VirtualizerRangeExtractorArgs<G extends GroupNode> {
   rows: Row<G>[];
   enableStickyGroupHeader: boolean;
+  /**
+   * Indexes of rows that are kept in the range regardless of the scroll position, e.g. rows whose
+   * size the virtualizer has not measured since their content changed.
+   */
+  getRetainedRowIndexes?: () => ReadonlyArray<number>;
 }
 
 /**
@@ -211,23 +239,32 @@ export interface VirtualizerRangeExtractorArgs<G extends GroupNode> {
 export const useCascadeVirtualizerRangeExtractor = <G extends GroupNode>({
   rows,
   enableStickyGroupHeader,
+  getRetainedRowIndexes,
 }: VirtualizerRangeExtractorArgs<G>) => {
   return useCallback<NonNullable<UseVirtualizerOptions['rangeExtractor']>>(
     (range) => {
-      if (!enableStickyGroupHeader) {
+      const retainedRowIndexes = (getRetainedRowIndexes?.() ?? []).filter(
+        (index) => index < range.count
+      );
+
+      if (!enableStickyGroupHeader && retainedRowIndexes.length === 0) {
         return defaultRangeExtractor(range);
       }
 
       // Calculate the sticky index to include in the render range
-      const activeStickyIndex = calculateActiveStickyIndex(rows, range.startIndex, true);
+      const activeStickyIndex = enableStickyGroupHeader
+        ? calculateActiveStickyIndex(rows, range.startIndex, true)
+        : null;
 
       const next = new Set(
-        [activeStickyIndex, ...defaultRangeExtractor(range)].filter(Number.isInteger) as number[]
+        [activeStickyIndex, ...retainedRowIndexes, ...defaultRangeExtractor(range)].filter(
+          Number.isInteger
+        ) as number[]
       );
 
       return Array.from(next).sort((a, b) => a - b);
     },
-    [rows, enableStickyGroupHeader]
+    [rows, enableStickyGroupHeader, getRetainedRowIndexes]
   );
 };
 
@@ -245,13 +282,48 @@ export const useCascadeVirtualizerRangeExtractor = <G extends GroupNode>({
  * on unrelated re-renders and eliminates feedback loops between corrections
  * and tanstack's `onChange` callback.
  */
+/**
+ * Scrolls through the virtualizer's `scrollToFn` and brings its cached scroll offset in line right
+ * away, like its own scroll listener does, so that item size compensations which run before the
+ * scroll event arrives are based on the new position rather than on the previous one.
+ */
+const scrollVirtualizerTo = (
+  virtualizer: UseVirtualizerReturnType,
+  offset: number,
+  options: Parameters<CascadeVirtualizerReturnValue['scrollToVirtualizedIndex']>[1] = {}
+) => {
+  virtualizer.options.scrollToFn(offset, options, virtualizer);
+  if (options.behavior === 'smooth') return;
+  virtualizer.scrollOffset = offset + (options.adjustments ?? 0);
+  // tanstack accumulates its compensations relative to the offset of the last scroll event and
+  // resets them in its scroll listener; a programmatic scroll supersedes them the same way
+  (virtualizer as unknown as { scrollAdjustments: number }).scrollAdjustments = 0;
+};
+
+/**
+ * Scroll offset that places the anchor item at the given offset within it. The offset is clamped to
+ * the item's size, in case the item has been measured smaller since the anchor was captured; a
+ * negative offset places the viewport's top above the item.
+ */
+const getAnchorTargetOffset = (item: { start: number; size: number }, itemOffset: number) =>
+  item.start + Math.min(itemOffset, item.size);
+
 export const useAnchorVirtualizerToItemIndex = (
   virtualizer: UseVirtualizerReturnType,
-  itemIndex: number,
+  // `undefined` when there is nothing to restore; `0` anchors to the first item like any other index
+  itemIndex: number | undefined,
   options?: {
     hasRestoredScrollPositionRef?: React.MutableRefObject<boolean>;
     hasStabilizedRef?: React.MutableRefObject<boolean>;
     skipCorrections?: boolean;
+    /**
+     * Restarts the restoration whenever it changes.
+     */
+    restorationKey?: string;
+    /**
+     * Pixel offset within the anchor item to restore to (default `0`, the start of the item).
+     */
+    itemOffset?: number;
   }
 ) => {
   const internalRestoredRef = useRef<boolean>(false);
@@ -260,11 +332,17 @@ export const useAnchorVirtualizerToItemIndex = (
   const stabilizedRef = options?.hasStabilizedRef ?? internalStabilizedRef;
   const itemCount = virtualizer.options.count;
   const skipCorrections = options?.skipCorrections ?? false;
+  const restorationKey = options?.restorationKey;
+  const itemOffset = options?.itemOffset ?? 0;
+  // an anchor beyond the current item count (e.g. the items shrank meanwhile) resolves to the last item
+  const anchorIndex = Math.min(itemIndex ?? 0, Math.max(itemCount - 1, 0));
+
+  const previousRestorationKeyRef = useRef(restorationKey);
 
   const restoreScrollOffset = useCallback(() => {
     if (resolvedRef.current || !virtualizer || itemCount === 0) return;
 
-    if (!Boolean(itemIndex)) {
+    if (itemIndex === undefined) {
       resolvedRef.current = true;
       return;
     }
@@ -278,20 +356,17 @@ export const useAnchorVirtualizerToItemIndex = (
         },
       },
     });
-    const offsetItemCache = virtualizer.measurementsCache[itemIndex];
+    const offsetItemCache = virtualizer.measurementsCache[anchorIndex];
 
     if (!offsetItemCache) return;
 
     // measurementsCache[N].start already includes scrollMargin (tanstack adds
     // paddingStart + scrollMargin to the first item, and chains from there),
     // so it is the absolute position within the shared scroll container.
-    const targetOffset = offsetItemCache.start;
+    const targetOffset = getAnchorTargetOffset(offsetItemCache, itemOffset);
     const scrollOffset = virtualizer.scrollOffset ?? 0;
-    const adjustments = targetOffset - scrollOffset;
 
-    virtualizer.options.scrollToFn(scrollOffset, { behavior: undefined, adjustments }, virtualizer);
-
-    virtualizer.scrollOffset = targetOffset;
+    scrollVirtualizerTo(virtualizer, scrollOffset, { adjustments: targetOffset - scrollOffset });
     resolvedRef.current = true;
 
     performance.measure('anchorVirtualizerToItemIndex', {
@@ -305,7 +380,17 @@ export const useAnchorVirtualizerToItemIndex = (
       start: 'anchorVirtualizerToItemIndex:start',
       end: performance.now(),
     });
-  }, [itemIndex, itemCount, resolvedRef, virtualizer]);
+  }, [itemIndex, anchorIndex, itemCount, itemOffset, resolvedRef, virtualizer]);
+
+  // A new restoration key restarts the restoration from scratch (e.g. when a child
+  // virtualizer's connection identity changes)
+  useLayoutEffect(() => {
+    if (previousRestorationKeyRef.current === restorationKey) return;
+    previousRestorationKeyRef.current = restorationKey;
+    resolvedRef.current = false;
+    stabilizedRef.current = false;
+    restoreScrollOffset();
+  }, [restorationKey, resolvedRef, stabilizedRef, restoreScrollOffset]);
 
   useLayoutEffect(() => {
     restoreScrollOffset();
@@ -319,7 +404,7 @@ export const useAnchorVirtualizerToItemIndex = (
   // authority to another virtualizer (e.g. root yields to a child that has
   // a persisted scroll anchor, since both share the same scroll element).
   useEffect(() => {
-    if (skipCorrections || !Boolean(itemIndex)) {
+    if (skipCorrections || itemIndex === undefined) {
       stabilizedRef.current = true;
       return;
     }
@@ -333,18 +418,19 @@ export const useAnchorVirtualizerToItemIndex = (
       rafId = null;
 
       if (budget <= 0) {
+        resolvedRef.current = true;
         stabilizedRef.current = true;
         return;
       }
 
-      const offsetItemCache = virtualizer.measurementsCache[itemIndex];
+      const offsetItemCache = virtualizer.measurementsCache[anchorIndex];
       if (!offsetItemCache) {
         budget -= 1;
         rafId = requestAnimationFrame(correct);
         return;
       }
 
-      const targetOffset = offsetItemCache.start;
+      const targetOffset = getAnchorTargetOffset(offsetItemCache, itemOffset);
       const currentOffset = virtualizer.scrollOffset ?? 0;
 
       if (Math.abs(targetOffset - currentOffset) <= 1) {
@@ -354,12 +440,9 @@ export const useAnchorVirtualizerToItemIndex = (
       }
 
       budget -= 1;
-      virtualizer.options.scrollToFn(
-        currentOffset,
-        { behavior: undefined, adjustments: targetOffset - currentOffset },
-        virtualizer
-      );
-      virtualizer.scrollOffset = targetOffset;
+      scrollVirtualizerTo(virtualizer, currentOffset, {
+        adjustments: targetOffset - currentOffset,
+      });
       resolvedRef.current = true;
 
       rafId = requestAnimationFrame(correct);
@@ -370,7 +453,18 @@ export const useAnchorVirtualizerToItemIndex = (
     return () => {
       if (rafId !== null) cancelAnimationFrame(rafId);
     };
-  }, [skipCorrections, itemIndex, itemCount, virtualizer, resolvedRef, stabilizedRef]);
+    // `restorationKey` restarts the corrections, see the layout effect above
+  }, [
+    skipCorrections,
+    itemIndex,
+    anchorIndex,
+    itemCount,
+    itemOffset,
+    virtualizer,
+    resolvedRef,
+    stabilizedRef,
+    restorationKey,
+  ]);
 };
 
 /**
@@ -423,10 +517,13 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
   initialRect,
   scrollMargin,
   initialAnchorItemIndex,
+  initialAnchorItemOffset,
   isRoot = true,
   observeElementOffset,
   observeElementRect,
   initialPersistedAnchors,
+  initialRetainedAnchors,
+  scrollRestorationKey,
 }: CascadeVirtualizerProps<G>): CascadeVirtualizerReturnValue => {
   const hasRestoredScrollPositionRef = useRef(false);
   const hasStabilizedRef = useRef(false);
@@ -445,12 +542,20 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
     // restoration, the virtualizer must measure enough items around the anchor
     // before the first `useLayoutEffect` fires so that initial position
     // estimates are as accurate as possible.
-    !isRoot || Boolean(initialAnchorItemIndex)
+    !isRoot || initialAnchorItemIndex !== undefined
+  );
+
+  // Rows whose connected child content has changed stay rendered until the root has measured them,
+  // since their size in the root is stale until then (see `getRowsAwaitingMeasurement`).
+  const getRetainedRowIndexes = useCallback(
+    () => childControllerRef.current?.getRowsAwaitingMeasurement() ?? NO_ROW_INDEXES,
+    []
   );
 
   const rangeExtractor = useCascadeVirtualizerRangeExtractor<G>({
     rows,
     enableStickyGroupHeader,
+    getRetainedRowIndexes,
   });
 
   // Determined once at creation: when persisted child anchors exist the root
@@ -466,6 +571,7 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
     childControllerRef.current = createChildVirtualizerController({
       getRootVirtualizer: () => virtualizerReturnValueRef.current,
       initialPersistedAnchors,
+      initialRetainedAnchors,
     });
   }
 
@@ -477,6 +583,10 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
     () => ({
       count: rows.length,
       estimateSize: () => estimatedRowHeight,
+      measureElement: (element, entry, instance) => {
+        childController?.markRowMeasured(instance.indexFromElement(element));
+        return measureElement(element, entry, instance);
+      },
       getItemKey,
       getScrollElement,
       overscan: initialOverscan,
@@ -511,6 +621,7 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
       observeElementOffset,
       observeElementRect,
       estimatedRowHeight,
+      childController,
       onStateChange,
     ]
   );
@@ -521,18 +632,53 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
     return applyDeferredOverscan(virtualizerImpl);
   }, [applyDeferredOverscan, virtualizerImpl]);
 
-  useAnchorVirtualizerToItemIndex(virtualizerImpl, initialAnchorItemIndex ?? 0, {
+  useAnchorVirtualizerToItemIndex(virtualizerImpl, initialAnchorItemIndex, {
+    itemOffset: initialAnchorItemOffset,
     hasRestoredScrollPositionRef,
     hasStabilizedRef,
     skipCorrections: hasPersistedChildAnchorsRef.current,
+    restorationKey: scrollRestorationKey,
   });
+
+  // A changed estimate repositions every unmeasured item. The cached sizes are dropped so that the
+  // items are laid out from the new estimate (tanstack does not do this on its own), and the item at
+  // the top of the viewport is kept in place across the relayout, so that the content under the
+  // viewport does not move, e.g. when the estimate is corrected right after a scroll restoration.
+  // This only applies to child virtualizers, whose items are positioned from the estimate: the root's
+  // rows are measured individually and keep their measured sizes, which dropping the cache would
+  // replace with the estimate, e.g. for an expanded row the viewport is scrolled into.
+  const previousEstimatedRowHeightRef = useRef(estimatedRowHeight);
+  useLayoutEffect(() => {
+    if (previousEstimatedRowHeightRef.current === estimatedRowHeight) return;
+    previousEstimatedRowHeightRef.current = estimatedRowHeight;
+    if (isRoot) return;
+
+    const scrollOffset = virtualizerImpl.scrollOffset ?? 0;
+    const anchorItem = hasRestoredScrollPositionRef.current
+      ? virtualizerImpl.getVirtualItemForOffset(scrollOffset)
+      : undefined;
+    virtualizerImpl.measure();
+    // a viewport that starts above the first item is anchored to content that does not move
+    if (!anchorItem || scrollOffset < anchorItem.start) return;
+
+    // recomputes the measurements from the new estimate
+    virtualizerImpl.calculateRange();
+    const relaidOutItem = virtualizerImpl.measurementsCache[anchorItem.index];
+    if (!relaidOutItem) return;
+    const targetOffset = getAnchorTargetOffset(relaidOutItem, scrollOffset - anchorItem.start);
+    if (Math.abs(targetOffset - scrollOffset) <= 1) return;
+
+    scrollVirtualizerTo(virtualizerImpl, scrollOffset, {
+      adjustments: targetOffset - scrollOffset,
+    });
+  }, [estimatedRowHeight, isRoot, virtualizerImpl]);
 
   useEffect(() => {
     if (!childController || childController.isRootStable) return;
 
     // Root is stable when scroll position has been restored, or when
-    // there was no anchor to restore to (itemIndex 0 / undefined).
-    const needsRestore = Boolean(initialAnchorItemIndex);
+    // there was no anchor to restore to.
+    const needsRestore = initialAnchorItemIndex !== undefined;
     if (!needsRestore || hasRestoredScrollPositionRef.current) {
       childController.markRootStable();
     }
@@ -549,8 +695,15 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
   // Bridges the imperative hasStabilizedRef into reactive state by polling
   // with rAF. Adds at most one frame (~16ms) of latency after the rAF
   // correction loop converges, imperceptible while content is hidden.
-  const needsRestore = Boolean(initialAnchorItemIndex);
+  const needsRestore = initialAnchorItemIndex !== undefined;
   const [rootStabilized, setRootStabilized] = useState(!needsRestore);
+
+  const previousRestorationKeyRef = useRef(scrollRestorationKey);
+  useLayoutEffect(() => {
+    if (previousRestorationKeyRef.current === scrollRestorationKey) return;
+    previousRestorationKeyRef.current = scrollRestorationKey;
+    setRootStabilized(!needsRestore);
+  }, [scrollRestorationKey, needsRestore]);
 
   useEffect(() => {
     if (rootStabilized) return;
@@ -592,7 +745,13 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
   // correction loop is still converging.
   virtualizerImpl.shouldAdjustScrollPositionOnItemSizeChange = (item) => {
     if (!hasStabilizedRef.current) return false;
-    if (childController && !childController.haveAllRestoringChildrenStabilized()) return false;
+    // waiting for restoring children is bounded by the same timeout as `isStable`
+    if (!timedOut && childController && !childController.haveAllRestoringChildrenStabilized()) {
+      return false;
+    }
+    // A connected child virtualizer that has synced its state owns scroll compensation for its row,
+    // so the root does not fight the child's own corrections (e.g. when its content is swapped).
+    if (childController && !childController.shouldAdjustScrollForRow(item.index)) return false;
     return item.start < (virtualizerImpl.scrollOffset ?? 0);
   };
 
@@ -608,7 +767,7 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
       getVirtualItems: virtualizerImpl.getVirtualItems.bind(virtualizerImpl),
       measureElement: virtualizerImpl.measureElement.bind(virtualizerImpl),
       scrollToVirtualizedIndex: ((offset, options = {}) => {
-        return virtualizerImpl.options.scrollToFn(offset, options, virtualizerImpl);
+        scrollVirtualizerTo(virtualizerImpl, offset, options);
       }) satisfies CascadeVirtualizerReturnValue['scrollToVirtualizedIndex'],
       get measurementsCache() {
         return virtualizerImpl.measurementsCache;

@@ -23,7 +23,12 @@ import { CascadeHeaderPrimitive } from './data_cascade_header';
 import { CascadeRowPrimitive, CascadeRowHeaderSlotsScrollSyncProvider } from './data_cascade_row';
 import { CascadeRowCellPrimitive } from './data_cascade_row_cell';
 import { type GroupNode, type LeafNode } from '../../store_provider';
-import { TableHeader, useCascadeTable, type Table, type CellContext } from '../../lib/core/table';
+import {
+  TableHeader,
+  useCascadeTable,
+  type Table,
+  type CascadeCellContext,
+} from '../../lib/core/table';
 import {
   useCascadeVirtualizer,
   VirtualizedCascadeRowList,
@@ -114,7 +119,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   );
 
   const cascadeRowCell = useCallback(
-    (props: CellContext<G, L>) => {
+    (props: CascadeCellContext<G, L>) => {
       return (
         <CascadeRowCellPrimitive
           {...{
@@ -161,8 +166,10 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     estimatedRowHeight: size === 's' ? 32 : size === 'm' ? 40 : 48,
     onStateChange: collectVirtualizerStateChanges,
     initialRect: initialState?.scrollRect,
-    initialAnchorItemIndex: initialState?.scrollAnchorItemIndex ?? undefined,
+    // the cascade at its first row has nothing to restore
+    initialAnchorItemIndex: initialState?.scrollAnchorItemIndex || undefined,
     initialPersistedAnchors,
+    initialRetainedAnchors: initialState?.retainedAnchors,
   });
 
   const isVirtualizerStable = virtualizerInstance.current.isStable;
