@@ -143,7 +143,7 @@ describe('anomaly_scores', () => {
         />
       </TestProviders>
     );
-    wrapper.find('[data-test-subj="anomaly-score-popover"]').first().simulate('click');
+    wrapper.find('[data-test-subj="anomaly-score-popover-button"]').first().simulate('click');
     await waitFor(() => wrapper.update());
     expect(wrapper.find('[data-test-subj="anomaly-description-list"]').exists()).toEqual(true);
   });
