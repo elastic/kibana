@@ -36,15 +36,18 @@ const setup = ({
   let left = [...tagged];
   const callKibanaApi = jest.fn(async ({ path, body }: { path: string; body?: any }) => {
     if (path.endsWith('/signals/search')) {
-      const asked: string[] | undefined = body?.query?.bool?.filter?.[0]?.ids?.values;
-      if (asked) {
-        return {
-          body: {
-            hits: { hits: asked.filter((id) => closed.includes(id)).map((_id) => ({ _id })) },
+      return {
+        body: {
+          hits: {
+            hits: left.map((_id) => ({
+              _id,
+              _source: {
+                'kibana.alert.workflow_status': closed.includes(_id) ? 'closed' : 'acknowledged',
+              },
+            })),
           },
-        };
-      }
-      return { body: { hits: { hits: left.map((_id) => ({ _id })) } } };
+        },
+      };
     }
     if (path.endsWith('/signals/status')) {
       if (statusError) throw statusError;
@@ -174,10 +177,7 @@ describe('triage revoke decision step', () => {
     const { output } = await run();
 
     expect(output).toEqual(expect.objectContaining({ failures: 1 }));
-    // One search per page for the tagged alerts; the status lookup of each page is not a page read.
-    expect(calls('/signals/search').filter(({ query }) => query.bool.filter[0].term)).toHaveLength(
-      MAX_REVOKE_PAGES
-    );
+    expect(calls('/signals/search')).toHaveLength(MAX_REVOKE_PAGES);
   });
 
   it('does nothing to alerts when none carry the tag', async () => {

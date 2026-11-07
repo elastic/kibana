@@ -393,19 +393,9 @@ export const openAlerts = async (api: KibanaApi, alertIds: readonly string[]): P
 };
 
 /** Which of the given alerts are still open or acknowledged. Used to undo a tag after a failed close. */
-export const findOpenAlertIds = (api: KibanaApi, alertIds: readonly string[]): Promise<string[]> =>
-  findAlertIdsWithStatus(api, alertIds, OPEN_ALERT_STATUSES);
-
-/** Which of the given alerts are still closed. Used by revoke, so it never overrides a later analyst decision. */
-export const findClosedAlertIds = (
-  api: KibanaApi,
-  alertIds: readonly string[]
-): Promise<string[]> => findAlertIdsWithStatus(api, alertIds, ['closed']);
-
-const findAlertIdsWithStatus = async (
+export const findOpenAlertIds = async (
   { callKibanaApi }: KibanaApi,
-  alertIds: readonly string[],
-  statuses: readonly string[]
+  alertIds: readonly string[]
 ): Promise<string[]> => {
   const { body } = await callKibanaApi<{ hits?: { hits?: AlertHit[] } }>({
     method: 'POST',
@@ -417,7 +407,7 @@ const findAlertIdsWithStatus = async (
         bool: {
           filter: [
             { ids: { values: [...alertIds] } },
-            { terms: { [ALERT_FIELDS.status]: [...statuses] } },
+            { terms: { [ALERT_FIELDS.status]: [...OPEN_ALERT_STATUSES] } },
           ],
         },
       },
@@ -426,21 +416,27 @@ const findAlertIdsWithStatus = async (
   return (body.hits?.hits ?? []).map(({ _id }) => _id);
 };
 
-/** The ids of the alerts that carry a tag, up to one page. Used by revoke to find what to put back. */
-export const findAlertIdsByTag = async (
+/**
+ * The alerts that carry a tag, up to one page, with their current status. Used by revoke to find
+ * what to put back, and to tell which of them an analyst has moved on from, in one search.
+ */
+export const findAlertsByTag = async (
   { callKibanaApi }: KibanaApi,
   tag: string
-): Promise<string[]> => {
+): Promise<Array<{ id: string; status?: string }>> => {
   const { body } = await callKibanaApi<{ hits?: { hits?: AlertHit[] } }>({
     method: 'POST',
     path: SIGNALS_SEARCH_PATH,
     body: {
       size: ALERT_FETCH_LIMIT,
-      _source: false,
+      _source: [ALERT_FIELDS.status],
       query: { bool: { filter: [{ term: { [ALERT_FIELDS.tags]: tag } }] } },
     },
   });
-  return (body.hits?.hits ?? []).map(({ _id }) => _id);
+  return (body.hits?.hits ?? []).map(({ _id, _source = {} }) => {
+    const status = readField(_source, ALERT_FIELDS.status);
+    return { id: _id, ...(typeof status === 'string' ? { status } : {}) };
+  });
 };
 
 const updateAlertStatus = async (
@@ -850,34 +846,6 @@ export const loadAlertsByIds = async (
   };
 };
 
-const SEARCH_RESULT_LIMIT = 10_000;
-
-/**
- * Open alerts that still carry `az:false_positive` and belong to a proposal: they carry its
- * `az:proposal` tag or are in `ids`. Alerts in `excludeIds` are left out. With `modelMarkerOnly`
- * it finds alerts of any status that carry `az:model_fp` instead.
- */
-export const findLeftoverFalsePositiveIds = async (
-  { callKibanaApi }: KibanaApi,
-  {
-    proposalTag,
-    ids,
-    excludeIds,
-    modelMarkerOnly = false,
-  }: {
-    proposalTag?: string;
-    ids: readonly string[];
-    excludeIds: readonly string[];
-    modelMarkerOnly?: boolean;
-  }
-): Promise<string[]> => {
-  const should = [
-    ...(proposalTag ? [{ term: { [ALERT_FIELDS.tags]: proposalTag } }] : []),
-    ...(ids.length > 0 ? [{ ids: { values: [...ids] } }] : []),
-  ];
-  const { body } = await callKibanaApi<{ hits?: { hits?: Array<{ _id: string }> } }>({
-    method: 'POST',
-    path: SIGNALS_SEARCH_PATH,
 /**
  * Which of the given alerts an analyst closed with a reason other than false positive (a true
  * positive, for example). A closed alert with no reason is not one of them. A failed read throws,
@@ -916,6 +884,34 @@ export const findAlertIdsClosedAsOther = async (
 
 const CLOSE_REASON_CHUNK_SIZE = 1000;
 
+const SEARCH_RESULT_LIMIT = 10_000;
+
+/**
+ * Open alerts that still carry `az:false_positive` and belong to a proposal: they carry its
+ * `az:proposal` tag or are in `ids`. Alerts in `excludeIds` are left out. With `modelMarkerOnly`
+ * it finds alerts of any status that carry `az:model_fp` instead.
+ */
+export const findLeftoverFalsePositiveIds = async (
+  { callKibanaApi }: KibanaApi,
+  {
+    proposalTag,
+    ids,
+    excludeIds,
+    modelMarkerOnly = false,
+  }: {
+    proposalTag?: string;
+    ids: readonly string[];
+    excludeIds: readonly string[];
+    modelMarkerOnly?: boolean;
+  }
+): Promise<string[]> => {
+  const should = [
+    ...(proposalTag ? [{ term: { [ALERT_FIELDS.tags]: proposalTag } }] : []),
+    ...(ids.length > 0 ? [{ ids: { values: [...ids] } }] : []),
+  ];
+  const { body } = await callKibanaApi<{ hits?: { hits?: Array<{ _id: string }> } }>({
+    method: 'POST',
+    path: SIGNALS_SEARCH_PATH,
     body: {
       size: SEARCH_RESULT_LIMIT,
       _source: false,
