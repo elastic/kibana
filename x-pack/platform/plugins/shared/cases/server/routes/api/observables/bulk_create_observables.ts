@@ -11,6 +11,9 @@ import {
   MAX_CASE_ID_LENGTH,
   MAX_OBSERVABLES_BULK_CREATE,
   MAX_OBSERVABLE_DESCRIPTION_LENGTH,
+  MAX_OBSERVABLE_METADATA_ENTRIES,
+  MAX_OBSERVABLE_METADATA_KEY_LENGTH,
+  MAX_OBSERVABLE_METADATA_VALUE_LENGTH,
   MAX_OBSERVABLE_TYPE_KEY_LENGTH,
   MAX_OBSERVABLE_VALUE_LENGTH,
 } from '../../../../common/constants';
@@ -33,6 +36,18 @@ export const bulkCreateObservablesRoute = createCasesRoute({
           value: schema.string({ maxLength: MAX_OBSERVABLE_VALUE_LENGTH }),
           description: schema.nullable(
             schema.string({ maxLength: MAX_OBSERVABLE_DESCRIPTION_LENGTH })
+          ),
+          metadata: schema.maybe(
+            schema.recordOf(
+              schema.string({ minLength: 1, maxLength: MAX_OBSERVABLE_METADATA_KEY_LENGTH }),
+              schema.string({ maxLength: MAX_OBSERVABLE_METADATA_VALUE_LENGTH }),
+              {
+                validate: (metadata) =>
+                  Object.keys(metadata).length > MAX_OBSERVABLE_METADATA_ENTRIES
+                    ? `must have at most ${MAX_OBSERVABLE_METADATA_ENTRIES} entries`
+                    : undefined,
+              }
+            )
           ),
         }),
         { minSize: 1, maxSize: MAX_OBSERVABLES_BULK_CREATE }

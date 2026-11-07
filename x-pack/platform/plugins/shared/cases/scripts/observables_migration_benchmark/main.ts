@@ -9,7 +9,9 @@ import { createEsClient, createKbnClient } from '../cases_generator/clients';
 import { logger } from '../cases_generator/logger';
 import { createRequester } from '../observables_load_test/shared';
 import { parseConfig } from './config';
+import { runPrepare } from './prepare';
 import { runSnapshot } from './snapshot';
+import { runUpgrade } from './upgrade';
 import { runWatch } from './watch';
 
 const main = async (): Promise<void> => {
@@ -27,8 +29,12 @@ const main = async (): Promise<void> => {
 
   if (config.mode === 'watch') {
     await runWatch(es, request, config);
+  } else if (config.mode === 'prepare') {
+    await runPrepare(es, request, config);
+  } else if (config.mode === 'upgrade') {
+    await runUpgrade(es, request, config);
   } else {
-    await runSnapshot(es, config.reads ? request : undefined, config);
+    await runSnapshot(es, config.reads || config.metadataWrites > 0 ? request : undefined, config);
   }
 };
 
