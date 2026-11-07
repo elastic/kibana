@@ -17,6 +17,7 @@ import { MonitorDetailsLinkPortal } from '../monitor_add_edit/monitor_details_po
 import { StepNumberNav } from './components/step_number_nav';
 import { StepScreenshotDetails } from './step_screenshot_details';
 import { StepTabs } from './step_tabs';
+import { JourneyVideo } from './journey_video';
 import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
 import { useSelectedMonitor } from '../monitor_details/hooks/use_selected_monitor';
 import { StepDurationPanel } from '../monitor_details/monitor_summary/step_duration_panel';
@@ -76,6 +77,12 @@ export const TestRunDetails = () => {
       {!hasNoSteps && (
         <EuiFlexGroup gutterSize="m" wrap={true}>
           <EuiFlexItem css={{ flexBasis: '60%', minWidth: 260 }}>
+            {!isApiMonitor && (
+              <JourneyVideo
+                checkGroup={stepsData?.checkGroup}
+                timestamp={stepsData?.details?.timestamp}
+              />
+            )}
             <EuiPanel hasShadow={false} hasBorder>
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={true}>
