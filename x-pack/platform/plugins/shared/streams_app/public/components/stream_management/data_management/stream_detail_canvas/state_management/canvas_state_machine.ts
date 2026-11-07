@@ -43,6 +43,7 @@ import {
 import {
   UNCONNECTED_PIPELINE_REASON,
   getUnconnectedPipelines,
+  getUnfedDestinations,
   getUnreachableScopes,
   withPublishedTelemetry,
 } from '../../../../../services/unit_connections';
@@ -854,6 +855,16 @@ async function validateCanvasUnitDefinition({
         defaultMessage:
           'A routing rule of {pipelineId} only handles {signals}, but no source connected to it sends {signals}. Connect such a source before saving, or remove the rule.',
         values: { pipelineId: unreachable.pipeline.id, signals: unreachable.telemetry.join(', ') },
+      })
+    );
+  }
+  const [unfed] = getUnfedDestinations(unitDefinition);
+  if (unfed) {
+    throw new Error(
+      i18n.translate('xpack.streams.streamDetailCanvas.unfedDestinationErrorMessage', {
+        defaultMessage:
+          '{pipelineId} forwards none of the signals {destinationId} accepts. Connect a source that sends them before saving, or unhook {destinationId}.',
+        values: { pipelineId: unfed.pipeline.id, destinationId: unfed.destinationId },
       })
     );
   }

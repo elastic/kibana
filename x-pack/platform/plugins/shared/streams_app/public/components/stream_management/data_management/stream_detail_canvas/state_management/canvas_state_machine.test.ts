@@ -15,7 +15,11 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import { createStreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { createActor, createMachine, waitFor, type Actor, type SnapshotFrom } from 'xstate';
-import { disconnectLine, withoutUnconnectedWiring } from '../../../../../services/unit_connections';
+import {
+  connectLine,
+  disconnectLine,
+  withoutUnconnectedWiring,
+} from '../../../../../services/unit_connections';
 import type { ProcessingNodeRef } from '../../../../../services/unit_graph';
 import { createDefaultUnit, type Unit } from '../../../../../services/unit_repository';
 import type { UnitDestination } from '@kbn/streams-schema';
@@ -377,6 +381,28 @@ describe('canvas save', () => {
 
     expect(await refuseToSave(routed, unhooked)).toBe(
       'A routing rule of p-src only handles metrics, but no source connected to it sends metrics. Connect such a source before saving, or remove the rule.'
+    );
+  });
+
+  it('keeps a destination the processing node cannot feed staged but refuses to save it', async () => {
+    const processed = processedUnit();
+    processed.unit.destinations = [
+      ...processed.unit.destinations,
+      { id: 'es-traces', type: 'elasticsearch', supported_telemetry: ['traces'] },
+    ];
+    const unfed = connectLine(
+      processed,
+      { kind: 'processing', ref: sourceSlot },
+      { kind: 'destination', id: 'es-traces' }
+    );
+    expect(unfed.unit.pipelines[0].config).toEqual([
+      { name: 'sources', value: ['src'] },
+      { name: 'processors', value: ['tag'] },
+      { name: 'destinations', value: ['es', 'es-traces'] },
+    ]);
+
+    expect(await refuseToSave(processed, unfed)).toBe(
+      'p-src forwards none of the signals es-traces accepts. Connect a source that sends them before saving, or unhook es-traces.'
     );
   });
 

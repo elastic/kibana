@@ -779,9 +779,10 @@ export const addTestRoutingToLine = (
 /**
  * Only pipeline processing starts direct lines, and only when the pipeline does
  * not route: a routed pipeline's processing feeds its routing node, whose rules
- * own the targets. The destination has to accept a signal the pipeline's
- * sources send, not one the pipeline currently carries: unhooking a line
- * narrows the pipeline, and the line has to be able to come back.
+ * own the targets. Signals do not gate the line: a processing node carries
+ * whatever its sources send and its destinations accept, so a destination the
+ * node cannot feed yet is wired now and reported by `getUnfedDestinations`
+ * until a source sending its signals is connected.
  */
 const canConnectProcessingToDestination = (
   unit: Unit,
@@ -790,13 +791,6 @@ const canConnectProcessingToDestination = (
 ): boolean => {
   const pipeline = unit.unit.pipelines[findWirableProcessingPipelineIndex(unit, ref)];
   if (!pipeline || pipelineUsesRoutes(pipeline.config)) {
-    return false;
-  }
-  const destination = unit.unit.destinations?.find(({ id }) => id === destinationId);
-  if (
-    destination &&
-    !sharesSignal(destination.supported_telemetry, upstreamSignals(unit, pipeline.id))
-  ) {
     return false;
   }
   const graph = buildUnitGraph(unit);
@@ -856,27 +850,13 @@ const disconnectProcessingFromDestination = (
 };
 
 /**
- * Signals a pipeline can forward: what its destinations accept, or, for a
- * routing pipeline or one with no destination yet, the signals it declares.
- */
-const downstreamSignals = (unit: Unit, pipeline: UnitPipeline): readonly UnitSignal[] => {
-  if (pipelineUsesRoutes(pipeline.config)) {
-    return pipeline.supported_telemetry;
-  }
-  const accepted = componentSignals(
-    unit.unit.destinations,
-    readEntryIds(pipeline.config, PIPELINE_ENTRY.destinations)
-  );
-  return accepted ? orderSignals(accepted) : pipeline.supported_telemetry;
-};
-
-/**
  * A source joins a pipeline's `sources` when the pipeline is not a delegation
  * target (the transpiler refuses routing to a source pipeline), its wiring is
- * not telemetry-scoped, the pipeline can forward a signal the source sends,
- * and the source's records do not already reach it or the destinations it
- * feeds. The pipeline's current signals do not count: unhooking a source
- * narrows them, and the line has to be able to come back.
+ * not telemetry-scoped, and the source's records do not already reach it or
+ * the destinations it feeds. A routing node also has to carry a signal the
+ * source sends. A processing node does not: it carries whatever its sources
+ * send and its destinations accept, and the transpiler ignores a source's
+ * other signals, so a line can come back in any order after it was unhooked.
  */
 const canConnectSourceToPipeline = (unit: Unit, sourceId: string, pipelineId: string): boolean => {
   const pipeline = findPipeline(unit, pipelineId);
@@ -889,7 +869,11 @@ const canConnectSourceToPipeline = (unit: Unit, sourceId: string, pipelineId: st
     return false;
   }
   const source = unit.unit.sources.find(({ id }) => id === sourceId);
-  if (source && !sharesSignal(source.supported_telemetry, downstreamSignals(unit, pipeline))) {
+  if (
+    source &&
+    !pipelineHasProcessors(pipeline.config) &&
+    !sharesSignal(source.supported_telemetry, pipeline.supported_telemetry)
+  ) {
     return false;
   }
   const graph = buildUnitGraph(unit);
@@ -1385,18 +1369,111 @@ const withoutUnreachableScopes = (unit: Unit, pipelines: UnitPipeline[]): UnitPi
   });
 };
 
+export interface UnfedDestination {
+  pipeline: UnitPipeline;
+  destinationId: string;
+}
+
 /**
- * The unit without the wiring the distributor would reject: rules left without
- * a target, scoped wiring whose signals no longer reach it, then every
- * pipeline `getUnconnectedPipelines` reports, until none is left. The canvas
- * Save refuses such a unit; a component save persists the staged unit while
- * lines are unhooked, so the published copy is cleaned up here. A connected
- * unit comes back as it is.
+ * Walks every destination line of a pipeline with the signals that line
+ * carries once published: the pipeline's published signals, narrowed by the
+ * selectors of its entry and route. `keep` decides whether the line stays.
+ */
+const keepDestinationLines = (
+  pipeline: UnitPipeline,
+  published: readonly UnitSignal[],
+  keep: (destinationId: string, carried: UnitSignal[]) => boolean
+): UnitPipeline => {
+  const config = pipeline.config.flatMap((entry): PipelineConfigEntry[] => {
+    if (entry.name === PIPELINE_ENTRY.destinations) {
+      const carried = intersectSignals(published, entry.telemetry);
+      const value = entry.value.filter((id) => keep(id, carried));
+      if (value.length === 0) {
+        return [];
+      }
+      return [value.length === entry.value.length ? entry : { ...entry, value }];
+    }
+    if (entry.name !== PIPELINE_ENTRY.routes) {
+      return [entry];
+    }
+    const value = entry.value.map((route) => {
+      if (isDelegatingRoute(route)) {
+        return route;
+      }
+      const carried = intersectSignals(
+        published,
+        narrowSelectors(entry.telemetry, route.telemetry)
+      );
+      const destinations = route.destinations.filter((id) => keep(id, carried));
+      return destinations.length === route.destinations.length ? route : { ...route, destinations };
+    });
+    return [isEqual(value, entry.value) ? entry : { ...entry, value }];
+  });
+  return isEqual(config, pipeline.config) ? pipeline : { ...pipeline, config };
+};
+
+/**
+ * Destination lines that carry nothing once published: the destination
+ * accepts none of the signals reaching it, typically because the source
+ * sending them was unhooked while the destination stayed. The canvas lets the
+ * line be drawn, so a node can be rewired in any order; the transpiler rejects
+ * it (`E040_ROUTE_NO_SHARED_SIGNAL`). A line whose selector itself carries
+ * nothing is left to `getUnreachableScopes`.
+ */
+export const getUnfedDestinations = (unit: Unit): UnfedDestination[] => {
+  const published = publishedSignalsById(unit);
+  const unfed: UnfedDestination[] = [];
+  for (const pipeline of unit.unit.pipelines) {
+    keepDestinationLines(
+      pipeline,
+      published.get(pipeline.id) ?? pipeline.supported_telemetry,
+      (destinationId, carried) => {
+        const destination = unit.unit.destinations.find(({ id }) => id === destinationId);
+        if (
+          destination &&
+          carried.length > 0 &&
+          !sharesSignal(destination.supported_telemetry, carried)
+        ) {
+          unfed.push({ pipeline, destinationId });
+        }
+        return true;
+      }
+    );
+  }
+  return unfed;
+};
+
+/** Drops the destination lines `getUnfedDestinations` reports. */
+const withoutUnfedDestinations = (unit: Unit, pipelines: UnitPipeline[]): UnitPipeline[] => {
+  const published = publishedSignalsById(replacePipelines(unit, pipelines));
+  return pipelines.map((pipeline) =>
+    keepDestinationLines(
+      pipeline,
+      published.get(pipeline.id) ?? pipeline.supported_telemetry,
+      (destinationId, carried) => {
+        const destination = unit.unit.destinations.find(({ id }) => id === destinationId);
+        return (
+          !destination ||
+          carried.length === 0 ||
+          sharesSignal(destination.supported_telemetry, carried)
+        );
+      }
+    )
+  );
+};
+
+/**
+ * The unit without the wiring the distributor would reject: destination lines
+ * that carry nothing, rules left without a target, scoped wiring whose signals
+ * no longer reach it, then every pipeline `getUnconnectedPipelines` reports,
+ * until none is left. The canvas Save refuses such a unit; a component save
+ * persists the staged unit while lines are unhooked, so the published copy is
+ * cleaned up here. A connected unit comes back as it is.
  */
 export const withoutUnconnectedWiring = (unit: Unit): Unit => {
   let pipelines = withoutUnreachableScopes(
     unit,
-    unit.unit.pipelines.map((pipeline) =>
+    withoutUnfedDestinations(unit, unit.unit.pipelines).map((pipeline) =>
       keepRoutes(pipeline, (route) => (routeTargets(route).length > 0 ? [route] : []))
     )
   );

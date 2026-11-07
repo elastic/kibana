@@ -16,6 +16,7 @@ import {
   disconnectLine,
   disconnectSourceFromDestination,
   getUnconnectedPipelines,
+  getUnfedDestinations,
   getUnitConnections,
   getUnreachableScopes,
   isolateSourceLine,
@@ -539,14 +540,24 @@ describe('unit connections', () => {
       expect(canMoveLine(processedUnit(), { ...move, origin: move.previousOrigin })).toBe(true);
     });
 
-    it('does not widen a processing pipeline for a destination it cannot carry', () => {
+    it('wires a destination the processing node cannot feed yet, without widening, and reports it', () => {
       const unit = processedUnit();
+      unit.unit.sources = [
+        ...unit.unit.sources,
+        { id: 'otlp-input', type: 'otlp', supported_telemetry: ['logs'] },
+      ];
       unit.unit.destinations = [
         ...unit.unit.destinations,
         { id: 'es-metrics', type: 'elasticsearch', supported_telemetry: ['metrics'] },
       ];
 
-      expect(canConnectLine(unit, processing('main'), destination('es-metrics'))).toBe(false);
+      expect(canConnectLine(unit, processing('main'), destination('es-metrics'))).toBe(true);
+      const next = connectLine(unit, processing('main'), destination('es-metrics'));
+      expect(next.unit.pipelines[1]?.supported_telemetry).toEqual(['logs']);
+      expect(getUnfedDestinations(next)).toEqual([
+        { pipeline: next.unit.pipelines[1], destinationId: 'es-metrics' },
+      ]);
+      expect(withoutUnconnectedWiring(next)).toEqual(unit);
     });
 
     it('unhooks the source from its processing node and keeps the node', () => {
@@ -717,14 +728,90 @@ describe('unit connections', () => {
       expect(signalsOf(reconnected)).toEqual({ 'p-mixed': ['logs', 'traces'] });
     });
 
-    it('still refuses a source whose signals no destination of the processing node accepts', () => {
+    it('lets both traces lines of a processing node come back, in either order, after both were unhooked', () => {
+      const sourceUnhooked = disconnectLine(
+        processedMixedUnit(),
+        source('traces-in'),
+        pipelineTarget('p-mixed')
+      );
+      const bothUnhooked = disconnectLine(
+        sourceUnhooked,
+        processing('p-mixed'),
+        destination('es-traces')
+      );
+      expect(signalsOf(bothUnhooked)).toEqual({ 'p-mixed': ['logs'] });
+      expect(canConnectLine(bothUnhooked, source('traces-in'), pipelineTarget('p-mixed'))).toBe(
+        true
+      );
+      expect(canConnectLine(bothUnhooked, processing('p-mixed'), destination('es-traces'))).toBe(
+        true
+      );
+
+      const sourceFirst = connectLine(bothUnhooked, source('traces-in'), pipelineTarget('p-mixed'));
+      expect(signalsOf(sourceFirst)).toEqual({ 'p-mixed': ['logs'] });
+      expect(getUnfedDestinations(sourceFirst)).toEqual([]);
+      expect(connectLine(sourceFirst, processing('p-mixed'), destination('es-traces'))).toEqual(
+        processedMixedUnit()
+      );
+
+      const destinationFirst = connectLine(
+        bothUnhooked,
+        processing('p-mixed'),
+        destination('es-traces')
+      );
+      expect(signalsOf(destinationFirst)).toEqual({ 'p-mixed': ['logs'] });
+      expect(getUnfedDestinations(destinationFirst)).toEqual([
+        { pipeline: destinationFirst.unit.pipelines[0], destinationId: 'es-traces' },
+      ]);
+      const bothBack = connectLine(
+        destinationFirst,
+        source('traces-in'),
+        pipelineTarget('p-mixed')
+      );
+      expect(getUnfedDestinations(bothBack)).toEqual([]);
+      expect(bothBack.unit.pipelines).toEqual([
+        {
+          ...processedMixedUnit().unit.pipelines[0],
+          config: [
+            { name: 'sources', value: ['logs-in', 'traces-in'] },
+            { name: 'processors', value: ['tag'] },
+            { name: 'destinations', value: ['es-logs', 'es-traces'] },
+          ],
+        },
+      ]);
+    });
+
+    it('wires a source whose signals no destination of the processing node accepts, without widening', () => {
       const unit = processedMixedUnit();
       unit.unit.sources = [
         ...unit.unit.sources,
         { id: 'metrics-in', type: 'otlp', supported_telemetry: ['metrics'] },
       ];
 
-      expect(canConnectLine(unit, source('metrics-in'), pipelineTarget('p-mixed'))).toBe(false);
+      expect(canConnectLine(unit, source('metrics-in'), pipelineTarget('p-mixed'))).toBe(true);
+      const next = connectLine(unit, source('metrics-in'), pipelineTarget('p-mixed'));
+      expect(signalsOf(next)).toEqual({ 'p-mixed': ['logs', 'traces'] });
+      expect(getUnfedDestinations(next)).toEqual([]);
+      expect(withoutUnconnectedWiring(next)).toBe(next);
+    });
+
+    it('still refuses a source that shares no signal with a routing node', () => {
+      const routed = unitWith([
+        {
+          id: 'router',
+          supported_telemetry: ['logs'],
+          config: [
+            { name: 'sources', value: ['logs-in'] },
+            { name: 'routes', value: [{ destinations: ['es-logs'] }] },
+          ],
+        },
+      ]);
+      routed.unit.sources = [
+        { id: 'logs-in', type: 'otlp', supported_telemetry: ['logs'] },
+        { id: 'traces-in', type: 'otlp', supported_telemetry: ['traces'] },
+      ];
+
+      expect(canConnectLine(routed, source('traces-in'), pipelineTarget('router'))).toBe(false);
     });
   });
 
@@ -1708,6 +1795,27 @@ describe('withoutUnconnectedWiring', () => {
 
       expect(reconnected).toEqual(splitRouter());
       expect(getUnreachableScopes(reconnected)).toEqual([]);
+    });
+
+    it('reports an unscoped rule destination nothing reaches any more and drops it from the published copy', () => {
+      const router = splitRouter();
+      router.unit.pipelines[0].config = [
+        { name: 'sources', value: ['logs-in', 'metrics-in'] },
+        {
+          name: 'routes',
+          value: [{ when: 'x', destinations: ['es-metrics'] }, { destinations: ['es-logs'] }],
+        },
+      ];
+      const unhooked = disconnectLine(router, source('metrics-in'), pipelineTarget('main'));
+
+      expect(getUnreachableScopes(unhooked)).toEqual([]);
+      expect(getUnfedDestinations(unhooked)).toEqual([
+        { pipeline: unhooked.unit.pipelines[0], destinationId: 'es-metrics' },
+      ]);
+      expect(withoutUnconnectedWiring(unhooked).unit.pipelines[0]?.config).toEqual([
+        { name: 'sources', value: ['logs-in'] },
+        { name: 'routes', value: [{ destinations: ['es-logs'] }] },
+      ]);
     });
   });
 });
