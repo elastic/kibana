@@ -8,7 +8,7 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator } from '../../types';
-import { createTraceBasedEvaluator } from './factory';
+import { createTraceBasedEvaluator, traceIdFilter } from './factory';
 
 // The ES client folds the root-cause reason into `message`. Pinned to this one column: any other
 // unknown column is a query bug and must stay a hard failure.
@@ -29,8 +29,8 @@ export function createOutputTokensEvaluator({
       name: 'Output Tokens',
       direction: 'minimize',
       // TO_LONG resolves union types (integer vs long across trace index generations).
-      buildQuery: (traceId) => `FROM traces-*
-        | WHERE trace.id == "${traceId}"
+      buildQuery: (_traceId, traceIds) => `FROM traces-*
+        | WHERE ${traceIdFilter(traceIds)}
         | STATS 
         output_tokens = SUM(TO_LONG(attributes.gen_ai.usage.output_tokens))`,
       extractResult: (response) => {
@@ -58,8 +58,8 @@ export function createInputTokensEvaluator({
       name: 'Input Tokens',
       direction: 'minimize',
       // TO_LONG resolves union types (integer vs long across trace index generations).
-      buildQuery: (traceId) => `FROM traces-*
-        | WHERE trace.id == "${traceId}"
+      buildQuery: (_traceId, traceIds) => `FROM traces-*
+        | WHERE ${traceIdFilter(traceIds)}
         | STATS 
         input_tokens = SUM(TO_LONG(attributes.gen_ai.usage.input_tokens))`,
       extractResult: (response) => {
@@ -88,8 +88,8 @@ export function createCachedTokensEvaluator({
       direction: 'neutral',
       // `input_tokens` is a liveness probe: providers that never report caching (most EIS models)
       // omit cache_read entirely, which otherwise looks like a trace that has not finished indexing.
-      buildQuery: (traceId) => `FROM traces-*
-        | WHERE trace.id == "${traceId}"
+      buildQuery: (_traceId, traceIds) => `FROM traces-*
+        | WHERE ${traceIdFilter(traceIds)}
         | STATS 
         cached_tokens = SUM(TO_LONG(attributes.gen_ai.usage.cache_read.input_tokens)),
         input_tokens = SUM(TO_LONG(attributes.gen_ai.usage.input_tokens))`,
@@ -108,8 +108,8 @@ export function createCachedTokensEvaluator({
       notReportedProbe: {
         matchesQueryError: (error) =>
           error instanceof Error && CACHE_READ_COLUMN_MISSING.test(error.message),
-        buildQuery: (traceId) => `FROM traces-*
-        | WHERE trace.id == "${traceId}"
+        buildQuery: (_traceId, traceIds) => `FROM traces-*
+        | WHERE ${traceIdFilter(traceIds)}
         | STATS input_tokens = SUM(TO_LONG(attributes.gen_ai.usage.input_tokens))`,
         isTraceComplete: (response) => {
           const { columns, values } = response;
