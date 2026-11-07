@@ -526,6 +526,20 @@ describe('ConversationDetailsFlyoutContent', () => {
     renderContent(createService({}), createConversation({ template_id: undefined }));
 
     expect(screen.getByRole('heading', { name: 'Summary' })).toBeInTheDocument();
+    expect(screen.getByText(ERROR_BODY)).toBeInTheDocument();
+  });
+
+  it('shows the error state for a template that registers no details flyout and no tabs', () => {
+    renderContent(createService({}));
+
+    expect(screen.getByText(ERROR_BODY)).toBeInTheDocument();
+  });
+
+  it('shows the tabs of a template that registers no details flyout', () => {
+    renderContent(createService({ tabs: ['test.first'] }));
+
+    expect(screen.getByText('First tab content')).toBeInTheDocument();
+    expect(screen.queryByText(ERROR_BODY)).not.toBeInTheDocument();
   });
 });
 

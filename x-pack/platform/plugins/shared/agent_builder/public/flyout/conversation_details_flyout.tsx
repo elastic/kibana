@@ -282,6 +282,10 @@ export const ConversationDetailsFlyoutContent = ({
     );
   }
 
+  if (tabs.length === 0) {
+    return <ErrorDeclaration onClose={onClose} />;
+  }
+
   return (
     <DetailsTemplate
       descriptor={undefined}
