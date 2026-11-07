@@ -467,6 +467,8 @@ await workflowsApi.getWorkflows({
 });
 ```
 
+Use `lists: ['workflows']` (context `list:workflows`) to show a managed workflow on the Workflows page when the `workflows:ui:showManagedWorkflows` setting is off. Users who can read managed workflows then see it in the table and in the Enabled / Created by / Tags filters, because the page sends the same `managed: 'all'` and `visibilityContext` to both `GET /api/workflows` and `GET /api/workflows/aggs`. Fleet package workflows use this context.
+
 Visibility is metadata for discovery surfaces. It does **not** grant permissions, bypass managed workflow privileges, or trigger a reinstall by itself. If you change only `visibility`, bump the definition `version` only when you explicitly want existing installed managed workflow documents to be rewritten for that metadata change.
 
 ## 9) `yaml` vs `yamlTemplate`

@@ -137,6 +137,7 @@ export interface GetWorkflowsParams {
 
 export interface GetWorkflowAggsOptions {
   managedFilter?: GetWorkflowsParams['managedFilter'];
+  visibilityContext?: GetWorkflowsParams['visibilityContext'];
   accessControlFilter?: estypes.QueryDslQueryContainer;
   request?: KibanaRequest;
 }

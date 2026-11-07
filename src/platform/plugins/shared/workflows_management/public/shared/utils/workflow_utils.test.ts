@@ -40,6 +40,20 @@ describe('shouldShowWorkflowsEmptyState', () => {
     expect(shouldShowWorkflowsEmptyState(undefined, search)).toBe(false);
   });
 
+  it('should return true when only the listed managed workflows context is requested', () => {
+    const workflows: WorkflowsData = { total: 0 };
+    const search = createSearchParams({ managed: 'all', visibilityContext: ['list:workflows'] });
+
+    expect(shouldShowWorkflowsEmptyState(workflows, search)).toBe(true);
+  });
+
+  it('should return false when all managed workflows are requested without a context', () => {
+    const workflows: WorkflowsData = { total: 0 };
+    const search = createSearchParams({ managed: 'all' });
+
+    expect(shouldShowWorkflowsEmptyState(workflows, search)).toBe(false);
+  });
+
   it('should return false when there is a query filter', () => {
     const workflows: WorkflowsData = { total: 0 };
     const search = createSearchParams({ query: 'test' });

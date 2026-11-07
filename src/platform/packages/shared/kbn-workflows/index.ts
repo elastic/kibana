@@ -66,13 +66,17 @@ export * from './common/hitl';
 export * from './common/hitl_slack_interactive';
 export * from './common/wait_for_approval';
 export {
+  getManagedWorkflowListVisibilityContext,
   getManagedWorkflowSelectorVisibilityContext,
   getManagedWorkflowSolutionVisibilityContext,
   getManagedWorkflowVisibilityContexts,
+  MANAGED_WORKFLOW_LISTS,
   MANAGED_WORKFLOW_SELECTORS,
   MANAGED_WORKFLOW_SOLUTIONS,
 } from './managed/types';
 export type {
+  ManagedWorkflowList,
+  ManagedWorkflowListVisibilityContext,
   ManagedWorkflowSelector,
   ManagedWorkflowSelectorVisibilityContext,
   ManagedWorkflowSolution,

@@ -25,3 +25,6 @@ export const ENABLE_OTLP_OUTPUT_FLAG = 'fleet.enableOtlpOutput';
  * agent policy, so version-specific policy code paths are exercised by default. Fallback is false.
  */
 export const ENABLE_SENTINEL_POLICY_VERSION_FLAG = 'fleet.enableSentinelPolicyVersion';
+
+/** Feature flag that gates the installation of `kibana/workflow` package assets as managed workflows. Fallback is false. */
+export const ENABLE_WORKFLOW_ASSETS_FLAG = 'fleet.enableWorkflowAssets';

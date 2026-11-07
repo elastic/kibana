@@ -1353,6 +1353,7 @@ The following asset types require the corresponding Kibana API privilege:
 - \`security_rule\`: \`rules-all\`
 - \`security_rule\` with type \`machine_learning\`: \`rules-all\` and \`ml:canCreateJob\`
 - \`security_ai_prompt\`: \`elasticAssistant\`
+- \`workflow\`: \`workflowsManagement:create\`, \`workflowsManagement:update\` and \`workflowsManagement:managed:update\`
 
 If any required privilege is missing, the request returns 403 and no assets are written. To learn more, refer to [Upload an integration to Kibana](https://www.elastic.co/docs/extend/integrations/upload-new-integration).`,
     })
