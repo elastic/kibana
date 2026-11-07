@@ -37,6 +37,11 @@ export interface SessionCookieValue {
   path: string;
 
   /**
+   * Tenant the session was created for, if multi-tenancy is enabled.
+   */
+  tenantId?: string;
+
+  /**
    * The Unix time in ms when the session should be considered expired. If `null`, session will stay
    * active until the max lifespan is reached.
    */
@@ -119,6 +124,13 @@ export class SessionCookie {
       return null;
     }
 
+    if (sessionValue && sessionValue.tenantId !== request.tenantId) {
+      this.logger.debug(
+        `Ignoring session cookie of tenant [${sessionValue.tenantId}] for tenant [${request.tenantId}]`
+      );
+      return null;
+    }
+
     return sessionValue;
   }
 
@@ -130,12 +142,12 @@ export class SessionCookie {
    */
   async set(
     request: KibanaRequest,
-    sessionValue: Readonly<Omit<SessionCookieValue, 'path'>>,
+    sessionValue: Readonly<Omit<SessionCookieValue, 'path' | 'tenantId'>>,
     options?: SessionStorageSetOptions
   ) {
     (await this.cookieSessionValueStorage)
       .asScoped(request)
-      .set({ ...sessionValue, path: this.serverBasePath }, options);
+      .set({ ...sessionValue, path: this.serverBasePath, tenantId: request.tenantId }, options);
   }
 
   /**

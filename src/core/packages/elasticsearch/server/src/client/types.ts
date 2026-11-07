@@ -9,6 +9,7 @@
 
 import type { Headers, KibanaRequest } from '@kbn/core-http-server';
 import type { SpaceId } from '@kbn/core-spaces-common';
+import type { TenantId } from '@kbn/core-tenants-server';
 
 /**
  * Fake request object created manually by Kibana plugins.
@@ -19,6 +20,8 @@ export interface FakeRequest {
   headers: Headers;
   /** The space ID this request is scoped to. Used by CPS for space-level routing. */
   spaceId?: SpaceId;
+  /** The tenant this request is scoped to. Picks the tenant's cluster when multi-tenancy is enabled. */
+  tenantId?: TenantId;
 }
 
 /**

@@ -80,6 +80,7 @@ const createStartMock = (): SecurityStartMock => {
     }),
     audit: auditServiceMock.create(),
     serviceAccounts: createServiceAccountsStartMock(),
+    getTenantSessionCrypto: jest.fn(),
   });
 
   return mock;
@@ -122,6 +123,7 @@ const createInternalStartMock = (): InternalSecurityStartMock => {
     serviceAccounts: lazyObject({
       asScopedToPlugin: jest.fn().mockImplementation(createServiceAccountsStartMock),
     }),
+    getTenantSessionCrypto: jest.fn(),
   });
 
   return mock;

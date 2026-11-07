@@ -7,7 +7,13 @@
 
 import { Subject } from 'rxjs';
 
-import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { KibanaRequest } from '@kbn/core/server';
+import {
+  coreMock,
+  elasticsearchServiceMock,
+  httpServerMock,
+  loggingSystemMock,
+} from '@kbn/core/server/mocks';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type {
   TaskManagerStartContract,
@@ -105,7 +111,7 @@ describe('SessionManagementService', () => {
       expect(
         service.start({
           audit: auditSetupMock,
-          elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
+          clusterClient: elasticsearchServiceMock.createClusterClient(),
           kibanaIndexName: '.kibana',
           online$: mockStatusSubject.asObservable(),
           taskManager: mockTaskManager,
@@ -117,7 +123,7 @@ describe('SessionManagementService', () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({
         audit: auditSetupMock,
-        elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
+        clusterClient: elasticsearchServiceMock.createClusterClient(),
         kibanaIndexName: '.kibana',
         online$: mockStatusSubject.asObservable(),
         taskManager: mockTaskManager,
@@ -133,11 +139,76 @@ describe('SessionManagementService', () => {
       expect(mockSessionIndexCleanUp).toHaveBeenCalledTimes(2);
     });
 
+    it('cleans up the session indices of the tenants it served', async () => {
+      const clusterClient = elasticsearchServiceMock.createClusterClient();
+      const tenantClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      tenantClusterClient.asInternalUser.deleteByQuery.mockResponse({ deleted: 0 });
+      clusterClient.asScoped.mockReturnValue(tenantClusterClient);
+      const { session } = service.start({
+        audit: auditSetupMock,
+        clusterClient,
+        kibanaIndexName: '.kibana',
+        online$: new Subject<OnlineStatusRetryScheduler>().asObservable(),
+        taskManager: mockTaskManager,
+      });
+
+      const context = { taskInstance: { state: { shardMissingCounter: 3 } } } as any;
+      const runner = sessionCleanupTaskRunCreator(context);
+      await runner.run();
+      expect(mockSessionIndexCleanUp).toHaveBeenCalledTimes(1);
+
+      const tenantRequest = Object.assign(httpServerMock.createKibanaRequest(), {
+        tenantId: 'project-b' as KibanaRequest['tenantId'],
+      });
+      await session.invalidate(tenantRequest, { match: 'all' });
+      mockSessionIndexCleanUp.mockClear();
+      mockSessionIndexCleanUp.mockRejectedValueOnce(new Error('tenant cluster is down'));
+
+      await expect(runner.run()).resolves.toEqual({ state: { shardMissingCounter: 0 } });
+      expect(mockSessionIndexCleanUp).toHaveBeenCalledTimes(2);
+      expect(mockSessionIndexCleanUp).toHaveBeenNthCalledWith(1, {
+        taskInstance: { state: {} },
+      });
+      expect(mockSessionIndexCleanUp).toHaveBeenNthCalledWith(2, context);
+    });
+
+    it("stores the sessions of a tenant in that tenant's cluster", async () => {
+      const clusterClient = elasticsearchServiceMock.createClusterClient();
+      clusterClient.asInternalUser.deleteByQuery.mockResponse({ deleted: 1 });
+      const tenantClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      tenantClusterClient.asInternalUser.deleteByQuery.mockResponse({ deleted: 2 });
+      clusterClient.asScoped.mockReturnValue(tenantClusterClient);
+
+      const { session } = service.start({
+        audit: auditSetupMock,
+        clusterClient,
+        kibanaIndexName: '.kibana',
+        online$: new Subject<OnlineStatusRetryScheduler>().asObservable(),
+        taskManager: mockTaskManager,
+      });
+
+      await expect(
+        session.invalidate(httpServerMock.createKibanaRequest(), { match: 'all' })
+      ).resolves.toBe(1);
+      expect(clusterClient.asScoped).not.toHaveBeenCalled();
+
+      const tenantRequest = Object.assign(httpServerMock.createKibanaRequest(), {
+        tenantId: 'project-b' as KibanaRequest['tenantId'],
+      });
+      await expect(session.invalidate(tenantRequest, { match: 'all' })).resolves.toBe(2);
+      await expect(session.invalidate(tenantRequest, { match: 'all' })).resolves.toBe(2);
+
+      expect(clusterClient.asScoped).toHaveBeenCalledTimes(1);
+      expect(clusterClient.asScoped).toHaveBeenCalledWith(tenantRequest);
+      expect(clusterClient.asInternalUser.deleteByQuery).toHaveBeenCalledTimes(1);
+      expect(tenantClusterClient.asInternalUser.deleteByQuery).toHaveBeenCalledTimes(2);
+    });
+
     it('initializes session index and schedules session index cleanup task when Elasticsearch goes online', async () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({
         audit: auditSetupMock,
-        elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
+        clusterClient: elasticsearchServiceMock.createClusterClient(),
         kibanaIndexName: '.kibana',
         online$: mockStatusSubject.asObservable(),
         taskManager: mockTaskManager,
@@ -185,7 +256,7 @@ describe('SessionManagementService', () => {
 
       service.start({
         audit: auditSetupMock,
-        elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
+        clusterClient: elasticsearchServiceMock.createClusterClient(),
         kibanaIndexName: '.kibana',
         online$: mockStatusSubject.asObservable(),
         taskManager: mockTaskManager,
@@ -202,7 +273,7 @@ describe('SessionManagementService', () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({
         audit: auditSetupMock,
-        elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
+        clusterClient: elasticsearchServiceMock.createClusterClient(),
         kibanaIndexName: '.kibana',
         online$: mockStatusSubject.asObservable(),
         taskManager: mockTaskManager,
@@ -238,7 +309,7 @@ describe('SessionManagementService', () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({
         audit: auditSetupMock,
-        elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
+        clusterClient: elasticsearchServiceMock.createClusterClient(),
         kibanaIndexName: '.kibana',
         online$: mockStatusSubject.asObservable(),
         taskManager: mockTaskManager,
@@ -265,7 +336,7 @@ describe('SessionManagementService', () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({
         audit: auditSetupMock,
-        elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
+        clusterClient: elasticsearchServiceMock.createClusterClient(),
         kibanaIndexName: '.kibana',
         online$: mockStatusSubject.asObservable(),
         taskManager: mockTaskManager,
@@ -304,7 +375,7 @@ describe('SessionManagementService', () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({
         audit: auditSetupMock,
-        elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
+        clusterClient: elasticsearchServiceMock.createClusterClient(),
         kibanaIndexName: '.kibana',
         online$: mockStatusSubject.asObservable(),
         taskManager: mockTaskManager,
@@ -343,7 +414,7 @@ describe('SessionManagementService', () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({
         audit: auditSetupMock,
-        elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
+        clusterClient: elasticsearchServiceMock.createClusterClient(),
         kibanaIndexName: '.kibana',
         online$: mockStatusSubject.asObservable(),
         taskManager: mockTaskManager,
@@ -396,7 +467,7 @@ describe('SessionManagementService', () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({
         audit: auditSetupMock,
-        elasticsearchClient: elasticsearchServiceMock.createElasticsearchClient(),
+        clusterClient: elasticsearchServiceMock.createClusterClient(),
         kibanaIndexName: '.kibana',
         online$: mockStatusSubject.asObservable(),
         taskManager: mockTaskManager,

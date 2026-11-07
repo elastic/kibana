@@ -24,6 +24,7 @@ import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
 import type { InternalUserActivityServiceSetup } from '@kbn/core-user-activity-server-internal';
+import type { InternalTenantsServiceSetup } from '@kbn/core-tenants-server-internal';
 import type {
   RequestHandlerContextBase,
   IContextContainer,
@@ -73,6 +74,7 @@ export interface SetupDeps {
   context: InternalContextSetup;
   executionContext: InternalExecutionContextSetup;
   userActivity: InternalUserActivityServiceSetup;
+  tenants?: InternalTenantsServiceSetup;
 }
 
 /** @internal */
@@ -212,6 +214,7 @@ export class HttpService
       config$: this.config$,
       executionContext: deps.executionContext,
       userActivity: deps.userActivity,
+      tenants: deps.tenants,
     });
 
     registerCoreHandlers(serverContract, config, this.env, this.log);

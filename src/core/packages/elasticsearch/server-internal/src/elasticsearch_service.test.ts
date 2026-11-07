@@ -39,6 +39,8 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import type { Headers } from '@kbn/core-http-server';
+import type { TenantId } from '@kbn/core-tenants-server';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { configSchema, ElasticsearchConfig } from './elasticsearch_config';
 import type { SetupDeps } from './elasticsearch_service';
@@ -86,6 +88,13 @@ beforeEach(() => {
     executionContext: executionContextServiceMock.createInternalSetupContract(),
     security: securityServiceMock.createInternalSetup(),
     loggingSystem: loggingSystemMock.create(),
+    tenants: {
+      enabled: false,
+      getTenantId: jest.fn(),
+      resolve: jest.fn(),
+      getProjectName: jest.fn(),
+      getClientConfig: jest.fn(),
+    },
   };
 
   env = Env.createDefault(REPO_ROOT, getEnvOptions());
@@ -674,5 +683,84 @@ describe('CPS onRequestHandlerFactory', () => {
       expect.objectContaining({ onRequestHandlerFactory: expect.any(Function) })
     );
     await serverlessService.stop();
+  });
+});
+
+describe('multi-tenancy', () => {
+  const tenantB = 'project-b' as TenantId;
+  let tenantClient: ReturnType<typeof elasticsearchClientMock.createCustomClusterClient>;
+
+  beforeEach(() => {
+    setupDeps.tenants = {
+      enabled: true,
+      getTenantId: jest.fn(({ 'x-elastic-project-id': id }: Headers) =>
+        id === tenantB ? tenantB : undefined
+      ),
+      resolve: jest.fn(),
+      getProjectName: jest.fn(),
+      getClientConfig: jest.fn().mockReturnValue({
+        hosts: ['http://localhost:9201'],
+        username: 'kibana_system',
+        password: 'changeme-b',
+      }),
+    };
+    tenantClient = elasticsearchClientMock.createCustomClusterClient();
+    MockClusterClient.mockImplementation(({ type }) =>
+      type === 'tenant-project-b' ? tenantClient : mockClusterClientInstance
+    );
+  });
+
+  it('is off without a tenants file', async () => {
+    setupDeps.tenants = { ...setupDeps.tenants, enabled: false };
+    await elasticsearchService.setup(setupDeps);
+    const { client } = await elasticsearchService.start();
+
+    client.asScoped({ headers: {}, tenantId: tenantB });
+
+    expect(tenantClient.asScoped).not.toHaveBeenCalled();
+    expect(mockClusterClientInstance.asScoped).toHaveBeenCalledTimes(1);
+  });
+
+  it('scopes requests to the client of their tenant', async () => {
+    await elasticsearchService.setup(setupDeps);
+    const { client } = await elasticsearchService.start();
+
+    const request = { headers: {}, tenantId: tenantB };
+    client.asScoped(request);
+    client.asScoped({ headers: {} });
+
+    expect(setupDeps.tenants.getClientConfig).toHaveBeenCalledWith(tenantB);
+    expect(tenantClient.asScoped).toHaveBeenCalledWith(request, undefined);
+    expect(mockClusterClientInstance.asScoped).toHaveBeenCalledTimes(1);
+    expect(MockClusterClient).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'tenant-project-b',
+        config: expect.objectContaining({
+          hosts: ['http://localhost:9201'],
+          username: 'kibana_system',
+          password: 'changeme-b',
+        }),
+      })
+    );
+  });
+
+  it('ignores the tenant header of requests without a tenant', async () => {
+    await elasticsearchService.setup(setupDeps);
+    const { client } = await elasticsearchService.start();
+
+    client.asScoped({ headers: { 'x-elastic-project-id': 'project-b' } });
+
+    expect(tenantClient.asScoped).not.toHaveBeenCalled();
+    expect(mockClusterClientInstance.asScoped).toHaveBeenCalledTimes(1);
+  });
+
+  it('closes the tenant clients on stop', async () => {
+    await elasticsearchService.setup(setupDeps);
+    const { client } = await elasticsearchService.start();
+    client.asScoped({ headers: {}, tenantId: tenantB });
+
+    await elasticsearchService.stop();
+
+    expect(tenantClient.close).toHaveBeenCalledTimes(1);
   });
 });

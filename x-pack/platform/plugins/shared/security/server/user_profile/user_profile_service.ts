@@ -51,15 +51,26 @@ export interface UserProfileServiceStartInternal extends UserProfileServiceStart
   /**
    * Activates user profile using provided user profile grant.
    * @param grant User profile grant (username/password or access token).
+   * @param request Request the profile is activated for. Picks the request's tenant when multi-tenancy is enabled.
    */
-  activate(grant: UserProfileGrant): Promise<UserProfileWithSecurity>;
+  activate(grant: UserProfileGrant, request?: KibanaRequest): Promise<UserProfileWithSecurity>;
 
   /**
    * Updates user preferences by identifier.
    * @param uid User ID
    * @param data Application data to be written (merged with existing data).
+   * @param request Request the profile is updated for. Picks the request's tenant when multi-tenancy is enabled.
    */
-  update<D extends UserProfileData>(uid: string, data: D): Promise<void>;
+  update<D extends UserProfileData>(uid: string, data: D, request?: KibanaRequest): Promise<void>;
+
+  /**
+   * See {@link UserProfileServiceStart.bulkGet}.
+   * @param request Request the profiles are retrieved for. Picks the request's tenant when multi-tenancy is enabled.
+   */
+  bulkGet<D extends UserProfileData>(
+    params: UserProfileBulkGetParams,
+    request?: KibanaRequest
+  ): Promise<Array<UserProfile<D>>>;
 }
 
 export interface UserProfileServiceSetupParams {
@@ -156,7 +167,11 @@ export class UserProfileService {
   /**
    * See {@link UserProfileServiceStartInternal} for documentation.
    */
-  private async activate(clusterClient: IClusterClient, grant: UserProfileGrant) {
+  private async activate(
+    clusterClient: IClusterClient,
+    grant: UserProfileGrant,
+    request?: KibanaRequest
+  ) {
     this.logger.debug(`Activating user profile via ${grant.type} grant.`);
 
     const activateRequest: SecurityActivateUserProfileRequest =
@@ -176,10 +191,11 @@ export class UserProfileService {
     // request after some time. Most of the Kibana users won't be affected by this issue, but there are edge cases
     // when users can be hit by the conflicts during profile activation, e.g. for PKI or Kerberos authentication when
     // client certificate/ticket changes and multiple requests can trigger profile re-activation at the same time.
+    const { asInternalUser } = request ? clusterClient.asScoped(request) : clusterClient;
     let activationRetriesLeft = ACTIVATION_MAX_RETRIES;
     do {
       try {
-        const response = await clusterClient.asInternalUser.security.activateUserProfile({
+        const response = await asInternalUser.security.activateUserProfile({
           ...activateRequest,
         });
 
@@ -297,11 +313,11 @@ export class UserProfileService {
       throw new Error(`Malformed basic credentials in Authorization header.`);
     }
 
-    const activatedProfile = await this.activate(clusterClient, {
-      type: 'password',
-      username,
-      password,
-    });
+    const activatedProfile = await this.activate(
+      clusterClient,
+      { type: 'password', username, password },
+      request
+    );
 
     return activatedProfile;
   }
@@ -522,7 +538,7 @@ export class UserProfileService {
 
     let body;
     try {
-      body = await clusterClient.asInternalUser.security.getUserProfile({
+      body = await clusterClient.asScoped(request).asInternalUser.security.getUserProfile({
         uid: profileId,
         data: dataPath ? prefixCommaSeparatedValues(dataPath, KIBANA_DATA_ROOT) : undefined,
       });
@@ -584,12 +600,14 @@ export class UserProfileService {
    */
   private async bulkGet<D extends UserProfileData>(
     clusterClient: IClusterClient,
-    { uids, dataPath }: UserProfileBulkGetParams
+    { uids, dataPath }: UserProfileBulkGetParams,
+    request?: KibanaRequest
   ): Promise<Array<UserProfile<D>>> {
     if (uids.size === 0) {
       return [];
     }
 
+    const { asInternalUser } = request ? clusterClient.asScoped(request) : clusterClient;
     const uidArray = [...uids];
 
     // Because the Bulk Get User Profile API is a GET there is a limit on how many UIDs we can pass in a single request.
@@ -603,7 +621,7 @@ export class UserProfileService {
       const limit = pLimit(BULK_GET_MAX_CONCURRENT_BATCH_REQUESTS);
       const batchPromises = batches.map((batchUids) => {
         return limit(async () => {
-          const body = await clusterClient.asInternalUser.security.getUserProfile({
+          const body = await asInternalUser.security.getUserProfile({
             uid: batchUids.join(','),
             data: dataPath ? prefixCommaSeparatedValues(dataPath, KIBANA_DATA_ROOT) : undefined,
           });
@@ -625,10 +643,12 @@ export class UserProfileService {
   private async update<D extends UserProfileData>(
     clusterClient: IClusterClient,
     uid: string,
-    data: D
+    data: D,
+    request?: KibanaRequest
   ) {
+    const { asInternalUser } = request ? clusterClient.asScoped(request) : clusterClient;
     try {
-      await clusterClient.asInternalUser.security.updateUserProfileData({
+      await asInternalUser.security.updateUserProfileData({
         uid,
         data: { [KIBANA_DATA_ROOT]: data },
       });

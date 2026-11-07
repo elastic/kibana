@@ -142,10 +142,24 @@ export class EncryptedSavedObjectsService {
    * Map of all registered saved object types where the `key` is saved object type and the `value`
    * is the definition (names of attributes that need to be encrypted etc.).
    */
-  private readonly typeDefinitions: Map<string, EncryptedSavedObjectAttributesDefinition> =
-    new Map();
+  private readonly typeDefinitions: Map<string, EncryptedSavedObjectAttributesDefinition>;
 
-  constructor(private readonly options: EncryptedSavedObjectsServiceOptions) {}
+  constructor(
+    private readonly options: EncryptedSavedObjectsServiceOptions,
+    typeDefinitions = new Map<string, EncryptedSavedObjectAttributesDefinition>()
+  ) {
+    this.typeDefinitions = typeDefinitions;
+  }
+
+  /**
+   * Returns a service that shares this service's registered types but encrypts and decrypts with `primaryCrypto` only.
+   */
+  public withPrimaryCrypto(primaryCrypto: Crypto): EncryptedSavedObjectsService {
+    return new EncryptedSavedObjectsService(
+      { logger: this.options.logger, primaryCrypto },
+      this.typeDefinitions
+    );
+  }
 
   /**
    * Registers saved object type as the one that contains attributes that should be encrypted.

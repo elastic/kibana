@@ -1,0 +1,63 @@
+# One-off single-tenant Kibana against tenant __NAME__, the in-cluster version of M1's init_tenant.sh. It creates the
+# .kibana* indices and registers Kibana's privileges, then exits. deploy.sh fills in __KIBANA_IMAGE__ and __NAME__,
+# and creates the mt-kibana-init-__NAME__ Secret (kibana.yml and the tenant CAs).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: init-__NAME__
+  namespace: mt-kibana
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 900
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mt-kibana-init
+        app.kubernetes.io/component: kibana-init
+        owner.k8s.elastic.co/division: engineering
+        owner.k8s.elastic.co/org: platform
+        owner.k8s.elastic.co/team: kibana-core
+    spec:
+      restartPolicy: Never
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - { key: infra.k8s.elastic.co/hardware-profile, operator: In, values: [general-purpose] }
+                  - { key: infra.k8s.elastic.co/schedulable-for-hardware-profile, operator: In, values: ['true'] }
+      imagePullSecrets:
+        - name: elastic-docker-registry
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: kibana
+          image: __KIBANA_IMAGE__
+          env:
+            - { name: NODE_OPTIONS, value: --max-old-space-size=2048 }
+          command:
+            - bash
+            - -c
+            - |
+              /usr/share/kibana/bin/kibana >/tmp/kibana.log 2>&1 &
+              pid=$!
+              until grep -q 'Kibana is now available' /tmp/kibana.log; do
+                kill -0 "$pid" 2>/dev/null || { tail -50 /tmp/kibana.log; exit 1; }
+                sleep 5
+              done
+              echo "tenant __NAME__ is initialised"
+              kill -INT "$pid"
+              wait "$pid" || true
+          resources:
+            requests: { cpu: '1', memory: 3Gi }
+            limits: { memory: 3Gi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: { drop: [ALL] }
+          volumeMounts:
+            - { name: config, mountPath: /usr/share/kibana/config/kibana.yml, subPath: kibana.yml, readOnly: true }
+            - { name: config, mountPath: /usr/share/kibana/config/mt, readOnly: true }
+      volumes:
+        - name: config
+          secret: { secretName: mt-kibana-init-__NAME__ }

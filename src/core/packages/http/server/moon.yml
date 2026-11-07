@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/core-http-common'
   - '@kbn/core-spaces-common'
   - '@kbn/zod'
+  - '@kbn/core-tenants-server'
 tags:
   - shared-server
   - package

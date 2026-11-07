@@ -858,6 +858,8 @@ export class ActionsPlugin
         actionsConfigUtils
       ),
       encryptedSavedObjectsClient,
+      getEncryptedSavedObjectsClient: (request: KibanaRequest) =>
+        plugins.encryptedSavedObjects.getClient({ includedHiddenTypes, request }),
       actionTypeRegistry: actionTypeRegistry!,
       inMemoryConnectors: this.inMemoryConnectors,
       getActionsAuthorizationWithRequest(request: KibanaRequest) {
