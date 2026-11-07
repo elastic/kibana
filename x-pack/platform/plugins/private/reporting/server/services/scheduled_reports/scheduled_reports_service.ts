@@ -537,6 +537,8 @@ export class ScheduledReportsService {
       await this.taskManager.bulkUpdateSchedules([id], schedule, {
         request: this.request,
         regenerateApiKey: true,
+        // Without this, editing the schedule of a claiming/running task is silently dropped.
+        includeRunningTasks: true,
       });
     }
   }
