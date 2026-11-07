@@ -79,6 +79,11 @@ export type DashboardDatasetExample = Example<
     controls?: ControlsGold;
     /** The time range the dashboard must end up with. */
     timeRange?: { from: string; to: string };
+    /**
+     * Panel types the prompt asks for whose config schema is only in a skill reference. The agent
+     * reads each type's reference before writing a panel of it.
+     */
+    panelConfigTypes?: readonly string[];
     goldenToolPath?: string[];
   },
   {
