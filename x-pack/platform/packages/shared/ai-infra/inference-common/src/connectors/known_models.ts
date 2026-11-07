@@ -474,4 +474,68 @@ export const knownModels: ModelDefinition[] = [
     family: ModelFamily.Claude,
     contextWindow: 1000000,
   },
+  // ---------------------------------------------------------------------------
+  // Other providers — served via EIS. Canonical ids are the EIS model_id form;
+  // context windows are the vendors' published serving limits. Nemotron models
+  // are 1M-capable in training, but NVIDIA's serving stack (HF config default,
+  // NIM `--max-model-len`, `/v1/models`) exposes 256K, so the conservative
+  // served figure is used — a too-large window fails requests past the real
+  // limit, a too-small one only compacts earlier.
+  // ---------------------------------------------------------------------------
+  {
+    id: 'moonshot-kimi-k3',
+    aliases: ['kimi-k3'],
+    provider: ModelProvider.Other,
+    family: ModelFamily.Unknown,
+    contextWindow: 1048576,
+  },
+  {
+    id: 'zai-glm-5.2',
+    aliases: ['glm-5.2'],
+    provider: ModelProvider.Other,
+    family: ModelFamily.Unknown,
+    contextWindow: 1048576,
+  },
+  {
+    id: 'zai-glm-5.3',
+    aliases: ['glm-5.3'],
+    provider: ModelProvider.Other,
+    family: ModelFamily.Unknown,
+    contextWindow: 1048576,
+  },
+  {
+    id: 'nvidia-nemotron-3-nano',
+    aliases: ['nemotron-3-nano'],
+    provider: ModelProvider.Other,
+    family: ModelFamily.Unknown,
+    contextWindow: 262144,
+  },
+  {
+    id: 'nvidia-nemotron-3-ultra',
+    aliases: ['nemotron-3-ultra'],
+    provider: ModelProvider.Other,
+    family: ModelFamily.Unknown,
+    contextWindow: 262144,
+  },
+  {
+    id: 'nvidia-nemotron-3.5-super-vl',
+    aliases: ['nemotron-3.5-super-vl'],
+    provider: ModelProvider.Other,
+    family: ModelFamily.Unknown,
+    contextWindow: 262144,
+  },
+  {
+    id: 'nvidia-nemotron-3.5-lightning',
+    aliases: ['nemotron-3.5-lightning'],
+    provider: ModelProvider.Other,
+    family: ModelFamily.Unknown,
+    contextWindow: 262144,
+  },
+  {
+    id: 'qwen-3.8-2.4t-a95b',
+    aliases: ['qwen-3.8'],
+    provider: ModelProvider.Other,
+    family: ModelFamily.Unknown,
+    contextWindow: 1000000,
+  },
 ];
