@@ -12,6 +12,9 @@ xpack.nightshiftSources.enabled: true
 xpack.nightshift_investigations.enabled: true
 xpack.agenticInvestigations.enabled: true
 xpack.proposals.enabled: true
+# Nightshift online evals: in-process judges only, no Evals app, routes or privileges
+xpack.evals.enabled: true
+xpack.evals.mode: runtime
 
 xpack.features.overrides:
   infrastructure.name: 'Infrastructure'
