@@ -9,6 +9,8 @@
 
 import type { CPSProject } from '../../types';
 
+export { getRegionLabel } from './cloud_regions';
+
 const PROJECT_TYPE_ICONS: Record<string, string> = {
   elasticsearch: 'logoElasticsearch',
   es: 'logoElasticsearch',
@@ -24,7 +26,7 @@ const CSP_LABELS: Record<string, string> = {
 } as const;
 
 export const getCSPLabel = (csp: string): string => {
-  return CSP_LABELS[csp] || csp.toUpperCase();
+  return CSP_LABELS[csp.toLowerCase()] || csp.toUpperCase();
 };
 
 export const getSolutionIcon = (solution: string): string => {
