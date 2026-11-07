@@ -77,4 +77,32 @@ describe('FieldValueSelection', () => {
       ]
     `);
   });
+
+  it('keeps selected values that are missing from the current suggestion list', () => {
+    const wrapper = mount(
+      <EuiThemeProvider>
+        <FieldValueSelection
+          label="Tags"
+          values={[{ label: 'b', count: 1 }]}
+          onChange={() => {}}
+          selectedValue={['a', 'b']}
+          loading={false}
+          setQuery={() => {}}
+        />
+      </EuiThemeProvider>
+    );
+
+    wrapper.find('button[data-test-subj="fieldValueSelectionBtn"]').simulate('click');
+
+    const visibleOptions = (wrapper.find(EuiSelectableList).props() as any)
+      .visibleOptions as Array<{
+      label: string;
+      checked?: string;
+    }>;
+
+    expect(visibleOptions.map(({ label, checked }) => ({ label, checked }))).toEqual([
+      { label: 'b', checked: 'on' },
+      { label: 'a', checked: 'on' },
+    ]);
+  });
 });
