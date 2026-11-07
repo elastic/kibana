@@ -18,15 +18,18 @@ const CACHE_READ_COLUMN_MISSING =
 export function createOutputTokensEvaluator({
   traceEsClient,
   log,
+  tracesUnavailableForSuiteMode,
 }: {
   traceEsClient: EsClient;
   log: ToolingLog;
+  tracesUnavailableForSuiteMode?: boolean;
 }): Evaluator {
   return createTraceBasedEvaluator({
     traceEsClient,
     log,
     config: {
       name: 'Output Tokens',
+      tracesUnavailableForSuiteMode,
       direction: 'minimize',
       // TO_LONG resolves union types (integer vs long across trace index generations).
       buildQuery: (traceId) => `FROM traces-*
@@ -47,15 +50,18 @@ export function createOutputTokensEvaluator({
 export function createInputTokensEvaluator({
   traceEsClient,
   log,
+  tracesUnavailableForSuiteMode,
 }: {
   traceEsClient: EsClient;
   log: ToolingLog;
+  tracesUnavailableForSuiteMode?: boolean;
 }): Evaluator {
   return createTraceBasedEvaluator({
     traceEsClient,
     log,
     config: {
       name: 'Input Tokens',
+      tracesUnavailableForSuiteMode,
       direction: 'minimize',
       // TO_LONG resolves union types (integer vs long across trace index generations).
       buildQuery: (traceId) => `FROM traces-*
@@ -76,15 +82,18 @@ export function createInputTokensEvaluator({
 export function createCachedTokensEvaluator({
   traceEsClient,
   log,
+  tracesUnavailableForSuiteMode,
 }: {
   traceEsClient: EsClient;
   log: ToolingLog;
+  tracesUnavailableForSuiteMode?: boolean;
 }): Evaluator {
   return createTraceBasedEvaluator({
     traceEsClient,
     log,
     config: {
       name: 'Cached Tokens',
+      tracesUnavailableForSuiteMode,
       direction: 'neutral',
       // `input_tokens` is a liveness probe: providers that never report caching (most EIS models)
       // omit cache_read entirely, which otherwise looks like a trace that has not finished indexing.
