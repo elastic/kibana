@@ -1162,6 +1162,50 @@ describe('useServiceSettings — integration name and description', () => {
       });
     });
 
+    it('leaves the switch to the deploy, so it stays paired with the namespace', async () => {
+      withDeployment('dep-1');
+      const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+      await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+      act(() => result.current.setNamespace('prod'));
+      act(() => result.current.setDedicatedNamespaceTemplates(true));
+
+      act(() => result.current.handleNext());
+
+      expect(mockUpdateDeployment.mock.calls[0][1]).not.toHaveProperty(
+        'dedicatedNamespaceTemplates'
+      );
+    });
+
+    describe('turning the switch off', () => {
+      it('is saved at once on an existing deployment, so reopening it does not turn the switch back on', async () => {
+        withDeployment('dep-1');
+        const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+        await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+        act(() => result.current.setNamespace('prod'));
+        act(() => result.current.setDedicatedNamespaceTemplates(true));
+        expect(mockUpdateDeployment).not.toHaveBeenCalled();
+
+        act(() => result.current.setDedicatedNamespaceTemplates(false));
+
+        expect(mockUpdateDeployment).toHaveBeenCalledTimes(1);
+        expect(mockUpdateDeployment).toHaveBeenCalledWith('dep-1', {
+          dedicatedNamespaceTemplates: false,
+        });
+      });
+
+      it('writes nothing before the first deploy has created the record', async () => {
+        withDeployment(undefined);
+        const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+        await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+        act(() => result.current.setNamespace('prod'));
+
+        act(() => result.current.setDedicatedNamespaceTemplates(true));
+        act(() => result.current.setDedicatedNamespaceTemplates(false));
+
+        expect(mockUpdateDeployment).not.toHaveBeenCalled();
+      });
+    });
+
     it('leaves the namespace to the deploy, so a change is still detected as drift', async () => {
       withDeployment('dep-1');
       const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
