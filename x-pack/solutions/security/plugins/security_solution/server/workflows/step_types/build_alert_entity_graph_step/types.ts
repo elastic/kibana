@@ -16,6 +16,14 @@ export interface AlertMeta {
   timestamp?: string;
   rule_name?: string;
   severity?: string;
+  process_name?: string;
+  process_executable?: string;
+  process_command_line?: string;
+  process_parent_command_line?: string;
+  host_name?: string;
+  host_id?: string;
+  user_name?: string;
+  user_id?: string;
   ts_ms?: number;
 }
 
@@ -42,6 +50,14 @@ export interface RelatedAlertsGraphOutput {
     timestamp?: string;
     rule_name?: string;
     severity?: string;
+    process_name?: string;
+    process_executable?: string;
+    process_command_line?: string;
+    process_parent_command_line?: string;
+    host_name?: string;
+    host_id?: string;
+    user_name?: string;
+    user_id?: string;
   }>;
   stats?: {
     depth_reached: number;
