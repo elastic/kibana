@@ -10,7 +10,7 @@ import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import { formatHydrateNotification } from '../lib/hydrate_notification';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
 import { formatPageRefs, previewText } from './log_format';
-import type { MemoryPageStore } from './page_store';
+import type { MemoryPageStore, MemoryRetrieveMode } from './page_store';
 import {
   isCanonicalMemoryId,
   slugFromMemoryId,
@@ -46,6 +46,8 @@ export interface MaterializeMemoryResult {
   notification: string;
   summary: {
     retrievalMode: 'search' | 'browse';
+    /** The retriever that produced the candidates; `bm25` on a search means hybrid search failed. */
+    retriever: MemoryRetrieveMode;
     searchFallback: boolean;
     candidateCount: number;
     recalledCount: number;
@@ -206,21 +208,21 @@ export const materializeMemory = async ({
     `Memory materialize start mode=${mode} keepCount=${keepCount} retrieveSize=${retrieveSize} ` +
       `queryChars=${trimmedQuery?.length ?? 0} query=${JSON.stringify(previewText(trimmedQuery))}`
   );
-  let candidates = (
-    await store.retrieve({
-      query: trimmedQuery,
-      size: retrieveSize,
-    })
-  ).filter((page) => isCanonicalMemoryId(page.id));
+  const searched = await store.retrieve({
+    query: trimmedQuery,
+    size: retrieveSize,
+  });
+  let retriever = searched.mode;
+  let candidates = searched.pages.filter((page) => isCanonicalMemoryId(page.id));
 
   // A short retry prompt still matches nothing, so fall back to browse and seed the workspace.
   if (mode === 'search' && candidates.length === 0) {
     logger.info('Memory search matched 0 page(s) — falling back to browse');
     searchFallback = true;
     mode = 'browse';
-    candidates = (await store.retrieve({ size: keepCount * 10 })).filter((page) =>
-      isCanonicalMemoryId(page.id)
-    );
+    const browsed = await store.retrieve({ size: keepCount * 10 });
+    retriever = browsed.mode;
+    candidates = browsed.pages.filter((page) => isCanonicalMemoryId(page.id));
   } else if (mode === 'search') {
     logger.info(`Memory search matched ${candidates.length} page(s)`);
   } else {
@@ -344,6 +346,7 @@ export const materializeMemory = async ({
     notification,
     summary: {
       retrievalMode: mode,
+      retriever,
       searchFallback,
       candidateCount: candidates.length,
       recalledCount: recalledIds.length,

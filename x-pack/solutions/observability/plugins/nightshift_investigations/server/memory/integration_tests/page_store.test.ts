@@ -129,14 +129,14 @@ describe('Nightshift Semantic Memory with Elasticsearch', () => {
     expect(await storeA.get('Memory-Cache Warmup!!')).toBeUndefined();
     expect((await storeA.get('memory_cache-warmup'))?.slug).toBe('Memory-Cache Warmup!!');
 
-    const contentHits = await storeA.retrieve({
+    const { pages: contentHits } = await storeA.retrieve({
       query: 'checkout consumer partition',
       match: 'content',
     });
     expect(contentHits.map(({ id }) => id)).toEqual(['memory_shared-runbook']);
 
-    const browsedA = await storeA.retrieve();
-    const browsedB = await storeB.retrieve();
+    const { pages: browsedA } = await storeA.retrieve();
+    const { pages: browsedB } = await storeB.retrieve();
     expect(browsedA.map(({ title }) => title).sort()).toEqual([
       'Cache warmup',
       'Checkout Kafka recovery',
@@ -185,7 +185,7 @@ describe('Nightshift Semantic Memory with Elasticsearch', () => {
         archive_reason: 'harmful',
       })
     );
-    expect((await storeA.retrieve()).map(({ id }) => id)).toEqual(['memory_cache-warmup']);
+    expect((await storeA.retrieve()).pages.map(({ id }) => id)).toEqual(['memory_cache-warmup']);
     expect((await storeA.list({ filter: 'archived' })).pages.map(({ id }) => id)).toEqual([
       pageA.id,
     ]);
