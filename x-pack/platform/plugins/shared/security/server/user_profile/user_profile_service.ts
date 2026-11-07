@@ -40,6 +40,8 @@ import { getPrintableSessionId, type Session } from '../session_management';
 const KIBANA_DATA_ROOT = 'kibana';
 const ACTIVATION_MAX_RETRIES = 10;
 const ACTIVATION_RETRY_SCALE_DURATION_MS = 150;
+const API_KEY_LOOKUP_MAX_RETRIES = 5;
+const API_KEY_LOOKUP_RETRY_SCALE_DURATION_MS = 250;
 const MAX_SUGGESTIONS_COUNT = 100;
 const DEFAULT_SUGGESTIONS_COUNT = 10;
 const MIN_SUGGESTIONS_FOR_PRIVILEGES_CHECK = 10;
@@ -310,36 +312,70 @@ export class UserProfileService {
    * Retrieves the user profile ID from an API key authenticated request by retrieving the API Key itself.
    * @param clusterClient The cluster client
    * @param request The HTTP request
-   * @returns The profile ID if found, undefined otherwise
+   * @returns The profile ID if found, undefined when the caller legitimately has none
+   * @throws If the API key lookup keeps failing, since that leaves the caller's identity unknown
+   * rather than proving they have no profile.
    */
   private async getCurrentUserProfileIdViaApiKey(
     clusterClient: IClusterClient,
     request: UserProfileGetCurrentParams['request']
   ): Promise<string | undefined> {
-    try {
-      const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
-      if (!id) {
-        this.logger.debug(`Failed to decode API key ID from Authorization header.`);
-        return undefined;
-      }
+    const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
+    if (!id) {
+      this.logger.debug(`Failed to decode API key ID from Authorization header.`);
+      return undefined;
+    }
 
-      const response = await clusterClient.asScoped(request).asCurrentUser.security.getApiKey({
-        with_profile_uid: true,
-        id,
-      });
+    let lookupRetriesLeft = API_KEY_LOOKUP_MAX_RETRIES;
+    do {
+      try {
+        const response = await clusterClient.asScoped(request).asCurrentUser.security.getApiKey({
+          with_profile_uid: true,
+          id,
+        });
 
-      if (response.api_keys && response.api_keys.length > 0) {
-        return response.api_keys[0].profile_uid;
-      } else {
+        if (response.api_keys && response.api_keys.length > 0) {
+          return response.api_keys[0].profile_uid;
+        }
+
         this.logger.debug(
           `No API keys were returned from query, cannot retrieve associated profile id.`
         );
+        return undefined;
+      } catch (error) {
+        const detailedErrorMessage = getDetailedErrorMessage(error);
+        // The key authenticated this very request, so a 404 only means the write that created it
+        // isn't visible to the search `GET _security/api_key` runs over `.security` yet.
+        if (getErrorStatusCode(error) !== 404) {
+          this.logger.error(
+            `Failed to retrieve API key for user profile retrieval: ${detailedErrorMessage}`
+          );
+          throw error;
+        }
+
+        lookupRetriesLeft--;
+        this.logger.debug(
+          `API key is not searchable yet (retries left: ${lookupRetriesLeft}): ${detailedErrorMessage}`
+        );
+
+        if (lookupRetriesLeft === 0) {
+          this.logger.error(
+            `Failed to retrieve API key for user profile retrieval, max retries exceeded: ${detailedErrorMessage}`
+          );
+          throw error;
+        }
       }
-    } catch (error) {
-      this.logger.error(
-        `Failed to retrieve API key for user profile retrieval: ${getDetailedErrorMessage(error)}`
+
+      await new Promise((resolve) =>
+        setTimeout(
+          resolve,
+          (API_KEY_LOOKUP_MAX_RETRIES - lookupRetriesLeft) * API_KEY_LOOKUP_RETRY_SCALE_DURATION_MS
+        )
       );
-    }
+    } while (lookupRetriesLeft > 0);
+
+    // This should be unreachable code, unless we have a bug in retry handling logic.
+    throw new Error('Failed to retrieve API key for user profile retrieval, max retries exceeded.');
   }
 
   private recordGetCurrentSuccess(params: GetCurrentTelemetry) {
@@ -465,7 +501,16 @@ export class UserProfileService {
         this.logger.debug(
           `Request to get current user profile is authenticated via API key [fake=${!!fakeRequestProfileResolution}].`
         );
-        profileId = await this.getCurrentUserProfileIdViaApiKey(clusterClient, request);
+        try {
+          profileId = await this.getCurrentUserProfileIdViaApiKey(clusterClient, request);
+        } catch (error) {
+          recordFailure({
+            profileActivationRequired,
+            apiKeyRetrievalRequired,
+            fakeRequestProfileResolution,
+          });
+          throw error;
+        }
       }
     }
 
