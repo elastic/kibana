@@ -32,12 +32,15 @@ components:
 
     WorkerBlockingReason:
       type: string
-      enum: [no_model]
+      enum: [no_model, weak_role]
       description: >-
         Why a Worker can't run in this space. `no_model`: the space has no AI model to run it on (no
         LLM connector and no Elastic Managed LLM, or "use only the default connector" is on with no
         default set). It applies to every Worker alike, and while it holds the Worker can't be
-        switched on; switching it off is still allowed.
+        switched on; switching it off is still allowed. `weak_role`: this Worker's bound service
+        account no longer carries the Worker's built-in role, so its runs may silently lack required
+        privileges. It is a warning about runs, not a gate: enabling and running stay allowed while
+        it holds, because the role can be restored without touching the Worker.
 
     WorkerSettingsExtras:
       type: object
