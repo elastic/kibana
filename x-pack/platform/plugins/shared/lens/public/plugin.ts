@@ -654,7 +654,7 @@ export class LensPlugin {
       ACTION_VISUALIZE_LENS_FIELD,
       async () => {
         const { visualizeFieldAction } = await import('./async_services');
-        return visualizeFieldAction(core.application);
+        return visualizeFieldAction(core.application, startDependencies.data);
       }
     );
 
