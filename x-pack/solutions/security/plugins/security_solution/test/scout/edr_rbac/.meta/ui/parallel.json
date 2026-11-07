@@ -1,0 +1,356 @@
+{
+  "sha1": "8a3bd778c69bac30fbba53637dea5c157ff72f8a",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "928b5411b7ac550-1b2ffbe892d8e38",
+      "title": "Endpoint management navigation RBAC grants no management area to a role holding only the base privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
+        "line": 31,
+        "column": 19
+      }
+    },
+    {
+      "id": "928b5411b7ac550-d4bc0b4395989c6",
+      "title": "Endpoint management navigation RBAC grants only endpoints to endpoint_list_read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
+        "line": 60,
+        "column": 6
+      }
+    },
+    {
+      "id": "928b5411b7ac550-ac87b95c88c0fd5",
+      "title": "Endpoint management navigation RBAC grants only policy to policy_management_read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
+        "line": 60,
+        "column": 6
+      }
+    },
+    {
+      "id": "928b5411b7ac550-0fcfa2f7257963c",
+      "title": "Endpoint management navigation RBAC grants only artifacts to trusted_applications_read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
+        "line": 60,
+        "column": 6
+      }
+    },
+    {
+      "id": "928b5411b7ac550-b42147a613993e2",
+      "title": "Endpoint management navigation RBAC grants only artifacts to trusted_devices_read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
+        "line": 60,
+        "column": 6
+      }
+    },
+    {
+      "id": "928b5411b7ac550-e6060119fd20b1d",
+      "title": "Endpoint management navigation RBAC grants only artifacts to event_filters_read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
+        "line": 60,
+        "column": 6
+      }
+    },
+    {
+      "id": "928b5411b7ac550-60662fb0a355c81",
+      "title": "Endpoint management navigation RBAC grants only artifacts to blocklist_read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
+        "line": 60,
+        "column": 6
+      }
+    },
+    {
+      "id": "928b5411b7ac550-7396afd64c423a9",
+      "title": "Endpoint management navigation RBAC grants only artifacts to host_isolation_exceptions_read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
+        "line": 60,
+        "column": 6
+      }
+    },
+    {
+      "id": "928b5411b7ac550-f1eaeb45e1f0646",
+      "title": "Endpoint management navigation RBAC grants only artifacts to endpoint_exceptions_read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
+        "line": 60,
+        "column": 6
+      }
+    },
+    {
+      "id": "928b5411b7ac550-ad4a2940be4f2a0",
+      "title": "Endpoint management navigation RBAC grants only response_actions_history to actions_log_management_read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
+        "line": 60,
+        "column": 6
+      }
+    },
+    {
+      "id": "928b5411b7ac550-d771165bc63fcb1",
+      "title": "Endpoint management navigation RBAC grants only endpoints to endpoint_list_all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
+        "line": 60,
+        "column": 6
+      }
+    },
+    {
+      "id": "928b5411b7ac550-4d838ff161072d1",
+      "title": "Endpoint management navigation RBAC grants only policy to policy_management_all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
+        "line": 60,
+        "column": 6
+      }
+    },
+    {
+      "id": "928b5411b7ac550-9894602ef1c6cad",
+      "title": "Endpoint management navigation RBAC grants only artifacts to trusted_applications_all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
+        "line": 60,
+        "column": 6
+      }
+    },
+    {
+      "id": "928b5411b7ac550-d876bdc2b5358a4",
+      "title": "Endpoint management navigation RBAC grants only artifacts to trusted_devices_all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
+        "line": 60,
+        "column": 6
+      }
+    },
+    {
+      "id": "928b5411b7ac550-de85c1151c91d3d",
+      "title": "Endpoint management navigation RBAC grants only artifacts to event_filters_all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
+        "line": 60,
+        "column": 6
+      }
+    },
+    {
+      "id": "928b5411b7ac550-d6bfb969832a14a",
+      "title": "Endpoint management navigation RBAC grants only artifacts to blocklist_all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
+        "line": 60,
+        "column": 6
+      }
+    },
+    {
+      "id": "928b5411b7ac550-e487c764a7df775",
+      "title": "Endpoint management navigation RBAC grants only artifacts to host_isolation_exceptions_all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
+        "line": 60,
+        "column": 6
+      }
+    },
+    {
+      "id": "928b5411b7ac550-7b6d7b3aafc0ab2",
+      "title": "Endpoint management navigation RBAC grants only artifacts to endpoint_exceptions_all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
+        "line": 60,
+        "column": 6
+      }
+    },
+    {
+      "id": "928b5411b7ac550-b5d444cf7e18622",
+      "title": "Endpoint management navigation RBAC grants only response_actions_history to actions_log_management_all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/navigation_matrix.spec.ts",
+        "line": 60,
+        "column": 6
+      }
+    },
+    {
+      "id": "72e1171e490d715-bcf5a7ccab50f77",
+      "title": "Endpoint sub-feature privileges configured for a single space shows the granted sub-feature privileges against that space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/per_space_privilege_config.spec.ts",
+        "line": 39,
+        "column": 15
+      }
+    },
+    {
+      "id": "32e1dd9ccbe300b-829701e381868d2",
+      "title": "Endpoint management navigation for prebuilt roles detections_admin reaches only Artifacts, through endpoint exceptions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/prebuilt_role_navigation.spec.ts",
+        "line": 32,
+        "column": 1
+      }
+    },
+    {
+      "id": "32e1dd9ccbe300b-ec283ffd63784f0",
+      "title": "Endpoint management navigation for prebuilt roles soc_manager reaches every Endpoint management area",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ui/parallel_tests/prebuilt_role_navigation.spec.ts",
+        "line": 46,
+        "column": 22
+      }
+    }
+  ]
+}
