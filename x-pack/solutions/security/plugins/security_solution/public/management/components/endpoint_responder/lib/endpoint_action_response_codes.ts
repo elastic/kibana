@@ -82,6 +82,12 @@ const CODES = Object.freeze({
     { defaultMessage: 'Not enough free disk space to process the action' }
   ),
 
+  /** the operating system locks the file and it could not be read in full */
+  'ra_get-file_error_file-locked': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.getFile.fileLocked',
+    { defaultMessage: 'The file is locked by the operating system and could not be read' }
+  ),
+
   // -----------------------------------------------------------------
   // SUSPEND-PROCESS CODES
   // -----------------------------------------------------------------

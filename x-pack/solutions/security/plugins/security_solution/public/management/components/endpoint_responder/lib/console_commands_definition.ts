@@ -206,6 +206,7 @@ export const getEndpointConsoleCommands = ({
     responseActionsEndpointMemoryDumpRaw,
     responseActionsEndpointRunScript,
     responseActionsEndpointKillProcessDescendants,
+    responseActionsEndpointGetFileForce,
   } = featureFlags;
   const commandMeta: EndpointCommandDefinitionMeta = {
     agentType,
@@ -257,6 +258,35 @@ export const getEndpointConsoleCommands = ({
             validate: () => {
               if (!isKillDescendantsSupportedByEndpoint) {
                 return CONSOLE_COMMANDS.killProcess.args.killDescendants.notSupported;
+              }
+
+              return true;
+            },
+          },
+        }
+      : {};
+
+  // `get-file --force` applies only to the Elastic Defend Endpoint, is gated behind a feature flag
+  // and requires that the host's Endpoint supports it (reported via the `get_file_force`
+  // capability, which only Endpoint on Windows reports).
+  const isGetFileForceSupportedByEndpoint = (
+    endpointCapabilities as EndpointCapabilities[]
+  ).includes('get_file_force');
+  const getFileForceArg: Record<string, CommandArgDefinition> =
+    agentType === 'endpoint' && responseActionsEndpointGetFileForce
+      ? {
+          force: {
+            required: false,
+            allowMultiples: false,
+            mustHaveValue: false,
+            about:
+              CONSOLE_COMMANDS.getFile.args.force.about +
+              (isGetFileForceSupportedByEndpoint
+                ? ''
+                : ` (${CONSOLE_COMMANDS.getFile.args.force.notSupported})`),
+            validate: () => {
+              if (!isGetFileForceSupportedByEndpoint) {
+                return CONSOLE_COMMANDS.getFile.args.force.notSupported;
               }
 
               return true;
@@ -431,6 +461,7 @@ export const getEndpointConsoleCommands = ({
             return emptyArgumentValidator(argData);
           },
         },
+        ...getFileForceArg,
         ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,

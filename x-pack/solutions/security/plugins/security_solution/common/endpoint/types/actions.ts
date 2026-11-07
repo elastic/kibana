@@ -305,6 +305,8 @@ export type ResponseActionParametersWithProcessData =
 
 export interface ResponseActionGetFileParameters {
   path: string;
+  /** Read files that the OS locks from a snapshot. Only for Endpoint on Windows, starting with v9.7 */
+  force?: boolean;
 }
 
 export interface ResponseActionsExecuteParameters {

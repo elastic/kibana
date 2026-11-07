@@ -81,6 +81,12 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsEndpointKillProcessDescendants: true,
 
   /**
+   * `force` parameter option for the `get-file` response action for Elastic Defend Endpoint
+   * Release: 9.7
+   */
+  responseActionsEndpointGetFileForce: true,
+
+  /**
    * Enables CCS prefixing of endpoint indices so a Defend agent shipping to a remote ES output
    * (Fleet remote output) is visible from the managing cluster's Kibana.
    * Release: 9.5
