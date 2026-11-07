@@ -23,6 +23,7 @@ import type { AppMenuRegistry, DataTableRecord } from '@kbn/discover-utils';
 import type { CellAction, CellActionExecutionContext, CellActionsData } from '@kbn/cell-actions';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { AggregateQuery, Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
+import type { Observable } from 'rxjs';
 import type { OmitIndexSignature } from 'type-fest';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type {
@@ -329,6 +330,10 @@ export interface CellRenderersExtensionParams {
    * True while the grid's primary search is in flight.
    */
   isDataLoading?: boolean;
+  /**
+   * The pattern currently drawn on the histogram, used to color its sparkline.
+   */
+  histogramComparisonSelection?: Pick<HistogramComparisonSelection, 'column' | 'value'>;
 }
 
 /**
@@ -343,6 +348,48 @@ export interface RowControlsExtensionParams {
    * The current query
    */
   query?: DiscoverAppState['query'];
+  /**
+   * ES|QL variables for the current query. Needed to build a comparison filter that matches the grid.
+   */
+  esqlVariables?: ESQLControlVariable[];
+  /**
+   * False when the ungrouped grid should not offer a histogram comparison, for example while the
+   * chart is unavailable, hidden, or replaced, a breakdown is set, or the grouped layout is shown.
+   */
+  histogramComparisonEnabled?: boolean;
+}
+
+/** One selected count series for the default document-count histogram. */
+export interface HistogramComparisonSelection {
+  key: string;
+  label: string;
+  column: string;
+  value: string;
+  documentQuery: string;
+}
+
+/** Inputs the chart uses to decide whether the current selection still applies. */
+export interface HistogramComparisonContext {
+  query?: DiscoverAppState['query'];
+  esqlVariables?: ESQLControlVariable[];
+  defaultHistogramAvailable: boolean;
+}
+
+/**
+ * Generic table selection. The owning profile turns it into a document query.
+ * Discover's histogram only receives that query.
+ */
+export interface HistogramComparisonTableSelection {
+  label: string;
+  column: string;
+  value: string;
+  query: AggregateQuery;
+  dataView: DataView;
+  esqlVariables?: ESQLControlVariable[];
+}
+
+export interface HistogramComparisonController {
+  selection$: Observable<HistogramComparisonSelection | undefined>;
 }
 
 /**
@@ -524,6 +571,19 @@ export interface Profile {
    * @returns The custom configuration for the chart
    */
   getChartSectionConfiguration: () => ChartSectionConfiguration;
+
+  /**
+   * Returns the table selection that should contribute one count series to the default
+   * document-count histogram. Profiles that replace the chart do not implement this.
+   */
+  getHistogramComparison: (
+    params: HistogramComparisonContext
+  ) => HistogramComparisonController | undefined;
+
+  /**
+   * Publishes or clears the table selection used by {@link getHistogramComparison}.
+   */
+  publishHistogramComparison: (params: HistogramComparisonTableSelection | undefined) => void;
 
   /**
    * Data grid

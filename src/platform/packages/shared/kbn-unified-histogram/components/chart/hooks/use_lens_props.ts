@@ -47,6 +47,7 @@ export const useLensProps = ({
       const { attributes, requestData } = visContext;
 
       return {
+        fetchParams,
         requestData: JSON.stringify(requestData),
         lensProps: getLensProps({
           searchSessionId: fetchParams.searchSessionId,
