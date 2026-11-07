@@ -8,10 +8,11 @@
  */
 
 import { TraceMetricsGrid } from '@kbn/unified-chart-section-viewer';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { DataSourceProfileProvider } from '../../../../profiles';
 import type { ContextAwarenessToolkitActions } from '../../../../toolkit';
+import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
 import {
   internalStateActions,
   useAppStateSelector,
@@ -27,6 +28,13 @@ const TraceMetricsGridWrapper = (
   const breakdownField = useAppStateSelector((state: DiscoverAppState) => state.breakdownField);
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
+  const { core } = useDiscoverServices();
+
+  // The latency map sits behind a feature flag the grid reads from the host.
+  const externalServices = useMemo(
+    () => ({ featureFlags: core.featureFlags }),
+    [core.featureFlags]
+  );
 
   const onBreakdownFieldChange = useCallback(
     (nextBreakdownField?: string) => {
@@ -42,6 +50,7 @@ const TraceMetricsGridWrapper = (
       actions={props.actions}
       breakdownField={breakdownField}
       onBreakdownFieldChange={onBreakdownFieldChange}
+      externalServices={externalServices}
     />
   );
 };

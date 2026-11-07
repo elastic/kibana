@@ -119,6 +119,7 @@ function renderChart(initial: { highlight?: CellRange } = {}) {
       stats={stats}
       unit="spans"
       sampled={false}
+      canClick={false}
       timeZone="UTC"
       colors={colors}
       failedOnly={false}

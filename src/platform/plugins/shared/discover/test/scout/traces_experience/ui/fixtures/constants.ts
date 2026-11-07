@@ -57,6 +57,12 @@ export const PRODUCER_TRACE = {
   KAFKA_SPAN_NAME: 'Publish to kafka/orders',
 };
 
+export const LATENCY_TRACE = {
+  SERVICE_NAME: 'synth-traces-latency',
+  TRANSACTION_NAME: 'GET /latency',
+  ESQL_QUERY: 'FROM traces-apm* | WHERE service.name == "synth-traces-latency"',
+};
+
 export const OTEL_SERVICE = {
   SERVICE_NAME: 'synth-traces-otel',
   NAMESPACE: 'production',

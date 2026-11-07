@@ -72,6 +72,8 @@ export const FEATURE_FLAGS = {
   IS_SORTING_ENABLED: 'discover.metricsExperienceSortEnabled',
   IS_EXEMPLARS_ENABLED: 'observability.metricsExemplarsEnabled',
   IS_HEATMAPS_ENABLED: 'observability.metricsHeatmapsEnabled',
+  // Gates the latency map next to the RED charts in the traces chart section.
+  IS_TRACES_LATENCY_MAP_ENABLED: 'observability.tracesLatencyMapEnabled',
 } as const;
 
 export type FeatureFlag = (typeof FEATURE_FLAGS)[keyof typeof FEATURE_FLAGS];
@@ -82,6 +84,7 @@ export const FEATURE_FLAG_DEFAULTS: Record<FeatureFlag, boolean> = {
   [FEATURE_FLAGS.IS_SORTING_ENABLED]: true,
   [FEATURE_FLAGS.IS_EXEMPLARS_ENABLED]: false,
   [FEATURE_FLAGS.IS_HEATMAPS_ENABLED]: false,
+  [FEATURE_FLAGS.IS_TRACES_LATENCY_MAP_ENABLED]: false,
 };
 
 // OTel exemplars live in a parallel `exemplars-*` stream with the same dataset and namespace.

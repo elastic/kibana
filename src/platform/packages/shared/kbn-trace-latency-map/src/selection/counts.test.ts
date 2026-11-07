@@ -12,7 +12,7 @@ import { durationToRow, rowToDuration } from '../query/duration_rows';
 import type { LatencyGrid } from '../query/parse';
 import type { DurationStats, LatencyMapSelection } from '../types';
 import { createMapGeometry } from '../geometry/map_geometry';
-import { getSelectionCounts } from './counts';
+import { getGridTotals, getSelectionCounts, isFailureRegion } from './counts';
 
 const stats: DurationStats = {
   min: 100,
@@ -137,5 +137,36 @@ describe('getSelectionCounts', () => {
         getSelectionCounts({ grid: clippedCells, timeGrid: clippedGrid, stats, selection })
       ).toEqual({ spans: 15, failed: 3, estimated: true });
     });
+  });
+});
+
+describe('getGridTotals', () => {
+  it('sums the spans and failures of every cell', () => {
+    expect(getGridTotals(grid)).toEqual({ spans: 71, failed: 21 });
+  });
+});
+
+describe('isFailureRegion', () => {
+  const map = { spans: 1000, failed: 50 };
+
+  it('is true where failures concentrate: a tenth failed, three times the rest', () => {
+    // 20% failed against 3% on the rest: about failures.
+    expect(isFailureRegion({ spans: 100, failed: 20 }, map)).toBe(true);
+  });
+
+  it('is false for a region that merely has some failures', () => {
+    // 8% failed: below a tenth, whatever the rest.
+    expect(isFailureRegion({ spans: 100, failed: 8 }, map)).toBe(false);
+    // 12% failed, but 4.9% on the rest: not three times it.
+    expect(isFailureRegion({ spans: 200, failed: 24 }, { spans: 1000, failed: 63 })).toBe(false);
+  });
+
+  it('is true when the region holds all the failures of the map', () => {
+    expect(isFailureRegion({ spans: 10, failed: 10 }, { spans: 1000, failed: 10 })).toBe(true);
+  });
+
+  it('is false for an empty region, and for the whole map as the region', () => {
+    expect(isFailureRegion({ spans: 0, failed: 0 }, map)).toBe(false);
+    expect(isFailureRegion(map, map)).toBe(false);
   });
 });
