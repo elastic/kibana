@@ -14,12 +14,17 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataSource } from '@kbn/data-source';
+import type {
+  UnifiedDataTableOpenInNewTab,
+  UnifiedDataTableQueryContext,
+} from '@kbn/unified-data-table';
 import type { DocViewerProps, DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { UnifiedDocViewerFlyoutProps } from '@kbn/unified-doc-viewer-plugin/public';
 import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useFlyoutActions } from './use_flyout_actions';
+import { useOnFindSimilarValues } from './use_on_find_similar_values';
 import { DiscoverGridFlyoutActions } from './discover_grid_flyout_actions';
 import { DocumentType, useProfileAccessor } from '../../context_awareness';
 import { recordHasContext } from '../../context_awareness/profiles_manager/record_has_context';
@@ -41,6 +46,9 @@ export interface DiscoverGridFlyoutProps
     | 'flyoutType'
   > {
   savedSearchId?: string;
+  /** The query context of the results, enables the "Find similar values" action when provided */
+  queryContext?: UnifiedDataTableQueryContext;
+  onOpenInNewTab?: UnifiedDataTableOpenInNewTab;
   filters?: Filter[];
   query?: Query | AggregateQuery;
   columns: string[];
@@ -74,6 +82,8 @@ export function DiscoverGridFlyout({
   columns,
   dataSource,
   savedSearchId,
+  queryContext,
+  onOpenInNewTab,
   filters,
   query,
   initialTabId,
@@ -126,6 +136,8 @@ export function DiscoverGridFlyout({
     dismissAllFlyoutsExceptFor(DiscoverFlyouts.docViewer);
   }, []);
 
+  const onFindSimilarValues = useOnFindSimilarValues({ dataView, queryContext, onOpenInNewTab });
+
   const originDocType = useMemo(() => getOriginDocType(actualHit), [actualHit]);
 
   return (
@@ -157,6 +169,7 @@ export function DiscoverGridFlyout({
       onRemoveColumn={onRemoveColumn}
       onClose={onClose}
       onFilter={onFilter}
+      onFindSimilarValues={onFindSimilarValues}
       setExpandedDoc={setExpandedDoc}
       initialTabId={initialTabId}
       docViewerRef={docViewerRef}

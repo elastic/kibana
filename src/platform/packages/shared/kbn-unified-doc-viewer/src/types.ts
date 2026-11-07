@@ -11,6 +11,7 @@ export type {
   DocView,
   DocViewActions,
   DocViewFilterFn,
+  DocViewFindSimilarValuesFn,
   DocViewRenderProps,
   DocViewRestorableStateProps,
   DocViewerComponent,

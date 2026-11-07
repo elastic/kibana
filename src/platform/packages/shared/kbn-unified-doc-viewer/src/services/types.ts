@@ -66,6 +66,11 @@ export type DocViewFilterFn = (
   mode: '+' | '-'
 ) => void;
 
+/**
+ * Finds values similar to the given one of a text field, e.g. by running a log pattern analysis.
+ */
+export type DocViewFindSimilarValuesFn = (fieldName: string, value: string) => void;
+
 export interface DocViewActions {
   openInNewTab?: (params: {
     query?: Query | AggregateQuery;
@@ -87,6 +92,8 @@ export interface DocViewRenderProps {
   textBasedHits?: DataTableRecord[];
   hideActionsColumn?: boolean;
   filter?: DocViewFilterFn;
+  /** When set, the action is offered for the text fields of time based data views */
+  onFindSimilarValues?: DocViewFindSimilarValuesFn;
   onAddColumn?: (columnName: string) => void;
   onRemoveColumn?: (columnName: string) => void;
   docViewsRegistry?: DocViewsRegistry | ((prevRegistry: DocViewsRegistry) => DocViewsRegistry);
