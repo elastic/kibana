@@ -1883,6 +1883,7 @@
     "@kbn/evals-suite-attack-discovery": "workspace:*",
     "@kbn/evals-suite-attack-discovery-agent-builder": "workspace:*",
     "@kbn/evals-suite-attack-discovery-fp-tp": "workspace:*",
+    "@kbn/evals-suite-attack-discovery-worker": "workspace:*",
     "@kbn/evals-suite-automatic-import": "workspace:*",
     "@kbn/evals-suite-detection-watch-rule-creation": "workspace:*",
     "@kbn/evals-suite-endpoint": "workspace:*",

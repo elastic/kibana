@@ -525,6 +525,21 @@
       "serverConfigSet": "evals_attack_discovery_fp_tp"
     },
     {
+      "id": "security-attack-discovery-worker",
+      "name": "Attack Discovery Worker",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-worker/playwright.config.ts",
+      "tags": [
+        "security",
+        "attack-discovery"
+      ],
+      "ciLabels": [
+        "evals:security-attack-discovery-worker"
+      ],
+      "stepTimeoutInMinutes": 555,
+      "serverConfigSet": "evals_attack_discovery_worker"
+    },
+    {
       "id": "skill-selection-benchmark",
       "name": "Skill Selection Benchmark",
       "slackChannel": "#agent-builder-alerts",

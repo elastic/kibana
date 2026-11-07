@@ -1663,6 +1663,7 @@ packages:
   - 'x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery'
   - 'x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder'
   - 'x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp'
+  - 'x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-worker'
   - 'x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation'
   - 'x-pack/solutions/security/packages/kbn-evals-suite-endpoint'
   - 'x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics'
