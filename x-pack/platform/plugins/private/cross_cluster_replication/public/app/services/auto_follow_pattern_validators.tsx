@@ -121,6 +121,15 @@ export const validateLeaderIndexPatterns = (
   return null;
 };
 
+export const validateLeaderIndexExclusionPatterns = (indexPatterns: string[]) => {
+  // Unlike leader index patterns, exclusions are optional.
+  if (!indexPatterns.length) {
+    return null;
+  }
+
+  return validateLeaderIndexPattern(indexPatterns[indexPatterns.length - 1]);
+};
+
 export const validatePrefix = (prefix: string): ReactElement | null => {
   // If it's empty, it is valid
   if (!prefix || !prefix.trim()) {
@@ -202,6 +211,7 @@ export const validateSuffix = (suffix: string): ReactElement | null => {
 export interface AutoFollowPatternValidationFields {
   name?: string;
   leaderIndexPatterns?: string[];
+  leaderIndexExclusionPatterns?: string[];
   followIndexPatternPrefix?: string;
   followIndexPatternSuffix?: string;
   remoteCluster?: string;
@@ -215,6 +225,7 @@ export interface MessageError {
 export interface AutoFollowPatternValidationErrors {
   name?: string | null;
   leaderIndexPatterns?: MessageError | null;
+  leaderIndexExclusionPatterns?: MessageError | null;
   followIndexPatternPrefix?: ReactElement | null;
   followIndexPatternSuffix?: ReactElement | null;
   remoteCluster?: MessageError | null;
@@ -231,6 +242,12 @@ export const validateAutoFollowPattern = (
 
   if (autoFollowPattern.leaderIndexPatterns !== undefined) {
     errors.leaderIndexPatterns = validateLeaderIndexPatterns(autoFollowPattern.leaderIndexPatterns);
+  }
+
+  if (autoFollowPattern.leaderIndexExclusionPatterns !== undefined) {
+    errors.leaderIndexExclusionPatterns = validateLeaderIndexExclusionPatterns(
+      autoFollowPattern.leaderIndexExclusionPatterns
+    );
   }
 
   if (autoFollowPattern.followIndexPatternPrefix !== undefined) {

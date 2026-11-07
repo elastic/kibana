@@ -76,6 +76,7 @@ apiTest.describe('CCR auto-follow patterns API', { tag: ['@local-stateful-classi
         id: `${PATTERN_PREFIX}unknown-cluster`,
         remoteCluster: 'unknown-cluster',
         leaderIndexPatterns: LEADER_INDEX_PATTERNS,
+        leaderIndexExclusionPatterns: [],
         followIndexPattern: '{{leader_index}}_follower',
       }),
     });
@@ -114,6 +115,7 @@ apiTest.describe('CCR auto-follow patterns API', { tag: ['@local-stateful-classi
         remoteCluster: AUTO_FOLLOW_REMOTE_CLUSTER,
         active: true,
         leaderIndexPatterns: LEADER_INDEX_PATTERNS,
+        leaderIndexExclusionPatterns: [],
         followIndexPattern: '{{leader_index}}_follower',
       });
     }
