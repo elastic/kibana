@@ -274,6 +274,27 @@ describe('fetchInvestigationAlertSnapshots', () => {
     );
   });
 
+  it('truncates large arrays of a v2 episode instead of dropping its data', async () => {
+    const lookup = makeLookup({
+      columns: v2Columns,
+      rows: [v2Row('v2-rule')],
+      episodeData: {
+        'episode-1': JSON.stringify({
+          event_id: 'evt-1',
+          rule_ids: ['rule-1'],
+          signals: Array.from({ length: 400 }, (_, i) => `signal-${i}-${'x'.repeat(100)}`),
+        }),
+      },
+    });
+
+    const [snapshot] = await run(makeAlertsClient({ alerts: [] }), lookup, ['episode-1']);
+
+    expect(snapshot).toMatchObject({
+      data: { event_id: 'evt-1', rule_ids: ['rule-1'], signals_truncated: 400 },
+    });
+    expect(JSON.stringify(snapshot).length).toBeLessThan(33_000 + 1_000);
+  });
+
   it('keeps the names of readable rules when another rule is inaccessible', async () => {
     const lookup = makeLookup({
       getRule: jest.fn(async ({ id }: { id: string }) => {
