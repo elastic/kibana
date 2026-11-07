@@ -63,8 +63,8 @@ export type SandboxCaller =
 export interface AuditedSandboxSession {
   /**
    * Identifies the pod session behind this view. A view is made per tool call or step, so a cache
-   * keyed by session needs this, not the view. It is opaque on purpose: it is not the session, so
-   * it cannot be used to call the sandbox without an audit event.
+   * keyed by session needs this, not the view. It is a token made for the session, not the session
+   * itself, so it cannot be used to call the sandbox without an audit event.
    */
   readonly sessionKey: object;
   readonly isReset: boolean;
@@ -142,6 +142,17 @@ const auditEvent = (rpc: SandboxRpcInfo, caller: SandboxCaller, spaceId?: string
   };
 };
 
+const sessionKeys = new WeakMap<SandboxSession, object>();
+
+/** The token that stands for a session in {@link AuditedSandboxSession.sessionKey}: one per session. */
+const sessionKeyOf = (session: SandboxSession): object => {
+  const existing = sessionKeys.get(session);
+  if (existing) return existing;
+  const key = {};
+  sessionKeys.set(session, key);
+  return key;
+};
+
 /**
  * Wraps a sandbox session so every RPC writes one audit event, whether it succeeds or fails, and
  * resolves with the plain value. An RPC that fails without reaching sandbox-api, such as a refused
@@ -189,7 +200,7 @@ export const auditedSandboxSession = ({
   };
 
   return {
-    sessionKey: session,
+    sessionKey: sessionKeyOf(session),
     get isReset() {
       return session.isReset;
     },
