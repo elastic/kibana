@@ -167,6 +167,13 @@ describe('evals.suites.json weeklyEisModelGroups', () => {
   });
 });
 
+describe('AlertZero endpoint analysis weekly coverage', () => {
+  it('runs the registered suite in the weekly pipeline against a non-empty model set', () => {
+    expect(suites.some(({ id }) => id === 'alertzero-endpoint-analysis')).toBe(true);
+    expect(weeklyModelGroupsBySuite.get('alertzero-endpoint-analysis')?.size).toBeGreaterThan(0);
+  });
+});
+
 describe('Nightshift CI coverage', () => {
   it('keeps the existing label and Customer-0 specs alongside an isolated ORCA spec', () => {
     const suite = suites.find(({ id }) => id === 'nightshift-investigations');
