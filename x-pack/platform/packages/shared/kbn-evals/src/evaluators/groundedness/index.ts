@@ -123,7 +123,7 @@ export function createQuantitativeGroundednessEvaluator(): Evaluator {
       if (!groundednessAnalysis) {
         return {
           score: null,
-          label: 'unavailable',
+          label: 'error',
           explanation: 'No groundedness analysis available',
           metadata: metadata ?? undefined,
         };

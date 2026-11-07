@@ -142,7 +142,7 @@ export function createQuantitativeCorrectnessEvaluators(): Evaluator[] {
       if (!correctnessAnalysis) {
         return {
           score: null,
-          label: 'unavailable',
+          label: 'error',
           explanation: 'No correctness analysis available',
           metadata: metadata ?? undefined,
         };

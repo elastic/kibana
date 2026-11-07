@@ -44,6 +44,29 @@ describe('IR Evaluators', () => {
   const createDoc = (id: string, index = 'test-index'): RetrievedDoc => ({ index, id });
 
   describe('Precision@KEvaluator', () => {
+    it('labels an extractor failure as an error, not a skip', async () => {
+      const evaluator = createPrecisionAtKEvaluator(
+        {
+          ...config,
+          extractRetrievedDocs: () => {
+            throw new Error('cannot parse output');
+          },
+        },
+        5
+      );
+
+      const result = await evaluator.evaluate({
+        input: {},
+        output: { retrievedDocs: [createDoc('doc_1')] },
+        expected: { groundTruth },
+        metadata: {},
+      });
+
+      // An extractor crash is a failure; `skipped` is reserved for deliberate abstentions.
+      expect(result.score).toBeNull();
+      expect(result.label).toBe('error');
+    });
+
     it('should calculate precision correctly', async () => {
       const evaluator = createPrecisionAtKEvaluator(config, 5);
 
@@ -67,7 +90,7 @@ describe('IR Evaluators', () => {
       expect(result.explanation).toContain('3 relevant docs in top 5');
     });
 
-    it('should return unavailable when no ground truth', async () => {
+    it('should return skipped when no ground truth', async () => {
       const evaluator = createPrecisionAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
@@ -78,7 +101,7 @@ describe('IR Evaluators', () => {
       });
 
       expect(result.score).toBeNull();
-      expect(result.label).toBe('unavailable');
+      expect(result.label).toBe('skipped');
     });
 
     it('should handle fewer retrieved docs than K', async () => {
@@ -120,7 +143,7 @@ describe('IR Evaluators', () => {
       expect(result.explanation).toContain('3 of 4 relevant docs');
     });
 
-    it('should return unavailable when no ground truth', async () => {
+    it('should return skipped when no ground truth', async () => {
       const evaluator = createRecallAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
@@ -131,7 +154,7 @@ describe('IR Evaluators', () => {
       });
 
       expect(result.score).toBeNull();
-      expect(result.label).toBe('unavailable');
+      expect(result.label).toBe('skipped');
     });
   });
 
@@ -160,7 +183,7 @@ describe('IR Evaluators', () => {
       expect(result.explanation).toContain('F1@5');
     });
 
-    it('should return unavailable when no ground truth', async () => {
+    it('should return skipped when no ground truth', async () => {
       const evaluator = createF1AtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
@@ -202,7 +225,7 @@ describe('IR Evaluators', () => {
       expect(result.score).toBe(0);
     });
 
-    it('should return unavailable when no ground truth', async () => {
+    it('should return skipped when no ground truth', async () => {
       const evaluator = createHitRateAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
@@ -213,7 +236,7 @@ describe('IR Evaluators', () => {
       });
 
       expect(result.score).toBeNull();
-      expect(result.label).toBe('unavailable');
+      expect(result.label).toBe('skipped');
     });
   });
 
@@ -263,7 +286,7 @@ describe('IR Evaluators', () => {
       expect(result.score).toBe(0);
     });
 
-    it('should return unavailable when no ground truth', async () => {
+    it('should return skipped when no ground truth', async () => {
       const evaluator = createMrrAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
@@ -274,7 +297,7 @@ describe('IR Evaluators', () => {
       });
 
       expect(result.score).toBeNull();
-      expect(result.label).toBe('unavailable');
+      expect(result.label).toBe('skipped');
     });
   });
 
@@ -333,7 +356,7 @@ describe('IR Evaluators', () => {
       expect(result.score).toBe(0);
     });
 
-    it('should return unavailable when no ground truth', async () => {
+    it('should return skipped when no ground truth', async () => {
       const evaluator = createNdcgAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
@@ -344,7 +367,7 @@ describe('IR Evaluators', () => {
       });
 
       expect(result.score).toBeNull();
-      expect(result.label).toBe('unavailable');
+      expect(result.label).toBe('skipped');
     });
   });
 
@@ -421,7 +444,7 @@ describe('IR Evaluators', () => {
       expect(result.score).toBe(0);
     });
 
-    it('should return unavailable when no ground truth', async () => {
+    it('should return skipped when no ground truth', async () => {
       const evaluator = createMapAtKEvaluator(config, 5);
 
       const result = await evaluator.evaluate({
@@ -432,7 +455,7 @@ describe('IR Evaluators', () => {
       });
 
       expect(result.score).toBeNull();
-      expect(result.label).toBe('unavailable');
+      expect(result.label).toBe('skipped');
     });
   });
 
@@ -717,7 +740,7 @@ describe('IR Evaluators', () => {
   });
 
   describe('extractor error handling', () => {
-    it('should return unavailable when extractGroundTruth throws', async () => {
+    it('labels an extractor crash as an error when extractGroundTruth throws', async () => {
       const errorConfig: IrEvaluatorConfig<TestOutput, TestReferenceOutput> = {
         extractRetrievedDocs: (output) => output.retrievedDocs,
         extractGroundTruth: () => {
@@ -735,11 +758,11 @@ describe('IR Evaluators', () => {
       });
 
       expect(result.score).toBeNull();
-      expect(result.label).toBe('unavailable');
+      expect(result.label).toBe('error');
       expect(result.explanation).toContain('Ground truth extraction failed');
     });
 
-    it('should return unavailable when extractRetrievedDocs throws', async () => {
+    it('labels an extractor crash as an error when extractRetrievedDocs throws', async () => {
       const errorConfig: IrEvaluatorConfig<TestOutput, TestReferenceOutput> = {
         extractRetrievedDocs: () => {
           throw new Error('Retrieved docs extraction failed');
@@ -757,7 +780,7 @@ describe('IR Evaluators', () => {
       });
 
       expect(result.score).toBeNull();
-      expect(result.label).toBe('unavailable');
+      expect(result.label).toBe('error');
       expect(result.explanation).toContain('Retrieved docs extraction failed');
     });
   });

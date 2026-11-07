@@ -247,7 +247,7 @@ export const EvaluatorStats = lazySchema(() =>
       max: z.number(),
       count: z.number().int(),
       /**
-       * Score documents with no score that are labelled `error` or `unavailable` (the evaluator or task could not produce a score). These are excluded from the other stats.
+       * Score documents with no score that are labelled `error` (the evaluator or task failed to produce a score). Deliberate skips (`skipped`, `unavailable`) and analysis labels are not counted. These are excluded from the other stats.
        */
       error_count: z.number().int().min(0).optional(),
     }),

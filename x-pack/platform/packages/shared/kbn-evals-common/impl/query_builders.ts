@@ -316,12 +316,13 @@ export const buildStatsAggregation = () => ({
           score_stats: { extended_stats: { field: 'evaluator.score' } },
           score_median: { percentiles: { field: 'evaluator.score', percents: [50] } },
           // Null scores mean "could not score"; extended_stats skips them, so count them apart.
-          // Only error/unavailable labels count: analysis evaluators emit a null score on purpose.
+          // Only the `error` label counts: `skipped` marks deliberate skips (no ground truth,
+          // skipWhen, metric not reported) and analysis evaluators emit a null score on purpose.
           score_error: {
             filter: {
               bool: {
                 must_not: [{ exists: { field: 'evaluator.score' } }],
-                filter: [{ terms: { 'evaluator.label': ['error', 'unavailable'] } }],
+                filter: [{ term: { 'evaluator.label': 'error' } }],
               },
             },
           },

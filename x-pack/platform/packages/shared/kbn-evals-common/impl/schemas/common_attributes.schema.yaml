@@ -363,8 +363,9 @@ components:
               type: integer
               minimum: 0
               description: >-
-                Score documents with no score that are labelled `error` or
-                `unavailable` (the evaluator or task could not produce a score).
+                Score documents with no score that are labelled `error` (the
+                evaluator or task failed to produce a score). Deliberate skips
+                (`skipped`, `unavailable`) and analysis labels are not counted.
                 These are excluded from the other stats.
           required:
             - mean

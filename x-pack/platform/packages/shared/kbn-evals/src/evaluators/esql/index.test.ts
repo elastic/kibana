@@ -64,6 +64,18 @@ describe('createEsqlEquivalenceEvaluator', () => {
     expect(result.explanation).toContain('judge unavailable');
   });
 
+  it('bounds the failure explanation to the ingest API 4096-character limit', async () => {
+    // The ingest route rejects `evaluator.explanation` longer than 4096 characters, and this
+    // catch returns the failure as a successful evaluator result, bypassing the executor's
+    // own truncation — so an oversized message would drop the score document entirely.
+    executeUntilValidMock.mockRejectedValue(new Error('x'.repeat(10_000)));
+
+    const result = await evaluate({ query: 'FROM a' }, { query: 'FROM b' });
+
+    expect(result.label).toBe('error');
+    expect((result.explanation ?? '').length).toBeLessThanOrEqual(4096);
+  });
+
   it('scores 1 for an equivalent query', async () => {
     executeUntilValidMock.mockResolvedValue({
       toolCalls: [{ function: { arguments: { equivalent: 'Yes', reason: 'same' } } }],

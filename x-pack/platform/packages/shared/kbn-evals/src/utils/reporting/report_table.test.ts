@@ -319,5 +319,24 @@ describe('report_table', () => {
       expect(result).toContain('errors: 2');
       expect(result).toContain('errors: 3');
     });
+
+    it('counts errored runs in the # column', () => {
+      const result = createTable(withErrors(3, 0), 1);
+
+      // All runs errored: the # column must show 3 runs, not 0. (The table uses
+      // box-drawing borders, so assert on the rendered row rather than raw `#\s*3`.)
+      expect(result).toMatch(/ds\s+│\s+3\s+│/);
+      expect(result).not.toMatch(/ds\s+│\s+0\s+│/);
+    });
+
+    it('does not render a fractional example count when some runs errored', () => {
+      // 3 repetitions, 4 runs: 2 scored + 2 errored. Counting only scored runs would
+      // divide 2 by 3 and render "3 x 0.666...".
+      const result = createTable(withErrors(2, 2), 3);
+
+      expect(result).toContain('3 x 1.33');
+      expect(result).not.toContain('0.67');
+      expect(result).not.toContain('0.66');
+    });
   });
 });

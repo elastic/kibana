@@ -87,7 +87,7 @@ describe('createTraceBasedEvaluator', () => {
     expect(result.score).toBe(100);
   });
 
-  it('should return an unscored result without retrying when the metric is not reported', async () => {
+  it('should return a skipped result without retrying when the metric is not reported', async () => {
     const evaluator = createTraceBasedEvaluator({
       traceEsClient: mockEsClient,
       log: mockLog,
@@ -102,7 +102,7 @@ describe('createTraceBasedEvaluator', () => {
     const result = await evaluateWith(evaluator, VALID_TRACE_ID);
 
     expect(result.score).toBeNull();
-    expect(result.label).toBe('unavailable');
+    expect(result.label).toBe('skipped');
     expect(mockEsClient.esql.query as jest.Mock).toHaveBeenCalledTimes(1);
     expect(mockLog.error).not.toHaveBeenCalled();
     expect(mockLog.warning).not.toHaveBeenCalled();

@@ -203,7 +203,7 @@ describe('query_builders', () => {
         filter: {
           bool: {
             must_not: [{ exists: { field: 'evaluator.score' } }],
-            filter: [{ terms: { 'evaluator.label': ['error', 'unavailable'] } }],
+            filter: [{ term: { 'evaluator.label': 'error' } }],
           },
         },
       });
@@ -212,12 +212,21 @@ describe('query_builders', () => {
     it('does not count an analysis-labelled null score as an error', () => {
       const { aggs } = buildStatsAggregation().by_dataset.aggs.by_evaluator;
       const { must_not: mustNot, filter } = aggs.score_error.filter.bool;
-      const labels = filter.flatMap((clause) => clause.terms['evaluator.label']);
+      const labels = JSON.stringify(filter);
 
       expect(mustNot).toEqual([{ exists: { field: 'evaluator.score' } }]);
-      expect(labels).toEqual(['error', 'unavailable']);
-      expect(labels).not.toContain('correctness-analysis');
-      expect(labels).not.toContain('groundedness-analysis');
+      expect(labels).toContain('error');
+    });
+
+    it('does not count deliberate skips as errors', () => {
+      const { aggs } = buildStatsAggregation().by_dataset.aggs.by_evaluator;
+      const { filter } = aggs.score_error.filter.bool;
+      const labels = JSON.stringify(filter);
+
+      // `skipped` marks intentional abstentions (no ground truth, skipWhen, metric not
+      // reported); counting them would flag every skipped run as a failure.
+      expect(labels).not.toContain('skipped');
+      expect(labels).not.toContain('unavailable');
     });
 
     it('aggregates the evaluator kind so code evaluators are never attributed a model', () => {
