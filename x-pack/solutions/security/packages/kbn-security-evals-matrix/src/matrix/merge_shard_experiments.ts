@@ -108,6 +108,7 @@ export const mergeShardDatasets = (
         string,
         { sum: number; count: number; min: number | undefined; max: number | undefined }
       >;
+      erroredOutEvaluators: Set<string>;
     }
   >();
 
@@ -119,8 +120,13 @@ export const mergeShardDatasets = (
           datasetId: dataset.datasetId,
           datasetName: dataset.datasetName,
           evaluators: new Map(),
+          erroredOutEvaluators: new Set(),
         };
         byDataset.set(dataset.datasetId, entry);
+      }
+
+      for (const name of dataset.erroredOutEvaluators ?? []) {
+        entry.erroredOutEvaluators.add(name);
       }
 
       for (const evaluator of dataset.evaluators) {
@@ -141,15 +147,22 @@ export const mergeShardDatasets = (
     }
   }
 
-  return [...byDataset.values()].map((entry) => ({
-    datasetId: entry.datasetId,
-    datasetName: entry.datasetName,
-    evaluators: [...entry.evaluators.entries()].map(([evaluatorName, agg]) => ({
-      evaluatorName,
-      mean: agg.count === 0 ? 0 : agg.sum / agg.count,
-      count: agg.count,
-      ...(agg.min === undefined ? {} : { min: agg.min }),
-      ...(agg.max === undefined ? {} : { max: agg.max }),
-    })),
-  }));
+  return [...byDataset.values()].map((entry) => {
+    // An evaluator that errored in one shard but graded in another still produced a score.
+    const erroredOut = [...entry.erroredOutEvaluators].filter(
+      (name) => !entry.evaluators.has(name)
+    );
+    return {
+      datasetId: entry.datasetId,
+      datasetName: entry.datasetName,
+      evaluators: [...entry.evaluators.entries()].map(([evaluatorName, agg]) => ({
+        evaluatorName,
+        mean: agg.count === 0 ? 0 : agg.sum / agg.count,
+        count: agg.count,
+        ...(agg.min === undefined ? {} : { min: agg.min }),
+        ...(agg.max === undefined ? {} : { max: agg.max }),
+      })),
+      ...(erroredOut.length > 0 ? { erroredOutEvaluators: erroredOut } : {}),
+    };
+  });
 };
