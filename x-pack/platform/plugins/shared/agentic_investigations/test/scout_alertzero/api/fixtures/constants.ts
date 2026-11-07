@@ -28,6 +28,9 @@ export const ESCALATION_LINK_PATH = (id: string) =>
 export const ESCALATION_ASSIGNEES_PATH = (id: string) =>
   `internal/investigations/escalations/${id}/assignees`;
 
+/** Kibana privilege that grants `manage_escalations`. */
+export const ESCALATIONS_ALL_PRIVILEGE = 'feature_agenticInvestigations.escalations_all';
+
 export const INVESTIGATIONS_INTERNAL_PATH = 'internal/investigations/investigations';
 export const INVESTIGATION_ASSIGNEES_PATH = (id: string) =>
   `internal/investigations/investigations/${id}/assignees`;
