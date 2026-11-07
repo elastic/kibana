@@ -33,6 +33,9 @@ const MemoryTab = React.lazy(() =>
 const DecisionTreesTab = React.lazy(() =>
   import('./decision_trees/tab').then((module) => ({ default: module.DecisionTreesTab }))
 );
+const TopologyTab = React.lazy(() =>
+  import('./topology/tab').then((module) => ({ default: module.TopologyTab }))
+);
 
 const nightshiftLabel = i18n.translate('xpack.nightshift.knowledgePage.backToNightshiftLabel', {
   defaultMessage: 'Nightshift',
@@ -81,7 +84,7 @@ export function KnowledgePage({
     id,
     label: KNOWLEDGE_TAB_LABELS[id],
     isSelected: tab === id,
-    ...(id === 'decision_trees' && { badge: { iconType: 'code' } }),
+    ...((id === 'decision_trees' || id === 'topology') && { badge: { iconType: 'code' } }),
     href: application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: `/knowledge/${id}` }),
     onClick: (event?: React.MouseEvent) => {
       event?.preventDefault();
@@ -107,6 +110,7 @@ export function KnowledgePage({
           {tab === 'cortex' && <CortexTab />}
           {tab === 'memory' && <MemoryTab />}
           {tab === 'decision_trees' && <DecisionTreesTab />}
+          {tab === 'topology' && <TopologyTab />}
         </React.Suspense>
       </EuiPageTemplate.Section>
     </>

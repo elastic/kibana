@@ -32,6 +32,9 @@ jest.mock('./memory/tab', () => ({
 jest.mock('./decision_trees/tab', () => ({
   DecisionTreesTab: () => <div data-test-subj="decisionTreesTab" />,
 }));
+jest.mock('./topology/tab', () => ({
+  TopologyTab: () => <div data-test-subj="topologyTab" />,
+}));
 jest.mock('./knowledge_indicators/tab', () => ({
   KnowledgeIndicatorsTab: () => <div data-test-subj="knowledgeIndicatorsTab" />,
 }));
@@ -90,35 +93,39 @@ it('renders an enabled deep link without waiting for unrelated gates', async () 
     cortex: { isEnabled: false, isLoading: true },
     memory: { isEnabled: true, isLoading: false },
     decision_trees: { isEnabled: false, isLoading: true },
+    topology: settledOff,
   });
 
   expect(await screen.findByTestId('memoryTab')).toBeInTheDocument();
   expect(screen.queryByTestId('nightshiftKnowledgePageLoading')).not.toBeInTheDocument();
 });
 
-it('marks only the Decision Trees tab with the developer mode badge', async () => {
-  renderPage('/knowledge/decision_trees', {
+it('renders Topology and marks developer-only tabs with the developer mode badge', async () => {
+  renderPage('/knowledge/topology', {
     knowledge_indicators: knowledgeIndicatorsEnabled,
     cortex: settledOff,
     memory: { isEnabled: true, isLoading: false },
     decision_trees: { isEnabled: true, isLoading: false },
+    topology: { isEnabled: true, isLoading: false },
   });
 
-  expect(await screen.findByTestId('decisionTreesTab')).toBeInTheDocument();
+  expect(await screen.findByTestId('topologyTab')).toBeInTheDocument();
   const { tabs } = mockAppHeader.mock.lastCall[0];
   expect(tabs.map(({ id, badge }: { id: string; badge?: unknown }) => ({ id, badge }))).toEqual([
     { id: 'knowledge_indicators', badge: undefined },
     { id: 'memory', badge: undefined },
     { id: 'decision_trees', badge: { iconType: 'code' } },
+    { id: 'topology', badge: { iconType: 'code' } },
   ]);
 });
 
-it('redirects a Decision Trees deep link when the tab is hidden', async () => {
-  const { history } = renderPage('/knowledge/decision_trees', {
+it('redirects a Topology deep link when the tab is hidden', async () => {
+  const { history } = renderPage('/knowledge/topology', {
     knowledge_indicators: knowledgeIndicatorsEnabled,
     cortex: settledOff,
     memory: settledOff,
     decision_trees: settledOff,
+    topology: settledOff,
   });
 
   expect(history.location.pathname).toBe('/knowledge/knowledge_indicators');
@@ -131,6 +138,7 @@ it('opens Knowledge Indicators immediately for a disabled deep link', async () =
     cortex: { isEnabled: false, isLoading: true },
     memory: settledOff,
     decision_trees: settledOff,
+    topology: settledOff,
   });
 
   expect(page.history.location.pathname).toBe('/knowledge/knowledge_indicators');
@@ -141,6 +149,7 @@ it('opens Knowledge Indicators immediately for a disabled deep link', async () =
     cortex: { isEnabled: true, isLoading: false },
     memory: settledOff,
     decision_trees: settledOff,
+    topology: settledOff,
   });
 
   expect(page.history.location.pathname).toBe('/knowledge/knowledge_indicators');
@@ -153,6 +162,7 @@ it('defaults to Knowledge Indicators while optional tabs are loading', async () 
     cortex: { isEnabled: false, isLoading: true },
     memory: { isEnabled: false, isLoading: true },
     decision_trees: { isEnabled: false, isLoading: true },
+    topology: settledOff,
   });
 
   expect(history.location.pathname).toBe('/knowledge/knowledge_indicators');
@@ -167,6 +177,7 @@ describe('getDefaultKnowledgeTab', () => {
         cortex: { isEnabled: false, isLoading: true },
         memory: { isEnabled: true, isLoading: false },
         decision_trees: settledOff,
+        topology: settledOff,
       })
     ).toBe('knowledge_indicators');
   });
@@ -178,6 +189,7 @@ describe('getDefaultKnowledgeTab', () => {
         cortex: { isEnabled: false, isLoading: true },
         memory: { isEnabled: true, isLoading: false },
         decision_trees: settledOff,
+        topology: settledOff,
       })
     ).toBe('loading');
   });
@@ -189,6 +201,7 @@ describe('getDefaultKnowledgeTab', () => {
         cortex: settledOff,
         memory: settledOff,
         decision_trees: settledOff,
+        topology: settledOff,
       })
     ).toBeUndefined();
   });
