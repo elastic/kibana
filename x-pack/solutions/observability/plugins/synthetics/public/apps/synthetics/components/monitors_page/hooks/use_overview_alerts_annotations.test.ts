@@ -10,7 +10,10 @@ import {
   SYNTHETICS_STATUS_RULE,
   SYNTHETICS_TLS_RULE,
 } from '../../../../../../common/constants/synthetics_alerts';
-import { useOverviewAlertsAnnotations } from './use_overview_alerts_annotations';
+import {
+  getClickedAlertsKuery,
+  useOverviewAlertsAnnotations,
+} from './use_overview_alerts_annotations';
 import * as paramHook from '../../../hooks/use_url_params';
 import * as filtersHook from './use_monitor_filters';
 import * as spaceHook from '../../../../../hooks/use_kibana_space';
@@ -140,5 +143,40 @@ describe('useOverviewAlertsAnnotations', () => {
     const { result } = renderHook(() => useOverviewAlertsAnnotations());
 
     expect(getQuery(result)).toContain('tags: "a\\" or monitor.name: \\"b\\\\"');
+  });
+});
+
+describe('getClickedAlertsKuery', () => {
+  const marker = (extras?: Record<string, unknown>) => ({
+    id: 'overview-alerts-annotation',
+    type: 'point' as const,
+    time: '2026-10-30T10:00:00.000Z',
+    extras,
+  });
+
+  it('scopes to the clicked monitor', () => {
+    expect(getClickedAlertsKuery([marker({ 'monitor.name': 'Checkout API' })])).toBe(
+      'monitor.name: "Checkout API"'
+    );
+  });
+
+  it('dedupes monitors across a grouped marker', () => {
+    expect(
+      getClickedAlertsKuery([
+        marker({ 'monitor.name': 'Checkout API' }),
+        marker({ 'monitor.name': 'Login' }),
+        marker({ 'monitor.name': 'Checkout API' }),
+      ])
+    ).toBe('monitor.name: ("Checkout API" or "Login")');
+  });
+
+  it('escapes quotes in a monitor name', () => {
+    expect(getClickedAlertsKuery([marker({ 'monitor.name': 'a" or b: "c' })])).toBe(
+      'monitor.name: "a\\" or b: \\"c"'
+    );
+  });
+
+  it('returns undefined when the click carries no monitor name', () => {
+    expect(getClickedAlertsKuery([marker(), marker({ 'monitor.name': null })])).toBeUndefined();
   });
 });
