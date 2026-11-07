@@ -13,6 +13,7 @@ import {
   type CloseInvestigationModalRenderProps,
   type EscalationModalRenderProps,
   type OverviewSlotRenderProps,
+  type ImpactMapSlotRenderProps,
   type LiveStateSlotRenderProps,
   type SeveritySlotRenderProps,
   type TitleSlotRenderProps,
@@ -38,6 +39,11 @@ const OVERVIEW_LOADING_LABEL = i18n.translate(
   { defaultMessage: 'Loading investigation…' }
 );
 
+const IMPACT_MAP_LOADING_LABEL = i18n.translate(
+  'xpack.agenticInvestigations.detailsFlyout.impactMap.loading',
+  { defaultMessage: 'Loading impact map…' }
+);
+
 /**
  * The `investigation` template: status, close, escalation, proposed actions, and the overview,
  * live state, title, and brief card from the query API.
@@ -55,6 +61,7 @@ export const investigationTemplate: TemplateDefinition = {
     renderAssignees,
     renderStatus,
     getImpactEntityOpener,
+    impactMapRenderer,
   }) => {
     const { agentBuilder, proposals } = startDeps;
 
@@ -137,6 +144,15 @@ export const investigationTemplate: TemplateDefinition = {
         return Overview;
       }
     );
+
+    const LazyImpactMapTab = impactMapRenderer
+      ? makeLazyWithSharedClient<ImpactMapSlotRenderProps>(async () => {
+          const { ImpactMapTab } = await import('./flyout/impact_map_tab');
+          const Tab: React.FC<ImpactMapSlotRenderProps> = (props) =>
+            React.createElement(ImpactMapTab, { ...props, Renderer: impactMapRenderer });
+          return Tab;
+        })
+      : undefined;
 
     const LazyInvestigationLiveState = makeLazyWithSharedClient<LiveStateSlotRenderProps>(
       async () => {
@@ -226,6 +242,14 @@ export const investigationTemplate: TemplateDefinition = {
           { loadingLabel: OVERVIEW_LOADING_LABEL },
           React.createElement(LazyInvestigationOverview, props)
         ),
+      renderImpactMap: LazyImpactMapTab
+        ? (props) =>
+            React.createElement(
+              EscalationModalBoundary,
+              { loadingLabel: IMPACT_MAP_LOADING_LABEL },
+              React.createElement(LazyImpactMapTab, props)
+            )
+        : undefined,
       renderLiveState: (props) =>
         React.createElement(
           React.Suspense,

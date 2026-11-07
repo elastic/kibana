@@ -40,6 +40,9 @@ describe('createFindingsWriter', () => {
       findByConversationId: jest.fn(),
       revertAttach: jest.fn(),
     };
+    const impactMapService = {
+      setWithPublicClient: jest.fn().mockResolvedValue({ warnings: [] }),
+    };
     const privileges = {
       assertCanManage: jest.fn(async () => {
         if (!canManage) throw new Error('forbidden');
@@ -48,13 +51,14 @@ describe('createFindingsWriter', () => {
     const writer = createFindingsWriter({
       getHypothesesService: () => hypothesesService as never,
       getImpactService: () => impactService as never,
+      getImpactMapService: () => impactMapService as never,
       getSpaceId: () => 'space-a',
       privileges: privileges as never,
       resolveUser: async () => user as never,
       getConversationClient: async () => conversations as never,
       getAttachmentClient: async () => attachments as never,
     })(request);
-    return { writer, hypothesesService, impactService, privileges };
+    return { writer, hypothesesService, impactService, impactMapService, privileges };
   };
 
   beforeEach(() => {
@@ -133,8 +137,33 @@ describe('createFindingsWriter', () => {
     );
   });
 
+  it('writes the impact map in the request space as the request user', async () => {
+    const { writer, impactMapService } = setup();
+    const impactMap = {
+      entities: [{ id: 'checkout', type_id: 'service', label: 'checkout' }],
+      relationships: [],
+    };
+
+    await writer.setImpactMap({ conversationId: 'conv-1', impactMap });
+
+    expect(impactMapService.setWithPublicClient).toHaveBeenCalledWith({
+      conversationId: 'conv-1',
+      input: impactMap,
+      spaceId: 'space-a',
+      user,
+      conversations,
+      attachments,
+    });
+  });
+
   it('refuses to write without the investigations manage privilege', async () => {
-    const { writer, hypothesesService, impactService } = setup({ canManage: false });
+    const { writer, hypothesesService, impactService, impactMapService } = setup({
+      canManage: false,
+    });
+    await expect(
+      writer.setImpactMap({ conversationId: 'c', impactMap: { entities: [], relationships: [] } })
+    ).rejects.toThrow('forbidden');
+    expect(impactMapService.setWithPublicClient).not.toHaveBeenCalled();
 
     await expect(writer.setHypotheses({ conversationId: 'c', hypotheses })).rejects.toThrow(
       'forbidden'

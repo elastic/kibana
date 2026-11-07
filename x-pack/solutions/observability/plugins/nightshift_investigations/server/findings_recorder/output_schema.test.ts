@@ -16,6 +16,7 @@ import {
   entityIdFor,
   limitEvidence,
   limitFindings,
+  limitImpactMap,
 } from './output_schema';
 
 describe('findings output', () => {
@@ -223,6 +224,91 @@ describe('entity evidence', () => {
     const [checkout, payments] = limitFindings(parsed.data).impact_entities ?? [];
     expect(checkout.evidence?.chart?.series[0].points).toHaveLength(100);
     expect(payments.evidence).toBeUndefined();
+  });
+});
+
+describe('impact map', () => {
+  it('builds the store shape: types from the icon fields, normalised ids, no dangling edges', () => {
+    const map = limitImpactMap({
+      title: ' Checkout failures ',
+      entities: [
+        {
+          id: 'checkout',
+          type: 'Java Service',
+          agent_name: 'java',
+          role: 'symptom',
+          impacted: true,
+        },
+        { id: 'checkout', type: 'java_service' },
+        { id: 'payments-db', type: 'PostgreSQL', span_type: 'db', span_subtype: 'postgresql' },
+        { id: 'cart', label: 'Cart', type: 'java_service', alert_count: 2.4, health: 'healthy' },
+      ],
+      relationships: [
+        { source: 'checkout', target: 'payments-db', type: 'Reads From', on_critical_path: true },
+        { source: 'checkout', target: 'ghost', type: 'calls' },
+        { source: 'checkout', target: 'cart', type: 'calls', on_critical_path: false },
+      ],
+    });
+
+    expect(map).toEqual({
+      title: 'Checkout failures',
+      entities: [
+        {
+          id: 'checkout',
+          type_id: 'java_service',
+          label: 'checkout',
+          annotations: { role: 'symptom', impacted: true },
+        },
+        { id: 'payments-db', type_id: 'postgresql', label: 'payments-db' },
+        {
+          id: 'cart',
+          type_id: 'java_service',
+          label: 'Cart',
+          annotations: { health: 'healthy', alert_count: 2 },
+        },
+      ],
+      relationships: [
+        {
+          type_id: 'reads_from',
+          source_id: 'checkout',
+          target_id: 'payments-db',
+          on_critical_path: true,
+        },
+        { type_id: 'calls', source_id: 'checkout', target_id: 'cart' },
+      ],
+      entity_types: [
+        {
+          id: 'java_service',
+          label: 'Java service',
+          kind: 'service',
+          icon: { agent_name: 'java' },
+        },
+        {
+          id: 'postgresql',
+          label: 'Postgresql',
+          kind: 'dependency',
+          icon: { span_type: 'db', span_subtype: 'postgresql' },
+        },
+      ],
+      relationship_types: [
+        { id: 'reads_from', label: 'reads from' },
+        { id: 'calls', label: 'calls' },
+      ],
+    });
+  });
+
+  it('leaves the map out of the record when none of its entities fit', () => {
+    const record = limitFindings({
+      summary: 's',
+      hypotheses: [],
+      impact_map: { entities: [{ id: '  ', type: 'x' }], relationships: [] },
+    });
+    expect(record).not.toHaveProperty('impact_map');
+  });
+
+  it('asks for the map in the final schema only', () => {
+    expect(FINDINGS_JSON_SCHEMA.properties).toHaveProperty('impact_map');
+    expect(LIVE_FINDINGS_JSON_SCHEMA.properties).not.toHaveProperty('impact_map');
   });
 });
 

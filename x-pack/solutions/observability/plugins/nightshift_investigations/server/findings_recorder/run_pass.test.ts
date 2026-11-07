@@ -53,6 +53,7 @@ describe('runFindingsPass', () => {
     const writer = {
       setHypotheses: jest.fn().mockResolvedValue(undefined),
       setImpact: jest.fn().mockResolvedValue(undefined),
+      setImpactMap: jest.fn().mockResolvedValue({ warnings: [] }),
       getFindings: jest.fn().mockResolvedValue({ hypotheses: [], impactEntities: [] }),
     };
     const patchMetadata = jest.fn().mockResolvedValue(undefined);
@@ -437,6 +438,36 @@ describe('runFindingsPass', () => {
     await run(deps, memory, { answer: 'Root cause: bad deploy' });
 
     expect(writer.setImpact).not.toHaveBeenCalled();
+  });
+
+  it('writes the impact map from the final pass only', async () => {
+    const impactMap = {
+      entities: [
+        { id: 'checkout', type: 'java_service', agent_name: 'java', role: 'symptom' },
+        { id: 'payments-db', type: 'postgresql', span_type: 'db', role: 'root_cause' },
+      ],
+      relationships: [
+        { source: 'checkout', target: 'payments-db', type: 'reads_from', on_critical_path: true },
+      ],
+    };
+    const live = setup({ answers: [answerWith({ ...output, impact_map: impactMap })] });
+    await run(live.deps, live.memory);
+    expect(live.writer.setImpactMap).not.toHaveBeenCalled();
+
+    const { deps, writer, memory } = setup({
+      answers: [answerWith({ ...output, impact_map: impactMap })],
+    });
+    await run(deps, memory, { answer: 'Root cause: bad deploy' });
+
+    const [{ conversationId, impactMap: written }] = writer.setImpactMap.mock.calls[0];
+    expect(conversationId).toBe('c1');
+    expect(written.entities.map(({ id }: { id: string }) => id)).toEqual([
+      'checkout',
+      'payments-db',
+    ]);
+    expect(written.relationships).toEqual([
+      expect.objectContaining({ source_id: 'checkout', on_critical_path: true }),
+    ]);
   });
 
   it('gives an entity with a long name an id within the store limit', async () => {

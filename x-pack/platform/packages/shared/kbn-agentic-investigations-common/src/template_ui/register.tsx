@@ -22,6 +22,7 @@ import type {
   RenderSeverity,
   RenderLinkedInvestigations,
   RenderOverview,
+  RenderImpactMap,
   RenderLiveState,
   RenderTitle,
   RenderSyncIndicator,
@@ -50,10 +51,15 @@ const LazyEscalationOverviewSlot = lazy(() =>
 
 /**
  * Tab ids are prefixed with the solution's template id because Agent Builder's tab ids are a
- * global keyspace and duplicate registration throws.
+ * global keyspace and duplicate registration throws. The Impact map tab exists only when the
+ * caller supplies `renderImpactMap`.
  */
-export const getInvestigationTabIds = (templateId: string): readonly string[] => [
+export const getInvestigationTabIds = (
+  templateId: string,
+  { impactMap = false }: { impactMap?: boolean } = {}
+): readonly string[] => [
   `${templateId}.overview`,
+  ...(impactMap ? [`${templateId}.impactMap`] : []),
 ];
 
 export interface RegisterAgenticInvestigationTemplateUIOptions {
@@ -110,6 +116,10 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
    */
   renderOverview?: RenderOverview;
   /**
+   * When provided, the flyout gets an Impact map tab with this as its body. See `RenderImpactMap`.
+   */
+  renderImpactMap?: RenderImpactMap;
+  /**
    * When provided, the header shows the investigation's live state (severity, running indicator)
    * next to its age. See `RenderLiveState`.
    */
@@ -153,12 +163,14 @@ export const registerAgenticInvestigationTemplateUI = ({
   renderSeverity,
   renderCloseInvestigationModal,
   renderOverview,
+  renderImpactMap,
   renderLiveState,
   renderTitle,
   briefCard,
   onCopyLink,
 }: RegisterAgenticInvestigationTemplateUIOptions): void => {
-  const [overviewTabId] = getInvestigationTabIds(templateId);
+  const tabIds = getInvestigationTabIds(templateId, { impactMap: Boolean(renderImpactMap) });
+  const [overviewTabId, impactMapTabId] = tabIds;
 
   conversationTemplates.registerTab(overviewTabId, () => ({
     label: DETAILS_FLYOUT_LABELS.tabs.overview,
@@ -177,12 +189,21 @@ export const registerAgenticInvestigationTemplateUI = ({
     },
   }));
 
+  if (renderImpactMap && impactMapTabId) {
+    conversationTemplates.registerTab(impactMapTabId, () => ({
+      label: DETAILS_FLYOUT_LABELS.tabs.impactMap,
+      content: function ImpactMapTabContent({ conversation }) {
+        return <>{renderImpactMap({ conversationId: conversation.id })}</>;
+      },
+    }));
+  }
+
   conversationTemplates.registerTemplateUIDefinition(
     templateId,
     ({ openFullscreenConversation, getConversationUrl }) => ({
       name,
       icon,
-      tabs: [overviewTabId],
+      tabs: [...tabIds],
       ...(briefCard && { briefCard }),
       detailsFlyout: {
         trailingActions: ({ conversation }) => [

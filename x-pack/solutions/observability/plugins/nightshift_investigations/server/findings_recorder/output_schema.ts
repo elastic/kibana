@@ -12,6 +12,9 @@ import {
   EVIDENCE_CHART_X_AXIS_TYPES,
   EVIDENCE_CHART_Y_AXIS_UNITS,
   HYPOTHESIS_STATUSES,
+  IMPACT_MAP_ENTITY_KINDS,
+  IMPACT_MAP_HEALTH_STATES,
+  IMPACT_MAP_ROLES,
   investigationEvidenceSchema,
   MAX_ENTITY_ID_LENGTH,
   MAX_ENTITY_NAME_LENGTH,
@@ -22,7 +25,13 @@ import {
   MAX_EVIDENCE_SHORT_TEXT_LENGTH,
   MAX_EVIDENCE_TEXT_LENGTH,
   MAX_HYPOTHESES,
+  MAX_IMPACT_MAP_ENTITIES,
+  MAX_IMPACT_MAP_RELATIONSHIPS,
   MAX_IMPACT_TOOL_ENTITIES,
+  type ImpactMapEntity,
+  type ImpactMapEntityType,
+  type ImpactMapRelationship,
+  type ImpactMapRelationshipType,
   type InvestigationEvidence,
 } from '@kbn/agentic-investigations-plugin/common';
 import {
@@ -110,6 +119,35 @@ export const findingsOutputSchema = lazySchema(() => {
       )
       .optional(),
     hypotheses: z.array(hypothesisSchema),
+    // Only the final pass draws the map. Omitting it keeps the stored map.
+    impact_map: z
+      .object({
+        title: z.string().optional(),
+        entities: z.array(
+          z.object({
+            id: z.string().min(1),
+            label: z.string().optional(),
+            type: z.string().min(1),
+            kind: z.enum(IMPACT_MAP_ENTITY_KINDS).optional(),
+            agent_name: z.string().optional(),
+            span_type: z.string().optional(),
+            span_subtype: z.string().optional(),
+            role: z.enum(IMPACT_MAP_ROLES).optional(),
+            health: z.enum(IMPACT_MAP_HEALTH_STATES).optional(),
+            impacted: z.boolean().optional(),
+            alert_count: z.number().optional(),
+          })
+        ),
+        relationships: z.array(
+          z.object({
+            source: z.string().min(1),
+            target: z.string().min(1),
+            type: z.string().min(1),
+            on_critical_path: z.boolean().optional(),
+          })
+        ),
+      })
+      .optional(),
   });
 });
 
@@ -201,11 +239,130 @@ export const limitEvidence = (raw: RawEvidence): InvestigationEvidence | undefin
   return description ? { description } : undefined;
 };
 
+/** The impact map in the shape the impact map store accepts. */
+export interface FindingsImpactMap {
+  title?: string;
+  entities: ImpactMapEntity[];
+  relationships: ImpactMapRelationship[];
+  entity_types: ImpactMapEntityType[];
+  relationship_types: ImpactMapRelationshipType[];
+}
+
+const MAX_MAP_ID_LENGTH = 256;
+const MAX_MAP_LABEL_LENGTH = 256;
+const MAX_MAP_TYPE_ID_LENGTH = 64;
+const MAX_MAP_ICON_KEY_LENGTH = 64;
+const MAX_MAP_ALERT_COUNT = 9_999;
+
+/** A catalog type id: lowercase, with anything the store rejects replaced by `_`. */
+export const toImpactMapTypeId = (raw: string): string =>
+  raw
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_.-]+/g, '_')
+    .replace(/^[^a-z0-9]+/, '')
+    .slice(0, MAX_MAP_TYPE_ID_LENGTH) || 'entity';
+
+const humanizeTypeId = (id: string): string => {
+  const words = id.replace(/[_.-]+/g, ' ').trim();
+  return words.charAt(0).toUpperCase() + words.slice(1);
+};
+
+/**
+ * Trims the model's impact map to what the store accepts and turns its flat entity fields into the
+ * store's shape: an entity type for each `type` that names a kind or an icon, so the catalog
+ * learns it, and a relationship type for each relationship `type`. Relationships to an entity the
+ * map does not list are dropped: the store rejects a whole map for one of them.
+ */
+export const limitImpactMap = (
+  raw: NonNullable<FindingsOutput['impact_map']>
+): FindingsImpactMap | undefined => {
+  const icon = (value?: string) => (value ? truncate(value, MAX_MAP_ICON_KEY_LENGTH) : undefined);
+  const entityTypes = new Map<string, ImpactMapEntityType>();
+  const seen = new Set<string>();
+  const entities: ImpactMapEntity[] = [];
+
+  for (const entity of raw.entities) {
+    const id = truncate(entity.id.trim(), MAX_MAP_ID_LENGTH);
+    if (!id || seen.has(id) || entities.length >= MAX_IMPACT_MAP_ENTITIES) continue;
+    seen.add(id);
+    const typeId = toImpactMapTypeId(entity.type);
+    const agentName = icon(entity.agent_name);
+    const spanType = icon(entity.span_type);
+    const spanSubtype = icon(entity.span_subtype);
+    if (!entityTypes.has(typeId) && (entity.kind || agentName || spanType || spanSubtype)) {
+      entityTypes.set(typeId, {
+        id: typeId,
+        label: humanizeTypeId(typeId),
+        kind: entity.kind ?? (spanType || spanSubtype ? 'dependency' : 'service'),
+        ...(agentName || spanType || spanSubtype
+          ? {
+              icon: {
+                ...(agentName ? { agent_name: agentName } : {}),
+                ...(spanType ? { span_type: spanType } : {}),
+                ...(spanSubtype ? { span_subtype: spanSubtype } : {}),
+              },
+            }
+          : {}),
+      });
+    }
+    const alertCount =
+      entity.alert_count !== undefined && Number.isFinite(entity.alert_count)
+        ? Math.min(MAX_MAP_ALERT_COUNT, Math.max(0, Math.round(entity.alert_count)))
+        : undefined;
+    const annotations = {
+      ...(entity.role ? { role: entity.role } : {}),
+      ...(entity.health ? { health: entity.health } : {}),
+      ...(entity.impacted !== undefined ? { impacted: entity.impacted } : {}),
+      ...(alertCount ? { alert_count: alertCount } : {}),
+    };
+    entities.push({
+      id,
+      type_id: typeId,
+      label: truncate(entity.label?.trim() || id, MAX_MAP_LABEL_LENGTH),
+      ...(Object.keys(annotations).length ? { annotations } : {}),
+    });
+  }
+  if (entities.length === 0) return undefined;
+
+  const relationshipTypes = new Map<string, ImpactMapRelationshipType>();
+  const relationships: ImpactMapRelationship[] = [];
+  for (const relationship of raw.relationships) {
+    const source = truncate(relationship.source.trim(), MAX_MAP_ID_LENGTH);
+    const target = truncate(relationship.target.trim(), MAX_MAP_ID_LENGTH);
+    if (!seen.has(source) || !seen.has(target)) continue;
+    if (relationships.length >= MAX_IMPACT_MAP_RELATIONSHIPS) break;
+    const typeId = toImpactMapTypeId(relationship.type);
+    if (!relationshipTypes.has(typeId)) {
+      relationshipTypes.set(typeId, {
+        id: typeId,
+        label: typeId.replace(/[_.-]+/g, ' ').trim(),
+      });
+    }
+    relationships.push({
+      type_id: typeId,
+      source_id: source,
+      target_id: target,
+      ...(relationship.on_critical_path ? { on_critical_path: true } : {}),
+    });
+  }
+
+  return {
+    ...(raw.title?.trim() ? { title: truncate(raw.title.trim(), MAX_MAP_LABEL_LENGTH) } : {}),
+    entities,
+    relationships,
+    entity_types: [...entityTypes.values()],
+    relationship_types: [...relationshipTypes.values()],
+  };
+};
+
 /** A parsed record with its evidence trimmed to what the stores accept. */
 export type FindingsRecord = Omit<
   FindingsOutput,
-  'impact_evidence' | 'impact_entities' | 'hypotheses' | 'proposals'
+  'impact_evidence' | 'impact_entities' | 'hypotheses' | 'proposals' | 'impact_map'
 > & {
+  /** Absent when the model drew no map or none of its entities fit. */
+  impact_map?: FindingsImpactMap;
   proposals?: Array<{ title: string; comment: string; impact?: string; confidence?: string }>;
   /** `null` retracts the stored evidence. */
   impact_evidence?: InvestigationEvidence | null;
@@ -223,11 +380,14 @@ export const limitFindings = (output: FindingsOutput): FindingsRecord => {
     impact_entities: rawEntities,
     proposals: rawProposals,
     hypotheses: rawHypotheses,
+    impact_map: rawImpactMap,
     ...rest
   } = output;
   const impactEvidence = rawImpactEvidence ? limitEvidence(rawImpactEvidence) : rawImpactEvidence;
+  const impactMap = rawImpactMap ? limitImpactMap(rawImpactMap) : undefined;
   return {
     ...rest,
+    ...(impactMap ? { impact_map: impactMap } : {}),
     impact_evidence: impactEvidence,
     summary: truncate(output.summary, MAX_METADATA_TEXT_LENGTH),
     ...(output.verdict !== undefined
@@ -463,6 +623,93 @@ export const FINDINGS_JSON_SCHEMA = {
         },
         required: ['candidate', 'confidence', 'status'],
       },
+    },
+    impact_map: {
+      type: 'object',
+      description: `Only once the cause is confirmed or leading: a map of the entities the problem touches and how they depend on each other, from the symptom to the root cause. At most ${MAX_IMPACT_MAP_ENTITIES} entities, usually 3 to 12. Only entities and dependencies the tool results show; leave out what was not looked at. Omit to keep the stored map.`,
+      properties: {
+        title: {
+          type: 'string',
+          description: 'A few words naming what the map shows, for example Checkout failures.',
+        },
+        entities: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'string',
+                description: 'Unique in the map: the service, host or resource name.',
+              },
+              label: { type: 'string', description: 'The name to show. Defaults to the id.' },
+              type: {
+                type: 'string',
+                description:
+                  'One lowercase id per kind of entity that looks the same, reused across investigations, for example nodejs_service, java_service, postgresql, kafka_topic, k8s_pod.',
+              },
+              kind: {
+                type: 'string',
+                enum: IMPACT_MAP_ENTITY_KINDS,
+                description:
+                  'service draws a circle, for code you run; dependency draws a diamond, for a database, queue, cache or external API.',
+              },
+              agent_name: {
+                type: 'string',
+                description:
+                  'For a service, the APM agent name for its icon: nodejs, java, go, python, dotnet, ruby, php, rum-js or opentelemetry.',
+              },
+              span_type: {
+                type: 'string',
+                description:
+                  'For a dependency, its span type for the icon: db, messaging, cache or external.',
+              },
+              span_subtype: {
+                type: 'string',
+                description:
+                  'For a dependency, its span subtype for the icon: postgresql, mysql, elasticsearch, redis, kafka, http and so on.',
+              },
+              role: {
+                type: 'string',
+                enum: IMPACT_MAP_ROLES,
+                description:
+                  'root_cause for the confirmed or leading cause, symptom where the problem was seen, contributor for something that made it worse, context for the rest.',
+              },
+              health: { type: 'string', enum: IMPACT_MAP_HEALTH_STATES },
+              impacted: {
+                type: 'boolean',
+                description: 'True when the problem hurt this entity or its users.',
+              },
+              alert_count: {
+                type: 'number',
+                description: 'Open alerts on this entity, only when the tool results show them.',
+              },
+            },
+            required: ['id', 'type'],
+          },
+        },
+        relationships: {
+          type: 'array',
+          description: `At most ${MAX_IMPACT_MAP_RELATIONSHIPS}. Point each from the caller or dependent to what it depends on.`,
+          items: {
+            type: 'object',
+            properties: {
+              source: { type: 'string', description: 'An entity id.' },
+              target: { type: 'string', description: 'An entity id.' },
+              type: {
+                type: 'string',
+                description:
+                  'A lowercase verb, reused across investigations: calls, reads_from, writes_to, publishes_to, runs_on.',
+              },
+              on_critical_path: {
+                type: 'boolean',
+                description: 'True for each hop on the path from the symptom to the root cause.',
+              },
+            },
+            required: ['source', 'target', 'type'],
+          },
+        },
+      },
+      required: ['entities', 'relationships'],
     },
   },
   required: ['summary', 'hypotheses'],

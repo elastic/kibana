@@ -8,6 +8,10 @@
 import { hypothesesStorageSettings } from './hypotheses/storage/hypotheses_storage';
 import { impactStorageSettings } from './impact/storage/impact_storage';
 import {
+  impactMapCatalogStorageSettings,
+  impactMapStorageSettings,
+} from './impact_map/storage/impact_map_storage';
+import {
   subjectClaimStorageSettings,
   subjectStorageSettings,
 } from './subjects/storage/subject_storage';
@@ -17,6 +21,8 @@ const storageNames = [
   subjectStorageSettings.name,
   subjectClaimStorageSettings.name,
   hypothesesStorageSettings.name,
+  impactMapStorageSettings.name,
+  impactMapCatalogStorageSettings.name,
 ];
 
 describe('agentic investigations index names', () => {

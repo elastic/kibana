@@ -1,0 +1,208 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type {
+  AttachmentPublicClient,
+  ConversationPublicClient,
+  ToolHandlerContext,
+} from '@kbn/agent-builder-server';
+import type {
+  ImpactMapEntity,
+  ImpactMapEntityType,
+  ImpactMapRelationship,
+  ImpactMapRelationshipType,
+  InvestigationImpactMap,
+} from '../../../common/impact_map/impact_map';
+import {
+  resolveImpactMapGraph,
+  type ResolvedImpactMapGraph,
+} from '../../../common/impact_map/resolve_graph';
+import type { User } from '../../../common/user';
+import {
+  InvestigationAttachmentInvalidRequestError,
+  type AttachedFromTool,
+  type InvestigationAttachmentDocService,
+} from '../../investigation_attachments';
+import { impactMapAttachment } from '../attachments/impact_map_attachment_type';
+import type { ImpactMapDocument } from '../storage/impact_map_storage';
+import type { ImpactMapCatalogService } from './impact_map_catalog_service';
+
+/** The map a caller writes. Types sent here are added to the space catalog too. */
+export interface ImpactMapInput {
+  title?: string;
+  entities: ImpactMapEntity[];
+  relationships: ImpactMapRelationship[];
+  entity_types?: ImpactMapEntityType[];
+  relationship_types?: ImpactMapRelationshipType[];
+}
+
+/** One impact map document per space and conversation. */
+export const impactMapDocumentId = (spaceId: string, conversationId: string): string =>
+  impactMapAttachment.documentId(spaceId, conversationId);
+
+const buildImpactMapDocument = ({
+  existing,
+  spaceId,
+  conversationId,
+  title,
+  graph,
+  user,
+}: {
+  existing: ImpactMapDocument | undefined;
+  spaceId: string;
+  conversationId: string;
+  title?: string;
+  graph: ResolvedImpactMapGraph;
+  user?: User;
+}): ImpactMapDocument => {
+  const now = new Date().toISOString();
+  const createdBy = existing ? existing.createdBy : user;
+  return {
+    spaceId,
+    conversationId,
+    ...(title && { title }),
+    entities: graph.entities,
+    relationships: graph.relationships,
+    entityTypes: graph.entityTypes,
+    relationshipTypes: graph.relationshipTypes,
+    createdAt: existing?.createdAt ?? now,
+    ...(createdBy && { createdBy }),
+    updatedAt: now,
+  };
+};
+
+/**
+ * Owns the impact map index. Each write is a full snapshot: the map the caller sends replaces the
+ * stored one. Before the write the graph is joined with the space catalog, and any type it adds
+ * is stored there, so the next investigation draws it the same way.
+ */
+export class ImpactMapService {
+  constructor(
+    private readonly deps: {
+      documents: InvestigationAttachmentDocService<ImpactMapDocument>;
+      catalog: ImpactMapCatalogService;
+    }
+  ) {}
+
+  getDocumentService(): InvestigationAttachmentDocService<ImpactMapDocument> {
+    return this.deps.documents;
+  }
+
+  getCatalogService(): ImpactMapCatalogService {
+    return this.deps.catalog;
+  }
+
+  /** Joins the graph with the catalog, stores new types, and throws when it can't be drawn. */
+  private async resolve(
+    spaceId: string,
+    input: ImpactMapInput,
+    user?: User
+  ): Promise<ResolvedImpactMapGraph> {
+    const graph = resolveImpactMapGraph({
+      entities: input.entities,
+      relationships: input.relationships,
+      catalog: await this.deps.catalog.get(spaceId),
+      entityTypes: input.entity_types,
+      relationshipTypes: input.relationship_types,
+    });
+    if (graph.errors.length > 0) {
+      throw new InvestigationAttachmentInvalidRequestError(
+        `The impact map was not saved: ${graph.errors.join(' ')}`
+      );
+    }
+    // Inline types the catalog already had may carry a better label or icon, so they are stored
+    // as well as the ones it lacked.
+    await this.deps.catalog.upsert({
+      spaceId,
+      types: {
+        entity_types: [...(input.entity_types ?? []), ...graph.newTypes.entity_types],
+        relationship_types: [
+          ...(input.relationship_types ?? []),
+          ...graph.newTypes.relationship_types,
+        ],
+      },
+      user,
+    });
+    return graph;
+  }
+
+  /** Agent tool path: replaces the map, then adds or updates the attachment in the run. */
+  async setFromTool({
+    context,
+    conversationId,
+    input,
+    user,
+  }: {
+    context: Pick<ToolHandlerContext, 'attachments' | 'request' | 'spaceId'>;
+    conversationId: string;
+    input: ImpactMapInput;
+    user?: User;
+  }): Promise<AttachedFromTool<ImpactMapDocument> & { warnings: string[] }> {
+    const { spaceId } = context;
+    const graph = await this.resolve(spaceId, input, user);
+    const attached = await impactMapAttachment.writeFromTool({
+      service: this.deps.documents,
+      id: impactMapDocumentId(spaceId, conversationId),
+      spaceId,
+      context,
+      mutate: (existing) =>
+        buildImpactMapDocument({
+          existing,
+          spaceId,
+          conversationId,
+          title: input.title,
+          graph,
+          user,
+        }),
+    });
+    return { ...attached, warnings: graph.warnings };
+  }
+
+  /** Out-of-run path (a hook, a workflow, a background pass): no tool context. */
+  async setWithPublicClient({
+    conversationId,
+    input,
+    spaceId,
+    user,
+    conversations,
+    attachments,
+  }: {
+    conversationId: string;
+    input: ImpactMapInput;
+    spaceId: string;
+    user?: User;
+    conversations: ConversationPublicClient;
+    attachments: AttachmentPublicClient;
+  }): Promise<{ warnings: string[] }> {
+    const graph = await this.resolve(spaceId, input, user);
+    await impactMapAttachment.writeAndAttach({
+      service: this.deps.documents,
+      id: impactMapDocumentId(spaceId, conversationId),
+      spaceId,
+      conversationId,
+      conversations,
+      attachments,
+      mutate: (existing) =>
+        buildImpactMapDocument({
+          existing,
+          spaceId,
+          conversationId,
+          title: input.title,
+          graph,
+          user,
+        }),
+    });
+    return { warnings: graph.warnings };
+  }
+
+  async findByConversationId(
+    conversationId: string,
+    spaceId: string
+  ): Promise<InvestigationImpactMap | undefined> {
+    return this.deps.documents.get(impactMapDocumentId(spaceId, conversationId), spaceId);
+  }
+}

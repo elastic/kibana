@@ -111,6 +111,8 @@ export {
   type LinkedInvestigationsSlotRenderProps,
   type RenderOverview,
   type OverviewSlotRenderProps,
+  type RenderImpactMap,
+  type ImpactMapSlotRenderProps,
   type RenderLiveState,
   type LiveStateSlotRenderProps,
   type RenderTitle,

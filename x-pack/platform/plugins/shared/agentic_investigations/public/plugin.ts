@@ -27,6 +27,7 @@ import type {
   AgenticInvestigationsPublicSetupDependencies,
   AgenticInvestigationsPublicStartDependencies,
   ImpactEntityOpener,
+  ImpactMapRenderer,
   AlertFlyoutRegistration,
 } from './types';
 
@@ -65,6 +66,7 @@ export class AgenticInvestigationsPublicPlugin
   private readonly groupedAttachments = createFlyoutGroupedAttachmentsRegistry();
   private impactEntityOpener: ImpactEntityOpener | undefined;
   private readonly alertFlyouts = new Map<string, AlertFlyoutRegistration>();
+  private impactMapRenderer: ImpactMapRenderer | undefined;
 
   constructor(context: PluginInitializerContext<AgenticInvestigationsPublicConfig>) {
     this.escalationsEnabled = context.config.get().escalations.enabled;
@@ -81,6 +83,9 @@ export class AgenticInvestigationsPublicPlugin
       registerFlyoutGroupedAttachment: this.groupedAttachments.register,
       registerAlertFlyout: (source, registration) => {
         this.alertFlyouts.set(source, registration);
+      },
+      registerImpactMapRenderer: (renderer) => {
+        this.impactMapRenderer = renderer;
       },
     };
   }
@@ -128,6 +133,7 @@ export class AgenticInvestigationsPublicPlugin
         escalationsEnabled: this.escalationsEnabled,
         groupedAttachments: this.groupedAttachments,
         getImpactEntityOpener: () => this.impactEntityOpener,
+        impactMapRenderer: this.impactMapRenderer,
         templates: this.escalationsEnabled
           ? [investigationTemplate, escalationTemplate]
           : [investigationTemplate],
@@ -144,5 +150,6 @@ export class AgenticInvestigationsPublicPlugin
   stop() {
     this.impactEntityOpener = undefined;
     this.alertFlyouts.clear();
+    this.impactMapRenderer = undefined;
   }
 }

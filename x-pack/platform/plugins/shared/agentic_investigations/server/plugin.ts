@@ -42,6 +42,16 @@ import { createThreadConversationResolver } from './subjects/services/thread_con
 import { hypothesesAttachment, registerHypothesesAttachment } from './hypotheses/attachments';
 import { HypothesesService } from './hypotheses/services/hypotheses_service';
 import { createSetHypothesesTool } from './hypotheses/tools/set_hypotheses_tool';
+import {
+  impactMapAttachment,
+  registerImpactMapAttachment,
+} from './impact_map/attachments/impact_map_attachment_type';
+import { ImpactMapCatalogService } from './impact_map/services/impact_map_catalog_service';
+import { ImpactMapService } from './impact_map/services/impact_map_service';
+import { registerSetImpactMapRoute } from './impact_map/routes/set_impact_map_route';
+import { createImpactMapCatalogStorageClient } from './impact_map/storage/impact_map_storage';
+import { createSetImpactMapTool } from './impact_map/tools/set_impact_map_tool';
+import { createUpsertImpactMapCatalogTool } from './impact_map/tools/upsert_impact_map_catalog_tool';
 import { EscalationsService } from './escalations/services/escalations_service';
 import { registerEscalationConversationEvents } from './escalations/conversation_events';
 import { registerInvestigationConversationEvents } from './investigations/conversation_events';
@@ -80,6 +90,7 @@ export class AgenticInvestigationsPlugin
   private impactPillsService?: ImpactPillsService;
   private subjectsService?: SubjectsService;
   private hypothesesService?: HypothesesService;
+  private impactMapService?: ImpactMapService;
   private escalationsService?: EscalationsService;
   private assignmentsService?: AssignmentsService;
   private investigationStatusService?: InvestigationStatusService;
@@ -141,6 +152,12 @@ export class AgenticInvestigationsPlugin
       assertCanReadConversation,
       logger: this.logger,
     });
+    registerImpactMapAttachment(agentBuilder, {
+      getDocumentService: () => this.requireImpactMapService().getDocumentService(),
+      privileges: investigationsPrivileges,
+      assertCanReadConversation,
+      logger: this.logger,
+    });
 
     agentBuilder.callbacks.registerConversationResolver(
       createThreadConversationResolver({
@@ -164,6 +181,22 @@ export class AgenticInvestigationsPlugin
         logger: this.logger,
       })
     );
+    agentBuilder.tools.register(
+      createSetImpactMapTool({
+        getImpactMapService: () => this.requireImpactMapService(),
+        resolveUser: (request) => this.requireUserResolver()(request),
+        privileges: investigationsPrivileges,
+        logger: this.logger,
+      })
+    );
+    agentBuilder.tools.register(
+      createUpsertImpactMapCatalogTool({
+        getImpactMapService: () => this.requireImpactMapService(),
+        resolveUser: (request) => this.requireUserResolver()(request),
+        privileges: investigationsPrivileges,
+        logger: this.logger,
+      })
+    );
 
     registerImpactStepDefinitions({
       workflowsExtensions,
@@ -182,6 +215,16 @@ export class AgenticInvestigationsPlugin
       getImpactService: () => this.requireImpactService(),
       getImpactPillsService: () => this.requireImpactPillsService(),
       escalationsEnabled: this.escalationsEnabled,
+      getSpaceId: (request) => this.getSpaceId(request),
+      resolveUser: (request) => this.requireUserResolver()(request),
+      getAttachmentClient: (request) => this.getAttachmentClient(request),
+      getConversationClient: (request) => this.getConversationClient(request),
+    });
+
+    registerSetImpactMapRoute({
+      router,
+      logger: this.logger,
+      getImpactMapService: () => this.requireImpactMapService(),
       getSpaceId: (request) => this.getSpaceId(request),
       resolveUser: (request) => this.requireUserResolver()(request),
       getAttachmentClient: (request) => this.getAttachmentClient(request),
@@ -255,6 +298,12 @@ export class AgenticInvestigationsPlugin
     this.hypothesesService = new HypothesesService({
       documents: hypothesesAttachment.createService({ esClient, logger: this.logger }),
     });
+    this.impactMapService = new ImpactMapService({
+      documents: impactMapAttachment.createService({ esClient, logger: this.logger }),
+      catalog: new ImpactMapCatalogService({
+        storage: createImpactMapCatalogStorageClient({ esClient, logger: this.logger }),
+      }),
+    });
 
     this.investigationStatusService = new InvestigationStatusService({
       getConversationClient: (request) =>
@@ -270,6 +319,7 @@ export class AgenticInvestigationsPlugin
       getImpactService: () => this.requireImpactService(),
       getSubjectsService: () => this.requireSubjectsService(),
       getHypothesesService: () => this.requireHypothesesService(),
+      getImpactMapService: () => this.requireImpactMapService(),
       getProposals: () => plugins.proposals,
       inProgress: new InProgressResolver({
         getWorkflowsManagement: () => this.workflowsManagement,
@@ -350,6 +400,7 @@ export class AgenticInvestigationsPlugin
     const getFindingsWriter = createFindingsWriter({
       getHypothesesService: () => this.requireHypothesesService(),
       getImpactService: () => this.requireImpactService(),
+      getImpactMapService: () => this.requireImpactMapService(),
       getSpaceId: (request) => this.getSpaceId(request),
       privileges: startPrivileges,
       resolveUser: (request) => this.requireUserResolver()(request),
@@ -369,7 +420,10 @@ export class AgenticInvestigationsPlugin
         const hypotheses = await this.requireHypothesesService()
           .getDocumentService()
           .deleteAllInSpace(spaceId);
-        return { subjects, subjectClaims: claims, impact, hypotheses };
+        const impactMap = await this.requireImpactMapService()
+          .getDocumentService()
+          .deleteAllInSpace(spaceId);
+        return { subjects, subjectClaims: claims, impact, hypotheses, impactMap };
       },
     });
 
@@ -383,6 +437,7 @@ export class AgenticInvestigationsPlugin
           subjects: subjects.getDocumentService(),
           impact: this.requireImpactService().getDocumentService(),
           hypotheses: this.requireHypothesesService().getDocumentService(),
+          impactMap: this.requireImpactMapService().getDocumentService(),
           deleteClaims: (ids, spaceId) => subjects.deleteClaimsByConversationIds(ids, spaceId),
           deleteAllClaims: () => subjects.deleteAllClaimsAcrossSpaces(),
         });
@@ -426,6 +481,15 @@ export class AgenticInvestigationsPlugin
       );
     }
     return this.hypothesesService;
+  }
+
+  private requireImpactMapService(): ImpactMapService {
+    if (!this.impactMapService) {
+      throw new Error(
+        'Impact map service is not available until the agenticInvestigations plugin has started'
+      );
+    }
+    return this.impactMapService;
   }
 
   private requireInvestigationsQueryService(): InvestigationsQueryService {

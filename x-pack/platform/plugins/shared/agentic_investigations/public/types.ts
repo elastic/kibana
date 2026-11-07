@@ -21,6 +21,7 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import type { AlertSubjectSnapshot } from '../common/subjects/subject';
+import type { InvestigationImpactMapResponse } from '../common/investigations/investigation';
 import type { InvestigationCardProps } from './conversation_templates/templates/investigation/card';
 
 export interface AgenticInvestigationsPublicSetupDependencies {
@@ -58,7 +59,24 @@ export interface AgenticInvestigationsPublicPluginSetup {
    * Read when a subject is clicked, so the registration can be made, or finish, at any point.
    */
   registerAlertFlyout: (source: string, registration: AlertFlyoutRegistration) => void;
+  /**
+   * Registers the component that draws an investigation's impact map, which adds the Impact map
+   * tab to the investigation flyout. Call it from `setup`: the tab is registered in this plugin's
+   * `start`. The last registration wins.
+   */
+  registerImpactMapRenderer: (renderer: ImpactMapRenderer) => void;
 }
+
+/** Props of the component that draws an impact map. It fills its container. */
+export interface ImpactMapRendererProps {
+  impactMap: InvestigationImpactMapResponse;
+}
+
+/**
+ * Draws an investigation's impact map. Supplied by the solution that owns the graph rendering
+ * (APM's service map), so this plugin carries no graph code of its own.
+ */
+export type ImpactMapRenderer = ComponentType<ImpactMapRendererProps>;
 
 /** Opens the entity flyout for one impacted entity. Supplied by the solution that owns the flyout. */
 export type ImpactEntityOpener = (entity: ImpactEntityTarget) => void;

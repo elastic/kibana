@@ -9,6 +9,12 @@ import { z, isoDateTime } from '@kbn/zod/v4';
 import type { ProposalConfidence, ProposalImpact, ProposalStatus } from '@kbn/proposals-common';
 import type { InvestigationEvidence } from '../evidence/evidence';
 import type { Hypothesis } from '../hypotheses/hypotheses';
+import type {
+  ImpactMapEntity,
+  ImpactMapEntityType,
+  ImpactMapRelationship,
+  ImpactMapRelationshipType,
+} from '../impact_map/impact_map';
 import { INVESTIGATION_SUBJECT_TYPES, MAX_SUBJECT_ID_LENGTH } from '../subjects/constants';
 import type {
   AlertSubjectSnapshot,
@@ -147,6 +153,17 @@ export interface InvestigationHypothesesResponse {
   updated_at?: string;
 }
 
+/** The investigation's impact map, with the types it draws with. */
+export interface InvestigationImpactMapResponse {
+  title?: string;
+  entities: ImpactMapEntity[];
+  relationships: Array<ImpactMapRelationship & { id: string }>;
+  entity_types: ImpactMapEntityType[];
+  relationship_types: ImpactMapRelationshipType[];
+  created_at: string;
+  updated_at?: string;
+}
+
 /** A proposed action on the investigation, without its action input or decision details. */
 export interface InvestigationProposalSummary {
   id: string;
@@ -192,6 +209,7 @@ export interface InvestigationSummary {
 /** One investigation, with hypotheses and proposed actions. */
 export interface Investigation extends InvestigationSummary {
   hypotheses?: InvestigationHypothesesResponse;
+  impact_map?: InvestigationImpactMapResponse;
   proposals: InvestigationProposalSummary[];
 }
 

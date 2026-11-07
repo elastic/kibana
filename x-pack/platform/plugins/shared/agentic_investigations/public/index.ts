@@ -21,6 +21,8 @@ export type {
   AgenticInvestigationsPublicPluginStart,
   AlertFlyoutProps,
   AlertFlyoutRegistration,
+  ImpactMapRenderer,
+  ImpactMapRendererProps,
 } from './types';
 
 export {

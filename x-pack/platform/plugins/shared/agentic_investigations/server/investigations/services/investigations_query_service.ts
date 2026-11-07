@@ -20,6 +20,7 @@ import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import { INVESTIGATION_TEMPLATE_ID } from '../../../common/escalations/constants';
 import type { InvestigationHypotheses } from '../../../common/hypotheses/hypotheses';
+import type { InvestigationImpactMap } from '../../../common/impact_map/impact_map';
 import type { Impact } from '../../../common/impact/impact';
 import {
   INVESTIGATION_SEVERITY_NONE,
@@ -48,6 +49,7 @@ import type {
 } from '../../../common/subjects/subject';
 import { WrongTemplateError } from '../../assignments/errors';
 import type { HypothesesService } from '../../hypotheses/services/hypotheses_service';
+import type { ImpactMapService } from '../../impact_map/services/impact_map_service';
 import type { ImpactService } from '../../impact/services/impact_service';
 import type { SubjectsService } from '../../subjects/services/subjects_service';
 import { retryWhileShardUnavailable } from '../../investigation_attachments';
@@ -82,6 +84,7 @@ export interface InvestigationsQueryServiceDeps {
   getImpactService: () => ImpactService;
   getSubjectsService: () => SubjectsService;
   getHypothesesService: () => HypothesesService;
+  getImpactMapService: () => ImpactMapService;
   getProposals: () => ProposalsPluginStart | undefined;
   inProgress: InProgressResolver;
   logger: Logger;
@@ -113,16 +116,18 @@ export class InvestigationsQueryService {
     }
 
     const spaceId = this.deps.getSpaceId(request);
-    const [subjects, impact, hypotheses, inProgress, proposals] = await Promise.all([
+    const [subjects, impact, hypotheses, impactMap, inProgress, proposals] = await Promise.all([
       this.deps.getSubjectsService().listByConversationIds([id], spaceId),
       this.deps.getImpactService().findByConversationId(id, spaceId),
       this.deps.getHypothesesService().findByConversationId(id, spaceId),
+      this.deps.getImpactMapService().findByConversationId(id, spaceId),
       this.deps.inProgress.isInProgress(request, spaceId, conversation),
       this.listProposals(request, id, spaceId),
     ]);
 
     const removed = removedAttachmentIds(conversation.attachments);
     const visibleHypotheses = hypotheses && !removed.has(hypotheses.id) ? hypotheses : undefined;
+    const visibleImpactMap = impactMap && !removed.has(impactMap.id) ? impactMap : undefined;
     return {
       ...toSummary({
         conversation,
@@ -131,6 +136,7 @@ export class InvestigationsQueryService {
         impact: impact && !removed.has(impact.id) ? impact : undefined,
       }),
       ...(visibleHypotheses && { hypotheses: toHypothesesResponse(visibleHypotheses) }),
+      ...(visibleImpactMap && { impact_map: toImpactMapResponse(visibleImpactMap) }),
       proposals,
     };
   }
@@ -754,6 +760,27 @@ const toImpactResponse = (impact: Impact): InvestigationImpactResponse => ({
   })),
   created_at: impact.createdAt,
   ...(impact.updatedAt !== undefined && { updated_at: impact.updatedAt }),
+});
+
+const toImpactMapResponse = ({
+  title,
+  entities,
+  relationships,
+  entityTypes,
+  relationshipTypes,
+  createdAt,
+  updatedAt,
+}: InvestigationImpactMap): NonNullable<Investigation['impact_map']> => ({
+  ...(title !== undefined && { title }),
+  entities,
+  relationships: relationships.map((relationship) => ({
+    ...relationship,
+    id: relationship.id ?? `${relationship.source_id}->${relationship.target_id}`,
+  })),
+  entity_types: entityTypes,
+  relationship_types: relationshipTypes,
+  created_at: createdAt,
+  ...(updatedAt !== undefined && { updated_at: updatedAt }),
 });
 
 const toHypothesesResponse = (

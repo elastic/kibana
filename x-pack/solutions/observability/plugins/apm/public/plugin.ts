@@ -95,6 +95,7 @@ import type { ICPSManager } from '@kbn/cps-utils';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import type { APMClientV2 } from '@kbn/apm-api-shared';
+import type { AgenticInvestigationsPublicPluginSetup } from '@kbn/agentic-investigations-plugin/public';
 import type { ConfigSchema } from '.';
 import {
   getApmEnrollmentFlyoutData,
@@ -114,6 +115,7 @@ import {
   registerServiceMapAttachment,
   registerServiceMapContextAttachment,
 } from './agent_builder/attachment_types';
+import { LazyImpactServiceMap } from './agent_builder/impact_map/lazy_impact_service_map';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import { createServiceFlyoutRenderer } from './components/shared/service_flyout/service_flyout_feature';
 
@@ -141,6 +143,7 @@ export interface ApmPluginSetupDeps {
   profiling?: ProfilingPluginSetup;
   cloud?: CloudSetup;
   discoverShared: DiscoverSharedPublicSetup;
+  agenticInvestigations?: AgenticInvestigationsPublicPluginSetup;
 }
 
 export interface ApmServices {
@@ -284,6 +287,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     if (pluginSetupDeps.home) {
       pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
     }
+
+    // Investigation impact maps are drawn with the service map's nodes and layout.
+    plugins.agenticInvestigations?.registerImpactMapRenderer(LazyImpactServiceMap);
 
     // register observability nav if user has access to plugin
     plugins.observabilityShared.navigation.registerSections(

@@ -33,6 +33,8 @@ interface DiamondNodeProps {
   badge?: ReactNode;
   ariaLabel?: string;
   groupedCount?: number;
+  /** Replaces the default border colour, for example to show health. Selection still wins. */
+  borderColor?: string;
 }
 
 export const DiamondNode = memo(
@@ -49,10 +51,13 @@ export const DiamondNode = memo(
     badge,
     ariaLabel: customAriaLabel,
     groupedCount,
+    borderColor: customBorderColor,
   }: DiamondNodeProps) => {
     const { euiTheme } = useEuiTheme();
 
-    const borderColor = selected ? euiTheme.colors.primary : euiTheme.colors.mediumShade;
+    const borderColor = selected
+      ? euiTheme.colors.primary
+      : customBorderColor ?? euiTheme.colors.mediumShade;
     const diamondBorderWidth = selected
       ? `${NODE_BORDER_WIDTH_SELECTED}px`
       : `${NODE_BORDER_WIDTH_DEFAULT}px`;

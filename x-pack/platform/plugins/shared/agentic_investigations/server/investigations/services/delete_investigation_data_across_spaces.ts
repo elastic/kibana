@@ -36,6 +36,7 @@ export interface DeleteInvestigationDataAcrossSpacesDeps {
   >;
   impact: DocumentService;
   hypotheses: DocumentService;
+  impactMap: DocumentService;
   /** Removes the claims the given investigations hold in the space. */
   deleteClaims: (conversationIds: string[], spaceId: string) => Promise<number>;
   /** Removes every claim in every space, including claims of investigations without subjects. */
@@ -53,6 +54,7 @@ export const deleteInvestigationDataAcrossSpaces = async ({
   subjects,
   impact,
   hypotheses,
+  impactMap,
   deleteClaims,
   deleteAllClaims,
 }: DeleteInvestigationDataAcrossSpacesDeps): Promise<DeleteInvestigationDataAcrossSpacesResult> => {
@@ -62,6 +64,7 @@ export const deleteInvestigationDataAcrossSpaces = async ({
     subjectClaims: 0,
     impact: 0,
     hypotheses: 0,
+    impactMap: 0,
     complete: false,
   };
 
@@ -78,6 +81,7 @@ export const deleteInvestigationDataAcrossSpaces = async ({
       // Subjects last: they are how the next round finds what is left.
       result.impact += await impact.deleteByConversationIds(ids, spaceId);
       result.hypotheses += await hypotheses.deleteByConversationIds(ids, spaceId);
+      result.impactMap += await impactMap.deleteByConversationIds(ids, spaceId);
       result.subjectClaims += await deleteClaims(ids, spaceId);
       result.subjects += await subjects.deleteByConversationIds(ids, spaceId);
     }

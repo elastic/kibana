@@ -114,6 +114,36 @@ export type {
   InvestigationHypotheses,
 } from './hypotheses/hypotheses';
 
+// Impact maps, like hypotheses: constants and types only, the schemas stay in the entity barrel.
+export {
+  IMPACT_MAP_ATTACHMENT_TYPE,
+  IMPACT_MAP_CATALOG_INDEX_NAME,
+  IMPACT_MAP_ENTITY_KINDS,
+  IMPACT_MAP_HEALTH_STATES,
+  IMPACT_MAP_INDEX_NAME,
+  IMPACT_MAP_ROLES,
+  MAX_IMPACT_MAP_CATALOG_TYPES,
+  MAX_IMPACT_MAP_ENTITIES,
+  MAX_IMPACT_MAP_RELATIONSHIPS,
+  SET_IMPACT_MAP_TOOL_ID,
+  UPSERT_IMPACT_MAP_CATALOG_TOOL_ID,
+  INVESTIGATION_IMPACT_MAP_URL,
+} from './impact_map/constants';
+
+export type {
+  ImpactMapAnnotations,
+  ImpactMapCatalog,
+  ImpactMapEntity,
+  ImpactMapEntityKind,
+  ImpactMapEntityType,
+  ImpactMapHealth,
+  ImpactMapIcon,
+  ImpactMapRelationship,
+  ImpactMapRelationshipType,
+  ImpactMapRole,
+  InvestigationImpactMap,
+} from './impact_map/impact_map';
+
 export {
   ESCALATION_ASSIGNEES_FIELD,
   ESCALATION_ASSIGN_URL,
@@ -178,6 +208,7 @@ export type {
   InvestigationFilters,
   InvestigationFiltersInput,
   InvestigationHypothesesResponse,
+  InvestigationImpactMapResponse,
   InvestigationImpactEntityResponse,
   InvestigationImpactResponse,
   InvestigationMetadata,

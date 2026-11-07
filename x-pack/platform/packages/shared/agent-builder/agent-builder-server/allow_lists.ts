@@ -157,6 +157,8 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // Platform – Agentic Investigations
   `${internalNamespaces.agenticInvestigations}.set_impact`,
   `${internalNamespaces.agenticInvestigations}.set_hypotheses`,
+  `${internalNamespaces.agenticInvestigations}.set_impact_map`,
+  `${internalNamespaces.agenticInvestigations}.upsert_impact_map_catalog`,
 
   // Platform – Proposals
   `${internalNamespaces.proposals}.create`,
@@ -459,6 +461,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'investigation_impact',
   'investigation_subject',
   'investigation_hypotheses',
+  'investigation_impact_map',
 
   // Observability – Nightshift
   'nightshift.notification_routing',

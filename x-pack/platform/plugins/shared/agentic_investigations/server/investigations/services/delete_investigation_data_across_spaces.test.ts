@@ -23,6 +23,7 @@ describe('deleteInvestigationDataAcrossSpaces', () => {
     };
     const impact = { deleteByConversationIds: jest.fn().mockResolvedValue(1) };
     const hypotheses = { deleteByConversationIds: jest.fn().mockResolvedValue(0) };
+    const impactMap = { deleteByConversationIds: jest.fn().mockResolvedValue(1) };
     const deleteClaims = jest.fn(async (ids: string[]) => ids.length);
     const deleteAllClaims = jest.fn().mockResolvedValue(1);
 
@@ -30,6 +31,7 @@ describe('deleteInvestigationDataAcrossSpaces', () => {
       subjects,
       impact,
       hypotheses,
+      impactMap,
       deleteClaims,
       deleteAllClaims,
     });
@@ -37,6 +39,7 @@ describe('deleteInvestigationDataAcrossSpaces', () => {
     expect(impact.deleteByConversationIds).toHaveBeenCalledWith(['a', 'c'], 'default');
     expect(impact.deleteByConversationIds).toHaveBeenCalledWith(['b'], 'other');
     expect(hypotheses.deleteByConversationIds).toHaveBeenCalledWith(['a', 'c'], 'default');
+    expect(impactMap.deleteByConversationIds).toHaveBeenCalledWith(['b'], 'other');
     expect(subjects.deleteByConversationIds).toHaveBeenCalledWith(['b'], 'other');
     expect(deleteClaims).toHaveBeenCalledWith(['a', 'c'], 'default');
     expect(deleteClaims).toHaveBeenCalledWith(['b'], 'other');
@@ -48,6 +51,7 @@ describe('deleteInvestigationDataAcrossSpaces', () => {
       subjectClaims: 4,
       impact: 2,
       hypotheses: 0,
+      impactMap: 2,
       complete: true,
     });
   });
@@ -68,6 +72,7 @@ describe('deleteInvestigationDataAcrossSpaces', () => {
       },
       impact: { deleteByConversationIds: jest.fn().mockResolvedValue(0) },
       hypotheses: { deleteByConversationIds: jest.fn().mockResolvedValue(0) },
+      impactMap: { deleteByConversationIds: jest.fn().mockResolvedValue(0) },
       deleteClaims,
       deleteAllClaims,
     });
@@ -88,6 +93,7 @@ describe('deleteInvestigationDataAcrossSpaces', () => {
       },
       impact,
       hypotheses: { deleteByConversationIds: jest.fn() },
+      impactMap: { deleteByConversationIds: jest.fn() },
       deleteClaims: jest.fn(),
       deleteAllClaims: jest.fn().mockResolvedValue(0),
     });
@@ -99,6 +105,7 @@ describe('deleteInvestigationDataAcrossSpaces', () => {
       subjectClaims: 0,
       impact: 0,
       hypotheses: 0,
+      impactMap: 0,
       complete: true,
     });
   });

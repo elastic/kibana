@@ -139,6 +139,17 @@ export interface OverviewSlotRenderProps {
  */
 export type RenderOverview = (props: OverviewSlotRenderProps) => React.ReactNode;
 
+/** Props passed to the `renderImpactMap` render prop. */
+export interface ImpactMapSlotRenderProps {
+  conversationId: string;
+}
+
+/**
+ * A render prop for the body of the investigation's Impact map tab. Supplied by the consuming
+ * plugin, which reads the map and draws it; without it the flyout has no Impact map tab.
+ */
+export type RenderImpactMap = (props: ImpactMapSlotRenderProps) => React.ReactNode;
+
 /** Props passed to the `renderLiveState` render prop. */
 export interface LiveStateSlotRenderProps {
   conversationId: string;

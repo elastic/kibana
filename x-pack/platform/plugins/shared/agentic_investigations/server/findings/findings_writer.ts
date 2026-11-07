@@ -13,6 +13,7 @@ import type { InvestigationEvidence } from '../../common/evidence';
 import type { HypothesesService } from '../hypotheses/services/hypotheses_service';
 import { attachImpactToInvestigation } from '../impact/attachments/attach_impact_to_investigation';
 import type { ImpactService } from '../impact/services/impact_service';
+import type { ImpactMapInput, ImpactMapService } from '../impact_map/services/impact_map_service';
 import type { InvestigationsPrivilegesChecker } from '../investigations/services/check_investigations_privileges';
 import type { ResolveUser } from '../services/resolve_user';
 
@@ -33,6 +34,14 @@ export interface FindingsWriter {
     evidence?: InvestigationEvidence | null;
     entities?: ImpactEntity[];
   }) => Promise<void>;
+  /**
+   * Replaces the impact map with this snapshot, adding any new types to the space catalog. Returns
+   * what was repaired on the way (unknown types made up from their ids, duplicate edges dropped).
+   */
+  setImpactMap: (params: {
+    conversationId: string;
+    impactMap: ImpactMapInput;
+  }) => Promise<{ warnings: string[] }>;
   /** The findings stored for the conversation: its hypotheses and impact, if any. */
   getFindings: (params: { conversationId: string }) => Promise<{
     hypotheses: Hypothesis[];
@@ -45,6 +54,7 @@ export interface FindingsWriter {
 export interface FindingsWriterDeps {
   getHypothesesService: () => HypothesesService;
   getImpactService: () => ImpactService;
+  getImpactMapService: () => ImpactMapService;
   getSpaceId: (request: KibanaRequest) => string;
   /** Writes need the investigations manage privilege. */
   privileges: InvestigationsPrivilegesChecker;
@@ -57,6 +67,7 @@ export const createFindingsWriter =
   ({
     getHypothesesService,
     getImpactService,
+    getImpactMapService,
     getSpaceId,
     privileges,
     resolveUser,
@@ -94,6 +105,17 @@ export const createFindingsWriter =
         await getHypothesesService().setWithPublicClient({
           conversationId,
           hypotheses,
+          spaceId,
+          user,
+          conversations,
+          attachments,
+        });
+      },
+      setImpactMap: async ({ conversationId, impactMap }) => {
+        const { conversations, attachments, user, spaceId } = await resolveContext();
+        return getImpactMapService().setWithPublicClient({
+          conversationId,
+          input: impactMap,
           spaceId,
           user,
           conversations,

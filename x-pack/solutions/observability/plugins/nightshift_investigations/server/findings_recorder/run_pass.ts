@@ -613,6 +613,11 @@ export const runFindingsPass = async (
           }),
       ]);
     }
+    // Omitted keeps the stored map: a later final pass may answer without redrawing it.
+    const impactMap = record.impact_map;
+    if (final && impactMap) {
+      writes.push(['impact map', () => writer.setImpactMap({ conversationId, impactMap })]);
+    }
     const proposals = deps.getProposals?.();
     if (final && proposals && record.proposals?.length) {
       const wanted = record.proposals;
