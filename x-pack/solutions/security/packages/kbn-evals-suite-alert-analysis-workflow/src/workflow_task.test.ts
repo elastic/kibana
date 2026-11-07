@@ -7,7 +7,7 @@
 
 import { extractAgentConversationIds } from '@kbn/security-evals-workflow-traces';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { readVerdict, readVerdicts } from './workflow_task';
+import { readTiming, readVerdict, readVerdicts } from './workflow_task';
 
 const step = (overrides: Partial<WorkflowStepExecutionDto>): WorkflowStepExecutionDto =>
   ({
@@ -197,5 +197,92 @@ describe('readVerdicts', () => {
     ];
 
     expect([...readVerdicts(steps).keys()]).toEqual(['a1', 'b2']);
+  });
+});
+
+describe('readTiming', () => {
+  it('spans the classification records and ignores other steps', () => {
+    const timing = readTiming({
+      startedAt: '2026-10-30T10:00:00.000Z',
+      finishedAt: '2026-10-30T10:05:00.000Z',
+      stepExecutions: [
+        step({
+          stepId: 'enrich',
+          stepType: 'elasticsearch.search',
+          startedAt: '2026-10-30T10:00:01.000Z',
+          finishedAt: '2026-10-30T10:00:05.000Z',
+        }),
+        step({ startedAt: '2026-10-30T10:01:00.000Z', finishedAt: '2026-10-30T10:02:00.000Z' }),
+        step({
+          stepType: 'ai.prompt',
+          startedAt: '2026-10-30T10:02:00.000Z',
+          finishedAt: '2026-10-30T10:03:30.000Z',
+        }),
+      ],
+    });
+
+    expect(timing).toEqual({
+      startedAt: '2026-10-30T10:00:00.000Z',
+      finishedAt: '2026-10-30T10:05:00.000Z',
+      classificationStartedAt: '2026-10-30T10:01:00.000Z',
+      classificationFinishedAt: '2026-10-30T10:03:30.000Z',
+    });
+  });
+
+  it('reports no classification end while a record is still running', () => {
+    const timing = readTiming({
+      startedAt: '2026-10-30T10:00:00.000Z',
+      finishedAt: '',
+      stepExecutions: [
+        step({ startedAt: '2026-10-30T10:01:00.000Z', finishedAt: '2026-10-30T10:02:00.000Z' }),
+        step({ startedAt: '2026-10-30T10:02:00.000Z', finishedAt: undefined }),
+      ],
+    });
+
+    expect(timing.classificationStartedAt).toBe('2026-10-30T10:01:00.000Z');
+    expect(timing.classificationFinishedAt).toBeUndefined();
+  });
+
+  it('still reports the end when every classification record finished', () => {
+    const timing = readTiming({
+      startedAt: '2026-10-30T10:00:00.000Z',
+      finishedAt: '2026-10-30T10:05:00.000Z',
+      stepExecutions: [
+        step({ startedAt: '2026-10-30T10:01:00.000Z', finishedAt: '2026-10-30T10:02:00.000Z' }),
+        step({ startedAt: '2026-10-30T10:02:00.000Z', finishedAt: '2026-10-30T10:03:00.000Z' }),
+      ],
+    });
+
+    expect(timing.classificationFinishedAt).toBe('2026-10-30T10:03:00.000Z');
+  });
+
+  it('ignores a running record of a non-classification step', () => {
+    const timing = readTiming({
+      startedAt: '2026-10-30T10:00:00.000Z',
+      finishedAt: '2026-10-30T10:05:00.000Z',
+      stepExecutions: [
+        step({ startedAt: '2026-10-30T10:01:00.000Z', finishedAt: '2026-10-30T10:02:00.000Z' }),
+        step({
+          stepId: 'enrich',
+          stepType: 'elasticsearch.search',
+          startedAt: '2026-10-30T10:04:00.000Z',
+          finishedAt: undefined,
+        }),
+      ],
+    });
+
+    expect(timing.classificationFinishedAt).toBe('2026-10-30T10:02:00.000Z');
+  });
+
+  it('leaves fields undefined when the engine reported none', () => {
+    const timing = readTiming({
+      startedAt: '2026-10-30T10:00:00.000Z',
+      finishedAt: '',
+      stepExecutions: [step({ startedAt: undefined, finishedAt: undefined })],
+    });
+
+    expect(timing.finishedAt).toBeUndefined();
+    expect(timing.classificationStartedAt).toBeUndefined();
+    expect(timing.classificationFinishedAt).toBeUndefined();
   });
 });
