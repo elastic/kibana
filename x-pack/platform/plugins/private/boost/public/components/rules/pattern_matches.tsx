@@ -44,9 +44,19 @@ const SELECT_PROFILE_MESSAGE = i18n.translate('xpack.boost.patternMatches.select
   defaultMessage: 'Select a boost profile to choose targets.',
 });
 
+// Heads the list until something is typed, when it starts counting matches.
+const UNFILTERED_TITLES: Readonly<Record<BoostProfileType, string>> = {
+  indices: i18n.translate('xpack.boost.patternMatches.unfilteredIndicesTitle', {
+    defaultMessage: 'Enter a pattern, or select an index',
+  }),
+  data_streams: i18n.translate('xpack.boost.patternMatches.unfilteredDataStreamsTitle', {
+    defaultMessage: 'Enter a pattern, or select a data stream',
+  }),
+};
+
 // Why the list's switches are off, when they are.
 const UNFILTERED_REASON = i18n.translate('xpack.boost.patternMatches.unfilteredReason', {
-  defaultMessage: "The list isn't filtered until you enter a name or pattern.",
+  defaultMessage: "The list isn't filtered until you enter a pattern or name.",
 });
 
 const NO_HIDDEN_REASONS: Readonly<Record<BoostProfileType, string>> = {
@@ -206,10 +216,13 @@ export const PatternMatches = ({
   const matchKind: MatchKind = hasExactMatches ? 'exact' : 'partial';
 
   // How many the pattern matches, which only counts exact matches, hidden ones included, as the
-  // rule applies to them all the same, shown or not, or how many it partly matches until then. It
-  // only ever counts matches, so it's 0 until something is typed, rather than counting a list whose
-  // length depends on whether hidden data sources are shown.
-  const getCount = (): string => {
+  // rule applies to them all the same, shown or not, or how many it partly matches until then.
+  // Until something is typed, a title says what the list is for instead: it only ever counts
+  // matches, rather than a list whose length depends on whether hidden data sources are shown.
+  const getTitle = (): string => {
+    if (!pattern) {
+      return UNFILTERED_TITLES[targetType];
+    }
     if (type && hasExactMatches) {
       return formatMatchCount('exact', exactMatches.length);
     }
@@ -237,11 +250,24 @@ export const PatternMatches = ({
 
   // How many hidden data sources a list leaves out, in a row after any others, as tall as them and
   // after the icon of how they match, if they do. As in the "Applies to" lists, it's in italics,
-  // setting the count apart from the names.
-  const renderHiddenNote = (count: number, isAfterOthers: boolean, match?: MatchKind) =>
+  // setting the count apart from the names. It takes the color of the names it stands for: the
+  // primary color for exact matches, unless higher-ranked rules keep every one of them.
+  const renderHiddenNote = (
+    count: number,
+    isAfterOthers: boolean,
+    match?: MatchKind,
+    isOutranked = false
+  ) =>
     count > 0 && (
       <EuiText
         size="s"
+        color={
+          match !== 'exact'
+            ? undefined
+            : isOutranked
+            ? euiTheme.colors.textDisabled
+            : euiTheme.colors.textPrimary
+        }
         css={{
           display: 'flex',
           alignItems: 'center',
@@ -252,10 +278,13 @@ export const PatternMatches = ({
         }}
         data-test-subj="boostRuleHiddenNotShown"
       >
-        <MatchIcon match={match} isLabeled={false} />
+        <MatchIcon match={match} isDisabled={isOutranked} isLabeled={false} />
         {formatHiddenTargets(targetType, count, isAfterOthers)}
       </EuiText>
     );
+
+  const isEveryOutranked = (targets: ReadonlyArray<Pick<TargetPreview, 'overriddenBy'>>) =>
+    targets.every(({ overriddenBy }) => overriddenBy !== undefined);
 
   // A list of targets, each after its match icon, struck through with the rule that keeps it when a
   // higher-ranked rule does. Each is an option that makes it the rule's target, with the hover of
@@ -340,6 +369,7 @@ export const PatternMatches = ({
     testSubj?: string
   ) => {
     const shown = includesHidden ? targets : targets.filter(({ isHidden }) => !isHidden);
+    const left = targets.filter((target) => !shown.includes(target));
     return renderList(
       label,
       shown.map(({ name, pattern: targetPattern, overriddenBy, isHidden }) => ({
@@ -349,7 +379,7 @@ export const PatternMatches = ({
         overriddenBy,
         isHidden,
       })),
-      renderHiddenNote(targets.length - shown.length, shown.length > 0, match),
+      renderHiddenNote(left.length, shown.length > 0, match, isEveryOutranked(left)),
       false,
       testSubj
     );
@@ -391,13 +421,21 @@ export const PatternMatches = ({
     const shown = includesHidden ? dataSources : dataSources.filter(({ hidden }) => !hidden);
     // As in the matching list, only hidden matches are counted, so the note doesn't count others as
     // matches. With nothing else to list, every hidden data source is counted, without an icon.
-    const hiddenMatchCount = includesHidden
-      ? 0
-      : dataSources.filter(({ name, hidden }) => hidden && matchesByName.has(name)).length;
+    const hiddenMatches = includesHidden
+      ? []
+      : dataSources.flatMap(({ name, hidden }) => {
+          const target = hidden ? matchesByName.get(name) : undefined;
+          return target ? [target] : [];
+        });
     const hiddenNote =
-      shown.length === 0 && hiddenMatchCount === 0
+      shown.length === 0 && hiddenMatches.length === 0
         ? renderHiddenNote(dataSources.length, false)
-        : renderHiddenNote(hiddenMatchCount, shown.length > 0, matchKind);
+        : renderHiddenNote(
+            hiddenMatches.length,
+            shown.length > 0,
+            matchKind,
+            isEveryOutranked(hiddenMatches)
+          );
     // Matches are mixed with everything else here, so their icons say which they are, and each
     // notes a higher-ranked rule that keeps it, as in the filtered list. The rest note one that
     // would keep them if the rule named them, since choosing one does.
@@ -457,7 +495,7 @@ export const PatternMatches = ({
           aria-live="polite"
           data-test-subj="boostRulePatternMatchCount"
         >
-          {getCount()}
+          {getTitle()}
         </EuiText>
       </TargetListHeader>
       {/* The options' hover fills the panel, less 8px around them. */}

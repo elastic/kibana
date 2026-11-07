@@ -90,10 +90,10 @@ const PROFILE_TYPES: readonly BoostProfileType[] = ['indices', 'data_streams'];
 // Names the field by what it takes, which the profile's type decides.
 const TARGET_LABELS: Readonly<Record<BoostProfileType, string>> = {
   indices: i18n.translate('xpack.boost.ruleForm.indexTargetLabel', {
-    defaultMessage: 'Index name or pattern',
+    defaultMessage: 'Index pattern or name',
   }),
   data_streams: i18n.translate('xpack.boost.ruleForm.dataStreamTargetLabel', {
-    defaultMessage: 'Data stream name or pattern',
+    defaultMessage: 'Data stream pattern or name',
   }),
 };
 
@@ -439,10 +439,10 @@ export const RuleFlyout = ({
         value={draft.pattern}
         onChange={({ target: { value } }) => updateDraft({ pattern: value })}
         placeholder={i18n.translate('xpack.boost.ruleForm.patternPlaceholder', {
-          defaultMessage: 'Example: {name} or {pattern}',
+          defaultMessage: 'Example: {pattern} or {name}',
           values: {
-            name: targetType === 'data_streams' ? 'logs-app' : 'products',
             pattern: targetType === 'data_streams' ? 'logs-*' : 'products-*',
+            name: targetType === 'data_streams' ? 'logs-app' : 'products',
           },
         })}
         isInvalid={Boolean(patternError)}

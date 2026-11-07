@@ -31,7 +31,7 @@ const RULE_NAME_MESSAGES: Record<ProfileNameError, string> = {
 const INDEX_PATTERN_MESSAGES: Record<IndexPatternError, string> = {
   required: 'must not be empty',
   too_long: `must be at most ${INDEX_PATTERN_MAX_LENGTH} characters`,
-  invalid_characters: 'must be a single name or pattern, without commas or spaces',
+  invalid_characters: 'must be a single pattern or name, without commas or spaces',
 };
 
 const ruleNameSchema = schema.string({

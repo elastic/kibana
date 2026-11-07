@@ -21,7 +21,7 @@ const SHOW_UNMATCHED_LABEL = i18n.translate('xpack.boost.targetListHeader.showUn
 
 // The height of a target list's header, for lists that size themselves to fit under it, with the
 // space above it.
-export const TARGET_LIST_HEADER_HEIGHT = 40;
+export const TARGET_LIST_HEADER_HEIGHT = 48;
 
 interface ListOption {
   checked: boolean;
@@ -64,7 +64,7 @@ export const TargetListHeader = ({
         justifyContent: 'space-between',
         gap: euiTheme.size.m,
         minBlockSize: euiTheme.size.xl,
-        padding: `${euiTheme.size.s} ${euiTheme.size.base} 0`,
+        padding: `${euiTheme.size.base} ${euiTheme.size.base} 0`,
       }}
     >
       {children}

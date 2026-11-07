@@ -33,14 +33,14 @@ export const PROFILE_REQUIRED_MESSAGE = i18n.translate('xpack.boost.ruleForm.pro
 
 export const INDEX_PATTERN_ERROR_MESSAGES: Readonly<Record<IndexPatternError, string>> = {
   required: i18n.translate('xpack.boost.ruleForm.patternRequired', {
-    defaultMessage: 'Enter a name or pattern.',
+    defaultMessage: 'Enter a pattern or name.',
   }),
   too_long: i18n.translate('xpack.boost.ruleForm.patternTooLong', {
     defaultMessage: 'Use {max} characters or fewer.',
     values: { max: INDEX_PATTERN_MAX_LENGTH },
   }),
   invalid_characters: i18n.translate('xpack.boost.ruleForm.patternInvalid', {
-    defaultMessage: 'Enter one name or pattern, without commas or spaces.',
+    defaultMessage: 'Enter one pattern or name, without commas or spaces.',
   }),
 };
 

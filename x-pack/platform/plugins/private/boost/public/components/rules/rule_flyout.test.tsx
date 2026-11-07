@@ -535,8 +535,8 @@ describe('RuleFlyout pattern matches', () => {
 
   it('lists every index until something is typed, and then filters it to what matches', async () => {
     renderNewRule();
-    // It only counts matches.
-    expect(getCount()).toHaveTextContent(/^0 matches$/);
+    // It only counts matches, so until something is typed, it says what the list is for.
+    expect(getCount()).toHaveTextContent(/^Enter a pattern, or select an index$/);
     expect(getListed()).toEqual(['catalog-fall', 'products']);
 
     await userEvent.type(getPattern(), 'catalog-*');
@@ -557,7 +557,7 @@ describe('RuleFlyout pattern matches', () => {
     expect(showUnmatched).toBeDisabled();
     await userEvent.hover(screen.getByText('Show unmatched'));
     expect(await screen.findByRole('tooltip')).toHaveTextContent(
-      "The list isn't filtered until you enter a name or pattern."
+      "The list isn't filtered until you enter a pattern or name."
     );
 
     await userEvent.type(getPattern(), 'catalog-*');
@@ -739,7 +739,9 @@ describe('RuleFlyout pattern matches', () => {
     expect(screen.getByTestId('boostRulePatternMatchesEmpty')).toHaveTextContent(
       'Select a boost profile to choose targets.'
     );
-    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(/^0 matches$/);
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(
+      /^Enter a pattern, or select an index$/
+    );
     expect(screen.getByTestId('boostRuleListOptions')).toBeDisabled();
   });
 
@@ -760,7 +762,7 @@ describe('RuleFlyout pattern matches', () => {
 
     expect(getPattern()).toBeDisabled();
     // EUI turns off pointer events on disabled inputs, so hovers land on the row the tooltip wraps.
-    await userEvent.hover(screen.getByText('Index name or pattern', { selector: 'label' }));
+    await userEvent.hover(screen.getByText('Index pattern or name', { selector: 'label' }));
 
     expect(await screen.findByRole('tooltip')).toHaveTextContent(
       'Select a boost profile to choose targets.'
@@ -890,7 +892,7 @@ describe('RuleFlyout choosing from the list', () => {
 
     await save();
     expect(
-      screen.getByText('Enter one name or pattern, without commas or spaces.')
+      screen.getByText('Enter one pattern or name, without commas or spaces.')
     ).toBeInTheDocument();
     expect(mutation.mutate).not.toHaveBeenCalled();
 
@@ -967,6 +969,39 @@ describe('RuleFlyout hidden data sources', () => {
     // With nothing before it, it adds to nothing.
     expect(screen.getByTestId('boostRuleHiddenNotShown')).toHaveTextContent(/^1 hidden index$/);
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+  });
+
+  it('colors the hidden ones it leaves out like the matches they are', async () => {
+    const {
+      result: { current: theme },
+    } = renderHook(() => useEuiTheme());
+    const getNoteColor = () =>
+      getComputedStyle(screen.getByTestId('boostRuleHiddenNotShown')).color.toLowerCase();
+    const toRgb = (hex: string) => {
+      const [red, green, blue] = [1, 3, 5].map((start) =>
+        parseInt(hex.slice(start, start + 2), 16)
+      );
+      return `rgb(${red}, ${green}, ${blue})`;
+    };
+    const { unmount } = renderNewRule();
+
+    // An exact match, like the rest, takes the primary color.
+    await userEvent.type(screen.getByTestId('boostRulePattern'), '.catalog-*');
+    expect(getNoteColor()).toBe(toRgb(theme.euiTheme.colors.textPrimary));
+
+    // A partial one doesn't.
+    await userEvent.clear(screen.getByTestId('boostRulePattern'));
+    await userEvent.type(screen.getByTestId('boostRulePattern'), '.catalog');
+    expect(getNoteColor()).not.toBe(toRgb(theme.euiTheme.colors.textPrimary));
+    unmount();
+
+    // A higher-ranked rule keeps it, so it's disabled, like a match struck through.
+    const { rules } = state;
+    state.rules = [...rules, { ...rule, name: 'archives', index_patterns: ['.catalog-*'] }];
+    renderNewRule();
+    await userEvent.type(screen.getByTestId('boostRulePattern'), '.catalog-*');
+    expect(getNoteColor()).toBe(toRgb(theme.euiTheme.colors.textDisabled));
+    state.rules = rules;
   });
 
   it('lists hidden data sources to choose from once they are shown', async () => {
