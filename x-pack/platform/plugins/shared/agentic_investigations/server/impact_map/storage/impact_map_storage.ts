@@ -43,6 +43,7 @@ export const impactMapStorageSettings = {
       relationships: types.object({ enabled: false }),
       entityTypes: types.object({ enabled: false }),
       relationshipTypes: types.object({ enabled: false }),
+      events: types.object({ enabled: false }),
       createdAt: types.date({}),
       updatedAt: types.date({}),
       createdBy: userMapping,

@@ -106,10 +106,56 @@ function StateBadge({ state, floating }: { state: ImpactState; floating?: boolea
   );
 }
 
+function EventCountBadge({ count }: { count?: number }) {
+  const { euiTheme } = useEuiTheme();
+  if (!count) {
+    return null;
+  }
+  const label = i18n.translate('xpack.apm.impactMap.badge.events', {
+    defaultMessage: '{count, plural, one {# event} other {# events}}: click to see them',
+    values: { count },
+  });
+  return (
+    <EuiToolTip
+      content={<EuiText size="xs">{label}</EuiText>}
+      position="top"
+      disableScreenReaderOutput
+    >
+      <span
+        role="img"
+        tabIndex={0}
+        aria-label={label}
+        data-test-subj="impactMapEventCount"
+        css={css`
+          position: absolute;
+          top: -8px;
+          right: calc(50% + 14px);
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-width: ${BADGE_SIZE}px;
+          height: ${BADGE_SIZE}px;
+          padding: 0 ${euiTheme.size.xs};
+          border-radius: ${BADGE_SIZE / 2}px;
+          background: ${euiTheme.colors.primary};
+          color: ${euiTheme.colors.textInverse};
+          border: 2px solid ${euiTheme.colors.backgroundBasePlain};
+          font-size: ${euiTheme.size.m};
+          font-weight: ${euiTheme.font.weight.bold};
+          line-height: 1;
+        `}
+      >
+        {count}
+      </span>
+    </EuiToolTip>
+  );
+}
+
 const ImpactServiceNode = memo((props: NodeProps<Node<ImpactServiceNodeData>>) => (
   <>
     <ServiceNode {...(props as unknown as ComponentProps<typeof ServiceNode>)} />
     {props.data.impactState && <StateBadge state={props.data.impactState} floating />}
+    <EventCountBadge count={props.data.eventCount} />
   </>
 ));
 ImpactServiceNode.displayName = 'ImpactServiceNode';
@@ -131,6 +177,7 @@ const ImpactDependencyNode = memo(
         }
       />
       {data.impactState && <StateBadge state={data.impactState} floating />}
+      <EventCountBadge count={data.eventCount} />
     </>
   )
 );
@@ -140,6 +187,7 @@ const ImpactInfrastructureNode = memo((props: NodeProps<Node<ImpactDependencyNod
   <>
     <InfrastructureNode {...props} />
     {props.data.impactState && <StateBadge state={props.data.impactState} floating />}
+    <EventCountBadge count={props.data.eventCount} />
   </>
 ));
 ImpactInfrastructureNode.displayName = 'ImpactInfrastructureNode';
@@ -282,9 +330,13 @@ const useServiceAgentNames = (impactMap: ImpactMapRendererProps['impactMap']) =>
 
 /**
  * Draws an investigation's impact map with the service map's nodes and layout. Users can pan,
- * zoom and drag nodes; nodes do not open anything yet.
+ * zoom and drag nodes, and click a node or an edge to see what happened to it.
  */
-export function ImpactServiceMap({ impactMap }: ImpactMapRendererProps) {
+export function ImpactServiceMap({
+  impactMap,
+  onEntityClick,
+  onRelationshipClick,
+}: ImpactMapRendererProps) {
   const { euiTheme, colorMode } = useEuiTheme();
   const criticalPathColor = euiTheme.colors.danger;
 
@@ -325,12 +377,16 @@ export function ImpactServiceMap({ impactMap }: ImpactMapRendererProps) {
               center,
             ${euiTheme.colors.lightShade};
           background-size: ${euiTheme.size.l} ${euiTheme.size.l};
+          ${onEntityClick ? '.react-flow__node { cursor: pointer; }' : ''}
+          ${onRelationshipClick ? '.react-flow__edge { cursor: pointer; }' : ''}
         `}
       >
         <ReactFlow
           nodes={nodes}
           edges={edges}
           onNodesChange={onNodesChange}
+          onNodeClick={onEntityClick ? (_, { id }) => onEntityClick(id) : undefined}
+          onEdgeClick={onRelationshipClick ? (_, { id }) => onRelationshipClick(id) : undefined}
           nodeTypes={nodeTypes}
           fitView
           fitViewOptions={{ padding: 0.12, maxZoom: 1.5 }}

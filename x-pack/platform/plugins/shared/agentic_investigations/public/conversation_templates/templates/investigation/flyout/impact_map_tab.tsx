@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
@@ -29,6 +29,11 @@ import type { ImpactMapSlotRenderProps } from '@kbn/agentic-investigations-commo
 import type { InvestigationImpactMapResponse } from '../../../../../common';
 import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
 import type { ImpactMapRenderer } from '../../../../types';
+import {
+  ImpactMapEventsFlyout,
+  resolveEventsSelection,
+  type EventsSelection,
+} from './impact_map_events';
 
 const MAP_HEIGHT = 520;
 
@@ -94,13 +99,17 @@ const ImpactMapPanel: React.FC<{
   Renderer: ImpactMapRenderer;
 }> = ({ impactMap, Renderer }) => {
   const [isMaximized, setIsMaximized] = useState(false);
+  const [selection, setSelection] = useState<EventsSelection>();
+  // Escape closes the events flyout first, and only then the full-screen map.
+  const selectionRef = useRef(selection);
+  selectionRef.current = selection;
 
   useEffect(() => {
     if (!isMaximized) {
       return;
     }
     const exitOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (event.key === 'Escape' && !selectionRef.current) {
         setIsMaximized(false);
       }
     };
@@ -111,6 +120,15 @@ const ImpactMapPanel: React.FC<{
   const title = impactMap.title?.trim() || DEFAULT_TITLE;
   const { euiTheme } = useEuiTheme();
   const updatedAt = new Date(impactMap.updated_at ?? impactMap.created_at);
+  const openEntity = (id: string) => setSelection({ kind: 'entity', id });
+  const openRelationship = (id: string) => setSelection({ kind: 'relationship', id });
+  const map = (
+    <Renderer
+      impactMap={impactMap}
+      onEntityClick={openEntity}
+      onRelationshipClick={openRelationship}
+    />
+  );
 
   return (
     <EuiPanel
@@ -154,11 +172,11 @@ const ImpactMapPanel: React.FC<{
           overflow: hidden;
         `}
       >
-        <Renderer impactMap={impactMap} />
+        {map}
       </div>
       {isMaximized && (
         <EuiPortal>
-          <EuiFocusTrap>
+          <EuiFocusTrap disabled={Boolean(selection)}>
             <div
               role="dialog"
               aria-labelledby={modalTitleId}
@@ -212,12 +230,22 @@ const ImpactMapPanel: React.FC<{
                     inset: 0;
                   `}
                 >
-                  <Renderer impactMap={impactMap} />
+                  {map}
                 </div>
               </div>
             </div>
           </EuiFocusTrap>
         </EuiPortal>
+      )}
+      {selection && (
+        <ImpactMapEventsFlyout
+          // A new selection starts on its own list, not on the last one's open event.
+          key={`${selection.kind}:${selection.id}`}
+          {...resolveEventsSelection(selection, impactMap)}
+          impactMap={impactMap}
+          standalone={isMaximized}
+          onClose={() => setSelection(undefined)}
+        />
       )}
     </EuiPanel>
   );

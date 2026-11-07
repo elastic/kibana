@@ -150,6 +150,17 @@ export interface ImpactMapSlotRenderProps {
  */
 export type RenderImpactMap = (props: ImpactMapSlotRenderProps) => React.ReactNode;
 
+/** Props passed to the `renderTimeline` render prop. */
+export interface TimelineSlotRenderProps {
+  conversationId: string;
+}
+
+/**
+ * A render prop for the body of the investigation's Timeline tab: what happened, in time order,
+ * including what responders did. Without it the flyout has no Timeline tab.
+ */
+export type RenderTimeline = (props: TimelineSlotRenderProps) => React.ReactNode;
+
 /** Props passed to the `renderLiveState` render prop. */
 export interface LiveStateSlotRenderProps {
   conversationId: string;

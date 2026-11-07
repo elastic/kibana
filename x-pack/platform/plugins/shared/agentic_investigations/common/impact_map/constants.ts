@@ -23,6 +23,22 @@ export const IMPACT_MAP_CATALOG_INDEX_NAME = '.kibana-investigation-impact_map_c
 export const MAX_IMPACT_MAP_ENTITIES = 50;
 export const MAX_IMPACT_MAP_RELATIONSHIPS = 100;
 export const MAX_IMPACT_MAP_CATALOG_TYPES = 100;
+export const MAX_IMPACT_MAP_EVENTS = 200;
+
+/**
+ * What an event on the map is: something done to the system (a change), something it did (a
+ * failure, an alert, a condition it was in), what customers felt, or what responders did. A
+ * response need not belong to an entity; every other kind happens to one entity or relationship.
+ */
+export const IMPACT_MAP_EVENT_KINDS = [
+  'change',
+  'failure',
+  'condition',
+  'alert',
+  'mitigation',
+  'customer_impact',
+  'response',
+] as const;
 
 /**
  * How an entity type draws, using the service map's own nodes: a circle for something that runs

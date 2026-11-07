@@ -58,6 +58,9 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
     impactMap: i18n.translate('xpack.agenticInvestigations.detailsFlyout.tabs.impactMap', {
       defaultMessage: 'Impact map',
     }),
+    timeline: i18n.translate('xpack.agenticInvestigations.detailsFlyout.tabs.timeline', {
+      defaultMessage: 'Timeline',
+    }),
   },
   sections: {
     overview: i18n.translate('xpack.agenticInvestigations.detailsFlyout.sections.situation', {

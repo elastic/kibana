@@ -10,6 +10,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { createOtherResult } from '@kbn/agent-builder-server';
 import {
   MAX_IMPACT_MAP_ENTITIES,
+  MAX_IMPACT_MAP_EVENTS,
   MAX_IMPACT_MAP_RELATIONSHIPS,
   SET_IMPACT_MAP_TOOL_ID,
 } from '../../../common/impact_map/constants';
@@ -17,6 +18,7 @@ import {
   impactMapAnnotationsSchema,
   impactMapEntitySchema,
   impactMapEntityTypesSchema,
+  impactMapEventSchema,
   impactMapRelationshipSchema,
   impactMapRelationshipTypesSchema,
 } from '../../../common/impact_map/impact_map';
@@ -64,6 +66,28 @@ const relationshipSchema = impactMapRelationshipSchema.extend({
   ),
 });
 
+const eventSchema = impactMapEventSchema.extend({
+  id: impactMapEventSchema.shape.id
+    .optional()
+    .describe('Leave out: an id is derived from the kind, what it happened to and the minute.'),
+  kind: impactMapEventSchema.shape.kind.describe(
+    '"change" for a deploy, config or scaling change; "failure" for errors, crashes, timeouts; "condition" for a state such as saturation or zero replicas; "alert" for an alert firing; "mitigation" for a fix applied; "customer_impact" for what customers felt, on the entry point; "response" for a responder action such as opening an incident channel.'
+  ),
+  title: impactMapEventSchema.shape.title.describe(
+    'One line, past tense, with the number: "Replicas scaled from 3 to 0".'
+  ),
+  at: impactMapEventSchema.shape.at.describe('When it happened, ISO 8601.'),
+  entity_id: impactMapEventSchema.shape.entity_id.describe(
+    'The entity in `entities` it happened to.'
+  ),
+  relationship_id: impactMapEventSchema.shape.relationship_id.describe(
+    'Instead of `entity_id`, the relationship it happened to: its id, or "source_id->target_id". Leave both out only for a response.'
+  ),
+  evidence: impactMapEventSchema.shape.evidence.describe(
+    'A chart of the trend around `at`, with an annotation at `at`, built only from numbers a tool returned.'
+  ),
+});
+
 export const setImpactMapToolSchema = lazySchema(() =>
   z.object({
     title: z.string().max(256).optional().describe('A short title for the map.'),
@@ -87,6 +111,13 @@ export const setImpactMapToolSchema = lazySchema(() =>
       .describe(
         'Relationship types this map needs that the catalog lacks. They are added to the catalog for later maps.'
       ),
+    events: z
+      .array(eventSchema)
+      .max(MAX_IMPACT_MAP_EVENTS)
+      .optional()
+      .describe(
+        'What happened, each against the entity or relationship it happened to. Merged with the events already recorded, so send new or changed ones.'
+      ),
   })
 );
 
@@ -94,7 +125,8 @@ export type SetImpactMapToolParams = z.infer<typeof setImpactMapToolSchema>;
 
 const DESCRIPTION =
   'Record the impact map of the investigation: a dependency graph of the entities the problem touches, how they relate, and the critical path from what users feel to the root cause. The user sees it in the Impact map tab. ' +
-  'This is a snapshot, not a diff: send the whole map every time; it replaces the stored one. ' +
+  'The graph is a snapshot, not a diff: send the whole map every time; it replaces the stored one. Events are merged by id. ' +
+  'Entities are physical things only (services, hosts, pods, databases, queues, cloud APIs). A change, an outage, a vendor or customer impact is an event on the entity it happened to, never an entity. ' +
   'Types come from the space catalog so every investigation draws things the same way: read it first with `agentic_investigations.upsert_impact_map_catalog` (no arguments) and reuse its type ids; send any new type in `entity_types` / `relationship_types`. ' +
   'Mark the confirmed cause `role: "root_cause"`, where the problem shows `role: "symptom"`, what users feel `impacted: true`, and every edge of the causal chain `on_critical_path: true`. ' +
   'It does not end the investigation; keep working after calling it.';

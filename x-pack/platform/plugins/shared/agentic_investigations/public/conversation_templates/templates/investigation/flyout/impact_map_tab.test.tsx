@@ -17,9 +17,18 @@ import { ImpactMapTab } from './impact_map_tab';
 jest.mock('../../../../investigations/hooks/use_investigation');
 const mockUseInvestigation = useInvestigation as jest.Mock;
 
-const FakeRenderer: React.FC<ImpactMapRendererProps> = ({ impactMap }) => (
+const FakeRenderer: React.FC<ImpactMapRendererProps> = ({
+  impactMap,
+  onEntityClick,
+  onRelationshipClick,
+}) => (
   <div data-test-subj="fakeImpactMapRenderer">
     {impactMap.entities.map(({ id }) => id).join(',')}
+    <button data-test-subj="fakeEntity" onClick={() => onEntityClick?.('payment')} />
+    <button
+      data-test-subj="fakeRelationship"
+      onClick={() => onRelationshipClick?.('checkout->payment:calls')}
+    />
   </div>
 );
 
@@ -39,6 +48,30 @@ const impactMap: InvestigationImpactMapResponse = {
   ],
   entity_types: [{ id: 'service', label: 'Service', kind: 'service' }],
   relationship_types: [{ id: 'calls', label: 'calls' }],
+  events: [
+    {
+      id: 'e1',
+      kind: 'change',
+      title: 'Deployed payment v2',
+      at: '2026-11-07T10:00:00.000Z',
+      entity_id: 'payment',
+    },
+    {
+      id: 'e2',
+      kind: 'failure',
+      title: 'Payment errors rose to 40%',
+      description: 'Errors started a minute after the deploy.',
+      at: '2026-11-07T10:01:00.000Z',
+      entity_id: 'payment',
+    },
+    {
+      id: 'e3',
+      kind: 'failure',
+      title: 'Calls timed out',
+      at: '2026-11-07T10:02:00.000Z',
+      relationship_id: 'checkout->payment:calls',
+    },
+  ],
   created_at: '2026-11-07T00:00:00.000Z',
 };
 
@@ -77,6 +110,42 @@ describe('ImpactMapTab', () => {
     expect(
       screen.queryByTestId('agenticInvestigationsImpactMapFullScreen')
     ).not.toBeInTheDocument();
+  });
+
+  it("lists an entity's events oldest first and opens one in place of the list", () => {
+    mockUseInvestigation.mockReturnValue({ data: { in_progress: false, impact_map: impactMap } });
+
+    renderTab();
+    fireEvent.click(screen.getByTestId('fakeEntity'));
+
+    const flyout = screen.getByTestId('agenticInvestigationsImpactMapEventsFlyout');
+    expect(flyout).toHaveTextContent('2 events, oldest first');
+    const rows = screen.getAllByTestId('agenticInvestigationsImpactMapEvent');
+    expect(rows.map((row) => row.textContent)).toEqual([
+      expect.stringContaining('Deployed payment v2'),
+      expect.stringContaining('Payment errors rose to 40%'),
+    ]);
+
+    fireEvent.click(rows[1]);
+    expect(screen.getByTestId('agenticInvestigationsImpactMapEventDetail')).toHaveTextContent(
+      'Errors started a minute after the deploy.'
+    );
+    expect(screen.queryByTestId('agenticInvestigationsImpactMapEvent')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('agenticInvestigationsImpactMapEventsBack'));
+    expect(screen.getAllByTestId('agenticInvestigationsImpactMapEvent')).toHaveLength(2);
+  });
+
+  it('lists the events of a relationship', () => {
+    mockUseInvestigation.mockReturnValue({ data: { in_progress: false, impact_map: impactMap } });
+
+    renderTab();
+    fireEvent.click(screen.getByTestId('fakeRelationship'));
+
+    expect(screen.getByTestId('agenticInvestigationsImpactMapEventsFlyout')).toHaveTextContent(
+      'checkout → payment'
+    );
+    expect(screen.getAllByTestId('agenticInvestigationsImpactMapEvent')).toHaveLength(1);
   });
 
   it('says the map is coming while the investigation runs without one', () => {

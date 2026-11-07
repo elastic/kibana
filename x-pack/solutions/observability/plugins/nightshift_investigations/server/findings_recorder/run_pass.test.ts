@@ -54,6 +54,7 @@ describe('runFindingsPass', () => {
       setHypotheses: jest.fn().mockResolvedValue(undefined),
       setImpact: jest.fn().mockResolvedValue(undefined),
       setImpactMap: jest.fn().mockResolvedValue({ warnings: [] }),
+      addImpactMapEvents: jest.fn().mockResolvedValue(undefined),
       getImpactMapCatalog: jest
         .fn()
         .mockResolvedValue({ entity_types: [], relationship_types: [] }),
@@ -344,6 +345,7 @@ describe('runFindingsPass', () => {
       'summary',
       'hypotheses',
       'impact_map',
+      'events',
     ]);
     expect(Object.keys(schemaOf(final.chatComplete))).toEqual(
       expect.arrayContaining(['verdict', 'severity', 'impact_summary', 'impact_entities'])
@@ -498,6 +500,38 @@ describe('runFindingsPass', () => {
     expect(written.relationships).toEqual([
       expect.objectContaining({ source_id: 'checkout', on_critical_path: true }),
     ]);
+  });
+
+  it('writes events with the map, or on their own when there is no map', async () => {
+    const events = [
+      {
+        kind: 'condition',
+        title: 'Replicas scaled to 0',
+        at: '2026-11-07T10:00:00Z',
+        entity: 'shipping',
+      },
+      { kind: 'response', title: 'Incident channel opened', at: '2026-11-07T10:05:00Z' },
+    ];
+    const impactMap = {
+      entities: [{ id: 'shipping', type: 'k8s_deployment' }],
+      relationships: [],
+    };
+    const withMap = setup({ answers: [answerWith({ ...output, impact_map: impactMap, events })] });
+    await run(withMap.deps, withMap.memory);
+    const [{ impactMap: written }] = withMap.writer.setImpactMap.mock.calls[0];
+    expect(written.events.map(({ kind }: { kind: string }) => kind)).toEqual([
+      'condition',
+      'response',
+    ]);
+    expect(withMap.writer.addImpactMapEvents).not.toHaveBeenCalled();
+
+    const alone = setup({ answers: [answerWith({ ...output, events })] });
+    await run(alone.deps, alone.memory);
+    expect(alone.writer.setImpactMap).not.toHaveBeenCalled();
+    const [{ events: added }] = alone.writer.addImpactMapEvents.mock.calls[0];
+    expect(added[0]).toEqual(
+      expect.objectContaining({ entity_id: 'shipping', at: '2026-11-07T10:00:00.000Z' })
+    );
   });
 
   it('gives an entity with a long name an id within the store limit', async () => {

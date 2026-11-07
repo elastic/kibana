@@ -6,6 +6,7 @@
  */
 
 import type { Edge, Node } from '@xyflow/react';
+import { i18n } from '@kbn/i18n';
 import type { AgentName } from '@kbn/apm-types';
 import type {
   ImpactMapAnnotations,
@@ -67,6 +68,8 @@ export const getImpactState = (annotations?: ImpactMapAnnotations): ImpactState 
 
 export type ImpactServiceNodeData = ServiceNodeData & {
   impactState?: ImpactState;
+  /** Events recorded against the entity, shown as a count on the node. */
+  eventCount?: number;
 };
 
 const KUBERNETES_TYPE =
@@ -80,6 +83,7 @@ export type ImpactDependencyNodeData = DependencyNodeData & {
   severityScore?: number;
   impactState?: ImpactState;
   euiIcon?: string;
+  eventCount?: number;
 };
 
 export type ImpactServiceMapNode =
@@ -89,7 +93,7 @@ export type ImpactServiceMapNode =
 
 export interface ImpactServiceMapEdge extends Edge {
   type: 'default';
-  data: { onCriticalPath: boolean };
+  data: { onCriticalPath: boolean; eventCount: number };
 }
 
 export interface ImpactMapEdgeColors {
@@ -111,6 +115,7 @@ export const transformImpactMap = (
     relationships,
     entity_types: entityTypes,
     relationship_types: relationshipTypes,
+    events = [],
   }: InvestigationImpactMapResponse,
   colors: ImpactMapEdgeColors,
   /** Agent names APM knows for services that have traces, by entity id. They win over the map's. */
@@ -118,6 +123,13 @@ export const transformImpactMap = (
 ): { nodes: ImpactServiceMapNode[]; edges: ImpactServiceMapEdge[] } => {
   const typesById = new Map<string, ImpactMapEntityType>(entityTypes.map((t) => [t.id, t]));
   const relationshipLabels = new Map(relationshipTypes.map(({ id, label }) => [id, label]));
+  const eventCounts = new Map<string, number>();
+  events.forEach(({ entity_id: entityId, relationship_id: relationshipId }) => {
+    const target = entityId ?? relationshipId;
+    if (target) {
+      eventCounts.set(target, (eventCounts.get(target) ?? 0) + 1);
+    }
+  });
 
   const nodes = entities.map<ImpactServiceMapNode>(
     ({ id, type_id: typeId, label, annotations }) => {
@@ -127,6 +139,7 @@ export const transformImpactMap = (
       const position = { x: 0, y: 0 };
 
       const euiIcon = getEuiIcon(type);
+      const eventCount = eventCounts.get(id) ?? 0;
       const agentName = (agentNames[id] ?? type?.icon?.agent_name) as AgentName | undefined;
 
       // What runs and hosts the services gets its own shape: a service with no agent logo but a
@@ -136,7 +149,15 @@ export const transformImpactMap = (
           id,
           type: 'impactInfrastructure',
           position,
-          data: { id, label, isService: false, severityScore: score, impactState, euiIcon },
+          data: {
+            id,
+            label,
+            isService: false,
+            severityScore: score,
+            impactState,
+            euiIcon,
+            eventCount,
+          },
         };
       }
       if (type?.kind === 'dependency') {
@@ -152,6 +173,7 @@ export const transformImpactMap = (
             spanSubtype: type.icon?.span_subtype,
             severityScore: score,
             impactState,
+            eventCount,
           },
         };
       }
@@ -164,6 +186,7 @@ export const transformImpactMap = (
           label,
           isService: true,
           impactState,
+          eventCount,
           agentName,
           ...(score !== undefined && { serviceAnomalyStats: { anomalyScore: score } }),
           ...(annotations?.alert_count && { alertsCount: annotations.alert_count }),
@@ -175,19 +198,27 @@ export const transformImpactMap = (
   const edges = relationships.map<ImpactServiceMapEdge>(
     ({ id, type_id: typeId, source_id: source, target_id: target, on_critical_path }) => {
       const onCriticalPath = on_critical_path === true;
+      const eventCount = eventCounts.get(id) ?? 0;
+      const label = relationshipLabels.get(typeId) ?? typeId;
       return {
         id,
         source,
         target,
         type: 'default',
-        label: relationshipLabels.get(typeId) ?? typeId,
+        label:
+          eventCount > 0
+            ? i18n.translate('xpack.apm.impactMap.edgeLabelWithEvents', {
+                defaultMessage: '{label} · {count, plural, one {# event} other {# events}}',
+                values: { label, count: eventCount },
+              })
+            : label,
         style: onCriticalPath
           ? { stroke: colors.criticalPath, strokeWidth: CRITICAL_PATH_STROKE_WIDTH }
           : DEFAULT_EDGE_STYLE,
         markerEnd: onCriticalPath ? createEdgeMarker(colors.criticalPath) : createEdgeMarker(),
         animated: onCriticalPath,
         zIndex: onCriticalPath ? 1 : 0,
-        data: { onCriticalPath },
+        data: { onCriticalPath, eventCount },
       };
     }
   );

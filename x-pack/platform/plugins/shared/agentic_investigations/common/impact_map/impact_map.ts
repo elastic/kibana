@@ -7,12 +7,15 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 import { userSchema } from '../user';
+import { investigationEvidenceSchema } from '../evidence/evidence';
 import {
   IMPACT_MAP_ENTITY_KINDS,
+  IMPACT_MAP_EVENT_KINDS,
   IMPACT_MAP_HEALTH_STATES,
   IMPACT_MAP_ROLES,
   MAX_IMPACT_MAP_CATALOG_TYPES,
   MAX_IMPACT_MAP_ENTITIES,
+  MAX_IMPACT_MAP_EVENTS,
   MAX_IMPACT_MAP_RELATIONSHIPS,
 } from './constants';
 
@@ -136,6 +139,49 @@ export const impactMapRelationshipTypesSchema = lazySchema(() =>
   z.array(impactMapRelationshipTypeSchema).max(MAX_IMPACT_MAP_CATALOG_TYPES)
 );
 
+const MAX_EVENT_LINKS = 5;
+const MAX_URL_LENGTH = 2_048;
+
+export const impactMapEventKindSchema = lazySchema(() => z.enum(IMPACT_MAP_EVENT_KINDS));
+export type ImpactMapEventKind = z.infer<typeof impactMapEventKindSchema>;
+
+/**
+ * Something that happened during the incident, placed against the entity or relationship it
+ * happened to, so the map shows where and the timeline shows when. The chart, when there is one,
+ * shows the trend around `at`.
+ */
+export const impactMapEventSchema = lazySchema(() =>
+  z.object({
+    /** Stable across passes, so a later write updates the event instead of adding it again. */
+    id: z.string().min(1).max(MAX_ID_LENGTH),
+    kind: impactMapEventKindSchema,
+    title: z.string().min(1).max(MAX_LABEL_LENGTH),
+    description: z.string().max(MAX_DESCRIPTION_LENGTH).optional(),
+    /** ISO 8601. */
+    at: z.string().min(1).max(MAX_TIMESTAMP_LENGTH),
+    ends_at: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
+    /** The entity it happened to. A response may have neither this nor `relationship_id`. */
+    entity_id: z.string().max(MAX_ID_LENGTH).optional(),
+    /** The relationship it happened to, as the map ids it: `source->target`. */
+    relationship_id: z.string().max(MAX_ID_LENGTH).optional(),
+    evidence: investigationEvidenceSchema.optional(),
+    links: z
+      .array(
+        z.object({
+          label: z.string().min(1).max(MAX_LABEL_LENGTH),
+          url: z.string().url().max(MAX_URL_LENGTH),
+        })
+      )
+      .max(MAX_EVENT_LINKS)
+      .optional(),
+  })
+);
+export type ImpactMapEvent = z.infer<typeof impactMapEventSchema>;
+
+export const impactMapEventsSchema = lazySchema(() =>
+  z.array(impactMapEventSchema).max(MAX_IMPACT_MAP_EVENTS)
+);
+
 /** The types one space has defined, reused across its investigations. */
 export interface ImpactMapCatalog {
   entity_types: ImpactMapEntityType[];
@@ -144,7 +190,7 @@ export interface ImpactMapCatalog {
 
 /**
  * Stored impact map: the graph, plus a copy of the types it uses so it still draws the same
- * after the space catalog changes. Replaced as a whole on every write.
+ * after the space catalog changes. The graph is replaced on every write; events are merged.
  */
 export const investigationImpactMapSchema = lazySchema(() =>
   z.object({
@@ -156,6 +202,8 @@ export const investigationImpactMapSchema = lazySchema(() =>
     relationships: impactMapRelationshipsSchema,
     entityTypes: impactMapEntityTypesSchema,
     relationshipTypes: impactMapRelationshipTypesSchema,
+    /** Kept across map writes and merged by id: events accumulate while the graph is redrawn. */
+    events: impactMapEventsSchema.optional(),
     createdAt: z.string().max(MAX_TIMESTAMP_LENGTH),
     createdBy: userSchema.optional(),
     updatedAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),

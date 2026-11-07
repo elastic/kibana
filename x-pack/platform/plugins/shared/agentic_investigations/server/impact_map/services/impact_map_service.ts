@@ -18,6 +18,11 @@ import type {
   InvestigationImpactMap,
 } from '../../../common/impact_map/impact_map';
 import {
+  mergeImpactMapEvents,
+  withImpactMapEventId,
+  type ImpactMapEventInput,
+} from '../../../common/impact_map/events';
+import {
   resolveImpactMapGraph,
   type ResolvedImpactMapGraph,
 } from '../../../common/impact_map/resolve_graph';
@@ -38,6 +43,8 @@ export interface ImpactMapInput {
   relationships: ImpactMapRelationship[];
   entity_types?: ImpactMapEntityType[];
   relationship_types?: ImpactMapRelationshipType[];
+  /** Merged by id with the events already stored. An event without an id gets a stable one. */
+  events?: ImpactMapEventInput[];
 }
 
 /** One impact map document per space and conversation. */
@@ -50,25 +57,30 @@ const buildImpactMapDocument = ({
   conversationId,
   title,
   graph,
+  events,
   user,
 }: {
   existing: ImpactMapDocument | undefined;
   spaceId: string;
   conversationId: string;
   title?: string;
-  graph: ResolvedImpactMapGraph;
+  /** Absent when only events are written: the stored graph stays. */
+  graph?: ResolvedImpactMapGraph;
+  events?: ImpactMapEventInput[];
   user?: User;
 }): ImpactMapDocument => {
   const now = new Date().toISOString();
   const createdBy = existing ? existing.createdBy : user;
+  const mergedTitle = title ?? existing?.title;
   return {
     spaceId,
     conversationId,
-    ...(title && { title }),
-    entities: graph.entities,
-    relationships: graph.relationships,
-    entityTypes: graph.entityTypes,
-    relationshipTypes: graph.relationshipTypes,
+    ...(mergedTitle && { title: mergedTitle }),
+    entities: graph?.entities ?? existing?.entities ?? [],
+    relationships: graph?.relationships ?? existing?.relationships ?? [],
+    entityTypes: graph?.entityTypes ?? existing?.entityTypes ?? [],
+    relationshipTypes: graph?.relationshipTypes ?? existing?.relationshipTypes ?? [],
+    events: mergeImpactMapEvents(existing?.events, events?.map(withImpactMapEventId)),
     createdAt: existing?.createdAt ?? now,
     ...(createdBy && { createdBy }),
     updatedAt: now,
@@ -76,8 +88,8 @@ const buildImpactMapDocument = ({
 };
 
 /**
- * Owns the impact map index. Each write is a full snapshot: the map the caller sends replaces the
- * stored one. Before the write the graph is joined with the space catalog, and any type it adds
+ * Owns the impact map index. Each write is a snapshot of the graph: the map the caller sends
+ * replaces the stored one, while its events are merged into the stored events by id. Before the write the graph is joined with the space catalog, and any type it adds
  * is stored there, so the next investigation draws it the same way.
  */
 export class ImpactMapService {
@@ -156,6 +168,7 @@ export class ImpactMapService {
           conversationId,
           title: input.title,
           graph,
+          events: input.events,
           user,
         }),
     });
@@ -193,10 +206,42 @@ export class ImpactMapService {
           conversationId,
           title: input.title,
           graph,
+          events: input.events,
           user,
         }),
     });
     return { warnings: graph.warnings };
+  }
+
+  /** Out-of-run path that adds or updates events and leaves the graph as it is. */
+  async addEventsWithPublicClient({
+    conversationId,
+    events,
+    spaceId,
+    user,
+    conversations,
+    attachments,
+  }: {
+    conversationId: string;
+    events: ImpactMapEventInput[];
+    spaceId: string;
+    user?: User;
+    conversations: ConversationPublicClient;
+    attachments: AttachmentPublicClient;
+  }): Promise<void> {
+    if (events.length === 0) {
+      return;
+    }
+    await impactMapAttachment.writeAndAttach({
+      service: this.deps.documents,
+      id: impactMapDocumentId(spaceId, conversationId),
+      spaceId,
+      conversationId,
+      conversations,
+      attachments,
+      mutate: (existing) =>
+        buildImpactMapDocument({ existing, spaceId, conversationId, events, user }),
+    });
   }
 
   async findByConversationId(

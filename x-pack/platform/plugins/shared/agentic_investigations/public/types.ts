@@ -70,6 +70,10 @@ export interface AgenticInvestigationsPublicPluginSetup {
 /** Props of the component that draws an impact map. It fills its container. */
 export interface ImpactMapRendererProps {
   impactMap: InvestigationImpactMapResponse;
+  /** Called with the entity id when a node is clicked, to show what happened to it. */
+  onEntityClick?: (entityId: string) => void;
+  /** Called with the relationship id when an edge is clicked. */
+  onRelationshipClick?: (relationshipId: string) => void;
 }
 
 /**

@@ -17,6 +17,7 @@ import type { ImpactMapCatalog } from '../../common/impact_map/impact_map';
 import type { ImpactMapInput, ImpactMapService } from '../impact_map/services/impact_map_service';
 import type { InvestigationsPrivilegesChecker } from '../investigations/services/check_investigations_privileges';
 import type { ResolveUser } from '../services/resolve_user';
+import type { ImpactMapEventInput } from '../../common/impact_map/events';
 
 /**
  * Writes the findings an agent would otherwise record with `set_hypotheses` and `set_impact`,
@@ -43,6 +44,11 @@ export interface FindingsWriter {
     conversationId: string;
     impactMap: ImpactMapInput;
   }) => Promise<{ warnings: string[] }>;
+  /** Adds or updates events on the conversation's impact map, leaving its graph as it is. */
+  addImpactMapEvents: (params: {
+    conversationId: string;
+    events: ImpactMapEventInput[];
+  }) => Promise<void>;
   /** The space's catalog of entity and relationship types, so a new map reuses what is there. */
   getImpactMapCatalog: () => Promise<ImpactMapCatalog>;
   /** The findings stored for the conversation: its hypotheses and impact, if any. */
@@ -123,6 +129,17 @@ export const createFindingsWriter =
         return getImpactMapService().setWithPublicClient({
           conversationId,
           input: impactMap,
+          spaceId,
+          user,
+          conversations,
+          attachments,
+        });
+      },
+      addImpactMapEvents: async ({ conversationId, events }) => {
+        const { conversations, attachments, user, spaceId } = await resolveContext();
+        await getImpactMapService().addEventsWithPublicClient({
+          conversationId,
+          events,
           spaceId,
           user,
           conversations,

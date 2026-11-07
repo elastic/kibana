@@ -86,6 +86,7 @@ const impactMap: InvestigationImpactMapResponse = {
     { id: 'calls', label: 'calls' },
     { id: 'reads', label: 'reads from' },
   ],
+  events: [],
   created_at: '2026-11-07T00:00:00.000Z',
 };
 
@@ -130,6 +131,7 @@ describe('infrastructure entities', () => {
       { id: 'host', label: 'Host', kind: 'infrastructure', icon: { eui_icon: 'compute' } },
     ],
     relationship_types: [],
+    events: [],
   };
 
   it('draws infrastructure as its own shape, including an older Kubernetes type', () => {
@@ -183,6 +185,37 @@ describe('transformImpactMap', () => {
     });
     const plain = edges.find(({ id }) => id === 'frontend->cart:calls');
     expect(plain).toMatchObject({ label: 'calls', animated: false, style: DEFAULT_EDGE_STYLE });
+  });
+});
+
+describe('event counts', () => {
+  const at = '2026-11-07T10:00:00.000Z';
+  const { nodes, edges } = transformImpactMap(
+    {
+      ...impactMap,
+      events: [
+        { id: 'a', kind: 'change', title: 'Deployed', at, entity_id: 'payments-db' },
+        { id: 'b', kind: 'failure', title: 'Failed', at, entity_id: 'payments-db' },
+        {
+          id: 'c',
+          kind: 'failure',
+          title: 'Timed out',
+          at,
+          relationship_id: 'checkout->payments-db:reads',
+        },
+        { id: 'd', kind: 'response', title: 'Channel opened', at },
+      ],
+    },
+    { criticalPath: 'red' }
+  );
+
+  it('counts the events of each entity and relationship', () => {
+    expect(nodes.find(({ id }) => id === 'payments-db')?.data.eventCount).toBe(2);
+    expect(nodes.find(({ id }) => id === 'cart')?.data.eventCount).toBe(0);
+    expect(edges.find(({ id }) => id === 'checkout->payments-db:reads')).toMatchObject({
+      label: 'reads from · 1 event',
+      data: { eventCount: 1 },
+    });
   });
 });
 

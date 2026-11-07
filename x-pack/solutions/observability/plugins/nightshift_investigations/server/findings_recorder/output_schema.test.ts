@@ -17,6 +17,7 @@ import {
   limitEvidence,
   limitFindings,
   limitImpactMap,
+  limitEvents,
   classifyEntityType,
 } from './output_schema';
 
@@ -356,5 +357,42 @@ describe('entityIdFor', () => {
     expect(entityIdFor(first).length).toBeLessThanOrEqual(256);
     expect(entityIdFor(first)).toBe(entityIdFor(first));
     expect(entityIdFor(first)).not.toBe(entityIdFor(second));
+  });
+});
+
+describe('limitEvents', () => {
+  const at = '2026-11-07T10:00:30Z';
+
+  it('places events on an entity or a relationship and gives them stable ids', () => {
+    const [onEntity, onEdge] = limitEvents([
+      { kind: 'change', title: ' Deployed v2 ', at, entity: 'checkout' },
+      { kind: 'failure', title: 'Calls timed out', at, relationship: { source: 'a', target: 'b' } },
+    ]);
+    expect(onEntity).toEqual({
+      id: 'change:checkout:2026-11-07T10:00',
+      kind: 'change',
+      title: 'Deployed v2',
+      at: '2026-11-07T10:00:30.000Z',
+      entity_id: 'checkout',
+    });
+    expect(onEdge.relationship_id).toBe('a->b');
+  });
+
+  it('keeps a response without a target and drops other events without one', () => {
+    const kept = limitEvents([
+      { kind: 'response', title: 'Status page updated', at },
+      { kind: 'failure', title: 'Something failed', at },
+    ]);
+    expect(kept.map(({ kind }) => kind)).toEqual(['response']);
+  });
+
+  it('drops an event whose time cannot be read, and merges repeats of one event', () => {
+    const kept = limitEvents([
+      { kind: 'alert', title: 'Fired', at: 'soon', entity: 'x' },
+      { kind: 'alert', title: 'Fired', at, entity: 'x' },
+      { kind: 'alert', title: 'Fired again', at: '2026-11-07T10:00:50Z', entity: 'x' },
+    ]);
+    expect(kept).toHaveLength(1);
+    expect(kept[0].title).toBe('Fired again');
   });
 });

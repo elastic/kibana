@@ -56,6 +56,7 @@ import { retryWhileShardUnavailable } from '../../investigation_attachments';
 import { MAX_INVESTIGATION_CANDIDATE_CONVERSATION_IDS } from '../../investigation_attachments/attachment_doc_service';
 import { bulkGetReadableConversations } from './readable_conversation_ids';
 import type { InProgressResolver } from './in_progress';
+import { sortImpactMapEvents } from '../../../common/impact_map/events';
 
 /** Bound on the proposals one investigation read returns. */
 const MAX_INVESTIGATION_PROPOSALS = 100;
@@ -768,6 +769,7 @@ const toImpactMapResponse = ({
   relationships,
   entityTypes,
   relationshipTypes,
+  events,
   createdAt,
   updatedAt,
 }: InvestigationImpactMap): NonNullable<Investigation['impact_map']> => ({
@@ -779,6 +781,7 @@ const toImpactMapResponse = ({
   })),
   entity_types: entityTypes,
   relationship_types: relationshipTypes,
+  events: sortImpactMapEvents(events ?? []),
   created_at: createdAt,
   ...(updatedAt !== undefined && { updated_at: updatedAt }),
 });

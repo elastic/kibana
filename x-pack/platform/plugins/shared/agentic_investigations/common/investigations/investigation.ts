@@ -12,6 +12,7 @@ import type { Hypothesis } from '../hypotheses/hypotheses';
 import type {
   ImpactMapEntity,
   ImpactMapEntityType,
+  ImpactMapEvent,
   ImpactMapRelationship,
   ImpactMapRelationshipType,
 } from '../impact_map/impact_map';
@@ -160,6 +161,8 @@ export interface InvestigationImpactMapResponse {
   relationships: Array<ImpactMapRelationship & { id: string }>;
   entity_types: ImpactMapEntityType[];
   relationship_types: ImpactMapRelationshipType[];
+  /** Oldest first. Includes responder actions that belong to no entity. */
+  events: ImpactMapEvent[];
   created_at: string;
   updated_at?: string;
 }

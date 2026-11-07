@@ -13,6 +13,7 @@ import {
   EVIDENCE_CHART_Y_AXIS_UNITS,
   HYPOTHESIS_STATUSES,
   IMPACT_MAP_ENTITY_KINDS,
+  IMPACT_MAP_EVENT_KINDS,
   IMPACT_MAP_HEALTH_STATES,
   IMPACT_MAP_ROLES,
   investigationEvidenceSchema,
@@ -26,10 +27,13 @@ import {
   MAX_EVIDENCE_TEXT_LENGTH,
   MAX_HYPOTHESES,
   MAX_IMPACT_MAP_ENTITIES,
+  MAX_IMPACT_MAP_EVENTS,
   MAX_IMPACT_MAP_RELATIONSHIPS,
   MAX_IMPACT_TOOL_ENTITIES,
+  impactMapEventId,
   type ImpactMapEntity,
   type ImpactMapEntityType,
+  type ImpactMapEvent,
   type ImpactMapRelationship,
   type ImpactMapRelationshipType,
   type InvestigationEvidence,
@@ -148,6 +152,21 @@ export const findingsOutputSchema = lazySchema(() => {
           })
         ),
       })
+      .optional(),
+    // Merged by id with the stored events, so a pass sends what is new or changed.
+    events: z
+      .array(
+        z.object({
+          kind: z.enum(IMPACT_MAP_EVENT_KINDS),
+          title: z.string().min(1),
+          description: z.string().optional(),
+          at: z.string().min(1),
+          ends_at: z.string().optional(),
+          entity: z.string().optional(),
+          relationship: z.object({ source: z.string(), target: z.string() }).optional(),
+          evidence: evidenceSchema.optional(),
+        })
+      )
       .optional(),
   });
 });
@@ -383,11 +402,67 @@ export const limitImpactMap = (
   };
 };
 
+const MAX_EVENT_DESCRIPTION_LENGTH = 1_000;
+
+/** An ISO 8601 time the store can sort by, or undefined when the model wrote something else. */
+const toIsoTime = (value?: string): string | undefined => {
+  if (!value) return undefined;
+  const parsed = Date.parse(value);
+  return Number.isNaN(parsed) ? undefined : new Date(parsed).toISOString();
+};
+
+/**
+ * Trims events to what the store accepts and gives each a stable id, so the next pass that
+ * describes the same event updates it. An event with no time it can be placed at is dropped, and
+ * only a response may belong to neither an entity nor a relationship.
+ */
+export const limitEvents = (raw: NonNullable<FindingsOutput['events']>): ImpactMapEvent[] => {
+  const byId = new Map<string, ImpactMapEvent>();
+  for (const event of raw) {
+    const at = toIsoTime(event.at);
+    const title = event.title.trim();
+    if (!at || !title) continue;
+    const entityId = event.entity?.trim()
+      ? truncate(event.entity.trim(), MAX_MAP_ID_LENGTH)
+      : undefined;
+    const relationshipId =
+      !entityId && event.relationship?.source.trim() && event.relationship.target.trim()
+        ? truncate(
+            `${event.relationship.source.trim()}->${event.relationship.target.trim()}`,
+            MAX_MAP_ID_LENGTH
+          )
+        : undefined;
+    if (!entityId && !relationshipId && event.kind !== 'response') continue;
+    const endsAt = toIsoTime(event.ends_at);
+    const evidence = event.evidence ? limitEvidence(event.evidence) : undefined;
+    const target = {
+      ...(entityId ? { entity_id: entityId } : {}),
+      ...(relationshipId ? { relationship_id: relationshipId } : {}),
+    };
+    const id = impactMapEventId({ kind: event.kind, at, ...target });
+    byId.set(id, {
+      id,
+      kind: event.kind,
+      title: truncate(title, MAX_MAP_LABEL_LENGTH),
+      ...(event.description?.trim()
+        ? { description: truncate(event.description.trim(), MAX_EVENT_DESCRIPTION_LENGTH) }
+        : {}),
+      at,
+      ...(endsAt ? { ends_at: endsAt } : {}),
+      ...target,
+      ...(evidence ? { evidence } : {}),
+    });
+  }
+  return [...byId.values()].slice(0, MAX_IMPACT_MAP_EVENTS);
+};
+
 /** A parsed record with its evidence trimmed to what the stores accept. */
 export type FindingsRecord = Omit<
   FindingsOutput,
-  'impact_evidence' | 'impact_entities' | 'hypotheses' | 'proposals' | 'impact_map'
+  'impact_evidence' | 'impact_entities' | 'hypotheses' | 'proposals' | 'impact_map' | 'events'
 > & {
+  /** Absent when the pass recorded none that could be placed. */
+  events?: ImpactMapEvent[];
   /** Absent when the model drew no map or none of its entities fit. */
   impact_map?: FindingsImpactMap;
   proposals?: Array<{ title: string; comment: string; impact?: string; confidence?: string }>;
@@ -411,13 +486,16 @@ export const limitFindings = (
     proposals: rawProposals,
     hypotheses: rawHypotheses,
     impact_map: rawImpactMap,
+    events: rawEvents,
     ...rest
   } = output;
+  const events = rawEvents ? limitEvents(rawEvents) : [];
   const impactEvidence = rawImpactEvidence ? limitEvidence(rawImpactEvidence) : rawImpactEvidence;
   const impactMap = rawImpactMap ? limitImpactMap(rawImpactMap, knownTypeIds) : undefined;
   return {
     ...rest,
     ...(impactMap ? { impact_map: impactMap } : {}),
+    ...(events.length ? { events } : {}),
     impact_evidence: impactEvidence,
     summary: truncate(output.summary, MAX_METADATA_TEXT_LENGTH),
     ...(output.verdict !== undefined
@@ -746,6 +824,53 @@ export const FINDINGS_JSON_SCHEMA = {
       },
       required: ['entities', 'relationships'],
     },
+    events: {
+      type: 'array',
+      description: `What happened, each placed against the entity or relationship of the impact map it happened to, so the map shows where and the timeline shows when. New or changed events only: they are merged with the ones already recorded. Only what the tool results or the conversation show, with the time they show. At most ${MAX_IMPACT_MAP_EVENTS}.`,
+      items: {
+        type: 'object',
+        properties: {
+          kind: {
+            type: 'string',
+            enum: IMPACT_MAP_EVENT_KINDS,
+            description:
+              'change for a deploy, config or scaling change; failure for errors, crashes, timeouts or restarts; condition for a state such as saturation, a full disk or zero replicas; alert for an alert that fired; mitigation for a fix applied; customer_impact for what customers felt, placed on the entry point they use; response for what responders did, such as opening an incident channel or updating the status page.',
+          },
+          title: {
+            type: 'string',
+            description:
+              'One line in the past tense with the measured number, for example Replicas scaled from 3 to 0 or Checkout error rate rose to 42%.',
+          },
+          description: {
+            type: 'string',
+            description: 'At most two sentences: what the data showed and why it matters.',
+          },
+          at: { type: 'string', description: 'When it happened or started, ISO 8601.' },
+          ends_at: { type: 'string', description: 'When it ended, if it has.' },
+          entity: {
+            type: 'string',
+            description:
+              'The id of the impact map entity it happened to. Use the same id as in impact_map.',
+          },
+          relationship: {
+            type: 'object',
+            description:
+              'Instead of entity, the relationship it happened to, such as timeouts on calls from one service to another.',
+            properties: {
+              source: { type: 'string', description: 'An entity id.' },
+              target: { type: 'string', description: 'An entity id.' },
+            },
+            required: ['source', 'target'],
+          },
+          evidence: {
+            ...EVIDENCE_JSON_SCHEMA,
+            description:
+              'The trend around the event: a small chart with an annotation at its time, or a short description. Only numbers a tool returned.',
+          },
+        },
+        required: ['kind', 'title', 'at'],
+      },
+    },
   },
   required: ['summary', 'hypotheses'],
 } as const;
@@ -754,8 +879,8 @@ const { evidence: _hypothesisEvidence, ...LIVE_HYPOTHESIS_PROPERTIES } =
   FINDINGS_JSON_SCHEMA.properties.hypotheses.items.properties;
 
 /**
- * What a live pass may answer while the investigation runs: the summary, the hypothesis tree and
- * the impact map. The rest of the record, with its evidence, is written once, from the final pass.
+ * What a live pass may answer while the investigation runs: the summary, the hypothesis tree, the
+ * impact map and its events. The rest of the record, with its evidence, is written once, from the final pass.
  */
 export const LIVE_FINDINGS_JSON_SCHEMA = {
   type: 'object',
@@ -772,6 +897,8 @@ export const LIVE_FINDINGS_JSON_SCHEMA = {
     },
     // Redrawn whenever new evidence changes it, so the map never lags the findings.
     impact_map: FINDINGS_JSON_SCHEMA.properties.impact_map,
+    // Recorded as they are found, so the timeline fills while the investigation runs.
+    events: FINDINGS_JSON_SCHEMA.properties.events,
   },
   required: ['summary', 'hypotheses'],
 } as const;

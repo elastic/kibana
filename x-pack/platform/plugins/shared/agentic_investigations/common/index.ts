@@ -119,11 +119,13 @@ export {
   IMPACT_MAP_ATTACHMENT_TYPE,
   IMPACT_MAP_CATALOG_INDEX_NAME,
   IMPACT_MAP_ENTITY_KINDS,
+  IMPACT_MAP_EVENT_KINDS,
   IMPACT_MAP_HEALTH_STATES,
   IMPACT_MAP_INDEX_NAME,
   IMPACT_MAP_ROLES,
   MAX_IMPACT_MAP_CATALOG_TYPES,
   MAX_IMPACT_MAP_ENTITIES,
+  MAX_IMPACT_MAP_EVENTS,
   MAX_IMPACT_MAP_RELATIONSHIPS,
   SET_IMPACT_MAP_TOOL_ID,
   UPSERT_IMPACT_MAP_CATALOG_TOOL_ID,
@@ -136,6 +138,8 @@ export type {
   ImpactMapEntity,
   ImpactMapEntityKind,
   ImpactMapEntityType,
+  ImpactMapEvent,
+  ImpactMapEventKind,
   ImpactMapHealth,
   ImpactMapIcon,
   ImpactMapRelationship,
@@ -143,6 +147,14 @@ export type {
   ImpactMapRole,
   InvestigationImpactMap,
 } from './impact_map/impact_map';
+
+export {
+  impactMapEventId,
+  mergeImpactMapEvents,
+  sortImpactMapEvents,
+  withImpactMapEventId,
+} from './impact_map/events';
+export type { ImpactMapEventInput } from './impact_map/events';
 
 export {
   ESCALATION_ASSIGNEES_FIELD,

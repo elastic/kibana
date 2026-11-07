@@ -9,11 +9,13 @@ export {
   IMPACT_MAP_ATTACHMENT_TYPE,
   IMPACT_MAP_CATALOG_INDEX_NAME,
   IMPACT_MAP_ENTITY_KINDS,
+  IMPACT_MAP_EVENT_KINDS,
   IMPACT_MAP_HEALTH_STATES,
   IMPACT_MAP_INDEX_NAME,
   IMPACT_MAP_ROLES,
   MAX_IMPACT_MAP_CATALOG_TYPES,
   MAX_IMPACT_MAP_ENTITIES,
+  MAX_IMPACT_MAP_EVENTS,
   MAX_IMPACT_MAP_RELATIONSHIPS,
   SET_IMPACT_MAP_TOOL_ID,
   UPSERT_IMPACT_MAP_CATALOG_TOOL_ID,
@@ -26,6 +28,9 @@ export {
   impactMapEntitySchema,
   impactMapEntityTypeSchema,
   impactMapEntityTypesSchema,
+  impactMapEventKindSchema,
+  impactMapEventSchema,
+  impactMapEventsSchema,
   impactMapHealthSchema,
   impactMapIconSchema,
   impactMapRelationshipSchema,
@@ -42,6 +47,8 @@ export type {
   ImpactMapEntity,
   ImpactMapEntityKind,
   ImpactMapEntityType,
+  ImpactMapEvent,
+  ImpactMapEventKind,
   ImpactMapHealth,
   ImpactMapIcon,
   ImpactMapRelationship,
@@ -52,3 +59,11 @@ export type {
 
 export { mergeImpactMapCatalog, resolveImpactMapGraph } from './resolve_graph';
 export type { ResolvedImpactMapGraph } from './resolve_graph';
+
+export {
+  impactMapEventId,
+  mergeImpactMapEvents,
+  sortImpactMapEvents,
+  withImpactMapEventId,
+} from './events';
+export type { ImpactMapEventInput } from './events';
