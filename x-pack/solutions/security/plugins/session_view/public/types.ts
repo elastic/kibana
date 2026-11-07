@@ -39,6 +39,7 @@ export type SessionViewTelemetryKey =
   | 'refresh_clicked'
   | 'process_selected'
   | 'collapse_tree'
+  | 'expand_tree'
   | 'children_opened'
   | 'children_closed'
   | 'alerts_opened'

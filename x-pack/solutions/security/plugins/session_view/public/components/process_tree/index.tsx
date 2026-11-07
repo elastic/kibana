@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { ProcessTreeNode } from '../process_tree_node';
 import { BackToInvestigatedAlert } from '../back_to_investigated_alert';
 import { useProcessTree } from './hooks';
-import { collapseProcessTree } from './helpers';
+import { collapseProcessTree, expandProcessTree } from './helpers';
 import { ProcessTreeLoadMoreButton } from '../process_tree_load_more_button';
 import type { AlertStatusEventEntityIdMap, Process, ProcessEventsPage } from '../../../common';
 import { useScroll } from '../../hooks/use_scroll';
@@ -87,6 +87,7 @@ export const ProcessTree = ({
   verboseMode = false,
 }: ProcessTreeDeps) => {
   const [isInvestigatedEventVisible, setIsInvestigatedEventVisible] = useState<boolean>(true);
+  const [isTreeCollapsed, setIsTreeCollapsed] = useState<boolean>(false);
   const [isInvestigatedEventAbove, setIsInvestigatedEventAbove] = useState<boolean>(false);
   const styles = useStyles();
 
@@ -128,14 +129,20 @@ export const ProcessTree = ({
     setIsInvestigatedEventVisible(true);
   }, [onProcessSelected]);
 
-  const handleCollapseProcessTree = useCallback(() => {
-    collapseProcessTree(sessionLeader);
+  const handleToggleProcessTree = useCallback(() => {
+    if (isTreeCollapsed) {
+      expandProcessTree(sessionLeader);
+    } else {
+      collapseProcessTree(sessionLeader);
+    }
+
     if (scrollerRef.current) {
       scrollerRef.current.scrollTop = 0;
     }
     setForceRerender(Math.random());
-    trackEvent('collapse_tree');
-  }, [sessionLeader, trackEvent]);
+    setIsTreeCollapsed(!isTreeCollapsed);
+    trackEvent(isTreeCollapsed ? 'expand_tree' : 'collapse_tree');
+  }, [isTreeCollapsed, sessionLeader, trackEvent]);
 
   useEffect(() => {
     if (setSearchResults) {
@@ -188,7 +195,8 @@ export const ProcessTree = ({
             showTimestamp={showTimestamp}
             verboseMode={verboseMode}
             searchResults={searchResults}
-            handleCollapseProcessTree={handleCollapseProcessTree}
+            isTreeCollapsed={isTreeCollapsed}
+            handleToggleProcessTree={handleToggleProcessTree}
             trackEvent={trackEvent}
             loadPreviousButton={
               hasPreviousPage ? (
