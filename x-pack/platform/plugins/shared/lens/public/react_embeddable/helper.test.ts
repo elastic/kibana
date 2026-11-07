@@ -13,6 +13,10 @@ import {
 } from './helper';
 import { makeEmbeddableServices } from './mocks';
 import expect from 'expect';
+
+jest.mock('../lazy_builder', () => ({
+  getLensBuilder: jest.fn(() => null),
+}));
 import type {
   FormBasedPersistedState,
   TextBasedPersistedState,
