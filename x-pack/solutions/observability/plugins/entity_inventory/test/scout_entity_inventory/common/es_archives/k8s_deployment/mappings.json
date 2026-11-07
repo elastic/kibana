@@ -1,0 +1,206 @@
+{
+  "type": "data_stream",
+  "value": {
+    "data_stream": "metrics-kubernetes.state_deployment-default",
+    "template": {
+      "data_stream": {
+        "allow_custom_routing": false,
+        "hidden": false
+      },
+      "index_patterns": [
+        "metrics-kubernetes.state_deployment-*"
+      ],
+      "name": "metrics-kubernetes.state_deployment",
+      "priority": 200,
+      "template": {
+        "mappings": {
+          "dynamic": false,
+          "properties": {
+            "@timestamp": {
+              "type": "date"
+            },
+            "metricset": {
+              "properties": {
+                "name": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "orchestrator": {
+              "properties": {
+                "cluster": {
+                  "properties": {
+                    "name": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "kubernetes": {
+              "properties": {
+                "namespace": {
+                  "type": "keyword"
+                },
+                "labels": {
+                  "properties": {
+                    "app": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "deployment": {
+                  "properties": {
+                    "name": {
+                      "type": "keyword"
+                    },
+                    "paused": {
+                      "type": "boolean"
+                    },
+                    "replicas": {
+                      "properties": {
+                        "available": {
+                          "type": "long"
+                        },
+                        "desired": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "data_stream",
+  "value": {
+    "data_stream": "metrics-k8sclusterreceiver.otel-default",
+    "template": {
+      "data_stream": {
+        "allow_custom_routing": false,
+        "hidden": false
+      },
+      "index_patterns": [
+        "metrics-k8sclusterreceiver.otel-default"
+      ],
+      "name": "metrics-k8sclusterreceiver.otel",
+      "priority": 200,
+      "template": {
+        "mappings": {
+          "dynamic": false,
+          "properties": {
+            "@timestamp": {
+              "type": "date"
+            },
+            "k8s": {
+              "properties": {
+                "cluster": {
+                  "properties": {
+                    "name": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "namespace": {
+                  "properties": {
+                    "name": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "deployment": {
+                  "properties": {
+                    "name": {
+                      "type": "keyword"
+                    },
+                    "uid": {
+                      "type": "keyword"
+                    },
+                    "available": {
+                      "type": "long"
+                    },
+                    "desired": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "metrics-k8sclusterreceiver.otel-tsds",
+    "mappings": {
+      "dynamic": false,
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "k8s": {
+          "properties": {
+            "cluster": {
+              "properties": {
+                "name": {
+                  "type": "keyword",
+                  "time_series_dimension": true
+                }
+              }
+            },
+            "namespace": {
+              "properties": {
+                "name": {
+                  "type": "keyword",
+                  "time_series_dimension": true
+                }
+              }
+            },
+            "deployment": {
+              "properties": {
+                "name": {
+                  "type": "keyword",
+                  "time_series_dimension": true
+                },
+                "available": {
+                  "type": "long",
+                  "time_series_metric": "gauge"
+                },
+                "desired": {
+                  "type": "long",
+                  "time_series_metric": "gauge"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "mode": "time_series",
+        "routing_path": [
+          "k8s.cluster.name",
+          "k8s.namespace.name",
+          "k8s.deployment.name"
+        ],
+        "time_series": {
+          "start_time": "2026-11-05T00:00:00.000Z",
+          "end_time": "2026-11-06T00:00:00.000Z"
+        }
+      }
+    }
+  }
+}
