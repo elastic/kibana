@@ -46,7 +46,7 @@ const upsertPanelSchema = lazySchema(() =>
     content: upsertPanelContentSchema
       .optional()
       .describe(
-        'Panel content. Required for new panels. For an existing panel, edits it (e.g. a request with a query describing the change) and must match its kind; to change the kind, remove the panel and add a new one with a new id. Omit to only move the panel.'
+        'Panel content. Required for new panels. For an existing panel, edits it (e.g. content with a `query` describing the change) and must match its kind; to change the kind, remove the panel and add a new one with a new id. Omit to only move the panel.'
       ),
   })
 );

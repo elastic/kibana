@@ -19,13 +19,13 @@ import { defineRequestPanelKind } from '../panel_kind';
  * Custom content panel requests.
  *
  * Custom content is an HTML template generated server-side, so it is requested
- * like a Lens or Vega panel (`source: 'request'`, `renderer: 'custom_content'`).
+ * like a Lens or Vega panel (`type: 'custom_content'`).
  * The host provides the resolver that turns these requests into panel content.
  */
 
 /** Request to generate a new custom content panel's template. */
 export interface CustomContentPanelAddRequest extends PanelResolutionRequestBase {
-  renderer: 'custom_content';
+  type: 'custom_content';
   /** What to display. */
   nlQuery: string;
   /** ES|QL query feeding the template. Wins over `hasData`. */
@@ -39,7 +39,7 @@ export interface CustomContentPanelAddRequest extends PanelResolutionRequestBase
 
 /** Request to refine an existing custom content panel's template. */
 export interface CustomContentPanelEditRequest extends PanelResolutionRequestBase {
-  renderer: 'custom_content';
+  type: 'custom_content';
   existingPanel: AttachmentPanel;
   /** What to change. Omitted when the edit only changes the query. */
   nlQuery?: string;
@@ -61,11 +61,10 @@ export type CustomContentPanelResolutionRequest =
 /** Creates or edits a custom content panel. */
 const customContentPanelContentSchema = lazySchema(() =>
   z.object({
-    source: z.literal('request'),
-    renderer: z
+    type: z
       .literal('custom_content')
       .describe(
-        'Render an HTML/CSS layout generated server-side. A last resort for content Lens and Vega cannot express. Required to edit a custom content panel; it is not inferred from the panel.'
+        'An HTML/CSS layout generated server-side. A last resort for content Lens and Vega cannot express.'
       ),
     query: z
       .string()
@@ -105,9 +104,21 @@ const customContentPanelContentSchema = lazySchema(() =>
   })
 );
 
+const customContentGuidance = `A custom content panel with live data does not need a query from you. Always set \`hasData\` when you create one, since there is no default: \`hasData: true\` (and \`index\` when you know it) and the server generates the query from \`query\`, then samples its schema before generating the template. \`hasData: false\` makes a static panel with no query — use that for banners, legends and notes, and never invent a query for them. Do not write the query yourself; pass \`esql\` only when the user supplied one verbatim. If the server cannot generate a query, the panel fails with an error naming the reason — fix the \`index\` or the description and retry rather than proceeding.
+
+To create one, set \`query\` to a concise description of what to display; the HTML template is generated server-side from it.
+
+To edit one, list its id in \`panels\` with \`type: "custom_content"\`. Set \`query\` to the requested change; layout, copy and style edits (colors, sizes, wording) keep the current query. An edit that needs different data, such as "also show the average bytes", a new grouping or filter, or another time window, also needs \`regenerateESQL: true\`: without it the stored query is kept and the new data can never appear. The server then regenerates the query from \`query\`, keeping what the request does not change. \`hasData: true\` gives a static panel a query; \`hasData: false\` (or \`esql: null\`) removes it. The server refines the existing template.`;
+
 export const customContentPanelKind = defineRequestPanelKind({
-  renderer: 'custom_content',
+  type: 'custom_content',
   embeddableType: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   label: 'custom content',
+  selection: {
+    priority: 4,
+    whenToUse:
+      'a last resort for HTML/CSS layouts that Lens and Vega cannot express, such as KPI scorecards with colored status badges, health/status boards, or narrative text mixed with live data values, or when the user asks for a custom/HTML panel.',
+  },
+  guidance: customContentGuidance,
   contentSchema: customContentPanelContentSchema,
 });

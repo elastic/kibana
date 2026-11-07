@@ -285,7 +285,7 @@ export const getCustomContentToolArgs = (
 
     if (toolId === CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID && Array.isArray(params.panels)) {
       return params.panels.flatMap((item: unknown) =>
-        isRecord(item) && isRecord(item.content) && item.content.renderer === 'custom_content'
+        isRecord(item) && isRecord(item.content) && item.content.type === 'custom_content'
           ? [
               `${toolId} panel ${String(item.id)}: hasData=${flag(
                 item.content.hasData

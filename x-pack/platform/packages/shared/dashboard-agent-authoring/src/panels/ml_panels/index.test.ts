@@ -6,14 +6,11 @@
  */
 
 import { MAX_STRING_LENGTH } from '@kbn/ml-server-schemas/constants';
-import { buildConfigPanelContent, getEditableEmbeddableTypes } from '..';
+import { buildConfigPanelContent, findPanelKind } from '..';
 import {
   anomalyChartsPanelConfigSchema,
   anomalySwimlaneConfigSchema,
-  anomalyChartsPanelContentSchema,
-  anomalySwimlanePanelContentSchema,
   singleMetricViewerConfigSchema,
-  singleMetricViewerPanelContentSchema,
 } from '.';
 
 describe('ml_anomaly_charts registry entry', () => {
@@ -77,15 +74,9 @@ describe('ml_anomaly_charts registry entry', () => {
     });
   });
 
-  describe('getEditableEmbeddableTypes', () => {
-    it('edits only anomaly charts panels', () => {
-      expect(
-        getEditableEmbeddableTypes({
-          source: 'config',
-          type: 'ml_anomaly_charts',
-          config: { job_ids: ['job-1'] },
-        })
-      ).toEqual(['ml_anomaly_charts']);
+  describe('findPanelKind', () => {
+    it('finds the anomaly charts kind by its embeddable type', () => {
+      expect(findPanelKind('ml_anomaly_charts')?.type).toBe('ml_anomaly_charts');
     });
   });
 });
@@ -162,15 +153,9 @@ describe('anomalySwimlaneConfigSchema', () => {
 });
 
 describe('ml_anomaly_swimlane registry entry', () => {
-  describe('getEditableEmbeddableTypes', () => {
-    it('edits only swim lane panels', () => {
-      expect(
-        getEditableEmbeddableTypes({
-          source: 'config',
-          type: 'ml_anomaly_swimlane',
-          config: { job_ids: ['job-1'], swimlane_type: 'overall' },
-        })
-      ).toEqual(['ml_anomaly_swimlane']);
+  describe('findPanelKind', () => {
+    it('finds the swim lane kind by its embeddable type', () => {
+      expect(findPanelKind('ml_anomaly_swimlane')?.type).toBe('ml_anomaly_swimlane');
     });
   });
 });
@@ -213,55 +198,9 @@ describe('singleMetricViewerConfigSchema', () => {
 });
 
 describe('ml_single_metric_viewer registry entry', () => {
-  describe('getEditableEmbeddableTypes', () => {
-    it('edits only single metric viewer panels', () => {
-      expect(
-        getEditableEmbeddableTypes({
-          source: 'config',
-          type: 'ml_single_metric_viewer',
-          config: { job_ids: ['job-1'] },
-        })
-      ).toEqual(['ml_single_metric_viewer']);
+  describe('findPanelKind', () => {
+    it('finds the single metric viewer kind by its embeddable type', () => {
+      expect(findPanelKind('ml_single_metric_viewer')?.type).toBe('ml_single_metric_viewer');
     });
-  });
-});
-
-describe('ML panel content schemas', () => {
-  it('accepts anomaly charts content', () => {
-    expect(
-      anomalyChartsPanelContentSchema.safeParse({
-        source: 'config',
-        type: 'ml_anomaly_charts',
-        config: { job_ids: ['job-1'], severity_threshold: 50, title: 'Updated charts' },
-      }).success
-    ).toBe(true);
-  });
-
-  it('accepts swim lane content', () => {
-    expect(
-      anomalySwimlanePanelContentSchema.safeParse({
-        source: 'config',
-        type: 'ml_anomaly_swimlane',
-        config: {
-          job_ids: ['job-1'],
-          swimlane_type: 'viewBy',
-          view_by: 'host.name',
-          severity_threshold: 75,
-        },
-      }).success
-    ).toBe(true);
-  });
-
-  it('accepts single metric viewer content', () => {
-    expect(
-      singleMetricViewerPanelContentSchema.safeParse({
-        source: 'config',
-        type: 'ml_single_metric_viewer',
-        config: {
-          job_ids: ['job-1'],
-          selected_entities: { 'host.name': 'web-01' },
-        },
-      }).success
-    ).toBe(true);
   });
 });
