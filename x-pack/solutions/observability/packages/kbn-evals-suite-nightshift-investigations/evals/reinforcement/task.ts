@@ -429,12 +429,15 @@ const reinforceStep = (execution: WorkflowExecutionDto) =>
   });
 
 /** Tree ids the submissions name, in the `symptom:<slug>` form the plugin stores trees under. */
-const submittedTreeIds = (submissions: readonly SubmitArguments[]): string[] =>
-  submissions
-    .flatMap((submission) => treeIdsInSubmission(submission))
-    .map(symptomSlugFromTreeId)
-    .filter((slug) => slug.length > 0)
-    .map(symptomTreeId);
+const submittedTreeIds = (submissions: readonly SubmitArguments[]): string[] => [
+  ...new Set(
+    submissions
+      .flatMap((submission) => treeIdsInSubmission(submission))
+      .map(symptomSlugFromTreeId)
+      .filter((slug) => slug.length > 0)
+      .map(symptomTreeId)
+  ),
+];
 
 const headContent = (treeId: string, docs: readonly IndexedTreeDoc[] | undefined) => {
   const content = docs?.find((doc) => doc.id === headId(treeId))?.source.content;
@@ -620,7 +623,21 @@ const writtenThisRun = (timestamp: string | undefined, startedAtMs: number): boo
   return Number.isFinite(writtenAt) && writtenAt >= startedAtMs - TREE_WRITE_SKEW_MS;
 };
 
-/** Prior is the previous version when this run committed, otherwise the head that was already there. */
+/** The newest version written before this run, which a run that committed several times skips past. */
+const versionBeforeRun = async (
+  esClient: Client,
+  treeId: string,
+  headVersion: number,
+  startedAtMs: number
+): Promise<StoredTree | undefined> => {
+  for (let version = headVersion - 1; version >= 1; version--) {
+    const doc = await readTreeDoc(esClient, versionId(treeId, version));
+    if (!doc || !writtenThisRun(doc['@timestamp'], startedAtMs)) return doc;
+  }
+  return undefined;
+};
+
+/** Prior is the tree before this run's first commit when it committed, otherwise the existing head. */
 const treesAfterRun = async (
   esClient: Client,
   treeIds: string[],
@@ -633,7 +650,7 @@ const treesAfterRun = async (
     const wrote = writtenThisRun(head?.['@timestamp'], startedAtMs);
     const previous =
       wrote && version > 1
-        ? await readTreeDoc(esClient, versionId(treeId, version - 1))
+        ? await versionBeforeRun(esClient, treeId, version, startedAtMs)
         : undefined;
     trees.push({
       tree_id: treeId,
@@ -817,8 +834,7 @@ export const runCustomer0Reinforcement = async ({
       }
     | undefined;
   const submissions = parseSubmissions(output?.submissions_json);
-  const treeIds = treeIdsInSubmission(submissions.at(-1));
-  const trees = await treesAfterRun(esClient, treeIds, startedAtMs);
+  const trees = await treesAfterRun(esClient, submittedTreeIds(submissions), startedAtMs);
   const reinforced = reinforce?.status === ExecutionStatus.COMPLETED && output?.skipped !== true;
   const submitRejected = output?.submit_rejected === true;
   const failed = execution.status !== ExecutionStatus.COMPLETED || !reinforced || submitRejected;

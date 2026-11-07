@@ -159,7 +159,9 @@ const readFinishedConversation = async (
   let lastTransient: unknown;
   const read = async () => {
     try {
-      return await readConversation(fetch, id);
+      const conversation = await readConversation(fetch, id);
+      lastTransient = undefined;
+      return conversation;
     } catch (error) {
       if (!isTransientReadError(error)) throw error;
       lastTransient = error;
