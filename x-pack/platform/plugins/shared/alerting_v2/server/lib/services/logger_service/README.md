@@ -138,32 +138,37 @@ on, so it must identify a bounded slice of behaviour, not a file.
   log line, and do not log from the root service.
 - Never repeat the subsystem name in message text.
 
-| Subsystem            | Covers                                                                     | Bound in                                                                                                          |
-| -------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `routes`             | HTTP route handlers.                                                       | `routes/alerting_route_context.ts`                                                                                |
-| `rulesClient`        | Rule CRUD, filter parsing, bulk operations, internal rules client.         | `lib/rules_client/`, `lib/internal_rules_client/`                                                                 |
-| `ruleTemplateClient` | Rule template read path.                                                   | `lib/rule_templates_client/`                                                                                      |
-| `actionPolicyClient` | Action policy CRUD and API key handling.                                   | `lib/action_policy_client/`                                                                                       |
-| `actionPolicyTest`   | Test-notification preview and send for action policies.                    | `lib/action_policy_test/action_policy_test_service.ts`                                                            |
-| `ruleExecutor`       | Rule task runner, pipeline steps, middlewares.                             | `lib/rule_executor/task_runner.ts`                                                                                |
-| `director`           | Episode state transitions. Runs inside the executor but is its own domain. | `lib/director/director.ts`                                                                                        |
-| `dispatcher`         | Dispatch task runner, pipeline steps, workflow scheduling.                 | `lib/dispatcher/dispatcher.ts`                                                                                    |
-| `executionHistory`   | Rule and action policy execution-history read paths.                       | `lib/execution_history_client/`, `lib/action_policy_execution_history_client/`, `lib/services/event_log_service/` |
-| `resources`          | Datastream, index template, ES\|QL view and managed workflow bootstrap.    | `setup/bind_on_start.ts`, `lib/services/resource_service/`                                                        |
-| `query`              | ES\|QL query execution and response formats.                               | `lib/services/query_service/`, `lib/services/esql_response_format_service/`                                       |
-| `storage`            | Bulk writes to the plugin's data streams.                                  | `lib/services/storage_service/`                                                                                   |
-| `maintenanceWindows` | Maintenance window lookups for suppression.                                | `lib/services/maintenance_window_service/`                                                                        |
-| `tasks`              | Background tasks other than the two engine tasks. Boot-time scheduling.    | `lib/tasks/`, `lib/usage/`, `setup/bind_on_start.ts`                                                              |
-| `savedObjects`       | Saved object type registration and model-version migrations.               | `setup/bind_on_setup.ts`                                                                                          |
-| `agentBuilder`       | Agent Builder tools, skills and attachments.                               | `setup/bind_agent_builder.ts`                                                                                     |
-| `events`             | Internal domain event bus, publishers, subscribers and workflow emission.  | `lib/events/`, `lib/services/workflow_service/`                                                                   |
-| `telemetry`          | Event-based telemetry (EBT) reporting.                                     | `lib/services/ebt_service/ebt_service.ts`                                                                         |
+| Subsystem            | Covers                                                                                                                                            | Bound in                                                                                                          |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `routes`             | HTTP route handlers.                                                                                                                              | `routes/alerting_route_context.ts`                                                                                |
+| `rulesClient`        | Rule CRUD, filter parsing, bulk operations, internal rules client.                                                                                | `lib/rules_client/`, `lib/internal_rules_client/`                                                                 |
+| `ruleTemplateClient` | Rule template read path.                                                                                                                          | `lib/rule_templates_client/`                                                                                      |
+| `actionPolicyClient` | Action policy CRUD and API key handling.                                                                                                          | `lib/action_policy_client/`                                                                                       |
+| `actionPolicyTest`   | Test-notification preview and send for action policies.                                                                                           | `lib/action_policy_test/action_policy_test_service.ts`                                                            |
+| `alertsClient`       | Alert actions and episode read / write clients.                                                                                                   | `lib/alert_actions_client/`, `lib/episodes_client/`                                                               |
+| `ruleExecutor`       | Rule task runner, pipeline steps, middlewares.                                                                                                    | `lib/rule_executor/task_runner.ts`                                                                                |
+| `director`           | Episode state transitions. Runs inside the executor but is its own domain.                                                                        | `lib/director/director.ts`                                                                                        |
+| `dispatcher`         | Dispatch task runner, pipeline steps, workflow scheduling.                                                                                        | `lib/dispatcher/dispatcher.ts`                                                                                    |
+| `executionHistory`   | Rule and action policy execution-history read paths.                                                                                              | `lib/execution_history_client/`, `lib/action_policy_execution_history_client/`, `lib/services/event_log_service/` |
+| `resources`          | Datastream, index template, ES\|QL view and managed workflow bootstrap, and bootstrap-time configuration such as the ES\|QL response format flag. | `setup/bind_on_start.ts`, `lib/services/resource_service/`, `lib/services/esql_response_format_service/`          |
+| `tasks`              | Background tasks other than the two engine tasks. Boot-time scheduling.                                                                           | `lib/tasks/`, `lib/usage/`, `setup/bind_on_start.ts`                                                              |
+| `savedObjects`       | Saved object type registration and model-version migrations.                                                                                      | `setup/bind_on_setup.ts`                                                                                          |
+| `agentBuilder`       | Agent Builder tools, skills and attachments.                                                                                                      | `setup/bind_agent_builder.ts`                                                                                     |
+| `events`             | Internal domain event bus, publishers, subscribers and workflow emission.                                                                         | `lib/events/`, `lib/services/workflow_service/`                                                                   |
+| `telemetry`          | Event-based telemetry (EBT) reporting.                                                                                                            | `lib/services/ebt_service/ebt_service.ts`                                                                         |
 
 The tree is split along **failure-domain** boundaries, not directory
-boundaries: 18 loggers an operator can remember, not 100+ file names. The
+boundaries: 16 loggers an operator can remember, not 100+ file names. The
 `director` runs inside the executor pipeline but gets its own logger because it
 is reasoned about independently. The `events` bus is one logger even though
 publishers and subscribers live in several directories.
+
+Shared infrastructure services (`QueryService`, `StorageService`,
+`MaintenanceWindowService`, the retry service) have no logger of their own.
+They take the caller's logger as a `logger` parameter on each call, so a failed
+query or bulk write is reported under the caller's `log.logger` with its bound
+`rule_id`, `task_id` and `step`. Do not add a subsystem for a service that only
+runs on behalf of another domain.
 
 Discover cheat sheet:
 
