@@ -17,6 +17,7 @@ import type {
   AttachmentsDeletedEventPayload,
   ObservablesAddedEventPayload,
   AlertStatusChangedEventPayload,
+  IncrementalIdsAssignedEventPayload,
 } from './types';
 import type { Case } from '../../common';
 import type { CaseSavedObjectTransformed } from '../common/types/case';
@@ -28,6 +29,7 @@ export const ATTACHMENTS_DELETED_EVENT = 'attachmentsDeleted';
 export const OBSERVABLES_ADDED_EVENT = 'observablesAdded';
 export const CASE_STATUS_CHANGED_EVENT = 'caseStatusChanged';
 export const ALERT_STATUS_CHANGED_EVENT = 'alertStatusChanged';
+export const INCREMENTAL_IDS_ASSIGNED_EVENT = 'incrementalIdsAssigned';
 
 interface CaseUpdatedExtraInfo {
   previousCase?: CaseSavedObjectTransformed;
@@ -40,6 +42,10 @@ export type CasesEventBusListener<TType extends CasesDomainEventType = CasesDoma
 
 export type CaseUpdatedEventBusListener<TType extends CasesDomainEventType = CasesDomainEventType> =
   (event: CasesEventPayload<TType>, extraInfo: CaseUpdatedExtraInfo) => void | Promise<void>;
+
+export type IncrementalIdsAssignedEventBusListener = (
+  payload: IncrementalIdsAssignedEventPayload
+) => void | Promise<void>;
 
 /**
  * Typed internal event bus for Cases domain events.
@@ -133,6 +139,14 @@ export class CasesEventBus extends EventEmitter {
 
   private logListenerError(eventName: string, error: unknown): void {
     this.logger?.warn(`Cases event bus listener for "${eventName}" failed: ${error}`);
+  }
+
+  emitIncrementalIdsAssigned(payload: IncrementalIdsAssignedEventPayload) {
+    this.emit(INCREMENTAL_IDS_ASSIGNED_EVENT, payload);
+  }
+
+  onIncrementalIdsAssigned(listener: IncrementalIdsAssignedEventBusListener) {
+    this.subscribeIsolated(INCREMENTAL_IDS_ASSIGNED_EVENT, listener);
   }
 
   hasAlertStatusChangedListeners(): boolean {
