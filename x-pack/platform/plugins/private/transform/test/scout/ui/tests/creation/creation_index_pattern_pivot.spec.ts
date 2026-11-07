@@ -27,8 +27,8 @@ import {
 } from '../../fixtures';
 
 const FULL_TIME_RANGE = {
-  start: 'Jun 12, 2023 @ 00:04:19.000',
-  end: 'Jul 12, 2023 @ 23:45:36.000',
+  start: '2023-06-12T00:04:19.000Z',
+  end: '2023-07-12T23:45:36.000Z',
 };
 
 interface PivotTestData {
