@@ -42,22 +42,18 @@ import {
 
 import type { OptionsListSuccessResponse } from '../../../../common/options_list';
 import { isValidSearch } from '../../../../common/options_list';
+import { optionsListStateComparison } from '../../../../common/state_comparison';
 import {
-  defaultDataControlComparators,
   initializeDataControlManager,
   type DataControlStateManager,
 } from '../data_control_manager';
 import { OptionsListControl } from './components/options_list_control';
 import { MIN_OPTIONS_LIST_REQUEST_SIZE } from './constants';
-import {
-  editorComparators,
-  initializeEditorStateManager,
-  type EditorState,
-} from './editor_state_manager';
+import { initializeEditorStateManager, type EditorState } from './editor_state_manager';
 import { fetchAndValidate$ } from './fetch_and_validate';
 import { OptionsListControlContext } from './options_list_context_provider';
 import { OptionsListStrings } from './options_list_strings';
-import { initializeSelectionsManager, selectionComparators } from './selections_manager';
+import { initializeSelectionsManager } from './selections_manager';
 import { initializeTemporayStateManager } from './temporay_state_manager';
 import type { DSLOptionsListComponentApi, OptionsListControlApi } from './types';
 import { buildFilter } from './utils/filter_utils';
@@ -76,6 +72,7 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
 > => {
   return {
     type: OPTIONS_LIST_CONTROL,
+    stateComparison: optionsListStateComparison,
     getPlacementHints,
     layoutConstraints: LAYOUT_CONSTRAINTS,
     buildEmbeddable: async ({ initialState: state, finalizeApi, uuid, parentApi }) => {
@@ -267,19 +264,12 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
         ).pipe(map(() => undefined)),
         getComparators: () => {
           return {
-            ...defaultDataControlComparators,
-            ...selectionComparators,
-            ...editorComparators,
+            ...optionsListStateComparison.comparators,
             // This state cannot currently be changed after the control is created
             display_settings: 'skip',
           };
         },
-        defaultState: {
-          search_technique: DEFAULT_DSL_OPTIONS_LIST_STATE.search_technique,
-          sort: DEFAULT_DSL_OPTIONS_LIST_STATE.sort,
-          exclude: false,
-          exists_selected: false,
-        },
+        defaultState: optionsListStateComparison.defaultState,
         applySerializedState: (nextState) => {
           dataControlManager.reinitializeState(nextState);
           selectionsManager.reinitializeState(nextState);

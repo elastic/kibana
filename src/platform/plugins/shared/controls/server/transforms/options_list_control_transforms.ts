@@ -19,6 +19,7 @@ import {
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 
+import { optionsListStateComparison } from '../../common/state_comparison';
 import { transformDataControlIn, transformDataControlOut } from './data_control_transforms';
 
 const OPTIONS_LIST_REF_NAME = 'optionsListDataView' as const;
@@ -31,6 +32,7 @@ export const registerOptionsListControlTransforms = (embeddable: EmbeddableSetup
   embeddable.registerEmbeddableServerDefinition(OPTIONS_LIST_CONTROL, {
     title: 'Options list control',
     getSchema: () => optionsListDSLControlSchema,
+    stateComparison: optionsListStateComparison,
     getTransforms: () => ({
       transformIn: (state: OptionsListDSLControlState) => {
         const { state: dataControlState, references } =

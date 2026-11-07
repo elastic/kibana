@@ -17,7 +17,6 @@ import {
   initializeStateApi,
   getViewModeSubject,
   initializeTitleManager,
-  titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import React from 'react';
@@ -29,6 +28,7 @@ import type {
   MarkdownByReferenceState,
 } from '../server';
 import { APP_NAME, MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
+import { markdownStateComparison } from '../common/state_comparison';
 import type { MarkdownEditorApi } from './types';
 import { resolveRelativeLinksPlugin } from './plugins/resolve_relative_links';
 import { MarkdownEditor } from './components/markdown_editor';
@@ -48,6 +48,7 @@ export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
   MarkdownEditorApi
 > = {
   type: MARKDOWN_EMBEDDABLE_TYPE,
+  stateComparison: markdownStateComparison,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const libraryId = (initialState as MarkdownByReferenceState).ref_id;
     const isByReference = libraryId !== undefined;
@@ -114,14 +115,10 @@ export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
           map(() => undefined)
         )
       ),
-      getComparators: () => {
-        return {
-          ...titleComparators,
-          content: isByReference ? 'skip' : 'referenceEquality',
-          settings: isByReference ? 'skip' : 'deepEquality',
-          ref_id: 'skip',
-        };
-      },
+      getComparators: () => ({
+        ...markdownStateComparison.comparators,
+        ref_id: 'skip',
+      }),
       applySerializedState: (nextState) => {
         titleManager.reinitializeState(nextState);
         // There are no unsaved changes to reset for

@@ -17,27 +17,23 @@ import { loadEmbeddableData } from './data_loader';
 import { isTextBasedLanguage, deserializeState } from './helper';
 import { initializeEditApi } from './initializers/initialize_edit';
 import { initializeInspector } from './initializers/initialize_inspector';
-import {
-  dashboardServicesComparators,
-  initializeDashboardServices,
-} from './initializers/initialize_dashboard_services';
+import { initializeDashboardServices } from './initializers/initialize_dashboard_services';
 import { initializeInternalApi } from './initializers/initialize_internal_api';
-import {
-  initializeSearchContext,
-  searchContextComparators,
-} from './initializers/initialize_search_context';
+import { initializeSearchContext } from './initializers/initialize_search_context';
 import { initializeActionApi } from './initializers/initialize_actions';
 import { initializeIntegrations } from './initializers/initialize_integrations';
 import { initializeStateManagement } from './initializers/initialize_state_management';
 import { LensEmbeddableComponent } from './renderer/lens_embeddable_component';
 import { EditorFrameServiceProvider } from '../editor_frame_service/editor_frame_service_context';
 import type { LensEmbeddableStartServices } from './types';
+import { lensStateComparison } from '../../common/state_comparison';
 
 export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices
 ): EmbeddablePublicDefinition<LensWireAPIConfig, LensApi> => {
   return {
     type: LENS_EMBEDDABLE_TYPE,
+    stateComparison: lensStateComparison,
     /**
      * This is called after the deserialize, so some assumptions can be made about its arguments:
      * @param uuid      a unique identifier for the embeddable panel
@@ -162,12 +158,8 @@ export const createLensEmbeddableFactory = (
         ),
         getComparators: () => {
           const comparators = {
-            ...stateConfig.getComparators(),
-            ...actionsConfig.getComparators(),
-            ...dashboardServicesComparators,
-            ...searchContextComparators,
-            isNewPanel: 'skip',
-            references: 'skip',
+            ...lensStateComparison.comparators,
+            ref_id: 'skip',
           } as const;
           // set all comparators to 'skip' when inline editing is in progress
           if (internalApi.isEditingInProgress()) {

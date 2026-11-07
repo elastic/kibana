@@ -26,17 +26,15 @@ import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
 
 import { isCompressed } from '../../../control_group/utils/is_compressed';
-import {
-  defaultDataControlComparators,
-  initializeDataControlManager,
-} from '../data_control_manager';
+import { rangeSliderStateComparison } from '../../../../common/state_comparison';
+import { initializeDataControlManager } from '../data_control_manager';
 import { RangeSliderControl } from './components/range_slider_control';
 import { hasNoResults$ } from './has_no_results';
 import { minMax$ } from './min_max';
 import { initializeRangeControlSelections } from './range_control_selections';
 import { RangeSliderStrings } from './range_slider_strings';
 import type { RangeSliderControlApi } from './types';
-import { editorComparators, initializeEditorStateManager } from './editor_state_manager';
+import { initializeEditorStateManager } from './editor_state_manager';
 import { buildFilter } from './utils/filter_utils';
 import { getPlacementHints, LAYOUT_CONSTRAINTS } from '../../constants';
 
@@ -46,6 +44,7 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
 > => {
   return {
     type: RANGE_SLIDER_CONTROL,
+    stateComparison: rangeSliderStateComparison,
     getPlacementHints,
     layoutConstraints: LAYOUT_CONSTRAINTS,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
@@ -90,13 +89,7 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
           ),
           editorStateManager.anyStateChange$
         ),
-        getComparators: () => {
-          return {
-            ...editorComparators,
-            ...defaultDataControlComparators,
-            value: 'deepEquality',
-          };
-        },
+        getComparators: () => rangeSliderStateComparison.comparators,
         applySerializedState: (nextState) => {
           dataControlManager.reinitializeState(nextState);
           editorStateManager.reinitializeState(nextState);
