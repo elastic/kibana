@@ -22,9 +22,12 @@ apiTest.describe(
     const createdPackIds: string[] = [];
 
     apiTest.beforeAll(async ({ samlAuth, kbnClient }) => {
+      // The package policy below installs the osquery_manager integration inline.
+      apiTest.setTimeout(300_000);
+
       adminCredentials = await samlAuth.asInteractiveUser('admin');
 
-      // Get installed osquery_manager version (pre-installed as bundled package)
+      // Resolve the osquery_manager version to install with the package policy
       const versionResponse = await kbnClient.request({
         method: 'GET',
         path: `${testData.API_PATHS.FLEET_EPM_PACKAGES}/osquery_manager`,
