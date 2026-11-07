@@ -106,8 +106,13 @@ the router picked the right skill, matching real user behavior.
 Low Skill Invoked scores are **routing/skill-description work** (fix the skill or router),
 not harness tweaks.
 
-Trajectory precision excludes `load_skill` calls — natural routing always pays that
-framework cost; the evaluator measures waste after the skill is loaded.
+Trajectory precision and `CostPerAlert` share one definition of the calls they count,
+`src/evaluators/tool_call_accounting.ts`. Both exclude what the run pays whether or not the
+model chose it: the harness call `load_skill` (natural routing always pays that framework
+cost), the platform bookkeeping a compliant run cannot avoid — `write_todos` and the report's
+`attachments.add` write-back — and `attachments.read` for examples that declare
+`input.attachments`. Every other call is a routing choice: precision scores those against the
+expected path, and `CostPerAlert` counts them per passed alert (efficient at 5 or fewer).
 
 ## How to run
 
