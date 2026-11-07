@@ -6,14 +6,16 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import moment from 'moment';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
-import { ENTITY_INVENTORY_APP_NAME } from '../constants';
-import type { EntityInventorySearchSubmitPayload } from '../context/search_context';
-import { useEntityInventorySearch } from '../context/search_context';
-import { useEntityInventoryDataView } from '../hooks/use_entity_inventory_data_view';
-import { useKibana } from '../../hooks/use_kibana';
-import { MAX_TIME_RANGE_HINT, SEARCH_BAR_PLACEHOLDERS } from '../translations';
+import { ENTITY_INVENTORY_APP_NAME, ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS } from '../../constants';
+import { QUICK_RANGES } from './quick_ranges';
+import type { EntityInventorySearchSubmitPayload } from '../../context/search_context';
+import { useEntityInventorySearch } from '../../context/search_context';
+import { useEntityInventoryDataView } from '../../hooks/use_entity_inventory_data_view';
+import { useKibana } from '../../../hooks/use_kibana';
+import { MAX_TIME_RANGE_HINT, SEARCH_BAR_PLACEHOLDERS } from '../../translations';
 
 export const EntityInventorySearchBar = () => {
   const { euiTheme } = useEuiTheme();
@@ -52,6 +54,10 @@ export const EntityInventorySearchBar = () => {
           indexPatterns={dataView ? [dataView] : undefined}
           useDefaultBehaviors={false}
           enableDateRangePicker={false}
+          legacyDatePickerProps={{
+            minDate: moment().subtract(ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS, 'days'),
+            commonlyUsedRanges: QUICK_RANGES,
+          }}
           showDatePicker
           showFilterBar
           hiddenFilterPanelOptions={['pinFilter']}

@@ -185,6 +185,23 @@ describe('SearchBar', () => {
     expect(screen.queryByRole('group', { name: 'Time window actions' })).not.toBeInTheDocument();
   });
 
+  it('forwards legacyDatePickerProps to the legacy date picker', async () => {
+    render(
+      wrapSearchBarInContext({
+        showFilterBar: false,
+        showQueryInput: false,
+        enableDateRangePicker: false,
+        legacyDatePickerProps: {
+          commonlyUsedRanges: [{ start: 'now-3d', end: 'now', label: 'Last 3 days' }],
+        },
+      })
+    );
+
+    await userEvent.click(await screen.findByTestId('superDatePickerToggleQuickMenuButton'));
+
+    expect(await screen.findByText('Last 3 days')).toBeInTheDocument();
+  });
+
   it('forwards showTimeWindowButtons through the stateful SearchBar', async () => {
     const data = dataPluginMock.createStartContract();
     data.query.timefilter.timefilter.getRefreshInterval = jest.fn(() => ({
