@@ -107,6 +107,9 @@ export const getSearchEmbeddableFactory = ({
       const tabs = runtimeState.tabs ?? [];
 
       const defaultState = { selected_tab_id: tabs[0]?.id };
+      const isSelectedTabImplicit = !(
+        'selected_tab_id' in initialState && initialState.selected_tab_id
+      );
 
       /** All other state */
       const searchError$ = new BehaviorSubject<Error | undefined>(undefined);
@@ -137,6 +140,7 @@ export const getSearchEmbeddableFactory = ({
           serializeDynamicActions: drilldownsManager.getLatestState,
           savedObjectId,
           selectedTabId: selectedTabId$.getValue(),
+          isSelectedTabImplicit,
         });
 
       const inlineEditingApi = initializeInlineEditingApi({
