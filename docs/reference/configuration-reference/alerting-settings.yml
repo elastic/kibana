@@ -1370,6 +1370,28 @@ groups:
           ech: ga
           self: ga
 
+  - group: Universal Alerting settings
+    id: alerting-v2-settings
+    settings:
+
+      - setting: xpack.alerting_v2.enabled
+        id: xpack-alerting-v2-enabled
+        description: |
+          Set to `false` to turn off Universal Alerting completely. {{kib}} doesn't load it, so existing rules and action policies stop running, and its pages, APIs, and the **Universal Alerting** advanced setting aren't available. Rules, action policies, and alert data stay in place, and rules start running again when you set it back to `true`.
+
+          This is the only setting that stops rules and action policies from running. The [`alerting:v2:enabled`](/reference/advanced-settings.md#alerting-v2-enabled) advanced setting only hides the interface and rejects API requests.
+        warning: |
+          Set this value back to `true` before you upgrade {{kib}}. If Universal Alerting rules or action policies exist while it's `false`, the upgrade fails.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
   - group: Rule Registry settings
     id: rule-registry-settings
     settings:
