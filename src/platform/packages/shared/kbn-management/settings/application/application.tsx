@@ -9,10 +9,19 @@
 
 import React, { useState } from 'react';
 
-import { EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem, Query, EuiTabs } from '@elastic/eui';
-import { KbnInfoCallout } from '@kbn/ui-callout';
+import {
+  EuiText,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  Query,
+  EuiTabs,
+} from '@elastic/eui';
+import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import { getCategoryCounts } from '@kbn/management-settings-utilities';
 import { Form } from '@kbn/management-settings-components-form';
+import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { SettingsTabs } from '@kbn/management-settings-types/tab';
 import { EmptyState } from './empty_state';
 import { i18nTexts } from './i18n_texts';
@@ -24,6 +33,8 @@ import { QueryInput } from './query_input';
 import { useServices } from './services';
 
 export const DATA_TEST_SUBJ_SETTINGS_TITLE = 'managementSettingsTitle';
+export const DATA_TEST_SUBJ_SETTINGS_LOAD_ERROR = 'managementSettingsLoadError';
+export const DATA_TEST_SUBJ_SETTINGS_LOADING = 'managementSettingsLoading';
 export const SPACE_SETTINGS_TAB_ID = 'space-settings';
 export const GLOBAL_SETTINGS_TAB_ID = 'global-settings';
 
@@ -46,6 +57,68 @@ function getQueryParam(url: string) {
   return '';
 }
 
+const SettingsBody = ({
+  isLoading,
+  selectedTab,
+  selectedTabId,
+  query,
+  onClearQuery,
+  getToastsService,
+  canSaveGlobalSettings,
+  canSaveSpaceSettings,
+}: {
+  isLoading: boolean;
+  selectedTab: SettingsTabs[string];
+  selectedTabId: string;
+  query: Query;
+  onClearQuery: () => void;
+  getToastsService: () => ToastsStart;
+  canSaveGlobalSettings: boolean;
+  canSaveSpaceSettings: boolean;
+}) => {
+  if (isLoading) {
+    return (
+      <EuiFlexGroup justifyContent="center">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="xl" data-test-subj={DATA_TEST_SUBJ_SETTINGS_LOADING} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  if (!selectedTab.fields.length) {
+    return <EmptyState queryText={query?.text} onClearQuery={onClearQuery} />;
+  }
+
+  return (
+    <>
+      <Form
+        fields={selectedTab.fields}
+        categoryCounts={selectedTab.categoryCounts}
+        isSavingEnabled={selectedTab.isSavingEnabled}
+        onClearQuery={onClearQuery}
+        scope={selectedTabId === SPACE_SETTINGS_TAB_ID ? 'namespace' : 'global'}
+      />
+      <EuiSpacer size="l" />
+      {selectedTab.sections.length > 0 &&
+        selectedTab.sections.map(({ Component, queryMatch }, index) => {
+          if (queryMatch(query.text)) {
+            return (
+              <Component
+                key={`component-${index}`}
+                toasts={getToastsService()}
+                enableSaving={{
+                  global: canSaveGlobalSettings,
+                  namespace: canSaveSpaceSettings,
+                }}
+              />
+            );
+          }
+        })}
+    </>
+  );
+};
+
 /**
  * Component for displaying the {@link SettingsApplication} component.
  */
@@ -63,8 +136,22 @@ export const SettingsApplication = () => {
     addUrlToHistory(search);
   };
 
-  const [spaceAllFields, globalAllFields] = useScopeFields();
-  const [spaceFilteredFields, globalFilteredFields] = useScopeFields(query);
+  const {
+    spaceFields: spaceAllFields,
+    globalFields: globalAllFields,
+    isLoading: allFieldsLoading,
+    error: allFieldsError,
+  } = useScopeFields();
+  const {
+    spaceFields: spaceFilteredFields,
+    globalFields: globalFilteredFields,
+    isLoading: filteredFieldsLoading,
+    error: filteredFieldsError,
+  } = useScopeFields(query);
+  const isLoading = allFieldsLoading || filteredFieldsLoading;
+  const loadError = allFieldsError ?? filteredFieldsError;
+
+  const [selectedTabId, setSelectedTabId] = useState(SPACE_SETTINGS_TAB_ID);
 
   const {
     spaceSettings: { save: canSaveSpaceSettings },
@@ -74,9 +161,9 @@ export const SettingsApplication = () => {
     setBadge(readOnlyBadge);
   }
 
-  // Only enabled the Global settings tab if there are any global settings
-  // and if global settings can be shown
-  const globalTabEnabled = globalAllFields.length > 0 && canShowGlobalSettings;
+  // Only enable the Global settings tab if global settings can be shown and there are any global
+  // settings. Whether there are any is unknown until the settings load, so keep the tab until then.
+  const globalTabEnabled = canShowGlobalSettings && (isLoading || globalAllFields.length > 0);
 
   const tabs: SettingsTabs = {
     [SPACE_SETTINGS_TAB_ID]: {
@@ -101,22 +188,36 @@ export const SettingsApplication = () => {
     };
   }
 
-  const [selectedTabId, setSelectedTabId] = useState(SPACE_SETTINGS_TAB_ID);
-  const selectedTab = tabs[selectedTabId];
+  const selectedTab = tabs[selectedTabId] ?? tabs[SPACE_SETTINGS_TAB_ID];
+
+  const title = (
+    <EuiText>
+      <h1 data-test-subj={DATA_TEST_SUBJ_SETTINGS_TITLE}>{i18nTexts.advancedSettingsTitle}</h1>
+    </EuiText>
+  );
+
+  if (loadError) {
+    return (
+      <div>
+        {title}
+        <EuiSpacer size="m" />
+        <KbnDangerCallout
+          title={i18nTexts.loadErrorTitle}
+          text={loadError.message}
+          data-test-subj={DATA_TEST_SUBJ_SETTINGS_LOAD_ERROR}
+        />
+      </div>
+    );
+  }
 
   return (
     <div>
       <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiText>
-            <h1 data-test-subj={DATA_TEST_SUBJ_SETTINGS_TITLE}>
-              {i18nTexts.advancedSettingsTitle}
-            </h1>
-          </EuiText>
-        </EuiFlexItem>
+        <EuiFlexItem>{title}</EuiFlexItem>
         <EuiFlexItem>
           <QueryInput
             {...{ categories: Object.keys(selectedTab.categoryCounts), query, onQueryChange }}
+            isDisabled={isLoading}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -143,35 +244,16 @@ export const SettingsApplication = () => {
         </>
       )}
       <EuiSpacer size="xl" />
-      {selectedTab.fields.length ? (
-        <>
-          <Form
-            fields={selectedTab.fields}
-            categoryCounts={selectedTab.categoryCounts}
-            isSavingEnabled={selectedTab.isSavingEnabled}
-            onClearQuery={() => onQueryChange()}
-            scope={selectedTabId === SPACE_SETTINGS_TAB_ID ? 'namespace' : 'global'}
-          />
-          <EuiSpacer size="l" />
-          {selectedTab.sections.length > 0 &&
-            selectedTab.sections.map(({ Component, queryMatch }, index) => {
-              if (queryMatch(query.text)) {
-                return (
-                  <Component
-                    key={`component-${index}`}
-                    toasts={getToastsService()}
-                    enableSaving={{
-                      global: canSaveGlobalSettings,
-                      namespace: canSaveSpaceSettings,
-                    }}
-                  />
-                );
-              }
-            })}
-        </>
-      ) : (
-        <EmptyState {...{ queryText: query?.text, onClearQuery: () => onQueryChange() }} />
-      )}
+      <SettingsBody
+        isLoading={isLoading}
+        selectedTab={selectedTab}
+        selectedTabId={selectedTabId}
+        query={query}
+        onClearQuery={() => onQueryChange()}
+        getToastsService={getToastsService}
+        canSaveGlobalSettings={canSaveGlobalSettings}
+        canSaveSpaceSettings={canSaveSpaceSettings}
+      />
     </div>
   );
 };

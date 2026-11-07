@@ -871,6 +871,7 @@ packages:
   - 'src/platform/packages/shared/kbn-management/settings/components/field_row'
   - 'src/platform/packages/shared/kbn-management/settings/components/form'
   - 'src/platform/packages/shared/kbn-management/settings/field_definition'
+  - 'src/platform/packages/shared/kbn-management/settings/hooks'
   - 'src/platform/packages/shared/kbn-management/settings/section_registry'
   - 'src/platform/packages/shared/kbn-management/settings/setting_ids'
   - 'src/platform/packages/shared/kbn-management/settings/types'

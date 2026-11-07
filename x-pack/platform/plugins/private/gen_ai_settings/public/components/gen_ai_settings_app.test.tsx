@@ -110,6 +110,9 @@ describe('GenAiSettingsApp', () => {
 
     // Mock settings client with default settings
     coreStart.settings.client.getAll.mockReturnValue(createSettingsMock() as any);
+    coreStart.settings.metadata.getAll.mockImplementation(async () =>
+      coreStart.settings.client.getAll()
+    );
     coreStart.http.fetch.mockResolvedValue({
       page: 1,
       perPage: 20,
@@ -121,7 +124,11 @@ describe('GenAiSettingsApp', () => {
     mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
   });
 
-  const renderComponent = (props = {}, servicesOverrides: Record<string, unknown> = {}) => {
+  const renderComponent = (
+    props = {},
+    servicesOverrides: Record<string, unknown> = {},
+    queryClient = new QueryClient()
+  ) => {
     const services = {
       ...coreStart,
       productDocBase: mockProductDocBase,
@@ -135,7 +142,7 @@ describe('GenAiSettingsApp', () => {
     };
     return renderWithI18n(
       <MockAppHeaderProvider>
-        <QueryClientProvider client={new QueryClient()}>
+        <QueryClientProvider client={queryClient}>
           <KibanaContextProvider services={services}>
             <SettingsContextProvider>
               <GenAiSettingsApp setBreadcrumbs={setBreadcrumbs} {...props} />
@@ -170,6 +177,58 @@ describe('GenAiSettingsApp', () => {
           text: 'GenAI Settings',
         },
       ]);
+    });
+  });
+
+  describe('loading and error states', () => {
+    it('should show a spinner while the setting definitions load, then remove it', async () => {
+      let resolveDefinitions: (definitions: Record<string, unknown>) => void = () => {};
+      coreStart.settings.metadata.getAll.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveDefinitions = resolve as typeof resolveDefinitions;
+          })
+      );
+
+      renderComponent();
+
+      expect(screen.getByTestId('genAiSettingsLoading')).toBeInTheDocument();
+      expect(screen.queryByTestId('genAiSettingsLoadError')).not.toBeInTheDocument();
+
+      resolveDefinitions(createSettingsMock());
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('genAiSettingsLoading')).not.toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('genAiSettingsLoadError')).not.toBeInTheDocument();
+    });
+
+    it('should show an error callout that replaces the spinner when the setting definitions fail to load', async () => {
+      coreStart.settings.metadata.getAll.mockRejectedValue(new Error('Internal Server Error'));
+
+      renderComponent(
+        {},
+        {},
+        new QueryClient({
+          logger: { log: () => {}, warn: () => {}, error: () => {} },
+          defaultOptions: { queries: { retry: false } },
+        })
+      );
+
+      const loadError = await screen.findByTestId('genAiSettingsLoadError');
+      expect(loadError).toHaveTextContent('Unable to load settings');
+      expect(loadError).toHaveTextContent('Internal Server Error');
+      expect(screen.queryByTestId('genAiSettingsLoading')).not.toBeInTheDocument();
+      expect(coreStart.notifications.toasts.addDanger).not.toHaveBeenCalled();
+    });
+
+    it('should not show the spinner or the error callout once the settings have loaded', async () => {
+      renderComponent();
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('genAiSettingsLoading')).not.toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('genAiSettingsLoadError')).not.toBeInTheDocument();
     });
   });
 

@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { render } from '../../../helpers/test_helper';
+import { act } from '@testing-library/react';
+import { coreStartMock, render } from '../../../helpers/test_helper';
 import { SettingsTab } from './settings_tab';
 import { useAppContext } from '../../../hooks/use_app_context';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -49,6 +50,7 @@ describe('SettingsTab', () => {
           basePath: { prepend: prependMock },
         },
         productDocBase: undefined,
+        settings: coreStartMock.settings,
         notifications: {
           toasts: {
             add: jest.fn(),
@@ -119,5 +121,60 @@ describe('SettingsTab', () => {
 
     expect(getByTestId('observabilityAiAssistantKnowledgeBaseLoadingSpinner')).toBeInTheDocument();
     expect(getByTestId('observabilityAiAssistantKnowledgeBaseUpdateModelButton')).toBeDisabled();
+  });
+
+  describe('setting definitions', () => {
+    beforeEach(() => {
+      coreStartMock.settings.client.getAll.mockReturnValue({});
+    });
+
+    afterEach(() => {
+      coreStartMock.settings.metadata.getAll.mockReset();
+    });
+
+    const renderSettingsTab = () =>
+      render(<SettingsTab />, {
+        coreStart: {
+          application: { navigateToApp: navigateToAppMock },
+        },
+      });
+
+    it('should show a spinner while the setting definitions load, then remove it', async () => {
+      let resolveDefinitions: (definitions: Record<string, never>) => void = () => {};
+      coreStartMock.settings.metadata.getAll.mockImplementation(
+        () =>
+          new Promise<Record<string, never>>((resolve) => {
+            resolveDefinitions = resolve;
+          })
+      );
+
+      const { getByTestId, queryByTestId } = renderSettingsTab();
+
+      expect(getByTestId('observabilityAiAssistantManagementSettingsLoading')).toBeInTheDocument();
+      expect(
+        queryByTestId('observabilityAiAssistantManagementSettingsLoadError')
+      ).not.toBeInTheDocument();
+
+      await act(async () => {
+        resolveDefinitions({});
+      });
+
+      expect(
+        queryByTestId('observabilityAiAssistantManagementSettingsLoading')
+      ).not.toBeInTheDocument();
+    });
+
+    it('should show an error callout that replaces the spinner when the setting definitions fail to load', async () => {
+      coreStartMock.settings.metadata.getAll.mockRejectedValue(new Error('Internal Server Error'));
+
+      const { findByTestId, queryByTestId } = renderSettingsTab();
+
+      const loadError = await findByTestId('observabilityAiAssistantManagementSettingsLoadError');
+      expect(loadError).toHaveTextContent('Unable to load settings');
+      expect(loadError).toHaveTextContent('Internal Server Error');
+      expect(
+        queryByTestId('observabilityAiAssistantManagementSettingsLoading')
+      ).not.toBeInTheDocument();
+    });
   });
 });

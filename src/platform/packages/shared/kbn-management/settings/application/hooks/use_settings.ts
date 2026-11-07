@@ -11,20 +11,24 @@ import { useState, useEffect } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 
 import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
+import type { UiSettingMetadata } from '@kbn/management-settings-types';
 import type { SolutionView } from '@kbn/spaces-plugin/common';
 import { useServices } from '../services';
 
 /**
- * React hook which retrieves settings from a particular {@link IUiSettingsClient},
+ * React hook which retrieves settings metadata from the server,
  * normalizes them to a predictable format, {@link UiSettingMetadata}, and returns
  * them as an observed collection.
  * @param scope The {@link UiSettingsScope} of the settings to be retrieved.
- * @returns An array of settings metadata objects.
+ * @returns An object with settings, a loading flag, and the error if the settings failed to load.
  */
 export const useSettings = (scope: UiSettingsScope) => {
   const { getAllowlistedSettings, subscribeToUpdates, getActiveSpace, subscribeToActiveSpace } =
     useServices();
   const [solutionView, setSolutionView] = useState<SolutionView>();
+  const [settings, setSettings] = useState<Record<string, UiSettingMetadata>>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error>();
 
   useEffectOnce(() => {
     const subscription = subscribeToActiveSpace(() => {
@@ -39,21 +43,36 @@ export const useSettings = (scope: UiSettingsScope) => {
     };
   });
 
-  const [settings, setSettings] = useState(getAllowlistedSettings(scope, solutionView));
-
   useEffect(() => {
-    setSettings(getAllowlistedSettings(scope, solutionView));
-  }, [solutionView, scope, getAllowlistedSettings]); // Update settings when solutionView changes
+    let isCurrent = true;
+    setIsLoading(true);
 
-  useEffectOnce(() => {
-    const subscription = subscribeToUpdates(() => {
-      setSettings(getAllowlistedSettings(scope, solutionView));
-    }, scope);
+    const refreshSettings = () => {
+      getAllowlistedSettings(scope, solutionView).then(
+        (result) => {
+          if (isCurrent) {
+            setSettings(result);
+            setError(undefined);
+            setIsLoading(false);
+          }
+        },
+        (e: Error) => {
+          if (isCurrent) {
+            setError(e);
+            setIsLoading(false);
+          }
+        }
+      );
+    };
+
+    refreshSettings();
+    const subscription = subscribeToUpdates(refreshSettings, scope);
 
     return () => {
+      isCurrent = false;
       subscription.unsubscribe();
     };
-  });
+  }, [scope, solutionView, getAllowlistedSettings, subscribeToUpdates]);
 
-  return settings;
+  return { settings, isLoading, error };
 };

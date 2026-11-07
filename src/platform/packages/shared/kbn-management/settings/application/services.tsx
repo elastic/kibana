@@ -8,7 +8,7 @@
  */
 
 import type { FC, PropsWithChildren } from 'react';
-import React, { useContext } from 'react';
+import React, { useContext, useRef } from 'react';
 
 import {
   FormProvider,
@@ -17,8 +17,12 @@ import {
   type FormServices,
 } from '@kbn/management-settings-components-form';
 import type { SettingsCapabilities, UiSettingMetadata } from '@kbn/management-settings-types';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { normalizeSettings } from '@kbn/management-settings-utilities';
+import type {
+  IUiSettingsClient,
+  IUiSettingsMetadataClient,
+  UiSettingsMetadataState,
+} from '@kbn/core-ui-settings-browser';
+import { mergeSettingDefinitions, normalizeSettings } from '@kbn/management-settings-utilities';
 import type { Subscription } from 'rxjs';
 import type { ApplicationStart, ScopedHistory } from '@kbn/core-application-browser';
 import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
@@ -36,7 +40,7 @@ export interface Services {
   getAllowlistedSettings: (
     scope: UiSettingsScope,
     solution: SolutionView | undefined
-  ) => Record<string, UiSettingMetadata>;
+  ) => Promise<Record<string, UiSettingMetadata>>;
   getSections: (scope: UiSettingsScope) => RegistryEntry[];
   getToastsService: () => ToastsStart;
   getCapabilities: () => SettingsCapabilities;
@@ -61,6 +65,7 @@ export interface KibanaDependencies {
       IUiSettingsClient,
       'getAll' | 'isCustom' | 'isOverridden' | 'getUpdate$' | 'validateValue'
     >;
+    metadata: IUiSettingsMetadataClient;
   };
   history: ScopedHistory;
   sectionRegistry: SectionRegistryStart;
@@ -148,17 +153,38 @@ export const SettingsApplicationKibanaProvider: FC<
     chrome,
     spaces,
   } = dependencies;
-  const { client, globalClient } = settings;
+  const { client, globalClient, metadata } = settings;
+  const definitionRequests = useRef<
+    Partial<Record<UiSettingsScope, Promise<UiSettingsMetadataState>>>
+  >({});
 
   const getScopeClient = (scope: UiSettingsScope) => {
     return scope === 'namespace' ? client : globalClient;
   };
 
-  const getAllowlistedSettings = (scope: UiSettingsScope, solution: SolutionView | undefined) => {
+  const getDefinitions = (scope: UiSettingsScope) => {
+    const pendingRequest = definitionRequests.current[scope];
+    if (pendingRequest) {
+      return pendingRequest;
+    }
+
+    const request = metadata.getAll(scope);
+    definitionRequests.current[scope] = request;
+    request.catch(() => {
+      delete definitionRequests.current[scope];
+    });
+    return request;
+  };
+
+  const getAllowlistedSettings = async (
+    scope: UiSettingsScope,
+    solution: SolutionView | undefined
+  ) => {
     const { filterSettings } = application.capabilities;
-    const scopeClient = getScopeClient(scope);
+    const definitions = await getDefinitions(scope);
+    const allSettings = mergeSettingDefinitions(definitions, getScopeClient(scope).getAll());
     const rawSettings = Object.fromEntries(
-      Object.entries(scopeClient.getAll()).filter(
+      Object.entries(allSettings).filter(
         ([settingId, settingDef]) =>
           !settingDef.readonly &&
           !client.isCustom(settingId) &&

@@ -8,4 +8,5 @@
  */
 
 export { isSettingDefaultValue } from './is_default_value';
+export { mergeSettingDefinitions } from './merge_setting_definitions';
 export { normalizeSettings } from './normalize_settings';

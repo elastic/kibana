@@ -15,10 +15,31 @@ import { useFields } from './use_fields';
  * React hook which retrieves the fields for each scope (`namespace` and `global`)
  * and returns two collections of {@link FieldDefinition} objects.
  * @param query The {@link Query} to execute for filtering the fields.
- * @returns Two arrays of {@link FieldDefinition} objects.
+ * @returns An object with two arrays of {@link FieldDefinition} objects, a loading flag, and the
+ * error if either scope failed to load.
  */
-export const useScopeFields = (query?: Query): [FieldDefinition[], FieldDefinition[]] => {
-  const spaceFields = useFields('namespace', query);
-  const globalFields = useFields('global', query);
-  return [spaceFields, globalFields];
+export const useScopeFields = (
+  query?: Query
+): {
+  spaceFields: FieldDefinition[];
+  globalFields: FieldDefinition[];
+  isLoading: boolean;
+  error?: Error;
+} => {
+  const {
+    fields: spaceFields,
+    isLoading: spaceLoading,
+    error: spaceError,
+  } = useFields('namespace', query);
+  const {
+    fields: globalFields,
+    isLoading: globalLoading,
+    error: globalError,
+  } = useFields('global', query);
+  return {
+    spaceFields,
+    globalFields,
+    isLoading: spaceLoading || globalLoading,
+    error: spaceError ?? globalError,
+  };
 };

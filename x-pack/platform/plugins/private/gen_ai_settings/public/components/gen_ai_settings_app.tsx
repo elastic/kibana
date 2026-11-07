@@ -14,10 +14,13 @@ import {
   EuiFormRow,
   EuiTitle,
   EuiLink,
+  EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { isEmpty } from 'lodash';
@@ -68,7 +71,8 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     showChatExperienceSetting,
     showAnonymizationProfilesSection,
   } = useEnabledFeatures();
-  const { fields, unsavedChanges, isSaving, cleanUnsavedChanges, saveAll } = useSettingsContext();
+  const { fields, isLoading, loadError, unsavedChanges, isSaving, cleanUnsavedChanges, saveAll } =
+    useSettingsContext();
 
   // Determine current chat experience (including unsaved changes)
   const chatExperienceField = fields[AI_CHAT_EXPERIENCE_TYPE];
@@ -311,6 +315,22 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                   </EuiFormRow>
                 </EuiDescribedFormGroup>
               )}
+              {isLoading && (
+                <EuiFlexGroup justifyContent="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="xl" data-test-subj="genAiSettingsLoading" />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
+              {loadError && (
+                <KbnDangerCallout
+                  title={i18n.translate('xpack.genAiSettings.load.error', {
+                    defaultMessage: 'Unable to load settings',
+                  })}
+                  text={loadError.message}
+                  data-test-subj="genAiSettingsLoadError"
+                />
+              )}
               {showChatExperienceSetting && (
                 <EuiFlexItem>
                   <ChatExperience />
@@ -334,13 +354,15 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
 
           {hasAgentBuilderPrivileges && <AgentBuilderTracingSection />}
 
-          {isAgentExperience && (showChatExperienceSetting || hasAgentBuilderPrivileges) && (
-            <>
-              <EuiSpacer size="l" />
+          {!isLoading &&
+            isAgentExperience &&
+            (showChatExperienceSetting || hasAgentBuilderPrivileges) && (
+              <>
+                <EuiSpacer size="l" />
 
-              <DocumentationSection productDocBase={productDocBase} />
-            </>
-          )}
+                <DocumentationSection productDocBase={productDocBase} />
+              </>
+            )}
 
           {showAnonymizationProfilesSection && (
             <>
