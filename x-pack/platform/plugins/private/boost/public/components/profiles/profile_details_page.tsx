@@ -349,6 +349,7 @@ export const ProfileDetailsPage = () => {
               canEdit={canEdit}
               filter={({ boost_profile: profileName }) => profileName === name}
               showsProfile={false}
+              showsStorageSize
               query={ruleQuery}
               showsCount
               tableCaption={i18n.translate('xpack.boost.profileDetails.rulesCaption', {

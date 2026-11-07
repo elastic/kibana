@@ -230,6 +230,9 @@ describe('ProfileDetailsPage', () => {
     // rules list what they apply it to on their own pages, so this page doesn't list them too.
     const profileRules = within(screen.getByTestId('boostProfileRules'));
     expect(profileRules.getByTestId('boostRuleMatches')).toHaveTextContent('1 index');
+    // With no profile column, it has room for the storage of what each rule applies to.
+    expect(profileRules.getByRole('columnheader', { name: /Storage size/ })).toBeInTheDocument();
+    expect(profileRules.getByRole('row', { name: /catalogs/ })).toHaveTextContent('2 GB');
     // The same table as the rules tab, with each rule's actions, but not its profile, which is
     // this one.
     expect(profileRules.getByTestId('editBoostRule')).toBeInTheDocument();

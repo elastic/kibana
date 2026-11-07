@@ -87,15 +87,11 @@ interface RuleFlyoutProps {
 
 const PROFILE_TYPES: readonly BoostProfileType[] = ['indices', 'data_streams'];
 
-// Names the field by what it takes, which the profile's type decides.
-const TARGET_LABELS: Readonly<Record<BoostProfileType, string>> = {
-  indices: i18n.translate('xpack.boost.ruleForm.indexTargetLabel', {
-    defaultMessage: 'Index pattern or name',
-  }),
-  data_streams: i18n.translate('xpack.boost.ruleForm.dataStreamTargetLabel', {
-    defaultMessage: 'Data stream pattern or name',
-  }),
-};
+// The same for either type: Elasticsearch calls the syntax that matches data streams an index
+// pattern too, and the placeholder and list show which type the field takes.
+const TARGET_LABEL = i18n.translate('xpack.boost.ruleForm.indexTargetLabel', {
+  defaultMessage: 'Index pattern or name',
+});
 
 // The tallest the list of matches grows.
 const PREVIEW_MAX_HEIGHT = 320;
@@ -428,7 +424,7 @@ export const RuleFlyout = ({
   const patternRow = (
     <EuiFormRow
       display="rowCompressed"
-      label={TARGET_LABELS[targetType]}
+      label={TARGET_LABEL}
       isInvalid={Boolean(patternError)}
       error={patternError}
       fullWidth

@@ -18,6 +18,7 @@ import type {
   BoostProfileType,
   BoostRule,
 } from '../../../common/types';
+import { formatSize } from '../cost_format';
 import { DetailsLink } from '../details_link';
 import { TableCount } from '../details/table_count';
 import { useTablePage } from '../use_table_page';
@@ -33,6 +34,8 @@ export type RuleRow = BoostRule &
     profileType?: BoostProfileType;
     /** The rule's name or pattern, which its column sorts by. */
     target: string;
+    /** The storage of what the rule applies to, after higher-ranked rules. */
+    appliedSize: number;
   };
 
 const isCustomRule = ({ is_builtin: isBuiltin }: BoostRule) => !isBuiltin;
@@ -58,6 +61,11 @@ interface RulesTableProps {
   filter?: (row: RuleRow) => boolean;
   /** Whether to show each rule's profile, which a profile's own page leaves out. */
   showsProfile?: boolean;
+  /**
+   * Whether to show the storage of what each rule applies to, which a profile's own page has room
+   * for without the profile column.
+   */
+  showsStorageSize?: boolean;
   /** A search bar's query, run on rule names, and profiles when the table shows them. */
   searchQuery?: Query;
   /** Text from a search field that rule names must contain. */
@@ -82,6 +90,7 @@ export const RulesTable = ({
   canEdit,
   filter,
   showsProfile = true,
+  showsStorageSize = false,
   searchQuery,
   query = '',
   resetKey = '',
@@ -96,6 +105,7 @@ export const RulesTable = ({
   const rows = useMemo<RuleRow[]>(() => {
     const profileTypes = new Map(profiles.map(({ name, type }) => [name, type]));
     const coverage = getRuleCoverage(dataSources, rules, profiles);
+    const sizes = new Map(dataSources.map(({ name, size_in_bytes: bytes }) => [name, bytes]));
     return rules.map((rule) => {
       const ruleCoverage = coverage.get(rule.name) ?? {
         matches: 0,
@@ -103,10 +113,14 @@ export const RulesTable = ({
         appliesTo: 0,
         supersededBy: new Map(),
       };
+      const { matchedNames, supersededBy } = ruleCoverage;
       return {
         ...rule,
         profileType: profileTypes.get(rule.boost_profile),
         ...ruleCoverage,
+        appliedSize: matchedNames
+          .filter((name) => !supersededBy.has(name))
+          .reduce((total, name) => total + (sizes.get(name) ?? 0), 0),
         target: rule.index_patterns.join(', '),
       };
     });
@@ -245,6 +259,21 @@ export const RulesTable = ({
         />
       ),
     },
+    ...(showsStorageSize
+      ? [
+          {
+            // The storage of what it applies to, hidden data included.
+            field: 'appliedSize',
+            name: i18n.translate('xpack.boost.rulesTab.storageSizeColumn', {
+              defaultMessage: 'Storage size',
+            }),
+            width: '9em',
+            sortable: true,
+            dataType: 'number' as const,
+            render: formatSize,
+          },
+        ]
+      : []),
     ...(canEdit ? [actionsColumn] : []),
   ];
 

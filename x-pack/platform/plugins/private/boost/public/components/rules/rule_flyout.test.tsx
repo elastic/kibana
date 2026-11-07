@@ -727,6 +727,8 @@ describe('RuleFlyout pattern matches', () => {
     expect(screen.getByTestId('boostRulePatternMatchesEmpty')).toHaveTextContent(
       'No data streams detected'
     );
+    // Elasticsearch calls the syntax an index pattern for data streams too.
+    expect(screen.getByText('Index pattern or name', { selector: 'label' })).toBeInTheDocument();
   });
 
   it('lists what the rule can target once a profile sets its type', async () => {
