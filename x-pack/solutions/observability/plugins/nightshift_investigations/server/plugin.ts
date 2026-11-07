@@ -977,6 +977,7 @@ export class NightshiftInvestigationsPlugin
       spaces: this.spaces,
       getAgentBuilder: () => this.agentBuilder,
       getAgentAvailability: () => this.getInvestigationAvailability(),
+      isAssistantEnabled: () => this.assistantEnabled,
       getAutomationsSoClient: this.getAutomationsSoClient,
       isUniversalAlertingAvailable: () => this.alertingVTwo !== undefined,
       isServerless: this.ctx.env.packageInfo.buildFlavor === 'serverless',
