@@ -5,8 +5,19 @@
  * 2.0.
  */
 
-import { isSection, type DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
-import { getLeafPanels, getPanelKind } from '../dashboard_panels';
+import { compact } from 'lodash';
+import {
+  isSection,
+  type AttachmentPanel,
+  type DashboardAttachmentData,
+} from '@kbn/agent-builder-dashboards-common';
+import {
+  GRID_COLUMNS,
+  formatGrid,
+  getLeafPanels,
+  getPanelContainers,
+  getPanelKind,
+} from '../dashboard_panels';
 import type { DashboardAgentEvaluator, DashboardStructureGold } from '../types';
 import { noDashboardResult, scoreChecks, skippedResult, type Check } from '../evaluator_utils';
 
@@ -14,6 +25,56 @@ export const DASHBOARD_STRUCTURE_EVALUATOR_NAME = 'Dashboard Structure';
 
 const describeRange = ({ min, max }: { min?: number; max?: number }): string =>
   `${min ?? 0}–${max ?? '∞'}`;
+
+type RowGold = NonNullable<DashboardStructureGold['rows']>[number];
+
+/**
+ * Checks each gold row against the panels of its kind and the row above it. A
+ * row shares its top and height, so it leaves no gap above the next row. A
+ * missing row also fails the row below it, which cannot be directly below it.
+ */
+const checkRows = (rows: readonly RowGold[], dashboard: DashboardAttachmentData): Check[] => {
+  const containers = getPanelContainers(dashboard);
+  let previous: { panels: AttachmentPanel[]; container: number } | undefined;
+
+  return rows.map(({ kind, fullWidth = false }, index) => {
+    const container = containers.findIndex(({ panels }) =>
+      panels.some((panel) => getPanelKind(panel) === kind)
+    );
+    const rowPanels = getLeafPanels(dashboard).filter((panel) => getPanelKind(panel) === kind);
+    const placed = rowPanels.map(({ id, grid }) => `${id} ${formatGrid(grid)}`);
+    const [first] = rowPanels;
+    const problems = compact([
+      first === undefined ? `no ${kind} panel` : undefined,
+      rowPanels.some(
+        (panel) =>
+          !containers[container]?.panels.includes(panel) ||
+          panel.grid.y !== first?.grid.y ||
+          panel.grid.h !== first?.grid.h
+      )
+        ? `${kind} panels are not in one row`
+        : undefined,
+      fullWidth && rowPanels.some(({ grid }) => grid.w !== GRID_COLUMNS)
+        ? `${kind} panels are not full width`
+        : undefined,
+      previous &&
+      first &&
+      (previous.container !== container ||
+        first.grid.y !== Math.max(...previous.panels.map(({ grid }) => grid.y + grid.h)))
+        ? `${kind} row is not directly below rows[${index - 1}]`
+        : undefined,
+    ]);
+    previous = { panels: rowPanels, container };
+
+    return {
+      assertion: `rows[${index}]`,
+      passed: problems.length === 0,
+      detail: `${
+        problems.length === 0 ? `${kind} row as asked` : problems.join('; ')
+      } (${placed.join(', ')})`,
+    };
+  });
+};
 
 const checkStructure = (
   gold: DashboardStructureGold,
@@ -72,13 +133,16 @@ const checkStructure = (
     });
   }
 
+  checks.push(...checkRows(gold.rows ?? [], dashboard));
+
   return checks;
 };
 
 /**
  * Checks what the prompt pins down about the dashboard's shape: panel count,
- * panels per chart kind, and named sections. Scored as the fraction of gold
- * assertions that hold, so one miss does not zero the example.
+ * panels per chart kind, named sections, and rows the prompt lays out. Scored
+ * as the fraction of gold assertions that hold, so one miss does not zero the
+ * example.
  */
 export const dashboardStructureEvaluator: DashboardAgentEvaluator = {
   name: DASHBOARD_STRUCTURE_EVALUATOR_NAME,

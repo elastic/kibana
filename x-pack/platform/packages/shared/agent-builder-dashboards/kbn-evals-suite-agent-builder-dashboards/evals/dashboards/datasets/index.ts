@@ -8,4 +8,5 @@
 export { DASHBOARD_CREATION_EXAMPLES } from './creation';
 export { DASHBOARD_DISCOVER_RESULTS_EXAMPLES } from './discover_results';
 export { DASHBOARD_ENHANCE_EXAMPLES } from './enhance';
+export { DASHBOARD_LAYOUT_EDIT_EXAMPLES } from './layout_edit';
 export { DASHBOARD_ROUTING_EXAMPLES } from './routing';

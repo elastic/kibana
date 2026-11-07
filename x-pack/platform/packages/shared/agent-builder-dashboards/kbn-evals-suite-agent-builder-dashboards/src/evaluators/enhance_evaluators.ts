@@ -284,13 +284,17 @@ export const enhanceDefectResolutionEvaluator: DashboardAgentEvaluator = {
 };
 
 /**
- * One key per rule and flagged panel, or per rule for dashboard-level
- * violations, so a container rule that flags fewer panels than the seed did
- * (for example one metric still after the charts, instead of four) is an
- * improvement, not a new violation.
+ * One key per rule and flagged panel, or per rule and container for
+ * dashboard-level violations, so a container rule that flags fewer panels than
+ * the seed did (for example one metric still after the charts, instead of
+ * four) is an improvement, not a new violation, while a gap in a new section is.
  */
-const violationKeys = ({ rule, panelIds }: DashboardRuleViolation): string[] =>
-  panelIds.length === 0 ? [rule] : panelIds.map((id) => `${rule}:${id}`);
+const violationKeys = ({ rule, panelIds, container }: DashboardRuleViolation): string[] => {
+  if (panelIds.length > 0) {
+    return panelIds.map((id) => `${rule}:${id}`);
+  }
+  return [container === undefined ? rule : `${rule}@${container}`];
+};
 
 /**
  * Enhancing must not break a rule the seeded dashboard already met, for
@@ -319,7 +323,7 @@ export const enhanceNoRegressionEvaluator: DashboardAgentEvaluator = {
     const seeded = new Set(findViolations(before, SCORED_RULES).flatMap(violationKeys));
     const introduced = findViolations(dashboard, SCORED_RULES).flatMap((violation) => {
       if (violation.panelIds.length === 0) {
-        return seeded.has(violation.rule) ? [] : [violation];
+        return violationKeys(violation).every((key) => seeded.has(key)) ? [] : [violation];
       }
       const newPanelIds = violation.panelIds.filter((id) => !seeded.has(`${violation.rule}:${id}`));
       return newPanelIds.length === 0 ? [] : [{ ...violation, panelIds: newPanelIds }];
