@@ -26,6 +26,7 @@ import { ProjectDefaultFlyout } from '../project_defaults/project_default_flyout
 import { DeleteRuleModal } from './delete_rule_modal';
 import { RuleFlyout } from './rule_flyout';
 import { RuleMatches } from './rule_matches';
+import { TARGETS_LABEL, getRuleTargets } from './rule_targets';
 import { DEFAULT_BADGE_LABEL } from '../badge_labels';
 
 export type RuleRow = BoostRule &
@@ -33,6 +34,8 @@ export type RuleRow = BoostRule &
     profileType?: BoostProfileType;
     /** The storage of what the rule applies to, after higher-ranked rules. */
     appliedSize: number;
+    /** The rule's name or pattern, which its column sorts by. */
+    target: string;
   };
 
 const isCustomRule = ({ is_builtin: isBuiltin }: BoostRule) => !isBuiltin;
@@ -112,6 +115,7 @@ export const RulesTable = ({
         appliedSize: matchedNames
           .filter((name) => !supersededBy.has(name))
           .reduce((total, name) => total + (sizes.get(name) ?? 0), 0),
+        target: rule.index_patterns.join(', '),
       };
     });
   }, [rules, profiles, dataSources]);
@@ -210,6 +214,13 @@ export const RulesTable = ({
           },
         ]
       : []),
+    // The name or pattern, beside the priority, which together decide which rule applies.
+    {
+      field: 'target',
+      name: TARGETS_LABEL,
+      sortable: true,
+      render: (_target: string, rule: RuleRow) => getRuleTargets(rule),
+    },
     {
       field: 'priority',
       name: i18n.translate('xpack.boost.rulesTab.priorityColumn', {
@@ -227,14 +238,13 @@ export const RulesTable = ({
       name: i18n.translate('xpack.boost.rulesTab.appliesToColumn', {
         defaultMessage: 'Applies to',
       }),
-      width: '17em',
+      width: '12em',
       sortable: true,
       render: (
         appliesTo: number,
-        { index_patterns: patterns, profileType, matches, matchedNames, supersededBy }: RuleRow
+        { profileType, matches, matchedNames, supersededBy }: RuleRow
       ) => (
         <RuleMatches
-          patterns={patterns}
           type={profileType}
           coverage={{ matches, matchedNames, appliesTo, supersededBy }}
           hiddenNames={hiddenNames}

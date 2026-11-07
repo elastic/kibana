@@ -157,7 +157,7 @@ export const RuleDetailsPage = () => {
                     </span>
                   ),
                 },
-                ...getRuleTargetItems(rule, type),
+                ...getRuleTargetItems(rule),
               ]}
             />
           </DetailsSection>

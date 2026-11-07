@@ -9,7 +9,6 @@ import {
   getBoostRangeError,
   formatMaxAge,
   getIndexPatternError,
-  getIndexPatternsError,
   getMaxAgeError,
   getProfileNameError,
   getRulePriorityError,
@@ -105,18 +104,6 @@ describe('getIndexPatternError', () => {
     expect(getIndexPatternError('')).toBe('required');
     expect(getIndexPatternError('logs-a,logs-b')).toBe('invalid_characters');
     expect(getIndexPatternError('logs a')).toBe('invalid_characters');
-  });
-});
-
-describe('getIndexPatternsError', () => {
-  it('accepts one pattern or a list of names', () => {
-    expect(getIndexPatternsError(['logs-*'])).toBeUndefined();
-    expect(getIndexPatternsError(['products', 'users'])).toBeUndefined();
-  });
-
-  it('rejects empty targets and patterns within a list', () => {
-    expect(getIndexPatternsError([])).toBe('required');
-    expect(getIndexPatternsError(['products', 'logs-*'])).toBe('wildcard_in_list');
   });
 });
 

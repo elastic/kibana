@@ -9,7 +9,6 @@ import { BUILTIN_PROFILES } from '../../common/presets';
 import {
   getBoostRangeError,
   getIndexPatternError,
-  getIndexPatternsError,
   getMaxAgeError,
   getProfileNameError,
   getRuleNameError,
@@ -43,7 +42,8 @@ describe('sample config', () => {
 
     SAMPLE_RULES.forEach((rule) => {
       expect(getRuleNameError(rule.name)).toBeUndefined();
-      expect(getIndexPatternsError(rule.index_patterns)).toBeUndefined();
+      // Elasticsearch takes one name or pattern per rule.
+      expect(rule.index_patterns).toHaveLength(1);
       rule.index_patterns.forEach((pattern) =>
         expect(getIndexPatternError(pattern)).toBeUndefined()
       );

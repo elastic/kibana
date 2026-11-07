@@ -131,16 +131,6 @@ const EDIT_PROFILE_HELP_TEXTS: Readonly<Record<BoostProfileType, string>> = {
   }),
 };
 
-// The same before a profile is chosen, when the tooltip says why the field is disabled.
-const TARGET_HELP_TEXTS: Readonly<Record<BoostProfileType, string>> = {
-  indices: i18n.translate('xpack.boost.ruleForm.indexTargetDescription', {
-    defaultMessage: 'Choose an index from the list, or use * to match several.',
-  }),
-  data_streams: i18n.translate('xpack.boost.ruleForm.dataStreamTargetDescription', {
-    defaultMessage: 'Choose a data stream from the list, or use * to match several.',
-  }),
-};
-
 const getInitialDraft = (
   rule: BoostRule | undefined,
   duplicateOf: BoostRule | undefined,
@@ -184,8 +174,9 @@ export const RuleFlyout = ({
   const [profileFieldKey, setProfileFieldKey] = useState(0);
   // While creating a profile, the flyout shows the profile form in place of the rule's.
   const [isCreatingProfile, setIsCreatingProfile] = useState(false);
-  // Whether the pattern or profile field has focus. While one does, an estimate it made
-  // unavailable stays, faded.
+  // Whether the profile field has focus. While it does, an estimate it made unavailable, such as
+  // while the field is emptied to choose another, stays, faded. One the pattern makes unavailable
+  // hides right away, since it no longer applies to anything.
   const [isEditingEstimateInput, setIsEditingEstimateInput] = useState(false);
   // Whether the list of matches shows hidden data sources.
   const [includesHidden, setIncludesHidden] = useState(false);
@@ -425,7 +416,11 @@ export const RuleFlyout = ({
   );
 
   // A name chosen from the list becomes the rule's target, replacing what the field had.
-  const selectName = (name: string) => updateDraft({ pattern: name });
+  const selectName = (name: string) => {
+    if (!isSaving) {
+      updateDraft({ pattern: name });
+    }
+  };
 
   const nameError = visibleErrors.name && RULE_NAME_ERROR_MESSAGES[visibleErrors.name];
   const patternError = visibleErrors.pattern && INDEX_PATTERN_ERROR_MESSAGES[visibleErrors.pattern];
@@ -434,7 +429,6 @@ export const RuleFlyout = ({
     <EuiFormRow
       display="rowCompressed"
       label={TARGET_LABELS[targetType]}
-      helpText={TARGET_HELP_TEXTS[targetType]}
       isInvalid={Boolean(patternError)}
       error={patternError}
       fullWidth
@@ -444,8 +438,6 @@ export const RuleFlyout = ({
         fullWidth
         value={draft.pattern}
         onChange={({ target: { value } }) => updateDraft({ pattern: value })}
-        onFocus={() => setIsEditingEstimateInput(true)}
-        onBlur={() => setIsEditingEstimateInput(false)}
         placeholder={i18n.translate('xpack.boost.ruleForm.patternPlaceholder', {
           defaultMessage: 'Example: {name} or {pattern}',
           values: {
@@ -516,9 +508,6 @@ export const RuleFlyout = ({
       display="rowCompressed"
       label={i18n.translate('xpack.boost.ruleForm.priorityLabel', {
         defaultMessage: 'Priority',
-      })}
-      helpText={i18n.translate('xpack.boost.ruleForm.priorityDescription', {
-        defaultMessage: 'Highest number wins.',
       })}
       isInvalid={Boolean(priorityError)}
       error={priorityError}
@@ -635,7 +624,7 @@ export const RuleFlyout = ({
 
         {/* EUI only spaces rows that are siblings, so the group takes the same space. */}
         <EuiSpacer size="m" />
-        <EuiFlexGroup gutterSize="m" responsive={false}>
+        <EuiFlexGroup gutterSize="s" responsive={false}>
           <EuiFlexItem>
             {/* The tooltip wraps the row, so the input stays the row's child and keeps its label.
                 It only explains the disabled state, so it's dropped once a profile is chosen. */}
@@ -652,8 +641,6 @@ export const RuleFlyout = ({
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
-        {/* A new rule starts on every data source to choose from, and an existing one on what it
-            matches. */}
         <PatternMatches
           type={type}
           targetType={targetType}
@@ -665,8 +652,7 @@ export const RuleFlyout = ({
           includesHidden={includesHidden}
           onIncludesHiddenChange={setIncludesHidden}
           maxHeight={PREVIEW_MAX_HEIGHT}
-          initialTab={draft.pattern ? 'matching' : 'all'}
-          onSelectName={type && !isSaving ? selectName : undefined}
+          onSelectName={selectName}
           outrankedIfChosen={outrankedIfChosen}
         />
       </EuiFlyoutBody>

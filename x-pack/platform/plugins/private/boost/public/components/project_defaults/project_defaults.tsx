@@ -92,7 +92,6 @@ export const ProjectDefaults = ({ state, canEdit }: ProjectDefaultsProps) => {
       <EuiFlexGroup gutterSize="l">
         {PROFILE_TYPES.map((type) => {
           const ruleName = DEFAULT_RULE_NAMES[type];
-          const rule = rules.find(({ name }) => name === ruleName);
           const ruleCoverage = coverage.get(ruleName);
           // A default rule matches everything of its type, so what it applies to is what it matches
           // that no higher-ranked rule takes.
@@ -107,7 +106,6 @@ export const ProjectDefaults = ({ state, canEdit }: ProjectDefaultsProps) => {
               <ProjectDefaultPanel
                 type={type}
                 ruleName={ruleName}
-                patterns={rule?.index_patterns ?? []}
                 profileName={settings.default_profiles[DEFAULT_PROFILE_KEYS[type]]}
                 coverage={
                   ruleCoverage ?? {
@@ -137,7 +135,6 @@ interface ProjectDefaultPanelProps {
   type: BoostProfileType;
   /** The default boost rule the default sets the profile of. */
   ruleName: string;
-  patterns: readonly string[];
   profileName: string;
   /** What the default rule matches, and what it applies to after other rules, with its data. */
   coverage: RuleCoverage;
@@ -151,7 +148,6 @@ interface ProjectDefaultPanelProps {
 const ProjectDefaultPanel = ({
   type,
   ruleName,
-  patterns,
   profileName,
   coverage,
   appliedSize,
@@ -275,7 +271,6 @@ const ProjectDefaultPanel = ({
             <EuiBadgeGroup gutterSize="s">
               {coverage.matches > 0 ? (
                 <MatchesPopover
-                  patterns={patterns}
                   type={type}
                   coverage={coverage}
                   hiddenNames={hiddenNames}

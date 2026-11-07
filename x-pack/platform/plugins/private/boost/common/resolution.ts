@@ -57,9 +57,6 @@ type PatternKind = (typeof PATTERN_KINDS)[number];
 const getPatternKind = (pattern: string): PatternKind =>
   pattern === '*' ? 'match_all' : pattern.includes('*') ? 'wildcard' : 'exact';
 
-/** Whether a rule's pattern is a concrete name, which Elasticsearch ranks above `*` patterns. */
-export const isExactName = (pattern: string): boolean => getPatternKind(pattern) === 'exact';
-
 /** Sorts patterns from most to least specific. */
 const compareSpecificity = (a: string, b: string): number =>
   PATTERN_KINDS.indexOf(getPatternKind(b)) - PATTERN_KINDS.indexOf(getPatternKind(a));

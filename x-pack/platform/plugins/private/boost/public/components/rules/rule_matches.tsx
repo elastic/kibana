@@ -9,7 +9,6 @@ import type { ReactElement } from 'react';
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import {
-  EuiCode,
   EuiLink,
   EuiPopover,
   EuiPopoverTitle,
@@ -19,16 +18,13 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { RuleCoverage } from '../../../common/resolution';
 import type { BoostProfileType } from '../../../common/types';
 import { formatDataSourceCount } from '../format';
 import { formatHiddenTargets } from '../hidden_data';
-import { getRuleTargetKind } from './rule_targets';
 import { SupersedingRuleTip, TargetName } from './target_name';
 
 interface RuleMatchesProps {
-  patterns: readonly string[];
   type?: BoostProfileType;
   coverage: RuleCoverage;
   /** The names of hidden indices and data streams, which the list leaves out, ending with how many. */
@@ -50,7 +46,7 @@ const formatMatchCount = (matches: number, outranked: number): string =>
  * How many data sources a rule applies to, as a link to the list of what it matches, which shows
  * any that a higher-ranked rule applies to instead.
  */
-export const RuleMatches = ({ patterns, type, coverage, hiddenNames }: RuleMatchesProps) => {
+export const RuleMatches = ({ type, coverage, hiddenNames }: RuleMatchesProps) => {
   const { euiTheme } = useEuiTheme();
 
   if (coverage.matches === 0) {
@@ -60,9 +56,7 @@ export const RuleMatches = ({ patterns, type, coverage, hiddenNames }: RuleMatch
       </EuiTextColor>
     );
   }
-  return (
-    <MatchesPopover patterns={patterns} type={type} coverage={coverage} hiddenNames={hiddenNames} />
-  );
+  return <MatchesPopover type={type} coverage={coverage} hiddenNames={hiddenNames} />;
 };
 
 interface MatchesPopoverProps extends RuleMatchesProps {
@@ -76,7 +70,6 @@ interface MatchesPopoverProps extends RuleMatchesProps {
  * how many, though the counts include them.
  */
 export const MatchesPopover = ({
-  patterns,
   type,
   coverage,
   hiddenNames,
@@ -89,35 +82,17 @@ export const MatchesPopover = ({
   const outranked = matches - appliesTo;
   const toggle = () => setIsOpen(!isOpen);
 
-  // The title says how the rule chooses what it matches, such as a default rule's `*`; the link
-  // already says how many.
-  const [pattern] = patterns;
-  const kind = getRuleTargetKind(patterns);
-  const isDataStreams = type === 'data_streams';
-  const title = {
-    pattern: i18n.translate('xpack.boost.ruleMatches.patternLabel', {
-      defaultMessage: 'Using index pattern {pattern}',
-      values: { pattern },
-    }),
-    name: isDataStreams
-      ? i18n.translate('xpack.boost.ruleMatches.dataStreamLabel', {
-          defaultMessage: 'Using data stream {name}',
-          values: { name: pattern },
-        })
-      : i18n.translate('xpack.boost.ruleMatches.indexLabel', {
-          defaultMessage: 'Using index {name}',
-          values: { name: pattern },
-        }),
-    names: isDataStreams
+  // The rule's targets are beside the link, so the title just says what the list holds, and how
+  // many of them higher-ranked rules take.
+  const title =
+    type === 'data_streams'
       ? i18n.translate('xpack.boost.ruleMatches.dataStreamsTitle', {
-          defaultMessage: 'Using data streams',
+          defaultMessage: 'Matching data streams',
         })
       : i18n.translate('xpack.boost.ruleMatches.indicesTitle', {
-          defaultMessage: 'Using indices',
-        }),
-  }[kind];
-  // A name always matches itself alone, so only a pattern or names count what they match.
-  const count = kind === 'name' ? undefined : formatMatchCount(matches, outranked);
+          defaultMessage: 'Matching indices',
+        });
+  const count = formatMatchCount(matches, outranked);
   const shownNames = matchedNames.filter((name) => !hiddenNames?.has(name));
   const hiddenCount = matchedNames.length - shownNames.length;
 
@@ -140,41 +115,17 @@ export const MatchesPopover = ({
       }
     >
       <EuiPopoverTitle paddingSize="s">
-        {kind === 'pattern' && (
-          <FormattedMessage
-            id="xpack.boost.ruleMatches.patternTitle"
-            defaultMessage="Using index pattern {pattern}"
-            values={{ pattern: <EuiCode>{pattern}</EuiCode> }}
-          />
-        )}
-        {kind === 'name' &&
-          (isDataStreams ? (
-            <FormattedMessage
-              id="xpack.boost.ruleMatches.dataStreamTitle"
-              defaultMessage="Using data stream {name}"
-              values={{ name: <EuiCode>{pattern}</EuiCode> }}
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.boost.ruleMatches.indexTitle"
-              defaultMessage="Using index {name}"
-              values={{ name: <EuiCode>{pattern}</EuiCode> }}
-            />
-          ))}
-        {kind === 'names' && title}
+        {title}
         {/* How many the rule matches, and how many of those higher-ranked rules take. It's set in
-            the regular weight, since it's in the title. A name leaves it out, since it would always
-            be 1. */}
-        {count && (
-          <EuiText
-            size="xs"
-            color="subdued"
-            css={{ fontWeight: euiTheme.font.weight.regular }}
-            data-test-subj="boostRuleMatchCount"
-          >
-            {count}
-          </EuiText>
-        )}
+            the regular weight, since it's in the title. */}
+        <EuiText
+          size="xs"
+          color="subdued"
+          css={{ fontWeight: euiTheme.font.weight.regular }}
+          data-test-subj="boostRuleMatchCount"
+        >
+          {count}
+        </EuiText>
       </EuiPopoverTitle>
       <div
         tabIndex={0}

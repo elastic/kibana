@@ -7,12 +7,27 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiSwitch, useEuiFontSize, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ShowHiddenSwitch } from '../hidden_data';
 
+const SHOW_UNMATCHED_LABEL = i18n.translate('xpack.boost.targetListHeader.showUnmatched', {
+  defaultMessage: 'Show unmatched',
+});
+
+// The height of a target list's header, for lists that size themselves to fit under it, with the
+// space above it.
+export const TARGET_LIST_HEADER_HEIGHT = 40;
+
 interface TargetListHeaderProps {
-  /** The list's tabs, or its heading. */
+  /** The list's heading. */
   children: ReactNode;
+  /** A switch before the one for hidden data sources that keeps names the pattern doesn't match listed. */
+  unmatched: {
+    checked: boolean;
+    onChange: (checked: boolean) => void;
+    disabled: boolean;
+  };
   /** Whether the lists show hidden data sources. */
   includesHidden: boolean;
   onIncludesHiddenChange: (includesHidden: boolean) => void;
@@ -21,19 +36,21 @@ interface TargetListHeaderProps {
 }
 
 /**
- * The row atop a rule's list of targets: its tabs or heading, then the switch that shows hidden data
- * sources at the end.
+ * The row atop a rule's list of targets: its heading, then the switches that show what the pattern
+ * doesn't match and hidden data sources at the end.
  */
 export const TargetListHeader = ({
   children,
+  unmatched,
   includesHidden,
   onIncludesHiddenChange,
   isShowHiddenDisabled,
 }: TargetListHeaderProps) => {
   const { euiTheme } = useEuiTheme();
+  const { fontSize } = useEuiFontSize('xs');
   return (
-    // The row draws the tabs' border, as the tabs do, so it runs under the switch too, and under a
-    // heading alike. A margin rather than padding, so the border stops at the panel's padding.
+    // The row draws a border under the heading and switches. A margin rather than padding, so the
+    // border stops at the panel's padding.
     <div
       css={{
         display: 'flex',
@@ -46,14 +63,31 @@ export const TargetListHeader = ({
       }}
     >
       {children}
-      <ShowHiddenSwitch
-        checked={includesHidden}
-        onChange={onIncludesHiddenChange}
-        disabled={isShowHiddenDisabled}
-        labelSize="xs"
-        isSubdued
-        data-test-subj="boostRuleShowHidden"
-      />
+      <div css={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.m }}>
+        {/* Like the switch for hidden data sources, its label is subdued unless it's off. */}
+        <EuiSwitch
+          compressed
+          label={SHOW_UNMATCHED_LABEL}
+          labelProps={{
+            css: {
+              fontSize,
+              color: unmatched.disabled ? undefined : euiTheme.colors.textSubdued,
+            },
+          }}
+          checked={unmatched.checked}
+          disabled={unmatched.disabled}
+          onChange={(event) => unmatched.onChange(event.target.checked)}
+          data-test-subj="boostRuleShowUnmatched"
+        />
+        <ShowHiddenSwitch
+          checked={includesHidden}
+          onChange={onIncludesHiddenChange}
+          disabled={isShowHiddenDisabled}
+          labelSize="xs"
+          isSubdued
+          data-test-subj="boostRuleShowHidden"
+        />
+      </div>
     </div>
   );
 };

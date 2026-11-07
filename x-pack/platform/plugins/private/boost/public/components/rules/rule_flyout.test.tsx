@@ -340,17 +340,14 @@ describe('RuleFlyout estimate', () => {
     });
   });
 
-  it('fades the last estimate while the pattern is cleared, and hides it once the field is left', async () => {
-    const { blur } = renderFlyout();
+  it('hides the estimate as soon as the pattern is cleared', async () => {
+    renderFlyout();
 
     await userEvent.clear(getPattern());
-    expect(getEstimate()).toHaveAttribute('data-stale', 'true');
-
-    await blur();
     expect(getEstimate()).toHaveAttribute('data-shown', 'false');
   });
 
-  it("hides a new rule's estimate when its pattern matches nothing once the field is left", async () => {
+  it("hides a new rule's estimate as soon as its pattern matches nothing", async () => {
     render(
       <IntlProvider locale="en">
         <RuleFlyout initialProfileName="zeta-search" onClose={jest.fn()} />
@@ -369,9 +366,6 @@ describe('RuleFlyout estimate', () => {
 
     await userEvent.clear(getPattern());
     await userEvent.type(getPattern(), 'nothing-*');
-    expect(getEstimate()).toHaveAttribute('data-stale', 'true');
-
-    await userEvent.click(screen.getByTestId('boostRulePriority'));
     expect(getEstimate()).toHaveAttribute('data-shown', 'false');
   });
 
@@ -515,46 +509,47 @@ describe('RuleFlyout duplicate', () => {
 });
 
 describe('RuleFlyout pattern matches', () => {
-  // A new rule opens on every index to choose from, so these start on what it matches.
-  const renderNewRule = async () => {
+  const renderNewRule = () =>
     render(
       <IntlProvider locale="en">
         <RuleFlyout initialProfileName="zeta-search" onClose={jest.fn()} />
       </IntlProvider>
     );
-    await userEvent.click(screen.getByTestId('boostRuleMatchingTab'));
-  };
+  const getCount = () => screen.getByTestId('boostRulePatternMatchCount');
+  const getPattern = () => screen.getByTestId('boostRulePattern');
+  const getListed = () =>
+    screen.queryAllByRole('option').map(({ textContent }) => textContent?.split('Higher')[0]);
 
-  it('opens a new rule on every index to choose from, and an existing one on its matches', () => {
-    const { unmount } = render(
-      <IntlProvider locale="en">
-        <RuleFlyout initialProfileName="zeta-search" onClose={jest.fn()} />
-      </IntlProvider>
-    );
-    expect(screen.getByTestId('boostRuleAllTab')).toHaveAttribute('aria-selected', 'true');
-    unmount();
+  it('lists every index until something is typed, and then filters it to what matches', async () => {
+    renderNewRule();
+    expect(getCount()).toHaveTextContent(/^2 indices$/);
+    expect(getListed()).toEqual(['catalog-fall', 'products']);
 
-    renderFlyout();
-    expect(screen.getByTestId('boostRuleMatchingTab')).toHaveAttribute('aria-selected', 'true');
+    await userEvent.type(getPattern(), 'catalog-*');
+    expect(getCount()).toHaveTextContent(/^1 exact match$/);
+    expect(getListed()).toEqual(['catalog-fall']);
+
+    await userEvent.clear(getPattern());
+    expect(getListed()).toEqual(['catalog-fall', 'products']);
   });
 
-  it('counts and lists what the pattern matches', async () => {
-    await renderNewRule();
+  it('keeps unmatched names listed beside the matches once asked', async () => {
+    renderNewRule();
+    // Everything is listed until something is typed.
+    expect(screen.getByTestId('boostRuleShowUnmatched')).toBeDisabled();
 
-    await userEvent.type(screen.getByTestId('boostRulePattern'), 'catalog-*');
+    await userEvent.type(getPattern(), 'catalog-*');
+    await userEvent.click(screen.getByTestId('boostRuleShowUnmatched'));
 
-    // Beside the tabs: how many match, and how many indices there are in all.
-    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(/^1$/);
-    expect(screen.getByTestId('boostRuleDataSourceCount')).toHaveTextContent(/^2$/);
-    expect(screen.getByTestId('boostRulePatternMatches')).toHaveTextContent('catalog-fall');
-    // No index is hidden, so there's nothing to show.
-    expect(screen.getByTestId('boostRuleShowHidden')).toBeDisabled();
+    expect(getListed()).toEqual(['catalog-fall', 'products']);
+    // Still counting what matches.
+    expect(getCount()).toHaveTextContent(/^1 exact match$/);
   });
 
   it('highlights the parts of each match that the pattern spells out', async () => {
-    await renderNewRule();
+    renderNewRule();
 
-    await userEvent.type(screen.getByTestId('boostRulePattern'), 'cat*-fa*');
+    await userEvent.type(getPattern(), 'cat*-fa*');
 
     const highlights = within(screen.getByTestId('boostRulePatternMatches'))
       .getAllByText((_content, element) => element?.tagName === 'MARK')
@@ -563,22 +558,23 @@ describe('RuleFlyout pattern matches', () => {
   });
 
   it('lists exact matches without partial ones', async () => {
-    await renderNewRule();
+    renderNewRule();
 
-    await userEvent.type(screen.getByTestId('boostRulePattern'), 'catalog-*');
+    await userEvent.type(getPattern(), 'catalog-*');
 
-    expect(screen.getByRole('region', { name: 'Exact matches' })).toHaveTextContent('catalog-fall');
+    expect(screen.getByRole('listbox', { name: 'Exact matches' })).toHaveTextContent(
+      'catalog-fall'
+    );
     expect(screen.queryByTestId('boostRulePartialMatch')).not.toBeInTheDocument();
   });
 
   it('shows what a partial pattern could match until it matches something', async () => {
-    await renderNewRule();
+    renderNewRule();
 
-    await userEvent.type(screen.getByTestId('boostRulePattern'), 'cat');
+    await userEvent.type(getPattern(), 'cat');
 
-    // Only exact matches count.
-    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(/^0$/);
-    expect(screen.getByRole('region', { name: 'Partial matches' })).toBeInTheDocument();
+    expect(getCount()).toHaveTextContent(/^1 partial match$/);
+    expect(screen.getByRole('listbox', { name: 'Partial matches' })).toBeInTheDocument();
     const [partialMatch] = screen.getAllByTestId('boostRulePartialMatch');
     expect(partialMatch).toHaveTextContent('catalog-fall');
     // A pattern widened to match it would still rank below the saved catalogs rule.
@@ -589,38 +585,46 @@ describe('RuleFlyout pattern matches', () => {
   });
 
   it('marks each exact match, or each partial match, with its icon', async () => {
-    await renderNewRule();
+    renderNewRule();
     // The match icons, leaving out the icon of a rule that ranks higher.
     const getIcons = () =>
       Array.from(
-        screen.getByTestId('boostRulePatternMatches').querySelectorAll('[data-euiicon-type]'),
+        screen
+          .getByTestId('boostRulePatternMatches')
+          .querySelectorAll('[role=option] [data-euiicon-type]'),
         (icon) => icon.getAttribute('data-euiicon-type')
       ).filter((iconType) => iconType !== 'sortAscending');
-
     const getIcon = () =>
-      screen.getByTestId('boostRulePatternMatches').querySelector('[data-euiicon-type]');
-
-    await userEvent.type(screen.getByTestId('boostRulePattern'), 'catalog-*');
-    expect(getIcons()).toEqual(['checkCircle']);
-    // The saved catalogs rule ranks higher, so the match is disabled like its struck-through name.
+      screen
+        .getByTestId('boostRulePatternMatches')
+        .querySelector('[role=option] [data-euiicon-type]');
     const {
       result: { current: theme },
     } = renderHook(() => useEuiTheme());
+
+    await userEvent.type(getPattern(), 'catalog-*');
+    expect(getIcons()).toEqual(['check']);
+    // The saved catalogs rule ranks higher, so the match is disabled like its struck-through name.
     expect(getIcon()).toHaveAttribute('color', theme.euiTheme.colors.textDisabled);
 
-    await userEvent.clear(screen.getByTestId('boostRulePattern'));
-    await userEvent.type(screen.getByTestId('boostRulePattern'), 'prod');
+    await userEvent.clear(getPattern());
+    await userEvent.type(getPattern(), 'prod');
     expect(getIcons()).toEqual(['partial']);
     // Nothing ranks higher for products, so its icon matches its name's color.
     expect(getIcon()).toHaveAttribute('color', theme.euiTheme.colors.textParagraph);
     expect(screen.queryByTestId('boostSupersededTarget')).not.toBeInTheDocument();
+
+    // An exact match that nothing outranks takes the primary color.
+    await userEvent.clear(getPattern());
+    await userEvent.type(getPattern(), 'products');
+    expect(getIcon()).toHaveAttribute('color', theme.euiTheme.colors.textPrimary);
   });
 
   it('marks the matches among every data source, keeping the rest aligned', async () => {
-    await renderNewRule();
+    renderNewRule();
 
-    await userEvent.type(screen.getByTestId('boostRulePattern'), 'catalog-*');
-    await userEvent.click(screen.getByTestId('boostRuleAllTab'));
+    await userEvent.type(getPattern(), 'catalog-*');
+    await userEvent.click(screen.getByTestId('boostRuleShowUnmatched'));
 
     const [catalogFall, products] = screen.getAllByTestId('boostRuleAvailableTarget');
     expect(within(catalogFall).getByTitle('Exact match')).toBeInTheDocument();
@@ -628,85 +632,67 @@ describe('RuleFlyout pattern matches', () => {
       'data-euiicon-type',
       'empty'
     );
-    // As in the matching list, a match that a higher-ranked rule keeps is struck through, beside
+    // As in the filtered list, a match that a higher-ranked rule keeps is struck through, beside
     // that rule.
     expect(within(catalogFall).getByTestId('boostSupersededTarget')).toHaveTextContent(
       'catalog-fall'
     );
     expect(within(catalogFall).getByTestId('boostSupersedingRule')).toHaveTextContent('catalogs');
     expect(within(products).queryByTestId('boostSupersededTarget')).not.toBeInTheDocument();
+    // Its highlights are the same as the filtered list's.
+    expect(within(catalogFall).getByText('catalog-', { selector: 'mark' })).toBeInTheDocument();
+    expect(products.querySelector('mark')).toBeNull();
   });
 
   it('finds partial matches by any part of their name', async () => {
-    await renderNewRule();
+    renderNewRule();
 
-    await userEvent.type(screen.getByTestId('boostRulePattern'), 'fall');
+    await userEvent.type(getPattern(), 'fall');
 
     expect(screen.getByTestId('boostRulePartialMatch')).toHaveTextContent('catalog-fall');
   });
 
   it('finds partial matches for a pattern that only needs a leading wildcard', async () => {
-    await renderNewRule();
+    renderNewRule();
 
-    await userEvent.type(screen.getByTestId('boostRulePattern'), 'alog-*');
+    await userEvent.type(getPattern(), 'alog-*');
 
     expect(screen.getByTestId('boostRulePartialMatch')).toHaveTextContent('catalog-fall');
   });
 
   it('says when nothing matches, in the same panel', async () => {
-    await renderNewRule();
+    renderNewRule();
 
-    await userEvent.type(screen.getByTestId('boostRulePattern'), 'nothing-*');
+    await userEvent.type(getPattern(), 'nothing-*');
 
-    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(/^0$/);
+    expect(getCount()).toHaveTextContent(/^No matches$/);
     expect(screen.getByTestId('boostRulePatternMatches')).toHaveTextContent('No matches detected');
   });
 
   it('saves a pattern that matches nothing yet, as Elasticsearch allows', async () => {
     mutation.mutate.mockClear();
-    await renderNewRule();
+    renderNewRule();
 
     await userEvent.type(screen.getByTestId('boostRuleName'), 'new-rule');
-    await userEvent.type(screen.getByTestId('boostRulePattern'), 'upcoming-*');
+    await userEvent.type(getPattern(), 'upcoming-*');
     await userEvent.click(screen.getByTestId('boostRuleSave'));
 
     expect(mutation.mutate).toHaveBeenCalled();
   });
 
-  it('asks for a name or pattern until one is entered', async () => {
-    await renderNewRule();
+  it('keeps unmatched names listed while the pattern changes', async () => {
+    renderNewRule();
 
-    expect(screen.getByTestId('boostRulePatternMatchesEmpty')).toHaveTextContent(
-      'Enter a name or pattern to see matches'
-    );
-    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(/^0$/);
-  });
+    await userEvent.type(getPattern(), 'p');
+    await userEvent.click(screen.getByTestId('boostRuleShowUnmatched'));
+    await userEvent.type(getPattern(), 'rod');
 
-  it('lists every index, highlighting the same matches', async () => {
-    await renderNewRule();
-
-    await userEvent.type(screen.getByTestId('boostRulePattern'), 'catalog-*');
-    await userEvent.click(screen.getByTestId('boostRuleAllTab'));
-
-    const [catalog, products] = screen.getAllByTestId('boostRuleAvailableTarget');
-    expect(catalog).toHaveTextContent('catalog-fall');
-    expect(within(catalog).getByText('catalog-', { selector: 'mark' })).toBeInTheDocument();
-    expect(products).toHaveTextContent('products');
-    expect(products.querySelector('mark')).toBeNull();
-  });
-
-  it('keeps showing every index while the pattern changes', async () => {
-    await renderNewRule();
-
-    await userEvent.click(screen.getByTestId('boostRuleAllTab'));
-    await userEvent.type(screen.getByTestId('boostRulePattern'), 'prod');
-
-    expect(screen.getByTestId('boostRuleAllTab')).toHaveAttribute('aria-selected', 'true');
-    // Nothing matches exactly, so the partial match is highlighted, as in the matching list.
+    expect(getListed()).toEqual(['catalog-fall', 'products']);
+    // Nothing matches exactly, so the partial match is highlighted, as in the filtered list.
     expect(screen.getByText('prod', { selector: 'mark' })).toBeInTheDocument();
   });
 
-  it('says when there are no data sources of the type to list', async () => {
+  it('says when there are no data sources of the type to list', () => {
     render(
       <IntlProvider locale="en">
         <RuleFlyout
@@ -716,14 +702,12 @@ describe('RuleFlyout pattern matches', () => {
       </IntlProvider>
     );
 
-    await userEvent.click(screen.getByTestId('boostRuleAllTab'));
-
     expect(screen.getByTestId('boostRulePatternMatchesEmpty')).toHaveTextContent(
       'No data streams detected'
     );
   });
 
-  it('disables both tabs, and the switch that shows hidden data sources, until a profile is selected', () => {
+  it('disables both switches until a profile is selected', () => {
     render(
       <IntlProvider locale="en">
         <RuleFlyout onClose={jest.fn()} />
@@ -731,16 +715,10 @@ describe('RuleFlyout pattern matches', () => {
     );
 
     expect(screen.getByTestId('boostRulePatternMatchesEmpty')).toHaveTextContent(
-      'Enter a name or pattern to see matches'
+      'Select a boost profile to choose targets.'
     );
-    const matchingTab = screen.getByTestId('boostRuleMatchingTab');
-    expect(matchingTab).toBeDisabled();
-    expect(matchingTab).toHaveAttribute('aria-selected', 'true');
-    expect(screen.getByTestId('boostRuleAllTab')).toBeDisabled();
+    expect(screen.getByTestId('boostRuleShowUnmatched')).toBeDisabled();
     expect(screen.getByTestId('boostRuleShowHidden')).toBeDisabled();
-    // There's nothing to count until the type is known.
-    expect(screen.queryByTestId('boostRulePatternMatchCount')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('boostRuleDataSourceCount')).not.toBeInTheDocument();
   });
 
   it('explains why the field is disabled before a profile is selected', async () => {
@@ -750,7 +728,7 @@ describe('RuleFlyout pattern matches', () => {
       </IntlProvider>
     );
 
-    expect(screen.getByTestId('boostRulePattern')).toBeDisabled();
+    expect(getPattern()).toBeDisabled();
     // EUI turns off pointer events on disabled inputs, so hovers land on the row the tooltip wraps.
     await userEvent.hover(screen.getByText('Index name or pattern', { selector: 'label' }));
 
@@ -822,14 +800,15 @@ describe('RuleFlyout superseded targets', () => {
 
 describe('RuleFlyout choosing from the list', () => {
   const getField = (): HTMLInputElement => screen.getByTestId('boostRulePattern');
-  const choose = async (name: string) => {
-    const button = screen
-      .getAllByTestId('boostRuleSelectTarget')
-      .find(({ textContent }) => textContent === name);
-    if (!button) {
+  // By its text, since a highlighted name's accessible name is split around its highlights.
+  const choose = (name: string) => {
+    const option = screen
+      .getAllByRole('option')
+      .find(({ textContent }) => textContent?.startsWith(name));
+    if (!option) {
       throw new Error(`No ${name} to choose`);
     }
-    await userEvent.click(button);
+    return userEvent.click(option);
   };
   const save = () => userEvent.click(screen.getByTestId('boostRuleSave'));
   const renderNewRule = () =>
@@ -844,12 +823,17 @@ describe('RuleFlyout choosing from the list', () => {
   it('uses a name chosen from the list, replacing what the field had', async () => {
     renderNewRule();
     await userEvent.type(screen.getByTestId('boostRuleName'), 'one-index');
-    await userEvent.type(getField(), 'catalog-*');
+    await userEvent.type(getField(), 'cat');
 
+    await choose('catalog-fall');
+    expect(getField()).toHaveValue('catalog-fall');
+    // The chosen name matches exactly.
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(/^1 exact match$/);
+
+    // Shown beside the match, another name replaces it.
+    await userEvent.click(screen.getByTestId('boostRuleShowUnmatched'));
     await choose('products');
     expect(getField()).toHaveValue('products');
-    // The chosen name matches exactly.
-    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(/^1$/);
 
     await choose('catalog-fall');
     expect(getField()).toHaveValue('catalog-fall');
@@ -867,7 +851,7 @@ describe('RuleFlyout choosing from the list', () => {
       </IntlProvider>
     );
 
-    expect(screen.queryByTestId('boostRuleSelectTarget')).not.toBeInTheDocument();
+    expect(screen.queryByRole('option')).not.toBeInTheDocument();
   });
 
   it('asks for one name or pattern for a rule saved with several, which the prototype once allowed', async () => {
@@ -880,7 +864,8 @@ describe('RuleFlyout choosing from the list', () => {
     ).toBeInTheDocument();
     expect(mutation.mutate).not.toHaveBeenCalled();
 
-    await userEvent.click(screen.getByTestId('boostRuleAllTab'));
+    // The field's commas make it invalid, so it has no matches to filter the list by.
+    await userEvent.click(screen.getByTestId('boostRuleShowUnmatched'));
     await choose('products');
     await save();
     expect(mutation.mutate).toHaveBeenCalledWith(
@@ -908,19 +893,17 @@ describe('RuleFlyout hidden data sources', () => {
         <RuleFlyout initialProfileName="zeta-search" onClose={jest.fn()} />
       </IntlProvider>
     );
-  const showMatching = () => userEvent.click(screen.getByTestId('boostRuleMatchingTab'));
 
   it('counts hidden matches, but only lists them once they are shown', async () => {
     renderNewRule();
-    await showMatching();
+    // Until something is typed, it counts what it lists.
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(/^2 indices$/);
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), '*');
 
     // The rule would apply to the hidden index all the same.
-    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(/^3$/);
-    // Every index counts only what it lists.
-    expect(screen.getByTestId('boostRuleDataSourceCount')).toHaveTextContent(/^2$/);
-    const matches = within(screen.getByRole('region', { name: 'Exact matches' }));
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(/^3 exact matches$/);
+    const matches = within(screen.getByTestId('boostRulePatternMatches'));
     expect(matches.queryByText('.catalog-archive')).not.toBeInTheDocument();
     // After the others, so it adds to them.
     expect(matches.getByTestId('boostRuleHiddenNotShown')).toHaveTextContent(/^\+1 hidden index$/);
@@ -930,14 +913,16 @@ describe('RuleFlyout hidden data sources', () => {
     expect(matches.getByText('.catalog-archive')).toBeInTheDocument();
     expect(matches.getByTestId('boostHiddenBadge')).toBeInTheDocument();
     expect(matches.queryByTestId('boostRuleHiddenNotShown')).not.toBeInTheDocument();
-    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(/^3$/);
-    expect(screen.getByTestId('boostRuleDataSourceCount')).toHaveTextContent(/^3$/);
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(/^3 exact matches$/);
+
+    await userEvent.clear(screen.getByTestId('boostRulePattern'));
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(/^3 indices$/);
   });
 
-  it('only counts hidden matches among every index, as the matching list does', async () => {
+  it('only counts hidden matches among unmatched names, as the filtered list does', async () => {
     renderNewRule();
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'products');
-    await userEvent.click(screen.getByTestId('boostRuleAllTab'));
+    await userEvent.click(screen.getByTestId('boostRuleShowUnmatched'));
 
     // The hidden index doesn't match, so it isn't counted.
     expect(screen.queryByTestId('boostRuleHiddenNotShown')).not.toBeInTheDocument();
@@ -950,15 +935,13 @@ describe('RuleFlyout hidden data sources', () => {
 
   it('counts a pattern that only matches hidden data sources as matching', async () => {
     renderNewRule();
-    await showMatching();
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), '.catalog-*');
 
-    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(/^1$/);
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(/^1 exact match$/);
     // With nothing before it, it adds to nothing.
-    expect(screen.getByRole('region', { name: 'Exact matches' })).toHaveTextContent(
-      /^1 hidden index$/
-    );
+    expect(screen.getByTestId('boostRuleHiddenNotShown')).toHaveTextContent(/^1 hidden index$/);
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
   });
 
   it('lists hidden data sources to choose from once they are shown', async () => {
@@ -970,7 +953,7 @@ describe('RuleFlyout hidden data sources', () => {
       .getAllByTestId('boostRuleAvailableTarget')
       .find(({ textContent }) => textContent?.startsWith('.catalog-archive')) as HTMLElement;
     expect(within(row).getByTestId('boostHiddenBadge')).toBeInTheDocument();
-    await userEvent.click(within(row).getByTestId('boostRuleSelectTarget'));
+    await userEvent.click(row);
 
     expect(screen.getByTestId('boostRulePattern')).toHaveValue('.catalog-archive');
   });

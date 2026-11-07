@@ -64,8 +64,7 @@ export const MatchingRules = ({ matches, profilesByName }: MatchingRulesProps) =
     },
     {
       name: TARGETS_LABEL,
-      render: ({ rule }: RankedRule) =>
-        getRuleTargets(rule, profilesByName.get(rule.boost_profile)?.type),
+      render: ({ rule }: RankedRule) => getRuleTargets(rule),
     },
   ];
 

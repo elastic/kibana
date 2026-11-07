@@ -41,6 +41,8 @@ interface TargetNameProps {
   linkedAs?: DataSourceType;
   /** Marks a hidden index or data stream with a badge. */
   isHidden?: boolean;
+  /** Highlights in the color around the name, such as an exact match's primary color. */
+  inheritsColor?: boolean;
 }
 
 /**
@@ -53,10 +55,11 @@ export const TargetName = ({
   supersededBy,
   linkedAs,
   isHidden = false,
+  inheritsColor = false,
 }: TargetNameProps) => {
   const { euiTheme } = useEuiTheme();
   // A disabled name's highlight and link are disabled too.
-  const inheritsColor = supersededBy ? { color: 'inherit' } : undefined;
+  const inheritedColor = supersededBy || inheritsColor ? { color: 'inherit' } : undefined;
 
   const text =
     pattern === undefined
@@ -65,7 +68,7 @@ export const TargetName = ({
           <Fragment key={index}>
             {/* The name already says what matched, so screen readers skip the highlights. */}
             {isLiteral ? (
-              <EuiMark hasScreenReaderHelpText={false} css={inheritsColor}>
+              <EuiMark hasScreenReaderHelpText={false} css={inheritedColor}>
                 {part}
               </EuiMark>
             ) : (
@@ -84,7 +87,7 @@ export const TargetName = ({
       data-test-subj={supersededBy ? 'boostSupersededTarget' : undefined}
     >
       {linkedAs ? (
-        <IndexManagementLink type={linkedAs} name={name} css={inheritsColor}>
+        <IndexManagementLink type={linkedAs} name={name} css={inheritedColor}>
           {text}
         </IndexManagementLink>
       ) : (

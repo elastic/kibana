@@ -248,7 +248,7 @@ describe('Index Management extensions', () => {
 
       const rule = await screen.findByTestId('boostIndexTabRule');
       expect(within(rule).getByTestId('boostExplanationRule')).toHaveTextContent('storefront-core');
-      expect(rule).toHaveTextContent('TargetsIndex products');
+      expect(rule).toHaveTextContent('Targetsproducts');
       expect(rule).toHaveTextContent('Priority10');
 
       // Both rules that match, in the order they rank, the first marked as the one that applies.
@@ -256,10 +256,8 @@ describe('Index Management extensions', () => {
         .getAllByRole('row')
         .slice(1);
       expect(matchingRows.map((row) => row.textContent)).toEqual([
-        expect.stringMatching(/^1.*storefront-coreApplied.*storefront-search.*10.*Index products$/),
-        expect.stringMatching(
-          /^2.*_default-indicesDefault.*_performantManaged.*-1.*Index pattern \*$/
-        ),
+        expect.stringMatching(/^1.*storefront-coreApplied.*storefront-search.*10products$/),
+        expect.stringMatching(/^2.*_default-indicesDefault.*_performantManaged.*-1\*$/),
       ]);
       const profile = screen.getByTestId('boostIndexTabProfile');
       expect(within(profile).getByTestId('boostExplanationProfile')).toHaveAttribute(
@@ -282,7 +280,7 @@ describe('Index Management extensions', () => {
 
       const rule = await screen.findByTestId('boostIndexTabRule');
       expect(rule).toHaveTextContent('_default-data-streams');
-      expect(rule).toHaveTextContent('TargetsIndex pattern *');
+      expect(rule).toHaveTextContent('Targets*');
       expect(rule).toHaveTextContent('Priority-1');
       expect(rule).toHaveTextContent('Data streamlogs-app');
       const profile = screen.getByTestId('boostIndexTabProfile');

@@ -221,7 +221,7 @@ describe('RulesTab matches', () => {
     await userEvent.click(picked.getByTestId('boostRuleMatches'));
 
     const popover = within(screen.getByRole('dialog'));
-    expect(popover.getByText('Using indices')).toBeInTheDocument();
+    expect(popover.getByText('Matching indices')).toBeInTheDocument();
     expect(popover.getByTestId('boostRuleMatchCount')).toHaveTextContent('2 matches, 1 outranked');
     expect(popover.getByTestId('boostSupersededTarget')).toHaveTextContent('products');
     // The rule's name is left to the icon's tooltip, keeping the list to the targets.
@@ -241,26 +241,33 @@ describe('RulesTab matches', () => {
     );
   });
 
-  it("shows a pattern rule's pattern above what it matches", async () => {
+  it("shows each rule's name or pattern in its own column", () => {
+    renderTab('/rules');
+
+    expect(getRow('archives').getByText('archives-*', { selector: 'code' })).toBeInTheDocument();
+    expect(
+      getRow('products-first').getByText('products', { selector: 'code' })
+    ).toBeInTheDocument();
+  });
+
+  it("titles what a pattern matches generically, since the rule's column shows the pattern", async () => {
     renderTab('/rules');
 
     await userEvent.click(getRow('archives').getByTestId('boostRuleMatches'));
 
-    const popover = screen.getByRole('dialog');
-    expect(popover).toHaveTextContent('Using index pattern archives-*');
-    expect(popover).toHaveTextContent('archives-2024');
+    expect(screen.getByRole('dialog')).toHaveTextContent('Matching indices');
+    expect(screen.getByRole('dialog')).toHaveTextContent('archives-2024');
     // No higher-ranked rule takes any of its matches, so its count notes nothing outranked.
     expect(screen.getByTestId('boostRuleMatchCount')).toHaveTextContent(/^\d+ match(es)?$/);
   });
 
-  it('names the index a rule names, without a count, which would always be 1', async () => {
+  it('titles and counts what a name matches the same way', async () => {
     renderTab('/rules');
 
     await userEvent.click(getRow('products-first').getByTestId('boostRuleMatches'));
 
-    expect(screen.getByRole('dialog')).toHaveTextContent('Using index products');
-    expect(screen.getByRole('dialog')).not.toHaveTextContent('Using index pattern');
-    expect(screen.queryByTestId('boostRuleMatchCount')).not.toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toHaveTextContent('Matching indices');
+    expect(screen.getByTestId('boostRuleMatchCount')).toHaveTextContent(/^1 match$/);
   });
 
   it('counts what a default rule applies to, and lists everything it matches with what other rules take', async () => {
@@ -271,7 +278,7 @@ describe('RulesTab matches', () => {
     await userEvent.click(defaults.getByTestId('boostRuleMatches'));
 
     const popover = within(screen.getByRole('dialog'));
-    expect(screen.getByRole('dialog')).toHaveTextContent('Using index pattern *');
+    expect(screen.getByRole('dialog')).toHaveTextContent('Matching indices');
     expect(popover.getByTestId('boostRuleMatchCount')).toHaveTextContent('4 matches, 3 outranked');
     expect(popover.getAllByTestId('boostSupersededTarget')).toHaveLength(3);
     expect(popover.getByText('synonyms')).not.toHaveAttribute('data-test-subj');

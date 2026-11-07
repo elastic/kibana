@@ -119,7 +119,7 @@ export const BoostIndexDetails = ({ indexName, dataStream }: BoostIndexDetailsPr
                   }),
                   description: <RuleLink rule={rule} />,
                 },
-                ...getRuleTargetItems(rule, profile.type),
+                ...getRuleTargetItems(rule),
                 ...(dataStream
                   ? [
                       {

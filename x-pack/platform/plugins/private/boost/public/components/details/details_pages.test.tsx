@@ -389,7 +389,7 @@ describe('RuleDetailsPage', () => {
 
     const settings = screen.getByTestId('boostRuleSettings');
     expect(within(settings).getByRole('link', { name: 'catalog-search' })).toBeInTheDocument();
-    expect(settings).toHaveTextContent('Index pattern catalog-*');
+    expect(settings).toHaveTextContent('Targetscatalog-*');
     expect(settings).toHaveTextContent('Priority1');
 
     const usage = screen.getByTestId('boostRuleUsage');
@@ -646,7 +646,7 @@ describe('RuleDetailsPage', () => {
 
     // The same color as the badge in the rules list, not the header's hollow default.
     expect(getHeader().getByText('Default')).toHaveAttribute('data-color', 'default');
-    expect(screen.getByTestId('boostRuleSettings')).toHaveTextContent('Index pattern *');
+    expect(screen.getByTestId('boostRuleSettings')).toHaveTextContent('Targets*');
     expect(getHeader().getByRole('button', { name: 'Edit rule' })).toBeInTheDocument();
     expect(getHeader().queryByRole('button', { name: 'Duplicate' })).not.toBeInTheDocument();
     expect(getHeader().queryByRole('button', { name: 'Delete' })).not.toBeInTheDocument();

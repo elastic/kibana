@@ -154,7 +154,7 @@ describe('Project defaults', () => {
     await userEvent.click(count);
 
     const popover = within(screen.getByRole('dialog'));
-    expect(screen.getByRole('dialog')).toHaveTextContent('Using index pattern *');
+    expect(screen.getByRole('dialog')).toHaveTextContent('Matching indices');
     expect(popover.getByTestId('boostRuleMatchCount')).toHaveTextContent('3 matches, 1 outranked');
     expect(popover.getByTestId('boostSupersededTarget')).toHaveTextContent('products');
     // Like the other lists, it leaves hidden ones out, saying how many last, though they're counted.
