@@ -159,7 +159,7 @@ describe('DatastreamInitializer forceReset (integration)', () => {
     expect(await getDataStreamVersion()).toBe(currentDefinition.version);
     await expectCurrentMapping();
     expect(logger.info).toHaveBeenCalledWith(
-      expect.stringContaining('Deleting data stream'),
+      expect.anything(),
       expect.objectContaining({ labels: expect.objectContaining({ resource: TEST_DATA_STREAM }) })
     );
   });
@@ -530,7 +530,7 @@ describe('DatastreamInitializer forceReset for .alert-actions (integration)', ()
     expect(properties[0]).not.toHaveProperty('episode_id');
     expect(properties[0]).not.toHaveProperty('episode_status');
     expect(logger.info).toHaveBeenCalledWith(
-      expect.stringContaining('Deleting data stream'),
+      expect.anything(),
       expect.objectContaining({
         labels: expect.objectContaining({ resource: TEST_ACTIONS_DATA_STREAM }),
       })

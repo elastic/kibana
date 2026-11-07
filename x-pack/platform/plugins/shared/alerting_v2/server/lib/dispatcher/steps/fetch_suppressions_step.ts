@@ -46,8 +46,16 @@ export class FetchSuppressionsStep implements DispatcherStep {
     const { signal } = state.input;
 
     const [alertResponses, seriesResponses] = await Promise.all([
-      this.runQueries<AlertSuppressionRow>(getAlertSuppressionsQueries(scan.alerts), signal),
-      this.runQueries<SeriesSuppressionRow>(getSeriesSuppressionsQueries(scan.alerts), signal),
+      this.runQueries<AlertSuppressionRow>(
+        getAlertSuppressionsQueries(scan.alerts),
+        signal,
+        logger
+      ),
+      this.runQueries<SeriesSuppressionRow>(
+        getSeriesSuppressionsQueries(scan.alerts),
+        signal,
+        logger
+      ),
     ]);
 
     // Both queries return at most one row per chunk literal, so reaching the limit means that
@@ -71,10 +79,14 @@ export class FetchSuppressionsStep implements DispatcherStep {
     return { type: 'continue', data: { suppressions: SuppressionIndex.of(suppressions) } };
   }
 
-  private runQueries<T>(requests: EsqlRequest[], abortSignal: AbortSignal): Promise<T[][]> {
+  private runQueries<T>(
+    requests: EsqlRequest[],
+    abortSignal: AbortSignal,
+    logger: LoggerServiceContract
+  ): Promise<T[][]> {
     return Promise.all(
       requests.map((request) =>
-        this.queryService.executeQueryRows<T>({ query: request.query, abortSignal })
+        this.queryService.executeQueryRows<T>({ logger, query: request.query, abortSignal })
       )
     );
   }

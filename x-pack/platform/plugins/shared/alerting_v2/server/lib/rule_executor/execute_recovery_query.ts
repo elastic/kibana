@@ -62,6 +62,7 @@ export const executeRecoveryQuery = async ({
 
   try {
     const esqlResponse = await queryService.executeQuery({
+      logger,
       query: effectiveQuery,
       filter: queryPayload.filter,
       params: queryPayload.params,

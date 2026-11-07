@@ -47,7 +47,7 @@ export class EsqlResponseFormatService implements EsqlResponseFormatServiceContr
     @inject(CoreStart('featureFlags')) featureFlags: FeatureFlagsStart,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract
   ) {
-    this.logger = loggerService.forSubsystem('query');
+    this.logger = loggerService.forSubsystem('resources');
     // Core exposes no plugin-stop hook to the DI container, so the subscription
     // intentionally lives for the lifetime of the process.
     featureFlags

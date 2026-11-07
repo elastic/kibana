@@ -68,8 +68,6 @@ export class RuleChangesHistoryService implements RuleChangesHistoryServiceContr
 
     const data = buildLogChangeHistoryData({ eventType });
 
-    // Failures propagate to the subscriber, which logs them once under
-    // EVENTS_RULE_CHANGES_HISTORY_SUBSCRIBER_FAILED.
     await this.client.logBulk(changes, {
       action,
       spaceId,

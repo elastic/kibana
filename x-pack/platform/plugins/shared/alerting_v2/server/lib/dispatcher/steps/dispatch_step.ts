@@ -214,6 +214,7 @@ export class DispatchStep implements DispatcherStep {
     try {
       const { errors } = await withDispatcherSpan('commit', () =>
         this.storageService.bulkIndexDocs<AlertActionDocument>({
+          logger,
           index: ALERT_ACTIONS_DATA_STREAM,
           docs,
         })

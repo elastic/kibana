@@ -23,6 +23,10 @@ import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import { normalizeTags } from '@kbn/alerting-v2-utils';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceScopedToken } from '../services/query_service/tokens';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../services/logger_service/logger_service';
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
 
 const toAckAction = (value: string | null | undefined): AlertEpisode['last_ack_action'] =>
@@ -30,10 +34,15 @@ const toAckAction = (value: string | null | undefined): AlertEpisode['last_ack_a
 
 @injectable()
 export class EpisodesClient {
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(QueryServiceScopedToken) private readonly queryService: QueryServiceContract,
-    @inject(RequestSpaceIdToken) private readonly spaceId: string
-  ) {}
+    @inject(RequestSpaceIdToken) private readonly spaceId: string,
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('alertsClient');
+  }
 
   /**
    * Returns the aggregated row for a single episode in the request's space, or
@@ -45,13 +54,16 @@ export class EpisodesClient {
     const dataRequest = buildEpisodeDataRequest(this.spaceId, episodeId);
     const [[row], [episodeData], [episodeActions]] = await Promise.all([
       this.queryService.executeQueryRows<EpisodeEventsEsqlRow>({
+        logger: this.logger,
         query: buildEpisodeQuery(this.spaceId, episodeId).print('basic'),
       }),
       this.queryService.executeQueryRows<EpisodeDataEsqlRow>({
+        logger: this.logger,
         query: dataRequest.query.print('basic'),
         filter: dataRequest.filter,
       }),
       this.queryService.executeQueryRows<EpisodeActionRow>({
+        logger: this.logger,
         query: buildEpisodeActionsQuery(this.spaceId, [episodeId]).print('basic'),
       }),
     ]);
@@ -61,6 +73,7 @@ export class EpisodesClient {
 
     // Snoozes target the series, which is only known from the episode row.
     const [seriesSnooze] = await this.queryService.executeQueryRows<SeriesSnoozeEsqlRow>({
+      logger: this.logger,
       query: buildSeriesSnoozeQuery(this.spaceId, row.group_hash, row.series_id).print('basic'),
     });
 
@@ -81,6 +94,7 @@ export class EpisodesClient {
     options?: BuildEpisodeEventsQueryOptions
   ): Promise<EpisodeEventRow[]> {
     return this.queryService.executeQueryRows<EpisodeEventRow>({
+      logger: this.logger,
       query: buildEpisodeEventsQuery(this.spaceId, episodeId, options).print('basic'),
     });
   }

@@ -12,10 +12,6 @@ import {
   resolveAlertEventType,
   type AlertEventsBatchBuilder,
 } from '../build_alert_events';
-import {
-  LoggerServiceToken,
-  type LoggerServiceContract,
-} from '../../services/logger_service/logger_service';
 import { forwardThenFinalize, guardedExpandStep } from '../stream_utils';
 import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
@@ -27,10 +23,7 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
 
   private readonly maxGroupsPerExecution: number;
 
-  constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
-    @inject(ConfigService) configService: ConfigService
-  ) {
+  constructor(@inject(ConfigService) configService: ConfigService) {
     this.maxGroupsPerExecution = configService.get('rules.run.maxGroupsPerExecution');
   }
 
@@ -82,14 +75,10 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
       finalize: (_acc, lastState) => {
         const droppedGroupCount = builder?.droppedGroupCount ?? 0;
         if (droppedGroupCount > 0) {
-          step.logger.warn({
-            message: `[${step.name}] Rule ${lastState.input.ruleId} (space ${lastState.input.spaceId}) exceeded maxGroupsPerExecution=${step.maxGroupsPerExecution}; dropped ${droppedGroupCount} new group(s) this run`,
+          lastState.logger.withLabels({ step: step.name }).warn({
+            message: () =>
+              `Dropped ${droppedGroupCount} new groups beyond maxGroupsPerExecution (${step.maxGroupsPerExecution})`,
             code: ALERTING_LOG_CODES.RULE_EXECUTION_MAX_GROUPS_EXCEEDED,
-            labels: {
-              rule_id: lastState.input.ruleId,
-              space_id: lastState.input.spaceId,
-              step: step.name,
-            },
           });
         }
         return undefined;

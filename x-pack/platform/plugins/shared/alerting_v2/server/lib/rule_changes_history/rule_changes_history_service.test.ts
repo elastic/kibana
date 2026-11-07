@@ -130,7 +130,7 @@ describe('RuleChangesHistoryService', () => {
       expect(changesFromNumber[0].timestamp).toBe('2024-06-01T12:00:00.000Z');
     });
 
-    it('rethrows when logBulk rejects so the subscriber can log it once', async () => {
+    it('rethrows when logBulk rejects', async () => {
       clientMock.logBulk.mockRejectedValueOnce(new Error('es unreachable'));
 
       await expect(service.logRuleChanges(baseParams)).rejects.toThrow('es unreachable');

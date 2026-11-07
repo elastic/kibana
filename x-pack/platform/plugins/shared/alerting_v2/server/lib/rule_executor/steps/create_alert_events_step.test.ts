@@ -17,6 +17,7 @@ import {
   createRulePipelineState,
 } from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { buildGroupHash } from '../build_alert_events';
 import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
@@ -25,6 +26,7 @@ import type { PluginConfig } from '../../../config';
 describe('CreateAlertEventsStep', () => {
   let step: CreateAlertEventsStep;
   let mockLogger: jest.Mocked<Logger>;
+  let stateLogger: LoggerServiceContract;
 
   function createStep(rulesConfigOverrides?: Partial<PluginConfig['rules']>) {
     const config: PluginConfig = {
@@ -49,8 +51,11 @@ describe('CreateAlertEventsStep', () => {
 
     const logger = createLoggerService();
     mockLogger = logger.mockLogger;
+    stateLogger = logger.loggerService
+      .forSubsystem('ruleExecutor')
+      .withLabels({ rule_id: 'rule-1', space_id: 'default', task_id: 'task-1' });
 
-    return new CreateAlertEventsStep(logger.loggerService, createConfigServiceMock(config));
+    return new CreateAlertEventsStep(createConfigServiceMock(config));
   }
 
   beforeEach(() => {
@@ -62,7 +67,7 @@ describe('CreateAlertEventsStep', () => {
     const rule = createRuleResponse({ kind: 'alert' });
     const esqlRowBatch = [{ 'host.name': 'host-a' }, { 'host.name': 'host-b' }];
 
-    const state = createRulePipelineState({ input, rule, esqlRowBatch });
+    const state = createRulePipelineState({ input, rule, esqlRowBatch, logger: stateLogger });
     const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     expect(result.type).toBe('continue');
@@ -96,7 +101,7 @@ describe('CreateAlertEventsStep', () => {
     const rule = createRuleResponse({ version: 5 });
     const esqlRowBatch = [{ 'host.name': 'host-a' }];
 
-    const state = createRulePipelineState({ input, rule, esqlRowBatch });
+    const state = createRulePipelineState({ input, rule, esqlRowBatch, logger: stateLogger });
     const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
     expect(result.state.alertEventsBatch?.[0].rule).toEqual({ id: rule.id, version: 5 });
   });
@@ -106,7 +111,7 @@ describe('CreateAlertEventsStep', () => {
     const rule = createRuleResponse({ kind: 'signal' });
     const esqlRowBatch = [{ 'host.name': 'host-a' }];
 
-    const state = createRulePipelineState({ input, rule, esqlRowBatch });
+    const state = createRulePipelineState({ input, rule, esqlRowBatch, logger: stateLogger });
     const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     expect(result.type).toBe('continue');
@@ -123,8 +128,18 @@ describe('CreateAlertEventsStep', () => {
     const batch1 = [{ 'host.name': 'host-a' }];
     const batch2 = [{ 'host.name': 'host-b' }];
 
-    const state1 = createRulePipelineState({ input, rule, esqlRowBatch: batch1 });
-    const state2 = createRulePipelineState({ input, rule, esqlRowBatch: batch2 });
+    const state1 = createRulePipelineState({
+      input,
+      rule,
+      logger: stateLogger,
+      esqlRowBatch: batch1,
+    });
+    const state2 = createRulePipelineState({
+      input,
+      rule,
+      logger: stateLogger,
+      esqlRowBatch: batch2,
+    });
 
     const results = await collectStreamResults(
       step.executeStream(createPipelineStream([state1, state2]))
@@ -141,7 +156,7 @@ describe('CreateAlertEventsStep', () => {
     const input = createRuleExecutionInput();
     const rule = createRuleResponse();
 
-    const state = createRulePipelineState({ input, rule, esqlRowBatch: [] });
+    const state = createRulePipelineState({ input, rule, logger: stateLogger, esqlRowBatch: [] });
 
     const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
@@ -185,7 +200,7 @@ describe('CreateAlertEventsStep', () => {
         { 'host.name': 'host-d' },
       ];
 
-      const state = createRulePipelineState({ input, rule, esqlRowBatch });
+      const state = createRulePipelineState({ input, rule, esqlRowBatch, logger: stateLogger });
       const [result] = await collectStreamResults(
         step.executeStream(createPipelineStream([state]))
       );
@@ -199,7 +214,7 @@ describe('CreateAlertEventsStep', () => {
       });
       expect(mockLogger.warn).toHaveBeenCalledTimes(1);
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('exceeded maxGroupsPerExecution=2'),
+        expect.any(Function),
         expect.objectContaining({
           labels: expect.objectContaining({
             code: ALERTING_LOG_CODES.RULE_EXECUTION_MAX_GROUPS_EXCEEDED,
@@ -208,10 +223,7 @@ describe('CreateAlertEventsStep', () => {
           }),
         })
       );
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('dropped 2 new group(s) this run'),
-        expect.anything()
-      );
+      expect(mockLogger.warn).toHaveBeenCalledWith(expect.any(Function), expect.anything());
     });
 
     it('counts distinct dropped groups, not dropped rows, when a group spans multiple rows', async () => {
@@ -232,7 +244,7 @@ describe('CreateAlertEventsStep', () => {
         { 'host.name': 'host-b' },
       ];
 
-      const state = createRulePipelineState({ input, rule, esqlRowBatch });
+      const state = createRulePipelineState({ input, rule, esqlRowBatch, logger: stateLogger });
       const [result] = await collectStreamResults(
         step.executeStream(createPipelineStream([state]))
       );
@@ -244,10 +256,7 @@ describe('CreateAlertEventsStep', () => {
         [RULE_EXECUTION_COUNTERS.groupsDroppedByLimit]: 1,
       });
       expect(mockLogger.warn).toHaveBeenCalledTimes(1);
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('dropped 1 new group(s) this run'),
-        expect.anything()
-      );
+      expect(mockLogger.warn).toHaveBeenCalledWith(expect.any(Function), expect.anything());
     });
 
     it('does not warn when the number of groups stays within the limit', async () => {
@@ -263,7 +272,7 @@ describe('CreateAlertEventsStep', () => {
       const rule = createRuleResponse({ kind: 'alert' });
       const esqlRowBatch = [{ 'host.name': 'host-a' }, { 'host.name': 'host-b' }];
 
-      const state = createRulePipelineState({ input, rule, esqlRowBatch });
+      const state = createRulePipelineState({ input, rule, esqlRowBatch, logger: stateLogger });
       const [result] = await collectStreamResults(
         step.executeStream(createPipelineStream([state]))
       );
@@ -292,8 +301,18 @@ describe('CreateAlertEventsStep', () => {
       const batch1 = [{ 'host.name': 'host-a' }, { 'host.name': 'host-b' }];
       const batch2 = [{ 'host.name': 'host-c' }, { 'host.name': 'host-d' }];
 
-      const state1 = createRulePipelineState({ input, rule, esqlRowBatch: batch1 });
-      const state2 = createRulePipelineState({ input, rule, esqlRowBatch: batch2 });
+      const state1 = createRulePipelineState({
+        input,
+        rule,
+        logger: stateLogger,
+        esqlRowBatch: batch1,
+      });
+      const state2 = createRulePipelineState({
+        input,
+        rule,
+        logger: stateLogger,
+        esqlRowBatch: batch2,
+      });
 
       const results = await collectStreamResults(
         step.executeStream(createPipelineStream([state1, state2]))
@@ -317,7 +336,7 @@ describe('CreateAlertEventsStep', () => {
       expect(mockLogger.warn).toHaveBeenCalledTimes(1);
       // The tally accumulates across batches, not just the last one.
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('dropped 2 new group(s) this run'),
+        expect.any(Function),
         expect.objectContaining({
           labels: expect.objectContaining({
             code: ALERTING_LOG_CODES.RULE_EXECUTION_MAX_GROUPS_EXCEEDED,
@@ -352,7 +371,13 @@ describe('CreateAlertEventsStep', () => {
       ];
       const activeGroups = [{ group_hash: hashFor('host-c') }];
 
-      const state = createRulePipelineState({ input, rule, esqlRowBatch, activeGroups });
+      const state = createRulePipelineState({
+        input,
+        rule,
+        logger: stateLogger,
+        esqlRowBatch,
+        activeGroups,
+      });
       const [result] = await collectStreamResults(
         step.executeStream(createPipelineStream([state]))
       );

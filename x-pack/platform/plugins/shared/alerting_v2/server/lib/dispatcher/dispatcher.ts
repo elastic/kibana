@@ -277,6 +277,7 @@ export class DispatcherService implements DispatcherServiceContract {
 
     try {
       await this.storageService.bulkIndexDocs({
+        logger,
         index: ALERT_ACTIONS_DATA_STREAM,
         docs: blockingAlerts.map((alert) =>
           toAction({

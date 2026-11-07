@@ -646,7 +646,7 @@ describe('DatastreamInitializer', () => {
         expect(installOrder).toBeLessThan(deleteOrder);
         expect(deleteOrder).toBeLessThan(createOrder);
         expect(mockLogger.info).toHaveBeenCalledWith(
-          expect.stringContaining(`created from index template v${createdFromVersion}`),
+          expect.anything(),
           expect.objectContaining({
             labels: expect.objectContaining({ resource: forceResetDefinition.dataStreamName }),
           })

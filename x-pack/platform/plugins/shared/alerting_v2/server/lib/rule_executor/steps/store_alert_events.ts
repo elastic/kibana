@@ -30,6 +30,7 @@ export class StoreAlertEventsStep implements RuleExecutionStep {
       logger.debug({ message: 'Storing alert events batch' });
 
       const bulkResult = await this.storageService.bulkIndexDocs({
+        logger,
         index: ALERT_EVENTS_DATA_STREAM,
         docs: state.alertEventsBatch,
       });

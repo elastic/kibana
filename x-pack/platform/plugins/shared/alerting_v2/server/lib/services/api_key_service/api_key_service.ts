@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { CoreStart, Request } from '@kbn/core-di-server';
@@ -14,15 +13,23 @@ import type { SecurityServiceStart } from '@kbn/core-security-server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import { inject, injectable } from 'inversify';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '../../../saved_objects';
-import { getActionPolicyCloudApiKeyNotSupportedMessage } from '../../errors/action_policy_error_messages';
-import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../../errors/error_codes';
-import { LoggerServiceToken, type LoggerServiceContract } from '../logger_service/logger_service';
+import { CloudApiKeyNotSupportedError } from './cloud_api_key_not_supported_error';
 import { ApiKeyServiceSavedObjectsClientToken } from './tokens';
 
 export interface ApiKeyAttributes {
   apiKey: string;
   owner: string;
   createdByUser: boolean;
+}
+
+export interface CreateApiKeyParams {
+  /** Key name shown in the Elasticsearch API key management UI. */
+  name: string;
+  /**
+   * Which kind of object the key belongs to, stored as `kibana.type` in the
+   * key metadata so operators can tell keys apart by owner.
+   */
+  type: string;
 }
 
 /**
@@ -33,7 +40,7 @@ export interface ApiKeyAttributes {
 export type ApiKeyInvalidationResult = { success: true } | { success: false; message: string };
 
 export interface ApiKeyServiceContract {
-  create(name: string): Promise<ApiKeyAttributes>;
+  create(params: CreateApiKeyParams): Promise<ApiKeyAttributes>;
   markApiKeysForInvalidation(apiKeys: string[]): Promise<ApiKeyInvalidationResult[]>;
 }
 
@@ -41,27 +48,26 @@ const encodeApiKey = (id?: string, key?: string): string | null => {
   return id && key ? Buffer.from(`${id}:${key}`).toString('base64') : null;
 };
 
+/**
+ * Creates API keys on behalf of the current user and queues superseded keys
+ * for invalidation. Knows nothing about what the keys are used for: callers
+ * supply the owner type, map {@link CloudApiKeyNotSupportedError} to their own
+ * error, and log invalidation failures from the returned results.
+ */
 @injectable()
 export class ApiKeyService implements ApiKeyServiceContract {
-  private readonly logger: LoggerServiceContract;
-
   constructor(
     @inject(Request) private readonly request: KibanaRequest,
     @inject(CoreStart('security'))
     private readonly securityService: SecurityServiceStart,
     @inject(ApiKeyServiceSavedObjectsClientToken)
-    private readonly invalidationSavedObjectsClient: SavedObjectsClientContract,
-    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
-  ) {
-    this.logger = loggerService.forSubsystem('actionPolicyClient');
-  }
+    private readonly invalidationSavedObjectsClient: SavedObjectsClientContract
+  ) {}
 
-  public async create(name: string): Promise<ApiKeyAttributes> {
+  public async create({ name, type }: CreateApiKeyParams): Promise<ApiKeyAttributes> {
     const username = this.securityService.authc.getCurrentUser(this.request)?.username;
     if (!username) {
-      throw new Error(
-        `Failed to create API key for action policy: ${name} - unable to determine current user`
-      );
+      throw new Error(`Failed to create API key "${name}": unable to determine current user`);
     }
 
     const isApiKeyAuth = this.isAuthenticationTypeAPIKey();
@@ -70,7 +76,7 @@ export class ApiKeyService implements ApiKeyServiceContract {
       return this.getAuthenticationAPIKeyAttributes(name, username);
     }
 
-    return this.grantAPIKeyAttributes(name, username);
+    return this.grantAPIKeyAttributes({ name, type }, username);
   }
 
   public async markApiKeysForInvalidation(apiKeys: string[]): Promise<ApiKeyInvalidationResult[]> {
@@ -92,14 +98,10 @@ export class ApiKeyService implements ApiKeyServiceContract {
       response = await this.invalidationSavedObjectsClient.bulkCreate(apiKeysToInvalidate);
     } catch (e) {
       const message = (e as Error).message;
-      this.logger.error({
-        code: ALERTING_LOG_CODES.POLICY_API_KEY_INVALIDATION_FAILED,
-        error: e,
-      });
       return apiKeys.map((): ApiKeyInvalidationResult => ({ success: false, message }));
     }
 
-    return decodedApiKeys.map(({ apiKeyId }, index): ApiKeyInvalidationResult => {
+    return decodedApiKeys.map((_, index): ApiKeyInvalidationResult => {
       const created = response.saved_objects[index];
       if (created && !isSavedObjectErrorResult(created)) {
         return { success: true };
@@ -108,10 +110,6 @@ export class ApiKeyService implements ApiKeyServiceContract {
       const message = created
         ? created.error.message
         : 'Saved object was not returned by bulkCreate';
-      this.logger.error({
-        code: ALERTING_LOG_CODES.POLICY_API_KEY_INVALIDATION_FAILED,
-        error: new Error(message),
-      });
       return { success: false, message };
     });
   }
@@ -129,22 +127,18 @@ export class ApiKeyService implements ApiKeyServiceContract {
   private getAuthenticationAPIKeyAttributes(name: string, username: string): ApiKeyAttributes {
     const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(this.request);
     if (!authorizationHeader?.credentials) {
-      throw new Error(
-        `Failed to extract API key from authorization header for action policy: ${name}`
-      );
+      throw new Error(`Failed to extract API key "${name}" from the authorization header`);
     }
 
     if (isUiamCredential(authorizationHeader)) {
-      throw Boom.badRequest(getActionPolicyCloudApiKeyNotSupportedMessage(name), {
-        code: ALERTING_ERROR_CODES.ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED,
-      });
+      throw new CloudApiKeyNotSupportedError(name);
     }
 
     const { apiKeyId, apiKeyValue } = this.decodeApiKey(authorizationHeader.credentials);
 
     if (!apiKeyId || !apiKeyValue) {
       throw new Error(
-        `Failed to parse API key credentials from authorization header for action policy: ${name}`
+        `Failed to parse API key "${name}" credentials from the authorization header`
       );
     }
 
@@ -161,14 +155,17 @@ export class ApiKeyService implements ApiKeyServiceContract {
     };
   }
 
-  private async grantAPIKeyAttributes(name: string, username: string): Promise<ApiKeyAttributes> {
+  private async grantAPIKeyAttributes(
+    { name, type }: CreateApiKeyParams,
+    username: string
+  ): Promise<ApiKeyAttributes> {
     if (this.shouldGrantUiam()) {
       const uiamResult = await this.securityService.authc.apiKeys.uiam?.grant(this.request, {
         name: `uiam-${name}`,
       });
 
       if (!uiamResult) {
-        throw new Error(`Failed to create UIAM API key for action policy: ${name}`);
+        throw new Error(`Failed to create UIAM API key "${name}"`);
       }
 
       return {
@@ -181,11 +178,11 @@ export class ApiKeyService implements ApiKeyServiceContract {
     const esResult = await this.securityService.authc.apiKeys.grantAsInternalUser(this.request, {
       name,
       role_descriptors: {},
-      metadata: { managed: true, kibana: { type: 'action_policy' } },
+      metadata: { managed: true, kibana: { type } },
     });
 
     if (!esResult) {
-      throw new Error(`Failed to create ES API key for action policy: ${name}`);
+      throw new Error(`Failed to create ES API key "${name}"`);
     }
 
     return {

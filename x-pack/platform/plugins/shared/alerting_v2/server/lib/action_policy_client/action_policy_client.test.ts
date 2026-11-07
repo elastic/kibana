@@ -16,6 +16,7 @@ import {
 } from '../../saved_objects';
 import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
 import { createMockApiKeyService } from '../services/api_key_service/api_key_service.mock';
+import { CloudApiKeyNotSupportedError } from '../services/api_key_service/cloud_api_key_not_supported_error';
 import type {
   ActionPolicyRoutingTagSource,
   ActionPolicySavedObjectService,
@@ -119,6 +120,27 @@ describe('ActionPolicyClient', () => {
   });
 
   describe('createActionPolicy', () => {
+    it('maps a Cloud API key rejection to ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED', async () => {
+      apiKeyService.create.mockRejectedValueOnce(
+        new CloudApiKeyNotSupportedError('Action Policy: my-policy')
+      );
+
+      await expect(
+        client.createActionPolicy({
+          data: {
+            name: 'my-policy',
+            description: 'my-policy description',
+            destinations: [{ type: 'workflow', id: 'my-workflow' }],
+          },
+          options: { id: 'policy-id-1' },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        data: { code: ALERTING_ERROR_CODES.ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED },
+      });
+      expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+
     it('creates a action policy with correct attributes including API key', async () => {
       mockSavedObjectsClient.create.mockResolvedValueOnce({
         id: 'policy-id-1',
@@ -137,7 +159,10 @@ describe('ActionPolicyClient', () => {
         options: { id: 'policy-id-1' },
       });
 
-      expect(apiKeyService.create).toHaveBeenCalledWith('Action Policy: my-policy');
+      expect(apiKeyService.create).toHaveBeenCalledWith({
+        name: 'Action Policy: my-policy',
+        type: 'action_policy',
+      });
 
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
         ACTION_POLICY_SAVED_OBJECT_TYPE,
@@ -189,7 +214,10 @@ describe('ActionPolicyClient', () => {
         },
       });
 
-      expect(apiKeyService.create).toHaveBeenCalledWith('Action Policy: my-policy');
+      expect(apiKeyService.create).toHaveBeenCalledWith({
+        name: 'Action Policy: my-policy',
+        type: 'action_policy',
+      });
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
         ACTION_POLICY_SAVED_OBJECT_TYPE,
         expect.objectContaining({ name: 'my-policy' }),
@@ -1047,7 +1075,10 @@ describe('ActionPolicyClient', () => {
         id: 'policy-id-update-1',
       });
 
-      expect(apiKeyService.create).toHaveBeenCalledWith('Action Policy: original-policy');
+      expect(apiKeyService.create).toHaveBeenCalledWith({
+        name: 'Action Policy: original-policy',
+        type: 'action_policy',
+      });
       expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
         ACTION_POLICY_SAVED_OBJECT_TYPE,
         'policy-id-update-1',
@@ -1198,7 +1229,10 @@ describe('ActionPolicyClient', () => {
         id: 'policy-id-update-1',
       });
 
-      expect(apiKeyService.create).toHaveBeenCalledWith('Action Policy: updated-policy');
+      expect(apiKeyService.create).toHaveBeenCalledWith({
+        name: 'Action Policy: updated-policy',
+        type: 'action_policy',
+      });
 
       expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
         ACTION_POLICY_SAVED_OBJECT_TYPE,
@@ -1229,6 +1263,61 @@ describe('ActionPolicyClient', () => {
       );
 
       expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['old-api-key']);
+    });
+
+    it('logs POLICY_API_KEY_INVALIDATION_FAILED when fire-and-forget invalidation reports a failed key', async () => {
+      const existingAttributes: ActionPolicySavedObjectAttributes = {
+        name: 'original-policy',
+        description: 'original-policy description',
+        enabled: true,
+        destinations: [{ type: 'workflow', id: 'original-workflow' }],
+        apiKey: 'old-api-key',
+        apiKeyOwner: 'old-user',
+        apiKeyCreatedByUser: false,
+        createdBy: { profile_uid: 'creator_profile_uid' },
+        createdAt: '2024-12-01T00:00:00.000Z',
+        updatedBy: { profile_uid: 'updater_profile_uid' },
+        updatedAt: '2024-12-01T00:00:00.000Z',
+      };
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-update-1',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: existingAttributes,
+      });
+      mockSavedObjectsClient.update.mockResolvedValueOnce({
+        id: 'policy-id-update-1',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {} as ActionPolicySavedObjectAttributes,
+        references: [],
+        version: 'WzIsMV0=',
+      });
+      apiKeyService.markApiKeysForInvalidation.mockResolvedValueOnce([
+        { success: false, message: 'version conflict' },
+      ]);
+
+      await client.updateActionPolicy({
+        data: {
+          name: 'updated-policy',
+          destinations: [{ type: 'workflow', id: 'updated-workflow' }],
+        },
+        id: 'policy-id-update-1',
+      });
+
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          labels: {
+            code: ALERTING_LOG_CODES.POLICY_API_KEY_INVALIDATION_FAILED,
+            policy_id: 'policy-id-update-1',
+          },
+          error: expect.anything(),
+        })
+      );
     });
 
     it('logs POLICY_API_KEY_INVALIDATION_FAILED when fire-and-forget invalidation rejects', async () => {
@@ -1596,7 +1685,10 @@ describe('ActionPolicyClient', () => {
           data: baseUpsertData,
         });
 
-        expect(apiKeyService.create).toHaveBeenCalledWith('Action Policy: upsert-policy');
+        expect(apiKeyService.create).toHaveBeenCalledWith({
+          name: 'Action Policy: upsert-policy',
+          type: 'action_policy',
+        });
         expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
           ACTION_POLICY_SAVED_OBJECT_TYPE,
           expect.objectContaining({
@@ -1963,7 +2055,10 @@ describe('ActionPolicyClient', () => {
       const result = await client.updateActionPolicyApiKey({ id: 'policy-id-update-key-1' });
 
       expect(result).toMatchObject({ id: 'policy-id-update-key-1', name: 'existing-policy' });
-      expect(apiKeyService.create).toHaveBeenCalledWith('Action Policy: existing-policy');
+      expect(apiKeyService.create).toHaveBeenCalledWith({
+        name: 'Action Policy: existing-policy',
+        type: 'action_policy',
+      });
 
       expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
         ACTION_POLICY_SAVED_OBJECT_TYPE,
@@ -1993,7 +2088,10 @@ describe('ActionPolicyClient', () => {
 
       await client.updateActionPolicyApiKey({ id: 'policy-id-update-key-trim' });
 
-      expect(apiKeyService.create).toHaveBeenCalledWith('Action Policy: existing-policy');
+      expect(apiKeyService.create).toHaveBeenCalledWith({
+        name: 'Action Policy: existing-policy',
+        type: 'action_policy',
+      });
     });
 
     it('does not invalidate old API key when createdByUser is true', async () => {

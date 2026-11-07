@@ -39,14 +39,16 @@ export class ApplyMaintenanceWindowStep implements DispatcherStep {
 
   public async execute(
     state: Readonly<DispatcherPipelineState>,
-    _: LoggerServiceContract
+    logger: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
     const { triage = AlertTriage.empty(), rules = RuleCatalog.empty() } = state;
     if (!triage.hasDispatchable()) {
       return { type: 'continue' };
     }
 
-    const enabledWindows = await this.maintenanceWindowService.getEnabledMaintenanceWindows();
+    const enabledWindows = await this.maintenanceWindowService.getEnabledMaintenanceWindows({
+      logger,
+    });
     if (enabledWindows.length === 0) {
       return { type: 'continue' };
     }

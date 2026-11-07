@@ -162,6 +162,7 @@ export class AlertEventsClient {
     // `refresh: 'wait_for'` ensures the written doc is visible to the next
     // resolveEpisode query when events for the same series arrive back-to-back.
     const { errors } = await this.storageService.bulkIndexDocs({
+      logger: this.logger,
       index: ALERT_EVENTS_DATA_STREAM,
       docs: [doc],
       refresh: 'wait_for',
@@ -242,6 +243,7 @@ export class AlertEventsClient {
       last_episode_id: string;
       last_episode_status: AlertEpisodeStatus;
     }>({
+      logger: this.logger,
       query: `FROM ${ALERT_EVENTS_DATA_STREAM}
           | WHERE type == "alert" AND group_hash == "${groupHash}" AND alert.status IS NOT NULL
           | STATS last_episode_id = LAST(alert.id, @timestamp),
