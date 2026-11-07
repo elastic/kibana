@@ -19,7 +19,11 @@ import {
   type AlertingDomainEvent,
   type AlertingPublisherContext,
 } from '../domain_events';
-import type { EventBus, Subscription } from '../event_bus';
+import type { EventBus } from '../event_bus';
+import {
+  BaseEventBusSubscriber,
+  type EventBusSubscriptionSpec,
+} from '../base_event_bus_subscriber';
 import { ALERT_ACTION_WORKFLOW_TRIGGERS, type AlertActionWorkflowTriggerBinding } from './triggers';
 
 /**
@@ -53,45 +57,21 @@ import { ALERT_ACTION_WORKFLOW_TRIGGERS, type AlertActionWorkflowTriggerBinding 
  *    auth implications.
  */
 @injectable()
-export class AlertActionWorkflowSubscriber {
-  #subscriptions: Subscription[] = [];
-
-  private readonly logger: LoggerServiceContract;
-
+export class AlertActionWorkflowSubscriber extends BaseEventBusSubscriber {
   constructor(
     @inject(AlertingDomainEventBusToken)
-    private readonly bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
+    bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
     @inject(WorkflowServiceToken)
     private readonly workflows: WorkflowServiceContract,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract
   ) {
-    this.logger = loggerService.forSubsystem('events');
+    super(bus, loggerService.forSubsystem('events'));
   }
 
-  public start(): void {
-    if (this.#subscriptions.length > 0) {
-      this.logger.debug({
-        message: () => 'Subscriber start called more than once; ignoring',
-      });
-
-      return;
-    }
-
-    for (const trigger of ALERT_ACTION_WORKFLOW_TRIGGERS) {
-      const subscription = this.bus.subscribe(trigger.eventType, (event, context) =>
-        this.#dispatch(trigger, event as AlertActionEvent, context)
-      );
-
-      this.#subscriptions.push(subscription);
-    }
-  }
-
-  public stop(): void {
-    for (const subscription of this.#subscriptions) {
-      subscription.unsubscribe();
-    }
-
-    this.#subscriptions = [];
+  protected getSubscriptions(): EventBusSubscriptionSpec[] {
+    return ALERT_ACTION_WORKFLOW_TRIGGERS.map((trigger) =>
+      this.on(trigger.eventType, (event, context) => this.#dispatch(trigger, event, context))
+    );
   }
 
   async #dispatch(

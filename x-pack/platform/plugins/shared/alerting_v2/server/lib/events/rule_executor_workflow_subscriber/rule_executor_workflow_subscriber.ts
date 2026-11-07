@@ -19,7 +19,11 @@ import {
   type AlertingDomainEvent,
   type AlertingPublisherContext,
 } from '../domain_events';
-import type { EventBus, Subscription } from '../event_bus';
+import type { EventBus } from '../event_bus';
+import {
+  BaseEventBusSubscriber,
+  type EventBusSubscriptionSpec,
+} from '../base_event_bus_subscriber';
 import {
   RULE_EXECUTOR_WORKFLOW_TRIGGERS,
   type RuleExecutorWorkflowTriggerBinding,
@@ -35,45 +39,21 @@ import {
  * produced no rule events). The subscriber honours that gate.
  */
 @injectable()
-export class RuleExecutorWorkflowSubscriber {
-  #subscriptions: Subscription[] = [];
-
-  private readonly logger: LoggerServiceContract;
-
+export class RuleExecutorWorkflowSubscriber extends BaseEventBusSubscriber {
   constructor(
     @inject(AlertingDomainEventBusToken)
-    private readonly bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
+    bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
     @inject(WorkflowServiceToken)
     private readonly workflows: WorkflowServiceContract,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract
   ) {
-    this.logger = loggerService.forSubsystem('events');
+    super(bus, loggerService.forSubsystem('events'));
   }
 
-  public start(): void {
-    if (this.#subscriptions.length > 0) {
-      this.logger.debug({
-        message: () => 'Subscriber start called more than once; ignoring',
-      });
-
-      return;
-    }
-
-    for (const trigger of RULE_EXECUTOR_WORKFLOW_TRIGGERS) {
-      const subscription = this.bus.subscribe(trigger.eventType, (event, context) =>
-        this.#dispatch(trigger, event as RuleExecutorEvent, context)
-      );
-
-      this.#subscriptions.push(subscription);
-    }
-  }
-
-  public stop(): void {
-    for (const subscription of this.#subscriptions) {
-      subscription.unsubscribe();
-    }
-
-    this.#subscriptions = [];
+  protected getSubscriptions(): EventBusSubscriptionSpec[] {
+    return RULE_EXECUTOR_WORKFLOW_TRIGGERS.map((trigger) =>
+      this.on(trigger.eventType, (event, context) => this.#dispatch(trigger, event, context))
+    );
   }
 
   async #dispatch(

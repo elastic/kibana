@@ -70,9 +70,11 @@ export type EventBusHandlerArgs<TEvent, TContext> = TContext extends void
 export interface EventBus<TEvent extends DomainEvent = DomainEvent, TContext = void> {
   publish<E extends TEvent>(event: E, ...rest: EventBusContextRest<TContext>): void;
 
-  subscribe<E extends TEvent>(
-    type: E['type'],
-    handler: (...args: EventBusHandlerArgs<E, TContext>) => Promise<void> | void
+  subscribe<K extends TEvent['type']>(
+    type: K,
+    handler: (
+      ...args: EventBusHandlerArgs<Extract<TEvent, { type: K }>, TContext>
+    ) => Promise<void> | void
   ): Subscription;
 }
 

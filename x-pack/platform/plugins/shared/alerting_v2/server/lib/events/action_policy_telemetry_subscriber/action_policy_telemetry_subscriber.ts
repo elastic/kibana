@@ -22,7 +22,11 @@ import {
   type AlertingDomainEvent,
   type AlertingPublisherContext,
 } from '../domain_events';
-import type { EventBus, Subscription } from '../event_bus';
+import type { EventBus } from '../event_bus';
+import {
+  BaseEventBusSubscriber,
+  type EventBusSubscriptionSpec,
+} from '../base_event_bus_subscriber';
 import type { ActionPolicyEvent } from '../action_policy_event_publisher/events';
 
 /**
@@ -33,44 +37,20 @@ import type { ActionPolicyEvent } from '../action_policy_event_publisher/events'
  * and `origin`. Fields that come from the policy are omitted.
  */
 @injectable()
-export class ActionPolicyTelemetrySubscriber {
-  #subscriptions: Subscription[] = [];
-
-  private readonly logger: LoggerServiceContract;
-
+export class ActionPolicyTelemetrySubscriber extends BaseEventBusSubscriber {
   constructor(
     @inject(AlertingDomainEventBusToken)
-    private readonly bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
+    bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
     @inject(EbtServiceToken) private readonly ebtService: EbtServiceContract,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract
   ) {
-    this.logger = loggerService.forSubsystem('events');
+    super(bus, loggerService.forSubsystem('events'));
   }
 
-  public start(): void {
-    if (this.#subscriptions.length > 0) {
-      this.logger.debug({
-        message: () => 'Subscriber start called more than once; ignoring',
-      });
-
-      return;
-    }
-
-    for (const eventType of ACTION_POLICY_OPERATIONS) {
-      this.#subscriptions.push(
-        this.bus.subscribe<ActionPolicyEvent>(eventType, (event, context) =>
-          this.#reportActionPolicyChanged(event, context)
-        )
-      );
-    }
-  }
-
-  public stop(): void {
-    for (const subscription of this.#subscriptions) {
-      subscription.unsubscribe();
-    }
-
-    this.#subscriptions = [];
+  protected getSubscriptions(): EventBusSubscriptionSpec[] {
+    return ACTION_POLICY_OPERATIONS.map((eventType) =>
+      this.on(eventType, (event, context) => this.#reportActionPolicyChanged(event, context))
+    );
   }
 
   #reportActionPolicyChanged(event: ActionPolicyEvent, { origin }: AlertingPublisherContext): void {
