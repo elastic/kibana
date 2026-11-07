@@ -11,6 +11,7 @@ import {
   RELATED_ALERT_ENTITY_SOURCE_INCLUDES,
   RELATED_ALERT_SOURCE_ALLOWLIST,
   trimEntityValues,
+  truncateRelatedAlertLongFields,
   type SourceEntities,
 } from './utils/entity_utils';
 
@@ -171,7 +172,9 @@ export const findRelatedAlerts = async (
         {
           _id: hit._id,
           _index: hit._index ?? alertsIndex,
-          ...((hit._source as Record<string, unknown> | undefined) ?? {}),
+          ...truncateRelatedAlertLongFields(
+            (hit._source as Record<string, unknown> | undefined) ?? {}
+          ),
         },
       ];
     });
