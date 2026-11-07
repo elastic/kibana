@@ -247,11 +247,26 @@ describe('auditedSandboxSession', () => {
     const first = audited();
     const second = audited(stepCaller);
 
-    expect(first.sessionKey).toBe(session);
     expect(second.sessionKey).toBe(first.sessionKey);
     expect(first.isReset).toBe(true);
     (session as any).isReset = false;
     expect(first.isReset).toBe(false);
+  });
+
+  it('gives each pod session its own key, and a key that is not the session', () => {
+    const other = createSession();
+    const first = audited();
+    const otherView = auditedSandboxSession({
+      session: other,
+      audit,
+      caller: toolCaller,
+      logger,
+    });
+
+    expect(otherView.sessionKey).not.toBe(first.sessionKey);
+    expect(first.sessionKey).not.toBe(session);
+    // The key opens no call to the sandbox.
+    expect(first.sessionKey).not.toHaveProperty('runCommand');
   });
 });
 
