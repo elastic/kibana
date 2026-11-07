@@ -117,16 +117,26 @@ export_token_usage() {
   mkdir -p "$out_dir"
   out_file="$out_dir/token_usage_${EVAL_PROJECT:-all}.ndjson"
   : >"$out_file"
-  page="$(es_curl -sS "$es_url/.kibana-inference-token-usage/_search?scroll=2m&size=2000&expand_wildcards=all" \
-    -H 'Content-Type: application/json' -d '{"sort":["_doc"]}')" || return 0
+  # `-f` makes an HTTP error fail the call instead of feeding its JSON body to jq, where it
+  # parses as "no hits" and looks like an empty export. `--max-time` bounds a hung ES so the
+  # on_exit trap cannot stall. Both paths stay best-effort: they warn and keep the step green.
+  if ! page="$(es_curl -sSf --max-time 30 \
+    "$es_url/.kibana-inference-token-usage/_search?scroll=2m&size=2000&expand_wildcards=all" \
+    -H 'Content-Type: application/json' -d '{"sort":["_doc"]}')"; then
+    echo "--- Token usage export failed (initial search returned no HTTP 2xx)"
+    return 0
+  fi
   while (( pages++ < 500 )); do
     hits="$(printf '%s' "$page" | jq -c '.hits.hits[]?._source' 2>/dev/null)" || break
     [[ -n "$hits" ]] || break
     printf '%s\n' "$hits" >>"$out_file"
     scroll_id="$(printf '%s' "$page" | jq -r '._scroll_id // empty')"
     [[ -n "$scroll_id" ]] || break
-    page="$(es_curl -sS "$es_url/_search/scroll" -H 'Content-Type: application/json' \
-      -d "{\"scroll\":\"2m\",\"scroll_id\":\"$scroll_id\"}")" || break
+    if ! page="$(es_curl -sSf --max-time 30 "$es_url/_search/scroll" -H 'Content-Type: application/json' \
+      -d "{\"scroll\":\"2m\",\"scroll_id\":\"$scroll_id\"}")"; then
+      echo "--- Token usage export truncated at page $pages (scroll request returned no HTTP 2xx)"
+      break
+    fi
   done
   echo "--- Token usage docs: $(wc -l <"$out_file") (by model)"
   jq -r '.model.model_id // "unknown"' "$out_file" | sort | uniq -c || true

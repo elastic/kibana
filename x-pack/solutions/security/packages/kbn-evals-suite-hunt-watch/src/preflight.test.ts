@@ -435,7 +435,7 @@ describe('runPreflight', () => {
     ]);
   });
 
-  it('pins every tier in every eval space to the subject connector through saved inference settings', async () => {
+  it('pins every tier and the Cyber template-models pick in every eval space via saved inference settings', async () => {
     const settingsWrites: MockOverrides['settingsWrites'] = [];
     const inferenceSettingsWrites: MockOverrides['inferenceSettingsWrites'] = [];
     await run(buildMockFetch({ settingsWrites, inferenceSettingsWrites }));
@@ -444,7 +444,12 @@ describe('runPreflight', () => {
     for (const { features } of inferenceSettingsWrites) {
       expect(features).toEqual(
         expect.arrayContaining(
-          ['alertzero_efficient', 'alertzero_balanced', 'alertzero_frontier'].map((feature_id) => ({
+          [
+            'alertzero_efficient',
+            'alertzero_balanced',
+            'alertzero_frontier',
+            'alertzero_template_models',
+          ].map((feature_id) => ({
             feature_id,
             endpoints: [{ id: CONNECTOR.id }],
           }))
@@ -489,6 +494,39 @@ describe('runPreflight', () => {
     );
     expect(inferenceSettingsWrites.find(({ spaceId }) => spaceId === 'hunt-a')?.features).toEqual([
       { feature_id: 'security_ai_detect_diagnose', endpoints: [{ id: 'ops-pick' }] },
+    ]);
+  });
+
+  it('overwrites a saved Cyber template-models pick with the subject and restores it afterwards', async () => {
+    // selectHuntCallModel prefers a saved Cyber pick over the pinned tiers, so a pick left on a
+    // reused stack would score another model under the subject's name while the tier pins hold.
+    const inferenceSettingsWrites: MockOverrides['inferenceSettingsWrites'] = [];
+    const cleanup = await run(
+      buildMockFetch({
+        previousInferenceSettingsBySpace: {
+          'hunt-b': [
+            { feature_id: 'alertzero_template_models', endpoints: [{ id: 'stale-cyber-pick' }] },
+          ],
+        },
+        inferenceSettingsWrites,
+      })
+    );
+    const pinned = inferenceSettingsWrites.find(({ spaceId }) => spaceId === 'hunt-b');
+    expect(pinned?.features).toEqual(
+      expect.arrayContaining([
+        { feature_id: 'alertzero_template_models', endpoints: [{ id: CONNECTOR.id }] },
+      ])
+    );
+    expect(
+      pinned?.features.some(({ endpoints }) =>
+        endpoints.some(({ id }) => id === 'stale-cyber-pick')
+      )
+    ).toBe(false);
+
+    inferenceSettingsWrites.length = 0;
+    await cleanup();
+    expect(inferenceSettingsWrites.find(({ spaceId }) => spaceId === 'hunt-b')?.features).toEqual([
+      { feature_id: 'alertzero_template_models', endpoints: [{ id: 'stale-cyber-pick' }] },
     ]);
   });
 
@@ -569,20 +607,60 @@ describe('runPreflight', () => {
     });
   });
 
-  it('throws naming the tier, the space and the model it resolves to when a tier does not resolve to the subject', async () => {
+  it('restores the saved picks of spaces bridged before an inference-settings write fails partway', async () => {
+    const inferenceSettingsWrites: MockOverrides['inferenceSettingsWrites'] = [];
+    const [first, second] = EVAL_SPACE_IDS;
+    await expect(
+      run(
+        buildMockFetch({
+          previousInferenceSettingsBySpace: {
+            [first]: [
+              { feature_id: 'security_ai_detect_diagnose', endpoints: [{ id: 'ops-pick' }] },
+            ],
+          },
+          // Fails the bridge PUT in the second space; its restore PUT fails too, only warned.
+          inferenceSettingsWriteErrorSpaces: [second],
+          inferenceSettingsWrites,
+        })
+      )
+    ).rejects.toThrow(/Bad Request/);
+
+    // Bridge: first (pins), second (fails). Restore: first (previous picks), second (warned).
+    // The spaces after the failure are never touched.
+    expect(inferenceSettingsWrites.map(({ spaceId }) => spaceId)).toEqual([
+      first,
+      second,
+      first,
+      second,
+    ]);
+    // The failed space's bridge body had pinned the subject before the write failed.
+    expect(inferenceSettingsWrites[1]?.features).toEqual(
+      expect.arrayContaining([
+        { feature_id: 'alertzero_efficient', endpoints: [{ id: CONNECTOR.id }] },
+      ])
+    );
+    // The space bridged before the failure gets its operator pick back, without the subject pins.
+    expect(inferenceSettingsWrites[2]?.features).toEqual([
+      { feature_id: 'security_ai_detect_diagnose', endpoints: [{ id: 'ops-pick' }] },
+    ]);
+  });
+
+  it('throws naming the feature, the space and the model it resolves to when one does not resolve to the subject', async () => {
     await expect(
       run(
         buildMockFetch({
           tierResolutionOverrides: { 'hunt-b/alertzero_frontier': 'gpt-6-sol' },
         })
       )
-    ).rejects.toThrow(/tier "alertzero_frontier" resolves to "gpt-6-sol" in space "hunt-b"/);
+    ).rejects.toThrow(/feature "alertzero_frontier" resolves to "gpt-6-sol" in space "hunt-b"/);
   });
 
-  it('throws when a tier resolves to no connector at all', async () => {
+  it('throws when a bridged feature resolves to no connector at all', async () => {
     await expect(
       run(buildMockFetch({ tierResolutionOverrides: { 'default/alertzero_efficient': undefined } }))
-    ).rejects.toThrow(/tier "alertzero_efficient" resolves to "no connector" in space "default"/);
+    ).rejects.toThrow(
+      /feature "alertzero_efficient" resolves to "no connector" in space "default"/
+    );
   });
 
   it('restores both bridged settings and never enables the Worker when a tier does not resolve to the subject', async () => {

@@ -17,6 +17,7 @@ import {
   ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
   ALERTZERO_ENABLED_SETTING_ID,
   ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+  ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
   ALERTZERO_WORKERS_URL,
   API_VERSIONS,
   buildWorkerUrl,
@@ -66,6 +67,10 @@ const ALERTZERO_TIER_FEATURE_IDS: readonly string[] = [
   ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
   ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
   ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+  // A saved Cyber pick replaces the tier in `selectHuntCallModel`, so it is pinned too: a pick
+  // left in place by an earlier run on a reused stack would score another model under the
+  // subject's name while the tier assertions still pass.
+  ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
 ];
 
 /** The `solution` view value AlertZero requires; any other value (or none) is a Classic space. */
@@ -248,10 +253,12 @@ type PreviousTierPicks = Map<string, InferenceSettingsResponse['data'] | null>;
  * `ignoreGlobalDefault: true` and recommended endpoints, so `genAiSettings:defaultAIConnector`
  * alone never reaches a tier, and `genAiSettings:defaultAIConnectorOnly` cannot be used either:
  * it would 400-reject the judge's explicit connector calls in the default space. Instead each
- * tier gets an operator-style pick through the per-space `inference-settings` saved object,
- * which resolution consults before recommendations and `ignoreGlobalDefault`, in both the
- * connectors route and the Worker's `endpoints.getForFeature` contract. The default-connector
- * setting is still written (without `Only`) so non-tier consumers resolve to the subject too.
+ * bridged feature (the three tiers plus the Cyber template-models row, which `selectHuntCallModel`
+ * prefers over the tiers) gets an operator-style pick through the per-space `inference-settings`
+ * saved object, which resolution consults before recommendations and `ignoreGlobalDefault`, in
+ * both the connectors route and the Worker's `endpoints.getForFeature` contract. The
+ * default-connector setting is still written (without `Only`) so non-tier consumers resolve to
+ * the subject too.
  *
  * Fills `previousSettings` and `previousTierPicks` space by space before each write, so a write
  * that throws partway still leaves the cleanup everything it needs to put back.
@@ -292,7 +299,7 @@ const bridgeSubjectModel = async ({
     }
     previousTierPicks.set(spaceId, existingPicks);
 
-    // Keep any non-tier picks the space already had; only the three AlertZero tiers move.
+    // Keep any non-pinned picks the space already had; only the four bridged features move.
     const keptFeatures = (existingPicks?.features ?? []).filter(
       ({ feature_id }) => !ALERTZERO_TIER_FEATURE_IDS.includes(feature_id)
     );
@@ -302,8 +309,9 @@ const bridgeSubjectModel = async ({
     }));
 
     log.info(
-      `[hunt-watch] pinning Hunt tiers to "${connectorId}" via inference settings and setting ` +
-        `genAiSettings:defaultAIConnector="${connectorId}" in space "${spaceId}"`
+      `[hunt-watch] pinning Hunt tiers and the Cyber template-models pick to "${connectorId}" ` +
+        `via inference settings and setting genAiSettings:defaultAIConnector="${connectorId}" ` +
+        `in space "${spaceId}"`
     );
     await fetch(spacePath(spaceId, INFERENCE_SETTINGS_PATH), {
       method: 'PUT',
@@ -328,9 +336,9 @@ interface InferenceConnectorsResponse {
 }
 
 /**
- * Asks the server which connector each Hunt tier resolves to in each eval space. The connectors
- * route runs `resolveModelsForFeature`, as the Worker's `endpoints.getForFeature` does, so this
- * fails before any example runs if the Worker would use another model than the one scored.
+ * Asks the server which connector each bridged feature resolves to in each eval space. The
+ * connectors route runs `resolveModelsForFeature`, as the Worker's `endpoints.getForFeature` does,
+ * so this fails before any example runs if the Worker would use another model than the one scored.
  * A `.inference` stack connector resolves to its inference endpoint, so either id matches.
  */
 const assertTiersResolveToSubject = async ({
@@ -355,7 +363,7 @@ const assertTiersResolveToSubject = async ({
       const resolved = connectors[0]?.connectorId;
       if (!resolved || !subjectIds.includes(resolved)) {
         throw new Error(
-          `[hunt-watch] tier "${featureId}" resolves to "${
+          `[hunt-watch] feature "${featureId}" resolves to "${
             resolved ?? 'no connector'
           }" in space "${spaceId}", not the subject model (${subjectIds.join(
             ' / '
@@ -364,7 +372,9 @@ const assertTiersResolveToSubject = async ({
         );
       }
     }
-    log.info(`[hunt-watch] every Hunt tier resolves to "${subjectIds[0]}" in space "${spaceId}"`);
+    log.info(
+      `[hunt-watch] every bridged feature resolves to "${subjectIds[0]}" in space "${spaceId}"`
+    );
   }
 };
 
