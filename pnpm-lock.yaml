@@ -2697,6 +2697,9 @@ importers:
       '@kbn/management-settings-field-definition':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-management/settings/field_definition
+      '@kbn/management-settings-hooks':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-management/settings/hooks
       '@kbn/management-settings-ids':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-management/settings/setting_ids
@@ -8234,6 +8237,8 @@ importers:
   src/platform/packages/shared/kbn-management/settings/components/form: {}
 
   src/platform/packages/shared/kbn-management/settings/field_definition: {}
+
+  src/platform/packages/shared/kbn-management/settings/hooks: {}
 
   src/platform/packages/shared/kbn-management/settings/section_registry: {}
 
