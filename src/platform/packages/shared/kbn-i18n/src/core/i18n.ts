@@ -155,6 +155,17 @@ export function translate(
       throw new Error('Missing `defaultMessage`.');
     }
 
+    // Plain English defaults do not need ICU parsing. Avoid retaining a message
+    // formatter for each one when there is no translated message for the ID.
+    if (
+      typeof defaultMessage === 'string' &&
+      intl.locale === intl.defaultLocale &&
+      (!intl.messages || !Object.prototype.hasOwnProperty.call(intl.messages, id)) &&
+      !/[{}<>']/.test(defaultMessage)
+    ) {
+      return defaultMessage;
+    }
+
     return intl.formatMessage(
       {
         id,
