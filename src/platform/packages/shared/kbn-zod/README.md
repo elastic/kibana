@@ -9,7 +9,7 @@ The root package and `@kbn/zod/v4` export semantic string helpers carrying share
 default length bounds.
 
 ```typescript
-import { z, savedObjectId, spaceId, description, unboundedString } from '@kbn/zod';
+import { z, savedObjectId, spaceId, description, boundedString, unboundedString } from '@kbn/zod';
 
 z.object({
   // strict, default bounds
@@ -20,6 +20,8 @@ z.object({
   panelId: savedObjectId.warn({ label: 'dashboard.panelId' }),
   // compose after choosing a mode
   description: description().optional(),
+  // no semantic helper fits: explicit limit required
+  keyFile: boundedString({ maxLength: 4096 }),
   // explicit opt-out, reason required
   blob: unboundedString({ reason: 'Size is enforced upstream' }),
 });

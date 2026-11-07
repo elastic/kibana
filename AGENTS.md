@@ -87,6 +87,7 @@ Follow existing patterns in the target area first; below are common defaults.
 
 ### Schema validation
 - When adding `schema.string()` / `schema.arrayOf()` (`@kbn/config-schema`) or `z.string()` / `z.array()` (`zod`) for HTTP request input, always bound them (`maxLength` / `maxSize` / `.max()`) to prevent unbounded-input DoS.
+- For string fields, prefer the semantic helpers (`savedObjectId`, `displayName`, `urlString`, `pemCertificate`, `version`, ...) from `@kbn/config-schema` / `@kbn/zod`. Use `boundedString({ maxLength })` only when no semantic helper fits the field. See `docs/extend/key-concepts/security/bounded-string-schemas.md`.
 
 ## Internationalization (i18n)
 - Guidelines are found in src/platform/packages/shared/kbn-i18n/GUIDELINE.md

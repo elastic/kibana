@@ -9,7 +9,7 @@
 
 import { metrics, ValueType } from '@opentelemetry/api';
 import type { Histogram, MeterProvider } from '@opentelemetry/api';
-import type { StringHelperName } from './limits';
+import type { ReportedStringHelperName } from './limits';
 
 const histograms = new WeakMap<MeterProvider, Histogram>();
 
@@ -24,7 +24,7 @@ const getHistogram = (): Histogram => {
     .getMeter('kibana.schema')
     .createHistogram('kibana.schema.string_length_violation.length', {
       description:
-        'Lengths of strings exceeding the configured maximum in reporting mode, in UTF-16 code units.',
+        'Lengths of strings violating a helper length bound in reporting mode, in UTF-16 code units.',
       unit: '{code_unit}',
       valueType: ValueType.INT,
       advice: {
@@ -38,17 +38,22 @@ const getHistogram = (): Histogram => {
   return histogram;
 };
 
-/** Records overlong string lengths without including input contents or lengths in attributes. */
+/** Which of a helper's length bounds a reported string violated. */
+export type StringLengthBound = 'min' | 'max';
+
+/** Records violating string lengths without including input contents or lengths in attributes. */
 export const reportStringLengthViolation = ({
   helper,
   library,
-  maxLength,
+  bound,
+  limit,
   length,
   label,
 }: {
-  helper: StringHelperName;
+  helper: ReportedStringHelperName;
   library: 'config-schema' | 'zod';
-  maxLength: number;
+  bound: StringLengthBound;
+  limit: number;
   length: number;
   label?: string;
 }): void => {
@@ -56,7 +61,8 @@ export const reportStringLengthViolation = ({
     getHistogram().record(length, {
       'schema.helper': helper,
       'schema.library': library,
-      'schema.max_length': maxLength,
+      'schema.bound': bound,
+      [bound === 'min' ? 'schema.min_length' : 'schema.max_length']: limit,
       ...(label === undefined ? {} : { 'schema.label': label }),
     });
   } catch {

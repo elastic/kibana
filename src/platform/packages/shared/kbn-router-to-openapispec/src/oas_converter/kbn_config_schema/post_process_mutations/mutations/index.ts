@@ -23,8 +23,25 @@ import type { IContext } from '../context';
 const {
   META_FIELD_X_OAS_MAX_LENGTH,
   META_FIELD_X_OAS_MIN_LENGTH,
+  META_FIELD_X_OAS_PLANNED_MAX_LENGTH,
+  META_FIELD_X_OAS_PLANNED_MIN_LENGTH,
   META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES,
+  X_KIBANA_PLANNED_MAX_LENGTH,
+  X_KIBANA_PLANNED_MIN_LENGTH,
 } = metaFields;
+
+// Reporting-mode strings enforce no length bound, so they publish the bounds they plan to
+// enforce as vendor extensions rather than as `minLength` / `maxLength`.
+const renameField = (
+  schema: OpenAPIV3.SchemaObject,
+  metaField: string,
+  extension: string
+): void => {
+  if (metaField in schema) {
+    (schema as Record<string, unknown>)[extension] = (schema as Record<string, unknown>)[metaField];
+    deleteField(schema, metaField);
+  }
+};
 
 export const processString = (schema: OpenAPIV3.SchemaObject): void => {
   if (META_FIELD_X_OAS_MIN_LENGTH in schema) {
@@ -35,6 +52,8 @@ export const processString = (schema: OpenAPIV3.SchemaObject): void => {
     schema.maxLength = schema[META_FIELD_X_OAS_MAX_LENGTH] as number;
     deleteField(schema, META_FIELD_X_OAS_MAX_LENGTH);
   }
+  renameField(schema, META_FIELD_X_OAS_PLANNED_MIN_LENGTH, X_KIBANA_PLANNED_MIN_LENGTH);
+  renameField(schema, META_FIELD_X_OAS_PLANNED_MAX_LENGTH, X_KIBANA_PLANNED_MAX_LENGTH);
 };
 
 export const processStream = (schema: OpenAPIV3.SchemaObject): void => {

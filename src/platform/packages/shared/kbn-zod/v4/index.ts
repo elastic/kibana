@@ -28,13 +28,22 @@ export {
   searchFilter,
   aggregation,
   querySortField,
+  urlString,
+  pemCertificate,
+  version,
+  boundedString,
   unboundedString,
 } from './string_helpers';
 export type {
   ZodStringOptions,
   ZodStringWarnOptions,
+  LabeledZodStringWarnOptions,
   ZodStringHelper,
+  LabeledZodStringHelper,
   UnboundedStringOptions,
+  ZodBoundedStringHelper,
+  ZodBoundedStringOptions,
+  ZodBoundedStringWarnOptions,
 } from './string_helpers';
 export { normalizeJsonSchemaTypeArrays, inlineRootJsonSchemaRef } from './json_schema_utils';
 export { isoDateTime } from './iso_datetime';
