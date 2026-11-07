@@ -29,6 +29,7 @@ import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import type { Severity } from '@kbn/nightshift-investigations-plugin/common';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { NO_INVESTIGATIONS_FOUND_MESSAGE } from '../../../common/messages';
 import type {
   InvestigationSectionId,
@@ -47,6 +48,11 @@ import {
   STICKY_HEADER_HEIGHT_VAR,
 } from './investigation_section';
 import { scrollSectionIntoView } from './scroll_section_into_view';
+
+const NO_INVESTIGATIONS_FOUND_HINT = i18n.translate(
+  'xpack.nightshift.investigations.noInvestigationsFoundHint',
+  { defaultMessage: 'Try adjusting your time range or filter' }
+);
 
 /**
  * Per space: the base path carries the space prefix (`/s/<space id>`).
@@ -78,10 +84,7 @@ export interface InvestigationListProps {
   /** Current Home time range, carried into View all investigations links. */
   rangeFrom?: string;
   rangeTo?: string;
-  /**
-   * Replaces the default empty copy when every section is empty. Pass `null` to keep the empty
-   * panel but hide the default “No investigations found” (e.g. while an archive check is pending).
-   */
+  /** Replaces the default empty copy when every section is empty. */
   emptyContent?: React.ReactNode;
 }
 
@@ -196,46 +199,47 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
             border-radius: ${euiTheme.border.radius.panel};
           `}
         >
-          {/* `null` keeps the panel while archive matching is still pending. */}
-          {emptyContent === null ? null : (
-            <EuiEmptyPrompt
-              layout="vertical"
-              color="transparent"
-              paddingSize="l"
-              css={css`
-                max-inline-size: none;
-                text-align: center;
-              `}
-              icon={
-                <EuiIllustration
-                  type={notFound}
-                  alt=""
-                  data-test-subj="nightshiftInvestigationsEmptyIllustration"
+          <EuiEmptyPrompt
+            layout="vertical"
+            color="transparent"
+            paddingSize="l"
+            css={css`
+              max-inline-size: none;
+              text-align: center;
+            `}
+            icon={
+              <EuiIllustration
+                type={notFound}
+                alt=""
+                data-test-subj="nightshiftInvestigationsEmptyIllustration"
+                css={css`
+                  max-inline-size: ${euiTheme.base * 10}px;
+                  margin-inline: auto;
+                `}
+              />
+            }
+            title={
+              emptyContent === undefined ? (
+                <h2>{NO_INVESTIGATIONS_FOUND_MESSAGE}</h2>
+              ) : undefined
+            }
+            titleSize="xs"
+            body={
+              emptyContent === undefined ? (
+                <p data-test-subj="nightshiftInvestigationsEmptyHint">
+                  {NO_INVESTIGATIONS_FOUND_HINT}
+                </p>
+              ) : (
+                <div
                   css={css`
-                    max-inline-size: ${euiTheme.base * 10}px;
-                    margin-inline: auto;
+                    text-align: center;
                   `}
-                />
-              }
-              title={
-                emptyContent === undefined ? (
-                  <h2>{NO_INVESTIGATIONS_FOUND_MESSAGE}</h2>
-                ) : undefined
-              }
-              titleSize="xs"
-              body={
-                emptyContent === undefined ? undefined : (
-                  <div
-                    css={css`
-                      text-align: center;
-                    `}
-                  >
-                    {emptyContent}
-                  </div>
-                )
-              }
-            />
-          )}
+                >
+                  {emptyContent}
+                </div>
+              )
+            }
+          />
         </EuiPanel>
       );
     }

@@ -5,18 +5,11 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useStatusSignal } from '@kbn/agentic-investigations-plugin/public';
 import type { Severity, SeverityCounts } from '@kbn/nightshift-investigations-plugin/common';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
-import { useKibana } from '../../hooks/use_kibana';
-import {
-  isDemoArchived,
-  isDemoRecentlyClosed,
-  seedDemoArchivedFromClosed,
-  subscribeDemoArchiveStore,
-} from './demo_archive_store';
 import { matchesInvestigationUpdatedAtRange } from './investigation_time_range';
 import {
   useFetchInvestigations,
@@ -45,9 +38,10 @@ const RECENT_CANDIDATES = 20;
 
 /**
  * `recent` overlays open investigations opened (`created_at`) in the last
- * {@link RECENT_INVESTIGATION_WINDOW_MS}. Closed and archived never appear here; in-progress
- * ones stay in In progress only. Open items may still also appear in their severity bucket.
+ * {@link RECENT_INVESTIGATION_WINDOW_MS}. Closed never appear here; in-progress ones stay in
+ * In progress only. Open items may still also appear in their severity bucket.
  * `not-rated` holds open investigations with no severity. `closed` holds closed ones.
+ * Home lists only investigations last-updated in the page time range.
  */
 export type InvestigationSectionId =
   | 'recent'
@@ -63,8 +57,8 @@ export interface InvestigationSectionState extends FetchInvestigationsResult {
 export interface InvestigationSectionsResult {
   sections: InvestigationSectionState[];
   /**
-   * Open severity totals after Home filters (search, time range, demo archive) — same numbers
-   * the severity sections return, so the overview tiles stay in sync with the list.
+   * Open severity totals after Home filters (search, time range) — same numbers the severity
+   * sections return, so the overview tiles stay in sync with the list.
    */
   severityCounts: SeverityCounts;
   /** True while any open severity tier is still on its first load. */
@@ -119,17 +113,15 @@ const toSectionState = ({
   ...queryResult,
 });
 
-const filterSectionForDemoHome = ({
+const filterSectionForHome = ({
   id,
   queryResult,
-  spaceKey,
   now,
   rangeFrom,
   rangeTo,
 }: {
   id: InvestigationSectionId;
   queryResult: FetchInvestigationsResult;
-  spaceKey: string;
   now: number;
   rangeFrom: string;
   rangeTo: string;
@@ -138,12 +130,9 @@ const filterSectionForDemoHome = ({
     matchesInvestigationUpdatedAtRange(investigation, rangeFrom, rangeTo);
 
   if (id === 'recent') {
-    // Opened in the last 10 minutes only — never closed or archived.
+    // Opened in the last 10 minutes only — never closed.
     const investigations = queryResult.investigations.filter(
-      (investigation) =>
-        !isDemoArchived(investigation, spaceKey) &&
-        isRecentInvestigation(investigation, now) &&
-        inTimeRange(investigation)
+      (investigation) => isRecentInvestigation(investigation, now) && inTimeRange(investigation)
     );
     return {
       ...queryResult,
@@ -152,13 +141,7 @@ const filterSectionForDemoHome = ({
       hasMore: false,
     };
   }
-  const keep =
-    id === 'closed'
-      ? (investigation: InvestigationSummary) =>
-          isDemoRecentlyClosed(investigation, spaceKey) && inTimeRange(investigation)
-      : (investigation: InvestigationSummary) =>
-          !isDemoArchived(investigation, spaceKey) && inTimeRange(investigation);
-  const investigations = queryResult.investigations.filter(keep);
+  const investigations = queryResult.investigations.filter(inTimeRange);
   const hiddenLoaded = queryResult.investigations.length - investigations.length;
   return {
     ...queryResult,
@@ -177,12 +160,6 @@ export const useInvestigationSections = ({
   rangeFrom: string;
   rangeTo: string;
 }): InvestigationSectionsResult => {
-  const { http } = useKibana().services;
-  const spaceKey = http.basePath.get() || 'default';
-  // Re-render when the demo archive store changes (Archive menu, seed).
-  const [archiveTick, setArchiveTick] = useState(0);
-  useEffect(() => subscribeDemoArchiveStore(() => setArchiveTick((tick) => tick + 1)), []);
-
   const recent = useFetchInvestigations({
     inProgress: false,
     status: 'open',
@@ -296,14 +273,6 @@ export const useInvestigationSections = ({
     refetchClosed,
   ]);
 
-  // Seed older closed as archived once the closed list has loaded and the store is empty.
-  useEffect(() => {
-    if (closed.isInitialLoading || closed.investigations.length === 0) {
-      return;
-    }
-    seedDemoArchivedFromClosed(spaceKey, closed.investigations);
-  }, [closed.isInitialLoading, closed.investigations, spaceKey]);
-
   const sections = useMemo(
     () => {
       const now = Date.now();
@@ -321,10 +290,9 @@ export const useInvestigationSections = ({
       ).map(([id, queryResult]) =>
         toSectionState({
           id,
-          queryResult: filterSectionForDemoHome({
+          queryResult: filterSectionForHome({
             id,
             queryResult,
-            spaceKey,
             now,
             rangeFrom,
             rangeTo,
@@ -341,8 +309,6 @@ export const useInvestigationSections = ({
       low,
       notRated,
       closed,
-      spaceKey,
-      archiveTick,
       rangeFrom,
       rangeTo,
     ]

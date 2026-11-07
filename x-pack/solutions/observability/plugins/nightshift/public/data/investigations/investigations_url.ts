@@ -10,7 +10,7 @@ import type { InvestigationSectionId } from './use_investigation_sections';
 export type InvestigationsSeverityFilter = 'critical' | 'high' | 'medium' | 'low' | 'none';
 
 /** List/filter states only — `in_progress` is a Home label, not a list state (it is Open). */
-export type InvestigationsStateFilter = 'open' | 'closed' | 'archived';
+export type InvestigationsStateFilter = 'open' | 'closed';
 
 export interface InvestigationsUrlState {
   query: string;
@@ -33,7 +33,6 @@ export const INVESTIGATIONS_SEVERITY_OPTIONS: readonly InvestigationsSeverityFil
 export const INVESTIGATIONS_STATE_OPTIONS: readonly InvestigationsStateFilter[] = [
   'open',
   'closed',
-  'archived',
 ] as const;
 
 const SEVERITY_PARAMS = new Set<string>(INVESTIGATIONS_SEVERITY_OPTIONS);
@@ -118,16 +117,6 @@ export const buildInvestigationsSearch = ({
 
 export const buildInvestigationsPath = (state: InvestigationsUrlState): string =>
   `/investigations${buildInvestigationsSearch(state)}`;
-
-/** Home archive-match notice: search query + archived state only. */
-export const buildArchivedMatchesInvestigationsPath = (query: string): string =>
-  buildInvestigationsPath({
-    query,
-    severity: [],
-    state: ['archived'],
-    rangeFrom: DEFAULT_INVESTIGATIONS_TIME_RANGE.from,
-    rangeTo: DEFAULT_INVESTIGATIONS_TIME_RANGE.to,
-  });
 
 export const parseInvestigationsSearch = (search: string): InvestigationsUrlState => {
   const params = new URLSearchParams(search.startsWith('?') ? search.slice(1) : search);

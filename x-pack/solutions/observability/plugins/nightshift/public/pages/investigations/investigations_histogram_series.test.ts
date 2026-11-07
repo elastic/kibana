@@ -20,7 +20,7 @@ const investigation = (
   }: {
     updatedAt: string;
     severity?: 'critical' | 'high' | 'medium' | 'low';
-    state?: 'open' | 'closed' | 'archived';
+    state?: 'open' | 'closed';
   }
 ): InvestigationSummary => ({
   id,
@@ -30,7 +30,7 @@ const investigation = (
   updated_at: updatedAt,
   agent_id: 'nightshift.investigation',
   metadata: {
-    status: state === 'closed' || state === 'archived' ? 'closed' : 'open',
+    status: state === 'closed' ? 'closed' : 'open',
     severity,
   },
   in_progress: false,

@@ -11,20 +11,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
-import {
-  archiveDemoInvestigation,
-  isDemoArchived,
-  unarchiveDemoInvestigation,
-} from '../../../data/investigations/demo_archive_store';
 import { InvestigationCardActions } from './investigation_card_actions';
-
-const mockIsDemoArchived = isDemoArchived as jest.MockedFunction<typeof isDemoArchived>;
-const mockArchiveDemoInvestigation = archiveDemoInvestigation as jest.MockedFunction<
-  typeof archiveDemoInvestigation
->;
-const mockUnarchiveDemoInvestigation = unarchiveDemoInvestigation as jest.MockedFunction<
-  typeof unarchiveDemoInvestigation
->;
 
 const openChat = jest.fn();
 const getChatHref = jest.fn(
@@ -52,12 +39,6 @@ jest.mock('../../../hooks/use_kibana', () => ({
       notifications: { toasts: { addSuccess, addError } },
     },
   }),
-}));
-
-jest.mock('../../../data/investigations/demo_archive_store', () => ({
-  archiveDemoInvestigation: jest.fn(),
-  isDemoArchived: jest.fn(() => false),
-  unarchiveDemoInvestigation: jest.fn(),
 }));
 
 jest.mock('@elastic/eui', () => {
@@ -104,9 +85,6 @@ describe('InvestigationCardActions', () => {
     httpDelete.mockReset().mockResolvedValue({ success: true });
     httpPut.mockReset().mockResolvedValue({ status: 'closed' });
     canManage = true;
-    mockIsDemoArchived.mockReturnValue(false);
-    mockArchiveDemoInvestigation.mockReset();
-    mockUnarchiveDemoInvestigation.mockReset();
     (copyToClipboard as jest.Mock).mockReturnValue(true);
   });
 
@@ -194,33 +172,7 @@ describe('InvestigationCardActions', () => {
     );
   });
 
-  it('reopens a closed investigation from the overflow menu', async () => {
-    renderActions(undefined, {
-      ...investigation,
-      metadata: { ...investigation.metadata, status: 'closed' },
-    });
-
-    fireEvent.click(screen.getByTestId('nightshiftInvestigationCardActions'));
-    expect(screen.getByTestId('nightshiftInvestigationCardOpen')).toHaveTextContent('Open');
-    expect(screen.getByTestId('nightshiftInvestigationCardArchive')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('nightshiftInvestigationCardOpen'));
-
-    await waitFor(() =>
-      expect(addSuccess).toHaveBeenCalledWith(
-        expect.objectContaining({ title: 'Investigation reopened' })
-      )
-    );
-    expect(httpPut).toHaveBeenCalledWith(
-      expect.stringContaining('/investigations/investigation-1/status'),
-      expect.objectContaining({
-        body: JSON.stringify({ status: 'open' }),
-      })
-    );
-    expect(mockUnarchiveDemoInvestigation).toHaveBeenCalledWith('/s/default', 'investigation-1');
-  });
-
-  it('offers Re-open on archived cards and hides Archive', async () => {
-    mockIsDemoArchived.mockReturnValue(true);
+  it('offers Open on closed cards without Archive', async () => {
     httpPut.mockResolvedValue({ status: 'open' });
     renderActions(undefined, {
       ...investigation,
@@ -229,7 +181,7 @@ describe('InvestigationCardActions', () => {
 
     fireEvent.click(screen.getByTestId('nightshiftInvestigationCardActions'));
 
-    expect(screen.getByTestId('nightshiftInvestigationCardOpen')).toHaveTextContent('Re-open');
+    expect(screen.getByTestId('nightshiftInvestigationCardOpen')).toHaveTextContent('Open');
     expect(screen.queryByTestId('nightshiftInvestigationCardArchive')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('nightshiftInvestigationCardOpen'));
@@ -244,22 +196,6 @@ describe('InvestigationCardActions', () => {
       expect.objectContaining({
         body: JSON.stringify({ status: 'open' }),
       })
-    );
-    expect(mockUnarchiveDemoInvestigation).toHaveBeenCalledWith('/s/default', 'investigation-1');
-  });
-
-  it('archives a closed investigation from the overflow menu', () => {
-    renderActions(undefined, {
-      ...investigation,
-      metadata: { ...investigation.metadata, status: 'closed' },
-    });
-
-    fireEvent.click(screen.getByTestId('nightshiftInvestigationCardActions'));
-    fireEvent.click(screen.getByTestId('nightshiftInvestigationCardArchive'));
-
-    expect(mockArchiveDemoInvestigation).toHaveBeenCalledWith('/s/default', 'investigation-1');
-    expect(addSuccess).toHaveBeenCalledWith(
-      expect.objectContaining({ title: 'Investigation archived' })
     );
   });
 

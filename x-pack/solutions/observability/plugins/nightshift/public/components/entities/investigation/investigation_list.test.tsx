@@ -105,6 +105,9 @@ describe('InvestigationList', () => {
     expect(screen.getByTestId('nightshiftInvestigationsEmpty')).toHaveTextContent(
       'No investigations found'
     );
+    expect(screen.getByTestId('nightshiftInvestigationsEmptyHint')).toHaveTextContent(
+      'Try adjusting your time range or filter'
+    );
     expect(screen.getByTestId('nightshiftInvestigationsEmptyIllustration')).toBeInTheDocument();
     expect(
       screen.queryByTestId('nightshiftInvestigationSection-in-progress')

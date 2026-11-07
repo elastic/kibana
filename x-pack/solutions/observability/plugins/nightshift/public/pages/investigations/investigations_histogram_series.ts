@@ -36,7 +36,7 @@ const SEVERITY_ORDER: InvestigationsSeverityFilter[] = [
   'none',
 ];
 
-const STATE_ORDER: InvestigationsStateFilter[] = ['open', 'closed', 'archived'];
+const STATE_ORDER: InvestigationsStateFilter[] = ['open', 'closed'];
 
 export const lastUpdatedMs = (investigation: InvestigationSummary): number | null => {
   const updated = Date.parse(investigation.updated_at || investigation.created_at);

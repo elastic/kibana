@@ -13,7 +13,6 @@ import { NIGHTSHIFT_UI_PRIVILEGES } from '@kbn/nightshift-shared';
 import React from 'react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { NightshiftApp } from './app';
-import { isDemoArchived } from '../../data/investigations/demo_archive_store';
 import type { InvestigationSectionState } from '../../data/investigations/use_investigation_sections';
 import { useInvestigationSections } from '../../data/investigations/use_investigation_sections';
 import { useFetchInvestigations } from '../../data/investigations/use_fetch_investigations';
@@ -22,9 +21,6 @@ import { useDetectionSetupBanner } from './use_detection_setup_banner';
 
 jest.mock('../../data/investigations/use_investigation_sections');
 jest.mock('../../data/investigations/use_fetch_investigations');
-jest.mock('../../data/investigations/demo_archive_store', () => ({
-  isDemoArchived: jest.fn(() => false),
-}));
 jest.mock('../../hooks/use_kibana');
 jest.mock('@kbn/ebt-tools');
 jest.mock('../../components/entities/investigation/use_investigation_assignees', () => ({
@@ -37,7 +33,6 @@ jest.mock('./use_detection_setup_banner');
 
 const mockUseInvestigationSections = useInvestigationSections as jest.Mock;
 const mockUseFetchInvestigations = useFetchInvestigations as jest.Mock;
-const mockIsDemoArchived = isDemoArchived as jest.MockedFunction<typeof isDemoArchived>;
 const mockUseKibana = useKibana as jest.Mock;
 const mockUsePageReady = usePageReady as jest.Mock;
 const mockUseDetectionSetupBanner = useDetectionSetupBanner as jest.Mock;
@@ -225,7 +220,6 @@ describe('NightshiftApp', () => {
     });
     openConversationDetails.mockReset().mockImplementation(async () => closeConversationDetails);
     closeConversationDetails.mockReset();
-    mockIsDemoArchived.mockReturnValue(false);
     mockUseFetchInvestigations.mockReturnValue({
       investigations: [],
       total: 0,
@@ -415,70 +409,12 @@ describe('NightshiftApp', () => {
     expect(screen.getByTestId('nightshiftInvestigationsEmpty')).toHaveTextContent(
       'No investigations found'
     );
+    expect(screen.getByTestId('nightshiftInvestigationsEmptyHint')).toHaveTextContent(
+      'Try adjusting your time range or filter'
+    );
     expect(
       screen.queryByTestId('nightshiftInvestigationSection-in-progress')
     ).not.toBeInTheDocument();
-  });
-
-  it('replaces the empty state when only archived investigations match the search', () => {
-    const archived = makeInvestigation('archived-1', 'Old checkout', {
-      metadata: { status: 'closed', summary: 'Old checkout' },
-    });
-    mockIsDemoArchived.mockImplementation(({ id }) => id === 'archived-1');
-    mockUseFetchInvestigations.mockReturnValue({
-      investigations: [archived],
-      total: 1,
-      hasMore: false,
-      isInitialLoading: false,
-      isFetchingNextPage: false,
-      isFetching: false,
-      isPreviousData: false,
-      error: null,
-      fetchNextPage: jest.fn(),
-      refetch: jest.fn(),
-    });
-    setSections({ sections: defaultSections() });
-
-    renderApp({ initialEntries: ['/?q=checkout'] });
-
-    expect(screen.getByTestId('nightshiftArchivedOnlyEmpty')).toHaveTextContent(
-      '1 archived investigation found'
-    );
-    expect(screen.getByTestId('nightshiftArchivedOnlyEmptyLink')).toHaveTextContent('View all');
-    expect(screen.queryByTestId('nightshiftArchivedMatchNotice')).not.toBeInTheDocument();
-    expect(screen.queryByText('No investigations found')).not.toBeInTheDocument();
-  });
-
-  it('keeps the also-found notice when open results and archived matches both exist', () => {
-    const archived = makeInvestigation('archived-1', 'Old checkout', {
-      metadata: { status: 'closed', summary: 'Old checkout' },
-    });
-    mockIsDemoArchived.mockImplementation(({ id }) => id === 'archived-1');
-    mockUseFetchInvestigations.mockReturnValue({
-      investigations: [archived],
-      total: 1,
-      hasMore: false,
-      isInitialLoading: false,
-      isFetchingNextPage: false,
-      isFetching: false,
-      isPreviousData: false,
-      error: null,
-      fetchNextPage: jest.fn(),
-      refetch: jest.fn(),
-    });
-    setSections({
-      sections: defaultSections({
-        'in-progress': { investigations: [investigation], total: 1 },
-      }),
-      hasActiveInvestigations: true,
-    });
-
-    renderApp({ initialEntries: ['/?q=checkout'] });
-
-    expect(screen.getByTestId('nightshiftArchivedMatchNotice')).toHaveTextContent(
-      '1 archived investigation also found'
-    );
-    expect(screen.queryByTestId('nightshiftArchivedOnlyEmpty')).not.toBeInTheDocument();
   });
 
   it('hides severity tiles when every severity count is zero', () => {

@@ -6,7 +6,6 @@
  */
 
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
-import { isDemoArchived } from '../../data/investigations/demo_archive_store';
 import type {
   InvestigationsSeverityFilter,
   InvestigationsStateFilter,
@@ -33,16 +32,12 @@ const SEVERITY_ORDER: InvestigationsSeverityFilter[] = [
   'none',
 ];
 
-const STATE_ORDER: InvestigationsStateFilter[] = ['open', 'closed', 'archived'];
+const STATE_ORDER: InvestigationsStateFilter[] = ['open', 'closed'];
 
 /** List state only — `in_progress` is a Home label; those rows are Open here. */
 const investigationState = (
-  investigation: InvestigationSummary,
-  spaceKey: string
+  investigation: InvestigationSummary
 ): InvestigationsStateFilter => {
-  if (isDemoArchived(investigation, spaceKey)) {
-    return 'archived';
-  }
   if (investigation.metadata.status === 'closed') {
     return 'closed';
   }
@@ -55,8 +50,8 @@ const severityRank = (investigation: InvestigationSummary): number => {
   return index === -1 ? SEVERITY_ORDER.indexOf('none') : index;
 };
 
-const stateRank = (investigation: InvestigationSummary, spaceKey: string): number =>
-  STATE_ORDER.indexOf(investigationState(investigation, spaceKey));
+const stateRank = (investigation: InvestigationSummary): number =>
+  STATE_ORDER.indexOf(investigationState(investigation));
 
 const compare = (a: number | string, b: number | string, direction: 'asc' | 'desc'): number => {
   const result =
@@ -68,14 +63,14 @@ const compare = (a: number | string, b: number | string, direction: 'asc' | 'des
 export const sortInvestigationsForTable = (
   items: InvestigationSummary[],
   sort: InvestigationsTableSort,
-  spaceKey: string
+  _spaceKey?: string
 ): InvestigationSummary[] =>
   [...items].sort((left, right) => {
     switch (sort.field) {
       case 'title':
         return compare(left.title || left.id, right.title || right.id, sort.direction);
       case 'state':
-        return compare(stateRank(left, spaceKey), stateRank(right, spaceKey), sort.direction);
+        return compare(stateRank(left), stateRank(right), sort.direction);
       case 'severity':
         return compare(severityRank(left), severityRank(right), sort.direction);
       case 'updated_at':

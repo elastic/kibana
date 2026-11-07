@@ -66,7 +66,6 @@ const fieldIconCss = css`
 const STATE_COLORS: Record<InvestigationsStateFilter, string> = {
   open: 'primary',
   closed: 'success',
-  archived: 'subdued',
 };
 
 export interface InvestigationsHistogramProps {

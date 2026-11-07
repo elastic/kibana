@@ -6,13 +6,10 @@
  */
 
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
-import { archiveDemoInvestigation } from '../../data/investigations/demo_archive_store';
 import {
   DEFAULT_INVESTIGATIONS_TABLE_SORT,
   sortInvestigationsForTable,
 } from './investigations_table_sort';
-
-const space = '/s/default';
 
 const makeInvestigation = (
   id: string,
@@ -40,16 +37,12 @@ const makeInvestigation = (
 });
 
 describe('sortInvestigationsForTable', () => {
-  beforeEach(() => {
-    window.localStorage.clear();
-  });
-
   it('defaults to newest last-updated first', () => {
     const older = makeInvestigation('older', { updated_at: '2026-01-01T00:00:00.000Z' });
     const newer = makeInvestigation('newer', { updated_at: '2026-02-01T00:00:00.000Z' });
 
     expect(
-      sortInvestigationsForTable([older, newer], DEFAULT_INVESTIGATIONS_TABLE_SORT, space).map(
+      sortInvestigationsForTable([older, newer], DEFAULT_INVESTIGATIONS_TABLE_SORT).map(
         ({ id }) => id
       )
     ).toEqual(['newer', 'older']);
@@ -60,11 +53,9 @@ describe('sortInvestigationsForTable', () => {
     const alpha = makeInvestigation('a', { title: 'Alpha' });
 
     expect(
-      sortInvestigationsForTable(
-        [beta, alpha],
-        { field: 'title', direction: 'asc' },
-        space
-      ).map(({ title }) => title)
+      sortInvestigationsForTable([beta, alpha], { field: 'title', direction: 'asc' }).map(
+        ({ title }) => title
+      )
     ).toEqual(['Alpha', 'Beta']);
   });
 
@@ -74,26 +65,21 @@ describe('sortInvestigationsForTable', () => {
     const none = makeInvestigation('none');
 
     expect(
-      sortInvestigationsForTable(
-        [low, none, critical],
-        { field: 'severity', direction: 'asc' },
-        space
-      ).map(({ id }) => id)
+      sortInvestigationsForTable([low, none, critical], {
+        field: 'severity',
+        direction: 'asc',
+      }).map(({ id }) => id)
     ).toEqual(['critical', 'low', 'none']);
   });
 
-  it('sorts by state including archived', () => {
+  it('sorts by state open before closed', () => {
     const open = makeInvestigation('open', { status: 'open' });
     const closed = makeInvestigation('closed', { status: 'closed' });
-    const archived = makeInvestigation('archived', { status: 'closed' });
-    archiveDemoInvestigation(space, 'archived');
 
     expect(
-      sortInvestigationsForTable(
-        [closed, archived, open],
-        { field: 'state', direction: 'asc' },
-        space
-      ).map(({ id }) => id)
-    ).toEqual(['open', 'closed', 'archived']);
+      sortInvestigationsForTable([closed, open], { field: 'state', direction: 'asc' }).map(
+        ({ id }) => id
+      )
+    ).toEqual(['open', 'closed']);
   });
 });

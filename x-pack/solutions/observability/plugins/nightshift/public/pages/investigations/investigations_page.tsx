@@ -41,7 +41,6 @@ import {
   SIGNIFICANT_EVENT_SEVERITY,
 } from '../../components/ui/severity_badge';
 import { NightshiftTimeRangePicker } from '../../components/ui/time_range_picker';
-import { isDemoArchived } from '../../data/investigations/demo_archive_store';
 import { matchesInvestigationUpdatedAtRange } from '../../data/investigations/investigation_time_range';
 import {
   buildInvestigationsSearch,
@@ -79,28 +78,17 @@ const STATE_FILTER_LABELS: Record<InvestigationsStateFilter, string> = {
   closed: i18n.translate('xpack.nightshift.investigationsPage.stateClosed', {
     defaultMessage: 'Closed',
   }),
-  archived: i18n.translate('xpack.nightshift.investigationsPage.stateArchived', {
-    defaultMessage: 'Archived',
-  }),
 };
 
-const STATE_FILTER_ICON_COLOR: Record<
-  InvestigationsStateFilter,
-  'primary' | 'success' | 'subdued'
-> = {
+const STATE_FILTER_ICON_COLOR: Record<InvestigationsStateFilter, 'primary' | 'success'> = {
   open: 'primary',
   closed: 'success',
-  archived: 'subdued',
 };
 
 /** List state only — `in_progress` is a Home label; those rows are Open here. */
 const investigationState = (
-  investigation: InvestigationSummary,
-  spaceKey: string
+  investigation: InvestigationSummary
 ): InvestigationsStateFilter => {
-  if (isDemoArchived(investigation, spaceKey)) {
-    return 'archived';
-  }
   if (investigation.metadata.status === 'closed') {
     return 'closed';
   }
@@ -111,8 +99,6 @@ const stateLabel = (
   state: InvestigationsStateFilter
 ): { label: string; color: 'default' | 'success' } => {
   switch (state) {
-    case 'archived':
-      return { label: 'Archived', color: 'default' };
     case 'closed':
       return { label: 'Closed', color: 'success' };
     case 'open':
@@ -133,13 +119,12 @@ const matchesSeverity = (
 
 const matchesState = (
   investigation: InvestigationSummary,
-  state: InvestigationsStateFilter[],
-  spaceKey: string
+  state: InvestigationsStateFilter[]
 ): boolean => {
   if (state.length === 0) {
     return true;
   }
-  return state.includes(investigationState(investigation, spaceKey));
+  return state.includes(investigationState(investigation));
 };
 
 /** Enough rows for the Investigations table so the time picker can filter client-side. */
@@ -147,8 +132,7 @@ const INVESTIGATIONS_PAGE_FETCH_SIZE = 100;
 
 export function InvestigationsPage(): React.ReactElement {
   const { euiTheme } = useEuiTheme();
-  const { http, agentBuilder } = useKibana().services;
-  const spaceKey = http.basePath.get() || 'default';
+  const { agentBuilder } = useKibana().services;
   const history = useHistory();
   const { search } = useLocation();
   const urlState = useMemo(() => parseInvestigationsSearch(search), [search]);
@@ -209,13 +193,12 @@ export function InvestigationsPage(): React.ReactElement {
     return combined.filter(
       (investigation) =>
         matchesSeverity(investigation, urlState.severity) &&
-        matchesState(investigation, urlState.state, spaceKey)
+        matchesState(investigation, urlState.state)
     );
   }, [
     closedList.investigations,
     inProgressList.investigations,
     openList.investigations,
-    spaceKey,
     urlState.severity,
     urlState.state,
   ]);
@@ -224,8 +207,8 @@ export function InvestigationsPage(): React.ReactElement {
     const inRange = filteredByAttributes.filter((investigation) =>
       matchesInvestigationUpdatedAtRange(investigation, urlState.rangeFrom, urlState.rangeTo)
     );
-    return sortInvestigationsForTable(inRange, sort, spaceKey);
-  }, [filteredByAttributes, sort, spaceKey, urlState.rangeFrom, urlState.rangeTo]);
+    return sortInvestigationsForTable(inRange, sort);
+  }, [filteredByAttributes, sort, urlState.rangeFrom, urlState.rangeTo]);
 
   const handleTableChange = useCallback(({ sort: nextSort }: Criteria<InvestigationSummary>) => {
     if (!nextSort || !isInvestigationsTableSortField(nextSort.field)) {
@@ -235,8 +218,8 @@ export function InvestigationsPage(): React.ReactElement {
   }, []);
 
   const stateOf = useCallback(
-    (investigation: InvestigationSummary) => investigationState(investigation, spaceKey),
-    [spaceKey]
+    (investigation: InvestigationSummary) => investigationState(investigation),
+    []
   );
 
   const openInvestigation = useCallback(
@@ -338,7 +321,7 @@ export function InvestigationsPage(): React.ReactElement {
       sortable: true,
       // Synthetic field for sorting — value comes from demo archive + status, not the API row.
       render: (_value: unknown, investigation: InvestigationSummary) => {
-        const state = stateLabel(investigationState(investigation, spaceKey));
+        const state = stateLabel(investigationState(investigation));
         return <EuiBadge color={state.color}>{state.label}</EuiBadge>;
       },
     },
