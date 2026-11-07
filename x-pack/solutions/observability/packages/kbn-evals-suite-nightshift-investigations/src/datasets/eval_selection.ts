@@ -14,6 +14,12 @@ export const INVESTIGATION_DATASET_ID = 'trace-only';
  * Elasticsearch connector, so unset and `all` never select it.
  */
 export const CONNECTOR_PROBE_DATASET_ID = 'connector-probe';
+/**
+ * `NIGHTSHIFT_DATASETS` id for the Cortex optimizer replay. Opt-in only, like the connector probes,
+ * but it needs no sandbox credentials: it replays saved rounds through the optimizer and runs no
+ * investigation.
+ */
+export const CORTEX_OPTIMIZE_DATASET_ID = 'cortex-optimize';
 
 /**
  * `NIGHTSHIFT_DATASETS` id for the reinforcement micro-eval. Opt-in: it enables decision trees
@@ -25,6 +31,7 @@ const EVAL_IDS: readonly string[] = [
   INVESTIGATION_DATASET_ID,
   CONNECTOR_PROBE_DATASET_ID,
   REINFORCEMENT_DATASET_ID,
+  CORTEX_OPTIMIZE_DATASET_ID,
 ];
 
 export interface EvalSelection {
@@ -37,6 +44,7 @@ export interface EvalSelection {
    * `reinforcement`. Not part of an unset or `all` run.
    */
   runReinforcement: boolean;
+  runCortexOptimize: boolean;
   /** Smoke dataset ids for `selectDatasets`; `undefined` runs them all. Unused when `runSmoke` is false. */
   smokeDatasetsRequest: string | undefined;
   /** True when an unset selection fell back to smoke because no sandbox credentials were found. */
@@ -62,6 +70,7 @@ export const resolveEvalSelection = (
       runOrca: false,
       runConnectorProbes: false,
       runReinforcement: true,
+      runCortexOptimize: false,
       smokeDatasetsRequest: undefined,
       fellBackToSmoke: false,
     };
@@ -80,6 +89,7 @@ export const resolveEvalSelection = (
       runOrca: true,
       runConnectorProbes: false,
       runReinforcement: false,
+      runCortexOptimize: false,
       smokeDatasetsRequest: undefined,
       fellBackToSmoke: false,
     };
@@ -123,6 +133,7 @@ export const resolveEvalSelection = (
       runInvestigations: hasSandbox,
       runConnectorProbes: false,
       runReinforcement: false,
+      runCortexOptimize: false,
       smokeDatasetsRequest: undefined,
       fellBackToSmoke: !hasSandbox,
     };
@@ -142,6 +153,7 @@ export const resolveEvalSelection = (
     runInvestigations,
     runConnectorProbes,
     runReinforcement,
+    runCortexOptimize: ids.includes(CORTEX_OPTIMIZE_DATASET_ID),
     smokeDatasetsRequest: smokeIds.length > 0 ? smokeIds.join(',') : undefined,
     fellBackToSmoke: false,
   };

@@ -42,6 +42,7 @@ import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
 import { decodeSmlLinkId, parseSmlEntryId } from '@kbn/agent-builder-sml-plugin/server';
 import { attachmentChangesToEvents } from '@kbn/agent-builder-server/attachments';
+import type { OnBeforeNewConversationContext } from '@kbn/agent-builder-server/callbacks';
 import type {
   AbortExecutionOptions,
   AbortExecutionResult,
@@ -224,6 +225,15 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       }
     }
 
+    // After the caller is authorized, and never for a replayed delivery, which the original already
+    // paid for. Given back below whenever the turn writes no conversation.
+    const newConversation = resolvedConversation?.newConversation;
+    const releaseNewConversation =
+      newConversation &&
+      !(await this.isIdempotentReplay({ executionClient, executionId, metadata }))
+        ? await this.deps.callbackDeliveryService.runOnBeforeNewConversation(newConversation)
+        : undefined;
+
     // Reserved for the round this run opens, so its events are named after it.
     const roundId = uuidv4();
 
@@ -258,6 +268,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         interactivity,
       });
     } catch (err) {
+      await releaseNewConversation?.();
       if (isVersionConflictError(err)) {
         if (metadata?.execution_idempotency_key) {
           this.logger.debug(
@@ -320,6 +331,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         // A refused run never started, so it leaves no execution record behind: a keyed
         // redelivery then starts afresh instead of replaying the refusal.
         if (isConversationBusyError(err) || isConversationWriteConflictError(err)) {
+          // Only a refusal is known to have written nothing; any other failure may follow a
+          // write that landed, so what the hooks took stays taken.
+          await releaseNewConversation?.();
           try {
             await executionClient.delete(executionId);
           } catch (deleteErr) {
@@ -1020,6 +1034,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     validatedParams: ConversationExecutionParams;
     conversation: ConversationWithOperation;
     receivedAt: Date;
+    newConversation?: OnBeforeNewConversationContext;
   }> {
     const validatedParams = await this.validateAttachments(params, request);
     const receivedAt = new Date();
@@ -1044,12 +1059,19 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       subagentCreation: resolvedParams.subagentCreation,
     });
 
-    return { validatedParams: resolvedParams, conversation, receivedAt };
+    return {
+      validatedParams: resolvedParams,
+      conversation,
+      receivedAt,
+      newConversation: resolved.newConversation,
+    };
   }
 
   /**
    * The conversation an execution continues and the agent it runs on: the ones it names, else the
-   * ones its origin resolves to. No conversation id starts a new conversation.
+   * ones its origin resolves to. No conversation id starts a new conversation; for an origin's
+   * execution, `newConversation` is what the on-before-new-conversation hooks run with before it is
+   * written.
    */
   private async resolveConversation({
     params,
@@ -1061,7 +1083,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     spaceId: string;
     request: KibanaRequest;
     conversationClient: ConversationClient;
-  }): Promise<{ conversationId?: string; agentId: string }> {
+  }): Promise<{
+    conversationId?: string;
+    agentId: string;
+    newConversation?: OnBeforeNewConversationContext;
+  }> {
     const { conversationId, origin } = params;
     const agentId = this.requestedAgentId(params);
 
@@ -1074,9 +1100,13 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       conversationClient
     );
 
+    if (!resolution) {
+      return { agentId, newConversation: { origin, spaceId, request, agentId } };
+    }
+
     return {
-      conversationId: resolution?.conversationId,
-      agentId: resolution?.agentId ?? agentId,
+      conversationId: resolution.conversationId,
+      agentId: resolution.agentId ?? agentId,
     };
   }
 

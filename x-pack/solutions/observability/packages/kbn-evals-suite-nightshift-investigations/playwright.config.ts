@@ -17,6 +17,7 @@ const {
   runOrca,
   runConnectorProbes,
   runReinforcement,
+  runCortexOptimize,
   fellBackToSmoke,
 } = resolveEvalSelection();
 // Workers re-evaluate this config; only the main process (no TEST_WORKER_INDEX) warns.
@@ -37,5 +38,6 @@ export default createPlaywrightEvalsConfig({
     ...(runOrca ? [] : ['**/investigation/orcabench.spec.ts']),
     ...(runConnectorProbes ? [] : ['**/connector_probe/**']),
     ...(runReinforcement ? [] : ['**/reinforcement/**']),
+    ...(runCortexOptimize ? [] : ['**/cortex_optimize/**']),
   ],
 });

@@ -22,6 +22,7 @@ describe('resolveEvalSelection', () => {
         runInvestigations: true,
         runConnectorProbes: false,
         runReinforcement: false,
+        runCortexOptimize: false,
         smokeDatasetsRequest: undefined,
         fellBackToSmoke: false,
       });
@@ -34,6 +35,7 @@ describe('resolveEvalSelection', () => {
         runInvestigations: false,
         runConnectorProbes: false,
         runReinforcement: false,
+        runCortexOptimize: false,
         smokeDatasetsRequest: undefined,
         fellBackToSmoke: true,
       });
@@ -58,6 +60,7 @@ describe('resolveEvalSelection', () => {
       runInvestigations: true,
       runConnectorProbes: false,
       runReinforcement: false,
+      runCortexOptimize: false,
       smokeDatasetsRequest: undefined,
       fellBackToSmoke: false,
     });
@@ -70,6 +73,7 @@ describe('resolveEvalSelection', () => {
       runInvestigations: false,
       runConnectorProbes: false,
       runReinforcement: false,
+      runCortexOptimize: false,
       smokeDatasetsRequest: 'synthetic-smoke',
       fellBackToSmoke: false,
     });
@@ -84,6 +88,7 @@ describe('resolveEvalSelection', () => {
       runInvestigations: true,
       runConnectorProbes: false,
       runReinforcement: false,
+      runCortexOptimize: false,
       smokeDatasetsRequest: 'synthetic-smoke',
       fellBackToSmoke: false,
     });
@@ -98,14 +103,51 @@ describe('resolveEvalSelection', () => {
       runInvestigations: false,
       runConnectorProbes: true,
       runReinforcement: false,
+      runCortexOptimize: false,
       smokeDatasetsRequest: undefined,
       fellBackToSmoke: false,
     });
   });
 
+  it('runs only the Cortex optimizer replay for cortex-optimize, without credentials', () => {
+    expect(resolveEvalSelection({ NIGHTSHIFT_DATASETS: 'cortex-optimize' })).toEqual({
+      runOrca: false,
+      runSmoke: false,
+      runInvestigations: false,
+      runConnectorProbes: false,
+      runCortexOptimize: true,
+      runReinforcement: false,
+      smokeDatasetsRequest: undefined,
+      fellBackToSmoke: false,
+    });
+  });
+
+  it('combines cortex-optimize with other evals', () => {
+    expect(
+      resolveEvalSelection({
+        ...WITH_SANDBOX,
+        NIGHTSHIFT_DATASETS: 'synthetic-smoke,cortex-optimize',
+      })
+    ).toMatchObject({
+      runSmoke: true,
+      runCortexOptimize: true,
+      runInvestigations: false,
+      smokeDatasetsRequest: 'synthetic-smoke',
+    });
+  });
+
+  it('never selects the Cortex optimizer replay for all or unset', () => {
+    for (const value of [undefined, 'all']) {
+      expect(resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: value })).toMatchObject({
+        runCortexOptimize: false,
+      });
+    }
+  });
+
   it('never selects the connector probes for all', () => {
     expect(resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: 'all' })).toMatchObject({
       runConnectorProbes: false,
+      runCortexOptimize: false,
     });
   });
 
@@ -141,6 +183,7 @@ describe('resolveEvalSelection', () => {
         runInvestigations: false,
         runConnectorProbes: false,
         runReinforcement: true,
+        runCortexOptimize: false,
         smokeDatasetsRequest: undefined,
         fellBackToSmoke: false,
       }
@@ -191,6 +234,7 @@ describe('ORCA selection', () => {
         runSmoke: false,
         runInvestigations: false,
         runConnectorProbes: false,
+        runCortexOptimize: false,
       });
     }
   );
@@ -225,6 +269,7 @@ describe('CI shard selection', () => {
         runInvestigations: false,
         runConnectorProbes: false,
         runReinforcement: true,
+        runCortexOptimize: false,
         smokeDatasetsRequest: undefined,
         fellBackToSmoke: false,
       });
