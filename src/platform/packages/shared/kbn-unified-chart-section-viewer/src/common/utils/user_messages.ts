@@ -10,6 +10,24 @@
 import { i18n } from '@kbn/i18n';
 import type { UserMessage } from '@kbn/lens-plugin/public';
 
+export const getExemplarsFetchFailedUserMessage = (errorMessage?: string): UserMessage => ({
+  uniqueId: 'metrics-experience-exemplars-fetch-warning',
+  severity: 'warning',
+  shortMessage: i18n.translate('metricsExperience.userMessage.exemplarsFetchFailed.short', {
+    defaultMessage: 'Exemplars unavailable',
+  }),
+  longMessage: errorMessage
+    ? i18n.translate('metricsExperience.userMessage.exemplarsFetchFailed.longWithReason', {
+        defaultMessage: 'Exemplars could not be loaded. The metric chart is unaffected. {reason}',
+        values: { reason: errorMessage },
+      })
+    : i18n.translate('metricsExperience.userMessage.exemplarsFetchFailed.long', {
+        defaultMessage: 'Exemplars could not be loaded. The metric chart is unaffected.',
+      }),
+  fixableInEditor: false,
+  displayLocations: [{ id: 'embeddableBadge' }],
+});
+
 export const LEGACY_HISTOGRAM_USER_MESSAGES: UserMessage[] = [
   {
     uniqueId: 'metrics-experience-histogram-warning',

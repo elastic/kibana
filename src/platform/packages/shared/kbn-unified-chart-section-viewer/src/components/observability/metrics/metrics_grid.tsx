@@ -45,6 +45,7 @@ import {
 } from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
+import { getExemplarsFetchFailedUserMessage } from '../../../common/utils/user_messages';
 import { useFetchExemplars } from './hooks/use_fetch_exemplars';
 
 const EMPTY_APPLICABLE_DIMENSIONS: Dimension[] = [];
@@ -402,17 +403,7 @@ const ChartItem = React.memo(
       metricItem.dimensionFields
     );
 
-    const exemplars = useFetchExemplars({
-      fetchParams,
-      services,
-      metricItem,
-      whereStatements,
-      originalSource: userSource,
-      profileId,
-      isComponentVisible,
-    });
-    // TODO(kibana#289722): feed `exemplars` into useChartLayers as a points layer.
-    void exemplars;
+    const isSupported = firstNonNullable(metricItem.fieldTypes) !== 'unsigned_long';
 
     const { shouldRenderHistogram, boundsError, distributionQuery, heatmapConfig } =
       useHistogramHeatmap({
@@ -429,12 +420,37 @@ const ChartItem = React.memo(
         backgroundColor: euiTheme.colors.backgroundBasePlain,
       });
 
+    const {
+      exemplars,
+      hasError: exemplarsFetchFailed,
+      errorMessage: exemplarsErrorMessage,
+    } = useFetchExemplars({
+      fetchParams,
+      services,
+      metricItem,
+      whereStatements,
+      metadataFields,
+      originalSource: userSource,
+      gridSettings,
+      profileId,
+      isSupported: isSupported && !shouldRenderHistogram,
+      isComponentVisible,
+    });
+    // TODO(kibana#289722): feed `exemplars` into useChartLayers as a points layer.
+    void exemplars;
+
+    const chartUserMessages = useMemo(() => {
+      if (!exemplarsFetchFailed) {
+        return userMessages;
+      }
+      const exemplarsMessage = getExemplarsFetchFailedUserMessage(exemplarsErrorMessage);
+      return userMessages ? [...userMessages, exemplarsMessage] : [exemplarsMessage];
+    }, [exemplarsErrorMessage, exemplarsFetchFailed, userMessages]);
+
     const esqlQuery = useMemo(() => {
       if (shouldRenderHistogram) {
         return distributionQuery ?? '';
       }
-      const fieldType = firstNonNullable(metricItem.fieldTypes);
-      const isSupported = fieldType !== 'unsigned_long';
       return isSupported
         ? createESQLQuery({
             metricItem,
@@ -448,6 +464,7 @@ const ChartItem = React.memo(
     }, [
       shouldRenderHistogram,
       distributionQuery,
+      isSupported,
       metricItem,
       applicableDimensions,
       whereStatements,
@@ -546,7 +563,7 @@ const ChartItem = React.memo(
           titleHighlight={titleHighlight}
           extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
           quickActionIds={METRICS_QUICK_ACTION_IDS}
-          userMessages={userMessages}
+          userMessages={chartUserMessages}
           profileId={profileId}
         />
       </A11yGridCell>

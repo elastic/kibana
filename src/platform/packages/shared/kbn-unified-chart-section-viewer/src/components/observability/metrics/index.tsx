@@ -12,7 +12,6 @@ import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
 import { withRestorableState } from '../../../restorable_state';
 import { MetricsExperienceStateProvider } from './context/metrics_experience_state_provider';
-import { ExemplarsAvailabilityProvider } from './context/exemplars_availability_provider';
 import { EventBasedTelemetryProvider } from '../../../context/ebt_telemetry_context';
 import { ChartSectionInspectorProvider } from '../../../context/chart_section_inspector';
 import { ExternalServicesProvider } from '../../../context/external_services';
@@ -23,9 +22,7 @@ const InternalUnifiedMetricsExperienceGrid = (props: UnifiedMetricsGridProps) =>
     <PerformanceContextProvider>
       <EventBasedTelemetryProvider analytics={props.services.analytics}>
         <ChartSectionInspectorProvider setLensRequestAdapter={props.setLensRequestAdapter}>
-          <ExemplarsAvailabilityProvider>
-            <MetricsExperienceGrid {...props} />
-          </ExemplarsAvailabilityProvider>
+          <MetricsExperienceGrid {...props} />
         </ChartSectionInspectorProvider>
       </EventBasedTelemetryProvider>
     </PerformanceContextProvider>

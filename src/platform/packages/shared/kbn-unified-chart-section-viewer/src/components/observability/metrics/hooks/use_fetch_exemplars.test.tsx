@@ -10,10 +10,6 @@
 jest.mock('../utils/execute_esql_query', () => ({
   executeEsqlQuery: jest.fn(),
 }));
-const mockProbe = jest.fn();
-jest.mock('../context/exemplars_availability_provider', () => ({
-  useExemplarsAvailabilityProbe: jest.fn(() => mockProbe),
-}));
 jest.mock('../../../../hooks/use_feature_flag', () => ({
   useFeatureFlag: jest.fn(),
 }));
@@ -29,6 +25,7 @@ import React from 'react';
 import { act, render, renderHook, waitFor } from '@testing-library/react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { Filter } from '@kbn/es-query';
+import { METRICS_GRID_SETTINGS_DEFAULTS } from '@kbn/discover-utils';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import type { DataSource } from '@kbn/data-source';
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
@@ -49,24 +46,33 @@ const mockCreateExemplarsQuery = createExemplarsQuery as jest.MockedFunction<
 >;
 
 const TEST_PROFILE_ID = 'metrics-data-source-profile';
+const TEST_WHERE_STATEMENTS = ['host.name == "a"'];
+const TEST_METADATA_FIELDS = ['_ignored'];
 const TEST_FILTERS: Filter[] = [
   {
     meta: { key: 'attributes.http.route' },
     query: { match_phrase: { 'attributes.http.route': '/orders' } },
   },
+  {
+    meta: { key: 'metrics.http.server.request.duration', type: 'range' },
+    query: { range: { 'metrics.http.server.request.duration': { gte: 0.5 } } },
+  },
 ];
 const TEST_ESQL_VARIABLES: ESQLControlVariable[] = [
   { key: 'service', value: 'checkout-service', type: ESQLVariableType.VALUES },
 ];
-const TEST_ESQL_QUERY =
-  'SET unmapped_fields = "NULLIFY";\nFROM exemplars-generic.otel-default | WHERE metric_name == "http.server.request.duration" | SORT @timestamp DESC | LIMIT 500';
-const TEST_COLUMNS = ['@timestamp', 'metric_name', 'value', 'trace.id', 'span.id'].map((name) => ({
+const TEST_ESQL_QUERY = `SET exemplars = true;
+TS metrics-generic.otel-default
+  | WHERE host.name == "a"
+  | STATS PERCENTILE(metrics.http.server.request.duration, 95) BY TBUCKET(100)`;
+const TEST_COLUMNS = ['@timestamp', 'metric_name', 'value', 'trace_id', 'span_id'].map((name) => ({
   name,
   type: 'keyword',
 }));
 const TEST_ROWS = [
   [1_700_000_000_000, 'http.server.request.duration', 0.42, 'trace-abc', 'span-xyz'],
 ];
+const IDLE_FETCH = { exemplars: undefined, hasError: false };
 
 const mockMetric: ParsedMetricItem = {
   metricName: 'metrics.http.server.request.duration',
@@ -92,7 +98,11 @@ const createParams = (
     uiSettings: {},
   } as unknown as ChartSectionProps['services'],
   metricItem: mockMetric,
+  whereStatements: TEST_WHERE_STATEMENTS,
+  metadataFields: TEST_METADATA_FIELDS,
+  gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
   profileId: TEST_PROFILE_ID,
+  isSupported: true,
   isComponentVisible: true,
   ...overrides,
 });
@@ -105,9 +115,6 @@ describe('useFetchExemplars', () => {
     jest.clearAllMocks();
     mockUseFeatureFlag.mockReturnValue(true);
     mockCreateExemplarsQuery.mockReturnValue(TEST_ESQL_QUERY);
-    mockProbe.mockResolvedValue(
-      new Map([['exemplars-generic.otel-default', new Set([mockMetric.metricName])]])
-    );
     mockExecuteEsqlQuery.mockResolvedValue({
       documents: [],
       rawResponse: {
@@ -124,14 +131,14 @@ describe('useFetchExemplars', () => {
       mockUseFeatureFlag.mockReturnValue(false);
     });
 
-    it('neither probes nor fetches, and returns undefined', async () => {
+    it('does not fetch, and returns undefined', async () => {
       const params = createParams();
       const { result } = renderHook(() => useFetchExemplars(params));
 
       await flushAsync();
-      expect(mockProbe).not.toHaveBeenCalled();
+      expect(mockCreateExemplarsQuery).not.toHaveBeenCalled();
       expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
-      expect(result.current).toBeUndefined();
+      expect(result.current).toEqual(IDLE_FETCH);
     });
   });
 
@@ -150,83 +157,42 @@ describe('useFetchExemplars', () => {
     const { result } = renderHook(() => useFetchExemplars(params));
 
     await flushAsync();
-    expect(mockProbe).not.toHaveBeenCalled();
+    expect(mockCreateExemplarsQuery).not.toHaveBeenCalled();
     expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
-    expect(result.current).toBeUndefined();
+    expect(result.current).toEqual(IDLE_FETCH);
   });
 
-  it('neither probes nor fetches while the grid is hidden', async () => {
+  it('does not fetch while the grid is hidden', async () => {
     const params = createParams({ isComponentVisible: false });
 
     const { result } = renderHook(() => useFetchExemplars(params));
 
     await flushAsync();
-    expect(mockProbe).not.toHaveBeenCalled();
+    expect(mockCreateExemplarsQuery).not.toHaveBeenCalled();
     expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
-    expect(result.current).toBeUndefined();
+    expect(result.current).toEqual(IDLE_FETCH);
   });
 
-  it('does not probe when the metric cannot have exemplars (empty query)', async () => {
+  it('does not fetch when the chart is unsupported', async () => {
+    const params = createParams({ isSupported: false });
+
+    const { result } = renderHook(() => useFetchExemplars(params));
+
+    await flushAsync();
+    expect(mockCreateExemplarsQuery).not.toHaveBeenCalled();
+    expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
+    expect(result.current).toEqual(IDLE_FETCH);
+  });
+
+  it('does not fetch when the chart query is empty', async () => {
     mockCreateExemplarsQuery.mockReturnValue('');
     const params = createParams();
 
     const { result } = renderHook(() => useFetchExemplars(params));
 
     await flushAsync();
-    expect(mockProbe).not.toHaveBeenCalled();
     expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
-    expect(result.current).toBeUndefined();
-  });
-
-  it('does not probe for a non-OTel metric', async () => {
-    const params = createParams({
-      metricItem: { ...mockMetric, indexName: 'metrics-system.cpu-default' },
-    });
-
-    const { result } = renderHook(() => useFetchExemplars(params));
-
-    await flushAsync();
-    expect(mockProbe).not.toHaveBeenCalled();
-    expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
-    expect(result.current).toBeUndefined();
-  });
-
-  it('probes but does not fetch when the metric has no exemplars', async () => {
-    mockProbe.mockResolvedValue(new Map());
-    const params = createParams();
-
-    const { result } = renderHook(() => useFetchExemplars(params));
-
-    await flushAsync();
-    expect(mockProbe).toHaveBeenCalledTimes(1);
-    expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
-    expect(result.current).toBeUndefined();
-  });
-
-  it('does not fetch when the metric only has exemplars in a different data stream', async () => {
-    mockProbe.mockResolvedValue(
-      new Map([['exemplars-payments.otel-prod', new Set([mockMetric.metricName])]])
-    );
-    const params = createParams();
-
-    const { result } = renderHook(() => useFetchExemplars(params));
-
-    await flushAsync();
-    expect(mockProbe).toHaveBeenCalledTimes(1);
-    expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
-    expect(result.current).toBeUndefined();
-  });
-
-  it('scopes the availability check to the user-typed source when it is one concrete index', async () => {
-    mockProbe.mockResolvedValue(
-      new Map([['exemplars-generic.otel-production', new Set([mockMetric.metricName])]])
-    );
-    const params = createParams({ originalSource: 'metrics-generic.otel-production' });
-
-    const { result } = renderHook(() => useFetchExemplars(params));
-
-    await waitFor(() => expect(result.current).toBeDefined());
-    expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+    expect(result.current).toEqual(IDLE_FETCH);
   });
 
   it('returns the exemplar columns and rows on a successful fetch', async () => {
@@ -234,29 +200,51 @@ describe('useFetchExemplars', () => {
 
     const { result } = renderHook(() => useFetchExemplars(params));
 
-    await waitFor(() => expect(result.current).toBeDefined());
-    expect(result.current).toEqual({ columns: TEST_COLUMNS, values: TEST_ROWS });
+    await waitFor(() => expect(result.current.exemplars).toBeDefined());
+    expect(result.current).toEqual({
+      exemplars: { columns: TEST_COLUMNS, values: TEST_ROWS },
+      hasError: false,
+    });
   });
 
-  it('forwards the request parameters under the exemplars execution context', async () => {
-    const params = createParams();
+  it('returns remote-cluster rows, including exemplars with no trace or span id', async () => {
+    const values = [[1_700_000_000_000, 'http.server.request.duration', 0.42, null, null]];
+    mockExecuteEsqlQuery.mockResolvedValue({
+      documents: [],
+      rawResponse: {
+        columns: TEST_COLUMNS,
+        values,
+        requestParams: { query: TEST_ESQL_QUERY },
+      },
+      requestParams: { query: TEST_ESQL_QUERY },
+    });
+    const params = createParams({ originalSource: 'remote:metrics-*' });
+
+    const { result } = renderHook(() => useFetchExemplars(params));
+
+    await waitFor(() => expect(result.current.exemplars).toBeDefined());
+    expect(result.current).toEqual({
+      exemplars: { columns: TEST_COLUMNS, values },
+      hasError: false,
+    });
+    expect(mockCreateExemplarsQuery).toHaveBeenCalledWith(
+      expect.objectContaining({ originalSource: 'remote:metrics-*' })
+    );
+  });
+
+  it('forwards the chart query inputs and request filters under the exemplars execution context', async () => {
+    const params = createParams({ originalSource: 'remote:metrics-generic.otel-default' });
 
     renderHook(() => useFetchExemplars(params));
 
     await flushAsync();
     expect(mockCreateExemplarsQuery).toHaveBeenCalledWith({
       metricItem: mockMetric,
-      exemplarsIndex: 'exemplars-generic.otel-default',
-      whereStatements: undefined,
-    });
-    expect(mockProbe).toHaveBeenCalledWith({
-      fetchId: params.fetchParams.lastReloadRequestTime,
-      search: params.services.data.search.search,
-      timeFieldName: '@timestamp',
-      timeRange: params.fetchParams.timeRange,
-      uiSettings: params.services.uiSettings,
-      profileId: TEST_PROFILE_ID,
-      onError: expect.any(Function),
+      isSupported: true,
+      whereStatements: TEST_WHERE_STATEMENTS,
+      metadataFields: TEST_METADATA_FIELDS,
+      originalSource: 'remote:metrics-generic.otel-default',
+      gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
     });
     expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
       esqlQuery: TEST_ESQL_QUERY,
@@ -272,43 +260,13 @@ describe('useFetchExemplars', () => {
     });
   });
 
-  it('translates filters on the chart metric onto value and drops other metric-field filters', async () => {
-    const params = createParams();
-    params.fetchParams = {
-      ...params.fetchParams,
-      filters: [
-        ...TEST_FILTERS,
-        {
-          meta: { key: mockMetric.metricName, type: 'range' },
-          query: { range: { [mockMetric.metricName]: { gte: 0.5 } } },
-        },
-        {
-          meta: { key: 'metrics.orders.created', type: 'phrase' },
-          query: { match_phrase: { 'metrics.orders.created': 5 } },
-        },
-      ],
-    };
-
-    renderHook(() => useFetchExemplars(params));
-
-    await flushAsync();
-    expect(mockExecuteEsqlQuery).toHaveBeenCalledWith(
-      expect.objectContaining({
-        filters: [
-          ...TEST_FILTERS,
-          { meta: { key: 'value', type: 'range' }, query: { range: { value: { gte: 0.5 } } } },
-        ],
-      })
-    );
-  });
-
   it('drops the previous rows while a refetch is in flight', async () => {
     const params = createParams();
     const { result, rerender } = renderHook(
       (props: UseFetchExemplarsParams) => useFetchExemplars(props),
       { initialProps: params }
     );
-    await waitFor(() => expect(result.current).toBeDefined());
+    await waitFor(() => expect(result.current.exemplars).toBeDefined());
 
     mockExecuteEsqlQuery.mockReturnValueOnce(new Promise(() => {}));
     rerender({
@@ -322,41 +280,62 @@ describe('useFetchExemplars', () => {
     await flushAsync();
 
     expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
-    expect(result.current).toBeUndefined();
+    expect(result.current).toEqual(IDLE_FETCH);
   });
 
-  it('probes again under the new fetch id when the Discover fetch changes', async () => {
+  it('fetches again when the Discover fetch changes', async () => {
     const params = createParams();
     const { rerender } = renderHook((props: UseFetchExemplarsParams) => useFetchExemplars(props), {
       initialProps: params,
     });
     await flushAsync();
 
-    const nextFetchParams = {
-      ...params.fetchParams,
-      lastReloadRequestTime: params.fetchParams.lastReloadRequestTime + 1,
-      timeRange: { ...params.fetchParams.timeRange },
-    };
-    rerender({ ...params, fetchParams: nextFetchParams });
+    rerender({
+      ...params,
+      fetchParams: {
+        ...params.fetchParams,
+        lastReloadRequestTime: params.fetchParams.lastReloadRequestTime + 1,
+        timeRange: { ...params.fetchParams.timeRange },
+      },
+    });
     await flushAsync();
 
-    expect(mockProbe).toHaveBeenCalledTimes(2);
-    expect(mockProbe.mock.calls[1][0].fetchId).toBe(nextFetchParams.lastReloadRequestTime);
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
   });
 
-  it('routes probe errors to the chart section error reporter', async () => {
+  it('does not refetch when a replaced metric item builds the same query', async () => {
     const params = createParams();
-    renderHook(() => useFetchExemplars(params));
+    const { rerender } = renderHook((props: UseFetchExemplarsParams) => useFetchExemplars(props), {
+      initialProps: params,
+    });
     await flushAsync();
 
-    const probeError = new Error('probe failed');
-    mockProbe.mock.calls[0][0].onError(probeError);
-
-    expect(mockReportError).toHaveBeenCalledWith({
-      error: probeError,
-      source: 'useFetchExemplars',
-      labels: { profile_id: TEST_PROFILE_ID },
+    rerender({
+      ...params,
+      metricItem: { ...mockMetric },
+      whereStatements: [...TEST_WHERE_STATEMENTS],
+      metadataFields: [...TEST_METADATA_FIELDS],
     });
+    await flushAsync();
+
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+  });
+
+  it('refetches when the exemplar query changes', async () => {
+    const params = createParams();
+    const { rerender } = renderHook((props: UseFetchExemplarsParams) => useFetchExemplars(props), {
+      initialProps: params,
+    });
+    await flushAsync();
+
+    mockCreateExemplarsQuery.mockReturnValue(`${TEST_ESQL_QUERY}\n| KEEP value`);
+    rerender({
+      ...params,
+      metricItem: { ...mockMetric, metricName: 'other.metric' },
+    });
+    await flushAsync();
+
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
   });
 
   it('returns undefined while the fetch is in flight', () => {
@@ -365,7 +344,7 @@ describe('useFetchExemplars', () => {
 
     const { result } = renderHook(() => useFetchExemplars(params));
 
-    expect(result.current).toBeUndefined();
+    expect(result.current).toEqual(IDLE_FETCH);
   });
 
   describe('when the row fetch rejects', () => {
@@ -379,10 +358,10 @@ describe('useFetchExemplars', () => {
 
       await flushAsync();
       expect(mockReportError).not.toHaveBeenCalled();
-      expect(result.current).toBeUndefined();
+      expect(result.current).toEqual(IDLE_FETCH);
     });
 
-    it('reports other errors once and returns undefined', async () => {
+    it('reports other errors once and marks the fetch failed', async () => {
       const fetchError = new Error('network failure');
       mockExecuteEsqlQuery.mockRejectedValue(fetchError);
       const params = createParams();
@@ -395,7 +374,11 @@ describe('useFetchExemplars', () => {
         source: 'useFetchExemplars',
         labels: { profile_id: TEST_PROFILE_ID },
       });
-      expect(result.current).toBeUndefined();
+      expect(result.current).toEqual({
+        exemplars: undefined,
+        hasError: true,
+        errorMessage: 'network failure',
+      });
     });
   });
 

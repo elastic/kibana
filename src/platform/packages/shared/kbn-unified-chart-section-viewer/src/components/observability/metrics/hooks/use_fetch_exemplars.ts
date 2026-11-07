@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MetricsGridSettings } from '@kbn/discover-utils';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { useAbortableAsync } from '@kbn/react-hooks';
@@ -16,44 +17,59 @@ import type { ParsedMetricItem } from '../../../../types';
 import { isSuppressedFetchError } from '../../../chart/utils/is_suppressed_fetch_error';
 import { useReportChartSectionError } from '../../../chart/hooks/use_report_chart_section_error';
 import { createExemplarsQuery } from '../../../../common/utils/esql/create_exemplars_query';
-import { resolveExemplarsIndex } from '../../../../common/utils/exemplars/derive_exemplars_index';
-import { translateExemplarFilters } from '../../../../common/utils/exemplars/translate_exemplar_filters';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { MetricsExecutionContextName } from '../utils/execution_context_enums';
-import { useExemplarsAvailabilityProbe } from '../context/exemplars_availability_provider';
 
 export type ExemplarsResponse = Pick<ESQLSearchResponse, 'columns' | 'values'>;
+
+export interface UseFetchExemplarsResult {
+  /** Rows from the last successful fetch. Absent while loading, when skipped, or after a failure. */
+  exemplars: ExemplarsResponse | undefined;
+  /** True when the last completed fetch failed. Aborts and skipped fetches stay false. */
+  hasError: boolean;
+  /** Elasticsearch error text when the fetch failed. Absent for skips and aborts. */
+  errorMessage?: string;
+}
+
+const IDLE_EXEMPLARS_FETCH: UseFetchExemplarsResult = { exemplars: undefined, hasError: false };
 
 export interface UseFetchExemplarsParams {
   fetchParams: ChartSectionProps['fetchParams'];
   services: ChartSectionProps['services'];
   metricItem: ParsedMetricItem;
   whereStatements?: string[];
+  metadataFields?: string[];
   originalSource?: string;
+  gridSettings?: MetricsGridSettings;
   profileId: string;
+  /** False for `unsigned_long` charts and heatmaps, which do not fetch exemplars. */
+  isSupported: boolean;
   /** False while Discover keeps the grid mounted but hidden; nothing is fetched then. */
   isComponentVisible: boolean;
 }
 
 /**
- * Fetches the exemplars for a metric chart. Returns `undefined` while in flight, when
- * the flag is off, or when the metric has no exemplars. Never throws.
+ * Fetches the exemplars for a metric chart. `exemplars` is absent while in flight, when
+ * the flag is off, or when the metric has no time-series query. A failed fetch sets
+ * `hasError` and does not throw.
  */
 export const useFetchExemplars = ({
   fetchParams,
   services,
   metricItem,
   whereStatements,
+  metadataFields,
   originalSource,
+  gridSettings,
   profileId,
+  isSupported,
   isComponentVisible,
-}: UseFetchExemplarsParams): ExemplarsResponse | undefined => {
+}: UseFetchExemplarsParams): UseFetchExemplarsResult => {
   const isExemplarsEnabled = useFeatureFlag(
     FEATURE_FLAGS.IS_EXEMPLARS_ENABLED,
     FEATURE_FLAG_DEFAULTS[FEATURE_FLAGS.IS_EXEMPLARS_ENABLED]
   );
   const reportError = useReportChartSectionError();
-  const probeExemplarsAvailability = useExemplarsAvailabilityProbe();
   const { dataSource } = fetchParams;
   const timeFieldName = dataSource?.timeFieldName;
   const {
@@ -63,38 +79,27 @@ export const useFetchExemplars = ({
     uiSettings,
   } = services;
 
-  const { value } = useAbortableAsync<ExemplarsResponse | undefined>(
+  // String identity stays put when METRICS_INFO replaces `metricItem` with an equal object.
+  const esqlQuery =
+    isExemplarsEnabled && isComponentVisible && dataSource && isSupported
+      ? createExemplarsQuery({
+          metricItem,
+          isSupported,
+          whereStatements,
+          metadataFields,
+          originalSource,
+          gridSettings,
+        })
+      : '';
+
+  const { value } = useAbortableAsync<UseFetchExemplarsResult>(
     async ({ signal }) => {
-      if (!isExemplarsEnabled || !isComponentVisible || !dataSource) {
-        return undefined;
-      }
-
-      // Non-OTel metrics have no exemplars stream and never probe.
-      const exemplarsIndex = resolveExemplarsIndex(metricItem, originalSource);
-      if (!exemplarsIndex) {
-        return undefined;
-      }
-
-      const esqlQuery = createExemplarsQuery({ metricItem, exemplarsIndex, whereStatements });
       if (!esqlQuery) {
-        return undefined;
+        return IDLE_EXEMPLARS_FETCH;
       }
 
       const onError = (error: unknown) =>
         reportError({ error, source: 'useFetchExemplars', labels: { profile_id: profileId } });
-
-      const metricsByStream = await probeExemplarsAvailability({
-        fetchId: fetchParams.lastReloadRequestTime,
-        search,
-        timeFieldName,
-        timeRange: fetchParams.timeRange,
-        uiSettings,
-        profileId,
-        onError,
-      });
-      if (signal.aborted || !metricsByStream.get(exemplarsIndex)?.has(metricItem.metricName)) {
-        return undefined;
-      }
 
       try {
         const { rawResponse } = await executeEsqlQuery({
@@ -103,35 +108,35 @@ export const useFetchExemplars = ({
           signal,
           timeFieldName,
           timeRange: fetchParams.timeRange,
-          // Filters on the chart's own metric field move onto `value`; other metric fields cannot
-          // apply to these exemplars and are dropped.
-          filters: translateExemplarFilters(fetchParams.filters, metricItem.metricName),
-          // The copied `WHERE` clauses may reference Discover control variables (`?service`).
+          filters: fetchParams.filters,
           variables: fetchParams.esqlVariables,
           uiSettings,
           profileId,
           executionContextName: MetricsExecutionContextName.EXEMPLARS,
         });
-        return { columns: rawResponse.columns, values: rawResponse.values };
+        return {
+          exemplars: { columns: rawResponse.columns, values: rawResponse.values },
+          hasError: false,
+        };
       } catch (error) {
         if (!isSuppressedFetchError(error)) {
           onError(error);
         }
-        return undefined;
+        const failed = !isSuppressedFetchError(error);
+        const errorMessage = error instanceof Error ? error.message : undefined;
+        return {
+          exemplars: undefined,
+          hasError: failed,
+          ...(failed && errorMessage ? { errorMessage } : {}),
+        };
       }
     },
     // `fetchParams.timeRange`, `filters`, `lastReloadRequestTime` and `abortController` are rebuilt
     // once per Discover fetch (see `processFetchParams` in kbn-unified-histogram), so this re-fires at
-    // the chart's cadence and, like the metrics-info fetch, aborts the previous request when a new
-    // Discover fetch starts.
+    // the chart's cadence and aborts the previous request when a new Discover fetch starts.
     [
-      isExemplarsEnabled,
-      isComponentVisible,
-      dataSource,
+      esqlQuery,
       timeFieldName,
-      metricItem,
-      whereStatements,
-      originalSource,
       search,
       fetchParams.timeRange,
       fetchParams.filters,
@@ -141,11 +146,10 @@ export const useFetchExemplars = ({
       uiSettings,
       profileId,
       reportError,
-      probeExemplarsAvailability,
     ],
     // Drop the previous rows as soon as a refetch starts so stale exemplars never render.
     { clearValueOnNext: true }
   );
 
-  return value;
+  return value ?? IDLE_EXEMPLARS_FETCH;
 };
