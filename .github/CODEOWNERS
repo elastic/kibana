@@ -678,6 +678,7 @@ src/platform/packages/shared/kbn-object-utils @elastic/kibana-core
 src/platform/packages/shared/kbn-object-versioning @elastic/appex-sharedux
 src/platform/packages/shared/kbn-object-versioning-utils @elastic/appex-sharedux
 src/platform/packages/shared/kbn-occ @elastic/workflows-eng
+src/platform/packages/shared/kbn-ols @elastic/kibana-security
 src/platform/packages/shared/kbn-openapi-bundler @elastic/security-detection-engineering
 src/platform/packages/shared/kbn-openapi-common @elastic/security-detection-engineering
 src/platform/packages/shared/kbn-openapi-generator @elastic/security-detection-engineering
