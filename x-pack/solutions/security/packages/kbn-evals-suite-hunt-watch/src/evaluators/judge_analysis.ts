@@ -299,7 +299,7 @@ const adaptJudgeEvaluator = (
       expected,
       metadata: undefined,
     });
-    if (result.label === 'unavailable') {
+    if (result.label === 'unavailable' || result.label === 'skipped' || result.label === 'error') {
       return {
         score: null,
         label: 'MISSING',

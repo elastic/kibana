@@ -65,7 +65,7 @@ describe('createScenarioCriteriaLlmEvaluator', () => {
 
     const resolved = await result;
     expect(resolved.score).toBeNull();
-    expect(resolved.label).toBe('unavailable');
+    expect(resolved.label).toBe('skipped');
     expect(resolved.explanation).toBe('No queries generated');
     // Not just abstaining — it must not spend an LLM call on an empty output.
     expect(judgeEvaluate).not.toHaveBeenCalled();
@@ -95,6 +95,7 @@ describe('createScenarioCriteriaLlmEvaluator', () => {
     });
 
     expect(result.score).toBeNull();
+    expect(result.label).toBe('skipped');
     expect(evaluate).not.toHaveBeenCalled();
   });
 

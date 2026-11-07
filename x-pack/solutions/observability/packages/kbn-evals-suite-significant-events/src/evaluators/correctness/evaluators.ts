@@ -134,6 +134,14 @@ export const createCorrectnessEvaluators = <
       }
 
       const score = calculateFactualScore(analysis);
+      if (score === null) {
+        return {
+          score: null,
+          label: 'error',
+          explanation: 'Correctness analysis has no claim analysis to score for factuality',
+          metadata: { analysis },
+        };
+      }
       return {
         score,
         label: analysis.summary.factual_accuracy_summary,
@@ -164,6 +172,14 @@ export const createCorrectnessEvaluators = <
       }
 
       const score = calculateRelevanceScore(analysis);
+      if (score === null) {
+        return {
+          score: null,
+          label: 'error',
+          explanation: 'Correctness analysis has no claim analysis to score for relevance',
+          metadata: { analysis },
+        };
+      }
       return {
         score,
         label: analysis.summary.relevance_summary,

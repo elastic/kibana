@@ -64,7 +64,7 @@ export const createScenarioCriteriaLlmEvaluator = <
 
     const skipReason = skipWhen?.(output);
     if (skipReason) {
-      return { score: null, label: 'unavailable', explanation: skipReason };
+      return { score: null, label: 'skipped', explanation: skipReason };
     }
 
     const resolvedCriteria =
@@ -73,7 +73,7 @@ export const createScenarioCriteriaLlmEvaluator = <
     if (!Array.isArray(resolvedCriteria) || resolvedCriteria.length === 0) {
       return {
         score: null,
-        label: 'unavailable',
+        label: 'skipped',
         explanation: 'No scenario criteria specified — skipping scenario criteria check',
       };
     }

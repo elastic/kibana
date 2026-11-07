@@ -103,11 +103,19 @@ export function createSimilarityEvaluator(config?: { threshold?: number }): Eval
         };
       }
 
-      if (expectedText.trim().length === 0 || outputText.trim().length === 0) {
+      if (expectedText.trim().length === 0) {
+        return {
+          score: null,
+          label: 'error',
+          explanation: 'No expected output to compare against.',
+        };
+      }
+
+      if (outputText.trim().length === 0) {
         return {
           score: 0.0,
           label: 'dissimilar',
-          explanation: 'One of the outputs is empty while the other is not.',
+          explanation: 'The output is empty while the expected output is not.',
         };
       }
 

@@ -229,6 +229,16 @@ components:
           type: object
           additionalProperties: true
           nullable: true
+        error:
+          type: object
+          description: >-
+            Why the task produced no output. Present only when the task threw.
+          properties:
+            message:
+              type: string
+              maxLength: 1024
+          required:
+            - message
         model:
           $ref: '#/components/schemas/Model'
       required:
@@ -349,6 +359,14 @@ components:
               type: number
             count:
               type: integer
+            error_count:
+              type: integer
+              minimum: 0
+              description: >-
+                Score documents with no score that are labelled `error` (the
+                evaluator or task failed to produce a score). Deliberate skips
+                (`skipped`, `unavailable`) and analysis labels are not counted.
+                These are excluded from the other stats.
           required:
             - mean
             - median

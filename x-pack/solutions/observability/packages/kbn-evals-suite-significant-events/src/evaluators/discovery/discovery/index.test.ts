@@ -38,7 +38,7 @@ describe('createDiscoveryEvaluators', () => {
         metadata: null,
       } as never);
 
-      expect(result).toEqual(expect.objectContaining({ score: null, label: 'unavailable' }));
+      expect(result).toEqual(expect.objectContaining({ score: null, label: 'skipped' }));
       expect(judge).not.toHaveBeenCalled();
     }
   );

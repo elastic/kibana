@@ -157,7 +157,7 @@ describe('createSecuritySkillInvocationEvaluator', () => {
     expect(mockEsClient.esql.query).toHaveBeenCalledTimes(1);
   });
 
-  it('returns unavailable when no traceId is present', async () => {
+  it('returns skipped when no traceId is present', async () => {
     const evaluator = createSecuritySkillInvocationEvaluator({
       traceEsClient: mockEsClient,
       log: mockLog,
@@ -172,7 +172,7 @@ describe('createSecuritySkillInvocationEvaluator', () => {
     });
 
     expect(result.score).toBeNull();
-    expect(result.label).toBe('unavailable');
+    expect(result.label).toBe('skipped');
   });
 
   it('throws for invalid skill names', () => {

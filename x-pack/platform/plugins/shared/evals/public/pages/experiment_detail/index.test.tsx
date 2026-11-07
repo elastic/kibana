@@ -7,13 +7,20 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { EuiBasicTable } from '@elastic/eui';
 import { MemoryRouter } from 'react-router-dom';
-import type { EvaluationExperimentDatasetExample } from '@kbn/evals-common';
+import type { EvaluationExperimentDatasetExample, EvaluatorStats } from '@kbn/evals-common';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ExampleScoresTable } from '../../components/example_scores_table';
 import { useExperimentDatasetExamples } from '../../hooks/use_evals_api';
 import { queryKeys } from '../../query_keys';
-import { DatasetStatsAccordion } from '.';
+import {
+  DatasetStatsAccordion,
+  formatStat,
+  MeanWithErrors,
+  statValueColumns,
+  sumScoresIngested,
+} from '.';
 
 jest.mock('../../hooks/use_evals_api');
 jest.mock('../../components/example_scores_table', () => ({
@@ -193,5 +200,103 @@ describe('DatasetStatsAccordion', () => {
     );
     expect(pollingCalls).toHaveLength(1);
     expect(pollingCalls[0][3]?.includePreviews).not.toBe(true);
+  });
+});
+
+describe('sumScoresIngested', () => {
+  const buildStat = (count: number, errorCount?: number): EvaluatorStats => ({
+    dataset_id: 'dataset-1',
+    dataset_name: 'Dataset 1',
+    evaluator_name: 'evaluator',
+    example_count: 1,
+    stats: {
+      mean: 0,
+      median: 0,
+      std_dev: 0,
+      min: 0,
+      max: 0,
+      count,
+      ...(errorCount !== undefined && { error_count: errorCount }),
+    },
+  });
+
+  it('counts errored scores alongside scored ones', () => {
+    expect(sumScoresIngested([buildStat(3, 2), buildStat(4)])).toBe(9);
+  });
+});
+
+describe('MeanWithErrors', () => {
+  it('shows the error count next to the mean', () => {
+    const { getByTestId, container } = render(
+      <MeanWithErrors mean={0.5} count={3} errorCount={2} />
+    );
+
+    expect(container.textContent).toContain('0.50');
+    expect(getByTestId('evalsExperimentDetailMeanErrorCount').textContent).toContain('2 errors');
+  });
+
+  it('shows only the mean when there are no errors', () => {
+    const { queryByTestId, container } = render(
+      <MeanWithErrors mean={0.5} count={3} errorCount={0} />
+    );
+
+    expect(container.textContent).toBe('0.50');
+    expect(queryByTestId('evalsExperimentDetailMeanErrorCount')).toBeNull();
+  });
+
+  it('shows a placeholder, not 0.00, when every run errored', () => {
+    const { getByTestId, container } = render(<MeanWithErrors mean={0} count={0} errorCount={4} />);
+
+    expect(container.textContent).not.toContain('0.00');
+    expect(container.textContent).toContain('-');
+    expect(getByTestId('evalsExperimentDetailMeanErrorCount').textContent).toContain('4 errors');
+  });
+});
+
+describe('formatStat', () => {
+  it('formats a scored stat to two decimals', () => {
+    expect(formatStat(0.456, 3)).toBe('0.46');
+    expect(formatStat(0, 3)).toBe('0.00');
+  });
+
+  it('returns the placeholder when there are no scored runs', () => {
+    expect(formatStat(0, 0)).toBe('-');
+  });
+});
+
+describe('statValueColumns', () => {
+  const buildRow = (stats: Partial<EvaluatorStats['stats']>): EvaluatorStats => ({
+    dataset_id: 'dataset-1',
+    dataset_name: 'Dataset 1',
+    evaluator_name: 'Factuality',
+    example_count: 1,
+    stats: { mean: 0, median: 0, std_dev: 0, min: 0, max: 0, count: 0, ...stats },
+  });
+
+  it('renders placeholders, not 0.00, in every stat column when every run errored', () => {
+    const { container, getByTestId } = render(
+      <EuiBasicTable
+        tableCaption="stats"
+        items={[buildRow({ error_count: 3 })]}
+        columns={statValueColumns}
+      />
+    );
+
+    expect(container.textContent).not.toContain('0.00');
+    expect(container.querySelectorAll('td')).toHaveLength(5);
+    expect(getByTestId('evalsExperimentDetailMeanErrorCount').textContent).toContain('3 errors');
+  });
+
+  it('renders numeric values when runs were scored', () => {
+    const { container } = render(
+      <EuiBasicTable
+        tableCaption="stats"
+        items={[buildRow({ mean: 0.5, median: 0.4, std_dev: 0.1, min: 0.2, max: 0.9, count: 4 })]}
+        columns={statValueColumns}
+      />
+    );
+
+    expect(container.textContent).toContain('0.50');
+    expect(container.textContent).toContain('0.90');
   });
 });
