@@ -309,10 +309,12 @@ const CostEstimateContent = ({
   // The last estimate rendered, which stays while it animates out.
   const lastRenderedRef = useRef<ShownEstimate>();
 
-  // Shown for real data: what the change covers, or, when there's a change to show, what it covered
-  // before, such as a rule edited to match nothing.
+  // Shown for what the change covers, or, for a rule edited to match nothing, for what it covered
+  // before, while costs show how much that saves. Without costs, it would only show nothing, so it's
+  // hidden, as for a new rule that matches nothing.
   const hasData =
-    impact !== undefined && (impact.dataSourceCount > 0 || (showChange && impact.hasCurrentData));
+    impact !== undefined &&
+    (impact.dataSourceCount > 0 || (showsCost && showChange && impact.hasCurrentData));
   const current = impact && hasData && type ? { impact, type } : undefined;
   // A faded estimate stays while the profile is cleared, but not once one of another type is chosen:
   // an indices estimate has no periods, and a data streams one has periods indices don't.

@@ -48,6 +48,7 @@ import { getCopyName } from '../copy_name';
 import { CostEstimate } from '../cost_estimate';
 import type { TargetPreview } from './pattern_matches';
 import { PatternMatches, getPartialPattern } from './pattern_matches';
+import { ClearableFieldText } from './clearable_field_text';
 import { FLYOUT_WIDTH } from '../flyout_width';
 import { CREATE_PROFILE_TITLE, ProfileFlyoutContent } from '../profiles/profile_flyout';
 import { FlyoutOnTop, getFlyoutHistoryProps } from '../flyout_history';
@@ -429,11 +430,13 @@ export const RuleFlyout = ({
       error={patternError}
       fullWidth
     >
-      <EuiFieldText
+      <ClearableFieldText
         compressed
         fullWidth
         value={draft.pattern}
         onChange={({ target: { value } }) => updateDraft({ pattern: value })}
+        onClear={() => updateDraft({ pattern: '' })}
+        clearTestSubj="boostRulePatternClear"
         placeholder={i18n.translate('xpack.boost.ruleForm.patternPlaceholder', {
           defaultMessage: 'Example: {pattern} or {name}',
           values: {

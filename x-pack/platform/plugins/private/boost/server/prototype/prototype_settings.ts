@@ -30,6 +30,10 @@ export const getPrototypeSettings = async (
     );
     return {
       shows_estimates: attributes.shows_estimates ?? DEFAULT_PROTOTYPE_SETTINGS.shows_estimates,
+      fails_rule_deletes:
+        attributes.fails_rule_deletes ?? DEFAULT_PROTOTYPE_SETTINGS.fails_rule_deletes,
+      fails_profile_deletes:
+        attributes.fails_profile_deletes ?? DEFAULT_PROTOTYPE_SETTINGS.fails_profile_deletes,
     };
   } catch (error) {
     if (SavedObjectsErrorHelpers.isNotFoundError(error)) {

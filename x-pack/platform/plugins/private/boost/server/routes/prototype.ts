@@ -56,6 +56,8 @@ const getSeededVersion = async (
 
 const prototypeSettingsBodySchema = schema.object({
   shows_estimates: schema.maybe(schema.boolean()),
+  fails_rule_deletes: schema.maybe(schema.boolean()),
+  fails_profile_deletes: schema.maybe(schema.boolean()),
 });
 
 const markSampleDataSeeded = async (client: SavedObjectsClientContract): Promise<void> => {

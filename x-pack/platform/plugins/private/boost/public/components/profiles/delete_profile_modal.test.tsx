@@ -19,12 +19,19 @@ import {
 import type { BoostProfile, BoostRule } from '../../../common/types';
 import { DeleteProfileModal } from './delete_profile_modal';
 
+const mockServices = {};
 jest.mock('../../hooks/use_boost_services', () => ({
-  useBoostServices: () => ({ notifications: { toasts: { addSuccess: jest.fn() } } }),
+  useBoostServices: () => mockServices,
 }));
 
+const mockNotify = jest.fn();
+jest.mock('./profile_deletion_notice', () => ({
+  notifyProfileDeletion: (...args: unknown[]) => mockNotify(...args),
+}));
+
+const mockMutate = jest.fn();
 jest.mock('../../hooks/use_boost_state', () => ({
-  useDeleteProfile: () => ({ mutate: jest.fn(), isLoading: false }),
+  useDeleteProfileAndRules: () => ({ mutate: mockMutate, isLoading: false }),
 }));
 
 const [builtinIndicesProfile] = BUILTIN_PROFILES.filter(({ type }) => type === 'indices');
@@ -86,5 +93,44 @@ describe('DeleteProfileModal', () => {
       ['catalog-fall', 'archives', BUILTIN_INDICES_PROFILE_NAMES.on_demand],
       ['catalog-spring', DEFAULT_INDICES_RULE_NAME, BUILTIN_INDICES_PROFILE_NAMES.performant],
     ]);
+  });
+
+  it('deletes the rules that use it first, and leaves only once the profile is deleted', async () => {
+    const onDeleted = jest.fn();
+    const onClose = jest.fn();
+    render(
+      <IntlProvider locale="en">
+        <DeleteProfileModal
+          profile={profile}
+          rules={[
+            rule('catalogs', 'catalog-*', 'catalog-search', 2),
+            rule('archives', '*-fall', 'catalog-search', 1),
+            ...createDefaultRules(DEFAULT_RULE_PROFILES),
+          ]}
+          profiles={[...BUILTIN_PROFILES, profile]}
+          dataSources={[]}
+          onClose={onClose}
+          onDeleted={onDeleted}
+        />
+      </IntlProvider>
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Delete 1 profile and 2 rules' }));
+    const [[variables, { onSuccess, onSettled }]] = mockMutate.mock.calls;
+    expect(variables).toEqual({ name: 'catalog-search', ruleNames: ['archives', 'catalogs'] });
+
+    // A rule that fails to delete keeps the profile, so its page stays.
+    const partial = {
+      ruleCount: 2,
+      failures: [{ kind: 'rule', name: 'archives', message: 'Timed out.' }],
+    };
+    onSuccess(partial);
+    expect(mockNotify).toHaveBeenCalledWith(mockServices, 'catalog-search', partial);
+    expect(onDeleted).not.toHaveBeenCalled();
+
+    onSuccess({ ruleCount: 2, failures: [] });
+    expect(onDeleted).toHaveBeenCalled();
+    onSettled();
+    expect(onClose).toHaveBeenCalled();
   });
 });

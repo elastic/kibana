@@ -7,9 +7,12 @@
 
 import type { IKibanaResponse, KibanaResponseFactory } from '@kbn/core/server';
 
-/** A client error that routes return with its status code and message. */
+/**
+ * An error that routes return with its status code and message: a client error, or a timeout the
+ * prototype simulates.
+ */
 export class BoostRequestError extends Error {
-  constructor(public readonly statusCode: 400 | 404 | 409, message: string) {
+  constructor(public readonly statusCode: 400 | 404 | 409 | 504, message: string) {
     super(message);
   }
 }

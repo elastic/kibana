@@ -11,13 +11,14 @@ import { i18n } from '@kbn/i18n';
 import { resolveRule } from '../../../common/resolution';
 import type { BoostDataSource, BoostProfile, BoostRule } from '../../../common/types';
 import { useBoostServices } from '../../hooks/use_boost_services';
-import { useDeleteProfile } from '../../hooks/use_boost_state';
+import { useDeleteProfileAndRules } from '../../hooks/use_boost_state';
 import { formatDataSourceCount } from '../format';
 import { ChangeTable } from '../change_table';
 import { ConfirmModal } from '../confirm_modal';
 import { MODAL_WIDTH } from '../modal_width';
 import { RuleChangeList } from '../rule_change_list';
 import { TargetName } from '../rules/target_name';
+import { notifyProfileDeletion } from './profile_deletion_notice';
 
 interface DeleteProfileModalProps {
   profile: BoostProfile;
@@ -25,7 +26,7 @@ interface DeleteProfileModalProps {
   profiles: BoostProfile[];
   dataSources: BoostDataSource[];
   onClose: () => void;
-  /** Called once the profile is deleted, such as to leave its details page. */
+  /** Called once the profile is deleted, such as to leave its details page, but not if it's kept. */
   onDeleted?: () => void;
 }
 
@@ -42,8 +43,9 @@ interface DeletedRule {
 }
 
 /**
- * Confirms deleting a custom profile. Its custom rules are deleted with it, and the data sources
- * they applied to fall back to the next matching rule.
+ * Confirms deleting a custom profile. Its custom rules are deleted first, as Elasticsearch requires,
+ * and the data sources they applied to fall back to the next matching rule. A toast says how it
+ * went, including which rules couldn't be deleted, which keeps the profile.
  */
 export const DeleteProfileModal = ({
   profile,
@@ -53,8 +55,8 @@ export const DeleteProfileModal = ({
   onClose,
   onDeleted,
 }: DeleteProfileModalProps) => {
-  const { notifications } = useBoostServices();
-  const { mutate: deleteProfile, isLoading: isDeleting } = useDeleteProfile();
+  const services = useBoostServices();
+  const { mutate: deleteProfile, isLoading: isDeleting } = useDeleteProfileAndRules();
   const { name, type } = profile;
 
   const deletedRules = useMemo<DeletedRule[]>(() => {
@@ -114,18 +116,18 @@ export const DeleteProfileModal = ({
       })}
       onCancel={onClose}
       onConfirm={() =>
-        deleteProfile(name, {
-          onSuccess: () => {
-            notifications.toasts.addSuccess(
-              i18n.translate('xpack.boost.profilesTab.deletedToast', {
-                defaultMessage: 'Deleted boost profile "{name}"',
-                values: { name },
-              })
-            );
-            onDeleted?.();
-          },
-          onSettled: onClose,
-        })
+        deleteProfile(
+          { name, ruleNames: deletedRules.map(({ name: ruleName }) => ruleName) },
+          {
+            onSuccess: (deletion) => {
+              notifyProfileDeletion(services, name, deletion);
+              if (deletion.failures.length === 0) {
+                onDeleted?.();
+              }
+            },
+            onSettled: onClose,
+          }
+        )
       }
       cancelButtonText={i18n.translate('xpack.boost.profilesTab.deleteModalCancel', {
         defaultMessage: 'Cancel',

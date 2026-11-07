@@ -43,7 +43,11 @@ export const PrototypeMenu = ({ http, notifications, onRestored }: PrototypeMenu
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
-  const { shows_estimates: showsEstimates } = usePrototypeSettings();
+  const {
+    shows_estimates: showsEstimates,
+    fails_rule_deletes: failsRuleDeletes,
+    fails_profile_deletes: failsProfileDeletes,
+  } = usePrototypeSettings();
   const { euiTheme } = useEuiTheme();
 
   const changeSettings = (changes: Partial<PrototypeSettings>) =>
@@ -106,6 +110,27 @@ export const PrototypeMenu = ({ http, notifications, onRestored }: PrototypeMenu
             checked={showsEstimates}
             onChange={({ target: { checked } }) => changeSettings({ shows_estimates: checked })}
             data-test-subj="boostShowEstimatesSwitch"
+          />
+          {/* Deleting a profile deletes its rules first, one request each, so some can fail. */}
+          <EuiSwitch
+            compressed
+            label={i18n.translate('xpack.boost.prototype.failRuleDeletes', {
+              defaultMessage: "Fail to delete each profile's first rule",
+            })}
+            checked={failsRuleDeletes}
+            onChange={({ target: { checked } }) => changeSettings({ fails_rule_deletes: checked })}
+            data-test-subj="boostFailRuleDeletesSwitch"
+          />
+          <EuiSwitch
+            compressed
+            label={i18n.translate('xpack.boost.prototype.failProfileDeletes', {
+              defaultMessage: 'Fail to delete profiles',
+            })}
+            checked={failsProfileDeletes}
+            onChange={({ target: { checked } }) =>
+              changeSettings({ fails_profile_deletes: checked })
+            }
+            data-test-subj="boostFailProfileDeletesSwitch"
           />
         </div>
         <EuiHorizontalRule margin="none" />

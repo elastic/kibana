@@ -35,12 +35,15 @@ const createHttp = (saved: PrototypeSettings) => {
 describe('prototype settings', () => {
   it('are off until the shared settings load, and load once', async () => {
     const { loadPrototypeSettings, getPrototypeSettings } = loadModule();
-    const { http, get } = createHttp({ shows_estimates: true });
+    const { http, get } = createHttp({ ...DEFAULT_PROTOTYPE_SETTINGS, shows_estimates: true });
     expect(getPrototypeSettings()).toEqual(DEFAULT_PROTOTYPE_SETTINGS);
 
     void loadPrototypeSettings(http);
     await loadPrototypeSettings(http);
-    expect(getPrototypeSettings()).toEqual({ shows_estimates: true });
+    expect(getPrototypeSettings()).toEqual({
+      ...DEFAULT_PROTOTYPE_SETTINGS,
+      shows_estimates: true,
+    });
     expect(get).toHaveBeenCalledTimes(1);
   });
 
@@ -55,7 +58,10 @@ describe('prototype settings', () => {
     expect(put).toHaveBeenCalledWith(expect.any(String), {
       body: JSON.stringify({ shows_estimates: true }),
     });
-    expect(getPrototypeSettings()).toEqual({ shows_estimates: true });
+    expect(getPrototypeSettings()).toEqual({
+      ...DEFAULT_PROTOTYPE_SETTINGS,
+      shows_estimates: true,
+    });
   });
 
   it('keeps a later change when an earlier one finishes saving after it', async () => {
@@ -71,7 +77,10 @@ describe('prototype settings', () => {
     await setPrototypeSettings({ shows_estimates: false });
     finishFirst();
     await first;
-    expect(getPrototypeSettings()).toEqual({ shows_estimates: false });
+    expect(getPrototypeSettings()).toEqual({
+      ...DEFAULT_PROTOTYPE_SETTINGS,
+      shows_estimates: false,
+    });
   });
 
   it("goes back to what it was when a change can't be saved", async () => {

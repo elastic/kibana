@@ -25,6 +25,7 @@ import {
 } from '../../common/validation';
 import { createProfile, deleteProfile, getState, updateProfile } from '../lib/boost_store';
 import { toErrorResponse } from '../lib/errors';
+import { simulateProfileDeleteFailure } from '../prototype/simulated_failures';
 import { getRequestClients } from './request_clients';
 
 const PROFILE_NAME_MESSAGES: Record<ProfileNameError, string> = {
@@ -171,6 +172,7 @@ export const registerProfileRoutes = (router: IRouter) => {
     async (context, { params: { name } }, response) => {
       try {
         const { savedObjectsClient, esClient } = await getRequestClients(context);
+        await simulateProfileDeleteFailure(savedObjectsClient);
         await deleteProfile(savedObjectsClient, name);
         return response.ok({ body: await getState(savedObjectsClient, esClient) });
       } catch (error) {

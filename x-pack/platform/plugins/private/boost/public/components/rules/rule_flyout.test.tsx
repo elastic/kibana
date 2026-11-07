@@ -397,6 +397,17 @@ describe('RuleFlyout estimate', () => {
     expect(screen.getByText(/^At peak, down from/)).toBeInTheDocument();
   });
 
+  it("hides an edited rule's estimate once it matches nothing, without costs to compare", async () => {
+    await setPrototypeSettings({ shows_estimates: false });
+    renderFlyout();
+    expect(getEstimate()).toHaveAttribute('data-shown', 'true');
+
+    await userEvent.clear(getPattern());
+    await userEvent.type(getPattern(), 'nothing-*');
+
+    expect(getEstimate()).toHaveAttribute('data-shown', 'false');
+  });
+
   describe('with a profile whose min boost is higher but max boost lower', () => {
     const profiles = state.profiles;
     const steadySearch: BoostProfile = {
@@ -548,6 +559,23 @@ describe('RuleFlyout pattern matches', () => {
 
     await userEvent.clear(getPattern());
     expect(getListed()).toEqual(['catalog-fall', 'products']);
+  });
+
+  it('clears the field with its clear button, listing everything again', async () => {
+    renderNewRule();
+    // Nothing to clear yet.
+    expect(screen.queryByTestId('boostRulePatternClear')).not.toBeInTheDocument();
+    // The row's label still names the input inside the clear button's layout.
+    const label = screen.getByText('Index pattern or name', { selector: 'label' });
+    expect(getPattern()).toHaveAttribute('id', label.getAttribute('for'));
+
+    await userEvent.type(getPattern(), 'catalog-*');
+    await userEvent.click(screen.getByTestId('boostRulePatternClear'));
+
+    expect(getPattern()).toHaveValue('');
+    expect(getPattern()).toHaveFocus();
+    expect(getListed()).toEqual(['catalog-fall', 'products']);
+    expect(screen.queryByTestId('boostRulePatternClear')).not.toBeInTheDocument();
   });
 
   it('keeps unmatched names listed beside the matches once asked', async () => {

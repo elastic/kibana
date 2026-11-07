@@ -12,8 +12,17 @@
 export interface PrototypeSettings {
   /** Whether to show search cost and VCU estimates, which aren't planned for the initial release. */
   shows_estimates: boolean;
+  /**
+   * Whether deleting the first custom rule, by name, that uses each profile fails, as a request to
+   * Elasticsearch can, so deleting a profile with its rules partly fails.
+   */
+  fails_rule_deletes: boolean;
+  /** Whether deleting a custom profile fails, as a request to Elasticsearch can. */
+  fails_profile_deletes: boolean;
 }
 
 export const DEFAULT_PROTOTYPE_SETTINGS: Readonly<PrototypeSettings> = {
   shows_estimates: false,
+  fails_rule_deletes: false,
+  fails_profile_deletes: false,
 };

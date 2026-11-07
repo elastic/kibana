@@ -153,7 +153,7 @@ const getCustomProfiles = async (client: SavedObjectsClientContract): Promise<Bo
 };
 
 /** Custom rules, highest priority first. */
-const getCustomRules = async (client: SavedObjectsClientContract): Promise<BoostRule[]> => {
+export const getCustomRules = async (client: SavedObjectsClientContract): Promise<BoostRule[]> => {
   const { saved_objects: savedObjects } = await client.find<RuleAttributes>({
     type: BOOST_SAVED_OBJECT_TYPE,
     filter: PROTOTYPE_KIND_FILTER('rule'),
@@ -286,8 +286,8 @@ export const updateProfile = async (
 };
 
 /**
- * Deletes a custom profile along with the custom rules that use it. A profile that a default rule
- * uses can't be deleted, since the default rules always need a profile.
+ * Deletes a custom profile. Like Elasticsearch, it refuses while any rule uses the profile: the UI
+ * deletes those rules first, each with its own request.
  */
 export const deleteProfile = async (
   client: SavedObjectsClientContract,
@@ -313,13 +313,13 @@ export const deleteProfile = async (
     );
   }
 
-  // Elasticsearch won't delete a profile that rules still reference, so the rules go first.
-  const attachedRules = customRules.filter(
-    ({ boost_profile: profileName }) => profileName === name
-  );
-  if (attachedRules.length > 0) {
-    await client.bulkDelete(
-      attachedRules.map((rule) => ({ type: BOOST_SAVED_OBJECT_TYPE, id: ruleId(rule.name) }))
+  const attachedRuleNames = customRules
+    .filter(({ boost_profile: profileName }) => profileName === name)
+    .map(({ name: ruleName }) => ruleName);
+  if (attachedRuleNames.length > 0) {
+    throw new BoostRequestError(
+      409,
+      `Boost profile [${name}] is used by boost rules [${attachedRuleNames.join(', ')}].`
     );
   }
   await client.delete(BOOST_SAVED_OBJECT_TYPE, profileId(name));

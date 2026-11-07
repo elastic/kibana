@@ -19,6 +19,7 @@
     "@kbn/kibana-react-plugin",
     "@kbn/react-query",
     "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-mount",
     "@kbn/shared-ux-router",
     "@kbn/app-header",
     "@kbn/core-chrome-browser-components",
