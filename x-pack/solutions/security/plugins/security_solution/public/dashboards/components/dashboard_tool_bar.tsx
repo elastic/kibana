@@ -12,6 +12,7 @@ import { DashboardTopNav } from '@kbn/dashboard-plugin/public';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { kbnRecessedGlassCss } from '@kbn/css-utils/public/recessed_glass_css';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { DashboardInternalApi } from '@kbn/dashboard-plugin/public/dashboard_api/types';
@@ -29,7 +30,8 @@ const DashboardToolBarComponent = ({
   onLoad?: (mode: ViewMode) => void;
 }) => {
   const { setHeaderActionMenu } = useKibana().services;
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
 
   const viewMode = useStateFromPublishingSubject(dashboardContainer.viewMode$);
 
@@ -80,11 +82,11 @@ const DashboardToolBarComponent = ({
         // Keep TopNav's levels.mask from competing with the shared Security KQL header.
         isolation: 'isolate',
         '.controlGroup[data-test-subj="controls-group-wrapper"]': {
-          backgroundColor: euiTheme.colors.backgroundBaseRecessed,
+          ...kbnRecessedGlassCss(euiThemeContext),
           paddingTop: euiTheme.size.s,
         },
       }),
-    [euiTheme.colors.backgroundBaseRecessed, euiTheme.size.s]
+    [euiThemeContext, euiTheme.size.s]
   );
 
   // Always mount so App Header title shows for read-only; write actions stay in Dashboard.

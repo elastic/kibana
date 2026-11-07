@@ -14,6 +14,10 @@ import { EuiPortal, type UseEuiTheme } from '@elastic/eui';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import {
+  kbnRecessedGlassCss,
+  kbnRecessedGlassResetCss,
+} from '@kbn/css-utils/public/recessed_glass_css';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import { DashboardGrid } from '../grid';
@@ -93,20 +97,24 @@ export const DashboardViewport = () => {
 };
 
 const dashboardViewportStyles = {
-  wrapper: ({ euiTheme }: UseEuiTheme) => ({
-    flex: 'auto',
-    display: 'flex',
-    flexDirection: 'column' as 'column',
-    width: '100%',
-    backgroundColor: euiTheme.colors.backgroundBaseRecessed,
-    '&.dshDashboardViewportWrapper--defaultBg': {
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-    },
-    '.dshDashboardViewport-controls': {
-      margin: `0 ${euiTheme.size.s}`,
-      paddingTop: euiTheme.size.s,
-    },
-  }),
+  wrapper: (euiThemeContext: UseEuiTheme) => {
+    const { euiTheme } = euiThemeContext;
+    return {
+      flex: 'auto',
+      display: 'flex',
+      flexDirection: 'column' as 'column',
+      width: '100%',
+      ...kbnRecessedGlassCss(euiThemeContext),
+      '&.dshDashboardViewportWrapper--defaultBg': {
+        ...kbnRecessedGlassResetCss,
+        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      },
+      '.dshDashboardViewport-controls': {
+        margin: `0 ${euiTheme.size.s}`,
+        paddingTop: euiTheme.size.s,
+      },
+    };
+  },
   viewport: {
     width: '100%',
     '&.dshDashboardViewport--empty': {

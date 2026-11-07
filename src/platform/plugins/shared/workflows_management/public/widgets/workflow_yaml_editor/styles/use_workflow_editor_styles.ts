@@ -11,6 +11,10 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import {
+  kbnRecessedGlassCss,
+  kbnRecessedGlassResetCss,
+} from '@kbn/css-utils/public/recessed_glass_css';
 import { EDITOR_SCROLLBAR_WIDTH_PX, FOCUSED_STEP_DECORATION_INSET_PX } from './constants';
 
 export const EXECUTION_YAML_SNAPSHOT_CLASS = 'execution-yaml-snapshot';
@@ -199,15 +203,16 @@ const editorStyleMap = {
   // paddingRight is intentionally omitted here: the call site adds it conditionally
   // via `isVisualEditorEnabled && css({ paddingRight: MINIMAP_RESERVE_PX })` so there
   // is no set-then-unset pattern depending on Emotion's array-compose order.
-  editorContainer: ({ euiTheme }: UseEuiTheme) =>
+  editorContainer: (euiThemeContext: UseEuiTheme) =>
     css({
       flex: '1 1 0',
       minWidth: 0,
       overflowY: 'auto',
       minHeight: 0,
-      backgroundColor: euiTheme.colors.backgroundBaseRecessed,
+      ...kbnRecessedGlassCss(euiThemeContext),
       [`&.${EXECUTION_YAML_SNAPSHOT_CLASS}`]: {
-        backgroundColor: euiTheme.colors.backgroundBasePlain,
+        ...kbnRecessedGlassResetCss,
+        backgroundColor: euiThemeContext.euiTheme.colors.backgroundBasePlain,
       },
     }),
 
