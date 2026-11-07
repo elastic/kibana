@@ -141,9 +141,23 @@ export class Http2BasePathProxyServer implements BasePathProxyServer {
                 // condition is met (e.g. until target listener is ready).
                 await delayUntil().pipe(take(1)).toPromise();
 
+                const hasContentLength =
+                  options.headers &&
+                  'content-length' in options.headers &&
+                  options.headers['content-length'] !== undefined;
+
                 const proxyOptions = {
                   ...options,
                   ...tlsOptions,
+                  ...(request.method === 'DELETE'
+                    ? {
+                        ALPNProtocols: ['http/1.1'],
+                        headers: {
+                          ...options.headers,
+                          ...(hasContentLength ? {} : { 'transfer-encoding': 'chunked' }),
+                        },
+                      }
+                    : {}),
                   rejectUnauthorized: false,
                   path: options.path,
                   agent: {
