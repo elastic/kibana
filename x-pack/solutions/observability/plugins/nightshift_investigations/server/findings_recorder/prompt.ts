@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ImpactMapCatalog } from '@kbn/agentic-investigations-plugin/common';
 import { RECORDER_RESULTS_DIR } from './constants';
 
 /**
@@ -104,18 +105,55 @@ You can read files in the investigation's workspace with \`recorder_read_file\` 
 export const buildRecorderSystemPrompt = ({
   final,
   files = false,
+  catalog,
 }: {
   final: boolean;
   files?: boolean;
+  catalog?: ImpactMapCatalog;
 }): string => {
-  if (!final) return LIVE_SYSTEM_PROMPT;
-  return files ? `${FINAL_RECORD(true)}${FILES}` : FINAL_RECORD(false);
+  const types = catalogPromptSection(catalog);
+  if (!final) return `${LIVE_SYSTEM_PROMPT}${types}`;
+  return `${files ? `${FINAL_RECORD(true)}${FILES}` : FINAL_RECORD(false)}${types}`;
 };
 
 /** Asked while the agent is still working. */
 export const LIVE_INSTRUCTION =
-  'The agent is still working. Update only the summary and the hypotheses to match the evidence so far. Leave out the verdict, severity, impact and evidence: they are written once the agent has finished.';
+  'The agent is still working. Update the summary, the hypotheses and the impact map to match the evidence so far. Leave out the verdict, severity, impact and evidence: they are written once the agent has finished.';
 
 /** Asked once the agent has given its final answer. */
 export const FINAL_INSTRUCTION =
   'The agent has finished, and its final message to the user is the last message above. Make the record final from it: set the verdict from that message and settle every hypothesis (none left investigating unless the telemetry needed to check it was unavailable). Where the message states a severity, or a status or confidence for a hypothesis, use it; decide from the evidence only what it leaves open. Set the severity (unless a person changed it) and the impact, each with evidence where the numbers are available.';
+
+const MAX_CATALOG_LINES = 60;
+
+/**
+ * The space's known entity and relationship types, for the recorder to reuse by id. A type it
+ * invents is added to this catalog, so it has to be classified (kind and icon) once, properly.
+ */
+export const catalogPromptSection = (catalog?: ImpactMapCatalog): string => {
+  const entityTypes = catalog?.entity_types ?? [];
+  const relationshipTypes = catalog?.relationship_types ?? [];
+  if (entityTypes.length === 0 && relationshipTypes.length === 0) return '';
+  const entityLines = entityTypes.slice(0, MAX_CATALOG_LINES).map(({ id, kind, icon }) => {
+    const iconText = icon
+      ? Object.entries(icon)
+          .filter(([key, value]) => key !== 'svg' && value)
+          .map(([key, value]) => `${key}=${value}`)
+          .join(' ')
+      : '';
+    return `- ${id}: ${kind}${iconText ? `, ${iconText}` : ''}`;
+  });
+  const relationshipLine = relationshipTypes
+    .slice(0, MAX_CATALOG_LINES)
+    .map(({ id }) => id)
+    .join(', ');
+  return `
+
+## Types already in the catalog
+
+Reuse these ids exactly when an entity or relationship is the same kind of thing. Add a new type only for a kind of thing that is not here, and classify it fully: its kind (service for code that runs, dependency for what it relies on) and its icon (agent_name, eui_icon, or span_type and span_subtype).
+
+Entity types:
+${entityLines.join('\n')}
+${relationshipLine ? `\nRelationship types: ${relationshipLine}` : ''}`;
+};

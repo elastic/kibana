@@ -13,6 +13,7 @@ import type { InvestigationEvidence } from '../../common/evidence';
 import type { HypothesesService } from '../hypotheses/services/hypotheses_service';
 import { attachImpactToInvestigation } from '../impact/attachments/attach_impact_to_investigation';
 import type { ImpactService } from '../impact/services/impact_service';
+import type { ImpactMapCatalog } from '../../common/impact_map/impact_map';
 import type { ImpactMapInput, ImpactMapService } from '../impact_map/services/impact_map_service';
 import type { InvestigationsPrivilegesChecker } from '../investigations/services/check_investigations_privileges';
 import type { ResolveUser } from '../services/resolve_user';
@@ -42,6 +43,8 @@ export interface FindingsWriter {
     conversationId: string;
     impactMap: ImpactMapInput;
   }) => Promise<{ warnings: string[] }>;
+  /** The space's catalog of entity and relationship types, so a new map reuses what is there. */
+  getImpactMapCatalog: () => Promise<ImpactMapCatalog>;
   /** The findings stored for the conversation: its hypotheses and impact, if any. */
   getFindings: (params: { conversationId: string }) => Promise<{
     hypotheses: Hypothesis[];
@@ -110,6 +113,10 @@ export const createFindingsWriter =
           conversations,
           attachments,
         });
+      },
+      getImpactMapCatalog: async () => {
+        const { spaceId } = await resolveContext();
+        return getImpactMapService().getCatalogService().get(spaceId);
       },
       setImpactMap: async ({ conversationId, impactMap }) => {
         const { conversations, attachments, user, spaceId } = await resolveContext();

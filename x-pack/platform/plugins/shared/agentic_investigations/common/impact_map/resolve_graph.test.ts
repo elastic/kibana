@@ -126,7 +126,7 @@ describe('resolveImpactMapGraph', () => {
 });
 
 describe('mergeImpactMapCatalog', () => {
-  it('replaces types by id, appends new ones, and keeps the order', () => {
+  it('updates types by id, keeps the icon the update left out, appends new ones, and keeps the order', () => {
     expect(
       mergeImpactMapCatalog(catalog, {
         entity_types: [
@@ -137,7 +137,7 @@ describe('mergeImpactMapCatalog', () => {
     ).toEqual({
       entity_types: [
         catalog.entity_types[0],
-        { id: 'database', label: 'SQL database', kind: 'dependency' },
+        { ...catalog.entity_types[1], label: 'SQL database' },
         catalog.entity_types[2],
         { id: 'cache', label: 'Cache', kind: 'dependency' },
       ],

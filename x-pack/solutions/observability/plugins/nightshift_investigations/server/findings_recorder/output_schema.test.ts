@@ -17,6 +17,7 @@ import {
   limitEvidence,
   limitFindings,
   limitImpactMap,
+  classifyEntityType,
 } from './output_schema';
 
 describe('findings output', () => {
@@ -224,6 +225,36 @@ describe('entity evidence', () => {
     const [checkout, payments] = limitFindings(parsed.data).impact_entities ?? [];
     expect(checkout.evidence?.chart?.series[0].points).toHaveLength(100);
     expect(payments.evidence).toBeUndefined();
+  });
+});
+
+describe('classifyEntityType', () => {
+  it('draws what services rely on as a dependency and Kubernetes objects with their logo', () => {
+    expect(classifyEntityType('postgres_database')).toEqual({ kind: 'dependency' });
+    expect(classifyEntityType('message_queue')).toEqual({ kind: 'dependency' });
+    expect(classifyEntityType('k8s_deployment')).toEqual({
+      kind: 'service',
+      euiIcon: 'logoKubernetes',
+    });
+    expect(classifyEntityType('java_service')).toEqual({ kind: 'service' });
+  });
+
+  it('classifies a new type the model left bare, and leaves a known one to the catalog', () => {
+    const map = {
+      entities: [
+        { id: 'ship', type: 'k8s_deployment' },
+        { id: 'db', type: 'known_db' },
+      ],
+      relationships: [],
+    };
+    const record = limitImpactMap(map, new Set(['known_db']));
+    expect(record?.entity_types).toEqual([
+      expect.objectContaining({
+        id: 'k8s_deployment',
+        kind: 'service',
+        icon: { eui_icon: 'logoKubernetes' },
+      }),
+    ]);
   });
 });
 

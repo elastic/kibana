@@ -158,16 +158,29 @@ export const resolveImpactMapGraph = ({
 };
 
 /**
- * Merges types into a catalog by id: an incoming type replaces the stored one with the same id,
- * the rest are appended, and the order is otherwise kept.
+ * Merges types into a catalog by id: an incoming type updates the stored one with the same id, the
+ * rest are appended, and the order is otherwise kept. A field the incoming type leaves out, an
+ * icon the model did not repeat for instance, keeps its stored value.
  */
+const mergeType = <T extends { id: string }>(before: T, after: T): T => {
+  const merged: T & { icon?: object } = { ...before, ...after };
+  const icons = [(before as { icon?: object }).icon, (after as { icon?: object }).icon];
+  if (icons[0] || icons[1]) {
+    merged.icon = { ...icons[0], ...icons[1] };
+  }
+  return merged;
+};
+
 export const mergeImpactMapCatalog = (
   current: ImpactMapCatalog,
   incoming: Partial<ImpactMapCatalog>
 ): ImpactMapCatalog => {
   const merge = <T extends { id: string }>(stored: T[], added: T[] = []): T[] => {
     const byId = new Map(stored.map((type) => [type.id, type]));
-    added.forEach((type) => byId.set(type.id, type));
+    added.forEach((type) => {
+      const before = byId.get(type.id);
+      byId.set(type.id, before ? mergeType(before, type) : type);
+    });
     return [...byId.values()];
   };
   return {

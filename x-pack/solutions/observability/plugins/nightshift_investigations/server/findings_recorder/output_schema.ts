@@ -269,6 +269,23 @@ const humanizeTypeId = (id: string): string => {
   return words.charAt(0).toUpperCase() + words.slice(1);
 };
 
+const KUBERNETES_OBJECT =
+  /(^|[^a-z])(k8s|kubernetes|deployment|statefulset|daemonset|replicaset|pod)([^a-z]|$)/i;
+const DEPENDENCY_THING =
+  /(database|(^|[^a-z])db([^a-z]|$)|sql|mongo|redis|memcache|cache|elasticsearch|kafka|queue|topic|rabbit|sqs|sns|pubsub|bucket|s3|storage|load[ _-]?balancer|gateway|proxy|external|third[ _-]?party|api[ _-]?endpoint|endpoint|http)/i;
+
+/**
+ * A first classification for a new entity type the model left unclassified: the shape (a dependency
+ * diamond for what services rely on, a service circle for what runs code) and, for a Kubernetes
+ * object, its logo. The catalog keeps it, so it is decided once for every later investigation.
+ */
+export const classifyEntityType = (
+  typeId: string
+): { kind: 'service' | 'dependency'; euiIcon?: string } => {
+  if (KUBERNETES_OBJECT.test(typeId)) return { kind: 'service', euiIcon: 'logoKubernetes' };
+  return { kind: DEPENDENCY_THING.test(typeId) ? 'dependency' : 'service' };
+};
+
 /**
  * Trims the model's impact map to what the store accepts and turns its flat entity fields into the
  * store's shape: an entity type for each `type` that names a kind or an icon, so the catalog
@@ -276,7 +293,9 @@ const humanizeTypeId = (id: string): string => {
  * map does not list are dropped: the store rejects a whole map for one of them.
  */
 export const limitImpactMap = (
-  raw: NonNullable<FindingsOutput['impact_map']>
+  raw: NonNullable<FindingsOutput['impact_map']>,
+  /** Type ids the catalog already holds: they are not redefined from here. */
+  knownTypeIds: ReadonlySet<string> = new Set()
 ): FindingsImpactMap | undefined => {
   const icon = (value?: string) => (value ? truncate(value, MAX_MAP_ICON_KEY_LENGTH) : undefined);
   const entityTypes = new Map<string, ImpactMapEntityType>();
@@ -292,19 +311,18 @@ export const limitImpactMap = (
     const euiIcon = icon(entity.eui_icon);
     const spanType = icon(entity.span_type);
     const spanSubtype = icon(entity.span_subtype);
-    if (
-      !entityTypes.has(typeId) &&
-      (entity.kind || agentName || euiIcon || spanType || spanSubtype)
-    ) {
+    if (!entityTypes.has(typeId) && !knownTypeIds.has(typeId)) {
+      const guess = classifyEntityType(typeId);
+      const euiName = euiIcon ?? (agentName || spanType || spanSubtype ? undefined : guess.euiIcon);
       entityTypes.set(typeId, {
         id: typeId,
         label: humanizeTypeId(typeId),
-        kind: entity.kind ?? (spanType || spanSubtype ? 'dependency' : 'service'),
-        ...(agentName || euiIcon || spanType || spanSubtype
+        kind: entity.kind ?? (spanType || spanSubtype ? 'dependency' : guess.kind),
+        ...(agentName || euiName || spanType || spanSubtype
           ? {
               icon: {
                 ...(agentName ? { agent_name: agentName } : {}),
-                ...(euiIcon ? { eui_icon: euiIcon } : {}),
+                ...(euiName ? { eui_icon: euiName } : {}),
                 ...(spanType ? { span_type: spanType } : {}),
                 ...(spanSubtype ? { span_subtype: spanSubtype } : {}),
               },
@@ -379,7 +397,10 @@ export type FindingsRecord = Omit<
 };
 
 /** Trims a parsed record to the sizes the metadata, hypotheses and impact stores accept. */
-export const limitFindings = (output: FindingsOutput): FindingsRecord => {
+export const limitFindings = (
+  output: FindingsOutput,
+  knownTypeIds?: ReadonlySet<string>
+): FindingsRecord => {
   // The fields that carry evidence are rebuilt below, so the raw ones are not spread back in.
   const {
     impact_evidence: rawImpactEvidence,
@@ -390,7 +411,7 @@ export const limitFindings = (output: FindingsOutput): FindingsRecord => {
     ...rest
   } = output;
   const impactEvidence = rawImpactEvidence ? limitEvidence(rawImpactEvidence) : rawImpactEvidence;
-  const impactMap = rawImpactMap ? limitImpactMap(rawImpactMap) : undefined;
+  const impactMap = rawImpactMap ? limitImpactMap(rawImpactMap, knownTypeIds) : undefined;
   return {
     ...rest,
     ...(impactMap ? { impact_map: impactMap } : {}),

@@ -334,6 +334,12 @@ export const runFindingsPass = async (
             }
           )
         : false;
+    // The types other investigations have taught the catalog, so this map reuses them and any new
+    // type it adds is classified once, properly.
+    const catalog = await agenticInvestigations
+      .getFindingsWriter(request)
+      .getImpactMapCatalog()
+      .catch(() => undefined);
     const buildMessages = (withFiles: boolean) =>
       buildRecorderMessages({
         question,
@@ -394,7 +400,7 @@ export const runFindingsPass = async (
       withFiles: boolean
     ) =>
       (await model.inferenceClient.chatComplete({
-        system: buildRecorderSystemPrompt({ final, files: withFiles }),
+        system: buildRecorderSystemPrompt({ final, files: withFiles, catalog }),
         messages: conversationMessages,
         tools: toolDefinitions as never,
         toolChoice: toolChoice as never,
@@ -407,7 +413,8 @@ export const runFindingsPass = async (
 
     const parseRecord = (raw: unknown, label: string): FindingsRecord | undefined => {
       const parsed = findingsOutputSchema.safeParse(raw);
-      if (parsed.success) return limitFindings(parsed.data);
+      if (parsed.success)
+        return limitFindings(parsed.data, new Set(catalog?.entity_types.map(({ id }) => id)));
       logger.warn(
         `Findings recorder returned an invalid record (${label}): ${parsed.error.message}`
       );

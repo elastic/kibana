@@ -54,6 +54,9 @@ describe('runFindingsPass', () => {
       setHypotheses: jest.fn().mockResolvedValue(undefined),
       setImpact: jest.fn().mockResolvedValue(undefined),
       setImpactMap: jest.fn().mockResolvedValue({ warnings: [] }),
+      getImpactMapCatalog: jest
+        .fn()
+        .mockResolvedValue({ entity_types: [], relationship_types: [] }),
       getFindings: jest.fn().mockResolvedValue({ hypotheses: [], impactEntities: [] }),
     };
     const patchMetadata = jest.fn().mockResolvedValue(undefined);
@@ -337,7 +340,11 @@ describe('runFindingsPass', () => {
 
     const schemaOf = (chatComplete: jest.Mock) =>
       chatComplete.mock.calls[0][0].tools.structuredOutput.schema.properties;
-    expect(Object.keys(schemaOf(live.chatComplete))).toEqual(['summary', 'hypotheses', 'impact_map']);
+    expect(Object.keys(schemaOf(live.chatComplete))).toEqual([
+      'summary',
+      'hypotheses',
+      'impact_map',
+    ]);
     expect(Object.keys(schemaOf(final.chatComplete))).toEqual(
       expect.arrayContaining(['verdict', 'severity', 'impact_summary', 'impact_entities'])
     );
@@ -438,6 +445,25 @@ describe('runFindingsPass', () => {
     await run(deps, memory, { answer: 'Root cause: bad deploy' });
 
     expect(writer.setImpact).not.toHaveBeenCalled();
+  });
+
+  it('shows the recorder the catalog types so the map reuses them', async () => {
+    const { deps, writer, memory, chatComplete } = setup();
+    writer.getImpactMapCatalog.mockResolvedValue({
+      entity_types: [
+        {
+          id: 'k8s_deployment',
+          label: 'K8s deployment',
+          kind: 'service',
+          icon: { eui_icon: 'logoKubernetes' },
+        },
+      ],
+      relationship_types: [{ id: 'scaled_to_zero', label: 'scaled to zero' }],
+    });
+    await run(deps, memory);
+    const { system } = chatComplete.mock.calls[0][0];
+    expect(system).toContain('k8s_deployment: service, eui_icon=logoKubernetes');
+    expect(system).toContain('scaled_to_zero');
   });
 
   it('redraws the impact map on live passes and on the final pass', async () => {
@@ -851,6 +877,9 @@ describe('runFindingsPass with workspace files', () => {
     const writer = {
       setHypotheses: jest.fn().mockResolvedValue(undefined),
       setImpact: jest.fn().mockResolvedValue(undefined),
+      getImpactMapCatalog: jest
+        .fn()
+        .mockResolvedValue({ entity_types: [], relationship_types: [] }),
       getFindings: jest.fn().mockResolvedValue({ hypotheses: [], impactEntities: [] }),
     };
     const chatComplete = jest.fn();
