@@ -50,6 +50,12 @@ interface MockOverrides {
     string,
     Array<{ feature_id: string; endpoints: Array<{ id: string }> }>
   >;
+  /**
+   * Cyber-row endpoint id the settings GET reports per space after the bridge write, modeling
+   * another writer replacing the pick between the PUT and the readback. `null` models the row
+   * missing entirely. Keyed by space id.
+   */
+  cyberPickReadbackBySpace?: Record<string, string | null>;
   /** Spaces whose inference-settings PUT fails (the settings GET and ui-settings writes succeed). */
   inferenceSettingsWriteErrorSpaces?: string[];
   /** Spaces whose bridge and restore settings writes fail (index-scope writes still succeed). */
@@ -76,6 +82,7 @@ const buildMockFetch = (overrides: MockOverrides = {}): HttpHandler => {
     previousDefaultConnectorBySpace = {},
     previousDefaultOnlyBySpace = {},
     previousInferenceSettingsBySpace = {},
+    cyberPickReadbackBySpace = {},
     inferenceSettingsWriteErrorSpaces = [],
     settingsWriteErrorSpaces = [],
     settingsWrites = [],
@@ -168,6 +175,13 @@ const buildMockFetch = (overrides: MockOverrides = {}): HttpHandler => {
       const spaceId = decodeURIComponent(connectorsMatch[1]);
       const key = `${spaceId}/${query?.featureId}`;
       const pinned = tierPicksBySpace[spaceId]?.[query?.featureId ?? ''];
+      // The server's route lists only template-required connectors for a feature registered with
+      // `allowTemplateRequiredModels` (the Cyber row), so an ordinary connector like the subject
+      // resolves to nothing there. That is why the Cyber pick is asserted from the saved
+      // inference settings instead of from this route.
+      if (query?.featureId === 'alertzero_template_models') {
+        return { connectors: [], soEntryFound: pinned != null };
+      }
       // Without a saved tier pick the tiers fall to their recommended endpoints.
       const resolved =
         key in tierResolutionOverrides
@@ -186,6 +200,20 @@ const buildMockFetch = (overrides: MockOverrides = {}): HttpHandler => {
         // Spaces with no saved picks 404, like the server does for a missing saved object.
         const existing = inferenceSettingsBySpace[spaceId];
         if (!existing) throw Object.assign(new Error('Not Found'), { status: 404 });
+        const readback = cyberPickReadbackBySpace[spaceId];
+        if (readback !== undefined) {
+          // `null` drops the Cyber row entirely, like another writer having replaced the saved
+          // object without it.
+          const features =
+            readback === null
+              ? existing.filter(({ feature_id }) => feature_id !== 'alertzero_template_models')
+              : existing.map((f) =>
+                  f.feature_id === 'alertzero_template_models'
+                    ? { ...f, endpoints: [{ id: readback }] }
+                    : f
+                );
+          return { data: { features } };
+        }
         return { data: { features: existing } };
       }
       if (method === 'PUT') {
@@ -199,6 +227,12 @@ const buildMockFetch = (overrides: MockOverrides = {}): HttpHandler => {
         if (inferenceSettingsWriteErrorSpaces.includes(spaceId)) {
           throw Object.assign(new Error('Bad Request'), { status: 400 });
         }
+        // The server persists the saved object, so a GET after this PUT returns the new picks —
+        // `assertCyberPickPinned` relies on that readback.
+        inferenceSettingsBySpace[spaceId] = features.map((f) => ({
+          ...f,
+          endpoints: [...f.endpoints],
+        }));
         tierPicksBySpace[spaceId] = Object.fromEntries(
           features.map((f) => [f.feature_id, f.endpoints[0]?.id])
         );
@@ -660,6 +694,28 @@ describe('runPreflight', () => {
       run(buildMockFetch({ tierResolutionOverrides: { 'default/alertzero_efficient': undefined } }))
     ).rejects.toThrow(
       /feature "alertzero_efficient" resolves to "no connector" in space "default"/
+    );
+  });
+
+  it('throws naming the space and the model when the saved Cyber pick readback is another connector', async () => {
+    // The connectors route lists no ordinary connector for the Cyber row, so its pin is asserted
+    // from the saved inference settings; a readback naming another model must fail the preflight.
+    await expect(
+      run(
+        buildMockFetch({
+          cyberPickReadbackBySpace: { 'hunt-a': 'gpt-6-sol' },
+        })
+      )
+    ).rejects.toThrow(
+      /Cyber template-models pick resolves to "gpt-6-sol" in space "hunt-a", not the subject model/
+    );
+  });
+
+  it('throws naming the space when the Cyber pick readback has no row at all', async () => {
+    await expect(
+      run(buildMockFetch({ cyberPickReadbackBySpace: { 'hunt-b': null } }))
+    ).rejects.toThrow(
+      /Cyber template-models pick resolves to "no connector" in space "hunt-b", not the subject model/
     );
   });
 

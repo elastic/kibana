@@ -63,13 +63,24 @@ interface InferenceSettingsResponse {
   data: { features: Array<{ feature_id: string; endpoints: Array<{ id: string }> }> };
 }
 
-const ALERTZERO_TIER_FEATURE_IDS: readonly string[] = [
+/** The three AlertZero cost tiers the connectors route can assert the subject on. */
+const ALERTZERO_COST_TIER_FEATURE_IDS: readonly string[] = [
   ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
   ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
   ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
-  // A saved Cyber pick replaces the tier in `selectHuntCallModel`, so it is pinned too: a pick
-  // left in place by an earlier run on a reused stack would score another model under the
-  // subject's name while the tier assertions still pass.
+];
+
+/**
+ * Every feature the bridge pins through the inference-settings saved object. Includes the Cyber
+ * row on top of the cost tiers: a saved Cyber pick replaces the tier in `selectHuntCallModel`,
+ * so a pick left in place by an earlier run on a reused stack would score another model under
+ * the subject's name while the tier assertions still pass. The Cyber row itself is registered
+ * with `allowTemplateRequiredModels: true`, so the connectors route filters out every ordinary
+ * connector for it and a normal subject resolves to nothing there; its pick is asserted from the
+ * saved settings instead (`assertCyberPickPinned`).
+ */
+const ALERTZERO_BRIDGED_FEATURE_IDS: readonly string[] = [
+  ...ALERTZERO_COST_TIER_FEATURE_IDS,
   ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
 ];
 
@@ -301,9 +312,9 @@ const bridgeSubjectModel = async ({
 
     // Keep any non-pinned picks the space already had; only the four bridged features move.
     const keptFeatures = (existingPicks?.features ?? []).filter(
-      ({ feature_id }) => !ALERTZERO_TIER_FEATURE_IDS.includes(feature_id)
+      ({ feature_id }) => !ALERTZERO_BRIDGED_FEATURE_IDS.includes(feature_id)
     );
-    const pinnedFeatures = ALERTZERO_TIER_FEATURE_IDS.map((feature_id) => ({
+    const pinnedFeatures = ALERTZERO_BRIDGED_FEATURE_IDS.map((feature_id) => ({
       feature_id,
       endpoints: [{ id: connectorId }],
     }));
@@ -351,7 +362,7 @@ const assertTiersResolveToSubject = async ({
   subjectIds: readonly string[];
 }): Promise<void> => {
   for (const spaceId of EVAL_SPACE_IDS) {
-    for (const featureId of ALERTZERO_TIER_FEATURE_IDS) {
+    for (const featureId of ALERTZERO_COST_TIER_FEATURE_IDS) {
       const { connectors } = await fetch<InferenceConnectorsResponse>(
         spacePath(spaceId, INFERENCE_CONNECTORS_PATH),
         {
@@ -372,8 +383,48 @@ const assertTiersResolveToSubject = async ({
         );
       }
     }
+    log.info(`[hunt-watch] every cost tier resolves to "${subjectIds[0]}" in space "${spaceId}"`);
+  }
+};
+
+/**
+ * The Cyber row is the one bridged feature the connectors route cannot validate: it is registered
+ * with `allowTemplateRequiredModels: true`, so the route filters out ordinary connectors for it
+ * and the subject would resolve to nothing there even when its pick is saved. This reads the
+ * saved inference settings back instead — the same saved object `resolveFeatureEndpoints` returns
+ * first, before any filtering — and fails unless the pick is the subject.
+ */
+const assertCyberPickPinned = async ({
+  fetch,
+  log,
+  subjectIds,
+}: {
+  fetch: HttpHandler;
+  log: ToolingLog;
+  subjectIds: readonly string[];
+}): Promise<void> => {
+  for (const spaceId of EVAL_SPACE_IDS) {
+    const { data } = await fetch<InferenceSettingsResponse>(
+      spacePath(spaceId, INFERENCE_SETTINGS_PATH),
+      {
+        method: 'GET',
+        headers: apiVersion(SEARCH_INFERENCE_ENDPOINTS_API_VERSION),
+      }
+    );
+    const pick = data.features.find(
+      ({ feature_id }) => feature_id === ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID
+    );
+    const resolved = pick?.endpoints[0]?.id;
+    if (!resolved || !subjectIds.includes(resolved)) {
+      throw new Error(
+        `[hunt-watch] the Cyber template-models pick resolves to "${
+          resolved ?? 'no connector'
+        }" in space "${spaceId}", not the subject model (${subjectIds.join(' / ')}). The Worker ` +
+          `would run on that model and the scores would be attributed to the wrong one.`
+      );
+    }
     log.info(
-      `[hunt-watch] every bridged feature resolves to "${subjectIds[0]}" in space "${spaceId}"`
+      `[hunt-watch] the Cyber template-models pick is "${subjectIds[0]}" in space "${spaceId}"`
     );
   }
 };
@@ -658,6 +709,9 @@ export const runPreflight = async ({
 
   // Every step below can throw, and a worker fixture that throws before `use()` never runs the
   // cleanup it would have returned, so the settings are put back here before the error leaves.
+  const subjectIds = [
+    ...new Set([connectorId, ...(subjectInferenceId ? [subjectInferenceId] : [])]),
+  ];
   try {
     await bridgeSubjectModel({
       fetch,
@@ -666,11 +720,8 @@ export const runPreflight = async ({
       previousSettings: previous,
       previousTierPicks,
     });
-    await assertTiersResolveToSubject({
-      fetch,
-      log,
-      subjectIds: [...new Set([connectorId, ...(subjectInferenceId ? [subjectInferenceId] : [])])],
-    });
+    await assertTiersResolveToSubject({ fetch, log, subjectIds });
+    await assertCyberPickPinned({ fetch, log, subjectIds });
     await enableWorkerInEvalSpaces({ fetch, log, isServerless });
     await assertThreatIntelSupplyReady({ fetch, log });
     await ensureEntityStoreRunning({ fetch, log });

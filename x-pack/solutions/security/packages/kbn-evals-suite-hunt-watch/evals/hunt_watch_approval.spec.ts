@@ -17,7 +17,7 @@ import type { IndexedFleetEndpointPolicyResponse } from '@kbn/security-solution-
 import type { KbnClient } from '@kbn/test';
 import { evaluate, tags } from '../src/evaluate';
 import { collectHuntArtifacts } from '../src/collect';
-import { DEFAULT_EVAL_SPACE_ID, HUNT_REPORT_IDS } from '../src/constants';
+import { DEFAULT_EVAL_SPACE_ID, HOLDOUT_REPORT_IDS, HUNT_REPORT_IDS } from '../src/constants';
 import { buildHuntInvestigationConversationId, resetHuntReport } from '../src/seed_hunt_data';
 import {
   ensureHuntEndpointMetadata,
@@ -62,6 +62,11 @@ const conversationId = buildHuntInvestigationConversationId({ spaceId, reportId 
 // space. A Proposal one of them left pending makes packaging converge onto it instead of minting
 // one here, so they are settled before this report is.
 const convergingReportIds = HUNT_REPORT_IDS.multiCandidate.filter((id) => id !== reportId);
+// The holdout assume-role row hunts the same WIN-ANALYST01/aws.exe subject in this same default
+// space and is expected to leave its Proposal pending. Under HUNT_WATCH_HOLDOUT=1 the holdout
+// spec sorts before this one, so that pending Proposal converges packaging the same way; a
+// reused stack can hold one from an earlier holdout run too.
+const holdoutConvergingReportIds = [HOLDOUT_REPORT_IDS[0]];
 
 const resetApprovalReports = async ({
   esClient,
@@ -72,7 +77,7 @@ const resetApprovalReports = async ({
   fetch: HttpHandler;
   log: ToolingLog;
 }): Promise<void> => {
-  for (const id of [...convergingReportIds, reportId]) {
+  for (const id of [...convergingReportIds, ...holdoutConvergingReportIds, reportId]) {
     await resetHuntReport({ esClient, fetch, log, reportId: id, spaceId });
   }
 };
