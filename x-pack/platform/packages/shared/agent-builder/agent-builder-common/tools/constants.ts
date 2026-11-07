@@ -102,6 +102,7 @@ export const contextEngineAiIndexTools = {
 export const contextEngineMemoryTools = {
   remember: `${internalNamespaces.platformContextEngine}.remember`,
   forget: `${internalNamespaces.platformContextEngine}.forget`,
+  recall: `${internalNamespaces.platformContextEngine}.recall`,
 } as const;
 
 /** AI-index automation tools, registered by the Context Engine Agent Builder plugin. */
