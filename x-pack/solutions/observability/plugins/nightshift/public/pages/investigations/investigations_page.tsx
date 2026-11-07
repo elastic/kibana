@@ -424,7 +424,6 @@ export function InvestigationsPage(): React.ReactElement {
             onChange={({ start, end }) =>
               replaceUrl({ ...urlState, rangeFrom: start, rangeTo: end })
             }
-            showRefreshButton
             data-test-subj="nightshiftInvestigationsPageTimePicker"
           />
         </EuiFlexItem>

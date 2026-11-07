@@ -174,6 +174,29 @@ describe('ConversationDetailsFlyoutFooter', () => {
     );
   });
 
+  it('closes immediately from Actions when onCloseInvestigationImmediate is set', () => {
+    const onCloseInvestigationImmediate = jest.fn();
+    const onCloseInvestigation = jest.fn(() => <div>Close modal</div>);
+    renderWithKibanaRenderContext(
+      <ConversationDetailsFlyoutFooter
+        investigation={investigation}
+        isOpenedFromChat={false}
+        onOpenChat={jest.fn()}
+        onCloseInvestigation={onCloseInvestigation}
+        onCloseInvestigationImmediate={onCloseInvestigationImmediate}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('investigationFlyoutActionsButton'));
+    fireEvent.click(screen.getByTestId('investigationFlyoutActionsClose'));
+
+    expect(onCloseInvestigationImmediate).toHaveBeenCalledWith(
+      expect.objectContaining({ id: investigation.id })
+    );
+    expect(onCloseInvestigation).not.toHaveBeenCalled();
+    expect(screen.queryByText('Close modal')).not.toBeInTheDocument();
+  });
+
   it('opens the delete confirmation from Actions', () => {
     renderWithKibanaRenderContext(
       <ConversationDetailsFlyoutFooter

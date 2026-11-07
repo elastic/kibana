@@ -63,8 +63,14 @@ export interface ConversationDetailsFlyoutFooterProps {
   /**
    * When provided, the "Close" Actions item renders a confirmation modal.
    * Supplied by the caller so the modal can use HTTP hooks unavailable in this package.
+   * Ignored when {@link onCloseInvestigationImmediate} is set.
    */
   onCloseInvestigation?: (props: CloseInvestigationModalRenderProps) => React.ReactNode;
+  /**
+   * When provided, Close runs this immediately with no confirmation (same as Open).
+   * Takes precedence over {@link onCloseInvestigation}.
+   */
+  onCloseInvestigationImmediate?: (investigation: Investigation) => void | Promise<void>;
   /**
    * When provided, the Actions menu offers "Open" on a closed investigation (no confirmation).
    * Supplied by the caller so the mutation can use HTTP hooks unavailable in this package.
@@ -95,6 +101,7 @@ export const ConversationDetailsFlyoutFooter = ({
   onOpenEscalation,
   wrapEscalationButton,
   onCloseInvestigation,
+  onCloseInvestigationImmediate,
   onReopenInvestigation,
   onDeleteInvestigation,
   wrapActionsMenu,
@@ -107,7 +114,10 @@ export const ConversationDetailsFlyoutFooter = ({
   const closeActions = useCallback(() => setIsActionsOpen(false), []);
   const canRenderEscalationButton = Boolean(onOpenEscalation);
   const closed = isInvestigationClosed(investigation);
-  const canCloseOrOpen = Boolean(onCloseInvestigation) || Boolean(onReopenInvestigation);
+  const canCloseOrOpen =
+    Boolean(onCloseInvestigationImmediate) ||
+    Boolean(onCloseInvestigation) ||
+    Boolean(onReopenInvestigation);
   const canDelete = Boolean(onDeleteInvestigation);
   const showActionsMenu = canDelete || canCloseOrOpen;
 
@@ -124,9 +134,10 @@ export const ConversationDetailsFlyoutFooter = ({
     </EuiFlexItem>
   );
 
-  const renderCloseModal = onCloseInvestigation
-    ? (props: CloseInvestigationModalRenderProps) => onCloseInvestigation(props)
-    : undefined;
+  const renderCloseModal =
+    !onCloseInvestigationImmediate && onCloseInvestigation
+      ? (props: CloseInvestigationModalRenderProps) => onCloseInvestigation(props)
+      : undefined;
 
   const actionItems = useMemo(() => {
     const itemCss = {
@@ -180,7 +191,7 @@ export const ConversationDetailsFlyoutFooter = ({
             {ACTIONS_TRANSLATIONS.buttons.openShort}
           </EuiContextMenuItem>
         );
-      } else if (!closed && onCloseInvestigation) {
+      } else if (!closed && (onCloseInvestigationImmediate || onCloseInvestigation)) {
         items.push(
           <EuiContextMenuItem
             key="close"
@@ -188,6 +199,10 @@ export const ConversationDetailsFlyoutFooter = ({
             icon={menuIcon(checkIcon)}
             onClick={() => {
               closeActions();
+              if (onCloseInvestigationImmediate) {
+                void onCloseInvestigationImmediate(investigation);
+                return;
+              }
               setModalAction('close');
             }}
             data-test-subj="investigationFlyoutActionsClose"
@@ -208,6 +223,7 @@ export const ConversationDetailsFlyoutFooter = ({
     euiTheme.size.xs,
     investigation,
     onCloseInvestigation,
+    onCloseInvestigationImmediate,
     onReopenInvestigation,
   ]);
 

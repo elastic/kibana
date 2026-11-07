@@ -102,8 +102,14 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
   /**
    * When provided, the "Close" footer Actions item renders a confirmation modal.
    * Supplied by the caller so the modal can use HTTP hooks unavailable in this package.
+   * Ignored when {@link onCloseInvestigationImmediate} is set.
    */
   renderCloseInvestigationModal?: import('./slots').FooterSlotProps['onCloseInvestigation'];
+  /**
+   * When provided, Close runs this immediately with no confirmation.
+   * Takes precedence over {@link renderCloseInvestigationModal}.
+   */
+  onCloseInvestigationImmediate?: import('./slots').FooterSlotProps['onCloseInvestigationImmediate'];
   /**
    * When provided, the footer Actions menu offers "Open" on a closed investigation.
    * Supplied by the caller so the mutation can use HTTP hooks unavailable in this package.
@@ -167,6 +173,7 @@ export const registerAgenticInvestigationTemplateUI = ({
   renderStatus,
   renderSeverity,
   renderCloseInvestigationModal,
+  onCloseInvestigationImmediate,
   onReopenInvestigation,
   renderDeleteInvestigationModal,
   wrapActionsMenu,
@@ -260,6 +267,7 @@ export const registerAgenticInvestigationTemplateUI = ({
                 onOpenEscalation={renderEscalationModal}
                 wrapEscalationButton={wrapEscalationButton}
                 onCloseInvestigation={renderCloseInvestigationModal}
+                onCloseInvestigationImmediate={onCloseInvestigationImmediate}
                 onReopenInvestigation={onReopenInvestigation}
                 onDeleteInvestigation={renderDeleteInvestigationModal}
                 wrapActionsMenu={wrapActionsMenu}
