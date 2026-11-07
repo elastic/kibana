@@ -164,6 +164,7 @@
       "shards": [
         {
           "id": "customer0",
+          "judge": "eis-openai-gpt-6-sol",
           "specFiles": [
             "evals/smoke/smoke.spec.ts",
             "evals/investigation/investigation.spec.ts"

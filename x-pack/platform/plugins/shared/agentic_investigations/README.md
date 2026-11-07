@@ -179,7 +179,7 @@ The public plugin registers the conversation template UI for `investigation` and
 
 The status and assignee signals and the shared query client in `public/` are module-level singletons. Solution pages must import them from `@kbn/agentic-investigations-plugin/public` so a change in the flyout reaches their queue views.
 
-To see the template UI without an agent run, `scripts/nightshift_seed_investigations.ts` seeds synthetic investigations (completed alert investigations with impact, hypotheses, and proposed actions — one with five hypotheses in every status and three proposals, for the hypothesis tree — a completed question, and an untitled one that was just started) and prints a link to each conversation in Agent Builder. Run it with `node -r @kbn/setup-node-env x-pack/platform/plugins/shared/agentic_investigations/scripts/nightshift_seed_investigations.ts` (`--help` for the connection flags, `--clean` to remove the seeds). Proposed actions need `xpack.proposals.enabled: true`.
+To see the template UI without an agent run, `scripts/nightshift_seed_investigations.ts` seeds synthetic investigations (completed alert investigations with impact, hypotheses, and proposed actions — one with five hypotheses in every status and three proposals, for the hypothesis tree — a completed question, and an untitled one that was just started) and prints a link to each conversation in Agent Builder. Run it with `node -r @kbn/setup-node-env x-pack/platform/plugins/shared/agentic_investigations/scripts/nightshift_seed_investigations.ts` (`--help` for the connection flags, `--clean` to remove the seeds). Proposed actions need the proposals plugin (`xpack.proposals.enabled`, on by default in stateful deployments).
 
 ## Index naming
 
