@@ -337,12 +337,17 @@ components:
     Threat:
       type: object
       description: |
-        > info
-        > Currently, only threats described using the MITRE ATT&CK&trade; framework are supported.
+        Maps the rule to a tactic and, optionally, techniques from a MITRE framework. Threats can be mapped to MITRE ATT&CK&trade; or, in 9.6 and later, MITRE ATLAS.
+
+        Each `threat` entry belongs to exactly one framework, set by its `framework` value. Don't mix ATT&CK and ATLAS tactic or technique IDs in the same entry. To map a rule to both frameworks, add a separate entry for each.
       properties:
         framework:
           type: string
-          description: Relevant attack framework
+          description: |
+            MITRE framework that the entry's tactic and techniques belong to. Use one of the following values:
+
+            - `MITRE ATT&CK`: Tactic and technique IDs from MITRE ATT&CK, such as `TA0001`, `T1566`, and `T1566.001`.
+            - `MITRE ATLAS` (9.6 and later): Tactic and technique IDs from MITRE ATLAS. These IDs have the `AML.` prefix, such as `AML.TA0000`, `AML.T0044`, and `AML.T0024.002`.
         tactic:
           $ref: '#/components/schemas/ThreatTactic'
         technique:
