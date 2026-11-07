@@ -507,6 +507,13 @@ export const ALERTING_LOG_CODES = {
    * Logged once per Kibana start; remove the override after the incident.
    */
   DISPATCHER_PAUSED: 'DISPATCHER_PAUSED',
+  /**
+   * The alert scan returned `xpack.alerting_v2.dispatcher.run.alerts.max` rows,
+   * so a tail of alerts was deferred to the next tick and the watermark advances
+   * only to the truncation edge. Logged on every truncated tick; a sustained rate
+   * means the dispatcher is falling behind.
+   */
+  DISPATCHER_ALERT_SCAN_TRUNCATED: 'DISPATCHER_ALERT_SCAN_TRUNCATED',
 
   // ────────────────────────────── Director ───────────────────────────
   /**
