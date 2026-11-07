@@ -138,10 +138,18 @@ steps:
   # A required source, so no `on-failure`: a failed search, including a missing
   # privilege, fails the run, which the review records as `failed`. An empty hit
   # set is a successful search and is rejected by `require_attack_discovery`.
+  #
+  # Both Attack Discovery destinations, unioned: the runner-launched analyses'
+  # ad-hoc index AND the persisted-alerts data stream. On serverless only the
+  # product data stream exists (user creation of dot-prefixed names is
+  # rejected), on stateful stacks both may hold the document — `ignore_unavailable`
+  # keeps either absence from failing the search. Same union as
+  # `fetch_attack_discovery_alert` in forensics_run_endpoint_analysis.
   - name: load_attack_discovery
     type: elasticsearch.search
     with:
-      index: .adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}
+      index: ".alerts-security.attack.discovery.alerts-{{ workflow.spaceId }},.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}"
+      ignore_unavailable: true
       size: 1
       # The template caps this document at 50k characters. Drop replacements and
       # api_config; the checks only need the narrative and the cited alert ids.
@@ -156,9 +164,14 @@ steps:
         - host.name
         - user.name
       query:
-        ids:
-          values:
-            - "{{ inputs.attack_discovery_id }}"
+        bool:
+          should:
+            - ids:
+                values:
+                  - "{{ inputs.attack_discovery_id }}"
+            - term:
+                kibana.alert.uuid: "{{ inputs.attack_discovery_id }}"
+          minimum_should_match: 1
 
   # An empty search SUCCEEDS, so the step above cannot catch an id that names no
   # document.
