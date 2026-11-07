@@ -11,11 +11,11 @@ import yargs from 'yargs';
 import type { Client } from '@elastic/elasticsearch';
 import { createEsClient, createKbnClient } from '../cases_generator/clients';
 import { logger } from '../cases_generator/logger';
-import type { KbnContext } from '../cases_generator/types';
 import { ALERTING_CASES_INDEX, RuleWriteProbe } from './probe';
 import type { ProbeResult } from './probe';
 import type { LatencyStats } from './stats';
 import { delay, sample, summarize, timed } from './stats';
+import { createProbeRule, createRequester, formatTable, latencyRow } from './shared';
 
 const TAG = 'observables-load-test';
 const IPV4 = 'observable-type-ipv4';
@@ -108,19 +108,6 @@ const observableAt = (index: number) =>
 const range = (start: number, end: number): number[] =>
   Array.from({ length: Math.max(0, end - start) }, (_, offset) => start + offset);
 
-const createRequester =
-  ({ kbnClient, headers }: KbnContext) =>
-  async <T>(method: 'GET' | 'POST' | 'DELETE', path: string, body?: unknown): Promise<T> => {
-    const { data } = await kbnClient.request<T>({
-      method,
-      path,
-      body,
-      retries: 0,
-      headers: { ...headers, 'x-elastic-internal-origin': 'kibana' },
-    });
-    return data;
-  };
-
 const getIndexStats = async (es: Client): Promise<IndexStats> => {
   await es.indices.flush({ index: ALERTING_CASES_INDEX });
   const [stats, { count }] = await Promise.all([
@@ -153,24 +140,7 @@ export const runObservablesLoadTest = async (): Promise<void> => {
   });
 
   const indexBefore = await getIndexStats(es);
-  const rule = await request<{ id: string }>('POST', '/api/alerting/rule', {
-    name: `${TAG} probe`,
-    rule_type_id: '.index-threshold',
-    consumer: 'stackAlerts',
-    enabled: false,
-    schedule: { interval: '1m' },
-    actions: [],
-    params: {
-      index: [TAG],
-      timeField: '@timestamp',
-      aggType: 'count',
-      groupBy: 'all',
-      thresholdComparator: '>',
-      threshold: [1_000_000],
-      timeWindowSize: 5,
-      timeWindowUnit: 'm',
-    },
-  });
+  const rule = await createProbeRule(request, TAG);
   const probe = new RuleWriteProbe(es, rule.id, config.probeIntervalMs);
 
   try {
@@ -332,25 +302,6 @@ export const runObservablesLoadTest = async (): Promise<void> => {
   }
 };
 
-/** Renders rows as an aligned text table for the tooling log. */
-const formatTable = (rows: Record<string, object>): string => {
-  const cells = Object.entries(rows).map(
-    ([name, row]) => [name, new Map<string, unknown>(Object.entries(row))] as const
-  );
-  const columns = [...new Set(cells.flatMap(([, row]) => [...row.keys()]))];
-  const lines = [
-    ['', ...columns],
-    ...cells.map(([name, row]) => [
-      name,
-      ...columns.map((column) => String(row.get(column) ?? '')),
-    ]),
-  ];
-  const widths = lines[0].map((_, index) => Math.max(...lines.map((line) => line[index].length)));
-  return lines
-    .map((line) => line.map((cell, index) => cell.padEnd(widths[index])).join('  '))
-    .join('\n');
-};
-
 const printReport = ({
   ruleWrite,
   bulkAdd,
@@ -366,14 +317,6 @@ const printReport = ({
   index: Record<string, IndexStats>;
   deleteCases?: { seconds: number; observablesLeft: number };
 }) => {
-  const latencyRow = (stats: LatencyStats) => ({
-    count: stats.count,
-    'p50 ms': stats.p50,
-    'p95 ms': stats.p95,
-    'p99 ms': stats.p99,
-    'max ms': stats.max,
-  });
-
   logger.info(
     `Rule status write latency\n${formatTable(
       Object.fromEntries(

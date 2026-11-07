@@ -47,6 +47,14 @@ export class RuleWriteProbe {
     return { latency: summarize(this.samples), errors: this.errors };
   }
 
+  /** Returns the samples and errors since the last drain, and keeps probing. */
+  public drain(): { samples: number[]; errors: number } {
+    const drained = { samples: this.samples, errors: this.errors };
+    this.samples = [];
+    this.errors = 0;
+    return drained;
+  }
+
   private async run(): Promise<void> {
     while (this.running) {
       const start = performance.now();
