@@ -639,7 +639,7 @@ const versionBeforeRun = async (
  * rejected earlier submit named is left out. Prior is the tree before this run's first commit when
  * it committed, otherwise the existing head.
  */
-const treesAfterRun = async (
+export const treesAfterRun = async (
   esClient: Client,
   submissions: readonly SubmitArguments[],
   conversationId: string

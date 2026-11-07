@@ -10,8 +10,9 @@ import type { HttpHandler } from '@kbn/core/public';
 import { ExecutionStatus } from '@kbn/workflows';
 import { NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { submitArgumentsEvaluator } from './evaluators';
-import { runReinforcementExample } from './task';
+import { runReinforcementExample, treesAfterRun } from './task';
 import { reinforcementExamples } from './traces';
+import type { SubmitArguments } from './types';
 
 jest.mock('timers/promises', () => ({ setTimeout: jest.fn().mockResolvedValue(undefined) }));
 
@@ -31,6 +32,7 @@ type Source = Record<string, unknown> & {
     space_id?: string;
     conversation_id?: string;
     counts_conversation_id?: string;
+    version?: number;
   };
 };
 
@@ -457,5 +459,94 @@ describe('runReinforcementExample', () => {
       expect(docs.get(OTHER_HEAD_ID)).toEqual(otherTree);
       expect(docs.get('default:dtree_foreign')?.content).toBe('edited by another investigation');
     });
+  });
+});
+
+describe('treesAfterRun', () => {
+  const RUN = 'investigation-conversation';
+  const OTHER = 'earlier-conversation';
+  const treeDoc = (content: string, treeVersion: number, conversationId?: string): Source => ({
+    content,
+    attributes: {
+      version: treeVersion,
+      ...(conversationId ? { conversation_id: conversationId } : {}),
+    },
+  });
+  const naming = (...treeIds: string[]) =>
+    ({
+      summary: 'test',
+      symptom_trees: [],
+      traversals: treeIds.map((tree_id) => ({
+        tree_id,
+        visited_path: ['S1', 'E1'],
+        causal_path: [],
+      })),
+    } as unknown as SubmitArguments);
+
+  it('grades against the version before the run, skipping every commit the run made', async () => {
+    const { esClient } = fakeEsClient([], {
+      'default:dtree_gateway': treeDoc('v3', 3, RUN),
+      'default:dtree_gateway_v2': treeDoc('v2', 2, RUN),
+      'default:dtree_gateway_v1': treeDoc('v1', 1, OTHER),
+    });
+    await expect(treesAfterRun(esClient, [naming('symptom:gateway')], RUN)).resolves.toEqual([
+      { tree_id: 'symptom:gateway', prior_mermaid: 'v1', submitted_mermaid: 'v3' },
+    ]);
+  });
+
+  it('keeps a predecessor another conversation committed just before the run as the baseline', async () => {
+    const { esClient } = fakeEsClient([], {
+      'default:dtree_gateway': treeDoc('v2', 2, RUN),
+      'default:dtree_gateway_v1': {
+        ...treeDoc('v1', 1, OTHER),
+        '@timestamp': new Date().toISOString(),
+      },
+    });
+    const [tree] = await treesAfterRun(esClient, [naming('symptom:gateway')], RUN);
+    expect(tree.prior_mermaid).toBe('v1');
+  });
+
+  it('has no prior when the run created the tree', async () => {
+    const { esClient } = fakeEsClient([], {
+      'default:dtree_gateway': treeDoc('v2', 2, RUN),
+      'default:dtree_gateway_v1': treeDoc('v1', 1, RUN),
+    });
+    const [tree] = await treesAfterRun(esClient, [naming('symptom:gateway')], RUN);
+    expect(tree.prior_mermaid).toBeUndefined();
+  });
+
+  it('skips a tree only a rejected earlier submit named', async () => {
+    const { esClient } = fakeEsClient([], {
+      'default:dtree_gateway': treeDoc('v2', 2, RUN),
+      'default:dtree_gateway_v1': treeDoc('v1', 1, OTHER),
+    });
+    const trees = await treesAfterRun(
+      esClient,
+      [naming('symptom:gatewy'), naming('symptom:gateway')],
+      RUN
+    );
+    expect(trees.map(({ tree_id: treeId }) => treeId)).toEqual(['symptom:gateway']);
+  });
+
+  it('keeps trees an earlier submit committed or counted when a retry names only another tree', async () => {
+    const { esClient } = fakeEsClient([], {
+      'default:dtree_proxy': treeDoc('proxy v2', 2, RUN),
+      'default:dtree_proxy_v1': treeDoc('proxy v1', 1, OTHER),
+      'default:dtree_slo': {
+        ...treeDoc('slo v1', 1, OTHER),
+        attributes: { version: 1, conversation_id: OTHER, counts_conversation_id: RUN },
+      },
+      'default:dtree_gateway': treeDoc('gateway v1', 1, OTHER),
+    });
+    const trees = await treesAfterRun(
+      esClient,
+      [naming('symptom:proxy', 'symptom:slo'), naming('symptom:gateway')],
+      RUN
+    );
+    expect(trees).toEqual([
+      { tree_id: 'symptom:proxy', prior_mermaid: 'proxy v1', submitted_mermaid: 'proxy v2' },
+      { tree_id: 'symptom:slo', prior_mermaid: 'slo v1', submitted_mermaid: 'slo v1' },
+      { tree_id: 'symptom:gateway', prior_mermaid: 'gateway v1', submitted_mermaid: 'gateway v1' },
+    ]);
   });
 });
