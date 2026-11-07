@@ -18,6 +18,9 @@ jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       http: { basePath: { get: () => mockBasePath } },
+      application: {
+        getUrlForApp: () => '/app/nightshift/',
+      },
       agenticInvestigations: {
         InvestigationCard: ({ investigation: item }: { investigation: InvestigationSummary }) => (
           <div data-test-subj="investigationCard">{item.title}</div>
@@ -126,6 +129,20 @@ describe('InvestigationList', () => {
       screen.getByTestId('customEmpty')
     );
     expect(screen.queryByText('No investigations found')).not.toBeInTheDocument();
+  });
+
+  it('hides View all on Recently opened and keeps it on other sections', () => {
+    renderSections([
+      makeSection('recent', { investigations: [investigation], total: 1 }),
+      makeSection('in-progress', { investigations: [investigation], total: 1 }),
+    ]);
+
+    expect(
+      screen.queryByTestId('nightshiftInvestigationSectionViewInInvestigations-recent')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId('nightshiftInvestigationSectionViewInInvestigations-in-progress')
+    ).toHaveTextContent('View all');
   });
 
   it('renders Recently opened above in progress, and Closed after the open buckets', () => {

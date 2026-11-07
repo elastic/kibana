@@ -11,6 +11,7 @@ import React, {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -25,6 +26,7 @@ import {
 } from '@elastic/eui';
 import { notFound } from '@elastic/eui-illustrations';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import type { Severity } from '@kbn/nightshift-investigations-plugin/common';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -33,6 +35,11 @@ import type {
   InvestigationSectionId,
   InvestigationSectionState,
 } from '../../../data/investigations/use_investigation_sections';
+import {
+  buildInvestigationsPath,
+  DEFAULT_INVESTIGATIONS_TIME_RANGE,
+  sectionIdToInvestigationsFilters,
+} from '../../../data/investigations/investigations_url';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
   getInvestigationSectionAnchorId,
@@ -73,6 +80,11 @@ export interface InvestigationListProps {
   sections: InvestigationSectionState[];
   selectedInvestigationId?: string;
   onInvestigationClick?: (investigation: InvestigationSummary) => void;
+  /** Current Home search query, carried into View in Investigations links. */
+  searchQuery?: string;
+  /** Current Home time range, carried into View in Investigations links. */
+  rangeFrom?: string;
+  rangeTo?: string;
   /** Replaces the default empty copy when every section is empty. */
   emptyContent?: React.ReactNode;
 }
@@ -83,13 +95,31 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
       sections,
       selectedInvestigationId,
       onInvestigationClick,
+      searchQuery = '',
+      rangeFrom = DEFAULT_INVESTIGATIONS_TIME_RANGE.from,
+      rangeTo = DEFAULT_INVESTIGATIONS_TIME_RANGE.to,
       emptyContent,
     },
     ref
   ): React.ReactElement {
     const { euiTheme } = useEuiTheme();
     const visibleSections = sections.filter(isInvestigationSectionVisible);
-    const { http } = useKibana().services;
+    const { application, http } = useKibana().services;
+    const viewInInvestigationsHrefFor = useMemo(() => {
+      const base = application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/' });
+      // getUrlForApp with path '/' ends with /app/nightshift/ — strip trailing slash for join.
+      const appRoot = base.replace(/\/$/, '');
+      return (id: InvestigationSectionId): string => {
+        const filters = sectionIdToInvestigationsFilters(id);
+        return `${appRoot}${buildInvestigationsPath({
+          query: searchQuery,
+          severity: filters.severity,
+          state: filters.state,
+          rangeFrom,
+          rangeTo,
+        })}`;
+      };
+    }, [application, rangeFrom, rangeTo, searchQuery]);
 
     // Default-open sections store collapses. Closed is always collapsed on load.
     const [collapsedSections = DEFAULT_COLLAPSED_SECTIONS, setCollapsedSections] = useLocalStorage<
@@ -251,6 +281,10 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
               isOpen={isSectionOpen(section.id)}
               onToggle={(isOpen) => setSectionOpen(section.id, isOpen)}
               isHighlighted={section.id === highlightedSection}
+              // Recently opened is a Home-only slice — no Investigations deep link.
+              viewInInvestigationsHref={
+                section.id === 'recent' ? undefined : viewInInvestigationsHrefFor(section.id)
+              }
             />
           </EuiFlexItem>
         ))}

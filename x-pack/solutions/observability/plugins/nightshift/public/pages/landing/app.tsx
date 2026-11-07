@@ -467,6 +467,9 @@ export function NightshiftApp({
         sections={sections}
         selectedInvestigationId={selectedInvestigationId}
         onInvestigationClick={handleInvestigationClick}
+        searchQuery={debouncedSearchQuery}
+        rangeFrom={timeRange.rangeFrom}
+        rangeTo={timeRange.rangeTo}
       />
     </EuiFlexGroup>
   );
