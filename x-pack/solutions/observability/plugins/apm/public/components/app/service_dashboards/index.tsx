@@ -209,6 +209,7 @@ export function ServiceDashboards() {
                 savedObjectId={dashboardId}
                 getCreationOptions={getCreationOptions}
                 onApiAvailable={setDashboard}
+                onApiCleanup={() => setDashboard(undefined)}
               />
             )}
           </EuiFlexItem>
