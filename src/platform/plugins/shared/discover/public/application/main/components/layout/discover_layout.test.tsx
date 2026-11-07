@@ -35,6 +35,8 @@ const setup = async ({
   hideSidebar,
   hideTable = false,
   isEsqlEnabled = false,
+  esqlQuery,
+  isErrorExplanationAvailable = false,
   dataMainMsg = {
     fetchStatus: FetchStatus.COMPLETE,
     foundDocuments: true,
@@ -45,6 +47,10 @@ const setup = async ({
   hideSidebar?: boolean;
   hideTable?: boolean;
   isEsqlEnabled?: boolean;
+  /** Puts Discover in ES|QL mode, with this query. */
+  esqlQuery?: string;
+  /** What the server answers when asked whether an error can be explained with AI. */
+  isErrorExplanationAvailable?: boolean;
   dataMainMsg?: DataMainMsg;
 }) => {
   const { profilesManagerMock } = createContextAwarenessMocks({ shouldRegisterProviders: false });
@@ -53,6 +59,7 @@ const setup = async ({
   const originalGetImplementation = getUiSettingsMock.getMockImplementation();
 
   services.profilesManager = profilesManagerMock;
+  jest.mocked(services.core.http.get).mockResolvedValue({ available: isErrorExplanationAvailable });
   getUiSettingsMock.mockImplementation((key, defaultOverride) => {
     if (key === ENABLE_ESQL) {
       return isEsqlEnabled;
@@ -72,11 +79,13 @@ const setup = async ({
     internalStateActions.updateAppState({
       tabId: toolkit.getCurrentTab().id,
       appState: {
-        dataSource: createDataViewDataSource({ dataViewId: dataView.id! }),
+        dataSource: esqlQuery
+          ? createEsqlDataSource()
+          : createDataViewDataSource({ dataViewId: dataView.id! }),
         columns,
         hideTable,
         hideSidebar,
-        query: { query: '', language: 'kuery' },
+        query: esqlQuery ? { esql: esqlQuery } : { query: '', language: 'kuery' },
       },
     })
   );
@@ -287,4 +296,52 @@ describe('Discover component', () => {
     expect(screen.queryByTestId('dscHideTableButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('dscShowTableButton')).not.toBeInTheDocument();
   }, 10000);
+
+  describe('explaining an error with AI', () => {
+    const errorMsg = {
+      fetchStatus: FetchStatus.ERROR,
+      foundDocuments: false,
+      error: new Error('circuit_breaking_exception'),
+    };
+
+    it('offers it in the callout for an ES|QL error when it can be used', async () => {
+      await setup({
+        dataView: dataViewWithTimefieldMock,
+        isEsqlEnabled: true,
+        esqlQuery: 'FROM logs | STATS COUNT(*) BY host',
+        isErrorExplanationAvailable: true,
+        dataMainMsg: errorMsg,
+      });
+
+      expect(await screen.findByTestId('discoverErrorExplainButton')).toBeInTheDocument();
+      expect(screen.getByTestId('discoverErrorCalloutWide')).toBeInTheDocument();
+    });
+
+    it('keeps the standard callout for an ES|QL error when it cannot be used', async () => {
+      const { services } = await setup({
+        dataView: dataViewWithTimefieldMock,
+        isEsqlEnabled: true,
+        esqlQuery: 'FROM logs | STATS COUNT(*) BY host',
+        isErrorExplanationAvailable: false,
+        dataMainMsg: errorMsg,
+      });
+
+      await waitFor(() => expect(services.core.http.get).toHaveBeenCalled());
+      expect(screen.getByTestId('discoverErrorCalloutTitle')).toBeInTheDocument();
+      expect(screen.queryByTestId('discoverErrorCalloutWide')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('discoverErrorExplainButton')).not.toBeInTheDocument();
+    });
+
+    it('does not ask the server or offer it outside of ES|QL mode', async () => {
+      const { services } = await setup({
+        dataView: dataViewWithTimefieldMock,
+        isErrorExplanationAvailable: true,
+        dataMainMsg: errorMsg,
+      });
+
+      expect(screen.getByTestId('discoverErrorCalloutTitle')).toBeInTheDocument();
+      expect(screen.queryByTestId('discoverErrorExplainButton')).not.toBeInTheDocument();
+      expect(services.core.http.get).not.toHaveBeenCalled();
+    });
+  });
 });

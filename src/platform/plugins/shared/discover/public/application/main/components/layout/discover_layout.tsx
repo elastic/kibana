@@ -56,6 +56,8 @@ import { SavedSearchURLConflictCallout } from '../../../../components/saved_sear
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { PanelsToggle } from '../../../../components/panels_toggle';
+import { EsqlErrorHelp } from '../../../../components/common/esql_error_help';
+import { useErrorExplanationAvailable } from '../../../../components/common/use_error_explanation_available';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useRegisterDiscoverEsqlFeedback } from '../../hooks/use_register_discover_esql_feedback';
 import {
@@ -104,6 +106,7 @@ export function DiscoverLayout() {
   const { scopedEBTManager } = useScopedServices();
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
+  const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
   const styles = useMemoCss(componentStyles);
   const { euiTheme } = useEuiTheme();
   const globalQueryState = data.query.getState();
@@ -412,6 +415,37 @@ export function DiscoverLayout() {
     return `${TABS_BAR_HEIGHT + 1}px`;
   }, [customizationContext.displayMode, euiTheme.size.xxl, isProjectChromeStyle]);
 
+  const isErrorExplanationAvailable = useErrorExplanationAvailable(
+    core.http,
+    Boolean(dataState.error) && isEsqlMode
+  );
+  // The AI help is passed only when it can be used, so that an error without it keeps the standard
+  // callout and layout, since an element is always truthy even when it renders nothing.
+  const errorAiHelp =
+    dataState.error &&
+    isEsqlMode &&
+    isOfAggregateQueryType(query) &&
+    isErrorExplanationAvailable ? (
+      <EsqlErrorHelp
+        http={core.http}
+        query={query.esql}
+        errorMessage={dataState.error.message}
+        onApplyQuery={(esql) => dispatch(updateESQLQuery({ queryOrUpdater: esql }))}
+      />
+    ) : undefined;
+  const errorCallout = dataState.error ? (
+    <ErrorCallout
+      title={i18n.translate('discover.noResults.searchExamples.noResultsErrorTitle', {
+        defaultMessage: 'Unable to retrieve search results',
+      })}
+      error={dataState.error}
+      isEsqlMode={isEsqlMode}
+      showErrorDialog={({ title, error }) => core.notifications.showErrorDialog({ title, error })}
+      esqlReferenceHref={docLinks.links.query.queryESQL}
+      aiHelp={errorAiHelp}
+    />
+  ) : undefined;
+
   return (
     <EuiPage
       className="dscPage" // class is used in tests and other styles
@@ -477,20 +511,12 @@ export function DiscoverLayout() {
                       <PanelsToggle omitChartButton omitTableButton dataTestSubjSuffix="InPage" />
                     </div>
                     {dataState.error ? (
-                      <ErrorCallout
-                        title={i18n.translate(
-                          'discover.noResults.searchExamples.noResultsErrorTitle',
-                          {
-                            defaultMessage: 'Unable to retrieve search results',
-                          }
-                        )}
-                        error={dataState.error}
-                        isEsqlMode={isEsqlMode}
-                        showErrorDialog={({ title, error }) =>
-                          core.notifications.showErrorDialog({ title, error })
-                        }
-                        esqlReferenceHref={docLinks.links.query.queryESQL}
-                      />
+                      errorAiHelp ? (
+                        // The page hides overflow, so a tall error with an AI explanation scrolls here.
+                        <div css={styles.errorContainer}>{errorCallout}</div>
+                      ) : (
+                        errorCallout
+                      )
                     ) : (
                       <DiscoverNoResults
                         isTimeBased={isTimeBased}
@@ -557,6 +583,11 @@ const componentStyles = {
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
+  }),
+  errorContainer: css({
+    overflowY: 'auto',
+    flex: '1 1 auto',
+    minHeight: 0,
   }),
   dscPageContent: css({
     position: 'relative',
