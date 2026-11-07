@@ -100,6 +100,11 @@ export async function getServiceAgent({
         ],
       },
     },
+    aggs: {
+      // The single sampled hit above is not guaranteed to expose `telemetry.sdk.*`, which select the ingestion path.
+      telemetrySdkName: { terms: { field: TELEMETRY_SDK_NAME } },
+      telemetrySdkLanguage: { terms: { field: TELEMETRY_SDK_LANGUAGE } },
+    },
     fields,
     sort: { '@timestamp': { order: 'desc' as const }, _score: { order: 'desc' as const } },
   };
@@ -111,6 +116,13 @@ export async function getServiceAgent({
   }
 
   const event = accessKnownApmEventFields(hit.fields);
+
+  const telemetrySdkName =
+    event[TELEMETRY_SDK_NAME] ??
+    (response.aggregations?.telemetrySdkName.buckets[0]?.key as string | undefined);
+  const telemetrySdkLanguage =
+    event[TELEMETRY_SDK_LANGUAGE] ??
+    (response.aggregations?.telemetrySdkLanguage.buckets[0]?.key as string | undefined);
 
   const serverlessType = getServerlessTypeFromCloudData(
     event[CLOUD_PROVIDER],
@@ -124,14 +136,14 @@ export async function getServiceAgent({
   const agentName =
     getAgentName(
       event[AGENT_NAME] ?? null,
-      event[TELEMETRY_SDK_LANGUAGE] ?? null,
-      event[TELEMETRY_SDK_NAME] ?? null
+      telemetrySdkLanguage ?? null,
+      telemetrySdkName ?? null
     ) ?? undefined;
 
   return {
     agentName,
-    telemetrySdkName: event[TELEMETRY_SDK_NAME],
-    telemetrySdkLanguage: event[TELEMETRY_SDK_LANGUAGE],
+    telemetrySdkName,
+    telemetrySdkLanguage,
     runtimeName: event[SERVICE_RUNTIME_NAME],
     runtimeVersion,
     serverlessType,
