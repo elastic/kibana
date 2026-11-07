@@ -35,7 +35,7 @@ export async function loadDataView({
   dataViewId,
   locationDataViewSpec,
   initialAdHocDataViewSpec,
-  services: { dataViews },
+  services: { dataViews, data },
   savedDataViews,
   adHocDataViews,
 }: {
@@ -47,6 +47,8 @@ export async function loadDataView({
   adHocDataViews: DataView[];
 }): Promise<DataViewData> {
   let fetchId: string | undefined = dataViewId;
+  // A replayed Inspector snapshot carries the full field list; the indices may not exist here
+  const skipFetchFields = data.search.replay.isActive();
 
   // Handle redirect with data view spec provided via history location state
   if (locationDataViewSpec) {
@@ -62,7 +64,7 @@ export async function loadDataView({
       if (locationDataViewSpec.id) {
         dataViews.clearInstanceCache(locationDataViewSpec.id);
       }
-      const createdAdHocDataView = await dataViews.create(locationDataViewSpec);
+      const createdAdHocDataView = await dataViews.create(locationDataViewSpec, skipFetchFields);
       return {
         loadedDataView: createdAdHocDataView,
         requestedDataViewId: createdAdHocDataView.id,
@@ -73,7 +75,7 @@ export async function loadDataView({
 
   // If the initial ad hoc data view spec matches the data view id, create and return it
   if (dataViewId && initialAdHocDataViewSpec?.id === dataViewId) {
-    const createdAdHocDataView = await dataViews.create(initialAdHocDataViewSpec);
+    const createdAdHocDataView = await dataViews.create(initialAdHocDataViewSpec, skipFetchFields);
     return {
       loadedDataView: createdAdHocDataView,
       requestedDataViewId: createdAdHocDataView.id,

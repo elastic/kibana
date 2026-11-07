@@ -16,11 +16,22 @@ import {
   EuiTitle,
   EuiFlyoutBody,
   EuiLoadingSpinner,
+  EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
-import type { InspectorViewDescription } from '../types';
+import type { InspectorSnapshotOptions, InspectorViewDescription } from '../types';
 import type { Adapters } from '../../common';
+import { RequestsViewComponent } from '../views/requests/components/requests_view';
+import type { InspectorSnapshot } from '../snapshot/snapshot';
+import {
+  createRequestAdapter,
+  decodeSnapshot,
+  downloadSnapshot,
+  serializeAdapters,
+} from '../snapshot/snapshot';
+import { SnapshotCallout, SnapshotControls } from '../snapshot/snapshot_controls';
 import type { InspectorKibanaServices } from '../views/requests/components/types';
 import { InspectorViewChooser } from './inspector_view_chooser';
 
@@ -41,12 +52,16 @@ interface InspectorPanelProps {
   options?: unknown;
   views: InspectorViewDescription[];
   dependencies: InspectorKibanaServices;
+  snapshot?: InspectorSnapshotOptions;
+  kibanaVersion?: string;
 }
 
 interface InspectorPanelState {
   selectedView: InspectorViewDescription;
   views: InspectorViewDescription[];
   adapters: Adapters;
+  imported?: { snapshot: InspectorSnapshot; adapters: Adapters };
+  importError?: string;
 }
 
 export class InspectorPanel extends Component<InspectorPanelProps, InspectorPanelState> {
@@ -81,7 +96,60 @@ export class InspectorPanel extends Component<InspectorPanelProps, InspectorPane
     }
   };
 
+  exportSnapshot = async (gzip: boolean) => {
+    const { adapters, title, snapshot, kibanaVersion = '', dependencies } = this.props;
+    const timezone = dependencies.uiSettings.get<string>('dateFormat:tz');
+    const meta = {
+      kibanaVersion,
+      createdAt: new Date().toISOString(),
+      appId: snapshot?.appId,
+      title,
+      timezone:
+        timezone === 'Browser' ? Intl.DateTimeFormat().resolvedOptions().timeZone : timezone,
+    };
+    const app = snapshot ? { id: snapshot.appId, state: await snapshot.getAppState() } : undefined;
+    await downloadSnapshot(serializeAdapters(adapters, meta, app), gzip);
+  };
+
+  importSnapshot = async (file: File) => {
+    try {
+      const snapshot = await decodeSnapshot(file);
+      const requests = createRequestAdapter(Object.values(snapshot.requests).flat());
+      this.setState({ imported: { snapshot, adapters: { requests } }, importError: undefined });
+    } catch (e) {
+      this.setState({ imported: undefined, importError: e.message });
+    }
+  };
+
+  renderImportedSnapshot() {
+    const { imported } = this.state;
+    const { snapshot, title } = this.props;
+    if (!imported) {
+      return null;
+    }
+    const { restore, appId } = snapshot ?? {};
+    return (
+      <>
+        <SnapshotCallout
+          snapshot={imported.snapshot}
+          canRestore={Boolean(restore) && imported.snapshot.app?.id === appId}
+          onRestore={async () => restore?.(imported.snapshot)}
+          onClose={() => this.setState({ imported: undefined })}
+        />
+        <Suspense fallback={<EuiLoadingSpinner />}>
+          <RequestsViewComponent
+            adapters={imported.adapters}
+            title={imported.snapshot.meta.title || title || ''}
+          />
+        </Suspense>
+      </>
+    );
+  }
+
   renderSelectedPanel() {
+    if (this.state.imported) {
+      return this.renderImportedSnapshot();
+    }
     return (
       <Suspense fallback={<EuiLoadingSpinner />}>
         <this.state.selectedView.component
@@ -105,6 +173,9 @@ export class InspectorPanel extends Component<InspectorPanelProps, InspectorPane
               <EuiTitle size="s">
                 <h1 id="inspector-panel-title">{title}</h1>
               </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <SnapshotControls onExport={this.exportSnapshot} onImport={this.importSnapshot} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <InspectorViewChooser
@@ -133,6 +204,18 @@ export class InspectorPanel extends Component<InspectorPanelProps, InspectorPane
             },
           })}
         >
+          {this.state.importError && (
+            <>
+              <EuiCallOut
+                announceOnMount
+                size="s"
+                color="danger"
+                iconType="error"
+                title={`Could not import snapshot: ${this.state.importError}`}
+              />
+              <EuiSpacer size="s" />
+            </>
+          )}
           {this.renderSelectedPanel()}
         </EuiFlyoutBody>
       </KibanaContextProvider>

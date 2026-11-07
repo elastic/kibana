@@ -29,6 +29,7 @@ import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/publ
 import { BehaviorSubject } from 'rxjs';
 import type { ICPSManager } from '@kbn/cps-utils';
 import type { SearchSourceDependencies } from '../../common/search';
+import { ReplayRegistry } from './replay/replay_registry';
 import {
   cidrFunction,
   dateRangeFunction,
@@ -101,6 +102,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly aggsService = new AggsService();
   private readonly searchSourceService = new SearchSourceService();
   private searchInterceptor!: ISearchInterceptor;
+  private readonly replayRegistry = new ReplayRegistry();
   private searchMethodsService!: SearchMethodsService;
   private usageCollector!: SearchUsageCollector;
   private sessionService!: ISessionService;
@@ -146,6 +148,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       session: this.sessionService,
       searchConfig: this.initializerContext.config.get().search,
       getCPSManager: () => this.cpsManager,
+      replay: this.replayRegistry,
     });
 
     expressions.registerFunction(
@@ -328,6 +331,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       session: this.sessionService,
       sessionsClient: this.sessionsClient,
       searchSource: this.searchSourceService.start(dataViews, searchSourceDependencies),
+      replay: this.replayRegistry,
     };
   }
 

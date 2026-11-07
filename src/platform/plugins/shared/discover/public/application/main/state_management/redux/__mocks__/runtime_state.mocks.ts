@@ -17,6 +17,7 @@ import {
   createRuntimeStateManager,
   type ReactiveTabRuntimeState,
   type RuntimeStateManager,
+  type TabReplayState,
 } from '../runtime_state';
 import type { CascadedDocumentsFetcher } from '../../../data_fetching/cascaded_documents_fetcher';
 
@@ -37,6 +38,7 @@ export function getTabRuntimeStateMock(
     currentDataSource$: new BehaviorSubject<DataSource | undefined>(undefined),
     cascadedLeafDataSource$: new BehaviorSubject<DataSource | undefined>(undefined),
     unsubscribeFn$: new BehaviorSubject<(() => void) | undefined>(undefined),
+    replay$: new BehaviorSubject<TabReplayState | undefined>(undefined),
     ...attrs,
   };
 }
