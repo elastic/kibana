@@ -7,9 +7,10 @@
 
 import { getIndexForESQLQuery, getInitialESQLQuery, getESQLQueryColumns } from '@kbn/esql-utils';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
-import type { LensSerializedState } from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID, LENS_LAYER_TYPES, type LensSerializedState } from '@kbn/lens-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { withTimeout } from '@kbn/std';
+import { generateId } from '../id_generator';
 import { createEsqlAdHocDataView } from '../data_views_service/create_esql_ad_hoc_data_view';
 import { isESQLModeEnabled } from './initializers/utils';
 import type { LensEmbeddableStartServices } from './types';
@@ -96,6 +97,46 @@ async function buildESQLAttributes(
   });
 }
 
+function createQueryBackedEsqlAttributes(
+  esqlQuery: string,
+  dataView: DataView,
+  error?: Error
+): LensSerializedState['attributes'] {
+  const layerId = generateId();
+  return getLensAttributesFromSuggestion({
+    filters: [],
+    query: { esql: esqlQuery },
+    suggestion: {
+      title: '',
+      visualizationId: 'lnsDatatable',
+      datasourceId: LENS_DATASOURCE_ID.TEXT_BASED,
+      datasourceState: {
+        layers: {
+          [layerId]: {
+            columns: [],
+            index: dataView.id,
+            query: { esql: esqlQuery },
+            timeField: dataView.timeFieldName,
+            ...(error ? { errors: [error] } : {}),
+          },
+        },
+      },
+      visualizationState: {
+        columns: [],
+        layerId,
+        layerType: LENS_LAYER_TYPES.DATA,
+        showRowNumbers: true,
+      },
+      columns: 0,
+      score: 0,
+      previewIcon: 'visTable',
+      changeType: 'initial',
+      keptLayerIds: [layerId],
+    },
+    dataView,
+  });
+}
+
 async function buildESQLAttributesFromDataView(
   esqlQuery: string,
   dataView: DataView,
@@ -107,45 +148,53 @@ async function buildESQLAttributesFromDataView(
 ): Promise<LensSerializedState['attributes'] | undefined> {
   const defaultEsqlQuery = { esql: esqlQuery };
 
-  // For the suggestions api we need only the columns
-  // so we are requesting them with limit 0
-  // this is much more performant than requesting
-  // all the table
-  const abortController = new AbortController();
-  const [columns, { suggestionsApi }] = await Promise.all([
-    getESQLQueryColumns({
+  try {
+    // For the suggestions api we need only the columns
+    // so we are requesting them with limit 0
+    // this is much more performant than requesting
+    // all the table
+    const abortController = new AbortController();
+    const [columns, { suggestionsApi }] = await Promise.all([
+      getESQLQueryColumns({
+        esqlQuery,
+        search: data.search.search,
+        signal: abortController.signal,
+        timeRange: data.query.timefilter.timefilter.getAbsoluteTime(),
+        includeColumnMetadata: true,
+      }),
+      import('../async_services'),
+    ]);
+
+    const context = {
+      dataViewSpec: dataView.toSpec(false),
+      fieldName: '',
+      textBasedColumns: columns,
+      query: defaultEsqlQuery,
+    };
+
+    // get the initial attributes from the suggestions api
+    const allSuggestions =
+      suggestionsApi({ context, dataView, datasourceMap, visualizationMap }) ?? [];
+
+    // Suggestions need columns. Keep a typed document so the flyout can still open.
+    if (!allSuggestions.length) {
+      return createQueryBackedEsqlAttributes(esqlQuery, dataView);
+    }
+    const [firstSuggestion] = allSuggestions;
+    return getLensAttributesFromSuggestion({
+      filters: [],
+      query: defaultEsqlQuery,
+      suggestion: {
+        ...firstSuggestion,
+        title: '', // when creating a new panel, we don't want to use the title from the suggestion
+      },
+      dataView,
+    });
+  } catch (error) {
+    return createQueryBackedEsqlAttributes(
       esqlQuery,
-      search: data.search.search,
-      signal: abortController.signal,
-      timeRange: data.query.timefilter.timefilter.getAbsoluteTime(),
-      includeColumnMetadata: true,
-    }),
-    import('../async_services'),
-  ]);
-
-  const context = {
-    dataViewSpec: dataView.toSpec(false),
-    fieldName: '',
-    textBasedColumns: columns,
-    query: defaultEsqlQuery,
-  };
-
-  // get the initial attributes from the suggestions api
-  const allSuggestions =
-    suggestionsApi({ context, dataView, datasourceMap, visualizationMap }) ?? [];
-
-  // Lens might not return suggestions for some cases, i.e. in case of errors
-  if (!allSuggestions.length) {
-    return;
+      dataView,
+      error instanceof Error ? error : new Error(String(error))
+    );
   }
-  const [firstSuggestion] = allSuggestions;
-  return getLensAttributesFromSuggestion({
-    filters: [],
-    query: defaultEsqlQuery,
-    suggestion: {
-      ...firstSuggestion,
-      title: '', // when creating a new panel, we don't want to use the title from the suggestion
-    },
-    dataView,
-  });
 }
