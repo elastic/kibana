@@ -91,7 +91,7 @@ export const alertOutcomeRcaAccuracyPrompt = createPrompt({
             offending_claim: {
               type: 'string',
               description:
-                'The specific wrong claim (quote/paraphrase); required when materially_wrong_claim is true.',
+                'The specific wrong claim, paraphrased in your own words; required when materially_wrong_claim is true.',
             },
             reasoning: {
               type: 'string',
