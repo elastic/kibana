@@ -21,6 +21,7 @@
       "encryptedSavedObjects",
       "usageCollection"
     ],
+    "runtimePluginDependencies": ["workflowsManagement"],
     "extraPublicDirs": [
       "common",
       "common/entity_summary"

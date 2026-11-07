@@ -186,6 +186,48 @@ Object {
         "entity.relationships.administers.raw_identifiers.user.name": Object {
           "type": "keyword",
         },
+        "entity.relationships.can_assume.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_assume.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_assume.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_assume.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_assume.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_assume.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_assume.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
         "entity.relationships.communicates_with.ids": Object {
           "type": "keyword",
         },
@@ -207,6 +249,27 @@ Object {
         "entity.relationships.communicates_with.raw_identifiers.user.name": Object {
           "type": "keyword",
         },
+        "entity.relationships.connected_to.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.connected_to.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.connected_to.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.connected_to.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.connected_to.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.connected_to.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.connected_to.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
         "entity.relationships.depends_on.ids": Object {
           "type": "keyword",
         },
@@ -226,6 +289,90 @@ Object {
           "type": "keyword",
         },
         "entity.relationships.depends_on.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.user.name": Object {
           "type": "keyword",
         },
         "entity.relationships.owns.ids": Object {
@@ -281,6 +428,48 @@ Object {
         },
         "entity.relationships.resolution.risk.calculated_score_norm": Object {
           "type": "float",
+        },
+        "entity.relationships.runs_as.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.runs_as.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.runs_as.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.runs_as.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.runs_as.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.runs_as.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.runs_as.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.user.name": Object {
+          "type": "keyword",
         },
         "entity.relationships.supervises.ids": Object {
           "type": "keyword",
@@ -574,6 +763,48 @@ Object {
         "entity.relationships.administers.user.name": Object {
           "type": "keyword",
         },
+        "entity.relationships.can_assume.entity.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_assume.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_assume.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_assume.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_assume.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_assume.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_assume.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.entity.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.user.name": Object {
+          "type": "keyword",
+        },
         "entity.relationships.communicates_with.entity.id": Object {
           "type": "keyword",
         },
@@ -595,6 +826,27 @@ Object {
         "entity.relationships.communicates_with.user.name": Object {
           "type": "keyword",
         },
+        "entity.relationships.connected_to.entity.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.connected_to.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.connected_to.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.connected_to.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.connected_to.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.connected_to.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.connected_to.user.name": Object {
+          "type": "keyword",
+        },
         "entity.relationships.depends_on.entity.id": Object {
           "type": "keyword",
         },
@@ -614,6 +866,90 @@ Object {
           "type": "keyword",
         },
         "entity.relationships.depends_on.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.entity.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.entity.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.entity.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.entity.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.user.name": Object {
           "type": "keyword",
         },
         "entity.relationships.owns.entity.id": Object {
@@ -669,6 +1005,48 @@ Object {
         },
         "entity.relationships.resolution.risk.calculated_score_norm": Object {
           "type": "float",
+        },
+        "entity.relationships.runs_as.entity.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.runs_as.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.runs_as.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.runs_as.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.runs_as.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.runs_as.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.runs_as.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.entity.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.user.name": Object {
+          "type": "keyword",
         },
         "entity.relationships.supervises.entity.id": Object {
           "type": "keyword",
@@ -1020,6 +1398,48 @@ Object {
         "entity.relationships.administers.raw_identifiers.user.name": Object {
           "type": "keyword",
         },
+        "entity.relationships.can_assume.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_assume.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_assume.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_assume.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_assume.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_assume.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_assume.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
         "entity.relationships.communicates_with.ids": Object {
           "type": "keyword",
         },
@@ -1041,6 +1461,27 @@ Object {
         "entity.relationships.communicates_with.raw_identifiers.user.name": Object {
           "type": "keyword",
         },
+        "entity.relationships.connected_to.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.connected_to.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.connected_to.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.connected_to.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.connected_to.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.connected_to.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.connected_to.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
         "entity.relationships.depends_on.ids": Object {
           "type": "keyword",
         },
@@ -1060,6 +1501,90 @@ Object {
           "type": "keyword",
         },
         "entity.relationships.depends_on.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.user.name": Object {
           "type": "keyword",
         },
         "entity.relationships.owns.ids": Object {
@@ -1115,6 +1640,48 @@ Object {
         },
         "entity.relationships.resolution.risk.calculated_score_norm": Object {
           "type": "float",
+        },
+        "entity.relationships.runs_as.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.runs_as.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.runs_as.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.runs_as.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.runs_as.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.runs_as.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.runs_as.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.user.name": Object {
+          "type": "keyword",
         },
         "entity.relationships.supervises.ids": Object {
           "type": "keyword",
@@ -1517,6 +2084,48 @@ Object {
         "host.entity.relationships.administers.user.name": Object {
           "type": "keyword",
         },
+        "host.entity.relationships.can_assume.entity.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.can_assume.host.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.can_assume.host.name": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.can_assume.service.name": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.can_assume.user.email": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.can_assume.user.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.can_assume.user.name": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.can_connect.entity.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.can_connect.host.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.can_connect.host.name": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.can_connect.service.name": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.can_connect.user.email": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.can_connect.user.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.can_connect.user.name": Object {
+          "type": "keyword",
+        },
         "host.entity.relationships.communicates_with.entity.id": Object {
           "type": "keyword",
         },
@@ -1538,6 +2147,27 @@ Object {
         "host.entity.relationships.communicates_with.user.name": Object {
           "type": "keyword",
         },
+        "host.entity.relationships.connected_to.entity.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.connected_to.host.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.connected_to.host.name": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.connected_to.service.name": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.connected_to.user.email": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.connected_to.user.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.connected_to.user.name": Object {
+          "type": "keyword",
+        },
         "host.entity.relationships.depends_on.entity.id": Object {
           "type": "keyword",
         },
@@ -1557,6 +2187,90 @@ Object {
           "type": "keyword",
         },
         "host.entity.relationships.depends_on.user.name": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.dropped.entity.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.dropped.host.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.dropped.host.name": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.dropped.service.name": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.dropped.user.email": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.dropped.user.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.dropped.user.name": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.executed.entity.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.executed.host.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.executed.host.name": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.executed.service.name": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.executed.user.email": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.executed.user.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.executed.user.name": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.grants_access_to.entity.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.grants_access_to.host.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.grants_access_to.host.name": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.grants_access_to.service.name": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.grants_access_to.user.email": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.grants_access_to.user.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.grants_access_to.user.name": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.member_of.entity.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.member_of.host.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.member_of.host.name": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.member_of.service.name": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.member_of.user.email": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.member_of.user.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.member_of.user.name": Object {
           "type": "keyword",
         },
         "host.entity.relationships.owns.entity.id": Object {
@@ -1599,6 +2313,48 @@ Object {
           "type": "keyword",
         },
         "host.entity.relationships.owns_inferred.user.name": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.runs_as.entity.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.runs_as.host.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.runs_as.host.name": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.runs_as.service.name": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.runs_as.user.email": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.runs_as.user.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.runs_as.user.name": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.sso_to_role.entity.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.sso_to_role.host.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.sso_to_role.host.name": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.sso_to_role.service.name": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.sso_to_role.user.email": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.sso_to_role.user.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.sso_to_role.user.name": Object {
           "type": "keyword",
         },
         "host.entity.relationships.supervises.entity.id": Object {
@@ -1957,6 +2713,48 @@ Object {
         "entity.relationships.administers.raw_identifiers.user.name": Object {
           "type": "keyword",
         },
+        "entity.relationships.can_assume.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_assume.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_assume.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_assume.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_assume.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_assume.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_assume.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
         "entity.relationships.communicates_with.ids": Object {
           "type": "keyword",
         },
@@ -1978,6 +2776,27 @@ Object {
         "entity.relationships.communicates_with.raw_identifiers.user.name": Object {
           "type": "keyword",
         },
+        "entity.relationships.connected_to.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.connected_to.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.connected_to.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.connected_to.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.connected_to.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.connected_to.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.connected_to.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
         "entity.relationships.depends_on.ids": Object {
           "type": "keyword",
         },
@@ -1997,6 +2816,90 @@ Object {
           "type": "keyword",
         },
         "entity.relationships.depends_on.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.user.name": Object {
           "type": "keyword",
         },
         "entity.relationships.owns.ids": Object {
@@ -2052,6 +2955,48 @@ Object {
         },
         "entity.relationships.resolution.risk.calculated_score_norm": Object {
           "type": "float",
+        },
+        "entity.relationships.runs_as.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.runs_as.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.runs_as.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.runs_as.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.runs_as.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.runs_as.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.runs_as.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.user.name": Object {
+          "type": "keyword",
         },
         "entity.relationships.supervises.ids": Object {
           "type": "keyword",
@@ -2342,6 +3287,48 @@ Object {
         "service.entity.relationships.administers.user.name": Object {
           "type": "keyword",
         },
+        "service.entity.relationships.can_assume.entity.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.can_assume.host.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.can_assume.host.name": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.can_assume.service.name": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.can_assume.user.email": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.can_assume.user.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.can_assume.user.name": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.can_connect.entity.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.can_connect.host.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.can_connect.host.name": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.can_connect.service.name": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.can_connect.user.email": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.can_connect.user.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.can_connect.user.name": Object {
+          "type": "keyword",
+        },
         "service.entity.relationships.communicates_with.entity.id": Object {
           "type": "keyword",
         },
@@ -2363,6 +3350,27 @@ Object {
         "service.entity.relationships.communicates_with.user.name": Object {
           "type": "keyword",
         },
+        "service.entity.relationships.connected_to.entity.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.connected_to.host.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.connected_to.host.name": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.connected_to.service.name": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.connected_to.user.email": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.connected_to.user.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.connected_to.user.name": Object {
+          "type": "keyword",
+        },
         "service.entity.relationships.depends_on.entity.id": Object {
           "type": "keyword",
         },
@@ -2382,6 +3390,90 @@ Object {
           "type": "keyword",
         },
         "service.entity.relationships.depends_on.user.name": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.dropped.entity.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.dropped.host.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.dropped.host.name": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.dropped.service.name": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.dropped.user.email": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.dropped.user.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.dropped.user.name": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.executed.entity.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.executed.host.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.executed.host.name": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.executed.service.name": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.executed.user.email": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.executed.user.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.executed.user.name": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.grants_access_to.entity.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.grants_access_to.host.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.grants_access_to.host.name": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.grants_access_to.service.name": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.grants_access_to.user.email": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.grants_access_to.user.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.grants_access_to.user.name": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.member_of.entity.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.member_of.host.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.member_of.host.name": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.member_of.service.name": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.member_of.user.email": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.member_of.user.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.member_of.user.name": Object {
           "type": "keyword",
         },
         "service.entity.relationships.owns.entity.id": Object {
@@ -2424,6 +3516,48 @@ Object {
           "type": "keyword",
         },
         "service.entity.relationships.owns_inferred.user.name": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.runs_as.entity.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.runs_as.host.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.runs_as.host.name": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.runs_as.service.name": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.runs_as.user.email": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.runs_as.user.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.runs_as.user.name": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.sso_to_role.entity.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.sso_to_role.host.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.sso_to_role.host.name": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.sso_to_role.service.name": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.sso_to_role.user.email": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.sso_to_role.user.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.sso_to_role.user.name": Object {
           "type": "keyword",
         },
         "service.entity.relationships.supervises.entity.id": Object {
@@ -2661,6 +3795,48 @@ Object {
         "entity.relationships.administers.raw_identifiers.user.name": Object {
           "type": "keyword",
         },
+        "entity.relationships.can_assume.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_assume.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_assume.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_assume.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_assume.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_assume.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_assume.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.can_connect.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
         "entity.relationships.communicates_with.ids": Object {
           "type": "keyword",
         },
@@ -2682,6 +3858,27 @@ Object {
         "entity.relationships.communicates_with.raw_identifiers.user.name": Object {
           "type": "keyword",
         },
+        "entity.relationships.connected_to.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.connected_to.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.connected_to.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.connected_to.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.connected_to.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.connected_to.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.connected_to.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
         "entity.relationships.depends_on.ids": Object {
           "type": "keyword",
         },
@@ -2701,6 +3898,90 @@ Object {
           "type": "keyword",
         },
         "entity.relationships.depends_on.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.dropped.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.executed.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.grants_access_to.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.user.name": Object {
           "type": "keyword",
         },
         "entity.relationships.owns.ids": Object {
@@ -2756,6 +4037,48 @@ Object {
         },
         "entity.relationships.resolution.risk.calculated_score_norm": Object {
           "type": "float",
+        },
+        "entity.relationships.runs_as.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.runs_as.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.runs_as.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.runs_as.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.runs_as.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.runs_as.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.runs_as.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.user.name": Object {
+          "type": "keyword",
         },
         "entity.relationships.supervises.ids": Object {
           "type": "keyword",
@@ -3103,6 +4426,48 @@ Object {
         "user.entity.relationships.administers.user.name": Object {
           "type": "keyword",
         },
+        "user.entity.relationships.can_assume.entity.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.can_assume.host.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.can_assume.host.name": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.can_assume.service.name": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.can_assume.user.email": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.can_assume.user.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.can_assume.user.name": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.can_connect.entity.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.can_connect.host.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.can_connect.host.name": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.can_connect.service.name": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.can_connect.user.email": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.can_connect.user.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.can_connect.user.name": Object {
+          "type": "keyword",
+        },
         "user.entity.relationships.communicates_with.entity.id": Object {
           "type": "keyword",
         },
@@ -3124,6 +4489,27 @@ Object {
         "user.entity.relationships.communicates_with.user.name": Object {
           "type": "keyword",
         },
+        "user.entity.relationships.connected_to.entity.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.connected_to.host.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.connected_to.host.name": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.connected_to.service.name": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.connected_to.user.email": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.connected_to.user.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.connected_to.user.name": Object {
+          "type": "keyword",
+        },
         "user.entity.relationships.depends_on.entity.id": Object {
           "type": "keyword",
         },
@@ -3143,6 +4529,90 @@ Object {
           "type": "keyword",
         },
         "user.entity.relationships.depends_on.user.name": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.dropped.entity.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.dropped.host.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.dropped.host.name": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.dropped.service.name": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.dropped.user.email": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.dropped.user.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.dropped.user.name": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.executed.entity.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.executed.host.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.executed.host.name": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.executed.service.name": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.executed.user.email": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.executed.user.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.executed.user.name": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.grants_access_to.entity.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.grants_access_to.host.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.grants_access_to.host.name": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.grants_access_to.service.name": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.grants_access_to.user.email": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.grants_access_to.user.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.grants_access_to.user.name": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.member_of.entity.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.member_of.host.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.member_of.host.name": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.member_of.service.name": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.member_of.user.email": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.member_of.user.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.member_of.user.name": Object {
           "type": "keyword",
         },
         "user.entity.relationships.owns.entity.id": Object {
@@ -3185,6 +4655,48 @@ Object {
           "type": "keyword",
         },
         "user.entity.relationships.owns_inferred.user.name": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.runs_as.entity.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.runs_as.host.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.runs_as.host.name": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.runs_as.service.name": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.runs_as.user.email": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.runs_as.user.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.runs_as.user.name": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.sso_to_role.entity.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.sso_to_role.host.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.sso_to_role.host.name": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.sso_to_role.service.name": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.sso_to_role.user.email": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.sso_to_role.user.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.sso_to_role.user.name": Object {
           "type": "keyword",
         },
         "user.entity.relationships.supervises.entity.id": Object {

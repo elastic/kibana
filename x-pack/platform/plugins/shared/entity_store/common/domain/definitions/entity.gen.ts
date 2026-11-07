@@ -275,6 +275,58 @@ export const EntityField = lazySchema(() =>
            */
           supervises: EntityRelationship.optional().describe('Entities supervised by this entity.'),
           /**
+           * Groups this entity is a member of.
+           */
+          member_of: EntityRelationship.optional().describe('Groups this entity is a member of.'),
+          /**
+           * Roles this group maps to on a single sign-on application (for example, the AWS federation app).
+           */
+          sso_to_role: EntityRelationship.optional().describe(
+            'Roles this group maps to on a single sign-on application (for example, the AWS federation app).'
+          ),
+          /**
+           * Roles this entity may assume (identity federation, trust policies).
+           */
+          can_assume: EntityRelationship.optional().describe(
+            'Roles this entity may assume (identity federation, trust policies).'
+          ),
+          /**
+           * Hosts this entity may open a session on (for example, Session Manager access).
+           */
+          can_connect: EntityRelationship.optional().describe(
+            'Hosts this entity may open a session on (for example, Session Manager access).'
+          ),
+          /**
+           * Roles this entity runs as (for example, an instance profile).
+           */
+          runs_as: EntityRelationship.optional().describe(
+            'Roles this entity runs as (for example, an instance profile).'
+          ),
+          /**
+           * Resources this entity grants access to (attached and resource policies).
+           */
+          grants_access_to: EntityRelationship.optional().describe(
+            'Resources this entity grants access to (attached and resource policies).'
+          ),
+          /**
+           * Indicators (process hashes) this entity executed.
+           */
+          executed: EntityRelationship.optional().describe(
+            'Indicators (process hashes) this entity executed.'
+          ),
+          /**
+           * Indicators (file hashes) this entity wrote.
+           */
+          dropped: EntityRelationship.optional().describe(
+            'Indicators (file hashes) this entity wrote.'
+          ),
+          /**
+           * Indicators (external addresses) this entity connected to.
+           */
+          connected_to: EntityRelationship.optional().describe(
+            'Indicators (external addresses) this entity connected to.'
+          ),
+          /**
            * Resolution metadata linking this entity to another.
            */
           resolution: z
