@@ -249,6 +249,26 @@ describe('getForFeature', () => {
     expect(result.warnings[0]).toContain('ep1');
   });
 
+  it('logs a warning when no recommended endpoint resolves to a connector', async () => {
+    registry.register(
+      createValidFeature({ featureId: 'f1', recommendedEndpoints: ['ep1', 'ep2'] })
+    );
+    const result = await getForFeature(
+      registry,
+      createSoClient(),
+      createGetConnectorById([]),
+      'f1',
+      logger
+    );
+    expect(result.endpoints).toEqual([]);
+    expect(result.warnings).toHaveLength(2);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'None of the 2 recommended inference endpoints for feature "f1" were found'
+      )
+    );
+  });
+
   it('falls back to recommended endpoints when SO client fails with non-404 error', async () => {
     registry.register(createValidFeature({ featureId: 'f1', recommendedEndpoints: ['rec1'] }));
     const soClient = {
