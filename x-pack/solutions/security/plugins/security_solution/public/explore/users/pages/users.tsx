@@ -13,7 +13,7 @@ import { useParams } from 'react-router-dom';
 import type { Filter } from '@kbn/es-query';
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
+import { LastEventIndexKey } from '@kbn/securitysolution-timeline-search-strategy';
 import { PageScope } from '../../../data_view_manager/constants';
 import { SecurityPageName } from '../../../app/types';
 import { TabNavigation } from '../../../common/components/navigation/tab_navigation';

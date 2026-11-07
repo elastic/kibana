@@ -6,7 +6,7 @@
  */
 
 import type { BrowserFields } from '@kbn/securitysolution-timeline-common';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { PageScope } from '../../../../data_view_manager/constants';

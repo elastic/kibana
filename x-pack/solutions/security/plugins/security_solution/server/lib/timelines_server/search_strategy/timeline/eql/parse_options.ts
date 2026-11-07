@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { timelineEqlRequestOptionsSchema } from '@kbn/timelines-plugin/common/api/search_strategy/timeline/eql';
+import { timelineEqlRequestOptionsSchema } from '@kbn/securitysolution-timeline-search-strategy';
 
 export const parseOptions = (options: unknown) => timelineEqlRequestOptionsSchema.parse(options);

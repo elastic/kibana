@@ -8,7 +8,7 @@
 import { isEmpty } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { EqlOptions } from '@kbn/timelines-plugin/common';
+import type { EqlOptions } from '@kbn/securitysolution-timeline-search-strategy';
 import { PageScope } from '../../data_view_manager/constants';
 import { useSelectDataView } from '../../data_view_manager/hooks/use_select_data_view';
 import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';

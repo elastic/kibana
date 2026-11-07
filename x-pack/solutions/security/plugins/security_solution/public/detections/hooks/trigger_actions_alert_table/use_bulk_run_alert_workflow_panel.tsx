@@ -13,7 +13,7 @@ import type {
   TimelineItem,
 } from '@kbn/response-ops-alerts-table/types';
 import type { TableId } from '@kbn/securitysolution-data-table';
-import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import type { RunTimeMappings } from '@kbn/securitysolution-timeline-search-strategy';
 import { MAX_RUN_WORKFLOW_DOCS } from '@kbn/workflows';
 import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
 import { useCaseAttachmentWorkflowRouting } from '@kbn/cases-plugin/public';

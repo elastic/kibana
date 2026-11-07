@@ -7,7 +7,7 @@
 
 import { get } from 'lodash/fp';
 
-import type { TimelineEventsDetailsItem } from '../search_strategy';
+import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 
 /**
  * Flattens a nested object into dotted-path keys with array values.

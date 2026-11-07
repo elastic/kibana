@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, memo, useContext, useMemo } from 'react';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { SearchHit } from '../../../../../common/search_strategy';
 import { useCreateEaseAlertsDataView } from '../../../hooks/alert_summary/use_create_data_view';

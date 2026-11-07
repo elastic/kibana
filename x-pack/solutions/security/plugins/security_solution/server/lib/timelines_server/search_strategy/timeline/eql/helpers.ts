@@ -8,14 +8,14 @@
 import { isEmpty } from 'lodash/fp';
 import type { EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
 import type { TimelineEdges } from '@kbn/securitysolution-timeline-common';
-import type { TimelineEqlRequestOptions } from '@kbn/timelines-plugin/common/api/search_strategy/timeline/eql';
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '@kbn/timelines-plugin/common/constants';
 import type {
+  TimelineEqlRequestOptions,
   EqlSearchResponse,
   EqlSequence,
   EventHit,
-} from '@kbn/timelines-plugin/common/search_strategy';
-import type { TimelineEqlResponse } from '@kbn/timelines-plugin/common/search_strategy/timeline/events/eql';
+  TimelineEqlResponse,
+} from '@kbn/securitysolution-timeline-search-strategy';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '@kbn/timelines-plugin/common/constants';
 import { inspectStringifyObject } from '../../../utils/build_query';
 import { formatTimelineData } from '../factory/helpers/format_timeline_data';
 

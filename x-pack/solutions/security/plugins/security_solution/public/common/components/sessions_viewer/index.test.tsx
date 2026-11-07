@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { waitFor, render } from '@testing-library/react';
 import { TestProviders } from '../../mock';
 import { TEST_ID, SessionsView, defaultSessionsFilter } from '.';
-import type { EntityType } from '@kbn/timelines-plugin/common';
+import type { EntityType } from '@kbn/securitysolution-timeline-search-strategy';
 import type { SessionsComponentsProps } from './types';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { licenseService } from '../../hooks/use_license';

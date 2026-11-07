@@ -8,8 +8,10 @@
 import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/search-types';
-import type { TimelineEventsQueries } from '@kbn/timelines-plugin/common/api/search_strategy';
-import type { TimelineKpiStrategyResponse } from '@kbn/timelines-plugin/common/search_strategy/timeline';
+import type {
+  TimelineEventsQueries,
+  TimelineKpiStrategyResponse,
+} from '@kbn/securitysolution-timeline-search-strategy';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import type { TimelineFactory } from '../../types';
 import { buildTimelineKpiQuery } from './query.kpi.dsl';

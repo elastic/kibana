@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimelineEqlRequestOptions } from '@kbn/timelines-plugin/common/api/search_strategy';
+import type { TimelineEqlRequestOptions } from '@kbn/securitysolution-timeline-search-strategy';
 import { Direction } from '@kbn/securitysolution-timeline-common';
 import { buildEqlDsl, parseEqlResponse } from './helpers';
 import { eventsResponse, sequenceResponse } from './__mocks__';

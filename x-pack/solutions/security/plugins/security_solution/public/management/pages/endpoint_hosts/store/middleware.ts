@@ -13,7 +13,7 @@ import semverGte from 'semver/functions/gte';
 import type {
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
-} from '@kbn/timelines-plugin/common';
+} from '@kbn/securitysolution-timeline-search-strategy';
 import { canFetchPackageAndAgentPolicies } from '../../../../../common/endpoint/service/authz/authz';
 import type {
   IsolationRouteRequestBody,

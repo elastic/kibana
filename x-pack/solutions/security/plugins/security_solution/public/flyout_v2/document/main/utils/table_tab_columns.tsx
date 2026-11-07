@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiText, EuiToolTip, type EuiBasicTableColumn } from '@elastic/eui';
 import type { BrowserFields } from '@kbn/securitysolution-timeline-common';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldFromBrowserField } from '../tabs/table_tab';
 import { TableFieldNameCell } from '../../../shared/components/table_field_name_cell';
