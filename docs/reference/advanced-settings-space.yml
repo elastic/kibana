@@ -1464,6 +1464,20 @@ groups:
           self: ga
           observability: ga
 
+      - setting: "observability:apmMaxNumberOfServices"
+        id: observability-apm-max-number-of-services
+        description: |
+          Sets the maximum number of services shown in the {{product.apm}} Service inventory. Values must be between 1 and 5000. Higher values slow down queries and use more memory on {{es}}. Above 2000 the query can exceed the `search.max_buckets` cluster setting, which defaults to 65536.
+        datatype: int
+        default: 1000
+        applies_to:
+          stack: ga 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          observability: ga
+
       - setting: "observability:apmTraceExplorerTab"
         id: observability-apm-trace-explorer-tab
         description: |
