@@ -36,7 +36,7 @@ import {
 } from '../../alert_triage/fp_decisions';
 import { tagInChunks } from '../../alert_triage/plan_sweep';
 import {
-  closeAlertsAsFalsePositive,
+  closeStillOpenAlertsAsFalsePositive,
   type DecisionCursor,
   countClosedByDecision,
   fetchDecisionCandidates,
@@ -199,6 +199,24 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
         };
 
         /**
+         * Takes the decision's tag off the alerts the close left alone because they were no longer
+         * open (an analyst acknowledged them after the search), and returns them. Unlike
+         * `untagStillOpen`, a failure here throws, because the notes must not claim a close that
+         * did not happen.
+         */
+        const releaseMovedOn = async (id: string, alertIds: string[]): Promise<string[]> => {
+          const left = await findOpenAlertIds(contextManager, alertIds);
+          if (left.length > 0) {
+            await tagInChunks(write, {
+              alertIds: left,
+              add: [],
+              remove: [`${TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX}${id}`],
+            });
+          }
+          return left;
+        };
+
+        /**
          * Closes what each decision may still close today. The decision's tag goes on first, so a
          * close that lands is always findable by revoke. A failure takes the tag off the alerts that
          * stayed open, so the next sweep tries them again. When the daily count cannot be read nothing is
@@ -233,10 +251,19 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
               });
               for (let from = 0; from < allowed.length; from += TAG_CHUNK_SIZE) {
                 const closing = allowed.slice(from, from + TAG_CHUNK_SIZE);
-                await closeAlertsAsFalsePositive(contextManager, closing);
-                totals.closed += closing.length;
+                // The attempt counts against today's allowance before it is made: a close that
+                // fails half way may have closed alerts, and the next page must not close another
+                // full allowance of the same decision. A close that skipped alerts gives them back.
                 room.set(id, (room.get(id) ?? 0) - closing.length);
-                queueNotes(id, closing, 'closed');
+                const updated = await closeStillOpenAlertsAsFalsePositive(contextManager, closing);
+                totals.closed += updated;
+                room.set(id, (room.get(id) ?? 0) + closing.length - updated);
+                const moved = updated < closing.length ? await releaseMovedOn(id, closing) : [];
+                queueNotes(
+                  id,
+                  closing.filter((alertId) => !moved.includes(alertId)),
+                  'closed'
+                );
               }
             } catch (error) {
               totals.close_failures++;
