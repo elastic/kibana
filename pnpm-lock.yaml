@@ -4936,8 +4936,8 @@ importers:
         specifier: 8.0.1
         version: 8.0.1
       source-map-support:
-        specifier: 0.5.21
-        version: 0.5.21
+        specifier: npm:@stackline/source-map-support@1.0.4
+        version: '@stackline/source-map-support@1.0.4'
       stats-lite:
         specifier: 2.2.0
         version: 2.2.0
@@ -14307,6 +14307,13 @@ packages:
 
   '@socket.io/component-emitter@3.1.2':
     resolution: {integrity: sha512-9BCxFwvbGg/RsZK9tjXd8s4UcwR0MWeFQ1XEKIQVVvAGJyINdrqKMcTRyLoK8Rse1GjzLV9cwjWV1olXRWEXVA==}
+
+  '@stackline/source-map-support@1.0.4':
+    resolution: {integrity: sha512-7dzLBRS1vsa+JeKuVydEcQjLNraBvt0O0oZRYa1wiuuzsRYfmY2fdOPgA5XJ4tIzHn+npnYQ1oXQw0h/Ho78Gw==}
+    engines: {node: '>=14.15.1'}
+
+  '@stackline/trace-mapping@1.0.0':
+    resolution: {integrity: sha512-to55jps5wfMx4vRpJL+Ri+yXa1B3H2V0C2LaXRegTIEivB/krQN3Njv9PT06Zxufek0mj4MmPIXN+gn5OCY6IA==}
 
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
@@ -30838,6 +30845,15 @@ snapshots:
       text-hex: 1.0.0
 
   '@socket.io/component-emitter@3.1.2': {}
+
+  '@stackline/source-map-support@1.0.4':
+    dependencies:
+      '@jridgewell/trace-mapping': '@stackline/trace-mapping@1.0.0'
+
+  '@stackline/trace-mapping@1.0.0':
+    dependencies:
+      '@jridgewell/resolve-uri': 3.1.2
+      '@jridgewell/sourcemap-codec': 1.6.0
 
   '@standard-schema/spec@1.1.0': {}
 
