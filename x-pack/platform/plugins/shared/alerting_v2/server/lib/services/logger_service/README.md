@@ -1,7 +1,9 @@
 # Alerting v2 — Logging
 
 This document is the logging standard for `alerting_v2` server code and the
-reference for `LoggerService`, the only logging entry point the plugin uses.
+reference for `LoggerService`, the plugin's single logging entry point. A few
+older call sites have not migrated yet. They are listed under
+[known exceptions](#known-exceptions) and are not precedent.
 Read the [rules](#rules) before adding or changing a log line. Read the
 [API reference](#loggerservice-api) when you need the exact call shape.
 
@@ -37,6 +39,22 @@ Every log line in this plugin:
 5. If `warn` or `error`, carries a `code` from `ALERTING_LOG_CODES`.
 6. Logs nothing from the [deny list](#deny-list--never-log-at-any-level).
 7. Is asserted in a unit test on `code` and `labels`, never on message text.
+
+#### Known exceptions
+
+These call sites predate the standard. Migrate one when you touch it and remove
+it from this list. Do not add to it.
+
+- Still on the raw core `Logger`: the managed-workflows install warning in
+  `setup/bind_on_start.ts`, `lib/services/api_key_service/api_key_service.ts`,
+  `lib/services/retry_service/alerting_retry_service.ts`,
+  `lib/rule_changes_history/rule_changes_history_service.ts` (which also
+  creates a `rule_changes_history` child that is not an
+  `AlertingSubsystemName`), and the datastream and ES|QL view initializers,
+  which receive the core logger from `resources/register_resources.ts`.
+- Logging from the root `LoggerService` without `forSubsystem`:
+  `QueryService`, `StorageService`, `MaintenanceWindowService`,
+  `WorkflowService`, `EsqlResponseFormatService`.
 
 ### 1. Log levels
 
@@ -85,8 +103,9 @@ Rules:
   ES DSL, no alert document payloads, no implementation details (class names,
   file paths, internal step names). Logs are read by users, Elastic
   employees, and contributors.
-- **At `debug`:** still no secrets. User KQL is permitted only when necessary
-  to reproduce a bug.
+- **At `debug`:** the same [deny list](#deny-list--never-log-at-any-level)
+  applies. A lower level does not relax redaction, because debug output is
+  routinely collected into support bundles.
 
 Lazy vs eager messages:
 
@@ -112,12 +131,13 @@ logger.debug({
 // Before — raw error text leaks the user's KQL fragment
 logger.warn({ message: () => `Failed to evaluate KQL matcher for policy "${id}": ${err.message}` });
 
-// After — synthetic message, code, id label, normalized error
+// After — synthetic message, code, id label. No `error`: the parse error quotes
+// the user's expression, and `warn` copies an error's message and stack into
+// ECS `error.*` unchanged.
 logger.warn({
   message: 'Policy matcher failed to evaluate; treating as no-match',
   code: ALERTING_LOG_CODES.POLICY_MATCHER_KQL_INVALID,
   labels: { policy_id: actionPolicy.id },
-  error: err,
 });
 ```
 
@@ -136,23 +156,23 @@ on, so it must identify a bounded slice of behaviour, not a file.
   log line, and do not log from the root service.
 - Never repeat the subsystem name in message text.
 
-| Subsystem            | Covers                                                                     | Bound in                                                                         |
-| -------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `routes`             | HTTP route handlers.                                                       | `routes/alerting_route_context.ts`                                               |
-| `rulesClient`        | Rule CRUD, filter parsing, bulk operations, internal rules client.         | `lib/rules_client/`, `lib/internal_rules_client/`                                |
-| `ruleTemplateClient` | Rule template read path.                                                   | `lib/rule_templates_client/`                                                     |
-| `actionPolicyClient` | Action policy CRUD and API key handling.                                   | `lib/action_policy_client/`                                                      |
-| `actionPolicyTest`   | Test-notification preview and send for action policies.                    | `lib/action_policy_test/action_policy_test_service.ts`                           |
-| `ruleExecutor`       | Rule task runner, pipeline steps, middlewares.                             | `lib/rule_executor/task_runner.ts`                                               |
-| `director`           | Episode state transitions. Runs inside the executor but is its own domain. | `lib/director/director.ts`                                                       |
-| `dispatcher`         | Dispatch task runner, pipeline steps, workflow scheduling.                 | `lib/dispatcher/dispatcher.ts`                                                   |
-| `executionHistory`   | Rule and action policy execution-history read paths.                       | `lib/action_policy_execution_history_client/`, `lib/services/event_log_service/` |
-| `resources`          | Datastream, index template and ES\|QL view bootstrap.                      | `lib/services/resource_service/resource_manager.ts`                              |
-| `tasks`              | Background tasks other than the two engine tasks. Boot-time scheduling.    | `lib/tasks/`, `lib/usage/`, `setup/bind_on_start.ts`                             |
-| `savedObjects`       | Saved object type registration and model-version migrations.               | `setup/bind_on_setup.ts`                                                         |
-| `agentBuilder`       | Agent Builder tools, skills and attachments.                               | `setup/bind_agent_builder.ts`                                                    |
-| `events`             | Internal domain event bus, publishers and subscribers.                     | `lib/events/`                                                                    |
-| `telemetry`          | Event-based telemetry (EBT) reporting.                                     | `lib/services/ebt_service/ebt_service.ts`                                        |
+| Subsystem            | Covers                                                                     | Bound in                                                                                                          |
+| -------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `routes`             | HTTP route handlers.                                                       | `routes/alerting_route_context.ts`                                                                                |
+| `rulesClient`        | Rule CRUD, filter parsing, bulk operations, internal rules client.         | `lib/rules_client/`, `lib/internal_rules_client/`                                                                 |
+| `ruleTemplateClient` | Rule template read path.                                                   | `lib/rule_templates_client/`                                                                                      |
+| `actionPolicyClient` | Action policy CRUD and API key handling.                                   | `lib/action_policy_client/`                                                                                       |
+| `actionPolicyTest`   | Test-notification preview and send for action policies.                    | `lib/action_policy_test/action_policy_test_service.ts`                                                            |
+| `ruleExecutor`       | Rule task runner, pipeline steps, middlewares.                             | `lib/rule_executor/task_runner.ts`                                                                                |
+| `director`           | Episode state transitions. Runs inside the executor but is its own domain. | `lib/director/director.ts`                                                                                        |
+| `dispatcher`         | Dispatch task runner, pipeline steps, workflow scheduling.                 | `lib/dispatcher/dispatcher.ts`                                                                                    |
+| `executionHistory`   | Rule and action policy execution-history read paths.                       | `lib/execution_history_client/`, `lib/action_policy_execution_history_client/`, `lib/services/event_log_service/` |
+| `resources`          | Datastream, index template and ES\|QL view bootstrap.                      | `lib/services/resource_service/resource_manager.ts`                                                               |
+| `tasks`              | Background tasks other than the two engine tasks. Boot-time scheduling.    | `lib/tasks/`, `lib/usage/`, `setup/bind_on_start.ts`                                                              |
+| `savedObjects`       | Saved object type registration and model-version migrations.               | `setup/bind_on_setup.ts`                                                                                          |
+| `agentBuilder`       | Agent Builder tools, skills and attachments.                               | `setup/bind_agent_builder.ts`                                                                                     |
+| `events`             | Internal domain event bus, publishers and subscribers.                     | `lib/events/`                                                                                                     |
+| `telemetry`          | Event-based telemetry (EBT) reporting.                                     | `lib/services/ebt_service/ebt_service.ts`                                                                         |
 
 The tree is split along **failure-domain** boundaries, not directory
 boundaries: 15 loggers an operator can remember, not 100+ file names. The
@@ -313,21 +333,30 @@ Errors from Elasticsearch, the saved objects client, or the workflows plugin
 sometimes echo user input.
 
 - `error.type`, `error.code`, HTTP status: safe.
-- `error.stack_trace`: safe (code paths, not user data).
 - `error.message`: safe **unless** the code path is known to echo user input.
-  KQL / ES|QL parse errors quote the offending fragment. Where that can
-  happen, override `message` with a synthetic one. The service writes it to
-  both the log line and ECS `error.message`:
+  KQL / ES|QL parse errors quote the offending fragment.
+- `error.stack_trace`: the frames are code paths, but the first line of a
+  Node.js stack repeats the message (`ResponseError: ...`), so it is exactly
+  as safe as `error.message`.
+
+A `message` override is not redaction. On `error`, the service writes the
+override to the log line and to ECS `error.message`, but copies the stack
+unchanged. On `warn`, the override changes only the log line, and
+`error.message` keeps the original text. Where the error may echo user input,
+do not pass the original through:
+
+- On `warn`, omit `error`. The `code` identifies the failure class.
+- On `error`, pass a sanitized error that carries the synthetic message and no
+  original stack. `error.type` becomes `Error`, so rely on `labels.code`.
 
 ```ts
 logger.error({
-  message: isEsqlUserError(error) ? 'Rule query failed to parse or verify' : undefined,
-  error,
+  error: isEsqlUserError(error) ? new Error('Rule query failed to parse or verify') : error,
   code: ALERTING_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
 });
 ```
 
-When in doubt, override `message` and rely on `labels.code` + `error.type`.
+When in doubt, drop the original error and rely on `labels.code`.
 
 ### 7. Review checklist
 
@@ -339,8 +368,9 @@ For any PR that adds or changes a log line, the reviewer asks, in order:
    entry? Is a new code really a new failure class?
 4. Is every value interpolated into the message, or placed in `labels`, on the
    allow list?
-5. Does any `error.message` come from a downstream service that might echo
-   user input? Override it if so.
+5. Does the `error` come from a downstream service that might echo user
+   input? Omit it or pass a sanitized error. A `message` override alone
+   leaves the text in `error.stack_trace`, and on `warn` in `error.message`.
 6. Is the log inside a hot loop that would emit one line per user document?
    Aggregate or drop.
 7. Does a unit test assert `code` and `labels`, and not the message text?
@@ -384,8 +414,9 @@ on every wording tweak without protecting anything an operator depends on. Use
 `expect.any(String)` for the first argument, or `expect.any(Function)` for a
 lazy message.
 
-The one exception is redaction. When a call site overrides `message` to keep
-user input out of the log, assert that the raw text is absent with
+The one exception is redaction. When a call site replaces the message or the
+error to keep user input out of the log, assert that the raw text is absent
+from the message and from the `error` meta with
 `expect.not.stringContaining(...)`, not what the replacement says.
 
 ## LoggerService API
@@ -414,8 +445,9 @@ logger.withLabels(labels); // → LoggerServiceContract
 | `error`   | `unknown`. Non-`Error` values are wrapped internally, so `catch (err)` blocks pass `err` straight through. Emitted as ECS `error.{message,type,stack_trace}`, with `type` taken from the exception's constructor name. |
 
 Overriding `message` on `error` replaces the error's message in both the log
-record and ECS `error.message`. Use it when the underlying message would echo
-user input (see [redaction](#6-redaction)).
+record and ECS `error.message`. The stack trace is copied as is, and `warn`
+never rewrites `error.message`, so an override alone does not redact a
+downstream error (see [redaction](#6-redaction)).
 
 ### Subsystem loggers
 
