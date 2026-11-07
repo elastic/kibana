@@ -324,6 +324,8 @@ exports[`Error PROCESSOR_EVENT 1`] = `"error"`;
 
 exports[`Error PROCESSOR_NAME 1`] = `"error"`;
 
+exports[`Error RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT_NAME 1`] = `undefined`;
+
 exports[`Error RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE 1`] = `undefined`;
 
 exports[`Error SERVER_ADDRESS 1`] = `undefined`;
@@ -776,6 +778,8 @@ exports[`Span PROCESS_RUNTIME_VERSION 1`] = `undefined`;
 exports[`Span PROCESSOR_EVENT 1`] = `"span"`;
 
 exports[`Span PROCESSOR_NAME 1`] = `"transaction"`;
+
+exports[`Span RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT_NAME 1`] = `undefined`;
 
 exports[`Span RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE 1`] = `undefined`;
 
@@ -1239,6 +1243,8 @@ exports[`Transaction PROCESS_RUNTIME_VERSION 1`] = `undefined`;
 exports[`Transaction PROCESSOR_EVENT 1`] = `"transaction"`;
 
 exports[`Transaction PROCESSOR_NAME 1`] = `"transaction"`;
+
+exports[`Transaction RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT_NAME 1`] = `undefined`;
 
 exports[`Transaction RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE 1`] = `undefined`;
 
