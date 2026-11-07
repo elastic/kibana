@@ -8,12 +8,16 @@ import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { ObjectRemover } from '../../../../../../common/lib';
+import { ENTERPRISE_LICENSE } from '../../../../../../../licensing_plugin/scenario';
 
 export default function emailTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const es = getService('es');
+  const retry = getService('retry');
   const objectRemover = new ObjectRemover(supertest);
 
   const getCopyOfAllowedEmailAddresses = () => ['foo.bar@example.org', 'user@test.com'];
+  const nonTrialEmailAddress = 'user@non-trial.example.org';
   const from = 'sender@domain.co'; // Wouldn't pass recipient_allowlist
 
   describe('email connector', () => {
@@ -74,6 +78,50 @@ export default function emailTest({ getService }: FtrProviderContext) {
       expect(body?.message).to.match(
         /not allowed emails: to.foo@example.org, invalidcc@domain.co, foobar@bcc.org/
       );
+    });
+
+    it('throws when recipients only match the non-trial recipient_allowlist', async () => {
+      const conn = await createConnector();
+      expect(conn.status).to.be(200);
+
+      const { status, body } = await runConnector(conn.body.id, [nonTrialEmailAddress], [], []);
+      expect(status).to.be(200);
+
+      expect(body?.status).to.be('error');
+      expect(body?.message).to.match(/not allowed emails: user@non-trial.example.org/);
+    });
+
+    // Must run last: the license cannot be reverted to trial for the rest of the suite.
+    describe('after upgrading from a trial license', () => {
+      before(async () => {
+        await es.license.post({ acknowledge: true, license: ENTERPRISE_LICENSE });
+        await retry.tryForTime(30_000, async () => {
+          const { body } = await supertest.get('/api/licensing/info').expect(200);
+          expect(body.license?.type).to.be('enterprise');
+        });
+      });
+
+      it('succeeds with recipients allowed by recipient_allowlist', async () => {
+        const conn = await createConnector();
+        expect(conn.status).to.be(200);
+
+        const run = await runConnector(conn.body.id, [nonTrialEmailAddress], [], []);
+        expect(run.status).to.be(200);
+        expect(run.body?.status).to.be('ok');
+        expect(addressesFromMessage(run.body?.data?.message, 'to')).to.eql([nonTrialEmailAddress]);
+      });
+
+      it('throws when recipients only match recipient_allowlist_in_trial', async () => {
+        const conn = await createConnector();
+        expect(conn.status).to.be(200);
+
+        const to = getCopyOfAllowedEmailAddresses();
+        const { status, body } = await runConnector(conn.body.id, to, [], []);
+        expect(status).to.be(200);
+
+        expect(body?.status).to.be('error');
+        expect(body?.message).to.match(/not allowed emails: foo.bar@example.org, user@test.com/);
+      });
     });
   });
 
