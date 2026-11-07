@@ -33,6 +33,9 @@ const mockMappings = {
         bytes: {
           type: 'integer',
         },
+        updated_at: {
+          type: 'date',
+        },
       },
     },
     bar: {
@@ -279,6 +282,26 @@ describe('Filter Utils', () => {
         validateConvertFilterToKueryNode([], 'hiddentype.title: "title"', mockMappings);
       }).toThrowErrorMatchingInlineSnapshot(`"This type hiddentype is not allowed: Bad Request"`);
     });
+
+    test('Verify that foo.updated_at targets root field and foo.attributes.updated_at targets type field', () => {
+      // Test foo.updated_at (should target root updated_at field)
+      const rootFieldResult = validateConvertFilterToKueryNode(
+        ['foo'],
+        'foo.updated_at: 5678654567',
+        mockMappings
+      );
+      expect(rootFieldResult).toEqual(
+        esKuery.fromKueryExpression('(type: foo and updated_at: 5678654567)')
+      );
+
+      // Test foo.attributes.updated_at (should target type-specific updated_at field)
+      const typeFieldResult = validateConvertFilterToKueryNode(
+        ['foo'],
+        'foo.attributes.updated_at: 5678654567',
+        mockMappings
+      );
+      expect(typeFieldResult).toEqual(esKuery.fromKueryExpression('foo.updated_at: 5678654567'));
+    });
   });
 
   describe('#validateFilterKueryNode', () => {
@@ -295,42 +318,42 @@ describe('Filter Utils', () => {
         {
           astPath: 'arguments.0',
           error: null,
-          isSavedObjectAttr: true,
+          isRootField: true,
           key: 'foo.updated_at',
           type: 'foo',
         },
         {
           astPath: 'arguments.1',
           error: null,
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: 'foo.attributes.bytes',
           type: 'foo',
         },
         {
           astPath: 'arguments.2',
           error: null,
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: 'foo.attributes.bytes',
           type: 'foo',
         },
         {
           astPath: 'arguments.3',
           error: null,
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: 'foo.attributes.title',
           type: 'foo',
         },
         {
           astPath: 'arguments.4.arguments.0',
           error: null,
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: 'foo.attributes.description',
           type: 'foo',
         },
         {
           astPath: 'arguments.4.arguments.1',
           error: null,
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: 'foo.attributes.description',
           type: 'foo',
         },
@@ -350,7 +373,7 @@ describe('Filter Utils', () => {
         {
           astPath: 'arguments.1',
           error: null,
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: 'alert.attributes.actions.actionTypeId',
           type: 'alert',
         },
@@ -370,42 +393,42 @@ describe('Filter Utils', () => {
         {
           astPath: 'arguments.0',
           error: "This key 'updated_at' need to be wrapped by a saved object type like foo",
-          isSavedObjectAttr: true,
+          isRootField: true,
           key: 'updated_at',
           type: null,
         },
         {
           astPath: 'arguments.1',
           error: null,
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: 'foo.attributes.bytes',
           type: 'foo',
         },
         {
           astPath: 'arguments.2',
           error: null,
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: 'foo.attributes.bytes',
           type: 'foo',
         },
         {
           astPath: 'arguments.3',
           error: null,
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: 'foo.attributes.title',
           type: 'foo',
         },
         {
           astPath: 'arguments.4.arguments.0',
           error: null,
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: 'foo.attributes.description',
           type: 'foo',
         },
         {
           astPath: 'arguments.4.arguments.1',
           error: null,
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: 'foo.attributes.description',
           type: 'foo',
         },
@@ -425,14 +448,14 @@ describe('Filter Utils', () => {
         {
           astPath: 'arguments.0',
           error: null,
-          isSavedObjectAttr: true,
+          isRootField: true,
           key: 'foo.updated_at',
           type: 'foo',
         },
         {
           astPath: 'arguments.1',
           error: null,
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: 'foo.attributes.bytes',
           type: 'foo',
         },
@@ -440,21 +463,21 @@ describe('Filter Utils', () => {
           astPath: 'arguments.2',
           error:
             "This key 'foo.bytes' does NOT match the filter proposition SavedObjectType.attributes.key",
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: 'foo.bytes',
           type: 'foo',
         },
         {
           astPath: 'arguments.3',
           error: null,
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: 'foo.attributes.title',
           type: 'foo',
         },
         {
           astPath: 'arguments.4.arguments.0',
           error: null,
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: 'foo.attributes.description',
           type: 'foo',
         },
@@ -462,7 +485,7 @@ describe('Filter Utils', () => {
           astPath: 'arguments.4.arguments.1',
           error:
             "This key 'foo.description' does NOT match the filter proposition SavedObjectType.attributes.key",
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: 'foo.description',
           type: 'foo',
         },
@@ -482,42 +505,42 @@ describe('Filter Utils', () => {
         {
           astPath: 'arguments.0',
           error: 'This type bar is not allowed',
-          isSavedObjectAttr: true,
+          isRootField: true,
           key: 'bar.updated_at',
           type: 'bar',
         },
         {
           astPath: 'arguments.1',
           error: null,
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: 'foo.attributes.bytes',
           type: 'foo',
         },
         {
           astPath: 'arguments.2',
           error: null,
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: 'foo.attributes.bytes',
           type: 'foo',
         },
         {
           astPath: 'arguments.3',
           error: null,
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: 'foo.attributes.title',
           type: 'foo',
         },
         {
           astPath: 'arguments.4.arguments.0',
           error: null,
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: 'foo.attributes.description',
           type: 'foo',
         },
         {
           astPath: 'arguments.4.arguments.1',
           error: null,
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: 'foo.attributes.description',
           type: 'foo',
         },
@@ -537,21 +560,21 @@ describe('Filter Utils', () => {
         {
           astPath: 'arguments.0',
           error: "This key 'foo.updated_at33' does NOT exist in foo saved object index patterns",
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: 'foo.updated_at33',
           type: 'foo',
         },
         {
           astPath: 'arguments.1',
           error: null,
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: 'foo.attributes.bytes',
           type: 'foo',
         },
         {
           astPath: 'arguments.2',
           error: null,
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: 'foo.attributes.bytes',
           type: 'foo',
         },
@@ -559,21 +582,21 @@ describe('Filter Utils', () => {
           astPath: 'arguments.3',
           error:
             "This key 'foo.attributes.header' does NOT exist in foo saved object index patterns",
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: 'foo.attributes.header',
           type: 'foo',
         },
         {
           astPath: 'arguments.4.arguments.0',
           error: null,
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: 'foo.attributes.description',
           type: 'foo',
         },
         {
           astPath: 'arguments.4.arguments.1',
           error: null,
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: 'foo.attributes.description',
           type: 'foo',
         },
@@ -591,14 +614,14 @@ describe('Filter Utils', () => {
         {
           astPath: 'arguments.0',
           error: null,
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: 'foo.attributes.description',
           type: 'foo',
         },
         {
           astPath: 'arguments.1',
           error: 'The key is empty and needs to be wrapped by a saved object type like foo',
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: null,
           type: null,
         },
@@ -618,14 +641,14 @@ describe('Filter Utils', () => {
         {
           astPath: 'arguments.1.arguments.0',
           error: null,
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: 'alert.attributes.actions.actionTypeId',
           type: 'alert',
         },
         {
           astPath: 'arguments.1.arguments.1',
           error: null,
-          isSavedObjectAttr: false,
+          isRootField: false,
           key: 'alert.attributes.actions.actionRef',
           type: 'alert',
         },
