@@ -47,20 +47,28 @@ export const useFittingCount = ({
   const [generation, setGeneration] = useState(0);
   const floor = Math.max(min, 0);
 
-  // A wider or narrower row starts the fitting over.
+  // A wider or narrower row, or last item, starts the fitting over. The last item is watched too as
+  // its width is not the items' to change: a longer label of the date picker takes room from them,
+  // and a shorter one gives it back. The other items are not, as the fitting changes their width.
   useEffect(() => {
     const container = containerRef.current;
     if (!container || typeof ResizeObserver === 'undefined') {
       return;
     }
-    let lastWidth = container.clientWidth;
+    const lastItem = container.firstElementChild?.lastElementChild;
+    const widths = () => `${container.clientWidth}|${lastItem?.clientWidth ?? 0}`;
+    let lastWidths = widths();
     const observer = new ResizeObserver(() => {
-      if (container.clientWidth !== lastWidth) {
-        lastWidth = container.clientWidth;
-        setGeneration((current) => current + 1);
+      const current = widths();
+      if (current !== lastWidths) {
+        lastWidths = current;
+        setGeneration((previous) => previous + 1);
       }
     });
     observer.observe(container);
+    if (lastItem) {
+      observer.observe(lastItem);
+    }
     return () => observer.disconnect();
   }, []);
 

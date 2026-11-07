@@ -53,8 +53,12 @@ export function ApplicationTabToolbar({
             {filters}
           </EuiFilterGroup>
         </EuiFlexItem>
-        {/* At the end of the row, or of its own when the filters leave no room. */}
-        <EuiFlexItem grow={false} css={{ flexBasis: 420, marginInlineStart: 'auto' }}>
+        {/*
+          At the end of the row, or of its own when the filters leave no room. As wide as the
+          picker is, which a range's label changes: a fixed width would leave a gap before a short
+          label, e.g. "Last 12 years".
+        */}
+        <EuiFlexItem grow={false} css={{ flexShrink: 0, marginInlineStart: 'auto' }}>
           <TimeRangePicker onRefresh={onRefresh} />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { useFittingCount } from './use_fitting_count';
 
 /**
@@ -115,5 +115,56 @@ describe('useFittingCount', () => {
     rerender(<Harness total={1} />);
 
     expect(shown()).toBe(1);
+  });
+
+  describe('when the last item changes width', () => {
+    let notify: () => void = () => {};
+    let lastItemWidth = 100;
+    const clientWidth = jest.spyOn(HTMLElement.prototype, 'clientWidth', 'get');
+    const originalObserver = globalThis.ResizeObserver;
+
+    beforeEach(() => {
+      lastItemWidth = 100;
+      clientWidth.mockImplementation(function (this: HTMLElement) {
+        return this.dataset.position === 'last' ? lastItemWidth : 1000;
+      });
+      // Reports a change when the test says so, like the browser does after a layout.
+      globalThis.ResizeObserver = class {
+        constructor(callback: ResizeObserverCallback) {
+          notify = () => callback([], this);
+        }
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+      };
+    });
+
+    afterEach(() => {
+      globalThis.ResizeObserver = originalObserver;
+    });
+
+    afterAll(() => clientWidth.mockRestore());
+
+    it('fits again, e.g. when a shorter label of the date picker gives room back', () => {
+      capacity = 1;
+      render(<Harness total={4} />);
+      expect(shown()).toBe(1);
+
+      capacity = 3;
+      lastItemWidth = 60;
+      act(() => notify());
+
+      expect(shown()).toBe(3);
+    });
+
+    it('leaves the buttons as they are when no width changed', () => {
+      capacity = 1;
+      render(<Harness total={4} />);
+
+      capacity = 3;
+      act(() => notify());
+
+      expect(shown()).toBe(1);
+    });
   });
 });
