@@ -12,14 +12,15 @@ Model versions decouple Saved Object versioning from the stack version and suppo
 
 ## Migration algorithms
 
-Kibana has two separate migration algorithms that handle updating Saved Object system indices: **v2** and **ZDT (Zero Downtime)**. The algorithm is selected via the `migrations.algorithm` configuration setting, which accepts either `'v2'` or `'zdt'`.
+Kibana has separate migration algorithms that handle updating Saved Object system indices: **v2**, **ZDT (Zero Downtime)** and **v3**. The algorithm is selected via the `migrations.algorithm` configuration setting, which accepts `'v2'`, `'zdt'` or `'v3'`.
 
 * **v2** is the traditional algorithm used on classic stack deployments. It runs during startup with downtime: all old-version nodes are stopped before the new version boots and migrates.
 * **ZDT** is the algorithm used on Serverless deployments. It supports zero-downtime upgrades where old and new Kibana versions cohabit.
+* **v3** merges v2 and ZDT into a single algorithm, which updates the indices in place on both classic and Serverless deployments. It detects Serverless from the Elasticsearch capabilities and adapts a few behaviors: for example, it leaves an index written by newer model versions untouched on Serverless, but fails on classic deployments. See the [v3 README](https://github.com/elastic/kibana/blob/main/src/core/packages/saved-objects/migration-server-internal/src/v3/README.md).
 
-The selection happens in `KibanaMigrator.runMigrationsInternal` (see `src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts`), which branches on `migrations.algorithm` to call either `runV2Migration` or `runZeroDowntimeMigration`.
+The selection happens in `KibanaMigrator.runMigrationsInternal` (see `src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts`), which branches on `migrations.algorithm` to call `runV2Migration`, `runZeroDowntimeMigration` or `runV3Migration`.
 
-Regardless of which algorithm is active, both share the same **Saved Object type definitions** (including `modelVersions`) and the same underlying component for transforming individual documents: the `DocumentMigrator` (`src/core/packages/saved-objects/migration-server-internal/src/document_migrator/document_migrator.ts`). The `DocumentMigrator` reads the type registry, builds an ordered pipeline of transforms from model version `changes`, and applies them to bring each document to the target model version. It supports both upgrades and downgrades (via `forwardCompatibility` schemas).
+Regardless of which algorithm is active, they all share the same **Saved Object type definitions** (including `modelVersions`) and the same underlying component for transforming individual documents: the `DocumentMigrator` (`src/core/packages/saved-objects/migration-server-internal/src/document_migrator/document_migrator.ts`). The `DocumentMigrator` reads the type registry, builds an ordered pipeline of transforms from model version `changes`, and applies them to bring each document to the target model version. It supports both upgrades and downgrades (via `forwardCompatibility` schemas).
 
 ## Classic stack upgrades
 
@@ -67,7 +68,7 @@ From a high level, the state machine consists of three main phases:
 2. **Index state update** — Creates the index if it does not exist, updates mappings and aliases. This phase is executed by **all Kibana node roles** (`ui`, `background_tasks`) as well as the `migrator` role.
 3. **Document conversion** — Updates index metadata, cleans up unknown and excluded documents, and transforms outdated documents according to the model versions defined for each Saved Object type. This phase is executed **solely by the background migration process**, which is a Kubernetes Job that starts a short-lived Kibana instance with the `migrator` role. The component responsible for upgrading each document is the `DocumentMigrator`.
 
-The algorithm uses the node's **role information** to decide which phases to run. The config option `migrations.zdt.runOnRoles` (default: `['migrator']`) controls which roles execute the document conversion phase. Nodes whose role is not in that list skip document conversion and transition directly to `DONE` after the index state update.
+The algorithm uses the node's **role information** to decide which phases to run. The config option `migrations.zdt.runOnRoles` (default: `['migrator']`) controls which roles execute the document conversion phase. Nodes whose role is not in that list skip document conversion and transition directly to `DONE` after the index state update. The `v3` algorithm, which replaces ZDT on Serverless, uses `migrations.zdt.runOnRoles` the same way.
 
 #### Goal
 
@@ -79,7 +80,7 @@ The algorithm updates **index mappings** to match the types' current mappings (d
 |-------|-------------|
 | **INIT** | Fetches indices matching the index prefix, resolves current aliases and mappings, and computes additive mapping changes from the type registry. Determines whether the index exists or needs to be created, and compares mapping/app model versions to decide the next step. |
 
-If the index does not exist, the machine transitions to **CREATE_TARGET_INDEX** (fresh install). If the index exists and model versions are **greater** than what is stored, it transitions to **UPDATE_INDEX_MAPPINGS**. If versions are **equal**, it may skip straight to **UPDATE_ALIASES** or **INDEX_STATE_UPDATE_DONE**. If versions are **lesser** or **conflicting**, it transitions to **FATAL**.
+If the index does not exist, the machine transitions to **CREATE_TARGET_INDEX** (fresh install). If the index exists and model versions are **greater** than what is stored, it transitions to **UPDATE_INDEX_MAPPINGS**. If versions are **equal**, it may skip straight to **UPDATE_ALIASES** or **INDEX_STATE_UPDATE_DONE**. If versions are **lesser** (a rollback, or an old node rebooting during the cohabitation period), it leaves the index untouched and transitions to **INDEX_STATE_UPDATE_DONE**. If versions are **conflicting** (some greater, some lesser), it transitions to **FATAL**.
 
 #### Phase 2: Index state update
 
