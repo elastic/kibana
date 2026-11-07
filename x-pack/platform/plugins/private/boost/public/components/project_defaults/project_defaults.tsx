@@ -9,7 +9,6 @@ import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   EuiBadge,
-  EuiBadgeGroup,
   EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -30,7 +29,6 @@ import { DEFAULT_PROFILE_KEYS, DEFAULT_RULE_NAMES } from '../../../common/preset
 import type { RuleCoverage } from '../../../common/resolution';
 import { getRuleCoverage } from '../../../common/resolution';
 import type { BoostProfileType, BoostState } from '../../../common/types';
-import { formatSize } from '../cost_format';
 import { getProfileDetailsPath } from '../details_link';
 import { PROFILE_TYPE_LABELS, formatDataSourceCount } from '../format';
 import { DEFAULT_PRESET_OPTIONS } from '../preset_options';
@@ -93,14 +91,6 @@ export const ProjectDefaults = ({ state, canEdit }: ProjectDefaultsProps) => {
         {PROFILE_TYPES.map((type) => {
           const ruleName = DEFAULT_RULE_NAMES[type];
           const ruleCoverage = coverage.get(ruleName);
-          // A default rule matches everything of its type, so what it applies to is what it matches
-          // that no higher-ranked rule takes.
-          const appliedSize = dataSources
-            .filter(
-              ({ name }) =>
-                ruleCoverage?.matchedNames.includes(name) && !ruleCoverage.supersededBy.has(name)
-            )
-            .reduce((total, { size_in_bytes: bytes }) => total + bytes, 0);
           return (
             <EuiFlexItem key={type}>
               <ProjectDefaultPanel
@@ -115,7 +105,6 @@ export const ProjectDefaults = ({ state, canEdit }: ProjectDefaultsProps) => {
                     supersededBy: new Map(),
                   }
                 }
-                appliedSize={appliedSize}
                 hiddenNames={hiddenNames}
                 onEdit={canEdit ? () => setEditedType(type) : undefined}
               />
@@ -138,7 +127,6 @@ interface ProjectDefaultPanelProps {
   profileName: string;
   /** What the default rule matches, and what it applies to after other rules, with its data. */
   coverage: RuleCoverage;
-  appliedSize: number;
   hiddenNames: ReadonlySet<string>;
   /** Opens the editor; omitted when the user can't edit. */
   onEdit?: () => void;
@@ -150,7 +138,6 @@ const ProjectDefaultPanel = ({
   ruleName,
   profileName,
   coverage,
-  appliedSize,
   hiddenNames,
   onEdit,
 }: ProjectDefaultPanelProps) => {
@@ -265,10 +252,10 @@ const ProjectDefaultPanel = ({
             <EuiText size="s" color="subdued">
               <p>{preset ? preset.description : CUSTOM_PROFILE_DESCRIPTION}</p>
             </EuiText>
-            {/* What the default applies to: how many, which opens the list of what it matches and
-                what other rules outrank it for, as the rules table does, and how much data. */}
+            {/* How many the default applies to, which opens the list of what it matches and what
+                other rules outrank it for, as the rules table does. */}
             <EuiSpacer size="s" />
-            <EuiBadgeGroup gutterSize="s">
+            <div>
               {coverage.matches > 0 ? (
                 <MatchesPopover
                   type={type}
@@ -297,10 +284,7 @@ const ProjectDefaultPanel = ({
                   {formatDataSourceCount(type, 0)}
                 </EuiBadge>
               )}
-              <EuiBadge color="hollow" data-test-subj={`boostProjectDefaultSize-${type}`}>
-                {formatSize(appliedSize)}
-              </EuiBadge>
-            </EuiBadgeGroup>
+            </div>
           </EuiStat>
         </EuiFlexItem>
       </EuiFlexGroup>

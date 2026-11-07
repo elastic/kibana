@@ -640,21 +640,25 @@ export const RuleFlyout = ({
             {priorityRow}
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <PatternMatches
-          type={type}
-          targetType={targetType}
-          pattern={pattern}
-          exactMatches={patternPreview}
-          partialMatches={partialPreview}
-          dataSources={typedDataSources}
-          hasHidden={hasHidden}
-          includesHidden={includesHidden}
-          onIncludesHiddenChange={setIncludesHidden}
-          maxHeight={PREVIEW_MAX_HEIGHT}
-          onSelectName={selectName}
-          outrankedIfChosen={outrankedIfChosen}
-        />
+        {/* What the rule can target depends on its profile's type, so it's listed once there is one. */}
+        {type && (
+          <>
+            <EuiSpacer size="s" />
+            <PatternMatches
+              type={type}
+              pattern={pattern}
+              exactMatches={patternPreview}
+              partialMatches={partialPreview}
+              dataSources={typedDataSources}
+              hasHidden={hasHidden}
+              includesHidden={includesHidden}
+              onIncludesHiddenChange={setIncludesHidden}
+              maxHeight={PREVIEW_MAX_HEIGHT}
+              onSelectName={selectName}
+              outrankedIfChosen={outrankedIfChosen}
+            />
+          </>
+        )}
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>

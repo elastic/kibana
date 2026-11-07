@@ -536,7 +536,7 @@ describe('RuleFlyout pattern matches', () => {
   it('lists every index until something is typed, and then filters it to what matches', async () => {
     renderNewRule();
     // It only counts matches, so until something is typed, it says what the list is for.
-    expect(getCount()).toHaveTextContent(/^Enter a pattern, or select an index$/);
+    expect(getCount()).toHaveTextContent(/^Enter a pattern or select an index$/);
     expect(getListed()).toEqual(['catalog-fall', 'products']);
 
     await userEvent.type(getPattern(), 'catalog-*');
@@ -729,20 +729,21 @@ describe('RuleFlyout pattern matches', () => {
     );
   });
 
-  it("disables the list's options until a profile is selected", () => {
+  it('lists what the rule can target once a profile sets its type', async () => {
     render(
       <IntlProvider locale="en">
         <RuleFlyout onClose={jest.fn()} />
       </IntlProvider>
     );
+    expect(screen.queryByTestId('boostRulePatternMatches')).not.toBeInTheDocument();
 
-    expect(screen.getByTestId('boostRulePatternMatchesEmpty')).toHaveTextContent(
-      'Select a boost profile to choose targets.'
+    await userEvent.click(
+      within(screen.getByTestId('boostRuleProfile')).getByTestId('comboBoxSearchInput')
     );
-    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(
-      /^Enter a pattern, or select an index$/
-    );
-    expect(screen.getByTestId('boostRuleListOptions')).toBeDisabled();
+    await userEvent.click(screen.getByRole('option', { name: /^zeta-search/ }));
+
+    expect(getCount()).toHaveTextContent(/^Enter a pattern or select an index$/);
+    expect(getListed()).toEqual(['catalog-fall', 'products']);
   });
 
   it("says why hidden indices can't be shown when there are none", async () => {

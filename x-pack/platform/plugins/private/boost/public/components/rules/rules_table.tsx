@@ -18,7 +18,6 @@ import type {
   BoostProfileType,
   BoostRule,
 } from '../../../common/types';
-import { formatSize } from '../cost_format';
 import { DetailsLink } from '../details_link';
 import { TableCount } from '../details/table_count';
 import { useTablePage } from '../use_table_page';
@@ -32,8 +31,6 @@ import { DEFAULT_BADGE_LABEL } from '../badge_labels';
 export type RuleRow = BoostRule &
   RuleCoverage & {
     profileType?: BoostProfileType;
-    /** The storage of what the rule applies to, after higher-ranked rules. */
-    appliedSize: number;
     /** The rule's name or pattern, which its column sorts by. */
     target: string;
   };
@@ -99,7 +96,6 @@ export const RulesTable = ({
   const rows = useMemo<RuleRow[]>(() => {
     const profileTypes = new Map(profiles.map(({ name, type }) => [name, type]));
     const coverage = getRuleCoverage(dataSources, rules, profiles);
-    const sizes = new Map(dataSources.map(({ name, size_in_bytes: bytes }) => [name, bytes]));
     return rules.map((rule) => {
       const ruleCoverage = coverage.get(rule.name) ?? {
         matches: 0,
@@ -107,14 +103,10 @@ export const RulesTable = ({
         appliesTo: 0,
         supersededBy: new Map(),
       };
-      const { matchedNames, supersededBy } = ruleCoverage;
       return {
         ...rule,
         profileType: profileTypes.get(rule.boost_profile),
         ...ruleCoverage,
-        appliedSize: matchedNames
-          .filter((name) => !supersededBy.has(name))
-          .reduce((total, name) => total + (sizes.get(name) ?? 0), 0),
         target: rule.index_patterns.join(', '),
       };
     });
@@ -252,17 +244,6 @@ export const RulesTable = ({
           hiddenNames={hiddenNames}
         />
       ),
-    },
-    {
-      // The storage of what it applies to, as the project defaults show beside their counts.
-      field: 'appliedSize',
-      name: i18n.translate('xpack.boost.rulesTab.storageSizeColumn', {
-        defaultMessage: 'Storage size',
-      }),
-      width: '9em',
-      sortable: true,
-      dataType: 'number',
-      render: formatSize,
     },
     ...(canEdit ? [actionsColumn] : []),
   ];

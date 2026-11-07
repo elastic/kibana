@@ -33,8 +33,6 @@ interface ListOption {
 interface TargetListHeaderProps {
   /** The list's heading. */
   children: ReactNode;
-  /** Whether the list's options are off, such as until a profile is selected. */
-  isDisabled: boolean;
   /** Whether names the pattern doesn't match stay listed. */
   unmatched: ListOption;
   /** Whether hidden data sources are listed. */
@@ -47,12 +45,7 @@ interface TargetListHeaderProps {
  * of the way of the list. The list itself shows which are on: it marks the names that match apart
  * from the rest, badges hidden ones, and counts hidden ones it leaves out.
  */
-export const TargetListHeader = ({
-  children,
-  isDisabled,
-  unmatched,
-  hidden,
-}: TargetListHeaderProps) => {
+export const TargetListHeader = ({ children, unmatched, hidden }: TargetListHeaderProps) => {
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -77,13 +70,12 @@ export const TargetListHeader = ({
               size="xs"
               color="text"
               aria-label={OPTIONS_LABEL}
-              isDisabled={isDisabled}
               onClick={() => setIsOpen((wasOpen) => !wasOpen)}
               data-test-subj="boostRuleListOptions"
             />
           </EuiToolTip>
         }
-        isOpen={isOpen && !isDisabled}
+        isOpen={isOpen}
         closePopover={() => setIsOpen(false)}
         anchorPosition="downRight"
         panelPaddingSize="s"

@@ -40,17 +40,13 @@ const ALL_LABELS: Readonly<Record<BoostProfileType, string>> = {
   }),
 };
 
-const SELECT_PROFILE_MESSAGE = i18n.translate('xpack.boost.patternMatches.selectProfile', {
-  defaultMessage: 'Select a boost profile to choose targets.',
-});
-
 // Heads the list until something is typed, when it starts counting matches.
 const UNFILTERED_TITLES: Readonly<Record<BoostProfileType, string>> = {
   indices: i18n.translate('xpack.boost.patternMatches.unfilteredIndicesTitle', {
-    defaultMessage: 'Enter a pattern, or select an index',
+    defaultMessage: 'Enter a pattern or select an index',
   }),
   data_streams: i18n.translate('xpack.boost.patternMatches.unfilteredDataStreamsTitle', {
-    defaultMessage: 'Enter a pattern, or select a data stream',
+    defaultMessage: 'Enter a pattern or select a data stream',
   }),
 };
 
@@ -143,10 +139,8 @@ interface TargetRow extends TargetOptionData {
 }
 
 interface PatternMatchesProps {
-  /** The rule's profile type, unknown until a profile is selected. */
-  type: BoostProfileType | undefined;
-  /** The type the wording follows, indices until a profile sets it. */
-  targetType: BoostProfileType;
+  /** The rule's profile type, which sets what it can target. */
+  type: BoostProfileType;
   /** What's typed in the rule's field, until which there's nothing to match. */
   pattern: string;
   /** What the name or pattern matches. */
@@ -190,7 +184,6 @@ const formatMatchCount = (match: MatchKind, count: number): string =>
  */
 export const PatternMatches = ({
   type,
-  targetType,
   pattern,
   exactMatches,
   partialMatches,
@@ -221,12 +214,12 @@ export const PatternMatches = ({
   // matches, rather than a list whose length depends on whether hidden data sources are shown.
   const getTitle = (): string => {
     if (!pattern) {
-      return UNFILTERED_TITLES[targetType];
+      return UNFILTERED_TITLES[type];
     }
-    if (type && hasExactMatches) {
+    if (hasExactMatches) {
       return formatMatchCount('exact', exactMatches.length);
     }
-    if (type && partialMatches.length > 0) {
+    if (partialMatches.length > 0) {
       return formatMatchCount('partial', partialMatches.length);
     }
     return i18n.translate('xpack.boost.patternMatches.matchCount', {
@@ -279,7 +272,7 @@ export const PatternMatches = ({
         data-test-subj="boostRuleHiddenNotShown"
       >
         <MatchIcon match={match} isDisabled={isOutranked} isLabeled={false} />
-        {formatHiddenTargets(targetType, count, isAfterOthers)}
+        {formatHiddenTargets(type, count, isAfterOthers)}
       </EuiText>
     );
 
@@ -416,7 +409,7 @@ export const PatternMatches = ({
 
   const renderAll = () => {
     if (dataSources.length === 0) {
-      return renderEmpty(NO_DATA_SOURCES[targetType]);
+      return renderEmpty(NO_DATA_SOURCES[type]);
     }
     const shown = includesHidden ? dataSources : dataSources.filter(({ hidden }) => !hidden);
     // As in the matching list, only hidden matches are counted, so the note doesn't count others as
@@ -440,7 +433,7 @@ export const PatternMatches = ({
     // notes a higher-ranked rule that keeps it, as in the filtered list. The rest note one that
     // would keep them if the rule named them, since choosing one does.
     return renderList(
-      ALL_LABELS[targetType],
+      ALL_LABELS[type],
       shown.map(({ name, hidden }) => {
         const target = matchesByName.get(name);
         return {
@@ -457,13 +450,6 @@ export const PatternMatches = ({
     );
   };
 
-  const renderContent = () => {
-    if (!type) {
-      return renderEmpty(SELECT_PROFILE_MESSAGE);
-    }
-    return isFiltered ? renderMatching() : renderAll();
-  };
-
   return (
     <EuiPanel
       hasBorder
@@ -472,11 +458,10 @@ export const PatternMatches = ({
       css={{ display: 'flex', flexDirection: 'column' }}
       data-test-subj="boostRulePatternMatches"
     >
-      {/* Off until a profile is selected. Showing unmatched names is also off until something is
-          typed, since everything is listed until then, and showing hidden ones while there's nothing
-          hidden to show, unless either is on already. */}
+      {/* Showing unmatched names is off until something is typed, since everything is listed until
+          then, and showing hidden ones while there's nothing hidden to show, unless either is on
+          already. */}
       <TargetListHeader
-        isDisabled={!type}
         unmatched={{
           checked: showsUnmatched,
           onChange: setShowsUnmatched,
@@ -485,13 +470,13 @@ export const PatternMatches = ({
         hidden={{
           checked: includesHidden,
           onChange: onIncludesHiddenChange,
-          disabledReason: !hasHidden && !includesHidden ? NO_HIDDEN_REASONS[targetType] : undefined,
+          disabledReason: !hasHidden && !includesHidden ? NO_HIDDEN_REASONS[type] : undefined,
         }}
       >
         {/* Announced as it changes, since it follows what's typed in another field. */}
         <EuiText
           size="xs"
-          color={type ? 'subdued' : euiTheme.colors.textDisabled}
+          color="subdued"
           aria-live="polite"
           data-test-subj="boostRulePatternMatchCount"
         >
@@ -499,7 +484,7 @@ export const PatternMatches = ({
         </EuiText>
       </TargetListHeader>
       {/* The options' hover fills the panel, less 8px around them. */}
-      <div css={{ padding: euiTheme.size.s }}>{renderContent()}</div>
+      <div css={{ padding: euiTheme.size.s }}>{isFiltered ? renderMatching() : renderAll()}</div>
     </EuiPanel>
   );
 };

@@ -250,6 +250,14 @@ describe('RulesTab matches', () => {
     ).toBeInTheDocument();
   });
 
+  it('leaves out how much data each rule applies to, which says little about what boosting costs', () => {
+    renderTab('/rules');
+
+    const headers = screen.getAllByRole('columnheader').map(({ textContent }) => textContent);
+    expect(headers).toEqual(expect.arrayContaining(['Targets', 'Priority', 'Applies to']));
+    expect(headers).not.toContain('Storage size');
+  });
+
   it("titles what a pattern matches generically, since the rule's column shows the pattern", async () => {
     renderTab('/rules');
 

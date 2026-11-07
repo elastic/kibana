@@ -117,12 +117,12 @@ describe('Project defaults', () => {
 
     expect(getPanel('indices')).toHaveTextContent('Performant');
     expect(screen.getByTestId('boostProjectDefaultCount-indices')).toHaveTextContent('1 index');
-    expect(screen.getByTestId('boostProjectDefaultSize-indices')).toHaveTextContent('2 GB');
     expect(getPanel('data_streams')).toHaveTextContent('Last 7 days');
     expect(screen.getByTestId('boostProjectDefaultCount-data_streams')).toHaveTextContent(
       '1 data stream'
     );
-    expect(screen.getByTestId('boostProjectDefaultSize-data_streams')).toHaveTextContent('3 GB');
+    // Not how much data, which says little about what boosting it costs.
+    expect(screen.queryByTestId('boostProjectDefaultSize-indices')).not.toBeInTheDocument();
   });
 
   it('lists what a default matches from its count, with what other rules outrank it for', async () => {
@@ -149,7 +149,6 @@ describe('Project defaults', () => {
 
     const count = screen.getByTestId('boostProjectDefaultCount-indices');
     expect(count).toHaveTextContent('2 indices');
-    expect(screen.getByTestId('boostProjectDefaultSize-indices')).toHaveTextContent('1 GB');
     expect(count).toHaveAccessibleName('2 indices. Show what the default for indices matches');
     await userEvent.click(count);
 
@@ -162,11 +161,6 @@ describe('Project defaults', () => {
     expect(popover.getByTestId('boostRuleMatchesMoreHidden')).toHaveTextContent(
       /^\+1 hidden index$/
     );
-    await userEvent.keyboard('{Escape}');
-
-    // The rules table counts the storage of what each rule applies to.
-    const defaultRow = screen.getByRole('row', { name: /_default-indices/ });
-    expect(defaultRow).toHaveTextContent('1 GB');
   });
 
   it('says which default rule each default sets, on its card and in its flyout', async () => {
