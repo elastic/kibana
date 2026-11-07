@@ -1,0 +1,101 @@
+{
+  "rule": {
+    "source": "prebuilt",
+    "rule_id": "dafa3235-76dc-40e2-9f71-1773b96d24cf"
+  },
+  "chain": "entra-cloud",
+  "step": "karen.d MFA disabled (post-compromise)",
+  "positive": {
+    "docs": [
+      {
+        "stream": "logs-azure.auditlogs",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "iam"
+            ],
+            "type": [
+              "info"
+            ],
+            "action": "Disable Strong Authentication",
+            "outcome": "success",
+            "kind": "event"
+          },
+          "cloud": {
+            "provider": "azure"
+          },
+          "user": {
+            "name": "karen.d@corp.example.com"
+          },
+          "azure": {
+            "auditlogs": {
+              "operation_name": "Disable Strong Authentication",
+              "properties": {
+                "initiated_by": {
+                  "user": {
+                    "userPrincipalName": "karen.d@corp.example.com",
+                    "ipAddress": "198.51.100.88"
+                  }
+                },
+                "additional_details": [
+                  {
+                    "key": "AuthenticationMethod",
+                    "value": "x"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "negative": {
+    "twin_delta": "Operation is an ordinary profile update",
+    "docs": [
+      {
+        "stream": "logs-azure.auditlogs",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "iam"
+            ],
+            "type": [
+              "info"
+            ],
+            "action": "Update user",
+            "outcome": "success",
+            "kind": "event"
+          },
+          "cloud": {
+            "provider": "azure"
+          },
+          "user": {
+            "name": "karen.d@corp.example.com"
+          },
+          "azure": {
+            "auditlogs": {
+              "operation_name": "Update user",
+              "properties": {
+                "initiated_by": {
+                  "user": {
+                    "userPrincipalName": "karen.d@corp.example.com",
+                    "ipAddress": "198.51.100.88"
+                  }
+                },
+                "additional_details": [
+                  {
+                    "key": "AuthenticationMethod",
+                    "value": "x"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}

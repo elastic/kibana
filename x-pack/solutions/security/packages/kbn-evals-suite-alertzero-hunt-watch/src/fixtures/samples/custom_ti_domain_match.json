@@ -1,0 +1,124 @@
+{
+  "rule": {
+    "source": "custom",
+    "file": "rules/custom/qa-ti-domain-indicator-match.json"
+  },
+  "chain": "encoded-powershell",
+  "step": "C2 connection (also covers the bits-mshta and linux-curl IoC domains)",
+  "positive": {
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.network",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "network"
+            ],
+            "type": [
+              "connection",
+              "protocol"
+            ],
+            "action": "lookup_requested",
+            "kind": "event"
+          },
+          "host": {
+            "name": "wks-alice-01",
+            "id": "azqa-wks-alice-01",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-alice-01"
+          },
+          "user": {
+            "name": "alice.chen"
+          },
+          "dns": {
+            "question": {
+              "name": "malicious-c2.example.com",
+              "type": "A"
+            }
+          },
+          "process": {
+            "name": "powershell.exe",
+            "executable": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "entity_id": "azqa-ps-c2"
+          }
+        }
+      }
+    ]
+  },
+  "negative": {
+    "twin_delta": "DNS lookup of a domain that is not in the indicator index",
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.network",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "network"
+            ],
+            "type": [
+              "connection",
+              "protocol"
+            ],
+            "action": "lookup_requested",
+            "kind": "event"
+          },
+          "host": {
+            "name": "wks-alice-01",
+            "id": "azqa-wks-alice-01",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-alice-01"
+          },
+          "user": {
+            "name": "alice.chen"
+          },
+          "dns": {
+            "question": {
+              "name": "intranet.contoso.local",
+              "type": "A"
+            }
+          },
+          "process": {
+            "name": "powershell.exe",
+            "executable": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "entity_id": "azqa-ps-c2"
+          }
+        }
+      }
+    ]
+  },
+  "fixtures": [
+    {
+      "stream": "logs-ti_abusech.url",
+      "at": -3600,
+      "doc": {
+        "event": {
+          "category": [
+            "threat"
+          ],
+          "kind": "enrichment",
+          "type": [
+            "indicator"
+          ],
+          "module": "ti_abusech"
+        },
+        "threat": {
+          "indicator": {
+            "type": "url",
+            "url": {
+              "domain": "malicious-c2.example.com",
+              "full": "http://malicious-c2.example.com/gate.php"
+            }
+          }
+        }
+      }
+    }
+  ]
+}
