@@ -135,7 +135,14 @@ const readQuery = (
   return splitValue(raw, QUERY_DELIMITERS[style] ?? ',', types, false);
 };
 
-const readPath = ({ style, explode }: OperationParameter, value: string, types: Set<string>) => {
+const readPath = (
+  { style, explode, delimiter }: OperationParameter,
+  value: string,
+  types: Set<string>
+) => {
+  if (delimiter !== undefined) {
+    return splitValue(value, delimiter, types, false);
+  }
   if (style === 'label') {
     return splitValue(value.replace(/^\./, ''), explode ? '.' : ',', types, explode);
   }
@@ -181,7 +188,7 @@ const readRaw = (
     return undefined;
   }
   return location === 'header'
-    ? splitValue(value.trim(), /\s*,\s*/, types, explode)
+    ? splitValue(value.trim(), parameter.delimiter ?? /\s*,\s*/, types, explode)
     : splitValue(value, ',', types, false);
 };
 

@@ -37,6 +37,7 @@ import { loadContractOperations } from '../openapi';
 import type { OperationMatch } from '../openapi/match_operation';
 import { createOpenApiAdapter } from '../openapi/openapi_adapter';
 import { findTokenEndpoints, respondToTokenRequest } from '../openapi/token_endpoints';
+import { isJsonMediaType } from '../openapi/validate_content';
 import { insufficientScopeChallenge } from '../openapi/validate_security';
 import type { SmithyModel } from '../smithy';
 import { convertSmithy, isSmithyModel } from '../smithy';
@@ -134,13 +135,15 @@ const toContractRequest = async (request: Request): Promise<ContractRequest> => 
   // `request.body` undefined even when the request has one.
   const text = await request.text();
   let body: unknown = text || undefined;
+  let bodyError: string | undefined;
   if (text) {
     headers['content-length'] ??= String(Buffer.byteLength(text));
-    if (/json/.test(headers['content-type'] ?? '')) {
+    // NDJSON and JSON text sequences are several documents, so they stay text.
+    if (isJsonMediaType(headers['content-type'])) {
       try {
         body = JSON.parse(text);
-      } catch {
-        // Left as a string so validation reports it against the JSON schema.
+      } catch (error) {
+        bodyError = error instanceof Error ? error.message : String(error);
       }
     }
   }
@@ -150,6 +153,7 @@ const toContractRequest = async (request: Request): Promise<ContractRequest> => 
     query: toQuery(url.searchParams),
     headers,
     body,
+    ...(bodyError === undefined ? {} : { bodyError }),
   };
 };
 
@@ -247,9 +251,19 @@ const toOperationRef = ({ method, path, spec: { source } }: ContractOperation): 
 // HTTP sends no body with these, though specs such as Jira's declare content for 204 responses.
 const NULL_BODY_STATUSES = new Set([101, 204, 205, 304]);
 
+// JSON bodies are serialized whatever their value, so a JSON string or `null` stays JSON.
+const isJsonContent = (headers: ContractResponse['headers'] = {}): boolean =>
+  Object.entries(headers).some(
+    ([name, value]) => name.toLowerCase() === 'content-type' && isJsonMediaType(value)
+  );
+
 const toResponse = ({ statusCode, headers, body }: ContractResponse): Response => {
   const payload =
-    body === undefined || body === null || NULL_BODY_STATUSES.has(statusCode)
+    body === undefined || NULL_BODY_STATUSES.has(statusCode)
+      ? null
+      : isJsonContent(headers)
+      ? JSON.stringify(body)
+      : body === null
       ? null
       : typeof body === 'string'
       ? body

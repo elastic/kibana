@@ -45,45 +45,101 @@ const toStatusCode = ({ code }: OperationResponse): number =>
 const baseType = (mediaType: string): string => mediaType.split(';')[0].trim().toLowerCase();
 const isJson = (mediaType: string): boolean => /[/+]json$/.test(baseType(mediaType));
 
-const parseAccept = (accept: string) =>
-  accept
-    .split(',')
-    .map((part) => {
-      const [range, ...parameters] = part.split(';').map((piece) => piece.trim());
-      const quality = parameters.find((parameter) => parameter.startsWith('q='));
-      return { range: range.toLowerCase(), q: quality ? Number(quality.slice(2)) : 1 };
-    })
-    .filter(({ range, q }) => range && q > 0)
-    .sort((a, b) => b.q - a.q);
+interface MediaRange {
+  readonly type: string;
+  readonly subtype: string;
+  readonly q: number;
+}
 
-const matchesRange = (range: string, mediaType: string): boolean => {
-  const type = baseType(mediaType);
-  return (
-    range === '*/*' ||
-    range === type ||
-    (range.endsWith('/*') && type.startsWith(range.slice(0, -1)))
-  );
+const parseAccept = (accept: string): MediaRange[] =>
+  accept.split(',').flatMap((part) => {
+    const [range, ...parameters] = part.split(';').map((piece) => piece.trim());
+    const [type, subtype] = range.toLowerCase().split('/');
+    if (!type || !subtype) {
+      return [];
+    }
+    const quality = parameters.find((parameter) => parameter.startsWith('q='));
+    const q = quality ? Number(quality.slice(2)) : 1;
+    return [{ type, subtype, q: Number.isFinite(q) ? q : 0 }];
+  });
+
+const covers = (range: MediaRange, type: string, subtype: string): boolean =>
+  (range.type === '*' || range.type === type) &&
+  (range.subtype === '*' || range.subtype === subtype);
+
+const specificity = ({ type, subtype }: MediaRange): number =>
+  Number(type !== '*') + Number(subtype !== '*');
+
+// RFC 9110 §12.5.1: a media type gets the quality of the most specific range that covers it, so
+// `application/json;q=0, */*` excludes JSON.
+const qualityOf = (ranges: readonly MediaRange[], mediaType: string): number => {
+  const [type, subtype = ''] = baseType(mediaType).split('/');
+  const [best] = ranges
+    .filter((range) => covers(range, type, subtype))
+    .sort((a, b) => specificity(b) - specificity(a));
+  return best?.q ?? 0;
+};
+
+// What a range such as `*/*` or `text/*` declared by the spec is sent as when the client accepts
+// nothing more specific.
+const WILDCARD_DEFAULTS: Readonly<Record<string, string>> = {
+  '*': 'application/json',
+  application: 'application/json',
+  text: 'text/plain',
+};
+
+// The concrete types a declared content can be sent as: itself, or for a declared range, the
+// concrete types the client accepts that it covers, then its default.
+const concreteTypes = (declared: string, ranges: readonly MediaRange[]): string[] => {
+  const [type, subtype = ''] = baseType(declared).split('/');
+  if (type !== '*' && subtype !== '*') {
+    return [declared];
+  }
+  const accepted = ranges
+    .filter((range) => specificity(range) === 2 && (type === '*' || range.type === type))
+    .map((range) => `${range.type}/${range.subtype}`);
+  const fallback = WILDCARD_DEFAULTS[type];
+  return fallback ? [...accepted, fallback] : accepted;
+};
+
+// OpenAPI: a concrete media type declared by the spec takes precedence over a range covering it.
+const declaredSpecificity = (mediaType: string): number => {
+  const [type, subtype = ''] = baseType(mediaType).split('/');
+  return specificity({ type, subtype, q: 1 });
 };
 
 /**
- * Picks the response content that best satisfies the `Accept` header, preferring JSON when
- * several match. A vendor JSON type such as `application/vnd.github+json` that the spec doesn't
- * declare gets its JSON content, as vendors answer those with `application/json`. Returns
- * undefined when the response has contents but none is acceptable.
+ * Picks the response content that best satisfies the `Accept` header: the highest quality, then
+ * JSON, then the most specific declaration, then the spec's order. Content the spec declares for a media range, such as `text/*`,
+ * is sent as a concrete type the client accepts. A vendor JSON type such as
+ * `application/vnd.github+json` that the spec doesn't declare gets its JSON content, as vendors
+ * answer those with `application/json`. Returns undefined when the response has contents but
+ * none is acceptable.
  */
 export const negotiateContent = (
   contents: readonly MediaTypeContent[],
   accept: string | undefined
 ): MediaTypeContent | undefined => {
-  const ranges = accept ? parseAccept(accept) : [{ range: '*/*', q: 1 }];
-  for (const { range } of ranges) {
-    const matching = contents.filter(({ mediaType }) => matchesRange(range, mediaType));
-    const match = matching.find(({ mediaType }) => isJson(mediaType)) ?? matching[0];
-    if (match) {
-      return match;
-    }
+  const ranges = accept ? parseAccept(accept) : [{ type: '*', subtype: '*', q: 1 }];
+  const candidates = contents
+    .flatMap((content, order) =>
+      concreteTypes(content.mediaType, ranges).map((mediaType) => ({
+        content: { ...content, mediaType },
+        q: qualityOf(ranges, mediaType),
+        json: isJson(mediaType),
+        declared: declaredSpecificity(content.mediaType),
+        order,
+      }))
+    )
+    .filter(({ q }) => q > 0)
+    .sort(
+      (a, b) =>
+        b.q - a.q || Number(b.json) - Number(a.json) || b.declared - a.declared || a.order - b.order
+    );
+  if (candidates.length > 0) {
+    return candidates[0].content;
   }
-  return ranges.some(({ range }) => range.endsWith('+json'))
+  return ranges.some(({ subtype, q }) => subtype.endsWith('+json') && q > 0)
     ? contents.find(({ mediaType }) => isJson(mediaType))
     : undefined;
 };

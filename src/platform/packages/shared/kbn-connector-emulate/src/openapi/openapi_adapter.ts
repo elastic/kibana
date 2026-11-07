@@ -26,8 +26,8 @@ export const createOpenApiAdapter = (
     route: ({ method, url, headers }) => match(method, url, headers),
     authenticate: ({ operation }, { query, headers }) =>
       validateSecurity(operation, { query, headers }, securityOptions),
-    validateRequest: ({ operation, pathParameters }, { query, headers, body }) =>
-      validateRequest(operation, { query, headers, pathParameters, body }),
+    validateRequest: ({ operation, pathParameters }, { query, headers, body, bodyError }) =>
+      validateRequest(operation, { query, headers, pathParameters, body, bodyError }),
     respond,
     validateResponse,
   };

@@ -71,7 +71,10 @@ const isSchema = (value: unknown): boolean => isRecord(value) || typeof value ==
 // instances, so these defects would otherwise surface on the first request that hits them.
 const describeDefect = (spec: ContractSpec, schema: SchemaNode): string | undefined => {
   const { $ref, type, required, enum: enumValues, patternProperties } = schema;
-  if ($ref !== undefined && (typeof $ref !== 'string' || !resolveSchemaRef(spec, $ref))) {
+  if (
+    $ref !== undefined &&
+    (typeof $ref !== 'string' || resolveSchemaRef(spec, $ref) === undefined)
+  ) {
     return `$ref ${JSON.stringify($ref)} does not resolve to a schema`;
   }
   const types = type === undefined ? [] : Array.isArray(type) ? type : [type];
