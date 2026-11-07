@@ -21,7 +21,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../functional/config.base.ts')
   );
 
-  const corsTestPlugin = Path.resolve(__dirname, './plugins/kibana_cors_test');
+  const corsTestPlugin = Path.resolve(
+    __dirname,
+    '../../test_plugins/functional_cors/plugins/kibana_cors_test'
+  );
 
   const servers = {
     ...kibanaFunctionalConfig.get('servers'),

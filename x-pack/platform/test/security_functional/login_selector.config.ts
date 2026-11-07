@@ -26,14 +26,20 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaPort = kibanaFunctionalConfig.get('servers.kibana.port');
   const idpPath = resolve(
     __dirname,
-    '../security_api_integration/plugins/saml_provider/metadata.xml'
+    '../../test_plugins/security_api_integration/plugins/saml_provider/metadata.xml'
   );
   const idpNeverLoginPath = require.resolve(
     '@kbn/security-api-integration-helpers/saml/idp_metadata_never_login.xml'
   );
-  const samlIdPPlugin = resolve(__dirname, '../security_api_integration/plugins/saml_provider');
+  const samlIdPPlugin = resolve(
+    __dirname,
+    '../../test_plugins/security_api_integration/plugins/saml_provider'
+  );
 
-  const testEndpointsPlugin = resolve(__dirname, './plugins/test_endpoints');
+  const testEndpointsPlugin = resolve(
+    __dirname,
+    '../../test_plugins/security_functional/plugins/test_endpoints'
+  );
 
   return {
     testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,

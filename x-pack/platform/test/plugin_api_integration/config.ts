@@ -55,6 +55,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'microsoftDefenderEndpointOn',
         ])}`,
         ...findTestPluginPaths(path.resolve(__dirname, 'plugins')),
+        ...findTestPluginPaths(
+          path.resolve(__dirname, '../../test_plugins/plugin_api_integration/plugins')
+        ),
       ],
     },
   };

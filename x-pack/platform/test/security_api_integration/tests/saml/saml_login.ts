@@ -824,7 +824,10 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Audit Log', function () {
-      const logFilePath = resolve(__dirname, '../../packages/helpers/audit/saml.log');
+      const logFilePath = resolve(
+        __dirname,
+        '../../../../test_plugins/security_api_integration/packages/helpers/audit/saml.log'
+      );
       const logFile = new FileWrapper(logFilePath, retry);
 
       beforeEach(async () => {
