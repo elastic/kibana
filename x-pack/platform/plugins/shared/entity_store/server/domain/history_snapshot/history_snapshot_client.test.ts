@@ -9,8 +9,16 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { HistorySnapshotClient } from './history_snapshot_client';
+import type { HistorySnapshotRun } from './history_snapshot_client';
 import { HISTORY_SNAPSHOT_RESET_SCRIPT } from './constants';
-import { createIndex, reindex, updateByQueryWithScript } from '../../infra/elasticsearch';
+import {
+  cancelTask,
+  createIndex,
+  pollTaskUntil,
+  startReindex,
+  startUpdateByQueryWithScript,
+  toReindexResult,
+} from '../../infra/elasticsearch';
 import { deleteExpiredHistorySnapshots } from './expire_history_snapshots';
 import { DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS } from '../saved_objects';
 import { resolveLatestEntitiesIndexName } from '../asset_manager/resolve_entity_store_indices';
@@ -20,10 +28,17 @@ jest.mock('./expire_history_snapshots');
 jest.mock('../asset_manager/resolve_entity_store_indices');
 
 const mockCreateIndex = createIndex as jest.MockedFunction<typeof createIndex>;
-const mockReindex = reindex as jest.MockedFunction<typeof reindex>;
-const mockUpdateByQueryWithScript = updateByQueryWithScript as jest.MockedFunction<
-  typeof updateByQueryWithScript
+const mockStartReindex = startReindex as jest.MockedFunction<typeof startReindex>;
+const mockStartUpdateByQuery = startUpdateByQueryWithScript as jest.MockedFunction<
+  typeof startUpdateByQueryWithScript
 >;
+const mockPollTaskUntil = pollTaskUntil as jest.MockedFunction<typeof pollTaskUntil>;
+const mockCancelTask = cancelTask as jest.MockedFunction<typeof cancelTask>;
+
+const completed = (response: Record<string, unknown>) => ({
+  status: 'completed' as const,
+  response,
+});
 const mockDeleteExpiredHistorySnapshots = deleteExpiredHistorySnapshots as jest.MockedFunction<
   typeof deleteExpiredHistorySnapshots
 >;
@@ -63,6 +78,7 @@ function createMockTaskManager() {
       errors: [],
     }),
     runSoon: jest.fn().mockResolvedValue({ id: 'entity_store:v2:history_snapshot_task:default' }),
+    bulkUpdateState: jest.fn().mockResolvedValue({ tasks: [], errors: [] }),
     ensureScheduled: jest
       .fn()
       .mockResolvedValue({ id: 'entity_store:v2:history_snapshot_task:default' }),
@@ -98,6 +114,9 @@ describe('HistorySnapshotClient', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockDeleteExpiredHistorySnapshots.mockResolvedValue({ deleted: [] });
+    jest
+      .mocked(toReindexResult)
+      .mockImplementation(jest.requireActual('../../infra/elasticsearch/reindex').toReindexResult);
     mockLogger = loggerMock.create();
     mockEsClient = {} as jest.Mocked<ElasticsearchClient>;
     mockInternalEsClient = {} as jest.Mocked<ElasticsearchClient>;
@@ -168,21 +187,34 @@ describe('HistorySnapshotClient', () => {
   });
 
   describe('runHistorySnapshot', () => {
-    it('returns success with docCount and resetCount when reindex and updateByQuery succeed', async () => {
+    const latestIndex = '.entities.v2.latest.default-00001';
+
+    const savedRun = (overrides: Partial<HistorySnapshotRun> = {}): HistorySnapshotRun => ({
+      phase: 'reindex',
+      esTaskId: 'node:1',
+      latestIndex,
+      historySnapshotIndex: '.entities.v2.history.default.2026-11-03-08',
+      timestampNow: '2026-11-03T08:00:00.000Z',
+      cycleStartedAt: '2026-11-03T08:00:00.000Z',
+      phaseStartedAt: '2026-11-03T08:00:00.000Z',
+      ...overrides,
+    });
+
+    beforeEach(() => {
       mockCreateIndex.mockResolvedValue(undefined);
-      mockReindex.mockResolvedValue({
-        created: 5,
-        updated: 0,
-        versionConflicts: 0,
-        total: 5,
-        failures: [],
-      });
-      mockUpdateByQueryWithScript.mockResolvedValue({ updated: 5, total: 5 });
+      mockStartReindex.mockResolvedValue('node:reindex');
+      mockStartUpdateByQuery.mockResolvedValue('node:reset');
+    });
+
+    it('returns success with docCount and resetCount when reindex and updateByQuery succeed', async () => {
+      mockPollTaskUntil
+        .mockResolvedValueOnce(completed({ total: 5, created: 5 }))
+        .mockResolvedValueOnce(completed({ updated: 5, total: 5 }));
 
       const result = await client.runHistorySnapshot();
 
       expect(result.ok).toBe(true);
-      if (result.ok && !('skipped' in result)) {
+      if (result.ok && 'docCount' in result) {
         expect(result.docCount).toBe(5);
         expect(result.resetCount).toBe(5);
         expect(result.historySnapshotIndex).toMatch(
@@ -190,33 +222,29 @@ describe('HistorySnapshotClient', () => {
         );
       }
       expect(mockCreateIndex).toHaveBeenCalledTimes(1);
-      expect(mockReindex).toHaveBeenCalledWith(
+      expect(mockStartReindex).toHaveBeenCalledWith(
         mockEsClient,
         expect.objectContaining({
-          source: { index: '.entities.v2.latest.default-00001' },
+          source: { index: latestIndex },
           dest: { index: expect.stringMatching(/\.entities\.v2\.history\.default\./) },
-          waitForTask: {
-            logger: expect.anything(),
-            minTimeout: 5 * 1000,
-            maxTimeout: 30 * 1000,
-            forever: true,
-          },
         })
       );
-      expect(mockUpdateByQueryWithScript).toHaveBeenCalledWith(
+      expect(mockStartUpdateByQuery).toHaveBeenCalledWith(
         mockEsClient,
         expect.objectContaining({
-          index: '.entities.v2.latest.default-00001',
+          index: latestIndex,
           query: { match_all: {} },
           script: HISTORY_SNAPSHOT_RESET_SCRIPT,
           params: expect.objectContaining({ timestampNow: expect.any(String) }),
-          waitForTask: {
-            logger: expect.anything(),
-            minTimeout: 5 * 1000,
-            maxTimeout: 30 * 1000,
-            forever: true,
-          },
         })
+      );
+      expect(mockPollTaskUntil).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ taskId: 'node:reindex', deadline: undefined })
+      );
+      expect(mockPollTaskUntil).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ taskId: 'node:reset' })
       );
       expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
         historySnapshot: { lastExecutionTimestamp: expect.any(String), lastError: null },
@@ -237,27 +265,150 @@ describe('HistorySnapshotClient', () => {
     });
 
     it('returns success with docCount 0 and resetCount 0 when latest index has no docs', async () => {
-      mockCreateIndex.mockResolvedValue(undefined);
-      mockReindex.mockResolvedValue({
-        created: 0,
-        updated: 0,
-        versionConflicts: 0,
-        total: 0,
-        failures: [],
-      });
+      mockPollTaskUntil.mockResolvedValueOnce(completed({ total: 0 }));
 
       const result = await client.runHistorySnapshot();
 
       expect(result.ok).toBe(true);
-      if (result.ok && !('skipped' in result)) {
+      if (result.ok && 'docCount' in result) {
         expect(result.docCount).toBe(0);
         expect(result.resetCount).toBe(0);
       }
-      expect(mockUpdateByQueryWithScript).not.toHaveBeenCalled();
+      expect(mockStartUpdateByQuery).not.toHaveBeenCalled();
       expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
         historySnapshot: { lastExecutionTimestamp: expect.any(String), lastError: null },
       });
       expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns in progress with the reindex task when the deadline passes', async () => {
+      mockPollTaskUntil.mockResolvedValueOnce({ status: 'pending' });
+      const deadline = Date.now() + 1000;
+
+      const result = await client.runHistorySnapshot({ deadline });
+
+      expect(result).toEqual({
+        ok: true,
+        inProgress: true,
+        run: expect.objectContaining({
+          phase: 'reindex',
+          esTaskId: 'node:reindex',
+          latestIndex,
+          historySnapshotIndex: expect.stringMatching(/\.entities\.v2\.history\.default\./),
+        }),
+      });
+      expect(mockPollTaskUntil).toHaveBeenCalledWith(expect.objectContaining({ deadline }));
+      expect(mockGlobalStateClient.update).not.toHaveBeenCalled();
+      expect(mockDeleteExpiredHistorySnapshots).not.toHaveBeenCalled();
+    });
+
+    it('returns in progress with the reset task and doc count when the deadline passes during the reset', async () => {
+      mockPollTaskUntil
+        .mockResolvedValueOnce(completed({ total: 7 }))
+        .mockResolvedValueOnce({ status: 'pending' });
+
+      const result = await client.runHistorySnapshot({ deadline: Date.now() + 1000 });
+
+      expect(result).toEqual({
+        ok: true,
+        inProgress: true,
+        run: expect.objectContaining({ phase: 'reset', esTaskId: 'node:reset', docCount: 7 }),
+      });
+    });
+
+    it('resumes a saved reindex without starting a new one', async () => {
+      mockPollTaskUntil
+        .mockResolvedValueOnce(completed({ total: 4 }))
+        .mockResolvedValueOnce(completed({ updated: 4, total: 4 }));
+      const run = savedRun();
+
+      const result = await client.runHistorySnapshot({ run });
+
+      expect(mockCreateIndex).not.toHaveBeenCalled();
+      expect(mockStartReindex).not.toHaveBeenCalled();
+      expect(mockPollTaskUntil).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ taskId: 'node:1' })
+      );
+      expect(mockStartUpdateByQuery).toHaveBeenCalledWith(
+        mockEsClient,
+        expect.objectContaining({ params: { timestampNow: run.timestampNow } })
+      );
+      expect(result).toEqual({
+        ok: true,
+        historySnapshotIndex: run.historySnapshotIndex,
+        docCount: 4,
+        resetCount: 4,
+      });
+    });
+
+    it('resumes a saved reset and reports the saved doc count', async () => {
+      mockPollTaskUntil.mockResolvedValueOnce(completed({ updated: 9, total: 9 }));
+
+      const result = await client.runHistorySnapshot({
+        run: savedRun({ phase: 'reset', esTaskId: 'node:2', docCount: 9 }),
+      });
+
+      expect(mockStartReindex).not.toHaveBeenCalled();
+      expect(mockStartUpdateByQuery).not.toHaveBeenCalled();
+      expect(result).toEqual(expect.objectContaining({ ok: true, docCount: 9, resetCount: 9 }));
+      expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledTimes(1);
+    });
+
+    it('starts the phase again when its Elasticsearch task no longer exists', async () => {
+      mockPollTaskUntil
+        .mockResolvedValueOnce({ status: 'missing' })
+        .mockResolvedValueOnce(completed({ total: 0 }));
+      const run = savedRun();
+
+      const result = await client.runHistorySnapshot({ run });
+
+      expect(mockStartReindex).toHaveBeenCalledWith(
+        mockEsClient,
+        expect.objectContaining({
+          source: { index: run.latestIndex },
+          dest: { index: run.historySnapshotIndex },
+        })
+      );
+      expect(mockPollTaskUntil).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ taskId: 'node:reindex' })
+      );
+      expect(result).toEqual(expect.objectContaining({ ok: true, docCount: 0 }));
+    });
+
+    it('fails when the Elasticsearch task was cancelled', async () => {
+      mockPollTaskUntil.mockResolvedValueOnce(
+        completed({ total: 10, created: 3, canceled: 'by user request' })
+      );
+
+      const result = await client.runHistorySnapshot({ run: savedRun() });
+
+      expect(result.ok).toBe(false);
+      expect(mockStartUpdateByQuery).not.toHaveBeenCalled();
+      expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
+        historySnapshot: expect.objectContaining({
+          lastError: {
+            message: expect.stringContaining('was cancelled: by user request'),
+            timestamp: expect.any(String),
+          },
+        }),
+      });
+    });
+
+    it('cancels the Elasticsearch task when the run is aborted', async () => {
+      const abortController = new AbortController();
+      mockPollTaskUntil.mockImplementationOnce(async () => {
+        abortController.abort();
+        throw new Error('Task polling aborted');
+      });
+
+      const result = await client.runHistorySnapshot({ abortSignal: abortController.signal });
+
+      expect(result.ok).toBe(false);
+      expect(mockCancelTask).toHaveBeenCalledWith(
+        expect.objectContaining({ esClient: mockInternalEsClient, taskId: 'node:reindex' })
+      );
     });
 
     it('returns skipped when history snapshot status is not started', async () => {
@@ -272,9 +423,23 @@ describe('HistorySnapshotClient', () => {
       expect(result.ok).toBe(true);
       expect(result).toHaveProperty('skipped', true);
       expect(mockCreateIndex).not.toHaveBeenCalled();
-      expect(mockReindex).not.toHaveBeenCalled();
+      expect(mockStartReindex).not.toHaveBeenCalled();
+      expect(mockCancelTask).not.toHaveBeenCalled();
       expect(mockGlobalStateClient.update).not.toHaveBeenCalled();
       expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledTimes(0);
+    });
+
+    it('cancels a saved run when history snapshot status is not started', async () => {
+      mockGlobalStateClient.findOrThrow.mockResolvedValue({
+        ...mockGlobalStateStarted,
+        historySnapshot: { ...mockGlobalStateStarted.historySnapshot, status: 'stopped' },
+      });
+
+      const result = await client.runHistorySnapshot({ run: savedRun() });
+
+      expect(result).toHaveProperty('skipped', true);
+      expect(mockCancelTask).toHaveBeenCalledWith(expect.objectContaining({ taskId: 'node:1' }));
+      expect(mockPollTaskUntil).not.toHaveBeenCalled();
     });
 
     it('returns error when createIndex throws', async () => {
@@ -286,8 +451,8 @@ describe('HistorySnapshotClient', () => {
       if (!result.ok) {
         expect(result.error.message).toBe('History snapshot failed');
       }
-      expect(mockReindex).not.toHaveBeenCalled();
-      expect(mockUpdateByQueryWithScript).not.toHaveBeenCalled();
+      expect(mockStartReindex).not.toHaveBeenCalled();
+      expect(mockStartUpdateByQuery).not.toHaveBeenCalled();
       expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
         historySnapshot: expect.objectContaining({
           lastError: { message: 'index creation failed', timestamp: expect.any(String) },
@@ -296,9 +461,8 @@ describe('HistorySnapshotClient', () => {
       expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledTimes(1);
     });
 
-    it('returns error when reindex throws', async () => {
-      mockCreateIndex.mockResolvedValue(undefined);
-      mockReindex.mockRejectedValue(new Error('reindex failed'));
+    it('returns error when the reindex task fails', async () => {
+      mockPollTaskUntil.mockRejectedValueOnce(new Error('reindex failed'));
 
       const result = await client.runHistorySnapshot();
 
@@ -306,7 +470,8 @@ describe('HistorySnapshotClient', () => {
       if (!result.ok) {
         expect(result.error.message).toBe('History snapshot failed');
       }
-      expect(mockUpdateByQueryWithScript).not.toHaveBeenCalled();
+      expect(mockStartUpdateByQuery).not.toHaveBeenCalled();
+      expect(mockCancelTask).not.toHaveBeenCalled();
       expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
         historySnapshot: expect.objectContaining({
           lastError: { message: 'reindex failed', timestamp: expect.any(String) },
@@ -333,20 +498,13 @@ describe('HistorySnapshotClient', () => {
     });
 
     it('still succeeds when retention cleanup throws', async () => {
-      mockCreateIndex.mockResolvedValue(undefined);
-      mockReindex.mockResolvedValue({
-        created: 0,
-        updated: 0,
-        versionConflicts: 0,
-        total: 0,
-        failures: [],
-      });
+      mockPollTaskUntil.mockResolvedValueOnce(completed({ total: 0 }));
       mockDeleteExpiredHistorySnapshots.mockRejectedValue(new Error('cleanup failed'));
 
       const result = await client.runHistorySnapshot();
 
       expect(result.ok).toBe(true);
-      if (result.ok && !('skipped' in result)) {
+      if (result.ok && 'docCount' in result) {
         expect(result.docCount).toBe(0);
       }
       expect(mockLogger.error).toHaveBeenCalledWith(
@@ -354,16 +512,9 @@ describe('HistorySnapshotClient', () => {
       );
     });
 
-    it('returns error when updateByQueryWithScript throws', async () => {
-      mockCreateIndex.mockResolvedValue(undefined);
-      mockReindex.mockResolvedValue({
-        created: 3,
-        updated: 0,
-        versionConflicts: 0,
-        total: 3,
-        failures: [],
-      });
-      mockUpdateByQueryWithScript.mockRejectedValue(new Error('update_by_query failed'));
+    it('returns error when the reset fails to start', async () => {
+      mockPollTaskUntil.mockResolvedValueOnce(completed({ total: 3 }));
+      mockStartUpdateByQuery.mockRejectedValue(new Error('update_by_query failed'));
 
       const result = await client.runHistorySnapshot();
 
@@ -385,15 +536,9 @@ describe('HistorySnapshotClient', () => {
     it('passes configured retentionDays to cleanup on a full reindex+reset run', async () => {
       // Exercises the complete success path (docs present → reindex → reset) with a
       // non-default retentionDays so a regression that always uses the default is caught.
-      mockCreateIndex.mockResolvedValue(undefined);
-      mockReindex.mockResolvedValue({
-        created: 5,
-        updated: 0,
-        versionConflicts: 0,
-        total: 5,
-        failures: [],
-      });
-      mockUpdateByQueryWithScript.mockResolvedValue({ updated: 5, total: 5 });
+      mockPollTaskUntil
+        .mockResolvedValueOnce(completed({ total: 5 }))
+        .mockResolvedValueOnce(completed({ updated: 5, total: 5 }));
       mockGlobalStateClient.findOrThrow.mockResolvedValue({
         ...mockGlobalStateStarted,
         historySnapshot: { ...mockGlobalStateStarted.historySnapshot, retentionDays: 90 },
@@ -410,14 +555,7 @@ describe('HistorySnapshotClient', () => {
     });
 
     it('calls deleteExpiredHistorySnapshots with configured retentionDays when set in global state', async () => {
-      mockCreateIndex.mockResolvedValue(undefined);
-      mockReindex.mockResolvedValue({
-        created: 0,
-        updated: 0,
-        versionConflicts: 0,
-        total: 0,
-        failures: [],
-      });
+      mockPollTaskUntil.mockResolvedValueOnce(completed({ total: 0 }));
       mockGlobalStateClient.findOrThrow.mockResolvedValue({
         ...mockGlobalStateStarted,
         historySnapshot: { ...mockGlobalStateStarted.historySnapshot, retentionDays: 7 },
@@ -433,14 +571,7 @@ describe('HistorySnapshotClient', () => {
     });
 
     it('calls deleteExpiredHistorySnapshots with default retention when retentionDays is not configured', async () => {
-      mockCreateIndex.mockResolvedValue(undefined);
-      mockReindex.mockResolvedValue({
-        created: 0,
-        updated: 0,
-        versionConflicts: 0,
-        total: 0,
-        failures: [],
-      });
+      mockPollTaskUntil.mockResolvedValueOnce(completed({ total: 0 }));
 
       await client.runHistorySnapshot();
 
@@ -575,6 +706,34 @@ describe('HistorySnapshotClient', () => {
       expect(mockLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining('roll back task disable')
       );
+    });
+
+    it('clears the unfinished run from task state and cancels its Elasticsearch task', async () => {
+      const run = { phase: 'reindex', esTaskId: 'node:1' };
+      mockTaskManager.bulkUpdateState.mockImplementation(async (_ids, mapFn) => {
+        expect(mapFn({ namespace, run }, taskId)).toEqual({ namespace });
+        return { tasks: [], errors: [] };
+      });
+
+      await client.disable(request);
+
+      expect(mockTaskManager.bulkUpdateState).toHaveBeenCalledWith([taskId], expect.any(Function), {
+        request,
+      });
+      expect(mockCancelTask).toHaveBeenCalledWith(
+        expect.objectContaining({ esClient: mockInternalEsClient, taskId: 'node:1' })
+      );
+    });
+
+    it('does not cancel anything when no run is in progress', async () => {
+      mockTaskManager.bulkUpdateState.mockImplementation(async (_ids, mapFn) => {
+        mapFn({ namespace }, taskId);
+        return { tasks: [], errors: [] };
+      });
+
+      await client.disable(request);
+
+      expect(mockCancelTask).not.toHaveBeenCalled();
     });
 
     it('returns without updating state when the task is already disabled', async () => {

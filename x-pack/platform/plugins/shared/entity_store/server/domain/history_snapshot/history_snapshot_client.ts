@@ -8,9 +8,17 @@
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
+import type { ReindexResponse, UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { entityStoreMetrics } from '../../monitor/metrics';
 import type { EntityStoreGlobalStateClient } from '../saved_objects';
-import { createIndex, reindex, updateByQueryWithScript } from '../../infra/elasticsearch';
+import {
+  cancelTask,
+  createIndex,
+  pollTaskUntil,
+  startReindex,
+  startUpdateByQueryWithScript,
+  toReindexResult,
+} from '../../infra/elasticsearch';
 import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
 import { getErrorMessage } from '../../../common';
 import { DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS } from '../saved_objects';
@@ -26,13 +34,30 @@ import type { HistorySnapshotState } from '../saved_objects';
 import { HISTORY_SNAPSHOT_RESET_SCRIPT } from './constants';
 import { deleteExpiredHistorySnapshots } from './expire_history_snapshots';
 
+/** An unfinished snapshot cycle, kept in task state so the next run can resume it. */
+export interface HistorySnapshotRun {
+  phase: 'reindex' | 'reset';
+  esTaskId: string;
+  latestIndex: string;
+  historySnapshotIndex: string;
+  timestampNow: string;
+  cycleStartedAt: string;
+  phaseStartedAt: string;
+  docCount?: number;
+}
+
 export type RunHistorySnapshotResult =
   | { ok: true; historySnapshotIndex: string; docCount: number; resetCount: number }
   | { ok: true; skipped: true }
+  | { ok: true; inProgress: true; run: HistorySnapshotRun }
   | { ok: false; error: Error };
 
 export interface RunHistorySnapshotOptions {
   abortSignal?: AbortSignal;
+  /** Unfinished cycle returned by a previous call. */
+  run?: HistorySnapshotRun;
+  /** Epoch milliseconds after which the call stops waiting and returns `inProgress`. */
+  deadline?: number;
 }
 
 export { HISTORY_SNAPSHOT_RESET_SCRIPT } from './constants';
@@ -209,6 +234,8 @@ export class HistorySnapshotClient {
     }
     this.logger.debug(`Disabled history snapshot task ${taskId}`);
 
+    await this.cancelSavedRun(taskId, request);
+
     if (options?.clearHistorySnapshots === true) {
       // Do not block response waiting for indices to finish clearing
       this.clearSnapshotIndices()
@@ -225,6 +252,30 @@ export class HistorySnapshotClient {
     }
   }
 
+  private async cancelSavedRun(taskId: string, request: KibanaRequest): Promise<void> {
+    let savedRun: HistorySnapshotRun | undefined;
+    try {
+      await this.taskManager.bulkUpdateState(
+        [taskId],
+        ({ run, ...state }) => {
+          savedRun = run as HistorySnapshotRun | undefined;
+          return state;
+        },
+        { request }
+      );
+    } catch (err) {
+      this.logger.warn(
+        `History snapshot: failed to clear the unfinished run from task state: ${getErrorMessage(
+          err
+        )}`
+      );
+      return;
+    }
+    if (savedRun) {
+      await this.cancelRun(savedRun);
+    }
+  }
+
   private async clearSnapshotIndices(): Promise<number> {
     const { deleted } = await deleteExpiredHistorySnapshots({
       esClient: this.internalEsClient,
@@ -234,105 +285,203 @@ export class HistorySnapshotClient {
     return deleted.length;
   }
 
+  /**
+   * Advances the snapshot cycle: copy latest into a dated history index, then reset latest.
+   *
+   * Pass `deadline` to stop waiting at that time. The result is then `inProgress` with the
+   * Elasticsearch task to resume from, and the caller passes it back as `run` on the next call.
+   */
   public async runHistorySnapshot(
     options: RunHistorySnapshotOptions = {}
   ): Promise<RunHistorySnapshotResult> {
-    const { abortSignal } = options;
+    const { abortSignal, deadline } = options;
 
     const globalState = await this.globalStateClient.findOrThrow();
 
     if (globalState.historySnapshot?.status !== 'started') {
+      if (options.run) {
+        await this.cancelRun(options.run);
+      }
       this.logger.debug('History snapshot status is not started, skipping run');
       return { ok: true, skipped: true };
     }
 
-    const timestampNow = moment.utc().toISOString();
-    const snapshotDate = moment.utc().toDate();
-
+    let run = options.run;
     let result: RunHistorySnapshotResult;
     try {
-      const latestIndex = await resolveLatestEntitiesIndexName(this.esClient, this.namespace);
-      const historySnapshotIndex =
-        latestIndex === getLatestEntitiesIndexName(this.namespace)
-          ? getHistorySnapshotIndexName(this.namespace, snapshotDate)
-          : getLegacySecurityHistorySnapshotIndexName(this.namespace, snapshotDate);
-
-      await createIndex(this.esClient, historySnapshotIndex, { throwIfExists: false });
-
-      const reindexStart = Date.now();
-      const reindexResult = await reindex(this.esClient, {
-        source: { index: latestIndex },
-        dest: { index: historySnapshotIndex },
-        signal: abortSignal,
-        waitForTask: {
-          logger: this.logger,
-          minTimeout: POLL_MIN_INTERVAL_MS,
-          maxTimeout: POLL_INTERVAL_MS,
-          forever: true,
-        },
-      });
-      entityStoreMetrics.historySnapshotReindexDurationMs.record(Date.now() - reindexStart, {
-        namespace: this.namespace,
-      });
-
-      const docCount = reindexResult.total;
-      if (docCount === 0) {
-        await this.updateGlobalStateOnSuccess();
-        entityStoreMetrics.historySnapshotSuccess.add(1, { namespace: this.namespace });
-        entityStoreMetrics.historySnapshotDocCount.record(0, { namespace: this.namespace });
-        return { ok: true, historySnapshotIndex, docCount: 0, resetCount: 0 };
+      if (run) {
+        this.logger.info(
+          `Resuming history snapshot ${run.phase} into ${run.historySnapshotIndex} (task ${run.esTaskId})`
+        );
+      } else {
+        run = await this.startCycle(abortSignal);
       }
-
-      const resetStart = Date.now();
-      const updateResult = await updateByQueryWithScript(this.esClient, {
-        index: latestIndex,
-        query: { match_all: {} },
-        script: HISTORY_SNAPSHOT_RESET_SCRIPT,
-        params: { timestampNow },
-        signal: abortSignal,
-        waitForTask: {
-          logger: this.logger,
-          minTimeout: POLL_MIN_INTERVAL_MS,
-          maxTimeout: POLL_INTERVAL_MS,
-          forever: true,
-        },
-      });
-      entityStoreMetrics.historySnapshotResetDurationMs.record(Date.now() - resetStart, {
-        namespace: this.namespace,
-      });
-
-      await this.updateGlobalStateOnSuccess();
-      entityStoreMetrics.historySnapshotSuccess.add(1, { namespace: this.namespace });
-      entityStoreMetrics.historySnapshotDocCount.record(docCount, { namespace: this.namespace });
-      result = {
-        ok: true,
-        historySnapshotIndex,
-        docCount,
-        resetCount: updateResult.updated,
-      };
+      result = await this.advance(run, (current) => (run = current), deadline, abortSignal);
     } catch (err) {
       const caughtError = err instanceof Error ? err : new Error(String(err));
+      if (abortSignal?.aborted && run) {
+        // Task Manager does not keep the state of an aborted run, so nothing would resume this task.
+        await this.cancelRun(run);
+      }
       this.logger.error(`history snapshot failed: ${caughtError.message}`, { error: caughtError });
       await this.updateGlobalStateOnError(caughtError);
       result = { ok: false, error: new Error('History snapshot failed') };
-    } finally {
-      try {
-        await deleteExpiredHistorySnapshots({
-          esClient: this.esClient,
-          namespace: this.namespace,
-          retentionDays:
-            globalState.historySnapshot?.retentionDays ?? DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS,
-          logger: this.logger,
-          abortSignal,
-        });
-      } catch (cleanupErr) {
-        this.logger.error(
-          `history snapshot: retention cleanup failed: ${getErrorMessage(cleanupErr)}`
-        );
-      }
+    }
+
+    if ('inProgress' in result) {
+      return result;
+    }
+
+    try {
+      await deleteExpiredHistorySnapshots({
+        esClient: this.esClient,
+        namespace: this.namespace,
+        retentionDays:
+          globalState.historySnapshot?.retentionDays ?? DEFAULT_HISTORY_SNAPSHOT_RETENTION_DAYS,
+        logger: this.logger,
+        abortSignal,
+      });
+    } catch (cleanupErr) {
+      this.logger.error(
+        `history snapshot: retention cleanup failed: ${getErrorMessage(cleanupErr)}`
+      );
     }
 
     return result;
+  }
+
+  /**
+   * Cancels the Elasticsearch task of an unfinished snapshot cycle.
+   */
+  public async cancelRun(run: HistorySnapshotRun): Promise<void> {
+    this.logger.info(`Cancelling history snapshot ${run.phase} task ${run.esTaskId}`);
+    await cancelTask({
+      esClient: this.internalEsClient,
+      taskId: run.esTaskId,
+      logger: this.logger,
+    });
+  }
+
+  private async startCycle(abortSignal?: AbortSignal): Promise<HistorySnapshotRun> {
+    const now = moment.utc();
+    const latestIndex = await resolveLatestEntitiesIndexName(this.esClient, this.namespace);
+    const historySnapshotIndex =
+      latestIndex === getLatestEntitiesIndexName(this.namespace)
+        ? getHistorySnapshotIndexName(this.namespace, now.toDate())
+        : getLegacySecurityHistorySnapshotIndexName(this.namespace, now.toDate());
+
+    await createIndex(this.esClient, historySnapshotIndex, { throwIfExists: false });
+
+    return this.startPhase(
+      {
+        phase: 'reindex',
+        latestIndex,
+        historySnapshotIndex,
+        timestampNow: now.toISOString(),
+        cycleStartedAt: now.toISOString(),
+      },
+      abortSignal
+    );
+  }
+
+  private async startPhase(
+    run: Omit<HistorySnapshotRun, 'esTaskId' | 'phaseStartedAt'>,
+    abortSignal?: AbortSignal
+  ): Promise<HistorySnapshotRun> {
+    const esTaskId =
+      run.phase === 'reindex'
+        ? await startReindex(this.esClient, {
+            source: { index: run.latestIndex },
+            dest: { index: run.historySnapshotIndex },
+            signal: abortSignal,
+          })
+        : await startUpdateByQueryWithScript(this.esClient, {
+            index: run.latestIndex,
+            query: { match_all: {} },
+            script: HISTORY_SNAPSHOT_RESET_SCRIPT,
+            params: { timestampNow: run.timestampNow },
+            signal: abortSignal,
+          });
+    this.logger.debug(`Started history snapshot ${run.phase} task ${esTaskId}`);
+    return { ...run, esTaskId, phaseStartedAt: moment.utc().toISOString() };
+  }
+
+  private async advance(
+    initialRun: HistorySnapshotRun,
+    onRunChange: (run: HistorySnapshotRun) => void,
+    deadline: number | undefined,
+    abortSignal: AbortSignal | undefined
+  ): Promise<RunHistorySnapshotResult> {
+    let run = initialRun;
+    const setRun = (next: HistorySnapshotRun) => {
+      run = next;
+      onRunChange(next);
+    };
+
+    while (true) {
+      const poll = await pollTaskUntil<ReindexResponse | UpdateByQueryResponse>({
+        esClient: this.esClient,
+        taskId: run.esTaskId,
+        deadline,
+        pollIntervalMs: POLL_INTERVAL_MS,
+        minPollIntervalMs: POLL_MIN_INTERVAL_MS,
+        logger: this.logger,
+        signal: abortSignal,
+      });
+
+      if (poll.status === 'pending') {
+        return { ok: true, inProgress: true, run };
+      }
+
+      if (poll.status === 'missing') {
+        this.logger.warn(
+          `History snapshot ${run.phase} task ${run.esTaskId} no longer exists; starting it again`
+        );
+        setRun(await this.startPhase(run, abortSignal));
+        continue;
+      }
+
+      const { canceled } = poll.response as { canceled?: string };
+      if (canceled) {
+        throw new Error(
+          `History snapshot ${run.phase} task ${run.esTaskId} was cancelled: ${canceled}`
+        );
+      }
+
+      const phaseDurationMs = Date.now() - Date.parse(run.phaseStartedAt);
+
+      if (run.phase === 'reindex') {
+        entityStoreMetrics.historySnapshotReindexDurationMs.record(phaseDurationMs, {
+          namespace: this.namespace,
+        });
+        const docCount = toReindexResult(poll.response as ReindexResponse).total;
+        if (docCount === 0) {
+          return this.completeCycle(run.historySnapshotIndex, 0, 0);
+        }
+        setRun(await this.startPhase({ ...run, phase: 'reset', docCount }, abortSignal));
+        continue;
+      }
+
+      entityStoreMetrics.historySnapshotResetDurationMs.record(phaseDurationMs, {
+        namespace: this.namespace,
+      });
+      return this.completeCycle(
+        run.historySnapshotIndex,
+        run.docCount ?? 0,
+        (poll.response as UpdateByQueryResponse).updated ?? 0
+      );
+    }
+  }
+
+  private async completeCycle(
+    historySnapshotIndex: string,
+    docCount: number,
+    resetCount: number
+  ): Promise<RunHistorySnapshotResult> {
+    await this.updateGlobalStateOnSuccess();
+    entityStoreMetrics.historySnapshotSuccess.add(1, { namespace: this.namespace });
+    entityStoreMetrics.historySnapshotDocCount.record(docCount, { namespace: this.namespace });
+    return { ok: true, historySnapshotIndex, docCount, resetCount };
   }
 
   private async updateGlobalStateOnSuccess(): Promise<void> {

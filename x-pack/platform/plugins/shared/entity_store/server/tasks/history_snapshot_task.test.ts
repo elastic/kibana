@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { registerHistorySnapshotTask } from './history_snapshot_task';
+import { registerHistorySnapshotTask, stopHistorySnapshotTask } from './history_snapshot_task';
 import type { EntityStoreCoreSetup } from '../types';
 import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from './execution_context';
 import { EntityStoreGlobalStateClient } from '../domain/saved_objects';
 import { HistorySnapshotClient } from '../domain/history_snapshot';
 import { wrapTaskRun } from '../telemetry/traces';
+import { cancelTask } from '../infra/elasticsearch';
 
 jest.mock('./should_delete_orphaned_task', () => ({
   shouldDeleteOrphanedEntityStoreTask: jest.fn().mockResolvedValue(false),
@@ -29,6 +34,13 @@ jest.mock('../domain/saved_objects', () => ({
 jest.mock('../domain/history_snapshot', () => ({
   HistorySnapshotClient: jest.fn(),
 }));
+jest.mock('../infra/elasticsearch', () => ({
+  cancelTask: jest.fn(),
+}));
+
+beforeEach(() => {
+  jest.mocked(cancelTask).mockClear();
+});
 
 describe('runHistorySnapshotTask — schedule reconciliation', () => {
   let core: EntityStoreCoreSetup;
@@ -131,6 +143,159 @@ describe('runHistorySnapshotTask — schedule reconciliation', () => {
 
     expect(result).not.toHaveProperty('schedule');
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('SO unavailable'));
+  });
+
+  describe('resumable cycle', () => {
+    const run = {
+      phase: 'reindex',
+      esTaskId: 'node:1',
+      latestIndex: '.entities.v2.latest.default',
+      historySnapshotIndex: '.entities.v2.history.default.2026-11-03-08',
+      timestampNow: '2026-11-03T08:00:00.000Z',
+      cycleStartedAt: '2026-11-03T08:00:00.000Z',
+      phaseStartedAt: '2026-11-03T08:00:00.000Z',
+    };
+
+    beforeEach(() => {
+      jest.useFakeTimers({ now: new Date('2026-11-03T09:00:00.000Z') });
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('passes the saved run and a deadline below the task timeout to the client', async () => {
+      await buildRunner({
+        schedule: { interval: '24h' },
+        state: { namespace: 'default', run },
+      }).run();
+
+      expect(mockRunHistorySnapshot).toHaveBeenCalledWith({
+        abortSignal: expect.any(AbortSignal),
+        run,
+        deadline: Date.now() + 25 * 60 * 1000,
+      });
+    });
+
+    it('saves the unfinished run and asks to run again in a minute', async () => {
+      mockRunHistorySnapshot.mockResolvedValue({ ok: true, inProgress: true, run });
+
+      const result = await buildRunner({ schedule: { interval: '24h' } }).run();
+
+      expect(result).toEqual({
+        state: { namespace: 'default', run },
+        runAt: new Date(Date.now() + 60 * 1000),
+      });
+    });
+
+    it('anchors the next cycle to the start of a resumed cycle', async () => {
+      mockRunHistorySnapshot.mockResolvedValue({
+        ok: true,
+        historySnapshotIndex: run.historySnapshotIndex,
+        docCount: 1,
+        resetCount: 1,
+      });
+
+      const result = await buildRunner({
+        schedule: { interval: '24h' },
+        state: { namespace: 'default', run },
+      }).run();
+
+      expect(result).toEqual({
+        state: { namespace: 'default' },
+        runAt: new Date('2026-11-04T08:00:00.000Z'),
+      });
+    });
+
+    it('drops the saved run when the cycle fails', async () => {
+      mockRunHistorySnapshot.mockResolvedValue({ ok: false, error: new Error('boom') });
+
+      const result = await buildRunner({
+        schedule: { interval: '24h' },
+        state: { namespace: 'default', run },
+      }).run();
+
+      expect(result.state).toEqual({ namespace: 'default' });
+    });
+  });
+});
+
+describe('registerHistorySnapshotTask — state schema', () => {
+  const getStateSchema = () => {
+    const registerTaskDefinitions = jest.fn();
+    registerHistorySnapshotTask({
+      taskManager: { registerTaskDefinitions } as unknown as TaskManagerSetupContract,
+      logger: loggerMock.create(),
+      core: {} as EntityStoreCoreSetup,
+    });
+    const [defs] = registerTaskDefinitions.mock.calls[0];
+    const [taskType] = Object.keys(defs);
+    return defs[taskType].stateSchemaByVersion;
+  };
+
+  it('migrates v1 state to v2 without a run', () => {
+    const { 2: v2 } = getStateSchema();
+
+    const state = v2.up({ namespace: 'space-a' });
+
+    expect(state).toEqual({ namespace: 'space-a' });
+    expect(v2.schema.validate(state)).toEqual({ namespace: 'space-a' });
+  });
+
+  it('accepts a saved run in v2 state', () => {
+    const { 2: v2 } = getStateSchema();
+    const run = {
+      phase: 'reset',
+      esTaskId: 'node:1',
+      latestIndex: 'latest',
+      historySnapshotIndex: 'history',
+      timestampNow: 't',
+      cycleStartedAt: 't',
+      phaseStartedAt: 't',
+      docCount: 3,
+    };
+
+    expect(v2.schema.validate(v2.up({ namespace: 'default', run }))).toEqual({
+      namespace: 'default',
+      run,
+    });
+  });
+});
+
+describe('stopHistorySnapshotTask', () => {
+  const esClient = {} as ElasticsearchClient;
+  const taskId = 'entity_store:v2:history_snapshot_task:default';
+
+  it('cancels the Elasticsearch task of an unfinished run before removing the task', async () => {
+    const taskManager = {
+      get: jest
+        .fn()
+        .mockResolvedValue({ state: { namespace: 'default', run: { esTaskId: 'n:1' } } }),
+      removeIfExists: jest.fn(),
+    } as unknown as TaskManagerStartContract;
+    const logger = loggerMock.create();
+
+    await stopHistorySnapshotTask({ taskManager, esClient, logger, namespace: 'default' });
+
+    expect(cancelTask).toHaveBeenCalledWith({ esClient, taskId: 'n:1', logger });
+    expect(taskManager.removeIfExists).toHaveBeenCalledWith(taskId);
+  });
+
+  it('still removes the task when it cannot be read', async () => {
+    const taskManager = {
+      get: jest.fn().mockRejectedValue(new Error('Not Found')),
+      removeIfExists: jest.fn(),
+    } as unknown as TaskManagerStartContract;
+
+    await stopHistorySnapshotTask({
+      taskManager,
+      esClient,
+      logger: loggerMock.create(),
+      namespace: 'default',
+    });
+
+    expect(cancelTask).not.toHaveBeenCalled();
+    expect(taskManager.removeIfExists).toHaveBeenCalledWith(taskId);
   });
 });
 

@@ -8,6 +8,7 @@ import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import type {
   IndexName,
   QueryDslQueryContainer,
+  UpdateByQueryRequest,
   UpdateByQueryResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
@@ -28,25 +29,51 @@ export interface UpdateByQueryWithScriptOptions {
   waitForTask?: Omit<WaitForTaskOptions, 'esClient' | 'taskId' | 'signal'>;
 }
 
+const buildUpdateByQueryRequest = (
+  {
+    index,
+    query,
+    script,
+    params,
+  }: Pick<UpdateByQueryWithScriptOptions, 'index' | 'query' | 'script' | 'params'>,
+  waitForCompletion: boolean
+): UpdateByQueryRequest => ({
+  index,
+  query,
+  refresh: true,
+  // Uses conflicts: 'proceed' so Elasticsearch continues on version conflicts.
+  // Conflicted documents are not updated.
+  conflicts: 'proceed',
+  wait_for_completion: waitForCompletion,
+  script: {
+    source: script,
+    lang: 'painless',
+    params,
+  },
+});
+
+/**
+ * Starts an update-by-query as a background Elasticsearch task and returns its task id without waiting.
+ */
+export const startUpdateByQueryWithScript = async (
+  esClient: ElasticsearchClient,
+  options: Omit<UpdateByQueryWithScriptOptions, 'waitForTask'>
+): Promise<string> => {
+  const { task } = await esClient.updateByQuery(buildUpdateByQueryRequest(options, false), {
+    signal: options.signal,
+  });
+  if (task == null) {
+    throw new Error('updateByQuery did not return a task id');
+  }
+  return String(task);
+};
+
 export const updateByQueryWithScript = async (
   esClient: ElasticsearchClient,
   options: UpdateByQueryWithScriptOptions
 ): Promise<{ updated: number; total: number }> => {
-  const { index, query, script, params, signal, waitForTask } = options;
-  const body = {
-    index,
-    query,
-    refresh: true,
-    // Uses conflicts: 'proceed' so Elasticsearch continues on version conflicts.
-    // Conflicted documents are not updated.
-    conflicts: 'proceed' as const,
-    wait_for_completion: waitForTask === undefined,
-    script: {
-      source: script,
-      lang: 'painless' as const,
-      params,
-    },
-  };
+  const { signal, waitForTask } = options;
+  const body = buildUpdateByQueryRequest(options, waitForTask === undefined);
 
   if (waitForTask !== undefined) {
     const { task } = await esClient.updateByQuery(body, { signal });
