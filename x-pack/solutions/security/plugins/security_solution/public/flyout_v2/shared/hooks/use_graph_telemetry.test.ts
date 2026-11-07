@@ -177,15 +177,29 @@ describe('useGraphTelemetry', () => {
     });
   });
 
-  it('reports the graph preview being shown', () => {
+  it('reports the graph preview being shown with a graph', () => {
     const { result } = renderHook(() => useGraphTelemetry(entryPoint));
 
-    result.current.reportGraphPreviewShown();
+    result.current.reportGraphPreviewShown(false);
 
     expect(mockReportEvent).toHaveBeenCalledTimes(1);
     expect(mockReportEvent).toHaveBeenCalledWith(GraphEventTypes.EntityGraph, {
       id: 'graph_preview_shown',
       entryPoint,
+      isEmpty: false,
+    });
+  });
+
+  it('reports the graph preview being shown empty', () => {
+    const { result } = renderHook(() => useGraphTelemetry(entryPoint));
+
+    result.current.reportGraphPreviewShown(true);
+
+    expect(mockReportEvent).toHaveBeenCalledTimes(1);
+    expect(mockReportEvent).toHaveBeenCalledWith(GraphEventTypes.EntityGraph, {
+      id: 'graph_preview_shown',
+      entryPoint,
+      isEmpty: true,
     });
   });
 
@@ -241,7 +255,7 @@ describe('useGraphTelemetry', () => {
 
     expect(() => {
       result.current.onTelemetryEvent({ type: 'filter_changed', change: 'removed' });
-      result.current.reportGraphPreviewShown();
+      result.current.reportGraphPreviewShown(true);
       result.current.reportGraphPreviewExpanded();
       result.current.reportGraphOpened();
       result.current.reportDrillThrough('event');

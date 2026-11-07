@@ -138,6 +138,14 @@ export const graphEntityGraphEvent: GraphTelemetryEvent = {
         optional: true,
       },
     },
+    isEmpty: {
+      type: 'boolean',
+      _meta: {
+        description:
+          'Whether the loaded graph preview has no nodes. Set only for graph_preview_shown: true when the preview shows the empty message, false when it shows the graph',
+        optional: true,
+      },
+    },
     errorCategory: {
       type: 'keyword',
       _meta: {

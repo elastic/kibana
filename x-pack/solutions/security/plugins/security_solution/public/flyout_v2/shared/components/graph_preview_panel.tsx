@@ -57,17 +57,20 @@ export const GraphPreviewPanel = ({
     onShowGraph?.();
   }, [reportGraphPreviewExpanded, onShowGraph]);
 
-  // Mirrors when GraphPreview renders the graph rather than its loading, error or empty states.
-  const isGraphShown = shouldShowGraph && !isLoading && !isError && (data?.nodes.length ?? 0) > 0;
+  // Mirrors the states in which GraphPreview renders the graph or its empty message, not its loading or error ones.
+  const isPreviewLoaded = shouldShowGraph && !isLoading && !isError;
+  // Same predicate GraphPreview uses to choose its empty message over the graph.
+  const isPreviewEmpty = (data?.nodes.length ?? 0) === 0;
   const hasReportedShown = useRef(false);
 
+  // Once per mount: the first loaded state wins, even if a later refetch changes whether it is empty.
   useEffect(() => {
-    if (!isGraphShown || hasReportedShown.current) {
+    if (!isPreviewLoaded || hasReportedShown.current) {
       return;
     }
     hasReportedShown.current = true;
-    reportGraphPreviewShown();
-  }, [isGraphShown, reportGraphPreviewShown]);
+    reportGraphPreviewShown(isPreviewEmpty);
+  }, [isPreviewLoaded, isPreviewEmpty, reportGraphPreviewShown]);
 
   useEffect(() => {
     if (shouldShowGraph) {

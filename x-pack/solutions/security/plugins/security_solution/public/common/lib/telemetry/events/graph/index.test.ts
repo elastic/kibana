@@ -33,6 +33,7 @@ describe('graph telemetry events', () => {
         'drillTarget',
         'emptyReason',
         'errorCategory',
+        'isEmpty',
       ].sort()
     );
   });
@@ -77,6 +78,19 @@ describe('graph telemetry events', () => {
     expect(Object.keys(GRAPH_EVENT_ID)).toEqual(
       expect.arrayContaining(['graph_preview_shown', 'graph_preview_expanded'])
     );
+  });
+
+  it('describes isEmpty as an optional boolean set only for graph_preview_shown', () => {
+    const [{ schema }] = graphTelemetryEvents;
+    const isEmpty = schema.isEmpty as {
+      type: string;
+      _meta: { description: string; optional?: boolean };
+    };
+
+    expect(isEmpty.type).toBe('boolean');
+    expect(isEmpty._meta.optional).toBe(true);
+    expect(isEmpty._meta.description.length).toBeGreaterThan(0);
+    expect(isEmpty._meta.description).toContain('graph_preview_shown');
   });
 
   it('uses a single entity_graph event type', () => {

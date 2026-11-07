@@ -69,7 +69,7 @@ describe('<GraphPreviewPanel />', () => {
     // A new function identity on every call, like the hook returns when telemetry or entryPoint change.
     mockUseGraphTelemetry.mockImplementation(() => ({
       onTelemetryEvent: jest.fn(),
-      reportGraphPreviewShown: () => mockReportGraphPreviewShown(),
+      reportGraphPreviewShown: (isEmpty: boolean) => mockReportGraphPreviewShown(isEmpty),
       reportGraphPreviewExpanded: mockReportGraphPreviewExpanded,
       reportGraphOpened: jest.fn(),
       reportDrillThrough: jest.fn(),
@@ -103,14 +103,35 @@ describe('<GraphPreviewPanel />', () => {
   });
 
   describe('graph preview shown report', () => {
-    it('reports once when the graph is loaded and has nodes', () => {
+    it('reports isEmpty false when the loaded preview has nodes', () => {
       renderPanel({ ...defaultProps, data: dataWithNodes });
 
       expect(mockReportGraphPreviewShown).toHaveBeenCalledTimes(1);
+      expect(mockReportGraphPreviewShown).toHaveBeenCalledWith(false);
+    });
+
+    it('reports isEmpty true when the loaded preview has no nodes', () => {
+      renderPanel({ ...defaultProps, data: emptyData });
+
+      expect(mockReportGraphPreviewShown).toHaveBeenCalledTimes(1);
+      expect(mockReportGraphPreviewShown).toHaveBeenCalledWith(true);
+    });
+
+    it('reports isEmpty true when the loaded preview has no data, which GraphPreview renders as empty', () => {
+      renderPanel({ ...defaultProps, data: undefined });
+
+      expect(mockReportGraphPreviewShown).toHaveBeenCalledTimes(1);
+      expect(mockReportGraphPreviewShown).toHaveBeenCalledWith(true);
     });
 
     it('does not report while the graph is loading', () => {
       renderPanel({ ...defaultProps, isLoading: true, data: dataWithNodes });
+
+      expect(mockReportGraphPreviewShown).not.toHaveBeenCalled();
+    });
+
+    it('does not report while the graph is loading without data', () => {
+      renderPanel({ ...defaultProps, isLoading: true, data: undefined });
 
       expect(mockReportGraphPreviewShown).not.toHaveBeenCalled();
     });
@@ -121,14 +142,8 @@ describe('<GraphPreviewPanel />', () => {
       expect(mockReportGraphPreviewShown).not.toHaveBeenCalled();
     });
 
-    it('does not report when the graph has no nodes', () => {
-      renderPanel({ ...defaultProps, data: emptyData });
-
-      expect(mockReportGraphPreviewShown).not.toHaveBeenCalled();
-    });
-
-    it('does not report when there is no data', () => {
-      renderPanel({ ...defaultProps, data: undefined });
+    it('does not report when loading the graph failed without data', () => {
+      renderPanel({ ...defaultProps, isError: true, data: undefined });
 
       expect(mockReportGraphPreviewShown).not.toHaveBeenCalled();
     });
@@ -139,21 +154,50 @@ describe('<GraphPreviewPanel />', () => {
       expect(mockReportGraphPreviewShown).not.toHaveBeenCalled();
     });
 
-    it('reports once when loading finishes with nodes', () => {
+    it('does not report an empty preview when the graph is not available (license upsell)', () => {
+      renderPanel({ ...defaultProps, shouldShowGraph: false, data: emptyData });
+
+      expect(mockReportGraphPreviewShown).not.toHaveBeenCalled();
+    });
+
+    it('reports once with isEmpty false when loading finishes with nodes', () => {
       const { rerender } = renderPanel({ ...defaultProps, isLoading: true, data: undefined });
       expect(mockReportGraphPreviewShown).not.toHaveBeenCalled();
 
       rerender(wrapPanel({ ...defaultProps, isLoading: false, data: dataWithNodes }));
 
       expect(mockReportGraphPreviewShown).toHaveBeenCalledTimes(1);
+      expect(mockReportGraphPreviewShown).toHaveBeenCalledWith(false);
     });
 
-    it('does not report when loading finishes without nodes', () => {
+    it('reports once with isEmpty true when loading finishes without nodes', () => {
       const { rerender } = renderPanel({ ...defaultProps, isLoading: true, data: undefined });
+      expect(mockReportGraphPreviewShown).not.toHaveBeenCalled();
 
       rerender(wrapPanel({ ...defaultProps, isLoading: false, data: emptyData }));
 
-      expect(mockReportGraphPreviewShown).not.toHaveBeenCalled();
+      expect(mockReportGraphPreviewShown).toHaveBeenCalledTimes(1);
+      expect(mockReportGraphPreviewShown).toHaveBeenCalledWith(true);
+    });
+
+    it('does not report again when an empty preview later gets nodes', () => {
+      const { rerender } = renderPanel({ ...defaultProps, data: emptyData });
+      expect(mockReportGraphPreviewShown).toHaveBeenCalledTimes(1);
+
+      rerender(wrapPanel({ ...defaultProps, data: dataWithNodes }));
+
+      expect(mockReportGraphPreviewShown).toHaveBeenCalledTimes(1);
+      expect(mockReportGraphPreviewShown).toHaveBeenCalledWith(true);
+    });
+
+    it('does not report again when the preview reloads after it was reported', () => {
+      const { rerender } = renderPanel({ ...defaultProps, data: dataWithNodes });
+
+      rerender(wrapPanel({ ...defaultProps, isLoading: true, data: undefined }));
+      rerender(wrapPanel({ ...defaultProps, isLoading: false, data: emptyData }));
+
+      expect(mockReportGraphPreviewShown).toHaveBeenCalledTimes(1);
+      expect(mockReportGraphPreviewShown).toHaveBeenCalledWith(false);
     });
 
     it('reports only once per mount when re-rendered, even if the report function changes identity', () => {

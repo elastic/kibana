@@ -18,8 +18,8 @@ import { GraphEventTypes } from '../../../common/lib/telemetry';
 export interface UseGraphTelemetryResult {
   /** Pass to `GraphInvestigation`'s `onTelemetryEvent`. */
   onTelemetryEvent: GraphTelemetryHandler;
-  /** Reports that the graph preview was shown with a loaded graph. */
-  reportGraphPreviewShown: () => void;
+  /** Reports that the graph preview finished loading, and whether it has no nodes to show. */
+  reportGraphPreviewShown: (isEmpty: boolean) => void;
   /** Reports that the graph preview was expanded into the full graph. */
   reportGraphPreviewExpanded: () => void;
   /** Reports that the full graph was opened. */
@@ -117,9 +117,16 @@ export const useGraphTelemetry = (entryPoint: GraphEntryPoint): UseGraphTelemetr
     [telemetry, entryPoint]
   );
 
-  const reportGraphPreviewShown = useCallback(() => {
-    telemetry?.reportEvent(GraphEventTypes.EntityGraph, { id: 'graph_preview_shown', entryPoint });
-  }, [telemetry, entryPoint]);
+  const reportGraphPreviewShown = useCallback(
+    (isEmpty: boolean) => {
+      telemetry?.reportEvent(GraphEventTypes.EntityGraph, {
+        id: 'graph_preview_shown',
+        entryPoint,
+        isEmpty,
+      });
+    },
+    [telemetry, entryPoint]
+  );
 
   const reportGraphPreviewExpanded = useCallback(() => {
     telemetry?.reportEvent(GraphEventTypes.EntityGraph, {

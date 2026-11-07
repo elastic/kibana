@@ -147,7 +147,7 @@ export type GraphEventProperties = GraphEventCommon &
     | ({ id: 'node_action_clicked' } & DistributiveOmit<GraphNodeActionEvent, 'type'>)
     | { id: 'filter_changed'; change: 'added' | 'removed' }
     | { id: 'search_submitted'; timeRangeChanged: boolean; queryChanged: boolean }
-    | { id: 'graph_preview_shown' }
+    | { id: 'graph_preview_shown'; isEmpty: boolean }
     | { id: 'graph_preview_expanded' }
     | { id: 'graph_opened' }
     | {
@@ -183,6 +183,7 @@ export interface GraphEventSchemaProperties {
   itemType?: GraphGroupedItemType;
   drillTarget?: GraphDrillTarget;
   emptyReason?: GraphEmptyStateReason;
+  isEmpty?: boolean;
   errorCategory?: GraphFetchErrorCategory;
 }
 
