@@ -10,8 +10,8 @@ import { EuiTabbedContent, EuiNotificationBadge, EuiPanel } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 
-import { ResultsTable } from '../../../results/results_table';
-import { ActionResultsSummary } from '../../../action_results/action_results_summary';
+import { UnifiedResultsTable } from '../../../results/unified_results_table';
+import { UnifiedActionResultsSummary } from '../../../action_results/unified_action_results_summary';
 import type { AddToTimelineHandler } from '../../../types';
 
 const euiTabbedContentCss = {
@@ -68,7 +68,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
         name: 'Results',
         'data-test-subj': 'osquery-results-tab',
         content: (
-          <ResultsTable
+          <UnifiedResultsTable
             actionId={actionId}
             agentIds={agentIds}
             ecsMapping={ecsMapping}
@@ -87,7 +87,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
         name: 'Status',
         'data-test-subj': 'osquery-status-tab',
         content: (
-          <ActionResultsSummary
+          <UnifiedActionResultsSummary
             startDate={startDate}
             actionId={actionId}
             agentIds={agentIds}

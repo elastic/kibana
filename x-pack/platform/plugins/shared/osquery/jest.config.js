@@ -13,5 +13,12 @@ module.exports = {
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
     '<rootDir>/x-pack/platform/plugins/shared/osquery/{common,public,server}/**/*.{ts,tsx}',
+    // The plugin array replaces the preset's, so its negations are mirrored here, scoped to the plugin.
+    '!<rootDir>/x-pack/platform/plugins/shared/osquery/**/{__tests__,__mocks__,__test_helpers__,__snapshots__,__examples__,__test__,*mock*,tests,test_helpers,integration_tests,types}/**/*',
+    '!<rootDir>/x-pack/platform/plugins/shared/osquery/**/*mock*.{ts,tsx}',
+    '!<rootDir>/x-pack/platform/plugins/shared/osquery/**/test_utils.{ts,tsx}',
+    '!<rootDir>/x-pack/platform/plugins/shared/osquery/**/*.test.{ts,tsx}',
+    '!<rootDir>/x-pack/platform/plugins/shared/osquery/**/*.d.ts',
+    '!<rootDir>/x-pack/platform/plugins/shared/osquery/**/index.{js,ts,tsx}',
   ],
 };

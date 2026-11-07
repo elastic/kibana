@@ -18,10 +18,8 @@ interface LazyLiveQueryFieldServices {
   services: ServicesWrapperProps['services'];
 }
 
-export const getLazyLiveQueryField =
-  ({ services }: LazyLiveQueryFieldServices) =>
-  // eslint-disable-next-line react/display-name
-  ({
+export const getLazyLiveQueryField = ({ services }: LazyLiveQueryFieldServices) =>
+  function LazyLiveQueryField({
     formMethods,
     ...props
   }: LiveQueryQueryFieldProps & {
@@ -30,8 +28,8 @@ export const getLazyLiveQueryField =
       query: string;
       ecs_mapping: Record<string, unknown>;
     }>;
-  }) =>
-    (
+  }) {
+    return (
       <Suspense fallback={null}>
         <ServicesWrapper services={services}>
           <FormProvider {...formMethods}>
@@ -40,3 +38,4 @@ export const getLazyLiveQueryField =
         </ServicesWrapper>
       </Suspense>
     );
+  };

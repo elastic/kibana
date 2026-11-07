@@ -18,10 +18,8 @@ interface LazyOsqueryActionServices {
   services: ServicesWrapperProps['services'];
 }
 
-export const getLazyOsqueryAction =
-  ({ services }: LazyOsqueryActionServices) =>
-  // eslint-disable-next-line react/display-name
-  (props: OsqueryActionProps & { ecsData?: Ecs }) => {
+export const getLazyOsqueryAction = ({ services }: LazyOsqueryActionServices) =>
+  function LazyOsqueryAction(props: OsqueryActionProps & { ecsData?: Ecs }) {
     const { ecsData, ...restProps } = props;
 
     return (

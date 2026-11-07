@@ -19,7 +19,6 @@ import { useKibana } from '../../common/lib/kibana';
 import type { ServicesWrapperProps } from '../services_wrapper';
 import ServicesWrapper from '../services_wrapper';
 
-// eslint-disable-next-line react/display-name
 const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
   ({ actionId, ruleName, startDate, ecsData, addToTimeline }) => {
     const { read } = useKibana().services.application.capabilities.osquery;
@@ -61,6 +60,7 @@ const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
     );
   }
 );
+OsqueryResultComponent.displayName = 'OsqueryResultComponent';
 
 export const OsqueryActionResult = React.memo(OsqueryResultComponent);
 
