@@ -4,7 +4,7 @@ navigation_title: Key concepts
 
 # Key concepts [key-concepts]
 
-The mental models and architecture you need to build on the {{kib}} platform: plugins and packages versus core, the platform lifecycle, saved objects, security, data views, embeddables, UI actions, and plugin performance.
+The mental models and architecture you need to build on the {{kib}} platform: plugins and packages versus core, the platform lifecycle, the in-process event bus, saved objects, security, data views, embeddables, UI actions, and plugin performance.
 
 ## Platform architecture
 
@@ -14,6 +14,7 @@ How {{kib}} is composed of plugins, packages, and core, and the patterns that ho
 - [Anatomy of a plugin](./platform-architecture/anatomy-of-a-plugin.md)
 - [Scoped services and patterns](./platform-architecture/scoped-services.md)
 - [Routing, navigation, and URL](./platform-architecture/routing-navigation-and-url.md)
+- [In-process event bus](./platform-architecture/in-process-event-bus.md)
 
 ## Security
 
