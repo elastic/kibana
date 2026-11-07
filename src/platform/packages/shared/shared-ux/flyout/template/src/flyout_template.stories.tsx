@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
@@ -33,6 +33,8 @@ type Args = SharedStoryArgs & {
   sectionIcon: boolean;
   sectionAction: boolean;
   sectionHasBorder: boolean;
+  moduleDelayMs?: number;
+  dataDelayMs?: number;
 };
 
 const meta: Meta<Args> = {
@@ -757,4 +759,123 @@ export const ErrorInFlyout: Story = {
     numTabs: { table: { disable: true } },
   },
   render: ErrorInFlyoutRender,
+};
+
+/** The details content, as a lazily loaded module would export it. It fetches its data after it mounts. */
+const LoadedDetails = ({
+  args,
+  dataDelayMs,
+  onClose,
+}: {
+  args: Args;
+  dataDelayMs: number;
+  onClose: () => void;
+}) => {
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoaded(true), dataDelayMs);
+    return () => clearTimeout(timer);
+  }, [dataDelayMs]);
+
+  if (!isLoaded) {
+    return (
+      <FlyoutTemplate onClose={onClose}>
+        <FlyoutTemplate.Header title="Alert details" isLoading />
+        <FlyoutTemplate.Body />
+      </FlyoutTemplate>
+    );
+  }
+
+  return (
+    <FlyoutTemplate onClose={onClose}>
+      {headerZone(args, 'Alert details')}
+      {bodyZone(
+        <FlyoutTemplate.Body.Section title="Summary">
+          {bodyText(fillContent('Summary section content.'))}
+        </FlyoutTemplate.Body.Section>
+      )}
+      {footerZone(args)}
+    </FlyoutTemplate>
+  );
+};
+
+const LoadingInAFrameRender = (args: Args): React.JSX.Element => {
+  const { moduleDelayMs = 1500, dataDelayMs = 1500 } = args;
+  const [openCount, setOpenCount] = useState(1);
+  const [isOpen, setIsOpen] = useState(true);
+
+  const close = () => {
+    action('onClose')();
+    setIsOpen(false);
+  };
+
+  // A new lazy component per open, so every open loads the module again.
+  const LazyDetails = useMemo(
+    () =>
+      React.lazy(
+        () =>
+          new Promise<{ default: React.ComponentType<{ onClose: () => void }> }>((resolve) =>
+            setTimeout(
+              () =>
+                resolve({
+                  default: ({ onClose }) => (
+                    <LoadedDetails args={args} dataDelayMs={dataDelayMs} onClose={onClose} />
+                  ),
+                }),
+              moduleDelayMs
+            )
+          )
+      ),
+    // `args` is read when the module resolves; only an open or a new delay loads it again.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [openCount, moduleDelayMs, dataDelayMs]
+  );
+
+  const builtProps = buildFlyoutProps(args, 'Alert details');
+
+  return (
+    <>
+      <EuiButton
+        onClick={() => {
+          setOpenCount((count) => count + 1);
+          setIsOpen(true);
+        }}
+      >
+        Reopen
+      </EuiButton>
+      {isOpen && (
+        <FlyoutTemplate.Frame
+          key={openCount}
+          onClose={close}
+          size="m"
+          {...builtProps}
+          flyoutMenuProps={{ title: 'Alert details', ...builtProps.flyoutMenuProps }}
+        >
+          <LazyDetails onClose={close} />
+        </FlyoutTemplate.Frame>
+      )}
+    </>
+  );
+};
+
+export const LoadingInAFrame: Story = {
+  name: 'Loading in a frame',
+  argTypes: {
+    moduleDelayMs: {
+      name: 'Module load (ms)',
+      control: { type: 'range', min: 0, max: 5000, step: 250 },
+      table: { category: 'Loading' },
+    },
+    dataDelayMs: {
+      name: 'Data load (ms)',
+      control: { type: 'range', min: 0, max: 5000, step: 250 },
+      table: { category: 'Loading' },
+    },
+    numPages: { table: { disable: true } },
+    numTabs: { table: { disable: true } },
+    titleAsLink: { table: { disable: true } },
+  },
+  args: { moduleDelayMs: 1500, dataDelayMs: 1500 },
+  render: LoadingInAFrameRender,
 };

@@ -150,11 +150,37 @@ const AlertDetails = ({ onClose }) => {
   );
 };
 
-core.overlays.openFlyoutTemplate({ size: 'm', session: 'start' }, AlertDetails);
+core.overlays.openFlyoutTemplate(
+  { size: 'm', session: 'start', flyoutMenuProps: { title: 'Alert details' } },
+  AlertDetails
+);
 ```
 
 The component is a real React component, so it can use hooks and re-render. The component receives `onClose` as a prop and passes it to `FlyoutTemplate`. `onClose` is the only root prop the component sets. It stays required so that every `FlyoutTemplate` has a way to close.
 
-Every other root prop comes from `FlyoutTemplateManagedProvider`, which gets them from the options argument. Other root props the component passes to `FlyoutTemplate` are ignored, with a warning in development. See `@kbn/core-overlays-browser` for the full signature.
+Every other root prop comes from `FlyoutTemplateManagedProvider`, which gets them from the options argument and renders the flyout's [frame](#loading-content-in-a-frame). Other root props the component passes to `FlyoutTemplate` are ignored, with a warning in development, except the tab props, which the component's `FlyoutTemplate` sets and the options only default. See `@kbn/core-overlays-browser` for the full signature.
+
+The options must include `flyoutMenuProps.title`. It names the flyout in EUI's flyout menu and history and stays fixed while the flyout is open. The header title of the content is not used for it. Without one, EUI shows its default title, and a warning is logged in development.
 
 You can wrap `onClose`, but not calling it does not keep the flyout open. EUI's flyout manager sends the close button, history navigation, and cascade closes through `onClose`. By the time your handler runs, EUI has already removed the flyout, so the template closes either way. Content nested too deeply to receive the prop can use `useFlyoutClose`.
+
+## Loading content in a frame
+
+Use a frame when a flyout's content loads lazily or goes through a loading state before it is ready. The frame owns the `EuiFlyout` and stays mounted for as long as the flyout is open. Every `FlyoutTemplate` inside it is a declaration: it renders its zones into the frame's flyout, not a flyout of its own. Declarations can come and go, such as a loading one followed by a loaded one, and the flyout keeps its position, its width, and the focus on its own controls.
+
+```tsx
+const AlertDetails = React.lazy(() => import('./alert_details'));
+
+<FlyoutTemplate.Frame onClose={onClose} size="m" flyoutMenuProps={{ title: 'Alert details' }}>
+  <AlertDetails />
+</FlyoutTemplate.Frame>
+```
+
+- **Managed flyouts have a frame already.** `core.overlays.openFlyoutTemplate` renders one from its options, so its content component can suspend or swap declarations without any change.
+- **Content can suspend.** While it does, the frame shows a loading declaration: a header with the frame's title (`flyoutMenuProps.title`, or `aria-label`) and a loading spinner. With no title, it shows a spinner in the body.
+- **The frame takes the flyout's root props**, the ones for `EuiFlyout`, and `FlyoutTemplate.Frame` has no tab props. A declaration takes `children`, the tab props, and `onClose`. Other root props on a declaration are ignored, with a warning in development.
+- **Closing.** An unmanaged frame calls its own `onClose`, not the declaration's. A managed frame runs the shown declaration's `onClose`, then closes the flyout.
+- **The menu title comes from the frame,** never from a declaration's header. EUI re-registers a managed flyout when its menu title or `size` changes, which closes its history group, so both have to be known when the frame mounts and stay the same.
+- **Content that suspends after it has loaded** shows the frame's loading state in its place until it resumes. To keep loaded content on screen, wrap the part that loads later, such as a lazily loaded tab panel, in its own `Suspense`.
+- **Labeling.** The frame is labeled by the shown declaration's header title, as a standalone flyout is. A declaration with no header leaves it to the frame's `aria-label` or menu title.
+- **A `FlyoutTemplate` inside zone content,** such as a child flyout declared in the body, is not a declaration of the frame. It renders its own flyout.
