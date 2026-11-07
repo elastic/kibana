@@ -34,7 +34,7 @@ import {
   type InvestigationViewSource,
 } from '../../common/ebt_events';
 import { RETRY_BUTTON_LABEL } from '../../common/messages';
-import { DEFAULT_INVESTIGATIONS_TIME_RANGE } from '../../data/investigations/investigations_url';
+import { DEFAULT_HOMEPAGE_TIME_RANGE } from '../../data/investigations/investigations_url';
 import { useFetchInvestigations } from '../../data/investigations/use_fetch_investigations';
 import { useInvestigationSections } from '../../data/investigations/use_investigation_sections';
 import {
@@ -96,7 +96,7 @@ export function NightshiftApp({
   const searchQuery = useMemo(() => getNightshiftSearchQueryFromSearch(search), [search]);
   const debouncedSearchQuery = useDebouncedValue(searchQuery, INVESTIGATIONS_SEARCH_DEBOUNCE_MS);
   const timeRange = useMemo(
-    () => getNightshiftTimeRangeFromSearch(search, DEFAULT_INVESTIGATIONS_TIME_RANGE),
+    () => getNightshiftTimeRangeFromSearch(search, DEFAULT_HOMEPAGE_TIME_RANGE),
     [search]
   );
   const rawSeverity = useMemo(() => getNightshiftSeverityFromSearch(search), [search]);
@@ -252,7 +252,7 @@ export function NightshiftApp({
       setNightshiftTimeRangeParams(
         params,
         { rangeFrom: start, rangeTo: end },
-        DEFAULT_INVESTIGATIONS_TIME_RANGE
+        DEFAULT_HOMEPAGE_TIME_RANGE
       );
       history.replace({ search: params.toString() });
     },

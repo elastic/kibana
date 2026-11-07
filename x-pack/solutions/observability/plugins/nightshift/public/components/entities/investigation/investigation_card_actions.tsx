@@ -71,6 +71,23 @@ const openMenuLabel = i18n.translate('xpack.nightshift.investigations.cardOpenMe
 const isInvestigationClosed = (investigation: InvestigationSummary): boolean =>
   investigation.metadata.status === 'closed';
 
+const statusErrorMessage = (error: unknown): Error => {
+  const bodyMessage =
+    error &&
+    typeof error === 'object' &&
+    'body' in error &&
+    error.body &&
+    typeof error.body === 'object' &&
+    'message' in error.body &&
+    typeof error.body.message === 'string'
+      ? error.body.message
+      : undefined;
+  if (bodyMessage) {
+    return new Error(bodyMessage);
+  }
+  return error instanceof Error ? error : new Error(String(error));
+};
+
 export interface InvestigationCardActionsProps {
   investigation: InvestigationSummary;
   /** The assignee avatars and picker, shown before the divider. */
@@ -156,11 +173,15 @@ export const InvestigationCardActions = ({
   const handleSetStatus = useCallback(
     async (status: 'open' | 'closed') => {
       try {
+        // Closing skips a confirm dialog. Pending proposals need a dismiss_reason; `no_reason` is
+        // the API default when the analyst does not pick one.
         await http.put(
           INVESTIGATION_STATUS_URL.replace('{id}', encodeURIComponent(investigation.id)),
           {
             version: AGENTIC_INVESTIGATIONS_API_VERSION,
-            body: JSON.stringify({ status }),
+            body: JSON.stringify(
+              status === 'closed' ? { status, dismiss_reason: 'no_reason' } : { status }
+            ),
           }
         );
         notifications.toasts.addSuccess({
@@ -174,7 +195,7 @@ export const InvestigationCardActions = ({
                 }),
         });
       } catch (error) {
-        notifications.toasts.addError(error as Error, {
+        notifications.toasts.addError(statusErrorMessage(error), {
           title: i18n.translate('xpack.nightshift.investigations.cardStatusError', {
             defaultMessage: 'Could not update the status',
           }),

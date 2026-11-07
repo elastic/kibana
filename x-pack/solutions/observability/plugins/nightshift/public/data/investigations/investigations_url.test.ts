@@ -7,12 +7,17 @@
 
 import {
   buildInvestigationsPath,
+  DEFAULT_HOMEPAGE_TIME_RANGE,
   DEFAULT_INVESTIGATIONS_TIME_RANGE,
   parseInvestigationsSearch,
   sectionIdToInvestigationsFilters,
 } from './investigations_url';
 
 describe('investigations_url', () => {
+  it('defaults the homepage time picker to the last 3 calendar days', () => {
+    expect(DEFAULT_HOMEPAGE_TIME_RANGE).toEqual({ from: 'now-3d/d', to: 'now' });
+  });
+
   it('still serializes severity and non-default ranges when asked', () => {
     expect(
       buildInvestigationsPath({

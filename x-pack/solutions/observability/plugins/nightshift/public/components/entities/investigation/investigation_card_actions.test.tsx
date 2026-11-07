@@ -153,7 +153,7 @@ describe('InvestigationCardActions', () => {
     expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: ['nightshift.investigations'] });
   });
 
-  it('closes an open investigation from the overflow menu', async () => {
+  it('closes an open investigation from the overflow menu without a confirm dialog', async () => {
     renderActions();
 
     fireEvent.click(screen.getByTestId('nightshiftInvestigationCardActions'));
@@ -167,7 +167,7 @@ describe('InvestigationCardActions', () => {
     expect(httpPut).toHaveBeenCalledWith(
       expect.stringContaining('/investigations/investigation-1/status'),
       expect.objectContaining({
-        body: JSON.stringify({ status: 'closed' }),
+        body: JSON.stringify({ status: 'closed', dismiss_reason: 'no_reason' }),
       })
     );
   });
