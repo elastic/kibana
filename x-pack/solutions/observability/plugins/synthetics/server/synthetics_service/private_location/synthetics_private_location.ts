@@ -72,6 +72,17 @@ export interface PrivateConfig {
   globalParams: Record<string, string>;
 }
 
+/**
+ * What a package policy ID is derived from. `id` is the heartbeat id; `config_id` is the monitor's
+ * saved-object id, found on the monitor attributes or, once formatted for Heartbeat, in `fields`.
+ * Both are the same string for monitors created in the UI, so `config_id` can be left out then.
+ */
+export interface PolicyIdConfig {
+  id: string;
+  config_id?: string;
+  fields?: { config_id?: string };
+}
+
 interface EnrolledAgents {
   agentIds: string[];
   /** Enrolled agents on the elastic-agent-complete image. Browser monitors pin only to these. */
@@ -112,12 +123,42 @@ export class SyntheticsPrivateLocation {
   }
 
   /**
-   * Returns the new (space-agnostic) policy ID format.
+   * Returns the ID a new package policy gets (space-agnostic).
    * Format: `${configId}-${locationId}`
-   * This removes the spaceId dependency to support multispace monitors.
+   *
+   * `configId` is the monitor's saved-object UUID, which Kibana generates. It is never the heartbeat
+   * id: project monitors pick that one themselves (`custom_heartbeat_id`), and Fleet uses the
+   * package policy id as a key in the agent policy's role descriptors, where Elasticsearch rejects
+   * some characters. For monitors created in the UI both ids are the same string.
    */
-  getPolicyId(config: { origin?: string; id: string }, locId: string) {
+  getPolicyId(config: PolicyIdConfig, locId: string) {
+    return `${config.fields?.config_id || config.config_id || config.id}-${locId}`;
+  }
+
+  /**
+   * Returns the ID versions before UUID-based ids gave the package policy.
+   * Format: `${heartbeatId}-${locationId}`
+   *
+   * It differs from {@link getPolicyId} only for monitors whose heartbeat id is not their
+   * saved-object id (project monitors). A policy that already exists under it keeps this ID: it is
+   * updated in place and never duplicated under the new ID.
+   */
+  getHeartbeatPolicyId(config: PolicyIdConfig, locId: string) {
     return `${config.id}-${locId}`;
+  }
+
+  /**
+   * Every ID the package policy of a monitor at a location can be stored under: the new ID, the
+   * heartbeat-based ID, and the legacy space-suffixed IDs.
+   */
+  getPolicyIdCandidates(config: PolicyIdConfig, locId: string, allSpaces: Set<string>) {
+    return [
+      ...new Set([
+        this.getPolicyId(config, locId),
+        this.getHeartbeatPolicyId(config, locId),
+        ...this.getLegacyPolicyIdsForAllSpaces(config.id, locId, allSpaces),
+      ]),
+    ];
   }
 
   getPolicyName(config: { id: string; origin?: string; name: string }, locName: string) {
@@ -135,10 +176,18 @@ export class SyntheticsPrivateLocation {
   }
 
   /**
-   * Checks whether new-format or legacy-format policy IDs exist for a given monitor + location.
+   * Checks which package policy IDs exist for a given monitor + location, and which of them the
+   * policy must be written under.
    *
-   * Finds legacy IDs (`{configId}-{locationId}-{spaceId}`) via prefix match + suffix
-   * validation against known spaces. Suffix validation uses O(1) Set lookup, keeping
+   * `policyId` is the ID to create or update the policy under. An existing policy keeps its ID,
+   * so one found under the heartbeat-based ID is updated in place and not re-created under the new
+   * ID. Only when none exists does it fall back to the new ID from {@link getPolicyId}.
+   * `hasNewFormatPolicyId` tells whether a policy exists under `policyId`.
+   *
+   * `legacyPolicyIds` are the IDs to remove once `policyId` is written: the space-suffixed IDs
+   * (`{heartbeatId}-{locationId}-{spaceId}`) and, if the policy exists under both the new and the
+   * heartbeat-based ID, the heartbeat-based one. Space-suffixed IDs are found via prefix match +
+   * suffix validation against known spaces. Suffix validation uses O(1) Set lookup, keeping
    * performance identical to plain prefix matching regardless of space count.
    *
    * This prevents most false positives — e.g. monitor "monitor-a" / location "loc-b"
@@ -148,16 +197,27 @@ export class SyntheticsPrivateLocation {
    * requires monitor IDs, location IDs, and space names to overlap in a specific way.
    */
   getPolicyIdFormatInfo(
-    config: { id: string },
+    config: PolicyIdConfig,
     locationId: string,
     existingPolicies: Array<{ id: string }> | undefined,
     allSpaces: Set<string>
-  ): { hasNewFormatPolicyId: boolean; hasAnyLegacyPolicyId: boolean; legacyPolicyIds: string[] } {
+  ): {
+    policyId: string;
+    hasNewFormatPolicyId: boolean;
+    hasAnyLegacyPolicyId: boolean;
+    legacyPolicyIds: string[];
+  } {
+    const existingIds = new Set(existingPolicies?.map((policy) => policy.id));
     const newId = this.getPolicyId(config, locationId);
-    const hasNewFormatPolicyId = existingPolicies?.some((policy) => policy.id === newId) ?? false;
+    const heartbeatId = this.getHeartbeatPolicyId(config, locationId);
+    const policyId = !existingIds.has(newId) && existingIds.has(heartbeatId) ? heartbeatId : newId;
+    const hasNewFormatPolicyId = existingIds.has(policyId);
+    const duplicatePolicyIds = [heartbeatId, newId].filter(
+      (id) => id !== policyId && existingIds.has(id)
+    );
 
     const legacyIdPrefix = `${config.id}-${locationId}-`;
-    const legacyPolicyIds =
+    const spaceSuffixedPolicyIds =
       existingPolicies
         ?.filter((policy) => {
           if (!policy.id.startsWith(legacyIdPrefix)) return false;
@@ -165,9 +225,10 @@ export class SyntheticsPrivateLocation {
           return allSpaces.has(spaceId);
         })
         .map((policy) => policy.id) ?? [];
+    const legacyPolicyIds = [...new Set([...duplicatePolicyIds, ...spaceSuffixedPolicyIds])];
     const hasAnyLegacyPolicyId = legacyPolicyIds.length > 0;
 
-    return { hasNewFormatPolicyId, hasAnyLegacyPolicyId, legacyPolicyIds };
+    return { policyId, hasNewFormatPolicyId, hasAnyLegacyPolicyId, legacyPolicyIds };
   }
 
   /**
@@ -660,6 +721,9 @@ export class SyntheticsPrivateLocation {
         ? await this.getEnrolledAgentsByLocation(referencedPrivateLocations)
         : new Map<string, EnrolledAgents>();
     const existingPolicyById = new Map(existingPolicies.map((policy) => [policy.id, policy]));
+    // An updated policy can sit under the new or the heartbeat-based ID, so a failure is matched
+    // back to its monitor by the ID the update was written under.
+    const configByUpdatedPolicyId = new Map<string, HeartbeatConfig>();
 
     for (const { config, globalParams } of configs) {
       const { locations } = config;
@@ -675,9 +739,12 @@ export class SyntheticsPrivateLocation {
 
       for (const privateLocation of allPrivateLocations) {
         const hasLocation = monitorPrivateLocations?.some((loc) => loc.id === privateLocation.id);
-        const newId = this.getPolicyId(config, privateLocation.id);
-        const { hasNewFormatPolicyId, hasAnyLegacyPolicyId, legacyPolicyIds } =
-          this.getPolicyIdFormatInfo(config, privateLocation.id, existingPolicies, allSpaces);
+        const {
+          policyId: newId,
+          hasNewFormatPolicyId,
+          hasAnyLegacyPolicyId,
+          legacyPolicyIds,
+        } = this.getPolicyIdFormatInfo(config, privateLocation.id, existingPolicies, allSpaces);
         const hasPolicy = hasNewFormatPolicyId || hasAnyLegacyPolicyId;
 
         try {
@@ -715,6 +782,7 @@ export class SyntheticsPrivateLocation {
             }
 
             if (hasNewFormatPolicyId) {
+              configByUpdatedPolicyId.set(newId, config);
               monitorPoliciesToUpdate.push({
                 ...newPolicy,
                 id: newId,
@@ -795,19 +863,10 @@ export class SyntheticsPrivateLocation {
     ]);
 
     const failedUpdates = failedUpdatesRes?.map(({ packagePolicy, error }) => {
-      const policyConfig = configs.find(({ config }) => {
-        const { locations } = config;
-
-        const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
-        for (const privateLocation of monitorPrivateLocations) {
-          const currId = this.getPolicyId(config, privateLocation.id);
-          return currId === packagePolicy.id;
-        }
-      });
       return {
         error,
         packagePolicy,
-        config: policyConfig?.config,
+        config: packagePolicy.id ? configByUpdatedPolicyId.get(packagePolicy.id) : undefined,
       };
     });
 
@@ -833,9 +892,8 @@ export class SyntheticsPrivateLocation {
 
     for (const config of configs) {
       for (const privateLocation of allPrivateLocations) {
-        policyIdsToFetch.add(this.getPolicyId(config, privateLocation.id));
-        this.getLegacyPolicyIdsForAllSpaces(config.id, privateLocation.id, allSpaces).forEach(
-          (id) => policyIdsToFetch.add(id)
+        this.getPolicyIdCandidates(config, privateLocation.id, allSpaces).forEach((id) =>
+          policyIdsToFetch.add(id)
         );
       }
     }
@@ -857,9 +915,8 @@ export class SyntheticsPrivateLocation {
     for (const config of configs) {
       const monitorPrivateLocations = config.locations.filter((loc) => !loc.isServiceManaged);
       for (const privateLocation of monitorPrivateLocations) {
-        policyIdsToFetch.add(this.getPolicyId(config, privateLocation.id));
-        this.getLegacyPolicyIdsForAllSpaces(config.id, privateLocation.id, allSpaces).forEach(
-          (id) => policyIdsToFetch.add(id)
+        this.getPolicyIdCandidates(config, privateLocation.id, allSpaces).forEach((id) =>
+          policyIdsToFetch.add(id)
         );
       }
     }
@@ -874,14 +931,14 @@ export class SyntheticsPrivateLocation {
     for (const config of configs) {
       const monitorPrivateLocations = config.locations.filter((loc) => !loc.isServiceManaged);
       for (const privateLocation of monitorPrivateLocations) {
-        const { hasNewFormatPolicyId, legacyPolicyIds } = this.getPolicyIdFormatInfo(
+        const { policyId, hasNewFormatPolicyId, legacyPolicyIds } = this.getPolicyIdFormatInfo(
           config,
           privateLocation.id,
           existingPolicies,
           allSpaces
         );
         if (hasNewFormatPolicyId) {
-          policyIdsToDelete.add(this.getPolicyId(config, privateLocation.id));
+          policyIdsToDelete.add(policyId);
         }
         legacyPolicyIds.forEach((id) => policyIdsToDelete.add(id));
       }

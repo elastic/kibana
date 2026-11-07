@@ -997,10 +997,7 @@ apiTest.describe(
         const customHeartbeatId = found[0][ConfigKey.CUSTOM_HEARTBEAT_ID];
         const configId = found[0].config_id;
 
-        const packagePolicy = await findPackagePolicy(
-          apiClient,
-          `${customHeartbeatId}-${testPolicyId}`
-        );
+        const packagePolicy = await findPackagePolicy(apiClient, `${configId}-${testPolicyId}`);
         expect(packagePolicy?.name).toBe(
           `${monitors[0].id}-${project}-default-${testPrivateLocationName}`
         );
@@ -1039,10 +1036,7 @@ apiTest.describe(
         const customHeartbeatId = found[0][ConfigKey.CUSTOM_HEARTBEAT_ID];
         const configId = found[0].config_id;
 
-        const packagePolicy = await findPackagePolicy(
-          apiClient,
-          `${customHeartbeatId}-${testPolicyId}`
-        );
+        const packagePolicy = await findPackagePolicy(apiClient, `${configId}-${testPolicyId}`);
         expect(packagePolicy?.name).toBe(
           `${monitors[1].id}-${project}-default-${testPrivateLocationName}`
         );
@@ -1080,22 +1074,16 @@ apiTest.describe(
         ]);
 
         const found = await findByJourneyId(apiClient, monitors[1].id);
-        const customHeartbeatId = found[0][ConfigKey.CUSTOM_HEARTBEAT_ID];
+        const configId = found[0].config_id;
 
-        const packagePolicy = await findPackagePolicy(
-          apiClient,
-          `${customHeartbeatId}-${testPolicyId}`
-        );
+        const packagePolicy = await findPackagePolicy(apiClient, `${configId}-${testPolicyId}`);
         expect(packagePolicy?.policy_id).toBe(testPolicyId);
 
         await pushProjectMonitors(apiClient, editorHeaders, project, [
           { ...monitors[1], privateLocations: [secondPrivateLocation.label] },
         ]);
 
-        const packagePolicy2 = await findPackagePolicy(
-          apiClient,
-          `${customHeartbeatId}-${testPolicyId}`
-        );
+        const packagePolicy2 = await findPackagePolicy(apiClient, `${configId}-${testPolicyId}`);
         expect(packagePolicy2).toBeUndefined();
       }
     );
@@ -1119,10 +1107,7 @@ apiTest.describe(
         const customHeartbeatId = found[0][ConfigKey.CUSTOM_HEARTBEAT_ID];
         const configId = found[0].config_id;
 
-        const packagePolicy = await findPackagePolicy(
-          apiClient,
-          `${customHeartbeatId}-${testPolicyId}`
-        );
+        const packagePolicy = await findPackagePolicy(apiClient, `${configId}-${testPolicyId}`);
         expect(packagePolicy?.policy_id).toBe(testPolicyId);
 
         comparePolicies(
@@ -1143,10 +1128,7 @@ apiTest.describe(
           { ...monitors[0], privateLocations: [secondPrivateLocation.label] },
         ]);
 
-        const packagePolicy2 = await findPackagePolicy(
-          apiClient,
-          `${customHeartbeatId}-${testPolicyId}`
-        );
+        const packagePolicy2 = await findPackagePolicy(apiClient, `${configId}-${testPolicyId}`);
         expect(packagePolicy2).toBeUndefined();
       }
     );
@@ -1164,7 +1146,7 @@ apiTest.describe(
         const found = await findByJourneyId(apiClient, monitors[0].id);
         const configId = found[0].config_id;
         const customHeartbeatId = found[0][ConfigKey.CUSTOM_HEARTBEAT_ID];
-        const policyId = `${customHeartbeatId}-${testPolicyId}`;
+        const policyId = `${configId}-${testPolicyId}`;
 
         const packagePolicy = await findPackagePolicy(apiClient, policyId);
         expect(packagePolicy?.policy_id).toBe(testPolicyId);
