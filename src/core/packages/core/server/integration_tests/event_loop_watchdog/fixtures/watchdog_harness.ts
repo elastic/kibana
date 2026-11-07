@@ -13,10 +13,13 @@
  * stderr, which also carries whatever Node and the require hook print.
  */
 
-import { writeSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync, writeSync } from 'node:fs';
+import Os from 'node:os';
 import Path from 'node:path';
+import { performance } from 'node:perf_hooks';
 import type { Logger } from '@kbn/logging';
 import { EventLoopWatchdog } from '@kbn/core-metrics-server-internal';
+import type { WatchdogProfilingData } from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/types';
 import { REPORT_BURST } from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/constants';
 
 // The last argument: `node -e <code> <scenario>` puts it at argv[1].
@@ -64,7 +67,20 @@ const waitForLogLine = async (text: string, timeoutMs: number) => {
   }
 };
 
-const create = (workerEntry?: string) =>
+const perPhase = (ms: number) => ({ starting: ms, running: ms });
+const NO_PROFILING: WatchdogProfilingData = {
+  startAfterMs: perPhase(30_000),
+  maxDurationMs: perPhase(10_000),
+  cooldownMs: perPhase(60_000),
+};
+/** Profiles blocks from 1 s, so the scenarios stay short. */
+const PROFILING: WatchdogProfilingData = {
+  startAfterMs: perPhase(1_000),
+  maxDurationMs: perPhase(10_000),
+  cooldownMs: perPhase(1_000),
+};
+
+const create = (workerEntry?: string, profiling = NO_PROFILING) =>
   new EventLoopWatchdog({
     logger,
     thresholdsMs: { starting: 200, running: 200 },
@@ -75,22 +91,40 @@ const create = (workerEntry?: string) =>
       format: 'json',
       service: { node: { roles: ['background_tasks'] }, version: 'harness', type: 'kibana' },
     },
-    profiling: {
-      startAfterMs: { starting: 30_000, running: 30_000 },
-      maxDurationMs: { starting: 10_000, running: 10_000 },
-      cooldownMs: { starting: 60_000, running: 60_000 },
-    },
+    profiling,
     workerEntry,
   });
 
 /** Starts the watchdog, marks running and waits a moment, so the next block is a running one. */
-const startRunning = async () => {
-  const watchdog = create();
+const startRunning = async (profiling?: WatchdogProfilingData) => {
+  const watchdog = create(undefined, profiling);
   watchdog.start();
   await waitForLogLine('ready', 30_000);
   watchdog.markRunning();
   await sleep(BLOCK_GAP_MS);
   return watchdog;
+};
+
+/**
+ * Writes a module with many functions that call each other in random chains, so a profile of it
+ * has many distinct stacks, like a profile of Kibana. Returns a function that runs for `ms`.
+ */
+const loadDeepCode = async (functionCount: number, depth: number) => {
+  const dir = mkdtempSync(Path.join(Os.tmpdir(), 'watchdog-deep-code-'));
+  const file = Path.join(dir, 'deep_code.js');
+  const lines = ['let x = 0;', 'const fns = [];'];
+  for (let i = 0; i < functionCount; i++) {
+    lines.push(
+      `fns.push(function f${i}(d, pick) { if (d === 0) { for (let j = 0; j < 2000; j++) x += j; return x; } return fns[pick()](d - 1, pick); });`
+    );
+  }
+  lines.push(
+    `module.exports = (ms) => { const end = Date.now() + ms; const pick = () => Math.floor(Math.random() * fns.length); while (Date.now() < end) fns[pick()](${depth}, pick); };`
+  );
+  writeFileSync(file, lines.join('\n'));
+  const { default: run }: { default: (ms: number) => void } = await import(file);
+  rmSync(dir, { recursive: true, force: true });
+  return run;
 };
 
 const scenarios: Record<string, () => Promise<void>> = {
@@ -139,6 +173,73 @@ const scenarios: Record<string, () => Promise<void>> = {
     }
     await sleep(BLOCK_GAP_MS);
     await watchdog.stop();
+  },
+  // A block under the start threshold, then one over it: only the second is profiled.
+  profile_blocks: async () => {
+    const watchdog = await startRunning(PROFILING);
+    watchdog.setProfiling(true);
+    blockFor(500);
+    await sleep(PROFILING.cooldownMs.running + BLOCK_GAP_MS);
+    blockFor(4_000);
+    await sleep(STATS_INTERVAL_MS * 2);
+    await watchdog.stop();
+  },
+  // The capture stops at its maximum duration while the block goes on; "block ended" is written
+  // once it ends, with the time.
+  profile_max_duration: async () => {
+    const watchdog = await startRunning({ ...PROFILING, maxDurationMs: perPhase(1_000) });
+    watchdog.setProfiling(true);
+    blockFor(5_000);
+    writeMainLogLine('info', 'block ended', Date.now());
+    await sleep(STATS_INTERVAL_MS * 2);
+    await watchdog.stop();
+  },
+  // Stopped right after a profiled block ends, while the capture's stop is in flight: the path a
+  // watchdog flag change or Kibana shutdown takes.
+  profile_shutdown: async () => {
+    const watchdog = await startRunning(PROFILING);
+    watchdog.setProfiling(true);
+    blockFor(3_000);
+    await watchdog.stop();
+    const before = performance.eventLoopUtilization();
+    await sleep(1_000);
+    const { utilization } = performance.eventLoopUtilization(before);
+    writeMainLogLine('info', `idle utilization ${utilization.toFixed(3)}`);
+  },
+  // Profiling off right after a profiled block ends: that capture still logs, the next block isn't
+  // profiled.
+  profile_flag_off: async () => {
+    const watchdog = await startRunning(PROFILING);
+    watchdog.setProfiling(true);
+    blockFor(3_000);
+    watchdog.setProfiling(false);
+    await sleep(PROFILING.cooldownMs.running + BLOCK_GAP_MS);
+    writeMainLogLine('info', 'second block', Date.now());
+    blockFor(3_000);
+    await sleep(STATS_INTERVAL_MS * 2);
+    await watchdog.stop();
+  },
+  // A 10 s capture of code with many distinct stacks, at the worker's 32 MB limit. Containers run
+  // Kibana with --max-old-space-size, which replaces that limit, so this covers other installs.
+  profile_large: async () => {
+    const run = await loadDeepCode(4_000, 40);
+    const watchdog = await startRunning({ ...PROFILING, maxDurationMs: perPhase(10_000) });
+    watchdog.setProfiling(true);
+    run(12_000);
+    await sleep(STATS_INTERVAL_MS * 3);
+    await watchdog.stop();
+  },
+  // The worker crashes while it profiles the main thread; the main thread's event loop
+  // utilization afterwards shows whether the profiler is still sampling.
+  profile_crash: async () => {
+    const watchdog = create(Path.resolve(__dirname, 'crash_while_profiling_entry.ts'));
+    watchdog.start();
+    await waitForLogLine('exited unexpectedly', 30_000);
+    await watchdog.stop();
+    const before = performance.eventLoopUtilization();
+    await sleep(1_000);
+    const { utilization } = performance.eventLoopUtilization(before);
+    writeMainLogLine('info', `idle utilization ${utilization.toFixed(3)}`);
   },
   // Short blocks use up the warning burst, with one more whose warning is suppressed, then a block
   // that never ends: the test kills the process once the worker reports it.
