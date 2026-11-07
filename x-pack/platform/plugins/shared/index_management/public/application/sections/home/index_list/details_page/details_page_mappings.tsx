@@ -21,7 +21,7 @@ export const DetailsPageMappings: FunctionComponent<{
   index?: Index;
   showAboutMappings?: boolean;
 }> = ({ index, showAboutMappings = true }) => {
-  const { isLoading, data, error, resendRequest } = useLoadIndexMappings(index?.name || '');
+  const { isLoading, data, error, refetch } = useLoadIndexMappings(index?.name || '');
   const [jsonError, setJsonError] = useState<boolean>(false);
 
   const stringifiedData = useMemo(() => {
@@ -73,7 +73,7 @@ export const DetailsPageMappings: FunctionComponent<{
             <EuiSpacer />
             <EuiButton
               iconSide="right"
-              onClick={resendRequest}
+              onClick={() => refetch()}
               iconType="refresh"
               color="danger"
               data-test-subj="indexDetailsMappingsReloadButton"
@@ -95,7 +95,7 @@ export const DetailsPageMappings: FunctionComponent<{
       data={stringifiedData}
       jsonData={data}
       showAboutMappings={showAboutMappings}
-      refetchMapping={resendRequest}
+      refetchMapping={refetch}
     />
   );
 };

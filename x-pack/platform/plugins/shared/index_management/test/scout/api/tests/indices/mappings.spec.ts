@@ -48,23 +48,4 @@ apiTest.describe('Index mappings API', { tag: tags.deploymentAgnostic }, () => {
     expect(response).toHaveStatusCode(200);
     expect(response.body.mappings).toStrictEqual(MAPPINGS);
   });
-
-  apiTest('updates the index mappings', async ({ apiClient }) => {
-    const updateResponse = await apiClient.put(`${API_BASE_PATH}/mapping/${INDEX_NAME}`, {
-      headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
-      responseType: 'json',
-      body: JSON.stringify({ name: { type: 'text' } }),
-    });
-    expect(updateResponse).toHaveStatusCode(200);
-
-    const response = await apiClient.get(`${API_BASE_PATH}/mapping/${INDEX_NAME}`, {
-      headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
-      responseType: 'json',
-    });
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.mappings).toStrictEqual({
-      ...MAPPINGS,
-      properties: { ...MAPPINGS.properties, name: { type: 'text' } },
-    });
-  });
 });

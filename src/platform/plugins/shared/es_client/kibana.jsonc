@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/es-client-plugin",
+  "owner": [
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "This plugin provides generic elasticsearch proxy functionality.",
+  "plugin": {
+    "id": "esClient",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [],
+    "optionalPlugins": [],
+    "requiredBundles": []
+  }
+}

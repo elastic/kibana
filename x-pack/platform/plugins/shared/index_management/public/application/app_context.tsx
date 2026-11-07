@@ -29,6 +29,7 @@ import type { CloudConnectedPluginStart } from '@kbn/cloud-connect-plugin/public
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
 import type { ReindexServicePublicStart } from '@kbn/reindex-service-plugin/public';
+import type { EsClientPluginStart } from '@kbn/es-client-plugin/public';
 
 import type { EuiBreadcrumb } from '@elastic/eui';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -61,6 +62,7 @@ export interface AppDependencies {
     ml?: MlPluginStart;
     streams?: StreamsPluginStart;
     reindexService: ReindexServicePublicStart;
+    esClient: EsClientPluginStart;
   };
   services: {
     uiMetricService: UiMetricService;
@@ -102,7 +104,9 @@ export interface AppDependencies {
   };
 }
 
-const queryClient = new QueryClient({});
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false, refetchOnWindowFocus: false } },
+});
 
 export const AppContextProvider = ({
   children,

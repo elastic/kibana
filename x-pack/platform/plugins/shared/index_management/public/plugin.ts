@@ -47,7 +47,7 @@ import { ComponentTemplateFlyout } from './application/components/component_temp
 import { DataStreamFlyout } from './application/sections/home/data_stream_list/data_stream_detail_panel/data_stream_flyout_embeddable';
 import { IndexTemplateFlyout } from './application/sections/home/template_list/template_details/index_template_flyout_embeddable';
 import { indexDataEnricher, type IndexDataEnricher } from './services';
-import { indexStatsEnricher } from './index_stats_enricher';
+import { createIndexStatsEnricher } from './index_stats_enricher';
 
 export class IndexMgmtUIPlugin
   implements
@@ -137,7 +137,7 @@ export class IndexMgmtUIPlugin
     coreSetup: CoreSetup<StartDependencies>,
     plugins: SetupDependencies
   ): IndexManagementPluginSetup {
-    const { fleet, usageCollection, management, cloud, reindexService } = plugins;
+    const { fleet, usageCollection, management, cloud, reindexService, esClient } = plugins;
 
     this.capabilities$.subscribe((capabilities) => {
       const { monitor, manageEnrich, monitorEnrich, manageIndexTemplates } =
@@ -181,7 +181,7 @@ export class IndexMgmtUIPlugin
 
     // disabled in serverless
     if (this.config.enableIndexStats) {
-      this.indexDataEnricher.add(indexStatsEnricher);
+      this.indexDataEnricher.add(createIndexStatsEnricher(esClient));
     }
 
     return {
@@ -224,6 +224,7 @@ export class IndexMgmtUIPlugin
       ml,
       licensing,
       reindexService,
+      esClient,
     } = plugins;
     const { docLinks, fatalErrors, application, uiSettings, executionContext, settings, http } =
       core;
@@ -251,6 +252,7 @@ export class IndexMgmtUIPlugin
         ml,
         licensing,
         reindexService,
+        esClient,
       },
       services: {
         extensionsService: this.extensionsService,

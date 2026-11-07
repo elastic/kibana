@@ -18,8 +18,7 @@ import {
   scan,
   shareReplay,
 } from 'rxjs';
-import type { HttpSetup } from '@kbn/core-http-browser';
-import { INTERNAL_API_BASE_PATH } from '../../../../../../common/constants';
+import { fetchIndexDocCounts } from '../../../../services/api';
 
 export type DocCountResult =
   | { status: RequestResultType.Success; count: number }
@@ -32,7 +31,7 @@ export enum RequestResultType {
 
 export type DocCountApi = ReturnType<typeof docCountApi>;
 
-export const docCountApi = (httpSetup: HttpSetup) => {
+export const docCountApi = () => {
   const subj = new Subject<string>();
   const abortController = new AbortController();
 
@@ -47,12 +46,7 @@ export const docCountApi = (httpSetup: HttpSetup) => {
     filter((indices) => indices.length > 0),
     // make a request for each batch of indices
     concatMap((indexNames) =>
-      from(
-        httpSetup.post<Record<string, number>>(`${INTERNAL_API_BASE_PATH}/index_doc_count`, {
-          body: JSON.stringify({ indexNames }),
-          signal: abortController.signal,
-        })
-      ).pipe(
+      from(fetchIndexDocCounts(indexNames, abortController.signal)).pipe(
         map(
           (response): RequestResult => ({ type: RequestResultType.Success, indexNames, response })
         ),

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { HttpFetchOptions } from '@kbn/core/public';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common/constants';
 
@@ -16,6 +17,27 @@ export interface ResponseError {
   message: string | Error;
   attributes?: Record<string, unknown>;
 }
+
+/** Kibana path of an Elasticsearch request sent through the es_client plugin. */
+export const esClientPath = (esPath: string) =>
+  `/internal/es_client/${esPath.split('/').map(encodeURIComponent).join('/')}`;
+
+/** Rejection of a failed es_client request, carrying an Elasticsearch error body. */
+const toEsFetchError = ({ statusCode, message }: ResponseError) =>
+  Object.assign(new Error(String(message)), {
+    name: 'HttpFetchError',
+    request: {},
+    response: new Response(null, { status: statusCode, statusText: 'Error' }),
+    body: { error: { type: 'exception', reason: String(message) }, status: statusCode },
+  });
+
+const toEsqlDocCountResponse = (counts: Record<string, number> = {}) => ({
+  columns: [
+    { name: 'count()', type: 'long' },
+    { name: '_index', type: 'keyword' },
+  ],
+  values: Object.entries(counts).map(([indexName, count]) => [count, indexName]),
+});
 
 // Register helpers to mock HTTP Requests
 const registerHttpRequestMockHelpers = (
@@ -51,23 +73,41 @@ const registerHttpRequestMockHelpers = (
   httpSetup.put.mockImplementation((path) =>
     mockMethodImplementation('PUT', path as unknown as string)
   );
+  httpSetup.fetch.mockImplementation((async (path: string, options?: HttpFetchOptions) => {
+    const body = await mockMethodImplementation((options?.method ?? 'GET') as HttpMethod, path);
+    // es_client requests ask for the full response.
+    return options?.asResponse ? { response: new Response(), body } : body;
+  }) as unknown as typeof httpSetup.fetch);
 
-  const mockResponse = (method: HttpMethod, path: string, response?: unknown, error?: unknown) => {
-    const defuse = (promise: Promise<unknown>) => {
-      promise.catch(() => {});
-      return promise;
-    };
+  const defuse = (promise: Promise<unknown>) => {
+    promise.catch(() => {});
+    return promise;
+  };
 
-    return mockResponses
+  const mockResponse = (method: HttpMethod, path: string, response?: unknown, error?: unknown) =>
+    mockResponses
       .get(method)!
       .set(path, error ? defuse(Promise.reject({ body: error })) : Promise.resolve(response));
-  };
+
+  /** Mocks an Elasticsearch request sent through the es_client plugin. */
+  const mockEsResponse = (
+    method: HttpMethod,
+    esPath: string,
+    response?: unknown,
+    error?: ResponseError
+  ) =>
+    mockResponses
+      .get(method)!
+      .set(
+        esClientPath(esPath),
+        error ? defuse(Promise.reject(toEsFetchError(error))) : Promise.resolve(response)
+      );
 
   const setLoadTemplatesResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('GET', `${API_BASE_PATH}/index_templates`, response, error);
 
   const setLoadIndicesStatsResponse = (response?: HttpResponse, error?: ResponseError) =>
-    mockResponse('GET', `${API_BASE_PATH}/indices_stats`, response, error);
+    mockEsResponse('GET', '*/_stats/docs,store', response, error);
 
   /**
    * The indices list endpoint switched from returning an array (`/indices`) to returning
@@ -143,29 +183,38 @@ const registerHttpRequestMockHelpers = (
   const setCreateTemplateResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${API_BASE_PATH}/index_templates`, response, error);
 
+  /** `response` is the `{ settings, defaults }` object for the index. */
   const setLoadIndexSettingsResponse = (
     indexName: string,
     response?: HttpResponse,
     error?: ResponseError
-  ) => mockResponse('GET', `${API_BASE_PATH}/settings/${indexName}`, response, error);
+  ) => mockEsResponse('GET', `${indexName}/_settings`, { [indexName]: response }, error);
 
+  /** `response` is the `{ mappings }` object for the index. */
   const setLoadIndexMappingResponse = (
     indexName: string,
     response?: HttpResponse,
     error?: ResponseError
-  ) => mockResponse('GET', `${API_BASE_PATH}/mapping/${indexName}`, response, error);
+  ) => mockEsResponse('GET', `${indexName}/_mapping`, { [indexName]: response }, error);
 
   const setUpdateIndexMappingsResponse = (
     indexName: string,
     response?: HttpResponse,
     error?: ResponseError
-  ) => mockResponse('PUT', `${API_BASE_PATH}/mapping/${indexName}`, response, error);
+  ) => mockEsResponse('PUT', `${indexName}/_mapping`, response, error);
 
+  /** `response` is the `{ _shards, stats }` object for the index. */
   const setLoadIndexStatsResponse = (
     indexName: string,
-    response?: HttpResponse,
+    response?: { _shards?: unknown; stats?: unknown },
     error?: ResponseError
-  ) => mockResponse('GET', `${API_BASE_PATH}/stats/${indexName}`, response, error);
+  ) =>
+    mockEsResponse(
+      'GET',
+      `${indexName}/_stats`,
+      { _shards: response?._shards, indices: { [indexName]: response?.stats } },
+      error
+    );
 
   const setUpdateIndexSettingsResponse = (
     indexName: string,
@@ -222,39 +271,53 @@ const registerHttpRequestMockHelpers = (
     error?: ResponseError
   ) => mockResponse('GET', `${INTERNAL_API_BASE_PATH}/indices/${indexName}`, response, error);
 
-  const setCreateIndexResponse = (response?: HttpResponse, error?: ResponseError) =>
-    mockResponse('PUT', `${INTERNAL_API_BASE_PATH}/indices/create`, response, error);
+  const setCreateIndexResponse = (
+    indexName: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockEsResponse('PUT', indexName, response, error);
 
   const setInferenceModels = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('GET', `${API_BASE_PATH}/inference/all`, response, error);
 
   const setUserStartPrivilegesResponse = (
     indexName: string,
-    response?: HttpResponse,
+    response?: {
+      privileges: { canManageIndex: boolean; canDeleteDocuments?: boolean };
+    },
     error?: ResponseError
-  ) => {
-    mockResponse(
-      'GET',
-      `${API_BASE_PATH}/start_privileges/${encodeURIComponent(indexName)}`,
-      response,
+  ) =>
+    mockEsResponse(
+      'POST',
+      '_security/user/_has_privileges',
+      {
+        index: {
+          [indexName]: {
+            manage: response?.privileges.canManageIndex ?? false,
+            delete: response?.privileges.canDeleteDocuments ?? false,
+          },
+        },
+      },
       error
     );
-  };
 
   const setLoadIndexDocumentsSampleResponse = (
     indexName: string,
-    response?: HttpResponse,
+    response?: { results: unknown[] },
     error?: ResponseError
   ) =>
-    mockResponse(
-      'GET',
-      `${INTERNAL_API_BASE_PATH}/indices/${encodeURIComponent(indexName)}/sample`,
-      response,
+    mockEsResponse(
+      'POST',
+      `${indexName}/_search`,
+      { hits: { hits: response?.results ?? [] } },
       error
     );
 
-  const setLoadIndexDocCountResponse = (response?: HttpResponse, error?: ResponseError) =>
-    mockResponse('POST', `${INTERNAL_API_BASE_PATH}/index_doc_count`, response, error);
+  /** `response` maps index names to their document counts. */
+  const setLoadIndexDocCountResponse = (response?: Record<string, number>, error?: ResponseError) =>
+    mockEsResponse('POST', '_query', toEsqlDocCountResponse(response), error);
+
+  setLoadIndexDocCountResponse({});
 
   return {
     setLoadTemplatesResponse,
