@@ -151,7 +151,7 @@ describe('WorkloadBindingStore', () => {
 
     it('propagates any other failure', async () => {
       client.delete.mockRejectedValue(new Error('cluster unavailable'));
-      await expect(store.delete(COORDINATES)).rejects.toThrowError('cluster unavailable');
+      await expect(store.delete(COORDINATES)).rejects.toThrow('cluster unavailable');
     });
   });
 
@@ -293,7 +293,7 @@ describe('WorkloadBindingStore', () => {
       encryptedClient.getDecryptedAsInternalUser.mockRejectedValue(
         new Error('cluster unavailable')
       );
-      await expect(store.getVerified(COORDINATES)).rejects.toThrowError('cluster unavailable');
+      await expect(store.getVerified(COORDINATES)).rejects.toThrow('cluster unavailable');
     });
   });
 
@@ -334,7 +334,7 @@ describe('WorkloadBindingStore', () => {
         close,
       } as never);
 
-      await expect(store.findByServiceAccountId('service-account-id')).rejects.toThrowError(
+      await expect(store.findByServiceAccountId('service-account-id')).rejects.toThrow(
         'search failed'
       );
       expect(close).toHaveBeenCalledTimes(1);
@@ -417,7 +417,7 @@ describe('WorkloadBindingStore', () => {
     it('propagates a failed search', async () => {
       client.find.mockRejectedValue(new Error('search failed'));
 
-      await expect(store.countByServiceAccountIds(['first-account'])).rejects.toThrowError(
+      await expect(store.countByServiceAccountIds(['first-account'])).rejects.toThrow(
         'search failed'
       );
     });

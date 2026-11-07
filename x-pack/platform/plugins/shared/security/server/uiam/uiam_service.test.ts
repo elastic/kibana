@@ -1784,7 +1784,7 @@ describe('UiamService', () => {
           new HTTPAuthorizationHeader('Bearer', 'access-token'),
           body
         )
-      ).rejects.toThrowError('socket hang up');
+      ).rejects.toThrow('socket hang up');
     });
   });
 
@@ -1898,7 +1898,7 @@ describe('UiamService', () => {
     it('logs and rethrows transport errors', async () => {
       fetchSpy.mockRejectedValue(new Error('socket hang up'));
 
-      await expect(uiamService.listServiceAccounts()).rejects.toThrowError('socket hang up');
+      await expect(uiamService.listServiceAccounts()).rejects.toThrow('socket hang up');
     });
   });
 
@@ -2013,7 +2013,7 @@ describe('UiamService', () => {
     it('logs and rethrows transport errors', async () => {
       fetchSpy.mockRejectedValue(new Error('socket hang up'));
 
-      await expect(uiamService.getServiceAccount('service-account-id')).rejects.toThrowError(
+      await expect(uiamService.getServiceAccount('service-account-id')).rejects.toThrow(
         'socket hang up'
       );
     });
@@ -2075,7 +2075,7 @@ describe('UiamService', () => {
     it('logs and rethrows transport errors', async () => {
       fetchSpy.mockRejectedValue(new Error('socket hang up'));
 
-      await expect(uiamService.revokeServiceAccount('service-account-id')).rejects.toThrowError(
+      await expect(uiamService.revokeServiceAccount('service-account-id')).rejects.toThrow(
         'socket hang up'
       );
     });
@@ -2178,9 +2178,9 @@ describe('UiamService', () => {
     it('logs and rethrows transport errors', async () => {
       fetchSpy.mockRejectedValue(new Error('secret-credential'));
 
-      await expect(
-        uiamService.exchangeServiceAccountToken('service-account-id')
-      ).rejects.toThrowError('secret-credential');
+      await expect(uiamService.exchangeServiceAccountToken('service-account-id')).rejects.toThrow(
+        'secret-credential'
+      );
       expect(exchangeLogger.error).toHaveBeenCalledWith(
         expect.stringContaining('service-account-id')
       );
@@ -2304,7 +2304,7 @@ describe('UiamService', () => {
     it('logs and rethrows transport errors without their message', async () => {
       fetchSpy.mockRejectedValue(new Error('secret-credential'));
 
-      await expect(uiamService.authenticateAsKibana()).rejects.toThrowError('secret-credential');
+      await expect(uiamService.authenticateAsKibana()).rejects.toThrow('secret-credential');
       expect(authenticateLogger.error).toHaveBeenCalledWith(
         expect.stringContaining('HTTP status: unavailable')
       );

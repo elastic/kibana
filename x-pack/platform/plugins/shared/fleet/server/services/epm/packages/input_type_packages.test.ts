@@ -290,7 +290,7 @@ describe('installAssetsForInputPackagePolicy', () => {
           ],
         } as any,
       })
-    ).rejects.toThrowError(PackagePolicyValidationError);
+    ).rejects.toThrow(PackagePolicyValidationError);
 
     expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
   });
@@ -340,7 +340,7 @@ describe('installAssetsForInputPackagePolicy', () => {
           ],
         } as any,
       })
-    ).rejects.toThrowError(PackagePolicyValidationError);
+    ).rejects.toThrow(PackagePolicyValidationError);
 
     expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
   });
@@ -436,7 +436,7 @@ describe('installAssetsForInputPackagePolicy', () => {
           ],
         } as any,
       })
-    ).rejects.toThrowError(PackagePolicyValidationError);
+    ).rejects.toThrow(PackagePolicyValidationError);
 
     expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
   });
@@ -2223,7 +2223,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
             ],
           } as any,
         })
-      ).rejects.toThrowError(PackagePolicyValidationError);
+      ).rejects.toThrow(PackagePolicyValidationError);
 
       expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
     });

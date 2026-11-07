@@ -2021,7 +2021,7 @@ describe('Output Service', () => {
           { id: 'output-test' }
         );
 
-        expect(soClient.create).toBeCalledWith(
+        expect(soClient.create).toHaveBeenCalledWith(
           expect.anything(),
           expect.objectContaining({
             type: 'otlp',
@@ -2083,7 +2083,7 @@ describe('Output Service', () => {
           { id: 'output-test' }
         );
 
-        expect(soClient.create).toBeCalledWith(
+        expect(soClient.create).toHaveBeenCalledWith(
           expect.anything(),
           expect.objectContaining({
             type: 'otlp',
@@ -2101,7 +2101,7 @@ describe('Output Service', () => {
           }),
           expect.anything()
         );
-        expect(soClient.create).not.toBeCalledWith(
+        expect(soClient.create).not.toHaveBeenCalledWith(
           expect.anything(),
           expect.objectContaining({ otlp_exporter_secrets: expect.anything() }),
           expect.anything()
@@ -2139,7 +2139,7 @@ describe('Output Service', () => {
             { id: 'output-test' }
           );
 
-          expect(soClient.create).toBeCalledWith(
+          expect(soClient.create).toHaveBeenCalledWith(
             expect.anything(),
             expect.objectContaining({
               otlp_exporter: expect.objectContaining({
@@ -2180,7 +2180,7 @@ describe('Output Service', () => {
             { id: 'output-test' }
           );
 
-          expect(soClient.create).toBeCalledWith(
+          expect(soClient.create).toHaveBeenCalledWith(
             expect.anything(),
             expect.objectContaining({
               otlp_exporter: expect.objectContaining({
@@ -2216,7 +2216,7 @@ describe('Output Service', () => {
             { id: 'output-test' }
           );
 
-          expect(soClient.create).toBeCalledWith(
+          expect(soClient.create).toHaveBeenCalledWith(
             expect.anything(),
             expect.objectContaining({
               otlp_exporter: expect.objectContaining({ sending_queue: null }),
@@ -2244,7 +2244,7 @@ describe('Output Service', () => {
             { id: 'output-test' }
           );
 
-          expect(soClient.create).toBeCalledWith(
+          expect(soClient.create).toHaveBeenCalledWith(
             expect.anything(),
             expect.objectContaining({
               otlp_exporter: expect.not.objectContaining({
@@ -2275,7 +2275,7 @@ describe('Output Service', () => {
             { id: 'output-test' }
           );
 
-          expect(soClient.create).toBeCalledWith(
+          expect(soClient.create).toHaveBeenCalledWith(
             expect.anything(),
             expect.objectContaining({
               otlp_exporter: expect.objectContaining({
@@ -2315,7 +2315,7 @@ describe('Output Service', () => {
             { id: 'output-test' }
           );
 
-          expect(soClient.create).toBeCalledWith(
+          expect(soClient.create).toHaveBeenCalledWith(
             expect.anything(),
             expect.objectContaining({
               otlp_exporter: expect.objectContaining({
@@ -2766,7 +2766,7 @@ describe('Output Service', () => {
       await outputService.update(soClient, esClientMock, 'existing-logstash-output', {
         secrets: { ssl: { key: { id: 'wnES3pUBqsj3cVixODPG' } } } as any,
       });
-      expect(soClient.update).toBeCalled();
+      expect(soClient.update).toHaveBeenCalled();
     });
 
     it('rejects update when ssl.certificate_authorities contains a path with whitespace', async () => {
@@ -2879,10 +2879,10 @@ describe('Output Service', () => {
         { fromPreconfiguration: true }
       );
 
-      expect(mockedLogger.warn).toBeCalledWith(
+      expect(mockedLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Preconfigured output failed validation')
       );
-      expect(soClient.create).toBeCalled();
+      expect(soClient.create).toHaveBeenCalled();
     });
 
     it('bypasses ssl path validation for preconfigured update and logs a warning', async () => {
@@ -2897,10 +2897,10 @@ describe('Output Service', () => {
         { fromPreconfiguration: true }
       );
 
-      expect(mockedLogger.warn).toBeCalledWith(
+      expect(mockedLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Preconfigured output failed validation')
       );
-      expect(soClient.update).toBeCalled();
+      expect(soClient.update).toHaveBeenCalled();
     });
   });
 
@@ -3192,7 +3192,7 @@ describe('Output Service', () => {
 
       // config_yaml !== undefined triggers recompute even without a type change (item 1 fix).
       // No explicit `type` in the update data proves mergedType is resolved from the stored output (item 4).
-      expect(soClient.update).toBeCalledWith(
+      expect(soClient.update).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.objectContaining({ config_yaml: 'logging.level: warning', preset: 'balanced' })
@@ -3208,7 +3208,7 @@ describe('Output Service', () => {
 
       // Preset must not be computed when config_yaml is absent — doing so would clobber a
       // stored 'custom' preset with 'balanced' on any innocuous rename.
-      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+      expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
         type: 'elasticsearch',
         name: 'Renamed ES',
       });
@@ -4797,7 +4797,7 @@ describe('Output Service', () => {
           },
         });
 
-        expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+        expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
           type: 'otlp',
           otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
           hosts: null,
@@ -4828,7 +4828,7 @@ describe('Output Service', () => {
           hosts: ['http://test:9200'],
         });
 
-        expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+        expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
           type: 'elasticsearch',
           hosts: ['http://test:9200'],
           otlp_exporter: null,
@@ -4846,7 +4846,7 @@ describe('Output Service', () => {
           },
         });
 
-        expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+        expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
           type: 'otlp',
           otlp_exporter: { endpoint: 'https://new.example.com:4317', protocol: 'grpc' },
         });
@@ -4864,7 +4864,7 @@ describe('Output Service', () => {
           },
         });
 
-        expect(soClient.update).toBeCalledWith(
+        expect(soClient.update).toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
           expect.objectContaining({
@@ -4902,7 +4902,7 @@ describe('Output Service', () => {
           },
         });
 
-        expect(soClient.update).toBeCalledWith(
+        expect(soClient.update).toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
           expect.objectContaining({
@@ -4951,7 +4951,7 @@ describe('Output Service', () => {
           },
         });
 
-        expect(soClient.update).toBeCalledWith(
+        expect(soClient.update).toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
           expect.objectContaining({
@@ -4974,7 +4974,7 @@ describe('Output Service', () => {
           },
         });
 
-        expect(soClient.update).toBeCalledWith(
+        expect(soClient.update).toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
           expect.objectContaining({
@@ -4998,7 +4998,7 @@ describe('Output Service', () => {
           otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
         });
 
-        expect(soClient.update).toBeCalled();
+        expect(soClient.update).toHaveBeenCalled();
       });
 
       it('accepts changing type to OTLP when all using policies have only OTel inputs', async () => {
@@ -5025,7 +5025,7 @@ describe('Output Service', () => {
           otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
         });
 
-        expect(soClient.update).toBeCalled();
+        expect(soClient.update).toHaveBeenCalled();
       });
 
       it('Should always write tls secrets as fleet-secret refs regardless of storage state', async () => {
@@ -5064,7 +5064,7 @@ describe('Output Service', () => {
           },
         });
 
-        expect(soClient.update).toBeCalledWith(
+        expect(soClient.update).toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
           expect.objectContaining({
@@ -5082,7 +5082,7 @@ describe('Output Service', () => {
             },
           })
         );
-        expect(soClient.update).not.toBeCalledWith(
+        expect(soClient.update).not.toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
           expect.objectContaining({ otlp_exporter_secrets: expect.anything() })
@@ -5188,7 +5188,7 @@ describe('Output Service', () => {
             },
           });
 
-          expect(soClient.update).toBeCalledWith(
+          expect(soClient.update).toHaveBeenCalledWith(
             expect.anything(),
             expect.anything(),
             expect.objectContaining({
@@ -5396,7 +5396,7 @@ describe('Output Service', () => {
               ssl: { key: 'PLAIN_KEY' },
               secrets: { ssl: { key: 'SECRET_KEY' } },
             })
-          ).rejects.toThrowError('Cannot specify both ssl.key and secrets.ssl.key');
+          ).rejects.toThrow('Cannot specify both ssl.key and secrets.ssl.key');
         });
       });
 
