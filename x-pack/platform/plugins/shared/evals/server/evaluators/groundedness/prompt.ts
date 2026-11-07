@@ -59,13 +59,15 @@ export const LlmGroundednessEvaluationPrompt = createPrompt({
                   },
                   verdict: {
                     type: 'string',
-                    description: 'Groundedness verdict for the claim against evidence.',
+                    description:
+                      "Groundedness verdict for the claim against evidence. NON_FACTUAL marks the agent's own procedural, meta or forward-looking text, which is not a claim about the environment (see the system prompt, step 1).",
                     enum: [
                       'FULLY_SUPPORTED',
                       'PARTIALLY_SUPPORTED',
                       'CONTRADICTED',
                       'NOT_FOUND',
                       'UNGROUNDED_BUT_DISCLOSED',
+                      'NON_FACTUAL',
                     ],
                   },
                   evidence: {
