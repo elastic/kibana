@@ -6,6 +6,7 @@
  */
 
 import { lazySchema, z } from '@kbn/zod/v4';
+import { ALERT_SEVERITY_VALUES } from '@kbn/rule-data-utils';
 import { presetScheduleSchema } from '../../../common/automation_schedule';
 import { MAX_RULE_NAMES } from '../../../common/automation_limits';
 
@@ -18,6 +19,10 @@ export const triggerRowSchema = lazySchema(() =>
       ruleNameMatchMode: z.enum(['substring', 'regex']).optional(),
       alertStatus: z.enum(['active', 'inactive', 'any']).optional(),
       tags: z.array(z.string().max(500)).optional(),
+      severities: z
+        .array(z.enum(ALERT_SEVERITY_VALUES))
+        .max(ALERT_SEVERITY_VALUES.length)
+        .optional(),
     }),
     presetScheduleSchema.and(
       z.object({

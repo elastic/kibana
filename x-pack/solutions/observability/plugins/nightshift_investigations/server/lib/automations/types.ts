@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AlertSeverity } from '@kbn/rule-data-utils';
 import type { PresetSchedule } from '../../../common/automation_schedule';
 
 export type AutomationType = 'custom' | 'managed';
@@ -23,6 +24,7 @@ export type NightshiftTriggerRow =
       ruleNames?: string[];
       ruleNameMatchMode?: RuleNameMatchMode;
       tags?: string[];
+      severities?: AlertSeverity[];
     }
   | (PresetSchedule & { kind: 'schedule'; scopeQuery?: string })
   | {

@@ -6,14 +6,15 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import type { TriggerFormValues } from '../../automation_form_values';
 import { PillPopover } from '../pills/pill_popover';
 import { Sentence, SentenceIcon } from '../pills/sentence';
-import { triggerLabels } from '../translations';
+import { alertSeverityLabels, triggerLabels } from '../translations';
 import { useRuleCatalog } from '../../../../../../data/rules/use_rule_catalog';
 import { RulePicker } from './rule_picker';
 import { rulePillLabel } from './rule_selection';
+import { AlertSeverityPicker } from './alert_severity_picker';
 
 export const AlertTriggerEditor = ({
   trigger,
@@ -26,31 +27,56 @@ export const AlertTriggerEditor = ({
 }) => {
   const { data: catalog = [] } = useRuleCatalog();
   const { ruleNamePattern, ruleNames, ruleTags } = trigger;
+  const showSeverity = !readOnly || trigger.severities.length > 0;
   const rulesLabel =
     ruleNamePattern.trim() && ruleNames.length === 0 && ruleTags.length === 0
       ? ruleNamePattern.trim()
       : rulePillLabel(catalog, { ruleNames, ruleTags });
 
   return (
-    <Sentence>
-      <SentenceIcon type="logoElastic" />
-      <EuiText size="s">
-        <strong>{triggerLabels.whenAnAlert}</strong>
-      </EuiText>
-      <EuiText size="s">{triggerLabels.from}</EuiText>
-      {readOnly ? (
-        <EuiBadge>{rulesLabel}</EuiBadge>
-      ) : (
-        <PillPopover
-          ariaLabel={triggerLabels.anyRule}
-          label={rulesLabel}
-          testSubject="automationRulePicker"
-        >
-          {() => <RulePicker trigger={trigger} onChange={onChange} />}
-        </PillPopover>
+    <>
+      <Sentence>
+        <SentenceIcon type="logoElastic" />
+        <EuiText size="s">
+          <strong>{triggerLabels.whenAnAlert}</strong>
+        </EuiText>
+        <EuiText size="s">{triggerLabels.from}</EuiText>
+        {readOnly ? (
+          <EuiBadge>{rulesLabel}</EuiBadge>
+        ) : (
+          <PillPopover
+            ariaLabel={triggerLabels.anyRule}
+            label={rulesLabel}
+            testSubject="automationRulePicker"
+          >
+            {() => <RulePicker trigger={trigger} onChange={onChange} />}
+          </PillPopover>
+        )}
+        <EuiText size="s">{triggerLabels.changesTo}</EuiText>
+        <EuiBadge>{triggerLabels.active}</EuiBadge>
+        {showSeverity && (
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">{alertSeverityLabels.withSeverity}</EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <AlertSeverityPicker
+                values={trigger.severities}
+                onChange={(severities) => onChange({ ...trigger, severities })}
+                readOnly={readOnly}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+      </Sentence>
+      {showSeverity && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="xs" color="subdued">
+            {alertSeverityLabels.help}
+          </EuiText>
+        </>
       )}
-      <EuiText size="s">{triggerLabels.changesTo}</EuiText>
-      <EuiBadge>{triggerLabels.active}</EuiBadge>
-    </Sentence>
+    </>
   );
 };
