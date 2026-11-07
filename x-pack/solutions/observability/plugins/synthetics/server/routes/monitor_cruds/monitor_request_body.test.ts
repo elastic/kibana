@@ -124,6 +124,26 @@ describe('createMonitorRequestBody', () => {
     ).toBe(true);
   });
 
+  it.each(['http', 'tcp', 'icmp', 'browser', 'api'])(
+    'accepts a custom monitor id in the body of a %s monitor',
+    (type) => {
+      const payload = { type, id: 'my-custom-id', locations: ['us_central'] };
+      expect(createMonitorRequestBody.parse(payload)).toEqual(payload);
+    }
+  );
+
+  it('accepts the empty id sent by the monitor form, but rejects an over-long one', () => {
+    expect(createMonitorRequestBody.safeParse({ ...scoutHttpCreate, id: '' }).success).toBe(true);
+    expect(
+      createMonitorRequestBody.safeParse({ ...scoutHttpCreate, id: 'x'.repeat(1025) }).success
+    ).toBe(false);
+  });
+
+  it('accepts max_attempts', () => {
+    const payload = { ...scoutHttpCreate, max_attempts: 3 };
+    expect(createMonitorRequestBody.parse(payload)).toEqual(payload);
+  });
+
   it('rejects a non-object body', () => {
     expect(createMonitorRequestBody.safeParse([]).success).toBe(false);
     expect(createMonitorRequestBody.safeParse('http').success).toBe(false);

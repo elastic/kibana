@@ -21,7 +21,7 @@ import {
 } from '../../synthetics_service/project_monitor/normalizers/common_fields';
 import { InvalidMaintenanceWindowError } from '../../synthetics_service/maintenance_windows/resolve_maintenance_windows';
 import type { CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
-import { AddEditMonitorAPI } from './add_monitor/add_monitor_api';
+import { AddEditMonitorAPI, monitorIdExistsError } from './add_monitor/add_monitor_api';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { ConfigKey } from '../../../common/runtime_types';
 import type { MonitorFields } from '../../../common/runtime_types';
@@ -50,7 +50,9 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
     request: {
       body: createMonitorRequestBody,
       query: z.strictObject({
-        id: optionalRouteId.describe('A custom ID for the new monitor. Generated if omitted.'),
+        id: optionalRouteId.describe(
+          'A custom ID for the new monitor. Generated if omitted. Equivalent to the `id` request body field; if both are provided they must match.'
+        ),
         preserve_namespace: queryBoolean
           .optional()
           .describe(
@@ -69,8 +71,9 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   },
   handler: async (routeContext): Promise<any> => {
     const { request, response, server, spaceId } = routeContext;
-    // usually id is auto generated, but this is useful for testing
-    const { id, internal, savedObjectType } = request.query;
+    // usually id is auto generated, but callers can supply their own, in the body or the query
+    const { id: queryId, internal, savedObjectType } = request.query;
+    const { id: bodyId } = request.body;
 
     const addMonitorAPI = new AddEditMonitorAPI(routeContext);
 
@@ -79,6 +82,13 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       private_locations: privateLocations,
       ...monitor
     } = request.body as CreateMonitorPayLoad;
+
+    if (bodyId && queryId && bodyId !== queryId) {
+      return response.badRequest({
+        body: { message: conflictingIdsError(bodyId, queryId) },
+      });
+    }
+    const id = bodyId || queryId;
 
     if (request.body.origin && request.body.origin !== 'ui') {
       return response.badRequest({
@@ -133,10 +143,11 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
       const normalizedMonitor = validationResult.decodedMonitor;
 
-      // Parallelize permission and unique name validation
-      const [err, nameError] = await Promise.all([
+      // Parallelize permission, unique name and (for a custom id) unique id validation
+      const [err, nameError, idError] = await Promise.all([
         validatePermissions(routeContext, normalizedMonitor.locations),
         addMonitorAPI.validateUniqueMonitorName(normalizedMonitor.name),
+        id ? addMonitorAPI.validateUniqueMonitorId(id) : undefined,
       ]);
 
       if (err) {
@@ -149,6 +160,11 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       if (nameError) {
         return response.badRequest({
           body: { message: nameError, attributes: { details: nameError } },
+        });
+      }
+      if (idError) {
+        return response.conflict({
+          body: { message: idError, attributes: { details: idError } },
         });
       }
 
@@ -208,6 +224,11 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       if (SavedObjectsErrorHelpers.isForbiddenError(error)) {
         return response.forbidden({ body: error });
       }
+      // The id was taken after the up-front check (e.g. by a concurrent request or in another space)
+      if (id && SavedObjectsErrorHelpers.isConflictError(error)) {
+        const message = monitorIdExistsError(id);
+        return response.conflict({ body: { message, attributes: { details: message } } });
+      }
 
       server.logger.error('Unable to create synthetics monitor', { error });
       return response.customError({
@@ -217,6 +238,14 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
     }
   },
 });
+
+export const conflictingIdsError = (bodyId: string, queryId: string) => {
+  return i18n.translate('xpack.synthetics.createMonitor.validation.conflictingIds', {
+    defaultMessage:
+      'The monitor id in the request body "{bodyId}" does not match the id query parameter "{queryId}". Provide only one, or make them match.',
+    values: { bodyId, queryId },
+  });
+};
 
 export const invalidOriginError = (origin: string) => {
   return i18n.translate('xpack.synthetics.server.projectMonitors.invalidPublicOriginError', {

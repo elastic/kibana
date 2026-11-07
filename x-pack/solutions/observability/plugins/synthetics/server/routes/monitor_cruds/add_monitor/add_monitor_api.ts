@@ -67,6 +67,12 @@ export const isPackagePolicyConflictFailure = (error: unknown): boolean => {
   return false;
 };
 
+export const monitorIdExistsError = (id: string) =>
+  i18n.translate('xpack.synthetics.createMonitor.validation.idConflict', {
+    defaultMessage: 'Monitor with id "{id}" already exists.',
+    values: { id },
+  });
+
 export type CreateMonitorPayLoad = MonitorFields & {
   url?: string;
   host?: string;
@@ -314,6 +320,19 @@ export class AddEditMonitorAPI {
         values: { name },
       });
     }
+  }
+
+  async validateUniqueMonitorId(id: string) {
+    const { monitorConfigRepository } = this.routeContext;
+    try {
+      await monitorConfigRepository.get(id);
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        return;
+      }
+      throw e;
+    }
+    return monitorIdExistsError(id);
   }
 
   initDefaultAlerts(name: string) {
