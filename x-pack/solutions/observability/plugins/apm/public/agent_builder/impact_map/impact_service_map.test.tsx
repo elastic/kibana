@@ -14,6 +14,7 @@ import { ImpactServiceMap } from './impact_service_map';
 import {
   IMPACT_SEVERITY_SCORES,
   getImpactSeverityScore,
+  getImpactState,
   transformImpactMap,
 } from './transform_impact_map';
 
@@ -101,6 +102,15 @@ describe('getImpactSeverityScore', () => {
   });
 });
 
+describe('getImpactState', () => {
+  it('badges a root cause or symptom over merely impacted, and leaves healthy nodes alone', () => {
+    expect(getImpactState({ role: 'root_cause', impacted: true })).toBe('root_cause');
+    expect(getImpactState({ role: 'symptom', impacted: true })).toBe('symptom');
+    expect(getImpactState({ impacted: true })).toBe('impacted');
+    expect(getImpactState({ health: 'healthy' })).toBeUndefined();
+  });
+});
+
 describe('transformImpactMap', () => {
   const { nodes, edges } = transformImpactMap(impactMap, { criticalPath: 'red' });
 
@@ -147,5 +157,8 @@ describe('ImpactServiceMap', () => {
     }
     expect(screen.getByTestId('serviceMapNodeAlertsBadge')).toBeInTheDocument();
     expect(screen.getByTestId('impactServiceMapLegend')).toHaveTextContent('Critical path');
+    // The root cause, the symptom and what it hurt each carry their own badge.
+    expect(screen.getAllByTestId('impactMapBadge-root_cause').length).toBeGreaterThan(1);
+    expect(screen.getAllByTestId('impactMapBadge-symptom').length).toBeGreaterThan(1);
   });
 });

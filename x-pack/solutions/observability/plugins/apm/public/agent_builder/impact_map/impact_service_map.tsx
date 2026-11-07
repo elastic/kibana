@@ -18,7 +18,16 @@ import {
   type NodeProps,
   type NodeTypes,
 } from '@xyflow/react';
-import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
+  type IconType,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import '@xyflow/react/dist/style.css';
@@ -33,39 +42,107 @@ import {
   IMPACT_SEVERITY_SCORES,
   transformImpactMap,
   type ImpactDependencyNodeData,
+  type ImpactServiceNodeData,
+  type ImpactState,
   type ImpactServiceMapNode,
 } from './transform_impact_map';
 
+const BADGES: Record<ImpactState, { icon: IconType; score: number; label: string }> = {
+  root_cause: {
+    icon: 'bullseye',
+    score: IMPACT_SEVERITY_SCORES.rootCause,
+    label: i18n.translate('xpack.apm.impactMap.badge.rootCause', {
+      defaultMessage: 'Root cause',
+    }),
+  },
+  symptom: {
+    icon: 'warning',
+    score: IMPACT_SEVERITY_SCORES.symptom,
+    label: i18n.translate('xpack.apm.impactMap.badge.symptom', {
+      defaultMessage: 'Symptom: where the problem shows',
+    }),
+  },
+  impacted: {
+    icon: 'sortDown',
+    score: IMPACT_SEVERITY_SCORES.impacted,
+    label: i18n.translate('xpack.apm.impactMap.badge.impacted', {
+      defaultMessage: 'Impacted',
+    }),
+  },
+};
+
+const BADGE_SIZE = 22;
+
+function StateBadge({ state, floating }: { state: ImpactState; floating?: boolean }) {
+  const { euiTheme } = useEuiTheme();
+  const { icon, score, label } = BADGES[state];
+  return (
+    <EuiToolTip content={label} disableScreenReaderOutput>
+      <span
+        role="img"
+        tabIndex={0}
+        aria-label={label}
+        data-test-subj={`impactMapBadge-${state}`}
+        css={css`
+          ${floating ? 'position: absolute; top: -8px; left: calc(50% + 14px);' : ''}
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          flex: none;
+          width: ${BADGE_SIZE}px;
+          height: ${BADGE_SIZE}px;
+          border-radius: 50%;
+          background: ${getSeverityColor(score)};
+          border: 2px solid ${euiTheme.colors.backgroundBasePlain};
+        `}
+      >
+        <EuiIcon type={icon} size="s" color={euiTheme.colors.ink} aria-hidden="true" />
+      </span>
+    </EuiToolTip>
+  );
+}
+
+const ImpactServiceNode = memo((props: NodeProps<Node<ImpactServiceNodeData>>) => (
+  <>
+    <ServiceNode {...props} />
+    {props.data.impactState && <StateBadge state={props.data.impactState} floating />}
+  </>
+));
+ImpactServiceNode.displayName = 'ImpactServiceNode';
+
 const ImpactDependencyNode = memo(
   ({ data, sourcePosition, targetPosition }: NodeProps<Node<ImpactDependencyNodeData>>) => (
-    <DiamondNode
-      id={data.id}
-      label={data.label}
-      spanType={data.spanType}
-      spanSubtype={data.spanSubtype}
-      sourcePosition={sourcePosition}
-      targetPosition={targetPosition}
-      testSubjPrefix="impactDependency"
-      iconAltFallback="dependency"
-      borderColor={
-        data.severityScore !== undefined ? getSeverityColor(data.severityScore) : undefined
-      }
-    />
+    <>
+      <DiamondNode
+        id={data.id}
+        label={data.label}
+        spanType={data.spanType}
+        spanSubtype={data.spanSubtype}
+        sourcePosition={sourcePosition}
+        targetPosition={targetPosition}
+        testSubjPrefix="impactDependency"
+        iconAltFallback="dependency"
+        borderColor={
+          data.severityScore !== undefined ? getSeverityColor(data.severityScore) : undefined
+        }
+      />
+      {data.impactState && <StateBadge state={data.impactState} floating />}
+    </>
   )
 );
 ImpactDependencyNode.displayName = 'ImpactDependencyNode';
 
 const nodeTypes: NodeTypes = {
-  service: ServiceNode,
+  service: ImpactServiceNode,
   impactDependency: ImpactDependencyNode,
 };
 
 const LEGEND = {
   rootCause: i18n.translate('xpack.apm.impactMap.legend.rootCause', {
-    defaultMessage: 'Root cause or critical',
+    defaultMessage: 'Root cause',
   }),
   symptom: i18n.translate('xpack.apm.impactMap.legend.symptom', {
-    defaultMessage: 'Symptom or degraded',
+    defaultMessage: 'Symptom',
   }),
   impacted: i18n.translate('xpack.apm.impactMap.legend.impacted', {
     defaultMessage: 'Impacted',
@@ -81,19 +158,22 @@ function ImpactMapLegend({ criticalPathColor }: { criticalPathColor: string }) {
     <EuiPanel paddingSize="xs" hasShadow={false} hasBorder data-test-subj="impactServiceMapLegend">
       <EuiFlexGroup gutterSize="m" wrap alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiHealth color={getSeverityColor(IMPACT_SEVERITY_SCORES.rootCause)}>
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <StateBadge state="root_cause" />
             <EuiText size="xs">{LEGEND.rootCause}</EuiText>
-          </EuiHealth>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiHealth color={getSeverityColor(IMPACT_SEVERITY_SCORES.symptom)}>
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <StateBadge state="symptom" />
             <EuiText size="xs">{LEGEND.symptom}</EuiText>
-          </EuiHealth>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiHealth color={getSeverityColor(IMPACT_SEVERITY_SCORES.impacted)}>
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <StateBadge state="impacted" />
             <EuiText size="xs">{LEGEND.impacted}</EuiText>
-          </EuiHealth>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>

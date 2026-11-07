@@ -44,10 +44,35 @@ export const getImpactSeverityScore = (annotations?: ImpactMapAnnotations): numb
   return undefined;
 };
 
-export type ImpactDependencyNodeData = DependencyNodeData & { severityScore?: number };
+/** What an entity is in the incident: where it started, where it shows, or what it hurt. */
+export type ImpactState = 'root_cause' | 'symptom' | 'impacted';
+
+/** The one state a node is badged with. A root cause or symptom outranks being impacted. */
+export const getImpactState = (annotations?: ImpactMapAnnotations): ImpactState | undefined => {
+  if (!annotations) {
+    return undefined;
+  }
+  const { role, health, impacted } = annotations;
+  if (role === 'root_cause') {
+    return 'root_cause';
+  }
+  if (role === 'symptom') {
+    return 'symptom';
+  }
+  if (impacted || role === 'contributor' || health === 'critical' || health === 'degraded') {
+    return 'impacted';
+  }
+  return undefined;
+};
+
+export type ImpactServiceNodeData = ServiceNodeData & { impactState?: ImpactState };
+export type ImpactDependencyNodeData = DependencyNodeData & {
+  severityScore?: number;
+  impactState?: ImpactState;
+};
 
 export type ImpactServiceMapNode =
-  | Node<ServiceNodeData, 'service'>
+  | Node<ImpactServiceNodeData, 'service'>
   | Node<ImpactDependencyNodeData, 'impactDependency'>;
 
 export interface ImpactServiceMapEdge extends Edge {
@@ -86,6 +111,7 @@ export const transformImpactMap = (
     ({ id, type_id: typeId, label, annotations }) => {
       const type = typesById.get(typeId);
       const score = getImpactSeverityScore(annotations);
+      const impactState = getImpactState(annotations);
       const position = { x: 0, y: 0 };
 
       if (type?.kind === 'dependency') {
@@ -100,6 +126,7 @@ export const transformImpactMap = (
             spanType: type.icon?.span_type,
             spanSubtype: type.icon?.span_subtype,
             severityScore: score,
+            impactState,
           },
         };
       }
@@ -111,6 +138,7 @@ export const transformImpactMap = (
           id,
           label,
           isService: true,
+          impactState,
           agentName: (agentNames[id] ?? type?.icon?.agent_name) as AgentName | undefined,
           ...(score !== undefined && { serviceAnomalyStats: { anomalyScore: score } }),
           ...(annotations?.alert_count && { alertsCount: annotations.alert_count }),
