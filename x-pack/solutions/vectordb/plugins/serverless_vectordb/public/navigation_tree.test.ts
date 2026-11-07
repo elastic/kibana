@@ -62,6 +62,7 @@ describe('VectorDB navigation tree', () => {
       expect.objectContaining({ cloudLink: 'deployment', title: 'Monitor performance' }),
       expect.objectContaining({ cloudLink: 'searchPower' }),
       expect.objectContaining({ link: 'management:queryActivity' }),
+      expect.objectContaining({ link: 'management:housekeeping' }),
     ]);
   });
 
