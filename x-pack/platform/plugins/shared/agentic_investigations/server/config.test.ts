@@ -8,8 +8,16 @@
 import { config } from './config';
 
 describe('agenticInvestigations config', () => {
-  it('keeps the plugin off, and escalations and the cases bridge on, by default', () => {
-    expect(config.schema.validate({})).toEqual({
+  it('turns the plugin, escalations and the cases bridge on by default in traditional deployments', () => {
+    expect(config.schema.validate({}, { serverless: false })).toEqual({
+      enabled: true,
+      escalations: { enabled: true },
+      cases: { enabled: true },
+    });
+  });
+
+  it('keeps the plugin off, and escalations and the cases bridge on, by default in serverless', () => {
+    expect(config.schema.validate({}, { serverless: true })).toEqual({
       enabled: false,
       escalations: { enabled: true },
       cases: { enabled: true },

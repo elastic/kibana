@@ -13,6 +13,7 @@ import {
   ID_MAX_LENGTH,
   MAX_ALERT_EVENT_DATA_KEYS,
   MAX_FIELD_NAME_LENGTH,
+  MAX_GROUPING_FIELDS,
   MAX_NAME_LENGTH,
   SERIES_ID_MAX_LENGTH,
 } from './constants';
@@ -92,6 +93,10 @@ const actionPolicyWorkflowPayloadRuleSchema = lazySchema(() =>
   z
     .object({
       name: z.string().min(1).max(MAX_NAME_LENGTH).describe('Display name of the rule'),
+      grouping_fields: z
+        .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
+        .max(MAX_GROUPING_FIELDS)
+        .describe('Fields the rule groups its alerts by. Empty when the rule has no grouping'),
     })
     .strict()
 );

@@ -11,6 +11,7 @@ import { createFlyoutGroupedAttachmentsRegistry } from '@kbn/agentic-investigati
 import { registerEscalationConversationEventUiDefinitions } from './escalations/conversation_events';
 import { registerInvestigationConversationEventUiDefinitions } from './investigations/conversation_events';
 import { registerImpactAttachmentTypes } from './impact/attachments';
+import type { AlertSubjectSnapshot } from '../common/subjects/subject';
 import { registerSubjectAttachmentTypes } from './subjects/attachments';
 import { registerHypothesesAttachmentTypes } from './hypotheses/attachments';
 import { registerImpactPublicStepDefinitions } from './impact/step_types';
@@ -28,6 +29,7 @@ import type {
   AgenticInvestigationsPublicSetupDependencies,
   AgenticInvestigationsPublicStartDependencies,
   ImpactEntityOpener,
+  AlertFlyoutRegistration,
 } from './types';
 
 const LazyInvestigationCardComponent = React.lazy(async () => {
@@ -67,6 +69,7 @@ export class AgenticInvestigationsPublicPlugin
   private casesBridgeEnabled: boolean;
   private readonly groupedAttachments = createFlyoutGroupedAttachmentsRegistry();
   private impactEntityOpener: ImpactEntityOpener | undefined;
+  private readonly alertFlyouts = new Map<string, AlertFlyoutRegistration>();
 
   constructor(context: PluginInitializerContext<AgenticInvestigationsPublicConfig>) {
     const config = context.config.get();
@@ -95,7 +98,12 @@ export class AgenticInvestigationsPublicPlugin
     registerImpactPublicStepDefinitions(workflowsExtensions);
     registerInvestigationPublicStepDefinitions(workflowsExtensions);
     registerWorkflowExecutionPublicStepDefinitions(workflowsExtensions);
-    return { registerFlyoutGroupedAttachment: this.groupedAttachments.register };
+    return {
+      registerFlyoutGroupedAttachment: this.groupedAttachments.register,
+      registerAlertFlyout: (source, registration) => {
+        this.alertFlyouts.set(source, registration);
+      },
+    };
   }
 
   start(
@@ -110,6 +118,13 @@ export class AgenticInvestigationsPublicPlugin
     if (this.casesBridgeEnabled) {
       setCaseBridgeHostServices({ ...core, ...startDeps });
     }
+    // Read where a subject renders, so a solution can register after this plugin starts.
+    const getAlertFlyout = (source?: string, snapshot?: AlertSubjectSnapshot) => {
+      const registration = source ? this.alertFlyouts.get(source) : undefined;
+      return registration && (registration.canOpen?.(snapshot) ?? true)
+        ? registration.Component
+        : undefined;
+    };
     if (agentBuilder) {
       registerImpactAttachmentTypes(agentBuilder, () => this.impactEntityOpener);
       registerInvestigationConversationEventUiDefinitions(agentBuilder.conversationEvents);
@@ -130,11 +145,12 @@ export class AgenticInvestigationsPublicPlugin
         spaces: startDeps.spaces,
         unifiedDocViewer: startDeps.unifiedDocViewer,
         charts: startDeps.charts,
+        getAlertFlyout,
       });
       registerHypothesesAttachmentTypes(agentBuilder);
       registerTemplate({
         core,
-        startDeps: { ...startDeps, agentBuilder },
+        startDeps: { ...startDeps, agentBuilder, getAlertFlyout },
         // Escalations are AlertZero-only for now: without them there is no escalation template,
         // and the investigation template has no escalate action.
         escalationsEnabled: this.escalationsEnabled,
@@ -164,5 +180,6 @@ export class AgenticInvestigationsPublicPlugin
 
   stop() {
     this.impactEntityOpener = undefined;
+    this.alertFlyouts.clear();
   }
 }
