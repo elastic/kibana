@@ -7,12 +7,11 @@
 
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import { DASHBOARDS_SKILL_ID } from '../../common';
-import { generateDashboardTool, type GenerateDashboardToolDeps } from '../tools';
+import { DASHBOARDS_SKILL_ID, dashboardTools } from '../../common';
 import { dashboardGeneration } from './generation_guidance';
 import { kibanaRendering } from './rendering_guidance';
 
-export const createDashboardsSkill = (deps: GenerateDashboardToolDeps): SkillDefinition =>
+export const createDashboardsSkill = (): SkillDefinition =>
   defineSkillType({
     id: DASHBOARDS_SKILL_ID,
     name: DASHBOARDS_SKILL_ID,
@@ -39,5 +38,5 @@ ${kibanaRendering.guidance}
       ...(dashboardGeneration.referencedContent ?? []),
       ...(kibanaRendering.referencedContent ?? []),
     ],
-    getInlineTools: () => [generateDashboardTool(deps)],
+    getRegistryTools: () => [dashboardTools.generateDashboard],
   });
