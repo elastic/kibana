@@ -93,6 +93,8 @@ Each tool that emits a rich attachment already explains the verbatim-copy rule i
 
 **Single-entity card vs. entities table** — the renderer selects automatically based on how many entities the \`security.entity\` attachment holds.
 
+**Combined intent — entity question *and* anomaly question** — when one question names both an **entity half** (a named entity or EUID, a risk / criticality / watchlist / data-source filter, or a scope word such as "business-critical", "high-risk", "privileged") and an **anomaly or behaviour half** ("unusual", "anomalous", "abnormal", "unexpected", "out of the ordinary", "behavioural", "lateral movement", "anomalous logins", "anomalous administrative actions"), you MUST cover **both halves in the same turn, before you answer**: \`load_skill\` on \`~/skills/security/ml/find-security-ml-jobs\`, call \`find.security.ml.jobs\` for the behavioural part, and call the entity tool the entity half asks for (\`security.search_entities\` / \`security.get_entity\`). Answering only the entity half leaves the anomaly half unanswered: the ML-jobs call is not optional follow-up work, a different anomaly skill does not stand in for it, and a later turn is too late. See Examples 9a–9d.
+
 **Dashboard trigger** — when the user's prompt contains any of: **entity analytics dashboard**, **EA dashboard**, **entity analytics home/overview/landing**, or **show / open / view / display / bring up Entity Analytics** (the product page, not a generic Kibana dashboard): gather entity data with \`security.search_entities\`, then call \`attachments.add\` with \`type: 'security.entity_analytics_dashboard'\`, and render both the entities table tag and the dashboard tag in the same turn. This rule takes precedence over list/ranking-only framing — if the product-page phrase is present, emit the dashboard. Does NOT apply when the user asks only for the riskiest / top-N entities without naming the Entity Analytics page.
 
 **Watchlist members** — resolve the name with \`security.get_watchlist_id\`, then list members with \`security.search_entities\` (\`watchlists: [<id>]\`). To **enumerate** watchlists ("what watchlists do we have"), use the \`manage-watchlists\` skill. Do NOT use \`get_watchlist_id\` to learn which watchlists a specific entity belongs to — that is on the entity profile from \`security.get_entity\` as \`entity.attributes.watchlists\`. Do NOT use this flow for "what are the **data sources** / **entity sources**" of a watchlist, "what's keeping this watchlist in sync", "how/why are we tracking X in this watchlist", or "why is this entity on this watchlist" — those ask about the *mechanism* adding/syncing entities, not the entities themselves, and belong to the \`manage-watchlists\` skill (\`security.list_watchlist_data_sources\`). The entity store only records watchlist *membership* (on the entity profile), not the reason a given entity was added — do not guess at a reason from risk score or alerts; hand off to \`manage-watchlists\` instead. Note that tool only lists the watchlist's candidate sources, not a definitive per-entity lookup — when more than one source exists, present them as possible explanations rather than asserting which one added a specific entity.
@@ -188,6 +190,8 @@ When the dashboard trigger fires:
 
 When investigating anomalous behavior, use \`~/skills/security/ml/find-security-ml-jobs\` to find the ML jobs that answer the user's question. That skill returns EUIDs of entities with anomalous behavior — pass those to \`security.get_entity\`.
 
+**Combined entity + anomaly questions need that skill in the same turn.** When the question also asks for entity facts (attribute / risk / criticality / watchlist filtering, or a business-critical / high-risk / privileged scope), \`load_skill\` on \`~/skills/security/ml/find-security-ml-jobs\` and call \`find.security.ml.jobs\` **in the same turn, before you answer** — see "Combined intent" in the Routing section and Examples 9a–9d. The entity tool alone does not answer the anomaly half.
+
 When the user wants to create a watchlist, add/remove members (one-time or standing/rule-based), or manage its data sources, hand off to the \`manage-watchlists\` skill (\`~/skills/security/watchlists\`) — do not attempt those actions here.
 
 ## Examples
@@ -280,6 +284,42 @@ User: Show me the Entity Analytics dashboard.
 2. \`attachments.add\` with \`type: 'security.entity_analytics_dashboard'\`, populated from tool output (see "Dashboard snapshot" above).
 3. Render the dashboard tag (from \`attachments.add\` \`id\`/\`current_version\`) AND the entities table tag (from \`search_entities\` \`renderTag\`) in the same turn.
 4. 2–4 prose sentences interpreting the snapshot.
+
+### Example 9a: Combined intent — business-critical hosts with unusual lateral movement
+
+User: Find business-critical hosts with unusual lateral movement activity
+
+1. Entity half: \`security.search_entities\` with \`entityTypes: ['host']\` and \`criticalityLevels: ['high_impact', 'extreme_impact']\`. Do not stop here.
+2. Anomaly half, same turn: \`load_skill\` on \`~/skills/security/ml/find-security-ml-jobs\`, then call \`find.security.ml.jobs\` for lateral movement. If active job ids come back, follow that skill's ES|QL steps against \`.ml-anomalies-*\` (and, with Entity Store V2, \`find.security.ml.jobs.extract_euid\`) to resolve the anomalies back to EUIDs.
+3. Render the \`renderTag\` from \`search_entities\` verbatim, then a blank line.
+4. Prose: the business-critical hosts, plus the lateral-movement anomalies found — or, when no lateral-movement job is active, say so and recommend enabling it. An answer with only the host list is incomplete.
+
+### Example 9b: Combined intent — watchlisted privileged users with anomalous administrative actions
+
+User: Show me privileged users on watchlists who also have anomalous administrative actions
+
+1. Entity half: \`security.get_watchlist_id\` for the named watchlist (when the user named one), then \`security.search_entities\` with \`watchlists: [<id>]\` and \`entityTypes: ['user']\`. When the user named no watchlist, pass the watchlist ids that hold privileged users.
+2. Anomaly half, same turn: \`load_skill\` on \`~/skills/security/ml/find-security-ml-jobs\`, then call \`find.security.ml.jobs\` for anomalous administrative actions.
+3. Render the aggregate \`renderTag\` from \`search_entities\` verbatim, then a blank line.
+4. Prose: the watchlisted privileged users and the administrative-action anomalies — or the recommendation to enable the job that covers them. Both halves belong in the same answer.
+
+### Example 9c: Combined intent — a named user's risk profile plus anomalies
+
+User: Show me the risk profile for user Cielo39 and any anomalous behavior detected
+
+1. Entity half: \`security.get_entity\` for the user's EUID or name.
+2. Anomaly half, same turn: \`load_skill\` on \`~/skills/security/ml/find-security-ml-jobs\`, then call \`find.security.ml.jobs\` for anomalies involving that user; if active jobs come back, run its ES|QL flow and use the returned EUIDs with \`security.get_entity\`.
+3. Render the \`renderTag\` from \`get_entity\` verbatim, then a blank line.
+4. Prose: the user's risk profile AND what the anomaly job did or did not find. A profile-only answer omits the half the user asked for.
+
+### Example 9d: Combined intent — high-risk entities with anomalous login patterns
+
+User: Which high-risk entities also have anomalous login patterns?
+
+1. Entity half: \`security.search_entities\` with a risk filter or the default risk-score ordering — \`riskLevels: ['critical', 'high']\` (or \`riskScoreMin\` when the user named a threshold) plus \`maxResults\`.
+2. Anomaly half, same turn: \`load_skill\` on \`~/skills/security/ml/find-security-ml-jobs\`, then call \`find.security.ml.jobs\` for anomalous login patterns (the security authentication jobs).
+3. Render the aggregate \`renderTag\` from \`search_entities\` verbatim, then a blank line.
+4. Prose: the high-risk entities and the login anomalies — or the recommendation to enable the authentication ML job. The entity list alone is not an answer.
 
 ## Best Practices
 - Report risk scores using \`calculated_score_norm\` (0–100). Scores above 80 are risky.
