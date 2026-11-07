@@ -185,6 +185,22 @@ describe('getEuidFromObject', () => {
       ).toBe('user:alice@example.com@okta');
     });
 
+    it('treats a multi-valued event.kind as an asset when any value matches, regardless of order', () => {
+      const assetEvent = (kind: string[]) => ({
+        user: { email: 'a@b.com' },
+        event: { kind, module: 'okta' },
+      });
+      expect(
+        getEuidFromObject(getBuiltInEntityDefinition('user'), assetEvent(['alert', 'asset']))
+      ).toBe('user:a@b.com@okta');
+      expect(
+        getEuidFromObject(getBuiltInEntityDefinition('user'), assetEvent(['asset', 'alert']))
+      ).toBe('user:a@b.com@okta');
+      expect(
+        getEuidFromObject(getBuiltInEntityDefinition('user'), assetEvent(['alert', 'assets']))
+      ).toBeUndefined();
+    });
+
     it('maps event.module okta and entityanalytics_okta to namespace okta', () => {
       expect(
         getEuidFromObject(getBuiltInEntityDefinition('user'), {
