@@ -18,6 +18,7 @@ import { RULE_KIND_ICONS } from '@kbn/alerting-v2-constants';
 import { Context } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import type { Container } from 'inversify';
+import { hasUnsavedChanges, UNSAVED_CHANGES_BADGE } from './attachment_save_state';
 import { RuleInlineContent } from './rule_inline_content';
 import { RuleCanvasContent } from './rule_canvas_content';
 
@@ -32,7 +33,10 @@ export const createRuleAttachmentDefinition = ({
 }: RuleAttachmentDefinitionServices): AttachmentUIDefinition<RuleAttachment> => ({
   getLabel: (attachment) => attachment.data.metadata.name,
   getIcon: () => 'if',
-  getHeader: ({ attachment }) => ({ icon: RULE_KIND_ICONS[attachment.data.kind] }),
+  getHeader: ({ attachment }) => ({
+    icon: RULE_KIND_ICONS[attachment.data.kind],
+    badges: hasUnsavedChanges(attachment) ? [UNSAVED_CHANGES_BADGE] : undefined,
+  }),
 
   canvasWidth: '40vw',
 

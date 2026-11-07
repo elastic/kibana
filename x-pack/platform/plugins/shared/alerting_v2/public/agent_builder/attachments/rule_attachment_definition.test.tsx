@@ -103,6 +103,38 @@ describe('createRuleAttachmentDefinition', () => {
 
       expect(definition.getHeader!({ attachment: { data: { kind } } as any })).toEqual({ icon });
     });
+
+    it('adds an unsaved changes badge when the latest version is newer than the last sync', () => {
+      const definition = createRuleAttachmentDefinition(createMockServices());
+      const attachment = {
+        ...createAttachment({ origin: 'rule-123' }),
+        versionData: {
+          version: 2,
+          versionCount: 2,
+          createdAt: '2026-04-02T00:00:00.000Z',
+          originSyncedAt: '2026-04-01T00:00:00.000Z',
+        },
+      };
+
+      expect(definition.getHeader!({ attachment }).badges).toEqual([
+        { label: 'Unsaved changes', color: 'warning' },
+      ]);
+    });
+
+    it('has no badge when the latest version matches the last sync', () => {
+      const definition = createRuleAttachmentDefinition(createMockServices());
+      const attachment = {
+        ...createAttachment({ origin: 'rule-123' }),
+        versionData: {
+          version: 1,
+          versionCount: 1,
+          createdAt: '2026-04-01T00:00:00.000Z',
+          originSyncedAt: '2026-04-01T00:00:00.000Z',
+        },
+      };
+
+      expect(definition.getHeader!({ attachment }).badges).toBeUndefined();
+    });
   });
 
   describe('getActionButtons', () => {
@@ -301,11 +333,12 @@ describe('createRuleAttachmentDefinition', () => {
     });
 
     describe('Update Rule handler', () => {
-      it('calls upsertRule with the origin id', async () => {
+      it('calls upsertRule with the origin id and refreshes the origin', async () => {
         const services = createMockServices();
         const definition = createRuleAttachmentDefinition(services);
         const attachment = createAttachment({ origin: 'rule-123' });
         const registerActionButtons = jest.fn();
+        const updateOrigin = jest.fn().mockResolvedValue(undefined);
 
         render(
           <>
@@ -313,7 +346,7 @@ describe('createRuleAttachmentDefinition', () => {
               { attachment, isSidebar: false },
               {
                 registerActionButtons,
-                updateOrigin: jest.fn(),
+                updateOrigin,
                 closeCanvas: jest.fn(),
               }
             )}
@@ -329,6 +362,7 @@ describe('createRuleAttachmentDefinition', () => {
           'rule-123',
           expect.objectContaining({ metadata: attachment.data.metadata })
         );
+        expect(updateOrigin).toHaveBeenCalledWith('rule-123');
       });
     });
 

@@ -12,8 +12,11 @@ import { RULE_AUTHORING_SKILL_ID } from '@kbn/alerting-v2-constants';
 import { expect } from '@kbn/scout/ui';
 import {
   agentChatTest as test,
+  buildCreateRuleData,
+  mockAttachRule,
   mockFinalAnswerRenderingRuleAttachment,
   mockLoadSkill,
+  mockManageAttachedRule,
   mockManageRule,
   mockTitleGeneration,
   type AlertingPageObjects,
@@ -27,6 +30,7 @@ import {
  * needs a context the canvas doesn't provide fails here.
  */
 const RULE_DESCRIPTION = 'Created from the canvas spec';
+const EDITED_RULE_DESCRIPTION = 'Edited by the agent in the canvas spec';
 const RULE_RENDER_ERROR = 'Timeline renderer threw an error';
 const CONVERSATIONS_PATH = '/api/agent_builder/conversations';
 const AGENT_BUILDER_PUBLIC_API_HEADERS = {
@@ -329,6 +333,63 @@ test.describe(
       await pageObjects.agentChat.openAttachmentCanvas();
 
       await expectCanvasSectionsVisible(pageObjects);
+    });
+
+    test('flags an agent edit to a saved rule until Update Rule saves it', async ({
+      page,
+      pageObjects,
+      llmProxy,
+      apiServices,
+    }) => {
+      const ruleName = 'Canvas edited rule';
+      ruleNames.push(ruleName);
+      const { id: ruleId } = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: ruleName, description: RULE_DESCRIPTION },
+          query: { base: `FROM ${testIndex} | STATS count = COUNT(*) BY host.name` },
+        })
+      );
+
+      await test.step('the agent attaches the saved rule and edits it', async () => {
+        // Each interceptor expires 30s after it is registered, so register after the app loads.
+        await pageObjects.agentChat.goto();
+        mockTitleGeneration(llmProxy, ruleName);
+        mockLoadSkill(llmProxy, RULE_AUTHORING_SKILL_ID);
+        mockAttachRule(llmProxy, ruleId);
+        mockManageAttachedRule(llmProxy, [
+          { operation: 'set_metadata', name: ruleName, description: EDITED_RULE_DESCRIPTION },
+        ]);
+        // attach_rule creates version 1 from the saved rule; the edit creates version 2.
+        mockFinalAnswerRenderingRuleAttachment(llmProxy, 'I updated the rule description.', 2);
+
+        await pageObjects.agentChat.sendMessage(`Update the description of ${ruleName}`);
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+        rememberConversationId(getConversationIdFromUrl(page));
+        await expect(pageObjects.agentChat.previewButton).toBeVisible({ timeout: 60_000 });
+      });
+
+      await test.step('both headers show unsaved changes', async () => {
+        await expect(pageObjects.agentChat.inlineUnsavedChangesBadge).toBeVisible();
+        await pageObjects.agentChat.openAttachmentCanvas();
+        await expect(pageObjects.agentChat.canvasUnsavedChangesBadge).toBeVisible();
+        await expect(pageObjects.agentChat.canvasSection('ruleDescription')).toHaveText(
+          EDITED_RULE_DESCRIPTION
+        );
+      });
+
+      await test.step('Update Rule saves the edit and clears the canvas badge', async () => {
+        await pageObjects.agentChat.canvasAction('Update Rule').click();
+
+        await expect(page.getByText(`Rule "${ruleName}" updated`)).toBeVisible();
+        await expect(pageObjects.agentChat.canvasUnsavedChangesBadge).toHaveCount(0);
+        const { metadata } = await apiServices.alertingV2.rules.get(ruleId);
+        expect(metadata.description).toBe(EDITED_RULE_DESCRIPTION);
+      });
+
+      await test.step('the inline badge clears once the canvas closes', async () => {
+        await pageObjects.agentChat.closeAttachmentCanvas();
+        await expect(pageObjects.agentChat.inlineUnsavedChangesBadge).toHaveCount(0);
+      });
     });
   }
 );

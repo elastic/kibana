@@ -6,4 +6,9 @@
  */
 
 export * from '../../../common/ui/fixtures';
-export { mockFinalAnswerRenderingRuleAttachment, mockManageRule } from './llm_mocks';
+export {
+  mockAttachRule,
+  mockFinalAnswerRenderingRuleAttachment,
+  mockManageAttachedRule,
+  mockManageRule,
+} from './llm_mocks';

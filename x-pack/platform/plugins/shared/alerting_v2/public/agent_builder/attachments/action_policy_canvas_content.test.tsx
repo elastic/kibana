@@ -232,8 +232,8 @@ describe('ActionPolicyCanvasContent', () => {
       expect(buttons.find((b) => b.label === 'Create policy')).toBeUndefined();
     });
 
-    it('Update Policy handler calls upsertActionPolicy with data.id', async () => {
-      const { registerActionButtons } = await renderCanvas({
+    it('Update Policy handler calls upsertActionPolicy with data.id, then refreshes the origin', async () => {
+      const { registerActionButtons, updateOrigin } = await renderCanvas({
         origin: 'policy-123',
         data: { id: 'policy-123' },
       });
@@ -246,13 +246,17 @@ describe('ActionPolicyCanvasContent', () => {
         'policy-123',
         expect.objectContaining({ name: 'My Policy' })
       );
+      expect(updateOrigin).toHaveBeenCalledWith('policy-123');
+      expect(mockUpsertActionPolicy.mock.invocationCallOrder[0]).toBeLessThan(
+        updateOrigin.mock.invocationCallOrder[0]
+      );
       expect(mockAddSuccess).toHaveBeenCalled();
     });
 
     it('shows a danger toast when update fails', async () => {
       mockUpsertActionPolicy.mockRejectedValueOnce({ message: 'Conflict' });
 
-      const { registerActionButtons } = await renderCanvas({
+      const { registerActionButtons, updateOrigin } = await renderCanvas({
         origin: 'policy-123',
         data: { id: 'policy-123' },
       });
@@ -263,6 +267,7 @@ describe('ActionPolicyCanvasContent', () => {
 
       expect(mockAddDanger).toHaveBeenCalledWith(expect.stringContaining('Failed to update'));
       expect(mockAddSuccess).not.toHaveBeenCalled();
+      expect(updateOrigin).not.toHaveBeenCalled();
     });
 
     it('View in Policies handler navigates with the observability host', async () => {

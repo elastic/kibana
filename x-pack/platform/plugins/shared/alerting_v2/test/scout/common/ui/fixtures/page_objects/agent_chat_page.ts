@@ -10,6 +10,7 @@ import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 
 const CANVAS_ARIA_LABEL = 'Attachment preview';
 const RENDER_ERROR_TITLE = "Couldn't render this attachment";
+const UNSAVED_CHANGES_BADGE = 'Unsaved changes';
 
 /** Drives the Agent Builder chat and the attachment canvas that alerting attachments render into. */
 export class AgentChatPage {
@@ -20,12 +21,20 @@ export class AgentChatPage {
   public readonly responseMessage: Locator;
   /** The Preview button on the inline attachment card in the agent's response. */
   public readonly previewButton: Locator;
+  /** The Unsaved changes badge in the inline attachment card's header. */
+  public readonly inlineUnsavedChangesBadge: Locator;
+  /** The Unsaved changes badge in the canvas header, next to the Update action. */
+  public readonly canvasUnsavedChangesBadge: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.canvas = this.page.locator(`[aria-label="${CANVAS_ARIA_LABEL}"]`);
     this.renderErrorCallout = this.page.getByText(RENDER_ERROR_TITLE);
     this.responseMessage = this.page.testSubj.locator('agentBuilderResponseMessage');
     this.previewButton = this.responseMessage.getByRole('button', { name: 'Preview', exact: true });
+    this.inlineUnsavedChangesBadge = this.responseMessage.getByText(UNSAVED_CHANGES_BADGE, {
+      exact: true,
+    });
+    this.canvasUnsavedChangesBadge = this.canvas.getByText(UNSAVED_CHANGES_BADGE, { exact: true });
   }
 
   async goto() {

@@ -29,6 +29,7 @@ import {
 import { RuleSummaryQueryPreviewSection } from '../../components/rule/rule_summary/rule_summary_query_preview_section';
 import { OBSERVABILITY_ALERTING_HOST } from '../../../common/locators';
 import { RulesApi } from '../../services/rules_api';
+import { recordAttachmentSync, useRecordedAttachmentSync } from './attachment_save_state';
 import type { RuleAttachment } from './rule_attachment_definition';
 
 export interface RuleCanvasContentProps
@@ -52,6 +53,7 @@ export const RuleCanvasContent = ({
   const { data, origin: savedObjectId } = attachment;
   const isPersisted = isPersistedSavedObject(savedObjectId);
   const summaryRule = useMemo(() => ({ ...data, id: undefined }), [data]);
+  const recordedSyncedAt = useRecordedAttachmentSync(attachment.id);
 
   const [mounted, setMounted] = React.useState(false);
 
@@ -77,7 +79,7 @@ export const RuleCanvasContent = ({
             const savedRule = data.id
               ? await rulesApi.upsertRule(data.id, buildRulePayload(data))
               : await rulesApi.createRule(buildRulePayload(data));
-            await updateOrigin(savedRule.id);
+            recordAttachmentSync(attachment.id, await updateOrigin(savedRule.id));
             notifications.toasts.addSuccess(
               i18n.translate('xpack.alertingV2.ruleAttachment.createdSuccess', {
                 defaultMessage: 'Rule "{name}" created',
@@ -101,6 +103,8 @@ export const RuleCanvasContent = ({
         type: ActionButtonType.PRIMARY,
         handler: async () => {
           await rulesApi.upsertRule(ruleId, buildRulePayload(data));
+          // The origin is unchanged; this refreshes origin_snapshot_at so the save counts as synced.
+          recordAttachmentSync(attachment.id, await updateOrigin(ruleId));
           notifications.toasts.addSuccess(
             i18n.translate('xpack.alertingV2.ruleAttachment.updatedSuccess', {
               defaultMessage: 'Rule "{name}" updated',
@@ -133,6 +137,10 @@ export const RuleCanvasContent = ({
     share,
     notifications,
     data,
+    attachment.id,
+    // Re-registering the buttons after a recorded sync redraws the canvas header, so getHeader
+    // re-evaluates the unsaved changes badge against the new sync date.
+    recordedSyncedAt,
   ]);
 
   return (
