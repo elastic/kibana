@@ -65,17 +65,6 @@ export const filterDataStreams = (
   });
 };
 
-export const isSelectedDataStreamHidden = (
-  dataStreams: DataStream[],
-  selectedDataStreamName?: string
-): boolean => {
-  return (
-    !!selectedDataStreamName &&
-    !!dataStreams.find((dataStream: DataStream) => dataStream.name === selectedDataStreamName)
-      ?.hidden
-  );
-};
-
 const getActiveRetention = (lifecycle?: EsLifecycle): unknown =>
   lifecycle?.effective_retention ?? lifecycle?.data_retention;
 
