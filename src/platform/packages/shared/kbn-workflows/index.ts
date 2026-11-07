@@ -94,6 +94,9 @@ export {
   SCHEDULED_INTERVAL_ERROR,
   SCHEDULED_INTERVAL_PATTERN,
   ManualTriggerSchema,
+  isPageTrigger,
+  PageTriggerSchema,
+  type PageTrigger,
   TriggerSchema,
   getCustomTriggerZodSchema,
   getTriggerSchema,
@@ -105,6 +108,7 @@ export {
   type CustomTriggerOn,
   type CustomTriggerSchemaConfig,
   type CustomTriggerSchemaInput,
+  type TriggerSchemaOptions,
   type TriggerType,
   type WorkflowEventsValue,
 } from './spec/schema/triggers';
