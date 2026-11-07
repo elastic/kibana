@@ -112,7 +112,7 @@ describe('SandboxSessionImpl', () => {
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('Sandbox pod evicted'),
       expect.objectContaining({
-        http: { request: { id: 'req-1' } },
+        sandbox: expect.objectContaining({ proxy_request_id: 'req-1' }),
         rpc: expect.objectContaining({ status_code: 'UNAVAILABLE' }),
       })
     );

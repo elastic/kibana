@@ -287,6 +287,24 @@ describe('createAuditedSandboxStart', () => {
     expect(unscoped.log).not.toHaveBeenCalled();
   });
 
+  it('audits a workflow step with its fake request, which names the service account or user', async () => {
+    const { session, scoped, unscoped, audit, start } = setup();
+    session.statFiles.mockResolvedValue({ value: [], rpc: rpc() });
+    const fakeRequest = { isFakeRequest: true } as unknown as KibanaRequest;
+
+    await start
+      .getSessionForSpace('my-space', 'conv-1', { ...stepCaller, request: fakeRequest })
+      .statFiles(['/a']);
+
+    expect(audit.asScoped).toHaveBeenCalledWith(fakeRequest);
+    expect(scoped.log).toHaveBeenCalledTimes(1);
+    // The space is named by the event, so it does not depend on the request's base path.
+    expect((scoped.log.mock.calls[0][0] as any).kibana.space_id).toBe('my-space');
+    // Nothing of the request itself reaches the event.
+    expect(JSON.stringify(scoped.log.mock.calls[0][0])).not.toContain('isFakeRequest');
+    expect(unscoped.log).not.toHaveBeenCalled();
+  });
+
   it('audits a space session without a request and names the space', async () => {
     const { session, scoped, unscoped, sandboxStart, start } = setup();
     session.statFiles.mockResolvedValue({ value: [], rpc: rpc() });

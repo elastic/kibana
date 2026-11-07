@@ -57,6 +57,7 @@ const reply = ({
   initialMetadata,
   trailers = new Metadata(),
   code = status.OK,
+  statusEventCode = code,
   response,
   emitCallback = true,
   emitStatus = true,
@@ -64,6 +65,8 @@ const reply = ({
   initialMetadata?: Metadata;
   trailers?: Metadata;
   code?: status;
+  /** The code of the `status` event, when it differs from the callback's, as grpc-js does for an OK status without a message. */
+  statusEventCode?: status;
   response?: unknown;
   emitCallback?: boolean;
   emitStatus?: boolean;
@@ -86,7 +89,9 @@ const reply = ({
             );
           }
         }
-        if (emitStatus) call.emit('status', { code, details: 'boom', metadata: trailers });
+        if (emitStatus) {
+          call.emit('status', { code: statusEventCode, details: 'boom', metadata: trailers });
+        }
       });
       return call;
     }
@@ -94,8 +99,7 @@ const reply = ({
 };
 
 interface RpcLogMeta {
-  http?: { request: { id: string } };
-  sandbox: { conversation_id: string };
+  sandbox: { conversation_id: string; proxy_request_id?: string };
   rpc: { method: string };
 }
 
@@ -189,6 +193,23 @@ describe('SandboxApiClient', () => {
       });
     });
 
+    it('reports the error, not the OK status, when the server sends no message', async () => {
+      // grpc-js calls back with UNIMPLEMENTED ("No message received") and then emits status OK.
+      reply({ code: status.UNIMPLEMENTED, statusEventCode: status.OK });
+
+      const error = await client.mkdirs(CONVERSATION_ID, ['/a']).catch((err) => err);
+
+      expect(error).toBeInstanceOf(SandboxRpcError);
+      expect(error).toMatchObject({
+        code: status.UNIMPLEMENTED,
+        rpc: { statusCode: 'UNIMPLEMENTED' },
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Sandbox RPC sandbox.SandboxService/Mkdirs finished with gRPC status UNIMPLEMENTED',
+        expect.anything()
+      );
+    });
+
     it('rejects when the status arrives without a result', async () => {
       reply({ code: status.INTERNAL, emitCallback: false });
 
@@ -265,8 +286,7 @@ describe('SandboxApiClient', () => {
       expect(logger.debug).toHaveBeenCalledWith(
         'Sandbox RPC sandbox.SandboxService/StatFiles finished with gRPC status OK',
         {
-          http: { request: { id: 'req-1' } },
-          sandbox: { conversation_id: CONVERSATION_ID },
+          sandbox: { conversation_id: CONVERSATION_ID, proxy_request_id: 'req-1' },
           rpc: {
             method: 'sandbox.SandboxService/StatFiles',
             status_code: 'OK',
@@ -288,18 +308,18 @@ describe('SandboxApiClient', () => {
       expect(logger.debug).toHaveBeenCalledWith(
         'Sandbox RPC sandbox.SandboxService/Mkdirs finished with gRPC status UNAVAILABLE',
         expect.objectContaining({
-          http: { request: { id: 'req-2' } },
+          sandbox: expect.objectContaining({ proxy_request_id: 'req-2' }),
           rpc: expect.objectContaining({ status_code: 'UNAVAILABLE' }),
         })
       );
     });
 
-    it('omits http.request.id when the response carries none', async () => {
+    it('omits sandbox.proxy_request_id when the response carries none', async () => {
       reply({ response: [true] });
 
       await client.mkdirs(CONVERSATION_ID, ['/a']);
 
-      expect(debugMeta()).not.toHaveProperty('http');
+      expect(debugMeta().sandbox).not.toHaveProperty('proxy_request_id');
       expect(debugMeta().sandbox).toEqual({ conversation_id: CONVERSATION_ID });
     });
 
