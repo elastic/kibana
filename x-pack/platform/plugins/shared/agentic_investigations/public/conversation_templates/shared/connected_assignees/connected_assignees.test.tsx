@@ -187,6 +187,15 @@ describe('ConnectedAssignees', () => {
     expect(screen.queryByTestId('assign-conv-1')).not.toBeInTheDocument();
   });
 
+  it('shows "None" when read-only with no assignees', () => {
+    renderPicker({
+      templateId: 'investigation',
+      capabilities: { manageEscalations: true, manageInvestigations: false },
+    });
+
+    expect(screen.getByText('None')).toBeInTheDocument();
+  });
+
   it('still clears pending after a successful mutation when refetchConversation is absent', async () => {
     renderPicker({ templateId: 'escalation', refetchConversation: undefined });
 

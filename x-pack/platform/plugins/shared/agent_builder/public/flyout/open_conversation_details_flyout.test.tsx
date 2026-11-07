@@ -27,7 +27,7 @@ describe('openConversationDetailsFlyout', () => {
     const onClosed = new Promise<void>((resolve) => {
       resolveClosed = resolve;
     });
-    core.overlays.openSystemFlyout.mockReturnValue({ close, onClose: onClosed });
+    core.overlays.openFlyoutTemplate.mockReturnValue({ close, onClose: onClosed });
 
     const open = ({
       onClose,
@@ -59,14 +59,14 @@ describe('openConversationDetailsFlyout', () => {
 
     await open();
 
-    expect(core.overlays.openSystemFlyout).toHaveBeenCalledWith(
-      expect.anything(),
+    expect(core.overlays.openFlyoutTemplate).toHaveBeenCalledWith(
       expect.objectContaining({
         session: 'start',
         historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
-        title: 'Summary',
+        flyoutMenuProps: expect.objectContaining({ title: 'Summary' }),
         type: 'push',
-      })
+      }),
+      expect.any(Function)
     );
   });
 
@@ -80,9 +80,11 @@ describe('openConversationDetailsFlyout', () => {
 
     await open({ trailingActions: [copyLink] });
 
-    expect(core.overlays.openSystemFlyout).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({ flyoutMenuProps: { trailingActions: [copyLink] } })
+    expect(core.overlays.openFlyoutTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        flyoutMenuProps: { title: 'Summary', trailingActions: [copyLink] },
+      }),
+      expect.any(Function)
     );
   });
 
@@ -91,11 +93,10 @@ describe('openConversationDetailsFlyout', () => {
 
     await open();
 
-    const [[, options]] = core.overlays.openSystemFlyout.mock.calls;
+    const [[options]] = core.overlays.openFlyoutTemplate.mock.calls;
     expect(options).toEqual(
       expect.objectContaining({
         size: CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH,
-        defaultSize: CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH,
         minWidth: CONVERSATION_DETAILS_FLYOUT_MIN_WIDTH,
         maxWidth: CONVERSATION_DETAILS_FLYOUT_MAX_WIDTH,
         resizable: true,
@@ -107,27 +108,25 @@ describe('openConversationDetailsFlyout', () => {
     const { core, open } = setup();
 
     await open();
-    const [[, firstOptions]] = core.overlays.openSystemFlyout.mock.calls;
+    const [[firstOptions]] = core.overlays.openFlyoutTemplate.mock.calls;
     firstOptions?.onResize?.(620);
 
     await open();
 
-    const [, [, options]] = core.overlays.openSystemFlyout.mock.calls;
+    const [, [options]] = core.overlays.openFlyoutTemplate.mock.calls;
     expect(options?.size).toBe(620);
-    // A reset still returns to the default, not to the remembered width.
-    expect(options?.defaultSize).toBe(CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH);
   });
 
   it('clamps a remembered width to the allowed range', async () => {
     const { core, open } = setup();
 
     await open();
-    const [[, firstOptions]] = core.overlays.openSystemFlyout.mock.calls;
+    const [[firstOptions]] = core.overlays.openFlyoutTemplate.mock.calls;
     firstOptions?.onResize?.(2000);
 
     await open();
 
-    const [, [, options]] = core.overlays.openSystemFlyout.mock.calls;
+    const [, [options]] = core.overlays.openFlyoutTemplate.mock.calls;
     expect(options?.size).toBe(CONVERSATION_DETAILS_FLYOUT_MAX_WIDTH);
   });
 
@@ -136,7 +135,7 @@ describe('openConversationDetailsFlyout', () => {
 
     await open();
 
-    const [[, options]] = core.overlays.openSystemFlyout.mock.calls;
+    const [[options]] = core.overlays.openFlyoutTemplate.mock.calls;
     expect(options?.flyoutMenuProps?.trailingActions).toBeUndefined();
   });
 

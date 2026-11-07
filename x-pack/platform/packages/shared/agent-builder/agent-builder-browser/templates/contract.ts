@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import type { ComponentType } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import type { EuiFlyoutMenuAction, IconType } from '@elastic/eui';
+import type {
+  FlyoutFooterPrimaryActionProps,
+  FlyoutFooterSecondaryActionProps,
+  FlyoutHeaderBadgeProps,
+  FlyoutHeaderInfoBlockProps,
+  FlyoutHeaderMetaBlockProps,
+} from '@kbn/flyout-template';
 import type {
   Conversation,
   ConversationWithoutRoundsWithPermissions,
@@ -14,7 +21,7 @@ import type {
 import type { AttachmentServiceStartContract } from '../attachments';
 
 /**
- * Props shared by conversation details tabs, headers, and footers.
+ * Props for conversation details tabs and for `useDetailsFlyout`.
  */
 export interface ConversationTemplateDetailsFlyoutRenderProps {
   /** The conversation the flyout is showing. */
@@ -45,6 +52,48 @@ export interface ConversationTemplateTabDefinition {
    * `KibanaContextProvider`, so ambient context (`useKibana()` etc.) is not available.
    */
   content: ComponentType<ConversationTemplateDetailsFlyoutRenderProps>;
+}
+
+/**
+ * The conversation details flyout's header and footer, as data. Agent Builder renders it with
+ * `@kbn/flyout-template`, so the parts take that package's props.
+ */
+export interface ConversationTemplateDetailsFlyoutDescriptor {
+  header: {
+    /**
+     * Plain text, so the collapsed header can show it in full on hover. The flyout menu is titled
+     * "Summary" either way.
+     */
+    title: string;
+    description?: ReactNode;
+    /** Shows a spinner after the title, for work the header reflects (e.g. a sync). */
+    isLoading?: boolean;
+    /** The spinner's accessible name, saying what is loading. */
+    loadingLabel?: string;
+    metaBlocks?: FlyoutHeaderMetaBlockProps[];
+    badges?: FlyoutHeaderBadgeProps[];
+    infoBlocks?: FlyoutHeaderInfoBlockProps[];
+  };
+  footer?: {
+    primary?: FlyoutFooterPrimaryActionProps;
+    secondary?: FlyoutFooterSecondaryActionProps;
+  };
+}
+
+/** What a template's `detailsFlyout.load` resolves to. */
+export interface ConversationTemplateDetailsFlyoutModule {
+  /**
+   * Returns the flyout's header and footer for a conversation. Called as a hook, on every render
+   * of the flyout, inside `Provider`.
+   */
+  useDetailsFlyout: (
+    props: ConversationTemplateDetailsFlyoutRenderProps
+  ) => ConversationTemplateDetailsFlyoutDescriptor;
+  /**
+   * Wraps the flyout so `useDetailsFlyout` and the values it returns can use the template's own
+   * contexts, such as its Kibana services or query client. The flyout renders outside them.
+   */
+  Provider?: ComponentType<{ children: ReactNode }>;
 }
 
 export interface ConversationTemplateBriefCardRenderProps {
@@ -86,10 +135,13 @@ export interface ConversationTemplateUIDefinition {
   briefCard?: ComponentType<ConversationTemplateBriefCardRenderProps>;
   /** Optional flyout content; capture capabilities from the template registration context. */
   detailsFlyout?: {
-    /** Replaces the default title above the tabs, inside Agent Builder's EuiFlyoutHeader. */
-    header?: ComponentType<ConversationTemplateDetailsFlyoutRenderProps>;
-    /** Rendered inside Agent Builder's EuiFlyoutFooter when provided. */
-    footer?: ComponentType<ConversationTemplateDetailsFlyoutRenderProps>;
+    /**
+     * Loads the module that describes the flyout's header and footer. Called once, the first time
+     * a flyout for this template opens; the flyout shows its loading state until it resolves. Use
+     * a dynamic `import()` so the module stays out of the page-load bundle. Without it, the flyout
+     * is titled "Summary" and has no footer.
+     */
+    load?: () => Promise<ConversationTemplateDetailsFlyoutModule>;
     /**
      * Icon buttons rendered in the in-chat flyout's menu bar, before the close button. Flyouts opened
      * with `openConversationDetails` take their actions from its `trailingActions` option instead.

@@ -14,4 +14,7 @@ export const CONNECTED_ASSIGNEES_LABELS = Object.freeze({
   assignError: i18n.translate('xpack.agenticInvestigations.connectedAssignees.assignError', {
     defaultMessage: 'Failed to update assignees',
   }),
+  none: i18n.translate('xpack.agenticInvestigations.connectedAssignees.none', {
+    defaultMessage: 'None',
+  }),
 });

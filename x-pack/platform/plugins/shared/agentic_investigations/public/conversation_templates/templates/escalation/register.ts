@@ -11,8 +11,6 @@ import {
   registerEscalationTemplateUI,
   type LinkedInvestigationsSlotRenderProps,
   type RenderLinkedInvestigations,
-  type RenderSyncIndicator,
-  type SyncIndicatorSlotRenderProps,
 } from '@kbn/agentic-investigations-common';
 import { ESCALATION_TEMPLATE_ID } from '../../../../common';
 import { copyLink } from '../../shared/copy_link';
@@ -37,6 +35,7 @@ export const escalationTemplate: TemplateDefinition = {
     startDeps,
     templateId,
     makeLazyWithProviders,
+    loadFlyoutProvider,
     groupedAttachments,
     renderAssignees,
     renderStatus,
@@ -60,26 +59,6 @@ export const escalationTemplate: TemplateDefinition = {
         return GatedLinkedInvestigations;
       });
 
-    // Syncing writes to the escalation, so it needs manage rather than read access.
-    const LazyEscalationSyncIndicator = makeLazyWithProviders<SyncIndicatorSlotRenderProps>(
-      async () => {
-        const [{ EscalationSyncIndicator }, { PrivilegeGate }] = await Promise.all([
-          import('./flyout/escalation_sync_indicator'),
-          import('../../shared/privileges/privilege_gate'),
-        ]);
-        const GatedSyncIndicator: React.FC<SyncIndicatorSlotRenderProps> = (props) =>
-          React.createElement(
-            PrivilegeGate,
-            { privilege: 'manageEscalations' },
-            React.createElement(EscalationSyncIndicator, props)
-          );
-        return GatedSyncIndicator;
-      }
-    );
-
-    const renderSyncIndicator: RenderSyncIndicator = (props) =>
-      React.createElement(LazyEscalationSyncIndicator, props);
-
     const renderLinkedInvestigations: RenderLinkedInvestigations = (props) =>
       React.createElement(
         EscalationModalBoundary,
@@ -97,7 +76,13 @@ export const escalationTemplate: TemplateDefinition = {
       // The toggle itself disables when the user may not change the status.
       renderStatus,
       renderLinkedInvestigations,
-      renderSyncIndicator,
+      loadDetailsFlyoutContext: async () => {
+        const [Provider, { useEscalationSync }] = await Promise.all([
+          loadFlyoutProvider(),
+          import('./flyout/use_escalation_sync'),
+        ]);
+        return { Provider, useEscalationSync };
+      },
       // The flyout's Copy link button confirms success itself; only a failure needs a toast.
       onCopyLink: (url) => copyLink(core.notifications.toasts, url),
     });

@@ -10,8 +10,13 @@ import type { PropsWithChildren } from 'react';
 import { EuiFlyout, EuiProvider } from '@elastic/eui';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { FlyoutTemplate } from '@kbn/flyout-template';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { Conversation } from '@kbn/agent-builder-common';
+import type {
+  ConversationTemplateDetailsFlyoutModule,
+  ConversationTemplateUIDefinition,
+} from '@kbn/agent-builder-browser';
 import { AttachmentType, type TextAttachment } from '@kbn/agent-builder-common/attachments';
 import { AttachmentsService, createPublicAttachmentContract } from '../services/attachments';
 import {
@@ -36,6 +41,15 @@ jest.mock('@elastic/eui', () => {
 });
 
 const ERROR_BODY = 'Something went wrong while loading this conversation.';
+
+/** The hosts render the content inside a frame, which shows its loading state while a module loads. */
+const FrameWrapper = ({ children }: PropsWithChildren) => (
+  <EuiProvider>
+    <FlyoutTemplate.Frame onClose={jest.fn()} flyoutMenuProps={{ title: 'Summary' }}>
+      {children}
+    </FlyoutTemplate.Frame>
+  </EuiProvider>
+);
 
 const createConversation = (overrides: Partial<Conversation> = {}): Conversation => ({
   id: 'conversation',
@@ -92,7 +106,7 @@ it('provides the live attachment registry at registration without remounting tab
     renderConversationDetailsContent: ({ attachment }) => <p>{attachment.data.content}</p>,
   });
   const conversation = createConversation();
-  const props = { conversationTemplatesService, titleId: 'title', isOpenedFromChat: false };
+  const props = { conversationTemplatesService, onClose: jest.fn(), isOpenedFromChat: false };
   const { rerender } = render(
     <ConversationDetailsFlyoutContent {...props} conversation={conversation} />,
     { wrapper: EuiProvider }
@@ -155,7 +169,9 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
       tabs: ['test.first', 'test.second'],
       // The title lives in the header so it stays asserted-on whichever tab is selected.
       detailsFlyout: {
-        header: ({ conversation }) => <h4>{conversation.title}</h4>,
+        load: async () => ({
+          useDetailsFlyout: ({ conversation }) => ({ header: { title: conversation.title } }),
+        }),
       },
     }));
     return conversationTemplatesService;
@@ -170,9 +186,9 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
       logger: { log: jest.fn(), warn: jest.fn(), error: jest.fn() },
     });
     const Wrapper = ({ children }: PropsWithChildren) => (
-      <EuiProvider>
+      <FrameWrapper>
         <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-      </EuiProvider>
+      </FrameWrapper>
     );
     const renderResult = () =>
       render(
@@ -180,8 +196,8 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
           conversationId="conversation"
           conversationsService={conversationsService}
           conversationTemplatesService={createTemplatesService()}
-          titleId="title"
           onNotFound={onNotFound}
+          onClose={jest.fn()}
         />,
         { wrapper: Wrapper }
       );
@@ -316,19 +332,214 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
     expect(onNotFound).not.toHaveBeenCalled();
   });
 
-  it('omits refetchConversation for the in-chat host', () => {
+  it('omits refetchConversation for the in-chat host', async () => {
     render(
       <ConversationDetailsFlyoutContent
         isOpenedFromChat
         conversation={createConversation()}
         conversationTemplatesService={createTemplatesService()}
-        titleId="title"
+        onClose={jest.fn()}
       />,
-      { wrapper: EuiProvider }
+      { wrapper: FrameWrapper }
     );
 
-    expect(screen.getByText('No refetch')).toBeInTheDocument();
+    expect(await screen.findByText('No refetch')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Refetch' })).not.toBeInTheDocument();
+  });
+});
+
+describe('ConversationDetailsFlyoutContent', () => {
+  const createService = ({
+    tabs = [],
+    detailsFlyout,
+  }: {
+    tabs?: string[];
+    detailsFlyout?: ConversationTemplateUIDefinition['detailsFlyout'];
+  }) => {
+    const conversationTemplatesService = new ConversationTemplatesService();
+    const conversationTemplates = createPublicConversationTemplatesContract({
+      conversationTemplatesService,
+      context: {
+        attachmentsService: createPublicAttachmentContract({
+          attachmentsService: new AttachmentsService({
+            http: httpServiceMock.createSetupContract(),
+          }),
+        }),
+        openSidebarConversation: jest.fn(),
+        openFullscreenConversation: jest.fn(),
+        getConversationUrl: jest.fn(),
+      },
+    });
+    conversationTemplates.registerTab('test.first', () => ({
+      label: 'First',
+      content: () => <p>First tab content</p>,
+    }));
+    conversationTemplates.registerTab('test.second', () => ({
+      label: 'Second',
+      content: () => <p>Second tab content</p>,
+    }));
+    conversationTemplates.registerTemplateUIDefinition('test', () => ({
+      name: 'Test',
+      tabs,
+      detailsFlyout,
+    }));
+    return conversationTemplatesService;
+  };
+
+  const renderContent = (
+    conversationTemplatesService: ConversationTemplatesService,
+    conversation = createConversation()
+  ) =>
+    render(
+      <ConversationDetailsFlyoutContent
+        isOpenedFromChat={false}
+        conversation={conversation}
+        conversationTemplatesService={conversationTemplatesService}
+        onClose={jest.fn()}
+      />,
+      { wrapper: FrameWrapper }
+    );
+
+  it('shows the loading header until the template module loads', async () => {
+    let resolveModule: (module: ConversationTemplateDetailsFlyoutModule) => void = () => {};
+    const load = () =>
+      new Promise<ConversationTemplateDetailsFlyoutModule>((resolve) => {
+        resolveModule = resolve;
+      });
+
+    renderContent(createService({ detailsFlyout: { load } }));
+
+    expect(screen.getByRole('heading', { name: 'Summary' })).toBeInTheDocument();
+    expect(screen.getByTestId('flyoutHeaderTitleLoading')).toBeInTheDocument();
+
+    await act(async () =>
+      resolveModule({ useDetailsFlyout: () => ({ header: { title: 'Loaded title' } }) })
+    );
+
+    expect(screen.getByRole('heading', { name: 'Loaded title' })).toBeInTheDocument();
+    expect(screen.queryByTestId('flyoutHeaderTitleLoading')).not.toBeInTheDocument();
+  });
+
+  it('renders the header blocks and footer actions the template module describes, inside its Provider', async () => {
+    const ProviderContext = React.createContext('missing');
+    const onOpenChat = jest.fn();
+    const load = async (): Promise<ConversationTemplateDetailsFlyoutModule> => ({
+      Provider: ({ children }) => (
+        <ProviderContext.Provider value="provided">{children}</ProviderContext.Provider>
+      ),
+      useDetailsFlyout: ({ conversation }) => {
+        const value = React.useContext(ProviderContext);
+        return {
+          header: {
+            title: conversation.title,
+            infoBlocks: [{ title: 'Context', children: value }],
+          },
+          footer: { secondary: { label: 'Open chat', onClick: onOpenChat } },
+        };
+      },
+    });
+
+    renderContent(createService({ detailsFlyout: { load } }));
+    await act(async () => {});
+
+    expect(screen.getByRole('heading', { name: 'Original content' })).toBeInTheDocument();
+    expect(screen.getByText('Context')).toBeInTheDocument();
+    expect(screen.getByText('provided')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Open chat' }));
+    expect(onOpenChat).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows the error state when the template module fails to load', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const load = () => Promise.reject(new Error('chunk failed'));
+
+    renderContent(createService({ detailsFlyout: { load } }));
+    await act(async () => {});
+
+    expect(screen.getByText(ERROR_BODY)).toBeInTheDocument();
+    consoleError.mockRestore();
+  });
+
+  it('loads the template module again on the next open after a failed load', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const load = jest
+      .fn<Promise<ConversationTemplateDetailsFlyoutModule>, []>()
+      .mockRejectedValueOnce(new Error('chunk failed'))
+      .mockResolvedValue({ useDetailsFlyout: () => ({ header: { title: 'Loaded title' } }) });
+    const service = createService({ detailsFlyout: { load } });
+
+    const { unmount } = renderContent(service);
+    await act(async () => {});
+    expect(screen.getByText(ERROR_BODY)).toBeInTheDocument();
+    unmount();
+
+    renderContent(service);
+    await act(async () => {});
+
+    expect(screen.getByRole('heading', { name: 'Loaded title' })).toBeInTheDocument();
+    expect(load).toHaveBeenCalledTimes(2);
+    consoleError.mockRestore();
+  });
+
+  it('renders a single tab as the body, with no tab bar', () => {
+    renderContent(createService({ tabs: ['test.first'] }));
+
+    expect(screen.getByText('First tab content')).toBeInTheDocument();
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument();
+  });
+
+  it('renders two or more tabs with a tab bar', () => {
+    renderContent(createService({ tabs: ['test.first', 'test.second'] }));
+
+    expect(screen.getByRole('tab', { name: 'First' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByText('First tab content')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Second' }));
+
+    expect(screen.getByText('Second tab content')).toBeInTheDocument();
+  });
+
+  it('gives the zones, tab bar, and tabs test subjects that do not depend on the host', async () => {
+    const load = async (): Promise<ConversationTemplateDetailsFlyoutModule> => ({
+      useDetailsFlyout: () => ({
+        header: { title: 'Loaded title' },
+        footer: { primary: { label: 'Act', onClick: jest.fn() } },
+      }),
+    });
+
+    renderContent(createService({ tabs: ['test.first', 'test.second'], detailsFlyout: { load } }));
+    await act(async () => {});
+
+    expect(screen.getByTestId('agentBuilderConversationDetailsFlyoutHeader')).toBeInTheDocument();
+    expect(screen.getByTestId('agentBuilderConversationDetailsFlyoutBody')).toBeInTheDocument();
+    expect(screen.getByTestId('agentBuilderConversationDetailsFlyoutFooter')).toBeInTheDocument();
+    expect(screen.getByTestId('agentBuilderConversationDetailsFlyoutTabs')).toHaveAttribute(
+      'aria-label',
+      'Summary tabs'
+    );
+    expect(
+      screen.getByTestId('agentBuilderConversationDetailsFlyoutTab-test.second')
+    ).toHaveAttribute('role', 'tab');
+  });
+
+  it('titles the flyout "Summary" for a conversation with no template', () => {
+    renderContent(createService({}), createConversation({ template_id: undefined }));
+
+    expect(screen.getByRole('heading', { name: 'Summary' })).toBeInTheDocument();
+    expect(screen.getByText(ERROR_BODY)).toBeInTheDocument();
+  });
+
+  it('shows the error state for a template that registers no details flyout and no tabs', () => {
+    renderContent(createService({}));
+
+    expect(screen.getByText(ERROR_BODY)).toBeInTheDocument();
+  });
+
+  it('shows the tabs of a template that registers no details flyout', () => {
+    renderContent(createService({ tabs: ['test.first'] }));
+
+    expect(screen.getByText('First tab content')).toBeInTheDocument();
+    expect(screen.queryByText(ERROR_BODY)).not.toBeInTheDocument();
   });
 });
 

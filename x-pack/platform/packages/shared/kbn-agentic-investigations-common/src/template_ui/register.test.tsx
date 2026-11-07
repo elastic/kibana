@@ -11,6 +11,7 @@ import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import type { Conversation } from '@kbn/agent-builder-common';
 import type {
   AttachmentServiceStartContract,
+  ConversationTemplateDetailsFlyoutRenderProps,
   ConversationTemplateServiceStartContract,
   ConversationTemplateTabDefinition,
   ConversationTemplateUIContext,
@@ -90,17 +91,63 @@ const createFakeService = () => {
   return { contract, openFullscreenConversation };
 };
 
-/** Reads a registered flyout slot, failing the test rather than rendering `undefined`. */
-const getSlot = (
+/**
+ * Loads a template's details flyout module and renders its header and footer the way Agent Builder
+ * does: inside the module's `Provider`, with the footer actions as buttons.
+ */
+const renderDetailsFlyout = async (
   contract: ConversationTemplateServiceStartContract,
   templateId: string,
-  slot: 'header' | 'footer'
+  props: ConversationTemplateDetailsFlyoutRenderProps
 ) => {
-  const Slot = contract.getTemplateUIDefinition(templateId)?.detailsFlyout?.[slot];
-  if (!Slot) {
-    throw new Error(`Expected a registered ${slot} for template [${templateId}]`);
+  const load = contract.getTemplateUIDefinition(templateId)?.detailsFlyout?.load;
+  if (!load) {
+    throw new Error(`Expected a registered details flyout for template [${templateId}]`);
   }
-  return Slot;
+  const { useDetailsFlyout, Provider } = await load();
+  const Flyout = () => {
+    const { header, footer } = useDetailsFlyout(props);
+    return (
+      <>
+        <h3>{header.title}</h3>
+        {header.badges?.map(({ children, 'data-test-subj': dataTestSubj }, index) => (
+          <span key={index} data-test-subj={dataTestSubj}>
+            {children}
+          </span>
+        ))}
+        <div>{header.description}</div>
+        <div data-test-subj="headerBlocks">
+          {header.infoBlocks?.map(({ id, title, children }) => (
+            <div key={id}>
+              {title}
+              {children}
+            </div>
+          ))}
+        </div>
+        {[footer?.secondary, footer?.primary].map(
+          (action) =>
+            action && (
+              <button
+                key={action.label}
+                data-test-subj={action['data-test-subj']}
+                onClick={action.onClick}
+              >
+                {action.label}
+              </button>
+            )
+        )}
+      </>
+    );
+  };
+  return renderWithKibanaRenderContext(
+    Provider ? (
+      <Provider>
+        <Flyout />
+      </Provider>
+    ) : (
+      <Flyout />
+    )
+  );
 };
 
 const register = (
@@ -214,9 +261,7 @@ describe('registerAgenticInvestigationTemplateUI', () => {
   it("shows the conversation's severity in the header without a live state", async () => {
     const { contract } = createFakeService();
     register(contract);
-    const Header = getSlot(contract, 'investigation', 'header');
-
-    renderWithKibanaRenderContext(<Header conversation={conversation} isOpenedFromChat={false} />);
+    await renderDetailsFlyout(contract, 'investigation', { conversation, isOpenedFromChat: false });
 
     expect(await screen.findByTestId('investigationFlyoutSeverity')).toHaveTextContent('High');
   });
@@ -230,9 +275,7 @@ describe('registerAgenticInvestigationTemplateUI', () => {
         </span>
       ),
     });
-    const Header = getSlot(contract, 'investigation', 'header');
-
-    renderWithKibanaRenderContext(<Header conversation={conversation} isOpenedFromChat={false} />);
+    await renderDetailsFlyout(contract, 'investigation', { conversation, isOpenedFromChat: false });
 
     expect(await screen.findByText('live conversation-1 high')).toBeInTheDocument();
     expect(screen.queryByTestId('investigationFlyoutSeverity')).not.toBeInTheDocument();
@@ -241,15 +284,12 @@ describe('registerAgenticInvestigationTemplateUI', () => {
   it('renders the header title with renderTitle, passing it the conversation id and title', async () => {
     const { contract } = createFakeService();
     register(contract, {
-      renderTitle: ({ conversationId, title }) => (
-        <span>
-          title {conversationId} {title}
-        </span>
-      ),
+      loadDetailsFlyoutContext: async () => ({
+        useTitle: ({ conversationId, title }) => `title ${conversationId} ${title}`,
+      }),
     });
-    const Header = getSlot(contract, 'investigation', 'header');
 
-    renderWithKibanaRenderContext(<Header conversation={conversation} isOpenedFromChat={false} />);
+    await renderDetailsFlyout(contract, 'investigation', { conversation, isOpenedFromChat: false });
 
     expect(
       await screen.findByRole('heading', {
@@ -275,8 +315,8 @@ describe('registerAgenticInvestigationTemplateUI', () => {
     expect(definition?.name).toBe('Investigation');
     expect(definition?.icon).toBe('securitySignalDetected');
     expect(definition?.tabs).toEqual(getInvestigationTabIds('investigation'));
-    expect(definition?.detailsFlyout?.header).toBeDefined();
-    expect(definition?.detailsFlyout?.footer).toBeDefined();
+    // The header and footer are data, described by the module `load` resolves to.
+    expect(definition?.detailsFlyout?.load).toBeDefined();
   });
 
   it('adds a Copy link flyout action that calls onCopyLink', () => {
@@ -320,9 +360,7 @@ describe('registerAgenticInvestigationTemplateUI', () => {
   it("renders the status from the conversation's template metadata", async () => {
     const { contract } = createFakeService();
     register(contract);
-    const Header = getSlot(contract, 'investigation', 'header');
-
-    renderWithKibanaRenderContext(<Header conversation={conversation} isOpenedFromChat={false} />);
+    await renderDetailsFlyout(contract, 'investigation', { conversation, isOpenedFromChat: false });
 
     // Nothing is fetched, so the slot has no loading or error state to pass through first.
     expect(await screen.findByText('open')).toBeInTheDocument();
@@ -331,14 +369,12 @@ describe('registerAgenticInvestigationTemplateUI', () => {
   it('still renders the header for a conversation carrying no template metadata', async () => {
     const { contract } = createFakeService();
     register(contract);
-    const Header = getSlot(contract, 'investigation', 'header');
+    await renderDetailsFlyout(contract, 'investigation', {
+      conversation: { ...conversation, metadata: undefined },
+      isOpenedFromChat: false,
+    });
 
-    renderWithKibanaRenderContext(
-      <Header conversation={{ ...conversation, metadata: undefined }} isOpenedFromChat={false} />
-    );
-
-    // Agent Builder points the flyout's `aria-labelledby` at the header, so it must still render.
-    expect(await screen.findByTestId('investigationHeaderBlocks')).toBeInTheDocument();
+    expect(await screen.findByTestId('headerBlocks')).toHaveTextContent('Status');
     // No assignees → nothing rendered in the assignees tile (no "Unassigned" placeholder).
     expect(screen.queryByText('Unassigned')).not.toBeInTheDocument();
   });
@@ -346,9 +382,7 @@ describe('registerAgenticInvestigationTemplateUI', () => {
   it('opens the conversation full screen from the footer slot', async () => {
     const { contract, openFullscreenConversation } = createFakeService();
     register(contract);
-    const Footer = getSlot(contract, 'investigation', 'footer');
-
-    renderWithKibanaRenderContext(<Footer conversation={conversation} isOpenedFromChat={false} />);
+    await renderDetailsFlyout(contract, 'investigation', { conversation, isOpenedFromChat: false });
 
     fireEvent.click(await screen.findByTestId('investigationFlyoutOpenChat'));
 
@@ -364,13 +398,11 @@ describe('registerAgenticInvestigationTemplateUI', () => {
 
   it('hides the footer slot Open in chat when the flyout was opened from within chat', async () => {
     const { contract } = createFakeService();
-    // The escalation button loads on the same lazy chunk as Open in chat; wiring one in gives a
-    // reliable element to await, so the assertion below cannot pass merely because the chunk
-    // has not resolved yet (the Suspense fallback is `null`).
+    // The escalation action renders whenever a modal renderer is wired in, which gives a reliable
+    // element to await before asserting that Open in chat is absent.
     register(contract, { renderEscalationModal: jest.fn(() => <div>Escalation modal</div>) });
-    const Footer = getSlot(contract, 'investigation', 'footer');
 
-    renderWithKibanaRenderContext(<Footer conversation={conversation} isOpenedFromChat />);
+    await renderDetailsFlyout(contract, 'investigation', { conversation, isOpenedFromChat: true });
 
     await screen.findByText(ACTIONS_TRANSLATIONS.buttons.openEscalation);
     expect(screen.queryByTestId('investigationFlyoutOpenChat')).not.toBeInTheDocument();
@@ -380,21 +412,17 @@ describe('registerAgenticInvestigationTemplateUI', () => {
     const { contract } = createFakeService();
     const renderAssignees: RenderAssignees = jest.fn(() => null);
     register(contract, { renderAssignees });
-    const Header = getSlot(contract, 'investigation', 'header');
     const refetchConversation = jest.fn();
 
-    renderWithKibanaRenderContext(
-      <Header
-        conversation={{
-          ...conversation,
-          metadata: { assignees: ['uid-1', 'uid-2'], status: 'open' },
-        }}
-        isOpenedFromChat={false}
-        refetchConversation={refetchConversation}
-      />
-    );
+    await renderDetailsFlyout(contract, 'investigation', {
+      conversation: {
+        ...conversation,
+        metadata: { assignees: ['uid-1', 'uid-2'], status: 'open' },
+      },
+      isOpenedFromChat: false,
+      refetchConversation,
+    });
 
-    // Wait for the lazy chunk to load and the slot to render.
     await waitFor(() => expect(renderAssignees).toHaveBeenCalled());
     expect(renderAssignees).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -410,18 +438,13 @@ describe('registerAgenticInvestigationTemplateUI', () => {
   it('falls back to read-only assignee display when renderAssignees is absent', async () => {
     const { contract } = createFakeService();
     register(contract);
-    const Header = getSlot(contract, 'investigation', 'header');
-
-    renderWithKibanaRenderContext(
-      <Header
-        conversation={{ ...conversation, metadata: { assignees: ['uid-1'] } }}
-        isOpenedFromChat={false}
-      />
-    );
+    await renderDetailsFlyout(contract, 'investigation', {
+      conversation: { ...conversation, metadata: { assignees: ['uid-1'] } },
+      isOpenedFromChat: false,
+    });
 
     // Without a picker the assignees block renders a read-only avatar, not "Unassigned".
-    // EuiAvatar is rendered for the uid — the block should not show "Unassigned".
-    expect(await screen.findByTestId('investigationHeaderBlocks')).toBeInTheDocument();
+    expect(await screen.findByTestId('headerBlocks')).toHaveTextContent('Assignees');
     expect(screen.queryByText('Unassigned')).not.toBeInTheDocument();
   });
 });
@@ -452,8 +475,7 @@ describe('registerEscalationTemplateUI', () => {
 
     const definition = contract.getTemplateUIDefinition('escalation');
     expect(definition?.tabs).toEqual(['escalation.overview']);
-    expect(definition?.detailsFlyout?.header).toBeDefined();
-    expect(definition?.detailsFlyout?.footer).toBeUndefined();
+    expect(definition?.detailsFlyout?.load).toBeDefined();
   });
 
   it('adds a Copy link flyout action that calls onCopyLink', () => {
@@ -492,17 +514,13 @@ describe('registerEscalationTemplateUI', () => {
       renderAssignees,
     });
 
-    const Header = contract.getTemplateUIDefinition('escalation')?.detailsFlyout?.header;
-    if (!Header) throw new Error('Expected header');
     const refetchConversation = jest.fn();
 
-    renderWithKibanaRenderContext(
-      <Header
-        conversation={escalationConversation}
-        isOpenedFromChat={false}
-        refetchConversation={refetchConversation}
-      />
-    );
+    await renderDetailsFlyout(contract, 'escalation', {
+      conversation: escalationConversation,
+      isOpenedFromChat: false,
+      refetchConversation,
+    });
 
     await waitFor(() => expect(renderAssignees).toHaveBeenCalled());
     expect(renderAssignees).toHaveBeenCalledWith(
@@ -527,15 +545,13 @@ describe('registerEscalationTemplateUI', () => {
       onCopyLink: () => true,
     });
 
-    const Header = contract.getTemplateUIDefinition('escalation')?.detailsFlyout?.header;
-    if (!Header) throw new Error('Expected header');
-
-    renderWithKibanaRenderContext(
-      <Header conversation={escalationConversation} isOpenedFromChat={false} />
-    );
+    await renderDetailsFlyout(contract, 'escalation', {
+      conversation: escalationConversation,
+      isOpenedFromChat: false,
+    });
 
     expect(await screen.findByText('open')).toBeInTheDocument();
-    expect(screen.getByTestId('escalationHeaderBlocks')).toBeInTheDocument();
+    expect(screen.getByTestId('headerBlocks')).toHaveTextContent('Status');
   });
 
   it('registers the escalation.overview tab', () => {

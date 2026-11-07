@@ -14,6 +14,7 @@ See the package README for the tab bar.
 - `titleIcon` — EUI icon type rendered after the title, in both the expanded and the compact layout. Without `titleTooltip`, it is decorative (`aria-hidden`).
 - `titleTooltip` — when set, the title icon becomes a focusable `EuiIconTip`. It uses `titleIcon` as its type, or `info` if `titleIcon` is not set.
 - `isLoading` — shows a loading spinner after the title and any title icon, in both the expanded and the compact layout. The spinner sits outside the `<h3>`, so it does not change the flyout's accessible name.
+- `loadingLabel` — the spinner's accessible name, saying what is loading (for example, "Syncing attachments"). Without it, the spinner has EUI's generic "Loading" name.
 - `description` — arbitrary `ReactNode` rendered below the title in subdued text. It is not wrapped in a `<p>`, so block content is valid.
 - `collapsed` — always renders the compact layout, regardless of scroll position. See [Starting collapsed](#starting-collapsed).
 - `children` — `Header.MetaBlock`, `Header.Badge`, and `Header.InfoBlock` parts. Anything else, such as elements, components, or bare text, is not rendered. The assembly library warns in development about unrecognized children.
@@ -57,6 +58,12 @@ Scrolling back to the top restores the full header with the same animation in re
 The mouse wheel scrolls the body from anywhere in the header. Scrolling over the header works, and the page behind the flyout never scrolls with it. Wheel events with a modifier key (Ctrl/Cmd, Alt, Shift) go to the browser, so zoom and horizontal scroll keep working.
 
 The behavior is always on and needs no configuration. It turns itself off when the body does not overflow by more than the collapse budget plus the 4px expansion threshold. The budget is the height of the collapsible content, the expanded title row, and the expanded spacer, so short flyouts are unaffected. A header with no secondary content still collapses, because the title row and spacer shrink on their own.
+
+### Open popovers keep the header expanded
+
+The header does not collapse while a control in the collapsible region has `aria-expanded="true"`, such as an info block value whose popover is open. The popover panel renders in a portal, outside the region, so collapsing would leave it floating over a hidden trigger that focus could not return to. EUI sets `aria-expanded` on a button-like `EuiPopover` trigger, so EUI popovers get this without extra work. A custom trigger needs to set `aria-expanded` itself. Once the popover closes, the next scroll collapses the header as usual. An expanded control does not stop an already collapsed header from expanding.
+
+The guard applies to scroll-driven collapse only. Setting `collapsed` to `true` while a popover in the region is open collapses the header regardless. The badge overflow popover closes with it. A popover you render in the region, such as one on an info block value, is not closed for you. Its panel stays visible over the now hidden trigger until you close it, so close your own popovers before forcing a collapse.
 
 ### Starting collapsed
 

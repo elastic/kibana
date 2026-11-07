@@ -86,6 +86,11 @@ export interface FlyoutHeaderProps {
    * become part of the flyout's accessible name.
    */
   isLoading?: boolean;
+  /**
+   * Accessible name of the `isLoading` spinner, saying what is loading. Without it, the spinner
+   * has EUI's generic "Loading" name.
+   */
+  loadingLabel?: string;
   /** Subdued text below the title. */
   description?: ReactNode;
   /**
@@ -376,3 +381,20 @@ export type FlyoutTemplateProps = Omit<EuiFlyoutProps, TemplateOwnedFlyoutProps>
     /** Called when the user clicks a tab. */
     onTabChange?: (id: string) => void;
   };
+
+/** The root props that drive the tab bar. Inside a frame, they belong to the declaration. */
+export type FlyoutTemplateTabRootProps = Pick<
+  FlyoutTemplateProps,
+  'tabs' | 'tabBarProps' | 'defaultSelectedTabId' | 'selectedTabId' | 'onTabChange'
+>;
+
+/**
+ * Props for `FlyoutTemplate.Frame`: the root props that configure the `EuiFlyout`. `children`
+ * renders `FlyoutTemplate` declarations, possibly behind components that suspend.
+ */
+export type FlyoutTemplateFrameProps = Omit<
+  FlyoutTemplateProps,
+  keyof FlyoutTemplateTabRootProps | 'children'
+> & {
+  children?: ReactNode;
+};

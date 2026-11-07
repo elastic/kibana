@@ -7,33 +7,17 @@
 
 import React from 'react';
 import type { Conversation } from '@kbn/agent-builder-common';
-import {
-  ConversationDetailsFlyoutHeader,
-  ConversationDetailsFlyoutFooter,
-  EscalationFlyoutHeader,
-  EscalationOverviewTab,
-  type ConversationDetailsFlyoutFooterProps,
-  OverviewTab,
-} from '../components/details';
+import { EscalationOverviewTab, OverviewTab } from '../components/details';
 import type { FlyoutGroupedAttachmentsRegistry } from '../components/grouped_attachments';
 import {
   conversationToInvestigation,
   conversationToEscalationHeader,
 } from './conversation_to_investigation';
-import type {
-  RenderAssignees,
-  RenderStatus,
-  RenderSeverity,
-  RenderLinkedInvestigations,
-  RenderOverview,
-  RenderLiveState,
-  RenderTitle,
-  RenderSyncIndicator,
-} from './types';
+import type { RenderLinkedInvestigations, RenderOverview } from './types';
 
 /**
- * The investigation flyout's slot contents, kept in one module so `register` can pull them in a
- * single lazy chunk instead of shipping them in each consuming plugin's page load bundle.
+ * The flyout tabs' contents, kept in one module so `register` can pull them in a single lazy chunk
+ * instead of shipping them in each consuming plugin's page load bundle.
  *
  * Every slot derives its investigation from the conversation Agent Builder passes in. The
  * derivation is synchronous, so no slot loads, fails, or renders a skeleton.
@@ -84,145 +68,6 @@ export const OverviewSlot = ({
       groupedAttachments={groupedAttachments}
       proposedActionsContent={proposedActionsContent}
       proposedActionsCount={proposedActionsCount}
-    />
-  );
-};
-
-export interface HeaderSlotProps extends InvestigationSlotProps {
-  renderAssignees?: RenderAssignees;
-  renderStatus?: RenderStatus;
-  renderSeverity?: RenderSeverity;
-  renderLiveState?: RenderLiveState;
-  renderTitle?: RenderTitle;
-}
-
-export const HeaderSlot = ({
-  conversation,
-  renderAssignees,
-  renderStatus,
-  renderSeverity,
-  renderLiveState,
-  renderTitle,
-  refetchConversation,
-}: HeaderSlotProps) => {
-  const investigation = conversationToInvestigation(conversation);
-  const assigneesNode = renderAssignees
-    ? renderAssignees({
-        conversationId: conversation.id,
-        templateId: 'investigation',
-        assigneeUids: investigation.assignees,
-        status: investigation.status,
-        refetchConversation,
-      })
-    : undefined;
-  const statusNode = renderStatus
-    ? renderStatus({
-        conversationId: conversation.id,
-        templateId: 'investigation',
-        status: investigation.status,
-        refetchConversation,
-      })
-    : undefined;
-  // Shown once the investigation has a severity: one that never got one (AlertZero's, today) has
-  // nothing to show or change.
-  const severityNode =
-    renderSeverity && investigation.severity
-      ? renderSeverity({
-          conversationId: conversation.id,
-          severity: investigation.severity,
-          refetchConversation,
-        })
-      : undefined;
-  return (
-    <ConversationDetailsFlyoutHeader
-      investigation={investigation}
-      assigneesNode={assigneesNode}
-      statusNode={statusNode}
-      severityNode={severityNode}
-      liveStateNode={renderLiveState?.({
-        conversationId: conversation.id,
-        severity: investigation.severity,
-      })}
-      titleNode={renderTitle?.({ conversationId: conversation.id, title: conversation.title })}
-    />
-  );
-};
-
-export interface FooterSlotProps extends InvestigationSlotProps {
-  isOpenedFromChat: boolean;
-  onOpenChat: () => void;
-  onOpenEscalation?: ConversationDetailsFlyoutFooterProps['onOpenEscalation'];
-  wrapEscalationButton?: ConversationDetailsFlyoutFooterProps['wrapEscalationButton'];
-  onCloseInvestigation?: ConversationDetailsFlyoutFooterProps['onCloseInvestigation'];
-}
-
-export const FooterSlot = ({
-  isOpenedFromChat,
-  conversation,
-  onOpenChat,
-  onOpenEscalation,
-  wrapEscalationButton,
-  onCloseInvestigation,
-}: FooterSlotProps) => (
-  <ConversationDetailsFlyoutFooter
-    investigation={conversationToInvestigation(conversation)}
-    isOpenedFromChat={isOpenedFromChat}
-    onOpenChat={onOpenChat}
-    onOpenEscalation={onOpenEscalation}
-    wrapEscalationButton={wrapEscalationButton}
-    onCloseInvestigation={onCloseInvestigation}
-  />
-);
-
-// ---------------------------------------------------------------------------
-// Escalation header slot
-// ---------------------------------------------------------------------------
-
-export interface EscalationHeaderSlotProps {
-  conversation: Conversation;
-  refetchConversation?: () => Promise<void>;
-  renderAssignees?: RenderAssignees;
-  renderStatus?: RenderStatus;
-  renderSyncIndicator?: RenderSyncIndicator;
-}
-
-export const EscalationHeaderSlot = ({
-  conversation,
-  renderAssignees,
-  renderStatus,
-  renderSyncIndicator,
-  refetchConversation,
-}: EscalationHeaderSlotProps) => {
-  const { status, assigneeUids } = conversationToEscalationHeader(conversation);
-
-  const assigneesNode = renderAssignees
-    ? renderAssignees({
-        conversationId: conversation.id,
-        templateId: 'escalation',
-        assigneeUids,
-        status,
-        refetchConversation,
-      })
-    : undefined;
-
-  const statusNode = renderStatus
-    ? renderStatus({
-        conversationId: conversation.id,
-        templateId: 'escalation',
-        status,
-        refetchConversation,
-      })
-    : undefined;
-
-  return (
-    <EscalationFlyoutHeader
-      title={conversation.title}
-      createdAt={conversation.created_at}
-      status={status}
-      assigneeUids={assigneeUids}
-      assigneesNode={assigneesNode}
-      statusNode={statusNode}
-      syncNode={renderSyncIndicator?.({ escalationId: conversation.id })}
     />
   );
 };
