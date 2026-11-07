@@ -137,6 +137,11 @@ on, so it must identify a bounded slice of behaviour, not a file.
   `setup/bind_*.ts` function that builds it. Do not call `forSubsystem` per
   log line, and do not log from the root service.
 - Never repeat the subsystem name in message text.
+- When a dependency's API requires a core `Logger` (`@kbn/data-streams`,
+  `@kbn/change-history`, Task Manager's `runInvalidate`), hand it a child of
+  the core logger named after the owning subsystem: `coreLogger.get('resources')`.
+  Its lines then share that subsystem's `log.logger`. Never invent a name
+  outside the union for a dependency.
 
 | Subsystem            | Covers                                                                                                                                            | Bound in                                                                                                          |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
@@ -154,7 +159,7 @@ on, so it must identify a bounded slice of behaviour, not a file.
 | `tasks`              | Background tasks other than the two engine tasks. Boot-time scheduling.                                                                           | `lib/tasks/`, `lib/usage/`, `setup/bind_on_start.ts`                                                              |
 | `savedObjects`       | Saved object type registration and model-version migrations.                                                                                      | `setup/bind_on_setup.ts`                                                                                          |
 | `agentBuilder`       | Agent Builder tools, skills and attachments.                                                                                                      | `setup/bind_agent_builder.ts`                                                                                     |
-| `events`             | Internal domain event bus, publishers, subscribers and workflow emission.                                                                         | `lib/events/`, `lib/services/workflow_service/`                                                                   |
+| `events`             | Internal domain event bus, publishers, subscribers, workflow emission and the rule changes history store the subscriber writes.                   | `lib/events/`, `lib/services/workflow_service/`, `setup/bind_clients.ts`                                          |
 | `telemetry`          | Event-based telemetry (EBT) reporting.                                                                                                            | `lib/services/ebt_service/ebt_service.ts`                                                                         |
 
 The tree is split along **failure-domain** boundaries, not directory
