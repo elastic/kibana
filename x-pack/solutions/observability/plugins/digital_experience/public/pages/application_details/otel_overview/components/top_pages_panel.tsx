@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
 import { toPagePath } from '../../../../../common/sessions';
 import type { TopPage } from '../../../../../common/types/usage';
-import { LOAD_TIME_LABEL, PAGE_LOADS_LABEL } from '../../../../labels';
+import { loadTimeLabel, PAGE_LOADS_LABEL } from '../../../../labels';
 import { formatDurationMs } from '../../../../utils/format_duration';
 import { metricColumnPreset } from '../../../../utils/column_presets';
 import { useFormatters } from '../../../../hooks/use_formatters';
@@ -34,6 +34,9 @@ const PAGE_LABEL = i18n.translate('xpack.digitalExperience.overview.topPages.pag
 const EMPTY_MESSAGE = i18n.translate('xpack.digitalExperience.overview.topPages.empty', {
   defaultMessage: 'No page loads in this time range.',
 });
+
+/** The pages' load time is the 75th percentile, whatever the Overview's percentile. */
+const TOP_PAGES_PERCENTILE = 75;
 
 /** The pages with the most page loads, with their share and load time. */
 export function TopPagesPanel({ pages, isLoading }: { pages: TopPage[]; isLoading: boolean }) {
@@ -57,7 +60,7 @@ export function TopPagesPanel({ pages, isLoading }: { pages: TopPage[]; isLoadin
     },
     {
       field: 'loadTimeP75Ms',
-      name: LOAD_TIME_LABEL,
+      name: loadTimeLabel(TOP_PAGES_PERCENTILE),
       ...metricColumnPreset<TopPage>(),
       render: (loadTimeP75Ms: number | null) => {
         return loadTimeP75Ms === null ? <EmptyCellValue /> : formatDurationMs(loadTimeP75Ms);

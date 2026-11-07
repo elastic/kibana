@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { termQuery } from '@kbn/es-query';
+import { partitionFilterValues } from '../../../common/filter_values';
 import type { FacetBucket } from '../../../common/sessions';
 import { SESSION_ATTRIBUTE_FIELDS } from '../../../common/session_attribute_fields';
 import {
@@ -70,8 +70,18 @@ export const filterRuntimeMappings = (): estypes.MappingRuntimeFields =>
     ])
   );
 
-const filterClause = (name: OverviewFilterName, filters: OverviewFilters) =>
-  filters[name] ? termQuery(filterFieldOf(name), filters[name]) : [];
+/** Keeps the documents with any included value of a filter and none of its excluded values. */
+const filterClause = (
+  name: OverviewFilterName,
+  filters: OverviewFilters
+): estypes.QueryDslQueryContainer[] => {
+  const { include, exclude } = partitionFilterValues(filters[name] ?? []);
+  const field = filterFieldOf(name);
+  return [
+    ...(include.length > 0 ? [{ terms: { [field]: include } }] : []),
+    ...(exclude.length > 0 ? [{ bool: { must_not: [{ terms: { [field]: exclude } }] } }] : []),
+  ];
+};
 
 /**
  * The selected filters that narrow every document of the Overview, except `exclude`'s own. The page
