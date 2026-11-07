@@ -6,7 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import type { SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { AuditedSandboxSession } from '../sandbox_audit';
 import type { CortexTelemetry } from '../telemetry';
 import { materializeCortex } from './materialize';
 import type { CortexPageStore } from './page_store';
@@ -52,7 +52,7 @@ describe('materializeCortex', () => {
     const session = {
       mkdirs: jest.fn().mockResolvedValue([true]),
       writeFiles: jest.fn().mockResolvedValue([]),
-    } as unknown as SandboxSession;
+    } as unknown as AuditedSandboxSession;
 
     const telemetry = createTelemetry();
     await materializeCortex({ session, store, telemetry, logger: loggerMock.create() });
@@ -119,7 +119,7 @@ describe('materializeCortex', () => {
     const session = {
       mkdirs: jest.fn().mockResolvedValue([true]),
       writeFiles: jest.fn().mockResolvedValue([]),
-    } as unknown as SandboxSession;
+    } as unknown as AuditedSandboxSession;
 
     const telemetry = createTelemetry();
     await materializeCortex({ session, store, telemetry, logger: loggerMock.create() });

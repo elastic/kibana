@@ -223,7 +223,9 @@ export class NightshiftInvestigationsPlugin
     // this, so nothing can reach the sandbox service while `nightshift.enabled` is off.
     const getGatedSandboxStart = createGatedSandboxStart({
       getSandboxStart: () => this.sandboxStart,
+      getAudit: () => this.security?.audit,
       isNightshiftEnabled: isNightshiftEnabledSync,
+      logger: this.logger.get('sandbox'),
     });
     const telemetry = setupNightshiftTelemetry({
       analytics: core.analytics,
@@ -389,14 +391,17 @@ export class NightshiftInvestigationsPlugin
                 security: this.securityStart,
               });
               if (access.status !== 'available') return undefined;
-              const spaceId = this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
               const redactor = await getRecorderOutputRedactor({
                 request,
                 allowedConnectorIds,
                 resolvedCredentials: new Map(),
               });
               return createRecorderWorkspace({
-                session: sandboxStart.getSessionForSpace(spaceId, conversationId),
+                // The request is the investigation's, so the audit events name its user or
+                // service account, and the space comes from it as for the investigator's tools.
+                session: sandboxStart.getSession(request, conversationId, {
+                  type: 'findings_recorder',
+                }),
                 redactor,
               });
             },

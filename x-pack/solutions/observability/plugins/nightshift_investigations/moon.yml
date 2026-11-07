@@ -81,6 +81,7 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/connector-specs'
   - '@kbn/inference-tracing'
+  - '@kbn/core-security-server'
 tags:
   - plugin
   - prod

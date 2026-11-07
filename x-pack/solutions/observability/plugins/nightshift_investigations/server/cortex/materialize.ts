@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { AuditedSandboxSession } from '../sandbox_audit';
 import {
   CORTEX_ENTITY_TYPE_BUCKETS,
   CORTEX_ENTITY_TYPES,
@@ -87,7 +87,7 @@ export const materializeCortex = async ({
   telemetry,
   logger,
 }: {
-  session: SandboxSession;
+  session: AuditedSandboxSession;
   store: CortexPageStore;
   telemetry: CortexTelemetry;
   logger: Logger;
