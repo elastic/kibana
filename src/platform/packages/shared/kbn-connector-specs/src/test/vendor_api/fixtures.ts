@@ -10,11 +10,22 @@
 import type { ResponseFixture } from '@kbn/connector-emulate';
 import { z } from '@kbn/zod/v4';
 
+const requestMatcherSchema = z
+  .object({
+    path: z.record(z.string(), z.string()).optional(),
+    query: z.record(z.string(), z.union([z.string(), z.array(z.string())])).optional(),
+    headers: z.record(z.string(), z.string()).optional(),
+    body: z.unknown().optional(),
+  })
+  .strict();
+
 const responseOverrideSchema = z
   .object({
     source: z.string().optional(),
     method: z.string(),
     path: z.string(),
+    /** Answers only the requests with these values; without it, every other request. */
+    when: requestMatcherSchema.optional(),
     status: z.number().int(),
     headers: z.record(z.string(), z.string()).optional(),
     body: z.unknown().optional(),
@@ -53,6 +64,9 @@ const actionFixtureSchema = z
 /** `vendor_api/fixtures.json`: per-action inputs, config, query operations and response overrides. */
 export const vendorApiFixturesSchema = z.record(z.string(), actionFixtureSchema);
 
+/** A list of response overrides on its own, as `node scripts/connector_emulate --fixtures` reads. */
+export const responseOverridesSchema = z.array(responseOverrideSchema);
+
 export type ActionFixture = z.infer<typeof actionFixtureSchema>;
 export type QueryOperation = z.infer<typeof queryOperationSchema>;
 export type ResponseOverride = z.infer<typeof responseOverrideSchema>;
@@ -61,7 +75,8 @@ export type VendorApiFixtures = z.infer<typeof vendorApiFixturesSchema>;
 export const toResponseFixtures = (
   responses: readonly ResponseOverride[] = []
 ): ResponseFixture[] =>
-  responses.map(({ source, method, path, status, headers, body }) => ({
+  responses.map(({ source, method, path, when, status, headers, body }) => ({
     operation: { method, path, ...(source === undefined ? {} : { source }) },
+    ...(when === undefined ? {} : { when }),
     response: { status, ...(headers === undefined ? {} : { headers }), body },
   }));
