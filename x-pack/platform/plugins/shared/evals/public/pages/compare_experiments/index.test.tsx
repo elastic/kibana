@@ -47,6 +47,13 @@ const buildResult = (overrides: Partial<ComparisonResult> = {}): ComparisonResul
   direction: 'maximize',
   metricType: 'continuous_bounded',
   hypothesisTest: { id: 'wilcoxon_signed_rank', method: 'exact', statistic: 10 },
+  usedTarget: 12,
+  usedBaseline: 12,
+  missingTarget: 0,
+  missingBaseline: 0,
+  stabilityTarget: 0,
+  stabilityBaseline: 0,
+  repetitionWarning: false,
   ...overrides,
 });
 

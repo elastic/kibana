@@ -8,7 +8,7 @@
 import chalk from 'chalk';
 import { table } from 'table';
 import { isImproved } from '@kbn/evals-common';
-import type { Direction, ComparisonResult } from '@kbn/evals-common';
+import type { Direction, ComparisonResult, RepetitionPolicy } from '@kbn/evals-common';
 import { formatDiscordantPairs, getTestLabel } from './test_label';
 
 const DEFAULT_SIGNIFICANCE_THRESHOLD = 0.05;
@@ -58,11 +58,13 @@ export function formatCompareReport({
   baselineExperimentId,
   results,
   significanceThreshold = DEFAULT_SIGNIFICANCE_THRESHOLD,
+  repetitionPolicy = 'mean',
 }: {
   targetExperimentId: string;
   baselineExperimentId: string;
   results: ComparisonResult[];
   significanceThreshold?: number;
+  repetitionPolicy?: RepetitionPolicy;
 }): {
   header: string[];
   summary: string;
@@ -103,7 +105,7 @@ export function formatCompareReport({
     const rows = rowsByDataset.get(result.datasetName) ?? [];
     rows.push([
       result.evaluatorName,
-      result.sampleSize.toString(),
+      `${result.sampleSize}${result.repetitionWarning ? '*' : ''}`,
       formatNumber(result.meanTarget),
       formatNumber(result.meanBaseline),
       formatDifference(delta, result.direction) + formatDiscordantPairs(result.hypothesisTest),
@@ -118,7 +120,15 @@ export function formatCompareReport({
     `Target: ${targetExperimentId}`,
     `Baseline: ${baselineExperimentId}`,
     `Significance threshold: p < ${significanceThreshold}`,
+    `Repetition policy: ${repetitionPolicy}`,
   ];
+  if (sortedResults.some((result) => result.repetitionWarning)) {
+    header.push(
+      chalk.yellow(
+        'Warning: in rows marked N*, some examples have a different number of valid repetitions in the two runs, or null scores.'
+      )
+    );
+  }
   const summary = `Significant differences: ${significantCount}/${sortedResults.length}`;
   const tableOutput = [...rowsByDataset.entries()]
     .map(([datasetName, rows]) => {
