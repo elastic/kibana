@@ -307,7 +307,8 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
     const valueLabel = useMemo(() => {
       return (
         <div>
-          {VALUE_LABEL}&nbsp;
+          {VALUE_LABEL}
+          {'\u00a0'}
           <EuiIconTip
             color="subdued"
             type="info"
