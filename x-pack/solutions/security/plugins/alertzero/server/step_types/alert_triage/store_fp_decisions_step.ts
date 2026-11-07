@@ -22,7 +22,12 @@ import {
   strictKeyTag,
   type FpDecisionKind,
 } from '../../alert_triage/fp_decisions';
-import { findKeyTagsWithVerdicts, loadAlertsByIds, statusCodeOf } from './ports';
+import {
+  findAlertIdsClosedAsOther,
+  findKeyTagsWithVerdicts,
+  loadAlertsByIds,
+  statusCodeOf,
+} from './ports';
 
 export interface StoreFpDecisionsStepDependencies {
   isContextEngineEnabled: (request: KibanaRequest) => Promise<boolean>;
@@ -74,8 +79,24 @@ export const getTriageStoreFpDecisionsStepDefinition = ({
         const kind: FpDecisionKind =
           input.outcome === 'approved' ? 'false_positive' : 'do_not_propose';
         const { alerts } = await loadAlertsByIds(contextManager, input.alert_ids);
+        const entries = alerts.map((doc) => ({ id: String(doc._id), doc }));
+        // The approval keeps earlier closures, so an alert an analyst closed as a true positive can
+        // be in the proposal. It is no evidence of a false positive, and its pattern is blocked.
+        const closedAsOther =
+          kind === 'false_positive'
+            ? new Set(
+                await findAlertIdsClosedAsOther(
+                  contextManager,
+                  entries.map(({ id }) => id)
+                )
+              )
+            : new Set<string>();
+        const conflictedKeys = groupByStrictKey({
+          alerts: entries.filter(({ id }) => closedAsOther.has(id)),
+          spaceId: input.space_id,
+        }).groups.map(({ hash }) => hash);
         const { groups, alertsWithoutStrictKey } = groupByStrictKey({
-          alerts: alerts.map((doc) => ({ id: String(doc._id), doc })),
+          alerts: entries.filter(({ id }) => !closedAsOther.has(id)),
           spaceId: input.space_id,
         });
         if (groups.length === 0) {
@@ -84,7 +105,7 @@ export const getTriageStoreFpDecisionsStepDefinition = ({
 
         // The consistency rule: only keys with enough alerts can become decisions, so only those
         // are looked up. A failed lookup throws, and then nothing is written.
-        const blocked = new Set<string>();
+        const blocked = new Set<string>(conflictedKeys);
         if (kind === 'false_positive') {
           const tagToHash = new Map(
             groups
