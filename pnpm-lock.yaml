@@ -3555,6 +3555,9 @@ importers:
       '@kbn/securitysolution-timeline-components':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/timeline-components
+      '@kbn/securitysolution-timeline-search-strategy':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/timeline-search-strategy
       '@kbn/securitysolution-utils':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-securitysolution-utils
@@ -9918,6 +9921,8 @@ importers:
   x-pack/solutions/security/packages/timeline-common: {}
 
   x-pack/solutions/security/packages/timeline-components: {}
+
+  x-pack/solutions/security/packages/timeline-search-strategy: {}
 
   x-pack/solutions/security/packages/upselling: {}
 

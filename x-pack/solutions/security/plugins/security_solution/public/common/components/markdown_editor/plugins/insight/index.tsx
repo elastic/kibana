@@ -38,7 +38,7 @@ import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { getFieldValue } from '@kbn/discover-utils';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import type { EventHit } from '@kbn/timelines-plugin/common/search_strategy';
+import type { EventHit } from '@kbn/securitysolution-timeline-search-strategy';
 import { FormProvider, useController, useForm } from 'react-hook-form';
 import { getTimelineFieldsDataFromHit } from '@kbn/timelines-plugin/common';
 import { PageScope } from '../../../../../data_view_manager/constants';

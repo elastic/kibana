@@ -26,12 +26,12 @@ import type {
   DeprecatedRowRenderer,
   Direction,
 } from '@kbn/securitysolution-timeline-common';
-import { EntityType } from '@kbn/timelines-plugin/common';
+import { EntityType } from '@kbn/securitysolution-timeline-search-strategy';
 import { isEmpty } from 'lodash';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import type { RunTimeMappings } from '@kbn/securitysolution-timeline-search-strategy';
 import type { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { InspectButton } from '../inspect';

@@ -11,7 +11,7 @@ export type {
   TimerangeInput,
   PaginationInputPaginated,
   TotalValue,
-} from '@kbn/timelines-plugin/common';
+} from '@kbn/securitysolution-timeline-search-strategy';
 export type { CursorType } from '@kbn/securitysolution-timeline-common';
 export { Direction } from '@kbn/securitysolution-timeline-common';
 

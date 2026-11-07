@@ -8,7 +8,7 @@
 import type {
   TimelineEventsAllOptionsInput,
   TimelineEqlRequestOptionsInput,
-} from '@kbn/timelines-plugin/common';
+} from '@kbn/securitysolution-timeline-search-strategy';
 import type { TimelineArgs } from '.';
 
 /*

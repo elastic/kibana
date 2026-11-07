@@ -13,7 +13,7 @@ import { EuiInMemoryTable, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
 import type { BrowserFields } from '@kbn/securitysolution-timeline-common';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { getCategory } from '@kbn/response-ops-alerts-fields-browser/helpers';
 import type { DataTableRecord } from '@kbn/discover-utils';

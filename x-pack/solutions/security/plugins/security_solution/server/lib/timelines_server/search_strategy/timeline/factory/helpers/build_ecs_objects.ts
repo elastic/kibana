@@ -7,7 +7,7 @@
 
 import { has, merge } from 'lodash/fp';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import type { EventHit } from '@kbn/timelines-plugin/common/search_strategy';
+import type { EventHit } from '@kbn/securitysolution-timeline-search-strategy';
 import { ECS_METADATA_FIELDS, TIMELINE_EVENTS_FIELDS } from './constants';
 import { getTimestamp } from './get_timestamp';
 import { buildObjectRecursive } from './build_object_recursive';

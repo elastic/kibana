@@ -10,9 +10,11 @@ import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
 import { shimHitsTotal } from '@kbn/data-plugin/server';
 import type { EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
 import { EQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
-import type { TimelineEqlRequestOptions } from '@kbn/timelines-plugin/common/api/search_strategy';
-import type { EqlSearchResponse } from '@kbn/timelines-plugin/common/search_strategy';
-import type { TimelineEqlResponse } from '@kbn/timelines-plugin/common/search_strategy/timeline/events/eql';
+import type {
+  TimelineEqlRequestOptions,
+  EqlSearchResponse,
+  TimelineEqlResponse,
+} from '@kbn/securitysolution-timeline-search-strategy';
 import { buildEqlDsl, parseEqlResponse } from './helpers';
 import { parseOptions } from './parse_options';
 

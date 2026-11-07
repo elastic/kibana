@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import type { BeatFields } from '@kbn/timelines-plugin/common/search_strategy/index_fields';
+import type { BeatFields } from '@kbn/securitysolution-timeline-search-strategy';
 
 export const fieldsBeat: BeatFields;

@@ -1209,6 +1209,7 @@
     "@kbn/securitysolution-t-grid": "workspace:*",
     "@kbn/securitysolution-timeline-common": "workspace:*",
     "@kbn/securitysolution-timeline-components": "workspace:*",
+    "@kbn/securitysolution-timeline-search-strategy": "workspace:*",
     "@kbn/securitysolution-utils": "workspace:*",
     "@kbn/server-http-tools": "workspace:*",
     "@kbn/server-route-repository": "workspace:*",
