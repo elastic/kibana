@@ -204945,6 +204945,10 @@ components:
             parameters:
               type: object
               properties:
+                force:
+                  description: Read files that the OS locks from a snapshot. Windows only.
+                  type: boolean
+                  x-state: Added in 9.7.0
                 path:
                   description: The full file path to retrieve from the endpoint.
                   maxLength: 4096
