@@ -71,6 +71,7 @@ import type { ISearchInterceptor } from './search_interceptor';
 import { SearchInterceptor } from './search_interceptor';
 import { SearchMethodsService } from '../../common/search';
 import { getEsQueryConfig } from '../../common/es_query';
+import { getEsPreference } from '../../common/search/search_source';
 import type { ISearchSessionEBTManager, ISessionsClient, ISessionService } from './session';
 import {
   SessionsClient,
@@ -237,7 +238,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     this.searchMethodsService = new SearchMethodsService(
       this.searchInterceptor.search.bind(this.searchInterceptor) as ISearchGeneric,
-      { getEsQueryConfig: async () => getEsQueryConfig(uiSettings) }
+      {
+        getEsQueryConfig: async () => getEsQueryConfig(uiSettings),
+        getRequestPreference: () => getEsPreference(uiSettings.get.bind(uiSettings)),
+      }
     );
 
     const loadingCount$ = new BehaviorSubject(0);

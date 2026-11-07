@@ -22,6 +22,7 @@ import type {
   IDslSearchOptions,
   IDslSearchResult,
   IDslPaginatedSearchParams,
+  IDslUntrackedPaginatedSearchParams,
   IDslPaginatedSearchOptions,
   IDslPaginatedSearchResult,
   IDslPagination,
@@ -61,6 +62,11 @@ export interface SearchMethodsServiceDependencies {
    * Resolves the query config from advanced settings, used to apply a search context
    */
   getEsQueryConfig: () => Promise<EsQueryConfig>;
+  /**
+   * Resolves the `preference` request param from the `courier:setRequestPreference` and
+   * `courier:customRequestPreference` advanced settings. Omit where those settings don't apply.
+   */
+  getRequestPreference?: () => string | undefined;
 }
 
 /**
@@ -139,54 +145,48 @@ export class SearchMethodsService implements ISearchMethods {
     const request = this.buildDslRequest(dslParams, options);
     const searchOptions = this.mapDslOptions(options, params);
 
-    const requestResponder = options?.inspector?.adapter.start(options.inspector.title, {
-      description: options.inspector.description,
-    });
+    const response = await this.executeDslSearch(
+      request,
+      searchOptions,
+      params,
+      options?.inspector
+    );
 
-    requestResponder?.json((request.params?.body ?? {}) as Record<string, unknown>);
-    if (options?.inspector?.getRequestStats) {
-      requestResponder?.stats(options.inspector.getRequestStats());
-    } else if (params.index && typeof params.index === 'object') {
-      requestResponder?.stats(getDslRequestInspectorStats(params.index));
-    }
-
-    try {
-      const response = await this.executeSearch(request, searchOptions);
-
-      requestResponder?.stats(getDslResponseInspectorStats(response.rawResponse));
-      requestResponder?.ok({
-        json: { rawResponse: response.rawResponse },
-        requestParams: response.requestParams,
-      });
-
-      return {
-        rawResponse: response.rawResponse,
-      };
-    } catch (error) {
-      requestResponder?.error({
-        json: 'attributes' in error ? error.attributes : { message: error.message },
-      });
-      throw error;
-    }
+    return {
+      rawResponse: response.rawResponse,
+    };
   }
 
   /**
-   * Execute a paginated DSL (Elasticsearch Query DSL) search with pagination helpers
+   * Execute a paginated DSL (Elasticsearch Query DSL) search with pagination helpers.
+   * Total hits are counted by default; pass `trackTotalHits: false` to skip counting, in which
+   * case `hasNextPage` must be given the total by the caller.
    */
-  async dslPaginated(
+  dslPaginated(
     params: IDslPaginatedSearchParams,
     options?: IDslPaginatedSearchOptions
-  ): Promise<IDslPaginatedSearchResult> {
+  ): Promise<IDslPaginatedSearchResult>;
+  dslPaginated(
+    params: IDslUntrackedPaginatedSearchParams,
+    options?: IDslPaginatedSearchOptions
+  ): Promise<IDslPaginatedSearchResult<true>>;
+  async dslPaginated(
+    params: IDslPaginatedSearchParams | IDslUntrackedPaginatedSearchParams,
+    options?: IDslPaginatedSearchOptions
+  ): Promise<IDslPaginatedSearchResult<boolean>> {
     // Apply the context once so every page reuses the merged query
     const contextParams = params.kibanaQueryContext
       ? await this.applyDslKibanaQueryContext(params)
       : params;
-    // trackTotalHits is required for pagination to determine if there are more pages
-    const paginatedParams = { ...contextParams, trackTotalHits: true as const };
+    const paginatedParams = { ...contextParams, trackTotalHits: params.trackTotalHits ?? true };
     const request = this.buildDslRequest(paginatedParams, options);
-    const response = await this.executeSearch(
+    const response = await this.executeDslSearch(
       request,
-      this.mapDslOptions(options, paginatedParams)
+      this.mapDslOptions(options, paginatedParams),
+      paginatedParams,
+      options?.inspector,
+      // The first page is the request users inspect, so it shows the session it belongs to
+      options?.sessionId
     );
 
     return {
@@ -286,6 +286,48 @@ export class SearchMethodsService implements ISearchMethods {
   // DSL Search Helpers
   // ============================================================================
 
+  /**
+   * Execute a DSL request, logging it and its response to the inspector when one is provided
+   */
+  private async executeDslSearch(
+    request: IEsSearchRequest,
+    searchOptions: ISearchOptions,
+    params: IDslSearchParams,
+    inspector: IDslSearchOptions['inspector'],
+    searchSessionId?: string
+  ): Promise<any> {
+    const requestResponder = inspector?.adapter.start(inspector.title, {
+      description: inspector.description,
+      searchSessionId,
+    });
+
+    // Stats go first: the Inspector opens on the first tab to become available, which should be
+    // Statistics (as it is for search source requests), not Request.
+    if (inspector?.getRequestStats) {
+      requestResponder?.stats(inspector.getRequestStats());
+    } else if (params.index && typeof params.index === 'object') {
+      requestResponder?.stats(getDslRequestInspectorStats(params.index));
+    }
+    requestResponder?.json((request.params?.body ?? {}) as Record<string, unknown>);
+
+    try {
+      const response = await this.executeSearch(request, searchOptions);
+
+      requestResponder?.stats(getDslResponseInspectorStats(response.rawResponse));
+      requestResponder?.ok({
+        json: { rawResponse: response.rawResponse },
+        requestParams: response.requestParams,
+      });
+
+      return response;
+    } catch (error) {
+      requestResponder?.error({
+        json: 'attributes' in error ? error.attributes : { message: error.message },
+      });
+      throw error;
+    }
+  }
+
   private async applyDslKibanaQueryContext(params: IDslSearchParams): Promise<IDslSearchParams> {
     const {
       timeRange,
@@ -343,9 +385,17 @@ export class SearchMethodsService implements ISearchMethods {
       track_total_hits: trackTotalHits,
     };
 
+    const { index: paramsIndex } = params;
+    const isDataView = typeof paramsIndex !== 'string';
+    const preference = this.deps.getRequestPreference?.();
+
     return {
       params: {
-        index: typeof params.index === 'string' ? params.index : params.index.getIndexPattern(),
+        index: isDataView ? paramsIndex.getIndexPattern() : paramsIndex,
+        // hidden indices for data views that
+        // allow them, and the shard preference (which keeps search_after pages on the same copies)
+        ...(isDataView && paramsIndex.getAllowHidden() && { expand_wildcards: 'all' }),
+        ...(preference && { preference }),
         body,
       },
     };
@@ -363,42 +413,72 @@ export class SearchMethodsService implements ISearchMethods {
   private buildDslPagination(
     rawResponse: any,
     originalParams: IDslSearchParams,
-    options?: IDslSearchOptions
-  ): IDslPagination {
+    options?: IDslSearchOptions,
+    previouslyLoadedCount = 0
+  ): IDslPagination<boolean> {
     const self = this;
     const lastHit = rawResponse.hits?.hits?.at?.(-1);
-    const currentCount = rawResponse.hits?.hits?.length ?? 0;
-    const totalValue =
+    // Total hits is for the whole query, so it is compared against everything loaded so far
+    const currentCount = previouslyLoadedCount + (rawResponse.hits?.hits?.length ?? 0);
+    const responseTotal: number | undefined =
       typeof rawResponse.hits?.total === 'number'
         ? rawResponse.hits.total
-        : rawResponse.hits?.total?.value ?? 0;
-    const hasNextPage = Boolean(lastHit?.sort) && totalValue > currentCount;
+        : rawResponse.hits?.total?.value;
+
+    // Without a total from the caller or the response there is no way to know, so assume none
+    const hasNextPage = (totalHits: number | undefined = responseTotal): boolean =>
+      Boolean(lastHit?.sort) && totalHits !== undefined && totalHits > currentCount;
 
     return {
       hasNextPage,
-      nextPage: async (): Promise<IDslPaginatedSearchResult | null> => {
-        if (!hasNextPage || !lastHit?.sort) {
+      nextPage: async (pageOptions): Promise<IDslPaginatedSearchResult<boolean> | null> => {
+        // When the response has no total the caller owns the decision to page, using `hasNextPage`
+        if (!lastHit?.sort || (responseTotal !== undefined && !hasNextPage())) {
           return null;
         }
+
+        const { abortSignal, executionContext, inspectorTitle, inspectorDescription } =
+          pageOptions ?? {};
+
+        // Later pages have their own lifecycle: they are not part of the first page's search
+        // session or abort signal, and are only logged when the caller asks for it
+        const paginationOptions: IDslSearchOptions = {
+          ...options,
+          abortSignal,
+          executionContext: executionContext ?? options?.executionContext,
+          sessionId: undefined,
+        };
+        const paginationInspector = options?.inspector && {
+          ...options.inspector,
+          title: inspectorTitle ?? options.inspector.title,
+          description: inspectorDescription ?? options.inspector.description,
+        };
 
         // Build next search with search_after
         const nextParams: IDslSearchParams = {
           ...originalParams,
         };
 
-        const request = self.buildDslRequest(nextParams, options);
+        const request = self.buildDslRequest(nextParams, paginationOptions);
         if (request.params && typeof request.params !== 'string') {
           (request.params as any).body.search_after = lastHit.sort;
         }
 
-        const nextResponse = await self.executeSearch(
+        const nextResponse = await self.executeDslSearch(
           request,
-          self.mapDslOptions(options, nextParams)
+          self.mapDslOptions(paginationOptions, nextParams),
+          nextParams,
+          paginationInspector
         );
 
         return {
           rawResponse: nextResponse.rawResponse,
-          pagination: self.buildDslPagination(nextResponse.rawResponse, nextParams, options),
+          pagination: self.buildDslPagination(
+            nextResponse.rawResponse,
+            nextParams,
+            paginationOptions,
+            currentCount
+          ),
         };
       },
     };

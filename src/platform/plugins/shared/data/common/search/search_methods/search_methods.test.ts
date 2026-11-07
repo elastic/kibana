@@ -317,6 +317,70 @@ describe('SearchMethodsService', () => {
       });
     });
 
+    it('nextPage() reports no further page once every hit has been loaded', async () => {
+      const page = (ids: string[]) => ({
+        hits: {
+          hits: ids.map((id) => ({ _id: id, sort: [Number(id)] })),
+          total: { value: 5 },
+        },
+      });
+      mockSearch
+        .mockReturnValueOnce(createMockResponse(page(['1', '2'])))
+        .mockReturnValueOnce(createMockResponse(page(['3', '4'])))
+        .mockReturnValueOnce(createMockResponse(page(['5'])));
+
+      const first = await service.dslPaginated({
+        index: 'logs-*',
+        sort: [{ timestamp: 'desc' }],
+      });
+      const second = await first.pagination.nextPage();
+      const third = await second?.pagination.nextPage();
+
+      expect(second?.pagination.hasNextPage()).toBe(true);
+      expect(third?.pagination.hasNextPage()).toBe(false);
+    });
+
+    it('sets expand_wildcards for data views that allow hidden indices', async () => {
+      mockSearch.mockReturnValue(createMockResponse({ hits: { hits: [], total: 0 } }));
+
+      const hiddenDataView = {
+        getIndexPattern: () => 'logs-*',
+        getAllowHidden: () => true,
+      } as AbstractDataView;
+
+      await service.dsl({ index: hiddenDataView });
+
+      expect(mockSearch.mock.calls[0][0].params).toEqual(
+        expect.objectContaining({ index: 'logs-*', expand_wildcards: 'all' })
+      );
+    });
+
+    it('sends the request preference and keeps it for later pages', async () => {
+      const getRequestPreference = jest.fn().mockReturnValue('my-preference');
+      service = new SearchMethodsService(mockSearch, { getEsQueryConfig, getRequestPreference });
+      mockSearch.mockReturnValue(
+        createMockResponse({
+          hits: { hits: [{ sort: [1] }], total: { value: 2, relation: 'eq' } },
+        })
+      );
+
+      const result = await service.dslPaginated({ index: 'logs-*', size: 1, sort: [{ a: 'asc' }] });
+      await result.pagination.nextPage();
+
+      expect(mockSearch).toHaveBeenCalledTimes(2);
+      mockSearch.mock.calls.forEach(([request]) => {
+        expect(request.params.preference).toBe('my-preference');
+      });
+    });
+
+    it('omits preference when none is configured', async () => {
+      mockSearch.mockReturnValue(createMockResponse({ hits: { hits: [], total: 0 } }));
+
+      await service.dsl({ index: 'logs-*' });
+
+      expect(mockSearch.mock.calls[0][0].params).not.toHaveProperty('preference');
+    });
+
     describe('search context', () => {
       const phraseFilter: Filter = {
         meta: { alias: null, disabled: false, negate: false },
@@ -497,6 +561,7 @@ describe('SearchMethodsService', () => {
       const mockDataView = {
         id: '1',
         getIndexPattern: () => 'logs-*',
+        getAllowHidden: () => false,
       } as AbstractDataView;
 
       await service.dsl({
@@ -830,7 +895,7 @@ describe('SearchMethodsService', () => {
         sort: [{ timestamp: 'desc' }],
       });
 
-      expect(result.pagination.hasNextPage).toBe(true);
+      expect(result.pagination.hasNextPage()).toBe(true);
     });
 
     it('hasNextPage is false when no more results', async () => {
@@ -851,7 +916,52 @@ describe('SearchMethodsService', () => {
         sort: [{ timestamp: 'desc' }],
       });
 
-      expect(result.pagination.hasNextPage).toBe(false);
+      expect(result.pagination.hasNextPage()).toBe(false);
+    });
+
+    describe('with trackTotalHits: false', () => {
+      const untrackedParams = {
+        index: 'logs-*',
+        query: { match_all: {} },
+        sort: [{ timestamp: 'desc' as const }],
+        trackTotalHits: false as const,
+      };
+      const twoHitsWithoutTotal = {
+        hits: {
+          hits: [
+            { _id: '1', _source: { message: 'test' }, sort: [1000] },
+            { _id: '2', _source: { message: 'test2' }, sort: [2000] },
+          ],
+        },
+      };
+
+      it('does not ask Elasticsearch to count total hits', async () => {
+        mockSearch.mockReturnValue(createMockResponse(twoHitsWithoutTotal));
+
+        await service.dslPaginated(untrackedParams);
+
+        expect(mockSearch.mock.calls[0][0].params.body.track_total_hits).toBe(false);
+      });
+
+      it('derives hasNextPage from the total the caller supplies', async () => {
+        mockSearch.mockReturnValue(createMockResponse(twoHitsWithoutTotal));
+
+        const { pagination } = await service.dslPaginated(untrackedParams);
+
+        expect(pagination.hasNextPage(100)).toBe(true);
+        expect(pagination.hasNextPage(2)).toBe(false);
+      });
+
+      it('compares the supplied total with everything loaded so far on later pages', async () => {
+        mockSearch.mockReturnValue(createMockResponse(twoHitsWithoutTotal));
+
+        const first = await service.dslPaginated(untrackedParams);
+        const second = await first.pagination.nextPage();
+
+        expect(mockSearch.mock.calls[1][0].params.body.track_total_hits).toBe(false);
+        expect(second?.pagination.hasNextPage(4)).toBe(false);
+        expect(second?.pagination.hasNextPage(5)).toBe(true);
+      });
     });
 
     it('hasNextPage is false when no sort values', async () => {
@@ -872,7 +982,7 @@ describe('SearchMethodsService', () => {
         sort: [{ '@timestamp': 'desc' }],
       });
 
-      expect(result.pagination.hasNextPage).toBe(false);
+      expect(result.pagination.hasNextPage()).toBe(false);
     });
 
     it('nextPage() uses search_after from last hit sort', async () => {
@@ -1138,6 +1248,190 @@ describe('SearchMethodsService', () => {
       const nextPage = await result.pagination.nextPage();
 
       expect(nextPage).toBeNull();
+    });
+
+    describe('nextPage() options', () => {
+      const paginatedParams = {
+        index: 'logs-*',
+        query: { match_all: {} },
+        sort: [{ timestamp: 'desc' as const }],
+      };
+
+      const mockTwoPages = () => {
+        const page = (ids: string[]) => ({
+          hits: {
+            hits: ids.map((id) => ({ _id: id, sort: [Number(id) * 1000] })),
+            total: { value: 100 },
+          },
+        });
+        mockSearch
+          .mockReturnValueOnce(createMockResponse(page(['1', '2'])))
+          .mockReturnValueOnce(createMockResponse(page(['3'])));
+      };
+
+      const executionContext = {
+        type: 'application' as const,
+        name: 'discover',
+        description: 'fetch documents',
+      };
+
+      it('does not carry over the session id or abort signal of the first page', async () => {
+        mockTwoPages();
+
+        const result = await service.dslPaginated(paginatedParams, {
+          sessionId: 'original-session-id',
+          abortSignal: new AbortController().signal,
+        });
+        await result.pagination.nextPage();
+
+        expect(mockSearch).toHaveBeenNthCalledWith(
+          2,
+          expect.anything(),
+          expect.objectContaining({ sessionId: undefined, abortSignal: undefined })
+        );
+      });
+
+      it('inherits the execution context of the first page by default', async () => {
+        mockTwoPages();
+
+        const result = await service.dslPaginated(paginatedParams, { executionContext });
+        await result.pagination.nextPage();
+
+        expect(mockSearch).toHaveBeenNthCalledWith(
+          2,
+          expect.anything(),
+          expect.objectContaining({ executionContext })
+        );
+      });
+
+      it('allows overriding the abort signal and execution context', async () => {
+        mockTwoPages();
+        const abortSignal = new AbortController().signal;
+        const overrideContext = { ...executionContext, description: 'fetch more documents' };
+
+        const result = await service.dslPaginated(paginatedParams, { executionContext });
+        await result.pagination.nextPage({ abortSignal, executionContext: overrideContext });
+
+        expect(mockSearch).toHaveBeenNthCalledWith(
+          2,
+          expect.anything(),
+          expect.objectContaining({ abortSignal, executionContext: overrideContext })
+        );
+      });
+    });
+
+    describe('inspector', () => {
+      const paginatedParams = {
+        index: 'logs-*',
+        query: { match_all: {} },
+        sort: [{ timestamp: 'desc' as const }],
+      };
+
+      const mockTwoPages = () => {
+        const page = (ids: string[]) => ({
+          hits: {
+            hits: ids.map((id) => ({ _id: id, sort: [Number(id) * 1000] })),
+            total: { value: 100 },
+          },
+        });
+        mockSearch
+          .mockReturnValueOnce(createMockResponse(page(['1', '2'])))
+          .mockReturnValueOnce(createMockResponse(page(['3'])));
+      };
+
+      it('logs the first page with the session id it belongs to', async () => {
+        mockTwoPages();
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.dslPaginated(paginatedParams, { inspector, sessionId: 'session-1' });
+
+        expect(inspector.adapter.start).toHaveBeenCalledTimes(1);
+        expect(inspector.adapter.start).toHaveBeenCalledWith('Test Request', {
+          description: 'Test description',
+          searchSessionId: 'session-1',
+        });
+        expect(requestResponder.json).toHaveBeenCalled();
+        expect(requestResponder.ok).toHaveBeenCalled();
+      });
+
+      it('logs request stats before the request body so the Inspector opens on Statistics', async () => {
+        mockTwoPages();
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+        const getRequestStats = jest.fn().mockReturnValue({});
+
+        await service.dslPaginated(paginatedParams, {
+          inspector: { ...inspector, getRequestStats },
+        });
+
+        const [statsOrder] = requestResponder.stats.mock.invocationCallOrder;
+        const [jsonOrder] = requestResponder.json.mock.invocationCallOrder;
+        expect(statsOrder).toBeLessThan(jsonOrder);
+      });
+
+      it('logs each page with the same adapter, without the session id after the first', async () => {
+        mockTwoPages();
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        const result = await service.dslPaginated(paginatedParams, {
+          inspector,
+          sessionId: 'session-1',
+        });
+        await result.pagination.nextPage();
+
+        expect(inspector.adapter.start).toHaveBeenCalledTimes(2);
+        expect(inspector.adapter.start).toHaveBeenNthCalledWith(2, 'Test Request', {
+          description: 'Test description',
+          searchSessionId: undefined,
+        });
+      });
+
+      it('allows overriding the inspector title and description per page', async () => {
+        mockTwoPages();
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        const result = await service.dslPaginated(paginatedParams, { inspector });
+        await result.pagination.nextPage({
+          inspectorTitle: 'Page 2 Request',
+          inspectorDescription: 'Fetching second page',
+        });
+
+        expect(inspector.adapter.start).toHaveBeenNthCalledWith(2, 'Page 2 Request', {
+          description: 'Fetching second page',
+          searchSessionId: undefined,
+        });
+      });
+
+      it('falls back to the original title and description for a page without overrides', async () => {
+        mockTwoPages();
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        const result = await service.dslPaginated(paginatedParams, { inspector });
+        await result.pagination.nextPage({ inspectorTitle: 'Only the title' });
+
+        expect(inspector.adapter.start).toHaveBeenNthCalledWith(2, 'Only the title', {
+          description: 'Test description',
+          searchSessionId: undefined,
+        });
+      });
+
+      it('logs an error when a page fails', async () => {
+        mockSearch.mockReturnValue(throwError(() => new Error('Search failed')));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await expect(service.dslPaginated(paginatedParams, { inspector })).rejects.toThrow(
+          'Search failed'
+        );
+
+        expect(requestResponder.error).toHaveBeenCalledWith({
+          json: { message: 'Search failed' },
+        });
+      });
     });
   });
 });
