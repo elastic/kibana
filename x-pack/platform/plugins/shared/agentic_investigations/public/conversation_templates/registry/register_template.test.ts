@@ -163,5 +163,32 @@ describe('registerTemplate', () => {
       await waitFor(() => expect(core.http.get).toHaveBeenCalled());
       expect(screen.queryByRole('button', { name: 'Open escalation' })).not.toBeInTheDocument();
     });
+
+    it('hides the button in the Nightshift app even when the user may escalate', async () => {
+      const { BehaviorSubject } = await import('rxjs');
+      const core = coreMock.createStart();
+      core.http.get.mockResolvedValue({
+        investigations: { read: true, manage: true },
+        escalations: { read: true, manage: true },
+      });
+      // Real Application uses a BehaviorSubject; the default mock Subject would miss a pre-mount next.
+      Object.assign(core.application, {
+        currentAppId$: new BehaviorSubject<string | undefined>('nightshift').asObservable(),
+      });
+      const { investigation } = register({ core });
+      render(
+        React.createElement(
+          React.Fragment,
+          null,
+          investigation.wrapEscalationButton(
+            React.createElement('button', { type: 'button' }, 'Open escalation')
+          )
+        )
+      );
+
+      await waitFor(() =>
+        expect(screen.queryByRole('button', { name: 'Open escalation' })).not.toBeInTheDocument()
+      );
+    });
   });
 });
