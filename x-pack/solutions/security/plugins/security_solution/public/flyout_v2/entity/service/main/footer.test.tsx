@@ -7,41 +7,55 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { TestProviders } from '../../../common/mock';
-import { ServicePanelFooter } from './footer';
-import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
-import { ADD_TO_CASE_TEST_ID } from '../../../../common/cases/attachments/entity/test_ids';
+import { TestProviders } from '../../../../common/mock';
+import { Footer } from './footer';
+import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import { ADD_TO_CASE_TEST_ID } from '../../../../../common/cases/attachments/entity/test_ids';
 
 jest.mock('@kbn/entity-store/public', () => ({
   useEntityStoreEuidApi: jest.fn(() => null),
 }));
 
 const mockUseIsExperimentalFeatureEnabled = jest.fn();
-jest.mock('../../../common/hooks/use_experimental_features', () => ({
+const mockUseIsInSecurityApp = jest.fn(() => true);
+jest.mock('../../../../common/hooks/is_in_security_app', () => ({
+  useIsInSecurityApp: () => mockUseIsInSecurityApp(),
+}));
+
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: () => mockUseIsExperimentalFeatureEnabled(),
 }));
 
 const mockUseKibana = jest.fn();
-jest.mock('../../../common/lib/kibana', () => ({
+jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: () => mockUseKibana(),
 }));
 
 // Render additionalItems inline so tests can assert on them without opening the popover.
-jest.mock('../shared/components/take_action', () => ({
+jest.mock('../../../../flyout/entity_details/shared/components/take_action', () => ({
   TakeAction: ({
     additionalItems,
+    isDisabled,
   }: {
     additionalItems?: (close: () => void) => React.ReactElement[];
-  }) => <div data-test-subj="mockTakeAction">{additionalItems?.(() => {}) ?? []}</div>,
-}));
-
-jest.mock('../../../entity_analytics/components/ai_assistant_button/ai_assistant_button', () => ({
-  AiAssistantButton: ({ entityName }: { entityName: string }) => (
-    <div data-test-subj="mockAiAssistantButton">{entityName}</div>
+    isDisabled?: boolean;
+  }) => (
+    <div data-test-subj="mockTakeAction" data-disabled={String(!!isDisabled)}>
+      {additionalItems?.(() => {}) ?? []}
+    </div>
   ),
 }));
 
-jest.mock('../../../cases/attachments/entity/components/add_to_case', () => ({
+jest.mock(
+  '../../../../entity_analytics/components/ai_assistant_button/ai_assistant_button',
+  () => ({
+    AiAssistantButton: ({ entityName }: { entityName: string }) => (
+      <div data-test-subj="mockAiAssistantButton">{entityName}</div>
+    ),
+  })
+);
+
+jest.mock('../../../../cases/attachments/entity/components/add_to_case', () => ({
   AddToCase: ({ 'data-test-subj': testSubj }: { 'data-test-subj': string }) => (
     <div data-test-subj={testSubj} />
   ),
@@ -73,16 +87,12 @@ const renderFooter = (
 
   return render(
     <TestProviders>
-      <ServicePanelFooter
-        serviceName={serviceName}
-        identityFields={identityFields}
-        entity={entity}
-      />
+      <Footer serviceName={serviceName} identityFields={identityFields} entity={entity} />
     </TestProviders>
   );
 };
 
-describe('ServicePanelFooter – entity attachment actions', () => {
+describe('Footer – entity attachment actions', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('renders the Add to case action when all conditions are met', () => {
@@ -116,7 +126,7 @@ describe('ServicePanelFooter – entity attachment actions', () => {
   });
 });
 
-describe('ServicePanelFooter – AiAssistantButton entity name', () => {
+describe('Footer – AiAssistantButton entity name', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('passes the raw serviceName prop, not a value derived from identityFields', () => {
@@ -132,5 +142,23 @@ describe('ServicePanelFooter – AiAssistantButton entity name', () => {
     );
 
     expect(screen.getByTestId('mockAiAssistantButton')).toHaveTextContent('service-alice');
+  });
+});
+
+describe('Footer – TakeAction availability', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('enables TakeAction inside the Security app', () => {
+    mockUseIsInSecurityApp.mockReturnValue(true);
+    renderFooter(true, true, ENTITY_STORE_RECORD);
+
+    expect(screen.getByTestId('mockTakeAction')).toHaveAttribute('data-disabled', 'false');
+  });
+
+  it('disables TakeAction outside the Security app', () => {
+    mockUseIsInSecurityApp.mockReturnValue(false);
+    renderFooter(true, true, ENTITY_STORE_RECORD);
+
+    expect(screen.getByTestId('mockTakeAction')).toHaveAttribute('data-disabled', 'true');
   });
 });
