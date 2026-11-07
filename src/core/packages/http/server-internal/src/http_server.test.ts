@@ -2476,3 +2476,16 @@ describe('space extraction in onRequest', () => {
     });
   }
 });
+
+test('logs when reloaded config is invalid, instead of silently stopping TLS reloads', async () => {
+  const sslConfig$ = new BehaviorSubject(configWithSSL);
+  await server.setup({ config$: sslConfig$ });
+
+  // An error terminates the subscription. Without the handler it does so silently, and TLS is
+  // never hot-reloaded again for the rest of the process lifetime.
+  sslConfig$.error(new Error('invalid config'));
+
+  expect(loggingSystemMock.collect(loggingService).error.flat().join(' ')).toContain(
+    'TLS configuration will no longer be reloaded'
+  );
+});

@@ -301,9 +301,8 @@ export class HttpServer {
     // only hot-reloading TLS config - don't need to subscribe if TLS is initially disabled,
     // given we can't hot-switch from/to enabled/disabled.
     if (config.ssl.enabled) {
-      const configSubscription = config$
-        .pipe(pairwise())
-        .subscribe(([{ ssl: prevSslConfig }, { ssl: newSslConfig }]) => {
+      const configSubscription = config$.pipe(pairwise()).subscribe({
+        next: ([{ ssl: prevSslConfig }, { ssl: newSslConfig }]) => {
           if (prevSslConfig.enabled !== newSslConfig.enabled) {
             this.log.warn(
               'Incompatible TLS config change detected - TLS cannot be toggled without a full server reboot.'
@@ -317,7 +316,15 @@ export class HttpServer {
             this.log.info('TLS configuration change detected - reloading TLS configuration.');
             setTlsConfig(this.server!, newSslConfig);
           }
-        });
+        },
+        // Without this the error terminates the subscription silently, and TLS stops hot-reloading
+        // for the rest of the process lifetime.
+        error: (error) => {
+          this.log.error(
+            `Reloaded configuration is invalid, so TLS configuration will no longer be reloaded: ${error.message}`
+          );
+        },
+      });
       this.subscriptions.push(configSubscription);
     }
 
