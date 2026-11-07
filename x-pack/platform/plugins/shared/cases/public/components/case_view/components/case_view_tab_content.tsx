@@ -6,12 +6,12 @@
  */
 
 import type { FC } from 'react';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import type { CaseUI } from '../../../../common';
-import { useUrlParams } from '../../../common/navigation';
+import { useCaseViewNavigation, useUrlParams } from '../../../common/navigation';
 import { ATTACHMENT_TAB_ALIASES } from '../use_case_attachment_tabs';
 import { CaseViewTabs } from '../case_view_tabs';
 import { CaseViewActivity } from './activity/case_view_activity';
@@ -55,8 +55,12 @@ const CaseViewTabContentInner: FC<CaseViewTabContentProps> = ({
   const { urlParams } = useUrlParams();
   const { tasksAuthorized } = useCasesFeatures();
   const rawTabId = urlParams?.tabId ?? CASE_VIEW_PAGE_TABS.ACTIVITY;
+  const { agenticEnabled } = useCasesConfig();
+  const extensionTabs = agenticEnabled ? caseViewSectionRegistry.getVisible('tab', caseData) : [];
+  const activeExtensionTab = extensionTabs.find(({ tabId }) => tabId === rawTabId);
 
   const activeTabId: CASE_VIEW_PAGE_TABS =
+    activeExtensionTab != null ||
     rawTabId === CASE_VIEW_PAGE_TABS.ACTIVITY ||
     rawTabId === CASE_VIEW_PAGE_TABS.SIMILAR_CASES ||
     (rawTabId === CASE_VIEW_PAGE_TABS.TASKS && tasksAuthorized) ||
@@ -65,9 +69,15 @@ const CaseViewTabContentInner: FC<CaseViewTabContentProps> = ({
       : CASE_VIEW_PAGE_TABS.ACTIVITY;
 
   const { isSidebarOpen } = useSidebar();
-  const { agenticEnabled } = useCasesConfig();
   const { permissions } = useCasesContext();
   const refreshCase = useRefreshCaseViewPage();
+  const { navigateToCaseView } = useCaseViewNavigation();
+  const openTab = useCallback(
+    // Registered tabs bring their own ids; see `CaseViewTabSection.tabId`.
+    (tabId: string) =>
+      navigateToCaseView({ detailName: caseData.id, tabId: tabId as CASE_VIEW_PAGE_TABS }),
+    [navigateToCaseView, caseData.id]
+  );
   const aboveTabsSections = agenticEnabled
     ? caseViewSectionRegistry.getVisible('aboveTabs', caseData)
     : [];
@@ -81,7 +91,7 @@ const CaseViewTabContentInner: FC<CaseViewTabContentProps> = ({
     <SavedObjectInAppUrlsProvider caseData={caseWithFilteredAttachments}>
       {aboveTabsSections.map((section) => (
         <div key={section.id} data-test-subj={`case-view-above-tabs-${section.id}`}>
-          {section.render({ caseData, canUpdate: permissions.update, refreshCase })}
+          {section.render({ caseData, canUpdate: permissions.update, refreshCase, openTab })}
           <EuiSpacer size="m" />
         </div>
       ))}
@@ -113,6 +123,16 @@ const CaseViewTabContentInner: FC<CaseViewTabContentProps> = ({
             <CaseViewSimilarCases caseData={caseWithFilteredAttachments} />
           )}
           {activeTabId === CASE_VIEW_PAGE_TABS.TASKS && <CaseViewTasks caseId={caseData.id} />}
+          {activeExtensionTab != null && (
+            <div data-test-subj={`case-view-tab-section-${activeExtensionTab.id}`}>
+              {activeExtensionTab.render({
+                caseData,
+                canUpdate: permissions.update,
+                refreshCase,
+                openTab,
+              })}
+            </div>
+          )}
         </EuiFlexItem>
         {/* Hidden rather than unmounted when collapsed, so pending unconfirmed field edits
             survive a toggle the same way they already survive collapsing a single accordion. */}

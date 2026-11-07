@@ -211,6 +211,28 @@ export const RELATED = {
   columnStatus: i18n.translate('xpack.agenticInvestigations.caseSection.related.column.status', {
     defaultMessage: 'Status',
   }),
+  columnSeverity: i18n.translate(
+    'xpack.agenticInvestigations.caseSection.related.column.severity',
+    { defaultMessage: 'Severity' }
+  ),
+  columnActions: i18n.translate(
+    'xpack.agenticInvestigations.caseSection.related.column.actions',
+    { defaultMessage: 'Actions' }
+  ),
+  severity: {
+    low: i18n.translate('xpack.agenticInvestigations.caseSection.related.severity.low', {
+      defaultMessage: 'Low',
+    }),
+    medium: i18n.translate('xpack.agenticInvestigations.caseSection.related.severity.medium', {
+      defaultMessage: 'Medium',
+    }),
+    high: i18n.translate('xpack.agenticInvestigations.caseSection.related.severity.high', {
+      defaultMessage: 'High',
+    }),
+    critical: i18n.translate('xpack.agenticInvestigations.caseSection.related.severity.critical', {
+      defaultMessage: 'Critical',
+    }),
+  } as Record<string, string>,
   columnVerdict: i18n.translate(
     'xpack.agenticInvestigations.caseSection.related.column.aiVerdict',
     { defaultMessage: 'AI verdict' }
@@ -499,6 +521,110 @@ export const DECISIONS = {
   removed: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.removedEvent', {
     defaultMessage: 'removed a decision',
   }),
+  noticeWaiting: (count: number) =>
+    i18n.translate('xpack.agenticInvestigations.caseSection.decisions.noticeWaiting', {
+      values: { count },
+      defaultMessage: '{count, plural, one {# decision} other {# decisions}} waiting',
+    }),
+  pendingToggle: (count: number) =>
+    i18n.translate('xpack.agenticInvestigations.caseSection.decisions.pendingToggle', {
+      values: { count },
+      defaultMessage: 'Pending ({count})',
+    }),
+  decidedToggle: (count: number) =>
+    i18n.translate('xpack.agenticInvestigations.caseSection.decisions.decidedToggle', {
+      values: { count },
+      defaultMessage: 'Decided ({count})',
+    }),
+  viewDecided: (count: number) =>
+    i18n.translate('xpack.agenticInvestigations.caseSection.decisions.viewDecided', {
+      values: { count },
+      defaultMessage: 'View {count} decided',
+    }),
+  reviewDecisions: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.reviewDecisions', {
+    defaultMessage: 'Review decisions',
+  }),
+  toggleLegend: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.toggleLegend', {
+    defaultMessage: 'Show pending or decided decisions',
+  }),
+  searchPlaceholder: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.searchPlaceholder', {
+    defaultMessage: 'Search decisions',
+  }),
+  allInvestigations: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.allInvestigations', {
+    defaultMessage: 'All investigations',
+  }),
+  investigationFilter: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.investigationFilter', {
+    defaultMessage: 'Investigation',
+  }),
+  columnDecision: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.columnDecision', {
+    defaultMessage: 'Decision',
+  }),
+  columnInvestigation: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.columnInvestigation', {
+    defaultMessage: 'Investigation',
+  }),
+  columnCategory: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.columnCategory', {
+    defaultMessage: 'Category',
+  }),
+  columnProposed: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.columnProposed', {
+    defaultMessage: 'Proposed',
+  }),
+  columnActions: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.columnActions', {
+    defaultMessage: 'Actions',
+  }),
+  columnOutcome: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.columnOutcome', {
+    defaultMessage: 'Outcome',
+  }),
+  columnDecidedBy: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.columnDecidedBy', {
+    defaultMessage: 'Decided by',
+  }),
+  columnDecided: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.columnDecided', {
+    defaultMessage: 'Decided',
+  }),
+  nothingWaiting: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.nothingWaiting', {
+    defaultMessage: 'Nothing is waiting on a decision.',
+  }),
+  noDecisions: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.noDecisions', {
+    defaultMessage: 'No decisions yet.',
+  }),
+  noMatches: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.noMatches', {
+    defaultMessage: 'No decisions match your search.',
+  }),
+  retry: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.retry', {
+    defaultMessage: 'Retry',
+  }),
+  investigationUnavailable: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.investigationUnavailable', {
+    defaultMessage: 'Investigation not available',
+  }),
+  outcomeApproved: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.outcomeApproved', {
+    defaultMessage: 'Approved',
+  }),
+  outcomeDismissed: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.outcomeDismissed', {
+    defaultMessage: 'Dismissed',
+  }),
+  outcomeExpired: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.outcomeExpired', {
+    defaultMessage: 'Expired',
+  }),
+  outcomeDeciding: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.outcomeDeciding', {
+    defaultMessage: 'Deciding',
+  }),
+  outcomeFailed: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.outcomeFailed', {
+    defaultMessage: 'Failed',
+  }),
+  proposedByName: (name: string) =>
+    i18n.translate('xpack.agenticInvestigations.caseSection.decisions.proposedByName', {
+      values: { name },
+      defaultMessage: 'by {name}',
+    }),
+  showComment: (title: string) =>
+    i18n.translate('xpack.agenticInvestigations.caseSection.decisions.showComment', {
+      values: { title },
+      defaultMessage: 'Show the details of {title}',
+    }),
+  hideComment: (title: string) =>
+    i18n.translate('xpack.agenticInvestigations.caseSection.decisions.hideComment', {
+      values: { title },
+      defaultMessage: 'Hide the details of {title}',
+    }),
 };
 
 export const EVIDENCE = {

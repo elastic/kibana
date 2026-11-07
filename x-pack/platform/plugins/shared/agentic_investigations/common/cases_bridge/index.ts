@@ -165,9 +165,34 @@ export interface CaseDecision {
   decided_by?: CaseDecisionPerson;
 }
 
+export const CASE_DECISIONS_MAX_PER_PAGE = 100;
+
+export const caseDecisionsQuerySchema = lazySchema(() =>
+  z.object({
+    status: z.enum(['pending', 'decided']).default('pending'),
+    page: z.coerce.number().int().min(1).max(10_000).default(1),
+    per_page: z.coerce.number().int().min(1).max(CASE_DECISIONS_MAX_PER_PAGE).default(20),
+    search: z.string().trim().max(256).optional(),
+    investigation_id: z.string().max(1024).optional(),
+  })
+);
+export interface CaseDecisionsQuery {
+  status?: 'pending' | 'decided';
+  page?: number;
+  per_page?: number;
+  search?: string;
+  investigation_id?: string;
+}
+
 export interface CaseDecisionsResponse {
+  /** One page of the decisions matching `status`, `search`, and `investigation_id`. */
   decisions: CaseDecision[];
+  /** All decisions matching the query, across pages. */
+  total: number;
+  /** Decisions on the case still waiting on someone, regardless of the query. */
   pending: number;
+  /** Decisions on the case already decided or expired, regardless of the query. */
+  decided: number;
   /** The caller can approve and dismiss (proposals manage and Cases update). */
   can_decide: boolean;
 }

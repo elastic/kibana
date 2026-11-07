@@ -14,8 +14,9 @@ import type { CaseUI } from '../../../common/ui/types';
  * - `related`: at the top of the Related tab, above the similar cases.
  * - `closeModal`: in the close modal, for side effects of closing (one case at a time).
  * - `aboveTabs`: between the header and the tabs, only for something on the case that needs action.
+ * - `tab`: a tab of its own, after Cases' tabs.
  */
-export type CaseViewSectionPosition = 'sidebar' | 'related' | 'closeModal' | 'aboveTabs';
+export type CaseViewSectionPosition = 'sidebar' | 'related' | 'closeModal' | 'aboveTabs' | 'tab';
 
 /** Why something is related to a case. Each Related section computes the reasons it can. */
 export type RelatedByReason =
@@ -66,6 +67,8 @@ export interface CaseViewSectionProps {
   canUpdate: boolean;
   /** Reloads the case, for example after a section added an attachment to it. */
   refreshCase: () => void;
+  /** Switches the case view to a tab, Cases' own or a registered `tab` section's `tabId`. */
+  openTab?: (tabId: string) => void;
 }
 
 export interface CaseViewCloseModalSectionProps extends CaseViewSectionProps {
@@ -93,7 +96,20 @@ export type CaseViewCloseModalSection = CaseViewSectionBase & {
   render: (props: CaseViewCloseModalSectionProps) => ReactNode;
 };
 
-export type CaseViewSection = CaseViewPanelSection | CaseViewCloseModalSection;
+export type CaseViewTabSection = CaseViewSectionBase & {
+  position: 'tab';
+  /** The tab's `tabId` in the URL. Must not collide with Cases' own tab ids. */
+  tabId: string;
+  name: string;
+  /** The count in the tab's badge. No badge when it returns 0 or undefined. */
+  getBadgeCount?: (caseData: CaseUI) => number | undefined;
+  render: (props: CaseViewSectionProps) => ReactNode;
+};
+
+export type CaseViewSection =
+  | CaseViewPanelSection
+  | CaseViewCloseModalSection
+  | CaseViewTabSection;
 
 /**
  * Lets another plugin add a section to the case view without Cases knowing what it shows. The
@@ -114,6 +130,7 @@ export class CaseViewSectionRegistry {
     caseData: CaseUI
   ): CaseViewPanelSection[];
   getVisible(position: 'closeModal', caseData: CaseUI): CaseViewCloseModalSection[];
+  getVisible(position: 'tab', caseData: CaseUI): CaseViewTabSection[];
   getVisible(position: CaseViewSectionPosition, caseData: CaseUI): CaseViewSection[] {
     return [...this.sections.values()].filter(
       (section) => section.position === position && (section.isVisible?.(caseData) ?? true)

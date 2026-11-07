@@ -668,7 +668,7 @@ const AddToExistingMode: React.FC<{
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={onSwitchMode} iconType="plusInCircle">
+            <EuiButton onClick={onSwitchMode} iconType="plusCircle">
               {ADD_TO_CASE.openNewCase}
             </EuiButton>
           </EuiFlexItem>

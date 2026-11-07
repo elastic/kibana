@@ -127,17 +127,26 @@ export const RelatedInvestigationsSection: React.FC<CaseViewSectionProps> = ({
   const columns: Array<EuiBasicTableColumn<Investigation>> = [
     {
       name: RELATED.columnInvestigation,
-      width: '40%',
       render: (investigation: Investigation) => (
-        <div>
-          <EuiLink
-            onClick={() => openInvestigation(investigation.id)}
-            data-test-subj="cases-bridge-related-investigation-title"
-          >
-            {investigation.title || RELATED.untitled}
-          </EuiLink>
+        // The cell content is a flex row: without a zero min-width this block grows to its text
+        // and the truncated summary runs under the next columns instead of ending in an ellipsis.
+        <div css={{ minWidth: 0, width: '100%' }}>
+          <div className="eui-textTruncate">
+            <EuiLink
+              onClick={() => openInvestigation(investigation.id)}
+              title={investigation.title || RELATED.untitled}
+              data-test-subj="cases-bridge-related-investigation-title"
+            >
+              {investigation.title || RELATED.untitled}
+            </EuiLink>
+          </div>
           {investigation.metadata.summary ? (
-            <EuiText size="xs" color="subdued" className="eui-textTruncate">
+            <EuiText
+              size="xs"
+              color="subdued"
+              className="eui-textTruncate"
+              title={investigation.metadata.summary}
+            >
               {investigation.metadata.summary}
             </EuiText>
           ) : null}
@@ -146,31 +155,41 @@ export const RelatedInvestigationsSection: React.FC<CaseViewSectionProps> = ({
     },
     {
       name: RELATED.columnStatus,
+      width: '7em',
       render: (investigation: Investigation) => (
-        <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color={investigation.metadata.status === 'closed' ? 'default' : 'primary'}>
-              {investigation.metadata.status === 'closed'
-                ? RELATED.statusClosed
-                : RELATED.statusOpen}
-            </EuiBadge>
-          </EuiFlexItem>
-          {investigation.metadata.severity ? (
-            <EuiFlexItem grow={false}>
-              <EuiHealth color={SEVERITY_COLORS[investigation.metadata.severity] ?? 'subdued'}>
-                {investigation.metadata.severity}
-              </EuiHealth>
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
+        <EuiBadge color={investigation.metadata.status === 'closed' ? 'default' : 'primary'}>
+          {investigation.metadata.status === 'closed' ? RELATED.statusClosed : RELATED.statusOpen}
+        </EuiBadge>
       ),
     },
     {
+      name: RELATED.columnSeverity,
+      width: '7em',
+      render: (investigation: Investigation) =>
+        investigation.metadata.severity ? (
+          <EuiHealth
+            color={SEVERITY_COLORS[investigation.metadata.severity] ?? 'subdued'}
+            data-test-subj="cases-bridge-related-severity"
+          >
+            {RELATED.severity[investigation.metadata.severity] ?? investigation.metadata.severity}
+          </EuiHealth>
+        ) : (
+          <EuiText size="xs" color="subdued">
+            {RELATED.none}
+          </EuiText>
+        ),
+    },
+    {
       name: RELATED.columnVerdict,
-      width: '22%',
+      width: '20%',
       render: (investigation: Investigation) =>
         investigation.metadata.verdict ? (
-          <EuiText size="xs" className="eui-textTruncate" title={investigation.metadata.verdict}>
+          <EuiText
+            size="xs"
+            className="eui-textTruncate"
+            css={{ minWidth: 0, width: '100%' }}
+            title={investigation.metadata.verdict}
+          >
             {investigation.metadata.verdict}
           </EuiText>
         ) : (
@@ -181,6 +200,7 @@ export const RelatedInvestigationsSection: React.FC<CaseViewSectionProps> = ({
     },
     {
       name: RELATED.columnProposals,
+      width: '9.5em',
       render: (investigation: Investigation) => {
         const pending = pendingProposals(investigation);
         if (pending.length === 0) {
@@ -195,7 +215,7 @@ export const RelatedInvestigationsSection: React.FC<CaseViewSectionProps> = ({
           <EuiButtonEmpty
             size="xs"
             flush="left"
-            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+            iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
             aria-expanded={isExpanded}
             aria-label={
               isExpanded
@@ -214,6 +234,7 @@ export const RelatedInvestigationsSection: React.FC<CaseViewSectionProps> = ({
     },
     {
       name: RELATED.columnRelatedBy,
+      width: '8em',
       render: (investigation: Investigation) => (
         <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
           <EuiFlexItem grow={false}>
@@ -230,7 +251,9 @@ export const RelatedInvestigationsSection: React.FC<CaseViewSectionProps> = ({
       ),
     },
     {
+      name: RELATED.columnActions,
       align: 'right',
+      width: '6em',
       render: (investigation: Investigation) => (
         <EuiButtonEmpty
           size="xs"

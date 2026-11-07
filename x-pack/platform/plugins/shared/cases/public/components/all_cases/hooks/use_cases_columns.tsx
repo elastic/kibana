@@ -422,9 +422,14 @@ export const useCasesColumns = ({
     dict.source = {
       field: casesColumnsConfig.source.field,
       name: casesColumnsConfig.source.name,
-      width: '9em',
+      width: '10em',
       render: (source: CaseUI['source']) => (
-        <span data-test-subj={`case-table-column-source-${source ?? 'user'}`}>
+        // The table squeezes columns below their width when many are shown, and "AlertZero"
+        // then breaks mid-word.
+        <span
+          className="eui-textNoWrap"
+          data-test-subj={`case-table-column-source-${source ?? 'user'}`}
+        >
           {SOURCE_LABELS[source ?? 'user']}
         </span>
       ),

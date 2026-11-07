@@ -125,7 +125,7 @@ const StatusRowComponent: React.FC<StatusRowProps> = ({
       ) : (
         <EuiContextMenuItem
           key="disable"
-          icon="eyeClosed"
+          icon="eyeSlash"
           disabled={disableBlocker != null}
           toolTipContent={
             disableBlocker === 'default'

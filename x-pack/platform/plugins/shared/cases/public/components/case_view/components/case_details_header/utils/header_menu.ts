@@ -57,7 +57,7 @@ export const getMenu = ({
           {
             id: 'caseRoom',
             label: room.label,
-            iconType: 'discuss' as const,
+            iconType: 'comment' as const,
             run: () => room.onToggle(),
             testId: 'case-view-room-button',
             order: 50,

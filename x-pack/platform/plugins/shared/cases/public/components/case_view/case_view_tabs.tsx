@@ -46,6 +46,10 @@ interface Tab {
   badge?: ReactNode;
 }
 
+// Registered tabs bring their own ids. The URL carries any string, so the enum type is only
+// widened at this boundary.
+const asTabId = (tabId: string) => tabId as CASE_VIEW_PAGE_TABS;
+
 export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab }) => {
   const { navigateToCaseView } = useCaseViewNavigation();
   const totalAttachments = useCaseAttachmentsTotal({ caseData });
@@ -85,6 +89,8 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
     similarCasesData?.total != null || relatedSectionsCount + linkedCasesCount > 0
       ? (similarCasesData?.total ?? 0) + relatedSectionsCount + linkedCasesCount
       : undefined;
+
+  const extensionTabs = agenticEnabled ? caseViewSectionRegistry.getVisible('tab', caseData) : [];
 
   const tabs: Tab[] = useMemo(
     () => [
@@ -127,8 +133,25 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
             },
           ]
         : []),
+      ...extensionTabs.map((section) => {
+        const count = section.getBadgeCount?.(caseData);
+        return {
+          id: asTabId(section.tabId),
+          name: section.name,
+          badge: count ? (
+            <AttachmentsBadge
+              isActive={activeTab === section.tabId}
+              euiTheme={euiTheme}
+              count={count}
+              dataTestSubj={`case-view-tab-badge-${section.tabId}`}
+            />
+          ) : undefined,
+        };
+      }),
     ],
     [
+      extensionTabs,
+      caseData,
       activeTab,
       euiTheme,
       isAttachmentsTabActive,

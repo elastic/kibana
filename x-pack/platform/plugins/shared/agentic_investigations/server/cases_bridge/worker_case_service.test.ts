@@ -80,10 +80,24 @@ const setup = ({
     openCase: jest.fn().mockResolvedValue({ case_id: 'case-1' }),
     getLinkedInvestigationIds: jest.fn().mockResolvedValue(linked),
   };
+  const isAwaiting = (p: ReturnType<typeof proposal>) =>
+    p.status === 'pending' && !('decision' in p) && !('gateReleasedAt' in p);
   const proposalsService = {
     getLatestRevision: jest.fn(async (id: string) => ({ proposalId: id })),
     get: jest.fn(async (id: string) => proposals.find((p) => p.id === id)),
     releaseGate: jest.fn().mockResolvedValue({}),
+    // Stands in for the case-scoped query: filters by case and by waiting, then pages.
+    list: jest.fn(
+      async (query: { caseId: string; awaitingDecision: boolean; from: number; size: number }) => {
+        const matching = proposals.filter(
+          (p) => p.caseId === query.caseId && isAwaiting(p) === query.awaitingDecision
+        );
+        return {
+          proposals: matching.slice(query.from, query.from + query.size),
+          total: matching.length,
+        };
+      }
+    ),
   };
   const logger = loggingSystemMock.createLogger();
   const service = new WorkerCaseService({
@@ -238,15 +252,16 @@ describe('WorkerCaseService', () => {
   });
 
   describe('listDecisions', () => {
-    it('lists the case decisions and corrects a stale counter', async () => {
+    it('lists the decided page and corrects a stale counter', async () => {
       const { service, casesClient } = setup({
         proposals: [proposal({ status: 'succeeded', decision: 'approved' })],
       });
 
-      const result = await service.listDecisions(request, 'case-1');
+      const result = await service.listDecisions(request, 'case-1', { status: 'decided' });
 
-      expect(result.pending).toBe(0);
-      expect(result.can_decide).toBe(true);
+      expect(result).toEqual(
+        expect.objectContaining({ pending: 0, decided: 1, total: 1, can_decide: true })
+      );
       expect(result.decisions[0]).toEqual(
         expect.objectContaining({ proposal_id: 'p-1', decision: 'approved' })
       );
@@ -254,6 +269,45 @@ describe('WorkerCaseService', () => {
         caseId: 'case-1',
         count: 0,
       });
+    });
+
+    it('pages the waiting decisions with one query by case, past the old 100 cap', async () => {
+      const many = Array.from({ length: 250 }, (_, i) =>
+        proposal({ id: `p-${i}`, rootProposalId: `p-${i}`, title: `Isolate host ${i}` })
+      );
+      const { service, proposalsService } = setup({ proposals: many });
+
+      const result = await service.listDecisions(request, 'case-1', {
+        page: 3,
+        per_page: 100,
+        search: 'isolate',
+      });
+
+      expect(result.total).toBe(250);
+      expect(result.pending).toBe(250);
+      expect(result.decisions).toHaveLength(50);
+      expect(result.decisions[0].proposal_id).toBe('p-200');
+      expect(proposalsService.list).toHaveBeenCalledWith(
+        expect.objectContaining({
+          caseId: 'case-1',
+          awaitingDecision: true,
+          excludeSuperseded: true,
+          titleSearch: 'isolate',
+          order: 'priority',
+          from: 200,
+          size: 100,
+        }),
+        'default',
+        request
+      );
+    });
+
+    it('reads the case as the caller first, so a hidden case lists nothing', async () => {
+      const { service, casesClient, proposalsService } = setup();
+      casesClient.cases.get.mockRejectedValue(new Error('Not found'));
+
+      await expect(service.listDecisions(request, 'case-1')).rejects.toThrow('Not found');
+      expect(proposalsService.list).not.toHaveBeenCalled();
     });
   });
 });

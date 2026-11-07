@@ -12,6 +12,9 @@ import {
 } from '../../common/cases_bridge';
 import { useCanManageInvestigations } from '../investigations/hooks/use_can_manage_investigations';
 
+/** The Decisions tab's `tabId` on the case view. */
+export const DECISIONS_TAB_ID = 'decisions';
+
 /** The investigation ids a case links, from its attachments. */
 export const getLinkedInvestigationIds = (caseData: Pick<CaseUI, 'comments'>): string[] => {
   const ids = new Set<string>();
@@ -25,6 +28,28 @@ export const getLinkedInvestigationIds = (caseData: Pick<CaseUI, 'comments'>): s
     }
   }
   return [...ids];
+};
+
+/** The investigations a case links, with the title their attachment was saved with. */
+export const getLinkedInvestigations = (
+  caseData: Pick<CaseUI, 'comments'>
+): Array<{ id: string; title?: string }> => {
+  const byId = new Map<string, string | undefined>();
+  for (const comment of caseData.comments) {
+    const attachment = comment as {
+      type?: string;
+      attachmentId?: unknown;
+      metadata?: { title?: unknown } | null;
+    };
+    if (
+      attachment.type === INVESTIGATION_CASE_ATTACHMENT_TYPE &&
+      typeof attachment.attachmentId === 'string'
+    ) {
+      const title = attachment.metadata?.title;
+      byId.set(attachment.attachmentId, typeof title === 'string' ? title : undefined);
+    }
+  }
+  return [...byId].map(([id, title]) => ({ id, title }));
 };
 
 export const hasLinkedInvestigations = (caseData: Pick<CaseUI, 'comments'>): boolean =>

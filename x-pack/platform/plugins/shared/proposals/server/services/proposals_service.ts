@@ -1696,6 +1696,15 @@ export interface InProcessProposalFilters {
   categories?: string[];
   statuses?: ProposalStatus[];
   conversationIds?: string[];
+  /** Proposals whose decision is on this case. */
+  caseId?: string;
+  /** Proposals whose title starts with these words. */
+  titleSearch?: string;
+  /**
+   * `true`: pending, undecided, and with the gate not yet released (still waiting on someone).
+   * `false`: everything else. A released gate still reads `pending` until the workflow resumes.
+   */
+  awaitingDecision?: boolean;
 }
 
 /**
@@ -1734,6 +1743,21 @@ const toFilterClauses = (
   }
   if (filters.conversationIds) {
     filter.push({ terms: { conversationId: filters.conversationIds } });
+  }
+  if (filters.caseId) {
+    filter.push({ term: { caseId: filters.caseId } });
+  }
+  if (filters.titleSearch) {
+    filter.push({ match_phrase_prefix: { title: filters.titleSearch } });
+  }
+  if (filters.awaitingDecision !== undefined) {
+    const awaiting = {
+      bool: {
+        filter: [{ term: { status: 'pending' } }],
+        must_not: [{ exists: { field: 'decision' } }, { exists: { field: 'gateReleasedAt' } }],
+      },
+    };
+    filter.push(filters.awaitingDecision ? awaiting : { bool: { must_not: [awaiting] } });
   }
   if (filters.decidedWithinHours !== undefined) {
     filter.push({ range: { decidedAt: { gte: `now-${filters.decidedWithinHours}h` } } });

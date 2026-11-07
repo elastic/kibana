@@ -22,6 +22,20 @@ describe('CaseViewSectionRegistry', () => {
     expect(registry.getVisible('closeModal', caseData)).toEqual([]);
   });
 
+  it('returns registered tabs on their own position', () => {
+    const registry = new CaseViewSectionRegistry();
+    registry.register({ id: 'a', position: 'aboveTabs', render: () => 'a' });
+    registry.register({
+      id: 'b',
+      position: 'tab',
+      tabId: 'decisions',
+      name: 'Decisions',
+      render: () => 'b',
+    });
+
+    expect(registry.getVisible('tab', caseData).map(({ tabId }) => tabId)).toEqual(['decisions']);
+  });
+
   it('refuses a second section with the same id', () => {
     const registry = new CaseViewSectionRegistry();
     registry.register({ id: 'a', position: 'related', render: () => 'a' });

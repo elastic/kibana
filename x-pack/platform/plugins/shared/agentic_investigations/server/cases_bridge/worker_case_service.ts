@@ -18,7 +18,9 @@ import {
   IMPACT_CASE_ATTACHMENT_TYPE,
   PROPOSAL_CASE_ATTACHMENT_TYPE,
   parseAiVerdict,
+  caseDecisionsQuerySchema,
   type CaseDecision,
+  type CaseDecisionsQuery,
   type CaseDecisionsResponse,
   type CaseVisibility,
   type HypothesesCaseAttachmentData,
@@ -37,7 +39,6 @@ const INVESTIGATION_TEMPLATE_ID = 'investigation';
 /** Marks the cases a Worker opened, so what follows onto a case only ever reaches those. */
 export const WORKER_CASE_TAG = 'alertzero:worker';
 const ACTOR_NAME = 'Elastic AI Agent';
-const MAX_DECISIONS = 100;
 
 /** The investigation fields that follow onto its case. */
 const MIRRORED_FIELDS = ['verdict', 'summary', 'severity', 'status'] as const;
@@ -113,6 +114,34 @@ const statusOf = (proposal: Proposal): string => {
   if (proposal.decision === undefined && proposal.gateReleasedAt !== undefined) return 'deciding';
   return proposal.status;
 };
+
+const toCaseDecision = (proposal: Proposal): CaseDecision => ({
+  proposal_id: proposal.id,
+  title: proposal.title,
+  comment: proposal.comment,
+  ...(proposal.category ? { category: proposal.category } : {}),
+  investigation_id: proposal.conversationId,
+  status: statusOf(proposal),
+  ...(proposal.decision ? { decision: proposal.decision } : {}),
+  ...(proposal.createdAt ? { created_at: proposal.createdAt } : {}),
+  ...(proposal.createdBy
+    ? {
+        created_by: {
+          username: proposal.createdBy.username,
+          full_name: proposal.createdBy.fullName,
+        },
+      }
+    : {}),
+  ...(proposal.decidedAt ? { decided_at: proposal.decidedAt } : {}),
+  ...(proposal.decidedBy
+    ? {
+        decided_by: {
+          username: proposal.decidedBy.username,
+          full_name: proposal.decidedBy.fullName,
+        },
+      }
+    : {}),
+});
 
 /**
  * Next-up, behind `agenticInvestigations:openCasesForInvestigations` (off by default): the case a
@@ -384,7 +413,7 @@ export class WorkerCaseService {
         },
       ],
     } as Parameters<CasesClient['attachments']['bulkCreate']>[0]);
-    const { pending } = await this.readDecisions(request, casesClient, theCase.id);
+    const { pending } = await this.countDecisions(request, theCase.id);
     await casesClient.cases.setPendingDecisions({ caseId: theCase.id, count: pending });
   }
 
@@ -396,96 +425,93 @@ export class WorkerCaseService {
     return proposals;
   }
 
-  /** The proposal ids the case's decision attachments reference, in attachment order. */
-  private async getDecisionIds(casesClient: CasesClient, caseId: string): Promise<string[]> {
-    const found = await casesClient.attachments.find({
-      caseID: caseId,
-      findQueryParams: { type: PROPOSAL_CASE_ATTACHMENT_TYPE, perPage: MAX_DECISIONS },
-    });
-    const ids = new Set<string>();
-    for (const attachment of found.data) {
-      if ('attachmentId' in attachment && typeof attachment.attachmentId === 'string') {
-        ids.add(attachment.attachmentId);
-      }
-    }
-    return [...ids];
-  }
-
-  private async readDecisions(
+  /**
+   * One page of the case's decisions. Proposals carry the case they belong to, so the read is one
+   * query by case rather than a walk over the case's decision attachments.
+   */
+  private async searchDecisions(
     request: KibanaRequest,
-    casesClient: CasesClient,
-    caseId: string
-  ): Promise<{ decisions: CaseDecision[]; proposals: Map<string, Proposal>; pending: number }> {
-    const ids = await this.getDecisionIds(casesClient, caseId);
-    const service = this.requireProposals().getProposalsService();
-    const spaceId = this.deps.getSpaceId(request);
-    const proposals = new Map<string, Proposal>();
-    const decisions: CaseDecision[] = [];
-    for (const rootId of ids) {
-      try {
-        // The attachment names the first revision; the decision is on the live one.
-        const latest = await service.getLatestRevision(rootId, spaceId);
-        const proposal = await service.get(latest?.proposalId ?? rootId, spaceId, request);
-        // A proposal that names another case (or none) is not this case's decision.
-        if (proposal.caseId !== caseId) continue;
-        proposals.set(proposal.id, proposal);
-        decisions.push({
-          proposal_id: proposal.id,
-          title: proposal.title,
-          comment: proposal.comment,
-          ...(proposal.category ? { category: proposal.category } : {}),
-          investigation_id: proposal.conversationId,
-          status: statusOf(proposal),
-          ...(proposal.decision ? { decision: proposal.decision } : {}),
-          ...(proposal.createdAt ? { created_at: proposal.createdAt } : {}),
-          ...(proposal.createdBy
-            ? {
-                created_by: {
-                  username: proposal.createdBy.username,
-                  full_name: proposal.createdBy.fullName,
-                },
-              }
-            : {}),
-          ...(proposal.decidedAt ? { decided_at: proposal.decidedAt } : {}),
-          ...(proposal.decidedBy
-            ? {
-                decided_by: {
-                  username: proposal.decidedBy.username,
-                  full_name: proposal.decidedBy.fullName,
-                },
-              }
-            : {}),
-        });
-      } catch (error) {
-        this.deps.logger.debug(
-          `Case ${caseId}: decision ${rootId} unreadable: ${toMessage(error)}`
-        );
-      }
-    }
-    const pending = decisions.filter(({ status }) => status === 'pending').length;
-    return { decisions, proposals, pending };
+    caseId: string,
+    {
+      awaiting,
+      from,
+      size,
+      search,
+      investigationId,
+    }: { awaiting: boolean; from: number; size: number; search?: string; investigationId?: string }
+  ): Promise<{ proposals: Proposal[]; total: number }> {
+    const { proposals, total } = await this.requireProposals()
+      .getProposalsService()
+      .list(
+        {
+          caseId,
+          awaitingDecision: awaiting,
+          excludeSuperseded: true,
+          excludeExpired: false,
+          ...(search ? { titleSearch: search } : {}),
+          ...(investigationId ? { conversationId: investigationId } : {}),
+          // Waiting decisions in the queue's priority order; decided ones newest first.
+          order: awaiting ? 'priority' : 'newest',
+          from,
+          size,
+        },
+        this.deps.getSpaceId(request),
+        request
+      );
+    return { proposals, total };
   }
 
-  async listDecisions(request: KibanaRequest, caseId: string): Promise<CaseDecisionsResponse> {
+  private async countDecisions(
+    request: KibanaRequest,
+    caseId: string
+  ): Promise<{ pending: number; decided: number }> {
+    const [pending, decided] = await Promise.all([
+      this.searchDecisions(request, caseId, { awaiting: true, from: 0, size: 1 }),
+      this.searchDecisions(request, caseId, { awaiting: false, from: 0, size: 1 }),
+    ]);
+    return { pending: pending.total, decided: decided.total };
+  }
+
+  async listDecisions(
+    request: KibanaRequest,
+    caseId: string,
+    rawQuery: CaseDecisionsQuery = {}
+  ): Promise<CaseDecisionsResponse> {
+    const query = caseDecisionsQuerySchema.parse(rawQuery);
     const casesClient = await this.getCasesClient(request);
     // Read as the caller first: a restricted case a non-member asks for is not found.
     const theCase = await casesClient.cases.get({ id: caseId, includeComments: false });
-    const { decisions, pending } = await this.readDecisions(request, casesClient, theCase.id);
-    const canDecide = await this.deps.canDecideProposals(request);
+    const [page, counts, canDecide] = await Promise.all([
+      this.searchDecisions(request, theCase.id, {
+        awaiting: query.status === 'pending',
+        from: (query.page - 1) * query.per_page,
+        size: query.per_page,
+        search: query.search || undefined,
+        investigationId: query.investigation_id,
+      }),
+      this.countDecisions(request, theCase.id),
+      this.deps.canDecideProposals(request),
+    ]);
 
     // Decisions made in AlertZero don't reach the case, so a read by someone who can decide
     // corrects the counter (it needs Cases update too; without it the write is refused quietly).
     const recorded = (theCase as { pending_decisions?: number | null }).pending_decisions ?? 0;
-    if (canDecide && recorded !== pending) {
+    if (canDecide && recorded !== counts.pending) {
       await casesClient.cases
-        .setPendingDecisions({ caseId: theCase.id, count: pending })
+        .setPendingDecisions({ caseId: theCase.id, count: counts.pending })
         .catch((error: unknown) =>
           this.deps.logger.debug(
             `Case ${caseId}: pending decisions not corrected: ${toMessage(error)}`
           )
         );
     }
-    return { decisions, pending, can_decide: canDecide };
+    return {
+      decisions: page.proposals.map(toCaseDecision),
+      total: page.total,
+      pending: counts.pending,
+      decided: counts.decided,
+      can_decide: canDecide,
+    };
   }
 
   /**
@@ -498,8 +524,7 @@ export class WorkerCaseService {
       const casesClient = await this.getCasesClient(request);
       const theCase = await casesClient.cases.get({ id: caseId, includeComments: false });
       const recorded = (theCase as { pending_decisions?: number | null }).pending_decisions ?? 0;
-      if (recorded === 0 && (await this.getDecisionIds(casesClient, caseId)).length === 0) return;
-      const { pending } = await this.readDecisions(request, casesClient, caseId);
+      const { pending } = await this.countDecisions(request, theCase.id);
       if (pending !== recorded) {
         await casesClient.cases.setPendingDecisions({ caseId, count: pending });
       }
@@ -518,11 +543,20 @@ export class WorkerCaseService {
   ): Promise<CaseDecisionsResponse> {
     const casesClient = await this.getCasesClient(request);
     const theCase = await casesClient.cases.get({ id: caseId, includeComments: false });
-    const { proposals, pending } = await this.readDecisions(request, casesClient, theCase.id);
-    const proposal = proposals.get(proposalId);
-    if (!proposal) {
+    const service = this.requireProposals().getProposalsService();
+    const spaceId = this.deps.getSpaceId(request);
+    let proposal: Proposal;
+    try {
+      // A decision made on an older revision is made on the live one.
+      const latest = await service.getLatestRevision(proposalId, spaceId);
+      proposal = await service.get(latest?.proposalId ?? proposalId, spaceId, request);
+    } catch (error) {
+      throw toBoom(error);
+    }
+    if (proposal.caseId !== theCase.id) {
       throw Boom.notFound(`Proposal ${proposalId} is not a decision on case ${caseId}`);
     }
+    const { pending } = await this.countDecisions(request, theCase.id);
     if (!isAwaitingDecision(proposal)) {
       throw Boom.conflict(`Proposal ${proposalId} was already decided`);
     }
@@ -532,22 +566,18 @@ export class WorkerCaseService {
     await casesClient.cases.setPendingDecisions({ caseId: theCase.id, count: pending });
 
     try {
-      await this.requireProposals()
-        .getProposalsService()
-        .releaseGate(proposal.id, {
-          approved: decision === 'approve',
-          ...(decision === 'dismiss' ? { dismissReason: 'no_reason' as const } : {}),
-          spaceId: this.deps.getSpaceId(request),
-          request,
-        });
+      await service.releaseGate(proposal.id, {
+        approved: decision === 'approve',
+        ...(decision === 'dismiss' ? { dismissReason: 'no_reason' as const } : {}),
+        spaceId,
+        request,
+      });
     } catch (error) {
       throw toBoom(error);
     }
 
     // The gate writes the decision after it resumes, so this one is counted as decided now.
-    const pendingAfter = [...proposals.values()].filter(
-      (other) => other.id !== proposal.id && isAwaitingDecision(other)
-    ).length;
+    const pendingAfter = Math.max(0, pending - 1);
     await casesClient.cases.recordDecision({
       caseId: theCase.id,
       proposalId: proposal.id,

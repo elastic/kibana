@@ -14,6 +14,7 @@ import type {
   CaseViewCloseModalSectionProps,
   CaseViewSectionProps,
 } from '@kbn/cases-plugin/public';
+import type { CaseUI } from '@kbn/cases-plugin/common';
 import { defineAttachment } from '@kbn/cases-plugin/public';
 import {
   HYPOTHESES_CASE_ATTACHMENT_TYPE,
@@ -27,7 +28,12 @@ import {
   proposalCaseAttachmentPayloadSchema,
 } from '../../common/cases_bridge';
 import type { AgenticInvestigationsPublicStartDependencies } from '../types';
-import { getLinkedInvestigationIds, hasDecisions, hasLinkedInvestigations } from './case_data';
+import {
+  DECISIONS_TAB_ID,
+  getLinkedInvestigationIds,
+  hasDecisions,
+  hasLinkedInvestigations,
+} from './case_data';
 import { ATTACHMENT, DECISIONS, EVIDENCE } from './translations';
 
 type StartServicesGetter =
@@ -111,9 +117,13 @@ export const registerCasesIntegration = ({
     })
   );
 
-  const LazyDecisions = makeLazy<CaseViewSectionProps>(
+  const LazyDecisionsTab = makeLazy<CaseViewSectionProps>(
     getStartServices,
-    async () => (await import('./decisions_panel')).DecisionsPanel
+    async () => (await import('./decisions_tab')).DecisionsTab
+  );
+  const LazyDecisionsNotice = makeLazy<CaseViewSectionProps>(
+    getStartServices,
+    async () => (await import('./decisions_tab')).DecisionsNotice
   );
   const LazyImpactListInner = React.lazy(async () => ({
     default: (await import('./copied_findings_list')).ImpactList,
@@ -138,7 +148,7 @@ export const registerCasesIntegration = ({
       id: PROPOSAL_CASE_ATTACHMENT_TYPE,
       schema: proposalCaseAttachmentPayloadSchema,
       workflowSchema: false,
-      getIcon: () => 'checkInCircleFilled',
+      getIcon: () => 'checkCircleFill',
       getLabel: () => DECISIONS.attachmentLabel,
       getCreationActivity: (props) => ({
         event: DECISIONS.added(String(props.metadata?.title ?? '')),
@@ -164,7 +174,7 @@ export const registerCasesIntegration = ({
       id: HYPOTHESES_CASE_ATTACHMENT_TYPE,
       schema: hypothesesCaseAttachmentPayloadSchema,
       workflowSchema: false,
-      getIcon: () => 'beaker',
+      getIcon: () => 'flask',
       getLabel: () => EVIDENCE.hypothesesTitle,
       getCreationActivity: () => ({ event: EVIDENCE.hypothesesAdded, hideDefaultActions: true }),
       getRemovalActivity: () => ({ event: EVIDENCE.removed }),
@@ -172,13 +182,32 @@ export const registerCasesIntegration = ({
     })
   );
 
+  const showDecisions = (caseData: CaseUI) =>
+    isOpenCasesForInvestigationsOn() &&
+    (hasDecisions(caseData) || (caseData.pendingDecisions ?? 0) > 0);
+
+  // Only a one-line notice sits above the tabs, so a case with many decisions doesn't push the
+  // tabs down; the list itself is the Decisions tab.
+  cases.caseView.registerSection({
+    id: 'agenticInvestigations.decisionsNotice',
+    position: 'aboveTabs',
+    isVisible: (caseData) => showDecisions(caseData) && (caseData.pendingDecisions ?? 0) > 0,
+    render: (props) => (
+      <Suspense fallback={null}>
+        <LazyDecisionsNotice {...props} />
+      </Suspense>
+    ),
+  });
   cases.caseView.registerSection({
     id: 'agenticInvestigations.decisions',
-    position: 'aboveTabs',
-    isVisible: (caseData) => isOpenCasesForInvestigationsOn() && hasDecisions(caseData),
+    position: 'tab',
+    tabId: DECISIONS_TAB_ID,
+    name: DECISIONS.title,
+    isVisible: showDecisions,
+    getBadgeCount: (caseData) => caseData.pendingDecisions ?? undefined,
     render: (props) => (
       <Suspense fallback={<EuiLoadingSpinner size="m" />}>
-        <LazyDecisions {...props} />
+        <LazyDecisionsTab {...props} />
       </Suspense>
     ),
   });

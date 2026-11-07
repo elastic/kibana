@@ -255,6 +255,7 @@ export const EditConnector = React.memo(
                   <EuiFlexGroup
                     gutterSize="s"
                     responsive={false}
+                    wrap
                     data-test-subj="connector-outlined-actions"
                   >
                     {showOutlinedEditAction ? (

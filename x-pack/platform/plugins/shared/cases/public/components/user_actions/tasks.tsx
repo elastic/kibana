@@ -50,7 +50,7 @@ export const createUpdateTaskUserActionBuilder: UserActionBuilder = (params) => 
     return build(i18n.STARTED_TASK_WORKFLOW(payload.taskTitle), 'play')(params);
   }
   if (runStatus === 'succeeded') {
-    return build(i18n.TASK_WORKFLOW_SUCCEEDED(payload.taskTitle), 'checkInCircleFilled')(params);
+    return build(i18n.TASK_WORKFLOW_SUCCEEDED(payload.taskTitle), 'checkCircleFill')(params);
   }
   if (runStatus === 'failed') {
     return build(i18n.TASK_WORKFLOW_FAILED(payload.taskTitle), 'warning')(params);

@@ -3041,6 +3041,37 @@ describe('ProposalsService', () => {
       );
     });
 
+    it("should restrict to a case's decisions still waiting on someone, by title", async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.list(
+        { ...listQuery(), caseId: 'case-1', titleSearch: 'isolate', awaitingDecision: true },
+        SPACE_ID,
+        request
+      );
+
+      const [[searchArgs]] = storage.search.mock.calls;
+      const awaiting = {
+        bool: {
+          filter: [{ term: { status: 'pending' } }],
+          must_not: [{ exists: { field: 'decision' } }, { exists: { field: 'gateReleasedAt' } }],
+        },
+      };
+      expect(searchArgs.query.bool.filter).toEqual(
+        expect.arrayContaining([
+          { term: { caseId: 'case-1' } },
+          { match_phrase_prefix: { title: 'isolate' } },
+          awaiting,
+        ])
+      );
+
+      await service.list({ ...listQuery(), awaitingDecision: false }, SPACE_ID, request);
+      expect(storage.search.mock.calls[1][0].query.bool.filter).toEqual(
+        expect.arrayContaining([{ bool: { must_not: [awaiting] } }])
+      );
+    });
+
     it('should order by rank in Elasticsearch rather than after the fetch', async () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);

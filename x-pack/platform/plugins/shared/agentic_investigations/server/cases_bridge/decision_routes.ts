@@ -14,6 +14,7 @@ import {
   CASE_DECISIONS_URL,
   CASE_DECISION_URL,
   caseDecisionRequestSchema,
+  caseDecisionsQuerySchema,
 } from '../../common/cases_bridge';
 import { handleCaseBridgeRouteError } from './routes';
 import type { WorkerCaseService } from './worker_case_service';
@@ -52,11 +53,20 @@ export const registerCaseDecisionRoutes = ({
     .addVersion(
       {
         version: AGENTIC_INVESTIGATIONS_API_VERSION,
-        validate: { request: { params: buildRouteValidationWithZod(caseParamsSchema) } },
+        validate: {
+          request: {
+            params: buildRouteValidationWithZod(caseParamsSchema),
+            query: buildRouteValidationWithZod(caseDecisionsQuerySchema),
+          },
+        },
       },
       async (_context, request, response) => {
         try {
-          const body = await getWorkerCaseService().listDecisions(request, request.params.case_id);
+          const body = await getWorkerCaseService().listDecisions(
+            request,
+            request.params.case_id,
+            request.query
+          );
           return response.ok({ body });
         } catch (error) {
           return handleCaseBridgeRouteError(error, response, logger);
