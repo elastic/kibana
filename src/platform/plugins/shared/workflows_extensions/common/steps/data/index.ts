@@ -73,3 +73,10 @@ export {
   type DataConcatStepInputSchema,
   type DataConcatStepOutputSchema,
 } from './data_concat_step';
+
+export {
+  DataLoadCheckpointStepTypeId,
+  dataLoadCheckpointStepCommonDefinition,
+  type DataLoadCheckpointStepInputSchema,
+  type DataLoadCheckpointStepOutputSchema,
+} from './data_load_checkpoint_step';

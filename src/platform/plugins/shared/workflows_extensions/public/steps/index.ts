@@ -10,6 +10,9 @@
 import type { PublicStepRegistry } from '../step_registry';
 
 export const registerInternalStepDefinitions = (stepRegistry: PublicStepRegistry) => {
+  stepRegistry.register(() =>
+    import('./data/data_load_checkpoint_step').then((m) => m.dataLoadCheckpointStepDefinition)
+  );
   stepRegistry.register(() => import('./data/data_map_step').then((m) => m.dataMapStepDefinition));
   stepRegistry.register(() =>
     import('./data/data_dedupe_step').then((m) => m.dataDedupeStepDefinition)
