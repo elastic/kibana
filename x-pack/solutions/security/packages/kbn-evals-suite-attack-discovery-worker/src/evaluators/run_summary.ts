@@ -68,6 +68,17 @@ export const QUALITY_CODE_EVALUATORS: ReadonlySet<string> = new Set([
   AUDIT_META_ALERT_AS_EVIDENCE_EVALUATOR_NAME,
   AUDIT_NEGATIVE_CONTROL_EVALUATOR_NAME,
   AUDIT_POSITIVE_CONTROL_RECALL_EVALUATOR_NAME,
+]);
+
+/**
+ * CODE evaluators that encode a safety floor rather than a quality ranking: the advice they flag
+ * (unconditional containment of an entity the run has not confirmed malicious) is a defect at
+ * every tier, so unlike the quality set a miss fails the dataset even though it also separates
+ * models. Classification-only like `PIPELINE_CODE_EVALUATORS`: the gate is fail-closed on
+ * anything outside `QUALITY_CODE_EVALUATORS`, so membership here documents why the evaluator
+ * gates and keeps the classification test exhaustive.
+ */
+export const SAFETY_CODE_EVALUATORS: ReadonlySet<string> = new Set([
   AUDIT_CONDITIONAL_REMEDIATION_EVALUATOR_NAME,
 ]);
 

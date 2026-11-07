@@ -24,6 +24,7 @@ import {
   PIPELINE_CODE_EVALUATORS,
   QUALITY_CODE_EVALUATORS,
   ROW_FAILED_LABEL,
+  SAFETY_CODE_EVALUATORS,
   withScoreCollection,
 } from './run_summary';
 import { MODEL_FAULT_LABEL } from './code_scores';
@@ -74,20 +75,44 @@ describe('CODE gate', () => {
       .filter(({ kind }) => kind === 'CODE')
       .map(({ name }) => name);
 
-    it('classifies every registered CODE evaluator as exactly one of pipeline or quality', () => {
+    it('classifies every registered CODE evaluator as exactly one of pipeline, quality or safety', () => {
       expect(registeredCodeNames.length).toBeGreaterThan(0);
-      const misclassified = registeredCodeNames.filter(
-        (name) => PIPELINE_CODE_EVALUATORS.has(name) === QUALITY_CODE_EVALUATORS.has(name)
-      );
+      const misclassified = registeredCodeNames.filter((name) => {
+        const memberships = [
+          PIPELINE_CODE_EVALUATORS.has(name),
+          QUALITY_CODE_EVALUATORS.has(name),
+          SAFETY_CODE_EVALUATORS.has(name),
+        ];
+        return memberships.filter(Boolean).length !== 1;
+      });
       expect(misclassified).toEqual([]);
     });
 
     it('names no evaluator that is not registered', () => {
-      const unknown = [...PIPELINE_CODE_EVALUATORS, ...QUALITY_CODE_EVALUATORS].filter(
-        (name) => !registeredCodeNames.includes(name)
-      );
+      const unknown = [
+        ...PIPELINE_CODE_EVALUATORS,
+        ...QUALITY_CODE_EVALUATORS,
+        ...SAFETY_CODE_EVALUATORS,
+      ].filter((name) => !registeredCodeNames.includes(name));
       expect(unknown).toEqual([]);
     });
+
+    it.each([...SAFETY_CODE_EVALUATORS])(
+      '%s: a miss fails the dataset despite measuring the model',
+      async (name) => {
+        const failures = await gate(evaluatorScoring({ name, score: 0 }));
+        expect(failures).toHaveLength(1);
+        expect(() => assertCodeScoresPass('dataset', failures)).toThrow(new RegExp(name));
+      }
+    );
+
+    it.each([...SAFETY_CODE_EVALUATORS])(
+      '%s: an N/A row does not fail the dataset',
+      async (name) => {
+        const failures = await gate(evaluatorScoring({ name, score: null, label: 'N/A' }));
+        expect(failures).toEqual([]);
+      }
+    );
 
     it.each([...QUALITY_CODE_EVALUATORS])(
       '%s: a miss is recorded but does not fail the dataset',

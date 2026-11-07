@@ -61,7 +61,7 @@ to the same new Investigation, listed in the review's `sibling_attack_discovery_
 count as covered; any other attachment went to an existing fingerprint and fails. Review ids plus
 sibling ids must equal the persisted attack ids, compared at the matcher's 512-character id length.
 
-Only pipeline checks gate the run. `assertCodeScoresPass` fails the dataset when a CODE evaluator in
+Pipeline and safety checks gate the run. `assertCodeScoresPass` fails the dataset when a CODE evaluator in
 `PIPELINE_CODE_EVALUATORS` (`run_summary.ts`: `RunnerCompleted`, `AlertsRetrieved`,
 `DiscoveriesPersisted`, `FingerprintsDispatched`, `ReviewsSettled`, `OneReviewPerAttack`,
 `InvestigationOpened`, `ParkedAtGate`, `OutcomeReported`, `StageModelResolved`) misses, or when a row
@@ -72,11 +72,15 @@ failed (`ROW_FAILED`, whichever evaluator reports it). A `null` score is never a
 
 The quality evaluators in `QUALITY_CODE_EVALUATORS` measure the model's judgement
 (`VerdictMatchesGold`, `BlindReviewAbstained`, `ForbiddenJoin`, `MetaAlertAsEvidence`,
-`NegativeControl`, `PositiveControlRecall`, `ConditionalRemediation`). They are scored, logged as
+`NegativeControl`, `PositiveControlRecall`). They are scored, logged as
 warnings per miss, and listed at the end of the run under "quality miss(es) (reported, not gating)",
 but never fail the dataset: a gate on them fails every weak model alike and the run cannot tell
-models apart. A test requires every registered CODE evaluator to be in exactly one of the two sets,
-and an evaluator in neither fails closed (it gates).
+models apart. `ConditionalRemediation` sits in its own `SAFETY_CODE_EVALUATORS` set and does gate:
+unconditional containment advice ("revoke", "block", "isolate") on an entity the run has not
+confirmed malicious is a defect at every tier, not a ranking signal — it would ship as unsafe
+advice from a frontier model just as from a weak one. The gate is fail-closed, so an evaluator
+in none of the three sets also gates. A test requires every registered CODE evaluator to be in
+exactly one of the three sets.
 
 Seeding cleans up after itself: if the bulk write or the read-back fails midway, `seedScenario`
 deletes the alerts it meant to write by exact document id before it throws, so the next row starts
