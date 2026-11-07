@@ -369,6 +369,50 @@ Set `SELECTED_EVALUATORS=connector_used,within_time_budget` to skip the judge. E
 case, duration, tool-call count, conversation and trace ids and scores. A failed `converse` call
 fails the test; low scores do not.
 
+## Cortex optimizer replay
+
+`NIGHTSHIFT_DATASETS=cortex-optimize` replays saved investigation rounds through the real Cortex
+optimizer with a real model and scores the wiki pages it writes. No investigation runs and no
+sandbox is needed, so a run takes a few model calls per example and isolates what the optimizer
+learns from a round: recurring tool failures and a correction in a follow-up message. The
+optimizer's own page store runs unchanged on an in-memory Elasticsearch fake, so page ids, statuses, corroboration counts and provenance behave as in production.
+
+It is opt-in: unset and `all` never select it. It still needs a model endpoint, so start it the same
+way as the other evals:
+
+```bash
+NIGHTSHIFT_DATASETS=cortex-optimize \
+  node scripts/evals start --suite nightshift-investigations --profile dev-vault --repetitions 3 \
+  --model eis-anthropic-claude-5-5-sonnet --judge eis-anthropic-claude-4-6-sonnet
+```
+
+The model is not deterministic, so use several repetitions and read the per-evaluator pass rates.
+The bundled `evals/cortex_optimize/synthetic.json` uses made-up services. Replays built from real
+traces name real infrastructure, so they live outside the repository: point
+`NIGHTSHIFT_CORTEX_REPLAY_FILE` at a file in the same format.
+
+Each example replays one or more `rounds` against one store, optionally starting from `seed_pages`:
+
+| Round `kind`     | What the optimizer is told                                                                        |
+| ---------------- | ------------------------------------------------------------------------------------------------- |
+| `initial`        | An investigation: learn the durable structure and tool behaviour it established.                  |
+| `follow_up`      | A user turn after an answer (`previous_assistant_message`) that may correct or extend it.         |
+
+An example's `output` states what must happen. Terms in `must_capture` may list alternatives with
+`|`.
+
+| Evaluator             | Kind | Scores                                                                                         |
+| --------------------- | ---- | ---------------------------------------------------------------------------------------------- |
+| `capture_recall`      | CODE | The share of `must_capture` items found on a page of the right type and section.               |
+| `non_temporal`        | CODE | The share of written pages free of dates, ids and counts of one run.                           |
+| `must_not_absent`     | CODE | No page holds a case-specific detail listed in `must_not`.                                     |
+| `effects_met`         | CODE | Each round created, corroborated, rewrote, archived or left untouched the pages `effects` name. |
+| `page_bounds`         | CODE | No more pages written than `max_pages_written`, and no near-duplicates of a described page.    |
+| `new_pages_tentative` | CODE | A page created in a round starts tentative.                                                    |
+
+An evaluator that does not apply to an example scores `null` rather than 1, so pass rates are not
+diluted.
+
 ## Deferred sandbox session isolation
 
 The shared sandbox workspace is scoped to a space and conversation, not to an agent's connector
@@ -532,8 +576,9 @@ against.
 
 | Variable                         | Effect                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NIGHTSHIFT_DATASETS`            | Comma-separated dataset ids (whitespace trimmed). Smoke dataset ids such as `synthetic-smoke` select seeded evals; `trace-only` selects the file-driven investigations; they can be combined, e.g. `synthetic-smoke,trace-only`. Unset or `all` runs every eval when sandbox credentials are present, except that a stored `NIGHTSHIFT_DATASET_NAME` defaults to trace-only when selection is unset. Without them, unset runs only smoke with a warning, while an explicit `all` or `trace-only` fails before any test runs, even when Scout is reused. `connector-probe` selects the [connector probes](#connector-probes), which unset and `all` never include. `orcabench` selects the isolated ORCA dataset and cannot be combined with other ids; it requires an ORCA-configured Scout server. Unknown ids fail early. |
+| `NIGHTSHIFT_DATASETS`            | Comma-separated dataset ids (whitespace trimmed). Smoke dataset ids such as `synthetic-smoke` select seeded evals; `trace-only` selects the file-driven investigations; they can be combined, e.g. `synthetic-smoke,trace-only`. Unset or `all` runs every eval when sandbox credentials are present, except that a stored `NIGHTSHIFT_DATASET_NAME` defaults to trace-only when selection is unset. Without them, unset runs only smoke with a warning, while an explicit `all` or `trace-only` fails before any test runs, even when Scout is reused. `connector-probe` selects the [connector probes](#connector-probes), which unset and `all` never include. `cortex-optimize` selects the [Cortex optimizer replay](#cortex-optimizer-replay), which unset and `all` never include and which needs no sandbox credentials. `orcabench` selects the isolated ORCA dataset and cannot be combined with other ids; it requires an ORCA-configured Scout server. Unknown ids fail early. |
 | `NIGHTSHIFT_PROBE_EXAMPLES_FILE` | Examples file for `connector-probe`; required when it is selected. See [connector probes](#connector-probes).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `NIGHTSHIFT_CORTEX_REPLAY_FILE` | Replay file for `cortex-optimize`; the bundled synthetic examples when unset. Same `nightshift/` dataset-file format as the investigation examples, with the round and expectation fields in [Cortex optimizer replay](#cortex-optimizer-replay). |
 | `NIGHTSHIFT_PROBE_TIME_BUDGET_S` | Seconds a probe may take before `within_time_budget` scores 0 (default 30).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | `SELECTED_EVALUATORS`            | Standard `@kbn/evals` filter, by evaluator name (`documents_restored`, `timestamps_replayed`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | `GCS_CREDENTIALS`                | Service account JSON Elasticsearch uses to reach the seed-data bucket. Read access is enough to run the suite.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
