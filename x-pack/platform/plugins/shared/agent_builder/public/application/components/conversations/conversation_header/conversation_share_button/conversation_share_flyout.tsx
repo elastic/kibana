@@ -35,9 +35,9 @@ import {
   saveErrorLabel,
   shareThisChatLabel,
 } from './conversation_share_i18n';
+import { useConversationFlyoutWidthProps } from '../../../../../flyout/conversation_details_flyout_width';
 
 const SEARCH_DEBOUNCE_MS = 200;
-const FLYOUT_WIDTH = 600;
 
 interface ConversationShareFlyoutProps {
   conversation: Conversation;
@@ -51,6 +51,7 @@ export const ConversationShareFlyout: React.FC<ConversationShareFlyoutProps> = (
   const { update_access_control: canUpdateAccessControl } = useConversationPermissions();
   const title = canUpdateAccessControl ? shareThisChatLabel : participantsLabel;
   const flyoutSessionProps = useConversationFlyoutSessionProps(title);
+  const widthProps = useConversationFlyoutWidthProps();
   const [accessMode, setAccessMode] = useState(ConversationAccessControlMode.Private);
   const [memberIds, setMemberIds] = useState<string[]>([]);
   const [pendingOptions, setPendingOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
@@ -171,7 +172,7 @@ export const ConversationShareFlyout: React.FC<ConversationShareFlyoutProps> = (
   return (
     <EuiFlyout
       type="push"
-      size={FLYOUT_WIDTH}
+      {...widthProps}
       ownFocus={false}
       onClose={onClose}
       closeButtonProps={{ 'aria-label': closeLabel }}

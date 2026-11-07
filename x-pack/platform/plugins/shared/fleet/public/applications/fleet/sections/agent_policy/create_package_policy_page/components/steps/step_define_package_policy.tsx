@@ -68,6 +68,7 @@ import {
   useVarGroupSelections,
 } from './components';
 import { useOutputs } from './components/hooks';
+import { PackagePolicyOutputSelect } from './components/package_policy_output_select';
 import { useNamespaceCustomization } from './use_namespace_customization';
 
 // on smaller screens, fields should be displayed in one column
@@ -210,26 +211,6 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       allowedOutputs,
       inheritedOutputName,
     } = useOutputs(packagePolicy, packageInfo.name, agentPolicies);
-
-    // An unset output_id means "use the output of the parent agent policy". EuiSelect cannot
-    // hold null, so that state is represented by an empty value — label it explicitly, since
-    // an unlabelled option reads as "no output configured".
-    const inheritedOutputText = useMemo(
-      () =>
-        inheritedOutputName
-          ? i18n.translate(
-              'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyOutputInheritedWithNameOption',
-              {
-                defaultMessage: 'Inherited from agent policy (currently {outputName})',
-                values: { outputName: inheritedOutputName },
-              }
-            )
-          : i18n.translate(
-              'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyOutputInheritedOption',
-              { defaultMessage: 'Inherited from agent policy' }
-            ),
-      [inheritedOutputName]
-    );
 
     const { data: epmDatastreamsRes } = useGetEpmDatastreams();
 
@@ -651,59 +632,14 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                   {/* Output */}
                   {canUseOutputPerIntegration && (
                     <EuiFlexItem>
-                      <EuiFormRow
-                        label={
-                          <>
-                            <FormattedMessage
-                              id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyOutputInputLabel"
-                              defaultMessage="Output"
-                            />
-                            {isOutputDisabled && (
-                              <>
-                                {' '}
-                                <EuiIconTip
-                                  type="question"
-                                  color="subdued"
-                                  content={
-                                    <FormattedMessage
-                                      id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyOutputDisabledTooltip"
-                                      defaultMessage="Output cannot be modified because this integration is used by a managed agent policy."
-                                    />
-                                  }
-                                />
-                              </>
-                            )}
-                          </>
-                        }
-                        helpText={
-                          <FormattedMessage
-                            id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyOutputHelpLabel"
-                            defaultMessage="Change the default output inherited from the parent agent policy. This setting changes where the integration's data is sent."
-                          />
-                        }
-                      >
-                        <EuiSelect
-                          disabled={isOutputDisabled}
-                          data-test-subj="packagePolicyOutputInput"
-                          isLoading={isOutputsLoading}
-                          options={[
-                            {
-                              value: '',
-                              text: inheritedOutputText,
-                            },
-                            ...allowedOutputs.map((output) => ({
-                              value: output.id,
-                              text: output.name,
-                            })),
-                          ]}
-                          value={packagePolicy.output_id || ''}
-                          onChange={(e) => {
-                            updatePackagePolicy({
-                              output_id: e.target.value.trim() || null,
-                            });
-                          }}
-                        />
-                      </EuiFormRow>
+                      <PackagePolicyOutputSelect
+                        outputId={packagePolicy.output_id}
+                        onChange={(outputId) => updatePackagePolicy({ output_id: outputId })}
+                        allowedOutputs={allowedOutputs}
+                        inheritedOutputName={inheritedOutputName}
+                        isLoading={isOutputsLoading}
+                        isDisabled={isOutputDisabled}
+                      />
                     </EuiFlexItem>
                   )}
 

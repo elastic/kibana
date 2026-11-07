@@ -33,6 +33,10 @@ const STATEFUL_ONLY_REASON =
  * file owns a single agnostic list id (spaces do not isolate those lists).
  * Policy-tab ALL/READ/NONE and list-page RBAC stay in the same file so they
  * cannot race on that list.
+ *
+ * `beforeAll` / `afterEach` wipe the whole list. When another spec file also
+ * writes to the list, use `describeArtifactTabPolicyDetailsItemScoped`, which
+ * deletes only the items it created (blocklists do).
  */
 export const describeArtifactTabPolicyDetails = (
   artifact: ArtifactTabCase,
