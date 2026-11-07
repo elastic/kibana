@@ -15,6 +15,7 @@ import { getPreviousVersionType } from '../../migrations';
 import { checkDocuments } from './check_documents';
 import type { FixtureTemplate } from '../../migrations/fixtures';
 import { getRollbackMigrationContext } from './rollback_context';
+import { getMigratorOptions } from '../algorithms';
 
 export const createBaseline: Task = async (ctx, task) => {
   const { migrationTypes, migrationKibanaIndex, migrationAlgorithm } =
@@ -34,7 +35,7 @@ export const createBaseline: Task = async (ctx, task) => {
   } = await getKibanaMigratorTestKit({
     types: previousVersionTypes,
     kibanaIndex,
-    settings: { migrations: { algorithm: migrationAlgorithm } },
+    ...getMigratorOptions(migrationAlgorithm, 'baseline'),
     encryptionExtensionFactory: ctx.encryptedSavedObjects
       ? (typeRegistry) =>
           ctx.encryptedSavedObjects!.__testCreateDangerousExtension(

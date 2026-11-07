@@ -18,7 +18,8 @@ import {
 } from '../findings';
 import { classifyUpdatedTypes, getNewTypes, resolveSnapshotSha } from '../snapshots';
 import type { MigrationSnapshot } from '../types';
-import type { MigrationAlgorithm, TaskContext } from './types';
+import type { TaskContext } from './types';
+import { parseAlgorithmFlag } from './algorithms';
 import { automatedRollbackTests, getSnapshots, validateSOChanges, validateTestFlow } from './tasks';
 
 /**
@@ -67,16 +68,7 @@ export function runCheckSavedObjectsCli() {
       const algorithmFlag = flagsReader.string('algorithm') ?? 'v2';
       const reportPath = flagsReader.string('reportPath');
 
-      let migrationAlgorithms: MigrationAlgorithm[];
-      if (algorithmFlag === 'both') {
-        migrationAlgorithms = ['v2', 'zdt'];
-      } else if (['v2', 'zdt'].includes(algorithmFlag)) {
-        migrationAlgorithms = [algorithmFlag as MigrationAlgorithm];
-      } else {
-        throw new Error(
-          `Invalid --algorithm value '${algorithmFlag}'. Must be one of: v2, zdt, both`
-        );
-      }
+      const migrationAlgorithms = parseAlgorithmFlag(algorithmFlag);
 
       if (!server && !test && !gitRev) {
         throw new Error(
@@ -311,7 +303,7 @@ export function runCheckSavedObjectsCli() {
       description: `
       Determine if the changes performed to the Saved Objects mappings are following our standards.
 
-      Usage: node scripts/check_saved_objects --baseline <gitRev> [--algorithm <v2|zdt|both>] --fix
+      Usage: node scripts/check_saved_objects --baseline <gitRev> [--algorithm <v2|zdt|v3|both|all>] --fix
     `,
       flags: {
         alias: {
@@ -332,7 +324,7 @@ export function runCheckSavedObjectsCli() {
         --server           Start ES in order to repeatedly execute the 'check_saved_objects' script
         --client           Do not start ES server (requires running the command above on a separate term)
         --test             Use a sample type registry with dummy types and hardcoded snapshots (no longer starts Kibana)
-        --algorithm <v2|zdt|both>  Migration algorithm to use for rollback tests (default: v2)
+        --algorithm <v2|zdt|v3|both|all>  Migration algorithm(s) to use for rollback tests (default: v2). 'both' runs v2 and zdt, 'all' also runs v3
         --report-path <file>       Write a structured JSON report of changes and findings to this file
       `,
       },

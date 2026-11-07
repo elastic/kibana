@@ -12,6 +12,7 @@ import { getKibanaMigratorTestKit } from '@kbn/migrator-test-kit';
 import type { Task, TaskContext } from '../types';
 import { checkDocuments } from './check_documents';
 import { getRollbackMigrationContext } from './rollback_context';
+import { getMigratorOptions } from '../algorithms';
 
 export const testUpgrade: Task = async (ctx, task) => {
   const { migrationTypes, migrationKibanaIndex, migrationAlgorithm } =
@@ -20,7 +21,7 @@ export const testUpgrade: Task = async (ctx, task) => {
   const { runMigrations, savedObjectsRepository } = await getKibanaMigratorTestKit({
     types: migrationTypes,
     kibanaIndex: migrationKibanaIndex,
-    settings: { migrations: { algorithm: migrationAlgorithm } },
+    ...getMigratorOptions(migrationAlgorithm, 'upgrade'),
     encryptionExtensionFactory: ctx.encryptedSavedObjects
       ? (typeRegistry) => ctx.encryptedSavedObjects!.__testCreateDangerousExtension(typeRegistry)
       : undefined,

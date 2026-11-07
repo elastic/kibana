@@ -41,7 +41,7 @@ So PRs validate against a baseline from a recent merge (or an ancestor with an e
 You can run the check from your Kibana working copy:
 
 ```bash
-node scripts/check_saved_objects --baseline <gitRev> [--algorithm <v2|zdt|both>] [--fix]
+node scripts/check_saved_objects --baseline <gitRev> [--algorithm <v2|zdt|v3|both|all>] [--fix]
 ```
 
 ### Parameters and behavior
@@ -49,7 +49,7 @@ node scripts/check_saved_objects --baseline <gitRev> [--algorithm <v2|zdt|both>]
 | Flag | Description |
 |------|-------------|
 | `--baseline <SHA>` | Commit SHA (or revision) to use as baseline. The script fetches the snapshot for this revision from the cloud bucket and compares the current SO types against it. |
-| `--algorithm <v2\|zdt\|both>` | Migration algorithm(s) to use for the automated rollback tests. Defaults to `v2`. Use `both` to run `v2` and then `zdt`. |
+| `--algorithm <v2\|zdt\|v3\|both\|all>` | Migration algorithm(s) to use for the automated rollback tests. Defaults to `v2`. Use `both` to run `v2` and then `zdt`, or `all` to also run `v3`. `v3` upgrades with the classic behaviours, and rolls back with the Serverless ones, since it rejects model version rollbacks on classic deployments. With every algorithm, the rollback must leave the index's aliases and `_meta` untouched. |
 | `--fix` | Generate templates for missing fixture files and update outdated JSON (e.g. `removed_types.json`, SO fixtures). Useful before committing. |
 | `--server` | Start Elasticsearch only and keep it running so you can run the check multiple times without restarting ES. |
 | `--client` | Do not start Elasticsearch; assume it is already running (e.g. from a previous `--server` run). Use with `--baseline` to run the validation. |
