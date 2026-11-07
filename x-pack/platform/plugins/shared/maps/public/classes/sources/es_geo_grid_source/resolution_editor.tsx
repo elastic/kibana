@@ -10,8 +10,9 @@ import type { EuiRangeProps } from '@elastic/eui';
 import { EuiConfirmModal, EuiFormRow, EuiRange, htmlIdGenerator } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { GRID_RESOLUTION } from '@kbn/geo-precision';
 import type { AggDescriptor } from '../../../../common/descriptor_types';
-import { AGG_TYPE, GRID_RESOLUTION, RENDER_AS } from '../../../../common/constants';
+import { AGG_TYPE, RENDER_AS } from '../../../../common/constants';
 import { isMvt } from './is_mvt';
 
 function isUnsupportedVectorTileMetric(metric: AggDescriptor) {

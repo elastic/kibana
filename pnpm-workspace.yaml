@@ -596,6 +596,7 @@ packages:
   - 'src/platform/packages/private/dashboard/dashboard-navigation-options-common'
   - 'src/platform/packages/private/dashboard/dashboard-navigation-options-components'
   - 'src/platform/packages/private/dashboard/dashboard-navigation-options-schema'
+  - 'src/platform/packages/private/geo/kbn-geo-precision'
   - 'src/platform/packages/private/kbn-ambient-common-types'
   - 'src/platform/packages/private/kbn-ambient-ftr-types'
   - 'src/platform/packages/private/kbn-apm-config-loader'

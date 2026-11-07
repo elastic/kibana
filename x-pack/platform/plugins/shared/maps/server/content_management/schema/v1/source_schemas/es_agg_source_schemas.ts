@@ -8,13 +8,8 @@
 import { z } from '@kbn/zod';
 
 import { SOURCE_TYPES } from '../../../../../common';
-import {
-  AGG_TYPE,
-  GRID_RESOLUTION,
-  MASK_OPERATOR,
-  RENDER_AS,
-} from '../../../../../common/constants';
-import { BaseESSourceSchema } from './es_source_schemas';
+import { AGG_TYPE, MASK_OPERATOR, RENDER_AS } from '../../../../../common/constants';
+import { BaseESSourceSchema, gridResolutionSchema } from './es_source_schemas';
 
 const aggMaskSchema = z
   .object({
@@ -80,12 +75,7 @@ export const ESGeoGridSourceSchema = BaseESAggSourceSchema.extend({
     z.literal(RENDER_AS.GRID),
     z.literal(RENDER_AS.HEX),
   ]),
-  resolution: z.union([
-    z.literal(GRID_RESOLUTION.COARSE),
-    z.literal(GRID_RESOLUTION.FINE),
-    z.literal(GRID_RESOLUTION.MOST_FINE),
-    z.literal(GRID_RESOLUTION.SUPER_FINE),
-  ]),
+  resolution: gridResolutionSchema,
   type: z.literal(SOURCE_TYPES.ES_GEO_GRID),
 }).meta({
   description:

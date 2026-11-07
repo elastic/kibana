@@ -9,7 +9,8 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { ResolutionEditor } from './resolution_editor';
-import { GRID_RESOLUTION, RENDER_AS } from '../../../../common/constants';
+import { GRID_RESOLUTION } from '@kbn/geo-precision';
+import { RENDER_AS } from '../../../../common/constants';
 
 const defaultProps = {
   resolution: GRID_RESOLUTION.COARSE,
