@@ -19,6 +19,7 @@
     "@kbn/shared-ux-page-no-data",
     "@kbn/shared-ux-page-no-data-config-types",
     "@kbn/shared-ux-page-no-data-config-mocks",
+    "@kbn/css-utils",
   ],
   "exclude": [
     "target/**/*",
