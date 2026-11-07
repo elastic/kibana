@@ -86,7 +86,9 @@ export function SlosWelcomePage() {
   return (
     <ObservabilityPageTemplate
       data-test-subj="sloWelcomePage"
-      pageSectionProps={{ paddingSize: 'none' }}
+      // POC: welcome is always an empty state; keeps top alignment the template would otherwise center.
+      isEmptyState={!isLoading}
+      pageSectionProps={{ paddingSize: 'none', alignment: 'top' }}
     >
       <SloAppHeader title={pageTitle} />
       <EuiPageSection paddingSize="l" restrictWidth={false}>
@@ -115,6 +117,9 @@ export function SlosWelcomePage() {
                   }
                   layout="horizontal"
                   color="plain"
+                  // POC: lifts the prompt off the recessed glass empty-state surface; shadow requires no border.
+                  hasShadow
+                  hasBorder={false}
                   body={
                     <>
                       <p>
