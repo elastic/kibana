@@ -34,6 +34,26 @@ export const importJsonFlyoutStrings = {
     i18n.translate('asCodeImport.importJson.fileTooLargeError', {
       defaultMessage: 'The selected file is too large. The maximum size is 1 MB.',
     }),
+  getInvalidTextError: () =>
+    i18n.translate('asCodeImport.importJson.invalidTextError', {
+      defaultMessage: 'The text is not valid JSON.',
+    }),
+  getTextTooLargeError: () =>
+    i18n.translate('asCodeImport.importJson.textTooLargeError', {
+      defaultMessage: 'The JSON is too large. The maximum size is 1 MB.',
+    }),
+  getEditorLabel: () =>
+    i18n.translate('asCodeImport.importJson.editorLabel', {
+      defaultMessage: 'Paste JSON',
+    }),
+  getUploadLinkLabel: () =>
+    i18n.translate('asCodeImport.importJson.uploadLinkLabel', {
+      defaultMessage: 'upload',
+    }),
+  getClearLabel: () =>
+    i18n.translate('asCodeImport.importJson.clearLabel', {
+      defaultMessage: 'Clear',
+    }),
   getGenericImportError: () =>
     i18n.translate('asCodeImport.importJson.genericImportError', {
       defaultMessage: 'An unexpected error occurred. Try again later.',
@@ -95,5 +115,15 @@ export const importJsonFlyoutStrings = {
   getRelatedItemsTableCaption: () =>
     i18n.translate('asCodeImport.importJson.relatedItemsTableCaption', {
       defaultMessage: 'Related items that should exist in this cluster or space',
+    }),
+  getMissingRelatedItemsSummary: (count: number) =>
+    i18n.translate('asCodeImport.importJson.missingRelatedItemsSummary', {
+      defaultMessage:
+        '{count} related {count, plural, one {item doesn’t} other {items don’t}} exist in this cluster or space.',
+      values: { count },
+    }),
+  getMissingRelatedItemsTableCaption: () =>
+    i18n.translate('asCodeImport.importJson.missingRelatedItemsTableCaption', {
+      defaultMessage: 'Related items that don’t exist in this cluster or space',
     }),
 };

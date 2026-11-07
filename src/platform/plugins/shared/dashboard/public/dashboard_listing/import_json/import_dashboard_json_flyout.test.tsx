@@ -21,6 +21,7 @@ jest.mock('../../dashboard_app/top_nav/share/export_json/sanitize_dashboard', ()
 
 const mockAddDanger = jest.fn();
 const mockHttpPost = jest.fn();
+const mockGetIdsWithTitle = jest.fn();
 jest.mock('../../services/kibana_services', () => ({
   coreServices: {
     http: { post: (...args: unknown[]) => mockHttpPost(...args) },
@@ -29,7 +30,12 @@ jest.mock('../../services/kibana_services', () => ({
       getUrlForApp: () => '/app/management/kibana/objects',
     },
   },
+  dataService: {
+    dataViews: { getIdsWithTitle: (...args: unknown[]) => mockGetIdsWithTitle(...args) },
+  },
 }));
+
+const DATA_VIEW_RELATED_ITEM = { type: 'index-pattern', type_label: 'Data view', id: 'logs-dv' };
 
 const SANITIZED_STATE = { title: 'My Dashboard', panels: [], description: '' };
 const UNSANITIZED_STATE = { ...SANITIZED_STATE, property_removed_by_sanitizer: 'remove me' };
@@ -58,8 +64,14 @@ const pickFile = async (file: File) => {
 describe('ImportDashboardJsonFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockSanitizeDashboard.mockResolvedValue({ data: SANITIZED_STATE, warnings: [] });
+    mockSanitizeDashboard.mockResolvedValue({
+      data: SANITIZED_STATE,
+      warnings: [],
+      relatedItems: [],
+      relatedItemsCount: 0,
+    });
     mockHttpPost.mockResolvedValue({ id: 'new-id', data: SANITIZED_STATE });
+    mockGetIdsWithTitle.mockResolvedValue([{ id: 'logs-dv', title: 'logs-*' }]);
   });
 
   it('adapts dashboard sanitization, creation, and success behavior', async () => {
@@ -89,6 +101,8 @@ describe('ImportDashboardJsonFlyout', () => {
     mockSanitizeDashboard.mockResolvedValue({
       data: SANITIZED_STATE,
       warnings: ['A property was removed'],
+      relatedItems: [],
+      relatedItemsCount: 0,
     });
     renderFlyout();
 
@@ -97,6 +111,27 @@ describe('ImportDashboardJsonFlyout', () => {
     expect(
       await screen.findByText(/1 item removed from the imported dashboard/)
     ).toBeInTheDocument();
+  });
+
+  it('warns about data views that do not exist in this space but still allows import', async () => {
+    mockSanitizeDashboard.mockResolvedValue({
+      data: SANITIZED_STATE,
+      warnings: [],
+      relatedItems: [DATA_VIEW_RELATED_ITEM],
+      relatedItemsCount: 1,
+    });
+    mockGetIdsWithTitle.mockResolvedValue([]);
+    renderFlyout();
+
+    await pickFile(VALID_FILE);
+
+    await waitFor(() =>
+      expect(screen.getByTestId('importDashboardJsonMissingRelatedItemsSummary')).toHaveTextContent(
+        'This dashboard uses a data view that doesn’t exist in this space.'
+      )
+    );
+    expect(screen.queryByTestId('importDashboardJsonRelatedItemsSummary')).not.toBeInTheDocument();
+    expect(screen.getByTestId('importDashboardJsonImportButton')).toBeEnabled();
   });
 
   it('shows the server message for a 4xx sanitize error', async () => {

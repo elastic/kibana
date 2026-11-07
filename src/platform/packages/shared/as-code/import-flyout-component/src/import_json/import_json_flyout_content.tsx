@@ -27,9 +27,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KbnDangerCallout } from '@kbn/ui-callout';
 
-import { ImportJsonErrorDetails } from './import_json_error_details';
+import { ImportJsonServerErrorCallout } from './import_json_server_error_callout';
 import { importJsonFlyoutStrings } from './import_json_strings';
 import { ImportJsonWarningsCallout } from './import_json_warnings_callout';
 import type { CreateFromJson, ImportJsonFlyoutServices, SanitizeImportJson } from './types';
@@ -48,6 +47,8 @@ export interface ImportJsonFlyoutContentProps<SanitizedState> {
   serverValidationErrorText?: ReactNode;
   /** Override the default generic warnings summary. */
   getWarningsSummary?: (count: number) => string;
+  /** Override the default summary of related items that don't exist in this cluster or space. */
+  getMissingRelatedItemsSummary?: (count: number) => string;
   sanitizeImportJson: SanitizeImportJson<SanitizedState>;
   createFromJson: CreateFromJson<SanitizedState>;
   onImportSuccess: (id: string, title: string) => void;
@@ -64,6 +65,7 @@ export const ImportJsonFlyoutContent = <SanitizedState,>({
   serverValidationErrorTitle,
   serverValidationErrorText,
   getWarningsSummary,
+  getMissingRelatedItemsSummary,
   sanitizeImportJson,
   createFromJson,
   onImportSuccess,
@@ -72,14 +74,14 @@ export const ImportJsonFlyoutContent = <SanitizedState,>({
     path: '/kibana/objects',
   });
   const {
-    filePickerError,
+    inputError,
     serverError,
     warnings,
     relatedItems,
     relatedItemsCount,
     isValidating,
     isImporting,
-    fileSelectionId,
+    inputVersion,
     canImport,
     onFileChange,
     onImport,
@@ -131,46 +133,37 @@ export const ImportJsonFlyoutContent = <SanitizedState,>({
         <EuiSpacer size="m" />
 
         {serverError && (
-          <>
-            <KbnDangerCallout
-              announceOnMount
-              title={serverValidationErrorTitle}
-              data-test-subj={`${dataTestSubjPrefix}ServerError`}
-            >
-              {serverValidationErrorText}
-              {serverError.details && (
-                <ImportJsonErrorDetails
-                  dataTestSubjPrefix={dataTestSubjPrefix}
-                  details={serverError.details}
-                />
-              )}
-            </KbnDangerCallout>
-            <EuiSpacer size="m" />
-          </>
+          <ImportJsonServerErrorCallout
+            dataTestSubjPrefix={dataTestSubjPrefix}
+            title={serverValidationErrorTitle}
+            text={serverValidationErrorText}
+            details={serverError.details}
+          />
         )}
 
         <ImportJsonWarningsCallout
-          key={fileSelectionId}
+          key={inputVersion}
           dataTestSubjPrefix={dataTestSubjPrefix}
           warnings={warnings}
           relatedItems={relatedItems}
           relatedItemsCount={relatedItemsCount}
           getWarningsSummary={getWarningsSummary}
+          getMissingRelatedItemsSummary={getMissingRelatedItemsSummary}
         />
 
         <EuiForm fullWidth>
           <EuiFormRow
             fullWidth
             label={importJsonFlyoutStrings.getFilePickerLabel()}
-            isInvalid={Boolean(filePickerError)}
-            error={filePickerError ?? undefined}
+            isInvalid={Boolean(inputError)}
+            error={inputError ?? undefined}
           >
             <EuiFilePicker
               fullWidth
               accept=".json"
               onChange={onFileChange}
               isLoading={isValidating}
-              isInvalid={Boolean(filePickerError)}
+              isInvalid={Boolean(inputError)}
               data-test-subj={`${dataTestSubjPrefix}FilePicker`}
             />
           </EuiFormRow>

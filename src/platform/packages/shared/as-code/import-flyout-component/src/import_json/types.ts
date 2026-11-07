@@ -11,10 +11,18 @@ import type { AsCodeRelatedItem } from '@kbn/as-code-shared-schemas';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 
+/**
+ * A related item of the imported state. `isMissing` is set when the consumer checked whether
+ * the item exists in the current cluster or space, and left undefined when it wasn't checked.
+ */
+export interface ImportJsonRelatedItem extends AsCodeRelatedItem {
+  isMissing?: boolean;
+}
+
 export interface SanitizeImportJsonResult<SanitizedState> {
   data: SanitizedState;
   warnings: string[];
-  relatedItems?: AsCodeRelatedItem[];
+  relatedItems?: ImportJsonRelatedItem[];
   relatedItemsCount?: number;
 }
 

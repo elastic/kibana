@@ -138,4 +138,47 @@ describe('Export JSON action', () => {
       expect(embeddableWithLibrary.serializeState).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('exported JSON', () => {
+    const renderFlyoutContent = async () => {
+      const { loadContent } = mockOpenLazyFlyout.mock.calls[0][0];
+      render(
+        await loadContent({
+          closeFlyout: jest.fn(),
+          ariaLabelledBy: 'dashboardExportJsonFlyoutTitle',
+        })
+      );
+      return exportJsonFlyoutSpy.mock.calls[0][0];
+    };
+
+    it('is a Dashboards API panel entry with the position of the panel on the dashboard', async () => {
+      const getDashboardPanelFromId = jest.fn().mockReturnValue({
+        type: 'testEmbeddable',
+        grid: { x: 12, y: 30, w: 24, h: 10 },
+        serializedState: {},
+      });
+      await action.execute({
+        embeddable: { ...context.embeddable, parentApi: { getDashboardPanelFromId } },
+      });
+      const { getExportJson } = await renderFlyoutContent();
+
+      expect(getExportJson()).toEqual({
+        type: 'testEmbeddable',
+        grid: { x: 12, y: 30, w: 24, h: 10 },
+        config: { rawState: { key: 'value' } },
+      });
+      expect(getDashboardPanelFromId).toHaveBeenCalledWith('panel-1');
+    });
+
+    it('uses the default size for panels outside of a dashboard', async () => {
+      await action.execute(context);
+      const { getExportJson } = await renderFlyoutContent();
+
+      expect(getExportJson()).toEqual({
+        type: 'testEmbeddable',
+        grid: { x: 0, y: 0, w: 24, h: 15 },
+        config: { rawState: { key: 'value' } },
+      });
+    });
+  });
 });

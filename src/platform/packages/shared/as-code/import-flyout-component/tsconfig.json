@@ -7,6 +7,8 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/as-code-shared-schemas",
+    "@kbn/code-editor",
+    "@kbn/code-editor-mock",
     "@kbn/core-application-browser",
     "@kbn/core-application-browser-mocks",
     "@kbn/core-http-browser",

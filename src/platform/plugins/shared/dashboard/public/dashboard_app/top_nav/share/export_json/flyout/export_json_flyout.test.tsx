@@ -79,6 +79,9 @@ describe('DashboardPanelExportJsonFlyout', () => {
 
     getLatestSharedProps().getExportJson();
     expect(getExportJson).toHaveBeenLastCalledWith(false);
+    expect(screen.getByTestId('dashboardPanelExportJsonImportHint')).toHaveTextContent(
+      'To add this panel to another dashboard, copy this JSON and paste it in Add > From JSON.'
+    );
     expect(screen.getByText(/This panel is linked to the library/)).toBeInTheDocument();
 
     await user.click(screen.getByRole('switch'));

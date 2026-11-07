@@ -23,12 +23,22 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { apiCanBeDuplicated, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import {
+  apiCanBeDuplicated,
+  apiHasType,
+  apiPublishesTitle,
+  getTitle,
+  useBatchedPublishingSubjects,
+} from '@kbn/presentation-publishing';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import {
   userCanCopyToDashboard,
   openCopyToDashboardModal,
 } from '../../dashboard_actions/copy_to_dashboard_action';
+import {
+  apiCanExportJson,
+  openPanelsExportJsonFlyout,
+} from '../../dashboard_actions/export_json_action';
 
 const clearSelectionLabel = i18n.translate('dashboard.selectedPanelsToolbar.clearSelectionLabel', {
   defaultMessage: 'Clear selection (Esc)',
@@ -41,14 +51,68 @@ const copyToDashboardDisabledLabel = i18n.translate(
   }
 );
 
+const exportJsonDisabledLabel = i18n.translate(
+  'dashboard.selectedPanelsToolbar.exportJsonDisabledLabel',
+  {
+    defaultMessage: "These selected panels can't be exported as JSON:",
+  }
+);
+
+const MAX_LISTED_PANELS = 3;
+
+const getPanelName = (panel: unknown, panelId: string): string => {
+  const title = apiPublishesTitle(panel) ? getTitle(panel) : undefined;
+  if (title) return title;
+  return apiHasType(panel)
+    ? i18n.translate('dashboard.selectedPanelsToolbar.untitledPanelName', {
+        defaultMessage: 'Untitled {typeName}',
+        values: { typeName: panel.type },
+      })
+    : panelId;
+};
+
+/** Tooltip listing the selected panels that a disabled bulk action can't use */
+const UnsupportedPanelsTooltip = ({
+  heading,
+  panelIds,
+  panels,
+}: {
+  heading: string;
+  panelIds: string[];
+  panels: Record<string, unknown>;
+}) => {
+  const styles = useMemoCss(selectedPanelsToolbarStyles);
+  const hiddenCount = panelIds.length - MAX_LISTED_PANELS;
+  return (
+    <>
+      <p>{heading}</p>
+      <ul css={styles.tooltipList}>
+        {panelIds.slice(0, MAX_LISTED_PANELS).map((panelId) => (
+          <li key={panelId}>{getPanelName(panels[panelId], panelId)}</li>
+        ))}
+      </ul>
+      {hiddenCount > 0 && (
+        <p>
+          <FormattedMessage
+            id="dashboard.selectedPanelsToolbar.moreUnsupportedPanels"
+            defaultMessage="and {count, plural, one {# more panel} other {# more panels}}"
+            values={{ count: hiddenCount }}
+          />
+        </p>
+      )}
+    </>
+  );
+};
+
 /** Floating toolbar shown while panels are selected; exposes the bulk actions available for the selection */
 export const SelectedPanelsToolbar = () => {
   const dashboardApi = useDashboardApi();
   const styles = useMemoCss(selectedPanelsToolbarStyles);
-  const [selectedPanelIds, viewMode, children] = useBatchedPublishingSubjects(
+  const [selectedPanelIds, viewMode, children, hasOverlays] = useBatchedPublishingSubjects(
     dashboardApi.selectedPanelIds$,
     dashboardApi.viewMode$,
-    dashboardApi.children$
+    dashboardApi.children$,
+    dashboardApi.hasOverlays$
   );
 
   const onRemove = useCallback(() => {
@@ -61,12 +125,26 @@ export const SelectedPanelsToolbar = () => {
     openCopyToDashboardModal(dashboardApi, dashboardApi.selectedPanelIds$.value);
   }, [dashboardApi]);
 
-  if (viewMode !== 'edit' || selectedPanelIds.length === 0) return null;
+  const onExportJson = useCallback(() => {
+    const currentChildren = dashboardApi.children$.value;
+    openPanelsExportJsonFlyout(
+      dashboardApi.selectedPanelIds$.value
+        .map((panelId) => currentChildren[panelId])
+        .filter(apiCanExportJson)
+    );
+  }, [dashboardApi]);
+
+  // Hidden while a flyout is open, such as the Export JSON flyout, so the toolbar doesn't cover it
+  if (viewMode !== 'edit' || selectedPanelIds.length === 0 || hasOverlays) return null;
 
   const showCopyToDashboard = userCanCopyToDashboard();
   const canCopySelection = selectedPanelIds.every((panelId) =>
     apiCanBeDuplicated(children[panelId])
   );
+  const unexportablePanelIds = selectedPanelIds.filter(
+    (panelId) => !apiCanExportJson(children[panelId])
+  );
+  const canExportSelection = unexportablePanelIds.length === 0;
 
   return (
     <EuiPanel
@@ -128,6 +206,34 @@ export const SelectedPanelsToolbar = () => {
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={
+                  canExportSelection ? undefined : (
+                    <UnsupportedPanelsTooltip
+                      heading={exportJsonDisabledLabel}
+                      panelIds={unexportablePanelIds}
+                      panels={children}
+                    />
+                  )
+                }
+              >
+                <EuiButtonEmpty
+                  iconType="code"
+                  color="text"
+                  size="s"
+                  isDisabled={!canExportSelection}
+                  hasAriaDisabled
+                  onClick={onExportJson}
+                  data-test-subj="dashboardSelectedPanelsExportJson"
+                >
+                  <FormattedMessage
+                    id="dashboard.selectedPanelsToolbar.exportJsonButtonLabel"
+                    defaultMessage="Export JSON"
+                  />
+                </EuiButtonEmpty>
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 iconType="trash"
                 color="danger"
@@ -159,6 +265,11 @@ const selectedPanelsToolbarStyles = {
     }),
   // EuiBadge is fixed to the `xs` font scale; use the `s` scale of the small action buttons next to it
   count: (euiThemeContext: UseEuiTheme) => css(euiFontSize(euiThemeContext, 's')),
+  tooltipList: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      listStyle: 'disc',
+      paddingInlineStart: euiTheme.size.l,
+    }),
   divider: ({ euiTheme }: UseEuiTheme) =>
     css({
       display: 'block',
