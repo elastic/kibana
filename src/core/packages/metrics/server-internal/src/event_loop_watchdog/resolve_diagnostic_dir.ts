@@ -52,11 +52,12 @@ export const resolveDiagnosticDir = (
   const args = [...splitNodeOptions(nodeOptions), ...execArgv];
   let dir: string | undefined;
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === OPTION) {
-      dir = args[++i];
-    } else if (args[i].startsWith(`${OPTION}=`)) {
-      dir = args[i].slice(OPTION.length + 1);
+    const separator = args[i].indexOf('=');
+    const name = separator === -1 ? args[i] : args[i].slice(0, separator);
+    if (name.replace(/_/g, '-') !== OPTION) {
+      continue;
     }
+    dir = separator === -1 ? args[++i] : args[i].slice(separator + 1);
   }
   return dir || undefined;
 };

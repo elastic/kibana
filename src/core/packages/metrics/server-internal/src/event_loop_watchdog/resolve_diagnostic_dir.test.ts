@@ -71,4 +71,40 @@ describe('resolveDiagnosticDir', () => {
   it('prefers command-line flags over NODE_OPTIONS', () => {
     expect(resolveDiagnosticDir(['--diagnostic-dir=/cli'], '--diagnostic-dir=/env')).toBe('/cli');
   });
+
+  it('uses a later --diagnostic_dir over an earlier --diagnostic-dir', () => {
+    expect(
+      resolveDiagnosticDir(['--diagnostic-dir=/default', '--diagnostic_dir=/override'], '')
+    ).toBe('/override');
+  });
+
+  it('uses a later --diagnostic-dir over an earlier --diagnostic_dir', () => {
+    expect(
+      resolveDiagnosticDir(['--diagnostic_dir=/override', '--diagnostic-dir=/default'], '')
+    ).toBe('/default');
+  });
+
+  it('reads a --diagnostic_dir value given as the next argument', () => {
+    expect(resolveDiagnosticDir(['--diagnostic_dir', '/override', '--inspect'], '')).toBe(
+      '/override'
+    );
+  });
+
+  it('keeps underscores in the directory', () => {
+    expect(resolveDiagnosticDir(['--diagnostic_dir=/opt/my_dir'], '')).toBe('/opt/my_dir');
+    expect(resolveDiagnosticDir(['--diagnostic-dir=/opt/my_dir'], '')).toBe('/opt/my_dir');
+  });
+
+  it('prefers command-line flags over NODE_OPTIONS of the other spelling', () => {
+    expect(resolveDiagnosticDir(['--diagnostic_dir=/cli'], '--diagnostic-dir=/env')).toBe('/cli');
+    expect(resolveDiagnosticDir(['--diagnostic-dir=/cli'], '--diagnostic_dir=/env')).toBe('/cli');
+  });
+
+  it('returns undefined when the last --diagnostic_dir is empty', () => {
+    expect(resolveDiagnosticDir(['--diagnostic_dir='], '--diagnostic-dir=/env')).toBeUndefined();
+  });
+
+  it('ignores --diagnostic_directory', () => {
+    expect(resolveDiagnosticDir(['--diagnostic_directory=/no'], '')).toBeUndefined();
+  });
 });
