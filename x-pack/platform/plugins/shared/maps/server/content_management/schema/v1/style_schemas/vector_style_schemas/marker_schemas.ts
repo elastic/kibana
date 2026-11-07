@@ -50,17 +50,17 @@ export const iconStop = z
   .object({
     stop: z.string().nullable().default(null),
     icon: z.string(),
-    iconSource,
+    icon_source: iconSource,
   })
   .strict();
 
 export const iconDynamicOptions = z
   .object({
-    iconPaletteId: z.string().nullable().default(null),
-    customIconStops: z.array(iconStop).optional(),
-    useCustomIconMap: z.boolean().optional(),
+    icon_palette_id: z.string().nullable().default(null),
+    custom_icon_stops: z.array(iconStop).optional(),
+    use_custom_icon_map: z.boolean().optional(),
     field: styleFieldSchema.optional(),
-    fieldMetaOptions: fieldMetaOptionsSchema,
+    field_meta_options: fieldMetaOptionsSchema,
   })
   .strict();
 
@@ -71,7 +71,7 @@ export const iconStaticOptions = z
     }),
     label: z.string().optional(),
     svg: z.string().optional(),
-    iconSource: iconSource.optional(),
+    icon_source: iconSource.optional(),
   })
   .strict();
 
@@ -103,7 +103,7 @@ export const iconSchema = z
 export const orientationDynamicOptions = z
   .object({
     field: styleFieldSchema.optional(),
-    fieldMetaOptions: fieldMetaOptionsSchema,
+    field_meta_options: fieldMetaOptionsSchema,
   })
   .strict();
 
@@ -141,10 +141,10 @@ export const orientationSchema = z
 
 export const sizeDynamicOptions = z
   .object({
-    minSize: z.number(),
-    maxSize: z.number(),
+    min_size: z.number(),
+    max_size: z.number(),
     field: styleFieldSchema.optional(),
-    fieldMetaOptions: fieldMetaOptionsSchema,
+    field_meta_options: fieldMetaOptionsSchema,
     invert: z.boolean().optional(),
   })
   .strict();

@@ -14,14 +14,14 @@ import { MIN_SIZE, MAX_SIZE } from '../../vector_style_defaults';
 interface Props extends Omit<EuiDualRangeProps, 'value' | 'onChange' | 'min' | 'max'> {
   minSize: number;
   maxSize: number;
-  onChange: ({ maxSize, minSize }: { maxSize: number; minSize: number }) => void;
+  onChange: (range: { max_size: number; min_size: number }) => void;
 }
 
 export function SizeRangeSelector({ minSize, maxSize, onChange, ...rest }: Props) {
   const onSizeChange = ([min, max]: [string, string]) => {
     onChange({
-      minSize: Math.max(MIN_SIZE, parseInt(min, 10)),
-      maxSize: Math.min(MAX_SIZE, parseInt(max, 10)),
+      min_size: Math.max(MIN_SIZE, parseInt(min, 10)),
+      max_size: Math.min(MAX_SIZE, parseInt(max, 10)),
     });
   };
 

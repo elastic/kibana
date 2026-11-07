@@ -40,46 +40,46 @@ export const ML_ANOMALY_LAYERS = {
 export const getCustomColorRampStyleProperty = (euiTheme: EuiThemeComputed) => ({
   type: STYLE_TYPE.DYNAMIC,
   options: {
-    customColorRamp: getMlSeverityColorRampValue(euiTheme),
+    custom_color_ramp: getMlSeverityColorRampValue(euiTheme),
     field: {
       name: 'record_score',
       origin: FIELD_ORIGIN.SOURCE,
     },
-    useCustomColorRamp: true,
+    use_custom_color_ramp: true,
   },
 });
 
 export const getActualStyle = (euiTheme: EuiThemeComputed) => ({
   type: 'VECTOR',
   properties: {
-    fillColor: getCustomColorRampStyleProperty(euiTheme),
-    lineColor: getCustomColorRampStyleProperty(euiTheme),
+    fill_color: getCustomColorRampStyleProperty(euiTheme),
+    line_color: getCustomColorRampStyleProperty(euiTheme),
   },
-  isTimeAware: false,
+  is_time_aware: false,
 });
 
 export const TYPICAL_STYLE = {
   type: 'VECTOR',
   properties: {
-    fillColor: {
+    fill_color: {
       type: 'STATIC',
       options: {
         color: '#98A2B2',
       },
     },
-    lineColor: {
+    line_color: {
       type: 'STATIC',
       options: {
         color: '#fff',
       },
     },
-    lineWidth: {
+    line_width: {
       type: 'STATIC',
       options: {
         size: 2,
       },
     },
-    iconSize: {
+    icon_size: {
       type: 'STATIC',
       options: {
         size: 6,
@@ -137,13 +137,13 @@ export function getInitialSourceIndexFieldLayers(
           style: {
             type: 'VECTOR',
             properties: {
-              fillColor: {
+              fill_color: {
                 type: 'STATIC',
                 options: {
                   color,
                 },
               },
-              lineColor: {
+              line_color: {
                 type: 'STATIC',
                 options: {
                   color,

@@ -82,26 +82,26 @@ describe('createLayerDescriptor', () => {
         type: 'EMS_FILE',
       },
       style: {
-        isTimeAware: true,
+        is_time_aware: true,
         properties: {
           ...getDefaultStaticProperties(),
-          fillColor: {
+          fill_color: {
             options: {
               color: 'Green to Red',
-              colorCategory: 'palette_0',
+              color_category: 'palette_0',
               field: {
                 name: '__kbnjoin__avg_of_transaction.duration.us__12345',
                 origin: 'join',
               },
-              fieldMetaOptions: {
-                isEnabled: true,
+              field_meta_options: {
+                is_enabled: true,
                 sigma: 3,
               },
               type: 'ORDINAL',
             },
             type: 'DYNAMIC',
           },
-          lineColor: {
+          line_color: {
             options: {
               color: '#3d3d3d',
             },
@@ -197,41 +197,41 @@ describe('createLayerDescriptor', () => {
         type: 'ES_GEO_GRID',
       },
       style: {
-        isTimeAware: true,
+        is_time_aware: true,
         properties: {
           ...getDefaultStaticProperties(),
-          fillColor: {
+          fill_color: {
             options: {
               color: 'Green to Red',
-              colorCategory: 'palette_0',
+              color_category: 'palette_0',
               field: {
                 name: 'avg_of_transaction.duration.us',
                 origin: 'source',
               },
-              fieldMetaOptions: {
-                isEnabled: true,
+              field_meta_options: {
+                is_enabled: true,
                 sigma: 3,
               },
               type: 'ORDINAL',
             },
             type: 'DYNAMIC',
           },
-          iconSize: {
+          icon_size: {
             options: {
               field: {
                 name: 'avg_of_transaction.duration.us',
                 origin: 'source',
               },
-              fieldMetaOptions: {
-                isEnabled: true,
+              field_meta_options: {
+                is_enabled: true,
                 sigma: 3,
               },
-              maxSize: 32,
-              minSize: 7,
+              max_size: 32,
+              min_size: 7,
             },
             type: 'DYNAMIC',
           },
-          lineColor: {
+          line_color: {
             options: {
               color: '#3d3d3d',
             },

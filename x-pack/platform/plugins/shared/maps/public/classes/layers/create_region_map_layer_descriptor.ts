@@ -118,10 +118,10 @@ export function createRegionMapLayerDescriptor({
           },
           color: colorPallette ? colorPallette.value : 'Yellow to Red',
           type: COLOR_MAP_TYPE.ORDINAL,
-          fieldMetaOptions: {
+          field_meta_options: {
             ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options as ColorDynamicOptions)
-              .fieldMetaOptions,
-            isEnabled: false,
+              .field_meta_options,
+            is_enabled: false,
           },
         },
       },

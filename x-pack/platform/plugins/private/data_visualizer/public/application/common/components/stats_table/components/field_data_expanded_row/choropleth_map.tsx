@@ -65,30 +65,29 @@ export const getChoroplethTopValuesLayer = (
     } as EMSFileSourceDescriptor,
     style: {
       type: LAYER_STYLE_TYPE.VECTOR,
-      // @ts-ignore missing style properties. Remove once 'VectorLayerDescriptor' type is updated
       properties: {
         icon: { type: STYLE_TYPE.STATIC, options: { value: 'marker' } },
-        fillColor: {
+        fill_color: {
           type: STYLE_TYPE.DYNAMIC,
           options: {
             color: 'Blue to Red',
-            colorCategory: 'palette_0',
-            fieldMetaOptions: { isEnabled: true, sigma: 3 },
+            color_category: 'palette_0',
+            field_meta_options: { is_enabled: true, sigma: 3 },
             type: COLOR_MAP_TYPE.ORDINAL,
             field: {
               name: 'doc_count',
               origin: FIELD_ORIGIN.JOIN,
             },
-            useCustomColorRamp: false,
+            use_custom_color_ramp: false,
           },
         },
-        lineColor: {
+        line_color: {
           type: STYLE_TYPE.DYNAMIC,
-          options: { fieldMetaOptions: { isEnabled: true } },
+          options: { field_meta_options: { is_enabled: true } },
         },
-        lineWidth: { type: STYLE_TYPE.STATIC, options: { size: 1 } },
+        line_width: { type: STYLE_TYPE.STATIC, options: { size: 1 } },
       },
-      isTimeAware: true,
+      is_time_aware: true,
     },
     type: LAYER_TYPE.GEOJSON_VECTOR,
   };

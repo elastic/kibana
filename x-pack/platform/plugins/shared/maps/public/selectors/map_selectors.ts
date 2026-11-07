@@ -394,7 +394,7 @@ export const getMapColors = createSelector(getLayerListRaw, (layerList) =>
     .reduce((accu: string[], layerDescriptor: LayerDescriptor) => {
       const color: string | undefined = _.get(
         layerDescriptor,
-        'style.properties.fillColor.options.color'
+        'style.properties.fill_color.options.color'
       );
       if (color) accu.push(color);
       return accu;

@@ -14,14 +14,14 @@ import type { IField } from '../../../../../fields/field';
 import { MarkerSizeLegend } from './marker_size_legend';
 
 const dynamicSizeOptions = {
-  minSize: 7,
-  maxSize: 32,
+  min_size: 7,
+  max_size: 32,
   field: {
     name: 'bytes',
     origin: FIELD_ORIGIN.SOURCE,
   },
-  fieldMetaOptions: {
-    isEnabled: true,
+  field_meta_options: {
+    is_enabled: true,
     sigma: 3,
   },
   invert: false,
@@ -74,7 +74,7 @@ test('Should render legend with 3 markers when size difference does not provide 
           getOptions: () => {
             return {
               ...dynamicSizeOptions,
-              maxSize: 24,
+              max_size: 24,
             };
           },
         } as unknown as DynamicSizeProperty
@@ -97,7 +97,7 @@ test('Should render legend with 2 markers when size difference does not provide 
           getOptions: () => {
             return {
               ...dynamicSizeOptions,
-              maxSize: 15,
+              max_size: 15,
             };
           },
         } as unknown as DynamicSizeProperty
@@ -120,7 +120,7 @@ test('Should render legend with only max marker when size difference does not pr
           getOptions: () => {
             return {
               ...dynamicSizeOptions,
-              maxSize: 11,
+              max_size: 11,
             };
           },
         } as unknown as DynamicSizeProperty
@@ -143,8 +143,8 @@ test('Should render legend without label cutoff when min size is 1', async () =>
           getOptions: () => {
             return {
               ...dynamicSizeOptions,
-              minSize: 1,
-              maxSize: 7,
+              min_size: 1,
+              max_size: 7,
             };
           },
         } as unknown as DynamicSizeProperty
@@ -167,7 +167,7 @@ test('Should render max label with std clamp notification', async () => {
           getOptions: () => {
             return {
               ...dynamicSizeOptions,
-              maxSize: 11,
+              max_size: 11,
             };
           },
           getRangeFieldMeta: () => {
@@ -198,7 +198,7 @@ test('Should invert legend', async () => {
           getOptions: () => {
             return {
               ...dynamicSizeOptions,
-              maxSize: 24,
+              max_size: 24,
               invert: true,
             };
           },

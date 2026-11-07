@@ -98,8 +98,8 @@ export class MarkerSizeLegend extends Component<Props, State> {
       strokeWidth: 1,
     };
 
-    const svgHeight = options.maxSize * 2 + HALF_FONT_SIZE + circleStyle.strokeWidth * 2;
-    const circleCenterX = options.maxSize + circleStyle.strokeWidth;
+    const svgHeight = options.max_size * 2 + HALF_FONT_SIZE + circleStyle.strokeWidth * 2;
+    const circleCenterX = options.max_size + circleStyle.strokeWidth;
     const circleBottomY = svgHeight - circleStyle.strokeWidth;
 
     const makeMarker = (radius: number, formattedValue: string | number): Marker => {
@@ -128,8 +128,8 @@ export class MarkerSizeLegend extends Component<Props, State> {
     };
 
     function getMarkerRadius(percentage: number) {
-      const delta = options.maxSize - options.minSize;
-      return percentage * delta + options.minSize;
+      const delta = options.max_size - options.min_size;
+      return percentage * delta + options.min_size;
     }
 
     function getValue(percentage: number) {
@@ -155,11 +155,11 @@ export class MarkerSizeLegend extends Component<Props, State> {
 
     const markerList = new MarkerList(
       FONT_SIZE,
-      makeMarker(options.maxSize, invert ? minLabel : maxLabel)
+      makeMarker(options.max_size, invert ? minLabel : maxLabel)
     );
 
     if (fieldMeta.delta > 0) {
-      markerList.push(makeMarker(options.minSize, invert ? maxLabel : minLabel));
+      markerList.push(makeMarker(options.min_size, invert ? maxLabel : minLabel));
       markerList.push(makeMarker(getMarkerRadius(0.25), this._formatValue(getValue(0.25))));
       markerList.push(makeMarker(getMarkerRadius(0.5), this._formatValue(getValue(0.5))));
       markerList.push(makeMarker(getMarkerRadius(0.75), this._formatValue(getValue(0.75))));

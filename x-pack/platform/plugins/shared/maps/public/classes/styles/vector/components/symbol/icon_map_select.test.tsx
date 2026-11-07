@@ -47,12 +47,12 @@ class MockDynamicStyleProperty {
 }
 
 const defaultProps = {
-  iconPaletteId: 'filledShapes',
+  icon_palette_id: 'filledShapes',
   onChange: () => {},
   styleProperty:
     new MockDynamicStyleProperty() as unknown as IDynamicStyleProperty<IconDynamicOptions>,
   isCustomOnly: false,
-  customIconStops: [
+  custom_icon_stops: [
     {
       stop: null,
       icon: 'circle',
@@ -73,8 +73,8 @@ test('Should render custom stops input when useCustomIconMap', () => {
   const component = shallow(
     <IconMapSelect
       {...defaultProps}
-      useCustomIconMap={true}
-      customIconStops={[
+      use_custom_icon_map={true}
+      custom_icon_stops={[
         {
           stop: null,
           icon: 'circle',
@@ -110,7 +110,7 @@ test('Should render icon map select with custom icons', () => {
           radius: 0.15,
         },
       ]}
-      customIconStops={[
+      custom_icon_stops={[
         {
           stop: null,
           icon: '__kbn__custom_icon_sdf__bizzbuzz',

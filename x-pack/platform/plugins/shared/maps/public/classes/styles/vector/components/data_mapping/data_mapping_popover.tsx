@@ -42,7 +42,7 @@ export class DataMappingPopover extends Component<Props, State> {
     return (
       <EuiButtonEmpty onClick={this._togglePopover} size="xs" iconType="controls" iconSide="left">
         <FormattedMessage
-          id="xpack.maps.styles.fieldMetaOptions.popoverToggle"
+          id="xpack.maps.styles.field_meta_options.popoverToggle"
           defaultMessage="Data mapping"
         />
       </EuiButtonEmpty>
@@ -59,7 +59,7 @@ export class DataMappingPopover extends Component<Props, State> {
         closePopover={this._closePopover}
         ownFocus
         aria-label={i18n.translate(
-          'xpack.maps.styles.fieldMetaOptions.dataMappingPopoverAriaLabel',
+          'xpack.maps.styles.field_meta_options.dataMappingPopoverAriaLabel',
           {
             defaultMessage: 'Data mapping',
           }

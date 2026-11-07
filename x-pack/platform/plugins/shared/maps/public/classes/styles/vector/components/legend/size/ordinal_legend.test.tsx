@@ -14,14 +14,14 @@ import type { IField } from '../../../../../fields/field';
 import { OrdinalLegend } from './ordinal_legend';
 
 const dynamicSizeOptions = {
-  minSize: 1,
-  maxSize: 10,
+  min_size: 1,
+  max_size: 10,
   field: {
     name: 'bytes',
     origin: FIELD_ORIGIN.SOURCE,
   },
-  fieldMetaOptions: {
-    isEnabled: true,
+  field_meta_options: {
+    is_enabled: true,
     sigma: 3,
   },
   invert: false,
