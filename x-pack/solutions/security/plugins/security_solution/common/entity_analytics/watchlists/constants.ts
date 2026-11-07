@@ -27,6 +27,9 @@ export const WATCHLISTS_ENTITIES_ASSIGN_URL =
   `${WATCHLISTS_URL}/{watchlist_id}/entities/assign` as const;
 export const WATCHLISTS_ENTITIES_UNASSIGN_URL =
   `${WATCHLISTS_URL}/{watchlist_id}/entities/unassign` as const;
+/** Internal: lists the entities assigned to a watchlist by hand, for the watchlist edit flyout. */
+export const WATCHLISTS_MANUAL_ENTITIES_LIST_INTERNAL_URL =
+  '/internal/entity_analytics/watchlists/{watchlist_id}/entities/manual' as const;
 
 const PRIVILEGED_USER_WATCHLIST_ID = 'privileged-user-monitoring-watchlist-id';
 export const PRIVILEGED_USER_WATCHLIST_NAME = 'Privileged Users';

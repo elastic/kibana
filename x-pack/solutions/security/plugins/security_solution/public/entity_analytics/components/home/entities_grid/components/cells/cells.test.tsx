@@ -212,6 +212,17 @@ describe('RowActionsCell', () => {
     expect(onAddToCase).toHaveBeenCalledTimes(1);
   });
 
+  it('adds the entity to a watchlist from the more actions menu', async () => {
+    const onAddToWatchlist = jest.fn();
+    renderInProviders(
+      <RowActionsCell onOpenEntityGraph={jest.fn()} onAddToWatchlist={onAddToWatchlist} />
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'More actions' }));
+    expect(screen.queryByText('Add to chat')).not.toBeInTheDocument();
+    fireEvent.click(await screen.findByText('Add to watchlist'));
+    expect(onAddToWatchlist).toHaveBeenCalledTimes(1);
+  });
+
   it('hides the more actions menu without the agent chat', () => {
     renderActions({ canAddToChat: false });
     expect(screen.queryByRole('button', { name: 'More actions' })).not.toBeInTheDocument();

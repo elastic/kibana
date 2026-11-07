@@ -6,4 +6,5 @@
  */
 
 export * from './assign.gen';
+export * from './list_manual.gen';
 export * from './unassign.gen';

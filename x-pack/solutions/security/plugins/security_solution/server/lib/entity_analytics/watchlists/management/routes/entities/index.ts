@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { EntityAnalyticsRoutesDeps } from '../../../../types';
 import { assignWatchlistEntitiesRoute } from './assign';
+import { listManualWatchlistEntitiesRoute } from './list_manual';
 import { unassignWatchlistEntitiesRoute } from './unassign';
 
 export const registerManualEntityRoutes = (
@@ -16,4 +17,5 @@ export const registerManualEntityRoutes = (
 ) => {
   assignWatchlistEntitiesRoute(router, logger);
   unassignWatchlistEntitiesRoute(router, logger);
+  listManualWatchlistEntitiesRoute(router, logger);
 };
