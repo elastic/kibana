@@ -9,7 +9,7 @@ import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import { set } from '@kbn/safer-lodash-set';
 import { waitFor } from '@testing-library/react';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 import type { SearchHit } from '../../../../../common/search_strategy';
 import type { TakeActionDropdownProps } from './take_action_dropdown';
 import { TakeActionDropdown } from './take_action_dropdown';

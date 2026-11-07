@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimelineEventsQueries } from '@kbn/timelines-plugin/common/api/search_strategy';
+import { TimelineEventsQueries } from '@kbn/securitysolution-timeline-search-strategy';
 
 import type { TimelineFactory } from '../types';
 import { timelineEventsAll } from './all';

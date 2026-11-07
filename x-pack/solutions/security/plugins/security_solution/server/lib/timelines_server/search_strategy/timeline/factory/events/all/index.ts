@@ -9,12 +9,12 @@ import { cloneDeep, getOr } from 'lodash/fp';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import { buildAlertFieldsRequest as buildFieldsRequest } from '@kbn/alerts-as-data-utils';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import type { TimelineEventsQueries } from '@kbn/timelines-plugin/common/api/search_strategy';
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '@kbn/timelines-plugin/common/constants';
 import type {
+  TimelineEventsQueries,
   EventHit,
   TimelineEventsAllStrategyResponse,
-} from '@kbn/timelines-plugin/common/search_strategy';
+} from '@kbn/securitysolution-timeline-search-strategy';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '@kbn/timelines-plugin/common/constants';
 import type { TimelineFactory } from '../../types';
 import { buildTimelineEventsAllQuery } from './query.events_all.dsl';
 import { inspectStringifyObject } from '../../../../../utils/build_query';

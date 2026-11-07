@@ -6,7 +6,7 @@
  */
 
 import type { Ecs } from '@elastic/ecs';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 import { get } from 'lodash';
 import { ECS_OS_TYPE_FIELDS } from '../../../../../common/endpoint/service/response_actions/constants';
 import { parseEcsFieldPath } from '..';

@@ -6,7 +6,7 @@
  */
 
 import type { EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
-import type { EqlSearchResponse } from '@kbn/timelines-plugin/common/search_strategy';
+import type { EqlSearchResponse } from '@kbn/securitysolution-timeline-search-strategy';
 
 export const sequenceResponse = {
   rawResponse: {

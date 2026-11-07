@@ -6,7 +6,7 @@
  */
 
 import type { BrowserFields } from '@kbn/securitysolution-timeline-common';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 import { get, getOr } from 'lodash/fp';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type {

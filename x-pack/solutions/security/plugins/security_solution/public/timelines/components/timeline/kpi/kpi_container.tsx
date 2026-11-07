@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { isEmpty, pick } from 'lodash/fp';
 import { useSelector } from 'react-redux-v7';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import type { TimerangeInput } from '@kbn/timelines-plugin/common';
+import type { TimerangeInput } from '@kbn/securitysolution-timeline-search-strategy';
 import { EuiPanel } from '@elastic/eui';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';

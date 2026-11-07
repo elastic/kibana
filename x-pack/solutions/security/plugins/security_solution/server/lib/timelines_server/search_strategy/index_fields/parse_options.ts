@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { indexFieldsRequestSchema } from '@kbn/timelines-plugin/common/api/search_strategy';
+import { indexFieldsRequestSchema } from '@kbn/securitysolution-timeline-search-strategy';
 
 export const parseOptions = (options: unknown) => indexFieldsRequestSchema.parse(options);

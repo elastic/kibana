@@ -7,7 +7,7 @@
 
 import { set } from '@kbn/safer-lodash-set';
 import { getHostPlatform } from './get_host_platform';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 
 describe('getHostPlatform() util', () => {
   const buildEcsData = (data: Record<string, string>) => {

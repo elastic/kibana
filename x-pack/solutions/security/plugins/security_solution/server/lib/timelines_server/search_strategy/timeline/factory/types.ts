@@ -9,7 +9,7 @@ import type {
   TimelineFactoryQueryTypes,
   TimelineStrategyRequestType,
   TimelineStrategyResponseType,
-} from '@kbn/timelines-plugin/common/search_strategy/timeline';
+} from '@kbn/securitysolution-timeline-search-strategy';
 
 export interface TimelineFactory<T extends TimelineFactoryQueryTypes> {
   buildDsl: (options: TimelineStrategyRequestType<T>) => ISearchRequestParams;

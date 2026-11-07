@@ -8,8 +8,10 @@
 import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/search-types';
-import type { TimelineEventsQueries } from '@kbn/timelines-plugin/common/api/search_strategy';
-import type { TimelineEventsLastEventTimeStrategyResponse } from '@kbn/timelines-plugin/common/search_strategy/timeline';
+import type {
+  TimelineEventsQueries,
+  TimelineEventsLastEventTimeStrategyResponse,
+} from '@kbn/securitysolution-timeline-search-strategy';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import type { TimelineFactory } from '../../types';
 import { buildLastEventTimeQuery } from './query.events_last_event_time.dsl';

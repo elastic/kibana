@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 import { useMemo } from 'react';
 import { find, some } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';

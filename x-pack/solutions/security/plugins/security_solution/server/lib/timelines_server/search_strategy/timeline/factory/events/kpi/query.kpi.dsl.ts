@@ -6,9 +6,12 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import type { TimelineKpiRequestOptions } from '@kbn/timelines-plugin/common/api/search_strategy/timeline/kpi';
+import type {
+  TimelineKpiRequestOptions,
+  TimerangeFilter,
+  TimerangeInput,
+} from '@kbn/securitysolution-timeline-search-strategy';
 
-import type { TimerangeFilter, TimerangeInput } from '@kbn/timelines-plugin/common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/filters';
 
 export const buildTimelineKpiQuery = ({
