@@ -306,9 +306,9 @@ describe('impact map', () => {
     expect(record).not.toHaveProperty('impact_map');
   });
 
-  it('asks for the map in the final schema only', () => {
+  it('asks for the map in both schemas', () => {
     expect(FINDINGS_JSON_SCHEMA.properties).toHaveProperty('impact_map');
-    expect(LIVE_FINDINGS_JSON_SCHEMA.properties).not.toHaveProperty('impact_map');
+    expect(LIVE_FINDINGS_JSON_SCHEMA.properties).toHaveProperty('impact_map');
   });
 });
 

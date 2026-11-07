@@ -533,6 +533,7 @@ export const runFindingsPass = async (
       ? {
           summary: output.summary,
           hypotheses: output.hypotheses.map((hypothesis) => omit(hypothesis, 'evidence')),
+          ...(output.impact_map ? { impact_map: output.impact_map } : {}),
         }
       : output;
   // A follow-up already has hypotheses with evidence. A live pass is too thin to revise them
@@ -613,9 +614,9 @@ export const runFindingsPass = async (
           }),
       ]);
     }
-    // Omitted keeps the stored map: a later final pass may answer without redrawing it.
+    // Omitted keeps the stored map. A live pass redraws it too, so it follows the evidence.
     const impactMap = record.impact_map;
-    if (final && impactMap) {
+    if (impactMap) {
       writes.push(['impact map', () => writer.setImpactMap({ conversationId, impactMap })]);
     }
     const proposals = deps.getProposals?.();

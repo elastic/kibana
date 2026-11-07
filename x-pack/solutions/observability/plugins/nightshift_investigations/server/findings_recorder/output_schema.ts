@@ -119,7 +119,7 @@ export const findingsOutputSchema = lazySchema(() => {
       )
       .optional(),
     hypotheses: z.array(hypothesisSchema),
-    // Only the final pass draws the map. Omitting it keeps the stored map.
+    // Omitting the map keeps the stored one; a pass that includes it replaces it.
     impact_map: z
       .object({
         title: z.string().optional(),
@@ -719,8 +719,8 @@ const { evidence: _hypothesisEvidence, ...LIVE_HYPOTHESIS_PROPERTIES } =
   FINDINGS_JSON_SCHEMA.properties.hypotheses.items.properties;
 
 /**
- * What a live pass may answer while the investigation runs: the summary and the hypothesis tree.
- * The rest of the record, with its evidence, is written once, from the final pass.
+ * What a live pass may answer while the investigation runs: the summary, the hypothesis tree and
+ * the impact map. The rest of the record, with its evidence, is written once, from the final pass.
  */
 export const LIVE_FINDINGS_JSON_SCHEMA = {
   type: 'object',
@@ -735,6 +735,8 @@ export const LIVE_FINDINGS_JSON_SCHEMA = {
         properties: LIVE_HYPOTHESIS_PROPERTIES,
       },
     },
+    // Redrawn whenever new evidence changes it, so the map never lags the findings.
+    impact_map: FINDINGS_JSON_SCHEMA.properties.impact_map,
   },
   required: ['summary', 'hypotheses'],
 } as const;

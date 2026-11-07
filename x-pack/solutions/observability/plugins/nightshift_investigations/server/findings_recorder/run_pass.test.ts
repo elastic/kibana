@@ -337,7 +337,7 @@ describe('runFindingsPass', () => {
 
     const schemaOf = (chatComplete: jest.Mock) =>
       chatComplete.mock.calls[0][0].tools.structuredOutput.schema.properties;
-    expect(Object.keys(schemaOf(live.chatComplete))).toEqual(['summary', 'hypotheses']);
+    expect(Object.keys(schemaOf(live.chatComplete))).toEqual(['summary', 'hypotheses', 'impact_map']);
     expect(Object.keys(schemaOf(final.chatComplete))).toEqual(
       expect.arrayContaining(['verdict', 'severity', 'impact_summary', 'impact_entities'])
     );
@@ -440,7 +440,7 @@ describe('runFindingsPass', () => {
     expect(writer.setImpact).not.toHaveBeenCalled();
   });
 
-  it('writes the impact map from the final pass only', async () => {
+  it('redraws the impact map on live passes and on the final pass', async () => {
     const impactMap = {
       entities: [
         { id: 'checkout', type: 'java_service', agent_name: 'java', role: 'symptom' },
@@ -452,7 +452,11 @@ describe('runFindingsPass', () => {
     };
     const live = setup({ answers: [answerWith({ ...output, impact_map: impactMap })] });
     await run(live.deps, live.memory);
-    expect(live.writer.setImpactMap).not.toHaveBeenCalled();
+    expect(live.writer.setImpactMap).toHaveBeenCalledTimes(1);
+
+    const quiet = setup({ answers: [answerWith(output)] });
+    await run(quiet.deps, quiet.memory);
+    expect(quiet.writer.setImpactMap).not.toHaveBeenCalled();
 
     const { deps, writer, memory } = setup({
       answers: [answerWith({ ...output, impact_map: impactMap })],
@@ -971,7 +975,7 @@ describe('runFindingsPass with workspace files', () => {
 
     // A live pass is not told about the fields it does not write, or the files it cannot read.
     expect(live).toContain('hypotheses');
-    for (const only of ['impact', 'severity', 'verdict', 'recorder_read_file']) {
+    for (const only of ['impact_evidence', 'severity', 'verdict', 'recorder_read_file']) {
       expect(live).not.toContain(only);
     }
     expect(finalPlain).toContain('impact');

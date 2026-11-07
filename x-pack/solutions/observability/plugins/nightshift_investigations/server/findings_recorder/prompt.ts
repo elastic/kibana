@@ -38,17 +38,20 @@ const UPDATING = `## Updating
 
 Your earlier answers in this conversation are the current record. Keep what is still right, correct what the new evidence changed, and add what is new. Do not drop a hypothesis the agent has not ruled out.`;
 
-/** Asked while the agent is still working: the summary and the hypotheses, nothing else. */
+const IMPACT_MAP_LIVE = `- impact_map: a map from where the problem was seen to its cause, kept current as you learn. It is a snapshot that replaces the stored map, so include it again whenever new evidence changes what it shows: a new or ruled-out entity or dependency, a different root cause or symptom, health that got better or worse, or a different critical path. Leave it out while you cannot tell how two or more entities depend on each other. List only the entities and dependencies the tool results show, usually 3 to 12. Mark the cause root_cause, where it was seen symptom, and every entity it hurt impacted, and set on_critical_path on each hop between them. Give every entity a type id you would reuse in another investigation (java_service, postgresql) with its kind and icon fields, and point each relationship from the caller to what it depends on.`;
+
+/** Asked while the agent is still working: the summary, the hypotheses and the impact map. */
 const LIVE_SYSTEM_PROMPT = `${ROLE}
 
 Be concise. There are at most eight hypotheses. Merge near-duplicates instead of listing them separately.
 
 ## The record
 
-While the agent is working you fill in only the summary and the hypotheses. The rest of the record is written once the agent has finished.
+While the agent is working you fill in the summary, the hypotheses and the impact map. The rest of the record is written once the agent has finished.
 
 ${SUMMARY}
 ${HYPOTHESES}
+${IMPACT_MAP_LIVE}
 
 ${UPDATING}`;
 
