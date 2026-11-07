@@ -16,7 +16,7 @@ import {
   ViewsStats,
   type ContentInsightsClientPublic,
 } from '@kbn/content-management-content-insights-public';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { ContentListItem } from '@kbn/content-list-provider';
 
 /**
  * Props for {@link SavedObjectActivityRow}.
@@ -34,9 +34,13 @@ export interface SavedObjectActivityRowProps {
    * `updatedBy`, `updatedAt`, and `managed` for the activity card and uses
    * `id` to fetch view stats.
    */
-  item: UserContentCommonSchema;
+  item: ContentListItem;
   /** Plural entity label used by the activity card's "no creator/updater" tip. */
   entityNamePlural?: string;
+  /**
+   * Whether Kibana versioning is enabled.
+   */
+  isKibanaVersioningEnabled?: boolean;
 }
 
 /**
@@ -60,34 +64,48 @@ export const SavedObjectActivityRow = ({
   service,
   item,
   entityNamePlural,
-}: SavedObjectActivityRowProps) => (
-  <ContentInsightsProvider contentInsightsClient={service}>
-    <EuiFormRow
-      fullWidth
-      label={
-        <>
-          <FormattedMessage
-            id="contentManagement.contentListProviderClient.contentEditor.activityLabel"
-            defaultMessage="Activity"
-          />{' '}
-          <EuiIconTip
-            type="info"
-            iconProps={{ style: { verticalAlign: 'bottom' } }}
-            content={
-              <FormattedMessage
-                id="contentManagement.contentListProviderClient.contentEditor.activityLabelHelpText"
-                defaultMessage="Activity data is auto-generated and cannot be updated."
-              />
-            }
-          />
-        </>
-      }
+  isKibanaVersioningEnabled,
+}: SavedObjectActivityRowProps) => {
+  const activityItem = {
+    createdAt: item.createdAt,
+    createdBy: item.createdBy,
+    updatedAt: item.updatedAt?.toISOString(),
+    updatedBy: item.updatedBy,
+    managed: item.managed,
+  };
+
+  return (
+    <ContentInsightsProvider
+      contentInsightsClient={service}
+      isKibanaVersioningEnabled={isKibanaVersioningEnabled}
     >
-      <>
-        <ActivityView {...{ item, entityNamePlural }} />
-        <EuiSpacer size="s" />
-        <ViewsStats {...{ item }} />
-      </>
-    </EuiFormRow>
-  </ContentInsightsProvider>
-);
+      <EuiFormRow
+        fullWidth
+        label={
+          <>
+            <FormattedMessage
+              id="contentManagement.contentListProviderClient.contentEditor.activityLabel"
+              defaultMessage="Activity"
+            />{' '}
+            <EuiIconTip
+              type="info"
+              iconProps={{ style: { verticalAlign: 'bottom' } }}
+              content={
+                <FormattedMessage
+                  id="contentManagement.contentListProviderClient.contentEditor.activityLabelHelpText"
+                  defaultMessage="Activity data is auto-generated and cannot be updated."
+                />
+              }
+            />
+          </>
+        }
+      >
+        <>
+          <ActivityView item={activityItem} entityNamePlural={entityNamePlural} />
+          <EuiSpacer size="s" />
+          <ViewsStats item={item} />
+        </>
+      </EuiFormRow>
+    </ContentInsightsProvider>
+  );
+};

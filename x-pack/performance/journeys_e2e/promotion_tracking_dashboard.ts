@@ -41,7 +41,12 @@ export const journey = new Journey({
   })
 
   .step('Go to Promotion Tracking Dashboard', async ({ page }) => {
-    await page.click(subj('dashboardListingTitleLink-Promotion-Dashboard'));
+    await page
+      .getByRole('link', {
+        name: 'Promotion Dashboard',
+        exact: true,
+      })
+      .click();
   })
 
   .step('Change time range', async ({ page }) => {

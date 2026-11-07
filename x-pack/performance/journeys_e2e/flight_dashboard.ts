@@ -14,7 +14,6 @@ export const journey = setupDashboardJourney({
     esArchives: ['x-pack/performance/es_archives/sample_data_flights_many_fields'],
     kbnArchives: ['x-pack/performance/kbn_archives/flights_no_map_dashboard'],
   }),
-  dashboardName: 'Flights Dashboard',
-  dashboardLinkSubj: 'dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard',
+  dashboardTitle: '[Flights] Global Flight Dashboard',
   visualizationCount: 14,
 });

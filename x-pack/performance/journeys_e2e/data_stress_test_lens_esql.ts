@@ -14,8 +14,7 @@ export const journey = setupDashboardJourney({
     esArchives: ['src/platform/test/functional/fixtures/es_archiver/stress_test'],
     kbnArchives: ['src/platform/test/functional/fixtures/kbn_archiver/stress_test_esql'],
   }),
-  dashboardName: 'Stress Test Dashboard',
-  dashboardLinkSubj: 'dashboardListingTitleLink-Stresstest-(ES|QL)',
+  dashboardTitle: 'Stresstest (ES|QL)',
   visualizationCount: 1,
   setup: async (kibanaServer) => {
     await kibanaServer.uiSettings.update({ 'histogram:maxBars': 100 });

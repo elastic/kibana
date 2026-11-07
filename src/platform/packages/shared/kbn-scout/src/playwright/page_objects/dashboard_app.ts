@@ -1130,9 +1130,7 @@ export class DashboardApp {
 
   /** Navigates to a dashboard by clicking its title link on the listing page. */
   async clickDashboardTitleLink(dashboardTitle: string) {
-    await this.page.testSubj.click(
-      `dashboardListingTitleLink-${dashboardTitle.split(' ').join('-')}`
-    );
+    await this.getDashboardListingLink(dashboardTitle).click();
     await this.waitForRenderComplete();
   }
 
@@ -1186,7 +1184,7 @@ export class DashboardApp {
   // ============================================================
 
   getDashboardListingLink(title: string) {
-    return this.page.testSubj.locator(`dashboardListingTitleLink-${title.split(' ').join('-')}`);
+    return this.page.getByRole('link', { name: title, exact: true });
   }
 
   // Project (chrome-next) shows the dashboard title in the app header; classic chrome shows it as
