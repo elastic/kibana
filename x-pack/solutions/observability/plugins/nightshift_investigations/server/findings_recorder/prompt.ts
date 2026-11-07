@@ -151,7 +151,7 @@ export const catalogPromptSection = (catalog?: ImpactMapCatalog): string => {
 
 ## Types already in the catalog
 
-Reuse these ids exactly when an entity or relationship is the same kind of thing. Add a new type only for a kind of thing that is not here, and classify it fully: its kind (service for code that runs, dependency for what it relies on) and its icon (agent_name, eui_icon, or span_type and span_subtype).
+Reuse these ids exactly when an entity or relationship is the same kind of thing. Add a new type only for a kind of thing that is not here, and classify it fully: its kind (service for application code, dependency for what services call, infrastructure for what runs them: Kubernetes objects, hosts, containers, cloud resources) and its icon (agent_name, eui_icon, or span_type and span_subtype).
 
 Entity types:
 ${entityLines.join('\n')}

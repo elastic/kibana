@@ -29,7 +29,7 @@ export const MAX_IMPACT_MAP_CATALOG_TYPES = 100;
  * code (a service, a pod, a function), a diamond for something it depends on (a database, a
  * queue, an external host).
  */
-export const IMPACT_MAP_ENTITY_KINDS = ['service', 'dependency'] as const;
+export const IMPACT_MAP_ENTITY_KINDS = ['service', 'dependency', 'infrastructure'] as const;
 
 /** Where an entity sits in the story of the problem. */
 export const IMPACT_MAP_ROLES = ['root_cause', 'symptom', 'contributor', 'context'] as const;

@@ -34,7 +34,7 @@ import type { ImpactMapRendererProps } from '@kbn/agentic-investigations-plugin/
 import { getSeverityColor } from '../../../common/anomaly_detection';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getApmInternalServices } from '../../plugin';
-import { SERVICE_NODE_CIRCLE_SIZE } from '../../../common/service_map/constants';
+import { InfrastructureNode } from './infrastructure_node';
 import { ServiceNode } from '../../components/shared/service_map/service_node';
 import { DiamondNode } from '../../components/shared/service_map/diamond_node';
 import { applyDagreLayout } from '../../components/shared/service_map/layout';
@@ -105,23 +105,6 @@ function StateBadge({ state, floating }: { state: ImpactState; floating?: boolea
 const ImpactServiceNode = memo((props: NodeProps<Node<ImpactServiceNodeData>>) => (
   <>
     <ServiceNode {...props} />
-    {!props.data.agentName && props.data.euiIcon && (
-      <span
-        css={css`
-          position: absolute;
-          top: 0;
-          left: calc(50% - ${SERVICE_NODE_CIRCLE_SIZE / 2}px);
-          width: ${SERVICE_NODE_CIRCLE_SIZE}px;
-          height: ${SERVICE_NODE_CIRCLE_SIZE}px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          pointer-events: none;
-        `}
-      >
-        <EuiIcon type={props.data.euiIcon} size="l" aria-hidden="true" />
-      </span>
-    )}
     {props.data.impactState && <StateBadge state={props.data.impactState} floating />}
   </>
 ));
@@ -149,7 +132,16 @@ const ImpactDependencyNode = memo(
 );
 ImpactDependencyNode.displayName = 'ImpactDependencyNode';
 
+const ImpactInfrastructureNode = memo((props: NodeProps<Node<ImpactDependencyNodeData>>) => (
+  <>
+    <InfrastructureNode {...props} />
+    {props.data.impactState && <StateBadge state={props.data.impactState} floating />}
+  </>
+));
+ImpactInfrastructureNode.displayName = 'ImpactInfrastructureNode';
+
 const nodeTypes: NodeTypes = {
+  impactInfrastructure: ImpactInfrastructureNode,
   service: ImpactServiceNode,
   impactDependency: ImpactDependencyNode,
 };
@@ -223,7 +215,7 @@ const useServiceAgentNames = (impactMap: ImpactMapRendererProps['impactMap']) =>
   const [agentNames, setAgentNames] = useState<Record<string, string>>({});
   const serviceIds = useMemo(() => {
     const dependencyTypes = new Set(
-      impactMap.entity_types.filter(({ kind }) => kind === 'dependency').map(({ id }) => id)
+      impactMap.entity_types.filter(({ kind }) => kind !== 'service').map(({ id }) => id)
     );
     return impactMap.entities
       .filter(({ type_id: t }) => !dependencyTypes.has(t))

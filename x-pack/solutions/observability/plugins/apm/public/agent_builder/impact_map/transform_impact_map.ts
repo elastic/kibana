@@ -67,8 +67,6 @@ export const getImpactState = (annotations?: ImpactMapAnnotations): ImpactState 
 
 export type ImpactServiceNodeData = ServiceNodeData & {
   impactState?: ImpactState;
-  /** An EUI icon for a service APM has no agent logo for, such as a Kubernetes deployment. */
-  euiIcon?: string;
 };
 
 const KUBERNETES_TYPE =
@@ -81,11 +79,13 @@ export const getEuiIcon = (type?: ImpactMapEntityType): string | undefined =>
 export type ImpactDependencyNodeData = DependencyNodeData & {
   severityScore?: number;
   impactState?: ImpactState;
+  euiIcon?: string;
 };
 
 export type ImpactServiceMapNode =
   | Node<ImpactServiceNodeData, 'service'>
-  | Node<ImpactDependencyNodeData, 'impactDependency'>;
+  | Node<ImpactDependencyNodeData, 'impactDependency'>
+  | Node<ImpactDependencyNodeData, 'impactInfrastructure'>;
 
 export interface ImpactServiceMapEdge extends Edge {
   type: 'default';
@@ -101,7 +101,7 @@ const CRITICAL_PATH_STROKE_WIDTH = 3;
 /**
  * Turns an investigation's impact map into service map nodes and edges: an entity type of kind
  * `service` draws as a service circle, `dependency` as a dependency diamond, with the icon the
- * type names. Root cause, symptom and impacted entities get the matching severity border, and
+ * type names, and `infrastructure` as a rounded square. Root cause, symptom and impacted entities get the matching severity border, and
  * relationships on the critical path are drawn thicker in the critical path colour. A service
  * APM has traces for takes the icon of its agent, as on the service map.
  */
@@ -126,6 +126,19 @@ export const transformImpactMap = (
       const impactState = getImpactState(annotations);
       const position = { x: 0, y: 0 };
 
+      const euiIcon = getEuiIcon(type);
+      const agentName = (agentNames[id] ?? type?.icon?.agent_name) as AgentName | undefined;
+
+      // What runs and hosts the services gets its own shape: a service with no agent logo but a
+      // named icon, such as a Kubernetes deployment a type from before this kind existed.
+      if (type?.kind === 'infrastructure' || (type?.kind === 'service' && !agentName && euiIcon)) {
+        return {
+          id,
+          type: 'impactInfrastructure',
+          position,
+          data: { id, label, isService: false, severityScore: score, impactState, euiIcon },
+        };
+      }
       if (type?.kind === 'dependency') {
         return {
           id,
@@ -151,8 +164,7 @@ export const transformImpactMap = (
           label,
           isService: true,
           impactState,
-          euiIcon: getEuiIcon(type),
-          agentName: (agentNames[id] ?? type?.icon?.agent_name) as AgentName | undefined,
+          agentName,
           ...(score !== undefined && { serviceAnomalyStats: { anomalyScore: score } }),
           ...(annotations?.alert_count && { alertsCount: annotations.alert_count }),
         },

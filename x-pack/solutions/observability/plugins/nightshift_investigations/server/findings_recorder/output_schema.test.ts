@@ -232,8 +232,9 @@ describe('classifyEntityType', () => {
   it('draws what services rely on as a dependency and Kubernetes objects with their logo', () => {
     expect(classifyEntityType('postgres_database')).toEqual({ kind: 'dependency' });
     expect(classifyEntityType('message_queue')).toEqual({ kind: 'dependency' });
+    expect(classifyEntityType('host')).toEqual({ kind: 'infrastructure' });
     expect(classifyEntityType('k8s_deployment')).toEqual({
-      kind: 'service',
+      kind: 'infrastructure',
       euiIcon: 'logoKubernetes',
     });
     expect(classifyEntityType('java_service')).toEqual({ kind: 'service' });
@@ -251,7 +252,7 @@ describe('classifyEntityType', () => {
     expect(record?.entity_types).toEqual([
       expect.objectContaining({
         id: 'k8s_deployment',
-        kind: 'service',
+        kind: 'infrastructure',
         icon: { eui_icon: 'logoKubernetes' },
       }),
     ]);

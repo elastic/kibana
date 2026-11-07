@@ -269,6 +269,8 @@ const humanizeTypeId = (id: string): string => {
   return words.charAt(0).toUpperCase() + words.slice(1);
 };
 
+const INFRASTRUCTURE_THING =
+  /(^|[^a-z])(k8s|kubernetes|deployment|statefulset|daemonset|replicaset|pod|node|host|vm|container|cluster|namespace|load[ _-]?balancer|ec2|lambda)([^a-z]|$)/i;
 const KUBERNETES_OBJECT =
   /(^|[^a-z])(k8s|kubernetes|deployment|statefulset|daemonset|replicaset|pod)([^a-z]|$)/i;
 const DEPENDENCY_THING =
@@ -281,8 +283,9 @@ const DEPENDENCY_THING =
  */
 export const classifyEntityType = (
   typeId: string
-): { kind: 'service' | 'dependency'; euiIcon?: string } => {
-  if (KUBERNETES_OBJECT.test(typeId)) return { kind: 'service', euiIcon: 'logoKubernetes' };
+): { kind: 'service' | 'dependency' | 'infrastructure'; euiIcon?: string } => {
+  if (KUBERNETES_OBJECT.test(typeId)) return { kind: 'infrastructure', euiIcon: 'logoKubernetes' };
+  if (INFRASTRUCTURE_THING.test(typeId)) return { kind: 'infrastructure' };
   return { kind: DEPENDENCY_THING.test(typeId) ? 'dependency' : 'service' };
 };
 
@@ -678,7 +681,7 @@ export const FINDINGS_JSON_SCHEMA = {
                 type: 'string',
                 enum: IMPACT_MAP_ENTITY_KINDS,
                 description:
-                  'service draws a circle, for code you run; dependency draws a diamond, for a database, queue, cache or external API.',
+                  'Classify by what the thing fundamentally is. service draws a circle, for application code you run; dependency draws a diamond, for a database, queue, cache or external API that services call; infrastructure draws a rounded square, for what runs and hosts them: a Kubernetes deployment, pod or node, a host, VM, container, cloud resource or load balancer.',
               },
               agent_name: {
                 type: 'string',

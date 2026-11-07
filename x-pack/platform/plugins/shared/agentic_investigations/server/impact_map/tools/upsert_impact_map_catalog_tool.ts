@@ -30,7 +30,7 @@ const entityTypeSchema = impactMapEntityTypeSchema.extend({
     'Human name of the type, e.g. "Kubernetes pod".'
   ),
   kind: impactMapEntityTypeSchema.shape.kind.describe(
-    '"service" draws a circle, for things that run code (services, pods, hosts, functions, front ends). "dependency" draws a diamond, for things they rely on (databases, queues, caches, load balancers, external APIs).'
+    'The shape, by what the thing fundamentally is. "service" draws a circle, for application code you run (services, functions, front ends). "dependency" draws a diamond, for what services call (databases, queues, caches, external APIs). "infrastructure" draws a rounded square, for what runs and hosts them (Kubernetes deployments, pods and nodes, hosts, VMs, containers, cloud resources, load balancers).'
   ),
   icon: impactMapIconSchema
     .extend({

@@ -117,6 +117,28 @@ describe('getEuiIcon', () => {
   });
 });
 
+describe('infrastructure entities', () => {
+  const map: InvestigationImpactMapResponse = {
+    entities: [
+      { id: 'ship-deploy', type_id: 'k8s_deployment', label: 'shipping Deployment' },
+      { id: 'host-1', type_id: 'host', label: 'host-1' },
+    ],
+    relationships: [],
+    entity_types: [
+      { id: 'k8s_deployment', label: 'K8s deployment', kind: 'service' },
+      { id: 'host', label: 'Host', kind: 'infrastructure', icon: { eui_icon: 'compute' } },
+    ],
+    relationship_types: [],
+  };
+
+  it('draws infrastructure as its own shape, including an older Kubernetes type', () => {
+    const { nodes } = transformImpactMap(map, { criticalPath: 'red' });
+    expect(nodes.map(({ type }) => type)).toEqual(['impactInfrastructure', 'impactInfrastructure']);
+    expect(nodes[0].data).toMatchObject({ euiIcon: 'logoKubernetes' });
+    expect(nodes[1].data).toMatchObject({ euiIcon: 'compute' });
+  });
+});
+
 describe('getImpactState', () => {
   it('badges a root cause or symptom over merely impacted, and leaves healthy nodes alone', () => {
     expect(getImpactState({ role: 'root_cause', impacted: true })).toBe('root_cause');
