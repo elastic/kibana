@@ -5,10 +5,11 @@
  * 2.0.
  */
 import { useMemo } from 'react';
-import type { TypedLensSerializedState } from '@kbn/lens-common';
+import type { TextBasedPersistedState, TypedLensSerializedState } from '@kbn/lens-common';
 import { createEmptyLensState } from '../../../react_embeddable/helper';
 import { selectAdHocDataViews, useLensSelector } from '../../../state_management';
 import { extractReferencesFromState } from '../../../utils';
+import { withoutEsqlLayerDataViewSpecs } from '../../../data_views_service/esql_layer_data_view_specs';
 import { useEditorFrameService } from '../../../editor_frame_service/editor_frame_service_context';
 
 export const useCurrentAttributes = ({
@@ -81,10 +82,11 @@ export const useCurrentAttributes = ({
         datasourceStates: dsStates,
         // include ad hoc data views created during the editing session (e.g. for
         // a new reference line layer) that are not persisted yet
-        adHocDataViews: {
-          ...attributes.state.adHocDataViews,
-          ...sessionAdHocDataViews,
-        },
+        adHocDataViews: withoutEsqlLayerDataViewSpecs(
+          { ...attributes.state.adHocDataViews, ...sessionAdHocDataViews },
+          (datasourceStates.textBased?.state as TextBasedPersistedState | undefined)?.layers,
+          allReferences
+        ),
         internalReferences,
       },
       references,

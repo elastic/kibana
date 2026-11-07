@@ -116,6 +116,55 @@ describe('getVisContextRequestData', () => {
     });
   });
 
+  it('reads the data view ID and time field from the layer when the chart has no spec', () => {
+    const attributes = createAttributes({
+      layers: { 'layer-1': { index: 'esql-dv', timeField: '@timestamp' } },
+    });
+
+    expect(getVisContextRequestData(createTab(attributes))).toStrictEqual({
+      dataViewId: 'esql-dv',
+      timeField: '@timestamp',
+    });
+  });
+
+  it('falls back to the layer time field when the spec has none', () => {
+    const attributes = createAttributes({
+      layers: { 'layer-1': { index: 'esql-dv', timeField: '@timestamp' } },
+      dataViews: { 'esql-dv': { type: 'esql' } },
+    });
+
+    expect(getVisContextRequestData(createTab(attributes))).toStrictEqual({
+      dataViewId: 'esql-dv',
+      timeField: '@timestamp',
+    });
+  });
+
+  it('prefers the spec time field over the layer one', () => {
+    const attributes = createAttributes({
+      layers: { 'layer-1': { index: 'esql-dv', timeField: 'event.ingested' } },
+      dataViews: { 'esql-dv': { type: 'esql', timeFieldName: '@timestamp' } },
+    });
+
+    expect(getVisContextRequestData(createTab(attributes))).toStrictEqual({
+      dataViewId: 'esql-dv',
+      timeField: '@timestamp',
+    });
+  });
+
+  it('uses the time field of any layer sharing the data view', () => {
+    const attributes = createAttributes({
+      layers: {
+        'layer-1': { index: 'esql-dv' },
+        'layer-2': { index: 'esql-dv', timeField: '@timestamp' },
+      },
+    });
+
+    expect(getVisContextRequestData(createTab(attributes))).toStrictEqual({
+      dataViewId: 'esql-dv',
+      timeField: '@timestamp',
+    });
+  });
+
   it('returns an empty fingerprint when layers refer to different data views', () => {
     const attributes = createAttributes({
       layers: { 'layer-1': { index: 'esql-dv-a' }, 'layer-2': { index: 'esql-dv-b' } },
@@ -139,17 +188,32 @@ describe('getVisContextRequestData', () => {
     });
   });
 
+  it('returns the layer data view when the chart has no spec at all', () => {
+    const attributes = {
+      state: { datasourceStates: { textBased: { layers: { 'layer-1': { index: 'esql-dv' } } } } },
+    };
+
+    expect(getVisContextRequestData(createTab(attributes))).toStrictEqual({
+      dataViewId: 'esql-dv',
+    });
+  });
+
+  it('returns the layer data view when the referenced spec is missing', () => {
+    const attributes = createAttributes({
+      layers: { 'layer-1': { index: 'esql-dv' } },
+      dataViews: {},
+    });
+
+    expect(getVisContextRequestData(createTab(attributes))).toStrictEqual({
+      dataViewId: 'esql-dv',
+    });
+  });
+
   it.each([
     { name: 'missing layers', attributes: {} },
     {
       name: 'non-object layers',
       attributes: { state: { datasourceStates: { textBased: { layers: [] } } } },
-    },
-    {
-      name: 'missing data view specs',
-      attributes: {
-        state: { datasourceStates: { textBased: { layers: { 'layer-1': { index: 'esql-dv' } } } } },
-      },
     },
   ])('returns an empty fingerprint for $name', ({ attributes }) => {
     expect(getVisContextRequestData(createTab(attributes))).toStrictEqual({});
@@ -159,11 +223,6 @@ describe('getVisContextRequestData', () => {
     {
       name: 'no referenced data view',
       layers: { 'layer-1': { index: '' } },
-      dataViews: {},
-    },
-    {
-      name: 'missing referenced spec',
-      layers: { 'layer-1': { index: 'esql-dv' } },
       dataViews: {},
     },
     {
@@ -195,11 +254,11 @@ const createAttributes = ({
   layers,
   dataViews,
 }: {
-  layers: Record<string, { index: string }>;
-  dataViews: Record<string, { type: string; timeFieldName?: string }>;
+  layers: Record<string, { index: string; timeField?: string }>;
+  dataViews?: Record<string, { type: string; timeFieldName?: string }>;
 }) => ({
   state: {
     datasourceStates: { textBased: { layers } },
-    adHocDataViews: dataViews,
+    ...(dataViews && { adHocDataViews: dataViews }),
   },
 });

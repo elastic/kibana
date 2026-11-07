@@ -295,7 +295,8 @@ async function loadFromSavedObject(
     {
       visualizationState: docVisualizationState,
       datasourceStates: docDatasourceStates,
-      references: [...doc.references, ...(doc.state.internalReferences || [])],
+      references: doc.references,
+      internalReferences: doc.state.internalReferences,
       adHocDataViews: doc.state.adHocDataViews,
       ...loaderSharedArgs,
       projectRouting,
