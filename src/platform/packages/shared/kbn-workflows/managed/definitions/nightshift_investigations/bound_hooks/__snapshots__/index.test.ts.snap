@@ -58,6 +58,11 @@ Object {
             "description": "The user message that started this round.",
             "type": "string",
           },
+          "replay": Object {
+            "description": "True when the round is a recorded transcript an evaluation replays. Decision-tree reinforcement learns from tool_calls and tool_results instead of reading the conversation.
+",
+            "type": "boolean",
+          },
           "response": Object {
             "description": "The assistant's final response for this round.",
             "type": "string",
@@ -125,7 +130,7 @@ Object {
       "type": "manual",
     },
   ],
-  "version": 2,
+  "version": 3,
 }
 `;
 

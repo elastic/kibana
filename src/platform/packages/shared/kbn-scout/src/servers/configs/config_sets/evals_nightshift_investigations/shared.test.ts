@@ -56,6 +56,7 @@ describe.each([
     process.env = { ...originalEnv };
     delete process.env.NIGHTSHIFT_DATASETS;
     delete process.env.NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG;
+    delete process.env.NIGHTSHIFT_DECISION_TREES;
     for (const key of Object.keys(process.env)) {
       if (key.startsWith('SANDBOX_')) delete process.env[key];
     }
@@ -119,6 +120,29 @@ describe.each([
       loadServers(configPath, { SANDBOX_KIBANA_CONFIG: '/does/not/exist/kibana.sandbox.yml' })
     ).toThrow(
       'SANDBOX_KIBANA_CONFIG references a missing file: /does/not/exist/kibana.sandbox.yml'
+    );
+  });
+
+  it('enables decision trees only when the reinforcement hook exported NIGHTSHIFT_DECISION_TREES', () => {
+    const off = loadServers(configPath, {
+      SANDBOX_KIBANA_CONFIG,
+      NIGHTSHIFT_DATASETS: 'reinforcement',
+    });
+    expect(off.kbnTestServer.serverArgs).toContain(
+      '--xpack.nightshift_investigations.cortex.enabled=false'
+    );
+    expect(off.kbnTestServer.serverArgs).toContain(
+      '--xpack.nightshift_investigations.decision_trees.enabled=false'
+    );
+    const on = loadServers(configPath, {
+      SANDBOX_KIBANA_CONFIG,
+      NIGHTSHIFT_DECISION_TREES: 'true',
+    });
+    expect(on.kbnTestServer.serverArgs).toContain(
+      '--xpack.nightshift_investigations.cortex.enabled=false'
+    );
+    expect(on.kbnTestServer.serverArgs).toContain(
+      '--xpack.nightshift_investigations.decision_trees.enabled=true'
     );
   });
 

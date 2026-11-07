@@ -16,6 +16,7 @@ const {
   runInvestigations,
   runOrca,
   runConnectorProbes,
+  runReinforcement,
   runCortexOptimize,
   fellBackToSmoke,
 } = resolveEvalSelection();
@@ -29,13 +30,14 @@ if (fellBackToSmoke && process.env.TEST_WORKER_INDEX === undefined) {
 
 export default createPlaywrightEvalsConfig({
   testDir: Path.resolve(__dirname, './evals'),
-  timeout: runInvestigations ? 45 * 60_000 : 10 * 60_000,
+  timeout: runReinforcement ? 70 * 60_000 : runInvestigations ? 45 * 60_000 : 10 * 60_000,
   concurrency: 16,
   testIgnore: [
     ...(runSmoke ? [] : ['**/smoke/**']),
     ...(runInvestigations ? [] : ['**/investigation/investigation.spec.ts']),
     ...(runOrca ? [] : ['**/investigation/orcabench.spec.ts']),
     ...(runConnectorProbes ? [] : ['**/connector_probe/**']),
+    ...(runReinforcement ? [] : ['**/reinforcement/**']),
     ...(runCortexOptimize ? [] : ['**/cortex_optimize/**']),
   ],
 });

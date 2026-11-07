@@ -44,6 +44,17 @@ resolve() {
 
 api_key="$(resolve SANDBOX_API_KEY '.sandbox.apiKey')"
 
+# Selecting the reinforcement micro-eval, locally or as the CI reinforcement shard, enables decision
+# trees without turning Cortex on. The key is absent otherwise, which keeps an ordinary investigation
+# server's fingerprint unchanged.
+decision_trees=''
+case ",$(printf '%s' "${NIGHTSHIFT_DATASETS:-}" | tr -d ' ')," in
+  *,reinforcement,*) decision_trees=true ;;
+esac
+if [[ "${EVAL_SHARD_ID:-}" == reinforcement ]]; then
+  decision_trees=true
+fi
+
 # Splits `https://host[:port]` into `host` and `port`. Kibana always connects over TLS, so the scheme
 # only picks the default port.
 parse_url() {
@@ -188,6 +199,7 @@ HOOK_HOST="$host" \
   HOOK_ES_URL="$es_url" \
   HOOK_ES_KEY="$es_key" \
   HOOK_KIBANA_CONFIG="$script_dir/kibana.sandbox.yml" \
+  HOOK_DECISION_TREES="$decision_trees" \
   jq -n '{
     env: (({
       SANDBOX_API_HOST: $ENV.HOOK_HOST,
@@ -199,7 +211,9 @@ HOOK_HOST="$host" \
       SANDBOX_CLIENT_KEY_PATH: $ENV.HOOK_KEY,
       SANDBOX_CA_CERT_PATH: $ENV.HOOK_CA,
       SANDBOX_KIBANA_CONFIG: $ENV.HOOK_KIBANA_CONFIG
-    } + (if $ENV.HOOK_CONNECTOR_SET == "" then {} else {
+    } + (if $ENV.HOOK_DECISION_TREES != "" then {
+      NIGHTSHIFT_DECISION_TREES: $ENV.HOOK_DECISION_TREES
+    } else {} end) + (if $ENV.HOOK_CONNECTOR_SET == "" then {} else {
       NIGHTSHIFT_CONNECTOR_SET: $ENV.HOOK_CONNECTOR_SET,
       NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG: $ENV.HOOK_CONNECTORS_CONFIG,
       NIGHTSHIFT_ES_URL: $ENV.HOOK_ES_URL,

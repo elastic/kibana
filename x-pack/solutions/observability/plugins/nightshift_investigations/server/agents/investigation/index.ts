@@ -177,6 +177,7 @@ export const buildNightshiftAgentConfiguration = ({
   sandboxEnabled,
   cortexEnabled,
   memoryEnabled = false,
+  decisionTreesEnabled = false,
   investigationToolsEnabled,
   proposalsEnabled,
   standalone = false,
@@ -186,7 +187,11 @@ export const buildNightshiftAgentConfiguration = ({
 }: NightshiftAgentTypeOptions & {
   instructions: string;
   standalone?: boolean;
+  /** Only the investigator passes this; the other agent types never hydrate or reinforce trees. */
+  decisionTreesEnabled?: boolean;
 }): AgentTypeDefinition['baseConfiguration'] => {
+  // Trees do not require Cortex or Memory, so any one of the three attaches the combined workflows.
+  const contextWorkflows = cortexEnabled || memoryEnabled || decisionTreesEnabled;
   const configurationFor = ({
     materializeWorkflowId,
     optimizeWorkflowId,
@@ -216,18 +221,15 @@ export const buildNightshiftAgentConfiguration = ({
         // Decision trees are no longer a separate before-agent hook: they hydrate as a third
         // parallel branch of the combined materialize workflow, which already carries the
         // sandbox_id they need. The reinforcement agent keeps its own hydrate workflow because
-        // it runs in a different conversation. `decisionTreesEnabled` implies `cortexEnabled`,
-        // so it adds nothing to either gate below.
+        // it runs in a different conversation.
         const beforeAgentWorkflowIds =
-          sandboxEnabled && (cortexEnabled || memoryEnabled) ? [materializeWorkflowId] : [];
+          sandboxEnabled && contextWorkflows ? [materializeWorkflowId] : [];
         return beforeAgentWorkflowIds.length ? { workflow_ids: beforeAgentWorkflowIds } : {};
       })(),
       // One post-hook. Decision-tree reinforcement is the tail phase of the combined optimize
       // workflow, so listing the reinforce workflow here as well would reinforce every round
       // twice — two ai.agent runs, up to 900s each, writing the same trees.
-      ...(cortexEnabled || memoryEnabled
-        ? { post_execution_workflow_ids: [optimizeWorkflowId] }
-        : {}),
+      ...(contextWorkflows ? { post_execution_workflow_ids: [optimizeWorkflowId] } : {}),
     } satisfies AgentBaseConfiguration);
 
   // The hooks are per space, so the configuration always resolves per request.
@@ -274,6 +276,7 @@ export const getInvestigationAgentType = ({
   avatar_icon: 'logoElastic',
   baseConfiguration: buildNightshiftAgentConfiguration({
     ...options,
+    decisionTreesEnabled,
     standalone: true,
     instructions: fillContextInstructions({
       includeCortex: options.sandboxEnabled && options.cortexEnabled,

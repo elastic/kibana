@@ -81,6 +81,12 @@ triggers:
           items:
             type: object
             additionalProperties: true
+        replay:
+          type: boolean
+          description: >
+            True when the round is a recorded transcript an evaluation replays.
+            Decision-tree reinforcement learns from tool_calls and tool_results
+            instead of reading the conversation.
       additionalProperties: false
 
 steps:
@@ -206,3 +212,5 @@ steps:
       connector_id: '{{ steps.resolve_model.output.connector_id }}'
       tool_calls: '${{ inputs.tool_calls }}'
       tool_results: '${{ inputs.tool_results }}'
+      # ${{ }} keeps the boolean. Liquid `{{ }}` would render it as the string "true".
+      replay: '${{ inputs.replay }}'

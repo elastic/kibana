@@ -247,6 +247,32 @@ describe('nightshift-investigations scout hook', () => {
       rmSync(shimDir, { recursive: true, force: true });
     }
   });
+  it('exports NIGHTSHIFT_DECISION_TREES only when the reinforcement micro-eval is selected', () => {
+    expect(
+      runHook({ sandbox: SANDBOX }, { NIGHTSHIFT_DATASETS: 'reinforcement' }).output.env
+        .NIGHTSHIFT_DECISION_TREES
+    ).toBe('true');
+    expect(
+      runHook({ sandbox: SANDBOX }, { NIGHTSHIFT_DATASETS: ' reinforcement ' }).output.env
+        .NIGHTSHIFT_DECISION_TREES
+    ).toBe('true');
+    expect(
+      runHook({ sandbox: SANDBOX }, { NIGHTSHIFT_DATASETS: 'trace-only' }).output.env
+        .NIGHTSHIFT_DECISION_TREES
+    ).toBeUndefined();
+  });
+
+  it('exports NIGHTSHIFT_DECISION_TREES on the reinforcement CI shard only', () => {
+    expect(
+      runHook({ sandbox: SANDBOX }, { EVAL_SHARD_ID: 'reinforcement' }).output.env
+        .NIGHTSHIFT_DECISION_TREES
+    ).toBe('true');
+    expect(
+      runHook({ sandbox: SANDBOX }, { EVAL_SHARD_ID: 'customer0' }).output.env
+        .NIGHTSHIFT_DECISION_TREES
+    ).toBeUndefined();
+  });
+
   it('keeps dataset selection out of the server fingerprint', () => {
     expect(runHook({ sandbox: SANDBOX }, { NIGHTSHIFT_DATASET_NAME: 'first' }).output).toEqual(
       runHook(
@@ -484,6 +510,17 @@ describe('ORCA CI shard', () => {
       NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG: Path.join(__dirname, 'connector_sets/default.yml'),
       NIGHTSHIFT_ES_URL: existing.nightshift.telemetry.url,
       NIGHTSHIFT_ES_API_KEY: existing.nightshift.telemetry.apiKey,
+    });
+  });
+  it('starts the reinforcement shard with the default connector set and decision trees', () => {
+    const { output } = runHook(
+      { ...existing, nightshiftOrcaEs: orca },
+      { EVAL_SHARD_ID: 'reinforcement' }
+    );
+    expect(output.env).toEqual({
+      ...runHook({ ...existing, nightshiftOrcaEs: orca }, { EVAL_SHARD_ID: 'customer0' }).output
+        .env,
+      NIGHTSHIFT_DECISION_TREES: 'true',
     });
   });
   it('selects ORCA from NIGHTSHIFT_DATASETS for local runs outside CI', () => {
