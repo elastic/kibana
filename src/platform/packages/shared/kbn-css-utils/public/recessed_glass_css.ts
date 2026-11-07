@@ -11,11 +11,13 @@ import type { CSSObject } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 import { transparentize } from '@elastic/eui';
 
-// POC: approximates the Figma glass effect (Frost 4, Light -45° / 80%); refraction and dispersion are not reproduced.
+// POC: approximates the Figma glass effect (Frost, Light -45°); refraction and dispersion are not reproduced.
 const RECESSED_GLASS_FILL_ALPHA = 0.77;
-const RECESSED_GLASS_BLUR = '4px';
-// POC: needs design input on highlight strength.
-const RECESSED_GLASS_HIGHLIGHT_ALPHA = 0.8;
+// POC: lighter than Figma's Frost 4; 4px blur smears the 2px ambient dots into a flat tint.
+const RECESSED_GLASS_BLUR = '1px';
+
+/** Marker class for glass surfaces; the framed app wrapper in `@kbn/ui-chrome-layout` drops its fill when it contains one. */
+export const KBN_RECESSED_GLASS_CLASS = 'kbnRecessedGlass';
 
 /** Frosted glass treatment for surfaces using the `backgroundBaseRecessed` color. */
 export const kbnRecessedGlassCss = ({ euiTheme }: UseEuiTheme): CSSObject => ({
@@ -24,10 +26,8 @@ export const kbnRecessedGlassCss = ({ euiTheme }: UseEuiTheme): CSSObject => ({
     RECESSED_GLASS_FILL_ALPHA
   ),
   backdropFilter: `blur(${RECESSED_GLASS_BLUR})`,
-  boxShadow: `inset 1px 1px 0 ${transparentize(
-    euiTheme.colors.plainLight,
-    RECESSED_GLASS_HIGHLIGHT_ALPHA
-  )}`,
+  // POC: needs design input — one step lighter than recessed in both themes, so the edge stays subtle in dark mode.
+  boxShadow: `inset 1px 1px 0 ${euiTheme.colors.backgroundBasePlain}`,
   '@media (prefers-reduced-transparency: reduce)': {
     backgroundColor: euiTheme.colors.backgroundBaseRecessed,
     backdropFilter: 'none',

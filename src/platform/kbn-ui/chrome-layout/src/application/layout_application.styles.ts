@@ -56,6 +56,11 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
         // can't cover it.
         // borderBaseFloating is transparent in light mode and visible in dark mode.
         outline: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseFloating};
+
+        // POC: glass surfaces (KBN_RECESSED_GLASS_CLASS in @kbn/css-utils) show the ambient field instead of the frame fill.
+        &:has(.kbnRecessedGlass) {
+          background-color: transparent;
+        }
       `}
       ${!isFramedAppearance &&
       css`

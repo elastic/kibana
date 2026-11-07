@@ -15,6 +15,7 @@ import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import {
+  KBN_RECESSED_GLASS_CLASS,
   kbnRecessedGlassCss,
   kbnRecessedGlassResetCss,
 } from '@kbn/css-utils/public/recessed_glass_css';
@@ -71,6 +72,7 @@ export const DashboardViewport = () => {
     <div
       className={classNames('dshDashboardViewportWrapper', {
         'dshDashboardViewportWrapper--defaultBg': !useMargins,
+        [KBN_RECESSED_GLASS_CLASS]: useMargins,
         'dshDashboardViewportWrapper--isFullscreen': fullScreenMode,
       })}
       css={styles.wrapper}
