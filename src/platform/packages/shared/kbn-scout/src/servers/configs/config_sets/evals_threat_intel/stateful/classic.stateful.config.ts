@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/classic.stateful.config';
+import { servers as evalsSecurityConfig } from '../../evals_security/stateful/classic.stateful.config';
 import type { ScoutServerConfig } from '../../../../../types';
 
 /**
@@ -22,4 +22,4 @@ import type { ScoutServerConfig } from '../../../../../types';
  * Usage:
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet evals_threat_intel
  */
-export const servers: ScoutServerConfig = evalsTracingConfig;
+export const servers: ScoutServerConfig = evalsSecurityConfig;

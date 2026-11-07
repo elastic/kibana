@@ -8,14 +8,14 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
-import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/classic.stateful.config';
+import { servers as evalsSecurityConfig } from '../../evals_security/stateful/classic.stateful.config';
 
 export const servers: ScoutServerConfig = {
-  ...evalsTracingConfig,
+  ...evalsSecurityConfig,
   kbnTestServer: {
-    ...evalsTracingConfig.kbnTestServer,
+    ...evalsSecurityConfig.kbnTestServer,
     serverArgs: [
-      ...evalsTracingConfig.kbnTestServer.serverArgs,
+      ...evalsSecurityConfig.kbnTestServer.serverArgs,
       '--feature_flags.overrides.aiAssistant.aiAgents.enabled=true',
       '--feature_flags.overrides.securitySolution.attackDiscoveryWorkflowsEnabled=true',
       '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
