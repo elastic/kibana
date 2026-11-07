@@ -6,17 +6,17 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { Logger } from '@kbn/logging';
 import {
   ESQLViewInitializer,
   type EsqlViewDefinition,
 } from '../../lib/services/resource_service/esql_view_initializer';
 import type { ResourceManagerContract } from '../../lib/services/resource_service/resource_manager';
+import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 
 export interface RegisterEsqlViewsOptions {
   resourceManager: ResourceManagerContract;
   esClient: ElasticsearchClient;
-  logger: Logger;
+  logger: LoggerServiceContract;
 }
 
 export function registerEsqlViews({

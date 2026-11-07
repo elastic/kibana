@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createMockEsClient } from '../../test_utils';
 import { createLoggerService } from '../logger_service/logger_service.mock';
+import type { LoggerService } from '../logger_service/logger_service';
 import {
   StorageService,
   type BulkIndexResult,
@@ -29,11 +30,13 @@ export function createStorageService(): {
   storageService: StorageService;
   mockEsClient: jest.Mocked<ElasticsearchClient>;
   mockLogger: jest.Mocked<Logger>;
+  /** Pass as `logger` on each call. Writes to `mockLogger`. */
+  loggerService: LoggerService;
 } {
   const mockEsClient = createMockEsClient();
   const { loggerService, mockLogger } = createLoggerService();
-  const storageService = new StorageService(mockEsClient, loggerService);
-  return { storageService, mockEsClient, mockLogger };
+  const storageService = new StorageService(mockEsClient);
+  return { storageService, mockEsClient, mockLogger, loggerService };
 }
 
 /**

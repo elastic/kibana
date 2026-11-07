@@ -44,12 +44,15 @@ describe('FetchActiveGroupsStep', () => {
         },
       },
     };
-    const step = new FetchActiveGroupsStep(
-      logger.loggerService,
-      internal.queryService,
-      createConfigServiceMock(config)
-    );
-    return { step, internalEsClient: internal.mockEsClient, mockLogger: logger.mockLogger };
+    const step = new FetchActiveGroupsStep(internal.queryService, createConfigServiceMock(config));
+    return {
+      step,
+      internalEsClient: internal.mockEsClient,
+      mockLogger: logger.mockLogger,
+      stateLogger: logger.loggerService
+        .forSubsystem('ruleExecutor')
+        .withLabels({ rule_id: 'rule-1', space_id: 'default', task_id: 'task-1' }),
+    };
   }
 
   function mockActiveGroups(
@@ -120,18 +123,18 @@ describe('FetchActiveGroupsStep', () => {
   });
 
   it('warns that the active set may be truncated when the fetch hits alerts.max', async () => {
-    const { step, internalEsClient, mockLogger } = createStep(2);
+    const { step, internalEsClient, mockLogger, stateLogger } = createStep(2);
     mockActiveGroups(internalEsClient, ['group-a', 'group-b']);
 
     const input = createRuleExecutionInput();
     const rule = createRuleResponse({ kind: 'alert' });
 
-    const state = createRulePipelineState({ input, rule });
+    const state = createRulePipelineState({ input, rule, logger: stateLogger });
     await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     expect(mockLogger.warn).toHaveBeenCalledTimes(1);
     expect(mockLogger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('hit alerts.max=2'),
+      expect.any(Function),
       expect.objectContaining({
         labels: expect.objectContaining({
           code: ALERTING_LOG_CODES.RULE_EXECUTION_ACTIVE_GROUPS_TRUNCATED,
@@ -141,13 +144,13 @@ describe('FetchActiveGroupsStep', () => {
   });
 
   it('does not warn when the fetch stays below the limit', async () => {
-    const { step, internalEsClient, mockLogger } = createStep(10);
+    const { step, internalEsClient, mockLogger, stateLogger } = createStep(10);
     mockActiveGroups(internalEsClient, ['group-a', 'group-b']);
 
     const input = createRuleExecutionInput();
     const rule = createRuleResponse({ kind: 'alert' });
 
-    const state = createRulePipelineState({ input, rule });
+    const state = createRulePipelineState({ input, rule, logger: stateLogger });
     await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     expect(mockLogger.warn).not.toHaveBeenCalled();

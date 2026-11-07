@@ -6,6 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import { createLoggerService } from '../../../lib/services/logger_service/logger_service.mock';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { EsTestCluster } from '@kbn/test';
 import { createTestEsCluster } from '@kbn/test';
@@ -62,6 +63,7 @@ describe('buildEpisodeActionsQuery (integration)', () => {
     });
     await esServer.start();
     await new DatastreamInitializer(
+      createLoggerService().loggerService,
       loggerMock.create(),
       esServer.getClient(),
       getAlertActionsResourceDefinition()

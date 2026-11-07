@@ -39,7 +39,7 @@ export class ApplyAlreadyNotifiedStep implements DispatcherStep {
 
   public async execute(
     state: Readonly<DispatcherPipelineState>,
-    _: LoggerServiceContract
+    logger: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
     const { groups = [] } = state;
     if (groups.length === 0) {
@@ -52,6 +52,7 @@ export class ApplyAlreadyNotifiedStep implements DispatcherStep {
     const responses = await Promise.all(
       getAlreadyNotifiedQueries(groups).map((request) =>
         this.queryService.executeQueryRows<AlreadyNotifiedRecord>({
+          logger,
           query: request.query,
           filter: { range: { '@timestamp': { gte } } },
           abortSignal: signal,

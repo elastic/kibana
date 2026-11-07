@@ -9,7 +9,6 @@ import type { EsqlQueryRequest, EsqlQueryResponse } from '@elastic/elasticsearch
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
-import { LoggerServiceToken } from '../logger_service/logger_service';
 import type { EsqlResponseFormatServiceContract } from '../esql_response_format_service/esql_response_format_service';
 import { EsqlResponseFormatServiceToken } from '../esql_response_format_service/tokens';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
@@ -28,6 +27,11 @@ import type {
 } from './formats';
 
 export interface ExecuteQueryParams {
+  /**
+   * The caller's logger. Query lines are emitted through it so they carry the
+   * caller's `log.logger` and bound labels (`rule_id`, `task_id`, `step`).
+   */
+  logger: LoggerServiceContract;
   query: EsqlQueryRequest['query'];
   filter?: EsqlQueryRequest['filter'];
   params?: EsqlQueryRequest['params'];
@@ -54,21 +58,19 @@ const DROP_NULL_COLUMNS = true;
 export class QueryService implements QueryServiceContract {
   constructor(
     private readonly esClient: ElasticsearchClient,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @inject(EsqlResponseFormatServiceToken)
     private readonly esqlResponseFormatService: EsqlResponseFormatServiceContract
   ) {}
 
   async executeQuery({
+    logger,
     query,
     filter,
     params,
     abortSignal,
     maxResponseSize,
   }: ExecuteQueryParams): Promise<EsqlQueryResponse> {
-    this.logger.debug({
-      message: 'QueryService: Executing query',
-    });
+    logger.debug({ message: () => 'Executing query' });
 
     try {
       const response = await this.esClient.esql.query(
@@ -81,13 +83,11 @@ export class QueryService implements QueryServiceContract {
         { signal: abortSignal, ...(maxResponseSize !== undefined ? { maxResponseSize } : {}) }
       );
 
-      this.logger.debug({
-        message: `QueryService: Query executed successfully, returned ${response.values.length} rows`,
-      });
+      logger.debug({ message: () => `Query returned ${response.values.length} rows` });
 
       return response;
     } catch (error) {
-      this.logger.error({
+      logger.error({
         error,
         code: ALERTING_LOG_CODES.QUERY_ESQL_EXECUTION_FAILED,
       });
@@ -111,12 +111,11 @@ export class QueryService implements QueryServiceContract {
   async *executeQueryStream<T = Record<string, unknown>>(
     params: ExecuteQueryParams
   ): AsyncIterable<T[]> {
+    const { logger } = params;
     const format = params.format ?? this.esqlResponseFormatService.get();
     const context = createExecutionContext(params.abortSignal ?? new AbortController().signal);
 
-    this.logger.debug({
-      message: () => `QueryService: Executing streaming query (${format.name})`,
-    });
+    logger.debug({ message: () => `Executing streaming query (${format.name})` });
 
     let source: EsqlRowBatchSource | undefined;
 
@@ -133,19 +132,15 @@ export class QueryService implements QueryServiceContract {
 
       yield* this.iterateBatches<T>(source, context);
 
-      this.logger.debug({
-        message: `QueryService: Streaming query completed successfully (${format.name})`,
-      });
+      logger.debug({ message: () => `Streaming query completed (${format.name})` });
     } catch (error) {
       if (this.isCancellation(error, context)) {
-        this.logger.debug({
-          message: `QueryService: Streaming query aborted (${format.name})`,
-        });
+        logger.debug({ message: () => `Streaming query aborted (${format.name})` });
 
         throw toRuleExecutionCancellationError(error);
       }
 
-      this.logger.error({
+      logger.error({
         error,
         code: ALERTING_LOG_CODES.QUERY_ESQL_EXECUTION_FAILED,
       });

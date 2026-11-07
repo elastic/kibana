@@ -130,12 +130,13 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
     // Falls back to a fetch in case they were not threaded onto state
     const activeGroups = state.activeGroups
       ? [...state.activeGroups]
-      : await fetchActiveAlertGroupHashes(
-          this.internalQueryService,
-          rule.id,
-          input.executionContext,
-          this.maxActiveGroups
-        );
+      : await fetchActiveAlertGroupHashes({
+          queryService: this.internalQueryService,
+          ruleId: rule.id,
+          executionContext: input.executionContext,
+          limit: this.maxActiveGroups,
+          logger: state.logger.withLabels({ step: this.name }),
+        });
 
     if (activeGroups.length === 0) {
       return [];

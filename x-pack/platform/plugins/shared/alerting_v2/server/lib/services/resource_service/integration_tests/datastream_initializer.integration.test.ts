@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import type { MockedLogger } from '@kbn/logging-mocks';
+import type { Logger } from '@kbn/logging';
 import { loggerMock } from '@kbn/logging-mocks';
+import type { LoggerService } from '../../logger_service/logger_service';
+import { createLoggerService } from '../../logger_service/logger_service.mock';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { EsTestCluster } from '@kbn/test';
 import { createTestEsCluster } from '@kbn/test';
@@ -53,10 +55,16 @@ const v7Definition: ResourceDefinition = {
 
 describe('DatastreamInitializer forceReset (integration)', () => {
   let esServer: EsTestCluster;
-  let logger: MockedLogger;
+  let logger: jest.Mocked<Logger>;
+  let loggerService: LoggerService;
 
   const initialize = (definition: ResourceDefinition) =>
-    new DatastreamInitializer(logger, esServer.getClient(), definition).initialize();
+    new DatastreamInitializer(
+      loggerService,
+      loggerMock.create(),
+      esServer.getClient(),
+      definition
+    ).initialize();
 
   const writeDocument = (id: string, document: Record<string, unknown>) =>
     esServer.getClient().create({ index: TEST_DATA_STREAM, id, document, refresh: true });
@@ -128,7 +136,7 @@ describe('DatastreamInitializer forceReset (integration)', () => {
   });
 
   beforeEach(() => {
-    logger = loggerMock.create();
+    ({ loggerService, mockLogger: logger } = createLoggerService());
   });
 
   afterEach(async () => {
@@ -150,8 +158,9 @@ describe('DatastreamInitializer forceReset (integration)', () => {
     expect(await countDocuments()).toBe(0);
     expect(await getDataStreamVersion()).toBe(currentDefinition.version);
     await expectCurrentMapping();
-    expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining(`Deleting data stream ${TEST_DATA_STREAM}`)
+    expect(logger.info).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ labels: expect.objectContaining({ resource: TEST_DATA_STREAM }) })
     );
   });
 
@@ -249,7 +258,7 @@ describe('DatastreamInitializer forceReset (integration)', () => {
     await initialize(currentDefinition);
 
     expect(await countDocuments()).toBe(1);
-    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.info).not.toHaveBeenCalled();
   });
 
   it('creates the data stream from the current version on a fresh install', async () => {
@@ -257,7 +266,7 @@ describe('DatastreamInitializer forceReset (integration)', () => {
 
     expect(await getDataStreamVersion()).toBe(currentDefinition.version);
     await expectCurrentMapping();
-    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.info).not.toHaveBeenCalled();
   });
 
   it('recreates the data stream from the current template when a v7 node writes right after the delete', async () => {
@@ -281,7 +290,12 @@ describe('DatastreamInitializer forceReset (integration)', () => {
       return response;
     });
 
-    await new DatastreamInitializer(logger, esClient, currentDefinition).initialize();
+    await new DatastreamInitializer(
+      loggerService,
+      loggerMock.create(),
+      esClient,
+      currentDefinition
+    ).initialize();
 
     expect(gapWriteError).toMatchObject({ message: expect.stringMatching(/field alias/) });
     expect(await countDocuments()).toBe(0);
@@ -335,7 +349,7 @@ describe('DatastreamInitializer forceReset (integration)', () => {
 
       await initialize(withRetention());
       expect(await getDataRetention()).toBeUndefined();
-      expect(logger.warn).not.toHaveBeenCalled();
+      expect(logger.info).not.toHaveBeenCalled();
     });
   });
 });
@@ -392,10 +406,16 @@ describe('DatastreamInitializer forceReset for .alert-actions (integration)', ()
   };
 
   let esServer: EsTestCluster;
-  let logger: MockedLogger;
+  let logger: jest.Mocked<Logger>;
+  let loggerService: LoggerService;
 
   const initialize = (definition: ResourceDefinition) =>
-    new DatastreamInitializer(logger, esServer.getClient(), definition).initialize();
+    new DatastreamInitializer(
+      loggerService,
+      loggerMock.create(),
+      esServer.getClient(),
+      definition
+    ).initialize();
 
   const writeDocument = (id: string, document: Record<string, unknown>) =>
     esServer.getClient().create({ index: TEST_ACTIONS_DATA_STREAM, id, document, refresh: true });
@@ -431,7 +451,7 @@ describe('DatastreamInitializer forceReset for .alert-actions (integration)', ()
   });
 
   beforeEach(() => {
-    logger = loggerMock.create();
+    ({ loggerService, mockLogger: logger } = createLoggerService());
   });
 
   afterEach(async () => {
@@ -509,8 +529,11 @@ describe('DatastreamInitializer forceReset for .alert-actions (integration)', ()
     });
     expect(properties[0]).not.toHaveProperty('episode_id');
     expect(properties[0]).not.toHaveProperty('episode_status');
-    expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining(`Deleting data stream ${TEST_ACTIONS_DATA_STREAM}`)
+    expect(logger.info).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        labels: expect.objectContaining({ resource: TEST_ACTIONS_DATA_STREAM }),
+      })
     );
   });
 

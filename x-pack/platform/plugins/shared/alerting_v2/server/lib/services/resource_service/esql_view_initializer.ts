@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { Logger } from '@kbn/logging';
+import type { LoggerServiceContract } from '../logger_service/logger_service';
 import type { IResourceInitializer } from './resource_manager';
 
 export interface EsqlViewDefinition {
@@ -17,7 +17,7 @@ export interface EsqlViewDefinition {
 
 export class ESQLViewInitializer implements IResourceInitializer {
   constructor(
-    private readonly logger: Logger,
+    private readonly logger: LoggerServiceContract,
     private readonly esClient: ElasticsearchClient,
     private readonly viewDefinition: EsqlViewDefinition
   ) {}
@@ -25,7 +25,7 @@ export class ESQLViewInitializer implements IResourceInitializer {
   public async initialize(): Promise<void> {
     const { name, query } = this.viewDefinition;
 
-    this.logger.debug(`ESQLViewInitializer: Initializing view [${name}].`);
+    this.logger.debug({ message: () => 'Initializing ES|QL view', labels: { resource: name } });
 
     await this.esClient.transport.request({
       method: 'PUT',

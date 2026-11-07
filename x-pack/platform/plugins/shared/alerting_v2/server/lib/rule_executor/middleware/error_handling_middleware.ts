@@ -19,6 +19,14 @@ import { resolveErrorSource } from '../../errors/error_source';
 import { getFailedStep, tagFailedStep } from '../execution_outcome';
 
 /**
+ * ES|QL parse and verification errors quote the user's query in their message,
+ * and a Node.js stack repeats that message on its first line, so neither may
+ * reach the log. A fresh error carries the synthetic message and nothing else.
+ */
+const redactEsqlUserError = (error: unknown): unknown =>
+  isEsqlUserError(error) ? new Error('Rule query failed to parse or verify') : error;
+
+/**
  * Middleware that provides centralized error handling for all steps.
  *
  * This middleware catches errors thrown by steps and logs them with
@@ -65,8 +73,7 @@ export class ErrorHandlingMiddleware implements RuleExecutionMiddleware {
           (latestState?.logger ?? fallbackLogger)
             .withLabels({ step: ctx.step.name, error_source: resolveErrorSource(error) })
             .error({
-              message: isEsqlUserError(error) ? 'Rule query failed to parse or verify' : undefined,
-              error,
+              error: redactEsqlUserError(error),
               code: ALERTING_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
             });
         }

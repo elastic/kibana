@@ -16,7 +16,6 @@ import {
   ActionPolicySavedObjectServiceScopedToken,
 } from '../lib/services/action_policy_saved_object_service/tokens';
 import { ApiKeyServiceSavedObjectsClientToken } from '../lib/services/api_key_service/tokens';
-import { LoggerServiceToken } from '../lib/services/logger_service/logger_service';
 import { MaintenanceWindowService } from '../lib/services/maintenance_window_service/maintenance_window_service';
 import {
   MaintenanceWindowSavedObjectsClientToken,
@@ -80,8 +79,8 @@ export function bindSavedObjects({ bind }: ContainerModuleLoadOptions) {
   );
 
   bind(MaintenanceWindowServiceInternalToken).toResolvedValue(
-    (client, logger) => new MaintenanceWindowService(client, logger),
-    [MaintenanceWindowSavedObjectsClientToken, LoggerServiceToken]
+    (client) => new MaintenanceWindowService(client),
+    [MaintenanceWindowSavedObjectsClientToken]
   );
 
   bind(EncryptedSavedObjectsClientToken).toResolvedValue(

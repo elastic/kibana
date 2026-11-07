@@ -50,6 +50,7 @@ const mockFinderForSavedObjects = (docs: Array<SavedObject<MaintenanceWindowAttr
 });
 
 describe('MaintenanceWindowService', () => {
+  const logger = createLoggerService().loggerService;
   let client: jest.Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
@@ -70,9 +71,9 @@ describe('MaintenanceWindowService', () => {
       >
     );
 
-    const service = new MaintenanceWindowService(client, createLoggerService().loggerService);
+    const service = new MaintenanceWindowService(client);
 
-    const result = await service.getEnabledMaintenanceWindows();
+    const result = await service.getEnabledMaintenanceWindows({ logger });
 
     expect(result.map((mw) => mw.id).sort()).toEqual(['mw-future', 'mw-past']);
     expect(result.find((mw) => mw.id === 'mw-past')!.events).toEqual([
@@ -91,8 +92,8 @@ describe('MaintenanceWindowService', () => {
       >
     );
 
-    const service = new MaintenanceWindowService(client, createLoggerService().loggerService);
-    await service.getEnabledMaintenanceWindows();
+    const service = new MaintenanceWindowService(client);
+    await service.getEnabledMaintenanceWindows({ logger });
 
     expect(client.createPointInTimeFinder).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -115,10 +116,10 @@ describe('MaintenanceWindowService', () => {
         >
     );
 
-    const service = new MaintenanceWindowService(client, createLoggerService().loggerService);
-    await service.getEnabledMaintenanceWindows();
-    await service.getEnabledMaintenanceWindows();
-    await service.getEnabledMaintenanceWindows();
+    const service = new MaintenanceWindowService(client);
+    await service.getEnabledMaintenanceWindows({ logger });
+    await service.getEnabledMaintenanceWindows({ logger });
+    await service.getEnabledMaintenanceWindows({ logger });
 
     expect(client.createPointInTimeFinder).toHaveBeenCalledTimes(3);
   });
@@ -135,10 +136,10 @@ describe('MaintenanceWindowService', () => {
       finderThatThrows as ReturnType<SavedObjectsClientContract['createPointInTimeFinder']>
     );
 
-    const { loggerService, mockLogger } = createLoggerService();
-    const service = new MaintenanceWindowService(client, loggerService);
+    const { loggerService: testLogger, mockLogger } = createLoggerService();
+    const service = new MaintenanceWindowService(client);
 
-    const result = await service.getEnabledMaintenanceWindows();
+    const result = await service.getEnabledMaintenanceWindows({ logger: testLogger });
 
     expect(result).toEqual([]);
     expect(mockLogger.error).toHaveBeenCalledWith(
@@ -164,10 +165,10 @@ describe('MaintenanceWindowService', () => {
       finderWithFailingClose as ReturnType<SavedObjectsClientContract['createPointInTimeFinder']>
     );
 
-    const { loggerService, mockLogger } = createLoggerService();
-    const service = new MaintenanceWindowService(client, loggerService);
+    const { loggerService: testLogger, mockLogger } = createLoggerService();
+    const service = new MaintenanceWindowService(client);
 
-    const result = await service.getEnabledMaintenanceWindows();
+    const result = await service.getEnabledMaintenanceWindows({ logger: testLogger });
 
     expect(result.map((mw) => mw.id)).toEqual(['mw-ok']);
     expect(mockLogger.warn).toHaveBeenCalledWith(expect.any(Function), {
@@ -188,10 +189,10 @@ describe('MaintenanceWindowService', () => {
       >
     );
 
-    const { loggerService, mockLogger } = createLoggerService();
-    const service = new MaintenanceWindowService(client, loggerService);
+    const { loggerService: testLogger, mockLogger } = createLoggerService();
+    const service = new MaintenanceWindowService(client);
 
-    const result = await service.getEnabledMaintenanceWindows();
+    const result = await service.getEnabledMaintenanceWindows({ logger: testLogger });
 
     expect(result.map((mw) => mw.id)).toEqual(['mw-ok']);
     expect(mockLogger.warn).toHaveBeenCalledWith(expect.any(Function), {
@@ -211,8 +212,8 @@ describe('MaintenanceWindowService', () => {
       >
     );
 
-    const service = new MaintenanceWindowService(client, createLoggerService().loggerService);
-    const result = await service.getEnabledMaintenanceWindows();
+    const service = new MaintenanceWindowService(client);
+    const result = await service.getEnabledMaintenanceWindows({ logger });
 
     expect(result).toHaveLength(1);
     expect(result[0].spaceId).toBe('default');

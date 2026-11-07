@@ -6,10 +6,12 @@
  */
 
 import { createQueryService } from '../../services/query_service/query_service.mock';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { getAlertActionStateESQLResponse, getEmptyESQLResponse } from '../fixtures/query_responses';
 import { loadAlertActionStatesByEpisodeId } from './load_alert_action_states';
 
 describe('loadAlertActionStatesByEpisodeId', () => {
+  const logger = createLoggerService().loggerService;
   const SPACE_ID = 'default';
 
   const setup = () => createQueryService();
@@ -19,6 +21,7 @@ describe('loadAlertActionStatesByEpisodeId', () => {
 
     const states = await loadAlertActionStatesByEpisodeId({
       queryService,
+      logger,
       spaceId: SPACE_ID,
       episodeIds: [],
     });
@@ -33,6 +36,7 @@ describe('loadAlertActionStatesByEpisodeId', () => {
 
     await loadAlertActionStatesByEpisodeId({
       queryService,
+      logger,
       spaceId: SPACE_ID,
       episodeIds: ['ep-1', 'ep-2', 'ep-1'],
     });
@@ -62,6 +66,7 @@ describe('loadAlertActionStatesByEpisodeId', () => {
 
     const states = await loadAlertActionStatesByEpisodeId({
       queryService,
+      logger,
       spaceId: SPACE_ID,
       episodeIds: ['ep-1', 'ep-2'],
     });
@@ -86,6 +91,7 @@ describe('loadAlertActionStatesByEpisodeId', () => {
 
     const states = await loadAlertActionStatesByEpisodeId({
       queryService,
+      logger,
       spaceId: SPACE_ID,
       episodeIds: ['ep-1'],
     });
@@ -101,6 +107,7 @@ describe('loadAlertActionStatesByEpisodeId', () => {
 
     const states = await loadAlertActionStatesByEpisodeId({
       queryService,
+      logger,
       spaceId: SPACE_ID,
       episodeIds: ['ep-1'],
     });
@@ -114,6 +121,7 @@ describe('loadAlertActionStatesByEpisodeId', () => {
 
     const states = await loadAlertActionStatesByEpisodeId({
       queryService,
+      logger,
       spaceId: SPACE_ID,
       episodeIds: ['ep-1'],
     });

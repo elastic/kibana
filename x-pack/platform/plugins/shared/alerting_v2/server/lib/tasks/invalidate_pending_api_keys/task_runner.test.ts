@@ -61,7 +61,7 @@ describe('ApiKeyInvalidationTaskRunner', () => {
         savedObjectType: API_KEY_PENDING_INVALIDATION_TYPE,
         savedObjectTypesToQuery: [],
         removalDelay: '1h',
-        logger: coreLogger,
+        logger: expect.objectContaining({ context: ['tasks'] }),
         invalidateApiKeyFn: securityStart.authc.apiKeys.invalidateAsInternalUser,
         invalidateUiamApiKeyFn: securityCore.authc.apiKeys.uiam?.invalidate,
       })

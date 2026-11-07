@@ -10,6 +10,7 @@ import { createMockEsClient } from '../../test_utils';
 import { createLoggerService } from '../logger_service/logger_service.mock';
 import { createEsqlResponseFormatService } from '../esql_response_format_service/esql_response_format_service.mock';
 import { QueryService } from './query_service';
+import type { LoggerService } from '../logger_service/logger_service';
 import type { EsqlResponseFormatName } from './formats';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 
@@ -17,13 +18,14 @@ export function createQueryService(responseFormat: EsqlResponseFormatName = 'jso
   queryService: QueryService;
   mockEsClient: DeeplyMockedApi<ElasticsearchClient>;
   mockLogger: jest.Mocked<Logger>;
+  /** Pass as `logger` on each call. Writes to `mockLogger`. */
+  loggerService: LoggerService;
 } {
   const mockEsClient = createMockEsClient();
   const { loggerService, mockLogger } = createLoggerService();
   const queryService = new QueryService(
     mockEsClient,
-    loggerService,
     createEsqlResponseFormatService(responseFormat)
   );
-  return { queryService, mockEsClient, mockLogger };
+  return { queryService, mockEsClient, mockLogger, loggerService };
 }

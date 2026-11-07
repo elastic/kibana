@@ -7,6 +7,7 @@
 
 import { encodeSeriesId, type DecodedSeriesId } from '@kbn/alerting-v2-utils';
 import { createQueryService } from '../../services/query_service/query_service.mock';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import {
   getEmptyESQLResponse,
   getSeriesActionStateESQLResponse,
@@ -38,6 +39,7 @@ const seriesIdOf = (series: DecodedSeriesId): string => {
 };
 
 describe('loadSeriesActionStatesBySeries', () => {
+  const logger = createLoggerService().loggerService;
   const SPACE_ID = 'default';
 
   const setup = () => createQueryService();
@@ -55,6 +57,7 @@ describe('loadSeriesActionStatesBySeries', () => {
 
     const states = await loadSeriesActionStatesBySeries({
       queryService,
+      logger,
       spaceId: SPACE_ID,
       series: [],
     });
@@ -69,6 +72,7 @@ describe('loadSeriesActionStatesBySeries', () => {
 
     await loadSeriesActionStatesBySeries({
       queryService,
+      logger,
       spaceId: SPACE_ID,
       series: [ruleSeries('rule-a'), sourceSeries('pagerduty')],
     });
@@ -105,6 +109,7 @@ describe('loadSeriesActionStatesBySeries', () => {
 
     const states = await loadSeriesActionStatesBySeries({
       queryService,
+      logger,
       spaceId: SPACE_ID,
       series: [ruleSeries('rule-a'), ruleSeries('rule-b')],
     });
@@ -148,6 +153,7 @@ describe('loadSeriesActionStatesBySeries', () => {
 
     const states = await loadSeriesActionStatesBySeries({
       queryService,
+      logger,
       spaceId: SPACE_ID,
       series: [indefinite, untilLater, expired, unsnoozed],
     });
@@ -167,6 +173,7 @@ describe('loadSeriesActionStatesBySeries', () => {
 
     const states = await loadSeriesActionStatesBySeries({
       queryService,
+      logger,
       spaceId: SPACE_ID,
       series: [ruleSeries('rule-a')],
     });

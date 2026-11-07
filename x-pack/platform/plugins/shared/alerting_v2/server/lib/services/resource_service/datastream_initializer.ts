@@ -11,6 +11,8 @@ import { DataStreamClient, type DataStreamDefinition } from '@kbn/data-streams';
 import type { Logger } from '@kbn/logging';
 import { isResponseError } from '@kbn/es-errors';
 import type { ResourceDefinition } from '../../../resources/datastreams/types';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
+import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { EsConcurrentModificationError } from '../retry_service/es_concurrent_modification_error';
 import { EsUnacknowledgedError } from '../retry_service/es_unacknowledged_error';
 import type { IResourceInitializer } from './resource_manager';
@@ -29,7 +31,9 @@ const INDEX_TEMPLATE_PRIORITY = `${9223372036854775807n}` as unknown as number;
 
 export class DatastreamInitializer implements IResourceInitializer {
   constructor(
-    private readonly logger: Logger,
+    private readonly logger: LoggerServiceContract,
+    /** Handed to `@kbn/data-streams`, whose API takes a core `Logger`. */
+    private readonly coreLogger: Logger,
     private readonly esClient: ElasticsearchClient,
     private readonly resourceDefinition: ResourceDefinition
   ) {
@@ -94,7 +98,7 @@ export class DatastreamInitializer implements IResourceInitializer {
   ): Promise<void> {
     try {
       await DataStreamClient.initialize({
-        logger: this.logger,
+        logger: this.coreLogger,
         dataStream: dataStreamDefinition,
         elasticsearchClient: this.esClient,
       });
@@ -103,7 +107,10 @@ export class DatastreamInitializer implements IResourceInitializer {
         throw error;
       }
 
-      this.logger.debug(`Data stream already exists: ${this.resourceDefinition.dataStreamName}.`);
+      this.logger.debug({
+        message: () => 'Data stream already exists',
+        labels: { resource: this.resourceDefinition.dataStreamName },
+      });
     }
   }
 
@@ -136,9 +143,10 @@ export class DatastreamInitializer implements IResourceInitializer {
     await this.installCurrentIndexTemplate(dataStreamDefinition);
 
     const createdFrom = createdFromVersion ?? '(unknown)';
-    this.logger.warn(
-      `Deleting data stream ${dataStreamName} created from index template v${createdFrom}: data streams created from v${forceReset.version} or below are recreated from v${version}. Their documents are lost.`
-    );
+    this.logger.info({
+      message: `Deleting data stream created from index template v${createdFrom} (reset at v${forceReset.version} or below, recreated from v${version}), its documents are lost`,
+      labels: { resource: dataStreamName },
+    });
 
     let acknowledged: boolean;
     try {
@@ -171,7 +179,7 @@ export class DatastreamInitializer implements IResourceInitializer {
     let installError: Error | undefined;
     try {
       await DataStreamClient.initializeTemplate({
-        logger: this.logger,
+        logger: this.coreLogger,
         dataStream: dataStreamDefinition,
         elasticsearchClient: this.esClient,
       });
@@ -192,9 +200,13 @@ export class DatastreamInitializer implements IResourceInitializer {
     }
 
     if (installError) {
-      this.logger.warn(
-        `Index template ${dataStreamName} v${installedVersion} is installed; ignoring the failure to update the existing data stream: ${installError.message}`
-      );
+      this.logger.warn({
+        message:
+          'Index template installed, ignoring the failure to update the existing data stream',
+        code: ALERTING_LOG_CODES.RESOURCES_DATASTREAM_UPDATE_FAILED,
+        labels: { resource: dataStreamName },
+        error: installError,
+      });
     }
   }
 
@@ -236,7 +248,10 @@ export class DatastreamInitializer implements IResourceInitializer {
 
     const deployedVersion = await this.getDeployedPipelineVersion(id);
     if (deployedVersion !== undefined && deployedVersion >= version) {
-      this.logger.debug(`Ingest pipeline ${id} v${deployedVersion} already applied and updated.`);
+      this.logger.debug({
+        message: () => 'Ingest pipeline already up to date',
+        labels: { resource: id },
+      });
       return;
     }
 
@@ -296,9 +311,12 @@ export class DatastreamInitializer implements IResourceInitializer {
     } catch (error) {
       // Best effort: replica expansion only affects cluster health reporting and
       // must not block the initialization of alerting resources.
-      this.logger.warn(
-        `Failed to update auto_expand_replicas for ${this.resourceDefinition.dataStreamName}: ${error.message}`
-      );
+      this.logger.warn({
+        message: 'Failed to update replica settings of existing backing indices',
+        code: ALERTING_LOG_CODES.RESOURCES_REPLICA_SETTINGS_UPDATE_FAILED,
+        labels: { resource: this.resourceDefinition.dataStreamName },
+        error,
+      });
     }
   }
 

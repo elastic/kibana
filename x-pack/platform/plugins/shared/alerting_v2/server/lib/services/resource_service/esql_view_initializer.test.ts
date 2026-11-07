@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { loggerMock } from '@kbn/logging-mocks';
+import { createLoggerService } from '../logger_service/logger_service.mock';
 import { ESQLViewInitializer } from './esql_view_initializer';
 
 const createMockEsClient = (transportRequestMock: jest.Mock) =>
@@ -17,7 +17,7 @@ const createMockEsClient = (transportRequestMock: jest.Mock) =>
 describe('ESQLViewInitializer', () => {
   let esClient: ElasticsearchClient;
   let transportRequestMock: jest.Mock;
-  const mockLogger = loggerMock.create();
+  const { loggerService } = createLoggerService();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -27,7 +27,7 @@ describe('ESQLViewInitializer', () => {
 
   it('creates the ESQL view via the transport API', async () => {
     const viewDefinition = { key: 'view:a', name: 'view-a', query: 'FROM a | LIMIT 1' };
-    const initializer = new ESQLViewInitializer(mockLogger, esClient, viewDefinition);
+    const initializer = new ESQLViewInitializer(loggerService, esClient, viewDefinition);
 
     await initializer.initialize();
 
@@ -47,7 +47,7 @@ describe('ESQLViewInitializer', () => {
     };
     transportRequestMock.mockRejectedValueOnce(new Error('ES request failed'));
 
-    const initializer = new ESQLViewInitializer(mockLogger, esClient, viewDefinition);
+    const initializer = new ESQLViewInitializer(loggerService, esClient, viewDefinition);
 
     await expect(initializer.initialize()).rejects.toThrow('ES request failed');
   });

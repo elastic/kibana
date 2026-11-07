@@ -58,7 +58,8 @@ export class ApplyThrottlingStep implements DispatcherStep {
       groups,
       policies,
       startedAt,
-      signal
+      signal,
+      logger
     );
 
     const { dispatch, throttled } = applyThrottling(
@@ -83,7 +84,8 @@ export class ApplyThrottlingStep implements DispatcherStep {
     groups: readonly ActionGroup[],
     policies: PolicyCatalog,
     startedAt: Date,
-    signal: AbortSignal
+    signal: AbortSignal,
+    logger: LoggerServiceContract
   ): Promise<Map<ActionGroupId, LastNotifiedInfo>> {
     const lookups = groups.flatMap(({ id, policyId }) => {
       const policy = policies.get(policyId);
@@ -107,7 +109,11 @@ export class ApplyThrottlingStep implements DispatcherStep {
     );
     const responses = await Promise.all(
       requests.map((request) =>
-        this.queryService.executeQueryRows<LastNotifiedRecord>({ ...request, abortSignal: signal })
+        this.queryService.executeQueryRows<LastNotifiedRecord>({
+          ...request,
+          logger,
+          abortSignal: signal,
+        })
       )
     );
     const records = responses.flat();

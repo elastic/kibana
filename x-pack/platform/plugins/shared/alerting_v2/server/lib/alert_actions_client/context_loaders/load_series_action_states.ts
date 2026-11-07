@@ -12,6 +12,7 @@ import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import type { DecodedSeriesId } from '@kbn/alerting-v2-utils';
 import { queryResponseToRecords } from '../../services/query_service/query_response_to_records';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 
 /**
  * The state the preconditioned series actions compare their request against,
@@ -56,6 +57,7 @@ const toSeriesActionState = (row: RawSeriesActionStateRow, now: number): SeriesA
 
 interface LoadSeriesActionStatesParams {
   queryService: QueryServiceContract;
+  logger: LoggerServiceContract;
   spaceId: string;
   series: readonly DecodedSeriesId[];
 }
@@ -84,6 +86,7 @@ const buildSeriesCondition = (series: DecodedSeriesId) =>
  */
 export const loadSeriesActionStatesBySeries = async ({
   queryService,
+  logger,
   spaceId,
   series,
 }: LoadSeriesActionStatesParams): Promise<Map<string, SeriesActionState>> => {
@@ -106,7 +109,7 @@ export const loadSeriesActionStatesBySeries = async ({
     .toRequest();
 
   const rows = queryResponseToRecords<RawSeriesActionStateRow>(
-    await queryService.executeQuery({ query: query.query })
+    await queryService.executeQuery({ logger, query: query.query })
   );
 
   const now = Date.now();

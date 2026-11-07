@@ -40,6 +40,10 @@ import {
 } from '../services/resource_service/resource_manager';
 import { AlertActionEventPublisher } from '../events/alert_action_event_publisher/alert_action_event_publisher';
 import { type QueryServiceContract } from '../services/query_service/query_service';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../services/logger_service/logger_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { StorageServiceScopedToken } from '../services/storage_service/tokens';
@@ -156,6 +160,8 @@ const isLifecycleActionType = (actionType: EpisodeAlertActionType): boolean =>
 
 @injectable()
 export class AlertActionsClient {
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
     @inject(StorageServiceScopedToken) private readonly storageService: StorageServiceContract,
@@ -164,8 +170,11 @@ export class AlertActionsClient {
     @inject(RequestSpaceIdToken) private readonly spaceId: string,
     @inject(AlertActionEventPublisher)
     private readonly eventPublisher: AlertActionEventPublisher,
-    @inject(ResourceManager) private readonly resourceManager: ResourceManagerContract
-  ) {}
+    @inject(ResourceManager) private readonly resourceManager: ResourceManagerContract,
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('alertsClient');
+  }
 
   /**
    * Creates a series-level action (`snooze` / `unsnooze`) for the
@@ -190,6 +199,7 @@ export class AlertActionsClient {
       this.userService.getCurrentUserProfileUid(),
       loadLastSeriesAlertEventOrThrow({
         queryService: this.queryService,
+        logger: this.logger,
         spaceId: this.spaceId,
         seriesId,
         series,
@@ -230,6 +240,7 @@ export class AlertActionsClient {
       this.userService.getCurrentUserProfileUid(),
       loadLastEpisodeAlertEventOrThrow({
         queryService: this.queryService,
+        logger: this.logger,
         spaceId: this.spaceId,
         episodeId,
       }),
@@ -267,6 +278,7 @@ export class AlertActionsClient {
   private loadActionStates(episodeIds: readonly string[]): Promise<Map<string, AlertActionState>> {
     return loadAlertActionStatesByEpisodeId({
       queryService: this.queryService,
+      logger: this.logger,
       spaceId: this.spaceId,
       episodeIds,
     });
@@ -287,6 +299,7 @@ export class AlertActionsClient {
   ): Promise<Map<string, SeriesActionState>> {
     return loadSeriesActionStatesBySeries({
       queryService: this.queryService,
+      logger: this.logger,
       spaceId: this.spaceId,
       series,
     });
@@ -323,6 +336,7 @@ export class AlertActionsClient {
 
     const latestEvents = await loadLatestAlertEventsBySeries({
       queryService: this.queryService,
+      logger: this.logger,
       spaceId: this.spaceId,
       series: [...seriesByEvent.values()],
     });
@@ -415,6 +429,7 @@ export class AlertActionsClient {
     ]);
 
     await this.storageService.bulkIndexDocsAcrossIndices({
+      logger: this.logger,
       docs,
       refresh: 'wait_for',
     });
@@ -442,6 +457,7 @@ export class AlertActionsClient {
       this.userService.getCurrentUserProfileUid(),
       loadLatestAlertEventsBySeries({
         queryService: this.queryService,
+        logger: this.logger,
         spaceId: this.spaceId,
         series: requestSpaceItems.map(({ series }) => series),
       }),
@@ -516,6 +532,7 @@ export class AlertActionsClient {
       this.userService.getCurrentUserProfileUid(),
       loadLatestAlertEventsByEpisodeId({
         queryService: this.queryService,
+        logger: this.logger,
         spaceId: this.spaceId,
         episodeIds: items.map((item) => item.alert_id),
       }),

@@ -81,7 +81,9 @@ export function bindClients({ bind }: ContainerModuleLoadOptions) {
   bind(ChangeHistoryClientToken).toResolvedValue(
     (logger, env) =>
       createChangeHistoryClient({
-        logger: logger.get('rule_changes_history'),
+        // `@kbn/change-history` requires a core `Logger`. Its failures surface
+        // through the rule changes history subscriber, so it logs as `events`.
+        logger: logger.get('events'),
         kibanaVersion: env.packageInfo.version,
       }),
     [Logger, PluginInitializer('env')]

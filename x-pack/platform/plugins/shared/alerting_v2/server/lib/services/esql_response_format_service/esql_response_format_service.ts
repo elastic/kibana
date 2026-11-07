@@ -41,11 +41,13 @@ export interface EsqlResponseFormatServiceContract {
 @injectable()
 export class EsqlResponseFormatService implements EsqlResponseFormatServiceContract {
   private format: EsqlResponseFormat = DEFAULT_ESQL_RESPONSE_FORMAT;
+  private readonly logger: LoggerServiceContract;
 
   constructor(
     @inject(CoreStart('featureFlags')) featureFlags: FeatureFlagsStart,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
   ) {
+    this.logger = loggerService.forSubsystem('resources');
     // Core exposes no plugin-stop hook to the DI container, so the subscription
     // intentionally lives for the lifetime of the process.
     featureFlags

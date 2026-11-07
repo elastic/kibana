@@ -76,6 +76,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
 
       try {
         const esqlRowBatchStream = step.queryService.executeQueryStream({
+          logger,
           query: boundedQuery,
           filter: queryPayload.filter,
           params: queryPayload.params,

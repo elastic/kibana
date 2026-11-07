@@ -173,7 +173,8 @@ export class DirectorService {
     const previousAlertStateByGroupHash = await this.fetchLatestAlertStateByGroupHash(
       rule,
       groupHashes,
-      executionContext
+      executionContext,
+      logger
     );
 
     executionContext.throwIfAborted();
@@ -212,10 +213,12 @@ export class DirectorService {
   private async fetchLatestAlertStateByGroupHash(
     rule: RuleResponse,
     groupHashes: string[],
-    context: ExecutionContext
+    context: ExecutionContext,
+    logger: LoggerServiceContract
   ): Promise<Map<string, LatestAlertEventState>> {
     const request = getLatestAlertEventStateQuery({ ruleId: rule.id, groupHashes }).toRequest();
     const records = await this.queryService.executeQueryRows<LatestAlertEventState>({
+      logger,
       query: request.query,
       // @ts-expect-error - the types of the composer query are not compatible with the types of the esql client
       params: request.params,

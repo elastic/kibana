@@ -16,6 +16,7 @@ import type {
 import { EPISODE_DATA_FILTER } from '@kbn/alerting-v2-common-queries';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import { EpisodesClient } from './episodes_client';
+import { createLoggerService } from '../services/logger_service/logger_service.mock';
 
 const SPACE_ID = 'space-a';
 const EPISODE_ID = 'episode-1';
@@ -70,7 +71,11 @@ const createClient = ({
   });
   const queryService = { executeQueryRows };
 
-  const client = new EpisodesClient(queryService as unknown as QueryServiceContract, SPACE_ID);
+  const client = new EpisodesClient(
+    queryService as unknown as QueryServiceContract,
+    SPACE_ID,
+    createLoggerService().loggerService
+  );
 
   return { client, queryService };
 };
@@ -190,7 +195,11 @@ describe('EpisodesClient', () => {
       const queryService: jest.Mocked<Pick<QueryServiceContract, 'executeQueryRows'>> = {
         executeQueryRows: jest.fn().mockResolvedValueOnce([eventRow]),
       };
-      const client = new EpisodesClient(queryService as unknown as QueryServiceContract, SPACE_ID);
+      const client = new EpisodesClient(
+        queryService as unknown as QueryServiceContract,
+        SPACE_ID,
+        createLoggerService().loggerService
+      );
 
       await expect(client.getEvents(EPISODE_ID)).resolves.toEqual([eventRow]);
 
@@ -209,7 +218,11 @@ describe('EpisodesClient', () => {
       const queryService: jest.Mocked<Pick<QueryServiceContract, 'executeQueryRows'>> = {
         executeQueryRows: jest.fn().mockResolvedValueOnce([]),
       };
-      const client = new EpisodesClient(queryService as unknown as QueryServiceContract, SPACE_ID);
+      const client = new EpisodesClient(
+        queryService as unknown as QueryServiceContract,
+        SPACE_ID,
+        createLoggerService().loggerService
+      );
 
       await client.getEvents(EPISODE_ID, {
         timeRange: {

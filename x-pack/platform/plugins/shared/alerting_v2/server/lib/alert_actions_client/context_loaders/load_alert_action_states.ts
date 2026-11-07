@@ -11,6 +11,7 @@ import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { normalizeTags } from '@kbn/alerting-v2-utils';
 import { queryResponseToRecords } from '../../services/query_service/query_response_to_records';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 
 /**
  * The state the preconditioned alert actions compare their request against,
@@ -50,6 +51,7 @@ const toAlertActionState = (row: RawAlertActionStateRow): AlertActionState => ({
 
 interface LoadAlertActionStatesParams {
   queryService: QueryServiceContract;
+  logger: LoggerServiceContract;
   spaceId: string;
   episodeIds: readonly string[];
 }
@@ -66,6 +68,7 @@ interface LoadAlertActionStatesParams {
  */
 export const loadAlertActionStatesByEpisodeId = async ({
   queryService,
+  logger,
   spaceId,
   episodeIds,
 }: LoadAlertActionStatesParams): Promise<Map<string, AlertActionState>> => {
@@ -89,7 +92,7 @@ export const loadAlertActionStatesByEpisodeId = async ({
   `.toRequest();
 
   const rows = queryResponseToRecords<RawAlertActionStateRow>(
-    await queryService.executeQuery({ query: query.query })
+    await queryService.executeQuery({ logger, query: query.query })
   );
 
   return new Map(rows.map((row) => [row.alert_id, toAlertActionState(row)]));

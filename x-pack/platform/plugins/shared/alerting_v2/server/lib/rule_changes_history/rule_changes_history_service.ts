@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { Logger as KibanaLogger } from '@kbn/logging';
 import { inject, injectable } from 'inversify';
-import { Logger } from '@kbn/core-di';
 import type {
   ChangeHistoryClient,
   LogChangeHistoryOptions,
@@ -37,19 +35,14 @@ export interface RuleChangesHistoryServiceContract {
 
 @injectable()
 export class RuleChangesHistoryService implements RuleChangesHistoryServiceContract {
-  private readonly logger: KibanaLogger;
   private readonly scope: RuleChangesHistoryScope;
 
-  constructor(
-    @inject(Logger) logger: KibanaLogger,
-    @inject(ChangeHistoryClientToken) private readonly client: ChangeHistoryClient
-  ) {
+  constructor(@inject(ChangeHistoryClientToken) private readonly client: ChangeHistoryClient) {
     this.scope = {
       module: RULE_CHANGES_HISTORY_MODULE,
       dataset: RULE_CHANGES_HISTORY_DATASET,
       objectType: RULE_CHANGES_HISTORY_OBJECT_TYPE,
     };
-    this.logger = logger.get('rule_changes_history');
   }
 
   public async logRuleChanges({
@@ -73,19 +66,15 @@ export class RuleChangesHistoryService implements RuleChangesHistoryServiceContr
       snapshot,
     }));
 
-    try {
-      const data = buildLogChangeHistoryData({ eventType });
+    const data = buildLogChangeHistoryData({ eventType });
 
-      await this.client.logBulk(changes, {
-        action,
-        spaceId,
-        username: author.username ?? '',
-        userProfileId: author.uid ?? undefined,
-        ...(correlationId ? { correlationId } : {}),
-        ...(data ? { data } : {}),
-      });
-    } catch (error) {
-      this.logger.warn(`Unable to log rule changes history for action "${action}": ${error}`);
-    }
+    await this.client.logBulk(changes, {
+      action,
+      spaceId,
+      username: author.username ?? '',
+      userProfileId: author.uid ?? undefined,
+      ...(correlationId ? { correlationId } : {}),
+      ...(data ? { data } : {}),
+    });
   }
 }

@@ -638,6 +638,23 @@ export const ALERTING_LOG_CODES = {
    * failed to bootstrap. Rule execution stays degraded until it succeeds.
    */
   RESOURCES_BOOTSTRAP_FAILED: 'RESOURCES_BOOTSTRAP_FAILED',
+  /**
+   * The current index template was installed ahead of a data stream reset,
+   * but applying it to the existing data stream failed. The reset proceeds
+   * with the template in place; the old write index is deleted anyway.
+   */
+  RESOURCES_DATASTREAM_UPDATE_FAILED: 'RESOURCES_DATASTREAM_UPDATE_FAILED',
+  /**
+   * Applying `auto_expand_replicas` to a data stream's existing backing
+   * indices failed. Best effort: only cluster health reporting is affected,
+   * and the setting is retried on the next start.
+   */
+  RESOURCES_REPLICA_SETTINGS_UPDATE_FAILED: 'RESOURCES_REPLICA_SETTINGS_UPDATE_FAILED',
+  /**
+   * The alerting v2 managed workflows could not be installed at start. The
+   * plugin runs without them until the next start succeeds.
+   */
+  RESOURCES_MANAGED_WORKFLOWS_INSTALL_FAILED: 'RESOURCES_MANAGED_WORKFLOWS_INSTALL_FAILED',
 
   // ──────────────────────────────── Retries ──────────────────────────
   /**
