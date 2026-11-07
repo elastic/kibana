@@ -462,9 +462,7 @@ describe('Detection Coverage review', () => {
       expect(attach?.type).toBe('ai.attachment.add');
       expect(attach?.with?.type).toBe('security.rule');
       expect(attach?.with?.id).toBe('coverage-rule');
-      expect(attach?.with?.origin).toBe(
-        '{{ steps.coverage_check.output.structured_output.rule_id }}'
-      );
+      expect(attach?.with?.origin).toBe('{{ steps.resolve_rule.output.id }}');
       expect(attach?.if).toContain('steps.resolve_rule.output.id != null');
       expect(attach?.with?.render_inline).toBe(true);
     });
