@@ -14,6 +14,7 @@ import { ImpactServiceMap } from './impact_service_map';
 import {
   IMPACT_SEVERITY_SCORES,
   getImpactSeverityScore,
+  getEuiIcon,
   getImpactState,
   transformImpactMap,
 } from './transform_impact_map';
@@ -99,6 +100,20 @@ describe('getImpactSeverityScore', () => {
     expect(getImpactSeverityScore({ impacted: true })).toBe(IMPACT_SEVERITY_SCORES.impacted);
     expect(getImpactSeverityScore({ health: 'healthy' })).toBeUndefined();
     expect(getImpactSeverityScore(undefined)).toBeUndefined();
+  });
+});
+
+describe('getEuiIcon', () => {
+  it('uses the named icon, and the Kubernetes logo for Kubernetes types the model left bare', () => {
+    expect(
+      getEuiIcon({ id: 'x', label: 'X', kind: 'service', icon: { eui_icon: 'logoAWS' } })
+    ).toBe('logoAWS');
+    expect(getEuiIcon({ id: 'k8s_deployment', label: 'K8s deployment', kind: 'service' })).toBe(
+      'logoKubernetes'
+    );
+    expect(
+      getEuiIcon({ id: 'java_service', label: 'Java service', kind: 'service' })
+    ).toBeUndefined();
   });
 });
 

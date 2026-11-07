@@ -65,7 +65,19 @@ export const getImpactState = (annotations?: ImpactMapAnnotations): ImpactState 
   return undefined;
 };
 
-export type ImpactServiceNodeData = ServiceNodeData & { impactState?: ImpactState };
+export type ImpactServiceNodeData = ServiceNodeData & {
+  impactState?: ImpactState;
+  /** An EUI icon for a service APM has no agent logo for, such as a Kubernetes deployment. */
+  euiIcon?: string;
+};
+
+const KUBERNETES_TYPE =
+  /(^|[^a-z])(k8s|kubernetes|deployment|statefulset|daemonset|replicaset|pod)([^a-z]|$)/i;
+
+/** The EUI icon an entity type names, or the Kubernetes logo when its id or name says it is one. */
+export const getEuiIcon = (type?: ImpactMapEntityType): string | undefined =>
+  type?.icon?.eui_icon ??
+  (type && KUBERNETES_TYPE.test(`${type.id} ${type.label}`) ? 'logoKubernetes' : undefined);
 export type ImpactDependencyNodeData = DependencyNodeData & {
   severityScore?: number;
   impactState?: ImpactState;
@@ -139,6 +151,7 @@ export const transformImpactMap = (
           label,
           isService: true,
           impactState,
+          euiIcon: getEuiIcon(type),
           agentName: (agentNames[id] ?? type?.icon?.agent_name) as AgentName | undefined,
           ...(score !== undefined && { serviceAnomalyStats: { anomalyScore: score } }),
           ...(annotations?.alert_count && { alertsCount: annotations.alert_count }),

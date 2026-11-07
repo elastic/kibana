@@ -55,6 +55,11 @@ export const impactMapIconSchema = lazySchema(() =>
     span_type: z.string().max(MAX_ICON_KEY_LENGTH).optional(),
     /** Span subtype of a dependency, for example `postgresql`, `kafka`, `http`, `redis`. */
     span_subtype: z.string().max(MAX_ICON_KEY_LENGTH).optional(),
+    /**
+     * An EUI icon name, for things APM has no agent logo for: `logoKubernetes` for Kubernetes
+     * objects, `logoAWS`, `logoDocker` and so on. A renderer draws it when there is no agent_name.
+     */
+    eui_icon: z.string().max(MAX_ICON_KEY_LENGTH).optional(),
     /** Stored for renderers that draw custom icons; the service map renderer does not. */
     svg: z.string().max(MAX_SVG_LENGTH).optional(),
   })

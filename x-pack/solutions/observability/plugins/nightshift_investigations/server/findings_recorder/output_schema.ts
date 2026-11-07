@@ -130,6 +130,7 @@ export const findingsOutputSchema = lazySchema(() => {
             type: z.string().min(1),
             kind: z.enum(IMPACT_MAP_ENTITY_KINDS).optional(),
             agent_name: z.string().optional(),
+            eui_icon: z.string().optional(),
             span_type: z.string().optional(),
             span_subtype: z.string().optional(),
             role: z.enum(IMPACT_MAP_ROLES).optional(),
@@ -288,17 +289,22 @@ export const limitImpactMap = (
     seen.add(id);
     const typeId = toImpactMapTypeId(entity.type);
     const agentName = icon(entity.agent_name);
+    const euiIcon = icon(entity.eui_icon);
     const spanType = icon(entity.span_type);
     const spanSubtype = icon(entity.span_subtype);
-    if (!entityTypes.has(typeId) && (entity.kind || agentName || spanType || spanSubtype)) {
+    if (
+      !entityTypes.has(typeId) &&
+      (entity.kind || agentName || euiIcon || spanType || spanSubtype)
+    ) {
       entityTypes.set(typeId, {
         id: typeId,
         label: humanizeTypeId(typeId),
         kind: entity.kind ?? (spanType || spanSubtype ? 'dependency' : 'service'),
-        ...(agentName || spanType || spanSubtype
+        ...(agentName || euiIcon || spanType || spanSubtype
           ? {
               icon: {
                 ...(agentName ? { agent_name: agentName } : {}),
+                ...(euiIcon ? { eui_icon: euiIcon } : {}),
                 ...(spanType ? { span_type: spanType } : {}),
                 ...(spanSubtype ? { span_subtype: spanSubtype } : {}),
               },
@@ -657,6 +663,11 @@ export const FINDINGS_JSON_SCHEMA = {
                 type: 'string',
                 description:
                   'For a service, the APM agent name for its icon: nodejs, java, go, python, dotnet, ruby, php, rum-js or opentelemetry.',
+              },
+              eui_icon: {
+                type: 'string',
+                description:
+                  'For something with no APM agent, an EUI icon name. Always logoKubernetes for a Kubernetes deployment, pod, node, statefulset, daemonset or namespace; logoDocker for a container; logoAWS, logoGcp or logoAzure for cloud resources.',
               },
               span_type: {
                 type: 'string',
