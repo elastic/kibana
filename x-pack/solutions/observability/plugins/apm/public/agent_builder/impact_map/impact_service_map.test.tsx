@@ -119,6 +119,7 @@ describe('getEuiIcon', () => {
 
 describe('infrastructure entities', () => {
   const map: InvestigationImpactMapResponse = {
+    created_at: '2026-11-07T00:00:00.000Z',
     entities: [
       { id: 'ship-deploy', type_id: 'k8s_deployment', label: 'shipping Deployment' },
       { id: 'host-1', type_id: 'host', label: 'host-1' },

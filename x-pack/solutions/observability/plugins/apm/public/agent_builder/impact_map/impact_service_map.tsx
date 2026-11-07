@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useMemo, useState } from 'react';
+import React, { memo, type ComponentProps, useEffect, useMemo, useState } from 'react';
 import {
   Controls,
   Panel,
@@ -96,7 +96,7 @@ function StateBadge({ state, floating }: { state: ImpactState; floating?: boolea
           border: 2px solid ${euiTheme.colors.backgroundBasePlain};
         `}
       >
-        <EuiIcon type={icon} size="s" color={euiTheme.colors.ink} aria-hidden="true" />
+        <EuiIcon type={icon} size="s" color={euiTheme.colors.darkestShade} aria-hidden="true" />
       </span>
     </EuiToolTip>
   );
@@ -104,7 +104,7 @@ function StateBadge({ state, floating }: { state: ImpactState; floating?: boolea
 
 const ImpactServiceNode = memo((props: NodeProps<Node<ImpactServiceNodeData>>) => (
   <>
-    <ServiceNode {...props} />
+    <ServiceNode {...(props as unknown as ComponentProps<typeof ServiceNode>)} />
     {props.data.impactState && <StateBadge state={props.data.impactState} floating />}
   </>
 ));
@@ -227,12 +227,13 @@ const useServiceAgentNames = (impactMap: ImpactMapRendererProps['impactMap']) =>
     if (!callApmApi) {
       return;
     }
-    let cancelled = false;
+    const controller = new AbortController();
     const end = new Date();
     const start = new Date(end.getTime() - LOOKBACK_MS);
     Promise.all(
       serviceIds.map((serviceName) =>
         callApmApi('GET /internal/apm/services/{serviceName}/agent', {
+          signal: controller.signal,
           params: {
             path: { serviceName },
             query: {
@@ -246,12 +247,12 @@ const useServiceAgentNames = (impactMap: ImpactMapRendererProps['impactMap']) =>
           .catch(() => undefined)
       )
     ).then((found) => {
-      if (!cancelled) {
+      if (!controller.signal.aborted) {
         setAgentNames(Object.fromEntries(found.filter((pair) => pair !== undefined)));
       }
     });
     return () => {
-      cancelled = true;
+      controller.abort();
     };
   }, [serviceIds]);
 
