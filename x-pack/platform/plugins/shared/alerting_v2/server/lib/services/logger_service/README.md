@@ -1,9 +1,7 @@
 # Alerting v2 — Logging
 
 This document is the logging standard for `alerting_v2` server code and the
-reference for `LoggerService`, the plugin's single logging entry point. A few
-older call sites have not migrated yet. They are listed under
-[known exceptions](#known-exceptions) and are not precedent.
+reference for `LoggerService`, the plugin's single logging entry point.
 Read the [rules](#rules) before adding or changing a log line. Read the
 [API reference](#loggerservice-api) when you need the exact call shape.
 
@@ -39,22 +37,6 @@ Every log line in this plugin:
 5. If `warn` or `error`, carries a `code` from `ALERTING_LOG_CODES`.
 6. Logs nothing from the [deny list](#deny-list--never-log-at-any-level).
 7. Is asserted in a unit test on `code` and `labels`, never on message text.
-
-#### Known exceptions
-
-These call sites predate the standard. Migrate one when you touch it and remove
-it from this list. Do not add to it.
-
-- Still on the raw core `Logger`: the managed-workflows install warning in
-  `setup/bind_on_start.ts`, `lib/services/api_key_service/api_key_service.ts`,
-  `lib/services/retry_service/alerting_retry_service.ts`,
-  `lib/rule_changes_history/rule_changes_history_service.ts` (which also
-  creates a `rule_changes_history` child that is not an
-  `AlertingSubsystemName`), and the datastream and ES|QL view initializers,
-  which receive the core logger from `resources/register_resources.ts`.
-- Logging from the root `LoggerService` without `forSubsystem`:
-  `QueryService`, `StorageService`, `MaintenanceWindowService`,
-  `WorkflowService`, `EsqlResponseFormatService`.
 
 ### 1. Log levels
 
