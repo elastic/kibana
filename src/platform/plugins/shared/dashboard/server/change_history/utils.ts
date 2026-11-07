@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { diffLines } from 'diff';
 import equal from 'fast-deep-equal';
 import * as jsondiffpatch from 'jsondiffpatch';
 import * as jsonpatchFormatter from 'jsondiffpatch/formatters/jsonpatch';
@@ -32,6 +33,34 @@ import { logger, securityService, spacesService } from '../kibana_services';
 import { getChangeHistoryClient } from './change_history_service';
 
 export const INITIAL_HISTORY_SEQUENCE = 1;
+
+const toDiffText = (value: object): string => JSON.stringify(value, null, 2);
+
+// The diff runs synchronously on the save path, so it is bounded to avoid blocking the event loop.
+// Maximum edit length (added + removed lines) the line diff computes before giving up, which keeps
+// the worst-case cost small and the fallback independent of machine speed.
+const MAX_DIFF_EDIT_LENGTH = 1000;
+
+/**
+ * Number of contiguous changed line blocks between two snapshots rendered as pretty-printed JSON,
+ * which is how the history preview's diff navigator counts changes. If the line diff is too
+ * expensive to compute, falls back to the number of JSON patch operations between the snapshots.
+ */
+export const countChangedLineBlocks = (previous: object, current: object): number => {
+  const changes = diffLines(toDiffText(previous), toDiffText(current), {
+    maxEditLength: MAX_DIFF_EDIT_LENGTH,
+  });
+  if (!changes) return jsonpatchFormatter.format(jsondiffpatch.diff(previous, current)).length;
+
+  let blocks = 0;
+  let inChangedBlock = false;
+  for (const { added, removed } of changes) {
+    const isChanged = Boolean(added || removed);
+    if (isChanged && !inChangedBlock) blocks++;
+    inChangedBlock = isChanged;
+  }
+  return blocks;
+};
 
 // Granted by both `all` and `minimal_all`, so editors with customized sub-feature privileges
 // (e.g. without short URLs or search sessions) are not rejected.
@@ -168,7 +197,7 @@ export const addToHistory = async ({
     // Diffed against the pre-update saved object, not the latest history event, which may not be
     // searchable yet. Stored with the event so listing history doesn't need to diff every snapshot.
     const changeCount = previousSnapshot
-      ? jsonpatchFormatter.format(jsondiffpatch.diff(previousSnapshot, snapshot)).length
+      ? countChangedLineBlocks(previousSnapshot, snapshot)
       : undefined;
 
     await client.log(change, {

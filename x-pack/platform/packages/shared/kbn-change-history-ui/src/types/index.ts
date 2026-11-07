@@ -8,7 +8,10 @@
 export type { ChangeHistoryScope } from './change_history_scope';
 export type { ChangeHistoryListItem } from './change_history_list_item';
 export type { ChangeHistoryListItemChanges } from './change_history_list_item_changes';
-export type { ChangeHistoryChangesSummaryRenderFn } from './change_history_changes_summary';
+export type {
+  ChangeHistoryChangesSummaryRenderFn,
+  ChangeHistoryChangesRenderFn,
+} from './change_history_changes_summary';
 export type { ChangeHistoryDetail } from './change_history_detail';
 export type {
   GetChangeParams,

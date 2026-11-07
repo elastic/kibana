@@ -9,7 +9,6 @@
 
 import React from 'react';
 import type { ChangeHistoryPreviewRenderFn } from '@kbn/change-history-ui';
-import { getWorkflowChangeHistoryCompareIndicator } from './get_workflow_change_history_compare_indicator';
 import { getWorkflowYamlFromSnapshot } from './get_workflow_yaml_from_snapshot';
 import { WorkflowChangeHistoryMonacoPreview } from './workflow_change_history_monaco_preview';
 
@@ -38,9 +37,8 @@ export const renderWorkflowChangeHistoryPreview: ChangeHistoryPreviewRenderFn = 
     <WorkflowChangeHistoryMonacoPreview
       baselineYaml={baselineYaml}
       targetYaml={targetYaml}
-      validationYaml={targetYaml}
       diffTelemetry={diffTelemetry}
-      compareIndicator={getWorkflowChangeHistoryCompareIndicator(compareSpec)}
+      compareSpec={compareSpec}
     />
   );
 };
