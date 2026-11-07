@@ -12,8 +12,9 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS } from '../../../../page_objects/dashboard_page_controls';
 
-export default function ({ getPageObjects }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { dashboardControls, dashboard } = getPageObjects(['dashboardControls', 'dashboard']);
+  const retry = getService('retry');
 
   /**
    * Purpose: Suggestions smoke test
@@ -186,7 +187,9 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         await dashboardControls.optionsListPopoverSearchForOption('R');
         expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(0);
         await dashboardControls.optionsListPopoverSearchForOption('RuFf');
-        expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
+        await retry.try(async () => {
+          expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
+        });
 
         await dashboardControls.optionsListPopoverClearSearch();
         await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
@@ -208,7 +211,9 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         await dashboardControls.optionsListPopoverSearchForOption('4');
         expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(0);
         await dashboardControls.optionsListPopoverSearchForOption('45'); // only supports exact match
-        expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
+        await retry.try(async () => {
+          expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
+        });
       });
     });
   });
