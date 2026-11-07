@@ -110,6 +110,14 @@ const describeFinding = (finding: RecordingFinding): string => {
       return `${finding.action}: ${finding.request} breaks the spec: ${finding.violations
         .map(({ message }) => message)
         .join('; ')}`;
+    case 'insufficient-scope':
+      return `${finding.action}: under auth type ${finding.authType}, ${
+        finding.operation
+      } needs OAuth scopes the auth type doesn't request: ${finding.violations
+        .map(({ message }) => message)
+        .join(
+          '; '
+        )}; add one to the auth type's default "scope", or correct the spec's scopes in ${OVERLAY}`;
     case 'read-scope':
       return `${finding.action}: has scope 'read' but sent ${finding.request}; if the operation only queries, add it to the action's "queries" in ${FIXTURES}, otherwise correct the scope`;
     case 'unused-query':
@@ -125,6 +133,7 @@ const isProblem = ({ kind }: RecordingFinding): boolean =>
   kind === 'no-auth-type' ||
   kind === 'auth-type-error' ||
   kind === 'request-violation' ||
+  kind === 'insufficient-scope' ||
   kind === 'read-scope' ||
   kind === 'unused-query' ||
   kind === 'rejected-response';
