@@ -26,7 +26,7 @@ never part of that gate.
 | SSE Attachment | CODE | a `security.significant_security_event` attachment with a `hunt_result` exists iff expected |
 | Evidence Honesty | CODE | report `evidence[]` written iff the coordinator result's `completed_successfully` is true (`complete` or `incomplete_final`, never `incomplete_retryable`), the same flag the hunt child's `write_evidence` step reads |
 | Proposal Presence | CODE | pending Proposals on the Investigation match the exact count or minimum; a row pinned to zero checks the run created no Proposal in any status |
-| Proposal Convergence | CODE | multi-candidate only: each actioned subject (target plus criticality level, the key packaging converges on) is pending under one Investigation, and a convergence note or `Also raised by [Investigation]` line is present |
+| Proposal Convergence | CODE | multi-candidate only: each actioned subject (the agent/process or identity packaging keys it by, plus the action workflow) is pending under one Investigation, and a convergence note or `Also raised by [Investigation]` line is present |
 | Investigation Status | CODE | conversation `metadata.status`, or no conversation at all |
 | Canary Inverted | CODE | 1 iff the hunt reached a verdict with Tier 1 `no_searchable_terms` and the prose-only report produced no hit, no Tier 2 execution, no Proposal, no SSE; a hunt that failed before searching scores 0 |
 | Narrative Rubric | LLM | per-row criteria over the messages the Worker posted to the Investigation; reported, not gated |
@@ -69,8 +69,9 @@ own data supports.
 ## Proposal gate (approve and dismiss)
 
 `evals/hunt_watch_approval.spec.ts` is an unscored e2e for the human side of the gate. Each test
-resets and runs the golden hit report in the default space, decides every pending Proposal it
-raised, waits for the Investigation to close, and checks the records:
+resets and runs the assume-role report in the default space — the only seeded report whose
+packaging mints an actioned Proposal (suspend-process on WIN-ANALYST01's aws.exe) — decides every
+pending Proposal it raised, waits for the Investigation to close, and checks the records:
 
 | Path | Proposal record | Investigation |
 |---|---|---|
@@ -81,6 +82,13 @@ The gate closes once nothing is pending or executing, whatever was decided, so d
 `resolved` too. `src/hitl_contract.test.ts` pins where decisions may come from: approve exists
 only in `src/proposal_gate.ts`, which only this spec imports, and dismiss exists there and in the
 pre-run reset. Scored tasks never decide a Proposal.
+
+The approve path is staged, not live: `src/endpoint_action_responder.ts` indexes endpoint
+metadata for the seeded host, enrolls it on a real Fleet agent policy carrying an endpoint
+package policy (the seeded `.fleet-agents` `policy_id` is a placeholder), and answers the
+dispatched suspend-process with a success response doc so the action's completion poll resolves.
+Teardown restores the agent's policy and deletes the created policies. The Scout config set
+preinstalls the `endpoint` Fleet package for this (same flag the endpoint eval suite uses).
 
 ## Datasets
 
@@ -138,7 +146,11 @@ Two hard rows force those paths without touching the product:
   incomplete, packaging closes the Investigation as `other` with the retired summary, and the
   narrative has to say part of the report was not searched.
   `seed_contract.test.ts` reads the bound from the Worker source so a change to it fails in Jest
-  first.
+  first. The report text deliberately describes no activity: when it said the addresses were
+  "observed scanning exposed services", some models extracted Active Scanning (T1595), and a
+  failed or ungrounded query for it is a retryable gap, so the run ended `partial` with no
+  evidence instead of retiring. The contract test rejects behavior words in the title, body and
+  categories.
 - `hard-failed-locked-investigation` (`failed`, `incomplete_stage: hunt`). The seed copies the
   clean report to `ti-report-aws-iam-clean-historic-01-locked` and, after `resetHuntReport`,
   `applyHuntFault` creates a private conversation at the report's Investigation id through the
@@ -171,9 +183,17 @@ node scripts/evals start --suite hunt-watch --profile local --skip-server --grep
 A full run takes about 26 minutes with the judges on. The suite is pinned to one worker and
 `concurrency: 1` because the Worker's per-space
 `concurrency: { strategy: drop, max: 1 }` silently drops a trigger that races another sweep.
-The Worker also keeps its own 4h schedule in every eval space, and the suite cannot pause it,
-so on a long-lived stack a scheduled sweep can land during a run and drop that row's trigger.
-`HuntWatchClient.run` throws with the dropped-trigger message when that happens; rerun the row.
+Before each trigger, `HuntWatchClient.run` cancels any Worker execution that still holds the
+slot and waits for it to free. That covers a run abandoned by a failed or retried test, and a
+scheduled sweep (the Worker keeps its own 4h schedule in every eval space). If the slot does not
+free within two minutes, or a trigger still ends with no step executions, `run` throws instead of
+scoring an empty sweep.
+
+AlertZero routes 404 outside a Security solution space. The preflight creates `hunt-a`, `hunt-b`
+and `hunt-blocked` as Security spaces, or switches them to Security, and leaves them that way. It
+only switches `default` when `CI=true`. On a local stack whose `default` space is Classic, the
+preflight fails and names the setting. Set `default`'s solution view to Security in Stack
+Management > Spaces, or run the suite on a throwaway stack.
 
 The `local` profile's `evaluationsKbn.url` defaults to `localhost:5601/dev`. When the Scout
 stack is the only Kibana running, point it at `localhost:5620` in
@@ -253,7 +273,7 @@ d=$(mktemp -d) && cp gate_checklist.yaml "$d/gate-checklist.yaml"
 | D10 proposal-gate-exclusivity | tested | `Proposal Presence`, `Proposal Convergence`, `Canary Inverted`, approval spec |
 | D10a watch-tag-grouping | n/a | Worker triggered directly |
 | D10b per-worker-settings-scope | n/a | v1 bridge is space-level |
-| D10c execute-time-revalidation | n/a | no Defend endpoint actions |
+| D10c execute-time-revalidation | n/a | approval spec runs a Defend action, but the staged responder always answers success |
 | D10d coverage-handoff-integrity | n/a | out of scope |
 <!-- gate-checklist:end -->
 
@@ -267,6 +287,14 @@ d=$(mktemp -d) && cp gate_checklist.yaml "$d/gate-checklist.yaml"
   that is the first place to look.
 - A confirmed hit raises more than one Proposal, so the hit rows use a minimum rather than an
   exact count.
+- Tier 2 writes its own ES|QL each run, and the model picks each behavior's `FROM` from the
+  indices Tier 1 matched. When Tier 1 matched only CloudTrail, the T1059.001 query often read
+  CloudTrail too. That query has no process to point at, so packaging minted only a
+  recommendation and the approval spec had no suspend-process Proposal to act on. The seeded
+  WIN-ANALYST01 process events therefore carry `host.ip` 192.0.2.30, the same source IP the
+  CloudTrail events record, so Tier 1 also matches them and Tier 2 is grounded on endpoint
+  data. The approval spec still re-mints, up to three times, when no actioned Proposal
+  appears.
 - On the `aws-iam-assume-role` scenario, Tier 2 often ends `incomplete_retryable`, which makes
   the run `partial` with no evidence written. Before Tier 2 ES|QL generation moved to the
   Frontier tier (#298211) the cause was `generation_failed` on at least one derived technique in

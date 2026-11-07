@@ -7,10 +7,14 @@
 
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { TerminalExecutionStatuses } from '@kbn/workflows';
+import {
+  ConcurrencySlotOccupyingExecutionStatuses,
+  TerminalExecutionStatuses,
+} from '@kbn/workflows';
 import type {
   ExecutionStatus,
   WorkflowExecutionDto,
+  WorkflowExecutionListDto,
   WorkflowStepExecutionDto,
 } from '@kbn/workflows';
 import { HUNT_WORKER_WORKFLOW_ID, PUBLIC_API_VERSION } from './constants';
@@ -70,24 +74,88 @@ export class HuntWatchClient {
     return execution;
   }
 
+  private async listSlotHolders(spaceId: string, workflowId: string): Promise<string[]> {
+    const { results } = await this.fetch<WorkflowExecutionListDto>(
+      spacePath(spaceId, `/api/workflows/workflow/${encodeURIComponent(workflowId)}/executions`),
+      {
+        method: 'GET',
+        headers: apiVersion(PUBLIC_API_VERSION),
+        query: { statuses: [...ConcurrencySlotOccupyingExecutionStatuses], size: 100 },
+      }
+    );
+    return results.map(({ id }) => id);
+  }
+
+  /**
+   * Cancels every execution of the space's Worker that holds its single concurrency slot and
+   * waits for them to finish. Without this, a run abandoned by a failed or retried test (e.g. a
+   * Playwright retry after an ES timeout) keeps the slot, and every later trigger is dropped.
+   */
+  private async freeWorkerSlot({
+    spaceId,
+    workflowId,
+    maxWaitMs,
+    pollIntervalMs,
+  }: {
+    spaceId: string;
+    workflowId: string;
+    maxWaitMs: number;
+    pollIntervalMs: number;
+  }): Promise<void> {
+    const deadline = Date.now() + maxWaitMs;
+    const cancelled = new Set<string>();
+    let holders = await this.listSlotHolders(spaceId, workflowId);
+    while (holders.length > 0) {
+      const fresh = holders.filter((id) => !cancelled.has(id));
+      if (fresh.length > 0) {
+        this.log.warning(
+          `Cancelling ${fresh.length} Worker execution(s) still holding the slot in space ` +
+            `"${spaceId}" before triggering: ${fresh.join(', ')}`
+        );
+        await Promise.allSettled(
+          fresh.map((id) =>
+            this.fetch(this.executionPath(spaceId, id, '/cancel'), {
+              method: 'POST',
+              headers: apiVersion(PUBLIC_API_VERSION),
+            })
+          )
+        );
+        fresh.forEach((id) => cancelled.add(id));
+      }
+      if (Date.now() >= deadline) {
+        throw new Error(
+          `Worker executions [${holders.join(', ')}] in space "${spaceId}" still hold the ` +
+            `Worker's concurrency slot ${maxWaitMs}ms after being cancelled; a trigger now ` +
+            `would be dropped.`
+        );
+      }
+      await sleep(pollIntervalMs);
+      holders = await this.listSlotHolders(spaceId, workflowId);
+    }
+  }
+
   /**
    * Manually triggers the per-space Worker with named `reportIds` and polls to a terminal state.
-   * An accepted run whose execution ends with no step executions is a trigger dropped by the
-   * Worker's per-space `concurrency: { strategy: drop, max: 1 }`, and throws rather than
-   * returning what looks like an empty sweep.
+   * Frees the Worker's slot first (see {@link freeWorkerSlot}). An accepted run whose execution
+   * still ends with no step executions is a trigger dropped by the Worker's per-space
+   * `concurrency: { strategy: drop, max: 1 }`, and throws rather than returning what looks like
+   * an empty sweep.
    */
   async run({
     spaceId,
     reportIds,
     maxWaitMs = 10 * 60_000,
     pollIntervalMs = 5_000,
+    slotWaitMs = 2 * 60_000,
   }: {
     spaceId: string;
     reportIds: string[];
     maxWaitMs?: number;
     pollIntervalMs?: number;
+    slotWaitMs?: number;
   }): Promise<HuntWatchRunResult> {
     const workflowId = `${HUNT_WORKER_WORKFLOW_ID}-${spaceId}`;
+    await this.freeWorkerSlot({ spaceId, workflowId, maxWaitMs: slotWaitMs, pollIntervalMs });
     const { workflowExecutionId } = await this.fetch<{ workflowExecutionId: string }>(
       spacePath(spaceId, `/api/workflows/workflow/${encodeURIComponent(workflowId)}/run`),
       {
