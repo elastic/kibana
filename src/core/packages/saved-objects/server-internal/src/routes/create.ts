@@ -42,10 +42,8 @@ interface RouteDependencies {
 
 export const registerCreateRoute = (
   router: InternalSavedObjectRouter,
-  { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies
+  { coreUsageData, logger, access, deprecationInfo }: RouteDependencies
 ) => {
-  const { allowHttpApiAccess } = config;
-
   const createQuerySchema = schema.object({
     overwrite: schema.boolean({
       defaultValue: false,
@@ -127,9 +125,7 @@ For transferring or backing up saved objects, prefer the import and export APIs 
     usageStatsClient.incrementSavedObjectsCreate({ request, types: [type] }).catch(() => {});
 
     const { savedObjects } = await context.core;
-    if (!allowHttpApiAccess) {
-      throwIfTypeNotVisibleByAPI(type, savedObjects.typeRegistry);
-    }
+    throwIfTypeNotVisibleByAPI(type, savedObjects.typeRegistry);
     const {
       attributes,
       migrationVersion,
