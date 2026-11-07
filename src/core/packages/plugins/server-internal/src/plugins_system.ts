@@ -26,12 +26,14 @@ import type {
 } from './plugins_service';
 import { RuntimePluginContractResolver } from './plugin_contract_resolver';
 import type { DeferredInitEngine, PluginInitRunner } from './deferred_init';
+import { PluginsTelemetry } from './plugins_telemetry';
 
 const Sec = 1000;
 
 /** @internal */
 export class PluginsSystem<T extends PluginType> {
   private readonly runtimeResolver = new RuntimePluginContractResolver();
+  private readonly telemetry = new PluginsTelemetry();
   private readonly plugins = new Map<PluginName, PluginWrapper>();
   private readonly log: Logger;
   // `satup`, the past-tense version of the noun `setup`.
@@ -142,7 +144,9 @@ export class PluginsSystem<T extends PluginType> {
 
       await plugin.init();
       let contract: unknown;
-      const contractOrPromise = plugin.setup(pluginSetupContext, pluginDepContracts);
+      const contractOrPromise = this.telemetry.measure(plugin, 'setup', () =>
+        plugin.setup(pluginSetupContext, pluginDepContracts)
+      );
       if (isPromise(contractOrPromise)) {
         if (this.coreContext.env.mode.dev) {
           this.log.warn(
@@ -207,7 +211,9 @@ export class PluginsSystem<T extends PluginType> {
         runtimeResolver: this.runtimeResolver,
       });
       let contract: unknown;
-      const contractOrPromise = plugin.start(startContext, pluginDepContracts);
+      const contractOrPromise = this.telemetry.measure(plugin, 'start', () =>
+        plugin.start(startContext, pluginDepContracts)
+      );
       if (isPromise(contractOrPromise)) {
         if (this.coreContext.env.mode.dev) {
           this.log.warn(
@@ -233,7 +239,9 @@ export class PluginsSystem<T extends PluginType> {
       contracts.set(pluginName, contract);
       if (plugin.hasInitialize) {
         initializeRunners.set(pluginName, () =>
-          plugin.runInitialize(startContext, pluginDepContracts)
+          this.telemetry.measureInitialize(plugin, () =>
+            plugin.runInitialize(startContext, pluginDepContracts)
+          )
         );
       } else {
         this.deferredInitEngine?.markAvailable(pluginName);
