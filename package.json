@@ -1410,6 +1410,7 @@
     "@kbn/workflows-execution-engine": "workspace:*",
     "@kbn/workflows-extensions": "workspace:*",
     "@kbn/workflows-extensions-example": "workspace:*",
+    "@kbn/workflows-inbound-hub-test-plugin": "workspace:*",
     "@kbn/workflows-library": "workspace:*",
     "@kbn/workflows-management-plugin": "workspace:*",
     "@kbn/workflows-ui": "workspace:*",

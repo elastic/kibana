@@ -1,0 +1,73 @@
+{
+  "sha1": "75422898253096102fa87317d04da78d9fbb63b7",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "8424fd7e3cd9a76-ef5eb2df47dc8cc",
+      "title": "[NON-MKI] Inbound hub on Serverless a Kibana API key on an events-on in-memory connector runs the workflow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_inbound_hub/api/tests/hub_service_account_bearer.spec.ts",
+        "line": 78,
+        "column": 22
+      }
+    },
+    {
+      "id": "8424fd7e3cd9a76-ae3aea9e393445b",
+      "title": "[NON-MKI] Inbound hub on Serverless an ingest token on a saved connector runs the workflow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_inbound_hub/api/tests/hub_service_account_bearer.spec.ts",
+        "line": 94,
+        "column": 15
+      }
+    },
+    {
+      "id": "8424fd7e3cd9a76-17eabf64cc0accb",
+      "title": "[NON-MKI] Inbound hub on Serverless a service account bearer runs the workflow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_inbound_hub/api/tests/hub_service_account_bearer.spec.ts",
+        "line": 108,
+        "column": 15
+      }
+    },
+    {
+      "id": "fbed02ac7636943-358655b3c584d25",
+      "title": "Inbound hub triggers a workflow a Kibana API key on an events-on in-memory connector runs the workflow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_inbound_hub/api/tests/hub_triggers_workflow.spec.ts",
+        "line": 32,
+        "column": 5
+      }
+    },
+    {
+      "id": "fbed02ac7636943-7d8cfcca6252d3f",
+      "title": "Inbound hub triggers a workflow an ingest token on a saved connector runs the workflow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_inbound_hub/api/tests/hub_triggers_workflow.spec.ts",
+        "line": 46,
+        "column": 14
+      }
+    }
+  ]
+}
