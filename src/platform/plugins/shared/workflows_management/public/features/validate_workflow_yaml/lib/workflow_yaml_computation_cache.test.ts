@@ -13,6 +13,12 @@ import {
   populateWorkflowYamlComputationCacheEntryForTests,
 } from './workflow_yaml_computation_cache';
 
+// The cache is the unit under test; stub the heavy YAML parse + graph build so
+// eviction coverage doesn't pay for ~36 real computations and blow the 5s budget.
+jest.mock('../../../entities/workflows/store/workflow_detail/utils/computation', () => ({
+  performComputation: jest.fn(() => ({ yamlDocument: {} })),
+}));
+
 describe('workflow_yaml_computation_cache', () => {
   beforeEach(() => {
     jest.useFakeTimers();
