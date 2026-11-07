@@ -10,16 +10,10 @@ import { Request } from '@kbn/core-di-server';
 import {
   errorResponseSchema,
   restoreRuleChangeParamsSchema,
-  restoreRuleChangeQuerySchema,
   ruleResponseSchema,
   type RestoreRuleChangeParams,
-  type RestoreRuleChangeQuery,
 } from '@kbn/alerting-v2-schemas';
 import { inject, injectable } from 'inversify';
-import {
-  RuleChangesHistoryClientToken,
-  type RuleChangesHistoryClientContract,
-} from '../../lib/rule_changes_history';
 import { RulesClient } from '../../lib/rules_client/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
@@ -47,7 +41,6 @@ export class RestoreRuleChangeRoute extends BaseAlertingRoute {
   static schemas = {
     request: {
       params: restoreRuleChangeParamsSchema,
-      query: restoreRuleChangeQuerySchema,
     },
     response: {
       200: {
@@ -65,7 +58,7 @@ export class RestoreRuleChangeRoute extends BaseAlertingRoute {
       409: {
         body: () => errorResponseSchema,
         description:
-          'Indicates the rule changed since `current_version`, was concurrently updated, or the snapshot changes immutable fields.',
+          'Indicates the rule was concurrently updated or the snapshot changes immutable fields.',
       },
     },
   };
@@ -75,27 +68,15 @@ export class RestoreRuleChangeRoute extends BaseAlertingRoute {
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
-    private readonly request: KibanaRequest<
-      RestoreRuleChangeParams,
-      RestoreRuleChangeQuery,
-      unknown
-    >,
-    @inject(RuleChangesHistoryClientToken)
-    private readonly ruleChangesHistoryClient: RuleChangesHistoryClientContract,
+    private readonly request: KibanaRequest<RestoreRuleChangeParams, unknown, unknown>,
     @inject(RulesClient) private readonly rulesClient: RulesClient
   ) {
     super(ctx);
   }
 
   protected async execute() {
-    const { ruleId, snapshot } = await this.ruleChangesHistoryClient.getRuleChangeSnapshot({
-      eventId: this.request.params.change_id,
-    });
-
     const rule = await this.rulesClient.restoreRule({
-      id: ruleId,
-      snapshot,
-      currentVersion: this.request.query.current_version,
+      changeId: this.request.params.change_id,
     });
 
     return this.ctx.response.ok({ body: rule });

@@ -59,23 +59,18 @@ export const getRuleChangeHistoryEventParamsSchema = lazySchema(() =>
 );
 export type GetRuleChangeHistoryEventParams = z.infer<typeof getRuleChangeHistoryEventParamsSchema>;
 
-/** Path params for `POST …/change_history/rules/{change_id}/_restore`. */
-export const restoreRuleChangeParamsSchema = getRuleChangeHistoryEventParamsSchema;
-export type RestoreRuleChangeParams = GetRuleChangeHistoryEventParams;
-
-/** Query params for `POST …/change_history/rules/{change_id}/_restore`. */
-export const restoreRuleChangeQuerySchema = lazySchema(() =>
+export const restoreRuleChangeParamsSchema = lazySchema(() =>
   z
     .object({
-      current_version: queryIntSchema({ min: 1, max: Number.MAX_SAFE_INTEGER })
-        .optional()
-        .describe(
-          'The rule version the caller last saw. When set, the restore is rejected with a conflict if the rule has changed since.'
-        ),
+      change_id: z
+        .string()
+        .min(1)
+        .max(ID_MAX_LENGTH)
+        .describe('The change-history event identifier to restore.'),
     })
     .strict()
 );
-export type RestoreRuleChangeQuery = z.infer<typeof restoreRuleChangeQuerySchema>;
+export type RestoreRuleChangeParams = z.infer<typeof restoreRuleChangeParamsSchema>;
 
 /**
  * Actor for a change-history row. Unattributed writes may carry an empty

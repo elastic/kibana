@@ -10,7 +10,7 @@ import {
   getRuleChangeHistoryEventParamsSchema,
   listRuleChangeHistoryRequestSchema,
   listRuleChangeHistoryResponseSchema,
-  restoreRuleChangeQuerySchema,
+  restoreRuleChangeParamsSchema,
   ruleChangeHistoryDetailSchema,
 } from '@kbn/alerting-v2-schemas';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
@@ -372,13 +372,13 @@ describe('rule change history schemas', () => {
     });
   });
 
-  it('accepts an optional numeric current_version restore query and rejects unknown keys', () => {
-    expect(restoreRuleChangeQuerySchema.parse({})).toEqual({});
-    expect(restoreRuleChangeQuerySchema.parse({ current_version: '3' })).toEqual({
-      current_version: 3,
+  it('parses restore path params and rejects unknown keys', () => {
+    expect(restoreRuleChangeParamsSchema.parse({ change_id: 'event-1' })).toEqual({
+      change_id: 'event-1',
     });
-    expect(restoreRuleChangeQuerySchema.safeParse({ current_version: '0' }).success).toBe(false);
-    expect(restoreRuleChangeQuerySchema.safeParse({ current_version: 'abc' }).success).toBe(false);
-    expect(restoreRuleChangeQuerySchema.safeParse({ version: '3' }).success).toBe(false);
+    expect(restoreRuleChangeParamsSchema.safeParse({ change_id: '' }).success).toBe(false);
+    expect(
+      restoreRuleChangeParamsSchema.safeParse({ change_id: 'event-1', version: 3 }).success
+    ).toBe(false);
   });
 });

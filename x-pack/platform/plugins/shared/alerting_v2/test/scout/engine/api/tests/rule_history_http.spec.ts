@@ -280,7 +280,7 @@ apiTest.describe('Rule change history API', { tag: testData.API_ENGINE_NON_MKI_T
   );
 
   apiTest(
-    'restore: rejects stale current_version, read-only callers and unknown changes',
+    'restore: rejects read-only callers and unknown changes',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
@@ -304,18 +304,7 @@ apiTest.describe('Rule change history API', { tag: testData.API_ENGINE_NON_MKI_T
       const list: ListRuleChangeHistoryResponse = listResponse.body;
       const restoreUrl = `${CHANGE_HISTORY_URL}/${encodeURIComponent(list.items[0].id)}/_restore`;
 
-      const staleResponse = await apiClient.post(
-        `${restoreUrl}?current_version=${created.version + 1}`,
-        { headers: writerHeaders }
-      );
-
-      expect(staleResponse).toHaveStatusCode(409);
-      expect(staleResponse.body).toMatchObject({ code: 'RULE_VERSION_CONFLICT' });
-
-      const readerResponse = await apiClient.post(
-        `${restoreUrl}?current_version=${created.version}`,
-        { headers: readerHeaders }
-      );
+      const readerResponse = await apiClient.post(restoreUrl, { headers: readerHeaders });
 
       expect(readerResponse).toHaveStatusCode(403);
 

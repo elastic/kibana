@@ -52,7 +52,10 @@ import {
   getRuleVersionConflictMessage,
   type RuleValidationContext,
 } from '../errors/rule_error_messages';
-import { RULE_VERSION_FALLBACK } from '../rule_changes_history';
+import {
+  RuleChangesHistoryClientToken,
+  type RuleChangesHistoryClientContract,
+} from '../rule_changes_history';
 import {
   bulkScheduleRuleExecutorTasks,
   ensureRuleExecutorTaskScheduled,
@@ -243,7 +246,9 @@ export class RulesClient {
     @inject(ArtifactTypeRegistry) private readonly artifactTypeRegistry: ArtifactTypeRegistry,
     @inject(RulesClientEventOriginToken) eventOrigin: RulesClientEventOrigin,
     @inject(RuleChangesHistoryEventLogger)
-    private readonly changeHistoryEventLogger: RuleChangesHistoryEventLogger
+    private readonly changeHistoryEventLogger: RuleChangesHistoryEventLogger,
+    @inject(RuleChangesHistoryClientToken)
+    private readonly ruleChangesHistoryClient: RuleChangesHistoryClientContract
   ) {
     this.eventContext = {
       request,
@@ -1956,35 +1961,29 @@ export class RulesClient {
   }
 
   /**
-   * Replaces the rule's configuration with a change-history snapshot. The
-   * current `enabled` state is kept and the version is bumped. Resolves once
-   * the restore's change-history entry is searchable.
+   * Replaces a rule's configuration with the snapshot recorded by a
+   * change-history event. The current `enabled` state is kept and the version
+   * is bumped. Resolves once the restore's change-history entry is searchable.
    */
   @withApm
-  public async restoreRule({
-    id,
-    snapshot,
-    currentVersion,
-  }: {
-    id: string;
-    snapshot: Record<string, unknown>;
-    currentVersion?: number;
-  }): Promise<RuleResponse> {
+  public async restoreRule({ changeId }: { changeId: string }): Promise<RuleResponse> {
+    const { ruleId, snapshot } = await this.ruleChangesHistoryClient.getRuleChangeSnapshot({
+      eventId: changeId,
+    });
+
     const parsed = this.parseRuleData(putRuleDataSchema, toRestoreRuleData(snapshot), 'restore');
     this.artifactTypeRegistry.validate(parsed.artifacts);
 
-    return this.replaceExistingRule({ id, parsed, currentVersion, awaitChangeHistory: true });
+    return this.replaceExistingRule({ id: ruleId, parsed, awaitChangeHistory: true });
   }
 
   private async replaceExistingRule({
     id,
     parsed,
-    currentVersion,
     awaitChangeHistory = false,
   }: {
     id: string;
     parsed: PutRuleData;
-    currentVersion?: number;
     awaitChangeHistory?: boolean;
   }): Promise<RuleResponse> {
     const actor = await this.userService.getCurrentActor();
@@ -1995,16 +1994,6 @@ export class RulesClient {
       version: existingVersion,
       references: existingReferences,
     } = await this.getExistingRule(id);
-
-    if (
-      currentVersion !== undefined &&
-      currentVersion !== (existingAttrs.version ?? RULE_VERSION_FALLBACK)
-    ) {
-      throw Boom.conflict(getRuleVersionConflictMessage(id), {
-        code: ALERTING_ERROR_CODES.RULE_VERSION_CONFLICT,
-        details: { rule_id: id },
-      });
-    }
 
     assertImmutableUnchanged(parsed, existingAttrs);
 
