@@ -10,7 +10,6 @@ import { getFlattenedObject } from '@kbn/std';
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import type { Case } from '../../../common/types/domain';
 import type { AlertInfo } from '../../common/types';
-import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { LICENSING_CASE_OBSERVABLES_FEATURE } from '../../common/constants';
 import { getObservablesFromEcs } from '../../../common/observables/get_observables_from_ecs';
 import type { FlattedEcsData } from '../../../common/observables/get_observables_from_ecs';
@@ -68,10 +67,8 @@ const toFlattedEcsData = (flatDoc: Record<string, unknown>): FlattedEcsData[] =>
  * - Gated on case.settings.extractObservables === true.
  * - Requires a Platinum license; skips (debug-log) if the license is insufficient.
  * - Never throws — a failure here must not abort the attachment creation.
- * - Returns the patched case when new observables were saved, otherwise `undefined`.
  *
- * Authorization note: the resulting write to `observables` / `total_observables`
- * is a side effect of an already-authorized bulkCreateAttachments operation and
+ * Authorization note: the resulting observable writes are a side effect of an already-authorized bulkCreateAttachments operation and
  * intentionally does NOT re-check ensureAuthorized(updateCase). This mirrors the
  * existing pattern for total_alerts increments triggered by alert attachment
  * creation — the attachment-level authorization is considered sufficient.
@@ -81,7 +78,7 @@ export const extractAndAddObservables = async (
   attachments: UnifiedAttachmentPayload[],
   { settings }: Pick<Case, 'settings'>,
   clientArgs: CasesClientArgs
-): Promise<CaseSavedObjectTransformed | undefined> => {
+): Promise<void> => {
   if (!settings?.extractObservables) {
     return;
   }
@@ -139,19 +136,17 @@ export const extractAndAddObservables = async (
     }
 
     const result = await applyObservablesToCase(caseId, observables, clientArgs);
-    if (!result) {
+    if (result.newlyAddedObservables.length === 0) {
       logger.debug(`[extractAndAddObservables] No new observables added to case ${caseId}`);
       return;
     }
 
     // Best-effort path — a bus error here is caught by the outer try and logged.
-    emitObservablesAddedEvent(clientArgs, result.caseWithPatch, result.newlyAddedObservables);
+    emitObservablesAddedEvent(clientArgs, result.theCase, result.newlyAddedObservables);
 
     logger.debug(
       `[extractAndAddObservables] Added ${result.newlyAddedObservables.length} observable(s) to case ${caseId}`
     );
-
-    return result.caseWithPatch;
   } catch (error) {
     logger.warn(
       `[extractAndAddObservables] Failed to extract observables for case ${caseId}: ${error}`

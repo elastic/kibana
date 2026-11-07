@@ -19,6 +19,8 @@ import * as i18n from './translations';
 
 export interface ObservablesUtilityBarProps {
   caseData: CaseUI;
+  /** Observables matching the current search, across every page. */
+  totalObservables: number;
   isLoading: boolean;
   onExtractObservablesChanged: (isOn: boolean) => void;
   /** Currently selected observables for bulk operations. */
@@ -31,6 +33,7 @@ export interface ObservablesUtilityBarProps {
 
 export const ObservablesUtilityBar = ({
   caseData,
+  totalObservables,
   isLoading,
   onExtractObservablesChanged,
   selectedObservables,
@@ -44,9 +47,9 @@ export const ObservablesUtilityBar = ({
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xs">
       <EuiFlexItem>
-        {caseData.observables.length > 0 && (
+        {totalObservables > 0 && (
           <EuiText size="xs" color="subdued" data-test-subj="cases-observables-table-results-count">
-            {i18n.SHOWING_OBSERVABLES(caseData.observables.length)}
+            {i18n.SHOWING_OBSERVABLES(totalObservables)}
           </EuiText>
         )}
       </EuiFlexItem>

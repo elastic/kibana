@@ -6,7 +6,7 @@
  */
 
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
-import { type Case, type Observable } from '../../../common/types/domain';
+import { type Case } from '../../../common/types/domain';
 import { OBSERVABLE_TYPE_IPV4, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { LICENSING_CASE_OBSERVABLES_FEATURE } from '../../common/constants';
 import {
@@ -223,6 +223,24 @@ describe('extractAndAddObservables', () => {
   });
 
   describe('observable extraction and persistence', () => {
+    /** Echoes created attachments; `conflict` marks them as already stored (409). */
+    const mockBulkCreate = ({ conflict = false }: { conflict?: boolean } = {}) =>
+      clientArgs.unsecuredSavedObjectsClient.bulkCreate.mockImplementation(async (objects) => ({
+        saved_objects: objects.map(({ id = '', attributes, references = [] }) => ({
+          id,
+          type: 'cases-attachments',
+          attributes,
+          references,
+          ...(conflict && {
+            error: { statusCode: 409, error: 'Conflict', message: 'conflict' },
+          }),
+        })),
+      }));
+
+    beforeEach(() => {
+      caseService.getCase.mockResolvedValue(caseSO);
+    });
+
     it('skips applyObservablesToCase when no docs have _source', async () => {
       licensingService.isAtLeastPlatinum.mockResolvedValue(true);
       alertsService.getAlerts.mockResolvedValue({
@@ -232,7 +250,7 @@ describe('extractAndAddObservables', () => {
 
       await extractAndAddObservables('case-1', [alertAttachment], theCase, clientArgs);
 
-      expect(caseService.patchCase).not.toHaveBeenCalled();
+      expect(clientArgs.unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
     });
 
     it('skips applyObservablesToCase when getAlerts returns no docs', async () => {
@@ -242,27 +260,33 @@ describe('extractAndAddObservables', () => {
 
       await extractAndAddObservables('case-1', [alertAttachment], theCase, clientArgs);
 
-      expect(caseService.patchCase).not.toHaveBeenCalled();
+      expect(clientArgs.unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
     });
 
-    it('persists extracted observables when ECS fields are present', async () => {
+    it('stores extracted observables as attachments when ECS fields are present', async () => {
       licensingService.isAtLeastPlatinum.mockResolvedValue(true);
       alertsService.getAlerts.mockResolvedValue({
         docs: [makeEcsDoc({ 'source.ip': '1.2.3.4' })],
       });
-      caseService.getCase.mockResolvedValue(caseSO);
-      caseService.patchCase.mockResolvedValue(caseSO);
+      mockBulkCreate();
       const theCase = makeCase(true);
 
       await extractAndAddObservables('case-1', [alertAttachment], theCase, clientArgs);
 
-      expect(caseService.patchCase).toHaveBeenCalledWith(
-        expect.objectContaining({
-          caseId: caseSO.id,
-          updatedAttributes: expect.objectContaining({
-            observables: expect.arrayContaining([expect.objectContaining({ value: '1.2.3.4' })]),
+      expect(clientArgs.unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            type: 'cases-attachments',
+            attributes: expect.objectContaining({
+              type: 'observable',
+              data: expect.objectContaining({
+                typeKey: OBSERVABLE_TYPE_IPV4.key,
+                value: '1.2.3.4',
+              }),
+            }),
           }),
-        })
+        ],
+        { refresh: 'wait_for' }
       );
 
       expect(clientArgs.casesEventBus.emitObservablesAdded).toHaveBeenCalledWith(
@@ -280,35 +304,21 @@ describe('extractAndAddObservables', () => {
       expect(payload).not.toHaveProperty('observables');
     });
 
-    it('returns the patched case with the new observables and version', async () => {
+    it('never writes the case document', async () => {
       licensingService.isAtLeastPlatinum.mockResolvedValue(true);
       alertsService.getAlerts.mockResolvedValue({
         docs: [makeEcsDoc({ 'source.ip': '1.2.3.4' })],
       });
-      caseService.getCase.mockResolvedValue(caseSO);
-      caseService.patchCase.mockImplementation(async ({ updatedAttributes }) => ({
-        id: caseSO.id,
-        type: caseSO.type,
-        version: 'patched-version',
-        attributes: updatedAttributes,
-        references: [],
-      }));
+      mockBulkCreate();
 
-      const res = await extractAndAddObservables(
-        'case-1',
-        [alertAttachment],
-        makeCase(true),
-        clientArgs
-      );
+      await expect(
+        extractAndAddObservables('case-1', [alertAttachment], makeCase(true), clientArgs)
+      ).resolves.toBeUndefined();
 
-      expect(res?.version).toBe('patched-version');
-      expect(res?.attributes.observables).toEqual([
-        expect.objectContaining({ typeKey: OBSERVABLE_TYPE_IPV4.key, value: '1.2.3.4' }),
-      ]);
-      expect(res?.attributes.total_observables).toBe(1);
+      expect(caseService.patchCase).not.toHaveBeenCalled();
     });
 
-    it('skips patchCase when extracted observables array is empty (no matching ECS fields)', async () => {
+    it('skips the write when extracted observables array is empty (no matching ECS fields)', async () => {
       licensingService.isAtLeastPlatinum.mockResolvedValue(true);
       alertsService.getAlerts.mockResolvedValue({
         docs: [makeEcsDoc({ 'unrelated.field': 'value' })],
@@ -317,7 +327,7 @@ describe('extractAndAddObservables', () => {
 
       await extractAndAddObservables('case-1', [alertAttachment], theCase, clientArgs);
 
-      expect(caseService.patchCase).not.toHaveBeenCalled();
+      expect(clientArgs.unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
     });
 
     it('logs a debug message with the count of observables added', async () => {
@@ -325,8 +335,7 @@ describe('extractAndAddObservables', () => {
       alertsService.getAlerts.mockResolvedValue({
         docs: [makeEcsDoc({ 'source.ip': '1.2.3.4' })],
       });
-      caseService.getCase.mockResolvedValue(caseSO);
-      caseService.patchCase.mockResolvedValue(caseSO);
+      mockBulkCreate();
       const theCase = makeCase(true);
 
       await extractAndAddObservables('case-1', [alertAttachment], theCase, clientArgs);
@@ -341,28 +350,13 @@ describe('extractAndAddObservables', () => {
       alertsService.getAlerts.mockResolvedValue({
         docs: [makeEcsDoc({ 'source.ip': '1.2.3.4' })],
       });
-      const existingObservable: Observable = {
-        id: '5c431380-c6ef-459f-b0fe-1699e978517b',
-        typeKey: OBSERVABLE_TYPE_IPV4.key,
-        value: '1.2.3.4',
-        description: null,
-        createdAt: '2026-09-08T00:00:00.000Z',
-        updatedAt: '2026-09-08T00:00:00.000Z',
-      };
-      caseService.getCase.mockResolvedValue({
-        ...caseSO,
-        attributes: {
-          ...caseSO.attributes,
-          observables: [existingObservable],
-        },
-      });
+      mockBulkCreate({ conflict: true });
       const theCase = makeCase(true);
 
       await expect(
         extractAndAddObservables('case-1', [alertAttachment], theCase, clientArgs)
       ).resolves.toBeUndefined();
 
-      expect(caseService.patchCase).not.toHaveBeenCalled();
       expect(clientArgs.casesEventBus.emitObservablesAdded).not.toHaveBeenCalled();
       expect(clientArgs.logger.debug).toHaveBeenCalledWith(
         expect.stringContaining('No new observables added')

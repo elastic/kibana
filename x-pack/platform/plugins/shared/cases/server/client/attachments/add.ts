@@ -20,6 +20,7 @@ import { toUnifiedAttachment } from '../../services/attachments/operations/utils
 import type { AttachmentSavedObjectTransformedV2 } from '../../common/types/attachments_v2';
 import type { AddArgs } from './types';
 import { validateUnifiedAttachments } from './validators';
+import { getObservablesSummary, withObservablesSummary } from '../cases/observables_storage';
 import { validateMaxUserActions } from '../../common/validators';
 import { extractAndAddObservables } from './extract_observables';
 import { emitAttachmentsAddedEvent } from './trigger_utils';
@@ -80,17 +81,10 @@ const createAttachment = async (
 
     emitAttachmentsAddedEvent(clientArgs, { id: caseId, owner }, [savedObjectID], query.type);
     // This call never throws — failures are logged and do not abort the attachment creation.
-    const caseWithObservables = await extractAndAddObservables(
-      caseId,
-      [query],
-      { settings },
-      clientArgs
-    );
+    await extractAndAddObservables(caseId, [query], { settings }, clientArgs);
 
     return {
-      model: caseWithObservables
-        ? updatedModel.newObjectWithInfo(caseWithObservables)
-        : updatedModel,
+      model: updatedModel,
       createdAttachment,
     };
   } catch (error) {
@@ -131,6 +125,10 @@ export const addCommentAndGetCase = async (
   clientArgs: CasesClientArgs
 ): Promise<Case> => {
   const { model } = await createAttachment(addArgs, clientArgs);
+  const [theCase, observablesSummaries] = await Promise.all([
+    model.encodeWithComments(),
+    getObservablesSummary([model.savedObject.id], clientArgs),
+  ]);
 
-  return model.encodeWithComments();
+  return withObservablesSummary(theCase, observablesSummaries);
 };

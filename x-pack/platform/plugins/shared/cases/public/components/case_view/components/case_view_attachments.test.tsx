@@ -25,8 +25,12 @@ import userEvent from '@testing-library/user-event';
 
 jest.mock('../../../containers/use_get_case_file_stats');
 jest.mock('../../../common/navigation/hooks');
-jest.mock('../use_case_observables', () => ({
-  useCaseObservables: jest.fn(() => ({ observables: [], isLoading: false })),
+jest.mock('../../../containers/use_find_observables', () => ({
+  useFindObservables: jest.fn(() => ({
+    data: { observables: [], total: 0 },
+    isFetching: false,
+    isLoading: false,
+  })),
 }));
 jest.mock('./sidebar/sidebar_toggle_button', () => ({
   SidebarToggleButton: () => <div data-test-subj="case-view-sidebar-toggle" />,
@@ -565,6 +569,7 @@ describe('Case View Attachments tab', () => {
     const caseWithAlertAndObservable: CaseUI = {
       ...basicCase,
       comments: [alertComment],
+      totalObservables: 1,
       observables: [
         {
           id: 'obs-1',
@@ -656,6 +661,7 @@ describe('Case View Attachments tab', () => {
     const caseWithTwoAuthors: CaseUI = {
       ...basicCase,
       comments: [alertComment, { ...alertComment, id: 'alert-other', createdBy: otherUser }],
+      totalObservables: 1,
       observables: [
         {
           id: 'obs-1',

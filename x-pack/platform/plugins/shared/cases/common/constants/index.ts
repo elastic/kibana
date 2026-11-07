@@ -130,6 +130,9 @@ export const INTERNAL_CASE_OBSERVABLES_DELETE_URL =
   `${INTERNAL_CASE_OBSERVABLES_URL}/{observable_id}` as const;
 export const INTERNAL_CASE_OBSERVABLES_BULK_DELETE_URL =
   `${INTERNAL_CASE_OBSERVABLES_URL}/_bulk_delete` as const;
+export const INTERNAL_CASE_OBSERVABLES_FIND_URL = `${INTERNAL_CASE_OBSERVABLES_URL}/_find` as const;
+export const INTERNAL_CASE_OBSERVABLES_BULK_CREATE_URL =
+  `${INTERNAL_CASE_OBSERVABLES_URL}/_bulk_create` as const;
 export const INTERNAL_CASE_WORKFLOW_RUN_URL =
   `${CASES_INTERNAL_URL}/workflows/{workflow_id}/run` as const;
 export const INTERNAL_CASE_FIND_USER_ACTIONS_URL =
@@ -417,6 +420,13 @@ export const NO_ASSIGNEES_FILTERING_KEYWORD = 'none';
 export const NO_ACTION_SOURCE_FILTERING_KEYWORD = 'none';
 export const KIBANA_SYSTEM_USERNAME = 'elastic/kibana';
 export const MAX_OBSERVABLES_PER_CASE = 50;
+/** Safety limit on observables stored per case; concurrent writers can pass it by their request sizes. */
+export const MAX_STORED_OBSERVABLES_PER_CASE = 100_000;
+export const MAX_OBSERVABLES_BULK_CREATE = 1_000;
+export const MAX_OBSERVABLES_FIND_PER_PAGE = 100;
+/** Matches the keyword `ignore_above`, so every stored value is searchable and sortable. */
+export const MAX_OBSERVABLE_VALUE_LENGTH = 1_024;
+export const MAX_OBSERVABLE_DESCRIPTION_LENGTH = 1_024;
 
 /**
  * Delays

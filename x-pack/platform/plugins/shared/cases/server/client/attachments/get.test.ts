@@ -9,6 +9,7 @@ import { omit } from 'lodash';
 import { mockCaseUnifiedAttachments } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import { find, get } from './get';
+import { excludeObservablesFilter } from './type_filter';
 
 const toLegacyShaped = (so: (typeof mockCaseUnifiedAttachments)[number], id = so.id) => {
   return {
@@ -41,11 +42,11 @@ describe('get', () => {
       expect(res).toStrictEqual({ data: [], page: 1, per_page: 20, total: 0 });
     });
 
-    it('does not restrict by type when `type` is omitted', async () => {
+    it('returns every type except observables when `type` is omitted', async () => {
       await find({ caseID: 'mock-id', findQueryParams: {} }, clientArgs);
 
       const call = clientArgs.services.attachmentService.find.mock.calls[0][0];
-      expect(call?.options?.filter).toBeUndefined();
+      expect(call?.options?.filter).toEqual(excludeObservablesFilter());
     });
 
     it('builds a type filter when a single `type` is requested', async () => {

@@ -13,8 +13,12 @@ import { basicCase } from '../../../containers/mock';
 import { CaseViewObservables } from './case_view_observables';
 import { renderWithTestingProviders } from '../../../common/mock';
 import { useCasesFeatures } from '../../../common/use_cases_features';
+import { useFindObservables } from '../../../containers/use_find_observables';
 
 jest.mock('../../../common/use_cases_features');
+jest.mock('../../../containers/use_find_observables');
+
+const useFindObservablesMock = useFindObservables as jest.Mock;
 
 describe('Case View Page observables tab', () => {
   beforeEach(() => {
@@ -23,16 +27,16 @@ describe('Case View Page observables tab', () => {
       isExtractObservablesEnabled: true,
       observablesAuthorized: true,
     });
+    useFindObservablesMock.mockReturnValue({
+      data: { observables: basicCase.observables, total: basicCase.observables.length },
+      isFetching: false,
+      isLoading: false,
+    });
   });
 
   it('should render the utility bar for the observables table', async () => {
     renderWithTestingProviders(
-      <CaseViewObservables
-        caseData={basicCase}
-        observables={basicCase.observables}
-        isLoading={false}
-        onUpdateField={jest.fn()}
-      />
+      <CaseViewObservables caseData={basicCase} isLoading={false} onUpdateField={jest.fn()} />
     );
 
     expect((await screen.findAllByTestId('cases-observables-add')).length).toBe(2);
@@ -40,12 +44,7 @@ describe('Case View Page observables tab', () => {
 
   it('should render the observable table', async () => {
     renderWithTestingProviders(
-      <CaseViewObservables
-        caseData={basicCase}
-        observables={basicCase.observables}
-        isLoading={false}
-        onUpdateField={jest.fn()}
-      />
+      <CaseViewObservables caseData={basicCase} isLoading={false} onUpdateField={jest.fn()} />
     );
 
     expect(await screen.findByTestId('cases-observables-table')).toBeInTheDocument();
@@ -56,7 +55,6 @@ describe('Case View Page observables tab', () => {
     renderWithTestingProviders(
       <CaseViewObservables
         caseData={{ ...basicCase, settings: { ...basicCase.settings, extractObservables: false } }}
-        observables={basicCase.observables}
         isLoading={false}
         onUpdateField={onUpdateField}
       />
@@ -71,17 +69,31 @@ describe('Case View Page observables tab', () => {
     });
   });
 
-  it('returns null when searching and no observables match', () => {
-    const { container } = renderWithTestingProviders(
+  it('counts every stored observable, not just the case preview', async () => {
+    renderWithTestingProviders(
+      <CaseViewObservables
+        caseData={{ ...basicCase, totalObservables: 47_552 }}
+        isLoading={false}
+        onUpdateField={jest.fn()}
+      />
+    );
+
+    expect(await screen.findByText('47552')).toBeInTheDocument();
+  });
+
+  it('searches observables on the server', () => {
+    renderWithTestingProviders(
       <CaseViewObservables
         caseData={basicCase}
-        observables={[]}
         isLoading={false}
         searchTerm="foobar"
         onUpdateField={jest.fn()}
       />
     );
 
-    expect(container).toBeEmptyDOMElement();
+    expect(useFindObservablesMock).toHaveBeenCalledWith(
+      basicCase.id,
+      expect.objectContaining({ search: 'foobar' })
+    );
   });
 });

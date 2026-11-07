@@ -13,6 +13,7 @@ import { CasesBulkGetResponseSchema, CasesBulkGetRequestSchema } from '../../../
 import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
 import { createCaseError, generateCaseErrorResponse, isSOError } from '../../common/error';
 import { flattenCaseSavedObject } from '../../common/utils';
+import { getObservablesSummary, withObservablesSummary } from './observables_storage';
 import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
@@ -49,9 +50,11 @@ export const bulkGet = async (
         operation: Operations.bulkGetCases,
       });
 
-    const commentTotals = await attachmentService.getter.getCaseAttatchmentStats({
-      caseIds: authorizedCases.map((theCase) => theCase.id),
-    });
+    const caseIds = authorizedCases.map((theCase) => theCase.id);
+    const [commentTotals, observablesSummaries] = await Promise.all([
+      attachmentService.getter.getCaseAttatchmentStats({ caseIds }),
+      getObservablesSummary(caseIds, clientArgs),
+    ]);
 
     const flattenedCases = authorizedCases.map((theCase) => {
       const { userComments, alerts, events } = commentTotals.get(theCase.id) ?? {
@@ -60,12 +63,15 @@ export const bulkGet = async (
         events: 0,
       };
 
-      return flattenCaseSavedObject({
-        savedObject: theCase,
-        totalComment: userComments,
-        totalAlerts: alerts,
-        totalEvents: events,
-      });
+      return withObservablesSummary(
+        flattenCaseSavedObject({
+          savedObject: theCase,
+          totalComment: userComments,
+          totalAlerts: alerts,
+          totalEvents: events,
+        }),
+        observablesSummaries
+      );
     });
 
     const errors = constructErrors(soBulkGetErrors, unauthorizedCases);

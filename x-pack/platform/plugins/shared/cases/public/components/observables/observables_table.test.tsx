@@ -11,6 +11,8 @@ import userEvent from '@testing-library/user-event';
 import { mockCase, mockObservables } from '../../containers/mock';
 import { ObservablesTable, type ObservablesTableProps } from './observables_table';
 import { readCasesPermissions, renderWithTestingProviders } from '../../common/mock';
+import { useFindObservables } from '../../containers/use_find_observables';
+import type { Observable } from '../../../common/types/domain';
 
 // Partial mock: keep createCaseWorkflowFilter / createCaseWorkflowComparator / useRunCaseWorkflow
 // real; only pin useCanRunCaseWorkflow so we don't need to wire up its four dependencies.
@@ -18,6 +20,21 @@ jest.mock('../workflows/use_run_case_workflow', () => ({
   ...jest.requireActual('../workflows/use_run_case_workflow'),
   useCanRunCaseWorkflow: jest.fn(),
 }));
+jest.mock('../../containers/use_find_observables');
+
+const useFindObservablesMock = useFindObservables as jest.Mock;
+
+const mockPage = (
+  observables: Observable[],
+  { total = observables.length, cursor }: { total?: number; cursor?: string } = {}
+) =>
+  useFindObservablesMock.mockReturnValue({
+    data: { observables, total, ...(cursor != null && { cursor }) },
+    isFetching: false,
+    isLoading: false,
+  });
+
+const lastFindParams = () => useFindObservablesMock.mock.calls.at(-1)?.[1];
 
 describe('ObservablesTable', () => {
   const { useCanRunCaseWorkflow } = jest.requireMock('../workflows/use_run_case_workflow');
@@ -35,6 +52,7 @@ describe('ObservablesTable', () => {
     jest.clearAllMocks();
     // Default: workflow runs disabled (mirrors a read-only user or feature-off state).
     (useCanRunCaseWorkflow as jest.Mock).mockReturnValue(false);
+    mockPage(mockObservables);
   });
 
   it('renders correctly', async () => {
@@ -53,11 +71,78 @@ describe('ObservablesTable', () => {
     expect(screen.getByTestId('cases-observables-table-loading')).toBeInTheDocument();
   });
 
+  describe('server paging', () => {
+    it('requests the first page sorted by creation date', () => {
+      renderWithTestingProviders(<ObservablesTable {...props} />);
+
+      expect(useFindObservablesMock).toHaveBeenCalledWith(mockCase.id, {
+        perPage: 20,
+        sortField: 'createdAt',
+        sortOrder: 'asc',
+      });
+    });
+
+    it('shows the total from the server rather than the case preview', () => {
+      mockPage(mockObservables, { total: 47_552, cursor: 'cursor-1' });
+      renderWithTestingProviders(<ObservablesTable {...props} />);
+
+      expect(screen.getByText('Showing 47552 observables')).toBeInTheDocument();
+      expect(screen.getByTestId('cases-observables-table-page-range')).toHaveTextContent(
+        '1–2 of 47552'
+      );
+    });
+
+    it('moves forward with the cursor and back to the previous page', async () => {
+      mockPage(mockObservables, { total: 47_552, cursor: 'cursor-1' });
+      renderWithTestingProviders(<ObservablesTable {...props} />);
+
+      expect(screen.getByTestId('cases-observables-table-previous-page')).toBeDisabled();
+      await userEvent.click(screen.getByTestId('cases-observables-table-next-page'));
+      expect(lastFindParams()).toEqual(expect.objectContaining({ cursor: 'cursor-1' }));
+
+      await userEvent.click(screen.getByTestId('cases-observables-table-previous-page'));
+      expect(lastFindParams()).not.toHaveProperty('cursor');
+    });
+
+    it('disables the next page on the last page', () => {
+      mockPage(mockObservables, { total: mockObservables.length, cursor: 'cursor-1' });
+      renderWithTestingProviders(<ObservablesTable {...props} />);
+
+      expect(screen.getByTestId('cases-observables-table-next-page')).toBeDisabled();
+    });
+
+    it('sends the search term to the server', () => {
+      renderWithTestingProviders(<ObservablesTable {...props} searchTerm="10.0" />);
+
+      expect(lastFindParams()).toEqual(expect.objectContaining({ search: '10.0' }));
+    });
+
+    it('sorts on the server when a column header is clicked', async () => {
+      renderWithTestingProviders(<ObservablesTable {...props} />);
+
+      await userEvent.click(screen.getByRole('button', { name: /Name/ }));
+
+      expect(lastFindParams()).toEqual(
+        expect.objectContaining({ sortField: 'value', sortOrder: 'asc' })
+      );
+    });
+
+    it('starts again from the first page when the page size changes', async () => {
+      mockPage(mockObservables, { total: 47_552, cursor: 'cursor-1' });
+      renderWithTestingProviders(<ObservablesTable {...props} />);
+
+      await userEvent.click(screen.getByTestId('cases-observables-table-next-page'));
+      await userEvent.selectOptions(screen.getByTestId('cases-observables-table-page-size'), '50');
+
+      expect(lastFindParams()).toEqual({ perPage: 50, sortField: 'createdAt', sortOrder: 'asc' });
+    });
+  });
+
   describe('row selection gating', () => {
     it('shows selection checkboxes when the user can run workflows', () => {
       (useCanRunCaseWorkflow as jest.Mock).mockReturnValue(true);
       renderWithTestingProviders(<ObservablesTable {...props} />);
-      // EuiInMemoryTable adds a checkbox for each row plus one "select all" header checkbox.
+      // EuiBasicTable adds a checkbox for each row plus one "select all" header checkbox.
       expect(screen.getAllByRole('checkbox')).toHaveLength(mockObservables.length + 1);
     });
 
@@ -86,7 +171,7 @@ describe('ObservablesTable', () => {
       expect(await screen.findByTestId('cases-observables-selected-count')).toBeInTheDocument();
     });
 
-    it('does not restore a selection that was filtered out once the filter is cleared', async () => {
+    it('does not restore a selection that left the page once it comes back', async () => {
       (useCanRunCaseWorkflow as jest.Mock).mockReturnValue(true);
       const [firstObservable, secondObservable] = mockObservables;
       const { rerender } = renderWithTestingProviders(<ObservablesTable {...props} />);
@@ -94,20 +179,12 @@ describe('ObservablesTable', () => {
       await userEvent.click(screen.getAllByRole('checkbox')[1]);
       expect(await screen.findByTestId('cases-observables-selected-count')).toBeInTheDocument();
 
-      rerender(
-        <ObservablesTable
-          {...props}
-          caseData={{ ...props.caseData, observables: [secondObservable] }}
-        />
-      );
+      mockPage([secondObservable]);
+      rerender(<ObservablesTable {...props} />);
       expect(screen.queryByTestId('cases-observables-selected-count')).not.toBeInTheDocument();
 
-      rerender(
-        <ObservablesTable
-          {...props}
-          caseData={{ ...props.caseData, observables: [firstObservable, secondObservable] }}
-        />
-      );
+      mockPage([firstObservable, secondObservable]);
+      rerender(<ObservablesTable {...props} />);
       expect(screen.queryByTestId('cases-observables-selected-count')).not.toBeInTheDocument();
       expect(screen.queryAllByRole('checkbox', { checked: true })).toHaveLength(0);
     });

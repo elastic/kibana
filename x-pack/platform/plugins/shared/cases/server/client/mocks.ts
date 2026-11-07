@@ -110,6 +110,8 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     bulkAddObservables: jest.fn(),
     bulkDeleteObservables: jest.fn(),
     getApplicableFields: jest.fn(),
+    bulkCreateObservables: jest.fn(),
+    findObservables: jest.fn(),
   });
 };
 
@@ -267,6 +269,13 @@ export const createSavedObjectsSerializerMock = (): SavedObjectsSerializerMock =
   return serializer;
 };
 
+const createUnsecuredSavedObjectsClientMock = () => {
+  const client = savedObjectsClientMock.create();
+  // Case reads aggregate stored observables with a `find`; default to a case with none.
+  client.find.mockResolvedValue({ saved_objects: [], total: 0, per_page: 0, page: 1 });
+  return client;
+};
+
 export const createCasesClientMockArgs = () => {
   return {
     services: {
@@ -283,7 +292,7 @@ export const createCasesClientMockArgs = () => {
     },
     authorization: createAuthorizationMock(),
     logger: loggingSystemMock.createLogger(),
-    unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
+    unsecuredSavedObjectsClient: createUnsecuredSavedObjectsClientMock(),
     actionsClient: actionsClientMock.create(),
     user: {
       username: 'damaged_raccoon',

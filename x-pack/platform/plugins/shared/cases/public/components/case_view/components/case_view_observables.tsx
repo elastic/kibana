@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo } from 'react';
-import type { CaseUI, ObservableUI } from '../../../../common/ui/types';
+import React, { useCallback } from 'react';
+import type { CaseUI } from '../../../../common/ui/types';
 import { ObservablesTable } from '../../observables/observables_table';
 import type { OnUpdateFields } from '../types';
 import { OBSERVABLES_TAB } from '../../user_actions/translations';
@@ -15,7 +15,6 @@ export const OBSERVABLES_FILTER_ID = 'observables';
 
 interface CaseViewObservablesProps {
   caseData: CaseUI;
-  observables: ObservableUI[];
   searchTerm?: string;
   isLoading: boolean;
   onUpdateField: (args: OnUpdateFields) => void;
@@ -25,18 +24,12 @@ interface CaseViewObservablesProps {
 
 export const CaseViewObservables = ({
   caseData,
-  observables,
   searchTerm,
   isLoading,
   onUpdateField,
   isOpen,
   onToggle,
 }: CaseViewObservablesProps) => {
-  const caseDataWithFilteredObservables: CaseUI = useMemo(
-    () => ({ ...caseData, observables }),
-    [caseData, observables]
-  );
-
   const onExtractObservablesChanged = useCallback(
     (isOn: boolean) => {
       onUpdateField({
@@ -47,21 +40,18 @@ export const CaseViewObservables = ({
     [caseData.settings, onUpdateField]
   );
 
-  if (searchTerm && observables.length === 0) {
-    return null;
-  }
-
   return (
     <AttachmentAccordion
       id="observables"
       title={OBSERVABLES_TAB}
-      count={observables.length}
+      count={caseData.totalObservables ?? 0}
       isOpen={isOpen}
       onToggle={onToggle}
     >
       <ObservablesTable
-        caseData={caseDataWithFilteredObservables}
+        caseData={caseData}
         isLoading={isLoading}
+        searchTerm={searchTerm}
         onExtractObservablesChanged={onExtractObservablesChanged}
       />
     </AttachmentAccordion>

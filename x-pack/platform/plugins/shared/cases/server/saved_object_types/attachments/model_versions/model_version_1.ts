@@ -37,14 +37,14 @@ const userSchema = schema.object(
   { unknowns: 'allow' }
 );
 
-const dataSchema = schema.object(
+export const attachmentDataSchemaV1 = schema.object(
   {
     content: schema.maybe(schema.nullable(schema.string({ maxLength: MAX_COMMENT_LENGTH }))),
   },
   { unknowns: 'allow' }
 );
 
-const createSchema = schema.object(
+export const attachmentCreateSchemaV1 = schema.object(
   {
     type: schema.string({ maxLength: MAX_ATTACHMENT_TYPE_LENGTH }),
     attachmentId: schema.maybe(
@@ -56,7 +56,7 @@ const createSchema = schema.object(
       ])
     ),
     owner: schema.string({ maxLength: MAX_OWNER_LENGTH }),
-    data: schema.maybe(schema.nullable(dataSchema)),
+    data: schema.maybe(schema.nullable(attachmentDataSchemaV1)),
     created_at: schema.string({ maxLength: MAX_ISO_DATE_LENGTH }),
     created_by: userSchema,
     pushed_at: schema.maybe(schema.nullable(schema.string({ maxLength: MAX_ISO_DATE_LENGTH }))),
@@ -70,6 +70,6 @@ export const modelVersion1: SavedObjectsFullModelVersion = {
   changes: [],
   schemas: {
     forwardCompatibility: (attrs) => attrs,
-    create: createSchema,
+    create: attachmentCreateSchemaV1,
   },
 };

@@ -23,6 +23,7 @@ import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
 import type { BulkCreateArgs } from './types';
 import { validateUnifiedAttachments } from './validators';
+import { getObservablesSummary, withObservablesSummary } from '../cases/observables_storage';
 import { validateMaxUserActions } from '../../common/validators';
 import { emitAttachmentsAddedEvent } from './trigger_utils';
 import { extractAndAddObservables } from './extract_observables';
@@ -114,17 +115,10 @@ const createAttachments = async (
     }
 
     // This call never throws — failures are logged and do not abort the attachment creation.
-    const caseWithObservables = await extractAndAddObservables(
-      caseId,
-      decodedAttachments,
-      { settings },
-      clientArgs
-    );
+    await extractAndAddObservables(caseId, decodedAttachments, { settings }, clientArgs);
 
     return {
-      model: caseWithObservables
-        ? updatedModel.newObjectWithInfo(caseWithObservables)
-        : updatedModel,
+      model: updatedModel,
       createdAttachments,
     };
   } catch (error) {
@@ -158,6 +152,10 @@ export const bulkCreateAndGetCase = async (
   clientArgs: CasesClientArgs
 ): Promise<Case> => {
   const { model } = await createAttachments(args, clientArgs);
+  const [theCase, observablesSummaries] = await Promise.all([
+    model.encodeWithComments(),
+    getObservablesSummary([model.savedObject.id], clientArgs),
+  ]);
 
-  return model.encodeWithComments();
+  return withObservablesSummary(theCase, observablesSummaries);
 };

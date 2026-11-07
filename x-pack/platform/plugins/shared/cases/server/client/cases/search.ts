@@ -29,6 +29,7 @@ import {
   resolveFieldLabelSearch,
 } from '../../services/cases/extended_field_search_utils';
 import { enrichCasesWithFieldLabels } from './utils';
+import { getObservablesSummary, withObservablesSummary } from './observables_storage';
 import { parseFieldDefinitionsToInlineFields } from '../../../common/utils';
 
 /**
@@ -209,6 +210,12 @@ export const search = async (
     });
 
     res.cases = enrichCasesWithFieldLabels(res.cases, templateSOs, globalFields);
+
+    const observablesSummaries = await getObservablesSummary(
+      res.cases.map(({ id }) => id),
+      clientArgs
+    );
+    res.cases = res.cases.map((theCase) => withObservablesSummary(theCase, observablesSummaries));
 
     return decodeOrThrowZod(CasesSearchResponseSchema)(res);
   } catch (error) {
