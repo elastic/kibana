@@ -77,7 +77,12 @@ function StateBadge({ state, floating }: { state: ImpactState; floating?: boolea
   const { euiTheme } = useEuiTheme();
   const { icon, score, label } = BADGES[state];
   return (
-    <EuiToolTip content={label} disableScreenReaderOutput>
+    <EuiToolTip
+      content={<EuiText size="xs">{label}</EuiText>}
+      position="top"
+      delay="long"
+      disableScreenReaderOutput
+    >
       <span
         role="img"
         tabIndex={0}
