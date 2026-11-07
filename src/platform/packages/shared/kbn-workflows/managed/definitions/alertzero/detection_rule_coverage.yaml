@@ -42,8 +42,9 @@ steps:
         lookback_days: "${{ consts.worker_settings.extras.lookbackDays }}"
         batch_size: "${{ consts.worker_settings.extras.maxGapsPerRun }}"
 
-  # The sweep swallows read failures and reports them as flags. Without them a
-  # failed run looks like an empty queue.
+  # A failed sweep (a failed dependency check or gap search) fails `run_rule_coverage`,
+  # so this run fails with the sweep's message and never reaches this step. A failed
+  # active-review lookup is reported as a flag only.
   - name: emit_result
     type: workflow.output
     status: completed
