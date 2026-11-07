@@ -208,6 +208,25 @@ describe('panel opener href', () => {
     expect(rulesPanel).toBeDefined();
     expect(rulesPanel?.href).toBe('/jom/app/security/cloud_security_posture/benchmarks');
   });
+
+  it('should prefer an explicit panel opener href over last active child', () => {
+    const tree = structuredClone(navigationTree);
+    const rulesPanelNode = tree.body![3];
+    rulesPanelNode.href = '/jom/app/security/rules/landing';
+
+    mockPanelStateManager.setPanelLastActive(
+      'securityGroup:rules',
+      'cloud_security_posture-benchmarks'
+    );
+
+    const {
+      navItems: { primaryItems },
+    } = createNavigationItems(tree);
+
+    const rulesPanel = primaryItems.find((item) => item.id === 'securityGroup:rules');
+    expect(rulesPanel).toBeDefined();
+    expect(rulesPanel?.href).toBe('/jom/app/security/rules/landing');
+  });
 });
 
 describe('empty panel opener', () => {

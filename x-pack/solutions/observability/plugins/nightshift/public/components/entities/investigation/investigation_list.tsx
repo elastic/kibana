@@ -11,12 +11,22 @@ import React, {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useMemo,
   useRef,
   useState,
 } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIllustration,
+  EuiPanel,
+  useEuiTheme,
+} from '@elastic/eui';
+import { notFound } from '@elastic/eui-illustrations';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import type { Severity } from '@kbn/nightshift-investigations-plugin/common';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { NO_INVESTIGATIONS_FOUND_MESSAGE } from '../../../common/messages';
@@ -24,6 +34,11 @@ import type {
   InvestigationSectionId,
   InvestigationSectionState,
 } from '../../../data/investigations/use_investigation_sections';
+import {
+  buildInvestigationsPath,
+  DEFAULT_INVESTIGATIONS_TIME_RANGE,
+  sectionIdToInvestigationsFilters,
+} from '../../../data/investigations/investigations_url';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
   getInvestigationSectionAnchorId,
@@ -33,9 +48,12 @@ import {
 } from './investigation_section';
 import { scrollSectionIntoView } from './scroll_section_into_view';
 
-/** Per space: the base path carries the space prefix (`/s/<space id>`). */
+/**
+ * Per space: the base path carries the space prefix (`/s/<space id>`).
+ * `.v2` resets older keys that omitted `closed`, which left Closed open on first load.
+ */
 const getCollapsedSectionsStorageKey = (basePath: string): string =>
-  `nightshift.investigations.collapsedSections:${basePath || 'default'}`;
+  `nightshift.investigations.collapsedSections.v2:${basePath || 'default'}`;
 
 /**
  * Closed starts collapsed; severity / in-progress start open. Stored ids are the ones the
@@ -55,16 +73,50 @@ export interface InvestigationListProps {
   sections: InvestigationSectionState[];
   selectedInvestigationId?: string;
   onInvestigationClick?: (investigation: InvestigationSummary) => void;
+  /** Current Home search query, carried into View all investigations links. */
+  searchQuery?: string;
+  /** Current Home time range, carried into View all investigations links. */
+  rangeFrom?: string;
+  rangeTo?: string;
+  /**
+   * Replaces the default empty copy when every section is empty. Pass `null` to keep the empty
+   * panel but hide the default “No investigations found” (e.g. while an archive check is pending).
+   */
+  emptyContent?: React.ReactNode;
 }
 
 export const InvestigationList = forwardRef<InvestigationListHandle, InvestigationListProps>(
   function InvestigationList(
-    { sections, selectedInvestigationId, onInvestigationClick },
+    {
+      sections,
+      selectedInvestigationId,
+      onInvestigationClick,
+      searchQuery = '',
+      rangeFrom = DEFAULT_INVESTIGATIONS_TIME_RANGE.from,
+      rangeTo = DEFAULT_INVESTIGATIONS_TIME_RANGE.to,
+      emptyContent,
+    },
     ref
   ): React.ReactElement {
     const { euiTheme } = useEuiTheme();
     const visibleSections = sections.filter(isInvestigationSectionVisible);
-    const { http } = useKibana().services;
+    const { application, http } = useKibana().services;
+    const viewAllHrefFor = useMemo(() => {
+      const base = application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/' });
+      // getUrlForApp with path '/' ends with /app/nightshift/ — strip trailing slash for join.
+      const appRoot = base.replace(/\/$/, '');
+      return (id: InvestigationSectionId): string => {
+        const filters = sectionIdToInvestigationsFilters(id);
+        return `${appRoot}${buildInvestigationsPath({
+          query: searchQuery,
+          severity: filters.severity,
+          state: filters.state,
+          rangeFrom,
+          rangeTo,
+        })}`;
+      };
+    }, [application, rangeFrom, rangeTo, searchQuery]);
+
     // Default-open sections store collapses; Closed starts in the default collapsed list.
     const [collapsedSections = DEFAULT_COLLAPSED_SECTIONS, setCollapsedSections] = useLocalStorage<
       InvestigationSectionId[]
@@ -135,7 +187,7 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
         <EuiPanel
           hasBorder
           hasShadow={false}
-          paddingSize="l"
+          paddingSize="none"
           color="subdued"
           data-test-subj="nightshiftInvestigationsEmpty"
           css={css`
@@ -144,9 +196,46 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
             border-radius: ${euiTheme.border.radius.panel};
           `}
         >
-          <EuiText textAlign="center" color="subdued" size="s">
-            {NO_INVESTIGATIONS_FOUND_MESSAGE}
-          </EuiText>
+          {/* `null` keeps the panel while archive matching is still pending. */}
+          {emptyContent === null ? null : (
+            <EuiEmptyPrompt
+              layout="vertical"
+              color="transparent"
+              paddingSize="l"
+              css={css`
+                max-inline-size: none;
+                text-align: center;
+              `}
+              icon={
+                <EuiIllustration
+                  type={notFound}
+                  alt=""
+                  data-test-subj="nightshiftInvestigationsEmptyIllustration"
+                  css={css`
+                    max-inline-size: ${euiTheme.base * 10}px;
+                    margin-inline: auto;
+                  `}
+                />
+              }
+              title={
+                emptyContent === undefined ? (
+                  <h2>{NO_INVESTIGATIONS_FOUND_MESSAGE}</h2>
+                ) : undefined
+              }
+              titleSize="xs"
+              body={
+                emptyContent === undefined ? undefined : (
+                  <div
+                    css={css`
+                      text-align: center;
+                    `}
+                  >
+                    {emptyContent}
+                  </div>
+                )
+              }
+            />
+          )}
         </EuiPanel>
       );
     }
@@ -170,6 +259,8 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
               isOpen={!collapsedSections.includes(section.id)}
               onToggle={(isOpen) => setSectionOpen(section.id, isOpen)}
               isHighlighted={section.id === highlightedSection}
+              // Recently opened is a Home-only slice — no Investigations deep link.
+              viewAllHref={section.id === 'recent' ? undefined : viewAllHrefFor(section.id)}
             />
           </EuiFlexItem>
         ))}

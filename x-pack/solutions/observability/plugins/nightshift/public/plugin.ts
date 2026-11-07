@@ -68,6 +68,14 @@ export class NightshiftPlugin
       visibleIn: [],
       deepLinks: [
         {
+          id: 'investigations' satisfies NightshiftLinkId,
+          title: i18n.translate('xpack.nightshift.investigationsDeepLinkTitle', {
+            defaultMessage: 'Investigations',
+          }),
+          path: '/investigations',
+          visibleIn: [],
+        },
+        {
           id: 'automations' satisfies NightshiftLinkId,
           title: i18n.translate('xpack.nightshift.automationsDeepLinkTitle', {
             defaultMessage: 'Automations',

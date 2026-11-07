@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiPanel,
   EuiScreenReaderOnly,
   EuiSkeletonText,
@@ -57,6 +58,8 @@ export interface InvestigationSectionProps {
   onToggle?: (isOpen: boolean) => void;
   /** Briefly draws the section's border in its severity colour, after a jump lands on it. */
   isHighlighted?: boolean;
+  /** Opens the Investigations section with this group's filter (and current Home search). */
+  viewAllHref?: string;
 }
 
 /** Set on a section by the list, to the height of the sticky page header that would cover it. */
@@ -80,6 +83,13 @@ const getSectionPresentation = (id: InvestigationSectionId): SectionPresentation
   const anchors = { id, anchorId, headingId: `${anchorId}-heading` };
 
   switch (id) {
+    case 'recent':
+      return {
+        ...anchors,
+        title: i18n.translate('xpack.nightshift.investigations.recentSectionTitle', {
+          defaultMessage: 'Recently opened',
+        }),
+      };
     case 'in-progress':
       return {
         ...anchors,
@@ -213,6 +223,11 @@ const SectionBlock = ({
   );
 };
 
+const viewAllInvestigationsLabel = i18n.translate(
+  'xpack.nightshift.investigations.sectionViewAllLabel',
+  { defaultMessage: 'View all' }
+);
+
 const SectionHeading = ({
   presentation: { id, title, severity },
   total,
@@ -247,8 +262,8 @@ const SectionHeading = ({
             id === 'closed'
               ? 'success'
               : severity != null
-                ? SEVERITY_DOT_COLOR[severity]
-                : 'default'
+              ? SEVERITY_DOT_COLOR[severity]
+              : 'default'
           }
           data-test-subj={`nightshiftInvestigationSectionCount-${id}`}
         >
@@ -417,6 +432,7 @@ export const InvestigationSection = ({
   isOpen = true,
   onToggle,
   isHighlighted = false,
+  viewAllHref,
 }: InvestigationSectionProps): React.ReactElement | null => {
   const { euiTheme } = useEuiTheme();
   const presentation = getSectionPresentation(id);
@@ -519,6 +535,45 @@ export const InvestigationSection = ({
           arrowDisplay="none"
           onToggle={onToggle}
           paddingSize="none"
+          // Hover lives on the trigger wrapper (button + View all), not the button alone — otherwise
+          // the highlight stops short of the optionalAction and leaves a seam.
+          css={css`
+            .euiAccordion__triggerWrapper {
+              &:hover,
+              &:has(button:focus-visible) {
+                background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+              }
+            }
+          `}
+          // Sibling of the toggle button so the link is not nested inside it.
+          // Sits on the right of the header row (EUI places optionalAction after the growing button).
+          extraAction={
+            viewAllHref ? (
+              <EuiLink
+                href={viewAllHref}
+                data-test-subj={`nightshiftInvestigationSectionViewAll-${id}`}
+                aria-label={i18n.translate(
+                  'xpack.nightshift.investigations.sectionViewAllAriaLabel',
+                  {
+                    defaultMessage: 'Open {sectionTitle} investigations in Investigations',
+                    values: { sectionTitle: presentation.title },
+                  }
+                )}
+                css={css`
+                  margin-right: ${euiTheme.size.base};
+                  font-size: ${euiTheme.size.m};
+                  text-decoration: none;
+
+                  &:hover,
+                  &:focus {
+                    text-decoration: none;
+                  }
+                `}
+              >
+                {viewAllInvestigationsLabel}
+              </EuiLink>
+            ) : undefined
+          }
           buttonContent={
             <SectionHeading
               presentation={presentation}
@@ -529,7 +584,7 @@ export const InvestigationSection = ({
           }
           buttonProps={{
             'data-test-subj': `nightshiftInvestigationSectionToggle-${id}`,
-            // The padding is on the button, so the whole row is clickable and takes the hover.
+            // Padding on the button keeps the title row clickable; hover fill is on the wrapper.
             css: css`
               box-sizing: border-box;
               align-items: center;
@@ -539,11 +594,6 @@ export const InvestigationSection = ({
               &:hover,
               &:focus {
                 text-decoration: none;
-              }
-
-              &:hover,
-              &:focus-visible {
-                background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
               }
             `,
           }}

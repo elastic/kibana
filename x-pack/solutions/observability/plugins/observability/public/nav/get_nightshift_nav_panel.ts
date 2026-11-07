@@ -26,14 +26,15 @@ const getHomeIsActive: NonNullable<PanelOpenerChildDefinition['getIsActive']> = 
   pathNameSerialized === prepend(NIGHTSHIFT_PATH) ||
   pathNameSerialized === prepend(`${NIGHTSHIFT_PATH}/`);
 
-/** Nightshift side nav entry: a panel with Home, then Automations, Detections and Knowledge. */
+/** Nightshift side nav entry: a panel with Home, then Investigations, Automations, Detections and Knowledge. */
 export const getNightshiftNavPanel = (): RootNodeDefinition => ({
   id: 'nightshift',
   title: i18n.translate('xpack.observability.nav.nightshift', {
     defaultMessage: 'Elastic nightshift',
   }),
-  // No parent `link`: a panel opener's own href is ignored, and visibility follows the
-  // children, which all hang off the Nightshift app.
+  // Parent `link` is the icon's landing page — always Nightshift Home, not the last
+  // opened section. Visibility still follows the Nightshift app deep link.
+  link: 'nightshift',
   icon: NightshiftNavigationIcon,
   renderAs: 'panelOpener',
   getIsActive: startsWithNightshiftPath(''),
@@ -55,6 +56,10 @@ export const getNightshiftNavPanel = (): RootNodeDefinition => ({
       id: 'nightshift_sections',
       breadcrumbStatus: 'hidden',
       children: [
+        {
+          link: 'nightshift:investigations',
+          getIsActive: startsWithNightshiftPath('/investigations'),
+        },
         {
           link: 'nightshift:automations',
           getIsActive: startsWithNightshiftPath('/automations'),

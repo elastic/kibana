@@ -23,12 +23,14 @@ import { NIGHTSHIFT_APP_ROUTE } from '../../common/constants';
 import { NightshiftApp } from '../pages/landing/app';
 import {
   DETECTION_PAGE_TITLE,
+  INVESTIGATIONS_PAGE_TITLE,
   KNOWLEDGE_PAGE_TITLE,
   NightshiftAppHeader,
   SETTINGS_PAGE_TITLE,
   SOURCES_PAGE_TITLE,
 } from '../components/app_header';
 import { AutomationsPage } from '../pages/automations/automations_page';
+import { InvestigationsPage } from '../pages/investigations/investigations_page';
 import { useKibana } from '../hooks/use_kibana';
 import { useDeveloperMode } from '../hooks/use_developer_mode';
 import { useSignificantEventsAvailability } from '../data/availability/use_significant_events_availability';
@@ -67,6 +69,8 @@ const getExecutionContextPage = (pathname: string, canUseAutomationsPage: boolea
       return 'sources';
     case 'automations':
       return canUseAutomationsPage ? 'automations' : 'landing';
+    case 'investigations':
+      return 'investigations';
     default:
       return 'landing';
   }
@@ -157,6 +161,7 @@ export function NightshiftPage(): React.ReactElement | null {
   const isDetectionPage = pathname === '/detections' || pathname.startsWith('/detections/');
   const isSettingsPage = pathname === '/settings' || pathname.startsWith('/settings/');
   const canUseAutomationsPage = canUseAutomations && pathname.startsWith('/automations');
+  const isInvestigationsPage = pathname === '/investigations' || pathname.startsWith('/investigations/');
   const isAutomationDetailRoute = pathname.startsWith('/automations/');
 
   // The custom context API is disabled (404) unless the nightshift.enabled flag is on.
@@ -205,7 +210,11 @@ export function NightshiftPage(): React.ReactElement | null {
   useEffect(() => {
     setIsStartInvestigationOpen(false);
   }, [pathname]);
-  const isLandingContent = !canUseAutomationsPage && !isOnboarding && !onboarding.isLoading;
+  const isLandingContent =
+    !canUseAutomationsPage &&
+    !isInvestigationsPage &&
+    !isOnboarding &&
+    !onboarding.isLoading;
   // Starting an investigation only needs the investigations client, so the action and its modal
   // don't depend on what the landing list renders.
   const canStartInvestigation =
@@ -246,6 +255,7 @@ export function NightshiftPage(): React.ReactElement | null {
               : []),
           ]
         : []),
+      ...(isInvestigationsPage ? [{ text: INVESTIGATIONS_PAGE_TITLE }] : []),
       ...(isSettingsPage ? [{ text: SETTINGS_PAGE_TITLE }] : []),
       ...(isKnowledgePage ? [{ text: KNOWLEDGE_PAGE_TITLE }] : []),
       ...(isSourcesPage ? [{ text: SOURCES_PAGE_TITLE }] : []),
@@ -310,6 +320,7 @@ export function NightshiftPage(): React.ReactElement | null {
     !isSourcesPage &&
     !isDetectionPage &&
     !canUseAutomationsPage &&
+    !isInvestigationsPage &&
     !isOnboarding &&
     !onboarding.isLoading;
 
@@ -422,7 +433,13 @@ export function NightshiftPage(): React.ReactElement | null {
       ) : (
         <>
           <NightshiftAppHeader
-            page={canUseAutomationsPage ? 'automations' : 'landing'}
+            page={
+              isInvestigationsPage
+                ? 'investigations'
+                : canUseAutomationsPage
+                ? 'automations'
+                : 'landing'
+            }
             onSettingsClick={canManageAndConfigure ? navigateToSettings : undefined}
             settingsHref={canManageAndConfigure ? settingsHref : undefined}
             onStartInvestigationClick={canStartInvestigation ? toggleStartInvestigation : undefined}
@@ -431,14 +448,18 @@ export function NightshiftPage(): React.ReactElement | null {
             component="div"
             color={isHomePage ? 'transparent' : undefined}
             restrictWidth={
-              canUseAutomationsPage
+              canUseAutomationsPage || isInvestigationsPage
                 ? false
                 : isOnboarding || onboarding.isLoading
                 ? ONBOARDING_MAX_WIDTH
                 : '1000px'
             }
           >
-            {canUseAutomationsPage ? (
+            {isInvestigationsPage ? (
+              <Routes>
+                <Route path="/investigations" component={InvestigationsPage} />
+              </Routes>
+            ) : canUseAutomationsPage ? (
               <Routes>
                 <Route path="/automations/:id/runs" component={AutomationsPage} />
                 <Route path="/automations/:id" component={AutomationsPage} />

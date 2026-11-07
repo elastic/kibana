@@ -51,6 +51,13 @@ jest.mock('./first_investigation_step', () => ({
   OnboardingFirstInvestigationStep: () => null,
 }));
 jest.mock('./automation_step', () => ({ OnboardingAutomationStep: () => null }));
+jest.mock('../../../data/automations/use_automations', () => ({
+  useFetchAutomations: () => ({
+    data: { automations: [] },
+    isInitialLoading: false,
+    isError: false,
+  }),
+}));
 
 const STEP_IDS = ['enable', 'addData', 'connectSources', 'investigate', 'automate'];
 

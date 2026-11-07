@@ -98,6 +98,38 @@ export const setNightshiftSearchQueryParam = (params: URLSearchParams, query: st
   }
 };
 
+/** Same param names as Investigations so Home ↔ Investigations deep links stay aligned. */
+export const NIGHTSHIFT_RANGE_FROM_PARAM = 'rangeFrom';
+export const NIGHTSHIFT_RANGE_TO_PARAM = 'rangeTo';
+
+export const getNightshiftTimeRangeFromSearch = (
+  search: string,
+  defaults: { from: string; to: string }
+): { rangeFrom: string; rangeTo: string } => {
+  const params = new URLSearchParams(search);
+  return {
+    rangeFrom: params.get(NIGHTSHIFT_RANGE_FROM_PARAM) ?? defaults.from,
+    rangeTo: params.get(NIGHTSHIFT_RANGE_TO_PARAM) ?? defaults.to,
+  };
+};
+
+export const setNightshiftTimeRangeParams = (
+  params: URLSearchParams,
+  range: { rangeFrom: string; rangeTo: string },
+  defaults: { from: string; to: string }
+): void => {
+  if (range.rangeFrom !== defaults.from) {
+    params.set(NIGHTSHIFT_RANGE_FROM_PARAM, range.rangeFrom);
+  } else {
+    params.delete(NIGHTSHIFT_RANGE_FROM_PARAM);
+  }
+  if (range.rangeTo !== defaults.to) {
+    params.set(NIGHTSHIFT_RANGE_TO_PARAM, range.rangeTo);
+  } else {
+    params.delete(NIGHTSHIFT_RANGE_TO_PARAM);
+  }
+};
+
 export const getNightshiftSeverityFromSearch = (search: string): string | undefined =>
   new URLSearchParams(search).get(NIGHTSHIFT_SEVERITY_QUERY_PARAM) ?? undefined;
 

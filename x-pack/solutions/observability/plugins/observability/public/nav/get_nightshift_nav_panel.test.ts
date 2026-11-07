@@ -22,13 +22,22 @@ const isActiveAt = (link: string, path: string): boolean =>
   } as Parameters<NonNullable<PanelOpenerChildDefinition['getIsActive']>>[0]) ?? false;
 
 describe('getNightshiftNavPanel', () => {
-  it('opens a panel with Home, then Automations, Detections and Knowledge', () => {
+  it('opens a panel with Home, then Investigations, Automations, Detections and Knowledge', () => {
     const panel = getNightshiftNavPanel();
 
-    expect(panel).toMatchObject({ id: 'nightshift', renderAs: 'panelOpener' });
+    expect(panel).toMatchObject({
+      id: 'nightshift',
+      link: 'nightshift',
+      renderAs: 'panelOpener',
+    });
     expect(panel.children?.map((section) => section.children?.map((child) => child.link))).toEqual([
       ['nightshift'],
-      ['nightshift:automations', 'nightshift:detections', 'nightshift:knowledge'],
+      [
+        'nightshift:investigations',
+        'nightshift:automations',
+        'nightshift:detections',
+        'nightshift:knowledge',
+      ],
     ]);
   });
 

@@ -37,6 +37,11 @@ import { useQueryClient } from '@kbn/react-query';
 import { getFlyoutShareUrlAriaLabel } from '../../ui/flyout_share_url_button';
 import { buildNightshiftInvestigationFlyoutShareUrl } from '../../../common/url_params';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import {
+  archiveDemoInvestigation,
+  isDemoArchived,
+  unarchiveDemoInvestigation,
+} from '../../../data/investigations/demo_archive_store';
 import { NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY } from '../../../data/investigations/use_fetch_investigations';
 import { useKibana } from '../../../hooks/use_kibana';
 
@@ -58,6 +63,14 @@ const closeLabel = i18n.translate('xpack.nightshift.investigations.cardCloseLabe
 
 const openLabel = i18n.translate('xpack.nightshift.investigations.cardOpenLabel', {
   defaultMessage: 'Open',
+});
+
+const reopenLabel = i18n.translate('xpack.nightshift.investigations.cardReopenLabel', {
+  defaultMessage: 'Re-open',
+});
+
+const archiveLabel = i18n.translate('xpack.nightshift.investigations.cardArchiveLabel', {
+  defaultMessage: 'Archive investigation',
 });
 
 const openInChatLabel = i18n.translate('xpack.nightshift.investigations.cardOpenInChatLabel', {
@@ -82,7 +95,8 @@ export interface InvestigationCardActionsProps {
 /**
  * Trailing controls for a Nightshift investigation list card: the assignees, open in chat (same
  * Agent Builder route as the flyout footer) and an overflow menu with Copy link plus, for users who
- * can manage investigations, Delete and Close/Open (same actions as the flyout footer Actions menu).
+ * can manage investigations, Close/Open, Archive (recently closed) or Re-open (archived), then
+ * Delete separated at the bottom.
  */
 export const InvestigationCardActions = ({
   investigation,
@@ -91,6 +105,7 @@ export const InvestigationCardActions = ({
 }: InvestigationCardActionsProps): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
   const { http, notifications } = useKibana().services;
+  const spaceKey = http.basePath.get() || 'default';
   const queryClient = useQueryClient();
   const canManage = useCanManageInvestigations();
   const { getChatHref, openChat } = useOpenInChat();
@@ -98,6 +113,7 @@ export const InvestigationCardActions = ({
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const deleteConfirmTitleId = useGeneratedHtmlId({ prefix: 'nightshiftDeleteInvestigation' });
   const closed = isInvestigationClosed(investigation);
+  const archived = isDemoArchived(investigation, spaceKey);
 
   const chatHref = getChatHref(investigation.id, investigation.agent_id);
   const handleOpenChat = useCallback(
@@ -163,6 +179,10 @@ export const InvestigationCardActions = ({
             body: JSON.stringify({ status }),
           }
         );
+        if (status === 'open') {
+          // Re-open clears demo archive so it can show in open buckets again.
+          unarchiveDemoInvestigation(spaceKey, investigation.id);
+        }
         notifications.toasts.addSuccess({
           title:
             status === 'closed'
@@ -183,8 +203,18 @@ export const InvestigationCardActions = ({
         invalidateLists();
       }
     },
-    [http, invalidateLists, investigation.id, notifications.toasts]
+    [http, invalidateLists, investigation.id, notifications.toasts, spaceKey]
   );
+
+  const handleArchive = useCallback(() => {
+    archiveDemoInvestigation(spaceKey, investigation.id);
+    notifications.toasts.addSuccess({
+      title: i18n.translate('xpack.nightshift.investigations.cardArchiveSuccess', {
+        defaultMessage: 'Investigation archived',
+      }),
+    });
+    invalidateLists();
+  }, [invalidateLists, investigation.id, notifications.toasts, spaceKey]);
 
   const menuItems = useMemo(
     () => [
@@ -203,25 +233,7 @@ export const InvestigationCardActions = ({
       </EuiContextMenuItem>,
       ...(canManage
         ? [
-            <EuiHorizontalRule key="manageSeparator" margin="none" />,
-            <EuiContextMenuItem
-              key="delete"
-              icon="trash"
-              color="danger"
-              onClick={(event) => {
-                event.stopPropagation();
-                setIsMenuOpen(false);
-                setIsDeleteConfirmOpen(true);
-              }}
-              data-test-subj="nightshiftInvestigationCardDelete"
-              {...getEbtProps({
-                action: NIGHTSHIFT_EBT_ACTIONS.DELETE_INVESTIGATION,
-                element: ebtElement,
-              })}
-            >
-              {deleteLabel}
-            </EuiContextMenuItem>,
-            closed ? (
+            closed || archived ? (
               <EuiContextMenuItem
                 key="open"
                 icon="refresh"
@@ -236,7 +248,7 @@ export const InvestigationCardActions = ({
                   element: ebtElement,
                 })}
               >
-                {openLabel}
+                {archived ? reopenLabel : openLabel}
               </EuiContextMenuItem>
             ) : (
               <EuiContextMenuItem
@@ -256,10 +268,45 @@ export const InvestigationCardActions = ({
                 {closeLabel}
               </EuiContextMenuItem>
             ),
+            // Archive only for recently closed — already-archived cards get Re-open instead.
+            ...(closed && !archived
+              ? [
+                  <EuiContextMenuItem
+                    key="archive"
+                    icon="folderClosed"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setIsMenuOpen(false);
+                      handleArchive();
+                    }}
+                    data-test-subj="nightshiftInvestigationCardArchive"
+                  >
+                    {archiveLabel}
+                  </EuiContextMenuItem>,
+                ]
+              : []),
+            <EuiHorizontalRule key="deleteSeparator" margin="none" />,
+            <EuiContextMenuItem
+              key="delete"
+              icon="trash"
+              color="danger"
+              onClick={(event) => {
+                event.stopPropagation();
+                setIsMenuOpen(false);
+                setIsDeleteConfirmOpen(true);
+              }}
+              data-test-subj="nightshiftInvestigationCardDelete"
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.DELETE_INVESTIGATION,
+                element: ebtElement,
+              })}
+            >
+              {deleteLabel}
+            </EuiContextMenuItem>,
           ]
         : []),
     ],
-    [canManage, closed, ebtElement, handleCopyLink, handleSetStatus]
+    [archived, canManage, closed, ebtElement, handleArchive, handleCopyLink, handleSetStatus]
   );
 
   return (

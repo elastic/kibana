@@ -13,6 +13,6 @@ module.exports = {
     // Icon SVGs are static ESM assets. Jest does not transform them, and the
     // menus import them so the glyphs paint with the menu instead of after it.
     '^@elastic/eui/es/components/icon/assets/(.*)$':
-      '<rootDir>/x-pack/solutions/observability/plugins/nightshift/public/automations/__mocks__/eui_icon_assets.js',
+      '<rootDir>/x-pack/solutions/observability/plugins/nightshift/public/pages/automations/__mocks__/eui_icon_assets.js',
   },
 };

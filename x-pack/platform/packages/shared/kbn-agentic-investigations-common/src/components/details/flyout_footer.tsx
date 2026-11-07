@@ -12,6 +12,7 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiPopover,
   useEuiTheme,
@@ -141,6 +142,7 @@ export const ConversationDetailsFlyoutFooter = ({
 
     const items: React.ReactElement[] = [];
 
+    // Delete first, with a divider under it before Close/Open.
     if (canDelete) {
       items.push(
         <EuiContextMenuItem
@@ -160,6 +162,9 @@ export const ConversationDetailsFlyoutFooter = ({
     }
 
     if (canCloseOrOpen) {
+      if (canDelete) {
+        items.push(<EuiHorizontalRule key="deleteSeparator" margin="none" />);
+      }
       if (closed && onReopenInvestigation) {
         items.push(
           <EuiContextMenuItem

@@ -18,6 +18,9 @@ jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       http: { basePath: { get: () => mockBasePath } },
+      application: {
+        getUrlForApp: () => '/app/nightshift/',
+      },
       agenticInvestigations: {
         InvestigationCard: ({ investigation: item }: { investigation: InvestigationSummary }) => (
           <div data-test-subj="investigationCard">{item.title}</div>
@@ -102,14 +105,46 @@ describe('InvestigationList', () => {
     expect(screen.getByTestId('nightshiftInvestigationsEmpty')).toHaveTextContent(
       'No investigations found'
     );
+    expect(screen.getByTestId('nightshiftInvestigationsEmptyIllustration')).toBeInTheDocument();
     expect(
       screen.queryByTestId('nightshiftInvestigationSection-in-progress')
     ).not.toBeInTheDocument();
     expect(screen.queryByTestId('nightshiftInvestigationSection-critical')).not.toBeInTheDocument();
   });
 
-  it('renders in progress first and Closed after the open buckets', () => {
+  it('uses emptyContent when every section is empty', () => {
+    render(
+      <I18nProvider>
+        <InvestigationList
+          sections={[makeSection('in-progress'), makeSection('critical')]}
+          emptyContent={<span data-test-subj="customEmpty">Archived only</span>}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('nightshiftInvestigationsEmpty')).toContainElement(
+      screen.getByTestId('customEmpty')
+    );
+    expect(screen.queryByText('No investigations found')).not.toBeInTheDocument();
+  });
+
+  it('hides View all on Recently opened and keeps it on other sections', () => {
     renderSections([
+      makeSection('recent', { investigations: [investigation], total: 1 }),
+      makeSection('in-progress', { investigations: [investigation], total: 1 }),
+    ]);
+
+    expect(
+      screen.queryByTestId('nightshiftInvestigationSectionViewAll-recent')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId('nightshiftInvestigationSectionViewAll-in-progress')
+    ).toBeInTheDocument();
+  });
+
+  it('renders Recently opened above in progress, and Closed after the open buckets', () => {
+    renderSections([
+      makeSection('recent', { investigations: [investigation], total: 1 }),
       makeSection('in-progress', { investigations: [investigation], total: 1 }),
       makeSection('critical', { investigations: [investigation], total: 1 }),
       makeSection('not-rated', { investigations: [investigation], total: 1 }),
@@ -117,7 +152,7 @@ describe('InvestigationList', () => {
     ]);
 
     const titles = screen.getAllByRole('heading').map((heading) => heading.textContent);
-    expect(titles).toEqual(['In progress', 'Critical', 'Not rated', 'Closed']);
+    expect(titles).toEqual(['Recently opened', 'In progress', 'Critical', 'Not rated', 'Closed']);
   });
 
   it('renders each investigation as the shared investigation card', () => {
@@ -156,6 +191,20 @@ describe('InvestigationList', () => {
       ]);
 
       expect(toggle('critical')).toHaveAttribute('aria-expanded', 'true');
+      expect(toggle('closed')).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('starts Closed collapsed even when an older storage key omitted it', () => {
+      window.localStorage.setItem(
+        'nightshift.investigations.collapsedSections:default',
+        JSON.stringify([])
+      );
+
+      renderSections([
+        makeSection('critical', { investigations: [investigation], total: 1 }),
+        makeSection('closed', { investigations: [investigation], total: 1 }),
+      ]);
+
       expect(toggle('closed')).toHaveAttribute('aria-expanded', 'false');
     });
 

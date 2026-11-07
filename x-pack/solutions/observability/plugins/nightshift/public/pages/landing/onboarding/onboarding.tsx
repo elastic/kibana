@@ -392,7 +392,8 @@ export function NightshiftOnboarding({
           ) : (
             <OnboardingAutomationStep
               investigation={latestInvestigation}
-              automationsHref={automationsHref}
+              automations={automations.data?.automations ?? []}
+              automationsAvailable={automationsHref != null}
               onInvestigationClick={openInvestigation}
             />
           )}

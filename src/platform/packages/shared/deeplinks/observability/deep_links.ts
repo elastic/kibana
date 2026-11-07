@@ -114,6 +114,7 @@ export type ProfilingLinkId = 'stacktraces' | 'flamegraphs' | 'functions';
 export type StreamsLinkId = 'overview';
 
 export type NightshiftLinkId =
+  | 'investigations'
   | 'automations'
   | 'detections'
   | 'knowledge'

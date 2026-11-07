@@ -21,6 +21,10 @@ const automationsLabel = i18n.translate('xpack.nightshift.automationsLabel', {
   defaultMessage: 'Automations',
 });
 
+export const INVESTIGATIONS_PAGE_TITLE = i18n.translate('xpack.nightshift.investigationsPage.title', {
+  defaultMessage: 'Investigations',
+});
+
 const investigateLabel = i18n.translate('xpack.nightshift.header.investigateButtonText', {
   defaultMessage: 'Investigate',
 });
@@ -78,7 +82,14 @@ const applyEbtProps = (
 };
 
 export interface NightshiftAppHeaderProps {
-  page?: 'landing' | 'automations' | 'detection' | 'knowledge' | 'settings' | 'sources';
+  page?:
+    | 'landing'
+    | 'investigations'
+    | 'automations'
+    | 'detection'
+    | 'knowledge'
+    | 'settings'
+    | 'sources';
   hideMenu?: boolean;
   onSourcesClick?: () => void | Promise<void>;
   sourcesHref?: string;
@@ -189,7 +200,9 @@ export function NightshiftAppHeader({
   return (
     <AppHeader
       title={
-        page === 'automations'
+        page === 'investigations'
+          ? INVESTIGATIONS_PAGE_TITLE
+          : page === 'automations'
           ? automationsLabel
           : isDetectionPage
           ? DETECTION_PAGE_TITLE

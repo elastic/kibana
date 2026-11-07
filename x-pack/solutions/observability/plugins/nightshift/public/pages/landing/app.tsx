@@ -13,7 +13,10 @@ import {
   EuiCallOut,
   EuiFieldSearch,
   EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
   EuiSpacer,
+  EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
@@ -33,6 +36,13 @@ import {
   type InvestigationViewSource,
 } from '../../common/ebt_events';
 import { RETRY_BUTTON_LABEL } from '../../common/messages';
+import { isDemoArchived } from '../../data/investigations/demo_archive_store';
+import {
+  buildArchivedMatchesInvestigationsPath,
+  buildInvestigationsPath,
+  DEFAULT_INVESTIGATIONS_TIME_RANGE,
+} from '../../data/investigations/investigations_url';
+import { useFetchInvestigations } from '../../data/investigations/use_fetch_investigations';
 import { useInvestigationSections } from '../../data/investigations/use_investigation_sections';
 import {
   InvestigationList,
@@ -41,15 +51,18 @@ import {
 import { isInvestigationSectionVisible } from '../../components/entities/investigation/investigation_section';
 import { InvestigationSeverityTiles } from '../../components/entities/investigation/investigation_severity_tiles';
 import { useFlyoutShareUrlCustomAction } from '../../components/ui/flyout_share_url_button';
+import { NightshiftTimeRangePicker } from '../../components/ui/time_range_picker';
 import {
   buildNightshiftInvestigationFlyoutShareUrl,
   clearNightshiftInvestigationIdParam,
   getNightshiftInvestigationIdFromSearch,
   getNightshiftSearchQueryFromSearch,
   getNightshiftSeverityFromSearch,
+  getNightshiftTimeRangeFromSearch,
   setNightshiftInvestigationIdParam,
   setNightshiftSearchQueryParam,
   setNightshiftSeverityParam,
+  setNightshiftTimeRangeParams,
 } from '../../common/url_params';
 import { DetectionSetupBanner } from './detection_setup_banner';
 import { NightshiftHeader } from './header';
@@ -61,14 +74,36 @@ function isSeverity(value: string | undefined): value is Severity {
 
 const INVESTIGATIONS_SEARCH_DEBOUNCE_MS = 300;
 
+const VIEW_ARCHIVED_INVESTIGATIONS_LABEL = i18n.translate(
+  'xpack.nightshift.investigations.viewArchivedInvestigationsLink',
+  { defaultMessage: 'View all' }
+);
+
+/** Empty-prompt / notice links: no always-on dotted underline. */
+const archivedInvestigationsLinkCss = css`
+  text-decoration: none;
+
+  &:hover,
+  &:focus {
+    text-decoration: underline;
+  }
+`;
+
 export function NightshiftApp({
   hideDetectionSetupBanner = false,
 }: {
   hideDetectionSetupBanner?: boolean;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
-  const { analytics, application, nightshiftInvestigations, agenticInvestigations, agentBuilder } =
-    useKibana().services;
+  const {
+    analytics,
+    application,
+    http,
+    nightshiftInvestigations,
+    agenticInvestigations,
+    agentBuilder,
+  } = useKibana().services;
+  const spaceKey = http.basePath.get() || 'default';
   const history = useHistory();
   const { search } = useLocation();
   const sectionsRef = useRef<InvestigationListHandle>(null);
@@ -83,6 +118,10 @@ export function NightshiftApp({
   // Read filter state from URL so it survives navigation and is shareable.
   const searchQuery = useMemo(() => getNightshiftSearchQueryFromSearch(search), [search]);
   const debouncedSearchQuery = useDebouncedValue(searchQuery, INVESTIGATIONS_SEARCH_DEBOUNCE_MS);
+  const timeRange = useMemo(
+    () => getNightshiftTimeRangeFromSearch(search, DEFAULT_INVESTIGATIONS_TIME_RANGE),
+    [search]
+  );
   const rawSeverity = useMemo(() => getNightshiftSeverityFromSearch(search), [search]);
   const activeSeverity: Severity | undefined = useMemo(
     () => (isSeverity(rawSeverity) ? rawSeverity : undefined),
@@ -99,7 +138,107 @@ export function NightshiftApp({
     totalCount,
     loadedCount,
     refetchAll,
-  } = useInvestigationSections({ query: debouncedSearchQuery });
+  } = useInvestigationSections({
+    query: debouncedSearchQuery,
+    rangeFrom: timeRange.rangeFrom,
+    rangeTo: timeRange.rangeTo,
+  });
+
+  // Closed list (unfiltered by demo archive) so we can count archived matches for the notice.
+  const closedForNotice = useFetchInvestigations({
+    inProgress: false,
+    status: 'closed',
+    query: debouncedSearchQuery,
+  });
+  // Severity-tile sparklines: every investigation (any status), bucketed by opened date.
+  const trendFinished = useFetchInvestigations({
+    inProgress: false,
+    sortField: 'created_at',
+    perPage: 200,
+  });
+  const trendInProgress = useFetchInvestigations({
+    inProgress: true,
+  });
+  const archivedMatchCount = useMemo(() => {
+    if (!debouncedSearchQuery?.trim()) {
+      return 0;
+    }
+    return closedForNotice.investigations.filter((investigation) =>
+      isDemoArchived(investigation, spaceKey)
+    ).length;
+  }, [closedForNotice.investigations, debouncedSearchQuery, spaceKey]);
+  const investigationsAppRoot = useMemo(
+    () =>
+      application
+        .getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/' })
+        .replace(/\/$/, ''),
+    [application]
+  );
+
+  // Archive notice → Investigations: carry only the search + archived state (no severity/time).
+  const archivedMatchesHref = useMemo(
+    () =>
+      `${investigationsAppRoot}${buildArchivedMatchesInvestigationsPath(
+        debouncedSearchQuery ?? ''
+      )}`,
+    [debouncedSearchQuery, investigationsAppRoot]
+  );
+
+  // Header control: Investigations with the current Home search + time range.
+  const viewAllInvestigationsHref = useMemo(
+    () =>
+      `${investigationsAppRoot}${buildInvestigationsPath({
+        query: debouncedSearchQuery ?? '',
+        severity: [],
+        state: [],
+        rangeFrom: timeRange.rangeFrom,
+        rangeTo: timeRange.rangeTo,
+      })}`,
+    [
+      debouncedSearchQuery,
+      investigationsAppRoot,
+      timeRange.rangeFrom,
+      timeRange.rangeTo,
+    ]
+  );
+
+  // Prefer the dedicated open-date fetch; also fold in Home section rows so tiles
+  // never miss investigations that are already on the page.
+  const trendInvestigations = useMemo(() => {
+    const seen = new Set<string>();
+    const items: InvestigationSummary[] = [];
+    for (const investigation of [
+      ...trendFinished.investigations,
+      ...trendInProgress.investigations,
+      ...sections.flatMap((section) => section.investigations),
+    ]) {
+      if (seen.has(investigation.id)) {
+        continue;
+      }
+      seen.add(investigation.id);
+      items.push(investigation);
+    }
+    return items;
+  }, [sections, trendFinished.investigations, trendInProgress.investigations]);
+
+  const hasVisibleSections = useMemo(
+    () => sections.some(isInvestigationSectionVisible),
+    [sections]
+  );
+  const hasSearchQuery = Boolean(debouncedSearchQuery?.trim());
+  // Empty Home results + archived hits: replace “No investigations found” with the archive
+  // message, and skip the bottom “also found” notice so it only appears once.
+  const onlyArchivedMatches =
+    hasSearchQuery &&
+    !hasVisibleSections &&
+    !isInitialLoading &&
+    !closedForNotice.isInitialLoading &&
+    archivedMatchCount > 0;
+  const archiveCheckPending =
+    hasSearchQuery &&
+    !hasVisibleSections &&
+    !isInitialLoading &&
+    closedForNotice.isInitialLoading;
 
   // A tile scrolls to its section, so it is only actionable while the list is rendering that
   // section — which the list, not the count, decides.
@@ -125,7 +264,7 @@ export function NightshiftApp({
     [search]
   );
 
-  const showAllEventsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
+  const detectionsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
     path: '/detections/events',
   });
   const detectionSetupBanner = useDetectionSetupBanner({
@@ -193,6 +332,19 @@ export function NightshiftApp({
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const params = new URLSearchParams(history.location.search);
       setNightshiftSearchQueryParam(params, e.target.value);
+      history.replace({ search: params.toString() });
+    },
+    [history]
+  );
+
+  const handleTimeRangeChange = useCallback(
+    ({ start, end }: { start: string; end: string }) => {
+      const params = new URLSearchParams(history.location.search);
+      setNightshiftTimeRangeParams(
+        params,
+        { rangeFrom: start, rangeTo: end },
+        DEFAULT_INVESTIGATIONS_TIME_RANGE
+      );
       history.replace({ search: params.toString() });
     },
     [history]
@@ -351,7 +503,7 @@ export function NightshiftApp({
       <NightshiftHeader
         isLoading={isInitialLoading}
         hasActiveInvestigations={hasActiveInvestigations}
-        showAllEventsHref={showAllEventsHref}
+        viewAllInvestigationsHref={viewAllInvestigationsHref}
       />
 
       <EuiSpacer size="l" />
@@ -359,29 +511,43 @@ export function NightshiftApp({
       {detectionSetupBanner.isVisible && (
         <>
           <DetectionSetupBanner
-            detectionsHref={showAllEventsHref}
+            detectionsHref={detectionsHref}
             onDismiss={detectionSetupBanner.dismiss}
           />
           <EuiSpacer size="l" />
         </>
       )}
 
-      <EuiFieldSearch
-        data-test-subj="nightshiftInvestigationsSearchInput"
-        placeholder={i18n.translate('xpack.nightshift.investigations.searchPlaceholder', {
-          defaultMessage: 'Search',
-        })}
-        value={searchQuery ?? ''}
-        onChange={handleSearchChange}
-        isClearable
-        fullWidth
-        compressed
-      />
+      <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} wrap>
+        <EuiFlexItem grow={2}>
+          <EuiFieldSearch
+            data-test-subj="nightshiftInvestigationsSearchInput"
+            placeholder={i18n.translate('xpack.nightshift.investigations.searchPlaceholder', {
+              defaultMessage: 'Search',
+            })}
+            value={searchQuery ?? ''}
+            onChange={handleSearchChange}
+            isClearable
+            fullWidth
+            compressed
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <NightshiftTimeRangePicker
+            start={timeRange.rangeFrom}
+            end={timeRange.rangeTo}
+            onChange={handleTimeRangeChange}
+            showRefreshButton
+            data-test-subj="nightshiftHomepageTimePicker"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       <EuiSpacer size="m" />
 
       <InvestigationSeverityTiles
         severityCounts={severityCounts}
+        trendInvestigations={trendInvestigations}
         scrollableSeverities={scrollableSeverities}
         isLoading={isInitialLoading}
         onSeverityClick={handleSeverityClick}
@@ -394,7 +560,57 @@ export function NightshiftApp({
         sections={sections}
         selectedInvestigationId={selectedInvestigationId}
         onInvestigationClick={handleInvestigationClick}
+        searchQuery={debouncedSearchQuery}
+        rangeFrom={timeRange.rangeFrom}
+        rangeTo={timeRange.rangeTo}
+        emptyContent={
+          onlyArchivedMatches ? (
+            <span data-test-subj="nightshiftArchivedOnlyEmpty">
+              {i18n.translate('xpack.nightshift.investigations.archivedOnlyEmpty', {
+                defaultMessage:
+                  '{count, plural, one {# archived investigation found} other {# archived investigations found}}.',
+                values: { count: archivedMatchCount },
+              })}{' '}
+              <EuiLink
+                href={archivedMatchesHref}
+                css={archivedInvestigationsLinkCss}
+                data-test-subj="nightshiftArchivedOnlyEmptyLink"
+              >
+                {VIEW_ARCHIVED_INVESTIGATIONS_LABEL}
+              </EuiLink>
+            </span>
+          ) : archiveCheckPending ? (
+            null
+          ) : undefined
+        }
       />
+
+      {archivedMatchCount > 0 && hasVisibleSections && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiText
+            size="s"
+            color="subdued"
+            textAlign="center"
+            data-test-subj="nightshiftArchivedMatchNotice"
+          >
+            <p>
+              {i18n.translate('xpack.nightshift.investigations.archivedMatchNotice', {
+                defaultMessage:
+                  '{count, plural, one {# archived investigation also found} other {# archived investigations also found}}.',
+                values: { count: archivedMatchCount },
+              })}{' '}
+              <EuiLink
+                href={archivedMatchesHref}
+                css={archivedInvestigationsLinkCss}
+                data-test-subj="nightshiftArchivedMatchNoticeLink"
+              >
+                {VIEW_ARCHIVED_INVESTIGATIONS_LABEL}
+              </EuiLink>
+            </p>
+          </EuiText>
+        </>
+      )}
     </EuiFlexGroup>
   );
 }

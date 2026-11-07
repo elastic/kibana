@@ -11,7 +11,7 @@ import type { FocusedSignificantEventService } from './chat/focused_significant_
 import type { NightshiftStartDependencies } from './types';
 
 /** Deep links the solution side nav lists in the Nightshift panel. */
-const SIDE_NAV_DEEP_LINK_IDS = new Set(['automations', 'detections', 'knowledge']);
+const SIDE_NAV_DEEP_LINK_IDS = new Set(['investigations', 'automations', 'detections', 'knowledge']);
 
 /** Starts focused-event auto-attach and updates app visibility from the detection availability API. */
 export const startNightshiftServices = ({

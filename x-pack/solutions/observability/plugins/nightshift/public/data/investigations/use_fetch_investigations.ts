@@ -39,10 +39,14 @@ export interface FetchInvestigationsParams {
   severities?: InvestigationSeverityFilterValue[];
   /**
    * Open severity / in-progress buckets pass `open`. The Closed accordion passes `closed`.
-   * Omitted only when a caller intentionally wants every status (none today).
+   * Omitted when a caller wants every status (Recent: open finished + closed).
    */
   status?: InvestigationListStatus;
   query?: string;
+  /** Defaults to `created_at`. Recent uses `updated_at` so just-finished work surfaces first. */
+  sortField?: 'created_at' | 'updated_at';
+  /** Overrides {@link INVESTIGATIONS_PAGE_SIZE} for non-in-progress sections. */
+  perPage?: number;
   /**
    * Poll interval in ms, or `false` to never poll. A refetch re-requests every page this
    * section has loaded, so only sections that stay shallow should poll.
@@ -94,6 +98,8 @@ export const useFetchInvestigations = ({
   severities,
   status,
   query,
+  sortField = 'created_at',
+  perPage = INVESTIGATIONS_PAGE_SIZE,
   refetchInterval = false,
 }: FetchInvestigationsParams): FetchInvestigationsResult => {
   const { http, agenticInvestigations } = useKibana().services;
@@ -116,6 +122,8 @@ export const useFetchInvestigations = ({
       severities,
       status,
       query,
+      sortField,
+      perPage,
     ],
     // The list API belongs to agenticInvestigations, an optional dependency.
     enabled: agenticInvestigations != null,
@@ -123,14 +131,14 @@ export const useFetchInvestigations = ({
       http.get<ListInvestigationsResponse>(SHARED_INVESTIGATIONS_URL, {
         version: SHARED_INVESTIGATIONS_API_VERSION,
         query: {
-          sort_field: 'created_at',
+          sort_field: sortField,
           sort_order: 'desc',
           in_progress: inProgress,
           ...(inProgress
             ? { page: 1, per_page: IN_PROGRESS_CANDIDATES }
             : {
                 page: typeof pageParam === 'number' ? pageParam : 1,
-                per_page: INVESTIGATIONS_PAGE_SIZE,
+                per_page: perPage,
               }),
           ...(status != null ? { status } : {}),
           ...(severities?.length ? { severity: severities } : {}),

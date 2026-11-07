@@ -140,13 +140,15 @@ describe('ConversationDetailsFlyoutFooter', () => {
     const closeItem = screen.getByTestId('investigationFlyoutActionsClose');
     expect(deleteItem).toHaveTextContent(ACTIONS_TRANSLATIONS.buttons.deleteInvestigation);
     expect(closeItem).toHaveTextContent(ACTIONS_TRANSLATIONS.buttons.closeShort);
-    // Delete is first in the Actions menu.
+    // Delete is first, with a divider before Close.
     const panel = screen.getByTestId('investigationFlyoutActionsPanel');
     const actionButtons = Array.from(panel.querySelectorAll('button'));
     expect(actionButtons.map((button) => button.getAttribute('data-test-subj'))).toEqual([
       'investigationFlyoutActionsDelete',
       'investigationFlyoutActionsClose',
     ]);
+    expect(deleteItem.compareDocumentPosition(closeItem) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(panel.querySelector('hr')).toBeInTheDocument();
   });
 
   it('offers Delete then Open in the Actions menu for a closed investigation', () => {

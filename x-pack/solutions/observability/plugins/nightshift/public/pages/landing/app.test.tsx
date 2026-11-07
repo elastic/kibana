@@ -13,20 +13,31 @@ import { NIGHTSHIFT_UI_PRIVILEGES } from '@kbn/nightshift-shared';
 import React from 'react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { NightshiftApp } from './app';
+import { isDemoArchived } from '../../data/investigations/demo_archive_store';
 import type { InvestigationSectionState } from '../../data/investigations/use_investigation_sections';
 import { useInvestigationSections } from '../../data/investigations/use_investigation_sections';
+import { useFetchInvestigations } from '../../data/investigations/use_fetch_investigations';
 import { useKibana } from '../../hooks/use_kibana';
 import { useDetectionSetupBanner } from './use_detection_setup_banner';
 
 jest.mock('../../data/investigations/use_investigation_sections');
+jest.mock('../../data/investigations/use_fetch_investigations');
+jest.mock('../../data/investigations/demo_archive_store', () => ({
+  isDemoArchived: jest.fn(() => false),
+}));
 jest.mock('../../hooks/use_kibana');
 jest.mock('@kbn/ebt-tools');
 jest.mock('../../components/entities/investigation/use_investigation_assignees', () => ({
   useInvestigationAssignees: () => () => null,
 }));
+jest.mock('../../components/ui/time_range_picker', () => ({
+  NightshiftTimeRangePicker: () => <div data-test-subj="nightshiftHomepageTimePicker" />,
+}));
 jest.mock('./use_detection_setup_banner');
 
 const mockUseInvestigationSections = useInvestigationSections as jest.Mock;
+const mockUseFetchInvestigations = useFetchInvestigations as jest.Mock;
+const mockIsDemoArchived = isDemoArchived as jest.MockedFunction<typeof isDemoArchived>;
 const mockUseKibana = useKibana as jest.Mock;
 const mockUsePageReady = usePageReady as jest.Mock;
 const mockUseDetectionSetupBanner = useDetectionSetupBanner as jest.Mock;
@@ -140,8 +151,12 @@ function setSections({
     hasActiveInvestigations,
     isInitialLoading,
     isFetching,
-    totalCount: sections.reduce((sum, section) => sum + section.total, 0),
-    loadedCount: sections.reduce((sum, section) => sum + section.investigations.length, 0),
+    totalCount: sections
+      .filter((section) => section.id !== 'recent')
+      .reduce((sum, section) => sum + section.total, 0),
+    loadedCount: sections
+      .filter((section) => section.id !== 'recent')
+      .reduce((sum, section) => sum + section.investigations.length, 0),
     refetchAll,
   });
 }
@@ -200,10 +215,29 @@ describe('NightshiftApp', () => {
         agenticInvestigations: { InvestigationCard },
         agentBuilder: { openConversationDetails },
         notifications: { toasts: { addSuccess: jest.fn() } },
+        charts: {
+          theme: {
+            useChartsBaseTheme: () => ({}),
+            useSparklineOverrides: () => ({}),
+          },
+        },
       },
     });
     openConversationDetails.mockReset().mockImplementation(async () => closeConversationDetails);
     closeConversationDetails.mockReset();
+    mockIsDemoArchived.mockReturnValue(false);
+    mockUseFetchInvestigations.mockReturnValue({
+      investigations: [],
+      total: 0,
+      hasMore: false,
+      isInitialLoading: false,
+      isFetchingNextPage: false,
+      isFetching: false,
+      isPreviousData: false,
+      error: null,
+      fetchNextPage: jest.fn(),
+      refetch: jest.fn(),
+    });
     setSections({
       sections: defaultSections({
         'in-progress': { investigations: [investigation], total: 1 },
@@ -215,10 +249,11 @@ describe('NightshiftApp', () => {
   it('renders investigations and reports the page ready metrics', () => {
     renderApp();
 
-    expect(screen.getByTestId('o11yNightshiftAppShowAllLink')).toHaveAttribute(
+    expect(screen.getByTestId('nightshiftHomepageViewAllInvestigations')).toHaveAttribute(
       'href',
-      '/app/nightshift/detections/events'
+      '/app/nightshift/investigations'
     );
+    expect(screen.getByTestId('nightshiftHomepageTimePicker')).toBeInTheDocument();
     expect(screen.getByText('Checkout errors are elevated')).toBeInTheDocument();
     expect(screen.getByText('Investigations are underway')).toBeInTheDocument();
     expect(mockUsePageReady).toHaveBeenCalledWith(
@@ -257,6 +292,7 @@ describe('NightshiftApp', () => {
     mockUseKibana.mockReturnValue({
       services: {
         analytics,
+        http: { basePath: { get: () => '' } },
         application: {
           capabilities: { nightshift: manageCapabilities },
           getUrlForApp: (appId: string, { path }: { path?: string } = {}) =>
@@ -384,7 +420,80 @@ describe('NightshiftApp', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('replaces the empty state when only archived investigations match the search', () => {
+    const archived = makeInvestigation('archived-1', 'Old checkout', {
+      metadata: { status: 'closed', summary: 'Old checkout' },
+    });
+    mockIsDemoArchived.mockImplementation(({ id }) => id === 'archived-1');
+    mockUseFetchInvestigations.mockReturnValue({
+      investigations: [archived],
+      total: 1,
+      hasMore: false,
+      isInitialLoading: false,
+      isFetchingNextPage: false,
+      isFetching: false,
+      isPreviousData: false,
+      error: null,
+      fetchNextPage: jest.fn(),
+      refetch: jest.fn(),
+    });
+    setSections({ sections: defaultSections() });
+
+    renderApp({ initialEntries: ['/?q=checkout'] });
+
+    expect(screen.getByTestId('nightshiftArchivedOnlyEmpty')).toHaveTextContent(
+      '1 archived investigation found'
+    );
+    expect(screen.getByTestId('nightshiftArchivedOnlyEmptyLink')).toHaveTextContent('View all');
+    expect(screen.queryByTestId('nightshiftArchivedMatchNotice')).not.toBeInTheDocument();
+    expect(screen.queryByText('No investigations found')).not.toBeInTheDocument();
+  });
+
+  it('keeps the also-found notice when open results and archived matches both exist', () => {
+    const archived = makeInvestigation('archived-1', 'Old checkout', {
+      metadata: { status: 'closed', summary: 'Old checkout' },
+    });
+    mockIsDemoArchived.mockImplementation(({ id }) => id === 'archived-1');
+    mockUseFetchInvestigations.mockReturnValue({
+      investigations: [archived],
+      total: 1,
+      hasMore: false,
+      isInitialLoading: false,
+      isFetchingNextPage: false,
+      isFetching: false,
+      isPreviousData: false,
+      error: null,
+      fetchNextPage: jest.fn(),
+      refetch: jest.fn(),
+    });
+    setSections({
+      sections: defaultSections({
+        'in-progress': { investigations: [investigation], total: 1 },
+      }),
+      hasActiveInvestigations: true,
+    });
+
+    renderApp({ initialEntries: ['/?q=checkout'] });
+
+    expect(screen.getByTestId('nightshiftArchivedMatchNotice')).toHaveTextContent(
+      '1 archived investigation also found'
+    );
+    expect(screen.queryByTestId('nightshiftArchivedOnlyEmpty')).not.toBeInTheDocument();
+  });
+
+  it('hides severity tiles when every severity count is zero', () => {
+    renderApp();
+
+    expect(screen.queryByTestId('nightshiftSeverityTiles')).not.toBeInTheDocument();
+  });
+
   it('does not scroll from a severity tile with no investigations', () => {
+    setSections({
+      sections: defaultSections({
+        high: { investigations: [highInvestigation], total: 1 },
+      }),
+    });
+
     renderApp();
 
     fireEvent.click(screen.getByTestId('nightshiftSeverityTile-critical'));
@@ -416,8 +525,8 @@ describe('NightshiftApp', () => {
       }),
     });
     window.localStorage.setItem(
-      'nightshift.investigations.collapsedSections:default',
-      JSON.stringify(['critical'])
+      'nightshift.investigations.collapsedSections.v2:default',
+      JSON.stringify(['critical', 'closed'])
     );
 
     renderApp(link ? { initialEntries: [link] } : undefined);
@@ -435,7 +544,13 @@ describe('NightshiftApp', () => {
 
   it('keeps a severity tile actionable when its section failed to load, since it still renders', async () => {
     setSections({
-      sections: defaultSections({ critical: { error: new Error('boom') } }),
+      sections: defaultSections({
+        critical: {
+          investigations: [criticalInvestigation],
+          total: 1,
+          error: new Error('boom'),
+        },
+      }),
     });
 
     renderApp();
