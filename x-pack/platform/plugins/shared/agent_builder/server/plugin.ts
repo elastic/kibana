@@ -358,6 +358,7 @@ export class AgentBuilderPlugin
       },
       callbacks: {
         registerConversationResolver: serviceSetups.callbacks.registerConversationResolver,
+        registerOnBeforeNewConversation: serviceSetups.callbacks.registerOnBeforeNewConversation,
         registerTransport: serviceSetups.callbacks.registerTransport,
       },
       topSnippets: this.config.topSnippets,

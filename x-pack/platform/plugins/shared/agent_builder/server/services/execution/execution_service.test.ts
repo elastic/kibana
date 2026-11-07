@@ -171,6 +171,10 @@ describe('AgentExecutionService', () => {
     logger,
   });
   const resolveConversation = jest.spyOn(callbackDeliveryService, 'resolveConversation');
+  const runOnBeforeNewConversation = jest.spyOn(
+    callbackDeliveryService,
+    'runOnBeforeNewConversation'
+  );
 
   const service = createAgentExecutionService({
     logger,
@@ -1905,6 +1909,95 @@ describe('AgentExecutionService', () => {
           'lookup failed'
         );
         expect(mockExecutionClient.create).not.toHaveBeenCalled();
+      });
+
+      it('runs the hooks for a new conversation on the requested agent before recording the execution', async () => {
+        await converse({ conversationId: undefined, origin });
+
+        expect(runOnBeforeNewConversation).toHaveBeenCalledWith({
+          origin,
+          spaceId: 'default',
+          request: expect.anything(),
+          agentId: 'agent-1',
+        });
+        expect(runOnBeforeNewConversation.mock.invocationCallOrder[0]).toBeLessThan(
+          mockExecutionClient.create.mock.invocationCallOrder[0]
+        );
+      });
+
+      it('does not run the hooks for a caller who may not run the agent', async () => {
+        agentRegistry.get.mockImplementation(async (agentId, options) => {
+          if (options?.access === 'use') {
+            throw new Error('forbidden');
+          }
+          return createMockedInternalAgent({ id: agentId });
+        });
+
+        await expect(converse({ conversationId: undefined, origin })).rejects.toThrow('forbidden');
+        expect(runOnBeforeNewConversation).not.toHaveBeenCalled();
+      });
+
+      it('does not run the hooks for a replayed delivery', async () => {
+        mockExecutionClient.peek.mockResolvedValue({
+          status: ExecutionStatus.scheduled,
+          eventCount: 0,
+        });
+        mockExecutionClient.create.mockRejectedValueOnce(conflictError());
+
+        await service.executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request: httpServerMock.createKibanaRequest(),
+          executionId: 'exec-1',
+          metadata: { execution_idempotency_key: 'Ev123' },
+          params: { agentId: 'agent-1', origin, nextInput: { message: 'Hello' } },
+        });
+
+        expect(runOnBeforeNewConversation).not.toHaveBeenCalled();
+      });
+
+      it.each([
+        ['gives back what the hooks took when the opening message is refused', true],
+        ['keeps what the hooks took when the opening message write may have landed', false],
+      ])('%s', async (_name, refused) => {
+        const release = jest.fn().mockResolvedValue(undefined);
+        runOnBeforeNewConversation.mockResolvedValueOnce(release);
+        conversationClient.create.mockRejectedValueOnce(
+          refused
+            ? createConversationWriteConflictError({ conversationId: 'conversation-1' })
+            : new Error('read after write failed')
+        );
+
+        await expect(converse({ conversationId: undefined, origin })).rejects.toBeDefined();
+        expect(release).toHaveBeenCalledTimes(refused ? 1 : 0);
+      });
+
+      it('keeps what the hooks took once the opening message is written', async () => {
+        const release = jest.fn().mockResolvedValue(undefined);
+        runOnBeforeNewConversation.mockResolvedValueOnce(release);
+
+        await converse({ conversationId: undefined, origin });
+
+        expect(release).not.toHaveBeenCalled();
+      });
+
+      it('writes nothing when a hook refuses the turn', async () => {
+        runOnBeforeNewConversation.mockRejectedValueOnce(new Error('limit reached'));
+
+        await expect(converse({ conversationId: undefined, origin })).rejects.toThrow(
+          'limit reached'
+        );
+        expect(conversationClient.create).not.toHaveBeenCalled();
+        expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+        expect(mockExecutionClient.create).not.toHaveBeenCalled();
+      });
+
+      it('does not run the hooks for a turn that continues a conversation', async () => {
+        resolveConversation.mockResolvedValueOnce({ conversationId: 'investigation-1' });
+        conversationClient.get.mockResolvedValueOnce(boundConversation);
+
+        await converse({ conversationId: undefined, origin });
+
+        expect(runOnBeforeNewConversation).not.toHaveBeenCalled();
       });
     });
 
