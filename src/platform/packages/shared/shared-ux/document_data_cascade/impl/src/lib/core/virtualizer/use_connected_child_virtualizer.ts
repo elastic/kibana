@@ -25,6 +25,21 @@ export interface UseConnectedChildVirtualizerOptions<G extends GroupNode> {
   estimatedRowHeight?: number;
   overscan?: number;
   /**
+   * Distance between the top of the root row and the top of the child's virtualized content
+   * (e.g. the row header and any chrome rendered above the list). Added to the row's start so
+   * that the child's item positions map onto their actual place in the shared scroll element.
+   */
+  scrollMarginOffset?: number;
+  /**
+   * Space at the top of the shared scroll element that is covered by other content (e.g. a
+   * sticky header), which `scrollToIndex` should keep items clear of.
+   */
+  scrollPaddingStart?: number;
+  /**
+   * Space at the bottom of the shared scroll element that `scrollToIndex` should keep items clear of.
+   */
+  scrollPaddingEnd?: number;
+  /**
    * When detached, the child uses this element as its own scroll container.
    * If not provided, the child cannot detach.
    */
@@ -49,6 +64,9 @@ export const useConnectedChildVirtualizer = <G extends GroupNode>({
   rows,
   estimatedRowHeight,
   overscan,
+  scrollMarginOffset = 0,
+  scrollPaddingStart,
+  scrollPaddingEnd,
   privateScrollElement,
 }: UseConnectedChildVirtualizerOptions<G>): UseConnectedChildVirtualizerResult => {
   const isActive = useSyncExternalStore(
@@ -135,7 +153,9 @@ export const useConnectedChildVirtualizer = <G extends GroupNode>({
 
   const effectiveRows = isActive ? rows : (EMPTY_ROWS as Row<G>[]);
 
-  const scrollMargin = isDetached ? 0 : controller.getScrollMarginForRow(rowIndex);
+  const scrollMargin = isDetached
+    ? 0
+    : controller.getScrollMarginForRow(rowIndex) + scrollMarginOffset;
 
   const virtualizer = useCascadeVirtualizer<G>({
     rows: effectiveRows,
@@ -145,6 +165,8 @@ export const useConnectedChildVirtualizer = <G extends GroupNode>({
     isRoot: false,
     getScrollElement,
     scrollMargin,
+    scrollPaddingStart: isDetached ? undefined : scrollPaddingStart,
+    scrollPaddingEnd: isDetached ? undefined : scrollPaddingEnd,
     initialOffset: isDetached ? 0 : childConfig.initialOffset,
     initialAnchorItemIndex: persistedAnchor ?? undefined,
     onStateChange,

@@ -30,6 +30,7 @@ import {
 } from '../../../store_provider';
 import type { ChildVirtualizerController } from '../../../lib/core/virtualizer/child_virtualizer_controller';
 import { cascadeRowCellStyles } from './cascade_row_cell.styles';
+import { useStickyHeaderExtensionPoint } from '../data_cascade_row/components/cascade_row_header_extension_point';
 
 export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>({
   children,
@@ -146,6 +147,8 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
     [onCascadeLeafNodeCollapsed, nodePath, nodePathMap, row]
   );
 
+  const stickyHeaderExtensionPoint = useStickyHeaderExtensionPoint();
+
   const isRowReturning = childController?.isReturningCell(leafCacheKey) ?? false;
   const isReady =
     Boolean(leafData) && !isPendingRowLeafDataFetch && (isActivated || isRowReturning);
@@ -159,12 +162,22 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
       nodePathMap,
       virtualizerController: childController,
       rowIndex: row.index,
+      stickyHeaderExtensionPoint,
     });
-  }, [children, leafData, leafCacheKey, nodePath, nodePathMap, childController, row.index]);
+  }, [
+    children,
+    leafData,
+    leafCacheKey,
+    nodePath,
+    nodePathMap,
+    childController,
+    row.index,
+    stickyHeaderExtensionPoint,
+  ]);
 
   return (
     <EuiFlexGroup>
-      <EuiFlexItem css={styles.cellWrapper} tabIndex={0}>
+      <EuiFlexItem css={styles.cellWrapper} data-cascade-row-loading={!isReady} tabIndex={0}>
         <EuiSkeletonText lines={3} size={size === 'l' ? 'm' : size} isLoading={!isReady}>
           <div css={styles.cellInner}>{memoizedChild}</div>
         </EuiSkeletonText>
