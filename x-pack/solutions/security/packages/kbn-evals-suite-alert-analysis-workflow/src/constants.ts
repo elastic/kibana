@@ -17,6 +17,8 @@
  *   - API_VERSION (workflows_management route constants)
  */
 
+import { attachmentTools, internalTools } from '@kbn/agent-builder-common';
+
 /** Alias the synthetic alerts are indexed into. Same alias the shipped workflow reads. */
 export const ALERTS_INDEX = '.alerts-security.alerts-default';
 
@@ -40,3 +42,33 @@ export const EVAL_TAG_PREFIX = 'eval-alert-analysis';
 export const CLASSIFICATIONS = ['true_positive', 'false_positive', 'inconclusive'] as const;
 
 export type Classification = (typeof CLASSIFICATIONS)[number];
+
+/** Agent Builder public API version (`Elastic-Api-Version` header). */
+export const AGENT_BUILDER_API_VERSION = '2023-10-31';
+
+/** Agent Builder conversations route; `DELETE <route>/{id}` removes one stored conversation. */
+export const AGENT_BUILDER_CONVERSATIONS_ROUTE = '/api/agent_builder/conversations';
+
+/**
+ * Agent-builder scaffolding tools the runtime exposes regardless of the workflow's `tools: []`
+ * override (see `select_tools.ts` and `register_internal_tools.ts` in agent_builder). They are not
+ * domain tool use, so the zero-tool trajectory guardrail ignores them; the evaluator still
+ * reports them as `harnessToolCalls` metadata. `describe_api` / `describe_api_type` only render a
+ * registry schema and read no data. Tools that read data or act for the user (`read_file`, `bash`,
+ * `execute_api`, `run_subagent`, `send_message_to_agent`, ...) stay out on purpose: calling one is
+ * a real failure.
+ *
+ * Storing the conversation (`createConversation: true`) widens the agent's toolset (`sleep`,
+ * `send_message_to_agent`), so trajectory numbers from before that change are not
+ * directly comparable.
+ */
+export const HARNESS_TOOL_IDS: readonly string[] = [
+  ...Object.values(attachmentTools),
+  internalTools.writeTodos,
+  internalTools.loadSkill,
+  internalTools.searchRelevantSkills,
+  internalTools.setConversationMetadata,
+  internalTools.sleep,
+  internalTools.describeApi,
+  internalTools.describeApiType,
+];
