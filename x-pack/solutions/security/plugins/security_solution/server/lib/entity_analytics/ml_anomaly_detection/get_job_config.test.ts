@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MitreDataUnavailableError } from '@kbn/security-mitre-attack-common';
 import { httpServerMock, loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
@@ -367,7 +368,11 @@ describe('getJobConfig', () => {
       techniques: [{ id: 'T9001', name: 'Managed Technique' }],
       subtechniques: [],
     });
-    const mitreDataClient: MitreAttackDataClient = { list: mockList, getById: jest.fn() };
+    const mitreDataClient: MitreAttackDataClient = {
+      list: mockList,
+      getById: jest.fn(),
+      getStatus: jest.fn().mockReturnValue({ status: 'ready' }),
+    };
 
     const result = await getJobConfig({
       jobIds: ['test-job'],
@@ -421,7 +426,11 @@ describe('getJobConfig', () => {
     });
 
     const failingList = jest.fn().mockRejectedValue(new Error('mitre service unavailable'));
-    const mitreDataClient: MitreAttackDataClient = { list: failingList, getById: jest.fn() };
+    const mitreDataClient: MitreAttackDataClient = {
+      list: failingList,
+      getById: jest.fn(),
+      getStatus: jest.fn().mockReturnValue({ status: 'ready' }),
+    };
 
     const result = await getJobConfig({
       jobIds: ['test-job'],
@@ -457,13 +466,14 @@ describe('getJobConfig', () => {
     });
 
     // Simulates the state where the managed SO has not yet been populated.
-    const emptyList = jest.fn().mockResolvedValue({
-      framework: 'enterprise',
-      tactics: [],
-      techniques: [],
-      subtechniques: [],
-    });
-    const mitreDataClient: MitreAttackDataClient = { list: emptyList, getById: jest.fn() };
+    const emptyList = jest
+      .fn()
+      .mockRejectedValue(new MitreDataUnavailableError('population_failed'));
+    const mitreDataClient: MitreAttackDataClient = {
+      list: emptyList,
+      getById: jest.fn(),
+      getStatus: jest.fn().mockReturnValue({ status: 'ready' }),
+    };
 
     const result = await getJobConfig({
       jobIds: ['test-job'],
@@ -482,7 +492,7 @@ describe('getJobConfig', () => {
       threatTechniques: ['T1110'],
     });
     expect(logger.debug).toHaveBeenCalledWith(
-      expect.stringContaining('Managed MITRE data is not initialized')
+      expect.stringContaining('MITRE data unavailable: population_failed')
     );
   });
 
@@ -563,7 +573,11 @@ describe('managed MITRE list caching', () => {
 
   it('calls list() on every request so runtime data changes are always visible', async () => {
     const mockList = makeMockList();
-    const mitreDataClient: MitreAttackDataClient = { list: mockList, getById: jest.fn() };
+    const mitreDataClient: MitreAttackDataClient = {
+      list: mockList,
+      getById: jest.fn(),
+      getStatus: jest.fn().mockReturnValue({ status: 'ready' }),
+    };
 
     // First call
     await getJobConfig({
@@ -590,7 +604,11 @@ describe('managed MITRE list caching', () => {
 
   it('calls list() again on the next request when the managed collection is empty', async () => {
     const mockList = makeMockList(true /* empty */);
-    const mitreDataClient: MitreAttackDataClient = { list: mockList, getById: jest.fn() };
+    const mitreDataClient: MitreAttackDataClient = {
+      list: mockList,
+      getById: jest.fn(),
+      getStatus: jest.fn().mockReturnValue({ status: 'ready' }),
+    };
 
     // First call — empty result causes degraded-mode fallback.
     await getJobConfig({

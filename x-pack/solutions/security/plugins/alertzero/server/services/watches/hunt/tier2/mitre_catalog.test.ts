@@ -107,7 +107,8 @@ describe('getMitreCatalog', () => {
         subtechniques: scoped.filter((e) => e.type === 'subtechnique'),
       };
     });
-    return { list } as unknown as MitreAttackDataClient & { list: typeof list };
+    const getStatus = jest.fn().mockReturnValue({ status: 'ready' });
+    return { list, getStatus } as unknown as MitreAttackDataClient & { list: typeof list };
   };
 
   beforeEach(() => {
@@ -167,7 +168,10 @@ describe('getMitreCatalog', () => {
       .fn()
       .mockRejectedValueOnce(new Error('search_phase_execution_exception'))
       .mockImplementation(makeClient().list);
-    const client = { list } as unknown as MitreAttackDataClient;
+    const client = {
+      list,
+      getStatus: jest.fn().mockReturnValue({ status: 'ready' }),
+    } as unknown as MitreAttackDataClient;
 
     const failed = await getMitreCatalog({ mitreDataClient: client, logger });
     expect(failed.techniqueById.size).toBe(0);
@@ -176,6 +180,19 @@ describe('getMitreCatalog', () => {
     const recovered = await getMitreCatalog({ mitreDataClient: client, logger });
     expect(recovered.techniqueById.has('T1566')).toBe(true);
     expect(list).toHaveBeenCalledTimes(2);
+  });
+
+  it('sets degraded flag when data client status is degraded', async () => {
+    const client = makeClient();
+    (client.getStatus as jest.Mock).mockReturnValue({ status: 'degraded' });
+    const catalog = await getMitreCatalog({ mitreDataClient: client });
+    expect(catalog.degraded).toBe(true);
+    expect(catalog.techniqueById.size).toBeGreaterThan(0);
+  });
+
+  it('does not set degraded flag when data client status is ready', async () => {
+    const catalog = await getMitreCatalog({ mitreDataClient: makeClient() });
+    expect(catalog.degraded).toBeUndefined();
   });
 
   it('returns an empty catalog and logs at debug when no client is available', async () => {

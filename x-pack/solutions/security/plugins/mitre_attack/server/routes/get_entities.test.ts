@@ -7,7 +7,10 @@
 
 import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { GET_MITRE_ENTITIES_URL } from '@kbn/security-mitre-attack-common';
+import {
+  GET_MITRE_ENTITIES_URL,
+  MitreDataUnavailableError,
+} from '@kbn/security-mitre-attack-common';
 import { mitreAttackDataClientMock } from '../services/mitre_attack_data_client/__mocks__/mitre_attack_data_client';
 import {
   getMockMitreTactic,
@@ -79,6 +82,24 @@ describe('registerGetEntitiesRoute', () => {
         expect.objectContaining({ statusCode: 503 })
       );
       expect(mockResponse.ok).not.toHaveBeenCalled();
+    });
+
+    it('returns 503 with reason when data client throws MitreDataUnavailableError', async () => {
+      registerRoute();
+      const handler = getHandler();
+      const context = createContext();
+
+      mockDataClient.list.mockRejectedValue(new MitreDataUnavailableError('population_failed'));
+
+      const request = httpServerMock.createKibanaRequest({ query: {} });
+      await handler(context, request, mockResponse);
+
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 503,
+        body: { message: 'MITRE data unavailable: population_failed' },
+      });
+      expect(mockResponse.ok).not.toHaveBeenCalled();
+      expect(logger.error).not.toHaveBeenCalled();
     });
 
     it('happy path: strips description from all entity types, returns framework metadata', async () => {
