@@ -22,6 +22,7 @@ import {
 } from '@kbn/es-query';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ProjectRouting } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import { ApiMessageCode } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import { css } from '@emotion/react';
 import { Panel } from '@xyflow/react';
 import { getEsQueryConfig } from '@kbn/data-service';
@@ -30,6 +31,7 @@ import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { Graph, isEntityNode } from '../../..';
 import { type UseFetchGraphDataParams, useFetchGraphData } from '../../hooks/use_fetch_graph_data';
+import { getGraphFetchErrorCategory } from '../../hooks/graph_fetch_error';
 import { GRAPH_INVESTIGATION_TEST_ID } from '../test_ids';
 import { useIpPopover } from '../node/ips/ips';
 import { useCountryFlagsPopover } from '../node/country_flags/country_flags';
@@ -60,8 +62,29 @@ import { isLabelNode, isRelationshipNode, showErrorToast } from '../utils';
 import { GRAPH_SCOPE_ID } from '../constants';
 import { useGraphFilters } from '../filters/use_graph_filters';
 import { getEntityTimelineFilter } from './entity_timeline_filters';
-import type { GraphTelemetryHandler } from '../graph_telemetry';
-import { getFiltersChangedEvent, getSearchSubmittedEvent } from '../graph_telemetry';
+import type {
+  GraphExpansionAction,
+  GraphNodeType,
+  GraphTelemetryEvent,
+  GraphTelemetryHandler,
+  GraphToggleState,
+} from '../graph_telemetry';
+import {
+  getEmptyStateReason,
+  getFiltersChangedEvent,
+  getSearchSubmittedEvent,
+  isExpansionAction,
+} from '../graph_telemetry';
+
+interface PendingExpansion {
+  action: GraphExpansionAction;
+  nodeType: GraphNodeType;
+  state: GraphToggleState;
+  /** Number of nodes in the graph when the toggle was clicked. */
+  previousNodeCount: number;
+  /** Set once the fetch triggered by the toggle has been seen in flight. */
+  fetchObserved: boolean;
+}
 
 const useGraphPopovers = ({
   scopeId,
@@ -420,11 +443,16 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     );
     const lastValidEsQuery = useRef<EsQuery | undefined>();
     const [kquery, setKQuery] = useState<Query>(EMPTY_QUERY);
+    const wasLoadedAndEmptyRef = useRef(false);
+    const pendingExpansionRef = useRef<PendingExpansion | undefined>();
+    const latestNodeCountRef = useRef(0);
 
     const onFiltersUpdated = useCallback(
       (filters: Filter[]) => {
         const event = getFiltersChangedEvent(searchFilters, filters);
         if (event) onTelemetryEvent?.(event);
+        // The next fetch result is no longer attributable to the node action.
+        pendingExpansionRef.current = undefined;
         setSearchFilters(filters);
       },
       [searchFilters, setSearchFilters, onTelemetryEvent]
@@ -548,11 +576,68 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     ]);
 
     useEffect(() => {
+      latestNodeCountRef.current = data?.nodes.length ?? 0;
+    }, [data?.nodes]);
+
+    useEffect(() => {
+      const pending = pendingExpansionRef.current;
+      if (!pending) return;
+      if (isFetching) {
+        pending.fetchObserved = true;
+        return;
+      }
+      if (!pending.fetchObserved) return;
+
+      pendingExpansionRef.current = undefined;
+      if (isError) return;
+      onTelemetryEvent?.({
+        type: 'expansion_result',
+        action: pending.action,
+        nodeType: pending.nodeType,
+        state: pending.state,
+        // Node ids are not stable across responses, so only the node count is comparable.
+        nodesAdded: (data?.nodes.length ?? 0) > pending.previousNodeCount,
+        nodesLimitReached: data?.messages?.includes(ApiMessageCode.ReachedNodesLimit) ?? false,
+      });
+    }, [data, isFetching, isError, onTelemetryEvent]);
+
+    // Remembers expansion toggles so the outcome can be reported once their fetch completes.
+    const trackExpansionTelemetryEvent = useCallback(
+      (event: GraphTelemetryEvent) => {
+        if (event.type === 'node_action') {
+          const { action, nodeType, state } = event;
+          if (isExpansionAction(action) && state) {
+            const pending = pendingExpansionRef.current;
+            pendingExpansionRef.current = {
+              action,
+              nodeType,
+              state,
+              previousNodeCount: pending?.previousNodeCount ?? latestNodeCountRef.current,
+              fetchObserved: pending?.fetchObserved ?? false,
+            };
+          }
+        }
+        onTelemetryEvent?.(event);
+      },
+      [onTelemetryEvent]
+    );
+
+    useEffect(() => {
       const toasts = notifications?.toasts;
       if (isError && error && toasts) {
         showErrorToast(toasts, error);
       }
     }, [error, isError, notifications]);
+
+    const lastReportedErrorRef = useRef<unknown>();
+    useEffect(() => {
+      if (!isError || !error || lastReportedErrorRef.current === error) return;
+      lastReportedErrorRef.current = error;
+      onTelemetryEvent?.({
+        type: 'fetch_failed',
+        errorCategory: getGraphFetchErrorCategory(error),
+      });
+    }, [error, isError, onTelemetryEvent]);
 
     const {
       nodeExpandPopover,
@@ -568,7 +653,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       scopeId,
       onOpenEventPreview,
       onOpenNetworkPreview,
-      onTelemetryEvent,
+      onTelemetryEvent: trackExpansionTelemetryEvent,
     });
 
     const nodeExpandButtonClickHandler = (...args: unknown[]) =>
@@ -803,6 +888,25 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       return filtersCount + queryCounter;
     }, [kquery.query, searchFilters]);
 
+    const isLoadedAndEmpty =
+      !isFetching && !isError && data !== undefined && data.nodes.length === 0;
+
+    // Reports once per transition into the loaded-and-empty state.
+    useEffect(() => {
+      const wasLoadedAndEmpty = wasLoadedAndEmptyRef.current;
+      wasLoadedAndEmptyRef.current = isLoadedAndEmpty;
+      if (!isLoadedAndEmpty || wasLoadedAndEmpty) return;
+
+      onTelemetryEvent?.({
+        type: 'empty_state_shown',
+        emptyReason: getEmptyStateReason({
+          hasActiveFilters: searchFilterCounter > 0,
+          timeRangeChanged:
+            timeRange.from !== initialTimeRange.from || timeRange.to !== initialTimeRange.to,
+        }),
+      });
+    }, [isLoadedAndEmpty, searchFilterCounter, timeRange, initialTimeRange, onTelemetryEvent]);
+
     const searchWarningMessage =
       searchFilters.filter(
         (filter) =>
@@ -875,7 +979,10 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
                           { timeRange, query: kquery },
                           payload
                         );
-                        if (event) onTelemetryEvent?.(event);
+                        if (event) {
+                          onTelemetryEvent?.(event);
+                          pendingExpansionRef.current = undefined;
+                        }
                         setTimeRange({ ...payload.dateRange });
                         setKQuery(payload.query || EMPTY_QUERY);
                       } else {

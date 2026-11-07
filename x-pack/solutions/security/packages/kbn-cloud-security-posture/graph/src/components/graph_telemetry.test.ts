@@ -6,8 +6,13 @@
  */
 
 import type { Filter, Query } from '@kbn/es-query';
-import type { GraphTelemetryEvent } from './graph_telemetry';
-import { getFiltersChangedEvent, getSearchSubmittedEvent } from './graph_telemetry';
+import type { GraphTelemetryEvent, GraphNodeAction } from './graph_telemetry';
+import {
+  getEmptyStateReason,
+  getFiltersChangedEvent,
+  getSearchSubmittedEvent,
+  isExpansionAction,
+} from './graph_telemetry';
 
 const createFilter = (key: string): Filter => ({
   meta: { key },
@@ -105,6 +110,40 @@ describe('getSearchSubmittedEvent', () => {
   });
 });
 
+describe('isExpansionAction', () => {
+  it.each<GraphNodeAction>([
+    'show_entity_relationships',
+    'show_actions_by',
+    'show_actions_on',
+    'show_related_events',
+  ])('is true for %s', (action) => {
+    expect(isExpansionAction(action)).toBe(true);
+  });
+
+  it.each<GraphNodeAction>(['show_details', 'show_grouped_entities', 'show_grouped_events'])(
+    'is false for %s',
+    (action) => {
+      expect(isExpansionAction(action)).toBe(false);
+    }
+  );
+});
+
+describe('getEmptyStateReason', () => {
+  it('reports no_data when nothing narrows the results', () => {
+    expect(getEmptyStateReason({ hasActiveFilters: false, timeRangeChanged: false })).toBe(
+      'no_data'
+    );
+  });
+
+  it.each([
+    { hasActiveFilters: true, timeRangeChanged: false },
+    { hasActiveFilters: false, timeRangeChanged: true },
+    { hasActiveFilters: true, timeRangeChanged: true },
+  ])('reports no_results_for_filters for %o', (params) => {
+    expect(getEmptyStateReason(params)).toBe('no_results_for_filters');
+  });
+});
+
 type IsAssignable<Candidate> = [Candidate] extends [GraphTelemetryEvent] ? true : false;
 
 describe('GraphTelemetryEvent node_action typing', () => {
@@ -198,5 +237,59 @@ describe('GraphTelemetryEvent node_action typing', () => {
     ] = [true, true, true, true, true, true, true, true];
 
     expect(accepted).toEqual([true, true, true, true, true, true, true, true]);
+  });
+});
+
+describe('GraphTelemetryEvent new event typing', () => {
+  it('requires every expansion_result field and rejects non-expansion actions', () => {
+    const results: [
+      IsAssignable<{
+        type: 'expansion_result';
+        action: 'show_actions_by';
+        nodeType: 'entity';
+        state: 'show';
+        nodesAdded: true;
+        nodesLimitReached: false;
+      }>,
+      IsAssignable<{
+        type: 'expansion_result';
+        action: 'show_actions_by';
+        nodeType: 'entity';
+        state: 'show';
+        nodesAdded: true;
+      }>,
+      IsAssignable<{
+        type: 'expansion_result';
+        action: 'show_actions_by';
+        nodeType: 'entity';
+        nodesAdded: true;
+        nodesLimitReached: false;
+      }>,
+      IsAssignable<{
+        type: 'expansion_result';
+        action: 'show_details';
+        nodeType: 'entity';
+        state: 'show';
+        nodesAdded: true;
+        nodesLimitReached: false;
+      }>
+    ] = [true, false, false, false];
+
+    expect(results).toEqual([true, false, false, false]);
+  });
+
+  it('accepts the other new events and rejects free-form values', () => {
+    const results: [
+      IsAssignable<{ type: 'empty_state_shown'; emptyReason: 'no_data' }>,
+      IsAssignable<{ type: 'empty_state_shown'; emptyReason: 'something_else' }>,
+      IsAssignable<{ type: 'fetch_failed'; errorCategory: 'timeout' }>,
+      IsAssignable<{ type: 'fetch_failed'; errorCategory: string }>,
+      IsAssignable<{ type: 'grouped_panel_opened'; nodeType: 'grouped_entity' }>,
+      IsAssignable<{ type: 'grouped_panel_opened'; nodeType: 'entity' }>,
+      IsAssignable<{ type: 'grouped_item_viewed'; itemType: 'alert' }>,
+      IsAssignable<{ type: 'grouped_item_viewed'; itemType: 'node' }>
+    ] = [true, false, true, false, true, false, true, false];
+
+    expect(results).toEqual([true, false, true, false, true, false, true, false]);
   });
 });

@@ -13,6 +13,7 @@ import {
   GraphPreviewPanel,
   type GraphPreviewPanelProps,
 } from '../../../shared/components/graph_preview_panel';
+import { getGraphEntryPoint } from '../../../shared/utils/get_graph_entry_point';
 import { useGraphPreview } from '../hooks/use_graph_preview';
 import { EventKind } from '../constants/event_kinds';
 
@@ -28,6 +29,7 @@ export const GraphPreviewContainer = memo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
     );
+    const entryPoint = getGraphEntryPoint({ mode: 'event', isAlert });
     const anchor = useMemo(() => timestamp ?? new Date().toISOString(), [timestamp]);
 
     const { isLoading, isError, data } = useFetchGraphData({
@@ -46,6 +48,7 @@ export const GraphPreviewContainer = memo(
 
     return (
       <GraphPreviewPanel
+        entryPoint={entryPoint}
         onShowGraph={onShowGraph}
         showIcon={showIcon}
         shouldShowGraph={shouldShowGraph}

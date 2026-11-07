@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, type FC } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, type FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useFetchDocumentDetails } from './use_fetch_document_details';
@@ -15,6 +15,7 @@ import { LoadingBody } from './components/loading_body';
 import { EmptyBody } from './components/empty_body';
 import { ContentBody } from './components/content_body';
 import { i18nNamespaceKey } from './constants';
+import type { GraphTelemetryHandler } from '../graph_telemetry';
 
 const hosts = i18n.translate(`${i18nNamespaceKey}.types.hosts`, {
   defaultMessage: 'Hosts',
@@ -73,6 +74,8 @@ export interface GraphGroupedNodePreviewPanelProps {
     entityId: string;
     entityName: string | undefined;
   }) => void;
+  /** Receives telemetry events for the panel being opened and for items being opened from it. */
+  onTelemetryEvent?: GraphTelemetryHandler;
 }
 
 interface PaginatedData {
@@ -142,7 +145,51 @@ const useContentMetadata = (
  * Panel to be displayed in the document details expandable flyout on top of right section
  */
 export const GraphGroupedNodePreviewPanel: FC<GraphGroupedNodePreviewPanelProps> = memo(
-  ({ docMode, scopeId, dataViewId, documentIds, entityItems, onShowDocument, onShowEntity }) => {
+  ({
+    docMode,
+    scopeId,
+    dataViewId,
+    documentIds,
+    entityItems,
+    onShowDocument,
+    onShowEntity,
+    onTelemetryEvent,
+  }) => {
+    // Keep the latest handler in a ref so a new handler identity never re-reports the open event
+    const onTelemetryEventRef = useRef(onTelemetryEvent);
+    onTelemetryEventRef.current = onTelemetryEvent;
+
+    // Fires once per mount: the ref guard holds even though the effect depends on `docMode`
+    const hasReportedOpenRef = useRef(false);
+    useEffect(() => {
+      if (hasReportedOpenRef.current) return;
+      hasReportedOpenRef.current = true;
+      onTelemetryEventRef.current?.({
+        type: 'grouped_panel_opened',
+        nodeType: docMode === 'grouped-entities' ? 'grouped_entity' : 'grouped_event',
+      });
+    }, [docMode]);
+
+    // Wrapped once here so the row title link and the actions popover both report
+    const handleShowEntity = useCallback<typeof onShowEntity>(
+      (params) => {
+        onTelemetryEventRef.current?.({ type: 'grouped_item_viewed', itemType: 'entity' });
+        onShowEntity(params);
+      },
+      [onShowEntity]
+    );
+
+    const handleShowDocument = useCallback<typeof onShowDocument>(
+      (docId, indexName, isEvent) => {
+        onTelemetryEventRef.current?.({
+          type: 'grouped_item_viewed',
+          itemType: isEvent === false ? 'alert' : 'event',
+        });
+        onShowDocument(docId, indexName, isEvent);
+      },
+      [onShowDocument]
+    );
+
     // Initialize pagination state with localStorage persistence
     // - For 'grouped-entities': Pass entityItems.length to enable client-side pagination validation
     // - For 'grouped-events': Pass 0 since events use server-side pagination (handled by useFetchDocumentDetails)
@@ -177,8 +224,8 @@ export const GraphGroupedNodePreviewPanel: FC<GraphGroupedNodePreviewPanelProps>
         groupedItemsType={groupedItemsType}
         pagination={pagination}
         scopeId={scopeId}
-        onShowDocument={onShowDocument}
-        onShowEntity={onShowEntity}
+        onShowDocument={handleShowDocument}
+        onShowEntity={handleShowEntity}
       />
     );
   }

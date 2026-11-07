@@ -21,6 +21,9 @@ import type {
 import type { GraphGroupedNodePreviewPanelProps } from '@kbn/cloud-security-posture-graph';
 import { GraphGroupedNodePreviewPanelKey } from '@kbn/cloud-security-posture-graph';
 import { ALERT_PREVIEW_BANNER, EVENT_PREVIEW_BANNER } from './document_details/preview/constants';
+import type { GraphGroupedNodePreviewPanelParams } from './shared/graph_grouped_node_preview_panel_params';
+import { useGraphTelemetry } from '../flyout_v2/shared/hooks/use_graph_telemetry';
+import type { GraphEntryPoint } from '../common/lib/telemetry';
 import type { GenericEntityDetailsExpandableFlyoutProps } from './entity_details/generic_details_left';
 import {
   GenericEntityDetailsPanel,
@@ -134,8 +137,9 @@ const GraphGroupedNodePreviewPanel = React.lazy(() =>
  * the `onShowDocument` / `onShowEntity` handlers that open previews via the expandable flyout API.
  * The panel itself is flyout-agnostic; this is the only place the legacy preview behaviour lives.
  */
-const GraphGroupedNodePreviewPanelForFlyout = (
-  params: Omit<GraphGroupedNodePreviewPanelProps, 'onShowDocument' | 'onShowEntity'>
+const GraphGroupedNodePreviewPanelWithHandlers = (
+  params: Omit<GraphGroupedNodePreviewPanelParams, 'entryPoint'> &
+    Pick<GraphGroupedNodePreviewPanelProps, 'onTelemetryEvent'>
 ) => {
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const onShowDocument = useCallback(
@@ -177,6 +181,30 @@ const GraphGroupedNodePreviewPanelForFlyout = (
   );
 };
 
+const GraphGroupedNodePreviewPanelWithTelemetry = ({
+  entryPoint,
+  ...params
+}: Omit<GraphGroupedNodePreviewPanelParams, 'entryPoint'> & { entryPoint: GraphEntryPoint }) => {
+  const { onTelemetryEvent } = useGraphTelemetry(entryPoint);
+  return (
+    <GraphGroupedNodePreviewPanelWithHandlers {...params} onTelemetryEvent={onTelemetryEvent} />
+  );
+};
+
+/**
+ * Panels restored from a URL created before `entryPoint` was added to the params have none, and
+ * must not report telemetry rather than report a guessed entry point.
+ */
+const GraphGroupedNodePreviewPanelForFlyout = ({
+  entryPoint,
+  ...params
+}: GraphGroupedNodePreviewPanelParams) =>
+  entryPoint ? (
+    <GraphGroupedNodePreviewPanelWithTelemetry entryPoint={entryPoint} {...params} />
+  ) : (
+    <GraphGroupedNodePreviewPanelWithHandlers {...params} />
+  );
+
 /**
  * List of all panels that will be used within the document details expandable flyout.
  * This needs to be passed to the expandable flyout registeredPanels property.
@@ -213,10 +241,7 @@ export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredP
     key: GraphGroupedNodePreviewPanelKey,
     component: (props) => {
       // TODO Fix typing issue here
-      const params = props.params as unknown as Omit<
-        GraphGroupedNodePreviewPanelProps,
-        'onShowDocument' | 'onShowEntity'
-      >;
+      const params = props.params as unknown as GraphGroupedNodePreviewPanelParams;
       return <GraphGroupedNodePreviewPanelForFlyout {...params} />;
     },
     'aria-label': GRAPH_GROUPED_NODE_PREVIEW_PANEL_ARIA_LABEL,

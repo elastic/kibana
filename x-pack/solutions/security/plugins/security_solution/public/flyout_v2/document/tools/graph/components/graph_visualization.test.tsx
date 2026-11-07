@@ -9,6 +9,7 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import { render, waitFor } from '@testing-library/react';
 import { GraphInvestigation } from '@kbn/cloud-security-posture-graph';
+import { ENTITY_ANALYTICS_TABLE_ID } from '../../../../../entity_analytics/components/home/constants';
 import { GraphVisualization, GRAPH_VISUALIZATION_TEST_ID } from './graph_visualization';
 
 const mockToasts = {
@@ -64,12 +65,12 @@ jest.mock('../../../../../common/lib/kibana', () => ({
 }));
 
 const mockOnTelemetryEvent = jest.fn();
+const mockReportGraphOpened = jest.fn();
+const mockReportDrillThrough = jest.fn();
+const mockUseGraphTelemetry = jest.fn();
 
 jest.mock('../../../../shared/hooks/use_graph_telemetry', () => ({
-  useGraphTelemetry: () => ({
-    onTelemetryEvent: mockOnTelemetryEvent,
-    reportPreviewExpanded: jest.fn(),
-  }),
+  useGraphTelemetry: (entryPoint: string) => mockUseGraphTelemetry(entryPoint),
 }));
 
 jest.mock('../../../../../common/hooks/timeline/use_investigate_in_timeline', () => ({
@@ -112,6 +113,13 @@ const ENTITY_PROPS = {
 describe('GraphVisualization', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseGraphTelemetry.mockReturnValue({
+      onTelemetryEvent: mockOnTelemetryEvent,
+      reportGraphPreviewShown: jest.fn(),
+      reportGraphPreviewExpanded: jest.fn(),
+      reportGraphOpened: mockReportGraphOpened,
+      reportDrillThrough: mockReportDrillThrough,
+    });
     (GraphInvestigation as unknown as jest.Mock).mockReturnValue(
       <div data-test-subj={GRAPH_INVESTIGATION_TEST_ID} />
     );
@@ -128,6 +136,58 @@ describe('GraphVisualization', () => {
 
   afterEach(() => {
     jest.resetAllMocks();
+  });
+
+  describe('telemetry', () => {
+    it('reports graph_opened exactly once on mount, not again after a re-render', async () => {
+      // In production the function identity changes whenever the telemetry service or entry point
+      // does, so hand out a new function on every render.
+      mockUseGraphTelemetry.mockImplementation(() => ({
+        onTelemetryEvent: mockOnTelemetryEvent,
+        reportGraphPreviewShown: jest.fn(),
+        reportGraphPreviewExpanded: jest.fn(),
+        reportGraphOpened: () => mockReportGraphOpened(),
+        reportDrillThrough: mockReportDrillThrough,
+      }));
+      const { rerender } = render(<GraphVisualization {...EVENT_PROPS} />);
+      await waitFor(() => expect(GraphInvestigation).toHaveBeenCalled());
+
+      rerender(<GraphVisualization {...EVENT_PROPS} eventIds={['event-3']} />);
+
+      expect(mockReportGraphOpened).toHaveBeenCalledTimes(1);
+    });
+
+    it('uses the alert_flyout entry point for an alert', () => {
+      render(<GraphVisualization {...EVENT_PROPS} isAlert />);
+
+      expect(mockUseGraphTelemetry).toHaveBeenCalledWith('alert_flyout');
+    });
+
+    it('uses the event_flyout entry point for a non-alert event', () => {
+      render(<GraphVisualization {...EVENT_PROPS} isAlert={false} />);
+
+      expect(mockUseGraphTelemetry).toHaveBeenCalledWith('event_flyout');
+    });
+
+    it('uses the entity_flyout entry point for an entity', () => {
+      render(<GraphVisualization {...ENTITY_PROPS} />);
+
+      expect(mockUseGraphTelemetry).toHaveBeenCalledWith('entity_flyout');
+    });
+
+    it('keeps the entity_flyout entry point when the scope is the entities table scope', () => {
+      render(<GraphVisualization {...ENTITY_PROPS} scopeId={ENTITY_ANALYTICS_TABLE_ID} />);
+
+      expect(mockUseGraphTelemetry).toHaveBeenCalledWith('entity_flyout');
+      expect(mockUseGraphTelemetry).not.toHaveBeenCalledWith('entity_data_grid');
+    });
+
+    it('uses the entry point the entity graph was opened from when one is given', () => {
+      render(<GraphVisualization {...ENTITY_PROPS} entryPoint="entity_data_grid" />);
+
+      expect(mockUseGraphTelemetry).toHaveBeenCalledWith('entity_data_grid');
+      expect(mockUseGraphTelemetry).not.toHaveBeenCalledWith('entity_flyout');
+    });
   });
 
   describe('event mode', () => {
@@ -375,16 +435,18 @@ describe('GraphVisualization', () => {
       );
     });
 
-    it('forwards onOpenNetworkPreview straight to GraphInvestigation', async () => {
+    it('routes onOpenNetworkPreview to onShowNetwork', async () => {
       render(<GraphVisualization {...EVENT_PROPS} />);
 
       await waitFor(() => {
         expect(GraphInvestigation).toHaveBeenCalledTimes(1);
       });
 
-      expect(jest.mocked(GraphInvestigation).mock.calls[0][0].onOpenNetworkPreview).toBe(
-        callbacks.onShowNetwork
-      );
+      jest
+        .mocked(GraphInvestigation)
+        .mock.calls[0][0].onOpenNetworkPreview?.('10.0.0.1', 'graph-scope');
+
+      expect(callbacks.onShowNetwork).toHaveBeenCalledWith('10.0.0.1');
     });
   });
 
@@ -415,6 +477,152 @@ describe('GraphVisualization', () => {
 
       expect(mockInvestigateInTimeline.investigateInTimeline).toHaveBeenCalled();
       expect(mockToasts.addDanger).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('drill-through telemetry', () => {
+    const renderGraph = async (props: React.ComponentProps<typeof GraphVisualization>) => {
+      render(<GraphVisualization {...props} />);
+      await waitFor(() => expect(GraphInvestigation).toHaveBeenCalledTimes(1));
+      return jest.mocked(GraphInvestigation).mock.calls[0][0];
+    };
+
+    beforeEach(() => {
+      const { getNodeDocumentMode, getSingleDocumentData } = jest.requireMock(
+        '@kbn/cloud-security-posture-graph'
+      );
+      const actual = jest.requireActual('@kbn/cloud-security-posture-graph/src/components/utils');
+      getNodeDocumentMode.mockImplementation(actual.getNodeDocumentMode);
+      getSingleDocumentData.mockImplementation(actual.getSingleDocumentData);
+    });
+
+    it('reports an event drill-through after opening a single-event node', async () => {
+      const { onOpenEventPreview } = await renderGraph(EVENT_PROPS);
+
+      onOpenEventPreview?.({
+        id: 'node-1',
+        shape: 'label',
+        documentsData: [{ id: 'doc-id', type: 'event', index: 'logs-*' }],
+      } as never);
+
+      expect(callbacks.onShowDocument).toHaveBeenCalledWith('doc-id', 'logs-*', true);
+      expect(mockReportDrillThrough).toHaveBeenCalledTimes(1);
+      expect(mockReportDrillThrough).toHaveBeenCalledWith('event');
+    });
+
+    it('reports an alert drill-through after opening a single-alert node', async () => {
+      const { onOpenEventPreview } = await renderGraph(EVENT_PROPS);
+
+      onOpenEventPreview?.({
+        id: 'node-1',
+        shape: 'label',
+        documentsData: [{ id: 'alert-id', type: 'alert', index: '.alerts-*' }],
+      } as never);
+
+      expect(callbacks.onShowDocument).toHaveBeenCalledWith('alert-id', '.alerts-*', false);
+      expect(mockReportDrillThrough).toHaveBeenCalledTimes(1);
+      expect(mockReportDrillThrough).toHaveBeenCalledWith('alert');
+    });
+
+    it('reports an entity drill-through after opening an enriched single-entity node', async () => {
+      const { onOpenEventPreview } = await renderGraph(ENTITY_PROPS);
+
+      onOpenEventPreview?.({
+        id: 'node-1',
+        shape: 'hexagon',
+        documentsData: [
+          {
+            id: 'entity-2',
+            type: 'entity',
+            entity: { name: 'Entity 2', availableInEntityStore: true },
+          },
+        ],
+      } as never);
+
+      expect(callbacks.onShowEntity).toHaveBeenCalledTimes(1);
+      expect(mockReportDrillThrough).toHaveBeenCalledTimes(1);
+      expect(mockReportDrillThrough).toHaveBeenCalledWith('entity');
+    });
+
+    it('does not report a drill-through for a single-entity node that is not enriched', async () => {
+      const { onOpenEventPreview } = await renderGraph(ENTITY_PROPS);
+
+      onOpenEventPreview?.({
+        id: 'node-1',
+        shape: 'hexagon',
+        documentsData: [
+          {
+            id: 'entity-2',
+            type: 'entity',
+            entity: { name: 'Entity 2', availableInEntityStore: false },
+          },
+        ],
+      } as never);
+
+      expect(callbacks.onShowEntity).not.toHaveBeenCalled();
+      expect(mockToasts.addDanger).toHaveBeenCalled();
+      expect(mockReportDrillThrough).not.toHaveBeenCalled();
+    });
+
+    it('does not report a drill-through for a grouped-entities node', async () => {
+      const { onOpenEventPreview } = await renderGraph(ENTITY_PROPS);
+
+      onOpenEventPreview?.({
+        id: 'node-1',
+        shape: 'hexagon',
+        documentsData: [
+          { id: 'entity-2', type: 'entity', entity: { name: 'Entity 2' } },
+          { id: 'entity-3', type: 'entity', entity: { name: 'Entity 3' } },
+        ],
+      } as never);
+
+      expect(callbacks.onShowGrouped).toHaveBeenCalledTimes(1);
+      expect(mockReportDrillThrough).not.toHaveBeenCalled();
+    });
+
+    it('does not report a drill-through for a grouped-events node', async () => {
+      const { onOpenEventPreview } = await renderGraph(EVENT_PROPS);
+
+      onOpenEventPreview?.({
+        id: 'node-1',
+        shape: 'label',
+        documentsData: [
+          { id: 'doc-1', type: 'event' },
+          { id: 'doc-2', type: 'event' },
+        ],
+      } as never);
+
+      expect(callbacks.onShowGrouped).toHaveBeenCalledTimes(1);
+      expect(mockReportDrillThrough).not.toHaveBeenCalled();
+    });
+
+    it('reports a network drill-through after opening the network preview', async () => {
+      const { onOpenNetworkPreview } = await renderGraph(EVENT_PROPS);
+
+      onOpenNetworkPreview?.('10.0.0.1', 'graph-scope');
+
+      expect(callbacks.onShowNetwork).toHaveBeenCalledWith('10.0.0.1');
+      expect(mockReportDrillThrough).toHaveBeenCalledTimes(1);
+      expect(mockReportDrillThrough).toHaveBeenCalledWith('network');
+    });
+
+    it('reports a timeline drill-through after investigating in timeline', async () => {
+      const { onInvestigateInTimeline } = await renderGraph(EVENT_PROPS);
+
+      onInvestigateInTimeline?.(undefined, [], { from: 'now-15m', to: 'now' });
+
+      expect(mockInvestigateInTimeline.investigateInTimeline).toHaveBeenCalled();
+      expect(mockReportDrillThrough).toHaveBeenCalledTimes(1);
+      expect(mockReportDrillThrough).toHaveBeenCalledWith('timeline');
+    });
+
+    it('does not report a drill-through when the time range is invalid', async () => {
+      const { onInvestigateInTimeline } = await renderGraph(EVENT_PROPS);
+
+      onInvestigateInTimeline?.(undefined, [], { from: '', to: '' });
+
+      expect(mockToasts.addDanger).toHaveBeenCalled();
+      expect(mockReportDrillThrough).not.toHaveBeenCalled();
     });
   });
 });

@@ -15,6 +15,8 @@ import {
 import { FlowTargetSourceDest } from '../../../../../../common/search_strategy';
 import { useDefaultDocumentFlyoutProperties } from '../../../../shared/hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../../../../shared/hooks/use_open_flyout';
+import { useGraphTelemetry } from '../../../../shared/hooks/use_graph_telemetry';
+import { getGraphEntryPoint } from '../../../../shared/utils/get_graph_entry_point';
 import { buildFlyoutNavTitle } from '../../../../shared/utils/build_flyout_nav_title';
 import {
   ENTITIES_TITLE,
@@ -31,6 +33,7 @@ import {
   FLYOUT_SESSION_KIND,
   FLYOUT_SURFACE,
   FLYOUT_TOOL,
+  type GraphEntryPoint,
 } from '../../../../../common/lib/telemetry';
 
 const TITLE = ENTITY_GRAPH_VIEW_TITLE;
@@ -50,6 +53,8 @@ export interface GraphViewProps {
   }) => void;
   /** Opens the originating entity flyout as a child (via the header title button). */
   onShowOriginatingEntity?: () => void;
+  /** Where the graph was opened from, for telemetry. Defaults to the entity flyout. */
+  entryPoint?: GraphEntryPoint;
 }
 
 /**
@@ -58,11 +63,20 @@ export interface GraphViewProps {
  * `overlays.openSystemFlyout` instead of the legacy expandable flyout API.
  */
 export const GraphView = memo(
-  ({ entityId, scopeId, entityName, onShowEntity, onShowOriginatingEntity }: GraphViewProps) => {
+  ({
+    entityId,
+    scopeId,
+    entityName,
+    onShowEntity,
+    onShowOriginatingEntity,
+    entryPoint: openedFrom,
+  }: GraphViewProps) => {
     const open = useOpenFlyout();
     const { historyKey } = useFlyoutSessionContext();
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
     const { openDocumentFlyoutFromIndexAsChild, openNetworkFlyoutAsChild } = useFlyoutApi();
+    const entryPoint = openedFrom ?? getGraphEntryPoint({ mode: 'entity' });
+    const { onTelemetryEvent } = useGraphTelemetry(entryPoint);
 
     const onShowDocument = useCallback(
       (documentId: string, indexName?: string, isEvent?: boolean) =>
@@ -91,7 +105,7 @@ export const GraphView = memo(
       (
         params: Omit<
           GraphGroupedNodePreviewPanelProps,
-          'showLoadingState' | 'onShowDocument' | 'onShowEntity'
+          'showLoadingState' | 'onShowDocument' | 'onShowEntity' | 'onTelemetryEvent'
         >
       ) =>
         open(
@@ -99,6 +113,7 @@ export const GraphView = memo(
             {...params}
             onShowDocument={onShowDocument}
             onShowEntity={onShowEntity}
+            onTelemetryEvent={onTelemetryEvent}
           />,
           {
             ...defaultFlyoutProperties,
@@ -116,7 +131,7 @@ export const GraphView = memo(
           },
           FLYOUT_SESSION_KIND.INHERIT
         ),
-      [onShowDocument, onShowEntity, defaultFlyoutProperties, historyKey, open]
+      [onShowDocument, onShowEntity, onTelemetryEvent, defaultFlyoutProperties, historyKey, open]
     );
 
     return (
@@ -134,6 +149,7 @@ export const GraphView = memo(
             mode="entity"
             scopeId={scopeId}
             entityId={entityId}
+            entryPoint={entryPoint}
             onShowDocument={onShowDocument}
             onShowEntity={onShowEntity}
             onShowNetwork={onShowNetwork}

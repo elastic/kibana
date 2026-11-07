@@ -11,6 +11,7 @@ import {
   GraphPreviewPanel,
   type GraphPreviewPanelProps,
 } from '../../../../../flyout_v2/shared/components/graph_preview_panel';
+import { getGraphEntryPoint } from '../../../../../flyout_v2/shared/utils/get_graph_entry_point';
 import { useShouldShowGraph } from '../../../../shared/hooks/use_should_show_graph';
 import { getScopeFlyoutTimeRange } from '../../../../../entity_analytics/common/scope_time_ranges';
 
@@ -27,6 +28,7 @@ export interface EntityGraphPreviewContainerProps
 export const EntityGraphPreviewContainer = memo(
   ({ entityId, scopeId, onShowGraph, showIcon }: EntityGraphPreviewContainerProps) => {
     const shouldShowGraph = useShouldShowGraph();
+    const entryPoint = getGraphEntryPoint({ mode: 'entity' });
     const timeRange = getScopeFlyoutTimeRange(scopeId) ?? DEFAULT_PREVIEW_TIME_RANGE;
 
     const { isLoading, isError, data } = useFetchGraphData({
@@ -45,6 +47,7 @@ export const EntityGraphPreviewContainer = memo(
 
     return (
       <GraphPreviewPanel
+        entryPoint={entryPoint}
         onShowGraph={onShowGraph}
         showIcon={showIcon}
         shouldShowGraph={shouldShowGraph}

@@ -22,6 +22,7 @@ import {
   EVENT_PREVIEW_BANNER,
 } from '../../../../document_details/preview/constants';
 import { FlowTargetSourceDest } from '../../../../../../common/search_strategy';
+import { getGraphEntryPoint } from '../../../../../flyout_v2/shared/utils/get_graph_entry_point';
 
 export interface GraphViewTabProps {
   /** Entity Store v2 entity ID (`entity.id`) to center the graph on */
@@ -37,6 +38,7 @@ export interface GraphViewTabProps {
  */
 export const GraphViewTab: FC<GraphViewTabProps> = memo(({ entityId, scopeId }) => {
   const { openPreviewPanel } = useExpandableFlyoutApi();
+  const entryPoint = getGraphEntryPoint({ mode: 'entity' });
 
   const onShowDocument = useCallback(
     (id: string, indexName?: string, isEvent?: boolean) => {
@@ -72,15 +74,21 @@ export const GraphViewTab: FC<GraphViewTabProps> = memo(({ entityId, scopeId }) 
     (
       params: Omit<
         GraphGroupedNodePreviewPanelProps,
-        'scopeId' | 'showLoadingState' | 'onShowDocument' | 'onShowEntity'
+        'scopeId' | 'showLoadingState' | 'onShowDocument' | 'onShowEntity' | 'onTelemetryEvent'
       >
     ) => {
       openPreviewPanel({
         id: GraphGroupedNodePreviewPanelKey,
-        params: { scopeId, isPreviewMode: true, banner: GROUP_PREVIEW_BANNER, ...params },
+        params: {
+          scopeId,
+          isPreviewMode: true,
+          banner: GROUP_PREVIEW_BANNER,
+          ...params,
+          entryPoint,
+        },
       });
     },
-    [openPreviewPanel, scopeId]
+    [openPreviewPanel, scopeId, entryPoint]
   );
 
   const onShowNetwork = useCallback(
