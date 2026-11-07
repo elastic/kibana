@@ -56,6 +56,7 @@ const ALERT_FIELDS = {
   ruleName: 'kibana.alert.rule.name',
   riskScore: 'kibana.alert.risk_score',
   status: 'kibana.alert.workflow_status',
+  reason: 'kibana.alert.workflow_reason',
   tags: 'kibana.alert.workflow_tags',
   timestamp: '@timestamp',
   nameOverride: 'kibana.alert.rule.rule_name_override',
@@ -845,6 +846,44 @@ export const findLeftoverFalsePositiveIds = async (
   const { body } = await callKibanaApi<{ hits?: { hits?: Array<{ _id: string }> } }>({
     method: 'POST',
     path: SIGNALS_SEARCH_PATH,
+/**
+ * Which of the given alerts an analyst closed with a reason other than false positive (a true
+ * positive, for example). A closed alert with no reason is not one of them. A failed read throws,
+ * so no decision is written on a guess.
+ */
+export const findAlertIdsClosedAsOther = async (
+  { callKibanaApi }: KibanaApi,
+  alertIds: readonly string[]
+): Promise<string[]> => {
+  const found: string[] = [];
+  // The search reads no `_source` and the filter runs in Elasticsearch, so a chunk can be large.
+  for (let from = 0; from < alertIds.length; from += CLOSE_REASON_CHUNK_SIZE) {
+    const ids = alertIds.slice(from, from + CLOSE_REASON_CHUNK_SIZE);
+    const { body } = await callKibanaApi<{ hits?: { hits?: AlertHit[] } }>({
+      method: 'POST',
+      path: SIGNALS_SEARCH_PATH,
+      body: {
+        size: ids.length,
+        _source: false,
+        query: {
+          bool: {
+            filter: [
+              { ids: { values: ids } },
+              { term: { [ALERT_FIELDS.status]: 'closed' } },
+              { exists: { field: ALERT_FIELDS.reason } },
+            ],
+            must_not: [{ term: { [ALERT_FIELDS.reason]: 'false_positive' } }],
+          },
+        },
+      },
+    });
+    found.push(...(body.hits?.hits ?? []).map(({ _id }) => _id));
+  }
+  return found;
+};
+
+const CLOSE_REASON_CHUNK_SIZE = 1000;
+
     body: {
       size: SEARCH_RESULT_LIMIT,
       _source: false,
