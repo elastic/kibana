@@ -56,7 +56,7 @@ import { ESQLField } from '../../fields/esql_field';
 
 type ESQLSourceSyncMeta = Pick<
   ESQLSourceDescriptor,
-  'dateField' | 'esql' | 'geoField' | 'narrowByMapBounds' | 'narrowByGlobalTime'
+  'date_field' | 'esql' | 'geo_field' | 'narrow_by_map_bounds' | 'narrow_by_global_time'
 >;
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esqlSearchTitle', {
@@ -67,7 +67,10 @@ export type NormalizedESQLSourceDescriptor = ESQLSourceDescriptor &
   Required<
     Pick<
       ESQLSourceDescriptor,
-      'narrowByGlobalSearch' | 'narrowByGlobalTime' | 'narrowByMapBounds' | 'applyForceRefresh'
+      | 'narrow_by_global_search'
+      | 'narrow_by_global_time'
+      | 'narrow_by_map_bounds'
+      | 'apply_force_refresh'
     >
   >;
 
@@ -95,20 +98,22 @@ export class ESQLSource
       id: isValidStringConfig(descriptor.id) ? descriptor.id! : uuidv4(),
       type: SOURCE_TYPES.ESQL,
       esql: descriptor.esql!,
-      narrowByGlobalSearch:
-        typeof descriptor.narrowByGlobalSearch !== 'undefined'
-          ? descriptor.narrowByGlobalSearch
+      narrow_by_global_search:
+        typeof descriptor.narrow_by_global_search !== 'undefined'
+          ? descriptor.narrow_by_global_search
           : true,
-      narrowByGlobalTime:
-        typeof descriptor.narrowByGlobalTime !== 'undefined'
-          ? descriptor.narrowByGlobalTime
-          : descriptor.dateField !== 'undefined',
-      narrowByMapBounds:
-        typeof descriptor.narrowByMapBounds !== 'undefined'
-          ? descriptor.narrowByMapBounds
-          : descriptor.geoField !== 'undefined',
-      applyForceRefresh:
-        typeof descriptor.applyForceRefresh !== 'undefined' ? descriptor.applyForceRefresh : true,
+      narrow_by_global_time:
+        typeof descriptor.narrow_by_global_time !== 'undefined'
+          ? descriptor.narrow_by_global_time
+          : descriptor.date_field !== 'undefined',
+      narrow_by_map_bounds:
+        typeof descriptor.narrow_by_map_bounds !== 'undefined'
+          ? descriptor.narrow_by_map_bounds
+          : descriptor.geo_field !== 'undefined',
+      apply_force_refresh:
+        typeof descriptor.apply_force_refresh !== 'undefined'
+          ? descriptor.apply_force_refresh
+          : true,
     };
   }
 
@@ -156,23 +161,23 @@ export class ESQLSource
   }
 
   getApplyGlobalQuery() {
-    return this._descriptor.narrowByGlobalSearch || hasStartEndParams(this._descriptor.esql);
+    return this._descriptor.narrow_by_global_search || hasStartEndParams(this._descriptor.esql);
   }
 
   async isTimeAware() {
-    return this._descriptor.narrowByGlobalTime || hasStartEndParams(this._descriptor.esql);
+    return this._descriptor.narrow_by_global_time || hasStartEndParams(this._descriptor.esql);
   }
 
   getApplyGlobalTime() {
-    return this._descriptor.narrowByGlobalTime;
+    return this._descriptor.narrow_by_global_time;
   }
 
   getApplyForceRefresh() {
-    return this._descriptor.applyForceRefresh;
+    return this._descriptor.apply_force_refresh;
   }
 
   isFilterByMapBounds() {
-    return this._descriptor.narrowByMapBounds;
+    return this._descriptor.narrow_by_map_bounds;
   }
 
   async getSupportedShapeTypes() {
@@ -206,7 +211,7 @@ export class ESQLSource
 
     const query: Query[] = [];
     const filters: Filter[] = [];
-    if (this._descriptor.narrowByGlobalSearch) {
+    if (this._descriptor.narrow_by_global_search) {
       if (requestMeta.query) {
         query.push(requestMeta.query);
       }
@@ -219,8 +224,8 @@ export class ESQLSource
       }
     }
 
-    if (this._descriptor.narrowByMapBounds && requestMeta.buffer) {
-      if (!this._descriptor.geoField) {
+    if (this._descriptor.narrow_by_map_bounds && requestMeta.buffer) {
+      if (!this._descriptor.geo_field) {
         throw new Error(
           i18n.translate('xpack.maps.source.esql.noGeoFieldError', {
             defaultMessage:
@@ -228,7 +233,7 @@ export class ESQLSource
           })
         );
       }
-      const extentFilter = createExtentFilter(requestMeta.buffer, [this._descriptor.geoField]);
+      const extentFilter = createExtentFilter(requestMeta.buffer, [this._descriptor.geo_field]);
       filters.push(extentFilter);
     }
 
@@ -241,7 +246,7 @@ export class ESQLSource
       : requestMeta.timeFilters;
 
     if (requestMeta.applyGlobalTime) {
-      if (!this._descriptor.dateField) {
+      if (!this._descriptor.date_field) {
         throw new Error(
           i18n.translate('xpack.maps.source.esql.noDateFieldError', {
             defaultMessage:
@@ -250,7 +255,7 @@ export class ESQLSource
         );
       }
       const timeFilter = getTime(undefined, timeRange, {
-        fieldName: this._descriptor.dateField,
+        fieldName: this._descriptor.date_field,
       });
 
       if (timeFilter) {
@@ -375,11 +380,11 @@ export class ESQLSource
 
   getSyncMeta(): ESQLSourceSyncMeta {
     return {
-      dateField: this._descriptor.dateField,
+      date_field: this._descriptor.date_field,
       esql: this._descriptor.esql,
-      geoField: this._descriptor.geoField,
-      narrowByMapBounds: this._descriptor.narrowByMapBounds,
-      narrowByGlobalTime: this._descriptor.narrowByGlobalTime,
+      geo_field: this._descriptor.geo_field,
+      narrow_by_map_bounds: this._descriptor.narrow_by_map_bounds,
+      narrow_by_global_time: this._descriptor.narrow_by_global_time,
     };
   }
 
@@ -404,7 +409,7 @@ export class ESQLSource
   }
 
   getGeoFieldName() {
-    return this._descriptor.geoField;
+    return this._descriptor.geo_field;
   }
 
   getESQL() {

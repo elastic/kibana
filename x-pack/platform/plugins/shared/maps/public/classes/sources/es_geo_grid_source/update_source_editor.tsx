@@ -117,7 +117,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
 
   _onRequestTypeSelect = (requestType: RENDER_AS) => {
     this.props.onChange({
-      propName: 'requestType',
+      propName: 'request_type',
       value: requestType,
       newLayerType: this._getNewLayerType(requestType, this.props.resolution),
     });

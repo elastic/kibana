@@ -30,9 +30,9 @@ export function initializeEsql(store: Pick<MapStore, 'getState' | 'subscribe'>) 
     let nextApproximationApplied: boolean | undefined;
 
     for (const layer of layerList) {
-      if (layer.sourceDescriptor?.type !== SOURCE_TYPES.ESQL) continue;
+      if (layer.source_descriptor?.type !== SOURCE_TYPES.ESQL) continue;
 
-      const esqlDescriptor = layer.sourceDescriptor as ESQLSourceDescriptor;
+      const esqlDescriptor = layer.source_descriptor as ESQLSourceDescriptor;
       if (esqlDescriptor.esql) {
         esqlQueries.push({ esql: esqlDescriptor.esql });
       }

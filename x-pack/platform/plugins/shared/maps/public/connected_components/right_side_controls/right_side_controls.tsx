@@ -27,10 +27,10 @@ export function RightSideControls({ settings, isInteractive }: Props) {
       gutterSize="s"
     >
       <EuiFlexItem className="mapWidgetOverlay__layerWrapper">
-        {isInteractive && !settings.hideLayerControl && <LayerControl />}
+        {isInteractive && !settings.hide_layer_control && <LayerControl />}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        {isInteractive && !settings.hideViewControl && <MouseCoordinatesControl />}
+        {isInteractive && !settings.hide_view_control && <MouseCoordinatesControl />}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <AttributionControl />

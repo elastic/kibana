@@ -74,9 +74,9 @@ import type {
 import { jumpTo } from '../../../reducers/non_serializable_instances';
 
 function setMapSettingsFromEncodedState(settings: Partial<MapSettings>) {
-  const decodedCustomIcons = settings.customIcons
+  const decodedCustomIcons = settings.custom_icons
     ? // base64 decode svg string
-      settings.customIcons.map((icon) => {
+      settings.custom_icons.map((icon) => {
         return { ...icon, svg: Buffer.from(icon.svg, 'base64').toString('utf-8') };
       })
     : [];
@@ -84,7 +84,7 @@ function setMapSettingsFromEncodedState(settings: Partial<MapSettings>) {
     ...settings,
     // Set projection to 'mercator' to avoid changing existing maps
     projection: !settings.projection ? 'mercator' : settings.projection,
-    customIcons: decodedCustomIcons,
+    custom_icons: decodedCustomIcons,
   });
 }
 
@@ -158,16 +158,16 @@ export class SavedMap {
     let isLayerTOCOpen = DEFAULT_IS_LAYER_TOC_OPEN;
     if (this._mapEmbeddableState?.isLayerTOCOpen !== undefined) {
       isLayerTOCOpen = this._mapEmbeddableState.isLayerTOCOpen;
-    } else if (this._attributes?.isLayerTOCOpen !== undefined) {
-      isLayerTOCOpen = this._attributes.isLayerTOCOpen;
+    } else if (this._attributes?.is_layer_toc_open !== undefined) {
+      isLayerTOCOpen = this._attributes.is_layer_toc_open;
     }
     this._store.dispatch(setIsLayerTOCOpen(isLayerTOCOpen));
 
     let openTOCDetails: string[] = [];
     if (this._mapEmbeddableState?.openTOCDetails !== undefined) {
       openTOCDetails = this._mapEmbeddableState.openTOCDetails;
-    } else if (this._attributes?.openTOCDetails !== undefined) {
-      openTOCDetails = this._attributes.openTOCDetails;
+    } else if (this._attributes?.open_toc_details !== undefined) {
+      openTOCDetails = this._attributes.open_toc_details;
     }
     this._store.dispatch(setOpenTOCDetails(openTOCDetails));
 
@@ -232,9 +232,9 @@ export class SavedMap {
 
     this._reportUsage();
 
-    if (this._attributes?.adHocDataViews?.length) {
+    if (this._attributes?.ad_hoc_data_views?.length) {
       const dataViewService = getIndexPatternService();
-      const promises = this._attributes.adHocDataViews.map((spec) => {
+      const promises = this._attributes.ad_hoc_data_views.map((spec) => {
         return dataViewService.create(spec);
       });
       await Promise.all(promises);
@@ -389,9 +389,9 @@ export class SavedMap {
   }
 
   public getAutoFitToBounds(): boolean {
-    return this._mapEmbeddableState?.mapSettings?.autoFitToDataBounds !== undefined
-      ? this._mapEmbeddableState.mapSettings.autoFitToDataBounds
-      : this._attributes?.settings?.autoFitToDataBounds ?? false;
+    return this._mapEmbeddableState?.mapSettings?.auto_fit_to_data_bounds !== undefined
+      ? this._mapEmbeddableState.mapSettings.auto_fit_to_data_bounds
+      : this._attributes?.settings?.auto_fit_to_data_bounds ?? false;
   }
 
   public getSharingSavedObjectProps(): SharingSavedObjectProps | null {
@@ -532,26 +532,26 @@ export class SavedMap {
     return;
   }
 
-  private async _getStoreAttributes() {
+  private async _getStoreAttributes(): Promise<Omit<MapAttributes, 'title'>> {
     const state: MapStoreState = this._store.getState();
     const mapSettings = getMapSettings(state);
     return {
-      adHocDataViews: await this._getAdHocDataViews(),
+      ad_hoc_data_views: await this._getAdHocDataViews(),
       center: getMapCenter(state),
       filters: getFilters(state),
-      isLayerTOCOpen: getIsLayerTOCOpen(state),
+      is_layer_toc_open: getIsLayerTOCOpen(state),
       layers: copyPersistentState(getLayerListRaw(state)),
-      openTOCDetails: getOpenTOCDetails(state),
+      open_toc_details: getOpenTOCDetails(state),
       query: getQuery(state),
-      refreshInterval: getTimeFilter().getRefreshInterval(),
+      refresh_interval: getTimeFilter().getRefreshInterval(),
       settings: {
         ...mapSettings,
         // base64 encode custom icons to avoid svg strings breaking saved object stringification/parsing.
-        customIcons: mapSettings.customIcons.map((icon) => {
+        custom_icons: mapSettings.custom_icons.map((icon) => {
           return { ...icon, svg: Buffer.from(icon.svg).toString('base64') };
         }),
       },
-      timeFilters: getTimeFilters(state),
+      time_filters: getTimeFilters(state),
       zoom: getMapZoom(state),
     };
   }
@@ -560,7 +560,7 @@ export class SavedMap {
     const dataViewIds: string[] = [];
     getLayerList(this._store.getState())
       // exclude adhoc data views from ESQL sources
-      .filter((layer) => layer.getDescriptor().sourceDescriptor?.type !== SOURCE_TYPES.ESQL)
+      .filter((layer) => layer.getDescriptor().source_descriptor?.type !== SOURCE_TYPES.ESQL)
       .forEach((layer) => {
         dataViewIds.push(...layer.getIndexPatternIds());
       });
@@ -573,10 +573,10 @@ export class SavedMap {
       .map((dataView) => {
         const { allowHidden, id, name, timeFieldName, title } = dataView.toSpec(false);
         return {
-          allowHidden,
+          allow_hidden: allowHidden,
           id,
           name,
-          timeFieldName,
+          time_field_name: timeFieldName,
           title,
         } as AdhocDataView;
       });

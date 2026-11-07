@@ -124,10 +124,10 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
     // Creates empty layer
     const layerDescriptor = createDefaultLayerDescriptor(
       {
-        indexPatternId,
-        geoField: 'coordinates',
-        filterByMapBounds: false,
-        applyGlobalQuery: false,
+        index_pattern_id: indexPatternId,
+        geo_field: 'coordinates',
+        filter_by_map_bounds: false,
+        apply_global_query: false,
       },
       this.props.mapColors
     );

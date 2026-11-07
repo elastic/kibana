@@ -28,7 +28,7 @@ test('should render', async () => {
 test('should render fixed location form when initialLocation is FIXED_LOCATION', async () => {
   const settings = {
     ...defaultProps.settings,
-    initialLocation: INITIAL_LOCATION.FIXED_LOCATION,
+    initial_location: INITIAL_LOCATION.FIXED_LOCATION,
   };
   const component = shallow(<NavigationPanel {...defaultProps} settings={settings} />);
 
@@ -38,7 +38,7 @@ test('should render fixed location form when initialLocation is FIXED_LOCATION',
 test('should render browser location form when initialLocation is BROWSER_LOCATION', async () => {
   const settings = {
     ...defaultProps.settings,
-    initialLocation: INITIAL_LOCATION.BROWSER_LOCATION,
+    initial_location: INITIAL_LOCATION.BROWSER_LOCATION,
   };
   const component = shallow(<NavigationPanel {...defaultProps} settings={settings} />);
 

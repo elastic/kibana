@@ -47,7 +47,7 @@ export const point2PointLayerWizardConfig: LayerWizard = {
 
       const defaultDynamicProperties = getDefaultDynamicProperties();
       const layerDescriptor = GeoJsonVectorLayer.createDescriptor({
-        sourceDescriptor: ESPewPewSource.createDescriptor(sourceConfig),
+        source_descriptor: ESPewPewSource.createDescriptor(sourceConfig),
         style: VectorStyle.createDescriptor({
           [VECTOR_STYLES.LINE_COLOR]: {
             type: STYLE_TYPE.DYNAMIC,

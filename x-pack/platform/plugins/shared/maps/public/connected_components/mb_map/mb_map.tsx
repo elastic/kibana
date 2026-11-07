@@ -170,8 +170,8 @@ export class MbMap extends Component<Props> {
         canvasContextAttributes: {
           preserveDrawingBuffer: getPreserveDrawingBuffer(),
         },
-        maxZoom: this.props.settings.maxZoom,
-        minZoom: this.props.settings.minZoom,
+        maxZoom: this.props.settings.max_zoom,
+        minZoom: this.props.settings.min_zoom,
         transformRequest,
       };
       if (initialView) {
@@ -282,7 +282,7 @@ export class MbMap extends Component<Props> {
     });
 
     // Attach event only if view control is visible, which shows lat/lon
-    if (!this.props.settings.hideViewControl) {
+    if (!this.props.settings.hide_view_control) {
       const throttledSetMouseCoordinates = _.throttle((e: MapMouseEvent) => {
         this.props.setMouseCoordinates({
           lat: e.lngLat.lat,
@@ -384,10 +384,10 @@ export class MbMap extends Component<Props> {
     if (
       !isScreenshotMode() &&
       (this._prevDisableInteractive === undefined ||
-        this._prevDisableInteractive !== this.props.settings.disableInteractive)
+        this._prevDisableInteractive !== this.props.settings.disable_interactive)
     ) {
-      this._prevDisableInteractive = this.props.settings.disableInteractive;
-      if (this.props.settings.disableInteractive) {
+      this._prevDisableInteractive = this.props.settings.disable_interactive;
+      if (this.props.settings.disable_interactive) {
         this._mbMap.boxZoom.disable();
         this._mbMap.doubleClickZoom.disable();
         this._mbMap.dragPan.disable();
@@ -410,7 +410,7 @@ export class MbMap extends Component<Props> {
     ) {
       this._prevCustomIcons = this.props.customIcons;
       const mbMap = this._mbMap;
-      for (const { symbolId, svg, cutoff, radius } of this.props.customIcons) {
+      for (const { symbol_id: symbolId, svg, cutoff, radius } of this.props.customIcons) {
         createSdfIcon({ svg, renderSize: CUSTOM_ICON_SIZE, cutoff, radius }).then(
           (imageData: ImageData | null) => {
             if (!imageData) {
@@ -428,12 +428,12 @@ export class MbMap extends Component<Props> {
     }
 
     let zoomRangeChanged = false;
-    if (this.props.settings.minZoom !== this._mbMap.getMinZoom()) {
-      this._mbMap.setMinZoom(this.props.settings.minZoom);
+    if (this.props.settings.min_zoom !== this._mbMap.getMinZoom()) {
+      this._mbMap.setMinZoom(this.props.settings.min_zoom);
       zoomRangeChanged = true;
     }
-    if (this.props.settings.maxZoom !== this._mbMap.getMaxZoom()) {
-      this._mbMap.setMaxZoom(this.props.settings.maxZoom);
+    if (this.props.settings.max_zoom !== this._mbMap.getMaxZoom()) {
+      this._mbMap.setMaxZoom(this.props.settings.max_zoom);
       zoomRangeChanged = true;
     }
 
@@ -472,7 +472,7 @@ export class MbMap extends Component<Props> {
       drawFeatureControl = this.props.featureModeActive ? (
         <DrawFeatureControl mbMap={this._mbMap} />
       ) : null;
-      tooltipControl = !this.props.settings.disableTooltipControl ? (
+      tooltipControl = !this.props.settings.disable_tooltip_control ? (
         <TooltipControl
           mbMap={this._mbMap}
           addFilters={this.props.isInteractive ? this.props.addFilters : null}
@@ -484,10 +484,10 @@ export class MbMap extends Component<Props> {
           renderTooltipContent={this.props.renderTooltipContent}
         />
       ) : null;
-      scaleControl = this.props.settings.showScaleControl ? (
+      scaleControl = this.props.settings.show_scale_control ? (
         <ScaleControl mbMap={this._mbMap} isFullScreen={this.props.isFullScreen} />
       ) : null;
-      keydownScrollZoomControl = this.props.settings.keydownScrollZoom ? (
+      keydownScrollZoomControl = this.props.settings.keydown_scroll_zoom ? (
         <KeydownScrollZoom mbMap={this._mbMap} />
       ) : null;
       tileStatusTrackerControl = <TileStatusTracker mbMap={this._mbMap} />;

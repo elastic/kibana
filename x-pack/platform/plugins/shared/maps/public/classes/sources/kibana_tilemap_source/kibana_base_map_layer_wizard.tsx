@@ -32,7 +32,7 @@ export const kibanaBasemapLayerWizardConfig: LayerWizard = {
   renderWizard: ({ previewLayers }: RenderWizardArguments) => {
     const onSourceConfigChange = () => {
       const layerDescriptor = RasterTileLayer.createDescriptor({
-        sourceDescriptor: KibanaTilemapSource.createDescriptor(),
+        source_descriptor: KibanaTilemapSource.createDescriptor(),
       });
       previewLayers([layerDescriptor]);
     };

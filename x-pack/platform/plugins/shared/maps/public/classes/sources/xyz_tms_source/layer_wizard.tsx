@@ -36,7 +36,7 @@ export const tmsLayerWizardConfig: LayerWizard = {
       }
 
       const layerDescriptor = RasterTileLayer.createDescriptor({
-        sourceDescriptor: XYZTMSSource.createDescriptor(sourceConfig),
+        source_descriptor: XYZTMSSource.createDescriptor(sourceConfig),
       });
       previewLayers([layerDescriptor]);
     };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 import { SOURCE_TYPES } from '../../../../../common';
 import {
@@ -71,15 +71,19 @@ export const BaseESAggSourceSchema = BaseESSourceSchema.extend({
 });
 
 export const ESGeoGridSourceSchema = BaseESAggSourceSchema.extend({
-  geoField: z.string().meta({
-    description: 'Field containing indexed geo-point or geo-shape values.',
-  }),
-  requestType: z.union([
-    z.literal(RENDER_AS.HEATMAP),
-    z.literal(RENDER_AS.POINT),
-    z.literal(RENDER_AS.GRID),
-    z.literal(RENDER_AS.HEX),
-  ]),
+  geo_field: lazySchema(() =>
+    z.string().meta({
+      description: 'Field containing indexed geo-point or geo-shape values.',
+    })
+  ),
+  request_type: lazySchema(() =>
+    z.union([
+      z.literal(RENDER_AS.HEATMAP),
+      z.literal(RENDER_AS.POINT),
+      z.literal(RENDER_AS.GRID),
+      z.literal(RENDER_AS.HEX),
+    ])
+  ),
   resolution: z.union([
     z.literal(GRID_RESOLUTION.COARSE),
     z.literal(GRID_RESOLUTION.FINE),
@@ -93,21 +97,31 @@ export const ESGeoGridSourceSchema = BaseESAggSourceSchema.extend({
 });
 
 export const ESGeoLineSourceSchema = BaseESAggSourceSchema.extend({
-  geoField: z.string().meta({
-    description: 'Field containing indexed geo-point values.',
-  }),
-  groupByTimeseries: z.boolean().default(false).optional().meta({
-    description: `When true, results are grouped by time_series aggregation, creating a line feature for each time_series group.`,
-  }),
-  lineSimplificationSize: z.number().min(1).max(10000).default(500).optional().meta({
-    description: `The maximum number of points for each line. Line is simplifed when threshold is exceeded. Use smaller values for better performance.`,
-  }),
-  splitField: z.string().optional().meta({
-    description: `Field used to group results by term aggregation, creating a line feature for each term. Required when groupByTimeseries is false. Ignored when groupByTimeseries is true.`,
-  }),
-  sortField: z.string().optional().meta({
-    description: `Numeric field used as the sort key for ordering the points. Required when groupByTimeseries is false. Ignored when groupByTimeseries is true.`,
-  }),
+  geo_field: lazySchema(() =>
+    z.string().meta({
+      description: 'Field containing indexed geo-point values.',
+    })
+  ),
+  group_by_timeseries: lazySchema(() =>
+    z.boolean().default(false).optional().meta({
+      description: `When true, results are grouped by time_series aggregation, creating a line feature for each time_series group.`,
+    })
+  ),
+  line_simplification_size: lazySchema(() =>
+    z.number().min(1).max(10000).default(500).optional().meta({
+      description: `The maximum number of points for each line. Line is simplifed when threshold is exceeded. Use smaller values for better performance.`,
+    })
+  ),
+  split_field: lazySchema(() =>
+    z.string().optional().meta({
+      description: `Field used to group results by term aggregation, creating a line feature for each term. Required when group_by_timeseries is false. Ignored when group_by_timeseries is true.`,
+    })
+  ),
+  sort_field: lazySchema(() =>
+    z.string().optional().meta({
+      description: `Numeric field used as the sort key for ordering the points. Required when group_by_timeseries is false. Ignored when group_by_timeseries is true.`,
+    })
+  ),
   type: z.literal(SOURCE_TYPES.ES_GEO_LINE),
 }).meta({
   description:
@@ -115,12 +129,16 @@ export const ESGeoLineSourceSchema = BaseESAggSourceSchema.extend({
 });
 
 export const ESPewPewSourceSchema = BaseESAggSourceSchema.extend({
-  destGeoField: z.string().meta({
-    description: `Field containing indexed geo-point values.`,
-  }),
-  sourceGeoField: z.string().meta({
-    description: `Field containing indexed geo-point values.`,
-  }),
+  dest_geo_field: lazySchema(() =>
+    z.string().meta({
+      description: `Field containing indexed geo-point values.`,
+    })
+  ),
+  source_geo_field: lazySchema(() =>
+    z.string().meta({
+      description: `Field containing indexed geo-point values.`,
+    })
+  ),
   type: z.literal(SOURCE_TYPES.ES_PEW_PEW),
 }).meta({
   description:

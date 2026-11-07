@@ -16,7 +16,7 @@ import { FitToData } from './fit_to_data';
 function mapStateToProps(state: MapStoreState) {
   const mapSettings = getMapSettings(state);
   return {
-    autoFitToDataBounds: mapSettings.autoFitToDataBounds,
+    autoFitToDataBounds: mapSettings.auto_fit_to_data_bounds,
   };
 }
 

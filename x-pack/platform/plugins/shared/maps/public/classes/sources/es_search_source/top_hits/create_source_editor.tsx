@@ -124,15 +124,15 @@ export class CreateSourceEditor extends Component<Props, State> {
     const sourceConfig =
       indexPattern && geoFieldName && sortField && (topHitsGroupByTimeseries || topHitsSplitField)
         ? {
-            indexPatternId: indexPattern.id,
-            geoField: geoFieldName,
-            scalingType: SCALING_TYPES.TOP_HITS,
-            sortField,
-            sortOrder,
-            tooltipProperties,
-            topHitsGroupByTimeseries,
-            topHitsSplitField: topHitsSplitField ? topHitsSplitField : undefined,
-            topHitsSize,
+            index_pattern_id: indexPattern.id,
+            geo_field: geoFieldName,
+            scaling_type: SCALING_TYPES.TOP_HITS,
+            sort_field: sortField,
+            sort_order: sortOrder,
+            tooltip_properties: tooltipProperties,
+            top_hits_group_by_timeseries: topHitsGroupByTimeseries,
+            top_hits_split_field: topHitsSplitField ? topHitsSplitField : undefined,
+            top_hits_size: topHitsSize,
           }
         : null;
     const isPointsOnly = field ? field.type === 'geo_point' : false;

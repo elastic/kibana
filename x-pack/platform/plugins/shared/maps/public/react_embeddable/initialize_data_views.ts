@@ -58,7 +58,7 @@ export function initializeDataViews(store: MapStore) {
         if (currentSyncLayerToken !== syncLayerTokens[layerDescriptor.id]) {
           return;
         }
-        if (getMapSettings(store.getState()).autoFitToDataBounds) {
+        if (getMapSettings(store.getState()).auto_fit_to_data_bounds) {
           store.dispatch<any>(autoFitToBounds());
         }
       })();

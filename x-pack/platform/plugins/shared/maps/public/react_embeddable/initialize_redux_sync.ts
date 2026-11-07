@@ -157,8 +157,8 @@ export function initializeReduxSync({
   store.dispatch(setReadOnly(true));
   store.dispatch(
     setMapSettings({
-      keydownScrollZoom: true,
-      showTimesliderToggleButton: false,
+      keydown_scroll_zoom: true,
+      show_timeslider_toggle_button: false,
     })
   );
   store.dispatch(

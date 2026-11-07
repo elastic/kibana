@@ -10,11 +10,18 @@ import type { StoredRefreshInterval } from '../../server/saved_objects/types';
 import type { MapAttributes, StoredMapAttributes } from '../../server';
 import { extractReferences } from '../migrations/references';
 import { mapStateKeys, uiStateKeys } from './stored_map_attributes';
+import { convertToCamelCase } from './convert_keys';
 
-export function transformMapAttributesIn(mapState: MapAttributes): {
+export function transformMapAttributesIn(mapAttributes: MapAttributes): {
   attributes: StoredMapAttributes;
   references: Reference[];
 } {
+  // Stored state is camelCase, API state is snake_case
+  const mapState = convertToCamelCase<
+    Omit<MapAttributes, 'refresh_interval'> & {
+      refreshInterval?: MapAttributes['refresh_interval'];
+    }
+  >(mapAttributes);
   const storedMapAttributes: StoredMapAttributes = {
     title: mapState.title,
   };

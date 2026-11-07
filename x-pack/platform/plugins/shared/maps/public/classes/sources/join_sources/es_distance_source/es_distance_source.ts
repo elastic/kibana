@@ -31,7 +31,7 @@ import { getJoinMetricsRequestName } from '../i18n_utils';
 export const DEFAULT_WITHIN_DISTANCE = 5;
 
 type ESDistanceSourceSyncMeta = ESAggsSourceSyncMeta &
-  Pick<ESDistanceSourceDescriptor, 'distance' | 'geoField'>;
+  Pick<ESDistanceSourceDescriptor, 'distance' | 'geo_field'>;
 
 type NormalizedESDistanceSourceDescriptor = ESDistanceSourceDescriptor &
   Required<Pick<ESDistanceSourceDescriptor, 'distance' | 'metrics'>>;
@@ -43,12 +43,12 @@ export class ESDistanceSource extends AbstractESAggSource implements IJoinSource
     descriptor: Partial<ESDistanceSourceDescriptor>
   ): NormalizedESDistanceSourceDescriptor {
     const normalizedDescriptor = AbstractESAggSource.createDescriptor(descriptor);
-    if (!isValidStringConfig(descriptor.geoField)) {
+    if (!isValidStringConfig(descriptor.geo_field)) {
       throw new Error('Cannot create an ESDistanceSource without a geoField property');
     }
     return {
       ...normalizedDescriptor,
-      geoField: descriptor.geoField!,
+      geo_field: descriptor.geo_field!,
       distance:
         typeof descriptor.distance === 'number' ? descriptor.distance : DEFAULT_WITHIN_DISTANCE,
       type: SOURCE_TYPES.ES_DISTANCE_SOURCE,
@@ -64,7 +64,7 @@ export class ESDistanceSource extends AbstractESAggSource implements IJoinSource
   }
 
   getGeoFieldName(): string {
-    return this._descriptor.geoField;
+    return this._descriptor.geo_field;
   }
 
   hasCompleteConfig(): boolean {
@@ -76,7 +76,7 @@ export class ESDistanceSource extends AbstractESAggSource implements IJoinSource
   }
 
   getWhereQuery(): Query | undefined {
-    return this._descriptor.whereQuery;
+    return this._descriptor.where_query;
   }
 
   getAggKey(aggType: AGG_TYPE, fieldName?: string): string {
@@ -118,7 +118,7 @@ export class ESDistanceSource extends AbstractESAggSource implements IJoinSource
         filters[feature.properties._id] = {
           geo_distance: {
             distance,
-            [this._descriptor.geoField]: feature.geometry.coordinates,
+            [this._descriptor.geo_field]: feature.geometry.coordinates,
           },
         };
         if (!hasFilters) {
@@ -177,7 +177,7 @@ export class ESDistanceSource extends AbstractESAggSource implements IJoinSource
     return {
       ...super.getSyncMeta(dataFilters),
       distance: this._descriptor.distance,
-      geoField: this._descriptor.geoField,
+      geo_field: this._descriptor.geo_field,
     };
   }
 

@@ -83,7 +83,7 @@ export function UpdateSourceEditor(props: Props) {
                 { propName: 'dataViewId', value: change.adhocDataViewId },
                 { propName: 'esql', value: change.esql },
               ];
-              function ensureField(key: 'dateField' | 'geoField', fields: string[]) {
+              function ensureField(key: 'date_field' | 'geo_field', fields: string[]) {
                 if (props.sourceDescriptor[key] && !fields.includes(props.sourceDescriptor[key]!)) {
                   const value = fields.length ? fields[0] : undefined;
                   changes.push({
@@ -93,14 +93,15 @@ export function UpdateSourceEditor(props: Props) {
                   // uncheck narrowing if there are no fields
                   if (!value) {
                     changes.push({
-                      propName: key === 'dateField' ? 'narrowByGlobalTime' : 'narrowByMapBounds',
+                      propName:
+                        key === 'date_field' ? 'narrow_by_global_time' : 'narrow_by_map_bounds',
                       value: false,
                     });
                   }
                 }
               }
-              ensureField('dateField', change.dateFields);
-              ensureField('geoField', change.geoFields);
+              ensureField('date_field', change.dateFields);
+              ensureField('geo_field', change.geoFields);
               props.onChange(...changes);
             }}
           />
@@ -109,19 +110,19 @@ export function UpdateSourceEditor(props: Props) {
 
           <NarrowByMapBounds
             esql={props.sourceDescriptor.esql}
-            field={props.sourceDescriptor.geoField}
+            field={props.sourceDescriptor.geo_field}
             fields={geoFields}
-            narrowByField={props.sourceDescriptor.narrowByMapBounds}
+            narrowByField={props.sourceDescriptor.narrow_by_map_bounds}
             onFieldChange={(fieldName: string) => {
-              props.onChange({ propName: 'geoField', value: fieldName });
+              props.onChange({ propName: 'geo_field', value: fieldName });
             }}
             onNarrowByFieldChange={(narrowByField: boolean) => {
               const changes: OnSourceChangeArgs[] = [
-                { propName: 'narrowByMapBounds', value: narrowByField },
+                { propName: 'narrow_by_map_bounds', value: narrowByField },
               ];
               // auto select first geo field when enabling narrowByMapBounds and geoField is not set
-              if (narrowByField && geoFields.length && !props.sourceDescriptor.geoField) {
-                changes.push({ propName: 'geoField', value: geoFields[0] });
+              if (narrowByField && geoFields.length && !props.sourceDescriptor.geo_field) {
+                changes.push({ propName: 'geo_field', value: geoFields[0] });
               }
               props.onChange(...changes);
             }}
@@ -132,9 +133,12 @@ export function UpdateSourceEditor(props: Props) {
               label={i18n.translate('xpack.maps.esqlSource.narrowByGlobalSearchLabel', {
                 defaultMessage: `Apply global search to ES|QL statement`,
               })}
-              checked={props.sourceDescriptor.narrowByGlobalSearch}
+              checked={props.sourceDescriptor.narrow_by_global_search}
               onChange={(event: EuiSwitchEvent) => {
-                props.onChange({ propName: 'narrowByGlobalSearch', value: event.target.checked });
+                props.onChange({
+                  propName: 'narrow_by_global_search',
+                  value: event.target.checked,
+                });
               }}
               compressed
             />
@@ -142,28 +146,28 @@ export function UpdateSourceEditor(props: Props) {
 
           <NarrowByTime
             esql={props.sourceDescriptor.esql}
-            field={props.sourceDescriptor.dateField}
+            field={props.sourceDescriptor.date_field}
             fields={dateFields}
-            narrowByField={props.sourceDescriptor.narrowByGlobalTime}
+            narrowByField={props.sourceDescriptor.narrow_by_global_time}
             onFieldChange={(fieldName: string) => {
-              props.onChange({ propName: 'dateField', value: fieldName });
+              props.onChange({ propName: 'date_field', value: fieldName });
             }}
             onNarrowByFieldChange={(narrowByField: boolean) => {
               const changes: OnSourceChangeArgs[] = [
-                { propName: 'narrowByGlobalTime', value: narrowByField },
+                { propName: 'narrow_by_global_time', value: narrowByField },
               ];
               // auto select first date field when enabling narrowByGlobalTime and dateField is not set
-              if (narrowByField && dateFields.length && !props.sourceDescriptor.dateField) {
-                changes.push({ propName: 'dateField', value: dateFields[0] });
+              if (narrowByField && dateFields.length && !props.sourceDescriptor.date_field) {
+                changes.push({ propName: 'date_field', value: dateFields[0] });
               }
               props.onChange(...changes);
             }}
           />
 
           <ForceRefreshCheckbox
-            applyForceRefresh={props.sourceDescriptor.applyForceRefresh}
+            applyForceRefresh={props.sourceDescriptor.apply_force_refresh}
             setApplyForceRefresh={(applyForceRefresh: boolean) => {
-              props.onChange({ propName: 'applyForceRefresh', value: applyForceRefresh });
+              props.onChange({ propName: 'apply_force_refresh', value: applyForceRefresh });
             }}
           />
         </EuiSkeletonText>

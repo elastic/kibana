@@ -57,7 +57,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   static createDescriptor(
     descriptor: Partial<AbstractESSourceDescriptor>
   ): AbstractESSourceDescriptor {
-    if (!isValidStringConfig(descriptor.indexPatternId)) {
+    if (!isValidStringConfig(descriptor.index_pattern_id)) {
       throw new Error(
         'Cannot create AbstractESSourceDescriptor when indexPatternId is not provided'
       );
@@ -65,13 +65,15 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     return {
       ...descriptor,
       id: isValidStringConfig(descriptor.id) ? descriptor.id! : uuidv4(),
-      indexPatternId: descriptor.indexPatternId!,
-      applyGlobalQuery:
-        typeof descriptor.applyGlobalQuery !== 'undefined' ? descriptor.applyGlobalQuery : true,
-      applyGlobalTime:
-        typeof descriptor.applyGlobalTime !== 'undefined' ? descriptor.applyGlobalTime : true,
-      applyForceRefresh:
-        typeof descriptor.applyForceRefresh !== 'undefined' ? descriptor.applyForceRefresh : true,
+      index_pattern_id: descriptor.index_pattern_id!,
+      apply_global_query:
+        typeof descriptor.apply_global_query !== 'undefined' ? descriptor.apply_global_query : true,
+      apply_global_time:
+        typeof descriptor.apply_global_time !== 'undefined' ? descriptor.apply_global_time : true,
+      apply_force_refresh:
+        typeof descriptor.apply_force_refresh !== 'undefined'
+          ? descriptor.apply_force_refresh
+          : true,
     } as AbstractESSourceDescriptor;
   }
 
@@ -89,15 +91,15 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   }
 
   getApplyGlobalQuery(): boolean {
-    return this._descriptor.applyGlobalQuery ?? true;
+    return this._descriptor.apply_global_query ?? true;
   }
 
   getApplyGlobalTime(): boolean {
-    return this._descriptor.applyGlobalTime ?? true;
+    return this._descriptor.apply_global_time ?? true;
   }
 
   getApplyForceRefresh(): boolean {
-    return this._descriptor.applyForceRefresh ?? true;
+    return this._descriptor.apply_force_refresh ?? true;
   }
 
   isQueryAware(): boolean {
@@ -336,7 +338,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   }
 
   getIndexPatternId(): string {
-    return this._descriptor.indexPatternId;
+    return this._descriptor.index_pattern_id;
   }
 
   getGeoFieldName(): string {

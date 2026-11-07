@@ -168,7 +168,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       layerDescriptor.joins = [];
     }
 
-    layerDescriptor.disableTooltips = options.disableTooltips ?? false;
+    layerDescriptor.disable_tooltips = options.disable_tooltips ?? false;
 
     return layerDescriptor;
   }
@@ -1158,7 +1158,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
    * @returns {boolean}
    */
   areTooltipsDisabled(): boolean {
-    return this._descriptor.disableTooltips ?? false;
+    return this._descriptor.disable_tooltips ?? false;
   }
 
   getFeatureId(feature: Feature): string | number | undefined {

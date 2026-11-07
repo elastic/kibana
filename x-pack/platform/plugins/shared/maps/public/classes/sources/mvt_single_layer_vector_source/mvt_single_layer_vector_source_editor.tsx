@@ -19,7 +19,7 @@ import { MVTSingleLayerSourceSettings } from './mvt_single_layer_source_settings
 
 export type TiledSingleLayerVectorSourceSettings = Omit<
   TiledSingleLayerVectorSourceDescriptor,
-  'tooltipProperties' | 'type'
+  'tooltip_properties' | 'type'
 >;
 
 interface Props {
@@ -51,10 +51,10 @@ export class MVTSingleLayerVectorSourceEditor extends Component<Props, State> {
 
     if (canPreview && this.state.layerName) {
       this.props.onSourceConfigChange({
-        urlTemplate: this.state.urlTemplate,
-        layerName: this.state.layerName,
-        minSourceZoom: this.state.minSourceZoom,
-        maxSourceZoom: this.state.maxSourceZoom,
+        url_template: this.state.urlTemplate,
+        layer_name: this.state.layerName,
+        min_source_zoom: this.state.minSourceZoom,
+        max_source_zoom: this.state.maxSourceZoom,
         fields: this.state.fields,
       });
     }

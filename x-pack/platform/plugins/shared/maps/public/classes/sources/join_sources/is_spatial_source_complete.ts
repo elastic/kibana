@@ -8,5 +8,5 @@
 import type { ESDistanceSourceDescriptor } from '../../../../common/descriptor_types';
 
 export function isSpatialSourceComplete(descriptor: Partial<ESDistanceSourceDescriptor>) {
-  return descriptor.indexPatternId !== undefined && descriptor.geoField !== undefined;
+  return descriptor.index_pattern_id !== undefined && descriptor.geo_field !== undefined;
 }

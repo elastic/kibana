@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 import {
   savedObjectSchema,
@@ -16,19 +16,23 @@ import { mapAttributesSchema } from './map_attributes_schema/map_attributes_sche
 
 export const mapSavedObjectSchema = savedObjectSchema(mapAttributesSchema);
 
-export const searchOptionsSchema = z
-  .object({
-    onlyTitle: z.boolean().optional(),
-  })
-  .strict()
-  .optional();
+export const searchOptionsSchema = lazySchema(() =>
+  z
+    .object({
+      onlyTitle: z.boolean().optional(),
+    })
+    .strict()
+    .optional()
+);
 
-export const mapsSearchOptionsSchema = z
-  .object({
-    onlyTitle: z.boolean().optional(),
-  })
-  .strict()
-  .optional();
+export const mapsSearchOptionsSchema = lazySchema(() =>
+  z
+    .object({
+      onlyTitle: z.boolean().optional(),
+    })
+    .strict()
+    .optional()
+);
 
 export const mapsCreateOptionsSchema = z
   .object({

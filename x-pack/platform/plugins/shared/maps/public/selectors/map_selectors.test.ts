@@ -267,11 +267,11 @@ describe('getQueryableUniqueIndexPatternIds', () => {
   }
 
   function createWaitLayerDescriptorMock({
-    indexPatternId,
+    index_pattern_id: indexPatternId,
     visible = true,
   }: {
     visible?: boolean;
-    indexPatternId: string;
+    index_pattern_id: string;
   }) {
     return {
       type: LAYER_TYPE.GEOJSON_VECTOR,
@@ -279,9 +279,9 @@ describe('getQueryableUniqueIndexPatternIds', () => {
         type: LAYER_STYLE_TYPE.VECTOR,
       },
       visible,
-      sourceDescriptor: ESSearchSource.createDescriptor({
-        indexPatternId,
-        geoField: 'field',
+      source_descriptor: ESSearchSource.createDescriptor({
+        index_pattern_id: indexPatternId,
+        geo_field: 'field',
       }),
     };
   }
@@ -310,10 +310,10 @@ describe('getQueryableUniqueIndexPatternIds', () => {
       createLayerMock({ indexPatterns: ['bar'] }),
     ];
     const waitingForMapReadyLayerList: VectorLayerDescriptor[] = [
-      createWaitLayerDescriptorMock({ indexPatternId: 'foo' }),
-      createWaitLayerDescriptorMock({ indexPatternId: 'barfoo', visible: false }),
-      createWaitLayerDescriptorMock({ indexPatternId: 'fbr' }),
-      createWaitLayerDescriptorMock({ indexPatternId: 'foo' }),
+      createWaitLayerDescriptorMock({ index_pattern_id: 'foo' }),
+      createWaitLayerDescriptorMock({ index_pattern_id: 'barfoo', visible: false }),
+      createWaitLayerDescriptorMock({ index_pattern_id: 'fbr' }),
+      createWaitLayerDescriptorMock({ index_pattern_id: 'foo' }),
     ] as unknown as VectorLayerDescriptor[];
     expect(
       getQueryableUniqueIndexPatternIds.resultFunc(layerList, waitingForMapReadyLayerList)
@@ -374,7 +374,7 @@ describe('getSpatialFiltersLayer', () => {
   test('should not show layer when showSpatialFilters is false', () => {
     const geoJsonVectorLayer = getSpatialFiltersLayer.resultFunc([], undefined, {
       ...getDefaultMapSettings(),
-      showSpatialFilters: false,
+      show_spatial_filters: false,
     });
     expect(geoJsonVectorLayer.isVisible()).toBe(false);
   });

@@ -44,7 +44,10 @@ export const esTopHitsLayerWizardConfig: LayerWizard = {
       }
 
       const sourceDescriptor = ESSearchSource.createDescriptor(sourceConfig);
-      const layerDescriptor = GeoJsonVectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
+      const layerDescriptor = GeoJsonVectorLayer.createDescriptor(
+        { source_descriptor: sourceDescriptor },
+        mapColors
+      );
       if (isPointsOnly && layerDescriptor.style) {
         (layerDescriptor.style.properties as Writable<VectorStylePropertiesDescriptor>)[
           VECTOR_STYLES.LINE_WIDTH

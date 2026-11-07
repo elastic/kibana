@@ -78,14 +78,14 @@ import { FeatureGeometryFilterForm } from '../../../connected_components/mb_map/
 
 type ESSearchSourceSyncMeta = Pick<
   ESSearchSourceDescriptor,
-  | 'geoField'
-  | 'filterByMapBounds'
-  | 'sortField'
-  | 'sortOrder'
-  | 'scalingType'
-  | 'topHitsGroupByTimeseries'
-  | 'topHitsSplitField'
-  | 'topHitsSize'
+  | 'geo_field'
+  | 'filter_by_map_bounds'
+  | 'sort_field'
+  | 'sort_order'
+  | 'scaling_type'
+  | 'top_hits_group_by_timeseries'
+  | 'top_hits_split_field'
+  | 'top_hits_size'
 >;
 
 export function timerangeToTimeextent(timerange: TimeRange): Timeslice | undefined {
@@ -112,37 +112,39 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     const normalizedDescriptor = AbstractESSource.createDescriptor(
       descriptor
     ) as AbstractESSourceDescriptor & Partial<ESSearchSourceDescriptor>;
-    if (!isValidStringConfig(normalizedDescriptor.geoField)) {
+    if (!isValidStringConfig(normalizedDescriptor.geo_field)) {
       throw new Error('Cannot create an ESSearchSourceDescriptor without a geoField');
     }
     return {
       ...normalizedDescriptor,
       type: SOURCE_TYPES.ES_SEARCH,
-      geoField: normalizedDescriptor.geoField!,
-      filterByMapBounds:
-        typeof descriptor.filterByMapBounds === 'boolean'
-          ? descriptor.filterByMapBounds
+      geo_field: normalizedDescriptor.geo_field!,
+      filter_by_map_bounds:
+        typeof descriptor.filter_by_map_bounds === 'boolean'
+          ? descriptor.filter_by_map_bounds
           : DEFAULT_FILTER_BY_MAP_BOUNDS,
-      tooltipProperties: Array.isArray(descriptor.tooltipProperties)
-        ? descriptor.tooltipProperties
+      tooltip_properties: Array.isArray(descriptor.tooltip_properties)
+        ? descriptor.tooltip_properties
         : [],
-      sortField: isValidStringConfig(descriptor.sortField) ? (descriptor.sortField as string) : '',
-      sortOrder: isValidStringConfig(descriptor.sortOrder)
-        ? descriptor.sortOrder!
-        : SortDirection.desc,
-      scalingType: isValidStringConfig(descriptor.scalingType)
-        ? descriptor.scalingType!
-        : SCALING_TYPES.MVT,
-      topHitsGroupByTimeseries:
-        typeof normalizedDescriptor.topHitsGroupByTimeseries === 'boolean'
-          ? normalizedDescriptor.topHitsGroupByTimeseries
-          : false,
-      topHitsSplitField: isValidStringConfig(descriptor.topHitsSplitField)
-        ? descriptor.topHitsSplitField!
+      sort_field: isValidStringConfig(descriptor.sort_field)
+        ? (descriptor.sort_field as string)
         : '',
-      topHitsSize:
-        typeof descriptor.topHitsSize === 'number' && descriptor.topHitsSize > 0
-          ? descriptor.topHitsSize
+      sort_order: isValidStringConfig(descriptor.sort_order)
+        ? descriptor.sort_order!
+        : SortDirection.desc,
+      scaling_type: isValidStringConfig(descriptor.scaling_type)
+        ? descriptor.scaling_type!
+        : SCALING_TYPES.MVT,
+      top_hits_group_by_timeseries:
+        typeof normalizedDescriptor.top_hits_group_by_timeseries === 'boolean'
+          ? normalizedDescriptor.top_hits_group_by_timeseries
+          : false,
+      top_hits_split_field: isValidStringConfig(descriptor.top_hits_split_field)
+        ? descriptor.top_hits_split_field!
+        : '',
+      top_hits_size:
+        typeof descriptor.top_hits_size === 'number' && descriptor.top_hits_size > 0
+          ? descriptor.top_hits_size
           : 1,
     } as Required<ESSearchSourceDescriptor>;
   }
@@ -151,15 +153,15 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     const sourceDescriptor = ESSearchSource.createDescriptor(descriptor);
     super(sourceDescriptor);
     this._descriptor = sourceDescriptor;
-    this._tooltipFields = this._descriptor.tooltipProperties
-      ? this._descriptor.tooltipProperties.map((property) => {
+    this._tooltipFields = this._descriptor.tooltip_properties
+      ? this._descriptor.tooltip_properties.map((property) => {
           return this.getFieldByName(property);
         })
       : [];
   }
 
   getGeoFieldName(): string {
-    return this._descriptor.geoField;
+    return this._descriptor.geo_field;
   }
 
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null {
@@ -170,12 +172,12 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
           indexPatternId={this.getIndexPatternId()}
           onChange={sourceEditorArgs.onChange}
           tooltipFields={this._tooltipFields}
-          sortField={this._descriptor.sortField}
-          sortOrder={this._descriptor.sortOrder}
+          sortField={this._descriptor.sort_field}
+          sortOrder={this._descriptor.sort_order}
           filterByMapBounds={this.isFilterByMapBounds()}
-          topHitsGroupByTimeseries={this._descriptor.topHitsGroupByTimeseries}
-          topHitsSplitField={this._descriptor.topHitsSplitField}
-          topHitsSize={this._descriptor.topHitsSize}
+          topHitsGroupByTimeseries={this._descriptor.top_hits_group_by_timeseries}
+          topHitsSplitField={this._descriptor.top_hits_split_field}
+          topHitsSize={this._descriptor.top_hits_size}
         />
       );
     }
@@ -190,9 +192,9 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
         getGeoField={getGeoField}
         onChange={sourceEditorArgs.onChange}
         tooltipFields={this._tooltipFields}
-        sortField={this._descriptor.sortField}
-        sortOrder={this._descriptor.sortOrder}
-        scalingType={this._descriptor.scalingType}
+        sortField={this._descriptor.sort_field}
+        sortOrder={this._descriptor.sort_order}
+        scalingType={this._descriptor.scaling_type}
         filterByMapBounds={this.isFilterByMapBounds()}
         numberOfJoins={sourceEditorArgs.numberOfJoins}
         hasSpatialJoins={sourceEditorArgs.hasSpatialJoins}
@@ -227,7 +229,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   }
 
   isMvt() {
-    return this._descriptor.scalingType === SCALING_TYPES.MVT;
+    return this._descriptor.scaling_type === SCALING_TYPES.MVT;
   }
 
   async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
@@ -252,7 +254,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
         label: i18n.translate('xpack.maps.source.esSearch.geoFieldLabel', {
           defaultMessage: 'Geospatial field',
         }),
-        value: this._descriptor.geoField,
+        value: this._descriptor.geo_field,
       },
       {
         label: i18n.translate('xpack.maps.source.esSearch.geoFieldTypeLabel', {
@@ -265,7 +267,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
 
   // Returns sort content for an Elasticsearch search body
   _buildEsSort(): Array<Record<string, SortDirectionNumeric>> {
-    const { sortField, sortOrder } = this._descriptor;
+    const { sort_field: sortField, sort_order: sortOrder } = this._descriptor;
 
     if (!sortField) {
       throw new Error('Cannot build sort');
@@ -286,9 +288,9 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     inspectorAdapters: Adapters
   ) {
     const {
-      topHitsGroupByTimeseries,
-      topHitsSplitField: topHitsSplitFieldName,
-      topHitsSize,
+      top_hits_group_by_timeseries: topHitsGroupByTimeseries,
+      top_hits_split_field: topHitsSplitFieldName,
+      top_hits_size: topHitsSize,
     } = this._descriptor;
 
     if (!topHitsGroupByTimeseries && !topHitsSplitFieldName) {
@@ -313,7 +315,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       size: topHitsSize,
       script_fields: scriptFields,
       docvalue_fields: docValueFields,
-      fields: [this._descriptor.geoField],
+      fields: [this._descriptor.geo_field],
     };
 
     if (this._hasSort()) {
@@ -474,7 +476,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     } else {
       searchSource.setField('source', sourceOnlyFields);
     }
-    searchSource.setField('fields', [this._descriptor.geoField]);
+    searchSource.setField('fields', [this._descriptor.geo_field]);
     if (this._hasSort()) {
       searchSource.setField('sort', this._buildEsSort());
     }
@@ -513,7 +515,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   }
 
   _isTopHits(): boolean {
-    return this._descriptor.scalingType === SCALING_TYPES.TOP_HITS;
+    return this._descriptor.scaling_type === SCALING_TYPES.TOP_HITS;
   }
 
   async _getSourceIndexList(): Promise<string[]> {
@@ -554,7 +556,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   }
 
   _hasSort(): boolean {
-    const { sortField, sortOrder } = this._descriptor;
+    const { sort_field: sortField, sort_order: sortOrder } = this._descriptor;
     return !!sortField && !!sortOrder;
   }
 
@@ -741,12 +743,12 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   }
 
   isFilterByMapBounds(): boolean {
-    if (this._descriptor.scalingType === SCALING_TYPES.CLUSTERS) {
+    if (this._descriptor.scaling_type === SCALING_TYPES.CLUSTERS) {
       return true;
-    } else if (this._descriptor.scalingType === SCALING_TYPES.MVT) {
+    } else if (this._descriptor.scaling_type === SCALING_TYPES.MVT) {
       return false;
     } else {
-      return !!this._descriptor.filterByMapBounds;
+      return !!this._descriptor.filter_by_map_bounds;
     }
   }
 
@@ -799,7 +801,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
           });
       const docsPerEntityMsg = i18n.translate('xpack.maps.esSearch.topHitsSizeMsg', {
         defaultMessage: `Showing top {topHitsSize} documents per entity.`,
-        values: { topHitsSize: this._descriptor.topHitsSize?.toLocaleString() },
+        values: { topHitsSize: this._descriptor.top_hits_size?.toLocaleString() },
       });
 
       return {
@@ -831,14 +833,14 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
 
   getSyncMeta(): ESSearchSourceSyncMeta {
     return {
-      geoField: this._descriptor.geoField,
-      filterByMapBounds: this._descriptor.filterByMapBounds,
-      sortField: this._descriptor.sortField,
-      sortOrder: this._descriptor.sortOrder,
-      scalingType: this._descriptor.scalingType,
-      topHitsGroupByTimeseries: this._descriptor.topHitsGroupByTimeseries,
-      topHitsSplitField: this._descriptor.topHitsSplitField,
-      topHitsSize: this._descriptor.topHitsSize,
+      geo_field: this._descriptor.geo_field,
+      filter_by_map_bounds: this._descriptor.filter_by_map_bounds,
+      sort_field: this._descriptor.sort_field,
+      sort_order: this._descriptor.sort_order,
+      scaling_type: this._descriptor.scaling_type,
+      top_hits_group_by_timeseries: this._descriptor.top_hits_group_by_timeseries,
+      top_hits_split_field: this._descriptor.top_hits_split_field,
+      top_hits_size: this._descriptor.top_hits_size,
     };
   }
 
@@ -857,7 +859,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
 
   supportsJoins(): boolean {
     // can only join with features, not aggregated clusters
-    return this._descriptor.scalingType !== SCALING_TYPES.CLUSTERS;
+    return this._descriptor.scaling_type !== SCALING_TYPES.CLUSTERS;
   }
 
   async _getEditableIndex(): Promise<string> {
@@ -939,13 +941,13 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     // Filter out documents without geo fields to avoid shard failures for indices without geo fields
     searchSource.setField('filter', [
       ...(searchSource.getField('filter') as Filter[]),
-      buildExistsFilter({ name: this._descriptor.geoField, type: 'geo_point' }, dataView),
+      buildExistsFilter({ name: this._descriptor.geo_field, type: 'geo_point' }, dataView),
     ]);
 
     const mvtUrlServicePath = getHttp().basePath.prepend(`${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`);
 
     const tileUrlParams = getTileUrlParams({
-      geometryFieldName: this._descriptor.geoField,
+      geometryFieldName: this._descriptor.geo_field,
       index: dataView.getIndexPattern(),
       hasLabels,
       buffer,
@@ -963,7 +965,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   }
 
   async getTimesliceMaskFieldName(): Promise<string | null> {
-    if (this._isTopHits() || this._descriptor.scalingType === SCALING_TYPES.MVT) {
+    if (this._isTopHits() || this._descriptor.scaling_type === SCALING_TYPES.MVT) {
       return null;
     }
     try {
@@ -976,7 +978,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   }
 
   getUpdateDueToTimeslice(prevMeta: DataRequestMeta, timeslice?: Timeslice): boolean {
-    if (this._isTopHits() || this._descriptor.scalingType === SCALING_TYPES.MVT) {
+    if (this._isTopHits() || this._descriptor.scaling_type === SCALING_TYPES.MVT) {
       return true;
     }
 

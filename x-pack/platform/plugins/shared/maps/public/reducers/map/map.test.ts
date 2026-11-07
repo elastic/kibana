@@ -15,25 +15,25 @@ describe('SET_MAP_SETTINGS', () => {
     const initialState = {
       ...DEFAULT_MAP_STATE,
     };
-    (initialState.settings as Writable<MapSettings>).autoFitToDataBounds = false;
-    (initialState.settings as Writable<MapSettings>).showTimesliderToggleButton = false;
+    (initialState.settings as Writable<MapSettings>).auto_fit_to_data_bounds = false;
+    (initialState.settings as Writable<MapSettings>).show_timeslider_toggle_button = false;
 
     const updatedState1 = map(initialState, {
       type: SET_MAP_SETTINGS,
       settings: {
-        autoFitToDataBounds: true,
+        auto_fit_to_data_bounds: true,
       },
     });
-    expect(updatedState1.settings.autoFitToDataBounds).toBe(true);
-    expect(updatedState1.settings.showTimesliderToggleButton).toBe(false);
+    expect(updatedState1.settings.auto_fit_to_data_bounds).toBe(true);
+    expect(updatedState1.settings.show_timeslider_toggle_button).toBe(false);
 
     const updatedState2 = map(updatedState1, {
       type: SET_MAP_SETTINGS,
       settings: {
-        showTimesliderToggleButton: true,
+        show_timeslider_toggle_button: true,
       },
     });
-    expect(updatedState2.settings.autoFitToDataBounds).toBe(true);
-    expect(updatedState2.settings.showTimesliderToggleButton).toBe(true);
+    expect(updatedState2.settings.auto_fit_to_data_bounds).toBe(true);
+    expect(updatedState2.settings.show_timeslider_toggle_button).toBe(true);
   });
 });

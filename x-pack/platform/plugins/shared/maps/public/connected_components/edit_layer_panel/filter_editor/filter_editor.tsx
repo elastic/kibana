@@ -103,15 +103,15 @@ export class FilterEditor extends Component<Props, State> {
   };
 
   _onApplyGlobalQueryChange = (applyGlobalQuery: boolean) => {
-    this.props.updateSourceProp(this.props.layer.getId(), 'applyGlobalQuery', applyGlobalQuery);
+    this.props.updateSourceProp(this.props.layer.getId(), 'apply_global_query', applyGlobalQuery);
   };
 
   _onApplyGlobalTimeChange = (applyGlobalTime: boolean) => {
-    this.props.updateSourceProp(this.props.layer.getId(), 'applyGlobalTime', applyGlobalTime);
+    this.props.updateSourceProp(this.props.layer.getId(), 'apply_global_time', applyGlobalTime);
   };
 
   _onRespondToForceRefreshChange = (applyForceRefresh: boolean) => {
-    this.props.updateSourceProp(this.props.layer.getId(), 'applyForceRefresh', applyForceRefresh);
+    this.props.updateSourceProp(this.props.layer.getId(), 'apply_force_refresh', applyForceRefresh);
   };
 
   _renderQueryPopover() {

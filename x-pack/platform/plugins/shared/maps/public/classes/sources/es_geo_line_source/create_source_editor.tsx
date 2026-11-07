@@ -120,12 +120,12 @@ export class CreateSourceEditor extends Component<Props, State> {
       geoField &&
       (groupByTimeseries || (splitField && sortField))
         ? {
-            indexPatternId: indexPattern.id,
-            geoField,
-            groupByTimeseries,
-            lineSimplificationSize,
-            splitField,
-            sortField,
+            index_pattern_id: indexPattern.id,
+            geo_field: geoField,
+            group_by_timeseries: groupByTimeseries,
+            line_simplification_size: lineSimplificationSize,
+            split_field: splitField,
+            sort_field: sortField,
           }
         : null;
     this.props.onSourceConfigChange(sourceConfig);

@@ -48,7 +48,10 @@ export const emsBoundariesLayerWizardConfig: LayerWizard = {
   renderWizard: ({ previewLayers, mapColors }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: Partial<EMSFileSourceDescriptor>) => {
       const sourceDescriptor = EMSFileSource.createDescriptor(sourceConfig);
-      const layerDescriptor = GeoJsonVectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
+      const layerDescriptor = GeoJsonVectorLayer.createDescriptor(
+        { source_descriptor: sourceDescriptor },
+        mapColors
+      );
       previewLayers([layerDescriptor]);
     };
     return <EMSFileCreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;

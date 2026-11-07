@@ -113,8 +113,8 @@ export class LabelPositionProperty extends AbstractStyleProperty<
         this._iconSizeProperty as DynamicSizeProperty
       ).getMbSizeExpression({
         forceFeatureProperties: true,
-        maxStopOutput: ['literal', this._getTextOffset(dynamicIconSizeOptions.maxSize, labelSize)],
-        minStopOutput: ['literal', this._getTextOffset(dynamicIconSizeOptions.minSize, labelSize)],
+        maxStopOutput: ['literal', this._getTextOffset(dynamicIconSizeOptions.max_size, labelSize)],
+        minStopOutput: ['literal', this._getTextOffset(dynamicIconSizeOptions.min_size, labelSize)],
       });
       mbMap.setLayoutProperty(mbLayerId, 'text-offset', interpolateExpression);
       return;

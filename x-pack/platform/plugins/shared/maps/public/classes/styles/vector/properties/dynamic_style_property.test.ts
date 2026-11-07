@@ -53,13 +53,13 @@ describe('percentilesValuesToFieldMeta', () => {
 describe('getFieldMetaOptions', () => {
   const dynamicColorOptions = {
     color: 'Blues',
-    colorCategory: 'palette_0',
+    color_category: 'palette_0',
     field: {
       name: 'machine.os.keyword',
       origin: 'source',
     },
-    fieldMetaOptions: {
-      isEnabled: false,
+    field_meta_options: {
+      is_enabled: false,
     },
     type: 'CATEGORICAL',
   };
@@ -80,7 +80,7 @@ describe('getFieldMetaOptions', () => {
     );
 
     const fieldMetaOptions = property.getFieldMetaOptions();
-    expect(fieldMetaOptions.isEnabled).toBe(false);
+    expect(fieldMetaOptions.is_enabled).toBe(false);
   });
 
   test('should automatically enable fieldMeta when field does not support field meta from local', () => {
@@ -99,9 +99,9 @@ describe('getFieldMetaOptions', () => {
     );
 
     const fieldMetaOptions = property.getFieldMetaOptions();
-    expect(fieldMetaOptions.isEnabled).toBe(true);
+    expect(fieldMetaOptions.is_enabled).toBe(true);
 
     // should not mutate original options state
-    expect(dynamicColorOptions.fieldMetaOptions.isEnabled).toBe(false);
+    expect(dynamicColorOptions.field_meta_options.is_enabled).toBe(false);
   });
 });

@@ -52,17 +52,17 @@ export class ESPewPewSource extends AbstractESAggSource {
     descriptor: Partial<ESPewPewSourceDescriptor>
   ): ESPewPewSourceDescriptor & Required<Pick<ESPewPewSourceDescriptor, 'metrics'>> {
     const normalizedDescriptor = AbstractESAggSource.createDescriptor(descriptor);
-    if (!isValidStringConfig(descriptor.sourceGeoField)) {
+    if (!isValidStringConfig(descriptor.source_geo_field)) {
       throw new Error('Cannot create ESPewPewSourceDescriptor, sourceGeoField is not provided');
     }
-    if (!isValidStringConfig(descriptor.destGeoField)) {
+    if (!isValidStringConfig(descriptor.dest_geo_field)) {
       throw new Error('Cannot create ESPewPewSourceDescriptor, destGeoField is not provided');
     }
     return {
       ...normalizedDescriptor,
       type: SOURCE_TYPES.ES_PEW_PEW,
-      sourceGeoField: descriptor.sourceGeoField!,
-      destGeoField: descriptor.destGeoField!,
+      source_geo_field: descriptor.source_geo_field!,
+      dest_geo_field: descriptor.dest_geo_field!,
     };
   }
 
@@ -126,13 +126,13 @@ export class ESPewPewSource extends AbstractESAggSource {
         label: i18n.translate('xpack.maps.source.pewPew.sourceGeoFieldLabel', {
           defaultMessage: 'Source',
         }),
-        value: this._descriptor.sourceGeoField,
+        value: this._descriptor.source_geo_field,
       },
       {
         label: i18n.translate('xpack.maps.source.pewPew.destGeoFieldLabel', {
           defaultMessage: 'Destination',
         }),
-        value: this._descriptor.destGeoField,
+        value: this._descriptor.dest_geo_field,
       },
     ];
   }
@@ -156,7 +156,7 @@ export class ESPewPewSource extends AbstractESAggSource {
       destSplit: {
         terms: {
           script: {
-            source: `doc['${this._descriptor.destGeoField}'].value.toString()`,
+            source: `doc['${this._descriptor.dest_geo_field}'].value.toString()`,
             lang: 'painless',
           },
           order: {
@@ -167,14 +167,14 @@ export class ESPewPewSource extends AbstractESAggSource {
         aggs: {
           sourceGrid: {
             geotile_grid: {
-              field: this._descriptor.sourceGeoField,
+              field: this._descriptor.source_geo_field,
               precision: this.getGeoGridPrecision(requestMeta.zoom),
               size: 500,
             },
             aggs: {
               sourceCentroid: {
                 geo_centroid: {
-                  field: this._descriptor.sourceGeoField,
+                  field: this._descriptor.source_geo_field,
                 },
               },
               ...this.getValueAggsDsl(indexPattern),
@@ -191,7 +191,10 @@ export class ESPewPewSource extends AbstractESAggSource {
       ...(searchSource.getField('filter') as Filter[]),
       // destGeoField exists ensured by buffer filter
       // so only need additional check for sourceGeoField
-      buildExistsFilter({ name: this._descriptor.sourceGeoField, type: 'geo_point' }, indexPattern),
+      buildExistsFilter(
+        { name: this._descriptor.source_geo_field, type: 'geo_point' },
+        indexPattern
+      ),
     ]);
 
     const warnings: SearchResponseWarning[] = [];
@@ -224,7 +227,7 @@ export class ESPewPewSource extends AbstractESAggSource {
   }
 
   getGeoFieldName() {
-    return this._descriptor.destGeoField;
+    return this._descriptor.dest_geo_field;
   }
 
   async getBoundsForFilters(
@@ -236,12 +239,12 @@ export class ESPewPewSource extends AbstractESAggSource {
     searchSource.setField('aggs', {
       destFitToBounds: {
         geo_bounds: {
-          field: this._descriptor.destGeoField,
+          field: this._descriptor.dest_geo_field,
         },
       },
       sourceFitToBounds: {
         geo_bounds: {
-          field: this._descriptor.sourceGeoField,
+          field: this._descriptor.source_geo_field,
         },
       },
     });

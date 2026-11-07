@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import _ from 'lodash';
-import type { Writable } from '@kbn/utility-types';
 import { LAYER_STYLE_TYPE, STYLE_TYPE, VECTOR_STYLES } from '../constants';
-import type {
-  ColorStylePropertyDescriptor,
-  LayerDescriptor,
-  VectorStyleDescriptor,
-} from '../descriptor_types';
+import type { StoredLayer } from './stored_layer';
 import type { StoredMapAttributes } from '../../server';
 
 const COLOR_STYLES = [
@@ -22,9 +16,15 @@ const COLOR_STYLES = [
   VECTOR_STYLES.LABEL_BORDER_COLOR,
 ];
 
-function migrateColorProperty(
-  descriptor: ColorStylePropertyDescriptor
-): ColorStylePropertyDescriptor {
+interface StoredColorProperty {
+  type: STYLE_TYPE;
+  options: {
+    customColorPalette?: Array<{ stop: string | null; color: string }>;
+    [key: string]: unknown;
+  };
+}
+
+function migrateColorProperty(descriptor: StoredColorProperty): StoredColorProperty {
   if (descriptor.type === STYLE_TYPE.STATIC) {
     return descriptor;
   }
@@ -60,7 +60,7 @@ export function migrateOtherCategoryColor({
     return attributes;
   }
 
-  let layerList: LayerDescriptor[] = [];
+  let layerList: StoredLayer[] = [];
   try {
     layerList = JSON.parse(attributes.layerListJSON);
   } catch (e) {
@@ -72,19 +72,16 @@ export function migrateOtherCategoryColor({
       return;
     }
 
-    Object.keys(_.get(layerDescriptor, 'style.properties', {})).forEach((key) => {
+    Object.keys(layerDescriptor.style.properties ?? {}).forEach((key) => {
       const styleName = key as VECTOR_STYLES;
       if (!COLOR_STYLES.includes(styleName)) {
         return;
       }
 
-      (layerDescriptor.style as Writable<VectorStyleDescriptor>)!.properties = {
-        ...(layerDescriptor.style as VectorStyleDescriptor)!.properties,
-        [styleName]: migrateColorProperty(
-          (layerDescriptor.style as VectorStyleDescriptor)!.properties[
-            styleName
-          ] as unknown as ColorStylePropertyDescriptor
-        ),
+      const style = layerDescriptor.style!;
+      style.properties = {
+        ...style.properties,
+        [styleName]: migrateColorProperty(style.properties![styleName] as StoredColorProperty),
       };
     });
   });

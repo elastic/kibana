@@ -54,7 +54,7 @@ export class LayerStatsCollector {
       if (layerDescriptor.type) {
         this._updateCounts(layerDescriptor.type, this._layerTypeCounts);
       }
-      const sourceId = (layerDescriptor.sourceDescriptor as { id?: string })?.id;
+      const sourceId = (layerDescriptor.source_descriptor as { id?: string })?.id;
       if (sourceId) {
         this._sourceIds.add(sourceId);
       }
@@ -109,24 +109,24 @@ export class LayerStatsCollector {
 }
 
 function getEmsFileId(layerDescriptor: LayerDescriptor): string | null {
-  return layerDescriptor.sourceDescriptor &&
-    layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.EMS_FILE &&
-    'id' in layerDescriptor.sourceDescriptor
-    ? (layerDescriptor.sourceDescriptor as EMSFileSourceDescriptor).id
+  return layerDescriptor.source_descriptor &&
+    layerDescriptor.source_descriptor.type === SOURCE_TYPES.EMS_FILE &&
+    'id' in layerDescriptor.source_descriptor
+    ? (layerDescriptor.source_descriptor as EMSFileSourceDescriptor).id
     : null;
 }
 
 function getBasemapKey(layerDescriptor: LayerDescriptor): EMS_BASEMAP_KEYS | null {
   if (
-    !layerDescriptor.sourceDescriptor ||
-    layerDescriptor.sourceDescriptor.type !== SOURCE_TYPES.EMS_TMS
+    !layerDescriptor.source_descriptor ||
+    layerDescriptor.source_descriptor.type !== SOURCE_TYPES.EMS_TMS
   ) {
     return null;
   }
 
-  const descriptor = layerDescriptor.sourceDescriptor as EMSTMSSourceDescriptor;
+  const descriptor = layerDescriptor.source_descriptor as EMSTMSSourceDescriptor;
 
-  if (descriptor.isAutoSelect) {
+  if (descriptor.is_auto_select) {
     return EMS_BASEMAP_KEYS.AUTO;
   }
 
@@ -166,67 +166,67 @@ function getLayerKey(layerDescriptor: LayerDescriptor): LAYER_KEYS | null {
     return LAYER_KEYS.LAYER_GROUP;
   }
 
-  if (!layerDescriptor.sourceDescriptor) {
+  if (!layerDescriptor.source_descriptor) {
     return null;
   }
 
-  if (layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.EMS_FILE) {
+  if (layerDescriptor.source_descriptor.type === SOURCE_TYPES.EMS_FILE) {
     return LAYER_KEYS.EMS_REGION;
   }
 
-  if (layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.EMS_TMS) {
+  if (layerDescriptor.source_descriptor.type === SOURCE_TYPES.EMS_TMS) {
     return LAYER_KEYS.EMS_BASEMAP;
   }
 
-  if (layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.KIBANA_TILEMAP) {
+  if (layerDescriptor.source_descriptor.type === SOURCE_TYPES.KIBANA_TILEMAP) {
     return LAYER_KEYS.KBN_TMS_RASTER;
   }
 
-  if (layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.EMS_XYZ) {
+  if (layerDescriptor.source_descriptor.type === SOURCE_TYPES.EMS_XYZ) {
     return LAYER_KEYS.UX_TMS_RASTER;
   }
 
-  if (layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.WMS) {
+  if (layerDescriptor.source_descriptor.type === SOURCE_TYPES.WMS) {
     return LAYER_KEYS.UX_WMS;
   }
 
-  if (layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.MVT_SINGLE_LAYER) {
+  if (layerDescriptor.source_descriptor.type === SOURCE_TYPES.MVT_SINGLE_LAYER) {
     return LAYER_KEYS.UX_TMS_MVT;
   }
 
-  if (layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.ES_GEO_LINE) {
+  if (layerDescriptor.source_descriptor.type === SOURCE_TYPES.ES_GEO_LINE) {
     return LAYER_KEYS.ES_TRACKS;
   }
 
-  if (layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.ES_PEW_PEW) {
+  if (layerDescriptor.source_descriptor.type === SOURCE_TYPES.ES_PEW_PEW) {
     return LAYER_KEYS.ES_POINT_TO_POINT;
   }
 
-  if (layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.ES_ML_ANOMALIES) {
+  if (layerDescriptor.source_descriptor.type === SOURCE_TYPES.ES_ML_ANOMALIES) {
     return LAYER_KEYS.ES_ML_ANOMALIES;
   }
 
-  if (layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.ESQL) {
+  if (layerDescriptor.source_descriptor.type === SOURCE_TYPES.ESQL) {
     return LAYER_KEYS.ESQL;
   }
 
-  if (layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.ES_SEARCH) {
-    const sourceDescriptor = layerDescriptor.sourceDescriptor as ESSearchSourceDescriptor;
+  if (layerDescriptor.source_descriptor.type === SOURCE_TYPES.ES_SEARCH) {
+    const sourceDescriptor = layerDescriptor.source_descriptor as ESSearchSourceDescriptor;
 
-    if (sourceDescriptor.scalingType === SCALING_TYPES.TOP_HITS) {
+    if (sourceDescriptor.scaling_type === SCALING_TYPES.TOP_HITS) {
       return LAYER_KEYS.ES_TOP_HITS;
     } else {
       return LAYER_KEYS.ES_DOCS;
     }
   }
 
-  if (layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.ES_GEO_GRID) {
-    const sourceDescriptor = layerDescriptor.sourceDescriptor as ESGeoGridSourceDescriptor;
-    if (sourceDescriptor.requestType === RENDER_AS.POINT) {
+  if (layerDescriptor.source_descriptor.type === SOURCE_TYPES.ES_GEO_GRID) {
+    const sourceDescriptor = layerDescriptor.source_descriptor as ESGeoGridSourceDescriptor;
+    if (sourceDescriptor.request_type === RENDER_AS.POINT) {
       return LAYER_KEYS.ES_AGG_CLUSTERS;
-    } else if (sourceDescriptor.requestType === RENDER_AS.GRID) {
+    } else if (sourceDescriptor.request_type === RENDER_AS.GRID) {
       return LAYER_KEYS.ES_AGG_GRIDS;
-    } else if (sourceDescriptor.requestType === RENDER_AS.HEX) {
+    } else if (sourceDescriptor.request_type === RENDER_AS.HEX) {
       return LAYER_KEYS.ES_AGG_HEXAGONS;
     }
   }
@@ -236,14 +236,14 @@ function getLayerKey(layerDescriptor: LayerDescriptor): LAYER_KEYS | null {
 
 function getResolutionKey(layerDescriptor: LayerDescriptor): RESOLUTION_KEYS | null {
   if (
-    !layerDescriptor.sourceDescriptor ||
-    layerDescriptor.sourceDescriptor.type !== SOURCE_TYPES.ES_GEO_GRID ||
-    !(layerDescriptor.sourceDescriptor as ESGeoGridSourceDescriptor).resolution
+    !layerDescriptor.source_descriptor ||
+    layerDescriptor.source_descriptor.type !== SOURCE_TYPES.ES_GEO_GRID ||
+    !(layerDescriptor.source_descriptor as ESGeoGridSourceDescriptor).resolution
   ) {
     return null;
   }
 
-  const descriptor = layerDescriptor.sourceDescriptor as ESGeoGridSourceDescriptor;
+  const descriptor = layerDescriptor.source_descriptor as ESGeoGridSourceDescriptor;
 
   if (descriptor.resolution === GRID_RESOLUTION.COARSE) {
     return RESOLUTION_KEYS.COARSE;
@@ -266,24 +266,24 @@ function getResolutionKey(layerDescriptor: LayerDescriptor): RESOLUTION_KEYS | n
 
 function getScalingKey(layerDescriptor: LayerDescriptor): SCALING_KEYS | null {
   if (
-    !layerDescriptor.sourceDescriptor ||
-    layerDescriptor.sourceDescriptor.type !== SOURCE_TYPES.ES_SEARCH ||
-    !(layerDescriptor.sourceDescriptor as ESSearchSourceDescriptor).scalingType
+    !layerDescriptor.source_descriptor ||
+    layerDescriptor.source_descriptor.type !== SOURCE_TYPES.ES_SEARCH ||
+    !(layerDescriptor.source_descriptor as ESSearchSourceDescriptor).scaling_type
   ) {
     return null;
   }
 
-  const descriptor = layerDescriptor.sourceDescriptor as ESSearchSourceDescriptor;
+  const descriptor = layerDescriptor.source_descriptor as ESSearchSourceDescriptor;
 
-  if (descriptor.scalingType === SCALING_TYPES.CLUSTERS) {
+  if (descriptor.scaling_type === SCALING_TYPES.CLUSTERS) {
     return SCALING_KEYS.CLUSTERS;
   }
 
-  if (descriptor.scalingType === SCALING_TYPES.MVT) {
+  if (descriptor.scaling_type === SCALING_TYPES.MVT) {
     return SCALING_KEYS.MVT;
   }
 
-  if (descriptor.scalingType === SCALING_TYPES.LIMIT) {
+  if (descriptor.scaling_type === SCALING_TYPES.LIMIT) {
     return SCALING_KEYS.LIMIT;
   }
 

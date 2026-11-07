@@ -47,12 +47,12 @@ class MockDynamicStyleProperty {
 }
 
 const defaultProps = {
-  iconPaletteId: 'filledShapes',
+  icon_palette_id: 'filledShapes',
   onChange: () => {},
   styleProperty:
     new MockDynamicStyleProperty() as unknown as IDynamicStyleProperty<IconDynamicOptions>,
   isCustomOnly: false,
-  customIconStops: [
+  custom_icon_stops: [
     {
       stop: null,
       icon: 'circle',
@@ -73,8 +73,8 @@ test('Should render custom stops input when useCustomIconMap', () => {
   const component = shallow(
     <IconMapSelect
       {...defaultProps}
-      useCustomIconMap={true}
-      customIconStops={[
+      use_custom_icon_map={true}
+      custom_icon_stops={[
         {
           stop: null,
           icon: 'circle',
@@ -96,21 +96,21 @@ test('Should render icon map select with custom icons', () => {
       {...defaultProps}
       customIcons={[
         {
-          symbolId: '__kbn__custom_icon_sdf__foobar',
+          symbol_id: '__kbn__custom_icon_sdf__foobar',
           label: 'My Custom Icon',
           svg: '<svg width="200" height="250" xmlns="http://www.w3.org/2000/svg"><path stroke="#000" fill="transparent" stroke-width="5" d="M10 10h30v30H10z"/></svg>',
           cutoff: 0.25,
           radius: 0.25,
         },
         {
-          symbolId: '__kbn__custom_icon_sdf__bizzbuzz',
+          symbol_id: '__kbn__custom_icon_sdf__bizzbuzz',
           label: 'My Other Custom Icon',
           svg: '<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" width="531.74" height="460.5" overflow="visible" xml:space="preserve"><path stroke="#000" d="M.866 460 265.87 1l265.004 459z"/></svg>',
           cutoff: 0.3,
           radius: 0.15,
         },
       ]}
-      customIconStops={[
+      custom_icon_stops={[
         {
           stop: null,
           icon: '__kbn__custom_icon_sdf__bizzbuzz',

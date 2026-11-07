@@ -67,12 +67,12 @@ describe('ESGeoGridSource', () => {
   };
   const geogridSource = new ESGeoGridSource({
     id: 'foobar',
-    indexPatternId: 'fooIp',
-    geoField: geoFieldName,
+    index_pattern_id: 'fooIp',
+    geo_field: geoFieldName,
     metrics: [],
     resolution: GRID_RESOLUTION.COARSE,
     type: SOURCE_TYPES.ES_GEO_GRID,
-    requestType: RENDER_AS.POINT,
+    request_type: RENDER_AS.POINT,
   });
   geogridSource._runEsQuery = async (args: unknown) => {
     return {
@@ -294,12 +294,12 @@ describe('ESGeoGridSource', () => {
     it('Should not return valid precision for super-fine resolution', () => {
       const superFineSource = new ESGeoGridSource({
         id: 'foobar',
-        indexPatternId: 'fooIp',
-        geoField: geoFieldName,
+        index_pattern_id: 'fooIp',
+        geo_field: geoFieldName,
         metrics: [],
         resolution: GRID_RESOLUTION.SUPER_FINE,
         type: SOURCE_TYPES.ES_GEO_GRID,
-        requestType: RENDER_AS.HEATMAP,
+        request_type: RENDER_AS.HEATMAP,
       });
       expect(superFineSource.getGeoGridPrecision(10)).toBe(0);
     });
@@ -308,12 +308,12 @@ describe('ESGeoGridSource', () => {
   describe('IMvtVectorSource', () => {
     const mvtGeogridSource = new ESGeoGridSource({
       id: 'foobar',
-      indexPatternId: 'fooIp',
-      geoField: geoFieldName,
+      index_pattern_id: 'fooIp',
+      geo_field: geoFieldName,
       metrics: [],
       resolution: GRID_RESOLUTION.SUPER_FINE,
       type: SOURCE_TYPES.ES_GEO_GRID,
-      requestType: RENDER_AS.HEATMAP,
+      request_type: RENDER_AS.HEATMAP,
     });
 
     it('getTileSourceLayer', () => {

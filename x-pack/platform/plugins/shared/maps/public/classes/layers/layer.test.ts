@@ -34,7 +34,7 @@ describe('isFittable', () => {
     {
       isVisible: true,
       fitToBounds: true,
-      includeInFitToBounds: false,
+      include_in_fit_to_bounds: false,
       canFit: false,
     },
   ].forEach((test) => {
@@ -44,7 +44,7 @@ describe('isFittable', () => {
       const layer = new AbstractLayer({
         layerDescriptor: {
           visible: test.isVisible,
-          includeInFitToBounds: test.includeInFitToBounds,
+          include_in_fit_to_bounds: test.include_in_fit_to_bounds,
         },
         source: {
           supportsFitToBounds: () => test.fitToBounds,
@@ -69,8 +69,8 @@ describe('isLayerLoading', () => {
   test('Should return false when layer is not visible at zoom level', () => {
     const layer = new AbstractLayer({
       layerDescriptor: {
-        maxZoom: 24,
-        minZoom: 3,
+        max_zoom: 24,
+        min_zoom: 3,
       },
       source: {} as unknown as ISource,
     });

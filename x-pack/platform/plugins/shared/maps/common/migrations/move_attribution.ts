@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { Writable } from '@kbn/utility-types';
 import type { StoredMapAttributes } from '../../server';
-import type { LayerDescriptor } from '../descriptor_types';
+import type { StoredLayer } from './stored_layer';
 
 // In 7.14, attribution added to the layer_descriptor. Prior to 7.14, 2 sources, WMS and TMS, had attribution on source descriptor.
 export function moveAttribution({
@@ -19,19 +18,19 @@ export function moveAttribution({
     return attributes;
   }
 
-  let layerList: LayerDescriptor[] = [];
+  let layerList: StoredLayer[] = [];
   try {
     layerList = JSON.parse(attributes.layerListJSON);
   } catch (e) {
     throw new Error('Unable to parse attribute layerListJSON');
   }
 
-  layerList.forEach((layer: Writable<LayerDescriptor>) => {
+  layerList.forEach((layer) => {
     const sourceDescriptor = layer.sourceDescriptor as {
       attributionText?: string;
       attributionUrl?: string;
     };
-    if (sourceDescriptor.attributionText && sourceDescriptor.attributionUrl) {
+    if (sourceDescriptor?.attributionText && sourceDescriptor.attributionUrl) {
       layer.attribution = {
         label: sourceDescriptor.attributionText,
         url: sourceDescriptor.attributionUrl,

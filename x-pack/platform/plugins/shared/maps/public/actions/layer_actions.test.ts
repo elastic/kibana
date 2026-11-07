@@ -86,7 +86,7 @@ describe('layer_actions', () => {
     const ORIGINAL_LAYER_LIST = [
       {
         id: 'layer0',
-        sourceDescriptor: {
+        source_descriptor: {
           id: 'world_countries',
           type: SOURCE_TYPES.EMS_FILE,
         },
@@ -94,7 +94,7 @@ describe('layer_actions', () => {
       },
       {
         id: 'layer1',
-        sourceDescriptor: {
+        source_descriptor: {
           id: 'australia_states',
           type: SOURCE_TYPES.EMS_FILE,
         },
@@ -102,7 +102,7 @@ describe('layer_actions', () => {
       },
       {
         id: 'layer2',
-        sourceDescriptor: {
+        source_descriptor: {
           id: 'canada_provinces',
           type: SOURCE_TYPES.EMS_FILE,
         },
@@ -110,7 +110,7 @@ describe('layer_actions', () => {
       },
       {
         id: 'layer3',
-        sourceDescriptor: {
+        source_descriptor: {
           id: 'usa_states',
           type: SOURCE_TYPES.EMS_FILE,
         },
@@ -140,7 +140,7 @@ describe('layer_actions', () => {
       store.dispatch<any>(
         addLayer({
           id: 'layer4',
-          sourceDescriptor: {
+          source_descriptor: {
             id: 'uk_subdivisions',
             type: SOURCE_TYPES.EMS_FILE,
           },
@@ -165,7 +165,7 @@ describe('layer_actions', () => {
         Object {
           "__dataRequests": Array [],
           "id": "layer0",
-          "sourceDescriptor": Object {
+          "source_descriptor": Object {
             "id": "world_countries",
             "type": "EMS_FILE",
           },

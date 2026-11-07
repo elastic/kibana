@@ -68,7 +68,7 @@ export function UpdateSourceEditor(props: Props) {
           <TooltipSelector
             tooltipFields={props.tooltipFields}
             onChange={(selectedFieldNames: string[]) => {
-              props.onChange({ propName: 'tooltipProperties', value: selectedFieldNames });
+              props.onChange({ propName: 'tooltip_properties', value: selectedFieldNames });
             }}
             fields={fields}
           />

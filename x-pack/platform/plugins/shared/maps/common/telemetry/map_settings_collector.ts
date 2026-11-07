@@ -15,8 +15,8 @@ export class MapSettingsCollector {
       return;
     }
 
-    if (attributes.settings.customIcons) {
-      this._customIconsCount = attributes.settings.customIcons.length;
+    if (attributes.settings.custom_icons) {
+      this._customIconsCount = attributes.settings.custom_icons.length;
     }
   }
 

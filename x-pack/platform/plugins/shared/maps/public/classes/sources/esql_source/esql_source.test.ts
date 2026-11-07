@@ -125,7 +125,7 @@ describe('getGeoJsonWithMeta', () => {
     sourceMeta: null,
     applyGlobalQuery: false,
     applyGlobalTime: false,
-    applyForceRefresh: false,
+    apply_force_refresh: false,
     isForceRefresh: false,
     isFeatureEditorOpenForLayer: false,
     executionContext: { name: 'maps' },
@@ -149,10 +149,10 @@ describe('getGeoJsonWithMeta', () => {
   const createSource = () =>
     new ESQLSource({
       esql: ESQL,
-      geoField: 'geo.coordinates',
-      narrowByGlobalSearch: false,
-      narrowByMapBounds: false,
-      narrowByGlobalTime: false,
+      geo_field: 'geo.coordinates',
+      narrow_by_global_search: false,
+      narrow_by_map_bounds: false,
+      narrow_by_global_time: false,
     });
 
   beforeEach(() => {

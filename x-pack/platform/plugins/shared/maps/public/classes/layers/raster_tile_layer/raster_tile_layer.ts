@@ -168,8 +168,8 @@ export class RasterTileLayer extends AbstractLayer {
         id: mbLayerId,
         type: 'raster',
         source: mbSourceId,
-        minzoom: this._descriptor.minZoom,
-        maxzoom: this._descriptor.maxZoom,
+        minzoom: this._descriptor.min_zoom,
+        maxzoom: this._descriptor.max_zoom,
       });
     }
 

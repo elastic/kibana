@@ -21,29 +21,29 @@ interface Props {
 
 export function SpatialFiltersPanel({ settings, updateMapSetting }: Props) {
   const onAlphaChange = (alpha: number) => {
-    updateMapSetting('spatialFiltersAlpa', alpha);
+    updateMapSetting('spatial_filters_alpa', alpha);
   };
 
   const onFillColorChange = (color: string) => {
-    updateMapSetting('spatialFiltersFillColor', color);
+    updateMapSetting('spatial_filters_fill_color', color);
   };
 
   const onLineColorChange = (color: string) => {
-    updateMapSetting('spatialFiltersLineColor', color);
+    updateMapSetting('spatial_filters_line_color', color);
   };
 
   const onShowSpatialFiltersChange = (event: EuiSwitchEvent) => {
-    updateMapSetting('showSpatialFilters', event.target.checked);
+    updateMapSetting('show_spatial_filters', event.target.checked);
   };
 
   const renderStyleInputs = () => {
-    if (!settings.showSpatialFilters) {
+    if (!settings.show_spatial_filters) {
       return null;
     }
 
     return (
       <>
-        <AlphaSlider alpha={settings.spatialFiltersAlpa} onChange={onAlphaChange} />
+        <AlphaSlider alpha={settings.spatial_filters_alpa} onChange={onAlphaChange} />
 
         <EuiFormRow
           label={i18n.translate('xpack.maps.mapSettingsPanel.spatialFiltersFillColorLabel', {
@@ -52,7 +52,7 @@ export function SpatialFiltersPanel({ settings, updateMapSetting }: Props) {
           display="columnCompressed"
         >
           <MbValidatedColorPicker
-            color={settings.spatialFiltersFillColor}
+            color={settings.spatial_filters_fill_color}
             onChange={onFillColorChange}
           />
         </EuiFormRow>
@@ -64,7 +64,7 @@ export function SpatialFiltersPanel({ settings, updateMapSetting }: Props) {
           display="columnCompressed"
         >
           <MbValidatedColorPicker
-            color={settings.spatialFiltersLineColor}
+            color={settings.spatial_filters_line_color}
             onChange={onLineColorChange}
           />
         </EuiFormRow>
@@ -89,7 +89,7 @@ export function SpatialFiltersPanel({ settings, updateMapSetting }: Props) {
           label={i18n.translate('xpack.maps.mapSettingsPanel.showSpatialFiltersLabel', {
             defaultMessage: 'Show spatial filters on map',
           })}
-          checked={settings.showSpatialFilters}
+          checked={settings.show_spatial_filters}
           onChange={onShowSpatialFiltersChange}
           compressed
         />

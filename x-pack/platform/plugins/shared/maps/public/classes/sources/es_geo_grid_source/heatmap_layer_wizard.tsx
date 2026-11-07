@@ -37,7 +37,7 @@ export const heatmapLayerWizardConfig: LayerWizard = {
       }
 
       const layerDescriptor = HeatmapLayer.createDescriptor({
-        sourceDescriptor: ESGeoGridSource.createDescriptor({
+        source_descriptor: ESGeoGridSource.createDescriptor({
           ...sourceConfig,
           resolution: GRID_RESOLUTION.SUPER_FINE,
         }),

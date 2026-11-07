@@ -6,10 +6,10 @@ exports[`should render 1`] = `
     defaultDynamicStyleOptions={
       Object {
         "color": "Blues",
-        "colorCategory": "palette_0",
+        "color_category": "palette_0",
         "field": undefined,
-        "fieldMetaOptions": Object {
-          "isEnabled": true,
+        "field_meta_options": Object {
+          "is_enabled": true,
           "sigma": 3,
         },
       }
@@ -65,10 +65,10 @@ exports[`should render 1`] = `
     defaultDynamicStyleOptions={
       Object {
         "color": "Blues",
-        "colorCategory": "palette_0",
+        "color_category": "palette_0",
         "field": undefined,
-        "fieldMetaOptions": Object {
-          "isEnabled": true,
+        "field_meta_options": Object {
+          "is_enabled": true,
           "sigma": 3,
         },
       }
@@ -126,12 +126,12 @@ exports[`should render 1`] = `
     defaultDynamicStyleOptions={
       Object {
         "field": undefined,
-        "fieldMetaOptions": Object {
-          "isEnabled": true,
+        "field_meta_options": Object {
+          "is_enabled": true,
           "sigma": 3,
         },
-        "maxSize": 10,
-        "minSize": 1,
+        "max_size": 10,
+        "min_size": 1,
       }
     }
     defaultStaticStyleOptions={
@@ -202,9 +202,9 @@ exports[`should render 1`] = `
         "_layerMaxZoom": 24,
         "_layerMinZoom": 0,
         "_options": Object {
-          "maxZoom": 24,
-          "minZoom": 0,
-          "useLayerZoomRange": true,
+          "max_zoom": 24,
+          "min_zoom": 0,
+          "use_layer_zoom_range": true,
         },
         "_styleName": "labelZoomRange",
       }
@@ -217,10 +217,10 @@ exports[`should render 1`] = `
     defaultDynamicStyleOptions={
       Object {
         "color": "Blues",
-        "colorCategory": "palette_0",
+        "color_category": "palette_0",
         "field": undefined,
-        "fieldMetaOptions": Object {
-          "isEnabled": true,
+        "field_meta_options": Object {
+          "is_enabled": true,
           "sigma": 3,
         },
       }
@@ -278,12 +278,12 @@ exports[`should render 1`] = `
     defaultDynamicStyleOptions={
       Object {
         "field": undefined,
-        "fieldMetaOptions": Object {
-          "isEnabled": true,
+        "field_meta_options": Object {
+          "is_enabled": true,
           "sigma": 3,
         },
-        "maxSize": 32,
-        "minSize": 7,
+        "max_size": 32,
+        "min_size": 7,
       }
     }
     defaultStaticStyleOptions={
@@ -312,10 +312,10 @@ exports[`should render 1`] = `
     defaultDynamicStyleOptions={
       Object {
         "color": "Blues",
-        "colorCategory": "palette_0",
+        "color_category": "palette_0",
         "field": undefined,
-        "fieldMetaOptions": Object {
-          "isEnabled": true,
+        "field_meta_options": Object {
+          "is_enabled": true,
           "sigma": 3,
         },
       }
@@ -410,10 +410,10 @@ exports[`should render with no style fields 1`] = `
     defaultDynamicStyleOptions={
       Object {
         "color": "Blues",
-        "colorCategory": "palette_0",
+        "color_category": "palette_0",
         "field": undefined,
-        "fieldMetaOptions": Object {
-          "isEnabled": true,
+        "field_meta_options": Object {
+          "is_enabled": true,
           "sigma": 3,
         },
       }
@@ -458,10 +458,10 @@ exports[`should render with no style fields 1`] = `
     defaultDynamicStyleOptions={
       Object {
         "color": "Blues",
-        "colorCategory": "palette_0",
+        "color_category": "palette_0",
         "field": undefined,
-        "fieldMetaOptions": Object {
-          "isEnabled": true,
+        "field_meta_options": Object {
+          "is_enabled": true,
           "sigma": 3,
         },
       }
@@ -508,12 +508,12 @@ exports[`should render with no style fields 1`] = `
     defaultDynamicStyleOptions={
       Object {
         "field": undefined,
-        "fieldMetaOptions": Object {
-          "isEnabled": true,
+        "field_meta_options": Object {
+          "is_enabled": true,
           "sigma": 3,
         },
-        "maxSize": 10,
-        "minSize": 1,
+        "max_size": 10,
+        "min_size": 1,
       }
     }
     defaultStaticStyleOptions={
@@ -573,9 +573,9 @@ exports[`should render with no style fields 1`] = `
         "_layerMaxZoom": 24,
         "_layerMinZoom": 0,
         "_options": Object {
-          "maxZoom": 24,
-          "minZoom": 0,
-          "useLayerZoomRange": true,
+          "max_zoom": 24,
+          "min_zoom": 0,
+          "use_layer_zoom_range": true,
         },
         "_styleName": "labelZoomRange",
       }
@@ -588,10 +588,10 @@ exports[`should render with no style fields 1`] = `
     defaultDynamicStyleOptions={
       Object {
         "color": "Blues",
-        "colorCategory": "palette_0",
+        "color_category": "palette_0",
         "field": undefined,
-        "fieldMetaOptions": Object {
-          "isEnabled": true,
+        "field_meta_options": Object {
+          "is_enabled": true,
           "sigma": 3,
         },
       }
@@ -638,12 +638,12 @@ exports[`should render with no style fields 1`] = `
     defaultDynamicStyleOptions={
       Object {
         "field": undefined,
-        "fieldMetaOptions": Object {
-          "isEnabled": true,
+        "field_meta_options": Object {
+          "is_enabled": true,
           "sigma": 3,
         },
-        "maxSize": 32,
-        "minSize": 7,
+        "max_size": 32,
+        "min_size": 7,
       }
     }
     defaultStaticStyleOptions={
@@ -672,10 +672,10 @@ exports[`should render with no style fields 1`] = `
     defaultDynamicStyleOptions={
       Object {
         "color": "Blues",
-        "colorCategory": "palette_0",
+        "color_category": "palette_0",
         "field": undefined,
-        "fieldMetaOptions": Object {
-          "isEnabled": true,
+        "field_meta_options": Object {
+          "is_enabled": true,
           "sigma": 3,
         },
       }

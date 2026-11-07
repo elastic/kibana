@@ -71,8 +71,8 @@ export class DecimalDegreesForm extends Component<Props, State> {
     const { isInvalid: isLonInvalid, error: lonError } = withinRange(this.state.lon, -180, 180);
     const { isInvalid: isZoomInvalid, error: zoomError } = withinRange(
       this.state.zoom,
-      this.props.settings.minZoom,
-      this.props.settings.maxZoom
+      this.props.settings.min_zoom,
+      this.props.settings.max_zoom
     );
 
     return (

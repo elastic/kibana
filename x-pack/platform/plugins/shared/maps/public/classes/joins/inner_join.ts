@@ -67,8 +67,8 @@ export class InnerJoin {
   constructor(joinDescriptor: Partial<JoinDescriptor>, leftSource: IVectorSource) {
     this._descriptor = joinDescriptor;
     this._rightSource = createJoinSource(this._descriptor.right);
-    this._leftField = joinDescriptor.leftField
-      ? leftSource.getFieldByName(joinDescriptor.leftField)
+    this._leftField = joinDescriptor.left_field
+      ? leftSource.getFieldByName(joinDescriptor.left_field)
       : undefined;
   }
 

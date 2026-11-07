@@ -5,7 +5,7 @@ exports[`renderDataMappingPopover Should render OrdinalDataMappingPopover 1`] = 
   dataMappingFunction="INTERPOLATE"
   fieldMetaOptions={
     Object {
-      "isEnabled": true,
+      "is_enabled": true,
     }
   }
   onChange={[Function]}

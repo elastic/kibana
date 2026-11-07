@@ -46,7 +46,7 @@ export const geoLineLayerWizardConfig: LayerWizard = {
       }
 
       const layerDescriptor = GeoJsonVectorLayer.createDescriptor({
-        sourceDescriptor: ESGeoLineSource.createDescriptor(sourceConfig),
+        source_descriptor: ESGeoLineSource.createDescriptor(sourceConfig),
         style: VectorStyle.createDescriptor({
           [VECTOR_STYLES.LINE_WIDTH]: {
             type: STYLE_TYPE.STATIC,

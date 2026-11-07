@@ -53,11 +53,14 @@ export function getSourceTitle() {
 }
 
 export class EMSFileSource extends AbstractVectorSource implements IEmsFileSource {
-  static createDescriptor({ id, tooltipProperties = [] }: Partial<EMSFileSourceDescriptor>) {
+  static createDescriptor({
+    id,
+    tooltip_properties: tooltipProperties = [],
+  }: Partial<EMSFileSourceDescriptor>) {
     return {
       type: SOURCE_TYPES.EMS_FILE,
       id: id!,
-      tooltipProperties,
+      tooltip_properties: tooltipProperties,
     } as EMSFileSourceDescriptor;
   }
 
@@ -67,7 +70,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
   constructor(descriptor: Partial<EMSFileSourceDescriptor>) {
     super(EMSFileSource.createDescriptor(descriptor));
     this._descriptor = EMSFileSource.createDescriptor(descriptor);
-    this._tooltipFields = (this._descriptor.tooltipProperties ?? []).map((propertyKey) =>
+    this._tooltipFields = (this._descriptor.tooltip_properties ?? []).map((propertyKey) =>
       this.getFieldByName(propertyKey)
     );
   }

@@ -10,7 +10,7 @@ import { EMSFileSource } from './ems_file_source';
 jest.mock('../../layers/vector_layer', () => {});
 
 function makeEMSFileSource(tooltipProperties: string[]) {
-  const emsFileSource = new EMSFileSource({ tooltipProperties });
+  const emsFileSource = new EMSFileSource({ tooltip_properties: tooltipProperties });
   emsFileSource.getEmsFieldLabel = async (name: string) => {
     return name === 'iso2' ? 'ISO 2 CODE' : name;
   };

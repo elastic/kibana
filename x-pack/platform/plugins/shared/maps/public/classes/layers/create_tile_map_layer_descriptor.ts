@@ -98,17 +98,17 @@ export function createTileMapLayerDescriptor({
 
   const metricsDescriptor = createAggDescriptor(mapType, metricAgg, metricFieldName);
   const geoGridSourceDescriptor = ESGeoGridSource.createDescriptor({
-    indexPatternId,
-    geoField: geoFieldName,
+    index_pattern_id: indexPatternId,
+    geo_field: geoFieldName,
     metrics: [metricsDescriptor],
-    requestType: getGeoGridRequestType(mapType),
+    request_type: getGeoGridRequestType(mapType),
     resolution: GRID_RESOLUTION.MOST_FINE,
   });
 
   if (isHeatmap(mapType)) {
     return HeatmapLayer.createDescriptor({
       label,
-      sourceDescriptor: geoGridSourceDescriptor,
+      source_descriptor: geoGridSourceDescriptor,
     });
   }
 
@@ -132,10 +132,10 @@ export function createTileMapLayerDescriptor({
         field: metricStyleField,
         color: colorPallette ? colorPallette.value : 'Yellow to Red',
         type: COLOR_MAP_TYPE.ORDINAL,
-        fieldMetaOptions: {
+        field_meta_options: {
           ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options as ColorDynamicOptions)
-            .fieldMetaOptions,
-          isEnabled: false,
+            .field_meta_options,
+          is_enabled: false,
         },
       },
     },
@@ -151,12 +151,12 @@ export function createTileMapLayerDescriptor({
       type: STYLE_TYPE.DYNAMIC,
       options: {
         ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options as SizeDynamicOptions),
-        maxSize: 18,
+        max_size: 18,
         field: metricStyleField,
-        fieldMetaOptions: {
+        field_meta_options: {
           ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options as SizeDynamicOptions)
-            .fieldMetaOptions,
-          isEnabled: false,
+            .field_meta_options,
+          is_enabled: false,
         },
       },
     };
@@ -164,7 +164,7 @@ export function createTileMapLayerDescriptor({
 
   return GeoJsonVectorLayer.createDescriptor({
     label,
-    sourceDescriptor: geoGridSourceDescriptor,
+    source_descriptor: geoGridSourceDescriptor,
     style: VectorStyle.createDescriptor(styleProperties),
   });
 }

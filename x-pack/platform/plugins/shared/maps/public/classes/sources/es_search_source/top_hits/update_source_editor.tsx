@@ -116,11 +116,11 @@ export class TopHitsUpdateSourceEditor extends Component<Props, State> {
     });
   }
   _onTooltipPropertiesChange = (propertyNames: string[]) => {
-    this.props.onChange({ propName: 'tooltipProperties', value: propertyNames });
+    this.props.onChange({ propName: 'tooltip_properties', value: propertyNames });
   };
 
   _onFilterByMapBoundsChange = (event: EuiSwitchEvent) => {
-    this.props.onChange({ propName: 'filterByMapBounds', value: event.target.checked });
+    this.props.onChange({ propName: 'filter_by_map_bounds', value: event.target.checked });
   };
 
   render() {

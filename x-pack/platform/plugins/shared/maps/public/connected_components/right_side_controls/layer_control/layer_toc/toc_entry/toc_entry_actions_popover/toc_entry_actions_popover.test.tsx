@@ -39,7 +39,7 @@ class LayerMock extends AbstractLayer implements ILayer {
     const source = new MockSource(sourceDescriptor);
     const layerDescriptor = {
       id: 'testLayer',
-      sourceDescriptor,
+      source_descriptor: sourceDescriptor,
     };
     super({ layerDescriptor, source });
   }

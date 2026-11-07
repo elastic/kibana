@@ -95,7 +95,7 @@ describe('cloneDescriptor', () => {
         style: styleDescriptor,
         joins: [
           {
-            leftField: 'iso2',
+            left_field: 'iso2',
             right: {
               id: '557d0f15',
               indexPatternId: 'myIndexPattern',
@@ -138,7 +138,7 @@ describe('cloneDescriptor', () => {
         style: styleDescriptor,
         joins: [
           {
-            leftField: 'iso2',
+            left_field: 'iso2',
             right: {
               id: '557d0f15',
               indexPatternId: 'myIndexPattern',

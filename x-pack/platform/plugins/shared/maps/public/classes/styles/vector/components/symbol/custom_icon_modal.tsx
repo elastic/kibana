@@ -402,7 +402,7 @@ export class CustomIconModal extends Component<Props, State> {
                       'settings_custom_icons_add'
                     );
                   }
-                  onSave({ symbolId: symbolId ?? getCustomIconId(), label, svg, cutoff, radius });
+                  onSave({ symbol_id: symbolId ?? getCustomIconId(), label, svg, cutoff, radius });
                 }}
                 data-test-subj="mapsCustomIconForm-submit"
                 isDisabled={!isComplete}

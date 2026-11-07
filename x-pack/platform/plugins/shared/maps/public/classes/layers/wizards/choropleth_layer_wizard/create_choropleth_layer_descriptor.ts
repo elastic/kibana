@@ -34,14 +34,14 @@ import { getDefaultDynamicProperties } from '../../../styles/vector/vector_style
 const defaultDynamicProperties = getDefaultDynamicProperties();
 
 function createChoroplethLayerDescriptor({
-  sourceDescriptor,
-  leftField,
+  source_descriptor: sourceDescriptor,
+  left_field: leftField,
   rightIndexPatternId,
   rightTermField,
   layerType,
 }: {
-  sourceDescriptor: EMSFileSourceDescriptor | ESSearchSourceDescriptor;
-  leftField: string;
+  source_descriptor: EMSFileSourceDescriptor | ESSearchSourceDescriptor;
+  left_field: string;
   rightIndexPatternId: string;
   rightTermField: string;
   layerType: LAYER_TYPE.GEOJSON_VECTOR | LAYER_TYPE.MVT_VECTOR;
@@ -90,16 +90,16 @@ function createChoroplethLayerDescriptor({
 
   const joins = [
     {
-      leftField,
+      left_field: leftField,
       right: {
         type: SOURCE_TYPES.ES_TERM_SOURCE,
         id: joinId,
-        indexPatternId: rightIndexPatternId,
+        index_pattern_id: rightIndexPatternId,
         term: rightTermField,
         metrics: [metricsDescriptor],
-        applyGlobalQuery: true,
-        applyGlobalTime: true,
-        applyForceRefresh: true,
+        apply_global_query: true,
+        apply_global_time: true,
+        apply_force_refresh: true,
       } as ESTermSourceDescriptor,
     },
   ];
@@ -107,12 +107,12 @@ function createChoroplethLayerDescriptor({
   return layerType === LAYER_TYPE.MVT_VECTOR
     ? MvtVectorLayer.createDescriptor({
         joins,
-        sourceDescriptor,
+        source_descriptor: sourceDescriptor,
         style: VectorStyle.createDescriptor(styleProperties),
       })
     : GeoJsonVectorLayer.createDescriptor({
         joins,
-        sourceDescriptor,
+        source_descriptor: sourceDescriptor,
         style: VectorStyle.createDescriptor(styleProperties),
       });
 }
@@ -129,11 +129,11 @@ export function createEmsChoroplethLayerDescriptor({
   rightTermField: string;
 }) {
   return createChoroplethLayerDescriptor({
-    sourceDescriptor: EMSFileSource.createDescriptor({
+    source_descriptor: EMSFileSource.createDescriptor({
       id: leftEmsFileId,
-      tooltipProperties: [leftEmsField],
+      tooltip_properties: [leftEmsField],
     }),
-    leftField: leftEmsField,
+    left_field: leftEmsField,
     rightIndexPatternId,
     rightTermField,
     layerType: LAYER_TYPE.GEOJSON_VECTOR,
@@ -154,16 +154,16 @@ export function createEsChoroplethLayerDescriptor({
   rightTermField: string;
 }) {
   return createChoroplethLayerDescriptor({
-    sourceDescriptor: ESSearchSource.createDescriptor({
-      indexPatternId: leftIndexPatternId,
-      geoField: leftGeoField,
-      scalingType: SCALING_TYPES.MVT,
-      tooltipProperties: [leftJoinField],
-      applyGlobalQuery: false,
-      applyGlobalTime: false,
-      applyForceRefresh: false,
+    source_descriptor: ESSearchSource.createDescriptor({
+      index_pattern_id: leftIndexPatternId,
+      geo_field: leftGeoField,
+      scaling_type: SCALING_TYPES.MVT,
+      tooltip_properties: [leftJoinField],
+      apply_global_query: false,
+      apply_global_time: false,
+      apply_force_refresh: false,
     }),
-    leftField: leftJoinField,
+    left_field: leftJoinField,
     rightIndexPatternId,
     rightTermField,
     layerType: LAYER_TYPE.MVT_VECTOR,

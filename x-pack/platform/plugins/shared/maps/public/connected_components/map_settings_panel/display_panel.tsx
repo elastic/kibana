@@ -36,7 +36,7 @@ interface Props {
 
 export function DisplayPanel({ settings, updateMapSetting }: Props) {
   const onBackgroundColorChange = (color: string) => {
-    updateMapSetting('backgroundColor', color);
+    updateMapSetting('background_color', color);
   };
 
   const onProjectionChange = (event: ChangeEvent<HTMLSelectElement>) => {
@@ -44,7 +44,7 @@ export function DisplayPanel({ settings, updateMapSetting }: Props) {
   };
 
   const onShowScale = (event: EuiSwitchEvent) => {
-    updateMapSetting('showScaleControl', event.target.checked);
+    updateMapSetting('show_scale_control', event.target.checked);
   };
 
   return (
@@ -65,7 +65,7 @@ export function DisplayPanel({ settings, updateMapSetting }: Props) {
         display="columnCompressed"
       >
         <MbValidatedColorPicker
-          color={settings.backgroundColor}
+          color={settings.background_color}
           onChange={onBackgroundColorChange}
         />
       </EuiFormRow>
@@ -88,7 +88,7 @@ export function DisplayPanel({ settings, updateMapSetting }: Props) {
           label={i18n.translate('xpack.maps.mapSettingsPanel.showScaleLabel', {
             defaultMessage: 'Show scale',
           })}
-          checked={settings.showScaleControl}
+          checked={settings.show_scale_control}
           onChange={onShowScale}
           compressed
         />

@@ -47,7 +47,7 @@ export function getSourceTitle() {
 }
 
 type NormalizedEMSTMSSourceDescriptor = EMSTMSSourceDescriptor &
-  Required<Pick<EMSTMSSourceDescriptor, 'isAutoSelect' | 'lightModeDefault'>>;
+  Required<Pick<EMSTMSSourceDescriptor, 'is_auto_select' | 'light_mode_default'>>;
 
 export class EMSTMSSource extends AbstractSource implements ITMSSource {
   static createDescriptor(
@@ -56,11 +56,11 @@ export class EMSTMSSource extends AbstractSource implements ITMSSource {
     return {
       type: SOURCE_TYPES.EMS_TMS,
       id: descriptor.id,
-      isAutoSelect:
-        typeof descriptor.isAutoSelect !== 'undefined' ? descriptor.isAutoSelect : false,
-      lightModeDefault:
-        descriptor.lightModeDefault === undefined ||
-        descriptor.lightModeDefault !== DEFAULT_EMS_ROADMAP_ID
+      is_auto_select:
+        typeof descriptor.is_auto_select !== 'undefined' ? descriptor.is_auto_select : false,
+      light_mode_default:
+        descriptor.light_mode_default === undefined ||
+        descriptor.light_mode_default !== DEFAULT_EMS_ROADMAP_ID
           ? getEmsTileLayerId().desaturated
           : DEFAULT_EMS_ROADMAP_ID,
     };
@@ -93,7 +93,7 @@ export class EMSTMSSource extends AbstractSource implements ITMSSource {
         label: i18n.translate('xpack.maps.source.emsTile.serviceId', {
           defaultMessage: `Tile service`,
         }),
-        value: this._descriptor.isAutoSelect
+        value: this._descriptor.is_auto_select
           ? `${tileServiceName} - ${autoSelectMsg}`
           : tileServiceName,
       },
@@ -172,11 +172,11 @@ export class EMSTMSSource extends AbstractSource implements ITMSSource {
   }
 
   getTileLayerId() {
-    if (!this._descriptor.isAutoSelect && this._descriptor.id) {
+    if (!this._descriptor.is_auto_select && this._descriptor.id) {
       return this._descriptor.id;
     }
 
-    return getIsDarkMode() ? getEmsTileLayerId().dark : this._descriptor.lightModeDefault;
+    return getIsDarkMode() ? getEmsTileLayerId().dark : this._descriptor.light_mode_default;
   }
 
   async getLicensedFeatures() {

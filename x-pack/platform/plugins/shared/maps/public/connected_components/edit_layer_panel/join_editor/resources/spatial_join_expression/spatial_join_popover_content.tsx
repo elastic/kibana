@@ -31,14 +31,14 @@ export function SpatialJoinPopoverContent(props: Props) {
   const [unableToLoadDataView, setUnableToLoadDataView] = useState<boolean>(false);
 
   useEffect(() => {
-    if (props.sourceDescriptor.indexPatternId === undefined) {
+    if (props.sourceDescriptor.index_pattern_id === undefined) {
       return;
     }
 
     let ignore = false;
     setIsLoading(true);
     getIndexPatternService()
-      .get(props.sourceDescriptor.indexPatternId)
+      .get(props.sourceDescriptor.index_pattern_id)
       .then((dataView) => {
         if (!ignore) {
           setIsLoading(false);
@@ -66,7 +66,7 @@ export function SpatialJoinPopoverContent(props: Props) {
         announceOnMount
         title={i18n.translate('xpack.maps.spatialJoinExpression.noDataViewTitle', {
           defaultMessage: 'Unable to load data view {dataViewId}.',
-          values: { dataViewId: props.sourceDescriptor.indexPatternId },
+          values: { dataViewId: props.sourceDescriptor.index_pattern_id },
         })}
       />
       <EuiSpacer size="s" />
@@ -75,14 +75,14 @@ export function SpatialJoinPopoverContent(props: Props) {
 
   const geoFieldSelect = rightDataView ? (
     <GeoFieldSelect
-      value={props.sourceDescriptor.geoField ? props.sourceDescriptor.geoField : ''}
+      value={props.sourceDescriptor.geo_field ? props.sourceDescriptor.geo_field : ''}
       onChange={(geoField?: string) => {
         if (!geoField) {
           return;
         }
         props.onSourceDescriptorChange({
           ...props.sourceDescriptor,
-          geoField,
+          geo_field: geoField,
         });
       }}
       geoFields={rightGeoFields}
@@ -126,8 +126,8 @@ export function SpatialJoinPopoverContent(props: Props) {
             setRightGeoFields(geoFields);
             props.onSourceDescriptorChange({
               ...props.sourceDescriptor,
-              indexPatternId: dataView.id,
-              geoField: geoFields.length ? geoFields[0].name : undefined,
+              index_pattern_id: dataView.id,
+              geo_field: geoFields.length ? geoFields[0].name : undefined,
             });
           }}
         />

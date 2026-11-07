@@ -9,10 +9,10 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { TimeRange } from '@kbn/es-query';
 import type { MapAttributes, StoredMapAttributes } from '../../server';
 import { injectReferences } from '../migrations/references';
-import type { LayerDescriptor } from '../descriptor_types';
 import { mapStateKeys, uiStateKeys } from './stored_map_attributes';
 import type { StoredRefreshInterval } from '../../server/saved_objects/types';
 import { transformLayersOut } from './transform_layers_out';
+import { convertToSnakeCase } from './convert_keys';
 
 export function transformMapAttributesOut(
   storedMapAttributes: StoredMapAttributes,
@@ -22,19 +22,20 @@ export function transformMapAttributesOut(
     attributes: storedMapAttributes,
     findReference,
   });
-  return {
+  // Stored state is camelCase, API state is snake_case
+  return convertToSnakeCase<MapAttributes>({
     title: injectedAttributes.title,
     ...(injectedAttributes.description ? { description: injectedAttributes.description } : {}),
     ...parseLayerListJSON(injectedAttributes.layerListJSON),
     ...parseMapStateJSON(injectedAttributes.mapStateJSON),
     ...parseUiStateJSON(injectedAttributes.uiStateJSON),
-  };
+  });
 }
 
 function parseLayerListJSON(layerListJSON?: string) {
   if (!layerListJSON) return {};
 
-  const layers = parseJSON<Partial<LayerDescriptor[]>>([], layerListJSON);
+  const layers = parseJSON<Array<Record<string, unknown>>>([], layerListJSON);
   return { layers: transformLayersOut(layers) };
 }
 
@@ -43,7 +44,11 @@ function parseMapStateJSON(mapStateJSON?: string) {
   const { refreshConfig, timeFilters, adHocDataViews, ...rest } = dropUnknownKeys(
     parsedMapState,
     mapStateKeys
-  ) as Partial<MapAttributes> & { refreshConfig: StoredRefreshInterval };
+  ) as {
+    adHocDataViews?: Array<Record<string, unknown>>;
+    refreshConfig: StoredRefreshInterval;
+    timeFilters?: Record<string, unknown>;
+  };
   return {
     ...rest,
     ...(refreshConfig
@@ -59,7 +64,7 @@ function parseMapStateJSON(mapStateJSON?: string) {
       ? {
           adHocDataViews: adHocDataViews.map((adhocDataView) =>
             dropUnknownKeys(adhocDataView, ['allowHidden', 'id', 'name', 'timeFieldName', 'title'])
-          ) as MapAttributes['adHocDataViews'],
+          ),
         }
       : {}),
   };

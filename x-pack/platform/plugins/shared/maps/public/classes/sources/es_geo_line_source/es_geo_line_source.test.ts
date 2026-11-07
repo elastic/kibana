@@ -10,10 +10,10 @@ import { DataRequest } from '../../util/data_request';
 
 describe('getSourceStatus', () => {
   const geoLineSource = new ESGeoLineSource({
-    indexPatternId: 'myindex',
-    geoField: 'myGeoField',
-    splitField: 'mySplitField',
-    sortField: 'mySortField',
+    index_pattern_id: 'myindex',
+    geo_field: 'myGeoField',
+    split_field: 'mySplitField',
+    sort_field: 'mySortField',
   });
 
   it('Should not show results trimmed icon when number of entities is not trimmed and all tracks are complete', () => {

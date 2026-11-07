@@ -32,12 +32,12 @@ export function createDefaultLayerDescriptor(
 ): VectorLayerDescriptor {
   const sourceDescriptor = ESSearchSource.createDescriptor(sourceConfig);
 
-  if (sourceDescriptor.scalingType === SCALING_TYPES.CLUSTERS) {
-    return BlendedVectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
-  } else if (sourceDescriptor.scalingType === SCALING_TYPES.MVT) {
-    return MvtVectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
+  if (sourceDescriptor.scaling_type === SCALING_TYPES.CLUSTERS) {
+    return BlendedVectorLayer.createDescriptor({ source_descriptor: sourceDescriptor }, mapColors);
+  } else if (sourceDescriptor.scaling_type === SCALING_TYPES.MVT) {
+    return MvtVectorLayer.createDescriptor({ source_descriptor: sourceDescriptor }, mapColors);
   } else {
-    return GeoJsonVectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
+    return GeoJsonVectorLayer.createDescriptor({ source_descriptor: sourceDescriptor }, mapColors);
   }
 }
 

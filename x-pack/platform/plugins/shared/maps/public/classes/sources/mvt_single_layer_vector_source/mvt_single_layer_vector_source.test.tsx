@@ -11,19 +11,19 @@ import type { TiledSingleLayerVectorSourceDescriptor } from '../../../../common/
 
 const descriptor: TiledSingleLayerVectorSourceDescriptor = {
   type: SOURCE_TYPES.MVT_SINGLE_LAYER,
-  urlTemplate: 'https://example.com/{x}/{y}/{z}.pbf',
-  layerName: 'foobar',
-  minSourceZoom: 4,
-  maxSourceZoom: 14,
+  url_template: 'https://example.com/{x}/{y}/{z}.pbf',
+  layer_name: 'foobar',
+  min_source_zoom: 4,
+  max_source_zoom: 14,
   fields: [],
-  tooltipProperties: [],
+  tooltip_properties: [],
 };
 
 describe('IMvtVectorSoucegetTileUrl', () => {
   it('getTileUrl', async () => {
     const source = new MVTSingleLayerVectorSource(descriptor);
     const tileUrl = await source.getTileUrl();
-    expect(tileUrl).toEqual(descriptor.urlTemplate);
+    expect(tileUrl).toEqual(descriptor.url_template);
   });
 });
 
@@ -36,7 +36,7 @@ describe('hasTooltipProperties', () => {
     const descriptorWithTooltips = {
       ...descriptor,
       fields: [{ name: 'foobar', type: MVT_FIELD_TYPE.STRING }],
-      tooltipProperties: ['foobar'],
+      tooltip_properties: ['foobar'],
     };
     const source = new MVTSingleLayerVectorSource(descriptorWithTooltips);
     expect(source.hasTooltipProperties()).toEqual(true);
@@ -60,7 +60,7 @@ describe('getTooltipProperties', () => {
         type: MVT_FIELD_TYPE.NUMBER,
       },
     ],
-    tooltipProperties: ['foo', 'fooz'],
+    tooltip_properties: ['foo', 'fooz'],
   };
 
   it('should get tooltipproperties', async () => {

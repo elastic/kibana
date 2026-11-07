@@ -42,7 +42,7 @@ const TERMS_AGG_NAME = 'join';
 const TERMS_BUCKET_KEYS_TO_IGNORE = ['key', 'doc_count'];
 
 type ESTermSourceSyncMeta = ESAggsSourceSyncMeta &
-  Pick<ESTermSourceDescriptor, 'indexPatternId' | 'size' | 'term'>;
+  Pick<ESTermSourceDescriptor, 'index_pattern_id' | 'size' | 'term'>;
 
 export function extractPropertiesMap(rawEsData: any, countPropertyName: string): PropertiesMap {
   const propertiesMap: PropertiesMap = new Map<string, BucketProperties>();
@@ -101,7 +101,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
   }
 
   getWhereQuery(): Query | undefined {
-    return this._descriptor.whereQuery;
+    return this._descriptor.where_query;
   }
 
   getAggKey(aggType: AGG_TYPE, fieldName?: string): string {
@@ -118,7 +118,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
       const indexPattern = await this.getIndexPattern();
       indexPatternLabel = indexPattern.getName();
     } catch (error) {
-      indexPatternLabel = this._descriptor.indexPatternId;
+      indexPatternLabel = this._descriptor.index_pattern_id;
     }
     return aggType === AGG_TYPE.COUNT
       ? i18n.translate('xpack.maps.source.esJoin.countLabel', {
@@ -192,7 +192,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
   getSyncMeta(dataFilters: DataFilters): ESTermSourceSyncMeta {
     return {
       ...super.getSyncMeta(dataFilters),
-      indexPatternId: this._descriptor.indexPatternId,
+      index_pattern_id: this._descriptor.index_pattern_id,
       size: this._descriptor.size,
       term: this._descriptor.term,
     };

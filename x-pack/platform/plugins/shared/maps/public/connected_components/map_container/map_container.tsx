@@ -211,7 +211,7 @@ export class MapContainer extends Component<Props, State> {
   }
 
   async _loadShowTimesliderButton() {
-    if (!this.props.settings.showTimesliderToggleButton) {
+    if (!this.props.settings.show_timeslider_toggle_button) {
       if (this.state.showTimesliderButton) {
         this.setState({ showTimesliderButton: false });
       }
@@ -264,7 +264,7 @@ export class MapContainer extends Component<Props, State> {
       <EuiFlexGroup gutterSize="none" responsive={false}>
         <EuiFlexItem
           css={mapWrapperStyles}
-          style={{ backgroundColor: this.props.settings.backgroundColor }}
+          style={{ backgroundColor: this.props.settings.background_color }}
         >
           {isInteractive && <MapControlsThemeStyles />}
           <MBMap
@@ -275,7 +275,7 @@ export class MapContainer extends Component<Props, State> {
             renderTooltipContent={renderTooltipContent}
             isInteractive={isInteractive}
           />
-          {isInteractive && !this.props.settings.hideToolbarOverlay && !isScreenshotMode() && (
+          {isInteractive && !this.props.settings.hide_toolbar_overlay && !isScreenshotMode() && (
             <ToolbarOverlay
               addFilters={addFilters}
               getFilterActions={getFilterActions}

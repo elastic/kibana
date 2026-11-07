@@ -13,7 +13,7 @@ import _ from 'lodash';
 import { EuiFormRow, EuiFieldText, EuiPanel } from '@elastic/eui';
 
 export type XYZTMSSourceConfig = {
-  urlTemplate: string;
+  url_template: string;
 };
 
 interface Props {
@@ -34,7 +34,7 @@ export class XYZTMSEditor extends Component<Props, State> {
 
     const isUrlValid =
       url.indexOf('{x}') >= 0 && url.indexOf('{y}') >= 0 && url.indexOf('{z}') >= 0;
-    const sourceConfig = isUrlValid ? { urlTemplate: url } : null;
+    const sourceConfig = isUrlValid ? { url_template: url } : null;
     this.props.onSourceConfigChange(sourceConfig);
   }, 500);
 

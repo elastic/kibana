@@ -54,7 +54,7 @@ import {
 type ESGeoLineSourceSyncMeta = ESAggsSourceSyncMeta &
   Pick<
     ESGeoLineSourceDescriptor,
-    'groupByTimeseries' | 'lineSimplificationSize' | 'splitField' | 'sortField'
+    'group_by_timeseries' | 'line_simplification_size' | 'split_field' | 'sort_field'
   >;
 
 export const geoLineTitle = i18n.translate('xpack.maps.source.esGeoLineTitle', {
@@ -71,7 +71,7 @@ export const REQUIRES_GOLD_LICENSE_MSG = i18n.translate(
 
 type NormalizedGeoLineDescriptor = ESGeoLineSourceDescriptor &
   Required<
-    Pick<ESGeoLineSourceDescriptor, 'groupByTimeseries' | 'lineSimplificationSize' | 'metrics'>
+    Pick<ESGeoLineSourceDescriptor, 'group_by_timeseries' | 'line_simplification_size' | 'metrics'>
   >;
 
 export class ESGeoLineSource extends AbstractESAggSource {
@@ -82,26 +82,26 @@ export class ESGeoLineSource extends AbstractESAggSource {
       descriptor
     ) as ESGeoLineSourceDescriptor;
 
-    if (!isValidStringConfig(normalizedDescriptor.geoField)) {
+    if (!isValidStringConfig(normalizedDescriptor.geo_field)) {
       throw new Error('Cannot create an ESGeoLineSource without a geoField');
     }
 
     const groupByTimeseries =
-      typeof normalizedDescriptor.groupByTimeseries === 'boolean'
-        ? normalizedDescriptor.groupByTimeseries
+      typeof normalizedDescriptor.group_by_timeseries === 'boolean'
+        ? normalizedDescriptor.group_by_timeseries
         : false;
 
     return {
       ...normalizedDescriptor,
       type: SOURCE_TYPES.ES_GEO_LINE,
-      groupByTimeseries,
-      lineSimplificationSize:
-        typeof normalizedDescriptor.lineSimplificationSize === 'number'
-          ? normalizedDescriptor.lineSimplificationSize
+      group_by_timeseries: groupByTimeseries,
+      line_simplification_size:
+        typeof normalizedDescriptor.line_simplification_size === 'number'
+          ? normalizedDescriptor.line_simplification_size
           : DEFAULT_LINE_SIMPLIFICATION_SIZE,
-      geoField: normalizedDescriptor.geoField!,
-      splitField: normalizedDescriptor.splitField,
-      sortField: normalizedDescriptor.sortField,
+      geo_field: normalizedDescriptor.geo_field!,
+      split_field: normalizedDescriptor.split_field,
+      sort_field: normalizedDescriptor.sort_field,
     } as NormalizedGeoLineDescriptor;
   }
 
@@ -120,7 +120,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
   }
 
   getGeoFieldName(): string {
-    return this._descriptor.geoField;
+    return this._descriptor.geo_field;
   }
 
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
@@ -130,10 +130,10 @@ export class ESGeoLineSource extends AbstractESAggSource {
         indexPatternId={this.getIndexPatternId()}
         onChange={onChange}
         metrics={this._descriptor.metrics}
-        groupByTimeseries={this._descriptor.groupByTimeseries}
-        lineSimplificationSize={this._descriptor.lineSimplificationSize}
-        splitField={this._descriptor.splitField ?? ''}
-        sortField={this._descriptor.sortField ?? ''}
+        groupByTimeseries={this._descriptor.group_by_timeseries}
+        lineSimplificationSize={this._descriptor.line_simplification_size}
+        splitField={this._descriptor.split_field ?? ''}
+        sortField={this._descriptor.sort_field ?? ''}
       />
     );
   }
@@ -141,10 +141,10 @@ export class ESGeoLineSource extends AbstractESAggSource {
   getSyncMeta(dataFilters: DataFilters): ESGeoLineSourceSyncMeta {
     return {
       ...super.getSyncMeta(dataFilters),
-      groupByTimeseries: this._descriptor.groupByTimeseries,
-      lineSimplificationSize: this._descriptor.lineSimplificationSize,
-      splitField: this._descriptor.splitField,
-      sortField: this._descriptor.sortField,
+      group_by_timeseries: this._descriptor.group_by_timeseries,
+      line_simplification_size: this._descriptor.line_simplification_size,
+      split_field: this._descriptor.split_field,
+      sort_field: this._descriptor.sort_field,
     };
   }
 
@@ -162,15 +162,15 @@ export class ESGeoLineSource extends AbstractESAggSource {
         label: i18n.translate('xpack.maps.source.esGeoLine.geospatialFieldLabel', {
           defaultMessage: 'Geospatial field',
         }),
-        value: this._descriptor.geoField,
+        value: this._descriptor.geo_field,
       },
     ];
   }
 
   _createSplitField(): IField | null {
-    return this._descriptor.splitField
+    return this._descriptor.split_field
       ? new ESDocField({
-          fieldName: this._descriptor.splitField,
+          fieldName: this._descriptor.split_field,
           source: this,
           origin: FIELD_ORIGIN.SOURCE,
         })
@@ -188,14 +188,14 @@ export class ESGeoLineSource extends AbstractESAggSource {
   }
 
   async getFields(): Promise<IField[]> {
-    const groupByField = this._descriptor.groupByTimeseries
+    const groupByField = this._descriptor.group_by_timeseries
       ? this._createTsidField()
       : this._createSplitField();
     return groupByField ? [...this.getMetricFields(), groupByField] : this.getMetricFields();
   }
 
   getFieldByName(name: string): IField | null {
-    if (name === this._descriptor.splitField) {
+    if (name === this._descriptor.split_field) {
       return this._createSplitField();
     }
 
@@ -225,7 +225,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
       throw new Error(REQUIRES_GOLD_LICENSE_MSG);
     }
 
-    return this._descriptor.groupByTimeseries
+    return this._descriptor.group_by_timeseries
       ? this._getGeoLineByTimeseries(
           layerName,
           requestMeta,
@@ -276,9 +276,9 @@ export class ESGeoLineSource extends AbstractESAggSource {
           path: {
             geo_line: {
               point: {
-                field: this._descriptor.geoField,
+                field: this._descriptor.geo_field,
               },
-              size: this._descriptor.lineSimplificationSize,
+              size: this._descriptor.line_simplification_size,
             },
           },
           ...this.getValueAggsDsl(indexPattern),
@@ -329,7 +329,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     isRequestStillActive: () => boolean,
     inspectorAdapters: Adapters
   ): Promise<GeoJsonWithMeta> {
-    if (!this._descriptor.splitField) {
+    if (!this._descriptor.split_field) {
       throw new Error(
         i18n.translate('xpack.maps.source.esGeoLine.missingConfigurationError', {
           defaultMessage: `Unable to create tracks. Provide a value for required configuration ''{inputLabel}''`,
@@ -338,7 +338,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
       );
     }
 
-    if (!this._descriptor.sortField) {
+    if (!this._descriptor.sort_field) {
       throw new Error(
         i18n.translate('xpack.maps.source.esGeoLine.missingConfigurationError', {
           defaultMessage: `Unable to create tracks. Provide a value for required configuration ''{inputLabel}''`,
@@ -361,7 +361,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     const { searchSource: entitySearchSource, fetchOptions: entityFetchOptions } =
       await this.makeSearchSource(requestMeta, 0);
     entitySearchSource.setField('trackTotalHits', false);
-    const splitField = getField(indexPattern, this._descriptor.splitField);
+    const splitField = getField(indexPattern, this._descriptor.split_field);
     const cardinalityAgg = { precision_threshold: MAX_TERMS_TRACKS };
     const termsAgg = { size: MAX_TERMS_TRACKS };
     entitySearchSource.setField('aggs', {
@@ -447,10 +447,10 @@ export class ESGeoLineSource extends AbstractESAggSource {
           path: {
             geo_line: {
               point: {
-                field: this._descriptor.geoField,
+                field: this._descriptor.geo_field,
               },
               sort: {
-                field: this._descriptor.sortField,
+                field: this._descriptor.sort_field,
               },
             },
           },
@@ -476,7 +476,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     });
     const { featureCollection, numTrimmedTracks } = convertToGeoJson(
       tracksResp,
-      this._descriptor.splitField
+      this._descriptor.split_field
     );
 
     return {
@@ -560,7 +560,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
       tooltipProperties.push(
         new TooltipProperty(
           '__kbn__track__complete',
-          this._descriptor.groupByTimeseries
+          this._descriptor.group_by_timeseries
             ? i18n.translate('xpack.maps.source.esGeoLine.isTrackSimplifiedLabel', {
                 defaultMessage: 'track is simplified',
               })

@@ -40,7 +40,11 @@ export class LabelZoomRangeProperty extends AbstractStyleProperty<
   }
 
   getLabelZoomRange() {
-    const { useLayerZoomRange, maxZoom, minZoom } = this.getOptions();
+    const {
+      use_layer_zoom_range: useLayerZoomRange,
+      max_zoom: maxZoom,
+      min_zoom: minZoom,
+    } = this.getOptions();
     return useLayerZoomRange
       ? this.getLayerZoomRange()
       : {

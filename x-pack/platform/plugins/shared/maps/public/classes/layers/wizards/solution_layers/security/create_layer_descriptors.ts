@@ -46,11 +46,11 @@ function createSourceLayerDescriptor(
   parentId: string
 ) {
   const sourceDescriptor = ESSearchSource.createDescriptor({
-    indexPatternId,
-    geoField: getSourceField(indexPatternId),
-    scalingType: SCALING_TYPES.TOP_HITS,
-    topHitsSplitField: isAPMDataView(indexPatternId) ? 'client.ip' : 'source.ip',
-    tooltipProperties: isAPMDataView(indexPatternId)
+    index_pattern_id: indexPatternId,
+    geo_field: getSourceField(indexPatternId),
+    scaling_type: SCALING_TYPES.TOP_HITS,
+    top_hits_split_field: isAPMDataView(indexPatternId) ? 'client.ip' : 'source.ip',
+    tooltip_properties: isAPMDataView(indexPatternId)
       ? [
           'host.name',
           'client.ip',
@@ -93,7 +93,7 @@ function createSourceLayerDescriptor(
       values: { indexPatternTitle },
     }),
     parent: parentId,
-    sourceDescriptor,
+    source_descriptor: sourceDescriptor,
     style: VectorStyle.createDescriptor(styleProperties),
   });
 }
@@ -104,11 +104,11 @@ function createDestinationLayerDescriptor(
   parentId: string
 ) {
   const sourceDescriptor = ESSearchSource.createDescriptor({
-    indexPatternId,
-    geoField: getDestinationField(indexPatternId),
-    scalingType: SCALING_TYPES.TOP_HITS,
-    topHitsSplitField: isAPMDataView(indexPatternId) ? 'server.ip' : 'destination.ip',
-    tooltipProperties: isAPMDataView(indexPatternId)
+    index_pattern_id: indexPatternId,
+    geo_field: getDestinationField(indexPatternId),
+    scaling_type: SCALING_TYPES.TOP_HITS,
+    top_hits_split_field: isAPMDataView(indexPatternId) ? 'server.ip' : 'destination.ip',
+    tooltip_properties: isAPMDataView(indexPatternId)
       ? [
           'host.name',
           'server.ip',
@@ -151,7 +151,7 @@ function createDestinationLayerDescriptor(
       values: { indexPatternTitle },
     }),
     parent: parentId,
-    sourceDescriptor,
+    source_descriptor: sourceDescriptor,
     style: VectorStyle.createDescriptor(styleProperties),
   });
 }
@@ -162,9 +162,9 @@ function createLineLayerDescriptor(
   parentId: string
 ) {
   const sourceDescriptor = ESPewPewSource.createDescriptor({
-    indexPatternId,
-    sourceGeoField: getSourceField(indexPatternId),
-    destGeoField: getDestinationField(indexPatternId),
+    index_pattern_id: indexPatternId,
+    source_geo_field: getSourceField(indexPatternId),
+    dest_geo_field: getDestinationField(indexPatternId),
     metrics: [
       {
         type: AGG_TYPE.SUM,
@@ -190,8 +190,8 @@ function createLineLayerDescriptor(
           name: COUNT_PROP_NAME,
           origin: FIELD_ORIGIN.SOURCE,
         },
-        minSize: 1,
-        maxSize: 8,
+        min_size: 1,
+        max_size: 8,
       },
     },
   };
@@ -202,7 +202,7 @@ function createLineLayerDescriptor(
       values: { indexPatternTitle },
     }),
     parent: parentId,
-    sourceDescriptor,
+    source_descriptor: sourceDescriptor,
     style: VectorStyle.createDescriptor(styleProperties),
   });
 }
