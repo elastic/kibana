@@ -56,7 +56,7 @@ export const DeleteProfileModal = ({
   onDeleted,
 }: DeleteProfileModalProps) => {
   const services = useBoostServices();
-  const { mutate: deleteProfile, isLoading: isDeleting } = useDeleteProfileAndRules();
+  const { deleteProfile, isDeleting } = useDeleteProfileAndRules();
   const { name, type } = profile;
 
   const deletedRules = useMemo<DeletedRule[]>(() => {
@@ -82,6 +82,18 @@ export const DeleteProfileModal = ({
         .sort((a, b) => a.name.localeCompare(b.name)),
     }));
   }, [name, rules, profiles, dataSources]);
+
+  // Deletes the rules, then the profile, saying how it went. Trying again, from the toast's details
+  // once this modal is gone, deletes what's left.
+  const runDeletion = async (ruleNames: readonly string[]): Promise<void> => {
+    const deletion = await deleteProfile({ name, ruleNames });
+    notifyProfileDeletion(services, name, deletion, (ruleNamesLeft) => {
+      void runDeletion(ruleNamesLeft);
+    });
+    if (deletion.failures.length === 0) {
+      onDeleted?.();
+    }
+  };
 
   const affectedCount = deletedRules.reduce((total, { affected }) => total + affected.length, 0);
 
@@ -116,18 +128,7 @@ export const DeleteProfileModal = ({
       })}
       onCancel={onClose}
       onConfirm={() =>
-        deleteProfile(
-          { name, ruleNames: deletedRules.map(({ name: ruleName }) => ruleName) },
-          {
-            onSuccess: (deletion) => {
-              notifyProfileDeletion(services, name, deletion);
-              if (deletion.failures.length === 0) {
-                onDeleted?.();
-              }
-            },
-            onSettled: onClose,
-          }
-        )
+        runDeletion(deletedRules.map(({ name: ruleName }) => ruleName)).finally(onClose)
       }
       cancelButtonText={i18n.translate('xpack.boost.profilesTab.deleteModalCancel', {
         defaultMessage: 'Cancel',

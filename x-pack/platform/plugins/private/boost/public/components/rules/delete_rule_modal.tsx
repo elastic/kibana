@@ -17,6 +17,7 @@ import { ConfirmModal } from '../confirm_modal';
 import { formatDataSourceCount } from '../format';
 import { MODAL_WIDTH } from '../modal_width';
 import { TargetName } from './target_name';
+import { notifyRuleDeletionError } from './rule_deletion_notice';
 
 interface DeleteRuleModalProps {
   ruleName: string;
@@ -49,8 +50,28 @@ export const DeleteRuleModal = ({
   onDeleted,
 }: DeleteRuleModalProps) => {
   const { euiTheme } = useEuiTheme();
-  const { notifications } = useBoostServices();
-  const { mutate: deleteRule, isLoading: isDeleting } = useDeleteRule();
+  const services = useBoostServices();
+  const { deleteRule, isDeleting } = useDeleteRule();
+
+  // Deletes the rule, saying how it went. Trying again, from the toast's details once this modal is
+  // gone, runs it again.
+  const runDeletion = async (): Promise<void> => {
+    try {
+      await deleteRule(ruleName);
+    } catch (error) {
+      notifyRuleDeletionError(services, ruleName, error, () => {
+        void runDeletion();
+      });
+      return;
+    }
+    services.notifications.toasts.addSuccess(
+      i18n.translate('xpack.boost.rulesTab.deletedToast', {
+        defaultMessage: 'Deleted boost rule "{name}"',
+        values: { name: ruleName },
+      })
+    );
+    onDeleted?.();
+  };
 
   const { profileType, affected } = useMemo(() => {
     const profilesByName = new Map(profiles.map((profile) => [profile.name, profile]));
@@ -80,20 +101,7 @@ export const DeleteRuleModal = ({
         values: { name: ruleName },
       })}
       onCancel={onClose}
-      onConfirm={() =>
-        deleteRule(ruleName, {
-          onSuccess: () => {
-            notifications.toasts.addSuccess(
-              i18n.translate('xpack.boost.rulesTab.deletedToast', {
-                defaultMessage: 'Deleted boost rule "{name}"',
-                values: { name: ruleName },
-              })
-            );
-            onDeleted?.();
-          },
-          onSettled: onClose,
-        })
-      }
+      onConfirm={() => runDeletion().finally(onClose)}
       cancelButtonText={i18n.translate('xpack.boost.rulesTab.deleteModalCancel', {
         defaultMessage: 'Cancel',
       })}

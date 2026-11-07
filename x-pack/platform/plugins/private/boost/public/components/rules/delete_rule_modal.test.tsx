@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
   BUILTIN_INDICES_PROFILE_NAMES,
@@ -18,12 +19,20 @@ import {
 import type { BoostRule } from '../../../common/types';
 import { DeleteRuleModal } from './delete_rule_modal';
 
+const mockAddSuccess = jest.fn();
+const mockServices = { notifications: { toasts: { addSuccess: mockAddSuccess } } };
 jest.mock('../../hooks/use_boost_services', () => ({
-  useBoostServices: () => ({ notifications: { toasts: { addSuccess: jest.fn() } } }),
+  useBoostServices: () => mockServices,
 }));
 
+const mockDeleteRule = jest.fn();
 jest.mock('../../hooks/use_boost_state', () => ({
-  useDeleteRule: () => ({ mutate: jest.fn(), isLoading: false }),
+  useDeleteRule: () => ({ deleteRule: mockDeleteRule, isDeleting: false }),
+}));
+
+const mockNotifyError = jest.fn();
+jest.mock('./rule_deletion_notice', () => ({
+  notifyRuleDeletionError: (...args: unknown[]) => mockNotifyError(...args),
 }));
 
 const rule = (name: string, pattern: string, profileName: string, priority: number): BoostRule => ({
@@ -89,5 +98,36 @@ describe('DeleteRuleModal', () => {
       "This permanently deletes the rule. The boost profile it uses won't be deleted."
     );
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
+  });
+
+  it('reports a failed deletion, which can be tried again once the modal is gone', async () => {
+    const onClose = jest.fn();
+    const onDeleted = jest.fn();
+    render(
+      <IntlProvider locale="en">
+        <DeleteRuleModal
+          ruleName="unused"
+          rules={rules}
+          profiles={BUILTIN_PROFILES}
+          dataSources={[]}
+          onClose={onClose}
+          onDeleted={onDeleted}
+        />
+      </IntlProvider>
+    );
+    const error = new Error('Gateway Timeout');
+    mockDeleteRule.mockRejectedValueOnce(error);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Delete rule' }));
+
+    const [[services, name, reported, retry]] = mockNotifyError.mock.calls;
+    expect([services, name, reported]).toEqual([mockServices, 'unused', error]);
+    expect(onDeleted).not.toHaveBeenCalled();
+    expect(onClose).toHaveBeenCalled();
+
+    mockDeleteRule.mockResolvedValueOnce(undefined);
+    await act(async () => retry());
+    expect(mockAddSuccess).toHaveBeenCalledWith('Deleted boost rule "unused"');
+    expect(onDeleted).toHaveBeenCalled();
   });
 });

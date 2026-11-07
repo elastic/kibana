@@ -24,7 +24,7 @@ jest.mock('../../hooks/use_boost_services', () => ({
 }));
 
 jest.mock('../../hooks/use_boost_state', () => ({
-  useDeleteRule: () => ({ mutate: jest.fn(), isLoading: false }),
+  useDeleteRule: () => ({ deleteRule: jest.fn(), isDeleting: false }),
 }));
 
 // The project default's editor, which edits a default rule.

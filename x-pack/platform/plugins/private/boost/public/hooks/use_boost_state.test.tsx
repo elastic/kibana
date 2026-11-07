@@ -10,7 +10,7 @@ import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { BOOST_PROFILES_API_PATH, BOOST_RULES_API_PATH } from '../../common/constants';
-import { useDeleteProfileAndRules } from './use_boost_state';
+import { useDeleteProfileAndRules, useDeleteRule } from './use_boost_state';
 
 const mockDelete = jest.fn();
 jest.mock('./use_boost_services', () => ({
@@ -19,14 +19,18 @@ jest.mock('./use_boost_services', () => ({
 
 // An error like Kibana's HTTP client throws for an error response.
 const httpError = (status: number, message: string) =>
-  Object.assign(new Error('Request failed'), { body: { message }, response: { status } });
+  Object.assign(new Error('Request failed'), {
+    body: { message },
+    response: { status, statusText: status === 504 ? 'Gateway Timeout' : 'Not Found' },
+  });
+
+const wrapper = ({ children }: { children: ReactNode }) => (
+  <QueryClientProvider client={new QueryClient()}>{children}</QueryClientProvider>
+);
 
 const deleteProfile = (ruleNames: string[]) => {
-  const wrapper = ({ children }: { children: ReactNode }) => (
-    <QueryClientProvider client={new QueryClient()}>{children}</QueryClientProvider>
-  );
   const { result } = renderHook(() => useDeleteProfileAndRules(), { wrapper });
-  return result.current.mutateAsync({ name: 'catalog-search', ruleNames });
+  return result.current.deleteProfile({ name: 'catalog-search', ruleNames });
 };
 
 describe('useDeleteProfileAndRules', () => {
@@ -59,7 +63,12 @@ describe('useDeleteProfileAndRules', () => {
     expect(deletion).toEqual({
       ruleCount: 2,
       failures: [
-        { kind: 'rule', name: 'archives', message: "Elasticsearch didn't respond in time." },
+        {
+          kind: 'rule',
+          name: 'archives',
+          message: "Elasticsearch didn't respond in time.",
+          details: "504 Gateway Timeout\nElasticsearch didn't respond in time.",
+        },
       ],
     });
     // Elasticsearch would refuse it while a rule uses it.
@@ -93,8 +102,24 @@ describe('useDeleteProfileAndRules', () => {
           kind: 'profile',
           name: 'catalog-search',
           message: "Elasticsearch didn't respond in time.",
+          details: "504 Gateway Timeout\nElasticsearch didn't respond in time.",
         },
       ],
     });
+  });
+});
+
+describe('useDeleteRule', () => {
+  beforeEach(() => mockDelete.mockReset());
+
+  it('deletes the rule, and throws what went wrong for the caller to report', async () => {
+    const { result } = renderHook(() => useDeleteRule(), { wrapper });
+    mockDelete.mockResolvedValueOnce({});
+    await result.current.deleteRule('catalogs');
+    expect(mockDelete).toHaveBeenCalledWith(`${BOOST_RULES_API_PATH}/catalogs`);
+
+    const error = httpError(504, "Elasticsearch didn't respond in time.");
+    mockDelete.mockRejectedValueOnce(error);
+    await expect(result.current.deleteRule('catalogs')).rejects.toBe(error);
   });
 });

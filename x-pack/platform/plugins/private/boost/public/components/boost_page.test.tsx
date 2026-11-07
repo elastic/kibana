@@ -67,10 +67,10 @@ jest.mock('../hooks/use_boost_state', () => ({
   useUpdateDefaultRule: () => ({ mutate: mockUpdateDefaultRule, isLoading: false }),
   useCreateRule: () => ({ mutate: jest.fn(), isLoading: false }),
   useUpdateRule: () => ({ mutate: jest.fn(), isLoading: false }),
-  useDeleteRule: () => ({ mutate: jest.fn(), isLoading: false }),
+  useDeleteRule: () => ({ deleteRule: jest.fn(), isDeleting: false }),
   useCreateProfile: () => ({ mutate: jest.fn(), isLoading: false }),
   useUpdateProfile: () => ({ mutate: jest.fn(), isLoading: false }),
-  useDeleteProfile: () => ({ mutate: jest.fn(), isLoading: false }),
+  useDeleteProfileAndRules: () => ({ deleteProfile: jest.fn(), isDeleting: false }),
 }));
 
 const renderPage = (path = '/') =>

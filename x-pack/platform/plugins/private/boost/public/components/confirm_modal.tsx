@@ -20,6 +20,54 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
+interface ModalFooterActionsProps {
+  cancelButtonText: string;
+  confirmButtonText: string;
+  onCancel: () => void;
+  onConfirm: () => void;
+  buttonColor?: 'primary' | 'danger';
+  isLoading?: boolean;
+  cancelTestSubj?: string;
+  confirmTestSubj?: string;
+}
+
+/**
+ * The footer every boost modal shares: small buttons, with the one that leaves, flush, at the start,
+ * and the one that acts at the end.
+ */
+export const ModalFooterActions = ({
+  cancelButtonText,
+  confirmButtonText,
+  onCancel,
+  onConfirm,
+  buttonColor = 'primary',
+  isLoading = false,
+  cancelTestSubj = 'confirmModalCancelButton',
+  confirmTestSubj = 'confirmModalConfirmButton',
+}: ModalFooterActionsProps) => (
+  <EuiModalFooter>
+    <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty size="s" flush="left" onClick={onCancel} data-test-subj={cancelTestSubj}>
+          {cancelButtonText}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          size="s"
+          fill
+          color={buttonColor}
+          onClick={onConfirm}
+          isLoading={isLoading}
+          data-test-subj={confirmTestSubj}
+        >
+          {confirmButtonText}
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiModalFooter>
+);
+
 interface ConfirmModalProps {
   title: string;
   children: ReactNode;
@@ -65,32 +113,14 @@ export const ConfirmModal = ({
         <EuiModalHeaderTitle id={titleId}>{title}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>{children}</EuiModalBody>
-      <EuiModalFooter>
-        <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              flush="left"
-              onClick={onCancel}
-              data-test-subj="confirmModalCancelButton"
-            >
-              {cancelButtonText}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              fill
-              color={buttonColor}
-              onClick={onConfirm}
-              isLoading={isLoading}
-              data-test-subj="confirmModalConfirmButton"
-            >
-              {confirmButtonText}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiModalFooter>
+      <ModalFooterActions
+        cancelButtonText={cancelButtonText}
+        confirmButtonText={confirmButtonText}
+        onCancel={onCancel}
+        onConfirm={onConfirm}
+        buttonColor={buttonColor}
+        isLoading={isLoading}
+      />
     </EuiModal>
   );
 };

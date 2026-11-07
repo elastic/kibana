@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
@@ -29,9 +29,9 @@ jest.mock('./profile_deletion_notice', () => ({
   notifyProfileDeletion: (...args: unknown[]) => mockNotify(...args),
 }));
 
-const mockMutate = jest.fn();
+const mockDeleteProfile = jest.fn();
 jest.mock('../../hooks/use_boost_state', () => ({
-  useDeleteProfileAndRules: () => ({ mutate: mockMutate, isLoading: false }),
+  useDeleteProfileAndRules: () => ({ deleteProfile: mockDeleteProfile, isDeleting: false }),
 }));
 
 const [builtinIndicesProfile] = BUILTIN_PROFILES.filter(({ type }) => type === 'indices');
@@ -115,22 +115,30 @@ describe('DeleteProfileModal', () => {
       </IntlProvider>
     );
 
-    await userEvent.click(screen.getByRole('button', { name: 'Delete 1 profile and 2 rules' }));
-    const [[variables, { onSuccess, onSettled }]] = mockMutate.mock.calls;
-    expect(variables).toEqual({ name: 'catalog-search', ruleNames: ['archives', 'catalogs'] });
-
     // A rule that fails to delete keeps the profile, so its page stays.
     const partial = {
       ruleCount: 2,
-      failures: [{ kind: 'rule', name: 'archives', message: 'Timed out.' }],
+      failures: [{ kind: 'rule', name: 'archives', message: 'Timed out.', details: 'Timed out.' }],
     };
-    onSuccess(partial);
-    expect(mockNotify).toHaveBeenCalledWith(mockServices, 'catalog-search', partial);
+    mockDeleteProfile.mockResolvedValueOnce(partial);
+    await userEvent.click(screen.getByRole('button', { name: 'Delete 1 profile and 2 rules' }));
+
+    expect(mockDeleteProfile).toHaveBeenCalledWith({
+      name: 'catalog-search',
+      ruleNames: ['archives', 'catalogs'],
+    });
+    const [[services, name, deletion, retry]] = mockNotify.mock.calls;
+    expect([services, name, deletion]).toEqual([mockServices, 'catalog-search', partial]);
     expect(onDeleted).not.toHaveBeenCalled();
 
-    onSuccess({ ruleCount: 2, failures: [] });
+    // Trying again, once the modal is gone, deletes what's left, and then leaves.
+    mockDeleteProfile.mockResolvedValueOnce({ ruleCount: 1, failures: [] });
+    await act(async () => retry(['archives']));
+    expect(mockDeleteProfile).toHaveBeenLastCalledWith({
+      name: 'catalog-search',
+      ruleNames: ['archives'],
+    });
     expect(onDeleted).toHaveBeenCalled();
-    onSettled();
     expect(onClose).toHaveBeenCalled();
   });
 });

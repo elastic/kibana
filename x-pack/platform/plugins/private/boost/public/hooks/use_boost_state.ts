@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useCallback, useState } from 'react';
 import type { HttpStart, IHttpFetchError } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
@@ -22,6 +23,8 @@ import type {
   BoostRuleInput,
   BoostState,
 } from '../../common/types';
+import type { RequestErrorDescription } from '../request_error';
+import { describeRequestError } from '../request_error';
 import { useBoostServices } from './use_boost_services';
 
 const BOOST_STATE_QUERY_KEY = ['boost', 'state'] as const;
@@ -95,10 +98,9 @@ export const useUpdateProfile = () =>
   );
 
 /** A rule or profile that deleting a profile couldn't delete, and why. */
-export interface FailedDeletion {
+export interface FailedDeletion extends RequestErrorDescription {
   kind: 'rule' | 'profile';
   name: string;
-  message: string;
 }
 
 /** What deleting a profile and the rules that use it did. */
@@ -109,55 +111,57 @@ export interface ProfileDeletion {
   failures: FailedDeletion[];
 }
 
-const toFailedDeletion = (
-  kind: FailedDeletion['kind'],
-  name: string,
-  error: IHttpFetchError<{ message?: string }>
-): FailedDeletion => ({ kind, name, message: error.body?.message ?? error.message });
-
 const isNotFound = (error: IHttpFetchError) => error.response?.status === 404;
 
 /**
  * Deletes a custom profile and the custom rules that use it. Elasticsearch won't delete a profile
  * that rules use, so each rule is deleted first, with its own request, and any of them can fail. A
  * rule that's already gone counts as deleted. If any rule is left, the profile is kept, since
- * Elasticsearch would refuse it anyway.
+ * Elasticsearch would refuse it anyway. The function keeps working once the component is gone, so a
+ * toast can try again with it.
  */
 export const useDeleteProfileAndRules = () => {
   const { http } = useBoostServices();
   const queryClient = useQueryClient();
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  return useMutation<ProfileDeletion, Error, { name: string; ruleNames: readonly string[] }>({
-    mutationFn: async ({ name, ruleNames }) => {
-      const results = await Promise.allSettled(
-        ruleNames.map((ruleName) =>
-          http.delete(`${BOOST_RULES_API_PATH}/${encodeURIComponent(ruleName)}`)
-        )
-      );
-      const failures = results.flatMap((result, index) =>
-        result.status === 'rejected' && !isNotFound(result.reason)
-          ? [toFailedDeletion('rule', ruleNames[index], result.reason)]
-          : []
-      );
-      if (failures.length > 0) {
-        return { ruleCount: ruleNames.length, failures };
-      }
+  const deleteProfile = useCallback(
+    async ({ name, ruleNames }: { name: string; ruleNames: readonly string[] }) => {
+      setIsDeleting(true);
       try {
-        await http.delete(`${BOOST_PROFILES_API_PATH}/${encodeURIComponent(name)}`);
-        return { ruleCount: ruleNames.length, failures: [] };
-      } catch (error) {
-        return {
-          ruleCount: ruleNames.length,
-          failures: [toFailedDeletion('profile', name, error)],
-        };
+        const results = await Promise.allSettled(
+          ruleNames.map((ruleName) =>
+            http.delete(`${BOOST_RULES_API_PATH}/${encodeURIComponent(ruleName)}`)
+          )
+        );
+        const failures = results.flatMap((result, index): FailedDeletion[] =>
+          result.status === 'rejected' && !isNotFound(result.reason)
+            ? [{ kind: 'rule', name: ruleNames[index], ...describeRequestError(result.reason) }]
+            : []
+        );
+        if (failures.length > 0) {
+          return { ruleCount: ruleNames.length, failures };
+        }
+        try {
+          await http.delete(`${BOOST_PROFILES_API_PATH}/${encodeURIComponent(name)}`);
+          return { ruleCount: ruleNames.length, failures: [] };
+        } catch (error) {
+          return {
+            ruleCount: ruleNames.length,
+            failures: [{ kind: 'profile' as const, name, ...describeRequestError(error) }],
+          };
+        }
+      } finally {
+        // Whatever was deleted changes what applies, even when something else failed.
+        queryClient.invalidateQueries({ queryKey: BOOST_STATE_QUERY_KEY });
+        queryClient.invalidateQueries({ queryKey: BOOST_EXPLAIN_QUERY_KEY });
+        setIsDeleting(false);
       }
     },
-    // Whatever was deleted changes what applies, even when something else failed.
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: BOOST_STATE_QUERY_KEY });
-      queryClient.invalidateQueries({ queryKey: BOOST_EXPLAIN_QUERY_KEY });
-    },
-  });
+    [http, queryClient]
+  );
+
+  return { deleteProfile, isDeleting };
 };
 
 export const useCreateRule = () =>
@@ -192,11 +196,30 @@ export const useUpdateDefaultRule = () =>
     })
   );
 
-export const useDeleteRule = () =>
-  useBoostMutation(
-    (http, name: string) =>
-      http.delete<BoostState>(`${BOOST_RULES_API_PATH}/${encodeURIComponent(name)}`),
-    i18n.translate('xpack.boost.deleteRuleErrorTitle', {
-      defaultMessage: 'Unable to delete boost rule',
-    })
+/**
+ * Deletes a custom rule, updating the state, and throws what went wrong for the caller to report.
+ * The function keeps working once the component is gone, so a toast can try again with it.
+ */
+export const useDeleteRule = () => {
+  const { http } = useBoostServices();
+  const queryClient = useQueryClient();
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const deleteRule = useCallback(
+    async (name: string): Promise<void> => {
+      setIsDeleting(true);
+      try {
+        const state = await http.delete<BoostState>(
+          `${BOOST_RULES_API_PATH}/${encodeURIComponent(name)}`
+        );
+        queryClient.setQueryData(BOOST_STATE_QUERY_KEY, state);
+        queryClient.invalidateQueries({ queryKey: BOOST_EXPLAIN_QUERY_KEY });
+      } finally {
+        setIsDeleting(false);
+      }
+    },
+    [http, queryClient]
   );
+
+  return { deleteRule, isDeleting };
+};
