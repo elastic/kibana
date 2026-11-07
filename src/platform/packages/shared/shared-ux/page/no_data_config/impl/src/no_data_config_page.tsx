@@ -58,7 +58,8 @@ export const NoDataConfigPage = (props: NoDataConfigPageProps) => {
       // the following props can be removed to allow the template to auto-handle
       // the fixed header and banner heights.
       offset={0}
-      minHeight={0}
+      // POC: fill the app area so the glass covers it even when app wrappers aren't flex containers.
+      minHeight="var(--kbn-application--content-height, 0)"
       {...rest}
     >
       {sideBar}
