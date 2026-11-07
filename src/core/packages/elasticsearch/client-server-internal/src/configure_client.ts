@@ -14,7 +14,7 @@ import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { metrics, ValueType } from '@opentelemetry/api';
 import { parseClientOptions } from './client_config';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
-import { createTransport, type OnRequestHandler } from './create_transport';
+import { createTransport, type OnRequestHandler, type TransportContext } from './create_transport';
 import type { AgentFactoryProvider } from './agent_manager';
 import { patchElasticsearchClient } from './patch_client';
 
@@ -111,13 +111,13 @@ function instrumentCpsMetrics({ client, logger }: { client: Client; logger: Logg
     cpsRequestCounter.add(1, metricAttributes);
 
     // Report ES request timing to Server-Timing header
-    const timingContext = (event.meta.request.options?.context as any)?.timingContext;
-    if (timingContext?.kibanaRequest?.serverTiming && timingContext.startTime) {
+    const timingContext = (event.meta.request.options?.context as TransportContext)?.timingContext;
+    if (timingContext?.measure && timingContext.startTime) {
       const duration = performance.now() - timingContext.startTime;
       const method = event.meta.request.params.method || 'unknown';
       const path = event.meta.request.params.path || 'unknown';
 
-      timingContext.kibanaRequest.serverTiming.measure('es-request', duration, `${method} ${path}`);
+      timingContext.measure('es-request', duration, `${method} ${path}`);
     }
 
     logger.debug('CPS request completed', {
