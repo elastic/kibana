@@ -26,6 +26,7 @@ import { makeVisualizeEmbeddableFactory } from './embeddable/make_visualize_embe
 import { getVisualizationSavedObjectType, registerReadOnlyVisType } from './saved_objects';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { getTransforms } from '../common/embeddable/transforms/get_transforms';
+import { visualizeStateComparison } from '../common/embeddable/state_comparison';
 
 export class VisualizationsPlugin
   implements Plugin<VisualizationsServerSetup, VisualizationsServerStart>
@@ -59,6 +60,7 @@ export class VisualizationsPlugin
     plugins.embeddable.registerEmbeddableServerDefinition(VISUALIZE_EMBEDDABLE_TYPE, {
       title: 'Legacy visualization',
       getTransforms,
+      stateComparison: visualizeStateComparison,
     });
 
     plugins.contentManagement.register({

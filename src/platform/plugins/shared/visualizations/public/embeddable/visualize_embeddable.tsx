@@ -31,8 +31,6 @@ import {
   fetch$,
   initializeTimeRangeManager,
   initializeTitleManager,
-  timeRangeComparators,
-  titleComparators,
   useStateFromPublishingSubject,
   type ProjectRoutingOverrides,
 } from '@kbn/presentation-publishing';
@@ -56,6 +54,7 @@ import {
   ON_SELECT_RANGE,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { VisualizeEmbeddableState } from '../../common/embeddable/types';
+import { visualizeStateComparison } from '../../common/embeddable/state_comparison';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { getInspector, getTheme, getUiActions, getUsageCollection } from '../services';
 import { ACTION_CONVERT_TO_LENS } from '../triggers';
@@ -73,6 +72,7 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
   VisualizeApi
 > = {
   type: VISUALIZE_EMBEDDABLE_TYPE,
+  stateComparison: visualizeStateComparison,
   buildEmbeddable: async ({
     initializeDrilldownsManager,
     initialState,
@@ -233,38 +233,10 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
         titleManager.anyStateChange$,
         timeRangeManager.anyStateChange$
       ).pipe(map(() => undefined)),
-      getComparators: () => {
-        return {
-          ...drilldownsManager.comparators,
-          ...titleComparators,
-          ...timeRangeComparators,
-          savedObjectId: 'skip',
-          uiState: linkedToLibrary ? 'deepEquality' : 'skip',
-          savedVis: linkedToLibrary
-            ? 'skip'
-            : (a, b) => {
-                function deepOmitBy(value: any) {
-                  if (value && !Array.isArray(value) && typeof value === 'object') {
-                    const keys = Object.keys(value);
-                    if (!keys.length) return;
-
-                    const cleanedValue: Record<string, unknown> = {};
-                    keys.forEach((key) => {
-                      const cleanedSubvalue = deepOmitBy(value[key]);
-                      if (cleanedSubvalue) {
-                        cleanedValue[key] = cleanedSubvalue;
-                      }
-                    });
-                    return cleanedValue;
-                  }
-
-                  return value;
-                }
-
-                return isEqual(deepOmitBy(a), deepOmitBy(b));
-              },
-        };
-      },
+      getComparators: () => ({
+        ...visualizeStateComparison.comparators,
+        savedObjectId: 'skip',
+      }),
       applySerializedState: async (nextState) => {
         drilldownsManager.reinitializeState(nextState);
         timeRangeManager.reinitializeState(nextState);
