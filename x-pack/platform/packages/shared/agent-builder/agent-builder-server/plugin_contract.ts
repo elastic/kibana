@@ -31,6 +31,7 @@ import type { RunToolFn, ModelProvider } from './runner';
 import type { RunAgentFn } from './agents';
 import type { HooksServiceSetup } from './hooks/types';
 import type { BuiltInPluginDefinition, PluginRegistry } from './plugins';
+import type { DecisionsStart } from './decisions';
 import type {
   ExecuteAgentParams,
   ExecuteAgentResult,
@@ -392,6 +393,10 @@ export interface AgentBuilderPluginStart {
    * outside of the agent builder's built-in tool/agent execution flow.
    */
   runtime: RuntimeStart;
+  /**
+   * Decisions service, to ask a decision model bounded questions.
+   */
+  decisions: DecisionsStart;
   /**
    * Conversations service, to list, retrieve, and append events to conversations.
    */

@@ -88,6 +88,9 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
     runtime: {
       createModelProvider: jest.fn(),
     },
+    decisions: {
+      decide: jest.fn().mockResolvedValue({ status: 'unavailable' }),
+    },
     conversations: {
       getScopedClient: jest.fn().mockResolvedValue({
         get: jest.fn(),

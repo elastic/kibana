@@ -16,6 +16,8 @@ import type {
 } from './types';
 import type { ConversationEventBus } from '../workflows/triggers/conversation_event_bus';
 import { ToolsService } from './tools';
+import { createDecisionProviders, DecisionService } from './decisions';
+import { createModelProviderFactory } from './execution/runner/model_provider';
 import { AgentsService } from './agents';
 import { RunnerFactoryImpl } from './execution/runner';
 import { ConversationServiceImpl } from './conversation';
@@ -297,6 +299,23 @@ export class ServiceManager {
       surfacesService: surfaces,
     });
 
+    const decisions = new DecisionService({
+      logger: logger.get('decisions'),
+      providers: createDecisionProviders({
+        config: this.config.decisionModel,
+        elasticsearch,
+        createModelProvider: createModelProviderFactory({
+          inference,
+          trackingService,
+          searchInferenceEndpoints,
+          logger: logger.get('decisions.model-provider'),
+          spaces,
+          security,
+          elasticsearch,
+        }),
+      }),
+    });
+
     executionService = createAgentExecutionService({
       logger: logger.get('execution'),
       elasticsearch,
@@ -335,6 +354,7 @@ export class ServiceManager {
       runnerFactory,
       auditLogService,
       execution: executionService,
+      decisions,
       taskHandler,
       hooks,
       spaces,
