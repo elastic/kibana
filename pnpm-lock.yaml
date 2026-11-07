@@ -6401,8 +6401,8 @@ importers:
         specifier: 7.8.0
         version: 7.8.0
       '@types/sinon':
-        specifier: 22.0.0
-        version: 22.0.0
+        specifier: 22.0.1
+        version: 22.0.1
       '@types/source-map-support':
         specifier: 0.5.10
         version: 0.5.10
@@ -15269,11 +15269,8 @@ packages:
   '@types/set-cookie-parser@2.4.10':
     resolution: {integrity: sha512-GGmQVGpQWUe5qglJozEjZV/5dyxbOOZ0LHe/lqyWssB88Y4svNfst0uqBVscdDeIKl5Jy5+aPSvy7mI9tYRguw==}
 
-  '@types/sinon@22.0.0':
-    resolution: {integrity: sha512-TDbVpbccc2HfiqHR09Argj3mHV1KMW7sCCKj52fsl8lbRLkEn7fB1966EWhOKWUBcqfBueZuPoA7/OK1CKiy3g==}
-
-  '@types/sinonjs__fake-timers@15.0.1':
-    resolution: {integrity: sha512-Ko2tjWJq8oozHzHV+reuvS5KYIRAokHnGbDwGh/J64LntgpbuylF74ipEL24HCyRjf9FOlBiBHWBR1RlVKsI1w==}
+  '@types/sinon@22.0.1':
+    resolution: {integrity: sha512-MThluJXPmpBY+Z5S3565F2z+hjkCXnBrr36j2mitVQ7JUtxA+A+YQhs+0Q6J8jxb0SVJvydO+6NWfj9EBzpiBQ==}
 
   '@types/sinonjs__fake-timers@8.1.1':
     resolution: {integrity: sha512-0kSuKjAS0TrGLJ0M/+8MaFkGsQhZpB6pxOmvS3K8FYI72K//YmdfoW9X2qPsAKh1mkwxGD5zib9s1FIFed6E8g==}
@@ -31975,11 +31972,9 @@ snapshots:
     dependencies:
       '@types/node': 24.10.13
 
-  '@types/sinon@22.0.0':
+  '@types/sinon@22.0.1':
     dependencies:
-      '@types/sinonjs__fake-timers': 15.0.1
-
-  '@types/sinonjs__fake-timers@15.0.1': {}
+      '@sinonjs/fake-timers': 15.4.0
 
   '@types/sinonjs__fake-timers@8.1.1': {}
 

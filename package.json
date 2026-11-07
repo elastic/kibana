@@ -2159,7 +2159,7 @@
     "@types/seedrandom": "2.4.28",
     "@types/selenium-webdriver": "4.35.6",
     "@types/semver": "7.8.0",
-    "@types/sinon": "22.0.0",
+    "@types/sinon": "22.0.1",
     "@types/source-map-support": "0.5.10",
     "@types/stats-lite": "2.2.2",
     "@types/styled-components": "5.1.36",
