@@ -6,5 +6,10 @@
  */
 
 export const MAX_RULE_NAMES = 100;
+export const MAX_ALERT_SOURCES = 100;
+export const CLASSIC_ALERT_SOURCE = 'classic';
+export const UNIVERSAL_ALERT_SOURCE = 'internal';
+export const SIGNIFICANT_EVENTS_ALERT_SOURCE = 'elastic.significant_events';
+export const EXTERNAL_ALERT_SOURCE = 'external';
 // Leave room in the investigation message for trigger context, including Slack message text.
 export const MAX_AUTOMATION_INSTRUCTIONS_LENGTH = 5000;
