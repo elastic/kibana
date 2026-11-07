@@ -131,12 +131,13 @@ export const reinforcementExamples: ReinforcementExample[] = [
         markdown: markdown('EQL query success SLO burn', EQL_TREE),
       },
       query: esqlQuery(
-        'k8s.pod.name LIKE \\"uiam-58fb87db87-*\\" | KEEP @timestamp, k8s.pod.name, event.action | SORT @timestamp'
+        'k8s.pod.name LIKE \\"uiam-58fb87db87-*\\" | KEEP @timestamp, k8s.pod.name, event.action, message | SORT @timestamp'
       ),
       stdout: [
-        '@timestamp                 k8s.pod.name           event.action',
-        '2026-09-14T18:00:00.000Z   uiam-58fb87db87-26cfj  deleted',
-        '2026-09-14T18:01:00.000Z   uiam-58fb87db87-vd5fc  started',
+        '@timestamp                 k8s.pod.name           event.action  message',
+        '2026-09-14T18:00:00.000Z   uiam-58fb87db87-26cfj  killing       Stopping container uiam for pod restart',
+        '2026-09-14T18:00:00.000Z   uiam-58fb87db87-26cfj  deleted       Pod deleted; ReplicaSet uiam-58fb87db87 creates a replacement',
+        '2026-09-14T18:01:00.000Z   uiam-58fb87db87-vd5fc  started       Replacement pod ready and serving traffic',
       ].join('\n'),
     },
   }),
@@ -158,12 +159,13 @@ export const reinforcementExamples: ReinforcementExample[] = [
         markdown: markdown('Otel delivery gateway errors', GATEWAY_TREE),
       },
       query: esqlQuery(
-        'service.name == \\"otel-delivery-gateway\\" | STATS errors = COUNT(*) BY bucket = BUCKET(@timestamp, 5 minutes) | SORT bucket'
+        'service.name == \\"otel-delivery-gateway\\" AND log.level == \\"error\\" | STATS errors = COUNT(*) BY bucket = BUCKET(@timestamp, 5 minutes), destination.address | SORT bucket'
       ),
       stdout: [
-        'bucket                     errors',
-        '2026-09-14T17:55:00.000Z   1',
-        '2026-09-14T18:05:00.000Z   0',
+        'bucket                     destination.address    errors',
+        '2026-09-14T17:50:00.000Z   uiam-58fb87db87-26cfj  212',
+        '2026-09-14T17:55:00.000Z   uiam-58fb87db87-26cfj  348',
+        '2026-09-14T18:00:00.000Z   uiam-58fb87db87-26cfj  41',
       ].join('\n'),
     },
   }),
@@ -186,9 +188,14 @@ export const reinforcementExamples: ReinforcementExample[] = [
         markdown: markdown('Elasticsearch proxy errors', PROXY_TREE),
       },
       query: esqlQuery(
-        'service.name == \\"elasticsearch-proxy\\" | STATS errors = COUNT(*) BY k8s.pod.name | SORT errors DESC'
+        'service.name == \\"elasticsearch-proxy\\" AND log.level == \\"error\\" | STATS errors = COUNT(*) BY bucket = BUCKET(@timestamp, 5 minutes), destination.address | SORT bucket'
       ),
-      stdout: ['k8s.pod.name           errors', 'uiam-58fb87db87-26cfj  0'].join('\n'),
+      stdout: [
+        'bucket                     destination.address    errors',
+        '2026-09-14T17:50:00.000Z   uiam-58fb87db87-26cfj  87',
+        '2026-09-14T17:55:00.000Z   uiam-58fb87db87-26cfj  131',
+        '2026-09-14T18:00:00.000Z   uiam-58fb87db87-26cfj  19',
+      ].join('\n'),
     },
   }),
   round({
