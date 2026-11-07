@@ -43,8 +43,9 @@ export type SandboxCaller =
       /** This run of the workflow. */
       workflowExecutionId?: string;
       /**
-       * The fake request the step runs with. When the workflow runs as a service account or a
-       * user, it is what lets the audit event name them, as it does for a tool call.
+       * The fake request the step runs with. When the workflow runs as a service account, it is
+       * what lets the audit event name the account, as it does for a tool call. A fake request
+       * carries no authentication state, so a workflow that runs as a user is not named.
        */
       request?: KibanaRequest;
     }
@@ -202,9 +203,9 @@ export const auditedSandboxSession = ({
 
 /**
  * Adds auditing to the sandbox start contract. A request-scoped audit logger attaches the user, or
- * the service account that runs an investigation, to every event. A workflow step has a request only
- * when its workflow has a fake request to act as; otherwise its events carry the space and the
- * workflow instead.
+ * the service account that runs an investigation, to every event. A workflow step names a service
+ * account only when its workflow has a fake request registered as one; otherwise its events carry
+ * the space and the workflow instead.
  */
 export const createAuditedSandboxStart = ({
   sandboxStart,

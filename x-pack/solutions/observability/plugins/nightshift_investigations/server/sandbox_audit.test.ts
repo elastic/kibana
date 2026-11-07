@@ -287,7 +287,7 @@ describe('createAuditedSandboxStart', () => {
     expect(unscoped.log).not.toHaveBeenCalled();
   });
 
-  it('audits a workflow step with its fake request, which names the service account or user', async () => {
+  it('audits a workflow step with its fake request, which names a service account', async () => {
     const { session, scoped, unscoped, audit, start } = setup();
     session.statFiles.mockResolvedValue({ value: [], rpc: rpc() });
     const fakeRequest = { isFakeRequest: true } as unknown as KibanaRequest;
