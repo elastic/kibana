@@ -253,8 +253,8 @@ Naming (the JSDoc above `ALERTING_LOG_CODES` is the source of truth):
   can filter a whole area with a prefix: `ROUTES_`, `RULE_` / `RULE_EXECUTION_`
   / `RULE_TEMPLATE_`, `DIRECTOR_`, `DISPATCH_` / `DISPATCHER_`, `POLICY_` /
   `ACTION_POLICY_`, `EXECUTION_HISTORY_`, `EVENTS_`, `STORAGE_`, `QUERY_`,
-  `RESOURCES_`, `MAINTENANCE_WINDOW_`, `SAVED_OBJECTS_`, `AGENT_BUILDER_`,
-  `TASKS_`, `TELEMETRY_`. Add the prefix to that JSDoc when you add a domain.
+  `RESOURCES_`, `RETRY_`, `MAINTENANCE_WINDOW_`, `SAVED_OBJECTS_`,
+  `AGENT_BUILDER_`, `TASKS_`, `TELEMETRY_`. Add the prefix to that JSDoc when you add a domain.
 - The suffix encodes the outcome. Warns (degraded but continued): `_FAILED`,
   `_SKIPPED`, `_TIMED_OUT`, `_NOT_FOUND`, `_LOOKUP_FAILED`, `_DEGRADED`,
   `_INVALID`, `_UNMAPPED`. Errors (could not complete): `_FAILED`,
