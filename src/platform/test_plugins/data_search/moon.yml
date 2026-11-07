@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/data-search-plugin
   channel: ''
   owner: '@elastic/kibana-discover'
-  sourceRoot: src/platform/test/plugin_functional/plugins/data_search
+  sourceRoot: src/platform/test_plugins/data_search
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'
