@@ -33,8 +33,9 @@ const SEVERITY_ORDER: InvestigationsSeverityFilter[] = [
   'none',
 ];
 
-const STATE_ORDER: InvestigationsStateFilter[] = ['in-progress', 'open', 'closed', 'archived'];
+const STATE_ORDER: InvestigationsStateFilter[] = ['open', 'closed', 'archived'];
 
+/** List state only — `in_progress` is a Home label; those rows are Open here. */
 const investigationState = (
   investigation: InvestigationSummary,
   spaceKey: string
@@ -44,9 +45,6 @@ const investigationState = (
   }
   if (investigation.metadata.status === 'closed') {
     return 'closed';
-  }
-  if (investigation.in_progress) {
-    return 'in-progress';
   }
   return 'open';
 };

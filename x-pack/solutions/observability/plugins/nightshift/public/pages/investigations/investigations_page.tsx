@@ -73,9 +73,6 @@ const STATE_FILTER_LABEL = i18n.translate('xpack.nightshift.investigationsPage.s
 });
 
 const STATE_FILTER_LABELS: Record<InvestigationsStateFilter, string> = {
-  'in-progress': i18n.translate('xpack.nightshift.investigationsPage.stateInProgress', {
-    defaultMessage: 'In progress',
-  }),
   open: i18n.translate('xpack.nightshift.investigationsPage.stateOpen', {
     defaultMessage: 'Open',
   }),
@@ -89,14 +86,14 @@ const STATE_FILTER_LABELS: Record<InvestigationsStateFilter, string> = {
 
 const STATE_FILTER_ICON_COLOR: Record<
   InvestigationsStateFilter,
-  'warning' | 'primary' | 'success' | 'subdued'
+  'primary' | 'success' | 'subdued'
 > = {
-  'in-progress': 'warning',
   open: 'primary',
   closed: 'success',
   archived: 'subdued',
 };
 
+/** List state only — `in_progress` is a Home label; those rows are Open here. */
 const investigationState = (
   investigation: InvestigationSummary,
   spaceKey: string
@@ -107,22 +104,17 @@ const investigationState = (
   if (investigation.metadata.status === 'closed') {
     return 'closed';
   }
-  if (investigation.in_progress) {
-    return 'in-progress';
-  }
   return 'open';
 };
 
 const stateLabel = (
   state: InvestigationsStateFilter
-): { label: string; color: 'default' | 'success' | 'warning' } => {
+): { label: string; color: 'default' | 'success' } => {
   switch (state) {
     case 'archived':
       return { label: 'Archived', color: 'default' };
     case 'closed':
       return { label: 'Closed', color: 'success' };
-    case 'in-progress':
-      return { label: 'In progress', color: 'warning' };
     case 'open':
       return { label: 'Open', color: 'default' };
   }

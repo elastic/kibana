@@ -64,7 +64,6 @@ const fieldIconCss = css`
 `;
 
 const STATE_COLORS: Record<InvestigationsStateFilter, string> = {
-  'in-progress': 'warning',
   open: 'primary',
   closed: 'success',
   archived: 'subdued',
@@ -139,9 +138,6 @@ export function InvestigationsHistogram({
       }
       if (breakdown === 'state') {
         const token = STATE_COLORS[id as InvestigationsStateFilter];
-        if (token === 'warning') {
-          return euiTheme.colors.warning;
-        }
         if (token === 'success') {
           return euiTheme.colors.success;
         }

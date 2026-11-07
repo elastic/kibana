@@ -20,7 +20,7 @@ const investigation = (
   }: {
     updatedAt: string;
     severity?: 'critical' | 'high' | 'medium' | 'low';
-    state?: 'open' | 'closed' | 'in-progress' | 'archived';
+    state?: 'open' | 'closed' | 'archived';
   }
 ): InvestigationSummary => ({
   id,
@@ -33,7 +33,7 @@ const investigation = (
     status: state === 'closed' || state === 'archived' ? 'closed' : 'open',
     severity,
   },
-  in_progress: state === 'in-progress',
+  in_progress: false,
   subjects: [],
 });
 

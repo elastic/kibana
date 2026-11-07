@@ -36,7 +36,7 @@ const SEVERITY_ORDER: InvestigationsSeverityFilter[] = [
   'none',
 ];
 
-const STATE_ORDER: InvestigationsStateFilter[] = ['in-progress', 'open', 'closed', 'archived'];
+const STATE_ORDER: InvestigationsStateFilter[] = ['open', 'closed', 'archived'];
 
 export const lastUpdatedMs = (investigation: InvestigationSummary): number | null => {
   const updated = Date.parse(investigation.updated_at || investigation.created_at);
@@ -129,8 +129,6 @@ export const buildInvestigationsHistogramSeries = ({
         ? 'Investigations'
         : id === 'none'
         ? 'None'
-        : id === 'in-progress'
-        ? 'In progress'
         : id.charAt(0).toUpperCase() + id.slice(1),
     data: bucketStarts.map((x) => ({ x, y: buckets.get(x) ?? 0 })),
   }));

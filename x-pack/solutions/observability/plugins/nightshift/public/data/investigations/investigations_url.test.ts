@@ -10,6 +10,7 @@ import {
   buildInvestigationsPath,
   DEFAULT_INVESTIGATIONS_TIME_RANGE,
   parseInvestigationsSearch,
+  sectionIdToInvestigationsFilters,
 } from './investigations_url';
 
 describe('investigations_url', () => {
@@ -45,5 +46,22 @@ describe('investigations_url', () => {
         rangeTo: 'now',
       })
     ).toBe('/investigations?query=x&severity=high&state=open&rangeFrom=now-7d');
+  });
+
+  it('maps Home In progress View all onto Open (in progress is a label, not a list state)', () => {
+    expect(sectionIdToInvestigationsFilters('in-progress')).toEqual({
+      severity: [],
+      state: ['open'],
+    });
+  });
+
+  it('maps legacy state=in-progress onto open', () => {
+    expect(parseInvestigationsSearch('?state=in-progress')).toEqual({
+      query: '',
+      severity: [],
+      state: ['open'],
+      rangeFrom: DEFAULT_INVESTIGATIONS_TIME_RANGE.from,
+      rangeTo: DEFAULT_INVESTIGATIONS_TIME_RANGE.to,
+    });
   });
 });

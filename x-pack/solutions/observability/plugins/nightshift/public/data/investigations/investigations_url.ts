@@ -9,7 +9,8 @@ import type { InvestigationSectionId } from './use_investigation_sections';
 
 export type InvestigationsSeverityFilter = 'critical' | 'high' | 'medium' | 'low' | 'none';
 
-export type InvestigationsStateFilter = 'in-progress' | 'open' | 'closed' | 'archived';
+/** List/filter states only — `in_progress` is a Home label, not a list state (it is Open). */
+export type InvestigationsStateFilter = 'open' | 'closed' | 'archived';
 
 export interface InvestigationsUrlState {
   query: string;
@@ -30,7 +31,6 @@ export const INVESTIGATIONS_SEVERITY_OPTIONS: readonly InvestigationsSeverityFil
 ] as const;
 
 export const INVESTIGATIONS_STATE_OPTIONS: readonly InvestigationsStateFilter[] = [
-  'in-progress',
   'open',
   'closed',
   'archived',
@@ -47,7 +47,8 @@ export const sectionIdToInvestigationsFilters = (
     case 'recent':
       return { severity: [], state: [] };
     case 'in-progress':
-      return { severity: [], state: ['in-progress'] };
+      // In progress is a Home label; those investigations are Open on the list.
+      return { severity: [], state: ['open'] };
     case 'closed':
       return { severity: [], state: ['closed'] };
     case 'not-rated':
@@ -72,7 +73,7 @@ const legacyGroupToFilters = (
     case 'recent':
       return { severity: [], state: [] };
     case 'in-progress':
-      return { severity: [], state: ['in-progress'] };
+      return { severity: [], state: ['open'] };
     case 'closed':
       return { severity: [], state: ['closed'] };
     case 'not-rated':
@@ -135,9 +136,13 @@ export const parseInvestigationsSearch = (search: string): InvestigationsUrlStat
   let severity = params
     .getAll('severity')
     .filter((value): value is InvestigationsSeverityFilter => SEVERITY_PARAMS.has(value));
-  let state = params
-    .getAll('state')
-    .filter((value): value is InvestigationsStateFilter => STATE_PARAMS.has(value));
+  let state = params.getAll('state').flatMap((value): InvestigationsStateFilter[] => {
+    // Older links used state=in-progress; that label is Open on the list.
+    if (value === 'in-progress') {
+      return ['open'];
+    }
+    return STATE_PARAMS.has(value) ? [value as InvestigationsStateFilter] : [];
+  });
 
   // Older Home “View all” links used `group=`; map once if the new params are absent.
   const groupRaw = params.get('group');
