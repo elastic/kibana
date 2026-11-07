@@ -21,7 +21,7 @@ import {
 import { EuiHorizontalRule, formatDate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { parse } from '@kbn/datemath';
-import type { TooltipValue } from '@elastic/charts/dist/specs';
+import type { TooltipValue } from '@elastic/charts';
 import { useChartThemes } from '../../hooks/use_chart_themes';
 import type { useAnnotations } from '../../components/annotations/use_annotations';
 import type { Annotation } from '../../../common/annotations';
