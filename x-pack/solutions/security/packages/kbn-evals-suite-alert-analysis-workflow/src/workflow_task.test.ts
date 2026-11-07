@@ -7,7 +7,7 @@
 
 import { extractAgentConversationIds } from '@kbn/security-evals-workflow-traces';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { readVerdict, readVerdicts } from './workflow_task';
+import { readRawVerdicts, readVerdict, readVerdicts } from './workflow_task';
 
 const step = (overrides: Partial<WorkflowStepExecutionDto>): WorkflowStepExecutionDto =>
   ({
@@ -197,5 +197,59 @@ describe('readVerdicts', () => {
     ];
 
     expect([...readVerdicts(steps).keys()]).toEqual(['a1', 'b2']);
+  });
+});
+
+describe('readRawVerdicts', () => {
+  it('returns every raw verdict in order, including repeated and foreign ids', () => {
+    const steps = [
+      step({
+        output: {
+          structured_output: {
+            verdicts: [
+              { id: 'a1', classification: 'false_positive' },
+              { id: 'a1', classification: 'true_positive' },
+              { id: 'zz', classification: 'inconclusive' },
+            ],
+          },
+        },
+      }),
+    ];
+
+    expect(readRawVerdicts(steps).map(({ id }) => id)).toEqual(['a1', 'a1', 'zz']);
+  });
+
+  it('reads the prompt step `content` as well as the agent `structured_output`', () => {
+    const steps = [
+      step({
+        stepId: 'runPrompt_step',
+        stepType: 'ai.prompt',
+        output: { content: { verdicts: [{ id: 'a1', classification: 'false_positive' }] } },
+      }),
+    ];
+
+    expect(readRawVerdicts(steps)).toHaveLength(1);
+  });
+
+  it('keeps the longest array when the call was retried', () => {
+    const steps = [
+      step({ output: { structured_output: { verdicts: [{ id: 'a1' }] } } }),
+      step({ output: { structured_output: { verdicts: [{ id: 'a1' }, { id: 'a2' }] } } }),
+      step({ output: null }),
+    ];
+
+    expect(readRawVerdicts(steps)).toHaveLength(2);
+  });
+
+  it('ignores steps that are not the classification step and returns [] when none match', () => {
+    const steps = [
+      step({
+        stepId: 'filter_verdicts_to_batch',
+        stepType: 'data.set',
+        output: { structured_output: { verdicts: [{ id: 'a1' }] } },
+      }),
+    ];
+
+    expect(readRawVerdicts(steps)).toEqual([]);
   });
 });
