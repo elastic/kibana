@@ -12,7 +12,10 @@ import type {
   AggregationsMaxAggregate,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import { inject, injectable } from 'inversify';
+import { Logger } from '@kbn/core-di';
+import { InternalElasticsearchClient } from '@kbn/core-di-server';
+import type { ElasticsearchClient, Logger as ILogger } from '@kbn/core/server';
 import { SEVERITY_TTL_GROUPS } from '../../common/notification_schema';
 import { NOTIFICATION_DATA_STREAM_NAME } from '../storage/notification_data_stream';
 
@@ -59,72 +62,86 @@ export const buildGroupCleanupQuery = (
   },
 });
 
-const getExpiredGroups = async (
-  esClient: ElasticsearchClient,
-  after: AggregationsCompositeAggregateKey | undefined,
-  signal: AbortSignal
-) => {
-  const response = await esClient.search<never, CleanupAggregations>(
-    {
-      index: NOTIFICATION_DATA_STREAM_NAME,
-      ignore_unavailable: true,
-      size: 0,
-      track_total_hits: false,
-      query: buildCleanupQuery(),
-      aggs: {
-        expired_groups: {
-          composite: {
-            size: CLEANUP_PAGE_SIZE,
-            sources: [{ notification_id: { terms: { field: 'notification_id' } } }],
-            ...(after ? { after } : {}),
-          },
-          aggs: { newest_expired_at: { max: { field: '@timestamp' } } },
+/** Enforces the per-severity retention windows over the notification data stream. */
+@injectable()
+export class NotificationCleanupService {
+  constructor(
+    @inject(InternalElasticsearchClient) private readonly esClient: ElasticsearchClient,
+    @inject(Logger) private readonly logger: ILogger
+  ) {}
+
+  /** Task-runner entry point: a cleanup failure is logged, never surfaced to Task Manager. */
+  public async run(signal: AbortSignal): Promise<void> {
+    try {
+      await this.cleanupExpiredNotifications(signal);
+    } catch (err) {
+      this.logger.error(`Notification Center cleanup task failed: ${err.message}`);
+    }
+  }
+
+  /** Remove expired notification groups in bounded pages. */
+  public async cleanupExpiredNotifications(signal: AbortSignal): Promise<void> {
+    let after: AggregationsCompositeAggregateKey | undefined;
+
+    do {
+      if (signal.aborted) {
+        return;
+      }
+
+      const page = await this.getExpiredGroups(after, signal);
+      if (page.groups.length === 0) {
+        return;
+      }
+
+      await this.esClient.deleteByQuery(
+        {
+          index: NOTIFICATION_DATA_STREAM_NAME,
+          ignore_unavailable: true,
+          conflicts: 'proceed',
+          refresh: false,
+          query: buildGroupCleanupQuery(page.groups),
         },
-      },
-    },
-    { signal }
-  );
+        { signal }
+      );
+      after = page.after;
+    } while (after);
+  }
 
-  const aggregation = response.aggregations?.expired_groups;
-  const buckets = (aggregation?.buckets ?? []) as AggregationsCompositeBucket[];
-  const groups = buckets.flatMap((bucket) => {
-    const notificationId = bucket.key.notification_id;
-    const newestExpiredAt = (bucket.newest_expired_at as AggregationsMaxAggregate).value;
-    return typeof notificationId === 'string' && newestExpiredAt !== null
-      ? [{ notificationId, newestExpiredAt }]
-      : [];
-  });
-
-  return { groups, after: aggregation?.after_key };
-};
-
-/** Remove expired notification groups in bounded pages. */
-export const cleanupExpiredNotifications = async (
-  esClient: ElasticsearchClient,
-  signal: AbortSignal
-): Promise<void> => {
-  let after: AggregationsCompositeAggregateKey | undefined;
-
-  do {
-    if (signal.aborted) {
-      return;
-    }
-
-    const page = await getExpiredGroups(esClient, after, signal);
-    if (page.groups.length === 0) {
-      return;
-    }
-
-    await esClient.deleteByQuery(
+  private async getExpiredGroups(
+    after: AggregationsCompositeAggregateKey | undefined,
+    signal: AbortSignal
+  ) {
+    const response = await this.esClient.search<never, CleanupAggregations>(
       {
         index: NOTIFICATION_DATA_STREAM_NAME,
         ignore_unavailable: true,
-        conflicts: 'proceed',
-        refresh: false,
-        query: buildGroupCleanupQuery(page.groups),
+        size: 0,
+        track_total_hits: false,
+        query: buildCleanupQuery(),
+        aggs: {
+          expired_groups: {
+            composite: {
+              size: CLEANUP_PAGE_SIZE,
+              sources: [{ notification_id: { terms: { field: 'notification_id' } } }],
+              ...(after ? { after } : {}),
+            },
+            aggs: { newest_expired_at: { max: { field: '@timestamp' } } },
+          },
+        },
       },
       { signal }
     );
-    after = page.after;
-  } while (after);
-};
+
+    const aggregation = response.aggregations?.expired_groups;
+    const buckets = (aggregation?.buckets ?? []) as AggregationsCompositeBucket[];
+    const groups = buckets.flatMap((bucket) => {
+      const notificationId = bucket.key.notification_id;
+      const newestExpiredAt = (bucket.newest_expired_at as AggregationsMaxAggregate).value;
+      return typeof notificationId === 'string' && newestExpiredAt !== null
+        ? [{ notificationId, newestExpiredAt }]
+        : [];
+    });
+
+    return { groups, after: aggregation?.after_key };
+  }
+}

@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-/** Every NC route is `access: 'internal'` and pinned to a single API version. */
+/** Every NC route is `access: 'internal'`. */
 export const INTERNAL_HEADERS = {
   'kbn-xsrf': 'scout',
   'x-elastic-internal-origin': 'kibana',
-  'elastic-api-version': '1',
 } as const;
 
 // Route paths and the data stream name are hardcoded to keep the test tsconfig free of a

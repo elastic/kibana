@@ -14,7 +14,8 @@ import {
   READ_ALL_BEFORE_KEY,
   type ReadOverrides,
 } from '../storage/user_storage';
-import { getReadState, isReadAt, markRead, markAllRead } from './read_state';
+import { isReadAt, ReadStateService } from './read_state';
+import { UserProfileRequiredError } from './user_profile_required_error';
 
 const createClient = (initial: { overrides?: ReadOverrides; readAllBefore?: string } = {}) => {
   const store: Record<string, unknown> = {
@@ -30,17 +31,18 @@ const createClient = (initial: { overrides?: ReadOverrides; readAllBefore?: stri
     remove: jest.fn(),
     getForInjection: jest.fn(),
   } as unknown as IUserStorageClient;
-  return { client, store };
+  const logger = loggingSystemMock.createLogger();
+  return { client, store, logger, service: new ReadStateService(client, logger) };
 };
 
 const readOverride = (markedAt: string) => ({ read: true, markedAt });
 
 describe('markRead', () => {
   it('records a read override for an unseen id', async () => {
-    const { client, store } = createClient({
+    const { store, service } = createClient({
       overrides: { a: readOverride('2026-07-01T00:00:00.000Z') },
     });
-    await markRead(client, 'b');
+    await service.markRead('b');
 
     const stored = store[OVERRIDES_KEY] as ReadOverrides;
     expect(Object.keys(stored)).toEqual(['a', 'b']);
@@ -50,8 +52,8 @@ describe('markRead', () => {
 
   it('re-stamps markedAt for an id that is already read', async () => {
     const markedAt = '2026-07-01T00:00:00.000Z';
-    const { client, store } = createClient({ overrides: { a: readOverride(markedAt) } });
-    await markRead(client, 'a');
+    const { store, service } = createClient({ overrides: { a: readOverride(markedAt) } });
+    await service.markRead('a');
 
     // The override anchors on the copy in hand, so re-marking has to move the anchor forward or
     // an id re-pushed since the last mark can never be read again.
@@ -68,8 +70,8 @@ describe('markRead', () => {
         readOverride(new Date(base + i * 1000).toISOString()),
       ])
     );
-    const { client, store } = createClient({ overrides });
-    await markRead(client, 'newest');
+    const { store, service } = createClient({ overrides });
+    await service.markRead('newest');
 
     const stored = store[OVERRIDES_KEY] as ReadOverrides;
     expect(Object.keys(stored)).toHaveLength(MAX_OVERRIDES);
@@ -81,11 +83,11 @@ describe('markRead', () => {
 
 describe('markAllRead', () => {
   it('advances readAllBefore and clears the overrides', async () => {
-    const { client, store } = createClient({
+    const { store, service } = createClient({
       overrides: { a: readOverride('2026-07-01T00:00:00.000Z') },
       readAllBefore: '1970-01-01T00:00:00.000Z',
     });
-    const marker = await markAllRead(client);
+    const marker = await service.markAllRead();
 
     expect(store[READ_ALL_BEFORE_KEY]).toBe(marker);
     expect(Date.parse(marker)).not.toBeNaN();
@@ -93,31 +95,33 @@ describe('markAllRead', () => {
   });
 
   it('writes the marker before clearing the overrides', async () => {
-    const { client } = createClient({ overrides: { a: readOverride('2026-07-01T00:00:00.000Z') } });
-    await markAllRead(client);
+    const { client, service } = createClient({
+      overrides: { a: readOverride('2026-07-01T00:00:00.000Z') },
+    });
+    await service.markAllRead();
 
     const setKeys = (client.set as jest.Mock).mock.calls.map(([key]) => key);
     expect(setKeys).toEqual([READ_ALL_BEFORE_KEY, OVERRIDES_KEY]);
   });
 });
 
-describe('getReadState', () => {
+describe('ReadStateService.get', () => {
   it('reads both keys for the scoped user', async () => {
-    const { client } = createClient({
+    const { service } = createClient({
       overrides: { a: readOverride('2026-07-01T00:00:00.000Z') },
       readAllBefore: '2026-07-02T00:00:00.000Z',
     });
 
-    await expect(getReadState(client, loggingSystemMock.createLogger())).resolves.toEqual({
+    await expect(service.get()).resolves.toEqual({
       overrides: { a: readOverride('2026-07-01T00:00:00.000Z') },
       readAllBefore: '2026-07-02T00:00:00.000Z',
     });
   });
 
   it('stamps the catch-up marker on a first read', async () => {
-    const { client, store } = createClient();
+    const { store, service } = createClient();
 
-    const state = await getReadState(client, loggingSystemMock.createLogger());
+    const state = await service.get();
 
     const stamped = store[READ_ALL_BEFORE_KEY] as string;
     expect(state?.readAllBefore).toBe(stamped);
@@ -126,20 +130,37 @@ describe('getReadState', () => {
   });
 
   it('leaves an existing marker untouched', async () => {
-    const { client } = createClient({ readAllBefore: '2026-07-02T00:00:00.000Z' });
+    const { client, service } = createClient({ readAllBefore: '2026-07-02T00:00:00.000Z' });
 
-    await getReadState(client, loggingSystemMock.createLogger());
+    await service.get();
 
     expect(client.set).not.toHaveBeenCalled();
   });
 
   it('degrades to an unannotated list when userStorage fails', async () => {
-    const { client } = createClient();
+    const { client, logger, service } = createClient();
     (client.get as jest.Mock).mockRejectedValue(new Error('boom'));
-    const logger = loggingSystemMock.createLogger();
 
-    await expect(getReadState(client, logger)).resolves.toBeUndefined();
+    await expect(service.get()).resolves.toBeUndefined();
     expect(logger.debug).toHaveBeenCalled();
+  });
+});
+
+describe('ReadStateService without a user profile', () => {
+  const createAnonymous = () => new ReadStateService(null, loggingSystemMock.createLogger());
+
+  it('reports no user profile and reads no state', async () => {
+    const service = createAnonymous();
+
+    expect(service.hasUserProfile).toBe(false);
+    await expect(service.get()).resolves.toBeUndefined();
+  });
+
+  it('rejects writes rather than silently dropping them', async () => {
+    const service = createAnonymous();
+
+    await expect(service.markRead('a')).rejects.toThrow(UserProfileRequiredError);
+    await expect(service.markAllRead()).rejects.toThrow(UserProfileRequiredError);
   });
 });
 

@@ -7,12 +7,12 @@
 
 import { of } from 'rxjs';
 import type { IndexRequest } from '@elastic/elasticsearch/lib/api/types';
-import type { CoreSetup } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { NOTIFICATION_TYPES, SEVERITY } from '../../common';
 import type { NotificationDocument } from '../../common/types';
-import { buildForType, buildIdAndTimestamp, NotificationValidationError } from './submit';
-import type { NotificationCenterPluginStart, NotificationCenterStartDependencies } from '../types';
+import { buildIdAndTimestamp, NotificationSubmitService } from './submit';
+import { NotificationValidationError } from './notification_validation_error';
 
 const modelStatus = NOTIFICATION_TYPES.inference.modelStatus;
 
@@ -26,28 +26,32 @@ const content = {
   description: 'Your endpoint model is deprecated.',
 };
 
-const createCoreMock = ({ enabled = true }: { enabled?: boolean } = {}) => {
-  const elasticsearch = elasticsearchServiceMock.createStart();
-  const { index } = elasticsearch.client.asInternalUser;
-  const getBooleanValue$ = jest.fn().mockReturnValue(of(enabled));
-  const core = {
-    getStartServices: jest
-      .fn()
-      .mockResolvedValue([{ elasticsearch, featureFlags: { getBooleanValue$ } }]),
-  } as unknown as CoreSetup<NotificationCenterStartDependencies, NotificationCenterPluginStart>;
-  return { core, index, getBooleanValue$ };
+const createDependencies = ({ enabled = true }: { enabled?: boolean } = {}) => {
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const { featureFlags } = coreMock.createStart();
+  featureFlags.getBooleanValue$.mockReturnValue(of(enabled));
+  return {
+    esClient,
+    featureFlags,
+    index: esClient.index,
+    getBooleanValue$: featureFlags.getBooleanValue$,
+  };
 };
 
 const setup = (opts: { enabled?: boolean } = {}) => {
-  const { core, index, getBooleanValue$ } = createCoreMock(opts);
-  return { forType: buildForType(core), index, getBooleanValue$ };
+  const { esClient, featureFlags, index, getBooleanValue$ } = createDependencies(opts);
+  return {
+    service: new NotificationSubmitService(esClient, featureFlags),
+    index,
+    getBooleanValue$,
+  };
 };
 
-describe('buildForType', () => {
+describe('NotificationSubmitService', () => {
   it('appends one document with the id built from the type + id parts, a stamped @timestamp, and defaulted severity', async () => {
-    const { forType, index } = setup();
+    const { service, index } = setup();
 
-    const result = await forType(modelStatus).submit(content);
+    const result = await service.submit(modelStatus, content);
 
     expect(result).toEqual({ status: 'submitted' });
     expect(index).toHaveBeenCalledTimes(1);
@@ -66,18 +70,18 @@ describe('buildForType', () => {
   });
 
   it('stores a producer-provided severity', async () => {
-    const { forType, index } = setup();
+    const { service, index } = setup();
 
-    await forType(modelStatus).submit({ ...content, severity: SEVERITY.warning });
+    await service.submit(modelStatus, { ...content, severity: SEVERITY.warning });
 
     const [request] = index.mock.calls[0];
     expect(appendedDocument(request).severity).toBe('warning');
   });
 
   it('evaluates the feature flag keyed to the notification namespace/type', async () => {
-    const { forType, getBooleanValue$ } = setup();
+    const { service, getBooleanValue$ } = setup();
 
-    await forType(modelStatus).submit(content);
+    await service.submit(modelStatus, content);
 
     expect(getBooleanValue$).toHaveBeenCalledWith(
       'notificationCenter.types.inference.modelStatus',
@@ -86,9 +90,9 @@ describe('buildForType', () => {
   });
 
   it('skips the write and reports skipped_disabled when the type flag is off', async () => {
-    const { forType, index } = setup({ enabled: false });
+    const { service, index } = setup({ enabled: false });
 
-    const result = await forType(modelStatus).submit(content);
+    const result = await service.submit(modelStatus, content);
 
     expect(result).toEqual({ status: 'skipped_disabled' });
     expect(index).not.toHaveBeenCalled();
@@ -102,10 +106,10 @@ describe('buildForType', () => {
         NOTIFICATION_TYPE_FLAGS: {},
         NOTIFICATION_TYPE_ENABLED_DEFAULT: false,
       }));
-      const { buildForType: buildIsolated } = await import('./submit');
-      const { core, index, getBooleanValue$ } = createCoreMock();
+      const { NotificationSubmitService: IsolatedService } = await import('./submit');
+      const { esClient, featureFlags, index, getBooleanValue$ } = createDependencies();
 
-      const result = await buildIsolated(core)(modelStatus).submit(content);
+      const result = await new IsolatedService(esClient, featureFlags).submit(modelStatus, content);
 
       expect(getBooleanValue$).not.toHaveBeenCalled();
       expect(index).toHaveBeenCalledTimes(1);
@@ -114,19 +118,19 @@ describe('buildForType', () => {
   });
 
   it('rejects invalid content with a typed error and writes nothing', async () => {
-    const { forType, index } = setup();
+    const { service, index } = setup();
 
-    await expect(forType(modelStatus).submit({ ...content, title: '' })).rejects.toBeInstanceOf(
+    await expect(service.submit(modelStatus, { ...content, title: '' })).rejects.toBeInstanceOf(
       NotificationValidationError
     );
     expect(index).not.toHaveBeenCalled();
   });
 
   it('propagates a rejected write', async () => {
-    const { forType, index } = setup();
+    const { service, index } = setup();
     index.mockRejectedValueOnce(new Error('mapping conflict'));
 
-    await expect(forType(modelStatus).submit(content)).rejects.toThrow('mapping conflict');
+    await expect(service.submit(modelStatus, content)).rejects.toThrow('mapping conflict');
   });
 });
 

@@ -8,7 +8,7 @@
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { NOTIFICATION_DATA_STREAM_NAME } from '../storage/notification_data_stream';
-import { queryUnreadStatus } from './query_unread_status';
+import { UnreadStatusService } from './query_unread_status';
 
 const setup = (documents: Array<{ notification_id: string; '@timestamp': string }>) => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -16,17 +16,21 @@ const setup = (documents: Array<{ notification_id: string; '@timestamp': string 
     hits: { hits: documents.map((source, index) => ({ _id: `doc-${index}`, _source: source })) },
   } as never);
 
+  const logger = loggingSystemMock.createLogger();
   return {
-    deps: { esClient, logger: loggingSystemMock.createLogger() },
+    service: new UnreadStatusService(esClient, logger),
+    logger,
     search: esClient.search,
   };
 };
 
-describe('queryUnreadStatus', () => {
+describe('UnreadStatusService', () => {
   it('reports unread for a representative newer than the read horizon', async () => {
-    const { deps } = setup([{ notification_id: 'new', '@timestamp': '2026-07-20T00:00:00.000Z' }]);
+    const { service } = setup([
+      { notification_id: 'new', '@timestamp': '2026-07-20T00:00:00.000Z' },
+    ]);
 
-    const result = await queryUnreadStatus(deps, {
+    const result = await service.query({
       overrides: {},
       readAllBefore: '2026-07-15T00:00:00.000Z',
     });
@@ -35,9 +39,9 @@ describe('queryUnreadStatus', () => {
   });
 
   it('reports no unread when the horizon covers everything returned', async () => {
-    const { deps } = setup([]);
+    const { service } = setup([]);
 
-    const result = await queryUnreadStatus(deps, {
+    const result = await service.query({
       overrides: {},
       readAllBefore: '2026-07-15T00:00:00.000Z',
     });
@@ -46,9 +50,9 @@ describe('queryUnreadStatus', () => {
   });
 
   it('prunes to the read horizon and asks for one group beyond the overrides', async () => {
-    const { deps, search } = setup([]);
+    const { service, search } = setup([]);
 
-    await queryUnreadStatus(deps, {
+    await service.query({
       overrides: {
         a: { read: true, markedAt: '2026-07-16T00:00:00.000Z' },
         b: { read: true, markedAt: '2026-07-16T00:00:00.000Z' },
@@ -71,9 +75,9 @@ describe('queryUnreadStatus', () => {
   });
 
   it('asks for a single group when the user has no overrides', async () => {
-    const { deps, search } = setup([]);
+    const { service, search } = setup([]);
 
-    await queryUnreadStatus(deps, {
+    await service.query({
       overrides: {},
       readAllBefore: '2026-07-15T00:00:00.000Z',
     });
@@ -82,12 +86,12 @@ describe('queryUnreadStatus', () => {
   });
 
   it('looks past the newest representatives when overrides suppress them', async () => {
-    const { deps } = setup([
+    const { service } = setup([
       { notification_id: 'acknowledged', '@timestamp': '2026-07-18T00:00:00.000Z' },
       { notification_id: 'still-unread', '@timestamp': '2026-07-16T00:00:00.000Z' },
     ]);
 
-    const result = await queryUnreadStatus(deps, {
+    const result = await service.query({
       overrides: { acknowledged: { read: true, markedAt: '2026-07-19T00:00:00.000Z' } },
       readAllBefore: '2026-07-15T00:00:00.000Z',
     });
@@ -96,11 +100,11 @@ describe('queryUnreadStatus', () => {
   });
 
   it('treats a re-push after its override as unread again', async () => {
-    const { deps } = setup([
+    const { service } = setup([
       { notification_id: 're-pushed', '@timestamp': '2026-07-20T00:00:00.000Z' },
     ]);
 
-    const result = await queryUnreadStatus(deps, {
+    const result = await service.query({
       overrides: { 're-pushed': { read: true, markedAt: '2026-07-17T00:00:00.000Z' } },
       readAllBefore: '2026-07-15T00:00:00.000Z',
     });
@@ -109,11 +113,11 @@ describe('queryUnreadStatus', () => {
   });
 
   it('reports no unread when every returned representative is overridden as read', async () => {
-    const { deps } = setup([
+    const { service } = setup([
       { notification_id: 'acknowledged', '@timestamp': '2026-07-16T00:00:00.000Z' },
     ]);
 
-    const result = await queryUnreadStatus(deps, {
+    const result = await service.query({
       overrides: { acknowledged: { read: true, markedAt: '2026-07-17T00:00:00.000Z' } },
       readAllBefore: '2026-07-15T00:00:00.000Z',
     });
@@ -122,9 +126,9 @@ describe('queryUnreadStatus', () => {
   });
 
   it('treats a malformed document as unread rather than hiding the badge', async () => {
-    const { deps } = setup([{ '@timestamp': '2026-07-20T00:00:00.000Z' } as never]);
+    const { service } = setup([{ '@timestamp': '2026-07-20T00:00:00.000Z' } as never]);
 
-    const result = await queryUnreadStatus(deps, {
+    const result = await service.query({
       overrides: {},
       readAllBefore: '2026-07-15T00:00:00.000Z',
     });

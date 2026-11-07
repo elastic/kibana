@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import { inject, injectable } from 'inversify';
+import { Logger } from '@kbn/core-di';
+import type { Logger as ILogger } from '@kbn/core/server';
 import type { IUserStorageClient } from '@kbn/core-user-storage-common';
+import { ScopedUserStorage } from '../tokens';
+import { UserProfileRequiredError } from './user_profile_required_error';
 import {
   MAX_OVERRIDES,
   OVERRIDES_KEY,
@@ -26,41 +30,6 @@ export interface NotificationReadState {
   overrides: ReadOverrides;
   readAllBefore: string;
 }
-
-/**
- * Stamp the catch-up marker at the moment a user first reads their notifications, so the
- * backlog they inherit doesn't show up as unread.
- */
-const initializeReadHorizon = async (client: IUserStorageClient): Promise<string> => {
-  const readAllBefore = new Date().toISOString();
-  await client.set(READ_ALL_BEFORE_KEY, readAllBefore);
-  return readAllBefore;
-};
-
-/**
- * Fetch the user's read state for annotating the notification list.
- * Stamp the catch-up marker on a first read.
- * A userStorage failure results in `undefined` (an unannotated list).
- */
-export const getReadState = async (
-  client: IUserStorageClient,
-  logger: Logger
-): Promise<NotificationReadState | undefined> => {
-  try {
-    const [overrides, stored] = await Promise.all([
-      client.get<ReadOverrides>(OVERRIDES_KEY),
-      client.get<string>(READ_ALL_BEFORE_KEY),
-    ]);
-    const readAllBefore =
-      typeof stored !== 'string' || !stored || stored === READ_ALL_BEFORE_DEFAULT
-        ? await initializeReadHorizon(client)
-        : stored;
-    return { overrides, readAllBefore };
-  } catch (error) {
-    logger.debug('Failed to fetch read state.', { error });
-    return undefined;
-  }
-};
 
 /**
  * Determine whether a notification is read
@@ -96,25 +65,82 @@ const boundOverrides = (overrides: ReadOverrides): ReadOverrides => {
   );
 };
 
-/**
- * Mark an individual notification as read, adding it to the overrides for a user.
- * Update `markedAt` if that notification ID was already marked as read.
- */
-export const markRead = async (client: IUserStorageClient, id: string): Promise<void> => {
-  const overrides = await client.get<ReadOverrides>(OVERRIDES_KEY);
-  // userStorage doesn't have consistency guarantee, so two concurrent marks from separate tabs
-  // can lose one of the ids. This is a risk only for a single id, and will resolve itself
-  // by the next mark-all-read or retry by the client.
-  const next = { ...overrides, [id]: { read: true, markedAt: new Date().toISOString() } };
-  await client.set(OVERRIDES_KEY, boundOverrides(next));
-};
+/** The caller's notification read state, backed by their own profile-scoped user storage. */
+@injectable()
+export class ReadStateService {
+  constructor(
+    @inject(ScopedUserStorage) private readonly client: IUserStorageClient | null,
+    @inject(Logger) private readonly logger: ILogger
+  ) {}
 
-/**
- * Mark everything read up to now for the user.
- */
-export const markAllRead = async (client: IUserStorageClient): Promise<string> => {
-  const readAllBefore = new Date().toISOString();
-  await client.set(READ_ALL_BEFORE_KEY, readAllBefore);
-  await client.set(OVERRIDES_KEY, {});
-  return readAllBefore;
-};
+  /** False for callers without a user profile (API keys), which have no read state to read or write. */
+  public get hasUserProfile(): boolean {
+    return this.client !== null;
+  }
+
+  /**
+   * Fetch the user's read state for annotating the notification list.
+   * Stamp the catch-up marker on a first read.
+   * A missing user profile or a userStorage failure results in `undefined` (an unannotated list).
+   */
+  public async get(): Promise<NotificationReadState | undefined> {
+    if (!this.client) {
+      return undefined;
+    }
+    try {
+      const [overrides, stored] = await Promise.all([
+        this.client.get<ReadOverrides>(OVERRIDES_KEY),
+        this.client.get<string>(READ_ALL_BEFORE_KEY),
+      ]);
+      const readAllBefore =
+        typeof stored !== 'string' || !stored || stored === READ_ALL_BEFORE_DEFAULT
+          ? await this.initializeReadHorizon()
+          : stored;
+      return { overrides, readAllBefore };
+    } catch (error) {
+      this.logger.debug('Failed to fetch read state.', { error });
+      return undefined;
+    }
+  }
+
+  /**
+   * Mark an individual notification as read, adding it to the overrides for a user.
+   * Update `markedAt` if that notification ID was already marked as read.
+   */
+  public async markRead(id: string): Promise<void> {
+    const client = this.requireClient();
+    const overrides = await client.get<ReadOverrides>(OVERRIDES_KEY);
+    // userStorage doesn't have consistency guarantee, so two concurrent marks from separate tabs
+    // can lose one of the ids. This is a risk only for a single id, and will resolve itself
+    // by the next mark-all-read or retry by the client.
+    const next = { ...overrides, [id]: { read: true, markedAt: new Date().toISOString() } };
+    await client.set(OVERRIDES_KEY, boundOverrides(next));
+  }
+
+  /** Mark everything read up to now for the user. */
+  public async markAllRead(): Promise<string> {
+    const client = this.requireClient();
+    const readAllBefore = new Date().toISOString();
+    await client.set(READ_ALL_BEFORE_KEY, readAllBefore);
+    await client.set(OVERRIDES_KEY, {});
+    return readAllBefore;
+  }
+
+  /**
+   * Stamp the catch-up marker at the moment a user first reads their notifications, so the
+   * backlog they inherit doesn't show up as unread.
+   */
+  private async initializeReadHorizon(): Promise<string> {
+    const client = this.requireClient();
+    const readAllBefore = new Date().toISOString();
+    await client.set(READ_ALL_BEFORE_KEY, readAllBefore);
+    return readAllBefore;
+  }
+
+  private requireClient(): IUserStorageClient {
+    if (!this.client) {
+      throw new UserProfileRequiredError();
+    }
+    return this.client;
+  }
+}
