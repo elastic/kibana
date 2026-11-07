@@ -54,6 +54,49 @@ describe('pciComplianceSkill', () => {
     expect(pciComplianceSkill.content).toContain('scopeClaim');
   });
 
+  /**
+   * The PCI evals suite's shared criteria (`BASELINE_PCI_CRITERIA` in
+   * `@kbn/evals-suite-pci-compliance`) require the DSS version, the evaluated scope and the QSA
+   * disclaimer in every answer. The skill conditioned that surfacing on "audit-facing output",
+   * and the field-mapping answers omitted all three while the values sat unused in the tool
+   * results. These tests pin the unconditional contract so the conditional cannot come back.
+   */
+  describe('output contract', () => {
+    const outputContract = (() => {
+      const match = /\n## Output Contract[^\n]*\n([\s\S]*?)\n## /.exec(pciComplianceSkill.content);
+      return match?.[1] ?? '';
+    })();
+
+    it('is a dedicated section applying to every answer', () => {
+      expect(outputContract).not.toBe('');
+      expect(outputContract).toMatch(/every answer/i);
+    });
+
+    it('requires the PCI DSS version on every answer', () => {
+      expect(outputContract).toMatch(/4\.0\.1/);
+    });
+
+    it('requires both the evaluated indices and the evaluated time range', () => {
+      expect(outputContract).toContain('scopeClaim.indices');
+      expect(outputContract).toContain('scopeClaim.timeRange');
+    });
+
+    it('requires the QSA disclaimer on every answer', () => {
+      expect(outputContract).toContain('scopeClaim.disclaimer');
+      expect(outputContract).toContain('Qualified Security Assessor (QSA)');
+    });
+
+    it('no longer conditions scopeClaim surfacing on audit-facing output', () => {
+      expect(pciComplianceSkill.content).not.toContain('when producing audit-facing output');
+    });
+
+    it('keeps the requirements 3/9/12 wording that defers to a QSA', () => {
+      expect(pciComplianceSkill.content).toContain(
+        'manual process verification by a Qualified Security Assessor (QSA) is required for full compliance'
+      );
+    });
+  });
+
   describe('getRegistryTools', () => {
     const toolIds = pciComplianceSkill.getRegistryTools!() as string[];
 
