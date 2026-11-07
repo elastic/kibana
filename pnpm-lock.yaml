@@ -813,6 +813,9 @@ importers:
       '@kbn/as-code-dashboard-schema':
         specifier: workspace:*
         version: link:src/platform/packages/shared/as-code/dashboard-schema
+      '@kbn/as-code-dashboard-terraform':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/as-code/dashboard-terraform
       '@kbn/as-code-data-views-schema':
         specifier: workspace:*
         version: link:src/platform/packages/shared/as-code/data-views-schema
@@ -7832,6 +7835,8 @@ importers:
   src/platform/packages/private/shared-ux/storybook/config: {}
 
   src/platform/packages/shared/as-code/dashboard-schema: {}
+
+  src/platform/packages/shared/as-code/dashboard-terraform: {}
 
   src/platform/packages/shared/as-code/data-views-schema: {}
 

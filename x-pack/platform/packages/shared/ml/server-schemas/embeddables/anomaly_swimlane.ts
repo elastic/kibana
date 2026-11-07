@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, tfUnion } from '@kbn/zod/v4';
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
@@ -51,6 +51,8 @@ export const anomalySwimLaneEmbeddableStateSchema = z
   .meta({
     id: 'ml_anomaly_swimlane',
     description: 'Anomaly Swim Lane embeddable',
+    // Terraform has one flat object; `swimlane_type` stays an attribute.
+    ...tfUnion({ merge: true }),
   });
 
 export type AnomalySwimLaneEmbeddableState = z.output<typeof anomalySwimLaneEmbeddableStateSchema>;

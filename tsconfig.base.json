@@ -221,6 +221,8 @@
       "@kbn/application-usage-test-plugin/*": ["./x-pack/platform/test/usage_collection/plugins/application_usage_test/*"],
       "@kbn/as-code-dashboard-schema": ["./src/platform/packages/shared/as-code/dashboard-schema"],
       "@kbn/as-code-dashboard-schema/*": ["./src/platform/packages/shared/as-code/dashboard-schema/*"],
+      "@kbn/as-code-dashboard-terraform": ["./src/platform/packages/shared/as-code/dashboard-terraform"],
+      "@kbn/as-code-dashboard-terraform/*": ["./src/platform/packages/shared/as-code/dashboard-terraform/*"],
       "@kbn/as-code-data-views-schema": ["./src/platform/packages/shared/as-code/data-views-schema"],
       "@kbn/as-code-data-views-schema/*": ["./src/platform/packages/shared/as-code/data-views-schema/*"],
       "@kbn/as-code-data-views-transforms": ["./src/platform/packages/shared/as-code/data-views-transforms"],

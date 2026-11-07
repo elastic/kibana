@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, lazySchema } from '@kbn/zod';
+import { z, lazySchema, tfUnion } from '@kbn/zod';
 import { LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS } from '@kbn/lens-common';
 import {
   DEFAULT_PRIMARY_POSITION,
@@ -600,6 +600,14 @@ export const metricConfigSchema = lazySchema(() =>
   z.union([metricConfigSchemaNoESQL, metricConfigSchemaESQL]).meta({
     id: 'visMetricChart',
     title: 'Metric Chart',
+    ...tfUnion({
+      merge: true,
+      json_leaves: {
+        data_source: 'data_source_json',
+        breakdown_by: 'breakdown_by_json',
+        'metrics[]': 'config_json',
+      },
+    }),
     description:
       'One or two metric values with optional color coding, trend line, and breakdown by dimension.',
   })

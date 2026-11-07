@@ -1,0 +1,181 @@
+{
+  "note": "Dashboards API request bodies (POST /api/dashboards). Regenerate with tools/build_fixtures.js.",
+  "fixtures": [
+    {
+      "file": "oas_create_simple.json",
+      "source": "Kibana OAS example: src/platform/plugins/shared/dashboard/server/api/oas_examples.ts (createDashboardOASOperationObject, example \"createDashboard\")",
+      "covers": [
+        "envelope.access_control",
+        "envelope.title",
+        "panel_type.markdown",
+        "panel_type.vis",
+        "vis.by_value",
+        "vis.metric.no_esql",
+        "vis.xy.esql"
+      ]
+    },
+    {
+      "file": "oas_sections_and_controls.json",
+      "source": "Kibana OAS example: src/platform/plugins/shared/dashboard/server/api/oas_examples.ts (createDashboardOASOperationObject, example \"createDashboardWithSectionsAndControls\")",
+      "covers": [
+        "envelope.time_range",
+        "panel_type.vis",
+        "panels_item.section",
+        "pinned_panels.options_list_control",
+        "vis.by_value",
+        "vis.metric.no_esql",
+        "vis.xy.esql",
+        "vis.xy.no_esql"
+      ]
+    },
+    {
+      "file": "image_file_src.json",
+      "source": "Provider acc test HCL, transcribed: elastic/terraform-provider-elasticstack@dde805511b27 internal/kibana/dashboard/panel/image/testdata/TestAccResourceDashboardImage_file_src_round_trip/file_src/main.tf",
+      "covers": [
+        "envelope.description",
+        "envelope.query",
+        "envelope.refresh_interval",
+        "envelope.time_range",
+        "image.src.file",
+        "panel_type.image"
+      ]
+    },
+    {
+      "file": "image_url_src_drilldowns.json",
+      "source": "Provider acc test HCL, transcribed: elastic/terraform-provider-elasticstack@dde805511b27 internal/kibana/dashboard/panel/image/testdata/TestAccResourceDashboardImage_url_drilldowns_round_trip/url_round_trip/main.tf (target dashboard id replaced by a literal); object_fit from TestAccResourceDashboardImage_object_fit_explicit",
+      "covers": [
+        "image.drilldowns.dashboard",
+        "image.drilldowns.url",
+        "image.src.url",
+        "panel_type.image"
+      ]
+    },
+    {
+      "file": "vis_metric_esql.json",
+      "source": "Kibana lens API mocks, wrapped in vis panels: src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/lens_api_config.mock.ts (esqlMetricWithTrendAPIAttributes, complexESQLMetricAPIAttributes)",
+      "covers": [
+        "panel_type.vis",
+        "vis.by_value",
+        "vis.metric.esql"
+      ]
+    },
+    {
+      "file": "vis_by_reference.json",
+      "source": "Provider acc test HCL, transcribed: elastic/terraform-provider-elasticstack@dde805511b27 internal/kibana/dashboard/panel/visconfig/testdata/TestAccResourceDashboardVisConfigByReference_full (first step)",
+      "covers": [
+        "panel_type.vis",
+        "vis.by_reference"
+      ]
+    },
+    {
+      "file": "pinned_range_slider.json",
+      "source": "Provider acc test HCL, transcribed: elastic/terraform-provider-elasticstack@dde805511b27 internal/kibana/dashboard/testdata/TestAccResourceKibanaDashboardPinnedPanels/updated/main.tf (range slider entry; data view id replaced by a literal) + panel/rangeslider/testdata/TestAccResourceDashboardRangeSliderControlByEsql (by_esql config moved into pinned_panels)",
+      "covers": [
+        "pinned_panels.range_slider_control",
+        "range_slider.values_source.esql",
+        "range_slider.values_source.field"
+      ]
+    },
+    {
+      "file": "root_filters.json",
+      "source": "Kibana filter tests: src/platform/packages/shared/as-code/filters-transforms/src/to_stored_filter.test.ts (condition \"is\", group \"and\", dsl script) + fromStoredFilter(__fixtures__/spatial_filter.ts) for spatial; provider acc constant accDashboardRootFilterHostCanonical (acc_dashboard_root_filters_test.go) for a second condition",
+      "covers": [
+        "filters.condition",
+        "filters.dsl",
+        "filters.group",
+        "filters.spatial"
+      ]
+    },
+    {
+      "file": "several_tags.json",
+      "source": "Kibana OAS example createDashboard (title and markdown panel, content shortened) + tags: two plain tags, Fleet's Kibana-managed tag ID (x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/tag_assets.ts, `fleet-managed-${spaceId}`), and one the user cannot read",
+      "covers": [
+        "envelope.tags"
+      ]
+    },
+    {
+      "file": "data_views.json",
+      "source": "Hand-written: one saved data view (`logs-dv`) used by a root filter, a pinned options list control, a by-value Lens metric's data source and a field statistics table; the filter value holds user text with `${`",
+      "covers": [
+        "envelope.filters",
+        "panel_type.field_stats_table",
+        "panel_type.vis",
+        "pinned_panels.options_list_control",
+        "vis.metric.no_esql"
+      ]
+    }
+  ],
+  "variants": {
+    "panel_type.image": [
+      "image_file_src.json",
+      "image_url_src_drilldowns.json"
+    ],
+    "panel_type.vis": [
+      "oas_create_simple.json",
+      "oas_sections_and_controls.json",
+      "vis_metric_esql.json",
+      "vis_by_reference.json"
+    ],
+    "panels_item.section": [
+      "oas_sections_and_controls.json"
+    ],
+    "image.src.file": [
+      "image_file_src.json"
+    ],
+    "image.src.url": [
+      "image_url_src_drilldowns.json"
+    ],
+    "vis.by_value": [
+      "oas_create_simple.json",
+      "oas_sections_and_controls.json",
+      "vis_metric_esql.json"
+    ],
+    "vis.by_reference": [
+      "vis_by_reference.json"
+    ],
+    "vis.xy.no_esql": [
+      "oas_sections_and_controls.json"
+    ],
+    "vis.xy.esql": [
+      "oas_create_simple.json",
+      "oas_sections_and_controls.json"
+    ],
+    "vis.metric.no_esql": [
+      "oas_create_simple.json",
+      "oas_sections_and_controls.json"
+    ],
+    "vis.metric.esql": [
+      "vis_metric_esql.json"
+    ],
+    "pinned_panels.range_slider_control": [
+      "pinned_range_slider.json"
+    ],
+    "range_slider.values_source.field": [
+      "pinned_range_slider.json"
+    ],
+    "range_slider.values_source.esql": [
+      "pinned_range_slider.json"
+    ],
+    "filters.condition": [
+      "root_filters.json"
+    ],
+    "filters.group": [
+      "root_filters.json"
+    ],
+    "filters.dsl": [
+      "root_filters.json"
+    ],
+    "filters.spatial": [
+      "root_filters.json"
+    ],
+    "envelope.tags": [
+      "several_tags.json"
+    ],
+    "envelope.filters": [
+      "data_views.json"
+    ],
+    "panel_type.field_stats_table": [
+      "data_views.json"
+    ]
+  }
+}

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, lazySchema } from '@kbn/zod';
+import { z, lazySchema, tfUnion } from '@kbn/zod';
 import type { ZodType } from '@kbn/zod';
 
 import type {
@@ -170,6 +170,17 @@ export const lensApiConfigSchema: ZodType<LensApiConfig> = lazySchema(() =>
     .meta({
       id: 'visApiConfig',
       title: 'Visualizations',
+      ...tfUnion({
+        discriminator: 'type',
+        key_template: '{value}_config',
+        variant_keys: {
+          xy: 'xy_chart_config',
+          metric: 'metric_chart_config',
+          pie: 'pie_chart_config',
+          data_table: 'datatable_config',
+          tag_cloud: 'tagcloud_config',
+        },
+      }),
       description:
         'Visualization configuration. Use the `type` field to specify the chart type. Each chart type has its own set of required and optional fields.',
     })

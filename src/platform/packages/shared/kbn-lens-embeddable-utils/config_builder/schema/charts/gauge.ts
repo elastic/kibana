@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, lazySchema } from '@kbn/zod';
+import { z, lazySchema, tfUnion } from '@kbn/zod';
 import {
   esqlColumnWithFormatSchema,
   esqlColumnSchema,
@@ -202,6 +202,7 @@ export const gaugeConfigSchemaESQL = lazySchema(() =>
 export const gaugeConfigSchema = lazySchema(() =>
   z.union([gaugeConfigSchemaNoESQL, gaugeConfigSchemaESQL]).meta({
     id: 'visGaugeChart',
+    ...tfUnion({ merge: true }), // ES|QL vs not, no variant key
     title: 'Gauge Chart',
     description:
       'A gauge chart with a metric value and optional minimum, maximum, and goal markers, in bullet or circular shape.',

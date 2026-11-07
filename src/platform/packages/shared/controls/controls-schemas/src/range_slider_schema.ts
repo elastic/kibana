@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, tfVariant, tfUnion } from '@kbn/zod';
 import { DEFAULT_RANGE_SLIDER_STATE } from '@kbn/controls-constants';
 import {
   dataControlEsqlVariantSchema,
@@ -29,16 +29,26 @@ const rangeSliderExtras = {
 
 export const rangeSliderControlSchema = z.preprocess(
   withFieldValuesSourceDefault,
-  z.discriminatedUnion('values_source', [
-    dataControlEsqlVariantSchema.extend(rangeSliderExtras).meta({
-      id: 'kbn-controls-schemas-range-slider-control-schema-esql',
-      title: 'EsqlRangeSliderControl',
-      description: "A range slider control whose values come from an ES|QL query's results.",
-    }),
-    dataControlFieldVariantSchema.extend(rangeSliderExtras).meta({
-      id: 'kbn-controls-schemas-range-slider-control-schema-field',
-      title: 'FieldRangeSliderControl',
-      description: 'A range slider control whose values come from a numeric data view field.',
-    }),
-  ])
+  z
+    .discriminatedUnion('values_source', [
+      dataControlEsqlVariantSchema.extend(rangeSliderExtras).meta({
+        id: 'kbn-controls-schemas-range-slider-control-schema-esql',
+        title: 'EsqlRangeSliderControl',
+        ...tfVariant({ keep_discriminator: true }), // baseline keeps values_source in by_esql
+        description: "A range slider control whose values come from an ES|QL query's results.",
+      }),
+      dataControlFieldVariantSchema.extend(rangeSliderExtras).meta({
+        id: 'kbn-controls-schemas-range-slider-control-schema-field',
+        title: 'FieldRangeSliderControl',
+        description: 'A range slider control whose values come from a numeric data view field.',
+      }),
+    ])
+    .meta({
+      // Values_source defaults to `field` when absent (see withFieldValuesSourceDefault)
+      ...tfUnion({
+        discriminator: 'values_source',
+        default_value: 'field',
+        variant_keys: { field: 'by_field', esql: 'by_esql' },
+      }),
+    })
 );

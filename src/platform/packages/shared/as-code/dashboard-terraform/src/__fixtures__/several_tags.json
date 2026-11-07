@@ -1,0 +1,18 @@
+{
+  "title": "Web logs overview",
+  "tags": ["tag-production", "tag-team-a", "fleet-managed-default", "tag-unreadable"],
+  "panels": [
+    {
+      "grid": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 15
+      },
+      "type": "markdown",
+      "config": {
+        "content": "## Web logs overview"
+      }
+    }
+  ]
+}

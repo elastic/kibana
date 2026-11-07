@@ -1,0 +1,175 @@
+{
+  "title": "Operations overview",
+  "time_range": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "pinned_panels": [
+    {
+      "type": "options_list_control",
+      "width": "medium",
+      "grow": true,
+      "config": {
+        "title": "Response code",
+        "data_view_id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+        "field_name": "response.keyword",
+        "values_source": "field",
+        "use_global_filters": true,
+        "ignore_validations": false,
+        "exclude": false,
+        "exists_selected": false,
+        "run_past_timeout": false,
+        "search_technique": "prefix",
+        "selected_options": [],
+        "single_select": false,
+        "sort": {
+          "by": "_count",
+          "direction": "desc"
+        }
+      }
+    }
+  ],
+  "panels": [
+    {
+      "title": "Key metrics",
+      "collapsed": false,
+      "grid": {
+        "y": 0
+      },
+      "panels": [
+        {
+          "grid": {
+            "x": 0,
+            "y": 0,
+            "w": 12,
+            "h": 5
+          },
+          "type": "vis",
+          "config": {
+            "type": "metric",
+            "data_source": {
+              "type": "data_view_spec",
+              "index_pattern": "kibana_sample_data_logs",
+              "time_field": "timestamp"
+            },
+            "metrics": [
+              {
+                "type": "primary",
+                "operation": "count"
+              }
+            ]
+          }
+        },
+        {
+          "grid": {
+            "x": 12,
+            "y": 0,
+            "w": 12,
+            "h": 5
+          },
+          "type": "vis",
+          "config": {
+            "type": "metric",
+            "data_source": {
+              "type": "data_view_spec",
+              "index_pattern": "kibana_sample_data_logs",
+              "time_field": "timestamp"
+            },
+            "metrics": [
+              {
+                "type": "primary",
+                "operation": "average",
+                "field": "bytes"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "Traffic trends",
+      "collapsed": false,
+      "grid": {
+        "y": 8
+      },
+      "panels": [
+        {
+          "grid": {
+            "x": 0,
+            "y": 0,
+            "w": 24,
+            "h": 10
+          },
+          "type": "vis",
+          "config": {
+            "type": "xy",
+            "title": "Requests over time",
+            "layers": [
+              {
+                "type": "line",
+                "data_source": {
+                  "type": "data_view_spec",
+                  "index_pattern": "kibana_sample_data_logs",
+                  "time_field": "timestamp"
+                },
+                "x": {
+                  "operation": "date_histogram",
+                  "field": "timestamp"
+                },
+                "y": [
+                  {
+                    "operation": "count"
+                  }
+                ]
+              }
+            ],
+            "axis": {
+              "x": {
+                "title": {
+                  "visible": false
+                }
+              }
+            }
+          }
+        },
+        {
+          "grid": {
+            "x": 24,
+            "y": 0,
+            "w": 24,
+            "h": 10
+          },
+          "type": "vis",
+          "config": {
+            "type": "xy",
+            "title": "Requests over time (ES|QL)",
+            "layers": [
+              {
+                "type": "line",
+                "data_source": {
+                  "type": "esql",
+                  "query": "FROM kibana_sample_data_logs | STATS count = COUNT() BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
+                },
+                "x": {
+                  "column": "BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
+                },
+                "y": [
+                  {
+                    "column": "count"
+                  }
+                ]
+              }
+            ],
+            "axis": {
+              "x": {
+                "title": {
+                  "visible": false
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

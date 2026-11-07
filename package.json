@@ -295,6 +295,7 @@
     "@kbn/app-menu": "workspace:*",
     "@kbn/application-usage-test-plugin": "workspace:*",
     "@kbn/as-code-dashboard-schema": "workspace:*",
+    "@kbn/as-code-dashboard-terraform": "workspace:*",
     "@kbn/as-code-data-views-schema": "workspace:*",
     "@kbn/as-code-data-views-transforms": "workspace:*",
     "@kbn/as-code-discover-schema": "workspace:*",

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, tfDataViewRef } from '@kbn/zod';
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
@@ -24,9 +24,14 @@ export const patternAnalysisEmbeddableStateSchema = z
   .object({
     ...serializedTitlesSchema.shape,
     ...serializedTimeRangeSchema.shape,
-    data_view_id: z.string().min(1).max(1000).meta({
-      description: 'The data view ID used for pattern analysis.',
-    }),
+    data_view_id: z
+      .string()
+      .min(1)
+      .max(1000)
+      .meta({
+        description: 'The data view ID used for pattern analysis.',
+        ...tfDataViewRef(),
+      }),
     field_name: z.string().min(1).max(1000).meta({
       description: 'The text field on which to run pattern analysis.',
     }),

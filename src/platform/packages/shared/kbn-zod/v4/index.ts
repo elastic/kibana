@@ -17,6 +17,18 @@ export { lazySchema, setLazySchemaDisabled } from './lazy_schema';
 export { lazyImmutableGCableObject } from './lazy_immutable_gcable_object';
 export type { ZodObjectType } from './types';
 export type { OasMetaExtensions, OasMetaAvailability } from './openapi';
+export {
+  tfUnion,
+  tfUnionOverride,
+  tfVariant,
+  tfJsonLeaf,
+  tfFlatten,
+  tfUnwrap,
+  tfOmit,
+  tfRef,
+  tfDataViewRef,
+} from './terraform_meta';
+export type { TfRefMeta, TfUnionMeta, TfVariantMeta } from './terraform_meta';
 
 export {
   savedObjectId,

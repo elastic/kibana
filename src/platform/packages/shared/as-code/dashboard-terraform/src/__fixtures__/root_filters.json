@@ -1,0 +1,155 @@
+{
+  "title": "Root filters",
+  "filters": [
+    {
+      "type": "condition",
+      "condition": {
+        "field": "status",
+        "operator": "is",
+        "value": "active"
+      }
+    },
+    {
+      "type": "condition",
+      "condition": {
+        "field": "host.name",
+        "operator": "is",
+        "value": "web-01"
+      }
+    },
+    {
+      "type": "group",
+      "group": {
+        "operator": "and",
+        "conditions": [
+          {
+            "field": "status",
+            "operator": "is",
+            "value": "active"
+          },
+          {
+            "field": "type",
+            "operator": "is",
+            "value": "user"
+          }
+        ]
+      }
+    },
+    {
+      "type": "dsl",
+      "dsl": {
+        "query": {
+          "script": {
+            "source": "doc.field.value > 0"
+          }
+        }
+      }
+    },
+    {
+      "disabled": false,
+      "label": "intersects shape",
+      "is_multi_index": true,
+      "type": "spatial",
+      "dsl": {
+        "query": {
+          "bool": {
+            "should": [
+              {
+                "bool": {
+                  "must": [
+                    {
+                      "exists": {
+                        "field": "DestLocation"
+                      }
+                    },
+                    {
+                      "geo_shape": {
+                        "ignore_unmapped": true,
+                        "DestLocation": {
+                          "relation": "intersects",
+                          "shape": {
+                            "coordinates": [
+                              [
+                                [
+                                  -116.98646,
+                                  49.95363
+                                ],
+                                [
+                                  -69.4932,
+                                  36.01698
+                                ],
+                                [
+                                  -89.978,
+                                  27.62399
+                                ],
+                                [
+                                  -114.50929,
+                                  36.07558
+                                ],
+                                [
+                                  -116.98646,
+                                  49.95363
+                                ]
+                              ]
+                            ],
+                            "type": "Polygon"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "bool": {
+                  "must": [
+                    {
+                      "exists": {
+                        "field": "geo.coordinates"
+                      }
+                    },
+                    {
+                      "geo_shape": {
+                        "ignore_unmapped": true,
+                        "geo.coordinates": {
+                          "relation": "intersects",
+                          "shape": {
+                            "coordinates": [
+                              [
+                                [
+                                  -116.98646,
+                                  49.95363
+                                ],
+                                [
+                                  -69.4932,
+                                  36.01698
+                                ],
+                                [
+                                  -89.978,
+                                  27.62399
+                                ],
+                                [
+                                  -114.50929,
+                                  36.07558
+                                ],
+                                [
+                                  -116.98646,
+                                  49.95363
+                                ]
+                              ]
+                            ],
+                            "type": "Polygon"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

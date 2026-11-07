@@ -675,6 +675,7 @@ packages:
   - 'src/platform/packages/private/opentelemetry/kbn-metrics-config'
   - 'src/platform/packages/private/shared-ux/storybook/config'
   - 'src/platform/packages/shared/as-code/dashboard-schema'
+  - 'src/platform/packages/shared/as-code/dashboard-terraform'
   - 'src/platform/packages/shared/as-code/data-views-schema'
   - 'src/platform/packages/shared/as-code/data-views-transforms'
   - 'src/platform/packages/shared/as-code/discover-schema'

@@ -1,0 +1,46 @@
+{
+  "title": "Vis by reference",
+  "description": "vis vis_config.by_reference full acceptance",
+  "time_range": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "refresh_interval": {
+    "pause": true,
+    "value": 0
+  },
+  "query": {
+    "language": "kql",
+    "expression": ""
+  },
+  "panels": [
+    {
+      "type": "vis",
+      "grid": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 10
+      },
+      "config": {
+        "ref_id": "lensRef",
+        "references": [
+          {
+            "id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+            "name": "lensRef",
+            "type": "lens"
+          }
+        ],
+        "title": "Ref title",
+        "description": "By reference desc",
+        "hide_title": true,
+        "hide_border": false,
+        "time_range": {
+          "from": "now-7d",
+          "to": "now",
+          "mode": "relative"
+        }
+      }
+    }
+  ]
+}

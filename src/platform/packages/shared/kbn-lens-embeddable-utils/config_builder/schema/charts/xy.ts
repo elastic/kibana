@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, lazySchema } from '@kbn/zod';
+import { z, lazySchema, tfVariant, tfUnion, tfUnwrap } from '@kbn/zod';
 import {
   axisTitleSchema,
   collapseBySchema,
@@ -167,14 +167,14 @@ export const sharedAxisSchema = lazySchema(() =>
         })
         .strict()
         .optional()
-        .meta({ description: 'Axis tick marks configuration' }),
+        .meta({ description: 'Axis tick marks configuration', ...tfUnwrap() }),
       grid: z
         .object({
           visible: z.boolean().meta({ description: 'Show grid lines for this axis' }),
         })
         .strict()
         .optional()
-        .meta({ description: 'Axis grid lines configuration' }),
+        .meta({ description: 'Axis grid lines configuration', ...tfUnwrap() }),
       labels: z
         .object({
           /**
@@ -614,6 +614,15 @@ const xyDataLayerSchemaNoESQL = lazySchema(() =>
     .strict()
     .meta({
       id: 'visXyLayerNoESQL',
+      ...tfVariant({
+        key: 'data_layer',
+        json_leaves: {
+          data_source: 'data_source_json',
+          breakdown_by: 'breakdown_by_json',
+          x: 'x_json',
+          'y[]': 'config_json',
+        },
+      }),
       title: 'Layer (DSL)',
       description: 'Data layer for standard queries with metrics and buckets',
     })
@@ -653,6 +662,15 @@ const xyDataLayerSchemaESQL = lazySchema(() =>
     .strict()
     .meta({
       id: 'visXyLayerESQL',
+      ...tfVariant({
+        key: 'data_layer',
+        json_leaves: {
+          data_source: 'data_source_json',
+          breakdown_by: 'breakdown_by_json',
+          x: 'x_json',
+          'y[]': 'config_json',
+        },
+      }),
       title: 'Layer (ES|QL)',
       description: 'Data layer for ES|QL queries with column references',
     })
@@ -745,6 +763,11 @@ const referenceLineLayerSchemaNoESQL = lazySchema(() =>
     .strict()
     .meta({
       id: 'visXyReferenceLineLayerNoESQL',
+      ...tfVariant({
+        key: 'reference_line_layer',
+        // The provider holds a threshold whole in the value_json of an object.
+        json_leaves: { data_source: 'data_source_json', 'thresholds[]': 'value_json' },
+      }),
       title: 'Reference Line Layer (DSL)',
       description: 'Reference line layer for standard queries',
     })
@@ -768,6 +791,11 @@ const esqlReferenceLineLayerSchema = lazySchema(() =>
     .strict()
     .meta({
       id: 'visXyReferenceLineLayerESQL',
+      ...tfVariant({
+        key: 'reference_line_layer',
+        // The provider holds a threshold whole in the value_json of an object.
+        json_leaves: { data_source: 'data_source_json', 'thresholds[]': 'value_json' },
+      }),
       title: 'ES|QL Reference Line Layer',
       description: 'Reference lines defined by numeric columns from a layer-specific ES|QL query.',
     })
@@ -923,6 +951,7 @@ const annotationLayerByValueSchema = lazySchema(() =>
     .strict()
     .meta({
       id: 'visXyAnnotationLayerNoESQL',
+      ...tfVariant({ omit: true }),
       title: 'Annotation Layer (DSL)',
       description: 'Layer containing annotations (query-based, points, and ranges)',
     })
@@ -942,6 +971,7 @@ const annotationByRefLayerSchema = lazySchema(() =>
     .strict()
     .meta({
       id: 'visXyAnnotationByRefLayer',
+      ...tfVariant({ omit: true }),
       title: 'Annotation Layer (By Reference)',
       description: 'Reference to a library annotation group',
     })
@@ -964,6 +994,12 @@ const xyLayerUnionNoESQL = lazySchema(() =>
     ])
     .meta({
       id: 'visXyLayersNoESQL',
+      // Keys live on the branches
+      ...tfUnion({
+        discriminator: 'type',
+        discriminator_placement: 'outside',
+        exclusivity: 'conflicts_with',
+      }),
       description: 'XY chart layer types for DSL queries',
     })
 );
@@ -991,6 +1027,7 @@ const annotationLayerESQLSchema = lazySchema(() =>
     .strict()
     .meta({
       id: 'visXyAnnotationLayerESQL',
+      ...tfVariant({ omit: true }),
       title: 'Annotation Layer (ES|QL)',
       description: 'Layer containing annotations (points and ranges)',
     })
@@ -1014,6 +1051,11 @@ const staticReferenceLineLayerSchemaForESQLCharts = lazySchema(() =>
     .strict()
     .meta({
       id: 'visXyReferenceLineLayerESQLStatic',
+      ...tfVariant({
+        key: 'reference_line_layer',
+        // The provider holds a threshold whole in the value_json of an object.
+        json_leaves: { data_source: 'data_source_json', 'thresholds[]': 'value_json' },
+      }),
       title: 'Static Reference Line Layer for ES|QL Charts',
       description: 'Reference lines defined by constant numeric values on ES|QL charts.',
     })
@@ -1029,6 +1071,12 @@ const xyLayerUnionESQL = lazySchema(() =>
     ])
     .meta({
       id: 'visXyLayersESQL',
+      // Keys live on the branches
+      ...tfUnion({
+        discriminator: 'type',
+        discriminator_placement: 'outside',
+        exclusivity: 'conflicts_with',
+      }),
       description: 'XY chart layer types for ES|QL queries.',
     })
 );
@@ -1079,6 +1127,7 @@ export const xyConfigSchema = lazySchema(() =>
   z.union([xyConfigSchemaNoESQL, xyConfigSchemaESQL]).meta({
     id: 'visXyChart',
     title: 'XY Chart',
+    ...tfUnion({ merge: true }),
     description: 'XY chart configuration',
   })
 );

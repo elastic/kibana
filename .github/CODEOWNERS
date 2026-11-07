@@ -472,6 +472,7 @@ src/platform/packages/private/opentelemetry/kbn-metrics @elastic/kibana-core @el
 src/platform/packages/private/opentelemetry/kbn-metrics-config @elastic/kibana-core
 src/platform/packages/private/shared-ux/storybook/config @elastic/appex-sharedux
 src/platform/packages/shared/as-code/dashboard-schema @elastic/kibana-dashboards
+src/platform/packages/shared/as-code/dashboard-terraform @elastic/kibana-dashboards
 src/platform/packages/shared/as-code/data-views-schema @elastic/kibana-discover
 src/platform/packages/shared/as-code/data-views-transforms @elastic/kibana-discover
 src/platform/packages/shared/as-code/discover-schema @elastic/kibana-discover
@@ -1693,6 +1694,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /src/platform/test/api_integration/fixtures/kbn_archiver/event_annotations/event_annotations.json @elastic/kibana-dashboards
 /src/platform/test/functional/apps/getting_started/*.ts @elastic/kibana-dashboards # Assigned per https://github.com/elastic/kibana/pull/199767#discussion_r1840485031
 /x-pack/platform/test/upgrade/apps/graph @elastic/kibana-dashboards
+/src/platform/packages/shared/as-code/dashboard-terraform/src/accepted_json_leaves.json @elastic/kibana-dashboards # Each entry exports a Dashboards API union as a JSON string in Terraform; `--update` writes it, review decides it
 /x-pack/platform/test/functional/page_objects/log_wrapper.ts @elastic/kibana-dashboards # Assigned per https://github.com/elastic/kibana/pull/36437
 /x-pack/platform/test/functional/page_objects/graph_page.ts @elastic/kibana-dashboards
 /x-pack/platform/test/functional/apps/managed_content @elastic/kibana-dashboards

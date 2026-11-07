@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, lazySchema } from '@kbn/zod';
+import { z, lazySchema, tfUnion } from '@kbn/zod';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema } from '../color';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
@@ -210,6 +210,7 @@ export const mosaicConfigSchemaESQL = lazySchema(() =>
 export const mosaicConfigSchema = lazySchema(() =>
   z.union([mosaicConfigSchemaNoESQL, mosaicConfigSchemaESQL]).meta({
     id: 'visMosaicChart',
+    ...tfUnion({ merge: true }), // ES|QL vs not, no variant key
     title: 'Mosaic Chart',
     description:
       'Mosaic chart configuration schema supporting both data source queries (non-ES|QL) and ES|QL query modes',

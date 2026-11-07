@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, lazySchema } from '@kbn/zod';
+import { z, lazySchema, tfUnion } from '@kbn/zod';
 
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { colorByValueSchema, autoColorSchema, AUTO_COLOR } from '../color';
@@ -207,6 +207,7 @@ export const heatmapConfigSchemaESQL = lazySchema(() =>
 export const heatmapConfigSchema = lazySchema(() =>
   z.union([heatmapConfigSchemaNoESQL, heatmapConfigSchemaESQL]).meta({
     id: 'visHeatmapChart',
+    ...tfUnion({ merge: true }), // ES|QL vs not, no variant key
     title: 'Heatmap Chart',
     description:
       'A grid of colored cells where color intensity represents the metric value at each X/Y intersection.',

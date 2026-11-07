@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, tfUnion, tfVariant } from '@kbn/zod';
 import { getAsCodeTagsSchema } from '@kbn/as-code-shared-schemas';
 import { dashboardNavigationOptionsSchema } from '@kbn/dashboard-navigation-options-schema';
 import {
@@ -85,9 +85,10 @@ const linksStateSchema = z
   })
   .strict();
 
-export const linksByValueSchema = serializedTitlesSchema
-  .extend(linksStateSchema.shape)
-  .meta(BY_VALUE_SCHEMA_META);
+export const linksByValueSchema = serializedTitlesSchema.extend(linksStateSchema.shape).meta({
+  ...BY_VALUE_SCHEMA_META,
+  ...tfVariant({ key: 'by_value', match: { present: 'links' } }),
+});
 
 export const linksByReferenceSchema = serializedTitlesSchema
   .extend({
@@ -96,11 +97,15 @@ export const linksByReferenceSchema = serializedTitlesSchema
       description: 'The unique identifier of the links library item.',
     }),
   })
-  .meta(BY_REF_SCHEMA_META);
+  .meta({
+    ...BY_REF_SCHEMA_META,
+    ...tfVariant({ key: 'by_reference', match: { present: 'ref_id' } }),
+  });
 
 // Complete links embeddable schema (union of by-value and by-reference embeddables)
 export const linksEmbeddableSchema = z.union([linksByValueSchema, linksByReferenceSchema]).meta({
   description: 'Links embeddable schema',
+  ...tfUnion({ structural: true }),
 });
 
 export const linksApiStateSchema = linksStateSchema.extend({
