@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/fleet-plugin-cypress
   channel: ''
   owner: '@elastic/streams-ui'
-  sourceRoot: x-pack/platform/plugins/shared/fleet/cypress
+  sourceRoot: x-pack/platform/plugins/shared/fleet-cypress
 dependsOn:
   - '@kbn/test'
   - '@kbn/axe-config'
