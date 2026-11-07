@@ -14,7 +14,7 @@ jest.mock('../risk_score/risk_score_data_client', () => ({
 }));
 
 jest.mock('../risk_score/tasks/helpers', () => ({
-  buildScopedInternalSavedObjectsClientUnsafe: jest.fn().mockReturnValue({}),
+  buildNamespacedInternalSavedObjectsClientUnsafe: jest.fn().mockReturnValue({}),
 }));
 
 import { loggerMock } from '@kbn/logging-mocks';
