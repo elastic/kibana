@@ -37,6 +37,11 @@ export const SECURITY_AI_PROMPTS_PACKAGE_NAME = 'security_ai_prompts';
  */
 export const ELASTIC_SECURITY_RULE_ID = '9a1a2dae-0b5f-4c3d-8305-a268d404c306';
 
+/**
+ * Runtime field that emits a rule's timestamp override, falling back to `@timestamp` when the override is missing.
+ */
+export const TIMESTAMP_RUNTIME_FIELD = 'kibana.combined_timestamp' as const;
+
 export const DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY = 'suppress' as const;
 
 export const MINIMUM_LICENSE_FOR_SUPPRESSION = 'platinum' as const;
