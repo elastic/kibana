@@ -347,6 +347,39 @@ describe('canvas save', () => {
     );
   });
 
+  it('keeps a scoped rule whose source was unhooked staged but refuses to save it', async () => {
+    const routed = loadedUnit();
+    routed.unit.sources = [
+      ...routed.unit.sources,
+      { id: 'metrics-src', type: 'otlp', supported_telemetry: ['metrics'] },
+    ];
+    routed.unit.destinations = [
+      ...routed.unit.destinations,
+      { id: 'es-metrics', type: 'elasticsearch', supported_telemetry: ['metrics'] },
+    ];
+    routed.unit.pipelines[0].supported_telemetry = ['logs', 'metrics'];
+    routed.unit.pipelines[0].config = [
+      { name: 'sources', value: ['src', 'metrics-src'] },
+      {
+        name: 'routes',
+        value: [
+          { telemetry: ['logs'], destinations: ['es'] },
+          { telemetry: ['metrics'], destinations: ['es-metrics'] },
+        ],
+      },
+    ];
+    const unhooked = disconnectLine(
+      routed,
+      { kind: 'source', id: 'metrics-src' },
+      { kind: 'pipeline', id: 'p-src' }
+    );
+    expect(unhooked.unit.pipelines[0].config[0]).toEqual({ name: 'sources', value: ['src'] });
+
+    expect(await refuseToSave(routed, unhooked)).toBe(
+      'A routing rule of p-src only handles metrics, but no source connected to it sends metrics. Connect such a source before saving, or remove the rule.'
+    );
+  });
+
   it('still persists a destination create while a line is unhooked, keeping the staged wiring', async () => {
     const processed = processedUnit();
     const unhooked = disconnectLine(

@@ -43,6 +43,7 @@ import {
 import {
   UNCONNECTED_PIPELINE_REASON,
   getUnconnectedPipelines,
+  getUnreachableScopes,
   withPublishedTelemetry,
 } from '../../../../../services/unit_connections';
 import { getFormattedError } from '../../../../../util/errors';
@@ -843,6 +844,16 @@ async function validateCanvasUnitDefinition({
       i18n.translate('xpack.streams.streamDetailCanvas.unconnectedRuleErrorMessage', {
         defaultMessage:
           'Connect each routing rule to a destination or a pipeline before saving, or remove the rule.',
+      })
+    );
+  }
+  const [unreachable] = getUnreachableScopes(unitDefinition);
+  if (unreachable) {
+    throw new Error(
+      i18n.translate('xpack.streams.streamDetailCanvas.unreachableScopeErrorMessage', {
+        defaultMessage:
+          'A routing rule of {pipelineId} only handles {signals}, but no source connected to it sends {signals}. Connect such a source before saving, or remove the rule.',
+        values: { pipelineId: unreachable.pipeline.id, signals: unreachable.telemetry.join(', ') },
       })
     );
   }
