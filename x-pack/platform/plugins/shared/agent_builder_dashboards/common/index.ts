@@ -6,5 +6,17 @@
  */
 
 export { dashboardTools, DASHBOARDS_SKILL_ID, getDashboardsSkillBadge } from './constants';
-export { DASHBOARD_UPDATED_UI_EVENT } from './ui_events';
-export type { DashboardUpdatedUiEventData } from './ui_events';
+export {
+  DASHBOARD_UPDATED_UI_EVENT,
+  DASHBOARD_BUILD_STARTED_UI_EVENT,
+  DASHBOARD_PANEL_RESOLVED_UI_EVENT,
+  DASHBOARD_BUILD_ENDED_UI_EVENT,
+} from './ui_events';
+export type {
+  DashboardUpdatedUiEventData,
+  DashboardBuildPlannedPanel,
+  DashboardBuildStartedUiEventData,
+  DashboardPanelResolvedUiEventData,
+  DashboardBuildEndedUiEventData,
+} from './ui_events';
+export { DASHBOARD_SKELETON_EMBEDDABLE_TYPE, SKELETON_PANEL_ID_PREFIX } from './skeleton';

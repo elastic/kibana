@@ -72,6 +72,7 @@ export const resolvePlan = async ({
   projectRouting,
   resolvers,
   logger,
+  onPanelResolved,
 }: {
   panels: PlannedPanel[];
   controls: PlannedControl[];
@@ -88,6 +89,8 @@ export const resolvePlan = async ({
   projectRouting?: string;
   resolvers: PanelResolvers;
   logger: Logger;
+  /** Called as soon as each planned panel's content resolves, before the others finish. */
+  onPanelResolved?: (panelId: string, attempt: PanelContentAttempt) => void;
 }): Promise<ResolvedChanges> => {
   // Where a panel, or a control in the grid, is once the call is applied.
   const sectionIdByPanelId = getSectionIdByPanelId({ panels: existingPanels });
@@ -104,13 +107,15 @@ export const resolvePlan = async ({
   });
   const [attempts, resolvedControls] = await Promise.all([
     Promise.all(
-      panels.map(({ id, content }) => {
+      panels.map(async ({ id, content }) => {
         if (!content) return undefined;
-        return resolveContent(
+        const attempt = await resolveContent(
           content,
           resolvers,
           getEsqlVariablesResolver(sectionIdByPanelId.get(id))
         );
+        onPanelResolved?.(id, attempt);
+        return attempt;
       })
     ),
     resolveControls({

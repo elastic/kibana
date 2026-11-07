@@ -15,12 +15,13 @@ import type {
   ResolveControlFieldCapabilities,
   ResolveEsqlControlColumnType,
 } from '../types';
-import type { PanelAuthoringNote } from '../resolve_panel';
+import type { PanelAuthoringNote, PanelContentAttempt } from '../resolve_panel';
 import type { DashboardFailure } from '../utils';
 import { discardInvalidChanges, type DashboardValidator } from '../validate_dashboard';
 import { applyPlan } from './apply';
 import { getChangedIds, type ChangedIds } from './changed_ids';
 import { planUpsert } from './plan';
+import { predictPlannedDashboard } from './predict';
 import { resolvePlan } from './resolve';
 import type { DashboardUpsert } from './schema';
 
@@ -33,6 +34,25 @@ interface ExecuteDashboardUpsertParams {
   resolveControlFieldCapabilities?: ResolveControlFieldCapabilities;
   resolveEsqlControlColumnType?: ResolveEsqlControlColumnType;
   validator?: DashboardValidator;
+  /**
+   * Called before panel content resolves with the dashboard the plan predicts, so the host can lay
+   * it out in parallel. Not called when a panel's kind or size is known only after resolution.
+   */
+  onPlanned?: (predictedDashboardData: DashboardAttachmentData) => void;
+  /**
+   * Called before panel content resolves with the panels the plan adds, whether or not their layout
+   * can be predicted, so the host can show them as they build.
+   */
+  onNewPanelsPlanned?: (newPanels: PlannedNewPanel[], title: string) => void;
+  /** Called as soon as each planned panel's content resolves, before the other panels finish. */
+  onPanelResolved?: (panelId: string, attempt: PanelContentAttempt) => void;
+}
+
+export interface PlannedNewPanel {
+  id: string;
+  /** What the panel is about, when the plan says. */
+  label?: string;
+  chartType?: string;
 }
 
 export interface DashboardUpsertResult extends ChangedIds {
@@ -66,12 +86,35 @@ export const executeDashboardUpsert = async ({
   resolveControlFieldCapabilities,
   resolveEsqlControlColumnType,
   validator,
+  onPlanned,
+  onNewPanelsPlanned,
+  onPanelResolved,
 }: ExecuteDashboardUpsertParams): Promise<DashboardUpsertResult> => {
   const originalDashboardData = structuredClone(
     dashboardData ?? { title: 'User Dashboard', description: undefined, panels: [] }
   );
   const original = indexDashboard(originalDashboardData);
   const plan = planUpsert({ original, upsert });
+  if (onNewPanelsPlanned) {
+    const newPanels = plan.panels.flatMap((panel): PlannedNewPanel[] => {
+      if (panel.existingPanel) return [];
+      const request = panel.content.source === 'request' ? panel.content.request : undefined;
+      return [
+        {
+          id: panel.id,
+          label: request && 'nlQuery' in request ? request.nlQuery : undefined,
+          chartType: request && 'chartType' in request ? request.chartType : undefined,
+        },
+      ];
+    });
+    onNewPanelsPlanned(newPanels, plan.metadata.title ?? originalDashboardData.title);
+  }
+  if (onPlanned) {
+    const predictedDashboardData = predictPlannedDashboard(originalDashboardData, plan);
+    if (predictedDashboardData) {
+      onPlanned(predictedDashboardData);
+    }
+  }
   const { panels, controls, failures } = await resolvePlan({
     panels: plan.panels,
     controls: plan.controls,
@@ -88,6 +131,7 @@ export const executeDashboardUpsert = async ({
       resolveEsqlControlColumnType,
     },
     logger,
+    onPanelResolved,
   });
   const nextDashboardData = applyPlan({
     dashboardData: originalDashboardData,
