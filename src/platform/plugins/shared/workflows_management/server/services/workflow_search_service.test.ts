@@ -11,6 +11,7 @@ import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
+  getManagedWorkflowListVisibilityContext,
   getManagedWorkflowSelectorVisibilityContext,
   getManagedWorkflowSolutionVisibilityContext,
 } from '@kbn/workflows/managed';
@@ -526,6 +527,45 @@ describe('WorkflowSearchService', () => {
         space: { id: 'default', includeGlobal: true },
         deleted: 'not_deleted',
         managed: 'all',
+      });
+      expect(storageClient.search.mock.calls[0][0].query.bool).toEqual(expectedFilter);
+    });
+
+    it('keeps unmanaged workflows and filters managed workflows by visibility context in the aggregation query', async () => {
+      const { deps, storageClient } = makeDeps();
+      storageClient.search.mockResolvedValue({ aggregations: {} });
+      const visibilityContext = [getManagedWorkflowListVisibilityContext('workflows')];
+
+      const service = new WorkflowSearchService(deps);
+      await service.getWorkflowAggs(['tags'], 'default', {
+        managedFilter: 'all',
+        visibilityContext,
+      });
+
+      expect(storageClient.search.mock.calls[0][0].query.bool.must).toContainEqual({
+        bool: {
+          should: [
+            { bool: { must_not: [{ term: { managed: true } }] } },
+            { terms: { managedVisibilityContexts: visibilityContext } },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+    });
+
+    it('ignores the visibility context when only unmanaged workflows are aggregated', async () => {
+      const { deps, storageClient } = makeDeps();
+      storageClient.search.mockResolvedValue({ aggregations: {} });
+
+      const service = new WorkflowSearchService(deps);
+      await service.getWorkflowAggs(['tags'], 'default', {
+        visibilityContext: [getManagedWorkflowListVisibilityContext('workflows')],
+      });
+
+      const expectedFilter = buildWorkflowFilters({
+        space: { id: 'default', includeGlobal: true },
+        deleted: 'not_deleted',
+        managed: 'unmanaged',
       });
       expect(storageClient.search.mock.calls[0][0].query.bool).toEqual(expectedFilter);
     });

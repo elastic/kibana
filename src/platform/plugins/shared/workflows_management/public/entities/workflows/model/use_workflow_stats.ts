@@ -24,13 +24,14 @@ export function useWorkflowStats() {
 
 export function useWorkflowFiltersOptions(
   fields: string[],
-  managed?: WorkflowsSearchParams['managed']
+  managed?: WorkflowsSearchParams['managed'],
+  visibilityContext?: WorkflowsSearchParams['visibilityContext']
 ) {
   const api = useWorkflowsApi();
 
   return useQuery<Record<string, Array<EuiSelectableOption>>>({
     networkMode: 'always',
-    queryKey: ['workflows', 'aggs', fields, managed],
-    queryFn: () => api.getAggs({ fields, managed }),
+    queryKey: ['workflows', 'aggs', fields, managed, visibilityContext],
+    queryFn: () => api.getAggs({ fields, managed, visibilityContext }),
   });
 }
