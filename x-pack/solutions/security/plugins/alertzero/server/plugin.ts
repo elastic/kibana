@@ -52,6 +52,7 @@ import { registerAlertZeroInferenceFeatures } from './inference_features';
 import { registerUiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { registerOwner } from './managed_workflows/register_owner';
+import { adoptInvestigationsAiIndex } from './context_engine/adopt_investigations_ai_index';
 import { ensureFingerprintIndexMapping } from './context_engine/ensure_fingerprint_index';
 import { registerInvestigationsAiIndex } from './context_engine/register_investigations_ai_index';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
@@ -368,6 +369,24 @@ export class AlertZeroPlugin
 
     if (!this.config.enabled) {
       return this.alertZeroStartContract();
+    }
+
+    // Empty rows created by createKi before this id was registered block the managed
+    // entry. Removing them lets the next read materialize the single managed index.
+    if (plugins.contextEngine) {
+      const contextEngine = plugins.contextEngine;
+      void adoptInvestigationsAiIndex({
+        getAiIndexService: () => contextEngine.getAiIndexService(),
+        listSpaceIds: () =>
+          enumerateSpaceIds(core.savedObjects.createInternalRepository(['space'])),
+        logger: this.logger.get('context_engine'),
+      }).catch((error) => {
+        this.logger.warn(
+          `Failed to adopt the security-investigations AI index: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      });
     }
 
     // Plugin start cannot return a promise. Writes stay refused until this settles, so a

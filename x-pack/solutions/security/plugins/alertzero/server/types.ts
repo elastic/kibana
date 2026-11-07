@@ -13,7 +13,10 @@ import type {
 } from '@kbn/agentic-investigations-plugin/server';
 import type { ProposalsPluginSetup, ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
+import type {
+  ContextEnginePluginSetup,
+  ContextEnginePluginStart,
+} from '@kbn/context-engine-plugin/server';
 import type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
@@ -134,6 +137,11 @@ export interface AlertZeroStartDependencies {
    * Elasticsearch work; a missing telemetry plugin counts as opted out.
    */
   telemetry?: TelemetryPluginStart;
+  /**
+   * Optional, matching the plugin manifest. Start reads the AI index service so empty
+   * `security-investigations` rows created before the managed registration can be removed.
+   */
+  contextEngine?: ContextEnginePluginStart;
 }
 
 export type AlertZeroRouter = IRouter<AlertZeroRequestHandlerContext>;
