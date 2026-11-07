@@ -8,6 +8,8 @@
  */
 
 import { escapeKuery, escapeQuotes } from './escape_kuery';
+import { fromKueryExpression } from '../ast';
+import { nodeTypes } from '../node_types';
 
 describe('escapeQuotes', () => {
   test('should escape quotes', () => {
@@ -35,14 +37,14 @@ describe('escapeKuery', () => {
 
   test('should escape keywords', () => {
     const value = 'foo and bar or baz not qux';
-    const expected = 'foo \\and bar \\or baz \\not qux';
+    const expected = 'foo \\and bar \\or baz \\u006eot qux';
 
     expect(escapeKuery(value)).toBe(expected);
   });
 
   test('should escape keywords next to each other', () => {
     const value = 'foo and bar or not baz';
-    const expected = 'foo \\and bar \\or \\not baz';
+    const expected = 'foo \\and bar \\or \\u006eot baz';
 
     expect(escapeKuery(value)).toBe(expected);
   });
@@ -73,5 +75,34 @@ describe('escapeKuery', () => {
     const expected = 'This\\nhas\\tnewlines\\r\\nwith\\ttabs';
 
     expect(escapeKuery(value)).toBe(expected);
+  });
+
+  test('should escape a lowercase "not" as a unicode sequence so it is not read as a newline escape', () => {
+    expect(escapeKuery('do not touch')).toBe('do \\u006eot touch');
+    expect(escapeKuery('Not found')).toBe('\\Not found');
+  });
+
+  test('should not escape "not" inside a word', () => {
+    expect(escapeKuery('cannot connect')).toBe('cannot connect');
+  });
+
+  test.each([
+    'cannot connect',
+    'do not touch',
+    'not this',
+    'Not found',
+    'NOT ME',
+    'knot\ttie',
+    'a and not b',
+    'not not b',
+    'line\nother',
+    'nothing to see',
+    '(special) *chars* and not <more>',
+  ])('should produce a value that parses back to the original: %p', (value) => {
+    const expected = nodeTypes.function.buildNodeWithArgumentNodes('is', [
+      nodeTypes.literal.buildNode('message'),
+      nodeTypes.literal.buildNode(value),
+    ]);
+    expect(fromKueryExpression(`message: ${escapeKuery(value)}`)).toEqual(expected);
   });
 });
