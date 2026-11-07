@@ -36,6 +36,8 @@ export const MatchingRules = ({ matches, profilesByName }: MatchingRulesProps) =
       name: i18n.translate('xpack.boost.matchingRules.rankColumn', { defaultMessage: 'Rank' }),
       nameTooltip: {
         icon: 'info',
+        // 12px, like the other icon tips beside small text.
+        iconProps: { size: 's' },
         content: i18n.translate('xpack.boost.matchingRules.rankTip', {
           defaultMessage:
             'Elasticsearch ranks matching rules by priority, highest first. Among rules with the same priority, exact names rank above other patterns, and those above *. The first rule applies.',

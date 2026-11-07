@@ -10,11 +10,11 @@ import React, { Fragment, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiAccordion,
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiHorizontalRule,
-  EuiNotificationBadge,
   EuiPanel,
   EuiText,
   useEuiOverflowScroll,
@@ -91,7 +91,7 @@ export const RuleChangeList = ({ 'aria-label': ariaLabel, items }: RuleChangeLis
                             {/* An inline block keeps the row's hover and focus underline off the
                                 badge. */}
                             <span css={{ display: 'inline-block' }}>
-                              <EuiNotificationBadge color="subdued">{count}</EuiNotificationBadge>
+                              <EuiBadge color="hollow">{count}</EuiBadge>
                             </span>
                           </EuiFlexItem>
                         )}

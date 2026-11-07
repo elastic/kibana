@@ -500,7 +500,7 @@ export const RuleFlyout = ({
   // corrects a priority that isn't usable, so its only error is a tie with another rule.
   const priorityError =
     visibleErrors.conflictsWith && type
-      ? getPriorityConflictMessage(type, visibleErrors.conflictsWith)
+      ? getPriorityConflictMessage(visibleErrors.conflictsWith)
       : undefined;
   const priorityRow = (
     <EuiFormRow

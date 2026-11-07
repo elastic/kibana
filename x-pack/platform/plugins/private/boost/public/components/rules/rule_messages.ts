@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { BoostProfileType } from '../../../common/types';
 import type { IndexPatternError, ProfileNameError } from '../../../common/validation';
 import { INDEX_PATTERN_MAX_LENGTH, PROFILE_NAME_MAX_LENGTH } from '../../../common/validation';
 
@@ -45,14 +44,8 @@ export const INDEX_PATTERN_ERROR_MESSAGES: Readonly<Record<IndexPatternError, st
 };
 
 /** A tie with another rule, which Elasticsearch rejects since neither rule would apply. */
-export const getPriorityConflictMessage = (type: BoostProfileType, ruleName: string): string =>
-  type === 'indices'
-    ? i18n.translate('xpack.boost.ruleForm.priorityConflict.indices', {
-        defaultMessage: 'Ties with rule "{ruleName}" on the same indices. Choose another priority.',
-        values: { ruleName },
-      })
-    : i18n.translate('xpack.boost.ruleForm.priorityConflict.dataStreams', {
-        defaultMessage:
-          'Ties with rule "{ruleName}" on the same data streams. Choose another priority.',
-        values: { ruleName },
-      });
+export const getPriorityConflictMessage = (ruleName: string): string =>
+  i18n.translate('xpack.boost.ruleForm.priorityConflict', {
+    defaultMessage: 'Ties with rule "{ruleName}".',
+    values: { ruleName },
+  });

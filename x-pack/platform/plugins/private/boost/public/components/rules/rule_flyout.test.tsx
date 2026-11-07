@@ -513,9 +513,7 @@ describe('RuleFlyout duplicate', () => {
     // An exact copy ties with the rule, which Elasticsearch rejects.
     await userEvent.click(screen.getByTestId('boostRuleSave'));
     expect(mutation.mutate).not.toHaveBeenCalled();
-    expect(
-      screen.getByText('Ties with rule "catalogs" on the same indices. Choose another priority.')
-    ).toBeInTheDocument();
+    expect(screen.getByText('Ties with rule "catalogs".')).toBeInTheDocument();
 
     await userEvent.clear(screen.getByTestId('boostRulePriority'));
     await userEvent.type(screen.getByTestId('boostRulePriority'), '2');
