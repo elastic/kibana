@@ -186,9 +186,15 @@ describe('Nightshift investigation agent type', () => {
 
   it('gives the agent the impact map tools when the investigations plugin is on, and only then', async () => {
     const withTools = await baseFor(
-      getInvestigationAgentType({ sandboxEnabled: false, investigationToolsEnabled: true })
+      getInvestigationAgentType({
+        sandboxEnabled: false,
+        cortexEnabled: false,
+        investigationToolsEnabled: true,
+      })
     );
-    const without = await baseFor(getInvestigationAgentType({ sandboxEnabled: false }));
+    const without = await baseFor(
+      getInvestigationAgentType({ sandboxEnabled: false, cortexEnabled: false })
+    );
 
     expect(withTools.tools?.[0]?.tool_ids).toEqual([
       TIME_CONVERTER_TOOL_ID,
