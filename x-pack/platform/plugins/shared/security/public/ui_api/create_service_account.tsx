@@ -38,6 +38,7 @@ export const getCreateServiceAccountComponent = async (
         serviceAccountsAPIClient={core.security.serviceAccounts}
         rolesAPIClient={rolesAPIClient}
         createRoleUrl={createRoleUrl}
+        onError={(error, title) => core.notifications.toasts.addError(error, { title })}
       />
     ) : null;
 };

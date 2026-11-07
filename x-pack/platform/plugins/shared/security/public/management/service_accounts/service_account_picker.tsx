@@ -334,6 +334,7 @@ export const ServiceAccountPicker = ({
           rolesAPIClient={rolesClient}
           createRoleUrl={createRoleUrl}
           onClose={() => setCreating(false)}
+          onError={(error, title) => core.notifications.toasts.addError(error, { title })}
           onCreated={(account) => {
             setCreating(false);
             if (directory) directory.onRetry();

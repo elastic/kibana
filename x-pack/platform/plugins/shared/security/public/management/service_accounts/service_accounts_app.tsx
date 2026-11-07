@@ -107,6 +107,7 @@ export const ServiceAccountsApp = ({
           createRoleUrl={createRoleUrl}
           onClose={() => history.replace('/')}
           onCreated={() => history.replace('/')}
+          onError={onError}
         />
       )}
     </>
