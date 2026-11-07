@@ -16,6 +16,20 @@ describe('detection-rule-edit', () => {
       await expect(validateSkillDefinition(skill)).resolves.toBeDefined();
     });
 
+    it('prioritizes stopping on unavailable research over attachment persistence', () => {
+      expect(skill.content).toContain('metadata.status: unavailable');
+      expect(skill.content).toContain('metadata.nextAction: stop');
+      expect(skill.content).toContain(
+        'takes precedence over every creation, editing, and attachment-persistence instruction'
+      );
+      expect(skill.content).toContain('Make no further tool calls: not `product_documentation`');
+      expect(skill.content).toContain('FIRST and on its own, in a turn with no other tool calls');
+      expect(skill.content).toContain('[GenAI Settings](<metadata.settingsUrl>)');
+      expect(skill.content).toContain(
+        'do not substitute attachments, prior knowledge, or another research source'
+      );
+    });
+
     it('has a description within the 1024 char limit', () => {
       expect(skill.description.length).toBeLessThanOrEqual(1024);
     });
