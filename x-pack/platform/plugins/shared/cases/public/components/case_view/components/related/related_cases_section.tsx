@@ -238,20 +238,22 @@ export const RelatedCasesSection: React.FC<RelatedCasesSectionProps> = ({
   const columns: Array<EuiBasicTableColumn<RelatedCaseRow>> = [
     {
       name: i18n.COLUMN_CASE,
-      width: '40%',
       render: (row: RelatedCaseRow) => (
-        <div>
+        // The cell content is a flex row: without a zero min-width this block grows to its text
+        // and a long title runs under the next columns instead of ending in an ellipsis.
+        <div css={{ minWidth: 0, width: '100%' }}>
           <EuiLink
             href={getCaseViewUrl({ detailName: row.id })}
             onClick={(e: React.MouseEvent) => {
               e.preventDefault();
               navigateToCaseView({ detailName: row.id });
             }}
+            className="eui-textTruncate"
+            css={{ display: 'block', maxWidth: '100%' }}
+            title={row.title}
             data-test-subj="related-case-title"
           >
-            <span className="eui-textTruncate" title={row.title}>
-              {row.title}
-            </span>
+            {row.title}
           </EuiLink>
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
             {row.restricted ? (
@@ -275,6 +277,7 @@ export const RelatedCasesSection: React.FC<RelatedCasesSectionProps> = ({
     },
     {
       name: i18n.COLUMN_STATUS,
+      width: '8em',
       render: (row: RelatedCaseRow) => {
         const status = getStatus(row.statusKey, row.status);
         return (
@@ -286,11 +289,12 @@ export const RelatedCasesSection: React.FC<RelatedCasesSectionProps> = ({
     },
     {
       name: i18n.COLUMN_CLOSE_REASON,
+      width: '9em',
       render: (row: RelatedCaseRow) => row.closeReason ?? i18n.NONE,
     },
     {
       name: i18n.RELATED_BY,
-      width: '28%',
+      width: '20%',
       render: (row: RelatedCaseRow) => (
         <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
           {row.linked ? (

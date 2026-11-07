@@ -156,19 +156,28 @@ export const DecisionsTab: React.FC<CaseViewSectionProps> = ({
         >
           {decision.comment ? (
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
-                aria-expanded={isExpanded}
-                aria-label={
+              <EuiToolTip
+                content={
                   isExpanded
                     ? DECISIONS.hideComment(decision.title)
                     : DECISIONS.showComment(decision.title)
                 }
-                onClick={() =>
-                  setExpanded((current) => ({ ...current, [decision.proposal_id]: !isExpanded }))
-                }
-                data-test-subj={`case-view-decision-expand-${decision.proposal_id}`}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+                  aria-expanded={isExpanded}
+                  aria-label={
+                    isExpanded
+                      ? DECISIONS.hideComment(decision.title)
+                      : DECISIONS.showComment(decision.title)
+                  }
+                  onClick={() =>
+                    setExpanded((current) => ({ ...current, [decision.proposal_id]: !isExpanded }))
+                  }
+                  data-test-subj={`case-view-decision-expand-${decision.proposal_id}`}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           ) : null}
           {/* A flex child needs a zero min-width for the truncation inside it to apply. */}

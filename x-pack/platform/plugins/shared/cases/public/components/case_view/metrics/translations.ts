@@ -71,3 +71,113 @@ export const CASE_REOPENED = i18n.translate('xpack.cases.caseView.metrics.lifesp
 export const CASE_REOPENED_ON = i18n.translate('xpack.cases.caseView.metrics.lifespan.reopenedOn', {
   defaultMessage: 'Reopened ',
 });
+
+export const SCOPE_TITLE = i18n.translate('xpack.cases.caseView.scope.title', {
+  defaultMessage: 'Scope',
+});
+
+export const SCOPE_IMPACTED = i18n.translate('xpack.cases.caseView.scope.impacted', {
+  defaultMessage: 'Impacted',
+});
+
+export const SCOPE_INDICATORS = i18n.translate('xpack.cases.caseView.scope.indicators', {
+  defaultMessage: 'Indicators',
+});
+
+export const SCOPE_ACTIVITY = i18n.translate('xpack.cases.caseView.scope.activity', {
+  defaultMessage: 'Case activity',
+});
+
+export const SCOPE_HOSTS = (count: number) =>
+  i18n.translate('xpack.cases.caseView.scope.hosts', {
+    values: { count },
+    defaultMessage: '{count, plural, one {# host} other {# hosts}}',
+  });
+
+export const SCOPE_USERS = (count: number) =>
+  i18n.translate('xpack.cases.caseView.scope.users', {
+    values: { count },
+    defaultMessage: '{count, plural, one {# user} other {# users}}',
+  });
+
+export const SCOPE_MORE = (count: number) =>
+  i18n.translate('xpack.cases.caseView.scope.more', {
+    values: { count },
+    defaultMessage: '+{count} more',
+  });
+
+export const SCOPE_MORE_TYPES = (count: number) =>
+  i18n.translate('xpack.cases.caseView.scope.moreTypes', {
+    values: { count },
+    defaultMessage: '+{count, plural, one {# more type} other {# more types}}',
+  });
+
+export const SCOPE_OBSERVABLES = (count: number) =>
+  i18n.translate('xpack.cases.caseView.scope.observables', {
+    values: { count },
+    defaultMessage: '{count, plural, one {# observable} other {# observables}}',
+  });
+
+export const SCOPE_ALERTS = (count: number) =>
+  i18n.translate('xpack.cases.caseView.scope.alerts', {
+    values: { count },
+    defaultMessage: '{count, plural, one {# alert} other {# alerts}}',
+  });
+
+export const SCOPE_CONNECTORS = (count: number) =>
+  i18n.translate('xpack.cases.caseView.scope.connectors', {
+    values: { count },
+    defaultMessage: '{count, plural, one {# connector} other {# connectors}}',
+  });
+
+export const SCOPE_OPENED = (time: string) =>
+  i18n.translate('xpack.cases.caseView.scope.opened', {
+    values: { time },
+    defaultMessage: 'Opened {time}',
+  });
+
+export const SCOPE_OPEN_FOR = (duration: string) =>
+  i18n.translate('xpack.cases.caseView.scope.openFor', {
+    values: { duration },
+    defaultMessage: 'open {duration}',
+  });
+
+export const SCOPE_IN_PROGRESS_FOR = (duration: string) =>
+  i18n.translate('xpack.cases.caseView.scope.inProgressFor', {
+    values: { duration },
+    defaultMessage: 'in progress {duration}',
+  });
+
+export const SCOPE_PAUSED_FOR = (duration: string) =>
+  i18n.translate('xpack.cases.caseView.scope.pausedFor', {
+    values: { duration },
+    defaultMessage: 'paused {duration}',
+  });
+
+export const SCOPE_CLOSED_AFTER = (duration: string) =>
+  i18n.translate('xpack.cases.caseView.scope.closedAfter', {
+    values: { duration },
+    defaultMessage: 'closed after {duration}',
+  });
+
+export const SCOPE_SHOW_TYPE = (type: string) =>
+  i18n.translate('xpack.cases.caseView.scope.showType', {
+    values: { type },
+    defaultMessage: 'Show the {type} observables',
+  });
+
+export const SCOPE_NO_IMPACTED = i18n.translate('xpack.cases.caseView.scope.noImpacted', {
+  defaultMessage: 'No impacted hosts or users yet.',
+});
+
+export const SCOPE_NO_OBSERVABLES = i18n.translate('xpack.cases.caseView.scope.noObservables', {
+  defaultMessage: 'No observables yet.',
+});
+
+export const SCOPE_SHOW_IMPACT = i18n.translate('xpack.cases.caseView.scope.showImpact', {
+  defaultMessage: 'Show every impacted host and user',
+});
+
+export const SCOPE_PAUSED_NOW = i18n.translate('xpack.cases.caseView.scope.pausedNow', {
+  defaultMessage: 'paused now',
+});

@@ -30,6 +30,7 @@ import {
 import type { AgenticInvestigationsPublicStartDependencies } from '../types';
 import {
   DECISIONS_TAB_ID,
+  getImpactedEntities,
   getLinkedInvestigationIds,
   hasDecisions,
   hasLinkedInvestigations,
@@ -210,6 +211,14 @@ export const registerCasesIntegration = ({
         <LazyDecisionsTab {...props} />
       </Suspense>
     ),
+  });
+
+  // The copied Impact's hosts and users join the case's Scope panel, with the setting on.
+  cases.caseView.registerSection({
+    id: 'agenticInvestigations.impact',
+    position: 'impact',
+    isVisible: () => isOpenCasesForInvestigationsOn(),
+    getEntities: getImpactedEntities,
   });
 
   cases.caseView.registerSection({

@@ -90,7 +90,10 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
       ? (similarCasesData?.total ?? 0) + relatedSectionsCount + linkedCasesCount
       : undefined;
 
-  const extensionTabs = agenticEnabled ? caseViewSectionRegistry.getVisible('tab', caseData) : [];
+  const extensionTabs = useMemo(
+    () => (agenticEnabled ? caseViewSectionRegistry.getVisible('tab', caseData) : []),
+    [agenticEnabled, caseData]
+  );
 
   const tabs: Tab[] = useMemo(
     () => [

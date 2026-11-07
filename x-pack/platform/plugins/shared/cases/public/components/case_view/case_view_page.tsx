@@ -13,7 +13,8 @@ import type { CaseViewPageProps } from './types';
 
 import { useOnUpdateField } from './use_on_update_field';
 import { LensAttachReturnConsumer } from '../attachments/lens/lens_return/lens_attach_return_consumer';
-import { KibanaServices } from '../../common/lib/kibana';
+import { KibanaServices, useCasesConfig } from '../../common/lib/kibana';
+import { CaseScope } from './metrics/case_scope';
 import { CasesPageBody } from '../app/cases_page_body';
 import { CaseDetailsAppHeader } from './components/case_details_header';
 import { CaseViewTabContent } from './components/case_view_tab_content';
@@ -42,6 +43,7 @@ export const CaseViewPage = React.memo<CaseViewPageComponentProps>(({ caseData, 
   useCaseRefreshRef({ refreshRef, isLoading });
   const visibleCaseData = useCaseDataWithVisibleConversations(caseData);
   const isRoomAvailable = useIsRoomAvailable();
+  const { agenticEnabled } = useCasesConfig();
 
   return (
     <>
@@ -52,7 +54,13 @@ export const CaseViewPage = React.memo<CaseViewPageComponentProps>(({ caseData, 
         onShowMetricsChange={setShowMetrics}
       />
       <CasesPageBody>
-        {showMetrics && <CaseViewMetrics data-test-subj="case-view-metrics" caseId={caseData.id} />}
+        {/* With agentic cases on, Scope (impacted, indicators, activity) takes the metrics' place. */}
+        {showMetrics &&
+          (agenticEnabled ? (
+            <CaseScope caseData={visibleCaseData} />
+          ) : (
+            <CaseViewMetrics data-test-subj="case-view-metrics" caseId={caseData.id} />
+          ))}
         <EuiSpacer size="l" />
         {KibanaServices.getConfig()?.attachments?.enabled === true && (
           <LensAttachReturnConsumer caseId={caseData.id} />

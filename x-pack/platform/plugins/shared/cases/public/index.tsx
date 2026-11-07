@@ -21,6 +21,7 @@ export type { GetRecentCasesProps } from './client/ui/get_recent_cases';
 
 export type { CaseAttachments, CaseAttachmentsWithoutOwner } from './types';
 export type {
+  CaseImpactedEntity,
   CaseViewSection,
   CaseViewSectionPosition,
   CaseViewSectionProps,

@@ -215,10 +215,9 @@ export const RELATED = {
     'xpack.agenticInvestigations.caseSection.related.column.severity',
     { defaultMessage: 'Severity' }
   ),
-  columnActions: i18n.translate(
-    'xpack.agenticInvestigations.caseSection.related.column.actions',
-    { defaultMessage: 'Actions' }
-  ),
+  columnActions: i18n.translate('xpack.agenticInvestigations.caseSection.related.column.actions', {
+    defaultMessage: 'Actions',
+  }),
   severity: {
     low: i18n.translate('xpack.agenticInvestigations.caseSection.related.severity.low', {
       defaultMessage: 'Low',
@@ -541,48 +540,78 @@ export const DECISIONS = {
       values: { count },
       defaultMessage: 'View {count} decided',
     }),
-  reviewDecisions: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.reviewDecisions', {
-    defaultMessage: 'Review decisions',
-  }),
+  reviewDecisions: i18n.translate(
+    'xpack.agenticInvestigations.caseSection.decisions.reviewDecisions',
+    {
+      defaultMessage: 'Review decisions',
+    }
+  ),
   toggleLegend: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.toggleLegend', {
     defaultMessage: 'Show pending or decided decisions',
   }),
-  searchPlaceholder: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.searchPlaceholder', {
-    defaultMessage: 'Search decisions',
-  }),
-  allInvestigations: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.allInvestigations', {
-    defaultMessage: 'All investigations',
-  }),
-  investigationFilter: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.investigationFilter', {
-    defaultMessage: 'Investigation',
-  }),
-  columnDecision: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.columnDecision', {
-    defaultMessage: 'Decision',
-  }),
-  columnInvestigation: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.columnInvestigation', {
-    defaultMessage: 'Investigation',
-  }),
-  columnCategory: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.columnCategory', {
-    defaultMessage: 'Category',
-  }),
-  columnProposed: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.columnProposed', {
-    defaultMessage: 'Proposed',
-  }),
+  searchPlaceholder: i18n.translate(
+    'xpack.agenticInvestigations.caseSection.decisions.searchPlaceholder',
+    {
+      defaultMessage: 'Search decisions',
+    }
+  ),
+  allInvestigations: i18n.translate(
+    'xpack.agenticInvestigations.caseSection.decisions.allInvestigations',
+    {
+      defaultMessage: 'All investigations',
+    }
+  ),
+  investigationFilter: i18n.translate(
+    'xpack.agenticInvestigations.caseSection.decisions.investigationFilter',
+    {
+      defaultMessage: 'Investigation',
+    }
+  ),
+  columnDecision: i18n.translate(
+    'xpack.agenticInvestigations.caseSection.decisions.columnDecision',
+    {
+      defaultMessage: 'Decision',
+    }
+  ),
+  columnInvestigation: i18n.translate(
+    'xpack.agenticInvestigations.caseSection.decisions.columnInvestigation',
+    {
+      defaultMessage: 'Investigation',
+    }
+  ),
+  columnCategory: i18n.translate(
+    'xpack.agenticInvestigations.caseSection.decisions.columnCategory',
+    {
+      defaultMessage: 'Category',
+    }
+  ),
+  columnProposed: i18n.translate(
+    'xpack.agenticInvestigations.caseSection.decisions.columnProposed',
+    {
+      defaultMessage: 'Proposed',
+    }
+  ),
   columnActions: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.columnActions', {
     defaultMessage: 'Actions',
   }),
   columnOutcome: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.columnOutcome', {
     defaultMessage: 'Outcome',
   }),
-  columnDecidedBy: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.columnDecidedBy', {
-    defaultMessage: 'Decided by',
-  }),
+  columnDecidedBy: i18n.translate(
+    'xpack.agenticInvestigations.caseSection.decisions.columnDecidedBy',
+    {
+      defaultMessage: 'Decided by',
+    }
+  ),
   columnDecided: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.columnDecided', {
     defaultMessage: 'Decided',
   }),
-  nothingWaiting: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.nothingWaiting', {
-    defaultMessage: 'Nothing is waiting on a decision.',
-  }),
+  nothingWaiting: i18n.translate(
+    'xpack.agenticInvestigations.caseSection.decisions.nothingWaiting',
+    {
+      defaultMessage: 'Nothing is waiting on a decision.',
+    }
+  ),
   noDecisions: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.noDecisions', {
     defaultMessage: 'No decisions yet.',
   }),
@@ -592,21 +621,36 @@ export const DECISIONS = {
   retry: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.retry', {
     defaultMessage: 'Retry',
   }),
-  investigationUnavailable: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.investigationUnavailable', {
-    defaultMessage: 'Investigation not available',
-  }),
-  outcomeApproved: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.outcomeApproved', {
-    defaultMessage: 'Approved',
-  }),
-  outcomeDismissed: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.outcomeDismissed', {
-    defaultMessage: 'Dismissed',
-  }),
-  outcomeExpired: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.outcomeExpired', {
-    defaultMessage: 'Expired',
-  }),
-  outcomeDeciding: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.outcomeDeciding', {
-    defaultMessage: 'Deciding',
-  }),
+  investigationUnavailable: i18n.translate(
+    'xpack.agenticInvestigations.caseSection.decisions.investigationUnavailable',
+    {
+      defaultMessage: 'Investigation not available',
+    }
+  ),
+  outcomeApproved: i18n.translate(
+    'xpack.agenticInvestigations.caseSection.decisions.outcomeApproved',
+    {
+      defaultMessage: 'Approved',
+    }
+  ),
+  outcomeDismissed: i18n.translate(
+    'xpack.agenticInvestigations.caseSection.decisions.outcomeDismissed',
+    {
+      defaultMessage: 'Dismissed',
+    }
+  ),
+  outcomeExpired: i18n.translate(
+    'xpack.agenticInvestigations.caseSection.decisions.outcomeExpired',
+    {
+      defaultMessage: 'Expired',
+    }
+  ),
+  outcomeDeciding: i18n.translate(
+    'xpack.agenticInvestigations.caseSection.decisions.outcomeDeciding',
+    {
+      defaultMessage: 'Deciding',
+    }
+  ),
   outcomeFailed: i18n.translate('xpack.agenticInvestigations.caseSection.decisions.outcomeFailed', {
     defaultMessage: 'Failed',
   }),

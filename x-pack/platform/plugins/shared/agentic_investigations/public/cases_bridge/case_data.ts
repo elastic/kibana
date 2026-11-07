@@ -6,9 +6,12 @@
  */
 
 import type { CaseUI } from '@kbn/cases-plugin/common';
+import type { CaseImpactedEntity } from '@kbn/cases-plugin/public';
 import {
+  IMPACT_CASE_ATTACHMENT_TYPE,
   INVESTIGATION_CASE_ATTACHMENT_TYPE,
   PROPOSAL_CASE_ATTACHMENT_TYPE,
+  type ImpactCaseAttachmentData,
 } from '../../common/cases_bridge';
 import { useCanManageInvestigations } from '../investigations/hooks/use_can_manage_investigations';
 
@@ -66,3 +69,14 @@ export const hasDecisions = (caseData: Pick<CaseUI, 'comments'>): boolean =>
   caseData.comments.some(
     (comment) => (comment as { type?: string }).type === PROPOSAL_CASE_ATTACHMENT_TYPE
   );
+
+/** The hosts and users the case's copied Impact names, for the case's Scope panel. */
+export const getImpactedEntities = (caseData: Pick<CaseUI, 'comments'>): CaseImpactedEntity[] =>
+  caseData.comments.flatMap((comment) => {
+    const attachment = comment as { type?: string; data?: ImpactCaseAttachmentData };
+    if (attachment.type !== IMPACT_CASE_ATTACHMENT_TYPE || !attachment.data) return [];
+    return attachment.data.entities.map(({ id, name, type }) => ({
+      type: type === 'host' || type === 'user' ? type : 'other',
+      name: name || id,
+    }));
+  });

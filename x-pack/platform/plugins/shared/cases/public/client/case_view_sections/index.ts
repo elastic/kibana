@@ -15,8 +15,15 @@ import type { CaseUI } from '../../../common/ui/types';
  * - `closeModal`: in the close modal, for side effects of closing (one case at a time).
  * - `aboveTabs`: between the header and the tabs, only for something on the case that needs action.
  * - `tab`: a tab of its own, after Cases' tabs.
+ * - `impact`: not rendered; hosts and users it reports join the case's Scope panel as impacted.
  */
-export type CaseViewSectionPosition = 'sidebar' | 'related' | 'closeModal' | 'aboveTabs' | 'tab';
+export type CaseViewSectionPosition =
+  | 'sidebar'
+  | 'related'
+  | 'closeModal'
+  | 'aboveTabs'
+  | 'tab'
+  | 'impact';
 
 /** Why something is related to a case. Each Related section computes the reasons it can. */
 export type RelatedByReason =
@@ -106,10 +113,22 @@ export type CaseViewTabSection = CaseViewSectionBase & {
   render: (props: CaseViewSectionProps) => ReactNode;
 };
 
+/** A host or user something reports as affected by what the case is about. */
+export interface CaseImpactedEntity {
+  type: 'host' | 'user' | 'other';
+  name: string;
+}
+
+export type CaseViewImpactSource = CaseViewSectionBase & {
+  position: 'impact';
+  getEntities: (caseData: CaseUI) => CaseImpactedEntity[];
+};
+
 export type CaseViewSection =
   | CaseViewPanelSection
   | CaseViewCloseModalSection
-  | CaseViewTabSection;
+  | CaseViewTabSection
+  | CaseViewImpactSource;
 
 /**
  * Lets another plugin add a section to the case view without Cases knowing what it shows. The
@@ -131,6 +150,7 @@ export class CaseViewSectionRegistry {
   ): CaseViewPanelSection[];
   getVisible(position: 'closeModal', caseData: CaseUI): CaseViewCloseModalSection[];
   getVisible(position: 'tab', caseData: CaseUI): CaseViewTabSection[];
+  getVisible(position: 'impact', caseData: CaseUI): CaseViewImpactSource[];
   getVisible(position: CaseViewSectionPosition, caseData: CaseUI): CaseViewSection[] {
     return [...this.sections.values()].filter(
       (section) => section.position === position && (section.isVisible?.(caseData) ?? true)

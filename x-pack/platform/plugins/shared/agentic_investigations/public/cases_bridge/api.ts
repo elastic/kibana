@@ -13,11 +13,11 @@ import {
   type InvestigationSummary,
   type ListInvestigationsResponse,
 } from '../../common';
+import type { CaseDecisionsResponse } from '../../common/cases_bridge';
 import {
   CASE_DECISIONS_URL,
   CASE_DECISION_URL,
   type CaseDecisionsQuery,
-  CaseDecisionsResponse,
   INVESTIGATION_LINK_CASE_URL,
   INVESTIGATION_OPEN_CASE_URL,
   type LinkCaseResponse,
