@@ -10,7 +10,7 @@ A `custom_content` panel stores two pieces of state (both optional) alongside th
 
 | Field | Type | Purpose |
 |-------|------|---------|
-| `esql_query` | `string[] \| undefined` | Optional ES\|QL query whose results are injected into the template at render time. An array so the shape can hold several queries later without a migration, capped at one for now — read and write it via `readEsqlQuery` / `toEsqlQueryState` |
+| `esql_query` | `string[] \| undefined` | Optional ES\|QL queries whose results are injected into the template at render time. The first is the panel's main query (`rows`); up to ten are allowed (`CUSTOM_CONTENT_MAX_ESQL_QUERIES`) and the rest are read by position as `queries[n]`. The whole list is passed around as one array; only the chat attachment keeps the first query in its own field (`esql_query`, with the rest in `additional_esql_queries`), converted by `readContextQueries` / `toContextQueries`. Only hand-edited panels hold more than one for now: the flyout does not change the others, and the agent tools keep them as they are |
 | `template` | `string \| undefined` | LiquidJS HTML template — the actual rendered content |
 
 Panels are saved as part of the dashboard's serialized state (standard embeddable contract, `server/embeddable/schemas.ts`). No separate saved object is created. Both `template` and `esql_query` participate in unsaved-change detection (`esql_query` compares with `deepEquality`, since a fresh array would otherwise look changed on every serialize).
@@ -77,6 +77,14 @@ Templates use [LiquidJS](https://liquidjs.com/) syntax. `fill_template.ts` expos
 
 - `rows` — array of row objects, keyed by exact column name. Each column resolves to an object with `.value` (raw cell value) and `.pct` (the value as 0–100 percent of that column's max across all rows; numeric columns only, useful for bar widths).
 - `max` — object of per-column maximums, keyed by exact column name.
+- `queries` — one entry per query in `esql_query`, in order. `queries[n]` has its own `rows` and `max` (`.pct` is relative to that query's own max). `rows` and `max` are the same as `queries[0]`. All queries run in parallel with the panel's time range and filters, and if one fails the whole panel shows an error that names it.
+
+```html
+{% assign totals = queries[0].rows.first %}
+{% for row in queries[1].rows %}
+  <span>{{ row["service"].value }}</span>
+{% endfor %}
+```
 
 ```html
 {% if rows.size == 0 %}<p>No data</p>{% endif %}
@@ -95,7 +103,7 @@ JavaScript is explicitly blocked — the iframe sandbox, a strict CSP, and `DOMP
 Opening the panel context menu → Edit renders `EditCustomContentFlyout`, which lets users:
 
 - Edit the LiquidJS template directly in a Monaco editor (`liquid` language mode), with a copy-to-clipboard button and a vertically resizable editor pane
-- Add or change the ES|QL query, with a live data preview (`EsqlPreviewSection`)
+- Add or change the ES|QL query, with a live data preview (`EsqlPreviewSection`). The flyout edits only the first query, but "Run preview" fetches every query the panel has, so a template that reads `queries[1]` previews the way it will render
 - Hand off to the AI chat sidebar with the current draft attached — labelled "Refine with chat" when a template already exists and "Generate with chat" when the editor is empty, and shown only when `agentBuilder` is available
 
 "Run Preview" renders the current draft into the panel without saving, and is enabled only while there are unpreviewed changes. "Apply and close" is enabled only when the template or the query has changed from the saved state.
@@ -146,6 +154,15 @@ A static panel has no query: a new panel must state `hasData` (there is no defau
 
 An edit targets a panel by its id in `panels`, so this path can reach any custom content panel on the dashboard whether or not it has a chat attachment. That makes it the fallback described above.
 
+### Panels with several queries
+
+The agent does not create or change a panel's additional queries yet, but it works on panels that have them without losing them:
+
+- The context attachment carries them as `additional_esql_queries` and its text lists each one with the name the template reads it by (`queries[1]`, …). The chat card renders them, and an applied update, including `Preview` on an earlier version, puts them back on the panel.
+- `custom_content_update_panel` and the dashboard generation tool keep them through an edit: they pass the panel's additional queries to `buildCustomContentConfig` in `existing`, which returns them and stores them after the main query. They are dropped with the main query when that is removed, because they have nothing to extend.
+- The template resolver treats the additional queries like the main one: a query that is not changing is not run, because the template that already reads it describes it. Only a new or changing query is sampled. For a panel that has additional queries it adds `queries[n]` guidance to the Liquid system prompt, so a restyle keeps the references and does not drop or mangle a section that reads `queries[1]`. Panels with one query get the same prompt as before.
+- "Refine with chat" from the flyout sends the panel's queries, so an agent update does not lose the additional ones.
+
 ### One builder for the three flows
 
 The dashboard generation tool, `custom_content_update_panel` and `create_visualization` all build a custom content panel with `buildCustomContentConfig` (`@kbn/agent-builder-visualizations-server`), next to `buildLensConfig` and `buildVegaConfig`. Each tool maps its own parameters (`hasData` / `has_data`, `regenerateESQL` / `regenerate_esql` / `regenerateEsql`) onto it and stores the result; none of them decides anything about the query or the template itself.
@@ -162,6 +179,8 @@ Each tool validates its own input at its edge, in its own parameter names (the d
 
 - **Static HTML** — no query involved; produces a self-contained HTML document.
 - **Liquid template** — a query is present or changing; produces a reusable template with no literal data baked in.
+
+It takes all the panel's queries as one list (`esqlQueries`: the first is `rows`, the others `queries[1]`, `queries[2]`, ...) and whether the first one is changing (`isQueryChanging`). A panel with no queries gets the static prompt.
 
 When a query is changing it samples 3 rows (`appendLimitToQuery`) to give the LLM the real schema and representative values. A query that refers to a dashboard control (`?name`) is generated and sampled with that control's value, since an unbound parameter is an error: `custom_content_update_panel` uses the values the panel was sent with, and the dashboard generation tool reads them from the dashboard's saved ES|QL controls, pinned or in the grid (a control in a section applies only to panels in that section). Like the live control, a control with static values passes numeric-looking options as numbers, and one whose values come from a query casts them by the column type its query returns (found once, only when a query being generated or sampled uses that control's variable, by running the control's query with `LIMIT 0` over the dashboard's time range; guessed from the value, like the live control does, if that fails). `create_visualization` has no control values to pass. When only the prompt changes, it skips sampling and asks the LLM to refine the existing template in place, preserving layout and colors. Output is stripped of markdown fences and validated before it is returned.
 
