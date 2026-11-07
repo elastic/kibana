@@ -21,6 +21,8 @@ Source commands select a data source.
 - TS: selects one or multiple data streams with support for time series semantics and time series aggregation functions
 - PROMQL: queries time series data streams using PromQL syntax. Use only when the user asks for PromQL or provides a PromQL expression; otherwise prefer TS.
 
+Use `METRICS_INFO` to discover metrics for either `TS` or `PROMQL` queries. Start with `TS` targeting the relevant indices or data streams, and apply the requested time range and known dimension filters in `WHERE` before `METRICS_INFO`. Request documentation for `TS` and `METRICS_INFO`.
+
 ## Processing commands
 
 ES|QL processing commands change an input table by adding, removing, or changing rows and columns.
@@ -38,6 +40,8 @@ ES|QL processing commands change an input table by adding, removing, or changing
 - SORT: sorts the row in a table by a column. Expressions are not supported.
 - LOOKUP JOIN: adds fields from the lookup index as new columns to your results table based on matching values in the join field
 - WHERE: Filters rows based on a boolean condition. WHERE supports the same functions as EVAL
+- METRICS_INFO: discovers metric names, types, units, and dimension field names after `TS`. Default to this for metric catalogue discovery.
+- TS_INFO: returns metadata for individual time series after `TS`. Use when individual-series information, such as label combinations or series counts, is needed. Emits one row per metric and time series combination and may use substantially more memory than `METRICS_INFO`.
 - RERANK: uses an inference model to compute a new relevance score for an initial set of documents
 - COMPLETION: send prompts and context to an LLM
 - CHANGE_POINT: detects spikes, dips, and change points in a metric.
