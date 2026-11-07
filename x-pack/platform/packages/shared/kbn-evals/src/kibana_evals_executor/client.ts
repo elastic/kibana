@@ -14,6 +14,7 @@ import type { Model } from '@kbn/inference-common';
 import { DEFAULT_SPACE_ID, getDatasetId } from '@kbn/evals-common';
 import type {
   EvalsExecutorClient,
+  EvaluationResult,
   Evaluator,
   EvaluationDataset,
   EvaluationDatasetWithId,
@@ -25,6 +26,7 @@ import type {
 } from '../types';
 import { getCurrentTraceId, withEvaluatorSpan, withTaskSpan } from '../utils/tracing';
 import { DEFAULT_EXPERIMENT_CONCURRENCY } from '../utils/concurrency';
+import { UNAVAILABLE_LABEL } from '../evaluators/unavailable';
 
 const EXPERIMENT_UUID_NAMESPACE = 'c7e6c018-66dc-4511-b97d-046e2194d017';
 
@@ -266,10 +268,10 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                   this.options.log.info(
                     `🧠 Evaluating run (exampleIndex=${exampleIndex}, repetition=${rep}) with evaluator "${evaluator.name}"`
                   );
-                  const { result, evaluatorTraceId } = await withEvaluatorSpan(
-                    evaluator.name,
-                    {},
-                    async () => {
+                  let result: EvaluationResult | undefined;
+                  let evaluatorTraceId: string | null = null;
+                  try {
+                    const evaluated = await withEvaluatorSpan(evaluator.name, {}, async () => {
                       const _traceId = getCurrentTraceId();
                       const _result = await evaluator.evaluate({
                         input: example.input,
@@ -284,11 +286,34 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                         result: _result,
                         evaluatorTraceId: _traceId,
                       };
-                    }
-                  );
-                  this.options.log.info(
-                    `✅ Evaluator "${evaluator.name}" on run (exampleIndex=${exampleIndex}, repetition=${rep}) completed`
-                  );
+                    });
+                    result = evaluated.result;
+                    evaluatorTraceId = evaluated.evaluatorTraceId;
+                    this.options.log.info(
+                      `✅ Evaluator "${evaluator.name}" on run (exampleIndex=${exampleIndex}, repetition=${rep}) completed`
+                    );
+                  } catch (err) {
+                    // An evaluator judges output the task already produced, so its failure is the
+                    // judge's, never the candidate's. A throw out of here rejects the whole run job:
+                    // every evaluator's score for this example/repetition is dropped from the export
+                    // (a silent hole in the metric's denominator) and the spec fails. Record the
+                    // cell as unscored instead.
+                    const message = err instanceof Error ? err.message : String(err);
+                    this.options.log.error(
+                      new Error(
+                        `Evaluator "${evaluator.name}" failed on run (exampleIndex=${exampleIndex}, repetition=${rep}); recording the cell as unscored`,
+                        { cause: err }
+                      )
+                    );
+                    result = {
+                      score: null,
+                      label: UNAVAILABLE_LABEL,
+                      explanation: `Evaluator "${evaluator.name}" failed: ${message}`.slice(
+                        0,
+                        1000
+                      ),
+                    };
+                  }
                   return {
                     evaluatorName: evaluator.name,
                     direction: evaluator.direction,
