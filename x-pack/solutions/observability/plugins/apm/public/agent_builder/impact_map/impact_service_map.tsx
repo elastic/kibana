@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, type ComponentProps, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, type ComponentProps, useEffect, useMemo, useState } from 'react';
 import {
   Controls,
   Panel,
@@ -80,7 +80,6 @@ function StateBadge({ state, floating }: { state: ImpactState; floating?: boolea
     <EuiToolTip
       content={<EuiText size="xs">{label}</EuiText>}
       position="top"
-      delay="long"
       disableScreenReaderOutput
     >
       <span
@@ -212,54 +211,71 @@ function ImpactMapLegend({ criticalPathColor }: { criticalPathColor: string }) {
 
 const LOOKBACK_MS = 7 * 24 * 60 * 60 * 1000;
 
+/** What APM said about a service, kept for the session so reopening a map draws at once. */
+const agentNameCache = new Map<string, string | null>();
+
 /**
  * The APM agent name of each service entity that has traces, so it draws with the same icon as on
- * the service map. A service APM knows nothing about keeps the map's own icon, or none.
+ * the service map. A type that already names its agent needs no lookup, a service seen before is
+ * answered from the cache, and each answer is drawn as it arrives instead of after the slowest.
  */
 const useServiceAgentNames = (impactMap: ImpactMapRendererProps['impactMap']) => {
-  const [agentNames, setAgentNames] = useState<Record<string, string>>({});
   const serviceIds = useMemo(() => {
-    const dependencyTypes = new Set(
-      impactMap.entity_types.filter(({ kind }) => kind !== 'service').map(({ id }) => id)
+    const knownTypes = new Set(
+      impactMap.entity_types
+        .filter(({ kind, icon }) => kind !== 'service' || icon?.agent_name)
+        .map(({ id }) => id)
     );
-    return impactMap.entities
-      .filter(({ type_id: t }) => !dependencyTypes.has(t))
-      .map(({ id }) => id);
+    return impactMap.entities.filter(({ type_id: t }) => !knownTypes.has(t)).map(({ id }) => id);
   }, [impactMap]);
 
+  const fromCache = useCallback(
+    () =>
+      Object.fromEntries(
+        serviceIds.flatMap((id) => {
+          const cached = agentNameCache.get(id);
+          return cached ? [[id, cached]] : [];
+        })
+      ),
+    [serviceIds]
+  );
+  const [agentNames, setAgentNames] = useState<Record<string, string>>(fromCache);
+
   useEffect(() => {
+    setAgentNames(fromCache());
     const callApmApi = getApmInternalServices()?.callApmApi;
-    if (!callApmApi) {
+    const missing = serviceIds.filter((id) => !agentNameCache.has(id));
+    if (!callApmApi || missing.length === 0) {
       return;
     }
     const controller = new AbortController();
     const end = new Date();
     const start = new Date(end.getTime() - LOOKBACK_MS);
-    Promise.all(
-      serviceIds.map((serviceName) =>
-        callApmApi('GET /internal/apm/services/{serviceName}/agent', {
-          signal: controller.signal,
-          params: {
-            path: { serviceName },
-            query: {
-              environment: ENVIRONMENT_ALL.value,
-              start: start.toISOString(),
-              end: end.toISOString(),
-            },
+    missing.forEach((serviceName) => {
+      callApmApi('GET /internal/apm/services/{serviceName}/agent', {
+        signal: controller.signal,
+        params: {
+          path: { serviceName },
+          query: {
+            environment: ENVIRONMENT_ALL.value,
+            start: start.toISOString(),
+            end: end.toISOString(),
           },
-        })
-          .then(({ agentName }) => (agentName ? ([serviceName, agentName] as const) : undefined))
-          .catch(() => undefined)
-      )
-    ).then((found) => {
-      if (!controller.signal.aborted) {
-        setAgentNames(Object.fromEntries(found.filter((pair) => pair !== undefined)));
-      }
+        },
+      }).then(
+        ({ agentName }) => {
+          agentNameCache.set(serviceName, agentName ?? null);
+          if (agentName && !controller.signal.aborted) {
+            setAgentNames((current) => ({ ...current, [serviceName]: agentName }));
+          }
+        },
+        () => undefined
+      );
     });
     return () => {
       controller.abort();
     };
-  }, [serviceIds]);
+  }, [serviceIds, fromCache]);
 
   return agentNames;
 };
