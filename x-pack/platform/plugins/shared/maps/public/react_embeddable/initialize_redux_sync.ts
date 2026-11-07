@@ -9,7 +9,7 @@ import type { Subscription } from 'rxjs';
 import { first } from 'rxjs';
 import { BehaviorSubject, debounceTime, filter, map, merge, skip } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
-import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
@@ -61,28 +61,6 @@ function getHiddenLayerIds(state: MapStoreState) {
     .filter((layer) => !layer.visible)
     .map((layer) => layer.id);
 }
-
-export const reduxSyncComparators: StateComparators<
-  Pick<
-    MapEmbeddableState,
-    'hiddenLayers' | 'isLayerTOCOpen' | 'mapCenter' | 'mapBuffer' | 'openTOCDetails'
-  >
-> = {
-  hiddenLayers: 'deepEquality',
-  isLayerTOCOpen: 'referenceEquality',
-  mapCenter: (a, b) => {
-    if (!a || !b) {
-      return a === b;
-    }
-
-    if (a.lat !== b.lat) return false;
-    if (a.lon !== b.lon) return false;
-    // Map may not restore reset zoom exactly
-    return Math.abs(a.zoom - b.zoom) < 0.05;
-  },
-  mapBuffer: 'skip',
-  openTOCDetails: 'deepEquality',
-};
 
 export function initializeReduxSync({
   savedMap,
