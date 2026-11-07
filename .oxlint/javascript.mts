@@ -106,7 +106,6 @@ export const javascriptRules: DummyRuleMap = {
   // 'no-path-concat': 'error',
   // 'no-return-assign': 'error',
   'no-script-url': 'error',
-  // 'no-undef': 'error',
   'no-underscore-dangle': 'off',
   'no-unused-labels': 'error',
   'no-with': 'error',
@@ -118,7 +117,9 @@ export const javascriptRules: DummyRuleMap = {
 export const javascriptOverrides: OxlintOverride[] = [
   {
     files: ['**/*.js', '**/*.mjs'],
+    env: { browser: true, es6: true, mocha: true, node: true },
     rules: {
+      'no-undef': 'error',
       '@kbn/compat/eslint-camelcase': ['error', { properties: 'never', allow: ['^UNSAFE_'] }],
       '@kbn/compat/eslint-no-restricted-modules': ['error', { paths: ['gulp-util'] }],
       '@kbn/compat/eslint-strict': ['error', 'never'],

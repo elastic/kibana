@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-env jest */
-
 const fs = require('fs');
 const vm = require('vm');
 const path = require('path');
