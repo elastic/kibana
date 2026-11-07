@@ -181,3 +181,57 @@ export const SCOPE_SHOW_IMPACT = i18n.translate('xpack.cases.caseView.scope.show
 export const SCOPE_PAUSED_NOW = i18n.translate('xpack.cases.caseView.scope.pausedNow', {
   defaultMessage: 'paused now',
 });
+
+export const SCOPE_METRICS = i18n.translate('xpack.cases.caseView.scope.metrics', {
+  defaultMessage: 'Case metrics',
+});
+
+export const SCOPE_METRIC_ALERTS = i18n.translate('xpack.cases.caseView.scope.metric.alerts', {
+  defaultMessage: 'Alerts',
+});
+
+export const SCOPE_METRIC_ALERT_HOSTS = i18n.translate(
+  'xpack.cases.caseView.scope.metric.alertHosts',
+  { defaultMessage: 'Hosts in alerts' }
+);
+
+export const SCOPE_METRIC_ALERT_USERS = i18n.translate(
+  'xpack.cases.caseView.scope.metric.alertUsers',
+  { defaultMessage: 'Users in alerts' }
+);
+
+export const SCOPE_METRIC_CONNECTORS = i18n.translate(
+  'xpack.cases.caseView.scope.metric.connectors',
+  { defaultMessage: 'Connectors' }
+);
+
+export const SCOPE_METRIC_CREATED = i18n.translate('xpack.cases.caseView.scope.metric.created', {
+  defaultMessage: 'Created',
+});
+
+export const SCOPE_METRIC_OPEN = i18n.translate('xpack.cases.caseView.scope.metric.open', {
+  defaultMessage: 'Open',
+});
+
+export const SCOPE_METRIC_IN_PROGRESS = i18n.translate(
+  'xpack.cases.caseView.scope.metric.inProgress',
+  { defaultMessage: 'In progress' }
+);
+
+export const SCOPE_METRIC_PAUSED = i18n.translate('xpack.cases.caseView.scope.metric.paused', {
+  defaultMessage: 'Paused',
+});
+
+export const SCOPE_METRIC_TO_CLOSE = i18n.translate('xpack.cases.caseView.scope.metric.toClose', {
+  defaultMessage: 'Created to close',
+});
+
+export const SCOPE_METRIC_REOPENED = i18n.translate('xpack.cases.caseView.scope.metric.reopened', {
+  defaultMessage: 'Reopened',
+});
+
+export const SCOPE_METRIC_TIMES = (count: number) =>
+  i18n.translate('xpack.cases.caseView.scope.metric.times', {
+    values: { count },
+    defaultMessage: '{count, plural, one {# time} other {# times}}',
+  });

@@ -63,6 +63,16 @@ const render = ({ observables = true } = {}) => {
           users: { total: 1, values: [{ name: 'jdoe', count: 7 }] },
         },
         connectors: { total: 1 },
+        lifespan: {
+          creationDate: '2026-11-06T10:00:00.000Z',
+          closeDate: null,
+          statusInfo: {
+            openDuration: 2 * 60 * 60 * 1000,
+            inProgressDuration: 0,
+            pausedDuration: 0,
+            reopenDates: ['2026-11-06T11:00:00.000Z'],
+          },
+        },
       },
     },
   });
@@ -72,6 +82,7 @@ const render = ({ observables = true } = {}) => {
       CaseMetricsFeature.ALERTS_HOSTS,
       CaseMetricsFeature.ALERTS_USERS,
       CaseMetricsFeature.CONNECTORS,
+      CaseMetricsFeature.LIFESPAN,
     ],
     observablesAuthorized: observables,
     isObservablesFeatureEnabled: observables,
@@ -126,6 +137,22 @@ describe('CaseScope', () => {
     expect(screen.getByTestId('case-view-scope-activity')).toHaveTextContent(
       '7 alerts · 1 connector'
     );
+  });
+
+  it('lists every case metric in the footer, with dashes for durations not yet reached', () => {
+    render();
+
+    const metric = (key: string) => screen.getByTestId(`case-view-scope-metric-${key}`);
+    expect(metric('alerts')).toHaveTextContent('Alerts 7');
+    expect(metric('alert-hosts')).toHaveTextContent('Hosts in alerts 2');
+    expect(metric('alert-users')).toHaveTextContent('Users in alerts 1');
+    expect(metric('connectors')).toHaveTextContent('Connectors 1');
+    expect(metric('created')).toHaveTextContent('Created');
+    expect(metric('open')).toHaveTextContent('Open 2 hours');
+    expect(metric('in-progress')).toHaveTextContent('In progress —');
+    expect(metric('paused')).toHaveTextContent('Paused —');
+    expect(metric('to-close')).toHaveTextContent('Created to close —');
+    expect(metric('reopened')).toHaveTextContent('Reopened 1 time');
   });
 
   it('hides indicators without the observables feature', () => {

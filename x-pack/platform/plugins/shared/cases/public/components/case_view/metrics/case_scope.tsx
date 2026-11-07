@@ -12,6 +12,7 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiLink,
   EuiPanel,
   EuiSkeletonText,
@@ -32,6 +33,7 @@ import {
   caseViewSectionRegistry,
   type CaseImpactedEntity,
 } from '../../../client/case_view_sections';
+import { CaseScopeMetrics } from './case_scope_metrics';
 import * as i18n from './translations';
 
 /** The panel shows at most this many entities and observable types, whatever the case holds. */
@@ -310,6 +312,12 @@ export const CaseScope = React.memo(({ caseData }: { caseData: CaseUI }) => {
           </div>
         </Block>
       </EuiFlexGroup>
+      {metricsFeatures.length > 0 && (
+        <>
+          <EuiHorizontalRule margin="s" />
+          <CaseScopeMetrics metrics={metrics} features={metricsFeatures} isLoading={isLoading} />
+        </>
+      )}
     </EuiPanel>
   );
 });
