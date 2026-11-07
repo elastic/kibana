@@ -35,7 +35,6 @@ interface RunResolutionScoringParams {
   calculationRunId: string;
   abortSignal?: AbortSignal;
   watchlistConfigs: Map<string, WatchlistObject>;
-  idBasedRiskScoringEnabled: boolean;
   writer: Awaited<ReturnType<RiskScoreDataClient['getWriter']>>;
   targetEntityIds?: string[];
   alertFilters: QueryDslQueryContainer[];
@@ -61,7 +60,6 @@ export const runResolutionScoringStep = async ({
   calculationRunId,
   abortSignal,
   watchlistConfigs,
-  idBasedRiskScoringEnabled,
   writer,
   targetEntityIds,
   alertFilters,
@@ -96,7 +94,6 @@ export const runResolutionScoringStep = async ({
         logger: runLogger,
         entityType,
         scores,
-        enabled: idBasedRiskScoringEnabled,
         refresh: entityStoreRefresh,
       })
     );

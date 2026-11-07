@@ -35,8 +35,7 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.entity_analytics.risk_score',
-                    acceptableAlternativeToolIds: ['security.entity_analytics.asset_criticality'],
+                    id: 'security.search_entities',
                     criteria: [
                       'The response uses entity analytics risk score (or related) capability; ESQL may use MIN/MAX or time-bounded query.',
                     ],
@@ -55,8 +54,7 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.entity_analytics.risk_score',
-                    acceptableAlternativeToolIds: ['security.entity_analytics.asset_criticality'],
+                    id: 'security.search_entities',
                     criteria: [
                       'The response uses at least one of risk_score or asset_criticality to surface hosts by risk or criticality.',
                     ],
@@ -75,8 +73,7 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.entity_analytics.risk_score',
-                    acceptableAlternativeToolIds: ['security.entity_analytics.asset_criticality'],
+                    id: 'security.search_entities',
                     criteria: [
                       'The response uses entity analytics with ESQL over risk-score indices, optionally filtering by user (e.g. user.name or id).',
                     ],
@@ -131,8 +128,7 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.entity_analytics.risk_score',
-                    acceptableAlternativeToolIds: ['security.entity_analytics.asset_criticality'],
+                    id: 'security.search_entities',
                     criteria: [
                       'The response uses entity analytics risk score with a time-bounded or scoring-over-time query where applicable.',
                     ],

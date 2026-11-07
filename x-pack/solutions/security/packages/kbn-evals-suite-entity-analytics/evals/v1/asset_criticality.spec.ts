@@ -9,7 +9,7 @@ import { tags } from '@kbn/scout-security';
 import { evaluate } from '../../src/evaluate';
 
 /**
- * Asset criticality prompts (P-AC1, P-AC2). Uses security.entity_analytics.asset_criticality tool.
+ * Asset criticality prompts (P-AC1, P-AC2). Uses security.search_entities.
  * For full grounding evals, seed asset criticality data; tool routing and criteria work without seeding.
  */
 evaluate.describe(
@@ -33,7 +33,7 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.entity_analytics.asset_criticality',
+                    id: 'security.search_entities',
                     criteria: [
                       'The response uses the asset criticality tool or clearly explains that the host was not found.',
                     ],
@@ -53,10 +53,9 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.entity_analytics.asset_criticality',
-                    acceptableAlternativeToolIds: ['security.entity_analytics.risk_score'],
+                    id: 'security.search_entities',
                     criteria: [
-                      'The response uses at least one of: asset_criticality or risk_score to surface business-critical or high-risk entities.',
+                      'The response uses entity search to surface business-critical or high-risk entities.',
                     ],
                   },
                 ],
