@@ -149,15 +149,18 @@ on, so it must identify a bounded slice of behaviour, not a file.
 | `director`           | Episode state transitions. Runs inside the executor but is its own domain. | `lib/director/director.ts`                                                                                        |
 | `dispatcher`         | Dispatch task runner, pipeline steps, workflow scheduling.                 | `lib/dispatcher/dispatcher.ts`                                                                                    |
 | `executionHistory`   | Rule and action policy execution-history read paths.                       | `lib/execution_history_client/`, `lib/action_policy_execution_history_client/`, `lib/services/event_log_service/` |
-| `resources`          | Datastream, index template and ES\|QL view bootstrap.                      | `lib/services/resource_service/resource_manager.ts`                                                               |
+| `resources`          | Datastream, index template, ES\|QL view and managed workflow bootstrap.    | `setup/bind_on_start.ts`, `lib/services/resource_service/`                                                        |
+| `query`              | ES\|QL query execution and response formats.                               | `lib/services/query_service/`, `lib/services/esql_response_format_service/`                                       |
+| `storage`            | Bulk writes to the plugin's data streams.                                  | `lib/services/storage_service/`                                                                                   |
+| `maintenanceWindows` | Maintenance window lookups for suppression.                                | `lib/services/maintenance_window_service/`                                                                        |
 | `tasks`              | Background tasks other than the two engine tasks. Boot-time scheduling.    | `lib/tasks/`, `lib/usage/`, `setup/bind_on_start.ts`                                                              |
 | `savedObjects`       | Saved object type registration and model-version migrations.               | `setup/bind_on_setup.ts`                                                                                          |
 | `agentBuilder`       | Agent Builder tools, skills and attachments.                               | `setup/bind_agent_builder.ts`                                                                                     |
-| `events`             | Internal domain event bus, publishers and subscribers.                     | `lib/events/`                                                                                                     |
+| `events`             | Internal domain event bus, publishers, subscribers and workflow emission.  | `lib/events/`, `lib/services/workflow_service/`                                                                   |
 | `telemetry`          | Event-based telemetry (EBT) reporting.                                     | `lib/services/ebt_service/ebt_service.ts`                                                                         |
 
 The tree is split along **failure-domain** boundaries, not directory
-boundaries: 15 loggers an operator can remember, not 100+ file names. The
+boundaries: 18 loggers an operator can remember, not 100+ file names. The
 `director` runs inside the executor pipeline but gets its own logger because it
 is reasoned about independently. The `events` bus is one logger even though
 publishers and subscribers live in several directories.
