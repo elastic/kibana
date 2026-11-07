@@ -238,8 +238,36 @@ function configureExperiment({
           };
         }
 
+        // Opt-in: tools that may precede the expected tool (e.g. the find-rules
+        // skill mandates calling security.discover_rule_tags first). Unset rows
+        // keep the strict only-tool semantics below.
+        const allowedPrecedingRaw = metadata?.['allowedPrecedingToolIds'];
+        const allowedPrecedingToolIds =
+          Array.isArray(allowedPrecedingRaw) &&
+          allowedPrecedingRaw.every((id) => typeof id === 'string')
+            ? (allowedPrecedingRaw as string[])
+            : undefined;
+
         const usedToolIds = domainToolCalls.map((t) => t.tool_id).filter(Boolean);
         const hasExpected = usedToolIds.includes(expectedOnlyToolId);
+        if (allowedPrecedingToolIds) {
+          const firstExpectedIndex = domainToolCalls.findIndex(
+            (t) => t.tool_id === expectedOnlyToolId
+          );
+          const allAllowed =
+            domainToolCalls.every(
+              (t) =>
+                t.tool_id === expectedOnlyToolId || allowedPrecedingToolIds.includes(t.tool_id!)
+            ) &&
+            // every allowed-preceding call must happen before the first expected call
+            domainToolCalls.every((t, i) =>
+              allowedPrecedingToolIds.includes(t.tool_id!) ? i < firstExpectedIndex : true
+            );
+          return {
+            score: hasExpected && allAllowed ? 1 : 0,
+            metadata: { expectedOnlyToolId, allowedPrecedingToolIds, usedToolIds },
+          };
+        }
         const allExpected = usedToolIds.every((id) => id === expectedOnlyToolId);
 
         return {
