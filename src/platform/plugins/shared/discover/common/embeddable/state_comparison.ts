@@ -43,10 +43,7 @@ const areOverridesEqual = (prev: Overrides = {}, next: Overrides = {}): boolean 
     omit(next, OVERRIDE_KEYS_WITH_EMPTY_DEFAULTS)
   );
 
-/**
- * Stateless rules for comparing two serialized Discover session panel states.
- * By-reference keys are absent from by-value states, so they compare equal there.
- */
+// By-reference keys are absent from by-value states, so they compare equal there.
 export const discoverSessionEmbeddableStateComparison: SerializedStateComparison<DiscoverSessionEmbeddableComparedState> =
   {
     comparators: {

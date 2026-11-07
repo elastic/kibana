@@ -59,9 +59,6 @@ const resolveAttributes = (
   return value;
 };
 
-/**
- * Stateless rules for comparing two serialized Lens panel states.
- */
 export const lensStateComparison: SerializedStateComparison<LensComparedState> = {
   comparators: {
     ...titleComparators,
