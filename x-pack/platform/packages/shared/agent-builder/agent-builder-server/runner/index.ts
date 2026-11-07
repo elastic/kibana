@@ -49,6 +49,7 @@ export type {
 } from './tool_provider';
 export type {
   ModelProvider,
+  ModelSource,
   ScopedModel,
   ModelProviderStats,
   ModelCallInfo,

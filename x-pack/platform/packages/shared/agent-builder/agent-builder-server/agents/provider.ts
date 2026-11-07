@@ -29,6 +29,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type {
   ModelProvider,
+  ModelSource,
   ScopedRunner,
   ToolProvider,
   WritableToolResultStore,
@@ -105,7 +106,8 @@ export interface ExecuteSubAgentParams {
   agentId: string;
   parentExecutionId: string;
   prompt: string;
-  connectorId?: string;
+  /** Model source the sub-agent runs on; undefined to let its own configuration decide. */
+  modelSource?: ModelSource;
   autoApprovedApis?: AutoApprovedApi[];
   abortSignal?: AbortSignal;
 }
@@ -120,7 +122,8 @@ export interface CreateSubAgentParams {
   /** Pre-allocated id for the child conversation (assigned by the caller). */
   conversationId: string;
   prompt: string;
-  connectorId?: string;
+  /** Model source the sub-agent runs on; undefined to let its own configuration decide. */
+  modelSource?: ModelSource;
   autoApprovedApis?: AutoApprovedApi[];
   abortSignal?: AbortSignal;
 }
@@ -132,7 +135,8 @@ export interface SendToSubAgentParams {
   /** Existing child conversation id */
   conversationId: string;
   prompt: string;
-  connectorId?: string;
+  /** Model source the sub-agent runs on; undefined to let its own configuration decide. */
+  modelSource?: ModelSource;
   abortSignal?: AbortSignal;
 }
 
@@ -249,9 +253,10 @@ export interface AgentHandlerContext {
    */
   deployment: DeploymentContext;
   /**
-   * The resolved connector ID for this execution, if any.
+   * The model source this execution runs on: an explicit connector or an inference feature.
+   * Undefined when the model comes from the Agent Builder default.
    */
-  defaultConnectorId?: string;
+  defaultModel?: ModelSource;
   /**
    * A cluster client scoped to the current user.
    * Can be used to access ES on behalf of either the current user or the system user.

@@ -10,8 +10,8 @@ import type { InferenceConnector } from '@kbn/inference-common';
 import type { InferenceFeatureConfig, SearchInferenceEndpointsPluginStart } from '../types';
 import {
   normalizeConnectorFeatureIds,
-  resolveConnectorIdFromFeatures,
-} from './resolve_connector_id_from_features';
+  resolveFeatureIdFromFeatures,
+} from './resolve_feature_id_from_features';
 
 const CONFLICT = 'connector conflict';
 
@@ -39,7 +39,7 @@ describe('normalizeConnectorFeatureIds', () => {
   });
 });
 
-describe('resolveConnectorIdFromFeatures', () => {
+describe('resolveFeatureIdFromFeatures', () => {
   const request = httpServerMock.createKibanaRequest();
 
   const configuredOptions = { onlyReturnConfigured: true };
@@ -54,7 +54,7 @@ describe('resolveConnectorIdFromFeatures', () => {
     return { taskType: 'chat_completion' } as InferenceFeatureConfig;
   };
 
-  it('returns the first configured connector and does not resolve later ids', async () => {
+  it('returns the first configured feature id and does not resolve later ids', async () => {
     const getForFeature = jest.fn().mockImplementation(async (featureId: string) => {
       if (featureId === 'alertzero_template_models') {
         return {
@@ -71,7 +71,7 @@ describe('resolveConnectorIdFromFeatures', () => {
     });
     const searchInferenceEndpoints = createServices(featureFor, getForFeature);
 
-    const connectorId = await resolveConnectorIdFromFeatures({
+    const featureId = await resolveFeatureIdFromFeatures({
       featureIds: ['alertzero_template_models', 'alertzero_frontier'],
       request,
       searchInferenceEndpoints,
@@ -79,7 +79,7 @@ describe('resolveConnectorIdFromFeatures', () => {
       conflictMessage: CONFLICT,
     });
 
-    expect(connectorId).toBe('template-connector');
+    expect(featureId).toBe('alertzero_template_models');
     expect(getForFeature).toHaveBeenCalledWith(
       'alertzero_template_models',
       request,
@@ -90,6 +90,25 @@ describe('resolveConnectorIdFromFeatures', () => {
       expect.anything(),
       expect.anything()
     );
+  });
+
+  it('returns the feature id, not the connector id of its configured endpoint', async () => {
+    const getForFeature = jest.fn().mockResolvedValue({
+      endpoints: [{ connectorId: 'feature-connector' } as InferenceConnector],
+      warnings: [],
+      soEntryFound: true,
+    });
+
+    const featureId = await resolveFeatureIdFromFeatures({
+      featureIds: ['significant_events_investigation'],
+      request,
+      searchInferenceEndpoints: createServices(featureFor, getForFeature),
+      hasExplicitConnector: false,
+      conflictMessage: CONFLICT,
+    });
+
+    expect(featureId).toBe('significant_events_investigation');
+    expect(featureId).not.toBe('feature-connector');
   });
 
   it('continues to the next feature when the first row has no configured connector', async () => {
@@ -104,7 +123,7 @@ describe('resolveConnectorIdFromFeatures', () => {
       };
     });
 
-    const connectorId = await resolveConnectorIdFromFeatures({
+    const featureId = await resolveFeatureIdFromFeatures({
       featureIds: ['alertzero_template_models', 'alertzero_frontier'],
       request,
       searchInferenceEndpoints: createServices(featureFor, getForFeature),
@@ -112,7 +131,7 @@ describe('resolveConnectorIdFromFeatures', () => {
       conflictMessage: CONFLICT,
     });
 
-    expect(connectorId).toBe('tier-connector');
+    expect(featureId).toBe('alertzero_frontier');
     expect(getForFeature).toHaveBeenCalledWith('alertzero_frontier', request, configuredOptions);
   });
 
@@ -124,7 +143,7 @@ describe('resolveConnectorIdFromFeatures', () => {
     });
 
     await expect(
-      resolveConnectorIdFromFeatures({
+      resolveFeatureIdFromFeatures({
         featureIds: ['alertzero_template_models', 'alertzero_frontier'],
         request,
         searchInferenceEndpoints: createServices(featureFor, getForFeature),
@@ -148,7 +167,7 @@ describe('resolveConnectorIdFromFeatures', () => {
     });
 
     await expect(
-      resolveConnectorIdFromFeatures({
+      resolveFeatureIdFromFeatures({
         featureIds: ['alertzero_template_models', 'alertzero_frontier'],
         request,
         searchInferenceEndpoints: createServices(featureFor, getForFeature),
@@ -163,7 +182,7 @@ describe('resolveConnectorIdFromFeatures', () => {
     const getForFeature = jest.fn();
 
     await expect(
-      resolveConnectorIdFromFeatures({
+      resolveFeatureIdFromFeatures({
         featureIds: ['knowledge_base_embeddings'],
         request,
         searchInferenceEndpoints: createServices(featureFor, getForFeature),
@@ -183,7 +202,7 @@ describe('resolveConnectorIdFromFeatures', () => {
       soEntryFound: false,
     });
 
-    const connectorId = await resolveConnectorIdFromFeatures({
+    const featureId = await resolveFeatureIdFromFeatures({
       featureIds: ['unknown_feature'],
       request,
       searchInferenceEndpoints: createServices(featureFor, getForFeature),
@@ -191,7 +210,7 @@ describe('resolveConnectorIdFromFeatures', () => {
       conflictMessage: CONFLICT,
     });
 
-    expect(connectorId).toBeUndefined();
+    expect(featureId).toBeUndefined();
     expect(getForFeature).not.toHaveBeenCalled();
   });
 
@@ -200,7 +219,7 @@ describe('resolveConnectorIdFromFeatures', () => {
     const emptyRegistry = () => undefined;
 
     await expect(
-      resolveConnectorIdFromFeatures({
+      resolveFeatureIdFromFeatures({
         featureIds: ['alertzero_template_models'],
         request,
         searchInferenceEndpoints: createServices(emptyRegistry, getForFeature),
@@ -218,7 +237,7 @@ describe('resolveConnectorIdFromFeatures', () => {
       soEntryFound: false,
     });
 
-    const connectorId = await resolveConnectorIdFromFeatures({
+    const featureId = await resolveFeatureIdFromFeatures({
       featureIds: ['unknown_feature', 'alertzero_frontier'],
       request,
       searchInferenceEndpoints: createServices(featureFor, getForFeature),
@@ -226,7 +245,7 @@ describe('resolveConnectorIdFromFeatures', () => {
       conflictMessage: CONFLICT,
     });
 
-    expect(connectorId).toBe('tier-connector');
+    expect(featureId).toBe('alertzero_frontier');
     expect(getForFeature).toHaveBeenCalledTimes(1);
     expect(getForFeature).toHaveBeenCalledWith('alertzero_frontier', request, configuredOptions);
   });

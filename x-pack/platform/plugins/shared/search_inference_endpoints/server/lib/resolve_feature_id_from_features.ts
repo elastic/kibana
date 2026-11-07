@@ -29,7 +29,7 @@ export const normalizeConnectorFeatureIds = (value: unknown): string[] => {
 };
 
 /**
- * Resolves the first configured connector from an ordered feature list.
+ * Picks the first configured feature from an ordered feature list and returns its id.
  *
  * Each id is asked only for what an operator configured (`onlyReturnConfigured`).
  * A miss continues to the next id. An id that is not registered is skipped the
@@ -37,9 +37,13 @@ export const normalizeConnectorFeatureIds = (value: unknown): string[] => {
  * plugin must not treat that missing row as a configured feature. A list where
  * every entry misses is not a conflict with an explicit connector id, so the
  * caller can use `connector-id` or its default. A listed feature that does
- * resolve a connector conflicts with an explicit connector id.
+ * have a configured endpoint conflicts with an explicit connector id.
+ *
+ * The configured endpoints are only consulted to pick *which* feature wins, never
+ * to pick the model: the caller hands the feature id to the inference plugin, which
+ * resolves the same configured endpoint together with the feature's settings.
  */
-export const resolveConnectorIdFromFeatures = async ({
+export const resolveFeatureIdFromFeatures = async ({
   featureIds,
   request,
   searchInferenceEndpoints,
@@ -80,7 +84,7 @@ export const resolveConnectorIdFromFeatures = async ({
       throw new Error(conflictMessage);
     }
 
-    return endpoints[0].connectorId;
+    return featureId;
   }
 
   return undefined;

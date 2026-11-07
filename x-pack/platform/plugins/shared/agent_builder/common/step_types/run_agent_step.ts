@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { StepCategory } from '@kbn/workflows';
 import { JsonModelSchema } from '@kbn/workflows/spec/schema/common/json_model_schema';
@@ -255,170 +255,177 @@ export const EPHEMERAL_WITH_CREATE_CONVERSATION_MESSAGE =
 /**
  * Config schema for the run agent step.
  */
-export const ConfigSchema = z
-  .object({
-    /**
-     * The ID of the agent to chat with. Defaults to the default Elastic AI agent.
-     */
-    'agent-id': z
-      .string()
-      .optional()
-      .describe('The ID of the agent to chat with. Defaults to the default Elastic AI agent.'),
-    /**
-     * The ID of the connector to use for model routing. Mutually exclusive with `inference-id`.
-     */
-    'connector-id': z
-      .string()
-      .optional()
-      .describe(
-        'The ID of the connector to use. Defaults to the default GenAI connector. Mutually exclusive with `inference-id`.'
-      ),
-    /**
-     * Inference endpoint ID for model routing (alias for the same internal id as connector-id).
-     */
-    'inference-id': z
-      .string()
-      .optional()
-      .describe(
-        'The inference endpoint ID to use. Mutually exclusive with `connector-id`; defaults apply when both are omitted.'
-      ),
-    /**
-     * Model Management feature id, or a priority list of them.
-     * A single id is mutually exclusive with `connector-id` and `inference-id`.
-     * In a list, an unregistered id is skipped. A listed feature conflicts with
-     * an explicit connector only when it resolves one.
-     */
-    'connector-id-by-feature': z
-      .union([z.string().max(255), z.array(z.string().max(255)).max(8)])
-      .optional()
-      .describe(
-        'A Model Management feature id, or an ordered list of them. An id that is not registered is skipped. Each id contributes a connector only when one is configured for it; otherwise the next id is tried. A configured connector is mutually exclusive with `connector-id` and `inference-id`. A list where every id misses is not a conflict.'
-      ),
-    /**
-     * When true, create/persist a conversation and associate it with the executing user.
-     * If conversation_id is provided, this can auto-create the conversation with that id if it does not exist.
-     */
-    'create-conversation': z
-      .boolean()
-      .optional()
-      .describe('When true, creates a conversation for the step.'),
-    /**
-     * When true, newly created conversations are public so other users who can use the
-     * underlying agent can list, view, and continue them. Ignored when continuing an
-     * existing conversation. Defaults to private.
-     */
-    'public-conversation': z
-      .boolean()
-      .optional()
-      .describe(
-        'When true, newly created conversations are public to users who can use the agent. Defaults to private. Ignored when continuing an existing conversation.'
-      ),
-    /**
-     * When true, the run writes nothing to a conversation. With `conversation_id`, the conversation
-     * is loaded as context but not modified.
-     */
-    ephemeral: z
-      .boolean()
-      .optional()
-      .describe(
-        'When true, the run writes nothing to a conversation: no conversation is created and, with conversation_id, the conversation is loaded as context but not modified (no message, round, metadata or workspace change). Defaults to false.'
-      ),
-    /**
-     * Connector telemetry feature id used to attribute this step's LLM calls for billing
-     * (sets `metadata.connectorTelemetry.pluginId`). When omitted, the default Agent Builder
-     * attribution is used.
-     */
-    'plugin-id': z
-      .string()
-      .max(255)
-      .optional()
-      .describe(
-        "The feature id to attribute this step's LLM calls to for billing (connector telemetry pluginId)."
-      ),
-    'product-solution': z
-      .string()
-      .max(255)
-      .optional()
-      .describe(
-        'The product solution to attribute this step to. Ignored when `plugin-id` is not set.'
-      ),
-    'product-feature': z
-      .string()
-      .max(255)
-      .optional()
-      .describe(
-        'The product feature to attribute this step to. Ignored when `plugin-id` is not set.'
-      ),
-    /**
-     * Parent feature id used to roll up this step's LLM token usage under a parent feature
-     * (sets `metadata.connectorTelemetry.aggregateBy`). Only used when `plugin-id` is set.
-     */
-    'aggregate-by': z
-      .string()
-      .max(255)
-      .optional()
-      .describe(
-        "The parent feature id to group this step's LLM token usage under (connector telemetry aggregateBy)."
-      ),
-    /**
-     * Maximum response size for this workflow step. Also used as the connector
-     * response content length limit (`maxContentLength`) for the step's LLM
-     * calls, including streamed completions.
-     */
-    'max-step-size': z
-      .string()
-      .max(32)
-      .optional()
-      .describe('Maximum response size for this workflow step.'),
-    /**
-     * Reasoning level the model should use.
-     */
-    'reasoning-level': z
-      .enum(['none', 'minimal', 'low', 'medium', 'high', 'xhigh'])
-      .optional()
-      .describe(
-        "[tech preview] Reasoning effort level forwarded to the LLM for this step's calls. Support depends on the underlying model and provider."
-      ),
-  })
-  .superRefine((cfg, ctx) => {
-    const connector = normalizeOptionalConnectorOrInferenceParam(cfg['connector-id']);
-    const inference = normalizeOptionalConnectorOrInferenceParam(cfg['inference-id']);
-    // A list may sit beside connector-id. Whether an id conflicts is decided at
-    // runtime, and only when that feature actually resolves a connector.
-    const connectorByFeatureRaw = cfg['connector-id-by-feature'];
-    const connectorByFeature =
-      typeof connectorByFeatureRaw === 'string'
-        ? normalizeOptionalStringParam(connectorByFeatureRaw)
-        : undefined;
-    if (connector !== undefined && inference !== undefined) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
-        path: ['connector-id'],
-      });
-    }
-    if (connectorByFeature !== undefined && (connector !== undefined || inference !== undefined)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
-        path: ['connector-id-by-feature'],
-      });
-    }
-    if (cfg['aggregate-by'] !== undefined && cfg['plugin-id'] === undefined) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
-        path: ['aggregate-by'],
-      });
-    }
-    if (cfg.ephemeral === true && cfg['create-conversation'] === true) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: EPHEMERAL_WITH_CREATE_CONVERSATION_MESSAGE,
-        path: ['ephemeral'],
-      });
-    }
-  });
+export const ConfigSchema = lazySchema(() =>
+  z
+    .object({
+      /**
+       * The ID of the agent to chat with. Defaults to the default Elastic AI agent.
+       */
+      'agent-id': z
+        .string()
+        .optional()
+        .describe('The ID of the agent to chat with. Defaults to the default Elastic AI agent.'),
+      /**
+       * The ID of the connector to use for model routing. Mutually exclusive with `inference-id`.
+       */
+      'connector-id': z
+        .string()
+        .optional()
+        .describe(
+          'The ID of the connector to use. Defaults to the default GenAI connector. Mutually exclusive with `inference-id`.'
+        ),
+      /**
+       * Inference endpoint ID for model routing (alias for the same internal id as connector-id).
+       */
+      'inference-id': z
+        .string()
+        .optional()
+        .describe(
+          'The inference endpoint ID to use. Mutually exclusive with `connector-id`; defaults apply when both are omitted.'
+        ),
+      /**
+       * Model Management feature id, or a priority list of them. The step runs on the
+       * winning feature: its configured model and reasoning are used.
+       * A single id is mutually exclusive with `connector-id` and `inference-id`.
+       * In a list, an unregistered id is skipped. A listed feature conflicts with
+       * an explicit connector only when a model is configured for it.
+       */
+      'connector-id-by-feature': z
+        .union([z.string().max(255), z.array(z.string().max(255)).max(8)])
+        .optional()
+        .describe(
+          "A Model Management feature id, or an ordered list of them. The step runs on the first id that has a model configured for it: the feature's configured model and reasoning are used, and `reasoning-level` is ignored. An id that is not registered, or has no configured model, is skipped and the next id is tried. A configured feature is mutually exclusive with `connector-id` and `inference-id`. A list where every id misses is not a conflict."
+        ),
+      /**
+       * When true, create/persist a conversation and associate it with the executing user.
+       * If conversation_id is provided, this can auto-create the conversation with that id if it does not exist.
+       */
+      'create-conversation': z
+        .boolean()
+        .optional()
+        .describe('When true, creates a conversation for the step.'),
+      /**
+       * When true, newly created conversations are public so other users who can use the
+       * underlying agent can list, view, and continue them. Ignored when continuing an
+       * existing conversation. Defaults to private.
+       */
+      'public-conversation': z
+        .boolean()
+        .optional()
+        .describe(
+          'When true, newly created conversations are public to users who can use the agent. Defaults to private. Ignored when continuing an existing conversation.'
+        ),
+      /**
+       * When true, the run writes nothing to a conversation. With `conversation_id`, the conversation
+       * is loaded as context but not modified.
+       */
+      ephemeral: z
+        .boolean()
+        .optional()
+        .describe(
+          'When true, the run writes nothing to a conversation: no conversation is created and, with conversation_id, the conversation is loaded as context but not modified (no message, round, metadata or workspace change). Defaults to false.'
+        ),
+      /**
+       * Connector telemetry feature id used to attribute this step's LLM calls for billing
+       * (sets `metadata.connectorTelemetry.pluginId`). When omitted, the default Agent Builder
+       * attribution is used.
+       */
+      'plugin-id': z
+        .string()
+        .max(255)
+        .optional()
+        .describe(
+          "The feature id to attribute this step's LLM calls to for billing (connector telemetry pluginId)."
+        ),
+      'product-solution': z
+        .string()
+        .max(255)
+        .optional()
+        .describe(
+          'The product solution to attribute this step to. Ignored when `plugin-id` is not set.'
+        ),
+      'product-feature': z
+        .string()
+        .max(255)
+        .optional()
+        .describe(
+          'The product feature to attribute this step to. Ignored when `plugin-id` is not set.'
+        ),
+      /**
+       * Parent feature id used to roll up this step's LLM token usage under a parent feature
+       * (sets `metadata.connectorTelemetry.aggregateBy`). Only used when `plugin-id` is set.
+       */
+      'aggregate-by': z
+        .string()
+        .max(255)
+        .optional()
+        .describe(
+          "The parent feature id to group this step's LLM token usage under (connector telemetry aggregateBy)."
+        ),
+      /**
+       * Maximum response size for this workflow step. Also used as the connector
+       * response content length limit (`maxContentLength`) for the step's LLM
+       * calls, including streamed completions.
+       */
+      'max-step-size': z
+        .string()
+        .max(32)
+        .optional()
+        .describe('Maximum response size for this workflow step.'),
+      /**
+       * Reasoning level the model should use. Only applied on an explicit connector: a
+       * feature selected through `connector-id-by-feature` owns its reasoning settings.
+       */
+      'reasoning-level': z
+        .enum(['none', 'minimal', 'low', 'medium', 'high', 'xhigh'])
+        .optional()
+        .describe(
+          "[tech preview] Reasoning effort level forwarded to the LLM for this step's calls. Support depends on the underlying model and provider. Ignored when the step runs on a `connector-id-by-feature` feature, whose configured reasoning is used instead."
+        ),
+    })
+    .superRefine((cfg, ctx) => {
+      const connector = normalizeOptionalConnectorOrInferenceParam(cfg['connector-id']);
+      const inference = normalizeOptionalConnectorOrInferenceParam(cfg['inference-id']);
+      // A list may sit beside connector-id. Whether an id conflicts is decided at
+      // runtime, and only when that feature actually resolves a connector.
+      const connectorByFeatureRaw = cfg['connector-id-by-feature'];
+      const connectorByFeature =
+        typeof connectorByFeatureRaw === 'string'
+          ? normalizeOptionalStringParam(connectorByFeatureRaw)
+          : undefined;
+      if (connector !== undefined && inference !== undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
+          path: ['connector-id'],
+        });
+      }
+      if (
+        connectorByFeature !== undefined &&
+        (connector !== undefined || inference !== undefined)
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
+          path: ['connector-id-by-feature'],
+        });
+      }
+      if (cfg['aggregate-by'] !== undefined && cfg['plugin-id'] === undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
+          path: ['aggregate-by'],
+        });
+      }
+      if (cfg.ephemeral === true && cfg['create-conversation'] === true) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: EPHEMERAL_WITH_CREATE_CONVERSATION_MESSAGE,
+          path: ['ephemeral'],
+        });
+      }
+    })
+);
 
 export type RunAgentStepInputSchema = typeof InputSchema;
 export type RunAgentStepOutputSchema = typeof OutputSchema;
@@ -475,7 +482,7 @@ export const runAgentStepCommonDefinition: CommonStepDefinition<
     message: "Summarize the findings."
 \`\`\``,
 
-      `## Use the connector configured for a Model Management feature (mutually exclusive with connector-id / inference-id)
+      `## Run on a Model Management feature (mutually exclusive with connector-id / inference-id)
 \`\`\`yaml
 - name: investigate
   type: ${RunAgentStepTypeId}
@@ -483,7 +490,9 @@ export const runAgentStepCommonDefinition: CommonStepDefinition<
   connector-id-by-feature: "significant_events_investigation"
   with:
     message: "Investigate the significant events in this stream."
-\`\`\``,
+\`\`\`
+
+The feature's configured model and reasoning are used, so \`reasoning-level\` is ignored on this path.`,
 
       `## Create a conversation and reuse it in a follow-up step
 \`\`\`yaml

@@ -50,7 +50,8 @@ export const createSubAgentExecutor = ({
         request,
         params: {
           agentId: params.agentId,
-          connectorId: params.connectorId,
+          connectorId: params.modelSource?.connectorId,
+          inferenceFeatureId: params.modelSource?.featureId,
           parentExecutionId: params.parentExecutionId,
           nextInput: { message: params.prompt },
           projectRouting,
@@ -69,7 +70,8 @@ export const createSubAgentExecutor = ({
         request,
         params: {
           agentId: params.agentId,
-          connectorId: params.connectorId,
+          connectorId: params.modelSource?.connectorId,
+          inferenceFeatureId: params.modelSource?.featureId,
           parentExecutionId: params.parentExecutionId,
           conversationId: params.conversationId,
           autoCreateConversationWithId: true,
@@ -93,7 +95,8 @@ export const createSubAgentExecutor = ({
         request,
         params: {
           agentId: params.agentId,
-          connectorId: params.connectorId,
+          connectorId: params.modelSource?.connectorId,
+          inferenceFeatureId: params.modelSource?.featureId,
           parentExecutionId: params.parentExecutionId,
           conversationId: params.conversationId,
           autoCreateConversationWithId: false,
