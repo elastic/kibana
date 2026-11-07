@@ -215,10 +215,11 @@ export function NightshiftPage(): React.ReactElement | null {
     !isInvestigationsPage &&
     !isOnboarding &&
     !onboarding.isLoading;
-  // Starting an investigation only needs the investigations client, so the action and its modal
-  // don't depend on what the landing list renders.
+  // Home and Investigations both show Investigate; the modal lives on this page, not the list.
   const canStartInvestigation =
-    canManage && isLandingContent && nightshiftInvestigations?.investigationsClient != null;
+    canManage &&
+    (isLandingContent || isInvestigationsPage) &&
+    nightshiftInvestigations?.investigationsClient != null;
 
   // Nightshift only works as its service account, so a space that is not set up shows the setup
   // step instead of the app. A failed status read (e.g. missing privileges) does not block it.

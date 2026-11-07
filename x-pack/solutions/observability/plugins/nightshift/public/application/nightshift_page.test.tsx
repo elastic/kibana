@@ -34,6 +34,9 @@ jest.mock('../pages/landing/app', () => ({
 jest.mock('../pages/automations/automations_page', () => ({
   AutomationsPage: () => <div data-test-subj="automationsPageStub" />,
 }));
+jest.mock('../pages/investigations/investigations_page', () => ({
+  InvestigationsPage: () => <div data-test-subj="investigationsPageStub" />,
+}));
 jest.mock('../pages/landing/onboarding/onboarding', () => ({
   NightshiftOnboarding: () => <div data-test-subj="nightshiftOnboardingStub" />,
 }));
@@ -269,6 +272,19 @@ describe('NightshiftPage', () => {
         fireEvent.click(screen.getByRole('button', { name: 'Close start investigation' }))
       );
       expect(screen.queryByTestId('startInvestigationPanelStub')).not.toBeInTheDocument();
+    });
+
+    it('shows Investigate on the Investigations list header', async () => {
+      withInvestigationsClient({
+        [NIGHTSHIFT_UI_PRIVILEGES.show]: true,
+        [NIGHTSHIFT_UI_PRIVILEGES.manage]: true,
+      });
+      renderPage('/investigations');
+
+      await screen.findByTestId('investigationsPageStub');
+      expect(
+        await screen.findByTestId('o11yNightshiftAppStartInvestigationButton')
+      ).toHaveTextContent('Investigate');
     });
 
     it('hides the action without the Nightshift manage privilege', async () => {
