@@ -117,6 +117,17 @@ export function splitSeriesAtNullGaps(
   return { mainSegments, leadingEdge, trailingEdge, interiorEdges };
 }
 
+/**
+ * Drops the final, partially-covered bucket of a coordinate series (returning a
+ * series of one point or fewer unchanged so there is still something to render).
+ */
+export function trimPartialTrailingBucket(data?: ReadonlyArray<Coordinate> | null): Coordinate[] {
+  if (!data || data.length <= 1) {
+    return data ? [...data] : [];
+  }
+  return data.slice(0, -1);
+}
+
 const EDGE_SERIES_TYPE = 'line' as const;
 
 const AREA_NO_LINE_STYLE: RecursivePartial<AreaSeriesStyle> = {
