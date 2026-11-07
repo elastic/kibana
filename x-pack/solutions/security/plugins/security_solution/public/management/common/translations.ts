@@ -270,6 +270,22 @@ export const CONSOLE_COMMANDS = {
           }
         ),
       },
+      force: {
+        about: i18n.translate(
+          'xpack.securitySolution.endpointConsoleCommands.getFile.force.about',
+          {
+            defaultMessage:
+              'Read a file that is locked by the operating system from a snapshot of its volume (Windows only)',
+          }
+        ),
+        notSupported: i18n.translate(
+          'xpack.securitySolution.endpointConsoleCommands.getFile.force.notSupported',
+          {
+            defaultMessage:
+              'This host does not support forced file retrieval. It is supported on Windows hosts only, with an Endpoint version that includes it. Upgrade your Agent in Fleet to use this parameter.',
+          }
+        ),
+      },
     },
   },
   execute: {

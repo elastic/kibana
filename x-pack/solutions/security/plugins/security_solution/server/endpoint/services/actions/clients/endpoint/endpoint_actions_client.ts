@@ -224,6 +224,32 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       }
     }
 
+    // Get File: `force` (read a locked file from a volume snapshot) is only supported on Windows and
+    // requires that the Endpoint supports it (via the `get_file_force` capability).
+    if (actionRequest.command === 'get-file' && actionRequest.parameters?.force === true) {
+      const endpointMetadata = await this.options.endpointService
+        .getEndpointMetadataService(this.options.spaceId)
+        .findHostMetadataForFleetAgents(actionRequest.endpoint_ids);
+
+      const unsupportedAgents = endpointMetadata
+        .filter((endpointMeta) => !endpointMeta.Endpoint.capabilities?.includes('get_file_force'))
+        .map(
+          (endpointMeta) =>
+            `${endpointMeta.agent.id} / ${endpointMeta.host.hostname} (Agent v.${endpointMeta.agent.version})`
+        );
+
+      if (unsupportedAgents.length > 0) {
+        return {
+          isValid: false,
+          error: new ResponseActionsClientError(
+            `The following agent IDs do not support the get-file \`force\` parameter (Windows only): ${unsupportedAgents.join(
+              ', '
+            )}`
+          ),
+        };
+      }
+    }
+
     if (actionRequest.command === 'runscript') {
       let scriptDetails: EndpointScript;
 
