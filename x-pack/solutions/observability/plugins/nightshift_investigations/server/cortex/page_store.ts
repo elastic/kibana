@@ -38,8 +38,17 @@ interface CortexKiSource {
     conversation_id?: string;
     round_id?: string;
     workflow_execution_id?: string;
+    authored_by?: string[] | string;
   };
 }
+
+/** Keeps the page document small: the most recent authors are the ones a later round asks about. */
+const MAX_AUTHORED_BY = 20;
+
+const toAuthoredBy = (value: string[] | string | undefined): string[] =>
+  (Array.isArray(value) ? value : value ? [value] : []).filter(
+    (entry): entry is string => typeof entry === 'string' && entry.length > 0
+  );
 
 interface CortexPageWrite {
   entityType: CortexEntityType;
@@ -55,6 +64,8 @@ interface CortexPageWrite {
   conversationId?: string;
   roundId?: string;
   workflowExecutionId?: string;
+  /** Replaces the stored list of authoring conversations; omit it to keep the stored one. */
+  authoredBy?: string[];
 }
 
 export interface CortexPageStore {
@@ -203,6 +214,9 @@ const toSummary = (id: string, source: CortexKiSource): CortexPageSummary | unde
     ...(source.attributes?.round_id ? { round_id: source.attributes.round_id } : {}),
     ...(source.attributes?.workflow_execution_id
       ? { workflow_execution_id: source.attributes.workflow_execution_id }
+      : {}),
+    ...(toAuthoredBy(source.attributes?.authored_by).length > 0
+      ? { authored_by: toAuthoredBy(source.attributes?.authored_by) }
       : {}),
     ...(docVersion && docVersion > 0 ? { doc_version: docVersion } : {}),
   };
@@ -372,6 +386,7 @@ export const createCortexPageStore = ({
       conversationId,
       roundId,
       workflowExecutionId,
+      authoredBy,
     }: CortexPageWrite,
     corroborations: number,
     existingSource?: CortexKiSource
@@ -386,6 +401,9 @@ export const createCortexPageStore = ({
     const resolvedConversationId = conversationId ?? existingAttrs?.conversation_id;
     const resolvedRoundId = roundId ?? existingAttrs?.round_id;
     const resolvedWorkflowExecutionId = workflowExecutionId ?? existingAttrs?.workflow_execution_id;
+    const resolvedAuthoredBy = (authoredBy ?? toAuthoredBy(existingAttrs?.authored_by)).slice(
+      -MAX_AUTHORED_BY
+    );
     return {
       id: toCortexPageId(entityType, slug),
       document: {
@@ -406,6 +424,7 @@ export const createCortexPageStore = ({
           ...(resolvedWorkflowExecutionId
             ? { workflow_execution_id: resolvedWorkflowExecutionId }
             : {}),
+          ...(resolvedAuthoredBy.length > 0 ? { authored_by: resolvedAuthoredBy } : {}),
         },
       },
     };

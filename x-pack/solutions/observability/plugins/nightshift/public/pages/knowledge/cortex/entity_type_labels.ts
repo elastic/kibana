@@ -52,6 +52,10 @@ export const getCortexEntityTypeSingularLabel = (entityType: CortexEntityType): 
       return i18n.translate('xpack.nightshift.knowledge.cortex.entityType.glossarySingularLabel', {
         defaultMessage: 'Glossary',
       });
+    case 'ontology':
+      return i18n.translate('xpack.nightshift.knowledge.cortex.entityType.ontologySingularLabel', {
+        defaultMessage: 'Ontology',
+      });
   }
 };
 
@@ -92,6 +96,10 @@ export const getCortexEntityTypeLabel = (entityType: CortexEntityType): string =
     case 'glossary':
       return i18n.translate('xpack.nightshift.knowledge.cortex.entityType.glossaryLabel', {
         defaultMessage: 'Glossary',
+      });
+    case 'ontology':
+      return i18n.translate('xpack.nightshift.knowledge.cortex.entityType.ontologyLabel', {
+        defaultMessage: 'Ontology',
       });
   }
 };

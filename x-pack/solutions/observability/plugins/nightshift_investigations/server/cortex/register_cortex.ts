@@ -34,6 +34,7 @@ import { createCortexTelemetry } from '../telemetry';
 import { materializeCortex } from './materialize';
 import { createLlmProposeCortexEdits, optimizeCortex } from './optimize';
 import { createCortexPageStore, type CortexPageStore } from './page_store';
+import { classifyCortexRound, shouldOptimizeRound } from './round_kind';
 
 export const createCortexStore = ({
   esClient,
@@ -67,9 +68,6 @@ export const registerCortexAiIndex = (
     traces: [],
   });
 };
-
-/** Rounds with fewer tool calls rarely establish anything durable, e.g. chat replies or smoke tests. */
-const MIN_OPTIMIZE_TOOL_CALLS = 3;
 
 // Only sandbox calls carry the queries and files the optimizer learns from; the rest (e.g.
 // recording hypotheses) would spend its transcript budget and count towards the minimum.
@@ -194,12 +192,20 @@ export const runCortexOptimize = async ({
     return;
   }
 
+  const roundKind = classifyCortexRound({
+    roundIndex: loadedRound.roundIndex ?? roundIndex,
+  });
   const sandboxToolCalls = loadedRound.toolCalls.filter(
     ({ tool_id: toolId }) => toolId !== undefined && OPTIMIZER_TOOL_IDS.has(toolId)
   );
-  if (sandboxToolCalls.length < MIN_OPTIMIZE_TOOL_CALLS) {
+  if (
+    !shouldOptimizeRound({
+      roundKind,
+      sandboxToolCallCount: sandboxToolCalls.length,
+    })
+  ) {
     logger.debug(
-      `Cortex optimizer skipped — round made ${sandboxToolCalls.length} sandbox tool calls, below ${MIN_OPTIMIZE_TOOL_CALLS}`
+      `Cortex optimizer skipped — ${roundKind} round with ${sandboxToolCalls.length} sandbox tool calls has nothing durable to learn from`
     );
     return { openedIds, appliedWrites: [] };
   }
@@ -227,6 +233,9 @@ export const runCortexOptimize = async ({
     userMessage,
     assistantMessage,
     toolCalls: sandboxToolCalls,
+    roundKind,
+    previousUserMessage: loadedRound.previousUserMessage,
+    previousAssistantMessage: loadedRound.previousAssistantMessage,
     telemetry: createCortexTelemetry({
       analytics,
       conversationId,
