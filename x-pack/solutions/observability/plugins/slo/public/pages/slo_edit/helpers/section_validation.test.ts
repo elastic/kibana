@@ -266,6 +266,31 @@ describe('isIndicatorSectionComplete', () => {
     expect(isComplete(indicator)).toBe(false);
   });
 
+  it.each(['avg', 'max', 'min', 'sum', 'cardinality', 'last_value', 'std_deviation'] as const)(
+    'is incomplete when a %s metric is missing its field',
+    (aggregation) => {
+      const metric = { name: 'A', aggregation, field: 'cpu' };
+      Reflect.deleteProperty(metric, 'field');
+
+      expect(isComplete(withTimesliceMetrics([metric]))).toBe(false);
+    }
+  );
+
+  it.each(['field', 'percentile'])(
+    'is incomplete when a percentile metric is missing %s',
+    (missingField) => {
+      const metric = {
+        name: 'A',
+        aggregation: 'percentile' as const,
+        field: 'latency',
+        percentile: 95,
+      };
+      Reflect.deleteProperty(metric, missingField);
+
+      expect(isComplete(withTimesliceMetrics([metric]))).toBe(false);
+    }
+  );
+
   it.each<[string, Indicator]>([
     ['kql: total is empty but not invalid', buildCustomKqlIndicator({ total: '' })],
     [
