@@ -11,6 +11,7 @@
     "@kbn/core",
     "@kbn/evals",
     "@kbn/security-evals-alerts-snapshot",
-    "@kbn/tooling-log"
+    "@kbn/tooling-log",
+    "@kbn/security-evals-matrix"
   ]
 }
