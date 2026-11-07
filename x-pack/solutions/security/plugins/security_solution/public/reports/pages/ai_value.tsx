@@ -114,7 +114,7 @@ const BaseComponent = () => {
   }, [isServerless, isExportEnabled, hasReportData, toggleContextMenu]);
 
   if (!hasSocManagementCapability) {
-    return <NoPrivileges docLinkSelector={(docLinks: DocLinks) => docLinks.siem.privileges} />;
+    return <NoPrivileges docLinkSelector={(docsLinks: DocLinks) => docsLinks.siem.privileges} />;
   }
 
   if (status === 'pristine') {

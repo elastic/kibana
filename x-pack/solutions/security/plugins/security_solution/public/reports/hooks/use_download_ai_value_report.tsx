@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { AI_VALUE_REPORT_LOCATOR } from '@kbn/deeplinks-analytics';
 import { SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE } from '@kbn/management-settings-ids';
 import { useMemo } from 'react';
-import type { AppMenuRunActionParams } from '@kbn/ui-app-menu';
+import type { AppMenuRunActionParams } from '@kbn/app-menu';
 import { useKibana } from '../../common/lib/kibana';
 import type { AIValueReportParams } from '../../../common/locators/ai_value_report/locator';
 import type { TimeRange } from '../../common/store/inputs/model';

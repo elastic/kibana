@@ -324,6 +324,5 @@
     "@kbn/css-utils",
     "@kbn/custom-content-common",
     "@kbn/custom-content-renderer",
-    "@kbn/ui-app-menu",
   ]
 }

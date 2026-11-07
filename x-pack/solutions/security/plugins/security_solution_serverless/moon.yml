@@ -63,6 +63,7 @@ dependsOn:
   - '@kbn/navigation-plugin'
   - '@kbn/scout-security'
   - '@kbn/deeplinks-security'
+  - '@kbn/ai-assistant-icon'
 tags:
   - plugin
   - prod
