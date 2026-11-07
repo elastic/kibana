@@ -26,9 +26,11 @@ import { toHashedId } from '@kbn/agent-builder-server/telemetry';
 import {
   DATA_STREAM_NAMESPACE_ATTR,
   getPrivacySettingsFromContext,
+  getExecutionAttributionFromContext,
   isAgentBuilderSpan,
 } from './agent_builder_context';
 import type { TracingPrivacySettings } from './privacy_settings';
+import { applyExecutionAttributionPrivacy } from './execution_attribution';
 import { normalizeAgentIdForTelemetry } from '../telemetry/utils';
 
 const BUILTIN_TOOL_IDS: Set<string> = new Set(AGENT_BUILDER_BUILTIN_TOOLS);
@@ -107,6 +109,7 @@ function anonymizeNames(
     [GenAISemanticConventions.GenAIToolDefinitions]: _defs,
     [GenAISemanticConventions.GenAIToolDescription]: _desc,
     [ElasticGenAIAttributes.ConversationTitle]: _title,
+    [UserAttributes.UserName]: _userName,
     ...result
   } = attributes;
   let finalSpanName = spanName;
@@ -286,6 +289,10 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
     if (!settings) {
       return;
     }
+    const attribution = getExecutionAttributionFromContext(parentContext);
+    for (const [key, value] of Object.entries(attribution?.attributes ?? {})) {
+      span.setAttribute(key, value);
+    }
     this.spanSettings.set(span, settings);
     span.setAttribute(SHOULD_TRACK_ATTR, true);
     this.batchProcessor.onStart(span, parentContext);
@@ -305,13 +312,15 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
       ...cleanAttributes
     } = span.attributes;
 
+    const attributedAttributes = applyExecutionAttributionPrivacy(cleanAttributes, settings);
     let processedAttributes: Record<string, unknown> = settings.includeRealIds
-      ? cleanAttributes
-      : hashSensitiveAttributes(cleanAttributes);
+      ? attributedAttributes
+      : hashSensitiveAttributes(attributedAttributes);
 
-    processedAttributes = settings.includeUserData
-      ? processedAttributes
-      : anonymizeUserData(processedAttributes);
+    processedAttributes =
+      settings.includeUserData && settings.includeRealIds
+        ? processedAttributes
+        : anonymizeUserData(processedAttributes);
 
     processedAttributes = settings.includeToolDetails
       ? processedAttributes

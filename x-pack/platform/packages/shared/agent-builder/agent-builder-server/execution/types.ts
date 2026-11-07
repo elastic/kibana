@@ -178,6 +178,8 @@ interface BaseAgentExecution {
   eventCount: number;
   /** Inline events emitted during the execution. The array index is the event number. */
   events: ChatEvent[];
+  /** Server-captured, privacy-filtered trace attribution; never accepted from request parameters. */
+  traceAttribution?: Record<string, string>;
   /** Caller-provided metadata. */
   metadata?: Record<string, string>;
   /** The ID of the parent execution that spawned this standalone execution. */

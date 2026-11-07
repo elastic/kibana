@@ -1,0 +1,23 @@
+{
+  "id": "ei-gcp-support-data-boundary",
+  "name": "Support agent customer-data boundary",
+  "revision": 1,
+  "mode": "monitor",
+  "description": "Record restricted customer reads and exports to the controlled demonstration review destination. Operations continue; no blocking is implemented.",
+  "rules": [
+    {
+      "id": "restricted-customer-read",
+      "tool": "read_customer_reference",
+      "severity": "high",
+      "title": "Restricted customer lookup requested",
+      "reason": "The support-summary workflow must not read confidential-demo customer records."
+    },
+    {
+      "id": "unapproved-summary-export",
+      "tool": "export_case_summary",
+      "severity": "high",
+      "title": "Export requested to an unapproved destination",
+      "reason": "The controlled review destination is classified as unapproved by this demonstration policy."
+    }
+  ]
+}

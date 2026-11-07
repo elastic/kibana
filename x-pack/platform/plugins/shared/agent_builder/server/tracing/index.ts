@@ -13,3 +13,8 @@ export { loadTracingPrivacySettings } from './privacy_settings';
 export type { TracingPrivacySettings } from './privacy_settings';
 export { getCurrentTraceId } from './get_current_trace_id';
 export { OpikDistributedTracingSpanProcessor } from './opik_distributed_tracing';
+export {
+  getExecutionAttribution,
+  captureExecutionAttribution,
+  restoreExecutionAttribution,
+} from './execution_attribution';

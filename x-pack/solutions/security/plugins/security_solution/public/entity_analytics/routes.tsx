@@ -12,6 +12,7 @@ import { withSecurityRoutePageWrapper } from '../common/components/security_rout
 import {
   ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH,
   ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
+  ENTITY_ANALYTICS_INTELLIGENCE_PATH,
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
   ENTITY_ANALYTICS_HOME_PAGE_PATH,
@@ -25,6 +26,7 @@ import { PluginTemplateWrapper } from '../common/components/plugin_template_wrap
 import { EntityAnalyticsPrivilegedUserMonitoringPage } from './pages/entity_analytics_privileged_user_monitoring_page';
 import { EntityAnalyticsHomePage } from './pages/entity_analytics_home_page';
 import { EntityAnalyticsNewHomePage } from './pages/entity_analytics_new_home_page';
+import { EntityIntelligencePage } from './pages/entity_intelligence';
 import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 import { useKibana } from '../common/lib/kibana';
 
@@ -167,6 +169,28 @@ const RedirectToEntityAnalyticsHome: React.FC = () => (
   <Redirect to={ENTITY_ANALYTICS_HOME_PAGE_PATH} />
 );
 
+// ---- Entity intelligence routes ----
+const EntityIntelligenceWrapper = () => (
+  <PluginTemplateWrapper>
+    <EntityIntelligencePage />
+  </PluginTemplateWrapper>
+);
+
+const EntityIntelligenceContainer: React.FC = React.memo(() => {
+  return (
+    <Routes>
+      <Route
+        path={ENTITY_ANALYTICS_INTELLIGENCE_PATH}
+        exact
+        component={EntityIntelligenceWrapper}
+      />
+      <Route component={NotFoundPage} />
+    </Routes>
+  );
+});
+
+EntityIntelligenceContainer.displayName = 'EntityIntelligenceContainer';
+
 // ---- Route definitions ----
 export const routes = [
   {
@@ -205,5 +229,12 @@ export const routes = [
   {
     path: ENTITY_ANALYTICS_OVERVIEW_PATH,
     component: RedirectToEntityAnalyticsHome,
+  },
+  {
+    path: ENTITY_ANALYTICS_INTELLIGENCE_PATH,
+    component: withSecurityRoutePageWrapper(
+      EntityIntelligenceContainer,
+      SecurityPageName.entityAnalyticsIntelligence
+    ),
   },
 ];

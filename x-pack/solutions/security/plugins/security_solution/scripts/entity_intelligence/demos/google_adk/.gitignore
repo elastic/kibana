@@ -1,0 +1,14 @@
+# Keep runtime data, source telemetry and credentials out of the review branch.
+__pycache__/
+*.pyc
+.venv/
+.env
+.env.*
+infra/state/
+native_response/runs/
+native_response/*.json
+*.log
+*.pid
+exports/
+credentials*
+tokens*

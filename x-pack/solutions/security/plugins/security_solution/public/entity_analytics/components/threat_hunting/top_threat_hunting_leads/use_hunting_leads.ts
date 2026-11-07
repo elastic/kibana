@@ -131,6 +131,7 @@ export const useHuntingLeads = (
   const {
     data,
     isLoading: isLeadsLoading,
+    isError: isLeadsError,
     refetch,
   } = useQuery({
     queryKey: [HUNTING_LEADS_QUERY_KEY],
@@ -211,7 +212,11 @@ export const useHuntingLeads = (
     },
   });
 
-  const { data: statusData, isLoading: isStatusLoading } = useQuery({
+  const {
+    data: statusData,
+    isLoading: isStatusLoading,
+    isError: isStatusError,
+  } = useQuery({
     queryKey: [LEAD_SCHEDULE_QUERY_KEY],
     queryFn: ({ signal }) => fetchLeadGenerationStatus({ signal }),
     enabled: isEnabled,
@@ -282,6 +287,7 @@ export const useHuntingLeads = (
     // what a consumer (e.g. the flyout) can actually show.
     totalCount: Math.min(data?.total ?? 0, MAX_RECENT_LEADS),
     isLoading,
+    isError: isLeadsError || isStatusError || proactiveReadPermissionError || readPermissionError,
     isGenerating,
     hasGenerated,
     lastRunTimestamp: statusData?.lastRun ?? null,

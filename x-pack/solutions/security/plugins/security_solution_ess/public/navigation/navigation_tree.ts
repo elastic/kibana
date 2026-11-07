@@ -86,6 +86,7 @@ export const createNavigationTree = (
       },
       defaultNavigationTree.cases(),
       defaultNavigationTree.entityAnalytics(),
+      defaultNavigationTree.entityIntelligence(),
       defaultNavigationTree.explore(),
       defaultNavigationTree.investigations(),
       {

@@ -297,4 +297,18 @@ describe('useRecentAnomaliesQuery', () => {
       expect(result.current.isLoading).toBe(true);
     });
   });
+  it('reports a full top-five result as a bounded sample', () => {
+    topRowsRecords = Array.from({ length: 5 }, (_, index) => ({
+      entity_id: `host:${index}`,
+      entity_name: `host-${index}`,
+      entity_type: 'host',
+    }));
+    const { result } = renderHook(() => useRecentAnomaliesQuery(baseParams));
+    expect(result.current.isTopRowsLimited).toBe(true);
+  });
+
+  it('does not mark a smaller successful result as limited', () => {
+    const { result } = renderHook(() => useRecentAnomaliesQuery(baseParams));
+    expect(result.current.isTopRowsLimited).toBe(false);
+  });
 });

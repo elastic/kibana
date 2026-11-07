@@ -59,6 +59,22 @@ describe('AgentExecutionClient', () => {
       expect(execution.owner).toEqual(owner);
     });
 
+    it('round-trips internal trace attribution separately from caller-provided metadata', async () => {
+      const traceAttribution = {
+        'elastic.agent_builder.attribution.capture_point': 'request',
+        'elastic.agent_builder.caller.api_key.hash': 'opaque-hash',
+      };
+      const metadata = { 'elastic.agent_builder.caller.api_key.id': 'untrusted-input' };
+      const execution = await client.create({ ...createParams, traceAttribution, metadata });
+      expect(mockStorageClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({ trace_attribution: traceAttribution, metadata }),
+        })
+      );
+      expect(execution.traceAttribution).toEqual(traceAttribution);
+      expect(execution.metadata).toEqual(metadata);
+    });
+
     it('omits the owner when the caller has none', async () => {
       const execution = await client.create(createParams);
 

@@ -8,6 +8,10 @@
 import { lastValueFrom, of, Subject, throwError, toArray } from 'rxjs';
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { securityServiceMock } from '@kbn/core/server/mocks';
+import { loadTracingPrivacySettings } from '../../tracing';
+import { DISABLED_TRACING_SETTINGS } from '../../tracing/privacy_settings';
+import { EXECUTION_ATTRIBUTION as ATTR } from '../../tracing/execution_attribution';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 import {
@@ -42,6 +46,12 @@ import {
   createRound,
 } from '../../test_utils';
 import { findConversationEvent } from './utils/chat_response';
+
+jest.mock('../../tracing', () => ({
+  ...jest.requireActual('../../tracing'),
+  loadTracingPrivacySettings: jest.fn(),
+}));
+const loadTracingPrivacySettingsMock = jest.mocked(loadTracingPrivacySettings);
 
 // Mock persistence module
 const mockExecutionClient: jest.Mocked<AgentExecutionClient> = {
@@ -99,6 +109,7 @@ import { ABORT_WAIT_FOR_TERMINAL_TIMEOUT_MS } from './constants';
 
 describe('AgentExecutionService', () => {
   const logger = loggerMock.create();
+  const security = securityServiceMock.createStart();
   const elasticsearch = elasticsearchServiceMock.createStart();
   const taskManager = {
     schedule: mockTaskManagerSchedule,
@@ -158,7 +169,7 @@ describe('AgentExecutionService', () => {
   const service = createAgentExecutionService({
     logger,
     elasticsearch,
-    security: {} as any,
+    security,
     taskManager,
     inference,
     conversationService: conversationService as any,
@@ -173,6 +184,8 @@ describe('AgentExecutionService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    loadTracingPrivacySettingsMock.mockResolvedValue(DISABLED_TRACING_SETTINGS);
+    security.authc.getPrincipal.mockReturnValue(null);
     getForFeature.mockResolvedValue({ endpoints: [], warnings: [], soEntryFound: false });
     agentService.getRegistry.mockResolvedValue(agentRegistry);
     agentRegistry.get.mockResolvedValue(createMockedInternalAgent({ id: 'agent-1' }));
@@ -241,6 +254,65 @@ describe('AgentExecutionService', () => {
         { request, cloneApiKey: true }
       );
       expect(mockTaskManagerRunSoon).not.toHaveBeenCalled();
+    });
+
+    it('captures the authenticated incoming key before scheduling and ignores supplied attribution metadata', async () => {
+      loadTracingPrivacySettingsMock.mockResolvedValue({
+        ...DISABLED_TRACING_SETTINGS,
+        enabled: true,
+        includeRealIds: true,
+        includeUserData: true,
+      });
+      security.authc.getPrincipal.mockReturnValue({
+        type: 'api_key',
+        apiKeyId: 'confirmed-key-id',
+        variant: 'stack',
+      });
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'ApiKey secret-not-for-storage' },
+      });
+      await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request,
+        useTaskManager: true,
+        params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+        metadata: { [ATTR.apiKeyId]: 'forged-key', [ATTR.actorId]: 'forged-actor' },
+      });
+      const [created] = mockExecutionClient.create.mock.calls[0];
+      expect(created.traceAttribution).toMatchObject({
+        [ATTR.capturePoint]: 'request',
+        [ATTR.callerType]: 'api_key',
+        [ATTR.apiKeyId]: 'confirmed-key-id',
+        [ATTR.downstreamCredentialStatus]: 'unknown',
+      });
+      expect(created.traceAttribution?.[ATTR.actorId]).toBeUndefined();
+      expect(JSON.stringify(created.traceAttribution)).not.toContain('forged');
+      expect(JSON.stringify(created)).not.toContain('secret-not-for-storage');
+      expect(mockExecutionClient.create.mock.invocationCallOrder[0]).toBeLessThan(
+        mockTaskManagerEnsureScheduled.mock.invocationCallOrder[0]
+      );
+    });
+
+    it('stores only pseudonymous caller identifiers when request-side tracing privacy requires it', async () => {
+      loadTracingPrivacySettingsMock.mockResolvedValue({
+        ...DISABLED_TRACING_SETTINGS,
+        enabled: true,
+      });
+      security.authc.getPrincipal.mockReturnValue({
+        type: 'api_key',
+        apiKeyId: 'private-key-id',
+        variant: 'stack',
+      });
+      await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request: httpServerMock.createKibanaRequest(),
+        params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+        useTaskManager: true,
+      });
+      const [created] = mockExecutionClient.create.mock.calls[0];
+      expect(created.traceAttribution?.[ATTR.apiKeyId]).toBeUndefined();
+      expect(created.traceAttribution?.[ATTR.apiKeyHash]).toMatch(/^[a-f0-9]{16}$/);
+      expect(JSON.stringify(created.traceAttribution)).not.toContain('private-key-id');
     });
 
     it('requests an immediate claim of the scheduled task when asked to', async () => {

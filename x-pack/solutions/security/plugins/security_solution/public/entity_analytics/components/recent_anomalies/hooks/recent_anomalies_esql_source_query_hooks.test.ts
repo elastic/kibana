@@ -73,4 +73,23 @@ describe('recent anomalies ES|QL sources', () => {
       expectTimeRangeBeforeLookupJoin(result.current);
     }
   );
+  it.each(['entity', 'jobId'] as const)(
+    'does not add an implicit tag exclusion in %s mode',
+    (viewBy) => {
+      const params = {
+        anomalyBands: [],
+        viewBy,
+        spaceId: 'default',
+        rowsLimit: 5,
+        rowLabels: ['row-1'],
+      };
+      const { result } = renderHook(() => ({
+        ranking: useRecentAnomaliesTopRowsEsqlSource(params),
+        scores: useRecentAnomaliesDataEsqlSource(params),
+      }));
+      for (const source of [result.current.ranking, result.current.scores]) {
+        expect(source).not.toContain('MV_CONTAINS(tags');
+      }
+    }
+  );
 });

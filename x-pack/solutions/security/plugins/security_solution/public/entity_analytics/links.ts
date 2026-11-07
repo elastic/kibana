@@ -10,6 +10,7 @@ import {
   SecurityPageName,
   SECURITY_FEATURE_ID,
   ENTITY_ANALYTICS_HOME_PAGE_PATH,
+  ENTITY_ANALYTICS_INTELLIGENCE_PATH,
 } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
 import { ENTITY_ANALYTICS } from '../app/translations';
@@ -25,6 +26,31 @@ export const entityAnalyticsLinks: LinkItem = {
     }),
   ],
   hideTimeline: false,
+  skipUrlState: false,
+  capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
+  licenseType: 'platinum',
+};
+
+export const entityIntelligenceLinks: LinkItem = {
+  id: SecurityPageName.entityAnalyticsIntelligence,
+  title: i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.intelligence', {
+    defaultMessage: 'Entity Intelligence',
+  }),
+  description: i18n.translate(
+    'xpack.securitySolution.navigation.entityAnalytics.intelligence.description',
+    {
+      defaultMessage:
+        'AI-powered UEBA: entity risk overview, relationship exploration, AI entity hunting, and behavioral analytics across users, hosts, and services.',
+    }
+  ),
+  path: ENTITY_ANALYTICS_INTELLIGENCE_PATH,
+  globalNavPosition: 8,
+  globalSearchKeywords: [
+    i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.intelligence.keywords', {
+      defaultMessage: 'entity intelligence UEBA behavior analytics',
+    }),
+  ],
+  hideTimeline: true,
   skipUrlState: false,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
   licenseType: 'platinum',

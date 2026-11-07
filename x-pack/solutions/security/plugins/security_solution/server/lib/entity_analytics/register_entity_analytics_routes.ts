@@ -18,6 +18,8 @@ import { registerEntityResolutionRoutes } from './entity_resolution/routes/regis
 import { registerAnomalySummaryRoutes } from './anomaly_summary';
 import { registerRiskScoreHistoryRoute } from './risk_score/routes/register_risk_score_history_route';
 import { registerEntityCaseCountsRoute } from './entity_case_counts/route';
+import { registerAiHuntHistoryRoutes } from './ai_hunt_history/routes/register_ai_hunt_history_routes';
+import { registerAiPolicyRoutes } from './ai_policies/register_ai_policy_routes';
 
 export const registerEntityAnalyticsRoutes = (routeDeps: EntityAnalyticsRoutesDeps) => {
   registerAssetCriticalityRoutes(routeDeps);
@@ -45,4 +47,7 @@ export const registerEntityAnalyticsRoutes = (routeDeps: EntityAnalyticsRoutesDe
   if (routeDeps.config.experimentalFeatures.riskScoreHistoryEnabled) {
     registerRiskScoreHistoryRoute(routeDeps);
   }
+
+  registerAiHuntHistoryRoutes(routeDeps);
+  registerAiPolicyRoutes(routeDeps);
 };

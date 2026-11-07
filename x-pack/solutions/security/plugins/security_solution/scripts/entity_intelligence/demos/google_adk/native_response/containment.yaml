@@ -1,0 +1,92 @@
+name: Google agent containment — revoke export access
+description: >-
+  On a real restricted customer-lookup alert, call Google Storage IAM directly to
+  remove this demo agent's export permission. Preserve every other member and
+  binding and use Google's etag to prevent concurrent policy overwrites. IAM
+  readback confirms the change; a subsequent real agent write must return 403
+  before data-plane containment can be claimed. The triggering read is not undone.
+enabled: true
+tags:
+  - Entity Intelligence
+  - Google ADK
+  - Native Google response
+triggers:
+  - type: alert
+consts:
+  subject: serviceAccount:ei-agent-demo-runtime@example-ei-project.iam.gserviceaccount.com
+  export_role: roles/storage.objectCreator
+steps:
+  - name: read_current_export_bucket_iam
+    type: http
+    connector-id: ei-google-storage-iam-response-v1
+    with:
+      method: GET
+      query:
+        optionsRequestedPolicyVersion: '3'
+      fetcher:
+        follow_redirects: false
+  - name: revoke_agent_export_permission
+    type: http
+    connector-id: ei-google-storage-iam-response-v1
+    with:
+      method: PUT
+      headers:
+        Content-Type: application/json
+      fetcher:
+        follow_redirects: false
+      body: >-
+        {"version": {{ steps.read_current_export_bucket_iam.output.data.version | default: 1 | json }},
+        "etag": {{ steps.read_current_export_bucket_iam.output.data.etag | json }},
+        "bindings": [
+        {% assign first_binding = true %}
+        {% for binding in steps.read_current_export_bucket_iam.output.data.bindings %}
+          {% assign members = binding.members %}
+          {% if binding.role == consts.export_role %}
+            {% assign members = binding.members | where_exp: 'member', 'member != consts.subject' %}
+          {% endif %}
+          {% if members.size > 0 %}
+            {% unless first_binding %},{% endunless %}
+            {% assign first_binding = false %}
+            {"role": {{ binding.role | json }}, "members": {{ members | json }}
+            {% if binding.condition %}, "condition": {{ binding.condition | json }}{% endif %}}
+          {% endif %}
+        {% endfor %}
+        ]}
+  - name: read_back_google_iam_policy
+    type: http
+    connector-id: ei-google-storage-iam-response-v1
+    with:
+      method: GET
+      query:
+        optionsRequestedPolicyVersion: '3'
+      fetcher:
+        follow_redirects: false
+  - name: find_remaining_export_grants
+    type: data.filter
+    items: '${{ steps.read_back_google_iam_policy.output.data.bindings }}'
+    with:
+      condition: 'item.role: "roles/storage.objectCreator" AND item.members: "serviceAccount:ei-agent-demo-runtime@example-ei-project.iam.gserviceaccount.com"'
+  - name: count_remaining_export_grants
+    type: data.set
+    with:
+      remaining_export_grants: '${{ steps.find_remaining_export_grants.output | size }}'
+  - name: require_permission_removed
+    type: if
+    condition: 'variables.remaining_export_grants > 0'
+    steps:
+      - name: reject_unconfirmed_iam_change
+        type: workflow.fail
+        with:
+          message: Google still reports an objectCreator grant for the runtime. Containment was not verified.
+  - name: report_google_iam_response
+    type: workflow.output
+    with:
+      action: revoke_export_permission
+      bucket: example-ei-project-ei-agent-demo-export
+      runtime_principal: ei-agent-demo-runtime@example-ei-project.iam.gserviceaccount.com
+      removed_role: roles/storage.objectCreator
+      google_api_status: '${{ steps.revoke_agent_export_permission.output.status }}'
+      google_policy_etag: '{{ steps.read_back_google_iam_policy.output.data.etag }}'
+      iam_policy_change_verified: true
+      data_plane_block_verified: false
+      verification_required: Run the agent export tool and confirm Google Storage rejects storage.objects.create with HTTP 403. IAM changes are eventually consistent.

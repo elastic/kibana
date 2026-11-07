@@ -10,11 +10,23 @@ import type { tracing } from '@elastic/opentelemetry-node/sdk';
 import { context as otelContext, createContextKey, propagation } from '@opentelemetry/api';
 import { isInferenceSpan, CONVERSATION_ID_BAGGAGE_KEY } from '@kbn/inference-tracing';
 import type { TracingPrivacySettings } from './privacy_settings';
+import type { ExecutionAttribution } from './execution_attribution';
 
 export const AGENT_BUILDER_OWNER_BAGGAGE_KEY = 'kibana.agent_builder';
 export const AGENT_BUILDER_OWNER_BAGGAGE_VALUE = '1';
 export const SPACE_ID_BAGGAGE_KEY = 'agent_builder.space_id';
 export const DATA_STREAM_NAMESPACE_ATTR = 'data_stream.namespace';
+
+const EXECUTION_ATTRIBUTION_KEY = createContextKey('agent_builder.execution_attribution');
+
+export const getExecutionAttributionFromContext = (
+  ctx: api.Context
+): ExecutionAttribution | undefined => {
+  const value = ctx.getValue(EXECUTION_ATTRIBUTION_KEY);
+  return typeof value === 'object' && value !== null && 'attributes' in value
+    ? (value as ExecutionAttribution)
+    : undefined;
+};
 
 const TRACING_PRIVACY_SETTINGS_KEY = createContextKey('agent_builder.tracing_privacy_settings');
 
@@ -45,7 +57,12 @@ export function getSpaceIdFromContext(parentContext: api.Context): string {
  */
 export const withAgentBuilderContext = <T>(
   fn: () => T,
-  options?: { spaceId?: string; conversationId?: string; privacySettings?: TracingPrivacySettings }
+  options?: {
+    spaceId?: string;
+    conversationId?: string;
+    privacySettings?: TracingPrivacySettings;
+    executionAttribution?: ExecutionAttribution;
+  }
 ): T => {
   const ctx = otelContext.active();
   let baggage = propagation.getBaggage(ctx) ?? propagation.createBaggage();
@@ -62,6 +79,10 @@ export const withAgentBuilderContext = <T>(
   if (options?.privacySettings) {
     updatedContext = setPrivacySettingsOnContext(updatedContext, options.privacySettings);
   }
+
+  updatedContext = options?.executionAttribution
+    ? updatedContext.setValue(EXECUTION_ATTRIBUTION_KEY, options.executionAttribution)
+    : updatedContext.deleteValue(EXECUTION_ATTRIBUTION_KEY);
 
   return otelContext.with(updatedContext, fn);
 };

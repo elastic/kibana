@@ -24,12 +24,14 @@ import {
 } from '@kbn/agent-builder-server/allow_lists';
 import { AgentBuilderSpanProcessor } from './agent_builder_span_processor';
 import type { TracingPrivacySettings } from './privacy_settings';
+import { EXECUTION_ATTRIBUTION as ATTR } from './execution_attribution';
 import {
   AGENT_BUILDER_OWNER_BAGGAGE_KEY,
   AGENT_BUILDER_OWNER_BAGGAGE_VALUE,
   DATA_STREAM_NAMESPACE_ATTR,
   SPACE_ID_BAGGAGE_KEY,
   setPrivacySettingsOnContext,
+  withAgentBuilderContext,
 } from './agent_builder_context';
 
 const SHOULD_TRACK_ATTR = '_agent_builder_should_track';
@@ -193,6 +195,86 @@ describe('AgentBuilderSpanProcessor', () => {
     );
     expect(mockBatch.onStart).toHaveBeenCalledWith(span, parentContext);
   });
+
+  it('propagates trusted attribution to descendant inference spans', () => {
+    const processor = new AgentBuilderSpanProcessor({
+      exporter: createExporter(),
+      scheduledDelayMillis: 1,
+    });
+    const attributes = {
+      [ATTR.callerType]: 'api_key',
+      [ATTR.apiKeyId]: 'opaque-key',
+      [ATTR.downstreamCredentialStatus]: 'unknown',
+    };
+    withAgentBuilderContext(
+      () => {
+        const childContext = propagation.setBaggage(
+          context.active(),
+          propagation.createBaggage({
+            [BAGGAGE_TRACKING_BEACON_KEY]: { value: BAGGAGE_TRACKING_BEACON_VALUE },
+            [AGENT_BUILDER_OWNER_BAGGAGE_KEY]: { value: AGENT_BUILDER_OWNER_BAGGAGE_VALUE },
+          })
+        );
+        const child = createMockSpan('inference', 'execute_tool security.search');
+        processor.onStart(child, childContext);
+        processor.onEnd(child);
+        expect(mockBatch.onEnd).toHaveBeenCalledWith(
+          expect.objectContaining({
+            attributes: expect.objectContaining(attributes),
+          })
+        );
+      },
+      { privacySettings: createSettings(), executionAttribution: { attributes } }
+    );
+  });
+
+  it.each([{ includeRealIds: false }, { includeUserData: false }])(
+    'pseudonymizes attribution IDs with explicit hash fields for privacy %j',
+    (privacy) => {
+      const exported = exportWith(privacy, {
+        [ATTR.callerId]: 'private-caller',
+        [ATTR.apiKeyId]: 'private-key',
+        [ATTR.actorId]: 'private-actor',
+        [ATTR.requestUserScopeId]: 'private-task-user',
+        [UserAttributes.UserId]: 'private-actor',
+        [UserAttributes.UserName]: 'actor-name',
+        [ATTR.status]: 'partial',
+        [ATTR.downstreamCredentialStatus]: 'unknown',
+      });
+      for (const [id, hash] of [
+        [ATTR.callerId, ATTR.callerHash],
+        [ATTR.apiKeyId, ATTR.apiKeyHash],
+        [ATTR.actorId, ATTR.actorHash],
+        [ATTR.requestUserScopeId, ATTR.requestUserScopeHash],
+      ]) {
+        expect(exported.attributes[id]).toBeUndefined();
+        expect(exported.attributes[hash]).toMatch(/^[a-f0-9]{16}$/);
+      }
+      expect(exported.attributes[UserAttributes.UserId]).toBeUndefined();
+      expect(exported.attributes[UserAttributes.UserName]).toBeUndefined();
+      expect(exported.attributes[UserAttributes.UserHash]).toBe(
+        exported.attributes[ATTR.actorHash]
+      );
+      expect(exported.attributes[ATTR.status]).toBe('partial');
+      expect(exported.attributes[ATTR.downstreamCredentialStatus]).toBe('unknown');
+    }
+  );
+
+  it.each([{ includeRealNames: false }, { includeUserData: false }])(
+    'removes attribution names for privacy %j',
+    (privacy) => {
+      const exported = exportWith(privacy, {
+        [ATTR.callerName]: 'caller',
+        [ATTR.actorName]: 'actor',
+        [ATTR.requestUserScopeName]: 'task-user',
+        [UserAttributes.UserName]: 'actor',
+      });
+      expect(exported.attributes[ATTR.callerName]).toBeUndefined();
+      expect(exported.attributes[ATTR.actorName]).toBeUndefined();
+      expect(exported.attributes[ATTR.requestUserScopeName]).toBeUndefined();
+      expect(exported.attributes[UserAttributes.UserName]).toBeUndefined();
+    }
+  );
 
   it('onStart skips inference spans without agent builder baggage', () => {
     const processor = new AgentBuilderSpanProcessor({

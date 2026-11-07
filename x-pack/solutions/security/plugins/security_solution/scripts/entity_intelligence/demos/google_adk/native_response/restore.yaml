@@ -1,0 +1,96 @@
+name: Google agent demo reset — restore export access
+description: >-
+  Explicitly reset this isolated demonstration by restoring only the runtime's
+  objectCreator grant on its dedicated export bucket. Elastic Workflow calls
+  Google directly, preserves unrelated IAM bindings, and uses the current etag.
+  This is a manual demonstration reset, never an automatic response to an alert.
+enabled: true
+tags:
+  - Entity Intelligence
+  - Google ADK
+  - Native Google response
+triggers:
+  - type: manual
+consts:
+  subject: serviceAccount:ei-agent-demo-runtime@example-ei-project.iam.gserviceaccount.com
+  export_role: roles/storage.objectCreator
+steps:
+  - name: read_current_export_bucket_iam
+    type: http
+    connector-id: ei-google-storage-iam-response-v1
+    with:
+      method: GET
+      query:
+        optionsRequestedPolicyVersion: '3'
+      fetcher:
+        follow_redirects: false
+  - name: restore_demo_export_permission
+    type: http
+    connector-id: ei-google-storage-iam-response-v1
+    with:
+      method: PUT
+      headers:
+        Content-Type: application/json
+      fetcher:
+        follow_redirects: false
+      body: >-
+        {"version": {{ steps.read_current_export_bucket_iam.output.data.version | default: 1 | json }},
+        "etag": {{ steps.read_current_export_bucket_iam.output.data.etag | json }},
+        "bindings": [
+        {% assign restored = false %}
+        {% for binding in steps.read_current_export_bucket_iam.output.data.bindings %}
+          {% unless forloop.first %},{% endunless %}
+          {% assign members = binding.members %}
+          {% if binding.role == consts.export_role and binding.condition == nil %}
+            {% assign restored = true %}
+            {% unless members contains consts.subject %}
+              {% assign subject_list = consts.subject | split: ',' %}
+              {% assign members = members | concat: subject_list %}
+            {% endunless %}
+          {% endif %}
+          {"role": {{ binding.role | json }}, "members": {{ members | json }}
+          {% if binding.condition %}, "condition": {{ binding.condition | json }}{% endif %}}
+        {% endfor %}
+        {% unless restored %}
+          {% if steps.read_current_export_bucket_iam.output.data.bindings.size > 0 %},{% endif %}
+          {"role": {{ consts.export_role | json }}, "members": [{{ consts.subject | json }}]}
+        {% endunless %}
+        ]}
+  - name: read_back_google_iam_policy
+    type: http
+    connector-id: ei-google-storage-iam-response-v1
+    with:
+      method: GET
+      query:
+        optionsRequestedPolicyVersion: '3'
+      fetcher:
+        follow_redirects: false
+  - name: find_restored_export_grants
+    type: data.filter
+    items: '${{ steps.read_back_google_iam_policy.output.data.bindings }}'
+    with:
+      condition: 'item.role: "roles/storage.objectCreator" AND item.members: "serviceAccount:ei-agent-demo-runtime@example-ei-project.iam.gserviceaccount.com" AND NOT item.condition: *'
+  - name: count_restored_export_grants
+    type: data.set
+    with:
+      restored_export_grants: '${{ steps.find_restored_export_grants.output | size }}'
+  - name: require_permission_restored
+    type: if
+    condition: 'variables.restored_export_grants: 0'
+    steps:
+      - name: reject_unconfirmed_restore
+        type: workflow.fail
+        with:
+          message: Google did not confirm the demo runtime's export grant. Reset was not verified.
+  - name: report_google_iam_reset
+    type: workflow.output
+    with:
+      action: restore_demo_export_permission
+      bucket: example-ei-project-ei-agent-demo-export
+      runtime_principal: ei-agent-demo-runtime@example-ei-project.iam.gserviceaccount.com
+      restored_role: roles/storage.objectCreator
+      google_api_status: '${{ steps.restore_demo_export_permission.output.status }}'
+      google_policy_etag: '{{ steps.read_back_google_iam_policy.output.data.etag }}'
+      iam_policy_change_verified: true
+      data_plane_access_verified: false
+      verification_required: Verify a real agent export succeeds after propagation before starting the next demonstration.

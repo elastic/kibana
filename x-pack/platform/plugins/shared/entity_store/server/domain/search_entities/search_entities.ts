@@ -99,7 +99,7 @@ const normalizeEntityHit = (raw: Record<string, unknown>): Entity => {
 
   const assetOverwrite: Partial<Record<string, unknown>> =
     asset && asset.criticality !== ASSET_CRITICALITY_DELETED
-      ? { asset: { criticality: asset.criticality } }
+      ? { asset: { ...asset, criticality: asset.criticality } }
       : {};
 
   const merged = {

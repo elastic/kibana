@@ -37,6 +37,8 @@ import {
 } from '@kbn/agent-builder-common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { UserAttributes } from '@kbn/inference-tracing';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
+import { EXECUTION_ATTRIBUTION as ATTR } from '../../tracing/execution_attribution';
 import { collectAndWriteEvents, handleAgentExecution, setUserAttributes } from './execution_runner';
 import {
   createConversationClientMock,
@@ -123,14 +125,22 @@ const createDeps = ({
   conversationClient,
   telemetry = createTelemetryMocks(),
   analyticsService,
+  principal = null,
 }: {
   conversationClient: ReturnType<typeof createConversationClientMock>;
+  principal?: ReturnType<SecurityServiceStart['authc']['getPrincipal']>;
   telemetry?: TelemetryMocks;
   analyticsService?: { reportRoundComplete?: jest.Mock; reportRoundError?: jest.Mock };
 }) =>
   ({
     logger: loggingSystemMock.createLogger(),
     runAgent: jest.fn(),
+    security: {
+      authc: {
+        getPrincipal: jest.fn().mockReturnValue(principal),
+        getCurrentUser: jest.fn().mockReturnValue(null),
+      },
+    },
     agentService: {
       getRegistry: jest
         .fn()
@@ -420,6 +430,7 @@ describe('handleAgentExecution', () => {
       deps: {
         logger: loggingSystemMock.createLogger(),
         runAgent: jest.fn(),
+        security: { authc: { getPrincipal: jest.fn().mockReturnValue(null) } },
         agentService: {
           getRegistry: jest.fn().mockResolvedValue(agentRegistry),
         },
@@ -790,7 +801,7 @@ describe('handleAgentExecution', () => {
   });
 
   describe('converse span user identity', () => {
-    it('sets the round author on the span for public UPDATE', async () => {
+    it('sets the trusted request actor instead of a round author or conversation owner', async () => {
       const author = { id: 'author-id', username: 'author' };
       const conversation = createEmptyConversation({
         id: 'conversation-1',
@@ -828,7 +839,10 @@ describe('handleAgentExecution', () => {
             nextInput: { message: 'Hello' },
           },
         } as never,
-        deps: createDeps({ conversationClient }),
+        deps: createDeps({
+          conversationClient,
+          principal: { type: 'user', userProfileId: 'caller-id', username: 'caller' },
+        }),
         request: { headers: {} } as never,
         abortSignal: new AbortController().signal,
       });
@@ -836,12 +850,62 @@ describe('handleAgentExecution', () => {
       await lastValueFrom(events$.pipe(toArray()));
 
       expect(withConverseSpanMock).toHaveBeenCalled();
-      expect(mockSpanSetAttribute).toHaveBeenCalledWith(UserAttributes.UserId, 'author-id');
-      expect(mockSpanSetAttribute).toHaveBeenCalledWith(UserAttributes.UserName, 'author');
+      expect(mockSpanSetAttribute).toHaveBeenCalledWith(UserAttributes.UserId, 'caller-id');
+      expect(mockSpanSetAttribute).toHaveBeenCalledWith(UserAttributes.UserName, 'caller');
       expect(mockSpanSetAttribute).not.toHaveBeenCalledWith(UserAttributes.UserId, 'owner-id');
     });
 
-    it('reports the stored owner of a conversation this request created', async () => {
+    it('uses server-captured incoming caller evidence on a Task Manager worker', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = createEmptyConversation({
+        id: 'conversation-1',
+        agent_id: 'test-agent',
+      });
+      conversationClient.get.mockResolvedValue(conversation);
+      conversationClient.update.mockResolvedValue(conversation);
+      conversationClient.appendEvents.mockResolvedValue(conversation);
+      conversationClient.replaceRoundEvents.mockResolvedValue(conversation);
+      mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()]);
+      stubResolveServices(conversationClient);
+      const traceAttribution = {
+        [ATTR.status]: 'partial',
+        [ATTR.capturePoint]: 'request',
+        [ATTR.callerType]: 'api_key',
+        [ATTR.apiKeyId]: 'original-request-key',
+        [ATTR.downstreamCredentialStatus]: 'unknown',
+      };
+      const events$ = await handleAgentExecution({
+        execution: {
+          executionId: 'execution-1',
+          executionMode: AgentExecutionMode.conversation,
+          owner: { id: 'owner-profile', username: 'key-owner' },
+          traceAttribution,
+          metadata: { [ATTR.apiKeyId]: 'forged-key', [ATTR.actorId]: 'forged-actor' },
+          agentParams: {
+            agentId: 'test-agent',
+            conversationId: 'conversation-1',
+            roundId: 'round-1',
+            conversationOperation: 'UPDATE',
+            receivedAt: '2024-01-01T00:00:00.000Z',
+            nextInput: { message: 'Hello' },
+          },
+        } as never,
+        deps: createDeps({ conversationClient }),
+        request: { headers: {}, isFakeRequest: true } as never,
+        abortSignal: new AbortController().signal,
+      });
+      await lastValueFrom(events$.pipe(toArray()));
+      expect(withConverseSpanMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          executionAttribution: { attributes: traceAttribution },
+        }),
+        expect.any(Function)
+      );
+      expect(mockSpanSetAttribute).not.toHaveBeenCalledWith(UserAttributes.UserId, 'owner-profile');
+      expect(mockSpanSetAttribute).not.toHaveBeenCalledWith(UserAttributes.UserId, 'forged-actor');
+    });
+
+    it('does not use the stored conversation owner as an API key initiator', async () => {
       const createdUser = { id: 'created-user-id', username: 'created_user' };
       const createdConversation = createEmptyConversation({
         id: 'new-conversation',
@@ -871,7 +935,10 @@ describe('handleAgentExecution', () => {
             nextInput: { message: 'Hello' },
           },
         } as never,
-        deps: createDeps({ conversationClient }),
+        deps: createDeps({
+          conversationClient,
+          principal: { type: 'api_key', apiKeyId: 'key-id', variant: 'stack' },
+        }),
         request: { headers: {} } as never,
         abortSignal: new AbortController().signal,
       });
@@ -880,8 +947,14 @@ describe('handleAgentExecution', () => {
 
       expect(mockSpanSetAttribute).not.toHaveBeenCalledWith(UserAttributes.UserId, 'unknown');
       expect(mockSpanSetAttribute).not.toHaveBeenCalledWith(UserAttributes.UserName, 'unknown');
-      expect(mockSpanSetAttribute).toHaveBeenCalledWith(UserAttributes.UserId, 'created-user-id');
-      expect(mockSpanSetAttribute).toHaveBeenCalledWith(UserAttributes.UserName, 'created_user');
+      expect(mockSpanSetAttribute).not.toHaveBeenCalledWith(
+        UserAttributes.UserId,
+        'created-user-id'
+      );
+      expect(mockSpanSetAttribute).not.toHaveBeenCalledWith(
+        UserAttributes.UserName,
+        'created_user'
+      );
     });
 
     it('reports no identity for a run whose conversation is never stored', async () => {

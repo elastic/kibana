@@ -1,0 +1,6 @@
+google-adk==2.12.0
+fastapi>=0.115.0,<1
+uvicorn>=0.30.0,<1
+google-auth>=2.40.0,<3
+requests>=2.32.4,<3
+opentelemetry-sdk>=1.36.0,<2

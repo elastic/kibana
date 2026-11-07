@@ -330,5 +330,8 @@
     "@kbn/core-user-profile-server-mocks",
     "@kbn/core-user-profile-server",
     "@kbn/core-security-server",
+    "@kbn/crypto-browser",
+    "@kbn/dag-layout",
+    "@kbn/sse-utils-client",
   ]
 }

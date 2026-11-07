@@ -70,7 +70,6 @@ import {
   convertErrors,
   toClientError,
   isPendingResumeConversation,
-  isPlaceholderUser,
   resolveTelemetryOrigin,
   persistExecutionInterruption,
   trackExecutionInterruption,
@@ -78,7 +77,13 @@ import {
 } from './utils';
 import { reportRoundTelemetry } from './utils/report_round_telemetry';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
-import { getCurrentTraceId, loadTracingPrivacySettings, withConverseSpan } from '../../tracing';
+import {
+  getCurrentTraceId,
+  getExecutionAttribution,
+  restoreExecutionAttribution,
+  loadTracingPrivacySettings,
+  withConverseSpan,
+} from '../../tracing';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { MeteringService } from '../metering';
 import type { AgentExecutionClient } from './persistence';
@@ -317,6 +322,11 @@ const handleConversationExecution = async ({
       ]
     );
     const connectorProvider = getConnectorProvider(chatModel.getConnector());
+    const executionAttribution = privacySettings.enabled
+      ? execution.traceAttribution
+        ? restoreExecutionAttribution(execution.traceAttribution)
+        : getExecutionAttribution({ request, security: deps.security })
+      : undefined;
 
     const title$ = (
       titleChatModel
@@ -356,16 +366,12 @@ const handleConversationExecution = async ({
         conversationId: conversation.id,
         spaceId,
         privacySettings,
+        executionAttribution,
         opikHeaders,
       },
       (span) => {
-        // The conversation is stored by now, so its owner is known — except for a run that does
-        // not store one, whose placeholder owner is nobody and stays unreported.
-        if (author || !isPlaceholderUser(conversation.user)) {
-          setUserAttributes(span, {
-            id: author?.id ?? conversation.user.id,
-            username: author?.username ?? conversation.user.username,
-          });
+        if (executionAttribution?.initiatingActor) {
+          setUserAttributes(span, executionAttribution.initiatingActor);
         }
 
         const titleAttr$ = storeConversation

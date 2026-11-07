@@ -1,0 +1,223 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Google ADK pre-operation gate evidence",
+  "description": "Decision objects are accepted only from the separate IAM-controlled bucket. The trusted relay validates the actual Elastic workflow execution before create-only writing. All correlation fields must equal the pending request; timestamps must be within its unexpired window. A provenance string alone does not authenticate a workflow.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/request"
+    },
+    {
+      "$ref": "#/$defs/decision"
+    }
+  ],
+  "$defs": {
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "request_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "session_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "tool_call_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "input_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "invocation_id": {
+          "type": "string"
+        },
+        "tool_name": {
+          "const": "export_case_summary"
+        },
+        "input": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "summary": {
+              "type": "string",
+              "maxLength": 4000
+            }
+          },
+          "required": [
+            "summary"
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "requester": {
+          "type": "object"
+        },
+        "executing_principal": {
+          "type": "object"
+        },
+        "target": {
+          "type": "object",
+          "properties": {
+            "bucket": {
+              "type": "string"
+            },
+            "object": {
+              "type": "string"
+            },
+            "uri": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "bucket",
+            "object",
+            "uri"
+          ],
+          "additionalProperties": false
+        },
+        "source_policy_matches": {
+          "type": "array"
+        },
+        "client_request_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Optional client-generated correlation nonce; copied by runtime into pending intent and completed run. Not identity or authorization evidence."
+        }
+      },
+      "required": [
+        "schema_version",
+        "request_id",
+        "run_id",
+        "session_id",
+        "trace_id",
+        "tool_call_id",
+        "input_sha256",
+        "invocation_id",
+        "tool_name",
+        "input",
+        "created_at",
+        "expires_at",
+        "requester",
+        "executing_principal",
+        "target",
+        "source_policy_matches"
+      ]
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "request_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "session_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "tool_call_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "input_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "decision": {
+          "enum": [
+            "allow",
+            "deny"
+          ]
+        },
+        "decided_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "workflow_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_.:-]{1,200}$",
+          "description": "Must equal deployment EI_GATE_WORKFLOW_ID (default workflow-ei-google-export-prevention-v1)."
+        },
+        "workflow_execution_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_.:-]{1,200}$"
+        },
+        "policy_id": {
+          "const": "ei-google-export-prevention"
+        },
+        "policy_revision": {
+          "const": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "provenance": {
+          "const": "elastic_workflow"
+        }
+      },
+      "required": [
+        "schema_version",
+        "request_id",
+        "run_id",
+        "session_id",
+        "trace_id",
+        "tool_call_id",
+        "input_sha256",
+        "decision",
+        "decided_at",
+        "expires_at",
+        "workflow_id",
+        "workflow_execution_id",
+        "policy_id",
+        "policy_revision",
+        "reason",
+        "provenance"
+      ]
+    }
+  }
+}

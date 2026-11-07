@@ -15,3 +15,10 @@ export const createEntityAnalyticsNavigationTree = (): NodeDefinition => ({
   link: securityLink(SecurityPageName.entityAnalyticsHomePage),
   badgeType: 'new',
 });
+
+export const createEntityIntelligenceNavigationTree = (): NodeDefinition => ({
+  id: SecurityPageName.entityAnalyticsIntelligence,
+  icon: 'sparkles',
+  link: securityLink(SecurityPageName.entityAnalyticsIntelligence),
+  badgeType: 'beta',
+});

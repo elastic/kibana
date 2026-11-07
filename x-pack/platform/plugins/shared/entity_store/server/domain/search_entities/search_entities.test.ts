@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { searchEntitiesV2, searchEntitiesV2Batch } from './search_entities';
 
 describe('searchEntitiesV2', () => {
@@ -27,6 +28,41 @@ describe('searchEntitiesV2', () => {
       })
     ).rejects.toThrow('Invalid filterQuery');
   });
+
+  it.each(['high_impact', undefined])(
+    'preserves asset ownership and environment when normalizing criticality %s',
+    async (criticality) => {
+      const asset = { owner: 'platform-team', environment: 'production', criticality };
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResponse({
+        took: 0,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          hits: [
+            {
+              _index: '.entities.v2.latest.default-00001',
+              _id: 'agent:triage',
+              _source: { entity: { id: 'agent:triage' }, asset },
+            },
+          ],
+        },
+      });
+
+      const result = await searchEntitiesV2({
+        esClient,
+        namespace: 'default',
+        entityTypes: ['generic'],
+        page: 1,
+        perPage: 10,
+        sortField: '@timestamp',
+        sortOrder: 'desc',
+      });
+
+      expect(result.records[0].asset).toEqual(asset);
+    }
+  );
 
   it('searches the v2 latest index with entity type and filter clauses', async () => {
     const search = jest.fn().mockResolvedValue({

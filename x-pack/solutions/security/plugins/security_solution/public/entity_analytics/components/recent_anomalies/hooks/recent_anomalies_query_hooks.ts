@@ -42,6 +42,7 @@ interface FixedTimeRange {
 // narrow to a handful of entities; this caps the `WHERE entity_id IN (...)`
 // list size for pathological "match everything" filters.
 const MAX_FILTERED_ENTITIES = 1000;
+const TOP_ROWS_LIMIT = 5;
 
 /**
  * Time-range-only resolver for the ML anomalies source. The search bar on
@@ -191,7 +192,7 @@ const useRecentAnomaliesTopRowsQuery = (params: {
 
   const topRowsEsqlSource = useRecentAnomaliesTopRowsEsqlSource({
     ...params,
-    rowsLimit: 5,
+    rowsLimit: TOP_ROWS_LIMIT,
     entityIds,
     jobIds: securityJobIds,
   });
@@ -236,6 +237,7 @@ const useRecentAnomaliesTopRowsQuery = (params: {
   return {
     isLoading: isLoading || isEntityIdsLoading || isSecurityJobIdsLoading || isMlIndexLoading,
     rowLabels: records?.map((each) => each[rowField]),
+    isTopRowsLimited: (records?.length ?? 0) >= TOP_ROWS_LIMIT,
     entityMetadata,
     isError,
     rawResponse: data?.rawResponse,
@@ -264,6 +266,7 @@ export const useRecentAnomaliesQuery = (params: {
   const {
     rowLabels,
     entityMetadata,
+    isTopRowsLimited,
     isError: isTopRowsError,
     isLoading: isTopRowsLoading,
     rawResponse: topRowsRawResponse,
@@ -356,6 +359,7 @@ export const useRecentAnomaliesQuery = (params: {
   return {
     data,
     entityMetadata,
+    isTopRowsLimited,
     isLoading: isTopRowsLoading || isAnomaliesLoading,
     isError: isTopRowsError || isAnomaliesError,
     refetch,

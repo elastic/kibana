@@ -9,11 +9,13 @@ import { context, propagation } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import {
   getPrivacySettingsFromContext,
+  getExecutionAttributionFromContext,
   getSpaceIdFromContext,
   SPACE_ID_BAGGAGE_KEY,
   withAgentBuilderContext,
 } from './agent_builder_context';
 import type { TracingPrivacySettings } from './privacy_settings';
+import { EXECUTION_ATTRIBUTION } from './execution_attribution';
 
 const settings: TracingPrivacySettings = {
   enabled: true,
@@ -49,6 +51,25 @@ describe('withAgentBuilderContext', () => {
         expect(getSpaceIdFromContext(context.active())).toBe('default');
       });
     });
+  });
+
+  it('keeps attribution in process and clears stale attribution for another execution', () => {
+    const executionAttribution = {
+      attributes: { [EXECUTION_ATTRIBUTION.callerId]: 'private-principal' },
+    };
+    withAgentBuilderContext(
+      () => {
+        expect(getExecutionAttributionFromContext(context.active())).toEqual(executionAttribution);
+        expect(propagation.getBaggage(context.active())?.getAllEntries()).not.toEqual(
+          expect.arrayContaining([expect.arrayContaining([EXECUTION_ATTRIBUTION.callerId])])
+        );
+        withAgentBuilderContext(() => {
+          expect(getExecutionAttributionFromContext(context.active())).toBeUndefined();
+        });
+      },
+      { executionAttribution }
+    );
+    expect(getExecutionAttributionFromContext(context.active())).toBeUndefined();
   });
 
   it('exposes privacy settings on the in-process context', () => {

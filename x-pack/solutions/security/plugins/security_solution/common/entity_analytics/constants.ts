@@ -14,6 +14,7 @@ export * from './watchlists/constants';
 export * from './entity_store/constants';
 export * from './lead_generation/constants';
 export * from './anomalies/constants';
+export * from './ai_hunt_history/constants';
 
 export const API_VERSIONS = {
   public: {

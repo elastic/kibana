@@ -75,6 +75,7 @@ import {
   createConversationUpdatedEvent,
 } from './utils/events';
 import { userMessageActor } from '../conversation/client/rounds_to_events';
+import { captureExecutionAttribution, loadTracingPrivacySettings } from '../../tracing';
 
 export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
@@ -162,6 +163,19 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     // Reserved for the round this run opens, so its events are named after it.
     const roundId = uuidv4();
 
+    const tracingSettings = await loadTracingPrivacySettings({
+      uiSettingsClient: this.deps.uiSettings.asScopedToClient(
+        this.deps.savedObjects.getScopedClient(request)
+      ),
+      logger: this.logger,
+      spaceId,
+    });
+    const traceAttribution = captureExecutionAttribution({
+      request,
+      security: this.deps.security,
+      settings: tracingSettings,
+    });
+
     let execution: AgentExecution;
     try {
       execution = await executionClient.create({
@@ -170,6 +184,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         agentId,
         spaceId,
         owner: { id: owner.id, username: owner.username },
+        ...(traceAttribution ? { traceAttribution } : {}),
         agentParams:
           conversationParams && conversation
             ? {

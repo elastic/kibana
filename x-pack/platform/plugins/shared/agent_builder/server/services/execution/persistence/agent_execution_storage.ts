@@ -54,6 +54,7 @@ const storageSettings = {
         },
       }),
       agent_params: types.object({ dynamic: false, properties: {} }),
+      trace_attribution: types.object({ dynamic: false, properties: {} }),
       error: types.object({
         dynamic: false,
         properties: {
@@ -86,6 +87,7 @@ export interface AgentExecutionProperties {
   space_id: string;
   owner?: UserIdAndName;
   agent_params: AgentExecutionParams;
+  trace_attribution?: Record<string, string>;
   error?: SerializedExecutionError;
   abort_reason?: ExecutionAbortReason;
   event_count?: number;
