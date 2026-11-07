@@ -52,12 +52,16 @@ const DROP_NULL_COLUMNS = true;
 
 @injectable()
 export class QueryService implements QueryServiceContract {
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     private readonly esClient: ElasticsearchClient,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @inject(EsqlResponseFormatServiceToken)
     private readonly esqlResponseFormatService: EsqlResponseFormatServiceContract
-  ) {}
+  ) {
+    this.logger = loggerService.forSubsystem('query');
+  }
 
   async executeQuery({
     query,

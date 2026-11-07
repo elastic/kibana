@@ -6,9 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
-import { Logger as PluginLogger } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
@@ -16,7 +15,8 @@ import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-se
 import { inject, injectable } from 'inversify';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '../../../saved_objects';
 import { getActionPolicyCloudApiKeyNotSupportedMessage } from '../../errors/action_policy_error_messages';
-import { ALERTING_ERROR_CODES } from '../../errors/error_codes';
+import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../../errors/error_codes';
+import { LoggerServiceToken, type LoggerServiceContract } from '../logger_service/logger_service';
 import { ApiKeyServiceSavedObjectsClientToken } from './tokens';
 
 export interface ApiKeyAttributes {
@@ -43,14 +43,18 @@ const encodeApiKey = (id?: string, key?: string): string | null => {
 
 @injectable()
 export class ApiKeyService implements ApiKeyServiceContract {
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(Request) private readonly request: KibanaRequest,
     @inject(CoreStart('security'))
     private readonly securityService: SecurityServiceStart,
     @inject(ApiKeyServiceSavedObjectsClientToken)
     private readonly invalidationSavedObjectsClient: SavedObjectsClientContract,
-    @inject(PluginLogger) private readonly logger: Logger
-  ) {}
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('actionPolicyClient');
+  }
 
   public async create(name: string): Promise<ApiKeyAttributes> {
     const username = this.securityService.authc.getCurrentUser(this.request)?.username;
@@ -88,14 +92,10 @@ export class ApiKeyService implements ApiKeyServiceContract {
       response = await this.invalidationSavedObjectsClient.bulkCreate(apiKeysToInvalidate);
     } catch (e) {
       const message = (e as Error).message;
-      this.logger.error(
-        `Failed to bulk mark list of API keys [${decodedApiKeys
-          .map(({ apiKeyId }) => `"${apiKeyId}"`)
-          .join(', ')}] for invalidation: ${message}`,
-        {
-          error: { stack_trace: (e as Error).stack },
-        }
-      );
+      this.logger.error({
+        code: ALERTING_LOG_CODES.POLICY_API_KEY_INVALIDATION_FAILED,
+        error: e,
+      });
       return apiKeys.map((): ApiKeyInvalidationResult => ({ success: false, message }));
     }
 
@@ -108,7 +108,10 @@ export class ApiKeyService implements ApiKeyServiceContract {
       const message = created
         ? created.error.message
         : 'Saved object was not returned by bulkCreate';
-      this.logger.error(`Failed to mark API key "${apiKeyId}" for invalidation: ${message}`);
+      this.logger.error({
+        code: ALERTING_LOG_CODES.POLICY_API_KEY_INVALIDATION_FAILED,
+        error: new Error(message),
+      });
       return { success: false, message };
     });
   }

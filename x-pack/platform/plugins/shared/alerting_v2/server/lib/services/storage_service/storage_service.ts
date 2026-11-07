@@ -139,10 +139,14 @@ export interface StorageServiceContract {
 
 @injectable()
 export class StorageService implements StorageServiceContract {
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     private readonly esClient: ElasticsearchClient,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
-  ) {}
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('storage');
+  }
 
   public async bulkIndexDocs<TDocument extends Record<string, unknown>>(
     params: BulkIndexDocsParams<TDocument>

@@ -7,17 +7,17 @@
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '../../../saved_objects';
-import { ALERTING_ERROR_CODES } from '../../errors/error_codes';
+import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../../errors/error_codes';
+import { createLoggerService } from '../logger_service/logger_service.mock';
 import { ApiKeyService } from './api_key_service';
 
 const createMockInvalidationDeps = () => ({
   invalidationSavedObjectsClient: savedObjectsClientMock.create(),
-  logger: loggingSystemMock.create().get(),
+  logger: createLoggerService().loggerService,
 });
 
 const createMockSecurityService = (
@@ -225,7 +225,7 @@ describe('ApiKeyService', () => {
   describe('markApiKeysForInvalidation', () => {
     const request = httpServerMock.createKibanaRequest();
     const security = createMockSecurityService();
-    const logger = loggingSystemMock.create().get();
+    const { loggerService: logger, mockLogger } = createLoggerService();
     let invalidationSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
 
     beforeEach(() => {
@@ -312,9 +312,14 @@ describe('ApiKeyService', () => {
         { success: false, message: 'bulkCreate failed' },
       ]);
 
-      expect(logger.error).toHaveBeenCalledWith(
-        'Failed to bulk mark list of API keys ["123"] for invalidation: bulkCreate failed',
-        { error: { stack_trace: err.stack } }
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          labels: expect.objectContaining({
+            code: ALERTING_LOG_CODES.POLICY_API_KEY_INVALIDATION_FAILED,
+          }),
+          error: expect.objectContaining({ message: 'bulkCreate failed' }),
+        })
       );
     });
 
@@ -347,8 +352,14 @@ describe('ApiKeyService', () => {
         { success: false, message: 'version conflict' },
       ]);
 
-      expect(logger.error).toHaveBeenCalledWith(
-        'Failed to mark API key "bad-id" for invalidation: version conflict'
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          labels: expect.objectContaining({
+            code: ALERTING_LOG_CODES.POLICY_API_KEY_INVALIDATION_FAILED,
+          }),
+          error: expect.objectContaining({ message: 'version conflict' }),
+        })
       );
     });
 

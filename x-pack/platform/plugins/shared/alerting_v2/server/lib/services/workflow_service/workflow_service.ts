@@ -22,13 +22,17 @@ export interface WorkflowServiceContract {
 
 @injectable()
 export class WorkflowService implements WorkflowServiceContract {
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(
       PluginStart<AlertingServerStartDependencies['workflowsExtensions']>('workflowsExtensions')
     )
     private readonly workflowsExtensions: WorkflowsExtensionsServerPluginStart,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
-  ) {}
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('events');
+  }
 
   public async emitEvent(
     request: KibanaRequest,
@@ -39,8 +43,8 @@ export class WorkflowService implements WorkflowServiceContract {
 
     if (!client.isWorkflowsAvailable) {
       this.logger.debug({
-        message: () =>
-          `[WorkflowService] Workflows is not available. Dropping trigger "${triggerId}".`,
+        message: () => 'Workflows are not available, dropping trigger',
+        labels: { resource: triggerId },
       });
 
       return;

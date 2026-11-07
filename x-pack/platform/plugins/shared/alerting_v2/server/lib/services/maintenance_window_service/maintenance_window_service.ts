@@ -30,12 +30,15 @@ export interface MaintenanceWindowServiceContract {
 
 @injectable()
 export class MaintenanceWindowService implements MaintenanceWindowServiceContract {
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(MaintenanceWindowSavedObjectsClientToken)
     private readonly client: SavedObjectsClientContract,
-    @inject(LoggerServiceToken)
-    private readonly logger: LoggerServiceContract
-  ) {}
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('maintenanceWindows');
+  }
 
   public async getEnabledMaintenanceWindows(): Promise<ActiveMaintenanceWindow[]> {
     const windows: ActiveMaintenanceWindow[] = [];
