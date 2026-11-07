@@ -28,6 +28,17 @@ export const THREAT_INTEL_SOURCES_INDEX = '.kibana-threat-intel-sources' as cons
 export const THREAT_INTEL_INDICATORS_INDEX = '.threat-intel-indicators' as const;
 export const INDICATOR_REFERENCE_PREFIX = 'threat-report:' as const;
 
+/**
+ * ECS `event.*` values stamped on every promoted indicator, the same shape Fleet `ti_*`
+ * rows carry. The Indicators page and flyout enrichment both filter on
+ * `event.type: indicator`, so a row without them never renders or enriches.
+ */
+export const INDICATOR_ECS_EVENT = {
+  kind: 'enrichment',
+  category: ['threat'],
+  type: ['indicator'],
+} as const;
+
 export const THREAT_INTEL_API_BASE = '/internal/threat_intel' as const;
 
 export const CREATE_THREAT_REPORT_API_PATH =

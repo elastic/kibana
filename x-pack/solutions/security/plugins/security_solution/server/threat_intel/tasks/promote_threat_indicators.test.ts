@@ -230,6 +230,47 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
     });
   });
 
+  describe('ECS fields legacy readers filter on', () => {
+    it('stamps event.* and threat.feed.name on the upsert body', () => {
+      const [op] = buildBulkOpsForTest(
+        [
+          makeReport({
+            id: 'r1',
+            sourceName: 'CISA Alerts',
+            iocs: [{ type: 'ip', value: '1.2.3.4' }],
+          }),
+        ],
+        NOW
+      );
+      const upsert = op.upsert as {
+        event: Record<string, unknown>;
+        threat: { feed: { name: string }; indicator: { provider: string; reference: string } };
+      };
+      expect(upsert.event).toEqual({
+        kind: 'enrichment',
+        category: ['threat'],
+        type: ['indicator'],
+      });
+      expect(upsert.threat.feed.name).toBe('CISA Alerts');
+      expect(upsert.threat.feed.name).toBe(upsert.threat.indicator.provider);
+    });
+
+    it('keeps the alert-to-report join key as threat-report:<report id>', () => {
+      const [op] = buildBulkOpsForTest(
+        [makeReport({ id: 'r1', iocs: [{ type: 'ip', value: '1.2.3.4' }] })],
+        NOW
+      );
+      const upsert = op.upsert as { threat: { indicator: { reference: string } } };
+      expect(upsert.threat.indicator.reference).toBe('threat-report:r1');
+    });
+
+    it('sets them in the update script only when absent, so existing rows gain them on citation', () => {
+      expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain('if (ctx._source.event == null)');
+      expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain('if (ctx._source.threat.feed == null)');
+      expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain("['name': params.provider]");
+    });
+  });
+
   describe('two reports citing the SAME IOC', () => {
     it('produces two separate ops (one per report×IOC) with distinct report_ids in scriptParams', () => {
       const reports = [

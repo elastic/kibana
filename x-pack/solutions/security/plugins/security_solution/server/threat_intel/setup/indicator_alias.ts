@@ -165,3 +165,30 @@ export const ensureIndicatorAliasForSpace = async ({
     );
   }
 };
+
+/**
+ * `ensureIndicatorAliasForSpace` is a master-node alias write. Bootstrap covers
+ * spaces that already existed; a space created afterward needs it on its first
+ * read request, but re-running it on every page-load-level GET adds a cluster-state
+ * round trip each time. Cache the space ids already ensured for this process
+ * lifetime so only the first request per space pays for it. Lost on restart, but
+ * restart re-runs bootstrap anyway.
+ */
+const spacesWithEnsuredAlias = new Set<string>();
+
+/** Ensures the space's alias once per process, then returns its name. */
+export const ensureIndicatorAliasOncePerSpace = async ({
+  esClient,
+  spaceId,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  spaceId: string;
+  logger: Logger;
+}): Promise<string> => {
+  if (!spacesWithEnsuredAlias.has(spaceId)) {
+    await ensureIndicatorAliasForSpace({ esClient, spaceId, logger });
+    spacesWithEnsuredAlias.add(spaceId);
+  }
+  return indicatorAliasForSpace(spaceId);
+};

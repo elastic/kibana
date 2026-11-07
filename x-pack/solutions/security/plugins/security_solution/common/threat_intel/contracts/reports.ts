@@ -310,6 +310,12 @@ export const readinessResponseSchema = schema.object({
   /** Count of hunt-usable reports (any finished report, with or without IOCs). */
   usableReportCount: schema.number(),
   indicatorEligibleReportCount: schema.number(),
+  /**
+   * The space's precision-filtered indicator alias. Present once the pipeline is not
+   * `blocked`; consumers that read curated indicators name this explicitly because
+   * the index is hidden and a wildcard pattern does not reach it.
+   */
+  indicatorAlias: schema.maybe(schema.string({ maxLength: 255 })),
   optional: schema.maybe(
     schema.arrayOf(schema.string({ maxLength: 64 }), { maxSize: READINESS_MAX_REASON_CODES })
   ),
