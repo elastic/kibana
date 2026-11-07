@@ -211,26 +211,24 @@ describe('runCortexOptimize', () => {
     expect(optimizeCortex).toHaveBeenCalledWith(expect.objectContaining({ roundKind: 'initial' }));
   });
 
-  // A correction can say something durable without a single sandbox call, so a follow-up round is
-  // not held to the investigation minimum.
+  // A follow-up is held to a lower bar than an investigation, but a message nobody checked, such as
+  // a correction or "thanks", is an unverified claim and teaches the shared wiki nothing.
   it('learns from a follow-up round that made fewer than three tool calls', async () => {
     await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, {
-      calls: [],
+      calls: toolCalls.slice(0, 1),
       userMessage: 'You never checked the session cache that checkout depends on.',
       roundIndex: 1,
     });
 
     expect(optimizeCortex).toHaveBeenCalledWith(
-      expect.objectContaining({ roundKind: 'follow_up', toolCalls: [] })
+      expect.objectContaining({ roundKind: 'follow_up', toolCalls: toolCalls.slice(0, 1) })
     );
   });
 
-  // Every later turn in the conversation is a follow-up, including "thanks". It has no tool calls
-  // and nothing to learn from, so it must not cost a model call.
-  it('skips a follow-up that is only a pleasantry', async () => {
+  it('skips a follow-up that made no tool calls, however substantive its message', async () => {
     await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, {
       calls: [],
-      userMessage: 'thanks',
+      userMessage: 'Cart uses Redis, not Memcached.',
       roundIndex: 1,
     });
 
@@ -238,7 +236,7 @@ describe('runCortexOptimize', () => {
     expect(createModelProvider).not.toHaveBeenCalled();
   });
 
-  it('learns from an alert-recovery round that made fewer than three tool calls', async () => {
+  it('treats an alert-recovery message as an ordinary follow-up', async () => {
     await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, {
       calls: toolCalls.slice(0, 1),
       userMessage: buildAlertRecoveredFollowUpMessage({
@@ -252,7 +250,7 @@ describe('runCortexOptimize', () => {
     });
 
     expect(optimizeCortex).toHaveBeenCalledWith(
-      expect.objectContaining({ roundKind: 'alert_recovery' })
+      expect.objectContaining({ roundKind: 'follow_up' })
     );
   });
 

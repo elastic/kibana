@@ -361,7 +361,7 @@ describe('applyCortexEdits', () => {
       conversationId,
     }: {
       existing: ReturnType<typeof cart>;
-      roundKind?: 'initial' | 'follow_up' | 'alert_recovery';
+      roundKind?: 'initial' | 'follow_up';
       conversationId?: string;
     }) => {
       const store = createStore({
@@ -430,18 +430,6 @@ describe('applyCortexEdits', () => {
       );
     });
 
-    it('does not count a rewrite that an alert-recovery round makes', async () => {
-      const store = await rewrite({
-        existing: cart(),
-        roundKind: 'alert_recovery',
-        conversationId: 'conversation-1',
-      });
-
-      expect(store.upsert).toHaveBeenCalledWith(
-        expect.objectContaining({ status: 'tentative', corroborations: 0 })
-      );
-    });
-
     it('does not let a conversation corroborate a page it wrote itself', async () => {
       const store = await rewrite({
         existing: cart(),
@@ -460,7 +448,7 @@ describe('applyCortexEdits', () => {
       conversationId,
     }: {
       existing: ReturnType<typeof cart>;
-      roundKind: 'initial' | 'follow_up' | 'alert_recovery';
+      roundKind: 'initial' | 'follow_up';
       conversationId: string;
     }) => {
       const logger = loggerMock.create();
@@ -505,61 +493,17 @@ describe('applyCortexEdits', () => {
       }
     );
 
-    it.each([
-      ['an initial round from a different investigation', 'initial', 'conversation-2'],
-      [
-        'an alert-recovery round, which is ground truth, on its own investigation',
-        'alert_recovery',
-        'conversation-1',
-      ],
-    ] as const)('applies a corroboration from %s', async (_name, roundKind, conversationId) => {
-      const { store } = await corroborate({ existing: cart(), roundKind, conversationId });
+    it('applies a corroboration from an initial round of a different investigation', async () => {
+      const { store } = await corroborate({
+        existing: cart(),
+        roundKind: 'initial',
+        conversationId: 'conversation-2',
+      });
 
       expect(store.corroborate).toHaveBeenCalledWith('cortex_service_otel-demo-cart', {
-        conversationId,
+        conversationId: 'conversation-2',
       });
     });
-
-    // The model may list the rewrite before the corroborate. A recovery rewrite does not confirm the
-    // page, so it must not use up the confirmation that the recovery's corroborate carries.
-    it.each([
-      ['rewrite first', ['upsert', 'corroborate']],
-      ['corroborate first', ['corroborate', 'upsert']],
-    ] as const)(
-      'applies both a rewrite and a corroborate in a recovery round, %s',
-      async (_name, actions) => {
-        const existing = cart();
-        const store = createStore({
-          list: jest.fn().mockResolvedValue({
-            pages: [existing],
-            stats: { total: 1, established: 0, total_corroborations: 0 },
-          }),
-          get: jest.fn().mockResolvedValue(existing),
-        });
-
-        await applyCortexEdits({
-          store,
-          telemetry: createTelemetry(),
-          logger: loggerMock.create(),
-          roundKind: 'alert_recovery',
-          provenance: { conversationId: 'conversation-1' },
-          edits: actions.map((action) => ({
-            action,
-            entity_type: 'service' as const,
-            slug: 'otel-demo-cart',
-            title: 'Cart',
-            ...(action === 'upsert' ? { content: 'Cart uses Redis and flagd.' } : {}),
-          })),
-        });
-
-        expect(store.upsert).toHaveBeenCalledWith(
-          expect.objectContaining({ content: 'Cart uses Redis and flagd.' })
-        );
-        expect(store.corroborate).toHaveBeenCalledWith('cortex_service_otel-demo-cart', {
-          conversationId: 'conversation-1',
-        });
-      }
-    );
 
     it('revives an archived page as tentative when a follow-up rewrites it', async () => {
       const store = await rewrite({
@@ -884,7 +828,7 @@ describe('optimizeCortex', () => {
     expect(telemetry.reportEditsApplied).not.toHaveBeenCalled();
   });
 
-  it.each(['initial', 'follow_up', 'alert_recovery'] as const)(
+  it.each(['initial', 'follow_up'] as const)(
     'hands the round kind to the model (%s)',
     async (roundKind) => {
       const proposeEdits = jest.fn().mockResolvedValue({ edits: [] });
@@ -920,32 +864,29 @@ describe('optimizeCortex', () => {
     expect(proposeEdits.mock.calls[0][0].roundKind).toBe('initial');
   });
 
-  it.each(['follow_up', 'alert_recovery'] as const)(
-    'replays the earlier request and answer to a %s round as turns',
-    async (roundKind) => {
-      const proposeEdits = jest.fn().mockResolvedValue({ edits: [] });
+  it('replays the earlier request and answer to a follow-up round as turns', async () => {
+    const proposeEdits = jest.fn().mockResolvedValue({ edits: [] });
 
-      await optimizeCortex({
-        store: createStore(),
-        telemetry: createTelemetry(),
-        logger: loggerMock.create(),
-        userMessage: 'You missed the cache.',
-        assistantMessage: 'Confirmed.',
-        previousUserMessage: 'Why do requests time out?',
-        previousAssistantMessage: 'The gateway times out.',
-        toolCalls: [],
-        roundKind,
-        proposeEdits,
-      });
+    await optimizeCortex({
+      store: createStore(),
+      telemetry: createTelemetry(),
+      logger: loggerMock.create(),
+      userMessage: 'You missed the cache.',
+      assistantMessage: 'Confirmed.',
+      previousUserMessage: 'Why do requests time out?',
+      previousAssistantMessage: 'The gateway times out.',
+      toolCalls: [],
+      roundKind: 'follow_up',
+      proposeEdits,
+    });
 
-      expect(proposeEdits.mock.calls[0][0].messages).toEqual([
-        { role: 'user', content: 'Why do requests time out?' },
-        { role: 'assistant', content: 'The gateway times out.' },
-        { role: 'user', content: 'You missed the cache.' },
-        { role: 'assistant', content: 'Confirmed.' },
-      ]);
-    }
-  );
+    expect(proposeEdits.mock.calls[0][0].messages).toEqual([
+      { role: 'user', content: 'Why do requests time out?' },
+      { role: 'assistant', content: 'The gateway times out.' },
+      { role: 'user', content: 'You missed the cache.' },
+      { role: 'assistant', content: 'Confirmed.' },
+    ]);
+  });
 
   it('does not show a previous answer to an initial round', async () => {
     const proposeEdits = jest.fn().mockResolvedValue({ edits: [] });
@@ -988,7 +929,7 @@ describe('optimizeCortex', () => {
   });
 });
 
-describe('authorship and recovery context', () => {
+describe('authorship and page content', () => {
   const written = (
     slug: string,
     authoredBy: string[],
@@ -1048,7 +989,7 @@ describe('authorship and recovery context', () => {
     expect(store.upsert).not.toHaveBeenCalled();
   });
 
-  const recoveryStore = () => {
+  const pagesStore = () => {
     const own = written('orders-consumer', ['conversation-1']);
     const shared = written('payments', ['conversation-2'], '## Dependencies\n- ledger');
     return createStore({
@@ -1062,18 +1003,18 @@ describe('authorship and recovery context', () => {
     });
   };
 
-  it('gives a recovery round the content of the pages its own investigation wrote', async () => {
+  it('gives a follow-up the content of the pages its own conversation wrote', async () => {
     const proposeEdits = jest.fn().mockResolvedValue({ edits: [] });
 
     await optimizeCortex({
-      store: recoveryStore(),
+      store: pagesStore(),
       telemetry: createTelemetry(),
       logger: loggerMock.create(),
-      userMessage: 'An alert in this investigation has recovered.',
-      assistantMessage: 'The cause was refuted.',
+      userMessage: 'The cause was not a full orders-db.',
+      assistantMessage: 'Agreed, the cause was refuted.',
       previousAssistantMessage: 'The cause was a full orders-db.',
       toolCalls: [],
-      roundKind: 'alert_recovery',
+      roundKind: 'follow_up',
       provenance: { conversationId: 'conversation-1' },
       proposeEdits,
     });
@@ -1089,7 +1030,7 @@ describe('authorship and recovery context', () => {
   ] as const)(
     "a %s round that rewrites another conversation's page leaves it %s at %sx",
     async (roundKind, status, count) => {
-      const store = recoveryStore();
+      const store = pagesStore();
 
       await optimizeCortex({
         store,
@@ -1125,7 +1066,7 @@ describe('authorship and recovery context', () => {
     userMessage,
   }: {
     store: CortexPageStore;
-    roundKind: 'initial' | 'follow_up' | 'alert_recovery';
+    roundKind: 'initial' | 'follow_up';
     userMessage: string;
   }) => {
     const proposeEdits = jest.fn().mockResolvedValue({ edits: [] });
@@ -1144,7 +1085,7 @@ describe('authorship and recovery context', () => {
   };
 
   it('loads no page content when nothing is named and nothing was written by this conversation', async () => {
-    const store = recoveryStore();
+    const store = pagesStore();
 
     const input = await optimizeWith({ store, roundKind: 'initial', userMessage: 'hello' });
 
@@ -1154,7 +1095,7 @@ describe('authorship and recovery context', () => {
 
   it('gives a follow-up the pages this conversation wrote, so a correction can edit them', async () => {
     const input = await optimizeWith({
-      store: recoveryStore(),
+      store: pagesStore(),
       roundKind: 'follow_up',
       userMessage: 'hello',
     });
@@ -1166,7 +1107,7 @@ describe('authorship and recovery context', () => {
 
   it('gives any round the content of a page the transcript names, whoever wrote it', async () => {
     const input = await optimizeWith({
-      store: recoveryStore(),
+      store: pagesStore(),
       roundKind: 'initial',
       userMessage: 'Why is the payments service slow?',
     });
@@ -1264,11 +1205,19 @@ describe('applyCortexEdits ontology cleanup', () => {
     '```',
   ].join('\n');
 
-  const integrationPage = {
+  const integrationPage: {
+    id: string;
+    title: string;
+    description?: string;
+    entity_type: 'integration';
+    status: 'established';
+    corroborations: number;
+    updated_at: string;
+  } = {
     id: 'cortex_integration_telemetry-connector',
     title: 'telemetry-connector',
-    entity_type: 'integration' as const,
-    status: 'established' as const,
+    entity_type: 'integration',
+    status: 'established',
     corroborations: 2,
     updated_at: '2026-03-02T09:00:00.000Z',
   };
@@ -1576,8 +1525,8 @@ describe('createLlmProposeCortexEdits prompt', () => {
     const { system } = await run({ messages: [], roundKind: 'initial', catalog: [] });
 
     expect(system).toContain('follow_up —');
-    expect(system).toContain('alert_recovery —');
-    expect(system).toContain('a rewrite alone does not confirm a page, so propose both edits');
+    expect(system).not.toContain('alert_recovery');
+    expect(system).toContain('A follow-up never confirms a page');
     expect(system).toContain('## Tool failures');
     expect(system).toContain('A single typo is not a failure signature');
     expect(system).toContain('recorded nowhere on the page');

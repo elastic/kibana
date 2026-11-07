@@ -193,7 +193,6 @@ export const runCortexOptimize = async ({
   }
 
   const roundKind = classifyCortexRound({
-    userMessage,
     roundIndex: loadedRound.roundIndex ?? roundIndex,
   });
   const sandboxToolCalls = loadedRound.toolCalls.filter(
@@ -203,7 +202,6 @@ export const runCortexOptimize = async ({
     !shouldOptimizeRound({
       roundKind,
       sandboxToolCallCount: sandboxToolCalls.length,
-      userMessage,
     })
   ) {
     logger.debug(

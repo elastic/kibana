@@ -374,9 +374,8 @@ fails the test; low scores do not.
 `NIGHTSHIFT_DATASETS=cortex-optimize` replays saved investigation rounds through the real Cortex
 optimizer with a real model and scores the wiki pages it writes. No investigation runs and no
 sandbox is needed, so a run takes a few model calls per example and isolates what the optimizer
-learns from a round: recurring tool failures, a correction in a follow-up message, and the outcome
-of a recovered alert. The optimizer's own page store runs unchanged on an in-memory Elasticsearch
-fake, so page ids, statuses, corroboration counts and provenance behave as in production.
+learns from a round: recurring tool failures and a correction in a follow-up message. The
+optimizer's own page store runs unchanged on an in-memory Elasticsearch fake, so page ids, statuses, corroboration counts and provenance behave as in production.
 
 It is opt-in: unset and `all` never select it. It still needs a model endpoint, so start it the same
 way as the other evals:
@@ -398,7 +397,6 @@ Each example replays one or more `rounds` against one store, optionally starting
 | ---------------- | ------------------------------------------------------------------------------------------------- |
 | `initial`        | An investigation: learn the durable structure and tool behaviour it established.                  |
 | `follow_up`      | A user turn after an answer (`previous_assistant_message`) that may correct or extend it.         |
-| `alert_recovery` | The round that checks whether a recovered alert confirms or refutes the investigation's cause.    |
 
 An example's `output` states what must happen. Terms in `must_capture` may list alternatives with
 `|`.

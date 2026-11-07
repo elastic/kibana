@@ -34,11 +34,10 @@ export type CortexPageStatus = (typeof CORTEX_PAGE_STATUSES)[number];
 export const CORTEX_PROMOTION_CORROBORATIONS = 1;
 
 /**
- * What a round is to the optimizer. A follow-up may correct the previous answer, and an alert
- * recovery says whether the alert's recovery confirms or refutes the investigation's root cause, so
- * both carry more weight than a single investigation.
+ * What a round is to the optimizer. A follow-up may correct or extend the previous answer, so it
+ * carries more weight than a single investigation, but one person's say-so never confirms a page.
  */
-export const CORTEX_ROUND_KINDS = ['initial', 'follow_up', 'alert_recovery'] as const;
+export const CORTEX_ROUND_KINDS = ['initial', 'follow_up'] as const;
 
 export type CortexRoundKind = (typeof CORTEX_ROUND_KINDS)[number];
 

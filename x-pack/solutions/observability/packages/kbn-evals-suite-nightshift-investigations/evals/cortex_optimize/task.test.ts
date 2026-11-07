@@ -102,7 +102,7 @@ describe('runCortexReplay', () => {
         ],
       })
     );
-    // The recovery round reads the content of the page its own investigation wrote.
+    // The follow-up reads the content of the page its own conversation wrote.
     expect(proposeEdits).toHaveBeenCalledWith(
       expect.objectContaining({
         pageBodies: [

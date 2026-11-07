@@ -16,13 +16,12 @@ import {
 
 const MAX_MESSAGE_LENGTH = 50_000;
 
-export const CORTEX_REPLAY_ROUND_KINDS = ['initial', 'follow_up', 'alert_recovery'] as const;
+export const CORTEX_REPLAY_ROUND_KINDS = ['initial', 'follow_up'] as const;
 export type CortexReplayRoundKind = (typeof CORTEX_REPLAY_ROUND_KINDS)[number];
 
 export const CORTEX_REPLAY_EXAMPLE_KINDS = [
   'tool_failure',
   'follow_up',
-  'alert_recovery',
   'dedup',
   'contradiction',
   'noop',
@@ -53,10 +52,10 @@ const replayToolCallSchema = lazySchema(() =>
 const replayRoundSchema = lazySchema(() =>
   z.object({
     kind: z.enum(CORTEX_REPLAY_ROUND_KINDS),
-    /** The round's user turn: the question, a follow-up correction or the recovery message. */
+    /** The round's user turn: the question, or a follow-up message. */
     user_message: z.string().min(1).max(MAX_MESSAGE_LENGTH),
     assistant_message: z.string().max(MAX_MESSAGE_LENGTH),
-    /** The previous round's request and final answer, which a follow-up or recovery round refers to. */
+    /** The previous round's request and final answer, which a follow-up refers to. */
     previous_user_message: z.string().max(MAX_MESSAGE_LENGTH).optional(),
     previous_assistant_message: z.string().max(MAX_MESSAGE_LENGTH).optional(),
     tool_calls: z.array(replayToolCallSchema).max(500).default([]),
@@ -72,7 +71,7 @@ const seedPageSchema = lazySchema(() =>
     content: z.string().max(65_536),
     status: z.enum(CORTEX_PAGE_STATUSES).default('tentative'),
     corroborations: z.number().int().min(0).default(0),
-    /** Conversation the page's provenance names, so a recovery round can find it. */
+    /** Conversation the page's provenance names, so a follow-up can find it. */
     conversation_id: z.string().max(200).optional(),
   })
 );
