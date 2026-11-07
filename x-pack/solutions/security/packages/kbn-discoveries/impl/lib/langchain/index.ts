@@ -21,5 +21,6 @@ export {
   getModelRefusalErrorMessage,
   getStructuredGenerationPrompt,
   handleModelRefusal,
+  partialResponseContainsJson,
 } from './output_chunking/nodes/helpers';
 export { NodeType } from './constants';
