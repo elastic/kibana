@@ -54,6 +54,7 @@ const setup = ({
   countError,
   closeError,
   noteError,
+  movedOn = [],
 }: {
   alerts: Array<[string, Record<string, unknown>]>;
   /** Stored decisions by document id. */
@@ -66,6 +67,8 @@ const setup = ({
   countError?: Error;
   closeError?: Error;
   noteError?: Error;
+  /** Alerts an analyst acknowledged after the search: the close leaves them alone. */
+  movedOn?: string[];
 }) => {
   const callKibanaApi = jest.fn(
     async ({ path, body }: { path: string; body?: Record<string, any> }) => {
@@ -75,6 +78,12 @@ const setup = ({
           return { body: { hits: { total: { value: closedToday } } } };
         }
         if (searchError) throw searchError;
+        // The lookup of alerts that are still open: after a failed close all of them, after a close
+        // that left some alone only those an analyst moved on from.
+        if (body?.query?.bool?.filter?.[0]?.ids) {
+          const open = closeError ? body.query.bool.filter[0].ids.values : movedOn;
+          return { body: { hits: { hits: open.map((_id: string) => ({ _id })) } } };
+        }
         return { body: { hits: { hits: alerts.map(([_id, _source]) => ({ _id, _source })) } } };
       }
       if (path.endsWith('/api/note')) {
@@ -83,7 +92,10 @@ const setup = ({
       }
       if (path.endsWith('/signals/status')) {
         if (closeError) throw closeError;
-        return { body: { updated: body?.signal_ids.length, failures: [] } };
+        const ids: string[] = body?.query.bool.filter[0].ids.values;
+        return {
+          body: { updated: ids.filter((id) => !movedOn.includes(id)).length, failures: [] },
+        };
       }
       return { body: { updated: 1, timed_out: false, failures: [] } };
     }
@@ -121,7 +133,15 @@ const setup = ({
   const closes = () =>
     callKibanaApi.mock.calls
       .filter(([{ path }]) => path.endsWith('/signals/status'))
-      .map(([{ body }]) => body as { signal_ids: string[]; status: string; reason: string });
+      .map(([{ body }]) => {
+        const { query, status, reason } = body as Record<string, any>;
+        return {
+          signal_ids: query.bool.filter[0].ids.values as string[],
+          status: status as string,
+          reason: reason as string,
+          onlyIfStatus: query.bool.filter[1].term['kibana.alert.workflow_status'] as string,
+        };
+      });
   const tags = () =>
     callKibanaApi.mock.calls
       .filter(([{ path }]) => path.endsWith('/signals/tags'))
@@ -447,7 +467,7 @@ describe('triage match decisions step in on mode', () => {
       },
     ]);
     expect(closes()).toEqual([
-      { signal_ids: ['a', 'b'], status: 'closed', reason: 'false_positive' },
+      { signal_ids: ['a', 'b'], status: 'closed', reason: 'false_positive', onlyIfStatus: 'open' },
     ]);
     const paths = callKibanaApi.mock.calls.map(([{ path }]) => path.split('/').pop());
     expect(paths.indexOf('tags')).toBeLessThan(paths.indexOf('status'));
@@ -524,6 +544,63 @@ describe('triage match decisions step in on mode', () => {
     const { output } = await run();
 
     expect(output).toEqual(expect.objectContaining({ status: 'ok', closed: 0, close_failures: 1 }));
+  });
+
+  it('leaves an alert alone that an analyst acknowledged after the search, and takes its tag off', async () => {
+    const { run, tags, notes } = setup({
+      mode: 'on',
+      movedOn: ['b'],
+      alerts: [
+        ['a', source('C:\\x.exe')],
+        ['b', source('C:\\x.exe')],
+      ],
+      decisions: approved('C:\\x.exe'),
+    });
+
+    const { output } = await run();
+
+    const tag = `az:closed_by_decision:${idOf('C:\\x.exe')}`;
+    expect(output).toEqual(expect.objectContaining({ closed: 1, close_failures: 0 }));
+    expect(tags().map(({ ids, tags: change }) => [ids, change])).toEqual([
+      [['a', 'b'], { tags_to_add: [tag], tags_to_remove: [] }],
+      [['b'], { tags_to_add: [], tags_to_remove: [tag] }],
+    ]);
+    expect(notes().map(({ eventId }) => eventId)).toEqual(['a']);
+  });
+
+  it('counts a close that failed against the daily allowance, so a later page cannot close another full allowance', async () => {
+    const { run, callKibanaApi, closes } = setup({
+      mode: 'on',
+      closedToday: 498,
+      closeError: new Error('partly applied'),
+      alerts: [],
+      decisions: approved('C:\\x.exe'),
+    });
+    const inner = callKibanaApi.getMockImplementation()!;
+    const pages = [
+      [
+        ...['a', 'b'].map((_id, i) => ({ _id, _source: source('C:\\x.exe'), sort: [i, _id] })),
+        ...Array.from({ length: ALERT_FETCH_LIMIT - 2 }, (_unused, i) => ({
+          _id: `old${i}`,
+          _source: source(`C:\\other${i}.exe`),
+          sort: [i + 2, `u${i}`],
+        })),
+      ],
+      [{ _id: 'late', _source: source('C:\\x.exe'), sort: [1, 'z'] }],
+    ];
+    callKibanaApi.mockImplementation(async (params: { path: string; body?: Record<string, any> }) =>
+      params.path.endsWith('/signals/search') &&
+      params.body?.size !== 0 &&
+      !params.body?.query?.bool?.filter?.[0]?.ids
+        ? { body: { hits: { hits: pages.shift() ?? [] } } }
+        : inner(params)
+    );
+
+    const { output } = await run();
+
+    // One attempt on the first page; the second page finds the allowance used up.
+    expect(closes()).toHaveLength(1);
+    expect(output).toEqual(expect.objectContaining({ close_failures: 1, capped: 1 }));
   });
 
   it('takes the decision tag off alerts a failed close left open, so the next sweep retries them', async () => {

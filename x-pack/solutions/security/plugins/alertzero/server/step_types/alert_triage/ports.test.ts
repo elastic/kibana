@@ -9,7 +9,7 @@ import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { ALERT_FETCH_LIMIT, BATCH_ALERT_CAP, RULE_FETCH_LIMIT } from '../../alert_triage/constants';
 import { LOADED_ALERT_FIELDS } from '../../alert_triage/loaded_alert_fields';
 import {
-  closeAlertsAsFalsePositive,
+  closeStillOpenAlertsAsFalsePositive,
   countClosedByDecision,
   fetchDecisionCandidates,
   type DecisionCursor,
@@ -708,13 +708,16 @@ describe('fetchDecisionCandidates', () => {
   });
 });
 
-describe('closeAlertsAsFalsePositive', () => {
+describe('closeStillOpenAlertsAsFalsePositive', () => {
   const closeWith = (body: Record<string, unknown>) => {
     const callKibanaApi = jest.fn().mockResolvedValue({ status: 200, headers: {}, body });
-    return { callKibanaApi, run: () => closeAlertsAsFalsePositive({ callKibanaApi }, ['a', 'b']) };
+    return {
+      callKibanaApi,
+      run: () => closeStillOpenAlertsAsFalsePositive({ callKibanaApi }, ['a', 'b']),
+    };
   };
 
-  it('closes the alerts with the reason the closure action records', async () => {
+  it('closes only the given alerts that are still open, with the reason the closure action records', async () => {
     const { run, callKibanaApi } = closeWith({ updated: 2, failures: [] });
 
     await run();
@@ -722,16 +725,30 @@ describe('closeAlertsAsFalsePositive', () => {
     expect(callKibanaApi).toHaveBeenCalledWith(
       expect.objectContaining({
         path: '/api/detection_engine/signals/status',
-        body: { signal_ids: ['a', 'b'], status: 'closed', reason: 'false_positive' },
+        body: {
+          query: {
+            bool: {
+              filter: [
+                { ids: { values: ['a', 'b'] } },
+                { term: { 'kibana.alert.workflow_status': 'open' } },
+              ],
+            },
+          },
+          status: 'closed',
+          reason: 'false_positive',
+        },
       })
     );
   });
 
-  it.each([
-    ['fewer alerts updated than asked', { updated: 1, version_conflicts: 1 }],
-    ['a failure', { updated: 2, failures: [{ cause: 'x' }] }],
-  ])('throws on %s, so a partial close is never reported as done', async (_name, body) => {
-    await expect(closeWith(body).run()).rejects.toThrow('not fully applied');
+  it('returns how many alerts it closed, fewer than asked when an analyst moved some on', async () => {
+    await expect(closeWith({ updated: 1, failures: [] }).run()).resolves.toBe(1);
+  });
+
+  it('throws on a failure, so a partial close is never reported as done', async () => {
+    await expect(closeWith({ updated: 2, failures: [{ cause: 'x' }] }).run()).rejects.toThrow(
+      'not fully applied'
+    );
   });
 });
 

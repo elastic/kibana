@@ -347,11 +347,43 @@ export const tagAlerts =
   };
 
 /**
- * Closes alerts as false positives, the reason the closure action records. Throws unless every
- * alert was updated: a close that was only partly applied must not be reported as done.
+ * Closes the given alerts as false positives, but only those that are still `open` when the write
+ * runs, so an alert an analyst acknowledged after the search is left alone. The status route cannot
+ * check the previous status for ids, so this sends the ids and the status as one query. Returns how
+ * many alerts were closed, which is less than the given count when some had moved on. Throws when
+ * the update reports failures.
  */
-export const closeAlertsAsFalsePositive = (api: KibanaApi, alertIds: readonly string[]) =>
-  updateAlertStatus(api, alertIds, { status: 'closed', reason: 'false_positive' });
+export const closeStillOpenAlertsAsFalsePositive = async (
+  { callKibanaApi }: KibanaApi,
+  alertIds: readonly string[]
+): Promise<number> => {
+  const { body } = await callKibanaApi<{
+    updated?: number;
+    version_conflicts?: number;
+    failures?: unknown[];
+  }>({
+    method: 'POST',
+    path: SIGNALS_STATUS_PATH,
+    body: {
+      query: {
+        bool: {
+          filter: [{ ids: { values: [...alertIds] } }, { term: { [ALERT_FIELDS.status]: 'open' } }],
+        },
+      },
+      status: 'closed',
+      reason: 'false_positive',
+    },
+  });
+  const failureCount = body.failures?.length ?? 0;
+  if (failureCount > 0) {
+    throw new Error(
+      `Closing ${alertIds.length} alert(s) was not fully applied (updated: ${
+        body.updated ?? 0
+      }, conflicts: ${body.version_conflicts ?? 0}, failures: ${failureCount})`
+    );
+  }
+  return body.updated ?? 0;
+};
 
 /** Reopens alerts, in the chunks the status route takes. Throws unless every alert was updated. */
 export const openAlerts = async (api: KibanaApi, alertIds: readonly string[]): Promise<void> => {
