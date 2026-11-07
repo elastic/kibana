@@ -7,7 +7,6 @@
 
 import React, { memo, useEffect, useMemo, useState } from 'react';
 import {
-  Background,
   Controls,
   Panel,
   ReactFlow,
@@ -296,6 +295,22 @@ export function ImpactServiceMap({ impactMap }: ImpactMapRendererProps) {
         css={css`
           width: 100%;
           height: 100%;
+          /* The service map's own grid: plain squares on a light shade. */
+          background: linear-gradient(
+                90deg,
+                ${euiTheme.colors.backgroundBasePlain}
+                  calc(${euiTheme.size.l} - calc(${euiTheme.size.xs} / 2)),
+                transparent 1%
+              )
+              center,
+            linear-gradient(
+                ${euiTheme.colors.backgroundBasePlain}
+                  calc(${euiTheme.size.l} - calc(${euiTheme.size.xs} / 2)),
+                transparent 1%
+              )
+              center,
+            ${euiTheme.colors.lightShade};
+          background-size: ${euiTheme.size.l} ${euiTheme.size.l};
         `}
       >
         <ReactFlow
@@ -313,7 +328,6 @@ export function ImpactServiceMap({ impactMap }: ImpactMapRendererProps) {
           proOptions={{ hideAttribution: true }}
           colorMode={colorMode.toLowerCase() as ColorMode}
         >
-          <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
           <Controls showInteractive={false} />
           <Panel position="top-left">
             <ImpactMapLegend criticalPathColor={criticalPathColor} />

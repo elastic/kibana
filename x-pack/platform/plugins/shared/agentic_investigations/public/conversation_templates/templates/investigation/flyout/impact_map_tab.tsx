@@ -179,6 +179,7 @@ const ImpactMapPanel: React.FC<{
                 alignItems="center"
                 responsive={false}
                 css={css`
+                  flex: none;
                   padding: ${euiTheme.size.m};
                 `}
               >
