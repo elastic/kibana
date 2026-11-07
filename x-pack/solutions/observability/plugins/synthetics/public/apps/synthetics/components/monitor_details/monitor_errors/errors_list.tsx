@@ -55,6 +55,41 @@ export function getNextUpStateForResolvedError(
   }
 }
 
+/**
+ * Total duration of an error state: the recorded state duration plus the time until the next up
+ * state (resolved errors) or until now, capped at one check interval (active errors).
+ */
+export function getErrorStateDurationMs({
+  errorState,
+  upStates,
+  isActive,
+  scopeByMonitor,
+  now = Date.now(),
+}: {
+  errorState: PingState;
+  upStates: PingState[];
+  isActive: boolean;
+  scopeByMonitor: boolean;
+  now?: number;
+}): number {
+  const stateDuration = Number(errorState.state?.duration_ms) || 0;
+  const { timespan } = errorState.monitor;
+  if (!timespan) {
+    return stateDuration;
+  }
+
+  if (isActive) {
+    const checkInterval = moment(timespan.lt).diff(moment(timespan.gte), 'millisecond');
+    const sinceLastCheck = moment(now).diff(errorState['@timestamp']);
+    return stateDuration + Math.min(sinceLastCheck, checkInterval);
+  }
+
+  const resolvedState = getNextUpStateForResolvedError(errorState, upStates, scopeByMonitor);
+  return resolvedState
+    ? stateDuration + moment(resolvedState.state.started_at).diff(errorState['@timestamp'])
+    : stateDuration;
+}
+
 export function computeActiveErrorKeys(
   errorStates: PingState[],
   upStates: PingState[]
@@ -141,6 +176,14 @@ export const ErrorsList = ({
 
   const isActive = (item: PingState) =>
     activeErrorIds.has(`${item.config_id ?? item.monitor?.id ?? ''}:${item['@timestamp']}`);
+
+  const getDuration = (item: PingState) =>
+    getErrorStateDurationMs({
+      errorState: item,
+      upStates,
+      isActive: isActive(item),
+      scopeByMonitor: isGlobalView,
+    });
 
   const isTabletOrGreater = useIsWithinMinBreakpoint('s');
 
@@ -265,30 +308,10 @@ export const ErrorsList = ({
       field: 'state.duration_ms',
       name: ERROR_DURATION_LABEL,
       align: 'right' as const,
-      sortable: true,
-      render: (value: string, item: PingState) => {
-        let activeDuration = 0;
-        if (item.monitor.timespan) {
-          const diff = moment(item.monitor.timespan.lt).diff(
-            moment(item.monitor.timespan.gte),
-            'millisecond'
-          );
-          if (isActive(item)) {
-            const currentDiff = moment().diff(item['@timestamp']);
-
-            activeDuration = currentDiff < diff ? currentDiff : diff;
-          } else {
-            const resolvedState = getNextUpStateForResolvedError(item, upStates, isGlobalView);
-
-            activeDuration = resolvedState
-              ? moment(resolvedState.state.started_at).diff(item['@timestamp'])
-              : 0;
-          }
-        }
-        return (
-          <EuiText size="s">{formatTestDuration(Number(value) + activeDuration, true)}</EuiText>
-        );
-      },
+      sortable: getDuration,
+      render: (_value: string, item: PingState) => (
+        <EuiText size="s">{formatTestDuration(getDuration(item), true)}</EuiText>
+      ),
     },
     {
       field: '@timestamp',
@@ -332,7 +355,7 @@ export const ErrorsList = ({
                 checkGroup: item.monitor?.check_group ?? '',
                 locationName: item.observer?.geo?.name ?? item.observer?.name ?? '',
                 locationId: item.observer?.name ?? '',
-                durationMs: Number(item.state?.duration_ms) || 0,
+                durationMs: getDuration(item),
                 errorMessage: item.error?.message ?? '',
               });
             }}

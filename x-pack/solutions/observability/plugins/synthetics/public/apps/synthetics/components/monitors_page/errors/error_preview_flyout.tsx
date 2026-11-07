@@ -30,6 +30,7 @@ import { i18n } from '@kbn/i18n';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { getErrorDetailsUrl } from '../../monitor_details/monitor_errors/error_details_url';
+import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { JourneyStepScreenshotContainer } from '../../common/screenshot/journey_step_screenshot_container';
 import type { ErrorGroupItem } from '../../../../../../common/runtime_types';
 
@@ -72,7 +73,7 @@ export const ErrorPreviewFlyout = ({
     },
     {
       title: DURATION_LABEL,
-      description: formatDuration(error.durationMs),
+      description: formatTestDuration(error.durationMs, true),
     },
   ];
 
@@ -186,14 +187,6 @@ export const ErrorPreviewFlyout = ({
     </EuiFlyout>
   );
 };
-
-function formatDuration(ms: number): string {
-  if (ms == null || isNaN(ms)) return '--';
-  if (ms < 1000) return `${Math.round(ms)}ms`;
-  if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`;
-  if (ms < 3600000) return `${Math.round(ms / 60000)}m`;
-  return `${(ms / 3600000).toFixed(1)}h`;
-}
 
 const ERROR_LABEL = i18n.translate('xpack.synthetics.errorPreview.error', {
   defaultMessage: 'Error',
