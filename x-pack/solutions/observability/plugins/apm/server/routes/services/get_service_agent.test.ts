@@ -29,12 +29,23 @@ const baseParams = {
   end,
 };
 
-function hitResponse(fields: Record<string, unknown[]>) {
+function telemetrySdkAggregations({ name, language }: { name?: string; language?: string }) {
+  return {
+    telemetrySdkName: { buckets: name ? [{ key: name, doc_count: 1 }] : [] },
+    telemetrySdkLanguage: { buckets: language ? [{ key: language, doc_count: 1 }] : [] },
+  };
+}
+
+function hitResponse(
+  fields: Record<string, unknown[]>,
+  aggregations?: ReturnType<typeof telemetrySdkAggregations>
+) {
   return {
     hits: {
       total: { value: 1 },
       hits: [{ fields }],
     },
+    ...(aggregations ? { aggregations } : {}),
   };
 }
 
@@ -79,6 +90,36 @@ describe('getServiceAgent', () => {
     const result = await getServiceAgent({ ...baseParams, apmEventClient });
 
     expect(result.agentName).toBe('java');
+  });
+
+  it('resolves the telemetry SDK fields from the range when the sampled document omits them', async () => {
+    const search: SearchMock = jest
+      .fn()
+      .mockResolvedValueOnce(
+        hitResponse(
+          { [AGENT_NAME]: ['opentelemetry/python/elastic'] },
+          telemetrySdkAggregations({ name: 'opentelemetry', language: 'python' })
+        )
+      );
+    const apmEventClient = { search } as unknown as APMEventClient;
+
+    const result = await getServiceAgent({ ...baseParams, apmEventClient });
+
+    expect(result.agentName).toBe('opentelemetry/python/elastic');
+    expect(result.telemetrySdkName).toBe('opentelemetry');
+    expect(result.telemetrySdkLanguage).toBe('python');
+  });
+
+  it('leaves the telemetry SDK fields unset when no document in the range has them', async () => {
+    const search: SearchMock = jest
+      .fn()
+      .mockResolvedValueOnce(hitResponse({ [AGENT_NAME]: ['java'] }, telemetrySdkAggregations({})));
+    const apmEventClient = { search } as unknown as APMEventClient;
+
+    const result = await getServiceAgent({ ...baseParams, apmEventClient });
+
+    expect(result.telemetrySdkName).toBeUndefined();
+    expect(result.telemetrySdkLanguage).toBeUndefined();
   });
 
   it('matches documents that have agent.name or telemetry SDK fields', async () => {
