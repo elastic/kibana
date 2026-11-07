@@ -10,7 +10,7 @@ import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extens
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 
 /**
- * Registers the osquery step editor definition only when the flag is on and the optional
+ * Registers the osquery step editor definitions only when the flag is on and the optional
  * `workflowsExtensions` plugin is present. Returns whether anything was registered.
  */
 export const registerOsqueryWorkflowSteps = ({
@@ -29,6 +29,10 @@ export const registerOsqueryWorkflowSteps = ({
 
   workflowsExtensions.registerStepDefinition(() =>
     import('./run_query_step').then((m) => m.createRunQueryStepDefinition(http))
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./run_pack_step').then((m) => m.createRunPackStepDefinition(http))
   );
 
   return true;
