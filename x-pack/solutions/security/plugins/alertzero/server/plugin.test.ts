@@ -24,6 +24,7 @@ import { ensureAgentSafe, registerAgentType } from './agent';
 import { registerAlertZeroInferenceFeatures } from './inference_features';
 import { ALERTZERO_TELEMETRY_EVENT_TYPES } from './telemetry';
 import { ReportWorkerOutcomeStepId } from '../common/step_types';
+import { adoptInvestigationsAiIndex } from './context_engine/adopt_investigations_ai_index';
 
 jest.mock('./managed_workflows/register_owner', () => ({
   registerOwner: jest.fn(),
@@ -45,6 +46,10 @@ jest.mock('./agent', () => ({
 
 jest.mock('./routes/register_routes', () => ({
   registerRoutes: jest.fn(),
+}));
+
+jest.mock('./context_engine/adopt_investigations_ai_index', () => ({
+  adoptInvestigationsAiIndex: jest.fn().mockResolvedValue(undefined),
 }));
 
 const createConfig = (overrides: Partial<AlertZeroConfig> = {}): AlertZeroConfig => ({
@@ -189,10 +194,12 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       await plugin.start(coreStart, {
         spaces: undefined,
         workflowsExtensions: { initManagedWorkflowsClient: jest.fn() },
+        contextEngine: { getAiIndexService: jest.fn() },
       } as never);
 
       expect(initializeManagedWorkflows).not.toHaveBeenCalled();
       expect(ensureAgentSafe).not.toHaveBeenCalled();
+      expect(adoptInvestigationsAiIndex).not.toHaveBeenCalled();
     });
   });
 
@@ -262,6 +269,21 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         'security-attack-fingerprints',
         expect.objectContaining({
           dest: { type: 'index', value: 'ai-index-idx-security-attack-fingerprints' },
+        })
+      );
+    });
+
+    it('replaces unconfigured security-investigations indexes once Context Engine has started', () => {
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
+      const contextEngine = { getAiIndexService: jest.fn() };
+
+      plugin.start(coreMock.createStart(), { contextEngine } as never);
+
+      expect(adoptInvestigationsAiIndex).toHaveBeenCalledWith(
+        expect.objectContaining({
+          getAiIndexService: expect.any(Function),
+          listSpaceIds: expect.any(Function),
+          logger: expect.anything(),
         })
       );
     });
