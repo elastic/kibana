@@ -20,6 +20,7 @@ import {
   seedPersonaMatrixTools,
   cleanupPersonaMatrixTools,
 } from '../src/fixtures/persona_matrix_tools_seed';
+import { ensureEntityStoreRunning } from '../src/fixtures/entity_store';
 import { assertPersonaMatrixToolsRegistered } from '../src/fixtures/tool_registration_check';
 import { agentProfile, resolveAgentId } from '../src/agent_profile';
 
@@ -37,6 +38,10 @@ evaluate.describe('Security Persona Matrix', { tag: tags.stateful.classic }, () 
     if (seedProfile === 'parity') {
       await assertParityDataGate({ esClient: esClient as unknown as EsClient, log });
     }
+    // Entity-analytics examples expect security.get_entity* built-in tools, which
+    // are availability-gated on the entity store being installed; nothing installs
+    // it on a fresh stack, so do it before the tool-registration pre-flight runs.
+    await ensureEntityStoreRunning({ kbnClient, log });
     await seedPersonaMatrixTools({ kbnClient, log, profile: agentProfile });
     log.info(
       `[persona-matrix] seeded persona-matrix tools (seed profile: ${seedProfile}, agent: ${resolveAgentId(
