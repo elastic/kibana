@@ -51,6 +51,17 @@ describe('parseEventEnrichmentResponse', () => {
               },
             },
           ],
+          must_not: [
+            {
+              bool: {
+                should: [
+                  { term: { 'labels.is_ioc_transform_source': 'true' } },
+                  { term: { 'labels.is_transform_source': 'true' } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
           minimum_should_match: 1,
           should: [
             {

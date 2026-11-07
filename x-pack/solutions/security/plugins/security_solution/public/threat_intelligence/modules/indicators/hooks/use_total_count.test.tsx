@@ -39,6 +39,34 @@ describe('useIndicatorsTotalCount()', () => {
     it('should query the database for threat indicators', async () => {
       expect(mockedSearchService.search).toHaveBeenCalledTimes(1);
     });
+
+    it('should exclude raw indicator copies stored by integration transforms', () => {
+      expect(mockedSearchService.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            query: {
+              bool: {
+                must: [
+                  { term: { 'event.category': { value: 'threat' } } },
+                  { term: { 'event.type': { value: 'indicator' } } },
+                ],
+                must_not: [
+                  {
+                    bool: {
+                      should: [
+                        { term: { 'labels.is_ioc_transform_source': 'true' } },
+                        { term: { 'labels.is_transform_source': 'true' } },
+                      ],
+                      minimum_should_match: 1,
+                    },
+                  },
+                ],
+              },
+            },
+          }),
+        })
+      );
+    });
   });
 
   describe('when rerendered', () => {

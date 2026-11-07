@@ -9,6 +9,7 @@ import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { THREAT_QUERY_BASE } from '../../../constants/common';
 import { RawIndicatorFieldId } from '../../../../../common/threat_intelligence/types/indicator';
+import { IOC_TRANSFORM_SOURCE_QUERY } from '../../../../../common/cti/constants';
 
 const TIMESTAMP_FIELD = RawIndicatorFieldId.TimeStamp;
 
@@ -49,6 +50,10 @@ export const getIndicatorQueryParams = ({
             },
           },
           meta: {},
+        },
+        {
+          query: IOC_TRANSFORM_SOURCE_QUERY,
+          meta: { negate: true },
         },
       ]
     ),

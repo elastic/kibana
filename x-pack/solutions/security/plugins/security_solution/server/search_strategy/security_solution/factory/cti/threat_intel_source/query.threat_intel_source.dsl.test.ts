@@ -20,6 +20,16 @@ export const mockOptions: ThreatIntelSourceRequestOptionsInput = {
   },
 };
 
+const transformSourceExclusion = {
+  bool: {
+    should: [
+      { term: { 'labels.is_ioc_transform_source': 'true' } },
+      { term: { 'labels.is_transform_source': 'true' } },
+    ],
+    minimum_should_match: 1,
+  },
+};
+
 export const expectedDsl = {
   aggs: {
     dataset: {
@@ -53,6 +63,7 @@ export const expectedDsl = {
           },
         },
       ],
+      must_not: [transformSourceExclusion],
     },
   },
   ignore_unavailable: true,
@@ -65,5 +76,14 @@ export const expectedDsl = {
 describe('buildbuildTiDataSourceQueryQuery', () => {
   test('build query from options correctly', () => {
     expect(buildTiDataSourceQuery(mockOptions)).toEqual(expectedDsl);
+  });
+
+  test('excludes raw indicator copies when no time range is given', () => {
+    expect(buildTiDataSourceQuery({ ...mockOptions, timerange: undefined }).query).toEqual({
+      bool: {
+        filter: [],
+        must_not: [transformSourceExclusion],
+      },
+    });
   });
 });
