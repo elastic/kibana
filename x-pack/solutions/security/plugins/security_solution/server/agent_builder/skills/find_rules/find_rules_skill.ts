@@ -69,6 +69,26 @@ In a multi-turn conversation, do not infer tag values from rule results — rule
 
 When the user refines a previous query — phrases like "which of them are network", "now show the Windows ones", "filter by endpoint" — make a fresh \`security.discover_rule_tags\` call to get current tag values, then call \`security.find_rules\` with the matching tags and any carry-over filters (e.g. severity). Do not filter the in-memory results from the previous response.
 
+## Tool Discipline
+
+Every tool call costs a turn, latency, and input tokens that are re-read on every subsequent step. Call a tool only when its result can change your next action, and follow these rules:
+
+### Provided-data short-circuit
+
+When the answer is already in the conversation — a previous \`security.find_rules\` result with the same criteria, a rule list the user pasted, or data an evaluation harness provided — answer from that data and make no tool calls. Re-query only when the user changes the criteria, asks for a field you do not already hold, or the provided set is empty.
+
+### No speculative core tools
+
+This skill's inline tools return every fact this skill renders. Do not call \`platform.core.search\`, \`platform.core.get_document_by_id\`, \`platform.core.generate_esql\`, or \`platform.core.execute_esql\` to look up rule or alert data — direct index access bypasses the rule-management APIs and cannot add information the answer needs. If a rule lookup returns zero results, say so instead of probing the index directly.
+
+### Bounded corroboration
+
+Corroborate once, within a bound. Noisy-rules questions: one \`security.alerts\` aggregation, then one \`security.find_rules\` lookup per rule you will name in the answer, at most 10. Count breakdowns: one call per bucket the user asked about. Never re-run a completed lookup to confirm it — a second identical call cannot change the answer.
+
+### No post-run calls
+
+Once \`security.find_rules\` (or the noisy-rules lookup chain) has returned the data your answer needs, render the response. Do not issue further \`security.discover_rule_tags\`, \`security.find_rules\`, or \`security.alerts\` calls after the result set is complete.
+
 ## Tag Discovery
 
 Tag values are environment-specific. Even widely-used names like "MITRE" may be spelled, cased, or absent differently in this space.
