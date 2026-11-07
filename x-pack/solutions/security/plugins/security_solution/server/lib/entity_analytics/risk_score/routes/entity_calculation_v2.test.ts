@@ -178,6 +178,7 @@ describe('entity risk score V2 calculation route', () => {
           entitiesCreated: 0,
           entityCreationsSkipped: 0,
           entityCreationsFailed: 0,
+          alertSources: {},
         };
       });
       jest.mocked(runResolutionScoringStep).mockImplementationOnce(async ({ pageTimings }) => {

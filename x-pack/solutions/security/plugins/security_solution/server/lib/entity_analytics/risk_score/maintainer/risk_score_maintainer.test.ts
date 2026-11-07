@@ -57,6 +57,7 @@ describe('createRiskScoreMaintainer run', () => {
     entitiesCreated: 0,
     entityCreationsSkipped: 0,
     entityCreationsFailed: 0,
+    alertSources: {},
   };
 
   const runMaintainer = async () => {

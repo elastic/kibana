@@ -8,6 +8,7 @@
 /** Shared types for the maintainer scoring runtime path. */
 
 import type { AssetCriticalityLevel } from '@kbn/entity-store/common';
+import type { AlertSourceCounts } from './tally_alert_sources';
 import type { EntityRiskScoreRecord } from '../../../../../../common/api/entity_analytics/common';
 
 /** Minimal entity fields required for modifier application. */
@@ -55,6 +56,8 @@ export interface ScoredEntityPage {
   entityIds: string[];
   scores: EntityRiskScoreRecord[];
   entities: Map<string, RiskScoreModifierEntity>;
+  /** Alerts of this page per source, split by whether the entity is in the store. */
+  alertSources: AlertSourceCounts;
 }
 
 /** Common summary fields returned by scorer modules. */
