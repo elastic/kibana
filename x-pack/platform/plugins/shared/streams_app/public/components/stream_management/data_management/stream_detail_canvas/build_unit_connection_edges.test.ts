@@ -85,6 +85,39 @@ describe('buildUnitCanvasGraph with routing nodes', () => {
     });
   });
 
+  it('lets "Add routing" put a routing node on lines into a destination it can route', () => {
+    expect(
+      buildRouted().edges.map(({ source, sourceHandle, target, data }) => [
+        source,
+        sourceHandle,
+        target,
+        data?.routingLine,
+      ])
+    ).toEqual([
+      [
+        'configured-source-direct-source',
+        undefined,
+        'configured-destination-es-a',
+        { origin: { kind: 'source', id: 'direct-source' }, destinationId: 'es-a' },
+      ],
+      ['configured-source-routed-source', undefined, 'configured-routing-p-routed', undefined],
+      // A rule with several targets cannot delegate one of them to a child pipeline.
+      ['configured-routing-p-routed', 'rule-0', 'configured-destination-es-a', undefined],
+      ['configured-routing-p-routed', 'rule-1', 'configured-routing-child', undefined],
+      [
+        'configured-routing-p-routed',
+        'rule-2',
+        'configured-destination-es-b',
+        {
+          origin: { kind: 'route', rule: { pipelineId: 'p-routed', ruleIndex: 2 } },
+          destinationId: 'es-b',
+        },
+      ],
+      // A routed child with a plain destinations list is edited as a routing node instead.
+      ['configured-routing-child', 'rule-0', 'configured-destination-es-c', undefined],
+    ]);
+  });
+
   it('skips sources that are not on the canvas', () => {
     const { edges } = buildRouted([]);
 

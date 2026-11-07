@@ -5,104 +5,277 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
+  EuiBadge,
+  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiSpacer,
   EuiTitle,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { KbnInfoCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useCanvasEvents } from '../stream_management/data_management/stream_detail_canvas/state_management';
+import { useSelector } from '@xstate/react';
+import { useDiscardConfirm } from '../../hooks/use_discard_confirm';
+import {
+  useCanvasEvents,
+  type CanvasRoutingFlyout,
+} from '../stream_management/data_management/stream_detail_canvas/state_management';
 import { RoutingErrorPrompt } from './error_prompt';
+import { RoutingRuleList } from './rule_list';
+import { discardRoutingChangesPromptOptions } from './prompt_options';
+import type {
+  RoutingFlyoutActorRef,
+  RoutingFlyoutTarget,
+  RoutingRuleChanges,
+} from './state_management/routing_flyout_machine';
 
 interface RoutingFlyoutProps {
-  edge: string;
-  /**
-   * Testing aid: routes the line through a routing node with one placeholder
-   * rule. Unset when the line cannot be routed.
-   */
-  onCreateTestRouting?: () => void;
+  flyout: CanvasRoutingFlyout;
+  /** Called right before the rules are staged, e.g. to record an undo step. */
+  onBeforeSave?: () => void;
 }
 
-export function RoutingFlyout({ edge, onCreateTestRouting }: RoutingFlyoutProps) {
+/** Names the line or routing node in the prompt shown when it cannot be configured. */
+const getRoutingTargetName = (target: RoutingFlyoutTarget): string => {
+  if (target.kind === 'pipeline') {
+    return target.pipelineId;
+  }
+  const { origin, destinationId } = target.line;
+  const from =
+    origin.kind === 'route'
+      ? `${origin.rule.pipelineId}[${origin.rule.ruleIndex}]`
+      : origin.kind === 'source'
+      ? origin.id
+      : origin.ref.pipelineId;
+  return `${from} → ${destinationId}`;
+};
+
+export function RoutingFlyout({ flyout, onBeforeSave }: RoutingFlyoutProps) {
   const { closeRoutingFlyout } = useCanvasEvents();
   const headerId = useGeneratedHtmlId();
+  const { ref, target } = flyout;
 
+  if (ref) {
+    return (
+      <RoutingFlyoutForm
+        flyoutRef={ref}
+        headerId={headerId}
+        onClose={closeRoutingFlyout}
+        onBeforeSave={onBeforeSave}
+      />
+    );
+  }
   return (
     <EuiFlyout
-      size="l"
-      maxWidth={1600}
+      size="m"
       aria-labelledby={headerId}
       onClose={closeRoutingFlyout}
       data-test-subj="streamsRoutingFlyout"
       paddingSize="none"
     >
-      <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup
-          justifyContent="spaceBetween"
+      <RoutingFlyoutHeader headerId={headerId} isNew={target.kind === 'line'} />
+      <EuiFlyoutBody>
+        <RoutingErrorPrompt edge={getRoutingTargetName(target)} onClose={closeRoutingFlyout} />
+      </EuiFlyoutBody>
+    </EuiFlyout>
+  );
+}
+
+function RoutingFlyoutHeader({
+  headerId,
+  isNew,
+  readOnly = false,
+}: {
+  headerId: string;
+  isNew: boolean;
+  readOnly?: boolean;
+}) {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiFlyoutHeader hasBorder>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+        css={css`
+          padding: ${euiTheme.size.m} ${euiTheme.size.l};
+          min-height: 32px;
+        `}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="s" data-test-subj="streamsCanvasFlyoutTitle">
+            <h1 id={headerId}>
+              {isNew
+                ? i18n.translate('xpack.streams.routingFlyout.addRoutingLabel', {
+                    defaultMessage: 'Add routing',
+                  })
+                : i18n.translate('xpack.streams.routingFlyout.editRoutingLabel', {
+                    defaultMessage: 'Edit routing',
+                  })}
+            </h1>
+          </EuiTitle>
+        </EuiFlexItem>
+        {readOnly ? (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">
+              {i18n.translate('xpack.streams.routingFlyout.readOnlyBadge', {
+                defaultMessage: 'Read only',
+              })}
+            </EuiBadge>
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+    </EuiFlyoutHeader>
+  );
+}
+
+function RoutingFlyoutForm({
+  flyoutRef,
+  headerId,
+  onClose,
+  onBeforeSave,
+}: {
+  flyoutRef: RoutingFlyoutActorRef;
+  headerId: string;
+  onClose: () => void;
+  onBeforeSave?: () => void;
+}) {
+  const { euiTheme } = useEuiTheme();
+  const rules = useSelector(flyoutRef, (state) => state.context.rules);
+  const availableSignals = useSelector(flyoutRef, (state) => state.context.availableSignals);
+  const isNew = useSelector(flyoutRef, (state) => state.context.target.kind === 'line');
+  const editable = useSelector(flyoutRef, (state) => state.context.editable);
+  const hasChanges = useSelector(flyoutRef, (state) => state.context.hasChanges);
+  const saveError = useSelector(flyoutRef, (state) => state.context.saveError);
+  const isSaving = useSelector(flyoutRef, (state) => state.matches('saving'));
+  const canSave = useSelector(flyoutRef, (state) => state.can({ type: 'flyout.save' }));
+
+  const addRule = useCallback(() => flyoutRef.send({ type: 'rule.add' }), [flyoutRef]);
+  const updateRule = useCallback(
+    (key: string, changes: RoutingRuleChanges) =>
+      flyoutRef.send({ type: 'rule.update', key, changes }),
+    [flyoutRef]
+  );
+  const deleteRule = useCallback(
+    (key: string) => flyoutRef.send({ type: 'rule.delete', key }),
+    [flyoutRef]
+  );
+  const reorderRule = useCallback(
+    (from: number, to: number) => flyoutRef.send({ type: 'rule.reorder', from, to }),
+    [flyoutRef]
+  );
+  const save = useCallback(() => {
+    onBeforeSave?.();
+    flyoutRef.send({ type: 'flyout.save' });
+  }, [flyoutRef, onBeforeSave]);
+
+  const confirmClose = useDiscardConfirm(onClose, {
+    enabled: hasChanges,
+    ...discardRoutingChangesPromptOptions,
+  });
+  // Closing does not cancel a save in flight, so the flyout stays open until it settles.
+  const requestClose = isSaving ? () => {} : confirmClose;
+
+  return (
+    <EuiFlyout
+      size="m"
+      aria-labelledby={headerId}
+      onClose={requestClose}
+      data-test-subj="streamsRoutingFlyout"
+      paddingSize="none"
+    >
+      <RoutingFlyoutHeader headerId={headerId} isNew={isNew} readOnly={!editable} />
+      <EuiFlyoutBody>
+        <div
           css={css`
-            padding: 12px 25px 0;
+            padding: ${euiTheme.size.l};
           `}
         >
-          <EuiFlexItem>
-            <EuiFlexGroup
-              alignItems="center"
-              css={css`
-                min-height: 32px;
-              `}
-              gutterSize="s"
-              wrap
-            >
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="s" data-test-subj="streamsCanvasFlyoutTitle">
-                  <h1 id={headerId}>
-                    {i18n.translate('xpack.streams.routingFlyout.addRoutingLabel', {
-                      defaultMessage: 'Add Routing',
-                    })}
-                  </h1>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <KbnInfoCallout
-          size="s"
-          title={i18n.translate('xpack.streams.routingFlyout.testRoutingTitle', {
-            defaultMessage: 'Testing only',
-          })}
-          data-test-subj="streamsRoutingFlyoutTestRouting"
-          actionProps={{
-            primary: {
-              onClick: onCreateTestRouting,
-              isDisabled: !onCreateTestRouting,
-              'data-test-subj': 'streamsRoutingFlyoutCreateTestRoutingButton',
-              children: i18n.translate('xpack.streams.routingFlyout.createTestRoutingButtonLabel', {
-                defaultMessage: 'Create test routing node',
-              }),
-            },
-          }}
-          text={
-            <p>
-              {i18n.translate('xpack.streams.routingFlyout.testRoutingDescription', {
-                defaultMessage:
-                  'Route this line through a routing node with a single placeholder rule that matches all data.',
-              })}
-            </p>
-          }
-        />
-        <EuiSpacer size="m" />
-        <RoutingErrorPrompt edge={edge} onClose={closeRoutingFlyout} />
+          {!editable ? (
+            <>
+              <KbnInfoCallout
+                announceOnMount
+                size="s"
+                title={i18n.translate('xpack.streams.routingFlyout.readOnlyCallout', {
+                  defaultMessage:
+                    'This routing uses telemetry-specific rule lists. Edit it in the YAML configuration.',
+                })}
+              />
+              <EuiSpacer size="m" />
+            </>
+          ) : null}
+          {saveError ? (
+            <>
+              <KbnDangerCallout
+                announceOnMount
+                title={i18n.translate('xpack.streams.routingFlyout.saveErrorTitle', {
+                  defaultMessage: 'Unable to apply routing',
+                })}
+                text={saveError}
+                data-test-subj="streamsRoutingFlyoutSaveError"
+              />
+              <EuiSpacer size="m" />
+            </>
+          ) : null}
+          <RoutingRuleList
+            rules={rules}
+            availableSignals={availableSignals}
+            editable={editable && !isSaving}
+            onAdd={addRule}
+            onChange={updateRule}
+            onDelete={deleteRule}
+            onReorder={reorderRule}
+          />
+        </div>
       </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <div
+          css={css`
+            padding: ${euiTheme.size.s} ${euiTheme.size.l};
+          `}
+        >
+          <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                isDisabled={isSaving}
+                onClick={requestClose}
+                data-test-subj="streamsRoutingFlyoutCancel"
+              >
+                {i18n.translate('xpack.streams.routingFlyout.cancel', {
+                  defaultMessage: 'Cancel',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                isLoading={isSaving}
+                isDisabled={!canSave}
+                onClick={save}
+                data-test-subj="streamsRoutingFlyoutSave"
+              >
+                {isNew
+                  ? i18n.translate('xpack.streams.routingFlyout.create', {
+                      defaultMessage: 'Create',
+                    })
+                  : i18n.translate('xpack.streams.routingFlyout.apply', {
+                      defaultMessage: 'Apply',
+                    })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 }

@@ -6,7 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { canDisconnectFromDestination } from '../../../../services/unit_connections';
+import {
+  canDisconnectFromDestination,
+  canRouteLine,
+  type UnitRoutableLine,
+} from '../../../../services/unit_connections';
 import {
   GRAPH_ENDPOINT_KIND,
   PROCESSING_SLOT_KIND,
@@ -34,7 +38,6 @@ import {
   type ClassicCanvasEdge,
   type ProcessingNode,
   type ProcessingNodeOutput,
-  type UnitEdgeData,
 } from './types';
 
 const CONFIGURED_SOURCE_PREFIX = 'configured-source-';
@@ -126,9 +129,14 @@ export interface UnitCanvasGraph {
 const routingEdge = (
   edge: Pick<ClassicCanvasEdge, 'id' | 'source' | 'target' | 'sourceHandle'>,
   isEditable: boolean,
-  processingTarget: UnitEdgeProcessingTarget | undefined
+  processingTarget: UnitEdgeProcessingTarget | undefined,
+  routingLine?: UnitRoutableLine
 ): ClassicCanvasEdge => {
-  const data: UnitEdgeData = { routing: true, unitConnection: isEditable };
+  const data = {
+    routing: true,
+    unitConnection: isEditable,
+    ...(routingLine ? { routingLine } : {}),
+  };
   return {
     ...edge,
     type: ANIMATED_EDGE_TYPE,
@@ -285,6 +293,13 @@ const buildRoutingGraph = (
         if (!isOnCanvas) {
           continue;
         }
+        const routingLine: UnitRoutableLine | undefined =
+          kind === 'destination'
+            ? {
+                origin: { kind: 'route', rule: { pipelineId: routing.id, ruleIndex: rule.index } },
+                destinationId: id,
+              }
+            : undefined;
         edges.push(
           routingEdge(
             {
@@ -293,7 +308,8 @@ const buildRoutingGraph = (
               target: kind === 'destination' ? configuredDestinationNodeId(id) : entryNodeId(id),
             },
             true,
-            ruleProcessingTarget
+            ruleProcessingTarget,
+            routingLine && canRouteLine(unit, routingLine) ? routingLine : undefined
           )
         );
       }
@@ -337,6 +353,11 @@ export const buildUnitCanvasGraph = (
         source.kind !== GRAPH_ENDPOINT_KIND.destination &&
         target.kind === GRAPH_ENDPOINT_KIND.destination &&
         canDisconnectFromDestination(unit, source, target.id);
+      const routingLine =
+        source.kind !== GRAPH_ENDPOINT_KIND.destination &&
+        target.kind === GRAPH_ENDPOINT_KIND.destination
+          ? { origin: source, destinationId: target.id }
+          : undefined;
       return {
         id: isDirect
           ? `unit-connection-${source.id}->${target.id}`
@@ -348,7 +369,12 @@ export const buildUnitCanvasGraph = (
         selectable: false,
         deletable: false,
         className: 'streamsUnitConnection nopan',
-        data: { unitConnection: isMovable, forwarding, processingTarget },
+        data: {
+          unitConnection: isMovable,
+          forwarding,
+          processingTarget,
+          ...(routingLine && canRouteLine(unit, routingLine) ? { routingLine } : {}),
+        },
       };
     }
   );

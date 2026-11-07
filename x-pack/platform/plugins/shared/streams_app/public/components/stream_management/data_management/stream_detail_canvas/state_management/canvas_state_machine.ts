@@ -24,6 +24,7 @@ import {
 } from 'xstate';
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { processingFlyoutMachine } from '../../../../stream_processing_flyout/state_management/processing_flyout_machine';
+import { routingFlyoutMachine } from '../../../../stream_routing_flyout/state_management/routing_flyout_machine';
 import {
   createDestinationsMachineImplementations,
   destinationsStateMachine,
@@ -53,7 +54,6 @@ import {
   type CanvasUrlInput,
   type CanvasUrlEvent,
   type CanvasState,
-  type RouteEdit,
 } from './types';
 import {
   PROCESSING_FLYOUT_ID,
@@ -68,12 +68,22 @@ import {
   rejectBusyProcessingSave,
   rejectMissingSlotProcessingSave,
 } from './processing_flyout_actions';
+import {
+  ROUTING_FLYOUT_ID,
+  canApplyRoutingDraft,
+  getRoutingFlyoutInput,
+  getRoutingStageUpdate,
+  notifyRoutingStaged,
+  rejectBusyRoutingSave,
+  rejectMissingRoutingSave,
+} from './routing_flyout_actions';
 
 export interface StoreUrlStateParams {
   urlState: CanvasUrlInput;
 }
 
 const CLOSE_PROCESSING_FLYOUT = ['stopProcessingFlyout', 'clearProcessingFlyout'] as const;
+const CLOSE_ROUTING_FLYOUT = ['stopRoutingFlyout', 'clearRoutingFlyout'] as const;
 
 /** Validating and persisting fail the same way: what is rolled back depends on what was saving. */
 const SAVE_FAILURE_TRANSITIONS = [
@@ -118,6 +128,7 @@ export const canvasStateMachine = setup({
     validateUnitDefinition: getPlaceholderFor(createValidateUnitDefinitionActor),
     persistUnitDefinition: getPlaceholderFor(createPersistUnitDefinitionActor),
     processingFlyoutMachine,
+    routingFlyoutMachine,
   },
   actions: {
     /* URL state actions */
@@ -378,20 +389,32 @@ export const canvasStateMachine = setup({
     rejectMissingSlotProcessingSave,
     rejectBusyProcessingSave,
     restoreProcessingRollback: assign((args) => getProcessingRollbackUpdate(args)),
-    syncRoutingEditMode: assign({
-      editingRoute: ({ context, event }) => {
-        switch (event.type) {
-          case 'routing.edit.open':
-            return [event.edgeId, event.mode] satisfies RouteEdit;
-
-          case 'routing.edit.close':
-            return [undefined, undefined] satisfies Partial<RouteEdit>;
-
-          default:
-            return context.editingRoute;
-        }
-      },
+    stopRoutingFlyout: stopChild(ROUTING_FLYOUT_ID),
+    clearRoutingFlyout: assign({ routingFlyout: undefined }),
+    openRoutingFlyout: assign(({ context, event, spawn, self }) => {
+      if (event.type !== 'routing.open') {
+        return {};
+      }
+      const { target } = event;
+      const input = getRoutingFlyoutInput(context.nextUnit, target, self);
+      if (!input) {
+        return { routingFlyout: { target } };
+      }
+      const ref = spawn('routingFlyoutMachine', { id: ROUTING_FLYOUT_ID, input });
+      return { routingFlyout: { target, ref } };
     }),
+    stageRoutingDraft: assign((args) => getRoutingStageUpdate(args)),
+    syncNextUnitToSources: sendTo(
+      ({ context }) => context.sourcesRef,
+      ({ context }) => ({ type: 'unit.loaded' as const, unitDefinition: context.nextUnit })
+    ),
+    syncNextUnitToDestinations: sendTo(
+      ({ context }) => context.destinationsRef,
+      ({ context }) => ({ type: 'unit.loaded' as const, unitDefinition: context.nextUnit })
+    ),
+    notifyRoutingStaged,
+    rejectMissingRoutingSave,
+    rejectBusyRoutingSave,
   },
   guards: {
     hasUnsavedUnitChanges: ({ context }) => context.unit !== context.nextUnit,
@@ -403,6 +426,7 @@ export const canvasStateMachine = setup({
     isSavingConnection: ({ context }) => context.savingComponentIntent === 'connect',
     isSavingProcessing,
     canApplyProcessingDraft,
+    canApplyRoutingDraft,
   },
 }).createMachine({
   id: 'canvasMachine',
@@ -497,13 +521,27 @@ export const canvasStateMachine = setup({
             raise({ type: 'url.sync', replace: true }),
           ],
         },
-        'routing.*': {
-          actions: [
-            {
-              type: 'syncRoutingEditMode',
-            },
-          ],
+        'routing.open': {
+          actions: [...CLOSE_ROUTING_FLYOUT, 'openRoutingFlyout'],
         },
+        'routing.close': {
+          actions: CLOSE_ROUTING_FLYOUT,
+        },
+        // Staged like any other canvas edit: the rules are persisted when the canvas is saved.
+        'routing.save': [
+          {
+            guard: and(['canEditUnit', 'canApplyRoutingDraft']),
+            actions: [
+              'stageRoutingDraft',
+              'syncNextUnitToSources',
+              'syncNextUnitToDestinations',
+              'notifyRoutingStaged',
+              ...CLOSE_ROUTING_FLYOUT,
+            ],
+          },
+          { guard: 'canEditUnit', actions: 'rejectMissingRoutingSave' },
+          { actions: 'rejectBusyRoutingSave' },
+        ],
         'processing.open': {
           actions: [...CLOSE_PROCESSING_FLYOUT, 'openProcessingFlyout'],
         },
@@ -694,7 +732,6 @@ export const canvasStateMachine = setup({
       // persisted alongside the unit without changing the graph components.
       nodePositions: {},
       error: undefined,
-      editingRoute: [],
       sourcesRef: spawn('sourcesMachine', {
         input: {
           unitDefinition,

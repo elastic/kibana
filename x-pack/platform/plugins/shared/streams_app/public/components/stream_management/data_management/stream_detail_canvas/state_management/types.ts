@@ -17,6 +17,11 @@ import type {
   ProcessingStepPosition,
 } from '../../../../stream_processing_flyout/state_management/processing_flyout_machine';
 import type {
+  RoutingFlyoutActorRef,
+  RoutingFlyoutTarget,
+  RoutingSaveRequest,
+} from '../../../../stream_routing_flyout/state_management/routing_flyout_machine';
+import type {
   DestinationsActorRef,
   DestinationsTimeDeps,
 } from '../../../../streams_layout/destinations/state_machines/destinations_state_machine';
@@ -62,14 +67,18 @@ export const defaultCanvasUrlState: CanvasUrlInput = {
   query: null,
 };
 
-export type RouteEditModes = 'processing' | 'routing';
-export type RouteEdit = [string, RouteEditModes];
-
 export interface CanvasProcessingFlyout {
   slot: ProcessingNodeRef;
   ref: ProcessingFlyoutActorRef;
   /** Set when `slot` is the pipeline a shared source line moves onto when the processing saves. */
   line?: UnitLine;
+}
+
+export interface CanvasRoutingFlyout {
+  /** A new routing node on a line, or an existing routing node. */
+  target: RoutingFlyoutTarget;
+  /** Unset when the target cannot be configured. */
+  ref?: RoutingFlyoutActorRef;
 }
 
 export interface CanvasState {
@@ -81,7 +90,7 @@ export interface CanvasState {
   savingComponentKind?: 'source' | 'destination';
   savingComponentIntent?: 'create' | 'delete' | 'connect' | 'processing';
   savingSecrets?: StreamsUnit.Secrets;
-  editingRoute: Partial<RouteEdit>;
+  routingFlyout?: CanvasRoutingFlyout;
   processingFlyout?: CanvasProcessingFlyout;
   /** Staged unit to return to when a processing flyout save fails. */
   processingRollbackUnit?: Unit;
@@ -131,8 +140,9 @@ export type CanvasUrlEvent =
   | { type: 'flyout.tab'; flyoutTab: string }
   | { type: 'flyout.close' }
   | { type: 'search.change'; query: string }
-  | { type: 'routing.edit.open'; edgeId: string; mode: RouteEditModes }
-  | { type: 'routing.edit.close' }
+  | { type: 'routing.open'; target: RoutingFlyoutTarget }
+  | { type: 'routing.close' }
+  | RoutingSaveRequest
   | {
       type: 'processing.open';
       slot: ProcessingNodeRef;

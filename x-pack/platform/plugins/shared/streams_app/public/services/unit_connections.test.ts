@@ -7,7 +7,13 @@
 
 import { createDefaultUnit, type Unit } from './unit_repository';
 import {
-  addTestRoutingToLine,
+  canEditPipelineRoutes,
+  canRouteLine,
+  getPipelineRoutes,
+  getPipelineRoutingSignals,
+  getRoutableLineSignals,
+  routeLine,
+  writePipelineRoutes,
   canConnectSourceToDestination,
   canConnectToDestination,
   canDisconnectFromDestination,
@@ -1195,14 +1201,21 @@ describe('routing rule connections', () => {
   });
 });
 
-describe('addTestRoutingToLine', () => {
-  it('moves a shared source line onto a routing pipeline with one placeholder rule', () => {
+describe('routeLine', () => {
+  const routes = [
+    { destinations: ['es-logs'] },
+    { when: 'body == "x"', action: 'copy' as const, destinations: [] },
+  ];
+
+  it('moves a shared source line onto a routing pipeline with the given rules', () => {
     const unit = unitWith([sharedPipeline()]);
-    const next = addTestRoutingToLine(unit, source('otlp-input'), 'es-logs');
+    const line = { origin: source('otlp-input'), destinationId: 'es-logs' };
+    expect(canRouteLine(unit, line)).toBe(true);
+    const next = routeLine(unit, line, routes);
 
     expect(pipelineConfig(next, 'p-otlp-input-2')).toEqual([
       { name: 'sources', value: ['otlp-input'] },
-      { name: 'routes', value: [{ when: 'true', destinations: ['es-logs'] }] },
+      { name: 'routes', value: routes },
     ]);
     expect(getUnitConnections(next, configuredSources, configuredDestinations)).toEqual(
       expect.arrayContaining([
@@ -1216,8 +1229,158 @@ describe('addTestRoutingToLine', () => {
 
   it("routes a processing line that is its pipeline's only destination", () => {
     const unit = processedUnit(['es-logs']);
-    const next = addTestRoutingToLine(unit, processing('main'), 'es-logs');
+    const next = routeLine(unit, { origin: processing('main'), destinationId: 'es-logs' }, routes);
 
+    expect(next.unit.pipelines.find(({ id }) => id === 'main')?.config).toEqual([
+      { name: 'sources', value: ['otlp-input'] },
+      { name: 'processors', value: ['tag'] },
+      { name: 'routes', value: routes },
+    ]);
+  });
+
+  it('leaves lines it cannot route as they are', () => {
+    const fanOut = processedUnit(['es-logs', 'es-metrics']);
+    const processingLine = { origin: processing('main'), destinationId: 'es-logs' };
+    const sourceLine = { origin: source('otlp-input'), destinationId: 'es-traces' };
+
+    expect(canRouteLine(fanOut, processingLine)).toBe(false);
+    expect(routeLine(fanOut, processingLine, routes)).toBe(fanOut);
+    expect(routeLine(fanOut, sourceLine, routes)).toBe(fanOut);
+    const single = processedUnit(['es-logs']);
+    expect(routeLine(single, processingLine, [])).toBe(single);
+  });
+});
+
+describe('routeLine from a routing rule', () => {
+  const routedUnit = (): Unit =>
+    unitWith([
+      {
+        id: 'main',
+        supported_telemetry: ['logs', 'traces'],
+        config: [
+          { name: 'sources', value: ['otlp-input'] },
+          {
+            name: 'routes',
+            value: [
+              {
+                when: 'resource.attributes["env"] == "prod"',
+                telemetry: ['logs'],
+                destinations: ['es-logs'],
+                processors: ['tag'],
+              },
+              { when: 'true', destinations: ['es-logs', 'es-metrics'] },
+            ],
+          },
+        ],
+      },
+    ]);
+  const ruleLine = (ruleIndex: number, destinationId: string) => ({
+    origin: { kind: 'route' as const, rule: { pipelineId: 'main', ruleIndex } },
+    destinationId,
+  });
+
+  it("delegates the rule to a new child routing node that keeps the rule's destination", () => {
+    const unit = routedUnit();
+    const line = ruleLine(0, 'es-logs');
+    expect(canRouteLine(unit, line)).toBe(true);
+
+    const next = routeLine(unit, line, [
+      { destinations: ['es-logs'] },
+      { when: 'body == "x"', destinations: [] },
+    ]);
+
+    expect(getPipelineRoutes(next, 'main')[0]).toEqual({
+      when: 'resource.attributes["env"] == "prod"',
+      telemetry: ['logs'],
+      processors: ['tag'],
+      pipelines: ['main-routing'],
+    });
+    expect(next.unit.pipelines.find(({ id }) => id === 'main-routing')).toEqual({
+      id: 'main-routing',
+      supported_telemetry: ['logs'],
+      config: [
+        {
+          name: 'routes',
+          value: [{ destinations: ['es-logs'] }, { when: 'body == "x"', destinations: [] }],
+        },
+      ],
+    });
+  });
+
+  it('leaves rules with several targets as they are', () => {
+    const unit = routedUnit();
+    const line = ruleLine(1, 'es-logs');
+    expect(canRouteLine(unit, line)).toBe(false);
+    expect(routeLine(unit, line, [{ destinations: ['es-logs'] }])).toBe(unit);
+  });
+});
+
+describe('routing signals', () => {
+  const narrowedUnit = (): Unit => {
+    const unit = routeLine(
+      processedUnit(['es-logs']),
+      { origin: processing('main'), destinationId: 'es-logs' },
+      [{ destinations: ['es-logs'] }]
+    );
+    unit.unit.sources = [
+      ...(unit.unit.sources ?? []),
+      { id: 'otlp-input', name: 'OTLP', type: 'otlp', supported_telemetry: ['logs', 'traces'] },
+    ];
+    return unit;
+  };
+
+  it('offers the signals the incoming source sends beyond those of a narrowed routing node', () => {
+    expect(getPipelineRoutingSignals(narrowedUnit(), 'main')).toEqual({
+      current: ['logs'],
+      available: ['logs', 'traces'],
+    });
+  });
+
+  it('offers what the source sends for a new routing node on its line', () => {
+    const unit = narrowedUnit();
+    expect(
+      getRoutableLineSignals(unit, { origin: processing('main'), destinationId: 'x' })
+    ).toEqual({ current: ['logs'], available: ['logs', 'traces'] });
+  });
+
+  it('widens a routing node to the signals its rules handle', () => {
+    const next = writePipelineRoutes(
+      narrowedUnit(),
+      'main',
+      [
+        { destinations: ['es-logs'], telemetry: ['logs'] },
+        { when: 'true', destinations: [] },
+      ],
+      ['logs', 'traces']
+    );
+    expect(next.unit.pipelines.find(({ id }) => id === 'main')?.supported_telemetry).toEqual([
+      'logs',
+      'traces',
+    ]);
+  });
+});
+
+describe('writePipelineRoutes', () => {
+  it('replaces the rules of a routing node and reads them back', () => {
+    const unit = routeLine(
+      processedUnit(['es-logs']),
+      { origin: processing('main'), destinationId: 'es-logs' },
+      [{ destinations: ['es-logs'] }]
+    );
+    const routes = [
+      { when: 'body == "x"', destinations: ['es-logs'], processors: ['tag'] },
+      { action: 'copy' as const, destinations: [] },
+    ];
+    const next = writePipelineRoutes(unit, 'main', routes);
+
+    expect(getPipelineRoutes(next, 'main')).toEqual(routes);
+  });
+
+  it('turns a plain destinations list into routes', () => {
+    const unit = processedUnit(['es-logs']);
+    expect(getPipelineRoutes(unit, 'main')).toEqual([{ destinations: ['es-logs'] }]);
+
+    const next = writePipelineRoutes(unit, 'main', [{ when: 'true', destinations: ['es-logs'] }]);
     expect(next.unit.pipelines.find(({ id }) => id === 'main')?.config).toEqual([
       { name: 'sources', value: ['otlp-input'] },
       { name: 'processors', value: ['tag'] },
@@ -1225,10 +1388,10 @@ describe('addTestRoutingToLine', () => {
     ]);
   });
 
-  it('leaves lines it cannot route as they are', () => {
-    const fanOut = processedUnit(['es-logs', 'es-metrics']);
-
-    expect(addTestRoutingToLine(fanOut, processing('main'), 'es-logs')).toBe(fanOut);
-    expect(addTestRoutingToLine(fanOut, source('otlp-input'), 'es-traces')).toBe(fanOut);
+  it('leaves missing pipelines and empty rule lists alone', () => {
+    const unit = processedUnit(['es-logs']);
+    expect(canEditPipelineRoutes(unit, 'missing')).toBe(false);
+    expect(writePipelineRoutes(unit, 'missing', [{ destinations: ['es-logs'] }])).toBe(unit);
+    expect(writePipelineRoutes(unit, 'main', [])).toBe(unit);
   });
 });

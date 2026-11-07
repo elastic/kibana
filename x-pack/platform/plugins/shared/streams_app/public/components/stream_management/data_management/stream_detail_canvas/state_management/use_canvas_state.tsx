@@ -9,12 +9,12 @@ import { createActorContext } from '@xstate/react';
 import type { XYPosition } from '@xyflow/react';
 import type { Unit } from '../../../../../services/unit_repository';
 import type { ProcessingNodeRef, UnitLine } from '../../../../../services/unit_graph';
+import type { RoutingFlyoutTarget } from '../../../../stream_routing_flyout/state_management/routing_flyout_machine';
 import type { ProcessingStepPosition } from '../../../../stream_processing_flyout/state_management/processing_flyout_machine';
 import type {
   CanvasCreateHistoryHandlers,
   CanvasFlyoutKind,
   CanvasStateServiceDeps,
-  RouteEditModes,
 } from './types';
 import { canvasStateMachine, createCanvasMachineImplementations } from './canvas_state_machine';
 
@@ -106,7 +106,7 @@ export const useCanvasNodePositions = () => {
 };
 
 export const useCanvasRoutingFlyout = () => {
-  return useCanvasStateSelector((state) => state.context.editingRoute);
+  return useCanvasStateSelector((state) => state.context.routingFlyout);
 };
 
 export const useCanvasProcessingFlyout = () => {
@@ -140,11 +140,11 @@ export const useCanvasEvents = () => {
       changeUnitConnection: (unitDefinition: Unit) => {
         service.send({ type: 'unit.stage', unitDefinition });
       },
-      openRoutingFlyout: (edgeId: string, mode: RouteEditModes) => {
-        service.send({ type: 'routing.edit.open', edgeId, mode });
+      openRoutingFlyout: (target: RoutingFlyoutTarget) => {
+        service.send({ type: 'routing.open', target });
       },
       closeRoutingFlyout: () => {
-        service.send({ type: 'routing.edit.close' });
+        service.send({ type: 'routing.close' });
       },
       openProcessingFlyout: (slot: ProcessingNodeRef, position?: ProcessingStepPosition) => {
         service.send({ type: 'processing.open', slot, position });

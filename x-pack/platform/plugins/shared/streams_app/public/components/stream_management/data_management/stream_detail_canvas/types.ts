@@ -16,6 +16,7 @@ import type {
   DestinationSignal,
   DestinationViewModel,
 } from '../../../streams_layout/destinations/types';
+import type { UnitRoutableLine } from '../../../../services/unit_connections';
 
 export const SOURCE_NODE_TYPE = 'source';
 export const DESTINATION_NODE_TYPE = 'destination';
@@ -86,6 +87,8 @@ export interface UnitEdgeData extends Record<string, unknown> {
   forwarding?: UnitEdgeForwarding;
   /** The slot "Add processing" writes to; unset when the line leads to a read-only node. */
   processingTarget?: UnitEdgeProcessingTarget;
+  /** The line "Add routing" puts a routing node on; unset when the line cannot be routed. */
+  routingLine?: UnitRoutableLine;
   /** Lines into a routing node or out of one of its rules. */
   routing?: boolean;
 }
