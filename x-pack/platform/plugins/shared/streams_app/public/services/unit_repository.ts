@@ -70,11 +70,11 @@ export const createDefaultUnit = (): Unit => ({
 
 export const createUnitRepository = ({
   streamsRepositoryClient,
-  unitId = STREAMS_DEFAULT_UNIT_ID,
+  unitId,
   toasts,
 }: {
   streamsRepositoryClient: StreamsRepositoryClient;
-  unitId?: string;
+  unitId: string;
   toasts?: ToastsStart;
 }): UnitRepository => ({
   load: async () => {
@@ -84,7 +84,8 @@ export const createUnitRepository = ({
         signal: null,
       });
     } catch (error) {
-      if (isNotFoundError(error)) {
+      // Only the default unit may be missing before its first save, any other id is not found.
+      if (isNotFoundError(error) && unitId === STREAMS_DEFAULT_UNIT_ID) {
         return createDefaultUnit();
       }
       throw error;
@@ -130,5 +131,5 @@ export const createUnitRepository = ({
   },
 });
 
-const isNotFoundError = (error: unknown): boolean =>
+export const isNotFoundError = (error: unknown): boolean =>
   isHttpFetchError(error) && error.body?.statusCode === 404;
