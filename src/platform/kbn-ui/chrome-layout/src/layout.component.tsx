@@ -77,11 +77,13 @@ export const ChromeLayoutComponent = ({ children, ...props }: ChromeLayoutCompon
       {React.createElement('elastic-ambient-bg', {
         'data-test-subj': 'chromeAmbientBg',
         static: '',
-        // POC: needs design input — quiets the top-left blob behind the nav/header after load.
+        // POC: needs design input — strengthens the field (bottom-right) and the mask quiets
+        // the top-left blob behind the nav/header; 0.14 * 2.2 keeps that corner at ~30%.
+        intensity: '2.2',
         style: {
-          maskImage: 'linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.3) 25%, black 60%)',
+          maskImage: 'linear-gradient(135deg, rgba(0,0,0,0.14) 0%, rgba(0,0,0,0.14) 25%, black 60%)',
           WebkitMaskImage:
-            'linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.3) 25%, black 60%)',
+            'linear-gradient(135deg, rgba(0,0,0,0.14) 0%, rgba(0,0,0,0.14) 25%, black 60%)',
         },
       })}
       {banner}

@@ -19,6 +19,7 @@
     pitch: 10,        // px — grid spacing between dot centres
     'dot-size': 2,    // px — max dot diameter
     opacity: 0.24,    // max dot alpha (deepest inside a blob)
+    intensity: 1,     // POC: multiplier on the themed opacity, e.g. to strengthen the field behind the app
     color: '#4D4D4F'  // dot fill
   };
   var LIGHT = {
@@ -213,7 +214,7 @@
       }
     }
     ctx.fillStyle = this.getAttribute('color') || this._palette().color || DEFAULTS.color;
-    var maxA = this._num('opacity');
+    var maxA = Math.min(1, this._num('opacity') * this._num('intensity'));
     for (var k = 0; k < LEVELS; k++) {
       if (!used[k]) continue;
       ctx.globalAlpha = maxA * ((k + 1) / LEVELS);
