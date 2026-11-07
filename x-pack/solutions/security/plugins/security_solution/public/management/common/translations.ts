@@ -270,6 +270,22 @@ export const CONSOLE_COMMANDS = {
           }
         ),
       },
+      force: {
+        about: i18n.translate(
+          'xpack.securitySolution.endpointConsoleCommands.getFile.force.about',
+          {
+            defaultMessage:
+              'Read a file that the operating system locks, such as a registry hive, from a snapshot of its volume',
+          }
+        ),
+        notSupported: i18n.translate(
+          'xpack.securitySolution.endpointConsoleCommands.getFile.force.notSupported',
+          {
+            defaultMessage:
+              'This host does not support reading locked files. It requires Windows and a version of the Endpoint that supports it. Upgrade your Agent in Fleet to use this parameter.',
+          }
+        ),
+      },
     },
   },
   execute: {
