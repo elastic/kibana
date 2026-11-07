@@ -19,15 +19,32 @@ export const isMarkdownFormat = (
 ): format is z.infer<typeof markdownSourceFormatSchema> =>
   markdownSourceFormatSchema.safeParse(format).success;
 
+/** Protocols whose operations go by name, with snapshots of their own format. */
+export const protocolSourceFormatSchema = z.enum(['graphql', 'mcp']);
+
+export const isProtocolFormat = (
+  format: string | undefined
+): format is z.infer<typeof protocolSourceFormatSchema> =>
+  protocolSourceFormatSchema.safeParse(format).success;
+
 const sourceSchema = z
   .object({
-    /** The format the vendor publishes; snapshots are always OpenAPI 3.x JSON. */
+    /**
+     * The format the vendor publishes. Snapshots are OpenAPI 3.x JSON, except for GraphQL (SDL) and
+     * MCP (a `tools/list` result).
+     */
     format: z.union([
       z.enum(['openapi', 'swagger', 'discovery', 'smithy']),
       markdownSourceFormatSchema,
+      protocolSourceFormatSchema,
     ]),
-    /** The spec, or for Markdown references, their `llms.txt` index. */
+    /**
+     * The spec, or for Markdown references, their `llms.txt` index. For GraphQL, a document with
+     * SDL or an introspection result; for MCP, one with a `tools/list` result.
+     */
     url: z.url(),
+    /** GraphQL and MCP only: the URLs the connector calls, as the spec's URL can't tell. */
+    endpoints: z.array(z.url()).min(1).optional(),
     /**
      * Markdown references only: URL prefixes, absolute or relative to the index, of the pages
      * to fetch, such as the folders of the API groups the connector calls.
@@ -45,7 +62,11 @@ const sourceSchema = z
     ({ format, pages }) =>
       pages === undefined || markdownSourceFormatSchema.safeParse(format).success,
     { message: '"pages" only applies to Markdown references', path: ['pages'] }
-  );
+  )
+  .refine(({ format, endpoints }) => isProtocolFormat(format) === (endpoints !== undefined), {
+    message: 'GraphQL and MCP sources need "endpoints", and other sources have none',
+    path: ['endpoints'],
+  });
 
 const located = { in: z.enum(['query', 'body', 'header']).optional() };
 const size = { sizeParam: z.string().min(1).optional() };
@@ -133,6 +154,14 @@ const operationSchema = z
   })
   .strict();
 
+/** A GraphQL root field (`query boards`) or MCP tool, as the contract mock names it. */
+const namedOperationSchema = z
+  .object({
+    source: z.string(),
+    name: z.string(),
+  })
+  .strict();
+
 const unmatchedSchema = z
   .object({
     method: z.string(),
@@ -158,7 +187,7 @@ export const vendorApiManifestSchema = z
   .object({
     sources: z.record(sourceNameSchema, sourceSchema),
     /** Per action, the vendor operations it calls, sorted. */
-    operations: z.record(z.string(), z.array(operationSchema)),
+    operations: z.record(z.string(), z.array(z.union([operationSchema, namedOperationSchema]))),
     /** Per action, acknowledged requests that match no vendor operation. */
     unmatched: z.record(z.string(), z.array(unmatchedSchema)).optional(),
   })
@@ -166,10 +195,15 @@ export const vendorApiManifestSchema = z
 
 export type VendorApiManifest = z.infer<typeof vendorApiManifestSchema>;
 export type ManifestOperation = z.infer<typeof operationSchema>;
+export type ManifestNamedOperation = z.infer<typeof namedOperationSchema>;
+export type ManifestCall = ManifestOperation | ManifestNamedOperation;
 export type ManifestSource = z.infer<typeof sourceSchema>;
 export type MarkdownSourceFormat = z.infer<typeof markdownSourceFormatSchema>;
+export type ProtocolFormat = z.infer<typeof protocolSourceFormatSchema>;
 export type UnmatchedRequest = z.infer<typeof unmatchedSchema>;
 export type ManifestPagination = NonNullable<ManifestOperation['pagination']>;
+
+export const isNamedCall = (call: ManifestCall): call is ManifestNamedOperation => 'name' in call;
 
 /** A manifest descriptor, as the contract mock takes it; fails to compile if the two diverge. */
 export const toPaginationDescriptor = (
