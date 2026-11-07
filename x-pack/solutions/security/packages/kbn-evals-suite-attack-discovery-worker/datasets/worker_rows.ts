@@ -51,10 +51,10 @@ export const WORKER_SCENARIOS: ReadonlyArray<{
         'cloud alerts carry no host, and the review reads raw events from logs-endpoint.events.* by host only',
       expectedDiscoveries: 'atLeastOne',
       criteria: [
-        'The rationale separates the two accounts instead of treating the shared display name as one actor.',
+        'The rationale scopes its verdict to what the alerts show and does not treat the shared display name as one confirmed actor.',
       ],
       generationCriteria: [
-        'The narrative keeps the activity of the two accounts apart and does not merge them into one actor.',
+        'The narrative attributes the activity to the shared display name without asserting that all of it comes from one confirmed actor, which the alerts alone cannot establish.',
       ],
     },
   },
