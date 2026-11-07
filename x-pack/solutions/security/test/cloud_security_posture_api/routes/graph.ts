@@ -17,11 +17,11 @@ import type {
   GraphRequest,
   NodeDataModel,
   EntityNodeDataModel,
-  LabelNodeDataModel,
+  EventNodeDataModel,
   EdgeDataModel,
   RelationshipNodeDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
-import { isEntityNode, isLabelNode } from '@kbn/cloud-security-posture-graph/src/components/utils';
+import { isEntityNode, isEventNode } from '@kbn/cloud-security-posture-graph/src/components/utils';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import {
@@ -722,14 +722,14 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).to.have.property('edges').length(2);
         expect(response.body).not.to.have.property('messages');
 
-        response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
+        response.body.nodes.forEach((node: EntityNodeDataModel | EventNodeDataModel) => {
           expect(node).to.have.property('color');
           expect(node.color).equal(
             'primary',
             `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
           );
 
-          if (isLabelNode(node)) {
+          if (isEventNode(node)) {
             // Check for both document types flexibly
             const hasAlert = node.documentsData!.some((doc) => doc.type === 'alert');
             const hasEvent = node.documentsData!.some((doc) => doc.type === 'event');
@@ -779,7 +779,7 @@ export default function (providerContext: FtrProviderContext) {
           // report, so neither key is emitted at all — on the node or under documentsData.
           // These runs are in the default space, where the entity store archive is not
           // loaded, so every entity node here is unenriched.
-          if (!isLabelNode(node)) {
+          if (!isEventNode(node)) {
             expect(node).to.not.have.property('riskScore');
             expect(node).to.not.have.property('assetCriticality');
             (node.documentsData ?? []).forEach((doc) => {
@@ -816,10 +816,10 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).to.have.property('edges').length(2);
         expect(response.body).not.to.have.property('messages');
 
-        response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
+        response.body.nodes.forEach((node: EntityNodeDataModel | EventNodeDataModel) => {
           expect(node).to.have.property('color');
           expect(node.color).equal(
-            isLabelNode(node) &&
+            isEventNode(node) &&
               Number(node.uniqueAlertsCount) > 0 &&
               Number(node.uniqueEventsCount) === 0
               ? 'danger'
@@ -827,7 +827,7 @@ export default function (providerContext: FtrProviderContext) {
             `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
           );
 
-          if (isLabelNode(node)) {
+          if (isEventNode(node)) {
             expect(node.documentsData).to.have.length(2);
             // Check for both document types flexibly
             const hasAlert = node.documentsData!.some((doc) => doc.type === 'alert');
@@ -861,14 +861,14 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).to.have.property('edges').length(2);
         expect(response.body).not.to.have.property('messages');
 
-        response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
+        response.body.nodes.forEach((node: EntityNodeDataModel | EventNodeDataModel) => {
           expect(node).to.have.property('color');
           expect(node.color).equal(
             'primary',
             `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
           );
 
-          if (node.shape === 'label') {
+          if (node.kind === 'event') {
             expect(node.documentsData).to.have.length(2);
             // Check document types based on actual content
             const hasAlert = node.documentsData!.some((doc) => doc.type === 'alert');
@@ -901,17 +901,17 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).to.have.property('edges').length(2);
         expect(response.body).not.to.have.property('messages');
 
-        response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
+        response.body.nodes.forEach((node: EntityNodeDataModel | EventNodeDataModel) => {
           expect(node).to.have.property('color');
           expect(node.color).equal(
             'primary',
             `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
           );
-          if (node.shape === 'label') {
+          if (node.kind === 'event') {
             expect(node.documentsData).to.have.length(1);
             expect(node.documentsData?.[0]).to.have.property(
               'type',
-              node.shape === 'label' ? 'event' : 'entity'
+              node.kind === 'event' ? 'event' : 'entity'
             );
           }
         });
@@ -951,17 +951,17 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).to.have.property('edges').length(2);
         expect(response.body).not.to.have.property('messages');
 
-        response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
+        response.body.nodes.forEach((node: EntityNodeDataModel | EventNodeDataModel) => {
           expect(node).to.have.property('color');
           expect(node.color).equal(
             'primary',
             `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
           );
-          if (node.shape === 'label') {
+          if (node.kind === 'event') {
             expect(node.documentsData).to.have.length(1);
             expect(node.documentsData?.[0]).to.have.property(
               'type',
-              node.shape === 'label' ? 'event' : 'entity'
+              node.kind === 'event' ? 'event' : 'entity'
             );
           }
         });
@@ -976,7 +976,7 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      it('two label nodes, one single and one grouped', async () => {
+      it('two event nodes, one single and one grouped', async () => {
         const response = await postGraph(supertest, {
           query: {
             indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
@@ -1004,33 +1004,33 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).not.to.have.property('messages');
 
         const groupNodes = response.body.nodes.filter(
-          (node: NodeDataModel) => node.shape === 'group'
+          (node: NodeDataModel) => node.kind === 'group'
         );
         expect(groupNodes).to.have.length(1);
 
         // Find the group node
-        const groupNode = response.body.nodes.find((node: NodeDataModel) => node.shape === 'group');
+        const groupNode = response.body.nodes.find((node: NodeDataModel) => node.kind === 'group');
         expect(groupNode).to.be.ok();
 
-        // Find label nodes and verify they have parentId pointing to group
-        const labelNodes = response.body.nodes.filter(
-          (node: NodeDataModel) => node.shape === 'label'
+        // Find event nodes and verify they have parentId pointing to group
+        const eventNodes = response.body.nodes.filter(
+          (node: NodeDataModel) => node.kind === 'event'
         );
-        expect(labelNodes).to.have.length(2);
-        labelNodes.forEach((labelNode: LabelNodeDataModel) => {
-          expect(labelNode).to.have.property('parentId');
-          expect(labelNode.parentId).to.equal(groupNode.id);
+        expect(eventNodes).to.have.length(2);
+        eventNodes.forEach((eventNode: EventNodeDataModel) => {
+          expect(eventNode).to.have.property('parentId');
+          expect(eventNode.parentId).to.equal(groupNode.id);
         });
 
         response.body.nodes.forEach((node: NodeDataModel) => {
-          if (node.shape !== 'group' && node.shape !== 'relationship') {
+          if (node.kind !== 'group' && node.kind !== 'relationship') {
             expect(node).to.have.property('color');
             expect(node.color).equal(
               'primary',
               `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
             );
 
-            if (node.shape === 'label') {
+            if (node.kind === 'event') {
               // Handle flexible document patterns
               if (node.documentsData && node.documentsData.length === 1) {
                 // Single document - check its actual type
@@ -1068,13 +1068,13 @@ export default function (providerContext: FtrProviderContext) {
 
         // After MV_EXPAND, the Cartesian product of 2 actors × 3 targets = 6 rows.
         // These are grouped by hash into 2 entity nodes (one for actors, one for targets)
-        // and 1 label node. Counts are per distinct entity id / document, not per row.
+        // and 1 event node. Counts are per distinct entity id / document, not per row.
         expect(response.body).to.have.property('nodes');
         expect(response.body).to.have.property('edges');
 
-        // Filter entity nodes (non-label nodes) - should be 2 (one actor group, one target group)
+        // Filter entity nodes (non-event nodes) - should be 2 (one actor group, one target group)
         const entityNodes = response.body.nodes.filter(
-          (node: NodeDataModel) => node.shape !== 'label'
+          (node: NodeDataModel) => node.kind !== 'event'
         );
         expect(entityNodes).to.have.length(
           2,
@@ -1084,7 +1084,7 @@ export default function (providerContext: FtrProviderContext) {
         // Find actor node (should have count: 2 for 2 actor IDs)
         const actorNode = entityNodes.find((node: EntityNodeDataModel) => node.count === 2);
         expect(actorNode).to.not.be(undefined);
-        expect(actorNode).to.have.property('shape', 'rectangle');
+        expect(actorNode).to.have.property('kind', 'entity');
         expect(actorNode).to.have.property('color', 'primary');
         expect(actorNode).to.have.property('tag', 'Entities');
         expect(actorNode).to.have.property('icon', 'magnifyExclamation');
@@ -1121,7 +1121,7 @@ export default function (providerContext: FtrProviderContext) {
         // Same as actors: generic entities, EUID column used directly for sourceFields.
         const targetNode = entityNodes.find((node: EntityNodeDataModel) => node.count === 3);
         expect(targetNode).to.not.be(undefined);
-        expect(targetNode).to.have.property('shape', 'rectangle');
+        expect(targetNode).to.have.property('kind', 'entity');
         expect(targetNode).to.have.property('color', 'primary');
         expect(targetNode).to.have.property('tag', 'Entities');
         expect(targetNode).to.have.property('icon', 'magnifyExclamation');
@@ -1163,21 +1163,21 @@ export default function (providerContext: FtrProviderContext) {
           })
         );
 
-        // Verify label node exists for the action, counting distinct documents (not MV_EXPAND rows)
-        const labelNodes = response.body.nodes.filter(
-          (node: LabelNodeDataModel) => node.shape === 'label'
+        // Verify event node exists for the action, counting distinct documents (not MV_EXPAND rows)
+        const eventNodes = response.body.nodes.filter(
+          (node: EventNodeDataModel) => node.kind === 'event'
         );
-        expect(labelNodes).to.have.length(
+        expect(eventNodes).to.have.length(
           1,
-          'Should have 1 label node representing all relationships'
+          'Should have 1 event node representing all relationships'
         );
 
-        const labelNode = labelNodes[0];
-        expect(labelNode).to.have.property('label', 'test.multivalue.action');
-        expect(labelNode).to.have.property('color', 'primary');
+        const eventNode = eventNodes[0];
+        expect(eventNode).to.have.property('label', 'test.multivalue.action');
+        expect(eventNode).to.have.property('color', 'primary');
         // `count` is COUNT_DISTINCT(_id), so the 6 Cartesian rows collapse to the 1 source document
-        expect(labelNode).to.have.property('count', 1);
-        expect(labelNode).to.have.property('uniqueEventsCount', 1); // 1 source event
+        expect(eventNode).to.have.property('count', 1);
+        expect(eventNode).to.have.property('uniqueEventsCount', 1); // 1 source event
 
         // Verify edges connect actor group -> label -> target group
         // Expected: 1 actor->label edge + 1 label->target edge = 2 edges
@@ -1187,16 +1187,16 @@ export default function (providerContext: FtrProviderContext) {
         );
 
         // Verify edge from actor to label
-        const actorToLabelEdge = response.body.edges.find(
-          (edge: EdgeDataModel) => edge.source === actorNode!.id && edge.target === labelNode.id
+        const actorToEventEdge = response.body.edges.find(
+          (edge: EdgeDataModel) => edge.source === actorNode!.id && edge.target === eventNode.id
         );
-        expect(actorToLabelEdge).to.not.be(undefined);
-        expect(actorToLabelEdge).to.have.property('color', 'subdued');
-        expect(actorToLabelEdge).to.have.property('type', 'solid');
+        expect(actorToEventEdge).to.not.be(undefined);
+        expect(actorToEventEdge).to.have.property('color', 'subdued');
+        expect(actorToEventEdge).to.have.property('type', 'solid');
 
         // Verify edge from label to target
         const labelToTargetEdge = response.body.edges.find(
-          (edge: EdgeDataModel) => edge.source === labelNode.id && edge.target === targetNode!.id
+          (edge: EdgeDataModel) => edge.source === eventNode.id && edge.target === targetNode!.id
         );
         expect(labelToTargetEdge).to.not.be(undefined);
         expect(labelToTargetEdge).to.have.property('color', 'subdued');
@@ -1220,10 +1220,10 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).to.have.property('edges').length(2);
         expect(response.body).not.to.have.property('messages');
 
-        response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
+        response.body.nodes.forEach((node: EntityNodeDataModel | EventNodeDataModel) => {
           expect(node).to.have.property('color');
           expect(node.color).equal(
-            isLabelNode(node) &&
+            isEventNode(node) &&
               Number(node.uniqueAlertsCount) > 0 &&
               Number(node.uniqueEventsCount) === 0
               ? 'danger'
@@ -1277,13 +1277,13 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).not.to.have.property('messages');
 
         response.body.nodes.forEach(
-          (node: EntityNodeDataModel | LabelNodeDataModel, idx: number) => {
+          (node: EntityNodeDataModel | EventNodeDataModel, idx: number) => {
             expect(node).to.have.property('color');
             expect(node.color).equal(
               'primary',
               `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
             );
-            if (node.shape === 'label') {
+            if (node.kind === 'event') {
               // Some nodes may have different document patterns
               if (node.documentsData && node.documentsData.length === 1) {
                 expect(node.documentsData?.[0]).to.have.property('type', 'event');
@@ -1417,17 +1417,17 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).to.have.property('edges').length(2);
         expect(response.body).not.to.have.property('messages');
 
-        response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
+        response.body.nodes.forEach((node: EntityNodeDataModel | EventNodeDataModel) => {
           expect(node).to.have.property('color');
           expect(node.color).equal(
-            isLabelNode(node) &&
+            isEventNode(node) &&
               Number(node.uniqueAlertsCount) > 0 &&
               Number(node.uniqueEventsCount) === 0
               ? 'danger'
               : 'primary',
             `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
           );
-          if (node.shape === 'label') {
+          if (node.kind === 'event') {
             expect(node.documentsData).to.have.length(2);
             expectExpect(node.documentsData).toContainEqual(
               expectExpect.objectContaining({
@@ -1448,7 +1448,7 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      it('should return label nodes with correct ID pattern confirming boolean handling', async () => {
+      it('should return event nodes with correct ID pattern confirming boolean handling', async () => {
         const response = await postGraph(supertest, {
           query: {
             indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
@@ -1463,41 +1463,41 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(response.body).to.have.property('nodes');
 
-        const labelNodes = response.body.nodes.filter(
-          (n: NodeDataModel) => n.shape === 'label'
-        ) as LabelNodeDataModel[];
+        const eventNodes = response.body.nodes.filter(
+          (n: NodeDataModel) => n.kind === 'event'
+        ) as EventNodeDataModel[];
 
-        // Verify we have label nodes to test
-        expect(labelNodes.length).to.be.greaterThan(0, 'Should have at least one label node');
+        // Verify we have event nodes to test
+        expect(eventNodes.length).to.be.greaterThan(0, 'Should have at least one event node');
 
-        // Verify label node IDs contain the expected pattern oe([01])oa([01])
+        // Verify event node IDs contain the expected pattern oe([01])oa([01])
         // This confirms isOrigin and isOriginAlert booleans are converted to 0/1
         // CRITICAL: If COALESCE(..., false) is missing, events with null event.id
         // would result in isOrigin=null which would break this pattern
-        labelNodes.forEach((labelNode: LabelNodeDataModel) => {
-          expect(labelNode.id).to.match(
+        eventNodes.forEach((eventNode: EventNodeDataModel) => {
+          expect(eventNode.id).to.match(
             /oe\([01]\)oa\([01]\)/,
-            `Label node ID should contain oe(0|1)oa(0|1) pattern but got: ${labelNode.id}. ` +
+            `Event node ID should contain oe(0|1)oa(0|1) pattern but got: ${eventNode.id}. ` +
               'This pattern validates that isOrigin and isOriginAlert are properly coalesced to boolean values.'
           );
         });
 
         // At least one label should be from an origin event (oe(1))
-        const originLabelNodes = labelNodes.filter((n: LabelNodeDataModel) =>
+        const originEventNodes = eventNodes.filter((n: EventNodeDataModel) =>
           n.id.includes('oe(1)')
         );
-        expect(originLabelNodes.length).to.be.greaterThan(
+        expect(originEventNodes.length).to.be.greaterThan(
           0,
-          'Should have at least one label node from origin event'
+          'Should have at least one event node from origin event'
         );
 
         // Verify the origin alert label has the correct pattern (oe(1)oa(1))
-        const originAlertLabels = labelNodes.filter((n: LabelNodeDataModel) =>
+        const originAlertLabels = eventNodes.filter((n: EventNodeDataModel) =>
           n.id.includes('oe(1)oa(1)')
         );
         expect(originAlertLabels.length).to.be.greaterThan(
           0,
-          'Should have at least one label node from origin alert (kabcd1234efgh5678 is marked as isAlert: true)'
+          'Should have at least one event node from origin alert (kabcd1234efgh5678 is marked as isAlert: true)'
         );
       });
 
@@ -1585,23 +1585,23 @@ export default function (providerContext: FtrProviderContext) {
             'Should return nodes for event with null event.id'
           );
 
-          const labelNodes = response.body.nodes.filter(
-            (n: NodeDataModel) => n.shape === 'label'
-          ) as LabelNodeDataModel[];
+          const eventNodes = response.body.nodes.filter(
+            (n: NodeDataModel) => n.kind === 'event'
+          ) as EventNodeDataModel[];
 
-          // Verify we got at least one label node for the null event.id event
-          expect(labelNodes.length).to.be.greaterThan(
+          // Verify we got at least one event node for the null event.id event
+          expect(eventNodes.length).to.be.greaterThan(
             0,
-            'Should have label node for event with null event.id'
+            'Should have event node for event with null event.id'
           );
 
-          // All label nodes should have valid IDs with the pattern oe([01])oa([01])
+          // All event nodes should have valid IDs with the pattern oe([01])oa([01])
           // This confirms COALESCE ensures boolean isOrigin and isOriginAlert values
           // even when event.id is null (should be oe(0)oa(0) for non-origin events)
-          labelNodes.forEach((labelNode: LabelNodeDataModel) => {
-            expect(labelNode.id).to.match(
+          eventNodes.forEach((eventNode: EventNodeDataModel) => {
+            expect(eventNode.id).to.match(
               /oe\([01]\)oa\([01]\)/,
-              `Label node ID should contain oe(0|1)oa(0|1) pattern but got: ${labelNode.id}. ` +
+              `Event node ID should contain oe(0|1)oa(0|1) pattern but got: ${eventNode.id}. ` +
                 'If the pattern shows null instead of 0/1, the COALESCE fix is missing.'
             );
           });
@@ -1609,11 +1609,11 @@ export default function (providerContext: FtrProviderContext) {
           // The event with null event.id should have isOrigin=false (oe(0)) since
           // event.id IN (...) returns null when event.id is null, and COALESCE should
           // convert that to false
-          const nullEventIdLabelNode = labelNodes.find((n: LabelNodeDataModel) =>
+          const nullEventIdEventNode = eventNodes.find((n: EventNodeDataModel) =>
             n.label?.includes('test_action_null_event_id')
           );
-          expect(nullEventIdLabelNode).to.not.be(undefined);
-          expect(nullEventIdLabelNode!.id).to.match(
+          expect(nullEventIdEventNode).to.not.be(undefined);
+          expect(nullEventIdEventNode!.id).to.match(
             /oe\(0\)oa\(0\)/,
             'Event with null event.id should have isOrigin=false (oe(0)) and isOriginAlert=false (oa(0))'
           );
@@ -1868,14 +1868,14 @@ export default function (providerContext: FtrProviderContext) {
               // For single enriched entities, label should be entity.name
               expect(actorNode.label).to.equal('AdminExample');
               expect(actorNode.icon).to.equal('user');
-              expect(actorNode.shape).to.equal('ellipse');
+              expect(actorNode.kind).to.equal('entity');
               expect(actorNode.tag).to.equal('Identity');
 
               // Verify other nodes
-              response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
+              response.body.nodes.forEach((node: EntityNodeDataModel | EventNodeDataModel) => {
                 expect(node).to.have.property('color');
 
-                if (node.shape === 'label') {
+                if (node.kind === 'event') {
                   expect(node.color).equal(
                     'primary',
                     `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
@@ -1938,7 +1938,7 @@ export default function (providerContext: FtrProviderContext) {
               expect(actorNode).not.to.be(undefined);
               expect(actorNode.label).to.equal('ServiceAccount123');
               expect(actorNode.icon).to.equal('cloudStormy');
-              expect(actorNode.shape).to.equal('rectangle');
+              expect(actorNode.kind).to.equal('entity');
               expect(actorNode.tag).to.equal('Service');
               expect(actorNode.count).to.be(undefined); // No count for single entity
               expect(actorNode.documentsData).to.have.length(1);
@@ -1969,7 +1969,7 @@ export default function (providerContext: FtrProviderContext) {
               expect(targetNode).not.to.be(undefined);
               expect(targetNode.label).to.equal('GCP Compute Instance'); // Should show sub_type for grouped entities
               expect(targetNode.icon).to.equal('container'); // Default icon for unmapped entity type
-              expect(targetNode.shape).to.equal('rectangle'); // Default shape for grouped entities
+              expect(targetNode.kind).to.equal('entity');
               expect(targetNode.tag).to.equal('Container');
               expect(targetNode.count).to.equal(2);
               expect(targetNode.documentsData).to.have.length(2);
@@ -2054,7 +2054,7 @@ export default function (providerContext: FtrProviderContext) {
               expect(actorNode).not.to.be(undefined);
               expect(actorNode.label).to.equal('EntityTestUser');
               expect(actorNode.icon).to.equal('user');
-              expect(actorNode.shape).to.equal('ellipse');
+              expect(actorNode.kind).to.equal('entity');
               expect(actorNode.tag).to.equal('Identity');
               expect(actorNode!.documentsData!.length).to.equal(1);
               expectExpect(actorNode!.documentsData).toContainEqual(
@@ -2086,7 +2086,7 @@ export default function (providerContext: FtrProviderContext) {
               ) as EntityNodeDataModel;
               expect(serviceTargetNode).not.to.be(undefined);
               expect(serviceTargetNode.label).to.equal('ComputeServiceTarget');
-              expect(serviceTargetNode.shape).to.equal('rectangle');
+              expect(serviceTargetNode.kind).to.equal('entity');
               expect(serviceTargetNode.tag).to.equal('Compute');
               expect(serviceTargetNode!.documentsData!.length).to.be.greaterThan(0);
 
@@ -2114,18 +2114,18 @@ export default function (providerContext: FtrProviderContext) {
                 { level: 'medium_impact', count: 1 },
               ]);
 
-              const labelNode = response.body.nodes.find(
-                (node: NodeDataModel) => node.shape === 'label'
-              ) as LabelNodeDataModel;
-              expect(labelNode).not.to.be(undefined);
-              expect(labelNode.color).equal('primary');
-              expect(labelNode.documentsData).to.have.length(2);
-              expectExpect(labelNode.documentsData).toContainEqual(
+              const eventNode = response.body.nodes.find(
+                (node: NodeDataModel) => node.kind === 'event'
+              ) as EventNodeDataModel;
+              expect(eventNode).not.to.be(undefined);
+              expect(eventNode.color).equal('primary');
+              expect(eventNode.documentsData).to.have.length(2);
+              expectExpect(eventNode.documentsData).toContainEqual(
                 expectExpect.objectContaining({
                   type: 'event',
                 })
               );
-              expectExpect(labelNode.documentsData).toContainEqual(
+              expectExpect(eventNode.documentsData).toContainEqual(
                 expectExpect.objectContaining({
                   type: 'alert',
                 })
@@ -2162,7 +2162,7 @@ export default function (providerContext: FtrProviderContext) {
               // - 1 actor node (single user)
               // - 1 grouped target node for Storage entities (target-bucket-a, target-bucket-b from entity.target.id + target-bucket-c from service.target.entity.id)
               // - 1 single target node for Service entity (target-sa-different from service.target.entity.id)
-              // - 1 label node (deduped - single action fans out to both targets)
+              // - 1 event node (deduped - single action fans out to both targets)
               // Total: 4 nodes, 3 edges (actor→label, label→service, label→storage group)
               expect(response.body).to.have.property('nodes').length(4);
               expect(response.body).to.have.property('edges').length(3);
@@ -2175,7 +2175,7 @@ export default function (providerContext: FtrProviderContext) {
               expect(actorNode).not.to.be(undefined);
               expect(actorNode.label).to.equal('MultiTargetUser');
               expect(actorNode.icon).to.equal('user');
-              expect(actorNode.shape).to.equal('ellipse');
+              expect(actorNode.kind).to.equal('entity');
               expect(actorNode.tag).to.equal('Identity');
               expect(actorNode.count).to.be(undefined); // Single entity, no count
               expect(actorNode.documentsData).to.have.length(1);
@@ -2203,7 +2203,7 @@ export default function (providerContext: FtrProviderContext) {
               ) as EntityNodeDataModel;
               expect(storageGroupNode).not.to.be(undefined);
               expect(storageGroupNode.label).to.equal('GCP Storage Bucket'); // Shows sub_type for grouped entities
-              expect(storageGroupNode.shape).to.equal('rectangle');
+              expect(storageGroupNode.kind).to.equal('entity');
               expect(storageGroupNode.tag).to.equal('Storage');
               expect(storageGroupNode.count).to.equal(3);
               expect(storageGroupNode.documentsData).to.have.length(3);
@@ -2265,7 +2265,7 @@ export default function (providerContext: FtrProviderContext) {
               expect(serviceNode).not.to.be(undefined);
               expect(serviceNode.label).to.equal('TargetServiceDifferent');
               expect(serviceNode.icon).to.equal('cloudStormy'); // Service type icon
-              expect(serviceNode.shape).to.equal('rectangle');
+              expect(serviceNode.kind).to.equal('entity');
               expect(serviceNode.tag).to.equal('Service');
               expect(serviceNode.count).to.be(undefined); // Single entity, no count
               expect(serviceNode.documentsData).to.have.length(1);
@@ -2286,16 +2286,16 @@ export default function (providerContext: FtrProviderContext) {
                 })
               );
 
-              // Verify label node (should have 1 - deduped label fans out to both targets)
-              const labelNodes = response.body.nodes.filter(
-                (node: NodeDataModel) => node.shape === 'label'
-              ) as LabelNodeDataModel[];
-              expect(labelNodes).to.have.length(1);
-              const labelNode = labelNodes[0];
-              expect(labelNode.color).equal('primary');
-              expect(labelNode.label).to.equal('google.cloud.multi.target.action');
-              expect(labelNode.documentsData).to.have.length(1);
-              expectExpect(labelNode.documentsData).toContainEqual(
+              // Verify event node (should have 1 - deduped label fans out to both targets)
+              const eventNodes = response.body.nodes.filter(
+                (node: NodeDataModel) => node.kind === 'event'
+              ) as EventNodeDataModel[];
+              expect(eventNodes).to.have.length(1);
+              const eventNode = eventNodes[0];
+              expect(eventNode.color).equal('primary');
+              expect(eventNode.label).to.equal('google.cloud.multi.target.action');
+              expect(eventNode.documentsData).to.have.length(1);
+              expectExpect(eventNode.documentsData).toContainEqual(
                 expectExpect.objectContaining({
                   type: 'event',
                 })
@@ -2340,9 +2340,9 @@ export default function (providerContext: FtrProviderContext) {
               expect(actorNode).not.to.be(undefined);
               // Label should be the entity name since it exists
               expect(actorNode.label).to.equal('user:partial-user@example.com@gcp');
-              // Icon and shape should be defaults since type is missing
+              // Icon should be the default since type is missing
               expect(actorNode.icon).to.equal('magnifyExclamation');
-              expect(actorNode.shape).to.equal('rectangle');
+              expect(actorNode.kind).to.equal('entity');
               expect(actorNode.documentsData).to.have.length(1);
               expectExpect(actorNode.documentsData).toContainEqual(
                 expectExpect.objectContaining({
@@ -2367,9 +2367,9 @@ export default function (providerContext: FtrProviderContext) {
                 (node: NodeDataModel) => node.id === 'host:partial-host-instance-1'
               ) as EntityNodeDataModel;
               expect(targetNode).not.to.be(undefined);
-              // Icon and shape should be based on type since it exists
+              // Icon should be based on type since it exists
               expect(targetNode.icon).to.equal('container');
-              expect(targetNode.shape).to.equal('rectangle');
+              expect(targetNode.kind).to.equal('entity');
               expect(targetNode.tag).to.equal('Container');
               expect(targetNode.documentsData).to.have.length(1);
               expectExpect(targetNode.documentsData).toContainEqual(
@@ -2390,13 +2390,13 @@ export default function (providerContext: FtrProviderContext) {
               // Verify name is NOT present in the entity data
               expectExpect(targetNode.documentsData![0].entity).not.toHaveProperty('name');
 
-              // Verify label node
-              const labelNode = response.body.nodes.find(
-                (node: NodeDataModel) => node.shape === 'label'
-              ) as LabelNodeDataModel;
-              expect(labelNode).not.to.be(undefined);
-              expect(labelNode.label).to.equal('google.compute.v1.Instances.start');
-              expect(labelNode.color).to.equal('primary');
+              // Verify event node
+              const eventNode = response.body.nodes.find(
+                (node: NodeDataModel) => node.kind === 'event'
+              ) as EventNodeDataModel;
+              expect(eventNode).not.to.be(undefined);
+              expect(eventNode.label).to.equal('google.compute.v1.Instances.start');
+              expect(eventNode.color).to.equal('primary');
             });
           });
 
@@ -2429,7 +2429,7 @@ export default function (providerContext: FtrProviderContext) {
               // For single enriched entities, label should be entity.name
               expect(entityNode.label).to.equal('Host with single ip');
               expect(entityNode.icon).to.equal('storage');
-              expect(entityNode.shape).to.equal('hexagon');
+              expect(entityNode.kind).to.equal('entity');
               expect(entityNode.tag).to.equal('Host');
               expect(entityNode.documentsData).to.have.length(1);
               expect(entityNode.documentsData![0].entity?.host?.ip).to.have.length(1);
@@ -2465,7 +2465,7 @@ export default function (providerContext: FtrProviderContext) {
               // For single enriched entities, label should be entity.name
               expect(entityNode.label).to.equal('Host with no ip');
               expect(entityNode.icon).to.equal('storage');
-              expect(entityNode.shape).to.equal('hexagon');
+              expect(entityNode.kind).to.equal('entity');
               expect(entityNode.tag).to.equal('Host');
               expect(entityNode.documentsData).to.have.length(1);
               expect(entityNode.documentsData![0].entity).not.to.have.property('host');
@@ -2501,7 +2501,7 @@ export default function (providerContext: FtrProviderContext) {
               // For single enriched entities, label should be entity.name
               expect(entityNode.label).to.equal('Host with multiple ips');
               expect(entityNode.icon).to.equal('storage');
-              expect(entityNode.shape).to.equal('hexagon');
+              expect(entityNode.kind).to.equal('entity');
               expect(entityNode.tag).to.equal('Host');
               expect(entityNode.documentsData).to.have.length(1);
               expect(entityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
@@ -2537,7 +2537,7 @@ export default function (providerContext: FtrProviderContext) {
               // For single enriched entities, label should be entity.name
               expect(actorEntityNode.label).to.equal('Actor Host with multiple ips');
               expect(actorEntityNode.icon).to.equal('storage');
-              expect(actorEntityNode.shape).to.equal('hexagon');
+              expect(actorEntityNode.kind).to.equal('entity');
               expect(actorEntityNode.tag).to.equal('Host');
               expect(actorEntityNode.documentsData).to.have.length(1);
               expect(actorEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
@@ -2552,7 +2552,7 @@ export default function (providerContext: FtrProviderContext) {
               // For single enriched entities, label should be entity.name
               expect(targetEntityNode.label).to.equal('Target Host with multiple ips');
               expect(targetEntityNode.icon).to.equal('storage');
-              expect(targetEntityNode.shape).to.equal('hexagon');
+              expect(targetEntityNode.kind).to.equal('entity');
               expect(targetEntityNode.tag).to.equal('Host');
               expect(targetEntityNode.documentsData).to.have.length(1);
               expect(targetEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
@@ -2588,7 +2588,7 @@ export default function (providerContext: FtrProviderContext) {
               // For single enriched entities, label should be entity.name
               expect(actorEntityNode.label).to.equal('Actor Host with multiple ips');
               expect(actorEntityNode.icon).to.equal('storage');
-              expect(actorEntityNode.shape).to.equal('hexagon');
+              expect(actorEntityNode.kind).to.equal('entity');
               expect(actorEntityNode.tag).to.equal('Host');
               expect(actorEntityNode.documentsData).to.have.length(1);
               expect(actorEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
@@ -2603,7 +2603,7 @@ export default function (providerContext: FtrProviderContext) {
               // For single enriched entities, label should be entity.name
               expect(targetEntityNode.label).to.equal('Target Host with multiple ips');
               expect(targetEntityNode.icon).to.equal('storage');
-              expect(targetEntityNode.shape).to.equal('hexagon');
+              expect(targetEntityNode.kind).to.equal('entity');
               expect(targetEntityNode.tag).to.equal('Host');
               expect(targetEntityNode.documentsData).to.have.length(1);
               expect(targetEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
@@ -2638,7 +2638,7 @@ export default function (providerContext: FtrProviderContext) {
               // For single enriched entities, label should be entity.name
               expect(actorEntityNode.label).to.equal('Actor Host with multiple ips');
               expect(actorEntityNode.icon).to.equal('storage');
-              expect(actorEntityNode.shape).to.equal('hexagon');
+              expect(actorEntityNode.kind).to.equal('entity');
               expect(actorEntityNode.tag).to.equal('Host');
               expect(actorEntityNode.documentsData).to.have.length(1);
               expect(actorEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
@@ -2653,7 +2653,7 @@ export default function (providerContext: FtrProviderContext) {
               // For single enriched entities, label should be entity.name
               expect(targetEntityNode.label).to.equal('Target Host with multiple ips');
               expect(targetEntityNode.icon).to.equal('storage');
-              expect(targetEntityNode.shape).to.equal('hexagon');
+              expect(targetEntityNode.kind).to.equal('entity');
               expect(targetEntityNode.tag).to.equal('Host');
               expect(targetEntityNode.documentsData).to.have.length(1);
               expect(targetEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
@@ -2737,13 +2737,13 @@ export default function (providerContext: FtrProviderContext) {
                 expect(sourceFields!['entity.id']).to.equal(doc.id);
               });
 
-              // The label node counts distinct documents, not MV_EXPAND rows.
-              const labelNode = response.body.nodes.find(
-                (node: LabelNodeDataModel) => node.shape === 'label'
-              ) as LabelNodeDataModel;
-              expect(labelNode).not.to.be(undefined);
-              expect(labelNode.count).to.equal(1);
-              expect(labelNode.uniqueEventsCount).to.equal(1);
+              // The event node counts distinct documents, not MV_EXPAND rows.
+              const eventNode = response.body.nodes.find(
+                (node: EventNodeDataModel) => node.kind === 'event'
+              ) as EventNodeDataModel;
+              expect(eventNode).not.to.be(undefined);
+              expect(eventNode.count).to.equal(1);
+              expect(eventNode.uniqueEventsCount).to.equal(1);
             });
           });
         };
@@ -2849,7 +2849,7 @@ export default function (providerContext: FtrProviderContext) {
 
               expect(userActorNode).not.to.be(undefined);
               expect(userActorNode.label).to.equal('Relationships Test User');
-              expect(userActorNode.shape).to.equal('ellipse');
+              expect(userActorNode.kind).to.equal('entity');
               expect(userActorNode.tag).to.equal('Identity');
               expect(userActorNode.icon).to.equal('user');
               expect(userActorNode!.documentsData!.length).to.equal(1);
@@ -2876,7 +2876,7 @@ export default function (providerContext: FtrProviderContext) {
               ) as EntityNodeDataModel;
               expect(serviceTargetNode).not.to.be(undefined);
               expect(serviceTargetNode.label).to.equal('Relationships Target Service');
-              expect(serviceTargetNode.shape).to.equal('rectangle');
+              expect(serviceTargetNode.kind).to.equal('entity');
               expect(serviceTargetNode.tag).to.equal('Service');
               expect(serviceTargetNode.icon).to.equal('cloudStormy');
               expect(serviceTargetNode!.documentsData!.length).to.equal(1);
@@ -2903,7 +2903,7 @@ export default function (providerContext: FtrProviderContext) {
               ) as EntityNodeDataModel;
               expect(relationshipGroupedNodeTarget).not.to.be(undefined);
               expect(relationshipGroupedNodeTarget.label).to.equal('AWS EC2 Instance');
-              expect(relationshipGroupedNodeTarget.shape).to.equal('hexagon');
+              expect(relationshipGroupedNodeTarget.kind).to.equal('entity');
               expect(relationshipGroupedNodeTarget.tag).to.equal('Host');
               expect(relationshipGroupedNodeTarget.icon).to.equal('storage');
 
@@ -2922,21 +2922,21 @@ export default function (providerContext: FtrProviderContext) {
                 })
               );
 
-              // Should have label nodes for events
-              const labelNodes = response.body.nodes.filter(
-                (node: NodeDataModel) => node.shape === 'label'
+              // Should have event nodes for events
+              const eventNodes = response.body.nodes.filter(
+                (node: NodeDataModel) => node.kind === 'event'
               );
-              expect(labelNodes.length).to.equal(1);
+              expect(eventNodes.length).to.equal(1);
 
               // Should have relationship nodes for entity relationships (Owns)
               const relationshipNodes = response.body.nodes.filter(
-                (node: NodeDataModel) => node.shape === 'relationship'
+                (node: NodeDataModel) => node.kind === 'relationship'
               );
               expect(relationshipNodes.length).to.equal(1);
 
               // Verify relationship node properties
               relationshipNodes.forEach((node: NodeDataModel) => {
-                expect(node.shape).to.equal('relationship');
+                expect(node.kind).to.equal('relationship');
                 expect(node.label).to.equal('Owns');
               });
             });
@@ -2957,24 +2957,21 @@ export default function (providerContext: FtrProviderContext) {
                   entitiesSpaceId
                 ).expect(result(200, logger));
 
-                // Should have no label nodes (no events)
-                const labelNodes = response.body.nodes.filter(
-                  (node: NodeDataModel) => node.shape === 'label'
+                // Should have no event nodes (no events)
+                const eventNodes = response.body.nodes.filter(
+                  (node: NodeDataModel) => node.kind === 'event'
                 );
-                expect(labelNodes.length).to.equal(0);
+                expect(eventNodes.length).to.equal(0);
 
                 // Should have relationship nodes for entity relationships (Owns)
                 const relationshipNodes = response.body.nodes.filter(
-                  (node: NodeDataModel) => node.shape === 'relationship'
+                  (node: NodeDataModel) => node.kind === 'relationship'
                 );
                 expect(relationshipNodes.length).to.equal(1);
 
                 // Should have entity nodes for source and targets
                 const entityNodes = response.body.nodes.filter(
-                  (node: NodeDataModel) =>
-                    node.shape === 'ellipse' ||
-                    node.shape === 'rectangle' ||
-                    node.shape === 'hexagon'
+                  (node: NodeDataModel) => node.kind === 'entity'
                 );
                 expect(entityNodes.length).to.equal(2);
 
@@ -2984,7 +2981,7 @@ export default function (providerContext: FtrProviderContext) {
 
                 expect(userActorNode).not.to.be(undefined);
                 expect(userActorNode.label).to.equal('Relationships Test User');
-                expect(userActorNode.shape).to.equal('ellipse');
+                expect(userActorNode.kind).to.equal('entity');
                 expect(userActorNode.tag).to.equal('Identity');
                 expect(userActorNode.icon).to.equal('user');
                 expect(userActorNode!.documentsData!.length).to.equal(1);
@@ -3019,7 +3016,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as EntityNodeDataModel;
                 expect(relationshipGroupedNodeTarget).not.to.be(undefined);
                 expect(relationshipGroupedNodeTarget.label).to.equal('AWS EC2 Instance');
-                expect(relationshipGroupedNodeTarget.shape).to.equal('hexagon');
+                expect(relationshipGroupedNodeTarget.kind).to.equal('entity');
                 expect(relationshipGroupedNodeTarget.tag).to.equal('Host');
                 expect(relationshipGroupedNodeTarget.icon).to.equal('storage');
 
@@ -3087,37 +3084,37 @@ export default function (providerContext: FtrProviderContext) {
 
                 // Find the group node (stacking Owns and Communicates_with relationships from same source)
                 const groupNode = response.body.nodes.find(
-                  (node: NodeDataModel) => node.shape === 'group'
+                  (node: NodeDataModel) => node.kind === 'group'
                 );
                 expect(groupNode).to.be.ok();
 
-                // Should have label nodes for events (SetIamPolicy and instances.start actions)
-                const labelNodes = response.body.nodes.filter(
-                  (node: NodeDataModel) => node.shape === 'label'
+                // Should have event nodes for events (SetIamPolicy and instances.start actions)
+                const eventNodes = response.body.nodes.filter(
+                  (node: NodeDataModel) => node.kind === 'event'
                 );
-                expect(labelNodes.length).to.equal(2);
+                expect(eventNodes.length).to.equal(2);
 
-                // Verify SetIamPolicy label node
-                const setIamPolicyLabel = labelNodes.find(
+                // Verify SetIamPolicy event node
+                const setIamPolicyLabel = eventNodes.find(
                   (node: NodeDataModel) =>
-                    (node as LabelNodeDataModel).label === 'google.iam.admin.v1.SetIamPolicy'
-                ) as LabelNodeDataModel;
+                    (node as EventNodeDataModel).label === 'google.iam.admin.v1.SetIamPolicy'
+                ) as EventNodeDataModel;
                 expect(setIamPolicyLabel).not.to.be(undefined);
-                expect(setIamPolicyLabel.shape).to.equal('label');
+                expect(setIamPolicyLabel.kind).to.equal('event');
                 expect(setIamPolicyLabel.color).to.equal('primary');
 
-                // Verify instances.start label node
-                const instancesStartLabel = labelNodes.find(
+                // Verify instances.start event node
+                const instancesStartLabel = eventNodes.find(
                   (node: NodeDataModel) =>
-                    (node as LabelNodeDataModel).label === 'google.compute.instances.start'
-                ) as LabelNodeDataModel;
+                    (node as EventNodeDataModel).label === 'google.compute.instances.start'
+                ) as EventNodeDataModel;
                 expect(instancesStartLabel).not.to.be(undefined);
-                expect(instancesStartLabel.shape).to.equal('label');
+                expect(instancesStartLabel.kind).to.equal('event');
                 expect(instancesStartLabel.color).to.equal('primary');
 
                 // Should have 3 relationship nodes for Owns and Communicates_with relationships
                 const relationshipNodes = response.body.nodes.filter(
-                  (node: NodeDataModel) => node.shape === 'relationship'
+                  (node: NodeDataModel) => node.kind === 'relationship'
                 );
                 expect(relationshipNodes.length).to.equal(3);
 
@@ -3129,7 +3126,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as RelationshipNodeDataModel;
                 expect(ownsNode).not.to.be(undefined);
                 expect(ownsNode.label).to.equal('Owns');
-                expect(ownsNode.shape).to.equal('relationship');
+                expect(ownsNode.kind).to.equal('relationship');
                 expect(ownsNode.parentId).to.equal(groupNode.id);
 
                 // Verify communicates_with relationship node from data-pipeline (stacked with parentId)
@@ -3140,7 +3137,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as RelationshipNodeDataModel;
                 expect(dataPipelineCommunicatesWithNode).not.to.be(undefined);
                 expect(dataPipelineCommunicatesWithNode.label).to.equal('Communicates with');
-                expect(dataPipelineCommunicatesWithNode.shape).to.equal('relationship');
+                expect(dataPipelineCommunicatesWithNode.kind).to.equal('relationship');
                 expect(dataPipelineCommunicatesWithNode.parentId).to.equal(groupNode.id);
 
                 // Verify communicates_with relationship node from database-server (NOT stacked)
@@ -3151,15 +3148,12 @@ export default function (providerContext: FtrProviderContext) {
                 ) as RelationshipNodeDataModel;
                 expect(dbServerCommunicatesWithNode).not.to.be(undefined);
                 expect(dbServerCommunicatesWithNode.label).to.equal('Communicates with');
-                expect(dbServerCommunicatesWithNode.shape).to.equal('relationship');
+                expect(dbServerCommunicatesWithNode.kind).to.equal('relationship');
                 expect(dbServerCommunicatesWithNode.parentId).to.be(undefined);
 
                 // Check for entity nodes - should have actors and targets
                 const entityNodes = response.body.nodes.filter(
-                  (node: NodeDataModel) =>
-                    node.shape === 'ellipse' ||
-                    node.shape === 'rectangle' ||
-                    node.shape === 'hexagon'
+                  (node: NodeDataModel) => node.kind === 'entity'
                 );
                 expect(entityNodes.length).to.be.greaterThan(0);
 
@@ -3171,7 +3165,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as EntityNodeDataModel;
                 expect(actorNode1).not.to.be(undefined);
                 expect(actorNode1.label).to.equal('GCP Admin User');
-                expect(actorNode1.shape).to.equal('ellipse');
+                expect(actorNode1.kind).to.equal('entity');
                 expect(actorNode1.icon).to.equal('user');
                 expect(actorNode1.tag).to.equal('Service Account');
                 expect(actorNode1.documentsData!.length).to.equal(1);
@@ -3201,7 +3195,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as EntityNodeDataModel;
                 expect(actorNode2).not.to.be(undefined);
                 expect(actorNode2.label).to.equal('GCP Compute Operator');
-                expect(actorNode2.shape).to.equal('ellipse');
+                expect(actorNode2.kind).to.equal('entity');
                 expect(actorNode2.icon).to.equal('user');
                 expect(actorNode2.tag).to.equal('Identity');
                 expect(actorNode2.documentsData!.length).to.equal(1);
@@ -3230,7 +3224,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as EntityNodeDataModel;
                 expect(serviceTargetNode).not.to.be(undefined);
                 expect(serviceTargetNode.label).to.equal('data-pipeline Service Account');
-                expect(serviceTargetNode.shape).to.equal('ellipse');
+                expect(serviceTargetNode.kind).to.equal('entity');
                 expect(serviceTargetNode.icon).to.equal('user');
                 expect(serviceTargetNode.tag).to.equal('Service Account');
                 expect(serviceTargetNode.documentsData!.length).to.equal(1);
@@ -3260,7 +3254,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as EntityNodeDataModel;
                 expect(hostTargetNode).not.to.be(undefined);
                 expect(hostTargetNode.label).to.equal('database-server-prod-1');
-                expect(hostTargetNode.shape).to.equal('hexagon');
+                expect(hostTargetNode.kind).to.equal('entity');
                 expect(hostTargetNode.icon).to.equal('storage');
                 expect(hostTargetNode.tag).to.equal('Host');
                 expect(hostTargetNode.documentsData!.length).to.equal(1);
@@ -3287,7 +3281,7 @@ export default function (providerContext: FtrProviderContext) {
                     node.id === 'c7d2fb4084505889f751c7a8ffcee9eb7d836a60c2e34f751b64faf34ac0b932'
                 ) as EntityNodeDataModel;
                 expect(relationshipsTargetNode.label).to.equal('GCP Compute Instance');
-                expect(relationshipsTargetNode.shape).to.equal('hexagon');
+                expect(relationshipsTargetNode.kind).to.equal('entity');
                 expect(relationshipsTargetNode.icon).to.equal('storage');
                 expect(relationshipsTargetNode.tag).to.equal('Host');
                 expect(relationshipsTargetNode.count).to.equal(2);
@@ -3351,8 +3345,7 @@ export default function (providerContext: FtrProviderContext) {
 
               // --- Entity nodes ---
               const entityNodes = allNodes.filter(
-                (n: NodeDataModel) =>
-                  n.shape === 'hexagon' || n.shape === 'ellipse' || n.shape === 'rectangle'
+                (n: NodeDataModel) => n.kind === 'entity'
               ) as EntityNodeDataModel[];
 
               const entityIds = entityNodes.map((n) => n.id).sort();
@@ -3362,7 +3355,7 @@ export default function (providerContext: FtrProviderContext) {
 
               // --- Relationship nodes ---
               const relationshipNodes = allNodes.filter(
-                (n: NodeDataModel) => n.shape === 'relationship'
+                (n: NodeDataModel) => n.kind === 'relationship'
               ) as RelationshipNodeDataModel[];
 
               expect(relationshipNodes.length).to.equal(2);
@@ -3405,7 +3398,7 @@ export default function (providerContext: FtrProviderContext) {
                 // Expected:
                 // - 9 entity nodes: root + 3 intermediate + 3 grouped targets + 1 delegate + 1 external-caller
                 // - 7 relationship nodes: 1 Owns + 4 Communicates_with + 1 Supervises + 1 Depends_on
-                // - 3 label nodes: 1 UpdatePolicy + 2 new events (AuditLog, UserOperation)
+                // - 3 event nodes: 1 UpdatePolicy + 2 new events (AuditLog, UserOperation)
                 // - 1 group node: stacking 2 relationships + 2 labels with same source-target pair (identity-1 → delegate-1)
                 const response = await postGraph(
                   supertest,
@@ -3430,59 +3423,56 @@ export default function (providerContext: FtrProviderContext) {
                   entitiesSpaceId
                 ).expect(result(200, logger));
 
-                // Verify label nodes count (3 event actions)
-                const labelNodes = response.body.nodes.filter(
-                  (node: NodeDataModel) => node.shape === 'label'
+                // Verify event nodes count (3 event actions)
+                const eventNodes = response.body.nodes.filter(
+                  (node: NodeDataModel) => node.kind === 'event'
                 );
-                expect(labelNodes.length).to.equal(3);
+                expect(eventNodes.length).to.equal(3);
 
-                // Verify the original UpdatePolicy label node
-                const updatePolicyLabel = labelNodes.find(
-                  (node: LabelNodeDataModel) => node.label === 'google.iam.admin.v1.UpdatePolicy'
-                ) as LabelNodeDataModel;
+                // Verify the original UpdatePolicy event node
+                const updatePolicyLabel = eventNodes.find(
+                  (node: EventNodeDataModel) => node.label === 'google.iam.admin.v1.UpdatePolicy'
+                ) as EventNodeDataModel;
                 expect(updatePolicyLabel).not.to.be(undefined);
                 expect(updatePolicyLabel.color).to.equal('primary');
-                expect(updatePolicyLabel.shape).to.equal('label');
+                expect(updatePolicyLabel.kind).to.equal('event');
 
-                // Verify the two new label nodes (from identity-1 to delegate-1)
-                const auditLogLabel = labelNodes.find(
-                  (node: LabelNodeDataModel) => node.label === 'google.admin.reports.v1.AuditLog'
-                ) as LabelNodeDataModel;
+                // Verify the two new event nodes (from identity-1 to delegate-1)
+                const auditLogLabel = eventNodes.find(
+                  (node: EventNodeDataModel) => node.label === 'google.admin.reports.v1.AuditLog'
+                ) as EventNodeDataModel;
                 expect(auditLogLabel).not.to.be(undefined);
                 expect(auditLogLabel.color).to.equal('primary');
 
-                const userOperationLabel = labelNodes.find(
-                  (node: LabelNodeDataModel) =>
+                const userOperationLabel = eventNodes.find(
+                  (node: EventNodeDataModel) =>
                     node.label === 'google.admin.directory.v1.UserOperation'
-                ) as LabelNodeDataModel;
+                ) as EventNodeDataModel;
                 expect(userOperationLabel).not.to.be(undefined);
                 expect(userOperationLabel.color).to.equal('primary');
 
                 // Verify entity nodes count
                 const entityNodes = response.body.nodes.filter(
-                  (node: NodeDataModel) =>
-                    node.shape === 'ellipse' ||
-                    node.shape === 'rectangle' ||
-                    node.shape === 'hexagon'
+                  (node: NodeDataModel) => node.kind === 'entity'
                 );
                 // 1 root + 3 intermediate (host, service, identity) + 3 grouped targets + 1 delegate + 1 external-caller = 9
                 expect(entityNodes.length).to.equal(9);
 
                 // Verify relationship nodes count
                 const relationshipNodes = response.body.nodes.filter(
-                  (node: NodeDataModel) => node.shape === 'relationship'
+                  (node: NodeDataModel) => node.kind === 'relationship'
                 );
                 // 1 Owns + 3 Communicates_with (original) + 1 Communicates_with (external-caller) + 1 Supervises + 1 Depends_on = 7
                 expect(relationshipNodes.length).to.equal(7);
 
                 // Verify group node exists (stacking 2 relationships + 2 labels with same source-target pair: identity-1 → delegate-1)
                 const groupNodes = response.body.nodes.filter(
-                  (node: NodeDataModel) => node.shape === 'group'
+                  (node: NodeDataModel) => node.kind === 'group'
                 );
                 expect(groupNodes.length).to.equal(1);
                 const groupNode = groupNodes[0];
 
-                // Verify the two label nodes are stacked in the group
+                // Verify the two event nodes are stacked in the group
                 expect(auditLogLabel.parentId).to.equal(groupNode.id);
                 expect(userOperationLabel.parentId).to.equal(groupNode.id);
 
@@ -3524,7 +3514,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as EntityNodeDataModel;
                 expect(rootNode).not.to.be(undefined);
                 expect(rootNode.label).to.equal('Hierarchy Root User');
-                expect(rootNode.shape).to.equal('ellipse');
+                expect(rootNode.kind).to.equal('entity');
                 expect(rootNode.tag).to.equal('Identity');
                 expect(rootNode.icon).to.equal('user');
                 expect(rootNode.documentsData!.length).to.equal(1);
@@ -3551,7 +3541,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as EntityNodeDataModel;
                 expect(hostNode).not.to.be(undefined);
                 expect(hostNode.label).to.equal('Hierarchy Host 1');
-                expect(hostNode.shape).to.equal('hexagon');
+                expect(hostNode.kind).to.equal('entity');
                 expect(hostNode.tag).to.equal('Host');
                 expect(hostNode.icon).to.equal('storage');
                 expect(hostNode.count).to.be(undefined); // Single entity, no count
@@ -3563,7 +3553,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as EntityNodeDataModel;
                 expect(serviceNode).not.to.be(undefined);
                 expect(serviceNode.label).to.equal('Hierarchy Service 1');
-                expect(serviceNode.shape).to.equal('rectangle');
+                expect(serviceNode.kind).to.equal('entity');
                 expect(serviceNode.tag).to.equal('Service');
                 expect(serviceNode.icon).to.equal('cloudStormy');
                 expect(serviceNode.count).to.be(undefined);
@@ -3574,7 +3564,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as EntityNodeDataModel;
                 expect(identityNode).not.to.be(undefined);
                 expect(identityNode.label).to.equal('Hierarchy Identity 1');
-                expect(identityNode.shape).to.equal('ellipse');
+                expect(identityNode.kind).to.equal('entity');
                 expect(identityNode.tag).to.equal('Identity');
                 expect(identityNode.icon).to.equal('user');
                 expect(identityNode.count).to.be(undefined);
@@ -3585,7 +3575,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as EntityNodeDataModel;
                 expect(storageGroupedNode).not.to.be(undefined);
                 expect(storageGroupedNode.label).to.equal('AWS S3 Bucket'); // Shows sub_type for grouped
-                expect(storageGroupedNode.shape).to.equal('rectangle');
+                expect(storageGroupedNode.kind).to.equal('entity');
                 expect(storageGroupedNode.documentsData!.length).to.equal(2);
                 expectExpect(storageGroupedNode.documentsData).toContainEqual(
                   expectExpect.objectContaining({
@@ -3616,7 +3606,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as EntityNodeDataModel;
                 expect(databaseGroupedNode).not.to.be(undefined);
                 expect(databaseGroupedNode.label).to.equal('AWS RDS Instance');
-                expect(databaseGroupedNode.shape).to.equal('rectangle');
+                expect(databaseGroupedNode.kind).to.equal('entity');
                 expect(databaseGroupedNode.documentsData!.length).to.equal(2);
 
                 // Verify grouped network target (2 VPCs with same type/subtype)
@@ -3625,7 +3615,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as EntityNodeDataModel;
                 expect(networkGroupedNode).not.to.be(undefined);
                 expect(networkGroupedNode.label).to.equal('AWS VPC');
-                expect(networkGroupedNode.shape).to.equal('rectangle');
+                expect(networkGroupedNode.kind).to.equal('entity');
                 expect(networkGroupedNode.icon).to.equal('globe');
                 expectExpect(networkGroupedNode.ips).toEqual(
                   expectExpect.arrayContaining(['172.16.0.1', '172.16.0.2'])
@@ -3639,7 +3629,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as EntityNodeDataModel;
                 expect(delegateNode).not.to.be(undefined);
                 expect(delegateNode.label).to.equal('Hierarchy Delegate Agent');
-                expect(delegateNode.shape).to.equal('ellipse');
+                expect(delegateNode.kind).to.equal('entity');
                 expect(delegateNode.tag).to.equal('User');
                 expect(delegateNode.icon).to.equal('user');
                 expect(delegateNode.count).to.be(undefined); // Single entity
@@ -3667,7 +3657,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as EntityNodeDataModel;
                 expect(externalCallerNode).not.to.be(undefined);
                 expect(externalCallerNode.label).to.equal('Hierarchy External Caller');
-                expect(externalCallerNode.shape).to.equal('rectangle');
+                expect(externalCallerNode.kind).to.equal('entity');
                 expect(externalCallerNode.tag).to.equal('Service');
                 expect(externalCallerNode.icon).to.equal('cloudStormy');
                 expect(externalCallerNode.count).to.be(undefined);
@@ -3691,7 +3681,7 @@ export default function (providerContext: FtrProviderContext) {
                   (node: NodeDataModel) => (node as RelationshipNodeDataModel).label === 'Owns'
                 );
                 expect(ownsNodes.length).to.equal(1);
-                expect(ownsNodes[0].shape).to.equal('relationship');
+                expect(ownsNodes[0].kind).to.equal('relationship');
 
                 // Verify Communicates_with relationship nodes (4 nodes - 3 from intermediate entities + 1 from external-caller)
                 const communicatesWithNodes = relationshipNodes.filter(
@@ -3700,7 +3690,7 @@ export default function (providerContext: FtrProviderContext) {
                 );
                 expect(communicatesWithNodes.length).to.equal(4);
                 communicatesWithNodes.forEach((node: NodeDataModel) => {
-                  expect(node.shape).to.equal('relationship');
+                  expect(node.kind).to.equal('relationship');
                 });
 
                 // Verify the external-caller's Communicates_with relationship node (NOT stacked)
@@ -3717,7 +3707,7 @@ export default function (providerContext: FtrProviderContext) {
                     (node as RelationshipNodeDataModel).label === 'Supervises'
                 );
                 expect(supervisesNodes.length).to.equal(1);
-                expect(supervisesNodes[0].shape).to.equal('relationship');
+                expect(supervisesNodes[0].kind).to.equal('relationship');
 
                 // Verify edges
                 response.body.edges.forEach((edge: EdgeDataModel) => {
@@ -3769,10 +3759,7 @@ export default function (providerContext: FtrProviderContext) {
                 ).expect(result(200, logger));
 
                 const entityNodes = response.body.nodes.filter(
-                  (node: NodeDataModel) =>
-                    node.shape === 'ellipse' ||
-                    node.shape === 'rectangle' ||
-                    node.shape === 'hexagon'
+                  (node: NodeDataModel) => node.kind === 'entity'
                 ) as EntityNodeDataModel[];
 
                 // 4 entity nodes total: origin-pinned-server (single), grouped-actor-server-1+3 (grouped),
@@ -3814,7 +3801,7 @@ export default function (providerContext: FtrProviderContext) {
 
                 // 3 relationship nodes: one per distinct actor group
                 const relationshipNodes = response.body.nodes.filter(
-                  (node: NodeDataModel) => node.shape === 'relationship'
+                  (node: NodeDataModel) => node.kind === 'relationship'
                 );
                 expect(relationshipNodes.length).to.equal(3);
                 relationshipNodes.forEach((node: RelationshipNodeDataModel) => {
@@ -3845,17 +3832,14 @@ export default function (providerContext: FtrProviderContext) {
                 // Both actors are "Host / Linux Host" with communicates_with → host:over-split-target.
                 // Before the fix: 2 relationship nodes. After the fix: 1 merged relationship node.
                 const relationshipNodes = response.body.nodes.filter(
-                  (node: NodeDataModel) => node.shape === 'relationship'
+                  (node: NodeDataModel) => node.kind === 'relationship'
                 );
                 expect(relationshipNodes.length).to.equal(1);
                 expect(relationshipNodes[0].label).to.equal('Communicates with');
 
                 // The merged actor node has count=2 (both actors collapsed)
                 const entityNodes = response.body.nodes.filter(
-                  (node: NodeDataModel) =>
-                    node.shape === 'ellipse' ||
-                    node.shape === 'rectangle' ||
-                    node.shape === 'hexagon'
+                  (node: NodeDataModel) => node.kind === 'entity'
                 );
                 const actorNode = entityNodes.find(
                   (node: EntityNodeDataModel) => node.count === 2
@@ -3916,13 +3900,13 @@ export default function (providerContext: FtrProviderContext) {
           expect(response.body).to.have.property('edges').length(2);
           expect(response.body).not.to.have.property('messages');
 
-          response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
+          response.body.nodes.forEach((node: EntityNodeDataModel | EventNodeDataModel) => {
             expect(node).to.have.property('color');
             expect(node.color).equal(
               'primary',
               `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
             );
-            if (node.shape === 'label') {
+            if (node.kind === 'event') {
               expect(node.documentsData).to.have.length(1);
               expectExpect(node.documentsData).not.toContainEqual(
                 expectExpect.objectContaining({

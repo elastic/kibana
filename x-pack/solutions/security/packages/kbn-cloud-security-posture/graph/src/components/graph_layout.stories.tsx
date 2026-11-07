@@ -13,7 +13,7 @@ import type { EdgeColor } from '@kbn/cloud-security-posture-common/types/graph/l
 import { GlobalStylesStorybookDecorator } from '../../.storybook/decorators';
 import type {
   EdgeViewModel,
-  LabelNodeViewModel,
+  EventNodeViewModel,
   NodeViewModel,
   EntityNodeViewModel,
   GroupNodeViewModel,
@@ -31,7 +31,7 @@ const storybookToolbarItems = () => [
 ];
 
 /** Reusable toolbar items for label (event) node Storybook previews. */
-const storybookLabelToolbarItems = () => [
+const storybookEventToolbarItems = () => [
   { iconType: 'filter', label: 'Show events with this action', onClick: () => {} },
   { iconType: 'inspect', label: 'Show event details', onClick: () => {} },
 ];
@@ -68,13 +68,13 @@ type Story = StoryObj<typeof Graph>;
 type EnhancedNodeViewModel =
   | EntityNodeViewModel
   | GroupNodeViewModel
-  | (LabelNodeViewModel & { source: string; target: string })
+  | (EventNodeViewModel & { source: string; target: string })
   | (RelationshipNodeViewModel & { source: string; target: string });
 
 // Helper to get edge color for connector nodes (label or relationship)
-const getConnectorEdgeColor = (node: LabelNodeViewModel | RelationshipNodeViewModel): EdgeColor => {
-  // Relationship nodes use 'subdued' color, label nodes use their color property
-  return node.shape === 'relationship' ? 'subdued' : node.color;
+const getConnectorEdgeColor = (node: EventNodeViewModel | RelationshipNodeViewModel): EdgeColor => {
+  // Relationship nodes use 'subdued' color, event nodes use their color property
+  return node.kind === 'relationship' ? 'subdued' : node.color;
 };
 
 const extractEdges = (
@@ -91,14 +91,14 @@ const extractEdges = (
     [key: string]: {
       source: string;
       target: string;
-      connectorNodes: Array<LabelNodeViewModel | RelationshipNodeViewModel>;
+      connectorNodes: Array<EventNodeViewModel | RelationshipNodeViewModel>;
     };
   } = {};
   const nodes: { [key: string]: NodeViewModel } = {};
   const edges: EdgeViewModel[] = [];
 
   graphData.forEach((node) => {
-    if (node.shape === 'label' || node.shape === 'relationship') {
+    if (node.kind === 'event' || node.kind === 'relationship') {
       const connectorNode = { ...node, id: `${node.id}connector(${node.label})` };
       const { source, target } = node;
 
@@ -136,7 +136,7 @@ const extractEdges = (
     if (connector.connectorNodes.length > 1) {
       const groupNode: NodeViewModel = {
         id: `grp(a(${connector.source})-b(${connector.target}))`,
-        shape: 'group',
+        kind: 'group',
       };
 
       const firstConnectorColor = getConnectorEdgeColor(connector.connectorNodes[0]);
@@ -145,41 +145,41 @@ const extractEdges = (
       edges.push({
         id: `a(${connector.source})-b(${groupNode.id})`,
         source: connector.source,
-        sourceShape: nodes[connector.source].shape,
+        sourceKind: nodes[connector.source].kind,
         target: groupNode.id,
-        targetShape: groupNode.shape,
+        targetKind: groupNode.kind,
         color: firstConnectorColor,
       });
 
       edges.push({
         id: `a(${groupNode.id})-b(${connector.target})`,
         source: groupNode.id,
-        sourceShape: groupNode.shape,
+        sourceKind: groupNode.kind,
         target: connector.target,
-        targetShape: nodes[connector.target].shape,
+        targetKind: nodes[connector.target].kind,
         color: firstConnectorColor,
       });
 
       connector.connectorNodes.forEach(
-        (connectorNode: Writable<LabelNodeViewModel | RelationshipNodeViewModel>) => {
+        (connectorNode: Writable<EventNodeViewModel | RelationshipNodeViewModel>) => {
           connectorNode.parentId = groupNode.id;
           const edgeColor = getConnectorEdgeColor(connectorNode);
 
           edges.push({
             id: `a(${groupNode.id})-b(${connectorNode.id})`,
             source: groupNode.id,
-            sourceShape: groupNode.shape,
+            sourceKind: groupNode.kind,
             target: connectorNode.id,
-            targetShape: connectorNode.shape,
+            targetKind: connectorNode.kind,
             color: edgeColor,
           });
 
           edges.push({
             id: `a(${connectorNode.id})-b(${groupNode.id})`,
             source: connectorNode.id,
-            sourceShape: connectorNode.shape,
+            sourceKind: connectorNode.kind,
             target: groupNode.id,
-            targetShape: groupNode.shape,
+            targetKind: groupNode.kind,
             color: edgeColor,
           });
         }
@@ -191,18 +191,18 @@ const extractEdges = (
       edges.push({
         id: `a(${connector.source})-b(${connectorNode.id})`,
         source: connector.source,
-        sourceShape: nodes[connector.source].shape,
+        sourceKind: nodes[connector.source].kind,
         target: connectorNode.id,
-        targetShape: connectorNode.shape,
+        targetKind: connectorNode.kind,
         color: edgeColor,
       });
 
       edges.push({
         id: `a(${connectorNode.id})-b(${connector.target})`,
         source: connectorNode.id,
-        sourceShape: connectorNode.shape,
+        sourceKind: connectorNode.kind,
         target: connector.target,
-        targetShape: nodes[connector.target].shape,
+        targetKind: nodes[connector.target].kind,
         color: edgeColor,
       });
     }
@@ -220,14 +220,14 @@ export const SimpleAPIMock: Story = {
         id: 'admin@example.com',
         label: 'admin@example.com',
         color: 'primary',
-        shape: 'ellipse',
+        kind: 'entity',
         icon: 'user',
       },
       {
         id: 'projects/your-project-id/roles/customRole',
         label: 'projects/your-project-id/roles/customRole',
         color: 'primary',
-        shape: 'hexagon',
+        kind: 'entity',
         icon: 'question',
       },
       {
@@ -236,26 +236,26 @@ export const SimpleAPIMock: Story = {
         source: 'admin@example.com',
         target: 'projects/your-project-id/roles/customRole',
         color: 'primary',
-        shape: 'label',
+        kind: 'event',
       },
     ],
     edges: [
       {
         id: 'a(admin@example.com)-b(a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole))',
         source: 'admin@example.com',
-        sourceShape: 'ellipse',
+        sourceKind: 'entity',
         target:
           'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)',
-        targetShape: 'label',
+        targetKind: 'event',
         color: 'primary',
       },
       {
         id: 'a(a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole))-b(projects/your-project-id/roles/customRole)',
         source:
           'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)',
-        sourceShape: 'label',
+        sourceKind: 'event',
         target: 'projects/your-project-id/roles/customRole',
-        targetShape: 'hexagon',
+        targetKind: 'entity',
         color: 'primary',
       },
     ],
@@ -268,20 +268,20 @@ export const GroupWithWarningAPIMock: Story = {
     nodes: [
       {
         id: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
-        shape: 'group',
+        kind: 'group',
       },
       {
         id: 'admin3@example.com',
         label: 'admin3@example.com',
         color: 'primary',
-        shape: 'ellipse',
+        kind: 'entity',
         icon: 'user',
       },
       {
         id: 'projects/your-project-id/roles/customRole',
         label: 'projects/your-project-id/roles/customRole',
         color: 'primary',
-        shape: 'hexagon',
+        kind: 'entity',
         icon: 'question',
       },
       {
@@ -290,9 +290,9 @@ export const GroupWithWarningAPIMock: Story = {
         source: 'admin3@example.com',
         target: 'projects/your-project-id/roles/customRole',
         color: 'warning',
-        shape: 'label',
+        kind: 'event',
         parentId: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
-        toolbarItemsFn: storybookLabelToolbarItems,
+        toolbarItemsFn: storybookEventToolbarItems,
       },
       {
         id: 'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(success)',
@@ -300,62 +300,62 @@ export const GroupWithWarningAPIMock: Story = {
         source: 'admin3@example.com',
         target: 'projects/your-project-id/roles/customRole',
         color: 'primary',
-        shape: 'label',
+        kind: 'event',
         parentId: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
-        toolbarItemsFn: storybookLabelToolbarItems,
+        toolbarItemsFn: storybookEventToolbarItems,
       },
     ],
     edges: [
       {
         id: 'a(admin3@example.com)-b(grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)))',
         source: 'admin3@example.com',
-        sourceShape: 'ellipse',
+        sourceKind: 'entity',
         target: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
-        targetShape: 'group',
+        targetKind: 'group',
         color: 'primary',
       },
       {
         id: 'a(grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)))-b(projects/your-project-id/roles/customRole)',
         source: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
-        sourceShape: 'group',
+        sourceKind: 'group',
         target: 'projects/your-project-id/roles/customRole',
-        targetShape: 'hexagon',
+        targetKind: 'entity',
         color: 'primary',
       },
       {
         id: 'a(grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)))-b(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(failed))',
         source: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
-        sourceShape: 'group',
+        sourceKind: 'group',
         target:
           'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(failed)',
-        targetShape: 'label',
+        targetKind: 'event',
         color: 'warning',
       },
       {
         id: 'a(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(failed))-b(grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)))',
         source:
           'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(failed)',
-        sourceShape: 'label',
+        sourceKind: 'event',
         target: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
-        targetShape: 'group',
+        targetKind: 'group',
         color: 'warning',
       },
       {
         id: 'a(grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)))-b(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(success))',
         source: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
-        sourceShape: 'group',
+        sourceKind: 'group',
         target:
           'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(success)',
-        targetShape: 'label',
+        targetKind: 'event',
         color: 'primary',
       },
       {
         id: 'a(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(success))-b(grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)))',
         source:
           'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(success)',
-        sourceShape: 'label',
+        sourceKind: 'event',
         target: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
-        targetShape: 'group',
+        targetKind: 'group',
         color: 'primary',
       },
     ],
@@ -368,35 +368,35 @@ export const GroupWithAlertAPIMock: Story = {
     nodes: [
       {
         id: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
-        shape: 'group',
+        kind: 'group',
       },
       {
         id: 'admin@example.com',
         color: 'primary',
-        shape: 'ellipse',
+        kind: 'entity',
         icon: 'user',
       },
       {
         id: 'projects/your-project-id/roles/customRole',
         color: 'primary',
-        shape: 'hexagon',
+        kind: 'entity',
       },
       {
         id: 'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)',
         label: 'google.iam.admin.v1.CreateRole',
         color: 'danger',
         uniqueAlertsCount: 1,
-        shape: 'label',
+        kind: 'event',
         parentId: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
-        toolbarItemsFn: storybookLabelToolbarItems,
+        toolbarItemsFn: storybookEventToolbarItems,
       },
       {
         id: 'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.UpdateRole)',
         label: 'google.iam.admin.v1.UpdateRole',
         color: 'primary',
-        shape: 'label',
+        kind: 'event',
         parentId: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
-        toolbarItemsFn: storybookLabelToolbarItems,
+        toolbarItemsFn: storybookEventToolbarItems,
       },
     ],
     edges: [
@@ -459,7 +459,7 @@ const baseGraph: EnhancedNodeViewModel[] = [
     id: 'siem-windows',
     label: '',
     color: 'danger',
-    shape: 'hexagon',
+    kind: 'entity',
     icon: 'storage',
     ips: ['213.180.204.3', '10.0.0.1', '192.168.1.5'],
     countryCodes: ['RU', 'US'],
@@ -508,7 +508,7 @@ const baseGraph: EnhancedNodeViewModel[] = [
     id: '213.180.204.3',
     label: 'IP: 213.180.204.3',
     color: 'danger',
-    shape: 'diamond',
+    kind: 'entity',
     icon: 'globe',
     tag: 'IP',
     toolbarItemsFn: storybookToolbarItems,
@@ -531,7 +531,7 @@ const baseGraph: EnhancedNodeViewModel[] = [
     id: 'user',
     label: '',
     color: 'danger',
-    shape: 'ellipse',
+    kind: 'entity',
     icon: 'user',
     ips: ['213.180.204.3', '10.0.0.2'],
     countryCodes: ['RU', 'DE'],
@@ -580,7 +580,7 @@ const baseGraph: EnhancedNodeViewModel[] = [
     id: 'oktauser',
     label: 'pluni@elastic.co',
     color: 'primary',
-    shape: 'ellipse',
+    kind: 'entity',
     icon: 'user',
     tag: 'User',
     toolbarItemsFn: storybookToolbarItems,
@@ -603,7 +603,7 @@ const baseGraph: EnhancedNodeViewModel[] = [
     id: 'hackeruser',
     label: 'Hacker',
     color: 'primary',
-    shape: 'ellipse',
+    kind: 'entity',
     icon: 'user',
     tag: 'User',
     toolbarItemsFn: storybookToolbarItems,
@@ -626,7 +626,7 @@ const baseGraph: EnhancedNodeViewModel[] = [
     id: 's3',
     label: 'Customer PII Data',
     color: 'primary',
-    shape: 'rectangle',
+    kind: 'entity',
     icon: 'aws_s3',
     tag: 'Storage',
     toolbarItemsFn: storybookToolbarItems,
@@ -649,7 +649,7 @@ const baseGraph: EnhancedNodeViewModel[] = [
     id: 'ec2',
     label: 'AWS::EC2',
     color: 'primary',
-    shape: 'rectangle',
+    kind: 'entity',
     icon: 'aws_ec2',
     tag: 'Host',
     toolbarItemsFn: storybookToolbarItems,
@@ -672,7 +672,7 @@ const baseGraph: EnhancedNodeViewModel[] = [
     id: 'aws',
     label: 'AWS CloudTrail',
     color: 'primary',
-    shape: 'rectangle',
+    kind: 'entity',
     icon: 'aws',
     tag: 'Service',
     toolbarItemsFn: storybookToolbarItems,
@@ -696,7 +696,7 @@ const baseGraph: EnhancedNodeViewModel[] = [
     label: 'User login to OKTA',
     color: 'danger',
     uniqueAlertsCount: 1,
-    shape: 'label',
+    kind: 'event',
     ips: ['85.43.21.73'],
     countryCodes: ['es', 'il', 'it'],
   },
@@ -707,7 +707,7 @@ const baseGraph: EnhancedNodeViewModel[] = [
     label: 'User login to OKTA',
     color: 'danger',
     uniqueAlertsCount: 1,
-    shape: 'label',
+    kind: 'event',
     ips: ['85.43.21.73'],
     countryCodes: ['es', 'il', 'it'],
   },
@@ -717,7 +717,7 @@ const baseGraph: EnhancedNodeViewModel[] = [
     target: 'oktauser',
     label: 'user.authentication.sso',
     color: 'primary',
-    shape: 'label',
+    kind: 'event',
     ips: ['85.43.21.73'],
     countryCodes: ['es', 'il', 'it'],
   },
@@ -727,7 +727,7 @@ const baseGraph: EnhancedNodeViewModel[] = [
     target: 'oktauser',
     label: 'AssumeRoleWithSAML',
     color: 'primary',
-    shape: 'label',
+    kind: 'event',
   },
   {
     id: 'a(user)-b(oktauser)',
@@ -735,7 +735,7 @@ const baseGraph: EnhancedNodeViewModel[] = [
     target: 'oktauser',
     label: 'AssumeRoleWithSAML2',
     color: 'primary',
-    shape: 'label',
+    kind: 'event',
     ips: ['85.43.21.73'],
     countryCodes: ['es', 'il', 'it'],
   },
@@ -745,7 +745,7 @@ const baseGraph: EnhancedNodeViewModel[] = [
     target: 'hackeruser',
     label: 'CreateUser',
     color: 'primary',
-    shape: 'label',
+    kind: 'event',
   },
   {
     id: 'a(oktauser)-b(s3)',
@@ -753,7 +753,7 @@ const baseGraph: EnhancedNodeViewModel[] = [
     target: 's3',
     label: 'PutObject',
     color: 'primary',
-    shape: 'label',
+    kind: 'event',
   },
   {
     id: 'a(oktauser)-b(ec2)',
@@ -761,7 +761,7 @@ const baseGraph: EnhancedNodeViewModel[] = [
     target: 'ec2',
     label: 'RunInstances',
     color: 'primary',
-    shape: 'label',
+    kind: 'event',
   },
   {
     id: 'a(oktauser)-b(aws)',
@@ -769,7 +769,7 @@ const baseGraph: EnhancedNodeViewModel[] = [
     target: 'aws',
     label: 'DeleteTrail (Failed)',
     color: 'warning',
-    shape: 'label',
+    kind: 'event',
   },
 ];
 
@@ -795,7 +795,7 @@ export const GraphLabelOverlayCases: Story = {
         id: 'newnode',
         label: 'New Node',
         color: 'primary',
-        shape: 'ellipse',
+        kind: 'entity',
         icon: 'user',
       },
       {
@@ -805,7 +805,7 @@ export const GraphLabelOverlayCases: Story = {
         label: 'Overlay Label',
         color: 'danger',
         uniqueAlertsCount: 1,
-        shape: 'label',
+        kind: 'event',
       },
       {
         id: 'a(newnode)-b(s3)',
@@ -814,7 +814,7 @@ export const GraphLabelOverlayCases: Story = {
         label: 'Overlay Label',
         color: 'danger',
         uniqueAlertsCount: 1,
-        shape: 'label',
+        kind: 'event',
       },
     ]),
   },
@@ -831,7 +831,7 @@ export const GraphStackedEdgeCases: Story = {
         target: 'hackeruser',
         label: 'CreateUser2',
         color: 'primary',
-        shape: 'label',
+        kind: 'event',
       },
       {
         id: 'a(siem-windows)-b(user)',
@@ -840,7 +840,7 @@ export const GraphStackedEdgeCases: Story = {
         label: 'User login to OKTA2',
         color: 'danger',
         uniqueAlertsCount: 1,
-        shape: 'label',
+        kind: 'event',
         ips: ['85.43.21.73'],
         countryCodes: ['es', 'il', 'it'],
       },
@@ -861,7 +861,7 @@ export const GraphLargeStackedEdgeCases: Story = {
           target: 'hackeruser',
           label: `CreateUser${idx}`,
           color: 'primary',
-          shape: 'label',
+          kind: 'event',
         })),
       ...Array(10)
         .fill(0)
@@ -872,7 +872,7 @@ export const GraphLargeStackedEdgeCases: Story = {
           label: `User login to OKTA${idx}`,
           color: 'danger',
           uniqueAlertsCount: 1,
-          shape: 'label',
+          kind: 'event',
         })),
     ]),
   },
@@ -890,7 +890,7 @@ export const VariantStackSizes: Story = {
           id: String.fromCharCode(97 + idx), // 'a', 'b', 'c', ...
           label: String.fromCharCode(97 + idx).toUpperCase(),
           color: 'primary',
-          shape: 'ellipse',
+          kind: 'entity',
         })) satisfies EnhancedNodeViewModel[]),
       ...Array(VARIANT_STACK_SIZES_NODES - 1)
         .fill(0)
@@ -903,7 +903,7 @@ export const VariantStackSizes: Story = {
               target: String.fromCharCode(97 + idx + 1),
               label: `${idx2}`,
               color: 'primary',
-              shape: 'label',
+              kind: 'event',
             }))
         )
         .flat(),
@@ -963,7 +963,7 @@ export const GraphWithAssetInventoryData: Story = {
         target: 'hackeruser',
         label: 'CreateUser2',
         color: 'primary',
-        shape: 'label',
+        kind: 'event',
       },
       {
         id: 'a(siem-windows)-b(user)',
@@ -972,7 +972,7 @@ export const GraphWithAssetInventoryData: Story = {
         label: 'User login to OKTA2',
         color: 'danger',
         uniqueAlertsCount: 1,
-        shape: 'label',
+        kind: 'event',
       },
     ]),
   },
@@ -982,12 +982,12 @@ export const SingleAndGroupNodes: Story = {
   args: {
     ...meta.args,
     ...extractEdges([
-      // Hexagon node -> Label node -> Hexagon node with count 2
+      // Entity node -> Event node -> Entity node with count 2
       {
         id: 'hex1',
         label: 'Hexagon Start',
         color: 'primary',
-        shape: 'hexagon',
+        kind: 'entity',
         icon: 'storage',
         ips: ['82.45.27.31'],
         countryCodes: ['US', 'IT'],
@@ -996,7 +996,7 @@ export const SingleAndGroupNodes: Story = {
         id: 'hex2',
         label: 'Hexagon Middle',
         color: 'primary',
-        shape: 'hexagon',
+        kind: 'entity',
         icon: 'storage',
         count: 2,
         ips: ['82.45.27.31'],
@@ -1006,7 +1006,7 @@ export const SingleAndGroupNodes: Story = {
         id: 'hex3',
         label: 'Hexagon End',
         color: 'danger',
-        shape: 'hexagon',
+        kind: 'entity',
         icon: 'storage',
         count: 2,
         ips: ['82.45.27.31'],
@@ -1018,7 +1018,7 @@ export const SingleAndGroupNodes: Story = {
         target: 'hex2',
         label: 'Hexagon Connection',
         color: 'primary',
-        shape: 'label',
+        kind: 'event',
         ips: ['82.45.27.31'],
         countryCodes: ['US', 'IT'],
       },
@@ -1028,17 +1028,17 @@ export const SingleAndGroupNodes: Story = {
         target: 'hex3',
         label: 'Hexagon Connection 2',
         color: 'danger',
-        shape: 'label',
+        kind: 'event',
         ips: ['82.45.27.31'],
         countryCodes: ['US', 'IT'],
       },
 
-      // Ellipse node -> Label node -> Ellipse node with count 2
+      // Entity node -> Event node -> Entity node with count 2
       {
         id: 'ell1',
         label: 'Ellipse Start',
         color: 'primary',
-        shape: 'ellipse',
+        kind: 'entity',
         icon: 'user',
         ips: ['82.45.27.31'],
         countryCodes: ['US', 'IT'],
@@ -1047,7 +1047,7 @@ export const SingleAndGroupNodes: Story = {
         id: 'ell2',
         label: 'Ellipse Middle',
         color: 'primary',
-        shape: 'ellipse',
+        kind: 'entity',
         icon: 'user',
         count: 2,
         ips: ['82.45.27.31'],
@@ -1057,7 +1057,7 @@ export const SingleAndGroupNodes: Story = {
         id: 'ell3',
         label: 'Ellipse End',
         color: 'danger',
-        shape: 'ellipse',
+        kind: 'entity',
         icon: 'user',
         count: 2,
         ips: ['82.45.27.31'],
@@ -1069,7 +1069,7 @@ export const SingleAndGroupNodes: Story = {
         target: 'ell2',
         label: 'Ellipse Connection',
         color: 'primary',
-        shape: 'label',
+        kind: 'event',
         uniqueEventsCount: 1,
         ips: ['82.45.27.31'],
         countryCodes: ['US', 'IT'],
@@ -1080,18 +1080,18 @@ export const SingleAndGroupNodes: Story = {
         target: 'ell3',
         label: 'Ellipse Connection 2',
         color: 'danger',
-        shape: 'label',
+        kind: 'event',
         uniqueAlertsCount: 1,
         ips: ['82.45.27.31'],
         countryCodes: ['US', 'IT'],
       },
 
-      // Diamond node -> Label node -> Diamond node with count 2
+      // Entity node -> Event node -> Entity node with count 2
       {
         id: 'dia1',
         label: 'Diamond Start',
         color: 'primary',
-        shape: 'diamond',
+        kind: 'entity',
         icon: 'globe',
         ips: ['82.45.27.31'],
         countryCodes: ['US', 'IT'],
@@ -1100,7 +1100,7 @@ export const SingleAndGroupNodes: Story = {
         id: 'dia2',
         label: 'Diamond Middle',
         color: 'primary',
-        shape: 'diamond',
+        kind: 'entity',
         icon: 'globe',
         count: 2,
         ips: ['82.45.27.31'],
@@ -1110,7 +1110,7 @@ export const SingleAndGroupNodes: Story = {
         id: 'dia3',
         label: 'Diamond End',
         color: 'danger',
-        shape: 'diamond',
+        kind: 'entity',
         icon: 'globe',
         count: 2,
         ips: ['82.45.27.31'],
@@ -1122,7 +1122,7 @@ export const SingleAndGroupNodes: Story = {
         target: 'dia2',
         label: 'Diamond Connection',
         color: 'primary',
-        shape: 'label',
+        kind: 'event',
         uniqueEventsCount: 2,
         ips: ['82.45.27.31'],
         countryCodes: ['US', 'IT'],
@@ -1133,18 +1133,18 @@ export const SingleAndGroupNodes: Story = {
         target: 'dia3',
         label: 'Diamond Connection2',
         color: 'danger',
-        shape: 'label',
+        kind: 'event',
         uniqueAlertsCount: 2,
         ips: ['82.45.27.31'],
         countryCodes: ['US', 'IT'],
       },
 
-      // Rectangle node -> Label node -> Rectangle node with count 2 -> Group of 2 label nodes -> Rectangle node 3
+      // Entity node -> Event node -> Entity node with count 2 -> Group of 2 event nodes -> Entity node 3
       {
         id: 'rect1',
         label: 'Rectangle Start',
         color: 'primary',
-        shape: 'rectangle',
+        kind: 'entity',
         icon: 'aws_s3',
         ips: ['82.45.27.31'],
         countryCodes: ['US', 'IT'],
@@ -1153,7 +1153,7 @@ export const SingleAndGroupNodes: Story = {
         id: 'rect2',
         label: 'Rectangle Middle',
         color: 'primary',
-        shape: 'rectangle',
+        kind: 'entity',
         icon: 'aws_s3',
         count: 2,
         ips: ['82.45.27.31'],
@@ -1163,7 +1163,7 @@ export const SingleAndGroupNodes: Story = {
         id: 'rect3',
         label: 'Rectangle End',
         color: 'danger',
-        shape: 'rectangle',
+        kind: 'entity',
         icon: 'aws_s3',
         count: 2,
         ips: ['82.45.27.31'],
@@ -1175,7 +1175,7 @@ export const SingleAndGroupNodes: Story = {
         target: 'rect2',
         label: 'Rectangle Connection',
         color: 'primary',
-        shape: 'label',
+        kind: 'event',
         ips: ['82.45.27.31'],
         countryCodes: ['US', 'IT'],
       },
@@ -1185,7 +1185,7 @@ export const SingleAndGroupNodes: Story = {
         target: 'rect3',
         label: 'Rectangle Group Label 1',
         color: 'danger',
-        shape: 'label',
+        kind: 'event',
         uniqueEventsCount: 1,
         ips: ['82.45.27.31'],
         countryCodes: ['US', 'IT'],
@@ -1196,18 +1196,18 @@ export const SingleAndGroupNodes: Story = {
         target: 'rect3',
         label: 'Rectangle Group Label 2',
         color: 'danger',
-        shape: 'label',
+        kind: 'event',
         uniqueAlertsCount: 2,
         ips: ['82.45.27.31'],
         countryCodes: ['US', 'IT'],
       },
 
-      // Pentagon node -> Label node -> Pentagon node with count 2 -> Group of 3 label nodes -> Pentagon node 3
+      // Entity node -> Event node -> Entity node with count 2 -> Group of 3 event nodes -> Entity node 3
       {
         id: 'pent1',
         label: 'Pentagon Start',
         color: 'primary',
-        shape: 'pentagon',
+        kind: 'entity',
         icon: 'question',
         ips: ['82.45.27.31'],
         countryCodes: ['US', 'IT'],
@@ -1216,7 +1216,7 @@ export const SingleAndGroupNodes: Story = {
         id: 'pent2',
         label: 'Pentagon Middle',
         color: 'primary',
-        shape: 'pentagon',
+        kind: 'entity',
         icon: 'question',
         count: 2,
         ips: ['82.45.27.31'],
@@ -1226,7 +1226,7 @@ export const SingleAndGroupNodes: Story = {
         id: 'pent3',
         label: 'Pentagon End',
         color: 'danger',
-        shape: 'pentagon',
+        kind: 'entity',
         icon: 'question',
         count: 3,
         ips: ['82.45.27.31'],
@@ -1238,7 +1238,7 @@ export const SingleAndGroupNodes: Story = {
         target: 'pent2',
         label: 'Pentagon Connection',
         color: 'primary',
-        shape: 'label',
+        kind: 'event',
         ips: ['82.45.27.31'],
         countryCodes: ['US', 'IT'],
       },
@@ -1248,7 +1248,7 @@ export const SingleAndGroupNodes: Story = {
         target: 'pent3',
         label: 'Pentagon Group Label 1',
         color: 'primary',
-        shape: 'label',
+        kind: 'event',
         uniqueEventsCount: 1,
         ips: ['82.45.27.31'],
         countryCodes: ['US', 'IT'],
@@ -1259,7 +1259,7 @@ export const SingleAndGroupNodes: Story = {
         target: 'pent3',
         label: 'Pentagon Group Label 2',
         color: 'primary',
-        shape: 'label',
+        kind: 'event',
         uniqueEventsCount: 2,
         ips: ['82.45.27.31'],
         countryCodes: ['US', 'IT'],
@@ -1270,7 +1270,7 @@ export const SingleAndGroupNodes: Story = {
         target: 'pent3',
         label: 'Pentagon Group Label 3',
         color: 'primary',
-        shape: 'label',
+        kind: 'event',
         uniqueEventsCount: 2,
         uniqueAlertsCount: 2,
         ips: ['82.45.27.31'],
@@ -1283,7 +1283,7 @@ export const SingleAndGroupNodes: Story = {
 /**
  * Story: Events and Relationships Combined
  * Demonstrates a realistic AWS/cloud scenario with both:
- * - Event connections (label nodes): Actions performed by a user (ConsoleLogin, AssumeRole)
+ * - Event connections (event nodes): Actions performed by a user (ConsoleLogin, AssumeRole)
  * - Relationship connections (relationship nodes): Static ownership/access relationships
  *
  * Scenario: A user logs into a host, assumes a role, and has ownership/access relationships to multiple hosts
@@ -1296,28 +1296,28 @@ export const EventsAndEntityRelationships: Story = {
         id: 'user-john',
         label: 'john.doe@company.com',
         color: 'primary',
-        shape: 'ellipse',
+        kind: 'entity',
         icon: 'user',
       },
       {
         id: 'host-prod-1',
         label: 'prod-ec2-instance-01',
         color: 'primary',
-        shape: 'pentagon',
+        kind: 'entity',
         icon: 'processor',
       },
       {
         id: 'host-prod-2',
         label: 'prod-ec2-instance-02',
         color: 'primary',
-        shape: 'pentagon',
+        kind: 'entity',
         icon: 'processor',
       },
       {
         id: 'iam-role',
         label: 'AdminRole',
         color: 'primary',
-        shape: 'hexagon',
+        kind: 'entity',
         icon: 'key',
       },
 
@@ -1328,7 +1328,7 @@ export const EventsAndEntityRelationships: Story = {
         target: 'host-prod-1',
         label: 'ConsoleLogin',
         color: 'primary',
-        shape: 'label',
+        kind: 'event',
         uniqueEventsCount: 3,
       },
       {
@@ -1337,7 +1337,7 @@ export const EventsAndEntityRelationships: Story = {
         target: 'iam-role',
         label: 'AssumeRole',
         color: 'primary',
-        shape: 'label',
+        kind: 'event',
         uniqueEventsCount: 1,
       },
 
@@ -1347,21 +1347,21 @@ export const EventsAndEntityRelationships: Story = {
         source: 'user-john',
         target: 'host-prod-1',
         label: 'Owns',
-        shape: 'relationship',
+        kind: 'relationship',
       },
       {
         id: 'rel-user-owns-host2',
         source: 'user-john',
         target: 'host-prod-2',
         label: 'Owns',
-        shape: 'relationship',
+        kind: 'relationship',
       },
       {
         id: 'rel-user-access-host1',
         source: 'user-john',
         target: 'host-prod-1',
         label: 'Has Access',
-        shape: 'relationship',
+        kind: 'relationship',
       },
     ]),
   },
@@ -1375,14 +1375,14 @@ export const EventsAndRelationshipsStacked: Story = {
         id: 'user-john',
         label: 'john.doe@company.com',
         color: 'primary',
-        shape: 'ellipse',
+        kind: 'entity',
         icon: 'user',
       },
       {
         id: 'host-prod-1',
         label: 'prod-ec2-instance-01',
         color: 'primary',
-        shape: 'pentagon',
+        kind: 'entity',
         icon: 'processor',
       },
       // Relationship edges (static/configuration-based) - Ownership and access permissions
@@ -1392,21 +1392,21 @@ export const EventsAndRelationshipsStacked: Story = {
         source: 'user-john',
         target: 'host-prod-1',
         label: 'Owns',
-        shape: 'relationship',
+        kind: 'relationship',
       },
       {
         id: 'a(user-john)-b(host-prod-1)',
         source: 'user-john',
         target: 'host-prod-1',
         label: 'Has Access',
-        shape: 'relationship',
+        kind: 'relationship',
       },
       {
         id: 'a(user-john)-b(host-prod-1)',
         source: 'user-john',
         target: 'host-prod-1',
         label: 'ConsoleLogin',
-        shape: 'label',
+        kind: 'event',
         color: 'primary',
       },
       {
@@ -1414,7 +1414,7 @@ export const EventsAndRelationshipsStacked: Story = {
         source: 'user-john',
         target: 'host-prod-1',
         label: 'DescribeInstance',
-        shape: 'label',
+        kind: 'event',
         color: 'primary',
       },
 
@@ -1423,21 +1423,21 @@ export const EventsAndRelationshipsStacked: Story = {
         id: 'user-1',
         label: 'user-1@company.com',
         color: 'primary',
-        shape: 'ellipse',
+        kind: 'entity',
         icon: 'user',
       },
       {
         id: 'user-2',
         label: 'user-2@company.com',
         color: 'primary',
-        shape: 'ellipse',
+        kind: 'entity',
         icon: 'user',
       },
       {
         id: 'hosts-group',
         label: 'hosts',
         color: 'primary',
-        shape: 'pentagon',
+        kind: 'entity',
         icon: 'processor',
         count: 3,
       },
@@ -1448,14 +1448,14 @@ export const EventsAndRelationshipsStacked: Story = {
         source: 'user-john',
         target: 'user-1',
         label: 'Supervises',
-        shape: 'relationship',
+        kind: 'relationship',
       },
       {
         id: 'a(user-john)-b(user-2)',
         source: 'user-john',
         target: 'user-2',
         label: 'Supervises',
-        shape: 'relationship',
+        kind: 'relationship',
       },
 
       // user-1 owns and has access to hosts (stacked)
@@ -1464,14 +1464,14 @@ export const EventsAndRelationshipsStacked: Story = {
         source: 'user-1',
         target: 'hosts-group',
         label: 'Owns',
-        shape: 'relationship',
+        kind: 'relationship',
       },
       {
         id: 'a(user-1)-b(hosts-group)',
         source: 'user-1',
         target: 'hosts-group',
         label: 'Has Access',
-        shape: 'relationship',
+        kind: 'relationship',
       },
 
       // user-2 owns and has access to the same hosts (stacked)
@@ -1480,14 +1480,14 @@ export const EventsAndRelationshipsStacked: Story = {
         source: 'user-2',
         target: 'hosts-group',
         label: 'Owns',
-        shape: 'relationship',
+        kind: 'relationship',
       },
       {
         id: 'a(user-2)-b(hosts-group)',
         source: 'user-2',
         target: 'hosts-group',
         label: 'Has Access',
-        shape: 'relationship',
+        kind: 'relationship',
       },
     ]),
   },
@@ -1510,68 +1510,68 @@ export const FanOutThreeTargets: Story = {
         id: 'actor',
         label: 'actor@example.com',
         color: 'primary',
-        shape: 'ellipse',
+        kind: 'entity',
         icon: 'user',
       },
       {
         id: 'target1',
         label: 'Target Identity 1',
         color: 'primary',
-        shape: 'ellipse',
+        kind: 'entity',
         icon: 'user',
       },
       {
         id: 'target2',
         label: 'Target Storage 2',
         color: 'primary',
-        shape: 'hexagon',
+        kind: 'entity',
         icon: 'storage',
       },
       {
         id: 'target3',
         label: 'Target Resource 3',
         color: 'primary',
-        shape: 'rectangle',
+        kind: 'entity',
         icon: 'question',
       },
       {
         id: 'label',
         label: 'MultiTargetAction',
         color: 'primary',
-        shape: 'label',
+        kind: 'event',
       },
     ],
     edges: [
       {
         id: 'a(actor)-b(label)',
         source: 'actor',
-        sourceShape: 'ellipse',
+        sourceKind: 'entity',
         target: 'label',
-        targetShape: 'label',
+        targetKind: 'event',
         color: 'primary',
       },
       {
         id: 'a(label)-b(target1)',
         source: 'label',
-        sourceShape: 'label',
+        sourceKind: 'event',
         target: 'target1',
-        targetShape: 'ellipse',
+        targetKind: 'entity',
         color: 'primary',
       },
       {
         id: 'a(label)-b(target2)',
         source: 'label',
-        sourceShape: 'label',
+        sourceKind: 'event',
         target: 'target2',
-        targetShape: 'hexagon',
+        targetKind: 'entity',
         color: 'primary',
       },
       {
         id: 'a(label)-b(target3)',
         source: 'label',
-        sourceShape: 'label',
+        sourceKind: 'event',
         target: 'target3',
-        targetShape: 'rectangle',
+        targetKind: 'entity',
         color: 'primary',
       },
     ],

@@ -28,7 +28,7 @@ export type {
   NodeViewModel,
   EdgeViewModel,
   GroupNodeViewModel,
-  LabelNodeViewModel,
+  EventNodeViewModel,
   EntityNodeViewModel,
   RelationshipNodeViewModel,
   NodeProps,

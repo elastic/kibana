@@ -461,7 +461,7 @@ ${buildPinnedEsql(['_id', 'actorEntityId', 'targetEntityId'], pinnedIds)}
 // Per-target → source-document mapping ("<targetEntityId>\\n<_id>"), collected via VALUES so
 // that after STATS drops targetEntityId from the group key we can still attribute each target
 // to the document(s) that referenced it. regroupEvents uses this to compute each target-type
-// group's own docIds, which keeps label nodes split by document exactly as they would be if the
+// group's own docIds, which keeps event nodes split by document exactly as they would be if the
 // query still grouped by targetEntityId.
 | EVAL targetDocMap = CONCAT(COALESCE(targetEntityId, ""), "\\n", _id)
 // Map host and source values to enriched contextual data

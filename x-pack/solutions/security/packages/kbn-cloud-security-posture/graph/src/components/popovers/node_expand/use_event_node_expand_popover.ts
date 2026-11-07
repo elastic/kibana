@@ -8,15 +8,15 @@
 import { useCallback } from 'react';
 import { useNodeExpandPopover } from './use_node_expand_popover';
 import type { NodeProps, NodeViewModel } from '../../types';
-import { GRAPH_LABEL_EXPAND_POPOVER_TEST_ID } from '../../test_ids';
-import { getLabelExpandItems } from './get_label_expand_items';
+import { GRAPH_EVENT_EXPAND_POPOVER_TEST_ID } from '../../test_ids';
+import { getEventExpandItems } from './get_event_expand_items';
 import { getNodeDocumentMode } from '../../utils';
 import type { GraphTelemetryHandler } from '../../graph_telemetry';
 import { emitFilterToggle, isFilterActiveForScope } from '../../filters/filter_store';
 
 /**
- * Hook to handle the label node expand popover.
- * This hook is used to show the popover when the user clicks on the expand button of a label node.
+ * Hook to handle the event node expand popover.
+ * This hook is used to show the popover when the user clicks on the expand button of a event node.
  * The popover contains the actions to show/hide the events with this action.
  *
  * Uses filter event bus for filter state management - emits events via emitFilterToggle().
@@ -25,9 +25,9 @@ import { emitFilterToggle, isFilterActiveForScope } from '../../filters/filter_s
  * @param onOpenEventPreview - Optional callback to open event preview with full node data.
  *                             If provided, clicking "Show event details" calls this callback.
  * @param onTelemetryEvent - Optional callback invoked when the user triggers a popover action.
- * @returns The label node expand popover.
+ * @returns The event node expand popover.
  */
-export const useLabelNodeExpandPopover = (
+export const useEventNodeExpandPopover = (
   scopeId: string,
   onOpenEventPreview?: (node: NodeViewModel) => void,
   onTelemetryEvent?: GraphTelemetryHandler
@@ -43,7 +43,7 @@ export const useLabelNodeExpandPopover = (
       const isSingleEvent = docMode === 'single-event';
       const isGroupedEvents = docMode === 'grouped-events';
 
-      return getLabelExpandItems({
+      return getEventExpandItems({
         nodeLabel,
         onShowEventDetails: onOpenEventPreview
           ? () => {
@@ -70,7 +70,7 @@ export const useLabelNodeExpandPopover = (
           emitFilterToggle(scopeId, field, value, action);
         },
         shouldRender: {
-          // Always show filter action for label nodes
+          // Always show filter action for event nodes
           showEventsWithAction: true,
           // Event details for single events/alerts or grouped events when handler available
           showEventDetails:
@@ -82,11 +82,11 @@ export const useLabelNodeExpandPopover = (
     [scopeId, onOpenEventPreview, onTelemetryEvent]
   );
 
-  const labelNodeExpandPopover = useNodeExpandPopover({
-    id: 'label-node-expand-popover',
-    testSubject: GRAPH_LABEL_EXPAND_POPOVER_TEST_ID,
+  const eventNodeExpandPopover = useNodeExpandPopover({
+    id: 'event-node-expand-popover',
+    testSubject: GRAPH_EVENT_EXPAND_POPOVER_TEST_ID,
     itemsFn,
   });
 
-  return labelNodeExpandPopover;
+  return eventNodeExpandPopover;
 };

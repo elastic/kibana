@@ -11,7 +11,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { EuiListGroup, EuiHorizontalRule } from '@elastic/eui';
 import type {
   EntityNodeViewModel,
-  LabelNodeViewModel,
+  EventNodeViewModel,
   NodeProps,
   ExpandButtonClickCallback,
 } from '../../types';
@@ -20,7 +20,7 @@ import { GlobalStylesStorybookDecorator } from '../../../../.storybook/decorator
 import { GraphPopover } from './graph_popover';
 import { useGraphPopoverState } from './use_graph_popover_state';
 import { PopoverListItem } from './popover_list_item';
-import { isLabelNode } from '../../utils';
+import { isEventNode } from '../../utils';
 
 export default {
   title: 'Components/Graph Components/Graph Popovers',
@@ -77,7 +77,7 @@ const useExpandButtonPopover = () => {
     closePopover();
   }, [closePopover]);
 
-  const isLabel = selectedNode.current?.data && isLabelNode(selectedNode.current.data);
+  const isLabel = selectedNode.current?.data && isEventNode(selectedNode.current.data);
 
   // eslint-disable-next-line react/display-name
   const PopoverComponent = memo(() => (
@@ -197,29 +197,30 @@ const Template = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const nodeClickHandler = (...args: any[]) => popoverOpenWrapper(nodePopover.onNodeClick, ...args);
 
-  const nodes: Array<EntityNodeViewModel | LabelNodeViewModel> = useMemo(
+  const nodes: Array<EntityNodeViewModel | EventNodeViewModel> = useMemo(
     () => [
-      ...(
-        ['hexagon', 'ellipse', 'rectangle', 'pentagon', 'diamond'] as const
-      ).map<EntityNodeViewModel>((shape, idx) => ({
-        id: `${idx}`,
-        label: `Node ${idx}`,
-        color: 'primary',
-        icon: 'okta',
-        interactive: true,
-        shape,
-        expandButtonClick: expandButtonClickHandler,
-        nodeClick: nodeClickHandler,
-      })),
+      ...Array.from(
+        { length: 5 },
+        (_, idx): EntityNodeViewModel => ({
+          id: `${idx}`,
+          label: `Node ${idx}`,
+          color: 'primary',
+          icon: 'okta',
+          interactive: true,
+          kind: 'entity',
+          expandButtonClick: expandButtonClickHandler,
+          nodeClick: nodeClickHandler,
+        })
+      ),
       {
         id: 'label',
         label: 'Node 5',
         color: 'primary',
         interactive: true,
-        shape: 'label',
+        kind: 'event',
         expandButtonClick: expandButtonClickHandler,
         nodeClick: nodeClickHandler,
-      } as LabelNodeViewModel,
+      } as EventNodeViewModel,
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []

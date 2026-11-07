@@ -8,13 +8,13 @@
 import React, { useCallback, useState } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { NodeExpandButtonContainer, RoundEuiButtonIcon, ExpandButtonSize } from './styles';
-import type { EntityNodeViewModel, LabelNodeViewModel } from '..';
+import type { EntityNodeViewModel, EventNodeViewModel } from '..';
 import { GRAPH_NODE_EXPAND_BUTTON_ID } from '../test_ids';
 
 export interface NodeExpandButtonProps {
   x?: string;
   y?: string;
-  color?: EntityNodeViewModel['color'] | LabelNodeViewModel['color'];
+  color?: EntityNodeViewModel['color'] | EventNodeViewModel['color'];
   onClick?: (e: React.MouseEvent<HTMLElement>, unToggleCallback: () => void) => void;
   /** Allows callers to hide the button via inline style (e.g. `display: 'none'`) while keeping it
    * in the DOM so tests can still find and interact with it. */

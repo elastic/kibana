@@ -34,8 +34,8 @@ import { GRAPH_INVESTIGATION_TEST_ID } from '../test_ids';
 import { useIpPopover } from '../node/ips/ips';
 import { useCountryFlagsPopover } from '../node/country_flags/country_flags';
 import { useEventDetailsPopover } from '../popovers/details/use_event_details_popover';
-import type { DocumentAnalysisOutput } from '../node/label_node/analyze_documents';
-import { analyzeDocuments } from '../node/label_node/analyze_documents';
+import type { DocumentAnalysisOutput } from '../node/event_node/analyze_documents';
+import { analyzeDocuments } from '../node/event_node/analyze_documents';
 import {
   ENTITY_ID,
   EVENT_ID,
@@ -50,13 +50,13 @@ import {
   addFilter,
 } from '../filters/search_filters';
 import { useEntityNodeExpandPopover } from '../popovers/node_expand/use_entity_node_expand_popover';
-import { useLabelNodeExpandPopover } from '../popovers/node_expand/use_label_node_expand_popover';
+import { useEventNodeExpandPopover } from '../popovers/node_expand/use_event_node_expand_popover';
 import type {
   ItemExpandPopoverListItemProps,
   SeparatorExpandPopoverListItemProps,
 } from '../popovers/primitives/list_graph_popover';
 import type { NodeProps, NodeViewModel } from '../types';
-import { isLabelNode, isRelationshipNode, showErrorToast } from '../utils';
+import { isEventNode, isRelationshipNode, showErrorToast } from '../utils';
 import { GRAPH_SCOPE_ID } from '../constants';
 import { useGraphFilters } from '../filters/use_graph_filters';
 import { getEntityTimelineFilter } from './entity_timeline_filters';
@@ -89,7 +89,7 @@ const useGraphPopovers = ({
     euidApi,
     onTelemetryEvent
   );
-  const labelExpandPopover = useLabelNodeExpandPopover(
+  const labelExpandPopover = useEventNodeExpandPopover(
     scopeId,
     onOpenEventPreview,
     onTelemetryEvent
@@ -731,7 +731,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               ipClickHandler: createIpClickHandler(nodeIps),
               countryClickHandler: createCountryClickHandler(nodeCountryCodes),
             };
-          } else if (isLabelNode(node)) {
+          } else if (isEventNode(node)) {
             const nodeIps = node.ips || [];
             const nodeCountryCodes = node.countryCodes || [];
             const numEvents = node.uniqueEventsCount ?? 0;

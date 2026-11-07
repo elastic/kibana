@@ -12,29 +12,29 @@ import { ReactFlow, Position } from '@xyflow/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import type { NodeProps } from '../../types';
 import { getLabelColors } from '../styles';
-import { GRAPH_FLAGS_BADGE_ID, GRAPH_IPS_TEXT_ID, GRAPH_LABEL_NODE_ID } from '../../test_ids';
+import { GRAPH_FLAGS_BADGE_ID, GRAPH_IPS_TEXT_ID, GRAPH_EVENT_NODE_ID } from '../../test_ids';
 import {
   GraphDisplayOptionsContext,
   DEFAULT_GRAPH_DISPLAY_OPTIONS,
 } from '../../graph/graph_display_options_context';
 import {
-  LabelNode,
+  EventNode,
   TEST_SUBJ_EXPAND_BTN,
   TEST_SUBJ_HANDLE,
   TEST_SUBJ_ORIGIN_HIGHLIGHT,
-} from './label_node';
+} from './event_node';
 
-describe('LabelNode', () => {
+describe('EventNode', () => {
   const baseProps: NodeProps = {
-    id: 'test-label-node',
+    id: 'test-event-node',
     data: {
-      id: 'test-label-node',
+      id: 'test-event-node',
       label: 'Test Label',
       color: 'primary',
-      shape: 'label',
+      kind: 'event',
       interactive: true,
     },
-    type: 'label',
+    type: 'event',
     selected: false,
     dragging: false,
     dragHandle: '',
@@ -51,10 +51,10 @@ describe('LabelNode', () => {
     draggable: true,
   };
 
-  test('renders basic label node', () => {
+  test('renders basic event node', () => {
     render(
       <ReactFlow>
-        <LabelNode {...baseProps} />
+        <EventNode {...baseProps} />
       </ReactFlow>
     );
 
@@ -69,7 +69,7 @@ describe('LabelNode', () => {
     ])('renders the highlight ring when the node is %s', (_, originFlags) => {
       render(
         <ReactFlow>
-          <LabelNode {...baseProps} data={{ ...baseProps.data, ...originFlags }} />
+          <EventNode {...baseProps} data={{ ...baseProps.data, ...originFlags }} />
         </ReactFlow>
       );
 
@@ -79,7 +79,7 @@ describe('LabelNode', () => {
     test('does not render the highlight ring for a non-origin node', () => {
       render(
         <ReactFlow>
-          <LabelNode {...baseProps} />
+          <EventNode {...baseProps} />
         </ReactFlow>
       );
 
@@ -92,7 +92,7 @@ describe('LabelNode', () => {
           value={{ ...DEFAULT_GRAPH_DISPLAY_OPTIONS, highlightOrigin: false }}
         >
           <ReactFlow>
-            <LabelNode {...baseProps} data={{ ...baseProps.data, isOrigin: true }} />
+            <EventNode {...baseProps} data={{ ...baseProps.data, isOrigin: true }} />
           </ReactFlow>
         </GraphDisplayOptionsContext.Provider>
       );
@@ -104,11 +104,11 @@ describe('LabelNode', () => {
   test('renders expand button on hover if interactive', async () => {
     render(
       <ReactFlow>
-        <LabelNode {...baseProps} />
+        <EventNode {...baseProps} />
       </ReactFlow>
     );
 
-    await userEvent.hover(screen.getByTestId(GRAPH_LABEL_NODE_ID));
+    await userEvent.hover(screen.getByTestId(GRAPH_EVENT_NODE_ID));
 
     await waitFor(() => {
       expect(screen.queryByTestId(TEST_SUBJ_EXPAND_BTN)).toBeInTheDocument();
@@ -126,11 +126,11 @@ describe('LabelNode', () => {
 
     render(
       <ReactFlow>
-        <LabelNode {...props} />
+        <EventNode {...props} />
       </ReactFlow>
     );
 
-    await userEvent.hover(screen.getByTestId(GRAPH_LABEL_NODE_ID));
+    await userEvent.hover(screen.getByTestId(GRAPH_EVENT_NODE_ID));
 
     await waitFor(() => {
       expect(screen.queryByTestId(TEST_SUBJ_EXPAND_BTN)).not.toBeInTheDocument();
@@ -147,7 +147,7 @@ describe('LabelNode', () => {
     };
     render(
       <ReactFlow>
-        <LabelNode {...props} />
+        <EventNode {...props} />
       </ReactFlow>
     );
 
@@ -166,7 +166,7 @@ describe('LabelNode', () => {
     };
     render(
       <ReactFlow>
-        <LabelNode {...props} />
+        <EventNode {...props} />
       </ReactFlow>
     );
 
@@ -185,7 +185,7 @@ describe('LabelNode', () => {
     };
     render(
       <ReactFlow>
-        <LabelNode {...props} />
+        <EventNode {...props} />
       </ReactFlow>
     );
 

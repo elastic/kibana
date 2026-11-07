@@ -30,21 +30,12 @@ import type { CommonProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { SvgDefsMarker } from '../edge/markers';
-import {
-  HexagonNode,
-  PentagonNode,
-  EllipseNode,
-  RectangleNode,
-  DiamondNode,
-  LabelNode,
-  EdgeGroupNode,
-  RelationshipNode,
-} from '../node';
+import { EntityCardNode, EventNode, EdgeGroupNode, RelationshipNode } from '../node';
 import { layoutGraph } from './layout_graph';
 import { DefaultEdge } from '../edge';
 import { Minimap } from '../minimap/minimap';
 import type { EdgeViewModel, NodeViewModel } from '../types';
-import { isConnectorShape } from '../utils';
+import { isConnectorKind } from '../utils';
 import { ONLY_RENDER_VISIBLE_ELEMENTS, GRID_SIZE } from '../constants';
 import { GRAPH_DISPLAY_OPTIONS_STORAGE_KEY } from '../../common/constants';
 
@@ -99,12 +90,8 @@ export interface GraphProps extends CommonProps {
 }
 
 const nodeTypes = {
-  hexagon: HexagonNode,
-  pentagon: PentagonNode,
-  ellipse: EllipseNode,
-  rectangle: RectangleNode,
-  diamond: DiamondNode,
-  label: LabelNode,
+  entity: EntityCardNode,
+  event: EventNode,
   group: EdgeGroupNode,
   relationship: RelationshipNode,
 };
@@ -427,19 +414,19 @@ const processGraph = (
 
     const node: Node<NodeViewModel> = {
       id: nodeData.id,
-      type: nodeData.shape,
+      type: nodeData.kind,
       data: { ...nodeData, interactive },
       position: { x: 0, y: 0 }, // Default position, should be updated later
       className: interactive ? undefined : 'non-interactive',
     };
 
-    if (node.type === 'group' && nodeData.shape === 'group') {
+    if (node.type === 'group' && nodeData.kind === 'group') {
       node.sourcePosition = Position.Right;
       node.targetPosition = Position.Left;
       node.resizing = false;
       node.focusable = false;
     } else if (
-      (nodeData.shape === 'label' || nodeData.shape === 'relationship') &&
+      (nodeData.kind === 'event' || nodeData.kind === 'relationship') &&
       nodeData.parentId
     ) {
       node.parentId = nodeData.parentId;
@@ -454,13 +441,13 @@ const processGraph = (
   const initialEdges: Array<Edge<EdgeViewModel>> = edgesModel
     .filter((edgeData) => nodesById[edgeData.source] && nodesById[edgeData.target])
     .map((edgeData) => {
-      const sourceShape = nodesById[edgeData.source].shape;
-      const targetShape = nodesById[edgeData.target].shape;
+      const sourceKind = nodesById[edgeData.source].kind;
+      const targetKind = nodesById[edgeData.target].kind;
 
-      const isIn = !isConnectorShape(sourceShape) && targetShape === 'group';
-      const isInside = sourceShape === 'group' && isConnectorShape(targetShape);
-      const isOut = isConnectorShape(sourceShape) && targetShape === 'group';
-      const isOutside = sourceShape === 'group' && !isConnectorShape(targetShape);
+      const isIn = !isConnectorKind(sourceKind) && targetKind === 'group';
+      const isInside = sourceKind === 'group' && isConnectorKind(targetKind);
+      const isOut = isConnectorKind(sourceKind) && targetKind === 'group';
+      const isOutside = sourceKind === 'group' && !isConnectorKind(targetKind);
 
       return {
         id: edgeData.id,
@@ -474,9 +461,9 @@ const processGraph = (
         deletable: false,
         data: {
           ...edgeData,
-          sourceShape: nodesById[edgeData.source].shape,
+          sourceKind: nodesById[edgeData.source].kind,
           sourceColor: nodesById[edgeData.source].color,
-          targetShape: nodesById[edgeData.target].shape,
+          targetKind: nodesById[edgeData.target].kind,
           targetColor: nodesById[edgeData.target].color,
         },
       };

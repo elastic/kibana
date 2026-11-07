@@ -8,7 +8,7 @@
 import {
   ApiMessageCode,
   type EntityNodeDataModel,
-  type LabelNodeDataModel,
+  type EventNodeDataModel,
   type GroupNodeDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import { parseRecords } from './parse_records';
@@ -60,7 +60,7 @@ describe('parseRecords', () => {
         targetHostIps: [],
         sourceIps: [],
         sourceCountryCodes: [],
-        labelNodeId: 'doc-id-1',
+        eventNodeId: 'doc-id-1',
       },
     ];
     const result = parseRecords(mockLogger, records, []);
@@ -70,42 +70,42 @@ describe('parseRecords', () => {
 
     const actorNode = result.nodes.find((n) => n.id === 'actor1') as EntityNodeDataModel;
     const targetNode = result.nodes.find((n) => n.id === 'target1') as EntityNodeDataModel;
-    const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
+    const eventNode = result.nodes.find((n) => n.kind === 'event') as EventNodeDataModel;
 
     expect(actorNode).toBeDefined();
     expect(targetNode).toBeDefined();
-    expect(labelNode).toBeDefined();
+    expect(eventNode).toBeDefined();
 
     // Verify actor node uses entity ID (single entity)
     expect(actorNode.id).toBe('actor1');
     expect(actorNode.label).toBe('John Doe');
     expect(actorNode).toHaveProperty('tag', 'user');
     expect(actorNode).toHaveProperty('icon', 'user');
-    expect(actorNode).toHaveProperty('shape', 'ellipse');
+    expect(actorNode).toHaveProperty('kind', 'entity');
 
     // Verify target node uses entity ID (single entity)
     expect(targetNode.id).toBe('target1');
     expect(targetNode.label).toBe('Server 01');
     expect(targetNode).toHaveProperty('tag', 'host');
     expect(targetNode).toHaveProperty('icon', 'storage');
-    expect(targetNode).toHaveProperty('shape', 'hexagon');
+    expect(targetNode).toHaveProperty('kind', 'entity');
 
-    // Label node should reference the actor and target by their entity IDs
-    expect(labelNode.id).toContain('label(login)ln(doc-id-1)oe(1)oa(0)');
-    expect(labelNode.label).toBe('login');
-    expect(labelNode).toHaveProperty('documentsData', [{ foo: 'bar' }]);
-    expect(labelNode).toHaveProperty('color', 'primary');
-    expect(labelNode.shape).toBe('label');
-    expect(labelNode).toHaveProperty('uniqueEventsCount', 1);
+    // Event node should reference the actor and target by their entity IDs
+    expect(eventNode.id).toContain('label(login)ln(doc-id-1)oe(1)oa(0)');
+    expect(eventNode.label).toBe('login');
+    expect(eventNode).toHaveProperty('documentsData', [{ foo: 'bar' }]);
+    expect(eventNode).toHaveProperty('color', 'primary');
+    expect(eventNode.kind).toBe('event');
+    expect(eventNode).toHaveProperty('uniqueEventsCount', 1);
 
     // Should have 2 edges: actor->label, label->target
     expect(result.edges.length).toBe(2);
     expect(result.edges[0].source).toBe('actor1');
-    expect(result.edges[0].target).toBe(labelNode.id);
-    expect(result.edges[1].source).toBe(labelNode.id);
+    expect(result.edges[0].target).toBe(eventNode.id);
+    expect(result.edges[1].source).toBe(eventNode.id);
     expect(result.edges[1].target).toBe('target1');
-    expect(result.edges[0].target).toBe(labelNode.id);
-    expect(result.edges[1].source).toBe(labelNode.id);
+    expect(result.edges[0].target).toBe(eventNode.id);
+    expect(result.edges[1].source).toBe(eventNode.id);
     expect(result.edges[1].target).toBe(targetNode.id);
   });
 
@@ -136,13 +136,13 @@ describe('parseRecords', () => {
         targetHostIps: [],
         sourceIps: [],
         sourceCountryCodes: [],
-        labelNodeId: 'doc-id-1',
+        eventNodeId: 'doc-id-1',
       },
     ];
     const result = parseRecords(mockLogger, records, []);
-    const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
-    expect(labelNode).toBeDefined();
-    expect(labelNode).toHaveProperty('documentsData', [{ a: 1 }]);
+    const eventNode = result.nodes.find((n) => n.kind === 'event') as EventNodeDataModel;
+    expect(eventNode).toBeDefined();
+    expect(eventNode).toHaveProperty('documentsData', [{ a: 1 }]);
 
     // Verify single entities use MD5 hashes
     const actorNode = result.nodes.find((n) => n.id === 'actor1');
@@ -180,7 +180,7 @@ describe('parseRecords', () => {
         targetHostIps: [],
         sourceIps: [],
         sourceCountryCodes: [],
-        labelNodeId: 'doc-id-1',
+        eventNodeId: 'doc-id-1',
       },
       {
         action: 'logout',
@@ -209,7 +209,7 @@ describe('parseRecords', () => {
         targetHostIps: [],
         sourceIps: [],
         sourceCountryCodes: [],
-        labelNodeId: 'doc-id-1',
+        eventNodeId: 'doc-id-1',
       },
     ];
     const result = parseRecords(mockLogger, records, []);
@@ -219,10 +219,10 @@ describe('parseRecords', () => {
     // Since both events reference the same actor/target groups, a group node IS created
 
     // Should have a group node since same actor and target have multiple connections
-    const groupNode = result.nodes.find((n) => n.shape === 'group') as GroupNodeDataModel;
+    const groupNode = result.nodes.find((n) => n.kind === 'group') as GroupNodeDataModel;
     expect(groupNode).toBeDefined();
 
-    // Should have 2 entity nodes (1 actor + 1 target), 2 label nodes, and 1 group node = 5 nodes
+    // Should have 2 entity nodes (1 actor + 1 target), 2 event nodes, and 1 group node = 5 nodes
     expect(result.nodes.length).toBe(5);
 
     // Find actor and target nodes by MD5 hash
@@ -234,11 +234,11 @@ describe('parseRecords', () => {
     expect(targetNode).toBeDefined();
     expect(targetNode.label).toBe('Server 01');
 
-    // Since same entities have multiple connections, label nodes should have the group as parent
-    const labelNodes = result.nodes.filter((n) => n.shape === 'label') as LabelNodeDataModel[];
-    expect(labelNodes.length).toBe(2);
-    expect(labelNodes[0].parentId).toBe(groupNode.id); // Has group node
-    expect(labelNodes[1].parentId).toBe(groupNode.id); // Has group node
+    // Since same entities have multiple connections, event nodes should have the group as parent
+    const eventNodes = result.nodes.filter((n) => n.kind === 'event') as EventNodeDataModel[];
+    expect(eventNodes.length).toBe(2);
+    expect(eventNodes[0].parentId).toBe(groupNode.id); // Has group node
+    expect(eventNodes[1].parentId).toBe(groupNode.id); // Has group node
   });
 
   describe('color assignment', () => {
@@ -269,14 +269,14 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
-          labelNodeId: 'doc-id-1',
+          eventNodeId: 'doc-id-1',
         },
       ];
       const result = parseRecords(mockLogger, records, []);
-      const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
-      expect(labelNode).toBeDefined();
-      expect(labelNode).toHaveProperty('color', 'danger');
-      expect(labelNode).toHaveProperty('uniqueAlertsCount', 1);
+      const eventNode = result.nodes.find((n) => n.kind === 'event') as EventNodeDataModel;
+      expect(eventNode).toBeDefined();
+      expect(eventNode).toHaveProperty('color', 'danger');
+      expect(eventNode).toHaveProperty('uniqueAlertsCount', 1);
     });
 
     it('sets color to danger for isAlert', () => {
@@ -306,19 +306,19 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
-          labelNodeId: 'doc-id-1',
+          eventNodeId: 'doc-id-1',
         },
       ];
       const result = parseRecords(mockLogger, records, []);
-      const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
-      expect(labelNode).toBeDefined();
-      expect(labelNode).toHaveProperty('color', 'danger');
-      expect(labelNode).toHaveProperty('uniqueAlertsCount', 1);
+      const eventNode = result.nodes.find((n) => n.kind === 'event') as EventNodeDataModel;
+      expect(eventNode).toBeDefined();
+      expect(eventNode).toHaveProperty('color', 'danger');
+      expect(eventNode).toHaveProperty('uniqueAlertsCount', 1);
     });
   });
 
-  it('sets label node id based on action, isOrigin and isOriginAlert fields', () => {
-    const baseLabelNodeData = {
+  it('sets event node id based on action, isOrigin and isOriginAlert fields', () => {
+    const baseEventNodeData = {
       actorNodeId: 'actor1',
       targetNodeId: 'target1',
       actorEntityType: '',
@@ -344,40 +344,40 @@ describe('parseRecords', () => {
 
     const records: EventEdge[] = [
       {
-        ...baseLabelNodeData,
+        ...baseEventNodeData,
         action: 'action1',
         isOrigin: false,
         isOriginAlert: false,
-        labelNodeId: 'doc-id-1',
+        eventNodeId: 'doc-id-1',
       },
       {
-        ...baseLabelNodeData,
+        ...baseEventNodeData,
         action: 'action2',
         isOrigin: true,
         isOriginAlert: false,
-        labelNodeId: 'doc-id-2',
+        eventNodeId: 'doc-id-2',
       },
       {
-        ...baseLabelNodeData,
+        ...baseEventNodeData,
         action: 'action3',
         isOrigin: false,
         isOriginAlert: true,
-        labelNodeId: 'doc-id-3',
+        eventNodeId: 'doc-id-3',
       },
       {
-        ...baseLabelNodeData,
+        ...baseEventNodeData,
         action: 'action4',
         isOrigin: true,
         isOriginAlert: true,
-        labelNodeId: 'doc-id-4',
+        eventNodeId: 'doc-id-4',
       },
     ];
     const result = parseRecords(mockLogger, records, []);
-    const labelNodes = result.nodes.filter((n) => n.shape === 'label') as LabelNodeDataModel[];
+    const eventNodes = result.nodes.filter((n) => n.kind === 'event') as EventNodeDataModel[];
 
     // All events use MD5 hashes for actor and target groups
     // Since it's the same actor and target with multiple actions, they should reuse hashes
-    expect(labelNodes.map((n) => n.id)).toStrictEqual([
+    expect(eventNodes.map((n) => n.id)).toStrictEqual([
       `label(action1)ln(doc-id-1)oe(0)oa(0)`,
       `label(action2)ln(doc-id-2)oe(1)oa(0)`,
       `label(action3)ln(doc-id-3)oe(0)oa(1)`,
@@ -413,7 +413,7 @@ describe('parseRecords', () => {
         targetHostIps: [],
         sourceIps: [],
         sourceCountryCodes: [],
-        labelNodeId: 'doc-id-1',
+        eventNodeId: 'doc-id-1',
       },
       {
         action: 'foo2',
@@ -441,7 +441,7 @@ describe('parseRecords', () => {
         targetHostIps: [],
         sourceIps: [],
         sourceCountryCodes: [],
-        labelNodeId: 'doc-id-2',
+        eventNodeId: 'doc-id-2',
       },
     ];
     // nodesLimit = 2, so only first record should be processed
@@ -452,7 +452,7 @@ describe('parseRecords', () => {
   });
 
   it('enforces a shared node limit across event and relationship records', () => {
-    // Event record: creates actor (actor-1), target (target-1), and label node = 3 nodes
+    // Event record: creates actor (actor-1), target (target-1), and event node = 3 nodes
     const eventRecords: EventEdge[] = [
       {
         action: 'Login',
@@ -479,7 +479,7 @@ describe('parseRecords', () => {
         targetHostIps: [],
         sourceIps: [],
         sourceCountryCodes: [],
-        labelNodeId: 'doc-shared-limit',
+        eventNodeId: 'doc-shared-limit',
       },
     ];
 
@@ -586,7 +586,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
-          labelNodeId: 'doc-id-1',
+          eventNodeId: 'doc-id-1',
         },
       ];
       const result = parseRecords(mockLogger, records, []);
@@ -650,7 +650,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
-          labelNodeId: 'doc-id-1',
+          eventNodeId: 'doc-id-1',
         },
       ];
       const result = parseRecords(mockLogger, records, []);
@@ -722,7 +722,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
-          labelNodeId: 'doc-id-1',
+          eventNodeId: 'doc-id-1',
         },
       ];
       const result = parseRecords(mockLogger, records, []);
@@ -732,7 +732,7 @@ describe('parseRecords', () => {
       expect(unknownNode).toBeDefined();
       expect(unknownNode!.id.startsWith('unknown')).toBe(true);
       expect(unknownNode).toHaveProperty('documentsData', []);
-      expect(unknownNode).toHaveProperty('shape', 'rectangle');
+      expect(unknownNode).toHaveProperty('kind', 'entity');
 
       // Should have actor node
       const actorNode = result.nodes.find((n) => n.label === 'Threat Actor') as EntityNodeDataModel;
@@ -740,21 +740,21 @@ describe('parseRecords', () => {
       expect(actorNode!.label).toBe('Threat Actor');
       expect(actorNode).toHaveProperty('tag', 'user');
 
-      const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
-      expect(labelNode).toBeDefined();
-      expect(labelNode).toHaveProperty('color', 'primary');
+      const eventNode = result.nodes.find((n) => n.kind === 'event') as EventNodeDataModel;
+      expect(eventNode).toBeDefined();
+      expect(eventNode).toHaveProperty('color', 'primary');
 
       // Should have proper edges
       expect(result.edges).toHaveLength(2);
-      const actorToLabelEdge = result.edges.find((e) => e.source === actorNode.id);
-      expect(actorToLabelEdge).toBeDefined();
+      const actorToEventEdge = result.edges.find((e) => e.source === actorNode.id);
+      expect(actorToEventEdge).toBeDefined();
       const labelToUnknownEdge = result.edges.find((e) => e.target === unknownNode!.id);
       expect(labelToUnknownEdge).toBeDefined();
     });
   });
 
   describe('event and alert grouping', () => {
-    it('creates label node with one event', () => {
+    it('creates event node with one event', () => {
       const records: EventEdge[] = [
         {
           action: 'file_access',
@@ -781,22 +781,22 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
-          labelNodeId: 'doc-id-1',
+          eventNodeId: 'doc-id-1',
         },
       ];
       const result = parseRecords(mockLogger, records, []);
 
-      const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
-      expect(labelNode).toBeDefined();
-      expect(labelNode).toHaveProperty('uniqueEventsCount', 1);
-      expect(labelNode).not.toHaveProperty('uniqueAlertsCount');
-      expect(labelNode).toHaveProperty('documentsData');
-      expect(labelNode.documentsData).toHaveLength(1);
-      expect(labelNode.documentsData![0]).toHaveProperty('event_type', 'file_access');
-      expect(labelNode).toHaveProperty('color', 'primary');
+      const eventNode = result.nodes.find((n) => n.kind === 'event') as EventNodeDataModel;
+      expect(eventNode).toBeDefined();
+      expect(eventNode).toHaveProperty('uniqueEventsCount', 1);
+      expect(eventNode).not.toHaveProperty('uniqueAlertsCount');
+      expect(eventNode).toHaveProperty('documentsData');
+      expect(eventNode.documentsData).toHaveLength(1);
+      expect(eventNode.documentsData![0]).toHaveProperty('event_type', 'file_access');
+      expect(eventNode).toHaveProperty('color', 'primary');
     });
 
-    it('creates label node with one alert', () => {
+    it('creates event node with one alert', () => {
       const records: EventEdge[] = [
         {
           action: 'malware_detected',
@@ -823,22 +823,22 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
-          labelNodeId: 'doc-id-1',
+          eventNodeId: 'doc-id-1',
         },
       ];
       const result = parseRecords(mockLogger, records, []);
 
-      const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
-      expect(labelNode).toBeDefined();
-      expect(labelNode).not.toHaveProperty('uniqueEventsCount');
-      expect(labelNode).toHaveProperty('uniqueAlertsCount', 1);
-      expect(labelNode).toHaveProperty('documentsData');
-      expect(labelNode.documentsData).toHaveLength(1);
-      expect(labelNode.documentsData![0]).toHaveProperty('alert_type', 'malware');
-      expect(labelNode).toHaveProperty('color', 'danger');
+      const eventNode = result.nodes.find((n) => n.kind === 'event') as EventNodeDataModel;
+      expect(eventNode).toBeDefined();
+      expect(eventNode).not.toHaveProperty('uniqueEventsCount');
+      expect(eventNode).toHaveProperty('uniqueAlertsCount', 1);
+      expect(eventNode).toHaveProperty('documentsData');
+      expect(eventNode.documentsData).toHaveLength(1);
+      expect(eventNode.documentsData![0]).toHaveProperty('alert_type', 'malware');
+      expect(eventNode).toHaveProperty('color', 'danger');
     });
 
-    it('creates label node with multiple events', () => {
+    it('creates event node with multiple events', () => {
       const records: EventEdge[] = [
         {
           action: 'network_activity',
@@ -869,22 +869,22 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
-          labelNodeId: 'doc-id-1',
+          eventNodeId: 'doc-id-1',
         },
       ];
       const result = parseRecords(mockLogger, records, []);
 
-      const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
-      expect(labelNode).toBeDefined();
-      expect(labelNode).toHaveProperty('uniqueEventsCount', 3);
-      expect(labelNode).not.toHaveProperty('uniqueAlertsCount');
-      expect(labelNode).toHaveProperty('documentsData');
-      expect(labelNode.documentsData).toHaveLength(3);
-      expect(labelNode).toHaveProperty('color', 'primary');
-      expect(labelNode).toHaveProperty('count', 3);
+      const eventNode = result.nodes.find((n) => n.kind === 'event') as EventNodeDataModel;
+      expect(eventNode).toBeDefined();
+      expect(eventNode).toHaveProperty('uniqueEventsCount', 3);
+      expect(eventNode).not.toHaveProperty('uniqueAlertsCount');
+      expect(eventNode).toHaveProperty('documentsData');
+      expect(eventNode.documentsData).toHaveLength(3);
+      expect(eventNode).toHaveProperty('color', 'primary');
+      expect(eventNode).toHaveProperty('count', 3);
     });
 
-    it('creates label node with mixed events and alerts', () => {
+    it('creates event node with mixed events and alerts', () => {
       const records: EventEdge[] = [
         {
           action: 'suspicious_login',
@@ -917,19 +917,19 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
-          labelNodeId: 'doc-id-1',
+          eventNodeId: 'doc-id-1',
         },
       ];
       const result = parseRecords(mockLogger, records, []);
 
-      const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
-      expect(labelNode).toBeDefined();
-      expect(labelNode).toHaveProperty('color', 'primary'); // Color is primary when uniqueEventsCount > 0 even with alerts
-      expect(labelNode).toHaveProperty('count', 5);
-      expect(labelNode).toHaveProperty('uniqueEventsCount', 3);
-      expect(labelNode).toHaveProperty('uniqueAlertsCount', 2);
-      expect(labelNode).toHaveProperty('documentsData');
-      expect(labelNode.documentsData).toHaveLength(5);
+      const eventNode = result.nodes.find((n) => n.kind === 'event') as EventNodeDataModel;
+      expect(eventNode).toBeDefined();
+      expect(eventNode).toHaveProperty('color', 'primary'); // Color is primary when uniqueEventsCount > 0 even with alerts
+      expect(eventNode).toHaveProperty('count', 5);
+      expect(eventNode).toHaveProperty('uniqueEventsCount', 3);
+      expect(eventNode).toHaveProperty('uniqueAlertsCount', 2);
+      expect(eventNode).toHaveProperty('documentsData');
+      expect(eventNode.documentsData).toHaveLength(5);
     });
   });
 
@@ -964,7 +964,7 @@ describe('parseRecords', () => {
           targetHostIps: ['172.16.0.10'],
           sourceIps: ['203.0.113.1', '198.51.100.1'],
           sourceCountryCodes: ['JP', 'CA'],
-          labelNodeId: 'doc-id-1',
+          eventNodeId: 'doc-id-1',
         },
       ];
       const result = parseRecords(mockLogger, records, []);
@@ -981,11 +981,11 @@ describe('parseRecords', () => {
       expect(targetNode).toBeDefined();
       expect(targetNode).toHaveProperty('ips', ['172.16.0.10']);
 
-      // Check label node has source IPs and country codes
-      const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
-      expect(labelNode).toBeDefined();
-      expect(labelNode).toHaveProperty('ips', ['203.0.113.1', '198.51.100.1']);
-      expect(labelNode).toHaveProperty('countryCodes', ['JP', 'CA']);
+      // Check event node has source IPs and country codes
+      const eventNode = result.nodes.find((n) => n.kind === 'event') as EventNodeDataModel;
+      expect(eventNode).toBeDefined();
+      expect(eventNode).toHaveProperty('ips', ['203.0.113.1', '198.51.100.1']);
+      expect(eventNode).toHaveProperty('countryCodes', ['JP', 'CA']);
     });
 
     it('handles empty geographic data arrays', () => {
@@ -1017,7 +1017,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
-          labelNodeId: 'doc-id-1',
+          eventNodeId: 'doc-id-1',
         },
       ];
       const result = parseRecords(mockLogger, records, []);
@@ -1033,10 +1033,10 @@ describe('parseRecords', () => {
       expect(targetNode).toBeDefined();
       expect(targetNode).not.toHaveProperty('ips');
 
-      const labelNode = result.nodes.find((n) => n.shape === 'label') as LabelNodeDataModel;
-      expect(labelNode).toBeDefined();
-      expect(labelNode).not.toHaveProperty('ips');
-      expect(labelNode).not.toHaveProperty('countryCodes');
+      const eventNode = result.nodes.find((n) => n.kind === 'event') as EventNodeDataModel;
+      expect(eventNode).toBeDefined();
+      expect(eventNode).not.toHaveProperty('ips');
+      expect(eventNode).not.toHaveProperty('countryCodes');
     });
   });
 
@@ -1070,7 +1070,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
-          labelNodeId: 'doc-id-1',
+          eventNodeId: 'doc-id-1',
         },
       ];
       const result = parseRecords(mockLogger, records, []);
@@ -1127,7 +1127,7 @@ describe('parseRecords', () => {
       targetHostIps: [],
       sourceIps: [],
       sourceCountryCodes: [],
-      labelNodeId: 'doc-id-1',
+      eventNodeId: 'doc-id-1',
       ...overrides,
     });
 
@@ -1254,7 +1254,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
-          labelNodeId: 'doc-id-1',
+          eventNodeId: 'doc-id-1',
         },
       ];
 
@@ -1272,14 +1272,14 @@ describe('parseRecords', () => {
       expect(actorNode.label).toBe('non-enriched-actor-123'); // group ID (entity ID for single)
       expect(actorNode.tag).toBe('Entity');
       expect(actorNode.icon).toBe('magnifyExclamation');
-      expect(actorNode.shape).toBe('rectangle');
+      expect(actorNode.kind).toBe('entity');
       expect(actorNode.count).toBeUndefined();
 
       expect(targetNode).toBeDefined();
       expect(targetNode.label).toBe('non-enriched-target-456'); // group ID (entity ID for single)
       expect(targetNode.tag).toBe('Entity');
       expect(targetNode.icon).toBe('magnifyExclamation');
-      expect(targetNode.shape).toBe('rectangle');
+      expect(targetNode.kind).toBe('entity');
       expect(targetNode.count).toBeUndefined();
     });
 
@@ -1319,7 +1319,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
-          labelNodeId: 'doc-id-1',
+          eventNodeId: 'doc-id-1',
         },
       ];
 
@@ -1336,14 +1336,14 @@ describe('parseRecords', () => {
       expect(actorNode.label).toBeUndefined(); // UI will fallback to node ID
       expect(actorNode.tag).toBe('Entities');
       expect(actorNode.icon).toBe('magnifyExclamation');
-      expect(actorNode.shape).toBe('rectangle');
+      expect(actorNode.kind).toBe('entity');
       expect(actorNode.count).toBe(3);
 
       expect(targetNode).toBeDefined();
       expect(targetNode.label).toBeUndefined(); // UI will fallback to node ID
       expect(targetNode.tag).toBe('Entities');
       expect(targetNode.icon).toBe('magnifyExclamation');
-      expect(targetNode.shape).toBe('rectangle');
+      expect(targetNode.kind).toBe('entity');
       expect(targetNode.count).toBe(2);
     });
 
@@ -1376,7 +1376,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
-          labelNodeId: 'doc-id-1',
+          eventNodeId: 'doc-id-1',
         },
       ];
 
@@ -1390,14 +1390,14 @@ describe('parseRecords', () => {
       expect(actorNode.label).toBe('John Doe'); // entity.name
       expect(actorNode.tag).toBe('user');
       expect(actorNode.icon).toBe('user');
-      expect(actorNode.shape).toBe('ellipse');
+      expect(actorNode.kind).toBe('entity');
       expect(actorNode.count).toBeUndefined();
 
       expect(targetNode).toBeDefined();
       expect(targetNode.label).toBe('web-server-01'); // entity.name
       expect(targetNode.tag).toBe('host');
       expect(targetNode.icon).toBe('storage');
-      expect(targetNode.shape).toBe('hexagon');
+      expect(targetNode.kind).toBe('entity');
       expect(targetNode.count).toBeUndefined();
     });
 
@@ -1439,7 +1439,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
-          labelNodeId: 'doc-id-1',
+          eventNodeId: 'doc-id-1',
         },
       ];
 
@@ -1456,14 +1456,14 @@ describe('parseRecords', () => {
       expect(actorNode.label).toBe('service_account');
       expect(actorNode.tag).toBe('user');
       expect(actorNode.icon).toBe('user');
-      expect(actorNode.shape).toBe('ellipse');
+      expect(actorNode.kind).toBe('entity');
       expect(actorNode.count).toBe(3);
 
       expect(targetNode).toBeDefined();
       expect(targetNode.label).toBe('server');
       expect(targetNode.tag).toBe('host');
       expect(targetNode.icon).toBe('storage');
-      expect(targetNode.shape).toBe('hexagon');
+      expect(targetNode.kind).toBe('entity');
       expect(targetNode.count).toBe(2);
     });
 
@@ -1503,7 +1503,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
-          labelNodeId: 'doc-id-1',
+          eventNodeId: 'doc-id-1',
         },
       ];
 
@@ -1520,14 +1520,14 @@ describe('parseRecords', () => {
       expect(actorNode.label).toBeUndefined(); // No label when only type exists
       expect(actorNode.tag).toBe('user');
       expect(actorNode.icon).toBe('user');
-      expect(actorNode.shape).toBe('ellipse');
+      expect(actorNode.kind).toBe('entity');
       expect(actorNode.count).toBe(3);
 
       expect(targetNode).toBeDefined();
       expect(targetNode.label).toBeUndefined(); // No label when only type exists
       expect(targetNode.tag).toBe('host');
       expect(targetNode.icon).toBe('storage');
-      expect(targetNode.shape).toBe('hexagon');
+      expect(targetNode.kind).toBe('entity');
       expect(targetNode.count).toBe(2);
     });
   });
@@ -1562,7 +1562,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
-          labelNodeId: 'doc-id-1',
+          eventNodeId: 'doc-id-1',
         },
       ];
       const result = parseRecords(mockLogger, records, []);
@@ -1622,7 +1622,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
-          labelNodeId: 'doc-id-1',
+          eventNodeId: 'doc-id-1',
         },
       ];
       const result = parseRecords(mockLogger, records, []);
@@ -1700,7 +1700,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
-          labelNodeId: 'doc-id-1',
+          eventNodeId: 'doc-id-1',
         },
       ];
       const result = parseRecords(mockLogger, records, []);
@@ -1737,7 +1737,7 @@ describe('parseRecords', () => {
       expect(actorNode.label).toBeUndefined();
       expect(actorNode.tag).toBe('Entities');
       expect(actorNode.icon).toBe('magnifyExclamation');
-      expect(actorNode.shape).toBe('rectangle');
+      expect(actorNode.kind).toBe('entity');
       expect(actorNode.count).toBe(3);
 
       const targetNode = result.nodes.find(
@@ -1764,14 +1764,14 @@ describe('parseRecords', () => {
       expect(targetNode.label).toBeUndefined();
       expect(targetNode.tag).toBe('Entities');
       expect(targetNode.icon).toBe('magnifyExclamation');
-      expect(targetNode.shape).toBe('rectangle');
+      expect(targetNode.kind).toBe('entity');
       expect(targetNode.count).toBe(2);
     });
   });
 
   describe('label stacking by actor-target pairs', () => {
-    it('stacks labels with same actor-target pair under a group node even with different labelNodeIds', () => {
-      // Two different documents (different labelNodeIds) with the same actor-target pair
+    it('stacks labels with same actor-target pair under a group node even with different eventNodeIds', () => {
+      // Two different documents (different eventNodeIds) with the same actor-target pair
       // should be stacked together under a group node
       const records: EventEdge[] = [
         {
@@ -1799,7 +1799,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
-          labelNodeId: 'doc-id-1', // Different document
+          eventNodeId: 'doc-id-1', // Different document
         },
         {
           action: 'action2',
@@ -1826,7 +1826,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
-          labelNodeId: 'doc-id-2', // Different document
+          eventNodeId: 'doc-id-2', // Different document
         },
       ];
       const result = parseRecords(mockLogger, records);
@@ -1835,14 +1835,14 @@ describe('parseRecords', () => {
       expect(result.nodes.length).toBe(5);
 
       // Should have a group node
-      const groupNode = result.nodes.find((n) => n.shape === 'group') as GroupNodeDataModel;
+      const groupNode = result.nodes.find((n) => n.kind === 'group') as GroupNodeDataModel;
       expect(groupNode).toBeDefined();
 
-      // Both label nodes should have the group as parent
-      const labelNodes = result.nodes.filter((n) => n.shape === 'label') as LabelNodeDataModel[];
-      expect(labelNodes.length).toBe(2);
-      expect(labelNodes[0].parentId).toBe(groupNode.id);
-      expect(labelNodes[1].parentId).toBe(groupNode.id);
+      // Both event nodes should have the group as parent
+      const eventNodes = result.nodes.filter((n) => n.kind === 'event') as EventNodeDataModel[];
+      expect(eventNodes.length).toBe(2);
+      expect(eventNodes[0].parentId).toBe(groupNode.id);
+      expect(eventNodes[1].parentId).toBe(groupNode.id);
     });
 
     it('does not stack labels with different actor-target pairs', () => {
@@ -1873,7 +1873,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
-          labelNodeId: 'doc-id-1',
+          eventNodeId: 'doc-id-1',
         },
         {
           action: 'action2',
@@ -1900,7 +1900,7 @@ describe('parseRecords', () => {
           targetHostIps: [],
           sourceIps: [],
           sourceCountryCodes: [],
-          labelNodeId: 'doc-id-2',
+          eventNodeId: 'doc-id-2',
         },
       ];
       const result = parseRecords(mockLogger, records);
@@ -1909,14 +1909,14 @@ describe('parseRecords', () => {
       expect(result.nodes.length).toBe(6);
 
       // Should NOT have a group node
-      const groupNode = result.nodes.find((n) => n.shape === 'group');
+      const groupNode = result.nodes.find((n) => n.kind === 'group');
       expect(groupNode).toBeUndefined();
 
-      // Label nodes should NOT have parentId
-      const labelNodes = result.nodes.filter((n) => n.shape === 'label') as LabelNodeDataModel[];
-      expect(labelNodes.length).toBe(2);
-      expect(labelNodes[0].parentId).toBeUndefined();
-      expect(labelNodes[1].parentId).toBeUndefined();
+      // Event nodes should NOT have parentId
+      const eventNodes = result.nodes.filter((n) => n.kind === 'event') as EventNodeDataModel[];
+      expect(eventNodes.length).toBe(2);
+      expect(eventNodes[0].parentId).toBeUndefined();
+      expect(eventNodes[1].parentId).toBeUndefined();
     });
   });
 });

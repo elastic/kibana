@@ -14,7 +14,7 @@ import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { RoundedBadge } from '../styles';
 import type { DocumentAnalysisOutput } from './analyze_documents';
 
-export const TEST_SUBJ_TITLE = 'label-node-tooltip-title';
+export const TEST_SUBJ_TITLE = 'event-node-tooltip-title';
 
 const POPOVER_TITLE_MAX_WIDTH = 320;
 
@@ -32,7 +32,7 @@ const defaultEventsText = i18n.translate(
   }
 );
 
-interface LabelNodePopoverProps {
+interface EventNodePopoverProps {
   analysis: DocumentAnalysisOutput;
   text?: string;
 }
@@ -93,20 +93,20 @@ const AlertBadge: React.FC<{ count: number }> = ({ count }) => (
       type="warningFill"
       color="danger"
       size="s"
-      data-test-subj="label-node-tooltip-alert-icon"
+      data-test-subj="event-node-tooltip-alert-icon"
       aria-hidden={true}
     />
-    <CountText testSubj="label-node-tooltip-alert-count">{getAbbreviatedNumber(count)}</CountText>
+    <CountText testSubj="event-node-tooltip-alert-count">{getAbbreviatedNumber(count)}</CountText>
   </RoundedBadge>
 );
 
 const EventBadge: React.FC<{ count: number }> = ({ count }) => (
   <RoundedBadge>
-    <CountText testSubj="label-node-tooltip-event-count">{getAbbreviatedNumber(count)}</CountText>
+    <CountText testSubj="event-node-tooltip-event-count">{getAbbreviatedNumber(count)}</CountText>
   </RoundedBadge>
 );
 
-export const LabelNodePopoverContent = ({ analysis, text }: LabelNodePopoverProps) => {
+export const EventNodePopoverContent = ({ analysis, text }: EventNodePopoverProps) => {
   const { euiTheme } = useEuiTheme();
   const hasTitle = Boolean(text);
   const hasCounters = analysis.uniqueAlertsCount > 0 || analysis.uniqueEventsCount > 0;
@@ -145,14 +145,14 @@ export const LabelNodePopoverContent = ({ analysis, text }: LabelNodePopoverProp
       )}
       {analysis.uniqueAlertsCount > 0 && (
         <Section
-          testSubj="label-node-tooltip-alert-section"
+          testSubj="event-node-tooltip-alert-section"
           badge={<AlertBadge count={analysis.uniqueAlertsCount} />}
           label={alertedEventsText}
         />
       )}
       {analysis.uniqueEventsCount > 0 && (
         <Section
-          testSubj="label-node-tooltip-event-section"
+          testSubj="event-node-tooltip-event-section"
           badge={<EventBadge count={analysis.uniqueEventsCount} />}
           label={defaultEventsText}
         />

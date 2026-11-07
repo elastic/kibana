@@ -809,8 +809,7 @@ const ToolbarButtonRow: React.FC<ToolbarButtonRowProps> = ({
 };
 
 /**
- * Shared horizontal card node rendered by all entity node shape types
- * (hexagon, pentagon, ellipse, rectangle, diamond). Always renders the full
+ * Horizontal card node rendered for every entity node. Always renders the full
  * card with header and metadata panel.
  */
 export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {

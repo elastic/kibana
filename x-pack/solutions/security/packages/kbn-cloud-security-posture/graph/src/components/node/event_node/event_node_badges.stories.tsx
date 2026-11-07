@@ -8,14 +8,14 @@
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { Meta, StoryObj } from '@storybook/react';
-import type { LabelNodeViewModel } from '../..';
+import type { EventNodeViewModel } from '../..';
 import { Graph } from '../..';
 import { useEventDetailsPopover } from '../../popovers/details/use_event_details_popover';
 import { analyzeDocuments } from './analyze_documents';
 import { GlobalStylesStorybookDecorator } from '../../../../.storybook/decorators';
 
 export default {
-  title: 'Components/Graph Components/Label Node/Badges',
+  title: 'Components/Graph Components/Event Node/Badges',
   argTypes: {},
   decorators: [GlobalStylesStorybookDecorator],
 } satisfies Meta<typeof Graph>;
@@ -97,7 +97,7 @@ const Template = () => {
     ]
   );
 
-  const nodes: LabelNodeViewModel[] = useMemo(
+  const nodes: EventNodeViewModel[] = useMemo(
     () =>
       Object.entries(useCases).map(([useCaseName, { uniqueEventsCount, uniqueAlertsCount }]) => {
         const eventClickHandler = popovers[useCaseName as keyof typeof popovers]?.onEventClick;
@@ -107,7 +107,7 @@ const Template = () => {
           label: useCaseName,
           color: uniqueAlertsCount >= 1 && uniqueEventsCount === 0 ? 'danger' : 'primary',
           interactive: true,
-          shape: 'label',
+          kind: 'event',
           uniqueEventsCount,
           uniqueAlertsCount,
           eventClickHandler,

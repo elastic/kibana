@@ -11,7 +11,7 @@ import { layoutGraph } from './layout_graph';
 
 describe('layoutGraph', () => {
   describe('fan-out scenario (one label → multiple targets)', () => {
-    it('should position multiple target nodes at distinct Y coordinates when connected to a single label node', () => {
+    it('should position multiple target nodes at distinct Y coordinates when connected to a single event node', () => {
       // Graph structure: Actor → Label → Target1
       //                              └─→ Target2
       const nodes: Array<Node<NodeViewModel>> = [
@@ -23,19 +23,19 @@ describe('layoutGraph', () => {
             id: 'actor',
             label: 'Actor',
             color: 'primary',
-            shape: 'ellipse',
+            kind: 'entity',
             icon: 'user',
           },
         },
         {
           id: 'label',
-          type: 'label',
+          type: 'event',
           position: { x: 0, y: 0 },
           data: {
             id: 'label',
             label: 'Action',
             color: 'primary',
-            shape: 'label',
+            kind: 'event',
           },
         },
         {
@@ -46,7 +46,7 @@ describe('layoutGraph', () => {
             id: 'target1',
             label: 'Target 1',
             color: 'primary',
-            shape: 'hexagon',
+            kind: 'entity',
             icon: 'storage',
           },
         },
@@ -58,7 +58,7 @@ describe('layoutGraph', () => {
             id: 'target2',
             label: 'Target 2',
             color: 'primary',
-            shape: 'hexagon',
+            kind: 'entity',
             icon: 'storage',
           },
         },
@@ -95,7 +95,7 @@ describe('layoutGraph', () => {
       expect(target1!.position.y).not.toBe(target2!.position.y);
     });
 
-    it('should position three target nodes at distinct Y coordinates when connected to a single label node', () => {
+    it('should position three target nodes at distinct Y coordinates when connected to a single event node', () => {
       // Graph structure: Actor → Label → Target1
       //                              ├─→ Target2
       //                              └─→ Target3
@@ -108,19 +108,19 @@ describe('layoutGraph', () => {
             id: 'actor',
             label: 'Actor',
             color: 'primary',
-            shape: 'ellipse',
+            kind: 'entity',
             icon: 'user',
           },
         },
         {
           id: 'label',
-          type: 'label',
+          type: 'event',
           position: { x: 0, y: 0 },
           data: {
             id: 'label',
             label: 'Action',
             color: 'primary',
-            shape: 'label',
+            kind: 'event',
           },
         },
         {
@@ -131,7 +131,7 @@ describe('layoutGraph', () => {
             id: 'target1',
             label: 'Target 1',
             color: 'primary',
-            shape: 'hexagon',
+            kind: 'entity',
             icon: 'storage',
           },
         },
@@ -143,7 +143,7 @@ describe('layoutGraph', () => {
             id: 'target2',
             label: 'Target 2',
             color: 'primary',
-            shape: 'hexagon',
+            kind: 'entity',
             icon: 'storage',
           },
         },
@@ -155,7 +155,7 @@ describe('layoutGraph', () => {
             id: 'target3',
             label: 'Target 3',
             color: 'primary',
-            shape: 'hexagon',
+            kind: 'entity',
             icon: 'storage',
           },
         },
@@ -212,19 +212,19 @@ describe('layoutGraph', () => {
             id: 'actor',
             label: 'Actor',
             color: 'primary',
-            shape: 'ellipse',
+            kind: 'entity',
             icon: 'user',
           },
         },
         {
           id: 'label',
-          type: 'label',
+          type: 'event',
           position: { x: 0, y: 0 },
           data: {
             id: 'label',
             label: 'Action',
             color: 'primary',
-            shape: 'label',
+            kind: 'event',
           },
         },
         {
@@ -235,7 +235,7 @@ describe('layoutGraph', () => {
             id: 'target',
             label: 'Target',
             color: 'primary',
-            shape: 'hexagon',
+            kind: 'entity',
             icon: 'storage',
           },
         },
@@ -272,7 +272,7 @@ describe('layoutGraph', () => {
   describe('mixed label and relationship nodes', () => {
     it('should position label and relationship nodes at distinct coordinates', () => {
       // Graph structure: Actor → RelationshipNode → Target1
-      //                       → LabelNode         → Target2
+      //                       → EventNode         → Target2
       const nodes: Array<Node<NodeViewModel>> = [
         {
           id: 'actor',
@@ -282,7 +282,7 @@ describe('layoutGraph', () => {
             id: 'actor',
             label: 'Actor',
             color: 'primary',
-            shape: 'ellipse',
+            kind: 'entity',
             icon: 'user',
           },
         },
@@ -293,18 +293,18 @@ describe('layoutGraph', () => {
           data: {
             id: 'rel',
             label: 'Owns',
-            shape: 'relationship',
+            kind: 'relationship',
           },
         },
         {
           id: 'label',
-          type: 'label',
+          type: 'event',
           position: { x: 0, y: 0 },
           data: {
             id: 'label',
             label: 'Action',
             color: 'primary',
-            shape: 'label',
+            kind: 'event',
           },
         },
         {
@@ -315,7 +315,7 @@ describe('layoutGraph', () => {
             id: 'target1',
             label: 'Target 1',
             color: 'primary',
-            shape: 'hexagon',
+            kind: 'entity',
             icon: 'storage',
           },
         },
@@ -327,7 +327,7 @@ describe('layoutGraph', () => {
             id: 'target2',
             label: 'Target 2',
             color: 'primary',
-            shape: 'hexagon',
+            kind: 'entity',
             icon: 'storage',
           },
         },
@@ -343,17 +343,17 @@ describe('layoutGraph', () => {
       const result = layoutGraph(nodes, edges);
 
       const relNode = result.nodes.find((n) => n.id === 'rel');
-      const labelNode = result.nodes.find((n) => n.id === 'label');
+      const eventNode = result.nodes.find((n) => n.id === 'label');
       const target1 = result.nodes.find((n) => n.id === 'target1');
       const target2 = result.nodes.find((n) => n.id === 'target2');
 
       expect(relNode).toBeDefined();
-      expect(labelNode).toBeDefined();
+      expect(eventNode).toBeDefined();
       expect(target1).toBeDefined();
       expect(target2).toBeDefined();
 
-      // Relationship and label nodes should not overlap
-      expect(relNode!.position.y).not.toBe(labelNode!.position.y);
+      // Relationship and event nodes should not overlap
+      expect(relNode!.position.y).not.toBe(eventNode!.position.y);
 
       // Target nodes should have different Y coordinates
       expect(target1!.position.y).not.toBe(target2!.position.y);
@@ -370,7 +370,7 @@ describe('layoutGraph', () => {
             id: 'entity1',
             label: 'Entity 1',
             color: 'primary',
-            shape: 'ellipse',
+            kind: 'entity',
             icon: 'user',
           },
         },
@@ -381,7 +381,7 @@ describe('layoutGraph', () => {
           data: {
             id: 'rel',
             label: 'Depends on',
-            shape: 'relationship',
+            kind: 'relationship',
           },
         },
         {
@@ -392,7 +392,7 @@ describe('layoutGraph', () => {
             id: 'entity2',
             label: 'Entity 2',
             color: 'primary',
-            shape: 'hexagon',
+            kind: 'entity',
             icon: 'storage',
           },
         },

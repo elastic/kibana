@@ -18,7 +18,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import {
-  LabelNodeContainer,
+  EventNodeContainer,
   LabelShape,
   LabelStackedShape,
   HandleStyleOverride,
@@ -28,23 +28,23 @@ import {
   LABEL_BORDER_RADIUS,
   getLabelColors,
 } from '../styles';
-import type { LabelNodeViewModel, NodeProps, NodeToolbarItem } from '../../types';
+import type { EventNodeViewModel, NodeProps, NodeToolbarItem } from '../../types';
 import { NodeExpandButton } from '../node_expand_button';
 import { useGraphDisplayOptions } from '../../graph/graph_display_options_context';
-import { GRAPH_LABEL_NODE_ID } from '../../test_ids';
+import { GRAPH_EVENT_NODE_ID } from '../../test_ids';
 import { analyzeDocuments } from './analyze_documents';
-import { LabelNodeBadges } from './label_node_badges';
-import { LabelNodeDetails } from './label_node_details';
+import { EventNodeBadges } from './event_node_badges';
+import { EventNodeDetails } from './event_node_details';
 import { showStackedShape } from '../../utils';
 
-export const TEST_SUBJ_SHAPE = 'label-node-shape';
-export const TEST_SUBJ_STACKED_SHAPE = 'label-node-stacked-shape';
-export const TEST_SUBJ_HANDLE = 'label-node-handle';
-export const TEST_SUBJ_EXPAND_BTN = 'label-node-expand-btn';
-export const TEST_SUBJ_LABEL_TEXT = 'label-node-text';
-export const TEST_SUBJ_ORIGIN_HIGHLIGHT = 'label-node-origin-highlight';
+export const TEST_SUBJ_SHAPE = 'event-node-shape';
+export const TEST_SUBJ_STACKED_SHAPE = 'event-node-stacked-shape';
+export const TEST_SUBJ_HANDLE = 'event-node-handle';
+export const TEST_SUBJ_EXPAND_BTN = 'event-node-expand-btn';
+export const TEST_SUBJ_LABEL_TEXT = 'event-node-text';
+export const TEST_SUBJ_ORIGIN_HIGHLIGHT = 'event-node-origin-highlight';
 
-export const LabelNode = memo<NodeProps>((props: NodeProps) => {
+export const EventNode = memo<NodeProps>((props: NodeProps) => {
   const {
     id,
     color,
@@ -62,7 +62,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
     eventClickHandler,
     isOrigin,
     isOriginAlert,
-  } = props.data as LabelNodeViewModel;
+  } = props.data as EventNodeViewModel;
 
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('m', { property: 'filter' });
@@ -103,8 +103,8 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
 
   return (
     <>
-      <LabelNodeContainer
-        data-test-subj={GRAPH_LABEL_NODE_ID}
+      <EventNodeContainer
+        data-test-subj={GRAPH_EVENT_NODE_ID}
         onMouseEnter={showToolbar}
         onMouseLeave={hideToolbar}
       >
@@ -162,7 +162,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
               gap: 4px;
             `}
           >
-            <LabelNodeBadges analysis={analysis} onEventClick={eventClickHandler} />
+            <EventNodeBadges analysis={analysis} onEventClick={eventClickHandler} />
             <EuiText
               color={textColor}
               css={css`
@@ -246,8 +246,8 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
           id="out"
           style={HandleStyleOverride}
         />
-      </LabelNodeContainer>
-      <LabelNodeDetails
+      </EventNodeContainer>
+      <EventNodeDetails
         ips={eventDisplayOpts.sourceIpAddress ? ips : undefined}
         countryCodes={eventDisplayOpts.sourceGeolocation ? countryCodes : undefined}
         onIpClick={ipClickHandler}
@@ -258,4 +258,4 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
   );
 });
 
-LabelNode.displayName = 'LabelNode';
+EventNode.displayName = 'EventNode';

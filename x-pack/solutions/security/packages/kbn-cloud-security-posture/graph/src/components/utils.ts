@@ -19,31 +19,27 @@ import type {
   NodeViewModel,
   NodeDocumentDataViewModel,
   EntityNodeViewModel,
-  LabelNodeViewModel,
+  EventNodeViewModel,
   GroupNodeViewModel,
   RelationshipNodeViewModel,
   EdgeViewModel,
 } from './types';
 
 export const isEntityNode = (node: NodeViewModel): node is EntityNodeViewModel =>
-  node.shape === 'ellipse' ||
-  node.shape === 'pentagon' ||
-  node.shape === 'rectangle' ||
-  node.shape === 'diamond' ||
-  node.shape === 'hexagon';
+  node.kind === 'entity';
 
-export const isLabelNode = (node: NodeViewModel): node is LabelNodeViewModel =>
-  node.shape === 'label';
+export const isEventNode = (node: NodeViewModel): node is EventNodeViewModel =>
+  node.kind === 'event';
 
 export const isRelationshipNode = (node: NodeViewModel): node is RelationshipNodeViewModel =>
-  node.shape === 'relationship';
+  node.kind === 'relationship';
 
 /**
- * Returns true if the shape is a connector shape (label or relationship).
- * Connector shapes act as connectors between entity nodes.
+ * Returns true if the kind is a connector kind (event or relationship).
+ * Connector nodes act as connectors between entity nodes.
  */
-export const isConnectorShape = (shape?: string): boolean =>
-  shape === 'label' || shape === 'relationship';
+export const isConnectorKind = (kind?: string): boolean =>
+  kind === 'event' || kind === 'relationship';
 
 /**
  * Returns true for nodes that act as connectors between entity nodes (label or relationship nodes).
@@ -51,13 +47,13 @@ export const isConnectorShape = (shape?: string): boolean =>
  */
 export const isConnectorNode = (
   node: NodeViewModel
-): node is LabelNodeViewModel | RelationshipNodeViewModel => isConnectorShape(node.shape);
+): node is EventNodeViewModel | RelationshipNodeViewModel => isConnectorKind(node.kind);
 
 export const isStackNode = (node: NodeViewModel): node is GroupNodeViewModel =>
-  node.shape === 'group';
+  node.kind === 'group';
 
 export const isStackedLabel = (node: NodeViewModel): boolean =>
-  !((node.shape === 'label' || node.shape === 'relationship') && Boolean(node.parentId));
+  !((node.kind === 'event' || node.kind === 'relationship') && Boolean(node.parentId));
 
 /**
  * Type guard: Returns true if node.documentsData is a non-empty array.
@@ -209,18 +205,18 @@ export const buildGraphFromViewModels = (
 
     const node: Node<NodeViewModel> = {
       id: nodeData.id,
-      type: nodeData.shape,
+      type: nodeData.kind,
       data: { ...nodeData, interactive },
       position: { x: 0, y: 0 }, // Default position, should be updated later
     };
 
-    if (node.type === 'group' && nodeData.shape === 'group') {
+    if (node.type === 'group' && nodeData.kind === 'group') {
       node.sourcePosition = Position.Right;
       node.targetPosition = Position.Left;
       node.resizing = false;
       node.focusable = false;
     } else if (
-      (nodeData.shape === 'label' || nodeData.shape === 'relationship') &&
+      (nodeData.kind === 'event' || nodeData.kind === 'relationship') &&
       nodeData.parentId
     ) {
       node.parentId = nodeData.parentId;
@@ -235,13 +231,13 @@ export const buildGraphFromViewModels = (
   const edges: Array<Edge<EdgeViewModel>> = edgesModel
     .filter((edgeData) => nodesById[edgeData.source] && nodesById[edgeData.target])
     .map((edgeData) => {
-      const sourceShape = nodesById[edgeData.source].shape;
-      const targetShape = nodesById[edgeData.target].shape;
+      const sourceKind = nodesById[edgeData.source].kind;
+      const targetKind = nodesById[edgeData.target].kind;
 
-      const isIn = !isConnectorShape(sourceShape) && targetShape === 'group';
-      const isInside = sourceShape === 'group' && isConnectorShape(targetShape);
-      const isOut = isConnectorShape(sourceShape) && targetShape === 'group';
-      const isOutside = sourceShape === 'group' && !isConnectorShape(targetShape);
+      const isIn = !isConnectorKind(sourceKind) && targetKind === 'group';
+      const isInside = sourceKind === 'group' && isConnectorKind(targetKind);
+      const isOut = isConnectorKind(sourceKind) && targetKind === 'group';
+      const isOutside = sourceKind === 'group' && !isConnectorKind(targetKind);
 
       return {
         id: edgeData.id,
@@ -255,9 +251,9 @@ export const buildGraphFromViewModels = (
         deletable: false,
         data: {
           ...edgeData,
-          sourceShape: nodesById[edgeData.source].shape,
+          sourceKind: nodesById[edgeData.source].kind,
           sourceColor: nodesById[edgeData.source].color,
-          targetShape: nodesById[edgeData.target].shape,
+          targetKind: nodesById[edgeData.target].kind,
           targetColor: nodesById[edgeData.target].color,
         },
       };

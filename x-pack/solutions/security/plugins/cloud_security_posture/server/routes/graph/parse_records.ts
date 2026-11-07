@@ -17,7 +17,7 @@ import type {
   EntityNodeDataModel,
   GraphResponse,
   GroupNodeDataModel,
-  LabelNodeDataModel,
+  EventNodeDataModel,
   NodeDataModel,
   NodeDocumentDataModel,
   RelationshipNodeDataModel,
@@ -36,7 +36,7 @@ import {
   NON_ENRICHED_ENTITY_TYPE_SINGULAR,
 } from './types';
 import {
-  transformEntityTypeToIconAndShape,
+  getEntityTypeIcon,
   compareConnectorNodes,
   hashIds,
   addValuesToSet,
@@ -70,7 +70,7 @@ interface ParseContext {
 }
 
 interface NodeVisualProps {
-  shape: EntityNodeDataModel['shape'];
+  kind: EntityNodeDataModel['kind'];
   label?: EntityNodeDataModel['label'];
   tag?: EntityNodeDataModel['tag'];
   icon?: EntityNodeDataModel['icon'];
@@ -162,22 +162,19 @@ export const parseRecords = (
 };
 
 const deriveEntityAttributesFromType = (entityGroupType: string): NodeVisualProps => {
-  const mappedProps: Partial<NodeVisualProps> = {
-    shape: 'rectangle',
+  const mappedProps: NodeVisualProps = {
+    kind: 'entity',
   };
 
   if (entityGroupType) {
-    const { icon, shape } = transformEntityTypeToIconAndShape(entityGroupType);
+    const icon = getEntityTypeIcon(entityGroupType);
     if (icon) {
       mappedProps.icon = icon;
-    }
-    if (shape) {
-      mappedProps.shape = shape;
     }
     mappedProps.tag = entityGroupType;
   }
 
-  return mappedProps as NodeVisualProps;
+  return mappedProps;
 };
 
 /**
@@ -368,9 +365,9 @@ const createGroupedActorAndTargetNodes = (
   };
 };
 
-const createLabelNode = (logger: Logger | undefined, record: EventEdge): LabelNodeDataModel => {
+const createEventNode = (logger: Logger | undefined, record: EventEdge): EventNodeDataModel => {
   const {
-    labelNodeId,
+    eventNodeId,
     action,
     docs,
     isOrigin,
@@ -383,7 +380,7 @@ const createLabelNode = (logger: Logger | undefined, record: EventEdge): LabelNo
     sourceCountryCodes,
   } = record;
 
-  const labelId = `label(${action})ln(${labelNodeId})oe(${isOrigin ? 1 : 0})oa(${
+  const labelId = `label(${action})ln(${eventNodeId})oe(${isOrigin ? 1 : 0})oa(${
     isOriginAlert ? 1 : 0
   })`;
   const color =
@@ -397,7 +394,7 @@ const createLabelNode = (logger: Logger | undefined, record: EventEdge): LabelNo
     id: labelId,
     label: action,
     color,
-    shape: 'label',
+    kind: 'event',
     documentsData: parseDocumentsData(logger, docs),
     count: badge,
     ...(uniqueEventsCount > 0 ? { uniqueEventsCount } : {}),
@@ -416,7 +413,7 @@ const processConnectorNode = (
   nodeData: {
     sourceId: string;
     targetId: string;
-    connectorNode: LabelNodeDataModel | RelationshipNodeDataModel;
+    connectorNode: EventNodeDataModel | RelationshipNodeDataModel;
   }
 ) => {
   const { nodesMap, connectorEdges } = context;
@@ -455,12 +452,12 @@ const emitAPINodesLimitMessage = (context: ParseContext) => {
 
 const processEventRecord = (record: EventEdge, context: ParseContext) => {
   const { actorId, targetId } = createGroupedActorAndTargetNodes(record, context);
-  const labelNode = createLabelNode(context.logger, record);
+  const eventNode = createEventNode(context.logger, record);
 
   processConnectorNode(context, {
     sourceId: actorId,
     targetId,
-    connectorNode: labelNode,
+    connectorNode: eventNode,
   });
 };
 
@@ -480,7 +477,7 @@ const createRelationshipNode = (
   return {
     id: `rel(${relationshipNodeId})`,
     label: getRelationshipLabel(relationship),
-    shape: 'relationship',
+    kind: 'relationship',
   };
 };
 
@@ -534,13 +531,13 @@ const processRelationshipRecord = (record: RelationshipEdge, context: ParseConte
 
 const sortNodes = (nodesMap: Record<string, NodeDataModel>) => {
   const groupNodes: NodeDataModel[] = [];
-  const connectorNodes: (LabelNodeDataModel | RelationshipNodeDataModel)[] = [];
+  const connectorNodes: (EventNodeDataModel | RelationshipNodeDataModel)[] = [];
   const otherNodes: NodeDataModel[] = [];
 
   for (const node of Object.values(nodesMap)) {
-    if (node.shape === 'group') {
+    if (node.kind === 'group') {
       groupNodes.push(node);
-    } else if (node.shape === 'relationship' || node.shape === 'label') {
+    } else if (node.kind === 'relationship' || node.kind === 'event') {
       connectorNodes.push(node);
     } else {
       otherNodes.push(node);
@@ -553,7 +550,7 @@ const sortNodes = (nodesMap: Record<string, NodeDataModel>) => {
 };
 
 /**
- * Sort edges so relationship edges come before label edges.
+ * Sort edges so relationship edges come before event edges.
  * This affects Dagre layout which positions nodes based on edge order.
  */
 const sortEdges = (
@@ -562,31 +559,31 @@ const sortEdges = (
 ): EdgeDataModel[] => {
   const edges = Object.values(edgesMap);
 
-  // Helper to get the connector node shape for an edge
-  const getConnectorShape = (edge: EdgeDataModel): 'relationship' | 'label' | 'other' => {
+  // Helper to get the connector node kind for an edge
+  const getConnectorKind = (edge: EdgeDataModel): ConnectorNodeType | 'other' => {
     // Check if target is a connector node
     const targetNode = nodesMap[edge.target];
-    if (targetNode?.shape === 'relationship') return 'relationship';
-    if (targetNode?.shape === 'label') return 'label';
+    if (targetNode?.kind === 'relationship') return 'relationship';
+    if (targetNode?.kind === 'event') return 'event';
 
     // Check if source is a connector node
     const sourceNode = nodesMap[edge.source];
-    if (sourceNode?.shape === 'relationship') return 'relationship';
-    if (sourceNode?.shape === 'label') return 'label';
+    if (sourceNode?.kind === 'relationship') return 'relationship';
+    if (sourceNode?.kind === 'event') return 'event';
 
     return 'other';
   };
 
   return edges.sort((a, b) => {
-    const shapeA = getConnectorShape(a);
-    const shapeB = getConnectorShape(b);
+    const kindA = getConnectorKind(a);
+    const kindB = getConnectorKind(b);
 
-    // Priority: relationship > label > other
-    const priority = { relationship: 0, label: 1, other: 2 };
-    const shapeDiff = priority[shapeA] - priority[shapeB];
+    // Priority: relationship > event > other
+    const priority = { relationship: 0, event: 1, other: 2 };
+    const kindDiff = priority[kindA] - priority[kindB];
 
     // If same priority, sort alphabetically by edge ID for deterministic ordering
-    if (shapeDiff !== 0) return shapeDiff;
+    if (kindDiff !== 0) return kindDiff;
     return a.id.localeCompare(b.id);
   });
 };
@@ -622,7 +619,7 @@ const processConnectorGroup = (
     // Create group node for multiple connectors
     const groupNode: GroupNodeDataModel = {
       id: `grp(${groupingKey})`,
-      shape: 'group',
+      kind: 'group',
     };
     nodesMap[groupNode.id] = groupNode;
 
@@ -647,7 +644,7 @@ const processConnectorGroup = (
 
     connectorIds.forEach((connectorId) => {
       const node = nodesMap[connectorId];
-      (node as Writable<LabelNodeDataModel | RelationshipNodeDataModel>).parentId = groupNode.id;
+      (node as Writable<EventNodeDataModel | RelationshipNodeDataModel>).parentId = groupNode.id;
 
       connectEntitiesAndConnectorNode(
         edgesMap,
@@ -658,8 +655,8 @@ const processConnectorGroup = (
         connectorEdgesMap[connectorId][0].edgeType
       );
 
-      // Update group color if any label node is danger
-      if (connectorType === 'label' && (node as LabelNodeDataModel).color === 'danger') {
+      // Update group color if any event node is danger
+      if (connectorType === 'event' && (node as EventNodeDataModel).color === 'danger') {
         groupEdgesColor = 'danger';
       }
     });
@@ -684,12 +681,12 @@ const createEdgesAndGroups = (context: ParseContext) => {
     const groupingKey = createHash('sha256').update(edgePairs.join(',')).digest('hex');
 
     // Build grouping maps by node type
-    if (node.shape === 'label') {
+    if (node.kind === 'event') {
       if (!labelGrouping[groupingKey]) {
         labelGrouping[groupingKey] = [];
       }
       labelGrouping[groupingKey].push(connectorNodeId);
-    } else if (node.shape === 'relationship') {
+    } else if (node.kind === 'relationship') {
       if (!relationshipGrouping[groupingKey]) {
         relationshipGrouping[groupingKey] = [];
       }
@@ -697,9 +694,9 @@ const createEdgesAndGroups = (context: ParseContext) => {
     }
   });
 
-  // Process label nodes (handles stacking)
+  // Process event nodes (handles stacking)
   Object.entries(labelGrouping).forEach(([groupingKey, nodeIds]) => {
-    processConnectorGroup(groupingKey, nodeIds, connectorEdges, edgesMap, nodesMap, 'label');
+    processConnectorGroup(groupingKey, nodeIds, connectorEdges, edgesMap, nodesMap, 'event');
   });
 
   // Process relationship nodes (handles stacking)
@@ -735,8 +732,8 @@ const connectNodes = (
   const sourceNode = nodesMap[sourceNodeId];
   const targetNode = nodesMap[targetNodeId];
   const color =
-    (sourceNode.shape === 'label' && sourceNode.color === 'danger') ||
-    (targetNode.shape === 'label' && targetNode.color === 'danger')
+    (sourceNode.kind === 'event' && sourceNode.color === 'danger') ||
+    (targetNode.kind === 'event' && targetNode.color === 'danger')
       ? 'danger'
       : 'subdued';
 
@@ -915,7 +912,7 @@ const docIdsForTargets = (
  * column, and records the actor/target IDs that belong to this group from this row.
  * Doc id / doc / doc-data columns are restricted to the documents that referenced this group's
  * targets (via targetDocMap) so that a STATS row shared across multiple target-type groups keeps
- * each group's documents, counts, and label node separate — matching a targetEntityId group key.
+ * each group's documents, counts, and event node separate — matching a targetEntityId group key.
  * Doc id / doc-data columns drop the empty-string sentinel; source IP / country keep
  * the historical null-only guard.
  */
@@ -1103,11 +1100,11 @@ export const regroupEvents = (
         : hashIds(targetEntityIds);
 
     const docIds = [...group.docIds];
-    // Label node is keyed on this group's own documents (already restricted, via targetDocMap, to
+    // Event node is keyed on this group's own documents (already restricted, via targetDocMap, to
     // the docs that referenced this group's targets). Two target-type groups that share the exact
-    // same documents therefore share one label node that fans out to both targets; groups backed
-    // by different documents get separate label nodes — matching a targetEntityId group key.
-    const labelNodeId = docIds.length === 1 ? docIds[0] : hashIds(docIds);
+    // same documents therefore share one event node that fans out to both targets; groups backed
+    // by different documents get separate event nodes — matching a targetEntityId group key.
+    const eventNodeId = docIds.length === 1 ? docIds[0] : hashIds(docIds);
 
     const actorNames = actorEntityIds
       .map((id) => enrichmentMap.get(id)?.name)
@@ -1135,7 +1132,7 @@ export const regroupEvents = (
       isOrigin: group.isOrigin,
       isOriginAlert: group.isOriginAlert,
       pinned: group.pinned,
-      labelNodeId,
+      eventNodeId,
       docs: [...group.docs],
       sourceIps: sourceIps.length > 0 ? sourceIps : undefined,
       sourceCountryCodes: sourceCountryCodes.length > 0 ? sourceCountryCodes : undefined,

@@ -10,7 +10,7 @@ import { Handle, Position } from '@xyflow/react';
 import { css } from '@emotion/react';
 import { EuiIcon, EuiText, EuiTextTruncate, useEuiShadow, useEuiTheme } from '@elastic/eui';
 import {
-  LabelNodeContainer,
+  EventNodeContainer,
   LabelShape,
   HandleStyleOverride,
   RoundedBadge,
@@ -39,7 +39,7 @@ export const RelationshipNode = memo<NodeProps>((props: NodeProps) => {
   );
 
   return (
-    <LabelNodeContainer data-test-subj={GRAPH_RELATIONSHIP_NODE_ID}>
+    <EventNodeContainer data-test-subj={GRAPH_RELATIONSHIP_NODE_ID}>
       <LabelShape
         data-test-subj={GRAPH_RELATIONSHIP_NODE_SHAPE_ID}
         backgroundColor={backgroundColor}
@@ -93,7 +93,7 @@ export const RelationshipNode = memo<NodeProps>((props: NodeProps) => {
         id="out"
         style={HandleStyleOverride}
       />
-    </LabelNodeContainer>
+    </EventNodeContainer>
   );
 });
 

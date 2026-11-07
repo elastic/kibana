@@ -23,7 +23,7 @@ describe('RelationshipNode', () => {
     data: {
       id: 'test-relationship-node',
       label: 'Owns',
-      shape: 'relationship',
+      kind: 'relationship',
       interactive: true,
     },
     type: 'relationship',
@@ -86,7 +86,7 @@ describe('RelationshipNode', () => {
       },
     };
 
-    it('should return relationship colors matching event/label node colors', () => {
+    it('should return relationship colors matching event node colors', () => {
       const colors = getRelationshipColors(mockEuiTheme as EuiThemeComputed);
       expect(colors).toEqual({
         backgroundColor: mockEuiTheme.colors.backgroundLightPrimary,
@@ -101,12 +101,12 @@ describe('RelationshipNode', () => {
       textColor: mockEuiTheme.colors.textHeading,
     };
 
-    it('should return gray colors for label nodes with primary color', () => {
+    it('should return gray colors for event nodes with primary color', () => {
       const colors = getLabelColors('primary', mockEuiTheme as EuiThemeComputed);
       expect(colors).toEqual(expectedLabelColors);
     });
 
-    it('should return gray colors for label nodes with danger color', () => {
+    it('should return gray colors for event nodes with danger color', () => {
       const colors = getLabelColors('danger', mockEuiTheme as EuiThemeComputed);
       expect(colors).toEqual(expectedLabelColors);
     });

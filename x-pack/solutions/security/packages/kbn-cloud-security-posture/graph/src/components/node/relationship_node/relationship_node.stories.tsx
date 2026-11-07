@@ -20,7 +20,7 @@ const meta: Meta<RelationshipNodeViewModel> = {
   args: {
     id: 'relationship-1',
     label: 'Owns',
-    shape: 'relationship',
+    kind: 'relationship',
     interactive: false,
   },
   argTypes: {
@@ -51,7 +51,7 @@ const Template: StoryFn<RelationshipNodeViewModel> = (args: RelationshipNodeView
       nodes={[
         {
           id: args.id,
-          type: args.shape,
+          type: args.kind,
           data: args,
           position: { x: 0, y: 0 },
         },

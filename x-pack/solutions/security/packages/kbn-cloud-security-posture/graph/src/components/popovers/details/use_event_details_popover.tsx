@@ -9,8 +9,8 @@ import React, { memo, useMemo, useCallback } from 'react';
 import type { PopoverActions, PopoverState } from '../primitives/use_graph_popover_state';
 import { useGraphPopoverState } from '../primitives/use_graph_popover_state';
 import { GraphPopover } from '../primitives/graph_popover';
-import { LabelNodePopoverContent } from '../../node/label_node/label_node_popover';
-import type { DocumentAnalysisOutput } from '../../node/label_node/analyze_documents';
+import { EventNodePopoverContent } from '../../node/event_node/event_node_popover';
+import type { DocumentAnalysisOutput } from '../../node/event_node/analyze_documents';
 import { GRAPH_EVENTS_POPOVER_ID } from '../../test_ids';
 
 export interface UseEventDetailsPopoverReturn {
@@ -56,7 +56,7 @@ export const useEventDetailsPopover = (
       closePopover={actions.closePopover}
       data-test-subj={GRAPH_EVENTS_POPOVER_ID}
     >
-      {analysis && <LabelNodePopoverContent analysis={analysis} text={text} />}
+      {analysis && <EventNodePopoverContent analysis={analysis} text={text} />}
     </GraphPopover>
   ));
 
