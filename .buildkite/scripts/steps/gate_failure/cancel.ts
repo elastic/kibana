@@ -10,6 +10,19 @@
 import { BuildkiteClient } from '#pipeline-utils';
 
 const BATCH_PREFIX = 'cancel_on_gate_failure_batch:';
+const AUTO_COMMIT_PUSHED_KEY = 'auto_commit_pushed';
+// Gate and build steps stay running on a normal gate failure so the author sees all
+// check results at once. When an auto-commit is pushed, a new build is starting and
+// the entire current build is obsolete, so cancel them first.
+const AUTO_COMMIT_EXTRA_STEP_KEYS = [
+  'build',
+  'quick_checks',
+  'checks',
+  'linting',
+  'linting_with_types',
+  'check_types',
+  'check',
+] as const;
 
 function run(): void {
   // Separate the raw env value from the display fallback: selfKey drives the
@@ -23,7 +36,7 @@ function run(): void {
 
   const bk = new BuildkiteClient();
 
-  const allStepKeys = [
+  const registeredStepKeys = [
     ...new Set(
       bk
         .getMetadataKeys()
@@ -39,13 +52,18 @@ function run(): void {
     ),
   ];
 
+  const isAutoCommit = bk.getMetadata(AUTO_COMMIT_PUSHED_KEY) === 'true';
+  const allStepKeys = isAutoCommit
+    ? [...new Set([...AUTO_COMMIT_EXTRA_STEP_KEYS, ...registeredStepKeys])]
+    : registeredStepKeys;
+
   // Never cancel the step that is running this cascade. Doing so kills the
   // post-command hook mid-loop, changes the step's recorded state from
   // "failed" to "canceled" (hiding the real failure), and prevents the final
   // annotation from being written.
   // check_oas_snapshot is registered this way today via pipeline.ts: it should
   // be cancelable by other gate failures, but must not cancel itself.
-  const skipsSelf = Boolean(selfKey) && allStepKeys.includes(selfKey!);
+  const skipsSelf = Boolean(selfKey) && registeredStepKeys.includes(selfKey!);
   const stepKeys = selfKey ? allStepKeys.filter((k) => k !== selfKey) : allStepKeys;
 
   if (stepKeys.length === 0) {
