@@ -11,6 +11,7 @@ import type {
   SavedObjectsModelVersion,
   SavedObjectMigrationFn,
 } from '@kbn/core-saved-objects-server';
+import type { MigrationAlgorithm } from '@kbn/core-saved-objects-base-server-internal';
 import { type KibanaMigratorTestKitParams, currentVersion } from '@kbn/migrator-test-kit';
 import { createType } from '../test_utils';
 
@@ -21,7 +22,7 @@ export const getBaseMigratorParams = ({
   kibanaVersion = currentVersion,
 }: {
   runOnNonMigratorNodes?: boolean;
-  migrationAlgorithm?: 'v2' | 'zdt';
+  migrationAlgorithm?: MigrationAlgorithm;
   kibanaVersion?: string;
 } = {}): KibanaMigratorTestKitParams => ({
   kibanaIndex: '.kibana',

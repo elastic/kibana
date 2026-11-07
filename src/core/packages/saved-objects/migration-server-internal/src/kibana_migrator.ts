@@ -37,8 +37,15 @@ import { createCummulativeLogger } from './create_cummulative_logger';
 import { buildActiveMappings, buildTypesMappings } from './core';
 import { DocumentMigrator } from './document_migrator';
 import { runZeroDowntimeMigration } from './zdt';
-import { ALLOWED_CONVERT_VERSION } from './kibana_migrator_constants';
+import { ALLOWED_CONVERT_VERSION, MIGRATION_CLIENT_OPTIONS } from './kibana_migrator_constants';
 import { runV2Migration } from './run_v2_migration';
+import { deriveMigrationInputs, runV3Migration, type MigrationInputs } from './v3';
+
+/** The cluster (or tenant) targeted by an on-demand migration. */
+export interface OnDemandMigrationParams {
+  client: ElasticsearchClient;
+  esCapabilities?: ElasticsearchCapabilities;
+}
 
 export interface KibanaMigratorOptions {
   client: ElasticsearchClient;
@@ -169,22 +176,49 @@ export class KibanaMigrator implements IKibanaMigrator {
     return this.status$.asObservable();
   }
 
-  private async runMigrationsInternal({
-    skipVersionCheck = false,
-  }: { skipVersionCheck?: boolean } = {}): Promise<MigrationResult[]> {
-    let logger: Logger & { dump?: () => void; clear?: () => void } = this.log;
-
-    if (this.soMigrationsConfig.useCumulativeLogger) {
-      logger = createCummulativeLogger(this.log);
-    }
+  /** Runs `migrate` with the configured logger: with `useCumulativeLogger`, logs are only emitted on failures. */
+  private async withMigrationLogger(
+    migrate: (logger: Logger) => Promise<MigrationResult[]>
+  ): Promise<MigrationResult[]> {
+    const logger: Logger & { dump?: () => void; clear?: () => void } = this.soMigrationsConfig
+      .useCumulativeLogger
+      ? createCummulativeLogger(this.log)
+      : this.log;
 
     const dumpLogs = () => logger.dump?.();
     process.on('uncaughtExceptionMonitor', dumpLogs);
 
     try {
+      return await migrate(logger);
+    } catch (error) {
+      dumpLogs();
+      throw error;
+    } finally {
+      process.removeListener('uncaughtExceptionMonitor', dumpLogs);
+      logger.clear?.();
+    }
+  }
+
+  private runMigrationsInternal({
+    skipVersionCheck = false,
+  }: { skipVersionCheck?: boolean } = {}): Promise<MigrationResult[]> {
+    return this.withMigrationLogger((logger) => {
       const migrationAlgorithm = this.soMigrationsConfig.algorithm;
-      if (migrationAlgorithm === 'zdt') {
-        return await runZeroDowntimeMigration({
+      if (migrationAlgorithm === 'v3') {
+        return this.runV3({
+          client: this.client,
+          esCapabilities: this.esCapabilities,
+          inputs: deriveMigrationInputs({
+            esCapabilities: this.esCapabilities,
+            nodeRoles: this.nodeRoles,
+            waitForMigrationCompletion: this.waitForMigrationCompletion,
+            runOnRoles: this.soMigrationsConfig.zdt.runOnRoles,
+          }),
+          logger,
+          skipVersionCheck,
+        });
+      } else if (migrationAlgorithm === 'zdt') {
+        return runZeroDowntimeMigration({
           kibanaVersion: this.kibanaVersion,
           kibanaIndexPrefix: this.kibanaIndex,
           typeRegistry: this.typeRegistry,
@@ -199,7 +233,7 @@ export class KibanaMigrator implements IKibanaMigrator {
           meter: this.soMigrationMeter,
         });
       } else {
-        return await runV2Migration({
+        return runV2Migration({
           kibanaVersion: this.kibanaVersion,
           kibanaIndexPrefix: this.kibanaIndex,
           typeRegistry: this.typeRegistry,
@@ -217,13 +251,79 @@ export class KibanaMigrator implements IKibanaMigrator {
           meter: this.soMigrationMeter,
         });
       }
-    } catch (error) {
-      dumpLogs();
-      throw error;
-    } finally {
-      process.removeListener('uncaughtExceptionMonitor', dumpLogs);
-      logger.clear?.();
-    }
+    });
+  }
+
+  /**
+   * Creates the saved objects indices of the cluster (or tenant) targeted by `client` with the v3 algorithm or,
+   * if they exist, updates their mappings and aliases. The documents are left to {@link migrate}.
+   * Unlike {@link runMigrations}, it is not memoized and doesn't update the status: callers must deduplicate concurrent calls.
+   */
+  public initialize(params: OnDemandMigrationParams): Promise<MigrationResult[]> {
+    return this.runOnDemand(params, { migrateDocuments: false, pickupUpdatedMappings: false });
+  }
+
+  /**
+   * Does what {@link initialize} does, and completes the migration of the saved objects indices of the cluster
+   * (or tenant) targeted by `client`: picks up the updated mappings, cleans up the unknown and excluded documents,
+   * and converts the outdated ones. Like {@link initialize}, it is not memoized and doesn't update the status.
+   */
+  public migrate(params: OnDemandMigrationParams): Promise<MigrationResult[]> {
+    return this.runOnDemand(params, { migrateDocuments: true, pickupUpdatedMappings: true });
+  }
+
+  /** On demand migrations are explicit requests: they never wait for another instance, whatever the node roles. */
+  private runOnDemand(
+    { client, esCapabilities = this.esCapabilities }: OnDemandMigrationParams,
+    overrides: Pick<MigrationInputs, 'migrateDocuments' | 'pickupUpdatedMappings'>
+  ): Promise<MigrationResult[]> {
+    return this.withMigrationLogger((logger) =>
+      this.runV3({
+        client: client.child(MIGRATION_CLIENT_OPTIONS),
+        esCapabilities,
+        inputs: {
+          ...deriveMigrationInputs({
+            esCapabilities,
+            nodeRoles: this.nodeRoles,
+            waitForMigrationCompletion: false,
+            runOnRoles: this.soMigrationsConfig.zdt.runOnRoles,
+          }),
+          ...overrides,
+        },
+        logger,
+        skipVersionCheck: false,
+      })
+    );
+  }
+
+  private runV3({
+    client,
+    esCapabilities,
+    inputs,
+    logger,
+    skipVersionCheck,
+  }: {
+    client: ElasticsearchClient;
+    esCapabilities: ElasticsearchCapabilities;
+    inputs: MigrationInputs;
+    logger: Logger;
+    skipVersionCheck: boolean;
+  }): Promise<MigrationResult[]> {
+    return runV3Migration({
+      inputs,
+      kibanaIndexPrefix: this.kibanaIndex,
+      kibanaVersion: this.kibanaVersion,
+      minimumPreviousVersion: skipVersionCheck ? undefined : this.kibanaVersionCheck,
+      typeRegistry: this.typeRegistry,
+      documentMigrator: this.documentMigrator,
+      serializer: this.serializer,
+      migrationConfig: this.soMigrationsConfig,
+      docLinks: this.docLinks,
+      elasticsearchClient: client,
+      esCapabilities,
+      logger,
+      meter: this.soMigrationMeter,
+    });
   }
 
   public getActiveMappings(): IndexMapping {
