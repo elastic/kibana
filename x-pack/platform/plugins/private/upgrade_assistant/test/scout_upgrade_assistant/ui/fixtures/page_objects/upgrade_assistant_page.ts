@@ -61,7 +61,7 @@ export class UpgradeAssistantPage {
     this.kibanaSectionHeading = this.page.getByRole('heading', { name: 'Kibana' });
     this.stackSectionHeading = this.page.getByRole('heading', { name: 'Stack' });
     this.dataQualityLink = this.page.getByRole('link', { name: 'Data Quality' });
-    this.contentConnectorsLink = this.page.getByRole('link', { name: 'Content connectors' });
+    this.contentConnectorsLink = this.page.getByRole('link', { name: 'Content crawlers' });
     this.licenseManagementLink = this.page.getByRole('link', { name: 'License Management' });
     this.upgradeAssistantLink = this.page.getByRole('link', { name: 'Upgrade Assistant' });
   }

@@ -45,7 +45,7 @@ const CreateConnector = lazy(() => import('./create_connector/create_connector')
 export const connectorsBreadcrumbs = [
   {
     text: i18n.translate('xpack.contentConnectors.content.connectors.breadcrumb', {
-      defaultMessage: 'Content Connectors',
+      defaultMessage: 'Content Crawlers',
     }),
     href: '/connectors',
   },
@@ -188,7 +188,7 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
           title={
             !isCrawler
               ? i18n.translate('xpack.contentConnectors.title', {
-                  defaultMessage: 'Content connectors',
+                  defaultMessage: 'Content crawlers',
                 })
               : i18n.translate('xpack.contentConnectors.crawlers.title', {
                   defaultMessage: 'Elastic Web Crawler',

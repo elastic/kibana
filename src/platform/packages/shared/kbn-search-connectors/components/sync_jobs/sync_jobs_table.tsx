@@ -271,7 +271,7 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
   const tableCaption =
     type === 'content'
       ? i18n.translate('searchConnectors.syncJobsTable.contentTableCaption', {
-          defaultMessage: 'Content connector sync jobs',
+          defaultMessage: 'Content crawler sync jobs',
         })
       : i18n.translate('searchConnectors.syncJobsTable.accessControlTableCaption', {
           defaultMessage: 'Access control connector sync jobs',
