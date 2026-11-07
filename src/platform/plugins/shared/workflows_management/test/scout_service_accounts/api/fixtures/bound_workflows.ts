@@ -13,13 +13,6 @@ import { authenticationStep, workflowYaml } from './service_account_suite';
 
 const SERVICE_ACCOUNT_ENDPOINT = 'internal/security/service_account';
 
-/** Headers for internal and versioned API requests, to add to a caller's credentials. */
-export const HEADERS = {
-  'kbn-xsrf': 'true',
-  'x-elastic-internal-origin': 'kibana',
-  'elastic-api-version': '2023-10-31',
-};
-
 /** The path of the service account route for one account. */
 export const accountPath = (id: string) => `${SERVICE_ACCOUNT_ENDPOINT}/${encodeURIComponent(id)}`;
 
