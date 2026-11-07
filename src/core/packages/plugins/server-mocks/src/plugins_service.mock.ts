@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Subject } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { PluginsServiceSetup, PluginsServiceStart } from '@kbn/core-plugins-contracts-server';
 import type { PluginsService } from '@kbn/core-plugins-server-internal';
@@ -36,6 +37,7 @@ const createServiceMock = (): PluginsServiceMock =>
     setup: jest.fn().mockResolvedValue(createInternalSetupContractMock()),
     start: jest.fn().mockResolvedValue(createInternalStartContractMock()),
     stop: jest.fn(),
+    getInitializationFailure$: jest.fn().mockReturnValue(new Subject<Error>()),
   });
 
 const createSetupContractMock = () => {

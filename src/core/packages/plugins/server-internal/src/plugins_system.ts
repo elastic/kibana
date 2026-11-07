@@ -25,6 +25,7 @@ import type {
   PluginsServiceStartDeps,
 } from './plugins_service';
 import { RuntimePluginContractResolver } from './plugin_contract_resolver';
+import type { DeferredInitEngine, PluginInitRunner } from './deferred_init';
 
 const Sec = 1000;
 
@@ -37,7 +38,11 @@ export class PluginsSystem<T extends PluginType> {
   private readonly satupPlugins: PluginName[] = [];
   private sortedPluginNames?: Set<string>;
 
-  constructor(private readonly coreContext: CoreContext, public readonly type: T) {
+  constructor(
+    private readonly coreContext: CoreContext,
+    public readonly type: T,
+    private readonly deferredInitEngine?: DeferredInitEngine
+  ) {
     this.log = coreContext.logger.get('plugins-system', this.type);
   }
 
@@ -181,6 +186,7 @@ export class PluginsSystem<T extends PluginType> {
 
     this.log.info(`Starting [${this.satupPlugins.length}] plugins: [${[...this.satupPlugins]}]`);
 
+    const initializeRunners = new Map<PluginName, PluginInitRunner>();
     for (const pluginName of this.satupPlugins) {
       this.log.debug(`Starting plugin "${pluginName}"...`);
       const plugin = this.plugins.get(pluginName)!;
@@ -195,11 +201,13 @@ export class PluginsSystem<T extends PluginType> {
         return depContracts;
       }, {} as Record<PluginName, unknown>);
 
+      const startContext = createPluginStartContext({
+        deps,
+        plugin,
+        runtimeResolver: this.runtimeResolver,
+      });
       let contract: unknown;
-      const contractOrPromise = plugin.start(
-        createPluginStartContext({ deps, plugin, runtimeResolver: this.runtimeResolver }),
-        pluginDepContracts
-      );
+      const contractOrPromise = plugin.start(startContext, pluginDepContracts);
       if (isPromise(contractOrPromise)) {
         if (this.coreContext.env.mode.dev) {
           this.log.warn(
@@ -223,9 +231,18 @@ export class PluginsSystem<T extends PluginType> {
       }
 
       contracts.set(pluginName, contract);
+      if (plugin.hasInitialize) {
+        initializeRunners.set(pluginName, () =>
+          plugin.runInitialize(startContext, pluginDepContracts)
+        );
+      } else {
+        this.deferredInitEngine?.markAvailable(pluginName);
+      }
     }
 
     this.runtimeResolver.resolveStartRequests(contracts);
+    // Only once every plugin has started, so no `start()` ever waits on an `initialize()`.
+    this.deferredInitEngine?.startInitialization(initializeRunners);
 
     return contracts;
   }

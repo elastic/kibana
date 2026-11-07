@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { shareReplay } from 'rxjs';
+import { defer, shareReplay } from 'rxjs';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { NodeInfo } from '@kbn/core-node-server';
@@ -28,6 +28,7 @@ import type {
 } from './plugins_service';
 import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
 import type { IRuntimePluginContractResolver } from './plugin_contract_resolver';
+import type { DeferredInitEngine } from './deferred_init';
 
 /** @internal */
 export interface InstanceInfo {
@@ -49,6 +50,7 @@ export interface InstanceInfo {
  * @param manifest The manifest of the plugin we're building these values for.
  * @param instanceInfo Info about the instance Kibana is running on.
  * @param nodeInfo Info about how the Kibana process has been configured.
+ * @param deferredInitEngine The engine that tracks every plugin's `initialize()` status.
  *
  * @internal
  */
@@ -58,12 +60,14 @@ export function createPluginInitializerContext({
   manifest,
   instanceInfo,
   nodeInfo,
+  deferredInitEngine,
 }: {
   coreContext: CoreContext;
   opaqueId: PluginOpaqueId;
   manifest: PluginManifest;
   instanceInfo: InstanceInfo;
   nodeInfo: NodeInfo;
+  deferredInitEngine: DeferredInitEngine;
 }): PluginInitializerContext {
   return {
     opaqueId,
@@ -119,6 +123,13 @@ export function createPluginInitializerContext({
       get<T>() {
         return coreContext.configService.atPathSync<T>(manifest.configPath);
       },
+    },
+
+    // `status$` is built on subscribe so creating the context leaves no engine record behind.
+    initialization: {
+      initialize: () => deferredInitEngine.initialize(manifest.id),
+      status$: defer(() => deferredInitEngine.status$(manifest.id)),
+      getStatus: () => deferredInitEngine.getStatus(manifest.id),
     },
   };
 }

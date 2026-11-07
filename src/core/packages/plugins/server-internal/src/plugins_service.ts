@@ -36,6 +36,7 @@ import type { PluginsConfigType } from './plugins_config';
 import { PluginsConfig } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 import { createBrowserConfig } from './create_browser_config';
+import { DeferredInitEngine } from './deferred_init';
 
 /** @internal */
 export type DiscoveredPlugins = {
@@ -89,6 +90,7 @@ export class PluginsService
   private readonly config$: Observable<PluginsConfig>;
   private readonly pluginConfigDescriptors = new Map<PluginName, PluginConfigDescriptor>();
   private readonly pluginConfigUsageDescriptors = new Map<string, Record<string, any | any[]>>();
+  private readonly deferredInitEngine: DeferredInitEngine;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('plugins-service');
@@ -96,8 +98,23 @@ export class PluginsService
     this.config$ = coreContext.configService
       .atPath<PluginsConfigType>('plugins')
       .pipe(map((rawConfig) => new PluginsConfig(rawConfig, coreContext.env)));
+    this.deferredInitEngine = new DeferredInitEngine(
+      coreContext.logger.get('plugins-initialization')
+    );
     this.prebootPluginsSystem = new PluginsSystem(this.coreContext, PluginType.preboot);
-    this.standardPluginsSystem = new PluginsSystem(this.coreContext, PluginType.standard);
+    this.standardPluginsSystem = new PluginsSystem(
+      this.coreContext,
+      PluginType.standard,
+      this.deferredInitEngine
+    );
+  }
+
+  /**
+   * Emits the error of a plugin `initialize()` that failed. Core shuts Kibana down on it, the
+   * same outcome as a thrown `setup()` or `start()`.
+   */
+  public getInitializationFailure$(): Observable<Error> {
+    return this.deferredInitEngine.failure$;
   }
 
   public async discover({
@@ -120,6 +137,7 @@ export class PluginsService
       nodeInfo: {
         roles: node.roles,
       },
+      deferredInitEngine: this.deferredInitEngine,
     });
 
     await this.handleDiscoveryErrors(error$);

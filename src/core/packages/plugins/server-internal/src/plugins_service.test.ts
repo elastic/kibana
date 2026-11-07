@@ -26,6 +26,7 @@ import { PluginDiscoveryError } from './discovery';
 import { PluginWrapper } from './plugin';
 import { PluginsService } from './plugins_service';
 import { PluginsSystem } from './plugins_system';
+import { DeferredInitEngine } from './deferred_init';
 import type { PluginsConfigType } from './plugins_config';
 import { config } from './plugins_config';
 import { take } from 'rxjs';
@@ -760,6 +761,7 @@ describe('PluginsService', () => {
         coreContext: { coreId, env, logger, configService },
         instanceInfo: { uuid: 'uuid', airgapped: false },
         nodeInfo: { roles: { backgroundTasks: true, ui: true, migrator: false } },
+        deferredInitEngine: expect.any(DeferredInitEngine),
       });
 
       const logs = loggingSystemMock.collect(logger);

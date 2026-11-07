@@ -26,6 +26,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { PluginWrapper } from './plugin';
 import { findCircularDependencies, normalizeCycle, PluginsSystem } from './plugins_system';
+import { DeferredInitEngine } from './deferred_init';
 import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 
 function createPlugin(
@@ -730,6 +731,108 @@ describe('start', () => {
       pluginA: 'contractA',
       pluginB: 'contractB',
     });
+  });
+});
+
+describe('initialize', () => {
+  let engine: DeferredInitEngine;
+  let system: PluginsSystem<PluginType.standard>;
+
+  const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
+
+  const withInitialize = (plugin: PluginWrapper<any, any>, runInitialize: jest.Mock) => {
+    jest.spyOn(plugin, 'hasInitialize', 'get').mockReturnValue(true);
+    jest.spyOn(plugin, 'runInitialize').mockImplementation(runInitialize);
+    return plugin;
+  };
+
+  // Fake `setTimeout` so the slow-run warning timers of runs that never settle do not outlive a test.
+  beforeEach(() => jest.useFakeTimers({ doNotFake: ['setImmediate'] }));
+  afterEach(() => jest.useRealTimers());
+
+  beforeEach(() => {
+    engine = new DeferredInitEngine(loggingSystemMock.createLogger());
+    system = new PluginsSystem(coreContext, PluginType.standard, engine);
+    mockCreatePluginSetupContext.mockImplementation(() => ({}));
+    mockCreatePluginStartContext.mockImplementation(({ plugin }) => ({
+      startContextOf: plugin.name,
+    }));
+  });
+
+  it('runs initialize() once every plugin has started, with the arguments start() received', async () => {
+    const pluginA = withInitialize(createPlugin('pluginA'), jest.fn().mockResolvedValue(undefined));
+    const pluginB = createPlugin('pluginB', { required: ['pluginA'] });
+    jest.spyOn(pluginA, 'setup').mockReturnValue({});
+    jest.spyOn(pluginB, 'setup').mockReturnValue({});
+    jest.spyOn(pluginA, 'start').mockReturnValue('contractA');
+    jest.spyOn(pluginB, 'start').mockReturnValue('contractB');
+    system.addPlugin(pluginA);
+    system.addPlugin(pluginB);
+
+    await system.setupPlugins(setupDeps);
+    await system.startPlugins(startDeps);
+    await flushPromises();
+
+    expect(pluginA.runInitialize).toHaveBeenCalledTimes(1);
+    expect(pluginA.runInitialize).toHaveBeenCalledWith({ startContextOf: 'pluginA' }, {});
+    expect((pluginA.runInitialize as jest.Mock).mock.invocationCallOrder[0]).toBeGreaterThan(
+      (pluginB.start as jest.Mock).mock.invocationCallOrder[0]
+    );
+    expect(engine.getStatus('pluginA')).toBe('available');
+  });
+
+  it('does not wait for initialize() to finish', async () => {
+    const pluginA = withInitialize(
+      createPlugin('pluginA'),
+      jest.fn(() => new Promise<void>(() => {}))
+    );
+    jest.spyOn(pluginA, 'setup').mockReturnValue({});
+    jest.spyOn(pluginA, 'start').mockReturnValue('contractA');
+    system.addPlugin(pluginA);
+
+    await system.setupPlugins(setupDeps);
+    const contracts = await system.startPlugins(startDeps);
+
+    expect(contracts.get('pluginA')).toBe('contractA');
+    expect(engine.getStatus('pluginA')).toBe('initializing');
+  });
+
+  it('marks plugins without initialize() as available once started', async () => {
+    const pluginA = createPlugin('pluginA');
+    jest.spyOn(pluginA, 'setup').mockReturnValue({});
+    jest.spyOn(pluginA, 'start').mockReturnValue('contractA');
+    system.addPlugin(pluginA);
+
+    await system.setupPlugins(setupDeps);
+    await system.startPlugins(startDeps);
+
+    expect(engine.getStatus('pluginA')).toBe('available');
+    await expect(engine.initialize('pluginA')).resolves.toBeUndefined();
+  });
+
+  it('rejects waiting for an initialization from inside start()', async () => {
+    const pluginA = withInitialize(createPlugin('pluginA'), jest.fn().mockResolvedValue(undefined));
+    const pluginB = createPlugin('pluginB', { required: ['pluginA'] });
+    jest.spyOn(pluginA, 'setup').mockReturnValue({});
+    jest.spyOn(pluginB, 'setup').mockReturnValue({});
+    jest.spyOn(pluginA, 'start').mockReturnValue('contractA');
+    const waitedInStart = jest.fn();
+    jest.spyOn(pluginB, 'start').mockImplementation(() => {
+      engine.initialize('pluginA').then(waitedInStart, waitedInStart);
+      return 'contractB';
+    });
+    system.addPlugin(pluginA);
+    system.addPlugin(pluginB);
+
+    await system.setupPlugins(setupDeps);
+    await system.startPlugins(startDeps);
+    await flushPromises();
+
+    expect(waitedInStart).toHaveBeenCalledWith(
+      new Error(
+        'Cannot wait for plugin "pluginA" to initialize before every plugin has started: it would block boot. Call initialize() from a route handler, a task runner, or a function returned from start() that runs after boot.'
+      )
+    );
   });
 });
 

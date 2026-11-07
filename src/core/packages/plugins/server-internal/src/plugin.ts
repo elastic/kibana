@@ -184,6 +184,31 @@ export class PluginWrapper<
   }
 
   /**
+   * Whether the plugin instance implements the `initialize` lifecycle hook. Known once `init()` has run.
+   */
+  public get hasInitialize(): boolean {
+    const { instance } = this;
+    return (
+      instance !== undefined &&
+      !this.isPrebootPluginInstance(instance) &&
+      typeof instance.initialize === 'function'
+    );
+  }
+
+  /**
+   * Calls the `initialize` function exposed by the plugin instance.
+   * @param startContext The same context the plugin's `start` received.
+   * @param plugins The same dependency contracts the plugin's `start` received.
+   */
+  public async runInitialize(startContext: CoreStart, plugins: TPluginsStart): Promise<void> {
+    const { instance } = this;
+    if (!instance || this.isPrebootPluginInstance(instance) || !instance.initialize) {
+      throw new Error(`Plugin "${this.name}" does not implement initialize().`);
+    }
+    await instance.initialize(startContext, plugins);
+  }
+
+  /**
    * Calls optional `stop` function exposed by the plugin initializer.
    */
   public async stop() {
@@ -241,17 +266,6 @@ export class PluginWrapper<
 
     if (typeof instance.setup !== 'function') {
       throw new Error(`Instance of plugin "${this.name}" does not define "setup" function.`);
-    }
-
-    // `initialize` is reserved for an upcoming core lifecycle hook, which preboot plugins do not get.
-    if (
-      !this.isPrebootPluginInstance(instance) &&
-      'initialize' in instance &&
-      typeof instance.initialize === 'function'
-    ) {
-      throw new Error(
-        `Instance of plugin "${this.name}" defines an "initialize" function. "initialize" is reserved by core for plugin lifecycle hooks, rename the method.`
-      );
     }
 
     return instance;

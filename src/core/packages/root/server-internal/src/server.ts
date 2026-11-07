@@ -8,7 +8,7 @@
  */
 
 import apm from 'elastic-apm-node';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, type Observable } from 'rxjs';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { NodeRoles } from '@kbn/core-node-server';
 import { CriticalError } from '@kbn/core-base-server-internal';
@@ -706,6 +706,11 @@ export class Server {
     await this.http.start();
 
     return this.coreStart;
+  }
+
+  /** Emits the error of a plugin `initialize()` that failed after start. */
+  public getPluginInitializationFailure$(): Observable<Error> {
+    return this.plugins.getInitializationFailure$();
   }
 
   public async stop() {

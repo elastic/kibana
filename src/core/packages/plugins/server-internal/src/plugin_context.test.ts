@@ -29,6 +29,7 @@ import type { PluginManifest } from '@kbn/core-plugins-server';
 import { schema, ByteSizeValue } from '@kbn/config-schema';
 import { ConfigService, Env } from '@kbn/config';
 import { PluginWrapper } from './plugin';
+import { DeferredInitEngine } from './deferred_init';
 
 import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
@@ -36,6 +37,8 @@ import {
   createCoreContextConfigServiceMock,
   createRuntimePluginContractResolverMock,
 } from './test_helpers';
+
+const deferredInitEngine = new DeferredInitEngine(loggingSystemMock.createLogger());
 
 function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): PluginManifest {
   return {
@@ -117,6 +120,7 @@ describe('createPluginInitializerContext', () => {
         manifest,
         instanceInfo,
         nodeInfo,
+        deferredInitEngine,
       });
 
       expect(pluginInitializerContext.config.get()).toEqual({
@@ -138,6 +142,7 @@ describe('createPluginInitializerContext', () => {
         manifest,
         instanceInfo,
         nodeInfo,
+        deferredInitEngine,
       });
 
       expect(pluginInitializerContext.config.legacy.globalConfig$).toBeDefined();
@@ -169,6 +174,7 @@ describe('createPluginInitializerContext', () => {
         manifest,
         instanceInfo,
         nodeInfo,
+        deferredInitEngine,
       });
       expect(pluginInitializerContext.env.instanceUuid).toBe('kibana-uuid');
     });
@@ -189,6 +195,7 @@ describe('createPluginInitializerContext', () => {
         manifest: createPluginManifest(),
         instanceInfo,
         nodeInfo,
+        deferredInitEngine,
       });
       expect(pluginInitializerContext.env.configs).toEqual([
         '/home/kibana/config/kibana.yml',
@@ -205,9 +212,46 @@ describe('createPluginInitializerContext', () => {
         manifest: createPluginManifest(),
         instanceInfo,
         nodeInfo: { roles: { backgroundTasks: false, ui: true, migrator: false } },
+        deferredInitEngine,
       });
       expect(pluginInitializerContext.node.roles.backgroundTasks).toBe(false);
       expect(pluginInitializerContext.node.roles.ui).toBe(true);
+    });
+  });
+
+  describe('context.initialization', () => {
+    const createContext = (engine: DeferredInitEngine) =>
+      createPluginInitializerContext({
+        coreContext,
+        opaqueId,
+        manifest: createPluginManifest(),
+        instanceInfo,
+        nodeInfo,
+        deferredInitEngine: engine,
+      });
+
+    it("reads the plugin's own status from the engine", async () => {
+      const engine = new DeferredInitEngine(loggingSystemMock.createLogger());
+      const { initialization } = createContext(engine);
+      const statuses: string[] = [];
+      initialization.status$.subscribe((status) => statuses.push(status));
+
+      engine.markAvailable('some-plugin-id');
+
+      expect(statuses).toEqual(['idle', 'available']);
+      expect(initialization.getStatus()).toBe('available');
+    });
+
+    it("waits for the plugin's own initialize() through the engine", async () => {
+      const engine = new DeferredInitEngine(loggingSystemMock.createLogger());
+      const { initialization } = createContext(engine);
+      const runner = jest.fn().mockResolvedValue(undefined);
+
+      engine.startInitialization(new Map([['some-plugin-id', runner]]));
+
+      await expect(initialization.initialize()).resolves.toBeUndefined();
+      expect(runner).toHaveBeenCalledTimes(1);
+      expect(initialization.getStatus()).toBe('available');
     });
   });
 });
@@ -243,6 +287,7 @@ describe('createPluginPrebootSetupContext', () => {
           airgapped: false,
         },
         nodeInfo,
+        deferredInitEngine,
       }),
     });
 
@@ -278,6 +323,7 @@ describe('plugin context service accounts', () => {
         manifest,
         instanceInfo: { uuid: 'instance-uuid', airgapped: false },
         nodeInfo: nodeServiceMock.createInternalPrebootContract(),
+        deferredInitEngine,
       }),
     });
     runtimeResolver = createRuntimePluginContractResolverMock();
