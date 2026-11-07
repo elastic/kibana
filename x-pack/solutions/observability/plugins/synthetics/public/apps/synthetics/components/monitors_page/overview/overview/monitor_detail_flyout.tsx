@@ -273,11 +273,15 @@ export function LoadingState() {
 
 function DetailFlyoutStatusHistory({
   monitorId,
+  configId,
   location,
+  locationId,
   remoteName,
 }: {
   monitorId: string;
+  configId: string;
   location: string;
+  locationId: string;
   remoteName?: string;
 }) {
   return (
@@ -292,7 +296,9 @@ function DetailFlyoutStatusHistory({
         brushable={false}
         periodCaption={LAST_24H_TEXT}
         monitorId={monitorId}
+        configId={configId}
         locationLabel={location}
+        locationId={locationId}
         remoteName={remoteName}
       />
     </EuiPageSection>
@@ -617,7 +623,9 @@ export function MonitorDetailFlyout(props: Props) {
             />
             <DetailFlyoutStatusHistory
               monitorId={monitorQueryId}
+              configId={configId}
               location={props.location}
+              locationId={locationId}
               remoteName={monitor?.remote?.remoteName}
             />
           </>
