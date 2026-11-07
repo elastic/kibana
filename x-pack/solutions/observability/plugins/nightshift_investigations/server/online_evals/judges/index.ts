@@ -6,6 +6,7 @@
  */
 
 import type { RegisteredEvaluatorDefinition } from '@kbn/evals-plugin/server';
+import { alertOutcomeBenignClassificationJudge } from './alert_outcome_benign_classification';
 import { alertOutcomeRcaAccuracyJudge } from './alert_outcome_rca_accuracy';
 import { conclusionQualityJudge } from './conclusion_quality';
 import { cortexPageInfluenceJudge } from './cortex_page_influence';
@@ -23,6 +24,7 @@ export const referenceFreeJudges: readonly RegisteredEvaluatorDefinition[] = [
 /** Reference-based judges ported from Deductive's alert-outcome scoring. */
 export const alertOutcomeJudges: readonly RegisteredEvaluatorDefinition[] = [
   alertOutcomeRcaAccuracyJudge,
+  alertOutcomeBenignClassificationJudge,
 ];
 
 /** Judges of how an investigation used the Cortex pages it read. */
