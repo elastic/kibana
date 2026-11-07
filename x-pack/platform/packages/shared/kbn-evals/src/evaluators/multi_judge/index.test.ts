@@ -179,4 +179,71 @@ describe('createMultiJudgeEvaluator', () => {
       expect(result.score).toBeNull();
     });
   });
+
+  describe('judge order', () => {
+    /** Judge that records its position in the evaluation order. */
+    function orderRecordingJudge(name: string, calls: string[]): Evaluator {
+      return {
+        name,
+        kind: 'CODE',
+        direction: 'maximize',
+        evaluate: async () => {
+          calls.push(name);
+          return { score: 0.5, label: 'test', explanation: name };
+        },
+      };
+    }
+
+    it('invokes judges in a deterministic order for the same example', async () => {
+      const firstRun: string[] = [];
+      const secondRun: string[] = [];
+      const params = { input: { q: 'fixed example' }, output: 'out', expected: 'exp' };
+
+      const names = ['a', 'b', 'c', 'd', 'e', 'f'];
+      await createMultiJudgeEvaluator({
+        judges: names.map((n) => orderRecordingJudge(n, firstRun)),
+      }).evaluate(params as EvaluatorParams<any, any>);
+      await createMultiJudgeEvaluator({
+        judges: names.map((n) => orderRecordingJudge(n, secondRun)),
+      }).evaluate(params as EvaluatorParams<any, any>);
+
+      expect(firstRun).toEqual(secondRun);
+    });
+
+    it('varies the order across different examples', async () => {
+      const orders: string[][] = [];
+      for (const q of ['example-1', 'example-2', 'example-3', 'example-4', 'example-5']) {
+        const calls: string[] = [];
+        await createMultiJudgeEvaluator({
+          judges: ['a', 'b', 'c', 'd', 'e', 'f'].map((n) => orderRecordingJudge(n, calls)),
+        }).evaluate({
+          input: { q },
+          output: 'out',
+          expected: undefined,
+        } as EvaluatorParams<any, any>);
+        orders.push(calls);
+      }
+
+      // With a per-example shuffle, not all examples can share the declaration order;
+      // a single fixed order across five distinct examples would mean no shuffle happened.
+      const declarationOrder = ['a', 'b', 'c', 'd', 'e', 'f'];
+      expect(orders.some((order) => order.join() !== declarationOrder.join())).toBe(true);
+    });
+
+    it('does not affect the aggregated score', async () => {
+      const scores = [0.8, 0.6, 1.0];
+      const evaluator = createMultiJudgeEvaluator({
+        judges: scores.map((s, i) => mockJudge(`judge-${i}`, s)),
+        strategy: 'mean',
+      });
+
+      const result = await evaluator.evaluate({
+        input: { q: 'some example' },
+        output: 'out',
+        expected: undefined,
+      } as EvaluatorParams<any, any>);
+
+      expect(result.score).toBeCloseTo(0.8);
+    });
+  });
 });
