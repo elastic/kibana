@@ -10,7 +10,7 @@
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { EsqlSource } from '@kbn/data-source';
 import { isEmptyEsqlQuery, isOfAggregateQueryType } from '@kbn/es-query';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import { cloneDeep, isEqual, pick } from 'lodash';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
@@ -24,10 +24,14 @@ import {
 import { TabInitializationStatus, type DiscoverAppState } from '..';
 import type { DiscoverDataStateContainer } from '../../discover_data_state_container';
 import { appendAdHocDataViews, loadDataViewListOnce } from './data_views';
-import { loadDataViewAvailabilityOnce, loadESDataAvailabilityOnce } from './data_availability';
+import { loadDataAvailabilityOnce } from './data_availability';
 import { setDataSource, setDataView } from './tab_state_data_view';
 import { type AppStateUrl, cleanupUrlState } from '../../utils/cleanup_url_state';
-import { getInitialDataViewTarget, loadAndResolveDataView } from '../../utils/resolve_data_view';
+import {
+  canOpenWithoutPersistedDataViews,
+  getInitialDataViewTarget,
+  loadAndResolveDataView,
+} from '../../utils/resolve_data_view';
 import { isRefreshIntervalValid, isTimeRangeValid } from '../../../../../utils/validate_time';
 import { getValidFilters } from '../../../../../utils/get_valid_filters';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
@@ -164,6 +168,39 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       locationStateHasDataViewSpec,
     });
 
+    const initialQuery = restoredQuery ?? configuredEsqlQuery;
+    const isEsqlMode = isOfAggregateQueryType(initialQuery);
+    const needsDataView = !isNonEmptyEsqlQuery(initialQuery);
+
+    const { hasESData, hasDataView } = await dispatch(loadDataAvailabilityOnce({ needsDataView }));
+
+    if (!hasESData && !hasDataView) {
+      return { showNoDataPage: true };
+    }
+
+    const currentDataView = persistedTabSearchSource?.getField('index');
+    const { dataViewId, initialAdHocDataViewSpec } = getInitialDataViewTarget({
+      dataSource: urlAppState?.dataSource,
+      initialDataViewIdOrSpec: tabInitialInternalState?.serializedSearchSource?.index,
+      currentDataView,
+    });
+
+    const canOpen =
+      hasDataView ||
+      canOpenWithoutPersistedDataViews({
+        isEsqlMode,
+        locationStateHasDataViewSpec,
+        dataViewId,
+        initialAdHocDataViewSpec,
+        currentDataView,
+        adHocDataViews: runtimeStateManager.adHocDataViews$.getValue(),
+        defaultProfileAdHocDataViewIds: getState().defaultProfileAdHocDataViewIds,
+      });
+
+    if (!canOpen) {
+      return { showNoDataPage: true };
+    }
+
     const resolveOpeningEsqlSource = (esql: string) =>
       resolveEsqlSource({
         esql,
@@ -175,52 +212,18 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
           services.data.query.timefilter.timefilter.getTime(),
       });
 
-    let openingQuery = restoredQuery ?? configuredEsqlQuery;
-    let dataView: DataView;
-    let esqlSource: EsqlSource | undefined;
-
-    if (isNonEmptyEsqlQuery(openingQuery)) {
-      ({ dataView, esqlSource } = await resolveOpeningEsqlSource(openingQuery.esql));
-    } else {
-      // Without an ES|QL query, a data view is needed to open the tab or derive its default query.
-      const isEsqlMode = isOfAggregateQueryType(openingQuery);
-      const currentDataView = persistedTabSearchSource?.getField('index');
-      const { dataViewId, initialAdHocDataViewSpec } = getInitialDataViewTarget({
-        dataSource: urlAppState?.dataSource,
-        initialDataViewIdOrSpec: tabInitialInternalState?.serializedSearchSource?.index,
-        currentDataView,
-      });
-      const hasDataView = await dispatch(loadDataViewAvailabilityOnce());
-
-      if (!hasDataView) {
-        const hasESData = await dispatch(loadESDataAvailabilityOnce());
-
-        if (!hasESData) {
-          return { showNoDataPage: true };
-        }
-
-        // Without persisted data views, the tab can still open an ad hoc data view it was given.
-        const { defaultProfileAdHocDataViewIds } = getState();
-        const hasInitialAdHocDataView = dataViewId && initialAdHocDataViewSpec?.id === dataViewId;
-        const hasCurrentAdHocDataView = currentDataView?.isPersisted() === false;
-        const hasProfileDataView = runtimeStateManager.adHocDataViews$
-          .getValue()
-          .some(({ id }) => id && defaultProfileAdHocDataViewIds.includes(id));
-        const canOpenWithoutDataViews =
-          isEsqlMode ||
-          locationStateHasDataViewSpec ||
-          hasInitialAdHocDataView ||
-          hasCurrentAdHocDataView ||
-          hasProfileDataView;
-
-        if (!canOpenWithoutDataViews) {
-          return { showNoDataPage: true };
-        }
+    const resolveOpeningState = async (): Promise<{
+      query: Query | AggregateQuery | undefined;
+      dataView: DataView;
+      esqlSource?: EsqlSource;
+    }> => {
+      if (isNonEmptyEsqlQuery(initialQuery)) {
+        return { query: initialQuery, ...(await resolveOpeningEsqlSource(initialQuery.esql)) };
       }
 
       await dispatch(loadDataViewListOnce());
 
-      ({ dataView } = await loadAndResolveDataView({
+      const { dataView } = await loadAndResolveDataView({
         dataViewId,
         locationDataViewSpec: dataViewSpec,
         initialAdHocDataViewSpec,
@@ -229,44 +232,27 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
         services,
         savedDataViews: getState().savedDataViews,
         runtimeStateManager,
-      }));
-
-      openingQuery ??= getDefaultQuery({
-        initialUrlState: urlAppState,
-        hasGlobalState,
-        persistedTab,
-        services,
-        dataView,
-        defaultProfileEsqlQuery,
-        locationStateHasDataViewSpec,
       });
+      const query =
+        initialQuery ??
+        getDefaultQuery({
+          initialUrlState: urlAppState,
+          hasGlobalState,
+          persistedTab,
+          services,
+          dataView,
+          defaultProfileEsqlQuery,
+          locationStateHasDataViewSpec,
+        });
 
-      // A new tab can derive an ES|QL query from the data view.
-      if (isNonEmptyEsqlQuery(openingQuery)) {
-        ({ dataView, esqlSource } = await resolveOpeningEsqlSource(openingQuery.esql));
+      if (isNonEmptyEsqlQuery(query)) {
+        return { query, ...(await resolveOpeningEsqlSource(query.esql)) };
       }
-    }
 
-    const readsIndex = esqlSource && Boolean(getIndexPatternFromESQLQuery(esqlSource.query));
-    const needsEsqlAvailabilityCheck =
-      esqlSource && (!esqlSource.areColumnsAvailable || !readsIndex);
+      return { query, dataView };
+    };
 
-    if (needsEsqlAvailabilityCheck) {
-      const esDataRequest = dispatch(loadESDataAvailabilityOnce());
-      const dataViewRequest = dispatch(loadDataViewAvailabilityOnce());
-      const availabilityRequests = [esDataRequest, dataViewRequest];
-
-      // Either positive result allows opening; onboarding requires both checks to finish negative.
-      const firstAvailabilityResult = await Promise.race(availabilityRequests);
-
-      if (!firstAvailabilityResult) {
-        const [hasESData, hasDataView] = await Promise.all(availabilityRequests);
-
-        if (!hasESData && !hasDataView) {
-          return { showNoDataPage: true };
-        }
-      }
-    }
+    const { query: openingQuery, dataView, esqlSource } = await resolveOpeningState();
 
     if (!esqlSource && !dataView.isPersisted()) {
       dispatch(appendAdHocDataViews(dataView));

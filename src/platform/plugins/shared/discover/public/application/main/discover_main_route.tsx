@@ -169,8 +169,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
 
   useEffect(() => {
     // Start the checks and the list early so tabs can reuse the requests when they initialize.
-    dispatch(internalStateActions.loadESDataAvailabilityOnce());
-    dispatch(internalStateActions.loadDataViewAvailabilityOnce());
+    dispatch(internalStateActions.loadDataAvailabilityOnce());
     dispatch(internalStateActions.loadDataViewListOnce());
   }, [dispatch]);
 

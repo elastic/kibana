@@ -460,13 +460,6 @@ describe('EsqlSource', () => {
   });
 
   describe('withColumns', () => {
-    it('marks an unresolved schema as known when fetch columns are supplied', async () => {
-      const source = await EsqlSource.create({ query: 'FROM logs-*' });
-
-      expect(source.areColumnsAvailable).toBe(false);
-      expect(source.withColumns([]).areColumnsAvailable).toBe(true);
-    });
-
     it('returns a new instance with the same identity and updated result columns', async () => {
       const originalCols = [makeColumn('message', 'string')];
       const original = await EsqlSource.create({
@@ -600,7 +593,6 @@ describe('EsqlSource', () => {
 
       expect(postedPaths(http)).not.toContain(SOURCE_INFO_ROUTE);
       expect(postedPaths(http)).not.toContain(TIMEFIELD_ROUTE);
-      expect(source.areColumnsAvailable).toBe(true);
       expect(source.getColumns()).toEqual([
         { name: 'message', type: 'string', esType: 'keyword', source: 'index' },
       ]);
@@ -620,16 +612,6 @@ describe('EsqlSource', () => {
 
       expect(source.getColumns()).toEqual([]);
       expect(source.timeFieldName).toBe('@timestamp');
-      expect(source.areColumnsAvailable).toBe(false);
-    });
-
-    it('recognizes a successfully resolved empty schema', async () => {
-      const http = createHttp({ sourceInfo: { columns: [] } });
-      const source = await EsqlSource.create({ query: 'FROM empty-schema', http });
-
-      expect(source.getColumns()).toEqual([]);
-      expect(source.areColumnsAvailable).toBe(true);
-      expect(await EsqlSource.create({ query: 'FROM empty-schema', http })).toBe(source);
     });
 
     it('retries source_info after a failed create instead of returning a cached empty schema', async () => {

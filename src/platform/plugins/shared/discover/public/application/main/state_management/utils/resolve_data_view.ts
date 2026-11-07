@@ -271,3 +271,40 @@ export const getInitialDataViewTarget = ({
 
   return { dataViewId, initialAdHocDataViewSpec };
 };
+
+/**
+ * Whether a tab can open without persisted data views: in ES|QL mode, or with an ad hoc data view
+ * from the location state, the tab or a profile.
+ */
+export const canOpenWithoutPersistedDataViews = ({
+  isEsqlMode,
+  locationStateHasDataViewSpec,
+  dataViewId,
+  initialAdHocDataViewSpec,
+  currentDataView,
+  adHocDataViews,
+  defaultProfileAdHocDataViewIds,
+}: {
+  isEsqlMode: boolean;
+  locationStateHasDataViewSpec: boolean;
+  dataViewId: string | undefined;
+  initialAdHocDataViewSpec: DataViewSpec | undefined;
+  currentDataView: DataView | undefined;
+  adHocDataViews: DataView[];
+  defaultProfileAdHocDataViewIds: string[];
+}): boolean => {
+  const hasInitialAdHocDataView =
+    Boolean(dataViewId) && initialAdHocDataViewSpec?.id === dataViewId;
+  const hasCurrentAdHocDataView = currentDataView?.isPersisted() === false;
+  const hasProfileDataView = adHocDataViews.some(
+    ({ id }) => id && defaultProfileAdHocDataViewIds.includes(id)
+  );
+
+  return (
+    isEsqlMode ||
+    locationStateHasDataViewSpec ||
+    hasInitialAdHocDataView ||
+    hasCurrentAdHocDataView ||
+    hasProfileDataView
+  );
+};

@@ -18,6 +18,7 @@ import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { discoverServiceMock } from '../../__mocks__/services';
 import type { MainRouteProps } from './discover_main_route';
 import { DiscoverMainRoute } from './discover_main_route';
+import * as resolveEsqlSourceModule from './data_fetching/resolve_esql_source';
 import { MemoryRouter } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
@@ -32,7 +33,7 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { RootProfileState } from '../../context_awareness';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import type { AppMountParameters } from '@kbn/core/public';
-import { DATASETS_ROUTE, SOURCE_INFO_ROUTE } from '@kbn/esql-types';
+import { DATASETS_ROUTE } from '@kbn/esql-types';
 import { clearESQLSourceInfoCache, ENABLE_ESQL } from '@kbn/esql-utils';
 import { DEFAULT_ESQL_QUERY_SETTING } from '@kbn/discover-utils';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
@@ -43,6 +44,7 @@ import {
   useAppStateSelector,
   useCurrentDataView,
   useCurrentTabAction,
+  useCurrentTabSelector,
   useInternalStateDispatch,
 } from './state_management/redux';
 
@@ -170,21 +172,6 @@ const setupComponent = ({
 
 const waitForLoad = () => {
   return waitFor(() => expect(screen.queryByLabelText('Loading')).not.toBeInTheDocument());
-};
-
-const mockFailedEsqlSchema = () => {
-  const { post } = discoverServiceMock.http;
-  discoverServiceMock.http.post = jest
-    .fn()
-    .mockImplementation((path: string) =>
-      path === SOURCE_INFO_ROUTE
-        ? Promise.resolve({ columns: [], error: { statusCode: 400, message: 'Unknown index' } })
-        : post(path)
-    );
-
-  return () => {
-    discoverServiceMock.http.post = post;
-  };
 };
 
 const createUrlStateWithQuery = async (query: Query | AggregateQuery) => {
@@ -425,9 +412,20 @@ describe('DiscoverMainRoute', () => {
     expect(screen.getByTestId('discover-main-app')).toBeVisible();
   });
 
-  test.each(['profile', 'space'])(
-    'opens the %s default ES|QL query without data views',
-    async (defaultQuerySource) => {
+  test('shows the data view prompt with only ES|QL datasets and no query or configured default', async () => {
+    setupComponent({ hasESData: false, hasDataView: false, hasESQLDatasets: true });
+    await waitForLoad();
+
+    expect(screen.getByTestId('noDataViewsPrompt')).toBeVisible();
+  });
+
+  test.each<[string, boolean, boolean]>([
+    ['profile', false, true],
+    ['space', false, true],
+    ['space', true, false],
+  ])(
+    'opens the %s default ES|QL query without data views (ES data: %s, ES|QL datasets: %s)',
+    async (defaultQuerySource, hasESData, hasESQLDatasets) => {
       mockRootProfileState = {
         ...defaultRootProfileState,
         getDefaultEsqlQuery: () =>
@@ -450,7 +448,7 @@ describe('DiscoverMainRoute', () => {
       getIsEsqlDefaultMock.mockImplementation(() => true);
 
       try {
-        setupComponent({ hasESData: false, hasDataView: false, hasESQLDatasets: true });
+        setupComponent({ hasESData, hasDataView: false, hasESQLDatasets });
         await waitForLoad();
 
         expect(screen.getByTestId('discover-main-app')).toBeVisible();
@@ -483,12 +481,14 @@ describe('DiscoverMainRoute', () => {
       const dataView = useCurrentDataView();
       const query = useAppStateSelector((state) => state.query);
       const mode = isOfAggregateQueryType(query) ? 'ES|QL' : 'Classic';
+      const isLoading = useCurrentTabSelector((tab) => tab.isDataViewLoading);
 
       return (
         <div data-test-subj="discover-main-app">
           <input aria-label="Draft query" defaultValue={initialQuery} />
           <button onClick={() => dispatch(transition({ dataView }))}>Switch to Classic</button>
           <output>{mode}</output>
+          <output>{isLoading ? 'Switching' : 'Ready'}</output>
         </div>
       );
     });
@@ -502,6 +502,7 @@ describe('DiscoverMainRoute', () => {
     await act(async () => {});
 
     expect(screen.getByText('ES|QL')).toBeVisible();
+    expect(screen.getByText('Switching')).toBeVisible();
     expect(screen.getByRole('textbox', { name: 'Draft query' })).toBe(draft);
     expect(draft).toHaveValue(draftQuery);
 
@@ -510,6 +511,7 @@ describe('DiscoverMainRoute', () => {
     });
 
     expect(await screen.findByText('Classic')).toBeVisible();
+    expect(screen.getByText('Ready')).toBeVisible();
     expect(screen.getByRole('textbox', { name: 'Draft query' })).toBe(draft);
     expect(draft).toHaveValue(draftQuery);
   });
@@ -545,103 +547,63 @@ describe('DiscoverMainRoute', () => {
     expect(DiscoverMainApp).not.toHaveBeenCalled();
   });
 
-  test('keeps an ES|QL query on an index mounted when the pending availability checks later find no data', async () => {
-    const stateStorageContainer = await createUrlStateWithQuery({ esql: 'FROM logs-*' });
-    const availability = Promise.withResolvers<boolean>();
-
-    setupComponent({
-      stateStorageContainer,
-      hasESData: availability.promise,
-      hasDataView: availability.promise,
-      hasESQLDatasets: availability.promise,
-    });
-
-    const editor = await screen.findByTestId('discover-main-app');
-
-    await act(async () => {
-      availability.resolve(false);
-    });
-
-    expect(screen.getByTestId('discover-main-app')).toBe(editor);
-    expect(screen.queryByTestId('kbnNoDataPage')).not.toBeInTheDocument();
-  });
-
-  test('waits for availability before showing onboarding for an ES|QL query without an index', async () => {
-    const stateStorageContainer = await createUrlStateWithQuery({ esql: 'ROW value = 1' });
-    const availability = Promise.withResolvers<boolean>();
-
-    setupComponent({
-      stateStorageContainer,
-      hasESData: availability.promise,
-      hasDataView: availability.promise,
-      hasESQLDatasets: availability.promise,
-    });
-
-    await act(async () => {});
-
-    expect(screen.getByLabelText('Loading')).toBeVisible();
-    expect(DiscoverMainApp).not.toHaveBeenCalled();
-
-    await act(async () => {
-      availability.resolve(false);
-    });
-
-    expect(await screen.findByTestId('kbnNoDataPage')).toBeVisible();
-    expect(DiscoverMainApp).not.toHaveBeenCalled();
-  });
-
-  test.each([
-    [true, false],
-    [false, true],
-    [false, false],
-  ])(
-    'handles a failed ES|QL schema with data availability %s and data view availability %s',
-    async (hasData, hasDataView) => {
-      const stateStorageContainer = await createUrlStateWithQuery({ esql: 'FROM logs-*' });
-      const esData = Promise.withResolvers<boolean>();
+  test.each(['FROM logs-*', 'ROW value = 1'])(
+    'opens ES|QL query %s without waiting for data view availability or the catalog',
+    async (esql) => {
+      const stateStorageContainer = await createUrlStateWithQuery({ esql });
       const dataViews = Promise.withResolvers<boolean>();
-      const datasets = Promise.withResolvers<boolean>();
-      const restorePost = mockFailedEsqlSchema();
+      const catalog = Promise.withResolvers<DataViewListItem[]>();
+
+      setupComponent({
+        stateStorageContainer,
+        hasESData: true,
+        hasDataView: dataViews.promise,
+        dataViewList: catalog.promise,
+      });
+
+      const editor = await screen.findByTestId('discover-main-app');
+      expect(editor).toBeVisible();
+
+      await act(async () => {
+        dataViews.resolve(false);
+      });
+
+      expect(screen.getByTestId('discover-main-app')).toBe(editor);
+      expect(screen.queryByTestId('kbnNoDataPage')).not.toBeInTheDocument();
+    }
+  );
+
+  test.each(['FROM logs-*', 'ROW value = 1'])(
+    'shows the no-data page without resolving the schema when delayed checks find nothing for %s',
+    async (esql) => {
+      const stateStorageContainer = await createUrlStateWithQuery({ esql });
+      const availability = Promise.withResolvers<boolean>();
+      const resolveSpy = jest.spyOn(resolveEsqlSourceModule, 'resolveEsqlSource');
 
       try {
         setupComponent({
           stateStorageContainer,
-          hasESData: esData.promise,
-          hasDataView: dataViews.promise,
-          hasESQLDatasets: datasets.promise,
+          hasESData: availability.promise,
+          hasDataView: availability.promise,
+          hasESQLDatasets: availability.promise,
         });
 
         await act(async () => {});
 
         expect(screen.getByLabelText('Loading')).toBeVisible();
         expect(DiscoverMainApp).not.toHaveBeenCalled();
+        expect(resolveSpy).not.toHaveBeenCalled();
         expect(screen.queryByTestId('kbnNoDataPage')).not.toBeInTheDocument();
 
         await act(async () => {
-          esData.resolve(hasData);
-          datasets.resolve(false);
+          availability.resolve(false);
         });
 
-        if (!hasData) {
-          expect(screen.getByLabelText('Loading')).toBeVisible();
-          expect(DiscoverMainApp).not.toHaveBeenCalled();
-          expect(screen.queryByTestId('kbnNoDataPage')).not.toBeInTheDocument();
-
-          await act(async () => {
-            dataViews.resolve(hasDataView);
-          });
-        }
-
-        const canOpenEditor = hasData || hasDataView;
-
-        if (canOpenEditor) {
-          expect(await screen.findByTestId('discover-main-app')).toBeVisible();
-        } else {
-          expect(await screen.findByTestId('kbnNoDataPage')).toBeVisible();
-          expect(DiscoverMainApp).not.toHaveBeenCalled();
-        }
+        expect(await screen.findByTestId('kbnNoDataPage')).toBeVisible();
+        expect(DiscoverMainApp).not.toHaveBeenCalled();
+        expect(resolveSpy).not.toHaveBeenCalled();
       } finally {
-        restorePost();
+        resolveSpy.mockRestore();
       }
     }
   );

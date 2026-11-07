@@ -11,6 +11,44 @@ import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_
 import { internalStateActions } from '..';
 
 describe('data availability', () => {
+  it('waits for data when the data view check finishes negative first', async () => {
+    const { internalState, services } = getDiscoverInternalStateMock();
+    const esData = Promise.withResolvers<boolean>();
+    jest.mocked(services.dataViews.hasData.hasESData).mockReturnValue(esData.promise);
+    jest.mocked(services.dataViews.hasData.hasDataView).mockResolvedValue(false);
+    jest.mocked(services.core.http.get).mockResolvedValue({ datasets: [] });
+    const onAvailable = jest.fn();
+    const availabilityRequest = internalState
+      .dispatch(internalStateActions.loadDataAvailabilityOnce())
+      .then(onAvailable);
+
+    await internalState.dispatch(internalStateActions.loadDataViewAvailabilityOnce());
+
+    expect(onAvailable).not.toHaveBeenCalled();
+
+    esData.resolve(true);
+    await availabilityRequest;
+
+    expect(onAvailable).toHaveBeenCalledWith({ hasESData: true, hasDataView: false });
+  });
+
+  it('waits for the data view check when the tab needs a data view', async () => {
+    const { internalState, services } = getDiscoverInternalStateMock();
+    const dataViews = Promise.withResolvers<boolean>();
+
+    jest.mocked(services.dataViews.hasData.hasESData).mockResolvedValue(true);
+    jest.mocked(services.dataViews.hasData.hasDataView).mockReturnValue(dataViews.promise);
+    jest.mocked(services.core.http.get).mockResolvedValue({ datasets: [] });
+
+    const availabilityRequest = internalState.dispatch(
+      internalStateActions.loadDataAvailabilityOnce({ needsDataView: true })
+    );
+    await internalState.dispatch(internalStateActions.loadESDataAvailabilityOnce());
+    dataViews.resolve(true);
+
+    await expect(availabilityRequest).resolves.toEqual({ hasESData: true, hasDataView: true });
+  });
+
   it('shares each request, counts ES|QL datasets as data and resolves the checks independently', async () => {
     const { internalState, services } = getDiscoverInternalStateMock();
     const dataViews = Promise.withResolvers<boolean>();

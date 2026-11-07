@@ -1378,11 +1378,21 @@ describe('tab_state actions', () => {
   });
 
   it.each([
-    ['profile', 'FROM logs*,-logstash*,filebeat-*'],
-    ['data view', 'FROM logs*,-logstash*,filebeat-* | SORT @timestamp DESC'],
+    {
+      querySource: 'profile',
+      openingQuery: 'FROM logs*,-logstash*,filebeat-*',
+      defaultProfileEsqlQuery: { query: 'FROM logs*,-logstash*,filebeat-*' },
+      expectedDataViewLoads: 0,
+    },
+    {
+      querySource: 'data view',
+      openingQuery: 'FROM logs*,-logstash*,filebeat-* | SORT @timestamp DESC',
+      defaultProfileEsqlQuery: undefined,
+      expectedDataViewLoads: 1,
+    },
   ])(
-    'resolves the opening ES|QL query from the %s before the first fetch',
-    async (querySource, openingQuery) => {
+    'resolves the opening ES|QL query from the $querySource before the first fetch',
+    async ({ openingQuery, defaultProfileEsqlQuery, expectedDataViewLoads }) => {
       const services = createDiscoverServicesMock();
       const uiSettingsGet = services.uiSettings.get as jest.Mock;
       const originalGet = uiSettingsGet.getMockImplementation();
@@ -1415,11 +1425,10 @@ describe('tab_state actions', () => {
       const loadDataViewSpy = jest.spyOn(resolveDataViewModule, 'loadAndResolveDataView');
 
       await toolkit.initializeTabs();
-      if (querySource === 'profile') {
-        toolkit.internalState.dispatch(
-          internalStateActions.setDefaultProfileEsqlQuery({ query: openingQuery })
-        );
-      }
+      toolkit.internalState.dispatch(
+        internalStateActions.setDefaultProfileEsqlQuery(defaultProfileEsqlQuery)
+      );
+
       const tabId = toolkit.getCurrentTab().id;
       await toolkit.initializeSingleTab({
         tabId,
@@ -1431,7 +1440,7 @@ describe('tab_state actions', () => {
       });
       expect(resolveSpy).toHaveBeenCalledTimes(1);
       expect(resolveSpy).toHaveBeenCalledWith(expect.objectContaining({ esql: openingQuery }));
-      expect(loadDataViewSpy).toHaveBeenCalledTimes(querySource === 'profile' ? 0 : 1);
+      expect(loadDataViewSpy).toHaveBeenCalledTimes(expectedDataViewLoads);
       expect(getTabDataView(selectTabRuntimeState(toolkit.runtimeStateManager, tabId))).toBe(
         resolved.dataView
       );

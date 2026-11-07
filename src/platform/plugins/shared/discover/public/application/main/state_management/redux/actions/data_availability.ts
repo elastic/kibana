@@ -11,10 +11,38 @@ import { DATASETS_ROUTE, type EsqlDatasetsResult } from '@kbn/esql-types';
 import type { DiscoverServices } from '../../../../../build_services';
 import { internalStateSlice, type InternalStateThunkActionCreator } from '../internal_state';
 import type { RuntimeStateManager } from '../runtime_state';
+import type { DiscoverInternalState } from '../types';
 import { getMemoizedRequest } from '../utils';
 
 const initialESDataAvailabilityRequests = new WeakMap<RuntimeStateManager, Promise<void>>();
 const initialDataViewAvailabilityRequests = new WeakMap<RuntimeStateManager, Promise<void>>();
+
+/**
+ * Waits until we can decide whether to open. With `needsDataView`, `hasDataView` is final;
+ * otherwise a false flag may still mean its check is pending.
+ */
+export const loadDataAvailabilityOnce: InternalStateThunkActionCreator<
+  [options?: { needsDataView?: boolean }],
+  Promise<DiscoverInternalState['initializationState']>
+> = ({ needsDataView = false } = {}) =>
+  async function loadDataAvailabilityOnceThunkFn(dispatch, getState) {
+    const esDataRequest = dispatch(loadESDataAvailabilityOnce());
+    const dataViewRequest = dispatch(loadDataViewAvailabilityOnce());
+
+    // Otherwise the race can resolve on ES data first, before hasDataView is known.
+    if (needsDataView) {
+      await dataViewRequest;
+    }
+
+    const availabilityRequests = [esDataRequest, dataViewRequest];
+    const firstAvailabilityResult = await Promise.race(availabilityRequests);
+
+    if (!firstAvailabilityResult) {
+      await Promise.all(availabilityRequests);
+    }
+
+    return getState().initializationState;
+  };
 
 /**
  * Checks ES indices and ES|QL datasets once per Discover instance. Resolves with the current
