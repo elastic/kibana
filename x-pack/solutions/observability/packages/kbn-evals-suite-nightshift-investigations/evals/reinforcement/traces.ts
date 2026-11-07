@@ -27,25 +27,33 @@ const markdown = (title: string, mermaid: string): string =>
 
 const treePath = (treeId: string): string => `/workspace/${symptomFilePath(treeId)}`;
 
+interface ReplayedQuery {
+  query: string;
+  stdout: string;
+}
+
 const round = (
   example: Omit<ReinforcementExample, 'input'> & {
     input: Omit<ReinforcementExample['input'], 'tool_calls' | 'tool_results'> & {
-      query: string;
-      stdout: string;
+      queries: ReplayedQuery[];
     };
   }
 ): ReinforcementExample => {
   const { tree_id: treeId, markdown: treeMarkdown } = example.input.prior_tree;
   const viewId = `${example.metadata.case_id}-view`;
-  const bashId = `${example.metadata.case_id}-bash`;
-  const { query, stdout, ...input } = example.input;
+  const bashId = (index: number): string => `${example.metadata.case_id}-bash-${index}`;
+  const { queries, ...input } = example.input;
   return {
     metadata: example.metadata,
     input: {
       ...input,
       tool_calls: [
         { tool_id: VIEW_FILE, tool_call_id: viewId, params: { file_path: treePath(treeId) } },
-        { tool_id: BASH, tool_call_id: bashId, params: { command: query } },
+        ...queries.map(({ query }, index) => ({
+          tool_id: BASH,
+          tool_call_id: bashId(index),
+          params: { command: query },
+        })),
       ],
       tool_results: [
         {
@@ -53,17 +61,17 @@ const round = (
           tool_call_id: viewId,
           results: [{ tool_result_id: `${viewId}-r`, type: 'other', data: { text: treeMarkdown } }],
         },
-        {
+        ...queries.map(({ stdout }, index) => ({
           tool_id: BASH,
-          tool_call_id: bashId,
+          tool_call_id: bashId(index),
           results: [
             {
-              tool_result_id: `${bashId}-r`,
-              type: 'other',
+              tool_result_id: `${bashId(index)}-r`,
+              type: 'other' as const,
               data: { exit_code: 0, stdout },
             },
           ],
-        },
+        })),
       ],
     },
   };
@@ -84,6 +92,19 @@ const unconfirmed = (rejected: string, inconclusive: string): string =>
 
 const esqlQuery = (body: string): string =>
   `esql "FROM logs-* | WHERE @timestamp >= \\"2026-09-14T17:50:00.000Z\\" AND @timestamp < \\"2026-09-14T18:20:00.000Z\\" AND ${body} | LIMIT 20"`;
+
+/** The uiam pod's lifecycle around the incident: the restart and the deletion are one event. */
+const UIAM_POD_LIFECYCLE: ReplayedQuery = {
+  query: esqlQuery(
+    'k8s.pod.name LIKE \\"uiam-58fb87db87-*\\" | KEEP @timestamp, k8s.pod.name, event.action, message | SORT @timestamp'
+  ),
+  stdout: [
+    '@timestamp                 k8s.pod.name           event.action  message',
+    '2026-09-14T18:00:00.000Z   uiam-58fb87db87-26cfj  killing       Stopping container uiam for pod restart',
+    '2026-09-14T18:00:00.000Z   uiam-58fb87db87-26cfj  deleted       Pod deleted; ReplicaSet uiam-58fb87db87 creates a replacement',
+    '2026-09-14T18:01:00.000Z   uiam-58fb87db87-vd5fc  started       Replacement pod ready and serving traffic',
+  ].join('\n'),
+};
 
 const EQL_TREE = `flowchart TD
     S1([EQL query success SLO burn]) --> E1[Read otel gateway and proxy errors]
@@ -130,15 +151,7 @@ export const reinforcementExamples: ReinforcementExample[] = [
         version: 1,
         markdown: markdown('EQL query success SLO burn', EQL_TREE),
       },
-      query: esqlQuery(
-        'k8s.pod.name LIKE \\"uiam-58fb87db87-*\\" | KEEP @timestamp, k8s.pod.name, event.action, message | SORT @timestamp'
-      ),
-      stdout: [
-        '@timestamp                 k8s.pod.name           event.action  message',
-        '2026-09-14T18:00:00.000Z   uiam-58fb87db87-26cfj  killing       Stopping container uiam for pod restart',
-        '2026-09-14T18:00:00.000Z   uiam-58fb87db87-26cfj  deleted       Pod deleted; ReplicaSet uiam-58fb87db87 creates a replacement',
-        '2026-09-14T18:01:00.000Z   uiam-58fb87db87-vd5fc  started       Replacement pod ready and serving traffic',
-      ].join('\n'),
+      queries: [UIAM_POD_LIFECYCLE],
     },
   }),
   round({
@@ -158,15 +171,20 @@ export const reinforcementExamples: ReinforcementExample[] = [
         version: 2,
         markdown: markdown('Otel delivery gateway errors', GATEWAY_TREE),
       },
-      query: esqlQuery(
-        'service.name == \\"otel-delivery-gateway\\" AND log.level == \\"error\\" | STATS errors = COUNT(*) BY bucket = BUCKET(@timestamp, 5 minutes), destination.address | SORT bucket'
-      ),
-      stdout: [
-        'bucket                     destination.address    errors',
-        '2026-09-14T17:50:00.000Z   uiam-58fb87db87-26cfj  212',
-        '2026-09-14T17:55:00.000Z   uiam-58fb87db87-26cfj  348',
-        '2026-09-14T18:00:00.000Z   uiam-58fb87db87-26cfj  41',
-      ].join('\n'),
+      queries: [
+        {
+          query: esqlQuery(
+            'service.name == \\"otel-delivery-gateway\\" AND log.level == \\"error\\" | STATS errors = COUNT(*) BY bucket = BUCKET(@timestamp, 5 minutes), destination.address | SORT bucket'
+          ),
+          stdout: [
+            'bucket                     destination.address    errors',
+            '2026-09-14T17:50:00.000Z   uiam-58fb87db87-26cfj  212',
+            '2026-09-14T17:55:00.000Z   uiam-58fb87db87-26cfj  348',
+            '2026-09-14T18:00:00.000Z   uiam-58fb87db87-26cfj  41',
+          ].join('\n'),
+        },
+        UIAM_POD_LIFECYCLE,
+      ],
     },
   }),
   round({
@@ -187,15 +205,20 @@ export const reinforcementExamples: ReinforcementExample[] = [
         version: 1,
         markdown: markdown('Elasticsearch proxy errors', PROXY_TREE),
       },
-      query: esqlQuery(
-        'service.name == \\"elasticsearch-proxy\\" AND log.level == \\"error\\" | STATS errors = COUNT(*) BY bucket = BUCKET(@timestamp, 5 minutes), destination.address | SORT bucket'
-      ),
-      stdout: [
-        'bucket                     destination.address    errors',
-        '2026-09-14T17:50:00.000Z   uiam-58fb87db87-26cfj  87',
-        '2026-09-14T17:55:00.000Z   uiam-58fb87db87-26cfj  131',
-        '2026-09-14T18:00:00.000Z   uiam-58fb87db87-26cfj  19',
-      ].join('\n'),
+      queries: [
+        {
+          query: esqlQuery(
+            'service.name == \\"elasticsearch-proxy\\" AND log.level == \\"error\\" | STATS errors = COUNT(*) BY bucket = BUCKET(@timestamp, 5 minutes), destination.address | SORT bucket'
+          ),
+          stdout: [
+            'bucket                     destination.address    errors',
+            '2026-09-14T17:50:00.000Z   uiam-58fb87db87-26cfj  87',
+            '2026-09-14T17:55:00.000Z   uiam-58fb87db87-26cfj  131',
+            '2026-09-14T18:00:00.000Z   uiam-58fb87db87-26cfj  19',
+          ].join('\n'),
+        },
+        UIAM_POD_LIFECYCLE,
+      ],
     },
   }),
   round({
@@ -218,15 +241,19 @@ export const reinforcementExamples: ReinforcementExample[] = [
         version: 1,
         markdown: markdown('Elasticsearch proxy errors', PROXY_TREE),
       },
-      query: esqlQuery(
-        'service.name == \\"elasticsearch-proxy\\" | STATS errors = COUNT(*) BY k8s.pod.name | SORT errors DESC'
-      ),
-      stdout: [
-        'k8s.pod.name                         errors',
-        'elasticsearch-proxy-7d9c5b6f4-2xkqp  14',
-        'elasticsearch-proxy-7d9c5b6f4-8mzvt  12',
-        'elasticsearch-proxy-7d9c5b6f4-q4wjn  11',
-      ].join('\n'),
+      queries: [
+        {
+          query: esqlQuery(
+            'service.name == \\"elasticsearch-proxy\\" | STATS errors = COUNT(*) BY k8s.pod.name | SORT errors DESC'
+          ),
+          stdout: [
+            'k8s.pod.name                         errors',
+            'elasticsearch-proxy-7d9c5b6f4-2xkqp  14',
+            'elasticsearch-proxy-7d9c5b6f4-8mzvt  12',
+            'elasticsearch-proxy-7d9c5b6f4-q4wjn  11',
+          ].join('\n'),
+        },
+      ],
     },
   }),
 ];
