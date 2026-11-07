@@ -109,7 +109,10 @@ describe('ServerShortUrlClient', () => {
             url: '/foo/bar',
           },
         })
-      ).rejects.toThrow('Invalid [slug = pipe|is-not-allowed].');
+      ).rejects.toMatchObject({
+        code: 'INVALID_SLUG',
+        message: 'Invalid [slug = pipe|is-not-allowed].',
+      });
     });
   });
 

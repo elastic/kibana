@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 import { DIGITAL_EXPERIENCE_FEATURE_ID } from '../../common/feature';
 import type { ApplicationSource } from '../../common/types/applications';
 import type { SessionsListUrlQuery } from '../utils/sessions_list_query';
+import { useSharedFilters } from './use_shared_filters';
 import { useDigitalExperienceRouter } from './use_digital_experience_router';
 import { useKibanaServices } from './use_kibana_services';
 import { useListQuery } from './use_list_query';
@@ -25,7 +26,8 @@ export interface ApplicationLinks {
 
 /**
  * Links to an application's pages. They keep the applications list's query, so its breadcrumb
- * leads back to the same list, and the sessions list's state where given.
+ * leads back to the same list, the filters the Overview and the Sessions share (browser, OS and
+ * country), and the sessions list's state where given.
  */
 export const useApplicationLinks = (
   serviceName: string,
@@ -34,11 +36,12 @@ export const useApplicationLinks = (
   const { application } = useKibanaServices();
   const router = useDigitalExperienceRouter();
   const listQuery = useListQuery();
+  const sharedFilters = useSharedFilters();
 
   return useMemo(() => {
     const toHref = (path: string) =>
       application.getUrlForApp(DIGITAL_EXPERIENCE_FEATURE_ID, { path });
-    const query = { ...listQuery, source };
+    const query = { ...listQuery, ...sharedFilters, source };
     const overviewPath = router.link('/{serviceName}', { path: { serviceName }, query });
     return {
       overviewHref: toHref(overviewPath),
@@ -60,5 +63,5 @@ export const useApplicationLinks = (
           })
         ),
     };
-  }, [application, router, listQuery, serviceName, source]);
+  }, [application, router, listQuery, sharedFilters, serviceName, source]);
 };
