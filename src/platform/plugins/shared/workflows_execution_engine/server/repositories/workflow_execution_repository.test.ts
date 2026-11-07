@@ -867,6 +867,40 @@ describe('WorkflowExecutionRepository', () => {
       expect(result[1]).toBe('exec-2');
     });
 
+    it('should query caller-supplied statuses, including queued backlog', async () => {
+      workflowExecutionsDataClient.search.mockResolvedValue(
+        asSearchResponse({
+          hits: { hits: [], total: { value: 0, relation: 'eq' } },
+        })
+      );
+
+      await repository.getRunningExecutionsByConcurrencyGroup(
+        'server-1',
+        'default',
+        undefined,
+        undefined,
+        [ExecutionStatus.QUEUED, ExecutionStatus.PENDING]
+      );
+
+      expect(workflowExecutionsDataClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              filter: [
+                { term: { concurrencyGroupKey: 'server-1' } },
+                { term: { spaceId: 'default' } },
+                {
+                  terms: {
+                    status: [ExecutionStatus.QUEUED, ExecutionStatus.PENDING],
+                  },
+                },
+              ],
+            },
+          },
+        })
+      );
+    });
+
     it('should exclude specified execution ID from results', async () => {
       const mockExecutions = [
         {

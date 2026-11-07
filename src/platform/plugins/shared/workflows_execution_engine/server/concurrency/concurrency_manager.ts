@@ -12,10 +12,42 @@ import {
   ConcurrencySlotOccupyingExecutionStatuses,
   DEFAULT_CONCURRENCY_QUEUE_SIZE,
   ExecutionStatus,
+  isTerminalStatus,
 } from '@kbn/workflows';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { WorkflowTemplatingEngine } from '../templating_engine';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
+
+/** Slot-holders plus the queued backlog, oldest first, so one snapshot can rank a new run. */
+const QUEUE_ADMISSION_STATUSES: readonly ExecutionStatus[] = [
+  ...ConcurrencySlotOccupyingExecutionStatuses,
+  ExecutionStatus.QUEUED,
+];
+
+/**
+ * Matches the default page of `getRunningExecutionsByConcurrencyGroup`. A full page that does not
+ * contain this run is truncated, so its rank is not known.
+ */
+const ADMISSION_ID_PAGE_SIZE = 5000;
+
+/**
+ * Rank of `currentExecutionId` in an oldest-first id list.
+ * A missing id is treated as newest so a run that cannot see itself does not take an older slot.
+ */
+const placeInAdmissionOrder = (
+  orderedIds: readonly string[],
+  currentExecutionId: string
+): { rank: number; olderIds: string[]; newerCount: number } => {
+  const selfIndex = orderedIds.indexOf(currentExecutionId);
+  if (selfIndex === -1) {
+    return { rank: orderedIds.length, olderIds: [...orderedIds], newerCount: 0 };
+  }
+  return {
+    rank: selfIndex,
+    olderIds: orderedIds.slice(0, selfIndex),
+    newerCount: orderedIds.length - selfIndex - 1,
+  };
+};
 
 /**
  * Manages concurrency control for workflow executions.
@@ -74,18 +106,21 @@ export class ConcurrencyManager {
   /**
    * Checks concurrency limits and applies the collision strategy if needed.
    *
-   * For 'cancel-in-progress' strategy:
-   * - Queries slot-occupying executions with the same concurrency group key (excludes backlog `queued`)
-   * - If limit is exceeded, cancels the oldest execution(s) to make room
-   * - Returns true if the new execution can proceed, false otherwise
+   * Admission uses one oldest-first snapshot that includes this run. Rank is the number of
+   * executions before this one. Each run writes only its own status, except cancel-in-progress
+   * winners, which still cancel older runs that no longer fit.
    *
-   * For 'drop' strategy:
-   * - Same slot count as cancel-in-progress; if limit exceeded, SKIPPED new execution (false).
+   * For 'cancel-in-progress':
+   * - The newest `max` runs proceed. A run with `max` or more newer peers cancels itself.
+   * - A winner cancels the oldest runs that do not fit in the remaining slots.
+   * - A run missing from the snapshot does not proceed and does not cancel peers.
+   *
+   * For 'drop':
+   * - Rank below `max` proceeds. A later rank is SKIPPED, even when newer peers are also pending.
    *
    * For `queue`:
-   * - If concurrency slots below max → proceed.
-   * - Else enqueues newest as `queued` unless queue depth exceeds `queue-size`
-   *   (`DEFAULT_CONCURRENCY_QUEUE_SIZE` when omitted), then SKIPPED explicitly.
+   * - The snapshot includes slot-holders and the `queued` backlog.
+   * - Rank below `max` proceeds. The next `queue-size` ranks are `queued`. The rest are SKIPPED.
    *
    * @param concurrencySettings - The concurrency settings from workflow definition
    * @param concurrencyGroupKey - The evaluated concurrency group key
@@ -108,67 +143,72 @@ export class ConcurrencyManager {
     const maxConcurrency = concurrencySettings.max ?? 1;
 
     if (strategy === 'queue') {
-      const othersOccupyingSlots =
-        await this.workflowExecutionRepository.countExecutionsByConcurrencyGroupAndStatuses(
-          concurrencyGroupKey,
-          spaceId,
-          ConcurrencySlotOccupyingExecutionStatuses,
-          currentExecutionId
-        );
-
-      if (othersOccupyingSlots < maxConcurrency) {
-        return true;
+      const orderedIds = await this.listAdmissionIds(
+        concurrencyGroupKey,
+        spaceId,
+        QUEUE_ADMISSION_STATUSES
+      );
+      const queueMax = concurrencySettings['queue-size'] ?? DEFAULT_CONCURRENCY_QUEUE_SIZE;
+      const pageTruncated =
+        orderedIds.length >= ADMISSION_ID_PAGE_SIZE && !orderedIds.includes(currentExecutionId);
+      if (pageTruncated) {
+        if (await this.currentRunAlreadyTerminal(currentExecutionId, spaceId)) {
+          return false;
+        }
+      } else {
+        const { rank } = placeInAdmissionOrder(orderedIds, currentExecutionId);
+        if (rank < maxConcurrency) {
+          return true;
+        }
+        if (rank < maxConcurrency + queueMax) {
+          await this.workflowExecutionRepository.updateWorkflowExecution(
+            {
+              id: currentExecutionId,
+              status: ExecutionStatus.QUEUED,
+            },
+            { refresh: 'wait_for' }
+          );
+          return false;
+        }
       }
 
-      const queuedCount =
-        await this.workflowExecutionRepository.countExecutionsByConcurrencyGroupAndStatuses(
-          concurrencyGroupKey,
-          spaceId,
-          [ExecutionStatus.QUEUED]
-        );
+      const skipTimestamp = new Date().toISOString();
+      await this.workflowExecutionRepository.updateWorkflowExecution({
+        id: currentExecutionId,
+        status: ExecutionStatus.SKIPPED,
+        cancelRequested: true,
+        cancellationReason: `Queue full (queue-size: ${queueMax})`,
+        cancelledAt: skipTimestamp,
+        cancelledBy: 'system',
+      });
+      return false;
+    }
 
-      const queueMax = concurrencySettings['queue-size'] ?? DEFAULT_CONCURRENCY_QUEUE_SIZE;
-
-      if (queuedCount >= queueMax) {
-        const skipTimestamp = new Date().toISOString();
-        await this.workflowExecutionRepository.updateWorkflowExecution({
-          id: currentExecutionId,
-          status: ExecutionStatus.SKIPPED,
-          cancelRequested: true,
-          cancellationReason: `Queue full (queue-size: ${queueMax})`,
-          cancelledAt: skipTimestamp,
-          cancelledBy: 'system',
-        });
+    const orderedIds = await this.listAdmissionIds(
+      concurrencyGroupKey,
+      spaceId,
+      ConcurrencySlotOccupyingExecutionStatuses
+    );
+    if (strategy === 'cancel-in-progress' && !orderedIds.includes(currentExecutionId)) {
+      // A cancel that already landed removes this run from the slot snapshot. Treating that
+      // miss as "newest" would cancel the winner and start this run anyway.
+      if (await this.currentRunAlreadyTerminal(currentExecutionId, spaceId)) {
         return false;
       }
-
-      await this.workflowExecutionRepository.updateWorkflowExecution(
-        {
-          id: currentExecutionId,
-          status: ExecutionStatus.QUEUED,
-        },
-        { refresh: 'wait_for' }
+      await this.cancelCurrentRun(
+        currentExecutionId,
+        `Cancelled due to concurrency limit (max: ${maxConcurrency})`
       );
       return false;
     }
 
-    // Slot-occupying execution IDs (excludes concurrency backlog `queued`).
-    const runningExecutionIds =
-      await this.workflowExecutionRepository.getRunningExecutionsByConcurrencyGroup(
-        concurrencyGroupKey,
-        spaceId,
-        currentExecutionId
-      );
+    const { rank, olderIds, newerCount } = placeInAdmissionOrder(orderedIds, currentExecutionId);
 
-    const activeCount = runningExecutionIds.length;
-
-    // If we're within the limit, allow execution to proceed
-    if (activeCount < maxConcurrency) {
-      return true;
-    }
-
-    // Handle 'drop' strategy: mark new execution as SKIPPED if limit is exceeded
+    // Drop ignores newer pending peers. Counting them would skip every simultaneous run.
     if (strategy === 'drop') {
+      if (rank < maxConcurrency) {
+        return true;
+      }
       const skipTimestamp = new Date().toISOString();
       await this.workflowExecutionRepository.updateWorkflowExecution({
         id: currentExecutionId,
@@ -178,18 +218,30 @@ export class ConcurrencyManager {
         cancelledAt: skipTimestamp,
         cancelledBy: 'system',
       });
-      return false; // Drop the new execution
+      return false;
     }
 
-    // Handle 'cancel-in-progress' strategy: cancel oldest execution(s) to make room
+    const activeCount = olderIds.length + newerCount;
+    if (activeCount < maxConcurrency) {
+      return true;
+    }
+
     if (strategy === 'cancel-in-progress') {
-      // Calculate how many executions to cancel
-      const executionsToCancel = activeCount - maxConcurrency + 1;
+      // A newer run owns the slot. Cancelling peers here would cancel that newer run too.
+      if (newerCount >= maxConcurrency) {
+        await this.cancelCurrentRun(
+          currentExecutionId,
+          `Cancelled due to concurrency limit (max: ${maxConcurrency})`
+        );
+        return false;
+      }
 
-      // Cancel the oldest executions (they're already sorted by createdAt ascending)
-      const executionIdsToCancel = runningExecutionIds.slice(0, executionsToCancel);
+      const slotsForOlder = maxConcurrency - newerCount - 1;
+      const executionIdsToCancel = olderIds.slice(0, olderIds.length - slotsForOlder);
+      if (executionIdsToCancel.length === 0) {
+        return true;
+      }
 
-      // Bulk update all executions to cancelled status in a single ES request
       const cancellationTimestamp = new Date().toISOString();
       await this.workflowExecutionRepository.bulkUpdateWorkflowExecutions(
         executionIdsToCancel.map((id) => ({
@@ -202,14 +254,53 @@ export class ConcurrencyManager {
         }))
       );
 
-      // Propagate cancellation to running tasks (can be done in parallel)
       await Promise.all(
         executionIdsToCancel.map((id) => this.workflowTaskManager.forceRunIdleTasks(id))
       );
 
-      return true; // Execution can proceed after cancelling old ones
+      return true;
     }
 
     return true;
+  }
+
+  private async currentRunAlreadyTerminal(
+    currentExecutionId: string,
+    spaceId: string
+  ): Promise<boolean> {
+    const current = await this.workflowExecutionRepository.getWorkflowExecutionById(
+      currentExecutionId,
+      spaceId
+    );
+    return current == null || isTerminalStatus(current.status);
+  }
+
+  private async cancelCurrentRun(
+    currentExecutionId: string,
+    cancellationReason: string
+  ): Promise<void> {
+    const cancellationTimestamp = new Date().toISOString();
+    await this.workflowExecutionRepository.updateWorkflowExecution({
+      id: currentExecutionId,
+      status: ExecutionStatus.CANCELLED,
+      cancelRequested: true,
+      cancellationReason,
+      cancelledAt: cancellationTimestamp,
+      cancelledBy: 'system',
+    });
+  }
+
+  private listAdmissionIds(
+    concurrencyGroupKey: string,
+    spaceId: string,
+    statuses: readonly ExecutionStatus[]
+  ): Promise<string[]> {
+    return this.workflowExecutionRepository.getRunningExecutionsByConcurrencyGroup(
+      concurrencyGroupKey,
+      spaceId,
+      undefined,
+      undefined,
+      statuses
+    );
   }
 }
