@@ -9,6 +9,56 @@ import type { KbnClient, KbnClientRequesterError } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { EXECUTION_ID_BAGGAGE_KEY, EVAL_EXPERIMENT_ID_BAGGAGE_KEY } from '@kbn/inference-tracing';
 
+/**
+ * Retries (after the initial attempt) for a transient failure. Small and bounded:
+ * it absorbs a blip without turning a deterministic connector failure into a
+ * slow success.
+ */
+const DEFAULT_HTTP_RETRIES = 2;
+
+const TRANSPORT_ERROR_CODES = new Set([
+  'UND_ERR_SOCKET',
+  'UND_ERR_HEADERS_TIMEOUT',
+  'UND_ERR_BODY_TIMEOUT',
+  'UND_ERR_CONNECT_TIMEOUT',
+  'ECONNRESET',
+  'ECONNREFUSED',
+  'EPIPE',
+  'ETIMEDOUT',
+]);
+
+/**
+ * True when the request never got an HTTP response because the connection failed or was
+ * closed (e.g. Kibana's `server.socketTimeout` closing a stalled handler). Caller aborts are
+ * never transport errors.
+ */
+export function isTransportError(error: unknown): boolean {
+  if (typeof (error as { status?: unknown } | undefined)?.status === 'number') {
+    return false;
+  }
+  let current: unknown = error;
+  for (let depth = 0; depth < 5 && current; depth++) {
+    const { name, code, message } = current as { name?: string; code?: string; message?: string };
+    if (name === 'AbortError') {
+      return false;
+    }
+    if (code && TRANSPORT_ERROR_CODES.has(code)) {
+      return true;
+    }
+    if (current instanceof TypeError && message === 'fetch failed') {
+      return true;
+    }
+    current = (current as { cause?: unknown }).cause;
+  }
+  return false;
+}
+
+// Inference calls hold no server-side state, so re-sending one after a dropped connection is
+// safe. Other POSTs (workflow runs, proposal writes) may have taken effect before the socket
+// closed, so they are not retried.
+const isSafeToResend = (method: string, path: string): boolean =>
+  ['GET', 'HEAD'].includes(method.toUpperCase()) || path.startsWith('/internal/inference/');
+
 // redefine args type to make it easier to handle in a type-safe way
 type HttpHandlerArgs =
   | [string, HttpFetchOptions & { asResponse: true }]
@@ -63,7 +113,13 @@ export function httpHandlerFromKbnClient({
 
     const finalHeaders = Object.keys(nextHeaders).length ? nextHeaders : undefined;
 
-    const maxRetries = Number(process.env.KBN_EVALS_HTTP_RETRIES ?? '0') || 0;
+    // Parsed once, outside the retry loop: a malformed body is a caller bug, not a transient failure.
+    const requestBody = body && typeof body === 'string' ? JSON.parse(body) : null;
+
+    // With a default of 0 a single dropped connection lost the run and the suite published the
+    // serving-layer error as a scored model failure. `KBN_EVALS_HTTP_RETRIES=0` disables retries.
+    const maxRetries =
+      Number(process.env.KBN_EVALS_HTTP_RETRIES ?? String(DEFAULT_HTTP_RETRIES)) || 0;
     const retryStatuses = new Set([429, 503, 504]);
 
     async function sleep(ms: number) {
@@ -101,7 +157,7 @@ export function httpHandlerFromKbnClient({
         const response = await kbnClient.request({
           path: options.path,
           method: method as any,
-          body: body && typeof body === 'string' ? JSON.parse(body) : null,
+          body: requestBody,
           query,
           responseType: rawResponse ? 'stream' : undefined,
           headers: finalHeaders,
@@ -142,10 +198,16 @@ export function httpHandlerFromKbnClient({
 
         lastError = error;
 
-        const shouldRetry =
-          attempt < maxRetries && typeof status === 'number' && retryStatuses.has(status);
+        const safeToResend = !signal?.aborted && isSafeToResend(method, options.path);
+        // 429 and 503 mean the request was refused. A 504 means a proxy gave up waiting, so the
+        // request may still have run and is only re-sent when that is harmless.
+        const retryableStatus =
+          typeof status === 'number' &&
+          retryStatuses.has(status) &&
+          (status !== 504 || safeToResend);
+        const retryableTransport = safeToResend && isTransportError(error);
 
-        if (!shouldRetry) {
+        if (attempt >= maxRetries || !(retryableStatus || retryableTransport)) {
           throw error;
         }
 
@@ -162,9 +224,11 @@ export function httpHandlerFromKbnClient({
         const delayMs = baseDelayMs + jitterMs;
 
         log.warning(
-          `HTTP ${status} from Kibana; retrying in ${Math.round(delayMs / 1000)}s (attempt ${
-            attempt + 1
-          }/${maxRetries + 1})`
+          `${
+            retryableStatus ? `HTTP ${status}` : `Transport error (${error.message.slice(0, 200)})`
+          } from Kibana on ${method} ${options.path}; retrying in ${Math.round(
+            delayMs / 1000
+          )}s (attempt ${attempt + 1}/${maxRetries + 1})`
         );
         await sleep(delayMs);
       }
