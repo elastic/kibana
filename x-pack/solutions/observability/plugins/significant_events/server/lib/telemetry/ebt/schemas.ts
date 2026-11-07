@@ -13,15 +13,54 @@ import type {
   AgentToolEventStatusUpdateProps,
   AgentToolKnowledgeIndicatorIdentificationStartedProps,
   DetectionScanProps,
+  DiscoveryTriggeredProps,
   KnowledgeIndicatorFeaturesIdentifiedProps,
   KnowledgeIndicatorQueriesGeneratedProps,
   KnowledgeIndicatorOnboardingScheduledProps,
   AgentToolEventWriteProps,
   AgentToolEventSearchProps,
+  OptionalWorkflowExecutionTelemetryProps,
+  ParentWorkflowExecutionTelemetryProps,
+  WorkflowExecutionTelemetryProps,
 } from './types';
+
+const workflowExecutionTelemetrySchema: RootSchema<WorkflowExecutionTelemetryProps> = {
+  workflow_execution_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Workflow Engine execution ID of the workflow that produced the event; joins to Workflow Engine terminal telemetry',
+    },
+  },
+};
+
+const optionalWorkflowExecutionTelemetrySchema: RootSchema<OptionalWorkflowExecutionTelemetryProps> =
+  {
+    workflow_execution_id: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Workflow Engine execution ID that produced the event; absent for standalone invocations',
+        optional: true,
+      },
+    },
+  };
+
+const parentWorkflowExecutionTelemetrySchema: RootSchema<ParentWorkflowExecutionTelemetryProps> = {
+  parent_workflow_execution_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Execution ID of the workflow that started the producing workflow via workflow.execute (the onboarding run for KI children); joins to onboarding-scheduled workflow_execution_id; absent for top-level or standalone runs',
+      optional: true,
+    },
+  },
+};
 
 const knowledgeIndicatorQueriesGeneratedSchema: RootSchema<KnowledgeIndicatorQueriesGeneratedProps> =
   {
+    ...optionalWorkflowExecutionTelemetrySchema,
+    ...parentWorkflowExecutionTelemetrySchema,
     count: {
       type: 'long',
       _meta: {
@@ -128,10 +167,13 @@ const knowledgeIndicatorQueriesGeneratedSchema: RootSchema<KnowledgeIndicatorQue
 
 const knowledgeIndicatorFeaturesIdentifiedSchema: RootSchema<KnowledgeIndicatorFeaturesIdentifiedProps> =
   {
+    ...optionalWorkflowExecutionTelemetrySchema,
+    ...parentWorkflowExecutionTelemetrySchema,
     run_id: {
       type: 'keyword',
       _meta: {
-        description: 'UUID identifying the full identification run (shared across iterations)',
+        description:
+          'Legacy feature-identification run ID; equals workflow_execution_id for workflow invocations',
       },
     },
     connector_id: {
@@ -254,6 +296,7 @@ const knowledgeIndicatorFeaturesIdentifiedSchema: RootSchema<KnowledgeIndicatorF
 
 const agentBuilderKnowledgeIndicatorCreatedSchema: RootSchema<AgentBuilderKnowledgeIndicatorCreatedProps> =
   {
+    ...optionalWorkflowExecutionTelemetrySchema,
     ki_kind: {
       type: 'keyword',
       _meta: {
@@ -289,6 +332,7 @@ const agentBuilderKnowledgeIndicatorCreatedSchema: RootSchema<AgentBuilderKnowle
 
 const agentToolKnowledgeIndicatorIdentificationStartedSchema: RootSchema<AgentToolKnowledgeIndicatorIdentificationStartedProps> =
   {
+    ...optionalWorkflowExecutionTelemetrySchema,
     success: {
       type: 'boolean',
       _meta: {
@@ -311,6 +355,7 @@ const agentToolKnowledgeIndicatorIdentificationStartedSchema: RootSchema<AgentTo
   };
 
 const agentToolEventCreateSchema: RootSchema<AgentToolEventCreateProps> = {
+  ...optionalWorkflowExecutionTelemetrySchema,
   success: {
     type: 'boolean',
     _meta: {
@@ -339,6 +384,7 @@ const agentToolEventCreateSchema: RootSchema<AgentToolEventCreateProps> = {
 };
 
 const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdateProps> = {
+  ...optionalWorkflowExecutionTelemetrySchema,
   success: {
     type: 'boolean',
     _meta: {
@@ -374,10 +420,14 @@ const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdatePro
   },
 };
 
-const discoveryTriggeredSchema = {
+const discoveryTriggeredSchema: RootSchema<DiscoveryTriggeredProps> = {
+  ...workflowExecutionTelemetrySchema,
   execution_id: {
     type: 'keyword' as const,
-    _meta: { description: 'The workflow execution ID returned by the orchestrator' },
+    _meta: {
+      description:
+        'Deprecated alias of workflow_execution_id; retained for discovery-triggered compatibility',
+    },
   },
   space_id: {
     type: 'keyword' as const,
@@ -386,6 +436,7 @@ const discoveryTriggeredSchema = {
 };
 
 const detectionScanSchema: RootSchema<DetectionScanProps> = {
+  ...optionalWorkflowExecutionTelemetrySchema,
   took_ms: {
     type: 'long',
     _meta: {
@@ -468,6 +519,7 @@ const detectionScanSchema: RootSchema<DetectionScanProps> = {
 };
 
 const onboardingScheduledSchema: RootSchema<KnowledgeIndicatorOnboardingScheduledProps> = {
+  ...workflowExecutionTelemetrySchema,
   source_id: {
     type: 'keyword',
     _meta: {
@@ -478,7 +530,7 @@ const onboardingScheduledSchema: RootSchema<KnowledgeIndicatorOnboardingSchedule
     type: 'keyword',
     _meta: {
       description:
-        'The workflow execution ID for this onboarding run; join key to workflow_execution_completed/_failed/_cancelled engine events and to streams-features-identified / streams-significant-events-queries-generated events',
+        'Deprecated alias of workflow_execution_id; retained for onboarding-scheduled compatibility',
     },
   },
   workflow_id: {
@@ -509,6 +561,7 @@ const onboardingScheduledSchema: RootSchema<KnowledgeIndicatorOnboardingSchedule
 
 const agentToolEventInvestigationAttachSchema: RootSchema<AgentToolEventInvestigationAttachProps> =
   {
+    ...optionalWorkflowExecutionTelemetrySchema,
     success: {
       type: 'boolean',
       _meta: {
@@ -531,10 +584,10 @@ const agentToolEventInvestigationAttachSchema: RootSchema<AgentToolEventInvestig
         optional: true,
       },
     },
-    workflow_execution_id: {
+    investigation_workflow_execution_id: {
       type: 'keyword',
       _meta: {
-        description: 'The investigation workflow execution id that was attached',
+        description: 'The investigation workflow execution ID that was attached to the event',
       },
     },
     error_message: {
@@ -547,6 +600,7 @@ const agentToolEventInvestigationAttachSchema: RootSchema<AgentToolEventInvestig
   };
 
 const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
+  ...optionalWorkflowExecutionTelemetrySchema,
   success: {
     type: 'boolean',
     _meta: {
@@ -601,6 +655,7 @@ const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
 };
 
 const agentToolEventSearchSchema: RootSchema<AgentToolEventSearchProps> = {
+  ...optionalWorkflowExecutionTelemetrySchema,
   success: {
     type: 'boolean',
     _meta: {

@@ -584,13 +584,22 @@ describe('generateQueriesRoute', () => {
   const makeHandlerParams = ({
     agentBuilder,
     body = { connectorId: 'test-connector' },
+    workflowExecutionId,
   }: {
     agentBuilder: unknown;
     body?: Record<string, unknown>;
+    workflowExecutionId?: string;
   }) =>
     ({
       params: { path: { sourceId: 'logs.test' }, body },
-      request: { spaceId: 'space-a', events: { aborted$: { subscribe: jest.fn() } } },
+      request: {
+        spaceId: 'space-a',
+        events: { aborted$: { subscribe: jest.fn() } },
+        isInternalApiRequest: workflowExecutionId !== undefined,
+        headers: workflowExecutionId
+          ? { 'x-kibana-workflow-execution-id': workflowExecutionId }
+          : {},
+      },
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: {
           get: jest.fn().mockResolvedValue({
@@ -674,8 +683,10 @@ describe('generateQueriesRoute', () => {
         body: {
           connectorId: 'test-connector',
           runId: 'run-1',
+          parentWorkflowExecutionId: 'onboarding-run-1',
           maxExistingQueriesForContext: 10,
         },
+        workflowExecutionId: 'workflow-run-1',
       })
     );
 
@@ -684,6 +695,8 @@ describe('generateQueriesRoute', () => {
         source: { id: 'logs.test', view_name: '$.nightshift.sources.default.logs' },
         connectorId: 'test-connector',
         runId: 'run-1',
+        workflowExecutionId: 'workflow-run-1',
+        parentWorkflowExecutionId: 'onboarding-run-1',
         maxExistingQueriesForContext: 10,
       }),
       expect.any(Object)
@@ -714,9 +727,12 @@ describe('generateQueriesRoute', () => {
   it('generates a run id when one is not provided', async () => {
     await generateRoute.handler(makeHandlerParams({ agentBuilder: makeAgentBuilder() }));
 
-    const { runId, maxExistingQueriesForContext } = mockGenerateKIQueries.mock.calls[0][0];
+    const { runId, workflowExecutionId, parentWorkflowExecutionId, maxExistingQueriesForContext } =
+      mockGenerateKIQueries.mock.calls[0][0];
     expect(runId).toEqual(expect.any(String));
     expect(runId).not.toBe('');
+    expect(workflowExecutionId).toBeUndefined();
+    expect(parentWorkflowExecutionId).toBeUndefined();
     expect(maxExistingQueriesForContext).toBe(50);
   });
 

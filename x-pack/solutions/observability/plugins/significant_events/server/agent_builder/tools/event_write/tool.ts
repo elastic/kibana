@@ -61,7 +61,6 @@ export const eventsWriteItemSchema = lazySchema(() =>
       signals: true,
       causal_features: true,
       blast_radius: true,
-      workflow_execution_id: true,
       conversation_id: true,
     })
     .extend({
@@ -437,7 +436,12 @@ export function createEventsWriteTool({
           items: toolParams.items,
           findDetections: (detectionIds) => detectionClient.findByIds(detectionIds),
         });
-        const resolvedItems = identifiedItems.map((item) => assignStoredSourceIds(catalog, item));
+        const resolvedItems = identifiedItems.map((item) => ({
+          ...assignStoredSourceIds(catalog, item),
+          ...(context.workflowExecutionId
+            ? { workflow_execution_id: context.workflowExecutionId }
+            : {}),
+        }));
         storedItems = resolvedItems;
         const items = await enrichCausalFeatures(
           resolvedItems,
@@ -465,6 +469,9 @@ export function createEventsWriteTool({
             description: 'events_write telemetry',
             track: () =>
               telemetry.trackAgentToolEventsWrite({
+                ...(context.workflowExecutionId
+                  ? { workflow_execution_id: context.workflowExecutionId }
+                  : {}),
                 success: result.written || isSkipped,
                 event_id: result.event_id ?? 'unknown',
                 status: result.status,
@@ -508,6 +515,9 @@ export function createEventsWriteTool({
             description: 'failed events_write telemetry',
             track: () =>
               telemetry.trackAgentToolEventsWrite({
+                ...(context.workflowExecutionId
+                  ? { workflow_execution_id: context.workflowExecutionId }
+                  : {}),
                 success: false,
                 event_id: input.event_id ?? 'unknown',
                 written: false,

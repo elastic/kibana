@@ -509,6 +509,27 @@ describe('inferred feature identification route', () => {
     expect(runId).not.toBe('');
   });
 
+  it('uses trusted workflow request provenance independently of the legacy run id', async () => {
+    const { handlerParams, telemetry } = makeInferredHandlerParams();
+    Object.assign(handlerParams.request, {
+      isInternalApiRequest: true,
+      headers: { 'x-kibana-workflow-execution-id': 'workflow-run-1' },
+    });
+    handlerParams.params.body.parentWorkflowExecutionId = 'onboarding-run-1';
+
+    await inferredRoute.handler(handlerParams);
+    const track = mockIdentifyInferredFeatures.mock.calls[0][0].trackFeaturesIdentified;
+    track?.({ run_id: 'run-1' } as never);
+
+    expect(telemetry.trackFeaturesIdentified).toHaveBeenCalledWith(
+      expect.objectContaining({
+        run_id: 'run-1',
+        workflow_execution_id: 'workflow-run-1',
+        parent_workflow_execution_id: 'onboarding-run-1',
+      })
+    );
+  });
+
   it('returns identification results when sync workflow bootstrap fails', async () => {
     const ensureEnabled = jest.fn().mockRejectedValue(new Error('workflow unavailable'));
     const { handlerParams, routeLogger, identifyResult } = makeInferredHandlerParams({

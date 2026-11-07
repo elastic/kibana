@@ -96,6 +96,8 @@ describe('generateKIQueries', () => {
         source,
         connectorId: 'test-connector',
         runId: 'run-1',
+        workflowExecutionId: 'run-1',
+        parentWorkflowExecutionId: 'onboarding-run-1',
         maxExistingQueriesForContext: 10,
       },
       makeDeps({ telemetry, logger })
@@ -135,6 +137,8 @@ describe('generateKIQueries', () => {
     );
     expect(telemetry.trackSignificantEventsQueriesGenerated).toHaveBeenCalledWith(
       expect.objectContaining({
+        workflow_execution_id: 'run-1',
+        parent_workflow_execution_id: 'onboarding-run-1',
         count: 1,
         connector_id: 'test-connector',
         source_id: 'source-1',

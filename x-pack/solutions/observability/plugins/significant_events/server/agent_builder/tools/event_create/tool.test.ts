@@ -74,6 +74,8 @@ describe('event_create tool', () => {
       telemetry: telemetry as never,
     });
 
+    const context = createMockToolContext();
+    context.workflowExecutionId = 'workflow-run-1';
     const result = await invokeHandler(
       tool as never,
       {
@@ -83,7 +85,7 @@ describe('event_create tool', () => {
         slugs: ['logs.a'],
         confidence: 0.8,
       },
-      createMockToolContext()
+      context
     );
 
     if ('results' in result) {
@@ -91,6 +93,14 @@ describe('event_create tool', () => {
     }
     expect(assertCanManageSignificantEvents).toHaveBeenCalledWith(
       expect.objectContaining({ request: expect.anything() })
+    );
+    expect(eventsWriteHandler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        input: expect.objectContaining({ workflow_execution_id: 'workflow-run-1' }),
+      })
+    );
+    expect(telemetry.trackAgentToolEventCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ workflow_execution_id: 'workflow-run-1' })
     );
   });
 });

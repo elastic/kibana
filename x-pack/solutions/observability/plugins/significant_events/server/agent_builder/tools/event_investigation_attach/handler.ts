@@ -14,18 +14,20 @@ import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 export const attachEventInvestigationToolHandler = async ({
   eventSearchClient,
   eventId,
-  workflowExecutionId,
+  investigationWorkflowExecutionId,
   startedAt,
   completedAt,
+  workflowExecutionId,
   alertEventsClient,
   emitTrigger,
   logger,
 }: {
   eventSearchClient: RuleEventsClient;
   eventId: string;
-  workflowExecutionId: string;
+  investigationWorkflowExecutionId: string;
   startedAt: string;
   completedAt?: string;
+  workflowExecutionId?: string;
   alertEventsClient: AlertEventsClientApi;
   emitTrigger?: TriggerEmitter;
   logger?: Logger;
@@ -39,10 +41,11 @@ export const attachEventInvestigationToolHandler = async ({
     eventSearchClient,
     eventId,
     investigation: {
-      workflow_execution_id: workflowExecutionId,
+      workflow_execution_id: investigationWorkflowExecutionId,
       started_at: startedAt,
       completed_at: completedAt,
     },
+    workflowExecutionId,
     alertEventsClient,
     emitTrigger,
     logger,

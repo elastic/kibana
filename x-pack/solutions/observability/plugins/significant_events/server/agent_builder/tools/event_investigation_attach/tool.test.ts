@@ -36,6 +36,7 @@ describe('event_investigation_attach tool', () => {
     });
 
     const logger = loggingSystemMock.createLogger();
+    const telemetry = { trackAgentToolEventInvestigationAttach: jest.fn() };
     const tool = createEventInvestigationAttachTool({
       getScopedClients: jest.fn().mockResolvedValue({
         getEventSearchClient: jest.fn().mockResolvedValue({}),
@@ -44,9 +45,11 @@ describe('event_investigation_attach tool', () => {
       }) as unknown as GetScopedClients,
       server: {} as SignificantEventsServer,
       logger,
-      telemetry: { trackAgentToolEventInvestigationAttach: jest.fn() } as never,
+      telemetry: telemetry as never,
     });
 
+    const context = createMockToolContext();
+    context.workflowExecutionId = 'attaching-workflow-id';
     await invokeHandler(
       tool as never,
       {
@@ -54,14 +57,24 @@ describe('event_investigation_attach tool', () => {
         workflow_execution_id: 'workflow-id',
         started_at: '2026-01-01T00:00:00.000Z',
       },
-      createMockToolContext()
+      context
     );
 
     expect(assertCanManageSignificantEvents).toHaveBeenCalledWith(
       expect.objectContaining({ request: expect.anything() })
     );
     expect(attachEventInvestigationToolHandler).toHaveBeenCalledWith(
-      expect.objectContaining({ logger })
+      expect.objectContaining({
+        logger,
+        investigationWorkflowExecutionId: 'workflow-id',
+        workflowExecutionId: 'attaching-workflow-id',
+      })
     );
+    expect(telemetry.trackAgentToolEventInvestigationAttach).toHaveBeenCalledWith({
+      success: true,
+      event_id: 'agent-event-1',
+      workflow_execution_id: 'attaching-workflow-id',
+      investigation_workflow_execution_id: 'workflow-id',
+    });
   });
 });

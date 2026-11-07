@@ -22,6 +22,7 @@ import type { GetScopedClients } from '../../../routes/types';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
+import { trackTelemetryBestEffort } from '../bulk_write';
 import { updateEventStatusToolHandler } from './handler';
 
 export const SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID =
@@ -86,23 +87,40 @@ export function createEventStatusUpdateTool({
           eventId: toolParams.event_id,
           status: toolParams.status,
           assessmentNote: toolParams.assessment_note,
+          workflowExecutionId: context.workflowExecutionId,
         });
 
-        telemetry.trackAgentToolEventStatusUpdate({
-          success: true,
-          event_id: toolParams.event_id,
-          status: toolParams.status,
+        trackTelemetryBestEffort({
+          logger,
+          description: 'event_status_update telemetry',
+          track: () =>
+            telemetry.trackAgentToolEventStatusUpdate({
+              ...(context.workflowExecutionId
+                ? { workflow_execution_id: context.workflowExecutionId }
+                : {}),
+              success: true,
+              event_id: toolParams.event_id,
+              status: toolParams.status,
+            }),
         });
 
         return { results: [{ type: ToolResultType.other, data }] };
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
         logger.error(`Error running event_status_update: ${message}`);
-        telemetry.trackAgentToolEventStatusUpdate({
-          success: false,
-          event_id: toolParams.event_id,
-          status: toolParams.status,
-          error_message: message,
+        trackTelemetryBestEffort({
+          logger,
+          description: 'failed event_status_update telemetry',
+          track: () =>
+            telemetry.trackAgentToolEventStatusUpdate({
+              ...(context.workflowExecutionId
+                ? { workflow_execution_id: context.workflowExecutionId }
+                : {}),
+              success: false,
+              event_id: toolParams.event_id,
+              status: toolParams.status,
+              error_message: message,
+            }),
         });
         return {
           results: [

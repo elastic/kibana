@@ -585,6 +585,7 @@ steps:
                               trigger_type: automatic
                               context:
                                 event_id: '{{ foreach.item.event_id }}'
+                                source_workflow_execution_id: '{{ execution.id }}'
                                 status: '{{ foreach.item.status }}'
                                 causal_features: '${{ steps.resolve_active_event.output.hits[0].causal_features | default: [] }}'
                                 blast_radius: '${{ steps.resolve_active_event.output.hits[0].blast_radius | default: [] }}'

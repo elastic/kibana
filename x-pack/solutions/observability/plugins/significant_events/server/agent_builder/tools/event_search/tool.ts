@@ -281,6 +281,9 @@ export function createSearchEventsTool({
         });
 
         telemetry.trackAgentToolEventSearch({
+          ...(context.workflowExecutionId
+            ? { workflow_execution_id: context.workflowExecutionId }
+            : {}),
           success: true,
           result_count: data.total,
           has_query: query !== undefined,
@@ -313,6 +316,9 @@ export function createSearchEventsTool({
         logger.error(`Error running event_search: ${message}`);
 
         telemetry.trackAgentToolEventSearch({
+          ...(context.workflowExecutionId
+            ? { workflow_execution_id: context.workflowExecutionId }
+            : {}),
           success: false,
           result_count: 0,
           has_query: query !== undefined,

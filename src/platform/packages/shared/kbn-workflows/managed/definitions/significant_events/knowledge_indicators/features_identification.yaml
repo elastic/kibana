@@ -158,6 +158,7 @@ steps:
           body:
             connectorId: "${{ inputs.connectorId }}"
             runId: "${{ execution.id }}"
+            parentWorkflowExecutionId: "${{ parent.executionId }}"
             iteration: "${{ variables.iterationResults.size | plus: 1 }}"
             documents: "${{ steps.prepare.output.documents }}"
             samplingTelemetry: "${{ steps.prepare.output.samplingTelemetry }}"

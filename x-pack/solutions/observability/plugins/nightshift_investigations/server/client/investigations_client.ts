@@ -115,6 +115,11 @@ function asString(v: unknown): string | undefined {
   return typeof v === 'string' ? v || undefined : undefined;
 }
 
+function asLifecycleCorrelationId(v: unknown): string | undefined {
+  const value = asString(v)?.trim();
+  return value && value.length <= 500 ? value : undefined;
+}
+
 /** `inputs.context.follow_up` of the investigation runs `followUpRecoveredAlert` starts. */
 export const ALERT_RECOVERED_FOLLOW_UP = 'alert_recovered';
 
@@ -280,6 +285,11 @@ export interface LifecycleSubject {
   triggerType: InvestigationTriggerType;
   /** When the subject joined the investigation. */
   startedAt: string;
+}
+
+export interface LifecycleCorrelation {
+  event_id?: string;
+  source_workflow_execution_id?: string;
 }
 
 /**
@@ -1186,6 +1196,36 @@ export class NightshiftInvestigationsClient {
       throw new InvestigationUnavailableError(NOT_RUN_AS_INVESTIGATOR_MESSAGE);
     }
     return { execution, inputs };
+  }
+
+  /** Pipeline join keys from the run context; best-effort so a lifecycle event still emits when the read fails. */
+  async getLifecycleCorrelation(
+    investigationId: string,
+    executionId: string
+  ): Promise<LifecycleCorrelation> {
+    let inputs: Record<string, unknown> | undefined;
+    try {
+      ({ inputs } = await this.readInvestigationExecution(investigationId, executionId));
+    } catch (error) {
+      this.logger.warn(
+        `Could not read lifecycle correlation for investigation "${investigationId}" execution "${executionId}": ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return {};
+    }
+    const context = isPlainObject(inputs?.context) ? inputs.context : undefined;
+    const eventId = asLifecycleCorrelationId(context?.event_id);
+    const sourceWorkflowExecutionId = asLifecycleCorrelationId(
+      context?.source_workflow_execution_id
+    );
+
+    return {
+      ...(eventId ? { event_id: eventId } : {}),
+      ...(sourceWorkflowExecutionId
+        ? { source_workflow_execution_id: sourceWorkflowExecutionId }
+        : {}),
+    };
   }
 
   /**

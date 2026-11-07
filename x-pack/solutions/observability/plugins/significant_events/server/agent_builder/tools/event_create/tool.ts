@@ -28,6 +28,7 @@ import { createEventToolHandler } from './handler';
 import { classifyError } from '../../utils/error_utils';
 import { loadSourceCatalog, toSourceRef } from '../../utils/resolve_source_slugs';
 import { assignStoredSourceIds, sourceSlugsSchema } from '../../utils/stored_source_fields';
+import { trackTelemetryBestEffort } from '../bulk_write';
 
 export const SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID = platformSignificantEventsTools.createEvent;
 
@@ -120,7 +121,12 @@ export function createEventTool({
         await assertSignificantEventsAccess({ server, licensing });
         await assertCanManageSignificantEvents({ request, server });
         const catalog = await loadSourceCatalog(sourcesClient);
-        const eventInput = assignStoredSourceIds(catalog, toolParams);
+        const eventInput = {
+          ...assignStoredSourceIds(catalog, toolParams),
+          ...(context.workflowExecutionId
+            ? { workflow_execution_id: context.workflowExecutionId }
+            : {}),
+        };
         sourceIds = eventInput.source_ids;
 
         const data = await createEventToolHandler({
@@ -129,9 +135,17 @@ export function createEventTool({
           logger,
         });
 
-        telemetry.trackAgentToolEventCreate({
-          success: true,
-          source_ids: sourceIds,
+        trackTelemetryBestEffort({
+          logger,
+          description: 'event_create telemetry',
+          track: () =>
+            telemetry.trackAgentToolEventCreate({
+              ...(context.workflowExecutionId
+                ? { workflow_execution_id: context.workflowExecutionId }
+                : {}),
+              success: true,
+              source_ids: sourceIds,
+            }),
         });
 
         return {
@@ -152,10 +166,18 @@ export function createEventTool({
         const classified = classifyError(error);
         const rawMessage = error instanceof Error ? error.message : String(error);
         logger.error(`Error running event_create: ${rawMessage}`);
-        telemetry.trackAgentToolEventCreate({
-          success: false,
-          source_ids: sourceIds,
-          error_message: rawMessage,
+        trackTelemetryBestEffort({
+          logger,
+          description: 'failed event_create telemetry',
+          track: () =>
+            telemetry.trackAgentToolEventCreate({
+              ...(context.workflowExecutionId
+                ? { workflow_execution_id: context.workflowExecutionId }
+                : {}),
+              success: false,
+              source_ids: sourceIds,
+              error_message: rawMessage,
+            }),
         });
         return {
           results: [
