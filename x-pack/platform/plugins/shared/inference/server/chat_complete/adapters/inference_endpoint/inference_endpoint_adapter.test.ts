@@ -237,6 +237,7 @@ describe('inferenceEndpointAdapter', () => {
               toolCallId: '',
             },
           ],
+          finish_reason: 'tool_use',
           type: ChatCompletionEventType.ChatCompletionChunk,
         },
         {

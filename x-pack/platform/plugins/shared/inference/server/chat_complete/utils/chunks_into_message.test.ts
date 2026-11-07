@@ -54,6 +54,33 @@ describe('chunksIntoMessage', () => {
     });
   });
 
+  it('propagates the provider-reported finish_reason onto the message event', async () => {
+    const message = await lastValueFrom(
+      chunksIntoMessage({ logger, toolOptions: {} })(
+        fromEvents(
+          {
+            content: 'partial',
+            type: ChatCompletionEventType.ChatCompletionChunk,
+            tool_calls: [],
+          },
+          {
+            content: '',
+            type: ChatCompletionEventType.ChatCompletionChunk,
+            tool_calls: [],
+            finish_reason: 'content_filter',
+          }
+        )
+      )
+    );
+
+    expect(message).toEqual({
+      content: 'partial',
+      toolCalls: [],
+      finish_reason: 'content_filter',
+      type: ChatCompletionEventType.ChatCompletionMessage,
+    });
+  });
+
   it('parses tool calls', async () => {
     const message = await lastValueFrom(
       chunksIntoMessage({

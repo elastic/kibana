@@ -91,8 +91,9 @@ export function parseInlineFunctionCalls({ logger }: { logger: Logger }) {
               return;
             }
 
-            const { type, content, reasoning } = event;
+            const { type, content, reasoning, finish_reason: finishReason } = event;
             let pendingReasoning = reasoning;
+            let pendingFinishReason = finishReason;
 
             function next(contentToEmit: string) {
               subscriber.next({
@@ -100,8 +101,10 @@ export function parseInlineFunctionCalls({ logger }: { logger: Logger }) {
                 content: contentToEmit,
                 reasoning: pendingReasoning,
                 tool_calls: [],
+                ...(pendingFinishReason ? { finish_reason: pendingFinishReason } : {}),
               });
               pendingReasoning = undefined;
+              pendingFinishReason = undefined;
             }
 
             const match = matchOnSignalStart(functionCallBuffer + content);
@@ -130,7 +133,7 @@ export function parseInlineFunctionCalls({ logger }: { logger: Logger }) {
               next(content);
             }
 
-            if (pendingReasoning) {
+            if (pendingReasoning || pendingFinishReason) {
               next('');
             }
           },

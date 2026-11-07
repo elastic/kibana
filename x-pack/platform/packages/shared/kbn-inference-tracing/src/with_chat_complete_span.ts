@@ -98,9 +98,11 @@ function buildSystemInstructions(system: string): GenAITextPart[] {
 function buildOutputMessages({
   content,
   toolCalls,
+  finishReason,
 }: {
   content: string;
   toolCalls: Array<ToolCall> | Array<UnvalidatedToolCall>;
+  finishReason?: string;
 }): GenAIOutputMessage[] {
   const parts: GenAIMessagePart[] = [];
   if (content) {
@@ -120,7 +122,9 @@ function buildOutputMessages({
   return [
     {
       role: 'assistant',
-      finish_reason: toolCalls.length ? 'tool_calls' : 'stop',
+      // Tool calls always normalize to `tool_calls` (providers report `tool_use`, or `stop`
+      // under simulated function calling); otherwise prefer the provider reason (e.g. `content_filter`).
+      finish_reason: toolCalls.length ? 'tool_calls' : finishReason ?? 'stop',
       parts,
     },
   ];
@@ -131,14 +135,19 @@ function setOutputMessages(
   {
     content,
     toolCalls,
-  }: { content: string; toolCalls: Array<ToolCall> | Array<UnvalidatedToolCall> }
+    finishReason,
+  }: {
+    content: string;
+    toolCalls: Array<ToolCall> | Array<UnvalidatedToolCall>;
+    finishReason?: string;
+  }
 ) {
   if (!span.isRecording()) {
     return;
   }
   span.setAttribute(
     GenAISemanticConventions.GenAIOutputMessages,
-    JSON.stringify(buildOutputMessages({ content, toolCalls }))
+    JSON.stringify(buildOutputMessages({ content, toolCalls, finishReason }))
   );
 }
 
@@ -271,6 +280,7 @@ export function withChatCompleteSpan(
                 setOutputMessages(span, {
                   content: value.content,
                   toolCalls: value.toolCalls,
+                  finishReason: value.finish_reason,
                 });
               } else if (isChatCompletionTokenCountEvent(value)) {
                 setTokens(span, value.tokens);
@@ -286,6 +296,7 @@ export function withChatCompleteSpan(
           setOutputMessages(span, {
             content: value.content,
             toolCalls: value.toolCalls,
+            finishReason: value.finish_reason,
           });
           if (value.tokens) {
             setTokens(span, value.tokens);
