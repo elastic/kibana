@@ -1643,7 +1643,7 @@
     "react-router-dom": "5.3.4",
     "react-shortcuts": "2.1.0",
     "react-use": "17.6.1",
-    "react-virtualized": "9.22.6",
+    "react-virtualized": "10.0.0",
     "react-window": "1.8.11",
     "react-window-infinite-loader": "1.0.9",
     "reduce-reducers": "1.0.4",
