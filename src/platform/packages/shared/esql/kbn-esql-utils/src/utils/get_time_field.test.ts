@@ -8,13 +8,14 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
-import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
+import { TIMEFIELD_ROUTE, TIMEFIELD_GET_MAX_QUERY_LENGTH } from '@kbn/esql-types';
 import { getESQLTimeField } from './get_time_field';
 
 describe('getESQLTimeField', () => {
   const createHttp = (timeField = '@timestamp'): HttpStart =>
     ({
       post: jest.fn(async () => ({ timeField })),
+      fetch: jest.fn(async () => ({ timeField })),
     } as unknown as HttpStart);
 
   it('does not reuse the cache across SET project_routing values for the same FROM', async () => {
@@ -29,9 +30,10 @@ describe('getESQLTimeField', () => {
       http,
     });
 
-    expect(http.post).toHaveBeenCalledTimes(2);
-    expect(http.post).toHaveBeenNthCalledWith(1, TIMEFIELD_ROUTE, expect.any(Object));
-    expect(http.post).toHaveBeenNthCalledWith(2, TIMEFIELD_ROUTE, expect.any(Object));
+    // Both queries are short, so they go through the cacheable GET path.
+    expect(http.fetch).toHaveBeenCalledTimes(2);
+    expect(http.fetch).toHaveBeenNthCalledWith(1, TIMEFIELD_ROUTE, expect.any(Object));
+    expect(http.fetch).toHaveBeenNthCalledWith(2, TIMEFIELD_ROUTE, expect.any(Object));
   });
 
   it('reuses the cache for the same SET project_routing and FROM', async () => {
@@ -41,6 +43,57 @@ describe('getESQLTimeField', () => {
     await getESQLTimeField({ query, http });
     await getESQLTimeField({ query, http });
 
-    expect(http.post).toHaveBeenCalledTimes(1);
+    expect(http.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  describe('GET/POST selection (cacheable GET vs. uncached POST)', () => {
+    it('uses GET for a short query', async () => {
+      const http = createHttp();
+      const query = 'FROM logs-timefield-get-short-*';
+
+      await getESQLTimeField({ query, http });
+
+      expect(http.fetch).toHaveBeenCalledWith(
+        TIMEFIELD_ROUTE,
+        expect.objectContaining({ query: { query, projectRouting: undefined } })
+      );
+      expect(http.post).not.toHaveBeenCalled();
+    });
+
+    it('falls back to POST once the encoded query string exceeds the GET threshold', async () => {
+      const http = createHttp();
+      // A single long clause comfortably pushes the encoded query string over the
+      // threshold once URL-encoded (spaces/pipes expand under encodeURIComponent).
+      const query = 'FROM logs-timefield-get-long-* | WHERE message == "' + 'x'.repeat(3000) + '"';
+
+      await getESQLTimeField({ query, http });
+
+      expect(http.post).toHaveBeenCalledWith(TIMEFIELD_ROUTE, {
+        body: JSON.stringify({ query, projectRouting: undefined }),
+      });
+      expect(http.fetch).not.toHaveBeenCalled();
+    });
+
+    it('falls back to POST when projectRouting alone pushes the total length over the threshold', async () => {
+      const http = createHttp();
+      const query = 'FROM logs-timefield-get-routing-*';
+      const projectRouting = 'x'.repeat(TIMEFIELD_GET_MAX_QUERY_LENGTH);
+
+      await getESQLTimeField({ query, http, projectRouting });
+
+      expect(http.post).toHaveBeenCalledWith(TIMEFIELD_ROUTE, {
+        body: JSON.stringify({ query, projectRouting }),
+      });
+      expect(http.fetch).not.toHaveBeenCalled();
+    });
+
+    it('still dedupes concurrent calls regardless of which verb is used', async () => {
+      const http = createHttp();
+      const query = 'FROM logs-timefield-get-dedupe-*';
+
+      await Promise.all([getESQLTimeField({ query, http }), getESQLTimeField({ query, http })]);
+
+      expect(http.fetch).toHaveBeenCalledTimes(1);
+    });
   });
 });
