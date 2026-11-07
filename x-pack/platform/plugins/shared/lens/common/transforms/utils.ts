@@ -52,7 +52,6 @@ export function isFlattenedAPIConfig(
     | LensWireAPIConfig
     | LensSerializedAPIConfig
     | LensByValueSerializedState
-    | object
 ): config is FlattenedLensByValuePanelSchema | LensByValueFlattenedSerializedAPIConfig {
   return (
     typeof config === 'object' && config !== null && 'type' in config && !('attributes' in config)

@@ -15,7 +15,11 @@ import {
 } from '@kbn/presentation-publishing';
 import { drilldownsComparators } from '@kbn/embeddable-plugin/common';
 import type { LensSerializedSharedState, LensSharedProps } from '@kbn/lens-common';
-import type { LensByValuePanelConfigs, LensByValueSerializedAPIConfig } from '@kbn/lens-common-2';
+import type {
+  LensByValuePanelConfigs,
+  LensByValueSerializedAPIConfig,
+  LensWireAPIConfig,
+} from '@kbn/lens-common-2';
 import { isFlattenedAPIConfig, unflattenAPIConfig } from './transforms/utils';
 
 type LensComparedState = LensSerializedSharedState &
@@ -47,7 +51,7 @@ const omitUndefinedKeys = (value: unknown): unknown => {
  */
 const resolveAttributes = (
   value: LensComparedState['attributes'],
-  state?: object
+  state?: LensWireAPIConfig
 ): LensComparedState['attributes'] => {
   if (value !== undefined) return value;
   if (state && 'attributes' in state && state.attributes) {
@@ -66,8 +70,8 @@ export const lensStateComparison: SerializedStateComparison<LensComparedState> =
     ...drilldownsComparators,
     attributes: byValueComparator((lastValue, currentValue, lastState, currentState) =>
       deepEqual(
-        omitUndefinedKeys(resolveAttributes(lastValue, lastState)),
-        omitUndefinedKeys(resolveAttributes(currentValue, currentState))
+        omitUndefinedKeys(resolveAttributes(lastValue, lastState as LensWireAPIConfig)),
+        omitUndefinedKeys(resolveAttributes(currentValue, currentState as LensWireAPIConfig))
       )
     ),
     ref_id: 'referenceEquality',
