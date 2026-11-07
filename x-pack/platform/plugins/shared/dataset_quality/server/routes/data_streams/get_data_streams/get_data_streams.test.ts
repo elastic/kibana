@@ -11,20 +11,6 @@ import { dataStreamService, datasetQualityPrivileges } from '../../../services';
 import { getDataStreams } from '.';
 
 const mockGetMockMatchingDataStreams = jest.fn().mockImplementation(() => MATCHING_DATA_STREAMS);
-const mockGetDatasetPrivileges = jest.fn().mockImplementation(() => ({
-  datasetsPrivilages: {
-    'logs-*-*': {
-      canRead: true,
-      canMonitor: true,
-      canReadFailureStore: true,
-    },
-    'metrics-*-*': {
-      canRead: true,
-      canMonitor: true,
-      canReadFailureStore: true,
-    },
-  },
-}));
 const mockGetMockDataStreamPrivileges = jest.fn().mockImplementation(() => DATA_STREAMS_PRIVILEGES);
 
 describe('getDataStreams', () => {
@@ -33,9 +19,6 @@ describe('getDataStreams', () => {
     jest
       .spyOn(dataStreamService, 'getMatchingDataStreams')
       .mockImplementation(mockGetMockMatchingDataStreams);
-    jest
-      .spyOn(datasetQualityPrivileges, 'getDatasetPrivileges')
-      .mockImplementation(mockGetDatasetPrivileges);
     jest
       .spyOn(datasetQualityPrivileges, 'getHasIndexPrivileges')
       .mockImplementation(mockGetMockDataStreamPrivileges);
@@ -57,14 +40,18 @@ describe('getDataStreams', () => {
       expect.anything(),
       'logs-*-*,metrics-*-*'
     );
-
-    expect(result.datasetUserPrivileges.datasetsPrivilages['logs-*-*'].canMonitor).toBe(true);
-    expect(result.datasetUserPrivileges.datasetsPrivilages['metrics-*-*'].canMonitor).toBe(true);
+    expect(datasetQualityPrivileges.getHasIndexPrivileges).toHaveBeenCalledWith(
+      esClientMock,
+      ['logs-test.test-default'],
+      ['read', 'monitor', 'read_failure_store', 'manage_failure_store'],
+      true
+    );
+    expect(result.dataStreams[0].userPrivileges.canMonitor).toBe(true);
   });
 
   it('Passes datasetQuery parameter to the DataStreamService', async () => {
     const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
-    const result = await getDataStreams({
+    await getDataStreams({
       esClient: esClientMock,
       datasetQuery: 'logs-nginx-*',
       uncategorisedOnly: true,
@@ -74,8 +61,6 @@ describe('getDataStreams', () => {
       expect.anything(),
       'logs-nginx-*'
     );
-
-    expect(result.datasetUserPrivileges.datasetsPrivilages['logs-*-*'].canMonitor).toBe(true);
   });
 
   describe('uncategorized only option', () => {
@@ -99,6 +84,28 @@ describe('getDataStreams', () => {
       });
       expect(results.dataStreams.length).toBe(5);
     });
+  });
+
+  it('excludes data streams that the user can neither read nor monitor', async () => {
+    const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    const inaccessibleDataStream = MATCHING_DATA_STREAMS[0].name;
+    mockGetMockDataStreamPrivileges.mockImplementationOnce(() => ({
+      ...DATA_STREAMS_PRIVILEGES,
+      [inaccessibleDataStream]: {
+        read: false,
+        monitor: false,
+        read_failure_store: false,
+        manage_failure_store: false,
+      },
+    }));
+
+    const result = await getDataStreams({
+      esClient: esClientMock,
+      types: ['logs'],
+      isSecurityEnabled: true,
+    });
+
+    expect(result.dataStreams.map(({ name }) => name)).not.toContain(inaccessibleDataStream);
   });
 });
 
@@ -192,7 +199,12 @@ const MATCHING_DATA_STREAMS = [
 ];
 
 const DATA_STREAMS_PRIVILEGES = Object.values(MATCHING_DATA_STREAMS).reduce((acc, stream) => {
-  acc[stream.name] = true;
+  acc[stream.name] = {
+    read: true,
+    monitor: true,
+    read_failure_store: true,
+    manage_failure_store: true,
+  };
 
   return acc;
-}, {} as Record<string, boolean>);
+}, {} as Record<string, Record<string, boolean>>);

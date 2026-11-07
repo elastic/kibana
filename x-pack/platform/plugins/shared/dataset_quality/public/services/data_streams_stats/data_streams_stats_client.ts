@@ -21,7 +21,6 @@ import {
   getDataStreamDegradedDocsResponseRt,
   getDataStreamFailedDocsResponseRt,
   getDataStreamsStatsResponseRt,
-  getDataStreamsTypesPrivilegesResponseRt,
   getDataStreamTotalDocsResponseRt,
   getIntegrationsResponseRt,
   getNonAggregatableDatasetsRt,
@@ -35,8 +34,6 @@ import type {
   GetDataStreamsStatsQuery,
   GetDataStreamsStatsResponse,
   GetDataStreamsTotalDocsQuery,
-  GetDataStreamsTypesPrivilegesQuery,
-  GetDataStreamsTypesPrivilegesResponse,
   GetNonAggregatableDataStreamsParams,
 } from '../../../common/data_streams_stats';
 import { Integration } from '../../../common/data_streams_stats/integration';
@@ -49,40 +46,6 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
     private readonly http: HttpStart,
     private readonly telemetryClient?: ITelemetryClient
   ) {}
-
-  public async getDataStreamsTypesPrivileges(
-    params: GetDataStreamsTypesPrivilegesQuery
-  ): Promise<GetDataStreamsTypesPrivilegesResponse> {
-    const types =
-      'types' in params
-        ? rison.encodeArray(params.types.length === 0 ? KNOWN_TYPES : params.types)
-        : undefined;
-
-    const response = await this.http
-      .get<GetDataStreamsTypesPrivilegesResponse>(
-        '/internal/dataset_quality/data_streams/types_privileges',
-        {
-          query: {
-            ...params,
-            types,
-          },
-        }
-      )
-      .catch((error) => {
-        throw new DatasetQualityError(
-          `Failed to fetch data streams types privileges: ${error}`,
-          error
-        );
-      });
-
-    const { datasetTypesPrivileges } = decodeOrThrow(
-      getDataStreamsTypesPrivilegesResponseRt,
-      (message: string) =>
-        new DatasetQualityError(`Failed to decode data streams types privileges: ${message}`)
-    )(response);
-
-    return { datasetTypesPrivileges };
-  }
 
   public async getDataStreamsStats(
     params: GetDataStreamsStatsQuery
@@ -102,13 +65,13 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
         throw new DatasetQualityError(`Failed to fetch data streams stats: ${error}`, error);
       });
 
-    const { dataStreamsStats, datasetUserPrivileges } = decodeOrThrow(
+    const { dataStreamsStats, canViewIntegrations } = decodeOrThrow(
       getDataStreamsStatsResponseRt,
       (message: string) =>
         new DatasetQualityError(`Failed to decode data streams stats response: ${message}`)
     )(response);
 
-    return { dataStreamsStats, datasetUserPrivileges };
+    return { dataStreamsStats, canViewIntegrations };
   }
 
   public async getDataStreamsTotalDocs(params: GetDataStreamsTotalDocsQuery) {

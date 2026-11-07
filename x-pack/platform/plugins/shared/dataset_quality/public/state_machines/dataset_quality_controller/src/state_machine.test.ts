@@ -82,70 +82,16 @@ const createNotImplementedError = () => {
 
 const createGenericError = () => new Error('Something went wrong');
 
-const defaultTypesPrivilegesResponse = {
-  datasetTypesPrivileges: {
-    'logs-*-*': {
-      canMonitor: true,
-      canRead: true,
-      canReadFailureStore: true,
-      canManageFailureStore: true,
-    },
-    'metrics-*-*': {
-      canMonitor: true,
-      canRead: true,
-      canReadFailureStore: true,
-      canManageFailureStore: true,
-    },
-    'traces-*-*': {
-      canMonitor: true,
-      canRead: true,
-      canReadFailureStore: true,
-      canManageFailureStore: true,
-    },
-    'synthetics-*-*': {
-      canMonitor: true,
-      canRead: true,
-      canReadFailureStore: true,
-      canManageFailureStore: true,
-    },
-  },
-};
-
-const noPrivilegesResponse = {
-  datasetTypesPrivileges: {
-    'logs-*-*': {
-      canMonitor: false,
-      canRead: false,
-      canReadFailureStore: false,
-      canManageFailureStore: false,
-    },
-    'metrics-*-*': {
-      canMonitor: false,
-      canRead: false,
-      canReadFailureStore: false,
-      canManageFailureStore: false,
-    },
-    'traces-*-*': {
-      canMonitor: false,
-      canRead: false,
-      canReadFailureStore: false,
-      canManageFailureStore: false,
-    },
-    'synthetics-*-*': {
-      canMonitor: false,
-      canRead: false,
-      canReadFailureStore: false,
-      canManageFailureStore: false,
-    },
-  },
-};
-
 const defaultDataStreamStatsResponse: DataStreamStatServiceResponse = {
-  dataStreamsStats: [],
-  datasetUserPrivileges: {
-    datasetsPrivilages: {},
-    canViewIntegrations: true,
-  },
+  dataStreamsStats: ['logs', 'metrics', 'traces', 'synthetics'].map((type) => ({
+    name: `${type}-test-default`,
+    userPrivileges: {
+      canMonitor: true,
+      canReadFailureStore: true,
+      canManageFailureStore: true,
+    },
+  })),
+  canViewIntegrations: true,
 };
 
 const defaultDegradedDocsResponse: DataStreamDocsStat[] = [];
@@ -163,7 +109,6 @@ const createMockDataStreamStatsClient = (
   overrides: Partial<Record<keyof IDataStreamsStatsClient, jest.Mock>> = {}
 ) =>
   ({
-    getDataStreamsTypesPrivileges: jest.fn().mockResolvedValue(defaultTypesPrivilegesResponse),
     getDataStreamsStats: jest.fn().mockResolvedValue(defaultDataStreamStatsResponse),
     getDataStreamsDegradedStats: jest.fn().mockResolvedValue(defaultDegradedDocsResponse),
     getDataStreamsFailedStats: jest.fn().mockResolvedValue(defaultFailedDocsResponse),
@@ -210,7 +155,7 @@ describe('DatasetQualityControllerStateMachine', () => {
       actor.stop();
     });
 
-    it('should transition to main state when types privileges are authorized', async () => {
+    it('should transition to main state when concrete data streams are discovered', async () => {
       const { machine } = buildStateMachine();
       const actor = createActor(machine);
       actor.start();
@@ -226,10 +171,13 @@ describe('DatasetQualityControllerStateMachine', () => {
       actor.stop();
     });
 
-    it('should transition to emptyState when no types are authorized', async () => {
+    it('should transition to emptyState when no data streams are accessible', async () => {
       const { machine } = buildStateMachine({
         dataStreamStatsClient: createMockDataStreamStatsClient({
-          getDataStreamsTypesPrivileges: jest.fn().mockResolvedValue(noPrivilegesResponse),
+          getDataStreamsStats: jest.fn().mockResolvedValue({
+            dataStreamsStats: [],
+            canViewIntegrations: false,
+          }),
         }),
       });
       const actor = createActor(machine);
@@ -242,10 +190,10 @@ describe('DatasetQualityControllerStateMachine', () => {
       actor.stop();
     });
 
-    it('should transition to initializationFailed on privileges fetch error', async () => {
+    it('should transition to initializationFailed when initial discovery fails', async () => {
       const { machine, toasts } = buildStateMachine({
         dataStreamStatsClient: createMockDataStreamStatsClient({
-          getDataStreamsTypesPrivileges: jest.fn().mockRejectedValue(createGenericError()),
+          getDataStreamsStats: jest.fn().mockRejectedValue(createGenericError()),
         }),
       });
       const actor = createActor(machine);
@@ -259,7 +207,7 @@ describe('DatasetQualityControllerStateMachine', () => {
       actor.stop();
     });
 
-    it('should store authorized dataset types in context after initialization', async () => {
+    it('should derive accessible dataset types from discovered streams', async () => {
       const { machine } = buildStateMachine();
       const actor = createActor(machine);
       actor.start();
@@ -272,6 +220,57 @@ describe('DatasetQualityControllerStateMachine', () => {
       const { authorizedDatasetTypes } = actor.getSnapshot().context;
       expect(authorizedDatasetTypes).toEqual(
         expect.arrayContaining(['logs', 'metrics', 'traces', 'synthetics'])
+      );
+
+      actor.stop();
+    });
+
+    it('should store only data streams matching the selected types', async () => {
+      const { machine } = buildStateMachine();
+      const actor = createActor(machine);
+      actor.start();
+
+      await waitForState(actor, 'main.stats.datasets.loaded');
+
+      expect(actor.getSnapshot().context.authorizedDatasetTypes).toEqual(
+        expect.arrayContaining(['logs', 'metrics', 'traces', 'synthetics'])
+      );
+      expect(actor.getSnapshot().context.filters.types).toEqual(['logs']);
+      expect(actor.getSnapshot().context.dataStreamStats.map(({ name }) => name)).toEqual([
+        'logs-test-default',
+      ]);
+
+      actor.stop();
+    });
+
+    it('should use discovered types for downstream requests', async () => {
+      const dataStreamStatsClient = createMockDataStreamStatsClient({
+        getDataStreamsStats: jest.fn().mockResolvedValue({
+          dataStreamsStats: [
+            {
+              name: 'metrics-test-default',
+              userPrivileges: {
+                canMonitor: true,
+                canReadFailureStore: false,
+                canManageFailureStore: false,
+              },
+            },
+          ],
+          canViewIntegrations: false,
+        }),
+      });
+      const { machine } = buildStateMachine({ dataStreamStatsClient });
+      const actor = createActor(machine);
+      actor.start();
+
+      await waitForState(actor, 'main.stats.degradedDocs.loaded');
+
+      expect(actor.getSnapshot().context.authorizedDatasetTypes).toEqual(['metrics']);
+      expect(dataStreamStatsClient.getDataStreamsStats).toHaveBeenCalledWith({
+        types: ['logs', 'metrics', 'traces', 'synthetics'],
+      });
+      expect(dataStreamStatsClient.getDataStreamsDegradedStats).toHaveBeenCalledWith(
+        expect.objectContaining({ types: ['metrics'] })
       );
 
       actor.stop();
@@ -333,14 +332,24 @@ describe('DatasetQualityControllerStateMachine', () => {
       });
 
       it('should transition datasets to loaded and notify on fetch error', async () => {
+        const getDataStreamsStats = jest
+          .fn()
+          .mockResolvedValueOnce(defaultDataStreamStatsResponse)
+          .mockRejectedValueOnce(createGenericError());
         const { machine, toasts } = buildStateMachine({
           dataStreamStatsClient: createMockDataStreamStatsClient({
-            getDataStreamsStats: jest.fn().mockRejectedValue(createGenericError()),
+            getDataStreamsStats,
           }),
         });
         const actor = createActor(machine);
         actor.start();
 
+        await waitForState(actor, 'main.stats.datasets.loaded');
+        actor.send({
+          type: 'UPDATE_TIME_RANGE',
+          timeRange: DEFAULT_CONTEXT.filters.timeRange,
+        });
+        await waitForPredicate(actor, () => getDataStreamsStats.mock.calls.length === 2);
         await waitForState(actor, 'main.stats.datasets.loaded');
 
         expect(stateMatches(actor.getSnapshot(), 'main.stats.datasets.loaded')).toBe(true);
@@ -365,7 +374,7 @@ describe('DatasetQualityControllerStateMachine', () => {
           dataStreamStatsClient: createMockDataStreamStatsClient({
             getDataStreamsStats: jest.fn().mockResolvedValue({
               dataStreamsStats: mockStats,
-              datasetUserPrivileges: { datasetsPrivilages: {}, canViewIntegrations: true },
+              canViewIntegrations: true,
             }),
           }),
         });
@@ -942,6 +951,58 @@ describe('DatasetQualityControllerStateMachine', () => {
 
         expect(dataStreamStatsClient.getDataStreamsStats.mock.calls.length).toBeGreaterThan(
           callCountBefore
+        );
+
+        actor.stop();
+      });
+
+      it('should rediscover accessible types before re-fetching downstream stats', async () => {
+        let resolveRefreshDiscovery: (value: DataStreamStatServiceResponse) => void = () => {};
+        const refreshDiscovery = new Promise<DataStreamStatServiceResponse>((resolve) => {
+          resolveRefreshDiscovery = resolve;
+        });
+        const dataStreamStatsClient = createMockDataStreamStatsClient({
+          getDataStreamsStats: jest
+            .fn()
+            .mockResolvedValueOnce(defaultDataStreamStatsResponse)
+            .mockImplementationOnce(() => refreshDiscovery),
+        });
+        const { actor } = await startInMainState({ dataStreamStatsClient });
+        const degradedCallsBefore =
+          dataStreamStatsClient.getDataStreamsDegradedStats.mock.calls.length;
+
+        actor.send({ type: 'REFRESH_DATA' });
+
+        expect(actor.getSnapshot().value).toBe('initializing');
+        expect(dataStreamStatsClient.getDataStreamsDegradedStats).toHaveBeenCalledTimes(
+          degradedCallsBefore
+        );
+
+        resolveRefreshDiscovery({
+          dataStreamsStats: [
+            {
+              name: 'metrics-refreshed-default',
+              userPrivileges: {
+                canMonitor: true,
+                canReadFailureStore: false,
+                canManageFailureStore: false,
+              },
+            },
+          ],
+          canViewIntegrations: false,
+        });
+
+        await waitForPredicate(
+          actor,
+          () =>
+            stateMatches(actor.getSnapshot(), 'main.stats.degradedDocs.loaded') &&
+            dataStreamStatsClient.getDataStreamsDegradedStats.mock.calls.length >
+              degradedCallsBefore
+        );
+
+        expect(actor.getSnapshot().context.authorizedDatasetTypes).toEqual(['metrics']);
+        expect(dataStreamStatsClient.getDataStreamsDegradedStats).toHaveBeenLastCalledWith(
+          expect.objectContaining({ types: ['metrics'] })
         );
 
         actor.stop();

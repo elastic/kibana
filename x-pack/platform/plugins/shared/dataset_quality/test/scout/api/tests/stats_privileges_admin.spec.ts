@@ -54,17 +54,7 @@ apiTest.describe(
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.datasetUserPrivileges).toStrictEqual({
-        datasetsPrivilages: {
-          'logs-*-*': {
-            canRead: true,
-            canMonitor: true,
-            canReadFailureStore: true,
-            canManageFailureStore: true,
-          },
-        },
-        canViewIntegrations: true,
-      });
+      expect(response.body.canViewIntegrations).toBe(true);
     });
   }
 );

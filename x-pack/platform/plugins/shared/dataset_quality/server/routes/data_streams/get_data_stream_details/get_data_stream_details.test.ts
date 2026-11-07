@@ -89,13 +89,18 @@ describe('getDataStreamDetails', () => {
       dataStreams: [
         {
           name: 'logs-test-default',
+          integration: undefined,
           hasFailureStore: true,
           lastActivity: 1234567890,
+          userPrivileges: {
+            canMonitor: true,
+            canReadFailureStore: true,
+            canManageFailureStore: true,
+          },
           customRetentionPeriod: '7d',
           defaultRetentionPeriod: '30d',
         },
       ],
-      datasetUserPrivileges: { datasetsPrivilages: {} },
     } as Awaited<ReturnType<typeof getDataStreams>>);
     mockGetFailedDocsPaginated.mockResolvedValue([{ count: 10 }] as Awaited<
       ReturnType<typeof getFailedDocsPaginated>

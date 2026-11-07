@@ -25,7 +25,7 @@ export function useDatasetTelemetry() {
   );
   const canUserViewIntegrations = useSelector(
     service,
-    (state) => state.context.datasetUserPrivileges.canViewIntegrations
+    (state) => state.context.canViewIntegrations
   );
   const sort = useSelector(service, (state) => state.context.table.sort);
   const appliedFilters = useDatasetQualityFilters();
