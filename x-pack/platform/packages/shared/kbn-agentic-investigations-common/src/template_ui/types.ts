@@ -163,17 +163,6 @@ export interface TimelineSlotRenderProps {
  */
 export type RenderTimeline = (props: TimelineSlotRenderProps) => React.ReactNode;
 
-/** Props passed to the `renderLearnings` render prop. */
-export interface LearningsSlotRenderProps {
-  conversationId: string;
-}
-
-/**
- * A render prop for the body of the investigation's Learnings tab: what Elastic Nightshift learned
- * during the investigation. Without it the flyout has no Learnings tab.
- */
-export type RenderLearnings = (props: LearningsSlotRenderProps) => React.ReactNode;
-
 /** Props passed to the `renderLiveState` render prop. */
 export interface LiveStateSlotRenderProps {
   conversationId: string;

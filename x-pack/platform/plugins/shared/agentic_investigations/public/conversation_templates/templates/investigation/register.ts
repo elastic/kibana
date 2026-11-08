@@ -163,10 +163,6 @@ export const investigationTemplate: TemplateDefinition = {
         })
       : undefined;
 
-    const LazyLearningsTab = React.lazy(async () => {
-      const { LearningsTab } = await import('./flyout/learnings_tab');
-      return { default: LearningsTab };
-    });
     const LazyTimelineTab = makeLazyWithSharedClient<TimelineSlotRenderProps>(async () => {
       const { TimelineTab } = await import('./flyout/timeline_tab');
       return TimelineTab;
@@ -334,12 +330,6 @@ export const investigationTemplate: TemplateDefinition = {
           EscalationModalBoundary,
           { loadingLabel: TIMELINE_LOADING_LABEL },
           React.createElement(LazyTimelineTab, props)
-        ),
-      renderLearnings: () =>
-        React.createElement(
-          React.Suspense,
-          { fallback: null },
-          React.createElement(LazyLearningsTab)
         ),
       renderLiveState: (props) =>
         React.createElement(
