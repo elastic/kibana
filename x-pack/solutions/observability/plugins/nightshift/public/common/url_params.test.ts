@@ -12,12 +12,16 @@ import {
   getNightshiftEventIdFromSearch,
   getNightshiftSearchQueryFromSearch,
   getNightshiftSeverityFromSearch,
+  getNightshiftTimeRangeFromSearch,
   NIGHTSHIFT_EVENT_ID_QUERY_PARAM,
+  NIGHTSHIFT_RANGE_FROM_PARAM,
+  NIGHTSHIFT_RANGE_TO_PARAM,
   NIGHTSHIFT_SEARCH_QUERY_PARAM,
   NIGHTSHIFT_SEVERITY_QUERY_PARAM,
   setNightshiftEventIdParam,
   setNightshiftSearchQueryParam,
   setNightshiftSeverityParam,
+  setNightshiftTimeRangeParams,
 } from './url_params';
 
 describe('url_params', () => {
@@ -90,5 +94,33 @@ describe('url_params', () => {
     const params = new URLSearchParams();
     setNightshiftSeverityParam(params, 'critical');
     expect(params.get(NIGHTSHIFT_SEVERITY_QUERY_PARAM)).toBe('critical');
+  });
+
+  it('reads and writes the time range params, omitting defaults', () => {
+    const defaults = { from: 'now-30d', to: 'now' };
+    expect(getNightshiftTimeRangeFromSearch('', defaults)).toEqual({
+      rangeFrom: 'now-30d',
+      rangeTo: 'now',
+    });
+    expect(getNightshiftTimeRangeFromSearch('?rangeFrom=now-7d&rangeTo=now-1h', defaults)).toEqual({
+      rangeFrom: 'now-7d',
+      rangeTo: 'now-1h',
+    });
+
+    const params = new URLSearchParams();
+    setNightshiftTimeRangeParams(
+      params,
+      { rangeFrom: 'now-7d', rangeTo: 'now' },
+      defaults
+    );
+    expect(params.get(NIGHTSHIFT_RANGE_FROM_PARAM)).toBe('now-7d');
+    expect(params.has(NIGHTSHIFT_RANGE_TO_PARAM)).toBe(false);
+
+    setNightshiftTimeRangeParams(
+      params,
+      { rangeFrom: 'now-30d', rangeTo: 'now' },
+      defaults
+    );
+    expect(params.has(NIGHTSHIFT_RANGE_FROM_PARAM)).toBe(false);
   });
 });

@@ -20,17 +20,22 @@ const getChatHref = jest.fn(
 const addSuccess = jest.fn();
 const addError = jest.fn();
 const httpDelete = jest.fn();
-let isAgentBuilderAdmin = true;
+const httpPut = jest.fn();
+let canManage = true;
 
 jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
   useOpenInChat: () => ({ getChatHref, openChat }),
+  useCanManageInvestigations: () => canManage,
 }));
 
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
-      application: { capabilities: { agentBuilder: { isAdmin: isAgentBuilderAdmin } } },
-      http: { delete: httpDelete },
+      http: {
+        basePath: { get: () => '/s/default' },
+        delete: httpDelete,
+        put: httpPut,
+      },
       notifications: { toasts: { addSuccess, addError } },
     },
   }),
@@ -58,11 +63,14 @@ const investigation: InvestigationSummary = {
 
 let queryClient: QueryClient;
 
-const renderActions = (assignees?: React.ReactNode) =>
+const renderActions = (
+  assignees?: React.ReactNode,
+  nextInvestigation: InvestigationSummary = investigation
+) =>
   render(
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
-        <InvestigationCardActions investigation={investigation} assignees={assignees} />
+        <InvestigationCardActions investigation={nextInvestigation} assignees={assignees} />
       </I18nProvider>
     </QueryClientProvider>
   );
@@ -75,7 +83,8 @@ describe('InvestigationCardActions', () => {
     addSuccess.mockReset();
     addError.mockReset();
     httpDelete.mockReset().mockResolvedValue({ success: true });
-    isAgentBuilderAdmin = true;
+    httpPut.mockReset().mockResolvedValue({ status: 'closed' });
+    canManage = true;
     (copyToClipboard as jest.Mock).mockReturnValue(true);
   });
 
@@ -144,31 +153,61 @@ describe('InvestigationCardActions', () => {
     expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: ['nightshift.investigations'] });
   });
 
-  it('shows an error toast when the delete fails', async () => {
-    const error = new Error('Not found');
-    httpDelete.mockRejectedValue(error);
+  it('closes an open investigation from the overflow menu without a confirm dialog', async () => {
     renderActions();
 
     fireEvent.click(screen.getByTestId('nightshiftInvestigationCardActions'));
-    fireEvent.click(screen.getByTestId('nightshiftInvestigationCardDelete'));
-    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationCardClose'));
 
     await waitFor(() =>
-      expect(addError).toHaveBeenCalledWith(
-        error,
-        expect.objectContaining({ title: 'Could not delete the investigation' })
+      expect(addSuccess).toHaveBeenCalledWith(
+        expect.objectContaining({ title: 'Investigation closed' })
       )
     );
-    expect(addSuccess).not.toHaveBeenCalled();
+    expect(httpPut).toHaveBeenCalledWith(
+      expect.stringContaining('/investigations/investigation-1/status'),
+      expect.objectContaining({
+        body: JSON.stringify({ status: 'closed', dismiss_reason: 'no_reason' }),
+      })
+    );
   });
 
-  it('hides Delete from users who are not Agent Builder admins', () => {
-    isAgentBuilderAdmin = false;
+  it('offers Open on closed cards without Archive', async () => {
+    httpPut.mockResolvedValue({ status: 'open' });
+    renderActions(undefined, {
+      ...investigation,
+      metadata: { ...investigation.metadata, status: 'closed' },
+    });
+
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationCardActions'));
+
+    expect(screen.getByTestId('nightshiftInvestigationCardOpen')).toHaveTextContent('Open');
+    expect(screen.queryByTestId('nightshiftInvestigationCardArchive')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationCardOpen'));
+
+    await waitFor(() =>
+      expect(addSuccess).toHaveBeenCalledWith(
+        expect.objectContaining({ title: 'Investigation reopened' })
+      )
+    );
+    expect(httpPut).toHaveBeenCalledWith(
+      expect.stringContaining('/investigations/investigation-1/status'),
+      expect.objectContaining({
+        body: JSON.stringify({ status: 'open' }),
+      })
+    );
+  });
+
+  it('hides Delete, Close and Open from users who cannot manage investigations', () => {
+    canManage = false;
     renderActions();
 
     fireEvent.click(screen.getByTestId('nightshiftInvestigationCardActions'));
 
     expect(screen.getByTestId('nightshiftInvestigationCardCopyLink')).toBeInTheDocument();
     expect(screen.queryByTestId('nightshiftInvestigationCardDelete')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftInvestigationCardClose')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftInvestigationCardOpen')).not.toBeInTheDocument();
   });
 });

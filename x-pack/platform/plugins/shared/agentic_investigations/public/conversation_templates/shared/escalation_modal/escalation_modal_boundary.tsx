@@ -41,14 +41,23 @@ const Spinner: React.FC<{ label: string }> = ({ label }) => (
 export interface EscalationModalBoundaryProps {
   /** Accessible label for the loading spinner. Defaults to "Loading escalation modal…". */
   loadingLabel?: string;
+  /**
+   * Suspense fallback while the lazy chunk loads. Defaults to a centered spinner. Pass `null` for
+   * footer Actions (Close / Delete) so the flyout does not flash a spinner under the buttons.
+   */
+  fallback?: React.ReactNode;
 }
 
 export const EscalationModalBoundary: React.FC<
   React.PropsWithChildren<EscalationModalBoundaryProps>
-> = ({ children, loadingLabel }) => (
+> = ({ children, loadingLabel, fallback }) => (
   <KibanaErrorBoundaryProvider>
     <KibanaErrorBoundary>
-      <React.Suspense fallback={<Spinner label={loadingLabel ?? LOADING_LABEL} />}>
+      <React.Suspense
+        fallback={
+          fallback !== undefined ? fallback : <Spinner label={loadingLabel ?? LOADING_LABEL} />
+        }
+      >
         {children}
       </React.Suspense>
     </KibanaErrorBoundary>

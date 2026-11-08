@@ -154,6 +154,10 @@ export interface FooterSlotProps extends InvestigationSlotProps {
   onOpenEscalation?: ConversationDetailsFlyoutFooterProps['onOpenEscalation'];
   wrapEscalationButton?: ConversationDetailsFlyoutFooterProps['wrapEscalationButton'];
   onCloseInvestigation?: ConversationDetailsFlyoutFooterProps['onCloseInvestigation'];
+  onCloseInvestigationImmediate?: ConversationDetailsFlyoutFooterProps['onCloseInvestigationImmediate'];
+  onReopenInvestigation?: ConversationDetailsFlyoutFooterProps['onReopenInvestigation'];
+  onDeleteInvestigation?: ConversationDetailsFlyoutFooterProps['onDeleteInvestigation'];
+  wrapActionsMenu?: ConversationDetailsFlyoutFooterProps['wrapActionsMenu'];
 }
 
 export const FooterSlot = ({
@@ -163,6 +167,10 @@ export const FooterSlot = ({
   onOpenEscalation,
   wrapEscalationButton,
   onCloseInvestigation,
+  onCloseInvestigationImmediate,
+  onReopenInvestigation,
+  onDeleteInvestigation,
+  wrapActionsMenu,
 }: FooterSlotProps) => (
   <ConversationDetailsFlyoutFooter
     investigation={conversationToInvestigation(conversation)}
@@ -171,6 +179,10 @@ export const FooterSlot = ({
     onOpenEscalation={onOpenEscalation}
     wrapEscalationButton={wrapEscalationButton}
     onCloseInvestigation={onCloseInvestigation}
+    onCloseInvestigationImmediate={onCloseInvestigationImmediate}
+    onReopenInvestigation={onReopenInvestigation}
+    onDeleteInvestigation={onDeleteInvestigation}
+    wrapActionsMenu={wrapActionsMenu}
   />
 );
 

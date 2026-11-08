@@ -99,70 +99,60 @@ export function NightshiftHeader({
         padding: 0;
       `}
     >
-      <EuiFlexGroup
-        alignItems="flexEnd"
-        direction="row"
-        gutterSize="l"
-        justifyContent="spaceBetween"
-        responsive={false}
-      >
-        <EuiFlexItem grow>
-          <EuiFlexGroup alignItems="center" direction="row" gutterSize="m" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <div
-                aria-label={i18n.translate('xpack.nightshift.hero.nightshiftIconAriaLabel', {
-                  defaultMessage: 'Nightshift',
-                })}
-                role="img"
-                css={css`
-                  align-items: center;
-                  background: linear-gradient(
-                    99.4deg,
-                    ${euiTheme.colors.backgroundLightPrimary} 3.97%,
-                    ${euiTheme.colors.backgroundLightAssistance} 65.6%
-                  );
-                  border-radius: 50%;
-                  color: ${euiTheme.colors.textAssistance};
-                  display: inline-flex;
-                  height: calc(${euiTheme.size.xxl} + ${euiTheme.size.m});
-                  justify-content: center;
-                  width: calc(${euiTheme.size.xxl} + ${euiTheme.size.m});
-                `}
-              >
-                <NightshiftMarkIcon />
-              </div>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              {!isGreetingInline && (
-                <EuiText color="subdued" size="s" textAlign="left">
-                  <p>{getGreeting(greetingName)}</p>
-                </EuiText>
+      <EuiFlexGroup alignItems="center" direction="row" gutterSize="m" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <div
+            aria-label={i18n.translate('xpack.nightshift.hero.nightshiftIconAriaLabel', {
+              defaultMessage: 'Nightshift',
+            })}
+            role="img"
+            css={css`
+              align-items: center;
+              background: linear-gradient(
+                99.4deg,
+                ${euiTheme.colors.backgroundLightPrimary} 3.97%,
+                ${euiTheme.colors.backgroundLightAssistance} 65.6%
+              );
+              border-radius: 50%;
+              color: ${euiTheme.colors.textAssistance};
+              display: inline-flex;
+              height: calc(${euiTheme.size.xxl} + ${euiTheme.size.m});
+              justify-content: center;
+              width: calc(${euiTheme.size.xxl} + ${euiTheme.size.m});
+            `}
+          >
+            <NightshiftMarkIcon />
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          {!isGreetingInline && (
+            <EuiText color="subdued" size="s" textAlign="left">
+              <p>{getGreeting(greetingName)}</p>
+            </EuiText>
+          )}
+          <EuiTitle
+            size="m"
+            css={css`
+              font-size: calc(${euiTheme.size.l} + ${euiTheme.size.xxs});
+              font-weight: ${euiTheme.font.weight.medium};
+              line-height: ${euiTheme.size.xl};
+              text-align: left;
+              white-space: nowrap;
+            `}
+          >
+            <h2>
+              {isGreetingInline && (
+                <span
+                  css={css`
+                    color: ${euiTheme.colors.textSubdued};
+                  `}
+                >
+                  {`${getGreeting(greetingName)} `}
+                </span>
               )}
-              <EuiTitle
-                size="m"
-                css={css`
-                  font-size: calc(${euiTheme.size.l} + ${euiTheme.size.xxs});
-                  font-weight: ${euiTheme.font.weight.medium};
-                  line-height: ${euiTheme.size.xl};
-                  text-align: left;
-                  white-space: nowrap;
-                `}
-              >
-                <h2>
-                  {isGreetingInline && (
-                    <span
-                      css={css`
-                        color: ${euiTheme.colors.textSubdued};
-                      `}
-                    >
-                      {`${getGreeting(greetingName)} `}
-                    </span>
-                  )}
-                  {title}
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              {title}
+            </h2>
+          </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>

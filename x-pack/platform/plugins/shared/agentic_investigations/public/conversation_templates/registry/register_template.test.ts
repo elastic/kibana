@@ -90,7 +90,8 @@ describe('registerTemplate', () => {
 
     expect(investigation.renderAssignees).toEqual(expect.any(Function));
     expect(investigation.renderStatus).toEqual(expect.any(Function));
-    expect(investigation.renderCloseInvestigationModal).toEqual(expect.any(Function));
+    expect(investigation.onCloseInvestigationImmediate).toEqual(expect.any(Function));
+    expect(investigation.renderCloseInvestigationModal).toBeUndefined();
     expect(investigation.renderEscalationModal).toEqual(expect.any(Function));
     expect(investigation.wrapEscalationButton).toEqual(expect.any(Function));
     expect(escalation.renderAssignees).toEqual(expect.any(Function));
@@ -105,7 +106,8 @@ describe('registerTemplate', () => {
     expect(investigation.wrapEscalationButton).toBeUndefined();
     // The investigation's own write actions are unaffected.
     expect(investigation.renderStatus).toEqual(expect.any(Function));
-    expect(investigation.renderCloseInvestigationModal).toEqual(expect.any(Function));
+    expect(investigation.onCloseInvestigationImmediate).toEqual(expect.any(Function));
+    expect(investigation.renderCloseInvestigationModal).toBeUndefined();
     expect(escalation).toBeUndefined();
   });
 

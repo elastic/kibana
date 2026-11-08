@@ -15,18 +15,24 @@ import { MemoryRouter, useLocation } from 'react-router-dom';
 import { NightshiftApp } from './app';
 import type { InvestigationSectionState } from '../../data/investigations/use_investigation_sections';
 import { useInvestigationSections } from '../../data/investigations/use_investigation_sections';
+import { useFetchInvestigations } from '../../data/investigations/use_fetch_investigations';
 import { useKibana } from '../../hooks/use_kibana';
 import { useDetectionSetupBanner } from './use_detection_setup_banner';
 
 jest.mock('../../data/investigations/use_investigation_sections');
+jest.mock('../../data/investigations/use_fetch_investigations');
 jest.mock('../../hooks/use_kibana');
 jest.mock('@kbn/ebt-tools');
 jest.mock('../../components/entities/investigation/use_investigation_assignees', () => ({
   useInvestigationAssignees: () => () => null,
 }));
+jest.mock('../../components/ui/time_range_picker', () => ({
+  NightshiftTimeRangePicker: () => <div data-test-subj="nightshiftHomepageTimePicker" />,
+}));
 jest.mock('./use_detection_setup_banner');
 
 const mockUseInvestigationSections = useInvestigationSections as jest.Mock;
+const mockUseFetchInvestigations = useFetchInvestigations as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
 const mockUsePageReady = usePageReady as jest.Mock;
 const mockUseDetectionSetupBanner = useDetectionSetupBanner as jest.Mock;
@@ -140,8 +146,12 @@ function setSections({
     hasActiveInvestigations,
     isInitialLoading,
     isFetching,
-    totalCount: sections.reduce((sum, section) => sum + section.total, 0),
-    loadedCount: sections.reduce((sum, section) => sum + section.investigations.length, 0),
+    totalCount: sections
+      .filter((section) => section.id !== 'recent')
+      .reduce((sum, section) => sum + section.total, 0),
+    loadedCount: sections
+      .filter((section) => section.id !== 'recent')
+      .reduce((sum, section) => sum + section.investigations.length, 0),
     refetchAll,
   });
 }
@@ -200,10 +210,28 @@ describe('NightshiftApp', () => {
         agenticInvestigations: { InvestigationCard },
         agentBuilder: { openConversationDetails },
         notifications: { toasts: { addSuccess: jest.fn() } },
+        charts: {
+          theme: {
+            useChartsBaseTheme: () => ({}),
+            useSparklineOverrides: () => ({}),
+          },
+        },
       },
     });
     openConversationDetails.mockReset().mockImplementation(async () => closeConversationDetails);
     closeConversationDetails.mockReset();
+    mockUseFetchInvestigations.mockReturnValue({
+      investigations: [],
+      total: 0,
+      hasMore: false,
+      isInitialLoading: false,
+      isFetchingNextPage: false,
+      isFetching: false,
+      isPreviousData: false,
+      error: null,
+      fetchNextPage: jest.fn(),
+      refetch: jest.fn(),
+    });
     setSections({
       sections: defaultSections({
         'in-progress': { investigations: [investigation], total: 1 },
@@ -215,7 +243,10 @@ describe('NightshiftApp', () => {
   it('renders investigations and reports the page ready metrics', () => {
     renderApp();
 
-    expect(screen.queryByTestId('o11yNightshiftAppShowAllLink')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('nightshiftHomepageViewAllInvestigations')
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftHomepageTimePicker')).toBeInTheDocument();
     expect(screen.getByText('Checkout errors are elevated')).toBeInTheDocument();
     expect(screen.getByText('Investigations are underway')).toBeInTheDocument();
     expect(mockUsePageReady).toHaveBeenCalledWith(
@@ -254,6 +285,7 @@ describe('NightshiftApp', () => {
     mockUseKibana.mockReturnValue({
       services: {
         analytics,
+        http: { basePath: { get: () => '' } },
         application: {
           capabilities: { nightshift: manageCapabilities },
           getUrlForApp: (appId: string, { path }: { path?: string } = {}) =>
@@ -376,12 +408,27 @@ describe('NightshiftApp', () => {
     expect(screen.getByTestId('nightshiftInvestigationsEmpty')).toHaveTextContent(
       'No investigations found'
     );
+    expect(screen.getByTestId('nightshiftInvestigationsEmptyHint')).toHaveTextContent(
+      'Try adjusting your time range or filter'
+    );
     expect(
       screen.queryByTestId('nightshiftInvestigationSection-in-progress')
     ).not.toBeInTheDocument();
   });
 
+  it('hides severity tiles when every severity count is zero', () => {
+    renderApp();
+
+    expect(screen.queryByTestId('nightshiftSeverityTiles')).not.toBeInTheDocument();
+  });
+
   it('does not scroll from a severity tile with no investigations', () => {
+    setSections({
+      sections: defaultSections({
+        high: { investigations: [highInvestigation], total: 1 },
+      }),
+    });
+
     renderApp();
 
     fireEvent.click(screen.getByTestId('nightshiftSeverityTile-critical'));
@@ -413,8 +460,8 @@ describe('NightshiftApp', () => {
       }),
     });
     window.localStorage.setItem(
-      'nightshift.investigations.collapsedSections:default',
-      JSON.stringify(['critical'])
+      'nightshift.investigations.collapsedSections.v2:default',
+      JSON.stringify(['critical', 'closed'])
     );
 
     renderApp(link ? { initialEntries: [link] } : undefined);
@@ -432,7 +479,13 @@ describe('NightshiftApp', () => {
 
   it('keeps a severity tile actionable when its section failed to load, since it still renders', async () => {
     setSections({
-      sections: defaultSections({ critical: { error: new Error('boom') } }),
+      sections: defaultSections({
+        critical: {
+          investigations: [criticalInvestigation],
+          total: 1,
+          error: new Error('boom'),
+        },
+      }),
     });
 
     renderApp();

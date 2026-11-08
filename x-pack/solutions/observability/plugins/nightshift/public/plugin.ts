@@ -90,6 +90,30 @@ export class NightshiftPlugin
       visibleIn: [],
       deepLinks: [
         {
+          id: 'investigations' satisfies NightshiftLinkId,
+          title: i18n.translate('xpack.nightshift.investigationsDeepLinkTitle', {
+            defaultMessage: 'Investigations',
+          }),
+          path: '/investigations',
+          visibleIn: [],
+        },
+        {
+          id: 'automations' satisfies NightshiftLinkId,
+          title: i18n.translate('xpack.nightshift.automationsDeepLinkTitle', {
+            defaultMessage: 'Automations',
+          }),
+          path: '/automations',
+          visibleIn: [],
+        },
+        {
+          id: 'knowledge' satisfies NightshiftLinkId,
+          title: i18n.translate('xpack.nightshift.knowledgeDeepLinkTitle', {
+            defaultMessage: 'Knowledge',
+          }),
+          path: '/knowledge',
+          visibleIn: [],
+        },
+        {
           id: 'detections' satisfies NightshiftLinkId,
           title: i18n.translate('xpack.nightshift.detectionsDeepLinkTitle', {
             defaultMessage: 'Detections',

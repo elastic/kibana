@@ -108,10 +108,31 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
    */
   renderSeverity?: RenderSeverity;
   /**
-   * When provided, the "Close investigation" footer action renders a confirmation modal.
+   * When provided, the "Close" footer Actions item renders a confirmation modal.
    * Supplied by the caller so the modal can use HTTP hooks unavailable in this package.
+   * Ignored when {@link onCloseInvestigationImmediate} is set.
    */
   renderCloseInvestigationModal?: import('./slots').FooterSlotProps['onCloseInvestigation'];
+  /**
+   * When provided, Close runs this immediately with no confirmation.
+   * Takes precedence over {@link renderCloseInvestigationModal}.
+   */
+  onCloseInvestigationImmediate?: import('./slots').FooterSlotProps['onCloseInvestigationImmediate'];
+  /**
+   * When provided, the footer Actions menu offers "Open" on a closed investigation.
+   * Supplied by the caller so the mutation can use HTTP hooks unavailable in this package.
+   */
+  onReopenInvestigation?: import('./slots').FooterSlotProps['onReopenInvestigation'];
+  /**
+   * When provided, the footer Actions menu offers "Delete investigation" with a confirmation modal.
+   * Supplied by the caller so the modal can use HTTP hooks unavailable in this package.
+   */
+  renderDeleteInvestigationModal?: import('./slots').FooterSlotProps['onDeleteInvestigation'];
+  /**
+   * Wraps the footer Actions menu so the caller can hide it when the user may not manage
+   * investigations.
+   */
+  wrapActionsMenu?: import('./slots').FooterSlotProps['wrapActionsMenu'];
   /**
    * When provided, replaces the overview tab body so the caller can add sections from data it
    * fetches. See `RenderOverview`.
@@ -168,6 +189,10 @@ export const registerAgenticInvestigationTemplateUI = ({
   renderStatus,
   renderSeverity,
   renderCloseInvestigationModal,
+  onCloseInvestigationImmediate,
+  onReopenInvestigation,
+  renderDeleteInvestigationModal,
+  wrapActionsMenu,
   renderOverview,
   renderImpactMap,
   renderTimeline,
@@ -291,6 +316,10 @@ export const registerAgenticInvestigationTemplateUI = ({
                 onOpenEscalation={renderEscalationModal}
                 wrapEscalationButton={wrapEscalationButton}
                 onCloseInvestigation={renderCloseInvestigationModal}
+                onCloseInvestigationImmediate={onCloseInvestigationImmediate}
+                onReopenInvestigation={onReopenInvestigation}
+                onDeleteInvestigation={renderDeleteInvestigationModal}
+                wrapActionsMenu={wrapActionsMenu}
               />
             </Suspense>
           );
