@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -221,56 +221,84 @@ const Timeline: React.FC<{
   const [selectedId, setSelectedId] = useState<string>();
   const { events, entities, relationships } = impactMap;
 
-  const entityOptions = useMemo<FilterOption[]>(() => {
-    const counts = new Map<string, number>();
-    events.forEach((event) =>
-      getEventEntityIds(event, relationships).forEach((id) =>
-        counts.set(id, (counts.get(id) ?? 0) + 1)
-      )
-    );
-    const seen = entities.filter(({ id }) => counts.has(id));
-    const types = new Map(impactMap.entity_types.map((type) => [type.id, type]));
-    return seen.map(({ id, label, type_id: typeId }) => ({
-      key: id,
-      label,
-      count: counts.get(id) ?? 0,
-      icon: getEntityIcon(types.get(typeId)),
-      type: getEntityKindLabel(types.get(typeId)?.kind),
-    }));
-  }, [events, entities, relationships, impactMap.entity_types]);
-
-  const kindOptions = useMemo<FilterOption[]>(
-    () =>
-      EVENT_GROUPS.map(({ id, label, icon }) => ({
-        key: id,
-        label,
-        count: events.filter(({ kind }) => kind === id).length,
-        icon,
-      })).filter(({ count }) => count > 0),
-    [events]
-  );
-
-  const isFiltered = entityFilter.length > 0 || kindFilter.length > 0 || text.trim() !== '';
-
-  const visible = useMemo(() => {
-    const needle = text.trim().toLowerCase();
-    const filtered = events.filter((event) => {
-      if (kindFilter.length && !kindFilter.includes(event.kind)) {
+  // Each filter's choices are counted over the events the other filters leave, so the numbers
+  // always say what choosing that option would show.
+  const matches = useCallback(
+    (
+      event: ImpactMapEvent,
+      { entityIds, kinds, search }: { entityIds?: string[]; kinds?: string[]; search?: string }
+    ) => {
+      if (kinds?.length && !kinds.includes(event.kind)) {
         return false;
       }
-      const touched = getEventEntityIds(event, relationships);
-      if (entityFilter.length && !touched.some((id) => entityFilter.includes(id))) {
+      if (
+        entityIds?.length &&
+        !getEventEntityIds(event, relationships).some((id) => entityIds.includes(id))
+      ) {
         return false;
       }
+      const needle = search?.trim().toLowerCase();
       return (
         !needle ||
         [event.title, event.description ?? '', describeEventTarget(event, impactMap)].some(
           (value) => value.toLowerCase().includes(needle)
         )
       );
-    });
+    },
+    [relationships, impactMap]
+  );
+
+  const entityOptions = useMemo<FilterOption[]>(() => {
+    const counts = new Map<string, number>();
+    events
+      .filter((event) => matches(event, { kinds: kindFilter, search: text }))
+      .forEach((event) =>
+        getEventEntityIds(event, relationships).forEach((id) =>
+          counts.set(id, (counts.get(id) ?? 0) + 1)
+        )
+      );
+    const everTouched = new Set(events.flatMap((event) => getEventEntityIds(event, relationships)));
+    const types = new Map(impactMap.entity_types.map((type) => [type.id, type]));
+    return entities
+      .filter(({ id }) => everTouched.has(id) && (counts.has(id) || entityFilter.includes(id)))
+      .map(({ id, label, type_id: typeId }) => ({
+        key: id,
+        label,
+        count: counts.get(id) ?? 0,
+        icon: getEntityIcon(types.get(typeId)),
+        type: getEntityKindLabel(types.get(typeId)?.kind),
+      }));
+  }, [
+    events,
+    entities,
+    relationships,
+    impactMap.entity_types,
+    matches,
+    kindFilter,
+    entityFilter,
+    text,
+  ]);
+
+  const kindOptions = useMemo<FilterOption[]>(() => {
+    const scoped = events.filter((event) =>
+      matches(event, { entityIds: entityFilter, search: text })
+    );
+    return EVENT_GROUPS.map(({ id, label, icon }) => ({
+      key: id,
+      label,
+      count: scoped.filter(({ kind }) => kind === id).length,
+      icon,
+    })).filter(({ key, count }) => count > 0 || kindFilter.includes(key));
+  }, [events, matches, entityFilter, kindFilter, text]);
+
+  const isFiltered = entityFilter.length > 0 || kindFilter.length > 0 || text.trim() !== '';
+
+  const visible = useMemo(() => {
+    const filtered = events.filter((event) =>
+      matches(event, { entityIds: entityFilter, kinds: kindFilter, search: text })
+    );
     return newestFirst ? [...filtered].reverse() : filtered;
-  }, [events, relationships, impactMap, entityFilter, kindFilter, text, newestFirst]);
+  }, [events, matches, entityFilter, kindFilter, text, newestFirst]);
 
   // Runs of events the filters hide, so the list shows where it skips. Each count sits between
   // the two visible events it separates, and at either end when events lie beyond the last one.

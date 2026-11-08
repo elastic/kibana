@@ -144,6 +144,17 @@ describe('TimelineTab', () => {
     expect((await screen.findAllByText('Type: Service')).length).toBeGreaterThan(0);
   });
 
+  it("counts each filter's choices over what the other filters leave", async () => {
+    renderTab();
+    fireEvent.click(screen.getByTestId('agenticInvestigationsTimelineTypeFilter'));
+    fireEvent.click(await screen.findByRole('option', { name: /Change/ }));
+    fireEvent.click(screen.getByTestId('agenticInvestigationsTimelineEntityFilter'));
+
+    // Only a change on checkout-service is left, so payment-gateway is not offered.
+    expect(await screen.findByRole('option', { name: /checkout-service/ })).toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: /payment-gateway/ })).toBeNull();
+  });
+
   it('filters by text and clears the filters', () => {
     renderTab();
     fireEvent.change(screen.getByTestId('agenticInvestigationsTimelineSearch'), {

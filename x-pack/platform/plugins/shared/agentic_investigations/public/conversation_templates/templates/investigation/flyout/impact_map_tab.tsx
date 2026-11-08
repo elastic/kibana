@@ -41,8 +41,11 @@ import { KindAvatar, TimelineEvent } from './timeline_event';
 import { requestTimelineFocus } from './timeline_focus';
 import { useIsInAgentBuilder } from './use_is_in_agent_builder';
 
-/** Fills the flyout below its header and tabs; the controls sit at the top, so nothing hides them. */
-const MAP_HEIGHT = 'clamp(320px, calc(100vh - 280px), 900px)';
+/**
+ * Fits the flyout below its header, tabs and title, with room for the footer, so the controls at
+ * the top of the map are never scrolled out of view.
+ */
+const MAP_HEIGHT = 'clamp(320px, calc(100vh - 480px), 900px)';
 
 const DEFAULT_TITLE = i18n.translate('xpack.agenticInvestigations.impactMap.defaultTitle', {
   defaultMessage: 'Impact map',
