@@ -17,6 +17,7 @@ import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiEmptyPrompt,
+  EuiFieldSearch,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
@@ -938,6 +939,10 @@ export const getEntityTypeLabel = (
 export const getEntityKindLabel = (kind?: string): string | undefined =>
   kind ? kind.charAt(0).toUpperCase() + kind.slice(1) : undefined;
 
+const SEARCH_EVENTS = i18n.translate('xpack.agenticInvestigations.impactMap.searchEvents', {
+  defaultMessage: 'Search events',
+});
+
 const TYPE_FILTER = i18n.translate('xpack.agenticInvestigations.impactMap.events.typeFilter', {
   defaultMessage: 'Event type',
 });
@@ -1084,17 +1089,19 @@ const EventsFlyoutContent: React.FC<
 
   // Newest first: what happened last is what a person usually wants to see.
   const [kindFilter, setKindFilter] = useState<string[]>([]);
+  const [searchText, setSearchText] = useState('');
   const allNewestFirst = useMemo(
     () => [...events].sort((a, b) => Date.parse(b.at) - Date.parse(a.at)),
     [events]
   );
-  const newestFirst = useMemo(
-    () =>
-      kindFilter.length > 0
-        ? allNewestFirst.filter(({ kind }) => kindFilter.includes(kind))
-        : allNewestFirst,
-    [allNewestFirst, kindFilter]
-  );
+  const newestFirst = useMemo(() => {
+    const needle = searchText.trim().toLowerCase();
+    return allNewestFirst.filter(
+      (event) =>
+        (kindFilter.length === 0 || kindFilter.includes(event.kind)) &&
+        (!needle || `${event.title} ${event.description ?? ''}`.toLowerCase().includes(needle))
+    );
+  }, [allNewestFirst, kindFilter, searchText]);
   const kindOptions = useMemo(
     () =>
       EVENT_GROUPS.map(({ id, label, icon: groupIcon }) => ({
@@ -1245,20 +1252,38 @@ const EventsFlyoutContent: React.FC<
           />
         ) : (
           <>
-            {kindOptions.length > 1 && (
-              <>
-                <EuiFilterGroup compressed>
-                  <FilterPopover
-                    label={TYPE_FILTER}
-                    options={kindOptions}
-                    selected={kindFilter}
-                    onChange={setKindFilter}
-                    testSubj="agenticInvestigationsImpactMapEventsTypeFilter"
-                  />
-                </EuiFilterGroup>
-                <EuiSpacer size="s" />
-              </>
-            )}
+            <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+              <EuiFlexItem
+                css={css`
+                  min-width: 160px;
+                `}
+              >
+                <EuiFieldSearch
+                  fullWidth
+                  compressed
+                  isClearable
+                  placeholder={SEARCH_EVENTS}
+                  aria-label={SEARCH_EVENTS}
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  data-test-subj="agenticInvestigationsImpactMapEventsSearch"
+                />
+              </EuiFlexItem>
+              {kindOptions.length > 0 && (
+                <EuiFlexItem grow={false}>
+                  <EuiFilterGroup compressed>
+                    <FilterPopover
+                      label={TYPE_FILTER}
+                      options={kindOptions}
+                      selected={kindFilter}
+                      onChange={setKindFilter}
+                      testSubj="agenticInvestigationsImpactMapEventsTypeFilter"
+                    />
+                  </EuiFilterGroup>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
             {newestFirst.length === 0 ? (
               <EuiText
                 size="s"
