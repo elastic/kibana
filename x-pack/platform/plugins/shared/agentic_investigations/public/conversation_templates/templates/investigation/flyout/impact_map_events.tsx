@@ -187,12 +187,6 @@ const NO_DESCRIPTION = i18n.translate(
     defaultMessage: 'No description recorded.',
   }
 );
-const TREND_LABEL = i18n.translate('xpack.agenticInvestigations.impactMap.events.trend', {
-  defaultMessage: 'Trend',
-});
-const NO_CHART = i18n.translate('xpack.agenticInvestigations.impactMap.events.noChart', {
-  defaultMessage: 'No chart yet: the agent had no numbers for this event.',
-});
 const LINKS_LABEL = i18n.translate('xpack.agenticInvestigations.impactMap.events.links', {
   defaultMessage: 'Links',
 });
@@ -353,17 +347,11 @@ const EventDetail: React.FC<{
     <EuiText size="s" color={event.description ? undefined : 'subdued'}>
       <p>{event.description ?? NO_DESCRIPTION}</p>
     </EuiText>
-    <EuiSpacer size="m" />
-    <EuiTitle size="xxs">
-      <h4>{TREND_LABEL}</h4>
-    </EuiTitle>
-    <EuiSpacer size="xs" />
-    {event.evidence?.chart ? (
-      <LazyEvidenceView evidence={withContextAnnotations(event.evidence, event, allEvents)} />
-    ) : (
-      <EuiText size="s" color="subdued" data-test-subj="agenticInvestigationsImpactMapEventNoChart">
-        <p>{NO_CHART}</p>
-      </EuiText>
+    {event.evidence?.chart && (
+      <>
+        <EuiSpacer size="m" />
+        <LazyEvidenceView evidence={withContextAnnotations(event.evidence, event, allEvents)} />
+      </>
     )}
     {event.links?.length ? (
       <>
