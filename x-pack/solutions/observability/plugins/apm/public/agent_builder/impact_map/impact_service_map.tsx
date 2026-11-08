@@ -350,6 +350,8 @@ function MapControls({
   );
 }
 
+const CLICKABLE_CLASS = 'impactMapClickable';
+
 const LOOKBACK_MS = 7 * 24 * 60 * 60 * 1000;
 
 /** What APM said about a service, kept for the session so reopening a map draws at once. */
@@ -474,9 +476,14 @@ export function ImpactServiceMap({
 
   const { laidOutNodes, edges } = useMemo(() => {
     const graph = transformImpactMap(impactMap, { criticalPath: criticalPathColor }, agentNames);
+    // Only a target with events opens anything, so only it looks clickable.
     return {
-      laidOutNodes: applyDagreLayout<ImpactServiceMapNode>(graph.nodes, graph.edges),
-      edges: graph.edges,
+      laidOutNodes: applyDagreLayout<ImpactServiceMapNode>(graph.nodes, graph.edges).map((node) =>
+        node.data.eventCount ? { ...node, className: CLICKABLE_CLASS } : node
+      ),
+      edges: graph.edges.map((edge) =>
+        edge.data?.eventCount ? { ...edge, className: CLICKABLE_CLASS } : edge
+      ),
     };
   }, [impactMap, criticalPathColor, agentNames]);
 
@@ -519,8 +526,12 @@ export function ImpactServiceMap({
               center,
             ${euiTheme.colors.lightShade};
           background-size: ${euiTheme.size.l} ${euiTheme.size.l};
-          ${onEntityClick ? '.react-flow__node { cursor: pointer; }' : ''}
-          ${onRelationshipClick ? '.react-flow__edge { cursor: pointer; }' : ''}
+          .react-flow__node,
+          .react-flow__edge {
+            cursor: default;
+          }
+          ${onEntityClick ? `.react-flow__node.${CLICKABLE_CLASS} { cursor: pointer; }` : ''}
+          ${onRelationshipClick ? `.react-flow__edge.${CLICKABLE_CLASS} { cursor: pointer; }` : ''}
         `}
       >
         <ReactFlow
