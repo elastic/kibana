@@ -485,14 +485,31 @@ const EventKeyFacts: React.FC<{
 };
 
 /** What the entity is, then the featured facts the agent recorded about it. */
-const EntityKeyFacts: React.FC<{ metadata?: EntityMetadataRow[] }> = ({ metadata }) => {
+const EntityKeyFacts: React.FC<{
+  metadata?: EntityMetadataRow[];
+  impactMap: ImpactMapFlyoutMap;
+  /** The entity being shown; a fact that names it is not linked back to it. */
+  selfLabel?: string;
+  onOpenEntity?: (entityId: string) => void;
+}> = ({ metadata, impactMap, selfLabel, onOpenEntity }) => {
   const facts: KeyFact[] = (metadata ?? [])
     .filter(({ featured }) => featured)
-    .map(({ key, label, value }) => ({
-      label,
-      value,
-      testSubj: `agenticInvestigationsImpactMapFeatured-${key}`,
-    }));
+    .map(({ key, label, value }) => {
+      // A value that names another entity on the map is shown as that entity, to open it.
+      const named =
+        value !== selfLabel
+          ? impactMap.entities.find((entity) => entity.label === value)
+          : undefined;
+      return {
+        label,
+        value: named ? (
+          <EntityBadge entityId={named.id} impactMap={impactMap} onOpenEntity={onOpenEntity} />
+        ) : (
+          value
+        ),
+        testSubj: `agenticInvestigationsImpactMapFeatured-${key}`,
+      };
+    });
   return facts.length ? (
     <KeyFacts facts={facts} testSubj="agenticInvestigationsImpactMapFeaturedMetadata" />
   ) : null;
@@ -1182,7 +1199,12 @@ const EventsFlyoutContent: React.FC<
             <EuiSpacer size="m" />
             {metadata?.some(({ featured }) => featured) && (
               <>
-                <EntityKeyFacts metadata={metadata} />
+                <EntityKeyFacts
+                  metadata={metadata}
+                  impactMap={impactMap}
+                  selfLabel={title}
+                  onOpenEntity={onOpenEntity}
+                />
                 <EuiSpacer size="m" />
               </>
             )}
