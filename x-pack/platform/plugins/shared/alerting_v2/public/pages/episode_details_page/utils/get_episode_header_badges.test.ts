@@ -5,19 +5,28 @@
  * 2.0.
  */
 
+import { render, screen } from '@testing-library/react';
 import { ALERT_EPISODE_ACTION_TYPE, ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import { getEpisodeHeaderBadges } from './get_episode_header_badges';
 
+const renderHeaderBadge = (badge: ReturnType<typeof getEpisodeHeaderBadges>[number]) => {
+  const customBadge = badge.renderCustomBadge;
+  if (!customBadge) {
+    throw new Error(`expected ${badge.label} to provide renderCustomBadge`);
+  }
+  return render(customBadge({ badgeText: badge.label }));
+};
+
 describe('getEpisodeHeaderBadges', () => {
-  it('maps each status to the expected badge color and label', () => {
+  it('maps each status to a hollow custom badge and label', () => {
     const statuses = [
-      { status: ALERT_EPISODE_STATUS.ACTIVE, color: 'danger', label: 'Active' },
-      { status: ALERT_EPISODE_STATUS.PENDING, color: 'warning', label: 'Pending' },
-      { status: ALERT_EPISODE_STATUS.RECOVERING, color: 'primary', label: 'Recovering' },
-      { status: ALERT_EPISODE_STATUS.INACTIVE, color: 'success', label: 'Inactive' },
+      { status: ALERT_EPISODE_STATUS.ACTIVE, label: 'Active' },
+      { status: ALERT_EPISODE_STATUS.PENDING, label: 'Pending' },
+      { status: ALERT_EPISODE_STATUS.RECOVERING, label: 'Recovering' },
+      { status: ALERT_EPISODE_STATUS.INACTIVE, label: 'Inactive' },
     ] as const;
 
-    for (const { status, color, label } of statuses) {
+    for (const { status, label } of statuses) {
       const badges = getEpisodeHeaderBadges({
         status,
         severity: undefined,
@@ -28,10 +37,15 @@ describe('getEpisodeHeaderBadges', () => {
       expect(badges).toEqual([
         expect.objectContaining({
           label,
-          color,
-          'data-test-subj': 'alertingV2EpisodeDetailsHeaderStatusBadge',
+          color: 'hollow',
         }),
       ]);
+
+      const { unmount } = renderHeaderBadge(badges[0]);
+      expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderStatusBadge')).toHaveTextContent(
+        label
+      );
+      unmount();
     }
   });
 
@@ -67,8 +81,12 @@ describe('getEpisodeHeaderBadges', () => {
 
     expect(badges[0]).toMatchObject({
       label: 'Inactive',
-      color: 'success',
+      color: 'hollow',
     });
+    renderHeaderBadge(badges[0]);
+    expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderStatusBadge')).toHaveTextContent(
+      'Inactive'
+    );
   });
 
   it('renders high severity as a custom soft badge', () => {
@@ -82,10 +100,10 @@ describe('getEpisodeHeaderBadges', () => {
     expect(badges).toEqual([
       expect.objectContaining({
         label: 'High',
-        'data-test-subj': 'alertingV2EpisodeSeverityBadge-high',
-        renderCustomBadge: expect.any(Function),
       }),
     ]);
+    renderHeaderBadge(badges[0]);
+    expect(screen.getByTestId('alertingV2EpisodeSeverityBadge-high')).toHaveTextContent('High');
   });
 
   it('adds acknowledged and snoozed text badges with tooltips', () => {

@@ -16,7 +16,8 @@
         ] */
 
 import { getEvalPipeline } from '../../../pipelines/evals/eval_pipeline.ts';
-import { emitPipeline, getPipeline } from '#pipeline-utils';
+import { emitPipeline } from '#pipeline-utils';
+import { postBuildSteps, renderSteps } from '#pipeline-utils/step-library';
 
 // Forwarded by the trigger from kibana-pull-request; re-selects the same suites/models.
 const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
@@ -58,7 +59,7 @@ const preludeSteps = [
 // Reuse kibana-pull-request's canonical Post-Build (trailing `wait` + post_build.sh on a light
 // k8s/sparse agent) so it can't drift. The wait must be last — run_suite.sh uploads each suite's
 // fanout as a separate group that inserts before it.
-const postludeSteps = getPipeline('.buildkite/pipelines/pull_request/post_build.yml');
+const postludeSteps = renderSteps(postBuildSteps());
 
 const evalsGroup = getEvalPipeline(GITHUB_PR_LABELS);
 

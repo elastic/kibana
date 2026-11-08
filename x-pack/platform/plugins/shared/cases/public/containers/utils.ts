@@ -16,6 +16,7 @@ import {
   CasesSchema,
   ConfigurationSchema,
   ConfigurationsSchema,
+  UnifiedAttachmentsSchema,
   UserActionsSchema,
 } from '../../common/types/domain';
 import { isAlertAttachmentType, isAttackAttachmentType } from '../../common/utils/attachments';
@@ -39,6 +40,7 @@ import type {
   Cases,
   Configuration,
   Configurations,
+  UnifiedAttachments,
   User,
   UserActions,
 } from '../../common/types/domain';
@@ -76,6 +78,9 @@ export const decodeCasesResponse = (respCase?: Cases) =>
 
 export const decodeCasesWithUpdateSummaryResponse = (response?: CasesPatchResponse) =>
   decodeWithToasterError(PatchCasesResponseSchema, response);
+
+export const decodeUnifiedAttachmentsResponse = (respAttachments?: UnifiedAttachments) =>
+  decodeWithToasterError(UnifiedAttachmentsSchema, respAttachments);
 
 export const decodeCaseConfigurationsResponse = (respCase?: Configurations) =>
   decodeWithToasterError(ConfigurationsSchema, respCase);

@@ -716,6 +716,8 @@ export function createCanvasMachineImplementations({
   core,
   urlStateStorageContainer,
   apiKeyGenerationDeps,
+  timeState,
+  timeState$,
   loadSourceEnvironment,
   loadUnitDefinition,
   validateUnitDefinition = validateCanvasUnitDefinition,
@@ -732,7 +734,12 @@ export function createCanvasMachineImplementations({
         apiKeyGenerationDeps,
         loadSourceEnvironment,
       }),
-      destinationsMachine: createDestinationsMachineActor({ core, apiKeyGenerationDeps }),
+      destinationsMachine: createDestinationsMachineActor({
+        core,
+        apiKeyGenerationDeps,
+        timeState,
+        timeState$,
+      }),
       loadUnitDefinition: createLoadUnitDefinitionActor({ loadUnitDefinition }),
       validateUnitDefinition: createValidateUnitDefinitionActor({ validateUnitDefinition }),
       persistUnitDefinition: createPersistUnitDefinitionActor({ persistUnitDefinition }),
@@ -765,11 +772,15 @@ function createSourcesMachineActor({
 function createDestinationsMachineActor({
   core,
   apiKeyGenerationDeps,
-}: Pick<CanvasStateServiceDeps, 'core' | 'apiKeyGenerationDeps'>) {
+  timeState,
+  timeState$,
+}: Pick<CanvasStateServiceDeps, 'core' | 'apiKeyGenerationDeps' | 'timeState' | 'timeState$'>) {
   return destinationsStateMachine.provide(
     createDestinationsMachineImplementations({
       toasts: core.notifications.toasts,
       apiKeyGenerationDeps,
+      timeState,
+      timeState$,
     })
   );
 }

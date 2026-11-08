@@ -14,6 +14,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { FF_DUAL_PROCESS_ENABLED } from '../../../common';
+import type { EntityType } from '../../../common/domain/definitions/entity_schema';
 import { hasPriorityExtractionGate } from '../../../common/domain/definitions/registry';
 import { ENGINE_STATUS } from '../../domain/constants';
 import { EngineDescriptorTypeName, EngineDescriptorClient } from '../../domain/saved_objects';
@@ -21,17 +22,19 @@ import type { EngineDescriptor } from '../../domain/saved_objects';
 
 /**
  * Whether the dual-process log extraction architecture is active for this deployment.
- * Reads from LaunchDarkly via core featureFlags; defaults to false so self-managed and
- * unreachable deployments always run single-process.
+ * Reads from LaunchDarkly via core featureFlags; defaults to true so self-managed and
+ * unreachable deployments, which never reach LaunchDarkly, also run dual-process.
  */
 export const isDualProcessEnabled = (featureFlags: FeatureFlagsStart): Promise<boolean> =>
-  firstValueFrom(featureFlags.getBooleanValue$(FF_DUAL_PROCESS_ENABLED, false));
+  firstValueFrom(featureFlags.getBooleanValue$(FF_DUAL_PROCESS_ENABLED, true));
 
 // ---------------------------------------------------------------------------
 // Flag-reactive stop / restart
 // ---------------------------------------------------------------------------
 
 const MAX_ENGINES_PER_PAGE = 10_000;
+
+type IsNonPriorityTaskScheduled = (type: EntityType, namespace: string) => Promise<boolean>;
 
 interface EngineEntry {
   attributes: EngineDescriptor;
@@ -53,8 +56,9 @@ async function findAllEngineDescriptors(coreStart: CoreStart): Promise<EngineEnt
 }
 
 /**
- * Removes the non-priority extraction task for every engine where the dual-process
- * flag just flipped off and the non-priority process is still tracked as started.
+ * Marks the non-priority extraction process as stopped and clears its cursor for every
+ * engine where the dual-process flag just flipped off and the process is still tracked
+ * as started. The task stays scheduled and returns early while the flag is off.
  *
  * The nonPriorityStatus guard ensures only one node acts per engine; subsequent
  * nodes find the status already cleared and skip.
@@ -102,13 +106,18 @@ async function teardownNonPriorityTasks({
  * Engines with nonPriorityStatus === null (pre-v10, not yet bootstrapped) are handled
  * separately by the priority task's bootstrap step. Task Manager scheduling happens
  * there too, so this function only manages SO state for already-bootstrapped engines.
+ *
+ * A stopped process without a scheduled task was stopped by an operator through
+ * `stopProcess`, so it is left stopped.
  */
 async function enableNonPriorityTasks({
   coreStart,
   logger,
+  isNonPriorityTaskScheduled,
 }: {
   coreStart: CoreStart;
   logger: Logger;
+  isNonPriorityTaskScheduled: IsNonPriorityTaskScheduled;
 }): Promise<void> {
   const engines = await findAllEngineDescriptors(coreStart);
 
@@ -120,7 +129,16 @@ async function enableNonPriorityTasks({
   );
 
   await Promise.all(
-    targets.map(async ({ attributes: { type }, namespace }) => {
+    targets.map(async ({ attributes: { type, nonPriorityStatus }, namespace }) => {
+      if (
+        nonPriorityStatus === ENGINE_STATUS.STOPPED &&
+        !(await isNonPriorityTaskScheduled(type, namespace))
+      ) {
+        logger.info(
+          `Non-priority extraction for ${type} in namespace ${namespace} was stopped by an operator, not resuming`
+        );
+        return;
+      }
       logger.info(
         `Dual-process flag turned on: resuming non-priority extraction for ${type} in namespace ${namespace}`
       );
@@ -139,14 +157,14 @@ async function enableNonPriorityTasks({
 /**
  * Subscribes to the dual-process feature flag and reacts to transitions:
  *
- * - true -> false: removes the non-priority extraction task and clears its cursor
- *   for every active engine. Guarded by nonPriorityStatus === 'started' so only
- *   one Kibana node acts.
+ * - true -> false: marks the non-priority process stopped and clears its cursor for
+ *   every active engine. The task stays scheduled and returns early. Guarded by
+ *   nonPriorityStatus === 'started' so only one Kibana node acts.
  *
- * - false -> true: schedules the non-priority extraction task (cursor-free, so it
- *   starts from now - lookbackPeriod) for every started engine that supports it.
- *   Guarded by nonPriorityStatus == null so only one node acts; Task Manager
- *   deduplicates the schedule by task ID.
+ * - false -> true: marks the non-priority process started (cursor-free, so it starts
+ *   from now - lookbackPeriod) for every started engine that supports it, except
+ *   engines an operator stopped (see enableNonPriorityTasks). The priority task
+ *   schedules the non-priority task.
  *
  * Transitions are processed sequentially (concatMap) so a rapid flip cannot
  * interleave teardown and re-enable operations.
@@ -157,17 +175,19 @@ export const subscribeToDualProcessFlag = ({
   coreStart,
   logger,
   stop$,
+  isNonPriorityTaskScheduled,
 }: {
   coreStart: CoreStart;
   logger: Logger;
   stop$: Subject<void>;
+  isNonPriorityTaskScheduled: IsNonPriorityTaskScheduled;
 }): void => {
   // Reconcile on startup: pairwise() only reacts to in-session transitions, so flag changes
   // between restarts (config edits, version upgrades) are handled here.
   isDualProcessEnabled(coreStart.featureFlags)
     .then((enabled) =>
       enabled
-        ? enableNonPriorityTasks({ coreStart, logger })
+        ? enableNonPriorityTasks({ coreStart, logger, isNonPriorityTaskScheduled })
         : teardownNonPriorityTasks({ coreStart, logger })
     )
     .catch((err: Error) =>
@@ -175,7 +195,7 @@ export const subscribeToDualProcessFlag = ({
     );
 
   coreStart.featureFlags
-    .getBooleanValue$(FF_DUAL_PROCESS_ENABLED, false)
+    .getBooleanValue$(FF_DUAL_PROCESS_ENABLED, true)
     .pipe(
       pairwise(),
       takeUntil(stop$),
@@ -184,7 +204,7 @@ export const subscribeToDualProcessFlag = ({
         const transition =
           prev && !curr
             ? teardownNonPriorityTasks({ coreStart, logger })
-            : enableNonPriorityTasks({ coreStart, logger });
+            : enableNonPriorityTasks({ coreStart, logger, isNonPriorityTaskScheduled });
         return transition.catch((err: Error) =>
           logger.error(`Dual-process flag transition failed: ${err.message}`)
         );

@@ -22,10 +22,10 @@ export const ALERTZERO_ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_WORKFLOW_ID =
  * and that attack's alerts. Proposed by `forensics_close_investigation_gate.yaml`.
  */
 export const ALERTZERO_ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 1,
+  version: 2,
   yaml: ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_YAML,
 } as const satisfies ManagedWorkflowDefinition;

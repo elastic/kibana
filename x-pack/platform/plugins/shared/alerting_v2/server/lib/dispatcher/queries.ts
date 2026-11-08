@@ -44,13 +44,18 @@ export const ESQL_QUERY_ROW_LIMIT = 10_000;
  * Only the action types that feed `last_fired` are read. The others (`notified`, episode
  * actions) carry an `alert_id` and are never window-capped, so each one would add a
  * `BY subject, group_hash, alert_id` bucket that grows with the whole `.alert-actions` history.
+ *
+ * `limit` is `xpack.alerting_v2.dispatcher.run.alerts.max` (at most `ESQL_QUERY_ROW_LIMIT`),
+ * inlined as a literal like every other dispatcher `LIMIT`.
  */
 export const getDispatchableAlertEventsQuery = ({
   gte,
   lte,
+  limit,
 }: {
   gte: string;
   lte: string;
+  limit: number;
 }): EsqlRequest => {
   return esql`FROM ${ALERT_EVENTS_DATA_STREAM},${ALERT_ACTIONS_DATA_STREAM}
       | WHERE type == ${ALERT_EVENT_TYPE} OR action_type IN ("fire", "suppress", "unmatched")
@@ -76,7 +81,7 @@ export const getDispatchableAlertEventsQuery = ({
       | KEEP last_event_timestamp, rule_id, source, space_id, group_hash, alert_id, last_alert_status, severity
       | RENAME last_alert_status AS alert_status
       | SORT last_event_timestamp asc
-      | LIMIT ${ESQL_QUERY_ROW_LIMIT}`.toRequest();
+      | LIMIT ${limit}`.toRequest();
 };
 
 const PAIR_SEPARATOR = '::';

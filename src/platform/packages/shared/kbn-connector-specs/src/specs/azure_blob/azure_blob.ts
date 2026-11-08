@@ -25,6 +25,8 @@ const AZURE_BLOB_API_VERSION = '2021-06-08';
 const MAX_CONTAINER_NAME_LENGTH = 63;
 const MAX_BLOB_NAME_LENGTH = 1024;
 const MAX_MARKER_LENGTH = 2048;
+// Azure returns at most 5000 items per page and rejects maxresults below 1.
+const MAX_RESULTS = 5000;
 
 function encodePathSegment(segment: string): string {
   return encodeURIComponent(segment).replace(/%2F/gi, '/');
@@ -183,6 +185,9 @@ export const AzureBlob: ConnectorSpec = {
             ),
           maxresults: z
             .number()
+            .int()
+            .min(1)
+            .max(MAX_RESULTS)
             .optional()
             .describe('Maximum number of containers to return. Omit to use the service default.'),
           marker: z
@@ -234,6 +239,9 @@ export const AzureBlob: ConnectorSpec = {
             ),
           maxresults: z
             .number()
+            .int()
+            .min(1)
+            .max(MAX_RESULTS)
             .optional()
             .describe('Maximum number of blobs to return. Omit to use the service default.'),
           marker: z

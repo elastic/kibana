@@ -12,7 +12,6 @@ import { datasetAnalysisGenerator } from './dataset_analysis';
 import { logSamplesGenerator } from './log_samples';
 import { logPatternsGenerator } from './log_patterns';
 import { errorLogsGenerator } from './error_logs';
-import { codeAnalysisGenerator } from './code_analysis';
 
 describe('generateAllComputedFeatures', () => {
   const logger = { warn: jest.fn() } as unknown as Logger;
@@ -32,7 +31,7 @@ describe('generateAllComputedFeatures', () => {
   afterEach(() => jest.restoreAllMocks());
 
   it('logs and skips a rejected generator while keeping the successful ones', async () => {
-    [datasetAnalysisGenerator, logPatternsGenerator, codeAnalysisGenerator].forEach((generator) =>
+    [datasetAnalysisGenerator, logPatternsGenerator].forEach((generator) =>
       jest.spyOn(generator, 'generate').mockResolvedValue(undefined)
     );
     jest.spyOn(errorLogsGenerator, 'generate').mockRejectedValue(new Error('boom'));
@@ -46,15 +45,10 @@ describe('generateAllComputedFeatures', () => {
   });
 
   it('throws when failures leave no features, alongside a skipped generator', async () => {
-    [
-      datasetAnalysisGenerator,
-      logSamplesGenerator,
-      logPatternsGenerator,
-      errorLogsGenerator,
-    ].forEach((generator) =>
+    [datasetAnalysisGenerator, logPatternsGenerator, errorLogsGenerator].forEach((generator) =>
       jest.spyOn(generator, 'generate').mockRejectedValue(new Error('boom'))
     );
-    jest.spyOn(codeAnalysisGenerator, 'generate').mockResolvedValue(undefined);
+    jest.spyOn(logSamplesGenerator, 'generate').mockResolvedValue(undefined);
 
     await expect(generateAllComputedFeatures(options)).rejects.toThrow(
       'All computed feature generators failed'
@@ -68,7 +62,6 @@ describe('generateAllComputedFeatures', () => {
       logSamplesGenerator,
       logPatternsGenerator,
       errorLogsGenerator,
-      codeAnalysisGenerator,
     ].forEach((generator) =>
       jest.spyOn(generator, 'generate').mockImplementation(async ({ signal }) => {
         seen.push(signal);
@@ -79,7 +72,7 @@ describe('generateAllComputedFeatures', () => {
     const controller = new AbortController();
     await generateAllComputedFeatures({ ...options, requestSignal: controller.signal });
 
-    expect(seen).toHaveLength(5);
+    expect(seen).toHaveLength(4);
     expect(new Set(seen).size).toBe(1);
     controller.abort();
     expect(seen[0].aborted).toBe(true);
@@ -93,7 +86,6 @@ describe('generateAllComputedFeatures', () => {
       logSamplesGenerator,
       logPatternsGenerator,
       errorLogsGenerator,
-      codeAnalysisGenerator,
     ].forEach((generator) =>
       jest.spyOn(generator, 'generate').mockImplementation(async ({ signal }) => {
         if (signal.aborted) throw signal.reason;
@@ -114,7 +106,6 @@ describe('generateAllComputedFeatures', () => {
       logSamplesGenerator,
       logPatternsGenerator,
       errorLogsGenerator,
-      codeAnalysisGenerator,
     ].forEach((generator) => jest.spyOn(generator, 'generate').mockResolvedValue(undefined));
 
     await expect(generateAllComputedFeatures(options)).resolves.toEqual({
