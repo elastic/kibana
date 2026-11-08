@@ -948,7 +948,7 @@ export const getEntityTypeLabel = (
   }
   // A built-in type is named as the catalog names it ("Kubernetes node"), not as a map stored it
   // ("K8s"), so a person can tell what the thing is.
-  const builtIn = BUILT_IN_ENTITY_TYPES.find(({ id }) => id === canonicalEntityTypeId(type.id));
+  const builtIn = BUILT_IN_ENTITY_TYPES.find(({ id }) => id === canonicalEntityTypeId(storedType.id));
   const type = builtIn ? { ...storedType, label: builtIn.label } : storedType;
   // A type that carries the entity's own name ('Shipping service') is not a sub-type.
   const name = entityName?.trim().toLowerCase();
