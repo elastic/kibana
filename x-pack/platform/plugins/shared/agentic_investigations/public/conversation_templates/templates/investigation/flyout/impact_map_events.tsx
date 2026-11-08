@@ -173,6 +173,24 @@ const EMPTY_BODY = i18n.translate('xpack.agenticInvestigations.impactMap.events.
 const BACK_LABEL = i18n.translate('xpack.agenticInvestigations.impactMap.events.back', {
   defaultMessage: 'All events',
 });
+const DESCRIPTION_LABEL = i18n.translate(
+  'xpack.agenticInvestigations.impactMap.events.description',
+  {
+    defaultMessage: 'Description',
+  }
+);
+const NO_DESCRIPTION = i18n.translate(
+  'xpack.agenticInvestigations.impactMap.events.noDescription',
+  {
+    defaultMessage: 'No description recorded.',
+  }
+);
+const TREND_LABEL = i18n.translate('xpack.agenticInvestigations.impactMap.events.trend', {
+  defaultMessage: 'Trend',
+});
+const NO_CHART = i18n.translate('xpack.agenticInvestigations.impactMap.events.noChart', {
+  defaultMessage: 'No chart yet: the agent had no numbers for this event.',
+});
 const LINKS_LABEL = i18n.translate('xpack.agenticInvestigations.impactMap.events.links', {
   defaultMessage: 'Links',
 });
@@ -314,37 +332,36 @@ const EventDetail: React.FC<{
   allEvents?: readonly ImpactMapEvent[];
 }> = ({ event, target, allEvents }) => (
   <div data-test-subj="agenticInvestigationsImpactMapEventDetail">
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-      <EuiFlexItem grow={false}>
-        <EventKindBadge kind={event.kind} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs" color="subdued">
-          <EventTime at={event.at} withDate />
-          {event.ends_at && (
-            <>
-              {' – '}
-              <EventTime at={event.ends_at} />
-            </>
-          )}
-          {' · '}
-          {target}
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    {event.description && (
-      <>
-        <EuiSpacer size="s" />
-        <EuiText size="s">
-          <p>{event.description}</p>
-        </EuiText>
-      </>
-    )}
-    {event.evidence && (
-      <>
-        <EuiSpacer size="m" />
-        <LazyEvidenceView evidence={withContextAnnotations(event.evidence, event, allEvents)} />
-      </>
+    <EuiText size="xs" color="subdued">
+      <EventTime at={event.at} withDate />
+      {event.ends_at && (
+        <>
+          {' – '}
+          <EventTime at={event.ends_at} />
+        </>
+      )}
+      {' · '}
+      {target}
+    </EuiText>
+    <EuiSpacer size="m" />
+    <EuiTitle size="xxs">
+      <h4>{DESCRIPTION_LABEL}</h4>
+    </EuiTitle>
+    <EuiSpacer size="xs" />
+    <EuiText size="s" color={event.description ? undefined : 'subdued'}>
+      <p>{event.description ?? NO_DESCRIPTION}</p>
+    </EuiText>
+    <EuiSpacer size="m" />
+    <EuiTitle size="xxs">
+      <h4>{TREND_LABEL}</h4>
+    </EuiTitle>
+    <EuiSpacer size="xs" />
+    {event.evidence?.chart ? (
+      <LazyEvidenceView evidence={withContextAnnotations(event.evidence, event, allEvents)} />
+    ) : (
+      <EuiText size="s" color="subdued" data-test-subj="agenticInvestigationsImpactMapEventNoChart">
+        <p>{NO_CHART}</p>
+      </EuiText>
     )}
     {event.links?.length ? (
       <>
@@ -432,6 +449,12 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
         <EuiTitle size="s">
           <h2 id={titleId}>{selected ? selected.title : title}</h2>
         </EuiTitle>
+        {selected && (
+          <>
+            <EuiSpacer size="xs" />
+            <EventKindBadge kind={selected.kind} />
+          </>
+        )}
         {!selected && (
           <EuiText size="xs" color="subdued">
             {i18n.translate('xpack.agenticInvestigations.impactMap.events.count', {
