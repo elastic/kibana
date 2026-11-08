@@ -75,9 +75,9 @@ it is kept in the URL (`browser`, `os`, `device`, `country`, `pageUrl`, `percent
   used values with their page loads in the time range, environment and the other selected filters,
   but not its own selection, so its other values stay selectable. A pinned filter without values,
   e.g. the country when the collector does no GeoIP processing, is hidden unless it is selected.
-  Hovering a value shows **Only**, which selects it in place of the others, and a click on a row of
-  the breakdowns or the top pages filters the Overview by it, or takes the filter off when it is
-  selected already; the arrow of a browser or system opens its sessions instead.
+  A click on a row of the breakdowns or the top pages filters the Overview by it, or takes the
+  filter off when it is selected already; the arrow of a browser or system opens its sessions
+  instead.
 - **App version and URL contains:** the version is `service.version` of the resource (or of the
   event). **URL contains** has no list: the text is written in the flyout and matches part of the
   page URL, whatever its case (`*` and `?` in it are the text itself). Like the page, it narrows the

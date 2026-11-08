@@ -8,7 +8,6 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import {
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCheckbox,
   EuiFlexGroup,
@@ -23,8 +22,7 @@ import { DIGITAL_EXPERIENCE_EBT_ACTIONS } from '../ebt_constants';
 
 /**
  * One value of a facet, with a checkbox to include it, a button to exclude it, and its count. The
- * checkbox and the button each undo themselves when pressed again. "Only" shows on hover and focus,
- * and narrows the filter to this value alone.
+ * checkbox and the button each undo themselves when pressed again.
  */
 export function FacetOptionRow({
   id,
@@ -35,7 +33,6 @@ export function FacetOptionRow({
   isDisabled = false,
   onInclude,
   onExclude,
-  onOnly,
   ebtElement,
   'data-test-subj': dataTestSubj,
 }: {
@@ -50,11 +47,9 @@ export function FacetOptionRow({
   isDisabled?: boolean;
   onInclude: () => void;
   onExclude: () => void;
-  /** Selects this value and no other; there is no "Only" button when it is left out. */
-  onOnly?: () => void;
   /** Names the filter in click telemetry. */
   ebtElement: string;
-  /** Prefix of the checkbox's test subject; the buttons' end in `-exclude` and `-only`. */
+  /** Prefix of the checkbox's test subject; the exclude button's ends in `-exclude`. */
   'data-test-subj': string;
 }) {
   const { euiTheme } = useEuiTheme();
@@ -78,8 +73,6 @@ export function FacetOptionRow({
         paddingInline: euiTheme.size.s,
         minBlockSize: euiTheme.size.xl,
         '&:hover': { backgroundColor: euiTheme.colors.backgroundBaseInteractiveHover },
-        '[data-only]': { visibility: 'hidden' },
-        '&:hover [data-only], &:focus-within [data-only]': { visibility: 'visible' },
       })}
     >
       <EuiFlexItem grow css={css({ minInlineSize: 0 })}>
@@ -105,28 +98,6 @@ export function FacetOptionRow({
           })}
         />
       </EuiFlexItem>
-      {onOnly && (
-        <EuiFlexItem grow={false} data-only>
-          <EuiButtonEmpty
-            size="xs"
-            flush="both"
-            aria-label={i18n.translate('xpack.digitalExperience.facetOption.onlyAriaLabel', {
-              defaultMessage: 'Only {value}',
-              values: { value: label },
-            })}
-            onClick={onOnly}
-            data-test-subj={`${dataTestSubj}-only`}
-            {...getEbtProps({
-              action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SELECT_ONLY_FILTER_VALUE,
-              element: ebtElement,
-            })}
-          >
-            {i18n.translate('xpack.digitalExperience.facetOption.onlyLabel', {
-              defaultMessage: 'Only',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      )}
       {count !== undefined && (
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued" css={css({ fontVariantNumeric: 'tabular-nums' })}>

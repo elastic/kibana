@@ -618,20 +618,6 @@ describe('OtelOverview', () => {
       });
     });
 
-    it('picks one value alone with Only, in place of the others', async () => {
-      mockFilters({ browser: [...include('Chrome'), ...exclude('Safari')] });
-      await openFlyout();
-
-      fireEvent.click(
-        screen.getByTestId('digitalExperienceOverviewFiltersFlyout-browserOption-Firefox-only')
-      );
-      fireEvent.click(screen.getByTestId('digitalExperienceOverviewFiltersApply'));
-
-      expect(setFilters).toHaveBeenCalledWith(
-        expect.objectContaining({ browser: include('Firefox') })
-      );
-    });
-
     it('lists the versions of the application to pick from', async () => {
       await openFlyout();
 

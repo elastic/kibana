@@ -228,11 +228,6 @@ export class DigitalExperiencePage {
     return this.page.getByTestId(`digitalExperienceOverviewFilter-${name}Option-${value}-exclude`);
   }
 
-  /** The "Only" button of a value in an Overview filter's popover; it shows on hover. */
-  overviewFilterOnly(name: OverviewFilterName, value: string): Locator {
-    return this.page.getByTestId(`digitalExperienceOverviewFilter-${name}Option-${value}-only`);
-  }
-
   /** The row of the breakdowns that filters the Overview by a value, e.g. `('browser', 'Safari')`. */
   overviewBreakdownFilter(name: 'browser' | 'os' | 'device', value: string): Locator {
     return this.page.getByTestId(`digitalExperienceOverviewBreakdownFilter-${name}-${value}`);

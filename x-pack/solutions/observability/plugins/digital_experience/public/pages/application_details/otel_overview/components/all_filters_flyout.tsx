@@ -99,9 +99,6 @@ export function AllFiltersFlyout({
         : { ...current, [name]: toggleFilterValue(values, text, false) };
     });
 
-  const selectOnly = (name: OverviewFilterName, value: string) =>
-    setDraft((current) => ({ ...current, [name]: [{ value, exclude: false }] }));
-
   return (
     <EuiFlyout
       onClose={onClose}
@@ -165,7 +162,6 @@ export function AllFiltersFlyout({
                         isDisabled={isFull && selection === undefined}
                         onInclude={() => toggle(name, value, false)}
                         onExclude={() => toggle(name, value, true)}
-                        onOnly={() => selectOnly(name, value)}
                         ebtElement={FILTER_EBT_ELEMENTS[name]}
                         data-test-subj={`digitalExperienceOverviewFiltersFlyout-${name}Option-${value}`}
                       />
