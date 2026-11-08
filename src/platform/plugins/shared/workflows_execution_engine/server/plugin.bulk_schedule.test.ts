@@ -72,6 +72,16 @@ jest.mock('./concurrency/concurrency_manager', () => ({
     evaluateConcurrencyKey: mockEvaluateConcurrencyKey,
   })),
 }));
+jest.mock('./concurrency/concurrency_group_lock', () => ({
+  setConcurrencyGroupLock: jest.fn(),
+  getConcurrencyGroupLock: jest.fn(),
+  withConcurrencyGroupLock: (
+    _lock: unknown,
+    _spaceId: string,
+    _key: string | null | undefined,
+    fn: () => Promise<unknown>
+  ) => fn(),
+}));
 
 import { checkLicense } from './lib/check_license';
 import {
