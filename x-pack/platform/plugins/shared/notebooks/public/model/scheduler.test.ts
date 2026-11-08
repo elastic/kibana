@@ -132,7 +132,10 @@ const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 const NOW = new Date('2026-10-29T12:00:00.000Z');
 
-const setup = (cells: CellDefinition[], { scope }: Pick<SchedulerDeps, 'scope'> = {}) => {
+const setup = (
+  cells: CellDefinition[],
+  { scope, ignoreManualRunMode }: Pick<SchedulerDeps, 'scope' | 'ignoreManualRunMode'> = {}
+) => {
   const store = new NotebookStore({
     title: 'Notebook',
     cellOrder: cells.map(({ id }) => id),
@@ -144,6 +147,7 @@ const setup = (cells: CellDefinition[], { scope }: Pick<SchedulerDeps, 'scope'> 
     runQuery: fake.runQuery,
     now: () => clock.now,
     scope,
+    ignoreManualRunMode,
   });
   const runtime = (id: string) => store.getRuntime(id);
   const output = (id: string): CellOutput | undefined => store.getRuntime(id).output;
@@ -1147,6 +1151,34 @@ describe('NotebookScheduler', () => {
 
       expect(env.fake.calls.map(({ query }) => query)).toEqual(['FROM logs | LIMIT ?limit_max']);
       expect(env.runtime('hidden')).toEqual({ status: 'idle' });
+    });
+  });
+
+  describe('ignoring manual run mode', () => {
+    it('runs manual cells on open and whenever an input they read changes', async () => {
+      const query = 'FROM logs | LIMIT ?limit_max';
+      const env = track(
+        setup(
+          [
+            range('limit', [0, 10]),
+            esql('q', query, { runMode: 'manual' }),
+            chart('c', 'q', { runMode: 'manual' }),
+          ],
+          { ignoreManualRunMode: true }
+        )
+      );
+      await env.open();
+
+      expect(env.fake.callsFor(query)).toHaveLength(1);
+      expect(env.runtime('q').status).toBe('done');
+      expect(env.runtime('c').status).toBe('done');
+
+      env.store.setInputValue('limit', { kind: 'range', value: [0, 20] });
+      await env.scheduler.whenIdle();
+
+      expect(env.fake.callsFor(query)).toHaveLength(2);
+      expect(env.runtime('q').status).toBe('done');
+      expect(env.output('c')).toBe(env.output('q'));
     });
   });
 

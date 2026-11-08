@@ -82,6 +82,8 @@ const StandaloneApp = ({
       search: plugins.data.search,
       notebookId,
       scope: panels.map(({ cellId }) => cellId),
+      // The page has no Run buttons, so every cell runs whenever what it reads changes.
+      ignoreManualRunMode: true,
     })
   );
   const [isFullScreen, setIsFullScreen] = useState(
@@ -92,16 +94,8 @@ const StandaloneApp = ({
 
   useEffect(() => {
     const { scheduler } = notebook;
-    let isActive = true;
     scheduler.start();
-    // The page has no Run buttons, so cells set to run manually run once when it opens.
-    void scheduler.whenIdle().then(() => {
-      if (isActive) void scheduler.runCellsWithStatus(['stale']);
-    });
-    return () => {
-      isActive = false;
-      scheduler.stop();
-    };
+    return () => scheduler.stop();
   }, [notebook]);
 
   const appMenu = useMemo<AppMenuConfig>(

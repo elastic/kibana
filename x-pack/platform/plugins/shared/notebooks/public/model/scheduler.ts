@@ -18,6 +18,7 @@ import type {
   VegaCellDefinition,
   EsqlCellDefinition,
   InputCellDefinition,
+  RunMode,
 } from '../../common/types';
 import { buildGraph, getAncestors, getDescendants, type NotebookGraph } from './graph';
 import { getDefaultInputValue, type NotebookStore } from './notebook_store';
@@ -41,6 +42,8 @@ export interface SchedulerDeps {
   now?: () => Date;
   /** Cells to keep up to date, along with everything upstream of them; every cell when omitted. */
   scope?: readonly string[];
+  /** Runs cells set to manual as if they were automatic. */
+  ignoreManualRunMode?: boolean;
 }
 
 /** Definition fields whose change re-evaluates a cell; everything else is metadata. */
@@ -144,6 +147,7 @@ export class NotebookScheduler {
   private graph: NotebookGraph;
   private readonly scope?: readonly string[];
   private inScope?: ReadonlySet<string>;
+  private readonly ignoreManualRunMode: boolean;
   private subscriptions: Subscription[] = [];
   private readonly tasks = new Map<string, Promise<void>>();
   private readonly controllers = new Map<string, AbortController>();
@@ -151,10 +155,14 @@ export class NotebookScheduler {
   /** How many times each cell has been recomputed rather than served from its memo. */
   readonly runCounts$ = new BehaviorSubject<Readonly<Record<string, number>>>({});
 
-  constructor(private readonly store: NotebookStore, { runQuery, now, scope }: SchedulerDeps) {
+  constructor(
+    private readonly store: NotebookStore,
+    { runQuery, now, scope, ignoreManualRunMode = false }: SchedulerDeps
+  ) {
     this.runQuery = runQuery;
     this.now = now ?? (() => new Date());
     this.scope = scope;
+    this.ignoreManualRunMode = ignoreManualRunMode;
     this.cells = store.cells$.getValue();
     this.inputValues = store.inputValues$.getValue();
     this.graph = buildGraph(this.cells, store.cellOrder$.getValue());
@@ -272,6 +280,10 @@ export class NotebookScheduler {
     if (roots.length > 0) void this.propagate(roots, new Set());
   }
 
+  private waitsForRun(runMode: RunMode, forced: boolean): boolean {
+    return runMode === 'manual' && !forced && !this.ignoreManualRunMode;
+  }
+
   private getInScope(graph: NotebookGraph): ReadonlySet<string> | undefined {
     const { scope } = this;
     return scope && new Set([...scope, ...getAncestors(graph, scope)]);
@@ -376,7 +388,7 @@ export class NotebookScheduler {
       this.setStatus(id, 'done');
       return;
     }
-    if (runMode === 'manual' && !forced) {
+    if (this.waitsForRun(runMode, forced)) {
       const { runParams } = this.runtime(id);
       this.markStale(
         id,
@@ -426,7 +438,7 @@ export class NotebookScheduler {
       this.setStatus(id, 'done');
       return;
     }
-    if (runMode === 'manual' && !forced) {
+    if (this.waitsForRun(runMode, forced)) {
       this.markStale(id, 'manual');
       return;
     }
@@ -492,7 +504,7 @@ export class NotebookScheduler {
       this.setStatus(id, 'done');
       return;
     }
-    if (runMode === 'manual' && !forced) {
+    if (this.waitsForRun(runMode, forced)) {
       const { output, runParams } = runtime;
       this.markStale(
         id,

@@ -12,7 +12,7 @@ import { EMPTY_CELL_FILTER, matchesCellFilter, type CellFilter } from '../model/
 import { isPinnedTimeCell } from '../model/cell_factory';
 import { NotebookStore } from '../model/notebook_store';
 import { createRunQuery } from '../model/run_query';
-import { NotebookScheduler } from '../model/scheduler';
+import { NotebookScheduler, type SchedulerDeps } from '../model/scheduler';
 import { getCellElementId } from './cell_display';
 import type { NotebookContextValue, SidePanel } from './notebook_context';
 
@@ -34,15 +34,18 @@ export const createNotebookContext = ({
   search,
   notebookId,
   scope,
+  ignoreManualRunMode,
 }: {
   attributes: NotebookAttributes;
   search: ISearchStart;
   notebookId?: string;
-  /** Cells to keep up to date, along with everything upstream of them; every cell when omitted. */
-  scope?: readonly string[];
-}): NotebookContextValue => {
+} & Pick<SchedulerDeps, 'scope' | 'ignoreManualRunMode'>): NotebookContextValue => {
   const store = new NotebookStore(attributes);
-  const scheduler = new NotebookScheduler(store, { runQuery: createRunQuery(search), scope });
+  const scheduler = new NotebookScheduler(store, {
+    runQuery: createRunQuery(search),
+    scope,
+    ignoreManualRunMode,
+  });
   const focusedCell$ = new BehaviorSubject<string | undefined>(undefined);
   const cellFilter$ = new BehaviorSubject<CellFilter>(EMPTY_CELL_FILTER);
   const addedCellIds = new Set<string>();
