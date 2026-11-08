@@ -114,15 +114,35 @@ const serviceType = (id: string, label: string, agentName?: string): ImpactMapEn
   kind: 'service',
   ...(agentName ? { icon: { agent_name: agentName } } : {}),
   description: 'Application code you run.',
-  metadata_fields: [
+  // service.name is the entity's own name, so it is not repeated as a field. Where it runs
+  // (cluster, namespace, deployment, pod, node, cloud) is what a person needs to find it.
+  metadata_fields: uniqueFields([
     field('deployment.environment.name', true),
+    field('service.environment', true),
+    field('k8s.cluster.name', true),
+    field('k8s.namespace.name', true),
     field('service.namespace'),
     field('service.version'),
     field('service.instance.id'),
+    field('service.node.name'),
+    field('service.runtime.name'),
+    field('service.runtime.version'),
+    field('service.framework.name'),
     field('telemetry.sdk.language'),
-    field('k8s.cluster.name'),
-    field('k8s.namespace.name'),
-  ],
+    field('telemetry.sdk.name'),
+    field('telemetry.sdk.version'),
+    field('agent.name'),
+    field('agent.version'),
+    field('k8s.deployment.name'),
+    field('k8s.pod.name'),
+    field('k8s.node.name'),
+    field('host.name'),
+    field('container.image.name'),
+    field('container.image.tag'),
+    field('cloud.provider'),
+    field('cloud.region'),
+    field('team.owner'),
+  ]),
 });
 
 const dependencyType = (
