@@ -148434,7 +148434,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create a copy of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:create AND workflowsManagement:read.
+        Create a copy of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:create AND workflowsManagement:read. Extended privileges (optional, expand functionality when granted): workflowsManagement:managed:read.
       operationId: post-workflows-workflow-id-clone
       parameters:
         - description: A required header to protect against CSRF attacks
