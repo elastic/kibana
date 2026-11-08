@@ -566,6 +566,17 @@ const TIMELINE_TAB = i18n.translate('xpack.agenticInvestigations.impactMap.event
 const METADATA_TAB = i18n.translate('xpack.agenticInvestigations.impactMap.events.metadataTab', {
   defaultMessage: 'Metadata',
 });
+const NO_METADATA_TITLE = i18n.translate(
+  'xpack.agenticInvestigations.impactMap.events.noMetadataTitle',
+  { defaultMessage: 'No metadata yet' }
+);
+const NO_METADATA_BODY = i18n.translate(
+  'xpack.agenticInvestigations.impactMap.events.noMetadataBody',
+  {
+    defaultMessage:
+      'The investigation adds details that help you find this entity, such as its cloud, availability zone, cluster and namespace, the next time it updates the impact map.',
+  }
+);
 const TYPE_LABEL = i18n.translate('xpack.agenticInvestigations.impactMap.events.type', {
   defaultMessage: 'Type',
 });
@@ -611,7 +622,7 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
   typeLabel,
   renderEvents,
   events,
-  metadata = [],
+  metadata,
   impactMap,
   initialEventId,
   onClose,
@@ -623,7 +634,7 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
   const [selectedId, setSelectedId] = useState(initialEventId);
   // An entity with facts but no events opens on its facts.
   const [tab, setTab] = useState<'timeline' | 'metadata'>(
-    events.length === 0 && metadata.length > 0 ? 'metadata' : 'timeline'
+    events.length === 0 && metadata?.length ? 'metadata' : 'timeline'
   );
   const selected = useMemo(() => events.find(({ id }) => id === selectedId), [events, selectedId]);
   // Opened on one event from the timeline, there is no list to go back to.
@@ -698,10 +709,10 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
                 )}
               </EuiFlexItem>
             </EuiFlexGroup>
-            {metadata.some(({ featured }) => featured) && (
+            {metadata?.some(({ featured }) => featured) && (
               <>
                 <EuiSpacer size="s" />
-                <FeaturedMetadata rows={metadata} />
+                <FeaturedMetadata rows={metadata ?? []} />
               </>
             )}
             <EuiSpacer size="s" />
@@ -723,7 +734,7 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
                   >
                     {TIMELINE_TAB}
                   </EuiTab>
-                  {metadata.length > 0 && (
+                  {metadata && (
                     <EuiTab
                       isSelected={tab === 'metadata'}
                       onClick={() => setTab('metadata')}
@@ -751,7 +762,17 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
             allEvents={impactMap.events}
           />
         ) : tab === 'metadata' ? (
-          <EntityMetadataTable rows={metadata} />
+          metadata?.length ? (
+            <EntityMetadataTable rows={metadata} />
+          ) : (
+            <EuiEmptyPrompt
+              iconType="list"
+              titleSize="xs"
+              title={<h3>{NO_METADATA_TITLE}</h3>}
+              body={<p>{NO_METADATA_BODY}</p>}
+              data-test-subj="agenticInvestigationsImpactMapNoMetadata"
+            />
+          )
         ) : events.length === 0 ? (
           <EuiEmptyPrompt
             iconType="clock"

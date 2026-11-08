@@ -180,6 +180,19 @@ describe('ImpactMapTab', () => {
     expect(within(table).queryByText('2.1.0')).toBeNull();
   });
 
+  it('shows a Metadata tab for an entity with none yet, and says why', async () => {
+    mockUseIsInAgentBuilder.mockReturnValue(false);
+    mockUseInvestigation.mockReturnValue({ data: { in_progress: false, impact_map: impactMap } });
+
+    renderTab();
+    fireEvent.click(screen.getByTestId('fakeEntity'));
+    fireEvent.click(await screen.findByTestId('agenticInvestigationsImpactMapMetadataTab'));
+
+    expect(await screen.findByTestId('agenticInvestigationsImpactMapNoMetadata')).toHaveTextContent(
+      'No metadata yet'
+    );
+  });
+
   it('opens an entity that has metadata but no events, on its Metadata tab', async () => {
     mockUseIsInAgentBuilder.mockReturnValue(false);
     mockUseInvestigation.mockReturnValue({
