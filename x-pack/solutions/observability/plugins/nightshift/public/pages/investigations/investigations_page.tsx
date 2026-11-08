@@ -132,7 +132,7 @@ export function InvestigationsPage(): React.ReactElement {
   const { search } = useLocation();
   const urlState = useMemo(() => parseInvestigationsSearch(search), [search]);
   const [draftQuery, setDraftQuery] = useState(urlState.query);
-  const [breakdown, setBreakdown] = useState<InvestigationsHistogramBreakdown>('none');
+  const [breakdown, setBreakdown] = useState<InvestigationsHistogramBreakdown>('severity');
   const [sort, setSort] = useState<InvestigationsTableSort>(DEFAULT_INVESTIGATIONS_TABLE_SORT);
   const selectedInvestigationId = useMemo(
     () => getNightshiftInvestigationIdFromSearch(search),
