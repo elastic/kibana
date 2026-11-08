@@ -184,7 +184,6 @@ const getPanelStyles = (euiThemeContext: UseEuiTheme, inset: number, isEditable:
       height: 100%;
       min-width: 0;
       overflow: auto;
-      padding: ${euiTheme.size.s};
       border-radius: ${euiTheme.border.radius.small};
       ${isEditable &&
       `outline: ${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBaseProminent};`}
