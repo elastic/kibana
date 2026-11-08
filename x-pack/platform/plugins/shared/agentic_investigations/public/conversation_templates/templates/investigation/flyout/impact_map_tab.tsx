@@ -302,9 +302,9 @@ const ImpactMapPanel: React.FC<{
                 >
                   {map}
                 </div>
-                {/* Inside the overlay, so it is above the map whatever EUI's z-index. */}
-                {selection && eventsFlyout}
               </div>
+              {/* Inside the overlay, so it is above the map whatever EUI's z-index, and as tall as the screen. */}
+              {selection && eventsFlyout}
             </div>
           </EuiFocusTrap>
         </EuiPortal>
