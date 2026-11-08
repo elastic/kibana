@@ -35,7 +35,8 @@ import {
   type EventsSelection,
 } from './impact_map_events';
 
-const MAP_HEIGHT = 520;
+/** Tall enough to read, short enough that the whole map, with its controls, fits in the flyout. */
+const MAP_HEIGHT = 'clamp(320px, calc(100vh - 360px), 640px)';
 
 const DEFAULT_TITLE = i18n.translate('xpack.agenticInvestigations.impactMap.defaultTitle', {
   defaultMessage: 'Impact map',
@@ -166,7 +167,7 @@ const ImpactMapPanel: React.FC<{
       <EuiSpacer size="s" />
       <div
         css={css`
-          height: ${MAP_HEIGHT}px;
+          height: ${MAP_HEIGHT};
           border: ${euiTheme.border.thin};
           border-radius: ${euiTheme.border.radius.medium};
           overflow: hidden;

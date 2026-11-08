@@ -11,7 +11,10 @@ import {
   Panel,
   ReactFlow,
   ReactFlowProvider,
+  useNodesInitialized,
   useNodesState,
+  useReactFlow,
+  useStore,
   type ColorMode,
   type Node,
   type NodeProps,
@@ -329,6 +332,25 @@ const useServiceAgentNames = (impactMap: ImpactMapRendererProps['impactMap']) =>
 };
 
 /**
+ * Keeps every node in view. The map is drawn inside a flyout that animates open and resizes, and
+ * a fit done before the size settles, or before nodes are measured, leaves the nodes off screen.
+ * So it fits again whenever the container's size or the set of nodes changes.
+ */
+function FitViewOnChange({ nodeIds }: { nodeIds: string }) {
+  const { fitView } = useReactFlow();
+  const initialized = useNodesInitialized();
+  const size = useStore(({ width, height }) => `${width}x${height}`);
+  useEffect(() => {
+    if (!initialized || size.startsWith('0x') || size.endsWith('x0')) {
+      return;
+    }
+    const frame = requestAnimationFrame(() => fitView({ padding: 0.12, maxZoom: 1.5 }));
+    return () => cancelAnimationFrame(frame);
+  }, [initialized, size, nodeIds, fitView]);
+  return null;
+}
+
+/**
  * Draws an investigation's impact map with the service map's nodes and layout. Users can pan,
  * zoom and drag nodes, and click a node or an edge to see what happened to it.
  */
@@ -398,6 +420,7 @@ export function ImpactServiceMap({
           proOptions={{ hideAttribution: true }}
           colorMode={colorMode.toLowerCase() as ColorMode}
         >
+          <FitViewOnChange nodeIds={nodes.map(({ id }) => id).join('|')} />
           <Controls showInteractive={false} />
           <Panel position="top-left">
             <ImpactMapLegend criticalPathColor={criticalPathColor} />
