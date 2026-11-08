@@ -904,7 +904,18 @@ const EventsFlyoutFrame: React.FC<{
   menuTitle: string;
   children: React.ReactNode;
 }> = ({ standalone, asMainFlyout, onClose, titleId, menuTitle, children }) => {
-  if (standalone) {
+  // Chosen once, when the flyout opens. Opening a main flyout changes which flyout EUI reports as
+  // the managed parent, so choosing again on a later render (every refresh of an investigation
+  // that is still running) flipped it to a child, and the flyout closed under the reader.
+  const [frame] = useState<'standalone' | 'main' | 'child'>(() => {
+    if (standalone) {
+      return 'standalone';
+    }
+    // A child of a managed flyout must have a named size and cannot go with a large parent, and
+    // EUI throws otherwise. Under a large parent it opens as a main flyout over it instead.
+    return asMainFlyout || getManagedParent()?.size === 'l' ? 'main' : 'child';
+  });
+  if (frame === 'standalone') {
     // Drawn inside the full-screen map and not as an EUI flyout: EUI sets a flyout's z-index
     // inline, below the map's, so a flyout opened over the map would sit behind it.
     return (
@@ -913,9 +924,7 @@ const EventsFlyoutFrame: React.FC<{
       </StandaloneEventsPanel>
     );
   }
-  // A child of a managed flyout must have a named size and cannot go with a large parent, and
-  // EUI throws otherwise. Under a large parent it opens as a main flyout over it instead.
-  if (asMainFlyout || getManagedParent()?.size === 'l') {
+  if (frame === 'main') {
     return (
       <MainEventsFlyout onClose={onClose} titleId={titleId} menuTitle={menuTitle}>
         {children}
@@ -1041,6 +1050,8 @@ const ChildEventsFlyout: React.FC<{
   titleId: string;
   children: React.ReactNode;
 }> = ({ onClose, titleId, children }) => {
+  // Read once: the parent's size is only true before this flyout opens.
+  const [size] = useState(() => childSize(getManagedParent()?.size));
   return (
     <EuiFlyout
       onClose={onClose}
@@ -1049,7 +1060,7 @@ const ChildEventsFlyout: React.FC<{
       // child, so beside a wide investigation flyout it was squeezed to a sliver. A medium child
       // goes beside a small parent, or stacks over it when the two don't fit; a medium parent
       // cannot have a medium child.
-      size={childSize(getManagedParent()?.size)}
+      size={size}
       ownFocus={false}
       data-test-subj="agenticInvestigationsImpactMapEventsFlyout"
     >
