@@ -398,8 +398,10 @@ const useServiceAgentNames = (impactMap: ImpactMapRendererProps['impactMap']) =>
     const start = new Date(end.getTime() - LOOKBACK_MS);
     // Never aborted: an answer that arrives after the effect re-ran still goes in the cache, so
     // a service is not left without its icon by a request that was cut short.
+    const { signal } = new AbortController();
     missing.forEach((serviceName) => {
       callApmApi('GET /internal/apm/services/{serviceName}/agent', {
+        signal,
         params: {
           path: { serviceName },
           query: {
