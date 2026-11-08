@@ -29,6 +29,7 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  getFlyoutManagerStore,
   useEuiTheme,
   useGeneratedHtmlId,
   type EuiBadgeProps,
@@ -379,7 +380,9 @@ const EventsFlyoutFrame: React.FC<{
       </StandaloneEventsPanel>
     );
   }
-  if (asMainFlyout) {
+  // A child of a managed flyout must have a named size and cannot go with a large parent, and
+  // EUI throws otherwise. Under a large parent it opens as a main flyout over it instead.
+  if (asMainFlyout || getManagedParent()?.size === 'l') {
     return (
       <MainEventsFlyout onClose={onClose} titleId={titleId} menuTitle={menuTitle}>
         {children}
@@ -484,6 +487,13 @@ const MainEventsFlyout: React.FC<{
   );
 };
 
+/** The main flyout of the open flyout session, when EUI is managing one. */
+const getManagedParent = () => {
+  const { sessions, flyouts } = getFlyoutManagerStore().getState();
+  const mainId = sessions[sessions.length - 1]?.mainFlyoutId;
+  return flyouts.find(({ flyoutId }) => flyoutId === mainId);
+};
+
 const ChildEventsFlyout: React.FC<{
   onClose: () => void;
   titleId: string;
@@ -493,7 +503,8 @@ const ChildEventsFlyout: React.FC<{
     <EuiFlyout
       onClose={onClose}
       aria-labelledby={titleId}
-      size={380}
+      // Under a managed flyout the size has to be a named one.
+      size={getManagedParent() ? 's' : 380}
       ownFocus={false}
       data-test-subj="agenticInvestigationsImpactMapEventsFlyout"
     >
@@ -655,7 +666,14 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
               {onViewInTimeline && events.length > 0 && (
                 <EuiFlexItem grow={false}>
                   <EuiLink
-                    onClick={onViewInTimeline}
+                    onClick={() => {
+                      // A main flyout opened over the investigation flyout steps back to it,
+                      // as Back does, instead of closing the whole stack.
+                      if (asMainFlyout) {
+                        getFlyoutManagerStore().goBack();
+                      }
+                      onViewInTimeline();
+                    }}
                     data-test-subj="agenticInvestigationsImpactMapViewInTimeline"
                   >
                     <EuiText size="xs" component="span">
