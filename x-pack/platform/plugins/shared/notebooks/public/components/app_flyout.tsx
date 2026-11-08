@@ -721,6 +721,7 @@ const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: NotebookApp[] }) =>
       css={{
         padding: euiTheme.size.m,
         paddingRight: `calc(${euiTheme.size.m} + ${euiTheme.size.xl})`,
+        paddingBottom: 0,
       }}
     >
       <EuiFlexItem grow={false}>
