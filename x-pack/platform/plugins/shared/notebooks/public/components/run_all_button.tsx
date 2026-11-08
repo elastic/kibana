@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiSplitButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { isPinnedTimeCell } from '../model/cell_factory';
 import type { CellStatus } from '../model/types';
 import { useNotebook } from './notebook_context';
 import { useCellStatuses } from './use_cell_statuses';
@@ -28,6 +29,12 @@ const FAILED: readonly CellStatus[] = ['error', 'blocked'];
 export const RunAllButton = () => {
   const { store, scheduler } = useNotebook();
   const cellOrder = useStateFromPublishingSubject(store.cellOrder$);
+  const cells = useStateFromPublishingSubject(store.cells$);
+  // The pinned time range lives in the header, so it doesn't count as a cell to run.
+  const hasCells = cellOrder.some((id) => {
+    const cell = cells[id];
+    return cell !== undefined && !isPinnedTimeCell(cell);
+  });
   const statuses = useCellStatuses(cellOrder);
   const [isOpen, setIsOpen] = useState(false);
   const countOf = (wanted: readonly CellStatus[]) =>
@@ -44,7 +51,7 @@ export const RunAllButton = () => {
   };
 
   return (
-    <EuiSplitButton size="s" color="primary" isDisabled={cellOrder.length === 0}>
+    <EuiSplitButton size="s" color="primary" isDisabled={!hasCells}>
       <EuiSplitButton.ActionPrimary
         iconType="play"
         onClick={() => scheduler.runAll()}
