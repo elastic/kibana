@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
@@ -41,11 +41,36 @@ import { KindAvatar, TimelineEvent } from './timeline_event';
 import { requestTimelineFocus } from './timeline_focus';
 import { useIsInAgentBuilder } from './use_is_in_agent_builder';
 
-/**
- * Fits the flyout below its header, tabs and title, with room for the footer, so the controls at
- * the top of the map are never scrolled out of view.
- */
+/** Used until the map has been measured, and while loading. */
 const MAP_HEIGHT = 'clamp(320px, calc(100vh - 480px), 900px)';
+const MIN_MAP_HEIGHT = 320;
+const MAX_MAP_HEIGHT = 900;
+/** Room the flyout's footer takes under the map, plus a margin. */
+const FOOTER_RESERVE = 88;
+
+/**
+ * A height that runs from where the map starts to just above the footer, wherever the header's
+ * title wraps to, so the map neither leaves a gap below it nor pushes its controls out of view.
+ */
+const useFillHeight = () => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState<number>();
+  const measure = () => {
+    const top = ref.current?.getBoundingClientRect().top;
+    if (top === undefined) return;
+    const next = Math.round(
+      Math.min(MAX_MAP_HEIGHT, Math.max(MIN_MAP_HEIGHT, window.innerHeight - top - FOOTER_RESERVE))
+    );
+    setHeight((current) => (current === next ? current : next));
+  };
+  // After every render: the title above can wrap differently without this component resizing.
+  useLayoutEffect(measure);
+  useEffect(() => {
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, []);
+  return { ref, height };
+};
 
 const DEFAULT_TITLE = i18n.translate('xpack.agenticInvestigations.impactMap.defaultTitle', {
   defaultMessage: 'Impact map',
@@ -144,6 +169,7 @@ const ImpactMapPanel: React.FC<{
   openTimeline?: () => void;
 }> = ({ impactMap, Renderer, conversationId, openTimeline }) => {
   const isInAgentBuilder = useIsInAgentBuilder();
+  const fill = useFillHeight();
   const [isMaximized, setIsMaximized] = useState(false);
   const [selection, setSelection] = useState<EventsSelection>();
   // Escape closes the events flyout first, and only then the full-screen map.
@@ -245,8 +271,9 @@ const ImpactMapPanel: React.FC<{
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <div
+        ref={fill.ref}
         css={css`
-          height: ${MAP_HEIGHT};
+          height: ${fill.height ? `${fill.height}px` : MAP_HEIGHT};
           border: ${euiTheme.border.thin};
           border-radius: ${euiTheme.border.radius.medium};
           overflow: hidden;
