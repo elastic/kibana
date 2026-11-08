@@ -14,6 +14,14 @@ export const DIGITAL_EXPERIENCE_EBT_ACTIONS = {
   OPEN_FILTER: 'openFilter',
   /** The user narrows the list, e.g. to one environment or source. */
   SET_FILTER: 'setFilter',
+  /** The user applies a saved view of filters, query and percentile. */
+  APPLY_VIEW: 'applyView',
+  /** The user saves the filters, query and percentile as a view, or saves a view again. */
+  SAVE_VIEW: 'saveView',
+  /** The user asks to delete a saved view, and then confirms it. */
+  DELETE_VIEW: 'deleteView',
+  /** The user keeps a saved view they were about to delete. */
+  CANCEL_DELETE_VIEW: 'cancelDeleteView',
   /** The user leaves a value out of the data, e.g. every Chrome page load. */
   EXCLUDE_FILTER_VALUE: 'excludeFilterValue',
   /** The user opens the list of columns to show or hide. */
@@ -68,6 +76,9 @@ export const APPLICATION_OVERVIEW_EBT_ELEMENTS = {
   OS_FILTER: 'overviewOsFilter',
   DEVICE_FILTER: 'overviewDeviceFilter',
   COUNTRY_FILTER: 'overviewCountryFilter',
+  SAVED_VIEWS: 'overviewSavedViews',
+  SAVED_VIEW_DELETE: 'overviewSavedViewDelete',
+  SAVED_VIEW_DELETE_CONFIRM: 'overviewSavedViewDeleteConfirm',
   APP_VERSION_FILTER: 'overviewAppVersionFilter',
   PAGE_FILTER: 'overviewPageFilter',
   PAGE_CONTAINS_FILTER: 'overviewPageContainsFilter',

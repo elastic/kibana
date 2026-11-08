@@ -16,6 +16,7 @@ import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { registerDigitalExperienceFeature } from './register_feature';
 import { getGlobalDigitalExperienceServerRouteRepository } from './routes/get_global_digital_experience_route_repository';
+import { savedViewSavedObjectType } from './saved_objects/saved_view';
 
 interface DigitalExperienceSetupDeps {
   features: FeaturesPluginSetup;
@@ -34,6 +35,8 @@ export class Plugin implements PluginType<void, void, DigitalExperienceSetupDeps
 
   public setup(core: CoreSetup, plugins: DigitalExperienceSetupDeps) {
     registerDigitalExperienceFeature(plugins.features);
+    // Always registered, not behind a setting, so the saved objects check sees the type.
+    core.savedObjects.registerType(savedViewSavedObjectType);
 
     const { buildFlavor } = this.initializerContext.env.packageInfo;
     registerRoutes({

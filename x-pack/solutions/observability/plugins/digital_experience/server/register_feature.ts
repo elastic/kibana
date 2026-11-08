@@ -14,6 +14,7 @@ import {
   DIGITAL_EXPERIENCE_UI_PRIVILEGES,
   MANAGE_SESSIONS_SUB_FEATURE_PRIVILEGE_ID,
 } from '../common/feature';
+import { SAVED_VIEW_TYPE } from '../common/saved_views';
 
 export const registerDigitalExperienceFeature = (features: FeaturesPluginSetup): void => {
   features.registerKibanaFeature({
@@ -33,13 +34,15 @@ export const registerDigitalExperienceFeature = (features: FeaturesPluginSetup):
         app: [DIGITAL_EXPERIENCE_FEATURE_ID, 'kibana'],
         api: [DIGITAL_EXPERIENCE_API_PRIVILEGES.read, DIGITAL_EXPERIENCE_API_PRIVILEGES.manage],
         ui: [DIGITAL_EXPERIENCE_UI_PRIVILEGES.show, DIGITAL_EXPERIENCE_UI_PRIVILEGES.save],
-        savedObject: { all: [], read: [] },
+        // Saving, updating and deleting the views of the space.
+        savedObject: { all: [SAVED_VIEW_TYPE], read: [SAVED_VIEW_TYPE] },
       },
       read: {
         app: [DIGITAL_EXPERIENCE_FEATURE_ID, 'kibana'],
         api: [DIGITAL_EXPERIENCE_API_PRIVILEGES.read],
         ui: [DIGITAL_EXPERIENCE_UI_PRIVILEGES.show],
-        savedObject: { all: [], read: [] },
+        // Applying the views of the space, not changing them.
+        savedObject: { all: [], read: [SAVED_VIEW_TYPE] },
       },
     },
     subFeatures: [
