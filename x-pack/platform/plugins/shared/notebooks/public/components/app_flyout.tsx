@@ -15,7 +15,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
-  EuiFlyoutHeader,
   EuiIcon,
   EuiMarkdownFormat,
   EuiSpacer,
@@ -796,6 +795,15 @@ const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: NotebookApp[] }) =>
   );
 };
 
+/** Stays below the panels' hover actions, which use the `menu` level. */
+const stickyToolbarStyles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    position: 'sticky',
+    top: 0,
+    zIndex: euiTheme.levels.header,
+    backgroundColor: euiTheme.colors.backgroundBasePlain,
+  });
+
 /** The notebook's apps in a push flyout, beside the notebook that feeds them. */
 export const AppFlyout = ({
   onClose,
@@ -821,17 +829,17 @@ export const AppFlyout = ({
       data-test-subj="notebookAppFlyout"
     >
       {app ? (
-        <>
-          <EuiFlyoutHeader>
+        // The toolbar scrolls with the app, rather than sitting in a flyout header, so the hover
+        // actions above the top row of panels can overlap it instead of being clipped.
+        <EuiFlyoutBody
+          scrollContainerRef={setBodyScrollContainer}
+          css={getAppBackgroundStyles(app)}
+        >
+          <div css={stickyToolbarStyles}>
             <AppToolbar app={app} apps={apps} />
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody
-            scrollContainerRef={setBodyScrollContainer}
-            css={getAppBackgroundStyles(app)}
-          >
-            <AppView app={app} onRevealCell={onRevealCell} scrollContainer={bodyScrollContainer} />
-          </EuiFlyoutBody>
-        </>
+          </div>
+          <AppView app={app} onRevealCell={onRevealCell} scrollContainer={bodyScrollContainer} />
+        </EuiFlyoutBody>
       ) : (
         <EuiFlyoutBody>
           <NoApps />
