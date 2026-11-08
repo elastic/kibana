@@ -382,10 +382,21 @@ const Timeline: React.FC<{
         counts.set(id, (counts.get(id) ?? 0) + 1)
       )
     );
-    return entities
-      .filter(({ id }) => counts.has(id))
-      .map(({ id, label }) => ({ key: id, label, count: counts.get(id) ?? 0 }));
-  }, [events, entities, relationships]);
+    const seen = entities.filter(({ id }) => counts.has(id));
+    const labelCounts = new Map<string, number>();
+    seen.forEach(({ label }) => labelCounts.set(label, (labelCounts.get(label) ?? 0) + 1));
+    const typeLabels = new Map(impactMap.entity_types.map(({ id, label }) => [id, label]));
+    // Two entities can share a name, such as a service and the deployment that runs it, so the
+    // kind of thing it is tells them apart.
+    return seen.map(({ id, label, type_id: typeId }) => ({
+      key: id,
+      label:
+        (labelCounts.get(label) ?? 0) > 1 && typeLabels.get(typeId)
+          ? `${label} (${typeLabels.get(typeId)})`
+          : label,
+      count: counts.get(id) ?? 0,
+    }));
+  }, [events, entities, relationships, impactMap.entity_types]);
 
   const kindOptions = useMemo<FilterOption[]>(
     () =>
