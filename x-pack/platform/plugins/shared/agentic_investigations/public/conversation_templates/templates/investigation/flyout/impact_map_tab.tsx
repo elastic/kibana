@@ -239,7 +239,6 @@ const ImpactMapPanel: React.FC<{
         <EventsTimeline events={events} impactMap={impactMap} onOpen={onOpen} />
       )}
       impactMap={impactMap}
-      onOpenEntity={openEntity}
       standalone={isMaximized}
       asMainFlyout={isInAgentBuilder}
       onViewInTimeline={viewInTimeline ? () => viewInTimeline(selection) : undefined}

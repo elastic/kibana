@@ -176,6 +176,11 @@ describe('TimelineTab', () => {
     // The flyout now shows the entity itself, with its events.
     expect(screen.getByTestId('agenticInvestigationsImpactMapEventsType')).toBeInTheDocument();
     expect(screen.queryByTestId('agenticInvestigationsImpactMapEventDetail')).toBeNull();
+
+    // Back returns to the event inside the same flyout.
+    fireEvent.click(screen.getByTestId('agenticInvestigationsImpactMapEventsBack'));
+    expect(screen.getByTestId('agenticInvestigationsImpactMapEventDetail')).toBeInTheDocument();
+    expect(screen.getAllByTestId('agenticInvestigationsImpactMapEventsFlyout')).toHaveLength(1);
   });
 
   it('opens an event straight to its detail', () => {

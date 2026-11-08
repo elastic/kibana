@@ -933,7 +933,7 @@ export interface ImpactMapEventsFlyoutProps {
     InvestigationImpactMapResponse,
     'entities' | 'relationships' | 'events' | 'entity_types'
   >;
-  /** Opens an entity named in an event; its names are plain text without it. */
+  /** Set by the flyout itself: the entity badges open the entity inside the same flyout. */
   onOpenEntity?: (entityId: string) => void;
   /** Opens on this event instead of the list. */
   initialEventId?: string;
@@ -961,6 +961,24 @@ export interface ImpactMapEventsFlyoutProps {
 export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = (props) => {
   const titleId = useGeneratedHtmlId({ prefix: 'impactMapEventsTitle' });
   const { standalone = false, asMainFlyout = false, onClose, title, targetKey } = props;
+  // An entity chosen from an event is shown inside this same flyout: the window never closes or
+  // reopens, and Back returns to what was open.
+  const [openedEntities, setOpenedEntities] = useState<string[]>([]);
+  const openedEntityId = openedEntities[openedEntities.length - 1];
+  const content: ImpactMapEventsFlyoutProps & { titleId: string; onBack?: () => void } = {
+    ...props,
+    titleId,
+    ...(openedEntityId
+      ? {
+          ...resolveEventsSelection({ kind: 'entity', id: openedEntityId }, props.impactMap),
+          initialEventId: undefined,
+          renderEvents: undefined,
+          onViewInTimeline: undefined,
+          onBack: () => setOpenedEntities((stack) => stack.slice(0, -1)),
+        }
+      : {}),
+    onOpenEntity: (entityId: string) => setOpenedEntities((stack) => [...stack, entityId]),
+  };
   return (
     <EventsFlyoutFrame
       standalone={standalone}
@@ -969,13 +987,16 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = (prop
       titleId={titleId}
       menuTitle={title}
     >
-      <EventsFlyoutContent key={targetKey} {...props} titleId={titleId} />
+      <EventsFlyoutContent key={`${targetKey ?? ''}|${openedEntities.join('>')}`} {...content} />
     </EventsFlyoutFrame>
   );
 };
 
-const EventsFlyoutContent: React.FC<ImpactMapEventsFlyoutProps & { titleId: string }> = ({
+const EventsFlyoutContent: React.FC<
+  ImpactMapEventsFlyoutProps & { titleId: string; onBack?: () => void }
+> = ({
   titleId,
+  onBack,
   title,
   icon,
   typeLabel,
@@ -1009,6 +1030,7 @@ const EventsFlyoutContent: React.FC<ImpactMapEventsFlyoutProps & { titleId: stri
   const selected = useMemo(() => events.find(({ id }) => id === selectedId), [events, selectedId]);
   // Opened on one event from the timeline, there is no list to go back to.
   const canGoBack = Boolean(selected) && (!initialEventId || events.length > 1);
+  const showBack = canGoBack || Boolean(onBack);
 
   const viewInTimelineLink = onViewInTimeline && events.length > 0 && (
     <EuiText size="xs" textAlign="right">
@@ -1035,18 +1057,18 @@ const EventsFlyoutContent: React.FC<ImpactMapEventsFlyoutProps & { titleId: stri
         // Outside an EUI flyout there is no padding to inherit, and the close button sits top right.
         css={standalone ? standaloneHeaderCss : undefined}
       >
-        {canGoBack && (
+        {showBack && (
           <EuiButtonEmpty
             size="xs"
             iconType="chevronSingleLeft"
             flush="left"
-            onClick={() => setSelectedId(undefined)}
+            onClick={() => (canGoBack ? setSelectedId(undefined) : onBack?.())}
             data-test-subj="agenticInvestigationsImpactMapEventsBack"
           >
             {BACK_LABEL}
           </EuiButtonEmpty>
         )}
-        {canGoBack && <EuiSpacer size="s" />}
+        {showBack && <EuiSpacer size="s" />}
         {selected ? (
           <>
             <EuiTitle size="s">
@@ -1174,7 +1196,11 @@ export type EventsSelection =
 /** The title and events a selection opens on. */
 export const resolveEventsSelection = (
   selection: EventsSelection,
-  impactMap: InvestigationImpactMapResponse
+  impactMap: Pick<
+    InvestigationImpactMapResponse,
+    'entities' | 'relationships' | 'events' | 'entity_types'
+  > &
+    Partial<Pick<InvestigationImpactMapResponse, 'relationship_types'>>
 ): Pick<
   ImpactMapEventsFlyoutProps,
   'title' | 'events' | 'initialEventId' | 'icon' | 'typeLabel' | 'metadata'
@@ -1196,7 +1222,8 @@ export const resolveEventsSelection = (
     const labelOf = (id: string) => entities.find((entity) => entity.id === id)?.label ?? id;
     return {
       icon: 'sortRight',
-      typeLabel: impactMap.relationship_types.find(({ id }) => id === relationship?.type_id)?.label,
+      typeLabel: (impactMap.relationship_types ?? []).find(({ id }) => id === relationship?.type_id)
+        ?.label,
       title: relationship
         ? `${labelOf(relationship.source_id)} → ${labelOf(relationship.target_id)}`
         : selection.id,
