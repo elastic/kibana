@@ -523,21 +523,6 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
             })}
           </EuiText>
         )}
-        {!selected && onViewInTimeline && events.length > 0 && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiButton
-              size="s"
-              iconType="clock"
-              onClick={onViewInTimeline}
-              data-test-subj="agenticInvestigationsImpactMapViewInTimeline"
-            >
-              {i18n.translate('xpack.agenticInvestigations.impactMap.events.viewInTimeline', {
-                defaultMessage: 'View in timeline',
-              })}
-            </EuiButton>
-          </>
-        )}
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {selected ? (
@@ -554,13 +539,30 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
             body={<p>{EMPTY_BODY}</p>}
           />
         ) : (
-          <EuiFlexGroup direction="column" gutterSize="s">
-            {events.map((event) => (
-              <EuiFlexItem key={event.id} grow={false}>
-                <EventSummary event={event} onClick={() => setSelectedId(event.id)} />
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
+          <>
+            {onViewInTimeline && (
+              <>
+                <EuiButton
+                  size="s"
+                  iconType="clock"
+                  onClick={onViewInTimeline}
+                  data-test-subj="agenticInvestigationsImpactMapViewInTimeline"
+                >
+                  {i18n.translate('xpack.agenticInvestigations.impactMap.events.viewInTimeline', {
+                    defaultMessage: 'View in timeline',
+                  })}
+                </EuiButton>
+                <EuiSpacer size="m" />
+              </>
+            )}
+            <EuiFlexGroup direction="column" gutterSize="s">
+              {events.map((event) => (
+                <EuiFlexItem key={event.id} grow={false}>
+                  <EventSummary event={event} onClick={() => setSelectedId(event.id)} />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          </>
         )}
       </EuiFlyoutBody>
     </EventsFlyoutFrame>

@@ -15,6 +15,7 @@ import type { ImpactMapRendererProps } from '../../../../types';
 import { ImpactMapTab } from './impact_map_tab';
 import { withContextAnnotations } from './impact_map_events';
 import { takeTimelineFocus } from './timeline_focus';
+import { useIsInAgentBuilder } from './use_is_in_agent_builder';
 
 jest.mock('@kbn/agent-builder-plugin/public', () => ({
   useConversationFlyoutWidthProps: () => ({
@@ -25,6 +26,20 @@ jest.mock('@kbn/agent-builder-plugin/public', () => ({
     onResize: jest.fn(),
   }),
 }));
+jest.mock('./use_is_in_agent_builder');
+const mockUseIsInAgentBuilder = useIsInAgentBuilder as jest.Mock;
+const mockEuiFlyout = jest.fn();
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  const { createElement } = jest.requireActual('react');
+  return {
+    ...actual,
+    EuiFlyout: (props: object) => {
+      mockEuiFlyout(props);
+      return createElement(actual.EuiFlyout, props);
+    },
+  };
+});
 jest.mock('../../../../investigations/hooks/use_investigation');
 const mockUseInvestigation = useInvestigation as jest.Mock;
 
@@ -125,64 +140,114 @@ describe('ImpactMapTab', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('goes to the Timeline tab filtered by the entity when one is clicked', () => {
-    mockUseInvestigation.mockReturnValue({ data: { in_progress: false, impact_map: impactMap } });
-    const openTimeline = jest.fn();
-
-    renderTab(openTimeline);
-    fireEvent.click(screen.getByTestId('fakeEntity'));
-
-    expect(openTimeline).toHaveBeenCalledTimes(1);
-    expect(takeTimelineFocus('conv-1')).toEqual(['payment']);
-    expect(screen.queryByTestId('agenticInvestigationsImpactMapTimelineFlyout')).toBeNull();
-  });
-
-  it('filters the Timeline by both ends of a relationship', () => {
-    mockUseInvestigation.mockReturnValue({ data: { in_progress: false, impact_map: impactMap } });
-    const openTimeline = jest.fn();
-
-    renderTab(openTimeline);
-    fireEvent.click(screen.getByTestId('fakeRelationship'));
-
-    expect(openTimeline).toHaveBeenCalledTimes(1);
-    expect(takeTimelineFocus('conv-1')).toEqual(['checkout', 'payment']);
-  });
-
-  it('shows the timeline as a flyout over the full-screen map', () => {
-    mockUseInvestigation.mockReturnValue({ data: { in_progress: false, impact_map: impactMap } });
-    const openTimeline = jest.fn();
-
-    renderTab(openTimeline);
-    fireEvent.click(screen.getByTestId('agenticInvestigationsImpactMapMaximize'));
-    fireEvent.click(screen.getAllByTestId('fakeEntity')[0]);
-
-    expect(openTimeline).not.toHaveBeenCalled();
-    expect(screen.getByTestId('agenticInvestigationsImpactMapTimelineFlyout')).toBeInTheDocument();
-    expect(screen.getByTestId('agenticInvestigationsImpactMapFullScreen')).toBeInTheDocument();
-    expect(screen.getAllByText('Deployed payment v2').length).toBeGreaterThan(0);
-  });
-
-  it('shows the timeline as a flyout when the host has no Timeline tab', () => {
+  it("lists an entity's events oldest first and opens one in place of the list", () => {
     mockUseInvestigation.mockReturnValue({ data: { in_progress: false, impact_map: impactMap } });
 
     renderTab();
     fireEvent.click(screen.getByTestId('fakeEntity'));
 
-    expect(screen.getByTestId('agenticInvestigationsImpactMapTimelineFlyout')).toBeInTheDocument();
+    const flyout = screen.getByTestId('agenticInvestigationsImpactMapEventsFlyout');
+    expect(flyout).toHaveTextContent('2 events, oldest first');
+    const rows = screen.getAllByTestId('agenticInvestigationsImpactMapEvent');
+    expect(rows.map((row) => row.textContent)).toEqual([
+      expect.stringContaining('Deployed payment v2'),
+      expect.stringContaining('Payment errors rose to 40%'),
+    ]);
+
+    fireEvent.click(rows[1]);
+    expect(screen.getByTestId('agenticInvestigationsImpactMapEventDetail')).toHaveTextContent(
+      'Errors started a minute after the deploy.'
+    );
+    expect(screen.queryByTestId('agenticInvestigationsImpactMapEvent')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('agenticInvestigationsImpactMapEventsBack'));
+    expect(screen.getAllByTestId('agenticInvestigationsImpactMapEvent')).toHaveLength(2);
   });
 
-  it('does nothing for an entity or a relationship that has no events', () => {
-    mockUseInvestigation.mockReturnValue({
-      data: { in_progress: false, impact_map: { ...impactMap, events: [] } },
-    });
+  it('opens the Timeline tab filtered by the entity from "View in timeline"', () => {
+    mockUseInvestigation.mockReturnValue({ data: { in_progress: false, impact_map: impactMap } });
     const openTimeline = jest.fn();
 
     renderTab(openTimeline);
     fireEvent.click(screen.getByTestId('fakeEntity'));
+    fireEvent.click(screen.getByTestId('agenticInvestigationsImpactMapViewInTimeline'));
+
+    expect(openTimeline).toHaveBeenCalledTimes(1);
+    expect(takeTimelineFocus('conv-1')).toEqual(['payment']);
+    expect(takeTimelineFocus('conv-1')).toEqual([]);
+    expect(screen.queryByTestId('agenticInvestigationsImpactMapEventsFlyout')).toBeNull();
+  });
+
+  it('offers no timeline action when the flyout has no Timeline tab', () => {
+    mockUseInvestigation.mockReturnValue({ data: { in_progress: false, impact_map: impactMap } });
+
+    renderTab();
+    fireEvent.click(screen.getByTestId('fakeEntity'));
+
+    expect(screen.queryByTestId('agenticInvestigationsImpactMapViewInTimeline')).toBeNull();
+  });
+
+  describe('where the events flyout opens', () => {
+    const openEntityEvents = () => {
+      mockUseInvestigation.mockReturnValue({
+        data: { in_progress: false, impact_map: impactMap },
+      });
+      mockUseIsInAgentBuilder.mockReturnValue(mockInAgentBuilder);
+      mockEuiFlyout.mockClear();
+      renderTab();
+    };
+    const lastFlyoutProps = () => mockEuiFlyout.mock.lastCall?.[0] as Record<string, unknown>;
+    let mockInAgentBuilder = false;
+
+    it('is a main flyout over the investigation flyout in Agent Builder', () => {
+      mockInAgentBuilder = true;
+      openEntityEvents();
+      fireEvent.click(screen.getByTestId('fakeEntity'));
+
+      expect(lastFlyoutProps()).toMatchObject({ session: 'start', type: 'push' });
+    });
+
+    it('is a child flyout anywhere else', () => {
+      mockInAgentBuilder = false;
+      openEntityEvents();
+      fireEvent.click(screen.getByTestId('fakeEntity'));
+
+      expect(lastFlyoutProps().session).toBeUndefined();
+      expect(lastFlyoutProps().type).toBeUndefined();
+    });
+
+    it('stands alone over the map in full screen, wherever it is', () => {
+      mockInAgentBuilder = true;
+      openEntityEvents();
+      fireEvent.click(screen.getByTestId('agenticInvestigationsImpactMapMaximize'));
+      fireEvent.click(screen.getAllByTestId('fakeEntity')[0]);
+
+      expect(lastFlyoutProps()).toMatchObject({ session: 'never', type: 'overlay' });
+    });
+  });
+
+  it('opens nothing for an entity or a relationship that has no events', () => {
+    mockUseInvestigation.mockReturnValue({
+      data: { in_progress: false, impact_map: { ...impactMap, events: [] } },
+    });
+
+    renderTab();
+    fireEvent.click(screen.getByTestId('fakeEntity'));
     fireEvent.click(screen.getByTestId('fakeRelationship'));
 
-    expect(openTimeline).not.toHaveBeenCalled();
-    expect(screen.queryByTestId('agenticInvestigationsImpactMapTimelineFlyout')).toBeNull();
+    expect(screen.queryByTestId('agenticInvestigationsImpactMapEventsFlyout')).toBeNull();
+  });
+
+  it('lists the events of a relationship', () => {
+    mockUseInvestigation.mockReturnValue({ data: { in_progress: false, impact_map: impactMap } });
+
+    renderTab();
+    fireEvent.click(screen.getByTestId('fakeRelationship'));
+
+    expect(screen.getByTestId('agenticInvestigationsImpactMapEventsFlyout')).toHaveTextContent(
+      'checkout → payment'
+    );
+    expect(screen.getAllByTestId('agenticInvestigationsImpactMapEvent')).toHaveLength(1);
   });
 
   it('says the map is coming while the investigation runs without one', () => {
