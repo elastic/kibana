@@ -15,7 +15,7 @@ const session = new Session();
 session.connectToMainThread();
 // Keeps the worker alive while the inspector replies are pending.
 setInterval(() => {}, 1_000);
-Promise.all([session.post('Profiler.enable'), session.post('Profiler.start')]).then(() => {
+void Promise.all([session.post('Profiler.enable'), session.post('Profiler.start')]).then(() => {
   writeSync(1, `${JSON.stringify({ message: 'profiling started' })}\n`);
   setTimeout(() => {
     throw new Error('crashed while profiling');
