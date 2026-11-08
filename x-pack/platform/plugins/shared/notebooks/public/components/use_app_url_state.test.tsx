@@ -8,7 +8,7 @@
 import React, { type PropsWithChildren } from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { BehaviorSubject } from 'rxjs';
 import type { NotebookApp } from '../../common/types';
 import { NotebookStore } from '../model/notebook_store';
