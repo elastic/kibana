@@ -143,15 +143,27 @@ describe('ImpactMapCards', () => {
   it('opens the investigation flyout on the Impact map tab from the map card', () => {
     renderCards(document);
 
-    fireEvent.click(screen.getByTestId('agenticInvestigationsImpactMapCard'));
+    fireEvent.click(screen.getByTestId('agenticInvestigationsImpactMapCardHeader'));
 
     expect(openInInvestigation).toHaveBeenCalledWith('conv-1', 'impactMap');
+  });
+
+  it('does not open anything when the body of a card is clicked', () => {
+    renderCards(document);
+
+    fireEvent.click(screen.getByTestId('fakeMap'));
+    fireEvent.click(screen.getByTestId('agenticInvestigationsImpactMapEventDetail'));
+
+    expect(openInInvestigation).not.toHaveBeenCalled();
+    expect(
+      screen.queryByTestId('agenticInvestigationsImpactMapEventsFlyout')
+    ).not.toBeInTheDocument();
   });
 
   it('opens the investigation flyout on the Timeline tab from the timeline card', () => {
     renderCards(documentWithoutImpact);
 
-    fireEvent.click(screen.getByTestId('agenticInvestigationsTimelineCard'));
+    fireEvent.click(screen.getByTestId('agenticInvestigationsTimelineCardHeader'));
 
     expect(openInInvestigation).toHaveBeenCalledWith('conv-1', 'timeline');
   });
@@ -178,7 +190,7 @@ describe('ImpactMapCards', () => {
   it('opens an entity from its card', () => {
     renderCards(document);
 
-    fireEvent.click(screen.getAllByTestId('agenticInvestigationsEntityCard')[0]);
+    fireEvent.click(screen.getAllByTestId('agenticInvestigationsEntityCardHeader')[0]);
 
     expect(screen.getByTestId('agenticInvestigationsImpactMapEventsFlyout')).toBeInTheDocument();
   });

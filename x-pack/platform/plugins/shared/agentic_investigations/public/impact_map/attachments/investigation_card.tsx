@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 
 export interface InvestigationCardProps {
@@ -36,38 +37,61 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
     hasShadow={false}
     paddingSize="m"
     borderRadius="m"
-    onClick={onClick}
-    aria-label={onClick ? title : undefined}
     data-test-subj={dataTestSubj ?? 'agenticInvestigationsCard'}
   >
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-      <EuiFlexItem grow={false}>
-        <EuiIcon type={icon} aria-hidden={true} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="xs">
-          <h4>{title}</h4>
-        </EuiTitle>
-      </EuiFlexItem>
-      {badges && (
+    {/* Only the header opens what the card stands for; the body has its own controls. */}
+    <div
+      {...(onClick
+        ? {
+            role: 'button',
+            tabIndex: 0,
+            'aria-label': title,
+            onClick,
+            onKeyDown: (event: React.KeyboardEvent) => {
+              if (
+                event.target === event.currentTarget &&
+                (event.key === 'Enter' || event.key === ' ')
+              ) {
+                event.preventDefault();
+                onClick();
+              }
+            },
+            css: css`
+              cursor: pointer;
+            `,
+          }
+        : {})}
+      data-test-subj={`${dataTestSubj ?? 'agenticInvestigationsCard'}Header`}
+    >
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
-            {badges}
-          </EuiFlexGroup>
+          <EuiIcon type={icon} aria-hidden={true} />
         </EuiFlexItem>
-      )}
-      <EuiFlexItem />
-      {onClick && (
         <EuiFlexItem grow={false}>
-          <EuiIcon type="chevronSingleRight" color="subdued" aria-hidden={true} />
+          <EuiTitle size="xs">
+            <h4>{title}</h4>
+          </EuiTitle>
         </EuiFlexItem>
+        {badges && (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
+              {badges}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem />
+        {onClick && (
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="chevronSingleRight" color="subdued" aria-hidden={true} />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+      {subtitle && (
+        <EuiText size="xs" color="subdued">
+          <p>{subtitle}</p>
+        </EuiText>
       )}
-    </EuiFlexGroup>
-    {subtitle && (
-      <EuiText size="xs" color="subdued">
-        <p>{subtitle}</p>
-      </EuiText>
-    )}
+    </div>
     {children}
   </EuiPanel>
 );
