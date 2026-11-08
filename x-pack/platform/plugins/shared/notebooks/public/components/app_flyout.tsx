@@ -788,11 +788,6 @@ export const AppFlyout = ({
   const activeAppId = useStateFromPublishingSubject(activeAppId$);
   const app = apps.find(({ id }) => id === activeAppId) ?? apps[0];
   const [bodyScrollContainer, setBodyScrollContainer] = useState<HTMLDivElement | null>(null);
-  useEffect(() => {
-    // Dragging near the bottom can grow the grid past the flyout; keeping room for the scrollbar
-    // stops the columns narrowing and widening as it comes and goes.
-    if (bodyScrollContainer) bodyScrollContainer.style.scrollbarGutter = 'stable';
-  }, [bodyScrollContainer]);
 
   return (
     <NotebookFlyout
