@@ -20,5 +20,9 @@ export const useIsInAgentBuilder = (): boolean => {
     useMemo(() => currentAppId$ ?? of(undefined), [currentAppId$]),
     undefined
   );
-  return appId === AGENTBUILDER_APP_ID;
+  // The services may not carry the application service in every host, so fall back to the URL.
+  return (
+    appId === AGENTBUILDER_APP_ID ||
+    (appId === undefined && window.location.pathname.includes(`/app/${AGENTBUILDER_APP_ID}`))
+  );
 };

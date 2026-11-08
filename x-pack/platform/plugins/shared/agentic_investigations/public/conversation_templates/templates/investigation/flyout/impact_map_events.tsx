@@ -437,7 +437,7 @@ const ChildEventsFlyout: React.FC<{
     <EuiFlyout
       onClose={onClose}
       aria-labelledby={titleId}
-      size="s"
+      size={380}
       ownFocus={false}
       data-test-subj="agenticInvestigationsImpactMapEventsFlyout"
     >
