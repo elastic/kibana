@@ -7,6 +7,7 @@
 
 import { MAX_IMPACT_MAP_CATALOG_TYPES } from '../../../common/impact_map/constants';
 import type { ImpactMapCatalog } from '../../../common/impact_map/impact_map';
+import { BUILT_IN_CATALOG, normalizeEntityType } from '../../../common/impact_map/built_in_types';
 import { mergeImpactMapCatalog } from '../../../common/impact_map/resolve_graph';
 import type { User } from '../../../common/user';
 import {
@@ -30,6 +31,12 @@ const toCatalog = (document: ImpactMapCatalogDocument | undefined): ImpactMapCat
     ? { entity_types: document.entityTypes, relationship_types: document.relationshipTypes }
     : EMPTY_CATALOG;
 
+/** What agents and maps see: the built-in types, with the space's own on top, repaired. */
+const withBuiltIns = (stored: ImpactMapCatalog): ImpactMapCatalog => {
+  const merged = mergeImpactMapCatalog(BUILT_IN_CATALOG, stored);
+  return { ...merged, entity_types: merged.entity_types.map(normalizeEntityType) };
+};
+
 /**
  * The entity and relationship types a space's impact maps share, so every investigation draws a
  * database or a `CALLS` edge the same way. Types are only added or replaced by id, never removed:
@@ -45,8 +52,14 @@ export class ImpactMapCatalogService {
     });
   }
 
+  /** Only what this space stored. */
   async get(spaceId: string): Promise<ImpactMapCatalog> {
     return toCatalog(await this.documents.get(catalogDocumentId(spaceId), spaceId));
+  }
+
+  /** What to classify against: built-in types plus the space's, so a new space starts well. */
+  async getWithBuiltIns(spaceId: string): Promise<ImpactMapCatalog> {
+    return withBuiltIns(await this.get(spaceId));
   }
 
   /** Adds the types, replacing stored ones with the same id, and returns the whole catalog. */
@@ -61,7 +74,7 @@ export class ImpactMapCatalogService {
   }): Promise<ImpactMapCatalog> {
     const nothingToAdd = !types.entity_types?.length && !types.relationship_types?.length;
     if (nothingToAdd) {
-      return this.get(spaceId);
+      return this.getWithBuiltIns(spaceId);
     }
     const { written } = await this.documents.upsert({
       id: catalogDocumentId(spaceId),
@@ -78,13 +91,13 @@ export class ImpactMapCatalogService {
         return {
           spaceId,
           conversationId: IMPACT_MAP_CATALOG_KEY,
-          entityTypes: merged.entity_types,
+          entityTypes: merged.entity_types.map(normalizeEntityType),
           relationshipTypes: merged.relationship_types,
           updatedAt: new Date().toISOString(),
           ...(user && { updatedBy: user }),
         };
       },
     });
-    return toCatalog(written);
+    return withBuiltIns(toCatalog(written));
   }
 }

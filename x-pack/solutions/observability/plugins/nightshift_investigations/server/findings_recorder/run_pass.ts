@@ -414,7 +414,11 @@ export const runFindingsPass = async (
     const parseRecord = (raw: unknown, label: string): FindingsRecord | undefined => {
       const parsed = findingsOutputSchema.safeParse(raw);
       if (parsed.success)
-        return limitFindings(parsed.data, new Set(catalog?.entity_types.map(({ id }) => id)));
+        return limitFindings(
+          parsed.data,
+          new Set(catalog?.entity_types.map(({ id }) => id)),
+          new Map(catalog?.entity_types.map((type) => [type.id, type]))
+        );
       logger.warn(
         `Findings recorder returned an invalid record (${label}): ${parsed.error.message}`
       );

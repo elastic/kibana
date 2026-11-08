@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { normalizeEntityType } from './built_in_types';
 import { MAX_IMPACT_MAP_TYPE_FIELDS } from './constants';
 import type {
   ImpactMapCatalog,
@@ -52,7 +53,7 @@ export const resolveImpactMapGraph = ({
   entities,
   relationships,
   catalog,
-  entityTypes: inlineEntityTypes = [],
+  entityTypes: rawInlineEntityTypes = [],
   relationshipTypes: inlineRelationshipTypes = [],
 }: {
   entities: ImpactMapEntity[];
@@ -63,6 +64,7 @@ export const resolveImpactMapGraph = ({
 }): ResolvedImpactMapGraph => {
   const errors: string[] = [];
   const warnings: string[] = [];
+  const inlineEntityTypes = rawInlineEntityTypes.map(normalizeEntityType);
 
   const catalogEntityTypes = new Map(catalog.entity_types.map((type) => [type.id, type]));
   const catalogRelationshipTypes = new Map(

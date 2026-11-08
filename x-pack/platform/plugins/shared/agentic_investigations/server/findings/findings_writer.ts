@@ -122,7 +122,7 @@ export const createFindingsWriter =
       },
       getImpactMapCatalog: async () => {
         const { spaceId } = await resolveContext();
-        return getImpactMapService().getCatalogService().get(spaceId);
+        return getImpactMapService().getCatalogService().getWithBuiltIns(spaceId);
       },
       setImpactMap: async ({ conversationId, impactMap }) => {
         const { conversations, attachments, user, spaceId } = await resolveContext();

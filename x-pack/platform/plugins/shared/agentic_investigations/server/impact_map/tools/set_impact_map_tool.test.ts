@@ -30,6 +30,11 @@ import {
 } from '../attachments/impact_map_attachment_type';
 import { ImpactMapCatalogService } from '../services/impact_map_catalog_service';
 import { impactMapDocumentId, ImpactMapService } from '../services/impact_map_service';
+import {
+  BUILT_IN_ENTITY_TYPES,
+  BUILT_IN_RELATIONSHIP_TYPES,
+} from '../../../common/impact_map/built_in_types';
+import type { ImpactMapEntityType } from '../../../common/impact_map/impact_map';
 import { STANDARD_METADATA_FIELDS } from '../../../common/impact_map/metadata';
 import type { ImpactMapCatalogDocument, ImpactMapDocument } from '../storage/impact_map_storage';
 import { createSetImpactMapTool, type SetImpactMapToolParams } from './set_impact_map_tool';
@@ -175,7 +180,10 @@ describe('agentic_investigations.set_impact_map', () => {
     const result = await call({ ...checkoutMap, entity_types: undefined, relationship_types: [] });
 
     expect(result.data).not.toHaveProperty('warning');
-    expect(storage.entries.get(MAP_ID)?.source.entityTypes).toEqual(checkoutMap.entity_types);
+    // Built-in types add their usual metadata fields to the map's copy.
+    expect(storage.entries.get(MAP_ID)?.source.entityTypes).toEqual(
+      checkoutMap.entity_types?.map((type) => expect.objectContaining(type))
+    );
   });
 
   it('warns when it had to make a type up', async () => {
@@ -221,9 +229,10 @@ describe('agentic_investigations.upsert_impact_map_catalog', () => {
 
     const result = await callCatalog({});
 
+    // A new space starts with the built-in types, which are not stored.
     expect(result.data).toEqual({
-      entity_types: [],
-      relationship_types: [],
+      entity_types: BUILT_IN_ENTITY_TYPES,
+      relationship_types: BUILT_IN_RELATIONSHIP_TYPES,
       standard_metadata_fields: STANDARD_METADATA_FIELDS,
     });
     expect(catalogStorage.entries.size).toBe(0);
@@ -240,13 +249,17 @@ describe('agentic_investigations.upsert_impact_map_catalog', () => {
       relationship_types: [{ id: 'calls', label: 'CALLS' }],
     });
 
-    expect(result.data).toEqual({
-      entity_types: [
-        { id: 'service', label: 'Microservice', kind: 'service', icon: { agent_name: 'go' } },
-      ],
-      relationship_types: [{ id: 'calls', label: 'CALLS' }],
-      standard_metadata_fields: STANDARD_METADATA_FIELDS,
+    const { entity_types: types } = result.data as { entity_types: ImpactMapEntityType[] };
+    // The space's type wins over the built-in one with the same id, and keeps its fields.
+    expect(types.find(({ id }) => id === 'service')).toMatchObject({
+      label: 'Microservice',
+      icon: { agent_name: 'go' },
+      metadata_fields: expect.arrayContaining([
+        expect.objectContaining({ key: 'service.version' }),
+      ]),
     });
+    expect(types.find(({ id }) => id === 'k8s_deployment')).toBeDefined();
+    expect(result.data).toMatchObject({ standard_metadata_fields: STANDARD_METADATA_FIELDS });
   });
 });
 

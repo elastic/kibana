@@ -290,6 +290,46 @@ describe('classifyEntityType', () => {
 });
 
 describe('impact map metadata', () => {
+  it('teaches a known type only the fields it does not already have', () => {
+    const known = new Map([
+      [
+        'k8s_deployment',
+        {
+          id: 'k8s_deployment',
+          label: 'Kubernetes deployment',
+          kind: 'infrastructure' as const,
+          metadata_fields: [{ key: 'k8s.deployment.name', label: 'Deployment' }],
+        },
+      ],
+    ]);
+    const record = limitImpactMap(
+      {
+        entities: [
+          {
+            id: 'shipping',
+            type: 'k8s_deployment',
+            metadata: [
+              { key: 'k8s.deployment.name', value: 'shipping' },
+              { key: 'k8s.namespace.name', value: 'shop' },
+              { key: 'app.owner_team', value: 'logistics', label: 'Owner team' },
+            ],
+          },
+        ],
+        relationships: [],
+      },
+      new Set(['k8s_deployment']),
+      known
+    );
+    expect(record?.entity_types).toEqual([
+      {
+        id: 'k8s_deployment',
+        label: 'Kubernetes deployment',
+        kind: 'infrastructure',
+        metadata_fields: [{ key: 'app.owner_team', label: 'Owner team' }],
+      },
+    ]);
+  });
+
   it('cleans keys and values, keeps featured, and teaches a new type its fields', () => {
     const record = limitImpactMap({
       entities: [

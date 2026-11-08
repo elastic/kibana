@@ -38,6 +38,7 @@ import { i18n } from '@kbn/i18n';
 import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
 import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
 import {
+  KNOWN_EUI_ICONS,
   resolveEntityMetadata,
   type EntityMetadataRow,
   type ImpactMapEntityType,
@@ -524,20 +525,7 @@ const DEPENDENCY_ICONS: Record<string, string> = {
   external: 'globe',
 };
 
-/** Icons EUI is known to have, so a name the agent made up never draws a broken image. */
-const KNOWN_ICONS = new Set([
-  'logoKubernetes',
-  'logoDocker',
-  'logoAWS',
-  'logoAzure',
-  'logoGCP',
-  'logoCloud',
-  'database',
-  'globe',
-  'compute',
-  'apps',
-  'package',
-]);
+const KNOWN_ICONS = new Set<string>(KNOWN_EUI_ICONS);
 
 /**
  * What an entity type is, as the map draws it. A type stored before `infrastructure` existed says

@@ -42,7 +42,7 @@ const entityTypeSchema = impactMapEntityTypeSchema.extend({
         'For a "service" type: the APM agent whose logo to draw, e.g. "nodejs", "java", "go", "python", "dotnet", "ruby", "php", "rum-js", "opentelemetry".'
       ),
       eui_icon: impactMapIconSchema.shape.eui_icon.describe(
-        'For a type with no APM agent: an EUI icon name. Always "logoKubernetes" for Kubernetes objects (deployment, pod, node, statefulset, daemonset, namespace), "logoDocker" for containers, "logoAWS", "logoGcp" or "logoAzure" for cloud resources.'
+        'For a type with no APM agent: an EUI icon name. Always "logoKubernetes" for Kubernetes objects (deployment, pod, node, statefulset, daemonset, namespace), "logoDocker" for containers, "logoAWS", "logoGCP" or "logoAzure" for cloud resources.'
       ),
       span_type: impactMapIconSchema.shape.span_type.describe(
         'For a "dependency" type: the span type whose icon to draw, e.g. "db", "messaging", "cache", "external", "storage".'

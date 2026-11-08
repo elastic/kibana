@@ -151,6 +151,13 @@ export type {
   InvestigationImpactMap,
 } from './impact_map/impact_map';
 
+export {
+  BUILT_IN_CATALOG,
+  BUILT_IN_ENTITY_TYPES,
+  BUILT_IN_RELATIONSHIP_TYPES,
+  KNOWN_EUI_ICONS,
+  normalizeEntityType,
+} from './impact_map/built_in_types';
 export { resolveEntityMetadata, STANDARD_METADATA_FIELDS } from './impact_map/metadata';
 export type { EntityMetadataRow } from './impact_map/metadata';
 

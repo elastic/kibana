@@ -38,6 +38,7 @@ import {
   type ImpactMapEntityType,
   type ImpactMapEvent,
   type ImpactMapMetadataEntry,
+  type ImpactMapMetadataField,
   type ImpactMapRelationship,
   type ImpactMapRelationshipType,
   type InvestigationEvidence,
@@ -380,12 +381,15 @@ export const classifyEntityType = (
 export const limitImpactMap = (
   raw: NonNullable<FindingsOutput['impact_map']>,
   /** Type ids the catalog already holds: they are not redefined from here. */
-  knownTypeIds: ReadonlySet<string> = new Set()
+  knownTypeIds: ReadonlySet<string> = new Set(),
+  /** The catalog's types by id: a known type is taught the metadata fields this map shows for it. */
+  knownTypes: ReadonlyMap<string, ImpactMapEntityType> = new Map()
 ): FindingsImpactMap | undefined => {
   const icon = (value?: string) => (value ? truncate(value, MAX_MAP_ICON_KEY_LENGTH) : undefined);
   const entityTypes = new Map<string, ImpactMapEntityType>();
   const seen = new Set<string>();
   const entities: ImpactMapEntity[] = [];
+  const fieldUpdates = new Map<string, Map<string, ImpactMapMetadataField>>();
 
   for (const entity of raw.entities) {
     const id = truncate(entity.id.trim(), MAX_MAP_ID_LENGTH);
@@ -397,6 +401,24 @@ export const limitImpactMap = (
     const spanType = icon(entity.span_type);
     const spanSubtype = icon(entity.span_subtype);
     const metadata = entity.metadata ? limitMetadata(entity.metadata) : [];
+    const knownType = knownTypes.get(typeId);
+    if (knownType && metadata.length) {
+      const have = new Set([
+        ...(knownType.metadata_fields ?? []).map(({ key }) => key),
+        ...STANDARD_METADATA_FIELDS.map(({ key }) => key),
+      ]);
+      const learned = fieldUpdates.get(typeId) ?? new Map<string, ImpactMapMetadataField>();
+      metadata
+        .filter(({ key }) => !have.has(key))
+        .forEach(({ key, label, featured }) =>
+          learned.set(key, {
+            key,
+            label: label ?? humanizeTypeId(key.replace(/[._]+/g, ' ')),
+            ...(featured !== undefined ? { featured } : {}),
+          })
+        );
+      if (learned.size) fieldUpdates.set(typeId, learned);
+    }
     if (!entityTypes.has(typeId) && !knownTypeIds.has(typeId)) {
       const guess = classifyEntityType(typeId);
       const euiName = euiIcon ?? (agentName || spanType || spanSubtype ? undefined : guess.euiIcon);
@@ -448,6 +470,19 @@ export const limitImpactMap = (
     });
   }
   if (entities.length === 0) return undefined;
+
+  // The catalog adds fields up by key, so a known type is sent with only what it has just learned.
+  fieldUpdates.forEach((fields, typeId) => {
+    const known = knownTypes.get(typeId);
+    if (known && !entityTypes.has(typeId)) {
+      entityTypes.set(typeId, {
+        id: known.id,
+        label: known.label,
+        kind: known.kind,
+        metadata_fields: [...fields.values()],
+      });
+    }
+  });
 
   const relationshipTypes = new Map<string, ImpactMapRelationshipType>();
   const relationships: ImpactMapRelationship[] = [];
@@ -556,7 +591,8 @@ export type FindingsRecord = Omit<
 /** Trims a parsed record to the sizes the metadata, hypotheses and impact stores accept. */
 export const limitFindings = (
   output: FindingsOutput,
-  knownTypeIds?: ReadonlySet<string>
+  knownTypeIds?: ReadonlySet<string>,
+  knownTypes?: ReadonlyMap<string, ImpactMapEntityType>
 ): FindingsRecord => {
   // The fields that carry evidence are rebuilt below, so the raw ones are not spread back in.
   const {
@@ -570,7 +606,9 @@ export const limitFindings = (
   } = output;
   const events = rawEvents ? limitEvents(rawEvents) : [];
   const impactEvidence = rawImpactEvidence ? limitEvidence(rawImpactEvidence) : rawImpactEvidence;
-  const impactMap = rawImpactMap ? limitImpactMap(rawImpactMap, knownTypeIds) : undefined;
+  const impactMap = rawImpactMap
+    ? limitImpactMap(rawImpactMap, knownTypeIds, knownTypes)
+    : undefined;
   return {
     ...rest,
     ...(impactMap ? { impact_map: impactMap } : {}),
@@ -853,7 +891,7 @@ export const FINDINGS_JSON_SCHEMA = {
               eui_icon: {
                 type: 'string',
                 description:
-                  'For something with no APM agent, an EUI icon name. Always logoKubernetes for a Kubernetes deployment, pod, node, statefulset, daemonset or namespace; logoDocker for a container; logoAWS, logoGcp or logoAzure for cloud resources.',
+                  'For something with no APM agent, an EUI icon name. Always logoKubernetes for a Kubernetes deployment, pod, node, statefulset, daemonset or namespace; logoDocker for a container; logoAWS, logoGCP or logoAzure for cloud resources.',
               },
               span_type: {
                 type: 'string',

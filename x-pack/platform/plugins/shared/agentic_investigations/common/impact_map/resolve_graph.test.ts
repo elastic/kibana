@@ -56,10 +56,11 @@ describe('resolveImpactMapGraph', () => {
 
     expect(graph.entityTypes).toEqual([
       { id: 'service', label: 'Microservice', kind: 'service', icon: { agent_name: 'go' } },
-      { id: 'k8s_pod', label: 'Kubernetes pod', kind: 'service' },
+      // A Kubernetes object sent as a service is infrastructure.
+      { id: 'k8s_pod', label: 'Kubernetes pod', kind: 'infrastructure' },
     ]);
     expect(graph.newTypes).toEqual({
-      entity_types: [{ id: 'k8s_pod', label: 'Kubernetes pod', kind: 'service' }],
+      entity_types: [{ id: 'k8s_pod', label: 'Kubernetes pod', kind: 'infrastructure' }],
       relationship_types: [{ id: 'runs_on', label: 'RUNS_ON' }],
     });
   });

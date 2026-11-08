@@ -64,6 +64,14 @@ export type {
 export { mergeImpactMapCatalog, resolveImpactMapGraph } from './resolve_graph';
 export type { ResolvedImpactMapGraph } from './resolve_graph';
 
+export {
+  BUILT_IN_CATALOG,
+  BUILT_IN_ENTITY_TYPES,
+  BUILT_IN_RELATIONSHIP_TYPES,
+  KNOWN_EUI_ICONS,
+  normalizeEntityType,
+} from './built_in_types';
+
 export { resolveEntityMetadata, STANDARD_METADATA_FIELDS } from './metadata';
 export type { EntityMetadataRow } from './metadata';
 

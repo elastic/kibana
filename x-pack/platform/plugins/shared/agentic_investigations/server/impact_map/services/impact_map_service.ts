@@ -117,7 +117,7 @@ export class ImpactMapService {
     const graph = resolveImpactMapGraph({
       entities: input.entities,
       relationships: input.relationships,
-      catalog: await this.deps.catalog.get(spaceId),
+      catalog: await this.deps.catalog.getWithBuiltIns(spaceId),
       entityTypes: input.entity_types,
       relationshipTypes: input.relationship_types,
     });
