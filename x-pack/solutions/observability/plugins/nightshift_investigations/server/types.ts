@@ -40,6 +40,8 @@ import type { TriggerEmitter } from './workflows/triggers/emit';
 
 export interface InvestigationQuotaResult {
   allowed: boolean;
+  /** Configured daily investigation limit when the callback knows it (used in Slack notices). */
+  limit?: number;
   /** Gives back the slot an allowed start took, when the start does not open a new investigation. */
   release?: () => Promise<void>;
 }

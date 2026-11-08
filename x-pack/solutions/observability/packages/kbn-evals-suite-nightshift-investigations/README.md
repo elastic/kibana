@@ -62,7 +62,7 @@ yarn start                         # Kibana on localhost:5601
 
 Either way the profile also supplies this suite's `GCS_CREDENTIALS`, read from `gcsDatasetAccessCredentials` in the profile's config — from Vault for `dev-vault`, from `config.<profile>.json` otherwise, and `node scripts/evals init` can fill it in. Export the variable by hand only when running outside a profile, as [publishing](#publishing-the-synthetic-snapshot) does.
 
-For model and judge selection, `--grep` and repetitions, see [running evals locally](../../../../platform/packages/shared/kbn-evals/README.md#11-getting-started-locally). This suite does not override any of those flags.
+For model and judge selection, `--grep` and repetitions, see [running evals locally](../../../../platform/packages/shared/kbn-evals/README.md#11-getting-started-locally). In CI, Customer-0's judge is pinned to `eis-openai-gpt-6-sol`, the model the online evals judges use; a `models:judge:` label doesn't change it. A run filtered with `EVAL_GREP` drops the shards, so pass `EVAL_CONNECTOR_ID=eis-openai-gpt-6-sol` with it. Pass it locally with `--judge`. The suite overrides no other flags.
 
 ## Trace-only investigations
 
@@ -74,7 +74,7 @@ Vault, so run with `--profile dev-vault` and there is nothing to configure:
 node scripts/evals start \
   --suite nightshift-investigations --profile dev-vault \
   --model eis-anthropic-claude-5-5-sonnet \
-  --judge eis-anthropic-claude-4-6-sonnet
+  --judge eis-openai-gpt-6-sol
 ```
 
 The suite owns its sandbox wiring through the `scoutHook` in its
@@ -194,7 +194,7 @@ To run another file with the same loader and task:
 ```bash
 NIGHTSHIFT_DATASETS=trace-only NIGHTSHIFT_EXAMPLES_FILE=/absolute/path/examples.json \
   node scripts/evals run --suite nightshift-investigations --profile dev-vault \
-  --model eis-anthropic-claude-5-5-sonnet --judge eis-anthropic-claude-4-6-sonnet
+  --model eis-anthropic-claude-5-5-sonnet --judge eis-openai-gpt-6-sol
 ```
 
 ```json
@@ -246,7 +246,7 @@ Select an existing evaluations dataset by its exact name in the evaluations UI:
 NIGHTSHIFT_DATASET_NAME='<dataset-name>' \
   node scripts/evals start --suite nightshift-investigations --profile dev-vault --repetitions 1 \
   --model eis-anthropic-claude-5-5-sonnet \
-  --judge eis-anthropic-claude-4-6-sonnet
+  --judge eis-openai-gpt-6-sol
 ```
 
 `NIGHTSHIFT_DATASET_NAME` selects trace-only investigations when `NIGHTSHIFT_DATASETS` is unset.
@@ -320,7 +320,7 @@ allow-list, and exposes the API key only to the requesting sandbox command.
 ```bash
 NIGHTSHIFT_DATASETS=trace-only NIGHTSHIFT_EXAMPLES_FILE=/private/path/examples.json \
   node scripts/evals start --suite nightshift-investigations --profile dev-vault \
-  --model eis-anthropic-claude-5-5-sonnet --judge eis-anthropic-claude-4-6-sonnet
+  --model eis-anthropic-claude-5-5-sonnet --judge eis-openai-gpt-6-sol
 ```
 
 For connectivity acceptance, inspect the persisted agent trace's command and actual Elasticsearch
@@ -349,7 +349,7 @@ investigator too, since the assistant uses the investigator's connectors.
 ```bash
 NIGHTSHIFT_DATASETS=connector-probe NIGHTSHIFT_PROBE_EXAMPLES_FILE=/path/to/probes.json \
   node scripts/evals start --suite nightshift-investigations --profile dev-vault --repetitions 1 \
-  --model eis-anthropic-claude-5-5-sonnet --judge eis-anthropic-claude-4-6-sonnet
+  --model eis-anthropic-claude-5-5-sonnet --judge eis-openai-gpt-6-sol
 ```
 
 Probes are not bundled: they name a real cluster's remotes and data streams, so they live outside
@@ -566,8 +566,8 @@ The bound is planned in Elasticsearch, not in the investigation: one read key pe
 whose role filters `@timestamp` with document-level security, set on the `orcabench-es` connector,
 so the agent investigates unchanged and cannot see past its snapshot.
 
-ORCA's judges bind to `eis-openai-gpt-5-4`, not the agent connector. Customer-0 keeps the suite's
-evaluation connector. The model is the paper's judge model, but not its settings: the paper runs
+ORCA's judges bind to `eis-openai-gpt-5-4`, not the agent connector; Customer-0's bind to
+`eis-openai-gpt-6-sol`. ORCA's model is the paper's judge model, but not its settings: the paper runs
 GPT-5.4 at reasoning effort "high", temperature 1, and 128,000 max tokens. Our judges answer
 through a forced `score` tool call, so the inference adapter sends reasoning effort "none" to
 gpt-5 models, and temperature falls back to the provider default of 1. Until the judges can set
