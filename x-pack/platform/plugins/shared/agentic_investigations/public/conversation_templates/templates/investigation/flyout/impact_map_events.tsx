@@ -364,20 +364,24 @@ const EventsFlyoutFrame: React.FC<{
   const { euiTheme } = useEuiTheme();
   if (standalone) {
     return (
-      <EuiFlyout
-        onClose={onClose}
-        aria-labelledby={titleId}
-        size="s"
-        ownFocus
-        session="never"
-        type="overlay"
-        css={css`
-          z-index: ${Number(euiTheme.levels.modal) + 1};
-        `}
-        data-test-subj="agenticInvestigationsImpactMapEventsFlyout"
-      >
-        {children}
-      </EuiFlyout>
+      // In a portal like the full-screen map: the investigation flyout's transformed body would
+      // otherwise contain the flyout, and hide it behind the map.
+      <EuiPortal>
+        <EuiFlyout
+          onClose={onClose}
+          aria-labelledby={titleId}
+          size="s"
+          ownFocus
+          session="never"
+          type="overlay"
+          css={css`
+            z-index: ${Number(euiTheme.levels.modal) + 1};
+          `}
+          data-test-subj="agenticInvestigationsImpactMapEventsFlyout"
+        >
+          {children}
+        </EuiFlyout>
+      </EuiPortal>
     );
   }
   if (asMainFlyout) {
