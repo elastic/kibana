@@ -52,6 +52,7 @@ import {
   proposalConfidenceSchema,
   proposalImpactSchema,
 } from '@kbn/proposals-common';
+import { normalizeEventLinks } from './event_links';
 
 export const FINDINGS_SEVERITIES = ['low', 'medium', 'high', 'critical'] as const;
 
@@ -707,12 +708,17 @@ export const limitFindings = (
     ...(impactMap ? { impact_map: impactMap } : {}),
     ...(events.length ? { events } : {}),
     impact_evidence: impactEvidence,
-    summary: truncate(output.summary, MAX_METADATA_TEXT_LENGTH),
+    summary: truncate(normalizeEventLinks(output.summary), MAX_METADATA_TEXT_LENGTH),
     ...(output.verdict !== undefined
-      ? { verdict: truncate(output.verdict, MAX_METADATA_TEXT_LENGTH) }
+      ? { verdict: truncate(normalizeEventLinks(output.verdict), MAX_METADATA_TEXT_LENGTH) }
       : {}),
     ...(output.impact_summary !== undefined
-      ? { impact_summary: truncate(output.impact_summary, MAX_EVIDENCE_TEXT_LENGTH) }
+      ? {
+          impact_summary: truncate(
+            normalizeEventLinks(output.impact_summary),
+            MAX_EVIDENCE_TEXT_LENGTH
+          ),
+        }
       : {}),
     ...(rawEntities !== undefined
       ? {
@@ -753,7 +759,7 @@ export const limitFindings = (
         candidate: truncate(hypothesis.candidate, MAX_EVIDENCE_TEXT_LENGTH),
         confidence: Math.min(1, Math.max(0, hypothesis.confidence)),
         ...(hypothesis.reason !== undefined
-          ? { reason: truncate(hypothesis.reason, MAX_EVIDENCE_TEXT_LENGTH) }
+          ? { reason: truncate(normalizeEventLinks(hypothesis.reason), MAX_EVIDENCE_TEXT_LENGTH) }
           : {}),
         ...(kept.length ? { evidence: kept } : {}),
       };

@@ -28,15 +28,19 @@ const HYPOTHESES = `- hypotheses: every candidate cause the agent considered, as
   - candidate is the name on the collapsed card: a noun phrase of at most eight words that tells it apart from the others ('Connection pool exhausted after 14:02 deploy', not 'Deploy' and not a sentence packed with counts). No leading 'Hypothesis:', no counts, no ids.
   - status is investigating while open, dismissed once ruled out, confirmed for the root cause.
   - confidence is 0 to 1 and reflects how strongly the evidence points to it.
-  - reason is the opened card: exactly two Markdown lines, each one sentence, no bullets. The ids, thresholds, counts and time windows belong here. Write '**Tested:** the claim as you checked it, and against which signal and time window.' then '**Result:** what the data showed and what it decided, ending with the word Confirmed, Dismissed or Unresolved.' While the hypothesis is still investigating, write the same two lines with what you have so far, ending in Unresolved.
+  - reason is the opened card: exactly two Markdown lines, each one sentence, no bullets. The ids, thresholds, counts and time windows belong here. Write '**Tested:** the claim as you checked it, and against which signal and time window.' then '**Result:** what the data showed, with the words naming the event that showed it linked, and what it decided, ending with the word Confirmed, Dismissed or Unresolved.' While the hypothesis is still investigating, write the same two lines with what you have so far, ending in Unresolved.
   - Confirmed means it caused the triggering symptom, not that a signal is present in the data. A downstream effect of a confirmed cause is dismissed with a reason that names it as one. Mark a hypothesis confirmed only when the agent's own text asserts it or its evidence clearly establishes it.`;
 
-const SUMMARY = `- summary: what did we see, and since when? At most 60 words of Markdown: one lead sentence of at most 25 words naming the symptom, where it showed up and when it started, then at most three bullets of at most 20 words for the scale, how it developed and the current state. It does not state a cause or a conclusion. Example:
+const SUMMARY = `- summary: what did we see, and since when? At most 60 words of Markdown: one lead sentence of at most 25 words naming the symptom, where it showed up and when it started, then at most three bullets of at most 20 words for the scale, how it developed and the current state. It does not state a cause or a conclusion. Link the words for when it started and for how it stands now to their events. Example:
 
 Checkout requests on the orders service started failing at 14:02Z in all regions.
 
 - About 30% of requests returned 500 for 40 minutes, recovering at 14:42Z.
 - Every failure comes from the payments call path.`;
+
+const CITING_EVENTS = `## Citing events
+
+Readers click through from your text to the events behind it. Every event you record has an id you can compute: \`<kind>:<entity id, or source->target for a relationship, or investigation when it has neither>:<time to the minute, UTC, like 2026-11-08T15:58>\`, for example \`failure:frontend:2026-11-08T15:45\`. When a claim in the summary, a hypothesis reason or the impact rests on an event, link the words that make the claim, as a Markdown link whose target is event: and that id: [lost every replica](event:condition:frontend:2026-11-08T15:45). Link only events you recorded in this conversation, at most one link per claim, never a link around a whole sentence, and never put an id in the visible text. Do not link when no event backs the claim.`;
 
 const UPDATING = `## Updating
 
@@ -94,6 +98,8 @@ ${HYPOTHESES}
 ${IMPACT_MAP_LIVE}
 ${eventsField(false)}
 
+${CITING_EVENTS}
+
 ${UPDATING}`;
 
 const evidenceField = (files: boolean) =>
@@ -114,7 +120,7 @@ Be concise. There are at most eight hypotheses. Merge near-duplicates instead of
 The record is shown to people on the investigation overview, on its card, and in notifications. The agent has finished, so you fill in all of the fields below.
 
 ${SUMMARY}
-- verdict: what is the most likely cause? At most 70 words of Markdown, no headings. Open with a single sentence of at most 25 words naming the cause as you would say it out loud to the on-call engineer ('Search filters have returned nothing since the 07-13 deploy, because the field they filter on is missing from the index mapping.', not 'The investigation has determined that the ROOT CAUSE is a mapping configuration issue'). When a hypothesis is confirmed, state the cause flatly, with no 'likely' or 'probably'. When none is, open with the literal words 'Cause not confirmed:' followed by the leading candidate, and never state it as the cause. Then add at most three bullets: the mechanism in one line, what rules the other candidates out or how confident you are, and any data you were missing that limited the conclusion. Stop there: the evidence is in the hypotheses. When the agent's Cortex results already document the cause as a known or chronic pattern, say so in the lead sentence and focus on what is new, and never present a documented condition as a fresh discovery. Example:
+- verdict: what is the most likely cause? At most 70 words of Markdown, no headings. Open with a single sentence of at most 25 words naming the cause as you would say it out loud to the on-call engineer ('Search filters have returned nothing since the 07-13 deploy, because the field they filter on is missing from the index mapping.', not 'The investigation has determined that the ROOT CAUSE is a mapping configuration issue'). When a hypothesis is confirmed, state the cause flatly, with no 'likely' or 'probably'. When none is, open with the literal words 'Cause not confirmed:' followed by the leading candidate, and never state it as the cause. Then add at most three bullets: the mechanism in one line, what rules the other candidates out or how confident you are, and any data you were missing that limited the conclusion. Link the words for the cause and for the key step in the mechanism to the events that show them. Stop there: the evidence is in the hypotheses. When the agent's Cortex results already document the cause as a known or chronic pattern, say so in the lead sentence and focus on what is new, and never present a documented condition as a fresh discovery. Example:
 
 The 14:02Z deploy shrank the orders service connection pool, so it ran out of connections under normal load.
 
@@ -127,12 +133,14 @@ The 14:02Z deploy shrank the orders service connection pool, so it ran out of co
   - low: confirmed recovery, or confirmed absence of impact. Say which in the verdict.
   - If the agent's final message states a severity, use it.
   - If the conversation says a person changed the severity, it is theirs: leave severity out of your answer, whatever the evidence shows.
-- impact: the business consequence, not the symptom: who or what was hurt and how badly. One lead sentence of at most 25 words, then at most three bullets of at most 20 words, one per distinct consequence, each with the share or size the agent measured; at most 45 words in all. Do not repeat the symptom, the time window or the counts the summary already says, and never write a caption for the chart. Example: 'Shoppers in every region could not complete checkout, and about a third of attempts were lost.' When entities are listed, the lead sentence alone is enough. Add entities only when two or more services or components were affected in different ways, grouped at service level; never list a single entity. Give each entity its own evidence of how it was affected: a chart of its own failure signal whenever the tool results hold one, and a description otherwise. When the record already lists entities, list them again with their evidence unless the agent has since shown they were not affected.
+- impact: what the customers felt, in terms of customers: who could not do what, how many of them or how much of it, and until when or whether it still goes on. One sentence of at most 30 words, no bullets, no entity list, no caption for a chart, and not the symptom, cause or time window the summary already says. The customer_impact events carry the detail and the charts, so link the one or two that show it: Example: 'Shoppers in every region could not [complete checkout](event:customer_impact:frontend-proxy:2026-11-08T15:58), and about a third of attempts were lost.' Leave impact_entities out.
 ${evidenceField(files)}
 - proposals: concrete actions for a person to decide, at most three, and only for steps the findings support: a command to run, a config change, a code fix or a rollback. Not general advice, and none that repeats a proposal the record already lists: the same action on the same target counts as a repeat even in different words, so propose only a step that is new. Each has a short plain-text title and a comment saying what to do and why, in Markdown, with the concrete steps and the findings that support them. Add impact (how disruptive the action is) and confidence (how strongly the findings say it resolves the issue) when you can judge them. Leave proposals out when the cause is unverified and no action is clear.
 - impact_map: when a cause is confirmed or leading and the problem touches two or more entities, a map from where the problem was seen to its cause. List only the entities and dependencies the tool results show, usually 3 to 12. Mark the cause root_cause, where it was seen symptom, and every entity it hurt impacted, and set on_critical_path on each hop between them. Give every entity a type id you would reuse in another investigation, named as the OpenTelemetry entity registry names it (k8s.deployment, k8s.pod, host, container) or java_service and db.postgresql for services and dependencies, with its kind and icon fields, and point each relationship from the caller to what it depends on. Kubernetes objects (deployment, pod, node, statefulset, daemonset, namespace) always get eui_icon logoKubernetes, and a service has the APM agent_name you can see in the tool results. Name each relationship for what it really is, and for what went wrong when the relationship is the failure: a service runs_on its deployment, and a deployment scaled to zero is scaled_to_zero, a crash-looping pod is crash_looping, a throttled call is throttled_by, a timing-out call is timing_out_on. Use calls only for a plain request between services, never for an infrastructure link or a failing one.${ENTITY_METADATA} Leave the map out when you cannot tell how the entities depend on each other.${PHYSICAL_ONLY}${ENTITY_NAMES}${TOPOLOGY}
 ${eventsField(files)}
 ${HYPOTHESES}
+
+${CITING_EVENTS}
 
 ${UPDATING}`;
 

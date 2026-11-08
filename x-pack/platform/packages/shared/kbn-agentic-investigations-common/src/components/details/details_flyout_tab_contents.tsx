@@ -58,6 +58,8 @@ export interface OverviewSections {
    * conclusion arrives.
    */
   reasoning?: React.ReactNode;
+  /** Draws markdown (the summary and the conclusion); the default is plain markdown. */
+  renderMarkdown?: (text: string, options?: { subdued?: boolean }) => React.ReactNode;
 }
 
 export const OverviewTab = memo<OverviewTabProps>(
@@ -70,7 +72,7 @@ export const OverviewTab = memo<OverviewTabProps>(
     sections = {},
     showLoadingSection = false,
   }) => {
-    const { subjects, impact, conclusion, reasoning } = sections;
+    const { subjects, impact, conclusion, reasoning, renderMarkdown } = sections;
 
     return (
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -79,6 +81,7 @@ export const OverviewTab = memo<OverviewTabProps>(
             summary={investigation.summary}
             attachments={attachments}
             groupedAttachments={groupedAttachments}
+            renderMarkdown={renderMarkdown}
           />
         </EuiFlexItem>
 
@@ -97,7 +100,9 @@ export const OverviewTab = memo<OverviewTabProps>(
         {conclusion && (
           <EuiFlexItem data-test-subj="investigationOverviewConclusion">
             <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.conclusion}>
-              <EuiMarkdownFormat textSize="s">{conclusion}</EuiMarkdownFormat>
+              {renderMarkdown?.(conclusion) ?? (
+                <EuiMarkdownFormat textSize="s">{conclusion}</EuiMarkdownFormat>
+              )}
             </DetailsBlock>
           </EuiFlexItem>
         )}

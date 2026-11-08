@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiLoadingSpinner,
-  EuiMarkdownFormat,
   EuiSpacer,
   EuiText,
   useGeneratedHtmlId,
@@ -24,6 +23,7 @@ import type {
   HypothesisStatus,
   InvestigationHypotheses,
 } from '../../../common/hypotheses/hypotheses';
+import { EventMarkdown } from '../../event_links/event_markdown';
 import { EvidenceView } from '../../evidence/evidence_view';
 import { HYPOTHESIS_STATUS_LABELS, confidenceLabel } from './translations';
 import type {
@@ -78,9 +78,7 @@ export const HypothesisDetail = ({
   <>
     <div data-test-subj="investigationHypothesisReason">
       {reason?.trim() ? (
-        <EuiMarkdownFormat textSize="xs" color="subdued">
-          {reason}
-        </EuiMarkdownFormat>
+        <EventMarkdown text={reason} textSize="xs" color="subdued" />
       ) : (
         <EuiText size="xs" color="subdued">
           <p>{NO_REASON}</p>

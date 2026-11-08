@@ -246,7 +246,7 @@ export const pickImpactEvents = (events: ImpactMapEvent[]): ImpactMapEvent[] => 
 };
 
 /** One event as a card: what happened, the trend around it and where it came from. */
-const EventCard: React.FC<{
+export const EventCard: React.FC<{
   event: ImpactMapEvent;
   impactMap: InvestigationImpactMapResponse;
   onOpen: () => void;

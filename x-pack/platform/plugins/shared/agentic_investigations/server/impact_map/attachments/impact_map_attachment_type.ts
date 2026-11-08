@@ -87,6 +87,7 @@ export const impactMapAttachment = defineInvestigationAttachment<
     'Rules:\n' +
     '- Update it with the `agentic_investigations.set_impact_map` tool, sending the whole map every time.\n' +
     '- When asked whether the impact has recovered, or how it stands now, first check the latest data, then record it with `agentic_investigations.set_impact_map`: send the customer impact and symptom events again (same kind, entity and time) with bullets that say whether it recovered and since when, and charts that run to the latest data and mark each mitigation or responder action. Then render the attachment so the cards show it.\n' +
+    '- When you tell the user what you found, talk about the events you recorded and link the words that rest on one, as `[words](event:ID)`, where ID is `kind:entity id (or source->target, or investigation):time to the minute in UTC`, for example `[lost every replica](event:condition:frontend:2026-11-08T15:45)`. Link only events you recorded, at most one link per claim.\n' +
     '- The investigation flyout\'s Impact map and Timeline tabs show it. In the chat it is a set of cards (the map and the events that are the impact, such as customer impact or the failures, with what they affect; when none are recorded, the timeline and the key entities) that open the same views; render it when it would help explain your answer (the impact, the root cause, what happened and when, an entity or event), once per answer, with `<render_attachment id="ATTACHMENT_ID" />` on its own line, after a blank line.',
 });
 

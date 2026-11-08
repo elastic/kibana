@@ -22,11 +22,13 @@ export interface WhatsHappenedBlockProps {
   summary?: string;
   attachments: VersionedAttachment[] | undefined;
   groupedAttachments: FlyoutGroupedAttachmentsRegistry;
+  /** Draws the summary's markdown; a host uses it to make parts of the text clickable. */
+  renderMarkdown?: (text: string, options?: { subdued?: boolean }) => React.ReactNode;
 }
 
 /** The summary and the grouped attachments card; renders nothing when there is neither. */
 export const WhatsHappenedBlock = memo<WhatsHappenedBlockProps>(
-  ({ summary, attachments, groupedAttachments }) => {
+  ({ summary, attachments, groupedAttachments, renderMarkdown }) => {
     const [expanded, setExpanded] = useState(false);
 
     const hasAttachments = useMemo(
@@ -50,11 +52,12 @@ export const WhatsHappenedBlock = memo<WhatsHappenedBlockProps>(
 
     return (
       <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.overview}>
-        {summary && (
-          <EuiMarkdownFormat textSize="s" color="subdued">
-            {displayedSummary ?? ''}
-          </EuiMarkdownFormat>
-        )}
+        {summary &&
+          (renderMarkdown?.(displayedSummary ?? '', { subdued: true }) ?? (
+            <EuiMarkdownFormat textSize="s" color="subdued">
+              {displayedSummary ?? ''}
+            </EuiMarkdownFormat>
+          ))}
         {isCondensed && (
           <div>
             <EuiButtonEmpty size="s" flush="left" onClick={() => setExpanded((prev) => !prev)}>

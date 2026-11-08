@@ -15,7 +15,6 @@ import {
   EuiFlyoutHeader,
   EuiIcon,
   EuiLoadingSpinner,
-  EuiMarkdownFormat,
   EuiPanel,
   EuiPortal,
   EuiSpacer,
@@ -46,6 +45,7 @@ import {
 import '@xyflow/react/dist/style.css';
 import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
 import { SubjectList } from '../../subjects/attachments/subject_view';
+import { EventMarkdown } from '../../event_links/event_markdown';
 import { HypothesisDetail } from '../attachments/hypotheses_view';
 import { confidenceLabel } from '../attachments/translations';
 import { ProposalDecision } from './proposal_decision';
@@ -153,7 +153,7 @@ const NodeDetail = ({
       );
     }
     case 'conclusion':
-      return <EuiMarkdownFormat textSize="s">{data.conclusion}</EuiMarkdownFormat>;
+      return <EventMarkdown text={data.conclusion} />;
     case 'actions': {
       const { id } = data.proposals[Math.min(selectedActionIndex ?? 0, data.proposals.length - 1)];
       return <ProposalDecision key={id} investigationId={investigationId} proposalId={id} />;
