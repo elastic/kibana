@@ -25,7 +25,7 @@ export interface ConcurrencyGroupLock {
   ): Promise<T>;
 }
 
-const CONCURRENCY_GROUP_LOCK_WAIT_MS = 45_000;
+const CONCURRENCY_GROUP_LOCK_WAIT_MS = 120_000;
 const LOCK_RETRY_INITIAL_MS = 25;
 const LOCK_RETRY_MAX_MS = 200;
 

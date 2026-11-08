@@ -1952,8 +1952,9 @@ export class WorkflowsExecutionEnginePlugin
         return results;
       }
 
-      // Executions that share a concurrency key are created and admitted one at a time
-      // under that group's lock. Everything else stays in one bulk write.
+      // Executions that share a concurrency key are created and admitted one at a time.
+      // The group lock is taken per item and released before the next, so one bulk
+      // request cannot hold the group for the whole bucket. Everything else stays in one bulk write.
       const keyedItems: PreparedItem[] = [];
       const bulkItems: PreparedItem[] = [];
       for (const item of prepared) {
@@ -2037,69 +2038,57 @@ export class WorkflowsExecutionEnginePlugin
 
       await Promise.all(
         Array.from(bucketsByGroup.values()).map(async (bucket) => {
-          const sample = bucket[0].workflowExecution;
-          try {
-            await withConcurrencyGroupLock(
-              getConcurrencyGroupLock(),
-              sample.spaceId ?? 'default',
-              sample.concurrencyGroupKey,
-              async () => {
-                for (const item of bucket) {
-                  let persisted = false;
-                  try {
-                    item.workflowExecution.createdAt = new Date().toISOString();
-                    await maybeDrainConcurrencyQueueBeforeEnqueue({
-                      workflowExecution: item.workflowExecution,
-                      workflowExecutionRepository,
-                      workflowTaskManager,
-                      logger: this.logger,
-                      failureLogLabel: 'Bulk concurrency queue drain failed',
-                    });
-                    await workflowExecutionRepository.createWorkflowExecution(
-                      item.workflowExecution,
-                      { refresh: 'wait_for' }
-                    );
-                    persisted = true;
-                    await ensureBoundExecutionAdmitted(
-                      item.workflowExecution,
-                      workflowRepository,
-                      workflowExecutionRepository
-                    );
-                    checkedIdx.add(item.idx);
-                    await runCheck(item);
-                    succeeded.push(item);
-                  } catch (error) {
-                    if (persisted && item.workflowExecution.id) {
-                      await workflowExecutionRepository
-                        .discardUnstartedExecution(
-                          item.workflowExecution.id,
-                          item.workflowExecution.spaceId ?? 'default'
-                        )
-                        .catch((discardError: unknown) => {
-                          const discardMessage =
-                            discardError instanceof Error
-                              ? discardError.message
-                              : String(discardError);
-                          this.logger.error(
-                            `Failed to discard unstarted workflow execution ${item.workflowExecution.id} after concurrency admission error: ${discardMessage}`
-                          );
-                        });
-                    }
-                    results[item.idx] = {
-                      status: 'error',
-                      error: { message: error instanceof Error ? error.message : String(error) },
-                    };
-                  }
+          for (const item of bucket) {
+            let persisted = false;
+            try {
+              await withConcurrencyGroupLock(
+                getConcurrencyGroupLock(),
+                item.workflowExecution.spaceId ?? 'default',
+                item.workflowExecution.concurrencyGroupKey,
+                async () => {
+                  item.workflowExecution.createdAt = new Date().toISOString();
+                  await maybeDrainConcurrencyQueueBeforeEnqueue({
+                    workflowExecution: item.workflowExecution,
+                    workflowExecutionRepository,
+                    workflowTaskManager,
+                    logger: this.logger,
+                    failureLogLabel: 'Bulk concurrency queue drain failed',
+                  });
+                  await workflowExecutionRepository.createWorkflowExecution(
+                    item.workflowExecution,
+                    { refresh: 'wait_for' }
+                  );
+                  persisted = true;
+                  await ensureBoundExecutionAdmitted(
+                    item.workflowExecution,
+                    workflowRepository,
+                    workflowExecutionRepository
+                  );
+                  checkedIdx.add(item.idx);
+                  await runCheck(item);
+                  succeeded.push(item);
                 }
-              }
-            );
-          } catch (error) {
-            const message = error instanceof Error ? error.message : String(error);
-            for (const item of bucket) {
+              );
+            } catch (error) {
+              const message = error instanceof Error ? error.message : String(error);
               const alreadyRecorded =
                 results[item.idx] != null || succeeded.some((entry) => entry.idx === item.idx);
               if (!alreadyRecorded) {
                 results[item.idx] = { status: 'error', error: { message } };
+              }
+              if (persisted && item.workflowExecution.id && !alreadyRecorded) {
+                await workflowExecutionRepository
+                  .discardUnstartedExecution(
+                    item.workflowExecution.id,
+                    item.workflowExecution.spaceId ?? 'default'
+                  )
+                  .catch((discardError: unknown) => {
+                    const discardMessage =
+                      discardError instanceof Error ? discardError.message : String(discardError);
+                    this.logger.error(
+                      `Failed to discard unstarted workflow execution ${item.workflowExecution.id} after concurrency admission error: ${discardMessage}`
+                    );
+                  });
               }
             }
           }

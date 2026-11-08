@@ -722,7 +722,7 @@ describe('bulkScheduleWorkflow', () => {
     expect(mockConcurrencyCheckConcurrency).toHaveBeenCalledTimes(2);
   });
 
-  it('returns an error for a group whose lock times out and still schedules the other items', async () => {
+  it('returns an error for each item whose lock times out and still schedules the other items', async () => {
     const workflowA = createWorkflow('wf-a', {
       definition: {
         name: 'wf-a',
@@ -771,6 +771,7 @@ describe('bulkScheduleWorkflow', () => {
     const result = await pluginStart.bulkScheduleWorkflow(
       [
         { workflow: workflowA, context: { spaceId: 'default' } },
+        { workflow: workflowA, context: { spaceId: 'default' } },
         { workflow: workflowB, context: { spaceId: 'default' } },
         { workflow: workflowC, context: { spaceId: 'default' } },
       ],
@@ -782,13 +783,18 @@ describe('bulkScheduleWorkflow', () => {
       error: { message: 'Lock wait timed out' },
     });
     expect(result[1]).toEqual({
-      status: 'scheduled',
-      workflowExecutionId: expect.any(String),
+      status: 'error',
+      error: { message: 'Lock wait timed out' },
     });
     expect(result[2]).toEqual({
       status: 'scheduled',
       workflowExecutionId: expect.any(String),
     });
+    expect(result[3]).toEqual({
+      status: 'scheduled',
+      workflowExecutionId: expect.any(String),
+    });
+    expect(mockWithConcurrencyGroupLock).toHaveBeenCalledTimes(3);
     expect(mockCreateWorkflowExecution).toHaveBeenCalledTimes(1);
     expect(taskManager.bulkSchedule).toHaveBeenCalledTimes(1);
     const [scheduledTasks] = taskManager.bulkSchedule.mock.calls[0];
