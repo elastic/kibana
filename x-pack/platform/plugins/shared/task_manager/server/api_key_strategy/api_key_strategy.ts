@@ -37,6 +37,8 @@ export interface GrantApiKeysOpts {
    * See {@link ApiKeyOptions.cloneApiKey}.
    */
   cloneApiKey?: boolean;
+  /** See {@link ApiKeyOptions.refreshApiKey}. */
+  refreshApiKey?: boolean;
   /**
    * Called as soon as Task Manager creates a credential, before the complete grant operation
    * resolves. This lets callers clean up partial successes when a later grant fails.

@@ -28,10 +28,10 @@ Both implementations satisfy `DataViewBase` from `@kbn/es-query`, so filter util
 
 | Key | Shape | Changes when | Use for |
 | --- | --- | --- | --- |
-| `id` | `esql-{sha256(trimmed query, projectRouting, esqlVariables, timeFieldName)}` | Query, routing, control values, or time field | Schema / columns, filter `meta.index`, cache keys |
-| `datasetKey` | `esql:{FROM}:{timeField}:{projectRouting}` | FROM target, time field, or CPS project | Pin, histogram vis keep/drop (`isSameDataset`) |
+| `id` | `esql-{sha256(trimmed query, projectRouting, esqlVariables, timeFieldName)}` | Query, routing, control values, or time field | Schema / columns, cache keys |
+| `datasetId` | `sha256(esql-{FROM}-{projectRouting}-{timeField})` | FROM target, time field, or CPS project | Same-dataset checks (`isSameDataset`), filter `meta.index`, Lens layer `index`; equals the id of the dataset's DataView shim and of the legacy ad-hoc DataView |
 
-`SORT` / `WHERE` / `EVAL` keep the same `datasetKey` and a different `id`. Classic and mixed switches compare `id` via `isSameDataset`.
+`SORT` / `WHERE` / `EVAL` keep the same `datasetId` and a different `id`. Classic and mixed switches compare `id` via `isSameDataset`.
 
 The `esql-` prefix sits outside the hash so `DataSourceService` can discriminate ES|QL ids without inspecting the registry.
 
@@ -73,7 +73,7 @@ const withFetchColumns = source.withColumns(datatableColumns);
 
 isSameDataset(source, withFetchColumns); // true (same FROM + time field + project)
 source.id === withFetchColumns.id;       // true
-source.datasetKey;                       // 'esql:logs-*:@timestamp:'
+source.datasetId;                        // id of the dataset's DataView shim
 
 // DSL — thin wrapper around an existing DataView
 const dslSource = new DataViewSource(dataView);

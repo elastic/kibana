@@ -14,7 +14,7 @@ import {
   EuiSuperSelect,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 
 import type { Threat, Threats, ThreatTechnique } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -49,6 +49,7 @@ interface AddTechniqueProps {
   tactics: MitreTacticSummary[];
   techniques: MitreTechniqueSummary[];
   subtechniques: MitreSubtechniqueSummary[];
+  labelPrefix: string;
 }
 
 export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
@@ -60,6 +61,7 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
   tactics,
   techniques,
   subtechniques,
+  labelPrefix,
 }): JSX.Element => {
   const isMitreAttackUpdatesUIEnabled = useIsExperimentalFeatureEnabled(
     'mitreAttackUpdatesUIEnabled'
@@ -165,11 +167,29 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
 
   const getTechniqueRenamedFromName = useCallback(
     (technique: ThreatTechnique) => {
-      if (!isMitreAttackUpdatesUIEnabled) return undefined;
+      if (!isMitreAttackUpdatesUIEnabled) {
+        return undefined;
+      }
       const matchedOption = findCurrentTechniqueOption(technique);
       return matchedOption && matchedOption.name !== technique.name ? technique.name : undefined;
     },
     [findCurrentTechniqueOption, isMitreAttackUpdatesUIEnabled]
+  );
+
+  const parentTacticId = values[threatIndex]?.tactic?.id ?? '';
+  // Filter techniques belonging to the parent tactic using MITRE tactic ids so renames
+  // in MITRE upgrades don't blank the list. The managed source returns entities
+  // name-ordered, so the filtered subset is already in the correct display order.
+  const baseTechniqueOptions = useMemo(
+    () =>
+      techniques
+        .filter((t) => t.tactic_ids.includes(parentTacticId))
+        .map((option) => ({
+          inputDisplay: <>{getMitreEntityDisplayName(option)}</>,
+          value: option.id,
+          disabled: isDisabled,
+        })),
+    [techniques, parentTacticId, isDisabled]
   );
 
   const getSelectTechnique = useCallback(
@@ -179,17 +199,13 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
       disabled: boolean,
       technique: ThreatTechnique
     ) => {
-      // Filter techniques belonging to the parent tactic using MITRE tactic ids so renames
-      // in MITRE upgrades don't blank the list. The managed source returns entities
-      // name-ordered, so the filtered subset is already in the correct display order.
-      const options = techniques.filter((t) => t.tactic_ids.includes(parentTactic.id));
       const isUnsupported = isUnsupportedTechnique(technique);
       const isReassigned = isTechniqueReassignedFromTactic(parentTactic, technique);
       const reassignedOption = isReassigned ? findCurrentTechniqueOption(technique) : undefined;
       return (
         <>
           <EuiSuperSelect
-            id="mitreAttackTechnique"
+            id={`mitreAttackTechnique-${threatIndex}-${index}`}
             options={[
               ...(technique.name === 'none'
                 ? [
@@ -213,13 +229,9 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
                     }),
                   ]
                 : []),
-              ...options.map((option) => ({
-                inputDisplay: <>{getMitreEntityDisplayName(option)}</>,
-                value: option.id,
-                disabled,
-              })),
+              ...baseTechniqueOptions,
             ]}
-            prepend={`${field.label} ${i18n.TECHNIQUE}`}
+            prepend={`${labelPrefix} ${i18n.TECHNIQUE}`}
             aria-label=""
             onChange={updateTechnique.bind(null, index)}
             fullWidth={true}
@@ -233,12 +245,13 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
       );
     },
     [
-      field.label,
+      labelPrefix,
       findCurrentTechniqueOption,
       isTechniqueReassignedFromTactic,
       isUnsupportedTechnique,
-      techniques,
+      baseTechniqueOptions,
       updateTechnique,
+      threatIndex,
     ]
   );
 
@@ -255,9 +268,9 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
         );
         const techniqueRenamedFrom = getTechniqueRenamedFromName(technique);
         const techniqueErrorMessage = techniqueUnsupported
-          ? i18n.UNSUPPORTED_MITRE_ID_ERROR(technique.id)
+          ? i18n.UNSUPPORTED_MITRE_ID_ERROR(technique.id, labelPrefix)
           : techniqueReassigned
-          ? i18n.TECHNIQUE_REASSIGNED_FROM_TACTIC_ERROR(technique.id)
+          ? i18n.TECHNIQUE_REASSIGNED_FROM_TACTIC_ERROR(technique.id, labelPrefix)
           : undefined;
         return (
           <div key={index}>
@@ -268,7 +281,9 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
               isInvalid={techniqueUnsupported || techniqueReassigned}
               error={techniqueErrorMessage}
               helpText={
-                techniqueRenamedFrom ? i18n.RENAMED_FROM_HINT(techniqueRenamedFrom) : undefined
+                techniqueRenamedFrom
+                  ? i18n.RENAMED_FROM_HINT(techniqueRenamedFrom, labelPrefix)
+                  : undefined
               }
             >
               <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -301,6 +316,7 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
               techniqueIndex={index}
               onFieldChange={onFieldChange}
               subtechniques={subtechniques}
+              labelPrefix={labelPrefix}
             />
           </div>
         );

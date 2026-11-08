@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Fs from 'fs';
 import Path from 'path';
 
 import Resolve from 'resolve';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { getPackages, type Package, type ParsedPackageJson } from '@kbn/repo-packages';
+import { getPackages, type Package } from '@kbn/repo-packages';
 import { exports as resolvePackageExports } from 'resolve.exports';
-import { safeStat, readFileSync } from './helpers/fs';
 import type { ResolveResult } from './resolve_result';
 import { getRelativeImportReq } from './helpers/import_req';
 import { memoize } from './helpers/memoize';
@@ -27,13 +27,23 @@ export class ImportResolver {
     return new ImportResolver(repoRoot, new Map(packages.map((p) => [p.id, p])));
   }
 
-  private safeStat = memoize(safeStat);
+  // `throwIfNoEntry: false` returns `undefined` for missing paths, which is much cheaper than throwing ENOENT
+  private safeStat = memoize((path: string) => Fs.statSync(path, { throwIfNoEntry: false }));
+  private readPackageJson = memoize((path: string): Record<string, unknown> | undefined => {
+    const body = Fs.readFileSync(path, 'utf8');
+    try {
+      return JSON.parse(body);
+    } catch {
+      return undefined;
+    }
+  });
 
   private baseResolveOpts = {
     extensions: ['.js', '.json', '.ts', '.tsx', '.d.ts'],
     isFile: (path: string) => !!this.safeStat(path)?.isFile(),
     isDirectory: (path: string) => !!this.safeStat(path)?.isDirectory(),
-    readFileSync: memoize(readFileSync),
+    // `resolve` reads the closest package.json for every request, so parse each one only once
+    readPackageSync: (_readFileSync, pkgfile) => this.readPackageJson(pkgfile),
     packageFilter(pkg) {
       if (!pkg.main && pkg.types) {
         // for the purpose of resolving files, a "types" file is adequate
@@ -138,10 +148,10 @@ export class ImportResolver {
   private adaptReq(req: string, dirname: string): string | undefined {
     // handle typescript aliases
     if (req === 'kibana/public') {
-      return this.adaptReq('src/core/public', dirname);
+      return this.adaptReq('src/core/packages/core/public', dirname);
     }
     if (req === 'kibana/server') {
-      return this.adaptReq('src/core/server', dirname);
+      return this.adaptReq('src/core/packages/core/server', dirname);
     }
 
     if (req.startsWith('@modelcontextprotocol/sdk')) {
@@ -285,15 +295,8 @@ export class ImportResolver {
     }
 
     const pkgDir = Path.dirname(manifestPath);
-    const pkgJsonRaw = this.baseResolveOpts.readFileSync(manifestPath);
-    if (!pkgJsonRaw) {
-      return null;
-    }
-
-    let pkgJson: ParsedPackageJson;
-    try {
-      pkgJson = JSON.parse(pkgJsonRaw);
-    } catch {
+    const pkgJson = this.readPackageJson(manifestPath);
+    if (!pkgJson) {
       return null;
     }
 
@@ -321,9 +324,31 @@ export class ImportResolver {
   }
 
   /**
+   * Results of `resolve()`, by dirname and request. Like the file system lookups behind them,
+   * they are kept for the lifetime of this resolver.
+   */
+  private readonly resolveCache = new Map<string, Map<string, ResolveResult | null>>();
+
+  /**
    * Resolve an import request from a file in the given dirname
    */
   resolve(req: string, dirname: string): ResolveResult | null {
+    let dirCache = this.resolveCache.get(dirname);
+    if (!dirCache) {
+      dirCache = new Map();
+      this.resolveCache.set(dirname, dirCache);
+    }
+
+    let result = dirCache.get(req);
+    if (result === undefined) {
+      result = this.resolveUncached(req, dirname);
+      dirCache.set(req, result);
+    }
+
+    return result;
+  }
+
+  private resolveUncached(req: string, dirname: string): ResolveResult | null {
     // transform webpack loader requests and focus on the actual file selected
     const lastExI = req.lastIndexOf('!');
     const quesI = req.lastIndexOf('?');

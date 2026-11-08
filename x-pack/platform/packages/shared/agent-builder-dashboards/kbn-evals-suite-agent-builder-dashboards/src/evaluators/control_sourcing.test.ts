@@ -24,22 +24,17 @@ interface Attempt {
   userRequested?: boolean;
 }
 
-/** One generate_dashboard call with an add_controls operation and optional grouped failures. */
+/** One generate_dashboard call that sends controls, with a failure for each failed field. */
 const call = (attempts: Attempt[], failedFields: string[] = []): Record<string, unknown> => ({
   type: 'tool_call',
   tool_id: GENERATE_DASHBOARD_TOOL_ID,
   params: {
-    operations: [
-      {
-        operation: 'add_controls',
-        controls: attempts.map(({ field, userRequested }) => ({
-          type: 'options_list_control',
-          field_name: field,
-          index: 'logs',
-          ...(userRequested ? { user_requested: true } : {}),
-        })),
-      },
-    ],
+    controls: attempts.map(({ field, userRequested }) => ({
+      type: 'options_list_control',
+      field_name: field,
+      index: 'logs',
+      ...(userRequested ? { user_requested: true } : {}),
+    })),
   },
   results: [
     {
@@ -48,13 +43,12 @@ const call = (attempts: Attempt[], failedFields: string[] = []): Record<string, 
         attachment_id: 'dash',
         ...(failedFields.length > 0
           ? {
-              failures: [
-                {
-                  type: 'add_controls',
-                  identifier: failedFields.join(', '),
-                  error: 'Not mapped on index "logs".',
-                },
-              ],
+              failures: failedFields.map((field) => ({
+                type: 'upsert_dashboard',
+                kind: 'control',
+                identifier: `controls[${attempts.findIndex((attempt) => attempt.field === field)}]`,
+                error: `Field "${field}" on index "logs" is not mapped.`,
+              })),
             }
           : {}),
       },
@@ -185,7 +179,10 @@ describe('dashboard control sourcing evaluator', () => {
 
       const raw = await evaluateSourcing(
         { requested: true, mappedFields: MAPPED },
-        { ...dropped, message: 'Controls failed: Not mapped on index "logs".' }
+        {
+          ...dropped,
+          message: 'Controls failed: Field "status_code" on index "logs" is not mapped.',
+        }
       );
       expect(failedAssertions(raw)).toContain('replyWithoutRawErrors');
 

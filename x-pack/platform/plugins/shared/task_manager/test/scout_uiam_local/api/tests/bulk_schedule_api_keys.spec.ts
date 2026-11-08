@@ -163,11 +163,16 @@ apiTest.describe(
         expect(omittedExists).toBe(false);
 
         // Exactly one ES key was granted for the omitted task's type during this call.
-        const grantedForOmitted = diffGrantedKeys(
-          omittedTypeKeysBefore,
-          await queryTaskManagerEsApiKeysByType(esClient, OMITTED_TASK_TYPE)
-        );
-        expect(grantedForOmitted).toHaveLength(1);
+        let grantedForOmitted: Array<{ id: string; invalidated: boolean }> = [];
+        await expect
+          .poll(async () => {
+            grantedForOmitted = diffGrantedKeys(
+              omittedTypeKeysBefore,
+              await queryTaskManagerEsApiKeysByType(esClient, OMITTED_TASK_TYPE)
+            );
+            return grantedForOmitted.length;
+          })
+          .toBe(1);
 
         // The omitted task has no entry in the bulk response, but its granted key must still be
         // queued for invalidation, while the persisted task's keys must be left alone.
@@ -238,16 +243,27 @@ apiTest.describe(
           expect(exists).toBe(false);
         }
 
-        const grantedForSupported = diffGrantedKeys(
-          supportedTypeKeysBefore,
-          await queryTaskManagerEsApiKeysByType(esClient, TEST_TASK_TYPE)
-        );
-        const grantedForUnsupported = diffGrantedKeys(
-          unsupportedTypeKeysBefore,
-          await queryTaskManagerEsApiKeysByType(esClient, UNSUPPORTED_TASK_TYPE)
-        );
-        expect(grantedForSupported).toHaveLength(1);
-        expect(grantedForUnsupported).toHaveLength(1);
+        let grantedForSupported: Array<{ id: string; invalidated: boolean }> = [];
+        await expect
+          .poll(async () => {
+            grantedForSupported = diffGrantedKeys(
+              supportedTypeKeysBefore,
+              await queryTaskManagerEsApiKeysByType(esClient, TEST_TASK_TYPE)
+            );
+            return grantedForSupported.length;
+          })
+          .toBe(1);
+
+        let grantedForUnsupported: Array<{ id: string; invalidated: boolean }> = [];
+        await expect
+          .poll(async () => {
+            grantedForUnsupported = diffGrantedKeys(
+              unsupportedTypeKeysBefore,
+              await queryTaskManagerEsApiKeysByType(esClient, UNSUPPORTED_TASK_TYPE)
+            );
+            return grantedForUnsupported.length;
+          })
+          .toBe(1);
 
         const markerKeyIds = await readInvalidationMarkerKeyIds(esClient);
         await expectKeyMarkedOrInvalidated(
@@ -316,16 +332,27 @@ apiTest.describe(
         expect(firstTask.userScope?.apiKeyId).not.toBe(secondTask.userScope?.apiKeyId);
         expect(firstTask.userScope?.uiamApiKeyId).not.toBe(secondTask.userScope?.uiamApiKeyId);
 
-        const grantedForFirstType = diffGrantedKeys(
-          firstTypeKeysBefore,
-          await queryTaskManagerEsApiKeysByType(esClient, TEST_TASK_TYPE)
-        );
-        const grantedForSecondType = diffGrantedKeys(
-          secondTypeKeysBefore,
-          await queryTaskManagerEsApiKeysByType(esClient, OMITTED_TASK_TYPE)
-        );
-        expect(grantedForFirstType).toHaveLength(1);
-        expect(grantedForSecondType).toHaveLength(1);
+        let grantedForFirstType: Array<{ id: string; invalidated: boolean }> = [];
+        await expect
+          .poll(async () => {
+            grantedForFirstType = diffGrantedKeys(
+              firstTypeKeysBefore,
+              await queryTaskManagerEsApiKeysByType(esClient, TEST_TASK_TYPE)
+            );
+            return grantedForFirstType.length;
+          })
+          .toBe(1);
+
+        let grantedForSecondType: Array<{ id: string; invalidated: boolean }> = [];
+        await expect
+          .poll(async () => {
+            grantedForSecondType = diffGrantedKeys(
+              secondTypeKeysBefore,
+              await queryTaskManagerEsApiKeysByType(esClient, OMITTED_TASK_TYPE)
+            );
+            return grantedForSecondType.length;
+          })
+          .toBe(1);
         expect(firstTask.userScope?.apiKeyId).toBe(grantedForFirstType[0].id);
         expect(secondTask.userScope?.apiKeyId).toBe(grantedForSecondType[0].id);
       }

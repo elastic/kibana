@@ -32,11 +32,26 @@ import {
 } from '../../../../rules_client/tests/test_helpers';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import {
+  bulkMigrateLegacyActions,
+  deleteLegacyActionsForRules,
+} from '../../../../rules_client/lib';
 import { RecoveredActionGroup } from '../../../../../common';
 
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
+
+jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => ({
+  bulkMigrateLegacyActions: jest.fn(),
+}));
+
+jest.mock(
+  '../../../../rules_client/lib/siem_legacy_actions/transform_and_delete_legacy_actions',
+  () => ({
+    deleteLegacyActionsForRules: jest.fn(),
+  })
+);
 
 jest.mock('../../../../rules_client/lib/untrack_rule_alerts', () => ({
   untrackRuleAlerts: jest.fn(),
@@ -67,6 +82,8 @@ const {
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
   (auditLogger.log as jest.Mock).mockClear();
+  (bulkMigrateLegacyActions as jest.Mock).mockReset().mockResolvedValue([]);
+  (deleteLegacyActionsForRules as jest.Mock).mockReset();
 });
 
 setGlobalDate();
@@ -156,6 +173,55 @@ describe('bulkDisableRules', () => {
       rules: [returnedRuleForBulkDisable1, returnedRuleForBulkDisable2],
       total: 2,
     });
+  });
+
+  test('should delete the migrated legacy actions only for the rules that were saved', async () => {
+    (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue(['id1', 'id2']);
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: [disabledRuleForBulkDisable1, savedObjectWith500Error],
+    });
+
+    await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
+
+    expect(deleteLegacyActionsForRules).toHaveBeenCalledTimes(1);
+    expect(deleteLegacyActionsForRules).toHaveBeenCalledWith(expect.anything(), ['id1']);
+    expect(
+      (unsecuredSavedObjectsClient.bulkCreate as jest.Mock).mock.invocationCallOrder[0]
+    ).toBeLessThan((deleteLegacyActionsForRules as jest.Mock).mock.invocationCallOrder[0]);
+  });
+
+  test('should keep the legacy actions of a rule whose save conflicted, and delete them once the retry saves it', async () => {
+    (bulkMigrateLegacyActions as jest.Mock)
+      .mockResolvedValueOnce(['id1', 'id2'])
+      .mockResolvedValueOnce(['id2']);
+    unsecuredSavedObjectsClient.bulkCreate
+      .mockResolvedValueOnce({
+        saved_objects: [disabledRuleForBulkDisable1, savedObjectWith409Error],
+      })
+      .mockResolvedValueOnce({
+        saved_objects: [disabledRuleForBulkDisable2],
+      });
+    encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+      .fn()
+      .mockResolvedValueOnce({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield { saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2] };
+        },
+      })
+      .mockResolvedValueOnce({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield { saved_objects: [enabledRuleForBulkOps2] };
+        },
+      });
+
+    await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
+
+    expect(bulkMigrateLegacyActions).toHaveBeenCalledTimes(2);
+    expect(deleteLegacyActionsForRules).toHaveBeenCalledTimes(2);
+    expect(deleteLegacyActionsForRules).toHaveBeenNthCalledWith(1, expect.anything(), ['id1']);
+    expect(deleteLegacyActionsForRules).toHaveBeenNthCalledWith(2, expect.anything(), ['id2']);
   });
 
   test('should disable two rule and return right actions', async () => {

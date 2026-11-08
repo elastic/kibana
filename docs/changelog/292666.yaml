@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/292666
-type: feature
-products:
-- product: cloud-serverless
-- product: kibana
-areas:
-- Dashboards and visualizations
-title: Enable the Enhance dashboard action

@@ -161,7 +161,7 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
         })
       ).toBeVisible();
       await page.keyboard.press('Escape');
-      await expect(page.testSubj.locator('workflowBottomBarRunButton')).toBeEnabled();
+      await expect(editor.runButton).toBeEnabled();
       await editor.executeWorkflowFromBottomBar({ message: 'Executor run' });
       await pageObjects.workflowExecution.waitForExecutionStatus('completed', 60000);
       const saved = await page.request.get(

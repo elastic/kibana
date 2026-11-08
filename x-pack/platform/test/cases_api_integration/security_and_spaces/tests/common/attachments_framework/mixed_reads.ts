@@ -10,8 +10,8 @@ import type { Case } from '@kbn/cases-plugin/common/types/domain';
 import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import {
   CASE_ATTACHMENT_SAVED_OBJECT,
-  CASE_COMMENT_SAVED_OBJECT,
   COMMENT_ATTACHMENT_TYPE,
+  INDICATOR_ATTACHMENT_TYPE,
   LENS_ATTACHMENT_TYPE,
   OSQUERY_ATTACHMENT_TYPE,
   SECURITY_ENDPOINT_ATTACHMENT_TYPE,
@@ -23,6 +23,7 @@ import {
   postCaseReq,
   postCommentActionsReq,
   postCommentUserReq,
+  postUnifiedIndicatorReq,
 } from '../../../../common/lib/mock';
 import {
   createCase,
@@ -33,9 +34,13 @@ import {
   getCase,
   findAttachmentsV2,
   getAttachmentV2,
+  seedLegacyCommentAttachment,
 } from '../../../../common/lib/api';
 
 const EVENTS_INDEX = 'test-events-index';
+// Stand-in for `.alerts-security.alerts-default` (no alert document is ever indexed here) so the
+// case status sync cannot race the alerting framework's bootstrap of that index.
+const ALERT_INDEX = '.alerts-test-cases-security-alerts';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -54,41 +59,6 @@ export default ({ getService }: FtrProviderContext): void => {
         })
       )
     );
-
-  const auditFields = {
-    created_at: '2024-01-01T00:00:00.000Z',
-    created_by: { username: 'elastic', full_name: null, email: null },
-    pushed_at: null,
-    pushed_by: null,
-    updated_at: null,
-    updated_by: null,
-  };
-
-  const seedLeftoverCommentSO = ({
-    id,
-    caseId,
-    attributes,
-  }: {
-    id: string;
-    caseId: string;
-    attributes: Record<string, unknown>;
-  }) =>
-    es.index({
-      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-      id: `${CASE_COMMENT_SAVED_OBJECT}:${id}`,
-      refresh: 'wait_for',
-      document: {
-        type: CASE_COMMENT_SAVED_OBJECT,
-        [CASE_COMMENT_SAVED_OBJECT]: {
-          ...auditFields,
-          ...attributes,
-        },
-        references: [{ type: 'cases', id: caseId, name: 'associated-cases' }],
-        namespaces: ['default'],
-        updated_at: '2024-01-01T00:00:00.000Z',
-        coreMigrationVersion: '8.8.0',
-      },
-    });
 
   describe('Mixed Legacy + Unified Reads', () => {
     afterEach(async () => {
@@ -313,22 +283,18 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(osqueryAttachment.attachmentId).to.be('mixed-osquery-1');
       });
 
-      it('handles mixed legacy v1 and unified v2 payloads in bulk create', async () => {
+      it('handles a batch of mixed unified attachment types in bulk create', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         const updatedCase = await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
           params: [
             {
-              type: AttachmentType.user,
-              comment: 'legacy v1 style comment',
+              type: COMMENT_ATTACHMENT_TYPE,
+              data: { content: 'unified comment' },
               owner: 'securitySolutionFixture',
             },
-            {
-              type: 'comment' as const,
-              data: { content: 'unified v2 style comment' },
-              owner: 'securitySolutionFixture',
-            },
+            postUnifiedIndicatorReq,
             {
               type: LENS_ATTACHMENT_TYPE,
               data: { state: { attributes: { title: 'mixed test viz' } } },
@@ -337,7 +303,9 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
         });
 
-        expect(updatedCase.comments?.length).to.be(3);
+        expect(updatedCase.comments?.map(({ type }) => type).sort()).to.eql(
+          [COMMENT_ATTACHMENT_TYPE, INDICATOR_ATTACHMENT_TYPE, LENS_ATTACHMENT_TYPE].sort()
+        );
       });
     });
 
@@ -418,7 +386,7 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: postedCase.id,
           params: {
             alertId: 'collection-legacy-alert-1',
-            index: '.alerts-security.alerts-default',
+            index: ALERT_INDEX,
             rule: { id: 'rule-collection-1', name: 'Rule collection 1' },
             type: AttachmentType.alert,
             owner: 'securitySolutionFixture',
@@ -434,7 +402,7 @@ export default ({ getService }: FtrProviderContext): void => {
               type: 'security.alert' as const,
               attachmentId: 'collection-unified-alert-1',
               metadata: {
-                index: '.alerts-security.alerts-default',
+                index: ALERT_INDEX,
                 rule: { id: 'rule-collection-2', name: 'Rule collection 2' },
               },
               owner: 'securitySolutionFixture',
@@ -458,7 +426,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const postedCase = await createCase(supertest, postCaseReq);
         const leftoverActionsId = 'leftover-actions-1';
 
-        await seedLeftoverCommentSO({
+        await seedLegacyCommentAttachment({
+          es,
           id: leftoverActionsId,
           caseId: postedCase.id,
           attributes: {
@@ -506,14 +475,15 @@ export default ({ getService }: FtrProviderContext): void => {
         const postedCase = await createCase(supertest, postCaseReq);
         const leftoverAlertId = 'leftover-security-alert-1';
 
-        await seedLeftoverCommentSO({
+        await seedLegacyCommentAttachment({
+          es,
           id: leftoverAlertId,
           caseId: postedCase.id,
           attributes: {
             type: AttachmentType.alert,
             owner: 'securitySolutionFixture',
             alertId: 'leftover-alert-1',
-            index: '.alerts-security.alerts-default',
+            index: ALERT_INDEX,
             rule: { id: 'rule-leftover-1', name: 'Rule leftover 1' },
           },
         });

@@ -9,6 +9,8 @@ import { createContext, useContext } from 'react';
 
 /** Controls which metadata fields are rendered on entity/event nodes in the graph. */
 export interface GraphDisplayOptions {
+  /** Whether to draw a blue border around origin/starting-point nodes. */
+  highlightOrigin: boolean;
   entity: {
     subType: boolean;
     assetCriticality: boolean;
@@ -24,6 +26,7 @@ export interface GraphDisplayOptions {
 
 /** All fields visible — used as the initial/default state. */
 export const DEFAULT_GRAPH_DISPLAY_OPTIONS: GraphDisplayOptions = {
+  highlightOrigin: true,
   entity: {
     subType: true,
     assetCriticality: true,

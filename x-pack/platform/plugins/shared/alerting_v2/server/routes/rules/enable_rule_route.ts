@@ -30,6 +30,7 @@ export class EnableRuleRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Enable a rule',
     description: 'Enable a rule by identifier.',
     oasOperationObject: enableRuleOasExamples,

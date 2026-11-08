@@ -577,6 +577,8 @@ describe('CountTimeframeStrategy', () => {
             })
           : undefined;
 
+      let phaseStartedAt: string | undefined;
+
       for (let evaluation = 1; evaluation <= 10; evaluation++) {
         const result = strategy.getNextState(
           buildStrategyStateTransitionContext({
@@ -591,15 +593,22 @@ describe('CountTimeframeStrategy', () => {
           return evaluation;
         }
 
-        // Mirrors production: last_episode_timestamp is the timestamp of the most
-        // recently stored event, not the timestamp the phase was entered. So elapsed
-        // time on the next evaluation is measured against *this* evaluation, not a
-        // fixed baseline.
+        // `status_count === 1` marks a (re)entry into the phase, so the phase start
+        // pins to this evaluation and stays put while the phase is held. Production
+        // derives the same value as MAX(@timestamp) over `status_count == 1` events.
+        if (result.statusCount === 1) {
+          phaseStartedAt = minute(evaluation - 1);
+        }
+
+        // `last_episode_timestamp` advances to the most recently stored event each
+        // evaluation, while `last_episode_phase_started_at` stays pinned to phase entry,
+        // so elapsed time accumulates across evaluations rather than resetting.
         previousEpisode = buildLatestAlertEvent({
           episodeStatus: result.status,
           eventStatus: on,
           statusCount: result.statusCount,
           previousTimestamp: minute(evaluation - 1),
+          phaseStartedAt,
         });
       }
 
@@ -637,10 +646,10 @@ describe('CountTimeframeStrategy', () => {
       ).toBe(expected);
     });
 
-    // These evaluations are 1 minute apart (see `minute`), so a timeframe below
-    // 1m models a schedule interval longer than the timeframe (works), and a
-    // timeframe above 1m models a schedule interval shorter than the timeframe
-    // (never resolves — see the doc comment on `isPhaseSkipped`).
+    // These evaluations are 1 minute apart (see `minute`). Because elapsed time is
+    // measured against the pinned phase-entry timestamp, an ANDed timeframe accumulates
+    // across evaluations and resolves once cumulative elapsed time exceeds it, whether
+    // the timeframe is shorter or longer than the 1-minute schedule interval.
     it('pending count 0 ORed with any timeframe is immediate regardless of schedule', () => {
       expect(
         evaluationThatResolves({
@@ -661,14 +670,14 @@ describe('CountTimeframeStrategy', () => {
       ).toBe(2);
     });
 
-    it('pending count 0 ANDed with a timeframe longer than the schedule interval never resolves', () => {
+    it('pending count 0 ANDed with a timeframe longer than the schedule interval resolves once cumulative elapsed time exceeds it', () => {
       expect(
         evaluationThatResolves({
           stateTransition: { pending: { count: 0, timeframe: '5m', operator: 'and' } },
           on: alertEventStatus.breached,
           until: alertEpisodeStatus.active,
         })
-      ).toBe(-1);
+      ).toBe(6);
     });
 
     it('recovering count 0 ORed with any timeframe is immediate regardless of schedule', () => {
@@ -693,7 +702,7 @@ describe('CountTimeframeStrategy', () => {
       ).toBe(2);
     });
 
-    it('recovering count 0 ANDed with a timeframe longer than the schedule interval never resolves', () => {
+    it('recovering count 0 ANDed with a timeframe longer than the schedule interval resolves once cumulative elapsed time exceeds it', () => {
       expect(
         evaluationThatResolves({
           stateTransition: { recovering: { count: 0, timeframe: '5m', operator: 'and' } },
@@ -701,7 +710,66 @@ describe('CountTimeframeStrategy', () => {
           on: alertEventStatus.recovered,
           until: alertEpisodeStatus.inactive,
         })
-      ).toBe(-1);
+      ).toBe(6);
+    });
+  });
+
+  describe('mid-phase episode with no derivable phase-entry timestamp', () => {
+    it('falls back to last_episode_timestamp to resolve a pending episode', () => {
+      const result = strategy.getNextState(
+        buildStrategyStateTransitionContext({
+          eventStatus: alertEventStatus.breached,
+          stateTransition: { pending: { count: 0, timeframe: '30s', operator: 'and' } },
+          evaluatedAt: '2026-01-01T00:05:00.000Z',
+          previousEpisode: buildLatestAlertEvent({
+            episodeStatus: alertEpisodeStatus.pending,
+            eventStatus: alertEventStatus.breached,
+            statusCount: 3,
+            previousTimestamp: '2026-01-01T00:04:00.000Z',
+            phaseStartedAt: null,
+          }),
+        })
+      );
+
+      expect(result.status).toBe(alertEpisodeStatus.active);
+    });
+
+    it('falls back to last_episode_timestamp to resolve a recovering episode', () => {
+      const result = strategy.getNextState(
+        buildStrategyStateTransitionContext({
+          eventStatus: alertEventStatus.recovered,
+          stateTransition: { recovering: { count: 0, timeframe: '30s', operator: 'and' } },
+          evaluatedAt: '2026-01-01T00:05:00.000Z',
+          previousEpisode: buildLatestAlertEvent({
+            episodeStatus: alertEpisodeStatus.recovering,
+            eventStatus: alertEventStatus.recovered,
+            statusCount: 3,
+            previousTimestamp: '2026-01-01T00:04:00.000Z',
+            phaseStartedAt: null,
+          }),
+        })
+      );
+
+      expect(result.status).toBe(alertEpisodeStatus.inactive);
+    });
+
+    it('holds the phase when the fallback elapsed is still below the timeframe', () => {
+      const result = strategy.getNextState(
+        buildStrategyStateTransitionContext({
+          eventStatus: alertEventStatus.breached,
+          stateTransition: { pending: { count: 0, timeframe: '5m', operator: 'and' } },
+          evaluatedAt: '2026-01-01T00:05:00.000Z',
+          previousEpisode: buildLatestAlertEvent({
+            episodeStatus: alertEpisodeStatus.pending,
+            eventStatus: alertEventStatus.breached,
+            statusCount: 3,
+            previousTimestamp: '2026-01-01T00:04:00.000Z',
+            phaseStartedAt: null,
+          }),
+        })
+      );
+
+      expect(result.status).toBe(alertEpisodeStatus.pending);
     });
   });
 });

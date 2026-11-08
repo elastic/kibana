@@ -25,20 +25,19 @@ import {
   NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
 } from '@kbn/nightshift-shared';
 import { EMPTY_TOKENS, buildKIQueryGenerationUserMessage } from '@kbn/nightshift-ai';
-import type { Streams } from '@kbn/streams-schema';
 import type { ExistingQuerySummary } from '@kbn/nightshift-ai';
+import type { NightshiftSource } from '@kbn/nightshift-shared';
 import { KI_QUERY_GENERATION_AGENT_ID } from '../../agent_builder/agents/ki_query_generation';
 import {
   SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
   type AcceptedQuery,
 } from '../../agent_builder/skills/ki_query_generation';
 import { chatTokenCountFromModelUsage } from './features/chat_token_count';
-import { streamToAnalysisTarget } from './stream_to_analysis_target';
 
 const QUERY_GENERATION_MAX_DURATION_MS = 300_000;
 
 interface FinalizedValidationData {
-  target_id: string;
+  slug: string;
   finalized: true;
   finalized_queries: AcceptedQuery[];
 }
@@ -46,8 +45,8 @@ interface FinalizedValidationData {
 const isFinalizedValidationData = (data: unknown): data is FinalizedValidationData =>
   typeof data === 'object' &&
   data !== null &&
-  'target_id' in data &&
-  typeof data.target_id === 'string' &&
+  'slug' in data &&
+  typeof data.slug === 'string' &&
   'finalized' in data &&
   data.finalized === true &&
   'finalized_queries' in data &&
@@ -58,8 +57,9 @@ export interface ExecuteKIQueryGenerationAgentOptions {
   request: KibanaRequest;
   connectorId: string;
   interactionId: string;
-  definition: Streams.all.Definition;
+  source: NightshiftSource;
   existingQueries: ExistingQuerySummary[];
+  maxExistingQueriesForContext: number;
   signal?: AbortSignal;
   logger: Logger;
 }
@@ -69,21 +69,25 @@ export async function executeKIQueryGenerationAgent({
   request,
   connectorId,
   interactionId,
-  definition,
+  source,
   existingQueries,
+  maxExistingQueriesForContext,
   signal,
   logger,
 }: ExecuteKIQueryGenerationAgentOptions): Promise<{
   queries: GeneratedSignificantEventQuery[];
   tokensUsed: ChatCompletionTokenCount;
 }> {
-  const target = streamToAnalysisTarget(definition);
-  const userMessage = buildKIQueryGenerationUserMessage(target, existingQueries);
+  const userMessage = buildKIQueryGenerationUserMessage(
+    { slug: source.slug, description: source.description },
+    existingQueries,
+    maxExistingQueriesForContext
+  );
 
   const conversationClient = await agentBuilder.conversations.getScopedClient({ request });
   const conversation = await conversationClient.create({
     agentId: KI_QUERY_GENERATION_AGENT_ID,
-    title: `KI query generation: ${definition.name}`.slice(0, CONVERSATION_TITLE_MAX_LENGTH),
+    title: `KI query generation: ${source.slug}`.slice(0, CONVERSATION_TITLE_MAX_LENGTH),
     accessControl: { access_mode: ConversationAccessControlMode.Public },
   });
 
@@ -123,9 +127,9 @@ export async function executeKIQueryGenerationAgent({
   if (!finalizedData) {
     throw new Error('KI query generation agent did not finalize validate_queries');
   }
-  if (finalizedData.target_id !== target.id) {
+  if (finalizedData.slug !== source.slug) {
     throw new Error(
-      `KI query generation agent finalized for unexpected target "${finalizedData.target_id}"`
+      `KI query generation agent finalized for unexpected source "${finalizedData.slug}"`
     );
   }
 
@@ -137,6 +141,7 @@ export async function executeKIQueryGenerationAgent({
     title: q.title,
     description: q.description,
     esql: q.esql,
+    category: q.category,
     severity_score: q.severity_score,
     evidence: q.evidence,
     replaces: q.replaces,
@@ -147,9 +152,7 @@ export async function executeKIQueryGenerationAgent({
     roundEvent?.data.round.model_usage
   ) ?? { ...EMPTY_TOKENS };
 
-  logger.debug(
-    `KI query generation agent returned ${queries.length} queries for "${definition.name}"`
-  );
+  logger.debug(`KI query generation agent returned ${queries.length} queries for "${source.slug}"`);
 
   return { queries, tokensUsed };
 }

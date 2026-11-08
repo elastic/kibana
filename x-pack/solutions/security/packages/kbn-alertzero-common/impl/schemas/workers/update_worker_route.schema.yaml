@@ -68,14 +68,6 @@ paths:
                 properties:
                   worker:
                     $ref: '../components/watch_settings.schema.yaml#/components/schemas/Worker'
-                  skippedRuleCount:
-                    type: integer
-                    minimum: 1
-                    description: >-
-                      Present when enabling or disabling the Alert Triage Worker left rules the
-                      caller cannot edit (machine learning rules without machine learning
-                      permissions). On enable those rules were not attached and are not triaged;
-                      on disable they still carry the Worker action.
                 required:
                   - worker
         '409':

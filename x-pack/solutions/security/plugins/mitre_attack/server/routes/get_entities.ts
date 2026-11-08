@@ -55,7 +55,7 @@ export const registerGetEntitiesRoute = (
         if (!mitreDataClient) {
           return response.customError({
             statusCode: 503,
-            body: { message: 'MITRE ATT&CK data client is not yet available' },
+            body: { message: 'MITRE data client is not yet available' },
           });
         }
 

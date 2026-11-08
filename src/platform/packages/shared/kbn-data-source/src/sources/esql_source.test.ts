@@ -10,7 +10,11 @@
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { HttpStart } from '@kbn/core/public';
 import { ESQLVariableType, SOURCE_INFO_ROUTE, TIMEFIELD_ROUTE } from '@kbn/esql-types';
-import { clearESQLSourceInfoCache, ESQL_SOURCE_INFO_CACHE_TTL } from '@kbn/esql-utils';
+import {
+  clearESQLSourceInfoCache,
+  ESQL_SOURCE_INFO_CACHE_TTL,
+  getESQLAdHocDataviewId,
+} from '@kbn/esql-utils';
 import { EsqlSource } from './esql_source';
 
 function makeColumn(
@@ -108,7 +112,7 @@ describe('EsqlSource', () => {
       expect(a.id).not.toBe(b.id);
     });
 
-    it('keeps the same datasetKey when the query changes but FROM and time field do not', async () => {
+    it('keeps the same datasetId when the query changes but FROM and time field do not', async () => {
       const sort = await EsqlSource.create({
         query: 'FROM logs-* | SORT @timestamp DESC',
         resultColumns: [],
@@ -125,12 +129,18 @@ describe('EsqlSource', () => {
         timeFieldName: '@timestamp',
       });
       expect(sort.id).not.toBe(where.id);
-      expect(sort.datasetKey).toBe('esql:logs-*:@timestamp:');
-      expect(sort.datasetKey).toBe(where.datasetKey);
-      expect(sort.datasetKey).toBe(evalQuery.datasetKey);
+      expect(sort.datasetId).toBe(
+        await getESQLAdHocDataviewId({
+          indexPattern: 'logs-*',
+          timeFieldName: '@timestamp',
+          projectRouting: undefined,
+        })
+      );
+      expect(sort.datasetId).toBe(where.datasetId);
+      expect(sort.datasetId).toBe(evalQuery.datasetId);
     });
 
-    it('uses a different datasetKey when the FROM or time field changes', async () => {
+    it('uses a different datasetId when the FROM or time field changes', async () => {
       const logs = await EsqlSource.create({
         query: 'FROM logs-*',
         resultColumns: [],
@@ -146,11 +156,11 @@ describe('EsqlSource', () => {
         resultColumns: [],
         timeFieldName: 'event.created',
       });
-      expect(logs.datasetKey).not.toBe(metrics.datasetKey);
-      expect(logs.datasetKey).not.toBe(otherTime.datasetKey);
+      expect(logs.datasetId).not.toBe(metrics.datasetId);
+      expect(logs.datasetId).not.toBe(otherTime.datasetId);
     });
 
-    it('uses a different datasetKey when projectRouting differs', async () => {
+    it('uses a different datasetId when projectRouting differs', async () => {
       const a = await EsqlSource.create({
         query: 'FROM logs-*',
         resultColumns: [],
@@ -163,18 +173,30 @@ describe('EsqlSource', () => {
         timeFieldName: '@timestamp',
         projectRouting: 'project-b',
       });
-      expect(a.datasetKey).toBe('esql:logs-*:@timestamp:project-a');
-      expect(b.datasetKey).toBe('esql:logs-*:@timestamp:project-b');
+      expect(a.datasetId).toBe(
+        await getESQLAdHocDataviewId({
+          indexPattern: 'logs-*',
+          timeFieldName: '@timestamp',
+          projectRouting: 'project-a',
+        })
+      );
+      expect(a.datasetId).not.toBe(b.datasetId);
     });
 
-    it('prefers SET project_routing over the picker arg in datasetKey', async () => {
+    it('prefers SET project_routing over the picker arg in datasetId', async () => {
       const source = await EsqlSource.create({
         query: 'SET project_routing = "_alias:project-a"; FROM logs-*',
         resultColumns: [],
         timeFieldName: '@timestamp',
         projectRouting: 'project-b',
       });
-      expect(source.datasetKey).toBe('esql:logs-*:@timestamp:_alias:project-a');
+      expect(source.datasetId).toBe(
+        await getESQLAdHocDataviewId({
+          indexPattern: 'logs-*',
+          timeFieldName: '@timestamp',
+          projectRouting: '_alias:project-a',
+        })
+      );
     });
 
     it('produces a different id when projectRouting differs', async () => {
@@ -456,7 +478,7 @@ describe('EsqlSource', () => {
       expect(updated.query).toBe(original.query);
       expect(updated.timeFieldName).toBe('@timestamp');
       expect(updated.projectRouting).toBe(original.projectRouting);
-      expect(updated.datasetKey).toBe(original.datasetKey);
+      expect(updated.datasetId).toBe(original.datasetId);
       expect(updated.resultColumns).toEqual(updatedCols);
       expect(original.resultColumns).toEqual(originalCols);
       expect(updated.getColumns().map((column) => column.name)).toEqual(['message', 'bytes']);
@@ -730,6 +752,83 @@ describe('EsqlSource', () => {
       const source = await EsqlSource.create({ query: 'FROM shared-time', http });
 
       expect(source.timeFieldName).toBe('@timestamp');
+    });
+  });
+
+  describe('resolveDataset', () => {
+    const createHttp = () =>
+      ({
+        post: jest.fn(async (path: string) =>
+          path === TIMEFIELD_ROUTE ? { timeField: '@timestamp' } : { columns: [] }
+        ),
+      } as unknown as HttpStart);
+
+    it('resolves the time field without requesting the schema', async () => {
+      const http = createHttp();
+
+      const dataset = await EsqlSource.resolveDataset({
+        query: 'FROM dataset-time | LIMIT 5',
+        http,
+      });
+
+      expect(dataset.title).toBe('dataset-time');
+      expect(dataset.timeFieldName).toBe('@timestamp');
+      expect(postedPathsOf(http)).toEqual([TIMEFIELD_ROUTE]);
+    });
+
+    it('has the same datasetId as the source of the same dataset', async () => {
+      const http = createHttp();
+      const dataset = await EsqlSource.resolveDataset({
+        query: 'FROM same-dataset | LIMIT 5',
+        http,
+      });
+
+      const source = await EsqlSource.create({
+        query: 'FROM same-dataset | WHERE a > 1',
+        http,
+      });
+
+      expect(dataset.datasetId).toBe(source.datasetId);
+      expect(dataset.datasetId).toBe(
+        await getESQLAdHocDataviewId({
+          indexPattern: 'same-dataset',
+          timeFieldName: '@timestamp',
+          projectRouting: undefined,
+        })
+      );
+    });
+
+    it('does not request the time field when it is given', async () => {
+      const http = createHttp();
+
+      const dataset = await EsqlSource.resolveDataset({
+        query: 'FROM given-time',
+        timeFieldName: 'event.created',
+        http,
+      });
+
+      expect(dataset.timeFieldName).toBe('event.created');
+      expect(postedPathsOf(http)).toEqual([]);
+    });
+
+    it('prefers SET project_routing over the picker arg', async () => {
+      const dataset = await EsqlSource.resolveDataset({
+        query: 'SET project_routing = "_alias:project-a"; FROM logs-*',
+        timeFieldName: '@timestamp',
+        projectRouting: 'project-b',
+      });
+
+      expect(dataset.projectRouting).toBe('_alias:project-a');
+    });
+
+    it('does not populate the instance cache, so a later create still resolves the schema', async () => {
+      const http = createHttp();
+      await EsqlSource.resolveDataset({ query: 'FROM no-poison', http });
+      (http.post as jest.Mock).mockClear();
+
+      await EsqlSource.create({ query: 'FROM no-poison', http });
+
+      expect(postedPathsOf(http)).toContain(SOURCE_INFO_ROUTE);
     });
   });
 

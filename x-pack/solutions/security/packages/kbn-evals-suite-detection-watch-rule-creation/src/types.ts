@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 /**
  * Zod schema for the rule object returned by the draft_creation ai.agent step.
@@ -17,35 +17,37 @@ import { z } from '@kbn/zod';
  * must survive parsing so the responsible evaluator can score it 0.
  *
  */
-export const draftRuleSchema = z
-  .object({
-    name: z.string(),
-    description: z.string(),
-    query: z.string(),
-    language: z.string(),
-    type: z.string(),
-    severity: z.string(),
-    risk_score: z.unknown(),
-    interval: z.unknown(),
-    from: z.unknown(),
-    tags: z.array(z.string()),
-    threat: z.array(
-      z.object({
-        tactic: z.object({ id: z.string(), name: z.string() }).partial().optional(),
-        technique: z
-          .array(
-            z
-              .object({
-                id: z.string(),
-                name: z.string(),
-                subtechnique: z.array(z.object({ id: z.string() }).partial()).optional(),
-              })
-              .partial()
-          )
-          .optional(),
-      })
-    ),
-  })
-  .partial();
+export const draftRuleSchema = lazySchema(() =>
+  z
+    .object({
+      name: z.string(),
+      description: z.string(),
+      query: z.string(),
+      language: z.string(),
+      type: z.string(),
+      severity: z.string(),
+      risk_score: z.unknown(),
+      interval: z.unknown(),
+      from: z.unknown(),
+      tags: z.array(z.string()),
+      threat: z.array(
+        z.object({
+          tactic: z.object({ id: z.string(), name: z.string() }).partial().optional(),
+          technique: z
+            .array(
+              z
+                .object({
+                  id: z.string(),
+                  name: z.string(),
+                  subtechnique: z.array(z.object({ id: z.string() }).partial()).optional(),
+                })
+                .partial()
+            )
+            .optional(),
+        })
+      ),
+    })
+    .partial()
+);
 
 export type DraftRule = z.infer<typeof draftRuleSchema>;

@@ -33,6 +33,7 @@ export class BulkSnoozeActionPoliciesRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Snooze action policies in bulk by ID',
     oasOperationObject: bulkSnoozeActionPoliciesOasExamples,
   } as const;

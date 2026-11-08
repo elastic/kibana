@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
-import { WrappedHelper } from '../utils/testing';
+import { HookWrapper } from '../utils/testing/hook_helpers';
 import { useMonitorEnableHandler } from './use_monitor_enable_handler';
 
 describe('useMonitorEnableHandler', () => {
@@ -27,7 +27,7 @@ describe('useMonitorEnableHandler', () => {
         }),
       {
         initialProps: { configId: 'monitor-a' },
-        wrapper: ({ children }) => <WrappedHelper>{children}</WrappedHelper>,
+        wrapper: ({ children }) => <HookWrapper>{children}</HookWrapper>,
       }
     );
 

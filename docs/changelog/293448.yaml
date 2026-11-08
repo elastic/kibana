@@ -1,7 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/293448
-type: enhancement
-products:
-- product: cloud-serverless
-- product: kibana
-title: Add support for templated wait duration and step timeout in workflows

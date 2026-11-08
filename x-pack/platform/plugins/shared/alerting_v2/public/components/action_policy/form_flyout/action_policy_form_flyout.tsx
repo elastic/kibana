@@ -51,7 +51,7 @@ export const ActionPolicyFormFlyout = ({
 }: ActionPolicyFormFlyoutProps) => {
   const application = useService(CoreStart('application'));
   const isLicenseValid = useIsActionPoliciesLicenseValid();
-  const { methods, isEditMode, isSubmitEnabled, handleSubmit } = useActionPolicyForm({
+  const { methods, isEditMode, handleSubmit } = useActionPolicyForm({
     initialValues,
     onSubmitCreate: onSave ?? noop,
     onSubmitUpdate: onUpdate ?? noop,
@@ -135,7 +135,7 @@ export const ActionPolicyFormFlyout = ({
               fill
               onClick={handleSubmit}
               isLoading={isLoading}
-              disabled={!isSubmitEnabled || !isLicenseValid}
+              disabled={!isLicenseValid}
               data-test-subj="submitButton"
             >
               {isEditMode ? (

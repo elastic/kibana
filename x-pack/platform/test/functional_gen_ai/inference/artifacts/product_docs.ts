@@ -27,7 +27,8 @@ const sourceClusterIndex = process.env.KIBANA_SOURCE_INDEX;
 const embeddingClusterUrl = 'http://localhost:9220';
 const embeddingClusterUsername = 'elastic';
 const embeddingClusterPassword = 'changeme';
-const MIN_ARTIFACT_SIZE_BYTES = 3 * 1024 * 1024;
+const MIN_ARTIFACT_SIZE_BYTES = 4 * 1024 * 1024;
+const MIN_OPENAPI_ARTIFACT_SIZE_BYTES = 2 * 1024 * 1024;
 
 const getCombinedOpenApiArtifactZipFileName = (
   stackVersion: string,
@@ -69,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ensureEisEndpoints({
         es,
         log,
-        requiredInferenceIds: [inferenceId, openApiInferenceId],
+        requiredInferenceIds: [inferenceId, openApiInferenceId, ESQL_DOCS_INFERENCE_ID],
       });
     });
 
@@ -119,7 +120,10 @@ export default function ({ getService }: FtrProviderContext) {
       const nodeBin = process.execPath;
       const kbArtifactsDir = resolve(REPO_ROOT, 'build', 'kb-artifacts');
 
-      const waitForArtifactZipAtPath = async (artifactPath: string) => {
+      const waitForArtifactZipAtPath = async (
+        artifactPath: string,
+        minSizeBytes: number = MIN_ARTIFACT_SIZE_BYTES
+      ) => {
         await retry.waitForWithTimeout(
           `Artifact zip [${artifactPath}] should exist`,
           30 * 60 * 1000, // 30 minutes
@@ -134,14 +138,14 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         const stats = await Fs.stat(artifactPath);
-        if (stats.size < MIN_ARTIFACT_SIZE_BYTES) {
+        if (stats.size < minSizeBytes) {
           throw new Error(
-            `Artifact zip '[${artifactPath}]' exists but is too small (${stats.size} bytes); expected at least ${MIN_ARTIFACT_SIZE_BYTES} bytes (failing immediately)`
+            `Artifact zip '[${artifactPath}]' exists but is too small (${stats.size} bytes); expected at least ${minSizeBytes} bytes (failing immediately)`
           );
         }
 
         log.info(
-          `Artifact zip [${artifactPath}] size check passed (${stats.size} bytes >= ${MIN_ARTIFACT_SIZE_BYTES} bytes)`
+          `Artifact zip [${artifactPath}] size check passed (${stats.size} bytes >= ${minSizeBytes} bytes)`
         );
       };
 
@@ -321,8 +325,10 @@ export default function ({ getService }: FtrProviderContext) {
           stackDocsVersion,
           openApiInferenceId
         );
-        // waits for zip, then asserts size >= MIN_ARTIFACT_SIZE_BYTES (see waitForArtifactZipAtPath)
-        await waitForArtifactZipAtPath(resolve(kbArtifactsDir, openApiZipName));
+        await waitForArtifactZipAtPath(
+          resolve(kbArtifactsDir, openApiZipName),
+          MIN_OPENAPI_ARTIFACT_SIZE_BYTES
+        );
       });
     });
   });

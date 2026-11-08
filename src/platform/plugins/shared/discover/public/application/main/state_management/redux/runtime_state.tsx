@@ -9,7 +9,7 @@
 
 import React, { type PropsWithChildren, createContext, useContext, useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DataSource } from '@kbn/data-source';
+import { getRegisteredEsqlDataView, type DataSource, type EsqlSource } from '@kbn/data-source';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
@@ -47,7 +47,6 @@ interface TabRuntimeState {
   scopedProfilesManager: ScopedProfilesManager;
   scopedEbtManager: ScopedDiscoverEBTManager;
   cascadedDocumentsFetcher: CascadedDocumentsFetcher;
-  currentDataView: DataView;
   currentDataSource: DataSource;
   /** Source of the cascade leaf rows; keeps the parent id, so never publish it as the current source. */
   cascadedLeafDataSource: DataSource;
@@ -62,7 +61,7 @@ type ReactiveRuntimeState<TState, TNullable extends keyof TState = never> = {
 
 export type ReactiveTabRuntimeState = ReactiveRuntimeState<
   TabRuntimeState,
-  'currentDataView' | 'currentDataSource' | 'cascadedLeafDataSource'
+  'currentDataSource' | 'cascadedLeafDataSource'
 >;
 
 export type RuntimeStateManager = ReactiveRuntimeState<DiscoverRuntimeState> & {
@@ -126,7 +125,6 @@ export const createTabRuntimeState = ({
     scopedProfilesManager$: new BehaviorSubject(scopedProfilesManager),
     scopedEbtManager$: new BehaviorSubject(scopedEbtManager),
     cascadedDocumentsFetcher$: new BehaviorSubject(cascadedDocumentsFetcher),
-    currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
     currentDataSource$,
     cascadedLeafDataSource$,
     unsubscribeFn$: new BehaviorSubject<TabRuntimeState['unsubscribeFn']>(undefined),
@@ -138,6 +136,44 @@ export const useRuntimeState = <T,>(stateSubject$: BehaviorSubject<T>) =>
 
 export const selectTabRuntimeState = (runtimeStateManager: RuntimeStateManager, tabId: string) =>
   runtimeStateManager.tabs.byId[tabId];
+
+// Queries with the same id share one registry entry, which another tab can unregister while this
+// one is still on that source. The shim published with the source is kept per source instance, so it survives that.
+const esqlDataViewsBySource = new WeakMap<EsqlSource, DataView>();
+
+/**
+ * The DataView of a data source: the wrapped one for `DataViewSource`, the shim registered by
+ * `resolveEsqlSource` for `EsqlSource`. Only for code that needs a real DataView (search source,
+ * filters, saved object serialization); everything else should work off the data source.
+ */
+export const getDataViewOfSource = (dataSource: DataSource | undefined): DataView | undefined => {
+  if (!dataSource) {
+    return undefined;
+  }
+  return dataSource.kind === 'index-pattern'
+    ? dataSource.getDataView()
+    : esqlDataViewsBySource.get(dataSource) ?? getRegisteredEsqlDataView(dataSource);
+};
+
+/** Pins the registered shim of an ES|QL source for as long as the source is in use. */
+export const pinDataViewOfSource = (dataSource: DataSource): DataView | undefined => {
+  if (dataSource.kind !== 'esql') {
+    return undefined;
+  }
+  const dataView = getRegisteredEsqlDataView(dataSource);
+  if (dataView) {
+    esqlDataViewsBySource.set(dataSource, dataView);
+  }
+  return dataView;
+};
+
+/** Id of the DataView of a data source, without needing the DataView: `datasetId` for ES|QL. */
+export const getDataViewIdOfSource = (dataSource: DataSource): string =>
+  dataSource.kind === 'esql' ? dataSource.datasetId : dataSource.id;
+
+/** The DataView of the tab's current data source, see {@link getDataViewOfSource}. */
+export const getTabDataView = (tabRuntimeState: ReactiveTabRuntimeState | undefined) =>
+  getDataViewOfSource(tabRuntimeState?.currentDataSource$.getValue());
 
 export const selectDataSourceProfileId = (
   runtimeStateManager: RuntimeStateManager,
@@ -263,9 +299,10 @@ export const selectIsDataViewUsedInMultipleRuntimeTabStates = (
   runtimeStateManager: RuntimeStateManager,
   dataViewId: string
 ) =>
-  Object.values(runtimeStateManager.tabs.byId).filter(
-    (tab) => tab.currentDataView$.getValue()?.id === dataViewId
-  ).length > 1;
+  Object.values(runtimeStateManager.tabs.byId).filter((tab) => {
+    const dataSource = tab.currentDataSource$.getValue();
+    return dataSource ? getDataViewIdOfSource(dataSource) === dataViewId : false;
+  }).length > 1;
 
 export const selectTabRuntimeInternalState = ({
   runtimeStateManager,
@@ -277,7 +314,7 @@ export const selectTabRuntimeInternalState = ({
   services: DiscoverServices;
 }): TabState['initialInternalState'] | undefined => {
   const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabState.id);
-  const dataView = tabRuntimeState?.currentDataView$.getValue();
+  const dataView = getTabDataView(tabRuntimeState);
   const dataStateContainer = tabRuntimeState?.dataStateContainer$.getValue();
 
   if (!dataStateContainer || !dataView) {
@@ -379,7 +416,8 @@ export const useCurrentDataSource = () => useRuntimeStateContext().currentDataSo
 
 /** Returns the underlying DataView for DSL consumers. Use {@link useCurrentDataSource} for rendering. */
 export const useCurrentDataView = (): DataView => {
-  const dataView = useCurrentTabRuntimeState((tab) => tab.currentDataView$);
+  const dataSource = useCurrentDataSource();
+  const dataView = useMemo(() => getDataViewOfSource(dataSource), [dataSource]);
   if (!dataView) {
     throw new Error('currentDataView is not initialized');
   }

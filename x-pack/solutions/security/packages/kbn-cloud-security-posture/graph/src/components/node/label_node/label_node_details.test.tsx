@@ -22,6 +22,16 @@ describe('LabelNodeDetails', () => {
     expect(container.firstChild).toBeNull();
   });
 
+  test('keeps the default spacing when there is no origin highlight', () => {
+    const { container } = render(<LabelNodeDetails ips={['10.0.0.1']} />);
+    expect(container.firstChild).toHaveStyleRule('margin-top', '4px');
+  });
+
+  test('adds extra spacing to clear the origin highlight ring', () => {
+    const { container } = render(<LabelNodeDetails ips={['10.0.0.1']} hasOriginHighlight />);
+    expect(container.firstChild).toHaveStyleRule('margin-top', '12px');
+  });
+
   test('renders Ips component when ips are provided', () => {
     const ips = ['192.168.1.1', '10.0.0.1'];
     const { container } = render(<LabelNodeDetails ips={ips} />);

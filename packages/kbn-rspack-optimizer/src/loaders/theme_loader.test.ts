@@ -55,8 +55,11 @@ describe('theme_loader', () => {
   });
 
   describe('theme globals files exist', () => {
-    // The actual path is src/core/public/styles/core_app/
-    const themeGlobalsDir = Path.resolve(REPO_ROOT, 'src/core/public/styles/core_app');
+    // The actual path is src/core/packages/core/public/styles/core_app/
+    const themeGlobalsDir = Path.resolve(
+      REPO_ROOT,
+      'src/core/packages/core/public/styles/core_app'
+    );
 
     it('light theme globals should exist', () => {
       const lightGlobals = Path.resolve(themeGlobalsDir, '_globals_borealislight.scss');

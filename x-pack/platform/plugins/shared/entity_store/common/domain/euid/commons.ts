@@ -16,7 +16,11 @@ import type {
   FieldEvaluationSource,
   FieldValueSchema,
 } from '../definitions/entity_schema';
-import { isSingleFieldIdentity } from '../definitions/entity_schema';
+import {
+  getPostAggFilter,
+  isSingleFieldIdentity,
+  validateEntityDefinitionType,
+} from '../definitions/entity_schema';
 
 interface FieldValue {
   [key: string]: string;
@@ -149,10 +153,11 @@ export function waiveForAlerts(postAggFilter?: Condition): Condition | undefined
  */
 export function documentPassesCalculatedIdentityPipelineGate(
   doc: any,
-  entityDefinition: EntityDefinitionWithoutId,
+  entityDefinition: Pick<EntityDefinitionWithoutId, 'identityField' | 'extraction'>,
   options?: EuidGateOptions
 ): boolean {
-  const { identityField, postAggFilter } = entityDefinition;
+  const { identityField } = entityDefinition;
+  const postAggFilter = getPostAggFilter(entityDefinition);
   const { applyPostAggFilter = true } = options ?? {};
   if (isSingleFieldIdentity(identityField)) {
     return true;
@@ -283,3 +288,11 @@ export function getSourceFieldNames(sources: FieldEvaluationSource[]): {
   }
   return { exactMatchFields, prefixMatchFields };
 }
+
+/** Throws when `type` cannot be safely emitted as the entity id prefix in a query string literal. */
+export const assertEmittableEntityType = (type: string): void => {
+  const reason = validateEntityDefinitionType(type);
+  if (reason) {
+    throw new Error(`Cannot emit the entity type prefix for '${type}': ${reason}`);
+  }
+};

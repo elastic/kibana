@@ -21,6 +21,7 @@ import {
   OPENAPI_TS_OUTPUT_FOLDER_PATH,
 } from './constants';
 import { INCLUDED_OPERATIONS, OPERATION_TYPE_OVERRIDES } from './included_operations';
+import { postProcessOpenapiZodGen } from './post_process_openapi_zod_gen';
 import { isHttpMethod } from '../..';
 import type { HttpMethod } from '../../types/latest';
 import {
@@ -32,7 +33,6 @@ import {
   generateOutputSchemaString,
   generateParameterTypes,
   generateParamsSchemaString,
-  getEslintrcForGeneratedCode,
   getLicenseHeader,
   getRequestSchemaName,
   getResponseSchemaName,
@@ -93,11 +93,6 @@ function saveKibanaConnectors(contracts: ContractMeta[]) {
         'utf8'
       );
     }
-    fs.writeFileSync(
-      Path.resolve(KIBANA_GENERATED_OUTPUT_FOLDER_PATH, '.eslintrc.json'),
-      JSON.stringify(getEslintrcForGeneratedCode(), null, 2),
-      'utf8'
-    );
     console.log(
       `✅ ${contracts.length} Kibana connectors generated in ${formatDuration(
         startedAt,
@@ -136,7 +131,7 @@ function generateKibanaConnectorsIndexFile(contracts: ContractMeta[]) {
  * 
  * To regenerate: node scripts/generate_workflow_kibana_contracts.js
  */
-/* eslint-disable import/order */
+/* eslint-disable @kbn/compat/import-order */
 
 import type { InternalConnectorContract } from '../../../types/latest';
 
@@ -216,13 +211,8 @@ async function generateZodSchemas(contracts: ContractMeta[]) {
       `${OPENAPI_TS_OUTPUT_FILENAME}.gen.ts`
     );
 
-    // replace zod imports with @kbn/zod
     const zodSchemas = fs.readFileSync(zodPath, 'utf8');
-    fs.writeFileSync(
-      zodPath,
-      zodSchemas.replace(/import { z } from 'zod\/v4';/, "import { z } from '@kbn/zod/v4';"),
-      'utf8'
-    );
+    fs.writeFileSync(zodPath, postProcessOpenapiZodGen(zodSchemas), 'utf8');
     console.log(
       `- Zod imports replaced in ${formatDuration(replaceZodImportsStartedAt, performance.now())}`
     );

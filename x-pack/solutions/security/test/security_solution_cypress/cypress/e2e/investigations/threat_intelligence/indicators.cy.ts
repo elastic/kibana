@@ -33,7 +33,6 @@ import {
   FIELD_SELECTOR_INPUT,
   FIELD_SELECTOR_LIST,
   FIELD_SELECTOR_TOGGLE_BUTTON,
-  FILTERS_GLOBAL_CONTAINER,
   FLYOUT_JSON,
   FLYOUT_JSON_TAB,
   FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK,
@@ -112,7 +111,7 @@ describe('Single indicator', { tags: ['@ess'] }, () => {
 
       cy.log('should show kql bar');
 
-      cy.get(FILTERS_GLOBAL_CONTAINER).should('exist');
+      cy.get(QUERY_INPUT).should('exist');
       cy.get(`${FIELD_SELECTOR}`).should('exist');
 
       cy.log('should show flyout');

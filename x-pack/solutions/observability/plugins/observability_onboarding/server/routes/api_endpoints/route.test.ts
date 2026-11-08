@@ -7,6 +7,8 @@
 
 import Boom from '@hapi/boom';
 import { isRight } from 'fp-ts/Either';
+import { of } from 'rxjs';
+import type { ElasticsearchConfig } from '@kbn/core/server';
 import { ApiEndpointId } from '../../../common/api_endpoints';
 import {
   apiEndpointsRouteRepository,
@@ -17,13 +19,11 @@ import { hasApiKeyPrivileges } from '../../lib/api_key/has_api_key_privileges';
 import { APM_EVENT_WRITE_APPLICATION } from '../../lib/api_key/privileges';
 import { resolveApiKeyFactory } from '../../lib/api_key/resolve_api_key_factory';
 import { getManagedOtlpServiceUrl } from '../../lib/get_managed_otlp_service_url';
+import { EsLegacyConfigService } from '../../services/es_legacy_config_service';
 import { IS_VENDOR_ENDPOINTS_ENABLED } from '../../../common/feature_flags';
 
 jest.mock('../../lib/get_managed_otlp_service_url', () => ({
   getManagedOtlpServiceUrl: jest.fn().mockReturnValue('https://otlp.example.com:443'),
-}));
-jest.mock('../../lib/get_fallback_urls', () => ({
-  getFallbackESUrl: jest.fn().mockResolvedValue([]),
 }));
 jest.mock('../../lib/api_key/has_api_key_privileges', () => ({
   hasApiKeyPrivileges: jest.fn().mockResolvedValue(true),
@@ -106,6 +106,61 @@ describe('ensureVendorEndpointAvailable', () => {
     expect(() =>
       ensureVendorEndpointAvailable(ApiEndpointId.Prometheus, unavailable)
     ).not.toThrow();
+  });
+});
+
+describe('api_endpoints handler', () => {
+  const { handler } =
+    apiEndpointsRouteRepository['GET /internal/observability_onboarding/api_endpoints'];
+
+  const esLegacyConfigService = new EsLegacyConfigService();
+  esLegacyConfigService.setup(
+    of({ hosts: ['http://kibana_system:secret@es.internal:9200/prefix'] } as ElasticsearchConfig)
+  );
+
+  const createResources = ({ hasAllRequested }: { hasAllRequested: boolean }) =>
+    ({
+      context: {
+        core: Promise.resolve({
+          elasticsearch: {
+            client: {
+              asCurrentUser: {
+                security: {
+                  hasPrivileges: jest
+                    .fn()
+                    .mockResolvedValue({ has_all_requested: hasAllRequested }),
+                },
+              },
+            },
+          },
+        }),
+      },
+      plugins: {},
+      services: { esLegacyConfigService },
+    } as unknown as Parameters<typeof handler>[0]);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('rejects a user without ingest privileges with 403 before reading the Elasticsearch hosts', async () => {
+    const readConfig = jest.spyOn(esLegacyConfigService, 'readConfig');
+
+    await expect(handler(createResources({ hasAllRequested: false }))).rejects.toMatchObject({
+      output: { statusCode: 403 },
+    });
+
+    expect(readConfig).not.toHaveBeenCalled();
+  });
+
+  it('returns the configured Elasticsearch host without its credentials', async () => {
+    const response = await handler(createResources({ hasAllRequested: true }));
+
+    expect(response).toEqual({
+      elasticsearchUrl: 'http://es.internal:9200/prefix',
+      managedOtlpServiceUrl: 'https://otlp.example.com:443',
+    });
+    expect(JSON.stringify(response)).not.toContain('secret');
   });
 });
 

@@ -19,6 +19,7 @@ import { getRiskFromEntityRecord } from '../shared/entity_store_risk_utils';
 import { AiAssistantButton } from '../../../entity_analytics/components/ai_assistant_button/ai_assistant_button';
 import type { EntityToAttach } from '../../../cases/attachments/entity';
 import { useEntityCaseTakeActionItems } from '../../../cases/attachments/entity/hooks/use_entity_case_take_action_items';
+import { useInvalidateEntityGrid } from '../../../entity_analytics/components/home/entities_grid/hooks/use_invalidate_entity_grid';
 
 export const ServicePanelFooter = ({
   serviceName,
@@ -57,8 +58,11 @@ export const ServicePanelFooter = ({
     if (!euidApi?.euid || !entity) {
       return undefined;
     }
-    return euidApi.euid.kql.getEuidFilterBasedOnDocument('service', entity);
-  }, [euidApi?.euid, entity]);
+    return euidApi.euid.kql.getEuidFilterBasedOnDocument(
+      euidApi.getBuiltInEntityDefinition('service'),
+      entity
+    );
+  }, [euidApi, entity]);
 
   const entityStoreId = entity?.entity?.id;
   const risk = entity ? getRiskFromEntityRecord(entity) : undefined;
@@ -75,7 +79,10 @@ export const ServicePanelFooter = ({
     }),
     [entityStoreId, identityServiceName, riskLevel, riskScore]
   );
-  const additionalItems = useEntityCaseTakeActionItems(entityToAttach);
+  const invalidateEntityGrid = useInvalidateEntityGrid();
+  const additionalItems = useEntityCaseTakeActionItems(entityToAttach, {
+    onSuccess: invalidateEntityGrid,
+  });
   const { euiTheme } = useEuiTheme();
   const paddingSize = panelProps?.paddingSize ?? 'm';
 

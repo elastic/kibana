@@ -17,6 +17,7 @@ import { CreateDatasetDetailsFields } from './create_dataset_details_fields';
 import type { CreateDatasetFormValues } from '../create_dataset_form_state';
 import { emptyDatasetFormValues } from '../dataset_form_initial_values';
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
+import { docLinksMock } from '../../doc_links_mock';
 
 jest.mock('../../create_data_source_flyout', () => ({
   CreateDataSourceFlyout: ({
@@ -63,7 +64,12 @@ function Harness({
   });
 
   return (
-    <KibanaContextProvider services={{ dataSourcesClient: { add } }}>
+    <KibanaContextProvider
+      services={{
+        dataSourcesClient: { add },
+        docLinks: docLinksMock,
+      }}
+    >
       <FormProvider {...methods}>
         <CreateDatasetDetailsFields
           control={methods.control}
@@ -123,6 +129,31 @@ describe('CreateDatasetDetailsFields', () => {
 
     fireEvent.click(getByTestId('createDatasetDataSource'));
     expect(await findByTestId('createDatasetDataSource-new-source')).toBeInTheDocument();
+  });
+
+  it('shows the authentication callout only for data sources that existed before the wizard', async () => {
+    const add = jest.fn().mockResolvedValue(undefined);
+    const { getByTestId, findByTestId, queryByTestId } = render(
+      <I18nProvider>
+        <EuiProvider>
+          <Harness add={add} />
+        </EuiProvider>
+      </I18nProvider>
+    );
+
+    fireEvent.click(getByTestId('createDatasetDataSource'));
+    fireEvent.click(await findByTestId('createDatasetDataSource-connectNew'));
+    fireEvent.click(await findByTestId('mockSaveDataSource'));
+
+    await waitFor(() => {
+      expect(getByTestId('selectedDataSource')).toHaveTextContent('new-source');
+    });
+    expect(queryByTestId('createDatasetDataSourceAuthenticationCallout')).toBeNull();
+
+    fireEvent.click(getByTestId('createDatasetDataSource'));
+    fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
+
+    expect(await findByTestId('createDatasetDataSourceAuthenticationCallout')).toBeInTheDocument();
   });
 
   it('reports a refresh failure after saving a new data source distinctly from a save failure', async () => {

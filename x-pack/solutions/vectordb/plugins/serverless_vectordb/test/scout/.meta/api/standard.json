@@ -1,5 +1,5 @@
 {
-  "sha1": "2960e6e617f52113314d1d8d5aff38d76c582d9f",
+  "sha1": "ce4c26e101da5a747b41d2bac8acefa2d1f16018",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -140,7 +140,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/api/tests/deployment_stats.spec.ts",
-        "line": 28,
+        "line": 30,
         "column": 68
       }
     },
@@ -154,7 +154,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/api/tests/deployment_stats.spec.ts",
-        "line": 47,
+        "line": 49,
         "column": 12
       }
     },
@@ -224,7 +224,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/api/tests/starred_dashboards_count.spec.ts",
-        "line": 90,
+        "line": 91,
         "column": 20
       }
     },
@@ -238,7 +238,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/api/tests/starred_dashboards_count.spec.ts",
-        "line": 102,
+        "line": 103,
         "column": 27
       }
     }

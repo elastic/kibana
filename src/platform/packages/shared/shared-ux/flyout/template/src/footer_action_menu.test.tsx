@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useState } from 'react';
+import { EuiButton, EuiContextMenuItem, EuiFieldText, EuiPopover } from '@elastic/eui';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
 import { FlyoutTemplate } from './flyout_template';
-import type { FlyoutFooterMenuPanel } from './types';
+import type { FlyoutFooterMenuItemRenderContext, FlyoutFooterMenuPanel } from './types';
 
 jest.mock('@elastic/apm-rum');
 
@@ -471,5 +472,167 @@ describe('FlyoutTemplate.Footer.PrimaryActionMenu', () => {
       'tagName',
       'DIV'
     );
+  });
+
+  describe('custom items', () => {
+    const NestedPopoverItem = ({ closeMenu }: FlyoutFooterMenuItemRenderContext) => {
+      const [isOpen, setIsOpen] = useState(false);
+      return (
+        <EuiPopover
+          isOpen={isOpen}
+          closePopover={() => setIsOpen(false)}
+          anchorPosition="rightUp"
+          display="block"
+          aria-label="Assignee"
+          button={
+            <EuiContextMenuItem hasPanel onClick={() => setIsOpen((open) => !open)}>
+              Edit assignee
+            </EuiContextMenuItem>
+          }
+        >
+          <EuiFieldText aria-label="Assignee name" />
+          <EuiButton
+            onClick={() => {
+              setIsOpen(false);
+              closeMenu();
+            }}
+          >
+            Apply
+          </EuiButton>
+        </EuiPopover>
+      );
+    };
+
+    it('renders a custom item in source order next to descriptor items', async () => {
+      const panels: FlyoutFooterMenuPanel[] = [
+        {
+          id: 0,
+          items: [
+            { name: 'Action one', onClick: noop },
+            { key: 'custom', renderItem: () => <span>Custom content</span> },
+            { name: 'Action two', onClick: noop },
+          ],
+        },
+      ];
+
+      renderMenu({ panels });
+      await user.click(screen.getByRole('button', { name: /take action/i }));
+
+      const panel = await screen.findByTestId('takeActionPanel');
+      expect(panel.textContent).toMatch(/Action one.*Custom content.*Action two/);
+    });
+
+    it('closeMenu closes the menu, and reopening shows the initial panel', async () => {
+      const panels: FlyoutFooterMenuPanel[] = [
+        {
+          id: 0,
+          items: [
+            { name: 'Top action', onClick: noop },
+            { name: 'Open submenu', panel: 1 },
+          ],
+        },
+        {
+          id: 1,
+          title: 'Submenu',
+          items: [
+            {
+              key: 'done',
+              renderItem: ({ closeMenu }) => <button onClick={closeMenu}>Done</button>,
+            },
+          ],
+        },
+      ];
+
+      const { container } = renderMenu({ panels });
+      const trigger = screen.getByRole('button', { name: /take action/i });
+
+      await user.click(trigger);
+      await user.click(await screen.findByRole('menuitem', { name: 'Open submenu' }));
+      await user.click(await screen.findByRole('button', { name: 'Done' }));
+
+      await waitFor(() => {
+        expect(
+          container.querySelector('[data-euiicon-type="chevronSingleDown"]')
+        ).toBeInTheDocument();
+      });
+
+      await user.click(trigger);
+      expect(await screen.findByRole('menuitem', { name: 'Top action' })).toBeInTheDocument();
+    });
+
+    it('clicking inside a custom item does not close the menu', async () => {
+      const onClick = jest.fn();
+      const panels: FlyoutFooterMenuPanel[] = [
+        {
+          id: 0,
+          items: [{ key: 'custom', renderItem: () => <button onClick={onClick}>Inside</button> }],
+        },
+      ];
+
+      const { container } = renderMenu({ panels });
+      await user.click(screen.getByRole('button', { name: /take action/i }));
+      await user.click(await screen.findByRole('button', { name: 'Inside' }));
+
+      expect(onClick).toHaveBeenCalledTimes(1);
+      expect(container.querySelector('[data-euiicon-type="chevronSingleUp"]')).toBeInTheDocument();
+      expect(screen.getByRole('dialog', { name: 'Take action menu' })).toBeInTheDocument();
+    });
+
+    it('a custom item can open its own popover and take input without closing the menu', async () => {
+      const panels: FlyoutFooterMenuPanel[] = [
+        {
+          id: 0,
+          items: [
+            { name: 'Top action', onClick: noop },
+            { key: 'assignee', renderItem: (context) => <NestedPopoverItem {...context} /> },
+          ],
+        },
+      ];
+
+      const { container } = renderMenu({ panels });
+      await user.click(screen.getByRole('button', { name: /take action/i }));
+      await user.click(await screen.findByRole('button', { name: 'Edit assignee' }));
+
+      // The inner popover portals to document.body, outside the menu's own panel.
+      const field = await screen.findByRole('textbox', { name: 'Assignee name' });
+      await user.click(field);
+      await user.type(field, 'elastic');
+
+      expect(field).toHaveValue('elastic');
+      expect(container.querySelector('[data-euiicon-type="chevronSingleUp"]')).toBeInTheDocument();
+      expect(screen.getByRole('dialog', { name: 'Take action menu' })).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Apply' }));
+
+      await waitFor(() => {
+        expect(
+          container.querySelector('[data-euiicon-type="chevronSingleDown"]')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('renderItem can use hooks directly', async () => {
+      const panels: FlyoutFooterMenuPanel[] = [
+        {
+          id: 0,
+          items: [
+            {
+              key: 'counter',
+              renderItem: () => {
+                // eslint-disable-next-line react-hooks/rules-of-hooks
+                const [count, setCount] = useState(0);
+                return <button onClick={() => setCount((c) => c + 1)}>Count {count}</button>;
+              },
+            },
+          ],
+        },
+      ];
+
+      renderMenu({ panels });
+      await user.click(screen.getByRole('button', { name: /take action/i }));
+      await user.click(await screen.findByRole('button', { name: 'Count 0' }));
+
+      expect(await screen.findByRole('button', { name: 'Count 1' })).toBeInTheDocument();
+    });
   });
 });

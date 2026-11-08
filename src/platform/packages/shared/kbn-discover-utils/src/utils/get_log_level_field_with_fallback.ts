@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fieldConstants } from '..';
+import * as fieldConstants from '../field_constants';
 import type { LogDocumentOverview } from '../types';
 import { getLogFieldWithFallback } from './get_log_field_with_fallback';
 
 const rankingOrder = [
   fieldConstants.LOG_LEVEL_FIELD,
+  fieldConstants.OTEL_SEVERITY_TEXT_FIELD,
   fieldConstants.ERROR_LOG_LEVEL_FIELD,
 ] as const;
 

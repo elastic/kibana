@@ -1,5 +1,5 @@
 {
-  "sha1": "fd39f75b6e9df1c43fea62edbd12e5b3959193c7",
+  "sha1": "59721c0a562b478bfe48bfb88c9ad42417ad0830",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -126,7 +126,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 99,
+        "line": 97,
         "column": 13
       }
     },
@@ -140,7 +140,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 125,
+        "line": 123,
         "column": 11
       }
     },
@@ -1111,8 +1111,8 @@
       }
     },
     {
-      "id": "68d451451493487-058290624b65263",
-      "title": "Model Detail Flyout opens flyout with model details, task badges, and author",
+      "id": "68d451451493487-cedad66d23a97eb",
+      "title": "Model Detail Flyout opens flyout with model details, documentation link, and author",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1134,7 +1134,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 39,
+        "line": 42,
         "column": 13
       }
     },
@@ -1148,7 +1148,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 54,
+        "line": 59,
         "column": 38
       }
     },
@@ -1162,13 +1162,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 77,
+        "line": 82,
         "column": 67
       }
     },
     {
-      "id": "68d451451493487-cc3dc0edc8db202",
-      "title": "Model Detail Flyout deprecated model flyout shows the deprecated badge and enables Add endpoint",
+      "id": "68d451451493487-9546fe0c7af327c",
+      "title": "Model Detail Flyout deprecated model flyout enables Add endpoint",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1176,13 +1176,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 103,
+        "line": 108,
         "column": 38
       }
     },
     {
-      "id": "68d451451493487-febfd8836752f31",
-      "title": "Model Detail Flyout EOL model flyout shows the EOL badge and disables Add endpoint",
+      "id": "68d451451493487-a4273f9f64690e4",
+      "title": "Model Detail Flyout EOL model flyout disables Add endpoint",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1190,8 +1190,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 119,
-        "column": 7
+        "line": 121,
+        "column": 13
       }
     },
     {
@@ -1204,8 +1204,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 135,
-        "column": 13
+        "line": 134,
+        "column": 7
       }
     },
     {
@@ -1218,8 +1218,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 152,
-        "column": 5
+        "line": 147,
+        "column": 7
       }
     },
     {
@@ -1232,7 +1232,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 167,
+        "line": 160,
         "column": 13
       }
     },
@@ -1246,7 +1246,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 176,
+        "line": 169,
         "column": 13
       }
     },
@@ -1260,7 +1260,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 203,
+        "line": 196,
         "column": 13
       }
     },
@@ -1274,7 +1274,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 237,
+        "line": 230,
         "column": 7
       }
     },
@@ -1288,7 +1288,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 273,
+        "line": 266,
         "column": 81
       }
     },
@@ -1302,7 +1302,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 297,
+        "line": 290,
         "column": 7
       }
     },
@@ -1316,7 +1316,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 308,
+        "line": 301,
         "column": 13
       }
     }

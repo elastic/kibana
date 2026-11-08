@@ -239,6 +239,10 @@ const purgeWorkflowRelatedData = async (
 
     for (let attempt = 1; attempt <= VERSION_CONFLICT_PURGE_ATTEMPTS; attempt++) {
       try {
+        // Execution writes skip refresh, and delete-by-query deletes by the versions in the last
+        // refreshed snapshot. An aborted request does not refresh, so without this every attempt
+        // conflicts on the same stale version.
+        await dataClient.refresh();
         const response = await dataClient.deleteByQuery(deleteByQueryRequest);
         const incomplete = Boolean(
           response.timed_out || response.version_conflicts || response.failures?.length

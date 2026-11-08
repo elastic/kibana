@@ -118,7 +118,12 @@ describe('groupStepCycles', () => {
       call('c2', 'g1'),
       reasoning('second', 'g2'),
       call('c3', 'g2'),
-      { type: ConversationRoundStepType.updateTodos, todos: [] },
+      {
+        type: ConversationRoundStepType.compaction,
+        summarized_cycle_count: 1,
+        token_count_before: 10,
+        token_count_after: 5,
+      },
     ];
     expect(groupStepCycles(steps)).toEqual([
       { start: 0, end: 2 },
@@ -132,12 +137,15 @@ describe('historyView', () => {
     const timeline = timelineFromRounds([{ id: 'a', input: input('first') }]);
     const view = historyView(conversationOf(timeline), '2026-01-01T00:00:00.000Z');
     expect(view.entries).toHaveLength(1);
+    expect(view.events).toEqual(timeline);
     expect(view.input).toEqual(input('next'));
     expect(view.inputTimestamp).toBe('2026-01-01T00:00:00.000Z');
   });
 
+  const historyBeforePause = () => timelineFromRounds([{ id: 'a', input: input('first') }]);
+
   const pausedTimeline = (paused: TimelineEvent[] = pausedRoundTimeline('p', ['c1'])) => [
-    ...timelineFromRounds([{ id: 'a', input: input('first') }]),
+    ...historyBeforePause(),
     ...(eventsForContext(eventsNativeConversation(paused)).map((event) =>
       event.type === TimelineEventType.userMessage
         ? { ...event, data: { ...event.data, attachments: [] } }
@@ -150,11 +158,14 @@ describe('historyView', () => {
     expect(view.entries.map((entry) => (isTimelineRound(entry) ? entry.id : 'message'))).toEqual([
       'a',
     ]);
+    expect(view.events).toEqual(historyBeforePause());
     expect(view.input).toEqual(expect.objectContaining({ message: 'hello p' }));
   });
 
   it('keeps a paused round the run does not resume, with its unreturned calls interrupted', () => {
-    const view = historyView(conversationOf(pausedTimeline()), '2026-01-01T00:00:00.000Z');
+    const timeline = pausedTimeline();
+    const view = historyView(conversationOf(timeline), '2026-01-01T00:00:00.000Z');
+    expect(view.events).toEqual(timeline);
     const rounds = view.entries.filter(isTimelineRound);
     expect(rounds.map((round) => round.id)).toEqual(['a', 'p']);
     expect(rounds[1].steps).toEqual([
@@ -270,7 +281,7 @@ describe('listVisibleUnits', () => {
   const describeUnit = (unit: ContextUnit) =>
     unit.kind === 'message'
       ? 'message'
-      : unit.kind === 'custom_event'
+      : unit.kind === 'standalone_event'
       ? `event:${unit.entry.event.id}`
       : unit.kind === 'round_cycle'
       ? `${unit.round.id}:${unit.range?.start ?? '-'}:${unit.first ? 'first' : ''}${

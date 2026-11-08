@@ -14,6 +14,7 @@ import type { TaskExecutionPeriod } from '../task';
 import { TELEMETRY_CHANNEL_DETECTION_ALERTS, DETECTION_RULE_TYPE_ESQL } from '../constants';
 import {
   batchTelemetryRecords,
+  buildSanitizedInfluencers,
   processK8sUsernames,
   newTelemetryLogger,
   getPreviousDailyTaskTimestamp,
@@ -27,7 +28,7 @@ import type { AllowlistFields } from '../filterlists/types';
 
 export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: number) {
   const taskName = 'Security Solution - Prebuilt Rule and Elastic ML Alerts Telemetry';
-  const taskVersion = '1.2.0';
+  const taskVersion = '1.3.0';
   const taskType = 'security:telemetry-prebuilt-rule-alerts';
   return {
     type: taskType,
@@ -80,12 +81,23 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
             return 0;
           }
 
-          const processedAlerts = alerts.map(
-            (event: TelemetryEvent): TelemetryEvent =>
-              event['kibana.alert.rule.type'] === DETECTION_RULE_TYPE_ESQL
-                ? copyAllowlistedFields(unflattenedFilterList, unflatten<TelemetryEvent>(event))
-                : copyAllowlistedFields(filterList.prebuiltRulesAlerts, event)
-          );
+          const processedAlerts = alerts.map((event: TelemetryEvent): TelemetryEvent => {
+            const sanitizedInfluencers = buildSanitizedInfluencers(
+              event.influencers,
+              filterList.detectionAlertsInfluencerAllowlist
+            );
+            const withSanitized: TelemetryEvent =
+              sanitizedInfluencers !== undefined
+                ? { ...event, influencers_sanitized: sanitizedInfluencers }
+                : event;
+
+            return withSanitized['kibana.alert.rule.type'] === DETECTION_RULE_TYPE_ESQL
+              ? copyAllowlistedFields(
+                  unflattenedFilterList,
+                  unflatten<TelemetryEvent>(withSanitized)
+                )
+              : copyAllowlistedFields(filterList.prebuiltRulesAlerts, withSanitized);
+          });
 
           const sanitizedAlerts = processedAlerts.map(
             (event: TelemetryEvent): TelemetryEvent =>

@@ -10,7 +10,20 @@ import { i18n } from '@kbn/i18n';
 import { WATCHLISTS_URL } from '../../../../../../../common/entity_analytics/watchlists/constants';
 import type { MonitoringEntitySource } from '../../../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import { useEntityAnalyticsRoutes } from '../../../../../api/api';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../../../common/utils/execution_context';
 import type { WatchlistTableItemType } from '../types';
+
+const WATCHLISTS_MANAGEMENT_TABLE_LIST_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.WATCHLISTS,
+  'watchlists_management_table_list'
+);
+const WATCHLISTS_ENTITY_SOURCES_LIST_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.WATCHLISTS,
+  'watchlists_entity_sources_list'
+);
 
 /**
  * Derives a human-readable source label from an entity source.
@@ -54,7 +67,8 @@ export const useWatchlistsTableData = (
   } = useQuery({
     queryKey: ['watchlists-management-table', spaceId],
     enabled: toggleStatus,
-    queryFn: ({ signal }) => fetchWatchlists({ signal }),
+    queryFn: ({ signal }) =>
+      fetchWatchlists({ signal, context: WATCHLISTS_MANAGEMENT_TABLE_LIST_CONTEXT }),
   });
 
   // Fetch entity sources for every watchlist that has entitySourceIds
@@ -80,6 +94,7 @@ export const useWatchlistsTableData = (
             const { sources } = await listWatchlistEntitySources({
               watchlistId: watchlist.id,
               signal,
+              context: WATCHLISTS_ENTITY_SOURCES_LIST_CONTEXT,
             });
 
             labels.push(

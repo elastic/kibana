@@ -10,8 +10,10 @@ import expect from '@kbn/expect';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
+  FILE_ATTACHMENT_TYPE,
+  INDICATOR_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common/constants';
-import { AttachmentType, UserActionTypes } from '@kbn/cases-plugin/common/types/domain';
+import { UserActionTypes } from '@kbn/cases-plugin/common/types/domain';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -249,7 +251,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const externalRefComment = patchedCase.comments?.find(
-        (comment) => comment.type === AttachmentType.externalReference
+        (comment) => comment.type === FILE_ATTACHMENT_TYPE
       );
 
       const esResponse = await getSOFromKibanaIndex({
@@ -292,7 +294,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const externalRefComment = patchedCase.comments?.find(
-        (comment) => comment.type === AttachmentType.externalReference
+        (comment) => comment.type === INDICATOR_ATTACHMENT_TYPE
       );
 
       const esResponse = await getSOFromKibanaIndex({

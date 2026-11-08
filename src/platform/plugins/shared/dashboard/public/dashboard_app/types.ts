@@ -11,6 +11,8 @@ import type { AppMountParameters, ScopedHistory } from '@kbn/core-application-br
 import type { DashboardListingTab } from '../dashboard_listing/types';
 
 export interface DashboardEmbedSettings {
+  /** Set when settings originate from the `embed=true` URL param (not supplied by a host app). */
+  isEmbeddedViaUrl?: boolean;
   forceHideFilterBar?: boolean;
   forceShowTopNavMenu?: boolean;
   forceShowQueryInput?: boolean;

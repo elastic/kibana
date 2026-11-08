@@ -18,6 +18,7 @@ import type {
   UnmappedFieldsStrategy,
 } from './types';
 import type { ESQLMessage } from '../definitions/types';
+import type { NamedSubquery } from '../definitions/utils/named_subqueries';
 
 /**
  * Interface defining the methods that each ES|QL command should register.
@@ -168,6 +169,12 @@ export interface IAdditionalFields {
   fromEnrich: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
   fromFrom: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
   fromPromql?: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
+  /** True when the pipeline source command is TS, so STATS output typing can apply implicit aggregates. */
+  isTimeseriesSource?: boolean;
+  /** LET bindings that FROM sources of the current pipeline can reference. */
+  namedSubqueries?: readonly NamedSubquery[];
+  /** Columns of the LET bindings already resolved in the current column computation. */
+  namedSubqueryColumns?: Map<NamedSubquery, Promise<ESQLColumnData[]>>;
 }
 
 /**

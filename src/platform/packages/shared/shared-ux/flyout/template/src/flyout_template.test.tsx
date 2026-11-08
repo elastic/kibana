@@ -27,7 +27,7 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-// eslint-disable-next-line import/order
+// eslint-disable-next-line @kbn/compat/import-order
 import { FlyoutTemplate } from './flyout_template';
 
 const noop = () => {};

@@ -12,11 +12,6 @@ module.exports = {
       env: {
         'jest': true,
       },
-
-      rules: {
-        'jest/no-identical-title': 'error',
-        'import/order': 'off',
-      },
     }
   ]
 };

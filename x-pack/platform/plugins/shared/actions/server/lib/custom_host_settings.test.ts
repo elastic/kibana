@@ -95,6 +95,7 @@ describe('custom_host_settings', () => {
         maxEmitted: 25,
         ...defaultInboundEventsLimitConfigs,
       },
+      connectorSigningKeys: { enabled: false },
     };
 
     test('ensure it copies over the config parts that it does not touch', () => {

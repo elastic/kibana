@@ -8,7 +8,7 @@
 /**
  * Outcome eval for the Attack Discovery FP/TP analysis workflow (security-team#19285).
  *
- * `beforeAll` routes the `alertzero_reasoning` inference feature to the model under test.
+ * `beforeAll` routes the `alertzero_frontier` inference feature to the model under test.
  * The suite runs the managed analysis workflow in place. Each task seeds a
  * fresh copy of one example's world, creates an empty Investigation, runs the workflow,
  * and grades its execution output against the contract in security-team#19280.

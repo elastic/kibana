@@ -9,7 +9,11 @@ import type { UseQueryOptions, UseQueryResult } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { GetAgentStatusResponse } from '@kbn/fleet-plugin/common';
 import { useQuery } from '@kbn/react-query';
-import { agentRouteService, API_VERSIONS } from '@kbn/fleet-plugin/common';
+import {
+  agentRouteService,
+  API_VERSIONS,
+  buildPolicyBaseIdsWithFallbackKuery,
+} from '@kbn/fleet-plugin/common';
 import { useHttp } from '../../../common/lib/kibana';
 
 type EndpointPolicyAgentSummary = GetAgentStatusResponse['results'];
@@ -33,7 +37,8 @@ export const useFetchAgentByAgentPolicySummary = (
             agentPolicyIds.length === 1
               ? { policyId: agentPolicyIds[0] }
               : {
-                  kuery: agentPolicyIds.map((id) => `policy_id:${id}`).join(' OR '),
+                  // also the agents on a version specific or the sentinel policy of the policies
+                  kuery: buildPolicyBaseIdsWithFallbackKuery(agentPolicyIds),
                 },
           version: API_VERSIONS.public.v1,
         })

@@ -26,7 +26,7 @@ import type {
   TypedLensSerializedState,
   LensDatasourceId,
 } from '@kbn/lens-common';
-import { LENS_DATASOURCE_ID, isTextBasedAttributes } from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID, LENS_LAYER_TYPES, isTextBasedAttributes } from '@kbn/lens-common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import type { TextBasedQueryState } from '../../../editor_frame_service/editor_frame/config_panel/types';
 import { getLensFeatureFlags } from '../../../get_feature_flags';
@@ -35,6 +35,7 @@ import {
   selectFramePublicAPI,
   useLensDispatch,
   selectHideTextBasedEditor,
+  selectSelectedLayerId,
 } from '../../../state_management';
 import { serializeVisualizationToSave } from '../../../state_management/shared_logic';
 import {
@@ -50,7 +51,9 @@ import { useHasMultipleVisibleLayers } from '../../../editor_frame_service/edito
 import { VisualizationToolbarWrapper } from '../../../editor_frame_service/editor_frame/visualization_toolbar';
 import { useEditorFrameService } from '../../../editor_frame_service/editor_frame_service_context';
 import { useApplicationUserMessages } from '../../get_application_user_messages';
-import { trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
+import { trackCreateUiCounterEvents, trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
+import { getInlineTelemetrySource } from '../../app_helpers';
+import { getParentContext } from '../../../react_embeddable/helper';
 import { useCurrentAttributes } from './use_current_attributes';
 import { deleteUserChartTypeFromSessionStorage } from '../../../chart_type_session_storage';
 import { LayerTabsWrapper } from './layer_tabs';
@@ -99,6 +102,7 @@ export function LensEditConfigurationFlyout({
   const { datasourceStates, visualization, isLoading, annotationGroups, searchSessionId } =
     useLensSelector((state) => state.lens);
   const hideTextBasedEditor = useLensSelector(selectHideTextBasedEditor);
+  const selectedLayerId = useLensSelector(selectSelectedLayerId);
 
   const activeVisualization =
     visualizationMap[visualization.activeId ?? attributes.visualizationType];
@@ -296,12 +300,19 @@ export function LensEditConfigurationFlyout({
     if (telemetryEvents && telemetryEvents.length) {
       trackSaveUiCounterEvents(telemetryEvents);
     }
+    if (isNewPanel) {
+      trackCreateUiCounterEvents(
+        isTextBasedAttributes(attributesToSave) ? 'esql' : 'dsl',
+        getInlineTelemetrySource(getParentContext(parentApi)?.type)
+      );
+    }
 
     deleteUserChartTypeFromSessionStorage();
     closeFlyout?.();
   }, [
     visualization.activeId,
     savedObjectId,
+    isNewPanel,
     closeFlyout,
     onApplyCallback,
     visualization.state,
@@ -310,6 +321,7 @@ export function LensEditConfigurationFlyout({
     coreStart.notifications.toasts,
     saveByRef,
     updateByRefInput,
+    parentApi,
   ]);
 
   const { getUserMessages } = useApplicationUserMessages({
@@ -415,7 +427,15 @@ export function LensEditConfigurationFlyout({
     visualizationState: visualization.state,
     framePublicAPI,
   });
-  const showSuggestions = !textBasedMode || !hasMultipleVisibleLayers;
+  const selectedLayerType =
+    selectedLayerId && visualization.state
+      ? activeVisualization?.getLayerType(selectedLayerId, visualization.state)
+      : undefined;
+  const isReferenceLineOrAnnotationLayer =
+    selectedLayerType === LENS_LAYER_TYPES.REFERENCELINE ||
+    selectedLayerType === LENS_LAYER_TYPES.ANNOTATIONS;
+  const showSuggestions =
+    !isReferenceLineOrAnnotationLayer && (!textBasedMode || !hasMultipleVisibleLayers);
 
   const showConvertToEsqlButton = useMemo(() => {
     return getLensFeatureFlags().enableEsqlConversion && !textBasedMode;
@@ -481,6 +501,26 @@ export function LensEditConfigurationFlyout({
         </EuiFlexItem>
       ) : null}
     </>
+  );
+
+  const layerConfiguration = (
+    <LayerConfiguration
+      attributes={attributes}
+      dataLoading$={dataLoading$}
+      lensAdapters={lensAdapters}
+      getUserMessages={getUserMessages}
+      coreStart={coreStart}
+      startDependencies={startDependencies}
+      framePublicAPI={framePublicAPI}
+      setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
+      updateSuggestion={updateSuggestion}
+      setCurrentAttributes={setCurrentAttributes}
+      closeFlyout={closeFlyout}
+      parentApi={parentApi}
+      panelId={panelId}
+      editorContainer={editorContainer.current || undefined}
+      onTextBasedQueryStateChange={onTextBasedQueryStateChange}
+    />
   );
 
   const layerTabs = (
@@ -579,15 +619,12 @@ export function LensEditConfigurationFlyout({
                   flex: 1;
                 }
               }
-              /* Scrollable accordion content area with custom scrollbar styling.
-                 pointer-events handling allows drag-drop to work outside content bounds. */
+              /* EUI sets overflow: hidden here. A vertical scroll on this box
+                 also clips the chips drawn to the left of each row. */
               .euiAccordion__childWrapper {
                 ${euiScrollBarStyles(euiTheme)}
-                overflow-y: auto !important;
+                overflow: visible !important;
                 pointer-events: none;
-
-                padding-left: ${euiTheme.euiTheme.components.forms.maxWidth};
-                margin-left: -${euiTheme.euiTheme.components.forms.maxWidth};
                 > * {
                   pointer-events: auto;
                 }
@@ -618,65 +655,52 @@ export function LensEditConfigurationFlyout({
             </EuiFlexItem>
             {/* Visualization parameters accordion - grows when open to fill available space */}
             <EuiFlexItem
-              grow={isLayerAccordionOpen ? 1 : false}
+              grow={isReferenceLineOrAnnotationLayer || isLayerAccordionOpen ? 1 : false}
               css={css`
                 .euiAccordion__childWrapper {
                   flex: ${isLayerAccordionOpen ? 1 : 'none'};
                 }
-                padding: 0 ${euiTheme.euiTheme.size.base};
+                padding: ${isReferenceLineOrAnnotationLayer ? euiTheme.euiTheme.size.base : '0'}
+                  ${euiTheme.euiTheme.size.base} 0;
               `}
             >
-              <EuiAccordion
-                id="layer-configuration"
-                buttonContent={
-                  <EuiTitle
-                    size="xxs"
-                    css={css`
-                      padding: 2px;
-                    `}
-                  >
-                    <h5>
-                      {i18n.translate('xpack.lens.config.visualizationConfigurationLabel', {
-                        defaultMessage: 'Visualization parameters',
-                      })}
-                    </h5>
-                  </EuiTitle>
-                }
-                buttonProps={{
-                  paddingSize: 'm',
-                }}
-                initialIsOpen={isLayerAccordionOpen}
-                forceState={isLayerAccordionOpen ? 'open' : 'closed'}
-                onToggle={(status) => {
-                  if (status && isSuggestionsAccordionOpen) {
-                    setIsSuggestionsAccordionOpen(!status);
+              {isReferenceLineOrAnnotationLayer ? (
+                layerConfiguration
+              ) : (
+                <EuiAccordion
+                  id="layer-configuration"
+                  buttonContent={
+                    <EuiTitle
+                      size="xxs"
+                      css={css`
+                        padding: 2px;
+                      `}
+                    >
+                      <h5>
+                        {i18n.translate('xpack.lens.config.visualizationConfigurationLabel', {
+                          defaultMessage: 'Visualization parameters',
+                        })}
+                      </h5>
+                    </EuiTitle>
                   }
-                  if (status && isESQLResultsAccordionOpen) {
-                    setIsESQLResultsAccordionOpen(!status);
-                  }
-                  setIsLayerAccordionOpen(!isLayerAccordionOpen);
-                }}
-              >
-                <>
-                  <LayerConfiguration
-                    attributes={attributes}
-                    dataLoading$={dataLoading$}
-                    lensAdapters={lensAdapters}
-                    getUserMessages={getUserMessages}
-                    coreStart={coreStart}
-                    startDependencies={startDependencies}
-                    framePublicAPI={framePublicAPI}
-                    setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
-                    updateSuggestion={updateSuggestion}
-                    setCurrentAttributes={setCurrentAttributes}
-                    closeFlyout={closeFlyout}
-                    parentApi={parentApi}
-                    panelId={panelId}
-                    editorContainer={editorContainer.current || undefined}
-                    onTextBasedQueryStateChange={onTextBasedQueryStateChange}
-                  />
-                </>
-              </EuiAccordion>
+                  buttonProps={{
+                    paddingSize: 'm',
+                  }}
+                  initialIsOpen={isLayerAccordionOpen}
+                  forceState={isLayerAccordionOpen ? 'open' : 'closed'}
+                  onToggle={(status) => {
+                    if (status && isSuggestionsAccordionOpen) {
+                      setIsSuggestionsAccordionOpen(!status);
+                    }
+                    if (status && isESQLResultsAccordionOpen) {
+                      setIsESQLResultsAccordionOpen(!status);
+                    }
+                    setIsLayerAccordionOpen(!isLayerAccordionOpen);
+                  }}
+                >
+                  {layerConfiguration}
+                </EuiAccordion>
+              )}
             </EuiFlexItem>
 
             {showSuggestions && (

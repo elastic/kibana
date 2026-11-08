@@ -16,6 +16,7 @@ import { useStateProps } from './use_state_props';
 import type { UnifiedHistogramFetchParamsExternal } from '../types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { DataViewSource } from '@kbn/data-source';
+import { getDefaultDataSource } from '../__mocks__/lens_vis';
 import * as fetchParamsUtils from '../utils/process_fetch_params';
 
 jest.mock('../services/state_service');
@@ -108,9 +109,14 @@ describe('useServicesBootstrap', () => {
   });
 
   it('ignores an older fetch that resolves after a newer one', async () => {
+    const esqlSource = await getDefaultDataSource({
+      query,
+      dataView: dataViewWithTimefieldMock,
+      columns: [],
+    });
     const createFetchParams = (searchSessionId: string): UnifiedHistogramFetchParamsExternal => ({
       searchSessionId,
-      dataSource: new DataViewSource(dataViewWithTimefieldMock),
+      dataSource: esqlSource,
       query,
       relativeTimeRange: { from: 'now-15m', to: 'now' },
       requestAdapter: new RequestAdapter(),

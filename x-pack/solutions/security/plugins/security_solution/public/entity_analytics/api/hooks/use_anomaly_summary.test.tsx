@@ -59,4 +59,41 @@ describe('useAnomalySummary', () => {
     const [callArg] = mockFetchAnomalySummary.mock.calls[0];
     expect(callArg.context).toBeUndefined();
   });
+
+  it('sends the default body without a mode in single mode', async () => {
+    renderHook(
+      () => useAnomalySummary({ entityId: 'host-1', entityType: 'host', mode: 'single' }),
+      {
+        wrapper: TestWrapper,
+      }
+    );
+
+    await waitFor(() => expect(mockFetchAnomalySummary).toHaveBeenCalled());
+    const [callArg] = mockFetchAnomalySummary.mock.calls[0];
+    expect(callArg).toEqual(
+      expect.objectContaining({
+        entityId: 'host-1',
+        entityType: 'host',
+        body: expect.objectContaining({ page: 1, page_size: 10 }),
+      })
+    );
+    expect(callArg.body).not.toHaveProperty('mode');
+  });
+
+  it('sends the resolved mode in the body so the server covers the resolution group', async () => {
+    renderHook(
+      () => useAnomalySummary({ entityId: 'host-1', entityType: 'host', mode: 'resolved' }),
+      { wrapper: TestWrapper }
+    );
+
+    await waitFor(() =>
+      expect(mockFetchAnomalySummary).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entityId: 'host-1',
+          entityType: 'host',
+          body: expect.objectContaining({ mode: 'resolved', page: 1, page_size: 10 }),
+        })
+      )
+    );
+  });
 });

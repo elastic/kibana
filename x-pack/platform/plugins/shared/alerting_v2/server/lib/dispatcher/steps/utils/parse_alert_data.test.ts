@@ -8,13 +8,6 @@
 import { parseDataJson } from './parse_alert_data';
 
 describe('parseDataJson', () => {
-  it('parses valid JSON object', () => {
-    expect(parseDataJson('{"severity":"critical","count":5}')).toEqual({
-      severity: 'critical',
-      count: 5,
-    });
-  });
-
   it('returns empty object for malformed JSON', () => {
     expect(parseDataJson('{not valid')).toEqual({});
   });

@@ -1,8 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/292579
-type: enhancement
-products:
-- product: cloud-serverless
-- product: kibana
-title: "Allow other workflows to call Alert Analysis and receive a structured verdict"
-description: "Makes the managed Alert Analysis workflow callable by other workflows with structured verdict output. Standalone Alert Analysis keeps its behavior, apart from shared-path hardening for batch verdict filtering, space-scoped enrichment, and tighter agent schema bounds."

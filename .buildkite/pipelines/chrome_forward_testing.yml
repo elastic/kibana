@@ -12,18 +12,12 @@ steps:
     label: Pre-Build
     timeout_in_minutes: 10
     agents:
+      image: family/kibana-minimal-ubuntu-2604
       machineType: n2-standard-2
     retry:
       automatic:
         - exit_status: '*'
           limit: 1
-  - command: .buildkite/scripts/steps/store_cache.sh
-    label: Store Cache for build
-    timeout_in_minutes: 10
-    id: store_cache
-    soft_fail: true
-    agents:
-      machineType: n2-highcpu-8
 
   - wait
 
@@ -32,6 +26,7 @@ steps:
     agents:
       machineType: n2-standard-8
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     key: build
     timeout_in_minutes: 60
     retry:
@@ -44,6 +39,7 @@ steps:
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
     label: Mark CI Stats as ready
     agents:
+      image: family/kibana-minimal-ubuntu-2604
       machineType: n2-standard-2
     timeout_in_minutes: 10
     depends_on:
@@ -90,6 +86,8 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -104,6 +102,8 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -118,6 +118,8 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -132,6 +134,8 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -146,6 +150,8 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -160,6 +166,8 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -174,6 +182,8 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -188,6 +198,8 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -204,6 +216,8 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -218,6 +232,8 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -232,6 +248,8 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -246,6 +264,8 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -260,6 +280,8 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -274,6 +296,8 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -288,6 +312,8 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -302,6 +328,8 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -316,6 +344,8 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -330,6 +360,8 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -344,6 +376,8 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -358,6 +392,8 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -372,6 +408,8 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -386,6 +424,8 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -398,8 +438,10 @@ steps:
   - command: .buildkite/scripts/steps/functional/osquery_cypress.sh
     label: 'Osquery Cypress Tests'
     agents:
-      machineType: n2-highmem-4
+      machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -412,8 +454,10 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
     label: 'Osquery Cypress Tests on Serverless'
     agents:
-      machineType: n2-highmem-4
+      machineType: n2-standard-4
       preemptible: true
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -427,7 +471,7 @@ steps:
     label: 'Defend Workflows Cypress Tests'
     agents:
       enableNestedVirtualization: true
-      machineType: n2-highmem-4
+      machineType: n2-standard-4
     depends_on:
       - build
     timeout_in_minutes: 75
@@ -441,7 +485,7 @@ steps:
     label: 'Defend Workflows Cypress Tests on Serverless'
     agents:
       enableNestedVirtualization: true
-      machineType: n2-highmem-4
+      machineType: n2-standard-4
     depends_on:
       - build
     timeout_in_minutes: 75
@@ -458,4 +502,5 @@ steps:
     label: Post-Build
     timeout_in_minutes: 10
     agents:
+      image: family/kibana-minimal-ubuntu-2604
       machineType: n2-standard-2

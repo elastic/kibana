@@ -13,6 +13,7 @@ import {
   TELEMETRY_SDK_LANGUAGE,
 } from '../../../common/es_fields/apm';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { getServiceAgent } from './get_service_agent';
 
 type SearchMock = jest.Mock<Promise<unknown>>;
@@ -122,9 +123,7 @@ describe('getServiceAgent', () => {
     await getServiceAgent({ ...baseParams, environment: 'production', apmEventClient });
 
     const filters = getSearchParams(search)?.query?.bool?.filter ?? [];
-    expect(filters).toEqual(
-      expect.arrayContaining([{ term: { [SERVICE_ENVIRONMENT]: 'production' } }])
-    );
+    expect(filters).toEqual(expect.arrayContaining(environmentQuery('production')));
   });
 
   it('does not add an environment filter for ENVIRONMENT_ALL', async () => {
@@ -134,8 +133,6 @@ describe('getServiceAgent', () => {
     await getServiceAgent({ ...baseParams, apmEventClient });
 
     const filters = getSearchParams(search)?.query?.bool?.filter ?? [];
-    expect(filters).not.toEqual(
-      expect.arrayContaining([{ term: { [SERVICE_ENVIRONMENT]: expect.any(String) } }])
-    );
+    expect(JSON.stringify(filters)).not.toContain(SERVICE_ENVIRONMENT);
   });
 });

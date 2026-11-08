@@ -42,6 +42,7 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/esql-language'
   - '@kbn/cps'
+  - '@kbn/discover-session-constants'
 tags:
   - shared-common
   - package
@@ -54,6 +55,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

@@ -25,7 +25,7 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { AreaFillOptions, LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-components';
@@ -72,7 +72,12 @@ import type {
   XYByValueAnnotationLayerConfig,
   XYVisualizationState,
 } from './types';
-import { visualizationSubtypes, visualizationTypes, defaultSeriesType } from './types';
+import {
+  visualizationSubtypes,
+  visualizationTypes,
+  defaultSeriesType,
+  defaultAreaFill,
+} from './types';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import {
   getAccessorColorConfigs,
@@ -913,8 +918,11 @@ export const getXyVisualization = ({
       <AddLayerButton
         {...props}
         eventAnnotationService={eventAnnotationService}
-        addLayer={async (type, loadedGroupInfo, _, seriesType) => {
-          if (type === LayerTypes.ANNOTATIONS && loadedGroupInfo) {
+        addLayer={async (
+          layerType,
+          { extraArg: loadedGroupInfo, ignoreInitialValues, seriesType, datasourceId } = {}
+        ) => {
+          if (layerType === LayerTypes.ANNOTATIONS && loadedGroupInfo) {
             await props.ensureIndexPattern(
               loadedGroupInfo.dataViewSpec ?? loadedGroupInfo.indexPatternId
             );
@@ -924,7 +932,12 @@ export const getXyVisualization = ({
               group: loadedGroupInfo,
             });
           }
-          props.addLayer(type, loadedGroupInfo, !!loadedGroupInfo, seriesType);
+          props.addLayer(layerType, {
+            extraArg: loadedGroupInfo,
+            ignoreInitialValues: ignoreInitialValues || !!loadedGroupInfo,
+            seriesType,
+            datasourceId,
+          });
         }}
       />
     );
@@ -1059,6 +1072,48 @@ export const getXyVisualization = ({
     }
 
     const warnings: UserMessage[] = [];
+
+    for (const layer of getReferenceLayers(state.layers)) {
+      if (!datasourceLayers[layer.layerId]?.isTextBasedLanguage()) continue;
+      const table = activeData?.[layer.layerId];
+      if (!table) continue;
+      if (table.rows.length > 1) {
+        warnings.push({
+          uniqueId: 'xy_esql_reference_multiple_rows',
+          severity: 'warning',
+          fixableInEditor: true,
+          displayLocations: [{ id: 'visualization' }],
+          shortMessage: i18n.translate(
+            'xpack.lens.xyVisualization.referenceMultipleRowsDescription',
+            {
+              defaultMessage:
+                'The reference line query returned multiple rows. Only the first row is used.',
+            }
+          ),
+          longMessage: '',
+        });
+      }
+      for (const accessor of layer.accessors) {
+        const column = table.columns.find(({ id }) => id === accessor);
+        const value = table.rows[0]?.[accessor];
+        if (column?.meta.type === 'number' && typeof value === 'number' && Number.isFinite(value))
+          continue;
+        warnings.push({
+          uniqueId: 'xy_esql_reference_invalid_value',
+          severity: 'warning',
+          fixableInEditor: true,
+          displayLocations: [{ id: 'dimensionButton', dimensionId: accessor }],
+          shortMessage: i18n.translate(
+            'xpack.lens.xyVisualization.referenceInvalidValueDescription',
+            {
+              defaultMessage:
+                'The reference line requires a numeric value in the first result row.',
+            }
+          ),
+          longMessage: '',
+        });
+      }
+    }
 
     if (state?.layers.length > 0 && activeData) {
       const filteredLayers = [
@@ -1361,7 +1416,7 @@ export const applyChartDefaultsIfNeeded = (
 
   return {
     ...state,
-    areaFill: AreaFillOptions.SOLID,
+    areaFill: defaultAreaFill,
   };
 };
 

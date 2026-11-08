@@ -15,6 +15,14 @@ import * as settingsI18n from '../settings_translations';
 /** Stack Management's "Feature Settings" page, registered by `searchInferenceEndpoints`. */
 const FEATURE_SETTINGS_DEEP_LINK_ID: LinkId = 'model_settings';
 
+/** URL of Stack Management > Feature Settings. */
+export const useFeatureSettingsUrl = (): string => {
+  const {
+    services: { application },
+  } = useKibana<CoreStart>();
+  return application.getUrlForApp('management', { deepLinkId: FEATURE_SETTINGS_DEEP_LINK_ID });
+};
+
 interface FeatureSettingsLinkProps {
   'data-test-subj'?: string;
 }
@@ -26,17 +34,10 @@ interface FeatureSettingsLinkProps {
 export const FeatureSettingsLink: React.FC<FeatureSettingsLinkProps> = ({
   'data-test-subj': dataTestSubj,
 }) => {
-  const {
-    services: { application },
-  } = useKibana<CoreStart>();
+  const featureSettingsUrl = useFeatureSettingsUrl();
 
   return (
-    <EuiLink
-      href={application.getUrlForApp('management', { deepLinkId: FEATURE_SETTINGS_DEEP_LINK_ID })}
-      target="_blank"
-      external
-      data-test-subj={dataTestSubj}
-    >
+    <EuiLink href={featureSettingsUrl} target="_blank" external data-test-subj={dataTestSubj}>
       {settingsI18n.FEATURE_SETTINGS_LINK}
     </EuiLink>
   );

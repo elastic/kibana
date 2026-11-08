@@ -61,6 +61,7 @@ export const registerAttachmentUiDefinitions = ({
     createConnectorSetupAttachmentDefinition({
       triggersActionsUi,
       application: core.application,
+      notifications: core.notifications,
     })
   );
 };

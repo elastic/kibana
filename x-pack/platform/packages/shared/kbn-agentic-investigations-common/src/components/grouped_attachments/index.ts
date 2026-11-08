@@ -14,6 +14,7 @@ export {
   type RegisterFlyoutGroupedAttachment,
 } from './types';
 export { createFlyoutGroupedAttachmentsRegistry } from './registry';
+export { GroupedAttachmentList, type GroupedAttachmentListProps } from './grouped_attachment_list';
 export {
   GroupedAttachmentRow,
   type GroupedAttachmentRowAction,
