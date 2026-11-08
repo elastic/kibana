@@ -546,17 +546,18 @@ const Timeline: React.FC<{
                 verticalAlign="center"
                 icon={<EuiIcon type="eyeSlash" color="subdued" aria-hidden={true} />}
               >
-                <EuiText
-                  size="xs"
-                  color="subdued"
+                <EuiLink
+                  onClick={clearFilters}
                   data-test-subj="agenticInvestigationsTimelineHidden"
                 >
-                  {i18n.translate('xpack.agenticInvestigations.timeline.hiddenEvents', {
-                    defaultMessage:
-                      '{count, plural, one {# event} other {# events}} hidden by filters',
-                    values: { count: row.count },
-                  })}
-                </EuiText>
+                  <EuiText size="xs" component="span">
+                    {i18n.translate('xpack.agenticInvestigations.timeline.hiddenEvents', {
+                      defaultMessage:
+                        '{count, plural, one {# event} other {# events}} hidden by filters. Show all',
+                      values: { count: row.count },
+                    })}
+                  </EuiText>
+                </EuiLink>
               </EuiTimelineItem>
             ) : (
               <EuiTimelineItem

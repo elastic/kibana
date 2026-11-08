@@ -113,7 +113,12 @@ describe('TimelineTab', () => {
     expect(rowTitles()).toEqual(['Payments-client retries surged']);
     expect(
       screen.getAllByTestId('agenticInvestigationsTimelineHidden').map((node) => node.textContent)
-    ).toEqual(['1 event hidden by filters', '1 event hidden by filters']);
+    ).toEqual(['1 event hidden by filters. Show all', '1 event hidden by filters. Show all']);
+
+    // Showing the hidden events clears every filter.
+    fireEvent.click(screen.getAllByTestId('agenticInvestigationsTimelineHidden')[0]);
+    expect(rowTitles()).toHaveLength(3);
+    expect(screen.queryByTestId('agenticInvestigationsTimelineHidden')).toBeNull();
   });
 
   it('filters by type from the Type filter', async () => {
