@@ -23,6 +23,7 @@ describe('runWatchdogWorker', () => {
   let logger: jest.Mocked<WorkerLogger>;
   let stop: () => void;
   let sessions: Array<jest.Mocked<InspectorSession>>;
+  let failConnect: boolean;
   let failStart: boolean;
   let failStop: boolean;
   let profile: CpuProfile;
@@ -96,7 +97,11 @@ describe('runWatchdogWorker', () => {
     });
     closed.catch(() => {});
     const session: jest.Mocked<InspectorSession> = {
-      connectToMainThread: jest.fn(),
+      connectToMainThread: jest.fn(() => {
+        if (failConnect) {
+          throw new Error('inspector not available');
+        }
+      }),
       disconnect: jest.fn(() => close()),
       post: jest.fn(async (method: string) => {
         if (method === 'Profiler.start') {
@@ -161,6 +166,7 @@ describe('runWatchdogWorker', () => {
     nowUs = 1_000_000_000;
     dropped = 0;
     sessions = [];
+    failConnect = false;
     failStart = false;
     failStop = false;
     profile = sampledProfile;
@@ -610,6 +616,24 @@ describe('runWatchdogWorker', () => {
       expect(profileLines()).toHaveLength(0);
       jest.advanceTimersByTime(STATS_INTERVAL_MS);
       expect(lastStats().profiling).toMatchObject({ profiled: 0, captureFailed: 1 });
+    });
+
+    it('waits out the cooldown after failing to connect to the main thread', async () => {
+      failConnect = true;
+      startProfiling();
+      block(1_500);
+      block(1_500);
+      await settle();
+      expect(
+        logger.warn.mock.calls.filter(([message]) => String(message).startsWith('Failed'))
+      ).toEqual([
+        [
+          'Failed to start profiling an event loop block: inspector not available',
+          { tags: ['event-loop-watchdog'] },
+        ],
+      ]);
+      idle(STATS_INTERVAL_MS);
+      expect(totalProfilingStats()).toMatchObject({ captureFailed: 1, skippedCooldown: 1 });
     });
 
     it('counts a failed start once when the block ends before the start fails', async () => {

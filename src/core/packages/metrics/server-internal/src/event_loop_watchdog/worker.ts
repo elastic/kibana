@@ -170,6 +170,7 @@ export const runWatchdogWorker = (
     try {
       profiler = new ProfileCapture(createSession);
     } catch (error) {
+      lastCaptureEndedAt = nowMs;
       onStartFailed(error);
       return;
     }
