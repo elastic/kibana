@@ -18,6 +18,12 @@ Every finding you will report as an event (a failure, a condition, a change, an 
 - Keep the query you ran for each series, the system it ran against, and the call (method, endpoint and body without credentials). For Elasticsearch always keep the exact request as sent, such as POST /_query with its body, even when you ran ES|QL. Also note which Elasticsearch it was: the cluster or project you run against (local), or another cluster or project (remote), with its name and base URL for a remote one, so a person or another agent can reach the same data. The record shows them as the event's evidence.
 - When no series exists for a finding, say so in your final message and give the number you have with the time it was measured.
 
+**TOPOLOGY AND TIMELINE**
+The record is drawn from what your tool calls returned, so gather it as you investigate: a failing service you never mapped and a step you never queried cannot appear.
+- Map the path: which service calls the failing one (spans or dependency data, for example group by `service.name` and the destination service), which deployment, pods and node or host run it (`k8s.deployment.name`, `k8s.pod.name`, `k8s.node.name`, `host.name` on its metrics or spans), and what else the failing path touches. Check the neighbours too, so a healthy one can be shown as healthy.
+- Find every step of the incident, not only its start and its effect: each scale or rollout (pod names and start times, replicas over time), when errors began and whether they stopped, alerts, chaos or change events, deploys. Query each at a resolution that shows the steps, and mention every one in your final message with its time.
+- A service and its deployment are two different things that share a name; keep both in your findings.
+
 **ENTITY METADATA**
 Each service, deployment, pod, host or database you name in the findings needs details a person can use to find it. The record is written from what your tool results show, so go and fetch them; nothing is added later.
 - For every entity that matters, run a small query that returns its resource attributes, not only its metrics: for example ES|QL `FROM <index> | WHERE service.name == "shipping" | KEEP cloud.*, k8s.*, host.*, service.*, deployment.*, container.* | LIMIT 1` (use the fields the data has, or `| STATS ... BY` them), or read the labels from the Kubernetes or cloud API.
