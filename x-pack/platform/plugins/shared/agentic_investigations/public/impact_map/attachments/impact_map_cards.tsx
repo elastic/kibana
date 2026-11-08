@@ -30,7 +30,7 @@ import type { ImpactMapEvent, InvestigationImpactMapResponse } from '../../../co
 import type { ImpactMapRenderer } from '../../types';
 import {
   EventAffects,
-  EventDetail,
+  EventGlance,
   FACT_AFFECTS,
   EventKindBadge,
   EventTime,
@@ -246,17 +246,7 @@ export const EventCard: React.FC<{
     icon={event.kind === 'recovery' ? 'checkInCircleFilled' : 'warning'}
     onClick={onOpen}
     data-test-subj="agenticInvestigationsEventCard"
-    badges={
-      <EuiFlexItem grow={false}>
-        <EventKindBadge kind={event.kind} />
-      </EuiFlexItem>
-    }
-    subtitle={undefined}
   >
-    <EuiText size="xs" color="subdued">
-      <EventTime at={event.at} withDate />
-    </EuiText>
-    <EuiSpacer size="s" />
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
       <EuiFlexItem grow={false}>
         <EuiText size="xs" color="subdued">
@@ -269,8 +259,8 @@ export const EventCard: React.FC<{
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
-    <EuiSpacer size="m" />
-    <EventDetail event={event} allEvents={impactMap.events} />
+    <EuiSpacer size="s" />
+    <EventGlance event={event} allEvents={impactMap.events} />
   </InvestigationCard>
 );
 

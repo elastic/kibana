@@ -764,6 +764,20 @@ const EventDataSource: React.FC<{ dataSource?: ImpactMapEvent['data_source'] }> 
   );
 };
 
+/** Just the chart of an event, or its description when it has none: for a card that stays small. */
+export const EventGlance: React.FC<{
+  event: ImpactMapEvent;
+  allEvents?: readonly ImpactMapEvent[];
+}> = ({ event, allEvents }) =>
+  event.evidence?.chart ? (
+    <LazyEvidenceView
+      evidence={withContextAnnotations(event.evidence, event, allEvents)}
+      referenceTime={event.at}
+    />
+  ) : event.description ? (
+    <EuiMarkdownFormat textSize="s">{event.description}</EuiMarkdownFormat>
+  ) : null;
+
 export const EventDetail: React.FC<{
   event: ImpactMapEvent;
   allEvents?: readonly ImpactMapEvent[];

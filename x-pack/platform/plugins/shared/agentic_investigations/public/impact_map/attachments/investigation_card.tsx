@@ -54,11 +54,11 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
   const accordionId = useGeneratedHtmlId({ prefix: 'investigationCard' });
   const [isOpen, setIsOpen] = useState(true);
   const heading = (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiIcon type={icon} aria-hidden={true} />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem>
         <EuiTitle size="xs">
           <h4>{title}</h4>
         </EuiTitle>

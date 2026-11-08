@@ -226,7 +226,7 @@ describe('ImpactMapCards', () => {
     renderCards(document);
 
     fireEvent.click(screen.getByTestId('fakeMap'));
-    fireEvent.click(screen.getByTestId('agenticInvestigationsImpactMapEventDetail'));
+    fireEvent.click(screen.getAllByTestId('agenticInvestigationsEventCard')[0]);
 
     expect(openInInvestigation).not.toHaveBeenCalled();
     expect(

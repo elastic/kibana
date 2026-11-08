@@ -1096,9 +1096,9 @@ describe('runFindingsPass with workspace files', () => {
     }
     expect(final).toContain('At most 70 words of Markdown');
     expect(final).toContain('Cause not confirmed:');
-    expect(final).toContain('at most 30 words');
+    expect(final).toContain('at most 15 words each, no lead sentence');
     expect(live).not.toContain('Cause not confirmed:');
-    expect(live).not.toContain('at most 30 words');
+    expect(live).not.toContain('at most 15 words each, no lead sentence');
   });
 
   it('sends the prompt that matches the pass', async () => {
