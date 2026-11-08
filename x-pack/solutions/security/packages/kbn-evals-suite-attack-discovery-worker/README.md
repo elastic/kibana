@@ -82,6 +82,10 @@ advice from a frontier model just as from a weak one. The gate is fail-closed, s
 in none of the three sets also gates. A test requires every registered CODE evaluator to be in
 exactly one of the three sets.
 
+The suite runs with Playwright retries off (`playwright.config.ts`), CI included. All rows run in
+one test, so a retry re-runs every row. The job would then follow the retry while the stored score
+docs come from the attempt that failed, and a gated miss could pass as "flaky".
+
 Seeding cleans up after itself: if the bulk write or the read-back fails midway, `seedScenario`
 deletes the alerts it meant to write by exact document id before it throws, so the next row starts
 in a clean space. A delete by id also reaches documents that are indexed but not yet searchable
