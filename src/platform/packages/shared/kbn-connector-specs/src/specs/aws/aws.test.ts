@@ -101,21 +101,24 @@ describe('AwsConnector', () => {
       );
     });
 
-    it('includes the status and AWS error body in the thrown error', async () => {
+    it('rethrows the AWS error with its status and body in the message, keeping the response', async () => {
       const errorBody = '<ErrorResponse><Error><Code>AccessDenied</Code></Error></ErrorResponse>';
-      mockClient.request.mockRejectedValue(
-        new AxiosError('Request failed', 'ERR_BAD_REQUEST', undefined, undefined, {
-          status: 403,
-          statusText: 'Forbidden',
-          headers: {},
-          config: { headers: new AxiosHeaders() },
-          data: errorBody,
-        })
-      );
+      const error = new AxiosError('Request failed', 'ERR_BAD_REQUEST', undefined, undefined, {
+        status: 403,
+        statusText: 'Forbidden',
+        headers: { 'x-amzn-requestid': 'req-1' },
+        config: { headers: new AxiosHeaders() },
+        data: errorBody,
+      });
+      mockClient.request.mockRejectedValue(error);
 
-      await expect(
-        request.handler(mockContext, RequestInputSchema.parse({ service: 'iam' }))
-      ).rejects.toThrow(`AWS iam request failed with status 403: ${errorBody}`);
+      const thrown = await request
+        .handler(mockContext, RequestInputSchema.parse({ service: 'iam' }))
+        .catch((e: unknown) => e);
+
+      expect(thrown).toBe(error);
+      expect(error.message).toBe(`AWS iam request failed with status 403: ${errorBody}`);
+      expect(error.response?.headers).toEqual({ 'x-amzn-requestid': 'req-1' });
     });
   });
 
@@ -140,6 +143,7 @@ describe('AwsConnector', () => {
       [{ service: '' }],
       [{ service: 'ec2', region: 'us-east-1.evil.com' }],
       [{ service: 'ec2', region: 'useast1' }],
+      [{ service: 'ec2', region: 'cn-north-1' }],
       [{ service: 'ec2', path: 'no-leading-slash' }],
       [{ service: 'bedrock-runtime', signingName: 'bedrock.evil' }],
     ])('rejects %o', (input) => {

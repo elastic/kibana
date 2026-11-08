@@ -36,10 +36,12 @@ export const RequestInputSchema = lazySchema(() =>
       .string()
       .max(MAX_HOST_LABEL_LENGTH)
       .regex(/^[a-z]{2}(-[a-z]+)+-\d+$/)
+      .refine((region) => !region.startsWith('cn-'), 'China (cn-*) regions are not supported')
       .optional()
       .describe(
         'AWS region, e.g. "us-east-1". The request goes to {service}.{region}.amazonaws.com. ' +
-          'Omit it for global endpoints such as IAM, which go to {service}.amazonaws.com and are signed in us-east-1.'
+          'Omit it for global endpoints such as IAM, which go to {service}.amazonaws.com and are signed in us-east-1. ' +
+          'China (cn-*) regions are not supported.'
       ),
     method: z
       .enum(['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE'])

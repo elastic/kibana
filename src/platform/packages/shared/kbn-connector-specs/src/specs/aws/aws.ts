@@ -32,7 +32,8 @@ const toAwsError = (service: string, error: unknown): unknown => {
   }
   const { status, data } = error.response;
   const details = typeof data === 'string' ? data : JSON.stringify(data);
-  return new Error(`AWS ${service} request failed with status ${status}: ${details}`);
+  error.message = `AWS ${service} request failed with status ${status}: ${details}`;
+  return error;
 };
 
 export const AwsConnector: ConnectorSpec = {

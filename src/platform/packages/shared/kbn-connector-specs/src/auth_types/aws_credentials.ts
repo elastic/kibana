@@ -161,6 +161,12 @@ export const AwsCredentialsAuth: AuthTypeSpec<AuthSchemaType> = {
         }`;
         config.params = undefined;
 
+        // Send the exact body we just signed. Axios's default
+        // transformRequest also runs after interceptors and, under a JSON
+        // Content-Type, trims a JSON string and JSON-quotes any other string.
+        config.data = body;
+        config.transformRequest = [];
+
         return config;
       }
     );
