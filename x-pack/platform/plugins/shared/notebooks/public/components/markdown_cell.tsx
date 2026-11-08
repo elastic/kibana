@@ -15,7 +15,10 @@ import {
   EuiMarkdownFormat,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
+  type UseEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { KbnWarningCallout } from '@kbn/ui-callout';
@@ -59,11 +62,32 @@ const useInterpolatedMarkdown = (content: string): InterpolatedMarkdown => {
   );
 };
 
-const MarkdownView = ({ content }: { content: string }) => {
+/** Matches the dashboard markdown panel; `isPanel` adds its padding, for use as an app panel. */
+const getMarkdownStyles = ({ euiTheme }: UseEuiTheme, isPanel: boolean) =>
+  css({
+    width: '100%',
+    overflowWrap: 'break-word',
+    img: { maxInlineSize: '100%' },
+    ...(isPanel && { padding: euiTheme.size.base }),
+  });
+
+/** The note with its references filled in, styled like a dashboard markdown panel. */
+export const MarkdownView = ({
+  content,
+  isPanel = false,
+}: {
+  content: string;
+  isPanel?: boolean;
+}) => {
   const { markdown, unknown } = useInterpolatedMarkdown(content);
+  const euiThemeContext = useEuiTheme();
+  const styles = useMemo(
+    () => getMarkdownStyles(euiThemeContext, isPanel),
+    [euiThemeContext, isPanel]
+  );
   return (
     <>
-      <EuiMarkdownFormat textSize="s">{markdown}</EuiMarkdownFormat>
+      <EuiMarkdownFormat css={styles}>{markdown}</EuiMarkdownFormat>
       {unknown.length > 0 && (
         <>
           <EuiSpacer size="s" />

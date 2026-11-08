@@ -16,7 +16,6 @@ import {
   EuiFlexItem,
   EuiFlyoutBody,
   EuiIcon,
-  EuiMarkdownFormat,
   EuiText,
   EuiTitle,
   EuiToolTip,
@@ -64,6 +63,7 @@ import { AppStatusDot } from './app_status_dot';
 import { ChartCanvas, useChartAttributes } from './chart_cell';
 import { CustomCanvas } from './custom_cell';
 import { InputControl } from './input_cell';
+import { MarkdownView } from './markdown_cell';
 import { useNotebook } from './notebook_context';
 import { NotebookFlyout } from './notebook_flyout';
 import { PinnedTimePicker } from './notebook_header';
@@ -113,7 +113,7 @@ const PanelContent = ({ panelId, cell }: { panelId: string; cell: AppCellDefinit
     case 'input':
       return <InputControl cell={cell} />;
     case 'markdown':
-      return <EuiMarkdownFormat textSize="s">{cell.content}</EuiMarkdownFormat>;
+      return <MarkdownView content={cell.content} isPanel />;
   }
 };
 
