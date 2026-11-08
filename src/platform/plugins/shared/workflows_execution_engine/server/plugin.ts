@@ -2038,42 +2038,71 @@ export class WorkflowsExecutionEnginePlugin
       await Promise.all(
         Array.from(bucketsByGroup.values()).map(async (bucket) => {
           const sample = bucket[0].workflowExecution;
-          await withConcurrencyGroupLock(
-            getConcurrencyGroupLock(),
-            sample.spaceId ?? 'default',
-            sample.concurrencyGroupKey,
-            async () => {
-              for (const item of bucket) {
-                try {
-                  item.workflowExecution.createdAt = new Date().toISOString();
-                  await maybeDrainConcurrencyQueueBeforeEnqueue({
-                    workflowExecution: item.workflowExecution,
-                    workflowExecutionRepository,
-                    workflowTaskManager,
-                    logger: this.logger,
-                    failureLogLabel: 'Bulk concurrency queue drain failed',
-                  });
-                  await workflowExecutionRepository.createWorkflowExecution(
-                    item.workflowExecution,
-                    { refresh: 'wait_for' }
-                  );
-                  await ensureBoundExecutionAdmitted(
-                    item.workflowExecution,
-                    workflowRepository,
-                    workflowExecutionRepository
-                  );
-                  succeeded.push(item);
-                  checkedIdx.add(item.idx);
-                  await runCheck(item);
-                } catch (error) {
-                  results[item.idx] = {
-                    status: 'error',
-                    error: { message: error instanceof Error ? error.message : String(error) },
-                  };
+          try {
+            await withConcurrencyGroupLock(
+              getConcurrencyGroupLock(),
+              sample.spaceId ?? 'default',
+              sample.concurrencyGroupKey,
+              async () => {
+                for (const item of bucket) {
+                  let persisted = false;
+                  try {
+                    item.workflowExecution.createdAt = new Date().toISOString();
+                    await maybeDrainConcurrencyQueueBeforeEnqueue({
+                      workflowExecution: item.workflowExecution,
+                      workflowExecutionRepository,
+                      workflowTaskManager,
+                      logger: this.logger,
+                      failureLogLabel: 'Bulk concurrency queue drain failed',
+                    });
+                    await workflowExecutionRepository.createWorkflowExecution(
+                      item.workflowExecution,
+                      { refresh: 'wait_for' }
+                    );
+                    persisted = true;
+                    await ensureBoundExecutionAdmitted(
+                      item.workflowExecution,
+                      workflowRepository,
+                      workflowExecutionRepository
+                    );
+                    checkedIdx.add(item.idx);
+                    await runCheck(item);
+                    succeeded.push(item);
+                  } catch (error) {
+                    if (persisted && item.workflowExecution.id) {
+                      await workflowExecutionRepository
+                        .discardUnstartedExecution(
+                          item.workflowExecution.id,
+                          item.workflowExecution.spaceId ?? 'default'
+                        )
+                        .catch((discardError: unknown) => {
+                          const discardMessage =
+                            discardError instanceof Error
+                              ? discardError.message
+                              : String(discardError);
+                          this.logger.error(
+                            `Failed to discard unstarted workflow execution ${item.workflowExecution.id} after concurrency admission error: ${discardMessage}`
+                          );
+                        });
+                    }
+                    results[item.idx] = {
+                      status: 'error',
+                      error: { message: error instanceof Error ? error.message : String(error) },
+                    };
+                  }
                 }
               }
+            );
+          } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            for (const item of bucket) {
+              const alreadyRecorded =
+                results[item.idx] != null || succeeded.some((entry) => entry.idx === item.idx);
+              if (!alreadyRecorded) {
+                results[item.idx] = { status: 'error', error: { message } };
+              }
             }
-          );
+          }
         })
       );
 
