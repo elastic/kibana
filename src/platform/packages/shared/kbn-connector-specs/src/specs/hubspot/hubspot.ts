@@ -33,7 +33,7 @@ export const HubSpotConnector: ConnectorSpec = {
   metadata: {
     id: '.hubspot',
     displayName: 'HubSpot',
-    description: i18n.translate('core.kibanaConnectorSpecs.hubspot.metadata.description', {
+    description: i18n.translate('connectorSpecs.hubspot.metadata.description', {
       defaultMessage: 'Search contacts, companies, deals, tickets, and engagements in HubSpot CRM.',
     }),
     minimumLicense: 'enterprise',
@@ -50,10 +50,10 @@ export const HubSpotConnector: ConnectorSpec = {
           meta: {
             token: {
               sensitive: true,
-              label: i18n.translate('core.kibanaConnectorSpecs.hubspot.auth.token.label', {
+              label: i18n.translate('connectorSpecs.hubspot.auth.token.label', {
                 defaultMessage: 'Access Token (Service Key or Private App)',
               }),
-              helpText: i18n.translate('core.kibanaConnectorSpecs.hubspot.auth.token.helpText', {
+              helpText: i18n.translate('connectorSpecs.hubspot.auth.token.helpText', {
                 defaultMessage:
                   'HubSpot Service Key (recommended) from Development > Keys, or a Private App access token ' +
                   '(pat- prefix) from Settings > Integrations > Private Apps.',
@@ -319,7 +319,7 @@ export const HubSpotConnector: ConnectorSpec = {
   },
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.hubspot.test.description', {
+    description: i18n.translate('connectorSpecs.hubspot.test.description', {
       defaultMessage: 'Verifies HubSpot connection by fetching contacts',
     }),
     handler: async (ctx) => {

@@ -93,6 +93,7 @@ export interface ClusterData {
 // The parameters required to preview the field
 export interface Params {
   name: string | null;
+  customLabel: string | null;
   index: string | null;
   type: RuntimeType | null;
   script: Required<RuntimeField>['script'] | null;

@@ -37,7 +37,7 @@ import type { HuntWatchClient } from '../src/hunt_watch_client';
 
 const spaceId = DEFAULT_EVAL_SPACE_ID;
 const reportId = HUNT_REPORT_IDS.hit;
-const conversationId = buildHuntInvestigationConversationId(reportId);
+const conversationId = buildHuntInvestigationConversationId({ spaceId, reportId });
 
 const isPending = (p: ProposalWithMetadata) => p.status === 'pending';
 

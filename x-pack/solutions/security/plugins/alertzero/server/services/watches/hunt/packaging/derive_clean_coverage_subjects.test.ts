@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { dedupeCoverageGaps } from './dedupe_coverage_gaps';
 import { deriveCleanCoverageSubjects } from './derive_clean_coverage_subjects';
 import type { ReportHuntContext } from './load_report_hunt_context';
 import type { CoordinatorInputs } from './types';
@@ -209,5 +210,48 @@ describe('deriveCleanCoverageSubjects', () => {
         reportContext: { title: 'Bulletin', bodyText: 'The campaign targets console logins.' },
       })[0].threatSummary
     ).toBe('Bulletin\nThe campaign targets console logins.');
+  });
+});
+
+describe('deriveCleanCoverageSubjects unsearched gaps', () => {
+  const unsearched = dedupeCoverageGaps([
+    { reason: 'unknown_technique_id', detail: 'T9999', technique_id: 'T9999' },
+    { reason: 'unknown_technique_id', detail: 'T9999', technique_id: 'T9999' },
+    { reason: 'input_truncated', detail: 'prefix only' },
+  ]);
+
+  it('names them on the report-scoped subject, deduped, and on no per-technique subject', () => {
+    const subjects = deriveCleanCoverageSubjects({
+      spaceId: 'default',
+      reportId: 'rpt-1',
+      inputs,
+      reportContext,
+      investigationConversationId: 'conv-1',
+      unsearched,
+    });
+
+    const reportScoped = subjects.filter((subject) => subject.technique === undefined);
+    const perTechnique = subjects.filter((subject) => subject.technique !== undefined);
+    expect(reportScoped).toHaveLength(1);
+    expect(reportScoped[0].threatSummary).toContain(
+      'Not searched by Hunt Watch (2 gaps): T9999 (unknown technique id), input truncated'
+    );
+    expect(perTechnique.length).toBeGreaterThan(0);
+    perTechnique.forEach((subject) =>
+      expect(subject.threatSummary).not.toContain('Not searched by Hunt Watch')
+    );
+  });
+
+  it('leaves the subjects as they were when there are none', () => {
+    const args = {
+      spaceId: 'default',
+      reportId: 'rpt-1',
+      inputs,
+      reportContext,
+      investigationConversationId: 'conv-1',
+    };
+    expect(deriveCleanCoverageSubjects({ ...args, unsearched: dedupeCoverageGaps([]) })).toEqual(
+      deriveCleanCoverageSubjects(args)
+    );
   });
 });

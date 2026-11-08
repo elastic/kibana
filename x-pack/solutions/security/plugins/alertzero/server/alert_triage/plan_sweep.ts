@@ -129,11 +129,19 @@ export const planSweep = async (ports: SweepPorts, config: SweepConfig): Promise
     lookbackCutoff: config.now - config.lookbackHours * HOUR_MS,
   });
 
+  // A verdicted alert is never planned again, but a dead claim on it is released like any other.
+  // Nothing is released when the live list could not be read, because every claim would look stale.
+  const staleSettled =
+    liveExecutionIds === undefined
+      ? []
+      : selected.settledClaimed.filter(
+          (alert) => !getExecutionIds(alert).some((id) => liveExecutionIds.has(id))
+        );
   const reclaimIds = new Set(plan.reclaimAlertIds);
-  await releaseClaims(
-    ports.tagAlerts,
-    selected.claimed.filter(({ id }) => reclaimIds.has(id))
-  );
+  await releaseClaims(ports.tagAlerts, [
+    ...selected.claimed.filter(({ id }) => reclaimIds.has(id)),
+    ...staleSettled,
+  ]);
   await tagInChunks(ports.tagAlerts, {
     alertIds: plan.batches.flatMap(({ alerts: batchAlerts }) => batchAlerts.map(({ id }) => id)),
     add: [TRIAGE_PENDING_TAG],
@@ -143,7 +151,7 @@ export const planSweep = async (ports: SweepPorts, config: SweepConfig): Promise
   return {
     skipReason: plan.skipReason,
     batches: plan.batches,
-    reclaimAlertIds: plan.reclaimAlertIds,
+    reclaimAlertIds: [...plan.reclaimAlertIds, ...staleSettled.map(({ id }) => id)],
     numbers: {
       pendingAlerts: selected.pending.length,
       agedOutAlerts,

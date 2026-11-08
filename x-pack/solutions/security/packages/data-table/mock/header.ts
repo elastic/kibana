@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { defaultColumnHeaderType } from '@kbn/timelines-plugin/common/types';
+import { defaultColumnHeaderType } from '@kbn/securitysolution-timeline-common';
 import type { ColumnHeaderOptions } from '../common/types';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,

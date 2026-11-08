@@ -12,6 +12,7 @@ import type { Agent } from '../../types';
 import { agentPolicyService } from '../agent_policy';
 import {
   AgentReassignmentError,
+  AgentlessAgentRestrictionError,
   FleetError,
   HostedAgentPolicyRestrictionRelatedError,
   AgentPolicyNotFoundError,
@@ -61,6 +62,7 @@ async function verifyNewAgentPolicy(
       `Cannot reassign agents to hosted agent policy ${newAgentPolicy.id}`
     );
   }
+  return newAgentPolicy;
 }
 
 export async function reassignAgent(
@@ -69,15 +71,22 @@ export async function reassignAgent(
   agentId: string,
   newAgentPolicyId: string
 ) {
-  await verifyNewAgentPolicy(soClient, newAgentPolicyId);
+  const targetAgentPolicy = await verifyNewAgentPolicy(soClient, newAgentPolicyId);
 
-  await getAgentById(esClient, soClient, agentId); // throw 404 if agent not in namespace
+  const agent = await getAgentById(esClient, soClient, agentId); // throw 404 if agent not in namespace
 
   const agentPolicy = await getAgentPolicyForAgent(soClient, esClient, agentId);
   if (agentPolicy?.is_managed) {
     throw new HostedAgentPolicyRestrictionRelatedError(
       `Cannot reassign an agent from hosted agent policy ${agentPolicy.id}`
     );
+  }
+  // agentless agents can only move between variants of their own policy (version-specific policies)
+  if (
+    (agentPolicy?.supports_agentless || targetAgentPolicy?.supports_agentless) &&
+    agent.policy_base_id !== removeVersionSuffixFromPolicyId(newAgentPolicyId)
+  ) {
+    throw new AgentlessAgentRestrictionError(`Cannot reassign agent ${agentId}`);
   }
 
   const newAgentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);

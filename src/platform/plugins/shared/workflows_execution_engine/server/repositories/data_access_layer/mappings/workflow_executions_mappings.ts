@@ -8,6 +8,7 @@
  */
 
 import { mappings } from '@kbn/es-mappings';
+import { WORKFLOW_RUN_NAME_MAX_LENGTH } from '@kbn/workflows';
 import { STEP_USAGE_MAPPING, TOKEN_USAGE_MAPPING } from './common';
 
 export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS = {
@@ -15,6 +16,7 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS = {
   properties: {
     spaceId: mappings.keyword(),
     id: mappings.keyword(),
+    runName: mappings.wildcard({ ignore_above: WORKFLOW_RUN_NAME_MAX_LENGTH }),
     workflowId: mappings.keyword(),
     managed: mappings.boolean(),
     managedBy: mappings.keyword(),
@@ -31,6 +33,13 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS = {
     stepId: mappings.keyword(),
     createdBy: mappings.keyword(),
     executedBy: mappings.keyword(),
+    executedByUser: mappings.object({
+      properties: {
+        name: mappings.keyword(),
+        username: mappings.keyword(),
+        profileUid: mappings.keyword(),
+      },
+    }),
     effectiveIdentity: mappings.object({
       properties: { type: mappings.keyword(), id: mappings.keyword() },
     }),

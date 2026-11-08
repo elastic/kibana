@@ -1,0 +1,24 @@
+overlay: 1.0.0
+info:
+  title: Microsoft Graph v1.0 corrections for Microsoft Teams
+  version: 1.0.0
+actions:
+  - target: $.components.schemas['microsoft.graph.entity','microsoft.graph.itemBody','microsoft.graph.searchRequest','microsoft.graph.searchQuery'].required[?@ == '@odata.type']
+    description: >-
+      The OpenAPI converter marks @odata.type required on every type because it is the
+      discriminator (https://github.com/microsoft/OpenAPI.NET.OData/issues/243), but Graph only
+      needs it for a derived type sent where a base type is expected; Microsoft's SDKs stopped
+      sending it by default (https://github.com/microsoftgraph/msgraph-sdk-php/issues/1006).
+      The request examples omit it on the itemBody of
+      https://learn.microsoft.com/en-us/graph/api/channel-post-messages?view=graph-rest-1.0 and on
+      the searchRequest and searchQuery of
+      https://learn.microsoft.com/en-us/graph/api/search-query?view=graph-rest-1.0.
+    remove: true
+  - target: $.components.schemas['microsoft.graph.chat','microsoft.graph.chatMessage'].allOf[*].required[?@ == '@odata.type']
+    description: >-
+      As above: the chat in https://learn.microsoft.com/en-us/graph/api/chat-post?view=graph-rest-1.0
+      and the chatMessage in https://learn.microsoft.com/en-us/graph/api/chat-post-messages?view=graph-rest-1.0,
+      https://learn.microsoft.com/en-us/graph/api/channel-post-messages?view=graph-rest-1.0 and
+      https://learn.microsoft.com/en-us/graph/api/chatmessage-update?view=graph-rest-1.0 are sent
+      without @odata.type.
+    remove: true

@@ -73,13 +73,13 @@ function formatValidationErrors(errors: StreamlangValidationError[]): string {
   }
 
   const formattedErrors = errors.map((error, index) => {
-    return i18n.translate('xpack.streams.streamlangYamlEditor.validationError.entry', {
+    return i18n.translate('xpack.streamlang.streamlangYamlEditor.validationError.entry', {
       defaultMessage: '**{entry}. {errorMessage}**',
       values: { entry: index + 1, errorMessage: error.message },
     });
   });
 
-  return i18n.translate('xpack.streams.streamlangYamlEditor.validationError.summary', {
+  return i18n.translate('xpack.streamlang.streamlangYamlEditor.validationError.summary', {
     defaultMessage: '**⚠️ Validation Errors ({count})**\n\n{errors}',
     values: { count: errors.length, errors: formattedErrors.join('\n\n---\n\n') },
   });

@@ -31,7 +31,7 @@ export interface UseBulkAttackCaseItemsProps {
   closePopover?: () => void;
   /** Source of the action for telemetry */
   telemetrySource?: AttacksActionTelemetrySource;
-  /** Posted as `security.attack` attachments instead of markdown when `attackAttachmentsEnabled`. */
+  /** Posted as `security.attack` attachments instead of markdown while the `attackAttachments` flag is on. */
   attacksToAttach?: ReadonlyArray<Omit<AttackToAttach, 'alertsIndex'>>;
 }
 

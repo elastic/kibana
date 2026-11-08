@@ -5,21 +5,24 @@
  * 2.0.
  */
 
+import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import type { StreamsAppStartDependencies } from '../../../types';
 import { getSourceTypeSlug } from './source_helpers';
 import type { ConfiguredSource, RevealedApiKey, SourceApiKey } from './types';
 
 export interface SourceApiKeyServicesDeps {
   streamsRepositoryClient: StreamsAppStartDependencies['streams']['streamsRepositoryClient'];
+  unitId?: string;
+  /** Whether the user has the V2 manage privilege; the API key routes require it. */
+  canManage?: boolean;
 }
 
 export type SourceApiKeyGenerationDeps = SourceApiKeyServicesDeps;
 
-export type SourceApiKeyPrivilegeFailure = 'none' | 'cluster' | 'source';
+export type SourceApiKeyPrivilegeFailure = 'none' | 'cluster' | 'source' | 'index';
 
 export interface SourceApiKeyPrivileges {
   canCreate: boolean;
-  canList: boolean;
   failure: SourceApiKeyPrivilegeFailure;
 }
 
@@ -34,11 +37,16 @@ export interface SourceApiKeyServices {
 
 export const createSourceApiKeyServices = ({
   streamsRepositoryClient,
+  unitId = STREAMS_DEFAULT_UNIT_ID,
+  canManage = true,
 }: SourceApiKeyServicesDeps): SourceApiKeyServices => ({
   load: async (sourceId) => {
+    if (!canManage) {
+      return [];
+    }
     const response = await streamsRepositoryClient.fetch('GET /internal/streams/sources/api_keys', {
       params: {
-        query: { sourceId },
+        query: { sourceId, unitId },
       },
       signal: null,
     });
@@ -46,6 +54,9 @@ export const createSourceApiKeyServices = ({
     return response.apiKeys;
   },
   checkPrivileges: async (source) => {
+    if (!canManage) {
+      return { canCreate: false, failure: 'none' };
+    }
     const response = await streamsRepositoryClient.fetch(
       'GET /internal/streams/sources/api_key/privileges',
       {
@@ -61,7 +72,6 @@ export const createSourceApiKeyServices = ({
 
     return {
       canCreate: response.canCreate,
-      canList: response.canList,
       failure: response.failure,
     };
   },
@@ -71,6 +81,7 @@ export const createSourceApiKeyServices = ({
         body: {
           sourceId: source.id,
           sourceTypeSlug: getSourceTypeSlug(source.type),
+          unitId,
         },
       },
       signal: null,
@@ -86,7 +97,7 @@ export const createSourceApiKeyServices = ({
   delete: async (sourceId, apiKeyId) => {
     await streamsRepositoryClient.fetch('DELETE /internal/streams/sources/api_key', {
       params: {
-        body: { sourceId, apiKeyId },
+        body: { sourceId, apiKeyId, unitId },
       },
       signal: null,
     });

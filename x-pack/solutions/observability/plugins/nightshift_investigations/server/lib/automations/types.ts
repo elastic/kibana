@@ -30,6 +30,7 @@ export type NightshiftTriggerRow =
       event: SlackTriggerEvent;
       channels?: string[];
       users?: string[];
+      bots?: string[];
       messageFilter?: string;
     };
 

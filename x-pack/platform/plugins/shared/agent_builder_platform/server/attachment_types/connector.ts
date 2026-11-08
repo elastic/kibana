@@ -12,11 +12,17 @@ import {
   connectorAttachmentDataSchema,
 } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { ComponentsNode } from '@kbn/isomer-components';
+import { i18n } from '@kbn/i18n';
 import { formatSchemaForLlm } from '@kbn/agent-builder-server';
 import {
   filterActionsBySelection,
   formatConnectorActionLine,
   getConnectorSpec,
+  isSpecificActionsSelection,
+  type SelectedActions,
 } from '@kbn/connector-specs';
 
 /**
@@ -28,15 +34,36 @@ import {
  * are listed so the agent knows how to call them via
  * `platform.core.execute_connector_sub_action` using the
  * `connectorId` + `subAction` + `params` JSON shape in the attachment text.
+ *
+ * `resolve` attaches a connector by reference, reading it as the requesting user.
  */
-export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
-  AttachmentType.connector,
-  ConnectorAttachmentData
-> => {
+export const createConnectorAttachmentType = ({
+  getActionSavedObjectsClient,
+}: {
+  getActionSavedObjectsClient: (request: KibanaRequest) => Promise<SavedObjectsClientContract>;
+}): AttachmentTypeDefinition<AttachmentType.connector, ConnectorAttachmentData> => {
   return {
     id: AttachmentType.connector,
 
     isReadonly: true,
+
+    resolve: async (origin, { request }) => {
+      const soClient = await getActionSavedObjectsClient(request);
+      const { attributes } = await soClient.get<{
+        name?: string;
+        actionTypeId: string;
+        config?: Record<string, unknown>;
+      }>('action', origin);
+      const selectedActions = attributes.config?.selectedActions as SelectedActions;
+      return {
+        connector_id: origin,
+        connector_name: attributes.name ?? origin,
+        connector_type: attributes.actionTypeId,
+        ...(isSpecificActionsSelection(selectedActions)
+          ? { selected_actions: selectedActions }
+          : {}),
+      };
+    },
 
     validate: (input) => {
       const parseResult = connectorAttachmentDataSchema.safeParse(input);
@@ -105,6 +132,53 @@ export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
         },
 
         getBoundedTools: () => [],
+      };
+    },
+
+    toSurfaceComposition: ({
+      data: {
+        connector_name: connectorName,
+        connector_type: connectorType,
+        selected_actions: selectedActions,
+      },
+    }) => {
+      const spec = getConnectorSpec(connectorType);
+      const actionNames = spec
+        ? filterActionsBySelection(spec.actions, selectedActions).map(([actionName]) => actionName)
+        : [];
+      const typeName = spec?.metadata.displayName ?? connectorType;
+      const description = spec?.metadata.description;
+
+      const fields: ComponentsNode = {
+        type: 'fields',
+        items: [
+          {
+            label: i18n.translate('xpack.agentBuilderPlatform.attachments.connector.surface.type', {
+              defaultMessage: 'Type',
+            }),
+            value: typeName,
+          },
+          ...(actionNames.length > 0
+            ? [
+                {
+                  label: i18n.translate(
+                    'xpack.agentBuilderPlatform.attachments.connector.surface.actions',
+                    { defaultMessage: 'Actions' }
+                  ),
+                  value: actionNames.join(', '),
+                },
+              ]
+            : []),
+        ],
+      };
+
+      return {
+        type: 'view',
+        title: connectorName,
+        body: [
+          ...(description ? [{ type: 'markdown' as const, text: description }] : []),
+          ...(typeName ? [fields] : []),
+        ],
       };
     },
 

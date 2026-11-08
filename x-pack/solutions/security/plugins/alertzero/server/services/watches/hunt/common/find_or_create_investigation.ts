@@ -127,7 +127,7 @@ export const runFindOrCreateInvestigation = async (
   { spaceId, reportId }: { spaceId: string; reportId: string },
   { conversationClient, loadReport, logger, onReopened }: RunFindOrCreateInvestigationDeps
 ): Promise<FindOrCreateInvestigationOutput> => {
-  const investigationConversationId = buildHuntInvestigationConversationId(reportId);
+  const investigationConversationId = buildHuntInvestigationConversationId({ spaceId, reportId });
   const triggerAttachmentId = buildHuntTriggerAttachmentId({ spaceId, reportId });
 
   let report: FindOrCreateInvestigationReportSummary | undefined;

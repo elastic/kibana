@@ -16,7 +16,7 @@ export const checkPrivileges = async (
   if (!user) {
     return response.customError({
       statusCode: 502,
-      body: i18n.translate('xpack.search.queryRules.api.routes.noUserError', {
+      body: i18n.translate('xpack.queryRules.queryRules.api.routes.noUserError', {
         defaultMessage: 'Could not retrieve current user, security plugin is not ready',
       }),
     });
@@ -26,7 +26,7 @@ export const checkPrivileges = async (
   });
   if (!hasPrivilege.has_all_requested) {
     response.forbidden({
-      body: i18n.translate('xpack.search.queryRules.api.routes.permissionError', {
+      body: i18n.translate('xpack.queryRules.queryRules.api.routes.permissionError', {
         defaultMessage: "You don't have manage_search_query_rules privileges",
       }),
     });

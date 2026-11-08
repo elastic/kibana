@@ -119,6 +119,17 @@ describe('formatRecalled', () => {
     expect(formatted).not.toContain('c'.repeat(100));
     expect(formatted).not.toContain('d'.repeat(100));
   });
+
+  it('includes opened_by_agent when openedMemoryIds is provided', () => {
+    const first = page('memory_opened', 'Opened memory', 'OPENED_BODY');
+    const second = page('memory_unopened', 'Unopened memory', 'UNOPENED_BODY');
+
+    const formatted = formatRecalled([first, second], undefined, new Set(['memory_opened']));
+
+    expect(formatted).toContain('- id=memory_opened\n  title: Opened memory\n  updated: ');
+    expect(formatted).toContain('  opened_by_agent: true\n  content: OPENED_BODY');
+    expect(formatted).toContain('  opened_by_agent: false\n  content: UNOPENED_BODY');
+  });
 });
 
 describe('formatMemoryMergeSources', () => {
@@ -2117,9 +2128,9 @@ describe('optimizeMemory', () => {
         },
         {
           kind: 'tool',
-          toolId: 'write_todos',
-          params: {},
-          resultText: 'todos saved',
+          toolId: 'nightshift_sandbox_write_file',
+          params: { file_path: 'notes.md', content: 'x' },
+          resultText: 'file written',
           isError: false,
         },
       ],
