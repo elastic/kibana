@@ -52,6 +52,7 @@ import {
 import type { AppCellDefinition } from '../model/app_layout';
 import {
   APP_ID,
+  APP_ROW_HEIGHT,
   DEFAULT_GRID_GAP,
   GRID_SUBDIVISIONS,
   getNotebookAppPath,
@@ -68,8 +69,6 @@ import { NotebookFlyout } from './notebook_flyout';
 import { PinnedTimePicker } from './notebook_header';
 import { VegaCanvas } from './vega_cell';
 import { PanelResultGrid } from './result_preview';
-
-const APP_ROW_HEIGHT = 40;
 
 const REMOVE_PANEL_LABEL = i18n.translate('xpack.notebook.app.removePanel', {
   defaultMessage: 'Remove',

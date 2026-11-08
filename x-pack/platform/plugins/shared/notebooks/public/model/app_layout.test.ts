@@ -90,11 +90,11 @@ describe('generateDefaultApp', () => {
       'split',
       'raw',
     ]);
-    expect(panelFor('intro')).toMatchObject({ x: 0, y: 0, width: 12, height: 3 });
-    expect(panelFor('host')).toMatchObject({ x: 0, y: 3 });
-    expect(panelFor('trend')).toMatchObject({ x: 0, y: 5, width: 6 });
-    expect(panelFor('split')).toMatchObject({ x: 6, y: 5, width: 6 });
-    expect(panelFor('raw')).toMatchObject({ x: 0, y: 12, width: 12 });
+    expect(panelFor('intro')).toMatchObject({ x: 0, y: 0, width: 12, height: 5 });
+    expect(panelFor('host')).toMatchObject({ x: 0, y: 5 });
+    expect(panelFor('trend')).toMatchObject({ x: 0, y: 8, width: 6 });
+    expect(panelFor('split')).toMatchObject({ x: 6, y: 8, width: 6 });
+    expect(panelFor('raw')).toMatchObject({ x: 0, y: 20, width: 12 });
   });
 
   it('leaves out the pinned time cell and queries a chart already shows', () => {
@@ -111,7 +111,7 @@ describe('appendPanel', () => {
       panels: [{ id: 'p', cellId: 'trend', x: 0, y: 2, width: 6, height: 7 }],
     };
     const next = appendPanel(app, dropdown('host'), () => 'new');
-    expect(next.panels[1]).toEqual({ id: 'new', cellId: 'host', x: 0, y: 9, width: 4, height: 2 });
+    expect(next.panels[1]).toEqual({ id: 'new', cellId: 'host', x: 0, y: 9, width: 4, height: 3 });
   });
 
   it('sizes the panel for the app grid columns', () => {

@@ -40,6 +40,9 @@ export const DEFAULT_GRID_COLUMNS = 12;
 export const MIN_GRID_COLUMNS = 1;
 export const MAX_GRID_COLUMNS = 48;
 
+/** The height of one row of an app's grid in pixels, matching dashboards. */
+export const APP_ROW_HEIGHT = 20;
+
 /** The space between an app's panels, in pixels. */
 export const DEFAULT_GRID_GAP = 8;
 export const MAX_GRID_GAP = 64;
