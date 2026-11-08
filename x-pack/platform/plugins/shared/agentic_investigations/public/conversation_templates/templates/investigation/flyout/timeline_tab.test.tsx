@@ -99,10 +99,10 @@ describe('TimelineTab', () => {
 
   it('filters by the kind of event', () => {
     renderTab();
-    fireEvent.click(screen.getByTestId('agenticInvestigationsTimelineGroup-contributing'));
+    fireEvent.click(screen.getByTestId('agenticInvestigationsTimelineGroup-change'));
     expect(rowTitles()).toEqual(['v3.8.0 rolled out by Argo CD']);
 
-    fireEvent.click(screen.getByTestId('agenticInvestigationsTimelineGroup-action'));
+    fireEvent.click(screen.getByTestId('agenticInvestigationsTimelineGroup-response'));
     expect(rowTitles()).toEqual(['Incident channel opened', 'v3.8.0 rolled out by Argo CD']);
   });
 

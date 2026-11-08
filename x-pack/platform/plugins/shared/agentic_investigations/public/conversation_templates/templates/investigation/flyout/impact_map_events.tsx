@@ -88,58 +88,31 @@ const KINDS: Record<ImpactMapEventKind, { label: string; color: EuiBadgeProps['c
   },
 };
 
-/** How the timeline groups and filters events, each with the icon its rows carry. */
+/** How each stored kind of event is drawn on the timeline and offered as a filter. */
 export const EVENT_GROUPS = [
-  {
-    id: 'symptom',
-    label: i18n.translate('xpack.agenticInvestigations.impactMap.events.group.symptom', {
-      defaultMessage: 'Symptom',
-    }),
-    icon: 'warning',
-    color: 'warning',
-    kinds: ['failure', 'condition', 'alert', 'customer_impact'],
-  },
-  {
-    id: 'contributing',
-    label: i18n.translate('xpack.agenticInvestigations.impactMap.events.group.contributing', {
-      defaultMessage: 'Contributing factor',
-    }),
-    icon: 'bug',
-    color: 'danger',
-    kinds: ['change'],
-  },
-  {
-    id: 'investigation',
-    label: i18n.translate('xpack.agenticInvestigations.impactMap.events.group.investigation', {
-      defaultMessage: 'Investigation',
-    }),
-    icon: 'sparkles',
-    color: 'primary',
-    kinds: ['investigation'],
-  },
-  {
-    id: 'action',
-    label: i18n.translate('xpack.agenticInvestigations.impactMap.events.group.action', {
-      defaultMessage: 'Action',
-    }),
-    icon: 'wrench',
-    color: 'primary',
-    kinds: ['mitigation', 'response'],
-  },
-] as const satisfies ReadonlyArray<{
-  id: string;
+  { id: 'change', icon: 'merge', color: 'danger' },
+  { id: 'failure', icon: 'error', color: 'danger' },
+  { id: 'condition', icon: 'warning', color: 'warning' },
+  { id: 'alert', icon: 'bell', color: 'warning' },
+  { id: 'customer_impact', icon: 'users', color: 'accent' },
+  { id: 'investigation', icon: 'sparkles', color: 'primary' },
+  { id: 'mitigation', icon: 'wrench', color: 'success' },
+  { id: 'response', icon: 'megaphone', color: 'primary' },
+].map((entry) => ({
+  ...entry,
+  label: KINDS[entry.id as ImpactMapEventKind].label,
+})) as ReadonlyArray<{
+  id: ImpactMapEventKind;
   label: string;
   icon: string;
-  color: 'warning' | 'danger' | 'primary';
-  kinds: readonly ImpactMapEventKind[];
+  color: 'primary' | 'success' | 'warning' | 'danger' | 'accent';
 }>;
 
 export type EventGroup = (typeof EVENT_GROUPS)[number];
 export type EventGroupId = EventGroup['id'];
 
 export const getEventGroup = (kind: ImpactMapEventKind): EventGroup =>
-  EVENT_GROUPS.find(({ kinds }) => (kinds as readonly ImpactMapEventKind[]).includes(kind)) ??
-  EVENT_GROUPS[0];
+  EVENT_GROUPS.find(({ id }) => id === kind) ?? EVENT_GROUPS[0];
 
 /** The entity ids an event touches: its entity, or both ends of its relationship. */
 export const getEventEntityIds = (

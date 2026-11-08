@@ -275,6 +275,7 @@ const Timeline: React.FC<{ impactMap: InvestigationImpactMapResponse }> = ({ imp
   const [isOpen, setIsOpen] = useState(true);
   const [selectedId, setSelectedId] = useState<string>();
   const { events } = impactMap;
+  const kindsPresent = useMemo(() => new Set(events.map(({ kind }) => kind)), [events]);
 
   const entityOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
     const withEvents = new Set(
@@ -327,7 +328,7 @@ const Timeline: React.FC<{ impactMap: InvestigationImpactMapResponse }> = ({ imp
             <EuiIcon type="filter" size="s" aria-hidden={true} /> {FILTER_BY}
           </EuiText>
         </EuiFlexItem>
-        {EVENT_GROUPS.map((group) => {
+        {EVENT_GROUPS.filter(({ id }) => kindsPresent.has(id)).map((group) => {
           const active = groupIds.includes(group.id);
           return (
             <EuiFlexItem grow={false} key={group.id}>
