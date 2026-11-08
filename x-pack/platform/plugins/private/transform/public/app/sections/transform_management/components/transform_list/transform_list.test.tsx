@@ -15,6 +15,9 @@ import * as ReactQuery from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
 
+import { getInitialTransformCapabilities } from '../../../../../../common/types/capabilities';
+import { useAppDependencies } from '../../../../app_dependencies';
+
 import { TransformList } from './transform_list';
 import type { TransformListRow } from '../../../../common';
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
@@ -38,24 +41,31 @@ jest.mock('../../../../serverless_context', () => ({
   useEnabledFeatures: () => ({ showNodeInfo: false }),
 }));
 
+const renderEmptyList = () =>
+  render(
+    <IntlProvider locale="en">
+      <QueryClientProvider client={queryClient}>
+        <TransformList
+          isLoading={false}
+          onCreateTransform={jest.fn()}
+          transformNodes={1}
+          transforms={[]}
+          transformsLoading={false}
+          transformsStatsLoading={false}
+          pageState={{ pageSize: 10, pageIndex: 0, sortField: 'id', sortDirection: 'asc' }}
+          updatePageState={jest.fn()}
+        />
+      </QueryClientProvider>
+    </IntlProvider>
+  );
+
 describe('Transform: Transform List <TransformList />', () => {
+  afterEach(() => {
+    Object.assign(useAppDependencies().application.capabilities, { transform: undefined });
+  });
+
   test('Minimal initialization', async () => {
-    const { container } = render(
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <TransformList
-            isLoading={false}
-            onCreateTransform={jest.fn()}
-            transformNodes={1}
-            transforms={[]}
-            transformsLoading={false}
-            transformsStatsLoading={false}
-            pageState={{ pageSize: 10, pageIndex: 0, sortField: 'id', sortDirection: 'asc' }}
-            updatePageState={jest.fn()}
-          />
-        </QueryClientProvider>
-      </IntlProvider>
-    );
+    const { container } = renderEmptyList();
 
     await waitFor(() => {
       expect(useQueryMock).toHaveBeenCalledTimes(5);
@@ -189,5 +199,19 @@ describe('Transform: Transform List <TransformList />', () => {
 
     expect(screen.getByTestId('transformBulkActionsMenuButton')).toHaveTextContent('11 selected');
     expect(screen.getByTestId('transformClearSelectionButton')).toBeInTheDocument();
+  });
+
+  test.each([
+    ['enables', true],
+    ['disables', false],
+  ])('%s the empty-state create button by transform capabilities', async (_, canManage) => {
+    Object.assign(useAppDependencies().application.capabilities, {
+      transform: getInitialTransformCapabilities(canManage),
+    });
+
+    renderEmptyList();
+
+    expect(await screen.findByTestId('transformNoTransformsFound')).toBeInTheDocument();
+    expect(screen.getByTestId('transformButtonCreate')).toHaveProperty('disabled', !canManage);
   });
 });

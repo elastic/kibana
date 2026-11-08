@@ -7,6 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
+import { createConversationNotFoundError } from '@kbn/agent-builder-common';
 import {
   NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID,
   NIGHTSHIFT_USAGE_PARENT_ID,
@@ -16,6 +17,7 @@ import {
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { NIGHTSHIFT_CORTEX_EDIT_APPLIED_EVENT_TYPE } from '../telemetry';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
+import { buildAlertRecoveredFollowUpMessage } from '../client/build_investigation_message';
 import { hydrateCortexWorkspace, runCortexOptimize } from './register_cortex';
 import { createLlmProposeCortexEdits, optimizeCortex } from './optimize';
 import { materializeCortex } from './materialize';
@@ -128,7 +130,10 @@ describe('runCortexOptimize', () => {
   const toolCalls: InvestigationToolCall[] = [
     { tool_id: 'nightshift_sandbox_bash', params: { command: 'cat /workspace/cortex/README.md' } },
     { tool_id: 'nightshift_sandbox_bash', params: { command: 'esql "FROM logs-* | LIMIT 5"' } },
-    { tool_id: 'nightshift_sandbox_view_file', params: { file_path: '/workspace/elastic.md' } },
+    {
+      tool_id: 'nightshift_sandbox_view_file',
+      params: { file_path: '/workspace/.connector-docs/elastic.md' },
+    },
   ];
   const recordHypotheses: InvestigationToolCall = {
     tool_id: 'agentic_investigations.set_hypotheses',
@@ -141,12 +146,20 @@ describe('runCortexOptimize', () => {
       calls = toolCalls,
       connectorId,
       roundConnectorId,
-    }: { calls?: InvestigationToolCall[]; connectorId?: string; roundConnectorId?: string } = {}
+      userMessage = 'why?',
+      roundIndex,
+    }: {
+      calls?: InvestigationToolCall[];
+      connectorId?: string;
+      roundConnectorId?: string;
+      userMessage?: string;
+      roundIndex?: number;
+    } = {}
   ) =>
     runCortexOptimize({
       request,
       agentId,
-      userMessage: 'why?',
+      userMessage,
       assistantMessage: 'redis',
       toolCalls: calls,
       esClient,
@@ -155,6 +168,7 @@ describe('runCortexOptimize', () => {
       analytics,
       conversationId: 'conversation-1',
       roundId: 'round-1',
+      roundIndex,
       getAgentBuilder,
       getInference,
       getSavedObjects,
@@ -189,6 +203,111 @@ describe('runCortexOptimize', () => {
     await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, { calls: toolCalls.slice(0, 2) });
     expect(optimizeCortex).not.toHaveBeenCalled();
     expect(createModelProvider).not.toHaveBeenCalled();
+  });
+
+  it('tells the optimizer the first round is an initial investigation', async () => {
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, { roundIndex: 0 });
+
+    expect(optimizeCortex).toHaveBeenCalledWith(expect.objectContaining({ roundKind: 'initial' }));
+  });
+
+  // A follow-up is held to a lower bar than an investigation, but a message nobody checked, such as
+  // a correction or "thanks", is an unverified claim and teaches the shared wiki nothing.
+  it('learns from a follow-up round that made fewer than three tool calls', async () => {
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, {
+      calls: toolCalls.slice(0, 1),
+      userMessage: 'You never checked the session cache that checkout depends on.',
+      roundIndex: 1,
+    });
+
+    expect(optimizeCortex).toHaveBeenCalledWith(
+      expect.objectContaining({ roundKind: 'follow_up', toolCalls: toolCalls.slice(0, 1) })
+    );
+  });
+
+  it('skips a follow-up that made no tool calls, however substantive its message', async () => {
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, {
+      calls: [],
+      userMessage: 'Cart uses Redis, not Memcached.',
+      roundIndex: 1,
+    });
+
+    expect(optimizeCortex).not.toHaveBeenCalled();
+    expect(createModelProvider).not.toHaveBeenCalled();
+  });
+
+  it('treats an alert-recovery message as an ordinary follow-up', async () => {
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, {
+      calls: toolCalls.slice(0, 1),
+      userMessage: buildAlertRecoveredFollowUpMessage({
+        alertUuid: 'uuid',
+        alertId: 'instance',
+        ruleId: 'rule',
+        ruleName: 'Orders lag',
+        ruleTypeId: 'type',
+      }),
+      roundIndex: 1,
+    });
+
+    expect(optimizeCortex).toHaveBeenCalledWith(
+      expect.objectContaining({ roundKind: 'follow_up' })
+    );
+  });
+
+  it('gives the optimizer the answer the round followed when the conversation is readable', async () => {
+    const conversation = {
+      rounds: [
+        {
+          id: 'round-0',
+          started_at: '2026-03-02T09:00:00.000Z',
+          input: { message: 'Why is checkout slow?' },
+          response: { message: 'The gateway times out.' },
+          steps: [],
+        },
+        {
+          id: 'round-1',
+          started_at: '2026-03-02T09:30:00.000Z',
+          input: { message: 'You missed the cache.' },
+          response: { message: 'Confirmed.' },
+          steps: [],
+        },
+      ],
+    };
+    getAgentBuilder.mockReturnValue({
+      runtime: { createModelProvider },
+      conversations: {
+        getScopedClient: jest
+          .fn()
+          .mockResolvedValue({ get: jest.fn().mockResolvedValue(conversation) }),
+      },
+    });
+
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, {
+      userMessage: 'You missed the cache.',
+      roundIndex: 1,
+    });
+
+    expect(optimizeCortex).toHaveBeenCalledWith(
+      expect.objectContaining({
+        roundKind: 'follow_up',
+        previousUserMessage: 'Why is checkout slow?',
+        previousAssistantMessage: 'The gateway times out.',
+      })
+    );
+  });
+
+  it('skips a round in a conversation the caller cannot read, without writing anything', async () => {
+    const get = jest
+      .fn()
+      .mockRejectedValue(createConversationNotFoundError({ conversationId: 'conversation-1' }));
+    getAgentBuilder.mockReturnValue({
+      runtime: { createModelProvider },
+      conversations: { getScopedClient: jest.fn().mockResolvedValue({ get }) },
+    });
+
+    await expect(run(NIGHTSHIFT_INVESTIGATION_AGENT_ID)).resolves.toBeUndefined();
+    expect(get).toHaveBeenCalledTimes(1);
+    expect(optimizeCortex).not.toHaveBeenCalled();
   });
 
   it('attributes inherited connector calls to the Nightshift investigation feature', async () => {

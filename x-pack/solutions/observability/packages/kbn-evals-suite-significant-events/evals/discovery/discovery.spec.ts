@@ -469,7 +469,10 @@ evaluate.describe(
                     ),
                 ];
                 const plans = allPlans.filter(
-                  (plan) => plan.sequence.length >= 2 && continuationSuite.includesPath(plan.path)
+                  (plan) =>
+                    plan.sequence.length >= 2 &&
+                    continuationSuite.includesPath(plan.path) &&
+                    (scenario.continuationPaths?.includes(plan.path) ?? true)
                 );
 
                 return plans.map((plan) => ({

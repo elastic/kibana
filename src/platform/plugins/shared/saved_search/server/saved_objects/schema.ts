@@ -9,7 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { HistogramPercentileValue } from '@kbn/discover-utils';
+import { HistogramPercentileValue, HistogramVisualizationValue } from '@kbn/discover-utils';
 import { DataGridDensity, DiscoverTabType } from '@kbn/discover-session-constants';
 import { FunctionNames } from '@kbn/esql-language';
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
@@ -204,6 +204,11 @@ const SCHEMA_SIMPLE_AGGREGATION = schema.oneOf([
   schema.literal(`${FunctionNames.MAX}`),
 ]);
 
+const SCHEMA_HISTOGRAM_VISUALIZATION = schema.oneOf([
+  schema.literal(`${HistogramVisualizationValue.LnsXY}`),
+  schema.literal(`${HistogramVisualizationValue.LnsHeatmap}`),
+]);
+
 const SCHEMA_HISTOGRAM_PERCENTILE = schema.oneOf([
   schema.literal(`${HistogramPercentileValue.P50}`),
   schema.literal(`${HistogramPercentileValue.P75}`),
@@ -292,6 +297,36 @@ const SCHEMA_DISCOVER_SESSION_V18 = SCHEMA_DISCOVER_SESSION_V17.extends({
   tabs: schema.arrayOf(SCHEMA_TAB_V18, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
 });
 
+// Optional so sessions saved before heatmaps keep validating. The public Discover session API
+// does not expose this field yet.
+const SCHEMA_TAB_TYPE_STATE_V19 = schema.oneOf([
+  schema.object({
+    type: schema.literal(DiscoverTabType.Metrics),
+    dimensions: schema.arrayOf(schema.string({ maxLength: 1000 }), {
+      maxSize: MAX_METRICS_TAB_DIMENSIONS,
+    }),
+    searchTerm: schema.string({ maxLength: 1000 }),
+    counterAggregation: SCHEMA_SIMPLE_AGGREGATION,
+    gaugeAggregation: SCHEMA_SIMPLE_AGGREGATION,
+    histogramPercentile: SCHEMA_HISTOGRAM_PERCENTILE,
+    gridSortField: schema.maybe(SCHEMA_METRICS_GRID_SORT_FIELD),
+    gridSortDirection: schema.maybe(SCHEMA_METRICS_GRID_SORT_DIRECTION),
+    histogramVisualization: schema.maybe(SCHEMA_HISTOGRAM_VISUALIZATION),
+  }),
+]);
+
+const SCHEMA_TAB_ATTRIBUTES_V19 = SCHEMA_TAB_ATTRIBUTES_V18.extends({
+  tabTypeState: schema.maybe(SCHEMA_TAB_TYPE_STATE_V19),
+});
+
+const SCHEMA_TAB_V19 = SCHEMA_TAB_V18.extends({
+  attributes: SCHEMA_TAB_ATTRIBUTES_V19,
+});
+
+const SCHEMA_DISCOVER_SESSION_V19 = SCHEMA_DISCOVER_SESSION_V18.extends({
+  tabs: schema.arrayOf(SCHEMA_TAB_V19, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
+});
+
 // Add new model versions here, which automatically registers them
 export const DISCOVER_SESSION_MODEL_VERSIONS: SavedObjectsModelVersionMap = {
   13: {
@@ -345,11 +380,18 @@ export const DISCOVER_SESSION_MODEL_VERSIONS: SavedObjectsModelVersionMap = {
       create: SCHEMA_DISCOVER_SESSION_V18,
     },
   },
+  19: {
+    changes: [],
+    schemas: {
+      forwardCompatibility: SCHEMA_DISCOVER_SESSION_V19.extends({}, { unknowns: 'ignore' }),
+      create: SCHEMA_DISCOVER_SESSION_V19,
+    },
+  },
 };
 
 // Set constants to the latest schemas, which updates derived types and content management
-export const SCHEMA_TAB_LATEST = SCHEMA_TAB_V18;
-export const SCHEMA_DISCOVER_SESSION_LATEST = SCHEMA_DISCOVER_SESSION_V18;
+export const SCHEMA_TAB_LATEST = SCHEMA_TAB_V19;
+export const SCHEMA_DISCOVER_SESSION_LATEST = SCHEMA_DISCOVER_SESSION_V19;
 
 export type DiscoverSessionTabAttributes = TypeOf<typeof SCHEMA_TAB_LATEST>['attributes'];
 export type DiscoverSessionTab = TypeOf<typeof SCHEMA_TAB_LATEST>;

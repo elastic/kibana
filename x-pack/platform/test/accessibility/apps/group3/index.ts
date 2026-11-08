@@ -9,7 +9,6 @@ import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('X-Pack Accessibility Tests - Group 3', function () {
-    loadTestFile(require.resolve('./upgrade_assistant'));
     loadTestFile(require.resolve('./canvas'));
     loadTestFile(require.resolve('./maps'));
     loadTestFile(require.resolve('./graph'));

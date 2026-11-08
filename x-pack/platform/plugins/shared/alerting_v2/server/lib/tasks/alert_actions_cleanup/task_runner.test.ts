@@ -6,26 +6,27 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import type { PluginInitializerContext } from '@kbn/core/server';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { isRetryableError } from '@kbn/task-manager-plugin/server/task_running';
 import type { PluginConfig } from '../../../config';
+import { createConfigServiceMock } from '../../services/config_service/config_service.mock';
 import { AlertActionsCleanupTaskRunner } from './task_runner';
 
 const NOW = new Date('2026-10-15T12:00:00.000Z');
 
 const createConfig = (dataRetention: string) =>
   ({
-    get: jest
-      .fn()
-      .mockReturnValue({ retention: { alertActions: { dispatcher: { dataRetention } } } }),
-  } as unknown as PluginInitializerContext<PluginConfig>['config']);
+    retention: { alertActions: { dispatcher: { dataRetention } } },
+  } as unknown as PluginConfig);
 
 describe('AlertActionsCleanupTaskRunner', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
 
   const createRunner = (dataRetention = '90d') =>
-    new AlertActionsCleanupTaskRunner(esClient, createConfig(dataRetention));
+    new AlertActionsCleanupTaskRunner(
+      esClient,
+      createConfigServiceMock(createConfig(dataRetention))
+    );
 
   beforeEach(() => {
     jest.clearAllMocks();

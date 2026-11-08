@@ -5,62 +5,55 @@
  * 2.0.
  */
 
+import { buildCustomContentConfig } from '@kbn/agent-builder-visualizations-server';
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   readEsqlQuery,
-  resolveEsqlQueryEdit,
   toEsqlQueryState,
   type CustomContentState,
 } from '@kbn/custom-content-common';
-import type { CustomContentTemplateResolver } from '@kbn/custom-content-server';
 import {
   getErrorMessage,
   type CustomContentPanelResolutionRequest,
   type PanelContentAttempt,
 } from '@kbn/dashboard-agent-authoring';
-
-const resolveCustomContentState = async (
-  request: CustomContentPanelResolutionRequest,
-  resolveTemplate: CustomContentTemplateResolver
-): Promise<CustomContentState> => {
-  const { nlQuery, esql, existingPanel } = request;
-  if (!existingPanel) {
-    const { template } = await resolveTemplate({ prompt: nlQuery, esqlQuery: esql });
-    return { esql_query: toEsqlQueryState(esql), template };
-  }
-
-  const existing = existingPanel.config as CustomContentState;
-  const { query: mergedEsqlQuery, isChanging: isQueryChanging } = resolveEsqlQueryEdit(
-    esql,
-    readEsqlQuery(existing)
-  );
-  const { template } = await resolveTemplate({
-    prompt: nlQuery ?? '',
-    esqlQuery: isQueryChanging ? mergedEsqlQuery : undefined,
-    existingTemplate: existing.template,
-    hasExistingQuery: !isQueryChanging && !!mergedEsqlQuery,
-  });
-  return { esql_query: toEsqlQueryState(mergedEsqlQuery), template };
-};
+import type { VisPanelResolverDeps } from './vis_panel_resolver';
 
 /**
- * Resolves custom content panel requests. New panels get a template generated
- * from the request; edits refine the existing panel's template, keeping its
- * ES|QL query unless the request replaces or removes it. On edits, upsert
- * has already checked that the existing panel is custom content.
+ * Resolves custom content panel requests with the custom content builder. New panels get a query
+ * and a template generated from the request; edits refine the existing panel, keeping its query
+ * unless the request replaces, removes or regenerates it, and keeping its other settings. On edits,
+ * upsert has already checked that the existing panel is custom content.
  */
 export const createCustomContentPanelResolver = ({
-  resolveTemplate,
-}: {
-  resolveTemplate: CustomContentTemplateResolver;
-}) => {
+  logger,
+  modelProvider,
+  events,
+  esClient,
+}: VisPanelResolverDeps) => {
   return async (request: CustomContentPanelResolutionRequest): Promise<PanelContentAttempt> => {
+    const { nlQuery, index, esql, hasData, existingPanel, resolveEsqlVariables } = request;
+    const regenerateESQL = request.existingPanel ? request.regenerateESQL : undefined;
     try {
+      const existing = existingPanel?.config as CustomContentState | undefined;
+      const { esqlQuery, template } = await buildCustomContentConfig({
+        nlQuery,
+        index,
+        esql,
+        hasData,
+        regenerateESQL,
+        resolveEsqlVariables,
+        existing: existing && { esqlQuery: readEsqlQuery(existing), template: existing.template },
+        modelProvider,
+        logger,
+        events,
+        esClient,
+      });
       return {
         type: 'success',
         panelContent: {
           type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
-          config: await resolveCustomContentState(request, resolveTemplate),
+          config: { ...existing, esql_query: toEsqlQueryState(esqlQuery), template },
         },
       };
     } catch (error) {

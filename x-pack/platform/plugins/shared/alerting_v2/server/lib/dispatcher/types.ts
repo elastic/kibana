@@ -39,6 +39,7 @@ export interface Alert {
   alert_status: AlertEpisodeStatus;
   severity?: AlertEventSeverity;
   data?: AlertData;
+  alert_url: string;
 }
 
 /** Suppression fact read from `.alert-actions`; a null `alert_id` means series-scoped. */
@@ -97,6 +98,7 @@ export interface Rule {
   spaceId: string;
   name: string;
   routingTags: string[];
+  groupingFields: string[];
 }
 
 export interface PolicyMatcherAttributes {
@@ -144,7 +146,9 @@ export interface ActionGroup {
   rules: Record<RuleId, ActionPolicyWorkflowPayloadRule>;
 }
 
-export type ActionPolicyWorkflowPayloadRule = Pick<Rule, 'name'>;
+export type ActionPolicyWorkflowPayloadRule = Pick<Rule, 'name'> & {
+  grouping_fields: Rule['groupingFields'];
+};
 
 export type ActionPolicyWorkflowPayloadAlert = Alert;
 

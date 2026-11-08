@@ -11,11 +11,15 @@ import { SecurityException } from '../../errors';
 
 export async function assertExpectedIndicatorSourceIndexPrivileges(
   slo: SLODefinition,
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  { signal }: { signal?: AbortSignal } = {}
 ) {
-  const privileges = await esClient.security.hasPrivileges({
-    index: [{ names: slo.indicator.params.index, privileges: ['read', 'view_index_metadata'] }],
-  });
+  const privileges = await esClient.security.hasPrivileges(
+    {
+      index: [{ names: slo.indicator.params.index, privileges: ['read', 'view_index_metadata'] }],
+    },
+    { signal }
+  );
   if (!privileges.has_all_requested) {
     throw new SecurityException(
       `Missing ['read', 'view_index_metadata'] privileges on the source index [${slo.indicator.params.index}]`

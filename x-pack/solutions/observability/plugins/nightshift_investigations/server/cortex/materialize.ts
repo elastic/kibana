@@ -28,6 +28,7 @@ Start here, then open \`INDEX.md\` and follow links with \`${SANDBOX_VIEW_FILE_T
 Do not write Cortex pages yourself — a post-run optimizer updates the wiki from this investigation.
 
 Pages live under \`{type}/{slug}.md\`. Status is established, tentative, or archived.
+\`ontology/\` pages describe how services and integrations relate; \`integrations/\` pages record how to query a system and how calls to it fail.
 `;
 
 const pagePath = (entityType: CortexEntityType, slug: string): string =>
@@ -90,7 +91,7 @@ export const materializeCortex = async ({
   store: CortexPageStore;
   telemetry: CortexTelemetry;
   logger: Logger;
-}): Promise<void> => {
+}): Promise<{ hydratedIds: string[] } | void> => {
   await store.pruneDuplicates();
   const { pages: allPages } = await store.list();
   // Archived means the optimizer retired the fact as stale, so materializing it would feed the
@@ -127,4 +128,5 @@ export const materializeCortex = async ({
       ? `Materialized ${fullPages.length} Cortex page(s) into sandbox`
       : 'Materialized 0 Cortex page(s) into sandbox — store.list returned no live pages'
   );
+  return { hydratedIds: fullPages.map((page) => page.id) };
 };

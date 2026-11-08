@@ -121,7 +121,7 @@ describe('SourcesPanel', () => {
     expect(screen.queryByTestId('contextAiIndexSourcesEmpty')).not.toBeInTheDocument();
   });
 
-  it('shows the empty message when not loading and there are no sources', () => {
+  it('shows the inline editor immediately when not loading and there are no sources', async () => {
     renderWithProviders(
       <SourcesPanel
         isLoading={false}
@@ -131,17 +131,20 @@ describe('SourcesPanel', () => {
       />
     );
 
-    expect(screen.getByTestId('contextAiIndexSourcesEmpty')).toBeInTheDocument();
-    expect(screen.getByText('No sources configured.')).toBeInTheDocument();
-    expect(screen.queryByTestId('contextAiIndexSourceRow')).not.toBeInTheDocument();
-    expect(screen.getByTestId('contextAddSourcesButton')).toBeInTheDocument();
+    expect(await screen.findByTestId('contextEditSourcesInlineEditor')).toBeInTheDocument();
+    expect(screen.getByTestId('contextSourcePicker')).toBeInTheDocument();
+    expect(screen.getAllByTestId('contextElasticsearchDataPanel')).toHaveLength(1);
+    expect(screen.getAllByTestId('contextConnectorsPanel')).toHaveLength(1);
+    expect(screen.queryByTestId('contextAiIndexSourcesEmpty')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextEditSourcesButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAddSourcesButton')).not.toBeInTheDocument();
+    expect(saveButton()).toBeDisabled();
     expect(
       screen.getByText('Data that automations should analyze when generating Knowledge Indicators.')
     ).toBeInTheDocument();
   });
 
-  it('shows read-only empty copy for managed AI indexes with no sources', () => {
+  it('shows read-only type panels with per-type empty copy for managed AI indexes with no sources', () => {
     renderWithProviders(
       <SourcesPanel
         isLoading={false}
@@ -151,11 +154,15 @@ describe('SourcesPanel', () => {
       />
     );
 
-    expect(screen.getByTestId('contextAiIndexSourcesEmpty')).toBeInTheDocument();
-    expect(screen.getByText('No sources configured.')).toBeInTheDocument();
+    expect(screen.getByTestId('contextElasticsearchDataPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('contextConnectorsPanel')).toBeInTheDocument();
+    expect(screen.getByText('No Elasticsearch data sources.')).toBeInTheDocument();
+    expect(screen.getByText('No connectors.')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextAiIndexSourcesEmpty')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextEditSourcesInlineEditor')).not.toBeInTheDocument();
   });
 
-  it('renders one row per source', () => {
+  it('renders selected source rows in the inline editor for non-managed indexes', async () => {
     renderWithProviders(
       <SourcesPanel
         isLoading={false}
@@ -165,12 +172,36 @@ describe('SourcesPanel', () => {
       />
     );
 
-    expect(screen.getAllByTestId('contextAiIndexSourceRow')).toHaveLength(sources.length);
+    expect(await screen.findByTestId('contextEditSourcesInlineEditor')).toBeInTheDocument();
+    expect(screen.getAllByTestId(/^contextSelectedSource-esql-/)).toHaveLength(sources.length);
+    expect(screen.queryByTestId('contextAiIndexSourceRow')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexSourcesEmpty')).not.toBeInTheDocument();
-    expect(screen.getByTestId('contextEditSourcesButton')).toBeInTheDocument();
   });
 
-  it('does not fetch connectors when there are no connector sources', () => {
+  it('renders read-only rows split by type for managed AI indexes with sources', () => {
+    renderWithProviders(
+      <SourcesPanel
+        isLoading={false}
+        aiIndex={{
+          ...baseAiIndex,
+          managed: true,
+          sources: [
+            { type: 'esql', value: 'FROM a' },
+            { type: 'connector', value: 'connector-gdrive' },
+          ],
+        }}
+        onSaved={jest.fn()}
+        isManaged
+      />
+    );
+
+    expect(screen.getByTestId('contextElasticsearchDataPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('contextConnectorsPanel')).toBeInTheDocument();
+    expect(screen.getAllByTestId('contextAiIndexSourceRow')).toHaveLength(2);
+    expect(screen.queryByTestId('contextEditSourcesInlineEditor')).not.toBeInTheDocument();
+  });
+
+  it('does not enable connector fetch from SourcesPanel for non-managed indexes', () => {
     renderWithProviders(
       <SourcesPanel
         isLoading={false}
@@ -183,7 +214,7 @@ describe('SourcesPanel', () => {
     expect(mockUseDataConnectors).toHaveBeenCalledWith({ enabled: false });
   });
 
-  it('fetches connectors when at least one source is a connector', () => {
+  it('fetches connectors from SourcePicker when a non-managed index has connector sources', () => {
     renderWithProviders(
       <SourcesPanel
         isLoading={false}
@@ -196,10 +227,11 @@ describe('SourcesPanel', () => {
       />
     );
 
+    expect(mockUseDataConnectors).toHaveBeenCalledWith({ enabled: false });
     expect(mockUseDataConnectors).toHaveBeenCalledWith({ enabled: true });
   });
 
-  it('does not fetch connectors for connector sources without Actions read', () => {
+  it('does not fetch connectors from SourcePicker without Actions read', () => {
     renderWithProviders(
       <SourcesPanel
         isLoading={false}
@@ -214,9 +246,45 @@ describe('SourcesPanel', () => {
     );
 
     expect(mockUseDataConnectors).toHaveBeenCalledWith({ enabled: false });
+    expect(mockUseDataConnectors).not.toHaveBeenCalledWith({ enabled: true });
   });
 
-  it('resolves the connector name for connector sources', () => {
+  it('fetches connectors for managed indexes with connector sources', () => {
+    renderWithProviders(
+      <SourcesPanel
+        isLoading={false}
+        aiIndex={{
+          ...baseAiIndex,
+          managed: true,
+          sources: [{ type: 'connector', value: 'connector-gdrive' }],
+        }}
+        onSaved={jest.fn()}
+        isManaged
+      />
+    );
+
+    expect(mockUseDataConnectors).toHaveBeenCalledWith({ enabled: true });
+  });
+
+  it('does not fetch connectors for managed connector sources without Actions read', () => {
+    renderWithProviders(
+      <SourcesPanel
+        isLoading={false}
+        aiIndex={{
+          ...baseAiIndex,
+          managed: true,
+          sources: [{ type: 'connector', value: 'connector-gdrive' }],
+        }}
+        onSaved={jest.fn()}
+        isManaged
+      />,
+      createServices(false)
+    );
+
+    expect(mockUseDataConnectors).toHaveBeenCalledWith({ enabled: false });
+  });
+
+  it('resolves the connector name for connector sources in the inline editor', async () => {
     renderWithProviders(
       <SourcesPanel
         isLoading={false}
@@ -229,7 +297,10 @@ describe('SourcesPanel', () => {
       />
     );
 
-    expect(screen.getByTestId('contextAiIndexSourceRow')).toHaveTextContent('Google Drive');
+    expect(await screen.findByTestId('contextSelectedSource-connector-0')).toHaveTextContent(
+      'Google Drive'
+    );
+    expect(screen.queryByTestId('contextAiIndexSourceRow')).not.toBeInTheDocument();
   });
 
   it('hides header actions for managed AI indexes', () => {
@@ -246,22 +317,6 @@ describe('SourcesPanel', () => {
     expect(screen.queryByTestId('contextAddSourcesButton')).not.toBeInTheDocument();
   });
 
-  it('opens the inline editor when Add sources is clicked', async () => {
-    renderWithProviders(
-      <SourcesPanel
-        isLoading={false}
-        aiIndex={{ ...baseAiIndex, sources: [] }}
-        onSaved={jest.fn()}
-        isManaged={false}
-      />
-    );
-
-    fireEvent.click(screen.getByTestId('contextAddSourcesButton'));
-
-    expect(await screen.findByTestId('contextEditSourcesInlineEditor')).toBeInTheDocument();
-    expect(screen.queryByTestId('contextAddSourcesButton')).not.toBeInTheDocument();
-  });
-
   it('disables Save when the current selection matches the sources loaded on open', async () => {
     renderWithProviders(
       <SourcesPanel
@@ -272,13 +327,11 @@ describe('SourcesPanel', () => {
       />
     );
 
-    fireEvent.click(screen.getByTestId('contextEditSourcesButton'));
-
     expect(await screen.findByTestId('contextSelectedSource-esql-0')).toBeInTheDocument();
     expect(saveButton()).toBeDisabled();
   });
 
-  it('closes the inline editor and restores the empty state when Cancel is clicked', async () => {
+  it('keeps the inline editor open and reverts the draft when Cancel is clicked', async () => {
     renderWithProviders(
       <SourcesPanel
         isLoading={false}
@@ -288,14 +341,17 @@ describe('SourcesPanel', () => {
       />
     );
 
-    fireEvent.click(screen.getByTestId('contextAddSourcesButton'));
     expect(await screen.findByTestId('contextEditSourcesInlineEditor')).toBeInTheDocument();
+
+    addEsqlSource('FROM logs-* | LIMIT 10');
+    expect(screen.getByTestId('contextSelectedSource-esql-0')).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('contextEditSourcesCancelButton'));
 
-    expect(screen.queryByTestId('contextEditSourcesInlineEditor')).not.toBeInTheDocument();
-    expect(screen.getByTestId('contextAiIndexSourcesEmpty')).toBeInTheDocument();
-    expect(screen.getByTestId('contextAddSourcesButton')).toBeInTheDocument();
+    expect(screen.getByTestId('contextEditSourcesInlineEditor')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextSelectedSource-esql-0')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAiIndexSourcesEmpty')).not.toBeInTheDocument();
+    expect(saveButton()).toBeDisabled();
   });
 
   it('enables Save after adding a source and disables it again when the selection is reverted', async () => {
@@ -308,8 +364,7 @@ describe('SourcesPanel', () => {
       />
     );
 
-    fireEvent.click(screen.getByTestId('contextAddSourcesButton'));
-
+    expect(await screen.findByTestId('contextEditSourcesInlineEditor')).toBeInTheDocument();
     expect(saveButton()).toBeDisabled();
 
     addEsqlSource('FROM logs-* | LIMIT 10');
@@ -322,7 +377,7 @@ describe('SourcesPanel', () => {
     expect(saveButton()).toBeDisabled();
   });
 
-  it('shows a loading header action while sources are saving', async () => {
+  it('keeps the inline editor open and shows Save loading while sources are saving', async () => {
     const testServices = coreMock.createStart();
     testServices.http.put.mockImplementation(() => new Promise(() => {}));
 
@@ -336,13 +391,13 @@ describe('SourcesPanel', () => {
       testServices
     );
 
-    fireEvent.click(screen.getByTestId('contextAddSourcesButton'));
+    expect(await screen.findByTestId('contextEditSourcesInlineEditor')).toBeInTheDocument();
     addEsqlSource('FROM logs-* | LIMIT 10');
     fireEvent.click(saveButton());
 
     await waitFor(() => {
-      expect(screen.queryByTestId('contextEditSourcesInlineEditor')).not.toBeInTheDocument();
-      expect(screen.getByTestId('contextAddSourcesButton')).toBeDisabled();
+      expect(screen.getByTestId('contextEditSourcesInlineEditor')).toBeInTheDocument();
+      expect(saveButton()).toBeDisabled();
     });
   });
 });

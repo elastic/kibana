@@ -136,22 +136,24 @@ describe('alerting_v2 config schema', () => {
   describe('getQueryRowLimit', () => {
     it('uses min(alerts.max, NON_STREAMING_MAX_ROWS) for the json response format', () => {
       const config = configSchema.validate({});
-      expect(getQueryRowLimit(config, formatByName('json'))).toBe(NON_STREAMING_MAX_ROWS);
+      expect(getQueryRowLimit(config.rules.run.alerts.max, formatByName('json'))).toBe(
+        NON_STREAMING_MAX_ROWS
+      );
     });
 
     it('uses alerts.max for the arrow response format', () => {
       const config = configSchema.validate({});
-      expect(getQueryRowLimit(config, formatByName('arrow'))).toBe(10000);
+      expect(getQueryRowLimit(config.rules.run.alerts.max, formatByName('arrow'))).toBe(10000);
     });
 
     it('honors a lower alerts.max on the json response format', () => {
       const config = configSchema.validate({ rules: { run: { alerts: { max: 500 } } } });
-      expect(getQueryRowLimit(config, formatByName('json'))).toBe(500);
+      expect(getQueryRowLimit(config.rules.run.alerts.max, formatByName('json'))).toBe(500);
     });
 
     it('honors a lower alerts.max on the arrow response format', () => {
       const config = configSchema.validate({ rules: { run: { alerts: { max: 500 } } } });
-      expect(getQueryRowLimit(config, formatByName('arrow'))).toBe(500);
+      expect(getQueryRowLimit(config.rules.run.alerts.max, formatByName('arrow'))).toBe(500);
     });
   });
 
@@ -293,6 +295,66 @@ describe('alerting_v2 config schema', () => {
           retention: { alertActions: { dispatcher: { dataRetention: 'abc' } } },
         })
       ).toThrow(/Invalid duration/);
+    });
+  });
+
+  describe('dispatcher.paused', () => {
+    it('defaults to false', () => {
+      expect(configSchema.validate({}).dispatcher.paused).toBe(false);
+    });
+  });
+
+  describe('dispatcher.run.timeout', () => {
+    it('defaults to 1m', () => {
+      expect(configSchema.validate({}).dispatcher.run.timeout).toBe('1m');
+    });
+
+    it('accepts the 5m ceiling', () => {
+      expect(
+        configSchema.validate({ dispatcher: { run: { timeout: '5m' } } }).dispatcher.run.timeout
+      ).toBe('5m');
+    });
+
+    it('rejects a value below the 1m floor', () => {
+      expect(() => configSchema.validate({ dispatcher: { run: { timeout: '30s' } } })).toThrow(
+        /cannot be less than 1m/
+      );
+    });
+
+    it('rejects a value above the 5m ceiling', () => {
+      expect(() => configSchema.validate({ dispatcher: { run: { timeout: '6m' } } })).toThrow(
+        /cannot exceed 5m/
+      );
+    });
+
+    it('rejects a malformed duration', () => {
+      expect(() => configSchema.validate({ dispatcher: { run: { timeout: 'abc' } } })).toThrow(
+        /Invalid duration/
+      );
+    });
+  });
+
+  describe('dispatcher.run.alerts.max', () => {
+    it('defaults to 10000', () => {
+      expect(configSchema.validate({}).dispatcher.run.alerts.max).toBe(10000);
+    });
+
+    it('rejects values below the 1000 floor', () => {
+      expect(() =>
+        configSchema.validate({ dispatcher: { run: { alerts: { max: 999 } } } })
+      ).toThrow();
+    });
+
+    it('rejects values above the 10000 ceiling', () => {
+      expect(() =>
+        configSchema.validate({ dispatcher: { run: { alerts: { max: 10001 } } } })
+      ).toThrow();
+    });
+
+    it('rejects non-integer values', () => {
+      expect(() =>
+        configSchema.validate({ dispatcher: { run: { alerts: { max: 1000.5 } } } })
+      ).toThrow(/must be an integer/);
     });
   });
 
