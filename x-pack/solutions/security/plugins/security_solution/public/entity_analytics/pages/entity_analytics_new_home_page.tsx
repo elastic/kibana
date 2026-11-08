@@ -1491,7 +1491,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
         : dataView.fields
             .getAll()
             .filter(
-              ({ name }) => !(rowsMode === 'resolved' && name === ENTITY_GROUPING_OPTIONS.RESOLUTION)
+              ({ name }) =>
+                !(rowsMode === 'resolved' && name === ENTITY_GROUPING_OPTIONS.RESOLUTION)
             ),
     [isDataViewLoading, dataView, rowsMode]
   );
