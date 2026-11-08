@@ -57,11 +57,19 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Add a guided anomaly detection job creation flow to Agent Builder chat [#286656]({{kib-pull}}286656).
 * Update the PagerDuty MCP connector to support the consolidated `browse_*` and `manage_*` tools that PagerDuty now provides [#295823]({{kib-pull}}295823).
 
-#### Alerting and cases [kibana-9.6.0-features-alerting-cases]
-* Make Kibana Universal Alerting generally available and turn it on by default. Universal Alerting is the {{esql}}-based alerting system. You can detect conditions in your data with {{esql}} rules, track them as alerts, and route notifications with action policies. Kibana Classic Alerting stays available next to it. Universal Alerting relies on Workflows [#296546]({{kib-pull}}296546), [#297284]({{kib-pull}}297284).
-* Add an `alert_url` field to each alert that Universal Alerting action policies pass to workflows. The field links to the alert details page [#300017]({{kib-pull}}300017).
-% The PR and its backport carry release_note:fix, but the release note in the PR says it adds a field. Listed as an enhancement.
+#### {{alerting-v1-system}} [kibana-9.6.0-features-classic-alerting]
 * Add support for recurring maintenance windows and scheduled reports on the last day of the month [#288008]({{kib-pull}}288008).
+* Prefix the subject of emails that Elastic Cloud trial deployments send through the built-in Elastic email service with `[Elastic Cloud Trial]` [#276705]({{kib-pull}}276705).
+* Use fixed subject and message content when you test the email connector with an HTTP request, to check that {{kib}} can send an email to a recipient [#288664]({{kib-pull}}288664).
+* Use the `event.ingested` field, when available, in anomaly detection alerting rule queries to avoid duplicate alerts [#279347]({{kib-pull}}279347).
+* Add a percentage threshold option to the delayed data check of the anomaly detection jobs health rule. You can now alert on a percentage of missed documents instead of a fixed count [#272076]({{kib-pull}}272076).
+
+#### {{alerting-v2-system}} [kibana-9.6.0-features-universal-alerting]
+* Make {{alerting-v2-system-short}} generally available and turn it on by default. {{alerting-v2-system-short}} is the {{esql}}-based alerting system. You can detect conditions in your data with {{esql}} rules, track them as alerts, and route notifications with action policies. {{alerting-v1-system-short}} stays available next to it. {{alerting-v2-system-short}} relies on Workflows [#296546]({{kib-pull}}296546), [#297284]({{kib-pull}}297284).
+* Add an `alert_url` field to each alert that {{alerting-v2-system-short}} action policies pass to workflows. The field links to the alert details page [#300017]({{kib-pull}}300017).
+% The PR and its backport carry release_note:fix, but the release note in the PR says it adds a field. Listed as an enhancement.
+
+#### Cases [kibana-9.6.0-features-cases]
 * Add an API to create, read, update, and delete case templates [#280144]({{kib-pull}}280144).
 * Add an API that lists the global fields and template fields you can set on a case, for a given owner and an optional template. The response includes the key to use in `extended_fields` [#279684]({{kib-pull}}279684).
 * Apply a case template's default values when you create a case through the API with a `template`. Values that you send in the request take precedence [#280143]({{kib-pull}}280143).
@@ -73,10 +81,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Run workflows without leaving Cases. Select **Run workflow** from the case view, from the cases list for up to 10 cases at once, or from attachments and observables in a case. The case activity records each run [#287993]({{kib-pull}}287993), [#287999]({{kib-pull}}287999), [#296254]({{kib-pull}}296254).
 * Show where each case action came from, such as an agent, a workflow, a rule, an attack, or the API, in the case activity, and filter the activity by source. Select an agent or workflow name to open the conversation or the workflow execution. Actions recorded before this release show **Not recorded** [#287149]({{kib-pull}}287149), [#291285]({{kib-pull}}291285).
 * Add public Cases attachments APIs under `/api/cases/{caseId}/attachments` in technical preview. They cover the legacy `/comments` APIs and return a single attachment format for all attachment types [#294886]({{kib-pull}}294886).
-* Prefix the subject of emails that Elastic Cloud trial deployments send through the built-in Elastic email service with `[Elastic Cloud Trial]` [#276705]({{kib-pull}}276705).
-* Use fixed subject and message content when you test the email connector with an HTTP request, to check that {{kib}} can send an email to a recipient [#288664]({{kib-pull}}288664).
-* Use the `event.ingested` field, when available, in anomaly detection alerting rule queries to avoid duplicate alerts [#279347]({{kib-pull}}279347).
-* Add a percentage threshold option to the delayed data check of the anomaly detection jobs health rule. You can now alert on a percentage of missed documents instead of a fixed count [#272076]({{kib-pull}}272076).
 
 #### Connectivity [kibana-9.6.0-features-connectivity]
 * Add the Microsoft Teams inbound event triggers, which start a workflow when a channel message or chat message is posted, when a channel or chat is created, or when a member is added to a team [#297619]({{kib-pull}}297619).
@@ -308,10 +312,10 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the Agent Builder chat appearing to hang while it silently retried an empty model response. After the first attempt and two retries, it now stops and reports an error [#281616]({{kib-pull}}281616).
 * Fix agent tool calls failing when a model calls a tool by a name that contains characters tool names don't allow, such as dots [#296516]({{kib-pull}}296516).
 * Fix the Agent Builder natural language search tool querying indices that aren't allowed to the tool. The tool now returns an error when no allowed indices are available [#295885]({{kib-pull}}295885).
-* Fix the Universal Alerting rule-authoring skill in Agent Builder not finding or editing existing rules unless `agentBuilder:experimentalFeatures` is on [#301256]({{kib-pull}}301256).
+* Fix the {{alerting-v2-system-short}} rule-authoring skill in Agent Builder not finding or editing existing rules unless `agentBuilder:experimentalFeatures` is on [#301256]({{kib-pull}}301256).
 % Consider #294871 (release_note:bug): {{kib}} now checks a model's structured answers against their schema, and rejects answers that fail limits such as `max`, `min`, or `enum` [#294871]({{kib-pull}}294871). It is left out because the reader impact is not clear from the PR. The one visible effect is on generated chat titles.
 
-#### Alerting and cases [kibana-9.6.0-fixes-alerting-cases]
+#### {{alerting-v1-system-short}} [kibana-9.6.0-fixes-classic-alerting]
 * Fix a recurring task running a second time for the same scheduled time when Task Manager starts it earlier than planned, for example because of clock skew [#297486]({{kib-pull}}297486).
 * Fix rules and background tasks silently stopping for several minutes when a concurrent update prevents a completed run from being recorded [#295415]({{kib-pull}}295415).
 * Fix a request to run a rule immediately, or a schedule change, being discarded when it arrives while the rule is finishing a run [#293492]({{kib-pull}}293492).
@@ -319,15 +323,19 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix some task and connector failures appearing in the {{kib}} logs as `[object Object]` or `undefined` instead of the real error message [#276782]({{kib-pull}}276782).
 * Fix high peak memory use at startup and during rule execution on deployments with many alerts-as-data resources, by limiting how many resources install at once [#287643]({{kib-pull}}287643).
 * Fix an error that broke the **Tracking containment** rule editor when you select a data view [#289778]({{kib-pull}}289778).
-* Fix the **Template** tab search in the create rule flow not matching partial words in template names and tags [#287961]({{kib-pull}}287961).
 * Fix false **Disk Usage** alerts for frozen nodes. Frozen nodes reserve most of their disk for the searchable snapshot cache, so they sit above the default threshold, and the rule now ignores them [#278374]({{kib-pull}}278374).
 * Fix the `FormatDate` mustache lambda rejecting epoch-millisecond values that arrive as strings, for example from nested templates that use the `x` format [#277391]({{kib-pull}}277391).
 * Fix the **Additional fields** editor of the ServiceNow ITSM, ServiceNow SecOps, and Jira connectors rejecting values that contain context variables with an `Invalid JSON.` error. You can now save a rule action that uses them [#286578]({{kib-pull}}286578).
 * Fix the ServiceNow ITSM, ServiceNow SecOps, and ServiceNow ITOM connectors showing duplicate choices for severity, urgency, impact, category, and subcategory when the same choice exists in more than one ServiceNow table [#300449]({{kib-pull}}300449).
 * Fix updating alert tags in one space also changing alerts in other spaces [#285874]({{kib-pull}}285874).
 * Fix rules that you created with your own API key failing with an `api key has been invalidated` error after a workflow edits them [#300667]({{kib-pull}}300667).
-* Fix workflows that a Universal Alerting action policy dispatches in a non-default space failing with `Connector <id> not found` for connectors that exist only in that space [#300939]({{kib-pull}}300939).
 * Fix out-of-memory failures when Reporting generates wide PNG and PDF reports, by sizing the screenshot to the dashboard width instead of the browser window width [#289062]({{kib-pull}}289062).
+
+#### {{alerting-v2-system-short}} [kibana-9.6.0-fixes-universal-alerting]
+* Fix the **Template** tab search in the create rule flow not matching partial words in template names and tags [#287961]({{kib-pull}}287961).
+* Fix workflows that a {{alerting-v2-system-short}} action policy dispatches in a non-default space failing with `Connector <id> not found` for connectors that exist only in that space [#300939]({{kib-pull}}300939).
+
+#### Cases [kibana-9.6.0-fixes-cases]
 * Fix the **Auto-push case to connected external system** option missing from the Cases rule action when case templates are enabled [#292187]({{kib-pull}}292187).
 * Fix the **Read only** badge appearing on the case templates pages for users who have read access to Cases and the case templates management privilege [#291719]({{kib-pull}}291719).
 * Fix the **Create case** button in the **Add to case** selector being available to users who can't create cases [#292761]({{kib-pull}}292761).
