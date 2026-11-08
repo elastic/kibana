@@ -414,7 +414,7 @@ const toIsoTime = (value?: string): string | undefined => {
 /**
  * Trims events to what the store accepts and gives each a stable id, so the next pass that
  * describes the same event updates it. An event with no time it can be placed at is dropped, and
- * only a response may belong to neither an entity nor a relationship.
+ * only a finding or a response may belong to neither an entity nor a relationship.
  */
 export const limitEvents = (raw: NonNullable<FindingsOutput['events']>): ImpactMapEvent[] => {
   const byId = new Map<string, ImpactMapEvent>();
@@ -432,7 +432,8 @@ export const limitEvents = (raw: NonNullable<FindingsOutput['events']>): ImpactM
             MAX_MAP_ID_LENGTH
           )
         : undefined;
-    if (!entityId && !relationshipId && event.kind !== 'response') continue;
+    if (!entityId && !relationshipId && event.kind !== 'response' && event.kind !== 'investigation')
+      continue;
     const endsAt = toIsoTime(event.ends_at);
     const evidence = event.evidence ? limitEvidence(event.evidence) : undefined;
     const target = {
@@ -834,7 +835,7 @@ export const FINDINGS_JSON_SCHEMA = {
             type: 'string',
             enum: IMPACT_MAP_EVENT_KINDS,
             description:
-              'change for a deploy, config or scaling change; failure for errors, crashes, timeouts or restarts; condition for a state such as saturation, a full disk or zero replicas; alert for an alert that fired; mitigation for a fix applied; customer_impact for what customers felt, placed on the entry point they use; response for what responders did, such as opening an incident channel or updating the status page.',
+              'change for a deploy, config or scaling change; failure for errors, crashes, timeouts or restarts; condition for a state such as saturation, a full disk or zero replicas; alert for an alert that fired; mitigation for a fix applied; customer_impact for what customers felt, placed on the entry point they use; investigation for a finding of the investigation, such as a hypothesis confirmed or ruled out; response for what responders did, such as opening an incident channel or updating the status page.',
           },
           title: {
             type: 'string',
@@ -865,7 +866,7 @@ export const FINDINGS_JSON_SCHEMA = {
           evidence: {
             ...EVIDENCE_JSON_SCHEMA,
             description:
-              'The trend around the event: a small chart with an annotation at its time, or a short description. Only numbers a tool returned.',
+              'A chart that explains the event in context: the signal that shows it, over a window that starts before the change that led to it, with an annotation at that change and one at the event. Copy only numbers a tool returned; describe instead when there are none.',
           },
         },
         required: ['kind', 'title', 'at'],

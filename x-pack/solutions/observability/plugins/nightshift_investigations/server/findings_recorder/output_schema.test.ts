@@ -378,12 +378,13 @@ describe('limitEvents', () => {
     expect(onEdge.relationship_id).toBe('a->b');
   });
 
-  it('keeps a response without a target and drops other events without one', () => {
+  it('keeps a finding or a response without a target and drops other events without one', () => {
     const kept = limitEvents([
       { kind: 'response', title: 'Status page updated', at },
+      { kind: 'investigation', title: 'Bad deploy confirmed', at },
       { kind: 'failure', title: 'Something failed', at },
     ]);
-    expect(kept.map(({ kind }) => kind)).toEqual(['response']);
+    expect(kept.map(({ kind }) => kind)).toEqual(['response', 'investigation']);
   });
 
   it('drops an event whose time cannot be read, and merges repeats of one event', () => {

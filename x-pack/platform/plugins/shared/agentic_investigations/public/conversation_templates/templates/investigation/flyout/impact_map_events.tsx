@@ -72,6 +72,12 @@ const KINDS: Record<ImpactMapEventKind, { label: string; color: EuiBadgeProps['c
     }),
     color: 'accent',
   },
+  investigation: {
+    label: i18n.translate('xpack.agenticInvestigations.impactMap.events.kind.investigation', {
+      defaultMessage: 'Finding',
+    }),
+    color: 'primary',
+  },
   response: {
     label: i18n.translate('xpack.agenticInvestigations.impactMap.events.kind.response', {
       defaultMessage: 'Response',
@@ -80,6 +86,80 @@ const KINDS: Record<ImpactMapEventKind, { label: string; color: EuiBadgeProps['c
   },
 };
 
+/** How the timeline groups and filters events, each with the icon its rows carry. */
+export const EVENT_GROUPS = [
+  {
+    id: 'symptom',
+    label: i18n.translate('xpack.agenticInvestigations.impactMap.events.group.symptom', {
+      defaultMessage: 'Symptom',
+    }),
+    icon: 'warning',
+    color: 'warning',
+    kinds: ['failure', 'condition', 'alert', 'customer_impact'],
+  },
+  {
+    id: 'contributing',
+    label: i18n.translate('xpack.agenticInvestigations.impactMap.events.group.contributing', {
+      defaultMessage: 'Contributing factor',
+    }),
+    icon: 'bug',
+    color: 'danger',
+    kinds: ['change'],
+  },
+  {
+    id: 'investigation',
+    label: i18n.translate('xpack.agenticInvestigations.impactMap.events.group.investigation', {
+      defaultMessage: 'Investigation',
+    }),
+    icon: 'sparkles',
+    color: 'primary',
+    kinds: ['investigation'],
+  },
+  {
+    id: 'action',
+    label: i18n.translate('xpack.agenticInvestigations.impactMap.events.group.action', {
+      defaultMessage: 'Action',
+    }),
+    icon: 'wrench',
+    color: 'primary',
+    kinds: ['mitigation', 'response'],
+  },
+] as const satisfies ReadonlyArray<{
+  id: string;
+  label: string;
+  icon: string;
+  color: 'warning' | 'danger' | 'primary';
+  kinds: readonly ImpactMapEventKind[];
+}>;
+
+export type EventGroup = (typeof EVENT_GROUPS)[number];
+export type EventGroupId = EventGroup['id'];
+
+export const getEventGroup = (kind: ImpactMapEventKind): EventGroup =>
+  EVENT_GROUPS.find(({ kinds }) => (kinds as readonly ImpactMapEventKind[]).includes(kind)) ??
+  EVENT_GROUPS[0];
+
+/** The entity ids an event touches: its entity, or both ends of its relationship. */
+export const getEventEntityIds = (
+  { entity_id: entityId, relationship_id: relationshipId }: ImpactMapEvent,
+  relationships: InvestigationImpactMapResponse['relationships']
+): string[] => {
+  if (entityId) {
+    return [entityId];
+  }
+  if (!relationshipId) {
+    return [];
+  }
+  const relationship = relationships.find(({ id }) => id === relationshipId);
+  return relationship
+    ? [relationship.source_id, relationship.target_id]
+    : relationshipId.split('->').filter(Boolean);
+};
+
+const INVESTIGATION_TARGET = i18n.translate(
+  'xpack.agenticInvestigations.impactMap.events.investigationTarget',
+  { defaultMessage: 'Investigation' }
+);
 const RESPONSE_TARGET = i18n.translate(
   'xpack.agenticInvestigations.impactMap.events.responseTarget',
   { defaultMessage: 'Responders' }
@@ -103,7 +183,7 @@ export const EventKindBadge: React.FC<{ kind: ImpactMapEventKind }> = ({ kind })
 
 /** What an event happened to, named as the map names it. */
 export const describeEventTarget = (
-  { entity_id: entityId, relationship_id: relationshipId }: ImpactMapEvent,
+  { kind, entity_id: entityId, relationship_id: relationshipId }: ImpactMapEvent,
   impactMap: Pick<InvestigationImpactMapResponse, 'entities' | 'relationships'>
 ): string => {
   const labelOf = (id: string) =>
@@ -118,7 +198,7 @@ export const describeEventTarget = (
       : relationshipId.split('->');
     return target ? `${labelOf(source)} → ${labelOf(target)}` : relationshipId;
   }
-  return RESPONSE_TARGET;
+  return kind === 'investigation' ? INVESTIGATION_TARGET : RESPONSE_TARGET;
 };
 
 export const EventTime: React.FC<{ at: string; withDate?: boolean }> = ({ at, withDate }) => {
@@ -186,25 +266,53 @@ export const EventSummary: React.FC<{
   </EuiPanel>
 );
 
+const MAX_CONTEXT_ANNOTATIONS = 4;
+
+const parseTime = (value: string): number | undefined => {
+  const parsed = Date.parse(value);
+  return Number.isNaN(parsed) ? undefined : parsed;
+};
+
 /**
- * A chart of the trend is more useful with the moment marked, so a time chart without its own
- * annotations gets one at the event.
+ * A chart explains an event best with what led to it marked. A time chart the agent left without
+ * annotations gets one at the event and one at each of the latest changes and mitigations in its
+ * window, so a deploy shows up just before the line it broke.
  */
-const withEventAnnotation = (
+export const withContextAnnotations = (
   evidence: InvestigationEvidence,
-  { at, ends_at: endsAt, title }: ImpactMapEvent
+  event: ImpactMapEvent,
+  allEvents: readonly ImpactMapEvent[] = []
 ): InvestigationEvidence => {
   const { chart } = evidence;
   if (!chart || chart.x_axis.type !== 'time' || chart.annotations?.length) {
     return evidence;
   }
-  return {
-    ...evidence,
-    chart: { ...chart, annotations: [{ x: at, ...(endsAt && { x_end: endsAt }), label: title }] },
-  };
+  const times = chart.series
+    .flatMap(({ points }) => points.map(({ x }) => parseTime(x)))
+    .filter((time): time is number => time !== undefined);
+  const [start, end] = [Math.min(...times), Math.max(...times)];
+  const context = allEvents
+    .filter(({ id, kind, at }) => {
+      const time = parseTime(at);
+      return (
+        id !== event.id &&
+        (kind === 'change' || kind === 'mitigation') &&
+        time !== undefined &&
+        time >= start &&
+        time <= end
+      );
+    })
+    .slice(-MAX_CONTEXT_ANNOTATIONS)
+    .map(({ at, title }) => ({ x: at, label: title }));
+  const own = { x: event.at, ...(event.ends_at && { x_end: event.ends_at }), label: event.title };
+  return { ...evidence, chart: { ...chart, annotations: [...context, own] } };
 };
 
-const EventDetail: React.FC<{ event: ImpactMapEvent; target: string }> = ({ event, target }) => (
+const EventDetail: React.FC<{
+  event: ImpactMapEvent;
+  target: string;
+  allEvents?: readonly ImpactMapEvent[];
+}> = ({ event, target, allEvents }) => (
   <div data-test-subj="agenticInvestigationsImpactMapEventDetail">
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
       <EuiFlexItem grow={false}>
@@ -235,7 +343,7 @@ const EventDetail: React.FC<{ event: ImpactMapEvent; target: string }> = ({ even
     {event.evidence && (
       <>
         <EuiSpacer size="m" />
-        <LazyEvidenceView evidence={withEventAnnotation(event.evidence, event)} />
+        <LazyEvidenceView evidence={withContextAnnotations(event.evidence, event, allEvents)} />
       </>
     )}
     {event.links?.length ? (
@@ -262,7 +370,7 @@ export interface ImpactMapEventsFlyoutProps {
   title: string;
   /** Oldest first. */
   events: ImpactMapEvent[];
-  impactMap: Pick<InvestigationImpactMapResponse, 'entities' | 'relationships'>;
+  impactMap: Pick<InvestigationImpactMapResponse, 'entities' | 'relationships' | 'events'>;
   /** Opens on this event instead of the list. */
   initialEventId?: string;
   onClose: () => void;
@@ -335,7 +443,11 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {selected ? (
-          <EventDetail event={selected} target={describeEventTarget(selected, impactMap)} />
+          <EventDetail
+            event={selected}
+            target={describeEventTarget(selected, impactMap)}
+            allEvents={impactMap.events}
+          />
         ) : events.length === 0 ? (
           <EuiEmptyPrompt
             iconType="clock"

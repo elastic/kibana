@@ -13,6 +13,7 @@ import type { InvestigationImpactMapResponse } from '../../../../../common';
 import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
 import type { ImpactMapRendererProps } from '../../../../types';
 import { ImpactMapTab } from './impact_map_tab';
+import { withContextAnnotations } from './impact_map_events';
 
 jest.mock('../../../../investigations/hooks/use_investigation');
 const mockUseInvestigation = useInvestigation as jest.Mock;
@@ -167,5 +168,37 @@ describe('ImpactMapTab', () => {
     expect(screen.getByTestId('agenticInvestigationsImpactMapEmpty')).toHaveTextContent(
       'No impact map yet'
     );
+  });
+});
+
+describe('withContextAnnotations', () => {
+  const chart = {
+    type: 'line' as const,
+    title: 'Restarts',
+    x_axis: { type: 'time' as const },
+    y_axis: {},
+    series: [
+      {
+        name: 'restarts',
+        points: [
+          { x: '2026-11-07T09:55:00.000Z', y: 0 },
+          { x: '2026-11-07T10:10:00.000Z', y: 6 },
+        ],
+      },
+    ],
+  };
+  const [deploy, failure] = impactMap.events;
+
+  it('marks the event and the changes in its window that led to it', () => {
+    const { chart: annotated } = withContextAnnotations({ chart }, failure, impactMap.events);
+    expect(annotated?.annotations).toEqual([
+      { x: deploy.at, label: deploy.title },
+      { x: failure.at, label: failure.title },
+    ]);
+  });
+
+  it("keeps the agent's own annotations", () => {
+    const own = { ...chart, annotations: [{ x: deploy.at, label: 'Deploy' }] };
+    expect(withContextAnnotations({ chart: own }, failure, impactMap.events).chart).toBe(own);
   });
 });

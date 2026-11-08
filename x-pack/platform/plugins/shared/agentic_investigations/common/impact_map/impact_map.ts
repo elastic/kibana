@@ -160,7 +160,7 @@ export const impactMapEventSchema = lazySchema(() =>
     /** ISO 8601. */
     at: z.string().min(1).max(MAX_TIMESTAMP_LENGTH),
     ends_at: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
-    /** The entity it happened to. A response may have neither this nor `relationship_id`. */
+    /** The entity it happened to. A finding or a response may have neither. */
     entity_id: z.string().max(MAX_ID_LENGTH).optional(),
     /** The relationship it happened to, as the map ids it: `source->target`. */
     relationship_id: z.string().max(MAX_ID_LENGTH).optional(),

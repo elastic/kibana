@@ -27,8 +27,9 @@ export const MAX_IMPACT_MAP_EVENTS = 200;
 
 /**
  * What an event on the map is: something done to the system (a change), something it did (a
- * failure, an alert, a condition it was in), what customers felt, or what responders did. A
- * response need not belong to an entity; every other kind happens to one entity or relationship.
+ * failure, an alert, a condition it was in), what customers felt, what the investigation found,
+ * or what responders did. A finding or a response need not belong to an entity; every other kind
+ * happens to one entity or relationship.
  */
 export const IMPACT_MAP_EVENT_KINDS = [
   'change',
@@ -37,6 +38,7 @@ export const IMPACT_MAP_EVENT_KINDS = [
   'alert',
   'mitigation',
   'customer_impact',
+  'investigation',
   'response',
 ] as const;
 

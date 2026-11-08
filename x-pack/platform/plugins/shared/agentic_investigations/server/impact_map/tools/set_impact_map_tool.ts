@@ -71,7 +71,7 @@ const eventSchema = impactMapEventSchema.extend({
     .optional()
     .describe('Leave out: an id is derived from the kind, what it happened to and the minute.'),
   kind: impactMapEventSchema.shape.kind.describe(
-    '"change" for a deploy, config or scaling change; "failure" for errors, crashes, timeouts; "condition" for a state such as saturation or zero replicas; "alert" for an alert firing; "mitigation" for a fix applied; "customer_impact" for what customers felt, on the entry point; "response" for a responder action such as opening an incident channel.'
+    '"change" for a deploy, config or scaling change; "failure" for errors, crashes, timeouts; "condition" for a state such as saturation or zero replicas; "alert" for an alert firing; "mitigation" for a fix applied; "customer_impact" for what customers felt, on the entry point; "investigation" for a finding, such as a hypothesis confirmed or ruled out; "response" for a responder action such as opening an incident channel.'
   ),
   title: impactMapEventSchema.shape.title.describe(
     'One line, past tense, with the number: "Replicas scaled from 3 to 0".'
@@ -81,10 +81,10 @@ const eventSchema = impactMapEventSchema.extend({
     'The entity in `entities` it happened to.'
   ),
   relationship_id: impactMapEventSchema.shape.relationship_id.describe(
-    'Instead of `entity_id`, the relationship it happened to: its id, or "source_id->target_id". Leave both out only for a response.'
+    'Instead of `entity_id`, the relationship it happened to: its id, or "source_id->target_id". Leave both out only for a finding or a response.'
   ),
   evidence: impactMapEventSchema.shape.evidence.describe(
-    'A chart of the trend around `at`, with an annotation at `at`, built only from numbers a tool returned.'
+    'A chart that explains the event in context: its signal over a window that starts before the change that led to it, with annotations at that change and at `at`. Built only from numbers a tool returned.'
   ),
 });
 
