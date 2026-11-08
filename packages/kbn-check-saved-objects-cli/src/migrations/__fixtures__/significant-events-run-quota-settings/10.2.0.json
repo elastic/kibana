@@ -1,0 +1,46 @@
+{
+  "10.1.0": [
+    {
+      "enabled": true,
+      "limits": {
+        "detection": 15,
+        "investigation": 5,
+        "manual_investigation": 5,
+        "total_investigation": 10,
+        "ki_extraction": 3
+      }
+    },
+    {
+      "enabled": false,
+      "limits": {
+        "detection": 0,
+        "investigation": 30,
+        "manual_investigation": 0,
+        "total_investigation": 0,
+        "ki_extraction": 0
+      }
+    }
+  ],
+  "10.2.0": [
+    {
+      "enabled": true,
+      "limits": {
+        "detection": 15,
+        "investigation": 5,
+        "manual_investigation": 5,
+        "total_investigation": 10,
+        "ki_extraction": 3
+      }
+    },
+    {
+      "enabled": false,
+      "limits": {
+        "detection": 0,
+        "investigation": 30,
+        "manual_investigation": 0,
+        "total_investigation": 0,
+        "ki_extraction": 0
+      }
+    }
+  ]
+}

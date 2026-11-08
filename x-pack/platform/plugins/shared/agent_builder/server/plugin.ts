@@ -282,6 +282,7 @@ export class AgentBuilderPlugin
       workflowsManagement: setupDeps.workflowsManagement,
       logger: this.logger,
       getInternalServices,
+      getStartServices: coreSetup.getStartServices,
     });
 
     registerSkillToolsLoaderHook(serviceSetups, {
@@ -357,6 +358,7 @@ export class AgentBuilderPlugin
       },
       callbacks: {
         registerConversationResolver: serviceSetups.callbacks.registerConversationResolver,
+        registerOnBeforeNewConversation: serviceSetups.callbacks.registerOnBeforeNewConversation,
         registerTransport: serviceSetups.callbacks.registerTransport,
       },
       topSnippets: this.config.topSnippets,
@@ -417,6 +419,8 @@ export class AgentBuilderPlugin
       }),
       deductiveRegister: this.config.deductive?.register ?? false,
       isomer,
+      getSmlTypeDefinition: startDeps.agentBuilderSml.getTypeDefinition,
+      cloud: this.cloudSetup,
       conversationEventBus: this.conversationEventBus,
     });
 

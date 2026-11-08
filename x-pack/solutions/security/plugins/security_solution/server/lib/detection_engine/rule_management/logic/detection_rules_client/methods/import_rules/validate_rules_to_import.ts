@@ -13,6 +13,7 @@ import type {
 } from '../../../../../../../../common/api/detection_engine';
 import { ruleToImportHasVersion } from '../../../../../../../../common/api/detection_engine/rule_management';
 import type { MlAuthz } from '../../../../../../machine_learning/authz';
+import { withSecuritySpan } from '../../../../../../../utils/with_security_span';
 import type { PrebuiltImportContext } from './fetch_prebuilt_import_context';
 import { createRuleImportErrorObject } from './errors';
 import { calculateRuleSourceForImport } from './calculate_rule_source_for_import';
@@ -43,50 +44,52 @@ export async function validateRulesToImport({
   existingExceptionLists,
   deps,
 }: ValidateRulesToImportParams): Promise<ValidateRulesToImportResult> {
-  const { prebuiltContext, mlAuthz } = deps;
+  return withSecuritySpan('ruleManagement.validateRulesToImport', async () => {
+    const { prebuiltContext, mlAuthz } = deps;
 
-  const importableRules: ImportableRuleData[] = [];
-  const errors: ImportRuleError[] = [];
+    const importableRules: ImportableRuleData[] = [];
+    const errors: ImportRuleError[] = [];
 
-  for (const rule of rules) {
-    const isKnownPrebuiltRule = prebuiltContext.availableRuleAssetIds.has(rule.rule_id);
+    for (const rule of rules) {
+      const isKnownPrebuiltRule = prebuiltContext.availableRuleAssetIds.has(rule.rule_id);
 
-    if (isKnownPrebuiltRule && !ruleToImportHasVersion(rule)) {
-      // Prebuilt rules without version are invalid
-      errors.push(missingVersionError(rule.rule_id));
-    } else {
-      try {
-        await validateMlAuth(mlAuthz, rule.type);
+      if (isKnownPrebuiltRule && !ruleToImportHasVersion(rule)) {
+        // Prebuilt rules without version are invalid
+        errors.push(missingVersionError(rule.rule_id));
+      } else {
+        try {
+          await validateMlAuth(mlAuthz, rule.type);
 
-        const [exceptionErrors, exceptionsList] = checkRuleExceptionReferences({
-          rule,
-          existingLists: existingExceptionLists,
-        });
-        errors.push(...exceptionErrors);
+          const [exceptionErrors, exceptionsList] = checkRuleExceptionReferences({
+            rule,
+            existingLists: existingExceptionLists,
+          });
+          errors.push(...exceptionErrors);
 
-        // For backwards compatibility, rules without a version default to version 1.
-        // The normalized copy is what proceeds to creation or overwrite.
-        const normalizedRule = { ...rule, version: rule.version ?? 1 };
-        const { immutable, ruleSource } = calculateRuleSourceForImport({
-          importedRule: normalizedRule,
-          currentRule: existingRules[rule.rule_id],
-          prebuiltRuleAssetsByRuleId: prebuiltContext.matchingAssetsByRuleId,
-          isKnownPrebuiltRule,
-        });
+          // For backwards compatibility, rules without a version default to version 1.
+          // The normalized copy is what proceeds to creation or overwrite.
+          const normalizedRule = { ...rule, version: rule.version ?? 1 };
+          const { immutable, ruleSource } = calculateRuleSourceForImport({
+            importedRule: normalizedRule,
+            currentRule: existingRules[rule.rule_id],
+            prebuiltRuleAssetsByRuleId: prebuiltContext.matchingAssetsByRuleId,
+            isKnownPrebuiltRule,
+          });
 
-        importableRules.push({ rule: normalizedRule, immutable, ruleSource, exceptionsList });
-      } catch (e) {
-        errors.push(
-          createRuleImportErrorObject({
-            ruleId: rule.rule_id,
-            message: e instanceof Error ? e.message : String(e),
-          })
-        );
+          importableRules.push({ rule: normalizedRule, immutable, ruleSource, exceptionsList });
+        } catch (e) {
+          errors.push(
+            createRuleImportErrorObject({
+              ruleId: rule.rule_id,
+              message: e instanceof Error ? e.message : String(e),
+            })
+          );
+        }
       }
     }
-  }
 
-  return { importableRules, errors };
+    return { importableRules, errors };
+  });
 }
 
 function missingVersionError(ruleId: string): ImportRuleError {
