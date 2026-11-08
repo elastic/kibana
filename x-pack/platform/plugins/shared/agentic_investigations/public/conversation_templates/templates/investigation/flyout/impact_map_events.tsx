@@ -57,6 +57,8 @@ import {
   type InvestigationImpactMapResponse,
 } from '../../../../../common';
 import { LazyEvidenceView } from '../../../../evidence';
+import { useImpactEntityLink } from '../../../../impact_map/entity_link';
+import type { ImpactEntityLinkTarget } from '../../../../types';
 import { EntityMetadataTable } from './entity_metadata';
 import { FilterPopover } from './event_filter_popover';
 
@@ -650,6 +652,33 @@ const TypeBadges: React.FC<{ typeLabel?: string; icon?: string }> = ({ typeLabel
   ) : null;
 };
 
+/**
+ * Top right of an entity's header: opens the entity where a solution shows it (APM for a service)
+ * in a new tab. Only there when the solution found it.
+ */
+const OpenInSolutionButton: React.FC<{ entity?: ImpactEntityLinkTarget }> = ({ entity }) => {
+  const link = useImpactEntityLink(entity);
+  if (!link) {
+    return null;
+  }
+  return (
+    // Right of the title row, and clear of the flyout's close button.
+    <EuiFlexItem grow style={{ alignItems: 'flex-end', paddingInlineEnd: 32 }}>
+      <EuiButtonEmpty
+        size="xs"
+        iconType="external"
+        iconSide="right"
+        href={link.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        data-test-subj="agenticInvestigationsImpactMapOpenInSolution"
+      >
+        {link.label}
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+  );
+};
+
 const EVIDENCE_LABEL = i18n.translate('xpack.agenticInvestigations.impactMap.events.evidence', {
   defaultMessage: 'Evidence',
 });
@@ -1133,6 +1162,8 @@ export interface ImpactMapEventsFlyoutProps {
   /** An EUI icon for what the events happened to, and what kind of thing it is. */
   icon?: string;
   typeLabel?: string;
+  /** The entity, for a link to where a solution shows it. */
+  entityTarget?: ImpactEntityLinkTarget;
   /** Oldest first. */
   events: ImpactMapEvent[];
   /** What the agent recorded about an entity; adds a Metadata tab and leads with the featured. */
@@ -1227,6 +1258,7 @@ const EventsFlyoutContent: React.FC<
   title,
   icon,
   typeLabel,
+  entityTarget,
   renderEvents,
   events,
   metadata,
@@ -1351,6 +1383,7 @@ const EventsFlyoutContent: React.FC<
                 </EuiTitle>
               </EuiFlexItem>
               <TypeBadges typeLabel={typeLabel} icon={icon} />
+              <OpenInSolutionButton entity={entityTarget} />
             </EuiFlexGroup>
             <EuiSpacer size="m" />
             {metadata?.some(({ featured }) => featured) && (
@@ -1504,7 +1537,7 @@ export const resolveEventsSelection = (
     Partial<Pick<InvestigationImpactMapResponse, 'relationship_types'>>
 ): Pick<
   ImpactMapEventsFlyoutProps,
-  'title' | 'events' | 'initialEventId' | 'icon' | 'typeLabel' | 'metadata'
+  'title' | 'events' | 'initialEventId' | 'icon' | 'typeLabel' | 'metadata' | 'entityTarget'
 > => {
   const { events, entities, relationships } = impactMap;
   if (selection.kind === 'entity') {
@@ -1515,6 +1548,13 @@ export const resolveEventsSelection = (
       icon: getEntityIcon(type),
       typeLabel: getEntityTypeLabel(type, entity?.label),
       metadata: resolveEntityMetadata(entity, type),
+      entityTarget: entity &&
+        type && {
+          id: entity.id,
+          label: entity.label,
+          kind: type.kind,
+          metadata: entity.metadata?.map(({ key, value }) => ({ key, value })),
+        },
       events: events.filter(({ entity_id: entityId }) => entityId === selection.id),
     };
   }

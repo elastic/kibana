@@ -115,6 +115,7 @@ import {
   registerServiceMapAttachment,
   registerServiceMapContextAttachment,
 } from './agent_builder/attachment_types';
+import { createApmEntityLinkResolver } from './agent_builder/impact_map/entity_link';
 import { LazyImpactServiceMap } from './agent_builder/impact_map/lazy_impact_service_map';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import { createServiceFlyoutRenderer } from './components/shared/service_flyout/service_flyout_feature';
@@ -292,6 +293,12 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     // Investigation impact maps are drawn with the service map's nodes and layout.
     plugins.agenticInvestigations?.registerImpactMapRenderer(LazyImpactServiceMap);
+    plugins.agenticInvestigations?.registerImpactEntityLink(
+      createApmEntityLinkResolver({
+        prependBasePath: (path) => core.http.basePath.prepend(path),
+        getCallApmApi: () => getApmInternalServices()?.callApmApi,
+      })
+    );
 
     // register observability nav if user has access to plugin
     plugins.observabilityShared.navigation.registerSections(

@@ -12,6 +12,7 @@ import { registerEscalationConversationEventUiDefinitions } from './escalations/
 import { registerInvestigationConversationEventUiDefinitions } from './investigations/conversation_events';
 import { registerImpactAttachmentTypes } from './impact/attachments';
 import { registerImpactMapAttachmentTypes } from './impact_map/attachments';
+import { setImpactEntityLinkResolver } from './impact_map/entity_link';
 import type { AlertSubjectSnapshot } from '../common/subjects/subject';
 import { registerSubjectAttachmentTypes } from './subjects/attachments';
 import { registerHypothesesAttachmentTypes } from './hypotheses/attachments';
@@ -88,6 +89,7 @@ export class AgenticInvestigationsPublicPlugin
       registerImpactMapRenderer: (renderer) => {
         this.impactMapRenderer = renderer;
       },
+      registerImpactEntityLink: setImpactEntityLinkResolver,
     };
   }
 

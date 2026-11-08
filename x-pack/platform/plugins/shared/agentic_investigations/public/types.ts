@@ -65,6 +65,11 @@ export interface AgenticInvestigationsPublicPluginSetup {
    * `start`. The last registration wins.
    */
   registerImpactMapRenderer: (renderer: ImpactMapRenderer) => void;
+  /**
+   * Registers how an entity is found in a solution, which adds an external link to its flyout
+   * when it is found. Call it from `setup`. The last registration wins.
+   */
+  registerImpactEntityLink: (resolver: ImpactEntityLinkResolver) => void;
 }
 
 /** Props of the component that draws an impact map. It fills its container. */
@@ -84,6 +89,27 @@ export interface ImpactMapRendererProps {
  * (APM's service map), so this plugin carries no graph code of its own.
  */
 export type ImpactMapRenderer = ComponentType<ImpactMapRendererProps>;
+
+/** What a solution is told about an entity when asked where it can show it. */
+export interface ImpactEntityLinkTarget {
+  id: string;
+  label: string;
+  /** The kind of its type: a service, a dependency or infrastructure. */
+  kind: string;
+  metadata?: Array<{ key: string; value: string }>;
+}
+
+/** Where a solution shows the entity: opened in another tab. */
+export interface ImpactEntityLink {
+  href: string;
+  /** The button's text; "Open in APM" for APM. */
+  label: string;
+}
+
+/** Finds the entity in a solution, or resolves to undefined when it is not there. */
+export type ImpactEntityLinkResolver = (
+  entity: ImpactEntityLinkTarget
+) => Promise<ImpactEntityLink | undefined>;
 
 /** Opens the entity flyout for one impacted entity. Supplied by the solution that owns the flyout. */
 export type ImpactEntityOpener = (entity: ImpactEntityTarget) => void;
