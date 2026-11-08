@@ -20,7 +20,7 @@ export interface InvestigationsUrlState {
   rangeTo: string;
 }
 
-export const DEFAULT_INVESTIGATIONS_TIME_RANGE = { from: 'now-30d', to: 'now' } as const;
+export const DEFAULT_INVESTIGATIONS_TIME_RANGE = { from: 'now-12h', to: 'now' } as const;
 
 /** Home time picker default — last 3 calendar days (rounded). */
 export const DEFAULT_HOMEPAGE_TIME_RANGE = { from: 'now-3d/d', to: 'now' } as const;
