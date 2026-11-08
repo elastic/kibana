@@ -147,8 +147,14 @@ const ImpactMapPanel: React.FC<{
         openTimeline();
       }
     : undefined;
-  const openEntity = (id: string) => setSelection({ kind: 'entity', id });
-  const openRelationship = (id: string) => setSelection({ kind: 'relationship', id });
+  // Nothing to show for a target with no events, so a click on it does nothing.
+  const open = (next: EventsSelection) => {
+    if (resolveEventsSelection(next, impactMap).events.length > 0) {
+      setSelection(next);
+    }
+  };
+  const openEntity = (id: string) => open({ kind: 'entity', id });
+  const openRelationship = (id: string) => open({ kind: 'relationship', id });
   const map = (
     <Renderer
       impactMap={impactMap}

@@ -163,6 +163,18 @@ describe('ImpactMapTab', () => {
     expect(screen.queryByTestId('agenticInvestigationsImpactMapViewInTimeline')).toBeNull();
   });
 
+  it('opens nothing for an entity or a relationship that has no events', () => {
+    mockUseInvestigation.mockReturnValue({
+      data: { in_progress: false, impact_map: { ...impactMap, events: [] } },
+    });
+
+    renderTab();
+    fireEvent.click(screen.getByTestId('fakeEntity'));
+    fireEvent.click(screen.getByTestId('fakeRelationship'));
+
+    expect(screen.queryByTestId('agenticInvestigationsImpactMapEventsFlyout')).toBeNull();
+  });
+
   it('lists the events of a relationship', () => {
     mockUseInvestigation.mockReturnValue({ data: { in_progress: false, impact_map: impactMap } });
 
