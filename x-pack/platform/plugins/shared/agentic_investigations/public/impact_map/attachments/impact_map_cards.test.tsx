@@ -259,6 +259,19 @@ describe('ImpactMapCards', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('collapses a card to its header without opening it', () => {
+    renderCards(document);
+
+    fireEvent.click(screen.getByTestId('agenticInvestigationsImpactMapCardCollapse'));
+
+    expect(screen.queryByTestId('fakeMap')).not.toBeInTheDocument();
+    expect(screen.getByTestId('agenticInvestigationsImpactMapCardHeader')).toBeInTheDocument();
+    expect(openInInvestigation).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTestId('agenticInvestigationsImpactMapCardCollapse'));
+    expect(screen.getByTestId('fakeMap')).toBeInTheDocument();
+  });
+
   it('opens an entity from its card', () => {
     renderCards(document);
 
