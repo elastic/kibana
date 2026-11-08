@@ -6,6 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
+import { EuiAccordion, EuiEmptyPrompt, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
   OverviewTab,
   conversationToInvestigation,
@@ -68,6 +70,34 @@ export const toOverviewSections = (
   };
 };
 
+const LEARNINGS_TITLE = i18n.translate('xpack.agenticInvestigations.overview.learnings.title', {
+  defaultMessage: 'Learnings',
+});
+const LEARNINGS_BODY = i18n.translate('xpack.agenticInvestigations.overview.learnings.body', {
+  defaultMessage: 'This will show what Elastic Nightshift learned during the investigation.',
+});
+
+/** A placeholder, collapsed, until the learnings of an investigation are recorded. */
+const LearningsSection: React.FC = () => {
+  const accordionId = useGeneratedHtmlId({ prefix: 'investigationLearnings' });
+  return (
+    <EuiAccordion
+      id={accordionId}
+      buttonContent={LEARNINGS_TITLE}
+      paddingSize="m"
+      data-test-subj="agenticInvestigationsLearningsSection"
+    >
+      <EuiEmptyPrompt
+        data-test-subj="agenticInvestigationsLearningsPlaceholder"
+        iconType="sparkles"
+        titleSize="xs"
+        title={<h3>{LEARNINGS_TITLE}</h3>}
+        body={<p>{LEARNINGS_BODY}</p>}
+      />
+    </EuiAccordion>
+  );
+};
+
 /**
  * The investigation template's overview tab: the conversation joined with what the query API
  * knows about it (subjects, impact, hypotheses), read again while an agent works on it. When the
@@ -106,14 +136,18 @@ export const InvestigationOverview: React.FC<
     (data?.proposals.length ?? 0) > 0;
 
   return (
-    <OverviewTab
-      investigation={investigation}
-      attachments={conversation.attachments}
-      groupedAttachments={groupedAttachments}
-      proposedActionsContent={proposedActionsContent}
-      proposedActionsCount={proposedActionsCount}
-      sections={sections}
-      showLoadingSection={(data?.in_progress ?? false) && !hasFindings}
-    />
+    <>
+      <OverviewTab
+        investigation={investigation}
+        attachments={conversation.attachments}
+        groupedAttachments={groupedAttachments}
+        proposedActionsContent={proposedActionsContent}
+        proposedActionsCount={proposedActionsCount}
+        sections={sections}
+        showLoadingSection={(data?.in_progress ?? false) && !hasFindings}
+      />
+      <EuiSpacer size="m" />
+      <LearningsSection />
+    </>
   );
 };
