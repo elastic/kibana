@@ -10,6 +10,7 @@ import { lastValueFrom } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
+import { PROJECT_ROUTING } from '@kbn/cps-utils';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useTileQueryInputs } from './use_tile_query_inputs';
 import { EMPTY_ENTITY_IDS } from '../data';
@@ -18,7 +19,6 @@ import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
 import type { EntityFilters, TimeRange } from '../../entities_grid/common';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 import { isTileQueryTimeout, retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
-import { TILE_PROJECT_ROUTING } from './tile_project_routing';
 
 export const useNewEntityCount = ({
   spaceId,
@@ -66,7 +66,7 @@ export const useNewEntityCount = ({
             {
               abortSignal: tileSignal,
               strategy: 'esql_async',
-              projectRouting: TILE_PROJECT_ROUTING,
+              projectRouting: PROJECT_ROUTING.ORIGIN,
             }
           )
         )

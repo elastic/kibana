@@ -12,6 +12,7 @@ import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helper
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
+import { PROJECT_ROUTING } from '@kbn/cps-utils';
 import { lastValueFrom } from 'rxjs';
 import { chunk } from 'lodash';
 import pMap from 'p-map';
@@ -204,9 +205,6 @@ export const buildStatsByEntityClause = (aggregations: readonly string[]): strin
 const toRows = ({ columns, values }: Pick<ESQLSearchResponse, 'columns' | 'values'>): Row[] =>
   values.map((row) => Object.fromEntries(columns.map((col, i) => [col.name, row[i]])));
 
-/** Pin ES|QL to the current project; CPS space default is often `_alias:*`. */
-const ESQL_PROJECT_ROUTING = '_alias:_origin' as const;
-
 export const createEsqlRunner =
   (searchService: DataPublicPluginStart['search'], signal?: AbortSignal): EsqlRunner =>
   async (steps) => {
@@ -220,7 +218,7 @@ export const createEsqlRunner =
         {
           abortSignal: signal,
           strategy: 'esql_async',
-          projectRouting: ESQL_PROJECT_ROUTING,
+          projectRouting: PROJECT_ROUTING.ORIGIN,
         }
       )
     );

@@ -9,11 +9,11 @@ import { lastValueFrom } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
+import { PROJECT_ROUTING } from '@kbn/cps-utils';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { REACHES_BACK_COLUMN } from '../queries/history_reaches_back';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 import { retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
-import { TILE_PROJECT_ROUTING } from './tile_project_routing';
 import type { TileDeltaFailure } from '../data';
 
 interface PreviousPeriodQueryOptions<T> {
@@ -50,7 +50,7 @@ const usePreviousPeriodQuery = <T>({
             {
               abortSignal: tileSignal,
               strategy: 'esql_async',
-              projectRouting: TILE_PROJECT_ROUTING,
+              projectRouting: PROJECT_ROUTING.ORIGIN,
             }
           )
         )
