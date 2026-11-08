@@ -510,27 +510,43 @@ const EntityBadge: React.FC<{
   const type = impactMap.entity_types.find(({ id }) => id === entity?.type_id);
   const label = entity?.label ?? entityId;
   const iconType = getEntityIcon(type);
-  return onOpenEntity ? (
-    <EuiBadge
-      color="hollow"
-      iconType={iconType}
-      onClick={() => onOpenEntity(entityId)}
-      onClickAriaLabel={i18n.translate('xpack.agenticInvestigations.impactMap.events.openEntity', {
-        defaultMessage: 'Open {entity}',
-        values: { entity: label },
-      })}
-      data-test-subj="agenticInvestigationsImpactMapEventEntityBadge"
-    >
-      {label}
-    </EuiBadge>
-  ) : (
-    <EuiBadge
-      color="hollow"
-      iconType={iconType}
-      data-test-subj="agenticInvestigationsImpactMapEventEntityBadge"
-    >
-      {label}
-    </EuiBadge>
+  const tooltip = i18n.translate(
+    'xpack.agenticInvestigations.impactMap.events.entityBadgeTooltip',
+    {
+      defaultMessage:
+        'Entity: {entity}{type, select, none {} other { (type: {type})}}{canOpen, select, yes { . Click to open it.} other {}}',
+      values: {
+        entity: label,
+        type: type?.label ?? 'none',
+        canOpen: onOpenEntity ? 'yes' : 'no',
+      },
+    }
+  );
+  return (
+    <EuiToolTip content={tooltip} disableScreenReaderOutput>
+      {onOpenEntity ? (
+        <EuiBadge
+          color="hollow"
+          iconType={iconType}
+          onClick={() => onOpenEntity(entityId)}
+          onClickAriaLabel={i18n.translate(
+            'xpack.agenticInvestigations.impactMap.events.openEntity',
+            { defaultMessage: 'Open {entity}', values: { entity: label } }
+          )}
+          data-test-subj="agenticInvestigationsImpactMapEventEntityBadge"
+        >
+          {label}
+        </EuiBadge>
+      ) : (
+        <EuiBadge
+          color="hollow"
+          iconType={iconType}
+          data-test-subj="agenticInvestigationsImpactMapEventEntityBadge"
+        >
+          {label}
+        </EuiBadge>
+      )}
+    </EuiToolTip>
   );
 };
 
@@ -637,15 +653,31 @@ const TypeBadges: React.FC<{ typeLabel?: string; icon?: string }> = ({ typeLabel
   return kind ? (
     <>
       <EuiFlexItem grow={false} data-test-subj="agenticInvestigationsImpactMapEventsType">
-        <EuiBadge color="hollow" iconType={KIND_ICONS[kind.toLowerCase()]}>
-          {kind}
-        </EuiBadge>
+        <EuiToolTip
+          content={i18n.translate('xpack.agenticInvestigations.impactMap.events.typeTooltip', {
+            defaultMessage: 'Entity type: {type}',
+            values: { type: kind },
+          })}
+          disableScreenReaderOutput
+        >
+          <EuiBadge color="hollow" iconType={KIND_ICONS[kind.toLowerCase()]} tabIndex={0}>
+            {kind}
+          </EuiBadge>
+        </EuiToolTip>
       </EuiFlexItem>
       {subtype && (
         <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow" iconType={icon}>
-            {subtype}
-          </EuiBadge>
+          <EuiToolTip
+            content={i18n.translate('xpack.agenticInvestigations.impactMap.events.subtypeTooltip', {
+              defaultMessage: 'Entity sub-type: {subtype}',
+              values: { subtype },
+            })}
+            disableScreenReaderOutput
+          >
+            <EuiBadge color="hollow" iconType={icon} tabIndex={0}>
+              {subtype}
+            </EuiBadge>
+          </EuiToolTip>
         </EuiFlexItem>
       )}
     </>
