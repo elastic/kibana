@@ -33,6 +33,7 @@ import { useInvestigation } from '../../../../investigations/hooks/use_investiga
 import type { ImpactMapRenderer } from '../../../../types';
 import {
   ImpactMapEventsFlyout,
+  STANDALONE_WIDTH,
   resolveEventsSelection,
   type EventsSelection,
 } from './impact_map_events';
@@ -273,6 +274,10 @@ const ImpactMapPanel: React.FC<{
                 css={css`
                   flex: none;
                   padding: ${euiTheme.size.m};
+                  /* Stays clear of the events panel, which runs the full height of the screen. */
+                  padding-inline-end: ${selection
+                    ? `calc(${STANDALONE_WIDTH} + ${euiTheme.size.m})`
+                    : euiTheme.size.m};
                 `}
               >
                 <EuiFlexItem>
@@ -302,6 +307,8 @@ const ImpactMapPanel: React.FC<{
                   css={css`
                     position: absolute;
                     inset: 0;
+                    /* The map gives up the panel's width, so no node hides behind it. */
+                    inset-inline-end: ${selection ? STANDALONE_WIDTH : 0};
                   `}
                 >
                   {map}

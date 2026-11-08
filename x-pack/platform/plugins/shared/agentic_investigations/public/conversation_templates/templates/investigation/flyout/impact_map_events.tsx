@@ -396,7 +396,7 @@ const EventsFlyoutFrame: React.FC<{
   );
 };
 
-const STANDALONE_WIDTH = 'min(440px, 100%)';
+export const STANDALONE_WIDTH = '440px';
 
 /** A flyout-like panel on the right of the full-screen map; Escape closes it. */
 const StandaloneEventsPanel: React.FC<{
@@ -426,6 +426,7 @@ const StandaloneEventsPanel: React.FC<{
         bottom: 0;
         z-index: 1;
         width: ${STANDALONE_WIDTH};
+        max-width: 100%;
         display: flex;
         flex-direction: column;
         background: ${euiTheme.colors.backgroundBasePlain};
