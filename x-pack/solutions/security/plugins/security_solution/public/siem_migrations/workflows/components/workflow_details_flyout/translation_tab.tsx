@@ -17,7 +17,7 @@ import {
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
-import { WorkflowGraph } from './workflow_graph';
+import { GraphMinimap, WorkflowGraph } from './workflow_graph';
 import * as i18n from './translations';
 
 export interface TranslationTabProps {
@@ -70,29 +70,56 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(({ yaml 
         ) : (
           <WorkflowGraph />
         )}
+        {/*
+          Zero-height sticky layer pinned to the bottom of the visible flyout body, so the
+          view toggle and minimap stay on screen however far the body is scrolled.
+        */}
         <div
           css={css`
-            position: absolute;
-            bottom: ${euiTheme.size.base};
-            left: 50%;
-            transform: translateX(-50%);
+            position: sticky;
+            bottom: 0;
+            height: 0;
             z-index: 1;
-            padding: ${euiTheme.size.xs};
-            background: ${euiTheme.colors.backgroundBasePlain};
-            border-radius: ${euiTheme.border.radius.medium};
-            box-shadow: 0 0 2px 0 rgba(43, 57, 79, 0.16), 0 4px 8px 0 rgba(43, 57, 79, 0.12),
-              0 8px 16px 0 rgba(43, 57, 79, 0.06);
+            container-type: inline-size;
           `}
-          data-test-subj="workflowMigrationViewToggle"
         >
-          <EuiButtonGroup
-            legend={i18n.VIEW_TOGGLE_LEGEND}
-            options={VIEW_OPTIONS}
-            idSelected={selectedView}
-            onChange={setSelectedView}
-            buttonSize="compressed"
-            isIconOnly
-          />
+          {selectedView === 'graph' && (
+            <div
+              css={css`
+                position: absolute;
+                right: ${euiTheme.size.base};
+                bottom: ${euiTheme.size.base};
+                @container (max-width: 480px) {
+                  bottom: calc(${euiTheme.size.base} + 56px);
+                }
+              `}
+            >
+              <GraphMinimap />
+            </div>
+          )}
+          <div
+            css={css`
+              position: absolute;
+              bottom: ${euiTheme.size.base};
+              left: 50%;
+              transform: translateX(-50%);
+              padding: ${euiTheme.size.xs};
+              background: ${euiTheme.colors.backgroundBasePlain};
+              border-radius: ${euiTheme.border.radius.medium};
+              box-shadow: 0 0 2px 0 rgba(43, 57, 79, 0.16), 0 4px 8px 0 rgba(43, 57, 79, 0.12),
+                0 8px 16px 0 rgba(43, 57, 79, 0.06);
+            `}
+            data-test-subj="workflowMigrationViewToggle"
+          >
+            <EuiButtonGroup
+              legend={i18n.VIEW_TOGGLE_LEGEND}
+              options={VIEW_OPTIONS}
+              idSelected={selectedView}
+              onChange={setSelectedView}
+              buttonSize="compressed"
+              isIconOnly
+            />
+          </div>
         </div>
       </div>
     </>

@@ -54,7 +54,7 @@ export const WorkflowDetailsFlyout: React.FC<WorkflowDetailsFlyoutProps> = React
     return (
       <EuiFlyout
         onClose={onClose}
-        size="l"
+        size="m"
         aria-labelledby={titleId}
         data-test-subj="workflowDetailsFlyout"
       >

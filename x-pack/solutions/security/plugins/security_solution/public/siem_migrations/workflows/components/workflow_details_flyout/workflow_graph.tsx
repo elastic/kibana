@@ -133,7 +133,7 @@ const GraphEdge: React.FC = () => (
 
 // Compact overview of the whole workflow: one bar per node, the trigger
 // highlighted, like the minimap in the Elastic Workflows visual editor.
-const GraphMinimap: React.FC = () => {
+export const GraphMinimap: React.FC = () => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -141,15 +141,16 @@ const GraphMinimap: React.FC = () => {
       role="img"
       aria-label={i18n.GRAPH_MINIMAP_LABEL}
       css={css`
-        position: absolute;
-        right: ${euiTheme.size.base};
-        bottom: ${euiTheme.size.base};
         display: flex;
         align-items: center;
         justify-content: center;
         box-sizing: border-box;
         width: 160px;
         height: 126px;
+        @media (max-height: 700px) {
+          width: 112px;
+          height: 88px;
+        }
         background: ${euiTheme.colors.emptyShade};
         border-radius: 4px;
         box-shadow: 0 0 2px 0 rgba(43, 57, 79, 0.16), 0 1px 4px 0 rgba(43, 57, 79, 0.06),
@@ -200,7 +201,6 @@ export const WorkflowGraph: React.FC = React.memo(() => {
   return (
     <div
       css={css`
-        position: relative;
         border-radius: ${euiTheme.border.radius.medium};
         overflow: hidden;
       `}
@@ -230,7 +230,6 @@ export const WorkflowGraph: React.FC = React.memo(() => {
           </React.Fragment>
         ))}
       </div>
-      <GraphMinimap />
     </div>
   );
 });
