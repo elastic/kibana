@@ -32,6 +32,7 @@ import {
   EventAffects,
   EventGlance,
   getEventEntityIds,
+  getEventGroup,
   EventKindBadge,
   EventTime,
   ImpactMapEventsFlyout,
@@ -261,13 +262,8 @@ export const EventCard: React.FC<{
 }> = ({ event, impactMap, onOpen, onOpenEntity }) => (
   <InvestigationCard
     title={event.title}
-    icon={
-      event.kind === 'recovery'
-        ? 'checkCircleFill'
-        : event.kind === 'root_cause'
-        ? 'crosshair'
-        : 'warning'
-    }
+    icon={getEventGroup(event.kind).icon}
+    iconColor={getEventGroup(event.kind).color}
     onClick={onOpen}
     data-test-subj="agenticInvestigationsEventCard"
   >

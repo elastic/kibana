@@ -26,6 +26,8 @@ export interface FilterOption {
   count: number;
   /** An EUI icon shown before the label. */
   icon?: string;
+  /** The colour of that icon, as the event kind is coloured elsewhere. */
+  iconColor?: string;
   /** What kind of thing the option is, shown after the label. */
   type?: string;
 }
@@ -48,11 +50,11 @@ export const FilterPopover: React.FC<{
   const popoverId = useGeneratedHtmlId({ prefix: testSubj });
   const typeOf = new Map(options.map(({ key, type }) => [key, type]));
   const selectable: EuiSelectableOption[] = options.map(
-    ({ key, label: optionLabel, count, icon }) => ({
+    ({ key, label: optionLabel, count, icon, iconColor }) => ({
       key,
       label: optionLabel,
       checked: selected.includes(key) ? 'on' : undefined,
-      ...(icon ? { prepend: <EuiIcon type={icon} aria-hidden={true} /> } : {}),
+      ...(icon ? { prepend: <EuiIcon type={icon} color={iconColor} aria-hidden={true} /> } : {}),
       append: <EuiBadge color="hollow">{count}</EuiBadge>,
     })
   );

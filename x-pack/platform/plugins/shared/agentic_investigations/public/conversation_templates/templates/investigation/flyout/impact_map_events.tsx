@@ -1276,10 +1276,11 @@ const EventsFlyoutContent: React.FC<
   }, [allNewestFirst, kindFilter, searchText]);
   const kindOptions = useMemo(
     () =>
-      EVENT_GROUPS.map(({ id, label, icon: groupIcon }) => ({
+      EVENT_GROUPS.map(({ id, label, icon: groupIcon, color }) => ({
         key: id,
         label,
         icon: groupIcon,
+        iconColor: color,
         count: events.filter(({ kind }) => kind === id).length,
       })).filter(({ key, count }) => count > 0 || kindFilter.includes(key)),
     [events, kindFilter]

@@ -24,6 +24,8 @@ import { css } from '@emotion/react';
 export interface InvestigationCardProps {
   title: string;
   icon: string;
+  /** The icon's colour; plain when absent. */
+  iconColor?: string;
   /** Badges next to the title: type, sub-type, counts. */
   badges?: React.ReactNode;
   /** One short line under the title. */
@@ -46,6 +48,7 @@ const OPEN = i18n.translate('xpack.agenticInvestigations.investigationCard.open'
 export const InvestigationCard: React.FC<InvestigationCardProps> = ({
   title,
   icon,
+  iconColor,
   badges,
   subtitle,
   onClick,
@@ -59,7 +62,7 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
   const heading = (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiIcon type={icon} aria-hidden={true} />
+        <EuiIcon type={icon} color={iconColor} aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle size="xs">

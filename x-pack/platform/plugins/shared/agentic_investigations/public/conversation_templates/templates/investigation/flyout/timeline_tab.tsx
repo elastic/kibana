@@ -195,9 +195,10 @@ const Timeline: React.FC<{
     const scoped = events.filter((event) =>
       matches(event, { entityIds: entityFilter, search: text })
     );
-    return EVENT_GROUPS.map(({ id, label, icon }) => ({
+    return EVENT_GROUPS.map(({ id, label, icon, color }) => ({
       key: id,
       label,
+      iconColor: color,
       count: scoped.filter(({ kind }) => kind === id).length,
       icon,
     })).filter(({ key, count }) => count > 0 || kindFilter.includes(key));
