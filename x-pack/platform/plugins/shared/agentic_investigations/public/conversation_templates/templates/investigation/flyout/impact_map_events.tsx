@@ -539,6 +539,20 @@ const KNOWN_ICONS = new Set([
   'package',
 ]);
 
+/**
+ * What an entity type is, as the map draws it. A type stored before `infrastructure` existed says
+ * `service` even for a Kubernetes deployment; it has a named icon and no APM agent, which is how
+ * the map already tells them apart.
+ */
+export const getEntityKind = (
+  type?: ImpactMapEntityType
+): ImpactMapEntityType['kind'] | undefined =>
+  type?.kind === 'service' &&
+  !type?.icon?.agent_name &&
+  (type?.icon?.eui_icon || /kubernetes|k8s/i.test(`${type?.id} ${type?.label}`))
+    ? 'infrastructure'
+    : type?.kind;
+
 /** An icon for an entity from its type: a named EUI icon, else one for its kind, else a generic one. */
 export const getEntityIcon = (type?: ImpactMapEntityType): string => {
   const named = type?.icon?.eui_icon;
@@ -795,7 +809,7 @@ export const resolveEventsSelection = (
     return {
       title: entity?.label ?? selection.id,
       icon: getEntityIcon(type),
-      typeLabel: getEntityKindLabel(type?.kind),
+      typeLabel: getEntityKindLabel(getEntityKind(type)),
       metadata: resolveEntityMetadata(entity, type),
       events: events.filter(({ entity_id: entityId }) => entityId === selection.id),
     };

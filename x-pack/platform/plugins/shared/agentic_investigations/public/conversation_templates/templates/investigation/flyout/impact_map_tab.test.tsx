@@ -13,7 +13,12 @@ import type { InvestigationImpactMapResponse } from '../../../../../common';
 import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
 import type { ImpactMapRendererProps } from '../../../../types';
 import { ImpactMapTab } from './impact_map_tab';
-import { getEntityIcon, getEntityKindLabel, withContextAnnotations } from './impact_map_events';
+import {
+  getEntityIcon,
+  getEntityKind,
+  getEntityKindLabel,
+  withContextAnnotations,
+} from './impact_map_events';
 import { takeTimelineFocus } from './timeline_focus';
 import { useIsInAgentBuilder } from './use_is_in_agent_builder';
 
@@ -129,6 +134,22 @@ const withMetadata: InvestigationImpactMapResponse = {
     },
   ],
 };
+
+describe('getEntityKind', () => {
+  it('treats an old service type with a Kubernetes icon and no agent as infrastructure', () => {
+    expect(
+      getEntityKind({
+        id: 'k8s_deployment',
+        label: 'K8s deployment',
+        kind: 'service',
+        icon: { eui_icon: 'logoKubernetes' },
+      })
+    ).toBe('infrastructure');
+    expect(
+      getEntityKind({ id: 'java', label: 'Java', kind: 'service', icon: { agent_name: 'java' } })
+    ).toBe('service');
+  });
+});
 
 describe('ImpactMapTab', () => {
   it('shows key metadata first and the rest in a filterable Metadata tab', async () => {
