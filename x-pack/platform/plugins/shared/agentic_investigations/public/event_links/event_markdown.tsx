@@ -37,10 +37,10 @@ const EVENT_LINK = /\]\(event:([^)\s]*)\)/g;
  * id moves into a relative path, which the link component below recognises.
  */
 export const toEventHref = (markdown: string): string =>
-  markdown.replace(
-    EVENT_LINK,
-    (_match, id: string) => `](${LINK_PREFIX}${encodeURIComponent(id)})`
-  );
+  markdown
+    // The model sometimes writes a line break as the two characters backslash and n.
+    .replace(/\\n/g, '\n')
+    .replace(EVENT_LINK, (_match, id: string) => `](${LINK_PREFIX}${encodeURIComponent(id)})`);
 
 export const parseEventHref = (href: string | undefined): string | undefined =>
   href?.startsWith(LINK_PREFIX) ? decodeURIComponent(href.slice(LINK_PREFIX.length)) : undefined;

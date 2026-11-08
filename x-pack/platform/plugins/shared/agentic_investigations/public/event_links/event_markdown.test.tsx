@@ -40,6 +40,10 @@ describe('event links', () => {
     expect(parseEventHref(href)).toBe(ID);
   });
 
+  it('turns an escaped line break into a real one', () => {
+    expect(toEventHref('- one.\\n- two.')).toBe('- one.\n- two.');
+  });
+
   it('opens the event a link names', () => {
     render(
       <EventLinksProvider impactMap={impactMap}>
