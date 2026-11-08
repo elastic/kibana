@@ -131,6 +131,31 @@ export const EntityStoreUtils = (getService: FtrProviderContext['getService']) =
     return res;
   };
 
+  /**
+   * Triggers the entity store's own log-extraction engine to create/update entities directly
+   * from raw source documents
+   */
+  const forceExtractEntities = async (
+    entityType: string,
+    {
+      fromDateISO = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+      toDateISO = new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+    }: { fromDateISO?: string; toDateISO?: string } = {}
+  ) => {
+    const res = await supertest
+      .post(`/internal/security/entity_store/${entityType}/force_log_extraction`)
+      .set('kbn-xsrf', 'true')
+      .set('x-elastic-internal-origin', 'Kibana')
+      .set('elastic-api-version', '2')
+      .send({ fromDateISO, toDateISO });
+
+    if (res.status !== 200 && res.status !== 202) {
+      log.error(`Failed to force log extraction for ${entityType}: ${JSON.stringify(res.body)}`);
+    }
+    expect([200, 202]).toContain(res.status);
+    return res;
+  };
+
   const getEntityWatchlists = async (euid: string): Promise<string[]> => {
     const res = await supertest
       .get('/api/security/entity_store/entities')
@@ -162,6 +187,7 @@ export const EntityStoreUtils = (getService: FtrProviderContext['getService']) =
     install,
     uninstall,
     createEntity,
+    forceExtractEntities,
     clearAllEntityStoreData,
     getEntityWatchlists,
     enableV2Setting,

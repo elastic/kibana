@@ -6,7 +6,7 @@
  */
 
 import { isPlainObject } from 'lodash';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_ACTION_SOURCE_NAME_LENGTH } from '../../../../constants';
 
 export const ActionSourceTypes = {
@@ -45,6 +45,18 @@ export const ActionSourceSchema = z.object({
 });
 
 export type ActionSource = z.infer<typeof ActionSourceSchema>;
+
+/**
+ * Read-side shape. `type` accepts any string so documents written by a newer
+ * version with an unknown source type still decode instead of failing the feed.
+ */
+export const PersistedActionSourceSchema = lazySchema(() =>
+  ActionSourceSchema.extend({
+    type: z.string(),
+  })
+);
+
+export type PersistedActionSource = z.infer<typeof PersistedActionSourceSchema>;
 
 export const isActionSource = (value: unknown): value is ActionSource => {
   if (!isPlainObject(value)) {

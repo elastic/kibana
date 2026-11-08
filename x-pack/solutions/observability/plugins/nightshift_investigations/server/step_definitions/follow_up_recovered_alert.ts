@@ -27,10 +27,10 @@ const inputSchema = lazySchema(() =>
       .max(100)
       .optional()
       .describe('When the recovery event was dispatched to workflows'),
-    rule_id: z.string().min(1).max(MAX_ALERT_FIELD_LENGTH),
-    rule_name: z.string().min(1).max(MAX_ALERT_FIELD_LENGTH),
-    rule_type_id: z.string().min(1).max(MAX_ALERT_FIELD_LENGTH),
-    rule_tags: z.array(z.string().max(MAX_ALERT_FIELD_LENGTH)).max(50).optional(),
+    rule_id: z.string().max(MAX_ALERT_FIELD_LENGTH).nullish(),
+    rule_name: z.string().max(MAX_ALERT_FIELD_LENGTH).nullish(),
+    rule_type_id: z.string().max(MAX_ALERT_FIELD_LENGTH).nullish(),
+    rule_tags: z.array(z.string().max(MAX_ALERT_FIELD_LENGTH)).max(50).nullish(),
   })
 );
 
@@ -74,10 +74,10 @@ export const followUpRecoveredAlertStepDefinition = (
         alertId: input.alert_id,
         alertStart: input.alert_start,
         recoveredAt: input.recovered_at,
-        ruleId: input.rule_id,
-        ruleName: input.rule_name,
-        ruleTypeId: input.rule_type_id,
-        ruleTags: input.rule_tags,
+        ruleId: input.rule_id ?? undefined,
+        ruleName: input.rule_name ?? undefined,
+        ruleTypeId: input.rule_type_id ?? undefined,
+        ruleTags: input.rule_tags ?? undefined,
       });
       return { output: result ?? { skip_reason: 'no_open_investigation' as const } };
     },

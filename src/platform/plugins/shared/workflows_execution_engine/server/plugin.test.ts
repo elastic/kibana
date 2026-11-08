@@ -18,6 +18,7 @@ import {
   TerminalExecutionStatuses,
 } from '@kbn/workflows';
 import { checkAndSkipIfExistingScheduledExecution } from './execution_functions';
+import { getWorkflowExecutionName } from './lib/get_workflow_execution_name';
 import type { WorkflowExecutionsDataClient } from './repositories/data_access_layer';
 import {
   createMockStepDataClient,
@@ -132,6 +133,14 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
 
   describe('when existing non-terminal scheduled execution exists', () => {
     it('should create a SKIPPED execution and return true', async () => {
+      workflow.definition = {
+        name: 'Test Workflow',
+        version: '1',
+        enabled: true,
+        'run-name': '{{ workflow.name }}: {{ event.type }}',
+        triggers: [{ type: 'scheduled', with: { every: '1h' } }],
+        steps: [],
+      };
       const existingExecution = {
         _source: {
           id: 'existing-execution-id',
@@ -159,7 +168,8 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         workflowExecutionRepository,
         stepExecutionRepository,
         currentTaskInstance,
-        logger
+        logger,
+        { getRunName: (execution) => getWorkflowExecutionName(execution, logger) }
       );
 
       expect(result.skipped).toBe(true);
@@ -175,6 +185,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
                 spaceId,
                 workflowId: workflow.id,
                 status: ExecutionStatus.SKIPPED,
+                runName: 'Test Workflow: scheduled',
                 triggeredBy: 'scheduled',
                 workflowDefinition: workflow.definition,
                 yaml: workflow.yaml,

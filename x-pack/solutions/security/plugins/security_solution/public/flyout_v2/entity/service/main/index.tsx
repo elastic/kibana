@@ -339,6 +339,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
             onCriticalitySave={onCriticalitySave}
           />
         )}
+        {isGroupView && !tabs && <EuiSpacer size="l" />}
         {tabsNode}
         {tabs && <EuiSpacer size="l" />}
         {tabs && selectedTabId === TABLE_TAB_ID && entityFromStoreResult.entityRecord ? (

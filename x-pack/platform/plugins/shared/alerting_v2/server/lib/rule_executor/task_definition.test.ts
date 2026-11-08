@@ -6,6 +6,7 @@
  */
 
 import type { PluginConfig } from '../../config';
+import { createConfigServiceMock } from '../services/config_service/config_service.mock';
 import { RuleExecutorTaskDefinition } from './task_definition';
 import { DEFAULT_ALERTING_RULE_EXECUTOR_TASK_TIMEOUT } from './constants';
 
@@ -22,13 +23,15 @@ const buildConfig = (timeout?: string): PluginConfig =>
 describe('RuleExecutorTaskDefinition', () => {
   describe('resolveTimeout', () => {
     test('returns the configured timeout when set', () => {
-      expect(RuleExecutorTaskDefinition.resolveTimeout?.(buildConfig('10m'))).toBe('10m');
+      expect(
+        RuleExecutorTaskDefinition.resolveTimeout?.(createConfigServiceMock(buildConfig('10m')))
+      ).toBe('10m');
     });
 
     test('falls back to the default timeout when the config timeout is unset', () => {
-      expect(RuleExecutorTaskDefinition.resolveTimeout?.(buildConfig(undefined))).toBe(
-        DEFAULT_ALERTING_RULE_EXECUTOR_TASK_TIMEOUT
-      );
+      expect(
+        RuleExecutorTaskDefinition.resolveTimeout?.(createConfigServiceMock(buildConfig(undefined)))
+      ).toBe(DEFAULT_ALERTING_RULE_EXECUTOR_TASK_TIMEOUT);
     });
   });
 });
