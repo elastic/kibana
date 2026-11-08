@@ -47,6 +47,7 @@ dependsOn:
   - '@kbn/lens-plugin'
   - '@kbn/presentation-publishing'
   - '@kbn/shared-ux-ai-components'
+  - '@kbn/shared-ux-button-exit-full-screen'
   - '@kbn/shared-ux-router'
   - '@kbn/ui-callout'
   - '@kbn/unified-tabs'

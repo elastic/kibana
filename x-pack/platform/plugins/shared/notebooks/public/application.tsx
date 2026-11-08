@@ -11,6 +11,7 @@ import type { BehaviorSubject } from 'rxjs';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { PLUGIN_NAME } from '../common/constants';
+import { AppPage } from './pages/app_page';
 import { NotebookListing } from './pages/notebook_listing';
 import { EditNotebookPage, NewNotebookPage } from './pages/notebook_page';
 import type { NotebookStartDependencies } from './plugin';
@@ -43,6 +44,9 @@ export const renderApp = ({
             </Route>
             <Route exact path="/view/:id">
               <EditNotebookPage api={api} />
+            </Route>
+            <Route exact path="/view/:id/apps/:appId">
+              <AppPage api={api} />
             </Route>
             <Route path="/">
               <NotebookListing api={api} />

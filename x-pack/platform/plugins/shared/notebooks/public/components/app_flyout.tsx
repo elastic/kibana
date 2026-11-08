@@ -22,6 +22,7 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  copyToClipboard,
   euiShadow,
   useEuiTheme,
   type UseEuiTheme,
@@ -30,7 +31,8 @@ import { css } from '@emotion/react';
 import { GridLayout, type GridLayoutData, type GridSettings } from '@kbn/grid-layout';
 import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import { UnifiedTabs, type TabItem } from '@kbn/unified-tabs';
+import { UnifiedTabs, type TabItem, type TabMenuItem } from '@kbn/unified-tabs';
+import useObservable from 'react-use/lib/useObservable';
 import { v4 as uuidv4 } from 'uuid';
 import type {
   AppPanel,
@@ -50,7 +52,7 @@ import {
   toGridLayout,
 } from '../model/app_layout';
 import type { AppCellDefinition } from '../model/app_layout';
-import { GRID_SUBDIVISIONS } from '../../common/constants';
+import { APP_ID, GRID_SUBDIVISIONS, getNotebookAppPath } from '../../common/constants';
 import { useNotebookServices } from '../services';
 import { findPinnedTimeCell } from '../model/cell_factory';
 import { AppSettingsFlyout } from './app_settings_flyout';
@@ -123,8 +125,11 @@ const MOVE_PANEL_LABEL = i18n.translate('xpack.notebook.app.movePanel', {
   defaultMessage: 'Move panel',
 });
 
-/** Dashboard-style panel chrome: a dashed outline and floating move, reveal and remove actions on hover. */
-const getPanelStyles = (euiThemeContext: UseEuiTheme, inset: number) => {
+/**
+ * Dashboard-style panel chrome. While editing: a dashed outline and floating move, reveal and
+ * remove actions on hover.
+ */
+const getPanelStyles = (euiThemeContext: UseEuiTheme, inset: number, isEditable: boolean) => {
   const { euiTheme } = euiThemeContext;
   return {
     container: css`
@@ -179,7 +184,8 @@ const getPanelStyles = (euiThemeContext: UseEuiTheme, inset: number) => {
       overflow: auto;
       padding: ${euiTheme.size.s};
       border-radius: ${euiTheme.border.radius.small};
-      outline: ${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBaseProminent};
+      ${isEditable &&
+      `outline: ${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBaseProminent};`}
       background-color: ${euiTheme.colors.backgroundBasePlain};
     `,
   };
@@ -195,14 +201,19 @@ const AppGridPanel = ({
   app: NotebookApp;
   panel: AppPanel;
   setDragHandles: (refs: Array<HTMLElement | null>) => void;
-  onRevealCell: (cellId: string) => void;
+  /** Omitted for a read-only app, which shows no panel actions. */
+  onRevealCell?: (cellId: string) => void;
   /** Space in pixels kept clear around the panel, standing in for the grid gutter. */
   inset: number;
 }) => {
   const { store } = useNotebook();
   const euiThemeContext = useEuiTheme();
   const cells = useStateFromPublishingSubject(store.cells$);
-  const styles = useMemo(() => getPanelStyles(euiThemeContext, inset), [euiThemeContext, inset]);
+  const isEditable = onRevealCell !== undefined;
+  const styles = useMemo(
+    () => getPanelStyles(euiThemeContext, inset, isEditable),
+    [euiThemeContext, inset, isEditable]
+  );
   const dragHandleRef = useCallback(
     (element: HTMLButtonElement | null) => setDragHandles([element]),
     [setDragHandles]
@@ -218,39 +229,41 @@ const AppGridPanel = ({
 
   return (
     <div css={styles.container} data-test-subj={`notebookAppPanel-${cell.name}`}>
-      <div className={HOVER_ACTIONS_CLASS} css={styles.hoverActions}>
-        <span>
-          <button
-            type="button"
-            ref={dragHandleRef}
-            aria-label={MOVE_PANEL_LABEL}
-            css={styles.dragHandle}
-            data-test-subj="notebookAppPanelDragHandle"
-          >
-            <EuiIcon type="move" color="text" aria-hidden={true} />
-          </button>
-        </span>
-        <span>
-          <EuiToolTip content={REVEAL_PANEL_LABEL} disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType="symlink"
-              color="text"
-              aria-label={REVEAL_PANEL_LABEL}
-              onClick={() => onRevealCell(cell.id)}
-              data-test-subj="notebookAppPanelReveal"
-            />
-          </EuiToolTip>
-          <EuiToolTip content={REMOVE_PANEL_LABEL} disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType="minusCircle"
-              color="text"
-              aria-label={REMOVE_PANEL_LABEL}
-              onClick={removePanel}
-              data-test-subj="notebookAppPanelRemove"
-            />
-          </EuiToolTip>
-        </span>
-      </div>
+      {onRevealCell && (
+        <div className={HOVER_ACTIONS_CLASS} css={styles.hoverActions}>
+          <span>
+            <button
+              type="button"
+              ref={dragHandleRef}
+              aria-label={MOVE_PANEL_LABEL}
+              css={styles.dragHandle}
+              data-test-subj="notebookAppPanelDragHandle"
+            >
+              <EuiIcon type="move" color="text" aria-hidden={true} />
+            </button>
+          </span>
+          <span>
+            <EuiToolTip content={REVEAL_PANEL_LABEL} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="symlink"
+                color="text"
+                aria-label={REVEAL_PANEL_LABEL}
+                onClick={() => onRevealCell(cell.id)}
+                data-test-subj="notebookAppPanelReveal"
+              />
+            </EuiToolTip>
+            <EuiToolTip content={REMOVE_PANEL_LABEL} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="minusCircle"
+                color="text"
+                aria-label={REMOVE_PANEL_LABEL}
+                onClick={removePanel}
+                data-test-subj="notebookAppPanelRemove"
+              />
+            </EuiToolTip>
+          </span>
+        </div>
+      )}
       <div css={styles.content}>
         <PanelContent panelId={panel.id} cell={cell} />
       </div>
@@ -385,8 +398,9 @@ const AppGrid = ({
   scrollContainer,
 }: {
   app: NotebookApp;
-  onRevealCell: (cellId: string) => void;
-  scrollContainer: HTMLDivElement | null;
+  /** Omitted for a read-only app, whose layout is locked. */
+  onRevealCell?: (cellId: string) => void;
+  scrollContainer?: HTMLDivElement | null;
 }) => {
   const { store } = useNotebook();
   const { euiTheme } = useEuiTheme();
@@ -482,6 +496,7 @@ const AppGrid = ({
         key={`${app.freePlacement ? 'free' : 'compact'}-${snapToGrid ? 'snap' : 'fine'}-${columns}`}
         layout={layout}
         gridSettings={gridSettings}
+        accessMode={onRevealCell ? 'EDIT' : 'VIEW'}
         scrollContainer={scrollContainer}
         renderPanelContents={renderPanelContents}
         useCustomDragHandle
@@ -491,6 +506,22 @@ const AppGrid = ({
     </div>
   );
 };
+
+/** The app's header and panels; read-only, with a locked layout, when `onRevealCell` is omitted. */
+export const AppView = ({
+  app,
+  onRevealCell,
+  scrollContainer,
+}: {
+  app: NotebookApp;
+  onRevealCell?: (cellId: string) => void;
+  scrollContainer?: HTMLDivElement | null;
+}) => (
+  <>
+    <AppHeader app={app} />
+    <AppGrid app={app} onRevealCell={onRevealCell} scrollContainer={scrollContainer} />
+  </>
+);
 
 const NoApps = () => {
   const { store, activeAppId$ } = useNotebook();
@@ -545,10 +576,55 @@ const NoApps = () => {
 
 const MAX_APPS = 20;
 
+/** Tab menu items that open or share the app's own page, which only a saved notebook has. */
+const useAppLinkMenuItems = (): ((appId: string) => TabMenuItem[]) => {
+  const { store, notebookId } = useNotebook();
+  const { core } = useNotebookServices();
+  const isDirty = useObservable(store.isDirty$, false);
+  return (appId) => {
+    if (!notebookId) return [];
+    const url = core.application.getUrlForApp(APP_ID, {
+      path: getNotebookAppPath(notebookId, appId),
+      absolute: true,
+    });
+    return [
+      {
+        'data-test-subj': 'notebookAppOpenInNewTab',
+        name: 'openAppInNewTab',
+        label: i18n.translate('xpack.notebook.app.openInNewTab', {
+          defaultMessage: 'Open in new tab',
+        }),
+        onClick: () => window.open(url, '_blank', 'noopener,noreferrer'),
+        icon: 'external',
+      },
+      {
+        'data-test-subj': 'notebookAppCopyLink',
+        name: 'copyAppLink',
+        label: i18n.translate('xpack.notebook.app.copyLink', { defaultMessage: 'Copy link' }),
+        onClick: () => {
+          copyToClipboard(url);
+          core.notifications.toasts.addSuccess({
+            title: i18n.translate('xpack.notebook.app.linkCopied', {
+              defaultMessage: 'Link copied',
+            }),
+            text: isDirty
+              ? i18n.translate('xpack.notebook.app.linkCopiedUnsaved', {
+                  defaultMessage: 'The link shows the last saved version of the notebook.',
+                })
+              : undefined,
+          });
+        },
+        icon: 'link',
+      },
+    ];
+  };
+};
+
 const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: NotebookApp[] }) => {
   const { store, activeAppId$ } = useNotebook();
   const { core } = useNotebookServices();
   const { euiTheme } = useEuiTheme();
+  const getAppLinkMenuItems = useAppLinkMenuItems();
   const confirmDelete = (deleted: readonly NotebookApp[]): Promise<boolean> =>
     core.overlays.openConfirm(
       i18n.translate('xpack.notebook.app.deleteConfirmBody', {
@@ -645,6 +721,7 @@ const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: NotebookApp[] }) =>
           }
           onChanged={({ items, selectedItem }) => applyTabs(items, selectedItem?.id)}
           getTopTabMenuItems={(item) => [
+            ...getAppLinkMenuItems(item.id),
             {
               'data-test-subj': 'notebookAppSettings',
               name: 'appSettings',
@@ -713,8 +790,7 @@ export const AppFlyout = ({
             <AppToolbar app={app} apps={apps} />
           </EuiFlyoutHeader>
           <EuiFlyoutBody scrollContainerRef={setBodyScrollContainer}>
-            <AppHeader app={app} />
-            <AppGrid app={app} onRevealCell={onRevealCell} scrollContainer={bodyScrollContainer} />
+            <AppView app={app} onRevealCell={onRevealCell} scrollContainer={bodyScrollContainer} />
           </EuiFlyoutBody>
         </>
       ) : (

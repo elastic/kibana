@@ -17,7 +17,7 @@ import type {
   LensAttributes,
 } from '../../common/types';
 import { NotebookStore } from './notebook_store';
-import { NotebookScheduler } from './scheduler';
+import { NotebookScheduler, type SchedulerDeps } from './scheduler';
 import type { CellOutput, RunQuery, RunQueryArgs } from './types';
 
 interface FakeCall extends RunQueryArgs {
@@ -132,7 +132,7 @@ const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 const NOW = new Date('2026-10-29T12:00:00.000Z');
 
-const setup = (cells: CellDefinition[]) => {
+const setup = (cells: CellDefinition[], { scope }: Pick<SchedulerDeps, 'scope'> = {}) => {
   const store = new NotebookStore({
     title: 'Notebook',
     cellOrder: cells.map(({ id }) => id),
@@ -143,6 +143,7 @@ const setup = (cells: CellDefinition[]) => {
   const scheduler = new NotebookScheduler(store, {
     runQuery: fake.runQuery,
     now: () => clock.now,
+    scope,
   });
   const runtime = (id: string) => store.getRuntime(id);
   const output = (id: string): CellOutput | undefined => store.getRuntime(id).output;
@@ -1116,6 +1117,36 @@ describe('NotebookScheduler', () => {
         output: { logs: [{ level: 'log', message: 'country US' }] },
       });
       jest.restoreAllMocks();
+    });
+  });
+
+  describe('scope', () => {
+    const cells = () => [
+      range('limit', [0, 10]),
+      esql('shown', 'FROM logs | LIMIT ?limit_max'),
+      chart('shown_chart', 'shown'),
+      esql('hidden', 'FROM hosts | LIMIT ?limit_max'),
+    ];
+
+    it('runs only the scoped cells and what feeds them', async () => {
+      const env = track(setup(cells(), { scope: ['shown_chart'] }));
+      await env.open();
+
+      expect(env.fake.calls.map(({ query }) => query)).toEqual(['FROM logs | LIMIT ?limit_max']);
+      expect(env.runtime('shown_chart').status).toBe('done');
+      expect(env.runtime('hidden')).toEqual({ status: 'idle' });
+    });
+
+    it('re-runs only scoped cells when an input changes', async () => {
+      const env = track(setup(cells(), { scope: ['shown_chart'] }));
+      await env.open();
+      env.fake.calls.length = 0;
+
+      env.store.setInputValue('limit', { kind: 'range', value: [0, 20] });
+      await env.scheduler.whenIdle();
+
+      expect(env.fake.calls.map(({ query }) => query)).toEqual(['FROM logs | LIMIT ?limit_max']);
+      expect(env.runtime('hidden')).toEqual({ status: 'idle' });
     });
   });
 

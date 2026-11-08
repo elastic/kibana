@@ -245,6 +245,7 @@ Hex-inspired, EUI, single linear notebook view.
 - **Input cell:** the control plus a config popover.
 - **Markdown cell:** rendered; click to edit.
 - **Adding cells:** "+ Add cell" hover bar between cells and at the end, with a type menu. A new cell that has an edit flyout (chart, custom, Vega, dropdown and range inputs) opens it straight away; a new chart's flyout suggests a chart for its source. Duplicated cells and cells added from a flyout don't.
+- **Standalone app:** `/app/notebook/view/:id/apps/:appId` shows one app of a saved notebook on its own page, read-only: its header and panels, with the layout locked and no panel actions. Only the app's cells and everything upstream of them run (the scheduler's `scope`), and cells set to run manually run once on open, since the page has no Run buttons. Inputs in the app work, but their changes are never saved. Breadcrumbs are Notebooks › notebook › app; the app menu has **Full screen** (hides Kibana's chrome, as Dashboard's does; `?fullScreen=true` opens in it) and **Open notebook**. An app tab's menu in the notebook has **Open in new tab** and **Copy link** once the notebook is saved; the link shows the saved version, and an app missing from it shows "App not found".
 
 ## Testing
 

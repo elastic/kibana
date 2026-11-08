@@ -19,6 +19,21 @@ import { useBreadcrumbs } from './use_breadcrumbs';
 
 const UNTITLED = i18n.translate('xpack.notebook.untitled', { defaultMessage: 'Untitled notebook' });
 
+export const NotebookLoadError = ({ message }: { message?: string }) => (
+  <EuiEmptyPrompt
+    color="danger"
+    iconType="error"
+    title={
+      <h2>
+        {i18n.translate('xpack.notebook.loadError', {
+          defaultMessage: 'Could not load notebook',
+        })}
+      </h2>
+    }
+    body={message}
+  />
+);
+
 export const NewNotebookPage = ({ api }: { api: NotebookApi }) => {
   const { core } = useNotebookServices();
   const history = useHistory();
@@ -43,22 +58,7 @@ export const EditNotebookPage = ({ api }: { api: NotebookApi }) => {
   useBreadcrumbs(value?.attributes.title);
 
   if (loading) return <EuiLoadingSpinner size="xl" />;
-  if (error || !value) {
-    return (
-      <EuiEmptyPrompt
-        color="danger"
-        iconType="error"
-        title={
-          <h2>
-            {i18n.translate('xpack.notebook.loadError', {
-              defaultMessage: 'Could not load notebook',
-            })}
-          </h2>
-        }
-        body={error?.message}
-      />
-    );
-  }
+  if (error || !value) return <NotebookLoadError message={error?.message} />;
 
   const save = async (store: NotebookStore) => {
     await api.update(id, store.toAttributes());
@@ -68,5 +68,5 @@ export const EditNotebookPage = ({ api }: { api: NotebookApi }) => {
     );
   };
 
-  return <NotebookEditor key={id} attributes={value.attributes} onSave={save} />;
+  return <NotebookEditor key={id} notebookId={id} attributes={value.attributes} onSave={save} />;
 };

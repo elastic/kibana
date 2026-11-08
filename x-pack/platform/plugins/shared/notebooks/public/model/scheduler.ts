@@ -19,7 +19,7 @@ import type {
   EsqlCellDefinition,
   InputCellDefinition,
 } from '../../common/types';
-import { buildGraph, getDescendants, type NotebookGraph } from './graph';
+import { buildGraph, getAncestors, getDescendants, type NotebookGraph } from './graph';
 import { getDefaultInputValue, type NotebookStore } from './notebook_store';
 import { buildQueryParams, resolveInputParams } from './params';
 import { getCodeReferences, runCode } from './code_cell';
@@ -39,6 +39,8 @@ import type {
 export interface SchedulerDeps {
   runQuery: RunQuery;
   now?: () => Date;
+  /** Cells to keep up to date, along with everything upstream of them; every cell when omitted. */
+  scope?: readonly string[];
 }
 
 /** Definition fields whose change re-evaluates a cell; everything else is metadata. */
@@ -140,6 +142,8 @@ export class NotebookScheduler {
   private cells: Readonly<Record<string, CellDefinition>>;
   private inputValues: Readonly<Record<string, InputValue>>;
   private graph: NotebookGraph;
+  private readonly scope?: readonly string[];
+  private inScope?: ReadonlySet<string>;
   private subscriptions: Subscription[] = [];
   private readonly tasks = new Map<string, Promise<void>>();
   private readonly controllers = new Map<string, AbortController>();
@@ -147,12 +151,14 @@ export class NotebookScheduler {
   /** How many times each cell has been recomputed rather than served from its memo. */
   readonly runCounts$ = new BehaviorSubject<Readonly<Record<string, number>>>({});
 
-  constructor(private readonly store: NotebookStore, { runQuery, now }: SchedulerDeps) {
+  constructor(private readonly store: NotebookStore, { runQuery, now, scope }: SchedulerDeps) {
     this.runQuery = runQuery;
     this.now = now ?? (() => new Date());
+    this.scope = scope;
     this.cells = store.cells$.getValue();
     this.inputValues = store.inputValues$.getValue();
     this.graph = buildGraph(this.cells, store.cellOrder$.getValue());
+    this.inScope = this.getInScope(this.graph);
   }
 
   start(): void {
@@ -237,6 +243,7 @@ export class NotebookScheduler {
     const previousErrors = this.graph.errors;
     this.cells = cells;
     this.graph = buildGraph(cells, this.store.cellOrder$.getValue());
+    this.inScope = this.getInScope(this.graph);
 
     Object.keys(previousCells)
       .filter((id) => !cells[id])
@@ -265,6 +272,11 @@ export class NotebookScheduler {
     if (roots.length > 0) void this.propagate(roots, new Set());
   }
 
+  private getInScope(graph: NotebookGraph): ReadonlySet<string> | undefined {
+    const { scope } = this;
+    return scope && new Set([...scope, ...getAncestors(graph, scope)]);
+  }
+
   private cancel(id: string): void {
     this.controllers.get(id)?.abort();
     this.controllers.delete(id);
@@ -274,8 +286,9 @@ export class NotebookScheduler {
   /** Re-evaluates `roots` and everything downstream; each cell waits for its parents' latest evaluation. */
   private propagate(roots: readonly string[], forced: ReadonlySet<string>): Promise<void> {
     const affected = new Set([...roots, ...getDescendants(this.graph, roots)]);
+    const { inScope } = this;
     const scheduled = this.graph.order
-      .filter((id) => affected.has(id))
+      .filter((id) => affected.has(id) && (!inScope || inScope.has(id)))
       .map((id) => {
         this.cancel(id);
         const controller = new AbortController();

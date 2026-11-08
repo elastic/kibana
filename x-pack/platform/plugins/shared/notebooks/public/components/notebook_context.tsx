@@ -12,6 +12,8 @@ import type { NotebookStore } from '../model/notebook_store';
 import type { NotebookScheduler } from '../model/scheduler';
 
 export interface NotebookContextValue {
+  /** The saved notebook's id; undefined until a new notebook is first saved. */
+  notebookId?: string;
   store: NotebookStore;
   scheduler: NotebookScheduler;
   /** Number of notebook flyouts currently open. */

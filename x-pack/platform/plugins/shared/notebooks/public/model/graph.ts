@@ -222,15 +222,25 @@ export const buildGraph = (
   return { parents, children, order, errors };
 };
 
-/** Every cell downstream of `roots`, excluding the roots unless one descends from another. */
-export const getDescendants = (graph: NotebookGraph, roots: Iterable<string>): Set<string> => {
-  const descendants = new Set<string>();
-  const queue = [...roots].flatMap((root) => graph.children.get(root) ?? []);
+const walk = (
+  edges: ReadonlyMap<string, readonly string[]>,
+  roots: Iterable<string>
+): Set<string> => {
+  const reached = new Set<string>();
+  const queue = [...roots].flatMap((root) => edges.get(root) ?? []);
   while (queue.length > 0) {
     const id = queue.shift();
-    if (id === undefined || descendants.has(id)) continue;
-    descendants.add(id);
-    queue.push(...(graph.children.get(id) ?? []));
+    if (id === undefined || reached.has(id)) continue;
+    reached.add(id);
+    queue.push(...(edges.get(id) ?? []));
   }
-  return descendants;
+  return reached;
 };
+
+/** Every cell downstream of `roots`, excluding the roots unless one descends from another. */
+export const getDescendants = (graph: NotebookGraph, roots: Iterable<string>): Set<string> =>
+  walk(graph.children, roots);
+
+/** Every cell upstream of `roots`, excluding the roots unless one feeds another. */
+export const getAncestors = (graph: NotebookGraph, roots: Iterable<string>): Set<string> =>
+  walk(graph.parents, roots);
