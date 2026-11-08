@@ -40,6 +40,7 @@ import {
   ImpactMapEventsFlyout,
   describeEventTarget,
   getEntityIcon,
+  getEntityKindLabel,
   getEventEntityIds,
   resolveEventsSelection,
 } from './impact_map_events';
@@ -234,7 +235,7 @@ const Timeline: React.FC<{
       label,
       count: counts.get(id) ?? 0,
       icon: getEntityIcon(types.get(typeId)),
-      type: types.get(typeId)?.label,
+      type: getEntityKindLabel(types.get(typeId)?.kind),
     }));
   }, [events, entities, relationships, impactMap.entity_types]);
 

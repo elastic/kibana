@@ -13,7 +13,7 @@ import type { InvestigationImpactMapResponse } from '../../../../../common';
 import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
 import type { ImpactMapRendererProps } from '../../../../types';
 import { ImpactMapTab } from './impact_map_tab';
-import { withContextAnnotations } from './impact_map_events';
+import { getEntityIcon, getEntityKindLabel, withContextAnnotations } from './impact_map_events';
 import { takeTimelineFocus } from './timeline_focus';
 import { useIsInAgentBuilder } from './use_is_in_agent_builder';
 
@@ -317,5 +317,30 @@ describe('withContextAnnotations', () => {
   it("keeps the agent's own annotations", () => {
     const own = { ...chart, annotations: [{ x: deploy.at, label: 'Deploy' }] };
     expect(withContextAnnotations({ chart: own }, failure, impactMap.events).chart).toBe(own);
+  });
+});
+
+describe('getEntityIcon', () => {
+  const type = (icon: object | undefined, kind = 'service' as const) => ({
+    id: 'checkout_service',
+    label: 'Checkout service',
+    kind,
+    icon,
+  });
+
+  it('keeps an icon EUI has and swaps one it does not for a generic one', () => {
+    expect(getEntityIcon(type({ eui_icon: 'logoDocker' }))).toBe('logoDocker');
+    expect(getEntityIcon(type({ eui_icon: 'logoGolang' }))).toBe('apps');
+    expect(getEntityIcon(undefined)).toBe('apps');
+  });
+
+  it('draws a Kubernetes object and a dependency by what they are', () => {
+    expect(getEntityIcon({ ...type(undefined), id: 'k8s_deployment' })).toBe('logoKubernetes');
+    expect(getEntityIcon(type({ span_type: 'db' }, 'dependency'))).toBe('database');
+    expect(getEntityIcon(type(undefined, 'dependency'))).toBe('globe');
+  });
+
+  it('names the stored kind as the type', () => {
+    expect(getEntityKindLabel('infrastructure')).toBe('Infrastructure');
   });
 });

@@ -520,10 +520,26 @@ const DEPENDENCY_ICONS: Record<string, string> = {
   external: 'globe',
 };
 
-/** An icon for an entity from its type: a named EUI icon, else one for its kind. */
+/** Icons EUI is known to have, so a name the agent made up never draws a broken image. */
+const KNOWN_ICONS = new Set([
+  'logoKubernetes',
+  'logoDocker',
+  'logoAWS',
+  'logoAzure',
+  'logoGCP',
+  'logoCloud',
+  'database',
+  'globe',
+  'compute',
+  'apps',
+  'package',
+]);
+
+/** An icon for an entity from its type: a named EUI icon, else one for its kind, else a generic one. */
 export const getEntityIcon = (type?: ImpactMapEntityType): string => {
-  if (type?.icon?.eui_icon) {
-    return type.icon.eui_icon;
+  const named = type?.icon?.eui_icon;
+  if (named && KNOWN_ICONS.has(named)) {
+    return named;
   }
   if (/kubernetes|k8s/i.test(`${type?.id} ${type?.label}`)) {
     return 'logoKubernetes';
@@ -533,6 +549,10 @@ export const getEntityIcon = (type?: ImpactMapEntityType): string => {
   }
   return type?.kind === 'infrastructure' ? 'compute' : 'apps';
 };
+
+/** The stored kind of an entity as a label: Service, Dependency or Infrastructure. */
+export const getEntityKindLabel = (kind?: string): string | undefined =>
+  kind ? kind.charAt(0).toUpperCase() + kind.slice(1) : undefined;
 
 const TIMELINE_TAB = i18n.translate('xpack.agenticInvestigations.impactMap.events.timelineTab', {
   defaultMessage: 'Timeline',
@@ -737,7 +757,7 @@ export const resolveEventsSelection = (
     return {
       title: entity?.label ?? selection.id,
       icon: getEntityIcon(type),
-      typeLabel: type?.label,
+      typeLabel: getEntityKindLabel(type?.kind),
       events: events.filter(({ entity_id: entityId }) => entityId === selection.id),
     };
   }
