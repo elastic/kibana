@@ -6,7 +6,11 @@
  */
 
 import { isoDateTime, z } from '@kbn/zod/v4';
-import { OVERVIEW_KUERY_MAX_LENGTH, type OverviewFilterName } from '../../common/overview_filters';
+import {
+  OVERVIEW_KUERY_MAX_LENGTH,
+  PAGE_FILTER_NAMES,
+  type OverviewFilterName,
+} from '../../common/overview_filters';
 import {
   OVERVIEW_FILTERS_PARAM_MAX_LENGTH,
   overviewFiltersParamIssue,
@@ -80,4 +84,6 @@ export const filteredTimeRangeQuery = () =>
  * `filteredTimeRangeQuery` but the page, which is rejected, not applied.
  */
 export const documentFilteredTimeRangeQuery = () =>
-  z.object(filteredTimeRangeShape(['pageUrl'])).refine(isStartBeforeEnd, START_AFTER_END_ISSUE);
+  z
+    .object(filteredTimeRangeShape(PAGE_FILTER_NAMES))
+    .refine(isStartBeforeEnd, START_AFTER_END_ISSUE);

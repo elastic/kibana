@@ -16,7 +16,14 @@ import { TIME_RANGE } from '../../../common/fixtures/constants';
 
 const APP_PATH = '/app/digital_experience';
 
-type OverviewFilterName = 'browser' | 'os' | 'device' | 'country' | 'pageUrl';
+type OverviewFilterName =
+  | 'browser'
+  | 'os'
+  | 'device'
+  | 'country'
+  | 'appVersion'
+  | 'pageUrl'
+  | 'pageContains';
 
 export class DigitalExperiencePage {
   public readonly mainContainer: Locator;
@@ -221,6 +228,23 @@ export class DigitalExperiencePage {
     return this.page.getByTestId(`digitalExperienceOverviewFilter-${name}Option-${value}-exclude`);
   }
 
+  /** The "Only" button of a value in an Overview filter's popover; it shows on hover. */
+  overviewFilterOnly(name: OverviewFilterName, value: string): Locator {
+    return this.page.getByTestId(`digitalExperienceOverviewFilter-${name}Option-${value}-only`);
+  }
+
+  /** The row of the breakdowns that filters the Overview by a value, e.g. `('browser', 'Safari')`. */
+  overviewBreakdownFilter(name: 'browser' | 'os' | 'device', value: string): Locator {
+    return this.page.getByTestId(`digitalExperienceOverviewBreakdownFilter-${name}-${value}`);
+  }
+
+  /** The row of the top pages that filters the Overview by a page, found by its path. */
+  overviewTopPageFilter(path: string): Locator {
+    return this.page
+      .getByTestId('digitalExperienceOverviewTopPageFilter')
+      .filter({ hasText: path });
+  }
+
   /** Includes one value of a filter, e.g. `('browser', 'Firefox')`, and closes the popover. */
   async selectOverviewFilter(name: OverviewFilterName, value: string): Promise<void> {
     await this.overviewFilter(name).click();
@@ -247,6 +271,16 @@ export class DigitalExperiencePage {
     return this.overviewFiltersFlyout.getByTestId(
       `digitalExperienceOverviewFiltersFlyout-${name}Option-${value}-exclude`
     );
+  }
+
+  /** Writes text the page URL contains in the "All filters" flyout, and adds it. */
+  async addOverviewFlyoutText(text: string): Promise<void> {
+    await this.overviewFiltersFlyout
+      .getByTestId('digitalExperienceOverviewFiltersFlyout-pageContainsTextInput')
+      .fill(text);
+    await this.overviewFiltersFlyout
+      .getByTestId('digitalExperienceOverviewFiltersFlyout-pageContainsTextAdd')
+      .click();
   }
 
   /** Types a KQL query in the Overview's bar and submits it. */

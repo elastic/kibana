@@ -9,9 +9,42 @@ import type { FilterValue } from './filter_values';
 import { SESSIONS_LIST_MAX_FACET_LENGTHS, type FacetBucket } from './sessions';
 
 /** The filters of the Overview, in display order. */
-export const OVERVIEW_FILTER_NAMES = ['browser', 'os', 'device', 'country', 'pageUrl'] as const;
+export const OVERVIEW_FILTER_NAMES = [
+  'browser',
+  'os',
+  'device',
+  'country',
+  'appVersion',
+  'pageUrl',
+  'pageContains',
+] as const;
 
 export type OverviewFilterName = (typeof OVERVIEW_FILTER_NAMES)[number];
+
+/**
+ * The filters on the page, which narrow the page loads only: the web vitals, errors and clicks
+ * carry no page URL yet. `pageContains` matches part of the URL, the others a whole URL.
+ */
+export const PAGE_FILTER_NAMES = [
+  'pageUrl',
+  'pageContains',
+] as const satisfies readonly OverviewFilterName[];
+
+/**
+ * The filters whose values the user writes, as there is no list to pick them from: text that the
+ * page URL contains.
+ */
+export const FREE_TEXT_FILTER_NAMES = [
+  'pageContains',
+] as const satisfies readonly OverviewFilterName[];
+
+export type FreeTextFilterName = (typeof FREE_TEXT_FILTER_NAMES)[number];
+
+/** The filters with a list of values to pick from, each with the page loads that have it. */
+export type ListedFilterName = Exclude<OverviewFilterName, FreeTextFilterName>;
+
+export const isFreeTextFilter = (name: OverviewFilterName): name is FreeTextFilterName =>
+  FREE_TEXT_FILTER_NAMES.some((freeText) => freeText === name);
 
 /**
  * The selected values of each filter, included or excluded; a filter without any is not applied.
@@ -38,7 +71,9 @@ export const OVERVIEW_FILTER_MAX_LENGTHS = {
   os: SESSIONS_LIST_MAX_FACET_LENGTHS.os,
   device: 256,
   country: SESSIONS_LIST_MAX_FACET_LENGTHS.country,
+  appVersion: 256,
   pageUrl: 1024,
+  pageContains: 256,
 } as const satisfies Record<OverviewFilterName, number>;
 
 /** How many values each filter lists, the most used first; the same as the Sessions facets. */

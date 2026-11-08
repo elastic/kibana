@@ -24,11 +24,11 @@ import {
 } from '../../../../ebt_constants';
 import type { Formatters } from '../../../../hooks/use_formatters';
 import { FILTER_EBT_ELEMENTS, FILTER_LABELS } from './overview_filter_labels';
-
 /** The filters that have a button of their own; the others are in the "All filters" flyout. */
 export const PINNED_FILTER_NAMES: readonly OverviewFilterName[] = [
   'browser',
   'os',
+  'appVersion',
   'country',
   'pageUrl',
 ];

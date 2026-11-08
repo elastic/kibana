@@ -10,9 +10,12 @@ import { partitionFilterValues } from '../../../common/filter_values';
 import type { FacetBucket } from '../../../common/sessions';
 import { SESSION_ATTRIBUTE_FIELDS } from '../../../common/session_attribute_fields';
 import {
+  isFreeTextFilter,
   OVERVIEW_FILTER_MAX_LENGTHS,
   OVERVIEW_FILTER_NAMES,
   OVERVIEW_FILTER_SIZE,
+  PAGE_FILTER_NAMES,
+  type ListedFilterName,
   type OverviewFilterName,
   type OverviewFilterOptions,
   type OverviewFilters,
@@ -43,7 +46,10 @@ const FILTER_SOURCE_FIELDS: Record<OverviewFilterName, readonly string[]> = {
   os: SESSION_ATTRIBUTE_FIELDS.os,
   device: [...SESSION_ATTRIBUTE_FIELDS.device, ...MOBILE_FIELDS],
   country: SESSION_ATTRIBUTE_FIELDS.countryIso,
+  // The version the application reports, a resource attribute of OpenTelemetry.
+  appVersion: ['resource.attributes.service.version', 'attributes.service.version'],
   pageUrl: [SOURCE_URL_FIELD],
+  pageContains: [SOURCE_URL_FIELD],
 };
 
 /** The runtime field that coalesces the alternatives of a filter. */
@@ -90,13 +96,42 @@ export const filterRuntimeMappings = (): estypes.MappingRuntimeFields =>
     ])
   );
 
-/** Keeps the documents with any included value of a filter and none of its excluded values. */
+/** `value` as a wildcard pattern's literal text: `*` and `?` match themselves. */
+const escapeWildcard = (value: string): string => value.replace(/[\\*?]/g, '\\$&');
+
+/** One query for the page URLs that contain `text`, whatever its case. */
+const containsQuery = (field: string, text: string): estypes.QueryDslQueryContainer => ({
+  wildcard: { [field]: { value: `*${escapeWildcard(text)}*`, case_insensitive: true } },
+});
+
+/**
+ * Keeps the documents with any included value of a filter and none of its excluded values. The
+ * values of a filter that matches text are patterns: the URLs that contain any included text and
+ * none of the excluded.
+ */
 const filterClause = (
   name: OverviewFilterName,
   filters: OverviewFilters
 ): estypes.QueryDslQueryContainer[] => {
   const { include, exclude } = partitionFilterValues(filters[name] ?? []);
   const field = filterFieldOf(name);
+  if (isFreeTextFilter(name)) {
+    return [
+      ...(include.length > 0
+        ? [
+            {
+              bool: {
+                should: include.map((text) => containsQuery(field, text)),
+                minimum_should_match: 1,
+              },
+            },
+          ]
+        : []),
+      ...(exclude.length > 0
+        ? [{ bool: { must_not: exclude.map((text) => containsQuery(field, text)) } }]
+        : []),
+    ];
+  }
   return [
     ...(include.length > 0 ? [{ terms: { [field]: include } }] : []),
     ...(exclude.length > 0 ? [{ bool: { must_not: [{ terms: { [field]: exclude } }] } }] : []),
@@ -104,26 +139,28 @@ const filterClause = (
 };
 
 /**
- * The selected filters that narrow every document of the Overview, except `exclude`'s own. The page
- * is left out: the web vitals, errors and clicks carry no page URL yet, so it narrows the page
- * loads only (`pageLoadFilters`).
+ * The selected filters that narrow every document of the Overview, except `exclude`'s own. The
+ * page filters are left out: the web vitals, errors and clicks carry no page URL yet, so they
+ * narrow the page loads only (`pageLoadFilters`).
  */
 export const documentFilters = (
   filters: OverviewFilters,
   exclude?: OverviewFilterName
 ): estypes.QueryDslQueryContainer[] =>
-  OVERVIEW_FILTER_NAMES.filter((name) => name !== 'pageUrl' && name !== exclude).flatMap((name) =>
-    filterClause(name, filters)
-  );
+  OVERVIEW_FILTER_NAMES.filter(
+    (name) => !PAGE_FILTER_NAMES.some((page) => page === name) && name !== exclude
+  ).flatMap((name) => filterClause(name, filters));
 
-/** The selected page, which narrows the page loads (unless it is `exclude`'s own). */
+/** The selected page filters, which narrow the page loads (except `exclude`'s own). */
 export const pageLoadFilters = (
   filters: OverviewFilters,
   exclude?: OverviewFilterName
 ): estypes.QueryDslQueryContainer[] =>
-  exclude === 'pageUrl' ? [] : filterClause('pageUrl', filters);
+  PAGE_FILTER_NAMES.filter((name) => name !== exclude).flatMap((name) =>
+    filterClause(name, filters)
+  );
 
-const optionsKeyOf = (name: OverviewFilterName) => `${name}Options` as const;
+const optionsKeyOf = (name: ListedFilterName) => `${name}Options` as const;
 
 /** The aggregation of one filter: its values with their page loads. */
 export interface FilterOptionsAggregation {
@@ -131,20 +168,24 @@ export interface FilterOptionsAggregation {
 }
 
 export type FilterOptionsAggregations = Record<
-  `${OverviewFilterName}Options`,
+  `${ListedFilterName}Options`,
   FilterOptionsAggregation
 >;
 
+const LISTED_FILTER_NAMES = OVERVIEW_FILTER_NAMES.filter(
+  (name): name is ListedFilterName => !isFreeTextFilter(name)
+);
+
 /**
- * Each filter's most used values among the page loads of `environment`, narrowed by the other
- * selected filters.
+ * Each listed filter's most used values among the page loads of `environment`, narrowed by the
+ * other selected filters. A filter that matches text has no list.
  */
 export const filterOptionsAggs = (
   filters: OverviewFilters,
   environment: string | undefined
 ): Record<string, estypes.AggregationsAggregationContainer> =>
   Object.fromEntries(
-    OVERVIEW_FILTER_NAMES.map((name) => [
+    LISTED_FILTER_NAMES.map((name) => [
       optionsKeyOf(name),
       {
         filter: {
@@ -162,7 +203,7 @@ export const filterOptionsAggs = (
     ])
   );
 
-const toBuckets = (name: OverviewFilterName, aggregation?: FilterOptionsAggregation) =>
+const toBuckets = (name: ListedFilterName, aggregation?: FilterOptionsAggregation) =>
   (aggregation?.values.buckets ?? []).flatMap(({ key, doc_count: count }): FacetBucket[] => {
     const value = String(key);
     // Longer values could not be selected: the routes and the URL accept no more.
@@ -177,5 +218,8 @@ export const toFilterOptions = (
   os: toBuckets('os', aggregations?.osOptions),
   device: toBuckets('device', aggregations?.deviceOptions),
   country: toBuckets('country', aggregations?.countryOptions),
+  appVersion: toBuckets('appVersion', aggregations?.appVersionOptions),
   pageUrl: toBuckets('pageUrl', aggregations?.pageUrlOptions),
+  // Text the URL contains is written, not picked from a list.
+  pageContains: [],
 });

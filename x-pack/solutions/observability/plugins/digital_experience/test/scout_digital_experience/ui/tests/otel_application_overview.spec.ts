@@ -136,10 +136,10 @@ test.describe(
 
         const list = digitalExperience.overviewFilterList('browser');
         await expect(list).toContainText(
-          new RegExp(`Chrome\\s*${testData.OTEL_SHOP_CHROME_PAGE_LOADS}`)
+          new RegExp(`Chrome(Only)?\\s*${testData.OTEL_SHOP_CHROME_PAGE_LOADS}`)
         );
         await expect(list).toContainText(
-          new RegExp(`Safari\\s*${testData.OTEL_SHOP_SAFARI_PAGE_LOADS}`)
+          new RegExp(`Safari(Only)?\\s*${testData.OTEL_SHOP_SAFARI_PAGE_LOADS}`)
         );
         await page.keyboard.press('Escape');
       });
@@ -165,7 +165,7 @@ test.describe(
       await test.step('lists the values of the other filters among that browser only', async () => {
         await digitalExperience.overviewFilter('os').click();
 
-        await expect(digitalExperience.overviewFilterList('os')).toContainText(/iOS\s*1/);
+        await expect(digitalExperience.overviewFilterList('os')).toContainText(/iOS(Only)?\s*1/);
         await expect(digitalExperience.overviewFilterOption('os', 'macOS')).toBeHidden();
         await page.keyboard.press('Escape');
       });
@@ -174,7 +174,7 @@ test.describe(
         await digitalExperience.overviewFilter('browser').click();
 
         await expect(digitalExperience.overviewFilterList('browser')).toContainText(
-          new RegExp(`Chrome\\s*${testData.OTEL_SHOP_CHROME_PAGE_LOADS}`)
+          new RegExp(`Chrome(Only)?\\s*${testData.OTEL_SHOP_CHROME_PAGE_LOADS}`)
         );
         await page.keyboard.press('Escape');
       });
@@ -331,6 +331,133 @@ test.describe(
           testData.OTEL_SHOP_PAGE_LOADS
         );
         await expect.poll(() => filtersParam(page)).toBe('');
+      });
+    });
+
+    test('filters by a row of the breakdowns or the top pages, and takes the filter off when it is clicked again', async ({
+      pageObjects: { digitalExperience },
+    }) => {
+      await digitalExperience.gotoApplication(testData.OTEL_APPS.shop, {
+        ...testData.TIME_RANGE,
+        source: 'otel',
+      });
+      await expect(digitalExperience.otelOverviewPageLoads).toContainText(
+        testData.OTEL_SHOP_PAGE_LOADS
+      );
+
+      await test.step('narrows the Overview to the browser that was clicked', async () => {
+        await digitalExperience.overviewBreakdownFilter('browser', 'Safari').click();
+
+        await expect(digitalExperience.otelOverviewPageLoads).toContainText(
+          testData.OTEL_SHOP_SAFARI_PAGE_LOADS
+        );
+        await expect(digitalExperience.overviewPill('browser', 'Safari')).toContainText(
+          'Browser: Safari'
+        );
+        await expect(
+          digitalExperience.overviewBreakdownFilter('browser', 'Safari')
+        ).toHaveAttribute('aria-pressed', 'true');
+      });
+
+      await test.step('takes the filter off when the row is clicked again', async () => {
+        await digitalExperience.overviewBreakdownFilter('browser', 'Safari').click();
+
+        await expect(digitalExperience.overviewPill('browser', 'Safari')).toBeHidden();
+        await expect(digitalExperience.otelOverviewPageLoads).toContainText(
+          testData.OTEL_SHOP_PAGE_LOADS
+        );
+      });
+
+      await test.step('narrows the page loads to a page of the top pages', async () => {
+        await digitalExperience.overviewTopPageFilter('/products').click();
+
+        await expect(
+          digitalExperience.overviewPill('pageUrl', 'https://otel-shop.example.com/products')
+        ).toBeVisible();
+        await expect(digitalExperience.otelOverviewPageLoads).toContainText('2');
+      });
+    });
+
+    test('selects a value alone with Only, in place of the others', async ({
+      pageObjects: { digitalExperience },
+    }) => {
+      await digitalExperience.gotoApplication(testData.OTEL_APPS.shop, {
+        ...testData.TIME_RANGE,
+        source: 'otel',
+      });
+      await expect(digitalExperience.otelOverviewPageLoads).toContainText(
+        testData.OTEL_SHOP_PAGE_LOADS
+      );
+
+      await digitalExperience.overviewFilter('browser').click();
+      await digitalExperience.overviewFilterOption('browser', 'Safari').click();
+      await expect(digitalExperience.overviewPill('browser', 'Safari')).toBeVisible();
+      // "Only" shows when the pointer is on the row.
+      await digitalExperience.overviewFilterOption('browser', 'Chrome').hover();
+      await digitalExperience.overviewFilterOnly('browser', 'Chrome').click();
+
+      await expect(digitalExperience.overviewPill('browser', 'Chrome')).toBeVisible();
+      await expect(digitalExperience.overviewPill('browser', 'Safari')).toBeHidden();
+      await expect(digitalExperience.otelOverviewPageLoads).toContainText(
+        testData.OTEL_SHOP_CHROME_PAGE_LOADS
+      );
+    });
+
+    test('narrows the Overview by the version of the application', async ({
+      pageObjects: { digitalExperience },
+    }) => {
+      await digitalExperience.gotoApplication(testData.OTEL_APPS.shop, {
+        ...testData.TIME_RANGE,
+        source: 'otel',
+      });
+      await expect(digitalExperience.otelOverviewPageLoads).toContainText(
+        testData.OTEL_SHOP_PAGE_LOADS
+      );
+
+      await digitalExperience.overviewAllFilters.click();
+      // Two of the page loads have version 1.2.0, the other three 1.3.0.
+      await expect(digitalExperience.overviewFlyoutOption('appVersion', '1.3.0')).toBeVisible();
+      await digitalExperience.overviewFlyoutOption('appVersion', '1.2.0').click();
+      await digitalExperience.overviewFiltersApply.click();
+
+      await expect(digitalExperience.otelOverviewPageLoads).toContainText('2');
+      await expect(digitalExperience.overviewPill('appVersion', '1.2.0')).toContainText(
+        'App version: 1.2.0'
+      );
+    });
+
+    test('narrows the page loads by text the URL contains, and by text it does not', async ({
+      pageObjects: { digitalExperience },
+    }) => {
+      await digitalExperience.gotoApplication(testData.OTEL_APPS.shop, {
+        ...testData.TIME_RANGE,
+        source: 'otel',
+      });
+      await expect(digitalExperience.otelOverviewPageLoads).toContainText(
+        testData.OTEL_SHOP_PAGE_LOADS
+      );
+
+      await test.step('keeps the page loads whose URL contains the text, whatever its case', async () => {
+        await digitalExperience.overviewAllFilters.click();
+        await digitalExperience.addOverviewFlyoutText('PRODUCTS');
+        await digitalExperience.overviewFiltersApply.click();
+
+        // Two of the page loads are of /products.
+        await expect(digitalExperience.otelOverviewPageLoads).toContainText('2');
+        await expect(digitalExperience.overviewPill('pageContains', 'PRODUCTS')).toContainText(
+          'URL contains: PRODUCTS'
+        );
+      });
+
+      await test.step('leaves out the page loads whose URL contains the text when it is excluded', async () => {
+        await digitalExperience.overviewAllFilters.click();
+        await digitalExperience.overviewFlyoutExclude('pageContains', 'PRODUCTS').click();
+        await digitalExperience.overviewFiltersApply.click();
+
+        await expect(digitalExperience.otelOverviewPageLoads).toContainText('3');
+        await expect(digitalExperience.overviewPill('pageContains', 'PRODUCTS')).toContainText(
+          'URL contains: not PRODUCTS'
+        );
       });
     });
 

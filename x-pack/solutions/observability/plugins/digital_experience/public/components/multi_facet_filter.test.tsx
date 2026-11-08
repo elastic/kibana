@@ -174,6 +174,17 @@ describe('MultiFacetFilter', () => {
     expect(screen.getByTestId('filterOption-v0-exclude')).toBeEnabled();
   });
 
+  it('selects a value alone with Only, in place of the others, even when the filter is full', async () => {
+    const selected = include(
+      ...Array.from({ length: FILTER_VALUE_CAP }, (_, index) => `v${index}`)
+    );
+    const onChange = renderFilter(selected);
+
+    fireEvent.click(await screen.findByTestId('filterOption-Chrome-only'));
+
+    expect(onChange).toHaveBeenCalledWith(include('Chrome'));
+  });
+
   it('says nothing about a limit below the cap', async () => {
     renderFilter(include('Chrome'));
 

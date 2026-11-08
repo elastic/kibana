@@ -81,7 +81,9 @@ describe('encodeOverviewFilters', () => {
       os: include('macOS'),
       device: exclude('!bang', "it's, a (device)"),
       country: include('DE'),
+      appVersion: [...include('1.3.0'), ...exclude('1.2.0-beta (rc,1)')],
       pageUrl: [...include('https://shop.example.com/a,b?q=!x&y=\\'), ...exclude('/health')],
+      pageContains: [...include('/checkout?step=2'), ...exclude('admin')],
     };
 
     expect(readOverviewFilters(encodeOverviewFilters(filters))).toEqual(filters);

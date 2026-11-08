@@ -96,6 +96,7 @@ describe('usageSearch with filters', () => {
       'digital_experience_filter_os',
       'digital_experience_filter_device',
       'digital_experience_filter_country',
+      'digital_experience_filter_appVersion',
     ]);
   });
 

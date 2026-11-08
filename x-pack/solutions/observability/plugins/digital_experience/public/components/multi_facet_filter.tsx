@@ -160,6 +160,7 @@ export function MultiFacetFilter({
                   isDisabled={isFull && selection === undefined}
                   onInclude={() => onChange(toggleFilterValue(values, value, false))}
                   onExclude={() => onChange(toggleFilterValue(values, value, true))}
+                  onOnly={() => onChange([{ value, exclude: false }])}
                   ebtElement={ebtElement}
                   data-test-subj={`${dataTestSubj}Option-${value}`}
                 />

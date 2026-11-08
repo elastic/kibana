@@ -20,7 +20,15 @@ const NO_VITAL = { p75Ms: null, sampleCount: 0, ratings: null };
 
 const ALL_GOOD = { good: 1, needsImprovement: 0, poor: 0 };
 
-const NO_FILTER_VALUES = { browser: [], os: [], device: [], country: [], pageUrl: [] };
+const NO_FILTER_VALUES = {
+  browser: [],
+  os: [],
+  device: [],
+  country: [],
+  appVersion: [],
+  pageUrl: [],
+  pageContains: [],
+};
 
 const filterValues = (...values: Array<[key: string, count: number]>) => ({
   values: { buckets: values.map(([key, count]) => ({ key, doc_count: count })) },
@@ -207,6 +215,7 @@ describe('getOtelOverview', () => {
         browserOptions: filterValues(['Chrome', 7], ['Firefox', 2]),
         osOptions: filterValues(['macOS', 9]),
         countryOptions: filterValues(['DE', 4]),
+        appVersionOptions: filterValues(['1.3.0', 6], ['1.2.0', 3]),
         pageUrlOptions: filterValues(['https://shop.example.com/cart', 3]),
       },
       spans: spansAggregations(),
@@ -222,7 +231,12 @@ describe('getOtelOverview', () => {
       os: [{ key: 'macOS', count: 9 }],
       device: [],
       country: [{ key: 'DE', count: 4 }],
+      appVersion: [
+        { key: '1.3.0', count: 6 },
+        { key: '1.2.0', count: 3 },
+      ],
       pageUrl: [{ key: 'https://shop.example.com/cart', count: 3 }],
+      pageContains: [],
     });
   });
 

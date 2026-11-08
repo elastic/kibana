@@ -12,13 +12,13 @@ import { countSelectedValues, limitFilters, visibleFilters } from './overview_fi
 const include = (...values: string[]): FilterValue[] =>
   values.map((value) => ({ value, exclude: false }));
 
-const NAMES = ['browser', 'os', 'country', 'pageUrl'] as const;
+const NAMES = ['browser', 'os', 'appVersion', 'country', 'pageUrl'] as const;
 
 describe('limitFilters', () => {
   it('keeps the most important filters, in order, up to the count', () => {
     expect(limitFilters(NAMES, {}, 2)).toEqual(['browser', 'os']);
-    expect(limitFilters(NAMES, {}, 3)).toEqual(['browser', 'os', 'country']);
-    expect(limitFilters(NAMES, {}, 4)).toEqual([...NAMES]);
+    expect(limitFilters(NAMES, {}, 3)).toEqual(['browser', 'os', 'appVersion']);
+    expect(limitFilters(NAMES, {}, 5)).toEqual([...NAMES]);
   });
 
   it('keeps none without room', () => {
@@ -59,10 +59,12 @@ describe('limitFilters', () => {
 describe('visibleFilters', () => {
   const options = (values: Partial<Record<(typeof NAMES)[number] | 'device', string[]>>) =>
     Object.fromEntries(
-      ['browser', 'os', 'device', 'country', 'pageUrl'].map((name) => [
-        name,
-        (values[name as keyof typeof values] ?? []).map((key) => ({ key, count: 1 })),
-      ])
+      ['browser', 'os', 'device', 'country', 'appVersion', 'pageUrl', 'pageContains'].map(
+        (name) => [
+          name,
+          (values[name as keyof typeof values] ?? []).map((key) => ({ key, count: 1 })),
+        ]
+      )
     ) as unknown as OverviewFilterOptions;
 
   it('shows every pinned filter until the first Overview has loaded', () => {

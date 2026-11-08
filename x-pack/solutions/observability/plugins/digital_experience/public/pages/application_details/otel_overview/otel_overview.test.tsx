@@ -149,7 +149,12 @@ const response = (pageLoads: number): ApplicationOverviewResponse => ({
     os: [{ key: 'macOS', count: 900 }],
     device: [],
     country: [],
+    appVersion: [
+      { key: '1.3.0', count: 800 },
+      { key: '1.2.0', count: 733 },
+    ],
     pageUrl: [{ key: 'https://shop.example.com/cart', count: 40 }],
+    pageContains: [],
   },
 });
 
@@ -296,11 +301,12 @@ describe('OtelOverview', () => {
     const query = {
       start: timeRange.rangeFrom,
       end: timeRange.rangeTo,
-      filters: encodeOverviewFilters({
-        browser: [...include('Chrome'), ...exclude('Safari')],
-        country: include('DE'),
-        pageUrl: include('https://shop.example.com/cart'),
-      }) ?? '',
+      filters:
+        encodeOverviewFilters({
+          browser: [...include('Chrome'), ...exclude('Safari')],
+          country: include('DE'),
+          pageUrl: include('https://shop.example.com/cart'),
+        }) ?? '',
     };
     await waitFor(() => expectFetchedWith(query));
     await waitFor(() => expectFetchedWith(query, USAGE_ENDPOINT));
@@ -310,10 +316,11 @@ describe('OtelOverview', () => {
         {
           start: timeRange.rangeFrom,
           end: timeRange.rangeTo,
-          filters: encodeOverviewFilters({
-            browser: [...include('Chrome'), ...exclude('Safari')],
-            country: include('DE'),
-          }) ?? '',
+          filters:
+            encodeOverviewFilters({
+              browser: [...include('Chrome'), ...exclude('Safari')],
+              country: include('DE'),
+            }) ?? '',
         },
         ERRORS_ENDPOINT
       )
@@ -502,14 +509,21 @@ describe('OtelOverview', () => {
     expect(clearFilters).toHaveBeenCalledTimes(1);
   });
 
-  it('says which panels the page filter narrows', async () => {
+  it('says which panels the page filters narrow, for a page and for text its URL contains', async () => {
     mockFilters({ pageUrl: include('https://shop.example.com/cart') });
-    renderOverview();
+    const { unmount } = renderOverview();
     await findPageLoads('1,533');
 
     expect(screen.getByTestId('digitalExperienceOverviewPageFilterNote')).toHaveTextContent(
-      'applies to page loads only'
+      'apply to page loads only'
     );
+    unmount();
+
+    mockFilters({ pageContains: include('/cart') });
+    renderOverview();
+    await findPageLoads('1,533');
+
+    expect(screen.getByTestId('digitalExperienceOverviewPageFilterNote')).toBeInTheDocument();
   });
 
   describe('All filters', () => {
@@ -526,10 +540,11 @@ describe('OtelOverview', () => {
     it('lists every filter, device included, with a note for one without values', async () => {
       const flyout = await openFlyout();
 
-      ['browser', 'os', 'device', 'country', 'pageUrl'].forEach((name) =>
-        expect(
-          within(flyout).getByTestId(`digitalExperienceOverviewFiltersFlyout-${name}`)
-        ).toBeInTheDocument()
+      ['browser', 'os', 'device', 'country', 'appVersion', 'pageUrl', 'pageContains'].forEach(
+        (name) =>
+          expect(
+            within(flyout).getByTestId(`digitalExperienceOverviewFiltersFlyout-${name}`)
+          ).toBeInTheDocument()
       );
       expect(
         within(screen.getByTestId('digitalExperienceOverviewFiltersFlyout-device')).getByText(
@@ -555,7 +570,9 @@ describe('OtelOverview', () => {
         os: include('macOS'),
         device: [],
         country: [],
+        appVersion: [],
         pageUrl: [],
+        pageContains: [],
       });
       await waitFor(() =>
         expect(
@@ -577,7 +594,9 @@ describe('OtelOverview', () => {
         os: include('macOS'),
         device: [],
         country: [],
+        appVersion: [],
         pageUrl: [],
+        pageContains: [],
       });
     });
 
@@ -593,8 +612,59 @@ describe('OtelOverview', () => {
         os: [],
         device: [],
         country: [],
+        appVersion: [],
         pageUrl: [],
+        pageContains: [],
       });
+    });
+
+    it('picks one value alone with Only, in place of the others', async () => {
+      mockFilters({ browser: [...include('Chrome'), ...exclude('Safari')] });
+      await openFlyout();
+
+      fireEvent.click(
+        screen.getByTestId('digitalExperienceOverviewFiltersFlyout-browserOption-Firefox-only')
+      );
+      fireEvent.click(screen.getByTestId('digitalExperienceOverviewFiltersApply'));
+
+      expect(setFilters).toHaveBeenCalledWith(
+        expect.objectContaining({ browser: include('Firefox') })
+      );
+    });
+
+    it('lists the versions of the application to pick from', async () => {
+      await openFlyout();
+
+      expect(flyoutOption('appVersion', '1.3.0')).toBeInTheDocument();
+      expect(flyoutOption('appVersion', '1.2.0')).toBeInTheDocument();
+    });
+
+    it('takes text the URL contains as a value, trimmed and once, with no list to pick from', async () => {
+      await openFlyout();
+      const section = within(
+        screen.getByTestId('digitalExperienceOverviewFiltersFlyout-pageContains')
+      );
+      expect(section.queryByText('No values in the selected time range')).not.toBeInTheDocument();
+
+      const input = screen.getByTestId(
+        'digitalExperienceOverviewFiltersFlyout-pageContainsTextInput'
+      );
+      fireEvent.change(input, { target: { value: '  /checkout  ' } });
+      fireEvent.click(
+        screen.getByTestId('digitalExperienceOverviewFiltersFlyout-pageContainsTextAdd')
+      );
+      fireEvent.change(input, { target: { value: '/checkout' } });
+      fireEvent.click(
+        screen.getByTestId('digitalExperienceOverviewFiltersFlyout-pageContainsTextAdd')
+      );
+      expect(flyoutOption('pageContains', '/checkout')).toBeChecked();
+      expect(input).toHaveValue('');
+
+      fireEvent.click(screen.getByTestId('digitalExperienceOverviewFiltersApply'));
+
+      expect(setFilters).toHaveBeenCalledWith(
+        expect.objectContaining({ pageContains: include('/checkout') })
+      );
     });
 
     it('applies nothing until a pick changes the filters, and nothing on cancel', async () => {
@@ -611,6 +681,40 @@ describe('OtelOverview', () => {
           screen.queryByTestId('digitalExperienceOverviewFiltersFlyout')
         ).not.toBeInTheDocument()
       );
+    });
+  });
+
+  describe('click to filter', () => {
+    it('filters by a browser, a system, a device or a page when its row is clicked', async () => {
+      renderOverview();
+      await findPageLoads('1,533');
+
+      fireEvent.click(
+        screen.getByTestId('digitalExperienceOverviewBreakdownFilter-browser-Chrome')
+      );
+      expect(setFilter).toHaveBeenLastCalledWith('browser', include('Chrome'));
+      fireEvent.click(screen.getByTestId('digitalExperienceOverviewBreakdownFilter-os-macOS'));
+      expect(setFilter).toHaveBeenLastCalledWith('os', include('macOS'));
+      fireEvent.click(
+        screen.getByTestId('digitalExperienceOverviewBreakdownFilter-device-MacBook Pro')
+      );
+      expect(setFilter).toHaveBeenLastCalledWith('device', include('MacBook Pro'));
+      fireEvent.click(screen.getByTestId('digitalExperienceOverviewTopPageFilter'));
+      expect(setFilter).toHaveBeenLastCalledWith('pageUrl', include('https://shop.example.com/'));
+    });
+
+    it('adds to what is selected, and takes a selected row off when it is clicked again', async () => {
+      mockFilters({ browser: include('Firefox'), pageUrl: include('https://shop.example.com/') });
+      renderOverview();
+      await findPageLoads('1,533');
+
+      fireEvent.click(
+        screen.getByTestId('digitalExperienceOverviewBreakdownFilter-browser-Chrome')
+      );
+      expect(setFilter).toHaveBeenLastCalledWith('browser', include('Firefox', 'Chrome'));
+
+      fireEvent.click(screen.getByTestId('digitalExperienceOverviewTopPageFilter'));
+      expect(setFilter).toHaveBeenLastCalledWith('pageUrl', []);
     });
   });
 

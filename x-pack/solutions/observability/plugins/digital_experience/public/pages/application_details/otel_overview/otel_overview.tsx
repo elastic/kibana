@@ -10,11 +10,15 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme } from '@ela
 import { i18n } from '@kbn/i18n';
 import { APPLICATION_SOURCE } from '../../../../common/application_source';
 import { NO_WEB_VITALS } from '../../../../common/core_web_vitals';
+import { toggleFilterValue } from '../../../../common/filter_values';
 import type {
+  OverviewFilterName,
+  OverviewFilters,
   OverviewPercentile,
   OverviewPercentileParam,
   OverviewSearchParams,
 } from '../../../../common/overview_filters';
+import { PAGE_FILTER_NAMES } from '../../../../common/overview_filters';
 import type {
   ApplicationOverview,
   ApplicationOverviewResponse,
@@ -48,7 +52,7 @@ import { usePickerOptions } from './hooks/use_picker_options';
 
 const PAGE_FILTER_NOTE = i18n.translate('xpack.digitalExperience.overview.filters.pageNote', {
   defaultMessage:
-    'The page filter applies to page loads only, with their load time, trend, pages and breakdowns: web vitals, JS errors, clicks and HTTP requests carry no page URL yet.',
+    'The page filters apply to page loads only, with their load time, trend, pages and breakdowns: web vitals, JS errors, clicks and HTTP requests carry no page URL yet.',
 });
 
 const FETCH_ERROR_TITLE = i18n.translate('xpack.digitalExperience.overview.fetchErrorTitle', {
@@ -154,10 +158,16 @@ function UsageAndErrorsPanels({
   serviceName,
   usage: { response, isLoading, error, refresh },
   topErrors,
+  filters,
+  onSelectFilter,
 }: {
   serviceName: string;
   usage: ApplicationData<ApplicationUsageResponse>;
   topErrors: ApplicationErrors;
+  /** The Overview's filters, to show which rows are selected. */
+  filters: OverviewFilters;
+  /** Includes the value in a filter, or takes it off when it is included already. */
+  onSelectFilter: (name: OverviewFilterName, value: string) => void;
 }) {
   const { errorsHref, sessionsHref } = useApplicationLinks(serviceName, APPLICATION_SOURCE.otel);
   const { topPages, breakdowns, topClicks, totalClicks } = response ?? EMPTY_USAGE;
@@ -176,13 +186,22 @@ function UsageAndErrorsPanels({
       ) : (
         <EuiFlexGroup gutterSize="m" alignItems="stretch">
           <EuiFlexItem grow={3}>
-            <TopPagesPanel pages={topPages} isLoading={isLoading} />
+            <TopPagesPanel
+              pages={topPages}
+              isLoading={isLoading}
+              selectedUrls={(filters.pageUrl ?? [])
+                .filter(({ exclude }) => !exclude)
+                .map(({ value }) => value)}
+              onSelectPage={(url) => onSelectFilter('pageUrl', url)}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={2}>
             <BreakdownsPanel
               breakdowns={breakdowns}
               isLoading={isLoading}
               sessionsHref={sessionsHref}
+              filters={filters}
+              onSelectFilter={onSelectFilter}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -242,6 +261,9 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
   // The pickers swap their lists for a spinner while loading, so they only load until they have one.
   const pickerOptions = usePickerOptions(serviceName, overview.response);
 
+  const selectFilterValue = (name: OverviewFilterName, value: string) =>
+    setFilter(name, toggleFilterValue(filters[name] ?? [], value, false));
+
   const refreshAll = () => {
     overview.refresh();
     usage.refresh();
@@ -275,7 +297,7 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
           onClose={() => setIsFlyoutOpen(false)}
         />
       )}
-      {(filters.pageUrl ?? []).length > 0 && (
+      {PAGE_FILTER_NAMES.some((name) => (filters[name] ?? []).length > 0) && (
         <>
           <EuiSpacer size="s" />
           <EuiText
@@ -307,7 +329,13 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
         />
       )}
       <EuiSpacer size="m" />
-      <UsageAndErrorsPanels serviceName={serviceName} usage={usage} topErrors={topErrors} />
+      <UsageAndErrorsPanels
+        serviceName={serviceName}
+        usage={usage}
+        topErrors={topErrors}
+        filters={filters}
+        onSelectFilter={selectFilterValue}
+      />
     </>
   );
 }

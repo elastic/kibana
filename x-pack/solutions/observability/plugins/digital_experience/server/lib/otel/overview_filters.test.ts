@@ -141,6 +141,86 @@ describe('documentFilters', () => {
   });
 });
 
+describe('the app version filter', () => {
+  it('reads the version of the resource, or of the event, whichever the data has', () => {
+    const appVersion = filterRuntimeMappings()[filterFieldOf('appVersion')];
+
+    expect(
+      (appVersion as unknown as { script: { params: { fields: string[] } } }).script.params.fields
+    ).toEqual(['resource.attributes.service.version', 'attributes.service.version']);
+    expect(filterFieldOf('appVersion')).toBe('digital_experience_filter_appVersion');
+  });
+
+  it('narrows every document to the selected versions, or leaves out the excluded ones', () => {
+    expect(
+      documentFilters({ appVersion: [...include('1.2.0', '1.3.0'), ...exclude('0.9')] })
+    ).toEqual([
+      { terms: { [filterFieldOf('appVersion')]: ['1.2.0', '1.3.0'] } },
+      { bool: { must_not: [{ terms: { [filterFieldOf('appVersion')]: ['0.9'] } }] } },
+    ]);
+  });
+});
+
+describe('the page contains filter', () => {
+  const contains = (text: string) => ({
+    wildcard: { 'attributes.url.full': { value: `*${text}*`, case_insensitive: true } },
+  });
+
+  it('keeps the page loads whose URL contains any included text, whatever its case', () => {
+    expect(pageLoadFilters({ pageContains: include('/checkout', 'cart') })).toEqual([
+      { bool: { should: [contains('/checkout'), contains('cart')], minimum_should_match: 1 } },
+    ]);
+  });
+
+  it('leaves out the page loads whose URL contains an excluded text', () => {
+    expect(pageLoadFilters({ pageContains: exclude('/admin') })).toEqual([
+      { bool: { must_not: [contains('/admin')] } },
+    ]);
+  });
+
+  it('takes the wildcard characters of the text as the text itself', () => {
+    expect(pageLoadFilters({ pageContains: include('a*b?c\\d') })).toEqual([
+      {
+        bool: {
+          should: [
+            {
+              wildcard: {
+                'attributes.url.full': { value: '*a\\*b\\?c\\\\d*', case_insensitive: true },
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    ]);
+  });
+
+  it('narrows the page loads only, like the page, and each page filter leaves the other alone', () => {
+    const filters = {
+      pageUrl: include('https://shop.example.com/'),
+      pageContains: include('cart'),
+    };
+
+    expect(documentFilters(filters)).toEqual([]);
+    expect(pageLoadFilters(filters)).toHaveLength(2);
+    expect(pageLoadFilters(filters, 'pageUrl')).toEqual([
+      { bool: { should: [contains('cart')], minimum_should_match: 1 } },
+    ]);
+    expect(pageLoadFilters(filters, 'pageContains')).toEqual([
+      { terms: { 'attributes.url.full': ['https://shop.example.com/'] } },
+    ]);
+  });
+
+  it('has no values to pick from, but the other filters have', () => {
+    expect(toFilterOptions().pageContains).toEqual([]);
+    expect(
+      toFilterOptions({
+        appVersionOptions: { values: { buckets: [{ key: '1.3.0', doc_count: 3 }] } },
+      }).appVersion
+    ).toEqual([{ key: '1.3.0', count: 3 }]);
+  });
+});
+
 describe('pageLoadFilters', () => {
   it('narrows the page loads to the selected pages, or leaves out the excluded ones', () => {
     expect(pageLoadFilters({ pageUrl: include('https://shop.example.com/') })).toEqual([
@@ -169,11 +249,13 @@ describe('filterOptionsAggs', () => {
   it('lists the ten most used values of every filter', () => {
     const aggs = filterOptionsAggs({}, undefined);
 
+    // Text the URL contains is written, so it has no list.
     expect(Object.keys(aggs)).toEqual([
       'browserOptions',
       'osOptions',
       'deviceOptions',
       'countryOptions',
+      'appVersionOptions',
       'pageUrlOptions',
     ]);
     expect(optionsOf(aggs, 'browser').aggs.values.terms).toEqual({
@@ -245,7 +327,9 @@ describe('toFilterOptions', () => {
       os: [],
       device: [],
       country: [],
+      appVersion: [],
       pageUrl: [],
+      pageContains: [],
     });
   });
 

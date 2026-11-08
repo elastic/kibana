@@ -66,18 +66,31 @@ it is kept in the URL (`browser`, `os`, `device`, `country`, `pageUrl`, `percent
   without a selection and the least important first (browser, OS, country, page), down to none.
   A filter without a button is still in its pill, the count of **All filters** and the flyout, and
   its button is back when the window grows. The KQL bar is never narrower than 300px and the date
-  picker is about 400px, so below roughly 1350px of window width the date picker still moves down.
-- **Filters:** browser, OS, country and page have a button in the row, which counts the values it
-  selects; **All filters** opens a flyout with every filter, device included, whose picks apply
-  together. Each filter lists its ten most
+  picker takes the width of its label, which a range changes, so below roughly 1350px of window
+  width the date picker still moves down. When it does, or when it wraps with no filter button
+  left, every button comes back, as taking them away does not help.
+- **Filters:** browser, OS, app version, country and page have a button in the row, which counts the
+  values it selects; **All filters** opens a flyout with every filter, device included, whose picks
+  apply together. Each filter lists its ten most
   used values with their page loads in the time range, environment and the other selected filters,
   but not its own selection, so its other values stay selectable. A pinned filter without values,
   e.g. the country when the collector does no GeoIP processing, is hidden unless it is selected.
-- **Several values, and exclusions:** a filter takes up to ten values, each included or excluded.
-  The included values keep the documents with any of them and the excluded values leave out those
-  with any of them. A filter's param is a comma-separated list with `!` before an excluded value,
-  e.g. `browser=Firefox,!Chrome`; a comma, a leading `!` and a backslash in a value are escaped with
-  a backslash (`common/filter_values.ts`), so a page URL with a comma stays one value.
+  Hovering a value shows **Only**, which selects it in place of the others, and a click on a row of
+  the breakdowns or the top pages filters the Overview by it, or takes the filter off when it is
+  selected already; the arrow of a browser or system opens its sessions instead.
+- **App version and URL contains:** the version is `service.version` of the resource (or of the
+  event). **URL contains** has no list: the text is written in the flyout and matches part of the
+  page URL, whatever its case (`*` and `?` in it are the text itself). Like the page, it narrows the
+  page loads only, and the errors route rejects both.
+- **Several values, and exclusions:** a filter takes up to ten values, each included or excluded,
+  and the other values are disabled once it has ten. The included values keep the documents with any
+  of them and the excluded values leave out those with any of them. The filters are one `filters`
+  param: Kibana filters (`Filter[]` from `@kbn/es-query`), as rison, a `phrase` or `phrases` filter
+  per field with `meta.negate` for the values to leave out, e.g.
+  `filters=!((meta:(key:browser,negate:!f,params:!(Chrome,Safari),type:phrases)),(meta:(key:browser,negate:!t,params:(query:Firefox),type:phrase)))`
+  (`common/overview_filters_param.ts`). The routes read `meta` only, never a query a client wrote,
+  and answer a param they would have to repair, e.g. one with more than ten values or a repeated
+  one, with a 400, so a request gets the filters it asked for.
 - **Sessions tab:** `browser`, `os` and `country` are the Sessions tab's own params, which take one
   value, so the tab links carry a filter over only when it is exactly one included value. The
   Sessions list's **Entry page** facet is its page filter; it is a different question from the
@@ -86,7 +99,7 @@ it is kept in the URL (`browser`, `os`, `device`, `country`, `pageUrl`, `percent
   the alternatives the sessions transform reads (`SESSION_ATTRIBUTE_FIELDS` in
   `common/session_attribute_fields.ts`, shared by both) and take the first non-empty one, with a
   runtime field. The page is `attributes.url.full`.
-- **Scope:** browser, OS, device, country and the KQL query narrow every panel of the Overview: the
+- **Scope:** browser, OS, device, country, app version and the KQL query narrow every panel of the Overview: the
   KPIs, Core Web Vitals and trends (`/overview`), the pages, breakdowns and clicks (`/usage`) and the
   top errors (`/errors`). The Errors tab reads the same URL params, so **View all** lists the errors
   the Overview counted; the page is left out there. The breakdowns aggregate the same fields the

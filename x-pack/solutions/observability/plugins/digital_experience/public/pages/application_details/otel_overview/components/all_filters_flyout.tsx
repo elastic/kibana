@@ -26,6 +26,8 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FILTER_VALUE_CAP, toggleFilterValue } from '../../../../../common/filter_values';
 import {
+  isFreeTextFilter,
+  OVERVIEW_FILTER_MAX_LENGTHS,
   OVERVIEW_FILTER_NAMES,
   type OverviewFilterName,
   type OverviewFilterOptions,
@@ -35,6 +37,7 @@ import { encodeOverviewFilters } from '../../../../../common/overview_filters_pa
 import { FacetOptionRow } from '../../../../components/facet_option_row';
 import { FilterLimitNote } from '../../../../components/filter_limit_note';
 import { facetRows } from '../../../../components/multi_facet_filter';
+import { TextValueInput } from '../../../../components/text_value_input';
 import {
   APPLICATION_OVERVIEW_EBT_ELEMENTS,
   DIGITAL_EXPERIENCE_EBT_ACTIONS,
@@ -45,6 +48,11 @@ import { FILTER_EBT_ELEMENTS, FILTER_LABELS } from './overview_filter_labels';
 const TITLE = i18n.translate('xpack.digitalExperience.overview.filtersFlyout.title', {
   defaultMessage: 'All filters',
 });
+
+const TEXT_PLACEHOLDER = i18n.translate(
+  'xpack.digitalExperience.overview.filtersFlyout.textPlaceholder',
+  { defaultMessage: 'Text in the URL, e.g. /checkout' }
+);
 
 const isSameSelection = (a: OverviewFilters, b: OverviewFilters): boolean =>
   encodeOverviewFilters(a) === encodeOverviewFilters(b);
@@ -81,6 +89,18 @@ export function AllFiltersFlyout({
       ...current,
       [name]: toggleFilterValue(current[name] ?? [], value, exclude),
     }));
+
+  // Writing the same text again leaves it as it is, rather than taking it off like a click would.
+  const addText = (name: OverviewFilterName, text: string) =>
+    setDraft((current) => {
+      const values = current[name] ?? [];
+      return values.some(({ value }) => value === text)
+        ? current
+        : { ...current, [name]: toggleFilterValue(values, text, false) };
+    });
+
+  const selectOnly = (name: OverviewFilterName, value: string) =>
+    setDraft((current) => ({ ...current, [name]: [{ value, exclude: false }] }));
 
   return (
     <EuiFlyout
@@ -125,7 +145,7 @@ export function AllFiltersFlyout({
                   </EuiFlexGroup>
                 }
               >
-                {rows.length === 0 ? (
+                {rows.length === 0 && !isFreeTextFilter(name) ? (
                   <EuiText size="s" color="subdued">
                     {i18n.translate('xpack.digitalExperience.overview.filtersFlyout.noValues', {
                       defaultMessage: 'No values in the selected time range',
@@ -145,11 +165,25 @@ export function AllFiltersFlyout({
                         isDisabled={isFull && selection === undefined}
                         onInclude={() => toggle(name, value, false)}
                         onExclude={() => toggle(name, value, true)}
+                        onOnly={() => selectOnly(name, value)}
                         ebtElement={FILTER_EBT_ELEMENTS[name]}
                         data-test-subj={`digitalExperienceOverviewFiltersFlyout-${name}Option-${value}`}
                       />
                     );
                   })
+                )}
+                {isFreeTextFilter(name) && (
+                  <>
+                    {rows.length > 0 && <EuiSpacer size="xs" />}
+                    <TextValueInput
+                      onAdd={(text) => addText(name, text)}
+                      maxLength={OVERVIEW_FILTER_MAX_LENGTHS[name]}
+                      placeholder={TEXT_PLACEHOLDER}
+                      isDisabled={isFull}
+                      ebtElement={FILTER_EBT_ELEMENTS[name]}
+                      data-test-subj={`digitalExperienceOverviewFiltersFlyout-${name}Text`}
+                    />
+                  </>
                 )}
                 {isFull && (
                   <>

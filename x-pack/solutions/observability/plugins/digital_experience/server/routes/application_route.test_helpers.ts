@@ -233,6 +233,9 @@ export const applicationRouteTestCases = ({
           schemaOf('query').safeParse({ start: START, end: END, filters }).success;
 
         expect(withFilters(encodeOverviewFilters({ browser: include('Chrome') }) ?? '')).toBe(true);
+        expect(withFilters(encodeOverviewFilters({ pageContains: include('/cart') }) ?? '')).toBe(
+          false
+        );
         expect(
           withFilters(encodeOverviewFilters({ pageUrl: include('https://shop.test/') }) ?? '')
         ).toBe(false);

@@ -9,6 +9,7 @@ import React from 'react';
 import { omit } from 'lodash';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { PAGE_FILTER_NAMES } from '../../../common/overview_filters';
 import { ApplicationTabToolbar } from '../../components/application_tab_toolbar';
 import { LoadErrorPrompt } from '../../components/load_error_prompt';
 import { ERRORS_EBT_ELEMENTS } from '../../ebt_constants';
@@ -41,7 +42,7 @@ export function ErrorsTab({ serviceName }: { serviceName: string }) {
   const { filters, setFilter, setFilters } = useOverviewFilters();
   const { kuery } = useOverviewKuery();
   // The page does not narrow the errors, so it is not shown as if it did.
-  const errorFilters = omit(filters, 'pageUrl');
+  const errorFilters = omit(filters, PAGE_FILTER_NAMES);
   // Clears what shows here only: the page stays for the Overview, which shows it.
   const clearErrorFilters = () =>
     setFilters(Object.fromEntries(Object.keys(errorFilters).map((name) => [name, []])));

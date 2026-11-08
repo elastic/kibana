@@ -225,7 +225,15 @@ describe('GET /internal/digital_experience/applications/{serviceName}/overview',
         end: END,
         filters: encodeOverviewFilters({ [name]: include(value) }),
       }).success;
-    const lengths = { browser: 256, os: 256, device: 256, country: 16, pageUrl: 1024 };
+    const lengths = {
+      browser: 256,
+      os: 256,
+      device: 256,
+      country: 16,
+      appVersion: 256,
+      pageUrl: 1024,
+      pageContains: 256,
+    };
 
     Object.entries(lengths).forEach(([name, length]) => {
       expect(withFilter(name, 'x'.repeat(length))).toBe(true);
