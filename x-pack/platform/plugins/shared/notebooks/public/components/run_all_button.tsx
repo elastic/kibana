@@ -44,7 +44,7 @@ export const RunAllButton = () => {
   };
 
   return (
-    <EuiSplitButton size="s" color="primary">
+    <EuiSplitButton size="s" color="primary" isDisabled={cellOrder.length === 0}>
       <EuiSplitButton.ActionPrimary
         iconType="play"
         onClick={() => scheduler.runAll()}
