@@ -45,6 +45,8 @@ import { i18n } from '@kbn/i18n';
 import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
 import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
 import {
+  BUILT_IN_ENTITY_TYPES,
+  canonicalEntityTypeId,
   KNOWN_EUI_ICONS,
   resolveEntityMetadata,
   type EntityMetadataRow,
@@ -937,13 +939,17 @@ export const getEntityIcon = (type?: ImpactMapEntityType): string => {
 
 /** The kind and the type under it: `Infrastructure › Kubernetes deployment`. */
 export const getEntityTypeLabel = (
-  type?: ImpactMapEntityType,
+  storedType?: ImpactMapEntityType,
   entityName?: string
 ): string | undefined => {
-  const kind = getEntityKindLabel(getEntityKind(type));
-  if (!type || !kind) {
+  const kind = getEntityKindLabel(getEntityKind(storedType));
+  if (!storedType || !kind) {
     return kind;
   }
+  // A built-in type is named as the catalog names it ("Kubernetes node"), not as a map stored it
+  // ("K8s"), so a person can tell what the thing is.
+  const builtIn = BUILT_IN_ENTITY_TYPES.find(({ id }) => id === canonicalEntityTypeId(type.id));
+  const type = builtIn ? { ...storedType, label: builtIn.label } : storedType;
   // A type that carries the entity's own name ('Shipping service') is not a sub-type.
   const name = entityName?.trim().toLowerCase();
   if (name && type.label.toLowerCase().includes(name)) {
