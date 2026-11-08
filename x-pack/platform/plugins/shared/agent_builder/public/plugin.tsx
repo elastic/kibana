@@ -277,6 +277,14 @@ export class AgentBuilderPlugin
       onClose,
       trailingActions,
     }: OpenConversationDetailsOptions): Promise<() => void> => {
+      // Already open for this conversation: show the tab there instead of reloading the flyout.
+      const { isDetailsFlyoutOpen, requestDetailsTab } = await import(
+        './flyout/details_flyout_registry'
+      );
+      if (initialTabId && isDetailsFlyoutOpen(conversationId)) {
+        requestDetailsTab(conversationId, initialTabId);
+        return () => {};
+      }
       const { openConversationDetailsFlyout } = await import(
         './flyout/open_conversation_details_flyout'
       );

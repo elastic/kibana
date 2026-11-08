@@ -16,8 +16,10 @@ import {
   EuiPanel,
   EuiText,
   EuiTitle,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 export interface InvestigationCardProps {
   title: string;
@@ -50,6 +52,7 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
   children,
   'data-test-subj': dataTestSubj,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const subj = dataTestSubj ?? 'agenticInvestigationsCard';
   const accordionId = useGeneratedHtmlId({ prefix: 'investigationCard' });
   const [isOpen, setIsOpen] = useState(true);
@@ -87,9 +90,22 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
       {OPEN}
     </EuiButtonEmpty>
   );
+  // Lines up under the title, not under its icon, and stops at two lines so a long one cannot
+  // push the card around.
   const subtitleText = subtitle && (
-    <EuiText size="xs" color="subdued">
-      <p>{subtitle}</p>
+    <EuiText
+      size="xs"
+      color="subdued"
+      css={css`
+        margin-left: ${euiTheme.size.l};
+        text-align: left;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      `}
+    >
+      <p title={subtitle}>{subtitle}</p>
     </EuiText>
   );
 

@@ -243,7 +243,7 @@ export const EventCard: React.FC<{
 }> = ({ event, impactMap, onOpen, onOpenEntity }) => (
   <InvestigationCard
     title={event.title}
-    icon={event.kind === 'recovery' ? 'checkInCircleFilled' : 'warning'}
+    icon={event.kind === 'recovery' ? 'checkCircleFill' : 'warning'}
     onClick={onOpen}
     data-test-subj="agenticInvestigationsEventCard"
   >

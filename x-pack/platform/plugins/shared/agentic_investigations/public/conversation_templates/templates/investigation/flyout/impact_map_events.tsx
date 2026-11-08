@@ -133,7 +133,7 @@ export const EVENT_GROUPS = [
   { id: 'customer_impact', icon: 'users', color: 'accent' },
   { id: 'investigation', icon: 'sparkles', color: 'primary' },
   { id: 'mitigation', icon: 'wrench', color: 'success' },
-  { id: 'recovery', icon: 'checkInCircleFilled', color: 'success' },
+  { id: 'recovery', icon: 'checkCircleFill', color: 'success' },
   { id: 'response', icon: 'megaphone', color: 'primary' },
 ].map((entry) => ({
   ...entry,

@@ -34,6 +34,10 @@ import type { ConversationTemplatesService } from '../services/conversation_temp
 import { useConversation } from '../application/hooks/use_conversation';
 import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
 import { useConversationFlyoutWidthProps } from './conversation_details_flyout_width';
+import {
+  registerOpenDetailsFlyout,
+  subscribeToDetailsTabRequests,
+} from './details_flyout_registry';
 
 export const FLYOUT_TITLE = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.title', {
   defaultMessage: 'Summary',
@@ -143,6 +147,22 @@ export const ConversationDetailsFlyoutContent = ({
     () => buildTabs(conversation, conversationTemplatesService),
     [conversation, conversationTemplatesService]
   );
+
+  // Something else (a card in the chat) asks this flyout, already open, to show another tab.
+  useEffect(() => {
+    const unregister = registerOpenDetailsFlyout(conversation.id);
+    const unsubscribe = subscribeToDetailsTabRequests((conversationId, tabId) => {
+      const requested =
+        tabs.find(({ id }) => id === tabId) ?? tabs.find(({ id }) => id.endsWith(`.${tabId}`));
+      if (conversationId === conversation.id && requested) {
+        setSelectedTabId(requested.id);
+      }
+    });
+    return () => {
+      unsubscribe();
+      unregister();
+    };
+  }, [conversation.id, tabs]);
   const initialTab = initialTabId
     ? tabs.find(({ id }) => id === initialTabId) ??
       tabs.find(({ id }) => id.endsWith(`.${initialTabId}`))
