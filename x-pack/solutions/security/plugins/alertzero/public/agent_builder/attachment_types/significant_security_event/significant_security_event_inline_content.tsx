@@ -101,10 +101,10 @@ const TIER1_STATUS_LABELS: Record<HuntResult['tier1']['status'], string> = {
 
 const TIER_LABELS: Record<HuntResult['hit_sources'][number], string> = {
   tier1: i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.tier1Prefix', {
-    defaultMessage: 'Tier 1',
+    defaultMessage: 'IOC Hunt',
   }),
   tier2: i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.tier2Prefix', {
-    defaultMessage: 'Tier 2',
+    defaultMessage: 'Behavior Hunt',
   }),
 };
 
@@ -370,7 +370,12 @@ const IndicatorList: React.FC<{
               ? buildMitreTechniqueUrl(indicator.technique_id)
               : undefined;
             const linkProps = mitreUrl
-              ? { href: mitreUrl, target: '_blank', rel: 'noopener noreferrer', iconType: 'popout' }
+              ? {
+                  href: mitreUrl,
+                  target: '_blank',
+                  rel: 'noopener noreferrer',
+                  iconType: 'external',
+                }
               : {};
             const showId =
               indicator.technique_id && !indicator.value.includes(indicator.technique_id);
@@ -501,7 +506,7 @@ const EvidenceColumn: React.FC<{
           <EuiButtonEmpty
             size="xs"
             flush="left"
-            iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
+            iconType={isExpanded ? 'chevronSingleUp' : 'chevronSingleDown'}
             onClick={() => setIsExpanded((expanded) => !expanded)}
             data-test-subj="alertzeroSignificantSecurityEventEvidenceOverflow"
           >

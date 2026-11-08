@@ -35,6 +35,7 @@ const createStore = (trees: DecisionTreeDetail[]): jest.Mocked<DecisionTreeStore
       .fn()
       .mockImplementation(async (treeId: string) => trees.find((tree) => tree.tree_id === treeId)),
     commit: jest.fn(),
+    listTreeIdsForInvestigation: jest.fn(),
     listVersions: jest.fn(),
     getVersion: jest.fn(),
     archive: jest.fn(),
