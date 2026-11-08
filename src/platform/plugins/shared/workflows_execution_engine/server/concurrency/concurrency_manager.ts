@@ -140,7 +140,7 @@ export class ConcurrencyManager {
             cancelledAt: skipTimestamp,
             cancelledBy: 'system',
           },
-          { refresh: 'wait_for' }
+          { refresh: true }
         );
         return false;
       }
@@ -150,7 +150,7 @@ export class ConcurrencyManager {
           id: currentExecutionId,
           status: ExecutionStatus.QUEUED,
         },
-        { refresh: 'wait_for' }
+        { refresh: true }
       );
       return false;
     }
@@ -182,7 +182,7 @@ export class ConcurrencyManager {
           cancelledAt: skipTimestamp,
           cancelledBy: 'system',
         },
-        { refresh: 'wait_for' }
+        { refresh: true }
       );
       return false; // Drop the new execution
     }

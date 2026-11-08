@@ -532,7 +532,7 @@ describe('ConcurrencyManager', () => {
           cancelledAt: expect.any(String),
           cancelledBy: 'system',
         },
-        { refresh: 'wait_for' }
+        { refresh: true }
       );
       expect(mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions).not.toHaveBeenCalled();
       expect(mockWorkflowTaskManager.forceRunIdleTasks).not.toHaveBeenCalled();
@@ -587,7 +587,7 @@ describe('ConcurrencyManager', () => {
           cancelledAt: expect.any(String),
           cancelledBy: 'system',
         },
-        { refresh: 'wait_for' }
+        { refresh: true }
       );
       expect(mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions).not.toHaveBeenCalled();
     });
@@ -695,7 +695,7 @@ describe('ConcurrencyManager', () => {
             id: 'exec-new',
             status: ExecutionStatus.QUEUED,
           },
-          { refresh: 'wait_for' }
+          { refresh: true }
         );
       });
 
@@ -727,7 +727,7 @@ describe('ConcurrencyManager', () => {
             cancelledAt: expect.any(String),
             cancelledBy: 'system',
           },
-          { refresh: 'wait_for' }
+          { refresh: true }
         );
       });
     });
