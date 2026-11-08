@@ -24,7 +24,8 @@ import { createEdgeMarker } from '../../../common/service_map/utils';
 export const IMPACT_SEVERITY_SCORES = {
   rootCause: 95,
   degraded: 60,
-  impacted: 30,
+  // Red like the root cause: what the problem hurt is as serious as where it started.
+  impacted: 95,
 } as const;
 
 /** The score whose severity colour a node's border takes, or none for a healthy or plain node. */

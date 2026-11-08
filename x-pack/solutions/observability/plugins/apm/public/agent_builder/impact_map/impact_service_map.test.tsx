@@ -91,7 +91,7 @@ const impactMap: InvestigationImpactMapResponse = {
 };
 
 describe('getImpactSeverityScore', () => {
-  it('ranks root cause over degraded over impacted, and leaves healthy entities plain', () => {
+  it('scores root cause and impacted red, degraded amber, and leaves healthy entities plain', () => {
     expect(getImpactSeverityScore({ role: 'root_cause', impacted: true })).toBe(
       IMPACT_SEVERITY_SCORES.rootCause
     );
