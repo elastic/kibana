@@ -13,6 +13,8 @@ import {
   isEcfStackArnValid,
   buildEcfStackConsoleUrl,
   ensureOtlpPort,
+  getEcfTemplateFamily,
+  ecfFamilySupportsNamespace,
   ECF_UNIFIED_TEMPLATE_FILE,
   ECF_OTEL_TEMPLATE_FILE,
   ECF_CROWDSTRIKE_TEMPLATE_FILE,
@@ -20,6 +22,7 @@ import {
   ECF_OTEL_STACK_NAME,
   ECF_CROWDSTRIKE_STACK_NAME,
 } from './ecf_cloudformation';
+import { AWS_SERVICES_MAP } from './aws_service_matrix';
 import {
   buildEcfTemplateUrl,
   ECF_FALLBACK_TEMPLATE_VERSION,
@@ -364,6 +367,48 @@ describe('buildEcfUnifiedCloudFormationUrl()', () => {
       otlpEndpoint: 'https://otlp.example.com',
     });
     expect(url).not.toContain('APIKey');
+  });
+
+  it('pre-fills DataStreamNamespace with the namespace', () => {
+    const url = buildEcfUnifiedCloudFormationUrl({
+      ecfConfigs: baseConfigs,
+      region: 'us-east-1',
+      version: TEST_VERSION,
+      namespace: 'prod',
+    });
+    expect(
+      new URLSearchParams(new URL(url).hash.split('?')[1]).get('param_DataStreamNamespace')
+    ).toBe('prod');
+  });
+
+  it('leaves DataStreamNamespace out when the namespace is empty or absent', () => {
+    for (const namespace of ['', undefined]) {
+      const url = buildEcfUnifiedCloudFormationUrl({
+        ecfConfigs: baseConfigs,
+        region: 'us-east-1',
+        version: TEST_VERSION,
+        namespace,
+      });
+      expect(url).not.toContain('DataStreamNamespace');
+    }
+  });
+});
+
+describe('getEcfTemplateFamily()', () => {
+  it.each([
+    ['vpcflow', 'unified'],
+    ['cloudtrail_otel', 'otel'],
+    ['s3', undefined],
+  ])('%s is in the %s family', (serviceId, family) => {
+    const entry = AWS_SERVICES_MAP.get(serviceId);
+    expect(entry && getEcfTemplateFamily(entry)).toBe(family);
+  });
+
+  it('only the unified family supports a namespace', () => {
+    expect(ecfFamilySupportsNamespace('unified')).toBe(true);
+    expect(ecfFamilySupportsNamespace('otel')).toBe(false);
+    expect(ecfFamilySupportsNamespace('crowdstrike')).toBe(false);
+    expect(ecfFamilySupportsNamespace(undefined)).toBe(false);
   });
 });
 

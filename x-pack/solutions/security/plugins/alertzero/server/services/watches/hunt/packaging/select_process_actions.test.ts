@@ -324,7 +324,7 @@ describe('selectProcessActions', () => {
       expect(decision.rule).toBe('destructive_technique');
     });
 
-    it('reads confirmed Tier 2 techniques, never the report SKI list', () => {
+    it('reads confirmed Behavior Hunt techniques, never the report SKI list', () => {
       const decision = selectProcessActions({
         selector: selector(),
         host: host(),
@@ -403,7 +403,7 @@ describe('selectProcessActions', () => {
   });
 
   describe('rule 4: critical IOC match', () => {
-    it('kills when severity is critical and the process was the Tier 1 IOC match, even without memdump_process', () => {
+    it('kills when severity is critical and the process was the IOC Hunt match, even without memdump_process', () => {
       const decision = selectProcessActions({
         selector: selector({ iocMatched: true }),
         host: host(),

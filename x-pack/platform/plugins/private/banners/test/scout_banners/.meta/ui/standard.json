@@ -1,5 +1,5 @@
 {
-  "sha1": "657b31e1084b78e57340c5a825aaa793b6709f88",
+  "sha1": "799b2a7f852035452914a64d2bfbba09c5ed6277",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -9,13 +9,12 @@
       "title": "global pages displays the global banner on the login page",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/banners/test/scout_banners/ui/tests/global.spec.ts",
         "line": 12,
-        "column": 14
+        "column": 75
       }
     },
     {
@@ -23,13 +22,12 @@
       "title": "per-spaces banners displays the space-specific banner within the space",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/banners/test/scout_banners/ui/tests/spaces.spec.ts",
-        "line": 31,
-        "column": 26
+        "line": 32,
+        "column": 21
       }
     },
     {
@@ -37,13 +35,12 @@
       "title": "per-spaces banners displays the global banner within another space",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/banners/test/scout_banners/ui/tests/spaces.spec.ts",
-        "line": 33,
-        "column": 62
+        "line": 36,
+        "column": 8
       }
     },
     {
@@ -51,13 +48,12 @@
       "title": "per-spaces banners displays the global banner on the login page",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/banners/test/scout_banners/ui/tests/spaces.spec.ts",
-        "line": 41,
-        "column": 21
+        "line": 44,
+        "column": 12
       }
     }
   ]

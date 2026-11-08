@@ -113,7 +113,6 @@ export interface SearchInterceptorDeps {
   replay?: ReplayRegistry;
 }
 
-const MAX_CACHE_ITEMS = 50;
 const MAX_CACHE_SIZE_MB = 10;
 
 const DEFAULT_MULTIPLEXING_POLL_LENGTH = '30s';
@@ -121,10 +120,7 @@ const DEFAULT_MULTIPLEXING_POLL_LENGTH = '30s';
 export class SearchInterceptor {
   private uiSettingsSubs: Subscription[] = [];
   private searchTimeout: number;
-  private readonly responseCache: SearchResponseCache = new SearchResponseCache(
-    MAX_CACHE_ITEMS,
-    MAX_CACHE_SIZE_MB
-  );
+  private readonly responseCache: SearchResponseCache = new SearchResponseCache(MAX_CACHE_SIZE_MB);
   private protocolSupportsMultiplexing: boolean = false;
   private performanceObserver?: PerformanceObserver;
   private readonly activeAsyncSearches = new Map<string, string>(); // id -> strategy
@@ -684,8 +680,8 @@ export class SearchInterceptor {
    * If requestHash is defined, tries to return them first from cache.
    */
   private getSearchResponse$(request: IKibanaSearchRequest, options: IAsyncSearchOptions) {
-    const { requestHash } = options;
-    const sessionOptions = this.deps.session.getSearchOptions(options.sessionId);
+    const { requestHash, sessionId } = options;
+    const sessionOptions = this.deps.session.getSearchOptions(sessionId);
     const cached =
       requestHash && !sessionOptions?.isRestore ? this.responseCache.get(requestHash) : undefined; // don't use cache if restoring a session
 
@@ -697,10 +693,11 @@ export class SearchInterceptor {
     searchAbortController.addAbortSignal(options.abortSignal ?? new AbortController().signal);
     const response$ = cached?.response$ || this.runSearch$(request, options, searchAbortController);
 
-    if (requestHash && !this.responseCache.has(requestHash)) {
+    if (requestHash && sessionId && !this.responseCache.has(requestHash)) {
       this.responseCache.set(requestHash, {
         response$,
         searchAbortController,
+        groupId: sessionId,
       });
     }
 
@@ -708,6 +705,16 @@ export class SearchInterceptor {
       response$,
       searchAbortController,
     };
+  }
+
+  /** Checks whether the session has completed responses available for replay. */
+  public hasResponseCacheForSession(sessionId: string): boolean {
+    return this.responseCache.hasCompletedResponses(sessionId);
+  }
+
+  /** Evicts a session's cached responses without canceling active searches. */
+  public evictResponseCacheForSession(sessionId: string): void {
+    this.responseCache.evictGroup(sessionId);
   }
 
   /**
