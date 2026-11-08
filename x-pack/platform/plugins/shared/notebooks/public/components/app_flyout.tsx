@@ -17,7 +17,6 @@ import {
   EuiFlyoutBody,
   EuiIcon,
   EuiMarkdownFormat,
-  EuiSpacer,
   EuiText,
   EuiTitle,
   EuiToolTip,
@@ -276,6 +275,11 @@ const AppGridPanel = ({
 };
 
 /** The app's title and description from its settings, with the global time picker on the right. */
+const getGridGap = ({ gridGap }: NotebookApp) => gridGap ?? DEFAULT_GRID_GAP;
+
+/** Without snapping the grid has no gutter, so panels keep half a gap clear around themselves. */
+const getPanelInset = (app: NotebookApp) => (app.snapToGrid ?? true ? 0 : getGridGap(app) / 2);
+
 const AppHeader = ({ app }: { app: NotebookApp }) => {
   const { store } = useNotebook();
   const cells = useStateFromPublishingSubject(store.cells$);
@@ -289,39 +293,37 @@ const AppHeader = ({ app }: { app: NotebookApp }) => {
   if (!heading && !description && !pinnedTime) return null;
 
   return (
-    <>
-      <EuiFlexGroup
-        alignItems="flexStart"
-        justifyContent="spaceBetween"
-        gutterSize="m"
-        responsive={false}
-        data-test-subj="notebookAppHeader"
-      >
-        <EuiFlexItem>
-          {heading && (
-            <EuiTitle size="m">
-              <h2 data-test-subj="notebookAppHeading">{heading}</h2>
-            </EuiTitle>
-          )}
-          {description && (
-            <EuiText
-              size="s"
-              color="subdued"
-              css={{ whiteSpace: 'pre-wrap' }}
-              data-test-subj="notebookAppDescription"
-            >
-              {description}
-            </EuiText>
-          )}
-        </EuiFlexItem>
-        {pinnedTime && (
-          <EuiFlexItem grow={false}>
-            <PinnedTimePicker cell={pinnedTime} />
-          </EuiFlexItem>
+    <EuiFlexGroup
+      alignItems="flexStart"
+      justifyContent="spaceBetween"
+      gutterSize="m"
+      responsive={false}
+      css={{ marginBottom: getGridGap(app) - getPanelInset(app) }}
+      data-test-subj="notebookAppHeader"
+    >
+      <EuiFlexItem>
+        {heading && (
+          <EuiTitle size="m">
+            <h2 data-test-subj="notebookAppHeading">{heading}</h2>
+          </EuiTitle>
         )}
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-    </>
+        {description && (
+          <EuiText
+            size="s"
+            color="subdued"
+            css={{ whiteSpace: 'pre-wrap' }}
+            data-test-subj="notebookAppDescription"
+          >
+            {description}
+          </EuiText>
+        )}
+      </EuiFlexItem>
+      {pinnedTime && (
+        <EuiFlexItem grow={false}>
+          <PinnedTimePicker cell={pinnedTime} />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 };
 
@@ -430,7 +432,7 @@ const AppGrid = ({
   const { store } = useNotebook();
   const { euiTheme } = useEuiTheme();
   const snapToGrid = app.snapToGrid ?? true;
-  const gutterSize = app.gridGap ?? DEFAULT_GRID_GAP;
+  const gutterSize = getGridGap(app);
   // Without snapping, the engine works on a finer grid with no gutter; panels inset themselves by
   // half a gutter so they keep the same spacing and row height as the snapped grid.
   const scale = snapToGrid ? 1 : GRID_SUBDIVISIONS;
@@ -452,7 +454,7 @@ const AppGrid = ({
     }),
     [snapToGrid, gutterSize, scale, columns, app.freePlacement, isShiftHeld]
   );
-  const panelInset = snapToGrid ? 0 : gutterSize / 2;
+  const panelInset = getPanelInset(app);
   const dotStep = snapToGrid ? 1 : isShiftHeld ? scale : undefined;
   const gridStyles = useMemo(
     () => getGridStyles(euiTheme, { dotStep, inset: panelInset }),
