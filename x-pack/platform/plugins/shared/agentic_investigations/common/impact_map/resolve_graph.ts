@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_IMPACT_MAP_TYPE_FIELDS } from './constants';
 import type {
   ImpactMapCatalog,
   ImpactMapEntity,
@@ -167,6 +168,21 @@ const mergeType = <T extends { id: string }>(before: T, after: T): T => {
   const icons = [(before as { icon?: object }).icon, (after as { icon?: object }).icon];
   if (icons[0] || icons[1]) {
     merged.icon = { ...icons[0], ...icons[1] };
+  }
+  // Fields add up by key, so a pass that learns one more does not forget the rest.
+  const fields = [
+    (before as { metadata_fields?: Array<{ key: string }> }).metadata_fields,
+    (after as { metadata_fields?: Array<{ key: string }> }).metadata_fields,
+  ];
+  if (fields[0] || fields[1]) {
+    const byKey = new Map<string, { key: string }>();
+    [...(fields[0] ?? []), ...(fields[1] ?? [])].forEach((field) =>
+      byKey.set(field.key, { ...byKey.get(field.key), ...field })
+    );
+    (merged as { metadata_fields?: unknown }).metadata_fields = [...byKey.values()].slice(
+      0,
+      MAX_IMPACT_MAP_TYPE_FIELDS
+    );
   }
   return merged;
 };

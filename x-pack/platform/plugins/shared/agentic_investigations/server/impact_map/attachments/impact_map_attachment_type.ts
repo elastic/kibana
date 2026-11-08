@@ -38,17 +38,20 @@ export const formatImpactMapForAgent = ({
 }: InvestigationImpactMap): string => {
   const entityTypeLabel = new Map(entityTypes.map(({ id, label }) => [id, label]));
   const relationshipLabel = new Map(relationshipTypes.map(({ id, label }) => [id, label]));
-  const entityLines = entities.map(({ id, type_id: typeId, label, annotations = {} }) => {
-    const notes = [
-      annotations.role,
-      annotations.health && `health ${annotations.health}`,
-      annotations.impacted && 'impacted',
-      annotations.alert_count !== undefined && `${annotations.alert_count} alerts`,
-    ].filter(Boolean);
-    return `- ${label} (id ${id}, ${entityTypeLabel.get(typeId) ?? typeId})${
-      notes.length > 0 ? `: ${notes.join(', ')}` : ''
-    }`;
-  });
+  const entityLines = entities.map(
+    ({ id, type_id: typeId, label, annotations = {}, metadata = [] }) => {
+      const notes = [
+        annotations.role,
+        annotations.health && `health ${annotations.health}`,
+        annotations.impacted && 'impacted',
+        annotations.alert_count !== undefined && `${annotations.alert_count} alerts`,
+      ].filter(Boolean);
+      const facts = metadata.map(({ key, value }) => `${key}=${value}`).join(', ');
+      return `- ${label} (id ${id}, ${entityTypeLabel.get(typeId) ?? typeId})${
+        notes.length > 0 ? `: ${notes.join(', ')}` : ''
+      }${facts ? ` [${facts}]` : ''}`;
+    }
+  );
   const relationshipLines = relationships.map(
     ({ source_id: source, target_id: target, type_id: typeId, on_critical_path: critical }) =>
       `- ${source} ${relationshipLabel.get(typeId) ?? typeId} ${target}${

@@ -37,14 +37,17 @@ import {
 import { i18n } from '@kbn/i18n';
 import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
 import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
-import type {
-  ImpactMapEntityType,
-  ImpactMapEvent,
-  ImpactMapEventKind,
-  InvestigationEvidence,
-  InvestigationImpactMapResponse,
+import {
+  resolveEntityMetadata,
+  type EntityMetadataRow,
+  type ImpactMapEntityType,
+  type ImpactMapEvent,
+  type ImpactMapEventKind,
+  type InvestigationEvidence,
+  type InvestigationImpactMapResponse,
 } from '../../../../../common';
 import { LazyEvidenceView } from '../../../../evidence';
+import { EntityMetadataTable, FeaturedMetadata } from './entity_metadata';
 
 const KINDS: Record<ImpactMapEventKind, { label: string; color: EuiBadgeProps['color'] }> = {
   change: {
@@ -558,6 +561,9 @@ export const getEntityKindLabel = (kind?: string): string | undefined =>
 const TIMELINE_TAB = i18n.translate('xpack.agenticInvestigations.impactMap.events.timelineTab', {
   defaultMessage: 'Timeline',
 });
+const METADATA_TAB = i18n.translate('xpack.agenticInvestigations.impactMap.events.metadataTab', {
+  defaultMessage: 'Metadata',
+});
 const TYPE_LABEL = i18n.translate('xpack.agenticInvestigations.impactMap.events.type', {
   defaultMessage: 'Type',
 });
@@ -574,6 +580,8 @@ export interface ImpactMapEventsFlyoutProps {
   typeLabel?: string;
   /** Oldest first. */
   events: ImpactMapEvent[];
+  /** What the agent recorded about an entity; adds a Metadata tab and leads with the featured. */
+  metadata?: EntityMetadataRow[];
   /** Draws the events of the list; the list falls back to plain summaries. */
   renderEvents?: (events: ImpactMapEvent[], onOpen: (eventId: string) => void) => React.ReactNode;
   impactMap: Pick<InvestigationImpactMapResponse, 'entities' | 'relationships' | 'events'>;
@@ -601,6 +609,7 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
   typeLabel,
   renderEvents,
   events,
+  metadata = [],
   impactMap,
   initialEventId,
   onClose,
@@ -610,6 +619,10 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
 }) => {
   const titleId = useGeneratedHtmlId({ prefix: 'impactMapEventsTitle' });
   const [selectedId, setSelectedId] = useState(initialEventId);
+  // An entity with facts but no events opens on its facts.
+  const [tab, setTab] = useState<'timeline' | 'metadata'>(
+    events.length === 0 && metadata.length > 0 ? 'metadata' : 'timeline'
+  );
   const selected = useMemo(() => events.find(({ id }) => id === selectedId), [events, selectedId]);
   // Opened on one event from the timeline, there is no list to go back to.
   const canGoBack = Boolean(selected) && (!initialEventId || events.length > 1);
@@ -665,6 +678,12 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
                 )}
               </EuiFlexItem>
             </EuiFlexGroup>
+            {metadata.some(({ featured }) => featured) && (
+              <>
+                <EuiSpacer size="s" />
+                <FeaturedMetadata rows={metadata} />
+              </>
+            )}
             <EuiSpacer size="s" />
             <EuiFlexGroup
               gutterSize="s"
@@ -675,16 +694,32 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiTabs bottomBorder={false} size="s">
                   <EuiTab
-                    isSelected
+                    isSelected={tab === 'timeline'}
+                    onClick={() => setTab('timeline')}
                     append={
                       <EuiNotificationBadge color="subdued">{events.length}</EuiNotificationBadge>
                     }
+                    data-test-subj="agenticInvestigationsImpactMapTimelineTab"
                   >
                     {TIMELINE_TAB}
                   </EuiTab>
+                  {metadata.length > 0 && (
+                    <EuiTab
+                      isSelected={tab === 'metadata'}
+                      onClick={() => setTab('metadata')}
+                      append={
+                        <EuiNotificationBadge color="subdued">
+                          {metadata.length}
+                        </EuiNotificationBadge>
+                      }
+                      data-test-subj="agenticInvestigationsImpactMapMetadataTab"
+                    >
+                      {METADATA_TAB}
+                    </EuiTab>
+                  )}
                 </EuiTabs>
               </EuiFlexItem>
-              {onViewInTimeline && events.length > 0 && (
+              {onViewInTimeline && events.length > 0 && tab === 'timeline' && (
                 <EuiFlexItem grow={false}>
                   <EuiLink
                     onClick={() => {
@@ -714,6 +749,8 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
             target={describeEventTarget(selected, impactMap)}
             allEvents={impactMap.events}
           />
+        ) : tab === 'metadata' ? (
+          <EntityMetadataTable rows={metadata} />
         ) : events.length === 0 ? (
           <EuiEmptyPrompt
             iconType="clock"
@@ -749,7 +786,7 @@ export const resolveEventsSelection = (
   impactMap: InvestigationImpactMapResponse
 ): Pick<
   ImpactMapEventsFlyoutProps,
-  'title' | 'events' | 'initialEventId' | 'icon' | 'typeLabel'
+  'title' | 'events' | 'initialEventId' | 'icon' | 'typeLabel' | 'metadata'
 > => {
   const { events, entities, relationships } = impactMap;
   if (selection.kind === 'entity') {
@@ -759,6 +796,7 @@ export const resolveEventsSelection = (
       title: entity?.label ?? selection.id,
       icon: getEntityIcon(type),
       typeLabel: getEntityKindLabel(type?.kind),
+      metadata: resolveEntityMetadata(entity, type),
       events: events.filter(({ entity_id: entityId }) => entityId === selection.id),
     };
   }

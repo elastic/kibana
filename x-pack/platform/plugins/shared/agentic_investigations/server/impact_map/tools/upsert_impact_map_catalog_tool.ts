@@ -12,6 +12,7 @@ import {
   MAX_IMPACT_MAP_CATALOG_TYPES,
   UPSERT_IMPACT_MAP_CATALOG_TOOL_ID,
 } from '../../../common/impact_map/constants';
+import { STANDARD_METADATA_FIELDS } from '../../../common/impact_map/metadata';
 import {
   impactMapEntityTypeSchema,
   impactMapIconSchema,
@@ -31,6 +32,9 @@ const entityTypeSchema = impactMapEntityTypeSchema.extend({
   ),
   kind: impactMapEntityTypeSchema.shape.kind.describe(
     'The shape, by what the thing fundamentally is. "service" draws a circle, for application code you run (services, functions, front ends). "dependency" draws a diamond, for what services call (databases, queues, caches, external APIs). "infrastructure" draws a rounded square, for what runs and hosts them (Kubernetes deployments, pods and nodes, hosts, VMs, containers, cloud resources, load balancers).'
+  ),
+  metadata_fields: impactMapEntityTypeSchema.shape.metadata_fields.describe(
+    'The metadata fields entities of this type usually carry, for example a Kubernetes deployment: k8s.cluster.name, k8s.namespace.name (both featured). Add fields beyond `standard_metadata_fields`; they are reused by later investigations.'
   ),
   icon: impactMapIconSchema
     .extend({
@@ -75,7 +79,7 @@ export const upsertImpactMapCatalogToolSchema = lazySchema(() =>
 const DESCRIPTION =
   "Read the space's impact map catalog, and add types to it. The catalog holds the entity types (with how they draw and their icon) and relationship types every impact map in this space reuses, so investigations look consistent. " +
   'Call it with no arguments to read the catalog before `agentic_investigations.set_impact_map`, and reuse existing ids rather than inventing near-duplicates. ' +
-  'Types sent here are added, or replace the stored type with the same id. Returns the whole catalog.';
+  'Types sent here are added, or replace the stored type with the same id (metadata fields add up by key). Returns the whole catalog, and `standard_metadata_fields`: the common metadata keys (cloud, Kubernetes, host) to reuse on entities before inventing your own.';
 
 /** `agentic_investigations.upsert_impact_map_catalog`: reads and extends the space catalog. */
 export const createUpsertImpactMapCatalogTool = ({
@@ -107,6 +111,10 @@ export const createUpsertImpactMapCatalogTool = ({
       const catalog = await getImpactMapService()
         .getCatalogService()
         .upsert({ spaceId: context.spaceId, types, user });
-      return { results: [createOtherResult(catalog)] };
+      return {
+        results: [
+          createOtherResult({ ...catalog, standard_metadata_fields: STANDARD_METADATA_FIELDS }),
+        ],
+      };
     },
   });

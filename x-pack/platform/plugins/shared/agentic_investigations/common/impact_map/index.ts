@@ -33,6 +33,8 @@ export {
   impactMapEventsSchema,
   impactMapHealthSchema,
   impactMapIconSchema,
+  impactMapMetadataEntrySchema,
+  impactMapMetadataFieldSchema,
   impactMapRelationshipSchema,
   impactMapRelationshipsSchema,
   impactMapRelationshipTypeSchema,
@@ -51,6 +53,8 @@ export type {
   ImpactMapEventKind,
   ImpactMapHealth,
   ImpactMapIcon,
+  ImpactMapMetadataEntry,
+  ImpactMapMetadataField,
   ImpactMapRelationship,
   ImpactMapRelationshipType,
   ImpactMapRole,
@@ -59,6 +63,9 @@ export type {
 
 export { mergeImpactMapCatalog, resolveImpactMapGraph } from './resolve_graph';
 export type { ResolvedImpactMapGraph } from './resolve_graph';
+
+export { resolveEntityMetadata, STANDARD_METADATA_FIELDS } from './metadata';
+export type { EntityMetadataRow } from './metadata';
 
 export { toEntityName } from './entity_name';
 export {

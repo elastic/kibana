@@ -37,6 +37,9 @@ const entitySchema = impactMapEntitySchema.extend({
   label: impactMapEntitySchema.shape.label.describe(
     'The bare name of the entity, e.g. "shipping", not "k8s deployment: shipping (0/0)". Its kind is the type; what is wrong with it is an event.'
   ),
+  metadata: impactMapEntitySchema.shape.metadata.describe(
+    "Facts that help a person understand and find this entity, from tool results only: cloud.provider, cloud.availability_zone, k8s.cluster.name, k8s.namespace.name, host.name, service.version and so on. Reuse the keys the catalog lists (`standard_metadata_fields` and each type's `metadata_fields`); add your own lowercase dotted key, with a `label`, for anything else that helps. Set `featured: true` on the few that matter most (for example cluster and namespace), which show on the first page of the entity's flyout."
+  ),
   annotations: impactMapAnnotationsSchema
     .extend({
       role: impactMapAnnotationsSchema.shape.role.describe(

@@ -27,14 +27,17 @@ import {
   MAX_EVIDENCE_TEXT_LENGTH,
   MAX_HYPOTHESES,
   MAX_IMPACT_MAP_ENTITIES,
+  MAX_IMPACT_MAP_ENTITY_METADATA,
   MAX_IMPACT_MAP_EVENTS,
   MAX_IMPACT_MAP_RELATIONSHIPS,
   MAX_IMPACT_TOOL_ENTITIES,
   impactMapEventId,
+  STANDARD_METADATA_FIELDS,
   toEntityName,
   type ImpactMapEntity,
   type ImpactMapEntityType,
   type ImpactMapEvent,
+  type ImpactMapMetadataEntry,
   type ImpactMapRelationship,
   type ImpactMapRelationshipType,
   type InvestigationEvidence,
@@ -142,6 +145,16 @@ export const findingsOutputSchema = lazySchema(() => {
             health: z.enum(IMPACT_MAP_HEALTH_STATES).optional(),
             impacted: z.boolean().optional(),
             alert_count: z.number().optional(),
+            metadata: z
+              .array(
+                z.object({
+                  key: z.string().min(1),
+                  value: z.string(),
+                  label: z.string().optional(),
+                  featured: z.boolean().optional(),
+                })
+              )
+              .optional(),
           })
         ),
         relationships: z.array(
@@ -292,6 +305,8 @@ const MAX_MAP_LABEL_LENGTH = 256;
 const MAX_MAP_TYPE_ID_LENGTH = 64;
 const MAX_MAP_ICON_KEY_LENGTH = 64;
 const MAX_MAP_ALERT_COUNT = 9_999;
+const MAX_MAP_METADATA_KEY_LENGTH = 96;
+const MAX_MAP_METADATA_VALUE_LENGTH = 500;
 
 /** A catalog type id: lowercase, with anything the store rejects replaced by `_`. */
 export const toImpactMapTypeId = (raw: string): string =>
@@ -301,6 +316,35 @@ export const toImpactMapTypeId = (raw: string): string =>
     .replace(/[^a-z0-9_.-]+/g, '_')
     .replace(/^[^a-z0-9]+/, '')
     .slice(0, MAX_MAP_TYPE_ID_LENGTH) || 'entity';
+
+/** A metadata key: lowercase and dotted, with anything the store rejects replaced by `_`. */
+export const toMetadataKey = (raw: string): string =>
+  raw
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_.-]+/g, '_')
+    .replace(/^[^a-z0-9]+/, '')
+    .slice(0, MAX_MAP_METADATA_KEY_LENGTH);
+
+const limitMetadata = (
+  raw: NonNullable<NonNullable<FindingsOutput['impact_map']>['entities'][number]['metadata']>
+): ImpactMapMetadataEntry[] => {
+  const byKey = new Map<string, ImpactMapMetadataEntry>();
+  for (const { key, value, label, featured } of raw) {
+    const cleanKey = toMetadataKey(key);
+    const cleanValue = truncate(value.trim(), MAX_MAP_METADATA_VALUE_LENGTH);
+    if (!cleanKey || !cleanValue || byKey.has(cleanKey)) continue;
+    if (byKey.size >= MAX_IMPACT_MAP_ENTITY_METADATA) break;
+    const cleanLabel = label?.trim();
+    byKey.set(cleanKey, {
+      key: cleanKey,
+      value: cleanValue,
+      ...(cleanLabel ? { label: truncate(cleanLabel, MAX_MAP_LABEL_LENGTH) } : {}),
+      ...(featured !== undefined ? { featured } : {}),
+    });
+  }
+  return [...byKey.values()];
+};
 
 const humanizeTypeId = (id: string): string => {
   const words = id.replace(/[_.-]+/g, ' ').trim();
@@ -352,6 +396,7 @@ export const limitImpactMap = (
     const euiIcon = icon(entity.eui_icon);
     const spanType = icon(entity.span_type);
     const spanSubtype = icon(entity.span_subtype);
+    const metadata = entity.metadata ? limitMetadata(entity.metadata) : [];
     if (!entityTypes.has(typeId) && !knownTypeIds.has(typeId)) {
       const guess = classifyEntityType(typeId);
       const euiName = euiIcon ?? (agentName || spanType || spanSubtype ? undefined : guess.euiIcon);
@@ -367,6 +412,19 @@ export const limitImpactMap = (
                 ...(spanType ? { span_type: spanType } : {}),
                 ...(spanSubtype ? { span_subtype: spanSubtype } : {}),
               },
+            }
+          : {}),
+        // The first entity of a new type teaches the catalog which fields the type carries.
+        ...(metadata.length
+          ? {
+              metadata_fields: metadata.map(({ key, label, featured }) => ({
+                key,
+                label:
+                  label ??
+                  STANDARD_METADATA_FIELDS.find((field) => field.key === key)?.label ??
+                  humanizeTypeId(key.replace(/[._]+/g, ' ')),
+                ...(featured !== undefined ? { featured } : {}),
+              })),
             }
           : {}),
       });
@@ -386,6 +444,7 @@ export const limitImpactMap = (
       type_id: typeId,
       label: truncate(toEntityName(entity.label?.trim() || id), MAX_MAP_LABEL_LENGTH),
       ...(Object.keys(annotations).length ? { annotations } : {}),
+      ...(metadata.length ? { metadata } : {}),
     });
   }
   if (entities.length === 0) return undefined;
@@ -820,6 +879,24 @@ export const FINDINGS_JSON_SCHEMA = {
               alert_count: {
                 type: 'number',
                 description: 'Open alerts on this entity, only when the tool results show them.',
+              },
+              metadata: {
+                type: 'array',
+                description: `At most ${MAX_IMPACT_MAP_ENTITY_METADATA}. Facts that help a person understand and locate the entity, taken from tool results only: its cloud provider, region, availability zone, Kubernetes cluster, namespace, node, host, version, owner. Reuse the keys listed under the catalog; add your own lowercase dotted key and a label for anything else that helps. Set featured on the few that matter most, such as cluster and namespace.`,
+                items: {
+                  type: 'object',
+                  properties: {
+                    key: {
+                      type: 'string',
+                      description:
+                        'Lowercase and dotted, like an OpenTelemetry attribute: cloud.availability_zone, k8s.namespace.name.',
+                    },
+                    value: { type: 'string' },
+                    label: { type: 'string', description: 'Only for a key you made up.' },
+                    featured: { type: 'boolean' },
+                  },
+                  required: ['key', 'value'],
+                },
               },
             },
             required: ['id', 'type'],

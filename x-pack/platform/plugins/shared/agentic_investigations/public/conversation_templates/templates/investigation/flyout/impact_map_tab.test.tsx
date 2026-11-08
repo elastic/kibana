@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationImpactMapResponse } from '../../../../../common';
@@ -112,7 +112,68 @@ const renderTab = (openTimeline?: () => void) =>
     </EuiProvider>
   );
 
+const withMetadata: InvestigationImpactMapResponse = {
+  ...impactMap,
+  entities: [
+    { id: 'checkout', type_id: 'service', label: 'checkout' },
+    {
+      id: 'payment',
+      type_id: 'service',
+      label: 'payment',
+      metadata: [
+        { key: 'k8s.namespace.name', value: 'payments' },
+        { key: 'cloud.availability_zone', value: 'eu-west-1b' },
+        { key: 'service.version', value: '2.1.0' },
+        { key: 'team.pager', value: 'payments-oncall', label: 'Pager', featured: true },
+      ],
+    },
+  ],
+};
+
 describe('ImpactMapTab', () => {
+  it('shows key metadata first and the rest in a filterable Metadata tab', async () => {
+    mockUseIsInAgentBuilder.mockReturnValue(false);
+    mockUseInvestigation.mockReturnValue({
+      data: { in_progress: false, impact_map: withMetadata },
+    });
+
+    renderTab();
+    fireEvent.click(screen.getByTestId('fakeEntity'));
+
+    // Standard fields marked as featured, and an entry that features itself, lead the flyout.
+    const featured = await screen.findByTestId('agenticInvestigationsImpactMapFeaturedMetadata');
+    expect(featured).toHaveTextContent('Namespace');
+    expect(featured).toHaveTextContent('payments');
+    expect(featured).toHaveTextContent('Pager');
+    expect(featured).not.toHaveTextContent('2.1.0');
+
+    fireEvent.click(screen.getByTestId('agenticInvestigationsImpactMapMetadataTab'));
+    const table = await screen.findByTestId('agenticInvestigationsImpactMapMetadataTable');
+    expect(table).toHaveTextContent('2.1.0');
+    expect(table).toHaveTextContent('Availability zone');
+
+    fireEvent.change(screen.getByPlaceholderText('Filter fields and values'), {
+      target: { value: 'eu-west' },
+    });
+    expect(await within(table).findByText('eu-west-1b')).toBeInTheDocument();
+    expect(within(table).queryByText('2.1.0')).toBeNull();
+  });
+
+  it('opens an entity that has metadata but no events, on its Metadata tab', async () => {
+    mockUseIsInAgentBuilder.mockReturnValue(false);
+    mockUseInvestigation.mockReturnValue({
+      data: {
+        in_progress: false,
+        impact_map: { ...withMetadata, events: [] },
+      },
+    });
+
+    renderTab();
+    fireEvent.click(screen.getByTestId('fakeEntity'));
+
+    expect(await screen.findByTestId('agenticInvestigationsImpactMapMetadataTable')).toBeVisible();
+  });
+
   it('draws the map with the registered renderer, under its title and updated time', () => {
     mockUseInvestigation.mockReturnValue({ data: { in_progress: false, impact_map: impactMap } });
 

@@ -289,6 +289,37 @@ describe('classifyEntityType', () => {
   });
 });
 
+describe('impact map metadata', () => {
+  it('cleans keys and values, keeps featured, and teaches a new type its fields', () => {
+    const record = limitImpactMap({
+      entities: [
+        {
+          id: 'shipping',
+          type: 'k8s_deployment',
+          metadata: [
+            { key: 'K8s Namespace.Name', value: ' shop ', featured: true },
+            { key: 'cloud.availability_zone', value: 'eu-west-1b' },
+            { key: 'cloud.availability_zone', value: 'duplicate' },
+            { key: 'empty', value: '   ' },
+            { key: 'team pager', value: 'oncall', label: 'Pager' },
+          ],
+        },
+      ],
+      relationships: [],
+    });
+    expect(record?.entities[0].metadata).toEqual([
+      { key: 'k8s_namespace.name', value: 'shop', featured: true },
+      { key: 'cloud.availability_zone', value: 'eu-west-1b' },
+      { key: 'team_pager', value: 'oncall', label: 'Pager' },
+    ]);
+    expect(record?.entity_types[0].metadata_fields).toEqual([
+      { key: 'k8s_namespace.name', label: 'K8s namespace name', featured: true },
+      { key: 'cloud.availability_zone', label: 'Availability zone' },
+      { key: 'team_pager', label: 'Pager' },
+    ]);
+  });
+});
+
 describe('impact map', () => {
   it('builds the store shape: types from the icon fields, normalised ids, no dangling edges', () => {
     const map = limitImpactMap({

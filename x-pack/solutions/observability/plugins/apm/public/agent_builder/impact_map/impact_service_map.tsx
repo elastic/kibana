@@ -476,10 +476,16 @@ export function ImpactServiceMap({
 
   const { laidOutNodes, edges } = useMemo(() => {
     const graph = transformImpactMap(impactMap, { criticalPath: criticalPathColor }, agentNames);
-    // Only a target with events opens anything, so only it looks clickable.
+    // Only a target with events, or an entity with metadata, opens anything, so only it looks
+    // clickable.
+    const withMetadata = new Set(
+      impactMap.entities.filter(({ metadata }) => metadata?.length).map(({ id }) => id)
+    );
     return {
       laidOutNodes: applyDagreLayout<ImpactServiceMapNode>(graph.nodes, graph.edges).map((node) =>
-        node.data.eventCount ? { ...node, className: CLICKABLE_CLASS } : node
+        node.data.eventCount || withMetadata.has(node.id)
+          ? { ...node, className: CLICKABLE_CLASS }
+          : node
       ),
       edges: graph.edges.map((edge) =>
         edge.data?.eventCount ? { ...edge, className: CLICKABLE_CLASS } : edge

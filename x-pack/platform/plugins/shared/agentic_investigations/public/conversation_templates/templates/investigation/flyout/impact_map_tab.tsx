@@ -186,7 +186,9 @@ const ImpactMapPanel: React.FC<{
     : undefined;
   // Nothing to show for a target with no events, so a click on it does nothing.
   const open = (next: EventsSelection) => {
-    if (resolveEventsSelection(next, impactMap).events.length > 0) {
+    const { events, metadata } = resolveEventsSelection(next, impactMap);
+    // Facts alone are worth opening: they tell a person where to look.
+    if (events.length > 0 || (metadata?.length ?? 0) > 0) {
       setSelection(next);
     }
   };

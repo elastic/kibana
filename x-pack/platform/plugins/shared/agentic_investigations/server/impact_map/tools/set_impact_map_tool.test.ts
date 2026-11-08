@@ -30,6 +30,7 @@ import {
 } from '../attachments/impact_map_attachment_type';
 import { ImpactMapCatalogService } from '../services/impact_map_catalog_service';
 import { impactMapDocumentId, ImpactMapService } from '../services/impact_map_service';
+import { STANDARD_METADATA_FIELDS } from '../../../common/impact_map/metadata';
 import type { ImpactMapCatalogDocument, ImpactMapDocument } from '../storage/impact_map_storage';
 import { createSetImpactMapTool, type SetImpactMapToolParams } from './set_impact_map_tool';
 import { createUpsertImpactMapCatalogTool } from './upsert_impact_map_catalog_tool';
@@ -220,7 +221,11 @@ describe('agentic_investigations.upsert_impact_map_catalog', () => {
 
     const result = await callCatalog({});
 
-    expect(result.data).toEqual({ entity_types: [], relationship_types: [] });
+    expect(result.data).toEqual({
+      entity_types: [],
+      relationship_types: [],
+      standard_metadata_fields: STANDARD_METADATA_FIELDS,
+    });
     expect(catalogStorage.entries.size).toBe(0);
   });
 
@@ -240,6 +245,7 @@ describe('agentic_investigations.upsert_impact_map_catalog', () => {
         { id: 'service', label: 'Microservice', kind: 'service', icon: { agent_name: 'go' } },
       ],
       relationship_types: [{ id: 'calls', label: 'CALLS' }],
+      standard_metadata_fields: STANDARD_METADATA_FIELDS,
     });
   });
 });

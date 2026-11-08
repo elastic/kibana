@@ -24,6 +24,8 @@ export const MAX_IMPACT_MAP_ENTITIES = 50;
 export const MAX_IMPACT_MAP_RELATIONSHIPS = 100;
 export const MAX_IMPACT_MAP_CATALOG_TYPES = 100;
 export const MAX_IMPACT_MAP_EVENTS = 200;
+export const MAX_IMPACT_MAP_ENTITY_METADATA = 40;
+export const MAX_IMPACT_MAP_TYPE_FIELDS = 30;
 
 /**
  * What an event on the map is: something done to the system (a change), something it did (a

@@ -125,6 +125,7 @@ export {
   IMPACT_MAP_ROLES,
   MAX_IMPACT_MAP_CATALOG_TYPES,
   MAX_IMPACT_MAP_ENTITIES,
+  MAX_IMPACT_MAP_ENTITY_METADATA,
   MAX_IMPACT_MAP_EVENTS,
   MAX_IMPACT_MAP_RELATIONSHIPS,
   SET_IMPACT_MAP_TOOL_ID,
@@ -142,11 +143,16 @@ export type {
   ImpactMapEventKind,
   ImpactMapHealth,
   ImpactMapIcon,
+  ImpactMapMetadataEntry,
+  ImpactMapMetadataField,
   ImpactMapRelationship,
   ImpactMapRelationshipType,
   ImpactMapRole,
   InvestigationImpactMap,
 } from './impact_map/impact_map';
+
+export { resolveEntityMetadata, STANDARD_METADATA_FIELDS } from './impact_map/metadata';
+export type { EntityMetadataRow } from './impact_map/metadata';
 
 export { toEntityName } from './impact_map/entity_name';
 export {

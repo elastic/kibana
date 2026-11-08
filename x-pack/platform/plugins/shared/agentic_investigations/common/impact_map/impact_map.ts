@@ -15,8 +15,10 @@ import {
   IMPACT_MAP_ROLES,
   MAX_IMPACT_MAP_CATALOG_TYPES,
   MAX_IMPACT_MAP_ENTITIES,
+  MAX_IMPACT_MAP_ENTITY_METADATA,
   MAX_IMPACT_MAP_EVENTS,
   MAX_IMPACT_MAP_RELATIONSHIPS,
+  MAX_IMPACT_MAP_TYPE_FIELDS,
 } from './constants';
 
 const MAX_ID_LENGTH = 256;
@@ -27,6 +29,45 @@ const MAX_ICON_KEY_LENGTH = 64;
 const MAX_SVG_LENGTH = 4_000;
 const MAX_TIMESTAMP_LENGTH = 64;
 const MAX_ALERT_COUNT = 9_999;
+const MAX_METADATA_KEY_LENGTH = 96;
+const MAX_METADATA_VALUE_LENGTH = 500;
+
+/**
+ * A metadata field's key: lowercase and dotted like an OpenTelemetry attribute, so the same fact
+ * (`cloud.availability_zone`) has the same key in every investigation and the table can filter on it.
+ */
+const metadataKeySchema = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(MAX_METADATA_KEY_LENGTH)
+    .regex(/^[a-z0-9][a-z0-9_.-]*$/, 'Use lowercase letters, digits, "_", "." or "-".')
+);
+
+/** A field an entity type is known to carry: what it is called and whether it leads the flyout. */
+export const impactMapMetadataFieldSchema = lazySchema(() =>
+  z.object({
+    key: metadataKeySchema,
+    label: z.string().min(1).max(MAX_LABEL_LENGTH),
+    description: z.string().max(MAX_DESCRIPTION_LENGTH).optional(),
+    /** Shown on the first page of the entity's flyout, not only in the Metadata tab. */
+    featured: z.boolean().optional(),
+  })
+);
+export type ImpactMapMetadataField = z.infer<typeof impactMapMetadataFieldSchema>;
+
+/** One fact about one entity, for example `k8s.namespace.name` = `checkout`. */
+export const impactMapMetadataEntrySchema = lazySchema(() =>
+  z.object({
+    key: metadataKeySchema,
+    value: z.string().min(1).max(MAX_METADATA_VALUE_LENGTH),
+    /** Overrides the label the type or the standard fields give the key. */
+    label: z.string().min(1).max(MAX_LABEL_LENGTH).optional(),
+    /** Overrides whether the type shows the field on the first page. */
+    featured: z.boolean().optional(),
+  })
+);
+export type ImpactMapMetadataEntry = z.infer<typeof impactMapMetadataEntrySchema>;
 
 /** Lowercase so `Database` and `database` are one type across investigations. */
 const typeIdSchema = lazySchema(() =>
@@ -76,6 +117,11 @@ export const impactMapEntityTypeSchema = lazySchema(() =>
     kind: impactMapEntityKindSchema,
     icon: impactMapIconSchema.optional(),
     description: z.string().max(MAX_DESCRIPTION_LENGTH).optional(),
+    /** The metadata fields entities of this type usually carry, reused by later investigations. */
+    metadata_fields: z
+      .array(impactMapMetadataFieldSchema)
+      .max(MAX_IMPACT_MAP_TYPE_FIELDS)
+      .optional(),
   })
 );
 export type ImpactMapEntityType = z.infer<typeof impactMapEntityTypeSchema>;
@@ -109,6 +155,8 @@ export const impactMapEntitySchema = lazySchema(() =>
     label: z.string().min(1).max(MAX_LABEL_LENGTH),
     description: z.string().max(MAX_DESCRIPTION_LENGTH).optional(),
     annotations: impactMapAnnotationsSchema.optional(),
+    /** Facts that help a person understand and find the entity: its cloud, zone, cluster, namespace. */
+    metadata: z.array(impactMapMetadataEntrySchema).max(MAX_IMPACT_MAP_ENTITY_METADATA).optional(),
   })
 );
 export type ImpactMapEntity = z.infer<typeof impactMapEntitySchema>;
