@@ -60,9 +60,10 @@ const documentWithoutImpact = {
   ),
 };
 
-const FakeRenderer: React.FC<ImpactMapRendererProps> = ({ onEntityClick }) => (
+const FakeRenderer: React.FC<ImpactMapRendererProps> = ({ onEntityClick, onToggleFullScreen }) => (
   <div data-test-subj="fakeMap">
     <button type="button" data-test-subj="fakeNode" onClick={() => onEntityClick?.('checkout')} />
+    <button type="button" data-test-subj="fakeFullScreen" onClick={() => onToggleFullScreen?.()} />
   </div>
 );
 
@@ -240,6 +241,22 @@ describe('ImpactMapCards', () => {
 
     expect(screen.getByTestId('agenticInvestigationsImpactMapEventsFlyout')).toBeInTheDocument();
     expect(openInInvestigation).not.toHaveBeenCalled();
+  });
+
+  it('opens the map full screen from its control, and an entity from there as a panel', () => {
+    renderCards(document);
+
+    fireEvent.click(screen.getByTestId('fakeFullScreen'));
+    expect(screen.getByTestId('agenticInvestigationsImpactMapCardFullScreen')).toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByTestId('fakeNode').pop()!);
+    expect(screen.getByTestId('agenticInvestigationsImpactMapEventsFlyout')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('agenticInvestigationsImpactMapEventsClose'));
+    fireEvent.click(screen.getByTestId('agenticInvestigationsImpactMapCardExitFullScreen'));
+    expect(
+      screen.queryByTestId('agenticInvestigationsImpactMapCardFullScreen')
+    ).not.toBeInTheDocument();
   });
 
   it('opens an entity from its card', () => {

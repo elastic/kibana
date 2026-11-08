@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFocusTrap,
+  EuiPortal,
+  EuiTitle,
+  EuiToolTip,
+  useEuiTheme,
+  useGeneratedHtmlId,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -28,6 +35,7 @@ import {
   EventKindBadge,
   EventTime,
   ImpactMapEventsFlyout,
+  STANDALONE_WIDTH,
   getEntityIcon,
   getEntityTypeLabel,
   resolveEventsSelection,
@@ -50,6 +58,12 @@ const DEFAULT_TITLE = i18n.translate('xpack.agenticInvestigations.impactMapCards
 const TIMELINE_TITLE = i18n.translate('xpack.agenticInvestigations.impactMapCards.timelineTitle', {
   defaultMessage: 'Timeline',
 });
+const EXIT_FULL_SCREEN = i18n.translate(
+  'xpack.agenticInvestigations.impactMapCards.exitFullScreen',
+  {
+    defaultMessage: 'Exit full screen',
+  }
+);
 const EMPTY = i18n.translate('xpack.agenticInvestigations.impactMapCards.empty', {
   defaultMessage: 'Nothing recorded yet.',
 });
@@ -141,7 +155,8 @@ const MapCard: React.FC<{
   Renderer?: ImpactMapRenderer;
   onOpen: () => void;
   onOpenTarget: (selection: EventsSelection) => void;
-}> = ({ impactMap, Renderer, onOpen, onOpenTarget }) => {
+  onToggleFullScreen: () => void;
+}> = ({ impactMap, Renderer, onOpen, onOpenTarget, onToggleFullScreen }) => {
   const name = impactMap.title?.trim();
   return (
     <InvestigationCard
@@ -164,6 +179,7 @@ const MapCard: React.FC<{
           >
             <Renderer
               impactMap={impactMap}
+              onToggleFullScreen={onToggleFullScreen}
               onEntityClick={(id) => onOpenTarget({ kind: 'entity', id })}
               onRelationshipClick={(id) => onOpenTarget({ kind: 'relationship', id })}
             />
@@ -371,7 +387,25 @@ export const createImpactMapCards = (
     const { conversationId } = document;
     const impactMap = useMemo(() => toImpactMapResponse(document), [document]);
     const [selection, setSelection] = useState<EventsSelection>();
+    const [isMaximized, setIsMaximized] = useState(false);
+    const { euiTheme } = useEuiTheme();
+    const modalTitleId = useGeneratedHtmlId({ prefix: 'impactMapCardModalTitle' });
     const Renderer = getRenderer();
+    // Escape closes the events panel first, and only then the full-screen map.
+    const selectionRef = useRef(selection);
+    selectionRef.current = selection;
+    useEffect(() => {
+      if (!isMaximized) {
+        return;
+      }
+      const exitOnEscape = (event: KeyboardEvent) => {
+        if (event.key === 'Escape' && !selectionRef.current) {
+          setIsMaximized(false);
+        }
+      };
+      window.document.addEventListener('keydown', exitOnEscape);
+      return () => window.document.removeEventListener('keydown', exitOnEscape);
+    }, [isMaximized]);
 
     if (impactMap.entities.length === 0 && impactMap.events.length === 0) {
       return (
@@ -404,6 +438,7 @@ export const createImpactMapCards = (
                 Renderer={Renderer}
                 onOpen={() => openInInvestigation(conversationId, 'impactMap')}
                 onOpenTarget={open}
+                onToggleFullScreen={() => setIsMaximized(true)}
               />
             </EuiFlexItem>
           )}
@@ -432,7 +467,87 @@ export const createImpactMapCards = (
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
-        {selection && selected && (
+        {isMaximized && Renderer && (
+          <EuiPortal>
+            <EuiFocusTrap disabled={Boolean(selection)}>
+              <div
+                role="dialog"
+                aria-labelledby={modalTitleId}
+                data-test-subj="agenticInvestigationsImpactMapCardFullScreen"
+                css={css`
+                  position: fixed;
+                  inset: 0;
+                  z-index: ${euiTheme.levels.modal};
+                  display: flex;
+                  flex-direction: column;
+                  background: ${euiTheme.colors.backgroundBasePlain};
+                `}
+              >
+                <EuiFlexGroup
+                  alignItems="center"
+                  responsive={false}
+                  css={css`
+                    flex: none;
+                    padding: ${euiTheme.size.m};
+                    padding-inline-end: ${selection
+                      ? `calc(${STANDALONE_WIDTH} + ${euiTheme.size.m})`
+                      : euiTheme.size.m};
+                  `}
+                >
+                  <EuiFlexItem>
+                    <EuiTitle size="s">
+                      <h2 id={modalTitleId}>{impactMap.title?.trim() || DEFAULT_TITLE}</h2>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip content={EXIT_FULL_SCREEN} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        iconType="cross"
+                        aria-label={EXIT_FULL_SCREEN}
+                        onClick={() => setIsMaximized(false)}
+                        data-test-subj="agenticInvestigationsImpactMapCardExitFullScreen"
+                      />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <div
+                  css={css`
+                    flex: 1;
+                    min-height: 0;
+                    position: relative;
+                  `}
+                >
+                  <div
+                    css={css`
+                      position: absolute;
+                      inset: 0;
+                      /* The map gives up the panel's width, so no node hides behind it. */
+                      inset-inline-end: ${selection ? STANDALONE_WIDTH : 0};
+                    `}
+                  >
+                    <Renderer
+                      impactMap={impactMap}
+                      isFullScreen
+                      onToggleFullScreen={() => setIsMaximized(false)}
+                      onEntityClick={(id) => open({ kind: 'entity', id })}
+                      onRelationshipClick={(id) => open({ kind: 'relationship', id })}
+                    />
+                  </div>
+                </div>
+                {selection && selected && (
+                  <ImpactMapEventsFlyout
+                    {...selected}
+                    impactMap={impactMap}
+                    standalone
+                    targetKey={`${selection.kind}:${selection.id}`}
+                    onClose={() => setSelection(undefined)}
+                  />
+                )}
+              </div>
+            </EuiFocusTrap>
+          </EuiPortal>
+        )}
+        {selection && selected && !isMaximized && (
           <ImpactMapEventsFlyout
             {...selected}
             impactMap={impactMap}
