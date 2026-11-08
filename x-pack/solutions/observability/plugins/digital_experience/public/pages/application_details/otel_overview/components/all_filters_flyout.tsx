@@ -45,6 +45,9 @@ import {
 import type { Formatters } from '../../../../hooks/use_formatters';
 import { FILTER_EBT_ELEMENTS, FILTER_LABELS } from './overview_filter_labels';
 
+/** Half the window on a narrow screen, never wider than this: the rows are short. */
+const FLYOUT_MAX_WIDTH = 640;
+
 const TITLE = i18n.translate('xpack.digitalExperience.overview.filtersFlyout.title', {
   defaultMessage: 'All filters',
 });
@@ -102,7 +105,8 @@ export function AllFiltersFlyout({
   return (
     <EuiFlyout
       onClose={onClose}
-      size="s"
+      size="m"
+      maxWidth={FLYOUT_MAX_WIDTH}
       ownFocus
       aria-labelledby={flyoutTitleId}
       data-test-subj="digitalExperienceOverviewFiltersFlyout"
