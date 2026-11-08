@@ -860,17 +860,14 @@ describe('runFindingsPass', () => {
     expect(patchMetadata).toHaveBeenCalled();
   });
 
-  it("falls back to the agent's answer as verdict and summary when no attempt is usable", async () => {
+  it("does not record the agent's chat reply as verdict or summary when no attempt is usable", async () => {
     const { deps, writer, patchMetadata, memory } = setup({
       answers: [{ content: 'a' }, { content: 'b' }],
     });
 
-    await run(deps, memory, { answer: 'Root cause: deploy' });
+    await expect(run(deps, memory, { answer: 'Root cause: deploy' })).resolves.toBe(false);
 
-    expect(patchMetadata).toHaveBeenCalledWith('c1', {
-      summary: 'Root cause: deploy',
-      verdict: 'Root cause: deploy',
-    });
+    expect(patchMetadata).not.toHaveBeenCalled();
     expect(writer.setHypotheses).not.toHaveBeenCalled();
     expect(memory.remember).not.toHaveBeenCalled();
   });

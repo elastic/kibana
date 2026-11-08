@@ -33,8 +33,12 @@ import { SubjectList } from '../../../../subjects/attachments/subject_view';
 import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
 import { getInvestigationDisplayTitle } from '../to_view_model';
 
-const readMetadataString = (value: unknown): string | undefined =>
-  typeof value === 'string' && value.trim().length > 0 ? value : undefined;
+const readMetadataString = (value: unknown): string | undefined => {
+  if (typeof value !== 'string') return undefined;
+  // Text saved from a chat reply may carry the tag that renders an attachment in chat.
+  const text = value.replace(/<render_attachment\b[^>]*\/?>/g, '').trim();
+  return text.length > 0 ? text : undefined;
+};
 
 /** Sections for the data an investigation has; missing data leaves its section out. */
 export const toOverviewSections = (

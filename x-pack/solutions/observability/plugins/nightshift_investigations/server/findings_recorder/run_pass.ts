@@ -93,8 +93,6 @@ export interface FindingsPassParams {
   allowedConnectorIds?: readonly string[];
 }
 
-const MAX_METADATA_TEXT_LENGTH = 10_000;
-const FALLBACK_SUMMARY_CHARS = 1_000;
 /** A malformed structured answer is the usual failure, so a pass asks again before giving up. */
 const MAX_ATTEMPTS = 2;
 
@@ -561,8 +559,8 @@ export const runFindingsPass = async (
     }
   }
 
-  // A final pass that could not extract still records the agent's own answer as the verdict.
-  if (!output && !(final && answer)) return false;
+  // A final pass that could not extract writes nothing: the chat reply is not a conclusion.
+  if (!output) return false;
   if (!guard.claimWrite()) return false;
 
   // While the investigation runs only the summary and the hypotheses are recorded. A live answer
@@ -586,7 +584,7 @@ export const runFindingsPass = async (
   // Read again here, not before the model call: a user may change it while the model is answering.
   const severityChosenByUser =
     severityNotices(await readConversation(agentBuilder, request, conversationId)).length > 0;
-  const verdict = final ? record?.verdict ?? answer?.slice(0, MAX_METADATA_TEXT_LENGTH) : undefined;
+  const verdict = final ? record?.verdict : undefined;
   // A write replaces the hypothesis and entity lists, so what is stored is read first to keep the
   // evidence of what the pass lists again without any.
   const stored = record
@@ -598,12 +596,7 @@ export const runFindingsPass = async (
       'metadata',
       () =>
         conversations.patchMetadata(conversationId, {
-          ...(record?.summary
-            ? { summary: record.summary }
-            : // A final pass without a record replaces an early live summary with the answer.
-            final && answer
-            ? { summary: answer.slice(0, FALLBACK_SUMMARY_CHARS) }
-            : {}),
+          ...(record?.summary ? { summary: record.summary } : {}),
           ...(final && record?.severity && !severityChosenByUser
             ? { severity: record.severity }
             : {}),
