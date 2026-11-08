@@ -415,6 +415,20 @@ describe('runWatchdogWorker', () => {
       expect(sessions).toHaveLength(0);
     });
 
+    it('starts profiling at the block threshold when it is longer than startAfter', async () => {
+      start({ thresholdsMs: { starting: 3_000, running: 3_000 }, profiling: profilingData });
+      setSlot(Slot.profiling, 1);
+      block(2_000);
+      await settle();
+      expect(sessions).toHaveLength(0);
+
+      block(4_000);
+      await settle();
+      expect(profileMeta()).toMatchObject({ profiledAfterMs: 3_000 });
+      idle(STATS_INTERVAL_MS);
+      expect(lastStats().profiling).toMatchObject({ pastStartAfter: 1, profiled: 1 });
+    });
+
     it('judges each phase against its own start threshold', async () => {
       start({ profiling: { ...profilingData, startAfterMs: { starting: 3_000, running: 1_000 } } });
       setSlot(Slot.profiling, 1);
