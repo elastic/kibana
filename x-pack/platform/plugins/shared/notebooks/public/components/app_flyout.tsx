@@ -353,12 +353,11 @@ const useIsShiftHeld = (enabled: boolean): boolean => {
  * Styles for the grid engine's resize handle and drop target, matching Dashboard. Dragged panels
  * stay locked to the grid, so there is no separate drop preview to style.
  * `dotStep` is how many engine cells apart the drop target's dots are, or undefined for none, and
- * `inset` matches the space panels keep clear around themselves. An editable grid keeps room above
- * its first row for the panels' hover actions.
+ * `inset` matches the space panels keep clear around themselves.
  */
 const getGridStyles = (
   euiTheme: UseEuiTheme['euiTheme'],
-  { dotStep, inset, isEditable }: { dotStep?: number; inset: number; isEditable: boolean }
+  { dotStep, inset }: { dotStep?: number; inset: number }
 ) => {
   const dot = (position: string) =>
     `radial-gradient(circle at ${position}, ${euiTheme.colors.accentSecondary} 1px, transparent 1px)`;
@@ -373,7 +372,6 @@ const getGridStyles = (
   `;
   return css`
     ${inset > 0 && `padding: 0 ${inset}px ${inset}px;`}
-    ${isEditable && `padding-top: ${euiTheme.size.l};`}
 
     &:has(.kbnGridPanel--active) {
       min-height: var(${GRID_FILL_HEIGHT_VAR}, auto);
@@ -457,10 +455,9 @@ const AppGrid = ({
   );
   const panelInset = snapToGrid ? 0 : gutterSize / 2;
   const dotStep = snapToGrid ? 1 : isShiftHeld ? scale : undefined;
-  const isEditable = onRevealCell !== undefined;
   const gridStyles = useMemo(
-    () => getGridStyles(euiTheme, { dotStep, inset: panelInset, isEditable }),
-    [euiTheme, dotStep, panelInset, isEditable]
+    () => getGridStyles(euiTheme, { dotStep, inset: panelInset }),
+    [euiTheme, dotStep, panelInset]
   );
 
   const onLayoutChange = useCallback(
