@@ -97,6 +97,23 @@ describe('evidence', () => {
     expect(limitEvidence({ chart: chart([]) })).toBeUndefined();
   });
 
+  it('writes epoch bucket keys as ISO times and drops points that are not times', () => {
+    const kept = limitEvidence({
+      chart: chart([
+        { x: '1786324200000', y: 3 },
+        { x: '1786324260', y: 412 },
+        { x: 'around then', y: 9 },
+        { x: '2026-08-09T01:12:00Z', y: 398 },
+      ]),
+    });
+    expect(kept?.chart?.series[0].points.map(({ x }) => x)).toEqual([
+      '2026-08-10T01:50:00.000Z',
+      '2026-08-10T01:51:00.000Z',
+      '2026-08-09T01:12:00Z',
+    ]);
+    expect(limitEvidence({ chart: chart([{ x: 'later', y: 1 }]) })).toBeUndefined();
+  });
+
   it('trims a chart to the store limits', () => {
     const many = Array.from({ length: 300 }, (_, i) => ({ x: `2026-08-09T01:${i}`, y: i }));
     const kept = limitEvidence({

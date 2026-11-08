@@ -78,7 +78,10 @@ const toXValue = (x: string, isTime: boolean): number | string | undefined => {
   if (!isTime) {
     return x;
   }
-  const timestamp = Date.parse(x);
+  // Epoch seconds or milliseconds, as a bucket key is often written.
+  const timestamp = /^\d{10}(\d{3})?$/.test(x.trim())
+    ? Number(x.trim()) * (x.trim().length === 10 ? 1000 : 1)
+    : Date.parse(x);
   return Number.isNaN(timestamp) ? undefined : timestamp;
 };
 

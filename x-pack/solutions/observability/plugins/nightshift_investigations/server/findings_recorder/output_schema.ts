@@ -203,6 +203,19 @@ export const entityIdFor = (name: string): string =>
         .slice(0, 12)}`;
 
 /**
+ * A time as an ISO 8601 string, or undefined when it is not a time. Epoch milliseconds or seconds
+ * copied from a bucket key become ISO, because the chart reads only what `Date.parse` accepts: a
+ * point it cannot place would otherwise leave a chart with a title and no plot.
+ */
+export const toIsoTime = (raw: string): string | undefined => {
+  const text = raw.trim();
+  if (/^\d{10}(\d{3})?$/.test(text)) {
+    return new Date(text.length === 10 ? Number(text) * 1000 : Number(text)).toISOString();
+  }
+  return Number.isNaN(Date.parse(text)) ? undefined : text;
+};
+
+/**
  * Trims evidence to what the stores accept. A chart is only the model's reading of numbers in the
  * conversation, so a chart that does not fit (no usable points, or a shape the schema rejects) is
  * dropped and the description is kept.
@@ -213,13 +226,18 @@ export const limitEvidence = (raw: RawEvidence): InvestigationEvidence | undefin
     : undefined;
   const label = (text: string) => truncate(text, MAX_EVIDENCE_CHART_LABEL_LENGTH);
   const short = (text: string) => truncate(text, MAX_EVIDENCE_SHORT_TEXT_LENGTH);
+  const isTime = raw.chart?.x_axis.type === 'time';
+  const xOf = (x: string) => (isTime ? toIsoTime(x) : x || undefined);
   const series = (raw.chart?.series ?? [])
     .slice(0, MAX_EVIDENCE_CHART_SERIES)
     .map(({ name, points }) => ({
       name: label(name),
       // An oversized series is thinned over its whole window, so an event near the end stays.
       points: spreadEvenly(
-        points.filter(({ x, y }) => x !== '' && Number.isFinite(y)),
+        points.flatMap(({ x, y }) => {
+          const at = xOf(x);
+          return at !== undefined && Number.isFinite(y) ? [{ x: at, y }] : [];
+        }),
         MAX_EVIDENCE_CHART_POINTS
       ).map(({ x, y }) => ({ x: label(x), y })),
     }))
@@ -244,8 +262,8 @@ export const limitEvidence = (raw: RawEvidence): InvestigationEvidence | undefin
                 annotations: raw.chart.annotations
                   .slice(0, MAX_EVIDENCE_CHART_ANNOTATIONS)
                   .map(({ x, x_end: xEnd, label: text }) => ({
-                    x: label(x),
-                    ...(xEnd ? { x_end: label(xEnd) } : {}),
+                    x: label(xOf(x) ?? x),
+                    ...(xEnd ? { x_end: label(xOf(xEnd) ?? xEnd) } : {}),
                     label: short(text),
                   })),
               }
