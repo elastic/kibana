@@ -15,6 +15,7 @@ import {
   useSelectionHistory,
 } from '../conversation_templates/templates/investigation/flyout/impact_map_events';
 import { useIsInAgentBuilder } from '../conversation_templates/templates/investigation/flyout/use_is_in_agent_builder';
+import { requestTimelineFocus } from '../conversation_templates/templates/investigation/flyout/timeline_focus';
 
 type EventLinksImpactMap = Pick<
   InvestigationImpactMapResponse,
@@ -52,13 +53,30 @@ export const parseEventHref = (href: string | undefined): string | undefined =>
  * is in. Without it (or for an id the record does not hold) a link reads as plain text.
  */
 export const EventLinksProvider: React.FC<
-  React.PropsWithChildren<{ impactMap: EventLinksImpactMap | undefined }>
-> = ({ impactMap, children }) => {
+  React.PropsWithChildren<{
+    impactMap: EventLinksImpactMap | undefined;
+    /** With `openTimeline`, an open event offers "View in timeline". */
+    conversationId?: string;
+    openTimeline?: () => void;
+  }>
+> = ({ impactMap, conversationId, openTimeline, children }) => {
   const history = useSelectionHistory();
   const selection = history.current;
   const openSelection = history.open;
   const isInAgentBuilder = useIsInAgentBuilder();
   const events = impactMap?.events;
+  const clearSelection = history.clear;
+  const viewInTimeline = useMemo(
+    () =>
+      conversationId && openTimeline
+        ? (eventId: string) => {
+            requestTimelineFocus(conversationId, [], eventId);
+            clearSelection();
+            openTimeline();
+          }
+        : undefined,
+    [conversationId, openTimeline, clearSelection]
+  );
 
   const links = useMemo<EventLinks | undefined>(
     () =>
@@ -82,6 +100,7 @@ export const EventLinksProvider: React.FC<
           {...resolveEventsSelection(selection, impactMap)}
           impactMap={impactMap}
           asMainFlyout={isInAgentBuilder}
+          onViewInTimeline={viewInTimeline}
           onClose={history.clear}
           onBackToPrevious={history.hasPrevious ? history.back : undefined}
         />

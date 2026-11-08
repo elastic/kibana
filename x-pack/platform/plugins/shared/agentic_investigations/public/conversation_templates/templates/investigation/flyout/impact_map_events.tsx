@@ -1198,7 +1198,7 @@ const NO_METADATA_BODY = i18n.translate(
 );
 const VIEW_IN_TIMELINE = i18n.translate(
   'xpack.agenticInvestigations.impactMap.events.viewInTimeline',
-  { defaultMessage: 'View in investigation timeline' }
+  { defaultMessage: 'View in timeline' }
 );
 
 export interface ImpactMapEventsFlyoutProps {
@@ -1364,21 +1364,22 @@ const EventsFlyoutContent: React.FC<
   );
 
   const viewInTimelineLink = onViewInTimeline && selected && (
-    <EuiText size="xs" textAlign="right">
-      <EuiLink
-        onClick={() => {
-          // A main flyout opened over the investigation flyout steps back to it,
-          // as Back does, instead of closing the whole stack.
-          if (asMainFlyout) {
-            getFlyoutManagerStore().goBack();
-          }
-          onViewInTimeline(selected.id);
-        }}
-        data-test-subj="agenticInvestigationsImpactMapViewInTimeline"
-      >
-        {VIEW_IN_TIMELINE}
-      </EuiLink>
-    </EuiText>
+    <EuiButtonEmpty
+      size="xs"
+      iconType="clock"
+      flush="left"
+      onClick={() => {
+        // A main flyout opened over the investigation flyout steps back to it,
+        // as Back does, instead of closing the whole stack.
+        if (asMainFlyout) {
+          getFlyoutManagerStore().goBack();
+        }
+        onViewInTimeline(selected.id);
+      }}
+      data-test-subj="agenticInvestigationsImpactMapViewInTimeline"
+    >
+      {VIEW_IN_TIMELINE}
+    </EuiButtonEmpty>
   );
 
   return (

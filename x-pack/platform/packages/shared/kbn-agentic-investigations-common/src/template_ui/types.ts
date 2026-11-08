@@ -130,6 +130,8 @@ export interface OverviewSlotRenderProps {
   proposedActionsContent?: React.ReactNode;
   /** The count shown beside the "Proposed actions" heading, from `renderProposedActionsCount`. */
   proposedActionsCount?: React.ReactNode;
+  /** Switches the flyout to its Timeline tab. Absent when the flyout has no Timeline tab. */
+  openTimeline?: () => void;
 }
 
 /**

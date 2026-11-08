@@ -217,7 +217,7 @@ export const registerAgenticInvestigationTemplateUI = ({
 
   conversationTemplates.registerTab(overviewTabId, () => ({
     label: DETAILS_FLYOUT_LABELS.tabs.overview,
-    content: function OverviewTabContent({ conversation }) {
+    content: function OverviewTabContent({ conversation, selectTab }) {
       return (
         <Suspense fallback={<EuiSkeletonText lines={3} />}>
           <LazyOverviewSlot
@@ -226,6 +226,7 @@ export const registerAgenticInvestigationTemplateUI = ({
             renderProposedActions={renderProposedActions}
             renderOverview={renderOverview}
             renderProposedActionsCount={renderProposedActionsCount}
+            openTimeline={selectTab && timelineTabId ? () => selectTab(timelineTabId) : undefined}
           />
         </Suspense>
       );

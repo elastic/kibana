@@ -167,7 +167,13 @@ export const InvestigationOverview: React.FC<
     /** Present when a solution registered an entity flyout. Entity-store ids open it. */
     onOpenEntity?: (entity: ImpactEntityTarget) => void;
   }
-> = ({ conversation, groupedAttachments, proposedActionsContent, proposedActionsCount }) => {
+> = ({
+  conversation,
+  groupedAttachments,
+  proposedActionsContent,
+  proposedActionsCount,
+  openTimeline,
+}) => {
   const { data } = useInvestigation(conversation.id);
   const investigation = useMemo(() => {
     const fromConversation = conversationToInvestigation(conversation);
@@ -188,7 +194,11 @@ export const InvestigationOverview: React.FC<
     (data?.proposals.length ?? 0) > 0;
 
   return (
-    <EventLinksProvider impactMap={data?.impact_map}>
+    <EventLinksProvider
+      impactMap={data?.impact_map}
+      conversationId={conversation.id}
+      openTimeline={openTimeline}
+    >
       <OverviewTab
         investigation={investigation}
         attachments={conversation.attachments}
