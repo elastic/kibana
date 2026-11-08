@@ -85,6 +85,21 @@ describe('AwsCredentialsAuth', () => {
     expect(signed.headers.get('Content-Type')).toBe(contentType);
   });
 
+  it('signs with `awsSigningName` instead of the endpoint prefix when it is set', async () => {
+    const interceptor = await getInterceptor();
+
+    const config = {
+      url: 'https://bedrock-runtime.us-east-1.amazonaws.com/model/my-model/invoke',
+      method: 'post',
+      data: '{}',
+      headers: new AxiosHeaders(),
+      awsSigningName: 'bedrock',
+    } as unknown as InternalAxiosRequestConfig;
+    const signed = await interceptor(config);
+
+    expect(signed.headers.get('Authorization')).toContain('/us-east-1/bedrock/aws4_request');
+  });
+
   // Regression test: query params passed via axios's `params` option (as
   // opposed to being baked into the URL string already) are not merged into
   // `config.url` until *after* request interceptors run (axios's

@@ -20,8 +20,17 @@ export const RequestInputSchema = lazySchema(() =>
       .max(MAX_HOST_LABEL_LENGTH)
       .regex(/^[a-z0-9][a-z0-9-]*$/)
       .describe(
-        'AWS endpoint prefix, used as the first label of the hostname and as the SigV4 signing name. ' +
+        'AWS endpoint prefix, used as the first label of the hostname and, unless "signingName" is set, as the SigV4 signing name. ' +
           'Examples: "iam", "sts", "ec2", "s3", "logs", "securityhub", "guardduty".'
+      ),
+    signingName: z
+      .string()
+      .max(MAX_HOST_LABEL_LENGTH)
+      .regex(/^[a-z0-9][a-z0-9-]*$/)
+      .optional()
+      .describe(
+        'SigV4 signing name, when it differs from the endpoint prefix in "service" ' +
+          '(for example "bedrock" for service "bedrock-runtime"). Defaults to the service.'
       ),
     region: z
       .string()
@@ -33,7 +42,7 @@ export const RequestInputSchema = lazySchema(() =>
           'Omit it for global endpoints such as IAM, which go to {service}.amazonaws.com and are signed in us-east-1.'
       ),
     method: z
-      .enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
+      .enum(['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE'])
       .default('GET')
       .describe('HTTP method.'),
     path: z

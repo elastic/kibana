@@ -78,6 +78,29 @@ describe('AwsConnector', () => {
       });
     });
 
+    it('passes the signing name to the SigV4 interceptor', async () => {
+      mockClient.request.mockResolvedValue({ status: 200, headers: {}, data: {} });
+
+      await request.handler(
+        mockContext,
+        RequestInputSchema.parse({
+          service: 'bedrock-runtime',
+          signingName: 'bedrock',
+          region: 'us-east-1',
+          method: 'POST',
+          path: '/model/my-model/invoke',
+          body: {},
+        })
+      );
+
+      expect(mockClient.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://bedrock-runtime.us-east-1.amazonaws.com/model/my-model/invoke',
+          awsSigningName: 'bedrock',
+        })
+      );
+    });
+
     it('includes the status and AWS error body in the thrown error', async () => {
       const errorBody = '<ErrorResponse><Error><Code>AccessDenied</Code></Error></ErrorResponse>';
       mockClient.request.mockRejectedValue(
@@ -106,6 +129,10 @@ describe('AwsConnector', () => {
       expect(RequestInputSchema.safeParse({ service, region }).success).toBe(true);
     });
 
+    it('accepts HEAD requests', () => {
+      expect(RequestInputSchema.safeParse({ service: 's3', method: 'HEAD' }).success).toBe(true);
+    });
+
     it.each([
       [{ service: 'evil.com/' }],
       [{ service: 'iam.evil' }],
@@ -114,20 +141,50 @@ describe('AwsConnector', () => {
       [{ service: 'ec2', region: 'us-east-1.evil.com' }],
       [{ service: 'ec2', region: 'useast1' }],
       [{ service: 'ec2', path: 'no-leading-slash' }],
+      [{ service: 'bedrock-runtime', signingName: 'bedrock.evil' }],
     ])('rejects %o', (input) => {
       expect(RequestInputSchema.safeParse(input).success).toBe(false);
     });
   });
 
   describe('test handler', () => {
+    const params = { Action: 'GetCallerIdentity', Version: '2011-06-15' };
+    const stsError = (code: string) =>
+      new AxiosError('Request failed', 'ERR_BAD_REQUEST', undefined, undefined, {
+        status: 403,
+        statusText: 'Forbidden',
+        headers: {},
+        config: { headers: new AxiosHeaders() },
+        data: { Error: { Code: code } },
+      });
+
     it('calls STS GetCallerIdentity', async () => {
       mockClient.get.mockResolvedValue({ status: 200, data: '' });
 
       await AwsConnector.test.handler(mockContext);
 
-      expect(mockClient.get).toHaveBeenCalledWith('https://sts.amazonaws.com/', {
-        params: { Action: 'GetCallerIdentity', Version: '2011-06-15' },
+      expect(mockClient.get).toHaveBeenCalledTimes(1);
+      expect(mockClient.get).toHaveBeenCalledWith('https://sts.amazonaws.com/', { params });
+    });
+
+    it('retries on the GovCloud STS endpoint when the commercial partition does not know the key', async () => {
+      mockClient.get
+        .mockRejectedValueOnce(stsError('InvalidClientTokenId'))
+        .mockResolvedValueOnce({ status: 200, data: '' });
+
+      await expect(AwsConnector.test.handler(mockContext)).resolves.toEqual({});
+
+      expect(mockClient.get).toHaveBeenLastCalledWith('https://sts.us-gov-west-1.amazonaws.com/', {
+        params,
       });
+    });
+
+    it('does not retry on other errors', async () => {
+      mockClient.get.mockRejectedValueOnce(stsError('SignatureDoesNotMatch'));
+
+      await expect(AwsConnector.test.handler(mockContext)).rejects.toThrow('Request failed');
+
+      expect(mockClient.get).toHaveBeenCalledTimes(1);
     });
   });
 });
