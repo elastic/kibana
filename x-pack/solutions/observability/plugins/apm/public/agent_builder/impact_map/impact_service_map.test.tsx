@@ -91,13 +91,13 @@ const impactMap: InvestigationImpactMapResponse = {
 };
 
 describe('getImpactSeverityScore', () => {
-  it('scores root cause and impacted red, degraded amber, and leaves healthy entities plain', () => {
+  it('scores root cause and impacted red, and leaves healthy entities plain', () => {
     expect(getImpactSeverityScore({ role: 'root_cause', impacted: true })).toBe(
       IMPACT_SEVERITY_SCORES.rootCause
     );
     expect(getImpactSeverityScore({ health: 'critical' })).toBe(IMPACT_SEVERITY_SCORES.rootCause);
-    expect(getImpactSeverityScore({ role: 'symptom' })).toBe(IMPACT_SEVERITY_SCORES.degraded);
-    expect(getImpactSeverityScore({ health: 'degraded' })).toBe(IMPACT_SEVERITY_SCORES.degraded);
+    expect(getImpactSeverityScore({ role: 'symptom' })).toBe(IMPACT_SEVERITY_SCORES.impacted);
+    expect(getImpactSeverityScore({ health: 'degraded' })).toBe(IMPACT_SEVERITY_SCORES.impacted);
     expect(getImpactSeverityScore({ impacted: true })).toBe(IMPACT_SEVERITY_SCORES.impacted);
     expect(getImpactSeverityScore({ health: 'healthy' })).toBeUndefined();
     expect(getImpactSeverityScore(undefined)).toBeUndefined();
@@ -228,9 +228,9 @@ describe('ImpactServiceMap', () => {
     }
     expect(screen.getByTestId('serviceMapNodeAlertsBadge')).toBeInTheDocument();
     expect(screen.getByTestId('impactServiceMapLegend')).toHaveTextContent('Critical path');
-    // The root cause and what it hurt each carry their own badge.
+    // Only the root cause is badged; what it hurt is shown by its red border.
     expect(screen.getAllByTestId('impactMapBadge-root_cause').length).toBeGreaterThan(1);
-    expect(screen.getAllByTestId('impactMapBadge-impacted').length).toBeGreaterThan(1);
+    expect(screen.queryByTestId('impactMapBadge-impacted')).not.toBeInTheDocument();
   });
 
   it('reports a click on any node, a service included, so its events open', () => {

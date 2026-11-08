@@ -37,11 +37,9 @@ export const getImpactSeverityScore = (annotations?: ImpactMapAnnotations): numb
   if (role === 'root_cause' || health === 'critical') {
     return IMPACT_SEVERITY_SCORES.rootCause;
   }
-  // `symptom` is a role older investigations stored; it reads as impacted now.
-  if (role === 'symptom' || health === 'degraded') {
-    return IMPACT_SEVERITY_SCORES.degraded;
-  }
-  if (impacted || role === 'contributor') {
+  // `symptom` is a role older investigations stored; it reads as impacted now. Degraded is
+  // impacted too: a node is either red or plain, never a third colour.
+  if (impacted || role === 'symptom' || role === 'contributor' || health === 'degraded') {
     return IMPACT_SEVERITY_SCORES.impacted;
   }
   return undefined;

@@ -47,11 +47,10 @@ import {
   transformImpactMap,
   type ImpactDependencyNodeData,
   type ImpactServiceNodeData,
-  type ImpactState,
   type ImpactServiceMapNode,
 } from './transform_impact_map';
 
-const BADGES: Record<ImpactState, { icon: IconType; score: number; label: string }> = {
+const BADGES: Record<'root_cause', { icon: IconType; score: number; label: string }> = {
   root_cause: {
     icon: 'bullseye',
     score: IMPACT_SEVERITY_SCORES.rootCause,
@@ -59,18 +58,11 @@ const BADGES: Record<ImpactState, { icon: IconType; score: number; label: string
       defaultMessage: 'Root cause',
     }),
   },
-  impacted: {
-    icon: 'sortDown',
-    score: IMPACT_SEVERITY_SCORES.impacted,
-    label: i18n.translate('xpack.apm.impactMap.badge.impacted', {
-      defaultMessage: 'Impacted',
-    }),
-  },
 };
 
 const BADGE_SIZE = 22;
 
-function StateBadge({ state, floating }: { state: ImpactState; floating?: boolean }) {
+function StateBadge({ state, floating }: { state: 'root_cause'; floating?: boolean }) {
   const { euiTheme } = useEuiTheme();
   const { icon, score, label } = BADGES[state];
   return (
@@ -165,7 +157,7 @@ function EventCountBadge({ count }: { count?: number }) {
 const ImpactServiceNode = memo((props: NodeProps<Node<ImpactServiceNodeData>>) => (
   <>
     <ServiceNode {...(props as unknown as ComponentProps<typeof ServiceNode>)} />
-    {props.data.impactState && <StateBadge state={props.data.impactState} floating />}
+    {props.data.impactState === 'root_cause' && <StateBadge state="root_cause" floating />}
     <EventCountBadge count={props.data.eventCount} />
   </>
 ));
@@ -187,7 +179,7 @@ const ImpactDependencyNode = memo(
           data.severityScore !== undefined ? getSeverityColor(data.severityScore) : undefined
         }
       />
-      {data.impactState && <StateBadge state={data.impactState} floating />}
+      {data.impactState === 'root_cause' && <StateBadge state="root_cause" floating />}
       <EventCountBadge count={data.eventCount} />
     </>
   )
@@ -197,7 +189,7 @@ ImpactDependencyNode.displayName = 'ImpactDependencyNode';
 const ImpactInfrastructureNode = memo((props: NodeProps<Node<ImpactDependencyNodeData>>) => (
   <>
     <InfrastructureNode {...props} />
-    {props.data.impactState && <StateBadge state={props.data.impactState} floating />}
+    {props.data.impactState === 'root_cause' && <StateBadge state="root_cause" floating />}
     <EventCountBadge count={props.data.eventCount} />
   </>
 ));
@@ -234,7 +226,15 @@ function ImpactMapLegend({ criticalPathColor }: { criticalPathColor: string }) {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            <StateBadge state="impacted" />
+            <span
+              css={css`
+                display: block;
+                width: ${BADGE_SIZE - 6}px;
+                height: ${BADGE_SIZE - 6}px;
+                border-radius: 50%;
+                border: 3px solid ${getSeverityColor(IMPACT_SEVERITY_SCORES.impacted)};
+              `}
+            />
             <EuiText size="xs">{LEGEND.impacted}</EuiText>
           </EuiFlexGroup>
         </EuiFlexItem>
