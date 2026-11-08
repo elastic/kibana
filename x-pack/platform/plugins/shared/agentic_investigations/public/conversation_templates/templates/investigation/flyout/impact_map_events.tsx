@@ -948,7 +948,9 @@ export const getEntityTypeLabel = (
   }
   // A built-in type is named as the catalog names it ("Kubernetes node"), not as a map stored it
   // ("K8s"), so a person can tell what the thing is.
-  const builtIn = BUILT_IN_ENTITY_TYPES.find(({ id }) => id === canonicalEntityTypeId(storedType.id));
+  const builtIn = BUILT_IN_ENTITY_TYPES.find(
+    ({ id }) => id === canonicalEntityTypeId(storedType.id)
+  );
   const type = builtIn ? { ...storedType, label: builtIn.label } : storedType;
   // A type that carries the entity's own name ('Shipping service') is not a sub-type.
   const name = entityName?.trim().toLowerCase();
@@ -1069,6 +1071,21 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = (prop
     </EventsFlyoutFrame>
   );
 };
+
+/**
+ * The body of the flyout. Standalone, it is a plain scrolling box: EuiFlyoutBody fades the top and
+ * bottom edge of what scrolls, which washed out the search box at the top of the list.
+ */
+const EventsBody: React.FC<{
+  standalone: boolean;
+  className?: string;
+  children: React.ReactNode;
+}> = ({ standalone, className, children }) =>
+  standalone ? (
+    <div className={className}>{children}</div>
+  ) : (
+    <EuiFlyoutBody>{children}</EuiFlyoutBody>
+  );
 
 const EventsFlyoutContent: React.FC<
   ImpactMapEventsFlyoutProps & { titleId: string; onBack?: () => void }
@@ -1252,7 +1269,7 @@ const EventsFlyoutContent: React.FC<
           </>
         )}
       </EuiFlyoutHeader>
-      <EuiFlyoutBody css={standalone ? standaloneBodyCss : undefined}>
+      <EventsBody standalone={standalone} css={standaloneBodyCss}>
         {selected ? (
           <>
             {viewInTimelineLink}
@@ -1333,7 +1350,7 @@ const EventsFlyoutContent: React.FC<
             )}
           </>
         )}
-      </EuiFlyoutBody>
+      </EventsBody>
     </>
   );
 };
