@@ -365,7 +365,7 @@ export const limitImpactMap = (
     entities.push({
       id,
       type_id: typeId,
-      label: truncate(entity.label?.trim() || id, MAX_MAP_LABEL_LENGTH),
+      label: truncate(toEntityName(entity.label?.trim() || id), MAX_MAP_LABEL_LENGTH),
       ...(Object.keys(annotations).length ? { annotations } : {}),
     });
   }
@@ -403,6 +403,20 @@ export const limitImpactMap = (
 };
 
 const MAX_EVENT_DESCRIPTION_LENGTH = 1_000;
+
+/**
+ * The name of the thing itself. Models tend to fold its type, a state or an endpoint into the
+ * name ("k8s deployment: shipping (0/0)", "quote-old:8080 (NXDOMAIN)"); those belong to the type
+ * and the events, so a leading "type:" and trailing "(...)" or ":port" are dropped.
+ */
+export const toEntityName = (raw: string): string => {
+  const name = raw
+    .replace(/^[A-Za-z0-9_ -]{2,40}:\s+(?=\S)/, '')
+    .replace(/\s*\([^)]*\)\s*$/, '')
+    .replace(/:\d{2,5}$/, '')
+    .trim();
+  return name || raw.trim();
+};
 
 /** An ISO 8601 time the store can sort by, or undefined when the model wrote something else. */
 const toIsoTime = (value?: string): string | undefined => {
@@ -748,9 +762,14 @@ export const FINDINGS_JSON_SCHEMA = {
             properties: {
               id: {
                 type: 'string',
-                description: 'Unique in the map: the service, host or resource name.',
+                description:
+                  'Unique in the map: the bare name of the thing itself, such as checkout, shipping or quote-old. Never its type, a state, a count or an endpoint.',
               },
-              label: { type: 'string', description: 'The name to show. Defaults to the id.' },
+              label: {
+                type: 'string',
+                description:
+                  'The bare name of the entity, as its owner would call it: shipping, not "k8s deployment: shipping (0/0)". What kind of thing it is goes in type; what is wrong with it (0 replicas, NXDOMAIN, a port, an operation) goes in events. Defaults to the id.',
+              },
               type: {
                 type: 'string',
                 description:

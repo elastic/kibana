@@ -29,12 +29,14 @@ import type { ImpactMapService } from '../services/impact_map_service';
 
 const entitySchema = impactMapEntitySchema.extend({
   id: impactMapEntitySchema.shape.id.describe(
-    'Stable id, unique in this map, used by relationships. Prefer the entity name, e.g. "checkout-service".'
+    'Stable id, unique in this map, used by relationships. The bare name of the thing itself, e.g. "checkout-service", never its type, a state or an endpoint.'
   ),
   type_id: impactMapEntitySchema.shape.type_id.describe(
     'Id of an entity type from the catalog, or from `entity_types` in this call.'
   ),
-  label: impactMapEntitySchema.shape.label.describe('The name shown under the node.'),
+  label: impactMapEntitySchema.shape.label.describe(
+    'The bare name of the entity, e.g. "shipping", not "k8s deployment: shipping (0/0)". Its kind is the type; what is wrong with it is an event.'
+  ),
   annotations: impactMapAnnotationsSchema
     .extend({
       role: impactMapAnnotationsSchema.shape.role.describe(
