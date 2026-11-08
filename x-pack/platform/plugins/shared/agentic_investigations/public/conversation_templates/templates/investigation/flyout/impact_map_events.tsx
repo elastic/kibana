@@ -7,6 +7,7 @@
 
 import React, { useLayoutEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
+import { useConversationFlyoutWidthProps } from '@kbn/agent-builder-plugin/public';
 import {
   EuiBadge,
   EuiButton,
@@ -381,28 +382,45 @@ const EventsFlyoutFrame: React.FC<{
   }
   if (asMainFlyout) {
     return (
-      // Rendered in a portal because the details flyout's transformed body would contain it.
-      <EuiPortal>
-        <EuiFlyout
-          onClose={onClose}
-          aria-labelledby={titleId}
-          session="start"
-          historyKey={CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY}
-          flyoutMenuProps={{ title: menuTitle, hideTitle: true }}
-          type="push"
-          size="m"
-          resizable
-          data-test-subj="agenticInvestigationsImpactMapEventsFlyout"
-        >
-          {children}
-        </EuiFlyout>
-      </EuiPortal>
+      <MainEventsFlyout onClose={onClose} titleId={titleId} menuTitle={menuTitle}>
+        {children}
+      </MainEventsFlyout>
     );
   }
   return (
     <ChildEventsFlyout onClose={onClose} titleId={titleId}>
       {children}
     </ChildEventsFlyout>
+  );
+};
+
+/**
+ * A new main flyout over the investigation flyout, at the investigation flyout's width: it uses
+ * the same width rules and the same remembered width, so resizing either resizes both next time.
+ */
+const MainEventsFlyout: React.FC<{
+  onClose: () => void;
+  titleId: string;
+  menuTitle: string;
+  children: React.ReactNode;
+}> = ({ onClose, titleId, menuTitle, children }) => {
+  const widthProps = useConversationFlyoutWidthProps();
+  return (
+    // Rendered in a portal because the details flyout's transformed body would contain it.
+    <EuiPortal>
+      <EuiFlyout
+        onClose={onClose}
+        aria-labelledby={titleId}
+        session="start"
+        historyKey={CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY}
+        flyoutMenuProps={{ title: menuTitle, hideTitle: true }}
+        type="push"
+        {...widthProps}
+        data-test-subj="agenticInvestigationsImpactMapEventsFlyout"
+      >
+        {children}
+      </EuiFlyout>
+    </EuiPortal>
   );
 };
 

@@ -28,6 +28,7 @@ export type {
 export type { EmbeddableConversationProps } from './embeddable/types';
 export { AGENTBUILDER_FEATURE_ID, AGENTBUILDER_APP_ID, uiPrivileges, MCP_SERVER_PATH };
 export { type CreateSkillResponse, SKILLS_API_PATH };
+export { useConversationFlyoutWidthProps } from './flyout/conversation_details_flyout_width';
 export { ConversationInputShell } from '@kbn/agent-builder-browser';
 export type { ConversationInputShellProps } from '@kbn/agent-builder-browser';
 export {

@@ -16,6 +16,15 @@ import { ImpactMapTab } from './impact_map_tab';
 import { withContextAnnotations } from './impact_map_events';
 import { takeTimelineFocus } from './timeline_focus';
 
+jest.mock('@kbn/agent-builder-plugin/public', () => ({
+  useConversationFlyoutWidthProps: () => ({
+    size: 480,
+    minWidth: 400,
+    maxWidth: 640,
+    resizable: true,
+    onResize: jest.fn(),
+  }),
+}));
 jest.mock('../../../../investigations/hooks/use_investigation');
 const mockUseInvestigation = useInvestigation as jest.Mock;
 
