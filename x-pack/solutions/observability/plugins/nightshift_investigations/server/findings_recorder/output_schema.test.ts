@@ -88,6 +88,24 @@ describe('evidence', () => {
     });
   });
 
+  it('keeps at most two threshold lines with a finite level', () => {
+    const kept = limitEvidence({
+      chart: {
+        ...chart(points),
+        thresholds: [
+          { y: 30, label: 'Alert at 30%' },
+          { y: Number.NaN, label: 'bad' },
+          { y: 50, label: 'b' },
+          { y: 60, label: 'c' },
+        ],
+      },
+    });
+    expect(kept?.chart?.thresholds).toEqual([
+      { y: 30, label: 'Alert at 30%' },
+      { y: 50, label: 'b' },
+    ]);
+  });
+
   it('drops points that are not finite numbers or have no x, and a chart left with none', () => {
     const kept = limitEvidence({
       chart: chart([...points, { x: '', y: 5 }, { x: '2026-08-09T01:13:00Z', y: Number.NaN }]),

@@ -165,11 +165,12 @@ export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart, referenceTi
       dataValue: number | string;
       details: string;
       header: string;
-      tone?: 'success';
+      tone?: 'success' | 'danger';
     }> = [];
     const ranges: Array<{
       coordinates: { x0: number | string; x1: number | string };
       details: string;
+      tone?: 'success' | 'danger';
     }> = [];
     for (const annotation of chart.annotations ?? []) {
       const start = toXValue(annotation.x, isTime, referenceTime);
@@ -178,7 +179,11 @@ export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart, referenceTi
       }
       const end = annotation.x_end ? toXValue(annotation.x_end, isTime, referenceTime) : undefined;
       if (end !== undefined) {
-        ranges.push({ coordinates: { x0: start, x1: end }, details: annotation.label });
+        ranges.push({
+          coordinates: { x0: start, x1: end },
+          details: annotation.label,
+          tone: annotation.tone,
+        });
       } else {
         // elastic-charts titles a point annotation's tooltip with `header`, falling back to the
         // raw data value — epoch milliseconds on a time axis.
@@ -194,6 +199,11 @@ export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart, referenceTi
     }
     return { pointAnnotations: points, rangeAnnotations: ranges };
   }, [chart.annotations, isTime, timeZone, dateFormat, referenceTime]);
+
+  const thresholdLines = (chart.thresholds ?? []).map(({ y, label }) => ({
+    dataValue: y,
+    details: label,
+  }));
 
   const hasAnnotations = pointAnnotations.length > 0 || rangeAnnotations.length > 0;
   // Point annotation markers are drawn above the plot, so reserve room for them there.
@@ -275,6 +285,7 @@ export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart, referenceTi
             {[
               { tone: undefined, color: euiTheme.colors.accent },
               { tone: 'success' as const, color: euiTheme.colors.success },
+              { tone: 'danger' as const, color: euiTheme.colors.danger },
             ].map(({ tone, color }) => {
               const values = pointAnnotations.filter((point) => point.tone === tone);
               return (
@@ -291,11 +302,36 @@ export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart, referenceTi
                 )
               );
             })}
-            {rangeAnnotations.length > 0 && (
-              <RectAnnotation
-                id="evidence-range-annotations"
-                dataValues={rangeAnnotations}
-                style={{ fill: euiTheme.colors.accent, opacity: 0.1 }}
+            {[
+              { tone: undefined, color: euiTheme.colors.accent },
+              { tone: 'success' as const, color: euiTheme.colors.success },
+              { tone: 'danger' as const, color: euiTheme.colors.danger },
+            ].map(({ tone, color }) => {
+              const values = rangeAnnotations.filter((range) => range.tone === tone);
+              return (
+                values.length > 0 && (
+                  <RectAnnotation
+                    key={tone ?? 'default'}
+                    id={`evidence-range-annotations-${tone ?? 'default'}`}
+                    dataValues={values}
+                    style={{ fill: color, opacity: 0.1 }}
+                  />
+                )
+              );
+            })}
+            {thresholdLines.length > 0 && (
+              <LineAnnotation
+                id="evidence-thresholds"
+                domainType={AnnotationDomainType.YDomain}
+                dataValues={thresholdLines}
+                style={{
+                  line: {
+                    strokeWidth: 1,
+                    stroke: euiTheme.colors.danger,
+                    dash: [4, 3],
+                    opacity: 1,
+                  },
+                }}
               />
             )}
           </Chart>

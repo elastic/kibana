@@ -39,41 +39,55 @@ const evidenceChartSeriesSchema = z.object({
   points: z.array(evidenceChartPointSchema).max(MAX_EVIDENCE_CHART_POINTS),
 });
 
-const evidenceChartAnnotationSchema = z.object({
-  /** Where the annotation sits: a timestamp or category, matching the x axis type. */
-  x: z.string().max(MAX_EVIDENCE_CHART_LABEL_LENGTH),
-  /** When set, the annotation highlights the range from `x` to `x_end` instead of a point. */
-  x_end: z.string().max(MAX_EVIDENCE_CHART_LABEL_LENGTH).optional(),
-  label: z.string().max(MAX_EVIDENCE_SHORT_TEXT_LENGTH),
-  /** Drawn green when the annotation is a recovery or a fix, which the screen sets itself. */
-  tone: z.enum(['success']).optional(),
-});
+const evidenceChartAnnotationSchema = lazySchema(() =>
+  z.object({
+    /** Where the annotation sits: a timestamp or category, matching the x axis type. */
+    x: z.string().max(MAX_EVIDENCE_CHART_LABEL_LENGTH),
+    /** When set, the annotation highlights the range from `x` to `x_end` instead of a point. */
+    x_end: z.string().max(MAX_EVIDENCE_CHART_LABEL_LENGTH).optional(),
+    label: z.string().max(MAX_EVIDENCE_SHORT_TEXT_LENGTH),
+    /** Drawn green for a recovery or a fix and red for an alert, which the screen sets itself. */
+    tone: z.enum(['success', 'danger']).optional(),
+  })
+);
+
+/** A level the series is measured against, such as the limit an alert rule fires on. */
+const evidenceChartThresholdSchema = lazySchema(() =>
+  z.object({
+    y: z.number(),
+    label: z.string().max(MAX_EVIDENCE_SHORT_TEXT_LENGTH),
+  })
+);
 
 /**
  * A small static chart carried inline with a piece of evidence. The data points are part of the
  * spec itself, so the chart renders the same no matter where the data originally came from.
  * Deliberately limited to line and bar charts with a handful of series and annotations.
  */
-export const evidenceChartSchema = z.object({
-  type: z.enum(EVIDENCE_CHART_TYPES),
-  title: z.string().max(MAX_EVIDENCE_SHORT_TEXT_LENGTH),
-  x_axis: z.object({
-    type: z.enum(EVIDENCE_CHART_X_AXIS_TYPES),
-    label: z.string().max(MAX_EVIDENCE_CHART_LABEL_LENGTH).optional(),
-  }),
-  y_axis: z.object({
-    label: z.string().max(MAX_EVIDENCE_CHART_LABEL_LENGTH).optional(),
-    /** How y values are formatted. `percent` values are on a 0–100 scale. */
-    unit: z.enum(EVIDENCE_CHART_Y_AXIS_UNITS).optional(),
-  }),
-  /** Stack the series on top of each other. Only meaningful for bar charts. */
-  stacked: z.boolean().optional(),
-  series: z.array(evidenceChartSeriesSchema).min(1).max(MAX_EVIDENCE_CHART_SERIES),
-  annotations: z
-    .array(evidenceChartAnnotationSchema)
-    .max(MAX_EVIDENCE_CHART_ANNOTATIONS)
-    .optional(),
-});
+export const evidenceChartSchema = lazySchema(() =>
+  z.object({
+    type: z.enum(EVIDENCE_CHART_TYPES),
+    title: z.string().max(MAX_EVIDENCE_SHORT_TEXT_LENGTH),
+    x_axis: z.object({
+      type: z.enum(EVIDENCE_CHART_X_AXIS_TYPES),
+      label: z.string().max(MAX_EVIDENCE_CHART_LABEL_LENGTH).optional(),
+    }),
+    y_axis: z.object({
+      label: z.string().max(MAX_EVIDENCE_CHART_LABEL_LENGTH).optional(),
+      /** How y values are formatted. `percent` values are on a 0–100 scale. */
+      unit: z.enum(EVIDENCE_CHART_Y_AXIS_UNITS).optional(),
+    }),
+    /** Stack the series on top of each other. Only meaningful for bar charts. */
+    stacked: z.boolean().optional(),
+    series: z.array(evidenceChartSeriesSchema).min(1).max(MAX_EVIDENCE_CHART_SERIES),
+    annotations: z
+      .array(evidenceChartAnnotationSchema)
+      .max(MAX_EVIDENCE_CHART_ANNOTATIONS)
+      .optional(),
+    /** Horizontal lines, such as an alert rule's threshold. */
+    thresholds: z.array(evidenceChartThresholdSchema).max(2).optional(),
+  })
+);
 export type EvidenceChart = z.infer<typeof evidenceChartSchema>;
 export type EvidenceChartSeries = z.infer<typeof evidenceChartSeriesSchema>;
 export type EvidenceChartAnnotation = z.infer<typeof evidenceChartAnnotationSchema>;

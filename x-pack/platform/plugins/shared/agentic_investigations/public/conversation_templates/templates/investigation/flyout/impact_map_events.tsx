@@ -324,7 +324,11 @@ export const withContextAnnotations = (
     .flatMap(({ points }) => points.map(({ x }) => parseTime(x)))
     .filter((time): time is number => time !== undefined);
   const [start, end] = [Math.min(...times), Math.max(...times)];
-  const own = chart.annotations ?? [];
+  const own = (chart.annotations ?? []).map((annotation) =>
+    event.kind === 'alert' && !annotation.tone
+      ? { ...annotation, tone: 'danger' as const }
+      : annotation
+  );
   const marked = new Set(own.map(({ x }) => parseTime(x)));
   const context = allEvents
     .filter(({ id, kind, at }) => {
@@ -356,6 +360,8 @@ export const withContextAnnotations = (
           label: event.title,
           ...(event.kind === 'recovery' || event.kind === 'mitigation'
             ? { tone: 'success' as const }
+            : event.kind === 'alert'
+            ? { tone: 'danger' as const }
             : {}),
         },
       ]

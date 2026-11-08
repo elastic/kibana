@@ -90,6 +90,7 @@ export const findingsOutputSchema = lazySchema(() => {
     annotations: z
       .array(z.object({ x: z.string(), x_end: z.string().optional(), label: z.string() }))
       .optional(),
+    thresholds: z.array(z.object({ y: z.number(), label: z.string() })).optional(),
   });
   const evidenceSchema = z.object({
     description: z.string().optional(),
@@ -307,6 +308,14 @@ export const limitEvidence = (
                     ...(xEnd ? { x_end: label(xOf(xEnd) ?? xEnd) } : {}),
                     label: short(text),
                   })),
+              }
+            : {}),
+          ...(raw.chart.thresholds?.length
+            ? {
+                thresholds: raw.chart.thresholds
+                  .filter(({ y }) => Number.isFinite(y))
+                  .slice(0, 2)
+                  .map(({ y, label: text }) => ({ y, label: short(text) })),
               }
             : {}),
         }
@@ -838,6 +847,15 @@ const EVIDENCE_JSON_SCHEMA = {
               label: { type: 'string' },
             },
             required: ['x', 'label'],
+          },
+        },
+        thresholds: {
+          type: 'array',
+          description: 'At most 2 horizontal lines, such as the limit an alert rule fires on.',
+          items: {
+            type: 'object',
+            properties: { y: { type: 'number' }, label: { type: 'string' } },
+            required: ['y', 'label'],
           },
         },
       },
