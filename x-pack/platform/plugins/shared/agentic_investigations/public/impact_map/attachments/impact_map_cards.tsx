@@ -35,7 +35,6 @@ import {
   EventGlance,
   getEventEntityIds,
   getEventGroup,
-  EventKindBadge,
   EventTime,
   ImpactMapEventsFlyout,
   STANDALONE_WIDTH,
@@ -196,13 +195,6 @@ const MapCard: React.FC<{
   );
 };
 
-/** How many events of each kind, so the shape of the incident reads before the rows do. */
-const kindCounts = (events: ImpactMapEvent[]) => {
-  const counts = new Map<ImpactMapEvent['kind'], number>();
-  events.forEach(({ kind }) => counts.set(kind, (counts.get(kind) ?? 0) + 1));
-  return [...counts.entries()];
-};
-
 /** The kinds that answer "what is the impact", best match first; a recovery ends any of them. */
 const IMPACT_KIND_TIERS: ImpactMapEvent['kind'][][] = [
   ['customer_impact', 'recovery'],
@@ -304,15 +296,7 @@ const TimelineCard: React.FC<{
         formatDay(first.at) === formatDay(last.at) ? '' : ` – ${formatDay(last.at)}`
       }`}
     >
-      <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
-        {kindCounts(events).map(([kind, count]) => (
-          <EuiFlexItem grow={false} key={kind}>
-            <EventKindBadge kind={kind} count={count} />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       <EuiTimeline gutterSize="m" data-test-subj="agenticInvestigationsTimelineCardEvents">
         {shown.map((event) => (
           <EuiTimelineItem

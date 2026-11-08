@@ -253,12 +253,12 @@ describe('ImpactMapCards', () => {
     expect(openInInvestigation).toHaveBeenCalledWith('conv-1', 'timeline');
   });
 
-  it('previews the timeline with the kinds of event and the latest events', () => {
+  it('previews the timeline as the latest events, without kind badges', () => {
     renderCards(documentWithoutImpact);
 
     const card = screen.getByTestId('agenticInvestigationsTimelineCard');
-    expect(card).toHaveTextContent('Mitigation 1');
-    expect(card).toHaveTextContent('Change 1');
+    expect(card).not.toHaveTextContent('Mitigation 1');
+    expect(card).not.toHaveTextContent('Change 1');
     const rows = screen.getAllByTestId('agenticInvestigationsTimelineCardEvent');
     expect(rows[0]).toHaveTextContent('Checkout errors');
   });
