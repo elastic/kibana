@@ -167,6 +167,19 @@ const ImpactMapPanel: React.FC<{
     />
   );
 
+  const eventsFlyout = selection && (
+    <ImpactMapEventsFlyout
+      // A new selection starts on its own list, not on the last one's open event.
+      key={`${selection.kind}:${selection.id}`}
+      {...resolveEventsSelection(selection, impactMap)}
+      impactMap={impactMap}
+      standalone={isMaximized}
+      asMainFlyout={isInAgentBuilder}
+      onViewInTimeline={viewInTimeline ? () => viewInTimeline(selection) : undefined}
+      onClose={() => setSelection(undefined)}
+    />
+  );
+
   return (
     <EuiPanel
       hasBorder={false}
@@ -259,23 +272,14 @@ const ImpactMapPanel: React.FC<{
                 >
                   {map}
                 </div>
+                {/* Inside the overlay, so it is above the map whatever EUI's z-index. */}
+                {selection && eventsFlyout}
               </div>
             </div>
           </EuiFocusTrap>
         </EuiPortal>
       )}
-      {selection && (
-        <ImpactMapEventsFlyout
-          // A new selection starts on its own list, not on the last one's open event.
-          key={`${selection.kind}:${selection.id}`}
-          {...resolveEventsSelection(selection, impactMap)}
-          impactMap={impactMap}
-          standalone={isMaximized}
-          asMainFlyout={isInAgentBuilder}
-          onViewInTimeline={viewInTimeline ? () => viewInTimeline(selection) : undefined}
-          onClose={() => setSelection(undefined)}
-        />
-      )}
+      {selection && !isMaximized && eventsFlyout}
     </EuiPanel>
   );
 };

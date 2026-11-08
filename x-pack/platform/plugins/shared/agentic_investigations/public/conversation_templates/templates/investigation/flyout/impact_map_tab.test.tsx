@@ -216,13 +216,20 @@ describe('ImpactMapTab', () => {
       expect(lastFlyoutProps().type).toBeUndefined();
     });
 
-    it('stands alone over the map in full screen, wherever it is', () => {
+    it('is drawn inside the full-screen map, so nothing can sit above it', () => {
       mockInAgentBuilder = true;
       openEntityEvents();
       fireEvent.click(screen.getByTestId('agenticInvestigationsImpactMapMaximize'));
       fireEvent.click(screen.getAllByTestId('fakeEntity')[0]);
 
-      expect(lastFlyoutProps()).toMatchObject({ session: 'never', type: 'overlay' });
+      const panel = screen.getByTestId('agenticInvestigationsImpactMapEventsFlyout');
+      expect(screen.getByTestId('agenticInvestigationsImpactMapFullScreen')).toContainElement(
+        panel
+      );
+
+      fireEvent.click(screen.getByTestId('agenticInvestigationsImpactMapEventsClose'));
+      expect(screen.queryByTestId('agenticInvestigationsImpactMapEventsFlyout')).toBeNull();
+      expect(screen.getByTestId('agenticInvestigationsImpactMapFullScreen')).toBeInTheDocument();
     });
   });
 

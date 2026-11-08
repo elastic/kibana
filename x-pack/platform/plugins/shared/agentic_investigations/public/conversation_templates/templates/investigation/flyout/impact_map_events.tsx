@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { useConversationFlyoutWidthProps } from '@kbn/agent-builder-plugin/public';
 import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,6 +25,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
   type EuiBadgeProps,
@@ -146,6 +148,9 @@ const EMPTY_TITLE = i18n.translate('xpack.agenticInvestigations.impactMap.events
 });
 const EMPTY_BODY = i18n.translate('xpack.agenticInvestigations.impactMap.events.emptyBody', {
   defaultMessage: 'The agent adds what happened here as it finds it.',
+});
+const CLOSE_LABEL = i18n.translate('xpack.agenticInvestigations.impactMap.events.close', {
+  defaultMessage: 'Close',
 });
 const BACK_LABEL = i18n.translate('xpack.agenticInvestigations.impactMap.events.back', {
   defaultMessage: 'All events',
@@ -361,27 +366,13 @@ const EventsFlyoutFrame: React.FC<{
   menuTitle: string;
   children: React.ReactNode;
 }> = ({ standalone, asMainFlyout, onClose, titleId, menuTitle, children }) => {
-  const { euiTheme } = useEuiTheme();
   if (standalone) {
+    // Drawn inside the full-screen map and not as an EUI flyout: EUI sets a flyout's z-index
+    // inline, below the map's, so a flyout opened over the map would sit behind it.
     return (
-      // In a portal like the full-screen map: the investigation flyout's transformed body would
-      // otherwise contain the flyout, and hide it behind the map.
-      <EuiPortal>
-        <EuiFlyout
-          onClose={onClose}
-          aria-labelledby={titleId}
-          size="s"
-          ownFocus
-          session="never"
-          type="overlay"
-          css={css`
-            z-index: ${Number(euiTheme.levels.modal) + 1};
-          `}
-          data-test-subj="agenticInvestigationsImpactMapEventsFlyout"
-        >
-          {children}
-        </EuiFlyout>
-      </EuiPortal>
+      <StandaloneEventsPanel onClose={onClose} titleId={titleId}>
+        {children}
+      </StandaloneEventsPanel>
     );
   }
   if (asMainFlyout) {
@@ -395,6 +386,67 @@ const EventsFlyoutFrame: React.FC<{
     <ChildEventsFlyout onClose={onClose} titleId={titleId}>
       {children}
     </ChildEventsFlyout>
+  );
+};
+
+const STANDALONE_WIDTH = 'min(440px, 100%)';
+
+/** A flyout-like panel on the right of the full-screen map; Escape closes it. */
+const StandaloneEventsPanel: React.FC<{
+  onClose: () => void;
+  titleId: string;
+  children: React.ReactNode;
+}> = ({ onClose, titleId, children }) => {
+  const { euiTheme } = useEuiTheme();
+  useEffect(() => {
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+    document.addEventListener('keydown', closeOnEscape);
+    return () => document.removeEventListener('keydown', closeOnEscape);
+  }, [onClose]);
+  return (
+    <div
+      role="dialog"
+      aria-labelledby={titleId}
+      data-test-subj="agenticInvestigationsImpactMapEventsFlyout"
+      css={css`
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1;
+        width: ${STANDALONE_WIDTH};
+        display: flex;
+        flex-direction: column;
+        background: ${euiTheme.colors.backgroundBasePlain};
+        border-left: ${euiTheme.border.thin};
+        box-shadow: ${euiTheme.shadows?.l?.down ?? 'none'};
+      `}
+    >
+      <EuiToolTip
+        content={CLOSE_LABEL}
+        disableScreenReaderOutput
+        anchorProps={{
+          css: css`
+            position: absolute;
+            top: ${euiTheme.size.s};
+            right: ${euiTheme.size.s};
+            z-index: 1;
+          `,
+        }}
+      >
+        <EuiButtonIcon
+          iconType="cross"
+          aria-label={CLOSE_LABEL}
+          onClick={onClose}
+          data-test-subj="agenticInvestigationsImpactMapEventsClose"
+        />
+      </EuiToolTip>
+      {children}
+    </div>
   );
 };
 
