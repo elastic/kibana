@@ -58,6 +58,7 @@ import { bulkGetReadableConversations } from './readable_conversation_ids';
 import type { InProgressResolver } from './in_progress';
 import {
   alertSubjectsToImpactMapEvents,
+  appliedProposalsToImpactMapEvents,
   mergeImpactMapEvents,
 } from '../../../common/impact_map/events';
 import { toEntityName } from '../../../common/impact_map/entity_name';
@@ -133,6 +134,17 @@ export class InvestigationsQueryService {
     const removed = removedAttachmentIds(conversation.attachments);
     const visibleHypotheses = hypotheses && !removed.has(hypotheses.id) ? hypotheses : undefined;
     const visibleImpactMap = impactMap && !removed.has(impactMap.id) ? impactMap : undefined;
+    // Alerts and applied to-dos are read, not stored with the map, so they appear without the
+    // agent writing them; with no map yet, the timeline still shows them.
+    const derivedEvents = [
+      ...alertSubjectsToImpactMapEvents(subjects.filter(({ id: docId }) => !removed.has(docId))),
+      ...appliedProposalsToImpactMapEvents(proposals),
+    ];
+    const impactMapResponse = visibleImpactMap
+      ? toImpactMapResponse(visibleImpactMap, derivedEvents)
+      : derivedEvents.length > 0
+      ? toEventsOnlyImpactMapResponse(derivedEvents)
+      : undefined;
     return {
       ...toSummary({
         conversation,
@@ -141,12 +153,7 @@ export class InvestigationsQueryService {
         impact: impact && !removed.has(impact.id) ? impact : undefined,
       }),
       ...(visibleHypotheses && { hypotheses: toHypothesesResponse(visibleHypotheses) }),
-      ...(visibleImpactMap && {
-        impact_map: toImpactMapResponse(
-          visibleImpactMap,
-          alertSubjectsToImpactMapEvents(subjects.filter(({ id: docId }) => !removed.has(docId)))
-        ),
-      }),
+      ...(impactMapResponse && { impact_map: impactMapResponse }),
       proposals,
     };
   }
@@ -800,6 +807,21 @@ const toImpactMapResponse = (
   ...(updatedAt !== undefined && { updated_at: updatedAt }),
 });
 
+/** An impact map with no graph, so the timeline can show events before the agent draws one. */
+const toEventsOnlyImpactMapResponse = (
+  events: ImpactMapEvent[]
+): NonNullable<Investigation['impact_map']> => {
+  const sorted = mergeImpactMapEvents([], events);
+  return {
+    entities: [],
+    relationships: [],
+    entity_types: [],
+    relationship_types: [],
+    events: sorted,
+    created_at: sorted[0]?.at ?? new Date().toISOString(),
+  };
+};
+
 const toHypothesesResponse = (
   hypotheses: InvestigationHypotheses
 ): NonNullable<Investigation['hypotheses']> => ({
@@ -816,6 +838,7 @@ const toProposalSummary = (proposal: ProposalWithMetadata): InvestigationProposa
   impact: proposal.impact,
   confidence: proposal.confidence,
   ...(proposal.category !== undefined && { category: proposal.category }),
+  ...(proposal.decision !== undefined && { decision: proposal.decision }),
   created_at: proposal.createdAt,
   ...(proposal.decidedAt !== undefined && { decided_at: proposal.decidedAt }),
 });

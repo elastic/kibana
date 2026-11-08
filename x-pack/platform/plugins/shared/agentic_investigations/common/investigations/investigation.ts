@@ -6,7 +6,12 @@
  */
 
 import { z, isoDateTime } from '@kbn/zod/v4';
-import type { ProposalConfidence, ProposalImpact, ProposalStatus } from '@kbn/proposals-common';
+import type {
+  ProposalConfidence,
+  ProposalDecision,
+  ProposalImpact,
+  ProposalStatus,
+} from '@kbn/proposals-common';
 import type { InvestigationEvidence } from '../evidence/evidence';
 import type { Hypothesis } from '../hypotheses/hypotheses';
 import type {
@@ -176,6 +181,8 @@ export interface InvestigationProposalSummary {
   impact: ProposalImpact;
   confidence: ProposalConfidence;
   category?: string;
+  /** What a person decided; absent while undecided. */
+  decision?: ProposalDecision;
   created_at: string;
   decided_at?: string;
 }

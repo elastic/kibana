@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { alertSubjectsToImpactMapEvents } from './events';
+import { alertSubjectsToImpactMapEvents, appliedProposalsToImpactMapEvents } from './events';
 
 describe('alertSubjectsToImpactMapEvents', () => {
   it('turns the alerts of an investigation into alert events and leaves other subjects out', () => {
@@ -55,5 +55,38 @@ describe('alertSubjectsToImpactMapEvents', () => {
     ]);
 
     expect(event).not.toHaveProperty('links');
+  });
+});
+
+describe('appliedProposalsToImpactMapEvents', () => {
+  const todo = {
+    id: 'p1',
+    title: 'Restore shipping to at least 1 replica',
+    comment: 'Scale the deployment back up and confirm recovery.',
+    category: 'todo',
+    decision: 'approved' as const,
+    decided_at: '2026-11-08T12:30:00Z',
+  };
+
+  it('shows a to-do marked as applied as a response event at the time it was marked', () => {
+    expect(appliedProposalsToImpactMapEvents([todo])).toEqual([
+      {
+        id: 'proposal:p1',
+        kind: 'response',
+        title: 'Applied: Restore shipping to at least 1 replica',
+        description: '- Scale the deployment back up and confirm recovery.',
+        at: '2026-11-08T12:30:00Z',
+      },
+    ]);
+  });
+
+  it('leaves out proposals that are undecided, dismissed or not to-dos', () => {
+    expect(
+      appliedProposalsToImpactMapEvents([
+        { ...todo, id: 'p2', decision: undefined, decided_at: undefined },
+        { ...todo, id: 'p3', decision: 'dismissed' as const },
+        { ...todo, id: 'p4', category: 'remediation' },
+      ])
+    ).toEqual([]);
   });
 });

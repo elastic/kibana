@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { PROPOSAL_CATEGORY_TODO } from '@kbn/proposals-common';
 import { withChartClockTimesDated } from './chart_times';
 import { sanitizeDataSource } from './data_source';
 import { MAX_IMPACT_MAP_EVENTS } from './constants';
 import type { InvestigationSubject } from '../subjects/subject';
+import type { InvestigationProposalSummary } from '../investigations/investigation';
 import type { ImpactMapEvent } from './impact_map';
 
 const MAX_EVENT_ID_LENGTH = 256;
@@ -89,3 +91,26 @@ export const alertSubjectsToImpactMapEvents = (
           : {}),
       };
     });
+
+/**
+ * The to-dos a person marked as applied, as response events: what responders did, at the time
+ * they marked it. Read, not stored, so "Mark as not applied" takes the event off the timeline.
+ */
+export const appliedProposalsToImpactMapEvents = (
+  proposals: readonly Pick<
+    InvestigationProposalSummary,
+    'id' | 'title' | 'comment' | 'category' | 'decision' | 'decided_at'
+  >[]
+): ImpactMapEvent[] =>
+  proposals
+    .filter(
+      ({ category, decision, decided_at: decidedAt }) =>
+        category === PROPOSAL_CATEGORY_TODO && decision === 'approved' && Boolean(decidedAt)
+    )
+    .map(({ id, title, comment, decided_at: decidedAt }) => ({
+      id: `proposal:${id}`.slice(0, MAX_EVENT_ID_LENGTH),
+      kind: 'response' as const,
+      title: `Applied: ${title}`,
+      ...(comment.trim() && { description: `- ${comment.trim().replace(/\n+/g, ' ')}` }),
+      at: decidedAt as string,
+    }));

@@ -246,6 +246,14 @@ describe('InvestigationsQueryService', () => {
           hypotheses: hypotheses.hypotheses,
           created_at: '2026-01-01T00:00:00.000Z',
         },
+        // Alerts show on the timeline even before the agent has drawn a map.
+        impact_map: expect.objectContaining({
+          entities: [],
+          events: [
+            expect.objectContaining({ id: 'alert:alert-1', kind: 'alert' }),
+            expect.objectContaining({ id: 'alert:alert-2', kind: 'alert' }),
+          ],
+        }),
         proposals: [],
       });
     });
