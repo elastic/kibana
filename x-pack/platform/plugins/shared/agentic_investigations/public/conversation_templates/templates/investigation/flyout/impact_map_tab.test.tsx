@@ -163,6 +163,18 @@ describe('ImpactMapTab', () => {
     expect(screen.queryByTestId('agenticInvestigationsImpactMapViewInTimeline')).toBeNull();
   });
 
+  it('pushes the page aside for the child flyout and puts it back on close', () => {
+    mockUseInvestigation.mockReturnValue({ data: { in_progress: false, impact_map: impactMap } });
+    document.body.style.paddingInlineEnd = '';
+
+    renderTab();
+    fireEvent.click(screen.getByTestId('fakeEntity'));
+    expect(document.body.style.paddingInlineEnd).toBe('380px');
+
+    fireEvent.click(screen.getByLabelText('Close this dialog'));
+    expect(document.body.style.paddingInlineEnd).toBe('');
+  });
+
   it('opens nothing for an entity or a relationship that has no events', () => {
     mockUseInvestigation.mockReturnValue({
       data: { in_progress: false, impact_map: { ...impactMap, events: [] } },
