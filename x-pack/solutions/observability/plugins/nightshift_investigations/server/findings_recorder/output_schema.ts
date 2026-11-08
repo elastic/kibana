@@ -574,12 +574,31 @@ export const limitImpactMap = (
 const MAX_EVENT_DESCRIPTION_LENGTH = 1_000;
 const MAX_EVENT_DESCRIPTION_BULLETS = 4;
 
-/** At most four bullet lines; a lead line before them is kept, so a long answer stays readable. */
+const MAX_EVENT_BULLET_LENGTH = 200;
+
+const clipAtWord = (text: string, max: number): string => {
+  if (text.length <= max) return text;
+  const cut = text.slice(0, max);
+  return `${cut.slice(0, Math.max(cut.lastIndexOf(' '), max / 2))}…`;
+};
+
+/**
+ * A description of at most four short bullets. Bullets the model wrote are kept (the first four,
+ * each cut at a word); a paragraph is split into sentences and the first four become bullets, so a
+ * verbose answer never reaches the reader as a wall of text.
+ */
 export const limitDescriptionBullets = (text: string): string => {
   const lines = text.split('\n').filter((line) => line.trim());
-  let bullets = 0;
-  return lines
-    .filter((line) => !/^\s*[-*]\s/.test(line) || ++bullets <= MAX_EVENT_DESCRIPTION_BULLETS)
+  const isBullet = (line: string) => /^\s*[-*]\s/.test(line);
+  const items = lines.some(isBullet)
+    ? lines.map((line) => line.replace(/^\s*[-*]\s+/, '').trim())
+    : text
+        .split(/(?<=[.;!?])\s+(?=[A-Z0-9"'(])/)
+        .map((sentence) => sentence.trim())
+        .filter(Boolean);
+  return items
+    .slice(0, MAX_EVENT_DESCRIPTION_BULLETS)
+    .map((item) => `- ${clipAtWord(item, MAX_EVENT_BULLET_LENGTH)}`)
     .join('\n');
 };
 
@@ -1057,7 +1076,8 @@ export const FINDINGS_JSON_SCHEMA = {
           },
           description: {
             type: 'string',
-            description: 'At most two sentences: what the data showed and why it matters.',
+            description:
+              "Three or four Markdown bullets ('- ...'), one short fact each of at most 20 words: what happened, how big, what it coincided with, what is still unknown. No paragraph, no restating the title, no identifiers unless a bullet is about one.",
           },
           at: { type: 'string', description: 'When it happened or started, ISO 8601.' },
           ends_at: { type: 'string', description: 'When it ended, if it has.' },

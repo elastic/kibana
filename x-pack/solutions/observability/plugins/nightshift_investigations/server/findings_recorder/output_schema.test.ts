@@ -542,4 +542,21 @@ describe('limitDescriptionBullets', () => {
     const text = ['- a', '- b', '- c', '- d', '- e', '- f'].join('\n');
     expect(limitDescriptionBullets(text)).toBe('- a\n- b\n- c\n- d');
   });
+
+  it('turns a paragraph into at most four short bullets', () => {
+    const text =
+      'A new pod started at 16:49Z. It replaced the old pod. No event record exists for this change. ' +
+      'A direct query returned zero rows. A fifth sentence is dropped.';
+    expect(limitDescriptionBullets(text).split('\n')).toEqual([
+      '- A new pod started at 16:49Z.',
+      '- It replaced the old pod.',
+      '- No event record exists for this change.',
+      '- A direct query returned zero rows.',
+    ]);
+  });
+
+  it('cuts a very long bullet at a word', () => {
+    const long = `- ${'word '.repeat(80)}`;
+    expect(limitDescriptionBullets(long).length).toBeLessThanOrEqual(205);
+  });
 });
