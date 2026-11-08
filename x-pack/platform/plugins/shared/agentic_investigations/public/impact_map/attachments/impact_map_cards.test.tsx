@@ -183,10 +183,10 @@ describe('ImpactMapCards', () => {
     expect(cards[0]).toHaveTextContent('Checkout errors');
   });
 
-  it('says what an impact event affects', () => {
+  it('does not repeat an affected entity the event title already names', () => {
     renderCards(document);
 
-    expect(screen.getByTestId('agenticInvestigationsEventCard')).toHaveTextContent('Affects');
+    expect(screen.getByTestId('agenticInvestigationsEventCard')).not.toHaveTextContent('Affects');
   });
 
   it('shows no entity cards when there are impact events to show', () => {

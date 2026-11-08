@@ -31,7 +31,7 @@ import type { ImpactMapRenderer } from '../../types';
 import {
   EventAffects,
   EventGlance,
-  FACT_AFFECTS,
+  getEventEntityIds,
   EventKindBadge,
   EventTime,
   ImpactMapEventsFlyout,
@@ -235,6 +235,23 @@ export const pickImpactEvents = (events: ImpactMapEvent[]): ImpactMapEvent[] => 
   return [];
 };
 
+/** Whether the title already says what the event is about, so a card need not repeat it. */
+const titleNamesAffected = (
+  event: ImpactMapEvent,
+  impactMap: InvestigationImpactMapResponse
+): boolean => {
+  const title = event.title.toLowerCase();
+  const ids = getEventEntityIds(event, impactMap.relationships);
+  return (
+    ids.length > 0 &&
+    ids.every((id) => {
+      const entity = impactMap.entities.find((candidate) => candidate.id === id);
+      const names = [id, entity?.label].filter((name): name is string => Boolean(name));
+      return names.some((name) => title.includes(name.toLowerCase()));
+    })
+  );
+};
+
 /** One event as a card: what happened, the trend around it and where it came from. */
 export const EventCard: React.FC<{
   event: ImpactMapEvent;
@@ -248,20 +265,9 @@ export const EventCard: React.FC<{
     onClick={onOpen}
     data-test-subj="agenticInvestigationsEventCard"
   >
-    {event.kind !== 'alert' && (
+    {event.kind !== 'alert' && !titleNamesAffected(event, impactMap) && (
       <>
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              {FACT_AFFECTS}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <EventAffects event={event} impactMap={impactMap} onOpenEntity={onOpenEntity} />
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EventAffects event={event} impactMap={impactMap} onOpenEntity={onOpenEntity} />
         <EuiSpacer size="s" />
       </>
     )}

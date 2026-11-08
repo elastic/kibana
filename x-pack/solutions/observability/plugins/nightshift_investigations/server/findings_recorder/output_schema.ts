@@ -434,6 +434,30 @@ export const classifyEntityType = (
 };
 
 /**
+ * A bare `k8s` type says nothing about what the entity is. A thing a pod runs on, or one that
+ * carries node metadata or is named a node, is a Kubernetes node.
+ */
+const resolveBareKubernetesType = (
+  entity: NonNullable<FindingsOutput['impact_map']>['entities'][number],
+  map: NonNullable<FindingsOutput['impact_map']>
+): string => {
+  const typeId = toImpactMapTypeId(entity.type);
+  if (typeId !== 'k8s' && typeId !== 'kubernetes') return typeId;
+  const podIds = new Set(
+    map.entities
+      .filter(({ type }) => toImpactMapTypeId(type) === 'k8s.pod')
+      .map(({ id }) => id.trim())
+  );
+  const hostsAPod = map.relationships.some(
+    ({ source, target }) => target.trim() === entity.id.trim() && podIds.has(source.trim())
+  );
+  const looksLikeNode =
+    /(^|[^a-z])node([^a-z]|$)/i.test(`${entity.id} ${entity.label ?? ''}`) ||
+    (entity.metadata ?? []).some(({ key }) => key.toLowerCase().startsWith('k8s.node.'));
+  return hostsAPod || looksLikeNode ? 'k8s.node' : typeId;
+};
+
+/**
  * Trims the model's impact map to what the store accepts and turns its flat entity fields into the
  * store's shape: an entity type for each `type` that names a kind or an icon, so the catalog
  * learns it, and a relationship type for each relationship `type`. Relationships to an entity the
@@ -456,7 +480,7 @@ export const limitImpactMap = (
     const id = truncate(entity.id.trim(), MAX_MAP_ID_LENGTH);
     if (!id || seen.has(id) || entities.length >= MAX_IMPACT_MAP_ENTITIES) continue;
     seen.add(id);
-    const typeId = withoutEntityName(toImpactMapTypeId(entity.type), [
+    const typeId = withoutEntityName(resolveBareKubernetesType(entity, raw), [
       entity.id,
       entity.label ?? '',
     ]);

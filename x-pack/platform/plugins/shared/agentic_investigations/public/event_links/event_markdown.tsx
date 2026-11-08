@@ -6,7 +6,8 @@
  */
 
 import React, { createContext, useContext, useMemo } from 'react';
-import { EuiLink, EuiMarkdownFormat, getDefaultEuiMarkdownPlugins } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiIcon, EuiLink, EuiMarkdownFormat, getDefaultEuiMarkdownPlugins } from '@elastic/eui';
 import type { InvestigationImpactMapResponse } from '../../common';
 import {
   ImpactMapEventsFlyout,
@@ -89,6 +90,18 @@ export const EventLinksProvider: React.FC<
 
 export const useEventLinks = (): EventLinks | undefined => useContext(EventLinksContext);
 
+const eventLinkStyles = css`
+  font-weight: inherit;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+`;
+const eventLinkIconStyles = css`
+  margin-inline-start: 3px;
+  vertical-align: baseline;
+  inline-size: 11px;
+  block-size: 11px;
+`;
+
 /** Markdown whose `event:` links open the event they name. */
 export const EventMarkdown: React.FC<{
   text: string;
@@ -116,14 +129,19 @@ export const EventMarkdown: React.FC<{
         return <>{children}</>;
       }
       return (
+        // Quiet on purpose: the words keep their colour, and a dotted underline and a small
+        // icon say they open the event behind the claim.
         <EuiLink
+          color="text"
           data-test-subj="agenticInvestigationsEventLink"
+          css={eventLinkStyles}
           onClick={(event: React.MouseEvent) => {
             event.stopPropagation();
             links.openEvent(eventId);
           }}
         >
           {children}
+          <EuiIcon type="external" size="s" color="subdued" css={eventLinkIconStyles} aria-hidden />
         </EuiLink>
       );
     };

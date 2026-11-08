@@ -794,7 +794,11 @@ export const EventGlance: React.FC<{
 }> = ({ event, allEvents }) =>
   event.evidence?.chart ? (
     <LazyEvidenceView
-      evidence={withContextAnnotations(event.evidence, event, allEvents)}
+      // The chart's own title says what it plots; a caption under a card is noise.
+      evidence={{
+        ...withContextAnnotations(event.evidence, event, allEvents),
+        description: undefined,
+      }}
       referenceTime={event.at}
     />
   ) : event.description ? (

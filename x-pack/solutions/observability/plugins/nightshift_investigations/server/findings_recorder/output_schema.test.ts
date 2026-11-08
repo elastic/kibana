@@ -309,6 +309,24 @@ describe('classifyEntityType', () => {
   });
 });
 
+describe('a bare k8s type', () => {
+  it('becomes a Kubernetes node when a pod runs on it', () => {
+    const record = limitImpactMap({
+      entities: [
+        { id: 'shipping-pod', type: 'k8s.pod' },
+        { id: 'gke-pool-1', type: 'k8s' },
+        { id: 'other', type: 'k8s' },
+      ],
+      relationships: [{ source: 'shipping-pod', target: 'gke-pool-1', type: 'runs_on' }],
+    });
+    expect(record?.entities.map(({ id, type_id: typeId }) => [id, typeId])).toEqual([
+      ['shipping-pod', 'k8s.pod'],
+      ['gke-pool-1', 'k8s.node'],
+      ['other', 'k8s'],
+    ]);
+  });
+});
+
 describe('impact map metadata', () => {
   it('teaches a known type only the fields it does not already have', () => {
     const known = new Map([
