@@ -234,7 +234,7 @@ export const pickImpactEvents = (events: ImpactMapEvent[]): ImpactMapEvent[] => 
 /** Whether the title already says what the event is about, so a card need not repeat it. */
 const titleNamesAffected = (
   event: ImpactMapEvent,
-  impactMap: InvestigationImpactMapResponse
+  impactMap: Pick<InvestigationImpactMapResponse, 'entities' | 'relationships'>
 ): boolean => {
   const title = event.title.toLowerCase();
   const ids = getEventEntityIds(event, impactMap.relationships);
@@ -251,7 +251,10 @@ const titleNamesAffected = (
 /** One event as a card: what happened, the trend around it and where it came from. */
 export const EventCard: React.FC<{
   event: ImpactMapEvent;
-  impactMap: InvestigationImpactMapResponse;
+  impactMap: Pick<
+    InvestigationImpactMapResponse,
+    'entities' | 'relationships' | 'events' | 'entity_types'
+  >;
   onOpen: () => void;
   onOpenEntity: (entityId: string) => void;
 }> = ({ event, impactMap, onOpen, onOpenEntity }) => (

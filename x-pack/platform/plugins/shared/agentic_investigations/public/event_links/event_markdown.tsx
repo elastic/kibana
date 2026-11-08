@@ -23,6 +23,7 @@ type EventLinksImpactMap = Pick<
   Partial<Pick<InvestigationImpactMapResponse, 'relationship_types'>>;
 
 interface EventLinks {
+  impactMap: EventLinksImpactMap;
   hasEvent: (id: string) => boolean;
   openEvent: (id: string) => void;
   openEntity: (id: string) => void;
@@ -63,12 +64,13 @@ export const EventLinksProvider: React.FC<
     () =>
       events
         ? {
+            impactMap,
             hasEvent: (id) => events.some((event) => event.id === id),
             openEvent: (id) => openSelection({ kind: 'event', id }),
             openEntity: (id) => openSelection({ kind: 'entity', id }),
           }
         : undefined,
-    [events, openSelection]
+    [events, impactMap, openSelection]
   );
 
   return (

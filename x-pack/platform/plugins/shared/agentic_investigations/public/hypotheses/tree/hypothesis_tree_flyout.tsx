@@ -46,6 +46,7 @@ import '@xyflow/react/dist/style.css';
 import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
 import { SubjectList } from '../../subjects/attachments/subject_view';
 import { EventMarkdown } from '../../event_links/event_markdown';
+import { RootCauseEventCard } from '../../event_links/linked_event_card';
 import { HypothesisDetail } from '../attachments/hypotheses_view';
 import { confidenceLabel } from '../attachments/translations';
 import { ProposalDecision } from './proposal_decision';
@@ -153,7 +154,14 @@ const NodeDetail = ({
       );
     }
     case 'conclusion':
-      return <EventMarkdown text={data.conclusion} />;
+      // The same conclusion and root cause card the Overview shows.
+      return (
+        <>
+          <EventMarkdown text={data.conclusion} />
+          <EuiSpacer size="m" />
+          <RootCauseEventCard />
+        </>
+      );
     case 'actions': {
       const { id } = data.proposals[Math.min(selectedActionIndex ?? 0, data.proposals.length - 1)];
       return <ProposalDecision key={id} investigationId={investigationId} proposalId={id} />;

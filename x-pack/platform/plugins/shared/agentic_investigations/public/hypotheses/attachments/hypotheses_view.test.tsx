@@ -11,7 +11,7 @@ import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationHypotheses } from '../../../common/hypotheses/hypotheses';
 import type { InvestigationAttachmentVariant } from '../../investigation_attachments';
-import { HypothesesView } from './hypotheses_view';
+import { HypothesesView, splitReason } from './hypotheses_view';
 
 jest.mock('../../evidence/evidence_chart', () => ({
   EvidenceChart: ({ chart }: { chart: { title: string } }) => (
@@ -129,5 +129,18 @@ describe('HypothesesView', () => {
     renderView({ ...document, hypotheses: [] });
 
     expect(screen.getByTestId('investigationHypothesesEmpty')).toBeInTheDocument();
+  });
+});
+
+describe('splitReason', () => {
+  it('splits the Tested and Result lines the recorder writes', () => {
+    expect(
+      splitReason('**Tested:** the swap.\n**Result:** [it matched](event:failure:a:t).')
+    ).toEqual({ tested: 'the swap.', result: '[it matched](event:failure:a:t).' });
+  });
+
+  it('leaves any other reason whole', () => {
+    expect(splitReason('Latency rose with the deploy.')).toBeUndefined();
+    expect(splitReason('**Tested:** only this')).toBeUndefined();
   });
 });

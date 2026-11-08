@@ -24,6 +24,7 @@ import type {
   InvestigationHypotheses,
 } from '../../../common/hypotheses/hypotheses';
 import { EventMarkdown } from '../../event_links/event_markdown';
+import { LinkedEventCard } from '../../event_links/linked_event_card';
 import { EvidenceView } from '../../evidence/evidence_view';
 import { HYPOTHESIS_STATUS_LABELS, confidenceLabel } from './translations';
 import type {
@@ -70,29 +71,95 @@ const HypothesisStatusIcon = ({ status }: { status: HypothesisStatus }) =>
     />
   );
 
-/** A hypothesis's reason and, when given, its evidence charts. */
+const TESTED_LABEL = i18n.translate('xpack.agenticInvestigations.hypotheses.testedLabel', {
+  defaultMessage: 'Tested',
+});
+const RESULT_LABEL = i18n.translate('xpack.agenticInvestigations.hypotheses.resultLabel', {
+  defaultMessage: 'Result',
+});
+
+const TESTED_AND_RESULT = /^\s*\**Tested:?\**:?\s*([\s\S]*?)\s*\**Result:?\**:?\s*([\s\S]*?)\s*$/i;
+
+/** The recorder writes a reason as "Tested: …" then "Result: …"; anything else stays whole. */
+export const splitReason = (reason: string): { tested: string; result: string } | undefined => {
+  const match = TESTED_AND_RESULT.exec(reason.replace(/\\n/g, '\n'));
+  return match && match[1] && match[2] ? { tested: match[1], result: match[2] } : undefined;
+};
+
+const ReasonSection = ({
+  label,
+  testSubject,
+  children,
+}: {
+  label: string;
+  testSubject: string;
+  children: React.ReactNode;
+}) => {
+  const accordionId = useGeneratedHtmlId({ prefix: 'investigationHypothesisSection' });
+  return (
+    <EuiAccordion
+      id={accordionId}
+      initialIsOpen
+      paddingSize="s"
+      data-test-subj={testSubject}
+      buttonContent={
+        <EuiText size="s">
+          <strong>{label}</strong>
+        </EuiText>
+      }
+    >
+      {children}
+    </EuiAccordion>
+  );
+};
+
+/**
+ * A hypothesis's reason and, when given, its evidence charts. A reason in the recorder's
+ * Tested / Result form is two collapsible sections; the Result shows the event card that backs it.
+ */
 export const HypothesisDetail = ({
   reason,
   evidence,
-}: Pick<Hypothesis, 'reason' | 'evidence'>): React.ReactElement => (
-  <>
-    <div data-test-subj="investigationHypothesisReason">
-      {reason?.trim() ? (
-        <EventMarkdown text={reason} textSize="xs" color="subdued" />
-      ) : (
-        <EuiText size="xs" color="subdued">
-          <p>{NO_REASON}</p>
-        </EuiText>
-      )}
-    </div>
-    {evidence?.map((item, index) => (
-      <React.Fragment key={index}>
+}: Pick<Hypothesis, 'reason' | 'evidence'>): React.ReactElement => {
+  const sections = reason?.trim() ? splitReason(reason) : undefined;
+  const charts = evidence?.map((item, index) => (
+    <React.Fragment key={index}>
+      <EuiSpacer size="s" />
+      <EvidenceView evidence={item} />
+    </React.Fragment>
+  ));
+  if (sections) {
+    const resultCard = <LinkedEventCard text={sections.result} />;
+    return (
+      <div data-test-subj="investigationHypothesisReason">
+        <ReasonSection label={TESTED_LABEL} testSubject="investigationHypothesisTested">
+          <EventMarkdown text={sections.tested} textSize="xs" color="subdued" />
+        </ReasonSection>
         <EuiSpacer size="s" />
-        <EvidenceView evidence={item} />
-      </React.Fragment>
-    ))}
-  </>
-);
+        <ReasonSection label={RESULT_LABEL} testSubject="investigationHypothesisResult">
+          <EventMarkdown text={sections.result} textSize="xs" color="subdued" />
+          <EuiSpacer size="s" />
+          {resultCard}
+        </ReasonSection>
+        {charts}
+      </div>
+    );
+  }
+  return (
+    <>
+      <div data-test-subj="investigationHypothesisReason">
+        {reason?.trim() ? (
+          <EventMarkdown text={reason} textSize="xs" color="subdued" />
+        ) : (
+          <EuiText size="xs" color="subdued">
+            <p>{NO_REASON}</p>
+          </EuiText>
+        )}
+      </div>
+      {charts}
+    </>
+  );
+};
 
 const HypothesisItem = ({
   hypothesis: { candidate, confidence, status, reason, evidence = [] },
