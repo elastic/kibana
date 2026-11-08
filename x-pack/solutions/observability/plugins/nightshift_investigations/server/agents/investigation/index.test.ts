@@ -200,6 +200,7 @@ describe('Nightshift investigation agent type', () => {
       TIME_CONVERTER_TOOL_ID,
       'agentic_investigations.set_impact_map',
       'agentic_investigations.upsert_impact_map_catalog',
+      'agentic_investigations.show_timeline',
       SLACK_READ_TOOL_ID,
     ]);
     expect(without.tools?.[0]?.tool_ids).toEqual([TIME_CONVERTER_TOOL_ID, SLACK_READ_TOOL_ID]);

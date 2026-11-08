@@ -68,6 +68,12 @@ export const IMPACT_MAP_HEALTH_STATES = ['healthy', 'degraded', 'critical', 'unk
 /** Agent Builder builtin tool that records an investigation's impact map. */
 export const SET_IMPACT_MAP_TOOL_ID = 'agentic_investigations.set_impact_map' as const;
 
+/** Attachment type of the chat card that shows an investigation's timeline. */
+export const TIMELINE_ATTACHMENT_TYPE = 'investigation_timeline' as const;
+
+/** Agent Builder builtin tool that puts the timeline card in the chat. */
+export const SHOW_TIMELINE_TOOL_ID = 'agentic_investigations.show_timeline' as const;
+
 /** Agent Builder builtin tool that reads and extends the space's impact map catalog. */
 export const UPSERT_IMPACT_MAP_CATALOG_TOOL_ID =
   'agentic_investigations.upsert_impact_map_catalog' as const;

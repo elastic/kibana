@@ -16,6 +16,7 @@ import {
   SET_HYPOTHESES_TOOL_ID,
   SET_IMPACT_MAP_TOOL_ID,
   SET_IMPACT_TOOL_ID,
+  SHOW_TIMELINE_TOOL_ID,
   UPSERT_IMPACT_MAP_CATALOG_TOOL_ID,
 } from '@kbn/agentic-investigations-plugin/common';
 import {
@@ -49,6 +50,7 @@ export const SANDBOX_TOOL_IDS = [
 export const IMPACT_MAP_TOOL_IDS = [
   SET_IMPACT_MAP_TOOL_ID,
   UPSERT_IMPACT_MAP_CATALOG_TOOL_ID,
+  SHOW_TIMELINE_TOOL_ID,
 ] as const;
 
 /** The agentic investigations tools the agent records findings with when they are enabled. */

@@ -6,7 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IMPACT_MAP_ATTACHMENT_TYPE } from '../../../common/impact_map/constants';
+import {
+  IMPACT_MAP_ATTACHMENT_TYPE,
+  TIMELINE_ATTACHMENT_TYPE,
+} from '../../../common/impact_map/constants';
 import type { InvestigationImpactMap } from '../../../common/impact_map/impact_map';
 import type { ImpactMapRenderer } from '../../types';
 import type { InvestigationTab } from './impact_map_cards';
@@ -32,5 +35,23 @@ export const createImpactMapAttachmentRenderer = (
   loadContent: () =>
     import('./impact_map_cards').then(({ createImpactMapCards }) =>
       createImpactMapCards(getImpactMapRenderer, openInInvestigation)
+    ),
+});
+
+/** Browser UI for the investigation_timeline attachment: the timeline card on its own. */
+export const createTimelineAttachmentRenderer = (
+  openInInvestigation: (conversationId: string, tab: InvestigationTab) => void
+): InvestigationAttachmentRenderer<{ conversationId: string }> & {
+  type: typeof TIMELINE_ATTACHMENT_TYPE;
+} => ({
+  type: TIMELINE_ATTACHMENT_TYPE,
+  getLabel: () =>
+    i18n.translate('xpack.agenticInvestigations.impactMap.attachments.timelineLabel', {
+      defaultMessage: 'Timeline',
+    }),
+  icon: 'clock',
+  loadContent: () =>
+    import('./impact_map_cards').then(({ createTimelineCards }) =>
+      createTimelineCards(openInInvestigation)
     ),
 });

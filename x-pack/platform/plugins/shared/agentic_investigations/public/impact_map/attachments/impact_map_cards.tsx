@@ -13,6 +13,7 @@ import {
   EuiButtonIcon,
   EuiFocusTrap,
   EuiPortal,
+  EuiSkeletonRectangle,
   EuiTitle,
   EuiToolTip,
   useEuiTheme,
@@ -47,6 +48,7 @@ import {
 } from '../../conversation_templates/templates/investigation/flyout/impact_map_events';
 import { KindAvatar } from '../../conversation_templates/templates/investigation/flyout/timeline_event';
 import type { InvestigationAttachmentContentProps } from '../../investigation_attachments';
+import { useInvestigation } from '../../investigations/hooks/use_investigation';
 import { InvestigationCard } from './investigation_card';
 import { toImpactMapResponse } from './to_impact_map_response';
 
@@ -560,4 +562,55 @@ export const createImpactMapCards = (
     );
   };
   return ImpactMapCards;
+};
+
+/**
+ * The timeline attachment in the chat: the timeline card on its own. The attachment only names
+ * the investigation, so the events are read when it renders and are always the latest.
+ */
+export const createTimelineCards = (
+  openInInvestigation: (conversationId: string, tab: InvestigationTab) => void
+): React.FC<InvestigationAttachmentContentProps<{ conversationId: string }>> => {
+  const TimelineCards: React.FC<
+    InvestigationAttachmentContentProps<{ conversationId: string }>
+  > = ({ document: { conversationId } }) => {
+    const { data, isLoading } = useInvestigation(conversationId);
+    const history = useSelectionHistory();
+    const isInAgentBuilder = useIsInAgentBuilder();
+    const impactMap = data?.impact_map;
+    const selection = history.current;
+    const selected = selection && impactMap && resolveEventsSelection(selection, impactMap);
+
+    if (isLoading) {
+      return <EuiSkeletonRectangle width="100%" height={120} borderRadius="m" />;
+    }
+    if (!impactMap || impactMap.events.length === 0) {
+      return (
+        <EuiText size="s" color="subdued">
+          <p>{EMPTY}</p>
+        </EuiText>
+      );
+    }
+
+    return (
+      <div data-test-subj="agenticInvestigationsTimelineCards">
+        <TimelineCard
+          impactMap={impactMap}
+          onOpen={() => openInInvestigation(conversationId, 'timeline')}
+          onOpenEvent={(id) => history.open({ kind: 'event', id })}
+        />
+        {selection && selected && (
+          <ImpactMapEventsFlyout
+            {...selected}
+            impactMap={impactMap}
+            asMainFlyout={isInAgentBuilder}
+            targetKey={`${selection.kind}:${selection.id}`}
+            onClose={history.clear}
+            onBackToPrevious={history.hasPrevious ? history.back : undefined}
+          />
+        )}
+      </div>
+    );
+  };
+  return TimelineCards;
 };

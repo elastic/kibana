@@ -8,7 +8,10 @@
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ImpactMapRenderer } from '../../types';
 import { registerInvestigationAttachmentRenderer } from '../../investigation_attachments';
-import { createImpactMapAttachmentRenderer } from './impact_map_attachment_definition';
+import {
+  createImpactMapAttachmentRenderer,
+  createTimelineAttachmentRenderer,
+} from './impact_map_attachment_definition';
 
 /** Registers the impact map cards with Agent Builder. */
 export const registerImpactMapAttachmentTypes = (
@@ -19,6 +22,12 @@ export const registerImpactMapAttachmentTypes = (
     agentBuilder,
     createImpactMapAttachmentRenderer(getImpactMapRenderer, (conversationId, tab) => {
       // Opens the investigation flyout on the tab, so the card leads to the full view.
+      agentBuilder.openConversationDetails({ conversationId, initialTabId: tab });
+    })
+  );
+  registerInvestigationAttachmentRenderer(
+    agentBuilder,
+    createTimelineAttachmentRenderer((conversationId, tab) => {
       agentBuilder.openConversationDetails({ conversationId, initialTabId: tab });
     })
   );

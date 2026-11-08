@@ -16,12 +16,20 @@ import {
   useSelectionHistory,
   withRecoveredHealth,
 } from '../../conversation_templates/templates/investigation/flyout/impact_map_events';
-import { createImpactMapCards, pickImpactEvents, pickKeyEntities } from './impact_map_cards';
+import {
+  createImpactMapCards,
+  createTimelineCards,
+  pickImpactEvents,
+  pickKeyEntities,
+} from './impact_map_cards';
+import { useInvestigation } from '../../investigations/hooks/use_investigation';
 import { toImpactMapResponse } from './to_impact_map_response';
 
 jest.mock('@kbn/agent-builder-plugin/public', () => ({
   useConversationFlyoutWidthProps: () => ({ size: 480, minWidth: 400, maxWidth: 640 }),
 }));
+
+jest.mock('../../investigations/hooks/use_investigation', () => ({ useInvestigation: jest.fn() }));
 
 const document: InvestigationImpactMap = {
   id: 'map-1',
@@ -387,5 +395,36 @@ describe('useSelectionHistory', () => {
     act(() => result.current.open({ kind: 'event', id: 'b' }));
     act(() => result.current.clear());
     expect(result.current.current).toBeUndefined();
+  });
+});
+
+describe('timeline attachment card', () => {
+  const renderTimeline = () => {
+    const Cards = createTimelineCards(openInInvestigation);
+    return render(
+      <EuiProvider>
+        <I18nProvider>
+          <Cards document={{ conversationId: 'conv-1' }} variant="inline" />
+        </I18nProvider>
+      </EuiProvider>
+    );
+  };
+
+  it('shows only the timeline card, with the recorded events', () => {
+    (useInvestigation as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: { impact_map: toImpactMapResponse(document) },
+    });
+    renderTimeline();
+
+    expect(screen.getByTestId('agenticInvestigationsTimelineCard')).toBeInTheDocument();
+    expect(screen.queryByTestId('agenticInvestigationsImpactMapCard')).not.toBeInTheDocument();
+  });
+
+  it('says so when no events are recorded', () => {
+    (useInvestigation as jest.Mock).mockReturnValue({ isLoading: false, data: undefined });
+    renderTimeline();
+
+    expect(screen.queryByTestId('agenticInvestigationsTimelineCard')).not.toBeInTheDocument();
   });
 });

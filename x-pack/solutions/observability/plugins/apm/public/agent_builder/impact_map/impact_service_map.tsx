@@ -356,6 +356,9 @@ const FIT_VIEW_OPTIONS = {
   maxZoom: 1.5,
 };
 
+/** The service map's spacing assumes wide service cards; these nodes are small icons. */
+const TIGHT_LAYOUT = { nodeWidth: 120, ranksep: 90, nodesep: 50 };
+
 const CLICKABLE_CLASS = 'impactMapClickable';
 
 const LOOKBACK_MS = 7 * 24 * 60 * 60 * 1000;
@@ -488,7 +491,11 @@ export function ImpactServiceMap({
       impactMap.entities.filter(({ metadata }) => metadata?.length).map(({ id }) => id)
     );
     return {
-      laidOutNodes: applyDagreLayout<ImpactServiceMapNode>(graph.nodes, graph.edges).map((node) =>
+      laidOutNodes: applyDagreLayout<ImpactServiceMapNode>(
+        graph.nodes,
+        graph.edges,
+        TIGHT_LAYOUT
+      ).map((node) =>
         node.data.eventCount || withMetadata.has(node.id)
           ? { ...node, className: CLICKABLE_CLASS }
           : node
