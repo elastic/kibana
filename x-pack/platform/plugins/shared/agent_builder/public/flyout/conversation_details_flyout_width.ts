@@ -17,11 +17,24 @@ export const CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH = 480;
 export const CONVERSATION_DETAILS_FLYOUT_MIN_WIDTH = 400;
 export const CONVERSATION_DETAILS_FLYOUT_MAX_WIDTH = 640;
 
-const clampWidth = (width: number): number =>
-  Math.min(
-    Math.max(Math.round(width), CONVERSATION_DETAILS_FLYOUT_MIN_WIDTH),
-    CONVERSATION_DETAILS_FLYOUT_MAX_WIDTH
+/** Outside Agent Builder the flyout opens at 40% of the page, so it has room for a list or a map. */
+const DEFAULT_SHARE_OF_PAGE = 0.4;
+const MAX_SHARE_OF_PAGE = 0.9;
+
+const getMaxWidth = (): number =>
+  Math.max(
+    CONVERSATION_DETAILS_FLYOUT_MAX_WIDTH,
+    Math.round(window.innerWidth * MAX_SHARE_OF_PAGE)
   );
+
+const getDefaultWidth = (): number =>
+  Math.max(
+    CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH,
+    Math.round(window.innerWidth * DEFAULT_SHARE_OF_PAGE)
+  );
+
+const clampWidth = (width: number): number =>
+  Math.min(Math.max(Math.round(width), CONVERSATION_DETAILS_FLYOUT_MIN_WIDTH), getMaxWidth());
 
 const readStoredWidth = (): number | undefined => {
   const raw = localStorage.getItem(storageKeys.conversationDetailsFlyoutWidth);
@@ -93,9 +106,9 @@ export const getConversationDetailsFlyoutWidthProps = ({
   wide
     ? getWideWidthProps()
     : {
-        size: readStoredWidth() ?? CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH,
+        size: readStoredWidth() ?? getDefaultWidth(),
         minWidth: CONVERSATION_DETAILS_FLYOUT_MIN_WIDTH,
-        maxWidth: CONVERSATION_DETAILS_FLYOUT_MAX_WIDTH,
+        maxWidth: getMaxWidth(),
         resizable: true,
         onResize: persistConversationDetailsFlyoutWidth,
       };

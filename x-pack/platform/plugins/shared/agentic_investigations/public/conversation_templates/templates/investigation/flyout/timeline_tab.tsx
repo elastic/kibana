@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { TimelineSlotRenderProps } from '@kbn/agentic-investigations-common';
+import { useIsInAgentBuilder } from './use_is_in_agent_builder';
 import { FilterPopover, type FilterOption } from './event_filter_popover';
 import { takeTimelineEventFocus, takeTimelineFocus } from './timeline_focus';
 import type { ImpactMapEvent, InvestigationImpactMapResponse } from '../../../../../common';
@@ -110,6 +111,7 @@ const Timeline: React.FC<{
   conversationId: string;
   embedded: boolean;
 }> = ({ impactMap, conversationId, embedded }) => {
+  const isInAgentBuilder = useIsInAgentBuilder();
   // Opened from the map's "View in timeline", it starts filtered by that entity.
   const [entityFilter, setEntityFilter] = useState<string[]>(() =>
     takeTimelineFocus(conversationId)
@@ -380,7 +382,7 @@ const Timeline: React.FC<{
           targetKey={selectedId}
           {...resolveEventsSelection({ kind: 'event', id: selectedId }, impactMap)}
           impactMap={impactMap}
-          asMainFlyout={!embedded}
+          asMainFlyout={!embedded && isInAgentBuilder}
           onClose={() => {
             setSelectedId(undefined);
           }}
