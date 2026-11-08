@@ -18,6 +18,7 @@ import {
   EuiFlyoutHeader,
   EuiLink,
   EuiPanel,
+  EuiPortal,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -26,6 +27,7 @@ import {
   type EuiBadgeProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
 import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
 import type {
   ImpactMapEvent,
@@ -382,6 +384,72 @@ const EventDetail: React.FC<{
   </div>
 );
 
+/**
+ * Where the flyout sits. Over the full-screen map it stands alone above it. Opened from the
+ * Timeline it is a new main flyout in the conversation details history group, like the hypothesis
+ * tree: it shows over the investigation flyout instead of pushing it aside, and the menu offers
+ * Back to it. From the map it is a child of the investigation flyout.
+ */
+const EventsFlyoutFrame: React.FC<{
+  standalone: boolean;
+  asMainFlyout: boolean;
+  onClose: () => void;
+  titleId: string;
+  menuTitle: string;
+  children: React.ReactNode;
+}> = ({ standalone, asMainFlyout, onClose, titleId, menuTitle, children }) => {
+  const { euiTheme } = useEuiTheme();
+  if (standalone) {
+    return (
+      <EuiFlyout
+        onClose={onClose}
+        aria-labelledby={titleId}
+        size="s"
+        ownFocus
+        session="never"
+        type="overlay"
+        css={css`
+          z-index: ${Number(euiTheme.levels.modal) + 1};
+        `}
+        data-test-subj="agenticInvestigationsImpactMapEventsFlyout"
+      >
+        {children}
+      </EuiFlyout>
+    );
+  }
+  if (asMainFlyout) {
+    return (
+      // Rendered in a portal because the details flyout's transformed body would contain it.
+      <EuiPortal>
+        <EuiFlyout
+          onClose={onClose}
+          aria-labelledby={titleId}
+          session="start"
+          historyKey={CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY}
+          flyoutMenuProps={{ title: menuTitle, hideTitle: true }}
+          type="push"
+          size="m"
+          resizable
+          data-test-subj="agenticInvestigationsImpactMapEventsFlyout"
+        >
+          {children}
+        </EuiFlyout>
+      </EuiPortal>
+    );
+  }
+  return (
+    <EuiFlyout
+      onClose={onClose}
+      aria-labelledby={titleId}
+      size="s"
+      ownFocus={false}
+      data-test-subj="agenticInvestigationsImpactMapEventsFlyout"
+    >
+      {children}
+    </EuiFlyout>
+  );
+};
+
 export interface ImpactMapEventsFlyoutProps {
   /** What the events happened to, shown as the list's title. */
   title: string;
@@ -396,6 +464,8 @@ export interface ImpactMapEventsFlyoutProps {
    * the investigation flyout.
    */
   standalone?: boolean;
+  /** Opens as a main flyout over the investigation flyout instead of as its child. */
+  asMainFlyout?: boolean;
 }
 
 /**
@@ -409,8 +479,8 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
   initialEventId,
   onClose,
   standalone = false,
+  asMainFlyout = false,
 }) => {
-  const { euiTheme } = useEuiTheme();
   const titleId = useGeneratedHtmlId({ prefix: 'impactMapEventsTitle' });
   const [selectedId, setSelectedId] = useState(initialEventId);
   const selected = useMemo(() => events.find(({ id }) => id === selectedId), [events, selectedId]);
@@ -418,21 +488,12 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
   const canGoBack = Boolean(selected) && (!initialEventId || events.length > 1);
 
   return (
-    <EuiFlyout
+    <EventsFlyoutFrame
+      standalone={standalone}
+      asMainFlyout={asMainFlyout}
       onClose={onClose}
-      aria-labelledby={titleId}
-      size="s"
-      ownFocus={standalone}
-      data-test-subj="agenticInvestigationsImpactMapEventsFlyout"
-      {...(standalone
-        ? {
-            session: 'never' as const,
-            type: 'overlay' as const,
-            css: css`
-              z-index: ${Number(euiTheme.levels.modal) + 1};
-            `,
-          }
-        : {})}
+      titleId={titleId}
+      menuTitle={title}
     >
       <EuiFlyoutHeader hasBorder>
         {canGoBack && (
@@ -488,7 +549,7 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
           </EuiFlexGroup>
         )}
       </EuiFlyoutBody>
-    </EuiFlyout>
+    </EventsFlyoutFrame>
   );
 };
 

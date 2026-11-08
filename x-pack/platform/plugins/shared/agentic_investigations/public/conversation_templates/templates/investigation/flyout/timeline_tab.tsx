@@ -436,6 +436,7 @@ const Timeline: React.FC<{ impactMap: InvestigationImpactMapResponse }> = ({ imp
           key={selectedId}
           {...resolveEventsSelection({ kind: 'event', id: selectedId }, impactMap)}
           impactMap={impactMap}
+          asMainFlyout
           onClose={() => setSelectedId(undefined)}
         />
       )}
