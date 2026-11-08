@@ -78,6 +78,7 @@ import type { GetExecutionStepExecutionsResult } from './lib/get_execution_step_
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
+import { ManagedWorkflowReadForbiddenError } from './managed_workflow_read_error';
 import type { TriggerSelectionKind } from './routes/executions/utils/parse_trigger_selections';
 import {
   ALL_TRIGGER_SELECTION_KINDS,
@@ -479,12 +480,20 @@ export class WorkflowsManagementApi {
   public async getHistoryForWorkflow(
     id: string,
     spaceId: string,
-    options: { page?: number; perPage?: number; request: KibanaRequest }
+    options: {
+      page?: number;
+      perPage?: number;
+      request: KibanaRequest;
+      allowManagedWorkflowRead?: boolean;
+    }
   ): Promise<WorkflowChangesHistoryResponse> {
     const workflow = await this.workflowsService.getWorkflow(id, spaceId, { includeDeleted: true });
     if (!workflow) throw new WorkflowNotFoundError(id);
     const access = await this.workflowsService.getAccessControl();
     await access.assertAccess(workflow, 'read', options.request);
+    if (workflow.managed === true && options.allowManagedWorkflowRead !== true) {
+      throw new ManagedWorkflowReadForbiddenError();
+    }
     return this.workflowsService.getHistoryForWorkflow(id, spaceId, options);
   }
 
