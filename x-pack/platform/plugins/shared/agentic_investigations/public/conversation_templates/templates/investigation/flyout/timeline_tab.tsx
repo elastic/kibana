@@ -369,7 +369,7 @@ const Timeline: React.FC<{
   );
   const [kindFilter, setKindFilter] = useState<string[]>([]);
   const [text, setText] = useState('');
-  const [newestFirst, setNewestFirst] = useState(true);
+  const [newestFirst, setNewestFirst] = useState(false);
   const [selectedId, setSelectedId] = useState<string>();
   const { events, entities, relationships } = impactMap;
 

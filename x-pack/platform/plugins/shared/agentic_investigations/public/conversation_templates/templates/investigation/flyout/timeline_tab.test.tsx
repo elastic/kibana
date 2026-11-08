@@ -68,23 +68,23 @@ describe('TimelineTab', () => {
     mockUseInvestigation.mockReturnValue({ data: { impact_map: impactMap } });
   });
 
-  it('lists every event newest first, with UTC time, time since the first event and a summary', () => {
+  it('lists every event oldest first, with UTC time, time since the first event and a summary', () => {
     renderTab();
 
     expect(rowTitles()).toEqual([
-      'Incident channel opened',
-      'Payments-client retries surged',
       'v3.8.0 rolled out by Argo CD',
+      'Payments-client retries surged',
+      'Incident channel opened',
     ]);
     const rows = screen.getAllByTestId('agenticInvestigationsTimelineRow');
-    expect(rows[2]).toHaveTextContent('14:02 UTC');
-    expect(rows[0]).toHaveTextContent('+6m');
+    expect(rows[0]).toHaveTextContent('14:02 UTC');
+    expect(rows[2]).toHaveTextContent('+6m');
     expect(screen.getByTestId('agenticInvestigationsTimelineSummary')).toHaveTextContent(
       '3 events over 6m'
     );
 
     fireEvent.click(screen.getByTestId('agenticInvestigationsTimelineSort'));
-    expect(rowTitles()[0]).toBe('v3.8.0 rolled out by Argo CD');
+    expect(rowTitles()[0]).toBe('Incident channel opened');
   });
 
   it('shows both ends of a relationship and filters by an entity from its badge', () => {
@@ -92,11 +92,11 @@ describe('TimelineTab', () => {
     const badges = screen.getAllByTestId('agenticInvestigationsTimelineEntity');
     expect(badges.map((badge) => badge.textContent)).toEqual([
       'checkout-service',
-      'payment-gateway',
       'checkout-service',
+      'payment-gateway',
     ]);
 
-    fireEvent.click(badges[1]);
+    fireEvent.click(badges[2]);
     expect(rowTitles()).toEqual(['Payments-client retries surged']);
     expect(screen.getByTestId('agenticInvestigationsTimelineSummary')).toHaveTextContent(
       'Showing 1 of 3 events'
@@ -123,7 +123,7 @@ describe('TimelineTab', () => {
 
   it('opens an event straight to its detail', () => {
     renderTab();
-    fireEvent.click(screen.getAllByTestId('agenticInvestigationsTimelineOpenEvent')[0]);
+    fireEvent.click(screen.getAllByTestId('agenticInvestigationsTimelineOpenEvent')[2]);
 
     expect(screen.getByTestId('agenticInvestigationsImpactMapEventDetail')).toHaveTextContent(
       'Responders'
