@@ -71,7 +71,8 @@ const configSchema = schema.object({
     // CPU profiling settings for long blocks that begin after startup. A role-specific feature
     // flag enables profiling.
     profiling: schema.object({
-      // Start a profile when a block reaches this duration.
+      // Start a profile when a block reaches this duration, or the block threshold if that's
+      // longer: a block is only detected once it reaches the block threshold.
       startAfter: schema.duration({ defaultValue: '30s', ...startAfterBounds }),
       // Maximum duration of one profile capture.
       maxDuration: schema.duration({ defaultValue: '10s', ...maxDurationBounds }),
