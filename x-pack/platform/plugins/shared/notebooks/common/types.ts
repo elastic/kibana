@@ -164,7 +164,7 @@ export interface NotebookApp {
   gridColumns?: number;
   /** The space between panels, in pixels. */
   gridGap?: number;
-  /** A hex color behind the whole app; the theme's page background when absent. */
+  /** A hex color behind the whole app; the same grey as dashboards when absent. */
   backgroundColor?: string;
   /** Shown at the top of the app; the tab title is separate and only labels the tab. */
   heading?: string;

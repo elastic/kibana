@@ -536,9 +536,11 @@ const AppGrid = ({
   );
 };
 
-/** The app's background color, for the element that contains its view. */
-export const getAppBackgroundStyles = ({ backgroundColor }: NotebookApp) =>
-  backgroundColor ? css({ backgroundColor }) : undefined;
+/** The app's background color, for the element that contains its view; dashboards' grey by default. */
+export const getAppBackgroundStyles =
+  ({ backgroundColor }: NotebookApp) =>
+  ({ euiTheme }: UseEuiTheme) =>
+    css({ backgroundColor: backgroundColor ?? euiTheme.colors.backgroundBaseRecessed });
 
 /** The app's header and panels; read-only, with a locked layout, when `onRevealCell` is omitted. */
 export const AppView = ({

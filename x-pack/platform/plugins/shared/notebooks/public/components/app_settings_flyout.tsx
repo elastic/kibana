@@ -103,7 +103,7 @@ const BackgroundColorField = ({
         defaultMessage: 'Background color',
       })}
       helpText={i18n.translate('xpack.notebook.appSettings.backgroundColorHelp', {
-        defaultMessage: 'Fills the app behind its panels. Clear it to use the theme background.',
+        defaultMessage: 'Fills the app behind its panels. Clear it to use the default grey.',
       })}
       isInvalid={!isValid}
     >
@@ -112,7 +112,7 @@ const BackgroundColorField = ({
         isClearable
         isInvalid={!isValid}
         placeholder={i18n.translate('xpack.notebook.appSettings.backgroundColorPlaceholder', {
-          defaultMessage: 'Theme default',
+          defaultMessage: 'Default',
         })}
         onChange={(text) => {
           setDraft(text);
