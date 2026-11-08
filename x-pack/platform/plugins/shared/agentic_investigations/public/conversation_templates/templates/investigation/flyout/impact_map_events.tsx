@@ -681,7 +681,7 @@ const EventDataSource: React.FC<{ dataSource?: ImpactMapEvent['data_source'] }> 
   );
 };
 
-const EventDetail: React.FC<{
+export const EventDetail: React.FC<{
   event: ImpactMapEvent;
   allEvents?: readonly ImpactMapEvent[];
 }> = ({ event, allEvents }) => (

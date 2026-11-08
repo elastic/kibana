@@ -22,6 +22,7 @@ import type { InvestigationImpactMap } from '../../../common/impact_map/impact_m
 import type { ImpactMapEvent, InvestigationImpactMapResponse } from '../../../common';
 import type { ImpactMapRenderer } from '../../types';
 import {
+  EventDetail,
   EventKindBadge,
   EventTime,
   ImpactMapEventsFlyout,
@@ -50,13 +51,6 @@ const TIMELINE_TITLE = i18n.translate('xpack.agenticInvestigations.impactMapCard
 const EMPTY = i18n.translate('xpack.agenticInvestigations.impactMapCards.empty', {
   defaultMessage: 'Nothing recorded yet.',
 });
-
-const mapSummary = (entities: number, relationships: number): string =>
-  i18n.translate('xpack.agenticInvestigations.impactMapCards.mapSummary', {
-    defaultMessage:
-      '{entities, plural, one {# entity} other {# entities}}, {relationships, plural, one {# relationship} other {# relationships}}',
-    values: { entities, relationships },
-  });
 
 const moreEvents = (count: number): string =>
   i18n.translate('xpack.agenticInvestigations.impactMapCards.moreEvents', {
@@ -154,9 +148,6 @@ const MapCard: React.FC<{
       data-test-subj="agenticInvestigationsImpactMapCard"
       subtitle={name}
     >
-      <EuiText size="xs" color="subdued">
-        <p>{mapSummary(impactMap.entities.length, impactMap.relationships.length)}</p>
-      </EuiText>
       {Renderer && (
         <>
           <EuiSpacer size="s" />
@@ -183,6 +174,53 @@ const kindCounts = (events: ImpactMapEvent[]) => {
   events.forEach(({ kind }) => counts.set(kind, (counts.get(kind) ?? 0) + 1));
   return [...counts.entries()];
 };
+
+/** The kinds that answer "what is the impact", best match first. */
+const IMPACT_KINDS: ImpactMapEvent['kind'][] = [
+  'customer_impact',
+  'failure',
+  'alert',
+  'anomaly',
+  'condition',
+];
+const MAX_IMPACT_CARDS = 3;
+
+/** The events that best show the impact: customer impact, else the nearest kind that has any. */
+const pickImpactEvents = (events: ImpactMapEvent[]): ImpactMapEvent[] => {
+  for (const kind of IMPACT_KINDS) {
+    const ofKind = events.filter((event) => event.kind === kind);
+    if (ofKind.length > 0) {
+      return ofKind.slice(0, MAX_IMPACT_CARDS);
+    }
+  }
+  return [];
+};
+
+/** One event as a card: what happened, the trend around it and where it came from. */
+const EventCard: React.FC<{
+  event: ImpactMapEvent;
+  allEvents: ImpactMapEvent[];
+  onOpen: () => void;
+}> = ({ event, allEvents, onOpen }) => (
+  <InvestigationCard
+    title={event.title}
+    icon="warning"
+    onClick={onOpen}
+    data-test-subj="agenticInvestigationsEventCard"
+    badges={
+      <EuiFlexItem grow={false}>
+        <EventKindBadge kind={event.kind} />
+      </EuiFlexItem>
+    }
+    subtitle={undefined}
+  >
+    <EuiText size="xs" color="subdued">
+      <EventTime at={event.at} withDate />
+    </EuiText>
+    <EuiSpacer size="s" />
+    <EventDetail event={event} allEvents={allEvents} />
+  </InvestigationCard>
+);
 
 /** The latest events as a short timeline; the card opens the whole one in the investigation. */
 const TimelineCard: React.FC<{
@@ -304,6 +342,9 @@ export const createImpactMapCards = (
       }
     };
     const keyEntities = pickKeyEntities(impactMap);
+    // An answer about the impact shows the events that are the impact; the whole timeline is a
+    // tab away, and is the card when nothing recorded reads as impact.
+    const impactEvents = pickImpactEvents(impactMap.events);
     const selected = selection && resolveEventsSelection(selection, impactMap);
 
     return (
@@ -318,7 +359,16 @@ export const createImpactMapCards = (
               />
             </EuiFlexItem>
           )}
-          {impactMap.events.length > 0 && (
+          {impactEvents.map((event) => (
+            <EuiFlexItem key={event.id}>
+              <EventCard
+                event={event}
+                allEvents={impactMap.events}
+                onOpen={() => open({ kind: 'event', id: event.id })}
+              />
+            </EuiFlexItem>
+          ))}
+          {impactEvents.length === 0 && impactMap.events.length > 0 && (
             <EuiFlexItem>
               <TimelineCard
                 impactMap={impactMap}

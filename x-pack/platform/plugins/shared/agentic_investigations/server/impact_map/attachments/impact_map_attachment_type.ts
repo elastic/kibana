@@ -86,7 +86,7 @@ export const impactMapAttachment = defineInvestigationAttachment<
     'The investigation impact map is a dependency graph of the entities the problem touches, their relationships, and the critical path from the root cause to the impact.\n\n' +
     'Rules:\n' +
     '- Update it with the `agentic_investigations.set_impact_map` tool, sending the whole map every time.\n' +
-    '- The investigation flyout\'s Impact map and Timeline tabs show it. In the chat it is a set of cards (the map, the timeline and the key entities) that open the same views; render it when it would help explain your answer (the impact, the root cause, what happened and when, an entity or event), once per answer, with `<render_attachment id="ATTACHMENT_ID" />` on its own line, after a blank line.',
+    '- The investigation flyout\'s Impact map and Timeline tabs show it. In the chat it is a set of cards (the map, the events that are the impact, such as customer impact or the failures, or the timeline when there are none, and the key entities) that open the same views; render it when it would help explain your answer (the impact, the root cause, what happened and when, an entity or event), once per answer, with `<render_attachment id="ATTACHMENT_ID" />` on its own line, after a blank line.',
 });
 
 /** Registers the readonly investigation_impact_map type with Agent Builder. */

@@ -52,6 +52,14 @@ const document: InvestigationImpactMap = {
   createdAt: '2026-11-07T17:05:00Z',
 };
 
+// Nothing in it reads as impact, so the chat shows the timeline card.
+const documentWithoutImpact = {
+  ...document,
+  events: (document.events ?? []).map((event) =>
+    event.kind === 'failure' ? { ...event, kind: 'mitigation' as const } : event
+  ),
+};
+
 const FakeRenderer: React.FC<ImpactMapRendererProps> = () => <div data-test-subj="fakeMap" />;
 
 const openInInvestigation = jest.fn();
@@ -92,13 +100,30 @@ describe('pickKeyEntities', () => {
 
 describe('ImpactMapCards', () => {
   it('shows cards for the map, the timeline and the key entities', () => {
-    renderCards(document);
+    renderCards(documentWithoutImpact);
 
     expect(screen.getByTestId('agenticInvestigationsImpactMapCard')).toHaveTextContent(
       'Checkout failures'
     );
     expect(screen.getByTestId('agenticInvestigationsTimelineCard')).toHaveTextContent('2 events');
     expect(screen.getAllByTestId('agenticInvestigationsEntityCard')).toHaveLength(3);
+  });
+
+  it('shows the events that are the impact, not the timeline, when there are some', () => {
+    renderCards(document);
+
+    expect(screen.queryByTestId('agenticInvestigationsTimelineCard')).not.toBeInTheDocument();
+    const cards = screen.getAllByTestId('agenticInvestigationsEventCard');
+    expect(cards).toHaveLength(1);
+    expect(cards[0]).toHaveTextContent('Checkout errors');
+  });
+
+  it('does not count entities and relationships on the map card', () => {
+    renderCards(document);
+
+    expect(screen.getByTestId('agenticInvestigationsImpactMapCard')).not.toHaveTextContent(
+      /\d+ entit/
+    );
   });
 
   it('titles the map card Impact map and names the map under it', () => {
@@ -124,7 +149,7 @@ describe('ImpactMapCards', () => {
   });
 
   it('opens the investigation flyout on the Timeline tab from the timeline card', () => {
-    renderCards(document);
+    renderCards(documentWithoutImpact);
 
     fireEvent.click(screen.getByTestId('agenticInvestigationsTimelineCard'));
 
@@ -132,17 +157,17 @@ describe('ImpactMapCards', () => {
   });
 
   it('previews the timeline with the kinds of event and the latest events', () => {
-    renderCards(document);
+    renderCards(documentWithoutImpact);
 
     const card = screen.getByTestId('agenticInvestigationsTimelineCard');
-    expect(card).toHaveTextContent('Failure 1');
+    expect(card).toHaveTextContent('Mitigation 1');
     expect(card).toHaveTextContent('Change 1');
     const rows = screen.getAllByTestId('agenticInvestigationsTimelineCardEvent');
     expect(rows[0]).toHaveTextContent('Checkout errors');
   });
 
   it('opens an event from the timeline card without opening the whole timeline', () => {
-    renderCards(document);
+    renderCards(documentWithoutImpact);
 
     fireEvent.click(screen.getAllByTestId('agenticInvestigationsTimelineCardEvent')[0]);
 
