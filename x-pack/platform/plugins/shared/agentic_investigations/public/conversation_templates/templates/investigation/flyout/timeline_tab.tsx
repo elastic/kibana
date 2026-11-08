@@ -307,11 +307,7 @@ const TimelineEvent: React.FC<{
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
       <EuiText size="s">
-        <EuiLink
-          onClick={onOpen}
-          color="text"
-          data-test-subj="agenticInvestigationsTimelineOpenEvent"
-        >
+        <EuiLink onClick={onOpen} data-test-subj="agenticInvestigationsTimelineOpenEvent">
           <strong>{event.title}</strong>
         </EuiLink>
       </EuiText>
