@@ -29,7 +29,7 @@ const MAX_NAME_LENGTH = 256;
 const MAX_VALUE_LENGTH = 1024;
 const MAX_STATIC_OPTIONS = 1000;
 const MAX_APPS = 20;
-export const MAX_GRID_UNITS = 2000;
+const MAX_GRID_UNITS = 1000;
 
 const idSchema = schema.string({ minLength: 1, maxLength: MAX_ID_LENGTH });
 const runModeSchema = schema.oneOf([schema.literal('auto'), schema.literal('manual')]);

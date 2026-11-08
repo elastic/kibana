@@ -6,10 +6,7 @@
  */
 
 import { pick } from 'lodash';
-import {
-  ANALYTICS_SAVED_OBJECT_INDEX,
-  type SavedObjectModelTransformationDoc,
-} from '@kbn/core-saved-objects-server';
+import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 import {
   APP_ID,
@@ -17,7 +14,6 @@ import {
   NOTEBOOK_SAVED_OBJECT_TYPE,
   getNotebookPath,
 } from '../common/constants';
-import { scaleAppRows } from './scale_app_rows';
 import { notebookAttributesSchema, type StoredNotebookAttributes } from './schema';
 
 const V1_FIELDS = ['title', 'description', 'cellOrder', 'cells'];
@@ -57,24 +53,6 @@ export const notebookSavedObjectType: SavedObjectsType<StoredNotebookAttributes>
     2: {
       // Adds the unindexed `panels` attribute, which holds the notebook's apps.
       changes: [],
-      schemas: {
-        forwardCompatibility: (attributes) => pick(attributes, V2_FIELDS),
-        create: notebookAttributesSchema,
-      },
-    },
-    3: {
-      // Halves the app row height to match dashboards; panel rows are rescaled to keep their size.
-      changes: [
-        {
-          type: 'unsafe_transform',
-          transformFn: (typeSafeGuard) =>
-            typeSafeGuard(
-              (document: SavedObjectModelTransformationDoc<StoredNotebookAttributes>) => ({
-                document: { ...document, attributes: scaleAppRows(document.attributes) },
-              })
-            ),
-        },
-      ],
       schemas: {
         forwardCompatibility: (attributes) => pick(attributes, V2_FIELDS),
         create: notebookAttributesSchema,

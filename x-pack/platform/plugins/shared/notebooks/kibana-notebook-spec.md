@@ -227,7 +227,7 @@ Discover is **not** a reference for the no-fetch path: it passes `table` to the 
 
 ## Persistence
 
-- Saved object type `notebook`, `namespaceType: 'multiple-isolated'`, `modelVersions: { 1, 2, 3 }`. Version 2 adds the unindexed `panels` (apps). Version 3 halves the app row height from 40px to dashboards' 20px with an `unsafe_transform` that rescales each panel's `y` and `height` (by `(40 + gap) / (20 + gap)`, rounding edges to whole rows, or tenths without snap to grid) so panels keep their size in pixels.
+- Saved object type `notebook`, `namespaceType: 'multiple-isolated'`, `modelVersions: { 1, 2 }`. Version 2 adds the unindexed `panels` (apps).
 - Internal routes under `/internal/notebook`: `GET/POST/PUT/DELETE /{id}`, `GET /_find`. Bounded `@kbn/config-schema` validation (`maxLength`/`maxSize` on all strings/arrays), `requiredPrivileges` from the `notebook` feature.
 - Kibana feature `notebook` with `all`/`read` privileges.
 - Explicit Save with a dirty indicator (no autosave).
