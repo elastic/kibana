@@ -461,7 +461,8 @@ export const createImpactMapCards = (
               />
             </EuiFlexItem>
           )}
-          {keyEntities.map((entity) => (
+          {/* With impact to show, entity cards would only be a list to click through. */}
+          {(impactEvents.length === 0 ? keyEntities : []).map((entity) => (
             <EuiFlexItem key={entity.id}>
               <EntityCard entityId={entity.id} impactMap={impactMap} onOpen={open} />
             </EuiFlexItem>

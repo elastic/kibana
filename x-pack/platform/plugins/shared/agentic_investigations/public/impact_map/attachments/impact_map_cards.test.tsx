@@ -165,6 +165,12 @@ describe('ImpactMapCards', () => {
     expect(screen.getByTestId('agenticInvestigationsEventCard')).toHaveTextContent('Affects');
   });
 
+  it('shows no entity cards when there are impact events to show', () => {
+    renderCards(document);
+
+    expect(screen.queryByTestId('agenticInvestigationsEntityCard')).not.toBeInTheDocument();
+  });
+
   it('does not count entities and relationships on the map card', () => {
     renderCards(document);
 
@@ -273,7 +279,7 @@ describe('ImpactMapCards', () => {
   });
 
   it('opens an entity from its card', () => {
-    renderCards(document);
+    renderCards(documentWithoutImpact);
 
     fireEvent.click(screen.getAllByTestId('agenticInvestigationsEntityCardHeader')[0]);
 
