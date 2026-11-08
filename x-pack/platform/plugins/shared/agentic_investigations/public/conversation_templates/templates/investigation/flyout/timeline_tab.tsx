@@ -334,7 +334,10 @@ const TimelineEvent: React.FC<{
  * The Timeline tab: every event of the investigation, including findings and responder actions,
  * with search, entity and type filters. An event opens its detail over the investigation flyout.
  */
-export const TimelineTab: React.FC<TimelineSlotRenderProps> = ({ conversationId }) => {
+export const TimelineTab: React.FC<TimelineSlotRenderProps & { embedded?: boolean }> = ({
+  conversationId,
+  embedded = false,
+}) => {
   const { data, isLoading } = useInvestigation(conversationId);
 
   if (isLoading) {
@@ -354,13 +357,14 @@ export const TimelineTab: React.FC<TimelineSlotRenderProps> = ({ conversationId 
     );
   }
 
-  return <Timeline impactMap={impactMap} conversationId={conversationId} />;
+  return <Timeline impactMap={impactMap} conversationId={conversationId} embedded={embedded} />;
 };
 
 const Timeline: React.FC<{
   impactMap: InvestigationImpactMapResponse;
   conversationId: string;
-}> = ({ impactMap, conversationId }) => {
+  embedded: boolean;
+}> = ({ impactMap, conversationId, embedded }) => {
   // Opened from the map's "View in timeline", it starts filtered by that entity.
   const [entityFilter, setEntityFilter] = useState<string[]>(() =>
     takeTimelineFocus(conversationId)
@@ -585,7 +589,7 @@ const Timeline: React.FC<{
           key={selectedId}
           {...resolveEventsSelection({ kind: 'event', id: selectedId }, impactMap)}
           impactMap={impactMap}
-          asMainFlyout
+          asMainFlyout={!embedded}
           onClose={() => setSelectedId(undefined)}
         />
       )}

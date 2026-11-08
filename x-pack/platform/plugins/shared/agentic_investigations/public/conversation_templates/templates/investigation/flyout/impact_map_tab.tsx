@@ -12,6 +12,9 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
   EuiFocusTrap,
   EuiPanel,
   EuiPortal,
@@ -29,13 +32,9 @@ import type { ImpactMapSlotRenderProps } from '@kbn/agentic-investigations-commo
 import type { InvestigationImpactMapResponse } from '../../../../../common';
 import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
 import type { ImpactMapRenderer } from '../../../../types';
-import {
-  ImpactMapEventsFlyout,
-  resolveEventsSelection,
-  type EventsSelection,
-} from './impact_map_events';
+import { resolveEventsSelection, type EventsSelection } from './impact_map_events';
+import { TimelineTab } from './timeline_tab';
 import { requestTimelineFocus } from './timeline_focus';
-import { useIsInAgentBuilder } from './use_is_in_agent_builder';
 
 /** Fills the flyout below its header and tabs; the controls sit at the top, so nothing hides them. */
 const MAP_HEIGHT = 'clamp(320px, calc(100vh - 280px), 900px)';
@@ -59,6 +58,9 @@ const EMPTY_BODY_RUNNING = i18n.translate(
 );
 const CLOSE_FULL_SCREEN_LABEL = i18n.translate('xpack.agenticInvestigations.impactMap.exit', {
   defaultMessage: 'Exit full screen',
+});
+const TIMELINE_TITLE = i18n.translate('xpack.agenticInvestigations.impactMap.timelineTitle', {
+  defaultMessage: 'Timeline',
 });
 const UPDATED_LABEL = i18n.translate('xpack.agenticInvestigations.impactMap.updated', {
   defaultMessage: 'Updated',
@@ -108,10 +110,10 @@ const ImpactMapPanel: React.FC<{
   conversationId: string;
   openTimeline?: () => void;
 }> = ({ impactMap, Renderer, conversationId, openTimeline }) => {
-  const isInAgentBuilder = useIsInAgentBuilder();
   const [isMaximized, setIsMaximized] = useState(false);
+  // The timeline flyout over the full-screen map, or where the host has no Timeline tab.
   const [selection, setSelection] = useState<EventsSelection>();
-  // Escape closes the events flyout first, and only then the full-screen map.
+  // Escape closes the timeline flyout first, and only then the full-screen map.
   const selectionRef = useRef(selection);
   selectionRef.current = selection;
 
@@ -127,31 +129,32 @@ const ImpactMapPanel: React.FC<{
     document.addEventListener('keydown', exitOnEscape);
     return () => document.removeEventListener('keydown', exitOnEscape);
   }, [isMaximized]);
+  const timelineTitleId = useGeneratedHtmlId({ prefix: 'impactMapTimelineTitle' });
   const modalTitleId = useGeneratedHtmlId({ prefix: 'impactMapModalTitle' });
   const title = impactMap.title?.trim() || DEFAULT_TITLE;
   const { euiTheme } = useEuiTheme();
   const updatedAt = new Date(impactMap.updated_at ?? impactMap.created_at);
-  const viewInTimeline = openTimeline
-    ? (current: EventsSelection) => {
-        const relationship =
-          current.kind === 'relationship'
-            ? impactMap.relationships.find(({ id }) => id === current.id)
-            : undefined;
-        const entityIds =
-          current.kind === 'entity'
-            ? [current.id]
-            : relationship
-            ? [relationship.source_id, relationship.target_id]
-            : [];
-        requestTimelineFocus(conversationId, entityIds);
-        setSelection(undefined);
-        setIsMaximized(false);
-        openTimeline();
-      }
-    : undefined;
-  // Nothing to show for a target with no events, so a click on it does nothing.
+  // A click goes to the Timeline tab filtered by the target. Over the full-screen map, or with no
+  // Timeline tab to go to, the timeline opens as a flyout instead. A target with no events does
+  // nothing.
   const open = (next: EventsSelection) => {
-    if (resolveEventsSelection(next, impactMap).events.length > 0) {
+    if (resolveEventsSelection(next, impactMap).events.length === 0) {
+      return;
+    }
+    const relationship =
+      next.kind === 'relationship'
+        ? impactMap.relationships.find(({ id }) => id === next.id)
+        : undefined;
+    const entityIds =
+      next.kind === 'entity'
+        ? [next.id]
+        : relationship
+        ? [relationship.source_id, relationship.target_id]
+        : [];
+    requestTimelineFocus(conversationId, entityIds);
+    if (openTimeline && !isMaximized) {
+      openTimeline();
+    } else {
       setSelection(next);
     }
   };
@@ -265,16 +268,31 @@ const ImpactMapPanel: React.FC<{
         </EuiPortal>
       )}
       {selection && (
-        <ImpactMapEventsFlyout
-          // A new selection starts on its own list, not on the last one's open event.
-          key={`${selection.kind}:${selection.id}`}
-          {...resolveEventsSelection(selection, impactMap)}
-          impactMap={impactMap}
-          standalone={isMaximized}
-          asMainFlyout={isInAgentBuilder}
-          onViewInTimeline={viewInTimeline ? () => viewInTimeline(selection) : undefined}
-          onClose={() => setSelection(undefined)}
-        />
+        <EuiPortal>
+          <EuiFlyout
+            // A new selection starts on its own filter.
+            key={`${selection.kind}:${selection.id}`}
+            onClose={() => setSelection(undefined)}
+            aria-labelledby={timelineTitleId}
+            size="m"
+            ownFocus
+            session="never"
+            type="overlay"
+            css={css`
+              z-index: ${Number(euiTheme.levels.modal) + 1};
+            `}
+            data-test-subj="agenticInvestigationsImpactMapTimelineFlyout"
+          >
+            <EuiFlyoutHeader hasBorder>
+              <EuiTitle size="s">
+                <h2 id={timelineTitleId}>{TIMELINE_TITLE}</h2>
+              </EuiTitle>
+            </EuiFlyoutHeader>
+            <EuiFlyoutBody>
+              <TimelineTab conversationId={conversationId} embedded />
+            </EuiFlyoutBody>
+          </EuiFlyout>
+        </EuiPortal>
       )}
     </EuiPanel>
   );
