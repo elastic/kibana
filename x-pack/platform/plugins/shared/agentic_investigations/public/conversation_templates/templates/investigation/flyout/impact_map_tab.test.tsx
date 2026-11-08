@@ -321,7 +321,10 @@ describe('withContextAnnotations', () => {
 });
 
 describe('getEntityIcon', () => {
-  const type = (icon: object | undefined, kind = 'service' as const) => ({
+  const type = (
+    icon: object | undefined,
+    kind: 'service' | 'dependency' | 'infrastructure' = 'service'
+  ) => ({
     id: 'checkout_service',
     label: 'Checkout service',
     kind,
