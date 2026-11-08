@@ -483,10 +483,35 @@ describe('withContextAnnotations', () => {
     ]);
   });
 
-  it("keeps the agent's own annotations", () => {
+  it("keeps the agent's own annotations and does not mark the same moment twice", () => {
     const own = { ...chart, annotations: [{ x: deploy.at, label: 'Deploy' }] };
-    expect(withContextAnnotations({ chart: own }, failure, impactMap.events).chart).toBe(own);
+    expect(
+      withContextAnnotations({ chart: own }, failure, impactMap.events).chart?.annotations
+    ).toEqual([
+      { x: deploy.at, label: 'Deploy' },
+      { x: failure.at, label: failure.title },
+    ]);
   });
+
+  it(
+    'marks the mitigations and responder actions in the window, even with the' +
+      " agent's own annotation",
+    () => {
+      const rollback = {
+        id: 'rollback',
+        kind: 'mitigation' as const,
+        title: 'Rolled back',
+        at: '2026-11-07T10:05:00.000Z',
+      };
+      const own = { ...chart, annotations: [{ x: failure.at, label: 'Failures begin' }] };
+      const labels = withContextAnnotations({ chart: own }, failure, [
+        ...impactMap.events,
+        rollback,
+      ]).chart?.annotations?.map(({ label }) => label);
+      expect(labels).toContain('Rolled back');
+      expect(labels).toContain('Failures begin');
+    }
+  );
 });
 
 describe('getEntityIcon', () => {

@@ -300,9 +300,9 @@ const parseTime = (value: string): number | undefined => {
 };
 
 /**
- * A chart explains an event best with what led to it marked. A time chart the agent left without
- * annotations gets one at the event and one at each of the latest changes and mitigations in its
- * window, so a deploy shows up just before the line it broke.
+ * A chart explains an event best with what led to it, and what was done about it, marked: the
+ * event itself, and the changes, mitigations and responder actions inside the chart's window. What
+ * the agent already annotated stays, and is not marked twice.
  */
 export const withContextAnnotations = (
   evidence: InvestigationEvidence,
@@ -310,28 +310,34 @@ export const withContextAnnotations = (
   allEvents: readonly ImpactMapEvent[] = []
 ): InvestigationEvidence => {
   const { chart } = evidence;
-  if (!chart || chart.x_axis.type !== 'time' || chart.annotations?.length) {
+  if (!chart || chart.x_axis.type !== 'time') {
     return evidence;
   }
   const times = chart.series
     .flatMap(({ points }) => points.map(({ x }) => parseTime(x)))
     .filter((time): time is number => time !== undefined);
   const [start, end] = [Math.min(...times), Math.max(...times)];
+  const own = chart.annotations ?? [];
+  const marked = new Set(own.map(({ x }) => parseTime(x)));
   const context = allEvents
     .filter(({ id, kind, at }) => {
       const time = parseTime(at);
       return (
         id !== event.id &&
-        (kind === 'change' || kind === 'mitigation') &&
+        (kind === 'change' || kind === 'mitigation' || kind === 'response') &&
         time !== undefined &&
         time >= start &&
-        time <= end
+        time <= end &&
+        !marked.has(time)
       );
     })
     .slice(-MAX_CONTEXT_ANNOTATIONS)
     .map(({ at, title }) => ({ x: at, label: title }));
-  const own = { x: event.at, ...(event.ends_at && { x_end: event.ends_at }), label: event.title };
-  return { ...evidence, chart: { ...chart, annotations: [...context, own] } };
+  const addsOwn = own.length === 0 || !marked.has(parseTime(event.at));
+  const ownEvent = addsOwn
+    ? [{ x: event.at, ...(event.ends_at && { x_end: event.ends_at }), label: event.title }]
+    : [];
+  return { ...evidence, chart: { ...chart, annotations: [...context, ...own, ...ownEvent] } };
 };
 
 const FACT_TYPE = i18n.translate('xpack.agenticInvestigations.impactMap.events.factType', {

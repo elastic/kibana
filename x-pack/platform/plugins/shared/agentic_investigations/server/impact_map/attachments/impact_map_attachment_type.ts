@@ -86,6 +86,7 @@ export const impactMapAttachment = defineInvestigationAttachment<
     'The investigation impact map is a dependency graph of the entities the problem touches, their relationships, and the critical path from the root cause to the impact.\n\n' +
     'Rules:\n' +
     '- Update it with the `agentic_investigations.set_impact_map` tool, sending the whole map every time.\n' +
+    '- When asked whether the impact has recovered, or how it stands now, first check the latest data, then record it with `agentic_investigations.set_impact_map`: send the customer impact and symptom events again (same kind, entity and time) with bullets that say whether it recovered and since when, and charts that run to the latest data and mark each mitigation or responder action. Then render the attachment so the cards show it.\n' +
     '- The investigation flyout\'s Impact map and Timeline tabs show it. In the chat it is a set of cards (the map and the events that are the impact, such as customer impact or the failures, with what they affect; when none are recorded, the timeline and the key entities) that open the same views; render it when it would help explain your answer (the impact, the root cause, what happened and when, an entity or event), once per answer, with `<render_attachment id="ATTACHMENT_ID" />` on its own line, after a blank line.',
 });
 
