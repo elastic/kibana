@@ -99,7 +99,7 @@ export interface ProfilingStats {
   emptyTooLate: number;
   /** Captures that failed to start or to stop. */
   captureFailed: number;
-  /** Blocks past `startAfter` that weren't profiled because of the cooldown. */
+  /** Blocks past `startAfter` that ended without a capture because of the cooldown. */
   skippedCooldown: number;
   /**
    * Time captures were running in the period, from each request until its profile reached the

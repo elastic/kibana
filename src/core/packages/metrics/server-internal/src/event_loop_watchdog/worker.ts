@@ -102,7 +102,7 @@ export const runWatchdogWorker = (
   let reportedDroppedLogLines = logger.getDroppedLogLineCount();
   let counts = noCaptures();
   let capture: Capture | undefined;
-  let lastRequestedAt: number | undefined;
+  let lastCaptureEndedAt: number | undefined;
   /** Start of the last block profiled: one capture per block, however long it lasts. */
   let lastProfiledBlock: number | undefined;
   let cooldownSkippedBlock: number | undefined;
@@ -121,6 +121,10 @@ export const runWatchdogWorker = (
       stats.record(block);
       if (block.blockedMs >= profiling.startAfterMs[block.phase]) {
         counts.pastStartAfter++;
+      }
+      // A block can outlast the cooldown and be profiled after all.
+      if (block.startedAt === cooldownSkippedBlock && block.startedAt !== lastProfiledBlock) {
+        counts.skippedCooldown++;
       }
     }
     if (!block.report) {
@@ -155,12 +159,12 @@ export const runWatchdogWorker = (
     current.profiler.dispose();
     if (capture === current) {
       capture = undefined;
-      counts.profilingActiveMs += toMs(nowUs()) - current.activeFrom;
+      lastCaptureEndedAt = toMs(nowUs());
+      counts.profilingActiveMs += lastCaptureEndedAt - current.activeFrom;
     }
   };
 
   const startCapture = (blockStartedAt: number, phase: Phase, nowMs: number) => {
-    lastRequestedAt = nowMs;
     lastProfiledBlock = blockStartedAt;
     let profiler: ProfileCapture;
     try {
@@ -306,13 +310,10 @@ export const runWatchdogWorker = (
       return;
     }
     if (
-      lastRequestedAt !== undefined &&
-      nowMs - lastRequestedAt < profiling.cooldownMs[block.phase]
+      lastCaptureEndedAt !== undefined &&
+      nowMs - lastCaptureEndedAt < profiling.cooldownMs[block.phase]
     ) {
-      if (cooldownSkippedBlock !== block.startedAt) {
-        cooldownSkippedBlock = block.startedAt;
-        counts.skippedCooldown++;
-      }
+      cooldownSkippedBlock = block.startedAt;
       return;
     }
     startCapture(block.startedAt, block.phase, nowMs);

@@ -129,12 +129,19 @@ describe('runWatchdogWorker', () => {
     logger.info.mock.calls.filter(([message]) =>
       String(message).startsWith('Event loop block profiled')
     );
-  const lastStats = () => {
-    const lines = logger.info.mock.calls.filter(([message]) =>
-      String(message).startsWith('Event loop watchdog stats')
-    );
-    return (lines[lines.length - 1][1] as StatsLogMeta).kibana.event_loop_watchdog.stats;
-  };
+  const allStats = () =>
+    logger.info.mock.calls
+      .filter(([message]) => String(message).startsWith('Event loop watchdog stats'))
+      .map(([, meta]) => (meta as StatsLogMeta).kibana.event_loop_watchdog.stats);
+  const lastStats = () => allStats()[allStats().length - 1];
+  /** Profiling counts summed over every stats period so far. */
+  const totalProfilingStats = () =>
+    allStats().reduce<Record<string, number>>((totals, { profiling }) => {
+      for (const [key, value] of Object.entries(profiling)) {
+        totals[key] = (totals[key] ?? 0) + value;
+      }
+      return totals;
+    }, {});
   const profileMeta = (line = 0) =>
     (profileLines()[line][1] as ProfileLogMeta).kibana.event_loop_watchdog.profile;
   const profilingData = {
@@ -534,6 +541,43 @@ describe('runWatchdogWorker', () => {
       block(1_500);
       await settle();
       expect(sessions).toHaveLength(2);
+    });
+
+    it('starts the cooldown when a capture ends, not when it was requested', async () => {
+      startProfiling();
+      beat();
+      stall(1_000);
+      await settle();
+      // Stopped at the maximum duration, 6s into the block.
+      stall(5_000);
+      await settle();
+      resume();
+      // 60s after the request, but only 55s after the capture ended.
+      idle(54_000);
+      block(1_500);
+      await settle();
+      expect(sessions).toHaveLength(1);
+      idle(5_000);
+      block(1_500);
+      await settle();
+      expect(sessions).toHaveLength(2);
+    });
+
+    it('counts a block that outlasts the cooldown as profiled, not as skipped', async () => {
+      startProfiling();
+      block(1_500);
+      await settle();
+      beat();
+      stall(profilingData.cooldownMs.running + 2_000);
+      resume();
+      await settle();
+      expect(sessions).toHaveLength(2);
+      idle(STATS_INTERVAL_MS);
+      expect(totalProfilingStats()).toMatchObject({
+        pastStartAfter: 2,
+        profiled: 2,
+        skippedCooldown: 0,
+      });
     });
 
     it('logs and counts a capture that fails to start, and ends its session', async () => {
