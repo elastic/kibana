@@ -256,7 +256,7 @@ const TimelineCard: React.FC<{
       {hidden > 0 && (
         <EuiButtonEmpty
           size="xs"
-          iconType={expanded ? 'arrowUp' : 'arrowDown'}
+          iconType={expanded ? 'chevronSingleUp' : 'chevronSingleDown'}
           flush="left"
           // The card around it opens the timeline; this only expands the card.
           onClick={(clicked: React.MouseEvent) => {
