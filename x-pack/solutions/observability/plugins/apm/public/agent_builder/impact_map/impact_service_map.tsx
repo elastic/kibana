@@ -85,6 +85,17 @@ function StateBadge({ state, floating }: { state: ImpactState; floating?: boolea
       content={<EuiText size="xs">{label}</EuiText>}
       position="top"
       disableScreenReaderOutput
+      // The tooltip's anchor is what has to sit on the node, or the tooltip opens where the
+      // badge would have been in the flow.
+      anchorProps={{
+        css: floating
+          ? css`
+              position: absolute;
+              top: -8px;
+              left: calc(50% + 14px);
+            `
+          : undefined,
+      }}
     >
       <span
         role="img"
@@ -92,7 +103,6 @@ function StateBadge({ state, floating }: { state: ImpactState; floating?: boolea
         aria-label={label}
         data-test-subj={`impactMapBadge-${state}`}
         css={css`
-          ${floating ? 'position: absolute; top: -8px; left: calc(50% + 14px);' : ''}
           display: inline-flex;
           align-items: center;
           justify-content: center;
@@ -124,6 +134,13 @@ function EventCountBadge({ count }: { count?: number }) {
       content={<EuiText size="xs">{label}</EuiText>}
       position="top"
       disableScreenReaderOutput
+      anchorProps={{
+        css: css`
+          position: absolute;
+          top: -8px;
+          right: calc(50% + 14px);
+        `,
+      }}
     >
       <span
         role="img"
@@ -131,9 +148,6 @@ function EventCountBadge({ count }: { count?: number }) {
         aria-label={label}
         data-test-subj="impactMapEventCount"
         css={css`
-          position: absolute;
-          top: -8px;
-          right: calc(50% + 14px);
           display: inline-flex;
           align-items: center;
           justify-content: center;
