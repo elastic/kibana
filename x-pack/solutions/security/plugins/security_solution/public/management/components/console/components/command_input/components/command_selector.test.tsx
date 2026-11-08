@@ -10,6 +10,8 @@ import type { ConsoleTestSetup } from '../../../mocks';
 import { getConsoleTestSetup, triggerConsoleCommandInputEvent } from '../../../mocks';
 import type { CommandDefinition } from '../../..';
 
+jest.setTimeout(15_000); // Costly: every case mounts the full Console and drives a popover cycle
+
 describe('Console: CommandSelector', () => {
   let testSetup: ConsoleTestSetup;
   let renderResult: ReturnType<ConsoleTestSetup['renderConsole']>;

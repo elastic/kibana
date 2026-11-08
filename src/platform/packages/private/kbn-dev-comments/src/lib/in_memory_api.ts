@@ -44,6 +44,10 @@ export const createInMemoryCommentsApi = (initial: Comment[] = []): CommentsApi 
       Array.from(comments.values())
         .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
         .map(withoutImage),
+    get: async (id) => {
+      const comment = comments.get(id);
+      return comment && withoutImage(comment);
+    },
     getSnapshot: async (id) => require(id).snapshot,
     create: async (input) => {
       const now = new Date().toISOString();

@@ -10,11 +10,7 @@
 import type { ElementAnchor } from '../types';
 import { isVisible, resolveAnchor, type ResolvedAnchor } from './anchor';
 
-/**
- * How long a search that found nothing holds before the page is searched
- * again: each one scans the whole document once per locator, and a page that
- * is rendering changes many times a second.
- */
+/** How long a miss holds before the document is scanned again: a page rendering changes many times a second. */
 export const MISS_RETRY_MS = 250;
 
 interface Entry {

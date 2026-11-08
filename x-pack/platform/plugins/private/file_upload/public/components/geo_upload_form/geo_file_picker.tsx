@@ -14,6 +14,10 @@ import { GEO_FILE_TYPES, geoImporterFactory } from '../../importer/geo';
 import type { GeoFileImporter, GeoFilePreview } from '../../importer/geo';
 import { hasSidecarFiles } from '../utils';
 
+const SELECT_FILE_LABEL = i18n.translate('xpack.fileUpload.geoFilePicker.filePicker', {
+  defaultMessage: 'Select or drag and drop a file',
+});
+
 export type OnFileSelectParameters = GeoFilePreview & {
   indexName: string;
   importer: GeoFileImporter;
@@ -189,9 +193,8 @@ export class GeoFilePicker extends Component<Props, State> {
         >
           <EuiFilePicker
             isInvalid={!!this.state.error}
-            initialPromptText={i18n.translate('xpack.fileUpload.geoFilePicker.filePicker', {
-              defaultMessage: 'Select or drag and drop a file',
-            })}
+            aria-label={SELECT_FILE_LABEL}
+            initialPromptText={SELECT_FILE_LABEL}
             onChange={this._onFileSelect}
             accept={GEO_FILE_TYPES.join(',')}
             isLoading={this.state.isLoadingPreview}

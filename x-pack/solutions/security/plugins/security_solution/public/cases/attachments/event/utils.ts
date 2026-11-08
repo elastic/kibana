@@ -19,6 +19,17 @@ export function getNonEmptyField(field: unknown): string | null {
   return firstItem;
 }
 
+/** Moves the page index back to the last page when removed items leave it past the end. */
+export const getPageIndexInRange = ({
+  pageIndex,
+  totalItems,
+  pageSize,
+}: {
+  pageIndex: number;
+  totalItems: number;
+  pageSize: number;
+}): number => Math.min(pageIndex, Math.max(Math.ceil(totalItems / pageSize) - 1, 0));
+
 export const generateEventAttachmentWithoutOwner = ({
   attachmentId,
   index,

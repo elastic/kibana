@@ -28,12 +28,12 @@ import type {
   GetConfigurationFindRequest,
 } from '../../../common/types/api';
 import {
-  ConfigurationPatchRequestRt,
-  ConfigurationRequestRt,
-  GetConfigurationFindRequestRt,
-  FindActionConnectorResponseRt,
+  ConfigurationPatchRequestSchema,
+  ConfigurationRequestSchema,
+  GetConfigurationFindRequestSchema,
+  FindActionConnectorResponseSchema,
 } from '../../../common/types/api';
-import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
+import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
 import {
   MAX_CONCURRENT_SEARCHES,
   MAX_SUPPORTED_CONNECTORS_RETURNED,
@@ -48,7 +48,7 @@ import { combineAuthorizedAndOwnerFilter, transformTemplateCustomFields } from '
 import type { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './types';
 import { createMappings } from './create_mappings';
 import { updateMappings } from './update_mappings';
-import { ConfigurationRt, ConfigurationsRt } from '../../../common/types/domain';
+import { ConfigurationSchema, ConfigurationsSchema } from '../../../common/types/domain';
 import {
   validateDuplicatedKeysInRequest,
   validateDuplicatedObservableTypesInRequest,
@@ -199,7 +199,7 @@ export async function get(
   } = clientArgs;
 
   try {
-    const queryParams = decodeWithExcessOrThrow(GetConfigurationFindRequestRt)(params);
+    const queryParams = decodeWithExcessOrThrowZod(GetConfigurationFindRequestSchema)(params);
 
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.findConfigurations);
@@ -256,7 +256,7 @@ export async function get(
       }
     );
 
-    return decodeOrThrow(ConfigurationsRt)(configurations);
+    return decodeOrThrowZod(ConfigurationsSchema)(configurations);
   } catch (error) {
     throw createCaseError({ message: `Failed to get case configure: ${error}`, error, logger });
   }
@@ -276,7 +276,7 @@ export async function getConnectors({
       .filter((action) => isConnectorSupported(action, actionTypes))
       .slice(0, MAX_SUPPORTED_CONNECTORS_RETURNED);
 
-    return decodeOrThrow(FindActionConnectorResponseRt)(res);
+    return decodeOrThrowZod(FindActionConnectorResponseSchema)(res);
   } catch (error) {
     throw createCaseError({ message: `Failed to get connectors: ${error}`, error, logger });
   }
@@ -308,7 +308,7 @@ export async function update(
   } = clientArgs;
 
   try {
-    const request = decodeWithExcessOrThrow(ConfigurationPatchRequestRt)(req);
+    const request = decodeWithExcessOrThrowZod(ConfigurationPatchRequestSchema)(req);
 
     validateDuplicatedKeysInRequest({
       requestFields: request.customFields,
@@ -331,10 +331,15 @@ export async function update(
       originalCustomFields: configuration.attributes.customFields,
     });
 
-    const updatedTemplates = transformTemplateCustomFields({
-      templates,
-      customFields: request.customFields,
-    });
+    // Templates are only rewritten when the patch touches them or the custom fields they mirror;
+    // otherwise unrelated patches (e.g. workflow tags only) would wipe the stored templates.
+    const updatedTemplates =
+      templates === undefined && request.customFields === undefined
+        ? undefined
+        : transformTemplateCustomFields({
+            templates: templates ?? configuration.attributes.templates,
+            customFields: request.customFields,
+          });
 
     await validateTemplates({
       templates: updatedTemplates,
@@ -438,7 +443,7 @@ export async function update(
       id: patch.id,
     };
 
-    return decodeOrThrow(ConfigurationRt)(res);
+    return decodeOrThrowZod(ConfigurationSchema)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to get patch configure in route: ${error}`,
@@ -462,8 +467,9 @@ export async function create(
   } = clientArgs;
 
   try {
-    const validatedConfigurationRequest =
-      decodeWithExcessOrThrow(ConfigurationRequestRt)(configRequest);
+    const validatedConfigurationRequest = decodeWithExcessOrThrowZod(ConfigurationRequestSchema)(
+      configRequest
+    );
 
     validateDuplicatedKeysInRequest({
       requestFields: validatedConfigurationRequest.customFields,
@@ -580,6 +586,7 @@ export async function create(
           OWNER_INFO[validatedConfigurationRequest.owner as Owner]?.features.observables
             .autoExtractDefault ??
           false,
+        workflowTags: validatedConfigurationRequest.workflowTags ?? [],
       },
       id: savedObjectID,
     });
@@ -594,7 +601,7 @@ export async function create(
       id: post.id,
     };
 
-    return decodeOrThrow(ConfigurationRt)(res);
+    return decodeOrThrowZod(ConfigurationSchema)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to create case configuration: ${error}`,

@@ -136,6 +136,27 @@ export async function getAgentPolicyRevision(
 }
 
 /**
+ * `GET /api/fleet/agent_policies/{id}` -- revision plus `updated_at`, for
+ * asserting a deferred bump landed after a `bumpRevision: false` package-policy
+ * write (which leaves the agent policy's `updated_at` untouched).
+ */
+export async function getAgentPolicyRevisionInfo(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  agentPolicyId: string
+): Promise<{ revision: number; updated_at: string }> {
+  const res = await apiClient.get(`api/fleet/agent_policies/${agentPolicyId}`, {
+    headers,
+    responseType: 'json',
+  });
+  expect(res).toHaveStatusCode(200);
+  const { revision, updated_at: updatedAt } = (
+    res.body as { item: { revision: number; updated_at: string } }
+  ).item;
+  return { revision, updated_at: updatedAt };
+}
+
+/**
  * `GET /api/fleet/agents/{id}` — Fleet's view of one enrolled agent.
  */
 export async function getFleetAgent(

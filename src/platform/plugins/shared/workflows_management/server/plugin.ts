@@ -103,7 +103,7 @@ export class WorkflowsPlugin
     }
 
     plugins.workflowsExtensions.registerWorkflowsClientProvider(
-      createWorkflowsClientProvider(workflowsService, this.config, this.logger)
+      createWorkflowsClientProvider(workflowsService, this.config, this.logger, api)
     );
     plugins.workflowsExtensions.registerManagedWorkflowsSystemApiProvider(
       createManagedWorkflowsSystemApiProvider(workflowsService, this.config, this.logger)
@@ -224,7 +224,7 @@ export class WorkflowsPlugin
     try {
       await this.workflowsService?.cleanupUnregisteredOrphans(registeredOwnerPluginIds);
     } catch (error) {
-      this.logger.warn(
+      this.logger.error(
         'Workflows Management: Failed to complete global orphan cleanup for unregistered workflows',
         { error }
       );

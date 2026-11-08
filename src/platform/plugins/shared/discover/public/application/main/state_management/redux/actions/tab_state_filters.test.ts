@@ -179,6 +179,55 @@ describe('tab_state_filters actions', () => {
     );
   });
 
+  it('should add "Other" bucket filters in non-ES|QL mode', async () => {
+    const { internalState, tabId, services } = await setup();
+    const addFiltersSpy = jest.spyOn(services.filterManager, 'addFilters');
+    const field = dataViewMockWithTimeField.getFieldByName('extension')!;
+    const terms = ['jpg', 'png'];
+    const expectedPhrasesMeta = {
+      index: expect.any(String),
+      type: 'phrases',
+      key: 'extension',
+      params: terms,
+    };
+    const expectedPhrasesQuery = {
+      bool: {
+        should: [{ match_phrase: { extension: 'jpg' } }, { match_phrase: { extension: 'png' } }],
+        minimum_should_match: 1,
+      },
+    };
+
+    internalState.dispatch(
+      internalStateActions.setAppState({
+        tabId,
+        appState: {
+          query: { language: 'kuery', query: '' },
+          dataSource: {
+            type: DataSourceType.DataView,
+            dataViewId: dataViewMockWithTimeField.id ?? 'test-data-view-id',
+          },
+        },
+      })
+    );
+
+    internalState.dispatch(
+      internalStateActions.addFilter({ tabId, field, value: terms, mode: '+', otherBucket: true })
+    );
+
+    expect(addFiltersSpy).toHaveBeenLastCalledWith([
+      { meta: { ...expectedPhrasesMeta, negate: true }, query: expectedPhrasesQuery },
+      { meta: { index: expect.any(String) }, query: { exists: { field: 'extension' } } },
+    ]);
+
+    internalState.dispatch(
+      internalStateActions.addFilter({ tabId, field, value: terms, mode: '-', otherBucket: true })
+    );
+
+    expect(addFiltersSpy).toHaveBeenLastCalledWith([
+      { meta: expectedPhrasesMeta, query: expectedPhrasesQuery },
+    ]);
+  });
+
   it('should not add a filter when field is undefined', async () => {
     const { internalState, tabId, services } = await setup();
     const addFiltersSpy = jest.spyOn(services.filterManager, 'addFilters');
@@ -204,7 +253,7 @@ describe('tab_state_filters actions', () => {
     const setQuerySpy = jest.spyOn(services.data.query.queryString, 'setQuery');
     setQuerySpy.mockClear();
 
-    selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.next(undefined);
+    selectTabRuntimeState(runtimeStateManager, tabId).currentDataSource$.next(undefined);
 
     internalState.dispatch(
       internalStateActions.addFilter({

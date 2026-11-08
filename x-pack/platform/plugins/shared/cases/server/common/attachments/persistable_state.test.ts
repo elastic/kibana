@@ -37,25 +37,6 @@ describe('persistableStateAttachmentTransformer', () => {
     expect(unified.owner).toBe(legacy.owner);
   });
 
-  it('accepts legacy persistable attachments stored with unified type id', () => {
-    const legacyWithUnifiedId = {
-      type: AttachmentType.persistableState,
-      owner: 'securitySolution',
-      persistableStateAttachmentTypeId: LENS_ATTACHMENT_TYPE,
-      persistableStateAttachmentState: { attributes: { title: 'Lens title' } },
-      created_at: '2026-01-01T00:00:00.000Z',
-      created_by: { username: 'elastic', full_name: null, email: null, profile_uid: 'abc' },
-      pushed_at: null,
-      pushed_by: null,
-      updated_at: null,
-      updated_by: null,
-    };
-
-    const unified = transformer.toUnifiedSchema(legacyWithUnifiedId);
-    expect(unified.type).toBe(LENS_ATTACHMENT_TYPE);
-    expect(unified.data).toEqual({ state: legacyWithUnifiedId.persistableStateAttachmentState });
-  });
-
   it('converts unified schema back to legacy persistable state attributes', () => {
     const unified = {
       type: LENS_ATTACHMENT_TYPE,

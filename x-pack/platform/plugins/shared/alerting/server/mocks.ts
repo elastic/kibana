@@ -38,6 +38,7 @@ const createSetupMock = () => {
     }),
     getDataStreamAdapter: jest.fn(),
     registerConnectorAdapter: jest.fn(),
+    enableAlertStatusChanged: jest.fn(),
   });
 
   return mock;

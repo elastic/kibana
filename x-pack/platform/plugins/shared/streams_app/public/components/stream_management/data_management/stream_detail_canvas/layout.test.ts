@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { COLUMN_GAP, DESTINATION_NODE_HEIGHT, SOURCE_NODE_HEIGHT } from './canvas_constants';
+import { COLUMN_GAP } from './canvas_constants';
 import { applyLayout, layoutGraph } from './layout';
 import { DESTINATION_NODE_TYPE, SOURCE_NODE_TYPE } from './types';
 
@@ -30,39 +30,6 @@ describe('layoutGraph', () => {
     expect(source.y).toBe(destination.y);
   });
 
-  it('centers a source -> destination pair vertically so the connector is straight', () => {
-    const positions = layoutGraph(
-      [
-        { id: 'source', type: SOURCE_NODE_TYPE },
-        { id: 'destination', type: DESTINATION_NODE_TYPE },
-      ],
-      [{ source: 'source', target: 'destination' }]
-    );
-
-    const source = positions.get('source')!;
-    const destination = positions.get('destination')!;
-
-    expect(source.y + SOURCE_NODE_HEIGHT / 2).toBe(destination.y + DESTINATION_NODE_HEIGHT / 2);
-    expect(source.y).toBe(0);
-    expect(destination.y).toBe((SOURCE_NODE_HEIGHT - DESTINATION_NODE_HEIGHT) / 2);
-  });
-
-  it('prefers a measured height over the per-kind estimate', () => {
-    const measuredHeight = SOURCE_NODE_HEIGHT + 40;
-    const positions = layoutGraph(
-      [
-        { id: 'source', type: SOURCE_NODE_TYPE, measured: { height: measuredHeight } },
-        { id: 'destination', type: DESTINATION_NODE_TYPE },
-      ],
-      [{ source: 'source', target: 'destination' }]
-    );
-
-    const source = positions.get('source')!;
-    const destination = positions.get('destination')!;
-
-    expect(source.y + measuredHeight / 2).toBe(destination.y + DESTINATION_NODE_HEIGHT / 2);
-  });
-
   it('stacks independent flows on distinct rows, each starting in column 0', () => {
     const positions = layoutGraph(
       [{ id: 's1' }, { id: 'd1' }, { id: 's2' }, { id: 'd2' }],
@@ -77,13 +44,13 @@ describe('layoutGraph', () => {
     expect(positions.get('s1')!.y).not.toEqual(positions.get('s2')!.y);
   });
 
-  it('places disconnected unit nodes on rows that do not overlap classic flows', () => {
+  it('places disconnected unit nodes on rows that do not overlap connected flows', () => {
     const positions = layoutGraph(
       [
         { id: 'classic-source' },
         { id: 'classic-destination' },
         { id: 'configured-source' },
-        { id: 'unconfigured-source' },
+        { id: 'standalone-source' },
       ],
       [{ source: 'classic-source', target: 'classic-destination' }]
     );
@@ -93,9 +60,24 @@ describe('layoutGraph', () => {
       new Set([
         positions.get('classic-source')!.y,
         positions.get('configured-source')!.y,
-        positions.get('unconfigured-source')!.y,
+        positions.get('standalone-source')!.y,
       ]).size
     ).toBe(3);
+  });
+
+  it('fans destination cards out from a source', () => {
+    const positions = layoutGraph(
+      [{ id: 'source' }, { id: 'd1' }, { id: 'd2' }],
+      [
+        { source: 'source', target: 'd1' },
+        { source: 'source', target: 'd2' },
+      ]
+    );
+
+    expect(positions.get('source')!.x).toBe(0);
+    expect(positions.get('d1')!.x).toBe(COLUMN_GAP);
+    expect(positions.get('d2')!.x).toBe(COLUMN_GAP);
+    expect(positions.get('d1')!.y).not.toEqual(positions.get('d2')!.y);
   });
 
   it('lays a multi-node chain into one column per depth (extensible topology)', () => {
@@ -131,12 +113,9 @@ describe('applyLayout', () => {
     const source = result.find((node) => node.id === 'source')!;
     const destination = result.find((node) => node.id === 'destination')!;
 
-    expect(source.position).toEqual({ x: 0, y: 0 });
+    expect(source.position.x).toBe(0);
+    expect(source.position).not.toEqual({ x: 999, y: 999 });
     expect(destination.position.x).toBe(COLUMN_GAP);
-    // The cards have different heights, so tidying aligns their centers.
-    expect(source.position.y + SOURCE_NODE_HEIGHT / 2).toBe(
-      destination.position.y + DESTINATION_NODE_HEIGHT / 2
-    );
     // Non-position fields survive the re-layout.
     expect(source.type).toBe(SOURCE_NODE_TYPE);
     expect(source.data).toEqual({ keep: true });

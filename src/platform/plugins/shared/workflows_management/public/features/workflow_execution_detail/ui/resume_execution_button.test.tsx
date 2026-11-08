@@ -105,6 +105,12 @@ describe('ResumeExecutionButton', () => {
       expect(screen.getByTestId('waitForInputCallout')).toBeInTheDocument();
     });
 
+    it('renders the "Provide action" button without a callout in button appearance', () => {
+      renderComponent({ appearance: 'button' });
+      expect(screen.queryByTestId('waitForInputCallout')).not.toBeInTheDocument();
+      expect(screen.getByTestId('provideActionButton')).toBeInTheDocument();
+    });
+
     it('renders the "Provide action" button', () => {
       renderComponent();
       expect(screen.getByTestId('provideActionButton')).toBeInTheDocument();
@@ -429,6 +435,15 @@ describe('ResumeExecutionButton', () => {
       expect(screen.queryByTestId('provideActionButton')).not.toBeInTheDocument();
     });
 
+    it('renders a markdown message inside the scroll region, with the actions outside it', () => {
+      renderComponent({ ...approvalProps, resumeMessage: '**Approve** this' });
+      const message = screen.getByTestId('waitForApprovalMessage');
+      expect(message.querySelector('strong')).toHaveTextContent('Approve');
+      expect(message).toHaveTextContent('Approve this');
+      expect(message).not.toContainElement(screen.getByTestId('approveActionButton'));
+      expect(message).not.toContainElement(screen.getByTestId('rejectActionButton'));
+    });
+
     it('submits approved=true when Approve is clicked', async () => {
       renderComponent(approvalProps);
       fireEvent.click(screen.getByTestId('approveActionButton'));
@@ -454,6 +469,32 @@ describe('ResumeExecutionButton', () => {
           }),
           version: '2023-10-31',
         });
+      });
+    });
+
+    it('shows loading only on the clicked button while both stay disabled', async () => {
+      let resolvePost!: () => void;
+      mockHttpPost.mockImplementationOnce(
+        () => new Promise<void>((resolve) => (resolvePost = resolve))
+      );
+
+      renderComponent(approvalProps);
+      fireEvent.click(screen.getByTestId('approveActionButton'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('approveActionButton')).toBeDisabled();
+        expect(screen.getByTestId('rejectActionButton')).toBeDisabled();
+      });
+      expect(
+        screen.getByTestId('approveActionButton').querySelector('.euiLoadingSpinner')
+      ).not.toBeNull();
+      expect(
+        screen.getByTestId('rejectActionButton').querySelector('.euiLoadingSpinner')
+      ).toBeNull();
+
+      resolvePost();
+      await waitFor(() => {
+        expect(mockAddSuccess).toHaveBeenCalledTimes(1);
       });
     });
   });

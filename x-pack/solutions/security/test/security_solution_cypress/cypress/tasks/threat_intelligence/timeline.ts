@@ -25,7 +25,10 @@ const ADD_TO_TIMELINE_ACTION =
 const clickFlyoutAddToTimelineAction = (selector: string) => {
   cy.get(selector).filter(':visible').first().scrollIntoView();
   cy.get(selector).filter(':visible').first().realHover();
+  // Scrolling can leave the pointer over the field without firing a mouse-enter event.
+  cy.get(selector).filter(':visible').first().trigger('mouseover');
 
+  cy.get('[data-test-subj="hoverActionsPopover"]').should('be.visible');
   cy.get(ADD_TO_TIMELINE_ACTION).should('be.visible').click();
 };
 

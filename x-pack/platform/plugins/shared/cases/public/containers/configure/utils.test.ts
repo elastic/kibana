@@ -18,6 +18,14 @@ describe('Utils', () => {
       });
     });
 
+    it('returns a fallback with the owner default when configurations is null (no saved configuration yet)', () => {
+      expect(getConfigurationByOwner({ configurations: null, owner: 'securitySolution' })).toEqual({
+        ...initialConfiguration,
+        owner: 'securitySolution',
+        extractObservables: true,
+      });
+    });
+
     it('returns a fallback configuration with the owner and its autoExtractDefault when the owner is not found', () => {
       expect(
         getConfigurationByOwner({

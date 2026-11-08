@@ -122,6 +122,33 @@ describe('useDynamicTypeIcons', () => {
     unmount();
   });
 
+  it('starts every icon lookup without waiting for earlier ones to resolve', async () => {
+    jest.mocked(getIconBase64).mockReturnValue(new Promise(() => {}));
+    const services = createStartServicesMock();
+    const connectorsData: ConnectorsResponse = {
+      totalConnectors: 0,
+      connectorTypes: {
+        '.jira': connectorTypeStub('.jira'),
+        '.teams': connectorTypeStub('.teams'),
+      },
+    };
+
+    const { unmount } = renderHook(() => useDynamicTypeIcons(connectorsData, undefined, true), {
+      wrapper: getTestProvider({ services }),
+    });
+
+    await waitFor(() => {
+      expect(getIconBase64).toHaveBeenCalledWith(
+        expect.objectContaining({ actionTypeId: '.jira', kind: 'step' })
+      );
+      expect(getIconBase64).toHaveBeenCalledWith(
+        expect.objectContaining({ actionTypeId: '.teams', kind: 'step' })
+      );
+    });
+
+    unmount();
+  });
+
   it('injects step icons and connector trigger icons', async () => {
     // Colored brand marks clear the mask. Length must exceed isValidDataUrl's 50-character minimum.
     const resolvedTriggerIcon = `data:image/svg+xml;base64,${btoa(

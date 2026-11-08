@@ -301,7 +301,7 @@ export const WorkflowExecuteAlertForm = ({
               defaultMessage: 'Failed to load alerts',
             })}
             color="warning"
-            iconType="help"
+            iconType="question"
             size="s"
           >
             <p>{errors}</p>
@@ -325,7 +325,6 @@ export const WorkflowExecuteAlertForm = ({
         dataView={dataView}
         getNoCellActions={tableConfig.getNoCellActions}
         visibleTableColumns={tableConfig.visibleTableColumns}
-        columnsMeta={tableConfig.columnsMeta}
         dataTableRows={tableConfig.dataTableRows}
         rowsLength={hitSearch.hits.length}
         unifiedDataTableServices={tableConfig.unifiedDataTableServices}

@@ -16,8 +16,13 @@ import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
 import { hasSloGroupBy, SloOverviewPanelContent } from './slo_overview_panel_content';
 
 jest.mock('../../../hooks/use_fetch_slo_details');
+
+const mockSloOverview = jest.fn();
 jest.mock('./slo_overview', () => ({
-  SloOverview: () => <div data-test-subj="slo-overview">SloOverview</div>,
+  SloOverview: (props: Record<string, unknown>) => {
+    mockSloOverview(props);
+    return <div data-test-subj="slo-overview">SloOverview</div>;
+  },
 }));
 jest.mock('./slo_overview_grid', () => ({
   SloCardChartList: () => <div data-test-subj="slo-card-chart-list">SloCardChartList</div>,
@@ -69,6 +74,8 @@ describe('SloOverviewPanelContent', () => {
       isLoading: false,
       isInitialLoading: false,
       isRefetching: false,
+      isFetching: false,
+      isFetchedAfterMount: true,
       isSuccess: false,
       isError: false,
       refetch: jest.fn(),
@@ -121,6 +128,8 @@ describe('SloOverviewPanelContent', () => {
       isLoading: false,
       isInitialLoading: false,
       isRefetching: false,
+      isFetching: false,
+      isFetchedAfterMount: true,
       isSuccess: true,
       isError: false,
       refetch: jest.fn(),
@@ -139,6 +148,8 @@ describe('SloOverviewPanelContent', () => {
       isLoading: false,
       isInitialLoading: false,
       isRefetching: false,
+      isFetching: false,
+      isFetchedAfterMount: true,
       isSuccess: true,
       isError: false,
       refetch: jest.fn(),
@@ -158,6 +169,8 @@ describe('SloOverviewPanelContent', () => {
       isLoading: false,
       isInitialLoading: false,
       isRefetching: false,
+      isFetching: false,
+      isFetchedAfterMount: true,
       isSuccess: true,
       isError: false,
       refetch: jest.fn(),
@@ -177,6 +190,8 @@ describe('SloOverviewPanelContent', () => {
       isLoading: false,
       isInitialLoading: false,
       isRefetching: false,
+      isFetching: false,
+      isFetchedAfterMount: true,
       isSuccess: true,
       isError: false,
       refetch: jest.fn(),
@@ -186,5 +201,36 @@ describe('SloOverviewPanelContent', () => {
 
     expect(getByTestId(container, 'slo-overview')).toBeInTheDocument();
     expect(queryByTestId(container, 'sloSingleOverviewPanel')).not.toBeInTheDocument();
+  });
+
+  describe('isInteractive', () => {
+    beforeEach(() => {
+      mockSloOverview.mockClear();
+      useFetchSloDetailsMock.mockReturnValue({
+        data: sloWithoutGroupBy,
+        isLoading: false,
+        isInitialLoading: false,
+        isRefetching: false,
+        isFetching: false,
+        isFetchedAfterMount: true,
+        isSuccess: true,
+        isError: false,
+        refetch: jest.fn(),
+      });
+    });
+
+    it('passes isInteractive=false down to SloOverview', () => {
+      render(<SloOverviewPanelContent {...defaultProps} isInteractive={false} />);
+
+      const lastProps = mockSloOverview.mock.calls.at(-1)?.[0];
+      expect(lastProps?.isInteractive).toBe(false);
+    });
+
+    it('passes isInteractive=true down to SloOverview', () => {
+      render(<SloOverviewPanelContent {...defaultProps} isInteractive={true} />);
+
+      const lastProps = mockSloOverview.mock.calls.at(-1)?.[0];
+      expect(lastProps?.isInteractive).toBe(true);
+    });
   });
 });

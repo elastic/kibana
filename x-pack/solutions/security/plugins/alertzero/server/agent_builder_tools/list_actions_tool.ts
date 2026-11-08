@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
@@ -14,26 +14,31 @@ import { actionCategorySchema } from '@kbn/workflows/managed';
 import { ALERTZERO_ACTIONS_LIST_TOOL_ID } from '@kbn/alertzero-common';
 import type { ActionsService } from '../services/actions/actions_service';
 
-const listByCategorySchema = z.object({
-  categories: z
-    .array(actionCategorySchema)
-    .max(20)
-    .optional()
-    .describe(
-      'Category keywords to filter on (e.g. ["contain", "escalate"]). An action is returned when its declared category matches ANY of these. Omit to list every available action.'
-    ),
-});
+import type { AssertAlertZeroAccess } from './assert_alertzero_access';
+
+const listByCategorySchema = lazySchema(() =>
+  z.object({
+    categories: z
+      .array(actionCategorySchema)
+      .max(20)
+      .optional()
+      .describe(
+        'Category keywords to filter on (e.g. ["contain", "escalate"]). An action is returned when its declared category matches ANY of these. Omit to list every available action.'
+      ),
+  })
+);
 
 /**
  * `security.alertzero.actions.list` — lets an agent discover the
  * installed action workflows at runtime instead of hard-coding workflow ids.
  *
  * Registered by the AlertZero plugin (setup), reads the catalog through
- * {@link ActionsService} — the same service backing the HTTP API — so the tool
- * and the API can never drift.
+ * {@link ActionsService} — the same service backing the HTTP API — so the tool and
+ * the API resolve the catalog the same way.
  */
 export const listActionsTool = (
-  getActionsService: () => Pick<ActionsService, 'list'>
+  getActionsService: () => Pick<ActionsService, 'list'>,
+  assertAlertZeroAccess: AssertAlertZeroAccess
 ): BuiltinToolDefinition<typeof listByCategorySchema> => ({
   id: ALERTZERO_ACTIONS_LIST_TOOL_ID,
   type: ToolType.builtin,
@@ -50,6 +55,7 @@ export const listActionsTool = (
   tags: ['alertzero'],
   handler: async ({ categories }, { logger, request, spaceId }) => {
     try {
+      await assertAlertZeroAccess(request, 'read');
       const { actions, total } = await getActionsService().list(spaceId, request, categories);
       const message =
         total === 0

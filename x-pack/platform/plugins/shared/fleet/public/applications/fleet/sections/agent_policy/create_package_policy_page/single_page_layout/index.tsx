@@ -183,10 +183,20 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     { enabled: !!pkgName }
   );
   const packageInfo = useMemo(() => {
-    if (packageInfoData && packageInfoData.item) {
-      return packageInfoData.item;
+    // The form initializes its inputs once from the package info, so wait for the FIPS status
+    // to avoid initializing them from the unfiltered templates.
+    if (!packageInfoData?.item || fleetStatus.isLoading) {
+      return undefined;
     }
-  }, [packageInfoData]);
+    const item = packageInfoData.item;
+    if (!fleetStatus.isFipsEnabled || !item.policy_templates) {
+      return item;
+    }
+    const fipsCompatibleTemplates = item.policy_templates.filter(
+      (t) => t.fips_compatible !== false
+    );
+    return { ...item, policy_templates: fipsCompatibleTemplates };
+  }, [packageInfoData, fleetStatus.isFipsEnabled, fleetStatus.isLoading]);
 
   const [agentCount, setAgentCount] = useState<number>(0);
 

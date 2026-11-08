@@ -12,7 +12,7 @@ import type {
   LensSavedObjectAttachmentData,
   LensSavedObjectAttachmentPayload,
   LensSavedObjectAttributes,
-} from '../../../../common/types/domain_zod/attachment/lens/v2';
+} from '../../../../common/types/domain/attachment/lens/v2';
 import { fitsSnapshotBudget } from '../common/saved_object/helpers';
 
 export type LensPayload = Omit<LensSavedObjectAttachmentPayload, 'owner'>;

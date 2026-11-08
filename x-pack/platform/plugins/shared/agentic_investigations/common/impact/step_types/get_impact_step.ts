@@ -10,7 +10,7 @@ import type { BaseStepDefinition } from '@kbn/workflows';
 import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import { MAX_IMPACT_ID_LENGTH } from '../constants';
-import { impactEntitiesSchema } from '../impact';
+import { storedImpactEntitiesSchema } from '../impact';
 
 export const GetImpactStepId = 'investigations.getImpact' as const;
 
@@ -24,7 +24,8 @@ export const getImpactStepInputSchema = z.object({
 
 export const getImpactStepOutputSchema = z.object({
   id: z.string(),
-  entities: impactEntitiesSchema,
+  /** Empty when the impact was recorded as a summary and evidence only. */
+  entities: storedImpactEntitiesSchema,
 });
 
 export const getImpactStepCommonDefinition: BaseStepDefinition<

@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { Route, Routes } from '@kbn/shared-ux-router';
+import { getLastUpdated } from '@kbn/securitysolution-timeline-components';
 
 import { noop } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -129,6 +130,7 @@ import * as i18n from './translations';
 import { NeedAdminForUpdateRulesCallOut } from '../../../rule_management/components/callouts/need_admin_for_update_rules_callout';
 import { MissingDetectionsPrivilegesCallOut } from '../../../../detections/components/callouts/missing_detections_privileges_callout';
 import { useRuleWithFallback } from '../../../rule_management/logic/use_rule_with_fallback';
+import { useRuleAuthorDisplayNames } from '../../../rule_management/logic/use_rule_author_display_names';
 import { useSyncShowBuildingBlockAlerts } from './use_sync_show_building_block_alerts';
 import type { BadgeOptions } from '../../../../common/components/header_page/types';
 import type { AlertsStackByField } from '../../../../detections/components/alerts_kpis/common/types';
@@ -245,12 +247,7 @@ export const RuleDetailsPage = connector(
     const isRuleChangesHistoryEnabled =
       ruleChangesHistoryFFEnabled && ruleChangesHistoryAdvancedSetting;
 
-    const {
-      application,
-      timelines: timelinesUi,
-      spaces: spacesApi,
-      aiRuleCreation,
-    } = useKibana().services;
+    const { application, spaces: spacesApi, aiRuleCreation } = useKibana().services;
     const {
       navigateToApp,
       capabilities: { actions },
@@ -416,13 +413,19 @@ export const RuleDetailsPage = connector(
           : undefined,
       [isExistingRule, ruleLoading]
     );
+    const { createdBy, updatedBy } = useRuleAuthorDisplayNames({
+      createdBy: rule?.created_by,
+      createdByProfileUid: rule?.created_by_profile_uid,
+      updatedBy: rule?.updated_by,
+      updatedByProfileUid: rule?.updated_by_profile_uid,
+    });
     const subTitle = useMemo(
       () =>
         rule ? (
           [
-            <CreatedBy createdBy={rule.created_by} createdAt={rule.created_at} />,
+            <CreatedBy createdBy={createdBy} createdAt={rule.created_at} />,
             rule.updated_by != null ? (
-              <UpdatedBy updatedBy={rule.updated_by} updatedAt={rule.updated_at} />
+              <UpdatedBy updatedBy={updatedBy} updatedAt={rule.updated_at} />
             ) : (
               ''
             ),
@@ -436,7 +439,7 @@ export const RuleDetailsPage = connector(
         ) : ruleLoading ? (
           <EuiLoadingSpinner size="m" />
         ) : null,
-      [rule, ruleLoading, isRuleChangesHistoryEnabled]
+      [rule, ruleLoading, isRuleChangesHistoryEnabled, createdBy, updatedBy]
     );
 
     // Callback for when open/closed filter changes
@@ -584,11 +587,11 @@ export const RuleDetailsPage = connector(
     );
     const currentAlertStatusFilterValue = useMemo(() => [filterGroup], [filterGroup]);
     const updatedAtValue = useMemo(() => {
-      return timelinesUi.getLastUpdated({
+      return getLastUpdated({
         updatedAt: updatedAt || Date.now(),
         showUpdating,
       });
-    }, [updatedAt, showUpdating, timelinesUi]);
+    }, [updatedAt, showUpdating]);
 
     const renderGroupedAlertTable = useCallback(
       (groupingFilters: Filter[]) => {

@@ -57,6 +57,16 @@ export interface MlADJobsApi {
   waitForJobToExist: (jobId: string, timeout?: number) => Promise<void>;
   /** Wait for an anomaly detection job to be deleted by polling the Elasticsearch API */
   waitForJobNotToExist: (jobId: string, timeout?: number) => Promise<void>;
+  /** Wait for a datafeed to reach the expected state via the Elasticsearch API */
+  waitForDatafeedState: (
+    datafeedId: string,
+    expectedState: string,
+    timeout?: number
+  ) => Promise<void>;
+  /** Wait for an anomaly detection job to have a positive processed record count via the Elasticsearch API */
+  waitForJobRecordCountToBePositive: (jobId: string, timeout?: number) => Promise<void>;
+  /** Get the model memory limit for an anomaly detection job via the Elasticsearch API */
+  getJobModelMemoryLimit: (jobId: string) => Promise<string | undefined>;
   /** Poll until model_forecast results exist for the job in .ml-anomalies-* */
   waitForForecastResults: (jobId: string, timeout?: number) => Promise<void>;
   /** Delete all anomaly detection jobs via the Elasticsearch API */
@@ -625,17 +635,19 @@ export const getMlApiHelper = (
 
     async waitForJobState(
       jobId: string,
-      state: string,
+      expectedState: string,
       timeout: number = 60 * 1000
     ): Promise<void> {
       await waitForCondition(
-        `anomaly detection job '${jobId}' to be in state '${state}'`,
+        `anomaly detection job '${jobId}' to be in state '${expectedState}'`,
         async () => {
           const resp = await esClient.ml.getJobStats({ job_id: jobId });
           const jobStats = resp.jobs[0];
           if (!jobStats) throw new Error(`Job '${jobId}' not found`);
-          if (jobStats.state === state) return true;
-          throw new Error(`Job '${jobId}' state is '${jobStats.state}', expected '${state}'`);
+          if (jobStats.state === expectedState) return true;
+          throw new Error(
+            `Job '${jobId}' state is '${jobStats.state}', expected '${expectedState}'`
+          );
         },
         timeout
       );
@@ -715,6 +727,49 @@ export const getMlApiHelper = (
           throw new Error(`expected forecast results for job '${jobId}' to exist`);
         },
         timeout
+      );
+    },
+
+    async waitForDatafeedState(
+      datafeedId: string,
+      expectedState: string,
+      timeout = 2 * 60 * 1000
+    ): Promise<void> {
+      await waitForCondition(
+        `datafeed '${datafeedId}' to be in state '${expectedState}'`,
+        async () => {
+          const { datafeeds: datafeedsList } = await esClient.ml.getDatafeedStats({
+            datafeed_id: datafeedId,
+          });
+          if (datafeedsList[0]?.state === expectedState) return true;
+          throw new Error(
+            `Datafeed '${datafeedId}' is in state '${datafeedsList[0]?.state}', expected '${expectedState}'`
+          );
+        },
+        timeout
+      );
+    },
+
+    async waitForJobRecordCountToBePositive(jobId: string, timeout = 2 * 60 * 1000): Promise<void> {
+      await waitForCondition(
+        `job '${jobId}' to have positive record count`,
+        async () => {
+          const { jobs } = await esClient.ml.getJobStats({ job_id: jobId });
+          if ((jobs[0]?.data_counts?.processed_record_count ?? 0) > 0) return true;
+          throw new Error(`Anomaly detection job '${jobId}' has no processed records yet`);
+        },
+        timeout
+      );
+    },
+
+    async getJobModelMemoryLimit(jobId: string): Promise<string | undefined> {
+      return measurePerformanceAsync(
+        log,
+        `mlApi.anomalyDetection.getJobModelMemoryLimit [${jobId}]`,
+        async () => {
+          const { jobs } = await esClient.ml.getJobs({ job_id: jobId });
+          return jobs[0]?.analysis_limits?.model_memory_limit as string | undefined;
+        }
       );
     },
 

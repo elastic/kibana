@@ -69,6 +69,7 @@ export { evaluate } from './src/evaluate';
 export { createAgentBuilderClient } from './src/utils/agent_builder_client';
 export type {
   AgentBuilderClient,
+  AgentBuilderConverseAttachment,
   AgentBuilderConverseParams,
   AgentBuilderClientResponse,
   ConverseStep,
@@ -76,6 +77,7 @@ export type {
 export type { DefaultEvaluators, EvaluatorKind, ReportDisplayOptions } from './src/types';
 export type { Direction } from '@kbn/evals-common';
 export type { EvaluationCriterion, EvaluationCriterionStructured } from './src/evaluators/criteria';
+export { createCriteriaEvaluator } from './src/evaluators/criteria';
 export { createPlaywrightEvalsConfig } from './src/config/create_playwright_eval_config';
 export type {
   Example,
@@ -98,7 +100,10 @@ export {
   calculateFactualScore,
   calculateRelevanceScore,
 } from './src/evaluators/correctness/scoring';
-export { createQuantitativeGroundednessEvaluator } from './src/evaluators/groundedness';
+export {
+  createQuantitativeGroundednessEvaluator,
+  createGroundednessAnalysisEvaluator,
+} from './src/evaluators/groundedness';
 export type { EvaluationDataset, EvaluationWorkerFixtures, EvaluationReport } from './src/types';
 export { withEvaluatorSpan, withTaskSpan, getCurrentTraceId } from './src/utils/tracing';
 export { withRetry, type RetryOptions } from './src/utils/retry_utils';

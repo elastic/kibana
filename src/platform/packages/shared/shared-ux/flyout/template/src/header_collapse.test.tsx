@@ -8,9 +8,8 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { FlyoutTemplate } from './flyout_template';
-import { FLYOUT_HEADER_CLASS_NAME } from './use_header_collapse';
 
 const noop = () => {};
 
@@ -97,7 +96,11 @@ describe('FlyoutTemplate header collapse on scroll', () => {
   const renderCollapsibleFlyout = () =>
     render(
       <FlyoutTemplate onClose={noop} session="never">
-        <FlyoutTemplate.Header title="Long title" description="A timestamp" />
+        <FlyoutTemplate.Header
+          title="Long title"
+          description="A timestamp"
+          data-test-subj="collapsibleHeader"
+        />
         <FlyoutTemplate.Body>
           <span>content</span>
         </FlyoutTemplate.Body>
@@ -372,7 +375,7 @@ describe('FlyoutTemplate header collapse on scroll', () => {
   ) => {
     renderCollapsibleFlyout();
     const overflowEl = screen.getByTestId('euiFlyoutBodyOverflow');
-    const headerEl = document.querySelector(`.${FLYOUT_HEADER_CLASS_NAME}`) as HTMLElement;
+    const headerEl = screen.getByTestId('collapsibleHeader');
     const scrollBy = jest.fn();
     Object.defineProperty(overflowEl, 'scrollBy', { value: scrollBy, configurable: true });
     // Page mode derives its pixel delta from the viewport height.
@@ -561,6 +564,26 @@ describe('FlyoutTemplate Header collapsed prop', () => {
     expect(heading).toHaveAttribute('title', 'Compact title');
   });
 
+  it('keeps a link title inside the compact heading, without a title attribute', () => {
+    render(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title={<a href="#compact">Compact title</a>} collapsed />
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    const heading = screen.getByRole('heading', { level: 3, name: 'Compact title' });
+    expect(within(heading).getByRole('link', { name: 'Compact title' })).toHaveAttribute(
+      'href',
+      '#compact'
+    );
+    expect(heading).not.toHaveAttribute('title');
+    expect(heading).toHaveStyleRule('font-weight', 'inherit', { target: / a$/ });
+    expect(heading).toHaveStyleRule('font-weight', 'inherit', { target: / button$/ });
+  });
+
   it('keeps a decorative title icon beside the compact title', () => {
     const { container } = render(
       <FlyoutTemplate onClose={noop} session="never">
@@ -574,6 +597,22 @@ describe('FlyoutTemplate Header collapsed prop', () => {
     expect(container.querySelector('[data-euiicon-type="warning"]')).toHaveAttribute(
       'aria-hidden',
       'true'
+    );
+  });
+
+  it('keeps the loading spinner beside the compact title, outside the heading', () => {
+    render(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title="Compact title" isLoading collapsed />
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    const spinner = screen.getByTestId('flyoutHeaderTitleLoading');
+    expect(screen.getByRole('heading', { level: 3, name: 'Compact title' })).not.toContainElement(
+      spinner
     );
   });
 

@@ -18,14 +18,15 @@ import {
 } from '@kbn/entity-store/common';
 import { compact } from 'lodash';
 import type { EntityDetailsHighlightsResponse } from '../../../common/api/entity_analytics/entity_details/highlights.gen';
+import type { EntityViewMode } from '../../../common/entity_analytics/entity_store/resolution_group';
 import {
   ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL,
   ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL,
 } from '../../../common/entity_analytics/entity_analytics/constants';
 import type {
-  AnomalyOverviewRequestBody,
+  GetAnomalyOverviewRequestBodyInput,
   AnomalyOverviewResponse,
-  AnomalySummaryRequestBody,
+  GetAnomalySummaryRequestBodyInput,
   AnomalySummaryResponse,
   AssetCriticalityRecord,
   ConfigureRiskEngineSavedObjectRequestBodyInput,
@@ -111,7 +112,10 @@ import {
   WATCHLISTS_CSV_UPLOAD_URL,
   WATCHLISTS_PRIVILEGES_URL,
 } from '../../../common/entity_analytics/watchlists/constants';
-import { RISK_SCORE_HISTORY_URL } from '../../../common/entity_analytics/risk_score/constants';
+import {
+  RISK_SCORE_HISTORY_URL,
+  RISK_SCORE_MAINTAINER_ID,
+} from '../../../common/entity_analytics/risk_score/constants';
 import type { UploadWatchlistCsvResponse } from '../../../common/api/entity_analytics/watchlists/csv_upload/csv_upload.gen';
 import {
   GENERATE_LEADS_URL,
@@ -142,7 +146,6 @@ export interface DeleteAssetCriticalityResponse {
  * It is used to identify the only entity source that can be edited by the UI.
  */
 const ENTITY_SOURCE_NAME = 'User Monitored Indices';
-const RISK_SCORE_MAINTAINER_ID = 'risk-score';
 const ENTITY_STORE_V2_QUERY = { apiVersion: ENTITY_STORE_API_VERSIONS.internal.v2 } as const;
 
 const getMaintainerRouteWithId = (route: string, id: string): string =>
@@ -755,7 +758,11 @@ export const useEntityAnalyticsRoutes = () => {
         body: JSON.stringify(params),
       });
 
-    const fetchEntityDetailsHighlights = (
+    const fetchEntityDetailsHighlights = ({
+      params,
+      signal,
+      context,
+    }: {
       params: {
         entityType: string;
         entityIdentifier: string;
@@ -763,23 +770,31 @@ export const useEntityAnalyticsRoutes = () => {
         from: number;
         to: number;
         connectorId: string;
-      },
-      signal?: AbortSignal
-    ): Promise<EntityDetailsHighlightsResponse> =>
+        mode?: EntityViewMode;
+      };
+      signal?: AbortSignal;
+      context?: KibanaExecutionContext;
+    }): Promise<EntityDetailsHighlightsResponse> =>
       http.fetch(ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL, {
         version: API_VERSIONS.internal.v1,
         method: 'POST',
         body: JSON.stringify(params),
         signal,
+        context,
       });
 
-    const saveEntityAiSummary = (
-      params: SaveEntityAiSummaryParams
-    ): Promise<{ created: boolean }> =>
+    const saveEntityAiSummary = ({
+      params,
+      context,
+    }: {
+      params: SaveEntityAiSummaryParams;
+      context?: KibanaExecutionContext;
+    }): Promise<{ created: boolean }> =>
       http.fetch(ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL, {
         version: API_VERSIONS.internal.v1,
         method: 'POST',
         body: JSON.stringify(params),
+        context,
       });
 
     /**
@@ -787,15 +802,25 @@ export const useEntityAnalyticsRoutes = () => {
      * `canRead: false` in the response means the user lacks metadata read access
      * and the caller should fall back to on-demand generation.
      */
-    const fetchPersistedAiSummary = (
-      params: { entityType: string; entityIdentifier: string },
-      signal?: AbortSignal
-    ): Promise<GetPersistedAiSummaryResponse> =>
+    const fetchPersistedAiSummary = ({
+      params,
+      signal,
+      context,
+    }: {
+      params: { entityType: string; entityIdentifier: string; mode?: EntityViewMode };
+      signal?: AbortSignal;
+      context?: KibanaExecutionContext;
+    }): Promise<GetPersistedAiSummaryResponse> =>
       http.fetch(ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL, {
         version: API_VERSIONS.internal.v1,
         method: 'GET',
-        query: { entityId: params.entityIdentifier, entityType: params.entityType },
+        query: {
+          entityId: params.entityIdentifier,
+          entityType: params.entityType,
+          ...(params.mode ? { mode: params.mode } : {}),
+        },
         signal,
+        context,
       });
 
     /**
@@ -1045,7 +1070,7 @@ export const useEntityAnalyticsRoutes = () => {
     }: {
       entityType: string;
       entityId: string;
-      body?: AnomalySummaryRequestBody;
+      body?: GetAnomalySummaryRequestBodyInput;
       signal?: AbortSignal;
       context?: KibanaExecutionContext;
     }) =>
@@ -1072,7 +1097,7 @@ export const useEntityAnalyticsRoutes = () => {
     }: {
       entityType: string;
       entityId: string;
-      body?: AnomalyOverviewRequestBody;
+      body?: GetAnomalyOverviewRequestBodyInput;
       signal?: AbortSignal;
       context?: KibanaExecutionContext;
     }) =>

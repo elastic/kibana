@@ -15,7 +15,6 @@ import { AiopsProvider } from './aiops';
 import { CanvasElementProvider } from './canvas_element';
 import { CasesServiceProvider } from './cases';
 import { DataStreamProvider } from './data_stream';
-import { GrokDebuggerProvider } from './grok_debugger';
 import { MachineLearningProvider } from './ml';
 import { PipelineEditorProvider } from './pipeline_editor';
 import { PipelineListProvider } from './pipeline_list';
@@ -76,7 +75,6 @@ export const services = {
   aceEditor: AceEditorProvider,
   rules: RulesServiceProvider,
   sampleData: SampleDataServiceProvider,
-  grokDebugger: GrokDebuggerProvider,
   ml: MachineLearningProvider,
   transform: TransformProvider,
   reporting: ReportingFunctionalProvider,

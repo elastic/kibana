@@ -51,11 +51,15 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
     }
 
     async function runInvalidateTask() {
-      // Invoke the invalidate API key task
-      await supertest
-        .post('/api/alerts_fixture/api_key_invalidation/_run_soon')
-        .set('kbn-xsrf', 'xxx')
-        .expect(200);
+      // A refused or conflicting runSoon still answers 200, so the body is what confirms the task was rescheduled
+      await retry.try(async () => {
+        const response = await supertest
+          .post('/api/alerts_fixture/api_key_invalidation/_run_soon')
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+        expect(response.body.error).to.be(undefined);
+        expect(response.body.conflict).to.be(undefined);
+      });
     }
 
     async function getApiKeysPendingInvalidation() {
@@ -262,10 +266,9 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
       });
 
       // pending API key should now be deleted because backfill is done
-      await retry.try(async () => {
-        // invoke the invalidate task
-        await runInvalidateTask();
+      await runInvalidateTask();
 
+      await retry.try(async () => {
         const results = await getApiKeysPendingInvalidation();
         expect(results.length).to.eql(0);
         return results;

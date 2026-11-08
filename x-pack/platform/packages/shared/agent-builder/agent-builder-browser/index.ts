@@ -19,7 +19,7 @@ export type {
   ListWorkflowsResponse,
   WorkflowListItem,
 } from './tools';
-export type { AgentsServiceStartContract } from './agents';
+export type { AgentsServiceStartContract, AgentWithPermissions } from './agents';
 export type {
   AttachmentUIDefinition,
   AttachmentServiceStartContract,
@@ -58,10 +58,15 @@ export type {
   ChatUiEventsContract,
   BrowserChatEvent,
   ActiveConversation,
+  ApiStateChangesOptions,
 } from './events';
+export { filterApiStateChanges } from './events';
 export { WorkflowComboBox } from './workflow_combo_box';
 export type { WorkflowComboBoxProps, WorkflowComboBoxOption } from './workflow_combo_box';
-export { ConversationInputShell } from './conversation_input_shell';
+export {
+  ConversationInputShell,
+  CONVERSATION_INPUT_SHELL_RADIUS,
+} from './conversation_input_shell';
 export type { ConversationInputShellProps } from './conversation_input_shell';
 export type {
   AgentBuilderPluginSetup,

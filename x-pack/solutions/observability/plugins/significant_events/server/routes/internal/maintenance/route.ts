@@ -6,7 +6,10 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import {
+  NIGHTSHIFT_API_PRIVILEGES,
+  NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
+} from '@kbn/nightshift-shared';
 import type {
   SignificantEventsMaintenanceStatus,
   SignificantEventsMaintenanceSummary,
@@ -23,7 +26,7 @@ const bootstrapCleanupRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
   params: z.object({}),
@@ -57,13 +60,13 @@ const pauseRoute = createServerRoute({
     access: 'internal',
     summary: 'Pause Significant Events activity',
     description:
-      'Disables all Significant Events managed workflows across every Kibana space, cancels their in-flight executions, and disables the alerting rules backing knowledge indicator queries. Existing data is kept. Idempotent while paused. ' +
-      'This is a deployment-wide control (agnostic saved object), not per-space. Authorization uses the caller’s space-scoped Nightshift manage privilege; there is no separate cluster-level privilege today — treat manage as sufficient to pause the whole deployment. ' +
+      'Pauses Significant Events activity in the current space only: disables that space’s scheduled workflows, cancels their in-flight executions (including executions of the shared workflows running in that space), turns off its continuous onboarding and scheduled discovery settings, and disables the alerting rules backing knowledge indicator queries in that space. Other spaces are not affected. The shared workflows stay enabled because every space uses them. Existing data is kept. Idempotent while paused. ' +
+      'The state is stored per space. Authorization uses the caller’s space-scoped Nightshift manage privilege, which is enough to pause that space. ' +
       'Stays available while the Nightshift feature flag is off, so background activity can be stopped without turning Nightshift back on.',
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
   params: z.object({}),
@@ -87,11 +90,11 @@ const resumeRoute = createServerRoute({
     access: 'internal',
     summary: 'Resume Significant Events activity',
     description:
-      'Re-enables the managed workflows and alerting rules that Pause disabled across the deployment. Does not restart cancelled executions. Idempotent while enabled.',
+      'Re-enables the workflows and alerting rules that Pause disabled in the current space, and restores the settings it turned off there. Other spaces are not affected. Does not restart cancelled executions. Idempotent while enabled.',
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
   params: z.object({}),
@@ -109,13 +112,43 @@ const resumeRoute = createServerRoute({
   },
 });
 
+const resetRoute = createServerRoute({
+  endpoint: 'POST /internal/significant_events/maintenance/_reset',
+  options: {
+    access: 'internal',
+    summary: 'Reset Significant Events activity and data',
+    description:
+      'Cancels Significant Events activity and permanently deletes KIs, stored queries, backing rules, detections and space-tagged legacy discoveries in the current Kibana space only. The operation is best-effort, irreversible, and idempotent. Other spaces, source definitions and views, investigations, untagged legacy documents and `.rule-events` history are preserved. ' +
+      'Requires Nightshift manage and configure privileges in the current space. The space is paused during cleanup and returned to enabled afterwards, with continuous onboarding and scheduled discovery off. Shared workflow documents remain enabled; only executions in the current space are cancelled. If the final state write fails after deletion, run reset again to return the space to enabled. ' +
+      'Shared data streams are retained: documents are refreshed and deleted as the caller, requiring Elasticsearch `read`, `delete` and `maintenance` index privileges on the owned `.significant_events-*` streams. Missing privileges are reported in `partialFailures`. `deleted.dataStreams` counts streams from which current-space documents were removed, not physically deleted streams.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
+    },
+  },
+  params: z.object({}),
+  handler: async ({
+    request,
+    server,
+    getScopedClients,
+    maintenanceService,
+  }): Promise<SignificantEventsMaintenanceSummary> => {
+    const { licensing } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing });
+
+    const updatedBy = server.core.security.authc.getCurrentUser(request)?.username;
+    return maintenanceService.reset({ request, updatedBy });
+  },
+});
+
 const statusRoute = createServerRoute({
   endpoint: 'GET /internal/significant_events/maintenance/_status',
   options: {
     access: 'internal',
     summary: 'Get Significant Events maintenance status',
     description:
-      'Returns the current maintenance state of Significant Events activity (e.g. enabled or paused). Stays available while the Nightshift feature flag is off.',
+      'Returns the maintenance state of Significant Events activity in the current space (e.g. enabled or paused). Stays available while the Nightshift feature flag is off.',
   },
   security: {
     authz: {
@@ -140,5 +173,6 @@ export const internalMaintenanceRoutes = {
   ...bootstrapCleanupRoute,
   ...pauseRoute,
   ...resumeRoute,
+  ...resetRoute,
   ...statusRoute,
 };

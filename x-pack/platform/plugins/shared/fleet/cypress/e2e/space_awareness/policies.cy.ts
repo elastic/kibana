@@ -16,6 +16,7 @@ import {
 import { login } from '../../tasks/login';
 import { createSpaces, enableSpaceAwareness } from '../../tasks/spaces';
 import { cleanupAgentPolicies } from '../../tasks/cleanup';
+import { visit } from '../../tasks/common';
 
 describe('Space aware policies creation', { testIsolation: false }, () => {
   before(() => {
@@ -35,7 +36,7 @@ describe('Space aware policies creation', { testIsolation: false }, () => {
   const POLICY_NAME = `Policy 1 space test`;
   const NO_AGENT_POLICIES = 'No agent policies';
   it('should allow to create an agent policy in the test space', () => {
-    cy.visit('/s/test/app/fleet/policies');
+    visit('/s/test/app/fleet/policies');
 
     cy.getBySel(ADD_AGENT_POLICY_BTN).click();
     cy.getBySel(AGENT_POLICY_CREATE_AGENT_POLICY_NAME_FIELD).type(POLICY_NAME);
@@ -46,13 +47,13 @@ describe('Space aware policies creation', { testIsolation: false }, () => {
   });
 
   it('the created policy should not be visible in the default space', () => {
-    cy.visit('/app/fleet/policies');
+    visit('/app/fleet/policies');
     cy.wait('@getAgentPolicies');
     cy.getBySel(AGENT_POLICIES_TABLE).contains(NO_AGENT_POLICIES);
   });
 
   it('should allow to update that policy to belong to both test and default space', () => {
-    cy.visit('/s/test/app/fleet/policies');
+    visit('/s/test/app/fleet/policies');
     cy.getBySel(AGENT_POLICIES_TABLE).contains(POLICY_NAME).click();
 
     cy.getBySel(AGENT_POLICY_DETAILS_PAGE.SETTINGS_TAB).click();
@@ -64,19 +65,19 @@ describe('Space aware policies creation', { testIsolation: false }, () => {
   });
 
   it('the policy should be visible in the test space', () => {
-    cy.visit('/s/test/app/fleet/policies');
+    visit('/s/test/app/fleet/policies');
     cy.wait('@getAgentPolicies');
     cy.getBySel(AGENT_POLICIES_TABLE).contains(POLICY_NAME);
   });
 
   it('the policy should be visible in the default space', () => {
-    cy.visit('/app/fleet/policies');
+    visit('/app/fleet/policies');
     cy.wait('@getAgentPolicies');
     cy.getBySel(AGENT_POLICIES_TABLE).contains(POLICY_NAME);
   });
 
   it('should redirect to the agent policies list when removing the current space from a policy', () => {
-    cy.visit('/s/test/app/fleet/policies');
+    visit('/s/test/app/fleet/policies');
     cy.getBySel(AGENT_POLICIES_TABLE).contains(POLICY_NAME).click();
 
     cy.getBySel(AGENT_POLICY_DETAILS_PAGE.SETTINGS_TAB).click();

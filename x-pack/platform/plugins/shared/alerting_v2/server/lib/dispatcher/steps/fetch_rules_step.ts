@@ -8,8 +8,8 @@
 import { inject, injectable } from 'inversify';
 import type { RulesSavedObjectServiceContract } from '../../services/rules_saved_object_service/rules_saved_object_service';
 import { RulesSavedObjectServiceInternalToken } from '../../services/rules_saved_object_service/tokens';
-import { savedObjectNamespacesToSpaceId } from '../../space_id_to_namespace';
-import { EpisodeTriage, RuleCatalog } from '../state';
+import { savedObjectNamespacesToSpaceId } from '../../saved_object_namespaces_to_space_id';
+import { AlertTriage, RuleCatalog } from '../state';
 import type {
   DispatcherPipelineState,
   DispatcherStep,
@@ -32,22 +32,26 @@ export class FetchRulesStep implements DispatcherStep {
     state: Readonly<DispatcherPipelineState>,
     _: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
-    const { triage = EpisodeTriage.empty() } = state;
+    const { triage = AlertTriage.empty() } = state;
 
     const uniqueRuleIds = triage.dispatchableRuleIds();
     if (uniqueRuleIds.length === 0) {
       return { type: 'continue', data: { rules: RuleCatalog.empty() } };
     }
 
-    const result = await this.rulesSavedObjectService.findByIds(uniqueRuleIds);
+    const result = await this.rulesSavedObjectService.findByIds(uniqueRuleIds, {
+      fields: ['metadata', 'grouping'],
+    });
     const rules = new Map<RuleId, Rule>();
 
     for (const doc of result) {
+      const { metadata, grouping } = doc.attributes;
       rules.set(doc.id, {
         id: doc.id,
         spaceId: savedObjectNamespacesToSpaceId(doc.namespaces),
-        name: doc.attributes.metadata.name,
-        tags: doc.attributes.metadata.tags ?? [],
+        name: metadata.name,
+        routingTags: metadata.routing_tags ?? [],
+        groupingFields: grouping?.fields ?? [],
       });
     }
 

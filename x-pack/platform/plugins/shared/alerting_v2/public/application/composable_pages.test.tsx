@@ -12,7 +12,7 @@ import { Route } from '@kbn/shared-ux-router';
 import type { CoreStart, ChromeBreadcrumb } from '@kbn/core/public';
 import type { Container } from 'inversify';
 import type { InternalPageProps } from './composable_pages';
-import { createAlertingV2HostApp } from '../locators';
+import { createAlertingV2HostApp } from '../../common/locators';
 
 const ALL_CAPABILITIES = {
   alerting_v2_rules: { read: true, all: true },
@@ -59,8 +59,8 @@ jest.mock('../pages/rule_library_page/rule_library_page', () => ({
   RuleLibraryPage: () => <div data-test-subj="ruleLibraryPage">library</div>,
 }));
 
-jest.mock('../pages/alert_episodes_list_page/alert_episodes_list_page', () => ({
-  AlertEpisodesListPage: () => <div data-test-subj="episodesListPage">episodes</div>,
+jest.mock('../pages/alert_episodes_list_page/alerts_list_page', () => ({
+  AlertsListPage: () => <div data-test-subj="episodesListPage">episodes</div>,
 }));
 
 jest.mock('../pages/episode_details_page/episode_details_page', () => ({
@@ -133,6 +133,13 @@ const defaultProps = (): InternalPageProps => ({
   coreStart: createMockCoreStart(),
   container: createMockContainer() as unknown as Container,
   setBreadcrumbs: jest.fn() as (crumbs: ChromeBreadcrumb[]) => void,
+  hostApp: createAlertingV2HostApp('test', {
+    rules: '/alerting',
+    ruleLibrary: '/alerting/library',
+    alerts: '/alerting/inbox',
+    actionPolicies: '/alerting/action-policies',
+    executionHistory: '/alerting/execution-history',
+  }),
 });
 
 const renderInRouter = (ui: React.ReactElement, path = '/') =>
@@ -212,7 +219,7 @@ describe('composable pages', () => {
       const hostApp = createAlertingV2HostApp('observability', {
         rules: '/alerting',
         ruleLibrary: '/alerting/library',
-        episodes: '/alerting/inbox',
+        alerts: '/alerting/inbox',
         actionPolicies: '/alerting/action-policies',
         executionHistory: '/alerting/execution-history',
       });
@@ -260,18 +267,39 @@ describe('composable pages', () => {
       expect(screen.getByTestId('ruleDetailsRoute')).toBeInTheDocument();
     });
 
-    it('RulesPage redirects sequence-builder URLs to the list when experimental features are disabled', () => {
-      mockAlertingV2ExperimentalFeaturesEnabled = false;
+    it('RulesPage renders the sequence builder at parent/sequence/:ruleId/edit', async () => {
       renderAtRoute(
         '/rules/v2',
-        '/rules/v2/sequence/create',
+        '/rules/v2/sequence/some-rule/edit',
         <AlertingV2RulesPage {...defaultProps()} />
       );
-
-      expect(screen.getByTestId('rulesListPage')).toBeInTheDocument();
-      expect(screen.queryByTestId('sequenceBuilderPage')).not.toBeInTheDocument();
-      mockAlertingV2ExperimentalFeaturesEnabled = true;
+      expect(await screen.findByTestId('sequenceBuilderPage')).toBeInTheDocument();
     });
+
+    it('RulesPage renders the sequence builder at parent/sequence/create for a clone', async () => {
+      renderAtRoute(
+        '/rules/v2',
+        '/rules/v2/sequence/create?cloneFrom=some-rule',
+        <AlertingV2RulesPage {...defaultProps()} />
+      );
+      expect(await screen.findByTestId('sequenceBuilderPage')).toBeInTheDocument();
+    });
+
+    it.each([
+      ['create', '/rules/v2/sequence/create'],
+      ['clone', '/rules/v2/sequence/create?cloneFrom=some-rule'],
+      ['edit', '/rules/v2/sequence/some-rule/edit'],
+    ])(
+      'RulesPage redirects the sequence %s URL to the list when experimental features are disabled',
+      (_name, location) => {
+        mockAlertingV2ExperimentalFeaturesEnabled = false;
+        renderAtRoute('/rules/v2', location, <AlertingV2RulesPage {...defaultProps()} />);
+
+        expect(screen.getByTestId('rulesListPage')).toBeInTheDocument();
+        expect(screen.queryByTestId('sequenceBuilderPage')).not.toBeInTheDocument();
+        mockAlertingV2ExperimentalFeaturesEnabled = true;
+      }
+    );
 
     it('ActionPoliciesPage renders list when parent route matches', () => {
       renderAtRoute(

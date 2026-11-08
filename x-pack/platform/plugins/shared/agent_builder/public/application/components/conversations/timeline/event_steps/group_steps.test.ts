@@ -7,14 +7,15 @@
 
 import {
   ConversationRoundStepType,
+  createInjectedContextStep,
   createReasoningStep,
+  createSubstitutionStep,
   createToolCallStep,
 } from '@kbn/agent-builder-common/chat/conversation';
 import type {
   AskUserQuestionStep,
   BackgroundAgentCompleteStep,
   CompactionStep,
-  TodosStep,
   ToolCallStep,
 } from '@kbn/agent-builder-common/chat/conversation';
 import { groupSteps } from './group_steps';
@@ -36,7 +37,7 @@ const transientReasoningStep = () =>
 
 const compactionStep = (): CompactionStep => ({
   type: ConversationRoundStepType.compaction,
-  summarized_round_count: 2,
+  summarized_cycle_count: 2,
   token_count_before: 4000,
   token_count_after: 1200,
 });
@@ -50,6 +51,14 @@ const backgroundAgentStep = (): BackgroundAgentCompleteStep => ({
 describe('groupSteps', () => {
   it('returns [] for an empty array', () => {
     expect(groupSteps([])).toEqual([]);
+  });
+
+  it('hides injected context steps without breaking the surrounding tool call group', () => {
+    const a = toolStep('a');
+    const b = toolStep('b');
+    const note = createInjectedContextStep({ hook_id: 'memory', text: 'remember' });
+
+    expect(groupSteps([note, a, note, b])).toEqual([{ kind: 'group', steps: [a, b] }]);
   });
 
   it('wraps a single tool call in a group', () => {
@@ -241,35 +250,29 @@ describe('groupSteps', () => {
     expect(result).toEqual([{ kind: 'group', steps: [a, solo, c] }]);
   });
 
-  it('does not flush the tool buffer when a TodosStep arrives mid-stream between tool calls', () => {
-    const todos: TodosStep = {
-      type: ConversationRoundStepType.updateTodos,
-      todos: [{ content: 'do thing', status: 'in_progress' }],
-    };
+  it('hides a SubstitutionStep without splitting the surrounding tool group', () => {
+    const substitution = createSubstitutionStep({
+      trigger: 'intra_round',
+      threshold_tokens: 1_000,
+      substituted_tool_calls: [{ round_id: 'round-1', tool_call_id: 'a' }],
+    });
     const a = toolStep('a');
     const b = toolStep('b');
-    const c = toolStep('c');
-    const result = groupSteps([a, b, todos, c]);
 
-    expect(result).toEqual([{ kind: 'group', steps: [a, b, c] }]);
+    const result = groupSteps([a, substitution, b]);
+
+    expect(result).toEqual([{ kind: 'group', steps: [a, b] }]);
   });
 
-  it('keeps a TodosStep between two reasoning steps from affecting grouping', () => {
-    const todos: TodosStep = {
-      type: ConversationRoundStepType.updateTodos,
-      todos: [],
-    };
-    const r1 = reasoningStep('r1');
+  it('hides a pre-execution workflow step without splitting tool groups', () => {
     const a = toolStep('a');
-    const r2 = reasoningStep('r2');
+    const b = toolStep('b');
+    const workflowStep = {
+      type: ConversationRoundStepType.preExecutionWorkflow,
+      model_context: 'hidden context',
+    } as const;
 
-    const result = groupSteps([r1, todos, a, todos, r2]);
-
-    expect(result).toEqual([
-      { kind: 'step', step: r1, index: 0 },
-      { kind: 'group', steps: [a] },
-      { kind: 'step', step: r2, index: 4 },
-    ]);
+    expect(groupSteps([a, workflowStep, b])).toEqual([{ kind: 'group', steps: [a, b] }]);
   });
 
   it('flushes the tool buffer when an AskUserQuestionStep arrives and renders it as a step', () => {

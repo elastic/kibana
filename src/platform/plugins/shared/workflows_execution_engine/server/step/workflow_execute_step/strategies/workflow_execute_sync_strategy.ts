@@ -11,7 +11,12 @@ import { omit } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflow } from '@kbn/workflows';
-import { ExecutionStatus, isTerminalStatus, toWorkflowExecutionEngineModel } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  isTerminalStatus,
+  toWorkflowExecutionEngineModel,
+  WORKFLOW_STEP_TRIGGER_SOURCE,
+} from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
 import type {
   EsWorkflowExecution,
@@ -23,6 +28,8 @@ import type { WorkflowExecutionRepository } from '../../../repositories/workflow
 import type { WorkflowsExecutionEnginePluginStart } from '../../../types';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
+import { buildChildEventChainContext } from '../build_child_event_chain_context';
+import { buildChildLineageContext } from '../build_child_lineage_context';
 import type { StrategyResult } from '../types';
 
 export type { StrategyResult } from '../types';
@@ -47,14 +54,24 @@ export class WorkflowExecuteSyncStrategy {
     inputs: Record<string, unknown>,
     spaceId: string,
     request: KibanaRequest,
-    parentDepth: number
+    parentDepth: number,
+    inheritParentIdentity: boolean,
+    parentStepName: string
   ): Promise<StrategyResult> {
     const currentState = this.stepExecutionRuntime.getCurrentStepState() as
       | SubWorkflowWaitState
       | undefined;
 
     if (!currentState) {
-      return this.initiateSubWorkflowExecution(workflow, inputs, spaceId, request, parentDepth);
+      return this.initiateSubWorkflowExecution(
+        workflow,
+        inputs,
+        spaceId,
+        request,
+        parentDepth,
+        inheritParentIdentity,
+        parentStepName
+      );
     }
 
     return this.readChildExecutionFromEs(currentState, spaceId);
@@ -97,7 +114,9 @@ export class WorkflowExecuteSyncStrategy {
     inputs: Record<string, unknown>,
     spaceId: string,
     request: KibanaRequest,
-    parentDepth: number
+    parentDepth: number,
+    inheritParentIdentity: boolean,
+    parentStepName: string
   ): Promise<StrategyResult> {
     try {
       const workflowExecution = this.stepExecutionRuntime.workflowExecution;
@@ -107,12 +126,15 @@ export class WorkflowExecuteSyncStrategy {
         {
           spaceId,
           inputs,
-          triggeredBy: 'workflow-step',
+          triggeredBy: WORKFLOW_STEP_TRIGGER_SOURCE,
           parentWorkflowInvocation: 'sync',
           parentWorkflowId: workflowExecution.workflowId,
           parentWorkflowExecutionId: workflowExecution.id,
           parentStepId: this.stepExecutionRuntime.node.stepId,
           parentDepth,
+          ...buildChildLineageContext({ invocation: 'sync', parent: workflowExecution }),
+          ...buildChildEventChainContext(workflowExecution),
+          ...(inheritParentIdentity ? { inheritParentIdentity: true, parentStepName } : {}),
         },
         request
       );
@@ -129,14 +151,42 @@ export class WorkflowExecuteSyncStrategy {
 
       this.stepExecutionRuntime.setCurrentStepState(state);
 
+      const childAlreadyTerminal = await this.isChildAlreadyTerminal(state, spaceId);
+
+      // Checked after the read so a cancellation that lands during it is not overwritten below.
       if (this.stepExecutionRuntime.abortController.signal.aborted) {
         return { status: 'cancelled' };
+      }
+
+      if (childAlreadyTerminal) {
+        return this.readChildExecutionFromEs(state, spaceId);
       }
 
       this.stepExecutionRuntime.tryEnterWaitUntil(undefined, ExecutionStatus.WAITING_FOR_CHILD);
       return { status: 'waiting' };
     } catch (error) {
       return { status: 'failed', error: error as Error };
+    }
+  }
+
+  private async isChildAlreadyTerminal(
+    state: SubWorkflowWaitState,
+    spaceId: string
+  ): Promise<boolean> {
+    try {
+      const execution = await this.workflowExecutionRepository.getWorkflowExecutionById(
+        state.executionId,
+        spaceId
+      );
+      return !!execution && isTerminalStatus(execution.status);
+    } catch (error) {
+      // Best-effort: a read failure falls back to waiting, where the child's task wakes the parent.
+      this.workflowLogger.logDebug(
+        `Failed to read sub-workflow execution ${state.executionId} after start: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return false;
     }
   }
 

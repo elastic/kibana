@@ -13,20 +13,12 @@ import {
 } from '../../../common/workflows/steps/attachment_delete';
 import type { AttachmentStepDeps } from '../attachment_registry';
 
-export const deleteAttachmentStepDefinition = ({
-  getAttachmentClient,
-  isExperimentalEnabled,
-}: AttachmentStepDeps) =>
+export const deleteAttachmentStepDefinition = ({ getAttachmentClient }: AttachmentStepDeps) =>
   createServerStepDefinition({
     ...deleteAttachmentStepCommonDefinition,
     handler: async (context: StepHandlerContext) => {
       try {
         const request = context.contextManager.getFakeRequest();
-        if (!(await isExperimentalEnabled(request))) {
-          return {
-            error: new Error('Attachment steps require experimental features to be enabled'),
-          };
-        }
         const client = await getAttachmentClient(request);
         const input = context.input as DeleteAttachmentStepInput;
 

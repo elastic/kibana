@@ -17,6 +17,10 @@ import type {
   AuthToolkit,
   CustomBrandingSetup,
   ElasticsearchServiceSetup,
+  HttpSelfCredentialRefresher,
+  HttpSelfCredentialRefresherToolkit,
+  HttpSelfUnauthorizedErrorHandler,
+  HttpSelfUnauthorizedErrorHandlerToolkit,
   HttpServiceSetup,
   HttpServiceStart,
   IStaticAssets,
@@ -55,6 +59,7 @@ import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
 import { securityMock } from '../mocks';
 import { ROUTE_TAG_ACCEPT_UIAM_OAUTH, ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
+import { ServiceAccountCredentialRefusedError } from '../service_accounts/credential_refused_error';
 import { serviceAccountsServiceMock } from '../service_accounts/service_accounts_service.mock';
 import type { Session } from '../session_management';
 import { sessionMock } from '../session_management/session.mock';
@@ -472,6 +477,228 @@ describe('AuthenticationService', () => {
         expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
         expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
       });
+    });
+
+    describe('self client unauthorized error handler', () => {
+      let selfClientHandler: HttpSelfUnauthorizedErrorHandler;
+      let toolkit: jest.Mocked<HttpSelfUnauthorizedErrorHandlerToolkit>;
+      let reauthenticate: jest.SpyInstance<Promise<AuthenticationResult>, [KibanaRequest]>;
+      let serviceAccounts: ReturnType<typeof serviceAccountsServiceMock.createStart>;
+      const handlerOptions = (request: KibanaRequest) => ({
+        request,
+        path: '/api/status',
+        responseHeaders: new Headers(),
+      });
+
+      beforeEach(() => {
+        toolkit = { notHandled: jest.fn(), retry: jest.fn() };
+        service.start(mockStartAuthenticationParams);
+        selfClientHandler =
+          mockSetupAuthenticationParams.http.setSelfClientUnauthorizedErrorHandler.mock.calls[0][0];
+        reauthenticate =
+          jest.requireMock('./authenticator').Authenticator.mock.instances[0].reauthenticate;
+        serviceAccounts = serviceAccountsServiceMock.createStart();
+        mockSetupAuthenticationParams.getServiceAccounts.mockReturnValue(serviceAccounts);
+      });
+
+      it('is registered exactly once', () => {
+        expect(
+          mockSetupAuthenticationParams.http.setSelfClientUnauthorizedErrorHandler
+        ).toHaveBeenCalledTimes(1);
+      });
+
+      it('retries with the replaced credential for a service-account-bound fake request', async () => {
+        serviceAccounts.backend.reauthenticateFakeRequest.mockResolvedValue({
+          authorization: 'Bearer essu_fresh_token',
+        });
+        const request = httpServerMock.createFakeKibanaRequest({
+          headers: { authorization: 'Bearer essu_stale_token' },
+        });
+
+        await selfClientHandler(handlerOptions(request), toolkit);
+
+        expect(serviceAccounts.backend.reauthenticateFakeRequest).toHaveBeenCalledTimes(1);
+        expect(serviceAccounts.backend.reauthenticateFakeRequest).toHaveBeenCalledWith(request);
+        expect(toolkit.retry).toHaveBeenCalledWith({
+          authHeaders: { authorization: 'Bearer essu_fresh_token' },
+        });
+        // The self client derives the internal-caller attestation itself, per attempt.
+        expect(toolkit.retry).not.toHaveBeenCalledWith(
+          expect.objectContaining({
+            authHeaders: expect.objectContaining({
+              'x-kbn-uiam-internal-caller-attestation': expect.anything(),
+            }),
+          })
+        );
+        expect(reauthenticate).not.toHaveBeenCalled();
+      });
+
+      it('does not handle a real request, and never touches the session machinery', async () => {
+        await selfClientHandler(handlerOptions(httpServerMock.createKibanaRequest()), toolkit);
+
+        expect(serviceAccounts.backend.reauthenticateFakeRequest).not.toHaveBeenCalled();
+        expect(reauthenticate).not.toHaveBeenCalled();
+        expect(toolkit.notHandled).toHaveBeenCalledTimes(1);
+        expect(toolkit.retry).not.toHaveBeenCalled();
+      });
+
+      it('does not handle a fake request that is not service-account-bound', async () => {
+        serviceAccounts.backend.reauthenticateFakeRequest.mockResolvedValue(null);
+
+        await selfClientHandler(
+          handlerOptions(
+            httpServerMock.createFakeKibanaRequest({
+              headers: { authorization: 'ApiKey essu_task_manager_key' },
+            })
+          ),
+          toolkit
+        );
+
+        expect(toolkit.notHandled).toHaveBeenCalledTimes(1);
+        expect(toolkit.retry).not.toHaveBeenCalled();
+      });
+
+      it('does not handle the error when the credential replacement rejects', async () => {
+        serviceAccounts.backend.reauthenticateFakeRequest.mockRejectedValue(
+          new Error('mint failed')
+        );
+
+        await expect(
+          selfClientHandler(handlerOptions(httpServerMock.createFakeKibanaRequest({})), toolkit)
+        ).resolves.not.toThrow();
+
+        expect(toolkit.notHandled).toHaveBeenCalledTimes(1);
+        expect(toolkit.retry).not.toHaveBeenCalled();
+      });
+
+      it('does not handle the error when the service accounts service is not available', async () => {
+        mockSetupAuthenticationParams.getServiceAccounts.mockReturnValue(null);
+
+        await selfClientHandler(
+          handlerOptions(httpServerMock.createFakeKibanaRequest({})),
+          toolkit
+        );
+
+        expect(toolkit.notHandled).toHaveBeenCalledTimes(1);
+        expect(toolkit.retry).not.toHaveBeenCalled();
+      });
+
+      it.each(['isLicenseAvailable', 'isEnabled'] as const)(
+        'does not refresh when %s is false',
+        async (method) => {
+          mockSetupAuthenticationParams.license[method].mockReturnValue(false);
+
+          await selfClientHandler(
+            handlerOptions(httpServerMock.createFakeKibanaRequest({})),
+            toolkit
+          );
+
+          expect(serviceAccounts.backend.reauthenticateFakeRequest).not.toHaveBeenCalled();
+          expect(toolkit.notHandled).toHaveBeenCalledTimes(1);
+          expect(toolkit.retry).not.toHaveBeenCalled();
+        }
+      );
+    });
+
+    describe('self client credential refresher', () => {
+      let refresher: HttpSelfCredentialRefresher;
+      let toolkit: jest.Mocked<HttpSelfCredentialRefresherToolkit>;
+      let serviceAccounts: ReturnType<typeof serviceAccountsServiceMock.createStart>;
+      const refresherOptions = (request: KibanaRequest) => ({
+        request,
+        path: '/api/status',
+        timeoutMs: 300_000,
+      });
+
+      beforeEach(() => {
+        toolkit = { notHandled: jest.fn(), replace: jest.fn(), reject: jest.fn() };
+        service.start(mockStartAuthenticationParams);
+        refresher =
+          mockSetupAuthenticationParams.http.setSelfClientCredentialRefresher.mock.calls[0][0];
+        serviceAccounts = serviceAccountsServiceMock.createStart();
+        mockSetupAuthenticationParams.getServiceAccounts.mockReturnValue(serviceAccounts);
+      });
+
+      it('is registered exactly once', () => {
+        expect(
+          mockSetupAuthenticationParams.http.setSelfClientCredentialRefresher
+        ).toHaveBeenCalledTimes(1);
+      });
+
+      it('sends the credential that covers the call for a service-account-bound fake request', async () => {
+        serviceAccounts.backend.refreshFakeRequestBeforeUse.mockResolvedValue({
+          authorization: 'Bearer essu_fresh_token',
+        });
+        const request = httpServerMock.createFakeKibanaRequest({
+          headers: { authorization: 'Bearer essu_expiring_token' },
+        });
+
+        await refresher(refresherOptions(request), toolkit);
+
+        expect(serviceAccounts.backend.refreshFakeRequestBeforeUse).toHaveBeenCalledWith(
+          request,
+          300_000
+        );
+        expect(toolkit.replace).toHaveBeenCalledWith({
+          authHeaders: { authorization: 'Bearer essu_fresh_token' },
+        });
+      });
+
+      it('rejects the call when the backend refuses the credential for good', async () => {
+        const refusal = new ServiceAccountCredentialRefusedError();
+        serviceAccounts.backend.refreshFakeRequestBeforeUse.mockRejectedValue(refusal);
+
+        await refresher(refresherOptions(httpServerMock.createFakeKibanaRequest({})), toolkit);
+
+        expect(toolkit.reject).toHaveBeenCalledWith({ error: refusal });
+        expect(toolkit.replace).not.toHaveBeenCalled();
+      });
+
+      it('sends the call unchanged when the refresh fails in any other way', async () => {
+        serviceAccounts.backend.refreshFakeRequestBeforeUse.mockRejectedValue(
+          new Error('mint failed')
+        );
+
+        await refresher(refresherOptions(httpServerMock.createFakeKibanaRequest({})), toolkit);
+
+        expect(toolkit.notHandled).toHaveBeenCalledTimes(1);
+        expect(toolkit.reject).not.toHaveBeenCalled();
+      });
+
+      it('leaves a real request alone', async () => {
+        await refresher(refresherOptions(httpServerMock.createKibanaRequest()), toolkit);
+
+        expect(serviceAccounts.backend.refreshFakeRequestBeforeUse).not.toHaveBeenCalled();
+        expect(toolkit.notHandled).toHaveBeenCalledTimes(1);
+      });
+
+      it('leaves a fake request that is not service-account-bound alone', async () => {
+        serviceAccounts.backend.refreshFakeRequestBeforeUse.mockResolvedValue(null);
+
+        await refresher(refresherOptions(httpServerMock.createFakeKibanaRequest({})), toolkit);
+
+        expect(toolkit.notHandled).toHaveBeenCalledTimes(1);
+      });
+
+      it('sends the call unchanged when the service accounts service is not available', async () => {
+        mockSetupAuthenticationParams.getServiceAccounts.mockReturnValue(null);
+
+        await refresher(refresherOptions(httpServerMock.createFakeKibanaRequest({})), toolkit);
+
+        expect(toolkit.notHandled).toHaveBeenCalledTimes(1);
+      });
+
+      it.each(['isLicenseAvailable', 'isEnabled'] as const)(
+        'does not refresh when %s is false',
+        async (method) => {
+          mockSetupAuthenticationParams.license[method].mockReturnValue(false);
+
+          await refresher(refresherOptions(httpServerMock.createFakeKibanaRequest({})), toolkit);
+
+          expect(serviceAccounts.backend.refreshFakeRequestBeforeUse).not.toHaveBeenCalled();
+          expect(toolkit.notHandled).toHaveBeenCalledTimes(1);
+        }
+      );
     });
 
     describe('unauthorized error handler', () => {
@@ -958,6 +1185,18 @@ describe('AuthenticationService', () => {
         } as ConfigType['public'];
         expect(getServerBaseURL()).toBe('https://elastic.co:4321');
       });
+
+      it('brackets IPv6 literal hostnames so the result is a parseable URL', async () => {
+        mockStartAuthenticationParams.http.getServerInfo.mockReturnValue({
+          name: 'some-name',
+          protocol: 'https',
+          hostname: '::1',
+          port: 5620,
+        });
+
+        expect(getServerBaseURL()).toBe('https://[::1]:5620');
+        expect(new URL(getServerBaseURL()).protocol).toBe('https:');
+      });
     });
 
     describe('getCurrentUser()', () => {
@@ -1051,7 +1290,7 @@ describe('AuthenticationService', () => {
                 oauth2: {
                   metadata: {
                     authorization_servers: ['https://localhost:9200'],
-                    resource: 'http://localhost:5620',
+                    resource: 'http://localhost:5620/api/agent_builder/mcp',
                   },
                 },
               },
@@ -1087,6 +1326,94 @@ describe('AuthenticationService', () => {
         });
       });
 
+      it.each(['/api/agent_builder/mcp', '/test_endpoints/self_client/as_scoped_oauth'])(
+        'builds resource_metadata URL from the configured resource for request path %s',
+        async (path) => {
+          const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+
+          mockSetupAuthenticationParams.config = createConfig(
+            ConfigSchema.validate(
+              {
+                mcp: {
+                  oauth2: {
+                    metadata: {
+                      authorization_servers: ['https://localhost:9200'],
+                      resource: 'http://localhost:5620/api/agent_builder/mcp',
+                    },
+                  },
+                },
+              },
+              { serverless: true }
+            ),
+            loggingSystemMock.create().get(),
+            { isTLSEnabled: false }
+          );
+
+          const { onPreResponseHandler } = getService();
+
+          await onPreResponseHandler(
+            httpServerMock.createKibanaRequest({
+              path,
+              routeTags: [ROUTE_TAG_ACCEPT_UIAM_OAUTH],
+            }),
+            { statusCode: 401 },
+            mockOnPreResponseToolkit
+          );
+
+          expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith(
+            expect.objectContaining({
+              headers: expect.objectContaining({
+                'WWW-Authenticate':
+                  'Bearer resource_metadata="http://localhost:5620/.well-known/oauth-protected-resource/api/agent_builder/mcp"',
+              }),
+            })
+          );
+        }
+      );
+
+      it.each(['marketing', 'default'])(
+        'includes the literal /s/%s prefix in the resource_metadata URL',
+        async (spaceId) => {
+          const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+
+          mockSetupAuthenticationParams.config = createConfig(
+            ConfigSchema.validate(
+              {
+                mcp: {
+                  oauth2: {
+                    metadata: {
+                      authorization_servers: ['https://localhost:9200'],
+                      resource: 'http://localhost:5620/api/agent_builder/mcp',
+                    },
+                  },
+                },
+              },
+              { serverless: true }
+            ),
+            loggingSystemMock.create().get(),
+            { isTLSEnabled: false }
+          );
+
+          const { onPreResponseHandler } = getService();
+          const mockRequest = httpServerMock.createKibanaRequest({
+            path: '/api/agent_builder/mcp',
+            routeTags: [ROUTE_TAG_ACCEPT_UIAM_OAUTH],
+          });
+          const { basePath } = mockSetupAuthenticationParams.http;
+          (basePath.get as jest.Mock).mockReturnValue(`${basePath.serverBasePath}/s/${spaceId}`);
+
+          await onPreResponseHandler(mockRequest, { statusCode: 401 }, mockOnPreResponseToolkit);
+
+          expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith(
+            expect.objectContaining({
+              headers: expect.objectContaining({
+                'WWW-Authenticate': `Bearer resource_metadata="http://localhost:5620/.well-known/oauth-protected-resource/s/${spaceId}/api/agent_builder/mcp"`,
+              }),
+            })
+          );
+        }
+      );
+
       it('does not add WWW-Authenticate header when mcp config is not set', async () => {
         const mockReturnedValue = { type: 'next' as any };
         const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
@@ -1116,7 +1443,7 @@ describe('AuthenticationService', () => {
                 oauth2: {
                   metadata: {
                     authorization_servers: ['https://localhost:9200'],
-                    resource: 'http://localhost:5620',
+                    resource: 'http://localhost:5620/api/agent_builder/mcp',
                   },
                 },
               },
@@ -1151,7 +1478,7 @@ describe('AuthenticationService', () => {
                 oauth2: {
                   metadata: {
                     authorization_servers: ['https://localhost:9200'],
-                    resource: 'http://localhost:5620',
+                    resource: 'http://localhost:5620/api/agent_builder/mcp',
                   },
                 },
               },

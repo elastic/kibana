@@ -49,7 +49,7 @@ export const toListExecutionHistoryRequest = ({
     search,
     rule_ids: ruleIds,
     outcomes,
-    episode_ids: episodeIds,
+    alert_ids: episodeIds,
     from,
     to,
     sort_field: sortField === 'dispatchedAt' ? 'dispatched_at' : sortField,

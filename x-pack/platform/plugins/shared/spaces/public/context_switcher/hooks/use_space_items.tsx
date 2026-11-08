@@ -49,12 +49,6 @@ const SOLUTION_VIEW_INFO: Record<SolutionKey, { iconType: IconType; label: strin
   search: ES_SOLUTION,
   vectordb: VECTORDB_SOLUTION,
   observability: OBS_SOLUTION,
-  workplaceai: {
-    iconType: 'logoElasticsearch',
-    label: i18n.translate('xpack.spaces.solutionViewInfo.workplaceai', {
-      defaultMessage: 'Workplace AI',
-    }),
-  },
   security: {
     iconType: 'logoSecurity',
     label: i18n.translate('xpack.spaces.solutionViewInfo.security', {

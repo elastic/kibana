@@ -344,7 +344,7 @@ globalSetupHook('Load shared test data (if needed)', async ({ esArchiver, log })
 });
 ```
 
-✔️ **Do:** revert suite-wide state in `global.teardown.ts` so it doesn't leak into other configs:
+✔️ **Do:** revert suite-wide state in `global.teardown.ts` so it doesn't leak into other configs. The feature-flag example restores a previous configured value of `false`. If the test introduced an override where none existed, use `null` to remove it instead. See [Feature flags](./feature-flags.md#scout-feature-flags-runtime):
 
 ```ts
 globalTeardownHook('Reset shared Kibana state', async ({ kbnClient, apiServices, log }) => {
@@ -548,8 +548,9 @@ test.beforeEach(async ({ browserAuth }) => {
 await browserAuth.loginAsViewer();
 
 // custom role for finer-grained control
-await browserAuth.loginWithCustomRole('logs_analyst', {
+await browserAuth.loginWithCustomRole({
   elasticsearch: {
+    cluster: [],
     indices: [{ names: ['logs-*'], privileges: ['read'] }],
   },
   kibana: [{ spaces: ['*'], base: [], feature: { discover: ['read'] } }],

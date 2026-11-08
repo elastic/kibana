@@ -7,13 +7,18 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { ExecutionStatus } from '@kbn/workflows';
+import { ALERTZERO_ACTION_WORKFLOW_IDS } from '@kbn/workflows/managed';
 import type {
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowExecutionDto,
   WorkflowExecutionListDto,
   WorkflowListDto,
+  WorkflowStepExecutionDto,
 } from '@kbn/workflows';
+/** `managedBy` stamped on AlertZero managed workflow executions. */
+const ALERTZERO_MANAGED_BY = 'alertzero';
 
 /**
  * Structural subset of WorkflowsManagementApi used by AlertZero Worker enablement and recent runs.
@@ -46,11 +51,48 @@ export interface WatchWorkflowsManagementClient {
     request: KibanaRequest
   ): Promise<WorkflowExecutionListDto>;
 
+  /**
+   * Failed AlertZero managed executions in the trailing 24 hours, across workflows.
+   * Test runs are included: the Workflows editor Run button records one.
+   */
+  searchFailedManagedExecutions(
+    params: { page: number; size: number },
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowExecutionListDto>;
+
+  /** The newest execution of one workflow in any status, so a later success can be told from a failure. */
+  getLatestWorkflowExecution(
+    workflowId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowExecutionListDto['results'][number] | undefined>;
+
+  /**
+   * The newest execution of one workflow that reached a final status. `skipped` (dropped by the
+   * concurrency rule) and in-progress executions never count, so this is "the last sweep".
+   */
+  getLatestFinishedWorkflowExecution(
+    workflowId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowExecutionListDto['results'][number] | undefined>;
+
   getWorkflowExecution(
     workflowExecutionId: string,
     spaceId: string,
     request: KibanaRequest
   ): Promise<WorkflowExecutionDto | null>;
+
+  /**
+   * One step of one execution with its output, read without loading the output of every other
+   * step in the run. Returns the document that carries the step's result when the id is shared.
+   */
+  getStepExecution(
+    params: { workflowId: string; workflowExecutionId: string; stepId: string },
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowStepExecutionDto | undefined>;
 
   cancelAllActiveWorkflowExecutions(
     workflowId: string,
@@ -115,12 +157,109 @@ export class WatchWorkflowsManagementClientImpl implements WatchWorkflowsManagem
     return this.management.getClient(request).getWorkflowExecutions(params, spaceId);
   }
 
+  searchFailedManagedExecutions(
+    params: { page: number; size: number },
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowExecutionListDto> {
+    return this.management.searchExecutionsView(
+      {
+        request,
+        statuses: [ExecutionStatus.FAILED],
+        finishedAfter: 'now-24h',
+        includeManagedExecutions: true,
+        query: {
+          bool: {
+            filter: [{ term: { managedBy: ALERTZERO_MANAGED_BY } }],
+            must_not: [{ terms: { originManagedWorkflowId: [...ALERTZERO_ACTION_WORKFLOW_IDS] } }],
+          },
+        },
+        sortField: 'finishedAt',
+        sortOrder: 'desc',
+        page: params.page,
+        size: params.size,
+      },
+      spaceId
+    );
+  }
+
+  async getLatestWorkflowExecution(
+    workflowId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowExecutionListDto['results'][number] | undefined> {
+    const { results } = await this.management.searchExecutionsView(
+      {
+        request,
+        includeManagedExecutions: true,
+        query: { bool: { filter: [{ term: { workflowId } }] } },
+        sortField: 'createdAt',
+        sortOrder: 'desc',
+        page: 1,
+        size: 1,
+      },
+      spaceId
+    );
+    return results[0];
+  }
+
+  async getLatestFinishedWorkflowExecution(
+    workflowId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowExecutionListDto['results'][number] | undefined> {
+    const { results } = await this.management.searchExecutionsView(
+      {
+        request,
+        includeManagedExecutions: true,
+        statuses: [
+          ExecutionStatus.COMPLETED,
+          ExecutionStatus.FAILED,
+          ExecutionStatus.CANCELLED,
+          ExecutionStatus.TIMED_OUT,
+        ],
+        query: { bool: { filter: [{ term: { workflowId } }] } },
+        sortField: 'createdAt',
+        sortOrder: 'desc',
+        page: 1,
+        size: 1,
+      },
+      spaceId
+    );
+    return results[0];
+  }
+
   getWorkflowExecution(
     workflowExecutionId: string,
     spaceId: string,
     request: KibanaRequest
   ): Promise<WorkflowExecutionDto | null> {
     return this.management.getClient(request).getWorkflowExecution(workflowExecutionId, spaceId);
+  }
+
+  async getStepExecution(
+    {
+      workflowId,
+      workflowExecutionId,
+      stepId,
+    }: { workflowId: string; workflowExecutionId: string; stepId: string },
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowStepExecutionDto | undefined> {
+    const { results } = await this.management.searchStepExecutions(
+      {
+        request,
+        workflowId,
+        stepId,
+        workflowExecutionIds: [workflowExecutionId],
+        includeOutput: true,
+        sourceIncludes: ['stepId', 'startedAt', 'finishedAt', 'output'],
+        page: 1,
+        size: 5,
+      },
+      spaceId
+    );
+    return results.find(({ output }) => output !== undefined) ?? results[0];
   }
 
   cancelAllActiveWorkflowExecutions(

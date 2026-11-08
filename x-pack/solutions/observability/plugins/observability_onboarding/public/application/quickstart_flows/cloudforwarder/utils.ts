@@ -60,10 +60,10 @@ export function buildCloudFormationUrl(
   const params = new URLSearchParams({
     templateURL: CLOUDFORWARDER_CLOUDFORMATION_TEMPLATE_URL,
     stackName: config.stackName,
-    param_EdotCloudForwarderS3LogsType: config.logType, // eslint-disable-line @typescript-eslint/naming-convention
-    param_OTLPEndpoint: otlpEndpoint, // eslint-disable-line @typescript-eslint/naming-convention
-    param_ElasticAPIKey: apiKey, // eslint-disable-line @typescript-eslint/naming-convention
-    param_SourceS3BucketARN: s3BucketArn, // eslint-disable-line @typescript-eslint/naming-convention
+    param_EdotCloudForwarderS3LogsType: config.logType, // eslint-disable-line @kbn/compat/typescript-naming-convention
+    param_OTLPEndpoint: otlpEndpoint, // eslint-disable-line @kbn/compat/typescript-naming-convention
+    param_ElasticAPIKey: apiKey, // eslint-disable-line @kbn/compat/typescript-naming-convention
+    param_SourceS3BucketARN: s3BucketArn, // eslint-disable-line @kbn/compat/typescript-naming-convention
   });
 
   url.hash = `/stacks/create/review?${params.toString()}`;

@@ -32,6 +32,39 @@ describe('VectorDB navigation tree', () => {
     );
   });
 
+  it('includes only organization-level Cloud links in Admin and Settings > Organization', () => {
+    const { footer } = createNavigationTree({
+      ...core.application,
+      core,
+    });
+    const adminAndSettingsNode = footer?.find((item) => item.id === 'admin_and_settings');
+    const organizationSection = adminAndSettingsNode?.children?.find(
+      (item) => item.id === 'organization'
+    );
+
+    expect(organizationSection?.children).toEqual([
+      expect.objectContaining({ cloudLink: 'billingAndSub' }),
+      expect.objectContaining({ cloudLink: 'userAndRoles' }),
+    ]);
+  });
+
+  it('includes the Monitor performance and Configure Search Power Cloud links in Admin and Settings > Project performance', () => {
+    const { footer } = createNavigationTree({
+      ...core.application,
+      core,
+    });
+    const adminAndSettingsNode = footer?.find((item) => item.id === 'admin_and_settings');
+    const projectPerformanceSection = adminAndSettingsNode?.children?.find(
+      (item) => item.id === 'settings_project_performance'
+    );
+
+    expect(projectPerformanceSection?.children).toEqual([
+      expect.objectContaining({ cloudLink: 'deployment', title: 'Monitor performance' }),
+      expect.objectContaining({ cloudLink: 'searchPower' }),
+      expect.objectContaining({ link: 'management:queryActivity' }),
+    ]);
+  });
+
   it('includes Stack Alerts in Admin and Settings > Alerts and insights', () => {
     const { footer } = createNavigationTree({
       ...core.application,

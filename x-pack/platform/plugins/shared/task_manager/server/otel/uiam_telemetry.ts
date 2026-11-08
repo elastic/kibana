@@ -15,17 +15,18 @@ import { type Attributes, type Counter, metrics, ValueType } from '@opentelemetr
 export type UiamApiKeyFallbackReason = 'user_created_key' | 'unexpected';
 
 /**
- * Which credential a user-scoped task run authenticated with. Summing across all
- * values yields the total user-scoped task runs. Deliberately credential-agnostic
- * (not API-key specific) so future execution identities — e.g. service-account
- * tokens — extend it with new values instead of a breaking attribute rename.
+ * Which credential a user-scoped or service account task run authenticated with.
+ * Summing across all values yields the total of those task runs. Deliberately
+ * credential-agnostic (not API-key specific) so future execution identities extend
+ * it with new values instead of a breaking attribute rename.
  */
-export type CredentialType = 'uiam_api_key' | 'es_api_key' | 'none';
+export type CredentialType = 'uiam_api_key' | 'es_api_key' | 'service_account' | 'none';
 
 /**
  * Why the run authenticated with that credential type. Set on every series so
  * grouping keys stay consistent: `provisioned` pairs with `uiam_api_key`,
- * `not_set` with `none`, `user_created_key` pairs with either key type (a task
+ * `not_set` with `none`, `run_as` with `service_account` (a task scheduled to run
+ * as a workload), `user_created_key` pairs with either key type (a task
  * whose key was supplied by the user), and the remaining values explain an
  * `es_api_key` run (project configured for ES keys, or a fallback because no
  * UIAM key was available). Shares the vocabulary of the alerting
@@ -37,6 +38,7 @@ export type CredentialReason =
   | 'config'
   | 'user_created_key'
   | 'fallback_unexpected'
+  | 'run_as'
   | 'not_set';
 
 class TaskManagerUiamTelemetry {
@@ -57,7 +59,7 @@ class TaskManagerUiamTelemetry {
     );
     this.taskRunCounter = this.meter.createCounter('kibana.task_manager.task_run.count', {
       description:
-        'Number of user-scoped task runs, partitioned by the credential type the run authenticated with (credential.type) and why that credential was selected (credential.reason).',
+        'Number of user-scoped and service account task runs, partitioned by the credential type the run authenticated with (credential.type) and why that credential was selected (credential.reason).',
       unit: '1',
       valueType: ValueType.INT,
     });

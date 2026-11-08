@@ -45,12 +45,14 @@ export {
   actionCategorySchema,
   actionImpactSchema,
   actionMetadataSchema,
+  actionSubjectKindSchema,
 } from './action_workflow';
 export type {
   ActionApprovalPolicy,
   ActionCategory,
   ActionImpact,
   ActionMetadata,
+  ActionSubjectKind,
 } from './action_workflow';
 export * from './definitions';
 

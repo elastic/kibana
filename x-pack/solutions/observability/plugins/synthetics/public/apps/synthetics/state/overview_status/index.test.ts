@@ -15,6 +15,8 @@ import type {
 import { overviewStatusReducer } from '.';
 import {
   appendOverviewStatusAction,
+  cancelAppendOverviewStatusAction,
+  cancelOverviewStatusAction,
   clearOverviewStatusErrorAction,
   fetchOverviewStatusAction,
   fetchStaleStatusAction,
@@ -90,6 +92,34 @@ const freshPriorRun = (
 });
 
 describe('overviewStatusReducer', () => {
+  describe('canceled requests', () => {
+    const pageState = { page: 1, perPage: 20 } as any;
+
+    it('settles a canceled overview request without recording an error', () => {
+      const loading = overviewStatusReducer(
+        undefined,
+        fetchOverviewStatusAction.get({ pageState })
+      );
+      const canceled = overviewStatusReducer(loading, cancelOverviewStatusAction());
+
+      expect(canceled.loading).toBe(false);
+      expect(canceled.error).toBeNull();
+      expect(canceled.settled).toBe(false);
+    });
+
+    it('settles a canceled append so a later refresh can proceed', () => {
+      const loading = overviewStatusReducer(
+        undefined,
+        appendOverviewStatusAction.get({ pageState })
+      );
+      const canceled = overviewStatusReducer(loading, cancelAppendOverviewStatusAction());
+
+      expect(canceled.loading).toBe(false);
+      expect(canceled.pendingAppendRequest).toBeUndefined();
+      expect(canceled.error).toBeNull();
+    });
+  });
+
   describe('settled flag (drives the Getting Started redirect)', () => {
     it('is false before any request completes', () => {
       const state = overviewStatusReducer(undefined, { type: '@@INIT' } as any);

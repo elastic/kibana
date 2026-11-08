@@ -33,11 +33,11 @@ export function TransactionBreakdownChart({
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
-              <h3>
+              <h2>
                 {i18n.translate('xpack.apm.transactionBreakdown.chartTitle', {
                   defaultMessage: 'Time spent by span type',
                 })}
-              </h3>
+              </h2>
             </EuiTitle>
           </EuiFlexItem>
 

@@ -90,7 +90,7 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
       }) => {
         createNewEmbeddable(panelType, serializedState);
       },
-      disableTriggers: true,
+      disableTriggers$: new BehaviorSubject<boolean>(true),
       // this is required to disable inline editing now enabled by default
       canEditInline: false,
       type: 'canvas',

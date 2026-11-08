@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TSESTree } from '@typescript-eslint/typescript-estree';
-import type * as ESTree from 'estree';
-import type { Rule, Scope } from 'eslint';
+import type { Context, CreateOnceRule, ESTree, Scope, Variable } from '@oxlint/plugins';
+
+type IdentifierNode = Extract<ESTree.Node, { type: 'Identifier' }>;
 
 // This excludes `addError` on purpose as it has a different API
 const TOAST_METHODS = new Set(['addSuccess', 'addWarning', 'addInfo', 'addDanger', 'add']);
@@ -36,9 +36,7 @@ const CONTAINER_ELEMENTS = new Set([
   'EuiFlexGrid',
 ]);
 
-const getPropertyKeyName = (
-  key: TSESTree.Expression | TSESTree.PrivateIdentifier
-): string | undefined => {
+const getPropertyKeyName = (key: ESTree.PropertyKey): string | undefined => {
   if (key.type === 'Identifier') {
     return key.name;
   }
@@ -50,7 +48,7 @@ const getPropertyKeyName = (
   return undefined;
 };
 
-const getJSXElementName = (name: TSESTree.JSXTagNameExpression): string | null => {
+const getJSXElementName = (name: ESTree.JSXElementName): string | null => {
   if (name.type === 'JSXIdentifier') {
     return name.name;
   }
@@ -71,16 +69,16 @@ const getJSXElementName = (name: TSESTree.JSXTagNameExpression): string | null =
   return null;
 };
 
-const isFormattedMessageElement = (node: TSESTree.Node): boolean =>
+const isFormattedMessageElement = (node: ESTree.Node): boolean =>
   node.type === 'JSXElement' && getJSXElementName(node.openingElement.name) === 'FormattedMessage';
 
 // An action element is considered inline when it has a sibling JSXText or FormattedMessage.
 // This is a heuristic to avoid flagging inline links that are part of a sentence.
-const isInlineTextNode = (node: TSESTree.Node): boolean =>
+const isInlineTextNode = (node: ESTree.Node): boolean =>
   (node.type === 'JSXText' && node.value.trim() !== '') || isFormattedMessageElement(node);
 
 interface ElementFinding {
-  node: TSESTree.JSXElement;
+  node: ESTree.JSXElement;
   elementName: string;
 }
 
@@ -90,7 +88,7 @@ interface ContentFindings {
 
 // A variable is only safely resolvable if it's assigned once. A second write
 // reference means the value at the point of use can't be determined statically.
-const isReassigned = (variable: Scope.Variable): boolean =>
+const isReassigned = (variable: Variable): boolean =>
   variable.references.filter((ref) => ref.isWrite()).length > 1;
 
 /**
@@ -99,16 +97,11 @@ const isReassigned = (variable: Scope.Variable): boolean =>
  * Returns null when unresolvable (e.g. globals) or unsafe to resolve statically
  * (reassigned after declaration).
  */
-const resolveVariable = (
-  context: Rule.RuleContext,
-  node: TSESTree.Identifier
-): Scope.Variable | null => {
-  let scope: Scope.Scope | null = context.sourceCode.getScope(node as unknown as ESTree.Node);
+const resolveVariable = (context: Context, node: IdentifierNode): Variable | null => {
+  let scope: Scope | null = context.sourceCode.getScope(node);
 
   while (scope) {
-    const reference = scope.references.find(
-      (ref) => ref.identifier === (node as unknown as ESTree.Identifier)
-    );
+    const reference = scope.references.find((ref) => ref.identifier === node);
 
     if (reference) {
       const variable = reference.resolved;
@@ -126,36 +119,30 @@ const resolveVariable = (
  * `<EuiButton/>` in `const actions = <EuiButton/>`.
  * Returns null for anything that can't be resolved (imports, params, reassignments).
  */
-const resolveIdentifierValue = (
-  context: Rule.RuleContext,
-  node: TSESTree.Identifier
-): TSESTree.Node | null => {
+const resolveIdentifierValue = (context: Context, node: IdentifierNode): ESTree.Node | null => {
   const variable = resolveVariable(context, node);
   const def = variable?.defs[0];
 
-  return def?.type === 'Variable' && def.node.init
-    ? (def.node.init as unknown as TSESTree.Node)
+  return def?.type === 'Variable' && def.node.type === 'VariableDeclarator' && def.node.init
+    ? def.node.init
     : null;
 };
 
 /**
  * Util to traverse the JSX content of a mount function argument and collect action elements
  */
-const collectMountContent = (
-  context: Rule.RuleContext,
-  rootNode: TSESTree.Node
-): ContentFindings => {
+const collectMountContent = (context: Context, rootNode: ESTree.Node): ContentFindings => {
   const findings: ContentFindings = {
     actionElements: [],
   };
-  const visited = new Set<TSESTree.Node>();
+  const visited = new Set<ESTree.Node>();
 
   // If an `EuiLink` has a sibling that's inline text (e.g. <FormattedMessage>) it reads as an
   // inline hyperlink as part of a sentence, not a standalone CTA, the same way an `EuiLink`
   // passed via <FormattedMessage>'s `values` is treated. Other action elements (e.g.
   // `EuiButton`) are always flagged regardless of this, since a button doesn't belong inline
   // in text the way a hyperlink might.
-  const traverse = (node: TSESTree.Node, siblingOfInlineText = false): void => {
+  const traverse = (node: ESTree.Node, siblingOfInlineText = false): void => {
     if (visited.has(node)) return;
     visited.add(node);
 
@@ -231,9 +218,9 @@ const collectMountContent = (
  *   - toastService.add() (where `const toastService = notifications.toasts`)
  */
 const isToastsReceiver = (
-  context: Rule.RuleContext,
-  obj: TSESTree.Node,
-  visited: Set<TSESTree.Node> = new Set()
+  context: Context,
+  obj: ESTree.Node,
+  visited: Set<ESTree.Node> = new Set()
 ): boolean => {
   if (visited.has(obj)) return false;
 
@@ -256,7 +243,7 @@ const isToastsReceiver = (
 
 interface MountCall {
   mountFn: string;
-  mountArg: TSESTree.Node;
+  mountArg: ESTree.Node;
 }
 
 /**
@@ -264,7 +251,7 @@ interface MountCall {
  * conditional shapes as `collectMountContent` (e.g. `condition ? mountReactNode(...) : 'text'`)
  * so a conditionally-chosen mount call isn't missed.
  */
-const findMountCalls = (value: TSESTree.Node): MountCall[] => {
+const findMountCalls = (value: ESTree.Node): MountCall[] => {
   switch (value.type) {
     case 'CallExpression': {
       if (value.callee.type !== 'Identifier' || !MOUNT_FUNCTIONS.has(value.callee.name)) {
@@ -293,7 +280,7 @@ interface ToastMountArg {
   methodName: string;
   // null when the content came directly from `children` rather than a mount call.
   mountFn: string | null;
-  mountArg: TSESTree.Node;
+  mountArg: ESTree.Node;
 }
 
 /**
@@ -302,12 +289,10 @@ interface ToastMountArg {
  * typed as plain `ReactNode` (see EuiToastProps), so it needs no mount-call wrapper.
  */
 const forEachToastMountArg = (
-  context: Rule.RuleContext,
-  node: Rule.Node,
+  context: Context,
+  callNode: ESTree.CallExpression,
   callback: (ctx: ToastMountArg) => void
 ): void => {
-  const callNode = node as unknown as TSESTree.CallExpression;
-
   if (
     callNode.callee.type !== 'MemberExpression' ||
     callNode.callee.property.type !== 'Identifier' ||
@@ -342,7 +327,7 @@ const forEachToastMountArg = (
 };
 
 // main rule
-export const PreferToastActionProps: Rule.RuleModule = {
+export const PreferToastActionProps: CreateOnceRule = {
   meta: {
     type: 'suggestion',
     docs: {
@@ -359,9 +344,9 @@ export const PreferToastActionProps: Rule.RuleModule = {
     },
     schema: [],
   },
-  create(context) {
+  createOnce(context) {
     return {
-      CallExpression(node: Rule.Node) {
+      CallExpression(node) {
         forEachToastMountArg(context, node, ({ methodName, mountFn, mountArg }) => {
           const { actionElements } = collectMountContent(context, mountArg);
 
@@ -369,12 +354,12 @@ export const PreferToastActionProps: Rule.RuleModule = {
             context.report(
               mountFn
                 ? {
-                    node: actionNode as unknown as Rule.Node,
+                    node: actionNode,
                     messageId: 'actionElementInMountContent',
                     data: { elementName, method: methodName, mountFn },
                   }
                 : {
-                    node: actionNode as unknown as Rule.Node,
+                    node: actionNode,
                     messageId: 'actionElementInChildren',
                     data: { elementName, method: methodName },
                   }

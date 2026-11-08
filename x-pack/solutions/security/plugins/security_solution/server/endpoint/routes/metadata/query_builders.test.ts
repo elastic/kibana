@@ -239,6 +239,7 @@ describe('query builder', () => {
 
         expect(query.sort).toEqual([
           { 'united.agent.enrolled_at': { order: 'desc', unmapped_type: 'date' } },
+          { 'united.agent.agent.id': 'asc' },
         ]);
       });
 
@@ -255,7 +256,7 @@ describe('query builder', () => {
           sortDirection: 'asc',
         });
 
-        expect(query.sort).toEqual([{ [mappedField]: 'asc' }]);
+        expect(query.sort).toEqual([{ [mappedField]: 'asc' }, { 'united.agent.agent.id': 'asc' }]);
       });
 
       it.each`
@@ -270,7 +271,22 @@ describe('query builder', () => {
           sortDirection: 'asc',
         });
 
-        expect(query.sort).toEqual([{ [mappedField]: { order: 'asc', unmapped_type: 'date' } }]);
+        expect(query.sort).toEqual([
+          { [mappedField]: { order: 'asc', unmapped_type: 'date' } },
+          { 'united.agent.agent.id': 'asc' },
+        ]);
+      });
+
+      it('appends the unique agent id as the final sort key so offset pages never tie', async () => {
+        // `enrolled_at` ties across agents enrolled in the same instant; without a unique
+        // tiebreaker ES may order tied hits differently per page request and skip/repeat hosts.
+        const [first, ...rest] = (await buildUnitedIndexQuery(soClient, { page: 3, pageSize: 50 }))
+          .sort as unknown[];
+
+        expect(first).toEqual({
+          'united.agent.enrolled_at': { order: 'desc', unmapped_type: 'date' },
+        });
+        expect(rest).toEqual([{ 'united.agent.agent.id': 'asc' }]);
       });
     });
   });

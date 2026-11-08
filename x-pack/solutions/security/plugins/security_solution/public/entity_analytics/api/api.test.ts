@@ -8,6 +8,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/public';
 
+import { API_VERSIONS } from '../../../common/constants';
 import { useEntityAnalyticsRoutes } from './api';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
@@ -61,6 +62,134 @@ describe('useEntityAnalyticsRoutes — executionContext propagation on v2 branch
     expect(mockFetch).toHaveBeenCalledWith(
       expect.any(String),
       expect.objectContaining({ context })
+    );
+  });
+});
+
+describe('useEntityAnalyticsRoutes — executionContext propagation on entity details flyout endpoints', () => {
+  const context = {
+    child: {
+      type: 'security_solution',
+      name: 'entity_analytics:entity_details_flyout',
+      id: 'test-panel',
+    },
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useKibanaMock.mockReturnValue({ services: { http: { fetch: mockFetch } } });
+    mockFetch.mockResolvedValue({});
+  });
+
+  it('forwards context to http.fetch in fetchEntityDetailsHighlights', async () => {
+    const { result } = renderHook(() => useEntityAnalyticsRoutes());
+    const signal = new AbortController().signal;
+
+    await result.current.fetchEntityDetailsHighlights({
+      params: {
+        entityType: 'user',
+        entityIdentifier: 'alice',
+        anonymizationFields: [],
+        from: 1,
+        to: 2,
+        connectorId: 'connector-1',
+      },
+      signal,
+      context,
+    });
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ method: 'POST', signal, context })
+    );
+  });
+
+  it('forwards context to http.fetch in saveEntityAiSummary', async () => {
+    const { result } = renderHook(() => useEntityAnalyticsRoutes());
+
+    await result.current.saveEntityAiSummary({
+      params: {
+        entityId: 'alice',
+        entityType: 'user',
+        summary: {
+          highlights: [],
+          recommended_actions: [],
+          generated_at: 1,
+          staleness: { enabled_signals: [], snapshot: {} },
+        },
+        modelOutputCounts: { highlights: 0, recommendedActions: 0 },
+      },
+      context,
+    });
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ method: 'POST', context })
+    );
+  });
+
+  it('forwards context and query to http.fetch in fetchPersistedAiSummary', async () => {
+    const { result } = renderHook(() => useEntityAnalyticsRoutes());
+    const signal = new AbortController().signal;
+
+    await result.current.fetchPersistedAiSummary({
+      params: { entityType: 'user', entityIdentifier: 'alice' },
+      signal,
+      context,
+    });
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        method: 'GET',
+        query: { entityId: 'alice', entityType: 'user' },
+        signal,
+        context,
+      })
+    );
+  });
+
+  it('passes mode as a query param in fetchPersistedAiSummary when provided', async () => {
+    const { result } = renderHook(() => useEntityAnalyticsRoutes());
+
+    await result.current.fetchPersistedAiSummary({
+      params: { entityType: 'user', entityIdentifier: 'alice', mode: 'resolved' },
+    });
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        method: 'GET',
+        query: { entityId: 'alice', entityType: 'user', mode: 'resolved' },
+      })
+    );
+  });
+});
+
+describe('useEntityAnalyticsRoutes — watchlist entity sources', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useKibanaMock.mockReturnValue({ services: { http: { fetch: mockFetch } } });
+    mockFetch.mockResolvedValue({});
+  });
+
+  it('sends a versioned PUT to the entity source URL in updateWatchlistEntitySource', async () => {
+    const { result } = renderHook(() => useEntityAnalyticsRoutes());
+
+    await result.current.updateWatchlistEntitySource({
+      watchlistId: 'watchlist-1',
+      entitySourceId: 'source-1',
+      body: { type: 'index' },
+    });
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(mockFetch).toHaveBeenCalledWith(
+      '/api/entity_analytics/watchlists/watchlist-1/entity_source/source-1',
+      expect.objectContaining({
+        method: 'PUT',
+        version: API_VERSIONS.public.v1,
+        body: JSON.stringify({ type: 'index' }),
+      })
     );
   });
 });

@@ -30,6 +30,7 @@ import {
   useStartServices,
   useGetPackageInfoByKeyQuery,
   useConfig,
+  useFleetStatus,
 } from '../../../../hooks';
 
 jest.mock('../../../../../../services/use_yaml', () => ({
@@ -188,15 +189,16 @@ describe('When on the package policy create page', () => {
 
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
-  const render = (queryParamsPolicyId?: string) =>
+  const render = (queryParamsPolicyId?: string, integration?: string) =>
     (renderResult = testRenderer.render(
       <Route path={INTEGRATIONS_ROUTING_PATHS.add_integration_to_policy}>
         <CreatePackagePolicySinglePage
           from="package"
           queryParamsPolicyId={queryParamsPolicyId}
           prerelease={false}
-          pkgName={'nginx'}
-          pkgVersion={'1.3.0'}
+          pkgName={integration ? 'aws' : 'nginx'}
+          pkgVersion={integration ? '8.12.0' : '1.3.0'}
+          integration={integration}
         />
       </Route>
     ));
@@ -378,6 +380,108 @@ describe('When on the package policy create page', () => {
         expect(cancelLink.href).toBe(expectedRouteState.onCancelUrl);
         expect(cancelButton.href).toBe(expectedRouteState.onCancelUrl);
       }, 10000);
+    });
+  });
+
+  describe('When the package has a non FIPS policy template', () => {
+    const NON_FIPS_INPUT_TITLE = 'Collect metrics from Nginx stub status';
+
+    const mockPackageWithNonFipsTemplate = () => {
+      const mockPackageInfo = getMockPackageInfo();
+      const item = mockPackageInfo.data.item as any;
+      item.policy_templates.push({
+        name: 'nginx_metrics',
+        title: 'Nginx metrics',
+        description: 'Collect metrics from Nginx instances',
+        fips_compatible: false,
+        inputs: [{ type: 'nginx/metrics', title: NON_FIPS_INPUT_TITLE, description: 'metrics' }],
+        multiple: true,
+      });
+      item.data_streams.push({
+        type: 'metrics',
+        dataset: 'nginx.stubstatus',
+        title: 'Nginx stub status',
+        ingest_pipeline: 'default',
+        package: 'nginx',
+        path: 'stubstatus',
+        streams: [
+          {
+            input: 'nginx/metrics',
+            title: 'Nginx stub status metrics',
+            template_path: 'stream.yml.hbs',
+            description: 'Collect Nginx stub status metrics',
+            enabled: true,
+          },
+        ],
+      });
+      (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(mockPackageInfo);
+    };
+
+    afterEach(() => {
+      (useFleetStatus as jest.Mock).mockReturnValue({ isReady: true });
+    });
+
+    it('should not show the inputs of the non FIPS policy template when FIPS is enabled', async () => {
+      mockPackageWithNonFipsTemplate();
+      (useFleetStatus as jest.Mock).mockReturnValue({ isReady: true, isFipsEnabled: true });
+
+      act(() => {
+        render();
+      });
+
+      expect(
+        await renderResult.findByText('Collect logs from Nginx instances')
+      ).toBeInTheDocument();
+      expect(renderResult.queryByText(NON_FIPS_INPUT_TITLE)).not.toBeInTheDocument();
+    });
+
+    it('should not initialize the inputs before the FIPS status is loaded', async () => {
+      mockPackageWithNonFipsTemplate();
+      (useFleetStatus as jest.Mock).mockReturnValue({ isReady: false, isLoading: true });
+
+      act(() => {
+        render();
+      });
+
+      expect(renderResult.queryByText('Collect logs from Nginx instances')).not.toBeInTheDocument();
+      expect(renderResult.queryByText(NON_FIPS_INPUT_TITLE)).not.toBeInTheDocument();
+
+      (useFleetStatus as jest.Mock).mockReturnValue({
+        isReady: true,
+        isLoading: false,
+        isFipsEnabled: true,
+      });
+      act(() => {
+        renderResult.rerender(
+          <Route path={INTEGRATIONS_ROUTING_PATHS.add_integration_to_policy}>
+            <CreatePackagePolicySinglePage
+              from="package"
+              prerelease={false}
+              pkgName={'nginx'}
+              pkgVersion={'1.3.0'}
+            />
+          </Route>
+        );
+      });
+
+      expect(
+        await renderResult.findByText('Collect logs from Nginx instances')
+      ).toBeInTheDocument();
+      expect(renderResult.queryByText(NON_FIPS_INPUT_TITLE)).not.toBeInTheDocument();
+    });
+
+    it('should show the inputs of the non FIPS policy template when FIPS is not enabled', async () => {
+      mockPackageWithNonFipsTemplate();
+      (useFleetStatus as jest.Mock).mockReturnValue({ isReady: true, isFipsEnabled: false });
+
+      act(() => {
+        render();
+      });
+
+      expect(
+        await renderResult.findByText('Collect logs from Nginx instances')
+      ).toBeInTheDocument();
+      expect(await renderResult.findByText(NON_FIPS_INPUT_TITLE)).toBeInTheDocument();
     });
   });
 
@@ -1012,6 +1116,175 @@ describe('When on the package policy create page', () => {
       });
     });
 
+    describe('With agentless as the default deployment mode of a package with a cloud connector var group', () => {
+      // Mirrors the aws package: agentless is the default of the `billing` policy template and the
+      // credentials are selected with a var group that has a cloud connector (`provider`) option
+      const getAwsLikePackageInfo = () => ({
+        data: {
+          item: {
+            name: 'aws',
+            title: 'AWS',
+            version: '8.12.0',
+            description: 'Collect logs and metrics from Amazon Web Services',
+            policy_templates: [
+              {
+                name: 'billing',
+                title: 'AWS Billing',
+                description: 'Collect billing metrics',
+                data_streams: ['billing'],
+                inputs: [{ type: 'aws/metrics', title: 'Collect billing metrics' }],
+                deployment_modes: {
+                  default: { enabled: true },
+                  agentless: {
+                    enabled: true,
+                    is_default: true,
+                    organization: 'org',
+                    division: 'division',
+                    team: 'team',
+                  },
+                },
+              },
+              {
+                name: 'cloudtrail',
+                title: 'AWS CloudTrail',
+                description: 'Collect CloudTrail logs',
+                data_streams: [],
+                inputs: [],
+                deployment_modes: { default: { enabled: true } },
+              },
+            ],
+            vars: [
+              { name: 'access_key_id', type: 'password', title: 'Access Key ID', secret: true },
+              {
+                name: 'secret_access_key',
+                type: 'password',
+                title: 'Secret Access Key',
+                secret: true,
+              },
+              { name: 'role_arn', type: 'text', title: 'Role ARN' },
+              { name: 'supports_identity_federation', type: 'bool', title: 'Identity Federation' },
+            ],
+            var_groups: [
+              {
+                name: 'credential_type',
+                title: 'Setup Access',
+                selector_title: 'Preferred method',
+                required: true,
+                options: [
+                  {
+                    name: 'identity_federation',
+                    title: 'Identity Federation',
+                    vars: ['role_arn', 'supports_identity_federation'],
+                    hide_in_deployment_modes: ['default'],
+                    provider: 'aws',
+                  },
+                  {
+                    name: 'direct_access_key',
+                    title: 'Direct Access Keys',
+                    vars: ['access_key_id', 'secret_access_key'],
+                  },
+                ],
+              },
+            ],
+            data_streams: [
+              {
+                type: 'metrics',
+                dataset: 'aws.billing',
+                title: 'AWS Billing Metrics',
+                release: 'ga',
+                package: 'aws',
+                path: 'billing',
+                ingest_pipeline: 'default',
+                streams: [
+                  {
+                    input: 'aws/metrics',
+                    title: 'AWS billing metrics',
+                    description: 'Collect billing metrics',
+                    template_path: 'stream.yml.hbs',
+                    enabled: true,
+                    vars: [
+                      {
+                        name: 'period',
+                        type: 'text',
+                        title: 'Collection Period',
+                        required: true,
+                        show_user: false,
+                        default: '24h',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+            latestVersion: '8.12.0',
+            keepPoliciesUpToDate: false,
+            status: 'not_installed',
+          },
+        },
+        isLoading: false,
+      });
+
+      beforeEach(() => {
+        (useConfig as jest.MockedFunction<any>).mockReturnValue({
+          agentless: { enabled: true, api: { url: 'http://agentless-api-url' } },
+          agents: { enabled: true },
+        });
+        (useStartServices as jest.MockedFunction<any>).mockReturnValue({
+          ...useStartServices(),
+          cloud: {
+            ...useStartServices().cloud,
+            isServerlessEnabled: true,
+            isCloudEnabled: true,
+          },
+        });
+        (sendCreateAgentlessPolicy as jest.MockedFunction<any>).mockResolvedValue({
+          item: {
+            name: 'aws-1',
+            id: 'policy-1',
+            namespace: 'default',
+            inputs: {},
+            package: { name: 'aws', title: 'AWS', version: '8.12.0' },
+          },
+        });
+        (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(getAwsLikePackageInfo());
+      });
+
+      test('should create an agentless policy on save when the deployment mode was not changed', async () => {
+        await act(async () => {
+          render(undefined, 'billing');
+        });
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ)).toBeInTheDocument();
+        });
+
+        await act(async () => {
+          fireEvent.change(renderResult.getByTestId('varGroupSelector-credential_type'), {
+            target: { value: 'direct_access_key' },
+          });
+        });
+        await act(async () => {
+          fireEvent.change(renderResult.getByTestId('passwordInput-access-key-id'), {
+            target: { value: 'key-id' },
+          });
+          fireEvent.change(renderResult.getByTestId('passwordInput-secret-access-key'), {
+            target: { value: 'secret' },
+          });
+        });
+
+        await act(async () => {
+          fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
+        });
+
+        expect(sendCreateAgentPolicy).not.toHaveBeenCalled();
+        expect(sendCreatePackagePolicyForRq).not.toHaveBeenCalled();
+        expect(sendCreateAgentlessPolicy).toHaveBeenCalledWith(
+          expect.objectContaining({ name: 'aws-1' }),
+          expect.objectContaining({ onIacPersistError: expect.any(Function) })
+        );
+      });
+    });
+
     describe('beta badge visibility based on agentless release', () => {
       beforeEach(() => {
         (useConfig as jest.MockedFunction<any>).mockReturnValue({
@@ -1111,6 +1384,15 @@ const mockApiCalls = (http: MockedFleetStartServices['http']) => {
     }
     if (path === '/api/fleet/agent_download_sources') {
       return Promise.resolve({ data: { items: [] } });
+    }
+    if (path === '/api/fleet/space_settings') {
+      return Promise.resolve({ item: {} });
+    }
+    if (path === '/api/fleet/cloud_connectors') {
+      return Promise.resolve({ items: [] });
+    }
+    if (path === '/api/fleet/epm/data_streams') {
+      return Promise.resolve({ items: [] });
     }
     const err = new Error(`API [GET ${path}] is not MOCKED!`);
     // eslint-disable-next-line no-console

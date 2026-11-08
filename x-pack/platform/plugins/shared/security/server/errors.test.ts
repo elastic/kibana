@@ -135,5 +135,14 @@ describe('lib/errors', () => {
     it('extracts `message` property', () => {
       expect(errors.getDetailedErrorMessage(new Error('some-message'))).toBe('some-message');
     });
+
+    it.each([
+      [null, 'null'],
+      [undefined, 'undefined'],
+      ['some-message', 'some-message'],
+      [42, '42'],
+    ])('reports a thrown %p that is not an object as is', (thrown, message) => {
+      expect(errors.getDetailedErrorMessage(thrown)).toBe(message);
+    });
   });
 });

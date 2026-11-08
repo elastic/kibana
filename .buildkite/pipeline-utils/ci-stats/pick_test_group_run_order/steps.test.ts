@@ -25,7 +25,7 @@ describe('buildJestStep', () => {
     label: 'Jest Tests',
     parallelism: 4,
     key: 'jest' as const,
-    agentDiskSize: 110,
+    agent: { queue: 'n2-8-spot', maxParallel: 7 },
     envFromLabels: { FOO: 'bar' },
     dependsOn: ['build'],
     retryCount: 2,
@@ -43,11 +43,23 @@ describe('buildJestStep', () => {
     expect(step.parallelism).toBe(4);
     expect(step.key).toBe('jest');
     expect(step.depends_on).toEqual(['build']);
-    expect(step.env).toEqual({ FOO: 'bar' });
+    expect(step.agents).toEqual({ queue: 'n2-8-spot', size: undefined });
+    expect(step.env).toEqual({ JEST_MAX_PARALLEL: '7', FOO: 'bar' });
     expect(step.retry.automatic).toEqual([
       { exit_status: '-1', limit: 3 },
       { exit_status: '*', limit: 2 },
     ]);
+  });
+
+  it('runs on the agent queue it is given, with that many config processes per job', () => {
+    const step = buildJestStep({
+      ...baseOpts,
+      agent: { queue: 'n2-4-spot', maxParallel: 1 },
+      agentDiskSize: 100,
+    }) as any;
+
+    expect(step.agents).toEqual({ queue: 'n2-4-spot', size: 100 });
+    expect(step.env.JEST_MAX_PARALLEL).toBe('1');
   });
 
   it('omits the wildcard retry when retryCount is 0', () => {

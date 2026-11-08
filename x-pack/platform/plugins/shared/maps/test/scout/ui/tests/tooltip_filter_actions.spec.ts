@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { tags, test } from '@kbn/scout';
+import { test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 const KBN_ARCHIVE = 'x-pack/platform/test/functional/fixtures/kbn_archives/maps.json';
@@ -17,7 +17,7 @@ const TOOLTIP_FILTER_ACTION_DASHBOARD_ID = '03c7cbf0-8eae-11e9-b674-69d1999628e4
 test.describe(
   'Maps - tooltip filter actions',
   {
-    tag: tags.stateful.classic,
+    tag: '@local-stateful-classic',
   },
   () => {
     let prevDefaultIndex: string | number | boolean | undefined;

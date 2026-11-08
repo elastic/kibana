@@ -30,6 +30,7 @@ export const getEndpointSecurityPolicyManager: () => Omit<Role, 'name'> = () => 
             'host_isolation_exceptions_all',
             'blocklist_all',
             'endpoint_exceptions_all',
+            'custom_yara_signatures_all',
 
             'workflow_insights_all',
           ],

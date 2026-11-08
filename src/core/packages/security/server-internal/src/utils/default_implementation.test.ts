@@ -25,6 +25,12 @@ describe('getDefaultSecurityImplementation', () => {
     });
   });
 
+  describe('authc.getPrincipal', () => {
+    it('returns null', () => {
+      expect(implementation.authc.getPrincipal({} as any)).toBeNull();
+    });
+  });
+
   describe('authc.getRedactedSessionId', () => {
     it('returns undefined', async () => {
       const sessionId = await implementation.authc.getRedactedSessionId({} as any);
@@ -76,6 +82,7 @@ describe('getDefaultSecurityImplementation', () => {
       'bindWorkload',
       'unbindWorkload',
       'getWorkloadBinding',
+      'getWorkloadServiceAccountSummary',
       'withScopedRequestForWorkload',
     ] as const)('%s rejects', async (method) => {
       await expect(

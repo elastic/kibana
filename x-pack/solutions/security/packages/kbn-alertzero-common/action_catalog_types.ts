@@ -9,10 +9,11 @@ import type {
   ActionApprovalPolicy,
   ActionCategory,
   ActionImpact,
+  ActionSubjectKind,
   JsonSchema,
 } from '@kbn/workflows';
 
-export type { ActionApprovalPolicy, ActionCategory, ActionImpact, JsonSchema };
+export type { ActionApprovalPolicy, ActionCategory, ActionImpact, ActionSubjectKind, JsonSchema };
 
 /**
  * One entry of the action catalog: the lightweight, agent-facing projection of
@@ -27,7 +28,13 @@ export interface ActionCatalogEntry {
   description?: string;
   category?: ActionCategory;
   impact?: ActionImpact;
-  approvalPolicy?: ActionApprovalPolicy;
+  approvalPolicy: ActionApprovalPolicy;
+  /**
+   * Subject kinds the action acts on, normalized to a list from
+   * `actionMetadata.subject`. Absent when the definition declares none; the
+   * consumer then infers host or process from `inputSchema`.
+   */
+  subjects?: ActionSubjectKind[];
   /**
    * JSON Schema of the workflow's inputs, as declared on its manual trigger
    * (`triggers[type=manual].inputs`). Describes the single `actionInput`

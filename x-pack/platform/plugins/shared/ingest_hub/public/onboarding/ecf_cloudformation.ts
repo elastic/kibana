@@ -16,14 +16,13 @@
  * Three template families are supported, each producing its own Launch button:
  *   - Unified ECS (multi-signal): ecs_logs-cloudformation.yaml   → ECS data streams
  *   - OTel (multi-signal):        otel_logs-cloudformation.yaml  → OpenTelemetry data streams
- *                                                                   (uses `S3SourceBuckets` instead of `S3Buckets`)
  *   - CrowdStrike FDR (dedicated): crowdstrike_fdr_cloudformation.yaml
  *
  * Reference templates:
  *   https://github.com/elastic/edot-cloud-forwarder-aws/tree/main/templates/release
  */
 
-import type { EcfLogType } from './aws_service_matrix';
+import type { AwsServiceMatrixEntry, EcfLogType } from './aws_service_matrix';
 import { AWS_SERVICES_MAP } from './aws_service_matrix';
 import type {
   ServiceInstance,
@@ -32,7 +31,9 @@ import type {
 import {
   buildEcfTemplateUrl,
   ECF_FALLBACK_TEMPLATE_VERSION,
-} from '../../common/ecf_template_version';
+} from '../../common/providers/aws/ecf_template_version';
+
+export { buildEcfTemplateUrl };
 
 // ── Template filenames ────────────────────────────────────────────────────────
 
@@ -75,6 +76,84 @@ export interface EcfServiceConfig {
    */
   logGroupArns: string[];
 }
+
+// ── Template families ─────────────────────────────────────────────────────────
+
+/** The CloudFormation template a service deploys with. */
+export type EcfTemplateFamily = 'unified' | 'otel' | 'crowdstrike';
+
+/** The template family of a service that deploys through ECF, or undefined for any other service. */
+export const getEcfTemplateFamily = (
+  entry: AwsServiceMatrixEntry
+): EcfTemplateFamily | undefined => {
+  if (entry.ecfDedicatedTemplate === 'otel') return 'otel';
+  if (entry.ecfDedicatedTemplate === 'crowdstrike_fdr') return 'crowdstrike';
+  return entry.ecfLogType ? 'unified' : undefined;
+};
+
+/** Only the unified (ECS) template takes a `DataStreamNamespace` parameter. */
+export const ecfFamilySupportsNamespace = (family: string | undefined): boolean =>
+  family === 'unified';
+
+/** The namespace a unified stack uses when the `DataStreamNamespace` parameter is left out. */
+export const ECF_DEFAULT_NAMESPACE = 'default';
+
+// ── Stack ARN utilities ───────────────────────────────────────────────────────
+
+/**
+ * Matches a complete CloudFormation stack ARN and captures the partition and region.
+ * Format: arn:PARTITION:cloudformation:REGION:ACCOUNT:stack/STACK_NAME/UNIQUE_ID
+ * The unique ID segment is restricted to hex digits and hyphens to reject embedded spaces or
+ * other characters that the AWS console never produces.
+ * Supports standard (aws), GovCloud (aws-us-gov), and China (aws-cn) partitions.
+ */
+const CFN_STACK_ARN_REGEX =
+  /^arn:(aws(?:-us-gov|-cn)?):cloudformation:([a-z0-9-]+):\d+:stack\/[^/]+\/[0-9a-fA-F-]+$/;
+
+/** Returns true when the trimmed value is a well-formed CloudFormation stack ARN. */
+export const isEcfStackArnValid = (arn: string): boolean => CFN_STACK_ARN_REGEX.test(arn.trim());
+
+const CFN_CONSOLE_HOSTS: Record<string, string> = {
+  'aws-us-gov': 'console.amazonaws-us-gov.com',
+  'aws-cn': 'console.amazonaws.cn',
+};
+
+/**
+ * Builds the AWS Console URL for viewing an existing CloudFormation stack.
+ * Uses the partition-appropriate console hostname (GovCloud / China have different domains).
+ * Returns undefined when `stackArn` is not a valid CFN stack ARN.
+ */
+export const buildEcfStackConsoleUrl = (stackArn: string): string | undefined => {
+  const match = CFN_STACK_ARN_REGEX.exec(stackArn.trim());
+  if (!match) return undefined;
+  const [, partition, region] = match;
+  const host = CFN_CONSOLE_HOSTS[partition] ?? 'console.aws.amazon.com';
+  const url = new URL(`https://${host}/cloudformation/home`);
+  url.searchParams.set('region', region);
+  url.hash = `/stacks/stackinfo?stackId=${encodeURIComponent(stackArn.trim())}`;
+  return url.toString();
+};
+
+/**
+ * Builds the AWS Console URL for the CloudFormation stack update wizard.
+ * Pre-fills the stack ID and template URL so the wizard opens with the correct template ready to apply.
+ * Returns undefined when `stackArn` is not a valid CFN stack ARN.
+ */
+export const buildEcfStackUpdateUrl = (
+  stackArn: string,
+  templateUrl: string
+): string | undefined => {
+  const match = CFN_STACK_ARN_REGEX.exec(stackArn.trim());
+  if (!match) return undefined;
+  const [, partition, region] = match;
+  const host = CFN_CONSOLE_HOSTS[partition] ?? 'console.aws.amazon.com';
+  const url = new URL(`https://${host}/cloudformation/home`);
+  url.searchParams.set('region', region);
+  url.hash = `/stacks/update/template?stackId=${encodeURIComponent(
+    stackArn.trim()
+  )}&templateURL=${encodeURIComponent(templateUrl)}`;
+  return url.toString();
+};
 
 // ── ECF param derivation ──────────────────────────────────────────────────────
 
@@ -121,12 +200,16 @@ export const getEcfServiceConfigs = (
         : [];
     };
 
-    const bucketArns = enabledInputs.includes('aws-s3')
-      ? splitArns(dsVars?.varsByInput?.['aws-s3']?.bucket_arn)
-      : [];
-    const logGroupArns = enabledInputs.includes('aws-cloudwatch')
-      ? splitArns(dsVars?.varsByInput?.['aws-cloudwatch']?.log_group_arn)
-      : [];
+    // Inputs outside `ecfInputs` (e.g. WAF CloudWatch) are agent-based only: never launch them via ECF.
+    const ecfCanRoute = (input: string) => !entry.ecfInputs || entry.ecfInputs.includes(input);
+    const bucketArns =
+      enabledInputs.includes('aws-s3') && ecfCanRoute('aws-s3')
+        ? splitArns(dsVars?.varsByInput?.['aws-s3']?.bucket_arn)
+        : [];
+    const logGroupArns =
+      enabledInputs.includes('aws-cloudwatch') && ecfCanRoute('aws-cloudwatch')
+        ? splitArns(dsVars?.varsByInput?.['aws-cloudwatch']?.log_group_arn)
+        : [];
 
     const existing = configsByServiceId.get(serviceId);
     if (existing) {
@@ -151,7 +234,34 @@ export const getEcfServiceConfigs = (
  * Ensures a CloudWatch log group ARN ends with `:*` as required by the ECF template's
  * `CloudWatchLogGroups` parameter.
  */
-const normaliseLogGroupArn = (arn: string): string => (arn.endsWith(':*') ? arn : `${arn}:*`);
+export const normaliseLogGroupArn = (arn: string): string =>
+  arn.endsWith(':*') ? arn : `${arn}:*`;
+
+/**
+ * Appends the default port (443 for https, 80 for http) to an OTLP endpoint URL when no
+ * explicit port is present. Required by the OTel ECF CloudFormation exporter configuration.
+ */
+export const ensureOtlpPort = (endpoint: string): string => {
+  try {
+    const parsed = new URL(endpoint);
+    // URL.port is '' for scheme-default ports, so check the raw string for an explicit port.
+    // Handles bracketed IPv6 ([::1]) and case-insensitive schemes (HTTPS://).
+    if (/^https?:\/\/(?:\[[^\]]+\]|[^/:[]+):\d+/i.test(endpoint)) return endpoint;
+    const port = parsed.protocol === 'https:' ? '443' : parsed.protocol === 'http:' ? '80' : null;
+    if (!port) return endpoint;
+    // URL.hostname is lowercased; use the original authority string to preserve casing.
+    // Stop at /, ?, or # so a bare query (e.g. ?token=abc) is not included in the authority.
+    const schemeEnd = endpoint.indexOf('://') + 3;
+    const afterScheme = endpoint.slice(schemeEnd);
+    const authorityEnd = afterScheme.search(/[/?#]/);
+    const originalAuthority =
+      authorityEnd === -1 ? afterScheme : afterScheme.slice(0, authorityEnd);
+    const rest = authorityEnd === -1 ? '' : afterScheme.slice(authorityEnd);
+    return `${endpoint.slice(0, schemeEnd)}${originalAuthority}:${port}${rest}`;
+  } catch {
+    return endpoint;
+  }
+};
 
 /**
  * Builds a CloudFormation Quick Create URL for the unified multi-signal ECF template.
@@ -161,6 +271,7 @@ const normaliseLogGroupArn = (arn: string): string => (arn.endsWith(':*') ? arn 
  *  - `S3Buckets`             – comma-separated bucket ARNs from S3-transport services
  *  - `CloudWatchLogGroups`   – comma-separated log group ARNs from CW-transport services
  *  - `LogTypes`              – comma-separated ECF log type identifiers
+ *  - `DataStreamNamespace`   – the global namespace, when set (the template defaults to `default`)
  *
  * `ElasticAPIKey` is intentionally NOT pre-filled: it is a sensitive credential that should
  * not appear in browser history or URL logs.  The user fills it in the AWS console.
@@ -173,6 +284,7 @@ const normaliseLogGroupArn = (arn: string): string => (arn.endsWith(':*') ? arn 
  * @param version       ECF template semantic version (from the version-resolver hook).
  *                      Falls back to `ECF_FALLBACK_TEMPLATE_VERSION` when omitted.
  * @param stackName     CloudFormation stack name. Defaults to `ECF_UNIFIED_STACK_NAME`.
+ * @param namespace     Global data stream namespace. Left out of the URL when empty.
  */
 export const buildEcfUnifiedCloudFormationUrl = ({
   ecfConfigs,
@@ -180,12 +292,14 @@ export const buildEcfUnifiedCloudFormationUrl = ({
   otlpEndpoint,
   version = ECF_FALLBACK_TEMPLATE_VERSION,
   stackName = ECF_UNIFIED_STACK_NAME,
+  namespace,
 }: {
   ecfConfigs: EcfServiceConfig[];
   region: string;
   otlpEndpoint?: string;
   version?: string;
   stackName?: string;
+  namespace?: string;
 }): string => {
   const s3BucketArns = ecfConfigs.flatMap((c) => c.bucketArns);
   const logGroupArns = ecfConfigs.flatMap((c) => c.logGroupArns.map(normaliseLogGroupArn));
@@ -214,6 +328,9 @@ export const buildEcfUnifiedCloudFormationUrl = ({
   }
   if (logTypes.length > 0) {
     hashParams.set('param_LogTypes', logTypes.join(','));
+  }
+  if (namespace) {
+    hashParams.set('param_DataStreamNamespace', namespace);
   }
 
   url.hash = `/stacks/quickcreate?${hashParams.toString()}`;
@@ -263,9 +380,8 @@ export const buildEcfCrowdstrikeCloudFormationUrl = ({
 /**
  * Builds a CloudFormation Quick Create URL for the OTel multi-signal ECF template.
  *
- * The OTel template uses `S3SourceBuckets` instead of `S3Buckets` (unlike the ECS unified
- * template). All other parameters — `CloudWatchLogGroups`, `LogTypes`, `OTLPEndpoint` — share
- * the same names and semantics.
+ * Parameters — `S3Buckets`, `CloudWatchLogGroups`, `LogTypes`, `OTLPEndpoint` — share the same
+ * names and semantics as the unified template.
  *
  * `ElasticAPIKey` is intentionally NOT pre-filled for the same security reasons as the unified
  * template: it must not appear in browser history or URL logs.
@@ -304,11 +420,10 @@ export const buildEcfOtelCloudFormationUrl = ({
   hashParams.set('stackName', stackName);
 
   if (otlpEndpoint) {
-    hashParams.set('param_OTLPEndpoint', otlpEndpoint);
+    hashParams.set('param_OTLPEndpoint', ensureOtlpPort(otlpEndpoint));
   }
-  // OTel template uses S3SourceBuckets, not S3Buckets
   if (s3BucketArns.length > 0) {
-    hashParams.set('param_S3SourceBuckets', s3BucketArns.join(','));
+    hashParams.set('param_S3Buckets', s3BucketArns.join(','));
   }
   if (logGroupArns.length > 0) {
     hashParams.set('param_CloudWatchLogGroups', logGroupArns.join(','));

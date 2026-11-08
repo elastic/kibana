@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { isImproved } from '@kbn/evals-common';
-import type { Direction, PairedTTestResult } from '@kbn/evals-common';
+import { isImproved, PARAMETRIC_UPGRADE_MIN_PAIRS } from '@kbn/evals-common';
+import type { Direction, ComparisonResult } from '@kbn/evals-common';
+import { formatDiscordantPairs, getTestLabel } from './test_label';
 
 const DEFAULT_SIGNIFICANCE_THRESHOLD = 0.05;
 const STALENESS_WARNING_DAYS = 3;
@@ -80,7 +81,7 @@ export function formatMarkdownCompareReport({
 }: {
   targetExperimentId: string;
   baselineExperimentId: string;
-  results: PairedTTestResult[];
+  results: ComparisonResult[];
   significanceThreshold?: number;
   comparePageUrl?: string;
   baselineTimestamp?: string;
@@ -123,6 +124,9 @@ export function formatMarkdownCompareReport({
   }
 
   lines.push(`Significance threshold: p < ${significanceThreshold}`);
+  lines.push(
+    `Test per row is chosen from the scores: McNemar for pass/fail, otherwise Wilcoxon signed-rank (paired t-test for continuous scores when n ≥ ${PARAMETRIC_UPGRADE_MIN_PAIRS} and differences look normal).`
+  );
   lines.push('');
 
   lines.push('**Summary**');
@@ -174,12 +178,12 @@ export function formatMarkdownCompareReport({
     (r) => r.pValue === null || !Number.isFinite(r.pValue) || r.pValue >= significanceThreshold
   );
 
-  const renderTable = (rows: PairedTTestResult[]) => {
+  const renderTable = (rows: ComparisonResult[]) => {
     const tableLines: string[] = [];
     tableLines.push(
-      `| Dataset | Evaluator | N | Mean (PR) | Mean (${baselineBranch}) | Diff | p-value | Sig | Outcome |`
+      `| Dataset | Evaluator | N | Mean (PR) | Mean (${baselineBranch}) | Diff | Test | p-value | Sig | Outcome |`
     );
-    tableLines.push('| --- | --- | --- | --- | --- | --- | --- | --- | --- |');
+    tableLines.push('| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |');
     rows.forEach((r) => {
       const delta = r.meanTarget - r.meanBaseline;
       const cols = [
@@ -188,7 +192,8 @@ export function formatMarkdownCompareReport({
         String(r.sampleSize),
         formatNumber(r.meanTarget),
         formatNumber(r.meanBaseline),
-        formatDifference(delta),
+        formatDifference(delta) + formatDiscordantPairs(r.hypothesisTest),
+        getTestLabel(r.hypothesisTest.id),
         formatPValue(r.pValue),
         formatSig(r.pValue, significanceThreshold),
         formatOutcome(delta, r.direction, r.pValue, significanceThreshold),

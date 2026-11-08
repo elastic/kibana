@@ -15,6 +15,7 @@ import type {
 import { assertWorkflowsEnabled } from '../../../lib/assert_workflows_enabled';
 import { registerGetPipelineDataRoute, type GetPipelineDataResponse } from './get_pipeline_data';
 import { getWorkflowExecutionsTracking } from './helpers/get_workflow_executions_tracking';
+import type { EventLogData } from './helpers/get_workflow_executions_tracking';
 
 jest.mock('../../../lib/assert_workflows_enabled', () => ({
   assertWorkflowsEnabled: jest.fn().mockResolvedValue(null),
@@ -436,6 +437,199 @@ describe('registerGetPipelineDataRoute', () => {
         }),
       ])
     );
+  });
+
+  describe('provided-alerts reconstruction (Step 2.5)', () => {
+    // The precondition used here is the one the product actually produces for a
+    // pre-provided run (the agent-builder run tool / `security.attack-discovery.run`
+    // step with `alerts` supplied): no alert-retrieval workflow executes, the
+    // supplied alerts are recorded in the generate-step-started event reference,
+    // and the diagnostics context records `custom_query`. The generation workflow
+    // config types `alert_retrieval_mode` as the built-in default-retrieval query
+    // mode (`custom_query | esql`) and every bridge derives it as
+    // `mode === 'esql' ? 'esql' : 'custom_query'`, so `provided` never reaches the
+    // diagnostics context — a reconstruction gated on that string can never fire.
+    const suppliedAlerts = ['_id,a1\nhost.name,web-01', '_id,a2\nhost.name,web-02'];
+    const resolvedGenerationAlerts = [
+      '_id,a1\nhost.name,web-01',
+      '_id,a2\nhost.name,web-02',
+      '_id,a3\nhost.name,web-03',
+    ];
+
+    const providedRunTracking: EventLogData = {
+      alertRetrieval: null,
+      diagnosticsContext: {
+        config: {
+          alertRetrievalMode: 'custom_query',
+          alertRetrievalWorkflowCount: 0,
+          connectorType: '.gen-ai',
+          hasCustomValidation: false,
+        },
+        preExecutionChecks: [],
+        workflowIntegrity: { repaired: [], status: 'all_intact', unrepairableErrors: [] },
+      },
+      generation: {
+        workflowId: 'workflow-generation',
+        workflowRunId: 'generation-run-id',
+      },
+      providedAlerts: suppliedAlerts,
+      validation: null,
+    };
+
+    const invokeHandler = async (): Promise<GetPipelineDataResponse> => {
+      const handler = registerAndGetHandler();
+      const responseMock = httpServerMock.createResponseFactory();
+
+      await handler(
+        {
+          core: Promise.resolve({
+            featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+          }),
+        },
+        createRequest(),
+        responseMock
+      );
+
+      return responseMock.ok.mock.calls[0]?.[0]?.body as GetPipelineDataResponse;
+    };
+
+    const mockGenerationExecutionWithAlerts = (alerts: string[]) =>
+      mockGetWorkflowExecution.mockImplementation((runId: string) =>
+        runId === 'generation-run-id'
+          ? Promise.resolve({
+              stepExecutions: [{ input: { alerts }, stepId: 'generate_discoveries' }],
+            })
+          : Promise.resolve({ stepExecutions: [] })
+      );
+
+    it('reconstructs the provided-alert entry from the event-log tracking while generation is still running', async () => {
+      mockGetWorkflowExecutionsTracking.mockResolvedValue(providedRunTracking);
+      // Generation has started, but its step input is not populated yet.
+      mockGetWorkflowExecution.mockResolvedValue({ stepExecutions: [] });
+      mockExtractPipelineGenerationData.mockReturnValue(null);
+      mockExtractPipelineValidationData.mockReturnValue(null);
+      mockComputeCombinedAlerts.mockReturnValue({
+        alerts: suppliedAlerts,
+        alerts_context_count: suppliedAlerts.length,
+      });
+
+      const body = await invokeHandler();
+
+      expect(body.alert_retrieval).toEqual([
+        expect.objectContaining({
+          alerts: suppliedAlerts,
+          alerts_context_count: suppliedAlerts.length,
+          extraction_strategy: 'provided',
+          workflow_id: 'provided',
+          workflow_run_id: 'provided',
+        }),
+      ]);
+      // The reconstruction feeds the combined ("Combined alert retrieval") view
+      // built from the Alert retrieval phase.
+      expect(mockComputeCombinedAlerts).toHaveBeenCalledWith([
+        expect.objectContaining({ alerts_context_count: suppliedAlerts.length }),
+      ]);
+    });
+
+    it('keeps the supplied alerts as the provided entry once the generation step input resolves', async () => {
+      // The resolved step input is the set generation analysed — the supplied
+      // alerts plus any net-new ones the gate added — and it belongs to the gate
+      // entry (Step 5b). The provided entry must keep reporting the alerts the run
+      // was given, so its count does not move between the running and completed
+      // states and gate additions are never labelled `provided`.
+      mockGetWorkflowExecutionsTracking.mockResolvedValue(providedRunTracking);
+      mockGenerationExecutionWithAlerts(resolvedGenerationAlerts);
+      mockExtractPipelineGenerationData.mockReturnValue(null);
+      mockExtractPipelineValidationData.mockReturnValue(null);
+      mockComputeCombinedAlerts.mockReturnValue({
+        alerts: suppliedAlerts,
+        alerts_context_count: suppliedAlerts.length,
+      });
+
+      const body = await invokeHandler();
+
+      expect(body.alert_retrieval).toEqual([
+        expect.objectContaining({
+          alerts: suppliedAlerts,
+          alerts_context_count: suppliedAlerts.length,
+          extraction_strategy: 'provided',
+        }),
+      ]);
+      // The gate addition is not smuggled into the provided entry...
+      expect(body.alert_retrieval?.[0]?.alerts).not.toContain(resolvedGenerationAlerts[2]);
+      // ...so the combined Alerts-retrieval view stays on the supplied set.
+      expect(mockComputeCombinedAlerts).toHaveBeenCalledWith([
+        expect.objectContaining({ alerts_context_count: suppliedAlerts.length }),
+      ]);
+    });
+
+    it('does not label retrieved alerts as provided when an alert-retrieval workflow ran', async () => {
+      mockGetWorkflowExecutionsTracking.mockResolvedValue({
+        alertRetrieval: [
+          {
+            workflowId: 'workflow-default-alert-retrieval',
+            workflowRunId: 'alert-retrieval-run-id',
+          },
+        ],
+        diagnosticsContext: {
+          config: {
+            alertRetrievalMode: 'esql',
+            alertRetrievalWorkflowCount: 0,
+            connectorType: '.gen-ai',
+            hasCustomValidation: false,
+          },
+          preExecutionChecks: [],
+          workflowIntegrity: { repaired: [], status: 'all_intact', unrepairableErrors: [] },
+        },
+        generation: {
+          workflowId: 'workflow-generation',
+          workflowRunId: 'generation-run-id',
+        },
+        validation: null,
+      });
+      mockGenerationExecutionWithAlerts(resolvedGenerationAlerts);
+      mockExtractPipelineAlertData.mockReturnValue({
+        alerts: resolvedGenerationAlerts,
+        alerts_context_count: resolvedGenerationAlerts.length,
+        extraction_strategy: 'default_esql' as const,
+      });
+      mockExtractPipelineGenerationData.mockReturnValue(null);
+      mockExtractPipelineValidationData.mockReturnValue(null);
+
+      const body = await invokeHandler();
+
+      expect(body.alert_retrieval).toEqual([
+        expect.objectContaining({
+          alerts_context_count: resolvedGenerationAlerts.length,
+          extraction_strategy: 'default_esql',
+        }),
+      ]);
+      expect(body.alert_retrieval?.some((entry) => entry.extraction_strategy === 'provided')).toBe(
+        false
+      );
+    });
+
+    it('does not synthesise a provided entry when the run recorded no supplied alerts', async () => {
+      // Not a provided run (or the generate-step-started event was lost): the
+      // generate step input alone must not be presented as pre-provided alerts,
+      // because in every retrieval mode it also carries the retrieved candidates.
+      mockGetWorkflowExecutionsTracking.mockResolvedValue({
+        alertRetrieval: null,
+        diagnosticsContext: providedRunTracking.diagnosticsContext,
+        generation: {
+          workflowId: 'workflow-generation',
+          workflowRunId: 'generation-run-id',
+        },
+        validation: null,
+      });
+      mockGenerationExecutionWithAlerts(resolvedGenerationAlerts);
+      mockExtractPipelineGenerationData.mockReturnValue(null);
+      mockExtractPipelineValidationData.mockReturnValue(null);
+
+      const body = await invokeHandler();
+
+      expect(body.alert_retrieval).toBeNull();
+    });
   });
 
   it('falls back to standard alert extraction for non-gate-decision runs in the gate bucket', async () => {

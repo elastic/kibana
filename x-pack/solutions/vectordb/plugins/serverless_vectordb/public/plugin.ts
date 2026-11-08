@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { combineLatest, map, of } from 'rxjs';
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { BehaviorSubject, combineLatest, map, of } from 'rxjs';
+import type { AppUpdater, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { hasSeenOnboarding } from '@kbn/vectordb-onboarding';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import {
@@ -41,6 +42,12 @@ export class ServerlessVectordbPlugin
   ): ServerlessVectordbPluginSetup {
     consolePlugin?.setDefaultEditorContent?.(CONSOLE_DEFAULT_CONTENT);
 
+    // Read once: updaters re-run on every applications$ change, and the landing page marks
+    // onboarding seen on mount, so a lazy read would show the chrome mid-wizard.
+    const hideChrome = !hasSeenOnboarding();
+    const appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({ hideChrome }));
+    const showChrome = () => appUpdater$.next(() => ({ hideChrome: false }));
+
     core.application.register({
       id: VECTORDB_APP_ID,
       title: i18n.translate('xpack.serverlessVectordb.app.title', {
@@ -49,6 +56,7 @@ export class ServerlessVectordbPlugin
       appRoute: '/app/vectordb',
       euiIconType: 'logoVectorDB',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      updater$: appUpdater$,
       deepLinks: [
         {
           id: GETTING_STARTED_DEEP_LINK_ID,
@@ -68,9 +76,10 @@ export class ServerlessVectordbPlugin
           console: depsStart.console,
           cloud: depsStart.cloud,
           agentBuilder: depsStart.agentBuilder,
+          elasticsearchHome: depsStart.elasticsearchHome,
           history: params.history,
         };
-        return renderApp(coreStart, appServices, params);
+        return renderApp(coreStart, appServices, params, showChrome);
       },
     });
 

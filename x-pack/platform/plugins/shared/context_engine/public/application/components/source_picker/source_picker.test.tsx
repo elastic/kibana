@@ -15,8 +15,12 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React, { useState } from 'react';
+import { contextEngineQueryKeys } from '../../hooks/query_keys';
 import { SourcePicker } from './source_picker';
 import type { SelectedSource } from './types';
+
+const getHttpPath = (pathOrOptions: string | { path: string }): string =>
+  typeof pathOrOptions === 'string' ? pathOrOptions : pathOrOptions.path;
 
 jest.mock('@kbn/esql/public', () => ({
   ESQLLangEditor: ({
@@ -60,21 +64,34 @@ const INDEX_MATCHES = [
 const createServices = ({
   indices = INDEX_MATCHES,
   indicesError,
+  canReadConnectors = true,
 }: {
   indices?: MatchedItem[];
   indicesError?: Error;
+  canReadConnectors?: boolean;
 } = {}) => {
   const services = coreMock.createStart();
+  services.application.capabilities = {
+    ...services.application.capabilities,
+    actions: {
+      ...services.application.capabilities.actions,
+      show: canReadConnectors,
+      save: canReadConnectors,
+    },
+  };
   const data = dataPluginMock.createStartContract();
   data.dataViews.getIndices = indicesError
     ? jest.fn().mockRejectedValue(indicesError)
     : jest.fn().mockResolvedValue(indices);
 
-  (services.http.get as jest.Mock).mockImplementation((path: string) => {
-    if (path === '/api/actions/connector_types') return Promise.resolve(SUPPORTED_TYPES);
-    if (path === '/api/actions/connectors') return Promise.resolve(CONNECTORS);
-    return Promise.resolve(undefined);
-  });
+  (services.http.get as jest.Mock).mockImplementation(
+    (pathOrOptions: string | { path: string }) => {
+      const path = getHttpPath(pathOrOptions);
+      if (path === '/api/actions/connector_types') return Promise.resolve(SUPPORTED_TYPES);
+      if (path === '/api/actions/connectors') return Promise.resolve(CONNECTORS);
+      return Promise.resolve(undefined);
+    }
+  );
 
   return { ...services, data, triggersActionsUi: triggersActionsUiMock.createStart() };
 };
@@ -88,6 +105,7 @@ const renderWithProviders = (ui: React.ReactElement, services = createServices()
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return {
     services,
+    queryClient,
     ...render(
       <I18nProvider>
         <EuiProvider>
@@ -111,9 +129,32 @@ const addEsqlSource = async (query: string) => {
   fireEvent.click(screen.getByTestId('contextAddEsqlSourceButton'));
 };
 
-const openConnectorsTab = () => {
-  fireEvent.click(screen.getByTestId('contextSourcePickerTab-connectors'));
+const waitForConnectorQueries = async (queryClient: QueryClient) => {
+  await waitFor(() => {
+    const typesQuery = queryClient.getQueryState(contextEngineQueryKeys.connectors.types());
+    const listQuery = queryClient.getQueryState(contextEngineQueryKeys.connectors.list());
+    expect(typesQuery?.status).toBe('success');
+    expect(listQuery?.status).toBe('success');
+  });
 };
+
+const openConnectorOptions = async (
+  services: ReturnType<typeof createServices>,
+  queryClient: QueryClient
+) => {
+  const comboBox = await screen.findByTestId('contextConnectorComboBox');
+  fireEvent.focus(within(comboBox).getByRole('combobox'));
+  await waitFor(() => expect(services.http.get).toHaveBeenCalled());
+  await waitForConnectorQueries(queryClient);
+  const input = within(comboBox).getByRole('combobox');
+  fireEvent.focus(input);
+  fireEvent.click(input);
+  await waitFor(() => {
+    expect(screen.getByRole('option', { name: 'Google Drive' })).toBeInTheDocument();
+  });
+};
+
+const getConnectorOptionByName = (name: string) => screen.getByRole('option', { name });
 
 const selectIndexSource = async (indexName: string) => {
   const comboBox = screen.getByTestId('contextIndexComboBox');
@@ -135,10 +176,13 @@ describe('SourcePicker', () => {
     jest.clearAllMocks();
   });
 
-  it('selects the Elasticsearch data tab by default with index picker visible', () => {
+  it('renders both Elasticsearch data and Connectors sections on mount', () => {
     renderWithProviders(<Harness />);
 
-    expect(screen.getByTestId('contextElasticsearchSourcesTab')).toBeInTheDocument();
+    expect(screen.getByTestId('contextElasticsearchDataPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('contextElasticsearchSourcesPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('contextConnectorsPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('contextConnectorsTab')).toBeInTheDocument();
     expect(screen.getByTestId('contextIndexComboBox')).toBeInTheDocument();
     expect(screen.getByTestId('contextAdvancedEsqlAccordion')).toBeInTheDocument();
     expect(screen.getByTestId('mockEsqlEditor')).not.toBeVisible();
@@ -204,7 +248,7 @@ describe('SourcePicker', () => {
     expect(screen.queryByTestId('contextSelectedSource-esql-0')).not.toBeInTheDocument();
   });
 
-  it('does not fetch connectors or indices on mount when only the Elasticsearch data tab is shown', () => {
+  it('does not fetch connectors or indices on mount', () => {
     const { services } = renderWithProviders(<Harness />);
 
     expect(services.http.get).not.toHaveBeenCalled();
@@ -212,23 +256,21 @@ describe('SourcePicker', () => {
   });
 
   it('lists only the data-retrieval connectors in the connectors tab', async () => {
-    const { services } = renderWithProviders(<Harness />);
+    const { services, queryClient } = renderWithProviders(<Harness />);
 
-    openConnectorsTab();
+    await openConnectorOptions(services, queryClient);
 
-    await waitFor(() => expect(services.http.get).toHaveBeenCalled());
-    expect(await screen.findByText('Google Drive')).toBeInTheDocument();
-    expect(screen.getByText('GitHub')).toBeInTheDocument();
+    expect(getConnectorOptionByName('Google Drive')).toHaveTextContent('Google Drive');
+    expect(getConnectorOptionByName('GitHub')).toHaveTextContent('GitHub');
     // Slack is not a data-retrieval connector, so it must be filtered out.
-    expect(screen.queryByText('Slack')).not.toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: 'Slack' })).not.toBeInTheDocument();
   });
 
   it('adds a connector as a source when selected', async () => {
-    renderWithProviders(<Harness />);
+    const { services, queryClient } = renderWithProviders(<Harness />);
 
-    openConnectorsTab();
-
-    fireEvent.click(await screen.findByText('Google Drive'));
+    await openConnectorOptions(services, queryClient);
+    fireEvent.click(getConnectorOptionByName('Google Drive'));
 
     const row = await screen.findByTestId('contextSelectedSource-connector-0');
     expect(row).toHaveTextContent('Google Drive');
@@ -255,13 +297,35 @@ describe('SourcePicker', () => {
     );
   });
 
+  it('does not fetch connectors for restored connector sources without Actions read', () => {
+    const { services } = renderWithProviders(
+      <Harness
+        initialSources={[
+          {
+            type: 'connector',
+            id: 'connector-github',
+            label: 'connector-github',
+            value: 'connector-github',
+          },
+        ]}
+      />,
+      createServices({ canReadConnectors: false })
+    );
+
+    expect(services.http.get).not.toHaveBeenCalled();
+    expect(screen.getByTestId('contextSelectedSource-connector-0')).toHaveTextContent(
+      'connector-github'
+    );
+  });
+
   it('shows an error prompt in the connectors tab when the connector request fails', async () => {
     const services = createServices();
     services.http.get.mockRejectedValue(new Error('Network error'));
 
     renderWithProviders(<Harness />, services);
 
-    openConnectorsTab();
+    const comboBox = await screen.findByTestId('contextConnectorComboBox');
+    fireEvent.focus(within(comboBox).getByRole('combobox'));
 
     expect(await screen.findByTestId('contextConnectorsError')).toBeInTheDocument();
     expect(screen.queryByTestId('contextConnectorsEmpty')).not.toBeInTheDocument();

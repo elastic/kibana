@@ -22,14 +22,16 @@ import { createDataViewDataSource, createEsqlDataSource } from '../../../../../c
 import { internalStateActions } from '../../state_management/redux';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { METRIC_TYPE } from '@kbn/analytics';
 import * as savedSearchUrlConflictCallout from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
 
 const setup = async ({
   dataView,
+  columns,
   hideSidebar,
   hideTable = false,
   isEsqlEnabled = false,
@@ -39,6 +41,7 @@ const setup = async ({
   },
 }: {
   dataView: DataView;
+  columns?: string[];
   hideSidebar?: boolean;
   hideTable?: boolean;
   isEsqlEnabled?: boolean;
@@ -70,6 +73,7 @@ const setup = async ({
       tabId: toolkit.getCurrentTab().id,
       appState: {
         dataSource: createDataViewDataSource({ dataViewId: dataView.id! }),
+        columns,
         hideTable,
         hideSidebar,
         query: { query: '', language: 'kuery' },
@@ -110,7 +114,9 @@ const setup = async ({
 
   render(
     <DiscoverToolkitTestProvider toolkit={toolkit} usePortalsRenderer>
-      <DiscoverLayout />
+      <RootDragDropProvider>
+        <DiscoverLayout />
+      </RootDragDropProvider>
     </DiscoverToolkitTestProvider>
   );
 
@@ -210,6 +216,56 @@ describe('Discover component', () => {
       });
       await waitFor(() => {
         expect(screen.queryByTestId('fieldList')).not.toBeInTheDocument();
+      });
+    }, 10000);
+
+    test('should reorder the table columns when a selected field is dropped onto another one', async () => {
+      // `_source` is not shown in the sidebar, so the sidebar position of a field doesn't match its column index
+      const { toolkit } = await setup({
+        dataView: dataViewWithTimefieldMock,
+        columns: ['_source', 'extension', 'bytes'],
+      });
+
+      const getSelectedFieldItem = (fieldName: string) => {
+        const item = screen
+          .getByTestId('fieldListGroupedSelectedFields')
+          .querySelector(`li[data-attr-field="${fieldName}"]`);
+        if (!(item instanceof HTMLElement)) {
+          throw new Error(`Selected field "${fieldName}" was not found`);
+        }
+        return item;
+      };
+
+      await waitFor(() => {
+        expect(getSelectedFieldItem('bytes')).toBeInTheDocument();
+      });
+
+      fireEvent.dragStart(
+        within(getSelectedFieldItem('extension')).getByTestId('dscFieldListPanelField-extension'),
+        {
+          // DataTransfer is not implemented in jsdom
+          dataTransfer: { setData: jest.fn(), getData: jest.fn() },
+        }
+      );
+
+      // the drop targets are rendered once the drag state has been set
+      const dropLayer = await within(getSelectedFieldItem('bytes')).findByTestId(
+        'domDragDrop-reorderableDropLayer'
+      );
+      fireEvent.drop(dropLayer);
+
+      // the sidebar is updated right away...
+      expect(
+        Array.from(
+          screen
+            .getByTestId('fieldListGroupedSelectedFields')
+            .querySelectorAll('li[data-attr-field]')
+        ).map((item) => item.getAttribute('data-attr-field'))
+      ).toEqual(['bytes', 'extension']);
+
+      // ...and the columns follow after the next paint
+      await waitFor(() => {
+        expect(toolkit.getCurrentTab().appState.columns).toEqual(['_source', 'bytes', 'extension']);
       });
     }, 10000);
   });

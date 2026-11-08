@@ -14,4 +14,5 @@ export enum BulkActionTaskType {
   MIGRATE_RETRY = 'fleet:migrate_action:retry',
   PRIVILEGE_LEVEL_CHANGE_RETRY = 'fleet:privilege_level_change:retry',
   ROLLBACK_RETRY = 'fleet:rollback_action:retry',
+  RESTART_RETRY = 'fleet:restart_action:retry',
 }

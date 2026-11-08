@@ -168,7 +168,7 @@ describe('getMonitorAgentAssignment route', () => {
       {
         locationId: 'loc-1',
         locationLabel: 'Location 1',
-        isAgentSharding: false,
+        isShardingActive: false,
         agentPolicyId: 'policy-1',
         agentPolicyName: 'Policy One',
         agents: [
@@ -187,6 +187,7 @@ describe('getMonitorAgentAssignment route', () => {
             enrolled: true,
           },
         ],
+        hasCompleteAgent: false,
       },
     ]);
     expect(result[0]).not.toHaveProperty('usedMemoryPct');
@@ -221,7 +222,7 @@ describe('getMonitorAgentAssignment route', () => {
     const result = (await run(routeContext)) as MonitorLocationAssignment[];
 
     expect(result).toHaveLength(1);
-    expect(result[0].isAgentSharding).toBe(true);
+    expect(result[0].isShardingActive).toBe(true);
     expect(result[0].agents).toEqual([
       {
         agentId: 'agent-2',
@@ -315,6 +316,38 @@ describe('getMonitorAgentAssignment route', () => {
     const result = (await run(routeContext)) as MonitorLocationAssignment[];
 
     expect(result[0].agents).toEqual([]);
+    expect(result[0].hasCompleteAgent).toBe(false);
+  });
+
+  it('reports a complete agent when one is enrolled', async () => {
+    mockGetLocations.mockResolvedValue({
+      locations: [{ id: 'loc-1', label: 'Location 1', agentPolicyId: 'policy-1' }],
+      agentPolicies: [{ id: 'policy-1', name: 'Policy One' }],
+    });
+    mockGetByIds.mockResolvedValue([]);
+    const getMonitor = jest.fn().mockResolvedValue({
+      attributes: { locations: [{ id: 'loc-1', isServiceManaged: false }] },
+    });
+    const listAgents = jest.fn().mockResolvedValue({
+      agents: [
+        agent({
+          local_metadata: {
+            host: { name: 'host-a' },
+            elastic: { agent: { version: '9.6.0', complete: true } },
+          },
+        }),
+      ],
+      total: 1,
+    });
+    const { routeContext } = makeContext({
+      listAgentsImpl: listAgents,
+      getMonitorImpl: getMonitor,
+      hasEnterprise: true,
+    });
+
+    const result = (await run(routeContext)) as MonitorLocationAssignment[];
+
+    expect(result[0].hasCompleteAgent).toBe(true);
   });
 
   it('returns the stamped agent as unhealthy when it is no longer enrolled', async () => {
@@ -383,7 +416,7 @@ describe('getMonitorAgentAssignment route', () => {
 
     const result = (await run(routeContext)) as MonitorLocationAssignment[];
 
-    expect(result[0].isAgentSharding).toBe(false);
+    expect(result[0].isShardingActive).toBe(false);
     expect(result[0].agents.map(({ agentId }) => agentId)).toEqual(['agent-1', 'agent-2']);
     expect(mockGetByIds).not.toHaveBeenCalled();
   });

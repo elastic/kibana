@@ -495,7 +495,8 @@ Register the step definitions in both server and public plugin setup:
 Both `registerStepDefinition` contracts (server and public) accept either a **direct definition** or an **async loader** of the form `() => Promise<Definition | undefined>`. Use the loader form when you need to:
 
 - Keep the step module out of your plugin's main bundle (defer the import).
-- Conditionally register the step based on something only known at runtime (feature flag, license, capabilities, etc.). **Resolve the loader with `undefined` to skip the registration silently** — no error is thrown and no entry is added to the registry.
+- Conditionally register the step based on something only known at runtime (license, capabilities, a missing dependency). **Resolve the loader with `undefined` to skip the registration silently** — no error is thrown and no entry is added to the registry. The loader runs once, so this is only for a decision that cannot change after startup.
+- Feature flags can change later. Do not snapshot them in the loader with `firstValueFrom(core.featureFlags.getBooleanValue$)` (or any other one-shot read). Subscribe in `start()`, keep the latest value, and gate the step handler. Unsubscribe in `stop()`.
 
 Loader rejections (and any error thrown while inserting the resolved definition into the registry) are caught and logged via the plugin logger; they do **not** propagate to the caller. This way a single broken loader cannot prevent other steps — or workflow execution as a whole — from working. Consumers that need to wait for all pending registrations can `await workflowsExtensions.isReady()`; it always resolves once every loader has settled.
 
@@ -515,10 +516,11 @@ export class MyPlugin implements Plugin {
     // Sync registration — definition is built up-front
     plugins.workflowsExtensions.registerStepDefinition(getMyStepDefinition(core));
 
-    // Async / conditional registration — resolve with `undefined` to skip
+    // Async / conditional registration — resolve with `undefined` to skip.
+    // Not for feature flags: the loader runs once. Subscribe in start() and gate the handler.
     plugins.workflowsExtensions.registerStepDefinition(async () => {
-      const isFeatureFlagEnabled = await checkFeatureFlag();
-      if (!isFeatureFlagEnabled) {
+      const isCapabilityAvailable = await checkCapability();
+      if (!isCapabilityAvailable) {
         return undefined; // Skip step registration
       }
       const { getMyOptionalStepDefinition } = await import(
@@ -551,10 +553,11 @@ export class MyPlugin implements Plugin {
       import('./workflows/step_types/my_step').then((m) => m.myStepDefinition)
     );
 
-    // Conditional registration — resolve with `undefined` to skip
+    // Conditional registration — resolve with `undefined` to skip.
+    // Not for feature flags: the loader runs once. Follow the flag from the server handler.
     plugins.workflowsExtensions.registerStepDefinition(async () => {
-      const isFeatureFlagEnabled = await checkFeatureFlag();
-      if (!isFeatureFlagEnabled) {
+      const isCapabilityAvailable = await checkCapability();
+      if (!isCapabilityAvailable) {
         return undefined; // Skip step registration
       }
       const { myOptionalStepDefinition } = await import(

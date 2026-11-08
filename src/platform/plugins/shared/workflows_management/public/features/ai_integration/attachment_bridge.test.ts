@@ -685,3 +685,89 @@ describe('AttachmentBridge: sequential events delegate to applyAfterYaml', () =>
     bridge.stop();
   });
 });
+
+describe('AttachmentBridge: read-only editor', () => {
+  const setup = () => {
+    const events = createChatEvents();
+    const editorRef = { current: createMockEditor('yaml: original') };
+    const tracker = new ProposalTracker();
+    const { manager } = createMockProposalManager();
+    const bridge = new AttachmentBridge();
+    const readOnly = { current: true };
+    const onProposalReceived = jest.fn();
+    const onProposalDeferred = jest.fn();
+
+    bridge.start(manager, editorRef, tracker, {
+      ...events,
+      attachmentId: 'workflow-a',
+      workflowId: 'workflow-a',
+      isReadOnly: () => readOnly.current,
+      onProposalReceived,
+      onProposalDeferred,
+    });
+
+    return { bridge, events, manager, tracker, readOnly, onProposalReceived, onProposalDeferred };
+  };
+
+  const yamlChange = (proposalId: string, afterYaml: string) =>
+    makeYamlChangedEvent({
+      proposalId,
+      beforeYaml: 'yaml: original',
+      afterYaml,
+      attachmentId: 'workflow-a',
+    });
+
+  it('holds the proposal instead of showing it in a read-only editor', () => {
+    const { bridge, events, manager, tracker, onProposalReceived, onProposalDeferred } = setup();
+
+    events.emit(yamlChange('p-1', 'yaml: fixed'));
+
+    expect(manager.applyAfterYaml).not.toHaveBeenCalled();
+    expect(bridge.hasDeferred()).toBe(true);
+    expect(tracker.getAllRecords()).toHaveLength(0);
+    expect(onProposalDeferred).toHaveBeenCalledTimes(1);
+    expect(onProposalReceived).not.toHaveBeenCalled();
+
+    bridge.stop();
+  });
+
+  it('shows only the latest held proposal once the editor is editable', () => {
+    const { bridge, events, manager, readOnly, onProposalReceived } = setup();
+
+    events.emit(yamlChange('p-1', 'yaml: first'));
+    events.emit(yamlChange('p-2', 'yaml: second'));
+    readOnly.current = false;
+    bridge.applyDeferred();
+
+    expect(manager.applyAfterYaml).toHaveBeenCalledTimes(1);
+    expect(manager.applyAfterYaml).toHaveBeenCalledWith('yaml: second');
+    expect(onProposalReceived).toHaveBeenCalledWith(expect.objectContaining({ proposalId: 'p-2' }));
+
+    bridge.applyDeferred();
+    expect(manager.applyAfterYaml).toHaveBeenCalledTimes(1);
+
+    bridge.stop();
+  });
+
+  it('keeps holding the proposal while the editor is still read-only', () => {
+    const { bridge, events, manager } = setup();
+
+    events.emit(yamlChange('p-1', 'yaml: fixed'));
+    bridge.applyDeferred();
+
+    expect(manager.applyAfterYaml).not.toHaveBeenCalled();
+
+    bridge.stop();
+  });
+
+  it('drops the held proposal on stop', () => {
+    const { bridge, events, manager, readOnly } = setup();
+
+    events.emit(yamlChange('p-1', 'yaml: fixed'));
+    bridge.stop();
+    readOnly.current = false;
+    bridge.applyDeferred();
+
+    expect(manager.applyAfterYaml).not.toHaveBeenCalled();
+  });
+});

@@ -6,7 +6,7 @@
  */
 
 import type { SchemaOutput } from '../schema_output';
-import {
+import type {
   LocationErrorStatType,
   TopFailingMonitorType,
   FailingDomainType,
@@ -16,19 +16,7 @@ import {
   EmergingTermType,
   ErrorInsightsType,
   ErrorStatsType,
-} from '../zod/ping';
-
-export {
-  LocationErrorStatType,
-  TopFailingMonitorType,
-  FailingDomainType,
-  TagErrorStatType,
-  StatusCodeStatType,
-  MonitorTypeStatType,
-  EmergingTermType,
-  ErrorInsightsType,
-  ErrorStatsType,
-};
+} from '../schemas/ping';
 
 export type LocationErrorStat = SchemaOutput<typeof LocationErrorStatType>;
 export type TopFailingMonitor = SchemaOutput<typeof TopFailingMonitorType>;

@@ -38,7 +38,7 @@ interface ParsedWorkflowInput {
 interface ParsedWorkflowTrigger {
   type: string;
   with?: { every?: string };
-  inputs?: ParsedWorkflowInput[];
+  inputs?: ParsedWorkflowInput[] | { properties?: Record<string, unknown> };
 }
 
 interface ParsedWorkflow {
@@ -197,8 +197,11 @@ describe('scheduled Significant Events managed workflows', () => {
   it('discovery always completes no-work runs as success and reports hasWork, so the scheduled drain loop can rely on hasWork instead of run status', () => {
     const parsed = getParsedStaticWorkflowYaml(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID);
 
-    const triggerInputs = parsed.triggers[0]?.inputs ?? [];
-    expect(triggerInputs.some((input) => input.name === 'completeNoWorkAsSuccess')).toBe(false);
+    const triggerInputs = parsed.triggers[0]?.inputs;
+    const hasLegacyInput = Array.isArray(triggerInputs)
+      ? triggerInputs.some((input) => input.name === 'completeNoWorkAsSuccess')
+      : Object.hasOwn(triggerInputs?.properties ?? {}, 'completeNoWorkAsSuccess');
+    expect(hasLegacyInput).toBe(false);
 
     const noWorkStep = findStep(parsed.steps, 'output_no_detections');
     expect(noWorkStep?.type).toBe('workflow.output');

@@ -17,6 +17,7 @@ import { trendStatsBatch } from './actions';
 import { fetchOverviewTrendStats as trendsApi } from './api';
 import { selectOverviewTrends } from '.';
 import { selectOverviewStatus } from '../overview_status';
+import { RequestCancellationManager } from '../request_cancellation_manager';
 
 /**
  * Minimal step-through saga test helper (replaces the `redux-saga-testing` package).
@@ -88,6 +89,22 @@ describe('overview effects', () => {
 
     it('terminates', (result) => {
       expect(result).toBeUndefined();
+    });
+
+    it('marks a canceled batch as retryable', () => {
+      const request = { configId: 'monitor-1', locationIds: ['us-east'], schedule: '3' };
+      const manager = new RequestCancellationManager();
+      manager.startLoad();
+      const generator = fetchTrendEffect(trendStatsBatch.get([request]), manager);
+
+      expect(generator.next().value).toEqual(call(trendsApi, [request], manager.signal));
+
+      manager.cancel();
+
+      expect(generator.throw(new Error('canceled')).value).toEqual(
+        put(trendStatsBatch.fail([request]))
+      );
+      expect(generator.next().done).toBe(true);
     });
   });
 

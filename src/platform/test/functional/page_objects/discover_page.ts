@@ -8,6 +8,7 @@
  */
 
 import expect from '@kbn/expect';
+import { getUrl } from '@kbn/test';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
@@ -41,7 +42,8 @@ export class DiscoverPageObject extends FtrService {
 
   public readonly APP_ID = 'discover';
 
-  public async navigateToApp() {
+  public async navigateToApp(opts: { queryMode: 'classic' | 'esql' }) {
+    await this.setQueryMode(opts.queryMode);
     await this.common.navigateToApp(this.APP_ID);
   }
 
@@ -1256,8 +1258,7 @@ export class DiscoverPageObject extends FtrService {
   private resetRequestCount = -1;
 
   public async expectRequestCount(endpointRegexp: RegExp, requestCount: number) {
-    await this.retry.tryWithRetries(
-      `expect the request to match count ${requestCount}`,
+    await this.retry.try(
       async () => {
         if (requestCount === this.resetRequestCount) {
           await this.browser.execute(async () => {
@@ -1283,7 +1284,7 @@ export class DiscoverPageObject extends FtrService {
           expect(count).to.be(requestCount);
         }
       },
-      { retryCount: 5, retryDelay: 500 }
+      { description: `expect the request to match count ${requestCount}`, retryDelay: 500 }
     );
   }
 
@@ -1333,11 +1334,15 @@ export class DiscoverPageObject extends FtrService {
   /**
    * Seeds the persisted query mode in localStorage. Discover ignores `currentMode`
    * unless `defaultMode` matches the resolved default (the `discover.isEsqlDefault`
-   * flag), so `defaultMode` defaults to `'classic'` to match today's default. When
-   * the flag is flipped to make ES|QL the default, update `defaultMode` or the seed
-   * is ignored.
+   * flag), so `defaultMode` defaults to `'esql'` to match the current application default.
    */
-  public setQueryMode(currentMode: string, defaultMode: string = 'classic') {
+  public async setQueryMode(currentMode: string, defaultMode: string = 'esql') {
+    const kibanaUrl = getUrl.noAuth(this.config.get('servers.kibana'), {});
+    const currentUrl = await this.browser.getCurrentUrl();
+    if (new URL(currentUrl).origin !== new URL(kibanaUrl).origin) {
+      await this.browser.get(kibanaUrl);
+    }
+
     return this.browser.setLocalStorageItem(
       DISCOVER_QUERY_MODE_KEY,
       JSON.stringify({ currentMode, defaultMode })

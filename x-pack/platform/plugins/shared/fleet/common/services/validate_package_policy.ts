@@ -37,6 +37,8 @@ import { isValidDataset, isValidDataStreamType } from './is_valid_namespace';
 
 type Errors = string[] | null;
 
+const AGENT_VARIABLE_REGEX = /\$\{[^}]+\}/;
+
 export interface ValidatePackagePolicyDeps {
   safeLoadYaml: (yaml: string) => any;
   conditionValidator?: (expr?: string) => Array<{ line: number; column: number; message: string }>;
@@ -866,12 +868,16 @@ export const validatePackagePolicyConfig = (
   }
 
   if (varName === DATASET_VAR_NAME && parsedValue !== undefined) {
-    const { valid, error } = isValidDataset(
-      parsedValue.dataset ? parsedValue.dataset : parsedValue,
-      false
-    );
-    if (!valid && error) {
-      errors.push(error);
+    const dataset = parsedValue.dataset ? parsedValue.dataset : parsedValue;
+    // Integration packages may use agent variables (e.g. ${env.NAME}) that Kibana can't resolve.
+    // Input packages stay strict because Kibana installs templates named after the dataset.
+    const isAgentResolved =
+      packageType !== 'input' && typeof dataset === 'string' && AGENT_VARIABLE_REGEX.test(dataset);
+    if (!isAgentResolved) {
+      const { valid, error } = isValidDataset(dataset, false);
+      if (!valid && error) {
+        errors.push(error);
+      }
     }
   }
 

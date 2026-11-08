@@ -35,7 +35,7 @@ export const updateSearchApplication = async ({
   indices,
   template,
 }: UpdateSearchApplicationApiParams): Promise<UpdateSearchApplicationApiResponse> => {
-  const route = `/internal/enterprise_search/search_applications/${name}`;
+  const route = `/internal/enterprise_search/search_applications/${encodeURIComponent(name)}`;
 
   return await HttpLogic.values.http.put<EnterpriseSearchApplication>(route, {
     body: JSON.stringify({ indices, name, template }),

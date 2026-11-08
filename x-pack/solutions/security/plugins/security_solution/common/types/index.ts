@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Status } from '../api/detection_engine';
 
 export * from './timeline';
@@ -13,19 +13,23 @@ export type * from './header_actions';
 export type * from './bulk_actions';
 
 // Hardcoded list of reasons for closing alerts
-export const DefaultClosingReasonSchema = z.enum([
-  'false_positive',
-  'duplicate',
-  'true_positive',
-  'benign_positive',
-  'automated_closure',
-  'other',
-]);
+export const DefaultClosingReasonSchema = lazySchema(() =>
+  z.enum([
+    'false_positive',
+    'duplicate',
+    'true_positive',
+    'benign_positive',
+    'automated_closure',
+    'other',
+  ])
+);
 
 // It's possible for users to supply custom reasons
-const AlertClosingReasonSchema = z.union([DefaultClosingReasonSchema, z.string()]);
+const AlertClosingReasonSchema = lazySchema(() =>
+  z.union([DefaultClosingReasonSchema, z.string()])
+);
 export type AlertClosingReason = z.infer<typeof AlertClosingReasonSchema>;
-export const AlertDefaultClosingReasonValues = DefaultClosingReasonSchema.enum;
+export const AlertDefaultClosingReasonValues = lazySchema(() => DefaultClosingReasonSchema.enum);
 
 export const FILTER_OPEN: Status = 'open';
 export const FILTER_CLOSED: Status = 'closed';

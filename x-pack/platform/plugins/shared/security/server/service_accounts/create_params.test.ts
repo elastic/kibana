@@ -7,16 +7,17 @@
 
 import Boom from '@hapi/boom';
 
-import type { CreateServiceAccountParams } from '@kbn/core-security-server';
+import type { CreateServiceAccountServerParams } from '@kbn/core-security-server';
 
 import { parseCreateServiceAccountParams } from './create_params';
+import { SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH } from '../../common/service_accounts';
 
 /** Each backend passes its own limits. Small ones keep the boundary cases readable. */
 const limits = { maxRoles: 3, maxRoleNameLength: 8 };
 const { maxRoles, maxRoleNameLength } = limits;
 
 /** Returns the Boom error `parseCreateServiceAccountParams` threw, or fails the test. */
-const expectRejection = (params: CreateServiceAccountParams): Boom.Boom => {
+const expectRejection = (params: CreateServiceAccountServerParams): Boom.Boom => {
   try {
     parseCreateServiceAccountParams(params, limits);
   } catch (e) {
@@ -50,7 +51,7 @@ describe('parseCreateServiceAccountParams', () => {
   // There is no "derive them from the creator" default, so an omitted `roles` is a 400 and not
   // the widest grant the creator could make.
   it('rejects an omitted roles array', () => {
-    const error = expectRejection({ name: 'nightshift-relay' } as CreateServiceAccountParams);
+    const error = expectRejection({ name: 'nightshift-relay' } as CreateServiceAccountServerParams);
 
     expect(error.output.statusCode).toBe(400);
     expect(error.message).toContain('`roles`');
@@ -130,9 +131,87 @@ describe('parseCreateServiceAccountParams', () => {
   });
 
   it('falls back to `params` when the issue has no path', () => {
-    const error = expectRejection('nightshift-relay' as unknown as CreateServiceAccountParams);
+    const error = expectRejection(
+      'nightshift-relay' as unknown as CreateServiceAccountServerParams
+    );
 
     expect(error.output.statusCode).toBe(400);
     expect(error.message).toContain('`params`');
+  });
+
+  it('trims the description and passes it along', () => {
+    expect(
+      parseCreateServiceAccountParams(
+        {
+          name: 'nightshift-relay',
+          roles: ['viewer'],
+          description: '  Relays the nightshift alerts. ',
+        },
+        limits
+      )
+    ).toEqual({
+      name: 'nightshift-relay',
+      roles: ['viewer'],
+      description: 'Relays the nightshift alerts.',
+    });
+  });
+
+  it('drops a blank description', () => {
+    const parsed = parseCreateServiceAccountParams(
+      { name: 'nightshift-relay', roles: ['viewer'], description: '   ' },
+      limits
+    );
+
+    expect(parsed.description).toBeUndefined();
+  });
+
+  it(`rejects a description longer than ${SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH} characters`, () => {
+    const error = expectRejection({
+      name: 'nightshift-relay',
+      roles: ['viewer'],
+      description: 'a'.repeat(SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH + 1),
+    });
+
+    expect(error.output.statusCode).toBe(400);
+    expect(error.message).toContain('`description`');
+  });
+
+  describe('platformAssumers', () => {
+    it('passes the assumers along, dropping duplicates', () => {
+      expect(
+        parseCreateServiceAccountParams(
+          {
+            name: 'nightshift-relay',
+            roles: ['viewer'],
+            platformAssumers: ['relay', 'sandbox', 'relay'],
+          },
+          limits
+        )
+      ).toEqual({
+        name: 'nightshift-relay',
+        roles: ['viewer'],
+        platformAssumers: ['relay', 'sandbox'],
+      });
+    });
+
+    it('accepts an empty list', () => {
+      expect(
+        parseCreateServiceAccountParams(
+          { name: 'nightshift-relay', roles: ['viewer'], platformAssumers: [] },
+          limits
+        )
+      ).toEqual({ name: 'nightshift-relay', roles: ['viewer'], platformAssumers: [] });
+    });
+
+    it('rejects an assumer that is not in the catalog', () => {
+      const error = expectRejection({
+        name: 'nightshift-relay',
+        roles: ['viewer'],
+        platformAssumers: ['unknown-service'],
+      } as never);
+
+      expect(error.output.statusCode).toBe(400);
+      expect(error.message).toContain('`platformAssumers');
+    });
   });
 });

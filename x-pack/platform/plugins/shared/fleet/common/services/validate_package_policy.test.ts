@@ -2258,6 +2258,39 @@ describe('Fleet - validatePackagePolicyConfig', () => {
       expect(res).toEqual(['Dataset must be lowercase']);
     });
 
+    describe('agent variable placeholders', () => {
+      const validateRaw = (value: unknown, packageType: string) =>
+        validatePackagePolicyConfig(
+          { type: 'text', value } as any,
+          { name: 'data_stream.dataset', type: 'text' },
+          'data_stream.dataset',
+          parse,
+          packageType
+        );
+
+      it.each([
+        '${env.LOGS_DATASET}',
+        'logs-${env.LOGS_TARGET}',
+        '${env.A}-x-${env.B}',
+        '${kubernetes.namespace}',
+        "${env.LOGS_DATASET|'default'}",
+      ])('should skip validation for integration packages with placeholder %s', (dataset) => {
+        expect(validateRaw(dataset, 'integration')).toEqual(null);
+        expect(validateRaw({ dataset, package: 'kubernetes' }, 'integration')).toEqual(null);
+      });
+
+      it('should still validate integration datasets without a placeholder', () => {
+        expect(validateRaw('Test', 'integration')).toEqual(['Dataset must be lowercase']);
+        expect(validateRaw('logs-${env.x', 'integration')).toEqual([
+          'Dataset contains invalid characters',
+        ]);
+      });
+
+      it('should keep validating placeholders for input packages', () => {
+        expect(validateRaw('${env.LOGS_DATASET}', 'input')).toEqual(['Dataset must be lowercase']);
+      });
+    });
+
     it('should return an error message for integration packages with hyphens in dataset', () => {
       const res = validatePackagePolicyConfig(
         {

@@ -6,32 +6,33 @@
  */
 
 import { isEqual } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
 import type { Logger } from '@kbn/core/server';
 import type { SignificantEventInvestigation } from '@kbn/significant-events-schema';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
-import type { EventClient } from './event_client';
+import type { RuleEventsClient } from './rule_events_client';
+import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
 import { toRuleEvent } from './to_rule_event';
 
 export const attachInvestigationToEvent = async ({
-  eventClient,
+  eventSearchClient,
   eventId,
   investigation,
   alertEventsClient,
+  emitTrigger,
   logger,
 }: {
-  eventClient: EventClient;
+  eventSearchClient: RuleEventsClient;
   eventId: string;
   investigation: SignificantEventInvestigation;
-  alertEventsClient?: AlertEventsClientApi;
+  alertEventsClient: AlertEventsClientApi;
+  emitTrigger?: TriggerEmitter;
   logger?: Logger;
-}): Promise<{ event_uuid: string; updated: number; ignored: number }> => {
-  const { hits } = await eventClient.findByEventId(eventId);
-  const latest = hits[hits.length - 1];
+}): Promise<{ updated: number; ignored: number }> => {
+  const latest = await eventSearchClient.findLatestByEventId(eventId);
 
   if (!latest) {
-    return { event_uuid: eventId, updated: 0, ignored: 1 };
+    return { updated: 0, ignored: 1 };
   }
 
   const existing = latest.investigations ?? [];
@@ -48,41 +49,31 @@ export const attachInvestigationToEvent = async ({
     investigations = [...existing, investigation];
   } else {
     // At the schema-enforced 100-entry cap, do not exceed investigations.max(100).
+    logger?.warn(
+      `attach_investigation: investigation cap (100) reached for event_id "${eventId}"; new investigation entry dropped`
+    );
     investigations = existing;
   }
 
   if (isEqual(investigations, existing)) {
-    return { event_uuid: latest.event_uuid, updated: 0, ignored: 1 };
+    return { updated: 0, ignored: 1 };
   }
 
   const now = new Date().toISOString();
-  const nextEventUuid = uuidv4();
   const updatedEvent = {
     ...latest,
     '@timestamp': now,
-    event_uuid: nextEventUuid,
-    previous_event_uuid: latest.event_uuid,
     investigations,
     workflow_execution_id: investigation.workflow_execution_id,
   };
 
-  await eventClient.bulkCreate([updatedEvent], { throwOnFail: true });
-
-  alertEventsClient
-    ?.createAlertEvent(toRuleEvent(updatedEvent))
-    .catch((err) =>
-      logger?.error(
-        `attach_investigation dual-write to .rule-events failed: ${
-          err instanceof Error ? err.message : err
-        }`
-      )
-    );
+  await alertEventsClient.createAlertEvent(toRuleEvent(updatedEvent));
 
   emitSignificantEventWriteTriggers({
-    eventClient,
+    emitTrigger,
     significantEvent: updatedEvent,
     priorSignificantEvent: latest,
   });
 
-  return { event_uuid: nextEventUuid, updated: 1, ignored: 0 };
+  return { updated: 1, ignored: 0 };
 };

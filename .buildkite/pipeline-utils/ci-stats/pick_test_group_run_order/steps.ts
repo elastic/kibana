@@ -17,7 +17,9 @@ interface JestStepOptions {
   label: string;
   parallelism: number;
   key: 'jest' | 'jest-integration';
-  agentDiskSize: number;
+  /** Agent queue for each job, and how many Jest config processes a job runs at once. */
+  agent: { queue: string; maxParallel: number };
+  agentDiskSize?: number;
   envFromLabels: Record<string, string>;
   dependsOn: string[];
   retryCount: number;
@@ -36,8 +38,8 @@ export function buildJestStep(opts: JestStepOptions): BuildkiteStep | undefined 
     parallelism: opts.parallelism,
     timeout_in_minutes: TEST_STEP_TIMEOUT_MINUTES,
     key: opts.key,
-    agents: expandAgentQueue('n2-4-spot', opts.agentDiskSize),
-    env: opts.envFromLabels,
+    agents: expandAgentQueue(opts.agent.queue, opts.agentDiskSize),
+    env: { JEST_MAX_PARALLEL: String(opts.agent.maxParallel), ...opts.envFromLabels },
     depends_on: opts.dependsOn,
     retry: {
       automatic: [

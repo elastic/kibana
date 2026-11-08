@@ -32,6 +32,11 @@ export { getTemplateInputs } from './get_template_inputs';
 
 export type { BulkInstallResponse, IBulkInstallPackageError } from './install';
 export { handleInstallPackageFailure, installPackage, ensureInstalledPackage } from './install';
+export {
+  assertPackagePoliciesUpgradeAcknowledged,
+  getPackagePoliciesUpgradeBreakingChanges,
+  packagePolicyBreakingChangesToError,
+} from './breaking_changes';
 export { reinstallPackageForInstallation } from './reinstall';
 export { removeInstallation } from './remove';
 export { updateCustomIntegration, incrementVersionAndUpdate } from './update_custom_integration';

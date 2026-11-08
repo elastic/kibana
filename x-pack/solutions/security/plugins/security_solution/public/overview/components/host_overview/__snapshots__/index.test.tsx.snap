@@ -194,7 +194,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                       id="generated-id-wrapper"
                     >
                       <button
-                        class="euiLink emotion-euiLink-primary"
+                        class="euiLink emotion-euiLink-text"
                         data-test-subj="securitySolutionFlyoutLink"
                         type="button"
                       >
@@ -887,7 +887,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                       id="generated-id-wrapper"
                     >
                       <button
-                        class="euiLink emotion-euiLink-primary"
+                        class="euiLink emotion-euiLink-text"
                         data-test-subj="securitySolutionFlyoutLink"
                         type="button"
                       >

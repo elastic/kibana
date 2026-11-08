@@ -22,12 +22,26 @@ describe('builtinWorkflowInputDefinitions', () => {
   it('registers alertingV2NotificationGroup with required top-level fields', () => {
     const schema = builtinWorkflowInputDefinitions.alertingV2NotificationGroup;
     expect(schema.type).toBe('object');
-    expect(schema.required).toEqual(['id', 'policyId', 'groupKey', 'episodes', 'rules']);
+    expect(schema.required).toEqual(['id', 'policyId', 'groupKey', 'alerts', 'rules']);
     expect(schema.properties?.id?.type).toBe('string');
     expect(schema.properties?.policyId?.type).toBe('string');
     expect(schema.properties?.groupKey?.type).toBe('object');
-    expect(schema.properties?.episodes?.type).toBe('array');
+    expect(schema.properties?.alerts?.type).toBe('array');
     expect(schema.properties?.rules?.type).toBe('object');
+  });
+
+  it('requires only name on alertingV2NotificationGroup rule values, so payloads without grouping_fields stay valid', () => {
+    const ruleValue =
+      builtinWorkflowInputDefinitions.alertingV2NotificationGroup.properties?.rules
+        ?.additionalProperties;
+    if (ruleValue == null || typeof ruleValue === 'boolean') {
+      throw new Error('expected rules.additionalProperties to be a value schema');
+    }
+    expect(ruleValue.required).toEqual(['name']);
+    expect(ruleValue.properties?.grouping_fields).toMatchObject({
+      type: 'array',
+      items: { type: 'string' },
+    });
   });
 
   it('registers securityAlertAnalysisCallerAlerts as a bounded alert-document array', () => {
@@ -43,7 +57,7 @@ describe('builtinWorkflowInputDefinitions', () => {
     );
     expect(items?.properties?._id?.type).toBe('string');
     expect(items?.properties?._index?.pattern).toBe(
-      '^\\.(internal\\.)?(preview\\.)?alerts-security\\.alerts-[a-zA-Z0-9._-]+$'
+      '^(\\.ds-)?\\.(internal\\.)?(preview\\.)?alerts-security\\.alerts-[a-zA-Z0-9._-]+$'
     );
     expect(items?.properties?.['@timestamp']?.format).toBe('date-time');
   });
@@ -71,13 +85,13 @@ describe('builtinWorkflowInputDefinitions', () => {
     expect(validator.parse([alert])).toEqual([alert]);
   });
 
-  it('registers alertingV2NotificationGroup with severity on episode items', () => {
+  it('registers alertingV2NotificationGroup with severity on alert items', () => {
     const schema = builtinWorkflowInputDefinitions.alertingV2NotificationGroup;
-    const episodeItems = schema.properties?.episodes?.items as {
+    const alertItems = schema.properties?.alerts?.items as {
       properties?: Record<string, { type?: string | string[]; enum?: unknown[] }>;
     };
-    expect(episodeItems?.properties?.severity?.type).toBe('string');
-    expect(episodeItems?.properties?.severity?.enum).toEqual([
+    expect(alertItems?.properties?.severity?.type).toBe('string');
+    expect(alertItems?.properties?.severity?.enum).toEqual([
       'info',
       'low',
       'medium',
@@ -86,12 +100,12 @@ describe('builtinWorkflowInputDefinitions', () => {
     ]);
   });
 
-  it('allows null rule_id on episode items to support external alerts', () => {
+  it('allows null rule_id on alert items to support external alerts', () => {
     const schema = builtinWorkflowInputDefinitions.alertingV2NotificationGroup;
-    const episodeItems = schema.properties?.episodes?.items as {
+    const alertItems = schema.properties?.alerts?.items as {
       properties?: Record<string, { type?: string | string[] }>;
     };
-    expect(episodeItems?.properties?.rule_id?.type).toEqual(['string', 'null']);
+    expect(alertItems?.properties?.rule_id?.type).toEqual(['string', 'null']);
   });
 
   it('keeps Monaco $ref enum values in sync with registry keys', () => {

@@ -5,6 +5,19 @@
  * 2.0.
  */
 
-export { GROUP_SIZE_CEILING, MATCHER_PAGE_SIZE } from './constants';
-export { buildMatchGroupsQuery, buildWatermarkQuery } from './query';
-export { runEsqlMatcherRule, type RunEsqlMatcherDeps } from './run';
+export { GROUP_SIZE_CEILING, MATCHER_PAGE_SIZE, RESOLVED_TO_FIELD } from './constants';
+export {
+  RAW_MATCH_VALUE_COLUMN,
+  buildMatchGroupsQuery,
+  buildMatcherValidationQuery,
+  buildWatermarkQuery,
+} from './query';
+export {
+  classifyMatchGroup,
+  fetchEntities,
+  parseMatchGroupRows,
+  planMatchGroupLink,
+  runEsqlMatcherRule,
+  type MatchGroupRow,
+  type RunEsqlMatcherDeps,
+} from './run';

@@ -8,14 +8,39 @@
 import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 
+/*
+ * Below this container width the controls row cannot fit the date picker, the 250px time field
+ * and Search on one line. The date picker then grows to fill the first row alongside Search, and
+ * the time field takes its own full-width second row.
+ */
+const COMPACT_CONTROLS_MAX_WIDTH = '560px';
+
 const sandboxRootCss = css`
   display: flex;
   flex-direction: column;
+  container-type: inline-size;
+`;
+
+const searchItemCss = css`
+  @container (max-width: ${COMPACT_CONTROLS_MAX_WIDTH}) {
+    order: 1;
+  }
+`;
+
+// Takes the free space so the time field sits flush against Search.
+const dateRangeItemCss = css`
+  min-width: 0;
 `;
 
 const timeFieldSelectCss = css`
   width: 250px;
   min-width: 0;
+
+  @container (max-width: ${COMPACT_CONTROLS_MAX_WIDTH}) {
+    width: auto;
+    flex: 1 1 100%;
+    order: 2;
+  }
 `;
 
 const loadingCenterCss = css`
@@ -24,6 +49,11 @@ const loadingCenterCss = css`
 
 const editorBodyCss = css`
   overflow: auto;
+
+  /* Line numbers are one step smaller than the code, as in Discover's editor. */
+  .monaco-editor .margin-view-overlays .line-numbers {
+    font-size: 12px;
+  }
 `;
 
 export const useQuerySandboxStyles = ({ euiTheme }: UseEuiTheme) => {
@@ -32,6 +62,16 @@ export const useQuerySandboxStyles = ({ euiTheme }: UseEuiTheme) => {
     flex-direction: column;
     gap: ${euiTheme.size.s};
     margin-bottom: ${euiTheme.size.s};
+  `;
+
+  // Tighter space between the two rows once the time field drops to its own row.
+  // `&&` outranks the flex group's own `gap` shorthand.
+  const controlsRowCss = css`
+    @container (max-width: ${COMPACT_CONTROLS_MAX_WIDTH}) {
+      && {
+        row-gap: ${euiTheme.size.xs};
+      }
+    }
   `;
 
   const resultsSectionCss = css`
@@ -79,6 +119,9 @@ export const useQuerySandboxStyles = ({ euiTheme }: UseEuiTheme) => {
     headerBlockCss,
     editorBodyCss,
     editorResizeHandleCss,
+    searchItemCss,
+    dateRangeItemCss,
+    controlsRowCss,
     timeFieldSelectCss,
     loadingCenterCss,
     resultsSectionCss,

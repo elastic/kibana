@@ -116,7 +116,21 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    it('rejects a pattern that is not a logs-* or metrics-* wildcard', async () => {
+    it('resolves a concrete namespace instead of the wildcard', async () => {
+      const otherNamespace = `logs-${pkgName}.test_logs-other_ns`;
+      const { body, status } = await getHasData(
+        `${logsDataStream},${otherNamespace}`,
+        START_BEFORE_DOCS
+      );
+
+      expect(status).to.eql(200);
+      expect(body.results).to.eql({
+        [logsDataStream]: true,
+        [otherNamespace]: false,
+      });
+    });
+
+    it('rejects a pattern that is not a logs-* or metrics-* data stream', async () => {
       const { body, status } = await getHasData('bad-pattern', START_BEFORE_DOCS);
 
       expect(status).to.eql(400);

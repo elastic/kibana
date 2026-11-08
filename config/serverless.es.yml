@@ -5,6 +5,7 @@ plugins.allowlistPluginGroups: ['platform', 'search']
 
 xpack.search.enabled: false
 xpack.osquery.enabled: false
+xpack.alerting_v2.enabled: false
 
 # Enable fleet on search projects for agentless features
 xpack.fleet.enabled: true
@@ -71,6 +72,9 @@ xpack.cloud.serverless.project_type: search
 ## Enable the Serverless Search plugin
 xpack.serverless.search.enabled: true
 
+## Enable the shared Elasticsearch home page
+xpack.elasticsearchHome.enabled: true
+
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/elasticsearch
 
@@ -92,9 +96,6 @@ xpack.ml.compatibleModuleType: 'search'
 
 data_visualizer.resultLinks.fileBeat.enabled: false
 
-# Search Notebooks
-xpack.searchNotebooks.catalog.url: https://elastic-enterprise-search.s3.us-east-2.amazonaws.com/serverless/catalog.json
-
 # Semantic text UI
 xpack.index_management.dev.enableSemanticText: true
 
@@ -111,6 +112,9 @@ aiAssistantManagementSelection.preferredChatExperience: "agent"
 
 # Query Rules UI
 xpack.searchQueryRules.enabled: true
+
+## ES|QL Data Federation in stack management
+xpack.dataFederation.enabled: true
 
 ## Search Connectors in stack management
 xpack.contentConnectors.ui.enabled: false

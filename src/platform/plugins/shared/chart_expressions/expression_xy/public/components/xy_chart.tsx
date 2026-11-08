@@ -252,7 +252,6 @@ export function XYChart({
     annotations,
     pointVisibility,
   } = args;
-
   const chartRef = useRef<Chart>(null);
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const darkMode = useKibanaIsDarkMode();
@@ -443,7 +442,8 @@ export function XYChart({
     shouldRotate,
     formatFactory,
     fieldFormats,
-    yAxisConfigs
+    yAxisConfigs,
+    args.axisFormatPolicies
   );
 
   const axesConfiguration = getAxesConfiguration(
@@ -451,7 +451,8 @@ export function XYChart({
     shouldRotate,
     formatFactory,
     fieldFormats,
-    [...(yAxisConfigs ?? []), ...(xAxisConfig ? [xAxisConfig] : [])]
+    [...(yAxisConfigs ?? []), ...(xAxisConfig ? [xAxisConfig] : [])],
+    args.axisFormatPolicies
   );
 
   const xTitle = xAxisConfig?.title || (xAxisColumn && xAxisColumn.name) || undefined;
@@ -863,7 +864,7 @@ export function XYChart({
     <>
       <GlobalXYChartStyles />
       <div css={chartContainerStyle}>
-        {showLegend !== undefined && uiState && (
+        {interactive && showLegend !== undefined && uiState && (
           <LegendToggle
             onClick={toggleLegend}
             showLegend={showLegend}
@@ -906,7 +907,8 @@ export function XYChart({
                 formatFactory,
                 isEsqlMode,
                 canCreateAlerts,
-                interactive && !args.detailedTooltip
+                interactive && !args.detailedTooltip,
+                args.axisFormatPolicies
               )}
               customTooltip={
                 args.detailedTooltip
@@ -923,6 +925,7 @@ export function XYChart({
                           splitRowAccessor: splitRowId,
                         }}
                         layers={dataLayers}
+                        axesConfiguration={yAxesConfiguration}
                         xDomain={isTimeVis ? rawXDomain : undefined}
                       />
                     )
@@ -945,7 +948,7 @@ export function XYChart({
               externalPointerEvents={{
                 tooltip: { visible: syncTooltips, placement: Placement.Right },
               }}
-              legendColorPicker={uiState ? LegendColorPickerWrapper : undefined}
+              legendColorPicker={interactive && uiState ? LegendColorPickerWrapper : undefined}
               debugState={window._echDebugStateFlag ?? false}
               showLegend={showLegend}
               legendPosition={legend?.isInside ? legendInsideParams : legend.position}

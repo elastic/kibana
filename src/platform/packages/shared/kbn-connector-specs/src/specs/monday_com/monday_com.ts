@@ -78,7 +78,7 @@ export const MondayCom: ConnectorSpec = {
   metadata: {
     id: '.monday_com',
     displayName: 'Monday.com',
-    description: i18n.translate('core.kibanaConnectorSpecs.monday_com.metadata.description', {
+    description: i18n.translate('connectorSpecs.monday_com.metadata.description', {
       defaultMessage:
         'Search boards, read and create items, post updates, and manage workspaces in Monday.com',
     }),
@@ -247,7 +247,7 @@ export const MondayCom: ConnectorSpec = {
     },
 
     createItem: {
-      isTool: false,
+      isTool: true,
       scope: 'write',
       description:
         'Create a new item (row) on a Monday.com board. Optionally assign it to a specific group ' +
@@ -265,7 +265,7 @@ export const MondayCom: ConnectorSpec = {
     },
 
     changeItemColumnValues: {
-      isTool: false,
+      isTool: true,
       scope: 'destroy',
       description:
         'Update one or more column values on an existing Monday.com item. Provide a map of column ' +
@@ -282,7 +282,7 @@ export const MondayCom: ConnectorSpec = {
     },
 
     createSubitem: {
-      isTool: false,
+      isTool: true,
       scope: 'write',
       description:
         'Create a subitem under an existing Monday.com item. Subitems share the same column ' +
@@ -303,7 +303,7 @@ export const MondayCom: ConnectorSpec = {
     },
 
     moveItemToGroup: {
-      isTool: false,
+      isTool: true,
       scope: 'destroy',
       description:
         'Move a Monday.com item to a different group within the same board. Use getBoardInfo to ' +

@@ -67,7 +67,10 @@ export const LocationForm = ({
           />
         </EuiFormRow>
         <EuiSpacer />
-        <PolicyHostsField privateLocations={privateLocations} isDisabled={isEditingLocation} />
+        <PolicyHostsField
+          privateLocations={privateLocations}
+          privateLocationToEdit={privateLocationToEdit}
+        />
         <EuiSpacer />
         <TagsField tagsList={tagsList} control={control} errors={errors} />
         <EuiSpacer />

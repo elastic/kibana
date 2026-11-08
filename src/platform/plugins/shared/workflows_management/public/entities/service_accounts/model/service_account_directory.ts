@@ -8,11 +8,14 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { QueryClient } from '@kbn/react-query';
+import type { ServiceAccountPickerStatus } from '@kbn/security-plugin/public';
 
 export interface WorkflowServiceAccount {
   id: string;
   name: string;
+  description?: string;
   roles: string[];
   enabled: boolean;
   assumable: boolean;
@@ -23,6 +26,10 @@ export interface ServiceAccountPage {
   nextPage?: string;
 }
 
+export interface ServiceAccountDirectoryError {
+  error: Exclude<ServiceAccountPickerStatus, 'loading' | 'ready'>;
+}
+
 export const serviceAccountQueryOptions = (http: HttpStart, id: string) => ({
   queryKey: ['workflows', 'serviceAccounts', 'account', id],
   queryFn: async (): Promise<WorkflowServiceAccount | null> => {
@@ -31,7 +38,7 @@ export const serviceAccountQueryOptions = (http: HttpStart, id: string) => ({
         `/internal/security/service_account/${encodeURIComponent(id)}`
       );
     } catch {
-      // Directory access is optional: workflow executors need not have read_security.
+      // Directory access is optional: workflow executors need not have manage_security.
       return null;
     }
   },
@@ -50,24 +57,30 @@ export const createServiceAccountDirectory = (
     isEnabled() && id
       ? queryClient.fetchQuery(serviceAccountQueryOptions(http, id))
       : Promise.resolve(null),
-  list: (after?: string): Promise<ServiceAccountPage | null> =>
-    isEnabled()
-      ? queryClient.fetchQuery({
-          queryKey: ['workflows', 'serviceAccounts', 'page', after],
-          queryFn: async (): Promise<ServiceAccountPage | null> => {
-            try {
-              return await http.get<ServiceAccountPage>('/internal/security/service_account', {
-                query: { limit: 100, ...(after ? { after } : {}) },
-              });
-            } catch {
-              return null;
-            }
-          },
-          retry: false,
-          staleTime: 30_000,
-          cacheTime: 60_000,
-        })
-      : Promise.resolve(null),
+  list: async (
+    after?: string,
+    refresh = false
+  ): Promise<ServiceAccountPage | ServiceAccountDirectoryError | null> => {
+    if (!isEnabled()) return null;
+    try {
+      // Failures are thrown rather than returned so that the query cache never stores them.
+      return await queryClient.fetchQuery({
+        queryKey: ['workflows', 'serviceAccounts', 'page', after],
+        queryFn: () =>
+          http.get<ServiceAccountPage>('/internal/security/service_account', {
+            query: { limit: 100, ...(after ? { after } : {}) },
+          }),
+        retry: false,
+        staleTime: refresh ? 0 : 30_000,
+        cacheTime: 60_000,
+      });
+    } catch (error) {
+      return {
+        error:
+          isHttpFetchError(error) && error.response?.status === 403 ? 'forbidden' : 'unavailable',
+      };
+    }
+  },
 });
 
 export type ServiceAccountDirectory = ReturnType<typeof createServiceAccountDirectory>;

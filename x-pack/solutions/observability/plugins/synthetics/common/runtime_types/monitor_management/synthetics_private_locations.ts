@@ -6,12 +6,10 @@
  */
 
 import type { SchemaOutput } from '../schema_output';
-import {
+import type {
   PrivateLocationCodec,
   SyntheticsPrivateLocationsType,
-} from '../zod/synthetics_private_locations';
-
-export { PrivateLocationCodec, SyntheticsPrivateLocationsType };
+} from '../schemas/synthetics_private_locations';
 
 export type PrivateLocation = SchemaOutput<typeof PrivateLocationCodec>;
 export type SyntheticsPrivateLocations = SchemaOutput<typeof SyntheticsPrivateLocationsType>;

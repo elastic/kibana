@@ -35,7 +35,7 @@ jest.mock('../../../common/components/visualization_actions/visualization_embedd
 
 const mockedUseRiskScore = jest.fn().mockReturnValue(mockRiskScoreState);
 jest.mock('../../../entity_analytics/api/hooks/use_risk_score', () => ({
-  useRiskScore: () => mockedUseRiskScore(),
+  useRiskScore: (params: unknown) => mockedUseRiskScore(params),
 }));
 
 const mockedUseEntityRiskScores = jest.fn();
@@ -47,7 +47,7 @@ const mockedUseManagedUser = jest.fn().mockReturnValue(mockManagedUserData);
 const mockedUseObservedUser = jest.fn().mockReturnValue(mockObservedUser);
 
 jest.mock('../shared/hooks/use_managed_user', () => ({
-  useManagedUser: () => mockedUseManagedUser(),
+  useManagedUser: (params: unknown) => mockedUseManagedUser(params),
 }));
 
 jest.mock('../../../flyout_v2/entity/user/main/hooks/use_observed_user', () => ({
@@ -88,6 +88,35 @@ describe('UserPanel', () => {
     expect(getByTestId('user-panel-header')).toBeInTheDocument();
     expect(queryByTestId('securitySolutionFlyoutLoading')).not.toBeInTheDocument();
     expect(getByTestId('securitySolutionFlyoutNavigationExpandDetailButton')).toBeInTheDocument();
+  });
+
+  it('labels the risk score and managed user requests with the entity details flyout execution context', () => {
+    render(
+      <TestProviders>
+        <UserPanel {...mockProps} />
+      </TestProviders>
+    );
+
+    expect(mockedUseRiskScore).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:entity_details_flyout',
+            id: 'user_risk_score',
+          },
+        },
+      })
+    );
+    expect(mockedUseManagedUser).toHaveBeenCalledWith({
+      executionContext: {
+        child: {
+          type: 'security_solution',
+          name: 'entity_analytics:entity_details_flyout',
+          id: 'user_managed_details',
+        },
+      },
+    });
   });
 
   it('renders loading state when observed user is loading', () => {

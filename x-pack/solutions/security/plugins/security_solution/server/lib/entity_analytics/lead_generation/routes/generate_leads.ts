@@ -19,6 +19,7 @@ import type { EntityAnalyticsRoutesDeps } from '../../types';
 import type { StartPlugins } from '../../../../plugin';
 import { fetchCandidateEntities } from '../entity_conversion';
 import { upsertLeadGenerationConfig } from '../saved_object';
+import { getUserLeadPrivileges } from '../get_user_lead_privileges';
 import { resolveChatModel } from '../utils';
 import { runLeadGenerationInBackground } from '../run_background_pipeline';
 import { withMinimumLicense } from '../../utils/with_minimum_license';
@@ -57,6 +58,7 @@ export const generateLeadsRoute = (
           const spaceId = secSol.getSpaceId();
           const coreCtx = await context.core;
           const esClient = coreCtx.elasticsearch.client.asCurrentUser;
+          const internalEsClient = coreCtx.elasticsearch.client.asInternalUser;
           const soClient = coreCtx.savedObjects.client;
           const executionUuid = uuidv4();
           const riskScoreDataClient = secSol.getRiskScoreDataClient();
@@ -67,6 +69,18 @@ export const generateLeadsRoute = (
             esClient,
             spaceId
           );
+          const { has_write_permissions: hasWritePermissions } = await getUserLeadPrivileges(
+            request,
+            startPlugins.security,
+            spaceId
+          );
+          if (!hasWritePermissions) {
+            return siemResponse.error({
+              statusCode: 403,
+              body: 'You do not have permission to generate leads in this space.',
+            });
+          }
+
           const { connectorId } = request.body;
 
           await upsertLeadGenerationConfig(soClient, spaceId, { connectorId });
@@ -85,6 +99,7 @@ export const generateLeadsRoute = (
             pipelineArgs: {
               listEntities: () => fetchCandidateEntities(crudClient, logger),
               esClient,
+              internalEsClient,
               logger,
               spaceId,
               riskScoreDataClient,

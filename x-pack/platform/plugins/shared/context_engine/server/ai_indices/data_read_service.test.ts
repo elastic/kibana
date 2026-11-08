@@ -26,6 +26,7 @@ const aiIndex: AiIndexHttpItem = {
   id: 'support',
   dest: { type: 'index', value: 'ai-index-idx-support' },
   managed: false,
+  memory_enabled: true,
   automations: [],
   sources: [],
   traces: [],
@@ -41,12 +42,14 @@ describe('AiIndexDataReadService', () => {
   const auditLogger = { log: jest.fn() } as unknown as jest.Mocked<AuditLogger>;
   const aiIndexService = { get: jest.fn(), list: jest.fn() };
   const logger = loggingSystemMock.createLogger();
+  const isMemoryEnabled = jest.fn().mockResolvedValue(true);
   const service = new AiIndexDataReadService({
     esClient,
     spaceId: 'marketing',
     auditLogger,
     aiIndexService,
     logger,
+    isMemoryEnabled,
   });
 
   beforeEach(() => {
@@ -54,12 +57,17 @@ describe('AiIndexDataReadService', () => {
     auditLogger.log.mockReset();
     aiIndexService.get.mockReset();
     aiIndexService.list.mockReset();
+    isMemoryEnabled.mockClear();
     describeAiIndexMock.mockReset();
     filterReadableAiIndicesMock.mockReset();
     probeAiIndicesMock.mockReset();
   });
 
   describe('query', () => {
+    beforeEach(() => {
+      aiIndexService.list.mockResolvedValue([]);
+    });
+
     it('runs the query in the service space and audit-logs success', async () => {
       esqlQuery.mockResolvedValue({ columns: [], values: [] });
 
@@ -78,6 +86,17 @@ describe('AiIndexDataReadService', () => {
           message: 'User has queried an AI index',
           event: expect.objectContaining({ action: 'ai_index_query', outcome: 'success' }),
         })
+      );
+    });
+
+    it('applies the lifecycle pipeline to a registered dest', async () => {
+      esqlQuery.mockResolvedValue({ columns: [], values: [] });
+      aiIndexService.list.mockResolvedValue([aiIndex]);
+
+      await service.query({ query: 'FROM ai-index-idx-support | KEEP title', limit: 10 });
+
+      expect(esqlQuery.mock.calls[0][0].query.replace(/\s+/g, ' ')).toBe(
+        'FROM ai-index-idx-support | WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active" | WHERE expires_at IS NULL OR expires_at > NOW() | DROP governance.* | KEEP title | LIMIT 10'
       );
     });
 
@@ -114,7 +133,12 @@ describe('AiIndexDataReadService', () => {
         aiIndices: [aiIndex],
         logger,
       });
-      expect(describeAiIndexMock).toHaveBeenCalledWith({ esClient, aiIndex, spaceId: 'marketing' });
+      expect(describeAiIndexMock).toHaveBeenCalledWith({
+        esClient,
+        aiIndex,
+        spaceId: 'marketing',
+        includeMemory: true,
+      });
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           message: 'User has described AI index [id=support]',

@@ -1,21 +1,21 @@
 {
-  "sha1": "ed7924abd2fb42ddccc8af9b1c028fb0cb6544c2",
+  "sha1": "357e007e76d62cb92d27afc4bc42f5b9c592ea67",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "3fbb83247d46cbc-f88b548a3856022",
-      "title": "Advanced settings - accessibility settings page has no a11y violations",
+      "id": "20fd3ec90091101-d65a2ca4be0f9c3",
+      "title": "Advanced settings - edit and save searches, edits and saves settings without a11y violations",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_a11y.spec.ts",
-        "line": 28,
-        "column": 64
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_edit.spec.ts",
+        "line": 29,
+        "column": 23
       }
     },
     {
@@ -159,6 +159,98 @@
         "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_spaces.spec.ts",
         "line": 57,
         "column": 5
+      }
+    },
+    {
+      "id": "097c759d9a3a9ff-591f404b0802fbf",
+      "title": "Advanced settings - common settings renders every common space and global setting field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/common_settings_fields.spec.ts",
+        "line": 55,
+        "column": 24
+      }
+    },
+    {
+      "id": "4c6123f145685f5-2eae084fca89f8f",
+      "title": "Advanced settings - disable animations disables animations while preserving completion events and exemptions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/disable_animations.spec.ts",
+        "line": 23,
+        "column": 60
+      }
+    },
+    {
+      "id": "56be6e862ac9594-a9844b276c65446",
+      "title": "Advanced settings - serverless setting validation blocks saving an invalid value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/serverless_setting_validation.spec.ts",
+        "line": 27,
+        "column": 25
+      }
+    },
+    {
+      "id": "9f0eb31a4bbd8d0-079d7ba5b670fdd",
+      "title": "Advanced settings - settings form updates a setting and resets it to its default value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/settings_form.spec.ts",
+        "line": 30,
+        "column": 27
+      }
+    },
+    {
+      "id": "9f0eb31a4bbd8d0-85511ca838c8adf",
+      "title": "Advanced settings - settings form shows the page reload toast for a setting that requires a page reload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/settings_form.spec.ts",
+        "line": 44,
+        "column": 13
       }
     },
     {

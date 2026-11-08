@@ -17,14 +17,20 @@ import {
   ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
 } from './action_kill_process';
 import {
+  ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW,
+  ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW_ID,
+} from './action_memory_dump';
+import {
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW,
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
 } from './action_suspend_process';
 import { ALERTZERO_ACTION_WORKFLOW_IDS } from '../..';
+import { createWorkflowLiquidEngine } from '../../../../../common/utils/create_workflow_liquid_engine/create_workflow_liquid_engine';
 import { WorkflowSchema } from '../../../../../spec/schema';
+import { ACTION_NON_RETRYABLE_ERROR_TYPE } from '../../../../action_workflow';
 
 /**
- * These three actions probe Actions-log privilege, dispatch via the
+ * These four actions probe Actions-log privilege, dispatch via the
  * public response-action API, then poll GET /api/endpoint/action/{id}
  * until `isCompleted` (or the 10-minute / 60-attempt ceiling). The
  * YAML is the source of truth; this suite pins the shared pre-flight,
@@ -47,9 +53,26 @@ interface YamlWorkflow {
   name: string;
   tags?: string[];
   consts?: {
-    actionMetadata?: { category?: string; impact?: string };
+    actionMetadata?: {
+      category?: string;
+      impact?: string;
+      reversible?: boolean;
+      subject?: string | string[];
+    };
     privilege_probe_action_id?: string;
   };
+  triggers?: Array<{
+    inputs?: {
+      properties?: {
+        actionInput?: {
+          properties?: {
+            endpoint_ids?: { minItems?: number };
+            parameters?: { properties?: { type?: { enum?: string[] } } };
+          };
+        };
+      };
+    };
+  }>;
   outputs?: Array<{ name: string; type?: string }>;
   steps: YamlStep[];
 }
@@ -57,24 +80,39 @@ interface YamlWorkflow {
 interface ResponseActionCase {
   id: string;
   workflow: { id: string; yaml: string };
+  category: 'respond' | 'investigate';
   dispatchPath: string;
+  subject: 'host' | 'process';
 }
 
 const CASES: ResponseActionCase[] = [
   {
     id: ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
     workflow: ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW,
+    category: 'respond',
     dispatchPath: '/s/{{ workflow.spaceId }}/api/endpoint/action/isolate',
+    subject: 'host',
   },
   {
     id: ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
     workflow: ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW,
+    category: 'respond',
     dispatchPath: '/s/{{ workflow.spaceId }}/api/endpoint/action/kill_process',
+    subject: 'process',
   },
   {
     id: ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
     workflow: ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW,
+    category: 'respond',
     dispatchPath: '/s/{{ workflow.spaceId }}/api/endpoint/action/suspend_process',
+    subject: 'process',
+  },
+  {
+    id: ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW_ID,
+    workflow: ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW,
+    category: 'investigate',
+    dispatchPath: '/s/{{ workflow.spaceId }}/api/endpoint/action/memory_dump',
+    subject: 'process',
   },
 ];
 
@@ -106,8 +144,12 @@ describe('AlertZero response-action workflows', () => {
     const stepByName = (name: string) => allSteps.find((step) => step.name === name);
     const requestSteps = allSteps.filter((step) => step.type === 'kibana.request');
 
-    it('declares respond catalog metadata so the action catalog can group it', () => {
-      expect(parsed.consts?.actionMetadata?.category).toBe('respond');
+    it('declares its catalog category so the action catalog can group it', () => {
+      expect(parsed.consts?.actionMetadata?.category).toBe(spec.category);
+    });
+
+    it('declares the subject kind it acts on, so packaging never falls back to inferring it', () => {
+      expect(parsed.consts?.actionMetadata?.subject).toBe(spec.subject);
     });
 
     it('space-scopes every kibana.request path', () => {
@@ -216,15 +258,93 @@ describe('AlertZero response-action workflows', () => {
     });
   });
 
-  it('kill and suspend pass parameters through to the request body', () => {
-    const kill = parseWorkflow(ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW.yaml);
-    const suspend = parseWorkflow(ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW.yaml);
-    const killDispatch = flatten(kill.steps).find((step) => step.name === 'dispatch');
-    const suspendDispatch = flatten(suspend.steps).find((step) => step.name === 'dispatch');
-    const killBody = killDispatch?.with?.body as Record<string, string> | undefined;
-    const suspendBody = suspendDispatch?.with?.body as Record<string, string> | undefined;
+  it.each([
+    ['kill', ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW],
+    ['suspend', ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW],
+    ['memory dump', ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW],
+  ] as const)('%s passes parameters through to the request body', (_label, workflow) => {
+    const parsed = parseWorkflow(workflow.yaml);
+    const dispatch = flatten(parsed.steps).find((step) => step.name === 'dispatch');
+    const body = dispatch?.with?.body as Record<string, string> | undefined;
 
-    expect(killBody?.parameters).toContain('inputs.actionInput.parameters');
-    expect(suspendBody?.parameters).toContain('inputs.actionInput.parameters');
+    expect(body?.parameters).toContain('inputs.actionInput.parameters');
+  });
+
+  describe.each([
+    ['kill', ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW, 'ra_kill-process_error_not-found'],
+    ['suspend', ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW, 'ra_suspend-process_error_not-found'],
+    ['memory dump', ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW, 'ra_memory-dump_error_not-found'],
+  ] as const)('%s on a failed action', (_label, workflow, notFoundCode) => {
+    const parsed = parseWorkflow(workflow.yaml);
+    const stepByName = (name: string) => flatten(parsed.steps).find((step) => step.name === name);
+    // Same options as the execution engine's templating engine.
+    const liquid = createWorkflowLiquidEngine({ strictFilters: true, strictVariables: false });
+    const notFound = { content: { code: notFoundCode } };
+
+    // Renders the flag, evaluates the branch condition on it, and returns the fail type taken.
+    const failureType = (endpointIds: string[], outputs: Record<string, unknown>) => {
+      const processNotFound = liquid.parseAndRenderSync(
+        String(stepByName('check_process_not_found')?.with?.process_not_found),
+        {
+          consts: parsed.consts,
+          inputs: { actionInput: { endpoint_ids: endpointIds } },
+          steps: { poll_status: { output: { data: { outputs } } } },
+        }
+      );
+      const branchStep = stepByName('emit_failure_by_cause');
+      // The engine evaluates a `${{ }}` condition as one Liquid expression; anything else is KQL.
+      const rawCondition = String(branchStep?.condition).trim();
+      expect(rawCondition).toMatch(/^\$\{\{[\s\S]*\}\}$/);
+      const condition = rawCondition.slice(3, -2).trim();
+      const branch = liquid.evalValueSync(condition, {
+        variables: { process_not_found: processNotFound },
+      })
+        ? branchStep?.steps
+        : branchStep?.else;
+      return branch?.find((step) => step.type === 'workflow.fail')?.with?.type;
+    };
+
+    it.each([
+      [
+        'non-retryable when every endpoint reports not-found',
+        ['a', 'b'],
+        { a: notFound, b: notFound },
+        ACTION_NON_RETRYABLE_ERROR_TYPE,
+      ],
+      [
+        'retryable when another endpoint reports a different code',
+        ['a', 'b'],
+        { a: notFound, b: { content: { code: 'other' } } },
+        undefined,
+      ],
+      ['retryable when another endpoint has no output', ['a', 'b'], { a: notFound }, undefined],
+    ])('fails as %s', (_case, endpointIds, outputs, expectedType) => {
+      expect(failureType(endpointIds, outputs)).toBe(expectedType);
+    });
+
+    // The not-found flag starts true and a loop over no endpoints would leave it there. Inputs
+    // are validated against this schema before the first step runs, so the loop never sees an
+    // empty list.
+    it('requires at least one endpoint', () => {
+      const endpointIds =
+        parsed.triggers?.[0]?.inputs?.properties?.actionInput?.properties?.endpoint_ids;
+      expect(endpointIds?.minItems).toBe(1);
+    });
+  });
+
+  it('memory dump is process-only, low impact, irreversible, and names Execute Operations as the privilege', () => {
+    const parsed = parseWorkflow(ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW.yaml);
+    const parameters =
+      parsed.triggers?.[0]?.inputs?.properties?.actionInput?.properties?.parameters;
+    const failStep = flatten(parsed.steps).find(
+      (step) => step.name === 'missing_actions_log_privilege'
+    );
+
+    // `kernel` / `raw` take no pid / entity_id and would make one action both process- and
+    // host-scoped for packaging's schema introspection.
+    expect(parameters?.properties?.type?.enum).toEqual(['process']);
+    expect(parsed.consts?.actionMetadata?.impact).toBe('low');
+    expect(parsed.consts?.actionMetadata?.reversible).toBe(false);
+    expect(failStep?.with?.message).toEqual(expect.stringContaining('Execute Operations'));
   });
 });
