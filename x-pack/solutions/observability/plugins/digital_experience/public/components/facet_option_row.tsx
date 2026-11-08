@@ -81,15 +81,33 @@ export function FacetOptionRow({
           checked={isIncluded}
           disabled={isDisabled}
           onChange={onInclude}
+          // The label takes the rest of the row, count included, so a click anywhere on it toggles
+          // the value instead of only a click on the text.
+          labelProps={{ css: css({ flexGrow: 1, minInlineSize: 0 }) }}
           label={
-            <EuiText
-              size="s"
-              color={isExcluded ? 'danger' : undefined}
-              css={css({ textDecoration: isExcluded ? 'line-through' : undefined })}
-              title={label}
-            >
-              <span className="eui-textTruncate">{label}</span>
-            </EuiText>
+            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+              <EuiFlexItem grow css={css({ minInlineSize: 0 })}>
+                <EuiText
+                  size="s"
+                  color={isExcluded ? 'danger' : undefined}
+                  css={css({ textDecoration: isExcluded ? 'line-through' : undefined })}
+                  title={label}
+                >
+                  <span className="eui-textTruncate">{label}</span>
+                </EuiText>
+              </EuiFlexItem>
+              {count !== undefined && (
+                <EuiFlexItem grow={false}>
+                  <EuiText
+                    size="xs"
+                    color="subdued"
+                    css={css({ fontVariantNumeric: 'tabular-nums' })}
+                  >
+                    {count}
+                  </EuiText>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           }
           data-test-subj={dataTestSubj}
           {...getEbtProps({
@@ -98,13 +116,6 @@ export function FacetOptionRow({
           })}
         />
       </EuiFlexItem>
-      {count !== undefined && (
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued" css={css({ fontVariantNumeric: 'tabular-nums' })}>
-            {count}
-          </EuiText>
-        </EuiFlexItem>
-      )}
       <EuiFlexItem grow={false}>
         <EuiToolTip content={excludeLabel} disableScreenReaderOutput>
           <EuiButtonIcon

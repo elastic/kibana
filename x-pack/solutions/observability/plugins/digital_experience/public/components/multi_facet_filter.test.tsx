@@ -86,6 +86,15 @@ describe('MultiFacetFilter', () => {
     expect(screen.queryByTestId('filterClear')).not.toBeInTheDocument();
   });
 
+  it('includes a value when its count is clicked, as the count is part of the row', async () => {
+    const onChange = renderFilter();
+
+    const list = await screen.findByTestId('filterList');
+    fireEvent.click(within(list).getByText('1,200'));
+
+    expect(onChange).toHaveBeenLastCalledWith(include('Chrome'));
+  });
+
   it('includes a value, and excludes another', async () => {
     const onChange = renderFilter(include('Chrome'));
 
