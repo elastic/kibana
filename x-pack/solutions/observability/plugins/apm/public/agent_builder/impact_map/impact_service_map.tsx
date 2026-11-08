@@ -361,7 +361,7 @@ const agentNameCache = new Map<string, string | null>();
  * answered from the cache, and each answer is drawn as it arrives instead of after the slowest.
  */
 const useServiceAgentNames = (impactMap: ImpactMapRendererProps['impactMap']) => {
-  const serviceIds = useMemo(() => {
+  const entityIds = useMemo(() => {
     const knownTypes = new Set(
       impactMap.entity_types
         .filter(({ kind, icon }) => kind !== 'service' || icon?.agent_name)
@@ -369,6 +369,11 @@ const useServiceAgentNames = (impactMap: ImpactMapRendererProps['impactMap']) =>
     );
     return impactMap.entities.filter(({ type_id: t }) => !knownTypes.has(t)).map(({ id }) => id);
   }, [impactMap]);
+
+  // The impact map is read again as the agent revises it, which makes a new list of the same
+  // ids. Keyed on the ids themselves, a refetch does not restart the lookups.
+  const idsKey = entityIds.join('\n');
+  const serviceIds = useMemo(() => (idsKey ? idsKey.split('\n') : []), [idsKey]);
 
   const fromCache = useCallback(
     () =>
@@ -381,7 +386,6 @@ const useServiceAgentNames = (impactMap: ImpactMapRendererProps['impactMap']) =>
     [serviceIds]
   );
   const [agentNames, setAgentNames] = useState<Record<string, string>>(fromCache);
-
   useEffect(() => {
     setAgentNames(fromCache());
     const callApmApi = getApmInternalServices()?.callApmApi;
@@ -389,12 +393,13 @@ const useServiceAgentNames = (impactMap: ImpactMapRendererProps['impactMap']) =>
     if (!callApmApi || missing.length === 0) {
       return;
     }
-    const controller = new AbortController();
+    let isCurrent = true;
     const end = new Date();
     const start = new Date(end.getTime() - LOOKBACK_MS);
+    // Never aborted: an answer that arrives after the effect re-ran still goes in the cache, so
+    // a service is not left without its icon by a request that was cut short.
     missing.forEach((serviceName) => {
       callApmApi('GET /internal/apm/services/{serviceName}/agent', {
-        signal: controller.signal,
         params: {
           path: { serviceName },
           query: {
@@ -406,7 +411,7 @@ const useServiceAgentNames = (impactMap: ImpactMapRendererProps['impactMap']) =>
       }).then(
         ({ agentName }) => {
           agentNameCache.set(serviceName, agentName ?? null);
-          if (agentName && !controller.signal.aborted) {
+          if (agentName && isCurrent) {
             setAgentNames((current) => ({ ...current, [serviceName]: agentName }));
           }
         },
@@ -414,7 +419,7 @@ const useServiceAgentNames = (impactMap: ImpactMapRendererProps['impactMap']) =>
       );
     });
     return () => {
-      controller.abort();
+      isCurrent = false;
     };
   }, [serviceIds, fromCache]);
 
