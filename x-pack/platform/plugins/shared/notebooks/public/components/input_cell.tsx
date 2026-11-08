@@ -47,7 +47,7 @@ const DropdownControl = ({ cell }: { cell: InputCellDefinition }) => {
       compressed
       singleSelection={{ asPlainText: true }}
       placeholder={i18n.translate('xpack.notebook.inputCell.dropdownPlaceholder', {
-        defaultMessage: 'Any (binds null)',
+        defaultMessage: 'Any',
       })}
       isLoading={runtime.status === 'running'}
       options={options.map((option) => ({ label: option }))}
