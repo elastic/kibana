@@ -298,7 +298,7 @@ const AppHeader = ({ app }: { app: NotebookApp }) => {
       justifyContent="spaceBetween"
       gutterSize="m"
       responsive={false}
-      css={{ marginBottom: getGridGap(app) - getPanelInset(app) }}
+      css={{ margin: getGridGap(app), marginBottom: getGridGap(app) - getPanelInset(app) }}
       data-test-subj="notebookAppHeader"
     >
       <EuiFlexItem>
