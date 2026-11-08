@@ -135,12 +135,13 @@ const MAP_PREVIEW_HEIGHT = 240;
 const formatDay = (at: string) =>
   new Date(at).toLocaleString(undefined, { month: 'short', day: 'numeric' });
 
-/** The map itself, drawn small. The card around it opens the full map, so it does not pan. */
+/** The map itself, drawn small. The header opens the full map; a node or edge opens its events. */
 const MapCard: React.FC<{
   impactMap: InvestigationImpactMapResponse;
   Renderer?: ImpactMapRenderer;
   onOpen: () => void;
-}> = ({ impactMap, Renderer, onOpen }) => {
+  onOpenTarget: (selection: EventsSelection) => void;
+}> = ({ impactMap, Renderer, onOpen, onOpenTarget }) => {
   const name = impactMap.title?.trim();
   return (
     <InvestigationCard
@@ -158,11 +159,14 @@ const MapCard: React.FC<{
             css={css`
               height: ${MAP_PREVIEW_HEIGHT}px;
               overflow: hidden;
-              pointer-events: none;
               border-radius: 6px;
             `}
           >
-            <Renderer impactMap={impactMap} />
+            <Renderer
+              impactMap={impactMap}
+              onEntityClick={(id) => onOpenTarget({ kind: 'entity', id })}
+              onRelationshipClick={(id) => onOpenTarget({ kind: 'relationship', id })}
+            />
           </div>
         </>
       )}
@@ -399,6 +403,7 @@ export const createImpactMapCards = (
                 impactMap={impactMap}
                 Renderer={Renderer}
                 onOpen={() => openInInvestigation(conversationId, 'impactMap')}
+                onOpenTarget={open}
               />
             </EuiFlexItem>
           )}

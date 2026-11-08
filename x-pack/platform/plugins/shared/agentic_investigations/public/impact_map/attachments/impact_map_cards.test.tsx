@@ -60,7 +60,11 @@ const documentWithoutImpact = {
   ),
 };
 
-const FakeRenderer: React.FC<ImpactMapRendererProps> = () => <div data-test-subj="fakeMap" />;
+const FakeRenderer: React.FC<ImpactMapRendererProps> = ({ onEntityClick }) => (
+  <div data-test-subj="fakeMap">
+    <button type="button" data-test-subj="fakeNode" onClick={() => onEntityClick?.('checkout')} />
+  </div>
+);
 
 const openInInvestigation = jest.fn();
 
@@ -227,6 +231,15 @@ describe('ImpactMapCards', () => {
 
     expect(openInInvestigation).not.toHaveBeenCalled();
     expect(screen.getByTestId('agenticInvestigationsImpactMapEventsFlyout')).toBeInTheDocument();
+  });
+
+  it('opens an entity from a node on the map card', () => {
+    renderCards(document);
+
+    fireEvent.click(screen.getByTestId('fakeNode'));
+
+    expect(screen.getByTestId('agenticInvestigationsImpactMapEventsFlyout')).toBeInTheDocument();
+    expect(openInInvestigation).not.toHaveBeenCalled();
   });
 
   it('opens an entity from its card', () => {
