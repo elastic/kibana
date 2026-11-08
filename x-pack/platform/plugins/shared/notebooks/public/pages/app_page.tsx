@@ -134,8 +134,8 @@ const StandaloneApp = ({
           <ExitFullScreenButton onExit={() => setIsFullScreen(false)} />
         </ExitFullScreenButtonKibanaProvider>
       )}
-      <EuiPageTemplate paddingSize="none" data-test-subj="notebookAppPage">
-        <EuiPageTemplate.Section paddingSize="none">
+      <EuiPageTemplate paddingSize="none" restrictWidth={false} data-test-subj="notebookAppPage">
+        <EuiPageTemplate.Section paddingSize="none" restrictWidth={false}>
           {app ? <AppView app={app} /> : <AppNotFound notebookId={notebookId} />}
         </EuiPageTemplate.Section>
       </EuiPageTemplate>
