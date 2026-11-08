@@ -23,6 +23,7 @@ import {
   EuiFlyoutHeader,
   EuiIcon,
   EuiLink,
+  EuiMarkdownFormat,
   EuiNotificationBadge,
   EuiPanel,
   EuiPortal,
@@ -353,7 +354,7 @@ const KeyFacts: React.FC<{ facts: KeyFact[]; testSubj: string }> = ({ facts, tes
       hasBorder
       hasShadow={false}
       paddingSize="m"
-      borderRadius="l"
+      borderRadius="m"
       data-test-subj={testSubj}
     >
       <EuiFlexGroup
@@ -508,6 +509,10 @@ const EVIDENCE_SOURCE = i18n.translate(
   'xpack.agenticInvestigations.impactMap.events.evidenceSource',
   { defaultMessage: 'Source' }
 );
+const EVIDENCE_INSTANCE = i18n.translate(
+  'xpack.agenticInvestigations.impactMap.events.evidenceInstance',
+  { defaultMessage: 'Where' }
+);
 const EVIDENCE_QUERY = i18n.translate(
   'xpack.agenticInvestigations.impactMap.events.evidenceQuery',
   {
@@ -550,6 +555,18 @@ const EventDataSource: React.FC<{ dataSource?: ImpactMapEvent['data_source'] }> 
                 </span>
               ),
             },
+            ...(dataSource.instance
+              ? [
+                  {
+                    title: EVIDENCE_INSTANCE,
+                    description: (
+                      <span data-test-subj="agenticInvestigationsImpactMapEventDataSourceInstance">
+                        {dataSource.instance}
+                      </span>
+                    ),
+                  },
+                ]
+              : []),
             ...(dataSource.query
               ? [
                   {
@@ -614,9 +631,13 @@ const EventDetail: React.FC<{
       <h4>{DESCRIPTION_LABEL}</h4>
     </EuiTitle>
     <EuiSpacer size="xs" />
-    <EuiText size="s" color={event.description ? undefined : 'subdued'}>
-      <p>{event.description ?? NO_DESCRIPTION}</p>
-    </EuiText>
+    {event.description ? (
+      <EuiMarkdownFormat textSize="s">{event.description}</EuiMarkdownFormat>
+    ) : (
+      <EuiText size="s" color="subdued">
+        <p>{NO_DESCRIPTION}</p>
+      </EuiText>
+    )}
     {event.evidence?.chart && (
       <>
         <EuiSpacer size="m" />
@@ -642,8 +663,12 @@ const EventDetail: React.FC<{
         ))}
       </>
     ) : null}
-    <EuiSpacer size="m" />
-    <EventDataSource dataSource={event.data_source} />
+    {event.data_source && (
+      <>
+        <EuiSpacer size="m" />
+        <EventDataSource dataSource={event.data_source} />
+      </>
+    )}
   </div>
 );
 
@@ -844,9 +869,17 @@ export const getEntityIcon = (type?: ImpactMapEntityType): string => {
 };
 
 /** The kind and the type under it: `Infrastructure › Kubernetes deployment`. */
-export const getEntityTypeLabel = (type?: ImpactMapEntityType): string | undefined => {
+export const getEntityTypeLabel = (
+  type?: ImpactMapEntityType,
+  entityName?: string
+): string | undefined => {
   const kind = getEntityKindLabel(getEntityKind(type));
   if (!type || !kind) {
+    return kind;
+  }
+  // A type that carries the entity's own name ('Shipping service') is not a sub-type.
+  const name = entityName?.trim().toLowerCase();
+  if (name && type.label.toLowerCase().includes(name)) {
     return kind;
   }
   return type.label.toLowerCase() === kind.toLowerCase() ? kind : `${kind} › ${type.label}`;
@@ -873,9 +906,6 @@ const NO_METADATA_BODY = i18n.translate(
       'The investigation adds details that help you find this entity, such as its cloud, availability zone, cluster and namespace, the next time it updates the impact map.',
   }
 );
-const TYPE_LABEL = i18n.translate('xpack.agenticInvestigations.impactMap.events.type', {
-  defaultMessage: 'Type',
-});
 const VIEW_IN_TIMELINE = i18n.translate(
   'xpack.agenticInvestigations.impactMap.events.viewInTimeline',
   { defaultMessage: 'View in investigation timeline' }
@@ -911,13 +941,35 @@ export interface ImpactMapEventsFlyoutProps {
   asMainFlyout?: boolean;
   /** Shows a "View in timeline" action that opens the Timeline tab filtered by this target. */
   onViewInTimeline?: () => void;
+  /**
+   * Changes when the flyout moves to another target. The flyout stays open and starts on the new
+   * target's list: remounting it instead would close the one open flyout and open another.
+   */
+  targetKey?: string;
 }
 
 /**
  * The events of one entity or relationship: a list in time order, and the detail of one event
  * with the trend around it. Choosing an event replaces the list, and Back returns to it.
  */
-export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
+export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = (props) => {
+  const titleId = useGeneratedHtmlId({ prefix: 'impactMapEventsTitle' });
+  const { standalone = false, asMainFlyout = false, onClose, title, targetKey } = props;
+  return (
+    <EventsFlyoutFrame
+      standalone={standalone}
+      asMainFlyout={asMainFlyout}
+      onClose={onClose}
+      titleId={titleId}
+      menuTitle={title}
+    >
+      <EventsFlyoutContent key={targetKey} {...props} titleId={titleId} />
+    </EventsFlyoutFrame>
+  );
+};
+
+const EventsFlyoutContent: React.FC<ImpactMapEventsFlyoutProps & { titleId: string }> = ({
+  titleId,
   title,
   icon,
   typeLabel,
@@ -933,7 +985,6 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
   onOpenEntity,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const titleId = useGeneratedHtmlId({ prefix: 'impactMapEventsTitle' });
   const standaloneHeaderCss = css`
     flex: none;
     padding: ${euiTheme.size.base} ${euiTheme.size.xxl} ${euiTheme.size.base} ${euiTheme.size.base};
@@ -972,13 +1023,7 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
   );
 
   return (
-    <EventsFlyoutFrame
-      standalone={standalone}
-      asMainFlyout={asMainFlyout}
-      onClose={onClose}
-      titleId={titleId}
-      menuTitle={title}
-    >
+    <>
       <EuiFlyoutHeader
         hasBorder={Boolean(selected)}
         // Outside an EUI flyout there is no padding to inherit, and the close button sits top right.
@@ -1099,7 +1144,7 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
           </>
         )}
       </EuiFlyoutBody>
-    </EventsFlyoutFrame>
+    </>
   );
 };
 
@@ -1124,7 +1169,7 @@ export const resolveEventsSelection = (
     return {
       title: entity?.label ?? selection.id,
       icon: getEntityIcon(type),
-      typeLabel: getEntityTypeLabel(type),
+      typeLabel: getEntityTypeLabel(type, entity?.label),
       metadata: resolveEntityMetadata(entity, type),
       events: events.filter(({ entity_id: entityId }) => entityId === selection.id),
     };

@@ -9,6 +9,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import {
   MAX_DATA_SOURCE_ENDPOINT_LENGTH,
   MAX_DATA_SOURCE_NAME_LENGTH,
+  MAX_DATA_SOURCE_INSTANCE_LENGTH,
   MAX_DATA_SOURCE_PAYLOAD_LENGTH,
   MAX_DATA_SOURCE_QUERY_LENGTH,
 } from './data_source';
@@ -198,6 +199,7 @@ const MAX_EVENT_LINKS = 5;
 export const impactMapDataSourceSchema = lazySchema(() =>
   z.object({
     name: z.string().min(1).max(MAX_DATA_SOURCE_NAME_LENGTH),
+    instance: z.string().max(MAX_DATA_SOURCE_INSTANCE_LENGTH).optional(),
     query: z
       .object({
         language: z.string().max(40).optional(),

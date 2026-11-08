@@ -185,10 +185,8 @@ describe('TimelineTab', () => {
     expect(screen.getByTestId('agenticInvestigationsImpactMapEventKeyFacts')).toHaveTextContent(
       'Responders'
     );
-    // Every event has the section, closed, and says so when it has no data source.
-    expect(screen.getByTestId('agenticInvestigationsImpactMapEventDataSource')).toHaveTextContent(
-      'No data source was recorded'
-    );
+    // An event saved before data sources were required shows no Evidence section, not a gap.
+    expect(screen.queryByTestId('agenticInvestigationsImpactMapEventDataSource')).toBeNull();
     expect(
       screen.queryByTestId('agenticInvestigationsImpactMapEventsBack')
     ).not.toBeInTheDocument();

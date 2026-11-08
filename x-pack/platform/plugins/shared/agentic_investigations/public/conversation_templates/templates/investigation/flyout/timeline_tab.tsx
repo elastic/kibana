@@ -40,7 +40,7 @@ import {
   ImpactMapEventsFlyout,
   describeEventTarget,
   getEntityIcon,
-  getEntityKindLabel,
+  getEntityTypeLabel,
   getEventEntityIds,
   resolveEventsSelection,
 } from './impact_map_events';
@@ -268,7 +268,7 @@ const Timeline: React.FC<{
         label,
         count: counts.get(id) ?? 0,
         icon: getEntityIcon(types.get(typeId)),
-        type: getEntityKindLabel(types.get(typeId)?.kind),
+        type: getEntityTypeLabel(types.get(typeId), label),
       }));
   }, [
     events,
@@ -469,7 +469,7 @@ const Timeline: React.FC<{
       )}
       {(openedEntityId || selectedId) && (
         <ImpactMapEventsFlyout
-          key={openedEntityId ? `entity:${openedEntityId}` : selectedId}
+          targetKey={openedEntityId ? `entity:${openedEntityId}` : selectedId}
           {...resolveEventsSelection(
             openedEntityId
               ? { kind: 'entity', id: openedEntityId }

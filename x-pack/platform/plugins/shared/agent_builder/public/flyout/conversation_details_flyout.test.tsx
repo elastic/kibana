@@ -333,6 +333,14 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
 });
 
 describe('ConversationDetailsFlyout', () => {
+  beforeEach(() => {
+    window.history.pushState({}, '', '/app/agent_builder/conversations/c1');
+  });
+
+  afterEach(() => {
+    window.history.pushState({}, '', '/');
+  });
+
   it('renders the template trailing actions in the menu bar', () => {
     const trailingActions = jest.fn(() => [
       { iconType: 'link', 'aria-label': 'Copy link', onClick: jest.fn() },

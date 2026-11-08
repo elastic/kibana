@@ -18,6 +18,7 @@ import { ConversationDetailsFlyoutSnapshot, FLYOUT_TITLE } from './conversation_
 import {
   getConversationDetailsFlyoutWidthProps,
   getSummaryFlyoutDefaultWidth,
+  isInAgentBuilderApp,
 } from './conversation_details_flyout_width';
 
 const notFoundMessage = (conversationId: string) =>
@@ -68,9 +69,9 @@ export const openConversationDetailsFlyout = async ({
       session: 'start',
       historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
       title: FLYOUT_TITLE,
-      ...getConversationDetailsFlyoutWidthProps({ wide: true }),
+      ...getConversationDetailsFlyoutWidthProps(),
       // Lets the flyout menu's reset action return to the default, not to the remembered width.
-      defaultSize: getSummaryFlyoutDefaultWidth(),
+      ...(isInAgentBuilderApp() ? { defaultSize: getSummaryFlyoutDefaultWidth() } : {}),
       flyoutMenuDisplayMode: 'always',
       flyoutMenuProps: { trailingActions },
       type: 'push',

@@ -233,7 +233,7 @@ const ImpactMapPanel: React.FC<{
   const eventsFlyout = selection && (
     <ImpactMapEventsFlyout
       // A new selection starts on its own list, not on the last one's open event.
-      key={`${selection.kind}:${selection.id}`}
+      targetKey={`${selection.kind}:${selection.id}`}
       {...resolveEventsSelection(selection, impactMap)}
       renderEvents={(events, onOpen) => (
         <EventsTimeline events={events} impactMap={impactMap} onOpen={onOpen} />

@@ -19,6 +19,8 @@ import {
   limitImpactMap,
   limitEvents,
   classifyEntityType,
+  withoutEntityName,
+  limitDescriptionBullets,
 } from './output_schema';
 
 describe('findings output', () => {
@@ -524,5 +526,20 @@ describe('limitEvents', () => {
     ]);
     expect(kept).toHaveLength(1);
     expect(kept[0].title).toBe('Fired again');
+  });
+});
+
+describe('withoutEntityName', () => {
+  it('drops the entity name from a type', () => {
+    expect(withoutEntityName('shipping_service', ['shipping'])).toBe('service');
+    expect(withoutEntityName('shipping', ['shipping'])).toBe('service');
+    expect(withoutEntityName('k8s_deployment', ['shipping'])).toBe('k8s_deployment');
+  });
+});
+
+describe('limitDescriptionBullets', () => {
+  it('keeps the first four bullets', () => {
+    const text = ['- a', '- b', '- c', '- d', '- e', '- f'].join('\n');
+    expect(limitDescriptionBullets(text)).toBe('- a\n- b\n- c\n- d');
   });
 });

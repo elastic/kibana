@@ -502,6 +502,30 @@ describe('runFindingsPass', () => {
     ]);
   });
 
+  it('asks again for events with no data source, then saves what it gets', async () => {
+    const bare = { kind: 'response', title: 'Incident channel opened', at: '2026-11-07T10:05:00Z' };
+    const { deps, memory, writer, chatComplete } = setup({
+      answers: [answerWith({ ...output, events: [bare] })],
+    });
+    await run(deps, memory);
+    expect(chatComplete.mock.calls.length).toBe(2);
+    expect(writer.addImpactMapEvents).toHaveBeenCalledTimes(1);
+    const [{ events }] = writer.addImpactMapEvents.mock.calls[0];
+    expect(events[0].data_source).toBeUndefined();
+  });
+
+  it('does not ask again when every event has a data source', async () => {
+    const events = [
+      {
+        ...{ kind: 'response', title: 'Opened', at: '2026-11-07T10:05:00Z' },
+        data_source: { name: 'Slack' },
+      },
+    ];
+    const { deps, memory, chatComplete } = setup({ answers: [answerWith({ ...output, events })] });
+    await run(deps, memory);
+    expect(chatComplete.mock.calls.length).toBe(1);
+  });
+
   it('writes events with the map, or on their own when there is no map', async () => {
     const events = [
       {
@@ -509,8 +533,14 @@ describe('runFindingsPass', () => {
         title: 'Replicas scaled to 0',
         at: '2026-11-07T10:00:00Z',
         entity: 'shipping',
+        data_source: { name: 'Elasticsearch' },
       },
-      { kind: 'response', title: 'Incident channel opened', at: '2026-11-07T10:05:00Z' },
+      {
+        kind: 'response',
+        title: 'Incident channel opened',
+        at: '2026-11-07T10:05:00Z',
+        data_source: { name: 'Slack' },
+      },
     ];
     const impactMap = {
       entities: [{ id: 'shipping', type: 'k8s_deployment' }],

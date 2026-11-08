@@ -95,6 +95,12 @@ const FALLBACK_SUMMARY_CHARS = 1_000;
 /** A malformed structured answer is the usual failure, so a pass asks again before giving up. */
 const MAX_ATTEMPTS = 2;
 
+const MISSING_EVIDENCE_REQUEST =
+  'Some events have no data_source. Answer again with the same record, giving every event the data_source copied from the tool call that returned its data (system, query, and the API call as sent, without credentials). Only an event that rests on no data at all may go without.';
+
+const eventsWithoutEvidence = (record: FindingsRecord): number =>
+  (record.events ?? []).filter((event) => !event.data_source).length;
+
 type RecordEntity = NonNullable<FindingsRecord['impact_entities']>[number];
 
 /**
@@ -501,16 +507,27 @@ export const runFindingsPass = async (
     // One call, forced to answer. This is every live pass, and the final pass when it has no
     // files or could not use them. The replay carries no file paths it could not follow.
     const plainMessages = workspace ? buildMessages(false) : messages;
+    // A record whose events lack evidence is asked for again, once; if the model still leaves some
+    // out, the record is saved anyway (those events show that no source was recorded).
+    let withoutEvidence: FindingsRecord | undefined;
     for (let attempt = 1; attempt <= MAX_ATTEMPTS && !output && !guard.signal.aborted; attempt++) {
       try {
         const response = await ask(
-          plainMessages,
+          withoutEvidence
+            ? [...plainMessages, { role: MessageRole.User, content: MISSING_EVIDENCE_REQUEST }]
+            : plainMessages,
           tools,
           { function: STRUCTURED_OUTPUT_TOOL },
           false
         );
         const call = response.toolCalls?.find((c) => c.function.name === STRUCTURED_OUTPUT_TOOL);
-        output = parseRecord(call?.function.arguments, `attempt ${attempt}`);
+        const candidate = parseRecord(call?.function.arguments, `attempt ${attempt}`);
+        if (candidate && eventsWithoutEvidence(candidate) > 0) {
+          withoutEvidence = candidate;
+          if (attempt === MAX_ATTEMPTS) output = candidate;
+        } else {
+          output = candidate;
+        }
       } catch (error) {
         if (!guard.signal.aborted) {
           // A tool validation error says which fields failed only in its metadata.
@@ -523,6 +540,7 @@ export const runFindingsPass = async (
         }
       }
     }
+    output ??= withoutEvidence;
   } catch (error) {
     if (!guard.signal.aborted) {
       logger.warn(

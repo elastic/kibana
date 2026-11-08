@@ -7,6 +7,7 @@
 
 import { redactSecrets, sanitizeDataSource } from './data_source';
 import { withImpactMapEventId } from './events';
+import { resolveEntityMetadata } from './metadata';
 
 describe('redactSecrets', () => {
   it('hides credentials in headers, JSON and curl flags', () => {
@@ -86,5 +87,29 @@ describe('clock times in an event chart', () => {
       '2026-11-07T16:40:00Z',
     ]);
     expect(event.evidence?.chart?.annotations?.[0].x).toBe('2026-11-07T16:54:00Z');
+  });
+
+  it('keeps which instance the data came from', () => {
+    const event = withImpactMapEventId({
+      kind: 'condition',
+      title: 'x',
+      at: '2026-11-07T10:00:00Z',
+      data_source: { name: 'Elasticsearch', instance: ' This project ' },
+    });
+    expect(event.data_source?.instance).toBe('This project');
+  });
+});
+
+describe('entity metadata', () => {
+  it('leaves out a value that only repeats the entity name', () => {
+    const rows = resolveEntityMetadata({
+      id: 'shipping',
+      label: 'shipping',
+      metadata: [
+        { key: 'k8s.deployment.name', value: 'Shipping' },
+        { key: 'k8s.namespace.name', value: 'prod' },
+      ],
+    });
+    expect(rows.map(({ key }) => key)).toEqual(['k8s.namespace.name']);
   });
 });

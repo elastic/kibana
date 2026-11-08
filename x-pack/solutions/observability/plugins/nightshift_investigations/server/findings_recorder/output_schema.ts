@@ -186,6 +186,7 @@ export const findingsOutputSchema = lazySchema(() => {
           data_source: z
             .object({
               name: z.string().min(1),
+              instance: z.string().optional(),
               query: z.object({ language: z.string().optional(), text: z.string() }).optional(),
               api_call: z
                 .object({
@@ -196,6 +197,8 @@ export const findingsOutputSchema = lazySchema(() => {
                 })
                 .optional(),
             })
+            // Optional here so a pass that leaves one out still saves; the JSON schema the model
+            // is given requires it, and the pass asks again before settling for less.
             .optional(),
         })
       )
@@ -341,6 +344,25 @@ export const toImpactMapTypeId = (raw: string): string =>
       .slice(0, MAX_MAP_TYPE_ID_LENGTH) || 'entity'
   );
 
+const GENERIC_KIND_WORDS = new Set(['service', 'database', 'deployment', 'cluster', 'queue']);
+
+/**
+ * A type names a kind of thing, never the thing: 'shipping_service' on an entity called shipping
+ * is the entity's name plus its kind, so the name is dropped ('service'). A type that is only the
+ * name has nothing left and becomes 'service'.
+ */
+export const withoutEntityName = (typeId: string, names: readonly string[]): string => {
+  const nameWords = new Set(
+    names
+      .flatMap((name) => name.toLowerCase().split(/[^a-z0-9]+/))
+      .filter((word) => word.length > 3 && !GENERIC_KIND_WORDS.has(word))
+  );
+  const kept = typeId.split(/[_.-]+/).filter((word) => word && !nameWords.has(word));
+  return kept.length === typeId.split(/[_.-]+/).filter(Boolean).length
+    ? typeId
+    : toImpactMapTypeId(kept.join('_') || 'service');
+};
+
 /** A metadata key: lowercase and dotted, with anything the store rejects replaced by `_`. */
 export const toMetadataKey = (raw: string): string =>
   raw
@@ -351,13 +373,17 @@ export const toMetadataKey = (raw: string): string =>
     .slice(0, MAX_MAP_METADATA_KEY_LENGTH);
 
 const limitMetadata = (
-  raw: NonNullable<NonNullable<FindingsOutput['impact_map']>['entities'][number]['metadata']>
+  raw: NonNullable<NonNullable<FindingsOutput['impact_map']>['entities'][number]['metadata']>,
+  /** The entity's own names: a value that repeats one is not metadata. */
+  names: readonly string[] = []
 ): ImpactMapMetadataEntry[] => {
+  const own = names.map((name) => name.trim().toLowerCase()).filter(Boolean);
   const byKey = new Map<string, ImpactMapMetadataEntry>();
   for (const { key, value, label, featured } of raw) {
     const cleanKey = toMetadataKey(key);
     const cleanValue = truncate(value.trim(), MAX_MAP_METADATA_VALUE_LENGTH);
     if (!cleanKey || !cleanValue || byKey.has(cleanKey)) continue;
+    if (own.includes(cleanValue.toLowerCase())) continue;
     if (byKey.size >= MAX_IMPACT_MAP_ENTITY_METADATA) break;
     const cleanLabel = label?.trim();
     byKey.set(cleanKey, {
@@ -418,12 +444,17 @@ export const limitImpactMap = (
     const id = truncate(entity.id.trim(), MAX_MAP_ID_LENGTH);
     if (!id || seen.has(id) || entities.length >= MAX_IMPACT_MAP_ENTITIES) continue;
     seen.add(id);
-    const typeId = toImpactMapTypeId(entity.type);
+    const typeId = withoutEntityName(toImpactMapTypeId(entity.type), [
+      entity.id,
+      entity.label ?? '',
+    ]);
     const agentName = icon(entity.agent_name);
     const euiIcon = icon(entity.eui_icon);
     const spanType = icon(entity.span_type);
     const spanSubtype = icon(entity.span_subtype);
-    const metadata = entity.metadata ? limitMetadata(entity.metadata) : [];
+    const metadata = entity.metadata
+      ? limitMetadata(entity.metadata, [entity.id, entity.label ?? ''])
+      : [];
     const knownType = knownTypes.get(typeId);
     if (knownType && metadata.length) {
       const have = new Set([
@@ -539,6 +570,16 @@ export const limitImpactMap = (
 };
 
 const MAX_EVENT_DESCRIPTION_LENGTH = 1_000;
+const MAX_EVENT_DESCRIPTION_BULLETS = 4;
+
+/** At most four bullet lines; a lead line before them is kept, so a long answer stays readable. */
+export const limitDescriptionBullets = (text: string): string => {
+  const lines = text.split('\n').filter((line) => line.trim());
+  let bullets = 0;
+  return lines
+    .filter((line) => !/^\s*[-*]\s/.test(line) || ++bullets <= MAX_EVENT_DESCRIPTION_BULLETS)
+    .join('\n');
+};
 
 /** An ISO 8601 time the store can sort by, or undefined when the model wrote something else. */
 const toIsoTime = (value?: string): string | undefined => {
@@ -582,7 +623,12 @@ export const limitEvents = (raw: NonNullable<FindingsOutput['events']>): ImpactM
       kind: event.kind,
       title: truncate(title, MAX_MAP_LABEL_LENGTH),
       ...(event.description?.trim()
-        ? { description: truncate(event.description.trim(), MAX_EVENT_DESCRIPTION_LENGTH) }
+        ? {
+            description: truncate(
+              limitDescriptionBullets(event.description.trim()),
+              MAX_EVENT_DESCRIPTION_LENGTH
+            ),
+          }
         : {}),
       at,
       ...(endsAt ? { ends_at: endsAt } : {}),
@@ -678,7 +724,7 @@ export const limitFindings = (
       : {}),
     hypotheses: rawHypotheses.slice(0, MAX_HYPOTHESES).map(({ evidence, ...hypothesis }) => {
       const kept = (evidence ?? [])
-        .map(limitEvidence)
+        .map((item) => limitEvidence(item))
         .filter((item): item is InvestigationEvidence => item !== undefined)
         .slice(0, MAX_HYPOTHESIS_EVIDENCE_ITEMS);
       return {
@@ -1036,11 +1082,16 @@ export const FINDINGS_JSON_SCHEMA = {
           data_source: {
             type: 'object',
             description:
-              'Where the data behind this event came from and how it was asked for, copied from the tool call that returned it. Required for every event that states a number, a state or a time taken from data; leave it out only for an event that uses no data, such as a response. Never include credentials, API keys or auth headers.',
+              'Where the data behind this event came from and how it was asked for, copied from the tool call that returned it. Required on every event, with no exception: an event without one is rejected. For an event that uses no data, such as a response, name the system it was learned from (Slack, PagerDuty, GitHub) and the call that showed it. Never include credentials, API keys or auth headers.',
             properties: {
               name: {
                 type: 'string',
                 description: 'The system the data came from, for example Elasticsearch or Grafana.',
+              },
+              instance: {
+                type: 'string',
+                description:
+                  'Which one of that system. For Elasticsearch say whether it is the cluster or project this investigation runs in (write: This project) or another one, naming it as the tool call shows (cluster alias, project name or host). For Grafana, Slack and others, the workspace, org or host.',
               },
               query: {
                 type: 'object',
@@ -1071,7 +1122,7 @@ export const FINDINGS_JSON_SCHEMA = {
             required: ['name'],
           },
         },
-        required: ['kind', 'title', 'at'],
+        required: ['kind', 'title', 'at', 'data_source'],
       },
     },
   },

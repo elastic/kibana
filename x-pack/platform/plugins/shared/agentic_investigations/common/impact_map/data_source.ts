@@ -6,6 +6,7 @@
  */
 
 export const MAX_DATA_SOURCE_NAME_LENGTH = 100;
+export const MAX_DATA_SOURCE_INSTANCE_LENGTH = 200;
 export const MAX_DATA_SOURCE_QUERY_LENGTH = 4_000;
 export const MAX_DATA_SOURCE_PAYLOAD_LENGTH = 4_000;
 export const MAX_DATA_SOURCE_ENDPOINT_LENGTH = 2_048;
@@ -14,6 +15,8 @@ export const MAX_DATA_SOURCE_ENDPOINT_LENGTH = 2_048;
 export interface ImpactMapDataSource {
   /** The system, for example Elasticsearch or Grafana. */
   name: string;
+  /** Which one: this project's own cluster, or another cluster, project or host by name. */
+  instance?: string;
   query?: { language?: string; text: string };
   api_call?: { method?: string; type?: string; endpoint?: string; payload?: string };
 }
@@ -45,6 +48,9 @@ export const sanitizeDataSource = (source: ImpactMapDataSource): ImpactMapDataSo
   const { name, query, api_call: call } = source;
   return {
     name: clip(name.trim(), MAX_DATA_SOURCE_NAME_LENGTH),
+    ...(source.instance?.trim()
+      ? { instance: clip(redactSecrets(source.instance.trim()), MAX_DATA_SOURCE_INSTANCE_LENGTH) }
+      : {}),
     ...(query?.text.trim()
       ? {
           query: {

@@ -44,11 +44,17 @@ export interface ConversationDetailsFlyoutWidthProps {
 
 export interface ConversationDetailsFlyoutWidthOptions {
   /**
-   * The Summary flyout, which holds a template's tabs and needs room: it opens at two thirds of
-   * the page, can be dragged up to nine tenths of it, and remembers its own width.
+   * On by default inside the Agent Builder app, off elsewhere (such as the Nightshift landing
+   * page, where the flyout sits beside a list). Wide flyouts open at two thirds of the page, can
+   * be dragged up to nine tenths of it, and share one remembered width, so opening another one
+   * from the Summary never makes it smaller.
    */
   wide?: boolean;
 }
+
+/** The Agent Builder app gives the Summary room; anywhere else it stays narrow. */
+export const isInAgentBuilderApp = (): boolean =>
+  window.location.pathname.includes('/app/agent_builder');
 
 const SUMMARY_FLYOUT_SHARE_OF_PAGE = 2 / 3;
 const SUMMARY_FLYOUT_MAX_SHARE_OF_PAGE = 0.9;
@@ -82,7 +88,7 @@ const getWideWidthProps = (): ConversationDetailsFlyoutWidthProps => {
  * width the user last chose anywhere, or at the default.
  */
 export const getConversationDetailsFlyoutWidthProps = ({
-  wide = false,
+  wide = isInAgentBuilderApp(),
 }: ConversationDetailsFlyoutWidthOptions = {}): ConversationDetailsFlyoutWidthProps =>
   wide
     ? getWideWidthProps()

@@ -107,7 +107,9 @@ export interface EntityMetadataRow {
  * itself. Featured fields come first.
  */
 export const resolveEntityMetadata = (
-  entity: Pick<ImpactMapEntity, 'metadata'> | undefined,
+  entity:
+    | (Pick<ImpactMapEntity, 'metadata'> & Partial<Pick<ImpactMapEntity, 'id' | 'label'>>)
+    | undefined,
   type?: Pick<ImpactMapEntityType, 'metadata_fields'>
 ): EntityMetadataRow[] => {
   const known = new Map<string, ImpactMapMetadataField>(
@@ -116,8 +118,11 @@ export const resolveEntityMetadata = (
   type?.metadata_fields?.forEach((field) =>
     known.set(field.key, { ...known.get(field.key), ...field })
   );
-  const rows = (entity?.metadata ?? []).map(
-    ({ key, value, label, featured }: ImpactMapMetadataEntry, index) => {
+  // A value that only repeats the entity's own name tells the reader nothing the title doesn't.
+  const names = [entity?.label, entity?.id].map((name) => name?.trim().toLowerCase());
+  const rows = (entity?.metadata ?? [])
+    .filter(({ value }) => !names.includes(value.trim().toLowerCase()))
+    .map(({ key, value, label, featured }: ImpactMapMetadataEntry, index) => {
       const field = known.get(key);
       return {
         index,
@@ -129,8 +134,7 @@ export const resolveEntityMetadata = (
           featured: featured ?? field?.featured ?? false,
         },
       };
-    }
-  );
+    });
   return rows
     .sort((a, b) => Number(b.row.featured) - Number(a.row.featured) || a.index - b.index)
     .map(({ row }) => row);

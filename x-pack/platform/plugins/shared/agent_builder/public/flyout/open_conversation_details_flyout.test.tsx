@@ -17,6 +17,15 @@ import {
 } from './conversation_details_flyout_width';
 
 describe('openConversationDetailsFlyout', () => {
+  // The Summary opens wide inside the Agent Builder app, so that is where these tests run.
+  beforeEach(() => {
+    window.history.pushState({}, '', '/app/agent_builder/conversations/c1');
+  });
+
+  afterEach(() => {
+    window.history.pushState({}, '', '/');
+  });
+
   const setup = () => {
     localStorage.clear();
     const core = coreMock.createStart();
@@ -115,6 +124,17 @@ describe('openConversationDetailsFlyout', () => {
     expect(options?.size).toBe(620);
     // A reset still returns to the default, not to the remembered width.
     expect(options?.defaultSize).toBe(getSummaryFlyoutDefaultWidth());
+  });
+
+  it('stays narrow outside the Agent Builder app', async () => {
+    window.history.pushState({}, '', '/app/observability/landing');
+    const { core, open } = setup();
+
+    await open();
+
+    const [[, options]] = core.overlays.openSystemFlyout.mock.calls;
+    expect(options?.defaultSize).toBeUndefined();
+    expect(options?.size).toBe(480);
   });
 
   it('clamps a remembered width to the allowed range', async () => {
