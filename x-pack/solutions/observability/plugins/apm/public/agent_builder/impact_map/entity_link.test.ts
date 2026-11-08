@@ -8,25 +8,39 @@
 import { createApmEntityLinkResolver } from './entity_link';
 
 const callApmApi = jest.fn();
+const renderServiceFlyout = jest.fn(() => 'flyout');
 const resolve = createApmEntityLinkResolver({
-  prependBasePath: (path) => `/base${path}`,
   getCallApmApi: () => callApmApi as never,
+  getRenderServiceFlyout: () => renderServiceFlyout as never,
 });
 
-beforeEach(() => callApmApi.mockReset());
+beforeEach(() => {
+  callApmApi.mockReset();
+  renderServiceFlyout.mockClear();
+});
 
 describe('createApmEntityLinkResolver', () => {
-  it('links a service APM knows to its overview, by its service.name when it has one', async () => {
+  it('offers the APM service flyout for a service APM knows, by its service.name when it has one', async () => {
     callApmApi.mockResolvedValue({ agentName: 'java' });
+    const onClose = jest.fn();
+    const historyKey = Symbol('history');
 
-    expect(
-      await resolve({
-        id: 'shipping',
-        label: 'Shipping',
-        kind: 'service',
-        metadata: [{ key: 'service.name', value: 'shipping' }],
+    const link = await resolve({
+      id: 'shipping',
+      label: 'Shipping',
+      kind: 'service',
+      metadata: [{ key: 'service.name', value: 'shipping' }],
+    });
+
+    expect(link?.label).toBe('View APM service');
+    expect(link?.renderFlyout({ onClose, historyKey })).toBe('flyout');
+    expect(renderServiceFlyout).toHaveBeenCalledWith(
+      expect.objectContaining({
+        service: { name: 'shipping', agentName: 'java' },
+        onClose,
+        flyoutHistoryKey: historyKey,
       })
-    ).toEqual({ href: '/base/app/apm/services/shipping/overview', label: 'Open in APM' });
+    );
     expect(callApmApi.mock.calls[0][1].params.path).toEqual({ serviceName: 'shipping' });
   });
 

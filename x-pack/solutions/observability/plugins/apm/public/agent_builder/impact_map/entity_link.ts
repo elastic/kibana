@@ -10,12 +10,17 @@ import type { ImpactEntityLinkResolver } from '@kbn/agentic-investigations-plugi
 import type { getApmInternalServices } from '../../plugin';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
-type CallApmApi = NonNullable<ReturnType<typeof getApmInternalServices>>['callApmApi'];
+type ApmServices = NonNullable<ReturnType<typeof getApmInternalServices>>;
+type CallApmApi = ApmServices['callApmApi'];
+type RenderServiceFlyout = NonNullable<ApmServices['renderServiceFlyout']>;
+
+const FLYOUT_SOURCE = 'investigation_impact_map';
+const FLYOUT_RANGE = { rangeFrom: 'now-24h', rangeTo: 'now' };
 
 const LOOKBACK_MS = 7 * 24 * 60 * 60 * 1000;
 
-const OPEN_IN_APM = i18n.translate('xpack.apm.impactMap.openInApm', {
-  defaultMessage: 'Open in APM',
+const VIEW_APM_SERVICE = i18n.translate('xpack.apm.impactMap.viewApmService', {
+  defaultMessage: 'View APM service',
 });
 
 /**
@@ -24,16 +29,16 @@ const OPEN_IN_APM = i18n.translate('xpack.apm.impactMap.openInApm', {
  */
 export const createApmEntityLinkResolver =
   ({
-    prependBasePath,
     getCallApmApi,
+    getRenderServiceFlyout,
   }: {
-    prependBasePath: (path: string) => string;
     /** Read per call: the client is published when APM starts, after this is registered. */
     getCallApmApi: () => CallApmApi | undefined;
+    getRenderServiceFlyout: () => RenderServiceFlyout | undefined;
   }): ImpactEntityLinkResolver =>
   async ({ kind, label, metadata }) => {
     const callApmApi = getCallApmApi();
-    if (kind !== 'service' || !callApmApi) {
+    if (kind !== 'service' || !callApmApi || !getRenderServiceFlyout()) {
       return undefined;
     }
     const serviceName = metadata?.find(({ key }) => key === 'service.name')?.value || label;
@@ -50,8 +55,15 @@ export const createApmEntityLinkResolver =
     });
     return agentName
       ? {
-          href: prependBasePath(`/app/apm/services/${encodeURIComponent(serviceName)}/overview`),
-          label: OPEN_IN_APM,
+          label: VIEW_APM_SERVICE,
+          renderFlyout: ({ onClose, historyKey }) =>
+            getRenderServiceFlyout()?.({
+              service: { name: serviceName, agentName },
+              filters: { environment: ENVIRONMENT_ALL.value, ...FLYOUT_RANGE },
+              source: FLYOUT_SOURCE,
+              onClose,
+              flyoutHistoryKey: historyKey,
+            }),
         }
       : undefined;
   };

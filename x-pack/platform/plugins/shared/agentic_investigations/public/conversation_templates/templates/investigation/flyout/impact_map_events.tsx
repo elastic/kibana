@@ -653,11 +653,13 @@ const TypeBadges: React.FC<{ typeLabel?: string; icon?: string }> = ({ typeLabel
 };
 
 /**
- * Top right of an entity's header: opens the entity where a solution shows it (APM for a service)
- * in a new tab. Only there when the solution found it.
+ * Top right of an entity's header: opens the solution's own flyout for the entity (the APM
+ * service flyout for a service). Only there when the solution found it.
  */
 const OpenInSolutionButton: React.FC<{ entity?: ImpactEntityLinkTarget }> = ({ entity }) => {
   const link = useImpactEntityLink(entity);
+  const [isOpen, setIsOpen] = useState(false);
+  const close = useCallback(() => setIsOpen(false), []);
   if (!link) {
     return null;
   }
@@ -666,15 +668,15 @@ const OpenInSolutionButton: React.FC<{ entity?: ImpactEntityLinkTarget }> = ({ e
     <EuiFlexItem grow style={{ alignItems: 'flex-end', paddingInlineEnd: 32 }}>
       <EuiButtonEmpty
         size="xs"
-        iconType="external"
+        iconType="eye"
         iconSide="right"
-        href={link.href}
-        target="_blank"
-        rel="noopener noreferrer"
+        onClick={() => setIsOpen(true)}
         data-test-subj="agenticInvestigationsImpactMapOpenInSolution"
       >
         {link.label}
       </EuiButtonEmpty>
+      {isOpen &&
+        link.renderFlyout({ onClose: close, historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY })}
     </EuiFlexItem>
   );
 };

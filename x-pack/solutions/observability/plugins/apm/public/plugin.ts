@@ -295,8 +295,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     plugins.agenticInvestigations?.registerImpactMapRenderer(LazyImpactServiceMap);
     plugins.agenticInvestigations?.registerImpactEntityLink(
       createApmEntityLinkResolver({
-        prependBasePath: (path) => core.http.basePath.prepend(path),
         getCallApmApi: () => getApmInternalServices()?.callApmApi,
+        getRenderServiceFlyout: () => getApmInternalServices()?.renderServiceFlyout,
       })
     );
 

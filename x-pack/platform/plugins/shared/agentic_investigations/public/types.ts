@@ -11,7 +11,7 @@ import type {
 } from '@kbn/agentic-investigations-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
-import type { ComponentType } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import type { ProposalsPublicPluginStart } from '@kbn/proposals-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -99,11 +99,15 @@ export interface ImpactEntityLinkTarget {
   metadata?: Array<{ key: string; value: string }>;
 }
 
-/** Where a solution shows the entity: opened in another tab. */
+/** Where a solution shows the entity: its own flyout, opened over the investigation's. */
 export interface ImpactEntityLink {
-  href: string;
-  /** The button's text; "Open in APM" for APM. */
+  /** The button's text; "View APM service" for APM. */
   label: string;
+  /**
+   * The solution's flyout. `historyKey` puts it in the investigation flyout's back-button stack,
+   * and it calls `onClose` when the reader closes it.
+   */
+  renderFlyout: (params: { onClose: () => void; historyKey?: symbol }) => ReactNode;
 }
 
 /** Finds the entity in a solution, or resolves to undefined when it is not there. */
