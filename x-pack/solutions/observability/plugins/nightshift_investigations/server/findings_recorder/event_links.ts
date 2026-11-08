@@ -19,14 +19,17 @@ const KINDS: readonly string[] = IMPACT_MAP_EVENT_KINDS;
  * Keeps the event links the recorder wrote and puts each id in the form the store makes (the
  * time to the minute), so a slip such as seconds or a trailing Z still finds its event. A link
  * that is not shaped like an event id is turned back into its words, so the reader never meets a
- * dead link. Whether the event exists is the screen's to check: it may be an earlier pass's.
+ * dead link. Escaped line breaks become real ones. Whether the event exists is the screen's to check: it may be an earlier pass's.
  */
 export const normalizeEventLinks = (text: string): string =>
-  text.replace(EVENT_LINK, (_match, words: string, rawId: string) => {
-    const parsed = EVENT_ID.exec(rawId.trim());
-    if (!parsed || !KINDS.includes(parsed[1]) || !words.trim()) {
-      return words;
-    }
-    const [, kind, target, time] = parsed;
-    return `[${words}](event:${kind}:${target}:${time})`;
-  });
+  text
+    // The model sometimes writes a line break as the two characters backslash and n.
+    .replace(/\\n/g, '\n')
+    .replace(EVENT_LINK, (_match, words: string, rawId: string) => {
+      const parsed = EVENT_ID.exec(rawId.trim());
+      if (!parsed || !KINDS.includes(parsed[1]) || !words.trim()) {
+        return words;
+      }
+      const [, kind, target, time] = parsed;
+      return `[${words}](event:${kind}:${target}:${time})`;
+    });

@@ -35,6 +35,10 @@ describe('normalizeEventLinks', () => {
     ).toBe('The pod and x');
   });
 
+  it('turns escaped line breaks into real ones', () => {
+    expect(normalizeEventLinks('- a.\\n- b.')).toBe('- a.\n- b.');
+  });
+
   it('leaves other links alone', () => {
     expect(normalizeEventLinks('[docs](https://elastic.co)')).toBe('[docs](https://elastic.co)');
   });
