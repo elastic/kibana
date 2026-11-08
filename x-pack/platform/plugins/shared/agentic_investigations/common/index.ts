@@ -164,7 +164,7 @@ export type { EntityMetadataRow } from './impact_map/metadata';
 
 export { toEntityName } from './impact_map/entity_name';
 export { clockTimeToIso, withChartClockTimesDated } from './impact_map/chart_times';
-export { redactSecrets, sanitizeDataSource } from './impact_map/data_source';
+export { redactSecrets, sanitizeDataSource, toBaseUrl } from './impact_map/data_source';
 export type { ImpactMapDataSource } from './impact_map/data_source';
 export {
   impactMapEventId,

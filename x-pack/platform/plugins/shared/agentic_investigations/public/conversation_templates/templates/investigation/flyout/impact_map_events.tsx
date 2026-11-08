@@ -11,6 +11,7 @@ import { useConversationFlyoutWidthProps } from '@kbn/agent-builder-plugin/publi
 import {
   EuiAccordion,
   EuiBadge,
+  EuiCode,
   EuiCodeBlock,
   EuiDescriptionList,
   EuiButtonEmpty,
@@ -515,6 +516,12 @@ const EVIDENCE_SOURCE = i18n.translate(
   'xpack.agenticInvestigations.impactMap.events.evidenceSource',
   { defaultMessage: 'Source' }
 );
+const SCOPE_LOCAL = i18n.translate('xpack.agenticInvestigations.impactMap.events.scopeLocal', {
+  defaultMessage: 'Local: this Kibana is connected to it',
+});
+const SCOPE_REMOTE = i18n.translate('xpack.agenticInvestigations.impactMap.events.scopeRemote', {
+  defaultMessage: 'Remote: somewhere else',
+});
 const EVIDENCE_INSTANCE = i18n.translate(
   'xpack.agenticInvestigations.impactMap.events.evidenceInstance',
   { defaultMessage: 'Where' }
@@ -561,13 +568,24 @@ const EventDataSource: React.FC<{ dataSource?: ImpactMapEvent['data_source'] }> 
                 </span>
               ),
             },
-            ...(dataSource.instance
+            ...(dataSource.instance || dataSource.scope || dataSource.base_url
               ? [
                   {
                     title: EVIDENCE_INSTANCE,
                     description: (
                       <span data-test-subj="agenticInvestigationsImpactMapEventDataSourceInstance">
+                        {dataSource.scope && (
+                          <EuiBadge color="hollow">
+                            {dataSource.scope === 'local' ? SCOPE_LOCAL : SCOPE_REMOTE}
+                          </EuiBadge>
+                        )}{' '}
                         {dataSource.instance}
+                        {dataSource.base_url && (
+                          <>
+                            <br />
+                            <EuiCode transparentBackground>{dataSource.base_url}</EuiCode>
+                          </>
+                        )}
                       </span>
                     ),
                   },

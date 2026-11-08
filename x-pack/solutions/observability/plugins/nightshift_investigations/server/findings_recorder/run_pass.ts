@@ -36,6 +36,7 @@ import {
   type FindingsRecord,
 } from './output_schema';
 import { buildRecorderSystemPrompt } from './prompt';
+import { withLocalElasticsearch, type LocalElasticsearch } from './local_elasticsearch';
 import { RECORDER_MAX_TOOL_CALLS, RECORDER_MAX_TOOL_ROUNDS } from './constants';
 import {
   RECORDER_READ_FILE_SCHEMA,
@@ -65,6 +66,8 @@ export interface FindingsPassDeps {
    * resolving to `undefined` when there is no sandbox: the final pass then answers without files.
    */
   getProposals?: () => RecorderProposals | undefined;
+  /** The Elasticsearch this Kibana runs against, so evidence can say which one it is and where. */
+  getLocalElasticsearch?: () => LocalElasticsearch | undefined;
   getWorkspace?: (args: {
     request: KibanaRequest;
     conversationId: string;
@@ -419,12 +422,19 @@ export const runFindingsPass = async (
 
     const parseRecord = (raw: unknown, label: string): FindingsRecord | undefined => {
       const parsed = findingsOutputSchema.safeParse(raw);
-      if (parsed.success)
-        return limitFindings(
+      if (parsed.success) {
+        const limited = limitFindings(
           parsed.data,
           new Set(catalog?.entity_types.map(({ id }) => id)),
           new Map(catalog?.entity_types.map((type) => [type.id, type]))
         );
+        return limited.events
+          ? {
+              ...limited,
+              events: withLocalElasticsearch(limited.events, deps.getLocalElasticsearch?.()),
+            }
+          : limited;
+      }
       logger.warn(
         `Findings recorder returned an invalid record (${label}): ${parsed.error.message}`
       );

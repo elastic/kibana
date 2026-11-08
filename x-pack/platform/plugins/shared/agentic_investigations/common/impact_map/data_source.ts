@@ -7,6 +7,9 @@
 
 export const MAX_DATA_SOURCE_NAME_LENGTH = 100;
 export const MAX_DATA_SOURCE_INSTANCE_LENGTH = 200;
+export const MAX_DATA_SOURCE_URL_LENGTH = 500;
+export const DATA_SOURCE_SCOPES = ['local', 'remote'] as const;
+export type ImpactMapDataSourceScope = (typeof DATA_SOURCE_SCOPES)[number];
 export const MAX_DATA_SOURCE_QUERY_LENGTH = 4_000;
 export const MAX_DATA_SOURCE_PAYLOAD_LENGTH = 4_000;
 export const MAX_DATA_SOURCE_ENDPOINT_LENGTH = 2_048;
@@ -15,8 +18,12 @@ export const MAX_DATA_SOURCE_ENDPOINT_LENGTH = 2_048;
 export interface ImpactMapDataSource {
   /** The system, for example Elasticsearch or Grafana. */
   name: string;
-  /** Which one: this project's own cluster, or another cluster, project or host by name. */
+  /** What it is, by kind and name: 'Serverless project my-project', 'Cluster prod-east'. */
   instance?: string;
+  /** Local is the cluster or project this Kibana runs against; remote is anywhere else. */
+  scope?: ImpactMapDataSourceScope;
+  /** The base URL of that system, such as https://host:443, with no credentials. */
+  base_url?: string;
   query?: { language?: string; text: string };
   api_call?: { method?: string; type?: string; endpoint?: string; payload?: string };
 }
@@ -43,11 +50,28 @@ export const redactSecrets = (text: string): string =>
 
 const clip = (text: string, max: number) => (text.length > max ? text.slice(0, max) : text);
 
+/** A URL with any credentials removed and no trailing slash; undefined when it is not a URL. */
+export const toBaseUrl = (raw?: string): string | undefined => {
+  if (!raw?.trim()) return undefined;
+  try {
+    const url = new URL(raw.trim());
+    url.username = '';
+    url.password = '';
+    url.search = '';
+    url.hash = '';
+    return clip(url.toString().replace(/\/+$/, ''), MAX_DATA_SOURCE_URL_LENGTH);
+  } catch {
+    return undefined;
+  }
+};
+
 /** The data source with every field clipped to its limit and credentials hidden. */
 export const sanitizeDataSource = (source: ImpactMapDataSource): ImpactMapDataSource => {
   const { name, query, api_call: call } = source;
   return {
     name: clip(name.trim(), MAX_DATA_SOURCE_NAME_LENGTH),
+    ...(source.scope && DATA_SOURCE_SCOPES.includes(source.scope) ? { scope: source.scope } : {}),
+    ...(toBaseUrl(source.base_url) ? { base_url: toBaseUrl(source.base_url) } : {}),
     ...(source.instance?.trim()
       ? { instance: clip(redactSecrets(source.instance.trim()), MAX_DATA_SOURCE_INSTANCE_LENGTH) }
       : {}),

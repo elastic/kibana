@@ -187,6 +187,8 @@ export const findingsOutputSchema = lazySchema(() => {
             .object({
               name: z.string().min(1),
               instance: z.string().optional(),
+              scope: z.enum(['local', 'remote']).optional(),
+              base_url: z.string().optional(),
               query: z.object({ language: z.string().optional(), text: z.string() }).optional(),
               api_call: z
                 .object({
@@ -1091,7 +1093,18 @@ export const FINDINGS_JSON_SCHEMA = {
               instance: {
                 type: 'string',
                 description:
-                  'Which one of that system. For Elasticsearch say whether it is the cluster or project this investigation runs in (write: This project) or another one, naming it as the tool call shows (cluster alias, project name or host). For Grafana, Slack and others, the workspace, org or host.',
+                  "What the system is, by kind and name, as the tool call shows it: 'Cluster prod-east', 'Serverless project my-project', 'Grafana org Platform'. Leave out when the tool call does not name it.",
+              },
+              scope: {
+                type: 'string',
+                enum: ['local', 'remote'],
+                description:
+                  'local when the data came from the cluster or project this investigation runs against, remote for anywhere else (another cluster or project, Grafana, Slack, GitHub).',
+              },
+              base_url: {
+                type: 'string',
+                description:
+                  'The base URL of a remote system as the tool call used it, for example https://my-cluster.es.example.com:443, with no credentials. Leave out for a local system: it is filled in.',
               },
               query: {
                 type: 'object',

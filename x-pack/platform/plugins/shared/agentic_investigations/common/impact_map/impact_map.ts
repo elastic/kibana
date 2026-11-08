@@ -10,6 +10,8 @@ import {
   MAX_DATA_SOURCE_ENDPOINT_LENGTH,
   MAX_DATA_SOURCE_NAME_LENGTH,
   MAX_DATA_SOURCE_INSTANCE_LENGTH,
+  MAX_DATA_SOURCE_URL_LENGTH,
+  DATA_SOURCE_SCOPES,
   MAX_DATA_SOURCE_PAYLOAD_LENGTH,
   MAX_DATA_SOURCE_QUERY_LENGTH,
 } from './data_source';
@@ -200,6 +202,8 @@ export const impactMapDataSourceSchema = lazySchema(() =>
   z.object({
     name: z.string().min(1).max(MAX_DATA_SOURCE_NAME_LENGTH),
     instance: z.string().max(MAX_DATA_SOURCE_INSTANCE_LENGTH).optional(),
+    scope: z.enum(DATA_SOURCE_SCOPES).optional(),
+    base_url: z.string().max(MAX_DATA_SOURCE_URL_LENGTH).optional(),
     query: z
       .object({
         language: z.string().max(40).optional(),
