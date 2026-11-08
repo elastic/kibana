@@ -31,7 +31,7 @@ import {
   useEuiTheme,
   type IconType,
 } from '@elastic/eui';
-import { css, Global } from '@emotion/react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import '@xyflow/react/dist/style.css';
 import type { ImpactMapRendererProps } from '@kbn/agentic-investigations-plugin/public';
@@ -336,18 +336,6 @@ function MapControls({
   );
 }
 
-const FLYOUT_LOOKBACK_MS = 24 * 60 * 60 * 1000;
-const FLYOUT_PADDING_MS = 30 * 60 * 1000;
-
-/** The window the service flyout opens on: around the map's events, else the last day. */
-const getFlyoutRange = (events: ImpactMapRendererProps['impactMap']['events']) => {
-  const times = events.map(({ at }) => Date.parse(at)).filter((time) => !Number.isNaN(time));
-  const now = Date.now();
-  const from = times.length ? Math.min(...times) - FLYOUT_PADDING_MS : now - FLYOUT_LOOKBACK_MS;
-  const to = times.length ? Math.min(Math.max(...times) + FLYOUT_PADDING_MS, now) : now;
-  return { rangeFrom: new Date(from).toISOString(), rangeTo: new Date(to).toISOString() };
-};
-
 const LOOKBACK_MS = 7 * 24 * 60 * 60 * 1000;
 
 /** What APM said about a service, kept for the session so reopening a map draws at once. */
@@ -463,25 +451,6 @@ export function ImpactServiceMap({
 
   const agentNames = useServiceAgentNames(impactMap);
 
-  // A service opens the same flyout as on the service map; its events stay one click away on the
-  // count badge. Anything else, and services when the flyout isn't available, show their events.
-  const [flyoutService, setFlyoutService] = useState<string>();
-  const renderServiceFlyout = getApmInternalServices()?.renderServiceFlyout;
-  const flyoutRange = useMemo(() => getFlyoutRange(impactMap.events), [impactMap.events]);
-  const handleNodeClick = useCallback(
-    (event: React.MouseEvent, { id, type }: Node) => {
-      const onBadge = (event.target as HTMLElement).closest?.(
-        '[data-test-subj="impactMapEventCount"]'
-      );
-      if (type === 'service' && renderServiceFlyout && !onBadge) {
-        setFlyoutService(id);
-      } else {
-        onEntityClick?.(id);
-      }
-    },
-    [onEntityClick, renderServiceFlyout]
-  );
-
   const { laidOutNodes, edges } = useMemo(() => {
     const graph = transformImpactMap(impactMap, { criticalPath: criticalPathColor }, agentNames);
     return {
@@ -529,7 +498,7 @@ export function ImpactServiceMap({
               center,
             ${euiTheme.colors.lightShade};
           background-size: ${euiTheme.size.l} ${euiTheme.size.l};
-          ${onEntityClick || renderServiceFlyout ? '.react-flow__node { cursor: pointer; }' : ''}
+          ${onEntityClick ? '.react-flow__node { cursor: pointer; }' : ''}
           ${onRelationshipClick ? '.react-flow__edge { cursor: pointer; }' : ''}
         `}
       >
@@ -537,7 +506,7 @@ export function ImpactServiceMap({
           nodes={nodes}
           edges={edges}
           onNodesChange={onNodesChange}
-          onNodeClick={onEntityClick || renderServiceFlyout ? handleNodeClick : undefined}
+          onNodeClick={onEntityClick ? (_, { id }) => onEntityClick(id) : undefined}
           onEdgeClick={onRelationshipClick ? (_, { id }) => onRelationshipClick(id) : undefined}
           nodeTypes={nodeTypes}
           fitView
@@ -563,24 +532,6 @@ export function ImpactServiceMap({
           </Panel>
         </ReactFlow>
       </div>
-      {flyoutService && renderServiceFlyout && (
-        <>
-          {/* The full-screen map sits at the modal level; the flyout must open above it. */}
-          <Global
-            styles={css`
-              [data-test-subj='serviceFlyout'] {
-                z-index: ${Number(euiTheme.levels.modal) + 1};
-              }
-            `}
-          />
-          {renderServiceFlyout({
-            service: { name: flyoutService },
-            filters: { environment: ENVIRONMENT_ALL.value, ...flyoutRange },
-            source: 'agentic_investigations_impact_map',
-            onClose: () => setFlyoutService(undefined),
-          })}
-        </>
-      )}
     </ReactFlowProvider>
   );
 }

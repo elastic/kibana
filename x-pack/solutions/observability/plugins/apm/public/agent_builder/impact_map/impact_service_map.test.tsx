@@ -34,11 +34,6 @@ jest.mock('@kbn/apm-ui-shared', () => ({
   getSpanIcon: jest.fn((type?: string) => (type ? 'mock-span-icon.svg' : undefined)),
 }));
 
-const mockRenderServiceFlyout = jest.fn();
-jest.mock('../../plugin', () => ({
-  getApmInternalServices: () => ({ renderServiceFlyout: mockRenderServiceFlyout }),
-}));
-
 jest.mock('../../components/shared/service_map/layout', () => ({
   applyDagreLayout: (nodes: unknown[]) => nodes,
 }));
@@ -238,20 +233,14 @@ describe('ImpactServiceMap', () => {
     expect(screen.getAllByTestId('impactMapBadge-symptom').length).toBeGreaterThan(1);
   });
 
-  it('opens the service flyout for a service, and the events for anything else', () => {
-    mockRenderServiceFlyout.mockReturnValue(<div data-test-subj="mockServiceFlyout" />);
+  it('reports a click on any node, a service included, so its events open', () => {
     const onEntityClick = jest.fn();
     render(<ImpactServiceMap impactMap={impactMap} onEntityClick={onEntityClick} />);
 
     fireEvent.click(screen.getByText('checkout'));
-    expect(screen.getByTestId('mockServiceFlyout')).toBeInTheDocument();
-    expect(mockRenderServiceFlyout).toHaveBeenCalledWith(
-      expect.objectContaining({ service: { name: 'checkout' } })
-    );
-    expect(onEntityClick).not.toHaveBeenCalled();
-
     fireEvent.click(screen.getByText('payments-db'));
-    expect(onEntityClick).toHaveBeenCalledWith('payments-db');
+
+    expect(onEntityClick.mock.calls).toEqual([['checkout'], ['payments-db']]);
   });
 
   it('has the service map zoom, fit and full-screen controls', () => {
