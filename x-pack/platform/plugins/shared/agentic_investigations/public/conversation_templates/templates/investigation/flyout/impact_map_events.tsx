@@ -585,14 +585,24 @@ const EventKeyFacts: React.FC<{
   event: ImpactMapEvent;
   impactMap: ImpactMapFlyoutMap;
   onOpenEntity?: (entityId: string) => void;
-}> = ({ event, impactMap, onOpenEntity }) => {
+  /** Shown under the time: when it happened is what places the event on the timeline. */
+  timelineAction?: React.ReactNode;
+}> = ({ event, impactMap, onOpenEntity, timelineAction }) => {
   const duration = event.ends_at ? formatEventDuration(event.at, event.ends_at) : undefined;
   return (
     <KeyFacts
       testSubj="agenticInvestigationsImpactMapEventKeyFacts"
       facts={[
         { label: FACT_TYPE, value: <EventKindBadge kind={event.kind} /> },
-        { label: FACT_HAPPENED, value: <EventTime at={event.at} withDate /> },
+        {
+          label: FACT_HAPPENED,
+          value: (
+            <>
+              <EventTime at={event.at} withDate />
+              {timelineAction && <div>{timelineAction}</div>}
+            </>
+          ),
+        },
         ...(duration ? [{ label: FACT_DURATION, value: duration }] : []),
         // An alert is about a rule, not about something it hurt.
         ...(event.kind === 'alert'
@@ -1407,7 +1417,12 @@ const EventsFlyoutContent: React.FC<
               <h2 id={titleId}>{selected.title}</h2>
             </EuiTitle>
             <EuiSpacer size="m" />
-            <EventKeyFacts event={selected} impactMap={impactMap} onOpenEntity={onOpenEntity} />
+            <EventKeyFacts
+              event={selected}
+              impactMap={impactMap}
+              onOpenEntity={onOpenEntity}
+              timelineAction={viewInTimelineLink}
+            />
           </>
         ) : (
           <>
@@ -1484,8 +1499,6 @@ const EventsFlyoutContent: React.FC<
       <EventsBody standalone={standalone} css={standaloneBodyCss}>
         {selected ? (
           <>
-            {viewInTimelineLink}
-            {viewInTimelineLink && <EuiSpacer size="s" />}
             <EventDetail event={selected} allEvents={impactMap.events} />
           </>
         ) : tab === 'metadata' ? (
