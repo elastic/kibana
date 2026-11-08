@@ -80,15 +80,13 @@ export const impactMapAttachment = defineInvestigationAttachment<
   type: IMPACT_MAP_ATTACHMENT_TYPE,
   storageSettings: impactMapStorageSettings,
   schema: investigationImpactMapSchema,
-  // The investigation flyout's Impact map tab shows it; the chat does not.
-  hiddenInConversation: true,
   format: formatImpactMapForAgent,
   describe: () => 'Impact map',
   agentDescription:
     'The investigation impact map is a dependency graph of the entities the problem touches, their relationships, and the critical path from the root cause to the impact.\n\n' +
     'Rules:\n' +
     '- Update it with the `agentic_investigations.set_impact_map` tool, sending the whole map every time.\n' +
-    "- The investigation flyout's Impact map tab shows it, not the chat; do not render it inline.",
+    '- The investigation flyout\'s Impact map and Timeline tabs show it. In the chat it is a set of cards (the map, the timeline and the key entities) that open the same views; render it once, when you give your findings, with `<render_attachment id="ATTACHMENT_ID" />` on its own line, after a blank line.',
 });
 
 /** Registers the readonly investigation_impact_map type with Agent Builder. */

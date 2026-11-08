@@ -11,6 +11,7 @@ import { createFlyoutGroupedAttachmentsRegistry } from '@kbn/agentic-investigati
 import { registerEscalationConversationEventUiDefinitions } from './escalations/conversation_events';
 import { registerInvestigationConversationEventUiDefinitions } from './investigations/conversation_events';
 import { registerImpactAttachmentTypes } from './impact/attachments';
+import { registerImpactMapAttachmentTypes } from './impact_map/attachments';
 import type { AlertSubjectSnapshot } from '../common/subjects/subject';
 import { registerSubjectAttachmentTypes } from './subjects/attachments';
 import { registerHypothesesAttachmentTypes } from './hypotheses/attachments';
@@ -104,6 +105,7 @@ export class AgenticInvestigationsPublicPlugin
     };
     if (agentBuilder) {
       registerImpactAttachmentTypes(agentBuilder, () => this.impactEntityOpener);
+      registerImpactMapAttachmentTypes(agentBuilder, () => this.impactMapRenderer);
       registerInvestigationConversationEventUiDefinitions(agentBuilder.conversationEvents);
       if (this.escalationsEnabled) {
         registerEscalationConversationEventUiDefinitions({

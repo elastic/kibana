@@ -141,7 +141,7 @@ describe('agentic_investigations.set_impact_map', () => {
     expect(catalogTool.id).toBe(UPSERT_IMPACT_MAP_CATALOG_TOOL_ID);
   });
 
-  it('writes the map with a copy of its types, attaches it hidden, and fills the catalog', async () => {
+  it('writes the map with a copy of its types, attaches it to the chat, and fills the catalog', async () => {
     const { storage, attachments, call, service } = setup();
 
     const result = await call(checkoutMap);
@@ -165,8 +165,8 @@ describe('agentic_investigations.set_impact_map', () => {
     ]);
     expect(attachments.getAttachmentRecord(MAP_ID)).toMatchObject({
       type: IMPACT_MAP_ATTACHMENT_TYPE,
-      hidden: true,
     });
+    expect(attachments.getAttachmentRecord(MAP_ID)).not.toHaveProperty('hidden');
     await expect(service.getCatalogService().get(SPACE_ID)).resolves.toEqual({
       entity_types: checkoutMap.entity_types,
       relationship_types: checkoutMap.relationship_types,
