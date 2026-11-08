@@ -9,6 +9,7 @@ import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -59,9 +60,13 @@ const mapSummary = (entities: number, relationships: number): string =>
 
 const moreEvents = (count: number): string =>
   i18n.translate('xpack.agenticInvestigations.impactMapCards.moreEvents', {
-    defaultMessage: '+{count} more',
+    defaultMessage: 'Show {count} more',
     values: { count },
   });
+
+const FEWER_EVENTS = i18n.translate('xpack.agenticInvestigations.impactMapCards.fewerEvents', {
+  defaultMessage: 'Show fewer',
+});
 
 const eventsLabel = (count: number): string =>
   i18n.translate('xpack.agenticInvestigations.impactMapCards.eventCount', {
@@ -186,9 +191,10 @@ const TimelineCard: React.FC<{
   onOpenEvent: (eventId: string) => void;
 }> = ({ impactMap, onOpen, onOpenEvent }) => {
   const { events } = impactMap;
+  const [expanded, setExpanded] = useState(false);
   const newestFirst = [...events].reverse();
-  const shown = newestFirst.slice(0, MAX_TIMELINE_ROWS);
-  const hidden = events.length - shown.length;
+  const shown = expanded ? newestFirst : newestFirst.slice(0, MAX_TIMELINE_ROWS);
+  const hidden = events.length - MAX_TIMELINE_ROWS;
   const first = events[0];
   const last = events[events.length - 1];
   return (
@@ -248,9 +254,19 @@ const TimelineCard: React.FC<{
         ))}
       </EuiTimeline>
       {hidden > 0 && (
-        <EuiText size="xs" color="subdued">
-          <p>{moreEvents(hidden)}</p>
-        </EuiText>
+        <EuiButtonEmpty
+          size="xs"
+          iconType={expanded ? 'arrowUp' : 'arrowDown'}
+          flush="left"
+          // The card around it opens the timeline; this only expands the card.
+          onClick={(clicked: React.MouseEvent) => {
+            clicked.stopPropagation();
+            setExpanded((current) => !current);
+          }}
+          data-test-subj="agenticInvestigationsTimelineCardToggle"
+        >
+          {expanded ? FEWER_EVENTS : moreEvents(hidden)}
+        </EuiButtonEmpty>
       )}
     </InvestigationCard>
   );
