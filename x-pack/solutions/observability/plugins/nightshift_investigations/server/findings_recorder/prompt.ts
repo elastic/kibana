@@ -32,11 +32,12 @@ const HYPOTHESES = `- hypotheses: every candidate cause the agent considered, as
   - Every hypothesis the agent tested leaves an investigation event (kind investigation) that the Result links to: titled for what the test found ('Node failure not confirmed: deployments back to 1/1'), at the time of the data it used, on the entity it was about, with a short chart of that data when the tool results hold it, and one bullet saying what was tested and found. Record the event in the same answer as the hypothesis.
   - Confirmed means it caused the triggering symptom, not that a signal is present in the data. A downstream effect of a confirmed cause is dismissed with a reason that names it as one. Mark a hypothesis confirmed only when the agent's own text asserts it or its evidence clearly establishes it.`;
 
-const SUMMARY = `- summary: what did we see, and since when? At most 60 words of Markdown, as exactly three bullets of at most 15 words each and no paragraph: the symptom and where it showed up, when it started, the scale, and the current state. It does not state a cause or a conclusion. Link the words for when it started and for how it stands now to their events. Example:
+const SUMMARY = `- summary: what did we see, and since when? At most 60 words of Markdown, as three to five bullets of at most 15 words each and no paragraph: the symptom and where it showed up, when it started, the scale, and the current state. It does not state a cause or a conclusion. Link the words for when it started and for how it stands now to their events. Example:
 
 - Checkout requests on the orders service failed in all regions from 14:02Z.
 - About 30% returned 500 for 40 minutes.
-- Recovered at 14:42Z, every failure on the payments call path.`;
+- Recovered at 14:42Z.
+- Every failure came from the payments call path.`;
 
 const CITING_EVENTS = `## Citing events
 
