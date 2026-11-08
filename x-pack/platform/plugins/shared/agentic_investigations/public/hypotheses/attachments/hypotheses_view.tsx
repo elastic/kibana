@@ -133,11 +133,11 @@ export const HypothesisDetail = ({
     return (
       <div data-test-subj="investigationHypothesisReason">
         <ReasonSection label={TESTED_LABEL} testSubject="investigationHypothesisTested">
-          <EventMarkdown text={sections.tested} textSize="xs" color="subdued" />
+          <EventMarkdown text={sections.tested} />
         </ReasonSection>
         <EuiSpacer size="s" />
         <ReasonSection label={RESULT_LABEL} testSubject="investigationHypothesisResult">
-          <EventMarkdown text={sections.result} textSize="xs" color="subdued" />
+          <EventMarkdown text={sections.result} />
           <EuiSpacer size="s" />
           {resultCard}
         </ReasonSection>
@@ -149,9 +149,9 @@ export const HypothesisDetail = ({
     <>
       <div data-test-subj="investigationHypothesisReason">
         {reason?.trim() ? (
-          <EventMarkdown text={reason} textSize="xs" color="subdued" />
+          <EventMarkdown text={reason} />
         ) : (
-          <EuiText size="xs" color="subdued">
+          <EuiText size="s" color="subdued">
             <p>{NO_REASON}</p>
           </EuiText>
         )}
