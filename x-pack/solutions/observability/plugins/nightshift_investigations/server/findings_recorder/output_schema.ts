@@ -207,7 +207,7 @@ export const entityIdFor = (name: string): string =>
  * copied from a bucket key become ISO, because the chart reads only what `Date.parse` accepts: a
  * point it cannot place would otherwise leave a chart with a title and no plot.
  */
-export const toIsoTime = (raw: string): string | undefined => {
+const chartTimeToIso = (raw: string): string | undefined => {
   const text = raw.trim();
   if (/^\d{10}(\d{3})?$/.test(text)) {
     return new Date(text.length === 10 ? Number(text) * 1000 : Number(text)).toISOString();
@@ -227,7 +227,7 @@ export const limitEvidence = (raw: RawEvidence): InvestigationEvidence | undefin
   const label = (text: string) => truncate(text, MAX_EVIDENCE_CHART_LABEL_LENGTH);
   const short = (text: string) => truncate(text, MAX_EVIDENCE_SHORT_TEXT_LENGTH);
   const isTime = raw.chart?.x_axis.type === 'time';
-  const xOf = (x: string) => (isTime ? toIsoTime(x) : x || undefined);
+  const xOf = (x: string) => (isTime ? chartTimeToIso(x) : x || undefined);
   const series = (raw.chart?.series ?? [])
     .slice(0, MAX_EVIDENCE_CHART_SERIES)
     .map(({ name, points }) => ({

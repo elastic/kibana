@@ -107,15 +107,18 @@ describe('evidence', () => {
       ]),
     });
     expect(kept?.chart?.series[0].points.map(({ x }) => x)).toEqual([
-      '2026-08-10T01:50:00.000Z',
-      '2026-08-10T01:51:00.000Z',
+      '2026-08-10T01:10:00.000Z',
+      '2026-08-10T01:11:00.000Z',
       '2026-08-09T01:12:00Z',
     ]);
     expect(limitEvidence({ chart: chart([{ x: 'later', y: 1 }]) })).toBeUndefined();
   });
 
   it('trims a chart to the store limits', () => {
-    const many = Array.from({ length: 300 }, (_, i) => ({ x: `2026-08-09T01:${i}`, y: i }));
+    const many = Array.from({ length: 300 }, (_, i) => ({
+      x: new Date(Date.UTC(2026, 7, 9, 1, i)).toISOString(),
+      y: i,
+    }));
     const kept = limitEvidence({
       chart: {
         ...chart(many),
@@ -127,7 +130,10 @@ describe('evidence', () => {
   });
 
   it('thins an oversized series across the whole window, keeping the first and last point', () => {
-    const many = Array.from({ length: 300 }, (_, i) => ({ x: `2026-08-09T01:${i}`, y: i }));
+    const many = Array.from({ length: 300 }, (_, i) => ({
+      x: new Date(Date.UTC(2026, 7, 9, 1, i)).toISOString(),
+      y: i,
+    }));
     const [{ points: kept }] = limitEvidence({ chart: chart(many) })?.chart?.series ?? [];
     expect(kept).toHaveLength(100);
     expect(kept[0]).toEqual(many[0]);
@@ -135,7 +141,10 @@ describe('evidence', () => {
   });
 
   it('keeps every point of a series that fits', () => {
-    const exact = Array.from({ length: 100 }, (_, i) => ({ x: `2026-08-09T01:${i}`, y: i }));
+    const exact = Array.from({ length: 100 }, (_, i) => ({
+      x: new Date(Date.UTC(2026, 7, 9, 1, i)).toISOString(),
+      y: i,
+    }));
     expect(limitEvidence({ chart: chart(exact) })?.chart?.series[0].points).toEqual(exact);
   });
 
@@ -211,7 +220,10 @@ describe('proposals', () => {
 
 describe('entity evidence', () => {
   it('trims the evidence of each entity to what the stores accept', () => {
-    const many = Array.from({ length: 300 }, (_, i) => ({ x: `2026-08-09T01:${i}`, y: i }));
+    const many = Array.from({ length: 300 }, (_, i) => ({
+      x: new Date(Date.UTC(2026, 7, 9, 1, i)).toISOString(),
+      y: i,
+    }));
     const parsed = findingsOutputSchema.safeParse({
       summary: 's',
       impact_summary: 'x',
