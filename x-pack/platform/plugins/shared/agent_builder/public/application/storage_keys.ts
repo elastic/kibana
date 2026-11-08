@@ -12,6 +12,7 @@ export const storageKeys = {
   mcpClientBannerDismissedIds: 'agentBuilder.mcpClientBannerDismissedIds',
   /** User-chosen width of the conversation details flyout. */
   conversationDetailsFlyoutWidth: 'agentBuilder.conversationDetailsFlyoutWidth',
+  conversationSummaryFlyoutWidth: 'agentBuilder.conversationSummaryFlyoutWidth',
 
   getAgentIdKey: (spaceId: string): string => `agentBuilder.agentId.${spaceId}`,
 

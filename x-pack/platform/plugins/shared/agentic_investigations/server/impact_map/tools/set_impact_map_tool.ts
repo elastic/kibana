@@ -91,6 +91,9 @@ const eventSchema = impactMapEventSchema.extend({
   evidence: impactMapEventSchema.shape.evidence.describe(
     'A chart that explains the event in context: its signal over a window that starts before the change that led to it, with annotations at that change and at `at`. Built only from numbers a tool returned.'
   ),
+  data_source: impactMapEventSchema.shape.data_source.describe(
+    'Where the data behind the event came from and how it was asked for: the system, the query text and language, and for an API call its method, type, endpoint and payload. Required for every event that uses data. Never include credentials or auth headers.'
+  ),
 });
 
 export const setImpactMapToolSchema = lazySchema(() =>

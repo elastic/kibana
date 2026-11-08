@@ -16,8 +16,8 @@ import type { ConversationsService } from '../services/conversations/conversatio
 import type { ConversationTemplatesService } from '../services/conversation_templates';
 import { ConversationDetailsFlyoutSnapshot, FLYOUT_TITLE } from './conversation_details_flyout';
 import {
-  CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH,
   getConversationDetailsFlyoutWidthProps,
+  getSummaryFlyoutDefaultWidth,
 } from './conversation_details_flyout_width';
 
 const notFoundMessage = (conversationId: string) =>
@@ -68,9 +68,9 @@ export const openConversationDetailsFlyout = async ({
       session: 'start',
       historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
       title: FLYOUT_TITLE,
-      ...getConversationDetailsFlyoutWidthProps(),
+      ...getConversationDetailsFlyoutWidthProps({ wide: true }),
       // Lets the flyout menu's reset action return to the default, not to the remembered width.
-      defaultSize: CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH,
+      defaultSize: getSummaryFlyoutDefaultWidth(),
       flyoutMenuDisplayMode: 'always',
       flyoutMenuProps: { trailingActions },
       type: 'push',

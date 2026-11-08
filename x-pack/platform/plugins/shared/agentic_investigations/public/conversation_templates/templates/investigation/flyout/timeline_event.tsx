@@ -30,6 +30,7 @@ import type {
 import {
   EventKindBadge,
   describeEventTarget,
+  getEntityIcon,
   getEventEntityIds,
   getEventGroup,
 } from './impact_map_events';
@@ -159,11 +160,17 @@ export const TimelineEvent: React.FC<{
           entityIds.map((entityId) => {
             const label = labelOf(entityId);
             const active = entityFilter.includes(entityId);
+            const entity = impactMap.entities.find(({ id }) => id === entityId);
+            const iconType = getEntityIcon(
+              impactMap.entity_types.find(({ id }) => id === entity?.type_id)
+            );
             return (
               <EuiFlexItem grow={false} key={entityId}>
                 {onToggleEntity ? (
                   <EuiBadge
-                    color={active ? 'primary' : 'hollow'}
+                    // Stays neutral when filtered: the filter bar already says it is on.
+                    color="hollow"
+                    iconType={iconType}
                     onClick={() => onToggleEntity(entityId)}
                     onClickAriaLabel={i18n.translate(
                       'xpack.agenticInvestigations.timeline.toggleEntity',
@@ -175,10 +182,14 @@ export const TimelineEvent: React.FC<{
                     )}
                     data-test-subj="agenticInvestigationsTimelineEntity"
                   >
-                    {label}
+                    {active ? <strong>{label}</strong> : label}
                   </EuiBadge>
                 ) : (
-                  <EuiBadge color="hollow" data-test-subj="agenticInvestigationsTimelineEntity">
+                  <EuiBadge
+                    color="hollow"
+                    iconType={iconType}
+                    data-test-subj="agenticInvestigationsTimelineEntity"
+                  >
                     {label}
                   </EuiBadge>
                 )}

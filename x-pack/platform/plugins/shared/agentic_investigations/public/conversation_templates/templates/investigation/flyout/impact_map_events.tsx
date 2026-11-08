@@ -9,7 +9,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { useConversationFlyoutWidthProps } from '@kbn/agent-builder-plugin/public';
 import {
+  EuiAccordion,
   EuiBadge,
+  EuiCodeBlock,
+  EuiDescriptionList,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiEmptyPrompt,
@@ -48,7 +51,7 @@ import {
   type InvestigationImpactMapResponse,
 } from '../../../../../common';
 import { LazyEvidenceView } from '../../../../evidence';
-import { EntityMetadataTable, FeaturedMetadata } from './entity_metadata';
+import { EntityMetadataTable } from './entity_metadata';
 
 const KINDS: Record<ImpactMapEventKind, { label: string; color: EuiBadgeProps['color'] }> = {
   change: {
@@ -311,24 +314,302 @@ export const withContextAnnotations = (
   return { ...evidence, chart: { ...chart, annotations: [...context, own] } };
 };
 
+const FACT_TYPE = i18n.translate('xpack.agenticInvestigations.impactMap.events.factType', {
+  defaultMessage: 'Type',
+});
+const FACT_HAPPENED = i18n.translate('xpack.agenticInvestigations.impactMap.events.factHappened', {
+  defaultMessage: 'Happened',
+});
+const FACT_DURATION = i18n.translate('xpack.agenticInvestigations.impactMap.events.factDuration', {
+  defaultMessage: 'Lasted',
+});
+const FACT_AFFECTS = i18n.translate('xpack.agenticInvestigations.impactMap.events.factAffects', {
+  defaultMessage: 'Affects',
+});
+
+/** "2h 5m", "4m 10s" or "30s" for the time between two ISO timestamps. */
+export const formatEventDuration = (from: string, to: string): string | undefined => {
+  const start = parseTime(from);
+  const end = parseTime(to);
+  if (start === undefined || end === undefined || end <= start) {
+    return undefined;
+  }
+  const seconds = Math.round((end - start) / 1000);
+  const [h, m, sec] = [Math.floor(seconds / 3600), Math.floor((seconds % 3600) / 60), seconds % 60];
+  return [h && `${h}h`, m && `${m}m`, !h && sec && `${sec}s`].filter(Boolean).join(' ') || '0s';
+};
+
+interface KeyFact {
+  label: string;
+  value: React.ReactNode;
+  testSubj?: string;
+}
+
+/** The facts to read first, in a row like the investigation flyout's status panel. */
+const KeyFacts: React.FC<{ facts: KeyFact[]; testSubj: string }> = ({ facts, testSubj }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiPanel
+      hasBorder
+      hasShadow={false}
+      paddingSize="m"
+      borderRadius="l"
+      data-test-subj={testSubj}
+    >
+      <EuiFlexGroup
+        gutterSize="none"
+        responsive={false}
+        wrap
+        css={css`
+          row-gap: ${euiTheme.size.m};
+        `}
+      >
+        {facts.map(({ label, value, testSubj: factTestSubj }, index) => (
+          <EuiFlexItem
+            key={label}
+            grow={false}
+            css={css`
+              padding: ${euiTheme.size.xs} ${euiTheme.size.l};
+              ${index === 0 ? 'padding-left: 0;' : `border-left: ${euiTheme.border.thin};`}
+            `}
+          >
+            <EuiText size="s" color="subdued">
+              {label}
+            </EuiText>
+            <EuiSpacer size="xs" />
+            <EuiText size="s" data-test-subj={factTestSubj}>
+              {value}
+            </EuiText>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+};
+
+/** An entity named as a badge with its icon; a click opens its flyout when one can open. */
+const EntityBadge: React.FC<{
+  entityId: string;
+  impactMap: ImpactMapFlyoutMap;
+  onOpenEntity?: (entityId: string) => void;
+}> = ({ entityId, impactMap, onOpenEntity }) => {
+  const entity = impactMap.entities.find(({ id }) => id === entityId);
+  const type = impactMap.entity_types.find(({ id }) => id === entity?.type_id);
+  const label = entity?.label ?? entityId;
+  const iconType = getEntityIcon(type);
+  return onOpenEntity ? (
+    <EuiBadge
+      color="hollow"
+      iconType={iconType}
+      onClick={() => onOpenEntity(entityId)}
+      onClickAriaLabel={i18n.translate('xpack.agenticInvestigations.impactMap.events.openEntity', {
+        defaultMessage: 'Open {entity}',
+        values: { entity: label },
+      })}
+      data-test-subj="agenticInvestigationsImpactMapEventEntityBadge"
+    >
+      {label}
+    </EuiBadge>
+  ) : (
+    <EuiBadge
+      color="hollow"
+      iconType={iconType}
+      data-test-subj="agenticInvestigationsImpactMapEventEntityBadge"
+    >
+      {label}
+    </EuiBadge>
+  );
+};
+
+type ImpactMapFlyoutMap = ImpactMapEventsFlyoutProps['impactMap'];
+
+const EventKeyFacts: React.FC<{
+  event: ImpactMapEvent;
+  impactMap: ImpactMapFlyoutMap;
+  onOpenEntity?: (entityId: string) => void;
+}> = ({ event, impactMap, onOpenEntity }) => {
+  const duration = event.ends_at ? formatEventDuration(event.at, event.ends_at) : undefined;
+  const entityIds = getEventEntityIds(event, impactMap.relationships);
+  const badge = (id: string) => (
+    <EntityBadge key={id} entityId={id} impactMap={impactMap} onOpenEntity={onOpenEntity} />
+  );
+  return (
+    <KeyFacts
+      testSubj="agenticInvestigationsImpactMapEventKeyFacts"
+      facts={[
+        { label: FACT_TYPE, value: <EventKindBadge kind={event.kind} /> },
+        { label: FACT_HAPPENED, value: <EventTime at={event.at} withDate /> },
+        ...(duration ? [{ label: FACT_DURATION, value: duration }] : []),
+        {
+          label: FACT_AFFECTS,
+          // An event with no entity or relationship is about the investigation or the responders.
+          value:
+            entityIds.length === 0 ? (
+              describeEventTarget(event, impactMap)
+            ) : (
+              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
+                {entityIds.map((id, index) => (
+                  <React.Fragment key={id}>
+                    {index > 0 && (
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type="sortRight" size="s" aria-hidden={true} />
+                      </EuiFlexItem>
+                    )}
+                    <EuiFlexItem grow={false}>{badge(id)}</EuiFlexItem>
+                  </React.Fragment>
+                ))}
+              </EuiFlexGroup>
+            ),
+        },
+      ]}
+    />
+  );
+};
+
+const FACT_SUBTYPE = i18n.translate('xpack.agenticInvestigations.impactMap.events.factSubtype', {
+  defaultMessage: 'Sub-type',
+});
+
+/** What the entity is, then the featured facts the agent recorded about it. */
+const EntityKeyFacts: React.FC<{ typeLabel?: string; metadata?: EntityMetadataRow[] }> = ({
+  typeLabel,
+  metadata,
+}) => {
+  const [kind, subtype] = (typeLabel ?? '').split(' › ');
+  const featured = (metadata ?? []).filter(({ featured: isFeatured }) => isFeatured);
+  const facts: KeyFact[] = [
+    ...(kind
+      ? [
+          {
+            label: FACT_TYPE,
+            value: <EuiBadge color="hollow">{kind}</EuiBadge>,
+            testSubj: 'agenticInvestigationsImpactMapEventsType',
+          },
+        ]
+      : []),
+    ...(subtype
+      ? [{ label: FACT_SUBTYPE, value: <EuiBadge color="hollow">{subtype}</EuiBadge> }]
+      : []),
+    ...featured.map(({ key, label, value }) => ({
+      label,
+      value,
+      testSubj: `agenticInvestigationsImpactMapFeatured-${key}`,
+    })),
+  ];
+  return facts.length ? (
+    <KeyFacts facts={facts} testSubj="agenticInvestigationsImpactMapFeaturedMetadata" />
+  ) : null;
+};
+
+const EVIDENCE_LABEL = i18n.translate('xpack.agenticInvestigations.impactMap.events.evidence', {
+  defaultMessage: 'Evidence',
+});
+const EVIDENCE_SOURCE = i18n.translate(
+  'xpack.agenticInvestigations.impactMap.events.evidenceSource',
+  { defaultMessage: 'Source' }
+);
+const EVIDENCE_QUERY = i18n.translate(
+  'xpack.agenticInvestigations.impactMap.events.evidenceQuery',
+  {
+    defaultMessage: 'Query',
+  }
+);
+const EVIDENCE_API_CALL = i18n.translate(
+  'xpack.agenticInvestigations.impactMap.events.evidenceApiCall',
+  { defaultMessage: 'API call' }
+);
+const EVIDENCE_NONE = i18n.translate('xpack.agenticInvestigations.impactMap.events.evidenceNone', {
+  defaultMessage: 'No data source was recorded for this event.',
+});
+
+/** Where an event's data came from and how it was asked for; closed until a reader wants it. */
+const EventDataSource: React.FC<{ dataSource?: ImpactMapEvent['data_source'] }> = ({
+  dataSource,
+}) => {
+  const accordionId = useGeneratedHtmlId({ prefix: 'impactMapEventEvidence' });
+  const call = dataSource?.api_call;
+  const callLine = [call?.method, call?.endpoint].filter(Boolean).join(' ');
+  return (
+    <EuiAccordion
+      id={accordionId}
+      buttonContent={<strong>{EVIDENCE_LABEL}</strong>}
+      paddingSize="m"
+      data-test-subj="agenticInvestigationsImpactMapEventDataSource"
+    >
+      {dataSource ? (
+        <EuiDescriptionList
+          compressed
+          type="column"
+          columnWidths={[1, 4]}
+          listItems={[
+            {
+              title: EVIDENCE_SOURCE,
+              description: (
+                <span data-test-subj="agenticInvestigationsImpactMapEventDataSourceName">
+                  {dataSource.name}
+                </span>
+              ),
+            },
+            ...(dataSource.query
+              ? [
+                  {
+                    title: dataSource.query.language
+                      ? `${EVIDENCE_QUERY} (${dataSource.query.language})`
+                      : EVIDENCE_QUERY,
+                    description: (
+                      <EuiCodeBlock
+                        language={
+                          dataSource.query.language?.toLowerCase().includes('esql')
+                            ? 'esql'
+                            : 'text'
+                        }
+                        paddingSize="s"
+                        fontSize="s"
+                        isCopyable
+                        whiteSpace="pre-wrap"
+                        data-test-subj="agenticInvestigationsImpactMapEventDataSourceQuery"
+                      >
+                        {dataSource.query.text}
+                      </EuiCodeBlock>
+                    ),
+                  },
+                ]
+              : []),
+            ...(call
+              ? [
+                  {
+                    title: call.type ? `${EVIDENCE_API_CALL} (${call.type})` : EVIDENCE_API_CALL,
+                    description: (
+                      <EuiCodeBlock
+                        language={call.payload ? 'json' : 'text'}
+                        paddingSize="s"
+                        fontSize="s"
+                        isCopyable
+                        whiteSpace="pre-wrap"
+                        data-test-subj="agenticInvestigationsImpactMapEventDataSourceApiCall"
+                      >
+                        {[callLine, call.payload].filter(Boolean).join('\n')}
+                      </EuiCodeBlock>
+                    ),
+                  },
+                ]
+              : []),
+          ]}
+        />
+      ) : (
+        <EuiText size="s" color="subdued">
+          {EVIDENCE_NONE}
+        </EuiText>
+      )}
+    </EuiAccordion>
+  );
+};
+
 const EventDetail: React.FC<{
   event: ImpactMapEvent;
-  target: string;
   allEvents?: readonly ImpactMapEvent[];
-}> = ({ event, target, allEvents }) => (
+}> = ({ event, allEvents }) => (
   <div data-test-subj="agenticInvestigationsImpactMapEventDetail">
-    <EuiText size="xs" color="subdued">
-      <EventTime at={event.at} withDate />
-      {event.ends_at && (
-        <>
-          {' – '}
-          <EventTime at={event.ends_at} />
-        </>
-      )}
-      {' · '}
-      {target}
-    </EuiText>
-    <EuiSpacer size="m" />
     <EuiTitle size="xxs">
       <h4>{DESCRIPTION_LABEL}</h4>
     </EuiTitle>
@@ -339,7 +620,10 @@ const EventDetail: React.FC<{
     {event.evidence?.chart && (
       <>
         <EuiSpacer size="m" />
-        <LazyEvidenceView evidence={withContextAnnotations(event.evidence, event, allEvents)} />
+        <LazyEvidenceView
+          evidence={withContextAnnotations(event.evidence, event, allEvents)}
+          referenceTime={event.at}
+        />
       </>
     )}
     {event.links?.length ? (
@@ -358,6 +642,8 @@ const EventDetail: React.FC<{
         ))}
       </>
     ) : null}
+    <EuiSpacer size="m" />
+    <EventDataSource dataSource={event.data_source} />
   </div>
 );
 
@@ -400,7 +686,7 @@ const EventsFlyoutFrame: React.FC<{
   );
 };
 
-export const STANDALONE_WIDTH = '440px';
+export const STANDALONE_WIDTH = 'clamp(440px, 40vw, 640px)';
 
 /** A flyout-like panel on the right of the full-screen map; Escape closes it. */
 const StandaloneEventsPanel: React.FC<{
@@ -433,6 +719,7 @@ const StandaloneEventsPanel: React.FC<{
         max-width: 100%;
         display: flex;
         flex-direction: column;
+        overflow: hidden;
         background: ${euiTheme.colors.backgroundBasePlain};
         border-left: ${euiTheme.border.thin};
         box-shadow: ${euiTheme.shadows?.l?.down ?? 'none'};
@@ -606,7 +893,12 @@ export interface ImpactMapEventsFlyoutProps {
   metadata?: EntityMetadataRow[];
   /** Draws the events of the list; the list falls back to plain summaries. */
   renderEvents?: (events: ImpactMapEvent[], onOpen: (eventId: string) => void) => React.ReactNode;
-  impactMap: Pick<InvestigationImpactMapResponse, 'entities' | 'relationships' | 'events'>;
+  impactMap: Pick<
+    InvestigationImpactMapResponse,
+    'entities' | 'relationships' | 'events' | 'entity_types'
+  >;
+  /** Opens an entity named in an event; its names are plain text without it. */
+  onOpenEntity?: (entityId: string) => void;
   /** Opens on this event instead of the list. */
   initialEventId?: string;
   onClose: () => void;
@@ -638,8 +930,20 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
   standalone = false,
   asMainFlyout = false,
   onViewInTimeline,
+  onOpenEntity,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const titleId = useGeneratedHtmlId({ prefix: 'impactMapEventsTitle' });
+  const standaloneHeaderCss = css`
+    flex: none;
+    padding: ${euiTheme.size.base} ${euiTheme.size.xxl} ${euiTheme.size.base} ${euiTheme.size.base};
+  `;
+  const standaloneBodyCss = css`
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: ${euiTheme.size.base};
+  `;
   const [selectedId, setSelectedId] = useState(initialEventId);
   // An entity with facts but no events opens on its facts.
   const [tab, setTab] = useState<'timeline' | 'metadata'>(
@@ -675,7 +979,11 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
       titleId={titleId}
       menuTitle={title}
     >
-      <EuiFlyoutHeader hasBorder={Boolean(selected)}>
+      <EuiFlyoutHeader
+        hasBorder={Boolean(selected)}
+        // Outside an EUI flyout there is no padding to inherit, and the close button sits top right.
+        css={standalone ? standaloneHeaderCss : undefined}
+      >
         {canGoBack && (
           <EuiButtonEmpty
             size="xs"
@@ -687,13 +995,14 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
             {BACK_LABEL}
           </EuiButtonEmpty>
         )}
+        {canGoBack && <EuiSpacer size="s" />}
         {selected ? (
           <>
             <EuiTitle size="s">
               <h2 id={titleId}>{selected.title}</h2>
             </EuiTitle>
-            <EuiSpacer size="xs" />
-            <EventKindBadge kind={selected.kind} />
+            <EuiSpacer size="m" />
+            <EventKeyFacts event={selected} impactMap={impactMap} onOpenEntity={onOpenEntity} />
           </>
         ) : (
           <>
@@ -707,24 +1016,11 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
                 <EuiTitle size="s">
                   <h2 id={titleId}>{title}</h2>
                 </EuiTitle>
-                {typeLabel && (
-                  <EuiText
-                    size="xs"
-                    color="subdued"
-                    data-test-subj="agenticInvestigationsImpactMapEventsType"
-                  >
-                    {TYPE_LABEL}: {typeLabel}
-                  </EuiText>
-                )}
               </EuiFlexItem>
             </EuiFlexGroup>
-            {metadata?.some(({ featured }) => featured) && (
-              <>
-                <EuiSpacer size="s" />
-                <FeaturedMetadata rows={metadata ?? []} />
-              </>
-            )}
-            <EuiSpacer size="s" />
+            <EuiSpacer size="m" />
+            <EntityKeyFacts typeLabel={typeLabel} metadata={metadata} />
+            <EuiSpacer size="m" />
             <EuiFlexGroup
               gutterSize="s"
               alignItems="center"
@@ -733,16 +1029,6 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
             >
               <EuiFlexItem grow={false}>
                 <EuiTabs bottomBorder={false} size="s">
-                  <EuiTab
-                    isSelected={tab === 'timeline'}
-                    onClick={() => setTab('timeline')}
-                    append={
-                      <EuiNotificationBadge color="subdued">{events.length}</EuiNotificationBadge>
-                    }
-                    data-test-subj="agenticInvestigationsImpactMapTimelineTab"
-                  >
-                    {TIMELINE_TAB}
-                  </EuiTab>
                   {metadata && (
                     <EuiTab
                       isSelected={tab === 'metadata'}
@@ -757,19 +1043,25 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
                       {METADATA_TAB}
                     </EuiTab>
                   )}
+                  <EuiTab
+                    isSelected={tab === 'timeline'}
+                    onClick={() => setTab('timeline')}
+                    append={
+                      <EuiNotificationBadge color="subdued">{events.length}</EuiNotificationBadge>
+                    }
+                    data-test-subj="agenticInvestigationsImpactMapTimelineTab"
+                  >
+                    {TIMELINE_TAB}
+                  </EuiTab>
                 </EuiTabs>
               </EuiFlexItem>
             </EuiFlexGroup>
           </>
         )}
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody css={standalone ? standaloneBodyCss : undefined}>
         {selected ? (
-          <EventDetail
-            event={selected}
-            target={describeEventTarget(selected, impactMap)}
-            allEvents={impactMap.events}
-          />
+          <EventDetail event={selected} allEvents={impactMap.events} />
         ) : tab === 'metadata' ? (
           metadata?.length ? (
             <EntityMetadataTable rows={metadata} />

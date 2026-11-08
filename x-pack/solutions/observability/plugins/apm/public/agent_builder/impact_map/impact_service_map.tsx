@@ -308,7 +308,7 @@ function MapControls({
       icon: 'crosshair',
       label: CONTROL_LABELS.fitView,
       id: 'FitView',
-      onClick: () => fitView({ padding: 0.12, maxZoom: 1.5, duration: 200 }),
+      onClick: () => fitView({ ...FIT_VIEW_OPTIONS, duration: 200 }),
     },
     ...(onToggleFullScreen
       ? [
@@ -349,6 +349,12 @@ function MapControls({
     </EuiPanel>
   );
 }
+
+/** More room on top, so the nodes sit centred in the space the controls and legend leave free. */
+const FIT_VIEW_OPTIONS = {
+  padding: { top: '96px', right: '10%', bottom: '8%', left: '10%' },
+  maxZoom: 1.5,
+};
 
 const CLICKABLE_CLASS = 'impactMapClickable';
 
@@ -448,7 +454,7 @@ function KeepNodesInView({ nodeIds, layout }: { nodeIds: string; layout: unknown
     let fitFrame = 0;
     const measureFrame = requestAnimationFrame(() => {
       updateNodeInternals(nodeIds.split('|'));
-      fitFrame = requestAnimationFrame(() => fitView({ padding: 0.12, maxZoom: 1.5 }));
+      fitFrame = requestAnimationFrame(() => fitView(FIT_VIEW_OPTIONS));
     });
     return () => {
       cancelAnimationFrame(measureFrame);
@@ -548,7 +554,7 @@ export function ImpactServiceMap({
           onEdgeClick={onRelationshipClick ? (_, { id }) => onRelationshipClick(id) : undefined}
           nodeTypes={nodeTypes}
           fitView
-          fitViewOptions={{ padding: 0.12, maxZoom: 1.5 }}
+          fitViewOptions={FIT_VIEW_OPTIONS}
           minZoom={0.1}
           maxZoom={3}
           nodesDraggable

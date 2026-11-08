@@ -74,9 +74,22 @@ interface ChartDatum {
 }
 
 /** Converts an x value to what the x scale expects; `undefined` when a time value is unparseable. */
-const toXValue = (x: string, isTime: boolean): number | string | undefined => {
+const toXValue = (
+  x: string,
+  isTime: boolean,
+  referenceTime?: string
+): number | string | undefined => {
   if (!isTime) {
     return x;
+  }
+  // A bare clock time, "16:30" or "16:30Z", is what a model often writes for a short window.
+  // Read it on the day of the thing the chart explains, as UTC, which is how such times are given.
+  const clock = /^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(?:Z|UTC)?$/i.exec(x.trim());
+  if (clock && referenceTime && !Number.isNaN(Date.parse(referenceTime))) {
+    const day = new Date(referenceTime).toISOString().slice(0, 10);
+    const [, hours, minutes, seconds = '00'] = clock;
+    const parsed = Date.parse(`${day}T${hours.padStart(2, '0')}:${minutes}:${seconds}Z`);
+    return Number.isNaN(parsed) ? undefined : parsed;
   }
   // Epoch seconds or milliseconds, as a bucket key is often written.
   const timestamp = /^\d{10}(\d{3})?$/.test(x.trim())
@@ -87,6 +100,8 @@ const toXValue = (x: string, isTime: boolean): number | string | undefined => {
 
 export interface EvidenceChartProps {
   chart: EvidenceChartSpec;
+  /** When the thing the chart explains happened; dates a time written without one. */
+  referenceTime?: string;
 }
 
 /** Used when no Kibana `dateFormat` setting is available, e.g. outside a Kibana context. */
@@ -112,7 +127,7 @@ const useChartTimeSettings = (): { timeZone: string; dateFormat: string } => {
  * Renders the static chart spec an investigation attaches to a piece of evidence. The data points
  * travel with the spec, so the chart looks the same regardless of where the data came from.
  */
-export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart }) => {
+export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart, referenceTime }) => {
   const { euiTheme } = useEuiTheme();
   const baseTheme = useElasticChartsTheme();
   const { timeZone, dateFormat } = useChartTimeSettings();
@@ -125,14 +140,14 @@ export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart }) => {
         id: `series-${index}`,
         name: entry.name,
         data: entry.points.reduce<ChartDatum[]>((data, { x, y }) => {
-          const xValue = toXValue(x, isTime);
+          const xValue = toXValue(x, isTime, referenceTime);
           if (xValue !== undefined && Number.isFinite(y)) {
             data.push({ x: xValue, y });
           }
           return data;
         }, []),
       })),
-    [chart.series, isTime]
+    [chart.series, isTime, referenceTime]
   );
 
   const xFormatter = useMemo(() => {
@@ -152,11 +167,11 @@ export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart }) => {
       details: string;
     }> = [];
     for (const annotation of chart.annotations ?? []) {
-      const start = toXValue(annotation.x, isTime);
+      const start = toXValue(annotation.x, isTime, referenceTime);
       if (start === undefined) {
         continue;
       }
-      const end = annotation.x_end ? toXValue(annotation.x_end, isTime) : undefined;
+      const end = annotation.x_end ? toXValue(annotation.x_end, isTime, referenceTime) : undefined;
       if (end !== undefined) {
         ranges.push({ coordinates: { x0: start, x1: end }, details: annotation.label });
       } else {
@@ -168,7 +183,7 @@ export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart }) => {
       }
     }
     return { pointAnnotations: points, rangeAnnotations: ranges };
-  }, [chart.annotations, isTime, timeZone, dateFormat]);
+  }, [chart.annotations, isTime, timeZone, dateFormat, referenceTime]);
 
   const hasAnnotations = pointAnnotations.length > 0 || rangeAnnotations.length > 0;
   // Point annotation markers are drawn above the plot, so reserve room for them there.

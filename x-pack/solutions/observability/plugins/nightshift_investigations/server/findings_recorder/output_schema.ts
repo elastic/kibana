@@ -42,6 +42,8 @@ import {
   type ImpactMapMetadataField,
   type ImpactMapRelationship,
   type ImpactMapRelationshipType,
+  sanitizeDataSource,
+  clockTimeToIso,
   type InvestigationEvidence,
 } from '@kbn/agentic-investigations-plugin/common';
 import {
@@ -181,6 +183,20 @@ export const findingsOutputSchema = lazySchema(() => {
           entity: z.string().optional(),
           relationship: z.object({ source: z.string(), target: z.string() }).optional(),
           evidence: evidenceSchema.optional(),
+          data_source: z
+            .object({
+              name: z.string().min(1),
+              query: z.object({ language: z.string().optional(), text: z.string() }).optional(),
+              api_call: z
+                .object({
+                  method: z.string().optional(),
+                  type: z.string().optional(),
+                  endpoint: z.string().optional(),
+                  payload: z.string().optional(),
+                })
+                .optional(),
+            })
+            .optional(),
         })
       )
       .optional(),
@@ -235,14 +251,18 @@ const chartTimeToIso = (raw: string): string | undefined => {
  * conversation, so a chart that does not fit (no usable points, or a shape the schema rejects) is
  * dropped and the description is kept.
  */
-export const limitEvidence = (raw: RawEvidence): InvestigationEvidence | undefined => {
+export const limitEvidence = (
+  raw: RawEvidence,
+  referenceTime?: string
+): InvestigationEvidence | undefined => {
   const description = raw.description?.trim()
     ? truncate(raw.description, MAX_EVIDENCE_TEXT_LENGTH)
     : undefined;
   const label = (text: string) => truncate(text, MAX_EVIDENCE_CHART_LABEL_LENGTH);
   const short = (text: string) => truncate(text, MAX_EVIDENCE_SHORT_TEXT_LENGTH);
   const isTime = raw.chart?.x_axis.type === 'time';
-  const xOf = (x: string) => (isTime ? chartTimeToIso(x) : x || undefined);
+  const xOf = (x: string) =>
+    isTime ? chartTimeToIso(referenceTime ? clockTimeToIso(x, referenceTime) : x) : x || undefined;
   const series = (raw.chart?.series ?? [])
     .slice(0, MAX_EVIDENCE_CHART_SERIES)
     .map(({ name, points }) => ({
@@ -551,7 +571,7 @@ export const limitEvents = (raw: NonNullable<FindingsOutput['events']>): ImpactM
     if (!entityId && !relationshipId && event.kind !== 'response' && event.kind !== 'investigation')
       continue;
     const endsAt = toIsoTime(event.ends_at);
-    const evidence = event.evidence ? limitEvidence(event.evidence) : undefined;
+    const evidence = event.evidence ? limitEvidence(event.evidence, at) : undefined;
     const target = {
       ...(entityId ? { entity_id: entityId } : {}),
       ...(relationshipId ? { relationship_id: relationshipId } : {}),
@@ -568,6 +588,9 @@ export const limitEvents = (raw: NonNullable<FindingsOutput['events']>): ImpactM
       ...(endsAt ? { ends_at: endsAt } : {}),
       ...target,
       ...(evidence ? { evidence } : {}),
+      ...(event.data_source?.name.trim()
+        ? { data_source: sanitizeDataSource(event.data_source) }
+        : {}),
     });
   }
   return [...byId.values()].slice(0, MAX_IMPACT_MAP_EVENTS);
@@ -923,7 +946,7 @@ export const FINDINGS_JSON_SCHEMA = {
               },
               metadata: {
                 type: 'array',
-                description: `At most ${MAX_IMPACT_MAP_ENTITY_METADATA}. Facts that help a person understand and locate the entity, taken from tool results only: its cloud provider, region, availability zone, Kubernetes cluster, namespace, node, host, version, owner. Reuse the keys listed under the catalog; add your own lowercase dotted key and a label for anything else that helps. Set featured on the few that matter most, such as cluster and namespace.`,
+                description: `Required on every entity, and sent again each time because the map replaces the stored one: an entity sent without it loses what it had. At most ${MAX_IMPACT_MAP_ENTITY_METADATA}. Include every one of these the tool results or files show for the entity, wherever the data came from; use an empty array only when none of them appear anywhere. Facts that help a person understand and locate the entity, taken from tool results only: its cloud provider, region, availability zone, Kubernetes cluster, namespace, node, host, version, owner. Reuse the keys listed under the catalog; add your own lowercase dotted key and a label for anything else that helps. Set featured on the few that matter most, such as cluster and namespace.`,
                 items: {
                   type: 'object',
                   properties: {
@@ -940,7 +963,7 @@ export const FINDINGS_JSON_SCHEMA = {
                 },
               },
             },
-            required: ['id', 'type'],
+            required: ['id', 'type', 'metadata'],
           },
         },
         relationships: {
@@ -1009,6 +1032,43 @@ export const FINDINGS_JSON_SCHEMA = {
             ...EVIDENCE_JSON_SCHEMA,
             description:
               'A chart that explains the event in context: the signal that shows it, over a window that starts before the change that led to it, with an annotation at that change and one at the event. Copy only numbers a tool returned; describe instead when there are none.',
+          },
+          data_source: {
+            type: 'object',
+            description:
+              'Where the data behind this event came from and how it was asked for, copied from the tool call that returned it. Required for every event that states a number, a state or a time taken from data; leave it out only for an event that uses no data, such as a response. Never include credentials, API keys or auth headers.',
+            properties: {
+              name: {
+                type: 'string',
+                description: 'The system the data came from, for example Elasticsearch or Grafana.',
+              },
+              query: {
+                type: 'object',
+                description: 'The query text, when one was used.',
+                properties: {
+                  language: { type: 'string', description: 'For example ES|QL, KQL, PromQL.' },
+                  text: { type: 'string', description: 'The query exactly as it was run.' },
+                },
+                required: ['text'],
+              },
+              api_call: {
+                type: 'object',
+                description: 'The call made, when the data came from an API or a tool.',
+                properties: {
+                  method: { type: 'string', description: 'The HTTP method, for example POST.' },
+                  type: {
+                    type: 'string',
+                    description: 'The kind of call, for example search, _query or MCP tool name.',
+                  },
+                  endpoint: { type: 'string', description: 'The path or URL called, no secrets.' },
+                  payload: {
+                    type: 'string',
+                    description: 'The request body as sent. Leave out credentials.',
+                  },
+                },
+              },
+            },
+            required: ['name'],
           },
         },
         required: ['kind', 'title', 'at'],

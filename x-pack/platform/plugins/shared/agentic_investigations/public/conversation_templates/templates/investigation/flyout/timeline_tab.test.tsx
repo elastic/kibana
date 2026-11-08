@@ -166,12 +166,28 @@ describe('TimelineTab', () => {
     expect(rowTitles()).toHaveLength(3);
   });
 
+  it('names the entity of an event as a badge that opens the entity', () => {
+    renderTab();
+    fireEvent.click(screen.getAllByTestId('agenticInvestigationsTimelineOpenEvent')[0]);
+
+    const badge = screen.getByTestId('agenticInvestigationsImpactMapEventEntityBadge');
+    fireEvent.click(badge);
+
+    // The flyout now shows the entity itself, with its events.
+    expect(screen.getByTestId('agenticInvestigationsImpactMapEventsType')).toBeInTheDocument();
+    expect(screen.queryByTestId('agenticInvestigationsImpactMapEventDetail')).toBeNull();
+  });
+
   it('opens an event straight to its detail', () => {
     renderTab();
     fireEvent.click(screen.getAllByTestId('agenticInvestigationsTimelineOpenEvent')[2]);
 
-    expect(screen.getByTestId('agenticInvestigationsImpactMapEventDetail')).toHaveTextContent(
+    expect(screen.getByTestId('agenticInvestigationsImpactMapEventKeyFacts')).toHaveTextContent(
       'Responders'
+    );
+    // Every event has the section, closed, and says so when it has no data source.
+    expect(screen.getByTestId('agenticInvestigationsImpactMapEventDataSource')).toHaveTextContent(
+      'No data source was recorded'
     );
     expect(
       screen.queryByTestId('agenticInvestigationsImpactMapEventsBack')

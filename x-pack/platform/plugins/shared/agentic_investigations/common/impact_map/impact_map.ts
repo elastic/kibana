@@ -6,6 +6,12 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
+import {
+  MAX_DATA_SOURCE_ENDPOINT_LENGTH,
+  MAX_DATA_SOURCE_NAME_LENGTH,
+  MAX_DATA_SOURCE_PAYLOAD_LENGTH,
+  MAX_DATA_SOURCE_QUERY_LENGTH,
+} from './data_source';
 import { userSchema } from '../user';
 import { investigationEvidenceSchema } from '../evidence/evidence';
 import {
@@ -188,6 +194,26 @@ export const impactMapRelationshipTypesSchema = lazySchema(() =>
 );
 
 const MAX_EVENT_LINKS = 5;
+
+export const impactMapDataSourceSchema = lazySchema(() =>
+  z.object({
+    name: z.string().min(1).max(MAX_DATA_SOURCE_NAME_LENGTH),
+    query: z
+      .object({
+        language: z.string().max(40).optional(),
+        text: z.string().min(1).max(MAX_DATA_SOURCE_QUERY_LENGTH),
+      })
+      .optional(),
+    api_call: z
+      .object({
+        method: z.string().max(16).optional(),
+        type: z.string().max(100).optional(),
+        endpoint: z.string().max(MAX_DATA_SOURCE_ENDPOINT_LENGTH).optional(),
+        payload: z.string().max(MAX_DATA_SOURCE_PAYLOAD_LENGTH).optional(),
+      })
+      .optional(),
+  })
+);
 const MAX_URL_LENGTH = 2_048;
 
 export const impactMapEventKindSchema = lazySchema(() => z.enum(IMPACT_MAP_EVENT_KINDS));
@@ -213,6 +239,8 @@ export const impactMapEventSchema = lazySchema(() =>
     /** The relationship it happened to, as the map ids it: `source->target`. */
     relationship_id: z.string().max(MAX_ID_LENGTH).optional(),
     evidence: investigationEvidenceSchema.optional(),
+    /** Where the event's data came from and how it was asked for; absent when it uses no data. */
+    data_source: impactMapDataSourceSchema.optional(),
     links: z
       .array(
         z.object({

@@ -463,6 +463,35 @@ describe('entityIdFor', () => {
 describe('limitEvents', () => {
   const at = '2026-11-07T10:00:30Z';
 
+  it('keeps where the data of an event came from and hides credentials in it', () => {
+    const [event] = limitEvents([
+      {
+        kind: 'failure',
+        title: 'Errors rose',
+        at,
+        entity: 'checkout',
+        data_source: {
+          name: 'Elasticsearch',
+          query: { language: 'ES|QL', text: 'FROM logs-* | LIMIT 5' },
+          api_call: {
+            method: 'post',
+            endpoint: '/_query',
+            payload: '{"query":"x","api_key":"abc123"}',
+          },
+        },
+      },
+    ]);
+    expect(event.data_source).toEqual({
+      name: 'Elasticsearch',
+      query: { language: 'ES|QL', text: 'FROM logs-* | LIMIT 5' },
+      api_call: {
+        method: 'POST',
+        endpoint: '/_query',
+        payload: '{"query":"x","api_key":"[hidden]"}',
+      },
+    });
+  });
+
   it('places events on an entity or a relationship and gives them stable ids', () => {
     const [onEntity, onEdge] = limitEvents([
       { kind: 'change', title: ' Deployed v2 ', at, entity: 'checkout' },

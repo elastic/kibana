@@ -219,6 +219,8 @@ const Timeline: React.FC<{
   const [text, setText] = useState('');
   const [newestFirst, setNewestFirst] = useState(false);
   const [selectedId, setSelectedId] = useState<string>();
+  // An entity chosen from inside an event's flyout replaces the event in it.
+  const [openedEntityId, setOpenedEntityId] = useState<string>();
   const { events, entities, relationships } = impactMap;
 
   // Each filter's choices are counted over the events the other filters leave, so the numbers
@@ -465,13 +467,22 @@ const Timeline: React.FC<{
           )}
         </EuiTimeline>
       )}
-      {selectedId && (
+      {(openedEntityId || selectedId) && (
         <ImpactMapEventsFlyout
-          key={selectedId}
-          {...resolveEventsSelection({ kind: 'event', id: selectedId }, impactMap)}
+          key={openedEntityId ? `entity:${openedEntityId}` : selectedId}
+          {...resolveEventsSelection(
+            openedEntityId
+              ? { kind: 'entity', id: openedEntityId }
+              : { kind: 'event', id: selectedId as string },
+            impactMap
+          )}
           impactMap={impactMap}
           asMainFlyout={!embedded}
-          onClose={() => setSelectedId(undefined)}
+          onOpenEntity={setOpenedEntityId}
+          onClose={() => {
+            setOpenedEntityId(undefined);
+            setSelectedId(undefined);
+          }}
         />
       )}
     </div>

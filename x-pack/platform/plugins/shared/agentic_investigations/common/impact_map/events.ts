@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { withChartClockTimesDated } from './chart_times';
+import { sanitizeDataSource } from './data_source';
 import { MAX_IMPACT_MAP_EVENTS } from './constants';
 import type { ImpactMapEvent } from './impact_map';
 
@@ -31,6 +33,9 @@ export type ImpactMapEventInput = Omit<ImpactMapEvent, 'id'> & { id?: string };
 export const withImpactMapEventId = (event: ImpactMapEventInput): ImpactMapEvent => ({
   ...event,
   id: event.id || impactMapEventId(event),
+  ...(event.evidence ? { evidence: withChartClockTimesDated(event.evidence, event.at) } : {}),
+  // The one place every write passes through, so no credential reaches the stored event.
+  ...(event.data_source ? { data_source: sanitizeDataSource(event.data_source) } : {}),
 });
 
 const time = ({ at }: ImpactMapEvent): number => {

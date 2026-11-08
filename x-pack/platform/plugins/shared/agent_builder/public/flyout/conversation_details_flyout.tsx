@@ -283,7 +283,7 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
   });
   const { conversation, isLoading } = useConversation();
   const { conversationTemplatesService } = useAgentBuilderServices();
-  const widthProps = useConversationFlyoutWidthProps();
+  const widthProps = useConversationFlyoutWidthProps({ wide: true });
 
   const trailingActions = useMemo(() => {
     if (!conversation?.template_id) {

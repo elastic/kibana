@@ -29,6 +29,7 @@ export {
   impactMapEntityTypeSchema,
   impactMapEntityTypesSchema,
   impactMapEventKindSchema,
+  impactMapDataSourceSchema,
   impactMapEventSchema,
   impactMapEventsSchema,
   impactMapHealthSchema,
@@ -84,3 +85,5 @@ export {
   withImpactMapEventId,
 } from './events';
 export type { ImpactMapEventInput } from './events';
+
+export { redactSecrets, sanitizeDataSource, type ImpactMapDataSource } from './data_source';

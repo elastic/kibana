@@ -258,7 +258,7 @@ describe('ImpactMapTab', () => {
     fireEvent.click(screen.getByTestId('fakeEntity'));
 
     expect(screen.getByTestId('agenticInvestigationsImpactMapEventsType')).toHaveTextContent(
-      'Type: Service'
+      'Service'
     );
     expect(screen.getByRole('tab', { name: /Timeline/ })).toHaveAttribute('aria-selected', 'true');
     const rows = screen.getAllByTestId('agenticInvestigationsTimelineRow');
@@ -282,6 +282,43 @@ describe('ImpactMapTab', () => {
 
     fireEvent.click(screen.getByTestId('agenticInvestigationsImpactMapEventsBack'));
     expect(screen.getAllByTestId('agenticInvestigationsTimelineRow')).toHaveLength(2);
+  });
+
+  it('shows where the data of an event came from in a closed Evidence section', () => {
+    const dataSource = {
+      name: 'Elasticsearch',
+      query: { language: 'ES|QL', text: 'FROM metrics-* | STATS count()' },
+      api_call: { method: 'POST', type: '_query', endpoint: '/_query', payload: '{"size":1}' },
+    };
+    mockUseInvestigation.mockReturnValue({
+      data: {
+        in_progress: false,
+        impact_map: {
+          ...impactMap,
+          events: impactMap.events?.map((event) => ({ ...event, data_source: dataSource })),
+        },
+      },
+    });
+
+    renderTab();
+    fireEvent.click(screen.getByTestId('fakeEntity'));
+    fireEvent.click(screen.getAllByTestId('agenticInvestigationsTimelineOpenEvent')[1]);
+
+    const section = screen.getByTestId('agenticInvestigationsImpactMapEventDataSource');
+    expect(section).toHaveTextContent('Evidence');
+    expect(screen.getByRole('button', { name: /Evidence/ })).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    );
+    expect(
+      screen.getByTestId('agenticInvestigationsImpactMapEventDataSourceName')
+    ).toHaveTextContent('Elasticsearch');
+    expect(
+      screen.getByTestId('agenticInvestigationsImpactMapEventDataSourceQuery')
+    ).toHaveTextContent('FROM metrics-* | STATS count()');
+    expect(
+      screen.getByTestId('agenticInvestigationsImpactMapEventDataSourceApiCall')
+    ).toHaveTextContent('POST /_query');
   });
 
   it('opens the Timeline tab filtered by the entity from "View in timeline"', () => {

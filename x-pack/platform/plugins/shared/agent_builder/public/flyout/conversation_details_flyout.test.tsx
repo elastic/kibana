@@ -373,7 +373,7 @@ describe('ConversationDetailsFlyout', () => {
   });
 
   it('opens resizable at the remembered width', () => {
-    localStorage.setItem('agentBuilder.conversationDetailsFlyoutWidth', '620');
+    localStorage.setItem('agentBuilder.conversationSummaryFlyoutWidth', '620');
     jest.mocked(useConversation).mockReturnValue({
       conversation: createConversation(),
       isLoading: false,
@@ -386,7 +386,12 @@ describe('ConversationDetailsFlyout', () => {
 
     const [flyoutProps] = jest.mocked(EuiFlyout).mock.lastCall ?? [{}];
     expect(flyoutProps).toEqual(
-      expect.objectContaining({ size: 620, minWidth: 400, maxWidth: 640, resizable: true })
+      expect.objectContaining({
+        size: 620,
+        minWidth: 400,
+        maxWidth: Math.round(window.innerWidth * 0.9),
+        resizable: true,
+      })
     );
   });
 });
