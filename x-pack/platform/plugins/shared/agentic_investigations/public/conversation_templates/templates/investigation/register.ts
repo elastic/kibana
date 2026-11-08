@@ -19,6 +19,7 @@ import {
   type SeveritySlotRenderProps,
   type TitleSlotRenderProps,
 } from '@kbn/agentic-investigations-common';
+import { NoDottedLinks } from '../../../no_dotted_links';
 import { INVESTIGATION_TEMPLATE_ID, isInvestigationTitlePending } from '../../../../common';
 import { EscalationModalBoundary } from '../../shared/escalation_modal/escalation_modal_boundary';
 import {
@@ -118,6 +119,7 @@ export const investigationTemplate: TemplateDefinition = {
             React.createElement(
               QueryClientProvider,
               { client: queryClient },
+              React.createElement(NoDottedLinks),
               React.createElement(Component, props)
             )
           );
