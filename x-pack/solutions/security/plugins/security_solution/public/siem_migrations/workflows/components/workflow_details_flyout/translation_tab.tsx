@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -14,6 +15,7 @@ import {
   EuiCodeBlock,
   EuiButtonGroup,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import { WorkflowGraph } from './workflow_graph';
 import * as i18n from './translations';
@@ -28,7 +30,8 @@ const VIEW_OPTIONS = [
 ];
 
 export const TranslationTab: React.FC<TranslationTabProps> = React.memo(({ yaml }) => {
-  const [selectedView, setSelectedView] = useState('yaml');
+  const { euiTheme } = useEuiTheme();
+  const [selectedView, setSelectedView] = useState('graph');
 
   return (
     <>
@@ -47,7 +50,41 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(({ yaml 
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <div
+        css={css`
+          position: relative;
+        `}
+      >
+        {selectedView === 'yaml' ? (
+          <EuiCodeBlock
+            language="yaml"
+            fontSize="s"
+            paddingSize="m"
+            isCopyable
+            overflowHeight={640}
+          >
+            {yaml}
+          </EuiCodeBlock>
+        ) : (
+          <WorkflowGraph />
+        )}
+        <div
+          css={css`
+            position: absolute;
+            bottom: ${euiTheme.size.base};
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+            padding: ${euiTheme.size.xs};
+            background: ${euiTheme.colors.backgroundBasePlain};
+            border-radius: ${euiTheme.border.radius.medium};
+            box-shadow: 0 0 2px 0 rgba(43, 57, 79, 0.16), 0 4px 8px 0 rgba(43, 57, 79, 0.12),
+              0 8px 16px 0 rgba(43, 57, 79, 0.06);
+          `}
+          data-test-subj="workflowMigrationViewToggle"
+        >
           <EuiButtonGroup
             legend={i18n.VIEW_TOGGLE_LEGEND}
             options={VIEW_OPTIONS}
@@ -56,16 +93,8 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(({ yaml 
             buttonSize="compressed"
             isIconOnly
           />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      {selectedView === 'yaml' ? (
-        <EuiCodeBlock language="yaml" fontSize="s" paddingSize="m" isCopyable overflowHeight={640}>
-          {yaml}
-        </EuiCodeBlock>
-      ) : (
-        <WorkflowGraph />
-      )}
+        </div>
+      </div>
     </>
   );
 });

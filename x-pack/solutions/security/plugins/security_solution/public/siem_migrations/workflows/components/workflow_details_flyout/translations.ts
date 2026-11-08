@@ -42,6 +42,13 @@ export const VIEW_TOGGLE_LEGEND = i18n.translate(
   }
 );
 
+export const GRAPH_MINIMAP_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.workflows.detailsFlyout.graphMinimapLabel',
+  {
+    defaultMessage: 'Workflow overview',
+  }
+);
+
 export const GRAPH_VIEW = i18n.translate(
   'xpack.securitySolution.siemMigrations.workflows.detailsFlyout.graphView',
   {

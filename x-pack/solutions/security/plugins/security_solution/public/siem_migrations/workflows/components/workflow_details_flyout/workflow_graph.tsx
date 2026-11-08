@@ -131,32 +131,106 @@ const GraphEdge: React.FC = () => (
   </div>
 );
 
+// Compact overview of the whole workflow: one bar per node, the trigger
+// highlighted, like the minimap in the Elastic Workflows visual editor.
+const GraphMinimap: React.FC = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <div
+      role="img"
+      aria-label={i18n.GRAPH_MINIMAP_LABEL}
+      css={css`
+        position: absolute;
+        right: ${euiTheme.size.base};
+        bottom: ${euiTheme.size.base};
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        width: 160px;
+        height: 126px;
+        background: ${euiTheme.colors.emptyShade};
+        border-radius: 4px;
+        box-shadow: 0 0 2px 0 rgba(43, 57, 79, 0.16), 0 1px 4px 0 rgba(43, 57, 79, 0.06),
+          0 2px 8px 0 rgba(43, 57, 79, 0.05);
+      `}
+      data-test-subj="workflowMigrationGraphMinimap"
+    >
+      <div
+        css={css`
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 3px;
+          box-sizing: border-box;
+          width: calc(100% - ${euiTheme.size.base});
+          height: calc(100% - ${euiTheme.size.base});
+          background: ${euiTheme.colors.backgroundBaseSubdued};
+        `}
+      >
+        <div
+          css={css`
+            width: 28px;
+            height: 4px;
+            border-radius: 2px;
+            background: ${euiTheme.colors.accent};
+          `}
+        />
+        {PHISHING_EMAIL_STEPS.map((step) => (
+          <div
+            key={step.title}
+            css={css`
+              width: 28px;
+              height: 4px;
+              border-radius: 2px;
+              background: ${euiTheme.colors.primary};
+            `}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export const WorkflowGraph: React.FC = React.memo(() => {
   const { euiTheme } = useEuiTheme();
 
   return (
     <div
       css={css`
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: ${euiTheme.size.xl} ${euiTheme.size.m};
-        background-color: ${euiTheme.colors.backgroundBaseSubdued};
-        background-image: radial-gradient(${euiTheme.colors.borderBasePlain} 1px, transparent 1px);
-        background-size: 16px 16px;
+        position: relative;
         border-radius: ${euiTheme.border.radius.medium};
-        max-height: 640px;
-        overflow-y: auto;
+        overflow: hidden;
       `}
-      data-test-subj="workflowMigrationGraph"
     >
-      <GraphNode label={i18n.GRAPH_TRIGGER_NODE} icon="bolt" />
-      {PHISHING_EMAIL_STEPS.map((step) => (
-        <React.Fragment key={step.title}>
-          <GraphEdge />
-          <GraphNode label={step.title} icon={step.icon} status={step.status} />
-        </React.Fragment>
-      ))}
+      <div
+        css={css`
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: ${euiTheme.size.xl} ${euiTheme.size.m} ${euiTheme.size.xxxxl};
+          background-color: ${euiTheme.colors.backgroundBaseSubdued};
+          background-image: radial-gradient(
+            ${euiTheme.colors.borderBasePlain} 1px,
+            transparent 1px
+          );
+          background-size: 16px 16px;
+          max-height: 640px;
+          overflow-y: auto;
+        `}
+        data-test-subj="workflowMigrationGraph"
+      >
+        <GraphNode label={i18n.GRAPH_TRIGGER_NODE} icon="bolt" />
+        {PHISHING_EMAIL_STEPS.map((step) => (
+          <React.Fragment key={step.title}>
+            <GraphEdge />
+            <GraphNode label={step.title} icon={step.icon} status={step.status} />
+          </React.Fragment>
+        ))}
+      </div>
+      <GraphMinimap />
     </div>
   );
 });
