@@ -253,4 +253,15 @@ describe('ImpactServiceMap', () => {
     fireEvent.click(screen.getByText('payments-db'));
     expect(onEntityClick).toHaveBeenCalledWith('payments-db');
   });
+
+  it('has the service map zoom, fit and full-screen controls', () => {
+    const onToggleFullScreen = jest.fn();
+    render(<ImpactServiceMap impactMap={impactMap} onToggleFullScreen={onToggleFullScreen} />);
+
+    for (const id of ['ZoomIn', 'ZoomOut', 'FitView', 'FullScreen']) {
+      expect(screen.getByTestId(`impactServiceMap${id}Button`)).toBeInTheDocument();
+    }
+    fireEvent.click(screen.getByTestId('impactServiceMapFullScreenButton'));
+    expect(onToggleFullScreen).toHaveBeenCalledTimes(1);
+  });
 });

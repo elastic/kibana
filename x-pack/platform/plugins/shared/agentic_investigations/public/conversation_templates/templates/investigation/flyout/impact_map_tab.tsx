@@ -56,9 +56,6 @@ const EMPTY_BODY_RUNNING = i18n.translate(
       'The investigation is still running. The map appears here once the agent knows which entities the problem touches.',
   }
 );
-const MAXIMIZE_LABEL = i18n.translate('xpack.agenticInvestigations.impactMap.maximize', {
-  defaultMessage: 'Full screen',
-});
 const CLOSE_FULL_SCREEN_LABEL = i18n.translate('xpack.agenticInvestigations.impactMap.exit', {
   defaultMessage: 'Exit full screen',
 });
@@ -155,6 +152,8 @@ const ImpactMapPanel: React.FC<{
   const map = (
     <Renderer
       impactMap={impactMap}
+      isFullScreen={isMaximized}
+      onToggleFullScreen={() => setIsMaximized(!isMaximized)}
       onEntityClick={openEntity}
       onRelationshipClick={openRelationship}
     />
@@ -181,16 +180,6 @@ const ImpactMapPanel: React.FC<{
               <FormattedRelative value={updatedAt} />
             </EuiToolTip>
           </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip content={MAXIMIZE_LABEL} disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType="fullScreen"
-              aria-label={MAXIMIZE_LABEL}
-              data-test-subj="agenticInvestigationsImpactMapMaximize"
-              onClick={() => setIsMaximized(true)}
-            />
-          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />

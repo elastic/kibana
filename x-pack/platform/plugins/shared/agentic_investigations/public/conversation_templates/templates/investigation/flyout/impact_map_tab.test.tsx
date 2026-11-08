@@ -23,9 +23,11 @@ const FakeRenderer: React.FC<ImpactMapRendererProps> = ({
   impactMap,
   onEntityClick,
   onRelationshipClick,
+  onToggleFullScreen,
 }) => (
   <div data-test-subj="fakeImpactMapRenderer">
     {impactMap.entities.map(({ id }) => id).join(',')}
+    <button data-test-subj="agenticInvestigationsImpactMapMaximize" onClick={onToggleFullScreen} />
     <button data-test-subj="fakeEntity" onClick={() => onEntityClick?.('payment')} />
     <button
       data-test-subj="fakeRelationship"

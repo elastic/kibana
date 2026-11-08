@@ -7,7 +7,6 @@
 
 import React, { memo, useCallback, type ComponentProps, useEffect, useMemo, useState } from 'react';
 import {
-  Controls,
   Panel,
   ReactFlow,
   ReactFlowProvider,
@@ -22,6 +21,7 @@ import {
   type NodeTypes,
 } from '@xyflow/react';
 import {
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -261,6 +261,81 @@ function ImpactMapLegend({ criticalPathColor }: { criticalPathColor: string }) {
   );
 }
 
+const CONTROL_LABELS = {
+  zoomIn: i18n.translate('xpack.apm.impactMap.zoomIn', { defaultMessage: 'Zoom In' }),
+  zoomOut: i18n.translate('xpack.apm.impactMap.zoomOut', { defaultMessage: 'Zoom Out' }),
+  fitView: i18n.translate('xpack.apm.impactMap.fitView', { defaultMessage: 'Fit View' }),
+  enterFullScreen: i18n.translate('xpack.apm.impactMap.enterFullScreen', {
+    defaultMessage: 'Enter fullscreen',
+  }),
+  exitFullScreen: i18n.translate('xpack.apm.impactMap.exitFullScreen', {
+    defaultMessage: 'Exit fullscreen (esc)',
+  }),
+};
+
+/** The service map's own zoom, fit and full-screen controls, so the two maps handle alike. */
+function MapControls({
+  onToggleFullScreen,
+  isFullScreen,
+}: Pick<ImpactMapRendererProps, 'onToggleFullScreen' | 'isFullScreen'>) {
+  const { euiTheme } = useEuiTheme();
+  const { zoomIn, zoomOut, fitView } = useReactFlow();
+  const iconCss = css`
+    min-inline-size: calc(${euiTheme.size.base} * 2);
+    min-block-size: calc(${euiTheme.size.base} * 2);
+  `;
+  const fullScreenLabel = isFullScreen
+    ? CONTROL_LABELS.exitFullScreen
+    : CONTROL_LABELS.enterFullScreen;
+  const buttons = [
+    { icon: 'plus', label: CONTROL_LABELS.zoomIn, id: 'ZoomIn', onClick: () => zoomIn() },
+    { icon: 'minus', label: CONTROL_LABELS.zoomOut, id: 'ZoomOut', onClick: () => zoomOut() },
+    {
+      icon: 'crosshair',
+      label: CONTROL_LABELS.fitView,
+      id: 'FitView',
+      onClick: () => fitView({ padding: 0.12, maxZoom: 1.5, duration: 200 }),
+    },
+    ...(onToggleFullScreen
+      ? [
+          {
+            icon: isFullScreen ? 'fullScreenExit' : 'fullScreen',
+            label: fullScreenLabel,
+            id: 'FullScreen',
+            onClick: onToggleFullScreen,
+          },
+        ]
+      : []),
+  ];
+  return (
+    <EuiPanel
+      hasBorder
+      hasShadow={false}
+      paddingSize="none"
+      borderRadius="m"
+      grow={false}
+      data-test-subj="impactServiceMapControls"
+    >
+      <EuiFlexGroup direction="column" gutterSize="none" alignItems="center" responsive={false}>
+        {buttons.map(({ icon, label, id, onClick }) => (
+          <EuiToolTip key={id} content={label} disableScreenReaderOutput>
+            <EuiButtonIcon
+              display="empty"
+              color="text"
+              size="s"
+              iconType={icon}
+              onClick={onClick}
+              aria-label={label}
+              data-test-subj={`impactServiceMap${id}Button`}
+              css={iconCss}
+            />
+          </EuiToolTip>
+        ))}
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+}
+
 const FLYOUT_LOOKBACK_MS = 24 * 60 * 60 * 1000;
 const FLYOUT_PADDING_MS = 30 * 60 * 1000;
 
@@ -380,6 +455,8 @@ export function ImpactServiceMap({
   impactMap,
   onEntityClick,
   onRelationshipClick,
+  onToggleFullScreen,
+  isFullScreen,
 }: ImpactMapRendererProps) {
   const { euiTheme, colorMode } = useEuiTheme();
   const criticalPathColor = euiTheme.colors.danger;
@@ -474,9 +551,15 @@ export function ImpactServiceMap({
           colorMode={colorMode.toLowerCase() as ColorMode}
         >
           <KeepNodesInView nodeIds={nodes.map(({ id }) => id).join('|')} layout={laidOutNodes} />
-          <Controls showInteractive={false} position="top-right" />
           <Panel position="top-left">
-            <ImpactMapLegend criticalPathColor={criticalPathColor} />
+            <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <MapControls onToggleFullScreen={onToggleFullScreen} isFullScreen={isFullScreen} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <ImpactMapLegend criticalPathColor={criticalPathColor} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </Panel>
         </ReactFlow>
       </div>

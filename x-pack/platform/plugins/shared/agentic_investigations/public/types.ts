@@ -74,6 +74,9 @@ export interface ImpactMapRendererProps {
   onEntityClick?: (entityId: string) => void;
   /** Called with the relationship id when an edge is clicked. */
   onRelationshipClick?: (relationshipId: string) => void;
+  /** Called by the map's full-screen control. Without it the map shows no such control. */
+  onToggleFullScreen?: () => void;
+  isFullScreen?: boolean;
 }
 
 /**
