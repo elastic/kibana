@@ -56,6 +56,7 @@ export type {
   CoreSecurityDelegateHandle,
   CoreSecurityDelegateServiceAccounts,
   ResolvedServiceAccountWorkload,
+  ResolveBoundWorkloadsOptions,
   ServiceAccountBoundWorkloadRef,
 } from './src/api_provider';
 export type {
