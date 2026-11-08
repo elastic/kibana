@@ -39,6 +39,7 @@ import { FormattedTime } from '@kbn/i18n-react';
 import type { TimelineSlotRenderProps } from '@kbn/agentic-investigations-common';
 import { takeTimelineFocus } from './timeline_focus';
 import type {
+  ImpactMapEntityType,
   ImpactMapEvent,
   ImpactMapEventKind,
   InvestigationImpactMapResponse,
@@ -158,7 +159,36 @@ interface FilterOption {
   key: string;
   label: string;
   count: number;
+  /** An EUI icon shown before the label. */
+  icon?: string;
+  /** What kind of thing the option is, shown after the label. */
+  type?: string;
 }
+
+const TYPE_LABEL = i18n.translate('xpack.agenticInvestigations.timeline.entityType', {
+  defaultMessage: 'Type',
+});
+
+const DEPENDENCY_ICONS: Record<string, string> = {
+  db: 'database',
+  messaging: 'logstashQueue',
+  cache: 'database',
+  external: 'globe',
+};
+
+/** An icon for an entity from its type: a named EUI icon, else one for its kind. */
+const getEntityIcon = (type?: ImpactMapEntityType): string => {
+  if (type?.icon?.eui_icon) {
+    return type.icon.eui_icon;
+  }
+  if (/kubernetes|k8s/i.test(`${type?.id} ${type?.label}`)) {
+    return 'logoKubernetes';
+  }
+  if (type?.kind === 'dependency') {
+    return DEPENDENCY_ICONS[type.icon?.span_type ?? ''] ?? 'globe';
+  }
+  return type?.kind === 'infrastructure' ? 'compute' : 'node';
+};
 
 /** A filter button with a popover of options and how many events each has, as Discover does. */
 const FilterPopover: React.FC<{
@@ -172,12 +202,28 @@ const FilterPopover: React.FC<{
 }> = ({ label, options, selected, onChange, searchable, searchPlaceholder, testSubj }) => {
   const [isOpen, setIsOpen] = useState(false);
   const popoverId = useGeneratedHtmlId({ prefix: testSubj });
-  const selectable: EuiSelectableOption[] = options.map(({ key, label: optionLabel, count }) => ({
-    key,
-    label: optionLabel,
-    checked: selected.includes(key) ? 'on' : undefined,
-    append: <EuiBadge color="hollow">{count}</EuiBadge>,
-  }));
+  const selectable: EuiSelectableOption[] = options.map(
+    ({ key, label: optionLabel, count, icon, type }) => ({
+      key,
+      label: optionLabel,
+      checked: selected.includes(key) ? 'on' : undefined,
+      ...(icon ? { prepend: <EuiIcon type={icon} aria-hidden={true} /> } : {}),
+      append: (
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          {type && (
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {TYPE_LABEL}: {type}
+              </EuiText>
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">{count}</EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+    })
+  );
   return (
     <EuiPopover
       id={popoverId}
@@ -383,18 +429,13 @@ const Timeline: React.FC<{
       )
     );
     const seen = entities.filter(({ id }) => counts.has(id));
-    const labelCounts = new Map<string, number>();
-    seen.forEach(({ label }) => labelCounts.set(label, (labelCounts.get(label) ?? 0) + 1));
-    const typeLabels = new Map(impactMap.entity_types.map(({ id, label }) => [id, label]));
-    // Two entities can share a name, such as a service and the deployment that runs it, so the
-    // kind of thing it is tells them apart.
+    const types = new Map(impactMap.entity_types.map((type) => [type.id, type]));
     return seen.map(({ id, label, type_id: typeId }) => ({
       key: id,
-      label:
-        (labelCounts.get(label) ?? 0) > 1 && typeLabels.get(typeId)
-          ? `${label} (${typeLabels.get(typeId)})`
-          : label,
+      label,
       count: counts.get(id) ?? 0,
+      icon: getEntityIcon(types.get(typeId)),
+      type: types.get(typeId)?.label,
     }));
   }, [events, entities, relationships, impactMap.entity_types]);
 
