@@ -19,6 +19,6 @@ describe('NoDottedLinks', () => {
       .map((rule) => rule.cssText)
       .join('\n');
     expect(rules).toContain('euiLink:not(:hover):not(:focus)');
-    expect(rules).toContain('text-decoration:none');
+    expect(rules).toContain('text-decoration: none');
   });
 });
