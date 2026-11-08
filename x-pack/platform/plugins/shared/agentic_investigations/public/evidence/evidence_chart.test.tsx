@@ -188,7 +188,9 @@ describe('EvidenceChart', () => {
 
     expect(mockLineAnnotationProps).toHaveBeenCalledWith(
       expect.objectContaining({
-        dataValues: [{ dataValue: 'checkout', details: 'Worst service', header: 'checkout' }],
+        dataValues: [
+          { dataValue: 'checkout', details: 'Worst service', header: 'checkout', isAlert: false },
+        ],
       })
     );
   });
