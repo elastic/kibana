@@ -1044,6 +1044,10 @@ describe('runFindingsPass with workspace files', () => {
     expect(finalPlain).toContain('impact');
     expect(finalPlain).not.toContain('recorder_read_file');
     expect(finalFiles).toContain('recorder_read_file');
+    // Only the final pass can read the files, so only it is told to chart events from them.
+    expect(finalFiles).toContain('read the file that holds the series');
+    expect(finalPlain).not.toContain('read the file that holds the series');
+    expect(live).not.toContain('read the file that holds the series');
     for (const prompt of [live, finalPlain, finalFiles]) {
       expect(prompt).toContain('structuredOutput');
     }

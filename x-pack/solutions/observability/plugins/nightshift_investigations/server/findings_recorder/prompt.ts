@@ -47,7 +47,20 @@ const ENTITY_NAMES =
 
 const IMPACT_MAP_LIVE = `- impact_map: a map from where the problem was seen to its cause, kept current as you learn. It is a snapshot that replaces the stored map, so include it again whenever new evidence changes what it shows: a new or ruled-out entity or dependency, a different root cause or symptom, health that got better or worse, or a different critical path.${PHYSICAL_ONLY}${ENTITY_NAMES} Leave it out while you cannot tell how two or more entities depend on each other. List only the entities and dependencies the tool results show, usually 3 to 12. Mark the cause root_cause, where it was seen symptom, and every entity it hurt impacted, and set on_critical_path on each hop between them. Give every entity a type id you would reuse in another investigation (java_service, postgresql) with its kind and icon fields, and point each relationship from the caller to what it depends on. Kubernetes objects (deployment, pod, node, statefulset, daemonset, namespace) always get eui_icon logoKubernetes, and a service has the APM agent_name you can see in the tool results. Name each relationship for what it really is, and for what went wrong when the relationship is the failure: a service runs_on its deployment, and a deployment scaled to zero is scaled_to_zero, a crash-looping pod is crash_looping, a throttled call is throttled_by, a timing-out call is timing_out_on. Use calls only for a plain request between services, never for an infrastructure link or a failing one.`;
 
-const EVENTS = `- events: what happened, each placed against the map entity it happened to (entity) or the relationship (relationship, with source and target), using the same ids as impact_map: a deploy, a config or scaling change, a failure, a condition such as zero replicas, an alert, a mitigation, and customer_impact for what customers felt, on the entry point they use. Responder actions such as opening an incident channel or updating the status page are response events and need no entity. Give each the time the data shows and a one-line past-tense title with the number. Every root_cause and symptom entity needs at least one event saying what happened to it. Findings of the investigation itself, such as a hypothesis confirmed, are investigation events and need no entity either. Give every failure, condition, alert, customer_impact and change event a chart whenever the tool results hold a series for the entity or relationship it happened to: the signal that shows it (error rate, failed calls, latency, restarts, replicas, saturation) over a window that starts before the change that led to it, with an annotation at that change, for example the deploy, and one at the event. Events on the same entity may share one series, each annotated at its own time. Charts are expected, not optional: leave one out only when no series for it appears in the tool results or files, and then say in the description what the numbers were. Copy the numbers exactly; never invent a point. Events are merged with the ones already recorded: send the new or changed ones, and never invent a time.`;
+const EVENTS_HEAD = `- events: what happened, each placed against the map entity it happened to (entity) or the relationship (relationship, with source and target), using the same ids as impact_map: a deploy, a config or scaling change, a failure, a condition such as zero replicas, an alert, a mitigation, and customer_impact for what customers felt, on the entry point they use. Responder actions such as opening an incident channel or updating the status page are response events and need no entity. Give each the time the data shows and a one-line past-tense title with the number. Every root_cause and symptom entity needs at least one event saying what happened to it. Findings of the investigation itself, such as a hypothesis confirmed, are investigation events and need no entity either. Give every failure, condition, alert, customer_impact and change event a chart whenever the tool results hold a series for the entity or relationship it happened to: the signal that shows it (error rate, failed calls, latency, restarts, replicas, saturation) over a window that starts before the change that led to it, with an annotation at that change, for example the deploy, and one at the event. Events on the same entity may share one series, each annotated at its own time. Charts are expected, not optional: leave one out only when no series for it appears in the tool results or files, and then say in the description what the numbers were. Copy the numbers exactly; never invent a point.`;
+
+const EVENTS_TAIL = ` Events are merged with the ones already recorded: send the new or changed ones, and never invent a time.`;
+
+/**
+ * The tool results the recorder is shown are clipped, and a series of buckets rarely fits, so the
+ * numbers an event needs are mostly in the files. Only the final pass can read them.
+ */
+const eventsField = (files: boolean) =>
+  `${EVENTS_HEAD}${
+    files
+      ? ' Most series are too long to be shown in the transcript and are in the files: for every event that has no chart yet, read the file that holds the series for its entity or relationship and chart it. Send again every recorded event you can now chart, with the same kind, entity or relationship and time (to the minute), so it is updated in place and not added twice.'
+      : ''
+  }${EVENTS_TAIL}`;
 
 /** Asked while the agent is still working: the summary, the hypotheses and the impact map. */
 const LIVE_SYSTEM_PROMPT = `${ROLE}
@@ -61,7 +74,7 @@ While the agent is working you fill in the summary, the hypotheses, the impact m
 ${SUMMARY}
 ${HYPOTHESES}
 ${IMPACT_MAP_LIVE}
-${EVENTS}
+${eventsField(false)}
 
 ${UPDATING}`;
 
@@ -100,7 +113,7 @@ The 14:02Z deploy shrank the orders service connection pool, so it ran out of co
 ${evidenceField(files)}
 - proposals: concrete actions for a person to decide, at most three, and only for steps the findings support: a command to run, a config change, a code fix or a rollback. Not general advice, and none that repeats a proposal the record already lists: the same action on the same target counts as a repeat even in different words, so propose only a step that is new. Each has a short plain-text title and a comment saying what to do and why, in Markdown, with the concrete steps and the findings that support them. Add impact (how disruptive the action is) and confidence (how strongly the findings say it resolves the issue) when you can judge them. Leave proposals out when the cause is unverified and no action is clear.
 - impact_map: when a cause is confirmed or leading and the problem touches two or more entities, a map from where the problem was seen to its cause. List only the entities and dependencies the tool results show, usually 3 to 12. Mark the cause root_cause, where it was seen symptom, and every entity it hurt impacted, and set on_critical_path on each hop between them. Give every entity a type id you would reuse in another investigation (java_service, postgresql) with its kind and icon fields, and point each relationship from the caller to what it depends on. Kubernetes objects (deployment, pod, node, statefulset, daemonset, namespace) always get eui_icon logoKubernetes, and a service has the APM agent_name you can see in the tool results. Name each relationship for what it really is, and for what went wrong when the relationship is the failure: a service runs_on its deployment, and a deployment scaled to zero is scaled_to_zero, a crash-looping pod is crash_looping, a throttled call is throttled_by, a timing-out call is timing_out_on. Use calls only for a plain request between services, never for an infrastructure link or a failing one. Leave the map out when you cannot tell how the entities depend on each other.${PHYSICAL_ONLY}${ENTITY_NAMES}
-${EVENTS}
+${eventsField(files)}
 ${HYPOTHESES}
 
 ${UPDATING}`;
