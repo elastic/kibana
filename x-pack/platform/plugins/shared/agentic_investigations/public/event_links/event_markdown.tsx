@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import { EuiLink, EuiMarkdownFormat, getDefaultEuiMarkdownPlugins } from '@elastic/eui';
 import type { InvestigationImpactMapResponse } from '../../common';
 import {
   ImpactMapEventsFlyout,
   resolveEventsSelection,
-  type EventsSelection,
+  useSelectionHistory,
 } from '../conversation_templates/templates/investigation/flyout/impact_map_events';
 import { useIsInAgentBuilder } from '../conversation_templates/templates/investigation/flyout/use_is_in_agent_builder';
 
@@ -52,7 +52,9 @@ export const parseEventHref = (href: string | undefined): string | undefined =>
 export const EventLinksProvider: React.FC<
   React.PropsWithChildren<{ impactMap: EventLinksImpactMap | undefined }>
 > = ({ impactMap, children }) => {
-  const [selection, setSelection] = useState<EventsSelection>();
+  const history = useSelectionHistory();
+  const selection = history.current;
+  const openSelection = history.open;
   const isInAgentBuilder = useIsInAgentBuilder();
   const events = impactMap?.events;
 
@@ -61,11 +63,11 @@ export const EventLinksProvider: React.FC<
       events
         ? {
             hasEvent: (id) => events.some((event) => event.id === id),
-            openEvent: (id) => setSelection({ kind: 'event', id }),
-            openEntity: (id) => setSelection({ kind: 'entity', id }),
+            openEvent: (id) => openSelection({ kind: 'event', id }),
+            openEntity: (id) => openSelection({ kind: 'entity', id }),
           }
         : undefined,
-    [events]
+    [events, openSelection]
   );
 
   return (
@@ -77,7 +79,8 @@ export const EventLinksProvider: React.FC<
           {...resolveEventsSelection(selection, impactMap)}
           impactMap={impactMap}
           asMainFlyout={isInAgentBuilder}
-          onClose={() => setSelection(undefined)}
+          onClose={history.clear}
+          onBackToPrevious={history.hasPrevious ? history.back : undefined}
         />
       )}
     </EventLinksContext.Provider>

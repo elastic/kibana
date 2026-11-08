@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { useConversationFlyoutWidthProps } from '@kbn/agent-builder-plugin/public';
 import {
@@ -184,6 +184,9 @@ const EMPTY_BODY = i18n.translate('xpack.agenticInvestigations.impactMap.events.
 });
 const CLOSE_LABEL = i18n.translate('xpack.agenticInvestigations.impactMap.events.close', {
   defaultMessage: 'Close',
+});
+const PREVIOUS_LABEL = i18n.translate('xpack.agenticInvestigations.impactMap.events.previous', {
+  defaultMessage: 'Back',
 });
 const BACK_LABEL = i18n.translate('xpack.agenticInvestigations.impactMap.events.back', {
   defaultMessage: 'All events',
@@ -1127,6 +1130,8 @@ export interface ImpactMapEventsFlyoutProps {
   onOpenEntity?: (entityId: string) => void;
   /** Opens on this event instead of the list. */
   initialEventId?: string;
+  /** Set when this flyout was opened from another one that is still to come back to. */
+  onBackToPrevious?: () => void;
   onClose: () => void;
   /**
    * Over the full-screen map the flyout stands alone, above it; otherwise it opens as a child of
@@ -1166,7 +1171,7 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = (prop
           onViewInTimeline: undefined,
           onBack: () => setOpenedEntities((stack) => stack.slice(0, -1)),
         }
-      : {}),
+      : { onBack: props.onBackToPrevious }),
     onOpenEntity: (entityId: string) => setOpenedEntities((stack) => [...stack, entityId]),
   };
   return (
@@ -1296,7 +1301,7 @@ const EventsFlyoutContent: React.FC<
             onClick={() => (canGoBack ? setSelectedId(undefined) : onBack?.())}
             data-test-subj="agenticInvestigationsImpactMapEventsBack"
           >
-            {BACK_LABEL}
+            {canGoBack ? BACK_LABEL : PREVIOUS_LABEL}
           </EuiButtonEmpty>
         )}
         {showBack && <EuiSpacer size="s" />}
@@ -1513,5 +1518,30 @@ export const resolveEventsSelection = (
     title: event?.title ?? '',
     events: event ? [event] : [],
     initialEventId: selection.id,
+  };
+};
+
+/**
+ * What a person has opened, one flyout after another: opening another thing adds to the stack,
+ * Back removes the last, and closing clears it, so Back always returns to the previous flyout.
+ */
+export const useSelectionHistory = () => {
+  const [history, setHistory] = useState<EventsSelection[]>([]);
+  const open = useCallback(
+    (next: EventsSelection) =>
+      setHistory((stack) => {
+        const last = stack[stack.length - 1];
+        return last && last.kind === next.kind && last.id === next.id ? stack : [...stack, next];
+      }),
+    []
+  );
+  const back = useCallback(() => setHistory((stack) => stack.slice(0, -1)), []);
+  const clear = useCallback(() => setHistory([]), []);
+  return {
+    current: history[history.length - 1],
+    hasPrevious: history.length > 1,
+    open,
+    back,
+    clear,
   };
 };

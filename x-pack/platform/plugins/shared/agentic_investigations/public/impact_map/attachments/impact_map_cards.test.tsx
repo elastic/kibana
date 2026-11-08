@@ -6,13 +6,16 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, renderHook, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationImpactMap } from '../../../common/impact_map/impact_map';
 import type { ImpactMapEvent } from '../../../common';
 import type { ImpactMapRendererProps } from '../../types';
-import { withRecoveredHealth } from '../../conversation_templates/templates/investigation/flyout/impact_map_events';
+import {
+  useSelectionHistory,
+  withRecoveredHealth,
+} from '../../conversation_templates/templates/investigation/flyout/impact_map_events';
 import { createImpactMapCards, pickImpactEvents, pickKeyEntities } from './impact_map_cards';
 import { toImpactMapResponse } from './to_impact_map_response';
 
@@ -355,5 +358,34 @@ describe('withRecoveredHealth', () => {
       'critical',
       'critical',
     ]);
+  });
+});
+
+describe('useSelectionHistory', () => {
+  it('goes back through what was opened, one flyout at a time', () => {
+    const { result } = renderHook(() => useSelectionHistory());
+
+    act(() => result.current.open({ kind: 'event', id: 'a' }));
+    act(() => result.current.open({ kind: 'event', id: 'b' }));
+    act(() => result.current.open({ kind: 'entity', id: 'checkout' }));
+    expect(result.current.hasPrevious).toBe(true);
+
+    act(() => result.current.back());
+    expect(result.current.current).toEqual({ kind: 'event', id: 'b' });
+    act(() => result.current.back());
+    expect(result.current.current).toEqual({ kind: 'event', id: 'a' });
+    expect(result.current.hasPrevious).toBe(false);
+  });
+
+  it('does not stack the same flyout twice, and closing clears it all', () => {
+    const { result } = renderHook(() => useSelectionHistory());
+
+    act(() => result.current.open({ kind: 'event', id: 'a' }));
+    act(() => result.current.open({ kind: 'event', id: 'a' }));
+    expect(result.current.hasPrevious).toBe(false);
+
+    act(() => result.current.open({ kind: 'event', id: 'b' }));
+    act(() => result.current.clear());
+    expect(result.current.current).toBeUndefined();
   });
 });

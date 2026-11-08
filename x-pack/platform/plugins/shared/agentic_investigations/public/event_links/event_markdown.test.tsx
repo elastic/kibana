@@ -16,6 +16,9 @@ jest.mock(
   })
 );
 jest.mock('../conversation_templates/templates/investigation/flyout/impact_map_events', () => ({
+  useSelectionHistory: jest.requireActual(
+    '../conversation_templates/templates/investigation/flyout/impact_map_events'
+  ).useSelectionHistory,
   ImpactMapEventsFlyout: ({ initialEventId }: { initialEventId?: string }) => (
     <div data-test-subj="eventsFlyout">{initialEventId}</div>
   ),

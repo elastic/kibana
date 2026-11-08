@@ -39,6 +39,7 @@ import {
   getEntityIcon,
   getEntityTypeLabel,
   resolveEventsSelection,
+  useSelectionHistory,
   withRecoveredHealth,
   type EventsSelection,
 } from '../../conversation_templates/templates/investigation/flyout/impact_map_events';
@@ -369,7 +370,8 @@ export const createImpactMapCards = (
   }) => {
     const { conversationId } = document;
     const impactMap = useMemo(() => toImpactMapResponse(document), [document]);
-    const [selection, setSelection] = useState<EventsSelection>();
+    const history = useSelectionHistory();
+    const selection = history.current;
     const [isMaximized, setIsMaximized] = useState(false);
     const { euiTheme } = useEuiTheme();
     const modalTitleId = useGeneratedHtmlId({ prefix: 'impactMapCardModalTitle' });
@@ -402,7 +404,7 @@ export const createImpactMapCards = (
     const open = (next: EventsSelection) => {
       const { events, metadata } = resolveEventsSelection(next, impactMap);
       if (events.length > 0 || (metadata?.length ?? 0) > 0) {
-        setSelection(next);
+        history.open(next);
       }
     };
     const keyEntities = pickKeyEntities(impactMap);
@@ -524,7 +526,8 @@ export const createImpactMapCards = (
                     impactMap={impactMap}
                     standalone
                     targetKey={`${selection.kind}:${selection.id}`}
-                    onClose={() => setSelection(undefined)}
+                    onClose={history.clear}
+                    onBackToPrevious={history.hasPrevious ? history.back : undefined}
                   />
                 )}
               </div>
@@ -537,7 +540,8 @@ export const createImpactMapCards = (
             impactMap={impactMap}
             asMainFlyout
             targetKey={`${selection.kind}:${selection.id}`}
-            onClose={() => setSelection(undefined)}
+            onClose={history.clear}
+            onBackToPrevious={history.hasPrevious ? history.back : undefined}
           />
         )}
       </div>
