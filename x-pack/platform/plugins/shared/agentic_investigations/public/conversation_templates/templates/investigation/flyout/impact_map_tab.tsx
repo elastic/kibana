@@ -35,6 +35,7 @@ import {
   type EventsSelection,
 } from './impact_map_events';
 import { requestTimelineFocus } from './timeline_focus';
+import { useIsInAgentBuilder } from './use_is_in_agent_builder';
 
 /** Fills the flyout below its header and tabs; the controls sit at the top, so nothing hides them. */
 const MAP_HEIGHT = 'clamp(320px, calc(100vh - 280px), 900px)';
@@ -107,6 +108,7 @@ const ImpactMapPanel: React.FC<{
   conversationId: string;
   openTimeline?: () => void;
 }> = ({ impactMap, Renderer, conversationId, openTimeline }) => {
+  const isInAgentBuilder = useIsInAgentBuilder();
   const [isMaximized, setIsMaximized] = useState(false);
   const [selection, setSelection] = useState<EventsSelection>();
   // Escape closes the events flyout first, and only then the full-screen map.
@@ -269,6 +271,7 @@ const ImpactMapPanel: React.FC<{
           {...resolveEventsSelection(selection, impactMap)}
           impactMap={impactMap}
           standalone={isMaximized}
+          asMainFlyout={isInAgentBuilder}
           onViewInTimeline={viewInTimeline ? () => viewInTimeline(selection) : undefined}
           onClose={() => setSelection(undefined)}
         />

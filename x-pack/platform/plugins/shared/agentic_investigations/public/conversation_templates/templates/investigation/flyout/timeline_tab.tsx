@@ -202,8 +202,9 @@ const FilterPopover: React.FC<{
       <EuiSelectable
         aria-label={label}
         options={selectable}
-        searchable={searchable}
-        searchProps={searchable ? { placeholder: searchPlaceholder, compressed: true } : undefined}
+        {...(searchable
+          ? { searchable: true, searchProps: { placeholder: searchPlaceholder, compressed: true } }
+          : {})}
         onChange={(next) =>
           onChange(next.flatMap(({ key, checked }) => (checked === 'on' && key ? [key] : [])))
         }

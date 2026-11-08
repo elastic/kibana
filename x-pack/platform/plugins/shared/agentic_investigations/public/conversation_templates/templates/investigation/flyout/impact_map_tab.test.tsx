@@ -15,6 +15,7 @@ import type { ImpactMapRendererProps } from '../../../../types';
 import { ImpactMapTab } from './impact_map_tab';
 import { withContextAnnotations } from './impact_map_events';
 import { takeTimelineFocus } from './timeline_focus';
+import { useIsInAgentBuilder } from './use_is_in_agent_builder';
 
 jest.mock('@kbn/agent-builder-plugin/public', () => ({
   useConversationFlyoutWidthProps: () => ({
@@ -25,6 +26,20 @@ jest.mock('@kbn/agent-builder-plugin/public', () => ({
     onResize: jest.fn(),
   }),
 }));
+jest.mock('./use_is_in_agent_builder');
+const mockUseIsInAgentBuilder = useIsInAgentBuilder as jest.Mock;
+const mockEuiFlyout = jest.fn();
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  const { createElement } = jest.requireActual('react');
+  return {
+    ...actual,
+    EuiFlyout: (props: object) => {
+      mockEuiFlyout(props);
+      return createElement(actual.EuiFlyout, props);
+    },
+  };
+});
 jest.mock('../../../../investigations/hooks/use_investigation');
 const mockUseInvestigation = useInvestigation as jest.Mock;
 
@@ -172,16 +187,43 @@ describe('ImpactMapTab', () => {
     expect(screen.queryByTestId('agenticInvestigationsImpactMapViewInTimeline')).toBeNull();
   });
 
-  it('pushes the page aside for the child flyout and puts it back on close', () => {
-    mockUseInvestigation.mockReturnValue({ data: { in_progress: false, impact_map: impactMap } });
-    document.body.style.paddingInlineEnd = '';
+  describe('where the events flyout opens', () => {
+    const openEntityEvents = () => {
+      mockUseInvestigation.mockReturnValue({
+        data: { in_progress: false, impact_map: impactMap },
+      });
+      mockUseIsInAgentBuilder.mockReturnValue(mockInAgentBuilder);
+      mockEuiFlyout.mockClear();
+      renderTab();
+    };
+    const lastFlyoutProps = () => mockEuiFlyout.mock.lastCall?.[0] as Record<string, unknown>;
+    let mockInAgentBuilder = false;
 
-    renderTab();
-    fireEvent.click(screen.getByTestId('fakeEntity'));
-    expect(document.body.style.paddingInlineEnd).toBe('380px');
+    it('is a main flyout over the investigation flyout in Agent Builder', () => {
+      mockInAgentBuilder = true;
+      openEntityEvents();
+      fireEvent.click(screen.getByTestId('fakeEntity'));
 
-    fireEvent.click(screen.getByLabelText('Close this dialog'));
-    expect(document.body.style.paddingInlineEnd).toBe('');
+      expect(lastFlyoutProps()).toMatchObject({ session: 'start', type: 'push' });
+    });
+
+    it('is a child flyout anywhere else', () => {
+      mockInAgentBuilder = false;
+      openEntityEvents();
+      fireEvent.click(screen.getByTestId('fakeEntity'));
+
+      expect(lastFlyoutProps().session).toBeUndefined();
+      expect(lastFlyoutProps().type).toBeUndefined();
+    });
+
+    it('stands alone over the map in full screen, wherever it is', () => {
+      mockInAgentBuilder = true;
+      openEntityEvents();
+      fireEvent.click(screen.getByTestId('agenticInvestigationsImpactMapMaximize'));
+      fireEvent.click(screen.getAllByTestId('fakeEntity')[0]);
+
+      expect(lastFlyoutProps()).toMatchObject({ session: 'never', type: 'overlay' });
+    });
   });
 
   it('opens nothing for an entity or a relationship that has no events', () => {

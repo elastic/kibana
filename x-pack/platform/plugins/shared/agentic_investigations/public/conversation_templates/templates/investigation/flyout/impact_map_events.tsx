@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useLayoutEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { useConversationFlyoutWidthProps } from '@kbn/agent-builder-plugin/public';
 import {
@@ -348,10 +348,10 @@ const EventDetail: React.FC<{
 );
 
 /**
- * Where the flyout sits. Over the full-screen map it stands alone above it. Opened from the
- * Timeline it is a new main flyout in the conversation details history group, like the hypothesis
- * tree: it shows over the investigation flyout instead of pushing it aside, and the menu offers
- * Back to it. From the map it is a child of the investigation flyout.
+ * Where the flyout sits. Over the full-screen map it stands alone above it. In Agent Builder, and
+ * from the Timeline, it is a new main flyout in the conversation details history group, like the
+ * hypothesis tree: it shows over the investigation flyout and the menu offers Back to it.
+ * Elsewhere it is a child of the investigation flyout, as an SLO opens from the SLO flyout.
  */
 const EventsFlyoutFrame: React.FC<{
   standalone: boolean;
@@ -428,39 +428,16 @@ const MainEventsFlyout: React.FC<{
   );
 };
 
-/** The child flyout's width. A fixed one, so the page can be pushed aside by exactly that much. */
-const CHILD_FLYOUT_WIDTH = 380;
-
-/**
- * Next to the investigation flyout, which pushes the page aside by its own width. EUI makes a
- * child push by no more than the wider of the two, so it would cover the chat. This adds the
- * child's width to the push so the chat moves left to make room, and takes it away again on close.
- */
-const usePushAside = (width: number) => {
-  useLayoutEffect(() => {
-    const target = document.body;
-    const before = parseFloat(target.style.paddingInlineEnd) || 0;
-    const applied = `${before + width}px`;
-    target.style.paddingInlineEnd = applied;
-    return () => {
-      if (target.style.paddingInlineEnd === applied) {
-        target.style.paddingInlineEnd = before ? `${before}px` : '';
-      }
-    };
-  }, [width]);
-};
-
 const ChildEventsFlyout: React.FC<{
   onClose: () => void;
   titleId: string;
   children: React.ReactNode;
 }> = ({ onClose, titleId, children }) => {
-  usePushAside(CHILD_FLYOUT_WIDTH);
   return (
     <EuiFlyout
       onClose={onClose}
       aria-labelledby={titleId}
-      size={CHILD_FLYOUT_WIDTH}
+      size="s"
       ownFocus={false}
       data-test-subj="agenticInvestigationsImpactMapEventsFlyout"
     >
