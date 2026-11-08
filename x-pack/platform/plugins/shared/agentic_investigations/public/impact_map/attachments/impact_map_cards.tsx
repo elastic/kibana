@@ -247,19 +247,23 @@ export const EventCard: React.FC<{
     onClick={onOpen}
     data-test-subj="agenticInvestigationsEventCard"
   >
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs" color="subdued">
-          {FACT_AFFECTS}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s">
-          <EventAffects event={event} impactMap={impactMap} onOpenEntity={onOpenEntity} />
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiSpacer size="s" />
+    {event.kind !== 'alert' && (
+      <>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              {FACT_AFFECTS}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">
+              <EventAffects event={event} impactMap={impactMap} onOpenEntity={onOpenEntity} />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+      </>
+    )}
     <EventGlance event={event} allEvents={impactMap.events} />
   </InvestigationCard>
 );

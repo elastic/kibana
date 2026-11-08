@@ -152,11 +152,13 @@ export const TimelineEvent: React.FC<{
         )}
         <EuiFlexItem />
         {entityIds.length === 0 ? (
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              {describeEventTarget(event, impactMap)}
-            </EuiText>
-          </EuiFlexItem>
+          event.kind === 'alert' ? null : (
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {describeEventTarget(event, impactMap)}
+              </EuiText>
+            </EuiFlexItem>
+          )
         ) : (
           entityIds.map((entityId) => {
             const label = labelOf(entityId);

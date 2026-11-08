@@ -566,10 +566,17 @@ const EventKeyFacts: React.FC<{
         { label: FACT_TYPE, value: <EventKindBadge kind={event.kind} /> },
         { label: FACT_HAPPENED, value: <EventTime at={event.at} withDate /> },
         ...(duration ? [{ label: FACT_DURATION, value: duration }] : []),
-        {
-          label: FACT_AFFECTS,
-          value: <EventAffects event={event} impactMap={impactMap} onOpenEntity={onOpenEntity} />,
-        },
+        // An alert is about a rule, not about something it hurt.
+        ...(event.kind === 'alert'
+          ? []
+          : [
+              {
+                label: FACT_AFFECTS,
+                value: (
+                  <EventAffects event={event} impactMap={impactMap} onOpenEntity={onOpenEntity} />
+                ),
+              },
+            ]),
       ]}
     />
   );
