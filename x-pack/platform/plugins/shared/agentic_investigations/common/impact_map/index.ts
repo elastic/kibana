@@ -68,6 +68,7 @@ export {
   BUILT_IN_CATALOG,
   BUILT_IN_ENTITY_TYPES,
   BUILT_IN_RELATIONSHIP_TYPES,
+  canonicalEntityTypeId,
   KNOWN_EUI_ICONS,
   normalizeEntityType,
 } from './built_in_types';

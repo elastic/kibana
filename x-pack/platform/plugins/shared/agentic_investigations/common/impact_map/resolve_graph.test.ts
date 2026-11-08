@@ -43,13 +43,13 @@ describe('resolveImpactMapGraph', () => {
     const graph = resolveImpactMapGraph({
       entities: [
         { id: 'checkout', type_id: 'service', label: 'checkout' },
-        { id: 'pod-1', type_id: 'k8s_pod', label: 'pod-1' },
+        { id: 'pod-1', type_id: 'k8s.pod', label: 'pod-1' },
       ],
       relationships: [{ type_id: 'runs_on', source_id: 'checkout', target_id: 'pod-1' }],
       catalog,
       entityTypes: [
         { id: 'service', label: 'Microservice', kind: 'service', icon: { agent_name: 'go' } },
-        { id: 'k8s_pod', label: 'Kubernetes pod', kind: 'service' },
+        { id: 'k8s.pod', label: 'Kubernetes pod', kind: 'service' },
       ],
       relationshipTypes: [{ id: 'runs_on', label: 'RUNS_ON' }],
     });
@@ -57,10 +57,10 @@ describe('resolveImpactMapGraph', () => {
     expect(graph.entityTypes).toEqual([
       { id: 'service', label: 'Microservice', kind: 'service', icon: { agent_name: 'go' } },
       // A Kubernetes object sent as a service is infrastructure.
-      { id: 'k8s_pod', label: 'Kubernetes pod', kind: 'infrastructure' },
+      { id: 'k8s.pod', label: 'Kubernetes pod', kind: 'infrastructure' },
     ]);
     expect(graph.newTypes).toEqual({
-      entity_types: [{ id: 'k8s_pod', label: 'Kubernetes pod', kind: 'infrastructure' }],
+      entity_types: [{ id: 'k8s.pod', label: 'Kubernetes pod', kind: 'infrastructure' }],
       relationship_types: [{ id: 'runs_on', label: 'RUNS_ON' }],
     });
   });

@@ -32,6 +32,7 @@ import {
   MAX_IMPACT_MAP_RELATIONSHIPS,
   MAX_IMPACT_TOOL_ENTITIES,
   impactMapEventId,
+  canonicalEntityTypeId,
   STANDARD_METADATA_FIELDS,
   toEntityName,
   type ImpactMapEntity,
@@ -311,12 +312,14 @@ const MAX_MAP_METADATA_VALUE_LENGTH = 500;
 
 /** A catalog type id: lowercase, with anything the store rejects replaced by `_`. */
 export const toImpactMapTypeId = (raw: string): string =>
-  raw
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9_.-]+/g, '_')
-    .replace(/^[^a-z0-9]+/, '')
-    .slice(0, MAX_MAP_TYPE_ID_LENGTH) || 'entity';
+  canonicalEntityTypeId(
+    raw
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9_.-]+/g, '_')
+      .replace(/^[^a-z0-9]+/, '')
+      .slice(0, MAX_MAP_TYPE_ID_LENGTH) || 'entity'
+  );
 
 /** A metadata key: lowercase and dotted, with anything the store rejects replaced by `_`. */
 export const toMetadataKey = (raw: string): string =>
@@ -875,7 +878,7 @@ export const FINDINGS_JSON_SCHEMA = {
               type: {
                 type: 'string',
                 description:
-                  'One lowercase id per kind of entity that looks the same, reused across investigations, for example nodejs_service, java_service, postgresql, kafka_topic, k8s_pod.',
+                  'One lowercase id per kind of entity, reused across investigations. Use the OpenTelemetry entity name when there is one (k8s.deployment, k8s.pod, k8s.node, k8s.namespace, host, container, process), nodejs_service, java_service and so on for services, db.postgresql, db.redis and messaging.kafka for dependencies, and make up a lowercase dotted id only for a kind of thing that is not in the catalog.',
               },
               kind: {
                 type: 'string',

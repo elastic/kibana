@@ -556,6 +556,15 @@ export const getEntityIcon = (type?: ImpactMapEntityType): string => {
   return type?.kind === 'infrastructure' ? 'compute' : 'apps';
 };
 
+/** The kind and the type under it: `Infrastructure › Kubernetes deployment`. */
+export const getEntityTypeLabel = (type?: ImpactMapEntityType): string | undefined => {
+  const kind = getEntityKindLabel(getEntityKind(type));
+  if (!type || !kind) {
+    return kind;
+  }
+  return type.label.toLowerCase() === kind.toLowerCase() ? kind : `${kind} › ${type.label}`;
+};
+
 /** The stored kind of an entity as a label: Service, Dependency or Infrastructure. */
 export const getEntityKindLabel = (kind?: string): string | undefined =>
   kind ? kind.charAt(0).toUpperCase() + kind.slice(1) : undefined;
@@ -823,7 +832,7 @@ export const resolveEventsSelection = (
     return {
       title: entity?.label ?? selection.id,
       icon: getEntityIcon(type),
-      typeLabel: getEntityKindLabel(getEntityKind(type)),
+      typeLabel: getEntityTypeLabel(type),
       metadata: resolveEntityMetadata(entity, type),
       events: events.filter(({ entity_id: entityId }) => entityId === selection.id),
     };

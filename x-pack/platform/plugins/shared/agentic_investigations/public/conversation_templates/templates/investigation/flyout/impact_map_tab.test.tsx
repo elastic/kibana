@@ -17,6 +17,7 @@ import {
   getEntityIcon,
   getEntityKind,
   getEntityKindLabel,
+  getEntityTypeLabel,
   withContextAnnotations,
 } from './impact_map_events';
 import { takeTimelineFocus } from './timeline_focus';
@@ -134,6 +135,21 @@ const withMetadata: InvestigationImpactMapResponse = {
     },
   ],
 };
+
+describe('getEntityTypeLabel', () => {
+  it('shows the kind and the type under it', () => {
+    expect(
+      getEntityTypeLabel({
+        id: 'k8s.deployment',
+        label: 'Kubernetes deployment',
+        kind: 'infrastructure',
+      })
+    ).toBe('Infrastructure › Kubernetes deployment');
+    expect(getEntityTypeLabel({ id: 'service', label: 'Service', kind: 'service' })).toBe(
+      'Service'
+    );
+  });
+});
 
 describe('getEntityKind', () => {
   it('treats an old service type with a Kubernetes icon and no agent as infrastructure', () => {

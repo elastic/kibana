@@ -263,7 +263,7 @@ describe('classifyEntityType', () => {
     expect(classifyEntityType('postgres_database')).toEqual({ kind: 'dependency' });
     expect(classifyEntityType('message_queue')).toEqual({ kind: 'dependency' });
     expect(classifyEntityType('host')).toEqual({ kind: 'infrastructure' });
-    expect(classifyEntityType('k8s_deployment')).toEqual({
+    expect(classifyEntityType('k8s.deployment')).toEqual({
       kind: 'infrastructure',
       euiIcon: 'logoKubernetes',
     });
@@ -273,7 +273,7 @@ describe('classifyEntityType', () => {
   it('classifies a new type the model left bare, and leaves a known one to the catalog', () => {
     const map = {
       entities: [
-        { id: 'ship', type: 'k8s_deployment' },
+        { id: 'ship', type: 'k8s.deployment' },
         { id: 'db', type: 'known_db' },
       ],
       relationships: [],
@@ -281,7 +281,7 @@ describe('classifyEntityType', () => {
     const record = limitImpactMap(map, new Set(['known_db']));
     expect(record?.entity_types).toEqual([
       expect.objectContaining({
-        id: 'k8s_deployment',
+        id: 'k8s.deployment',
         kind: 'infrastructure',
         icon: { eui_icon: 'logoKubernetes' },
       }),
@@ -293,9 +293,9 @@ describe('impact map metadata', () => {
   it('teaches a known type only the fields it does not already have', () => {
     const known = new Map([
       [
-        'k8s_deployment',
+        'k8s.deployment',
         {
-          id: 'k8s_deployment',
+          id: 'k8s.deployment',
           label: 'Kubernetes deployment',
           kind: 'infrastructure' as const,
           metadata_fields: [{ key: 'k8s.deployment.name', label: 'Deployment' }],
@@ -307,7 +307,7 @@ describe('impact map metadata', () => {
         entities: [
           {
             id: 'shipping',
-            type: 'k8s_deployment',
+            type: 'k8s.deployment',
             metadata: [
               { key: 'k8s.deployment.name', value: 'shipping' },
               { key: 'k8s.namespace.name', value: 'shop' },
@@ -317,12 +317,12 @@ describe('impact map metadata', () => {
         ],
         relationships: [],
       },
-      new Set(['k8s_deployment']),
+      new Set(['k8s.deployment']),
       known
     );
     expect(record?.entity_types).toEqual([
       {
-        id: 'k8s_deployment',
+        id: 'k8s.deployment',
         label: 'Kubernetes deployment',
         kind: 'infrastructure',
         metadata_fields: [{ key: 'app.owner_team', label: 'Owner team' }],
@@ -335,7 +335,7 @@ describe('impact map metadata', () => {
       entities: [
         {
           id: 'shipping',
-          type: 'k8s_deployment',
+          type: 'k8s.deployment',
           metadata: [
             { key: 'K8s Namespace.Name', value: ' shop ', featured: true },
             { key: 'cloud.availability_zone', value: 'eu-west-1b' },
@@ -392,7 +392,7 @@ describe('impact map', () => {
           label: 'checkout',
           annotations: { role: 'symptom', impacted: true },
         },
-        { id: 'payments-db', type_id: 'postgresql', label: 'payments-db' },
+        { id: 'payments-db', type_id: 'db.postgresql', label: 'payments-db' },
         {
           id: 'cart',
           type_id: 'java_service',
@@ -417,8 +417,8 @@ describe('impact map', () => {
           icon: { agent_name: 'java' },
         },
         {
-          id: 'postgresql',
-          label: 'Postgresql',
+          id: 'db.postgresql',
+          label: 'Db postgresql',
           kind: 'dependency',
           icon: { span_type: 'db', span_subtype: 'postgresql' },
         },

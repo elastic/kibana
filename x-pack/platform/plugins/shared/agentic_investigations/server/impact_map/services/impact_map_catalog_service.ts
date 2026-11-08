@@ -7,7 +7,11 @@
 
 import { MAX_IMPACT_MAP_CATALOG_TYPES } from '../../../common/impact_map/constants';
 import type { ImpactMapCatalog } from '../../../common/impact_map/impact_map';
-import { BUILT_IN_CATALOG, normalizeEntityType } from '../../../common/impact_map/built_in_types';
+import {
+  BUILT_IN_CATALOG,
+  canonicalEntityTypeId,
+  normalizeEntityType,
+} from '../../../common/impact_map/built_in_types';
 import { mergeImpactMapCatalog } from '../../../common/impact_map/resolve_graph';
 import type { User } from '../../../common/user';
 import {
@@ -33,7 +37,18 @@ const toCatalog = (document: ImpactMapCatalogDocument | undefined): ImpactMapCat
 
 /** What agents and maps see: the built-in types, with the space's own on top, repaired. */
 const withBuiltIns = (stored: ImpactMapCatalog): ImpactMapCatalog => {
-  const merged = mergeImpactMapCatalog(BUILT_IN_CATALOG, stored);
+  // Types stored under an old id (`k8s_pod`) join the one they became (`k8s.pod`).
+  const renamed = mergeImpactMapCatalog(
+    { entity_types: [], relationship_types: [] },
+    {
+      ...stored,
+      entity_types: stored.entity_types.map((type) => ({
+        ...type,
+        id: canonicalEntityTypeId(type.id),
+      })),
+    }
+  );
+  const merged = mergeImpactMapCatalog(BUILT_IN_CATALOG, renamed);
   return { ...merged, entity_types: merged.entity_types.map(normalizeEntityType) };
 };
 

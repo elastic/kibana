@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { normalizeEntityType } from './built_in_types';
+import { canonicalEntityTypeId, normalizeEntityType } from './built_in_types';
 import { MAX_IMPACT_MAP_TYPE_FIELDS } from './constants';
 import type {
   ImpactMapCatalog,
@@ -64,7 +64,9 @@ export const resolveImpactMapGraph = ({
 }): ResolvedImpactMapGraph => {
   const errors: string[] = [];
   const warnings: string[] = [];
-  const inlineEntityTypes = rawInlineEntityTypes.map(normalizeEntityType);
+  const inlineEntityTypes = rawInlineEntityTypes.map((type) =>
+    normalizeEntityType({ ...type, id: canonicalEntityTypeId(type.id) })
+  );
 
   const catalogEntityTypes = new Map(catalog.entity_types.map((type) => [type.id, type]));
   const catalogRelationshipTypes = new Map(
@@ -86,7 +88,9 @@ export const resolveImpactMapGraph = ({
 
   const entityIds = new Set<string>();
   const keptEntities: ImpactMapEntity[] = [];
-  for (const entity of entities) {
+  for (const rawEntity of entities) {
+    // An old id (`k8s_pod`) is the type it became (`k8s.pod`).
+    const entity = { ...rawEntity, type_id: canonicalEntityTypeId(rawEntity.type_id) };
     if (entityIds.has(entity.id)) {
       errors.push(`Entity id "${entity.id}" is used more than once.`);
       continue;

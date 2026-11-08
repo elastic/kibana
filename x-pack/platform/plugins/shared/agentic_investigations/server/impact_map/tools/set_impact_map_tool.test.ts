@@ -59,7 +59,7 @@ const checkoutMap: SetImpactMapToolParams = {
       label: 'checkout',
       annotations: { role: 'root_cause', health: 'critical', alert_count: 5 },
     },
-    { id: 'payments-db', type_id: 'postgres', label: 'payments-db' },
+    { id: 'payments-db', type_id: 'payments_postgres', label: 'payments-db' },
   ],
   relationships: [
     { type_id: 'calls', source_id: 'frontend', target_id: 'checkout', on_critical_path: true },
@@ -68,7 +68,7 @@ const checkoutMap: SetImpactMapToolParams = {
   entity_types: [
     { id: 'service', label: 'Service', kind: 'service', icon: { agent_name: 'nodejs' } },
     {
-      id: 'postgres',
+      id: 'payments_postgres',
       label: 'PostgreSQL',
       kind: 'dependency',
       icon: { span_type: 'db', span_subtype: 'postgresql' },
@@ -258,7 +258,7 @@ describe('agentic_investigations.upsert_impact_map_catalog', () => {
         expect.objectContaining({ key: 'service.version' }),
       ]),
     });
-    expect(types.find(({ id }) => id === 'k8s_deployment')).toBeDefined();
+    expect(types.find(({ id }) => id === 'k8s.deployment')).toBeDefined();
     expect(result.data).toMatchObject({ standard_metadata_fields: STANDARD_METADATA_FIELDS });
   });
 });
