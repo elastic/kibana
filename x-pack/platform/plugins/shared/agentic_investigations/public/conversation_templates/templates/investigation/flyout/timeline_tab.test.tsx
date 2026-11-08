@@ -103,6 +103,19 @@ describe('TimelineTab', () => {
     );
   });
 
+  it('counts the events the filters hide where the list skips them', () => {
+    renderTab();
+    expect(screen.queryByTestId('agenticInvestigationsTimelineHidden')).toBeNull();
+
+    // Oldest first: the rollout, the retries, then the channel opening. Keep only the retries.
+    fireEvent.click(screen.getAllByTestId('agenticInvestigationsTimelineEntity')[2]);
+
+    expect(rowTitles()).toEqual(['Payments-client retries surged']);
+    expect(
+      screen.getAllByTestId('agenticInvestigationsTimelineHidden').map((node) => node.textContent)
+    ).toEqual(['1 event hidden by filters', '1 event hidden by filters']);
+  });
+
   it('filters by type from the Type filter', async () => {
     renderTab();
     fireEvent.click(screen.getByTestId('agenticInvestigationsTimelineTypeFilter'));

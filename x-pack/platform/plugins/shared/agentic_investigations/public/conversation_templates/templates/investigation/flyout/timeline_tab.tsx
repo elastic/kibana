@@ -18,6 +18,7 @@ import {
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiIconTip,
   EuiLink,
   EuiPanel,
@@ -395,6 +396,8 @@ const Timeline: React.FC<{
     [events]
   );
 
+  const isFiltered = entityFilter.length > 0 || kindFilter.length > 0 || text.trim() !== '';
+
   const visible = useMemo(() => {
     const needle = text.trim().toLowerCase();
     const filtered = events.filter((event) => {
@@ -415,9 +418,31 @@ const Timeline: React.FC<{
     return newestFirst ? [...filtered].reverse() : filtered;
   }, [events, relationships, impactMap, entityFilter, kindFilter, text, newestFirst]);
 
+  // Runs of events the filters hide, so the list shows where it skips. Each count sits between
+  // the two visible events it separates, and at either end when events lie beyond the last one.
+  const rows = useMemo(() => {
+    const positions = new Map(events.map(({ id }, index) => [id, index]));
+    const items: Array<
+      { type: 'event'; event: ImpactMapEvent } | { type: 'gap'; key: string; count: number }
+    > = [];
+    let previous = newestFirst ? events.length : -1;
+    const addGap = (key: string, count: number) => {
+      if (isFiltered && count > 0) {
+        items.push({ type: 'gap', key, count });
+      }
+    };
+    visible.forEach((event) => {
+      const position = positions.get(event.id) ?? 0;
+      addGap(`before-${event.id}`, Math.abs(position - previous) - 1);
+      items.push({ type: 'event', event });
+      previous = position;
+    });
+    addGap('after-last', newestFirst ? previous : events.length - 1 - previous);
+    return items;
+  }, [events, visible, newestFirst, isFiltered]);
+
   const firstAt = Date.parse(events[0].at);
   const lastAt = Date.parse(events[events.length - 1].at);
-  const isFiltered = entityFilter.length > 0 || kindFilter.length > 0 || text.trim() !== '';
   const clearFilters = () => {
     setEntityFilter([]);
     setKindFilter([]);
@@ -518,23 +543,43 @@ const Timeline: React.FC<{
         />
       ) : (
         <EuiTimeline gutterSize="m" aria-label={TIMELINE_LABEL}>
-          {visible.map((event) => (
-            <EuiTimelineItem
-              key={event.id}
-              verticalAlign="top"
-              icon={<KindAvatar kind={event.kind} />}
-            >
-              <TimelineEvent
-                event={event}
-                impactMap={impactMap}
-                firstAt={firstAt}
-                selected={event.id === selectedId}
-                entityFilter={entityFilter}
-                onOpen={() => setSelectedId(event.id)}
-                onToggleEntity={toggleEntity}
-              />
-            </EuiTimelineItem>
-          ))}
+          {rows.map((row) =>
+            row.type === 'gap' ? (
+              <EuiTimelineItem
+                key={row.key}
+                verticalAlign="center"
+                icon={<EuiIcon type="eyeClosed" color="subdued" aria-hidden={true} />}
+              >
+                <EuiText
+                  size="xs"
+                  color="subdued"
+                  data-test-subj="agenticInvestigationsTimelineHidden"
+                >
+                  {i18n.translate('xpack.agenticInvestigations.timeline.hiddenEvents', {
+                    defaultMessage:
+                      '{count, plural, one {# event} other {# events}} hidden by filters',
+                    values: { count: row.count },
+                  })}
+                </EuiText>
+              </EuiTimelineItem>
+            ) : (
+              <EuiTimelineItem
+                key={row.event.id}
+                verticalAlign="top"
+                icon={<KindAvatar kind={row.event.kind} />}
+              >
+                <TimelineEvent
+                  event={row.event}
+                  impactMap={impactMap}
+                  firstAt={firstAt}
+                  selected={row.event.id === selectedId}
+                  entityFilter={entityFilter}
+                  onOpen={() => setSelectedId(row.event.id)}
+                  onToggleEntity={toggleEntity}
+                />
+              </EuiTimelineItem>
+            )
+          )}
         </EuiTimeline>
       )}
       {selectedId && (
