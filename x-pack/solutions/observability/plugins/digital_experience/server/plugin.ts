@@ -14,12 +14,15 @@ import type {
 import type { ApmDataAccessPluginSetup } from '@kbn/apm-data-access-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { registerRoutes } from '@kbn/server-route-repository';
+import type { SharePluginSetup } from '@kbn/share-plugin/server';
+import { DigitalExperienceLocatorDefinition } from '../common/locator';
 import { registerDigitalExperienceFeature } from './register_feature';
 import { getGlobalDigitalExperienceServerRouteRepository } from './routes/get_global_digital_experience_route_repository';
 import { savedViewSavedObjectType } from './saved_objects/saved_view';
 
 interface DigitalExperienceSetupDeps {
   features: FeaturesPluginSetup;
+  share: SharePluginSetup;
   /** Optional: only the Classic RUM source (stateful) needs it. */
   apmDataAccess?: ApmDataAccessPluginSetup;
   /** Optional: only its presence is read, as the Classic RUM source needs it. */
@@ -37,6 +40,8 @@ export class Plugin implements PluginType<void, void, DigitalExperienceSetupDeps
     registerDigitalExperienceFeature(plugins.features);
     // Always registered, not behind a setting, so the saved objects check sees the type.
     core.savedObjects.registerType(savedViewSavedObjectType);
+    // A short URL names its locator, and the server looks it up to create one.
+    plugins.share.url.locators.create(new DigitalExperienceLocatorDefinition());
 
     const { buildFlavor } = this.initializerContext.env.packageInfo;
     registerRoutes({
