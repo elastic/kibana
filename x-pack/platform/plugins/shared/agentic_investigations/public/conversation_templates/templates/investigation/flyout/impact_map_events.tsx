@@ -800,6 +800,8 @@ export const EventGlance: React.FC<{
         description: undefined,
       }}
       referenceTime={event.at}
+      // The card is the frame; a second outline inside it only eats the padding.
+      outlineChart={false}
     />
   ) : event.description ? (
     <EuiMarkdownFormat textSize="s">{event.description}</EuiMarkdownFormat>

@@ -271,6 +271,7 @@ export const EventCard: React.FC<{
     onClick={onOpen}
     data-test-subj="agenticInvestigationsEventCard"
   >
+    <EuiSpacer size="m" />
     {event.kind !== 'alert' && !titleNamesAffected(event, impactMap) && (
       <>
         <EventAffects event={event} impactMap={impactMap} onOpenEntity={onOpenEntity} />
