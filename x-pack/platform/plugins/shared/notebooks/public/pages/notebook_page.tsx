@@ -8,8 +8,9 @@
 import React from 'react';
 import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useHistory, useParams } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
+import { NOTEBOOK_APP_PARAM } from '../../common/constants';
 import { NotebookEditor } from '../components/notebook_editor';
 import { createEmptyNotebook } from '../model/cell_factory';
 import type { NotebookStore } from '../model/notebook_store';
@@ -54,6 +55,8 @@ export const NewNotebookPage = ({ api }: { api: NotebookApi }) => {
 export const EditNotebookPage = ({ api }: { api: NotebookApi }) => {
   const { core } = useNotebookServices();
   const { id } = useParams<{ id: string }>();
+  const { search } = useLocation();
+  const initialAppId = new URLSearchParams(search).get(NOTEBOOK_APP_PARAM) ?? undefined;
   const { loading, value, error } = useAsync(() => api.get(id), [api, id]);
   useBreadcrumbs(value?.attributes.title);
 
@@ -68,5 +71,13 @@ export const EditNotebookPage = ({ api }: { api: NotebookApi }) => {
     );
   };
 
-  return <NotebookEditor key={id} notebookId={id} attributes={value.attributes} onSave={save} />;
+  return (
+    <NotebookEditor
+      key={id}
+      notebookId={id}
+      initialAppId={initialAppId}
+      attributes={value.attributes}
+      onSave={save}
+    />
+  );
 };

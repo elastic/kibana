@@ -91,13 +91,20 @@ export interface NotebookEditorProps {
   attributes: NotebookAttributes;
   /** The saved notebook's id; undefined for a notebook not saved yet. */
   notebookId?: string;
+  /** Opens the app panel showing this app. */
+  initialAppId?: string;
   onSave?: (store: NotebookStore) => Promise<void>;
 }
 
-export const NotebookEditor = ({ attributes, notebookId, onSave }: NotebookEditorProps) => {
+export const NotebookEditor = ({
+  attributes,
+  notebookId,
+  initialAppId,
+  onSave,
+}: NotebookEditorProps) => {
   const { plugins } = useNotebookServices();
   const [notebook] = useState<NotebookContextValue>(() =>
-    createNotebookContext({ attributes, search: plugins.data.search, notebookId })
+    createNotebookContext({ attributes, search: plugins.data.search, notebookId, initialAppId })
   );
   const [isSaving, setIsSaving] = useState(false);
   const headerRunControls = useRef<HTMLDivElement>(null);

@@ -35,10 +35,13 @@ export const createNotebookContext = ({
   notebookId,
   scope,
   ignoreManualRunMode,
+  initialAppId,
 }: {
   attributes: NotebookAttributes;
   search: ISearchStart;
   notebookId?: string;
+  /** Opens the app panel showing this app. */
+  initialAppId?: string;
 } & Pick<SchedulerDeps, 'scope' | 'ignoreManualRunMode'>): NotebookContextValue => {
   const store = new NotebookStore(attributes);
   const scheduler = new NotebookScheduler(store, {
@@ -72,7 +75,7 @@ export const createNotebookContext = ({
     cellFilter$,
     addedCellIds,
     editOnAddCellIds: new Set<string>(),
-    sidePanel$: new BehaviorSubject<SidePanel | undefined>(undefined),
-    activeAppId$: new BehaviorSubject<string | undefined>(undefined),
+    sidePanel$: new BehaviorSubject<SidePanel | undefined>(initialAppId ? 'app' : undefined),
+    activeAppId$: new BehaviorSubject<string | undefined>(initialAppId),
   };
 };

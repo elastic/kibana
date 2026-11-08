@@ -117,11 +117,11 @@ const StandaloneApp = ({
           label: OPEN_NOTEBOOK_LABEL,
           iconType: 'notebookApp',
           testId: 'notebookAppPageOpenNotebook',
-          run: () => history.push(getNotebookPath(notebookId)),
+          run: () => history.push(getNotebookPath(notebookId, appId)),
         },
       ],
     }),
-    [history, notebookId]
+    [history, notebookId, appId]
   );
 
   return (
@@ -149,7 +149,7 @@ export const AppPage = ({ api }: { api: NotebookApi }) => {
   const app = value?.attributes.panels?.find((candidate) => candidate.id === appId);
   useBreadcrumbs(
     value?.attributes.title,
-    app && { title: app.title, notebookPath: getNotebookPath(id) }
+    app && { title: app.title, notebookPath: getNotebookPath(id, appId) }
   );
 
   if (loading) return <EuiLoadingSpinner size="xl" />;

@@ -16,13 +16,18 @@ export const MAX_DESCRIPTION_LENGTH = 10_000;
 export const MAX_TITLE_LENGTH = 1024;
 export const MAX_CELL_HEIGHT = 5000;
 
-/** The in-app path that opens a saved notebook. */
-export const getNotebookPath = (notebookId: string): string =>
-  `/view/${encodeURIComponent(notebookId)}`;
+/** Query parameter that opens the notebook with the app panel showing this app. */
+export const NOTEBOOK_APP_PARAM = 'app';
+
+/** The in-app path that opens a saved notebook, with the app panel showing `appId` when given. */
+export const getNotebookPath = (notebookId: string, appId?: string): string => {
+  const path = `/view/${encodeURIComponent(notebookId)}`;
+  return appId ? `${path}?${new URLSearchParams({ [NOTEBOOK_APP_PARAM]: appId })}` : path;
+};
 
 /** The in-app path that shows one of a saved notebook's apps on its own. */
 export const getNotebookAppPath = (notebookId: string, appId: string): string =>
-  `${getNotebookPath(notebookId)}/apps/${encodeURIComponent(appId)}`;
+  `/view/${encodeURIComponent(notebookId)}/apps/${encodeURIComponent(appId)}`;
 
 export const PLUGIN_NAME = i18n.translate('xpack.notebook.pluginName', {
   defaultMessage: 'Notebooks',
