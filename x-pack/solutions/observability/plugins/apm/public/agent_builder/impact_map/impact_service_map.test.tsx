@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { InvestigationImpactMapResponse } from '@kbn/agentic-investigations-plugin/common';
 import { MOCK_EUI_THEME_FOR_USE_THEME } from '../../components/shared/service_map/test_helpers';
 import { DEFAULT_EDGE_STYLE } from '../../../common/service_map/constants';
@@ -32,6 +32,11 @@ jest.mock('@elastic/eui', () => {
 
 jest.mock('@kbn/apm-ui-shared', () => ({
   getSpanIcon: jest.fn((type?: string) => (type ? 'mock-span-icon.svg' : undefined)),
+}));
+
+const mockRenderServiceFlyout = jest.fn();
+jest.mock('../../plugin', () => ({
+  getApmInternalServices: () => ({ renderServiceFlyout: mockRenderServiceFlyout }),
 }));
 
 jest.mock('../../components/shared/service_map/layout', () => ({
@@ -231,5 +236,21 @@ describe('ImpactServiceMap', () => {
     // The root cause, the symptom and what it hurt each carry their own badge.
     expect(screen.getAllByTestId('impactMapBadge-root_cause').length).toBeGreaterThan(1);
     expect(screen.getAllByTestId('impactMapBadge-symptom').length).toBeGreaterThan(1);
+  });
+
+  it('opens the service flyout for a service, and the events for anything else', () => {
+    mockRenderServiceFlyout.mockReturnValue(<div data-test-subj="mockServiceFlyout" />);
+    const onEntityClick = jest.fn();
+    render(<ImpactServiceMap impactMap={impactMap} onEntityClick={onEntityClick} />);
+
+    fireEvent.click(screen.getByText('checkout'));
+    expect(screen.getByTestId('mockServiceFlyout')).toBeInTheDocument();
+    expect(mockRenderServiceFlyout).toHaveBeenCalledWith(
+      expect.objectContaining({ service: { name: 'checkout' } })
+    );
+    expect(onEntityClick).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByText('payments-db'));
+    expect(onEntityClick).toHaveBeenCalledWith('payments-db');
   });
 });

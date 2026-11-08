@@ -154,6 +154,8 @@ export interface ApmServices {
 export interface ApmInternalServices {
   cpsManager?: ICPSManager;
   callApmApi: APMClientV2;
+  /** Draws the service flyout, for hosts that show services outside the APM app. */
+  renderServiceFlyout?: ReturnType<typeof createServiceFlyoutRenderer>;
 }
 
 const [getApmInternalServices, publishApmInternalServices] =
@@ -568,20 +570,22 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     const { fleet } = plugins;
 
+    const renderServiceFlyout = createServiceFlyoutRenderer({
+      share: plugins.share,
+      core,
+      lens: plugins.lens,
+      dataViews: plugins.dataViews,
+      alerting: plugins.alerting,
+      telemetryClient: this.telemetry.start(),
+    });
     plugins.discoverShared.features.registry.register({
       id: 'observability-service-flyout',
-      renderServiceFlyout: createServiceFlyoutRenderer({
-        share: plugins.share,
-        core,
-        lens: plugins.lens,
-        dataViews: plugins.dataViews,
-        alerting: plugins.alerting,
-        telemetryClient: this.telemetry.start(),
-      }),
+      renderServiceFlyout,
     });
 
     const apmInternalServices: ApmInternalServices = {
       callApmApi: plugins.apmShared.callApmApi,
+      renderServiceFlyout,
     };
 
     this.cpsEnabledSubscription = core.featureFlags
