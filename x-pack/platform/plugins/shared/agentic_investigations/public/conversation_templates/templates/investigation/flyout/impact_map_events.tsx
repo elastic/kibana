@@ -481,20 +481,30 @@ const EntityKeyFacts: React.FC<{ metadata?: EntityMetadataRow[] }> = ({ metadata
   ) : null;
 };
 
-/** Type and sub-type as white badges, to the right of the name. */
-const TypeBadges: React.FC<{ typeLabel?: string }> = ({ typeLabel }) => {
+const KIND_ICONS: Record<string, string> = {
+  service: 'apps',
+  infrastructure: 'compute',
+  dependency: 'database',
+};
+
+/** Type and sub-type as white badges with an icon each, as items for the title's row. */
+const TypeBadges: React.FC<{ typeLabel?: string; icon?: string }> = ({ typeLabel, icon }) => {
   const [kind, subtype] = (typeLabel ?? '').split(' › ');
   return kind ? (
-    <EuiFlexGroup gutterSize="xs" responsive={false} wrap={false} alignItems="center">
+    <>
       <EuiFlexItem grow={false} data-test-subj="agenticInvestigationsImpactMapEventsType">
-        <EuiBadge color="hollow">{kind}</EuiBadge>
+        <EuiBadge color="hollow" iconType={KIND_ICONS[kind.toLowerCase()]}>
+          {kind}
+        </EuiBadge>
       </EuiFlexItem>
       {subtype && (
         <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow">{subtype}</EuiBadge>
+          <EuiBadge color="hollow" iconType={icon}>
+            {subtype}
+          </EuiBadge>
         </EuiFlexItem>
       )}
-    </EuiFlexGroup>
+    </>
   ) : null;
 };
 
@@ -1047,7 +1057,13 @@ const EventsFlyoutContent: React.FC<ImpactMapEventsFlyoutProps & { titleId: stri
           </>
         ) : (
           <>
-            <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+            <EuiFlexGroup
+              gutterSize="s"
+              alignItems="center"
+              justifyContent="flexStart"
+              responsive={false}
+              wrap
+            >
               {icon && (
                 <EuiFlexItem grow={false}>
                   <EuiIcon type={icon} size="xl" aria-hidden={true} />
@@ -1058,9 +1074,7 @@ const EventsFlyoutContent: React.FC<ImpactMapEventsFlyoutProps & { titleId: stri
                   <h2 id={titleId}>{title}</h2>
                 </EuiTitle>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <TypeBadges typeLabel={typeLabel} />
-              </EuiFlexItem>
+              <TypeBadges typeLabel={typeLabel} icon={icon} />
             </EuiFlexGroup>
             <EuiSpacer size="m" />
             {metadata?.some(({ featured }) => featured) && (
