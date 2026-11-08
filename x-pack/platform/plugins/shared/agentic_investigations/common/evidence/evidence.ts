@@ -45,6 +45,8 @@ const evidenceChartAnnotationSchema = z.object({
   /** When set, the annotation highlights the range from `x` to `x_end` instead of a point. */
   x_end: z.string().max(MAX_EVIDENCE_CHART_LABEL_LENGTH).optional(),
   label: z.string().max(MAX_EVIDENCE_SHORT_TEXT_LENGTH),
+  /** Drawn green when the annotation is a recovery or a fix, which the screen sets itself. */
+  tone: z.enum(['success']).optional(),
 });
 
 /**

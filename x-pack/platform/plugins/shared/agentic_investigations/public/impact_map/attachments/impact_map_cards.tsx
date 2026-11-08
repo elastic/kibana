@@ -39,6 +39,7 @@ import {
   getEntityIcon,
   getEntityTypeLabel,
   resolveEventsSelection,
+  withRecoveredHealth,
   type EventsSelection,
 } from '../../conversation_templates/templates/investigation/flyout/impact_map_events';
 import { KindAvatar } from '../../conversation_templates/templates/investigation/flyout/timeline_event';
@@ -178,7 +179,7 @@ const MapCard: React.FC<{
             `}
           >
             <Renderer
-              impactMap={impactMap}
+              impactMap={withRecoveredHealth(impactMap)}
               onToggleFullScreen={onToggleFullScreen}
               onEntityClick={(id) => onOpenTarget({ kind: 'entity', id })}
               onRelationshipClick={(id) => onOpenTarget({ kind: 'relationship', id })}
@@ -197,43 +198,31 @@ const kindCounts = (events: ImpactMapEvent[]) => {
   return [...counts.entries()];
 };
 
-/** The kinds that answer "what is the impact", best match first. */
-const IMPACT_KINDS: ImpactMapEvent['kind'][] = [
-  'customer_impact',
-  'failure',
-  'alert',
-  'anomaly',
-  'condition',
+/** The kinds that answer "what is the impact", best match first; a recovery ends any of them. */
+const IMPACT_KIND_TIERS: ImpactMapEvent['kind'][][] = [
+  ['customer_impact', 'recovery'],
+  ['failure', 'alert', 'anomaly', 'condition', 'recovery'],
 ];
 const MAX_IMPACT_CARDS = 3;
 
-/** What an event says without its times, so "failed from 15:58Z" and "failed at 15:47-15:50Z" meet. */
-const sameStory = (event: ImpactMapEvent): string =>
-  [
-    event.kind,
-    event.entity_id ?? event.relationship_id ?? '',
-    event.title
-      .toLowerCase()
-      .replace(/\d{1,2}:\d{2}(:\d{2})?z?(\s*[-–]\s*\d{1,2}:\d{2}(:\d{2})?z?)?/g, '')
-      .replace(/\b(at|from|through|until|by|between|since|again)\b/g, '')
-      .replace(/\s+/g, ' ')
-      .trim(),
-  ].join('|');
+const targetOf = ({ entity_id: entityId, relationship_id: relationshipId }: ImpactMapEvent) =>
+  entityId ?? relationshipId ?? 'investigation';
 
 /**
- * The events that best show the impact: customer impact, else the nearest kind that has any. The
- * same thing happening twice is one card, the latest of them, so the answer says it once.
+ * The events that best show where things stand now: customer impact, else the nearest kind that
+ * has any, and a recovery when that is the latest word. Each thing shows only its latest event, so
+ * an old failure never sits next to the recovery that ended it.
  */
 export const pickImpactEvents = (events: ImpactMapEvent[]): ImpactMapEvent[] => {
-  for (const kind of IMPACT_KINDS) {
+  for (const kinds of IMPACT_KIND_TIERS) {
     const latestOfEach = new Map<string, ImpactMapEvent>();
     events
-      .filter((event) => event.kind === kind)
+      .filter((event) => kinds.includes(event.kind))
       .forEach((event) => {
-        const story = sameStory(event);
-        const seen = latestOfEach.get(story);
+        const target = targetOf(event);
+        const seen = latestOfEach.get(target);
         if (!seen || Date.parse(event.at) > Date.parse(seen.at)) {
-          latestOfEach.set(story, event);
+          latestOfEach.set(target, event);
         }
       });
     if (latestOfEach.size > 0) {
@@ -254,7 +243,7 @@ export const EventCard: React.FC<{
 }> = ({ event, impactMap, onOpen, onOpenEntity }) => (
   <InvestigationCard
     title={event.title}
-    icon="warning"
+    icon={event.kind === 'recovery' ? 'checkInCircleFilled' : 'warning'}
     onClick={onOpen}
     data-test-subj="agenticInvestigationsEventCard"
     badges={

@@ -33,6 +33,7 @@ import { useInvestigation } from '../../../../investigations/hooks/use_investiga
 import type { ImpactMapRenderer } from '../../../../types';
 import {
   ImpactMapEventsFlyout,
+  withRecoveredHealth,
   STANDALONE_WIDTH,
   resolveEventsSelection,
   type EventsSelection,
@@ -222,7 +223,7 @@ const ImpactMapPanel: React.FC<{
   const openRelationship = (id: string) => open({ kind: 'relationship', id });
   const map = (
     <Renderer
-      impactMap={impactMap}
+      impactMap={withRecoveredHealth(impactMap)}
       isFullScreen={isMaximized}
       onToggleFullScreen={() => setIsMaximized(!isMaximized)}
       onEntityClick={openEntity}

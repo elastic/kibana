@@ -46,6 +46,7 @@ export const IMPACT_MAP_EVENT_KINDS = [
   'alert',
   'anomaly',
   'mitigation',
+  'recovery',
   'customer_impact',
   'investigation',
   'response',

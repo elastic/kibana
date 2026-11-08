@@ -97,6 +97,12 @@ const KINDS: Record<ImpactMapEventKind, { label: string; color: EuiBadgeProps['c
     }),
     color: 'success',
   },
+  recovery: {
+    label: i18n.translate('xpack.agenticInvestigations.impactMap.events.kind.recovery', {
+      defaultMessage: 'Recovered',
+    }),
+    color: 'success',
+  },
   customer_impact: {
     label: i18n.translate('xpack.agenticInvestigations.impactMap.events.kind.customerImpact', {
       defaultMessage: 'Customer impact',
@@ -127,6 +133,7 @@ export const EVENT_GROUPS = [
   { id: 'customer_impact', icon: 'users', color: 'accent' },
   { id: 'investigation', icon: 'sparkles', color: 'primary' },
   { id: 'mitigation', icon: 'wrench', color: 'success' },
+  { id: 'recovery', icon: 'checkInCircleFilled', color: 'success' },
   { id: 'response', icon: 'megaphone', color: 'primary' },
 ].map((entry) => ({
   ...entry,
@@ -324,7 +331,10 @@ export const withContextAnnotations = (
       const time = parseTime(at);
       return (
         id !== event.id &&
-        (kind === 'change' || kind === 'mitigation' || kind === 'response') &&
+        (kind === 'change' ||
+          kind === 'mitigation' ||
+          kind === 'recovery' ||
+          kind === 'response') &&
         time !== undefined &&
         time >= start &&
         time <= end &&
@@ -332,12 +342,68 @@ export const withContextAnnotations = (
       );
     })
     .slice(-MAX_CONTEXT_ANNOTATIONS)
-    .map(({ at, title }) => ({ x: at, label: title }));
+    .map(({ at, title, kind }) => ({
+      x: at,
+      label: title,
+      ...(kind === 'mitigation' || kind === 'recovery' ? { tone: 'success' as const } : {}),
+    }));
   const addsOwn = own.length === 0 || !marked.has(parseTime(event.at));
   const ownEvent = addsOwn
-    ? [{ x: event.at, ...(event.ends_at && { x_end: event.ends_at }), label: event.title }]
+    ? [
+        {
+          x: event.at,
+          ...(event.ends_at && { x_end: event.ends_at }),
+          label: event.title,
+          ...(event.kind === 'recovery' || event.kind === 'mitigation'
+            ? { tone: 'success' as const }
+            : {}),
+        },
+      ]
     : [];
   return { ...evidence, chart: { ...chart, annotations: [...context, ...own, ...ownEvent] } };
+};
+
+const STATE_KINDS: readonly ImpactMapEventKind[] = [
+  'customer_impact',
+  'failure',
+  'alert',
+  'anomaly',
+  'condition',
+  'recovery',
+];
+
+/**
+ * The map with every entity healthy whose latest event about its state is a recovery, so the map
+ * shows what got better even when the agent did not re-send the entity's health.
+ */
+export const withRecoveredHealth = <
+  T extends Pick<InvestigationImpactMapResponse, 'entities' | 'events'>
+>(
+  impactMap: T
+): T => {
+  const latest = new Map<string, ImpactMapEvent>();
+  impactMap.events
+    .filter(({ kind, entity_id: entityId }) => entityId && STATE_KINDS.includes(kind))
+    .forEach((event) => {
+      const seen = latest.get(event.entity_id ?? '');
+      if (!seen || Date.parse(event.at) > Date.parse(seen.at)) {
+        latest.set(event.entity_id ?? '', event);
+      }
+    });
+  const recovered = new Set(
+    [...latest.entries()].filter(([, { kind }]) => kind === 'recovery').map(([id]) => id)
+  );
+  if (recovered.size === 0) {
+    return impactMap;
+  }
+  return {
+    ...impactMap,
+    entities: impactMap.entities.map((entity) =>
+      recovered.has(entity.id)
+        ? { ...entity, annotations: { ...entity.annotations, health: 'healthy' as const } }
+        : entity
+    ),
+  };
 };
 
 const FACT_TYPE = i18n.translate('xpack.agenticInvestigations.impactMap.events.factType', {

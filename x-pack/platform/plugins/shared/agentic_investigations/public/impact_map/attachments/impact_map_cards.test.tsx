@@ -10,7 +10,9 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationImpactMap } from '../../../common/impact_map/impact_map';
+import type { ImpactMapEvent } from '../../../common';
 import type { ImpactMapRendererProps } from '../../types';
+import { withRecoveredHealth } from '../../conversation_templates/templates/investigation/flyout/impact_map_events';
 import { createImpactMapCards, pickImpactEvents, pickKeyEntities } from './impact_map_cards';
 import { toImpactMapResponse } from './to_impact_map_response';
 
@@ -96,13 +98,13 @@ describe('toImpactMapResponse', () => {
 });
 
 describe('pickImpactEvents', () => {
-  const impact = (id: string, title: string, at: string, kind = 'customer_impact' as const) => ({
-    id,
-    kind,
-    title,
-    at,
-    entity_id: 'checkout',
-  });
+  const impact = (
+    id: string,
+    title: string,
+    at: string,
+    kind: ImpactMapEvent['kind'] = 'customer_impact',
+    entityId = 'checkout'
+  ) => ({ id, kind, title, at, entity_id: entityId });
 
   it('keeps only the latest of the same thing happening twice', () => {
     const picked = pickImpactEvents([
@@ -123,11 +125,30 @@ describe('pickImpactEvents', () => {
 
   it('keeps different things, newest first', () => {
     const picked = pickImpactEvents([
-      impact('a', 'Checkout failed', '2026-11-08T15:00:00Z'),
-      impact('b', 'Login slowed', '2026-11-08T16:00:00Z'),
+      impact('a', 'Checkout failed', '2026-11-08T15:00:00Z', 'customer_impact', 'checkout'),
+      impact('b', 'Login slowed', '2026-11-08T16:00:00Z', 'customer_impact', 'login'),
     ]);
 
     expect(picked.map(({ id }) => id)).toEqual(['b', 'a']);
+  });
+
+  it('shows a recovery instead of the failures it ended', () => {
+    const picked = pickImpactEvents([
+      impact('first', 'Checkout failed', '2026-11-08T15:47:00Z'),
+      impact('second', 'Checkout failed again', '2026-11-08T15:58:00Z'),
+      impact('done', 'Checkout recovered', '2026-11-08T20:59:00Z', 'recovery'),
+    ]);
+
+    expect(picked.map(({ id }) => id)).toEqual(['done']);
+  });
+
+  it('shows what is still failing next to what recovered', () => {
+    const picked = pickImpactEvents([
+      impact('old', 'Login slowed', '2026-11-08T15:00:00Z', 'customer_impact', 'login'),
+      impact('done', 'Checkout recovered', '2026-11-08T20:59:00Z', 'recovery'),
+    ]);
+
+    expect(picked.map(({ id }) => id)).toEqual(['done', 'old']);
   });
 });
 
@@ -299,5 +320,40 @@ describe('ImpactMapCards', () => {
     renderCards({ ...document, entities: [], relationships: [], events: [] });
 
     expect(screen.getByText('Nothing recorded yet.')).toBeInTheDocument();
+  });
+});
+
+describe('withRecoveredHealth', () => {
+  const entity = (id: string) => ({
+    id,
+    label: id,
+    type_id: 'service',
+    annotations: { health: 'critical' as const },
+  });
+  const event = (id: string, kind: ImpactMapEvent['kind'], at: string, entityId: string) => ({
+    id,
+    kind,
+    title: id,
+    at,
+    entity_id: entityId,
+  });
+
+  it('marks an entity healthy when its latest state event is a recovery', () => {
+    const map = withRecoveredHealth({
+      entities: [entity('a'), entity('b'), entity('c')],
+      events: [
+        event('f1', 'failure', '2026-11-08T15:00:00Z', 'a'),
+        event('r1', 'recovery', '2026-11-08T16:00:00Z', 'a'),
+        event('f2', 'failure', '2026-11-08T15:00:00Z', 'b'),
+        event('r2', 'recovery', '2026-11-08T16:00:00Z', 'b'),
+        event('f3', 'failure', '2026-11-08T17:00:00Z', 'b'),
+      ],
+    } as unknown as Parameters<typeof withRecoveredHealth>[0]);
+
+    expect(map.entities.map(({ annotations }) => annotations?.health)).toEqual([
+      'healthy',
+      'critical',
+      'critical',
+    ]);
   });
 });

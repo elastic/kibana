@@ -161,7 +161,12 @@ export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart, referenceTi
   }, [isTime, series]);
 
   const { pointAnnotations, rangeAnnotations } = useMemo(() => {
-    const points: Array<{ dataValue: number | string; details: string; header: string }> = [];
+    const points: Array<{
+      dataValue: number | string;
+      details: string;
+      header: string;
+      tone?: 'success';
+    }> = [];
     const ranges: Array<{
       coordinates: { x0: number | string; x1: number | string };
       details: string;
@@ -179,7 +184,12 @@ export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart, referenceTi
         // raw data value — epoch milliseconds on a time axis.
         const header =
           typeof start === 'number' ? moment.tz(start, timeZone).format(dateFormat) : start;
-        points.push({ dataValue: start, details: annotation.label, header });
+        points.push({
+          dataValue: start,
+          details: annotation.label,
+          header,
+          tone: annotation.tone,
+        });
       }
     }
     return { pointAnnotations: points, rangeAnnotations: ranges };
@@ -262,16 +272,25 @@ export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart, referenceTi
                 />
               )
             )}
-            {pointAnnotations.length > 0 && (
-              <LineAnnotation
-                id="evidence-point-annotations"
-                domainType={AnnotationDomainType.XDomain}
-                dataValues={pointAnnotations}
-                marker={<EuiIcon type="dot" color={euiTheme.colors.accent} aria-hidden={true} />}
-                markerPosition={Position.Top}
-                style={{ line: { strokeWidth: 1, stroke: euiTheme.colors.accent, opacity: 1 } }}
-              />
-            )}
+            {[
+              { tone: undefined, color: euiTheme.colors.accent },
+              { tone: 'success' as const, color: euiTheme.colors.success },
+            ].map(({ tone, color }) => {
+              const values = pointAnnotations.filter((point) => point.tone === tone);
+              return (
+                values.length > 0 && (
+                  <LineAnnotation
+                    key={tone ?? 'default'}
+                    id={`evidence-point-annotations-${tone ?? 'default'}`}
+                    domainType={AnnotationDomainType.XDomain}
+                    dataValues={values}
+                    marker={<EuiIcon type="dot" color={color} aria-hidden={true} />}
+                    markerPosition={Position.Top}
+                    style={{ line: { strokeWidth: 1, stroke: color, opacity: 1 } }}
+                  />
+                )
+              );
+            })}
             {rangeAnnotations.length > 0 && (
               <RectAnnotation
                 id="evidence-range-annotations"
