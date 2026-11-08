@@ -45,7 +45,7 @@ const impactMap: InvestigationImpactMapResponse = {
       id: 'frontend',
       type_id: 'service',
       label: 'frontend',
-      annotations: { role: 'symptom', impacted: true, alert_count: 3 },
+      annotations: { impacted: true, alert_count: 3 },
     },
     { id: 'checkout', type_id: 'service', label: 'checkout', annotations: { impacted: true } },
     {
@@ -91,13 +91,13 @@ const impactMap: InvestigationImpactMapResponse = {
 };
 
 describe('getImpactSeverityScore', () => {
-  it('ranks root cause over symptom over impacted, and leaves healthy entities plain', () => {
+  it('ranks root cause over degraded over impacted, and leaves healthy entities plain', () => {
     expect(getImpactSeverityScore({ role: 'root_cause', impacted: true })).toBe(
       IMPACT_SEVERITY_SCORES.rootCause
     );
     expect(getImpactSeverityScore({ health: 'critical' })).toBe(IMPACT_SEVERITY_SCORES.rootCause);
-    expect(getImpactSeverityScore({ role: 'symptom' })).toBe(IMPACT_SEVERITY_SCORES.symptom);
-    expect(getImpactSeverityScore({ health: 'degraded' })).toBe(IMPACT_SEVERITY_SCORES.symptom);
+    expect(getImpactSeverityScore({ role: 'symptom' })).toBe(IMPACT_SEVERITY_SCORES.degraded);
+    expect(getImpactSeverityScore({ health: 'degraded' })).toBe(IMPACT_SEVERITY_SCORES.degraded);
     expect(getImpactSeverityScore({ impacted: true })).toBe(IMPACT_SEVERITY_SCORES.impacted);
     expect(getImpactSeverityScore({ health: 'healthy' })).toBeUndefined();
     expect(getImpactSeverityScore(undefined)).toBeUndefined();
@@ -143,9 +143,9 @@ describe('infrastructure entities', () => {
 });
 
 describe('getImpactState', () => {
-  it('badges a root cause or symptom over merely impacted, and leaves healthy nodes alone', () => {
+  it('badges a root cause over merely impacted, and leaves healthy nodes alone', () => {
     expect(getImpactState({ role: 'root_cause', impacted: true })).toBe('root_cause');
-    expect(getImpactState({ role: 'symptom', impacted: true })).toBe('symptom');
+    expect(getImpactState({ role: 'symptom', impacted: true })).toBe('impacted');
     expect(getImpactState({ impacted: true })).toBe('impacted');
     expect(getImpactState({ health: 'healthy' })).toBeUndefined();
   });
@@ -160,7 +160,7 @@ describe('transformImpactMap', () => {
       data: {
         agentName: 'nodejs',
         alertsCount: 3,
-        serviceAnomalyStats: { anomalyScore: IMPACT_SEVERITY_SCORES.symptom },
+        serviceAnomalyStats: { anomalyScore: IMPACT_SEVERITY_SCORES.impacted },
       },
     });
     expect(nodes.find(({ id }) => id === 'payments-db')).toMatchObject({
@@ -228,9 +228,9 @@ describe('ImpactServiceMap', () => {
     }
     expect(screen.getByTestId('serviceMapNodeAlertsBadge')).toBeInTheDocument();
     expect(screen.getByTestId('impactServiceMapLegend')).toHaveTextContent('Critical path');
-    // The root cause, the symptom and what it hurt each carry their own badge.
+    // The root cause and what it hurt each carry their own badge.
     expect(screen.getAllByTestId('impactMapBadge-root_cause').length).toBeGreaterThan(1);
-    expect(screen.getAllByTestId('impactMapBadge-symptom').length).toBeGreaterThan(1);
+    expect(screen.getAllByTestId('impactMapBadge-impacted').length).toBeGreaterThan(1);
   });
 
   it('reports a click on any node, a service included, so its events open', () => {

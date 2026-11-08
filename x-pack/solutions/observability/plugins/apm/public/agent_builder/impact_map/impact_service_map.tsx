@@ -59,13 +59,6 @@ const BADGES: Record<ImpactState, { icon: IconType; score: number; label: string
       defaultMessage: 'Root cause',
     }),
   },
-  symptom: {
-    icon: 'warning',
-    score: IMPACT_SEVERITY_SCORES.symptom,
-    label: i18n.translate('xpack.apm.impactMap.badge.symptom', {
-      defaultMessage: 'Symptom: where the problem shows',
-    }),
-  },
   impacted: {
     icon: 'sortDown',
     score: IMPACT_SEVERITY_SCORES.impacted,
@@ -220,9 +213,6 @@ const LEGEND = {
   rootCause: i18n.translate('xpack.apm.impactMap.legend.rootCause', {
     defaultMessage: 'Root cause',
   }),
-  symptom: i18n.translate('xpack.apm.impactMap.legend.symptom', {
-    defaultMessage: 'Symptom',
-  }),
   impacted: i18n.translate('xpack.apm.impactMap.legend.impacted', {
     defaultMessage: 'Impacted',
   }),
@@ -240,12 +230,6 @@ function ImpactMapLegend({ criticalPathColor }: { criticalPathColor: string }) {
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <StateBadge state="root_cause" />
             <EuiText size="xs">{LEGEND.rootCause}</EuiText>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            <StateBadge state="symptom" />
-            <EuiText size="xs">{LEGEND.symptom}</EuiText>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

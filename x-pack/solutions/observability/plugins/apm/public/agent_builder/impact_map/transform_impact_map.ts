@@ -23,7 +23,7 @@ import { createEdgeMarker } from '../../../common/service_map/utils';
  */
 export const IMPACT_SEVERITY_SCORES = {
   rootCause: 95,
-  symptom: 60,
+  degraded: 60,
   impacted: 30,
 } as const;
 
@@ -36,8 +36,9 @@ export const getImpactSeverityScore = (annotations?: ImpactMapAnnotations): numb
   if (role === 'root_cause' || health === 'critical') {
     return IMPACT_SEVERITY_SCORES.rootCause;
   }
+  // `symptom` is a role older investigations stored; it reads as impacted now.
   if (role === 'symptom' || health === 'degraded') {
-    return IMPACT_SEVERITY_SCORES.symptom;
+    return IMPACT_SEVERITY_SCORES.degraded;
   }
   if (impacted || role === 'contributor') {
     return IMPACT_SEVERITY_SCORES.impacted;
@@ -45,10 +46,10 @@ export const getImpactSeverityScore = (annotations?: ImpactMapAnnotations): numb
   return undefined;
 };
 
-/** What an entity is in the incident: where it started, where it shows, or what it hurt. */
-export type ImpactState = 'root_cause' | 'symptom' | 'impacted';
+/** What an entity is in the incident: where it started, or what it hurt. */
+export type ImpactState = 'root_cause' | 'impacted';
 
-/** The one state a node is badged with. A root cause or symptom outranks being impacted. */
+/** The one state a node is badged with. A root cause outranks being impacted. */
 export const getImpactState = (annotations?: ImpactMapAnnotations): ImpactState | undefined => {
   if (!annotations) {
     return undefined;
@@ -57,10 +58,13 @@ export const getImpactState = (annotations?: ImpactMapAnnotations): ImpactState 
   if (role === 'root_cause') {
     return 'root_cause';
   }
-  if (role === 'symptom') {
-    return 'symptom';
-  }
-  if (impacted || role === 'contributor' || health === 'critical' || health === 'degraded') {
+  if (
+    impacted ||
+    role === 'symptom' ||
+    role === 'contributor' ||
+    health === 'critical' ||
+    health === 'degraded'
+  ) {
     return 'impacted';
   }
   return undefined;
@@ -105,7 +109,7 @@ const CRITICAL_PATH_STROKE_WIDTH = 3;
 /**
  * Turns an investigation's impact map into service map nodes and edges: an entity type of kind
  * `service` draws as a service circle, `dependency` as a dependency diamond, with the icon the
- * type names, and `infrastructure` as a rounded square. Root cause, symptom and impacted entities get the matching severity border, and
+ * type names, and `infrastructure` as a rounded square. Root cause and impacted entities get the matching severity border, and
  * relationships on the critical path are drawn thicker in the critical path colour. A service
  * APM has traces for takes the icon of its agent, as on the service map.
  */

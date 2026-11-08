@@ -1077,7 +1077,7 @@ export const FINDINGS_JSON_SCHEMA = {
                 type: 'string',
                 enum: IMPACT_MAP_ROLES,
                 description:
-                  'root_cause for the confirmed or leading cause, symptom where the problem was seen, contributor for something that made it worse, context for the rest.',
+                  'root_cause for the confirmed or leading cause, contributor for something that made it worse, context for the rest.',
               },
               health: { type: 'string', enum: IMPACT_MAP_HEALTH_STATES },
               impacted: {

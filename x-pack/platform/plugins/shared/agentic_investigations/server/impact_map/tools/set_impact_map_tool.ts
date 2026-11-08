@@ -43,7 +43,7 @@ const entitySchema = impactMapEntitySchema.extend({
   annotations: impactMapAnnotationsSchema
     .extend({
       role: impactMapAnnotationsSchema.shape.role.describe(
-        '"root_cause" for the confirmed cause (at most one, usually), "symptom" where the problem is seen, "contributor" for what made it worse, "context" for the rest.'
+        '"root_cause" for the confirmed cause (at most one, usually), "contributor" for what made it worse, "context" for the rest.'
       ),
       health: impactMapAnnotationsSchema.shape.health.describe(
         'What the data says about this entity now.'
@@ -138,7 +138,7 @@ const DESCRIPTION =
   'The graph is a snapshot, not a diff: send the whole map every time; it replaces the stored one. Events are merged by id. ' +
   'Entities are physical things only (services, hosts, pods, databases, queues, cloud APIs). A change, an outage, a vendor or customer impact is an event on the entity it happened to, never an entity. ' +
   'Types come from the space catalog so every investigation draws things the same way: read it first with `agentic_investigations.upsert_impact_map_catalog` (no arguments) and reuse its type ids; send any new type in `entity_types` / `relationship_types`. ' +
-  'Mark the confirmed cause `role: "root_cause"`, where the problem shows `role: "symptom"`, what users feel `impacted: true`, and every edge of the causal chain `on_critical_path: true`. ' +
+  'Mark the confirmed cause `role: "root_cause"`, what the problem touched, where it shows included, `impacted: true`, and every edge of the causal chain `on_critical_path: true`. ' +
   'It does not end the investigation; keep working after calling it.';
 
 export const REMOVED_IMPACT_MAP_ATTACHMENT_NOTE =
