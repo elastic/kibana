@@ -21,7 +21,7 @@ const BODY = i18n.translate('xpack.agenticInvestigations.detailsFlyout.learnings
 export const LearningsTab: React.FC = () => (
   <EuiEmptyPrompt
     data-test-subj="agenticInvestigationsLearningsPlaceholder"
-    iconType="sparkles"
+    iconType="training"
     title={<h3>{TITLE}</h3>}
     titleSize="xs"
     body={<p>{BODY}</p>}
