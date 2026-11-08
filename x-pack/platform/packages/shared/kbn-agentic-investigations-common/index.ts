@@ -115,6 +115,8 @@ export {
   type RenderImpactMap,
   type ImpactMapSlotRenderProps,
   type RenderTimeline,
+  type RenderLearnings,
+  type LearningsSlotRenderProps,
   type TimelineSlotRenderProps,
   type RenderLiveState,
   type LiveStateSlotRenderProps,

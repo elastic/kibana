@@ -61,6 +61,9 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
     timeline: i18n.translate('xpack.agenticInvestigations.detailsFlyout.tabs.timeline', {
       defaultMessage: 'Timeline',
     }),
+    learnings: i18n.translate('xpack.agenticInvestigations.detailsFlyout.tabs.learnings', {
+      defaultMessage: 'Learnings',
+    }),
   },
   sections: {
     overview: i18n.translate('xpack.agenticInvestigations.detailsFlyout.sections.situation', {

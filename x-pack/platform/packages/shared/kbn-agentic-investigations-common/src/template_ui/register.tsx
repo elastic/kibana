@@ -24,6 +24,7 @@ import type {
   RenderOverview,
   RenderImpactMap,
   RenderTimeline,
+  RenderLearnings,
   RenderLiveState,
   RenderTitle,
   RenderSyncIndicator,
@@ -53,15 +54,21 @@ const LazyEscalationOverviewSlot = lazy(() =>
 /**
  * Tab ids are prefixed with the solution's template id because Agent Builder's tab ids are a
  * global keyspace and duplicate registration throws. The Impact map and Timeline tabs exist only
- * when the caller supplies `renderImpactMap` and `renderTimeline`.
+ * when the caller supplies `renderImpactMap` and `renderTimeline`, and the Learnings tab when it
+ * supplies `renderLearnings`.
  */
 export const getInvestigationTabIds = (
   templateId: string,
-  { impactMap = false, timeline = false }: { impactMap?: boolean; timeline?: boolean } = {}
+  {
+    impactMap = false,
+    timeline = false,
+    learnings = false,
+  }: { impactMap?: boolean; timeline?: boolean; learnings?: boolean } = {}
 ): readonly string[] => [
   `${templateId}.overview`,
   ...(impactMap ? [`${templateId}.impactMap`] : []),
   ...(timeline ? [`${templateId}.timeline`] : []),
+  ...(learnings ? [`${templateId}.learnings`] : []),
 ];
 
 export interface RegisterAgenticInvestigationTemplateUIOptions {
@@ -147,6 +154,10 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
    */
   renderTimeline?: RenderTimeline;
   /**
+   * When provided, the flyout gets a Learnings tab with this as its body. See `RenderLearnings`.
+   */
+  renderLearnings?: RenderLearnings;
+  /**
    * When provided, the header shows the investigation's live state (severity, running indicator)
    * next to its age. See `RenderLiveState`.
    */
@@ -196,6 +207,7 @@ export const registerAgenticInvestigationTemplateUI = ({
   renderOverview,
   renderImpactMap,
   renderTimeline,
+  renderLearnings,
   renderLiveState,
   renderTitle,
   briefCard,
@@ -204,10 +216,12 @@ export const registerAgenticInvestigationTemplateUI = ({
   const tabIds = getInvestigationTabIds(templateId, {
     impactMap: Boolean(renderImpactMap),
     timeline: Boolean(renderTimeline),
+    learnings: Boolean(renderLearnings),
   });
   const [overviewTabId] = tabIds;
   const impactMapTabId = tabIds.find((id) => id === `${templateId}.impactMap`);
   const timelineTabId = tabIds.find((id) => id === `${templateId}.timeline`);
+  const learningsTabId = tabIds.find((id) => id === `${templateId}.learnings`);
 
   conversationTemplates.registerTab(overviewTabId, () => ({
     label: DETAILS_FLYOUT_LABELS.tabs.overview,
@@ -247,6 +261,15 @@ export const registerAgenticInvestigationTemplateUI = ({
       label: DETAILS_FLYOUT_LABELS.tabs.timeline,
       content: function TimelineTabContent({ conversation }) {
         return <>{renderTimeline({ conversationId: conversation.id })}</>;
+      },
+    }));
+  }
+
+  if (renderLearnings && learningsTabId) {
+    conversationTemplates.registerTab(learningsTabId, () => ({
+      label: DETAILS_FLYOUT_LABELS.tabs.learnings,
+      content: function LearningsTabContent({ conversation }) {
+        return <>{renderLearnings({ conversationId: conversation.id })}</>;
       },
     }));
   }

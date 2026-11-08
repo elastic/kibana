@@ -147,7 +147,9 @@ describe('ConversationDetailsFlyoutFooter', () => {
       'investigationFlyoutActionsDelete',
       'investigationFlyoutActionsClose',
     ]);
-    expect(deleteItem.compareDocumentPosition(closeItem) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(
+      deleteItem.compareDocumentPosition(closeItem) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
     expect(panel.querySelector('hr')).toBeInTheDocument();
   });
 

@@ -304,6 +304,17 @@ describe('registerAgenticInvestigationTemplateUI', () => {
     expect(definition?.detailsFlyout?.footer).toBeDefined();
   });
 
+  it('adds a Learnings tab, after the others, only when it is given a body', () => {
+    const { contract } = createFakeService();
+    register(contract, { renderLearnings: () => <div>learnings</div> });
+
+    expect(contract.getTemplateUIDefinition('investigation')?.tabs).toEqual(
+      getInvestigationTabIds('investigation', { learnings: true })
+    );
+    expect(contract.getTab('investigation.learnings')).toBeDefined();
+    expect(getInvestigationTabIds('investigation')).not.toContain('investigation.learnings');
+  });
+
   it('adds a Copy link flyout action that calls onCopyLink', () => {
     const onCopyLink = jest.fn().mockReturnValue(true);
     const { contract } = createFakeService();
