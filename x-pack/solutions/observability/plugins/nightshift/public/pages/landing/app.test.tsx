@@ -243,9 +243,10 @@ describe('NightshiftApp', () => {
   it('renders investigations and reports the page ready metrics', () => {
     renderApp();
 
-    expect(
-      screen.queryByTestId('nightshiftHomepageViewAllInvestigations')
-    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftHomepageViewAllInvestigations')).toHaveAttribute(
+      'href',
+      expect.stringContaining('/app/nightshift/investigations')
+    );
     expect(screen.getByTestId('nightshiftHomepageTimePicker')).toBeInTheDocument();
     expect(screen.getByText('Checkout errors are elevated')).toBeInTheDocument();
     expect(screen.getByText('Investigations are underway')).toBeInTheDocument();
