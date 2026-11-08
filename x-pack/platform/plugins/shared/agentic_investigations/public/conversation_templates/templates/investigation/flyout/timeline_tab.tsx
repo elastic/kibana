@@ -544,7 +544,7 @@ const Timeline: React.FC<{
               <EuiTimelineItem
                 key={row.key}
                 verticalAlign="center"
-                icon={<EuiIcon type="eyeClosed" color="subdued" aria-hidden={true} />}
+                icon={<EuiIcon type="eyeSlash" color="subdued" aria-hidden={true} />}
               >
                 <EuiText
                   size="xs"
