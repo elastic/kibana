@@ -337,6 +337,7 @@ const TimelineCard: React.FC<{
           </EuiTimelineItem>
         ))}
       </EuiTimeline>
+      {hidden > 0 && <EuiSpacer size="m" />}
       {hidden > 0 && (
         <EuiButtonEmpty
           size="xs"
