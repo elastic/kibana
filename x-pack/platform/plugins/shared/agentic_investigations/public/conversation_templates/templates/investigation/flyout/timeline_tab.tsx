@@ -419,7 +419,7 @@ const Timeline: React.FC<{
             ) : (
               <EuiTimelineItem
                 key={row.event.id}
-                verticalAlign="top"
+                verticalAlign="center"
                 icon={<KindAvatar kind={row.event.kind} />}
               >
                 <TimelineEvent

@@ -115,7 +115,11 @@ const EventsTimeline: React.FC<{
   return (
     <EuiTimeline gutterSize="m" data-test-subj="agenticInvestigationsImpactMapEventsTimeline">
       {events.map((event) => (
-        <EuiTimelineItem key={event.id} verticalAlign="top" icon={<KindAvatar kind={event.kind} />}>
+        <EuiTimelineItem
+          key={event.id}
+          verticalAlign="center"
+          icon={<KindAvatar kind={event.kind} />}
+        >
           <TimelineEvent
             event={event}
             impactMap={impactMap}
