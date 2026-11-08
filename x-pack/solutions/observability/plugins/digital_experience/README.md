@@ -48,6 +48,24 @@ time, JS errors and failed HTTP requests, its Core Web Vitals, and page loads an
 time, from `GET /internal/digital_experience/applications/{serviceName}/overview`. Without `source`,
 the page shows the Classic RUM application.
 
+The EDOT Browser Overview can be narrowed by environment and by **Browser**, **OS**, **Device**,
+**Country** and **Page**, all kept in the URL (`browser`, `os`, `device`, `country`, `pageUrl`).
+`browser`, `os` and `country` are the Sessions tab's own params, so the tab links carry them over.
+
+- **Values:** each filter lists its ten most used values with their page loads in the time range,
+  environment and the other selected filters, but not its own selection, so its other values stay
+  selectable. A filter without values, e.g. the country when the collector does no GeoIP processing,
+  is hidden unless it is selected.
+- **Fields:** the raw documents have no field per dimension, so browser, OS, device and country read
+  the alternatives the sessions transform reads (`SESSION_ATTRIBUTE_FIELDS` in
+  `common/session_attribute_fields.ts`, shared by both) and take the first non-empty one, with a
+  runtime field. The page is `attributes.url.full`.
+- **Scope:** browser, OS, device and country narrow every panel of the Overview: the KPIs, Core Web
+  Vitals and trends (`/overview`), the pages, breakdowns and clicks (`/usage`) and the top errors
+  (`/errors`, whose tab has no filters). Web vitals, errors and clicks carry no page URL yet, and an
+  HTTP request's `url.full` is the URL requested, so the page narrows the page loads, with their
+  load time, trend, pages and breakdowns only; the page says so while a page is selected.
+
 ### Sessions (`/{serviceName}/sessions?source=otel`)
 
 A tab of EDOT Browser applications only, as sessions are built from EDOT Browser data (see
@@ -75,7 +93,9 @@ A tab of EDOT Browser applications only, as sessions are built from EDOT Browser
 - **Summary:** duration, page views, clicks and errors; when, who, browser and OS, location, entry and
   exit pages; and the session's Core Web Vitals.
 - **Timeline:** one bar for the session, with a segment per page visit as wide as the time spent on
-  the page (its counts in a tooltip) and a marker per error.
+  the page and a marker per error. Selecting a segment scrolls to that visit.
+- **Page journey:** a card per page visit with its time, share of the session, clicks, errors and web
+  vitals, and its page views, clicks, errors and web vitals in order. Spans and logs are left out.
 - **States:** a 404 leads back to the list; a timeline cut at the event limit is flagged.
 
 ## Sessions
@@ -111,7 +131,8 @@ user's credentials**
 needs these Elasticsearch privileges; when any is missing the request fails with a 403 listing them,
 before anything is written:
 
-- Cluster: `manage_transform`, `manage_ingest_pipelines`, `manage_index_templates`
+- Cluster: `manage_transform`, `manage_ingest_pipelines`, `manage_index_templates`, and on
+  serverless also `read_security` (the predefined `admin` role has it; custom roles may not)
 - `traces-*.otel-*`, `logs-*.otel-*`: `read`, `view_index_metadata`
 - `digital-experience-sessions-*`: `read`, `index`, `create_index`, `delete`, `delete_index`
 
@@ -119,11 +140,16 @@ The read on `traces-*.otel-*` and `logs-*.otel-*` must also be unrestricted: no 
 field-level security. Otherwise the transforms would only see that user's slice of the data, so
 every other application's sessions (or fields) would silently stop updating for everyone, and
 retention would then delete them. `has_privileges` doesn't report these restrictions, so enabling
-also reads the user's roles (`GET _security/user/_privileges`) and fails with a 403 naming the
-affected patterns. One role with unrestricted read on a pattern is enough, even if another role
-filters it. Elasticsearch can't report the privileges of an API key with its own role descriptors,
-so such keys are refused too; enable sessions as a user, or with an API key without role
-descriptors.
+also reads the user's index privileges and fails with a 403 naming the affected patterns. It reads
+them with `GET _security/user/_privileges`, which serverless only allows operator users; for
+everyone else there it reads the user's roles with `_security/_authenticate` and the Query Role
+API, hence `read_security`. A pattern is refused when a role's read that could apply to it has a
+`query` or field restriction, unless another role provably reads all of it: one role with
+unrestricted read on a pattern is enough, even if another role filters it. Roles that grant read
+through a regular expression, like serverless `editor`, pass when unfiltered, as `has_privileges`
+already checked the read, but never lift another role's filter. Elasticsearch can't report the
+privileges of an API key with its own role descriptors, nor of any API key on serverless, so such
+keys are refused too; enable sessions as a user.
 
 Each enable records the username and time on the transforms (`_meta.enabled_by`,
 `_meta.enabled_at`) and writes a `digital_experience_sessions_enable` audit event, successful or
