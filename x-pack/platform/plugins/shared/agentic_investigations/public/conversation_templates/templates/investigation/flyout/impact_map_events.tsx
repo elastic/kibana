@@ -629,6 +629,24 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
   // Opened on one event from the timeline, there is no list to go back to.
   const canGoBack = Boolean(selected) && (!initialEventId || events.length > 1);
 
+  const viewInTimelineLink = onViewInTimeline && events.length > 0 && (
+    <EuiText size="xs" textAlign="right">
+      <EuiLink
+        onClick={() => {
+          // A main flyout opened over the investigation flyout steps back to it,
+          // as Back does, instead of closing the whole stack.
+          if (asMainFlyout) {
+            getFlyoutManagerStore().goBack();
+          }
+          onViewInTimeline();
+        }}
+        data-test-subj="agenticInvestigationsImpactMapViewInTimeline"
+      >
+        {VIEW_IN_TIMELINE}
+      </EuiLink>
+    </EuiText>
+  );
+
   return (
     <EventsFlyoutFrame
       standalone={standalone}
@@ -721,25 +739,6 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
                   )}
                 </EuiTabs>
               </EuiFlexItem>
-              {onViewInTimeline && events.length > 0 && tab === 'timeline' && (
-                <EuiFlexItem grow={false}>
-                  <EuiLink
-                    onClick={() => {
-                      // A main flyout opened over the investigation flyout steps back to it,
-                      // as Back does, instead of closing the whole stack.
-                      if (asMainFlyout) {
-                        getFlyoutManagerStore().goBack();
-                      }
-                      onViewInTimeline();
-                    }}
-                    data-test-subj="agenticInvestigationsImpactMapViewInTimeline"
-                  >
-                    <EuiText size="xs" component="span">
-                      {VIEW_IN_TIMELINE}
-                    </EuiText>
-                  </EuiLink>
-                </EuiFlexItem>
-              )}
             </EuiFlexGroup>
           </>
         )}
@@ -760,16 +759,22 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
             title={<h3>{EMPTY_TITLE}</h3>}
             body={<p>{EMPTY_BODY}</p>}
           />
-        ) : renderEvents ? (
-          renderEvents(events, setSelectedId)
         ) : (
-          <EuiFlexGroup direction="column" gutterSize="s">
-            {events.map((event) => (
-              <EuiFlexItem key={event.id} grow={false}>
-                <EventSummary event={event} onClick={() => setSelectedId(event.id)} />
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
+          <>
+            {viewInTimelineLink}
+            {viewInTimelineLink && <EuiSpacer size="s" />}
+            {renderEvents ? (
+              renderEvents(events, setSelectedId)
+            ) : (
+              <EuiFlexGroup direction="column" gutterSize="s">
+                {events.map((event) => (
+                  <EuiFlexItem key={event.id} grow={false}>
+                    <EventSummary event={event} onClick={() => setSelectedId(event.id)} />
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            )}
+          </>
         )}
       </EuiFlyoutBody>
     </EventsFlyoutFrame>
