@@ -20,6 +20,7 @@ import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task
 /**
  * When concurrency defers an execution to `queued`, schedule a dormant `workflow:run` task
  * using the trigger user's request so promotion can `runSoon` without privilege escalation.
+ * A promotion that already moved it to `pending` still gets that task when none exists yet.
  */
 export async function maybeScheduleDormantQueuedRunIfNeeded({
   workflowExecutionId,
@@ -43,21 +44,33 @@ export async function maybeScheduleDormantQueuedRunIfNeeded({
     spaceId
   );
 
-  if (!execution || execution.status !== ExecutionStatus.QUEUED) {
-    return;
-  }
-
-  const concurrency = execution.workflowDefinition?.settings?.concurrency;
-  if (concurrency?.strategy !== 'queue') {
+  if (
+    !execution ||
+    execution.workflowDefinition?.settings?.concurrency?.strategy !== 'queue' ||
+    (execution.status !== ExecutionStatus.QUEUED && execution.status !== ExecutionStatus.PENDING)
+  ) {
     return;
   }
 
   try {
+    if (execution.status === ExecutionStatus.PENDING) {
+      if (!execution.id || (await workflowTaskManager.hasActiveTaskForExecution(execution.id))) {
+        return;
+      }
+    }
+
     await workflowTaskManager.scheduleDormantQueuedRunTask({
       workflowExecution: execution,
       request,
       runAs,
     });
+
+    if (execution.status === ExecutionStatus.PENDING && execution.id) {
+      await workflowTaskManager.promoteQueuedRunTask({
+        executionId: execution.id,
+        triggeredBy: execution.triggeredBy || 'manual',
+      });
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     logger.warn(
@@ -105,7 +118,7 @@ export async function handleConcurrencyBlockedExecution({
     return;
   }
 
-  if (execution.status === ExecutionStatus.QUEUED) {
+  if (execution.status === ExecutionStatus.QUEUED || execution.status === ExecutionStatus.PENDING) {
     await maybeScheduleDormantQueuedRunIfNeeded({
       workflowExecutionId,
       spaceId,
