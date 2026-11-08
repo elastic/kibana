@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationImpactMapResponse } from '../../../../../common';
@@ -68,7 +68,7 @@ describe('TimelineTab', () => {
     mockUseInvestigation.mockReturnValue({ data: { impact_map: impactMap } });
   });
 
-  it('lists every event latest first, in UTC, and flips the order', () => {
+  it('lists every event newest first, with UTC time, time since the first event and a summary', () => {
     renderTab();
 
     expect(rowTitles()).toEqual([
@@ -76,42 +76,49 @@ describe('TimelineTab', () => {
       'Payments-client retries surged',
       'v3.8.0 rolled out by Argo CD',
     ]);
-    expect(screen.getAllByTestId('agenticInvestigationsTimelineRow')[2]).toHaveTextContent(
-      '14:02 UTC'
+    const rows = screen.getAllByTestId('agenticInvestigationsTimelineRow');
+    expect(rows[2]).toHaveTextContent('14:02 UTC');
+    expect(rows[0]).toHaveTextContent('+6m');
+    expect(screen.getByTestId('agenticInvestigationsTimelineSummary')).toHaveTextContent(
+      '3 events over 6m'
     );
 
     fireEvent.click(screen.getByTestId('agenticInvestigationsTimelineSort'));
     expect(rowTitles()[0]).toBe('v3.8.0 rolled out by Argo CD');
   });
 
-  it('shows both ends of a relationship and filters by an entity from its chip', () => {
+  it('shows both ends of a relationship and filters by an entity from its badge', () => {
     renderTab();
-    const chips = screen.getAllByTestId('agenticInvestigationsTimelineEntity');
-    expect(chips.map((chip) => chip.textContent)).toEqual([
+    const badges = screen.getAllByTestId('agenticInvestigationsTimelineEntity');
+    expect(badges.map((badge) => badge.textContent)).toEqual([
       'checkout-service',
       'payment-gateway',
       'checkout-service',
     ]);
 
-    fireEvent.click(chips[1]);
+    fireEvent.click(badges[1]);
     expect(rowTitles()).toEqual(['Payments-client retries surged']);
+    expect(screen.getByTestId('agenticInvestigationsTimelineSummary')).toHaveTextContent(
+      'Showing 1 of 3 events'
+    );
   });
 
-  it('filters by the kind of event', () => {
+  it('filters by type from the Type filter', async () => {
     renderTab();
-    fireEvent.click(screen.getByTestId('agenticInvestigationsTimelineGroup-change'));
-    expect(rowTitles()).toEqual(['v3.8.0 rolled out by Argo CD']);
-
-    fireEvent.click(screen.getByTestId('agenticInvestigationsTimelineGroup-response'));
-    expect(rowTitles()).toEqual(['Incident channel opened', 'v3.8.0 rolled out by Argo CD']);
+    fireEvent.click(screen.getByTestId('agenticInvestigationsTimelineTypeFilter'));
+    fireEvent.click(screen.getByRole('option', { name: /Change/ }));
+    await waitFor(() => expect(rowTitles()).toEqual(['v3.8.0 rolled out by Argo CD']));
   });
 
-  it('filters by text', () => {
+  it('filters by text and clears the filters', () => {
     renderTab();
-    fireEvent.change(screen.getByTestId('comboBoxSearchInput'), {
-      target: { value: 'retries' },
+    fireEvent.change(screen.getByTestId('agenticInvestigationsTimelineSearch'), {
+      target: { value: 'nothing like this' },
     });
-    expect(rowTitles()).toEqual(['Payments-client retries surged']);
+    expect(rowTitles()).toEqual([]);
+
+    fireEvent.click(screen.getAllByText('Clear filters')[0]);
+    expect(rowTitles()).toHaveLength(3);
   });
 
   it('opens an event straight to its detail', () => {

@@ -57,6 +57,7 @@ import { MAX_INVESTIGATION_CANDIDATE_CONVERSATION_IDS } from '../../investigatio
 import { bulkGetReadableConversations } from './readable_conversation_ids';
 import type { InProgressResolver } from './in_progress';
 import { sortImpactMapEvents } from '../../../common/impact_map/events';
+import { toEntityName } from '../../../common/impact_map/entity_name';
 
 /** Bound on the proposals one investigation read returns. */
 const MAX_INVESTIGATION_PROPOSALS = 100;
@@ -774,7 +775,8 @@ const toImpactMapResponse = ({
   updatedAt,
 }: InvestigationImpactMap): NonNullable<Investigation['impact_map']> => ({
   ...(title !== undefined && { title }),
-  entities,
+  // Maps recorded before names were cleaned on write still carry types and states in labels.
+  entities: entities.map((entity) => ({ ...entity, label: toEntityName(entity.label) })),
   relationships: relationships.map((relationship) => ({
     ...relationship,
     id: relationship.id ?? `${relationship.source_id}->${relationship.target_id}`,

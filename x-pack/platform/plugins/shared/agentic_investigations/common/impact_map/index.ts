@@ -60,6 +60,7 @@ export type {
 export { mergeImpactMapCatalog, resolveImpactMapGraph } from './resolve_graph';
 export type { ResolvedImpactMapGraph } from './resolve_graph';
 
+export { toEntityName } from './entity_name';
 export {
   impactMapEventId,
   mergeImpactMapEvents,

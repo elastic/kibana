@@ -148,6 +148,7 @@ export type {
   InvestigationImpactMap,
 } from './impact_map/impact_map';
 
+export { toEntityName } from './impact_map/entity_name';
 export {
   impactMapEventId,
   mergeImpactMapEvents,

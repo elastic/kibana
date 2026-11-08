@@ -31,6 +31,7 @@ import {
   MAX_IMPACT_MAP_RELATIONSHIPS,
   MAX_IMPACT_TOOL_ENTITIES,
   impactMapEventId,
+  toEntityName,
   type ImpactMapEntity,
   type ImpactMapEntityType,
   type ImpactMapEvent,
@@ -403,20 +404,6 @@ export const limitImpactMap = (
 };
 
 const MAX_EVENT_DESCRIPTION_LENGTH = 1_000;
-
-/**
- * The name of the thing itself. Models tend to fold its type, a state or an endpoint into the
- * name ("k8s deployment: shipping (0/0)", "quote-old:8080 (NXDOMAIN)"); those belong to the type
- * and the events, so a leading "type:" and trailing "(...)" or ":port" are dropped.
- */
-export const toEntityName = (raw: string): string => {
-  const name = raw
-    .replace(/^[A-Za-z0-9_ -]{2,40}:\s+(?=\S)/, '')
-    .replace(/\s*\([^)]*\)\s*$/, '')
-    .replace(/:\d{2,5}$/, '')
-    .trim();
-  return name || raw.trim();
-};
 
 /** An ISO 8601 time the store can sort by, or undefined when the model wrote something else. */
 const toIsoTime = (value?: string): string | undefined => {

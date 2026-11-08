@@ -8,35 +8,48 @@
 import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiAvatar,
   EuiBadge,
+  EuiButton,
   EuiButtonEmpty,
-  EuiComboBox,
   EuiEmptyPrompt,
+  EuiFieldSearch,
+  EuiFilterButton,
+  EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiIconTip,
+  EuiLink,
   EuiPanel,
+  EuiPopover,
+  EuiSelectable,
   EuiSkeletonText,
   EuiSpacer,
   EuiText,
-  EuiTitle,
+  EuiTimeline,
+  EuiTimelineItem,
+  EuiToolTip,
   useEuiTheme,
-  type EuiComboBoxOptionOption,
+  useGeneratedHtmlId,
+  type EuiSelectableOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedTime } from '@kbn/i18n-react';
 import type { TimelineSlotRenderProps } from '@kbn/agentic-investigations-common';
-import type { ImpactMapEvent, InvestigationImpactMapResponse } from '../../../../../common';
+import type {
+  ImpactMapEvent,
+  ImpactMapEventKind,
+  InvestigationImpactMapResponse,
+} from '../../../../../common';
 import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
 import {
   EVENT_GROUPS,
+  EventKindBadge,
   ImpactMapEventsFlyout,
   describeEventTarget,
   getEventEntityIds,
   getEventGroup,
   resolveEventsSelection,
-  type EventGroup,
-  type EventGroupId,
 } from './impact_map_events';
 
 const EMPTY_TITLE = i18n.translate('xpack.agenticInvestigations.timeline.emptyTitle', {
@@ -47,176 +60,231 @@ const EMPTY_BODY = i18n.translate('xpack.agenticInvestigations.timeline.emptyBod
     'Changes, failures, alerts and what responders did appear here in the order they happened.',
 });
 const NO_MATCHES = i18n.translate('xpack.agenticInvestigations.timeline.noMatches', {
-  defaultMessage: 'No events match these filters.',
+  defaultMessage: 'No events match these filters',
+});
+const CLEAR_FILTERS = i18n.translate('xpack.agenticInvestigations.timeline.clearFilters', {
+  defaultMessage: 'Clear filters',
 });
 const SEARCH_PLACEHOLDER = i18n.translate('xpack.agenticInvestigations.timeline.search', {
-  defaultMessage: 'Search',
+  defaultMessage: 'Search events',
 });
-const SEARCH_LABEL = i18n.translate('xpack.agenticInvestigations.timeline.searchLabel', {
-  defaultMessage: 'Filter the timeline by entity or text',
+const ENTITY_FILTER = i18n.translate('xpack.agenticInvestigations.timeline.entityFilter', {
+  defaultMessage: 'Entity',
 });
-const FILTER_BY = i18n.translate('xpack.agenticInvestigations.timeline.filterBy', {
-  defaultMessage: 'Filter by',
+const TYPE_FILTER = i18n.translate('xpack.agenticInvestigations.timeline.typeFilter', {
+  defaultMessage: 'Type',
 });
-const TIMELINE_TITLE = i18n.translate('xpack.agenticInvestigations.timeline.title', {
-  defaultMessage: 'Timeline',
+const SEARCH_ENTITIES = i18n.translate('xpack.agenticInvestigations.timeline.searchEntities', {
+  defaultMessage: 'Search entities',
 });
-const LATEST_FIRST = i18n.translate('xpack.agenticInvestigations.timeline.latestFirst', {
-  defaultMessage: 'Latest first',
+const NEWEST_FIRST = i18n.translate('xpack.agenticInvestigations.timeline.newestFirst', {
+  defaultMessage: 'Newest first',
 });
 const OLDEST_FIRST = i18n.translate('xpack.agenticInvestigations.timeline.oldestFirst', {
   defaultMessage: 'Oldest first',
 });
-const COLLAPSE = i18n.translate('xpack.agenticInvestigations.timeline.collapse', {
-  defaultMessage: 'Collapse the timeline',
+const HAS_CHART = i18n.translate('xpack.agenticInvestigations.timeline.hasChart', {
+  defaultMessage: 'Has a chart',
 });
-const EXPAND = i18n.translate('xpack.agenticInvestigations.timeline.expand', {
-  defaultMessage: 'Expand the timeline',
+const SINCE_FIRST = i18n.translate('xpack.agenticInvestigations.timeline.sinceFirst', {
+  defaultMessage: 'Time since the first event',
 });
 
-const ICON_SIZE = 28;
+const TIMELINE_LABEL = i18n.translate('xpack.agenticInvestigations.timeline.label', {
+  defaultMessage: 'Investigation timeline',
+});
 
-const GroupIcon: React.FC<{ group: EventGroup; filled?: boolean }> = ({ group, filled }) => {
+const MINUTE_MS = 60_000;
+
+/** "57m" or "1h 12m". */
+const formatDuration = (ms: number): string => {
+  const minutes = Math.round(ms / MINUTE_MS);
+  const hours = Math.floor(minutes / 60);
+  return hours > 0
+    ? i18n.translate('xpack.agenticInvestigations.timeline.durationHours', {
+        defaultMessage: '{hours}h {minutes}m',
+        values: { hours, minutes: minutes % 60 },
+      })
+    : i18n.translate('xpack.agenticInvestigations.timeline.durationMinutes', {
+        defaultMessage: '{minutes}m',
+        values: { minutes },
+      });
+};
+
+/** "+57m" after the first event, so the order of a cascade reads at a glance. */
+const formatOffset = (ms: number): string =>
+  i18n.translate('xpack.agenticInvestigations.timeline.offset', {
+    defaultMessage: '+{duration}',
+    values: { duration: formatDuration(ms) },
+  });
+
+const UtcTime: React.FC<{ at: string }> = ({ at }) => (
+  <>
+    <FormattedTime
+      value={new Date(at)}
+      hour="2-digit"
+      minute="2-digit"
+      hourCycle="h23"
+      timeZone="UTC"
+    />{' '}
+    UTC
+  </>
+);
+
+const KindAvatar: React.FC<{ kind: ImpactMapEventKind }> = ({ kind }) => {
   const { euiTheme } = useEuiTheme();
-  const color = euiTheme.colors[group.color];
+  const { icon, color, label } = getEventGroup(kind);
+  const background = {
+    primary: euiTheme.colors.backgroundLightPrimary,
+    success: euiTheme.colors.backgroundLightSuccess,
+    warning: euiTheme.colors.backgroundLightWarning,
+    danger: euiTheme.colors.backgroundLightDanger,
+    accent: euiTheme.colors.backgroundLightAccent,
+  }[color];
   return (
-    <span
-      css={css`
-        display: inline-flex;
-        flex: none;
-        align-items: center;
-        justify-content: center;
-        width: ${ICON_SIZE}px;
-        height: ${ICON_SIZE}px;
-        border-radius: 50%;
-        border: 2px solid ${color};
-        background: ${filled ? color : euiTheme.colors.backgroundBasePlain};
-      `}
+    <EuiAvatar
+      name={label}
+      size="m"
+      iconType={icon}
+      iconColor={euiTheme.colors[color]}
+      color={background}
+    />
+  );
+};
+
+interface FilterOption {
+  key: string;
+  label: string;
+  count: number;
+}
+
+/** A filter button with a popover of options and how many events each has, as Discover does. */
+const FilterPopover: React.FC<{
+  label: string;
+  options: FilterOption[];
+  selected: string[];
+  onChange: (selected: string[]) => void;
+  searchable?: boolean;
+  searchPlaceholder?: string;
+  testSubj: string;
+}> = ({ label, options, selected, onChange, searchable, searchPlaceholder, testSubj }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const popoverId = useGeneratedHtmlId({ prefix: testSubj });
+  const selectable: EuiSelectableOption[] = options.map(({ key, label: optionLabel, count }) => ({
+    key,
+    label: optionLabel,
+    checked: selected.includes(key) ? 'on' : undefined,
+    append: <EuiBadge color="hollow">{count}</EuiBadge>,
+  }));
+  return (
+    <EuiPopover
+      id={popoverId}
+      aria-label={label}
+      isOpen={isOpen}
+      closePopover={() => setIsOpen(false)}
+      panelPaddingSize="none"
+      button={
+        <EuiFilterButton
+          iconType="chevronSingleDown"
+          onClick={() => setIsOpen(!isOpen)}
+          isSelected={isOpen}
+          hasActiveFilters={selected.length > 0}
+          numFilters={options.length}
+          numActiveFilters={selected.length}
+          data-test-subj={testSubj}
+        >
+          {label}
+        </EuiFilterButton>
+      }
     >
-      <EuiIcon
-        type={group.icon}
-        size="s"
-        color={filled ? euiTheme.colors.backgroundBasePlain : color}
-        aria-hidden
-      />
-    </span>
+      <EuiSelectable
+        aria-label={label}
+        options={selectable}
+        searchable={searchable}
+        searchProps={searchable ? { placeholder: searchPlaceholder, compressed: true } : undefined}
+        onChange={(next) =>
+          onChange(next.flatMap(({ key, checked }) => (checked === 'on' && key ? [key] : [])))
+        }
+        listProps={{ showIcons: true }}
+        data-test-subj={`${testSubj}Options`}
+      >
+        {(list, search) => (
+          <div
+            css={css`
+              width: 280px;
+            `}
+          >
+            {search && <EuiPanel paddingSize="s">{search}</EuiPanel>}
+            {list}
+          </div>
+        )}
+      </EuiSelectable>
+    </EuiPopover>
   );
 };
 
-/** Matches an event against the chosen entities, groups and text. Empty filters match all. */
-const matches = (
-  event: ImpactMapEvent,
-  impactMap: InvestigationImpactMapResponse,
-  { entityIds, groupIds, text }: { entityIds: string[]; groupIds: EventGroupId[]; text: string }
-): boolean => {
-  if (groupIds.length && !groupIds.includes(getEventGroup(event.kind).id)) {
-    return false;
-  }
-  const touched = getEventEntityIds(event, impactMap.relationships);
-  if (entityIds.length && !touched.some((id) => entityIds.includes(id))) {
-    return false;
-  }
-  const needle = text.trim().toLowerCase();
-  if (!needle) {
-    return true;
-  }
-  return [event.title, event.description ?? '', describeEventTarget(event, impactMap)].some(
-    (value) => value.toLowerCase().includes(needle)
-  );
-};
-
-const TimelineRow: React.FC<{
+const TimelineEvent: React.FC<{
   event: ImpactMapEvent;
   impactMap: InvestigationImpactMapResponse;
+  firstAt: number;
   selected: boolean;
-  filteredEntityIds: string[];
+  entityFilter: string[];
   onOpen: () => void;
   onToggleEntity: (entityId: string) => void;
-}> = ({ event, impactMap, selected, filteredEntityIds, onOpen, onToggleEntity }) => {
-  const { euiTheme } = useEuiTheme();
-  const group = getEventGroup(event.kind);
+}> = ({ event, impactMap, firstAt, selected, entityFilter, onOpen, onToggleEntity }) => {
   const entityIds = getEventEntityIds(event, impactMap.relationships);
   const labelOf = (id: string) =>
     impactMap.entities.find((entity) => entity.id === id)?.label ?? id;
+  const offset = Date.parse(event.at) - firstAt;
 
   return (
-    <div
+    <EuiPanel
+      hasBorder
+      hasShadow={false}
+      paddingSize="s"
+      color={selected ? 'primary' : 'plain'}
       data-test-subj="agenticInvestigationsTimelineRow"
-      css={css`
-        position: relative;
-        display: flex;
-        align-items: center;
-        gap: ${euiTheme.size.m};
-        padding: ${euiTheme.size.xs} ${euiTheme.size.s} ${euiTheme.size.xs} 0;
-        border-radius: ${euiTheme.border.radius.medium};
-        background: ${selected ? euiTheme.colors.backgroundBaseInteractiveSelect : 'transparent'};
-        &:hover {
-          background: ${euiTheme.colors.backgroundBaseInteractiveHover};
-        }
-      `}
     >
-      <GroupIcon group={group} filled={selected} />
-      <EuiText
-        size="s"
-        color="subdued"
-        css={css`
-          flex: none;
-          font-variant-numeric: tabular-nums;
-        `}
-      >
-        <FormattedTime
-          value={new Date(event.at)}
-          hour="2-digit"
-          minute="2-digit"
-          hourCycle="h23"
-          timeZone="UTC"
-        />{' '}
-        UTC
-      </EuiText>
-      <button
-        type="button"
-        onClick={onOpen}
-        title={event.title}
-        data-test-subj="agenticInvestigationsTimelineOpenEvent"
-        css={css`
-          flex: 1;
-          min-width: 0;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          text-align: left;
-          font-size: ${euiTheme.size.base};
-          font-weight: ${selected ? euiTheme.font.weight.bold : euiTheme.font.weight.regular};
-          color: ${euiTheme.colors.textParagraph};
-          /* The whole row opens the event. */
-          &::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-          }
-        `}
-      >
-        {event.title}
-      </button>
-      {entityIds.length > 0 && (
-        <EuiFlexGroup
-          gutterSize="xs"
-          responsive={false}
-          wrap={false}
-          css={css`
-            flex: none;
-            /* Positioned after the title, so it paints above the title's full-row click area. */
-            position: relative;
-          `}
-        >
-          {entityIds.map((entityId) => {
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs">
+            <strong>
+              <UtcTime at={event.at} />
+            </strong>
+          </EuiText>
+        </EuiFlexItem>
+        {offset > 0 && (
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={SINCE_FIRST}>
+              <EuiText size="xs" color="subdued" tabIndex={0}>
+                {formatOffset(offset)}
+              </EuiText>
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <EventKindBadge kind={event.kind} />
+        </EuiFlexItem>
+        {event.evidence?.chart && (
+          <EuiFlexItem grow={false}>
+            <EuiIconTip content={HAS_CHART} type="chartLine" color="subdued" />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem />
+        {entityIds.length === 0 ? (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              {describeEventTarget(event, impactMap)}
+            </EuiText>
+          </EuiFlexItem>
+        ) : (
+          entityIds.map((entityId) => {
             const label = labelOf(entityId);
-            const active = filteredEntityIds.includes(entityId);
+            const active = entityFilter.includes(entityId);
             return (
               <EuiFlexItem grow={false} key={entityId}>
                 <EuiBadge
                   color={active ? 'primary' : 'hollow'}
-                  iconType="branch"
                   onClick={() => onToggleEntity(entityId)}
                   onClickAriaLabel={i18n.translate(
                     'xpack.agenticInvestigations.timeline.toggleEntity',
@@ -232,16 +300,40 @@ const TimelineRow: React.FC<{
                 </EuiBadge>
               </EuiFlexItem>
             );
-          })}
-        </EuiFlexGroup>
+          })
+        )}
+      </EuiFlexGroup>
+      <EuiSpacer size="xs" />
+      <EuiText size="s">
+        <EuiLink
+          onClick={onOpen}
+          color="text"
+          data-test-subj="agenticInvestigationsTimelineOpenEvent"
+        >
+          <strong>{event.title}</strong>
+        </EuiLink>
+      </EuiText>
+      {event.description && (
+        <EuiText
+          size="xs"
+          color="subdued"
+          css={css`
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          `}
+        >
+          {event.description}
+        </EuiText>
       )}
-    </div>
+    </EuiPanel>
   );
 };
 
 /**
  * The Timeline tab: every event of the investigation, including findings and responder actions,
- * filterable by entity, by kind of event and by text. An event opens its detail in a child flyout.
+ * with search, entity and type filters. An event opens its detail over the investigation flyout.
  */
 export const TimelineTab: React.FC<TimelineSlotRenderProps> = ({ conversationId }) => {
   const { data, isLoading } = useInvestigation(conversationId);
@@ -267,170 +359,176 @@ export const TimelineTab: React.FC<TimelineSlotRenderProps> = ({ conversationId 
 };
 
 const Timeline: React.FC<{ impactMap: InvestigationImpactMapResponse }> = ({ impactMap }) => {
-  const { euiTheme } = useEuiTheme();
-  const [entityIds, setEntityIds] = useState<string[]>([]);
-  const [groupIds, setGroupIds] = useState<EventGroupId[]>([]);
+  const [entityFilter, setEntityFilter] = useState<string[]>([]);
+  const [kindFilter, setKindFilter] = useState<string[]>([]);
   const [text, setText] = useState('');
-  const [latestFirst, setLatestFirst] = useState(true);
-  const [isOpen, setIsOpen] = useState(true);
+  const [newestFirst, setNewestFirst] = useState(true);
   const [selectedId, setSelectedId] = useState<string>();
-  const { events } = impactMap;
-  const kindsPresent = useMemo(() => new Set(events.map(({ kind }) => kind)), [events]);
+  const { events, entities, relationships } = impactMap;
 
-  const entityOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
-    const withEvents = new Set(
-      events.flatMap((event) => getEventEntityIds(event, impactMap.relationships))
+  const entityOptions = useMemo<FilterOption[]>(() => {
+    const counts = new Map<string, number>();
+    events.forEach((event) =>
+      getEventEntityIds(event, relationships).forEach((id) =>
+        counts.set(id, (counts.get(id) ?? 0) + 1)
+      )
     );
-    return impactMap.entities
-      .filter(({ id }) => withEvents.has(id))
-      .map(({ id, label }) => ({
+    return entities
+      .filter(({ id }) => counts.has(id))
+      .map(({ id, label }) => ({ key: id, label, count: counts.get(id) ?? 0 }));
+  }, [events, entities, relationships]);
+
+  const kindOptions = useMemo<FilterOption[]>(
+    () =>
+      EVENT_GROUPS.map(({ id, label }) => ({
+        key: id,
         label,
-        value: id,
-        prepend: <EuiIcon type="branch" size="s" aria-hidden={true} />,
-      }));
-  }, [events, impactMap]);
+        count: events.filter(({ kind }) => kind === id).length,
+      })).filter(({ count }) => count > 0),
+    [events]
+  );
 
   const visible = useMemo(() => {
-    const filtered = events.filter((event) =>
-      matches(event, impactMap, { entityIds, groupIds, text })
-    );
-    return latestFirst ? [...filtered].reverse() : filtered;
-  }, [events, impactMap, entityIds, groupIds, text, latestFirst]);
+    const needle = text.trim().toLowerCase();
+    const filtered = events.filter((event) => {
+      if (kindFilter.length && !kindFilter.includes(event.kind)) {
+        return false;
+      }
+      const touched = getEventEntityIds(event, relationships);
+      if (entityFilter.length && !touched.some((id) => entityFilter.includes(id))) {
+        return false;
+      }
+      return (
+        !needle ||
+        [event.title, event.description ?? '', describeEventTarget(event, impactMap)].some(
+          (value) => value.toLowerCase().includes(needle)
+        )
+      );
+    });
+    return newestFirst ? [...filtered].reverse() : filtered;
+  }, [events, relationships, impactMap, entityFilter, kindFilter, text, newestFirst]);
 
+  const firstAt = Date.parse(events[0].at);
+  const lastAt = Date.parse(events[events.length - 1].at);
+  const isFiltered = entityFilter.length > 0 || kindFilter.length > 0 || text.trim() !== '';
+  const clearFilters = () => {
+    setEntityFilter([]);
+    setKindFilter([]);
+    setText('');
+  };
   const toggleEntity = (entityId: string) =>
-    setEntityIds((current) =>
+    setEntityFilter((current) =>
       current.includes(entityId) ? current.filter((id) => id !== entityId) : [...current, entityId]
-    );
-  const toggleGroup = (groupId: EventGroupId) =>
-    setGroupIds((current) =>
-      current.includes(groupId) ? current.filter((id) => id !== groupId) : [...current, groupId]
     );
 
   return (
     <div data-test-subj="agenticInvestigationsTimeline">
-      <EuiComboBox<string>
-        fullWidth
-        aria-label={SEARCH_LABEL}
-        placeholder={SEARCH_PLACEHOLDER}
-        prepend={<EuiIcon type="magnify" aria-hidden={true} />}
-        options={entityOptions}
-        selectedOptions={entityOptions.filter(({ value }) => value && entityIds.includes(value))}
-        onChange={(selected) =>
-          setEntityIds(selected.flatMap(({ value }) => (value ? [value] : [])))
-        }
-        onSearchChange={setText}
-        data-test-subj="agenticInvestigationsTimelineSearch"
-      />
-      <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} wrap>
+      <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+        <EuiFlexItem
+          css={css`
+            min-width: 200px;
+          `}
+        >
+          <EuiFieldSearch
+            fullWidth
+            compressed
+            placeholder={SEARCH_PLACEHOLDER}
+            value={text}
+            onChange={(event) => setText(event.target.value)}
+            isClearable
+            aria-label={SEARCH_PLACEHOLDER}
+            data-test-subj="agenticInvestigationsTimelineSearch"
+          />
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued">
-            <EuiIcon type="filter" size="s" aria-hidden={true} /> {FILTER_BY}
+          <EuiFilterGroup compressed>
+            <FilterPopover
+              label={ENTITY_FILTER}
+              options={entityOptions}
+              selected={entityFilter}
+              onChange={setEntityFilter}
+              searchable
+              searchPlaceholder={SEARCH_ENTITIES}
+              testSubj="agenticInvestigationsTimelineEntityFilter"
+            />
+            <FilterPopover
+              label={TYPE_FILTER}
+              options={kindOptions}
+              selected={kindFilter}
+              onChange={setKindFilter}
+              testSubj="agenticInvestigationsTimelineTypeFilter"
+            />
+          </EuiFilterGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem>
+          <EuiText size="xs" color="subdued" data-test-subj="agenticInvestigationsTimelineSummary">
+            {isFiltered
+              ? i18n.translate('xpack.agenticInvestigations.timeline.summaryFiltered', {
+                  defaultMessage: 'Showing {shown} of {total} events',
+                  values: { shown: visible.length, total: events.length },
+                })
+              : i18n.translate('xpack.agenticInvestigations.timeline.summary', {
+                  defaultMessage: '{total, plural, one {# event} other {# events}} over {duration}',
+                  values: {
+                    total: events.length,
+                    duration: formatDuration(lastAt - firstAt),
+                  },
+                })}
           </EuiText>
         </EuiFlexItem>
-        {EVENT_GROUPS.filter(({ id }) => kindsPresent.has(id)).map((group) => {
-          const active = groupIds.includes(group.id);
-          return (
-            <EuiFlexItem grow={false} key={group.id}>
-              <button
-                type="button"
-                aria-pressed={active}
-                onClick={() => toggleGroup(group.id)}
-                data-test-subj={`agenticInvestigationsTimelineGroup-${group.id}`}
-                css={css`
-                  display: inline-flex;
-                  align-items: center;
-                  gap: ${euiTheme.size.xs};
-                  padding: 2px ${euiTheme.size.s} 2px 2px;
-                  border-radius: ${ICON_SIZE}px;
-                  font-size: ${euiTheme.size.base};
-                  color: ${euiTheme.colors.textParagraph};
-                  background: ${active ? euiTheme.colors.backgroundBaseInteractiveSelect : 'none'};
-                  &:hover {
-                    background: ${euiTheme.colors.backgroundBaseInteractiveHover};
-                  }
-                `}
-              >
-                <GroupIcon group={group} filled={active} />
-                {group.label}
-              </button>
-            </EuiFlexItem>
-          );
-        })}
+        {isFiltered && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty size="xs" onClick={clearFilters}>
+              {CLEAR_FILTERS}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="xs"
+            iconType={newestFirst ? 'sortDown' : 'sortUp'}
+            onClick={() => setNewestFirst(!newestFirst)}
+            data-test-subj="agenticInvestigationsTimelineSort"
+          >
+            {newestFirst ? NEWEST_FIRST : OLDEST_FIRST}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <EuiPanel color="subdued" hasBorder hasShadow={false} paddingSize="s">
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              color="text"
-              iconType={isOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
-              aria-label={isOpen ? COLLAPSE : EXPAND}
-              aria-expanded={isOpen}
-              onClick={() => setIsOpen(!isOpen)}
-              data-test-subj="agenticInvestigationsTimelineToggle"
+      {visible.length === 0 ? (
+        <EuiEmptyPrompt
+          iconType="magnify"
+          titleSize="xs"
+          title={<h3>{NO_MATCHES}</h3>}
+          actions={
+            <EuiButton size="s" onClick={clearFilters}>
+              {CLEAR_FILTERS}
+            </EuiButton>
+          }
+        />
+      ) : (
+        <EuiTimeline gutterSize="m" aria-label={TIMELINE_LABEL}>
+          {visible.map((event) => (
+            <EuiTimelineItem
+              key={event.id}
+              verticalAlign="top"
+              icon={<KindAvatar kind={event.kind} />}
             >
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                <EuiIcon type="timeline" aria-hidden={true} />
-                <EuiTitle size="xs">
-                  <h3>{TIMELINE_TITLE}</h3>
-                </EuiTitle>
-              </EuiFlexGroup>
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem />
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              iconType="sortable"
-              onClick={() => setLatestFirst(!latestFirst)}
-              data-test-subj="agenticInvestigationsTimelineSort"
-            >
-              {latestFirst ? LATEST_FIRST : OLDEST_FIRST}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-      {isOpen && (
-        <>
-          <EuiSpacer size="s" />
-          {visible.length === 0 ? (
-            <EuiText size="s" color="subdued" textAlign="center">
-              <p>{NO_MATCHES}</p>
-            </EuiText>
-          ) : (
-            <div
-              css={css`
-                position: relative;
-                display: flex;
-                flex-direction: column;
-                gap: ${euiTheme.size.xs};
-                /* The line that joins the event icons. */
-                &::before {
-                  content: '';
-                  position: absolute;
-                  top: ${ICON_SIZE / 2}px;
-                  bottom: ${ICON_SIZE / 2}px;
-                  left: ${ICON_SIZE / 2 - 1}px;
-                  border-left: 2px solid ${euiTheme.colors.borderBaseSubdued};
-                }
-              `}
-            >
-              {visible.map((event) => (
-                <TimelineRow
-                  key={event.id}
-                  event={event}
-                  impactMap={impactMap}
-                  selected={event.id === selectedId}
-                  filteredEntityIds={entityIds}
-                  onOpen={() => setSelectedId(event.id)}
-                  onToggleEntity={toggleEntity}
-                />
-              ))}
-            </div>
-          )}
-        </>
+              <TimelineEvent
+                event={event}
+                impactMap={impactMap}
+                firstAt={firstAt}
+                selected={event.id === selectedId}
+                entityFilter={entityFilter}
+                onOpen={() => setSelectedId(event.id)}
+                onToggleEntity={toggleEntity}
+              />
+            </EuiTimelineItem>
+          ))}
+        </EuiTimeline>
       )}
       {selectedId && (
         <ImpactMapEventsFlyout
