@@ -801,7 +801,7 @@ describe('bulkScheduleWorkflow', () => {
     expect(scheduledTasks).toHaveLength(2);
   });
 
-  it('keeps a blocked-execution error and discards the persisted execution', async () => {
+  it('keeps a decided execution when the blocked-execution follow-up fails', async () => {
     const workflow = createWorkflow('wf-a', {
       definition: {
         name: 'wf-a',
@@ -839,14 +839,14 @@ describe('bulkScheduleWorkflow', () => {
     );
 
     expect(result[0]).toEqual({
-      status: 'error',
-      error: { message: 'execution read failed' },
+      status: 'scheduled',
+      workflowExecutionId: expect.any(String),
     });
     expect(result[1]).toEqual({
       status: 'scheduled',
       workflowExecutionId: expect.any(String),
     });
-    expect(mockDiscardUnstartedExecution).toHaveBeenCalledTimes(1);
+    expect(mockDiscardUnstartedExecution).not.toHaveBeenCalled();
     expect(taskManager.bulkSchedule).toHaveBeenCalledTimes(1);
     const [scheduledTasks] = taskManager.bulkSchedule.mock.calls[0];
     expect(scheduledTasks).toHaveLength(1);

@@ -2040,8 +2040,9 @@ export class WorkflowsExecutionEnginePlugin
         Array.from(bucketsByGroup.values()).map(async (bucket) => {
           for (const item of bucket) {
             let persisted = false;
+            let decided = false;
             try {
-              await withConcurrencyGroupLock(
+              const canProceed = await withConcurrencyGroupLock(
                 getConcurrencyGroupLock(),
                 item.workflowExecution.spaceId ?? 'default',
                 item.workflowExecution.concurrencyGroupKey,
@@ -2065,10 +2066,27 @@ export class WorkflowsExecutionEnginePlugin
                     workflowExecutionRepository
                   );
                   checkedIdx.add(item.idx);
-                  await runCheck(item);
+                  const proceed = await this.checkConcurrencyIfNeeded(item.workflowExecution);
+                  if (proceed) {
+                    passingIdx.add(item.idx);
+                  }
                   succeeded.push(item);
+                  decided = true;
+                  return proceed;
                 }
               );
+              if (!canProceed) {
+                await handleConcurrencyBlockedExecution({
+                  workflowExecutionId: item.workflowExecution.id as string,
+                  spaceId: item.workflowExecution.spaceId ?? 'default',
+                  request,
+                  workflowExecutionRepository,
+                  stepExecutionRepository,
+                  workflowTaskManager,
+                  internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
+                  logger: this.logger,
+                });
+              }
             } catch (error) {
               const message = error instanceof Error ? error.message : String(error);
               const alreadyRecorded =
@@ -2076,7 +2094,12 @@ export class WorkflowsExecutionEnginePlugin
               if (!alreadyRecorded) {
                 results[item.idx] = { status: 'error', error: { message } };
               }
-              if (persisted && item.workflowExecution.id && !alreadyRecorded) {
+              if (decided) {
+                this.logger.warn(
+                  `Concurrency follow-up failed for workflow execution ${item.workflowExecution.id}; keeping the decided execution: ${message}`
+                );
+              }
+              if (persisted && item.workflowExecution.id && !decided) {
                 await workflowExecutionRepository
                   .discardUnstartedExecution(
                     item.workflowExecution.id,

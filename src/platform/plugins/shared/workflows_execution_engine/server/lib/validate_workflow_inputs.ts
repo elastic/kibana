@@ -76,6 +76,21 @@ export const validateWorkflowInputs = async (
     return value;
   };
 
+  const markInputValidationFailed = (message: string): Promise<void> => {
+    const update = {
+      id: workflowExecution.id,
+      status: ExecutionStatus.FAILED,
+      error: {
+        type: 'InputValidationError',
+        message,
+      },
+    };
+    if (workflowExecution.concurrencyGroupKey) {
+      return workflowExecutionRepository.updateWorkflowExecution(update, { refresh: true });
+    }
+    return workflowExecutionRepository.updateWorkflowExecution(update);
+  };
+
   let inputsWithDefaults: Record<string, unknown> | undefined;
   try {
     inputsWithDefaults = applyInputDefaults(
@@ -89,14 +104,7 @@ export const validateWorkflowInputs = async (
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     try {
-      await workflowExecutionRepository.updateWorkflowExecution({
-        id: workflowExecution.id,
-        status: ExecutionStatus.FAILED,
-        error: {
-          type: 'InputValidationError',
-          message: `Workflow input validation failed: ${message}`,
-        },
-      });
+      await markInputValidationFailed(`Workflow input validation failed: ${message}`);
     } catch (updateError) {
       logger.error(
         `Failed to mark execution ${workflowExecution.id} as FAILED after input validation error: ${updateError}`
@@ -111,14 +119,7 @@ export const validateWorkflowInputs = async (
       .join('; ');
 
     try {
-      await workflowExecutionRepository.updateWorkflowExecution({
-        id: workflowExecution.id,
-        status: ExecutionStatus.FAILED,
-        error: {
-          type: 'InputValidationError',
-          message: `Workflow input validation failed: ${issues}`,
-        },
-      });
+      await markInputValidationFailed(`Workflow input validation failed: ${issues}`);
     } catch (updateError) {
       logger.error(
         `Failed to mark execution ${workflowExecution.id} as FAILED after input validation error: ${updateError}`
