@@ -52,7 +52,12 @@ import {
   toGridLayout,
 } from '../model/app_layout';
 import type { AppCellDefinition } from '../model/app_layout';
-import { APP_ID, GRID_SUBDIVISIONS, getNotebookAppPath } from '../../common/constants';
+import {
+  APP_ID,
+  DEFAULT_GRID_GAP,
+  GRID_SUBDIVISIONS,
+  getNotebookAppPath,
+} from '../../common/constants';
 import { useNotebookServices } from '../services';
 import { findPinnedTimeCell } from '../model/cell_factory';
 import { AppSettingsFlyout } from './app_settings_flyout';
@@ -406,7 +411,7 @@ const AppGrid = ({
   const { store } = useNotebook();
   const { euiTheme } = useEuiTheme();
   const snapToGrid = app.snapToGrid ?? true;
-  const gutterSize = euiTheme.base / 2;
+  const gutterSize = app.gridGap ?? DEFAULT_GRID_GAP;
   // Without snapping, the engine works on a finer grid with no gutter; panels inset themselves by
   // half a gutter so they keep the same spacing and row height as the snapped grid.
   const scale = snapToGrid ? 1 : GRID_SUBDIVISIONS;
@@ -508,6 +513,10 @@ const AppGrid = ({
     </div>
   );
 };
+
+/** The app's background color, for the element that contains its view. */
+export const getAppBackgroundStyles = ({ backgroundColor }: NotebookApp) =>
+  backgroundColor ? css({ backgroundColor }) : undefined;
 
 /** The app's header and panels; read-only, with a locked layout, when `onRevealCell` is omitted. */
 export const AppView = ({
@@ -799,7 +808,10 @@ export const AppFlyout = ({
           <EuiFlyoutHeader>
             <AppToolbar app={app} apps={apps} />
           </EuiFlyoutHeader>
-          <EuiFlyoutBody scrollContainerRef={setBodyScrollContainer}>
+          <EuiFlyoutBody
+            scrollContainerRef={setBodyScrollContainer}
+            css={getAppBackgroundStyles(app)}
+          >
             <AppView app={app} onRevealCell={onRevealCell} scrollContainer={bodyScrollContainer} />
           </EuiFlyoutBody>
         </>

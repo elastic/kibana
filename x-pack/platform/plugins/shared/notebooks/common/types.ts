@@ -162,6 +162,10 @@ export interface NotebookApp {
   snapToGrid?: boolean;
   /** How many columns the grid has; panel `x` and `width` are measured in these columns. */
   gridColumns?: number;
+  /** The space between panels, in pixels. */
+  gridGap?: number;
+  /** A hex color behind the whole app; the theme's page background when absent. */
+  backgroundColor?: string;
   /** Shown at the top of the app; the tab title is separate and only labels the tab. */
   heading?: string;
   description?: string;

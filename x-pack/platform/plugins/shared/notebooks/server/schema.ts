@@ -11,7 +11,9 @@ import {
   GRID_SUBDIVISIONS,
   MAX_CELL_HEIGHT,
   MAX_DESCRIPTION_LENGTH,
+  HEX_COLOR_PATTERN,
   MAX_GRID_COLUMNS,
+  MAX_GRID_GAP,
   MAX_TITLE_LENGTH,
   MIN_GRID_COLUMNS,
 } from '../common/constants';
@@ -180,6 +182,20 @@ const appSchema = schema.object({
       max: MAX_GRID_COLUMNS,
       validate: (value) =>
         Number.isInteger(value) ? undefined : 'gridColumns must be a whole number',
+    })
+  ),
+  gridGap: schema.maybe(
+    schema.number({
+      min: 0,
+      max: MAX_GRID_GAP,
+      validate: (value) => (Number.isInteger(value) ? undefined : 'gridGap must be a whole number'),
+    })
+  ),
+  backgroundColor: schema.maybe(
+    schema.string({
+      maxLength: 9,
+      validate: (value) =>
+        HEX_COLOR_PATTERN.test(value) ? undefined : 'backgroundColor must be a hex color',
     })
   ),
   heading: schema.maybe(schema.string({ maxLength: MAX_TITLE_LENGTH })),

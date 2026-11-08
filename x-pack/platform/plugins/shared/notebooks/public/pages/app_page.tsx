@@ -19,7 +19,7 @@ import { useHistory, useLocation, useParams } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
 import type { NotebookApp, NotebookAttributes } from '../../common/types';
 import { getNotebookPath } from '../../common/constants';
-import { AppView } from '../components/app_flyout';
+import { AppView, getAppBackgroundStyles } from '../components/app_flyout';
 import { createNotebookContext } from '../components/create_notebook_context';
 import { NotebookContext } from '../components/notebook_context';
 import { useNotebookServices } from '../services';
@@ -135,7 +135,12 @@ const StandaloneApp = ({
         </ExitFullScreenButtonKibanaProvider>
       )}
       <EuiPageTemplate paddingSize="none" restrictWidth={false} data-test-subj="notebookAppPage">
-        <EuiPageTemplate.Section paddingSize="none" restrictWidth={false}>
+        <EuiPageTemplate.Section
+          paddingSize="none"
+          restrictWidth={false}
+          grow
+          css={app && getAppBackgroundStyles(app)}
+        >
           {app ? <AppView app={app} /> : <AppNotFound notebookId={notebookId} />}
         </EuiPageTemplate.Section>
       </EuiPageTemplate>

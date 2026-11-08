@@ -175,6 +175,8 @@ describe('notebookAttributesSchema', () => {
         freePlacement: true,
         snapToGrid: false,
         gridColumns: 24,
+        gridGap: 0,
+        backgroundColor: '#f5f7fa',
         heading: 'Traffic overview',
         description: 'Daily visits by host',
       })),
@@ -189,6 +191,21 @@ describe('notebookAttributesSchema', () => {
       panels: notebook.panels.map((app) => ({ ...app, gridColumns })),
     };
     expect(() => notebookAttributesSchema.validate(withColumns)).toThrow();
+  });
+
+  it.each([-1, 65, 2.5])('rejects a %s pixel grid gap', (gridGap) => {
+    const notebook = withApp('visits');
+    const withGap = { ...notebook, panels: notebook.panels.map((app) => ({ ...app, gridGap })) };
+    expect(() => notebookAttributesSchema.validate(withGap)).toThrow();
+  });
+
+  it.each(['red', '#ff', 'url(x)'])('rejects %s as a background color', (backgroundColor) => {
+    const notebook = withApp('visits');
+    const withColor = {
+      ...notebook,
+      panels: notebook.panels.map((app) => ({ ...app, backgroundColor })),
+    };
+    expect(() => notebookAttributesSchema.validate(withColor)).toThrow();
   });
 
   const manyCells = toNotebook(

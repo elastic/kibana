@@ -39,3 +39,10 @@ export const GRID_SUBDIVISIONS = 10;
 export const DEFAULT_GRID_COLUMNS = 12;
 export const MIN_GRID_COLUMNS = 1;
 export const MAX_GRID_COLUMNS = 48;
+
+/** The space between an app's panels, in pixels. */
+export const DEFAULT_GRID_GAP = 8;
+export const MAX_GRID_GAP = 64;
+
+/** A hex color such as `#fff`, `#ffffff` or `#ffffff80`. */
+export const HEX_COLOR_PATTERN = /^#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i;

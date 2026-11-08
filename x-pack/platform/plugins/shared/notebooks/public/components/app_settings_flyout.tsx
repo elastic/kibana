@@ -7,11 +7,13 @@
 
 import React, { useEffect, useState } from 'react';
 import {
+  EuiColorPicker,
   EuiFieldNumber,
   EuiFieldText,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiFormRow,
+  EuiRange,
   EuiSwitch,
   EuiTextArea,
   EuiTitle,
@@ -20,8 +22,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import {
+  DEFAULT_GRID_GAP,
+  HEX_COLOR_PATTERN,
   MAX_DESCRIPTION_LENGTH,
   MAX_GRID_COLUMNS,
+  MAX_GRID_GAP,
   MAX_TITLE_LENGTH,
   MIN_GRID_COLUMNS,
 } from '../../common/constants';
@@ -75,6 +80,46 @@ const GridColumnsField = ({
           if (key === 'Enter') commit();
         }}
         data-test-subj="notebookAppSettingsGridColumns"
+      />
+    </EuiFormRow>
+  );
+};
+
+/** Keeps a partly typed color in the field and only applies it once it is a complete hex color. */
+const BackgroundColorField = ({
+  color,
+  onChange,
+}: {
+  color?: string;
+  onChange: (color?: string) => void;
+}) => {
+  const [draft, setDraft] = useState(color ?? '');
+  useEffect(() => setDraft(color ?? ''), [color]);
+  const isValid = draft === '' || HEX_COLOR_PATTERN.test(draft);
+
+  return (
+    <EuiFormRow
+      label={i18n.translate('xpack.notebook.appSettings.backgroundColor', {
+        defaultMessage: 'Background color',
+      })}
+      helpText={i18n.translate('xpack.notebook.appSettings.backgroundColorHelp', {
+        defaultMessage: 'Fills the app behind its panels. Clear it to use the theme background.',
+      })}
+      isInvalid={!isValid}
+    >
+      <EuiColorPicker
+        color={draft}
+        isClearable
+        isInvalid={!isValid}
+        placeholder={i18n.translate('xpack.notebook.appSettings.backgroundColorPlaceholder', {
+          defaultMessage: 'Theme default',
+        })}
+        onChange={(text) => {
+          setDraft(text);
+          if (text === '') onChange(undefined);
+          else if (HEX_COLOR_PATTERN.test(text)) onChange(text);
+        }}
+        data-test-subj="notebookAppSettingsBackgroundColor"
       />
     </EuiFormRow>
   );
@@ -203,6 +248,38 @@ export const AppSettingsFlyout = ({ appId, onClose }: { appId: string; onClose: 
           columns={getGridColumns(app)}
           onChange={(columns) =>
             store.updateApp(appId, (current) => setGridColumns(current, columns))
+          }
+        />
+        <EuiFormRow
+          label={i18n.translate('xpack.notebook.appSettings.gridGap', {
+            defaultMessage: 'Grid gap',
+          })}
+          helpText={i18n.translate('xpack.notebook.appSettings.gridGapHelp', {
+            defaultMessage: 'The space between panels, in pixels.',
+          })}
+        >
+          <EuiRange
+            min={0}
+            max={MAX_GRID_GAP}
+            step={1}
+            value={app.gridGap ?? DEFAULT_GRID_GAP}
+            showInput
+            onChange={({ currentTarget: { value } }) => {
+              const gap = Number(value);
+              if (value === '' || !Number.isInteger(gap) || gap < 0 || gap > MAX_GRID_GAP) return;
+              store.updateApp(appId, ({ gridGap, ...rest }) =>
+                gap === DEFAULT_GRID_GAP ? rest : { ...rest, gridGap: gap }
+              );
+            }}
+            data-test-subj="notebookAppSettingsGridGap"
+          />
+        </EuiFormRow>
+        <BackgroundColorField
+          color={app.backgroundColor}
+          onChange={(color) =>
+            store.updateApp(appId, ({ backgroundColor, ...rest }) =>
+              color ? { ...rest, backgroundColor: color } : rest
+            )
           }
         />
       </EuiFlyoutBody>
