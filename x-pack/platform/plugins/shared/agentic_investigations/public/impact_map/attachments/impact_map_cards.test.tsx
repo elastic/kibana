@@ -11,7 +11,7 @@ import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationImpactMap } from '../../../common/impact_map/impact_map';
 import type { ImpactMapRendererProps } from '../../types';
-import { createImpactMapCards, pickKeyEntities } from './impact_map_cards';
+import { createImpactMapCards, pickImpactEvents, pickKeyEntities } from './impact_map_cards';
 import { toImpactMapResponse } from './to_impact_map_response';
 
 jest.mock('@kbn/agent-builder-plugin/public', () => ({
@@ -90,6 +90,42 @@ describe('toImpactMapResponse', () => {
   });
 });
 
+describe('pickImpactEvents', () => {
+  const impact = (id: string, title: string, at: string, kind = 'customer_impact' as const) => ({
+    id,
+    kind,
+    title,
+    at,
+    entity_id: 'checkout',
+  });
+
+  it('keeps only the latest of the same thing happening twice', () => {
+    const picked = pickImpactEvents([
+      impact(
+        'first',
+        'frontend-proxy failed 100% of requests at 15:47-15:50Z',
+        '2026-11-08T15:47:00Z'
+      ),
+      impact(
+        'second',
+        'frontend-proxy failed 100% of requests from 15:58Z',
+        '2026-11-08T15:58:00Z'
+      ),
+    ]);
+
+    expect(picked.map(({ id }) => id)).toEqual(['second']);
+  });
+
+  it('keeps different things, newest first', () => {
+    const picked = pickImpactEvents([
+      impact('a', 'Checkout failed', '2026-11-08T15:00:00Z'),
+      impact('b', 'Login slowed', '2026-11-08T16:00:00Z'),
+    ]);
+
+    expect(picked.map(({ id }) => id)).toEqual(['b', 'a']);
+  });
+});
+
 describe('pickKeyEntities', () => {
   it('puts the impacted entity and the root cause before the rest', () => {
     const picked = pickKeyEntities(toImpactMapResponse(document), 2).map(({ id }) => id);
@@ -116,6 +152,12 @@ describe('ImpactMapCards', () => {
     const cards = screen.getAllByTestId('agenticInvestigationsEventCard');
     expect(cards).toHaveLength(1);
     expect(cards[0]).toHaveTextContent('Checkout errors');
+  });
+
+  it('says what an impact event affects', () => {
+    renderCards(document);
+
+    expect(screen.getByTestId('agenticInvestigationsEventCard')).toHaveTextContent('Affects');
   });
 
   it('does not count entities and relationships on the map card', () => {

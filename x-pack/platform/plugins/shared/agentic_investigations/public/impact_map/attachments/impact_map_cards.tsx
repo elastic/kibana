@@ -22,7 +22,9 @@ import type { InvestigationImpactMap } from '../../../common/impact_map/impact_m
 import type { ImpactMapEvent, InvestigationImpactMapResponse } from '../../../common';
 import type { ImpactMapRenderer } from '../../types';
 import {
+  EventAffects,
   EventDetail,
+  FACT_AFFECTS,
   EventKindBadge,
   EventTime,
   ImpactMapEventsFlyout,
@@ -185,12 +187,39 @@ const IMPACT_KINDS: ImpactMapEvent['kind'][] = [
 ];
 const MAX_IMPACT_CARDS = 3;
 
-/** The events that best show the impact: customer impact, else the nearest kind that has any. */
-const pickImpactEvents = (events: ImpactMapEvent[]): ImpactMapEvent[] => {
+/** What an event says without its times, so "failed from 15:58Z" and "failed at 15:47-15:50Z" meet. */
+const sameStory = (event: ImpactMapEvent): string =>
+  [
+    event.kind,
+    event.entity_id ?? event.relationship_id ?? '',
+    event.title
+      .toLowerCase()
+      .replace(/\d{1,2}:\d{2}(:\d{2})?z?(\s*[-–]\s*\d{1,2}:\d{2}(:\d{2})?z?)?/g, '')
+      .replace(/\b(at|from|through|until|by|between|since|again)\b/g, '')
+      .replace(/\s+/g, ' ')
+      .trim(),
+  ].join('|');
+
+/**
+ * The events that best show the impact: customer impact, else the nearest kind that has any. The
+ * same thing happening twice is one card, the latest of them, so the answer says it once.
+ */
+export const pickImpactEvents = (events: ImpactMapEvent[]): ImpactMapEvent[] => {
   for (const kind of IMPACT_KINDS) {
-    const ofKind = events.filter((event) => event.kind === kind);
-    if (ofKind.length > 0) {
-      return ofKind.slice(0, MAX_IMPACT_CARDS);
+    const latestOfEach = new Map<string, ImpactMapEvent>();
+    events
+      .filter((event) => event.kind === kind)
+      .forEach((event) => {
+        const story = sameStory(event);
+        const seen = latestOfEach.get(story);
+        if (!seen || Date.parse(event.at) > Date.parse(seen.at)) {
+          latestOfEach.set(story, event);
+        }
+      });
+    if (latestOfEach.size > 0) {
+      return [...latestOfEach.values()]
+        .sort((a, b) => Date.parse(b.at) - Date.parse(a.at))
+        .slice(0, MAX_IMPACT_CARDS);
     }
   }
   return [];
@@ -199,9 +228,10 @@ const pickImpactEvents = (events: ImpactMapEvent[]): ImpactMapEvent[] => {
 /** One event as a card: what happened, the trend around it and where it came from. */
 const EventCard: React.FC<{
   event: ImpactMapEvent;
-  allEvents: ImpactMapEvent[];
+  impactMap: InvestigationImpactMapResponse;
   onOpen: () => void;
-}> = ({ event, allEvents, onOpen }) => (
+  onOpenEntity: (entityId: string) => void;
+}> = ({ event, impactMap, onOpen, onOpenEntity }) => (
   <InvestigationCard
     title={event.title}
     icon="warning"
@@ -218,7 +248,20 @@ const EventCard: React.FC<{
       <EventTime at={event.at} withDate />
     </EuiText>
     <EuiSpacer size="s" />
-    <EventDetail event={event} allEvents={allEvents} />
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs" color="subdued">
+          {FACT_AFFECTS}
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s">
+          <EventAffects event={event} impactMap={impactMap} onOpenEntity={onOpenEntity} />
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiSpacer size="m" />
+    <EventDetail event={event} allEvents={impactMap.events} />
   </InvestigationCard>
 );
 
@@ -363,8 +406,9 @@ export const createImpactMapCards = (
             <EuiFlexItem key={event.id}>
               <EventCard
                 event={event}
-                allEvents={impactMap.events}
+                impactMap={impactMap}
                 onOpen={() => open({ kind: 'event', id: event.id })}
+                onOpenEntity={(id) => open({ kind: 'entity', id })}
               />
             </EuiFlexItem>
           ))}

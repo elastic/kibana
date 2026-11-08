@@ -343,9 +343,12 @@ const FACT_HAPPENED = i18n.translate('xpack.agenticInvestigations.impactMap.even
 const FACT_DURATION = i18n.translate('xpack.agenticInvestigations.impactMap.events.factDuration', {
   defaultMessage: 'Lasted',
 });
-const FACT_AFFECTS = i18n.translate('xpack.agenticInvestigations.impactMap.events.factAffects', {
-  defaultMessage: 'Affects',
-});
+export const FACT_AFFECTS = i18n.translate(
+  'xpack.agenticInvestigations.impactMap.events.factAffects',
+  {
+    defaultMessage: 'Affects',
+  }
+);
 
 /** "2h 5m", "4m 10s" or "30s" for the time between two ISO timestamps. */
 export const formatEventDuration = (from: string, to: string): string | undefined => {
@@ -443,16 +446,41 @@ const EntityBadge: React.FC<{
 
 type ImpactMapFlyoutMap = ImpactMapEventsFlyoutProps['impactMap'];
 
+/** What an event happened to: the entities as badges, in order, or the target in words. */
+export const EventAffects: React.FC<{
+  event: ImpactMapEvent;
+  impactMap: ImpactMapFlyoutMap;
+  onOpenEntity?: (entityId: string) => void;
+}> = ({ event, impactMap, onOpenEntity }) => {
+  const entityIds = getEventEntityIds(event, impactMap.relationships);
+  // An event with no entity or relationship is about the investigation or the responders.
+  if (entityIds.length === 0) {
+    return <>{describeEventTarget(event, impactMap)}</>;
+  }
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
+      {entityIds.map((id, index) => (
+        <React.Fragment key={id}>
+          {index > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="sortRight" size="s" aria-hidden={true} />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <EntityBadge entityId={id} impactMap={impactMap} onOpenEntity={onOpenEntity} />
+          </EuiFlexItem>
+        </React.Fragment>
+      ))}
+    </EuiFlexGroup>
+  );
+};
+
 const EventKeyFacts: React.FC<{
   event: ImpactMapEvent;
   impactMap: ImpactMapFlyoutMap;
   onOpenEntity?: (entityId: string) => void;
 }> = ({ event, impactMap, onOpenEntity }) => {
   const duration = event.ends_at ? formatEventDuration(event.at, event.ends_at) : undefined;
-  const entityIds = getEventEntityIds(event, impactMap.relationships);
-  const badge = (id: string) => (
-    <EntityBadge key={id} entityId={id} impactMap={impactMap} onOpenEntity={onOpenEntity} />
-  );
   return (
     <KeyFacts
       testSubj="agenticInvestigationsImpactMapEventKeyFacts"
@@ -462,24 +490,7 @@ const EventKeyFacts: React.FC<{
         ...(duration ? [{ label: FACT_DURATION, value: duration }] : []),
         {
           label: FACT_AFFECTS,
-          // An event with no entity or relationship is about the investigation or the responders.
-          value:
-            entityIds.length === 0 ? (
-              describeEventTarget(event, impactMap)
-            ) : (
-              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
-                {entityIds.map((id, index) => (
-                  <React.Fragment key={id}>
-                    {index > 0 && (
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon type="sortRight" size="s" aria-hidden={true} />
-                      </EuiFlexItem>
-                    )}
-                    <EuiFlexItem grow={false}>{badge(id)}</EuiFlexItem>
-                  </React.Fragment>
-                ))}
-              </EuiFlexGroup>
-            ),
+          value: <EventAffects event={event} impactMap={impactMap} onOpenEntity={onOpenEntity} />,
         },
       ]}
     />
