@@ -40,6 +40,9 @@ const CHART_HEIGHT = 140;
 /** Room above the plot for point annotation markers, which are drawn above its top edge. */
 const ANNOTATION_MARKER_MARGIN = 16;
 
+/** The label the recorder gives the moment an alert fired; it gets Kibana's alert icon. */
+const isAlertFired = (label: string): boolean => /^alert fired\b/i.test(label.trim());
+
 type YAxisUnit = NonNullable<EvidenceChartSpec['y_axis']['unit']>;
 
 const BYTE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'] as const;
@@ -165,6 +168,7 @@ export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart, referenceTi
       dataValue: number | string;
       details: string;
       header: string;
+      isAlert: boolean;
       tone?: 'success' | 'danger';
     }> = [];
     const ranges: Array<{
@@ -193,6 +197,7 @@ export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart, referenceTi
           dataValue: start,
           details: annotation.label,
           header,
+          isAlert: isAlertFired(annotation.label),
           tone: annotation.tone,
         });
       }
@@ -287,7 +292,9 @@ export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart, referenceTi
               { tone: 'success' as const, color: euiTheme.colors.success },
               { tone: 'danger' as const, color: euiTheme.colors.danger },
             ].map(({ tone, color }) => {
-              const values = pointAnnotations.filter((point) => point.tone === tone);
+              const values = pointAnnotations.filter(
+                (point) => !point.isAlert && point.tone === tone
+              );
               return (
                 values.length > 0 && (
                   <LineAnnotation
@@ -302,6 +309,18 @@ export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart, referenceTi
                 )
               );
             })}
+            {pointAnnotations.some((point) => point.isAlert) && (
+              <LineAnnotation
+                id="evidence-point-annotations-alert"
+                domainType={AnnotationDomainType.XDomain}
+                dataValues={pointAnnotations.filter((point) => point.isAlert)}
+                marker={
+                  <EuiIcon type="warning" color={euiTheme.colors.danger} aria-hidden={true} />
+                }
+                markerPosition={Position.Top}
+                style={{ line: { strokeWidth: 1, stroke: euiTheme.colors.danger, opacity: 1 } }}
+              />
+            )}
             {[
               { tone: undefined, color: euiTheme.colors.accent },
               { tone: 'success' as const, color: euiTheme.colors.success },
@@ -353,15 +372,31 @@ export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart, referenceTi
                     </EuiHealth>
                   </EuiFlexItem>
                 ))}
-              {pointAnnotations.map(({ details }, index) => (
+              {pointAnnotations.map(({ details, isAlert }, index) => (
                 <EuiFlexItem
                   key={`point-${index}`}
                   grow={false}
                   data-test-subj="investigationEvidenceChartAnnotation"
                 >
-                  <EuiHealth color={euiTheme.colors.accent} textSize="xs">
-                    {details}
-                  </EuiHealth>
+                  {isAlert ? (
+                    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon
+                          type="warning"
+                          color={euiTheme.colors.danger}
+                          size="s"
+                          aria-hidden
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs">{details}</EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  ) : (
+                    <EuiHealth color={euiTheme.colors.accent} textSize="xs">
+                      {details}
+                    </EuiHealth>
+                  )}
                 </EuiFlexItem>
               ))}
               {rangeAnnotations.map(({ details }, index) => (
