@@ -391,6 +391,28 @@ const getGridStyles = (
       background-color: ${euiTheme.colors.borderBaseProminent};
     }
 
+    .kbnGridPanel--resizeGauge {
+      z-index: ${euiTheme.levels.menu};
+      padding: ${euiTheme.size.xxs};
+      background-color: ${euiTheme.colors.backgroundBasePlain};
+      border-top-right-radius: ${euiTheme.border.radius.small};
+
+      & .kbnGridPanel--resizeGauge--inner {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: ${euiTheme.size.l};
+        padding: ${euiTheme.size.xxs} ${euiTheme.size.xs};
+        background-color: ${euiTheme.colors.backgroundLightAccentSecondary};
+        border-radius: ${euiTheme.border.radius.small};
+      }
+
+      & .kbnGridPanel--resizeGauge--text {
+        font-weight: ${euiTheme.font.weight.medium};
+        color: ${euiTheme.colors.textAccentSecondary};
+      }
+    }
+
     .kbnGridPanel--resizeHandle:hover:after,
     .kbnGridPanel--resizeHandle:focus-visible:after {
       background-color: ${euiTheme.colors.vis.euiColorVis0};
