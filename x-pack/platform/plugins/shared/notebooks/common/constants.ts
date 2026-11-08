@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export const PLUGIN_ID = 'notebook';
 export const APP_ID = 'notebook';
-export const APP_ROUTE = '/app/notebook';
+export const APP_ROUTE = '/app/notebooks';
 export const NOTEBOOK_SAVED_OBJECT_TYPE = 'notebook';
 export const NOTEBOOK_API_BASE_PATH = '/internal/notebook';
 export const MAX_DESCRIPTION_LENGTH = 10_000;
@@ -21,13 +21,13 @@ export const NOTEBOOK_APP_PARAM = 'app';
 
 /** The in-app path that opens a saved notebook, with the app panel showing `appId` when given. */
 export const getNotebookPath = (notebookId: string, appId?: string): string => {
-  const path = `/view/${encodeURIComponent(notebookId)}`;
+  const path = `/${encodeURIComponent(notebookId)}`;
   return appId ? `${path}?${new URLSearchParams({ [NOTEBOOK_APP_PARAM]: appId })}` : path;
 };
 
 /** The in-app path that shows one of a saved notebook's apps on its own. */
 export const getNotebookAppPath = (notebookId: string, appId: string): string =>
-  `/view/${encodeURIComponent(notebookId)}/apps/${encodeURIComponent(appId)}`;
+  `/${encodeURIComponent(notebookId)}/apps/${encodeURIComponent(appId)}`;
 
 export const PLUGIN_NAME = i18n.translate('xpack.notebook.pluginName', {
   defaultMessage: 'Notebooks',

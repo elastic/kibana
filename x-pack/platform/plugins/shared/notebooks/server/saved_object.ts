@@ -8,7 +8,12 @@
 import { pick } from 'lodash';
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
-import { APP_ID, APP_ROUTE, NOTEBOOK_SAVED_OBJECT_TYPE } from '../common/constants';
+import {
+  APP_ID,
+  APP_ROUTE,
+  NOTEBOOK_SAVED_OBJECT_TYPE,
+  getNotebookPath,
+} from '../common/constants';
 import { notebookAttributesSchema, type StoredNotebookAttributes } from './schema';
 
 const V1_FIELDS = ['title', 'description', 'cellOrder', 'cells'];
@@ -25,7 +30,7 @@ export const notebookSavedObjectType: SavedObjectsType<StoredNotebookAttributes>
     importableAndExportable: true,
     getTitle: ({ attributes }) => attributes.title,
     getInAppUrl: ({ id }) => ({
-      path: `${APP_ROUTE}/view/${encodeURIComponent(id)}`,
+      path: `${APP_ROUTE}${getNotebookPath(id)}`,
       uiCapabilitiesPath: `${APP_ID}.show`,
     }),
   },

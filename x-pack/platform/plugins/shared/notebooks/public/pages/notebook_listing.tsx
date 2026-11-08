@@ -13,7 +13,7 @@ import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
-import { NOTEBOOK_SAVED_OBJECT_TYPE, PLUGIN_NAME } from '../../common/constants';
+import { NOTEBOOK_SAVED_OBJECT_TYPE, PLUGIN_NAME, getNotebookPath } from '../../common/constants';
 import type { InputCellDefinition } from '../../common/types';
 import { buildDemoNotebook } from '../demo/demo_notebook';
 import { resolveInputParams } from '../model/params';
@@ -49,7 +49,7 @@ export const NotebookListing = ({ api }: { api: NotebookApi }) => {
         ),
       });
       const { id } = await api.create(attributes);
-      history.push(`/view/${id}`);
+      history.push(getNotebookPath(id));
     } catch (error) {
       core.notifications.toasts.addError(error, {
         title: i18n.translate('xpack.notebook.listing.demoError', {
@@ -103,7 +103,7 @@ export const NotebookListing = ({ api }: { api: NotebookApi }) => {
         }}
         getOnClickTitle={({ id }) =>
           () =>
-            history.push(`/view/${id}`)}
+            history.push(getNotebookPath(id))}
       />
     </TableListViewKibanaProvider>
   );

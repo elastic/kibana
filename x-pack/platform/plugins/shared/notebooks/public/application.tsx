@@ -42,11 +42,11 @@ export const renderApp = ({
             <Route exact path="/new">
               <NewNotebookPage api={api} />
             </Route>
-            <Route exact path="/view/:id">
-              <EditNotebookPage api={api} />
-            </Route>
-            <Route exact path="/view/:id/apps/:appId">
+            <Route exact path="/:id/apps/:appId">
               <AppPage api={api} />
+            </Route>
+            <Route exact path="/:id">
+              <EditNotebookPage api={api} />
             </Route>
             <Route path="/">
               <NotebookListing api={api} />

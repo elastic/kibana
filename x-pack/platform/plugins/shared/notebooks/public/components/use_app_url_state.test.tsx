@@ -33,14 +33,14 @@ const setup = (path: string, apps: NotebookApp[] = [app('one'), app('two')]) => 
 
 describe('useAppUrlState', () => {
   it('opens the app panel on the app in the URL', () => {
-    const { sidePanel$, activeAppId$ } = setup('/view/n?app=two');
+    const { sidePanel$, activeAppId$ } = setup('/n?app=two');
 
     expect(sidePanel$.getValue()).toBe('app');
     expect(activeAppId$.getValue()).toBe('two');
   });
 
   it('writes the shown app to the URL as the panel opens, switches and closes', () => {
-    const { history, sidePanel$, activeAppId$ } = setup('/view/n?other=1');
+    const { history, sidePanel$, activeAppId$ } = setup('/n?other=1');
 
     act(() => sidePanel$.next('app'));
     expect(history.location.search).toBe('?other=1&app=one');
@@ -54,17 +54,17 @@ describe('useAppUrlState', () => {
   });
 
   it('follows the URL when it changes', () => {
-    const { history, sidePanel$, activeAppId$ } = setup('/view/n?app=one');
+    const { history, sidePanel$, activeAppId$ } = setup('/n?app=one');
 
-    act(() => history.push('/view/n?app=two'));
+    act(() => history.push('/n?app=two'));
     expect(activeAppId$.getValue()).toBe('two');
 
-    act(() => history.push('/view/n'));
+    act(() => history.push('/n'));
     expect(sidePanel$.getValue()).toBeUndefined();
   });
 
   it('keeps an empty parameter while the panel is open with no apps', () => {
-    const { history, sidePanel$ } = setup('/view/n', []);
+    const { history, sidePanel$ } = setup('/n', []);
 
     act(() => sidePanel$.next('app'));
     expect(history.location.search).toBe('?app=');
