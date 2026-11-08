@@ -11,16 +11,10 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiPortal,
   EuiSpacer,
   EuiText,
   EuiTimeline,
   EuiTimelineItem,
-  EuiTitle,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { InvestigationImpactMap } from '../../../common/impact_map/impact_map';
@@ -35,13 +29,13 @@ import {
   resolveEventsSelection,
   type EventsSelection,
 } from '../../conversation_templates/templates/investigation/flyout/impact_map_events';
-import {
-  KindAvatar,
-  TimelineEvent,
-} from '../../conversation_templates/templates/investigation/flyout/timeline_event';
+import { KindAvatar } from '../../conversation_templates/templates/investigation/flyout/timeline_event';
 import type { InvestigationAttachmentContentProps } from '../../investigation_attachments';
 import { InvestigationCard } from './investigation_card';
 import { toImpactMapResponse } from './to_impact_map_response';
+
+/** The investigation flyout's tabs, by the name after the template id. */
+export type InvestigationTab = 'impactMap' | 'timeline';
 
 const MAX_ENTITY_CARDS = 3;
 const MAX_TIMELINE_ROWS = 3;
@@ -61,6 +55,12 @@ const mapSummary = (entities: number, relationships: number): string =>
     defaultMessage:
       '{entities, plural, one {# entity} other {# entities}}, {relationships, plural, one {# relationship} other {# relationships}}',
     values: { entities, relationships },
+  });
+
+const moreEvents = (count: number): string =>
+  i18n.translate('xpack.agenticInvestigations.impactMapCards.moreEvents', {
+    defaultMessage: '+{count} more',
+    values: { count },
   });
 
 const eventsLabel = (count: number): string =>
@@ -129,168 +129,146 @@ const EntityCard: React.FC<{
   );
 };
 
-const TimelineCard: React.FC<{
+const MAP_PREVIEW_HEIGHT = 240;
+
+const formatDay = (at: string) =>
+  new Date(at).toLocaleString(undefined, { month: 'short', day: 'numeric' });
+
+/** The map itself, drawn small. The card around it opens the full map, so it does not pan. */
+const MapCard: React.FC<{
   impactMap: InvestigationImpactMapResponse;
-  onOpenTimeline: () => void;
-  onOpenEvent: (eventId: string) => void;
-}> = ({ impactMap, onOpenTimeline, onOpenEvent }) => {
-  const { events } = impactMap;
-  const shown = events.slice(0, MAX_TIMELINE_ROWS);
+  Renderer?: ImpactMapRenderer;
+  onOpen: () => void;
+}> = ({ impactMap, Renderer, onOpen }) => {
+  const name = impactMap.title?.trim();
   return (
     <InvestigationCard
-      title={TIMELINE_TITLE}
-      icon="clock"
-      onClick={onOpenTimeline}
-      data-test-subj="agenticInvestigationsTimelineCard"
-      subtitle={eventsLabel(events.length)}
+      title={DEFAULT_TITLE}
+      icon="graphApp"
+      onClick={onOpen}
+      data-test-subj="agenticInvestigationsImpactMapCard"
+      subtitle={name}
     >
-      <EuiSpacer size="s" />
-      {shown.map((event) => (
-        // The rows open the event; the card around them opens the whole timeline.
-        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
-        <div
-          key={event.id}
-          onClick={(clicked) => {
-            clicked.stopPropagation();
-            onOpenEvent(event.id);
-          }}
-          css={css`
-            cursor: pointer;
-          `}
-          data-test-subj="agenticInvestigationsTimelineCardEvent"
-        >
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                <EventTime at={event.at} />
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EventKindBadge kind={event.kind} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="xs">
-                <span>{event.title}</span>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-      ))}
+      <EuiText size="xs" color="subdued">
+        <p>{mapSummary(impactMap.entities.length, impactMap.relationships.length)}</p>
+      </EuiText>
+      {Renderer && (
+        <>
+          <EuiSpacer size="s" />
+          <div
+            data-test-subj="agenticInvestigationsImpactMapCardPreview"
+            css={css`
+              height: ${MAP_PREVIEW_HEIGHT}px;
+              overflow: hidden;
+              pointer-events: none;
+              border-radius: 6px;
+            `}
+          >
+            <Renderer impactMap={impactMap} />
+          </div>
+        </>
+      )}
     </InvestigationCard>
   );
 };
 
-const MapCard: React.FC<{
-  impactMap: InvestigationImpactMapResponse;
-  onOpen?: () => void;
-}> = ({ impactMap, onOpen }) => (
-  <InvestigationCard
-    title={impactMap.title?.trim() || DEFAULT_TITLE}
-    icon="graphApp"
-    onClick={onOpen}
-    data-test-subj="agenticInvestigationsImpactMapCard"
-    subtitle={mapSummary(impactMap.entities.length, impactMap.relationships.length)}
-  />
-);
+/** How many events of each kind, so the shape of the incident reads before the rows do. */
+const kindCounts = (events: ImpactMapEvent[]) => {
+  const counts = new Map<ImpactMapEvent['kind'], number>();
+  events.forEach(({ kind }) => counts.set(kind, (counts.get(kind) ?? 0) + 1));
+  return [...counts.entries()];
+};
 
-/** Every event in the Timeline tab's own rows, over the chat. */
-const TimelineFlyout: React.FC<{
+/** The latest events as a short timeline; the card opens the whole one in the investigation. */
+const TimelineCard: React.FC<{
   impactMap: InvestigationImpactMapResponse;
+  onOpen: () => void;
   onOpenEvent: (eventId: string) => void;
-  onClose: () => void;
-}> = ({ impactMap, onOpenEvent, onClose }) => {
-  const titleId = useGeneratedHtmlId({ prefix: 'impactMapCardsTimelineTitle' });
-  const firstAt = Math.min(...impactMap.events.map(({ at }) => Date.parse(at)));
+}> = ({ impactMap, onOpen, onOpenEvent }) => {
+  const { events } = impactMap;
+  const newestFirst = [...events].reverse();
+  const shown = newestFirst.slice(0, MAX_TIMELINE_ROWS);
+  const hidden = events.length - shown.length;
+  const first = events[0];
+  const last = events[events.length - 1];
   return (
-    <EuiPortal>
-      <EuiFlyout
-        onClose={onClose}
-        aria-labelledby={titleId}
-        size="m"
-        data-test-subj="agenticInvestigationsTimelineCardFlyout"
-      >
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m">
-            <h2 id={titleId}>{TIMELINE_TITLE}</h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <EuiTimeline gutterSize="m">
-            {impactMap.events.map((event: ImpactMapEvent) => (
-              <EuiTimelineItem
-                key={event.id}
-                verticalAlign="center"
-                icon={<KindAvatar kind={event.kind} />}
-              >
-                <TimelineEvent
-                  event={event}
-                  impactMap={impactMap}
-                  firstAt={firstAt}
-                  selected={false}
-                  onOpen={() => onOpenEvent(event.id)}
-                />
-              </EuiTimelineItem>
-            ))}
-          </EuiTimeline>
-        </EuiFlyoutBody>
-      </EuiFlyout>
-    </EuiPortal>
-  );
-};
-
-const MapFlyout: React.FC<{
-  impactMap: InvestigationImpactMapResponse;
-  Renderer: ImpactMapRenderer;
-  onOpen: (selection: EventsSelection) => void;
-  onClose: () => void;
-}> = ({ impactMap, Renderer, onOpen, onClose }) => {
-  const titleId = useGeneratedHtmlId({ prefix: 'impactMapCardsMapTitle' });
-  return (
-    <EuiPortal>
-      <EuiFlyout
-        onClose={onClose}
-        aria-labelledby={titleId}
-        size="l"
-        data-test-subj="agenticInvestigationsImpactMapCardFlyout"
-      >
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m">
-            <h2 id={titleId}>{impactMap.title?.trim() || DEFAULT_TITLE}</h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <div
-            css={css`
-              height: 100%;
-              min-height: 360px;
-            `}
+    <InvestigationCard
+      title={TIMELINE_TITLE}
+      icon="clock"
+      onClick={onOpen}
+      data-test-subj="agenticInvestigationsTimelineCard"
+      subtitle={`${eventsLabel(events.length)} · ${formatDay(first.at)}${
+        formatDay(first.at) === formatDay(last.at) ? '' : ` – ${formatDay(last.at)}`
+      }`}
+    >
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
+        {kindCounts(events).map(([kind, count]) => (
+          <EuiFlexItem grow={false} key={kind}>
+            <EventKindBadge kind={kind} count={count} />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiTimeline gutterSize="m" data-test-subj="agenticInvestigationsTimelineCardEvents">
+        {shown.map((event) => (
+          <EuiTimelineItem
+            key={event.id}
+            verticalAlign="center"
+            icon={<KindAvatar kind={event.kind} />}
           >
-            <Renderer
-              impactMap={impactMap}
-              onEntityClick={(id) => onOpen({ kind: 'entity', id })}
-              onRelationshipClick={(id) => onOpen({ kind: 'relationship', id })}
-            />
-          </div>
-        </EuiFlyoutBody>
-      </EuiFlyout>
-    </EuiPortal>
+            {/* The rows open the event; the card around them opens the whole timeline. */}
+            {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+            <div
+              onClick={(clicked) => {
+                clicked.stopPropagation();
+                onOpenEvent(event.id);
+              }}
+              css={css`
+                cursor: pointer;
+                min-width: 0;
+              `}
+              data-test-subj="agenticInvestigationsTimelineCardEvent"
+            >
+              <EuiText size="xs" color="subdued">
+                <EventTime at={event.at} withDate />
+              </EuiText>
+              <EuiText
+                size="s"
+                css={css`
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                `}
+              >
+                <strong>{event.title}</strong>
+              </EuiText>
+            </div>
+          </EuiTimelineItem>
+        ))}
+      </EuiTimeline>
+      {hidden > 0 && (
+        <EuiText size="xs" color="subdued">
+          <p>{moreEvents(hidden)}</p>
+        </EuiText>
+      )}
+    </InvestigationCard>
   );
 };
-
-type Panel = 'map' | 'timeline';
 
 /**
  * The impact map attachment in the chat: cards for the impact map, the timeline and the entities
  * that matter most. A card opens the same view the investigation flyout has, over the chat.
  */
 export const createImpactMapCards = (
-  getRenderer: () => ImpactMapRenderer | undefined
+  getRenderer: () => ImpactMapRenderer | undefined,
+  openInInvestigation: (conversationId: string, tab: InvestigationTab) => void
 ): React.FC<InvestigationAttachmentContentProps<InvestigationImpactMap>> => {
   const ImpactMapCards: React.FC<InvestigationAttachmentContentProps<InvestigationImpactMap>> = ({
     document,
   }) => {
+    const { conversationId } = document;
     const impactMap = useMemo(() => toImpactMapResponse(document), [document]);
-    const [panel, setPanel] = useState<Panel>();
     const [selection, setSelection] = useState<EventsSelection>();
     const Renderer = getRenderer();
 
@@ -319,7 +297,8 @@ export const createImpactMapCards = (
             <EuiFlexItem>
               <MapCard
                 impactMap={impactMap}
-                onOpen={Renderer ? () => setPanel('map') : undefined}
+                Renderer={Renderer}
+                onOpen={() => openInInvestigation(conversationId, 'impactMap')}
               />
             </EuiFlexItem>
           )}
@@ -327,7 +306,7 @@ export const createImpactMapCards = (
             <EuiFlexItem>
               <TimelineCard
                 impactMap={impactMap}
-                onOpenTimeline={() => setPanel('timeline')}
+                onOpen={() => openInInvestigation(conversationId, 'timeline')}
                 onOpenEvent={(id) => open({ kind: 'event', id })}
               />
             </EuiFlexItem>
@@ -338,21 +317,6 @@ export const createImpactMapCards = (
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
-        {!selection && panel === 'map' && Renderer && (
-          <MapFlyout
-            impactMap={impactMap}
-            Renderer={Renderer}
-            onOpen={open}
-            onClose={() => setPanel(undefined)}
-          />
-        )}
-        {!selection && panel === 'timeline' && (
-          <TimelineFlyout
-            impactMap={impactMap}
-            onOpenEvent={(id) => open({ kind: 'event', id })}
-            onClose={() => setPanel(undefined)}
-          />
-        )}
         {selection && selected && (
           <ImpactMapEventsFlyout
             {...selected}

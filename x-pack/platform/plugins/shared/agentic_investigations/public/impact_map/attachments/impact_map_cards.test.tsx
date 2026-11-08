@@ -54,8 +54,15 @@ const document: InvestigationImpactMap = {
 
 const FakeRenderer: React.FC<ImpactMapRendererProps> = () => <div data-test-subj="fakeMap" />;
 
+const openInInvestigation = jest.fn();
+
+beforeEach(() => openInInvestigation.mockClear());
+
 const renderCards = (doc: InvestigationImpactMap, withRenderer = true) => {
-  const Cards = createImpactMapCards(() => (withRenderer ? FakeRenderer : undefined));
+  const Cards = createImpactMapCards(
+    () => (withRenderer ? FakeRenderer : undefined),
+    openInInvestigation
+  );
   return render(
     <EuiProvider>
       <I18nProvider>
@@ -94,20 +101,44 @@ describe('ImpactMapCards', () => {
     expect(screen.getAllByTestId('agenticInvestigationsEntityCard')).toHaveLength(3);
   });
 
-  it('opens the map in a flyout when its card is clicked', () => {
+  it('titles the map card Impact map and names the map under it', () => {
     renderCards(document);
 
-    fireEvent.click(screen.getByTestId('agenticInvestigationsImpactMapCard'));
+    const card = screen.getByTestId('agenticInvestigationsImpactMapCard');
+    expect(card).toHaveTextContent('Impact map');
+    expect(card).toHaveTextContent('Checkout failures');
+  });
+
+  it('draws the map inline in the card', () => {
+    renderCards(document);
 
     expect(screen.getByTestId('fakeMap')).toBeInTheDocument();
   });
 
-  it('opens the timeline from its card', () => {
+  it('opens the investigation flyout on the Impact map tab from the map card', () => {
+    renderCards(document);
+
+    fireEvent.click(screen.getByTestId('agenticInvestigationsImpactMapCard'));
+
+    expect(openInInvestigation).toHaveBeenCalledWith('conv-1', 'impactMap');
+  });
+
+  it('opens the investigation flyout on the Timeline tab from the timeline card', () => {
     renderCards(document);
 
     fireEvent.click(screen.getByTestId('agenticInvestigationsTimelineCard'));
 
-    expect(screen.getByTestId('agenticInvestigationsTimelineCardFlyout')).toBeInTheDocument();
+    expect(openInInvestigation).toHaveBeenCalledWith('conv-1', 'timeline');
+  });
+
+  it('previews the timeline with the kinds of event and the latest events', () => {
+    renderCards(document);
+
+    const card = screen.getByTestId('agenticInvestigationsTimelineCard');
+    expect(card).toHaveTextContent('Failure 1');
+    expect(card).toHaveTextContent('Change 1');
+    const rows = screen.getAllByTestId('agenticInvestigationsTimelineCardEvent');
+    expect(rows[0]).toHaveTextContent('Checkout errors');
   });
 
   it('opens an event from the timeline card without opening the whole timeline', () => {
@@ -115,7 +146,7 @@ describe('ImpactMapCards', () => {
 
     fireEvent.click(screen.getAllByTestId('agenticInvestigationsTimelineCardEvent')[0]);
 
-    expect(screen.queryByTestId('agenticInvestigationsTimelineCardFlyout')).not.toBeInTheDocument();
+    expect(openInInvestigation).not.toHaveBeenCalled();
     expect(screen.getByTestId('agenticInvestigationsImpactMapEventsFlyout')).toBeInTheDocument();
   });
 
@@ -127,12 +158,13 @@ describe('ImpactMapCards', () => {
     expect(screen.getByTestId('agenticInvestigationsImpactMapEventsFlyout')).toBeInTheDocument();
   });
 
-  it('leaves the map card plain when no renderer is registered', () => {
+  it('shows the map card without a preview when no renderer is registered', () => {
     renderCards(document, false);
 
-    fireEvent.click(screen.getByTestId('agenticInvestigationsImpactMapCard'));
-
     expect(screen.queryByTestId('fakeMap')).not.toBeInTheDocument();
+    expect(screen.getByTestId('agenticInvestigationsImpactMapCard')).toHaveTextContent(
+      'Impact map'
+    );
   });
 
   it('says so when nothing is recorded', () => {

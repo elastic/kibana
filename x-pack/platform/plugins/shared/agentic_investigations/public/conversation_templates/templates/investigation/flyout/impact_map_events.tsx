@@ -17,6 +17,7 @@ import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiEmptyPrompt,
+  EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -54,6 +55,7 @@ import {
 } from '../../../../../common';
 import { LazyEvidenceView } from '../../../../evidence';
 import { EntityMetadataTable } from './entity_metadata';
+import { FilterPopover } from './event_filter_popover';
 
 const KINDS: Record<ImpactMapEventKind, { label: string; color: EuiBadgeProps['color'] }> = {
   change: {
@@ -192,8 +194,14 @@ const LINKS_LABEL = i18n.translate('xpack.agenticInvestigations.impactMap.events
   defaultMessage: 'Links',
 });
 
-export const EventKindBadge: React.FC<{ kind: ImpactMapEventKind }> = ({ kind }) => (
-  <EuiBadge color={KINDS[kind].color}>{KINDS[kind].label}</EuiBadge>
+export const EventKindBadge: React.FC<{ kind: ImpactMapEventKind; count?: number }> = ({
+  kind,
+  count,
+}) => (
+  <EuiBadge color={KINDS[kind].color}>
+    {KINDS[kind].label}
+    {count !== undefined && ` ${count}`}
+  </EuiBadge>
 );
 
 /** What an event happened to, named as the map names it. */
@@ -920,6 +928,13 @@ export const getEntityTypeLabel = (
 export const getEntityKindLabel = (kind?: string): string | undefined =>
   kind ? kind.charAt(0).toUpperCase() + kind.slice(1) : undefined;
 
+const TYPE_FILTER = i18n.translate('xpack.agenticInvestigations.impactMap.events.typeFilter', {
+  defaultMessage: 'Event type',
+});
+const NO_MATCHING_EVENTS = i18n.translate(
+  'xpack.agenticInvestigations.impactMap.events.noMatchingEvents',
+  { defaultMessage: 'No events of this type.' }
+);
 const EVENTS_TAB = i18n.translate('xpack.agenticInvestigations.impactMap.events.eventsTab', {
   defaultMessage: 'Events',
 });
@@ -1058,9 +1073,27 @@ const EventsFlyoutContent: React.FC<
   const showBack = canGoBack || Boolean(onBack);
 
   // Newest first: what happened last is what a person usually wants to see.
-  const newestFirst = useMemo(
+  const [kindFilter, setKindFilter] = useState<string[]>([]);
+  const allNewestFirst = useMemo(
     () => [...events].sort((a, b) => Date.parse(b.at) - Date.parse(a.at)),
     [events]
+  );
+  const newestFirst = useMemo(
+    () =>
+      kindFilter.length > 0
+        ? allNewestFirst.filter(({ kind }) => kindFilter.includes(kind))
+        : allNewestFirst,
+    [allNewestFirst, kindFilter]
+  );
+  const kindOptions = useMemo(
+    () =>
+      EVENT_GROUPS.map(({ id, label, icon: groupIcon }) => ({
+        key: id,
+        label,
+        icon: groupIcon,
+        count: events.filter(({ kind }) => kind === id).length,
+      })).filter(({ key, count }) => count > 0 || kindFilter.includes(key)),
+    [events, kindFilter]
   );
 
   const viewInTimelineLink = onViewInTimeline && selected && (
@@ -1202,7 +1235,29 @@ const EventsFlyoutContent: React.FC<
           />
         ) : (
           <>
-            {renderEvents ? (
+            {kindOptions.length > 1 && (
+              <>
+                <EuiFilterGroup compressed>
+                  <FilterPopover
+                    label={TYPE_FILTER}
+                    options={kindOptions}
+                    selected={kindFilter}
+                    onChange={setKindFilter}
+                    testSubj="agenticInvestigationsImpactMapEventsTypeFilter"
+                  />
+                </EuiFilterGroup>
+                <EuiSpacer size="s" />
+              </>
+            )}
+            {newestFirst.length === 0 ? (
+              <EuiText
+                size="s"
+                color="subdued"
+                data-test-subj="agenticInvestigationsImpactMapNoMatch"
+              >
+                <p>{NO_MATCHING_EVENTS}</p>
+              </EuiText>
+            ) : renderEvents ? (
               renderEvents(newestFirst, setSelectedId)
             ) : (
               <EuiFlexGroup direction="column" gutterSize="s">

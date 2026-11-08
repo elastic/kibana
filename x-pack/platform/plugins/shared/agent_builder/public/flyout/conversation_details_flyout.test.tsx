@@ -161,7 +161,7 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
     return conversationTemplatesService;
   };
 
-  const renderSnapshot = (onNotFound?: () => void) => {
+  const renderSnapshot = (onNotFound?: () => void, initialTabId?: string) => {
     const get = jest.fn();
     const conversationsService = { get } as unknown as ConversationsService;
     const queryClient = new QueryClient({
@@ -181,6 +181,7 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
           conversationsService={conversationsService}
           conversationTemplatesService={createTemplatesService()}
           titleId="title"
+          initialTabId={initialTabId}
           onNotFound={onNotFound}
         />,
         { wrapper: Wrapper }
@@ -196,6 +197,27 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+  });
+
+  it.each([
+    ['a full tab id', 'test.second'],
+    ['the part after the template id', 'second'],
+  ])('opens on the tab named by %s', async (_label, initialTabId) => {
+    const { get, renderResult } = renderSnapshot(undefined, initialTabId);
+    get.mockResolvedValue(createConversation({ title: 'Conversation' }));
+
+    renderResult();
+
+    expect(await screen.findByRole('button', { name: 'Second clicked 0' })).toBeInTheDocument();
+  });
+
+  it('opens on the first tab when the initial tab matches none', async () => {
+    const { get, renderResult } = renderSnapshot(undefined, 'missing');
+    get.mockResolvedValue(createConversation({ title: 'Conversation' }));
+
+    renderResult();
+
+    expect(await screen.findByRole('button', { name: 'First clicked 0' })).toBeInTheDocument();
   });
 
   it('polls the conversation every 5 seconds while open', async () => {

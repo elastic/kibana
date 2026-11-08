@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { IMPACT_MAP_ATTACHMENT_TYPE } from '../../../common/impact_map/constants';
 import type { InvestigationImpactMap } from '../../../common/impact_map/impact_map';
 import type { ImpactMapRenderer } from '../../types';
+import type { InvestigationTab } from './impact_map_cards';
 import type { InvestigationAttachmentRenderer } from '../../investigation_attachments';
 
 /**
@@ -16,7 +17,8 @@ import type { InvestigationAttachmentRenderer } from '../../investigation_attach
  * key entities. The map is drawn by the renderer a solution registered, read when a card opens.
  */
 export const createImpactMapAttachmentRenderer = (
-  getImpactMapRenderer: () => ImpactMapRenderer | undefined
+  getImpactMapRenderer: () => ImpactMapRenderer | undefined,
+  openInInvestigation: (conversationId: string, tab: InvestigationTab) => void
 ): InvestigationAttachmentRenderer<InvestigationImpactMap> & {
   type: typeof IMPACT_MAP_ATTACHMENT_TYPE;
 } => ({
@@ -29,6 +31,6 @@ export const createImpactMapAttachmentRenderer = (
   icon: 'graphApp',
   loadContent: () =>
     import('./impact_map_cards').then(({ createImpactMapCards }) =>
-      createImpactMapCards(getImpactMapRenderer)
+      createImpactMapCards(getImpactMapRenderer, openInInvestigation)
     ),
 });

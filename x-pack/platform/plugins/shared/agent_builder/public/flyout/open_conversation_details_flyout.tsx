@@ -35,6 +35,7 @@ export interface OpenConversationDetailsFlyoutOptions {
   conversationsService: ConversationsService;
   conversationTemplatesService: ConversationTemplatesService;
   conversationId: string;
+  initialTabId?: string;
   onClose?: () => void;
   trailingActions?: EuiFlyoutMenuAction[];
 }
@@ -44,6 +45,7 @@ export const openConversationDetailsFlyout = async ({
   conversationsService,
   conversationTemplatesService,
   conversationId,
+  initialTabId,
   onClose,
   trailingActions,
 }: OpenConversationDetailsFlyoutOptions): Promise<() => void> => {
@@ -59,6 +61,7 @@ export const openConversationDetailsFlyout = async ({
     <QueryClientProvider client={queryClient}>
       <ConversationDetailsFlyoutSnapshot
         conversationId={conversationId}
+        initialTabId={initialTabId}
         conversationsService={conversationsService}
         conversationTemplatesService={conversationTemplatesService}
         titleId={titleId}

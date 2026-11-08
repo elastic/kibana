@@ -270,6 +270,23 @@ describe('ImpactMapTab', () => {
     expect(screen.queryByTestId('agenticInvestigationsImpactMapViewInTimeline')).toBeNull();
   });
 
+  it("filters an entity's events by event type", () => {
+    mockUseInvestigation.mockReturnValue({ data: { in_progress: false, impact_map: impactMap } });
+
+    renderTab();
+    fireEvent.click(screen.getByTestId('fakeEntity'));
+    expect(screen.getAllByTestId('agenticInvestigationsTimelineRow')).toHaveLength(2);
+
+    fireEvent.click(screen.getByTestId('agenticInvestigationsImpactMapEventsTypeFilter'));
+    fireEvent.click(
+      within(
+        screen.getByTestId('agenticInvestigationsImpactMapEventsTypeFilterOptions')
+      ).getAllByRole('option')[0]
+    );
+
+    expect(screen.getAllByTestId('agenticInvestigationsTimelineRow')).toHaveLength(1);
+  });
+
   it('opens an event in place of the list and goes back to it', () => {
     mockUseInvestigation.mockReturnValue({ data: { in_progress: false, impact_map: impactMap } });
 

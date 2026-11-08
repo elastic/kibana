@@ -17,6 +17,9 @@ export const registerImpactMapAttachmentTypes = (
 ): void => {
   registerInvestigationAttachmentRenderer(
     agentBuilder,
-    createImpactMapAttachmentRenderer(getImpactMapRenderer)
+    createImpactMapAttachmentRenderer(getImpactMapRenderer, (conversationId, tab) => {
+      // Opens the investigation flyout on the tab, so the card leads to the full view.
+      agentBuilder.openConversationDetails({ conversationId, initialTabId: tab });
+    })
   );
 };

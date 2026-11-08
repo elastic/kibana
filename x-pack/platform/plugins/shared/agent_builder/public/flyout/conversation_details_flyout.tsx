@@ -120,6 +120,8 @@ export interface ConversationDetailsFlyoutContentProps {
   conversationTemplatesService: ConversationTemplatesService;
   titleId: string;
   refetchConversation?: () => Promise<void>;
+  /** A tab id, or the part after the template id; the first tab when it matches none. */
+  initialTabId?: string;
 }
 
 /** Presentational only — renders whatever conversation it is given; not responsible for data fetching. */
@@ -129,6 +131,7 @@ export const ConversationDetailsFlyoutContent = ({
   conversationTemplatesService,
   titleId,
   refetchConversation,
+  initialTabId,
 }: ConversationDetailsFlyoutContentProps) => {
   const [selectedTabId, setSelectedTabId] = useState<string | undefined>(undefined);
 
@@ -140,7 +143,11 @@ export const ConversationDetailsFlyoutContent = ({
     () => buildTabs(conversation, conversationTemplatesService),
     [conversation, conversationTemplatesService]
   );
-  const effectiveSelectedTabId = selectedTabId ?? tabs[0]?.id;
+  const initialTab = initialTabId
+    ? tabs.find(({ id }) => id === initialTabId) ??
+      tabs.find(({ id }) => id.endsWith(`.${initialTabId}`))
+    : undefined;
+  const effectiveSelectedTabId = selectedTabId ?? initialTab?.id ?? tabs[0]?.id;
   const selectedTab = tabs.find((entry) => entry.id === effectiveSelectedTabId);
   // Render as a component so registered tabs can use hooks.
   const SelectedTabContent = selectedTab?.content;
@@ -204,6 +211,7 @@ export interface ConversationDetailsFlyoutSnapshotProps {
   conversationsService: ConversationsService;
   conversationTemplatesService: ConversationTemplatesService;
   titleId: string;
+  initialTabId?: string;
   onNotFound?: () => void;
 }
 
@@ -217,6 +225,7 @@ export const ConversationDetailsFlyoutSnapshot = ({
   conversationsService,
   conversationTemplatesService,
   titleId,
+  initialTabId,
   onNotFound,
 }: ConversationDetailsFlyoutSnapshotProps) => {
   const {
@@ -268,6 +277,7 @@ export const ConversationDetailsFlyoutSnapshot = ({
       conversationTemplatesService={conversationTemplatesService}
       titleId={titleId}
       refetchConversation={refetchConversation}
+      initialTabId={initialTabId}
     />
   );
 };

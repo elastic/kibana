@@ -273,6 +273,7 @@ export class AgentBuilderPlugin
 
     const openConversationDetails = async ({
       conversationId,
+      initialTabId,
       onClose,
       trailingActions,
     }: OpenConversationDetailsOptions): Promise<() => void> => {
@@ -284,6 +285,7 @@ export class AgentBuilderPlugin
         conversationsService,
         conversationTemplatesService,
         conversationId,
+        initialTabId,
         onClose,
         trailingActions,
       });
