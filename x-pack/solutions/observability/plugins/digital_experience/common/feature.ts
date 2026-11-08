@@ -19,6 +19,9 @@ export const DIGITAL_EXPERIENCE_API_PRIVILEGES = {
 /** Sub-feature privilege that grants `manageSessions`. */
 export const MANAGE_SESSIONS_SUB_FEATURE_PRIVILEGE_ID = 'manage_sessions';
 
+/** Sub-feature privilege that grants `createShortUrl`, named like Discover's and Dashboard's. */
+export const CREATE_SHORT_URL_SUB_FEATURE_PRIVILEGE_ID = 'url_create';
+
 /** APM's API privilege, which the routes also require as the app reads its data through APM. */
 export const APM_API_PRIVILEGE = 'apm';
 
@@ -26,4 +29,5 @@ export const DIGITAL_EXPERIENCE_UI_PRIVILEGES = {
   show: 'show',
   save: 'save',
   manageSessions: 'manageSessions',
+  createShortUrl: 'createShortUrl',
 } as const;

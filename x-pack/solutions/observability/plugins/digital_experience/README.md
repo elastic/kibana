@@ -98,6 +98,17 @@ it is kept in the URL (`browser`, `os`, `device`, `country`, `pageUrl`, `percent
   `digital-experience-view` type). A view belongs to the space, not to an application, and the space
   holds up to 100, each with a name of its own. The routes are `GET`, `POST`, `PUT` and `DELETE`
   `/internal/digital_experience/views`.
+- **Sharing:** the **Share** action in an application's header opens Kibana's Share modal on the
+  page the URL shows, any tab. The page is named by the app's locator (`DIGITAL_EXPERIENCE_LOCATOR`,
+  `common/locator.ts`): the service, the tab and the URL params it lists (time range, environment,
+  source, the Overview's filters, KQL query and percentile, the Sessions list's state). It is
+  registered on the browser and on the server, which creates short URLs, and other plugins can look
+  it up by its id, e.g. for the link of a rule or a report. With the **Short URLs** sub-feature
+  privilege (included in `all`) **Copy link** copies a short URL, a `url` saved object of the space,
+  and the modal can fix a relative time range; without it the link is the long URL. Following a
+  short URL needs no privilege of its own. A param the pages gain has to be added to
+  `DIGITAL_EXPERIENCE_LOCATOR_QUERY_KEYS`, which a test checks against the params of the Overview
+  and the Sessions list.
 - **Sessions tab:** `browser`, `os` and `country` are the Sessions tab's own params, which take one
   value, so the tab links carry a filter over only when it is exactly one included value. The
   Sessions list's **Entry page** facet is its page filter; it is a different question from the
