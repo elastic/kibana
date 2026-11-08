@@ -3906,6 +3906,9 @@ importers:
       '@kbn/tracing-utils':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-tracing-utils
+      '@kbn/trailblazer-plugin':
+        specifier: workspace:*
+        version: link:examples/trailblazer
       '@kbn/transform-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/transform
@@ -6974,6 +6977,8 @@ importers:
   examples/sse_example: {}
 
   examples/state_containers_examples: {}
+
+  examples/trailblazer: {}
 
   examples/unified_doc_viewer: {}
 

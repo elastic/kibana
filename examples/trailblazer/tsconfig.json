@@ -1,0 +1,28 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "index.ts",
+    "common/**/*.ts",
+    "public/**/*.ts",
+    "server/**/*.ts",
+    "../../typings/**/*"
+  ],
+  "exclude": [
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/developer-examples-plugin",
+    "@kbn/config-schema",
+    "@kbn/es-query",
+    "@kbn/es-errors",
+    "@kbn/ui-theme",
+    "@kbn/rule-data-utils",
+    "@kbn/share-plugin",
+    "@kbn/discover-plugin",
+    "@kbn/deeplinks-analytics"
+  ]
+}
