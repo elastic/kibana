@@ -69,6 +69,22 @@ describe('AwsCredentialsAuth', () => {
     expect(unsigned.headers.get('Authorization')).toBeUndefined();
   });
 
+  it('signs a global-endpoint form request in us-east-1 and keeps its content type', async () => {
+    const interceptor = await getInterceptor();
+    const contentType = 'application/x-www-form-urlencoded; charset=utf-8';
+
+    const config = {
+      url: 'https://iam.amazonaws.com/',
+      method: 'post',
+      data: 'Action=ListUsers&Version=2010-05-08',
+      headers: new AxiosHeaders({ 'Content-Type': contentType }),
+    } as unknown as InternalAxiosRequestConfig;
+    const signed = await interceptor(config);
+
+    expect(signed.headers.get('Authorization')).toContain('/us-east-1/iam/aws4_request');
+    expect(signed.headers.get('Content-Type')).toBe(contentType);
+  });
+
   // Regression test: query params passed via axios's `params` option (as
   // opposed to being baked into the URL string already) are not merged into
   // `config.url` until *after* request interceptors run (axios's
