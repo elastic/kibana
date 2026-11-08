@@ -44,7 +44,7 @@ export const AwsConnector: ConnectorSpec = {
       scope: 'destroy',
       description:
         'Send a SigV4-signed request to any AWS service API and return its status, headers, and body. ' +
-        'JSON bodies are parsed; XML bodies (Query-protocol APIs such as IAM, STS, and EC2) are returned as text.',
+        'JSON responses are parsed; XML responses (for example from EC2) are returned as text.',
       input: RequestInputSchema,
       handler: async (ctx, input: RequestInput) => {
         const { service, region, method, path, query, headers, body } = input;

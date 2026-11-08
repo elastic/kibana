@@ -58,13 +58,16 @@ export const RequestInputSchema = lazySchema(() =>
       .describe(
         'Extra request headers. Set Content-Type for non-JSON bodies, e.g. ' +
           '"application/x-www-form-urlencoded; charset=utf-8" for Query-protocol APIs, or ' +
-          '"application/x-amz-json-1.1" with X-Amz-Target for JSON-protocol APIs. x-amz-* headers are signed.'
+          '"application/x-amz-json-1.1" with X-Amz-Target for JSON-protocol APIs, e.g. ' +
+          '{ "Content-Type": "application/x-amz-json-1.1", "X-Amz-Target": "Logs_20140328.DescribeLogGroups" }. ' +
+          'x-amz-* headers are signed.'
       ),
     body: z
       .unknown()
       .optional()
       .describe(
-        'Request body. A string is sent as-is (e.g. a form-encoded Query-protocol body); any other value is sent as JSON.'
+        'Request body. A string is sent as-is (e.g. a form-encoded Query-protocol body); any other value is sent as JSON, ' +
+          'e.g. { "limit": 5 } for CloudWatch Logs DescribeLogGroups.'
       ),
   })
 );
