@@ -28,6 +28,7 @@ import { i18n } from '@kbn/i18n';
 import type { InvestigationImpactMap } from '../../../common/impact_map/impact_map';
 import type { ImpactMapEvent, InvestigationImpactMapResponse } from '../../../common';
 import type { ImpactMapRenderer } from '../../types';
+import { useIsInAgentBuilder } from '../../conversation_templates/templates/investigation/flyout/use_is_in_agent_builder';
 import {
   EventAffects,
   EventGlance,
@@ -380,6 +381,8 @@ export const createImpactMapCards = (
     const { conversationId } = document;
     const impactMap = useMemo(() => toImpactMapResponse(document), [document]);
     const history = useSelectionHistory();
+    // In Agent Builder the event opens over the details flyout; anywhere else it is a child of it.
+    const isInAgentBuilder = useIsInAgentBuilder();
     const selection = history.current;
     const [isMaximized, setIsMaximized] = useState(false);
     const { euiTheme } = useEuiTheme();
@@ -547,7 +550,7 @@ export const createImpactMapCards = (
           <ImpactMapEventsFlyout
             {...selected}
             impactMap={impactMap}
-            asMainFlyout
+            asMainFlyout={isInAgentBuilder}
             targetKey={`${selection.kind}:${selection.id}`}
             onClose={history.clear}
             onBackToPrevious={history.hasPrevious ? history.back : undefined}
