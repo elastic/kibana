@@ -30,6 +30,7 @@ import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/co
 import {
   AGENTIC_INVESTIGATIONS_API_VERSION,
   INVESTIGATION_STATUS_URL,
+  buildAgentInstructions,
 } from '@kbn/agentic-investigations-plugin/common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
@@ -47,6 +48,11 @@ const AGENT_BUILDER_PUBLIC_API_VERSION = '2023-10-31';
 const copyLinkLabel = i18n.translate('xpack.nightshift.investigations.cardCopyLinkLabel', {
   defaultMessage: 'Copy link',
 });
+
+const copyAgentInstructionsLabel = i18n.translate(
+  'xpack.nightshift.investigations.cardCopyAgentInstructionsLabel',
+  { defaultMessage: 'Copy agent instructions' }
+);
 
 const deleteLabel = i18n.translate('xpack.nightshift.investigations.cardDeleteLabel', {
   defaultMessage: 'Delete investigation',
@@ -98,7 +104,8 @@ export interface InvestigationCardActionsProps {
 
 /**
  * Trailing controls for a Nightshift investigation list card: the assignees, open in chat (same
- * Agent Builder route as the flyout footer) and an overflow menu with Copy link plus, for users who
+ * Agent Builder route as the flyout footer) and an overflow menu with Copy link, Copy agent
+ * instructions plus, for users who
  * can manage investigations, Close/Open, then Delete separated at the bottom.
  */
 export const InvestigationCardActions = ({
@@ -142,6 +149,28 @@ export const InvestigationCardActions = ({
       });
     }
   }, [investigation.id, notifications.toasts]);
+
+  const handleCopyAgentInstructions = useCallback(() => {
+    const copied = copyToClipboard(
+      buildAgentInstructions({
+        investigationId: investigation.id,
+        kibanaUrl: http.basePath.publicBaseUrl ?? `${window.location.origin}${http.basePath.get()}`,
+      })
+    );
+    if (copied) {
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.nightshift.investigations.cardCopyAgentInstructionsSuccess', {
+          defaultMessage: 'Copied agent instructions to clipboard',
+        }),
+      });
+    } else {
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.nightshift.investigations.cardCopyAgentInstructionsError', {
+          defaultMessage: 'Could not copy the agent instructions',
+        }),
+      });
+    }
+  }, [http.basePath, investigation.id, notifications.toasts]);
 
   const invalidateLists = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY });
@@ -222,6 +251,18 @@ export const InvestigationCardActions = ({
       >
         {copyLinkLabel}
       </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        key="copyAgentInstructions"
+        icon="copy"
+        onClick={(event) => {
+          event.stopPropagation();
+          setIsMenuOpen(false);
+          handleCopyAgentInstructions();
+        }}
+        data-test-subj="nightshiftInvestigationCardCopyAgentInstructions"
+      >
+        {copyAgentInstructionsLabel}
+      </EuiContextMenuItem>,
       ...(canManage
         ? [
             closed ? (
@@ -280,7 +321,7 @@ export const InvestigationCardActions = ({
           ]
         : []),
     ],
-    [canManage, closed, ebtElement, handleCopyLink, handleSetStatus]
+    [canManage, closed, ebtElement, handleCopyAgentInstructions, handleCopyLink, handleSetStatus]
   );
 
   return (

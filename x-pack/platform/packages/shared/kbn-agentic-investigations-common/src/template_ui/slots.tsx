@@ -157,6 +157,7 @@ export interface FooterSlotProps extends InvestigationSlotProps {
   onCloseInvestigationImmediate?: ConversationDetailsFlyoutFooterProps['onCloseInvestigationImmediate'];
   onReopenInvestigation?: ConversationDetailsFlyoutFooterProps['onReopenInvestigation'];
   onDeleteInvestigation?: ConversationDetailsFlyoutFooterProps['onDeleteInvestigation'];
+  onCopyAgentInstructions?: ConversationDetailsFlyoutFooterProps['onCopyAgentInstructions'];
   wrapActionsMenu?: ConversationDetailsFlyoutFooterProps['wrapActionsMenu'];
 }
 
@@ -170,6 +171,7 @@ export const FooterSlot = ({
   onCloseInvestigationImmediate,
   onReopenInvestigation,
   onDeleteInvestigation,
+  onCopyAgentInstructions,
   wrapActionsMenu,
 }: FooterSlotProps) => (
   <ConversationDetailsFlyoutFooter
@@ -182,6 +184,7 @@ export const FooterSlot = ({
     onCloseInvestigationImmediate={onCloseInvestigationImmediate}
     onReopenInvestigation={onReopenInvestigation}
     onDeleteInvestigation={onDeleteInvestigation}
+    onCopyAgentInstructions={onCopyAgentInstructions}
     wrapActionsMenu={wrapActionsMenu}
   />
 );

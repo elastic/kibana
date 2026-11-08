@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { icon as checkIcon } from '@elastic/eui/es/components/icon/assets/check';
 import { icon as chevronSingleDownIcon } from '@elastic/eui/es/components/icon/assets/chevron_single_down';
+import { icon as copyIcon } from '@elastic/eui/es/components/icon/assets/copy';
 import { icon as refreshIcon } from '@elastic/eui/es/components/icon/assets/refresh';
 import { icon as trashIcon } from '@elastic/eui/es/components/icon/assets/trash';
 import { AiButtonEmpty } from '@kbn/ui-ai-components';
@@ -82,6 +83,12 @@ export interface ConversationDetailsFlyoutFooterProps {
    */
   onDeleteInvestigation?: (props: DeleteInvestigationModalRenderProps) => React.ReactNode;
   /**
+   * When provided, the Actions menu offers "Copy agent instructions": how to install the Elastic
+   * CLI and read this investigation into a local agent. Supplied by the caller, which owns the
+   * Kibana URL and the clipboard.
+   */
+  onCopyAgentInstructions?: (investigation: Investigation) => void;
+  /**
    * Wraps the Actions menu, so the caller can hide it when the user may not manage investigations.
    */
   wrapActionsMenu?: (menu: React.ReactElement) => React.ReactNode;
@@ -104,6 +111,7 @@ export const ConversationDetailsFlyoutFooter = ({
   onCloseInvestigationImmediate,
   onReopenInvestigation,
   onDeleteInvestigation,
+  onCopyAgentInstructions,
   wrapActionsMenu,
 }: ConversationDetailsFlyoutFooterProps) => {
   const { euiTheme } = useEuiTheme();
@@ -119,7 +127,7 @@ export const ConversationDetailsFlyoutFooter = ({
     Boolean(onCloseInvestigation) ||
     Boolean(onReopenInvestigation);
   const canDelete = Boolean(onDeleteInvestigation);
-  const showActionsMenu = canDelete || canCloseOrOpen;
+  const showActionsMenu = canDelete || canCloseOrOpen || Boolean(onCopyAgentInstructions);
 
   const escalationButton = (
     <EuiFlexItem grow={false}>
@@ -152,6 +160,26 @@ export const ConversationDetailsFlyoutFooter = ({
     };
 
     const items: React.ReactElement[] = [];
+
+    if (onCopyAgentInstructions) {
+      items.push(
+        <EuiContextMenuItem
+          key="copyAgentInstructions"
+          css={itemCss}
+          icon={menuIcon(copyIcon)}
+          onClick={() => {
+            closeActions();
+            onCopyAgentInstructions(investigation);
+          }}
+          data-test-subj="investigationFlyoutActionsCopyAgentInstructions"
+        >
+          {ACTIONS_TRANSLATIONS.buttons.copyAgentInstructions}
+        </EuiContextMenuItem>
+      );
+      if (canDelete || canCloseOrOpen) {
+        items.push(<EuiHorizontalRule key="copySeparator" margin="none" />);
+      }
+    }
 
     // Delete first, with a divider under it before Close/Open.
     if (canDelete) {
@@ -224,6 +252,7 @@ export const ConversationDetailsFlyoutFooter = ({
     investigation,
     onCloseInvestigation,
     onCloseInvestigationImmediate,
+    onCopyAgentInstructions,
     onReopenInvestigation,
   ]);
 

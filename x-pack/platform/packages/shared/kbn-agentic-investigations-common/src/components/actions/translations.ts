@@ -31,6 +31,10 @@ export const ACTIONS_TRANSLATIONS = Object.freeze({
     copyLink: i18n.translate('xpack.agenticInvestigations.baseActions.copyLink', {
       defaultMessage: 'Copy link',
     }),
+    copyAgentInstructions: i18n.translate(
+      'xpack.agenticInvestigations.baseActions.copyAgentInstructions',
+      { defaultMessage: 'Copy agent instructions' }
+    ),
     close: i18n.translate('xpack.agenticInvestigations.baseActions.closeInvestigation', {
       defaultMessage: 'Close investigation',
     }),

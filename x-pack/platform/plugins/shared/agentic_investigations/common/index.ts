@@ -12,6 +12,12 @@ export {
   SUGGEST_USER_PROFILES_URL,
 } from './constants';
 
+export {
+  ELASTIC_CLI_INSTALL_DOCS_URL,
+  buildAgentInstructions,
+  type AgentInstructionsOptions,
+} from './agent_instructions/build_agent_instructions';
+
 export { userSchema } from './user';
 export type { User } from './user';
 

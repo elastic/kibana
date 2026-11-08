@@ -129,6 +129,11 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
    */
   renderDeleteInvestigationModal?: import('./slots').FooterSlotProps['onDeleteInvestigation'];
   /**
+   * When provided, the footer Actions menu offers "Copy agent instructions". Supplied by the
+   * caller, which builds the text for its Kibana and does the copying.
+   */
+  onCopyAgentInstructions?: import('./slots').FooterSlotProps['onCopyAgentInstructions'];
+  /**
    * Wraps the footer Actions menu so the caller can hide it when the user may not manage
    * investigations.
    */
@@ -192,6 +197,7 @@ export const registerAgenticInvestigationTemplateUI = ({
   onCloseInvestigationImmediate,
   onReopenInvestigation,
   renderDeleteInvestigationModal,
+  onCopyAgentInstructions,
   wrapActionsMenu,
   renderOverview,
   renderImpactMap,
@@ -319,6 +325,7 @@ export const registerAgenticInvestigationTemplateUI = ({
                 onCloseInvestigationImmediate={onCloseInvestigationImmediate}
                 onReopenInvestigation={onReopenInvestigation}
                 onDeleteInvestigation={renderDeleteInvestigationModal}
+                onCopyAgentInstructions={onCopyAgentInstructions}
                 wrapActionsMenu={wrapActionsMenu}
               />
             </Suspense>

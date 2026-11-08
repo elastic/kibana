@@ -30,6 +30,7 @@ import {
 import { getSharedInvestigationsQueryClient } from '../../../shared_query_client';
 import { NEW_INVESTIGATION_TITLE } from './translations';
 import { copyLink } from '../../shared/copy_link';
+import { copyAgentInstructions } from '../../shared/copy_agent_instructions';
 import type { TemplateDefinition } from '../../registry/types';
 
 const INVESTIGATION_TEMPLATE_NAME = i18n.translate(
@@ -303,6 +304,9 @@ export const investigationTemplate: TemplateDefinition = {
       onCloseInvestigationImmediate,
       onReopenInvestigation,
       renderDeleteInvestigationModal,
+      onCopyAgentInstructions: ({ id }) => {
+        copyAgentInstructions(core, id);
+      },
       wrapActionsMenu: (menu) => {
         preloadFooterActionChunks();
         return React.createElement(
