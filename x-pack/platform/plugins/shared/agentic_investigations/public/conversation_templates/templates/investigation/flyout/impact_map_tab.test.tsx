@@ -14,6 +14,7 @@ import { useInvestigation } from '../../../../investigations/hooks/use_investiga
 import type { ImpactMapRendererProps } from '../../../../types';
 import { ImpactMapTab } from './impact_map_tab';
 import { withContextAnnotations } from './impact_map_events';
+import { takeTimelineFocus } from './timeline_focus';
 
 jest.mock('../../../../investigations/hooks/use_investigation');
 const mockUseInvestigation = useInvestigation as jest.Mock;
@@ -76,11 +77,11 @@ const impactMap: InvestigationImpactMapResponse = {
   created_at: '2026-11-07T00:00:00.000Z',
 };
 
-const renderTab = () =>
+const renderTab = (openTimeline?: () => void) =>
   render(
     <EuiProvider>
       <I18nProvider>
-        <ImpactMapTab conversationId="conv-1" Renderer={FakeRenderer} />
+        <ImpactMapTab conversationId="conv-1" Renderer={FakeRenderer} openTimeline={openTimeline} />
       </I18nProvider>
     </EuiProvider>
   );
@@ -135,6 +136,29 @@ describe('ImpactMapTab', () => {
 
     fireEvent.click(screen.getByTestId('agenticInvestigationsImpactMapEventsBack'));
     expect(screen.getAllByTestId('agenticInvestigationsImpactMapEvent')).toHaveLength(2);
+  });
+
+  it('opens the Timeline tab filtered by the entity from "View in timeline"', () => {
+    mockUseInvestigation.mockReturnValue({ data: { in_progress: false, impact_map: impactMap } });
+    const openTimeline = jest.fn();
+
+    renderTab(openTimeline);
+    fireEvent.click(screen.getByTestId('fakeEntity'));
+    fireEvent.click(screen.getByTestId('agenticInvestigationsImpactMapViewInTimeline'));
+
+    expect(openTimeline).toHaveBeenCalledTimes(1);
+    expect(takeTimelineFocus('conv-1')).toEqual(['payment']);
+    expect(takeTimelineFocus('conv-1')).toEqual([]);
+    expect(screen.queryByTestId('agenticInvestigationsImpactMapEventsFlyout')).toBeNull();
+  });
+
+  it('offers no timeline action when the flyout has no Timeline tab', () => {
+    mockUseInvestigation.mockReturnValue({ data: { in_progress: false, impact_map: impactMap } });
+
+    renderTab();
+    fireEvent.click(screen.getByTestId('fakeEntity'));
+
+    expect(screen.queryByTestId('agenticInvestigationsImpactMapViewInTimeline')).toBeNull();
   });
 
   it('lists the events of a relationship', () => {

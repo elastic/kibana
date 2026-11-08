@@ -192,6 +192,7 @@ export const ConversationDetailsFlyoutContent = ({
           conversation={conversation}
           isOpenedFromChat={isOpenedFromChat}
           refetchConversation={refetchConversation}
+          selectTab={setSelectedTabId}
         />
       )}
     </FlyoutFrame>

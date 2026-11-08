@@ -9,6 +9,7 @@ import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
+  EuiButton,
   EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -427,6 +428,8 @@ export interface ImpactMapEventsFlyoutProps {
   standalone?: boolean;
   /** Opens as a main flyout over the investigation flyout instead of as its child. */
   asMainFlyout?: boolean;
+  /** Shows a "View in timeline" action that opens the Timeline tab filtered by this target. */
+  onViewInTimeline?: () => void;
 }
 
 /**
@@ -441,6 +444,7 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
   onClose,
   standalone = false,
   asMainFlyout = false,
+  onViewInTimeline,
 }) => {
   const titleId = useGeneratedHtmlId({ prefix: 'impactMapEventsTitle' });
   const [selectedId, setSelectedId] = useState(initialEventId);
@@ -484,6 +488,21 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
               values: { count: events.length },
             })}
           </EuiText>
+        )}
+        {!selected && onViewInTimeline && events.length > 0 && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiButton
+              size="s"
+              iconType="clock"
+              onClick={onViewInTimeline}
+              data-test-subj="agenticInvestigationsImpactMapViewInTimeline"
+            >
+              {i18n.translate('xpack.agenticInvestigations.impactMap.events.viewInTimeline', {
+                defaultMessage: 'View in timeline',
+              })}
+            </EuiButton>
+          </>
         )}
       </EuiFlyoutHeader>
       <EuiFlyoutBody>

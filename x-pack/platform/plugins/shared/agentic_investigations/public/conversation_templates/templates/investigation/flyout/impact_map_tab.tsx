@@ -34,9 +34,10 @@ import {
   resolveEventsSelection,
   type EventsSelection,
 } from './impact_map_events';
+import { requestTimelineFocus } from './timeline_focus';
 
 /** Tall enough to read, short enough that the whole map, with its controls, fits in the flyout. */
-const MAP_HEIGHT = 'clamp(320px, calc(100vh - 360px), 640px)';
+const MAP_HEIGHT = 'clamp(300px, calc(100vh - 480px), 560px)';
 
 const DEFAULT_TITLE = i18n.translate('xpack.agenticInvestigations.impactMap.defaultTitle', {
   defaultMessage: 'Impact map',
@@ -72,6 +73,7 @@ const UPDATED_LABEL = i18n.translate('xpack.agenticInvestigations.impactMap.upda
 export const ImpactMapTab: React.FC<ImpactMapSlotRenderProps & { Renderer: ImpactMapRenderer }> = ({
   conversationId,
   Renderer,
+  openTimeline,
 }) => {
   const { data, isLoading } = useInvestigation(conversationId);
 
@@ -92,13 +94,22 @@ export const ImpactMapTab: React.FC<ImpactMapSlotRenderProps & { Renderer: Impac
     );
   }
 
-  return <ImpactMapPanel impactMap={impactMap} Renderer={Renderer} />;
+  return (
+    <ImpactMapPanel
+      impactMap={impactMap}
+      Renderer={Renderer}
+      conversationId={conversationId}
+      openTimeline={openTimeline}
+    />
+  );
 };
 
 const ImpactMapPanel: React.FC<{
   impactMap: InvestigationImpactMapResponse;
   Renderer: ImpactMapRenderer;
-}> = ({ impactMap, Renderer }) => {
+  conversationId: string;
+  openTimeline?: () => void;
+}> = ({ impactMap, Renderer, conversationId, openTimeline }) => {
   const [isMaximized, setIsMaximized] = useState(false);
   const [selection, setSelection] = useState<EventsSelection>();
   // Escape closes the events flyout first, and only then the full-screen map.
@@ -121,6 +132,24 @@ const ImpactMapPanel: React.FC<{
   const title = impactMap.title?.trim() || DEFAULT_TITLE;
   const { euiTheme } = useEuiTheme();
   const updatedAt = new Date(impactMap.updated_at ?? impactMap.created_at);
+  const viewInTimeline = openTimeline
+    ? (current: EventsSelection) => {
+        const relationship =
+          current.kind === 'relationship'
+            ? impactMap.relationships.find(({ id }) => id === current.id)
+            : undefined;
+        const entityIds =
+          current.kind === 'entity'
+            ? [current.id]
+            : relationship
+            ? [relationship.source_id, relationship.target_id]
+            : [];
+        requestTimelineFocus(conversationId, entityIds);
+        setSelection(undefined);
+        setIsMaximized(false);
+        openTimeline();
+      }
+    : undefined;
   const openEntity = (id: string) => setSelection({ kind: 'entity', id });
   const openRelationship = (id: string) => setSelection({ kind: 'relationship', id });
   const map = (
@@ -245,6 +274,7 @@ const ImpactMapPanel: React.FC<{
           {...resolveEventsSelection(selection, impactMap)}
           impactMap={impactMap}
           standalone={isMaximized}
+          onViewInTimeline={viewInTimeline ? () => viewInTimeline(selection) : undefined}
           onClose={() => setSelection(undefined)}
         />
       )}

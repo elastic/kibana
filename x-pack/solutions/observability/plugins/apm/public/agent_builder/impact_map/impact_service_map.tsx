@@ -36,6 +36,7 @@ import '@xyflow/react/dist/style.css';
 import type { ImpactMapRendererProps } from '@kbn/agentic-investigations-plugin/public';
 import { getSeverityColor } from '../../../common/anomaly_detection';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import { NODE_HEIGHT, NODE_WIDTH } from '../../../common/service_map/constants';
 import { getApmInternalServices } from '../../plugin';
 import { InfrastructureNode } from './infrastructure_node';
 import { ServiceNode } from '../../components/shared/service_map/service_node';
@@ -398,7 +399,11 @@ export function ImpactServiceMap({
   const { laidOutNodes, edges } = useMemo(() => {
     const graph = transformImpactMap(impactMap, { criticalPath: criticalPathColor }, agentNames);
     return {
-      laidOutNodes: applyDagreLayout<ImpactServiceMapNode>(graph.nodes, graph.edges),
+      // With a size to start from, a node shows (and the view can fit) before it is measured,
+      // which a flyout that is still opening may delay.
+      laidOutNodes: applyDagreLayout<ImpactServiceMapNode>(graph.nodes, graph.edges).map(
+        (node) => ({ ...node, initialWidth: NODE_WIDTH, initialHeight: NODE_HEIGHT })
+      ),
       edges: graph.edges,
     };
   }, [impactMap, criticalPathColor, agentNames]);
@@ -452,7 +457,7 @@ export function ImpactServiceMap({
           colorMode={colorMode.toLowerCase() as ColorMode}
         >
           <FitViewOnChange nodeIds={nodes.map(({ id }) => id).join('|')} />
-          <Controls showInteractive={false} />
+          <Controls showInteractive={false} position="top-right" />
           <Panel position="top-left">
             <ImpactMapLegend criticalPathColor={criticalPathColor} />
           </Panel>

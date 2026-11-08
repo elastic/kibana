@@ -204,8 +204,15 @@ export const registerAgenticInvestigationTemplateUI = ({
   if (renderImpactMap && impactMapTabId) {
     conversationTemplates.registerTab(impactMapTabId, () => ({
       label: DETAILS_FLYOUT_LABELS.tabs.impactMap,
-      content: function ImpactMapTabContent({ conversation }) {
-        return <>{renderImpactMap({ conversationId: conversation.id })}</>;
+      content: function ImpactMapTabContent({ conversation, selectTab }) {
+        return (
+          <>
+            {renderImpactMap({
+              conversationId: conversation.id,
+              openTimeline: selectTab && timelineTabId ? () => selectTab(timelineTabId) : undefined,
+            })}
+          </>
+        );
       },
     }));
   }

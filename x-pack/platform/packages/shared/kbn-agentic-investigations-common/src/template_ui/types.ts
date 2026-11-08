@@ -142,6 +142,8 @@ export type RenderOverview = (props: OverviewSlotRenderProps) => React.ReactNode
 /** Props passed to the `renderImpactMap` render prop. */
 export interface ImpactMapSlotRenderProps {
   conversationId: string;
+  /** Switches the flyout to its Timeline tab. Absent when the flyout has no Timeline tab. */
+  openTimeline?: () => void;
 }
 
 /**

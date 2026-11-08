@@ -36,6 +36,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedTime } from '@kbn/i18n-react';
 import type { TimelineSlotRenderProps } from '@kbn/agentic-investigations-common';
+import { takeTimelineFocus } from './timeline_focus';
 import type {
   ImpactMapEvent,
   ImpactMapEventKind,
@@ -355,11 +356,17 @@ export const TimelineTab: React.FC<TimelineSlotRenderProps> = ({ conversationId 
     );
   }
 
-  return <Timeline impactMap={impactMap} />;
+  return <Timeline impactMap={impactMap} conversationId={conversationId} />;
 };
 
-const Timeline: React.FC<{ impactMap: InvestigationImpactMapResponse }> = ({ impactMap }) => {
-  const [entityFilter, setEntityFilter] = useState<string[]>([]);
+const Timeline: React.FC<{
+  impactMap: InvestigationImpactMapResponse;
+  conversationId: string;
+}> = ({ impactMap, conversationId }) => {
+  // Opened from the map's "View in timeline", it starts filtered by that entity.
+  const [entityFilter, setEntityFilter] = useState<string[]>(() =>
+    takeTimelineFocus(conversationId)
+  );
   const [kindFilter, setKindFilter] = useState<string[]>([]);
   const [text, setText] = useState('');
   const [newestFirst, setNewestFirst] = useState(true);
