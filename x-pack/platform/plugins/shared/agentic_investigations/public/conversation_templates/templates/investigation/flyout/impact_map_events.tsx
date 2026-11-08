@@ -854,7 +854,7 @@ const childSize = (parentSize: unknown) => {
   if (parentSize === undefined) {
     return 380;
   }
-  return parentSize === 's' ? 'm' : 'fill';
+  return parentSize === 'm' ? 's' : 'm';
 };
 
 const ChildEventsFlyout: React.FC<{
@@ -866,9 +866,10 @@ const ChildEventsFlyout: React.FC<{
     <EuiFlyout
       onClose={onClose}
       aria-labelledby={titleId}
-      // Under a managed flyout the size has to be a named one. A small parent leaves room for a
-      // medium child, as an SLO opens from the SLO flyout; a medium parent cannot have one, so the
-      // child fills the space beside it. A small child is too narrow for the evidence tables.
+      // Under a managed flyout the size has to be a named one. Not 'fill': EUI never stacks a fill
+      // child, so beside a wide investigation flyout it was squeezed to a sliver. A medium child
+      // goes beside a small parent, or stacks over it when the two don't fit; a medium parent
+      // cannot have a medium child.
       size={childSize(getManagedParent()?.size)}
       ownFocus={false}
       data-test-subj="agenticInvestigationsImpactMapEventsFlyout"
