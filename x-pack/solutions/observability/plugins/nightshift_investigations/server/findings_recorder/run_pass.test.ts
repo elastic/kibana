@@ -16,10 +16,10 @@ import { runFindingsPass, toImpactEntities, type FindingsPassDeps } from './run_
 jest.mock('../lib/create_optimize_model', () => ({ createOptimizeModel: jest.fn() }));
 
 const output = {
-  summary: 'Checkout errors rose after the 01:00 deploy.',
+  summary: '- Checkout errors rose after the 01:00 deploy.',
   verdict: 'The deploy doubled DB latency.',
   severity: 'high',
-  impact_summary: 'Checkout failed for 10 minutes.',
+  impact_summary: '- Checkout failed for 10 minutes.',
   impact_entities: [{ name: 'checkout' }],
   hypotheses: [
     {

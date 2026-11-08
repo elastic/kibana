@@ -56,7 +56,6 @@ import { normalizeEventLinks } from './event_links';
 
 export const FINDINGS_SEVERITIES = ['low', 'medium', 'high', 'critical'] as const;
 
-const MAX_METADATA_TEXT_LENGTH = 10_000;
 /** Actions the final pass may propose for a person to decide. */
 export const MAX_PROPOSALS = 3;
 /** Evidence charts the recorder may attach to one hypothesis. */
@@ -612,8 +611,31 @@ const MAX_EVENT_BULLET_LENGTH = 200;
 
 const clipAtWord = (text: string, max: number): string => {
   if (text.length <= max) return text;
-  const cut = text.slice(0, max);
-  return `${cut.slice(0, Math.max(cut.lastIndexOf(' '), max / 2))}…`;
+  let cut = text.slice(0, max);
+  // Never leave half of an event link behind: its target would show as text.
+  const openLink = cut.lastIndexOf('[');
+  if (openLink > cut.lastIndexOf(')') && openLink > max / 2) {
+    cut = cut.slice(0, openLink);
+  }
+  return `${cut.slice(0, Math.max(cut.lastIndexOf(' '), max / 2)).trimEnd()}…`;
+};
+
+/**
+ * Text as a short list of bullets, however the model wrote it: bullets are kept, a paragraph is
+ * split into sentences, and nothing runs past `maxItems` or `maxChars` an item.
+ */
+export const limitBulletList = (text: string, maxItems: number, maxChars: number): string => {
+  const lines = text.split('\n').filter((line) => line.trim());
+  const items = lines.some((line) => /^\s*[-*]\s/.test(line))
+    ? lines.map((line) => line.replace(/^\s*[-*]\s+/, '').trim())
+    : text
+        .split(/(?<=[.;!?])\s+(?=[A-Z0-9"'(`[])/)
+        .map((sentence) => sentence.trim())
+        .filter(Boolean);
+  return items
+    .slice(0, maxItems)
+    .map((item) => `- ${clipAtWord(item, maxChars)}`)
+    .join('\n');
 };
 
 /**
@@ -751,16 +773,13 @@ export const limitFindings = (
     ...(impactMap ? { impact_map: impactMap } : {}),
     ...(events.length ? { events } : {}),
     impact_evidence: impactEvidence,
-    summary: truncate(normalizeEventLinks(output.summary), MAX_METADATA_TEXT_LENGTH),
+    summary: limitBulletList(normalizeEventLinks(output.summary), 5, 160),
     ...(output.verdict !== undefined
-      ? { verdict: truncate(normalizeEventLinks(output.verdict), MAX_METADATA_TEXT_LENGTH) }
+      ? { verdict: limitDescriptionBullets(normalizeEventLinks(output.verdict)) }
       : {}),
     ...(output.impact_summary !== undefined
       ? {
-          impact_summary: truncate(
-            normalizeEventLinks(output.impact_summary),
-            MAX_EVIDENCE_TEXT_LENGTH
-          ),
+          impact_summary: limitBulletList(normalizeEventLinks(output.impact_summary), 2, 160),
         }
       : {}),
     ...(rawEntities !== undefined

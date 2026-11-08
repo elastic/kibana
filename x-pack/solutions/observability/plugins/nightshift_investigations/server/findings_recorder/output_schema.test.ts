@@ -21,6 +21,7 @@ import {
   classifyEntityType,
   withoutEntityName,
   limitDescriptionBullets,
+  limitBulletList,
 } from './output_schema';
 
 describe('findings output', () => {
@@ -603,5 +604,23 @@ describe('limitDescriptionBullets', () => {
   it('cuts a very long bullet at a word', () => {
     const long = `- ${'word '.repeat(80)}`;
     expect(limitDescriptionBullets(long).length).toBeLessThanOrEqual(205);
+  });
+});
+
+describe('limitBulletList', () => {
+  it('turns a paragraph into short bullets', () => {
+    const text = 'Alert fired. Shipping pod crashed. A deploy changed it. Fourth. Fifth. Sixth.';
+    expect(limitBulletList(text, 3, 160).split('\n')).toEqual([
+      '- Alert fired.',
+      '- Shipping pod crashed.',
+      '- A deploy changed it.',
+    ]);
+  });
+
+  it('keeps bullets and never cuts inside an event link', () => {
+    const link = '[the shipping pod crashed repeatedly](event:failure:e1:2026-11-06T01:00)';
+    const out = limitBulletList(`- Something happened because ${link}\n- Two`, 5, 50);
+    expect(out).not.toMatch(/\[[^\]]*$|\]\([^)]*$/);
+    expect(out.split('\n')).toHaveLength(2);
   });
 });
