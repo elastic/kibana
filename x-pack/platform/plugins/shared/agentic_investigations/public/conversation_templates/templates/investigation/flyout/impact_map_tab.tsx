@@ -36,8 +36,8 @@ import {
 } from './impact_map_events';
 import { requestTimelineFocus } from './timeline_focus';
 
-/** Tall enough to read, short enough that the whole map, with its controls, fits in the flyout. */
-const MAP_HEIGHT = 'clamp(300px, calc(100vh - 480px), 560px)';
+/** Fills the flyout below its header and tabs; the controls sit at the top, so nothing hides them. */
+const MAP_HEIGHT = 'clamp(320px, calc(100vh - 280px), 900px)';
 
 const DEFAULT_TITLE = i18n.translate('xpack.agenticInvestigations.impactMap.defaultTitle', {
   defaultMessage: 'Impact map',

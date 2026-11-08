@@ -15,6 +15,7 @@ import {
   useNodesState,
   useReactFlow,
   useStore,
+  useUpdateNodeInternals,
   type ColorMode,
   type Node,
   type NodeProps,
@@ -36,7 +37,6 @@ import '@xyflow/react/dist/style.css';
 import type { ImpactMapRendererProps } from '@kbn/agentic-investigations-plugin/public';
 import { getSeverityColor } from '../../../common/anomaly_detection';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import { NODE_HEIGHT, NODE_WIDTH } from '../../../common/service_map/constants';
 import { getApmInternalServices } from '../../plugin';
 import { InfrastructureNode } from './infrastructure_node';
 import { ServiceNode } from '../../components/shared/service_map/service_node';
@@ -345,21 +345,30 @@ const useServiceAgentNames = (impactMap: ImpactMapRendererProps['impactMap']) =>
 };
 
 /**
- * Keeps every node in view. The map is drawn inside a flyout that animates open and resizes, and
- * a fit done before the size settles, or before nodes are measured, leaves the nodes off screen.
- * So it fits again whenever the container's size or the set of nodes changes.
+ * Measures the nodes again and keeps every one in view. The map is drawn inside a flyout that
+ * animates open and resizes, and a fit done before the size settles, or before the nodes are
+ * measured, leaves them small or off screen. So it measures and fits again whenever the
+ * container's size, the layout or the set of nodes changes.
  */
-function FitViewOnChange({ nodeIds }: { nodeIds: string }) {
+function KeepNodesInView({ nodeIds, layout }: { nodeIds: string; layout: unknown }) {
   const { fitView } = useReactFlow();
+  const updateNodeInternals = useUpdateNodeInternals();
   const initialized = useNodesInitialized();
   const size = useStore(({ width, height }) => `${width}x${height}`);
   useEffect(() => {
-    if (!initialized || size.startsWith('0x') || size.endsWith('x0')) {
+    if (size.startsWith('0x') || size.endsWith('x0')) {
       return;
     }
-    const frame = requestAnimationFrame(() => fitView({ padding: 0.12, maxZoom: 1.5 }));
-    return () => cancelAnimationFrame(frame);
-  }, [initialized, size, nodeIds, fitView]);
+    let fitFrame = 0;
+    const measureFrame = requestAnimationFrame(() => {
+      updateNodeInternals(nodeIds.split('|'));
+      fitFrame = requestAnimationFrame(() => fitView({ padding: 0.12, maxZoom: 1.5 }));
+    });
+    return () => {
+      cancelAnimationFrame(measureFrame);
+      cancelAnimationFrame(fitFrame);
+    };
+  }, [initialized, size, nodeIds, layout, fitView, updateNodeInternals]);
   return null;
 }
 
@@ -399,18 +408,26 @@ export function ImpactServiceMap({
   const { laidOutNodes, edges } = useMemo(() => {
     const graph = transformImpactMap(impactMap, { criticalPath: criticalPathColor }, agentNames);
     return {
-      // With a size to start from, a node shows (and the view can fit) before it is measured,
-      // which a flyout that is still opening may delay.
-      laidOutNodes: applyDagreLayout<ImpactServiceMapNode>(graph.nodes, graph.edges).map(
-        (node) => ({ ...node, initialWidth: NODE_WIDTH, initialHeight: NODE_HEIGHT })
-      ),
+      laidOutNodes: applyDagreLayout<ImpactServiceMapNode>(graph.nodes, graph.edges),
       edges: graph.edges,
     };
   }, [impactMap, criticalPathColor, agentNames]);
 
   // Local state so a dragged node stays put; a revised map from the agent lays out afresh.
   const [nodes, setNodes, onNodesChange] = useNodesState<ImpactServiceMapNode>(laidOutNodes);
-  useEffect(() => setNodes(laidOutNodes), [laidOutNodes, setNodes]);
+  // A revised map or a late agent lookup replaces the nodes. Each keeps the size already measured:
+  // the nodes do not remount, so nothing would measure them again, and without a size a node has
+  // no handles and its edges are not drawn.
+  useEffect(
+    () =>
+      setNodes((current) =>
+        laidOutNodes.map((node) => {
+          const { measured } = current.find(({ id }) => id === node.id) ?? {};
+          return measured ? { ...node, measured } : node;
+        })
+      ),
+    [laidOutNodes, setNodes]
+  );
 
   return (
     <ReactFlowProvider>
@@ -456,7 +473,7 @@ export function ImpactServiceMap({
           proOptions={{ hideAttribution: true }}
           colorMode={colorMode.toLowerCase() as ColorMode}
         >
-          <FitViewOnChange nodeIds={nodes.map(({ id }) => id).join('|')} />
+          <KeepNodesInView nodeIds={nodes.map(({ id }) => id).join('|')} layout={laidOutNodes} />
           <Controls showInteractive={false} position="top-right" />
           <Panel position="top-left">
             <ImpactMapLegend criticalPathColor={criticalPathColor} />
