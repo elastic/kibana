@@ -106,26 +106,14 @@ const FilterPopover: React.FC<{
 }> = ({ label, options, selected, onChange, searchable, searchPlaceholder, testSubj }) => {
   const [isOpen, setIsOpen] = useState(false);
   const popoverId = useGeneratedHtmlId({ prefix: testSubj });
+  const typeOf = new Map(options.map(({ key, type }) => [key, type]));
   const selectable: EuiSelectableOption[] = options.map(
-    ({ key, label: optionLabel, count, icon, type }) => ({
+    ({ key, label: optionLabel, count, icon }) => ({
       key,
       label: optionLabel,
       checked: selected.includes(key) ? 'on' : undefined,
       ...(icon ? { prepend: <EuiIcon type={icon} aria-hidden={true} /> } : {}),
-      append: (
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          {type && (
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                {TYPE_LABEL}: {type}
-              </EuiText>
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">{count}</EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
+      append: <EuiBadge color="hollow">{count}</EuiBadge>,
     })
   );
   return (
@@ -158,13 +146,24 @@ const FilterPopover: React.FC<{
         onChange={(next) =>
           onChange(next.flatMap(({ key, checked }) => (checked === 'on' && key ? [key] : [])))
         }
-        listProps={{ showIcons: true }}
+        listProps={{ showIcons: true, rowHeight: options.some(({ type }) => type) ? 48 : 32 }}
+        // The name on one line and what kind of thing it is under it, so neither is cut short.
+        renderOption={(option) => (
+          <>
+            <EuiText size="s">{option.label}</EuiText>
+            {typeOf.get(option.key ?? '') && (
+              <EuiText size="xs" color="subdued">
+                {TYPE_LABEL}: {typeOf.get(option.key ?? '')}
+              </EuiText>
+            )}
+          </>
+        )}
         data-test-subj={`${testSubj}Options`}
       >
         {(list, search) => (
           <div
             css={css`
-              width: 280px;
+              width: 360px;
             `}
           >
             {search && <EuiPanel paddingSize="s">{search}</EuiPanel>}
@@ -241,10 +240,11 @@ const Timeline: React.FC<{
 
   const kindOptions = useMemo<FilterOption[]>(
     () =>
-      EVENT_GROUPS.map(({ id, label }) => ({
+      EVENT_GROUPS.map(({ id, label, icon }) => ({
         key: id,
         label,
         count: events.filter(({ kind }) => kind === id).length,
+        icon,
       })).filter(({ count }) => count > 0),
     [events]
   );

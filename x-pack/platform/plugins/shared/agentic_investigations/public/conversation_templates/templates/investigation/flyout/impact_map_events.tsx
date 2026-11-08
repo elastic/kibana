@@ -504,7 +504,7 @@ const ChildEventsFlyout: React.FC<{
 
 const DEPENDENCY_ICONS: Record<string, string> = {
   db: 'database',
-  messaging: 'logstashQueue',
+  messaging: 'package',
   cache: 'database',
   external: 'globe',
 };
@@ -520,7 +520,7 @@ export const getEntityIcon = (type?: ImpactMapEntityType): string => {
   if (type?.kind === 'dependency') {
     return DEPENDENCY_ICONS[type.icon?.span_type ?? ''] ?? 'globe';
   }
-  return type?.kind === 'infrastructure' ? 'compute' : 'node';
+  return type?.kind === 'infrastructure' ? 'compute' : 'apps';
 };
 
 const TIMELINE_TAB = i18n.translate('xpack.agenticInvestigations.impactMap.events.timelineTab', {

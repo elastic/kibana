@@ -137,11 +137,11 @@ describe('TimelineTab', () => {
     await waitFor(() => expect(rowTitles()).toEqual(['v3.8.0 rolled out by Argo CD']));
   });
 
-  it('shows what kind of thing each entity is in the Entity filter', () => {
+  it('shows what kind of thing each entity is in the Entity filter', async () => {
     renderTab();
     fireEvent.click(screen.getByTestId('agenticInvestigationsTimelineEntityFilter'));
 
-    expect(screen.getAllByText('Type: Service').length).toBeGreaterThan(0);
+    expect((await screen.findAllByText('Type: Service')).length).toBeGreaterThan(0);
   });
 
   it('filters by text and clears the filters', () => {
