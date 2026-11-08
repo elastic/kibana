@@ -60,6 +60,25 @@ describe('registerDigitalExperienceFeature', () => {
     ]);
   });
 
+  it('grants creating short URLs through a sub-feature privilege that all includes', () => {
+    const [, shortUrls] = registerKibanaFeature.mock.calls[0][0].subFeatures;
+    expect(shortUrls.requireAllSpaces).toBeUndefined();
+    expect(shortUrls.privilegeGroups).toEqual([
+      {
+        groupType: 'independent',
+        privileges: [
+          expect.objectContaining({
+            id: 'url_create',
+            // As in Discover and Dashboard: part of `all`, and taken off in a custom role.
+            includeIn: 'all',
+            ui: ['createShortUrl'],
+            savedObject: { all: ['url'], read: [] },
+          }),
+        ],
+      },
+    ]);
+  });
+
   it('grants only show and the read API privilege to read, and the views to apply', () => {
     expect(registerKibanaFeature.mock.calls[0][0].privileges.read).toEqual({
       app: ['digital_experience', 'kibana'],
