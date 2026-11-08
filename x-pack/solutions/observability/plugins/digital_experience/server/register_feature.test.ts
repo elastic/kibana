@@ -32,12 +32,12 @@ describe('registerDigitalExperienceFeature', () => {
     );
   });
 
-  it('grants show and save UI privileges and both API privileges to all', () => {
+  it('grants show and save UI privileges and both API privileges to all, with the views to change', () => {
     expect(registerKibanaFeature.mock.calls[0][0].privileges.all).toEqual({
       app: ['digital_experience', 'kibana'],
       api: ['read_digital_experience', 'manage_digital_experience'],
       ui: ['show', 'save'],
-      savedObject: { all: [], read: [] },
+      savedObject: { all: ['digital-experience-view'], read: ['digital-experience-view'] },
     });
   });
 
@@ -60,12 +60,12 @@ describe('registerDigitalExperienceFeature', () => {
     ]);
   });
 
-  it('grants only show and the read API privilege to read', () => {
+  it('grants only show and the read API privilege to read, and the views to apply', () => {
     expect(registerKibanaFeature.mock.calls[0][0].privileges.read).toEqual({
       app: ['digital_experience', 'kibana'],
       api: ['read_digital_experience'],
       ui: ['show'],
-      savedObject: { all: [], read: [] },
+      savedObject: { all: [], read: ['digital-experience-view'] },
     });
   });
 });

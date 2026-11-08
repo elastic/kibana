@@ -20,3 +20,7 @@ export const canManageSessions = (capabilities: Capabilities): boolean =>
   Boolean(
     capabilities[DIGITAL_EXPERIENCE_FEATURE_ID]?.[DIGITAL_EXPERIENCE_UI_PRIVILEGES.manageSessions]
   );
+
+/** Whether the user can save, update and delete the views of the space, granted with `all`. */
+export const canSaveViews = (capabilities: Capabilities): boolean =>
+  Boolean(capabilities[DIGITAL_EXPERIENCE_FEATURE_ID]?.[DIGITAL_EXPERIENCE_UI_PRIVILEGES.save]);

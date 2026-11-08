@@ -26,6 +26,7 @@ import type {
 import type { DigitalExperienceConfig } from './config';
 import { registerDigitalExperienceFeature } from './register_feature';
 import { getGlobalDigitalExperienceServerRouteRepository } from './routes/get_global_digital_experience_route_repository';
+import { savedViewSavedObjectType } from './saved_objects/saved_view';
 import {
   SessionsApiKeys,
   sessionsApiKeyEncryptionParams,
@@ -66,6 +67,8 @@ export class Plugin
 
   public setup(core: CoreSetup<DigitalExperienceStartDeps>, plugins: DigitalExperienceSetupDeps) {
     registerDigitalExperienceFeature(plugins.features);
+    // Always registered, not behind a setting, so the saved objects check sees the type.
+    core.savedObjects.registerType(savedViewSavedObjectType);
 
     core.savedObjects.registerType(sessionsApiKeySavedObjectType);
     plugins.encryptedSavedObjects?.registerType(sessionsApiKeyEncryptionParams);

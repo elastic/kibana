@@ -441,6 +441,88 @@ test.describe(
       });
     });
 
+    test('saves the filters as a view, applies it from the Views menu, and deletes it', async ({
+      browserAuth,
+      page,
+      pageObjects: { digitalExperience },
+    }) => {
+      // Saving needs the privilege to change the views: the viewer only reads them.
+      await browserAuth.loginAsAdmin();
+      const name = `Safari ${Date.now()}`;
+      await digitalExperience.gotoApplication(testData.OTEL_APPS.shop, {
+        ...testData.TIME_RANGE,
+        source: 'otel',
+      });
+      await expect(digitalExperience.otelOverviewPageLoads).toContainText(
+        testData.OTEL_SHOP_PAGE_LOADS
+      );
+      const views = page.getByTestId('digitalExperienceOverviewSavedViews');
+      const apply = page.getByTestId(`digitalExperienceSavedViewApply-${name}`);
+
+      await test.step('saves the Overview as a view', async () => {
+        await digitalExperience.selectOverviewFilter('browser', 'Safari');
+        await expect(digitalExperience.otelOverviewPageLoads).toContainText(
+          testData.OTEL_SHOP_SAFARI_PAGE_LOADS
+        );
+
+        await views.click();
+        await page.getByTestId('digitalExperienceSavedViewName').fill(name);
+        await page.getByTestId('digitalExperienceSavedViewSave').click();
+
+        await expect(apply).toBeVisible();
+        await expect(page.getByTestId('digitalExperienceSavedViewName')).toHaveValue('');
+      });
+
+      await test.step('refuses a second view with the same name', async () => {
+        await page.getByTestId('digitalExperienceSavedViewName').fill(name.toLowerCase());
+        await page.getByTestId('digitalExperienceSavedViewSave').click();
+
+        await expect(page.getByTestId('digitalExperienceSavedViewError')).toContainText('exists');
+        await page.keyboard.press('Escape');
+      });
+
+      await test.step('applies the view in place of the filters of the moment', async () => {
+        await digitalExperience.overviewClearFilters.click();
+        await expect(digitalExperience.otelOverviewPageLoads).toContainText(
+          testData.OTEL_SHOP_PAGE_LOADS
+        );
+
+        await views.click();
+        await apply.click();
+
+        await expect(digitalExperience.overviewPill('browser', 'Safari')).toBeVisible();
+        await expect(digitalExperience.otelOverviewPageLoads).toContainText(
+          testData.OTEL_SHOP_SAFARI_PAGE_LOADS
+        );
+      });
+
+      await test.step('lists the view for someone who can only read it, without a way to change it', async () => {
+        await browserAuth.loginAsViewer();
+        await digitalExperience.gotoApplication(testData.OTEL_APPS.shop, {
+          ...testData.TIME_RANGE,
+          source: 'otel',
+        });
+        await views.click();
+
+        await expect(apply).toBeVisible();
+        await expect(page.getByTestId('digitalExperienceSavedViewName')).toBeHidden();
+        await expect(page.getByTestId(`digitalExperienceSavedViewDelete-${name}`)).toBeHidden();
+      });
+
+      await test.step('deletes the view after asking', async () => {
+        await browserAuth.loginAsAdmin();
+        await digitalExperience.gotoApplication(testData.OTEL_APPS.shop, {
+          ...testData.TIME_RANGE,
+          source: 'otel',
+        });
+        await views.click();
+        await page.getByTestId(`digitalExperienceSavedViewDelete-${name}`).click();
+        await page.getByTestId(`digitalExperienceSavedViewConfirmDelete-${name}`).click();
+
+        await expect(apply).toBeHidden();
+      });
+    });
+
     test('shows the load time at the percentile picked, and keeps it in the URL', async ({
       page,
       pageObjects: { digitalExperience },

@@ -91,6 +91,13 @@ it is kept in the URL (`browser`, `os`, `device`, `country`, `pageUrl`, `percent
   (`common/overview_filters_param.ts`). The routes read `meta` only, never a query a client wrote,
   and answer a param they would have to repair, e.g. one with more than ten values or a repeated
   one, with a 400, so a request gets the filters it asked for.
+- **Saved views:** **Views** lists the views of the space, each a name with the filters, KQL query and
+  percentile, and optionally the time range; applying one replaces them in one step. Everyone who
+  can read the app sees the views of the space and applies them. Saving, saving again and deleting
+  need `all` (the `manage` API and `save` UI privileges, and the saved object privilege for the
+  `digital-experience-view` type). A view belongs to the space, not to an application, and the space
+  holds up to 100, each with a name of its own. The routes are `GET`, `POST`, `PUT` and `DELETE`
+  `/internal/digital_experience/views`.
 - **Sessions tab:** `browser`, `os` and `country` are the Sessions tab's own params, which take one
   value, so the tab links carry a filter over only when it is exactly one included value. The
   Sessions list's **Entry page** facet is its page filter; it is a different question from the
