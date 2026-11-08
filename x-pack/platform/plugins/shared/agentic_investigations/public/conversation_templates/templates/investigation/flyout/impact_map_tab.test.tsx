@@ -140,28 +140,37 @@ describe('ImpactMapTab', () => {
     ).not.toBeInTheDocument();
   });
 
-  it("lists an entity's events oldest first and opens one in place of the list", () => {
+  it("shows an entity's icon and type over its events, oldest first, in the timeline style", () => {
     mockUseInvestigation.mockReturnValue({ data: { in_progress: false, impact_map: impactMap } });
 
     renderTab();
     fireEvent.click(screen.getByTestId('fakeEntity'));
 
-    const flyout = screen.getByTestId('agenticInvestigationsImpactMapEventsFlyout');
-    expect(flyout).toHaveTextContent('2 events, oldest first');
-    const rows = screen.getAllByTestId('agenticInvestigationsImpactMapEvent');
+    expect(screen.getByTestId('agenticInvestigationsImpactMapEventsType')).toHaveTextContent(
+      'Type: Service'
+    );
+    expect(screen.getByRole('tab', { name: /Timeline/ })).toHaveAttribute('aria-selected', 'true');
+    const rows = screen.getAllByTestId('agenticInvestigationsTimelineRow');
     expect(rows.map((row) => row.textContent)).toEqual([
       expect.stringContaining('Deployed payment v2'),
       expect.stringContaining('Payment errors rose to 40%'),
     ]);
+  });
 
-    fireEvent.click(rows[1]);
+  it('opens an event in place of the list and goes back to it', () => {
+    mockUseInvestigation.mockReturnValue({ data: { in_progress: false, impact_map: impactMap } });
+
+    renderTab();
+    fireEvent.click(screen.getByTestId('fakeEntity'));
+    fireEvent.click(screen.getAllByTestId('agenticInvestigationsTimelineOpenEvent')[1]);
+
     expect(screen.getByTestId('agenticInvestigationsImpactMapEventDetail')).toHaveTextContent(
       'Errors started a minute after the deploy.'
     );
-    expect(screen.queryByTestId('agenticInvestigationsImpactMapEvent')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('agenticInvestigationsTimelineRow')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('agenticInvestigationsImpactMapEventsBack'));
-    expect(screen.getAllByTestId('agenticInvestigationsImpactMapEvent')).toHaveLength(2);
+    expect(screen.getAllByTestId('agenticInvestigationsTimelineRow')).toHaveLength(2);
   });
 
   it('opens the Timeline tab filtered by the entity from "View in timeline"', () => {
@@ -254,7 +263,7 @@ describe('ImpactMapTab', () => {
     expect(screen.getByTestId('agenticInvestigationsImpactMapEventsFlyout')).toHaveTextContent(
       'checkout → payment'
     );
-    expect(screen.getAllByTestId('agenticInvestigationsImpactMapEvent')).toHaveLength(1);
+    expect(screen.getAllByTestId('agenticInvestigationsTimelineRow')).toHaveLength(1);
   });
 
   it('says the map is coming while the investigation runs without one', () => {

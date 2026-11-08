@@ -10,7 +10,6 @@ import { css } from '@emotion/react';
 import { useConversationFlyoutWidthProps } from '@kbn/agent-builder-plugin/public';
 import {
   EuiBadge,
-  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiEmptyPrompt,
@@ -19,10 +18,14 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiIcon,
   EuiLink,
+  EuiNotificationBadge,
   EuiPanel,
   EuiPortal,
   EuiSpacer,
+  EuiTab,
+  EuiTabs,
   EuiText,
   EuiTitle,
   EuiToolTip,
@@ -34,6 +37,7 @@ import { i18n } from '@kbn/i18n';
 import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
 import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
 import type {
+  ImpactMapEntityType,
   ImpactMapEvent,
   ImpactMapEventKind,
   InvestigationEvidence,
@@ -498,11 +502,48 @@ const ChildEventsFlyout: React.FC<{
   );
 };
 
+const DEPENDENCY_ICONS: Record<string, string> = {
+  db: 'database',
+  messaging: 'logstashQueue',
+  cache: 'database',
+  external: 'globe',
+};
+
+/** An icon for an entity from its type: a named EUI icon, else one for its kind. */
+export const getEntityIcon = (type?: ImpactMapEntityType): string => {
+  if (type?.icon?.eui_icon) {
+    return type.icon.eui_icon;
+  }
+  if (/kubernetes|k8s/i.test(`${type?.id} ${type?.label}`)) {
+    return 'logoKubernetes';
+  }
+  if (type?.kind === 'dependency') {
+    return DEPENDENCY_ICONS[type.icon?.span_type ?? ''] ?? 'globe';
+  }
+  return type?.kind === 'infrastructure' ? 'compute' : 'node';
+};
+
+const TIMELINE_TAB = i18n.translate('xpack.agenticInvestigations.impactMap.events.timelineTab', {
+  defaultMessage: 'Timeline',
+});
+const TYPE_LABEL = i18n.translate('xpack.agenticInvestigations.impactMap.events.type', {
+  defaultMessage: 'Type',
+});
+const VIEW_IN_TIMELINE = i18n.translate(
+  'xpack.agenticInvestigations.impactMap.events.viewInTimeline',
+  { defaultMessage: 'View in investigation timeline' }
+);
+
 export interface ImpactMapEventsFlyoutProps {
   /** What the events happened to, shown as the list's title. */
   title: string;
+  /** An EUI icon for what the events happened to, and what kind of thing it is. */
+  icon?: string;
+  typeLabel?: string;
   /** Oldest first. */
   events: ImpactMapEvent[];
+  /** Draws the events of the list; the list falls back to plain summaries. */
+  renderEvents?: (events: ImpactMapEvent[], onOpen: (eventId: string) => void) => React.ReactNode;
   impactMap: Pick<InvestigationImpactMapResponse, 'entities' | 'relationships' | 'events'>;
   /** Opens on this event instead of the list. */
   initialEventId?: string;
@@ -524,6 +565,9 @@ export interface ImpactMapEventsFlyoutProps {
  */
 export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
   title,
+  icon,
+  typeLabel,
+  renderEvents,
   events,
   impactMap,
   initialEventId,
@@ -546,7 +590,7 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
       titleId={titleId}
       menuTitle={title}
     >
-      <EuiFlyoutHeader hasBorder>
+      <EuiFlyoutHeader hasBorder={Boolean(selected)}>
         {canGoBack && (
           <EuiButtonEmpty
             size="xs"
@@ -558,22 +602,70 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
             {BACK_LABEL}
           </EuiButtonEmpty>
         )}
-        <EuiTitle size="s">
-          <h2 id={titleId}>{selected ? selected.title : title}</h2>
-        </EuiTitle>
-        {selected && (
+        {selected ? (
           <>
+            <EuiTitle size="s">
+              <h2 id={titleId}>{selected.title}</h2>
+            </EuiTitle>
             <EuiSpacer size="xs" />
             <EventKindBadge kind={selected.kind} />
           </>
-        )}
-        {!selected && (
-          <EuiText size="xs" color="subdued">
-            {i18n.translate('xpack.agenticInvestigations.impactMap.events.count', {
-              defaultMessage: '{count, plural, one {# event} other {# events}}, oldest first',
-              values: { count: events.length },
-            })}
-          </EuiText>
+        ) : (
+          <>
+            <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+              {icon && (
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type={icon} size="xl" aria-hidden={true} />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem>
+                <EuiTitle size="s">
+                  <h2 id={titleId}>{title}</h2>
+                </EuiTitle>
+                {typeLabel && (
+                  <EuiText
+                    size="xs"
+                    color="subdued"
+                    data-test-subj="agenticInvestigationsImpactMapEventsType"
+                  >
+                    {TYPE_LABEL}: {typeLabel}
+                  </EuiText>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+            <EuiFlexGroup
+              gutterSize="s"
+              alignItems="center"
+              justifyContent="spaceBetween"
+              responsive={false}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiTabs bottomBorder={false} size="s">
+                  <EuiTab
+                    isSelected
+                    append={
+                      <EuiNotificationBadge color="subdued">{events.length}</EuiNotificationBadge>
+                    }
+                  >
+                    {TIMELINE_TAB}
+                  </EuiTab>
+                </EuiTabs>
+              </EuiFlexItem>
+              {onViewInTimeline && events.length > 0 && (
+                <EuiFlexItem grow={false}>
+                  <EuiLink
+                    onClick={onViewInTimeline}
+                    data-test-subj="agenticInvestigationsImpactMapViewInTimeline"
+                  >
+                    <EuiText size="xs" component="span">
+                      {VIEW_IN_TIMELINE}
+                    </EuiText>
+                  </EuiLink>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </>
         )}
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
@@ -590,31 +682,16 @@ export const ImpactMapEventsFlyout: React.FC<ImpactMapEventsFlyoutProps> = ({
             title={<h3>{EMPTY_TITLE}</h3>}
             body={<p>{EMPTY_BODY}</p>}
           />
+        ) : renderEvents ? (
+          renderEvents(events, setSelectedId)
         ) : (
-          <>
-            {onViewInTimeline && (
-              <>
-                <EuiButton
-                  size="s"
-                  iconType="clock"
-                  onClick={onViewInTimeline}
-                  data-test-subj="agenticInvestigationsImpactMapViewInTimeline"
-                >
-                  {i18n.translate('xpack.agenticInvestigations.impactMap.events.viewInTimeline', {
-                    defaultMessage: 'View in timeline',
-                  })}
-                </EuiButton>
-                <EuiSpacer size="m" />
-              </>
-            )}
-            <EuiFlexGroup direction="column" gutterSize="s">
-              {events.map((event) => (
-                <EuiFlexItem key={event.id} grow={false}>
-                  <EventSummary event={event} onClick={() => setSelectedId(event.id)} />
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          </>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {events.map((event) => (
+              <EuiFlexItem key={event.id} grow={false}>
+                <EventSummary event={event} onClick={() => setSelectedId(event.id)} />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
         )}
       </EuiFlyoutBody>
     </EventsFlyoutFrame>
@@ -631,11 +708,18 @@ export type EventsSelection =
 export const resolveEventsSelection = (
   selection: EventsSelection,
   impactMap: InvestigationImpactMapResponse
-): Pick<ImpactMapEventsFlyoutProps, 'title' | 'events' | 'initialEventId'> => {
+): Pick<
+  ImpactMapEventsFlyoutProps,
+  'title' | 'events' | 'initialEventId' | 'icon' | 'typeLabel'
+> => {
   const { events, entities, relationships } = impactMap;
   if (selection.kind === 'entity') {
+    const entity = entities.find(({ id }) => id === selection.id);
+    const type = impactMap.entity_types.find(({ id }) => id === entity?.type_id);
     return {
-      title: entities.find(({ id }) => id === selection.id)?.label ?? selection.id,
+      title: entity?.label ?? selection.id,
+      icon: getEntityIcon(type),
+      typeLabel: type?.label,
       events: events.filter(({ entity_id: entityId }) => entityId === selection.id),
     };
   }
@@ -643,6 +727,8 @@ export const resolveEventsSelection = (
     const relationship = relationships.find(({ id }) => id === selection.id);
     const labelOf = (id: string) => entities.find((entity) => entity.id === id)?.label ?? id;
     return {
+      icon: 'sortRight',
+      typeLabel: impactMap.relationship_types.find(({ id }) => id === relationship?.type_id)?.label,
       title: relationship
         ? `${labelOf(relationship.source_id)} → ${labelOf(relationship.target_id)}`
         : selection.id,

@@ -18,6 +18,8 @@ import {
   EuiSkeletonRectangle,
   EuiSpacer,
   EuiText,
+  EuiTimeline,
+  EuiTimelineItem,
   EuiTitle,
   EuiToolTip,
   useEuiTheme,
@@ -34,6 +36,7 @@ import {
   resolveEventsSelection,
   type EventsSelection,
 } from './impact_map_events';
+import { KindAvatar, TimelineEvent } from './timeline_event';
 import { requestTimelineFocus } from './timeline_focus';
 import { useIsInAgentBuilder } from './use_is_in_agent_builder';
 
@@ -99,6 +102,30 @@ export const ImpactMapTab: React.FC<ImpactMapSlotRenderProps & { Renderer: Impac
       conversationId={conversationId}
       openTimeline={openTimeline}
     />
+  );
+};
+
+/** The events of one target in the Timeline tab's own style. */
+const EventsTimeline: React.FC<{
+  events: InvestigationImpactMapResponse['events'];
+  impactMap: InvestigationImpactMapResponse;
+  onOpen: (eventId: string) => void;
+}> = ({ events, impactMap, onOpen }) => {
+  const firstAt = Math.min(...impactMap.events.map(({ at }) => Date.parse(at)));
+  return (
+    <EuiTimeline gutterSize="m" data-test-subj="agenticInvestigationsImpactMapEventsTimeline">
+      {events.map((event) => (
+        <EuiTimelineItem key={event.id} verticalAlign="top" icon={<KindAvatar kind={event.kind} />}>
+          <TimelineEvent
+            event={event}
+            impactMap={impactMap}
+            firstAt={firstAt}
+            selected={false}
+            onOpen={() => onOpen(event.id)}
+          />
+        </EuiTimelineItem>
+      ))}
+    </EuiTimeline>
   );
 };
 
@@ -172,6 +199,9 @@ const ImpactMapPanel: React.FC<{
       // A new selection starts on its own list, not on the last one's open event.
       key={`${selection.kind}:${selection.id}`}
       {...resolveEventsSelection(selection, impactMap)}
+      renderEvents={(events, onOpen) => (
+        <EventsTimeline events={events} impactMap={impactMap} onOpen={onOpen} />
+      )}
       impactMap={impactMap}
       standalone={isMaximized}
       asMainFlyout={isInAgentBuilder}
