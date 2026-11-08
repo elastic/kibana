@@ -8,6 +8,7 @@
 import { withChartClockTimesDated } from './chart_times';
 import { sanitizeDataSource } from './data_source';
 import { MAX_IMPACT_MAP_EVENTS } from './constants';
+import type { InvestigationSubject } from '../subjects/subject';
 import type { ImpactMapEvent } from './impact_map';
 
 const MAX_EVENT_ID_LENGTH = 256;
@@ -60,3 +61,31 @@ export const mergeImpactMapEvents = (
   incoming.forEach((event) => byId.set(event.id, event));
   return sortImpactMapEvents([...byId.values()]).slice(-MAX_IMPACT_MAP_EVENTS);
 };
+
+/**
+ * The alerts an investigation was opened on, as timeline events. They are read, not stored with
+ * the map, so an alert that arrives or changes shows up without the agent writing it. The id
+ * starts with `alert:` so it never clashes with an event the agent recorded.
+ */
+export const alertSubjectsToImpactMapEvents = (
+  subjects: readonly Pick<
+    InvestigationSubject,
+    'subjectType' | 'subjectId' | 'summary' | 'snapshot' | 'createdAt'
+  >[]
+): ImpactMapEvent[] =>
+  subjects
+    .filter(({ subjectType }) => subjectType === 'alert')
+    .map(({ subjectId, summary, snapshot, createdAt }) => {
+      const at = snapshot?.start || snapshot?.timestamp || createdAt;
+      const title = snapshot?.rule_name ?? summary ?? subjectId;
+      return {
+        id: `alert:${subjectId}`.slice(0, MAX_EVENT_ID_LENGTH),
+        kind: 'alert' as const,
+        title,
+        ...(snapshot?.reason && { description: `- ${snapshot.reason}` }),
+        at,
+        ...(snapshot?.url && /^https?:\/\//.test(snapshot.url)
+          ? { links: [{ label: title, url: snapshot.url }] }
+          : {}),
+      };
+    });

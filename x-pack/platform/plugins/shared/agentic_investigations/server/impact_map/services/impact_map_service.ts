@@ -35,6 +35,7 @@ import {
 import { impactMapAttachment } from '../attachments/impact_map_attachment_type';
 import type { ImpactMapDocument } from '../storage/impact_map_storage';
 import type { ImpactMapCatalogService } from './impact_map_catalog_service';
+import type { ImpactMapEventsStore } from './impact_map_events_store';
 
 /** The map a caller writes. Types sent here are added to the space catalog too. */
 export interface ImpactMapInput {
@@ -97,8 +98,18 @@ export class ImpactMapService {
     private readonly deps: {
       documents: InvestigationAttachmentDocService<ImpactMapDocument>;
       catalog: ImpactMapCatalogService;
+      /** Every write also puts the map's events in their own index. */
+      events?: ImpactMapEventsStore;
     }
   ) {}
+
+  private async writeEvents(document: ImpactMapDocument): Promise<void> {
+    await this.deps.events?.write({
+      spaceId: document.spaceId,
+      conversationId: document.conversationId,
+      events: document.events ?? [],
+    });
+  }
 
   getDocumentService(): InvestigationAttachmentDocService<ImpactMapDocument> {
     return this.deps.documents;
@@ -156,13 +167,14 @@ export class ImpactMapService {
   }): Promise<AttachedFromTool<ImpactMapDocument> & { warnings: string[] }> {
     const { spaceId } = context;
     const graph = await this.resolve(spaceId, input, user);
+    let built: ImpactMapDocument | undefined;
     const attached = await impactMapAttachment.writeFromTool({
       service: this.deps.documents,
       id: impactMapDocumentId(spaceId, conversationId),
       spaceId,
       context,
       mutate: (existing) =>
-        buildImpactMapDocument({
+        (built = buildImpactMapDocument({
           existing,
           spaceId,
           conversationId,
@@ -170,8 +182,11 @@ export class ImpactMapService {
           graph,
           events: input.events,
           user,
-        }),
+        })),
     });
+    if (built) {
+      await this.writeEvents(built);
+    }
     return { ...attached, warnings: graph.warnings };
   }
 
@@ -192,6 +207,7 @@ export class ImpactMapService {
     attachments: AttachmentPublicClient;
   }): Promise<{ warnings: string[] }> {
     const graph = await this.resolve(spaceId, input, user);
+    let built: ImpactMapDocument | undefined;
     await impactMapAttachment.writeAndAttach({
       service: this.deps.documents,
       id: impactMapDocumentId(spaceId, conversationId),
@@ -200,7 +216,7 @@ export class ImpactMapService {
       conversations,
       attachments,
       mutate: (existing) =>
-        buildImpactMapDocument({
+        (built = buildImpactMapDocument({
           existing,
           spaceId,
           conversationId,
@@ -208,8 +224,11 @@ export class ImpactMapService {
           graph,
           events: input.events,
           user,
-        }),
+        })),
     });
+    if (built) {
+      await this.writeEvents(built);
+    }
     return { warnings: graph.warnings };
   }
 
@@ -232,6 +251,7 @@ export class ImpactMapService {
     if (events.length === 0) {
       return;
     }
+    let built: ImpactMapDocument | undefined;
     await impactMapAttachment.writeAndAttach({
       service: this.deps.documents,
       id: impactMapDocumentId(spaceId, conversationId),
@@ -240,8 +260,11 @@ export class ImpactMapService {
       conversations,
       attachments,
       mutate: (existing) =>
-        buildImpactMapDocument({ existing, spaceId, conversationId, events, user }),
+        (built = buildImpactMapDocument({ existing, spaceId, conversationId, events, user })),
     });
+    if (built) {
+      await this.writeEvents(built);
+    }
   }
 
   async findByConversationId(

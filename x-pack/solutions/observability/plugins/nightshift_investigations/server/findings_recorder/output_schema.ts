@@ -1067,7 +1067,7 @@ export const FINDINGS_JSON_SCHEMA = {
             type: 'string',
             enum: IMPACT_MAP_EVENT_KINDS,
             description:
-              'change for a deploy, config or scaling change; failure for errors, crashes, timeouts or restarts; condition for a state such as saturation, a full disk or zero replicas; alert for an alert that fired; mitigation for a fix applied; customer_impact for what customers felt, placed on the entry point they use; investigation for a finding of the investigation, such as a hypothesis confirmed or ruled out; response for what responders did, such as opening an incident channel or updating the status page.',
+              'change for a deploy, config or scaling change; failure for errors, crashes, timeouts or restarts; condition for a state such as saturation, a full disk or zero replicas; alert for an alert that fired; anomaly for an anomaly an ML job or detector flagged; mitigation for a fix applied; customer_impact for what customers felt, placed on the entry point they use; investigation for a finding of the investigation, such as a hypothesis confirmed or ruled out; response for what responders did, such as opening an incident channel or updating the status page.',
           },
           title: {
             type: 'string',

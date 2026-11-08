@@ -123,6 +123,7 @@ export const TimelineEvent: React.FC<{
       paddingSize="s"
       color={selected ? 'primary' : 'plain'}
       data-test-subj="agenticInvestigationsTimelineRow"
+      data-event-id={event.id}
     >
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
         <EuiFlexItem grow={false}>

@@ -20,7 +20,7 @@ import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import { INVESTIGATION_TEMPLATE_ID } from '../../../common/escalations/constants';
 import type { InvestigationHypotheses } from '../../../common/hypotheses/hypotheses';
-import type { InvestigationImpactMap } from '../../../common/impact_map/impact_map';
+import type { ImpactMapEvent, InvestigationImpactMap } from '../../../common/impact_map/impact_map';
 import type { Impact } from '../../../common/impact/impact';
 import {
   INVESTIGATION_SEVERITY_NONE,
@@ -56,7 +56,10 @@ import { retryWhileShardUnavailable } from '../../investigation_attachments';
 import { MAX_INVESTIGATION_CANDIDATE_CONVERSATION_IDS } from '../../investigation_attachments/attachment_doc_service';
 import { bulkGetReadableConversations } from './readable_conversation_ids';
 import type { InProgressResolver } from './in_progress';
-import { sortImpactMapEvents } from '../../../common/impact_map/events';
+import {
+  alertSubjectsToImpactMapEvents,
+  mergeImpactMapEvents,
+} from '../../../common/impact_map/events';
 import { toEntityName } from '../../../common/impact_map/entity_name';
 
 /** Bound on the proposals one investigation read returns. */
@@ -138,7 +141,12 @@ export class InvestigationsQueryService {
         impact: impact && !removed.has(impact.id) ? impact : undefined,
       }),
       ...(visibleHypotheses && { hypotheses: toHypothesesResponse(visibleHypotheses) }),
-      ...(visibleImpactMap && { impact_map: toImpactMapResponse(visibleImpactMap) }),
+      ...(visibleImpactMap && {
+        impact_map: toImpactMapResponse(
+          visibleImpactMap,
+          alertSubjectsToImpactMapEvents(subjects.filter(({ id: docId }) => !removed.has(docId)))
+        ),
+      }),
       proposals,
     };
   }
@@ -764,16 +772,19 @@ const toImpactResponse = (impact: Impact): InvestigationImpactResponse => ({
   ...(impact.updatedAt !== undefined && { updated_at: impact.updatedAt }),
 });
 
-const toImpactMapResponse = ({
-  title,
-  entities,
-  relationships,
-  entityTypes,
-  relationshipTypes,
-  events,
-  createdAt,
-  updatedAt,
-}: InvestigationImpactMap): NonNullable<Investigation['impact_map']> => ({
+const toImpactMapResponse = (
+  {
+    title,
+    entities,
+    relationships,
+    entityTypes,
+    relationshipTypes,
+    events,
+    createdAt,
+    updatedAt,
+  }: InvestigationImpactMap,
+  alertEvents: ImpactMapEvent[] = []
+): NonNullable<Investigation['impact_map']> => ({
   ...(title !== undefined && { title }),
   // Maps recorded before names were cleaned on write still carry types and states in labels.
   entities: entities.map((entity) => ({ ...entity, label: toEntityName(entity.label) })),
@@ -783,7 +794,8 @@ const toImpactMapResponse = ({
   })),
   entity_types: entityTypes,
   relationship_types: relationshipTypes,
-  events: sortImpactMapEvents(events ?? []),
+  // Alerts the investigation was opened on join the events the agent recorded.
+  events: mergeImpactMapEvents(events ?? [], alertEvents),
   created_at: createdAt,
   ...(updatedAt !== undefined && { updated_at: updatedAt }),
 });

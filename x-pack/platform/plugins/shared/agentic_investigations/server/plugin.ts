@@ -49,7 +49,11 @@ import {
 import { ImpactMapCatalogService } from './impact_map/services/impact_map_catalog_service';
 import { ImpactMapService } from './impact_map/services/impact_map_service';
 import { registerSetImpactMapRoute } from './impact_map/routes/set_impact_map_route';
-import { createImpactMapCatalogStorageClient } from './impact_map/storage/impact_map_storage';
+import {
+  createImpactMapCatalogStorageClient,
+  createImpactMapEventsStorageClient,
+} from './impact_map/storage/impact_map_storage';
+import { ImpactMapEventsStore } from './impact_map/services/impact_map_events_store';
 import { createSetImpactMapTool } from './impact_map/tools/set_impact_map_tool';
 import { createUpsertImpactMapCatalogTool } from './impact_map/tools/upsert_impact_map_catalog_tool';
 import { EscalationsService } from './escalations/services/escalations_service';
@@ -302,6 +306,10 @@ export class AgenticInvestigationsPlugin
       documents: impactMapAttachment.createService({ esClient, logger: this.logger }),
       catalog: new ImpactMapCatalogService({
         storage: createImpactMapCatalogStorageClient({ esClient, logger: this.logger }),
+      }),
+      events: new ImpactMapEventsStore({
+        storage: createImpactMapEventsStorageClient({ esClient, logger: this.logger }),
+        logger: this.logger,
       }),
     });
 

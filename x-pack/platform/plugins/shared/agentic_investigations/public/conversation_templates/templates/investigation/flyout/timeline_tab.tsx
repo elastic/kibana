@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -32,7 +32,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { TimelineSlotRenderProps } from '@kbn/agentic-investigations-common';
-import { takeTimelineFocus } from './timeline_focus';
+import { takeTimelineEventFocus, takeTimelineFocus } from './timeline_focus';
 import type { ImpactMapEvent, InvestigationImpactMapResponse } from '../../../../../common';
 import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
 import {
@@ -219,6 +219,17 @@ const Timeline: React.FC<{
   const [text, setText] = useState('');
   const [newestFirst, setNewestFirst] = useState(false);
   const [selectedId, setSelectedId] = useState<string>();
+  // Opened from an event's "View in investigation timeline": the event is marked and scrolled to
+  // without opening it again.
+  const [markedId] = useState(() => takeTimelineEventFocus(conversationId));
+  const containerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!markedId) return;
+    const row = Array.from(
+      containerRef.current?.querySelectorAll<HTMLElement>('[data-event-id]') ?? []
+    ).find((element) => element.dataset.eventId === markedId);
+    row?.scrollIntoView({ block: 'center' });
+  }, [markedId]);
   const { events, entities, relationships } = impactMap;
 
   // Each filter's choices are counted over the events the other filters leave, so the numbers
@@ -336,7 +347,7 @@ const Timeline: React.FC<{
     );
 
   return (
-    <div data-test-subj="agenticInvestigationsTimeline">
+    <div ref={containerRef} data-test-subj="agenticInvestigationsTimeline">
       <EuiFlexGroup gutterSize="s" responsive={false} wrap>
         <EuiFlexItem
           css={css`
@@ -455,7 +466,7 @@ const Timeline: React.FC<{
                   event={row.event}
                   impactMap={impactMap}
                   firstAt={firstAt}
-                  selected={row.event.id === selectedId}
+                  selected={row.event.id === selectedId || row.event.id === markedId}
                   entityFilter={entityFilter}
                   onOpen={() => setSelectedId(row.event.id)}
                   onToggleEntity={toggleEntity}

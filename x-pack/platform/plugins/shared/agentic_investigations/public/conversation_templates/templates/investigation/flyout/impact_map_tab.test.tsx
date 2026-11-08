@@ -20,7 +20,7 @@ import {
   getEntityTypeLabel,
   withContextAnnotations,
 } from './impact_map_events';
-import { takeTimelineFocus } from './timeline_focus';
+import { takeTimelineEventFocus, takeTimelineFocus } from './timeline_focus';
 import { useIsInAgentBuilder } from './use_is_in_agent_builder';
 
 jest.mock('@kbn/agent-builder-plugin/public', () => ({
@@ -251,7 +251,7 @@ describe('ImpactMapTab', () => {
     ).not.toBeInTheDocument();
   });
 
-  it("shows an entity's icon and type over its events, oldest first, in the timeline style", () => {
+  it("shows an entity's icon and type over its events, newest first, in the timeline style", () => {
     mockUseInvestigation.mockReturnValue({ data: { in_progress: false, impact_map: impactMap } });
 
     renderTab();
@@ -260,12 +260,14 @@ describe('ImpactMapTab', () => {
     expect(screen.getByTestId('agenticInvestigationsImpactMapEventsType')).toHaveTextContent(
       'Service'
     );
-    expect(screen.getByRole('tab', { name: /Timeline/ })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('tab', { name: /Events/ })).toHaveAttribute('aria-selected', 'true');
     const rows = screen.getAllByTestId('agenticInvestigationsTimelineRow');
     expect(rows.map((row) => row.textContent)).toEqual([
-      expect.stringContaining('Deployed payment v2'),
       expect.stringContaining('Payment errors rose to 40%'),
+      expect.stringContaining('Deployed payment v2'),
     ]);
+    // The list has no timeline link: it belongs to an open event.
+    expect(screen.queryByTestId('agenticInvestigationsImpactMapViewInTimeline')).toBeNull();
   });
 
   it('opens an event in place of the list and goes back to it', () => {
@@ -273,7 +275,7 @@ describe('ImpactMapTab', () => {
 
     renderTab();
     fireEvent.click(screen.getByTestId('fakeEntity'));
-    fireEvent.click(screen.getAllByTestId('agenticInvestigationsTimelineOpenEvent')[1]);
+    fireEvent.click(screen.getAllByTestId('agenticInvestigationsTimelineOpenEvent')[0]);
 
     expect(screen.getByTestId('agenticInvestigationsImpactMapEventDetail')).toHaveTextContent(
       'Errors started a minute after the deploy.'
@@ -321,16 +323,18 @@ describe('ImpactMapTab', () => {
     ).toHaveTextContent('POST /_query');
   });
 
-  it('opens the Timeline tab filtered by the entity from "View in timeline"', () => {
+  it('opens the Timeline tab on the event from "View in investigation timeline"', () => {
     mockUseInvestigation.mockReturnValue({ data: { in_progress: false, impact_map: impactMap } });
     const openTimeline = jest.fn();
 
     renderTab(openTimeline);
     fireEvent.click(screen.getByTestId('fakeEntity'));
+    fireEvent.click(screen.getAllByTestId('agenticInvestigationsTimelineOpenEvent')[0]);
     fireEvent.click(screen.getByTestId('agenticInvestigationsImpactMapViewInTimeline'));
 
     expect(openTimeline).toHaveBeenCalledTimes(1);
-    expect(takeTimelineFocus('conv-1')).toEqual(['payment']);
+    expect(takeTimelineEventFocus('conv-1')).toBe('e2');
+    expect(takeTimelineEventFocus('conv-1')).toBeUndefined();
     expect(takeTimelineFocus('conv-1')).toEqual([]);
     expect(screen.queryByTestId('agenticInvestigationsImpactMapEventsFlyout')).toBeNull();
   });

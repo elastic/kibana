@@ -193,7 +193,7 @@ const ImpactMapPanel: React.FC<{
   const { euiTheme } = useEuiTheme();
   const updatedAt = new Date(impactMap.updated_at ?? impactMap.created_at);
   const viewInTimeline = openTimeline
-    ? (current: EventsSelection) => {
+    ? (current: EventsSelection, eventId?: string) => {
         const relationship =
           current.kind === 'relationship'
             ? impactMap.relationships.find(({ id }) => id === current.id)
@@ -204,7 +204,7 @@ const ImpactMapPanel: React.FC<{
             : relationship
             ? [relationship.source_id, relationship.target_id]
             : [];
-        requestTimelineFocus(conversationId, entityIds);
+        requestTimelineFocus(conversationId, eventId ? [] : entityIds, eventId);
         setSelection(undefined);
         setIsMaximized(false);
         openTimeline();
@@ -241,7 +241,9 @@ const ImpactMapPanel: React.FC<{
       impactMap={impactMap}
       standalone={isMaximized}
       asMainFlyout={isInAgentBuilder}
-      onViewInTimeline={viewInTimeline ? () => viewInTimeline(selection) : undefined}
+      onViewInTimeline={
+        viewInTimeline ? (eventId) => viewInTimeline(selection, eventId) : undefined
+      }
       onClose={() => setSelection(undefined)}
     />
   );

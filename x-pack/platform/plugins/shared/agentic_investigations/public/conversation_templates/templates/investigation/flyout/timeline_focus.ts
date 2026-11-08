@@ -6,13 +6,30 @@
  */
 
 const pending = new Map<string, string[]>();
+const pendingEvents = new Map<string, string>();
 
 /**
  * Asks the Timeline tab to open filtered by these entities. The tab mounts when it is selected, so
  * the request waits here until it reads it.
  */
-export const requestTimelineFocus = (conversationId: string, entityIds: string[]): void => {
+export const requestTimelineFocus = (
+  conversationId: string,
+  entityIds: string[],
+  eventId?: string
+): void => {
   pending.set(conversationId, entityIds);
+  if (eventId) {
+    pendingEvents.set(conversationId, eventId);
+  } else {
+    pendingEvents.delete(conversationId);
+  }
+};
+
+/** The event the Timeline tab was asked to scroll to and mark, once. */
+export const takeTimelineEventFocus = (conversationId: string): string | undefined => {
+  const eventId = pendingEvents.get(conversationId);
+  pendingEvents.delete(conversationId);
+  return eventId;
 };
 
 /** The entities the Timeline tab was asked to focus on, once. */

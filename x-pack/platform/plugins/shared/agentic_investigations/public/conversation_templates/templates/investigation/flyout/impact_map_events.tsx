@@ -80,6 +80,12 @@ const KINDS: Record<ImpactMapEventKind, { label: string; color: EuiBadgeProps['c
     }),
     color: 'danger',
   },
+  anomaly: {
+    label: i18n.translate('xpack.agenticInvestigations.impactMap.events.kind.anomaly', {
+      defaultMessage: 'Anomaly',
+    }),
+    color: 'warning',
+  },
   mitigation: {
     label: i18n.translate('xpack.agenticInvestigations.impactMap.events.kind.mitigation', {
       defaultMessage: 'Mitigation',
@@ -112,6 +118,7 @@ export const EVENT_GROUPS = [
   { id: 'failure', icon: 'error', color: 'danger' },
   { id: 'condition', icon: 'warning', color: 'warning' },
   { id: 'alert', icon: 'bell', color: 'warning' },
+  { id: 'anomaly', icon: 'visLine', color: 'warning' },
   { id: 'customer_impact', icon: 'users', color: 'accent' },
   { id: 'investigation', icon: 'sparkles', color: 'primary' },
   { id: 'mitigation', icon: 'wrench', color: 'success' },
@@ -913,8 +920,8 @@ export const getEntityTypeLabel = (
 export const getEntityKindLabel = (kind?: string): string | undefined =>
   kind ? kind.charAt(0).toUpperCase() + kind.slice(1) : undefined;
 
-const TIMELINE_TAB = i18n.translate('xpack.agenticInvestigations.impactMap.events.timelineTab', {
-  defaultMessage: 'Timeline',
+const EVENTS_TAB = i18n.translate('xpack.agenticInvestigations.impactMap.events.eventsTab', {
+  defaultMessage: 'Events',
 });
 const METADATA_TAB = i18n.translate('xpack.agenticInvestigations.impactMap.events.metadataTab', {
   defaultMessage: 'Metadata',
@@ -963,8 +970,8 @@ export interface ImpactMapEventsFlyoutProps {
   standalone?: boolean;
   /** Opens as a main flyout over the investigation flyout instead of as its child. */
   asMainFlyout?: boolean;
-  /** Shows a "View in timeline" action that opens the Timeline tab filtered by this target. */
-  onViewInTimeline?: () => void;
+  /** Shows "View in investigation timeline" on an open event: the Timeline tab, scrolled to it. */
+  onViewInTimeline?: (eventId: string) => void;
   /**
    * Changes when the flyout moves to another target. The flyout stays open and starts on the new
    * target's list: remounting it instead would close the one open flyout and open another.
@@ -1050,7 +1057,13 @@ const EventsFlyoutContent: React.FC<
   const canGoBack = Boolean(selected) && (!initialEventId || events.length > 1);
   const showBack = canGoBack || Boolean(onBack);
 
-  const viewInTimelineLink = onViewInTimeline && events.length > 0 && (
+  // Newest first: what happened last is what a person usually wants to see.
+  const newestFirst = useMemo(
+    () => [...events].sort((a, b) => Date.parse(b.at) - Date.parse(a.at)),
+    [events]
+  );
+
+  const viewInTimelineLink = onViewInTimeline && selected && (
     <EuiText size="xs" textAlign="right">
       <EuiLink
         onClick={() => {
@@ -1059,7 +1072,7 @@ const EventsFlyoutContent: React.FC<
           if (asMainFlyout) {
             getFlyoutManagerStore().goBack();
           }
-          onViewInTimeline();
+          onViewInTimeline(selected.id);
         }}
         data-test-subj="agenticInvestigationsImpactMapViewInTimeline"
       >
@@ -1153,7 +1166,7 @@ const EventsFlyoutContent: React.FC<
                     }
                     data-test-subj="agenticInvestigationsImpactMapTimelineTab"
                   >
-                    {TIMELINE_TAB}
+                    {EVENTS_TAB}
                   </EuiTab>
                 </EuiTabs>
               </EuiFlexItem>
@@ -1163,7 +1176,11 @@ const EventsFlyoutContent: React.FC<
       </EuiFlyoutHeader>
       <EuiFlyoutBody css={standalone ? standaloneBodyCss : undefined}>
         {selected ? (
-          <EventDetail event={selected} allEvents={impactMap.events} />
+          <>
+            {viewInTimelineLink}
+            {viewInTimelineLink && <EuiSpacer size="s" />}
+            <EventDetail event={selected} allEvents={impactMap.events} />
+          </>
         ) : tab === 'metadata' ? (
           metadata?.length ? (
             <EntityMetadataTable rows={metadata} />
@@ -1185,13 +1202,11 @@ const EventsFlyoutContent: React.FC<
           />
         ) : (
           <>
-            {viewInTimelineLink}
-            {viewInTimelineLink && <EuiSpacer size="s" />}
             {renderEvents ? (
-              renderEvents(events, setSelectedId)
+              renderEvents(newestFirst, setSelectedId)
             ) : (
               <EuiFlexGroup direction="column" gutterSize="s">
-                {events.map((event) => (
+                {newestFirst.map((event) => (
                   <EuiFlexItem key={event.id} grow={false}>
                     <EventSummary event={event} onClick={() => setSelectedId(event.id)} />
                   </EuiFlexItem>

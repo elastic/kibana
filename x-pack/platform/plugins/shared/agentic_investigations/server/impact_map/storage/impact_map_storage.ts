@@ -10,10 +10,12 @@ import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import {
   IMPACT_MAP_CATALOG_INDEX_NAME,
+  IMPACT_MAP_EVENTS_INDEX_NAME,
   IMPACT_MAP_INDEX_NAME,
 } from '../../../common/impact_map/constants';
 import type {
   ImpactMapEntityType,
+  ImpactMapEvent,
   ImpactMapRelationshipType,
   InvestigationImpactMap,
 } from '../../../common/impact_map/impact_map';
@@ -96,4 +98,57 @@ export const createImpactMapCatalogStorageClient = ({
     esClient,
     logger,
     impactMapCatalogStorageSettings
+  ).getClient();
+
+/**
+ * One event per document, so events can be searched across investigations. Alerts, anomalies and
+ * the rest all land here by `kind`. The evidence, source and links are stored, not indexed.
+ */
+export const impactMapEventsStorageSettings = {
+  name: IMPACT_MAP_EVENTS_INDEX_NAME,
+  schema: {
+    properties: {
+      spaceId: types.keyword({}),
+      conversationId: types.keyword({}),
+      eventId: types.keyword({}),
+      kind: types.keyword({}),
+      title: types.text({}),
+      description: types.text({}),
+      at: types.date({}),
+      endsAt: types.date({}),
+      entityId: types.keyword({}),
+      relationshipId: types.keyword({}),
+      event: types.object({ enabled: false }),
+      updatedAt: types.date({}),
+    },
+  },
+} satisfies IndexStorageSettings;
+
+export interface ImpactMapEventDocument {
+  spaceId: string;
+  conversationId: string;
+  eventId: string;
+  kind: ImpactMapEvent['kind'];
+  title: string;
+  description?: string;
+  at: string;
+  endsAt?: string;
+  entityId?: string;
+  relationshipId?: string;
+  /** The event as the flyout reads it. */
+  event: ImpactMapEvent;
+  updatedAt: string;
+}
+
+export const createImpactMapEventsStorageClient = ({
+  esClient,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+}) =>
+  new StorageIndexAdapter<typeof impactMapEventsStorageSettings, ImpactMapEventDocument>(
+    esClient,
+    logger,
+    impactMapEventsStorageSettings
   ).getClient();

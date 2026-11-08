@@ -19,6 +19,12 @@ export const IMPACT_MAP_INDEX_NAME = '.kibana-investigation-impact_map' as const
 /** One document per space: the entity and relationship types every impact map reuses. */
 export const IMPACT_MAP_CATALOG_INDEX_NAME = '.kibana-investigation-impact_map_catalog' as const;
 
+/**
+ * One document per event: the events of every investigation in the space, searchable by kind,
+ * time and what they happened to. The map document still carries the events its flyout reads.
+ */
+export const IMPACT_MAP_EVENTS_INDEX_NAME = '.kibana-investigation-impact_map_events' as const;
+
 /** Bounds that keep a map readable in the flyout and a tool call small enough for the agent. */
 export const MAX_IMPACT_MAP_ENTITIES = 50;
 export const MAX_IMPACT_MAP_RELATIONSHIPS = 100;
@@ -29,7 +35,7 @@ export const MAX_IMPACT_MAP_TYPE_FIELDS = 30;
 
 /**
  * What an event on the map is: something done to the system (a change), something it did (a
- * failure, an alert, a condition it was in), what customers felt, what the investigation found,
+ * failure, an alert, an anomaly, a condition it was in), what customers felt, what the investigation found,
  * or what responders did. A finding or a response need not belong to an entity; every other kind
  * happens to one entity or relationship.
  */
@@ -38,6 +44,7 @@ export const IMPACT_MAP_EVENT_KINDS = [
   'failure',
   'condition',
   'alert',
+  'anomaly',
   'mitigation',
   'customer_impact',
   'investigation',
