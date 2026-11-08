@@ -327,6 +327,67 @@ describe('createCortexPageStore', () => {
     );
   });
 
+  it('keeps the authors when a later conversation corroborates, and reads them back', async () => {
+    const authored = {
+      ...source,
+      attributes: { ...source.attributes, authored_by: ['conversation-1'] },
+    };
+    const esClient = {
+      get: jest.fn().mockResolvedValue({
+        found: true,
+        _id: 'cortex_service_checkout',
+        _source: authored,
+      }),
+      index: jest.fn().mockResolvedValue({ _id: 'cortex_service_checkout' }),
+    };
+
+    const store = createCortexPageStore({
+      esClient: esClient as never,
+      logger,
+      spaceId: 'default',
+    });
+
+    const page = await store.corroborate('cortex_service_checkout', {
+      conversationId: 'conversation-2',
+    });
+
+    expect(page?.conversation_id).toBe('conversation-2');
+    expect(page?.authored_by).toEqual(['conversation-1']);
+  });
+
+  it('replaces the authors on an upsert that names them', async () => {
+    const esClient = {
+      get: jest.fn().mockResolvedValue({ found: false }),
+      index: jest.fn().mockResolvedValue({ _id: 'cortex_service_checkout' }),
+    };
+
+    const store = createCortexPageStore({
+      esClient: esClient as never,
+      logger,
+      spaceId: 'default',
+    });
+
+    await store.upsert({
+      entityType: 'service',
+      slug: 'checkout',
+      title: 'Checkout',
+      content: 'Checkout talks to Redis.',
+      status: 'tentative',
+      authoredBy: ['conversation-1', 'conversation-2'],
+    });
+
+    expect(esClient.index).toHaveBeenCalledWith(
+      expect.objectContaining({
+        document: expect.objectContaining({
+          attributes: expect.objectContaining({
+            authored_by: ['conversation-1', 'conversation-2'],
+          }),
+        }),
+      }),
+      expect.anything()
+    );
+  });
+
   // Corroborating revives an archived page, but it has to earn its way back rather than jumping
   // straight to the status the optimizer retired it from.
   it('revives an archived page as tentative, not established', async () => {

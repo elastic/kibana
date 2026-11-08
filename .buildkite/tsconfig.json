@@ -10,7 +10,9 @@
     "allowImportingTsExtensions": true,
     "moduleResolution": "bundler",
     "outDir": "target/types",
-    "types": ["node", "jest"],
+    // Declare these extra dependencies explicitly; they are used by some tests
+    // importing `@kbn/storybook`.
+    "types": ["node", "jest", "@kbn/ambient-ui-types", "@kbn/ambient-common-types"],
     "verbatimModuleSyntax": true
   },
   "include": [
@@ -19,7 +21,8 @@
     "scripts/**/*",
     "pipelines/flaky_tests/groups.json",
     "pull_requests.json",
-    "pipeline-resource-definitions/**/*.ts"
+    "pipeline-resource-definitions/**/*.ts",
+    "../src/platform/packages/shared/kbn-config-schema/types/joi.d.ts"
   ],
   "exclude": ["target/**/*"]
 }

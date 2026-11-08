@@ -27,7 +27,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { makeDsView } from '../../aws_service_matrix';
 import type { ServiceVars, ServiceDataStreamVars } from './use_service_settings';
-import { getRequiredTextFields, resolveFieldMeta, toTyped } from './field_config';
+import {
+  getRequiredTextFields,
+  resolveFieldMeta,
+  resolveVarGroupSelections,
+  toTyped,
+} from './field_config';
 import { ServiceFieldsForm } from './service_fields_form';
 import { isDuplicateNameTaken } from './duplicate_name';
 import { MAX_POLICY_NAME_LENGTH } from './integration_settings';
@@ -109,15 +114,21 @@ export function DuplicateServiceModal({
       ? dsInfo.defaultEnabledInputs
       : dsInfo?.inputs?.slice(0, 1) ?? [];
     const dsView = makeDsView(service, dsId);
-    return activeInputs.some((inp) =>
-      getRequiredTextFields(dsView, inp).some((f) => {
+    return activeInputs.some((inp) => {
+      // The copied (or changed) var_group selection decides which fields are required.
+      const selections = resolveVarGroupSelections(
+        dsView,
+        inp,
+        dsVars.varGroupSelectionsByInput?.[inp]
+      );
+      return getRequiredTextFields(dsView, inp, selections).some((f) => {
         const meta = resolveFieldMeta(dsView, inp, f);
         const raw = dsVars.varsByInput[inp]?.[f];
         const effective = meta ? toTyped(raw, meta) : raw ?? '';
         if (Array.isArray(effective)) return effective.length === 0;
         return typeof effective === 'string' && !effective.trim();
-      })
-    );
+      });
+    });
   });
 
   const canAdd = !nameInvalid && !anyRequiredEmpty && !isNamespaceInvalid;
@@ -234,6 +245,28 @@ export function DuplicateServiceModal({
                   varsByInput: {
                     ...existing.varsByInput,
                     [input]: { ...(existing.varsByInput[input] ?? {}), [fieldName]: value },
+                  },
+                },
+              };
+            })
+          }
+          onVarGroupSelectionChange={(dsId, input, groupName, optionName) =>
+            setDraftByDs((prev) => {
+              const dsInfo = service.varDefsByDataStream?.[dsId];
+              const defaultInputs = singleDs
+                ? dsInfo?.inputs ?? []
+                : dsInfo?.defaultEnabledInputs ?? [];
+              const existing = prev[dsId] ?? { enabledInputs: defaultInputs, varsByInput: {} };
+              return {
+                ...prev,
+                [dsId]: {
+                  ...existing,
+                  varGroupSelectionsByInput: {
+                    ...(existing.varGroupSelectionsByInput ?? {}),
+                    [input]: {
+                      ...(existing.varGroupSelectionsByInput?.[input] ?? {}),
+                      [groupName]: optionName,
+                    },
                   },
                 },
               };
