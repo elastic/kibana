@@ -827,7 +827,11 @@ export const EventDetail: React.FC<{
       <>
         <EuiSpacer size="m" />
         <LazyEvidenceView
-          evidence={withContextAnnotations(event.evidence, event, allEvents)}
+          // Nothing is written after the chart: its title says what it plots.
+          evidence={{
+            ...withContextAnnotations(event.evidence, event, allEvents),
+            description: undefined,
+          }}
           referenceTime={event.at}
         />
       </>

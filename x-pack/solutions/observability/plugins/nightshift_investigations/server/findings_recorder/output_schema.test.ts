@@ -579,15 +579,24 @@ describe('limitDescriptionBullets', () => {
     expect(limitDescriptionBullets(text)).toBe('- a\n- b\n- c\n- d');
   });
 
-  it('turns a paragraph into at most four short bullets', () => {
+  it('keeps a lead sentence above its bullets', () => {
+    const text = 'Calls failed from 21:10Z.\n- 66 of 66 failed\n- Still failing at 22:00Z';
+    expect(limitDescriptionBullets(text)).toBe(
+      'Calls failed from 21:10Z.\n\n- 66 of 66 failed\n- Still failing at 22:00Z'
+    );
+  });
+
+  it('turns a paragraph into a lead sentence and at most four short bullets', () => {
     const text =
       'A new pod started at 16:49Z. It replaced the old pod. No event record exists for this change. ' +
       'A direct query returned zero rows. A fifth sentence is dropped.';
     expect(limitDescriptionBullets(text).split('\n')).toEqual([
-      '- A new pod started at 16:49Z.',
+      'A new pod started at 16:49Z.',
+      '',
       '- It replaced the old pod.',
       '- No event record exists for this change.',
       '- A direct query returned zero rows.',
+      '- A fifth sentence is dropped.',
     ]);
   });
 

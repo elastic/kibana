@@ -617,23 +617,33 @@ const clipAtWord = (text: string, max: number): string => {
 };
 
 /**
- * A description of at most four short bullets. Bullets the model wrote are kept (the first four,
- * each cut at a word); a paragraph is split into sentences and the first four become bullets, so a
- * verbose answer never reaches the reader as a wall of text.
+ * An event description: one lead sentence, then at most four short bullets. A description of
+ * bullets only is kept as bullets. A paragraph becomes its first sentence and the next few as
+ * bullets, so a verbose answer never reaches the reader as a wall of text.
  */
 export const limitDescriptionBullets = (text: string): string => {
   const lines = text.split('\n').filter((line) => line.trim());
   const isBullet = (line: string) => /^\s*[-*]\s/.test(line);
-  const items = lines.some(isBullet)
-    ? lines.map((line) => line.replace(/^\s*[-*]\s+/, '').trim())
-    : text
-        .split(/(?<=[.;!?])\s+(?=[A-Z0-9"'(])/)
-        .map((sentence) => sentence.trim())
-        .filter(Boolean);
-  return items
+  const unbullet = (line: string) => line.replace(/^\s*[-*]\s+/, '').trim();
+  let lead: string | undefined;
+  let items: string[];
+  if (lines.some(isBullet)) {
+    lead = lines[0] && !isBullet(lines[0]) ? lines[0].trim() : undefined;
+    items = lines.filter(isBullet).map(unbullet);
+  } else {
+    const sentences = text
+      .split(/(?<=[.;!?])\s+(?=[A-Z0-9"'(])/)
+      .map((sentence) => sentence.trim())
+      .filter(Boolean);
+    lead = sentences.shift();
+    items = sentences;
+  }
+  const bullets = items
     .slice(0, MAX_EVENT_DESCRIPTION_BULLETS)
     .map((item) => `- ${clipAtWord(item, MAX_EVENT_BULLET_LENGTH)}`)
     .join('\n');
+  const head = lead ? clipAtWord(lead, MAX_EVENT_BULLET_LENGTH) : '';
+  return head && bullets ? `${head}\n\n${bullets}` : head || bullets;
 };
 
 /** An ISO 8601 time the store can sort by, or undefined when the model wrote something else. */
