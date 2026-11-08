@@ -467,38 +467,34 @@ const EventKeyFacts: React.FC<{
   );
 };
 
-const FACT_SUBTYPE = i18n.translate('xpack.agenticInvestigations.impactMap.events.factSubtype', {
-  defaultMessage: 'Sub-type',
-});
-
 /** What the entity is, then the featured facts the agent recorded about it. */
-const EntityKeyFacts: React.FC<{ typeLabel?: string; metadata?: EntityMetadataRow[] }> = ({
-  typeLabel,
-  metadata,
-}) => {
-  const [kind, subtype] = (typeLabel ?? '').split(' › ');
-  const featured = (metadata ?? []).filter(({ featured: isFeatured }) => isFeatured);
-  const facts: KeyFact[] = [
-    ...(kind
-      ? [
-          {
-            label: FACT_TYPE,
-            value: <EuiBadge color="hollow">{kind}</EuiBadge>,
-            testSubj: 'agenticInvestigationsImpactMapEventsType',
-          },
-        ]
-      : []),
-    ...(subtype
-      ? [{ label: FACT_SUBTYPE, value: <EuiBadge color="hollow">{subtype}</EuiBadge> }]
-      : []),
-    ...featured.map(({ key, label, value }) => ({
+const EntityKeyFacts: React.FC<{ metadata?: EntityMetadataRow[] }> = ({ metadata }) => {
+  const facts: KeyFact[] = (metadata ?? [])
+    .filter(({ featured }) => featured)
+    .map(({ key, label, value }) => ({
       label,
       value,
       testSubj: `agenticInvestigationsImpactMapFeatured-${key}`,
-    })),
-  ];
+    }));
   return facts.length ? (
     <KeyFacts facts={facts} testSubj="agenticInvestigationsImpactMapFeaturedMetadata" />
+  ) : null;
+};
+
+/** Type and sub-type as white badges, to the right of the name. */
+const TypeBadges: React.FC<{ typeLabel?: string }> = ({ typeLabel }) => {
+  const [kind, subtype] = (typeLabel ?? '').split(' › ');
+  return kind ? (
+    <EuiFlexGroup gutterSize="xs" responsive={false} wrap={false} alignItems="center">
+      <EuiFlexItem grow={false} data-test-subj="agenticInvestigationsImpactMapEventsType">
+        <EuiBadge color="hollow">{kind}</EuiBadge>
+      </EuiFlexItem>
+      {subtype && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow">{subtype}</EuiBadge>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   ) : null;
 };
 
@@ -1057,15 +1053,22 @@ const EventsFlyoutContent: React.FC<ImpactMapEventsFlyoutProps & { titleId: stri
                   <EuiIcon type={icon} size="xl" aria-hidden={true} />
                 </EuiFlexItem>
               )}
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiTitle size="s">
                   <h2 id={titleId}>{title}</h2>
                 </EuiTitle>
               </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <TypeBadges typeLabel={typeLabel} />
+              </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="m" />
-            <EntityKeyFacts typeLabel={typeLabel} metadata={metadata} />
-            <EuiSpacer size="m" />
+            {metadata?.some(({ featured }) => featured) && (
+              <>
+                <EntityKeyFacts metadata={metadata} />
+                <EuiSpacer size="m" />
+              </>
+            )}
             <EuiFlexGroup
               gutterSize="s"
               alignItems="center"
