@@ -109,6 +109,12 @@ const KINDS: Record<ImpactMapEventKind, { label: string; color: EuiBadgeProps['c
     }),
     color: 'accent',
   },
+  root_cause: {
+    label: i18n.translate('xpack.agenticInvestigations.impactMap.events.kind.rootCause', {
+      defaultMessage: 'Root cause',
+    }),
+    color: 'danger',
+  },
   investigation: {
     label: i18n.translate('xpack.agenticInvestigations.impactMap.events.kind.investigation', {
       defaultMessage: 'Finding',
@@ -131,6 +137,7 @@ export const EVENT_GROUPS = [
   { id: 'alert', icon: 'bell', color: 'warning' },
   { id: 'anomaly', icon: 'visLine', color: 'warning' },
   { id: 'customer_impact', icon: 'users', color: 'accent' },
+  { id: 'root_cause', icon: 'crosshair', color: 'danger' },
   { id: 'investigation', icon: 'sparkles', color: 'primary' },
   { id: 'mitigation', icon: 'wrench', color: 'success' },
   { id: 'recovery', icon: 'checkCircleFill', color: 'success' },

@@ -76,7 +76,7 @@ const eventSchema = impactMapEventSchema.extend({
     .optional()
     .describe('Leave out: an id is derived from the kind, what it happened to and the minute.'),
   kind: impactMapEventSchema.shape.kind.describe(
-    '"change" for a deploy, config or scaling change; "failure" for errors, crashes, timeouts; "condition" for a state such as saturation or zero replicas; "alert" for an alert firing; "anomaly" for an anomaly an ML job or detector flagged; "mitigation" for a fix applied; "recovery" for something that was failing and now is not, on the same entity as the failure, with a chart that runs to the latest data and shows the drop; "customer_impact" for what customers felt, on the entry point; "investigation" for a finding, such as a hypothesis confirmed or ruled out; "response" for a responder action such as opening an incident channel.'
+    '"change" for a deploy, config or scaling change; "failure" for errors, crashes, timeouts; "condition" for a state such as saturation or zero replicas; "alert" for an alert firing; "anomaly" for an anomaly an ML job or detector flagged; "mitigation" for a fix applied; "recovery" for something that was failing and now is not, on the same entity as the failure, with a chart that runs to the latest data and shows the drop; "customer_impact" for what customers felt, on the entry point; "root_cause" for the one thing you found that caused the incident, on the entity it happened to, once you are confident of it; "investigation" for any other finding, such as a hypothesis ruled out; "response" for a responder action such as opening an incident channel.'
   ),
   title: impactMapEventSchema.shape.title.describe(
     'One line, past tense, with the number: "Replicas scaled from 3 to 0".'
