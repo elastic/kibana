@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiMarkdownFormat } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Investigation } from '../../types';
 import type { FlyoutGroupedAttachmentsRegistry } from '../grouped_attachments';
@@ -52,6 +52,8 @@ export interface OverviewSections {
   impact?: React.ReactNode;
   /** The conclusion, as markdown. */
   conclusion?: string;
+  /** Shown under the conclusion, inside its section: the event it names as the root cause. */
+  conclusionEvent?: React.ReactNode;
   /**
    * How the investigation got there, such as an entry point to its hypotheses. Shown right under
    * the conclusion, in the same place whether or not there is one, so it keeps its state when the
@@ -72,7 +74,7 @@ export const OverviewTab = memo<OverviewTabProps>(
     sections = {},
     showLoadingSection = false,
   }) => {
-    const { subjects, impact, conclusion, reasoning, renderMarkdown } = sections;
+    const { subjects, impact, conclusion, conclusionEvent, reasoning, renderMarkdown } = sections;
 
     return (
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -102,6 +104,12 @@ export const OverviewTab = memo<OverviewTabProps>(
             <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.conclusion}>
               {renderMarkdown?.(conclusion) ?? (
                 <EuiMarkdownFormat textSize="s">{conclusion}</EuiMarkdownFormat>
+              )}
+              {conclusionEvent && (
+                <>
+                  <EuiSpacer size="m" />
+                  {conclusionEvent}
+                </>
               )}
             </DetailsBlock>
           </EuiFlexItem>

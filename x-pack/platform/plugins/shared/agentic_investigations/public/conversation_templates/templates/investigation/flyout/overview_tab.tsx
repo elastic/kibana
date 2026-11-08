@@ -63,6 +63,7 @@ export const toOverviewSections = (
       <EventMarkdown text={text} color={options?.subdued ? 'subdued' : undefined} />
     ),
     conclusion,
+    conclusionEvent: conclusion && impactMap ? <RootCauseEvent impactMap={impactMap} /> : undefined,
     reasoning:
       investigation && hypotheses.length > 0 ? (
         <HypothesisTreeCard
@@ -104,6 +105,27 @@ const CustomerImpact: React.FC<{
           />
         ))}
     </EuiFlexGroup>
+  );
+};
+
+/** The latest event the investigation recorded as the root cause, as the impact section shows its events. */
+const RootCauseEvent: React.FC<{ impactMap: InvestigationImpactMapResponse }> = ({ impactMap }) => {
+  const links = useEventLinks();
+  const event = useMemo(
+    () =>
+      impactMap.events
+        .filter(({ kind }) => kind === 'root_cause')
+        .sort((a, b) => Date.parse(b.at) - Date.parse(a.at))[0],
+    [impactMap.events]
+  );
+  if (!event) return null;
+  return (
+    <EventCard
+      event={event}
+      impactMap={impactMap}
+      onOpen={() => links?.openEvent(event.id)}
+      onOpenEntity={(entityId) => links?.openEntity(entityId)}
+    />
   );
 };
 
