@@ -8,6 +8,7 @@
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiPageTemplate, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useLocation } from 'react-router-dom';
 import useLatest from 'react-use/lib/useLatest';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { CellDefinition, NotebookAttributes } from '../../common/types';
@@ -34,6 +35,7 @@ import { NotebookHeader } from './notebook_header';
 import { VegaCell } from './vega_cell';
 import { AppFlyout } from './app_flyout';
 import { createNotebookContext } from './create_notebook_context';
+import { getAppParam, useAppUrlState } from './use_app_url_state';
 import { GraphFlyout } from './graph_flyout';
 
 const CellView = ({ cell }: { cell: CellDefinition }) => {
@@ -91,21 +93,21 @@ export interface NotebookEditorProps {
   attributes: NotebookAttributes;
   /** The saved notebook's id; undefined for a notebook not saved yet. */
   notebookId?: string;
-  /** Opens the app panel showing this app. */
-  initialAppId?: string;
   onSave?: (store: NotebookStore) => Promise<void>;
 }
 
-export const NotebookEditor = ({
-  attributes,
-  notebookId,
-  initialAppId,
-  onSave,
-}: NotebookEditorProps) => {
+export const NotebookEditor = ({ attributes, notebookId, onSave }: NotebookEditorProps) => {
   const { plugins } = useNotebookServices();
+  const { search } = useLocation();
   const [notebook] = useState<NotebookContextValue>(() =>
-    createNotebookContext({ attributes, search: plugins.data.search, notebookId, initialAppId })
+    createNotebookContext({
+      attributes,
+      search: plugins.data.search,
+      notebookId,
+      initialAppId: getAppParam(search),
+    })
   );
+  useAppUrlState(notebook);
   const [isSaving, setIsSaving] = useState(false);
   const headerRunControls = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
