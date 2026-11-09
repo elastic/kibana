@@ -427,8 +427,8 @@ importers:
         specifier: 2.0.2
         version: 2.0.2
       '@elastic/monaco-esql':
-        specifier: 4.36.0
-        version: 4.36.0(monaco-editor@0.56.0)
+        specifier: 4.37.0
+        version: 4.37.0(monaco-editor@0.56.0)
       '@elastic/node-crypto':
         specifier: 1.2.3
         version: 1.2.3
@@ -2967,6 +2967,9 @@ importers:
       '@kbn/oidc-provider-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/test/security_api_integration/plugins/oidc_provider
+      '@kbn/ols':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-ols
       '@kbn/open-telemetry-instrumented-plugin':
         specifier: workspace:*
         version: link:src/platform/test/common/plugins/otel_metrics
@@ -8255,6 +8258,8 @@ importers:
 
   src/platform/packages/shared/kbn-occ: {}
 
+  src/platform/packages/shared/kbn-ols: {}
+
   src/platform/packages/shared/kbn-openapi-bundler: {}
 
   src/platform/packages/shared/kbn-openapi-common: {}
@@ -11267,8 +11272,8 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  '@elastic/monaco-esql@4.36.0':
-    resolution: {integrity: sha512-VEhThD2e+K4KMNSg1pPsngpSLe3hjzPW4RC8L/2QLM8M8U5PAba0Z1fV2p7mozw2XBZ7Robj4Dphtu5qk/+LfA==}
+  '@elastic/monaco-esql@4.37.0':
+    resolution: {integrity: sha512-eHmJU+SSqtAopMs2VPrBRyc381W/giNJEa6ZfAdjhg0Ye0hOmQnXDhqFTXDLn5v0ObWmtDUTzKptwodnGFVjIg==}
     peerDependencies:
       monaco-editor: '>=0.30.0'
 
@@ -27399,7 +27404,7 @@ snapshots:
 
   '@elastic/micro-jq@2.0.2': {}
 
-  '@elastic/monaco-esql@4.36.0(monaco-editor@0.56.0)':
+  '@elastic/monaco-esql@4.37.0(monaco-editor@0.56.0)':
     dependencies:
       '@elastic/esql-definitions': 4.36.0
       monaco-editor: 0.56.0
