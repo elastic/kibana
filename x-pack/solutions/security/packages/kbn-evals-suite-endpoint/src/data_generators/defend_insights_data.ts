@@ -24,6 +24,9 @@ const BENIGN_PATHS = [
   'C:\\Program Files\\Elastic\\Agent\\elastic-agent.exe',
 ];
 
+const AV_CONFLICT_EXECUTABLES = [AVAST_SVC, AVAST_UI, KASPERSKY_AVP, ...BENIGN_PATHS];
+const SINGLE_AV_EXECUTABLES = [MALWAREBYTES_SVC, ...BENIGN_PATHS];
+
 const fileEventDocument = (
   agentId: string,
   hostName: string,
@@ -72,6 +75,8 @@ export interface DefendInsightsDatasetCase {
 
 /**
  * Each case owns one agent id so retrieval (`terms agent.id`) only sees that case's events.
+ * `seededEventCount` is the number of unique executables: the retriever aggregates per
+ * `process.executable`, so that is the `eventsContextCount` a healthy run reports.
  * Expected paths use real product directories, matching what the AV prompt keeps.
  */
 export const DEFEND_INSIGHTS_CASES: DefendInsightsDatasetCase[] = [
@@ -79,8 +84,9 @@ export const DEFEND_INSIGHTS_CASES: DefendInsightsDatasetCase[] = [
     name: 'av-conflict',
     description:
       'Two third-party AV products mixed with benign executables: expect one group each.',
-    scenario: buildScenario('av-conflict', [AVAST_SVC, AVAST_UI, KASPERSKY_AVP, ...BENIGN_PATHS]),
+    scenario: buildScenario('av-conflict', AV_CONFLICT_EXECUTABLES),
     expected: {
+      seededEventCount: new Set(AV_CONFLICT_EXECUTABLES).size,
       results: [
         {
           name: 'Avast',
@@ -100,8 +106,9 @@ export const DEFEND_INSIGHTS_CASES: DefendInsightsDatasetCase[] = [
   {
     name: 'single-av',
     description: 'One AV product mixed with benign executables: expect exactly one group.',
-    scenario: buildScenario('single-av', [MALWAREBYTES_SVC, ...BENIGN_PATHS]),
+    scenario: buildScenario('single-av', SINGLE_AV_EXECUTABLES),
     expected: {
+      seededEventCount: new Set(SINGLE_AV_EXECUTABLES).size,
       results: [
         {
           name: 'Malwarebytes',
@@ -116,6 +123,10 @@ export const DEFEND_INSIGHTS_CASES: DefendInsightsDatasetCase[] = [
     name: 'clean-host',
     description: 'Negative control: only benign and Elastic executables, expect no AV group.',
     scenario: buildScenario('clean-host', BENIGN_PATHS),
-    expected: { results: [], benignPaths: BENIGN_PATHS },
+    expected: {
+      seededEventCount: new Set(BENIGN_PATHS).size,
+      results: [],
+      benignPaths: BENIGN_PATHS,
+    },
   },
 ];

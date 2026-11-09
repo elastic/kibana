@@ -19,8 +19,8 @@ export const createGenerationSucceededEvaluator = (): Evaluator<
   name: GENERATION_SUCCEEDED_EVALUATOR_NAME,
   kind: 'CODE',
   direction: 'maximize',
-  evaluate: async ({ output }) => {
-    const infra = infraFailureResult(output);
+  evaluate: async ({ output, expected }) => {
+    const infra = infraFailureResult(output, expected);
     if (infra) return infra;
 
     const succeeded = output.status === 'succeeded';

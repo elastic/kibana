@@ -6,6 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 const EVAL_SEEDED_INDICES = [
   'metrics-endpoint.metadata-default',
@@ -47,25 +48,56 @@ interface CleanupClients {
   internalEsClient: Client;
 }
 
+/**
+ * Deletes matching documents, including from hidden indices and data streams (the Defend Insights
+ * store is hidden, so a default `expand_wildcards` silently matches nothing). Without a `log` the
+ * result is ignored, as in the other suites; with one, the deleted count is logged and errors are
+ * reported as warnings instead of swallowed.
+ */
+const deleteByQuerySafe = async ({
+  client,
+  index,
+  query,
+  log,
+}: {
+  client: Client;
+  index: string;
+  query: Record<string, unknown>;
+  log?: ToolingLog;
+}): Promise<number> => {
+  try {
+    const { deleted = 0 } = await client.deleteByQuery({
+      index,
+      query,
+      refresh: true,
+      ignore_unavailable: true,
+      expand_wildcards: ['open', 'hidden'],
+    });
+    log?.info(`cleanup ${index}: deleted ${deleted}`);
+    return deleted;
+  } catch (e) {
+    log?.warning(`cleanup ${index} failed: ${e instanceof Error ? e.message : String(e)}`);
+    return 0;
+  }
+};
+
 async function cleanupSeededData({
   esClient,
   internalEsClient,
   agentIdPrefix,
+  log,
 }: CleanupClients & {
   agentIdPrefix: string;
+  log?: ToolingLog;
 }): Promise<void> {
-  const deleteQuery = { prefix: { 'agent.id': agentIdPrefix } };
+  const query = { prefix: { 'agent.id': agentIdPrefix } };
 
   await Promise.all([
     ...EVAL_SEEDED_INDICES.map((index) =>
-      esClient
-        .deleteByQuery({ index, query: deleteQuery, refresh: true, ignore_unavailable: true })
-        .catch(() => {})
+      deleteByQuerySafe({ client: esClient, index, query, log })
     ),
     ...RESTRICTED_INDICES.map((index) =>
-      internalEsClient
-        .deleteByQuery({ index, query: deleteQuery, refresh: true, ignore_unavailable: true })
-        .catch(() => {})
+      deleteByQuerySafe({ client: internalEsClient, index, query, log })
     ),
   ]);
 }
@@ -89,29 +121,27 @@ export async function cleanupResponseActionsData(clients: CleanupClients): Promi
 export async function cleanupDefendInsightsData({
   esClient,
   internalEsClient,
-}: CleanupClients): Promise<void> {
+  log,
+}: CleanupClients & { log: ToolingLog }): Promise<void> {
   await cleanupSeededData({
     esClient,
     internalEsClient,
     agentIdPrefix: DEFEND_INSIGHTS_AGENT_ID_PREFIX,
+    log,
   });
 
   await Promise.all([
-    internalEsClient
-      .deleteByQuery({
-        index: WORKFLOW_INSIGHTS_INDEX,
-        query: { prefix: { 'target.ids': DEFEND_INSIGHTS_AGENT_ID_PREFIX } },
-        refresh: true,
-        ignore_unavailable: true,
-      })
-      .catch(() => {}),
-    internalEsClient
-      .deleteByQuery({
-        index: DEFEND_INSIGHTS_INDEX,
-        query: { prefix: { endpoint_ids: DEFEND_INSIGHTS_AGENT_ID_PREFIX } },
-        refresh: true,
-        ignore_unavailable: true,
-      })
-      .catch(() => {}),
+    deleteByQuerySafe({
+      client: internalEsClient,
+      index: WORKFLOW_INSIGHTS_INDEX,
+      query: { prefix: { 'target.ids': DEFEND_INSIGHTS_AGENT_ID_PREFIX } },
+      log,
+    }),
+    deleteByQuerySafe({
+      client: internalEsClient,
+      index: DEFEND_INSIGHTS_INDEX,
+      query: { prefix: { endpoint_ids: DEFEND_INSIGHTS_AGENT_ID_PREFIX } },
+      log,
+    }),
   ]);
 }

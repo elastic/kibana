@@ -14,6 +14,7 @@ import {
   insight,
   output,
   params,
+  SEEDED_EVENT_COUNT,
 } from './evaluator_test_fixtures';
 
 describe('NegativeControl', () => {
@@ -35,9 +36,25 @@ describe('NegativeControl', () => {
     });
   });
 
-  it('passes when a non-benign path is flagged (covered by other evaluators)', async () => {
+  it('fails when any insight is returned, even for a non-benign path, and lists the paths', async () => {
     const out = output({ insights: [insight('Avast', [AVAST_SVC])] });
-    expect(await evaluate(params(out, cleanExpected))).toMatchObject({ score: 1 });
+    expect(await evaluate(params(out, cleanExpected))).toMatchObject({
+      score: 0,
+      label: 'fail',
+      explanation: expect.stringContaining(AVAST_SVC),
+    });
+  });
+
+  it.each([
+    ['0 events', 0],
+    ['fewer events than seeded', SEEDED_EVENT_COUNT - 1],
+    ['no eventsContextCount', undefined],
+  ])('is task_error, not a pass, when the model saw %s', async (_name, eventsContextCount) => {
+    const out = output({ eventsContextCount });
+    expect(await evaluate(params(out, cleanExpected))).toMatchObject({
+      score: null,
+      label: 'task_error',
+    });
   });
 
   it('is N/A for non-control examples', async () => {

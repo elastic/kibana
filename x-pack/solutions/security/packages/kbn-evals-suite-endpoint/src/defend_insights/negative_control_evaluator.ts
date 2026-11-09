@@ -12,8 +12,9 @@ import type { DefendInsightsDatasetExample, DefendInsightsTaskOutput } from './t
 export const NEGATIVE_CONTROL_EVALUATOR_NAME = 'NegativeControl';
 
 /**
- * Applies only to examples with no expected groups (a clean host). Passes when no seeded benign
- * executable appears in any insight event.
+ * Applies only to examples with no expected groups (a clean host). Passes only when the model
+ * returns no insight at all: every seeded executable is benign, so any insight is a false positive.
+ * The explanation lists the paths it flagged.
  */
 export const createNegativeControlEvaluator = (): Evaluator<
   DefendInsightsDatasetExample,
@@ -26,23 +27,28 @@ export const createNegativeControlEvaluator = (): Evaluator<
     if (!isNegativeControl(expected)) {
       return notApplicableResult('not a negative-control example');
     }
-    const infra = infraFailureResult(output);
+    const infra = infraFailureResult(output, expected);
     if (infra) return infra;
     if (output.status !== 'succeeded' || !output.insights) {
       return notApplicableResult(`generation ${output.status}; nothing to check`);
     }
 
-    const benign = new Set(expected?.benignPaths ?? []);
-    const flagged = output.insights.flatMap(({ events = [] }) =>
-      events.map(({ value }) => value).filter((value) => benign.has(value))
-    );
-    const unique = [...new Set(flagged)];
+    if (output.insights.length === 0) {
+      return { score: 1, label: 'pass' };
+    }
 
+    const flagged = [
+      ...new Set(output.insights.flatMap(({ events = [] }) => events.map(({ value }) => value))),
+    ];
+    const groups = output.insights.map(({ group }) => group).join(', ');
     return {
-      score: unique.length === 0 ? 1 : 0,
-      label: unique.length === 0 ? 'pass' : 'fail',
-      explanation:
-        unique.length === 0 ? undefined : `benign executables flagged: ${unique.join(', ')}`,
+      score: 0,
+      label: 'fail',
+      explanation: `clean host returned ${
+        output.insights.length
+      } insight(s) (groups: ${groups}); flagged paths: ${
+        flagged.length > 0 ? flagged.join(', ') : 'none listed'
+      }`,
     };
   },
 });

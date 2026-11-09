@@ -12,13 +12,44 @@ import type { DefendInsightsDatasetExample, DefendInsightsTaskOutput } from './t
 export const EXPECTED_INSIGHT_GROUPS_EVALUATOR_NAME = 'ExpectedInsightGroups';
 
 /**
+ * Generic words a model appends to a vendor name ("Avast Antivirus", "Kaspersky Total Security").
+ * The AV prompt asks for "the antivirus program" as the group, so the vendor name is the stable part.
+ */
+const GENERIC_GROUP_SUFFIXES = new Set([
+  'antivirus',
+  'anti-virus',
+  'antimalware',
+  'anti-malware',
+  'security',
+  'software',
+  'total',
+  'internet',
+  'free',
+  'premium',
+  'pro',
+]);
+
+/**
+ * Trims, lowercases, collapses whitespace and drops trailing generic words, so the comparison is an
+ * exact match on the vendor/product name instead of a substring (which would let "Avast" match
+ * "Not Avast" or any group that merely mentions it).
+ */
+export const normalizeGroupName = (group: string): string => {
+  const words = group.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  while (words.length > 1 && GENERIC_GROUP_SUFFIXES.has(words[words.length - 1])) {
+    words.pop();
+  }
+  return words.join(' ');
+};
+
+/**
  * Ported from the legacy `customIncompatibleAntivirusEvaluator`: score is
- * `1 - failedChecks / totalChecks` with one check for the group count and three per expected
- * group (missing required paths, excluded paths present, unexpected paths).
+ * `1 - failedChecks / totalChecks` with three checks per expected group (group present, no missing
+ * required paths, no excluded or unexpected paths) plus one check per unexpected extra group, so an
+ * invented group costs the same as a missing one. `label` is `pass` only when the score is 1.
  *
- * Differences: an empty result on the negative control is not a failure (it is the expected
- * outcome and is scored here as a single passing group-count check), and infra failures are
- * `task_error`, not zero.
+ * Differences: an empty result on the negative control is the expected outcome (score 1), and infra
+ * failures (including a run whose model saw no seeded events) are `task_error`, not zero.
  */
 export const createExpectedInsightGroupsEvaluator = (): Evaluator<
   DefendInsightsDatasetExample,
@@ -28,7 +59,7 @@ export const createExpectedInsightGroupsEvaluator = (): Evaluator<
   kind: 'CODE',
   direction: 'maximize',
   evaluate: async ({ output, expected }) => {
-    const infra = infraFailureResult(output);
+    const infra = infraFailureResult(output, expected);
     if (infra) return infra;
     if (!expected) return notApplicableResult('example has no expected output');
     if (output.status !== 'succeeded' || !output.insights) {
@@ -47,19 +78,16 @@ export const createExpectedInsightGroupsEvaluator = (): Evaluator<
     }
 
     const failedChecks: Array<{ label: string; details?: string[] }> = [];
-    let totalChecks = 1;
-
-    if (insights.length !== requirements.length) {
-      failedChecks.push({
-        label: 'number of insight groups does not match number of requirements',
-        details: [`insights: ${insights.length}`, `requirements: ${requirements.length}`],
-      });
-    }
+    const unclaimed = [...insights];
+    let totalChecks = 0;
 
     for (const requirement of requirements) {
       const label = `requirement "${requirement.name}"`;
-      const needle = requirement.name.toLowerCase();
-      const matched = insights.find((insight) => insight.group.toLowerCase().includes(needle));
+      const wanted = normalizeGroupName(requirement.name);
+      const matchIndex = unclaimed.findIndex(
+        (insight) => normalizeGroupName(insight.group) === wanted
+      );
+      const matched = matchIndex === -1 ? undefined : unclaimed.splice(matchIndex, 1)[0];
       totalChecks += 3;
 
       if (!matched) {
@@ -92,18 +120,29 @@ export const createExpectedInsightGroupsEvaluator = (): Evaluator<
       }
     }
 
-    const score = Number((1 - failedChecks.length / totalChecks).toFixed(2));
+    for (const extra of unclaimed) {
+      totalChecks += 1;
+      failedChecks.push({
+        label: `unexpected insight group "${extra.group}"`,
+        details: (extra.events ?? []).map((event) => event.value),
+      });
+    }
+
+    const passed = failedChecks.length === 0;
+    // Rounding must not turn a failing run into a 1.
+    const score = passed
+      ? 1
+      : Math.min(0.99, Number((1 - failedChecks.length / totalChecks).toFixed(2)));
     return {
       score,
-      label: failedChecks.length === 0 ? 'pass' : 'fail',
-      explanation:
-        failedChecks.length === 0
-          ? 'All checks passed'
-          : failedChecks
-              .map(({ label, details }) =>
-                details?.length ? `${label}:\n  - ${details.join('\n  - ')}` : label
-              )
-              .join('\n'),
+      label: passed ? 'pass' : 'fail',
+      explanation: passed
+        ? 'All checks passed'
+        : failedChecks
+            .map(({ label, details }) =>
+              details?.length ? `${label}:\n  - ${details.join('\n  - ')}` : label
+            )
+            .join('\n'),
     };
   },
 });

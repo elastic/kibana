@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EvaluationDataset, EvalsExecutorClient } from '@kbn/evals';
+import type { DatasetRunResult, EvaluationDataset, EvalsExecutorClient } from '@kbn/evals';
 import type { DefendInsightsApiClient } from './defend_insights/defend_insights_api_client';
 import { createExpectedInsightGroupsEvaluator } from './defend_insights/expected_insight_groups_evaluator';
 import { createGenerationSucceededEvaluator } from './defend_insights/generation_succeeded_evaluator';
@@ -22,7 +22,7 @@ export type EvaluateDefendInsightsDataset = (options: {
     description: string;
     examples: DefendInsightsDatasetExample[];
   };
-}) => Promise<void>;
+}) => Promise<DatasetRunResult[]>;
 
 export const createEvaluateDefendInsightsDataset = ({
   executorClient,
@@ -44,7 +44,7 @@ export const createEvaluateDefendInsightsDataset = ({
       examples,
     } satisfies EvaluationDataset<DefendInsightsDatasetExample>;
 
-    await executorClient.runExperiment(
+    return executorClient.runExperiment(
       {
         datasets: [dataset],
         task: async ({ input }): Promise<DefendInsightsTaskOutput> => {
@@ -56,11 +56,22 @@ export const createEvaluateDefendInsightsDataset = ({
               error: 'Missing example input',
             };
           }
-          return apiClient.generateIncompatibleAntivirus({
-            endpointId: input.endpointId,
-            connectorId,
-            actionTypeId,
-          });
+          const startedAt = Date.now();
+          try {
+            return await apiClient.generateIncompatibleAntivirus({
+              endpointId: input.endpointId,
+              connectorId,
+              actionTypeId,
+            });
+          } catch (e) {
+            // One example's exception must not abort the experiment; score it as infra.
+            return {
+              status: 'request_failed',
+              insights: null,
+              latencyMs: Date.now() - startedAt,
+              error: `task threw: ${e instanceof Error ? e.message : String(e)}`.slice(0, 800),
+            };
+          }
         },
         // One generation at a time: each hits the shared LLM connector and a single ES.
         concurrency: 1,

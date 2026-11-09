@@ -25,12 +25,16 @@ const TERMINAL_STATUSES = new Set(['succeeded', 'failed', 'canceled']);
 const POLL_INTERVAL_MS = 3_000;
 export const DEFEND_INSIGHTS_POLL_MAX_WAIT_MS = 480_000;
 const INSIGHT_NOT_FOUND_GRACE_MS = 30_000;
+/** Cap on a single HTTP request; the remaining poll budget shortens it near the deadline. */
+export const REQUEST_TIMEOUT_MS = 30_000;
 const MAX_ERROR_LENGTH = 800;
+const ANONYMIZATION_FIELDS_PAGE_SIZE = 1000;
 
 type AnonymizationFields = DefendInsightsPostRequestBodyInput['anonymizationFields'];
 
 interface AnonymizationFieldsFindResponse {
   data?: AnonymizationFields;
+  total?: number;
 }
 
 interface GetDefendInsightResponse {
@@ -46,6 +50,9 @@ const statusOf = (e: unknown): number | undefined => {
 
 const describeError = (e: unknown): string =>
   (e instanceof Error ? e.message : String(e)).slice(0, MAX_ERROR_LENGTH);
+
+const isTimeoutError = (e: unknown): boolean =>
+  e instanceof Error && (e.name === 'TimeoutError' || e.name === 'AbortError');
 
 const isRetryable = (status: number | undefined): boolean =>
   status === 429 || (status !== undefined && status >= 500);
@@ -64,23 +71,38 @@ export interface GenerateDefendInsightsOptions {
 export class DefendInsightsApiClient {
   constructor(private readonly fetch: HttpHandler, private readonly log: ToolingLog) {}
 
+  /**
+   * Reads the anonymization fields the UI would send. The route does not cap `per_page`, but the
+   * response carries `total`, so truncation is detected instead of silently sending a partial list.
+   * An error, an empty list or a truncated list throws (the caller maps it to `request_failed`): without these fields the route sends the
+   * model no events, and the run would "succeed" with empty insights.
+   */
   async fetchAnonymizationFields(): Promise<AnonymizationFields> {
+    let payload: AnonymizationFieldsFindResponse;
     try {
-      const payload = await this.fetch<AnonymizationFieldsFindResponse>(
+      payload = await this.fetch<AnonymizationFieldsFindResponse>(
         ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
         {
           method: 'GET',
           version: PUBLIC_API_VERSION,
-          query: { page: '1', per_page: '1000' },
+          query: { page: '1', per_page: String(ANONYMIZATION_FIELDS_PAGE_SIZE) },
+          signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
         }
       );
-      return payload.data ?? [];
     } catch (e) {
-      this.log.warning(
-        `anonymization_fields find failed (${statusOf(e) ?? 'n/a'}); using empty list`
+      throw new Error(
+        `anonymization_fields find HTTP ${statusOf(e) ?? 'n/a'}: ${describeError(e)}`
       );
-      return [];
     }
+
+    const data = payload.data ?? [];
+    if (data.length === 0) {
+      throw new Error('anonymization_fields find returned no fields');
+    }
+    if (typeof payload.total === 'number' && payload.total > data.length) {
+      throw new Error(`anonymization_fields find truncated: ${data.length} of ${payload.total}`);
+    }
+    return data;
   }
 
   async generateIncompatibleAntivirus({
@@ -92,10 +114,22 @@ export class DefendInsightsApiClient {
     const startedAt = Date.now();
     const elapsed = () => Date.now() - startedAt;
 
+    let anonymizationFields: AnonymizationFields;
+    try {
+      anonymizationFields = await this.fetchAnonymizationFields();
+    } catch (e) {
+      return {
+        status: 'request_failed',
+        insights: null,
+        latencyMs: elapsed(),
+        error: describeError(e),
+      };
+    }
+
     const body: DefendInsightsPostRequestBodyInput = {
       endpointIds: [endpointId],
       insightType: 'incompatible_antivirus',
-      anonymizationFields: await this.fetchAnonymizationFields(),
+      anonymizationFields,
       apiConfig: { connectorId, actionTypeId },
       subAction: 'invokeAI',
     };
@@ -110,6 +144,7 @@ export class DefendInsightsApiClient {
           'kbn-xsrf': 'true',
           'Content-Type': 'application/json',
         },
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       });
       insightId = created.id;
     } catch (e) {
@@ -152,6 +187,7 @@ export class DefendInsightsApiClient {
         const { data } = await this.fetch<GetDefendInsightResponse>(path, {
           method: 'GET',
           headers: { 'elastic-api-version': INTERNAL_API_VERSION },
+          signal: AbortSignal.timeout(Math.min(deadline - Date.now(), REQUEST_TIMEOUT_MS)),
         });
 
         if (data && TERMINAL_STATUSES.has(data.status)) {
@@ -160,6 +196,7 @@ export class DefendInsightsApiClient {
             status: terminal,
             insights: terminal === 'succeeded' ? data.insights : null,
             insightId,
+            eventsContextCount: data.eventsContextCount,
             latencyMs: Date.now() - startedAt,
             ...(terminal === 'succeeded'
               ? {}
@@ -169,7 +206,8 @@ export class DefendInsightsApiClient {
       } catch (e) {
         const status = statusOf(e);
         const inNotFoundGrace = status === 404 && Date.now() < notFoundDeadline;
-        if (!isRetryable(status) && !inNotFoundGrace) {
+        // A single request that hit its own timeout is transient; the overall deadline still bounds the poll.
+        if (!isRetryable(status) && !inNotFoundGrace && !isTimeoutError(e)) {
           return {
             status: 'request_failed',
             insights: null,

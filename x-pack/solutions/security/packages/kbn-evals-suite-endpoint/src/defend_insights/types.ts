@@ -21,12 +21,21 @@ export interface DefendInsightsTaskOutput {
   status: DefendInsightsRunStatus;
   insights: DefendInsight[] | null;
   insightId?: string;
+  /**
+   * Number of retrieved events the route fed to the model, as persisted on the insight. The
+   * retriever aggregates file events per unique `process.executable`, so this counts unique
+   * executables, not raw documents. Absent when the run never reached a persisted insight.
+   */
+  eventsContextCount?: number;
   latencyMs: number;
   error?: string;
 }
 
 export interface ExpectedInsightGroup {
-  /** Case-insensitive substring of the insight `group`, e.g. "Avast". */
+  /**
+   * Vendor/product name the insight `group` must equal after trimming, lowercasing and dropping
+   * a trailing generic suffix (see `normalizeGroupName`), e.g. "Avast" matches "Avast Antivirus".
+   */
   name: string;
   requiredPaths: string[];
   optionalPaths: string[];
@@ -35,6 +44,11 @@ export interface ExpectedInsightGroup {
 
 export interface DefendInsightsExpectedOutput {
   results: ExpectedInsightGroup[];
+  /**
+   * Unique executables seeded for this example's host. The route's `eventsContextCount` must be at
+   * least this, otherwise the model never saw the seeded data and the run proves nothing.
+   */
+  seededEventCount: number;
   /** Executables seeded on the host that no insight may contain. Used by the negative control. */
   benignPaths?: string[];
 }

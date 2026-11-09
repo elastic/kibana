@@ -26,7 +26,7 @@ export const createInsightsWellFormedEvaluator = (): Evaluator<
   kind: 'CODE',
   direction: 'maximize',
   evaluate: async ({ output, expected }) => {
-    const infra = infraFailureResult(output);
+    const infra = infraFailureResult(output, expected);
     if (infra) return infra;
     if (output.status !== 'succeeded' || !output.insights) {
       return notApplicableResult(`generation ${output.status}; no insights to validate`);

@@ -13,6 +13,7 @@ import {
   insight,
   output,
   params,
+  SEEDED_EVENT_COUNT,
 } from './evaluator_test_fixtures';
 
 describe('InsightsWellFormed', () => {
@@ -32,6 +33,17 @@ describe('InsightsWellFormed', () => {
       score: 1,
       label: 'pass',
     });
+  });
+
+  it('is task_error, not a pass, for an empty result on a host the model saw no events for', async () => {
+    const out = output({ eventsContextCount: 0, insights: [] });
+    expect(await evaluate(params(out, cleanExpected))).toMatchObject({
+      score: null,
+      label: 'task_error',
+    });
+    expect(
+      await evaluate(params(output({ eventsContextCount: SEEDED_EVENT_COUNT - 1 }), cleanExpected))
+    ).toMatchObject({ score: null, label: 'task_error' });
   });
 
   it('fails an insight with a blank group', async () => {

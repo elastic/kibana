@@ -29,7 +29,7 @@ evaluate.describe(
   () => {
     evaluate.beforeAll(async ({ kbnClient, esClient, internalEsClient, log }) => {
       await waitForEndpointPackage(kbnClient, esClient, log);
-      await cleanupDefendInsightsData({ esClient, internalEsClient });
+      await cleanupDefendInsightsData({ esClient, internalEsClient, log });
 
       for (const { scenario } of DEFEND_INSIGHTS_CASES) {
         await seedScenario({ esClient, internalEsClient }, scenario);
@@ -48,11 +48,11 @@ evaluate.describe(
       );
     });
 
-    evaluate.afterAll(async ({ esClient, internalEsClient }) => {
-      await cleanupDefendInsightsData({ esClient, internalEsClient });
+    evaluate.afterAll(async ({ esClient, internalEsClient, log }) => {
+      await cleanupDefendInsightsData({ esClient, internalEsClient, log });
     });
 
-    evaluate('incompatible antivirus insights', async ({ evaluateDefendInsightsDataset }) => {
+    evaluate('incompatible antivirus insights', async ({ evaluateDefendInsightsDataset, log }) => {
       const examples: DefendInsightsDatasetExample[] = DEFEND_INSIGHTS_CASES.map(
         ({ name, scenario, expected }) => ({
           input: { endpointId: scenario.agentId, insightType: 'incompatible_antivirus' },
@@ -61,7 +61,7 @@ evaluate.describe(
         })
       );
 
-      await evaluateDefendInsightsDataset({
+      const results = await evaluateDefendInsightsDataset({
         dataset: {
           name: 'defend insights: incompatible antivirus',
           description:
@@ -69,6 +69,21 @@ evaluate.describe(
           examples,
         },
       });
+
+      // task_error results carry a null score, so an all-infra-failure run would otherwise look empty
+      // rather than broken.
+      const evaluationRuns = results.flatMap((result) => result.evaluationRuns);
+      const taskErrors = evaluationRuns.filter(({ result }) => result?.label === 'task_error');
+      log.info(
+        `defend insights: ${taskErrors.length} of ${evaluationRuns.length} evaluator results were task_error`
+      );
+      if (taskErrors.length > 0) {
+        log.warning(
+          `defend insights task_error: ${[
+            ...new Set(taskErrors.map(({ result }) => result?.explanation)),
+          ].join(' | ')}`
+        );
+      }
     });
   }
 );

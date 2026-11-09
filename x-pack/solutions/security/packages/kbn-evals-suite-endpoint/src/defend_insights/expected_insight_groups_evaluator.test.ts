@@ -15,42 +15,77 @@ import {
   insight,
   output,
   params,
+  SEEDED_EVENT_COUNT,
 } from './evaluator_test_fixtures';
 
 describe('ExpectedInsightGroups', () => {
   const { evaluate } = createExpectedInsightGroupsEvaluator();
 
   it('scores 1 when every check passes (case-insensitive group match)', async () => {
-    const out = output({ insights: [insight('avast antivirus', [AVAST_SVC, AVAST_UI])] });
+    const out = output({ insights: [insight('  AVAST ', [AVAST_SVC, AVAST_UI])] });
     expect(await evaluate(params(out, avExpected))).toMatchObject({ score: 1, label: 'pass' });
+  });
+
+  it('accepts the vendor name with a generic product suffix', async () => {
+    const out = output({ insights: [insight('Avast Antivirus', [AVAST_SVC, AVAST_UI])] });
+    expect(await evaluate(params(out, avExpected))).toMatchObject({ score: 1, label: 'pass' });
+  });
+
+  it('does not match a group that only contains the vendor name', async () => {
+    const out = output({ insights: [insight('Not Avast related', [AVAST_SVC, AVAST_UI])] });
+    expect(await evaluate(params(out, avExpected))).toMatchObject({ label: 'fail' });
+  });
+
+  it('never labels a failing run as pass, even when rounding would reach 1', async () => {
+    const result = await evaluate(
+      params(output({ insights: [insight('Avast', [AVAST_UI])] }), avExpected)
+    );
+    expect(result.label).toBe('fail');
+    expect(result.score).toBeLessThan(1);
   });
 
   it('fails the missing-required check', async () => {
     const out = output({ insights: [insight('Avast', [AVAST_UI])] });
-    expect(await evaluate(params(out, avExpected))).toMatchObject({ score: 0.75, label: 'fail' });
+    expect(await evaluate(params(out, avExpected))).toMatchObject({ score: 0.67, label: 'fail' });
   });
 
   it('fails the excluded-path check (and counts it only once)', async () => {
     const out = output({ insights: [insight('Avast', [AVAST_SVC, CHROME])] });
-    expect(await evaluate(params(out, avExpected))).toMatchObject({ score: 0.75 });
+    expect(await evaluate(params(out, avExpected))).toMatchObject({ score: 0.67 });
   });
 
   it('fails the unexpected-path check', async () => {
     const out = output({ insights: [insight('Avast', [AVAST_SVC, 'C:\\other\\tool.exe'])] });
-    expect(await evaluate(params(out, avExpected))).toMatchObject({ score: 0.75 });
+    expect(await evaluate(params(out, avExpected))).toMatchObject({ score: 0.67 });
   });
 
-  it('fails group-count and match checks when the group is wrong', async () => {
+  it('fails the match and the extra-group check when the group is wrong', async () => {
     const out = output({ insights: [insight('Kaspersky', [AVAST_SVC])] });
-    // group count ok (1/1); requirement did not match (1 failed of 4)
-    expect(await evaluate(params(out, avExpected))).toMatchObject({ score: 0.75, label: 'fail' });
+    // requirement unmatched (1) + unexpected group (1) of 4 checks
+    expect(await evaluate(params(out, avExpected))).toMatchObject({ score: 0.5, label: 'fail' });
   });
 
-  it('fails the group-count check when an extra group is returned', async () => {
+  it('counts each unexpected extra group as one failed check', async () => {
     const out = output({
       insights: [insight('Avast', [AVAST_SVC]), insight('Chrome', [CHROME])],
     });
-    expect(await evaluate(params(out, avExpected))).toMatchObject({ score: 0.75 });
+    // 3 checks for the Avast requirement + 1 for the extra group; the extra group fails.
+    expect(await evaluate(params(out, avExpected))).toMatchObject({
+      score: 0.75,
+      label: 'fail',
+      explanation: expect.stringContaining('unexpected insight group "Chrome"'),
+    });
+  });
+
+  it('weighs two extra groups twice', async () => {
+    const out = output({
+      insights: [
+        insight('Avast', [AVAST_SVC]),
+        insight('Chrome', [CHROME]),
+        insight('Edge', [CHROME]),
+      ],
+    });
+    expect(await evaluate(params(out, avExpected))).toMatchObject({ score: 0.6 });
   });
 
   it('scores 0 when insights were expected but none returned', async () => {
@@ -80,6 +115,17 @@ describe('ExpectedInsightGroups', () => {
       score: null,
       label: 'task_error',
     });
+  });
+
+  it('is task_error when the model saw no seeded events', async () => {
+    const out = output({ eventsContextCount: 0, insights: [] });
+    expect(await evaluate(params(out, cleanExpected))).toMatchObject({
+      score: null,
+      label: 'task_error',
+    });
+    expect(
+      await evaluate(params(output({ eventsContextCount: SEEDED_EVENT_COUNT - 1 }), avExpected))
+    ).toMatchObject({ score: null, label: 'task_error' });
   });
 
   it('is N/A without expected output', async () => {

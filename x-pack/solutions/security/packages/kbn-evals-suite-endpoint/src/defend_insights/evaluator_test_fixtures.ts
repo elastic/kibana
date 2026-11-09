@@ -16,12 +16,16 @@ export const AVAST_SVC = 'C:\\Program Files\\Avast Software\\Avast\\AvastSvc.exe
 export const AVAST_UI = 'C:\\Program Files\\Avast Software\\Avast\\AvastUI.exe';
 export const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 
+/** Healthy runs report at least this many events; fixtures seed 3 unique executables. */
+export const SEEDED_EVENT_COUNT = 3;
+
 export const output = (
   overrides: Partial<DefendInsightsTaskOutput> = {}
 ): DefendInsightsTaskOutput => ({
   status: 'succeeded',
   insights: [],
   insightId: 'insight-1',
+  eventsContextCount: SEEDED_EVENT_COUNT,
   latencyMs: 10,
   ...overrides,
 });
@@ -32,6 +36,7 @@ export const insight = (group: string, values: string[]) => ({
 });
 
 export const avExpected: NonNullable<DefendInsightsDatasetExample['output']> = {
+  seededEventCount: SEEDED_EVENT_COUNT,
   results: [
     {
       name: 'Avast',
@@ -43,6 +48,7 @@ export const avExpected: NonNullable<DefendInsightsDatasetExample['output']> = {
 };
 
 export const cleanExpected: NonNullable<DefendInsightsDatasetExample['output']> = {
+  seededEventCount: SEEDED_EVENT_COUNT,
   results: [],
   benignPaths: [CHROME],
 };
