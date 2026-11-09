@@ -7,7 +7,7 @@
 
 import { isBoom } from '@hapi/boom';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
-import { getNightshiftRoleName } from '@kbn/nightshift-shared';
+import { getNightshiftRoleName, getNightshiftServiceAccountName } from '@kbn/nightshift-shared';
 import {
   NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_INVESTIGATION_COMPLETED_WORKFLOW_ID,
@@ -130,6 +130,53 @@ export function createDetectionEngineSetupService({
     }
   };
 
+  // Core cannot look an account up before binding it, so the binding is read back: its summary
+  // is empty when the account does not exist. The account must be the one `nightshift_detection`
+  // that holds the detection role, which is what the setup step finds or creates by name. Binding
+  // any other account would leave every later run failing with an opaque token exchange error, so
+  // the space is put back as it was and the call is refused.
+  const assertBoundAccountIsDetectionAccount = async ({
+    spaceId,
+    serviceAccountId,
+    previousAccountId,
+    request,
+  }: {
+    spaceId: string;
+    serviceAccountId: string;
+    previousAccountId: string | undefined;
+    request: KibanaRequest;
+  }): Promise<void> => {
+    const expectedName = getNightshiftServiceAccountName('detection');
+    const summary = await core.security.serviceAccounts.getWorkloadServiceAccountSummary({
+      workloadType: DETECTION_ENGINE_WORKLOAD_TYPE,
+      workloadId: DETECTION_ENGINE_WORKLOAD_ID,
+      spaceId,
+    });
+    if (summary?.name === expectedName && summary.enabled) {
+      return;
+    }
+    if (previousAccountId) {
+      await core.security.serviceAccounts.bindWorkload(request, {
+        serviceAccountId: previousAccountId,
+        workloadType: DETECTION_ENGINE_WORKLOAD_TYPE,
+        workloadId: DETECTION_ENGINE_WORKLOAD_ID,
+      });
+    } else {
+      await core.security.serviceAccounts.unbindWorkload(request, {
+        workloadType: DETECTION_ENGINE_WORKLOAD_TYPE,
+        workloadId: DETECTION_ENGINE_WORKLOAD_ID,
+      });
+    }
+    throw new StatusError(
+      summary === null
+        ? `Service account [${serviceAccountId}] does not exist. Use the id of the [${expectedName}] account.`
+        : `Service account [${serviceAccountId}] is [${summary.name}]${
+            summary.enabled ? '' : ' and disabled'
+          }, not an enabled [${expectedName}] account. Use the id of the [${expectedName}] account.`,
+      400
+    );
+  };
+
   // The scheduled workflows install off. A paused space keeps them off for Resume to turn on.
   const enableScheduledWorkflows = async ({
     request,
@@ -186,10 +233,17 @@ export function createDetectionEngineSetupService({
     await assertRoleExists(request);
     // Bound first, so what the engine does outside workflow runs is tied to the account before
     // any workflow is. Binding again with another account rebinds the space.
+    const previousAccountId = await getDetectionEngineAccountId({ core, spaceId });
     await core.security.serviceAccounts.bindWorkload(request, {
       serviceAccountId,
       workloadType: DETECTION_ENGINE_WORKLOAD_TYPE,
       workloadId: DETECTION_ENGINE_WORKLOAD_ID,
+    });
+    await assertBoundAccountIsDetectionAccount({
+      spaceId,
+      serviceAccountId,
+      previousAccountId,
+      request,
     });
     // Installed with the caller's request: binding a workflow to an account needs the caller's
     // `manage_security`, which the workflows plugin enforces. Installing again with another
@@ -223,7 +277,17 @@ export function createDetectionEngineSetupService({
         spaceId,
         request
       );
-      if (document?.definition?.settings?.run_as !== serviceAccountId) {
+      // The binding is what authorizes a run. A document can carry `run_as` while its binding is
+      // gone, such as after the space was deleted and created again.
+      const binding = await core.security.serviceAccounts.getWorkloadBinding({
+        workloadType: 'workflow',
+        workloadId: `${workflowId}-${spaceId}`,
+        spaceId,
+      });
+      if (
+        document?.definition?.settings?.run_as !== serviceAccountId ||
+        binding?.serviceAccountId !== serviceAccountId
+      ) {
         unbound.push(workflowId);
       }
     }

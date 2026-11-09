@@ -47,12 +47,18 @@ const createCore = ({
   roleCount = 1,
   boundAccountId,
   privilegeProbeFails = false,
+  accountSummary = { name: 'nightshift_detection', enabled: true },
+  workflowsBound = true,
 }: {
   enabled?: boolean;
   canManageSecurity?: boolean;
   roleCount?: number;
   boundAccountId?: string;
   privilegeProbeFails?: boolean;
+  /** What core knows of the bound account, or `null` when it does not exist. */
+  accountSummary?: { name: string; enabled: boolean } | null;
+  /** Whether the workflows have a workload binding, apart from `run_as` on their documents. */
+  workflowsBound?: boolean;
 } = {}) => {
   const hasPrivileges = jest.fn(async () => {
     if (privilegeProbeFails) {
@@ -65,14 +71,27 @@ const createCore = ({
     currentAccountId = binding.serviceAccountId;
     return {};
   });
+  const unbindWorkload = jest.fn(async () => {
+    currentAccountId = undefined;
+    return true;
+  });
   const queryRole = jest.fn(async () => ({ total: roleCount }));
   const core = {
     security: {
       serviceAccounts: {
         isEnabled: () => enabled,
         bindWorkload,
-        getWorkloadBinding: jest.fn(async () =>
-          currentAccountId ? { serviceAccountId: currentAccountId } : null
+        unbindWorkload,
+        getWorkloadBinding: jest.fn(async ({ workloadType }: { workloadType: string }) => {
+          if (workloadType === 'workflow') {
+            return workflowsBound && currentAccountId
+              ? { serviceAccountId: currentAccountId }
+              : null;
+          }
+          return currentAccountId ? { serviceAccountId: currentAccountId } : null;
+        }),
+        getWorkloadServiceAccountSummary: jest.fn(async () =>
+          accountSummary && currentAccountId ? { id: currentAccountId, ...accountSummary } : null
         ),
       },
     },
@@ -92,7 +111,7 @@ const createCore = ({
   const rebind = (serviceAccountId: string) => {
     currentAccountId = serviceAccountId;
   };
-  return { core, bindWorkload, queryRole, hasPrivileges, rebind };
+  return { core, bindWorkload, unbindWorkload, queryRole, hasPrivileges, rebind };
 };
 
 describe('createDetectionEngineSetupService.enable', () => {
@@ -113,6 +132,52 @@ describe('createDetectionEngineSetupService.enable', () => {
     });
     expect(bindWorkload).toHaveBeenCalledWith(request, {
       serviceAccountId: 'account-1',
+      workloadType: 'detection_engine',
+      workloadId: 'detection_engine',
+    });
+  });
+
+  it('refuses an account that does not exist and leaves the space not set up', async () => {
+    const { core, unbindWorkload } = createCore({ accountSummary: null });
+    const { install, ...workflows } = createWorkflowsExtensions();
+
+    await expect(
+      createDetectionEngineSetupService({
+        core,
+        spaces: undefined,
+        ...workflows,
+        isServerless: true,
+      }).enable({ request, spaceId: 'default', serviceAccountId: 'does-not-exist' })
+    ).rejects.toMatchObject({
+      statusCode: 400,
+      message: expect.stringContaining('does not exist'),
+    });
+    expect(unbindWorkload).toHaveBeenCalledWith(request, {
+      workloadType: 'detection_engine',
+      workloadId: 'detection_engine',
+    });
+    expect(install).not.toHaveBeenCalled();
+  });
+
+  it('refuses another account and puts the previous binding back', async () => {
+    const { core, bindWorkload } = createCore({
+      boundAccountId: 'detection-account',
+      accountSummary: { name: 'nightshift_agent', enabled: true },
+    });
+
+    await expect(
+      createDetectionEngineSetupService({
+        core,
+        spaces: undefined,
+        ...createWorkflowsExtensions(),
+        isServerless: true,
+      }).enable({ request, spaceId: 'default', serviceAccountId: 'agent-account' })
+    ).rejects.toMatchObject({
+      statusCode: 400,
+      message: expect.stringContaining('nightshift_agent'),
+    });
+    expect(bindWorkload).toHaveBeenLastCalledWith(request, {
+      serviceAccountId: 'detection-account',
       workloadType: 'detection_engine',
       workloadId: 'detection_engine',
     });
@@ -349,6 +414,22 @@ describe('createDetectionEngineSetupService.enable workflows', () => {
     ).rejects.toMatchObject({
       statusCode: 500,
       message: expect.stringContaining('[system-sources-ki-onboarding-bound]'),
+    });
+  });
+
+  it('fails when a workflow keeps run_as but lost its binding, naming it', async () => {
+    const { core } = createCore({ workflowsBound: false });
+
+    await expect(
+      createDetectionEngineSetupService({
+        core,
+        spaces: undefined,
+        ...createWorkflowsExtensions(),
+        isServerless: true,
+      }).enable({ request, spaceId: 'default', serviceAccountId: 'account-1' })
+    ).rejects.toMatchObject({
+      statusCode: 500,
+      message: expect.stringContaining(`[${SETUP_WORKFLOW_IDS[0]}]`),
     });
   });
 
