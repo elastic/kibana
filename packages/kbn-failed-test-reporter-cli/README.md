@@ -69,6 +69,14 @@ thresholds again without their builds: it's dropped if it no longer clears them,
 kept, counted and ranked without those builds. Each test dropped this way is logged with the
 breakage that dropped it, or the longest one, and each test kept with how many builds it lost.
 
+Tests that were fixed since are dropped too. On every branch the test qualifies on, its last failure
+was at least 24 hours before the end of the window, and it has passed enough builds since then
+that, failing as often as before, it would have failed at least 1.5 times on average. The failure
+rate leaves out the breakage builds, but a breakage still counts as its last failure, as the test
+may have changed to end it. For a test failing 8% of its builds, that's 19 builds. Only
+the pipelines, configs and targets where the test failed are counted, so a test can only look less
+fixed for it.
+
 Tests that have been skipped since are left out (`--no-omit-skipped-tests` keeps them): on every
 branch the test failed on, its latest run in every pipeline, config and target was a skip. A suite
 left with no test gets no issue (`all-tests-skipped`).
