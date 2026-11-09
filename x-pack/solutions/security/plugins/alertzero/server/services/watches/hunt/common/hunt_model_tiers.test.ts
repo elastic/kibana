@@ -12,7 +12,7 @@ const model = {} as ScopedModel;
 
 describe('unavailableModelTiers', () => {
   it('lists the tiers with no model, in tier order', () => {
-    expect(unavailableModelTiers({ balanced: model })).toEqual(['efficient', 'frontier']);
+    expect(unavailableModelTiers({ frontier: model })).toEqual(['efficient']);
   });
 
   it('is empty when every tier resolved', () => {
@@ -22,7 +22,36 @@ describe('unavailableModelTiers', () => {
   });
 
   it('only considers the tiers it is asked about', () => {
-    expect(unavailableModelTiers({ balanced: model }, TIER2_MODEL_TIERS)).toEqual(['frontier']);
+    expect(unavailableModelTiers({ efficient: model }, TIER2_MODEL_TIERS)).toEqual(['frontier']);
+    expect(unavailableModelTiers({ frontier: model }, TIER2_MODEL_TIERS)).toEqual([]);
+  });
+
+  it('never asks about the balanced tier, which no hunt consumer runs on', () => {
+    expect(unavailableModelTiers({ efficient: model, frontier: model })).toEqual([]);
+  });
+
+  it('does not list Efficient when a cyber model covers its consumers', () => {
+    const cyber = {
+      connector: { connectorId: 'daybreak', metadata: {} },
+    } as ScopedModel;
+    expect(unavailableModelTiers({ frontier: model, cyber })).toEqual([]);
+  });
+
+  it('does not list Frontier when a messages-capable cyber model covers both of its jobs', () => {
+    const cyber = {
+      connector: { connectorId: 'daybreak', metadata: {} },
+    } as ScopedModel;
+    expect(unavailableModelTiers({ cyber })).toEqual([]);
+  });
+
+  it('still lists Frontier when a template-required cyber model cannot run ES|QL generation', () => {
+    const cyber = {
+      connector: {
+        connectorId: 'daybreak',
+        metadata: { capabilities: { templates: { policy: 'required' } } },
+      },
+    } as ScopedModel;
+    expect(unavailableModelTiers({ cyber })).toEqual(['frontier']);
   });
 });
 

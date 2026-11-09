@@ -301,7 +301,7 @@ export const WorkflowExecuteAlertForm = ({
               defaultMessage: 'Failed to load alerts',
             })}
             color="warning"
-            iconType="help"
+            iconType="question"
             size="s"
           >
             <p>{errors}</p>

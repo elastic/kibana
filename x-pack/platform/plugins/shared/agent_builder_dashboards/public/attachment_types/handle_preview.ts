@@ -33,6 +33,7 @@ export const handlePreview = async ({
     return previewAttachmentInDashboard({
       attachment,
       dashboardApi,
+      dashboardLocator,
       checkSavedDashboardExist,
     });
   }

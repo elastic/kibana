@@ -27,6 +27,7 @@ jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
 }));
 
 const mockEntityFilter = { term: { 'user.name': 'alice' } };
+const namedEntityFilter = { bool: { filter: [mockEntityFilter], _name: 'user:alice' } };
 
 let mockMlAnomalySearch: jest.Mock;
 let mockMl: MlPluginSetup;
@@ -38,8 +39,8 @@ const mockEntityRecord = { entity: { id: 'user:alice' }, user: { name: 'alice' }
 
 const defaultOpts = {
   entityType: 'user' as const,
-  entityId: 'user:alice',
-  entityRecord: mockEntityRecord,
+  entityIds: ['user:alice'],
+  entityRecords: [mockEntityRecord],
   request,
 };
 
@@ -107,10 +108,93 @@ describe('searchEntityAnomalies', () => {
       }),
       []
     );
+    expect(mockMlAnomalySearch.mock.calls[0][0].query.bool.should).toBeUndefined();
     expect(mockMlAnomalySearch).not.toHaveBeenCalledWith(
       expect.objectContaining({ runtime_mappings: expect.anything() }),
       expect.anything()
     );
+  });
+
+  it('attributes hits to the single entity when the query is unnamed', async () => {
+    mockMlAnomalySearch.mockResolvedValueOnce(
+      makeResponse([makeHit({ id: 'hit-1', matchedQueries: undefined })])
+    );
+
+    const result = await searchEntityAnomalies({ ...defaultOpts, logger, ml: mockMl, soClient });
+
+    expect(result.hits.map(({ entityId }) => entityId)).toEqual(['user:alice']);
+  });
+
+  it('ORs the named identity filters of every entity record in a resolution group', async () => {
+    const { euid } = jest.requireMock('@kbn/entity-store/common/euid_helpers');
+    const aliasFilter = { term: { 'user.name': 'alice.alias' } };
+    const aliasRecord = { entity: { id: 'user:alice-alias' }, user: { name: 'alice.alias' } };
+    euid.dsl.getEuidFilterBasedOnEntityRecord
+      .mockReturnValueOnce(mockEntityFilter)
+      .mockReturnValueOnce(aliasFilter);
+
+    const result = await searchEntityAnomalies({
+      ...defaultOpts,
+      entityIds: ['user:alice', 'user:alice-alias'],
+      entityRecords: [mockEntityRecord, aliasRecord],
+      logger,
+      ml: mockMl,
+      soClient,
+    });
+
+    expect(mockMlAnomalySearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            filter: expect.arrayContaining([
+              {
+                bool: {
+                  should: [
+                    namedEntityFilter,
+                    { bool: { filter: [aliasFilter], _name: 'user:alice-alias' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ]),
+          },
+        },
+      }),
+      []
+    );
+    expect(result.hits).toEqual([]);
+  });
+
+  it('attributes each hit to the entity record whose named filter it matched', async () => {
+    const { euid } = jest.requireMock('@kbn/entity-store/common/euid_helpers');
+    const aliasRecord = { entity: { id: 'user:alice-alias' }, user: { name: 'alice.alias' } };
+    euid.dsl.getEuidFilterBasedOnEntityRecord
+      .mockReturnValueOnce(mockEntityFilter)
+      .mockReturnValueOnce({ term: { 'user.name': 'alice.alias' } });
+    mockMlAnomalySearch.mockResolvedValueOnce(
+      makeResponse([
+        makeHit({ id: 'target-hit', matchedQueries: ['user:alice'] }),
+        makeHit({ id: 'alias-hit', matchedQueries: ['user:alice-alias'] }),
+        makeHit({ id: 'both-hit', matchedQueries: ['user:alice-alias', 'user:alice'] }),
+        makeHit({ id: 'unmatched-hit', matchedQueries: [] }),
+      ])
+    );
+
+    const result = await searchEntityAnomalies({
+      ...defaultOpts,
+      entityIds: ['user:alice', 'user:alice-alias'],
+      entityRecords: [mockEntityRecord, aliasRecord],
+      logger,
+      ml: mockMl,
+      soClient,
+    });
+
+    expect(result.hits.map(({ _id: id, entityId }) => [id, entityId])).toEqual([
+      ['target-hit', 'user:alice'],
+      ['alias-hit', 'user:alice-alias'],
+      ['both-hit', 'user:alice'],
+      ['unmatched-hit', 'user:alice'],
+    ]);
   });
 
   it('uses now-DEFAULT_ML_AD_LOOKBACK as the timestamp lower bound when fromMs is not provided', async () => {
@@ -320,30 +404,117 @@ describe('searchEntityAnomalies', () => {
     expect(result.hits[1]._id).toBe('h2');
   });
 
-  it('skips hits where actual or typical is missing', async () => {
-    for (const field of ['actual', 'typical'] as const) {
-      jest.clearAllMocks();
-      mockMlAnomalySearch = jest.fn().mockResolvedValue(makeResponse([]));
-      mockMl = {
-        mlSystemProvider: jest.fn().mockReturnValue({ mlAnomalySearch: mockMlAnomalySearch }),
-      } as unknown as MlPluginSetup;
+  it('keeps hits where actual or typical is missing so the page matches the total', async () => {
+    const hit = makeHit({ id: 'no-values', entityId: 'user:alice' });
+    delete (hit._source as Record<string, unknown>).actual;
+    delete (hit._source as Record<string, unknown>).typical;
+    mockMlAnomalySearch.mockResolvedValueOnce(makeResponse([hit], 1));
 
-      const hit = makeHit({ entityId: 'user:alice' });
-      delete (hit._source as Record<string, unknown>)[field];
-      mockMlAnomalySearch.mockResolvedValueOnce(makeResponse([hit]));
+    const result = await searchEntityAnomalies({ ...defaultOpts, logger, ml: mockMl, soClient });
 
-      const result = await searchEntityAnomalies({ ...defaultOpts, logger, ml: mockMl, soClient });
-      expect(result.hits).toEqual([]);
-    }
+    expect(result.total).toBe(1);
+    expect(result.hits).toHaveLength(1);
+    expect(result.hits[0]._id).toBe('no-values');
+    expect(result.hits[0]).not.toHaveProperty('actual');
+    expect(result.hits[0]).not.toHaveProperty('typical');
   });
 
-  it('skips hits where detector_index is missing', async () => {
-    const hit = makeHit({ entityId: 'user:alice' });
-    delete (hit._source as Record<string, unknown>).detector_index;
+  it("completes population-analysis records from the entity's cause (values and dimensions)", async () => {
+    // by+over analysis: the parent carries by_field_name but no by_field_value / actual / typical;
+    // each cause does. The cause for the requested entity (user.name = alice) is not the first.
+    const hit = makeHit({
+      id: 'population',
+      entityId: 'user:alice',
+      byFieldName: 'user.name',
+      noByFieldValue: true,
+      causes: [
+        { by_field_value: 'mallory', actual: [99], typical: [1] },
+        { by_field_value: 'alice', actual: [42], typical: [3] },
+      ],
+    });
+    delete (hit._source as Record<string, unknown>).actual;
+    delete (hit._source as Record<string, unknown>).typical;
     mockMlAnomalySearch.mockResolvedValueOnce(makeResponse([hit]));
 
     const result = await searchEntityAnomalies({ ...defaultOpts, logger, ml: mockMl, soClient });
-    expect(result.hits).toEqual([]);
+
+    expect(result.hits[0]).toMatchObject({
+      _id: 'population',
+      actual: 42,
+      typical: 3,
+      byFieldName: 'user.name',
+      byFieldValue: 'alice',
+    });
+  });
+
+  it("does not pick another user's cause because it shares the entity's host partition", async () => {
+    const winPartition = { partition_field_name: 'host.name', partition_field_value: 'WIN-1' };
+    // mockEntityRecord: user.name=alice. Both causes are partitioned on WIN-1 (makeHit default
+    // partition_field_value = 'web-01' is overridden per cause); only the second is Alice's.
+    const hit = makeHit({
+      entityId: 'user:alice',
+      byFieldName: 'user.name',
+      noByFieldValue: true,
+      causes: [
+        { by_field_value: 'mallory', actual: [99], typical: [1], ...winPartition },
+        { by_field_value: 'alice', actual: [42], typical: [3], ...winPartition },
+      ],
+    });
+    delete (hit._source as Record<string, unknown>).actual;
+    delete (hit._source as Record<string, unknown>).typical;
+    mockMlAnomalySearch.mockResolvedValueOnce(makeResponse([hit]));
+
+    const result = await searchEntityAnomalies({
+      ...defaultOpts,
+      entityRecords: [{ ...mockEntityRecord, host: { name: 'WIN-1' } }],
+      logger,
+      ml: mockMl,
+      soClient,
+    });
+
+    expect(result.hits[0]).toMatchObject({ actual: 42, typical: 3, byFieldValue: 'alice' });
+  });
+
+  it('falls back to the first cause when none matches the entity', async () => {
+    const hit = makeHit({
+      entityId: 'user:alice',
+      byFieldName: 'user.name',
+      noByFieldValue: true,
+      causes: [
+        { by_field_value: 'mallory', actual: [99], typical: [1] },
+        { by_field_value: 'trent', actual: [7], typical: [2] },
+      ],
+    });
+    delete (hit._source as Record<string, unknown>).actual;
+    delete (hit._source as Record<string, unknown>).typical;
+    mockMlAnomalySearch.mockResolvedValueOnce(makeResponse([hit]));
+
+    const result = await searchEntityAnomalies({ ...defaultOpts, logger, ml: mockMl, soClient });
+
+    expect(result.hits[0]).toMatchObject({ actual: 99, typical: 1, byFieldValue: 'mallory' });
+  });
+
+  it('prefers top-level actual/typical over causes when both are present', async () => {
+    const hit = makeHit({
+      entityId: 'user:alice',
+      actual: [10],
+      typical: [2],
+      causes: [{ actual: [99], typical: [98] }],
+    });
+    mockMlAnomalySearch.mockResolvedValueOnce(makeResponse([hit]));
+
+    const result = await searchEntityAnomalies({ ...defaultOpts, logger, ml: mockMl, soClient });
+
+    expect(result.hits[0]).toMatchObject({ actual: 10, typical: 2 });
+  });
+
+  it('excludes records without detector_index in the query rather than post-filtering', async () => {
+    await searchEntityAnomalies({ ...defaultOpts, logger, ml: mockMl, soClient });
+
+    const [body] = mockMlAnomalySearch.mock.calls[0];
+    expect(body.query.bool.filter).toEqual(
+      expect.arrayContaining([{ exists: { field: 'detector_index' } }])
+    );
   });
 
   it('returns empty result and logs a warning when entity filter cannot be built', async () => {

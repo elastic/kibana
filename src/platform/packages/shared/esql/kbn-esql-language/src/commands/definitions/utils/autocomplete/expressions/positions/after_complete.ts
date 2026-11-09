@@ -87,7 +87,8 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
   const expressionType = getExpressionType(
     expressionRoot,
     context?.columns,
-    context?.unmappedFieldsStrategy
+    context?.unmappedFieldsStrategy,
+    context?.isTimeseriesSource === true
   );
   const signatureState = functionParameterContext ?? null;
 

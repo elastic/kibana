@@ -16,6 +16,7 @@ import {
   untrackRuleAlerts,
   updateMeta,
   bulkMigrateLegacyActions,
+  deleteLegacyActionsForRules,
 } from '../../../../rules_client/lib';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { DisableRuleParams } from './types';
@@ -119,6 +120,8 @@ async function disableWithOCC(
         ...(migratedIds.includes(alert.id) ? { references: alert.references } : {}),
       }
     );
+    // Legacy actions are deleted only once the rule carrying them is saved, so a conflict can be retried
+    await deleteLegacyActionsForRules(context, migratedIds);
     const { autoRecoverAlerts: isLifecycleAlert } = context.ruleTypeRegistry.get(
       attributes.alertTypeId
     );

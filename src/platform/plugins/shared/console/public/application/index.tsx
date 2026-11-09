@@ -34,6 +34,8 @@ import { ServicesContextProvider, EditorContextProvider, RequestContextProvider 
 import { createApi, createEsHostService } from './lib';
 import type { ConsoleStartServices } from '../types';
 
+const ACTIVE_API_STATUS_ATTRIBUTE = 'data-console-active-api-status';
+
 const RedirectToShell = () => {
   const location = useLocation();
   return <Redirect to={`/console/shell${location.search}`} />;
@@ -74,7 +76,9 @@ export async function renderApp({
   const trackUiMetric = createUsageTracker(usageCollection);
   trackUiMetric.load('opened_app');
 
+  element.setAttribute(ACTIVE_API_STATUS_ATTRIBUTE, 'pending');
   await loadActiveApi(http);
+  element.setAttribute(ACTIVE_API_STATUS_ATTRIBUTE, 'complete');
   const storage = createStorage({
     engine: window.localStorage,
     prefix: 'sense:',

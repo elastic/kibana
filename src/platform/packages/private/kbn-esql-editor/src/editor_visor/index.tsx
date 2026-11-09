@@ -242,6 +242,8 @@ interface QuickSearchVisorPropsInternal {
   disableSubmitAction?: boolean;
   // Called after a KQL filter is submitted so the parent can move focus back to the editor
   onKqlSubmitted?: () => void;
+  // Insets the visor from an outlined editor so its controls do not sit on the border
+  hasOutline?: boolean;
 }
 
 // React.memo is applied inside the withRestorableState HOC (called below)
@@ -254,6 +256,7 @@ function QuickSearchVisorInternal({
   isDisabled = false,
   disableSubmitAction = false,
   onKqlSubmitted,
+  hasOutline = false,
 }: QuickSearchVisorPropsInternal) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { kql, data, core } = kibana.services;
@@ -380,7 +383,7 @@ function QuickSearchVisorInternal({
   const isKqlMode =
     (!showAskAiButton || (visorMode ?? VisorMode.NaturalLanguage) === VisorMode.KQL) &&
     !(hasNoSource && showAskAiButton);
-  const styles = visorStyles(euiThemeContext, Boolean(isInline), isVisible);
+  const styles = visorStyles(euiThemeContext, Boolean(isInline), isVisible, hasOutline);
 
   if (!KQLComponent) {
     return null;

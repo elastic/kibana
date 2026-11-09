@@ -19,12 +19,29 @@ import { esqlResponseToRecords } from '../../../../common/utils/esql';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useErrorToast } from '../../../../common/hooks/use_error_toast';
 import { useInstalledSecurityJobsIds } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 import type { AnomalyBand } from '../anomaly_bands';
 import {
   useRecentAnomaliesDataEsqlSource,
   useRecentAnomaliesTopRowsEsqlSource,
   type ViewByMode,
 } from './recent_anomalies_esql_source_query_hooks';
+
+const ANOMALIES_ENTITY_FILTER_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.HOME_PAGE,
+  'anomalies_entity_filter'
+);
+const ANOMALIES_TOP_ROWS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.HOME_PAGE,
+  'anomalies_top_rows'
+);
+const ANOMALIES_HEATMAP_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.HOME_PAGE,
+  'anomalies_heatmap'
+);
 
 export interface EntityMetadata {
   entityId: string;
@@ -113,6 +130,7 @@ const useFilteredEntityIds = (spaceId?: string): FilteredEntityIds => {
         search,
         signal,
         filter: filterQuery,
+        executionContext: ANOMALIES_ENTITY_FILTER_CONTEXT,
       });
       return esqlResponseToRecords<{ 'entity.id': string }>(esqlResult?.response)
         .map((record) => record['entity.id'])
@@ -207,6 +225,7 @@ const useRecentAnomaliesTopRowsQuery = (params: {
         search,
         signal,
         timeRange,
+        executionContext: ANOMALIES_TOP_ROWS_CONTEXT,
       });
       return {
         records: esqlResponseToRecords<Record<string, string>>(esqlResult?.response),
@@ -301,6 +320,7 @@ export const useRecentAnomaliesQuery = (params: {
         search,
         signal,
         timeRange,
+        executionContext: ANOMALIES_HEATMAP_CONTEXT,
       });
       const anomalyRecords = esqlResponseToRecords<Record<string, string | number>>(
         esqlResult.response

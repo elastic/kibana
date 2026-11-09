@@ -270,6 +270,20 @@ describe('rule_details', () => {
       expect(backLink.closest('a')).toHaveAttribute('href', '/');
     });
 
+    it('does not render the Classic badge when the page context omits it', () => {
+      const rule = mockRule();
+      renderPage(rule);
+      expect(screen.queryByTestId('classicRulesBadge')).not.toBeInTheDocument();
+    });
+
+    it('renders the Classic badge from the page context', () => {
+      useKibanaMock().services.showClassicBadge = true;
+      const rule = mockRule();
+      renderPage(rule);
+      expect(screen.getByTestId('classicRulesBadge')).toHaveTextContent('Classic');
+      delete useKibanaMock().services.showClassicBadge;
+    });
+
     it('renders the rule execution status badge', () => {
       const rule = mockRule({
         executionStatus: {
@@ -539,12 +553,21 @@ describe('rule_details', () => {
           interval: '1s',
         },
       });
-      renderRuleDetails(
-        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
-      );
+      renderPage(rule);
 
       await waitFor(() => {
-        expect(useKibanaMock().services.notifications.toasts.addInfo).toHaveBeenCalled();
+        expect(useKibanaMock().services.notifications.toasts.addInfo).toHaveBeenCalledWith(
+          expect.objectContaining({
+            'data-test-subj': 'intervalConfigToast',
+            title: 'Configuration settings',
+            actionProps: {
+              primary: expect.objectContaining({
+                'data-test-subj': 'ruleIntervalToastEditButton',
+                children: 'Edit rule',
+              }),
+            },
+          })
+        );
       });
     });
 

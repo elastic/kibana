@@ -32,7 +32,6 @@ export function validateInitialModelVersion(name: string, mv: ModelVersionSummar
       typeName: name,
       message: `The new model version '${mv.version}' for SO type '${name}' is defining mappings' changes. For backwards-compatibility reasons, the initial model version can only include schema definitions.`,
       fixHint: `Remove 'changes' from model version '${mv.version}' and only define 'schemas'.`,
-      docsAnchor: '#defining-model-versions',
     });
   }
 }
@@ -48,7 +47,6 @@ export function validateModelVersionNumbers(name: string, mvs: ModelVersionSumma
           typeName: name,
           message: `Invalid model version '${version}' for SO type '${name}'. Model versions must be consecutive integer numbers starting at 1.`,
           fixHint: `Rename the model version key to a positive integer.`,
-          docsAnchor: '#defining-model-versions',
         });
       }
       return parsed;
@@ -66,7 +64,6 @@ export function validateModelVersionNumbers(name: string, mvs: ModelVersionSumma
           fixHint: `Add the missing model version '${
             index + 1
           }' so versions are consecutive integers starting at 1.`,
-          docsAnchor: '#defining-model-versions',
         });
       }
     });
@@ -80,7 +77,6 @@ export function validateNewModelVersionSchemas(name: string, mv: ModelVersionSum
       typeName: name,
       message: `The new model version '${mv.version}' for SO type '${name}' is missing the 'schemas' definition.`,
       fixHint: `Add a 'schemas' object with both 'create' and 'forwardCompatibility' to model version '${mv.version}'.`,
-      docsAnchor: '#defining-model-versions',
     });
   }
   if (mv.schemas.forwardCompatibility === false) {
@@ -90,7 +86,6 @@ export function validateNewModelVersionSchemas(name: string, mv: ModelVersionSum
       typeName: name,
       message: `The new model version '${mv.version}' for SO type '${name}' is missing the 'forwardCompatibility' schema definition.`,
       fixHint: `Add 'schemas.forwardCompatibility' to model version '${mv.version}'.`,
-      docsAnchor: '#defining-model-versions',
     });
   }
   if (mv.schemas.create === false) {
@@ -100,7 +95,6 @@ export function validateNewModelVersionSchemas(name: string, mv: ModelVersionSum
       typeName: name,
       message: `The new model version '${mv.version}' for SO type '${name}' is missing the 'create' schema definition.`,
       fixHint: `Add 'schemas.create' to model version '${mv.version}'.`,
-      docsAnchor: '#defining-model-versions',
     });
   }
 }
@@ -138,7 +132,6 @@ export function validateUpdateSchemaContinuity(name: string, registeredType: Sav
       fixHint: `Add 'schemas.update' to model version(s) ${missing
         .map((version) => `'${version}'`)
         .join(', ')}.`,
-      docsAnchor: '#defining-model-versions',
     });
   }
 }
@@ -254,7 +247,6 @@ export function validateAllMappingsInModelVersion(
         ', '
       )}.`,
       fixHint: `Add the missing fields to the 'create' schema of the latest model version.`,
-      docsAnchor: '#defining-model-versions',
     });
   }
 }
@@ -273,7 +265,6 @@ function throwIfIndexOrEnabledFalse(
         ', '
       )}.`,
       fixHint: `Use 'dynamic: false' instead or omit the mapping entirely. The 'index: false' option cannot be updated without reindexing.`,
-      docsAnchor: '#defining-model-versions',
     });
   }
 
@@ -286,7 +277,6 @@ function throwIfIndexOrEnabledFalse(
         ', '
       )}.`,
       fixHint: `Use 'dynamic: false' instead or omit the mapping entirely. The 'enabled: false' option cannot be updated without reindexing.`,
-      docsAnchor: '#defining-model-versions',
     });
   }
 }

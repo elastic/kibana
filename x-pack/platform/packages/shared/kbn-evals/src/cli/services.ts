@@ -10,12 +10,27 @@ import Path from 'path';
 import { createHash } from 'crypto';
 import { execFileSync, spawn, type SpawnOptions } from 'child_process';
 import type { ToolingLog } from '@kbn/tooling-log';
+import {
+  ES_SERVERLESS_REPO_ELASTICSEARCH,
+  ES_SERVERLESS_REPO_KIBANA,
+  SERVERLESS_NODES,
+  SERVERLESS_SECRETS_DIR,
+  getUiamContainers,
+} from '@kbn/es';
 import { DEFAULT_SCOUT_TARGET, formatScoutTarget, type ScoutTarget } from './scout_target';
 
 const EVALS_DIR = 'target/evals';
 const STATE_FILE = 'target/evals/services.json';
 const DEFAULT_SERVER_CONFIG_SET = 'evals_tracing';
 export const EDOT_CONTAINER_NAME = 'kibana-edot-collector';
+const SERVERLESS_ES_NODE_NAMES: readonly string[] = SERVERLESS_NODES.map(({ name }) => name);
+const UIAM_CONTAINER_NAMES: readonly string[] = getUiamContainers({ includeOAuth: true }).map(
+  ({ name }) => name
+);
+const SERVERLESS_ES_REPOS: readonly string[] = [
+  ES_SERVERLESS_REPO_KIBANA,
+  ES_SERVERLESS_REPO_ELASTICSEARCH,
+];
 
 export type ServiceName = 'edot' | 'scout';
 
@@ -291,6 +306,106 @@ const stopEdotDockerContainer = (repoRoot: string, log: ToolingLog): void => {
 };
 
 /**
+ * Stateful `es docker` also names its container `es01`, so ES nodes only count
+ * as serverless when they run a serverless image.
+ */
+const isServerlessContainer = (name: string, image: string): boolean =>
+  UIAM_CONTAINER_NAMES.includes(name) ||
+  (SERVERLESS_ES_NODE_NAMES.includes(name) &&
+    SERVERLESS_ES_REPOS.includes(image.replace(/[:@].*$/, '')));
+
+const listServerlessContainers = (): { containers: string[] } | { error: string } => {
+  try {
+    const output = execFileSync(
+      'docker',
+      [
+        'ps',
+        '--all',
+        ...[...SERVERLESS_ES_NODE_NAMES, ...UIAM_CONTAINER_NAMES].flatMap((name) => [
+          '--filter',
+          `name=^/${name}$`,
+        ]),
+        '--format',
+        '{{.Names}}\t{{.Image}}',
+      ],
+      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 5_000 }
+    );
+    const containers = output
+      .split('\n')
+      .map((line) => line.trim().split('\t'))
+      .filter(([name, image = '']) => name && isServerlessContainer(name, image))
+      .map(([name]) => name);
+    return { containers };
+  } catch (err) {
+    const { signal, stderr } = err as Record<string, unknown>;
+    if (signal != null) {
+      return { error: 'docker ps timed out' };
+    }
+    return {
+      error: typeof stderr === 'string' && stderr.trim() ? stderr.trim() : String(err),
+    };
+  }
+};
+
+/**
+ * Remove the serverless ES and UIAM containers along with their secrets. kbn-es
+ * only tears these down on SIGINT, so terminating the Scout process group
+ * leaves them running.
+ */
+const removeServerlessDockerContainers = (log: ToolingLog): void => {
+  const result = listServerlessContainers();
+
+  if ('error' in result) {
+    log.warning(
+      `[scout] Could not list serverless Docker containers (${result.error}). ` +
+        `Leaving ${SERVERLESS_SECRETS_DIR} in place; check with: docker ps --all`
+    );
+    return;
+  }
+
+  const { containers } = result;
+
+  if (containers.length > 0) {
+    try {
+      execFileSync('docker', ['rm', '--force', ...containers], {
+        stdio: 'ignore',
+        timeout: 30_000,
+      });
+      log.info(`[scout] Removed serverless Docker containers: ${containers.join(', ')}`);
+    } catch (err) {
+      log.warning(
+        `[scout] docker rm failed (${err instanceof Error ? err.message : err}). ` +
+          `Remove them with: docker rm --force ${containers.join(' ')}`
+      );
+      return;
+    }
+  }
+
+  // The operator settings carry the cluster secrets, so they must not outlive the cluster.
+  Fs.rmSync(SERVERLESS_SECRETS_DIR, { recursive: true, force: true });
+};
+
+/**
+ * A stateful Scout never started the serverless containers, so leave any that
+ * exist alone. Without a tracked entry they may have been orphaned by an earlier stop.
+ */
+const ownsServerlessContainers = (entry: ServiceEntry | undefined): boolean =>
+  !entry || entry.scoutArch === 'serverless';
+
+const stopServiceContainers = (
+  repoRoot: string,
+  name: ServiceName,
+  entry: ServiceEntry | undefined,
+  log: ToolingLog
+): void => {
+  if (name === 'edot') {
+    stopEdotDockerContainer(repoRoot, log);
+  } else if (ownsServerlessContainers(entry)) {
+    removeServerlessDockerContainers(log);
+  }
+};
+
+/**
  * Best-effort kill of a process group. Useful when the group leader (tracked
  * PID) has exited but children (ES, Kibana) may still be running.
  * Returns true if any process in the group was signalled.
@@ -355,7 +470,7 @@ const terminateProcessGroup = async (
 
 /**
  * Stop a service by PID. Sends SIGTERM, waits briefly, then SIGKILL if needed.
- * For EDOT, also tears down the Docker container.
+ * Also tears down the service's Docker containers (EDOT collector, serverless ES and UIAM).
  */
 export const stopService = async (
   repoRoot: string,
@@ -367,9 +482,7 @@ export const stopService = async (
 
   if (!entry) {
     log.info(`[${name}] no tracked process`);
-    if (name === 'edot') {
-      stopEdotDockerContainer(repoRoot, log);
-    }
+    stopServiceContainers(repoRoot, name, entry, log);
     return false;
   }
 
@@ -377,10 +490,7 @@ export const stopService = async (
     log.info(`[${name}] tracked process already exited (PID ${entry.pid})`);
 
     await terminateProcessGroup(entry.pid, log, name);
-
-    if (name === 'edot') {
-      stopEdotDockerContainer(repoRoot, log);
-    }
+    stopServiceContainers(repoRoot, name, entry, log);
 
     delete state[name];
     writeState(repoRoot, state);
@@ -390,10 +500,7 @@ export const stopService = async (
   log.info(`[${name}] stopping (PID ${entry.pid})...`);
 
   await terminateProcessGroup(entry.pid, log, name);
-
-  if (name === 'edot') {
-    stopEdotDockerContainer(repoRoot, log);
-  }
+  stopServiceContainers(repoRoot, name, entry, log);
 
   if (isProcessGroupAlive(entry.pid)) {
     log.warning(`[${name}] may not have fully stopped (PID ${entry.pid})`);

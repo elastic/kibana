@@ -8,6 +8,7 @@
 import React, { Suspense } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiBadge,
   EuiCode,
   EuiCopy,
   EuiFlexGroup,
@@ -196,6 +197,34 @@ export const EpisodeRuleTagsCell = ({
   }
 
   return <TagBadges tags={rule?.metadata.tags ?? []} data-test-subj="episodeRuleTagsCell" />;
+};
+
+export const EpisodeSuppressedCell = ({ row }: CellRendererProps) => {
+  const ids = row.flattened.maintenance_window_ids;
+
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return <>{EMPTY_VALUE}</>;
+  }
+
+  return (
+    <EuiBadge color="hollow" data-test-subj="episodeSuppressedCell">
+      {i18n.SUPPRESSED_BY_MAINTENANCE_WINDOW}
+    </EuiBadge>
+  );
+};
+
+/**
+ * Renders the source alert reason as inline text so the grid's line clamp truncates it; the
+ * full value is reachable through the cell popover, the row height setting and the flyout.
+ */
+export const EpisodeReasonCell = ({ row }: CellRendererProps) => {
+  const reason = row.flattened.reason;
+
+  if (typeof reason !== 'string' || reason.length === 0) {
+    return <>{EMPTY_VALUE}</>;
+  }
+
+  return <span data-test-subj="episodeReasonCell">{reason}</span>;
 };
 
 export const EpisodeSeverityCell = ({ row }: CellRendererProps) => {

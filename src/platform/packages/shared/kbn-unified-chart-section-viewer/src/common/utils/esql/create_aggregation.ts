@@ -17,7 +17,7 @@ import {
   type MetricsGridSettings,
   type SimpleAggregation,
 } from '@kbn/discover-utils';
-import { isLegacyHistogram } from '../legacy_histogram';
+import { isLegacyHistogram } from '../histogram_metric';
 import { resolveConflictingFieldTypes } from './resolve_conflicting_field_types';
 import { fieldNameToColumn } from './helpers';
 import { HISTOGRAM_PERCENTILE_VALUES } from '../../../components/flyout/metrics_grid_settings_flyout/constants';

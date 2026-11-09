@@ -89,6 +89,11 @@ export interface SignificantEventsMaintenanceService {
   /** Read only the persisted maintenance state of the caller's space (no feature-settings I/O). */
   getState(params: { request: KibanaRequest }): Promise<SignificantEventsMaintenanceState>;
   /**
+   * While paused, forget that continuous onboarding should resume. Used when the last source is
+   * deleted so Resume cannot restore a setting that no longer matches the source catalog.
+   */
+  clearContinuousOnboardingRestore(params: { request: KibanaRequest }): Promise<void>;
+  /**
    * In the caller's space only: disable the per-space managed workflows, cancel
    * in-flight executions (including those of the shared workflows), turn off
    * continuous/scheduled Settings toggles (recording which were on), and disable
@@ -122,10 +127,10 @@ export interface SignificantEventsMaintenanceService {
     updatedBy?: string;
   }): Promise<SignificantEventsMaintenanceSummary>;
   /**
-   * Destructively clear all Significant Events data across every space and return
-   * every space to enabled, including spaces a user had paused beforehand. Each space is
-   * paused through its own document while the data is being deleted, and the spaces reset
-   * paused are released again if it aborts before the data is touched.
+   * Clear the current space's KIs, queries, backing rules and detections, then return
+   * it to enabled with feature settings off. Other spaces, shared streams, sources,
+   * investigations and rule-event history are preserved. An abort before cleanup
+   * rolls back reset's pause and sweep; completed deletions are never rolled back.
    */
   reset(params: {
     request: KibanaRequest;
@@ -526,6 +531,31 @@ export const createSignificantEventsMaintenanceService = ({
   return {
     async getState({ request }) {
       return normalizeState((await readState(request.spaceId))?.state);
+    },
+
+    async clearContinuousOnboardingRestore({ request }) {
+      return withTransitionLock(async () => {
+        const { spaceId } = request;
+        const existing = await readState(spaceId);
+        if (!existing || normalizeState(existing.state) !== 'paused') {
+          return;
+        }
+
+        const disabledWorkflows = existing.disabledWorkflows.filter(
+          ({ id }) => !isContinuousOnboardingWorkflowId(id)
+        );
+        if (disabledWorkflows.length === existing.disabledWorkflows.length) {
+          return;
+        }
+
+        await writeState(spaceId, {
+          ...existing,
+          disabledWorkflows,
+          lastSummary: existing.lastSummary
+            ? { ...existing.lastSummary, workflowsDisabled: disabledWorkflows.length }
+            : undefined,
+        });
+      });
     },
 
     async pause({ request, updatedBy }) {

@@ -13,6 +13,7 @@ export const CONTEXT_ENGINE_EVENT_TYPES = {
   KiCreate: `${TELEMETRY_PREFIX}_ki_create`,
   KiUpdate: `${TELEMETRY_PREFIX}_ki_update`,
   KiDelete: `${TELEMETRY_PREFIX}_ki_delete`,
+  KiRestore: `${TELEMETRY_PREFIX}_ki_restore`,
   KiVerification: `${TELEMETRY_PREFIX}_ki_verification`,
 } as const;
 
@@ -71,6 +72,11 @@ const KI_UPDATE_EVENT: EventTypeOpts<ReportKiWriteEventParams> = {
 
 const KI_DELETE_EVENT: EventTypeOpts<ReportKiWriteEventParams> = {
   eventType: CONTEXT_ENGINE_EVENT_TYPES.KiDelete,
+  schema: kiWriteEventSchema,
+};
+
+const KI_RESTORE_EVENT: EventTypeOpts<ReportKiWriteEventParams> = {
+  eventType: CONTEXT_ENGINE_EVENT_TYPES.KiRestore,
   schema: kiWriteEventSchema,
 };
 
@@ -164,5 +170,6 @@ export const contextEngineServerEbtEvents: Array<EventTypeOpts<Record<string, un
   KI_CREATE_EVENT,
   KI_UPDATE_EVENT,
   KI_DELETE_EVENT,
+  KI_RESTORE_EVENT,
   KI_VERIFICATION_EVENT,
 ];

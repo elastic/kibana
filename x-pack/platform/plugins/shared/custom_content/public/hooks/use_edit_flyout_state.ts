@@ -11,6 +11,7 @@ import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import {
+  getLinkBasePath,
   fetchEsqlData,
   fillTemplate,
   sanitizeHtml,
@@ -182,7 +183,9 @@ export const useEditFlyoutState = ({
         rawHtml = state.draftTemplate;
       }
       if (!controller.signal.aborted && draftVersionRef.current === snapVersion) {
-        onRunPreview(applyHtmlTheme(sanitizeHtml(rawHtml), colorMode, euiTheme));
+        onRunPreview(
+          applyHtmlTheme(sanitizeHtml(rawHtml, getLinkBasePath(core.http)), colorMode, euiTheme)
+        );
       }
     } catch (err) {
       if (!controller.signal.aborted && !(err instanceof Error && err.name === 'AbortError')) {

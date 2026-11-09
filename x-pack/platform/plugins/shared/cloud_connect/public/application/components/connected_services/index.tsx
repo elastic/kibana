@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPage, EuiSpacer } from '@elastic/eui';
+import { EuiPage, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import useObservable from 'react-use/lib/useObservable';
 import { useCloudConnectedAppContext } from '../../app_context';
@@ -30,6 +30,7 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
   onServiceUpdate,
   onDisconnect,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const { notifications, hasConfigurePermission, docLinks, apiService, licensing } =
     useCloudConnectedAppContext();
   const [isDisconnectModalVisible, setIsDisconnectModalVisible] = useState(false);
@@ -128,7 +129,7 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
           label: i18n.translate('xpack.cloudConnect.connectedServices.actions.disconnectCluster', {
             defaultMessage: 'Disconnect cluster',
           }),
-          iconType: 'unlink',
+          iconType: 'linkSlash',
           overflow: true,
           isDestructive: true,
           run: showDisconnectModal,
@@ -148,7 +149,11 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
   ) : null;
 
   return (
-    <EuiPage direction="column" grow={false} paddingSize="m">
+    <EuiPage
+      direction="column"
+      paddingSize="m"
+      css={{ background: euiTheme.colors.backgroundBasePlain }}
+    >
       <AppHeader
         title={i18n.translate('xpack.cloudConnect.connectedServices.pageTitle', {
           defaultMessage: 'Cloud connected services',

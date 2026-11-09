@@ -37,6 +37,7 @@ import {
   sendGetAgentTagsForRq,
   useAgentlessResources,
   useGetInfoOutputsForPolicy,
+  useRestartAgentAction,
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
 import { ExperimentalFeaturesService } from '../../../services';
@@ -58,6 +59,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
   } = useRouteMatch<{ agentId: string; tabId?: string }>();
   const { getHref } = useLink();
   const { showAgentless } = useAgentlessResources();
+  const { isRestartAgentActionEnabled } = useRestartAgentAction();
   const {
     isLoading,
     isInitialRequest,
@@ -68,6 +70,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     pollIntervalMs: 5000,
     query: {
       withMetrics: true,
+      withPendingRestart: isRestartAgentActionEnabled,
     },
   });
   const {
@@ -367,7 +370,7 @@ const AgentDetailsPageContent: React.FunctionComponent<{
         <Route
           path={FLEET_ROUTING_PATHS.agent_details_diagnostics}
           render={() => {
-            return <AgentDiagnosticsTab agent={agent} />;
+            return <AgentDiagnosticsTab agent={agent} agentPolicy={agentPolicy} />;
           }}
         />
       )}

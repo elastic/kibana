@@ -238,6 +238,7 @@ describe('WorkflowDetailEditor', () => {
       setEditorView: jest.fn(),
       setGraphDirection: jest.fn(),
       setSelectedExecution: jest.fn(),
+      selectEditorRun: jest.fn(),
       setSelectedStepExecution: jest.fn(),
       setSelectedStep: jest.fn(),
       updateUrlState: jest.fn(),
@@ -284,6 +285,7 @@ describe('WorkflowDetailEditor', () => {
         ...mockUseWorkflowUrlState(),
         activeTab: 'executions',
         selectedExecutionId: 'execution-1',
+        isViewingExecution: true,
       });
 
       const { getByTestId } = renderEditor();
@@ -295,6 +297,7 @@ describe('WorkflowDetailEditor', () => {
         ...mockUseWorkflowUrlState(),
         activeTab: 'executions',
         selectedExecutionId: 'execution-1',
+        isViewingExecution: true,
       });
 
       const { queryByTestId, getByTestId } = renderEditor();
@@ -412,6 +415,7 @@ describe('WorkflowDetailEditor', () => {
         setEditorView: jest.fn(),
         setGraphDirection: jest.fn(),
         setSelectedExecution: jest.fn(),
+        selectEditorRun: jest.fn(),
         setSelectedStepExecution: jest.fn(),
         setSelectedStep: jest.fn(),
         updateUrlState: jest.fn(),
@@ -438,6 +442,7 @@ describe('WorkflowDetailEditor', () => {
         setEditorView: jest.fn(),
         setGraphDirection: jest.fn(),
         setSelectedExecution: jest.fn(),
+        selectEditorRun: jest.fn(),
         setSelectedStepExecution: jest.fn(),
         setSelectedStep: jest.fn(),
         updateUrlState: jest.fn(),

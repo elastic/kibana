@@ -68,6 +68,7 @@ describe('TopN data from Elasticsearch', () => {
         }) as Promise<any>
     ),
     topNFunctions: jest.fn(),
+    sampleStacktraceIds: jest.fn(),
     universalProfiling: {
       status: jest.fn(
         () =>

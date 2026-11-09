@@ -141,6 +141,10 @@ kibana_vars=(
     notifications.connectors.default.email
     ops.cGroupOverrides.cpuAcctPath
     ops.cGroupOverrides.cpuPath
+    ops.eventLoopWatchdog.blockThreshold
+    ops.eventLoopWatchdog.enabled
+    ops.eventLoopWatchdog.startup.blockThreshold
+    ops.eventLoopWatchdog.statsInterval
     ops.interval
     path.data
     pid.file
@@ -430,6 +434,7 @@ kibana_vars=(
     xpack.security.loginHelp
     xpack.security.sameSiteCookies
     xpack.security.secureCookies
+    xpack.security.serviceAccounts.enabled
     xpack.security.serviceAccounts.requestLifetime
     xpack.security.session.cleanupInterval
     xpack.security.session.concurrentSessions.maxSessions

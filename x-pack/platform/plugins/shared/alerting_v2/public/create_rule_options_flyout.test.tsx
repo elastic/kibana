@@ -180,6 +180,8 @@ describe('CreateRuleOptionsFlyout', () => {
       expect(capturedComposeProps.initialQuery).toBe('FROM logs-*');
       expect(capturedComposeProps.mode).toBe('create');
       expect(capturedComposeProps.onClose).toBe(onClose);
+      expect(capturedComposeProps.onHistoryBack).toEqual(expect.any(Function));
+      expect(screen.getByTestId('mockRuleCreateOptionsFlyout')).toBeInTheDocument();
       expect(capturedComposeProps.onCreateRule).toBeDefined();
       expect(
         (capturedComposeProps.services as AlertingV2KibanaServices).createActionPolicyFormFlyout
@@ -225,6 +227,28 @@ describe('CreateRuleOptionsFlyout', () => {
         expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
       });
       expect(capturedComposeProps.initialQuery).toBeUndefined();
+    });
+
+    it('returns to the selector when the form navigates back', async () => {
+      renderFlyout();
+      resolveServices(mockServices);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('mockRuleCreateOptionsFlyout')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('esqlBtn'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+      });
+
+      act(() => {
+        (capturedComposeProps.onHistoryBack as () => void)();
+      });
+
+      expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
+      expect(screen.getByTestId('mockRuleCreateOptionsFlyout')).toBeInTheDocument();
     });
   });
 

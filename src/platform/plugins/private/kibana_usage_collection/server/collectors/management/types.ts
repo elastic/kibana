@@ -33,6 +33,7 @@ export interface UsageStats {
   'search:timeout': number;
   'visualization:visualize:legacyHeatmapChartsLibrary': boolean;
   'discover:modifyColumnsOnSwitch': boolean;
+  'discover:enableSolutionProfilesInClassic': boolean;
   'discover:showFieldStatistics': boolean;
   'discover:showMultiFields': boolean;
   enableESQL: boolean;
@@ -59,6 +60,7 @@ export interface UsageStats {
   'agentBuilder:experimentalFeatures': boolean;
   'agentBuilder:bashSupport': boolean;
   'agentBuilder:apiDiscovery': boolean;
+  'agentBuilder:includeFrozenByDefault': boolean;
   'agentBuilder:deductiveEnabled': boolean;
   'agentBuilder:deductiveEndpoint': string;
   'agentBuilder:deductiveApiKey': string;
@@ -89,7 +91,6 @@ export interface UsageStats {
   'securitySolution:defaultAnomalyScore': number;
   'securitySolution:refreshIntervalDefaults': string;
   'securitySolution:enableNewsFeed': boolean;
-  'securitySolution:enableNewFlyout': boolean;
   'securitySolution:enableAssetCriticality': boolean;
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer': boolean;
   'securitySolution:excludeColdAndFrozenTiersInPrevalence': boolean;
@@ -100,9 +101,9 @@ export interface UsageStats {
   'securitySolution:defaultValueReportMinutes': string;
   'securitySolution:defaultValueReportRate': string;
   'securitySolution:defaultValueReportTitle': string;
-  'securitySolution:enableAlertsAndAttacksAlignment': boolean;
   'securitySolution:enableAttackDiscoveryWorkflows': boolean;
   'securitySolution:enableRuleChangesHistory': boolean;
+  'securitySolution:enableAlertZero': boolean;
   'search:includeFrozen': boolean;
   'courier:maxConcurrentShardRequests': number;
   'courier:setRequestPreference': string;
@@ -241,5 +242,6 @@ export interface UsageStats {
   'elasticRamen:enabled': boolean;
   'query_activity:minRunningTime': number;
   'genAiSettings:tokenUsageTracking': boolean;
+  'genAiSettings:inferenceStreaming': boolean;
   'alerting:v1:showV1ObservabilityAlertsTable': boolean;
 }

@@ -45,6 +45,7 @@ export const ENTITY_STORE_ROUTES = {
     STATUS: `${PUBLIC_BASE}/status`,
     START: `${PUBLIC_BASE}/start`,
     STOP: `${PUBLIC_BASE}/stop`,
+    UPDATE_API_KEY: `${PUBLIC_BASE}/update_api_key`,
     ENABLE_HISTORY_SNAPSHOT: `${PUBLIC_BASE}/history_snapshot/enable`,
     DISABLE_HISTORY_SNAPSHOT: `${PUBLIC_BASE}/history_snapshot/disable`,
     UNINSTALL: `${PUBLIC_BASE}/uninstall`,
@@ -73,6 +74,9 @@ export const ENTITY_STORE_ROUTES = {
     ENTITY_MAINTAINERS_START: (id: string) => `${INTERNAL_BASE}/entity_maintainers/start/${id}`,
     ENTITY_MAINTAINERS_STOP: (id: string) => `${INTERNAL_BASE}/entity_maintainers/stop/${id}`,
     ENTITY_MAINTAINERS_RUN: (id: string) => `${INTERNAL_BASE}/entity_maintainers/run/${id}`,
+    RESOLUTION_CUSTOM_RULES: `${INTERNAL_BASE}/resolution/custom_rules`,
+    RESOLUTION_CUSTOM_RULE: (id: string) => `${INTERNAL_BASE}/resolution/custom_rules/${id}`,
+    RESOLUTION_CUSTOM_RULES_PREVIEW: `${INTERNAL_BASE}/resolution/custom_rules/_preview`,
   },
 } as const;
 

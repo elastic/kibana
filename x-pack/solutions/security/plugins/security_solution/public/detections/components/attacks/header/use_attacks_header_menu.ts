@@ -19,7 +19,7 @@ import { GENERATIONS_BUTTON } from '../generations_control_center/translations';
 
 export const GENERATIONS_MENU_ITEM_TEST_ID = 'attacks-page-generations-button';
 export const RUN_MENU_ITEM_TEST_ID = 'run';
-export const SETTINGS_MENU_ITEM_TEST_ID = 'settings';
+export const SETTINGS_MENU_ITEM_TEST_ID = `${RUN_MENU_ITEM_TEST_ID}-secondary-button`;
 export const SCHEDULE_MENU_ITEM_TEST_ID = 'schedule';
 
 interface UseAttacksHeaderMenuParams {
@@ -36,8 +36,8 @@ interface UseAttacksHeaderMenuParams {
 }
 
 /**
- * Builds the attacks page menu: "Schedule" as the primary action, with "Generations", "Run" and
- * "Settings" inline. `SecurityAppHeader` merges in "Add integrations" automatically.
+ * Builds the attacks page menu: "Run" as a split primary action with a "Settings" button, and
+ * "Generations" and "Schedule" inline. `SecurityAppHeader` merges in "Add integrations" automatically.
  */
 export const useAttacksHeaderMenu = ({
   isLoading,
@@ -57,34 +57,32 @@ export const useAttacksHeaderMenu = ({
           testId: GENERATIONS_MENU_ITEM_TEST_ID,
         },
         {
-          id: 'run',
-          label: runI18n.RUN,
-          iconType: 'play',
-          run: () => {
-            void onGenerate();
-          },
-          disableButton: isLoading || isRunDisabled,
-          tooltipContent: isRunDisabled ? runI18n.DISABLED_TOOLTIP : runI18n.RUN_TOOLTIP,
-          testId: RUN_MENU_ITEM_TEST_ID,
-        },
-        {
-          id: 'settings',
-          label: settingsI18n.SETTINGS,
-          iconType: 'indexSettings',
-          run: () => openFlyout(SETTINGS_TAB_ID),
+          id: 'schedule',
+          label: scheduleI18n.SCHEDULE,
+          iconType: 'calendar',
+          run: () => openFlyout(SCHEDULE_TAB_ID),
           disableButton: isLoading,
-          tooltipContent: settingsI18n.SETTINGS_TOOLTIP,
-          testId: SETTINGS_MENU_ITEM_TEST_ID,
+          tooltipContent: scheduleI18n.SCHEDULE_TOOLTIP,
+          testId: SCHEDULE_MENU_ITEM_TEST_ID,
         },
       ],
       primaryActionItem: {
-        id: 'schedule',
-        label: scheduleI18n.SCHEDULE,
-        iconType: 'calendar',
-        run: () => openFlyout(SCHEDULE_TAB_ID),
-        disableButton: isLoading,
-        tooltipContent: scheduleI18n.SCHEDULE_TOOLTIP,
-        testId: SCHEDULE_MENU_ITEM_TEST_ID,
+        id: 'run',
+        label: runI18n.RUN,
+        iconType: 'play',
+        run: () => {
+          void onGenerate();
+        },
+        tooltipContent: isRunDisabled ? runI18n.DISABLED_TOOLTIP : runI18n.RUN_TOOLTIP,
+        testId: RUN_MENU_ITEM_TEST_ID,
+        splitButtonProps: {
+          isMainButtonDisabled: isLoading || isRunDisabled,
+          isSecondaryButtonDisabled: isLoading,
+          secondaryButtonAriaLabel: settingsI18n.SETTINGS,
+          secondaryButtonIconType: 'indexSettings',
+          secondaryButtonTooltipContent: settingsI18n.SETTINGS_TOOLTIP,
+          run: () => openFlyout(SETTINGS_TAB_ID),
+        },
       },
     }),
     [isLoading, isRunDisabled, onGenerate, openControlCenter, openFlyout]

@@ -7,8 +7,9 @@
 
 import { Socket } from 'node:net';
 
-import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import { httpServiceMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
+import { ACTIONS_INBOUND_EVENTS_ENABLED_FLAG } from '../../../common';
 import {
   INBOUND_EVENTS_API_PATH,
   INBOUND_EVENTS_API_VERSION,
@@ -21,6 +22,14 @@ import { inboundEventsRoute } from './inbound_events';
 
 describe('inboundEventsRoute', () => {
   const getSpaceId = jest.fn().mockReturnValue('default');
+  const getBooleanValue = jest.fn().mockResolvedValue(true);
+  const logger = loggingSystemMock.createLogger();
+
+  const routeContext = () => ({
+    core: Promise.resolve({
+      featureFlags: { getBooleanValue },
+    }),
+  });
 
   const registerRoute = (client: InboundEventsClient) => {
     const router = httpServiceMock.createRouter();
@@ -32,10 +41,17 @@ describe('inboundEventsRoute', () => {
       maxBodyBytes: 1024 * 1024,
       inboundEventsClient: client,
       getSpaceId,
+      logger,
     });
 
     return { router, addVersionMock };
   };
+
+  beforeEach(() => {
+    getBooleanValue.mockReset();
+    getBooleanValue.mockResolvedValue(true);
+    logger.warn.mockClear();
+  });
 
   it('registers a public versioned POST route', () => {
     const ingest = jest.fn();
@@ -77,6 +93,9 @@ describe('inboundEventsRoute', () => {
               description: expect.stringMatching(/plain-text/i),
             }),
             202: expect.anything(),
+            403: expect.objectContaining({
+              description: 'Inbound connector events are disabled.',
+            }),
             404: expect.anything(),
             500: expect.anything(),
           }),
@@ -98,19 +117,45 @@ describe('inboundEventsRoute', () => {
     });
     const [, , res] = mockHandlerArguments({}, request, ['accepted']);
 
-    await handler({}, request, res);
+    await handler(routeContext(), request, res);
 
     expect(ingest).toHaveBeenCalledWith({
       connectorTypeId: 'webhook',
       connectorId: 'c1',
       spaceId: 'default',
-      requestId: request.id,
-      headers: request.headers,
-      query: request.query,
-      body: request.body,
-      remoteAddress: request.socket.remoteAddress,
+      request,
     });
     expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
+    expect(getBooleanValue).toHaveBeenCalledWith(ACTIONS_INBOUND_EVENTS_ENABLED_FLAG, true);
+  });
+
+  it('returns 403 and skips ingest when the feature flag is off', async () => {
+    getBooleanValue.mockResolvedValueOnce(false);
+    const ingest = jest.fn();
+    const { addVersionMock } = registerRoute({ ingest });
+    const handler = addVersionMock.mock.calls[0][1];
+
+    const request = httpServerMock.createKibanaRequest({
+      params: { connector_type_id: 'webhook', connector_id: 'c1' },
+    });
+    const [, , res] = mockHandlerArguments({}, request, ['forbidden']);
+
+    await handler(routeContext(), request, res);
+
+    expect(getBooleanValue).toHaveBeenCalledWith(ACTIONS_INBOUND_EVENTS_ENABLED_FLAG, true);
+    expect(ingest).not.toHaveBeenCalled();
+    expect(res.forbidden).toHaveBeenCalledWith({ body: INBOUND_EVENTS_DISABLED_MESSAGE });
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('outcome=disabled'),
+      expect.objectContaining({
+        inboundEvents: expect.objectContaining({
+          outcome: 'disabled',
+          connectorId: 'c1',
+          connectorTypeId: 'webhook',
+          detail: 'feature_flag',
+        }),
+      })
+    );
   });
 
   it('forwards Authorization ApiKey and the request space to ingest', async () => {
@@ -128,15 +173,14 @@ describe('inboundEventsRoute', () => {
     });
     const [, , res] = mockHandlerArguments({}, request, ['accepted']);
 
-    await handler({}, request, res);
+    await handler(routeContext(), request, res);
 
     expect(ingest).toHaveBeenCalledWith(
       expect.objectContaining({
         connectorTypeId: '.slack2',
         connectorId: 'elastic-apps-slack',
         spaceId: 'space-a',
-        headers: expect.objectContaining({ authorization: `ApiKey ${apiKey}` }),
-        body: { type: 'event_callback' },
+        request,
       })
     );
     expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
@@ -158,14 +202,11 @@ describe('inboundEventsRoute', () => {
     });
     const [, , res] = mockHandlerArguments({}, request, ['accepted']);
 
-    await handler({}, request, res);
+    await handler(routeContext(), request, res);
 
-    expect(ingest).toHaveBeenCalledWith(
-      expect.objectContaining({
-        remoteAddress: '203.0.113.8',
-        headers: expect.objectContaining({ 'x-forwarded-for': '198.51.100.1' }),
-      })
-    );
+    expect(ingest).toHaveBeenCalledWith(expect.objectContaining({ request }));
+    expect(request.socket.remoteAddress).toBe('203.0.113.8');
+    expect(request.headers['x-forwarded-for']).toBe('198.51.100.1');
   });
 
   it('maps forbidden ingest results to 403', async () => {
@@ -180,7 +221,7 @@ describe('inboundEventsRoute', () => {
     });
     const [, , res] = mockHandlerArguments({}, request, ['forbidden']);
 
-    await handler({}, request, res);
+    await handler(routeContext(), request, res);
 
     expect(res.forbidden).toHaveBeenCalledWith({ body: INBOUND_EVENTS_DISABLED_MESSAGE });
   });
@@ -203,7 +244,7 @@ describe('inboundEventsRoute', () => {
     });
     const [, , res] = mockHandlerArguments({}, request, ['custom']);
 
-    await handler({}, request, res);
+    await handler(routeContext(), request, res);
 
     expect(res.custom).toHaveBeenCalledWith({ statusCode: 202, body });
     expect(bodySchema.validate(jest.mocked(res.custom).mock.calls[0][0].body)).toEqual(body);
@@ -220,7 +261,7 @@ describe('inboundEventsRoute', () => {
     });
     const [, , res] = mockHandlerArguments({}, request, ['notFound']);
 
-    await handler({}, request, res);
+    await handler(routeContext(), request, res);
 
     expect(res.notFound).toHaveBeenCalled();
   });

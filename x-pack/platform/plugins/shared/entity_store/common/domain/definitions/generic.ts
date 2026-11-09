@@ -23,7 +23,9 @@ import {
 export const genericEntityDefinition = {
   type: 'generic',
   managedBy: { kind: 'plugin', id: PLUGIN_ID },
-  name: `Security 'generic' Entity Store Definition`,
+  name: 'Generic',
+  description:
+    'Any entity that carries its own entity.id, such as an asset discovered by an integration. The id is used as-is and is not prefixed with the type.',
   identityField: { singleField: 'entity.id', skipTypePrepend: true },
   extraction: {
     fieldEvaluations: [ENTITY_SOURCE_FIELD_EVALUATION],

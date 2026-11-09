@@ -1,0 +1,78 @@
+{
+  "sha1": "d6a063645af876daad3a5c94f54ea59f678af5dc",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "bc93397deafcea1-bd6311afcd7a993",
+      "title": "Rule changed EBT telemetry reports rule.created",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/rules/api/tests/ebt_telemetry.spec.ts",
+        "line": 39,
+        "column": 7
+      }
+    },
+    {
+      "id": "bc93397deafcea1-47420c9d34a88e4",
+      "title": "Rule changed EBT telemetry reports rule.updated",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/rules/api/tests/ebt_telemetry.spec.ts",
+        "line": 53,
+        "column": 29
+      }
+    },
+    {
+      "id": "bc93397deafcea1-84650f370fe3485",
+      "title": "Rule changed EBT telemetry reports rule.deleted with the enabled state at deletion",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/rules/api/tests/ebt_telemetry.spec.ts",
+        "line": 71,
+        "column": 27
+      }
+    },
+    {
+      "id": "bc93397deafcea1-f7b1be40011af04",
+      "title": "Rule changed EBT telemetry reports rule.enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/rules/api/tests/ebt_telemetry.spec.ts",
+        "line": 88,
+        "column": 41
+      }
+    },
+    {
+      "id": "bc93397deafcea1-68178bc66ded68c",
+      "title": "Rule changed EBT telemetry reports rule.disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/rules/api/tests/ebt_telemetry.spec.ts",
+        "line": 106,
+        "column": 41
+      }
+    }
+  ]
+}

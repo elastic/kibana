@@ -37,6 +37,7 @@ properties:
     oneOf:
       - $ref: 'payload_alert_comment.yaml'
       - $ref: 'payload_assignees.yaml'
+      - $ref: 'payload_bulk_attachments.yaml'
       - $ref: 'payload_connector.yaml'
       - $ref: 'payload_create_case.yaml'
       - $ref: 'payload_delete.yaml'
@@ -57,6 +58,7 @@ properties:
     description: The type of action.
     enum:
       - assignees
+      - bulkAttachments
       - category
       - comment
       - connector

@@ -13,11 +13,13 @@ import type {
   PersistedEntityAiSummary,
   EntitySummaryStalenessEntitySnapshot,
 } from '@kbn/entity-store/common';
+import { AI_SUMMARY_RESOLVED_GROUP_VARIANT_ID } from '@kbn/entity-store/common';
 import {
   buildEntitySummaryStaleness,
   capEntitySummaryContent,
 } from '@kbn/entity-store/common/entity_summary';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../../common/constants';
+import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useCurrentUser } from '../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -114,11 +116,13 @@ export const useFetchEntityDetailsHighlights = ({
   refetchEntityRecord,
   refetchPersistedSummary,
   persistSummary,
+  mode = 'single',
 }: {
   connectorId: string;
   anonymizationFields: AnonymizationFieldResponse[];
   entityType: string;
   entityIdentifier: string;
+  mode?: EntityViewMode;
   storedSummary?: PersistedEntityAiSummary | null;
   /** Current entity signal values — snapshotted into the summary at generation time for staleness detection. */
   entitySnapshot?: EntitySummaryStalenessEntitySnapshot | null;
@@ -159,7 +163,7 @@ export const useFetchEntityDetailsHighlights = ({
   useEffect(() => {
     setGenerationBaseline(null);
     userTriggeredGeneration.current = false;
-  }, [entityType, entityIdentifier]);
+  }, [entityType, entityIdentifier, mode]);
 
   const fetchEntityHighlights = useCallback(async () => {
     const errorTitle = i18n.translate(
@@ -189,6 +193,7 @@ export const useFetchEntityDetailsHighlights = ({
           from: fromDate,
           to: toDate,
           connectorId,
+          mode,
         },
         context: HIGHLIGHTS_CONTEXT,
       }).catch((e: Error) => {
@@ -263,6 +268,8 @@ export const useFetchEntityDetailsHighlights = ({
               staleness: buildEntitySummaryStaleness({
                 riskScoreNorm: entitySnapshot?.riskScoreNorm ?? null,
               }),
+              // Single-entity summaries stay untagged so existing persisted docs keep matching.
+              ...(mode === 'resolved' && { variant_id: AI_SUMMARY_RESOLVED_GROUP_VARIANT_ID }),
             },
             modelOutputCounts: {
               highlights: modelHighlightsCount,
@@ -313,6 +320,7 @@ export const useFetchEntityDetailsHighlights = ({
     saveEntityAiSummary,
     entityType,
     entityIdentifier,
+    mode,
     anonymizationFields,
     connectorId,
     inference,

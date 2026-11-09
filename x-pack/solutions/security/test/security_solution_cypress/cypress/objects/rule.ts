@@ -31,8 +31,6 @@ export const getIndexPatterns = (): string[] => [
   '-*elastic-cloud-logs-*',
 ];
 
-export const getThreatIndexPatterns = (): string[] => ['logs-ti_*'];
-
 const getMitre1 = (): Threat => ({
   framework: 'MITRE ATT&CK',
   tactic: {

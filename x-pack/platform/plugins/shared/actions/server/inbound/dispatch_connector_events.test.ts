@@ -6,6 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { dispatchConnectorEvents } from './dispatch_connector_events';
 import type { ConnectorEventEmitter } from './types';
@@ -14,7 +15,7 @@ describe('dispatchConnectorEvents', () => {
   const params = {
     eventId: 'myConnector.received',
     payload: { body: {} },
-    spaceId: 'default',
+    spaceId: DEFAULT_SPACE_ID,
     connectorId: 'c1',
     connectorTypeId: '.myConnector',
     correlationKey: 'corr-1',

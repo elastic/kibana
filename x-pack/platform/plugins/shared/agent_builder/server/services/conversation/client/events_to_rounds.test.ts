@@ -12,6 +12,7 @@ import type {
   TimelineEvent,
 } from '@kbn/agent-builder-common';
 import {
+  ConversationActivityEventType,
   ConversationRoundStatus,
   ConversationRoundStepType,
   EventActorType,
@@ -21,6 +22,8 @@ import {
 } from '@kbn/agent-builder-common';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import {
+  activityEventFixture,
+  customEventFixture,
   pauseState,
   promptResponseEvent as promptResponse,
   userMessageEvent as userMessage,
@@ -688,6 +691,44 @@ describe('eventsToRounds — multi-execution HITL fold', () => {
     const rounds = eventsToRounds(events);
     expect(rounds.map((r) => r.id)).toEqual(['a', 'b']);
     expect(rounds.map((r) => r.response.message)).toEqual(['first', 'second']);
+  });
+
+  it('ignores activity and custom events by class, even when they name a real execution', () => {
+    const timeline: TimelineEvent[] = [
+      {
+        id: 'a::user_message',
+        type: TimelineEventType.userMessage,
+        created_at: '2024-01-01T00:00:00.000Z',
+        actor: userActor,
+        data: { message: 'one' },
+      },
+      ...executionEvents({
+        roundId: 'a',
+        executionId: 'a::execution',
+        triggerEventId: 'a::user_message',
+        triggerType: TimelineTriggerType.userMessage,
+        steps: [reasoningStep('r')],
+        outcome: { type: 'responded', response: { message: 'first' } },
+        createdAt: '2024-01-01T00:00:00.000Z',
+      }),
+    ];
+    const withExtras = [
+      activityEventFixture({ id: 'act-1', created_at: '2024-01-01T00:00:01.000Z' }),
+      ...timeline,
+      activityEventFixture({
+        id: 'act-2',
+        type: ConversationActivityEventType.metadataUpdated,
+        created_at: '2024-01-01T00:00:02.000Z',
+        execution_id: 'a::execution',
+        data: { changed_fields: ['status'] },
+      }),
+      customEventFixture({
+        id: 'note',
+        created_at: '2024-01-01T00:00:03.000Z',
+      }),
+    ];
+
+    expect(eventsToRounds(withExtras)).toEqual(eventsToRounds(timeline));
   });
 
   it("recovers the resume's own input (message + attachment_refs) from the prompt_response", () => {

@@ -53,6 +53,15 @@ describe('getViewKiHeaderBadges', () => {
     expect(statusBadge(badges)?.color).toBe('danger');
   });
 
+  it('includes status badge when lifecycle is verification_failed', () => {
+    const document: KiDocument = { type: 'policy' };
+    const badges = getViewKiHeaderBadges(document, 'verification_failed');
+
+    expect(badgeTestSubjs(badges)).toEqual(['contextViewKiTypeBadge', STATUS_BADGE_TEST_SUBJ]);
+    expect(statusBadge(badges)?.color).toBe('warning');
+    expect(statusBadge(badges)?.label).toBe('failed');
+  });
+
   it('includes status badge when expires_at is in the past', () => {
     const document: KiDocument = { type: 'faq', expires_at: PAST_EXPIRES_AT };
     const badges = getViewKiHeaderBadges(document);

@@ -24,12 +24,19 @@ import { z } from '@kbn/zod/v4';
  * 3. takes a single {@link ACTION_WORKFLOW_INPUT} object, so a generic gate never
  *    needs to know an action's parameter names;
  * 4. ends in a `workflow.output` step, because `workflow.execute` cannot type a
- *    child's result.
+ *    child's result;
+ * 5. may fail with {@link ACTION_NON_RETRYABLE_ERROR_TYPE} when another attempt
+ *    cannot succeed, so the proposal gate settles instead of re-offering it.
+ *    The gate then reports `decision: approved` with `status: failed`, so check
+ *    that every caller running the action reads `status`, not `decision` alone.
  */
 export const ACTION_WORKFLOW_TAG = 'action' as const;
 
 /** The single input every action workflow accepts. */
 export const ACTION_WORKFLOW_INPUT = 'actionInput' as const;
+
+/** The `workflow.fail` type an action uses when retrying it cannot help. */
+export const ACTION_NON_RETRYABLE_ERROR_TYPE = 'NonRetryableError' as const;
 
 /**
  * Grouping axis for the decision queue an approved action feeds. Deliberately
@@ -47,7 +54,8 @@ export type ActionImpact = z.infer<typeof actionImpactSchema>;
 
 /**
  * `always-gate` actions must never be auto-approved, whatever a caller's
- * autonomy policy resolves to.
+ * autonomy policy resolves to. Required, so an action is only auto-approved
+ * when its author declared `autonomy-dependent`.
  */
 export const actionApprovalPolicySchema = z.enum(['always-gate', 'autonomy-dependent']);
 export type ActionApprovalPolicy = z.infer<typeof actionApprovalPolicySchema>;
@@ -58,7 +66,7 @@ export type ActionApprovalPolicy = z.infer<typeof actionApprovalPolicySchema>;
  * that declares no `subject` is inferred `process` when its input schema has
  * `parameters`, else `host`, so older installed definitions keep working.
  */
-export const actionSubjectKindSchema = z.enum(['host', 'process', 'user', 'service']);
+export const actionSubjectKindSchema = z.enum(['host', 'process']);
 export type ActionSubjectKind = z.infer<typeof actionSubjectKindSchema>;
 
 /** Self-description an action workflow declares under `consts.actionMetadata`. */
@@ -68,10 +76,10 @@ export const actionMetadataSchema = z.object({
   category: actionCategorySchema.optional(),
   impact: actionImpactSchema.optional(),
   reversible: z.boolean().optional(),
-  approvalPolicy: actionApprovalPolicySchema.optional(),
+  approvalPolicy: actionApprovalPolicySchema,
   /** A single kind or a list of kinds; the catalog normalizes to a list. */
   subject: z
-    .union([actionSubjectKindSchema, z.array(actionSubjectKindSchema).min(1).max(4)])
+    .union([actionSubjectKindSchema, z.array(actionSubjectKindSchema).min(1).max(2)])
     .optional(),
 });
 export type ActionMetadata = z.infer<typeof actionMetadataSchema>;

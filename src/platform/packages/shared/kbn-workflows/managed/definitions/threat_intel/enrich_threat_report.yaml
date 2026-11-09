@@ -2,7 +2,7 @@ version: "1"
 # Every 4h: IOC extract, taxonomy, severity, and Diamond for pending reports.
 # Driver `size: 50` caps wall clock and inference load. Each item runs several
 # LLM steps sequentially; partial drain per pass is intentional.
-# Installed once globally: enrichment is content-only and space-blind, so it
+# Installed once in the default space: enrichment is content-only and space-blind, so it
 # selects all pending reports regardless of `space_id` (analyst-paste and
 # future custom-source reports included). The LLM-calling steps below carry no
 # `/s/{id}/` prefix, so they resolve to the `default` space, including the
