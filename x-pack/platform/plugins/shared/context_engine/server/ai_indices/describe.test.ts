@@ -44,11 +44,9 @@ const exampleQueriesBlock = [
 
 const memoryAwareExampleQueriesBlock = [
   'Example queries (adapt field names for non-canonical indices)',
-  ...buildExampleQueries(aiIndex.dest, { excludeMemory: true }).flatMap(({ title, esql }) => [
-    '',
-    title,
-    esql,
-  ]),
+  ...buildExampleQueries(aiIndex.dest, { excludeMemory: true, dreams: true }).flatMap(
+    ({ title, esql }) => ['', title, esql]
+  ),
 ].join('\n');
 
 describe('describeAiIndex', () => {
@@ -86,7 +84,8 @@ describe('describeAiIndex', () => {
       dest: aiIndex.dest,
       spaceId: 'marketing',
       fields,
-      countFactTypes: false,
+      dreams: false,
+      factTypes: [],
     });
     expect(response).toBe(
       [
@@ -255,7 +254,7 @@ describe('describeAiIndex', () => {
     });
 
     expect(describeAiIndexAggregationsMock).toHaveBeenCalledWith(
-      expect.objectContaining({ countFactTypes: true })
+      expect.objectContaining({ dreams: true, factTypes: ['fact.known_issue', 'fact.policy'] })
     );
     expect(response).toContain(
       [
@@ -287,7 +286,7 @@ describe('describeAiIndex', () => {
     });
 
     expect(describeAiIndexAggregationsMock).toHaveBeenCalledWith(
-      expect.objectContaining({ countFactTypes: false })
+      expect.objectContaining({ dreams: true, factTypes: [] })
     );
     expect(response).toContain('\nMemory\n');
     expect(response).not.toContain('Fact types');
@@ -302,6 +301,25 @@ describe('describeAiIndex', () => {
 
     expect(response).not.toContain('\nMemory\n');
     expect(response).not.toContain('platform.context_engine.remember');
+  });
+
+  it('keeps fact and entity types in the counts and queries of an AI index that does not dream', async () => {
+    describeAiIndexAggregationsMock.mockResolvedValue({
+      kiTypeCounts: [
+        { type: 'entity.host', count: 5 },
+        { type: 'document', count: 3 },
+      ],
+      tagCounts: [],
+      factTypeCounts: [],
+    });
+
+    const response = await describeAiIndex({ ...params, includeMemory: true });
+
+    expect(describeAiIndexAggregationsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ dreams: false, factTypes: [] })
+    );
+    expect(response).toContain('\nKnowledge item types\n"entity.host": 5\n"document": 3\n');
+    expect(response).not.toContain('NOT type LIKE');
   });
 
   it('omits memory capability when the memory feature flag is disabled', async () => {

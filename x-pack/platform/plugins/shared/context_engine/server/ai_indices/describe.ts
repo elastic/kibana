@@ -17,7 +17,7 @@ import {
 } from '../../common/dreaming';
 import { describeAiIndexAggregations } from './describe_aggregations';
 import { describeAiIndexFields } from './describe_fields';
-import { buildExampleQueries, EXCLUDE_MEMORY_KI_TYPES_FILTER } from './example_queries';
+import { buildExampleQueries, excludeMemoryKiTypesFilter } from './example_queries';
 import { buildMemoryExampleQueries } from './memory_example_queries';
 import type { AiIndexField, AiIndexTagCount } from './types';
 
@@ -60,11 +60,11 @@ const countsSection = (heading: string, counts: Array<[key: string, count: numbe
     ? [heading, ...counts.map(([key, count]) => `${JSON.stringify(key)}: ${count}`)]
     : [];
 
-const kiTypeCountsSection = (counts: KiTypeCount[]): string[] =>
+const kiTypeCountsSection = (counts: KiTypeCount[], dreams: boolean): string[] =>
   countsSection(
     'Knowledge item types',
     counts
-      .filter(({ type }) => !MEMORY_KI_TYPE_SET.has(type) && !isDreamedKiType(type))
+      .filter(({ type }) => !MEMORY_KI_TYPE_SET.has(type) && !(dreams && isDreamedKiType(type)))
       .map(({ type, count }) => [type, count])
   );
 
@@ -74,11 +74,13 @@ const tagCountsSection = (counts: AiIndexTagCount[]): string[] =>
     counts.map(({ tag, count }) => [tag, count])
   );
 
+const factKiType = (type: string): string => `${FACT_TYPE_PREFIX}${type}`;
+
 const factTypeLine = (
   { type, description }: DreamingFactType,
   counts: ReadonlyMap<string, number>
 ): string => {
-  const kiType = `${FACT_TYPE_PREFIX}${type}`;
+  const kiType = factKiType(type);
   return `${JSON.stringify(kiType)}: ${counts.get(kiType) ?? 0}${
     description ? ` - ${description}` : ''
   }`;
@@ -125,7 +127,7 @@ const memorySection = (
     'Use platform.context_engine.remember to write memory.',
     'Use platform.context_engine.forget with a memory id to tombstone memory.',
     'Unless the task specifically calls for memory, exclude memory types, and the facts and entities dreaming writes, from ordinary KI retrieval:',
-    EXCLUDE_MEMORY_KI_TYPES_FILTER,
+    excludeMemoryKiTypesFilter(true),
     ...(includeFacts ? factsLines(factTypes, factTypeCounts, factQueries) : []),
     includeFacts
       ? 'For cross-session recall, search session facts and long-term facts together with hybrid retrieval, so memories dreaming has not reached yet are found too:'
@@ -136,9 +138,17 @@ const memorySection = (
   ];
 };
 
-const exampleQueriesSection = (dest: AiIndexHttpItem['dest'], excludeMemory: boolean): string[] => [
+const exampleQueriesSection = (
+  dest: AiIndexHttpItem['dest'],
+  excludeMemory: boolean,
+  dreams: boolean
+): string[] => [
   'Example queries (adapt field names for non-canonical indices)',
-  ...buildExampleQueries(dest, { excludeMemory }).flatMap(({ title, esql }) => ['', title, esql]),
+  ...buildExampleQueries(dest, { excludeMemory, dreams }).flatMap(({ title, esql }) => [
+    '',
+    title,
+    esql,
+  ]),
 ];
 
 /** One item per line; sections separated by a blank line; empty sections dropped. */
@@ -163,21 +173,23 @@ export const describeAiIndex = async ({
     esClient,
     target,
   });
+  const dreams = includeMemory && isDreamingConfigured(aiIndex.dreaming);
   const { kiTypeCounts, tagCounts, factTypeCounts } = await describeAiIndexAggregations({
     esClient,
     dest: aiIndex.dest,
     spaceId,
     fields: allFields,
-    countFactTypes: includeMemory && configuredFactTypes(aiIndex).length > 0,
+    dreams,
+    factTypes: dreams ? configuredFactTypes(aiIndex).map(({ type }) => factKiType(type)) : [],
   });
 
   return renderSections([
     headerSection(aiIndex),
     fieldsSection(fields, omittedFieldCount),
     semanticFieldsSection(semanticFields),
-    kiTypeCountsSection(kiTypeCounts),
+    kiTypeCountsSection(kiTypeCounts, dreams),
     tagCountsSection(tagCounts),
     includeMemory ? memorySection(aiIndex, target, factTypeCounts) : [],
-    exampleQueriesSection(aiIndex.dest, includeMemory),
+    exampleQueriesSection(aiIndex.dest, includeMemory, dreams),
   ]);
 };

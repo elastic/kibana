@@ -19,11 +19,18 @@ export interface AiIndexExampleQuery {
 const KEEP = '| KEEP title, description, content, type, tags';
 export const FACT_TYPE_PATTERN = `${FACT_TYPE_PREFIX}*`;
 export const ENTITY_TYPE_PATTERN = `${ENTITY_TYPE_PREFIX}*`;
-export const EXCLUDE_MEMORY_KI_TYPES_CONDITION = `type IS NULL OR (${[
-  ...MEMORY_KI_TYPES.map((type) => `type != "${type}"`),
-  ...[FACT_TYPE_PATTERN, ENTITY_TYPE_PATTERN].map((pattern) => `NOT type LIKE "${pattern}"`),
-].join(' AND ')})`;
-export const EXCLUDE_MEMORY_KI_TYPES_FILTER = `| WHERE ${EXCLUDE_MEMORY_KI_TYPES_CONDITION}`;
+
+/** Leaves out memory types and, when the AI index dreams, the fact and entity types dreaming writes. */
+export const excludeMemoryKiTypesCondition = (dreams: boolean): string =>
+  `type IS NULL OR (${[
+    ...MEMORY_KI_TYPES.map((type) => `type != "${type}"`),
+    ...(dreams ? [FACT_TYPE_PATTERN, ENTITY_TYPE_PATTERN] : []).map(
+      (pattern) => `NOT type LIKE "${pattern}"`
+    ),
+  ].join(' AND ')})`;
+
+export const excludeMemoryKiTypesFilter = (dreams: boolean): string =>
+  `| WHERE ${excludeMemoryKiTypesCondition(dreams)}`;
 
 /**
  * Three fixed ES|QL shapes for the canonical KI schema (`title`, `description`, `content`, their
@@ -33,12 +40,12 @@ export const EXCLUDE_MEMORY_KI_TYPES_FILTER = `| WHERE ${EXCLUDE_MEMORY_KI_TYPES
  */
 export const buildExampleQueries = (
   { type, value }: AiIndexDest,
-  { excludeMemory = false }: { excludeMemory?: boolean } = {}
+  { excludeMemory = false, dreams = false }: { excludeMemory?: boolean; dreams?: boolean } = {}
 ): AiIndexExampleQuery[] => {
   const from = [
     `FROM ${value} METADATA _id, _index, _score`,
     ...kiLifecyclePipeline(type).map((command) => `| ${command}`),
-    ...(excludeMemory ? [EXCLUDE_MEMORY_KI_TYPES_FILTER] : []),
+    ...(excludeMemory ? [excludeMemoryKiTypesFilter(dreams)] : []),
   ];
   return [
     {
