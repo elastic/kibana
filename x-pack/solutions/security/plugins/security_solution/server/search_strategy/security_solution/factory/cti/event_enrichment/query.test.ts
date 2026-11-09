@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { buildEventEnrichmentRequestOptionsMock } from '../../../../../../common/search_strategy/security_solution/cti/index.mock';
+import {
+  buildEventEnrichmentRequestOptionsMock,
+  buildTransformSourceExclusionMock,
+} from '../../../../../../common/search_strategy/security_solution/cti/index.mock';
 import { buildEventEnrichmentQuery } from './query';
 
 describe('buildEventEnrichmentQuery', () => {
@@ -39,17 +42,7 @@ describe('buildEventEnrichmentQuery', () => {
   it('excludes raw indicator copies stored by integration transforms', () => {
     const options = buildEventEnrichmentRequestOptionsMock();
     const query = buildEventEnrichmentQuery(options);
-    expect(query.query?.bool?.must_not).toEqual([
-      {
-        bool: {
-          should: [
-            { term: { 'labels.is_ioc_transform_source': 'true' } },
-            { term: { 'labels.is_transform_source': 'true' } },
-          ],
-          minimum_should_match: 1,
-        },
-      },
-    ]);
+    expect(query.query?.bool?.must_not).toEqual([buildTransformSourceExclusionMock()]);
   });
 
   it('does not require a transform label, so unlabeled indicators still match', () => {

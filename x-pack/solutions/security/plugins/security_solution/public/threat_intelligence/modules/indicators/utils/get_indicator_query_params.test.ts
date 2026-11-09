@@ -7,16 +7,7 @@
 
 import type { Filter } from '@kbn/es-query';
 import { getIndicatorQueryParams } from './get_indicator_query_params';
-
-const transformSourceExclusion = {
-  bool: {
-    should: [
-      { term: { 'labels.is_ioc_transform_source': 'true' } },
-      { term: { 'labels.is_transform_source': 'true' } },
-    ],
-    minimum_should_match: 1,
-  },
-};
+import { buildTransformSourceExclusionMock } from '../../../../../common/search_strategy/security_solution/cti/index.mock';
 
 describe('getIndicatorQueryParams()', () => {
   const timeRange = { from: '2022-06-01T00:00:00.000Z', to: '2022-06-30T00:00:00.000Z' };
@@ -28,7 +19,7 @@ describe('getIndicatorQueryParams()', () => {
       timeRange,
     });
 
-    expect(query.bool.must_not).toEqual([transformSourceExclusion]);
+    expect(query.bool.must_not).toEqual([buildTransformSourceExclusionMock()]);
   });
 
   it('does not require a transform label, so unlabeled indicators still match', () => {
@@ -57,7 +48,7 @@ describe('getIndicatorQueryParams()', () => {
 
     expect(query.bool.must_not).toEqual([
       { match_phrase: { 'threat.indicator.type': 'file' } },
-      transformSourceExclusion,
+      buildTransformSourceExclusionMock(),
     ]);
     expect(query.bool.filter).toEqual(
       expect.arrayContaining([

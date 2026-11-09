@@ -10,6 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 import { useIndicatorsTotalCount } from './use_total_count';
 import { TestProvidersComponent, mockedSearchService } from '../../../mocks/test_providers';
 import { useKibana } from '../../../../common/lib/kibana';
+import { buildTransformSourceExclusionMock } from '../../../../../common/search_strategy/security_solution/cti/index.mock';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -50,17 +51,7 @@ describe('useIndicatorsTotalCount()', () => {
                   { term: { 'event.category': { value: 'threat' } } },
                   { term: { 'event.type': { value: 'indicator' } } },
                 ],
-                must_not: [
-                  {
-                    bool: {
-                      should: [
-                        { term: { 'labels.is_ioc_transform_source': 'true' } },
-                        { term: { 'labels.is_transform_source': 'true' } },
-                      ],
-                      minimum_should_match: 1,
-                    },
-                  },
-                ],
+                must_not: [buildTransformSourceExclusionMock()],
               },
             },
           }),

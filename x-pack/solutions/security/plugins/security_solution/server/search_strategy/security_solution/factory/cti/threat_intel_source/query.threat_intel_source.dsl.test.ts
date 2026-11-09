@@ -8,6 +8,7 @@
 import { buildTiDataSourceQuery } from './query.threat_intel_source.dsl';
 import { CtiQueries } from '../../../../../../common/search_strategy/security_solution/cti';
 import type { ThreatIntelSourceRequestOptionsInput } from '../../../../../../common/api/search_strategy';
+import { buildTransformSourceExclusionMock } from '../../../../../../common/search_strategy/security_solution/cti/index.mock';
 
 export const mockOptions: ThreatIntelSourceRequestOptionsInput = {
   defaultIndex: ['logs-ti_*', 'filebeat-8*'],
@@ -17,16 +18,6 @@ export const mockOptions: ThreatIntelSourceRequestOptionsInput = {
     interval: '12h',
     from: '2020-09-06T15:23:52.757Z',
     to: '2020-09-07T15:23:52.757Z',
-  },
-};
-
-const transformSourceExclusion = {
-  bool: {
-    should: [
-      { term: { 'labels.is_ioc_transform_source': 'true' } },
-      { term: { 'labels.is_transform_source': 'true' } },
-    ],
-    minimum_should_match: 1,
   },
 };
 
@@ -63,7 +54,7 @@ export const expectedDsl = {
           },
         },
       ],
-      must_not: [transformSourceExclusion],
+      must_not: [buildTransformSourceExclusionMock()],
     },
   },
   ignore_unavailable: true,
@@ -82,7 +73,7 @@ describe('buildbuildTiDataSourceQueryQuery', () => {
     expect(buildTiDataSourceQuery({ ...mockOptions, timerange: undefined }).query).toEqual({
       bool: {
         filter: [],
-        must_not: [transformSourceExclusion],
+        must_not: [buildTransformSourceExclusionMock()],
       },
     });
   });
