@@ -44350,6 +44350,8 @@ paths:
                           type: string
                         unenrolled_at:
                           type: string
+                        unenrolled_reason:
+                          type: string
                         unenrollment_started_at:
                           type: string
                         unhealthy_reason:
@@ -45039,6 +45041,8 @@ paths:
                         type: string
                       unenrolled_at:
                         type: string
+                      unenrolled_reason:
+                        type: string
                       unenrollment_started_at:
                         type: string
                       unhealthy_reason:
@@ -45536,6 +45540,8 @@ paths:
                           - OPAMP
                         type: string
                       unenrolled_at:
+                        type: string
+                      unenrolled_reason:
                         type: string
                       unenrollment_started_at:
                         type: string
