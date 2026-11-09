@@ -17,7 +17,6 @@ import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { inputsSelectors } from '../../../common/store/selectors';
 import { usePaneStyles, OverflowHiddenGlobalStyles } from './index.styles';
 import { useUnmanagedFlyoutZIndex } from '../../../common/hooks/use_unmanaged_flyout_z_index';
-import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 import { FlyoutSessionContextProvider } from '../../../flyout_v2/session_context';
 import { timelineFlyoutHistoryKey } from '../../../flyout_v2/shared/constants/flyout_history';
 
@@ -65,10 +64,6 @@ export const TimelineModal = React.memo<TimelineModalProps>(
       active: visible,
     });
     const styles = usePaneStyles(dynamicZIndex);
-    // Gates on the same flag as `useUnmanagedFlyoutZIndex` above. Gives flyouts opened from within
-    // Timeline (host/user/rule/network/document/notes/...) their own history group, isolated from
-    // whatever flyout was already open before Timeline, see `session_context.tsx`.
-    const isNewFlyoutEnabled = useIsNewFlyoutEnabled();
     const wrapperClassName = classNames('timeline-portal-overlay-mask', styles, {
       'timeline-portal-overlay-mask--full-screen': isFullScreen,
       'timeline-portal-overlay-mask--hidden': !visible,
@@ -79,6 +74,9 @@ export const TimelineModal = React.memo<TimelineModalProps>(
       [visible]
     );
 
+    // The session context gives flyouts opened from within Timeline (host/user/rule/network/
+    // document/notes/...) their own history group, isolated from whatever flyout was already open
+    // before Timeline, see `session_context.tsx`.
     return (
       <div data-test-subj="timeline-portal-ref" ref={ref}>
         <CustomEuiPortal sibling={sibling}>
@@ -88,25 +86,16 @@ export const TimelineModal = React.memo<TimelineModalProps>(
               data-test-subj="timeline-container"
               className="timeline-container"
             >
-              {isNewFlyoutEnabled ? (
-                <FlyoutSessionContextProvider
-                  value={{ session: 'start', historyKey: timelineFlyoutHistoryKey }}
-                >
-                  <StatefulTimeline
-                    renderCellValue={DefaultCellRenderer}
-                    rowRenderers={defaultRowRenderers}
-                    timelineId={timelineId}
-                    openToggleRef={openToggleRef}
-                  />
-                </FlyoutSessionContextProvider>
-              ) : (
+              <FlyoutSessionContextProvider
+                value={{ session: 'start', historyKey: timelineFlyoutHistoryKey }}
+              >
                 <StatefulTimeline
                   renderCellValue={DefaultCellRenderer}
                   rowRenderers={defaultRowRenderers}
                   timelineId={timelineId}
                   openToggleRef={openToggleRef}
                 />
-              )}
+              </FlyoutSessionContextProvider>
             </div>
           </div>
         </CustomEuiPortal>

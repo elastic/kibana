@@ -22,6 +22,7 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { ESQLLocation, ESQLProperNode } from '@elastic/esql/types';
 import type { SupportedDataType } from '../definitions/types';
+import type { NamedSubquery } from '../definitions/utils/named_subqueries';
 import type { EditorExtensions } from './options/recommended_queries';
 import type { SuggestionCategory } from '../../language/autocomplete/utils/sorting/types';
 import type { ReplacementRangeStrategy } from '../../language/autocomplete/utils/prefix_range';
@@ -228,6 +229,8 @@ export interface ICommandContext {
   isFieldsBrowserEnabled?: boolean;
   unmappedFieldsStrategy?: UnmappedFieldsStrategy;
   isTimeseriesSource?: boolean;
+  /** LET bindings that the sources of the current pipeline can reference. */
+  namedSubqueries?: readonly NamedSubquery[];
 }
 /**
  * This is a list of locations within an ES|QL query.

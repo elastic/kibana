@@ -108,6 +108,8 @@ export interface InvestigationMetadata {
   summary?: string;
   /** The conclusion. */
   verdict?: string;
+  /** User profile uids of the assignees. Absent when nobody is assigned. */
+  assignees?: string[];
 }
 
 /** What the investigation is about, one entry per subject. */

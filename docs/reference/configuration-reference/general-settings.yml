@@ -965,7 +965,7 @@ groups:
         datatype: string
         applies_to:
           stack: ga
-          ech: unavailable
+          ech: ga
           self: ga
 
       - setting: server.selfHttp.maxRedirects
@@ -1770,6 +1770,16 @@ groups:
         default: true
         applies_to:
           stack: ga
+          ech: unavailable
+          self: ga
+
+      - setting: xpack.subscription_status.enabled
+        description: |
+          Set this value to false to hide the license badge in the {{kib}} header. The badge shows trial and Basic license information.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga 9.7
           ech: unavailable
           self: ga
 

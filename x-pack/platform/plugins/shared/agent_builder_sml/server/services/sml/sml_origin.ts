@@ -17,6 +17,24 @@ export const smlOriginUri = (type: string, originId: string): string =>
 export const smlEntryId = (type: string, originId: string): string =>
   `${type}${ID_SEPARATOR}${originId}`;
 
+/** Splits an entry id into its type and origin id. */
+export const parseSmlEntryId = (entryId: string) => {
+  const separatorIndex = entryId.indexOf(ID_SEPARATOR);
+  const originId = entryId.slice(separatorIndex + ID_SEPARATOR.length);
+  return separatorIndex > 0 && originId
+    ? { type: entryId.slice(0, separatorIndex), originId }
+    : undefined;
+};
+
+/** Decodes an entry id taken from a `sml://` link, keeping it as is when the encoding is malformed. */
+export const decodeSmlLinkId = (id: string): string => {
+  try {
+    return decodeURIComponent(id);
+  } catch {
+    return id;
+  }
+};
+
 export const smlEntryIdFromOriginUri = (originUri: string): string => {
   const separatorIndex = originUri.indexOf(SCHEME_SEPARATOR);
   return separatorIndex === -1

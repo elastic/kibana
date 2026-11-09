@@ -40,7 +40,7 @@ export const registerHuntForThreatRoute = ({
           requiredPrivileges: [ALERTZERO_API_PRIVILEGE_READ],
         },
       },
-      summary: 'Run Tier 1 deterministic hunt',
+      summary: 'Run IOC Hunt',
     })
     .addVersion(
       {
