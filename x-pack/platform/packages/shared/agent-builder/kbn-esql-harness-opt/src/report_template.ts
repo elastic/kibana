@@ -83,6 +83,8 @@ const n = (v, d = 3) => (typeof v === 'number' && isFinite(v) ? v.toFixed(d) : '
 const usd = (v) => (typeof v === 'number' && isFinite(v) ? '$' + v.toFixed(4) : '—');
 const pct = (v) => (typeof v === 'number' ? Math.round(v * 100) + '%' : '—');
 /** Attribute carrying a route, quoted with entities so no backslash escaping is needed. */
+// Show paths relative to the tool directory; the absolute prefix is noise in every row.
+const shortPath = (path) => String(path).split('generate_esql/').pop();
 const goAttr = (route) => 'data-go="' + esc(JSON.stringify(route)) + '"';
 const sign = (v, d = 3) => (typeof v === 'number' ? (v >= 0 ? '+' : '') + v.toFixed(d) : '—');
 const cls = (v) => (v > 0.001 ? 'good' : v < -0.001 ? 'bad' : 'muted');
@@ -175,6 +177,7 @@ function lineageGraph() {
     state: 'base', round: null, delta: null, cost: null,
   });
 
+  const campaigns = [...new Set(DATA.rounds.map((round) => round.campaignId))];
   DATA.rounds.forEach((round) => {
     if (round.rejectedReason && !round.gate) {
       nodes.set('failed-' + round.round, {
@@ -187,7 +190,7 @@ function lineageGraph() {
     nodes.set(round.configHash + '-' + round.round, {
       id: round.configHash + '-' + round.round,
       label: 'round ' + round.round,
-      sub: (round.slots || []).join(', ') || 'config change',
+      sub: (round.slots || []).map(shortPath).join(', ') || 'edit',
       parent: round.parentHash,
       state: round.gate && round.gate.accepted ? 'accepted' : 'rejected',
       round: round.round,
@@ -250,7 +253,7 @@ function lineageGraph() {
 
   return '<div style="overflow:auto;border:1px solid var(--line);border-radius:8px;background:var(--bg)">' +
     '<svg width="' + width + '" height="' + height + '" style="display:block">' + edges + boxes + '</svg></div>' +
-    '<p class="muted">Each column is a generation: every candidate hangs off the config it was proposed from. ' +
+    '<p class="muted">' + campaigns.length + ' campaign(s). Each column is a generation: every candidate hangs off the variant it was proposed from. ' +
     'Green edges are acceptances — only those extend the chain; red nodes are dead ends that were measured and rejected.</p>';
 }
 
@@ -280,11 +283,12 @@ function viewCampaign() {
     '<h3>Lineage — configs tried, and what was built on what</h3>' + timeline +
     '<h3>Sealed split</h3>' + sealedTable +
     '<h3>What each round proposed</h3>' +
-    '<table><tr><th>round</th><th>slots</th><th>Δ reward [CI]</th><th>$/solved</th><th>regressions</th><th>verdict</th><th>rationale</th></tr>' +
+    '<table><tr><th>campaign</th><th>round</th><th>files</th><th>Δ reward [CI]</th><th>$/solved</th><th>regressions</th><th>verdict</th><th>rationale</th></tr>' +
     DATA.rounds.map((round) => {
       const g = round.gate;
       return '<tr ' + goAttr({ tab: 'rounds', round: round.round }) + ' style="cursor:pointer">' +
-        '<td>' + round.round + '</td><td>' + esc((round.slots || []).join(', ')) + '</td>' +
+        '<td class="muted">' + esc(String(round.campaignId).slice(4, 12)) + '</td>' +
+        '<td>' + round.round + '</td><td>' + esc((round.slots || []).map(shortPath).join(', ')) + '</td>' +
         '<td class="' + cls(g ? g.meanDelta : 0) + '">' + (g ? sign(g.meanDelta) + ' [' + n(g.ciLow) + ', ' + n(g.ciHigh) + ']' : '—') + '</td>' +
         '<td>' + (g ? usd(g.incumbentCostPerSolved) + ' → ' + usd(g.candidateCostPerSolved) : '—') + '</td>' +
         '<td>' + (g ? (g.regressions || []).length : '—') + '</td>' +

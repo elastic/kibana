@@ -110,11 +110,33 @@ export const runCampaign = async ({
   const workspace = { path: candidateWorktree, kibanaUrl: candidateTarget.kibanaUrl };
   const laneEnv: Record<string, string> = tier ? { ESQL_HARNESS_MODEL_CONNECTOR: tier } : {};
 
-  let incumbentEdits: CodeEdit[] = [];
-  let incumbentDiff = '';
+  // Continue from whatever the incumbent worktree already is — a previous campaign's accepted
+  // variants live there, and starting from an empty diff would relabel them as "base" and
+  // re-explore ground that was already won.
+  let incumbentEdits: CodeEdit[] = await collectEdits({
+    path: mainWorktree,
+    kibanaUrl: incumbentTarget.kibanaUrl,
+  });
+  let incumbentDiff = await candidateDiff({
+    path: mainWorktree,
+    kibanaUrl: incumbentTarget.kibanaUrl,
+  });
   let lastFeedback = '';
 
-  for (let round = 0; round < rounds; round++) {
+  // Rounds from earlier campaigns stay in the ledger; a campaign id keeps their numbering apart.
+  const campaignId = new Date()
+    .toISOString()
+    .replace(/[-:.TZ]/g, '')
+    .slice(0, 14);
+  const priorRounds = ledger.length;
+  log.info(
+    `[harness-opt] campaign ${campaignId} starting from variant ${variantHash(incumbentDiff)}${
+      incumbentEdits.length ? ` (${incumbentEdits.length} file(s) already changed)` : ' (clean)'
+    }`
+  );
+
+  for (let roundInCampaign = 0; roundInCampaign < rounds; roundInCampaign++) {
+    const round = priorRounds + roundInCampaign;
     const outputDir = Path.join(runsDir, `round-${Date.now()}`);
     const incumbentVariant = { hash: variantHash(incumbentDiff), diff: incumbentDiff };
 
@@ -149,7 +171,7 @@ export const runCampaign = async ({
       });
     } catch (e) {
       log.warning(`[harness-opt] round ${round} proposer failed: ${(e as Error).message}`);
-      ledger.push({ round, rejected: 'proposer-failed', error: (e as Error).message });
+      ledger.push({ round, campaignId, rejected: 'proposer-failed', error: (e as Error).message });
       saveLedger();
       continue;
     }
@@ -157,7 +179,7 @@ export const runCampaign = async ({
     const codeEdits = await collectEdits(workspace);
     if (codeEdits.length === 0) {
       log.warning(`[harness-opt] round ${round} produced no file changes`);
-      ledger.push({ round, rejected: 'no-edits', manifest: proposal.manifest });
+      ledger.push({ round, campaignId, rejected: 'no-edits', manifest: proposal.manifest });
       saveLedger();
       continue;
     }
@@ -173,6 +195,7 @@ export const runCampaign = async ({
       log.warning(`[harness-opt] edits rejected: ${validation.failures.join(' | ').slice(0, 500)}`);
       ledger.push({
         round,
+        campaignId,
         rejected: 'validation',
         failures: validation.failures.map((failure) => failure.slice(0, 800)),
         manifest: proposal.manifest,
@@ -194,7 +217,12 @@ export const runCampaign = async ({
     if (!candidateReady) {
       // Measuring a lane that did not restart compares the incumbent against itself and reports
       // a null result, which is worse than no round at all.
-      ledger.push({ round, rejected: 'candidate-restart-failed', manifest: proposal.manifest });
+      ledger.push({
+        round,
+        campaignId,
+        rejected: 'candidate-restart-failed',
+        manifest: proposal.manifest,
+      });
       saveLedger();
       await resetCandidate(workspace);
       continue;
@@ -276,6 +304,7 @@ export const runCampaign = async ({
 
     ledger.push({
       round,
+      campaignId,
       manifest: proposal.manifest,
       verification,
       filesChanged: codeEdits.map((edit) => edit.path),

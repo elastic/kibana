@@ -23,6 +23,7 @@ interface StoredRun {
 
 interface LedgerEntry {
   round: number;
+  campaignId?: string;
   rejected?: string;
   manifest?: {
     slots?: string[];
@@ -213,6 +214,7 @@ export const buildReportPayload = () => {
 
     return {
       round: entry.round,
+      campaignId: entry.campaignId ?? 'legacy',
       rejectedReason: entry.rejected,
       parentHash: entry.parentHash ?? 'base',
       configHash: entry.variantHash ?? `round-${entry.round}`,
