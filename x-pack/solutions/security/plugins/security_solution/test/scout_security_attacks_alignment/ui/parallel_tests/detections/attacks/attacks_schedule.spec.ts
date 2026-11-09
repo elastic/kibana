@@ -8,9 +8,6 @@
 import { spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
-const ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING =
-  'securitySolution:enableAlertsAndAttacksAlignment';
-
 spaceTest.describe(
   'Attacks schedule flyout',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
@@ -21,15 +18,8 @@ spaceTest.describe(
       await apiServices.attackDiscovery.seedAttackSchedule();
     });
 
-    spaceTest.beforeEach(async ({ browserAuth, scoutSpace }) => {
-      await scoutSpace.uiSettings.set({
-        [ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING]: true,
-      });
+    spaceTest.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsPlatformEngineer();
-    });
-
-    spaceTest.afterEach(async ({ scoutSpace }) => {
-      await scoutSpace.uiSettings.unset(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING);
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {

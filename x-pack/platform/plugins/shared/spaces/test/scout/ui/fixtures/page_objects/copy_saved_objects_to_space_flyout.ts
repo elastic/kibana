@@ -128,8 +128,21 @@ export class CopySavedObjectsToSpaceFlyout {
     destinationSpaceId: string,
     conflictObjectId: string
   ): Promise<void> {
-    await this.page.testSubj.locator(`cts-space-result-${destinationSpaceId}`).click();
-    await this.page.testSubj.locator(`cts-overwrite-conflict-${conflictObjectId}`).click();
+    const resultToggle = this.page.testSubj.locator(
+      `cts-space-result-toggle-${destinationSpaceId}`
+    );
+    await resultToggle.click();
+    await resultToggle
+      .and(this.page.locator('[aria-expanded="true"]'))
+      .waitFor({ state: 'visible' });
+
+    const overwriteSwitch = this.page.testSubj.locator(
+      `cts-overwrite-conflict-${conflictObjectId}`
+    );
+    await overwriteSwitch.click();
+    await overwriteSwitch
+      .and(this.page.locator('[aria-checked="true"]'))
+      .waitFor({ state: 'visible' });
   }
 
   /** Reads the four EuiStat counters in the flyout summary. */

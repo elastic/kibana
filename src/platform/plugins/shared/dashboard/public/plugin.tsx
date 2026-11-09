@@ -182,6 +182,15 @@ export class DashboardPlugin
       schema: dashboardSavedEventSchema,
     });
 
+    // Lazy-load via @kbn/change-history-ui/telemetry to avoid pulling React UI into page-load bundle.
+    void import('@kbn/change-history-ui/telemetry')
+      .then(({ registerChangeHistoryTelemetryEvents }) => {
+        registerChangeHistoryTelemetryEvents(core.analytics);
+      })
+      .catch(() => {
+        // Telemetry registration must not break plugin setup.
+      });
+
     if (share) {
       share.url.locators.create(
         new DashboardAppLocatorDefinition({

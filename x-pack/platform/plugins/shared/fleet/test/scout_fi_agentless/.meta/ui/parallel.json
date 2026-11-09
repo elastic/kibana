@@ -1,5 +1,5 @@
 {
-  "sha1": "4a40b5b1d09c63645d7e6cc1574ea13dda3ee6a4",
+  "sha1": "1dc195268913cdba733fca5aab238656e9d33eec",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,6 +13,20 @@
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_fi_agentless/ui/parallel_tests/global.setup.ts",
         "line": 5,
         "column": 1
+      }
+    },
+    {
+      "id": "d857cde6ebf8844-927a1dd0f954376",
+      "title": "Agentless as the default deployment mode AWS Billing: saves an agentless policy when the deployment mode was not changed (regression guard for #297105)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_fi_agentless/ui/parallel_tests/agentless_default/default_deployment_mode.spec.ts",
+        "line": 57,
+        "column": 14
       }
     },
     {

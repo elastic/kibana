@@ -1,0 +1,98 @@
+{
+  "batchGetTraces": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/Traces"
+      }
+    ]
+  },
+  "getGroups": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/Groups"
+      }
+    ]
+  },
+  "getInsight": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/Insight"
+      }
+    ]
+  },
+  "getInsightEvents": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/InsightEvents"
+      }
+    ]
+  },
+  "getInsightImpactGraph": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/InsightImpactGraph"
+      }
+    ]
+  },
+  "getInsightSummaries": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/InsightSummaries"
+      }
+    ]
+  },
+  "getRetrievedTracesGraph": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/GetRetrievedTracesGraph"
+      }
+    ]
+  },
+  "getSamplingRules": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/GetSamplingRules"
+      }
+    ]
+  },
+  "getServiceGraph": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/ServiceGraph"
+      }
+    ]
+  },
+  "getTimeSeriesServiceStatistics": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/TimeSeriesServiceStatistics"
+      }
+    ]
+  },
+  "getTraceGraph": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/TraceGraph"
+      }
+    ]
+  },
+  "getTraceSummaries": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/TraceSummaries"
+      }
+    ]
+  }
+}

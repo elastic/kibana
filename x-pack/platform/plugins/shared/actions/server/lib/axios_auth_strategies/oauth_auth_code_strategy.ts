@@ -11,6 +11,7 @@ import type { AxiosErrorWithRetry } from '../axios_utils';
 import { getOAuthAuthorizationCodeAccessToken } from '../get_oauth_authorization_code_access_token';
 import { buildTokenResponseOptions } from '../request_oauth_token';
 import type { AxiosAuthStrategy, AuthStrategyDeps } from './types';
+import { recordConnectorAuth } from '../connector_metrics';
 
 interface OAuthAuthCodeSecrets {
   clientId?: string;
@@ -27,6 +28,7 @@ export class OAuthAuthCodeStrategy implements AxiosAuthStrategy {
   installResponseInterceptor(axiosInstance: AxiosInstance, deps: AuthStrategyDeps): void {
     const {
       connectorId,
+      connectorTypeId,
       secrets,
       connectorTokenClient,
       logger,
@@ -88,6 +90,13 @@ export class OAuthAuthCodeStrategy implements AxiosAuthStrategy {
             tokenTypePath,
             tokenType,
           }),
+        });
+
+        recordConnectorAuth({
+          phase: 'token',
+          authType: 'oauth_authorization_code',
+          connectorType: connectorTypeId,
+          ...(newAccessToken ? {} : { errorType: 'token_request_failed' as const }),
         });
 
         if (!newAccessToken) {

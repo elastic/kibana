@@ -7,15 +7,16 @@
 
 import { MAX_ACTION_SOURCE_NAME_LENGTH } from '../../../../constants';
 import {
-  ActionSourceRt,
+  ActionSourceSchema,
   ActionSourceTypes,
+  PersistedActionSourceSchema,
   isActionSource,
   isHeaderActionSource,
   toActionSource,
 } from './v1';
 
 describe('ActionSource', () => {
-  it('decodes a full source', () => {
+  it('parses a full source', () => {
     const value = {
       type: 'agent',
       id: 'agent-1',
@@ -23,13 +24,27 @@ describe('ActionSource', () => {
       run_id: 'conv-1',
     };
 
-    expect(ActionSourceRt.decode(value)).toEqual({ _tag: 'Right', right: value });
+    expect(ActionSourceSchema.safeParse(value)).toEqual({ success: true, data: value });
   });
 
-  it('decodes a source with only type and id', () => {
+  it('parses a source with only type and id', () => {
     const value = { type: 'rule', id: 'rule-1' };
 
-    expect(ActionSourceRt.decode(value)).toEqual({ _tag: 'Right', right: value });
+    expect(ActionSourceSchema.safeParse(value)).toEqual({ success: true, data: value });
+  });
+
+  it('ActionSourceSchema rejects an unknown type', () => {
+    expect(ActionSourceSchema.safeParse({ type: 'futuristic', id: 'x1' }).success).toBe(false);
+  });
+
+  it('PersistedActionSourceSchema accepts an unknown type', () => {
+    const value = { type: 'futuristic', id: 'x1' };
+
+    expect(PersistedActionSourceSchema.safeParse(value)).toEqual({ success: true, data: value });
+  });
+
+  it('hides unknown types from the header', () => {
+    expect(isHeaderActionSource({ type: 'futuristic', id: 'x1' })).toBe(false);
   });
 
   it('isActionSource accepts a valid source', () => {

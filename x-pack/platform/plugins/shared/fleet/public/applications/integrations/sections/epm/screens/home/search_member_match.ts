@@ -5,19 +5,9 @@
  * 2.0.
  */
 
+import { getMatchingCollectionMembers } from '../../../../../../services/collections';
+
 import type { IntegrationCardItem } from './card_utils';
-
-const tokenize = (text: string): string[] =>
-  text
-    .toLowerCase()
-    .split(/[^\p{L}\p{N}]+/u)
-    .filter(Boolean);
-
-// Same semantics as the local search index: every query token must prefix a token of the text.
-const matchesAllTokens = (queryTokens: string[], text: string): boolean => {
-  const textTokens = tokenize(text);
-  return queryTokens.every((q) => textTokens.some((t) => t.startsWith(q)));
-};
 
 /**
  * When the search term matched a service bundled behind the card (`searchMembers`) rather than
@@ -32,19 +22,10 @@ export const withSearchMemberMatch = (
   // their member integrations.
   const members =
     card.searchMembers ?? card.groupMembers?.map(({ name, title }) => ({ name, title }));
-  const queryTokens = tokenize(searchTerm ?? '');
-  if (queryTokens.length === 0 || !members?.length) {
-    return card;
-  }
-
-  // The term is about the card itself ("aws", "amazon"): the generic description fits.
-  if (matchesAllTokens(queryTokens, `${card.title} ${card.name}`)) {
-    return card;
-  }
-
-  const matches = members.filter(
-    (member) =>
-      matchesAllTokens(queryTokens, member.title) || matchesAllTokens(queryTokens, member.name)
+  const matches = getMatchingCollectionMembers(
+    { title: card.title, name: card.name },
+    members ?? [],
+    searchTerm
   );
   if (matches.length === 0) {
     return card;

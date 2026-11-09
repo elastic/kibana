@@ -7,7 +7,7 @@
 
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiPopoverTitle, EuiSelectable, EuiButton } from '@elastic/eui';
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 import React, { memo, useCallback, useMemo, useReducer, useEffect } from 'react';
 import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
 import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';

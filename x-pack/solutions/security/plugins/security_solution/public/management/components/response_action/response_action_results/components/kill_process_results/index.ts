@@ -6,4 +6,4 @@
  */
 
 // TODO:PT move component to this new location and refactor it
-export { KillSuspendProcessActionResult } from '../../../../kill_process_action_result';
+export { KillSuspendProcessActionResult } from './kill_process_action_result';

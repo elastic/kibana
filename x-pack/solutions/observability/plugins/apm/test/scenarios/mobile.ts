@@ -36,6 +36,19 @@ const modelIdentifiersWithCrashes = [
   'iPad12,2',
 ];
 
+// Kept disjoint from the crashing models so the errors and crashes tabs surface visibly
+// different filter options, while the overview and transactions screens show every model.
+const modelIdentifiersWithErrors = [
+  'SM-G973F',
+  'SM-N950F',
+  'HUAWEI NXT-CL00',
+  'Pixel 7 Pro',
+  'LG G6',
+  'iPhone15,2',
+  'iPhone9,1',
+  'iPad13,7',
+];
+
 const ANDROID_DEVICES: DeviceMetadata[] = [
   {
     manufacturer: 'Samsung',
@@ -370,9 +383,23 @@ const scenario: Scenario<ApmFields> = async ({ scenarioOpts, logger }) => {
           device.startNewSession();
           const framework =
             device.fields['device.manufacturer'] === 'Apple' ? 'iOS' : 'Android Activity';
-          const couldCrash = modelIdentifiersWithCrashes.includes(
-            device.fields['device.model.identifier'] ?? ''
-          );
+          const modelIdentifier = device.fields['device.model.identifier'] ?? '';
+          const couldCrash = modelIdentifiersWithCrashes.includes(modelIdentifier);
+          const couldError = modelIdentifiersWithErrors.includes(modelIdentifier);
+
+          const buildStartTxError = () => {
+            if (index % 2 !== 0) {
+              return undefined;
+            }
+            if (couldCrash) {
+              return device.crash({ message: 'crash' }).timestamp(timestamp);
+            }
+            if (couldError) {
+              return device.error({ message: 'error' }).timestamp(timestamp);
+            }
+            return undefined;
+          };
+          const startTxError = buildStartTxError();
           const startTx = device
             .transaction('Start View - View Appearing', framework)
             .timestamp(timestamp)
@@ -401,9 +428,7 @@ const scenario: Scenario<ApmFields> = async ({ scenarioOpts, logger }) => {
                 .timestamp(timestamp + 400)
             );
           return [
-            couldCrash && index % 2 === 0
-              ? startTx.errors(device.crash({ message: 'error' }).timestamp(timestamp))
-              : startTx,
+            startTxError ? startTx.errors(startTxError) : startTx,
             device
               .transaction('Second View - View Appearing', framework)
               .timestamp(10000 + timestamp)

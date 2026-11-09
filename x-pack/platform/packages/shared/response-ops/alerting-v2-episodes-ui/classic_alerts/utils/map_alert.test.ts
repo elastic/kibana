@@ -44,10 +44,13 @@ describe('mapClassicAlertToEpisode', () => {
     'kibana.alert.rule.uuid': 'rule-uuid-1',
     'kibana.alert.rule.name': 'My Rule',
     'kibana.alert.rule.category': 'Test',
+    'kibana.alert.rule.rule_type_id': 'apm.error_rate',
     'kibana.alert.workflow_tags': ['tag-a', 'tag-b'],
     'kibana.alert.workflow_status': 'open',
     'kibana.alert.duration.us': 7_200_000_000,
     'kibana.alert.severity': 'critical',
+    'kibana.alert.case_ids': ['case-1', 'case-2'],
+    'kibana.alert.reason': 'CPU usage is 95%, above the threshold of 90%',
   };
 
   it('maps all fields correctly', () => {
@@ -67,6 +70,7 @@ describe('mapClassicAlertToEpisode', () => {
       last_tags: ['tag-a', 'tag-b'],
       severity: 'critical',
       rule_category: 'Test',
+      reason: 'CPU usage is 95%, above the threshold of 90%',
       supports_actions: false,
       supports_timeline: false,
     });
@@ -87,9 +91,19 @@ describe('mapClassicAlertToEpisode', () => {
       alertUuid: 'alert-uuid-1',
       instanceId: 'instance-1',
       ruleId: 'rule-uuid-1',
+      ruleTypeId: 'apm.error_rate',
       workflowStatus: 'open',
       workflowTags: ['tag-a', 'tag-b'],
+      caseIds: ['case-1', 'case-2'],
     });
+  });
+
+  it('defaults caseIds to an empty array when the alert is not attached to a case', () => {
+    const { 'kibana.alert.case_ids': _caseIds, ...withoutCaseIds } = baseSource;
+    const episode = mapClassicAlertToEpisode(withoutCaseIds, TEST_INDEX);
+    const ctx = episode.source_action_context as ClassicAlertActionContext;
+
+    expect(ctx.caseIds).toEqual([]);
   });
 
   it('handles missing optional fields gracefully', () => {
@@ -105,6 +119,7 @@ describe('mapClassicAlertToEpisode', () => {
     expect(episode['episode.id']).toBe('uuid-minimal');
     expect(episode['episode.status']).toBe(ALERT_EPISODE_STATUS.INACTIVE);
     expect(episode['rule.name']).toBeUndefined();
+    expect(episode.reason).toBeUndefined();
     expect(episode.severity).toBeNull();
     expect(episode.last_tags).toEqual([]);
     expect(episode.last_assignee_uid).toBeNull();

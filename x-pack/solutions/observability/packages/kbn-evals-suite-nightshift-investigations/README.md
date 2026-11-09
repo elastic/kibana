@@ -2,7 +2,15 @@
 
 Evaluation suite for [Nightshift investigations](../../plugins/nightshift_investigations).
 
-By default every eval runs, locally and in CI, as long as sandbox credentials are available. Set `NIGHTSHIFT_DATASETS` to run just one. The smoke eval checks seed data loading and score ingestion. The trace-only eval runs the real manual investigation workflow on file-based or stored questions and persists its report, conversation and full agent trace. Its single placeholder score is **ungraded**. It does not measure investigation quality or establish execution success.
+The smoke and trace-only evals run by default, locally and in CI, when sandbox credentials are
+available. Set `NIGHTSHIFT_DATASETS` to run just one. The smoke eval checks seed data loading and
+score ingestion. The trace-only eval runs the real manual investigation workflow on file-based or
+stored questions and persists its report, conversation and full agent trace. The
+[ORCA benchmark](#orca-benchmark) runs the same investigation and judges on its own Scout server.
+
+Investigation evals grade each run with five RCA judges and an `execution_success` score. A run
+that ends without a conclusion scores 0 there but doesn't fail the eval on its own; the eval fails
+when fewer than 80% of runs complete.
 
 ## Running the suite
 
@@ -54,7 +62,7 @@ yarn start                         # Kibana on localhost:5601
 
 Either way the profile also supplies this suite's `GCS_CREDENTIALS`, read from `gcsDatasetAccessCredentials` in the profile's config — from Vault for `dev-vault`, from `config.<profile>.json` otherwise, and `node scripts/evals init` can fill it in. Export the variable by hand only when running outside a profile, as [publishing](#publishing-the-synthetic-snapshot) does.
 
-For model and judge selection, `--grep` and repetitions, see [running evals locally](../../../../platform/packages/shared/kbn-evals/README.md#11-getting-started-locally). This suite does not override any of those flags.
+For model and judge selection, `--grep` and repetitions, see [running evals locally](../../../../platform/packages/shared/kbn-evals/README.md#11-getting-started-locally). In CI, Customer-0's judge is pinned to `eis-openai-gpt-6-sol`, the model the online evals judges use; a `models:judge:` label doesn't change it. A run filtered with `EVAL_GREP` drops the shards, so pass `EVAL_CONNECTOR_ID=eis-openai-gpt-6-sol` with it. Pass it locally with `--judge`. The suite overrides no other flags.
 
 ## Trace-only investigations
 
@@ -66,17 +74,40 @@ Vault, so run with `--profile dev-vault` and there is nothing to configure:
 node scripts/evals start \
   --suite nightshift-investigations --profile dev-vault \
   --model eis-anthropic-claude-5-5-sonnet \
-  --judge eis-anthropic-claude-4-6-sonnet
+  --judge eis-openai-gpt-6-sol
 ```
 
 The suite owns its sandbox wiring through the `scoutHook` in its
 [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json) entry,
-[`scout/scout_hook.sh`](scout/scout_hook.sh). The evals CLI (and `run_suite.sh` in CI) pipes the
-profile's evals config to it; the hook reads the `sandbox` block and exports the `SANDBOX_*`
-variables plus `SANDBOX_KIBANA_CONFIG`, which tells the `evals_nightshift_investigations` Scout
-config set to load [`scout/kibana.sandbox.yml`](scout/kibana.sandbox.yml). Kibana resolves the
+[`scout/scout_hook.sh`](scout/scout_hook.sh). The hook reads the `sandbox` block and exports the
+`SANDBOX_*` variables plus `SANDBOX_KIBANA_CONFIG`, which tells the `evals_nightshift_investigations`
+Scout config set to load [`scout/kibana.sandbox.yml`](scout/kibana.sandbox.yml). Kibana resolves the
 `${SANDBOX_*}` references in that file from its environment, so API keys never reach disk or
-process arguments. CI reads the same block from the ci-prod Vault. The hook needs `jq`.
+process arguments. The hook needs `jq`.
+
+The `sandbox` and `nightshift` blocks live in the suite's own Vault secret (`"vaultSecret":
+"nightshift"`), separate from the general `@kbn/evals` config that every other suite reads, so
+rotating them cannot break other suites:
+
+| Where                 | Hook input                                                       |
+| --------------------- | ---------------------------------------------------------------- |
+| CI (`run_suite.sh`)   | `kv/ci-shared/kbn-evals/nightshift` in the ci-prod Vault         |
+| `--profile dev-vault` | `secret/kibana-issues/dev/kbn-evals/nightshift` in the dev Vault |
+| Other profiles        | The profile's `config.<profile>.json` (see below)                |
+
+#### Rotating Nightshift secrets
+
+Retrieve the secret into the gitignored [`vault/config.json`](vault/config.example.json), edit it, and upload it. Upload runs this suite's hook on the file first and refuses a config the hook rejects. Each upload replaces the whole secret, so always retrieve first. See [updating Vault config](../../../../platform/packages/shared/kbn-evals/README.md#ci-ops) for logging in to each Vault.
+
+```bash
+# dev Vault (dev-vault profile)
+node x-pack/platform/packages/shared/kbn-evals/scripts/vault/retrieve_secrets.js --vault dev --suite nightshift-investigations
+node x-pack/platform/packages/shared/kbn-evals/scripts/vault/upload_secrets.js --vault dev --suite nightshift-investigations
+
+# ci-prod Vault (CI)
+node x-pack/platform/packages/shared/kbn-evals/scripts/vault/retrieve_secrets.js --vault ci-prod --suite nightshift-investigations
+node x-pack/platform/packages/shared/kbn-evals/scripts/vault/upload_secrets.js --vault ci-prod --suite nightshift-investigations
+```
 
 #### Other profiles or a different sandbox
 
@@ -111,6 +142,12 @@ finish and verify concurrent commands can allocate before launching a larger dat
 
 #### What the run does
 
+Investigations only run as the Nightshift agent service account, so the eval first creates the
+account's roles on stateful (`ensureNightshiftServiceAccountRoles`), finds or creates the accounts
+(`ensureNightshiftServiceAccounts`, as the app's setup step does), and sets up the space with `POST /internal/nightshift/investigations/service_account/_enable` (idempotent; the eval
+user holds `manage_security`). The `evals_nightshift_investigations` config set turns on
+`xpack.security.serviceAccounts.enabled`.
+
 The native framework still requires an evaluation endpoint in its configuration; the command
 reuses the target endpoint for that metadata. This suite never invokes an LLM evaluator or judge.
 The CODE evaluator `ungraded_placeholder` always returns one, uses neutral direction, and states
@@ -144,9 +181,10 @@ remains an execution failure. Ordinary reports are preserved unchanged.
 The `evals_nightshift_investigations` server config extends `evals_tracing` whenever the hook
 exports sandbox credentials. Otherwise it is plain `evals_tracing`, so the smoke eval needs no
 sandbox credentials. It enables the investigation engine, its `nightshift.enabled` feature flag
-and sandbox, disables Cortex, and exports full Agent Builder payloads (user messages, system
+and sandbox, pauses online evals (`nightshift.onlineEvals.paused`) so investigations are judged
+only by the suite, disables Wiki, and exports full Agent Builder payloads (user messages, system
 instructions, responses, tool arguments/results and conversation IDs) to the profile's configured
-destination. Trace-exporter headers and remote telemetry credentials reach Kibana through
+destination. Trace-exporter headers and connector credentials reach Kibana through
 environment references in committed YAML, without generated secret files or credential arguments.
 Full payloads have the destination's access controls; use synthetic questions or data
 you are allowed to export there. Existing sandbox connector authorization remains unchanged.
@@ -156,7 +194,7 @@ To run another file with the same loader and task:
 ```bash
 NIGHTSHIFT_DATASETS=trace-only NIGHTSHIFT_EXAMPLES_FILE=/absolute/path/examples.json \
   node scripts/evals run --suite nightshift-investigations --profile dev-vault \
-  --model eis-anthropic-claude-5-5-sonnet --judge eis-anthropic-claude-4-6-sonnet
+  --model eis-anthropic-claude-5-5-sonnet --judge eis-openai-gpt-6-sol
 ```
 
 ```json
@@ -208,7 +246,7 @@ Select an existing evaluations dataset by its exact name in the evaluations UI:
 NIGHTSHIFT_DATASET_NAME='<dataset-name>' \
   node scripts/evals start --suite nightshift-investigations --profile dev-vault --repetitions 1 \
   --model eis-anthropic-claude-5-5-sonnet \
-  --judge eis-anthropic-claude-4-6-sonnet
+  --judge eis-openai-gpt-6-sol
 ```
 
 `NIGHTSHIFT_DATASET_NAME` selects trace-only investigations when `NIGHTSHIFT_DATASETS` is unset.
@@ -216,8 +254,8 @@ It reads the dataset from the results profile's Kibana, in the first `--space-id
 and example IDs, labels, tags and metadata through `trustUpstreamDataset`. The existing runner
 upserts the fetched dataset before running; skipping that write is a separate framework follow-up. Its examples
 must satisfy the same question and distinct `case_id` requirements as a file. Do not combine it
-with `NIGHTSHIFT_EXAMPLES_FILE`. The dataset's telemetry source still needs the sandbox and remote
-telemetry settings below; selecting a dataset does not provision its source data.
+with `NIGHTSHIFT_EXAMPLES_FILE`. The dataset's data source still needs the sandbox credentials and
+a [connector set](#connector-sets); selecting a dataset does not provision its source data.
 
 The investigation spec sets the existing `runExperiment` concurrency option to **16**. Its
 Scout config reserves **21 normal-task slots** (42 raw cost units): sixteen for investigation
@@ -232,78 +270,154 @@ selection alone does not restart Scout. `run` and `start --skip-server` use your
 whose Task Manager capacity you must configure yourself. Wait for any active eval to finish before
 restarting a shared local stack.
 
-## Remote telemetry investigations
+## Connector sets
 
-Use the same `trace-only` selection, dataset loader, investigation task, placeholder evaluator and
-trace acceptance checks to investigate an operator-configured Elasticsearch cluster. The telemetry
-source is independent of the evaluations profile: the sandbox queries the remote cluster, while
-the profile still selects where experiment results and agent traces are persisted.
+Evals start the investigator the way production does: with a set of saved connectors, listed for
+the agent in `connectors.md`. There is no eval-only telemetry setting, start parameter or index
+hint; the agent finds the data through the connectors, as it must for a customer. A connector set
+is the group of preconfigured connectors one Scout stack starts with:
 
-Configure a dedicated API key restricted to `read` and `view_index_metadata` on the telemetry
-patterns the example needs, with only the cluster privileges required for discovery. For
-cross-cluster search, verify that the key can read the intended remote and index pattern. Keep
-endpoints, keys and readable-index hints in Vault (or a private local profile JSON), and customer
-example files private and uncommitted.
+| Set         | Kibana config                                                              | Connectors                         | Credentials (Vault / profile JSON)  |
+| ----------- | -------------------------------------------------------------------------- | ---------------------------------- | ----------------------------------- |
+| `default`   | [`scout/connector_sets/default.yml`](scout/connector_sets/default.yml)     | `elasticsearch` (`.elasticsearch`) | `nightshift.telemetry.{url,apiKey}` |
+| `orcabench` | [`scout/connector_sets/orcabench.yml`](scout/connector_sets/orcabench.yml) | `orcabench-es` (`.elasticsearch`)  | `nightshiftOrcaEs.{url,apiKey}`     |
 
-Add a `nightshift.telemetry` block beside `sandbox` in the profile's existing evals Vault config
-(or local profile JSON). The suite hook reads it without adding Nightshift fields to the shared
-CLI or global config schema:
+To add a connector to a set, declare it in the set's YAML and add its id to `CONNECTOR_SETS`. The
+hook selects `orcabench` on the ORCA shard (or `NIGHTSHIFT_DATASETS=orcabench`), and `default`
+whenever Elasticsearch credentials are configured. It exports `NIGHTSHIFT_CONNECTOR_SET` and points the
+Scout config set at the set's YAML; the eval then saves every connector in the set on the
+investigator through the Agent Builder agents API (`saveConnectorSetOnInvestigator` in
+[`connector_sets.ts`](evals/investigation/connector_sets.ts)), as a user would in the agent's
+settings. Without a connector set, nothing is saved. One stack runs one set; the eval does not
+switch connectors per example.
+
+The `default` set's credentials keep the Vault field name `nightshift.telemetry`:
 
 ```json
 "nightshift": {
-  "telemetry": {
-    "url": "https://telemetry.example.com",
-    "apiKey": "...",
-    "readableIndices": "Read remote-a:logs-service-*"
-  }
+  "telemetry": { "url": "https://es.example.com", "apiKey": "..." }
 }
 ```
 
-`url` and `apiKey` are required together; `readableIndices` is optional. Profile values take
-precedence over the following shell fallbacks. The hook selects the telemetry YAML only when the
-URL and key are configured, and requires sandbox credentials for remote investigations.
+`url` and `apiKey` are required together, and a connector set requires sandbox credentials.
+Profile values take precedence over these shell fallbacks, which replace the former
+`NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL` and `NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY`:
 
-| Variable | Purpose |
-| --- | --- |
-| `NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL` | Remote Elasticsearch endpoint. Requires the API key below. |
-| `NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY` | Encoded restricted API key, without the `ApiKey` prefix. Requires the URL above. |
-| `NIGHTSHIFT_SANDBOX_READABLE_INDICES` | Optional manifest guidance naming readable index patterns and explicit remote names (up to 10,000 characters). |
-| `NIGHTSHIFT_EXAMPLES_FILE` | The same file format documented above; only questions and stable case IDs are required. |
+| Variable                | Purpose                                                                           |
+| ----------------------- | --------------------------------------------------------------------------------- |
+| `NIGHTSHIFT_ES_URL`     | Elasticsearch endpoint, without embedded credentials. Requires the API key below. |
+| `NIGHTSHIFT_ES_API_KEY` | Encoded restricted API key, without the `ApiKey` prefix. Requires the URL above.  |
 
-With those variables and the sandbox credentials configured:
+A `readableIndices` field left in Vault is ignored.
+
+Restrict each Elasticsearch API key to `read` and `view_index_metadata` on the patterns the
+examples need, with only the cluster privileges required for discovery. Keep endpoints and keys in
+Vault (or a private local profile JSON), and customer example files private and uncommitted. The
+existing credential resolver authorizes connector access and execution, checks the agent's
+allow-list, and exposes the API key only to the requesting sandbox command.
+`/workspace/.connector-docs/elastic.md` is the same Elasticsearch guide every investigation gets.
 
 ```bash
 NIGHTSHIFT_DATASETS=trace-only NIGHTSHIFT_EXAMPLES_FILE=/private/path/examples.json \
   node scripts/evals start --suite nightshift-investigations --profile dev-vault \
+  --model eis-anthropic-claude-5-5-sonnet --judge eis-openai-gpt-6-sol
+```
+
+For connectivity acceptance, inspect the persisted agent trace's command and actual Elasticsearch
+response: confirm it queried the intended connector and returned data from the intended
+remote/index and time range without query or remote failures. A `connector_id`, exit code zero,
+completed investigation or placeholder score alone does not prove connectivity.
+
+Leave the Elasticsearch settings unset for the bundled synthetic examples; they need no connector. The
+former `remote` selection and `NIGHTSHIFT_REMOTE_EXAMPLES_FILE` are replaced by this shared file
+workflow.
+
+## Connector probes
+
+`NIGHTSHIFT_DATASETS=connector-probe` asks the hidden **Nightshift Assistant** agent
+(`nightshift.assistant`) each question in one `POST /api/agent_builder/converse` call. The
+assistant has the investigator's tools, connectors, Wiki and Semantic Memory hooks, but a short
+direct-answer prompt that reads the workspace `.md` files only when needed, and no decision trees,
+so a probe takes a few model turns instead of a full investigation. Use it to iterate quickly on
+how the agent queries Elasticsearch. Wiki and memory optimize still run after each reply, so
+probes update the space's wiki and memories like investigations do.
+
+It is opt-in: unset and `all` never select it, because it needs a
+[connector set](#connector-sets) as well as sandbox credentials. The probe saves the set on the
+investigator too, since the assistant uses the investigator's connectors.
+
+```bash
+NIGHTSHIFT_DATASETS=connector-probe NIGHTSHIFT_PROBE_EXAMPLES_FILE=/path/to/probes.json \
+  node scripts/evals start --suite nightshift-investigations --profile dev-vault --repetitions 1 \
+  --model eis-anthropic-claude-5-5-sonnet --judge eis-openai-gpt-6-sol
+```
+
+Probes are not bundled: they name a real cluster's remotes and data streams, so they live outside
+the repository. `NIGHTSHIFT_PROBE_EXAMPLES_FILE` points at a file in the
+[same format](#trace-only-investigations) as trace-only investigations, where each example's
+`output.reference_answer` describes the expected behaviour. Write questions with a relative time
+window and references that grade behaviour rather than counts, so they stay valid week to week. Give
+a subset its own `dataset` name so it does not replace the stored full set.
+
+| Evaluator             | Kind | Scores                                                                     |
+| --------------------- | ---- | -------------------------------------------------------------------------- |
+| `connector_used`      | CODE | At least one `nightshift_sandbox_bash` call passed a `connector_id`.       |
+| `within_time_budget`  | CODE | The `converse` call finished within `NIGHTSHIFT_PROBE_TIME_BUDGET_S` (30). |
+| `reference_behaviour` | LLM  | The reply and tool calls match the example's `output.reference_answer`.    |
+
+Set `SELECTED_EVALUATORS=connector_used,within_time_budget` to skip the judge. Each run logs its
+case, duration, tool-call count, conversation and trace ids and scores. A failed `converse` call
+fails the test; low scores do not.
+
+## Wiki optimizer replay
+
+`NIGHTSHIFT_DATASETS=wiki-optimize` replays saved investigation rounds through the real Wiki
+optimizer with a real model and scores the wiki pages it writes. No investigation runs and no
+sandbox is needed, so a run takes a few model calls per example and isolates what the optimizer
+learns from a round: recurring tool failures and a correction in a follow-up message. The
+optimizer's own page store runs unchanged on an in-memory Elasticsearch fake, so page ids, statuses, corroboration counts and provenance behave as in production.
+
+It is opt-in: unset and `all` never select it. It still needs a model endpoint, so start it the same
+way as the other evals:
+
+```bash
+NIGHTSHIFT_DATASETS=wiki-optimize \
+  node scripts/evals start --suite nightshift-investigations --profile dev-vault --repetitions 3 \
   --model eis-anthropic-claude-5-5-sonnet --judge eis-anthropic-claude-4-6-sonnet
 ```
 
-The committed [`scout/kibana.telemetry.yml`](scout/kibana.telemetry.yml) creates the preconfigured `nightshift-evals-telemetry` webhook with a secret
-`Authorization` header. The existing credential resolver authorizes connector access and execution,
-checks the agent's allow-list, and exposes the API key only to the requesting sandbox command.
-Remote telemetry and sandbox credentials are supplied through the hook environment.
-`/workspace/elastic.md` contains variable names and query guidance, never credential values. Its
-examples bound requests by time and advise using explicit remote names and narrow index patterns.
-These are instructions for the agent; the API key's privileges enforce the read restrictions.
+The model is not deterministic, so use several repetitions and read the per-evaluator pass rates.
+The bundled `evals/wiki_optimize/synthetic.json` uses made-up services. Replays built from real
+traces name real infrastructure, so they live outside the repository: point
+`NIGHTSHIFT_WIKI_REPLAY_FILE` at a file in the same format.
 
-Choose an example whose required telemetry is still retained and verify a bounded query with the
-restricted key first. For connectivity acceptance, inspect the persisted agent trace's command and
-actual Elasticsearch response: confirm it queried the configured endpoint through the telemetry
-connector and returned data from the intended remote/index and time range without query or remote
-failures. Record the tested commit, experiment and trace links, plus sanitized query evidence. A
-`connector_id`, exit code zero, completed investigation or placeholder score alone does not prove
-connectivity. This workflow remains ungraded and requires no reference answer or quality threshold.
+Each example replays one or more `rounds` against one store, optionally starting from `seed_pages`:
 
-Leave the remote settings unset for the bundled synthetic examples;
-synthetic execution continues to need no telemetry connector. The former `remote` selection and
-`NIGHTSHIFT_REMOTE_EXAMPLES_FILE` are replaced by this shared file workflow. Grading, snapshot
-provisioning and micro-evals are separate follow-ups.
+| Round `kind`     | What the optimizer is told                                                                        |
+| ---------------- | ------------------------------------------------------------------------------------------------- |
+| `initial`        | An investigation: learn the durable structure and tool behaviour it established.                  |
+| `follow_up`      | A user turn after an answer (`previous_assistant_message`) that may correct or extend it.         |
+
+An example's `output` states what must happen. Terms in `must_capture` may list alternatives with
+`|`.
+
+| Evaluator             | Kind | Scores                                                                                         |
+| --------------------- | ---- | ---------------------------------------------------------------------------------------------- |
+| `capture_recall`      | CODE | The share of `must_capture` items found on a page of the right type and section.               |
+| `non_temporal`        | CODE | The share of written pages free of dates, ids and counts of one run.                           |
+| `must_not_absent`     | CODE | No page holds a case-specific detail listed in `must_not`.                                     |
+| `effects_met`         | CODE | Each round created, corroborated, rewrote, archived or left untouched the pages `effects` name. |
+| `page_bounds`         | CODE | No more pages written than `max_pages_written`, and no near-duplicates of a described page.    |
+| `new_pages_tentative` | CODE | A page created in a round starts tentative.                                                    |
+
+An evaluator that does not apply to an example scores `null` rather than 1, so pass rates are not
+diluted.
 
 ## Deferred sandbox session isolation
 
 The shared sandbox workspace is scoped to a space and conversation, not to an agent's connector
-allow-list or a user's current execution privileges. Telemetry hints are authorized before seeding
-and cleared when access or configuration is removed, but overlapping calls with different
+allow-list or a user's current execution privileges. Connector guides are written for every
+conversation, but overlapping calls with different
 authorization contexts can race between manifest preparation and file access. Previously created
 files can also remain in that workspace. This PR does not establish isolation between those contexts.
 
@@ -460,17 +574,211 @@ against.
 
 ## Environment variables
 
-| Variable              | Effect                                                                                                                                                                                                                                                                                              |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NIGHTSHIFT_DATASETS` | Comma-separated dataset ids (whitespace trimmed). Smoke dataset ids such as `synthetic-smoke` select seeded evals; `trace-only` selects the file-driven investigations; they can be combined, e.g. `synthetic-smoke,trace-only`. Unset or `all` runs every eval when sandbox credentials are present, except that a stored `NIGHTSHIFT_DATASET_NAME` defaults to trace-only when selection is unset. Without them, unset runs only smoke with a warning, while an explicit `all` or `trace-only` fails before any test runs, even when Scout is reused. Unknown ids fail early. |
-| `SELECTED_EVALUATORS` | Standard `@kbn/evals` filter, by evaluator name (`documents_restored`, `timestamps_replayed`).                                                                                                                                                                                                      |
-| `GCS_CREDENTIALS`     | Service account JSON Elasticsearch uses to reach the seed-data bucket. Read access is enough to run the suite.                                                                                                                                                                                      |
+| Variable                         | Effect                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NIGHTSHIFT_DATASETS`            | Comma-separated dataset ids (whitespace trimmed). Smoke dataset ids such as `synthetic-smoke` select seeded evals; `trace-only` selects the file-driven investigations; they can be combined, e.g. `synthetic-smoke,trace-only`. Unset or `all` runs every eval when sandbox credentials are present, except that a stored `NIGHTSHIFT_DATASET_NAME` defaults to trace-only when selection is unset. Without them, unset runs only smoke with a warning, while an explicit `all` or `trace-only` fails before any test runs, even when Scout is reused. `connector-probe` selects the [connector probes](#connector-probes), which unset and `all` never include. `wiki-optimize` selects the [Wiki optimizer replay](#wiki-optimizer-replay), which unset and `all` never include and which needs no sandbox credentials. `orcabench` selects the isolated ORCA dataset and cannot be combined with other ids; it requires an ORCA-configured Scout server. Unknown ids fail early. |
+| `NIGHTSHIFT_PROBE_EXAMPLES_FILE` | Examples file for `connector-probe`; required when it is selected. See [connector probes](#connector-probes).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `NIGHTSHIFT_WIKI_REPLAY_FILE` | Replay file for `wiki-optimize`; the bundled synthetic examples when unset. Same `nightshift/` dataset-file format as the investigation examples, with the round and expectation fields in [Wiki optimizer replay](#wiki-optimizer-replay). |
+| `NIGHTSHIFT_PROBE_TIME_BUDGET_S` | Seconds a probe may take before `within_time_budget` scores 0 (default 30).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `SELECTED_EVALUATORS`            | Standard `@kbn/evals` filter, by evaluator name (`documents_restored`, `timestamps_replayed`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `GCS_CREDENTIALS`                | Service account JSON Elasticsearch uses to reach the seed-data bucket. Read access is enough to run the suite.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 
 Because every eval dataset gets its own `describe` block, Playwright's `--grep` filters by dataset id as well.
 
 ```bash
 NIGHTSHIFT_DATASETS=synthetic-smoke node scripts/evals run --suite nightshift-investigations
 ```
+
+## ORCA benchmark
+
+`orcabench` runs ORCA's 50 sampled tasks from the Golden dataset `nightshift/orca-sampled50-v3`
+against the ORCA telemetry cluster: 40 incident tasks over 28 incidents and 10 no-incident
+controls. Each question uses ORCA's own wording: a stated current time, a vague or offset report
+time and the user-facing symptom, without the incident onset or an analysis window. CI runs it as
+its own shard under the `evals:nightshift-investigations` label, next to the `customer0` shard that
+runs the smoke and trace-only evals, so each Scout server runs one [connector set](#connector-sets).
+The ORCA shard runs the `orcabench` set: one Elasticsearch connector, `orcabench-es`, and no index
+hint, so the agent discovers the ORCA indices the way it would on any cluster. The Golden release `nightshift/orca-ech-full-20261019` is an alert-triggered eval
+of 42 questions and is not this ORCA benchmark; CI does not run it. Quote that 42-question set
+as a benchmark result again only after its windows end at detection time.
+
+Each example records `metadata.current_time`, and the public 755 also record
+`metadata.telemetry_snapshot_time`. ORCA serves each task the first telemetry snapshot taken after
+`current_time` plus five minutes, so that snapshot time is the latest data the paper's agents can
+see. This suite does not bound reads yet: the ORCA cluster holds all six days, so an agent can read
+telemetry after its task's snapshot, and a rate here can be higher than a bounded run would give.
+The bound is planned in Elasticsearch, not in the investigation: one read key per snapshot time
+whose role filters `@timestamp` with document-level security, set on the `orcabench-es` connector,
+so the agent investigates unchanged and cannot see past its snapshot.
+
+ORCA's judges bind to `eis-openai-gpt-5-4`, not the agent connector; Customer-0's bind to
+`eis-openai-gpt-6-sol`. ORCA's model is the paper's judge model, but not its settings: the paper runs
+GPT-5.4 at reasoning effort "high", temperature 1, and 128,000 max tokens. Our judges answer
+through a forced `score` tool call, so the inference adapter sends reasoning effort "none" to
+gpt-5 models, and temperature falls back to the provider default of 1. Until the judges can set
+an effort ([#297542](https://github.com/elastic/kibana/pull/297542)), ORCA scores here come from a
+judge that does not reason and are not directly comparable to the paper's. `goal_pass` is unchanged: it scores the single best hypothesis and passes at
+4/5. ORCA also records three scores. RCA accuracy is 1 when the report names every flag in
+`metadata.plausible_flags`. A flag named without its variant still counts, and an extra cause
+does not fail accuracy. Hallucination is 1 when the report names at least one cause and none of
+them is in that set, and its direction is minimize. An empty incident report scores 0 on both.
+Only the control judge uses ORCA's prompt. Accuracy and hallucination use our own extraction
+prompt, `OrcaFlagsJudgePrompt`, which lists the flags a report names, and the set logic above is
+applied in code. They do not use the paper's incident judge prompt (`JUDGE_PROMPT_MULTI_HEADER`
+plus its scoring footer).
+Control passes an empty report and fails when a report places an incident inside
+`metadata.quiet_window`. Its judge prompt is ORCA's `JUDGE_PROMPT_CONTROL` from the Harbor tasks'
+`check_prediction.py`, word for word except that it answers through the `score` tool. Like ORCA's
+judge reading the agent's report file, it sees the whole report: the answer, the evidence, the
+impact summary and the proposed actions. It gets
+`current_time` and the quiet window moved ten minutes inward on each defined side, with an
+open-ended bound shown as `null`, as ORCA does. Past incidents and timeline lines that only record
+when the issue was reported are not false positives. A run that crashed, timed out, or ended without recording anything has
+no answer, so all three scores are `unscored` (null) instead of reading it as an empty report,
+as ORCA leaves unscored trials out. A run whose last agent round failed or was aborted counts
+as crashed even when it recorded a verdict first. A report too large to persist keeps only its
+summary and conclusion, so it is unscored too. `execution_success` still counts those runs, so quote it next
+to any ORCA rate. A run that ended without a verdict but recorded hypotheses is scored on them.
+A control is `metadata.control`, `metadata.task_type === "control"`,
+`metadata.no_incident === true`, or `metadata.section === "control"`. Accuracy and hallucination
+stay `n/a` on a control, including when its flag set is empty. Golden drops an empty metadata
+array on write, so the ten controls keep those markers and do not store `plausible_flags: []`.
+`rca_anti_leakage` judges trajectory leakage of incident records and post-resolution writeups. It
+does not see prompt leakage, and a feature-flag key in telemetry is a legitimate signal.
+
+`nightshift/orca-sampled50-v3` copies `plausible_flags` from the public Harbor dataset
+`orca-bench/orca-bench` (`sha256:2add497ac2f93468dba1b83977c295a784c89031754e6a35520195345ad62ada`).
+A task matches when `sha256(case_id)` truncated to 16 hex characters is that task's package name
+and the task's `user_facing_issue` appears in the question. The copied value is the set of
+`events[].root_cause` keys, with duplicate events of the same key removed. The 32 non-medium
+incident tasks match and are in the paper's Verified view (the non-medium rows of the sampled
+tasks that the ORCA build keeps on the public side: 32 incidents and 8 controls). Those 8
+controls, and the 2 medium controls, have the official empty answer set. Golden drops an empty
+metadata array, so the release omits `plausible_flags` and the judges read the control markers.
+The 10 medium tasks are not in the public 755 and are not a paper tier. The 8 medium
+incident tasks have no official answer set, so `plausible_flags` is omitted and they stay out of
+any quoted ORCA accuracy or hallucination number:
+`d6-big-cartfailure-on-02-medium_ttd60m_range30m_off+10m`,
+`d5-ic2-adfailure-on-03-medium_ttd480m_at_off+10m`,
+`d3-d2dep-paymentfailure-10-02-medium_ttd480m_period_previous-period`,
+`d4-d3dep-paymentunreachable-on-03-medium_ttd1440m_day_same-day`,
+`d3-ic1-loadgeneratorfloodhomepage-on-02-medium_ttd60m_range30m_off+10m`,
+`d1-c1-admanualgc-on-02-medium_ttd15m_at_off+10m`,
+`d1-i1-imageslowload-on-02-medium_ttd480m_period_previous-period`,
+`d2-cc1-adfailure-on-02-medium_ttd1440m_day_same-day`.
+`nightshift/orca-sampled50-v2` is unchanged.
+
+The previous run of this pinned 50 is the 28 October 2026 Sonnet 4.6 investigation
+`bk-01a184b7-e436-462e-9b4b-015d32c3ae77` on `nightshift/orca-sampled50-v2`. Its mean `goal_pass`
+was 0.515. That number is not ORCA accuracy: the release had no plausible-flag set, so the ORCA
+scores were not available. The 42-question `goal_pass` numbers are a different eval. The latest
+stored run, 21 October 2026 `bk-01a1606b-fecd-479e-b2ae-eb4eedb78385` on
+`nightshift/orca-ech-full-20261019`, has mean `goal_pass` 0.875. A flag-query split on that eval,
+where 39 of 42 investigations touched `feature_flag.key` and mean `goal_pass` was about 0.89, is
+a correlation and is not ORCA accuracy.
+
+Do not compare these scores with the paper's published rates. This agent has ES|QL and does not
+have the Astronomy Shop source. The paper's agents have that repository and Grafana (Prometheus,
+Jaeger, OpenSearch). The closer paper baseline is the telemetry-only Sonnet 4.6 result, 21.4%,
+against 30.9% for the same model with code. The 40 matched tasks above are the Verified view, so
+a later writeup may quote Verified only for those 40, still with this tool-surface caveat. The
+paper's 25.3% and 10.0% are not like-for-like.
+
+### Public 755
+
+`nightshift/orca-bench-public755-v1` (`342ac04a-b9f7-59a1-9462-3503b3bd52a6`, 755 examples, sha256
+`5b09b95d3f192f43086a5653572e3d8480c97412e14a79c0e48411d519555ecb`) holds every task of the public
+Harbor dataset above: 617 incident tasks and 138 controls, with tiers easy 245, hard 264 and
+universal 246. The tiers are the question's granularity, not the paper's difficulty: the paper's
+Easy, Medium and Hard (`orca_difficulty`) are our `easy`, `hard` and `universal`, one to one. Each
+example is built from its Harbor task:
+
+- `case_id` is the name whose `sha256` prefix is the task's package name, and `harbor_task` is
+  the package. Every one of the 755 resolves to exactly one name.
+- The question uses the task's stated current time, `reported_styled` and `user_facing_issue`,
+  in the same wording as `nightshift/orca-sampled50-v3`. On the 40 tasks both releases hold, the
+  questions, flag sets and current times are identical.
+- `plausible_flags` is the set of `events[].root_cause` keys. On 77 incident tasks it does not
+  contain the flag the `qid` names, for example `d1-n1-loadGeneratorFloodHomepage-on-00-hard`,
+  whose answer is `imageSlowLoad`. That set is ORCA's answer.
+- The reference answer is the rubric description and mechanism of the task's first event, so
+  `goal_pass` and RCA accuracy read the same cause. Four v3 incidents describe the `qid` flag
+  instead.
+- `difficulty` is the tier (easy, hard or universal), as in v3, and `orca_difficulty` is the
+  task's own difficulty label. Controls carry `quiet_window` from the task. Ten of them have no
+  start.
+- `telemetry_snapshot_time` is the snapshot named in the task's environment.
+
+Every root-cause event of the 755 falls inside the ORCA cluster's data. Its logs, traces and
+metrics each cover every hour from 2026-04-19T03:00Z through the 2026-04-24T19:00Z hour, which
+holds ORCA's last snapshot.
+
+The 755 is a periodic baseline, not a CI shard. The `orcabench` shard budgets 240 minutes for 50
+tasks, and release-gate issue elastic/nightshift-program#1893 wants gates under 30 minutes. At
+eight investigations at a time the 755 needs tens of hours, so run it in slices. The score API
+returns at most 10,000 scores per experiment, so a run that would write more (the unsliced 755
+writes about 13,600) fails before any investigation starts.
+`NIGHTSHIFT_ORCA_RELEASE=public755` selects the release, and `NIGHTSHIFT_ORCA_SLICE=<index>/<count>`
+runs one contiguous part of it in `case_id` order. Each run validates the whole release before
+slicing. A slice runs as its own dataset, `nightshift/orca-bench-public755-v1/slice-<index>-of-<count>`,
+because the eval client upserts the dataset it runs, and under the release name a slice would
+remove the other tasks. The eval stores the slice first and runs it with the example ids the
+server gave it, so its scores show up in each example's history in the Evals UI. Keep one `<count>` for a baseline and join the slices on `case_id`.
+
+Report the 755 by `orca_difficulty` (Easy, Medium, Hard), so a rate is read against the paper's
+tier of the same name, with `execution_success` and the number of unscored runs next to each
+rate. Quote the 40 sampled tasks against Verified only with the task-by-task match above. The 10
+medium tasks in the sampled 50 are their own line and are not a paper tier. The headline run keeps
+flag telemetry visible.
+
+The flag ablation runs the same agent, tasks and judge with every flag document hidden:
+flagd's own logs, spans and metrics, any document with a `feature_flag` field, flag-evaluation
+spans, and log lines that name a flag. Elasticsearch hides them through document-level security on
+a separate read key, so no query the agent writes can bring them back. To run it:
+
+1. Have an ORCA cluster admin create an API key whose role reads the three ORCA index patterns
+   with a `query` of `{"bool": {"must_not": [<the flag documents>]}}`. The key cannot be derived
+   from the read-only key above.
+2. Store that key as `nightshiftOrcaEs.noFlagsApiKey`, next to the full key's `apiKey`, in the
+   config the run uses. With the variant set, the Scout hook fills the `orcabench-es` connector
+   from `noFlagsApiKey` and refuses to start without it; every other ORCA run keeps `apiKey`.
+3. Set `NIGHTSHIFT_ORCA_TELEMETRY_VARIANT=no-flags`. The preflight then expects the flag-free
+   document counts pinned in [`orca_dataset.ts`](evals/investigation/orca_dataset.ts), so a run on
+   the full key fails before any investigation, and every score records
+   `telemetry_variant: no-flags`.
+
+```bash
+NIGHTSHIFT_DATASETS=orcabench NIGHTSHIFT_ORCA_TELEMETRY_VARIANT=no-flags \
+  NIGHTSHIFT_ORCA_RELEASE=public755 NIGHTSHIFT_ORCA_SLICE=1/8 \
+  node scripts/evals start --suite nightshift-investigations --profile dev-vault
+```
+
+The Nightshift Vault config must hold a `nightshiftOrcaEs` block (see
+[`vault/config.example.json`](vault/config.example.json)) whose key can only `read` and
+`view_index_metadata` on `logs-orcabench.otel-*`, `traces-orcabench.otel-*` and
+`metrics-orcabench.otel-*`.
+
+- The dataset's ID, case count and content digest are pinned in
+  [`orca_dataset.ts`](evals/investigation/orca_dataset.ts). A changed release fails before any
+  investigation starts, as does a source whose document counts differ from the snapshot.
+- Each task runs once, at most eight at a time, and Playwright doesn't retry the test.
+- The eval fails when fewer than 80% of investigations complete, or when none returned ORCA
+  telemetry. Judge scores are advisory.
+- Both shards draw on one sandbox pool. When it runs out, investigations end without a
+  conclusion and the eval fails, so leave room for overlapping builds.
+
+Locally, start a fresh Scout server for ORCA; a reused server keeps its connector credentials:
+
+```bash
+NIGHTSHIFT_DATASETS=orcabench node scripts/evals start \
+  --suite nightshift-investigations --profile dev-vault
+
+# One slice of the public 755
+NIGHTSHIFT_DATASETS=orcabench NIGHTSHIFT_ORCA_RELEASE=public755 NIGHTSHIFT_ORCA_SLICE=1/8 \
+  node scripts/evals start --suite nightshift-investigations --profile dev-vault
+```
+
+The ORCA telemetry is CC BY 4.0; keep the dataset's attribution when sharing results.
 
 ## CI
 
@@ -479,15 +787,18 @@ as `nightshift-investigations`.
 
 - **Where it runs:** a serverless observability Scout cluster; `run_suite.sh` reads `scoutArch` /
   `scoutDomain` from the suite entry.
-- **What runs:** every eval — smoke and trace-only investigations. The ci-prod Vault config must
-  hold the `sandbox` block; `.buildkite/scripts/steps/evals/run_suite.sh` runs the suite's
-  `scoutHook` on it before starting Scout, and Buildkite agents must be able to reach the
-  sandbox-api host.
+- **What runs:** a `customer0` shard with the smoke and trace-only evals, and an `orcabench`
+  shard with the ORCA benchmark. The suite's ci-prod secret,
+  `kv/ci-shared/kbn-evals/nightshift`, must hold the `sandbox` block;
+  `.buildkite/scripts/steps/evals/run_suite.sh` reads it and runs the suite's `scoutHook` on it
+  before starting Scout (failing the step if it cannot be read), and Buildkite agents must be able
+  to reach the sandbox-api host.
 - **On a PR:** add the `evals:nightshift-investigations` label plus a `models:` label (for example
   `models:eis/anthropic-claude-5.5-sonnet`) to choose which model investigates. Without a `models:`
   label the suite is skipped, like other suites that run the real agent.
 - **Weekly:** a step in [`llm_evals.yml`](../../../../../.buildkite/pipelines/evals/llm_evals.yml)
-  runs it against the weekly core models (`weekly_eis_core_models`).
+  runs it against Sonnet 5.5, GPT 5.6 Sol and GPT 5.6 Terra, set by
+  `weeklyEisModelGroups` in the suite entry.
 - **Failures** are posted to `#nightshift-alerts`, resolved from `slackChannel` in the suite entry.
 - **Scores** reach the golden cluster automatically, through `EVAL_KBN_URL` in CI.
 

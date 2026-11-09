@@ -6,19 +6,25 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
+import { convertQueryToESQLExpression } from '@kbn/esql-utils';
 import { EntityType } from '../../../../../../../common/entity_analytics/types';
 import { RiskSeverity } from '../../../../../../../common/search_strategy';
 import { EMPTY_ENTITY_FILTERS } from '../../common';
 import type { QueryArgs, Row, SortDir } from '../../common';
 import { QUERY_SPECS, findSortPageFetcher } from '../../grid_columns';
-import { toEsql } from '../../active_filters';
+import { toDsl, toEsql } from '../../active_filters';
 import type { ActiveFilters } from '../../active_filters';
 import {
   applyResolvedEntityFilterOverrides,
   fetchResolvedEntityFilterOverrides,
+  fetchResolvedEntityOverrides,
+  fetchResolvedEntityValueChanges,
   withResolvedEntityValues,
 } from '../resolved_entities';
+import type { ResolvedEntityValueChange } from '../resolved_entities';
 import { buildAlertSortAllQuery } from '../alerts';
+import { joinAnd } from '../esql';
+import { translateSearch } from '../kql_to_esql';
 import { buildEntitiesInViewCountQuery } from '../entities_in_view';
 import type { EsqlRunner } from '../types';
 import { BASE_ARGS, getIds, hoursAgo, startFixtureCluster } from './fixture';
@@ -158,6 +164,36 @@ const SEARCH_CASES: readonly FilterCase[] = [
   ],
 ];
 
+/**
+ * KQL searches on the values a resolved row shows, and the rows they keep sorted by name. host:h1
+ * is high impact itself, extreme through host:h4 and low through host:h5, on okta itself, aws
+ * through host:h4 and gcp through host:h5, on wl-2 and wl-3 through its aliases, and its group's
+ * risk is 95 where its own is 90. user:bob@okta has only a group risk, 85.
+ */
+const GROUP_SEARCH_CASES: ReadonlyArray<[kql: string, ids: string[]]> = [
+  ['asset.criticality: extreme_impact', ['host:h1']],
+  ['asset.criticality: high_impact', []],
+  ['asset.criticality: low_impact', ['user:alice@okta']],
+  ['asset.criticality: *', ['user:alice@okta', 'host:h1', 'host:h2']],
+  [
+    'not asset.criticality: extreme_impact',
+    ['user:alice@okta', 'user:bob@okta', 'service:payments', 'host:h2', 'host:h3'],
+  ],
+  ['entity.source: aws', ['host:h1']],
+  ['entity.source: gcp', ['host:h1']],
+  ['entity.source: *', ['host:h1']],
+  ['entity.attributes.watchlists: wl-2', ['host:h1']],
+  ['entity.attributes.watchlists: wl-1', ['host:h2']],
+  ['entity.risk.calculated_level: High', ['user:alice@okta', 'user:bob@okta']],
+  ['entity.risk.calculated_score_norm >= 80', ['user:bob@okta', 'host:h1']],
+  ['entity.risk.calculated_score_norm > 90', ['host:h1']],
+  ['entity.name: web-*', ['host:h1', 'host:h2', 'host:h3']],
+  // The example of the issue: the name is the main entity's, the criticality the group's.
+  ['entity.name: web* and asset.criticality: extreme_impact', ['host:h1']],
+  ['entity.name: web-1 and asset.criticality: low_impact', []],
+  ['entity.source: aws or entity.name: web-2', ['host:h1', 'host:h2']],
+];
+
 const FILTER_CASES: readonly FilterCase[] = [
   [
     'an entity type filter',
@@ -180,6 +216,26 @@ const FILTER_CASES: readonly FilterCase[] = [
     'entity.name',
     'asc',
     ['user:alice@okta', 'user:bob@okta'],
+  ],
+  [
+    // Unknown is also the absence of a level: host:h3 has none, service:payments stores Unknown.
+    'an unknown risk level filter',
+    { entityFilters: { ...EMPTY_ENTITY_FILTERS, riskLevels: [RiskSeverity.Unknown] } },
+    'entity.name',
+    'asc',
+    ['service:payments', 'host:h3'],
+  ],
+  [
+    'an unknown risk level filter with a risk level',
+    {
+      entityFilters: {
+        ...EMPTY_ENTITY_FILTERS,
+        riskLevels: [RiskSeverity.Unknown, RiskSeverity.Critical],
+      },
+    },
+    'entity.name',
+    'asc',
+    ['service:payments', 'host:h1', 'host:h3'],
   ],
   [
     // host:h1 is high impact itself, and extreme through one of its aliases.
@@ -364,6 +420,73 @@ describe('entities grid on Elasticsearch', () => {
     });
   });
 
+  describe('search on the values of the groups', () => {
+    /** The search as the page patches it: the groups the group's values add or remove, by id. */
+    const getSearchExpression = async (kql: string): Promise<string> => {
+      const conditions = translateSearch(kql);
+      if (!conditions) throw new Error(`${kql} is not translated`);
+      return applyResolvedEntityFilterOverrides(
+        convertQueryToESQLExpression({ query: kql, language: 'kuery' }),
+        await fetchResolvedEntityOverrides(
+          {
+            namespace: BASE_ARGS.namespace,
+            concreteEntityIndexName: BASE_ARGS.concreteEntityIndexName,
+            ...conditions,
+          },
+          cluster.runQuery
+        )
+      );
+    };
+
+    const fetchSearchedPage = async (searchExpression: string): Promise<Row[]> =>
+      fetchPage(cluster.runQuery, {
+        ...BASE_ARGS,
+        ...toEsql({ ...NO_FILTERS, search: { esql: searchExpression } }),
+        sort: { field: 'entity.name', direction: 'asc' },
+      });
+
+    it.each(GROUP_SEARCH_CASES)(
+      'keeps the rows the group values match for %s',
+      async (kql, ids) => {
+        expect(getIds(await fetchSearchedPage(await getSearchExpression(kql)))).toEqual(ids);
+      }
+    );
+
+    it('still holds the search when it is joined with a condition of its own', async () => {
+      // host:h2 matches the name and host:h1 the source of its alias: only host:h1 passes both.
+      const searchExpression = await getSearchExpression(
+        'entity.source: aws or entity.name: web-2'
+      );
+
+      expect(
+        getIds(await fetchSearchedPage(joinAnd(searchExpression, 'entity.id == "host:h1"') ?? ''))
+      ).toEqual(['host:h1']);
+    });
+  });
+
+  describe('Group by', () => {
+    it('reads the same entities as the grid, for a watchlist only an alias is on', async () => {
+      // host:h1 isn't on wl-2 itself; its alias host:h4 is.
+      const activeFilters: ActiveFilters = {
+        ...NO_FILTERS,
+        entityFilters: { ...EMPTY_ENTITY_FILTERS, watchlists: ['wl-2'] },
+      };
+      const args = { ...BASE_ARGS, ...toEsql(activeFilters) };
+      const overrides = await fetchResolvedEntityFilterOverrides(args, cluster.runQuery);
+      const gridIds = getIds(
+        await fetchPage(cluster.runQuery, {
+          ...args,
+          entityExpression:
+            args.entityExpression &&
+            applyResolvedEntityFilterOverrides(args.entityExpression, overrides),
+        })
+      );
+
+      expect(gridIds).toEqual(['host:h1']);
+      expect(await cluster.searchEntityIds(toDsl(activeFilters, overrides) ?? {})).toEqual(gridIds);
+    });
+  });
+
   describe('the values of the groups', () => {
     const fetchGroupRows = async (ids: string[]): Promise<Map<unknown, Row>> => {
       const rows = await withResolvedEntityValues(
@@ -391,6 +514,37 @@ describe('entities grid on Elasticsearch', () => {
       const rows = await fetchGroupRows(['host:h2']);
 
       expect(rows.get('host:h2')).toEqual({ 'entity.id': 'host:h2' });
+    });
+
+    describe("the counts of the groups' values", () => {
+      /** The net change of each value the counts show, by field. */
+      const getNetChanges = (changes: readonly ResolvedEntityValueChange[]) =>
+        changes.reduce<Record<string, Record<string, number>>>((net, { field, value, change }) => {
+          if (value == null) return net;
+          const total = (net[field]?.[value] ?? 0) + change;
+          const { [value]: _, ...others } = net[field] ?? {};
+          return { ...net, [field]: total ? { ...others, [value]: total } : others };
+        }, {});
+
+      it("moves a group's count from its main entity's own values to the group's", async () => {
+        const changes = await fetchResolvedEntityValueChanges(BASE_ARGS, cluster.runQuery);
+
+        // host:h1 is high_impact on okta and on no watchlist; its aliases add the rest.
+        expect(getNetChanges(changes)).toEqual({
+          'asset.criticality': { extreme_impact: 1, high_impact: -1 },
+          'entity.source': { aws: 1, gcp: 1 },
+          'entity.attributes.watchlists': { 'wl-2': 1, 'wl-3': 1 },
+        });
+      });
+
+      it('counts only the groups whose main entity the search matches', async () => {
+        const changes = await fetchResolvedEntityValueChanges(
+          { ...BASE_ARGS, searchExpression: 'KQL("""entity.name: bob""")' },
+          cluster.runQuery
+        );
+
+        expect(getNetChanges(changes)).toEqual({});
+      });
     });
 
     it('has no value for a group in which no member has one', async () => {
@@ -435,11 +589,13 @@ describe('entities grid on Elasticsearch', () => {
     it('counts the open alerts in the window per severity, with the last one', async () => {
       expect(await fetchColumnValues('alert_count')).toEqual({
         // The alerts of host:h1 and of its two aliases: host:h4 was last alerted half an hour ago.
+        // That includes a failed login that also names user:bob@okta, which bob does not count.
         'host:h1': {
           ...NO_SEVERITIES,
-          alert_count: 5,
+          alert_count: 6,
           alert_critical: 2,
           alert_high: 2,
+          alert_medium: 1,
           alert_low: 1,
           last_seen_alert: hoursAgo(cluster.now, 0.5),
         },
@@ -461,6 +617,24 @@ describe('entities grid on Elasticsearch', () => {
       });
     });
 
+    it('counts an unstamped failed login for its host, not for the user it names', async () => {
+      const sortArgs: QueryArgs = {
+        ...BASE_ARGS,
+        sort: { field: 'alert_count', direction: 'desc' },
+      };
+      const getBobCount = (rows: Row[]) =>
+        rows.find((row) => row['entity.id'] === 'user:bob@okta')?.alert_count;
+
+      const enriched = await fetchColumnValues('alert_count');
+      const sorted = await fetchPage(cluster.runQuery, sortArgs);
+      const sortedAll = await cluster.runQuery(buildAlertSortAllQuery(sortArgs));
+
+      expect(enriched['host:h1']).toMatchObject({ alert_medium: 1 });
+      expect(enriched['user:bob@okta']).toEqual(NO_ALERTS);
+      expect(getBobCount(sorted)).toBeNull();
+      expect(getBobCount(sortedAll)).toBeNull();
+    });
+
     it('counts the anomaly records of the installed jobs, in a group those of its members', async () => {
       expect(await fetchColumnValues('anomaly_count')).toEqual({
         'host:h1': { anomaly_count: 1 },
@@ -474,7 +648,7 @@ describe('entities grid on Elasticsearch', () => {
 
     it('counts the alerts and anomalies of an entity alone in individual rows', async () => {
       expect(await fetchColumnValues('alert_count', 'individual')).toMatchObject({
-        'host:h1': { alert_count: 3 },
+        'host:h1': { alert_count: 4 },
         'host:h4': { alert_count: 1 },
         'host:h5': { alert_count: 1 },
       });

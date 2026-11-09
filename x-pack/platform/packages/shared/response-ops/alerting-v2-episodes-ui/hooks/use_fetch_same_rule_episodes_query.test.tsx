@@ -11,6 +11,7 @@ import { fetchRelatedEpisodes } from '../apis/fetch_related_episodes';
 import {
   buildRelatedBaseQuery,
   finishRelatedEpisodesQuery,
+  type RelatedEpisodesScope,
 } from '../queries/related_episodes_query';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
@@ -40,7 +41,7 @@ describe('useFetchSameRuleEpisodesQuery', () => {
     const { result } = renderHook(
       () =>
         useFetchSameRuleEpisodesQuery({
-          ruleId: 'r1',
+          scope: { type: 'rule', ruleId: 'r1' },
           excludeEpisodeId: undefined,
           pageSize: 5,
           currentGroupHash: 'gh-1',
@@ -57,17 +58,17 @@ describe('useFetchSameRuleEpisodesQuery', () => {
   it('uses buildRelatedBaseQuery + finishRelatedEpisodesQuery when currentGroupHash is undefined', async () => {
     fetchRelatedEpisodesMock.mockResolvedValue([]);
 
-    const ruleId = 'rule-1';
+    const scope: RelatedEpisodesScope = { type: 'rule', ruleId: 'rule-1' };
     const excludeEpisodeId = 'ep-current';
     const pageSize = 5;
     const expectedQuery = finishRelatedEpisodesQuery(
-      buildRelatedBaseQuery(DEFAULT_SPACE_ID, ruleId, excludeEpisodeId)
+      buildRelatedBaseQuery(DEFAULT_SPACE_ID, scope, excludeEpisodeId)
     ).print('basic');
 
     const { result } = renderHook(
       () =>
         useFetchSameRuleEpisodesQuery({
-          ruleId,
+          scope,
           excludeEpisodeId,
           pageSize,
           currentGroupHash: undefined,
@@ -90,18 +91,18 @@ describe('useFetchSameRuleEpisodesQuery', () => {
   it('adds group_hash != when currentGroupHash is set', async () => {
     fetchRelatedEpisodesMock.mockResolvedValue([]);
 
-    const ruleId = 'rule-1';
+    const scope: RelatedEpisodesScope = { type: 'rule', ruleId: 'rule-1' };
     const excludeEpisodeId = 'ep-current';
     const currentGroupHash = 'gh-1';
     const pageSize = 5;
-    const otherGroupsQuery = buildRelatedBaseQuery(DEFAULT_SPACE_ID, ruleId, excludeEpisodeId);
+    const otherGroupsQuery = buildRelatedBaseQuery(DEFAULT_SPACE_ID, scope, excludeEpisodeId);
     otherGroupsQuery.where`group_hash != ${currentGroupHash}`;
     const expectedQuery = finishRelatedEpisodesQuery(otherGroupsQuery).print('basic');
 
     const { result } = renderHook(
       () =>
         useFetchSameRuleEpisodesQuery({
-          ruleId,
+          scope,
           excludeEpisodeId,
           pageSize,
           currentGroupHash,
@@ -120,5 +121,33 @@ describe('useFetchSameRuleEpisodesQuery', () => {
       })
     );
     expect(result.current.data).toEqual([]);
+  });
+
+  it('scopes the query to the source when the episode has no rule', async () => {
+    fetchRelatedEpisodesMock.mockResolvedValue([]);
+
+    const scope: RelatedEpisodesScope = { type: 'source', source: 'zabbix' };
+    const otherGroupsQuery = buildRelatedBaseQuery(DEFAULT_SPACE_ID, scope, 'ep-current');
+    otherGroupsQuery.where`group_hash != ${'gh-1'}`;
+    const expectedQuery = finishRelatedEpisodesQuery(otherGroupsQuery).print('basic');
+
+    const { result } = renderHook(
+      () =>
+        useFetchSameRuleEpisodesQuery({
+          scope,
+          excludeEpisodeId: 'ep-current',
+          pageSize: 5,
+          currentGroupHash: 'gh-1',
+          services: { expressions: mockExpressions, spaces: mockSpaces },
+          toastDanger: mockToastDanger,
+        }),
+      { wrapper }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(fetchRelatedEpisodesMock).toHaveBeenCalledWith(
+      expect.objectContaining({ query: expectedQuery })
+    );
   });
 });

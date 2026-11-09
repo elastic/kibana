@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { Case } from '@kbn/cases-plugin/common/types/domain';
+import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
@@ -24,8 +25,11 @@ import {
   createComment,
   deleteAttachmentV2,
   getAllComments,
+  getAttachmentV2,
   listFiles,
+  seedLegacyCommentAttachment,
   seedOwnerlessAttachment,
+  seedUnreadableAttachment,
   superUserSpace1Auth,
   unifiedAttachmentExists,
 } from '../../../../common/lib/api';
@@ -130,6 +134,37 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(await unifiedAttachmentExists({ es, id: attachmentId })).to.be(false);
     });
 
+    it('deletes an attachment that cannot be read', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const attachmentId = await seedUnreadableAttachment({ es, caseId: postedCase.id });
+
+      await deleteAttachmentV2({ supertest, caseId: postedCase.id, attachmentId });
+
+      expect(await unifiedAttachmentExists({ es, id: attachmentId })).to.be(false);
+    });
+
+    it('deletes a leftover cases-comments attachment', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const attachmentId = await seedLegacyCommentAttachment({
+        es,
+        caseId: postedCase.id,
+        attributes: {
+          type: AttachmentType.user,
+          comment: 'leftover comment',
+          owner: 'securitySolutionFixture',
+        },
+      });
+
+      await deleteAttachmentV2({ supertest, caseId: postedCase.id, attachmentId });
+
+      await getAttachmentV2({
+        supertest,
+        caseId: postedCase.id,
+        attachmentId,
+        expectedHttpCode: 404,
+      });
+    });
+
     describe('unhappy path', () => {
       it('404s when attachment belongs to a different case', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
@@ -147,7 +182,9 @@ export default ({ getService }: FtrProviderContext): void => {
           expectedHttpCode: 404,
         })) as Error;
 
-        expect(error.message).to.be(`This comment ${attachmentId} does not exist in fake-id.`);
+        expect(error.message).to.be(
+          `This attachment ${attachmentId} does not exist in case fake-id.`
+        );
       });
 
       it('404s when attachment is not there', async () => {

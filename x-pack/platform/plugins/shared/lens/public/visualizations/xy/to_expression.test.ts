@@ -1126,7 +1126,7 @@ describe('#toExpression', () => {
     expect(ast.chain[0].arguments.areaFill[0]).toEqual('solid');
   });
 
-  it('should default areaFill to solid', () => {
+  it('should default areaFill to gradient', () => {
     const ast = xyVisualization.toExpression(
       {
         legend: { position: Position.Bottom, isVisible: true },
@@ -1148,6 +1148,6 @@ describe('#toExpression', () => {
       datasourceExpressionsByLayers
     ) as Ast;
 
-    expect(ast.chain[0].arguments.areaFill[0]).toEqual('solid');
+    expect(ast.chain[0].arguments.areaFill[0]).toEqual('gradient');
   });
 });

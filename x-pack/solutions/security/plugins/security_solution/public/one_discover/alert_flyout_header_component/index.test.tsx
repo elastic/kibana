@@ -17,6 +17,7 @@ import { AlertFlyoutHeader } from '.';
 import type { StartServices } from '../../types';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
+import { docViewerFlyoutChain } from '../../flyout_v2/shared/url_state/flyout_v2_doc_viewer_chain';
 import { documentFlyoutHistoryKey } from '../../flyout_v2/shared/constants/flyout_history';
 import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 import {
@@ -334,6 +335,43 @@ describe('AlertFlyoutHeader', () => {
       session: FLYOUT_SESSION_KIND.START,
       origin: FLYOUT_ORIGIN.FLYOUT_HEADER,
     });
+  });
+
+  it('records the notes flyout in the doc viewer chain and clears it on close', async () => {
+    const hit = {
+      id: '1',
+      raw: { _id: '1', _index: 'idx' },
+      flattened: {},
+    } as unknown as DataTableRecord;
+    const store = createStore(() => ({}));
+    const history = createMemoryHistory({ initialEntries: ['/discover'] });
+    docViewerFlyoutChain.stack = [];
+
+    render(
+      <Router history={history}>
+        <AlertFlyoutHeader
+          hit={hit}
+          servicesPromise={Promise.resolve(servicesMock)}
+          storePromise={Promise.resolve(store as never)}
+          onAlertUpdated={jest.fn()}
+        />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('MockDocumentHeader')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('MockDocumentHeader'));
+
+    expect(docViewerFlyoutChain.stack).toEqual([
+      { kind: 'notes', documentId: '1', indexName: 'idx' },
+    ]);
+
+    const [[, { onClose }]] = (servicesMock.overlays.openSystemFlyout as jest.Mock).mock.calls;
+    onClose();
+
+    expect(docViewerFlyoutChain.stack).toEqual([]);
   });
 
   it('uses Security history key when opened inside Security app', async () => {

@@ -15,7 +15,7 @@ import { GroupedAttachmentRow } from '@kbn/agentic-investigations-common';
 import type { FlyoutGroupedAttachmentRendererProps } from '@kbn/agentic-investigations-common';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
-import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
+import { APP_UI_ID, ATTACKS_PATH } from '../../../../common/constants';
 import { FLYOUT_DESCRIPTOR_KIND } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
 import { ATTACK_SUBTITLE, FlyoutRow, attacksTitle, useSpaceId } from '../grouped_attachments';
 import { getAttackDiscoveryLabel } from './attack_discovery_attachment';
@@ -58,9 +58,13 @@ export const createAttacksGroupRenderer = ({
         .map(({ data }) => data?.timestamp)
         .filter((timestamp): timestamp is string => Boolean(timestamp))
         .sort()[0];
+      // Pass the attacks path directly. Without Alerts read or Attack Discovery
+      // that deep link is omitted, and getUrlForApp would leave the Security app root.
       const href = application.getUrlForApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.attacks,
-        path: buildAttacksPagePath([...attacks.keys()], createdAt ?? new Date().toISOString()),
+        path: `${ATTACKS_PATH}${buildAttacksPagePath(
+          [...attacks.keys()],
+          createdAt ?? new Date().toISOString()
+        )}`,
       });
 
       return (

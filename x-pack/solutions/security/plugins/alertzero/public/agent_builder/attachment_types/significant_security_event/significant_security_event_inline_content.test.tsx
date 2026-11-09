@@ -526,7 +526,7 @@ describe('SignificantSecurityEventInlineContent', () => {
       const outcome = screen.getByTestId('alertzeroSignificantSecurityEventHuntResultOutcome');
       expect(
         screen.getByTestId('alertzeroSignificantSecurityEventHuntResultHitSources')
-      ).toHaveTextContent('Confirmed by Tier 2');
+      ).toHaveTextContent('Confirmed by Behavior Hunt');
       expect(outcome).toHaveTextContent('Environment hits found');
     });
 

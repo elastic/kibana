@@ -99,6 +99,11 @@ const EDGE_TYPES: EdgeTypes = {
 const INITIAL_ZOOM = 1;
 const TOP_PADDING = 80;
 
+// Minimap tint per loop-container (any CONTAINER_STEP_TYPES step: foreach,
+// while, …) nesting depth, index 0 = outermost. Deeper containers fall back to
+// solid primary; inner steps paint solid on top.
+const MINIMAP_CONTAINER_ALPHAS = [0.2, 0.35] as const;
+
 const CANVAS_CONTROLS_SHADOW =
   '0 0 2px 0 rgba(43, 57, 79, 0.16), 0 1px 4px 0 rgba(43, 57, 79, 0.06), 0 2px 8px 0 rgba(43, 57, 79, 0.05)';
 
@@ -573,11 +578,34 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     };
   }, [direction, nodes.length, fitViewProp, fitViewOptionsProp, applyHomeViewport]);
 
+  // Nesting depth of each loop container (outermost = 1), from the `parentId`
+  // chain of the stable layout output.
+  const containerDepthById = useMemo(() => {
+    const parentById = new Map(nodes.map((n) => [n.id, n.parentId]));
+    const depths = new Map<string, number>();
+    for (const n of nodes) {
+      if (n.type === 'foreachGroup') {
+        let depth = 1;
+        for (let id = n.parentId; id !== undefined; id = parentById.get(id)) depth++;
+        depths.set(n.id, depth);
+      }
+    }
+    return depths;
+  }, [nodes]);
+
   const minimapNodeColor = useCallback(
-    (n: { type?: string; data?: unknown }) => {
+    (n: { id: string; type?: string; data?: unknown }) => {
       // Placeholder nodes for empty `if` branches are invisible — hide them in
       // the minimap too so they don't appear as spurious coloured dots.
       if (n.type === 'bypassLane') return 'transparent';
+      // Loop containers are a translucent primary tint (regardless of execution
+      // status) so the solid inner steps painted on top of them stay visible.
+      if (n.type === 'foreachGroup') {
+        const alpha = MINIMAP_CONTAINER_ALPHAS[(containerDepthById.get(n.id) ?? 1) - 1];
+        return alpha === undefined
+          ? euiTheme.colors.primary
+          : transparentize(euiTheme.colors.primary, alpha);
+      }
       const data = n.data as
         | {
             stepExecution?: { status?: string };
@@ -601,6 +629,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
       return isTriggerNode ? euiTheme.colors.accent : euiTheme.colors.primary;
     },
     [
+      containerDepthById,
       euiTheme.colors.danger,
       euiTheme.colors.dangerText,
       euiTheme.colors.accent,

@@ -63,4 +63,15 @@ export interface EpisodeAction {
    * Whether this action is a workflow action grouped with lifecycle operations.
    */
   isWorkflowAction?: boolean;
+  /**
+   * Whether this action navigates elsewhere, grouped with "View details" at the top of
+   * the details flyout menu.
+   */
+  isNavigationAction?: boolean;
+  /**
+   * Whether privileges for this action are enforced by the system it hands off
+   * to, so it stays visible without alerting write privilege. Defaults to
+   * `false` when omitted, which hides the action from read-only users.
+   */
+  enforcesOwnPrivileges?: boolean;
 }

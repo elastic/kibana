@@ -39,7 +39,15 @@ import {
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { get, isEqual } from 'lodash';
 import React, { useEffect, useRef } from 'react';
-import { BehaviorSubject, combineLatest, map, merge, skip, switchMap } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  distinctUntilChanged,
+  map,
+  merge,
+  skip,
+  switchMap,
+} from 'rxjs';
 import { useErrorTextStyle } from '@kbn/react-hooks';
 import { VISUALIZE_APP_NAME, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
 import {
@@ -49,7 +57,7 @@ import {
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { VisualizeEmbeddableState } from '../../common/embeddable/types';
 import { VIS_EVENT_TO_TRIGGER } from './events';
-import { getInspector, getUiActions, getUsageCollection } from '../services';
+import { getInspector, getTheme, getUiActions, getUsageCollection } from '../services';
 import { ACTION_CONVERT_TO_LENS } from '../triggers';
 import type { SerializedVis, Vis } from '../vis';
 import { createVisInstance } from './create_vis_instance';
@@ -111,7 +119,7 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       }
       return visInstance.data.indexPattern ? [visInstance.data.indexPattern] : [];
     };
-    const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
+    const dataSources$ = new BehaviorSubject<DataView[] | undefined>(
       await getUsedDataViews(initialVisInstance)
     );
 
@@ -144,10 +152,10 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
 
           try {
             const nextDataViews = await getUsedDataViews(vis);
-            const currentDataViewIds = (dataViews$.getValue() ?? []).map(({ id }) => id);
+            const currentDataViewIds = (dataSources$.getValue() ?? []).map(({ id }) => id);
             const nextDataViewIds = nextDataViews.map(({ id }) => id);
             if (!isEqual(currentDataViewIds, nextDataViewIds)) {
-              dataViews$.next(nextDataViews);
+              dataSources$.next(nextDataViews);
             }
           } catch {
             // keep the previously resolved data views if resolution fails
@@ -274,7 +282,7 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       ...stateApi,
       defaultTitle$,
       dataLoading$,
-      dataViews$,
+      dataSources$,
       projectRoutingOverrides$,
       esql$,
       approximationApplied$,
@@ -364,6 +372,12 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
     const fetchSubscription = combineLatest([
       fetch$(api),
       getViewModeSubject(api) ?? new BehaviorSubject('view'),
+      // Vis types resolve theme colors when the expression executes, so a live theme
+      // switch needs a fresh execution.
+      getTheme().theme$.pipe(
+        map(({ darkMode }) => darkMode),
+        distinctUntilChanged()
+      ),
     ])
       .pipe(
         switchMap(async ([data, viewMode]) => {

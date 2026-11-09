@@ -8,7 +8,7 @@
  */
 
 import { RuleTester } from 'eslint';
-import { NoDirectHandlebarsImportRule } from './no_direct_handlebars_import';
+import { rules } from '../..';
 
 const ruleTester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),
@@ -21,7 +21,7 @@ const ruleTester = new RuleTester({
   },
 });
 
-ruleTester.run('@kbn/imports/no_direct_handlebars_import', NoDirectHandlebarsImportRule, {
+ruleTester.run('@kbn/imports/no_direct_handlebars_import', rules.no_direct_handlebars_import, {
   valid: [
     {
       code: 'import Handlebars from "@kbn/handlebars";',

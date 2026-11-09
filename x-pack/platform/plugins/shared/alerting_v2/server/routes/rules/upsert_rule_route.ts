@@ -36,6 +36,7 @@ export class UpsertRuleRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Create or replace a rule',
     description:
       'Creates a rule with the given identifier, or fully replaces it if one already exists.',
