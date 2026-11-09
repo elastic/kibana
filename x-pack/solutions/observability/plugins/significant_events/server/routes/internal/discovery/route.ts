@@ -6,6 +6,7 @@
  */
 import {
   MAX_ID_LENGTH,
+  SIGNIFICANT_EVENTS_ALERT_SOURCE,
   type SignificantEventsWorkflowStatusResult,
 } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
@@ -131,7 +132,109 @@ const discoveryStatusRoute = createServerRoute({
   },
 });
 
+const optionalCount = z.number().int().min(0).optional();
+
+/** Called by the discovery workflow before each exit and from its failure fallback (nightshift-program#1956). */
+const discoveryCompletedRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/significant_events/discovery/_completed',
+  params: z.object({
+    body: z.object({
+      discovery_execution_id: z.string().max(MAX_ID_LENGTH),
+      outcome: z.enum(['completed', 'failed']),
+      has_work: z.boolean().optional(),
+      processed_count: optionalCount,
+      skipped_count: optionalCount,
+      held_back_count: optionalCount,
+      needs_agent_count: optionalCount,
+      written_event_count: optionalCount,
+      written_rule_count: optionalCount,
+      classifier_failed: z.boolean().optional(),
+      error_message: z.string().max(1024).optional(),
+    }),
+  }),
+  options: {
+    access: 'internal',
+    summary: 'Report the end of a Significant Events discovery run',
+    description:
+      'Emits the discovery-completed telemetry event for the reporting discovery workflow execution, paired to the orchestrator execution that started it.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+    },
+  },
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    workflowClients,
+    getSpaceId,
+    server,
+    telemetry,
+    logger,
+  }): Promise<{ acknowledged: true }> => {
+    const { significantEventsDiscoveryClient } = workflowClients;
+    if (!significantEventsDiscoveryClient) {
+      throw new FeatureNotEnabledError(
+        'Significant events discovery requires the workflows feature to be enabled'
+      );
+    }
+    const { licensing } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing });
+    const spaceId = await getSpaceId(request);
+    const {
+      discovery_execution_id: discoveryExecutionId,
+      error_message: errorMessage,
+      ...counts
+    } = params.body;
+
+    // The report must land even when the execution records cannot be read.
+    const lookup = async <T>(what: string, read: () => Promise<T>): Promise<T | undefined> => {
+      try {
+        return await read();
+      } catch (error) {
+        logger.debug(
+          `discovery-completed: could not read ${what}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+        return undefined;
+      }
+    };
+    const [execution, orchestrator] = await Promise.all([
+      lookup('the discovery execution', () =>
+        significantEventsDiscoveryClient.getExecution({
+          id: discoveryExecutionId,
+          spaceId,
+          request,
+        })
+      ),
+      lookup('the orchestrator execution', () =>
+        significantEventsDiscoveryClient.getLastExecution({ spaceId, request })
+      ),
+    ]);
+    // The management client resolves an unknown execution id to null rather than throwing.
+    const durationMs = !execution
+      ? undefined
+      : execution.finishedAt
+      ? execution.duration
+      : Date.now() - Date.parse(execution.startedAt);
+
+    telemetry.trackSignificantEventsDiscoveryCompleted({
+      ...(orchestrator ? { execution_id: orchestrator.id } : {}),
+      discovery_execution_id: discoveryExecutionId,
+      space_id: spaceId,
+      alert_source: SIGNIFICANT_EVENTS_ALERT_SOURCE,
+      ...(durationMs !== undefined ? { duration_ms: durationMs } : {}),
+      ...counts,
+      ...(errorMessage ? { error_message: errorMessage } : {}),
+    });
+    return { acknowledged: true };
+  },
+});
+
 export const internalDiscoveryRoutes = {
   ...discoveryExecuteRoute,
   ...discoveryStatusRoute,
+  ...discoveryCompletedRoute,
 };

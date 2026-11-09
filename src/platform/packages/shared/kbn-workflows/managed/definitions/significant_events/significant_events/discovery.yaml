@@ -8,6 +8,24 @@ settings:
     key: significant-events-discovery
     strategy: drop
     max: 1
+  # Reports the failed run for telemetry (nightshift-program#1956); the engine restores the error
+  # afterwards, so the workflow still fails. A cancelled or timed-out run never gets here.
+  on-failure:
+    fallback:
+      - name: report_discovery_failed
+        type: kibana.request
+        with:
+          method: POST
+          path: '/s/{{ workflow.spaceId }}/internal/streams/significant_events/discovery/_completed'
+          body:
+            discovery_execution_id: '{{ execution.id }}'
+            outcome: failed
+            error_message: '${{ error.message | default: "" | truncate: 1024, "" }}'
+          headers:
+            x-elastic-internal-origin: 'kibana'
+        timeout: '10s'
+        on-failure:
+          continue: true
 tags:
   - observability
   - streams
@@ -151,6 +169,21 @@ steps:
     type: if
     condition: '${{ steps.check_budget.output.allowed == false }}'
     steps:
+      - name: report_discovery_budget_denied
+        type: kibana.request
+        with:
+          method: POST
+          path: '/s/{{ workflow.spaceId }}/internal/streams/significant_events/discovery/_completed'
+          body:
+            discovery_execution_id: '{{ execution.id }}'
+            outcome: completed
+            has_work: false
+            processed_count: 0
+          headers:
+            x-elastic-internal-origin: 'kibana'
+        timeout: '10s'
+        on-failure:
+          continue: true
       - name: output_budget_denied
         type: workflow.output
         with:
@@ -330,6 +363,25 @@ steps:
     type: if
     condition: '${{ steps.compute_has_work.output.hasWork == false }}'
     steps:
+      - name: report_discovery_no_work
+        type: kibana.request
+        with:
+          method: POST
+          path: '/s/{{ workflow.spaceId }}/internal/streams/significant_events/discovery/_completed'
+          body:
+            discovery_execution_id: '{{ execution.id }}'
+            outcome: completed
+            has_work: false
+            processed_count: '${{ steps.compute_batch_size.output.processedCount | default: 0 }}'
+            skipped_count: '${{ steps.classify_detections.output.skipped_count | default: 0 }}'
+            held_back_count: '${{ steps.classify_detections.output.held_back_count | default: 0 }}'
+            needs_agent_count: '${{ steps.classify_detections.output.needs_agent_count | default: 0 }}'
+            classifier_failed: '${{ steps.classify_detections.error != null or steps.classify_detections.output.failed == true }}'
+          headers:
+            x-elastic-internal-origin: 'kibana'
+        timeout: '10s'
+        on-failure:
+          continue: true
       - name: output_no_detections
         type: workflow.output
         with:
@@ -591,6 +643,32 @@ steps:
                             on-failure:
                               continue: true
 
+  - name: report_discovery_completed
+    type: kibana.request
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/internal/streams/significant_events/discovery/_completed'
+      body:
+        discovery_execution_id: '{{ execution.id }}'
+        outcome: completed
+        has_work: true
+        processed_count: '${{ steps.compute_batch_size.output.processedCount | default: 0 }}'
+        skipped_count: '${{ steps.classify_detections.output.skipped_count | default: 0 }}'
+        held_back_count: '${{ steps.classify_detections.output.held_back_count | default: 0 }}'
+        needs_agent_count: '${{ steps.classify_detections.output.needs_agent_count | default: 0 }}'
+        written_event_count: >-
+          ${{ steps.run_discovery_agent.output.structured_output.significant_events
+            | default: []
+            | where: 'written', true
+            | size
+            | default: 0 }}
+        written_rule_count: '${{ steps.count_written_rules.output.writtenCount | default: 0 }}'
+        classifier_failed: '${{ steps.classify_detections.error != null or steps.classify_detections.output.failed == true }}'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+    timeout: '10s'
+    on-failure:
+      continue: true
   - name: output_result
     type: workflow.output
     with:

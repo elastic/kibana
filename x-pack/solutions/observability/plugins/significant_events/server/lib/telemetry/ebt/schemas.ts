@@ -15,6 +15,7 @@ import type {
   AgentToolEventStatusUpdateProps,
   AgentToolKnowledgeIndicatorIdentificationStartedProps,
   DetectionScanProps,
+  DiscoveryCompletedProps,
   KnowledgeIndicatorFeaturesIdentifiedProps,
   KnowledgeIndicatorQueriesGeneratedProps,
   KnowledgeIndicatorOnboardingScheduledProps,
@@ -434,6 +435,84 @@ const discoveryTriggeredSchema = {
   },
 };
 
+const optionalCount = (description: string) => ({
+  type: 'long' as const,
+  _meta: { description, optional: true as const },
+});
+
+const discoveryCompletedSchema: RootSchema<DiscoveryCompletedProps> = {
+  execution_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The orchestrator workflow execution this run belongs to, the same id `discovery-triggered` carries; absent when no orchestrator execution was found for the space',
+      optional: true,
+    },
+  },
+  discovery_execution_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The discovery sub-workflow execution that reported; joins the workflow engine events for that execution',
+    },
+  },
+  space_id: {
+    type: 'keyword',
+    _meta: { description: 'The Kibana space the run worked in' },
+  },
+  alert_source: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The `.rule-events` `source` of the alerts this run produces; always `elastic.significant_events` until other sources feed discovery',
+    },
+  },
+  outcome: {
+    type: 'keyword',
+    _meta: {
+      description:
+        '`completed` when the workflow reached an exit, `failed` when a step failed and the workflow-level fallback reported. A cancelled or timed-out run never reports; pair with the workflow engine `workflows_execution_workflow_cancelled` event',
+    },
+  },
+  duration_ms: {
+    type: 'long',
+    _meta: {
+      description:
+        'Milliseconds from the discovery execution start to this report; absent when the execution could not be read',
+      optional: true,
+    },
+  },
+  has_work: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether any detection reached the discovery agent',
+      optional: true,
+    },
+  },
+  processed_count: optionalCount('Detections handed to the run after classification'),
+  skipped_count: optionalCount('Detections the classifier skipped'),
+  held_back_count: optionalCount('Detections the classifier held back'),
+  needs_agent_count: optionalCount('Detections the classifier routed to the agent'),
+  written_event_count: optionalCount(
+    'Significant Event versions the agent reported written in this run: the discoveries produced'
+  ),
+  written_rule_count: optionalCount('Distinct rules the written events cover'),
+  classifier_failed: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the detection classifier failed and the run fell back to the agent',
+      optional: true,
+    },
+  },
+  error_message: {
+    type: 'text',
+    _meta: {
+      description: 'The failing step error when `outcome` is `failed`',
+      optional: true,
+    },
+  },
+};
+
 const detectionScanSchema: RootSchema<DetectionScanProps> = {
   took_ms: {
     type: 'long',
@@ -714,6 +793,7 @@ export {
   agentToolEventWriteSchema,
   agentToolKnowledgeIndicatorIdentificationStartedSchema,
   detectionScanSchema,
+  discoveryCompletedSchema,
   discoveryTriggeredSchema,
   knowledgeIndicatorFeaturesIdentifiedSchema,
   knowledgeIndicatorQueriesGeneratedSchema,

@@ -84,7 +84,7 @@ const investigationCompleted = parse(SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_
 
 describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {
-    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(28);
+    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(29);
     expect(SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW.version).toBe(4);
   });
 
@@ -127,6 +127,42 @@ describe('significant events persistence workflow contracts', () => {
     expect(
       requireStep(discovery, 'run_discovery_agent')['connector-id-by-feature']
     ).toBeUndefined();
+  });
+
+  it('reports discovery completion before every exit and from the failure fallback', () => {
+    const isReport = (step: WorkflowStep | undefined) =>
+      step?.type === 'kibana.request' &&
+      step.with?.path?.endsWith('/internal/streams/significant_events/discovery/_completed') ===
+        true &&
+      step['on-failure']?.continue === true;
+    const exits: Array<[WorkflowStep | undefined, WorkflowStep]> = [];
+    const walk = (steps: WorkflowStep[]) =>
+      steps.forEach((step, index) => {
+        if (step.type === 'workflow.output') exits.push([steps[index - 1], step]);
+        if (step.steps) walk(step.steps);
+      });
+    walk(discovery.steps);
+
+    expect(exits.map(([, exit]) => exit.name)).toEqual([
+      'output_budget_denied',
+      'output_no_detections',
+      'output_result',
+    ]);
+    exits.forEach(([report]) => {
+      expect(isReport(report)).toBe(true);
+      expect(report?.with?.body).toMatchObject({ outcome: 'completed' });
+    });
+    expect(requireStep(discovery, 'report_discovery_completed').with?.body).toMatchObject({
+      has_work: true,
+      written_event_count: expect.stringContaining("where: 'written', true"),
+    });
+
+    const { settings } = parse(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.yaml) as {
+      settings: { 'on-failure': { fallback: WorkflowStep[] } };
+    };
+    const [fallback] = settings['on-failure'].fallback;
+    expect(isReport(fallback)).toBe(true);
+    expect(fallback.with?.body).toMatchObject({ outcome: 'failed' });
   });
 
   it('bootstraps per-space cleanup before discovery work', () => {

@@ -184,6 +184,13 @@ describe('Significant Events run quota workflow contracts', () => {
 
     expect(discoveryDenial.steps).toEqual([
       expect.objectContaining({
+        type: 'kibana.request',
+        with: expect.objectContaining({
+          path: expect.stringContaining('/discovery/_completed'),
+          body: expect.objectContaining({ outcome: 'completed', has_work: false }),
+        }),
+      }),
+      expect.objectContaining({
         type: 'workflow.output',
         with: {
           processedCount: 0,

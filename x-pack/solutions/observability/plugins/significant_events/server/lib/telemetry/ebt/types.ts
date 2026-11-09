@@ -108,6 +108,24 @@ interface DiscoveryTriggeredProps {
   space_id: string;
 }
 
+interface DiscoveryCompletedProps {
+  execution_id?: string;
+  discovery_execution_id: string;
+  space_id: string;
+  alert_source: string;
+  outcome: 'completed' | 'failed';
+  duration_ms?: number;
+  has_work?: boolean;
+  processed_count?: number;
+  skipped_count?: number;
+  held_back_count?: number;
+  needs_agent_count?: number;
+  written_event_count?: number;
+  written_rule_count?: number;
+  classifier_failed?: boolean;
+  error_message?: string;
+}
+
 interface DetectionScanProps {
   /** ES `took` (ms) reported by the alerts-source search itself. */
   took_ms: number;
@@ -180,6 +198,7 @@ export {
   type AgentToolEventStatusUpdateProps,
   type AgentToolEventWriteProps,
   type DetectionScanProps,
+  type DiscoveryCompletedProps,
   type DiscoveryTriggeredProps,
   type KnowledgeIndicatorQueriesGeneratedProps,
   type KnowledgeIndicatorFeaturesIdentifiedProps,

@@ -99,6 +99,100 @@ it('passes a strict connector override and request-scoped resolver to the discov
   });
 });
 
+describe('discovery completed report', () => {
+  const completedRoute =
+    internalDiscoveryRoutes['POST /internal/streams/significant_events/discovery/_completed'];
+  type CompletedParams = Parameters<typeof completedRoute.handler>[0];
+
+  const makeParams = ({
+    getExecution = jest.fn().mockResolvedValue({
+      startedAt: new Date(Date.now() - 90_000).toISOString(),
+      finishedAt: undefined,
+    }),
+    getLastExecution = jest.fn().mockResolvedValue({ id: 'orchestrator-1' }),
+    body = {},
+  }: {
+    getExecution?: jest.Mock;
+    getLastExecution?: jest.Mock;
+    body?: Record<string, unknown>;
+  } = {}) => {
+    const track = jest.fn();
+    return {
+      track,
+      handlerParams: {
+        params: {
+          body: {
+            discovery_execution_id: 'discovery-1',
+            outcome: 'completed',
+            has_work: true,
+            processed_count: 4,
+            written_event_count: 2,
+            ...body,
+          },
+        },
+        request: {},
+        getScopedClients: jest.fn().mockResolvedValue({ licensing: {} }),
+        workflowClients: {
+          significantEventsDiscoveryClient: { getExecution, getLastExecution },
+        },
+        getSpaceId: jest.fn().mockResolvedValue('space-a'),
+        server: {},
+        telemetry: { trackSignificantEventsDiscoveryCompleted: track },
+        logger: { debug: jest.fn() },
+      } as unknown as CompletedParams,
+    };
+  };
+
+  it('pairs the report with the orchestrator run and measures the discovery execution', async () => {
+    const { handlerParams, track } = makeParams();
+
+    await expect(completedRoute.handler(handlerParams)).resolves.toEqual({ acknowledged: true });
+
+    const [[reported]] = track.mock.calls;
+    expect(reported).toMatchObject({
+      execution_id: 'orchestrator-1',
+      discovery_execution_id: 'discovery-1',
+      space_id: 'space-a',
+      alert_source: 'elastic.significant_events',
+      outcome: 'completed',
+      has_work: true,
+      processed_count: 4,
+      written_event_count: 2,
+    });
+    expect(reported.duration_ms).toBeGreaterThanOrEqual(90_000);
+    expect(reported).not.toHaveProperty('error_message');
+  });
+
+  it('still reports when the execution records cannot be read', async () => {
+    const { handlerParams, track } = makeParams({
+      getExecution: jest.fn().mockRejectedValue(new Error('not found')),
+      getLastExecution: jest.fn().mockRejectedValue(new Error('unavailable')),
+      body: { outcome: 'failed', error_message: 'agent step failed' },
+    });
+
+    await completedRoute.handler(handlerParams);
+
+    const [[reported]] = track.mock.calls;
+    expect(reported).toMatchObject({ outcome: 'failed', error_message: 'agent step failed' });
+    expect(reported).not.toHaveProperty('execution_id');
+    expect(reported).not.toHaveProperty('duration_ms');
+  });
+
+  it('reports without a duration when the execution id is unknown', async () => {
+    const { handlerParams, track } = makeParams({
+      getExecution: jest.fn().mockResolvedValue(null),
+      getLastExecution: jest.fn().mockResolvedValue(null),
+    });
+
+    await completedRoute.handler(handlerParams);
+
+    const [[reported]] = track.mock.calls;
+    expect(reported).toMatchObject({ discovery_execution_id: 'discovery-1', outcome: 'completed' });
+    expect(reported).not.toHaveProperty('duration_ms');
+    expect(reported).not.toHaveProperty('execution_id');
+  });
+});
+
 it('maps an unknown connector to a 400 response', async () => {
   const { handlerParams } = makeHandlerParams();
   mockResolveNightshiftModelForRequest.mockRejectedValueOnce(
