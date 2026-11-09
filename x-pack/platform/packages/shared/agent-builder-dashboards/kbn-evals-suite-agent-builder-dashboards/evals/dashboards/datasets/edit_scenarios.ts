@@ -124,10 +124,12 @@ export const DASHBOARD_EDIT_SCENARIO_EXAMPLES: DashboardDatasetExample[] = [
     },
     // The seeded low_request_rate job has no influencers; response_code_rates does.
     panelEdits: [
+      { panel: { added: 'markdown' }, contentIncludes: ['75', 'critical'] },
       {
         panel: { added: 'ml_anomaly_swimlane' },
         config: { job_ids: ['response_code_rates'], swimlane_type: 'viewBy' },
       },
+      { panel: { added: 'vega' }, vegaMark: 'rect' },
     ],
     structure: { panelKinds: { markdown: 3, ml_anomaly_swimlane: 2, vega: 2 } },
   }),

@@ -250,6 +250,9 @@ export const matchesColorName = (color: string, name: PanelColorName): boolean =
   return Math.min(distance, 360 - distance) <= tolerance;
 };
 
+const getVegaMarkTypes = ({ type, config }: AttachmentPanel): string[] =>
+  type === 'vega' ? collectDrawnMarks(parseVegaSpec(config.spec)).map((mark) => mark.type) : [];
+
 const BULLET_ITEM = /^\s*[-*+]\s+\S/;
 
 const countBulletItems = (content: string): number =>
@@ -277,7 +280,7 @@ const resolvePanel = (
 };
 
 const checkPanelEdit = (
-  { panel: item, type, config, color, bulletList }: PanelEditGold,
+  { panel: item, type, config, color, bulletList, contentIncludes = [], vegaMark }: PanelEditGold,
   index: number,
   dashboard: DashboardAttachmentData,
   before: DashboardAttachmentData | undefined
@@ -298,6 +301,12 @@ const checkPanelEdit = (
       ? `colors [${colors.join(', ')}] have no ${color}`
       : undefined,
     bulletList && countBulletItems(content) < 2 ? 'no bullet list' : undefined,
+    ...contentIncludes
+      .filter((term) => !content.toLowerCase().includes(term.toLowerCase()))
+      .map((term) => `content does not mention "${term}"`),
+    vegaMark !== undefined && !getVegaMarkTypes(panel).includes(vegaMark)
+      ? `spec draws no ${vegaMark} mark`
+      : undefined,
   ]);
 
   return {
@@ -311,8 +320,8 @@ const checkPanelEdit = (
  * Checks that a panel the prompt edits in place keeps its id, and that it, or a
  * panel the prompt adds, ends up as the gold describes it: the listed `type`
  * and `config` values, subset-matched as the visualization suite matches its
- * config gold, plus a requested color hue (in a Vega spec too) or markdown
- * bullet list. Whether the rest of the layout held is scored by Dashboard
+ * config gold, plus a requested color hue (in a Vega spec too), markdown
+ * bullet list or terms, or Vega mark type. Whether the rest of the layout held is scored by Dashboard
  * Layout Edit.
  */
 export const dashboardPanelEditsEvaluator: DashboardAgentEvaluator = {

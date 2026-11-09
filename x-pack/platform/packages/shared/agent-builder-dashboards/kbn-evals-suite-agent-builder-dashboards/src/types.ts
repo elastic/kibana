@@ -100,8 +100,8 @@ export type PanelColorName = 'red' | 'blue';
 
 /**
  * What one seed panel looks like after an edit, in the attachment's own shape.
- * `type` and `config` are subset-matched; `color` and `bulletList` cover what
- * no exact value can express.
+ * `type` and `config` are subset-matched; `color`, `bulletList`,
+ * `contentIncludes` and `vegaMark` cover what no exact value can express.
  */
 export interface PanelEditGold {
   /** Seed panel id, which the edit keeps, or `{ added: kind }` for the first panel of that kind the edit added. */
@@ -114,6 +114,10 @@ export interface PanelEditGold {
   color?: PanelColorName;
   /** The markdown content holds a bullet list of at least two items. */
   bulletList?: boolean;
+  /** The markdown content mentions each term, ignoring case. */
+  contentIncludes?: readonly string[];
+  /** The Vega spec draws a mark of this type (`rect` for a heatmap), in any view or layer. */
+  vegaMark?: string;
 }
 
 /**

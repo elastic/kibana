@@ -369,6 +369,38 @@ describe('dashboard panel edits evaluator', () => {
     );
   });
 
+  it('checks markdown terms and the Vega mark type of added panels', async () => {
+    const withAdded = (content: string, mark: string): DashboardAttachmentData => ({
+      ...SECTIONED_LOGS_DASHBOARD,
+      panels: [
+        ...SECTIONED_LOGS_DASHBOARD.panels,
+        {
+          type: 'markdown',
+          id: 'added-note',
+          grid: { x: 0, y: 200, w: 24, h: 5 },
+          config: { content },
+        },
+        {
+          type: 'vega',
+          id: 'added-heatmap',
+          grid: { x: 24, y: 200, w: 24, h: 5 },
+          config: { spec: JSON.stringify({ layer: [{ mark: { type: mark } }] }) },
+        },
+      ],
+    });
+    const gold: PanelEditGold[] = [
+      { panel: { added: 'markdown' }, contentIncludes: ['75', 'critical'] },
+      { panel: { added: 'vega' }, vegaMark: 'rect' },
+    ];
+    expect(
+      (await evaluateEdits(gold, withAdded('Scores above 75 are **Critical**.', 'rect'))).score
+    ).toBe(1);
+    const wrong = await evaluateEdits(gold, withAdded('Scores above 50 are critical.', 'bar'));
+    expect(wrong.score).toBe(0);
+    expect(wrong.explanation).toContain('content does not mention "75"');
+    expect(wrong.explanation).toContain('spec draws no rect mark');
+  });
+
   it('fails a panel the edit replaced under a new id', async () => {
     const result = await evaluateEdits(
       [{ panel: 'response-codes', config: { type: 'data_table' } }],
