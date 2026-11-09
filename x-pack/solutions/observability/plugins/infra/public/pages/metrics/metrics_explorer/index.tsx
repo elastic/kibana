@@ -51,6 +51,8 @@ export const MetricsExplorerPage = (): React.ReactElement => {
         <WithMetricsExplorerOptionsUrlState />
         <InfraPageTemplate
           hasDataOverride={!showOnboarding}
+          // POC: onboarding renders as page content, so flag the empty state for the recessed glass.
+          isEmptyState={showOnboarding}
           header={
             <>
               <AppHeader title={metricsExplorerTitle} menu={menu} spacing="standard" />
@@ -59,6 +61,7 @@ export const MetricsExplorerPage = (): React.ReactElement => {
           }
           pageSectionProps={{
             paddingSize: 'none',
+            alignment: 'top',
             contentProps: {
               css: css`
                 display: flex;

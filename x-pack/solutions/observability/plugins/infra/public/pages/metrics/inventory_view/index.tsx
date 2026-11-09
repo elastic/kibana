@@ -46,6 +46,8 @@ export const SnapshotPage = (): React.ReactElement => {
               <div className={APP_WRAPPER_CLASS}>
                 <InfraPageTemplate
                   hasDataOverride={!showOnboarding}
+                  // POC: onboarding renders as page content, so flag the empty state for the recessed glass.
+                  isEmptyState={showOnboarding}
                   header={
                     <>
                       <AppHeader title={inventoryTitle} menu={menu} spacing="standard" />
@@ -54,6 +56,7 @@ export const SnapshotPage = (): React.ReactElement => {
                   }
                   pageSectionProps={{
                     paddingSize: 'none',
+                    alignment: 'top',
                     contentProps: {
                       css: css`
                         display: flex;
