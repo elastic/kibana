@@ -41,7 +41,10 @@ import { createVisibilityState, type VisibilityState } from './visibility_state'
 import { createChromeStyleState, type ChromeStyleState } from './chrome_style_state';
 
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
-const INITIAL_SIDENAV_WIDTH = 0;
+// Mirrors COLLAPSED_WIDTH / EXPANDED_WIDTH in @kbn/ui-side-navigation; importing that package here
+// would pull the lazy-loaded nav into core's eager bundle.
+const INITIAL_SIDENAV_COLLAPSED_WIDTH = 48;
+const INITIAL_SIDENAV_EXPANDED_WIDTH = 100;
 
 export interface ChromeState {
   /** Visibility management */
@@ -113,7 +116,11 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
 
   // Side Nav
   const sideNavCollapsed = createPersistedState(IS_SIDENAV_COLLAPSED_KEY, false);
-  const sideNavWidth = createState<number>(INITIAL_SIDENAV_WIDTH);
+  // POC: reserve the nav column before the lazy side nav mounts and reports its width,
+  // so the app frame doesn't start at the window edge while loading.
+  const sideNavWidth = createState<number>(
+    sideNavCollapsed.get() ? INITIAL_SIDENAV_COLLAPSED_WIDTH : INITIAL_SIDENAV_EXPANDED_WIDTH
+  );
 
   // Breadcrumbs (legacyBadge powers setBadge() -> breadcrumbs badge pipeline)
   const {
