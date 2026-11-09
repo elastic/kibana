@@ -7,7 +7,6 @@
 
 import Fs from 'fs';
 import Path from 'path';
-import { readAssetOverride } from '../harness_assets';
 
 export interface InstructionsTemplateParams {
   /**
@@ -26,21 +25,20 @@ const DEFAULT_LIMIT = 100;
 const TEMPLATE_FILE = Path.join(__dirname, 'instructions.md');
 
 /**
- * The instruction block lives in `instructions.md` rather than inline, so the same text can be
- * replaced wholesale by the offline optimization loop (see `harness_assets.ts`) without touching
- * code. Two placeholders are supported: `{{defaultLimit}}` and a `{{#namedParams}}…
- * {{/namedParams}}` section that is dropped when named parameters are disabled.
+ * The instruction block lives in `instructions.md` rather than inline so it can be edited as
+ * prose — by a person or by the offline optimization loop — without touching code. Two
+ * placeholders are supported: `{{defaultLimit}}` and a `{{#namedParams}}…{{/namedParams}}`
+ * section that is dropped when named parameters are disabled.
  */
 let bundledTemplate: string | undefined;
 
 const loadTemplate = (): string => {
-  const override = readAssetOverride('prompts/instructions.md');
-  if (override !== undefined) {
-    return override;
+  // Re-read on every call in dev so an edit to the markdown takes effect without a restart;
+  // cached in production, where the file never changes at runtime.
+  if (process.env.NODE_ENV === 'production' && bundledTemplate !== undefined) {
+    return bundledTemplate;
   }
-  if (bundledTemplate === undefined) {
-    bundledTemplate = Fs.readFileSync(TEMPLATE_FILE, 'utf8');
-  }
+  bundledTemplate = Fs.readFileSync(TEMPLATE_FILE, 'utf8');
   return bundledTemplate;
 };
 

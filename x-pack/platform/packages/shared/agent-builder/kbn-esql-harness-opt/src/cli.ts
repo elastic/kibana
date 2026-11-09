@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import Fs from 'fs';
 import Path from 'path';
 import { run } from '@kbn/dev-cli-runner';
-import { DEFAULT_ESQL_HARNESS_CONFIG } from '@kbn/agent-builder-genai-utils/tools/generate_esql/harness_config';
 import {
   allExamples,
   anchorExamples,
@@ -19,7 +17,7 @@ import {
 import type { Split } from './dataset';
 import { createEsClient, executeGenerateEsql, resolveTarget } from './clients';
 import { setupFixtures } from './corpora/setup';
-import { buildGoldRowCache, runConfig } from './runner';
+import { buildGoldRowCache, runVariant } from './runner';
 import { executeGold, scoreQuery } from './scorers';
 import { runCampaign } from './campaign';
 import { setupCandidateWorktree } from './candidate_workspace';
@@ -37,22 +35,9 @@ import {
 import type { GeneratedExample } from './corpus/generate';
 import { corpusIndices, installSampleData } from './corpora/setup';
 
-type HarnessConfigObject = Record<string, unknown>;
-
 /** `@kbn/dev-cli-runner` hands back `''` for declared-but-unpassed string flags. */
 const optionalFlag = (value: unknown): string | undefined =>
   typeof value === 'string' && value.length > 0 ? value : undefined;
-
-const defaultConfig = (): HarnessConfigObject =>
-  JSON.parse(JSON.stringify(DEFAULT_ESQL_HARNESS_CONFIG)) as HarnessConfigObject;
-
-const loadConfig = (path?: string): HarnessConfigObject =>
-  path ? (JSON.parse(Fs.readFileSync(path, 'utf8')) as HarnessConfigObject) : defaultConfig();
-
-const withMaxRetries = (config: HarnessConfigObject, maxRetries: number): HarnessConfigObject => ({
-  ...config,
-  retryPolicy: { ...(config.retryPolicy as object), maxRetries },
-});
 
 export const cli = () =>
   run(
@@ -64,22 +49,21 @@ export const cli = () =>
         esUrl: optionalFlag(flags['es-url']),
       });
       const esClient = createEsClient(target);
-      const { runsDir, configPath, tracePath } = harnessPaths();
+      const { runsDir } = harnessPaths();
 
       if (command === 'help') {
         log.info(`Commands:
   setup-fixtures [--sample-data]    create and seed the fixture indices (and sample data sets)
+  setup-models                      create the inference connectors used as gate tiers
+  setup-candidate                   create + bootstrap the candidate worktree (second lane)
   generate-corpus [--probes n]      synthesize, back-translate and difficulty-label a corpus
-  baseline [--rollouts n]           run the default config plus matched-compute variants
-  round [--config path]             one propose → gate round against the current incumbent
-  campaign --rounds n               repeat rounds, promoting accepted candidates
-  sealed --config path              score a config on the sealed split
-  report [--serve] [--port n]       write (or serve) an HTML report of all rounds and runs
-  setup-models                      create the inference connectors the model slot can choose
-  setup-candidate                   create + bootstrap the candidate worktree (code-edit lane)
+  baseline [--tiers ids]            measure this worktree's harness, per model tier
+  round / campaign --rounds n       propose → validate → gate → promote, repeatedly
+  sealed [--tiers id]               score the current worktree on the sealed split
+  report [--serve] [--port n]       write (or serve) the HTML report
 
-Start Kibana with:
-  ESQL_HARNESS_CONFIG=${configPath} ESQL_HARNESS_TRACE_FILE=${tracePath}`);
+Both lanes' Kibana processes must run with ESQL_HARNESS_TRACE_FILE pointing at
+<harness dir>/{incumbent,candidate}/trace.jsonl.`);
         return;
       }
 
@@ -204,20 +188,23 @@ Start Kibana with:
         const examples = examplesForSplit(splitFlag ?? 'search');
         const goldRows = await buildGoldRowCache({ esClient, examples });
         const outputDir = Path.join(runsDir, `baseline-${Date.now()}`);
+        const tiers = (optionalFlag(flags.tiers) ?? '')
+          .split(',')
+          .map((tier) => tier.trim())
+          .filter(Boolean);
 
-        const variants: Array<{ label: string; config: HarnessConfigObject }> = [
-          { label: 'default', config: defaultConfig() },
-          { label: 'maxRetries-1', config: withMaxRetries(defaultConfig(), 1) },
-          { label: 'maxRetries-5', config: withMaxRetries(defaultConfig(), 5) },
-        ];
-
-        for (const variant of variants) {
-          await runConfig({
-            ...variant,
+        // The baseline is the harness as it stands in this worktree, measured on each model it
+        // might run on — there is no config to vary any more.
+        for (const tier of tiers.length ? tiers : [undefined]) {
+          await runVariant({
+            label: `baseline${tier ? `-${tier.slice(0, 8)}` : ''}`,
+            variant: { hash: 'baseline', tier },
+            lane: 'incumbent',
             examples,
             rollouts,
             esClient,
             target,
+            connectorId: tier,
             log,
             concurrency,
             goldRows,
@@ -231,14 +218,18 @@ Start Kibana with:
       if (command === 'sealed') {
         const examples = examplesForSplit('sealed');
         const goldRows = await buildGoldRowCache({ esClient, examples });
-        const config = loadConfig(optionalFlag(flags.config));
-        await runConfig({
+        const tier = optionalFlag(flags.tiers);
+        await runVariant({
           label: 'sealed',
-          config,
+          variant: { hash: optionalFlag(flags.label) ?? 'sealed', tier },
+          lane: optionalFlag(flags['candidate-url']) ? 'candidate' : 'incumbent',
           examples,
           rollouts,
           esClient,
-          target,
+          target: optionalFlag(flags['candidate-url'])
+            ? { ...target, kibanaUrl: optionalFlag(flags['candidate-url'])! }
+            : target,
+          connectorId: tier,
           log,
           concurrency,
           goldRows,
@@ -271,13 +262,12 @@ Start Kibana with:
             .map((tier) => tier.trim())
             .filter(Boolean),
           incumbentTarget: target,
-          candidateTarget: candidateUrl ? { ...target, kibanaUrl: candidateUrl } : undefined,
-          candidateWorktree: candidatePath,
+          candidateTarget: { ...target, kibanaUrl: candidateUrl ?? 'http://localhost:5691' },
+          candidateWorktree: candidatePath ?? `${process.cwd()}-candidate`,
           mainWorktree: process.cwd(),
           esClient,
           searchExamples: examplesForSplit('search'),
           gateExamples: examplesForSplit('gate'),
-          startingConfig: loadConfig(optionalFlag(flags.config)),
           log,
         });
         return;
@@ -303,10 +293,10 @@ Start Kibana with:
           'candidate-path',
           'candidate-url',
           'candidate-port',
+          'label',
         ],
         boolean: ['serve', 'sample-data'],
         help: `
-        --config <path>      incumbent config to start from (default: shipped defaults)
         --split <name>       search | gate | sealed (baseline only)
         --rollouts <n>       repetitions per example (default 1)
         --rounds <n>         rounds for the campaign command (default 3)

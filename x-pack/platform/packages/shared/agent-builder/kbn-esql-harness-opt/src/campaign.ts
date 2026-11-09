@@ -11,13 +11,13 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { HarnessExample } from './dataset';
 import type { HarnessTarget } from './clients';
-import { buildGoldRowCache, runConfig } from './runner';
+import { buildGoldRowCache, runVariant } from './runner';
 import type { RunSummary } from './runner';
 import { gateCandidate } from './gate';
 import type { GateResult } from './gate';
-import { lintProposal, proposeCandidate } from './proposer';
+import { proposeCandidate } from './proposer';
 import { verificationSummary, verifyManifest } from './verification';
-import { harnessPaths } from './workspace';
+import { harnessPaths, variantHash } from './workspace';
 import { readModelChoices } from './models';
 import {
   applyAndValidateEdits,
@@ -33,40 +33,17 @@ export interface CampaignOptions {
   rounds: number;
   rollouts: number;
   concurrency: number;
+  /** Connector ids the candidate must clear the gate on. Empty = whatever the code selects. */
   tiers: string[];
   incumbentTarget: HarnessTarget;
-  candidateTarget?: HarnessTarget;
-  candidateWorktree?: string;
+  candidateTarget: HarnessTarget;
+  candidateWorktree: string;
   mainWorktree: string;
   esClient: EsClient;
   searchExamples: HarnessExample[];
   gateExamples: HarnessExample[];
-  startingConfig: Record<string, unknown>;
   log: ToolingLog;
 }
-
-/** Everything that defines one harness variant: policy, text assets and code. */
-interface HarnessState {
-  config: Record<string, unknown>;
-  assets: Record<string, string>;
-  codeEdits: CodeEdit[];
-}
-
-const tierApplications = (tiers: string[]) =>
-  tiers.length
-    ? tiers.map((connectorId) => ({
-        name: connectorId,
-        // A tier only fills in a model the candidate left unset: if the proposal pinned one, that
-        // choice is part of what is being evaluated and must not be overwritten.
-        apply: (config: Record<string, unknown>) => {
-          const model = (config.model ?? {}) as { generateConnectorId?: string | null };
-          return {
-            ...config,
-            model: { ...model, generateConnectorId: model.generateConnectorId ?? connectorId },
-          };
-        },
-      }))
-    : [{ name: 'default-tier', apply: (config: Record<string, unknown>) => config }];
 
 const measuredFacts = (searchRun: RunSummary, lastFeedback: string): string =>
   [
@@ -77,14 +54,14 @@ const measuredFacts = (searchRun: RunSummary, lastFeedback: string): string =>
     )} generation attempts on average and ${(searchRun.meanExecutes * 100).toFixed(
       0
     )}% of queries executed without an Elasticsearch error.`,
-    '- A matched-compute baseline measured `maxRetries` 1, 3 and 5 as indistinguishable, so retry',
-    '  policy and error-feedback wording have little surface here: the failures are semantic',
-    '  (wrong rows), not syntactic.',
+    '- A matched-compute baseline measured `maxRetries` 1, 3 and 5 as indistinguishable, so the',
+    '  retry loop and the wording of error feedback have little surface here: the failures are',
+    '  semantic (wrong rows), not syntactic.',
     `- Mean result equivalence is ${searchRun.meanResultEquivalence.toFixed(
       3
     )} against near-perfect execution, so the whole gap is in producing the right rows.`,
-    '- Cost is priced per model in USD, so a cheaper model can win on the cost path even at equal',
-    '  quality, and an expensive model has to earn its price in reward.',
+    '- Cost is priced per model in USD. A cheaper model can win on the cost path at equal quality,',
+    '  and an expensive one has to earn its price in reward.',
     '',
     lastFeedback ? `# How your last proposal turned out\n\n${lastFeedback}` : '',
   ].join('\n');
@@ -92,9 +69,10 @@ const measuredFacts = (searchRun: RunSummary, lastFeedback: string): string =>
 /**
  * One propose → validate → gate → promote cycle, repeated.
  *
- * The three edit channels (typed config, text assets, code files) are gated identically: a
- * candidate only becomes the incumbent by beating it on held-out examples, on every model tier,
- * without losing more than two seeds.
+ * A harness variant is a set of file edits inside the tool, nothing else: no config object, no
+ * override layer. The incumbent runs from one worktree, the candidate from a second one with its
+ * own Kibana, and a candidate only becomes the incumbent by beating it on held-out examples, on
+ * every model tier, without losing more than two seeds.
  */
 export const runCampaign = async ({
   rounds,
@@ -108,7 +86,6 @@ export const runCampaign = async ({
   esClient,
   searchExamples,
   gateExamples,
-  startingConfig,
   log,
 }: CampaignOptions): Promise<void> => {
   const { runsDir, lineageDir } = harnessPaths();
@@ -122,21 +99,20 @@ export const runCampaign = async ({
   const searchGold = await buildGoldRowCache({ esClient, examples: searchExamples });
   const gateGold = await buildGoldRowCache({ esClient, examples: gateExamples });
 
-  const codeEditsEnabled = Boolean(candidateWorktree && candidateTarget);
-  const workspace = codeEditsEnabled
-    ? { path: candidateWorktree!, kibanaUrl: candidateTarget!.kibanaUrl }
-    : undefined;
+  const workspace = { path: candidateWorktree, kibanaUrl: candidateTarget.kibanaUrl };
+  const tierList = tiers.length ? tiers : [undefined];
 
-  let incumbent: HarnessState = { config: startingConfig, assets: {}, codeEdits: [] };
+  let incumbentEdits: CodeEdit[] = [];
+  let incumbentDiff = '';
   let lastFeedback = '';
 
   for (let round = 0; round < rounds; round++) {
     const outputDir = Path.join(runsDir, `round-${Date.now()}`);
+    const incumbentVariant = { hash: variantHash(incumbentDiff), diff: incumbentDiff };
 
-    const searchRun = await runConfig({
+    const searchRun = await runVariant({
       label: `round${round}-incumbent-search`,
-      config: incumbent.config,
-      assets: incumbent.assets,
+      variant: incumbentVariant,
       lane: 'incumbent',
       examples: searchExamples,
       rollouts,
@@ -148,25 +124,18 @@ export const runCampaign = async ({
       outputDir,
     });
 
-    if (workspace) {
-      // Start the candidate from the incumbent's code, not from main: accepted edits accumulate.
-      await resetCandidate(workspace);
-      promoteEdits({ edits: incumbent.codeEdits, targetWorktree: workspace.path });
-    }
+    // The candidate always starts from the incumbent's code, so accepted edits accumulate.
+    await resetCandidate(workspace);
+    promoteEdits({ edits: incumbentEdits, targetWorktree: workspace.path });
 
     let proposal;
     try {
       proposal = await proposeCandidate({
         summary: searchRun,
-        incumbentConfig: incumbent.config,
-        incumbentAssets: incumbent.assets,
         history: ledger,
         feedback: measuredFacts(searchRun, lastFeedback),
-        scratchDir: workspace
-          ? Path.join(workspace.path, '.harness-scratch')
-          : Path.join(outputDir, 'proposer'),
-        workingDir: workspace?.path,
-        editableFiles: codeEditsEnabled,
+        scratchDir: Path.join(workspace.path, '.harness-scratch'),
+        workingDir: workspace.path,
         modelChoices: readModelChoices(),
         log,
       });
@@ -177,86 +146,65 @@ export const runCampaign = async ({
       continue;
     }
 
-    const configViolations = lintProposal(proposal.config);
-    if (configViolations.length > 0) {
-      log.warning(
-        `[harness-opt] config lint rejected the proposal: ${configViolations.join('; ')}`
-      );
-      ledger.push({
-        round,
-        rejected: 'lint',
-        violations: configViolations,
-        manifest: proposal.manifest,
-      });
+    const codeEdits = await collectEdits(workspace);
+    if (codeEdits.length === 0) {
+      log.warning(`[harness-opt] round ${round} produced no file changes`);
+      ledger.push({ round, rejected: 'no-edits', manifest: proposal.manifest });
       saveLedger();
-      if (workspace) await resetCandidate(workspace);
       continue;
     }
 
-    let codeEdits: CodeEdit[] = [];
-    let diff = '';
-    if (workspace) {
-      codeEdits = await collectEdits(workspace);
-      if (codeEdits.length > 0) {
-        const validation = await applyAndValidateEdits({ workspace, edits: codeEdits, log });
-        if (!validation.ok) {
-          log.warning(
-            `[harness-opt] code edits rejected: ${validation.failures.join(' | ').slice(0, 600)}`
-          );
-          ledger.push({
-            round,
-            rejected: 'code-validation',
-            failures: validation.failures.map((failure) => failure.slice(0, 800)),
-            manifest: proposal.manifest,
-          });
-          saveLedger();
-          await resetCandidate(workspace);
-          continue;
-        }
-        diff = await candidateDiff(workspace);
-        // The dev server reloads the edited files; measuring before it comes back would score
-        // the previous code.
-        await waitForKibana({ url: workspace.kibanaUrl, log });
-      }
+    const validation = await applyAndValidateEdits({ workspace, edits: codeEdits, log });
+    if (!validation.ok) {
+      log.warning(`[harness-opt] edits rejected: ${validation.failures.join(' | ').slice(0, 500)}`);
+      ledger.push({
+        round,
+        rejected: 'validation',
+        failures: validation.failures.map((failure) => failure.slice(0, 800)),
+        manifest: proposal.manifest,
+        filesChanged: codeEdits.map((edit) => edit.path),
+      });
+      saveLedger();
+      await resetCandidate(workspace);
+      continue;
     }
 
-    const candidateState: HarnessState = {
-      config: proposal.config,
-      assets: { ...incumbent.assets, ...(proposal.assets ?? {}) },
-      codeEdits: codeEdits.length > 0 ? codeEdits : incumbent.codeEdits,
-    };
+    const diff = await candidateDiff(workspace);
+    const candidateVariant = { hash: variantHash(diff), diff };
+    // The dev server reloads the edited files; measuring before it is back would score old code.
+    await waitForKibana({ url: workspace.kibanaUrl, log });
 
     const tierResults: Array<{ tier: string; gate: GateResult }> = [];
     let lastIncumbentGate: RunSummary | undefined;
     let lastCandidateGate: RunSummary | undefined;
 
-    for (const tier of tierApplications(tiers)) {
-      const suffix = tiers.length ? `-${tier.name.slice(0, 8)}` : '';
+    for (const tier of tierList) {
+      const suffix = tier ? `-${tier.slice(0, 8)}` : '';
 
-      const incumbentGate = await runConfig({
+      const incumbentGate = await runVariant({
         label: `round${round}-incumbent-gate${suffix}`,
-        config: tier.apply(incumbent.config),
-        assets: incumbent.assets,
+        variant: { ...incumbentVariant, tier },
         lane: 'incumbent',
         examples: gateExamples,
         rollouts: Math.max(rollouts, 2),
         esClient,
         target: incumbentTarget,
+        connectorId: tier,
         log,
         concurrency,
         goldRows: gateGold,
         outputDir,
       });
 
-      const candidateGate = await runConfig({
+      const candidateGate = await runVariant({
         label: `round${round}-candidate-gate${suffix}`,
-        config: tier.apply(candidateState.config),
-        assets: candidateState.assets,
-        lane: codeEditsEnabled ? 'candidate' : 'incumbent',
+        variant: { ...candidateVariant, tier },
+        lane: 'candidate',
         examples: gateExamples,
         rollouts: Math.max(rollouts, 2),
         esClient,
-        target: codeEditsEnabled ? candidateTarget! : incumbentTarget,
+        target: candidateTarget,
+        connectorId: tier,
         log,
         concurrency,
         goldRows: gateGold,
@@ -264,7 +212,7 @@ export const runCampaign = async ({
       });
 
       tierResults.push({
-        tier: tier.name,
+        tier: tier ?? 'default',
         gate: gateCandidate({ incumbent: incumbentGate, candidate: candidateGate }),
       });
       lastIncumbentGate = incumbentGate;
@@ -275,7 +223,7 @@ export const runCampaign = async ({
       ...tierResults[0].gate,
       accepted: tierResults.every(({ gate }) => gate.accepted),
       reasons: tierResults.flatMap(({ tier, gate }) =>
-        gate.accepted ? [] : gate.reasons.map((reason) => `[${tier}] ${reason}`)
+        gate.accepted ? [] : gate.reasons.map((reason) => `[${tier.slice(0, 8)}] ${reason}`)
       ),
     };
 
@@ -290,15 +238,13 @@ export const runCampaign = async ({
             : 0;
         };
         const example = incumbentRuns.find((entry) => entry.exampleId === exampleId);
-        const incumbentReward = rewardFor(incumbentRuns);
-        const candidateReward = rewardFor(candidateRuns);
         return {
           exampleId,
           question: example?.question ?? exampleId,
           provenance: example?.provenance ?? '',
-          incumbent: incumbentReward,
-          candidate: candidateReward,
-          delta: candidateReward - incumbentReward,
+          incumbent: rewardFor(incumbentRuns),
+          candidate: rewardFor(candidateRuns),
+          delta: rewardFor(candidateRuns) - rewardFor(incumbentRuns),
         };
       }
     );
@@ -324,11 +270,10 @@ export const runCampaign = async ({
       round,
       manifest: proposal.manifest,
       verification,
-      incumbentConfig: incumbent.config,
-      config: proposal.config,
-      assetsChanged: Object.keys(proposal.assets ?? {}),
       filesChanged: codeEdits.map((edit) => edit.path),
-      diff: diff.slice(0, 20_000),
+      diff: diff.slice(0, 40_000),
+      parentHash: incumbentVariant.hash,
+      variantHash: candidateVariant.hash,
       gate: gateResult,
       tiers: tierResults,
       searchReward: searchRun.meanReward,
@@ -336,25 +281,16 @@ export const runCampaign = async ({
     saveLedger();
 
     if (gateResult.accepted) {
-      incumbent = candidateState;
-      const lineageDirForRound = Path.join(lineageDir, `accepted-${round}`);
-      Fs.mkdirSync(lineageDirForRound, { recursive: true });
-      Fs.writeFileSync(
-        Path.join(lineageDirForRound, 'config.json'),
-        JSON.stringify(incumbent.config, null, 2)
-      );
-      Fs.writeFileSync(
-        Path.join(lineageDirForRound, 'assets.json'),
-        JSON.stringify(incumbent.assets, null, 2)
-      );
-      if (codeEdits.length > 0) {
-        Fs.writeFileSync(Path.join(lineageDirForRound, 'code.diff'), diff);
-        // Lock the code change in: the incumbent process has to run it from now on.
-        promoteEdits({ edits: codeEdits, targetWorktree: mainWorktree });
-        await waitForKibana({ url: incumbentTarget.kibanaUrl, log });
-      }
+      incumbentEdits = codeEdits;
+      incumbentDiff = diff;
+      const acceptedDir = Path.join(lineageDir, `accepted-${round}-${candidateVariant.hash}`);
+      Fs.mkdirSync(acceptedDir, { recursive: true });
+      Fs.writeFileSync(Path.join(acceptedDir, 'variant.diff'), diff);
+      // Lock it in: the incumbent process runs this code from now on.
+      promoteEdits({ edits: codeEdits, targetWorktree: mainWorktree });
+      await waitForKibana({ url: incumbentTarget.kibanaUrl, log });
       log.info(`[harness-opt] round ${round} promoted to incumbent`);
-    } else if (workspace) {
+    } else {
       await resetCandidate(workspace);
     }
   }

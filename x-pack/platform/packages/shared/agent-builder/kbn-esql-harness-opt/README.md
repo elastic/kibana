@@ -3,11 +3,10 @@
 Experimental, dev-only optimization loop for the `platform.core.generate_esql` harness
 (tracking issue: `elastic/nightshift-program#2285`).
 
-It searches a **typed config object** (`EsqlHarnessConfig`), not free-form rewrites of the tool,
-and it gates every candidate on a held-out split with a paired test clustered by seed. Both
-choices come straight from the failure catalogue in the harness-optimization literature review
-that motivated the experiment: unrestricted rewriting underperformed no optimization at all, and
-"keep it if the dev score went up" overstates held-out accuracy by 13–20 points.
+A **harness variant is a set of file edits inside the tool** — prompts, documentation corpus,
+control flow, model selection. There is no config object and no override layer: the optimizer
+edits the same files a human would, and every edit has to typecheck, pass the tool's unit tests
+and pass lint before it is measured.
 
 ## What it measures
 
@@ -18,89 +17,90 @@ Reward per example is deterministic and LLM-free:
 ```
 
 - `ast_valid` — `@kbn/esql-language` `validateQuery`
-- `executes` — the query runs against the fixture indices (`?_tstart` / `?_tend` substituted)
-- `result_equivalence` — Jaccard over normalised row multisets against the gold query. When the
-  gold query itself does not execute, this component is dropped and the rest renormalised.
+- `executes` — the query runs against the fixtures (`?_tstart` / `?_tend` substituted)
+- `result_equivalence` — Jaccard over normalised row multisets vs the gold query; dropped (and
+  the rest renormalised) when the gold query itself does not execute
 
-Cost comes from the in-process harness trace (generation attempts and real token counts), which
-the HTTP response does not expose.
+Cost is **USD, priced per model** from OpenRouter list prices (`src/pricing.ts`, override with
+`~/.esql-harness/prices.json`), computed from the token counts the harness trace records.
+
+## Two lanes
+
+| lane | worktree | Kibana | role |
+|---|---|---|---|
+| incumbent | your checkout | `:5681` | the current best variant |
+| candidate | `setup-candidate` worktree | `:5691` | the proposal under test |
+
+Both point at the same Elasticsearch. Two processes rather than one, because a dev-server
+restart per variant swap would dominate every round, and because A/B without ordering effects is
+the whole point of the gate.
+
+## What the optimizer may edit
+
+Everything under `tools/generate_esql/`, except `*.test.ts` and `harness_trace.ts` — the tests
+are a guard on the optimizer and the trace writer is measurement apparatus.
+
+Rejected mechanically, before anything runs: paths outside that folder, filesystem / process /
+network / environment access, dynamic code execution, new dependencies, hardcoded fixture index
+names or gold strings, and more than two files touched in one round.
 
 ## Running it
 
-1. Start a stack from this worktree with the two eval-only environment variables set:
+```bash
+# once
+node scripts/esql_harness_opt.js setup-fixtures --sample-data
+node scripts/esql_harness_opt.js setup-models          # connectors used as gate tiers
+node scripts/esql_harness_opt.js setup-candidate       # second worktree + bootstrap
+node scripts/esql_harness_opt.js generate-corpus --probes 3
 
-   ```bash
-   ESQL_HARNESS_CONFIG=~/.esql-harness/current.json \
-   ESQL_HARNESS_TRACE_FILE=~/.esql-harness/trace.jsonl \
-   node scripts/kibana --dev
-   ```
+# measure what you have, on each model you care about
+node scripts/esql_harness_opt.js baseline --tiers <connectorA>,<connectorB>
 
-   Neither variable is read anywhere in production; with them unset the harness is byte-identical
-   to `main`.
+# optimize
+node scripts/esql_harness_opt.js campaign --rounds 5 \
+  --candidate-path ~/kibana-harness-cand --candidate-url http://localhost:5691 \
+  --tiers <connectorA>,<connectorB>
 
-2. Seed the fixtures and check how many gold queries execute:
+# the honest number, once
+node scripts/esql_harness_opt.js sealed --tiers <connectorA>
 
-   ```bash
-   node scripts/esql_harness_opt.js setup-fixtures
-   ```
+# browse everything
+node scripts/esql_harness_opt.js report --serve --port 7711
+```
 
-2b. Optionally regenerate the synthetic corpus (query-first synthesis → back-translation →
-   difficulty probe). It is committed, so this is only needed when the fixtures change:
-
-   ```bash
-   node scripts/esql_harness_opt.js generate-corpus --probes 2 --concurrency 6
-   ```
-
-3. Measure what the current harness costs and buys, including the matched-compute baselines
-   (`maxRetries ∈ {1, 3, 5}`) that any later "gain" has to beat:
-
-   ```bash
-   node scripts/esql_harness_opt.js baseline --rollouts 2
-   ```
-
-4. Run optimization rounds (search split → proposer → gate split → ledger):
-
-   ```bash
-   node scripts/esql_harness_opt.js campaign --rounds 5
-   ```
-
-5. Score a promoted config once, on the split the proposer never saw:
-
-   ```bash
-   node scripts/esql_harness_opt.js sealed --config ~/.esql-harness/lineage/accepted-3-<hash>.json
-   ```
-
-## Guardrails
-
-- Three disjoint splits assigned by hash of the seed id; the proposer only ever sees the search
-  split's failures.
-- The proposer runs in a scratch directory containing the bundle, the incumbent config and the
-  ledger — it has no access to the dataset, fixtures, scorers or runner.
-- Candidates are linted for fixture index names and other benchmark leakage before they are run.
-- Gate requires: paired bootstrap 95% CI over seeds excluding 0, ≤2 regressed seeds, and ≤1.1×
-  token cost.
+Each lane's Kibana must run with `ESQL_HARNESS_TRACE_FILE` pointing at
+`~/.esql-harness/{incumbent,candidate}/trace.jsonl`; that file is how the loop sees retries,
+token spend and which model served each call. `ESQL_HARNESS_MODEL_CONNECTOR` pins a model for
+tier runs. Production sets neither.
 
 ## The dataset
 
-Two parts, always reported separately:
-
 - **Anchor set (34)** — 31 from the security ES|QL regression suite, 3 from the agent-builder
-  ES|QL spec. Human-written language, human-written gold. This is the benchmark of record.
-- **Generated corpus (43)** — built by `generate-corpus`: templates instantiated against the
-  live mappings and sampled literals, executed (so the gold is an observed fact, never a model's
-  opinion), back-translated into questions by a different model family, then probed twice
-  through the current harness to label difficulty.
+  ES|QL spec. Human language, human-verified gold. The benchmark of record.
+- **Generated corpus (159)** — `generate-corpus`: templates instantiated against live mappings
+  and sampled literals, executed (so gold is an observed fact), back-translated into questions by
+  a different model family, then probed three times to label difficulty.
 
-The probe exists because the first generated corpus was **saturated**: the harness solved 95% of
-it on the first attempt, so it could show neither improvement nor regression. The corpus keeps
-every flipping case (solved on one attempt, not the other), caps never-solved examples, and
-admits trivial ones only as regression ballast (≤30%).
+Saturation is actively controlled: the first generated corpus was solved 95% of the time on the
+first attempt and could show neither improvement nor regression. Flipping cases are all kept,
+never-solved examples are capped, trivial ones are admitted only as regression ballast (≤30%).
 
-## Known limitations (read before believing a number)
+Splits are assigned by hash of the seed id: search 62 / gate 79 / sealed 52.
 
-- 77 seeds total. Enough for the gate to resolve effects around +0.08 reward; not enough to
-  promote a config to production defaults.
-- Several gold queries in the security regression set are themselves dubious or non-executable;
-  those examples score on `executes` / `ast_valid` only.
-- Only one model tier is exercised per run. Harness fixes are pathology-matched to a model, so a
-  promotion needs at least two.
+## The gate
+
+Paired bootstrap over **seeds** (not rows — rollouts of one seed are not independent), 10k
+resamples, with two acceptance paths:
+
+- **quality**: reward CI excludes 0 and cost ≤ 1.1×
+- **cost**: reward non-inferior (CI low > −0.02) and USD per solved example significantly lower
+
+Either way: ≤2 regressed seeds, and the candidate must clear every model tier.
+
+## Known limitations
+
+- 193 seeds. Enough to resolve effects around +0.05 reward; not enough to promote to production
+  defaults without more data.
+- 11 of the 34 anchor gold queries do not execute against the fixtures; those score on
+  `executes` / `ast_valid` only.
+- The proposer runs with write access to the candidate worktree. Local-only, never in CI.

@@ -46,7 +46,6 @@ import {
 } from './actions';
 import type { EsqlLoadedDocumentation } from './documentation';
 import { hasRejectedJoinTarget } from './join_errors';
-import { getEsqlHarnessConfig } from './harness_config';
 import { withPromqlKeyword } from './promql_keyword';
 
 export const requestDocumentationSchema = z
@@ -90,7 +89,6 @@ export type StateType = typeof StateAnnotation.State;
 
 export const createNlToEsqlGraph = ({
   model,
-  requestDocModel = model,
   esClient,
   docBase,
   documentation,
@@ -102,8 +100,6 @@ export const createNlToEsqlGraph = ({
   cacheControl,
 }: {
   model: ScopedModel;
-  /** Model used for the keyword-selection step; defaults to the generation model. */
-  requestDocModel?: ScopedModel;
   esClient: ElasticsearchClient;
   docBase: EsqlDocumentBase;
   documentation: EsqlLoadedDocumentation;
@@ -117,7 +113,7 @@ export const createNlToEsqlGraph = ({
   const resolveTarget = async (state: StateType) => {
     const resolvedResource = await resolveResourceForEsqlWithSamplingStats({
       resourceName: state.target,
-      samplingSize: getEsqlHarnessConfig().resourceContext.samplingSize,
+      samplingSize: 100,
       includeDatasets,
       includeViews,
       includeFrozen,
@@ -138,11 +134,11 @@ export const createNlToEsqlGraph = ({
       return {}; // pre-computed by caller
     }
 
-    const structuredRequestDocModel = requestDocModel.chatModel
+    const requestDocModel = model.chatModel
       .withStructuredOutput(requestDocumentationSchema, { name: 'request_documentation' })
       .withConfig(requestDocCallConfig);
 
-    const { commands = [], functions = [] } = await structuredRequestDocModel.invoke(
+    const { commands = [], functions = [] } = await requestDocModel.invoke(
       createRequestDocumentationPrompt({
         nlQuery: state.nlQuery,
         documentation,
@@ -152,7 +148,7 @@ export const createNlToEsqlGraph = ({
     );
 
     const requestedKeywords = withPromqlKeyword(
-      [...commands, ...functions, ...getEsqlHarnessConfig().docRetrieval.alwaysInclude],
+      [...commands, ...functions],
       state.nlQuery,
       state.additionalContext
     );
@@ -229,8 +225,7 @@ export const createNlToEsqlGraph = ({
    *
    * Decided from the errors already in state; no cluster lookup is involved.
    */
-  const joinTargetRejected = (state: StateType): boolean =>
-    getEsqlHarnessConfig().retryPolicy.stopOnJoinReject && hasRejectedJoinTarget(state.actions);
+  const joinTargetRejected = (state: StateType): boolean => hasRejectedJoinTarget(state.actions);
 
   const branchAfterGenerate = async (state: StateType) => {
     const lastAction = state.actions[state.actions.length - 1];
@@ -388,8 +383,7 @@ export const createNlToEsqlGraph = ({
    * transient slow cluster as well as a genuinely narrower query); a second timeout ends the call.
    */
   const timeoutRetriesExhausted = (state: StateType): boolean =>
-    state.actions.filter((action) => isExecuteQueryAction(action) && action.timedOut).length >
-    getEsqlHarnessConfig().retryPolicy.timeoutRetryBudget;
+    state.actions.filter((action) => isExecuteQueryAction(action) && action.timedOut).length > 1;
 
   const branchAfterQueryExecution = async (state: StateType) => {
     const lastAction = state.actions[state.actions.length - 1];

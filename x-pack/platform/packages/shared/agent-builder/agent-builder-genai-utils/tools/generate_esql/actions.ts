@@ -8,11 +8,6 @@
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { EsqlResponse } from '../utils/esql';
 import {
-  getEsqlHarnessConfig,
-  renderFeedbackTemplate,
-  truncateHarnessError,
-} from './harness_config';
-import {
   createUserMessage,
   createAIMessage,
   createToolResultMessage,
@@ -101,18 +96,15 @@ export const formatAction = (action: Action, withoutToolCalls = true): BaseMessa
   // yes, this is sub-optimal, but this is how models behave.
 
   const toolCallId = generateFakeToolCallId();
-  const { feedback } = getEsqlHarnessConfig();
-  const formatError = (error: string | undefined, query: string, template: string): string =>
-    renderFeedbackTemplate(template, {
-      error: truncateHarnessError(error, feedback.errorTruncation),
-      query: feedback.includeFailedQuery ? query : '',
-    });
-
   switch (action.type) {
     case 'generate_query':
       return [
         createAIMessage(action.response),
-        createUserMessage(action.success ? `Thank you` : feedback.noQueryTemplate),
+        createUserMessage(
+          action.success
+            ? `Thank you`
+            : `I don't see any query in your response, can you please try again? Don't forget to wrap your query with \`\`\`esql[query]\`\`\``
+        ),
       ];
     case 'autocorrect_query':
       if (!action.wasCorrected) {
@@ -154,7 +146,13 @@ export const formatAction = (action: Action, withoutToolCalls = true): BaseMessa
             createUserMessage(
               action.timedOut
                 ? formatTimedOutExecution(action)
-                : formatError(action.error, action.query, feedback.executionErrorTemplate)
+                : `I tried executing the query and got the following error:
+
+\`\`\`
+${action.error}
+\`\`\`
+
+Can you fix the query?`
             ),
           ]
         : [
@@ -181,7 +179,13 @@ export const formatAction = (action: Action, withoutToolCalls = true): BaseMessa
         ? [
             createAIMessage('Now you can validate the query'),
             createUserMessage(
-              formatError(action.error, action.query, feedback.validationErrorTemplate)
+              `I tried validating the query and got the following error:
+
+\`\`\`
+${action.error}
+\`\`\`
+
+Can you fix the query?`
             ),
           ]
         : [

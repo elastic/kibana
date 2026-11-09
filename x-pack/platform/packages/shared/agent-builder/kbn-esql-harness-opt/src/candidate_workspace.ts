@@ -23,19 +23,16 @@ const TOOL_DIR =
  * fixtures, the scorers or the gate. The list is deliberately explicit rather than a glob: the
  * review's clearest failure mode is an optimizer that edits its own evaluator.
  */
-export const EDITABLE_CODE_FILES: string[] = [
-  `${TOOL_DIR}/prompts.ts`,
-  `${TOOL_DIR}/prompts/instructions.md`,
-  `${TOOL_DIR}/actions.ts`,
-  `${TOOL_DIR}/graph.ts`,
-  `${TOOL_DIR}/join_errors.ts`,
-  `${TOOL_DIR}/promql_keyword.ts`,
-  `${TOOL_DIR}/exemplars.ts`,
-  `${TOOL_DIR}/documentation/syntax.md`,
-  `${TOOL_DIR}/documentation/examples.md`,
-  `${TOOL_DIR}/documentation/ts_queries.md`,
-  `${TOOL_DIR}/documentation/promql_queries.md`,
-];
+export const EDITABLE_PATH_PREFIXES: string[] = [`${TOOL_DIR}/`];
+
+/**
+ * Files inside the tool that stay fixed even though they live under an editable folder.
+ *
+ * The unit tests are a guard on the optimizer, not part of its search space, and the trace
+ * writer is measurement apparatus — an optimizer that can edit either can make itself look good
+ * without changing anything real.
+ */
+export const PROTECTED_PATHS: RegExp[] = [/\.test\.ts$/, /harness_trace\.ts$/];
 
 /**
  * Patterns that must never appear in a generated edit.
@@ -76,8 +73,12 @@ export const lintCodeEdits = (edits: CodeEdit[]): string[] => {
 
   for (const edit of edits) {
     const normalized = edit.path.replace(/^\.\//, '');
-    if (!EDITABLE_CODE_FILES.includes(normalized)) {
-      violations.push(`${edit.path} is not in the editable file list`);
+    if (!EDITABLE_PATH_PREFIXES.some((prefix) => normalized.startsWith(prefix))) {
+      violations.push(`${edit.path} is outside the editable folders`);
+      continue;
+    }
+    if (PROTECTED_PATHS.some((pattern) => pattern.test(normalized))) {
+      violations.push(`${edit.path} is protected (tests and trace writer are fixed)`);
       continue;
     }
     for (const { pattern, reason } of FORBIDDEN_PATTERNS) {

@@ -14,13 +14,7 @@ import type { HarnessTarget } from './clients';
 import { executeGenerateEsql } from './clients';
 import { executeGold, scoreQuery } from './scorers';
 import type { QueryScore } from './scorers';
-import {
-  activeConfigPath,
-  harnessPaths,
-  writeActiveConfig,
-  writeLaneAssets,
-  writeLaneConfig,
-} from './workspace';
+import { lanePaths } from './workspace';
 import type { Lane } from './workspace';
 import { costUsd } from './pricing';
 
@@ -120,9 +114,9 @@ export const buildGoldRowCache = async ({
   return cache;
 };
 
-export const runConfig = async ({
+export const runVariant = async ({
   label,
-  config,
+  variant,
   examples,
   rollouts,
   esClient,
@@ -132,14 +126,15 @@ export const runConfig = async ({
   goldRows,
   outputDir,
   lane,
-  assets,
+  connectorId,
 }: {
   label: string;
-  config: Record<string, unknown>;
-  /** Which Kibana process serves this run; omitted for the legacy single-process setup. */
-  lane?: Lane;
-  /** Asset overrides installed for this run (documentation corpus, instruction block). */
-  assets?: Record<string, string>;
+  /** Description of the harness variant under test: its lane, diff hash and model tier. */
+  variant: { hash: string; diff?: string; tier?: string };
+  /** Which Kibana process serves this run. */
+  lane: Lane;
+  /** Model tier for this run; passed through to the tool call. */
+  connectorId?: string;
   examples: HarnessExample[];
   rollouts: number;
   esClient: EsClient;
@@ -149,18 +144,14 @@ export const runConfig = async ({
   goldRows: Map<string, string[] | null>;
   outputDir: string;
 }): Promise<RunSummary> => {
-  const { tracePath: sharedTracePath } = harnessPaths();
-  const tracePath = lane ? Path.join(harnessPaths().root, lane, 'trace.jsonl') : sharedTracePath;
-  const configHash = lane ? writeLaneConfig(lane, config) : writeActiveConfig(config);
-  if (lane) {
-    writeLaneAssets(lane, assets ?? {});
-  }
+  const { tracePath } = lanePaths(lane);
   log.info(
-    `[harness-opt] running "${label}" (config ${configHash}) over ${examples.length} examples × ${rollouts} rollouts`
+    `[harness-opt] running "${label}" (variant ${variant.hash}${
+      variant.tier ? `, tier ${variant.tier.slice(0, 8)}` : ''
+    }) over ${examples.length} examples × ${rollouts} rollouts`
   );
 
-  // Kibana re-reads the active config file on mtime change, so the only thing a round has to do
-  // between candidates is rewrite it — no restart, no Scout reboot.
+  // Each lane keeps its own trace file; clearing it here scopes the records to this run.
   if (Fs.existsSync(tracePath)) {
     Fs.truncateSync(tracePath, 0);
   }
@@ -224,7 +215,7 @@ export const runConfig = async ({
 
   const summary: RunSummary = {
     label,
-    configHash,
+    configHash: variant.hash,
     runs,
     meanReward: mean(runs.map((run) => run.score.reward)),
     meanExecutes: mean(runs.map((run) => (run.score.executes ? 1 : 0))),
@@ -252,7 +243,7 @@ export const runConfig = async ({
   Fs.mkdirSync(outputDir, { recursive: true });
   Fs.writeFileSync(
     Path.join(outputDir, `${label}.json`),
-    JSON.stringify({ summary: { ...summary, runs: undefined }, config, runs }, null, 2)
+    JSON.stringify({ summary: { ...summary, runs: undefined }, variant, runs }, null, 2)
   );
   log.info(
     `[harness-opt] "${label}": reward ${summary.meanReward.toFixed(
@@ -263,7 +254,11 @@ export const runConfig = async ({
       2
     )}, tokens ${summary.totalInputTokens}/${
       summary.totalOutputTokens
-    }, active config ${activeConfigPath()}`
+    }, $${summary.totalCostUsd.toFixed(3)} [${lane}], by provenance ${Object.entries(
+      summary.rewardByProvenance
+    )
+      .map(([provenance, { reward, count }]) => `${provenance} ${reward.toFixed(3)} (n=${count})`)
+      .join(', ')}`
   );
 
   return summary;

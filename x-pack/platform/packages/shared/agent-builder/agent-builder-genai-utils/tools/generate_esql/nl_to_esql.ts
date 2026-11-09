@@ -22,8 +22,7 @@ import { indexExplorer } from '../index_explorer';
 import { loadDocumentation } from './documentation';
 import { createRequestDocumentationPromptNoResource } from './prompts';
 import { withPromqlKeyword } from './promql_keyword';
-import { getEsqlHarnessConfig } from './harness_config';
-import { writeHarnessTrace, harnessTracingEnabled } from './harness_trace';
+import { harnessTracingEnabled, writeHarnessTrace } from './harness_trace';
 import { isExecuteQueryAction, isGenerateQueryAction, isValidateQueryAction } from './actions';
 
 export const DEFAULT_EXECUTION_TIMEOUT_MS = 30_000;
@@ -179,39 +178,16 @@ export const generateEsql = async ({
   logger,
   sessionId,
 }: GenerateEsqlParams): Promise<GenerateEsqlResponse> => {
-  const harnessConfig = getEsqlHarnessConfig();
-  const { retryPolicy } = harnessConfig;
-  const effectiveExecute = retryPolicy.execute ?? execute;
-  const effectiveMaxRetries = retryPolicy.maxRetries ?? maxRetries;
-  const effectiveExecutionTimeoutMs = retryPolicy.executionTimeoutMs ?? executionTimeoutMs;
   const startedAt = Date.now();
-
-  // Slot F: the model tier is part of the search space, so it is resolved from the harness
-  // config rather than hardcoded. Defaults to `low` for both steps, i.e. today's behaviour.
-  const selectHarnessModel = async (
-    connectorId: string | null,
-    effort: 'low' | 'medium' | 'high'
-  ) => {
-    if (!modelProvider) {
-      return inputModel!;
-    }
-    return connectorId
-      ? modelProvider.getModelById({ connectorId })
-      : modelProvider.selectModel({ effortLevel: EffortLevels[effort] });
-  };
-
-  const model = await selectHarnessModel(
-    harnessConfig.model.generateConnectorId,
-    harnessConfig.model.generateEffort
-  );
-  const requestDocModel =
-    harnessConfig.model.requestDocConnectorId ||
-    harnessConfig.model.requestDocEffort !== harnessConfig.model.generateEffort
-      ? await selectHarnessModel(
-          harnessConfig.model.requestDocConnectorId ?? harnessConfig.model.generateConnectorId,
-          harnessConfig.model.requestDocEffort
-        )
-      : model;
+  // Measurement hook for the offline optimization loop: it evaluates a harness variant on more
+  // than one model, and the model a variant *chooses* is part of the code being optimized. Unset
+  // in production, where selection below applies unchanged.
+  const tierConnectorId = process.env.ESQL_HARNESS_MODEL_CONNECTOR;
+  const model = modelProvider
+    ? tierConnectorId
+      ? await modelProvider.getModelById({ connectorId: tierConnectorId })
+      : await modelProvider.selectModel({ effortLevel: EffortLevels.low })
+    : inputModel!;
   const timeRange = inputTimeRange ?? { from: 'now-24h', to: 'now' };
   const docBase = await EsqlDocumentBase.load();
   const documentation = await loadDocumentation();
@@ -222,7 +198,6 @@ export const generateEsql = async ({
 
   const graph = createNlToEsqlGraph({
     model,
-    requestDocModel,
     esClient,
     docBase,
     documentation,
@@ -249,14 +224,13 @@ export const generateEsql = async ({
         let selectedTarget = index;
         let precomputedDocAction: RequestDocumentationAction | undefined;
 
-        if (!selectedTarget && harnessConfig.docRetrieval.prefetchWithoutResource) {
+        if (!selectedTarget) {
           // Pre-fetch doc keywords from the NL query alone, in parallel with index discovery.
           // The resource-less prompt is an accepted quality tradeoff for the latency win.
-          const prefetchDocModel = requestDocModel.chatModel.withStructuredOutput(
-            requestDocumentationSchema,
-            { name: 'request_documentation' }
-          );
-          const docPromise = prefetchDocModel
+          const requestDocModel = model.chatModel.withStructuredOutput(requestDocumentationSchema, {
+            name: 'request_documentation',
+          });
+          const docPromise = requestDocModel
             .invoke(
               createRequestDocumentationPromptNoResource({
                 nlQuery,
@@ -266,7 +240,7 @@ export const generateEsql = async ({
             )
             .then(({ commands = [], functions = [] }) => {
               const requestedKeywords = withPromqlKeyword(
-                [...commands, ...functions, ...harnessConfig.docRetrieval.alwaysInclude],
+                [...commands, ...functions],
                 nlQuery,
                 additionalContext
               );
@@ -303,42 +277,21 @@ export const generateEsql = async ({
           selectedTarget = selectedResource.name;
           logger?.debug(`Discovered target index: ${selectedTarget}`);
           precomputedDocAction = docAction;
-        } else if (!selectedTarget) {
-          // Prefetch disabled by the harness config: discover the index first, then let the graph
-          // request documentation with the resolved resource in context.
-          const {
-            resources: [discoveredResource],
-          } = await indexExplorer({
-            nlQuery: nlQueryWithContext,
-            esClient,
-            limit: 1,
-            includeDatasets,
-            includeViews,
-            includeFrozen,
-            model,
-            logger,
-          });
-          if (!discoveredResource) {
-            throw new GenerateEsqlNoDataError(
-              'Could not discover a suitable index for the query. Please specify an index explicitly.'
-            );
-          }
-          selectedTarget = discoveredResource.name;
         }
 
         const outState = await graph.invoke(
           {
             nlQuery,
             target: selectedTarget,
-            execute: effectiveExecute,
-            maxRetries: effectiveMaxRetries,
+            execute,
+            maxRetries,
             additionalInstructions,
             additionalContext,
             rowLimit,
             disableNamedParams,
             timeRange,
             esqlVariables,
-            executionTimeoutMs: effectiveExecutionTimeoutMs,
+            executionTimeoutMs,
             // Empty when index is known — graph runs request_documentation in-graph with resource context.
             actions: precomputedDocAction ? [precomputedDocAction] : [],
           },
@@ -360,8 +313,6 @@ export const generateEsql = async ({
             target: selectedTarget,
             requestedKeywords: precomputedDocAction?.requestedKeywords,
             generateConnectorId: model.connector?.connectorId,
-            generateModel: model.connector?.config?.defaultModel,
-            requestDocConnectorId: requestDocModel.connector?.connectorId,
             tries: generateActions.length,
             generatedQueries: generateActions.map((action) => action.query ?? ''),
             attempts: attempts.map((action) => ({

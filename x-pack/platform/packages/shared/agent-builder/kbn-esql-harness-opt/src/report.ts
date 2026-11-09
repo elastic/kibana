@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Crypto from 'crypto';
 import Fs from 'fs';
 import Http from 'http';
 import Path from 'path';
@@ -18,7 +17,7 @@ import type { ExampleRun, RunSummary } from './runner';
 
 interface StoredRun {
   summary: Omit<RunSummary, 'runs'> & { configHash: string };
-  config: Record<string, unknown>;
+  variant?: { hash: string; tier?: string };
   runs: ExampleRun[];
 }
 
@@ -32,8 +31,10 @@ interface LedgerEntry {
     predictedRegressions?: string[];
   };
   gate?: Record<string, unknown>;
-  config?: Record<string, unknown>;
-  incumbentConfig?: Record<string, unknown>;
+  filesChanged?: string[];
+  diff?: string;
+  parentHash?: string;
+  variantHash?: string;
 }
 
 const readJson = <T>(path: string): T | undefined => {
@@ -73,13 +74,6 @@ const loadRuns = (runsDir: string) => {
 
   return loaded.sort((a, b) => a.mtimeMs - b.mtimeMs);
 };
-
-/** Short, stable identity of a config, so the lineage can be drawn as a tree of configs. */
-const hashConfig = (config: Record<string, unknown> | undefined): string =>
-  Crypto.createHash('sha256')
-    .update(JSON.stringify(config ?? {}))
-    .digest('hex')
-    .slice(0, 8);
 
 /**
  * Runs recorded before cost was priced carry tokens but no USD. They all ran on the context's
@@ -131,7 +125,6 @@ export const buildReportPayload = () => {
       group,
       label,
       configHash: stored.summary.configHash,
-      config: stored.config,
       meanReward: stored.summary.meanReward,
       meanExecutes: stored.summary.meanExecutes,
       meanResultEquivalence: stored.summary.meanResultEquivalence,
@@ -195,19 +188,16 @@ export const buildReportPayload = () => {
         };
       });
 
-    const incumbentConfig = entry.incumbentConfig ?? incumbentRun?.config ?? {};
-    const candidateConfig = entry.config ?? candidateRun?.config ?? {};
-
     return {
       round: entry.round,
       rejectedReason: entry.rejected,
-      parentHash: hashConfig(incumbentConfig),
-      configHash: hashConfig(candidateConfig),
+      parentHash: entry.parentHash ?? 'base',
+      configHash: entry.variantHash ?? `round-${entry.round}`,
+      filesChanged: entry.filesChanged ?? [],
+      diff: entry.diff ?? '',
       slots: entry.manifest?.slots ?? [],
       rationale: entry.manifest?.rationale ?? '',
       gate: entry.gate,
-      incumbentConfig,
-      candidateConfig,
       seedDeltas,
       verification: entry.manifest
         ? verifyManifest({ manifest: entry.manifest, seedDeltas })
@@ -267,7 +257,7 @@ export const buildReportPayload = () => {
     .filter((run) => run.label === 'sealed')
     .map((run) => ({
       label: `${run.group} (${run.configHash})`,
-      isBaseline: JSON.stringify(run.config).length < 400,
+      isBaseline: run.configHash === 'baseline',
       meanReward: run.meanReward,
       anchorReward: meanBy(
         run.results.filter((result) => result.provenance !== 'generated-corpus'),
@@ -286,7 +276,7 @@ export const buildReportPayload = () => {
         ),
     }));
 
-  const baseHash = rounds.length ? rounds[0].parentHash : hashConfig({});
+  const baseHash = rounds.length ? rounds[0].parentHash : 'base';
 
   return {
     generatedAt: new Date().toISOString(),

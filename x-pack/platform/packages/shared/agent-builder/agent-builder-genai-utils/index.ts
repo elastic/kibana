@@ -53,11 +53,6 @@ export {
   setDefaultEsqlCacheKey,
 } from './tools';
 export {
-  DEFAULT_ESQL_HARNESS_CONFIG,
-  getEsqlHarnessConfig,
-  type EsqlHarnessConfig,
-} from './tools/generate_esql/harness_config';
-export {
   resolveResourceForEsqlWithSamplingStats,
   type ResolvedResourceWithSampling,
   formatResourceWithSampledValues,

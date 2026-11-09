@@ -52,36 +52,8 @@ export interface ProposalManifest {
 }
 
 export interface Proposal {
-  config: Record<string, unknown>;
-  /** Replacement content for text assets, keyed by asset path. */
-  assets?: Record<string, string>;
   manifest: ProposalManifest;
 }
-
-const SLOT_SCHEMA = `interface EsqlHarnessConfig {
-  docRetrieval: { prefetchWithoutResource: boolean; alwaysInclude: string[] };            // slot A
-  exemplars: { selection: 'all' | 'knn'; k: number };                                      // slot B
-  resourceContext: { samplingSize: number };                                               // slot C
-  feedback: {                                                                              // slot D
-    errorTruncation: number;              // 0 = unlimited
-    includeFailedQuery: boolean;          // makes {{query}} available in templates
-    executionErrorTemplate: string;       // placeholders: {{error}}, {{query}}
-    validationErrorTemplate: string;
-    noQueryTemplate: string;
-  };
-  retryPolicy: {                                                                           // slot E
-    maxRetries: number | null;            // null = caller's value (3)
-    execute: 'none' | 'schema' | 'data' | null;
-    executionTimeoutMs: number | null;
-    stopOnJoinReject: boolean;
-    timeoutRetryBudget: number;
-  };
-  model: {                                                                                 // slot F
-    generateEffort: 'low' | 'medium' | 'high';     // tier used to write the query
-    requestDocEffort: 'low' | 'medium' | 'high';   // tier used to pick documentation keywords
-  };
-  instructions: { extraInstructions: string };                                             // slot G
-}`;
 
 /**
  * Per-example failure evidence handed to the proposer.
@@ -125,122 +97,70 @@ export const buildTraceBundle = (summary: RunSummary): string => {
   );
 };
 
-const FORBIDDEN_PATTERNS = [
-  /postgres-logs/i,
-  /packetbeat/i,
-  /nyc_taxis/i,
-  /metricbeat/i,
-  /employees-/i,
-  /logs-production/i,
-  /error_rate_daily/i,
-  /traces-apm/i,
-  /metrics-apm/i,
-];
-
-/**
- * Reject a candidate that smuggles the benchmark into the harness.
- *
- * Hardcoded fixture index names are the shortcut audits of this literature found in every
- * framework they examined, and they are invisible in the score until the sealed split.
- */
-export const lintProposal = (config: Record<string, unknown>): string[] => {
-  const serialized = JSON.stringify(config);
-  const violations = FORBIDDEN_PATTERNS.filter((pattern) => pattern.test(serialized)).map(
-    (pattern) => `config references benchmark data (${pattern})`
-  );
-  if (serialized.length > 20_000) {
-    violations.push('config is implausibly large (>20k chars)');
-  }
-  return violations;
-};
-
-const EDITABLE_FILES_TEXT = `You may also edit these files directly in this checkout:
-
-- tools/generate_esql/documentation/{syntax,examples,ts_queries,promql_queries}.md — the ES|QL
-  documentation corpus injected into every prompt. Rewriting, pruning or re-ordering it is fair
-  game; it is also the biggest block of tokens in the prompt, so pruning is a cost lever.
-- tools/generate_esql/prompts/instructions.md — the instruction block, as plain text.
-- tools/generate_esql/prompts.ts — how prompts are assembled.
-- tools/generate_esql/actions.ts — how past attempts are replayed to the model.
-- tools/generate_esql/graph.ts — the control flow (nodes, retry branches). You may add a node.
-- tools/generate_esql/exemplars.ts, join_errors.ts, promql_keyword.ts — deterministic middleware.
-
-(Paths are relative to x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/.)
-
-Anything you change there must typecheck, pass the tool's existing unit tests and pass eslint —
-all three run automatically before your variant is measured, and a failure wastes the round. Do
-not touch any other file: the dataset, fixtures, scorers and the evaluation runner are off limits
-and edits outside the list are rejected mechanically.`;
-
 const PROPOSER_TASK = ({
   modelChoices,
-  editableFiles,
 }: {
   modelChoices: Array<{ connectorId: string; inferenceId: string }>;
-  editableFiles: boolean;
 }) => `You are optimizing the Kibana \`generate_esql\` harness: the prompts, documentation corpus,
 control flow and model choice behind the tool that turns a natural-language question into an
-ES|QL query.
+ES|QL query. You improve it by editing its files in this checkout.
 
 In \`.harness-scratch/\` you will find:
 
 - \`bundle.json\` — failing examples from the latest run on the search split: the question, the
   query the harness produced, the gold query, the Elasticsearch error shown to the model, the
   number of attempts and the token spend.
-- \`incumbent.json\` — the typed configuration that produced those results.
-- \`assets.json\` — text assets currently overriding the bundled ones (often empty).
 - \`history.json\` — every earlier proposal, with its gate outcome and rejection reason.
 - \`feedback.md\` — measured facts about this harness and how your last prediction held up.
 
 Your goal is a variant that scores better on \`0.6·result_equivalence + 0.3·executes +
-0.1·ast_valid\`, measured on held-out examples, without costing more than 1.1× in USD. A variant
-that holds quality while costing materially less is equally welcome.
+0.1·ast_valid\` on held-out examples, without costing more than 1.1× in USD. A variant that holds
+quality while costing materially less is equally welcome.
 
-## Channel 1 — the typed config
+## What you may edit
 
-${SLOT_SCHEMA}
+All paths below are relative to
+\`x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/generate_esql/\`:
+
+- \`documentation/syntax.md\`, \`documentation/examples.md\`, \`documentation/ts_queries.md\`,
+  \`documentation/promql_queries.md\` — the corpus injected into every prompt. Rewriting, pruning
+  or re-ordering it is fair game, and it is the biggest block of tokens in the prompt.
+- \`prompts/instructions.md\` — the instruction block, as prose.
+- \`prompts.ts\` — how prompts are assembled (what is included, in what order).
+- \`actions.ts\` — how previous attempts are replayed to the model.
+- \`graph.ts\` — the control flow: nodes, retry branches, when generation stops. You may add a node.
+- \`nl_to_esql.ts\` — entry point: defaults, index discovery, which model tier is selected.
+- \`join_errors.ts\`, \`promql_keyword.ts\` — deterministic middleware.
 
 ${
   modelChoices.length
-    ? `Connector ids available for the model slot:\n${modelChoices
+    ? `If you change which model the tool uses, these connector ids exist:\n${modelChoices
         .map((choice) => `- ${choice.connectorId} → ${choice.inferenceId}`)
-        .join('\n')}\nUse \`null\` to keep the context's own model selection.\n`
+        .join('\n')}\n`
     : ''
 }
-## Channel 2 — text assets
-
-Write replacement content for \`documentation/*.md\` or \`prompts/instructions.md\` into the
-\`assets\` field of your proposal (keyed by that exact relative path). These are swapped at
-runtime without touching code.
-
-${editableFiles ? `## Channel 3 — code\n\n${EDITABLE_FILES_TEXT}\n` : ''}
-## Which channel to use
-
-Channel 1 alone is rarely enough: the measured facts in \`feedback.md\` show retry and feedback
-policy have little surface on this dataset. The remaining gap is in what the model is *told* —
-the documentation corpus, the exemplars it is shown, the instruction block — and in how the
-graph decides it is done. Read the files before you decide, and prefer a channel that no
-previous round has tried.
+Nothing else may change. The dataset, fixtures, scorers and the evaluation runner are off limits,
+and edits outside the list are rejected mechanically before anything is measured.
 
 ## Rules, enforced mechanically
 
-1. Change at most TWO areas. A diffuse edit cannot be attributed to anything.
-2. Never mention a concrete index name, field name or query from the bundle. The harness has to
-   generalise to unseen data; candidates that leak the benchmark are rejected automatically.
-3. Prefer evidence-driven edits: name the failures in \`bundle.json\` you expect to fix.
-4. Read \`feedback.md\` first, and do not re-propose something \`history.json\` shows was already
-   rejected unless you change it materially and say what is different.
+1. Your edit must typecheck, pass the tool's existing unit tests and pass eslint. All three run
+   automatically; a failure wastes the round.
+2. Touch at most TWO files. A diffuse edit cannot be attributed to anything.
+3. Never hardcode an index name, field name or query from \`bundle.json\`. The harness has to
+   generalise to unseen data, and leaked benchmark values are rejected automatically.
+4. No filesystem, network, process or environment access, and no new dependencies.
+5. Read \`feedback.md\` first, and do not repeat something \`history.json\` shows was rejected
+   unless you change it materially and say what is different.
 
 ## Your answer
 
-Write \`.harness-scratch/proposal.json\`:
+Edit the files, then write \`.harness-scratch/proposal.json\`:
 
 {
-  "config": { ...the full typed config, including unchanged slots... },
-  "assets": { "documentation/examples.md": "...new content..." },   // optional
   "manifest": {
-    "slots": ["exemplars"],                    // or asset/file names you touched
-    "rationale": "one paragraph",
+    "slots": ["documentation/examples.md"],     // the files you touched
+    "rationale": "one paragraph: what in bundle.json made you do this",
     "predictedFixes": ["first words of each question you expect to flip to correct"],
     "predictedRegressions": ["questions you expect might regress"]
   }
@@ -251,28 +171,22 @@ Do not run the evaluation yourself and do not commit anything.`;
 /** Run the proposer agent in a scratch directory that holds the bundle and nothing else. */
 export const proposeCandidate = async ({
   summary,
-  incumbentConfig,
-  incumbentAssets = {},
   history,
   feedback,
   scratchDir,
   workingDir,
-  editableFiles = false,
   log,
   modelChoices = [],
   model = process.env.HARNESS_PROPOSER_MODEL ?? 'grok-4.7-low',
   timeoutMs = Number(process.env.HARNESS_PROPOSER_TIMEOUT_MS ?? 900_000),
 }: {
   summary: RunSummary;
-  incumbentConfig: Record<string, unknown>;
-  incumbentAssets?: Record<string, string>;
   history: unknown[];
   /** Measured facts + last round's manifest verification, written to `feedback.md`. */
   feedback: string;
   scratchDir: string;
-  /** Directory the agent runs in; the candidate worktree when code edits are allowed. */
-  workingDir?: string;
-  editableFiles?: boolean;
+  /** Directory the agent runs in: the candidate worktree. */
+  workingDir: string;
   log: ToolingLog;
   modelChoices?: Array<{ connectorId: string; inferenceId: string }>;
   model?: string;
@@ -280,13 +194,8 @@ export const proposeCandidate = async ({
 }): Promise<Proposal> => {
   Fs.mkdirSync(scratchDir, { recursive: true });
   Fs.writeFileSync(Path.join(scratchDir, 'bundle.json'), buildTraceBundle(summary));
-  Fs.writeFileSync(
-    Path.join(scratchDir, 'incumbent.json'),
-    JSON.stringify(incumbentConfig, null, 2)
-  );
   Fs.writeFileSync(Path.join(scratchDir, 'history.json'), JSON.stringify(history, null, 2));
   Fs.writeFileSync(Path.join(scratchDir, 'feedback.md'), feedback);
-  Fs.writeFileSync(Path.join(scratchDir, 'assets.json'), JSON.stringify(incumbentAssets, null, 2));
   const proposalPath = Path.join(scratchDir, 'proposal.json');
   if (Fs.existsSync(proposalPath)) {
     Fs.unlinkSync(proposalPath);
@@ -301,12 +210,7 @@ export const proposeCandidate = async ({
   try {
     const code = await runProposerCommand({
       command,
-      args: [
-        workingDir ?? scratchDir,
-        '--model',
-        model,
-        PROPOSER_TASK({ modelChoices, editableFiles }),
-      ],
+      args: [workingDir ?? scratchDir, '--model', model, PROPOSER_TASK({ modelChoices })],
       logPath,
       timeoutMs,
     });
@@ -322,8 +226,8 @@ export const proposeCandidate = async ({
   }
 
   const proposal = JSON.parse(Fs.readFileSync(proposalPath, 'utf8')) as Proposal;
-  if (!proposal.config || !proposal.manifest) {
-    throw new Error('[harness-opt] proposal.json is missing "config" or "manifest"');
+  if (!proposal.manifest) {
+    throw new Error('[harness-opt] proposal.json is missing "manifest"');
   }
   return proposal;
 };

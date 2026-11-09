@@ -148,26 +148,18 @@ const verdict = (round) => round.rejectedReason
         : '<span class="pill bad">rejected</span>')
     : '<span class="pill">no gate</span>';
 
-/** Flatten a config so two configs can be compared slot-by-slot, value-by-value. */
-const flatten = (object, prefix = '') => Object.entries(object ?? {}).reduce((acc, [key, value]) => {
-  const path = prefix ? prefix + '.' + key : key;
-  if (value && typeof value === 'object' && !Array.isArray(value)) Object.assign(acc, flatten(value, path));
-  else acc[path] = value;
-  return acc;
-}, {});
-
-const configDiff = (before, after) => {
-  const a = flatten(before), b = flatten(after);
-  const keys = [...new Set([...Object.keys(a), ...Object.keys(b)])].sort();
-  const changed = keys.filter((k) => JSON.stringify(a[k]) !== JSON.stringify(b[k]));
-  if (changed.length === 0) return '<p class="muted">No change (identical config).</p>';
-  return '<table><tr><th>setting</th><th>incumbent</th><th>candidate</th></tr>' + changed.map((k) =>
-    '<tr><td>' + esc(k) + '</td>' +
-    '<td><pre class="diff-del">' + esc(JSON.stringify(a[k], null, 1) ?? '—') + '</pre></td>' +
-    '<td><pre class="diff-add">' + esc(JSON.stringify(b[k], null, 1) ?? '—') + '</pre></td></tr>').join('') +
-    '</table>';
+/** Colourised unified diff: the edit *is* the variant, so this is the primary artifact. */
+const renderDiff = (diff, files) => {
+  if (!diff) return '<p class="muted">No diff recorded.</p>';
+  const body = diff.split(String.fromCharCode(10)).map((line) => {
+    const cls = line.startsWith('+++') || line.startsWith('---') || line.startsWith('diff ')
+      ? 'muted'
+      : line.startsWith('+') ? 'good' : line.startsWith('-') ? 'bad'
+      : line.startsWith('@@') ? 'accent' : '';
+    return '<span class="' + cls + '">' + esc(line) + '</span>';
+  }).join(String.fromCharCode(10));
+  return '<p class="muted">' + (files || []).map(esc).join(', ') + '</p><pre>' + body + '</pre>';
 };
-
 
 /* ------------------------------------------------------------ lineage graph */
 /**
@@ -341,7 +333,7 @@ function viewRounds() {
       ['regressed seeds', (g.regressions || []).length, (g.regressions || []).length ? 'bad' : 'muted'],
     ]) : '') +
     (g && !g.accepted ? '<p class="bad">' + esc((g.reasons || []).join(' · ')) + '</p>' : '') +
-    '<h3>What changed</h3>' + configDiff(round.incumbentConfig, round.candidateConfig) +
+    '<h3>What changed</h3>' + renderDiff(round.diff, round.filesChanged) +
     '<h3>Why (proposer rationale)</h3><pre>' + esc(round.rationale || '—') + '</pre>' +
     '<h3>Manifest verification</h3>' + verification +
     '<h3>Per-seed effect (' + perSeed.length + ' seeds, worst first)</h3>' +

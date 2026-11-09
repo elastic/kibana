@@ -8,8 +8,6 @@
 import Path from 'path';
 import { readFile } from 'fs/promises';
 import { promqlFunctionDefinitions } from '@elastic/esql-definitions/promql-functions';
-import { assetOverridesEnabled, readAssetOverride } from '../harness_assets';
-import type { HarnessAssetPath } from '../harness_assets';
 
 export enum EsqlDocEntry {
   syntax = 'syntax.md',
@@ -42,11 +40,6 @@ export const _loadDocumentation = async (): Promise<EsqlLoadedDocumentation> => 
  * on first call and returns the cached promise on subsequent calls.
  */
 export const loadDocumentation = (): Promise<EsqlLoadedDocumentation> => {
-  // Memoisation is skipped while asset overrides are active, so an optimization round can swap
-  // the corpus between candidates without restarting Kibana.
-  if (assetOverridesEnabled()) {
-    return _loadDocumentation();
-  }
   if (!cachedDocumentation) {
     cachedDocumentation = _loadDocumentation();
   }
@@ -68,12 +61,9 @@ const getPromqlFunctionNames = (): string =>
 const HTML_COMMENT = /^[ \t]*<!--[\s\S]*?-->[ \t]*\n?/gm;
 
 const loadFile = async (entry: EsqlDocEntry): Promise<string> => {
-  // The documentation corpus is the largest thing the model reads, which makes it the most
-  // valuable surface for the offline optimization loop — so each file can be replaced from the
-  // asset override directory. Production never sets that variable.
-  const override = readAssetOverride(`documentation/${entry}` as HarnessAssetPath);
-  const raw = override ?? (await readFile(Path.join(__dirname, `./${entry}`))).toString('utf-8');
-  const content = raw.replace(HTML_COMMENT, '');
+  const content = (await readFile(Path.join(__dirname, `./${entry}`)))
+    .toString('utf-8')
+    .replace(HTML_COMMENT, '');
   return entry === EsqlDocEntry.promqlQueries
     ? content.replace(PROMQL_FUNCTIONS_PLACEHOLDER, getPromqlFunctionNames())
     : content;
