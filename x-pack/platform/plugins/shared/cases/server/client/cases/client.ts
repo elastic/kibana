@@ -30,6 +30,8 @@ import type {
   BulkCreateObservablesRequest,
   BulkCreateObservablesResponse,
   BulkDeleteObservablesRequest,
+  FindObservablesRequest,
+  FindObservablesResponse,
   CasesPatchResponse,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
@@ -71,6 +73,7 @@ import {
   deleteObservable,
   updateObservable,
 } from './observables';
+import { findObservables } from './find_observables';
 import type { GetApplicableFieldsParams } from './applicable_fields';
 import { getApplicableFields } from './applicable_fields';
 import type { ApplicableFieldsResponse } from '../../../common/types/domain/template/applicable_field';
@@ -189,6 +192,10 @@ export interface CasesSubClient {
     params: BulkCreateObservablesRequest
   ): Promise<BulkCreateObservablesResponse>;
   /**
+   * Returns a page of the observables of the case, across the case field and `cases-observables`
+   */
+  findObservables(caseId: string, params: FindObservablesRequest): Promise<FindObservablesResponse>;
+  /**
    * Bulk deletes observables from the case
    */
   bulkDeleteObservables(params: BulkDeleteObservablesRequest): Promise<Case>;
@@ -224,6 +231,7 @@ const usageCounterByMethod = {
   deleteObservable: 'delete_observable',
   bulkAddObservables: 'bulk_add_observables',
   bulkCreateObservables: 'bulk_create_observables',
+  findObservables: null,
   bulkDeleteObservables: 'bulk_delete_observables',
   getApplicableFields: null,
 } as const satisfies Record<keyof CasesSubClient, string | null>;
@@ -306,6 +314,8 @@ export const createCasesSubClient = (
       (caseId: string, params: BulkCreateObservablesRequest) =>
         bulkCreateObservables(caseId, params, clientArgs, casesClient)
     ),
+    findObservables: (caseId: string, params: FindObservablesRequest) =>
+      findObservables(caseId, params, clientArgs),
     bulkDeleteObservables: withUsageCounter(
       usageCounterByMethod.bulkDeleteObservables,
       clientArgs,
