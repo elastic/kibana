@@ -8,7 +8,12 @@
 import _ from 'lodash';
 import { Component } from 'react';
 import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
-import type { AJAXError, Map as MbMap, MapSourceDataEvent } from '@kbn/mapbox-gl';
+import type {
+  AJAXError,
+  ErrorEvent as MapErrorEvent,
+  Map as MbMap,
+  MapSourceDataEvent,
+} from '@kbn/mapbox-gl';
 import type { TileError, TileMetaFeature } from '../../../../common/descriptor_types';
 import { SPATIAL_FILTERS_LAYER_ID } from '../../../../common/constants';
 import type { ILayer } from '../../../classes/layers/layer';
@@ -29,6 +34,11 @@ interface Tile {
   mbSourceId: string;
   mbTile: MbTile;
 }
+
+type MapTileErrorEvent = MapErrorEvent & Pick<MapSourceDataEvent, 'sourceId' | 'source' | 'tile'>;
+
+const isMapTileErrorEvent = (event: MapErrorEvent): event is MapTileErrorEvent =>
+  'sourceId' in event && 'source' in event && 'tile' in event;
 
 export interface Props {
   mbMap: MbMap;
@@ -124,8 +134,9 @@ export class TileStatusTracker extends Component<Props> {
     }
   };
 
-  _onError = (e: MapSourceDataEvent & { error: { message: string } | AJAXError }) => {
+  _onError = (e: MapErrorEvent) => {
     if (
+      isMapTileErrorEvent(e) &&
       e.sourceId &&
       e.sourceId !== SPATIAL_FILTERS_LAYER_ID &&
       e.tile &&

@@ -1,0 +1,262 @@
+version: "1"
+name: Close Investigation
+description: >
+  AlertZero action: closes an Investigation together with the Attack Discovery
+  attack it was opened for and the detection alerts under that attack, with
+  one reason. Proposed by the Endpoint analysis close gate once every
+  containment proposal on the Investigation has been decided, or right away
+  when the analysis proposed nothing. Always gated, so the close is the
+  approving analyst's decision and runs under their account.
+enabled: true
+tags:
+  # Generic tag every action workflow carries, so the catalog finds this workflow
+  # by tag instead of a hardcoded id list.
+  - action
+  - alertzero
+consts:
+  # Catalog metadata the proposals service reads when a proposal referencing this
+  # workflow is created or rendered. Must be under `consts`: the schema strips
+  # unknown top-level keys.
+  actionMetadata:
+    name: Close Investigation
+    category: respond
+    description: >-
+      Closes the Investigation, the Attack Discovery attack it was opened for,
+      and that attack's detection alerts, with the reason the analysis decided
+      on. An alert another open attack also owns is left acknowledged.
+    impact: medium
+    # An analyst can reopen everything this closes.
+    reversible: true
+    # The analyst always decides: Supervised mode carries out containment without
+    # asking, but still asks before closing.
+    approvalPolicy: always-gate
+  # What the attack and alert status routes need of the approver, on the alert
+  # indices they write to with the approver's own privileges (update-by-query with
+  # a refresh). Checked before anything is closed; see `probe_privileges`.
+  required_index_privileges:
+    - index
+    - maintenance
+  required_api_privileges:
+    - api:alerts-all
+    - api:alerts-signal-update-deprecated-privilege
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        # Every action workflow takes a single `actionInput` object. The gate
+        # passes exactly one key; top-level fields declared here would receive
+        # nothing.
+        actionInput:
+          type: object
+          description: >
+            Close payload. Every action workflow takes a single `actionInput`
+            object so the generic gate workflow never needs to know an
+            action's parameter names. Names no host, process or identity on
+            purpose: the proposal dedup keys an input without a target to the
+            Investigation and this action, which is what keeps one Close
+            question open per Investigation at a time.
+          properties:
+            investigation_id:
+              type: string
+              minLength: 1
+              maxLength: 256
+              description: Investigation conversation to close.
+            attack_discovery_id:
+              type: string
+              minLength: 1
+              maxLength: 512
+              description: Attack Discovery alert the Investigation was opened for.
+            close_reason:
+              type: string
+              enum:
+                - false_positive
+                - benign
+                - resolved
+                - duplicate
+                - other
+              description: >-
+                Investigation close reason, from the Investigation template's `close_reason`
+                options. Recorded once the investigations status route accepts it; until
+                then the Investigation is closed without one, as from the UI.
+            attack_reason:
+              type: string
+              enum:
+                - false_positive
+                - true_positive
+                - benign_positive
+                - duplicate
+                - other
+              description: Written as `kibana.alert.workflow_reason` on the attack and its alerts.
+            summary:
+              type: string
+              maxLength: 2000
+              description: One-paragraph assessment behind the close, for the journal.
+          required:
+            - investigation_id
+            - attack_discovery_id
+            - close_reason
+            - attack_reason
+          additionalProperties: false
+      required:
+        - actionInput
+      additionalProperties: false
+outputs:
+  - name: investigation_id
+    type: string
+  - name: attack_closed
+    type: boolean
+  - name: alerts_closed
+    type: number
+  - name: alerts_kept
+    type: number
+steps:
+  # This action runs as the approver, and the attack and alert status routes
+  # write with the approver's privileges. Asked up front, as the approver, so an
+  # account that cannot close alerts fails fast.
+  - name: probe_privileges
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: /_security/user/_has_privileges
+      body:
+        application:
+          - application: kibana-.kibana
+            privileges: "${{ consts.required_api_privileges }}"
+            resources:
+              - "space:{{ workflow.spaceId }}"
+        index:
+          - names:
+              - ".alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}"
+              - ".adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}"
+              - ".alerts-security.alerts-{{ workflow.spaceId }}"
+            privileges: "${{ consts.required_index_privileges }}"
+    on-failure:
+      continue: true
+
+  # `missing` is empty when every privilege is granted; otherwise each missing
+  # grant, `; `-separated with a leading separator the message removes.
+  - name: resolve_privileges
+    type: data.set
+    with:
+      missing: >-
+        {%- assign probe = steps.probe_privileges.output -%}
+        {%- assign space = 'space:' | append: workflow.spaceId -%}
+        {%- assign granted = probe.application['kibana-.kibana'][space] -%}
+        {%- if granted['api:alerts-all'] != true and granted['api:alerts-signal-update-deprecated-privilege'] != true -%}
+        ; the Kibana privilege Security › Alerts: All
+        {%- endif -%}
+        {%- for entry in probe.index -%}
+        {%- if entry[1].index != true or entry[1].maintenance != true -%}
+        ; the Elasticsearch index privileges `index` and `maintenance` on `{{ entry[0] }}`
+        {%- endif -%}
+        {%- endfor -%}
+
+  # The message is what the proposal card shows on the re-offered attempt, so it
+  # says what to grant rather than echoing a route's error.
+  - name: fail_if_unprivileged
+    type: if
+    condition: "${{ steps.probe_privileges.error != blank or steps.resolve_privileges.output.missing != blank }}"
+    steps:
+      - name: missing_privileges
+        type: workflow.fail
+        with:
+          message: >-
+            {%- if steps.probe_privileges.error != blank -%}
+            Nothing was closed: the approving account's privileges could not be checked ({{ steps.probe_privileges.error.message }}).
+            {%- else -%}
+            Nothing was closed: the approving account is missing {{ steps.resolve_privileges.output.missing | remove_first: '; ' }}.
+            {%- endif %}
+            Closing an Investigation also closes its attack and detection alerts, which needs the Kibana privilege Security › Alerts: All and the Elasticsearch index privileges `index` and `maintenance` on `.alerts-security.alerts-{{ workflow.spaceId }}`, `.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}` and `.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}`. Ask an administrator to grant them to the account that approves, then approve again.
+
+  # Attack and alerts first, Investigation last. The status route below refuses to
+  # close over a pending proposal. If it refuses, the attack and alerts are
+  # already closed and the analyst only has to close the Investigation by hand.
+  # The other order could close the Investigation and leave its attack open.
+  #
+  # No `run-as-mode` anywhere in this action: a proposal starts it by a templated
+  # id, so it runs as the approver (or, auto-approved, as the Worker's service
+  # account through the bridge's own `inherit`), and every child defaults to the
+  # same identity. `inherit` here would fail every human-approved close. Not
+  # continued on failure: a failed close is recorded on the proposal as `failed`,
+  # and the bridge offers the analyst a fresh card.
+  - name: close_attack_and_alerts
+    type: workflow.execute
+    with:
+      workflow-id: system-alertzero-close-attack-and-alerts
+      inputs:
+        attack_discovery_id: "{{ inputs.actionInput.attack_discovery_id }}"
+        reason: "{{ inputs.actionInput.attack_reason }}"
+
+  # Journaled here rather than by the child, which is shared and must not pick an
+  # identity for its children. Says what was read back, never a write's error
+  # message: a later agent round reads this journal as user input. Before the
+  # Investigation is closed, and best-effort: a lost note must not block the close.
+  - name: journal_closed
+    type: workflow.execute
+    with:
+      workflow-id: system-alertzero-journal-note
+      inputs:
+        conversation_id: "{{ inputs.actionInput.investigation_id }}"
+        message: >-
+          {%- assign closed = steps.close_attack_and_alerts.output -%}
+          {%- if closed.attack_found != true -%}
+          No Attack Discovery alert matching `{{ inputs.actionInput.attack_discovery_id }}` was found, so no attack or alerts were closed.
+          {%- elsif closed.attack_closed != true -%}
+          The attack could not be closed and was left as it was. See execution `{{ execution.id }}`.
+          {%- else -%}
+          Closed the attack as `{{ inputs.actionInput.attack_reason }}`.
+          {%- if closed.alerts_requested == 0 %} It lists no detection alerts.
+          {%- elsif closed.alerts_read != true %} Could not read its {{ closed.alerts_requested }} detection alert(s) back, so whether they were closed is unknown. See execution `{{ execution.id }}`.
+          {%- else %} Closed {{ closed.alerts_closed }} of its {{ closed.alerts_requested }} detection alert(s) as `{{ inputs.actionInput.attack_reason }}`.
+          {%- if closed.alerts_kept > 0 %} {{ closed.alerts_kept }} also belong to another open attack and were left as they were.{% endif -%}
+          {%- if closed.alerts_open > 0 %} Still open, because closing them did not land: {{ closed.alerts_open }}. See execution `{{ execution.id }}`.{% endif -%}
+          {%- endif -%}
+          {%- endif -%}
+    on-failure:
+      continue: true
+
+  # Closes via the investigations status route, not
+  # `ai.conversation.metadata.patch`. That step patches with owner access, and the
+  # approver is not the account that opened the Investigation (the Attack
+  # Discovery Worker, or whoever handed the host off). The status route closes
+  # with converse access, which the Investigation's public access mode grants,
+  # and is how the UI closes one.
+  #
+  # `expected_proposal_ids: []` makes the route refuse if any Proposal is still
+  # pending. The Close proposal itself is `executing` while this runs, so it
+  # doesn't count. Idempotent on an already-closed Investigation.
+  #
+  # The route patches `status` only, so `close_reason` isn't sent yet. The action
+  # input carries it for when the route accepts one.
+  #
+  # The doubled `investigations` segment is the route's real shape:
+  # INVESTIGATION_STATUS_URL is `/internal/investigations` (the plugin prefix)
+  # + `/investigations/{id}/status`.
+  - name: close_investigation
+    type: kibana.request
+    with:
+      method: PUT
+      path: "/s/{{ workflow.spaceId }}/internal/investigations/investigations/{{ inputs.actionInput.investigation_id }}/status"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+        Content-Type: application/json
+      body:
+        status: closed
+        expected_proposal_ids: []
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+
+  # Emits a structured result so the gate can see what the close did.
+  # `workflow.execute` declares its output as unknown, so without an explicit
+  # emit the parent guesses from the last step.
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      investigation_id: "{{ inputs.actionInput.investigation_id }}"
+      attack_closed: "${{ steps.close_attack_and_alerts.output.attack_closed == true }}"
+      alerts_closed: "${{ steps.close_attack_and_alerts.output.alerts_closed | default: 0 }}"
+      alerts_kept: "${{ steps.close_attack_and_alerts.output.alerts_kept | default: 0 }}"

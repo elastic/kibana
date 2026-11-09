@@ -6,9 +6,9 @@
  */
 import { z } from '@kbn/zod';
 
-import { sloIdSchema } from '../../schema/zod/slo';
-import { sloHealthSchema } from '../../schema/zod/health';
-import { allOrAnyString } from '../../schema/zod/common';
+import { sloIdSchema } from '../../schema/slo';
+import { sloHealthSchema } from '../../schema/health';
+import { allOrAnyString } from '../../schema/common';
 
 const fetchSLOHealthResponseSchema = z.array(
   z.object({

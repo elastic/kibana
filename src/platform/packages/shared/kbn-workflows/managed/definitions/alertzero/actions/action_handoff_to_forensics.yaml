@@ -41,7 +41,6 @@ consts:
     # runs at manual autonomy, which this does not contradict — at manual,
     # `autonomy-dependent` gates.
     approvalPolicy: autonomy-dependent
-  journal_note: system-alertzero-journal-note
 triggers:
   - type: manual
     inputs:
@@ -193,18 +192,22 @@ steps:
           space_id: "{{ workflow.spaceId }}"
           classification: "{{ inputs.actionInput.classification }}"
           workflow_execution_id: "{{ inputs.actionInput.workflow_execution_id }}"
+    # The journal notes are steps, not calls to the journal note workflow: a child started
+    # without `run-as-mode: inherit` runs as the original request instead of this action's
+    # identity, and `inherit` is refused when an analyst approved. As steps they run as
+    # whoever this action runs as, the approver or the Worker's service account.
     on-failure:
       fallback:
         - name: journal_handoff_failed
-          type: workflow.execute
+          type: ai.conversation.add_user_message
           with:
-            workflow-id: "{{ consts.journal_note }}"
-            inputs:
-              author_name: "{{ consts.author_name }}"
-              conversation_id: "{{ inputs.actionInput.investigation_id }}"
-              message: >-
-                Forensics handoff failed: knowledge indicator write failed.
-                {{ steps.write_analyze_endpoint_ki.error.message }}
+            author_name: "{{ consts.author_name }}"
+            conversation_id: "{{ inputs.actionInput.investigation_id }}"
+            # The KI write error is unbounded and, unlike the journal note helper's 8000,
+            # this step does not cap `message`.
+            message: >-
+              Forensics handoff failed: knowledge indicator write failed.
+              {{ steps.write_analyze_endpoint_ki.error.message | truncate: 2000 }}
           on-failure:
             continue: true
         - name: fail_handoff
@@ -215,16 +218,14 @@ steps:
               {{ steps.write_analyze_endpoint_ki.error.message }}
 
   - name: journal_handoff_succeeded
-    type: workflow.execute
+    type: ai.conversation.add_user_message
     with:
-      workflow-id: "{{ consts.journal_note }}"
-      inputs:
-        author_name: "{{ consts.author_name }}"
-        conversation_id: "{{ inputs.actionInput.investigation_id }}"
-        message: >-
-          Wrote knowledge indicator {{ steps.write_analyze_endpoint_ki.output.id }}
-          to {{ inputs.actionInput.ai_index_id }}
-          ({{ inputs.actionInput.classification }}).
+      author_name: "{{ consts.author_name }}"
+      conversation_id: "{{ inputs.actionInput.investigation_id }}"
+      message: >-
+        Wrote knowledge indicator {{ steps.write_analyze_endpoint_ki.output.id }}
+        to {{ inputs.actionInput.ai_index_id }}
+        ({{ inputs.actionInput.classification }}).
     on-failure:
       continue: true
 

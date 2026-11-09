@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import { z, lazySchema } from '@kbn/zod';
 
 /**
  * IMPORTANT: Any changes to this file must be carefully checked against both usage
@@ -14,25 +14,36 @@ import * as t from 'io-ts';
  * If types need to diverge, they should be split into separate files.
  */
 
-const transformHealthSchema = t.intersection([
-  t.type({
-    isProblematic: t.boolean,
-    missing: t.boolean,
-    status: t.union([t.literal('healthy'), t.literal('unhealthy'), t.literal('unavailable')]),
-    state: t.union([
-      t.literal('stopped'),
-      t.literal('started'),
-      t.literal('stopping'),
-      t.literal('aborting'),
-      t.literal('failed'),
-      t.literal('indexing'),
-      t.literal('unavailable'),
-    ]),
-  }),
-  t.partial({
-    stateMatches: t.boolean,
-  }),
-]);
+const transformHealthSchema = lazySchema(() =>
+  z
+    .object({
+      isProblematic: z.boolean(),
+      missing: z.boolean(),
+      status: z.union([z.literal('healthy'), z.literal('unhealthy'), z.literal('unavailable')]),
+      state: z.union([
+        z.literal('stopped'),
+        z.literal('started'),
+        z.literal('stopping'),
+        z.literal('aborting'),
+        z.literal('failed'),
+        z.literal('indexing'),
+        z.literal('unavailable'),
+      ]),
+      stateMatches: z.boolean().optional(),
+    })
+    .meta({ additionalProperties: true })
+);
 
-export type TransformHealthResponse = t.OutputOf<typeof transformHealthSchema>;
-export { transformHealthSchema };
+const sloHealthSchema = lazySchema(() =>
+  z
+    .object({
+      isProblematic: z.boolean(),
+      rollup: transformHealthSchema,
+      summary: transformHealthSchema,
+    })
+    .meta({ additionalProperties: true })
+);
+
+export { sloHealthSchema, transformHealthSchema };
+
+export type TransformHealthResponse = z.input<typeof transformHealthSchema>;

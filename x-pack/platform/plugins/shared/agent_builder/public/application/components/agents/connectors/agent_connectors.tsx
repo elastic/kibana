@@ -7,14 +7,10 @@
 
 import {
   EuiBetaBadge,
-  EuiButton,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiPopover,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -34,6 +30,7 @@ import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
 import { PageWrapper } from '../common/page_wrapper';
 import { useListDetailPageStyles } from '../common/styles';
+import { AddConnectorMenu } from './add_connector_menu';
 import { ActiveConnectorRow } from './active_connector_row';
 import { ConnectorDetailPanel } from './connector_detail_panel';
 import { ConnectorLibraryPanel } from './connector_library_panel';
@@ -52,7 +49,6 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
   const hasAllPrivileges = useHasConnectorsAllPrivileges();
   const canEditAgent = useCanUpdateAgent({ agent: agentQuery.agent ?? null });
 
-  const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedConnectorId, setSelectedConnectorId] = useQueryState<string>(
     searchParamNames.connectorId
@@ -178,51 +174,10 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
                   </EuiFlexItem>
                   {hasAllPrivileges && canEditAgent && (
                     <EuiFlexItem grow={false}>
-                      <EuiPopover
-                        aria-label={labels.connectors.addConnectorPopoverLabel}
-                        button={
-                          <EuiButton
-                            fill
-                            iconType="plusCircle"
-                            iconSide="left"
-                            onClick={() => setIsAddMenuOpen((prev) => !prev)}
-                            data-test-subj="agentBuilderAddConnectorButton"
-                          >
-                            {labels.connectors.addConnectorButton}
-                          </EuiButton>
-                        }
-                        isOpen={isAddMenuOpen}
-                        closePopover={() => setIsAddMenuOpen(false)}
-                        anchorPosition="downLeft"
-                        panelPaddingSize="none"
-                      >
-                        <EuiContextMenuPanel
-                          items={[
-                            <EuiContextMenuItem
-                              key="from-library"
-                              icon="download"
-                              data-test-subj="agentConnectorsAddFromLibraryMenuItem"
-                              onClick={() => {
-                                setIsAddMenuOpen(false);
-                                openLibrary();
-                              }}
-                            >
-                              {labels.connectors.fromLibraryMenuItem}
-                            </EuiContextMenuItem>,
-                            <EuiContextMenuItem
-                              key="create-new"
-                              icon="plusCircle"
-                              data-test-subj="agentConnectorsCreateNewMenuItem"
-                              onClick={() => {
-                                setIsAddMenuOpen(false);
-                                openCreateFlyout();
-                              }}
-                            >
-                              {labels.connectors.createNewMenuItem}
-                            </EuiContextMenuItem>,
-                          ]}
-                        />
-                      </EuiPopover>
+                      <AddConnectorMenu
+                        onAddFromLibrary={openLibrary}
+                        onCreateNew={openCreateFlyout}
+                      />
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>

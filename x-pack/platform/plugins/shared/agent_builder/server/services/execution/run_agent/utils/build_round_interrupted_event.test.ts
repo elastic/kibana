@@ -16,12 +16,27 @@ import {
 } from '@kbn/agent-builder-common';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import type { ModelProvider } from '@kbn/agent-builder-server/runner';
-import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import type {
+  AttachmentStateManager,
+  AttachmentTypeDefinition,
+} from '@kbn/agent-builder-server/attachments';
 import { createEmptyConversation, createRound } from '../../../../test_utils/conversations';
 import { createRootStateChunkEvent } from '../../../../test_utils/graph_stream';
+import { RunAttachmentEvents } from '../run_attachment_events';
 import { RunTracker } from '../run_tracker';
-import { buildRoundInterruptedEvent } from './build_round_interrupted_event';
+import {
+  buildRoundInterruptedEvent,
+  type BuildRoundInterruptedEventParams,
+} from './build_round_interrupted_event';
 import { getPendingTurn } from './conversation_turn';
+
+const getTypeDefinition = (type: string) =>
+  ({
+    id: type,
+    validate: (input: unknown) => ({ valid: true, data: input }),
+    isReadonly: false,
+  } as unknown as AttachmentTypeDefinition);
 
 jest.mock('../../../../tracing', () => ({
   getCurrentTraceId: () => 'trace-1',
@@ -30,18 +45,20 @@ jest.mock('../../../../tracing', () => ({
 describe('buildRoundInterruptedEvent', () => {
   const startTime = new Date('2026-01-01T00:00:00.000Z');
   const endTime = new Date('2026-01-01T00:00:03.000Z');
-  const ref = { attachment_id: 'a1', version: 1 };
-
-  const attachmentStateManager = ({
-    accessedRefs = [] as Array<typeof ref>,
-    changes = [] as unknown[],
-  } = {}) =>
+  const mockAttachmentStateManager = () =>
     ({
-      getAccessedRefs: jest.fn(() => accessedRefs),
       getAll: jest.fn(() => [{ id: 'a1' }]),
-      drainChanges: jest.fn(() => changes),
-      getAttachmentRecord: jest.fn(() => undefined),
+      drainChanges: jest.fn(() => []),
     } as unknown as AttachmentStateManager);
+
+  const runEventsOver = (attachmentStateManager: AttachmentStateManager) =>
+    new RunAttachmentEvents({
+      attachmentStateManager,
+      roundId: 'r1',
+      triggerEventId: 'r1::user_message',
+      inputActor: { type: EventActorType.user, id: 'u1' },
+      agentId: 'agent-1',
+    });
 
   const modelProvider = { getUsageStats: () => ({ calls: [] }) } as unknown as ModelProvider;
 
@@ -64,22 +81,23 @@ describe('buildRoundInterruptedEvent', () => {
     return tracker;
   };
 
-  const base = (overrides: Partial<Parameters<typeof buildRoundInterruptedEvent>[0]> = {}) =>
-    buildRoundInterruptedEvent({
-      tracker: freshTracker(),
-      roundId: 'r1',
-      pendingTurn: undefined,
-      startTime,
-      endTime,
-      processedInput: { message: 'hi', attachments: [] },
-      agentId: 'agent-1',
-      conversation: createEmptyConversation({ id: 'c1', agent_id: 'agent-1' }),
-      modelProvider,
-      mainConnectorId: 'connector-1',
-      attachmentStateManager: attachmentStateManager(),
-      chatInputChanges: [],
-      ...overrides,
-    });
+  const baseParams = (
+    attachmentStateManager: AttachmentStateManager = mockAttachmentStateManager()
+  ): BuildRoundInterruptedEventParams => ({
+    tracker: freshTracker(),
+    roundId: 'r1',
+    pendingTurn: undefined,
+    startTime,
+    endTime,
+    processedInput: { message: 'hi', attachments: [] },
+    modelProvider,
+    mainConnectorId: 'connector-1',
+    attachmentStateManager,
+    runAttachmentEvents: runEventsOver(attachmentStateManager),
+  });
+
+  const base = (overrides: Partial<BuildRoundInterruptedEventParams> = {}) =>
+    buildRoundInterruptedEvent({ ...baseParams(), ...overrides });
 
   it('builds the interrupted round from the tracked steps with the partial summary', () => {
     const event = base();
@@ -113,37 +131,20 @@ describe('buildRoundInterruptedEvent', () => {
     expect(event.data.steps).toEqual([workflowStep]);
   });
 
-  it('merges refs accessed during the run into the input and renders the attachment context', () => {
-    const event = base({ attachmentStateManager: attachmentStateManager({ accessedRefs: [ref] }) });
-
-    expect(event.data.input.attachment_refs).toEqual([ref]);
-    // no resolvable attachment record here, so no context is rendered and the field is left out
-    expect(event.data.input).not.toHaveProperty('attachment_context');
+  it('persists the run attachment events, including changes of a batch that threw, and the received input', async () => {
+    const attachmentStateManager = createAttachmentStateManager([], { getTypeDefinition });
+    await attachmentStateManager.forToolCall('call-1').add({ id: 'a1', type: 'text', data: 'x' });
+    const event = buildRoundInterruptedEvent({
+      ...baseParams(attachmentStateManager),
+      processedInput: { message: 'hi' },
+    });
+    expect(event.data.input).toEqual({ message: 'hi' });
+    expect(event.data.attachment_events).toEqual([
+      expect.objectContaining({ data: expect.objectContaining({ tool_call_id: 'call-1' }) }),
+    ]);
   });
 
-  it('stamps chat_input attachment events with the fresh round identity (author + origin)', () => {
-    const change = {
-      kind: 'added',
-      attachment_id: 'a1',
-      attachment_type: 'text',
-      current_version: 1,
-    };
-    const event = base({
-      author: { id: 'slack-U1', username: 'bob' },
-      origin: { type: ConversationOriginType.Slack } as never,
-      chatInputChanges: [change as never],
-    });
-
-    const [attachmentEvent] = event.data.attachment_events!;
-    expect(attachmentEvent.execution_id).toBe('r1::execution');
-    expect(attachmentEvent.actor).toMatchObject({
-      type: EventActorType.external,
-      id: 'slack-U1',
-      origin: { type: ConversationOriginType.Slack },
-    });
-  });
-
-  it('on a resume, uses the pending turn identity and flags the event as resumed', () => {
+  it('on a resume, flags the event as resumed and keeps the runner round id', () => {
     const pendingRound = createRound({
       id: 'pending-1',
       status: ConversationRoundStatus.awaitingPrompt,
@@ -181,22 +182,10 @@ describe('buildRoundInterruptedEvent', () => {
       inherited: { steps: pendingTurn.steps, pendingToolCallIds: ['c1'] },
     });
 
-    const change = {
-      kind: 'added',
-      attachment_id: 'a1',
-      attachment_type: 'text',
-      current_version: 1,
-    };
-    const event = base({
-      tracker,
-      pendingTurn,
-      conversation,
-      author: { id: 'u-new', username: 'new' },
-      chatInputChanges: [change as never],
-    });
+    const event = base({ tracker, pendingTurn });
 
     expect(event.data.resumed).toBe(true);
-    // the runner's round id is announced; the identity for attachment events is the pending turn's
+    // the runner's round id is announced
     expect(event.data.round_id).toBe('r1');
     // the current execution's start, not the original user message's
     expect(event.data.started_at).toBe('2026-01-01T00:00:00.000Z');
@@ -204,13 +193,6 @@ describe('buildRoundInterruptedEvent', () => {
     expect(event.data.steps).toEqual([
       expect.objectContaining({ tool_call_id: 'c1', results: [], progression: [] }),
     ]);
-    const [attachmentEvent] = event.data.attachment_events!;
-    expect(attachmentEvent.execution_id).toBe('pending-1::execution');
-    expect(attachmentEvent.actor).toMatchObject({
-      type: EventActorType.external,
-      id: 'u-pending',
-      origin: { type: ConversationOriginType.Slack },
-    });
   });
 
   it('includes the workspace id when the run had one', () => {

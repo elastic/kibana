@@ -25,7 +25,7 @@ value:
       description: A description of the template.
       tags:
         - Template tag 1
-  extractObservables: true
+  extractObservables: false
   workflowTags:
     - soc-triage
   owner: cases

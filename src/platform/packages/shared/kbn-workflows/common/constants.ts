@@ -12,6 +12,13 @@
  */
 export const WORKFLOWS_MANAGEMENT_FEATURE_ID = 'workflowsManagement';
 
+export const WORKFLOW_RUN_NAME_MAX_LENGTH = 1024;
+
+/**
+ * Longer substring patterns can be too complex for the `wildcard` field to determinize.
+ */
+export const WORKFLOW_RUN_NAME_FILTER_MAX_LENGTH = 128;
+
 /**
  * UI Setting ID for enabling / disabling the workflows management UI
  */

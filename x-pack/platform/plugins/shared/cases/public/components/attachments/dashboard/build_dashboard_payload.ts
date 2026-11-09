@@ -11,7 +11,7 @@ import {
   type DashboardAttachmentData as DashboardAttachmentApiData,
 } from '@kbn/agent-builder-dashboards-common';
 import { DASHBOARD_ATTACHMENT_TYPE, DASHBOARD_SO_TYPE } from '../../../../common/constants';
-import type { DashboardAttachmentPayload } from '../../../../common/types/domain_zod/attachment/dashboard/v2';
+import type { DashboardAttachmentPayload } from '../../../../common/types/domain/attachment/dashboard/v2';
 import { fitsSnapshotBudget } from '../common/saved_object/helpers';
 
 export type DashboardPayload = Omit<DashboardAttachmentPayload, 'owner'>;

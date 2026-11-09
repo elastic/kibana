@@ -132,7 +132,15 @@ const filteredFiles = filterFilesByPackages(
 
 ## PR and merge-queue Jest selective testing
 
-On pull request builds, Jest unit and integration test groups are narrowed to configs under affected packages (see `pick_test_group_run_order` in CI stats). Add the GitHub label `ci:prevent-selective-testing` to run the full Jest suite instead. Touching files listed in `CRITICAL_FILES_JEST_*` in `const.ts` also skips filtering for the relevant test type.
+On pull request builds, Jest unit and integration configs are narrowed to affected packages (see `pick_test_group_run_order` in CI stats). Moon's affected tasks are queried for comparison but do not change the scheduled configs. Add the GitHub label `ci:prevent-selective-testing` to run the full Jest suite instead. Touching files listed in `CRITICAL_FILES_JEST_*` in `const.ts` also skips filtering for the relevant test type.
+
+### Moon test tasks
+
+`regenerate_moon_projects` tags projects containing Jest, Jest integration, or Scout configs. One inherited task per runner and project exposes its config paths through Moon's `@files` token in `moon query tasks`. The selection helper maps changes inside a test suite to its config and treats shared source or upstream changes as affecting all configs in the project. CI compares that list with its current selection and retains its existing per-config sharding. Moon projects cannot be nested, so each config has one owning project.
+
+Jest integration and Scout config tasks are no-ops that expose configs to Moon queries. CI retains the deployment target and shard scheduling for Scout.
+
+Jest unit and integration Moon selection is observational until a separate CI cutover. Critical-file and always-run rules remain in the current scheduler.
 
 Merge-queue builds select Jest unit tests affected by changes since the group's pinned base (`BUILDKITE_MERGE_QUEUE_BASE_COMMIT`), not the live target-branch comparison (`MERGE_QUEUE_MERGE_BASE`). If that base is missing or invalid, or CI cannot determine the comparison range, test selection fails.
 
@@ -140,8 +148,6 @@ Merge-queue builds select Jest unit tests affected by changes since the group's 
 
 Some integration suites boot a full Kibana and snapshot a *global registry* (rule-type params, connector types, task types, …) populated at runtime by downstream publishers that sit **upstream** of the suite's own package. `includeDownstream` expansion never reaches them, so a publisher-only change can silently skip the snapshot. Configs listed in `ALWAYS_RUN_JEST_INTEGRATION_CONFIGS` (`const.ts`) are re-added after affected-filtering so they run on every PR regardless of the graph. Keep the list tiny — it is a deliberate escape hatch.
 
-## Scout selective testing: git -> Moon (shadow mode)
+## Scout selective testing: Moon comparison
 
-`resolve_selective_testing.ts` still uses **git** as the authoritative strategy (written to `.scout/code_changes.json`, no behavior change). In parallel, it runs the **Moon** strategy above for observation only, and writes the result plus a diff of `affectedModules` to `.scout/code_changes.moon_shadow.json` (uploaded as a Buildkite artifact). Mismatches are logged as a warning via `ToolingLog`; a Moon failure is swallowed and logged, never fails the build.
-
-Once shadow-mode data shows git and Moon agree across real PR traffic, Moon will become authoritative and the git path removed (follow-up change, not yet done).
+`resolve_selective_testing.ts` keeps git selection authoritative and writes the git/Moon comparison to `.scout/code_changes.moon_shadow.json` for diagnosis. The Scout scheduler logs differences between scheduled configs and Moon's affected config tasks. A separate patch can switch selection to Moon while retaining the existing deployment-mode and duration splits.

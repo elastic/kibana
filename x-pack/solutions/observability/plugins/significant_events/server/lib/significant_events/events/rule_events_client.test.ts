@@ -14,7 +14,8 @@ import {
 } from '../../../../common/workflows/triggers';
 import { StatusChange } from './lifecycle/lifecycle_controller';
 import { asRuleEventsClient } from './rule_events_client.mock';
-import { RuleEventsClient, operatorFallbackAssessmentNote } from './rule_events_client';
+import { RuleEventsClient } from './rule_events_client';
+import { operatorFallbackAssessmentNote } from '@kbn/significant-events-schema';
 import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 
 interface MockRow {
@@ -542,6 +543,23 @@ describe('RuleEventsClient', () => {
     });
   });
 
+  describe('episode id on listed events', () => {
+    it('returns the series current episode so an operator action can address it', async () => {
+      const row: MockRow = {
+        source: ruleEventSource({ alert: { id: 'episode-7', status: 'active' } }),
+        dataJson: JSON.stringify(dataDoc),
+        createdAt: '2026-01-01T00:00:00.000Z',
+      };
+      const { client } = createClient(async (request) =>
+        request.query.includes('STATS total') ? countResponse(1) : sourceResponse([row])
+      );
+
+      const { hits } = await client.findLatestByCurrentStatePaginated({});
+
+      expect(hits[0]).toMatchObject({ episode_id: 'episode-7' });
+    });
+  });
+
   describe('list sorting and investigation filter', () => {
     it('sorts by severity rank, then newest first', async () => {
       const { client, query } = createClient(async (request) =>
@@ -555,6 +573,20 @@ describe('RuleEventsClient', () => {
         'EVAL sort_rank = CASE(severity == "critical", 4, severity == "high", 3, severity == "low", 1, 2)'
       );
       expect(commands).toContainEqual('SORT sort_rank DESC, created_at DESC, _id ASC');
+    });
+
+    it('sorts by the latest update timestamp', async () => {
+      const { client, query } = createClient(async (request) =>
+        request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
+      );
+
+      await client.findLatestByCurrentStatePaginated({
+        sortField: 'updated_at',
+        sortOrder: 'desc',
+      });
+
+      const { commands } = getPageRequest(query);
+      expect(commands).toContainEqual('SORT @timestamp DESC, created_at DESC, _id ASC');
     });
 
     it('sorts missing alert statuses as active', async () => {
@@ -633,11 +665,11 @@ describe('RuleEventsClient', () => {
     });
   });
 
-  describe('findLatestActive', () => {
+  describe('findLatestLive', () => {
     it('filters alert.status to the live statuses (active and recovering), not the top-level status', async () => {
       const { client, query } = createClient(async () => sourceResponse([]));
 
-      await client.findLatestActive({});
+      await client.findLatestLive({});
 
       const q = lastQuery(query);
       expect(q).toContain('COALESCE(`alert.status`, "active") IN ("active", "recovering")');
@@ -647,7 +679,7 @@ describe('RuleEventsClient', () => {
     it('narrows by sourceIds via FIELD_EXTRACT(data, "source_ids")', async () => {
       const { client, query } = createClient(async () => sourceResponse([]));
 
-      await client.findLatestActive({ sourceIds: ['logs.checkout'] });
+      await client.findLatestLive({ sourceIds: ['logs.checkout'] });
 
       const q = lastQuery(query);
       expect(q).toContain('MV_INTERSECTS(FIELD_EXTRACT(data, "source_ids"), ["logs.checkout"])');
@@ -656,7 +688,7 @@ describe('RuleEventsClient', () => {
     it('narrows by ruleUuids via FIELD_EXTRACT(data, "signals.metadata.rule_uuid")', async () => {
       const { client, query } = createClient(async () => sourceResponse([]));
 
-      await client.findLatestActive({ ruleUuids: ['rule-A'] });
+      await client.findLatestLive({ ruleUuids: ['rule-A'] });
 
       const q = lastQuery(query);
       expect(q).toContain(
@@ -668,7 +700,7 @@ describe('RuleEventsClient', () => {
       const row: MockRow = { source: ruleEventSource(), dataJson: JSON.stringify(dataDoc) };
       const { client } = createClient(async () => sourceResponse([row]));
 
-      const { hits } = await client.findLatestActive({});
+      const { hits } = await client.findLatestLive({});
 
       expect(hits).toEqual([
         {
@@ -678,6 +710,269 @@ describe('RuleEventsClient', () => {
           severity: 'medium',
         },
       ]);
+    });
+  });
+
+  describe('findLatestInactiveByIdentity', () => {
+    const identity = {
+      sourceIds: ['logs.checkout'],
+      ruleUuids: ['rule-A'],
+      inactiveSince: '2026-10-26T12:00:00.000Z',
+    };
+
+    it('reads only closed series, after picking the latest version of each series', async () => {
+      const { client, query } = createClient(async () => sourceResponse([]));
+
+      await client.findLatestInactiveByIdentity(identity);
+
+      const q = lastQuery(query);
+      expect(q).toContain('COALESCE(`alert.status`, "active") == "inactive"');
+      expect(q.indexOf('WHERE @timestamp == latest_ts')).toBeLessThan(
+        q.indexOf('WHERE @timestamp >= TO_DATETIME(')
+      );
+    });
+
+    it('requires both the sources and the rules to intersect', async () => {
+      const { client, query } = createClient(async () => sourceResponse([]));
+
+      await client.findLatestInactiveByIdentity(identity);
+
+      const q = lastQuery(query);
+      expect(q).toContain('MV_INTERSECTS(FIELD_EXTRACT(data, "source_ids"), ["logs.checkout"])');
+      expect(q).toContain(
+        'MV_INTERSECTS(FIELD_EXTRACT(data, "signals.metadata.rule_uuid"), ["rule-A"])'
+      );
+    });
+
+    it.each([
+      ['sources', { sourceIds: [] }],
+      ['rules', { ruleUuids: [] }],
+    ])('reads nothing, and runs no query, when there are no %s to match', async (_name, empty) => {
+      const { client, query } = createClient(async () => sourceResponse([]));
+
+      const { hits } = await client.findLatestInactiveByIdentity({ ...identity, ...empty });
+
+      expect(hits).toEqual([]);
+      expect(query).not.toHaveBeenCalled();
+    });
+
+    it('returns the group_hash and episode each closed series is on, for deactivation lookups', async () => {
+      const row: MockRow = {
+        source: ruleEventSource({ alert: { id: 'episode-1', status: 'inactive' } }),
+        dataJson: JSON.stringify(dataDoc),
+      };
+      const { client } = createClient(async () => sourceResponse([row]));
+
+      const { heads } = await client.findLatestInactiveByIdentity(identity);
+
+      expect(heads).toEqual([
+        { eventId: expect.any(String), groupHash: 'group-hash-1', episodeId: 'episode-1' },
+      ]);
+    });
+  });
+
+  describe('findOperatorDeactivations', () => {
+    type ActionType = 'deactivate' | 'activate';
+    interface ActionDoc {
+      at: string;
+      groupHash?: string;
+      episodeId?: string;
+      type?: ActionType;
+      actor?: string;
+      reason?: string | null;
+    }
+    const actionColumns = [
+      '@timestamp',
+      'group_hash',
+      'alert_id',
+      'action_type',
+      'actor.type',
+      'reason',
+    ];
+    const actionsResponse = (docs: ActionDoc[]): ESQLSearchResponse =>
+      ({
+        columns: actionColumns.map((name) => ({ name, type: 'keyword' })),
+        values: docs.map(
+          ({
+            at,
+            groupHash = 'series-1',
+            episodeId = 'episode-1',
+            type = 'deactivate',
+            actor = 'user',
+            reason = 'noise',
+          }) => [at, groupHash, episodeId, type, actor, reason]
+        ),
+      } as unknown as ESQLSearchResponse);
+
+    const heads = [{ groupHash: 'series-1', episodeId: 'episode-1' }];
+    const setup = (docs: ActionDoc[] | Error) => {
+      const query = jest.fn(async (_request: EsqlRequest) => {
+        if (docs instanceof Error) throw docs;
+        return actionsResponse(docs);
+      });
+      const logger = { warn: jest.fn(), error: jest.fn() };
+      const client = new RuleEventsClient({
+        esClient: { esql: { query } } as never,
+        space: 'default',
+        logger: logger as never,
+      });
+      return { client, query, logger };
+    };
+
+    it('reads a user deactivate of the episode the series is on', async () => {
+      const { client } = setup([{ at: '2026-10-28T10:00:00.000Z', reason: 'known noise' }]);
+
+      const { deactivations, failed } = await client.findOperatorDeactivations({ heads });
+
+      expect(failed).toBe(false);
+      expect(deactivations.get('series-1')).toEqual({
+        groupHash: 'series-1',
+        episodeId: 'episode-1',
+        reason: 'known noise',
+        deactivatedAt: '2026-10-28T10:00:00.000Z',
+      });
+    });
+
+    it('scopes the read to the space, the series and the lifecycle actions only', async () => {
+      const { client, query } = setup([]);
+
+      await client.findOperatorDeactivations({ heads });
+
+      const text = lastQuery(query);
+      expect(text).toContain('.alert-actions');
+      expect(text).toContain('space_id == "default"');
+      expect(text).toContain('group_hash IN ("series-1")');
+      expect(text).toContain('action_type IN ("deactivate", "activate")');
+    });
+
+    it('reads with the internal client when one is given', async () => {
+      const internalQuery = jest.fn(async () => actionsResponse([]));
+      const { query } = setup([]);
+      const client = new RuleEventsClient({
+        esClient: { esql: { query } } as never,
+        internalEsClient: { esql: { query: internalQuery } } as never,
+        space: 'default',
+      });
+
+      await client.findOperatorDeactivations({ heads });
+
+      expect(internalQuery).toHaveBeenCalledTimes(1);
+      expect(query).not.toHaveBeenCalled();
+    });
+
+    it('does not read a deactivation of an older episode once the series is on a new one', async () => {
+      const { client } = setup([{ at: '2026-10-28T10:00:00.000Z', episodeId: 'episode-0' }]);
+
+      expect((await client.findOperatorDeactivations({ heads })).deactivations.size).toBe(0);
+    });
+
+    it('does not read an engine deactivate as an operator deactivation', async () => {
+      const { client } = setup([{ at: '2026-10-28T10:00:00.000Z', actor: 'internal' }]);
+
+      expect((await client.findOperatorDeactivations({ heads })).deactivations.size).toBe(0);
+    });
+
+    it('lets a later activate cancel the deactivation, and a later deactivate restore it', async () => {
+      const cancelled = setup([
+        { at: '2026-10-28T10:00:00.000Z', type: 'deactivate' },
+        { at: '2026-10-28T11:00:00.000Z', type: 'activate' },
+      ]);
+      const restored = setup([
+        { at: '2026-10-28T11:00:00.000Z', type: 'deactivate', reason: 'second' },
+        { at: '2026-10-28T10:00:00.000Z', type: 'activate' },
+      ]);
+
+      expect((await cancelled.client.findOperatorDeactivations({ heads })).deactivations.size).toBe(
+        0
+      );
+      expect(
+        (await restored.client.findOperatorDeactivations({ heads })).deactivations.get('series-1')
+          ?.reason
+      ).toBe('second');
+    });
+
+    it('reports a failed read as failed, with a tagged error, instead of throwing', async () => {
+      const { client, logger } = setup(new Error('index_not_found_exception'));
+
+      expect(await client.findOperatorDeactivations({ heads })).toEqual({
+        deactivations: new Map(),
+        failed: true,
+      });
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('deactivation_check_failed')
+      );
+    });
+
+    it('reads the standard no-reason note as a deactivation without a reason', async () => {
+      const { client } = setup([
+        {
+          at: '2026-10-28T10:00:00.000Z',
+          reason: operatorFallbackAssessmentNote('inactive'),
+        },
+      ]);
+
+      const { deactivations } = await client.findOperatorDeactivations({ heads });
+      expect(deactivations.get('series-1')?.reason).toBe('');
+    });
+  });
+
+  describe('findEventDeactivations', () => {
+    const groupResponse = (hashes: string[]): ESQLSearchResponse =>
+      ({
+        columns: [{ name: 'group_hash', type: 'keyword' }],
+        values: hashes.map((hash) => [hash]),
+      } as unknown as ESQLSearchResponse);
+    const actionResponse = (
+      rows: Array<[string, string | null, string | null]>
+    ): ESQLSearchResponse =>
+      ({
+        columns: [
+          { name: '@timestamp', type: 'date' },
+          { name: 'alert_id', type: 'keyword' },
+          { name: 'reason', type: 'text' },
+        ],
+        values: rows,
+      } as unknown as ESQLSearchResponse);
+    const setup = (actions: ESQLSearchResponse, hashes: string[] = ['group-1']) => {
+      const logger = { error: jest.fn() };
+      const query = jest.fn(async (request: EsqlRequest) =>
+        request.query.includes('.alert-actions') ? actions : groupResponse(hashes)
+      );
+      const client = new RuleEventsClient({
+        esClient: { esql: { query } } as never,
+        space: 'default',
+        logger: logger as never,
+      });
+      return { client, query, logger };
+    };
+
+    it('returns the operator deactivations of the event with episode, time and reason', async () => {
+      const { client } = setup(
+        actionResponse([
+          ['2026-10-28T12:48:35.184Z', 'episode-1', '  Known noise  '],
+          ['2026-10-28T15:00:00.000Z', 'episode-2', null],
+        ])
+      );
+
+      expect(await client.findEventDeactivations('event-1')).toEqual([
+        {
+          '@timestamp': '2026-10-28T12:48:35.184Z',
+          episode_id: 'episode-1',
+          reason: 'Known noise',
+        },
+        { '@timestamp': '2026-10-28T15:00:00.000Z', episode_id: 'episode-2', reason: '' },
+      ]);
+    });
+
+    it('reads only user deactivations of the event series in the space', async () => {
+      const { client, query } = setup(actionResponse([]));
+
+      await client.findEventDeactivations('event-1');
+
+      const text = lastQuery(query, (q) => q.includes('.alert-actions'));
+      expect(text).toContain('space_id == "default"');
+      expect(text).toContain('group_hash == "group-1"');
+      expect(text).toContain('action_type == "deactivate" AND actor.type == "user"');
     });
   });
 
@@ -737,6 +1032,8 @@ describe('RuleEventsClient', () => {
       expect(q.indexOf('INLINE STATS created_at')).toBeLessThan(
         q.indexOf('@timestamp >= TO_DATETIME(?fromIso)')
       );
+      expect(q).toContain('COALESCE(`alert.status`, "active") IN ("active", "recovering")');
+      expect(q.indexOf('COALESCE(`alert.status`, "active")')).toBeLessThan(q.indexOf('LIMIT 500'));
       expect(q).toContain('SORT @timestamp DESC');
       expect(q).toContain(
         'MV_INTERSECTS(FIELD_EXTRACT(data, "signals.metadata.rule_uuid"), ["rule-A"])'
@@ -822,6 +1119,55 @@ describe('RuleEventsClient', () => {
         ['event-1', 'active', 'confirms'],
         ['event-2', 'recovering', 'refutes'],
       ]);
+    });
+
+    describe('time bounds', () => {
+      const requestOf = (query: jest.Mock) => query.mock.calls[0][0] as EsqlRequest;
+      const LOOKBACK_FILTER = '@timestamp >= TO_DATETIME(?lookbackIso)';
+      const FROM_FILTER = '@timestamp >= TO_DATETIME(?fromIso)';
+
+      it('applies a lookback after the lineage is aggregated, with its own parameter', async () => {
+        const { client, query } = createClient(async () => sourceResponse([]));
+
+        await client.findLiveMemberships({
+          ruleUuids: ['rule-A'],
+          lookback: '2026-08-01T00:00:00.000Z',
+        });
+
+        const { query: q, params } = requestOf(query);
+        expect(q.indexOf(LOOKBACK_FILTER)).toBeGreaterThan(-1);
+        expect(q.indexOf('INLINE STATS created_at')).toBeLessThan(q.indexOf(LOOKBACK_FILTER));
+        expect(q).not.toContain('?fromIso');
+        expect(params).toContainEqual({ lookbackIso: '2026-08-01T00:00:00.000Z' });
+      });
+
+      it('adds no time filter when neither bound is given', async () => {
+        const { client, query } = createClient(async () => sourceResponse([]));
+
+        await client.findLiveMemberships({ ruleUuids: ['rule-A'] });
+
+        expect(requestOf(query).query).not.toContain('@timestamp >=');
+      });
+
+      it('applies each bound at its own position with its own value when both are given', async () => {
+        const { client, query } = createClient(async () => sourceResponse([]));
+
+        await client.findLiveMemberships({
+          ruleUuids: ['rule-A'],
+          lookback: '2026-08-01T00:00:00.000Z',
+          from: '2026-10-01T00:00:00.000Z',
+        });
+
+        const { query: q, params } = requestOf(query);
+        expect(q.indexOf('INLINE STATS created_at')).toBeLessThan(q.indexOf(LOOKBACK_FILTER));
+        expect(q.indexOf(LOOKBACK_FILTER)).toBeLessThan(q.indexOf(FROM_FILTER));
+        expect(params).toEqual(
+          expect.arrayContaining([
+            { lookbackIso: '2026-08-01T00:00:00.000Z' },
+            { fromIso: '2026-10-01T00:00:00.000Z' },
+          ])
+        );
+      });
     });
   });
 
@@ -927,9 +1273,11 @@ describe('RuleEventsClient', () => {
       ...overrides,
     });
     const makeWriter = () =>
-      ({ createAlertEvent: jest.fn().mockResolvedValue(undefined) } as jest.Mocked<
-        Pick<AlertEventsClientApi, 'createAlertEvent'>
-      >);
+      ({
+        createAlertEvent: jest
+          .fn()
+          .mockResolvedValue({ group_hash: 'hash-1', alert_id: 'alert-1' }),
+      } as jest.Mocked<Pick<AlertEventsClientApi, 'createAlertEvent'>>);
     const clientWith = ({
       head,
       writer,
@@ -944,13 +1292,14 @@ describe('RuleEventsClient', () => {
         { getAlertEventsClient: async () => writer as AlertEventsClientApi, emitTrigger }
       );
 
-    it('createEvent writes the version without reading the head, and notifies its creation', async () => {
+    it('createEvent writes without reading the head, returns its series identity, and notifies its creation', async () => {
       const writer = makeWriter();
       const emitTrigger = jest.fn();
       const client = clientWith({ writer, emitTrigger });
 
-      await client.createEvent({ event: version() });
+      const result = await client.createEvent({ event: version() });
 
+      expect(result).toEqual({ groupHash: 'hash-1', alertId: 'alert-1' });
       expect(writer.createAlertEvent).toHaveBeenCalledWith(
         expect.objectContaining({ fingerprint: 'agent-event-1' })
       );

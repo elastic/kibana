@@ -101,10 +101,7 @@ describe('getNextHistorySequence', () => {
 });
 
 describe('addToHistory', () => {
-  const getContext = (user: unknown = { username: 'elastic', profile_uid: 'u_1' }) =>
-    ({
-      core: Promise.resolve({ security: { authc: { getCurrentUser: () => user } } }),
-    } as unknown as RequestHandlerContext);
+  const user = { username: 'elastic', profile_uid: 'u_1' };
 
   const getClient = (latestHistorySnapshot?: DashboardState) => ({
     getHistory: jest.fn().mockResolvedValue({
@@ -118,7 +115,7 @@ describe('addToHistory', () => {
   it('logs without an actor when there is no authenticated user (security disabled)', async () => {
     const client = getClient();
     mockedGetClient.mockResolvedValue(client as never);
-    await addToHistory({ ...baseArgs, ctx: getContext(null), sequence: 1 });
+    await addToHistory({ ...baseArgs, user: null, sequence: 1 });
     expect(client.log).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ username: '', userProfileId: undefined })
@@ -127,15 +124,13 @@ describe('addToHistory', () => {
 
   it('does nothing when the change history client is not ready', async () => {
     mockedGetClient.mockRejectedValue(new Error('not ready'));
-    await expect(
-      addToHistory({ ...baseArgs, ctx: getContext(), sequence: 1 })
-    ).resolves.toBeUndefined();
+    await expect(addToHistory({ ...baseArgs, user, sequence: 1 })).resolves.toBeUndefined();
   });
 
   it('logs the first version without a change count', async () => {
     const client = getClient();
     mockedGetClient.mockResolvedValue(client as never);
-    await addToHistory({ ...baseArgs, ctx: getContext(), sequence: 1 });
+    await addToHistory({ ...baseArgs, user, sequence: 1 });
 
     expect(client.log).toHaveBeenCalledWith(
       {
@@ -158,7 +153,7 @@ describe('addToHistory', () => {
   it('logs deletes with their sequence and waits for refresh so that a recreated ID continues after it', async () => {
     const client = getClient();
     mockedGetClient.mockResolvedValue(client as never);
-    await addToHistory({ ...baseArgs, ctx: getContext(), sequence: 4, type: 'delete' });
+    await addToHistory({ ...baseArgs, user, sequence: 4, type: 'delete' });
 
     expect(client.log).toHaveBeenCalledWith(
       expect.objectContaining({ objectId: 'dash-1', sequence: 4 }),
@@ -171,7 +166,7 @@ describe('addToHistory', () => {
     mockedGetClient.mockResolvedValue(client as never);
     await addToHistory({
       ...baseArgs,
-      ctx: getContext(),
+      user,
       sequence: 2,
       previousSnapshot: { title: 'Old' } as DashboardState,
     });
@@ -186,7 +181,7 @@ describe('addToHistory', () => {
     mockedGetClient.mockResolvedValue(client as never);
     await addToHistory({
       ...baseArgs,
-      ctx: getContext(),
+      user,
       sequence: 3,
       previousSnapshot: baseArgs.snapshot,
     });
@@ -199,7 +194,7 @@ describe('addToHistory', () => {
     mockedGetClient.mockResolvedValue(client as never);
     await addToHistory({
       ...baseArgs,
-      ctx: getContext(),
+      user,
       previousSnapshot: { title: 'Old' } as DashboardState,
       sequence: 5,
       restoredFrom: 2,
@@ -214,9 +209,7 @@ describe('addToHistory', () => {
     const client = getClient();
     client.log.mockRejectedValue(new Error('boom'));
     mockedGetClient.mockResolvedValue(client as never);
-    await expect(
-      addToHistory({ ...baseArgs, ctx: getContext(), sequence: 1 })
-    ).resolves.toBeUndefined();
+    await expect(addToHistory({ ...baseArgs, user, sequence: 1 })).resolves.toBeUndefined();
   });
 });
 

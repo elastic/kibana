@@ -164,3 +164,157 @@ describe('useOnboardingDriftDetection — dependence on serviceSettings.instance
     });
   });
 });
+
+describe('useOnboardingDriftDetection — global namespace', () => {
+  const updateDetectAndReviewStep = jest.fn();
+
+  const renderDrift = ({
+    namespace,
+    savedNamespace,
+    instances,
+  }: {
+    namespace: string | undefined;
+    savedNamespace?: string;
+    instances: ServiceInstance[] | undefined;
+  }) => {
+    mockGetDeployment.mockResolvedValue({
+      item: { connectorId: 'connector-1', serviceVars: {}, namespace: savedNamespace },
+    });
+    return renderHook(() =>
+      useOnboardingDriftDetection({
+        onboardingDeploymentId: 'deployment-1',
+        policyIdsByInstance: { [INSTANCE_ID]: 'policy-1' },
+        awsServicesMap: new Map(),
+        deploymentMethod: 'managed_integration',
+        connectorId: 'connector-1',
+        agentBasedDeployment: {
+          agentCredentialMethod: undefined,
+          agentHostsMode: 'new',
+          selectedAgentPolicyIds: [],
+        },
+        serviceSettings: { globalRegion: 'us-east-1', namespace, serviceVars: {}, instances },
+        isDirty: false,
+        updateDetectAndReviewStep,
+      })
+    );
+  };
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it('is dirty when the namespace changed since the last deploy', async () => {
+    const { result } = renderDrift({ namespace: 'prod', instances: [instance] });
+
+    await waitFor(() => expect(result.current.driftSettled).toBe(true));
+    expect(updateDetectAndReviewStep).toHaveBeenCalledWith(
+      expect.objectContaining({ isDirty: true })
+    );
+  });
+
+  it('is dirty in a session that has no instances yet', async () => {
+    // Every deployed instance is then an original, which follows the global namespace.
+    const { result } = renderDrift({ namespace: 'prod', instances: undefined });
+
+    await waitFor(() => expect(result.current.driftSettled).toBe(true));
+    expect(updateDetectAndReviewStep).toHaveBeenCalledWith(
+      expect.objectContaining({ isDirty: true })
+    );
+  });
+
+  it('stays clean when the namespace is the one that was deployed', async () => {
+    const { result } = renderDrift({
+      namespace: 'prod',
+      savedNamespace: 'prod',
+      instances: [instance],
+    });
+
+    await waitFor(() => expect(result.current.driftSettled).toBe(true));
+    expect(updateDetectAndReviewStep).toHaveBeenCalledWith(
+      expect.objectContaining({ isDirty: false })
+    );
+  });
+});
+
+describe('useOnboardingDriftDetection — package policy settings', () => {
+  const updateDetectAndReviewStep = jest.fn();
+
+  const renderDrift = ({
+    policySettings,
+    savedPolicySettings,
+    deploymentMethod = 'agent_based',
+  }: {
+    policySettings?: Record<string, string>;
+    savedPolicySettings?: Record<string, string>;
+    deploymentMethod?: 'agent_based' | 'managed_integration';
+  }) => {
+    mockGetDeployment.mockResolvedValue({
+      item: {
+        connectorId: 'connector-1',
+        serviceVars: {},
+        agentPolicyIds: [],
+        // The default credential method, so only the settings can drift.
+        authMethod: 'static_keys',
+        policySettings: savedPolicySettings,
+      },
+    });
+    return renderHook(() =>
+      useOnboardingDriftDetection({
+        onboardingDeploymentId: 'deployment-1',
+        policyIdsByInstance: { [INSTANCE_ID]: 'policy-1' },
+        awsServicesMap: new Map(),
+        deploymentMethod,
+        connectorId: 'connector-1',
+        agentBasedDeployment: {
+          agentCredentialMethod: undefined,
+          agentHostsMode: 'existing',
+          selectedAgentPolicyIds: [],
+        },
+        serviceSettings: {
+          globalRegion: 'us-east-1',
+          serviceVars: {},
+          instances: [instance],
+          policySettings,
+        },
+        isDirty: false,
+        updateDetectAndReviewStep,
+      })
+    );
+  };
+
+  const expectDirty = async (result: { current: { driftSettled: boolean } }, isDirty: boolean) => {
+    await waitFor(() => expect(result.current.driftSettled).toBe(true));
+    expect(updateDetectAndReviewStep).toHaveBeenLastCalledWith(
+      expect.objectContaining({ isDirty })
+    );
+  };
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it('is dirty when the output changed since the last deploy', async () => {
+    const { result } = renderDrift({
+      policySettings: { output_id: 'kafka-1' },
+      savedPolicySettings: { output_id: 'logstash-1' },
+    });
+    await expectDirty(result, true);
+  });
+
+  it('is dirty when the output was set back to the inherited one', async () => {
+    const { result } = renderDrift({
+      policySettings: { output_id: '' },
+      savedPolicySettings: { output_id: 'logstash-1' },
+    });
+    await expectDirty(result, true);
+  });
+
+  it('stays clean when the inherited output is chosen and none was saved', async () => {
+    const { result } = renderDrift({ policySettings: { output_id: '' } });
+    await expectDirty(result, false);
+  });
+
+  it('ignores an output under managed integration, which does not apply it', async () => {
+    const { result } = renderDrift({
+      deploymentMethod: 'managed_integration',
+      policySettings: { output_id: 'kafka-1' },
+    });
+    await expectDirty(result, false);
+  });
+});
