@@ -148,8 +148,7 @@ on, so it must identify a bounded slice of behaviour, not a file.
 | `routes`             | HTTP route handlers.                                                                                                                              | `routes/alerting_route_context.ts`                                                                                |
 | `rulesClient`        | Rule CRUD, filter parsing, bulk operations, internal rules client.                                                                                | `lib/rules_client/`, `lib/internal_rules_client/`                                                                 |
 | `ruleTemplateClient` | Rule template read path.                                                                                                                          | `lib/rule_templates_client/`                                                                                      |
-| `actionPolicyClient` | Action policy CRUD and API key handling.                                                                                                          | `lib/action_policy_client/`                                                                                       |
-| `actionPolicyTest`   | Test-notification preview and send for action policies.                                                                                           | `lib/action_policy_test/action_policy_test_service.ts`                                                            |
+| `actionPolicyClient` | Action policy CRUD, API key handling and test notifications.                                                                                      | `lib/action_policy_client/`, `lib/action_policy_test/`                                                            |
 | `alertsClient`       | Alert actions and episode read / write clients.                                                                                                   | `lib/alert_actions_client/`, `lib/episodes_client/`                                                               |
 | `ruleExecutor`       | Rule task runner, pipeline steps, middlewares.                                                                                                    | `lib/rule_executor/task_runner.ts`                                                                                |
 | `director`           | Episode state transitions. Runs inside the executor but is its own domain.                                                                        | `lib/director/director.ts`                                                                                        |
@@ -163,7 +162,7 @@ on, so it must identify a bounded slice of behaviour, not a file.
 | `telemetry`          | Event-based telemetry (EBT) reporting.                                                                                                            | `lib/services/ebt_service/ebt_service.ts`                                                                         |
 
 The tree is split along **failure-domain** boundaries, not directory
-boundaries: 16 loggers an operator can remember, not 100+ file names. The
+boundaries: 15 loggers an operator can remember, not 100+ file names. The
 `director` runs inside the executor pipeline but gets its own logger because it
 is reasoned about independently. The `events` bus is one logger even though
 publishers and subscribers live in several directories.
