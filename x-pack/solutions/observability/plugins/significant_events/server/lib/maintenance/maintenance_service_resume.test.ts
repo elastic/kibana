@@ -42,6 +42,27 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(v2RulesClient?.bulkEnableRules).not.toHaveBeenCalled();
     });
 
+    it('re-keys the rules it enabled and keeps one that cannot be re-keyed for a retry', async () => {
+      const { api } = makeManagementApi();
+      const accountClient = makeV2RulesClient();
+      accountClient.bulkUpdateApiKey.mockResolvedValueOnce({
+        affected_count: 1,
+        errors: [{ id: 'rule-2', error: { code: 'BOOM', message: 'boom' } }],
+      });
+      const { service } = makeService({
+        management: api,
+        ruleBackedRuleIds: ['rule-1', 'rule-2'],
+        accountV2RulesClient: accountClient,
+      });
+
+      await service.pause({ request: REQUEST });
+      const summary = await service.resume({ request: REQUEST });
+
+      expect(accountClient.bulkUpdateApiKey).toHaveBeenCalledWith({ ids: ['rule-1', 'rule-2'] });
+      expect(summary.partialFailures).toContainEqual({ target: 'rule:rule-2', error: 'boom' });
+      expect(summary.rulesDisabled).toBe(1);
+    });
+
     it('leaves the rules of a source disabled before or during the pause off', async () => {
       const { api } = makeManagementApi();
       const { service, v2RulesClient } = makeService({

@@ -229,7 +229,11 @@ export function makeV2RulesClient(options?: {
     affected_count: ids.length - (options?.deleteErrors?.length ?? 0),
     errors: options?.deleteErrors ?? [],
   }));
-  return { bulkDisableRules, bulkEnableRules, bulkDeleteRules };
+  const bulkUpdateApiKey = jest.fn(async ({ ids }: { ids: string[] }) => ({
+    affected_count: ids.length,
+    errors: [] as BulkError[],
+  }));
+  return { bulkDisableRules, bulkEnableRules, bulkDeleteRules, bulkUpdateApiKey };
 }
 
 export function makeUiSettingsClient(

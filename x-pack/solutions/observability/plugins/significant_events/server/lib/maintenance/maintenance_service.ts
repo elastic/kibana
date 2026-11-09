@@ -315,9 +315,20 @@ export const createSignificantEventsMaintenanceService = ({
     (await getDetectionEngineAccountId({ core: server.core, spaceId: request.spaceId })) ===
     undefined
       ? setV2RulesEnabled(alertingV2RulesClient, ids, true)
-      : withAccountAlertingV2RulesClient((accountClient) =>
-          setV2RulesEnabled(accountClient, ids, true)
-        );
+      : withAccountAlertingV2RulesClient(async (accountClient) => {
+          const enabled = await setV2RulesEnabled(accountClient, ids, true);
+          // Bulk enable skips rules that are already on, so they would keep the previous owner's
+          // key. A rule that cannot be re-keyed stays in the retry inventory.
+          const rotated = await runRulesInBatches(enabled.toggledIds, (chunk) =>
+            accountClient.bulkUpdateApiKey({ ids: chunk })
+          );
+          const rotationFailed = new Set(rotated.failedIds);
+          return {
+            toggledIds: enabled.toggledIds.filter((id) => !rotationFailed.has(id)),
+            failedIds: [...enabled.failedIds, ...rotated.failedIds],
+            failures: [...enabled.failures, ...rotated.failures],
+          };
+        });
 
   const reEnableRules = async (
     request: KibanaRequest,

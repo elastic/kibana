@@ -722,6 +722,29 @@ describe('RulesAdapterV2', () => {
       mock.bulkUpdateApiKey.mockResolvedValueOnce({ affected_count: 0, errors: [error('BOOM')] });
       await expect(adapter.rotateRulesApiKey(['c'])).rejects.toThrow('BOOM');
     });
+
+    it('retries only the rules whose task was mid-run, and fails if they stay busy', async () => {
+      const mock = makeRulesClientMock();
+      const adapter = makeAdapter(mock);
+      const error = (id: string, code: string) => ({ id, error: { code, message: code } });
+
+      mock.bulkUpdateApiKey
+        .mockResolvedValueOnce({
+          affected_count: 1,
+          errors: [error('busy', 'RULE_ALREADY_RUNNING')],
+        })
+        .mockResolvedValueOnce({ affected_count: 1, errors: [] });
+      await expect(adapter.rotateRulesApiKey(['ok', 'busy'])).resolves.toBeUndefined();
+      expect(mock.bulkUpdateApiKey).toHaveBeenLastCalledWith({ ids: ['busy'] });
+
+      mock.bulkUpdateApiKey.mockClear();
+      mock.bulkUpdateApiKey.mockResolvedValue({
+        affected_count: 0,
+        errors: [error('busy', 'RULE_ALREADY_RUNNING')],
+      });
+      await expect(adapter.rotateRulesApiKey(['busy'])).rejects.toThrow('busy');
+      expect(mock.bulkUpdateApiKey).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe('findOwnedRuleIds', () => {
