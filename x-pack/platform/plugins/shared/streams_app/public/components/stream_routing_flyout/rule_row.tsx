@@ -41,10 +41,11 @@ import {
   type RoutingFieldCondition,
   type RoutingRuleCondition,
 } from './routing_rule_condition';
-import type {
-  RoutingAction,
-  RoutingRuleChanges,
-  RoutingRuleDraft,
+import {
+  isDefaultRule,
+  type RoutingAction,
+  type RoutingRuleChanges,
+  type RoutingRuleDraft,
 } from './state_management/routing_flyout_machine';
 
 interface RoutingRuleRowProps {
@@ -146,6 +147,12 @@ function RoutingRuleView({ rule: { condition, action, telemetry } }: { rule: Rou
           <EuiCode data-test-subj="streamsRoutingRuleRawCondition">{condition.raw}</EuiCode>
         ) : condition && !isCatchAll ? (
           <RoutingConditionSummary condition={condition} />
+        ) : action === 'copy' ? (
+          <EuiText data-test-subj="streamsRoutingRuleCatchAll">
+            {i18n.translate('xpack.streams.routingFlyout.rule.copyAllBadge', {
+              defaultMessage: 'No condition, copies all data',
+            })}
+          </EuiText>
         ) : (
           <EuiText data-test-subj="streamsRoutingRuleCatchAll">
             {i18n.translate('xpack.streams.routingFlyout.rule.catchAllBadge', {
@@ -391,7 +398,7 @@ export function RoutingRuleRow({
     isUnsetCondition(rule) ? { condition, action, telemetry } : undefined
   );
   const isEditing = editable && edit !== undefined;
-  const isCatchAll = serializeCondition(condition) === undefined;
+  const isCatchAll = isDefaultRule(rule);
   const title = !isCreated
     ? i18n.translate('xpack.streams.routingFlyout.rule.creatingTitle', {
         defaultMessage: 'Creating route rule',

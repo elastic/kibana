@@ -43,6 +43,8 @@ interface RoutingFlyoutProps {
   flyout: CanvasRoutingFlyout;
   /** Called right before the rules are staged, e.g. to record an undo step. */
   onBeforeSave?: () => void;
+  /** Whether the user cannot manage the stream; the rules are then shown without editing. */
+  readOnly?: boolean;
 }
 
 /** Names the line or routing node in the prompt shown when it cannot be configured. */
@@ -60,7 +62,7 @@ const getRoutingTargetName = (target: RoutingFlyoutTarget): string => {
   return `${from} → ${destinationId}`;
 };
 
-export function RoutingFlyout({ flyout, onBeforeSave }: RoutingFlyoutProps) {
+export function RoutingFlyout({ flyout, onBeforeSave, readOnly = false }: RoutingFlyoutProps) {
   const { closeRoutingFlyout } = useCanvasEvents();
   const headerId = useGeneratedHtmlId();
   const { ref, target } = flyout;
@@ -72,6 +74,7 @@ export function RoutingFlyout({ flyout, onBeforeSave }: RoutingFlyoutProps) {
         headerId={headerId}
         onClose={closeRoutingFlyout}
         onBeforeSave={onBeforeSave}
+        readOnly={readOnly}
       />
     );
   }
@@ -144,21 +147,26 @@ function RoutingFlyoutForm({
   headerId,
   onClose,
   onBeforeSave,
+  readOnly,
 }: {
   flyoutRef: RoutingFlyoutActorRef;
   headerId: string;
   onClose: () => void;
   onBeforeSave?: () => void;
+  readOnly: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
   const rules = useSelector(flyoutRef, (state) => state.context.rules);
   const availableSignals = useSelector(flyoutRef, (state) => state.context.availableSignals);
   const isNew = useSelector(flyoutRef, (state) => state.context.target.kind === 'line');
-  const editable = useSelector(flyoutRef, (state) => state.context.editable);
+  // A routing node with telemetry-scoped rule lists cannot be edited here.
+  const isSupported = useSelector(flyoutRef, (state) => state.context.editable);
+  const editable = isSupported && !readOnly;
   const hasChanges = useSelector(flyoutRef, (state) => state.context.hasChanges);
   const saveError = useSelector(flyoutRef, (state) => state.context.saveError);
   const isSaving = useSelector(flyoutRef, (state) => state.matches('saving'));
-  const canSave = useSelector(flyoutRef, (state) => state.can({ type: 'flyout.save' }));
+  const canSave =
+    useSelector(flyoutRef, (state) => state.can({ type: 'flyout.save' })) && !readOnly;
 
   const addRule = useCallback(() => flyoutRef.send({ type: 'rule.add' }), [flyoutRef]);
   const updateRule = useCallback(
@@ -175,9 +183,12 @@ function RoutingFlyoutForm({
     [flyoutRef]
   );
   const save = useCallback(() => {
+    if (readOnly) {
+      return;
+    }
     onBeforeSave?.();
     flyoutRef.send({ type: 'flyout.save' });
-  }, [flyoutRef, onBeforeSave]);
+  }, [flyoutRef, onBeforeSave, readOnly]);
 
   const confirmClose = useDiscardConfirm(onClose, {
     enabled: hasChanges,
@@ -201,7 +212,7 @@ function RoutingFlyoutForm({
             padding: ${euiTheme.size.l};
           `}
         >
-          {!editable ? (
+          {!isSupported ? (
             <>
               <KbnInfoCallout
                 announceOnMount

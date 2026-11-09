@@ -1639,11 +1639,14 @@ const routePipelineLine = (
     pipelineIndex = findWirableProcessingPipelineIndex(unit, origin.ref);
   }
   const pipeline = routable.unit.pipelines[pipelineIndex];
-  if (
-    !pipeline ||
-    pipelineUsesRoutes(pipeline.config) ||
-    !isEqual(readEntryIds(pipeline.config, PIPELINE_ENTRY.destinations), [destinationId])
-  ) {
+  const destinations = pipeline ? readEntryIds(pipeline.config, PIPELINE_ENTRY.destinations) : [];
+  // A processing node may fan out; its other destinations are kept by the rules
+  // from `getNewRoutingRules`. A source line is isolated onto its own pipeline first.
+  const isRoutable =
+    origin.kind === GRAPH_ENDPOINT_KIND.source
+      ? isEqual(destinations, [destinationId])
+      : destinations.includes(destinationId);
+  if (!pipeline || pipelineUsesRoutes(pipeline.config) || !isRoutable) {
     return unit;
   }
   return withoutUnfitRuleTargets(
@@ -1725,9 +1728,35 @@ export const routeLine = (
   if (routes.length === 0) {
     return unit;
   }
-  return origin.kind === GRAPH_ENDPOINT_KIND.rule
-    ? routeRuleLine(unit, origin.rule, destinationId, routes, supportedTelemetry)
-    : routePipelineLine(unit, origin, destinationId, routes, supportedTelemetry);
+  const from = lineOrigin(origin);
+  return from.kind === GRAPH_ENDPOINT_KIND.rule
+    ? routeRuleLine(unit, from.rule, destinationId, routes, supportedTelemetry)
+    : routePipelineLine(unit, from, destinationId, routes, supportedTelemetry);
+};
+
+/**
+ * The rules a new routing node on the line starts with: one with no condition
+ * that keeps the line's destination. A processing node's other destinations
+ * keep receiving all data through a copy rule with no condition ahead of it.
+ */
+export const getNewRoutingRules = (
+  unit: Unit,
+  { origin, destinationId }: UnitRoutableLine
+): RouteRule[] => {
+  const from = lineOrigin(origin);
+  const pipeline =
+    from.kind === GRAPH_ENDPOINT_KIND.processing
+      ? unit.unit.pipelines[findWirableProcessingPipelineIndex(unit, from.ref)]
+      : undefined;
+  const others = pipeline
+    ? readEntryIds(pipeline.config, PIPELINE_ENTRY.destinations).filter(
+        (id) => id !== destinationId
+      )
+    : [];
+  return [
+    ...(others.length > 0 ? [{ action: 'copy' as const, destinations: others }] : []),
+    { destinations: [destinationId] },
+  ];
 };
 
 /** Whether {@link routeLine} can put a routing node on the line. */
@@ -1762,8 +1791,9 @@ export const getPipelineRoutingSignals = (unit: Unit, pipelineId: string): Routi
 /** Signals a new routing node on the line starts with, and those it can take on. */
 export const getRoutableLineSignals = (
   unit: Unit,
-  { origin, destinationId }: UnitRoutableLine
+  { origin: drawnOrigin, destinationId }: UnitRoutableLine
 ): RoutingSignals => {
+  const origin = lineOrigin(drawnOrigin);
   if (origin.kind === GRAPH_ENDPOINT_KIND.rule) {
     const pipeline = findPipeline(unit, origin.rule.pipelineId);
     // The child node only receives what the rule carries, not everything its pipeline does.

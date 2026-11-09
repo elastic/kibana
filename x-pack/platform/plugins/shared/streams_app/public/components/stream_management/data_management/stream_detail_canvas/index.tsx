@@ -922,6 +922,7 @@ function StreamsCanvasInner() {
                 key={routingFlyout.ref?.sessionId}
                 flyout={routingFlyout}
                 onBeforeSave={record}
+                readOnly={readOnly}
               />
             ) : null}
             {processingFlyout ? (

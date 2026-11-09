@@ -166,6 +166,70 @@ describe('buildUnitCanvasGraph with routing nodes', () => {
     });
   });
 
+  it('lets "Add routing" put a routing node on lines leaving processing', () => {
+    const processed = {
+      unit: {
+        sources: [],
+        destinations: [],
+        processors: [{ id: 'tag', type: 'add_fields', supported_telemetry: ['logs'] }],
+        pipelines: [
+          {
+            id: 'fan',
+            supported_telemetry: ['logs'],
+            config: [
+              { name: 'sources', value: ['s1'] },
+              { name: 'processors', value: ['tag'] },
+              { name: 'destinations', value: ['es-a', 'es-b'] },
+            ],
+          },
+          {
+            id: 'ruled',
+            supported_telemetry: ['logs'],
+            config: [
+              { name: 'sources', value: ['s2'] },
+              { name: 'routes', value: [{ processors: ['tag'], destinations: ['es-c'] }] },
+            ],
+          },
+        ],
+      },
+      ui_metadata: {},
+    } as Unit;
+    const { edges } = buildUnitCanvasGraph(processed, ['s1', 's2'], ['es-a', 'es-b', 'es-c']);
+    expect(
+      edges
+        .filter(({ source }) => source.startsWith('processing-'))
+        .map(({ source, target, data }) => [source, target, data?.routingLine])
+    ).toEqual([
+      [
+        'processing-pipeline-fan',
+        'configured-destination-es-a',
+        {
+          origin: { kind: 'processing', ref: { kind: 'pipeline', pipelineId: 'fan' } },
+          destinationId: 'es-a',
+        },
+      ],
+      [
+        'processing-pipeline-fan',
+        'configured-destination-es-b',
+        {
+          origin: { kind: 'processing', ref: { kind: 'pipeline', pipelineId: 'fan' } },
+          destinationId: 'es-b',
+        },
+      ],
+      [
+        'processing-route-ruled-0',
+        'configured-destination-es-c',
+        {
+          origin: {
+            kind: 'processing',
+            ref: { kind: 'route', pipelineId: 'ruled', routeIndex: 0 },
+          },
+          destinationId: 'es-c',
+        },
+      ],
+    ]);
+  });
+
   it('lets "Add routing" put a routing node on lines into a destination it can route', () => {
     expect(
       buildRouted().edges.map(({ source, sourceHandle, target, data }) => [

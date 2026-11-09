@@ -153,9 +153,12 @@ export const toRouteRule = (
   return rule;
 };
 
-/** Whether the rule has no condition once saved, so it keeps all remaining data. */
-export const isDefaultRule = ({ condition }: RoutingRuleDraft): boolean =>
-  serializeCondition(condition) === undefined;
+/**
+ * Whether the rule moves all remaining data, having no condition once saved. A
+ * copy rule with no condition passes the data on, so it can sit anywhere.
+ */
+export const isDefaultRule = ({ condition, action }: RoutingRuleDraft): boolean =>
+  action === 'move' && serializeCondition(condition) === undefined;
 
 /**
  * Rules with conditions first, then the default rules, each in their current
@@ -169,16 +172,11 @@ const withDefaultsLast = (rules: readonly RoutingRuleDraft[]): RoutingRuleDraft[
 /** Where the trailing default rules start; the rules list's length when there are none. */
 const defaultSectionStart = (rules: readonly RoutingRuleDraft[]): number => {
   let start = rules.length;
-  while (start > 0 && rules[start - 1].condition === undefined) {
+  while (start > 0 && isDefaultRule(rules[start - 1])) {
     start -= 1;
   }
   return start;
 };
-
-/** A new routing node starts with one rule with no condition that keeps the line's destination. */
-export const getNewRoutingNodeRules = (line: UnitRoutableLine): RouteRule[] => [
-  { destinations: [line.destinationId] },
-];
 
 export const routingFlyoutMachine = setup({
   types: {
@@ -211,9 +209,15 @@ export const routingFlyoutMachine = setup({
       }
       const next: RoutingRuleDraft = { ...updated, ...event.changes };
       const others = context.rules.filter(({ key }) => key !== event.key);
-      if (isDefaultRule(next)) {
-        // A cleared condition makes the rule a default one, which moves to the end.
-        return { rules: [...others, { ...next, condition: undefined }], hasChanges: true };
+      if (serializeCondition(next.condition) === undefined) {
+        // A cleared condition leaves no condition; a move rule then joins the default rules at the end.
+        const cleared = { ...next, condition: undefined };
+        return {
+          rules: isDefaultRule(cleared)
+            ? [...others, cleared]
+            : context.rules.map((rule) => (rule.key === event.key ? cleared : rule)),
+          hasChanges: true,
+        };
       }
       return {
         rules: context.rules.map((rule) => (rule.key === event.key ? next : rule)),

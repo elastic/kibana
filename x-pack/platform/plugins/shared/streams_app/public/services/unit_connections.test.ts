@@ -12,6 +12,7 @@ import {
   canRouteLine,
   getPipelineRoutes,
   getPipelineRoutingSignals,
+  getNewRoutingRules,
   getRoutableLineSignals,
   routeLine,
   writePipelineRoutes,
@@ -1929,16 +1930,55 @@ describe('routeLine', () => {
     ]);
   });
 
+  it('routes one line of a processing node that fans out, copying all data to its other destinations', () => {
+    const unit = processedUnit(['es-logs', 'es-metrics']);
+    const line = { origin: processing('main'), destinationId: 'es-logs' };
+    expect(canRouteLine(unit, line)).toBe(true);
+
+    const rules = getNewRoutingRules(unit, line);
+    expect(rules).toEqual([
+      { action: 'copy', destinations: ['es-metrics'] },
+      { destinations: ['es-logs'] },
+    ]);
+    const next = routeLine(unit, line, rules);
+    expect(next.unit.pipelines.find(({ id }) => id === 'main')?.config).toEqual([
+      { name: 'sources', value: ['otlp-input'] },
+      { name: 'processors', value: ['tag'] },
+      { name: 'routes', value: rules },
+    ]);
+  });
+
+  it("routes a rule's processing line through a child routing node, like the rule's line", () => {
+    const unit = unitWith([
+      {
+        id: 'main',
+        supported_telemetry: ['logs'],
+        config: [
+          { name: 'sources', value: ['otlp-input'] },
+          { name: 'routes', value: [{ processors: ['tag'], destinations: ['es-logs'] }] },
+        ],
+      },
+    ]);
+    unit.unit.processors = [{ id: 'tag', type: 'add_fields', supported_telemetry: ['logs'] }];
+    const line = { origin: routeProcessing('main', 0), destinationId: 'es-logs' };
+    expect(canRouteLine(unit, line)).toBe(true);
+    expect(getNewRoutingRules(unit, line)).toEqual([{ destinations: ['es-logs'] }]);
+
+    const next = routeLine(unit, line, [{ destinations: ['es-logs'] }]);
+    expect(getPipelineRoutes(next, 'main')).toEqual([
+      { processors: ['tag'], pipelines: ['main-routing'] },
+    ]);
+    expect(getPipelineRoutes(next, 'main-routing')).toEqual([{ destinations: ['es-logs'] }]);
+  });
+
   it('leaves lines it cannot route as they are', () => {
-    const fanOut = processedUnit(['es-logs', 'es-metrics']);
+    const unit = processedUnit(['es-logs']);
     const processingLine = { origin: processing('main'), destinationId: 'es-logs' };
     const sourceLine = { origin: source('otlp-input'), destinationId: 'es-traces' };
 
-    expect(canRouteLine(fanOut, processingLine)).toBe(false);
-    expect(routeLine(fanOut, processingLine, routes)).toBe(fanOut);
-    expect(routeLine(fanOut, sourceLine, routes)).toBe(fanOut);
-    const single = processedUnit(['es-logs']);
-    expect(routeLine(single, processingLine, [])).toBe(single);
+    expect(canRouteLine(unit, { ...processingLine, destinationId: 'es-traces' })).toBe(false);
+    expect(routeLine(unit, sourceLine, routes)).toBe(unit);
+    expect(routeLine(unit, processingLine, [])).toBe(unit);
   });
 });
 

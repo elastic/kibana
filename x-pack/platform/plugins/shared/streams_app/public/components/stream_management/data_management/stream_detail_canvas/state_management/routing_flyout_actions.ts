@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import type { AnyActorRef } from 'xstate';
 import {
-  getNewRoutingNodeRules,
   type RoutingFlyoutInput,
   type RoutingFlyoutTarget,
   type RoutingSaveRequest,
@@ -16,6 +15,7 @@ import {
 import {
   canEditPipelineRoutes,
   canRouteLine,
+  getNewRoutingRules,
   getPipelineRoutes,
   getPipelineRoutingSignals,
   getRoutableLineSignals,
@@ -67,7 +67,7 @@ export const getRoutingFlyoutInput = (
   const { current, available } = getRoutableLineSignals(unit, target.line);
   return {
     target,
-    rules: getNewRoutingNodeRules(target.line),
+    rules: getNewRoutingRules(unit, target.line),
     signals: current,
     availableSignals: available,
     editable: true,

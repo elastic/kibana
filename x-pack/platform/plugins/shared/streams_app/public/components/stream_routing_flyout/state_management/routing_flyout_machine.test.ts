@@ -7,7 +7,6 @@
 
 import { createActor, setup } from 'xstate';
 import {
-  getNewRoutingNodeRules,
   getUnmatchedSignals,
   routingFlyoutMachine,
   type RoutingFlyoutInput,
@@ -29,7 +28,7 @@ const startFlyout = (overrides: Partial<Omit<RoutingFlyoutInput, 'parentRef'>> =
   const flyout = createActor(routingFlyoutMachine, {
     input: {
       target: { kind: 'line', line },
-      rules: getNewRoutingNodeRules(line),
+      rules: [{ destinations: [line.destinationId] }],
       signals: ['logs'],
       availableSignals: ['logs', 'traces'],
       editable: true,
@@ -263,6 +262,30 @@ describe('routingFlyoutMachine', () => {
     expect(requests[0].rules).toEqual([
       { when: 'resource.attributes["team"] == "a"', destinations: ['es-a'] },
       { destinations: [] },
+    ]);
+  });
+
+  it('lets a copy rule with no condition sit above other rules', () => {
+    const { flyout, requests } = startFlyout({
+      rules: [{ action: 'copy', destinations: ['es-metrics'] }, { destinations: ['es-logs'] }],
+    });
+    const keys = () => flyout.getSnapshot().context.rules.map(({ key }) => key);
+    flyout.send({ type: 'rule.add' });
+    expect(keys()).toEqual(['rule-0', 'rule-2', 'rule-1']);
+    flyout.send({
+      type: 'rule.update',
+      key: 'rule-2',
+      changes: { condition: { field: 'team', operator: 'equals', value: 'a' } },
+    });
+    flyout.send({ type: 'rule.reorder', from: 1, to: 0 });
+    expect(keys()).toEqual(['rule-2', 'rule-0', 'rule-1']);
+
+    flyout.send({ type: 'rule.reorder', from: 1, to: 0 });
+    flyout.send({ type: 'flyout.save' });
+    expect(requests[0].rules).toEqual([
+      { action: 'copy', destinations: ['es-metrics'] },
+      { when: 'resource.attributes["team"] == "a"', destinations: [] },
+      { destinations: ['es-logs'] },
     ]);
   });
 
