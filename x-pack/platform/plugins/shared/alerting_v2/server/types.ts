@@ -112,8 +112,9 @@ export interface AlertingServerStart {
   /**
    * Returns an AlertActionsClient for the request's space and user, whose `.alert-actions` and
    * synthetic `.rule-events` writes use the internal ES user, so a caller with no write
-   * privilege on those indices can still create an action. The action's actor is still the
-   * request user.
+   * privilege on those indices can still create an action. The action's actor carries the
+   * request user's `profile_uid` only when the user has a profile; otherwise it is recorded as
+   * an anonymous `user` actor.
    * NOTE: the client can act on any episode in the request's space. Callers are responsible
    * for enforcing write authorization before calling it AND for verifying that the episode
    * belongs to the entity the caller is allowed to change. HTTP routes must check via their own
