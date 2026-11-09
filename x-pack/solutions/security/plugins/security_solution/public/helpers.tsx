@@ -23,6 +23,7 @@ import {
   APP_UI_ID,
   CASES_FEATURE_ID,
   CASES_PATH,
+  COVERAGE_OVERVIEW_PATH,
   DASHBOARDS_PATH,
   EXCEPTIONS_PATH,
   MANAGE_PATH,
@@ -236,6 +237,16 @@ export const isRuleDetailsPath = (pathname: string): boolean =>
     strict: false,
   });
 
+/**
+ * Matches the MITRE coverage page, whose app header owns the page actions.
+ */
+export const isCoverageOverviewPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: COVERAGE_OVERVIEW_PATH,
+    exact: true,
+    strict: false,
+  });
+
 export const isCloudSecurityPosturePath = (pathname: string): boolean =>
   !!matchPath(pathname, {
     path: CLOUD_SECURITY_POSTURE_BASE_PATH,
@@ -289,6 +300,7 @@ export const isPageWithAppHeaderPath = (pathname: string): boolean =>
     isRulesManagementPath,
     isRulesAddPath,
     isRuleDetailsPath,
+    isCoverageOverviewPath,
     isExceptionsPath,
     isCloudSecurityPosturePath,
     isEndpointManagementPath,

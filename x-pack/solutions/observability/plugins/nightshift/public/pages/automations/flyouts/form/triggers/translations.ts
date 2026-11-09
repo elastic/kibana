@@ -194,6 +194,34 @@ export const slackTriggerLeads: Record<SlackTriggerKind, string> = {
   }),
 };
 
+export const alertSourceLabels = {
+  anySource: i18n.translate('xpack.nightshift.automations.flyout.anySource', {
+    defaultMessage: 'any source',
+  }),
+  title: i18n.translate('xpack.nightshift.automations.flyout.alertSources', {
+    defaultMessage: 'Alert sources',
+  }),
+  include: i18n.translate('xpack.nightshift.automations.flyout.alertSourcesInclude', {
+    defaultMessage: 'Only these sources',
+  }),
+  exclude: i18n.translate('xpack.nightshift.automations.flyout.alertSourcesExclude', {
+    defaultMessage: 'All except these',
+  }),
+  classic: i18n.translate('xpack.nightshift.automations.flyout.alertSourceClassic', {
+    defaultMessage: 'Classic',
+  }),
+  universalRules: i18n.translate('xpack.nightshift.automations.flyout.alertSourceUniversalRules', {
+    defaultMessage: 'Universal rules',
+  }),
+  significantEvents: i18n.translate(
+    'xpack.nightshift.automations.flyout.alertSourceSignificantEvents',
+    { defaultMessage: 'Significant events' }
+  ),
+  external: i18n.translate('xpack.nightshift.automations.flyout.alertSourceExternal', {
+    defaultMessage: 'External sources',
+  }),
+};
+
 export const rulePickerLabels = {
   searchAriaLabel: i18n.translate('xpack.nightshift.automations.rulePicker.searchAriaLabel', {
     defaultMessage: 'Search rules and tags',

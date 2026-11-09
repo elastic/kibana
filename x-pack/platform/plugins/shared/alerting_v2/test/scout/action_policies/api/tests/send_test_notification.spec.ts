@@ -47,7 +47,7 @@ const PAYLOAD: ActionPolicyWorkflowPayloadInput = {
       alert_url: 'http://localhost:5601/app/observability/alerts/test-alert-1',
     },
   ],
-  rules: { 'test-rule-1': { name: 'Test rule 1' } },
+  rules: { 'test-rule-1': { name: 'Test rule 1', grouping_fields: [] } },
 };
 
 // Sending runs the workflow as the requesting user, who authenticates with an interactive session

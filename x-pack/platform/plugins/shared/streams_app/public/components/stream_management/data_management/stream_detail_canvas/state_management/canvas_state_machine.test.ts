@@ -14,6 +14,7 @@ import {
   type IKbnUrlStateStorage,
 } from '@kbn/kibana-utils-plugin/public';
 import { createStreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import { createActor, createMachine, waitFor, type Actor, type SnapshotFrom } from 'xstate';
 import { disconnectFromDestination } from '../../../../../services/unit_connections';
 import type { ProcessingNodeRef } from '../../../../../services/unit_graph';
@@ -82,7 +83,10 @@ const startCanvas = (
         history: createMemoryHistory(),
         useHash: false,
       }),
-      apiKeyGenerationDeps: { streamsRepositoryClient: createStreamsRepositoryClient(core) },
+      apiKeyGenerationDeps: {
+        streamsRepositoryClient: createStreamsRepositoryClient(core),
+        unitId: STREAMS_DEFAULT_UNIT_ID,
+      },
       timeState,
       timeState$: EMPTY,
       loadUnitDefinition: async () => unit,
@@ -331,6 +335,7 @@ describe('canvasStateMachine', () => {
       } as unknown as IKbnUrlStateStorage,
       apiKeyGenerationDeps: {
         streamsRepositoryClient: { fetch: jest.fn() },
+        unitId: STREAMS_DEFAULT_UNIT_ID,
       } as unknown as DestinationApiKeyGenerationDeps,
       timeState,
       timeState$: EMPTY,

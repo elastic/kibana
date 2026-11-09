@@ -308,6 +308,7 @@ describe('isPageWithAppHeaderPath', () => {
     ['the rule monitoring tab', '/rules/monitoring'],
     ['the rule updates tab', '/rules/updates'],
     ['the add Elastic rules page', '/rules/add_rules'],
+    ['the MITRE coverage page', '/rules_coverage_overview'],
     ['the rule details overview tab', '/rules/id/rule-id/overview'],
     ['the rule details alerts tab', '/rules/id/rule-id/alerts'],
     ['the rule details rule exceptions tab', '/rules/id/rule-id/rule_exceptions'],

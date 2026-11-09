@@ -18,6 +18,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import { GlobalLimitCallout } from '../../../list/global_limit_callout';
+import { useGlobalLimit } from '../../../hooks/use_global_limit';
 import { triggerLabels } from './translations';
 import { isValidDailyLimit } from '../validation';
 import {
@@ -46,6 +48,11 @@ export const DailyLimitField = ({
   readOnly?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
+  const {
+    blockingLimit,
+    limit: globalInvestigationLimit,
+    settingsHref: globalLimitSettingsHref,
+  } = useGlobalLimit();
   const isUnlimited = value === UNLIMITED_DAILY_LIMIT;
   const limit = Number(value);
   const tone =
@@ -130,27 +137,39 @@ export const DailyLimitField = ({
       <EuiText size="s" color="subdued">
         {isUnlimited ? triggerLabels.noDailyLimitHelp : helpText}
       </EuiText>
-      {usedToday !== undefined && tone === 'exceeded' && (
-        <KbnWarningCallout
-          announceOnMount={false}
-          size="s"
-          css={calloutCss}
-          title={triggerLabels.dailyLimitReached}
-          text={triggerLabels.getDailyLimitReachedBody(usedToday, limit)}
-          actionProps={raiseAction}
-          data-test-subj="automationDailyLimitReachedCallout"
-        />
-      )}
-      {usedToday !== undefined && tone === 'high' && (
-        <KbnWarningCallout
-          announceOnMount={false}
-          size="s"
-          css={calloutCss}
-          title={triggerLabels.dailyLimitApproaching}
-          text={triggerLabels.getDailyLimitApproachingBody(usedToday, limit)}
-          actionProps={raiseAction}
-          data-test-subj="automationDailyLimitApproachingCallout"
-        />
+      {usedToday !== undefined && blockingLimit && globalInvestigationLimit !== undefined ? (
+        <div css={calloutCss}>
+          <GlobalLimitCallout
+            group={blockingLimit}
+            limit={globalInvestigationLimit}
+            settingsHref={globalLimitSettingsHref}
+          />
+        </div>
+      ) : (
+        <>
+          {usedToday !== undefined && tone === 'exceeded' && (
+            <KbnWarningCallout
+              announceOnMount={false}
+              size="s"
+              css={calloutCss}
+              title={triggerLabels.dailyLimitReached}
+              text={triggerLabels.getDailyLimitReachedBody(usedToday, limit)}
+              actionProps={raiseAction}
+              data-test-subj="automationDailyLimitReachedCallout"
+            />
+          )}
+          {usedToday !== undefined && tone === 'high' && (
+            <KbnWarningCallout
+              announceOnMount={false}
+              size="s"
+              css={calloutCss}
+              title={triggerLabels.dailyLimitApproaching}
+              text={triggerLabels.getDailyLimitApproachingBody(usedToday, limit)}
+              actionProps={raiseAction}
+              data-test-subj="automationDailyLimitApproachingCallout"
+            />
+          )}
+        </>
       )}
       {!isUnlimited && limit > SOFT_DAILY_LIMIT && (
         <KbnWarningCallout

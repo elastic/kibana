@@ -28,6 +28,7 @@ Start here, then open \`INDEX.md\` and follow links with \`${SANDBOX_VIEW_FILE_T
 Do not write Cortex pages yourself — a post-run optimizer updates the wiki from this investigation.
 
 Pages live under \`{type}/{slug}.md\`. Status is established, tentative, or archived.
+\`ontology/\` pages describe how services and integrations relate; \`integrations/\` pages record how to query a system and how calls to it fail.
 `;
 
 const pagePath = (entityType: CortexEntityType, slug: string): string =>
