@@ -32,7 +32,7 @@ import type { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/u
 const getRecord = (value: unknown): Record<string, unknown> | undefined =>
   isPlainObject(value) ? (value as Record<string, unknown>) : undefined;
 
-interface DocumentPair {
+export interface DocumentPair {
   _id: string;
   _index: string;
 }

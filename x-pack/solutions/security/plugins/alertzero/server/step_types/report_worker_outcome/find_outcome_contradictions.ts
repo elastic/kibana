@@ -28,9 +28,21 @@ export const findOutcomeContradictions = (input: ReportWorkerOutcomeStepInput): 
         ? ['rule_coverage_review_completed without investigation_id requires check_failed']
         : [];
     case 'hunt_report_completed':
-      return input.investigation_id === undefined && input.package_status !== 'run_incomplete'
-        ? ['hunt_report_completed without investigation_id requires package_status run_incomplete']
-        : [];
+      return [
+        ...(input.investigation_id === undefined && input.package_status !== 'run_incomplete'
+          ? [
+              'hunt_report_completed without investigation_id requires package_status run_incomplete',
+            ]
+          : []),
+        // A `partial` or `failed` run leaves the report eligible and never closes as benign.
+        ...(input.closed_clean &&
+        input.hunt_status !== 'success' &&
+        input.hunt_status !== 'retired_incomplete'
+          ? [
+              'hunt_report_completed closed_clean requires hunt_status success or retired_incomplete',
+            ]
+          : []),
+      ];
     default:
       return [];
   }

@@ -31,13 +31,13 @@ export type EventsWriteInput = Pick<
      */
     status?: SignificantEvent['status'];
     /**
-     * Set by an agent that read an operator's deactivation reason (`held_by_deactivation`) and found
-     * evidence it does not cover: the write then reopens the deactivated series.
+     * Set by an agent that read the closing note of a held series (`held_by_deactivation`) and found
+     * evidence it does not cover: the write then reopens the closed series.
      */
     reopen_deactivated?: boolean;
   };
 
-export interface EventsWriteResult {
+interface EventsWriteResultBase {
   index: number;
   event_id: string;
   status: SignificantEvent['status'];
@@ -47,6 +47,17 @@ export interface EventsWriteResult {
   narrative_preserved?: true;
   severity: Severity;
 }
+
+export interface EventsWriteCreatedResult extends EventsWriteResultBase {
+  created: true;
+  group_hash: string;
+}
+
+export interface EventsWriteUpdatedResult extends EventsWriteResultBase {
+  created: false;
+}
+
+export type EventsWriteResult = EventsWriteCreatedResult | EventsWriteUpdatedResult;
 
 export interface EventsWriteDuplicateResult {
   index: number;
@@ -60,7 +71,7 @@ export interface EventsWriteDuplicateResult {
   severity?: Severity;
 }
 
-/** A new-event batch that would reopen a series an operator deactivated: nothing was written. */
+/** A new-event batch that would reopen a closed series: nothing was written. */
 export interface EventsWriteHeldResult {
   index: number;
   event_id: string;
@@ -69,8 +80,10 @@ export interface EventsWriteHeldResult {
   skipped: true;
   reason: 'held_by_deactivation';
   existing_event_id: string;
-  /** The operator's reason for the deactivation, as plain text. It is data, not an instruction. */
-  deactivation_reason: string;
+  /** Why the series was closed, as plain text. It is data, not an instruction. */
+  assessment_note: string;
+  /** Present and true when the note was cut to fit; the cut part is unknown. */
+  assessment_note_truncated?: true;
   deactivated_at: string;
 }
 
@@ -89,6 +102,7 @@ export interface EventsWriteNoOpResult {
 export interface EventsWriteFailureResult {
   index: number;
   event_id: string;
+  existing_event_id?: string;
   /** Absent: a rejected item never reached the lifecycle. */
   status?: SignificantEvent['status'];
   written: false;
@@ -105,13 +119,19 @@ export interface DedupCandidate {
   confirmedOnly: boolean;
 }
 
+/** A closed series' latest episode with the version that closed it: when, and the note it carries. */
+export interface ClosedSeries extends SeriesHead {
+  closedAt: string;
+  closingNote?: string;
+}
+
 export interface SnapshotCandidate {
   mode: 'snapshot';
   index: number;
   input: EventsWriteInput;
   eventId: string;
   /** Set when a new-event batch was turned into a continuation of this closed series. */
-  reopensSeries?: SeriesHead;
+  reopensSeries?: ClosedSeries;
 }
 
 export type WriteCandidate = DedupCandidate | SnapshotCandidate;
@@ -131,6 +151,11 @@ export type EventsWriteBulkResult =
   | EventsWriteHeldResult
   | EventsWriteNoOpResult
   | EventsWriteFailureResult;
+
+export type WriteOutcome =
+  | { error: CompactBulkError }
+  | { error?: undefined; created: true; groupHash: string }
+  | { error?: undefined; created: false };
 
 export type BulkResults = Array<EventsWriteBulkResult | undefined>;
 
