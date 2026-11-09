@@ -915,7 +915,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async saveAndReturn() {
-      await testSubjects.clickWhenNotDisabledWithoutRetry('lnsApp_saveAndReturnButton', {
+      await testSubjects.clickWhenNotDisabled('lnsApp_saveAndReturnButton', {
         timeout: 60_000,
       });
     },
