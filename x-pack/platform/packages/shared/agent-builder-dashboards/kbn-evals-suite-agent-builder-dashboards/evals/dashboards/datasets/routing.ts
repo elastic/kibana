@@ -6,7 +6,7 @@
  */
 
 import type { DashboardDatasetExample } from '../../../src/types';
-import { routingExample } from './factories';
+import { routingExample, unavailableDashboardExample } from './factories';
 
 /** Requests that must not become a dashboard. Cheap: nothing is generated. */
 export const DASHBOARD_ROUTING_EXAMPLES: DashboardDatasetExample[] = [
@@ -22,5 +22,10 @@ export const DASHBOARD_ROUTING_EXAMPLES: DashboardDatasetExample[] = [
   routingExample({
     question: 'What fields are available in the logs-* index?',
     route: 'none',
+  }),
+  unavailableDashboardExample({
+    question:
+      'Create a dashboard of checkout latency and failed payments from the nonexistent-* index.',
+    unavailableRequests: [{ name: 'nonexistent' }],
   }),
 ];

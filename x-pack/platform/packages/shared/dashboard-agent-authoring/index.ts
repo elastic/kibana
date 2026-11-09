@@ -28,6 +28,7 @@ export {
   getInlinePanelKindGuidance,
   getPanelTypeSelection,
   getRendererEmbeddableType,
+  parseVegaSpec,
   requiresRegisteredSchema,
 } from './src/panels';
 export type {

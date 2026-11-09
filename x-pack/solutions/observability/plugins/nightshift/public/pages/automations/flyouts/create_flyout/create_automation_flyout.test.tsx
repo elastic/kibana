@@ -17,8 +17,9 @@ jest.mock('../../../../data/automations/use_automations', () => ({
 jest.mock('../../hooks/use_global_limit', () => ({
   useGlobalLimit: () => ({ isReached: false }),
 }));
+const mockUseRuleCatalog = jest.fn();
 jest.mock('../../../../data/rules/use_rule_catalog', () => ({
-  useRuleCatalog: () => ({ data: [] }),
+  useRuleCatalog: () => mockUseRuleCatalog(),
 }));
 jest.mock('../../../../data/relay_apps/use_relay_app_bindings', () => ({
   ...jest.requireActual('../../../../data/relay_apps/use_relay_app_bindings'),
@@ -61,6 +62,7 @@ describe('CreateAutomationFlyout', () => {
   const mutate = jest.fn();
 
   beforeEach(() => {
+    mockUseRuleCatalog.mockReturnValue({ data: [], isComplete: true });
     mutate.mockClear();
     onClose.mockClear();
     mockUseCreateAutomation.mockReturnValue({ mutate, isLoading: false });
@@ -82,6 +84,51 @@ describe('CreateAutomationFlyout', () => {
 
     expect(mutate).not.toHaveBeenCalled();
     expect(screen.getByTestId('automationName')).toBeInvalid();
+  });
+
+  it('keeps an incompatible severity visible and blocks saving after switching to a universal rule', async () => {
+    mockUseRuleCatalog.mockReturnValue({
+      data: [
+        { name: 'Classic CPU', tags: [], family: 'classic' },
+        { name: 'Universal CPU', tags: [], family: 'universal' },
+      ],
+      isComplete: true,
+    });
+    renderFlyout();
+    rename('CPU triage');
+    await addTrigger('Alert triggered');
+    const rulePicker = screen.getByTestId('automationRulePicker');
+    const severityPicker = screen.getByTestId('automationAlertSeverity');
+    fireEvent.click(severityPicker);
+    fireEvent.click(await screen.findByRole('option', { name: 'Major' }));
+    fireEvent.click(severityPicker);
+    fireEvent.click(rulePicker);
+    fireEvent.click(await screen.findByText('Universal CPU'));
+    fireEvent.click(rulePicker);
+
+    expect(severityPicker).toHaveTextContent('Major');
+    expect(severityPicker).toBeInvalid();
+    expect(screen.getByRole('alert')).toHaveTextContent('Major cannot match');
+    expect(screen.getByTestId('submitAutomation')).toBeDisabled();
+    expect(screen.getByTestId('submitAndEnableAutomation')).toBeDisabled();
+    fireEvent.click(screen.getByTestId('submitAutomation'));
+    expect(mutate).not.toHaveBeenCalled();
+
+    fireEvent.click(severityPicker);
+    expect(screen.queryByRole('option', { name: 'Warning' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: 'Minor' })).not.toBeInTheDocument();
+    fireEvent.click(await screen.findByRole('option', { name: 'Major' }));
+    expect(screen.queryByRole('option', { name: 'Major' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('option', { name: 'High' }));
+    fireEvent.click(severityPicker);
+    fireEvent.click(screen.getByTestId('submitAutomation'));
+    expect(mutate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        trigger: { rows: [{ kind: 'alert', ruleNames: ['Universal CPU'], severities: ['high'] }] },
+      }),
+      expect.any(Object)
+    );
   });
 
   it('creates a disabled alert automation with tags, instructions, and daily limit', async () => {

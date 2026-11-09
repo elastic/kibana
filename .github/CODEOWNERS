@@ -2699,6 +2699,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/abuseipdb/** @elastic
 src/platform/packages/shared/kbn-connector-specs/src/specs/alienvault_otx/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/amazon_s3/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/atlassian/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/aws/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_cloudwatch/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_eks/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_lambda/** @elastic/workflows-eng
@@ -4024,6 +4025,12 @@ pnpm-workspace.yaml @elastic/kibana-operations
 /**/scout/*/.meta/**
 /**/scout_*/.meta/**
 /**/scout_*/*/.meta/**
+
+# Checks to ensure ML models are not deployed
+/x-pack/platform/test/serverless/api_integration/test_suites/ml/ @elastic/search-ml-ux
+/x-pack/solutions/*/test/serverless/api_integration/test_suites/ml/ @elastic/search-ml-ux
+/x-pack/solutions/search/test/serverless/functional/test_suites/ml/trained_models_list.ts @elastic/search-ml-ux
+/x-pack/solutions/security/test/serverless/functional/test_suites/ml/trained_models_list.ts @elastic/search-ml-ux @elastic/security-solution
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
