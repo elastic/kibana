@@ -212,8 +212,10 @@ function lineageGraph() {
   const byHash = new Map();
   nodes.forEach((node) => { if (node.hash) byHash.set(node.hash, node.id); });
   nodes.forEach((node) => {
-    if (node.parent && byHash.has(node.parent)) node.parentId = byHash.get(node.parent);
-    else if (node.parent) node.parentId = DATA.baseHash;
+    if (!node.parent) return;
+    // Children attach to the *node* whose variant hash they branched from: an accepted
+    // candidate is the next incumbent, so later rounds hang off it rather than off start.
+    node.parentId = byHash.has(node.parent) ? byHash.get(node.parent) : DATA.baseHash;
   });
 
   // depth = generation; siblings are stacked vertically within their generation

@@ -171,7 +171,13 @@ export const runCampaign = async ({
       });
     } catch (e) {
       log.warning(`[harness-opt] round ${round} proposer failed: ${(e as Error).message}`);
-      ledger.push({ round, campaignId, rejected: 'proposer-failed', error: (e as Error).message });
+      ledger.push({
+        round,
+        campaignId,
+        parentHash: incumbentVariant.hash,
+        rejected: 'proposer-failed',
+        error: (e as Error).message,
+      });
       saveLedger();
       continue;
     }
@@ -179,7 +185,13 @@ export const runCampaign = async ({
     const codeEdits = await collectEdits(workspace);
     if (codeEdits.length === 0) {
       log.warning(`[harness-opt] round ${round} produced no file changes`);
-      ledger.push({ round, campaignId, rejected: 'no-edits', manifest: proposal.manifest });
+      ledger.push({
+        round,
+        campaignId,
+        parentHash: incumbentVariant.hash,
+        rejected: 'no-edits',
+        manifest: proposal.manifest,
+      });
       saveLedger();
       continue;
     }
@@ -198,6 +210,7 @@ export const runCampaign = async ({
       ledger.push({
         round,
         campaignId,
+        parentHash: incumbentVariant.hash,
         rejected: 'review',
         failures: review.reasons,
         manifest: proposal.manifest,
@@ -218,6 +231,7 @@ export const runCampaign = async ({
       ledger.push({
         round,
         campaignId,
+        parentHash: incumbentVariant.hash,
         rejected: 'validation',
         failures: validation.failures.map((failure) => failure.slice(0, 2000)),
         manifest: proposal.manifest,
@@ -250,6 +264,7 @@ export const runCampaign = async ({
       ledger.push({
         round,
         campaignId,
+        parentHash: incumbentVariant.hash,
         rejected: 'candidate-restart-failed',
         manifest: proposal.manifest,
       });
