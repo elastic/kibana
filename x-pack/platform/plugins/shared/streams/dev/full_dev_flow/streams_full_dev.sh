@@ -230,7 +230,7 @@ cmd_status() {
   if kubectl_ctx -n streams-controller get deploy streams-controller >/dev/null 2>&1; then
     ok "controller Deployment"
   else
-    missing "controller  →  cd streams-controller && tilt up --port 10351"
+    missing "controller  →  cd streams-controller && tilt up --context kind-streams --port 10351"
   fi
   if [[ -n "$ES" ]]; then
     ok "Elasticsearch $ES ($ES_USER)"
@@ -541,7 +541,7 @@ mint_source_api_key() {
   SOURCE_KEY="$(printf '%s' "$body" | jq -r '.encodedApiKey // empty')"
   if [[ -z "$SOURCE_KEY" || "$SOURCE_KEY" == "null" ]]; then
     printf '%s\n' "$body" >&2
-    die "failed to mint a source API key (does elastic_serverless have ingest_source_manager / manage_own_api_key?)"
+    die "failed to mint a source API key (does the Kibana user have manage_own_api_key and the streams application write privilege on source:$SOURCE_ID?)"
   fi
   printf '%s' "$SOURCE_KEY" > "$STATE_DIR/source_api_key"
   chmod 600 "$STATE_DIR/source_api_key"
@@ -853,7 +853,7 @@ send_traffic_round() {
 print_ready() {
   echo
   echo "Local Streams backend is ready. Login: $ES_USER / $ES_PASS"
-  echo "  Canvas   ${KIBANA_URL:-http://localhost:5601}/app/streams/new-experience/"
+  echo "  Canvas   ${KIBANA_URL:-http://localhost:5601}/app/streams/v2/unit/$UNIT_ID/map"
   echo "  Discover ${KIBANA_URL:-http://localhost:5601}/app/discover"
   echo "  Logs     FROM $LOGS_DEV_DS  |  FROM $LOGS_PROD_DS"
   echo "  Failures FROM $LOGS_DEV_DS::failures  |  FROM $LOGS_PROD_DS::failures"
@@ -1167,7 +1167,7 @@ reset_canvas_unit() {
     -H 'Content-Type: application/json' -d '{}' || true)"
   if ! printf '%s' "$body" | jq -e '.acknowledged == true' >/dev/null 2>&1; then
     printf '%s\n' "$body" >&2
-    warn "Canvas unit reset did not acknowledge; reload /app/streams/new-experience/ after Kibana is up"
+    warn "Canvas unit reset did not acknowledge; reload /app/streams/v2/unit/$UNIT_ID/map after Kibana is up"
   fi
 }
 
@@ -1196,7 +1196,7 @@ Start these yourself and leave them running:
   pnpm es serverless --projectType=observability
   pnpm serverless-oblt
   cd streams-config-distributor && tilt up --context kind-streams -- --port 18443
-  cd streams-controller && tilt up --port 10351
+  cd streams-controller && tilt up --context kind-streams --port 10351
 
 Then from the Kibana checkout:
 

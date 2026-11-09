@@ -31,11 +31,26 @@ export interface ContractResponse {
 
 export type RouteResult = OperationMatch | OperationMismatch;
 
+export interface ResponderContext {
+  /**
+   * State kept for the emulator's run, until `reset()`. A responder keeps its entries under keys
+   * of its own, such as a symbol, so several responders can share it.
+   */
+  readonly state: Map<unknown, unknown>;
+  /**
+   * The default chain's answer: the operation's fixture, else its first conforming recording,
+   * else an example or a sample of its schema, paged for paginated operations. Each call gets
+   * its own copy, which the responder is free to change.
+   */
+  readonly next: () => Promise<ContractResponse>;
+}
+
 /** Produces the mock's answer to a valid request. */
 export type Responder = (
   operation: ContractOperation,
-  request: ContractRequest
-) => ContractResponse;
+  request: ContractRequest,
+  context: ResponderContext
+) => ContractResponse | Promise<ContractResponse>;
 
 /**
  * A vendor operation that has no method and path of its own, because a protocol sends every

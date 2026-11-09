@@ -99,29 +99,35 @@ export const bulkDisableRules = async <Params extends RuleParams>(
     tryToRemoveTasks({ taskIdsToDelete, logger: context.logger, taskManager: context.taskManager }),
   ]);
 
-  const disabledRules = rules.map(({ id, attributes, references }) => {
-    // TODO (http-versioning): alertTypeId should never be null, but we need to
-    // fix the type cast from SavedObjectsBulkUpdateObject to SavedObjectsBulkUpdateObject
-    // when we are doing the bulk disable and this should fix itself
-    const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
-    const ruleDomain = transformRuleAttributesToRuleDomain<Params>(
-      attributes as RawRule,
-      {
-        id,
-        logger: context.logger,
-        ruleType,
-        references,
-      },
-      (connectorId: string) => actionsClient.isSystemAction(connectorId)
-    );
+  const disabledRules = await withSpan(
+    { name: 'bulkDisableRules.toRuleDomain', type: 'rules' },
+    async () =>
+      rules.map(({ id, attributes, references }) => {
+        // TODO (http-versioning): alertTypeId should never be null, but we need to
+        // fix the type cast from SavedObjectsBulkUpdateObject to SavedObjectsBulkUpdateObject
+        // when we are doing the bulk disable and this should fix itself
+        const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
+        const ruleDomain = transformRuleAttributesToRuleDomain<Params>(
+          attributes as RawRule,
+          {
+            id,
+            logger: context.logger,
+            ruleType,
+            references,
+          },
+          (connectorId: string) => actionsClient.isSystemAction(connectorId)
+        );
 
-    try {
-      ruleDomainSchema.validate(ruleDomain);
-    } catch (e) {
-      context.logger.warn(`Error validating bulk disabled rule domain object for id: ${id}, ${e}`);
-    }
-    return ruleDomain;
-  });
+        try {
+          ruleDomainSchema.validate(ruleDomain);
+        } catch (e) {
+          context.logger.warn(
+            `Error validating bulk disabled rule domain object for id: ${id}, ${e}`
+          );
+        }
+        return ruleDomain;
+      })
+  );
 
   // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
   const disabledPublicRules = disabledRules.map((rule: RuleDomain<Params>) => {
