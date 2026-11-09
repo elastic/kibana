@@ -198,6 +198,8 @@ describe('global header', () => {
     '/manage',
     '/configurations',
     '/configurations/integrations/browse',
+    '/siem_readiness',
+    '/siem_readiness/visibility/coverage',
   ])(
     'does not mount the header action menu on %s, where the page app header owns the actions',
     (pathname) => {

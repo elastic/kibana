@@ -5,17 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import {
-  EuiPageHeader,
-  EuiPageSection,
-  EuiSpacer,
-  EuiButtonEmpty,
-  EuiBetaBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React, { useCallback, useMemo } from 'react';
+import { EuiPageSection, EuiSpacer } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { MainCategories } from '@kbn/siem-readiness';
@@ -25,10 +16,8 @@ import { useKibana } from '../../common/lib/kibana';
 import { SiemReadinessEventTypes } from '../../common/lib/telemetry/events/siem_readiness/types';
 import { VisibilitySectionBoxes, type VisibilityTabId } from './visibility_section_boxes';
 import { VisibilitySectionTabs } from './visibility_section_tabs';
-import {
-  CategoryConfigurationPanel,
-  ACTIVE_CATEGORIES_STORAGE_KEY,
-} from './components/configuration_panel';
+import { SiemReadinessHeader } from './siem_readiness_header';
+import { ACTIVE_CATEGORIES_STORAGE_KEY } from './components/configuration_panel';
 
 const VALID_TABS: VisibilityTabId[] = ['coverage', 'quality', 'continuity', 'retention'];
 const DEFAULT_TAB: VisibilityTabId = 'coverage';
@@ -43,9 +32,6 @@ const SiemReadinessDashboard = () => {
     ACTIVE_CATEGORIES_STORAGE_KEY,
     ALL_CATEGORIES
   );
-
-  // State for showing configuration modal
-  const [isConfigModalVisible, setIsConfigModalVisible] = useState(false);
 
   // Get selected tab from URL path params
   const selectedTabId = useMemo<VisibilityTabId>(() => {
@@ -65,42 +51,7 @@ const SiemReadinessDashboard = () => {
 
   return (
     <div>
-      <EuiPageHeader
-        pageTitle={
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              {i18n.translate('xpack.securitySolution.siemReadiness.pageTitle', {
-                defaultMessage: 'SIEM Readiness',
-              })}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                label={i18n.translate(
-                  'xpack.securitySolution.siemReadiness.technicalPreviewBadgeLabel',
-                  {
-                    defaultMessage: 'Technical Preview',
-                  }
-                )}
-                data-test-subj="siemReadinessPreviewBadge"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        bottomBorder={true}
-        rightSideItems={[
-          <EuiButtonEmpty
-            iconSide="right"
-            size="s"
-            iconType="gear"
-            onClick={() => setIsConfigModalVisible(true)}
-            data-test-subj="configurationsButton"
-          >
-            {i18n.translate('xpack.securitySolution.siemReadiness.configurations', {
-              defaultMessage: 'Configurations',
-            })}
-          </EuiButtonEmpty>,
-        ]}
-      />
+      <SiemReadinessHeader onConfigurationsSave={setActiveCategories} />
       <EuiSpacer />
       <EuiPageSection paddingSize="none">
         <VisibilitySectionBoxes
@@ -117,12 +68,6 @@ const SiemReadinessDashboard = () => {
           activeCategories={activeCategories ?? ALL_CATEGORIES}
         />
       </EuiPageSection>
-      {isConfigModalVisible && (
-        <CategoryConfigurationPanel
-          onClose={() => setIsConfigModalVisible(false)}
-          onSave={setActiveCategories}
-        />
-      )}
     </div>
   );
 };

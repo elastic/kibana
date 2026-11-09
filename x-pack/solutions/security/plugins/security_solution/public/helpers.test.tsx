@@ -321,6 +321,8 @@ describe('isPageWithAppHeaderPath', () => {
     ['the Manage landing page', '/manage'],
     ['the Configurations page', '/configurations'],
     ['a Configurations sub-route', '/configurations/integrations/browse'],
+    ['the SIEM readiness page', '/siem_readiness'],
+    ['a SIEM readiness tab route', '/siem_readiness/visibility/coverage'],
     ['an endpoint management page', '/administration/endpoints'],
     ['a rules tab with a trailing slash', '/rules/management/'],
     ['a rule details tab with a trailing slash', '/rules/id/rule-id/overview/'],
