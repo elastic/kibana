@@ -9,7 +9,7 @@ import {
   SIGNIFICANT_EVENTS_ALERT_SOURCE,
   type SignificantEventsWorkflowStatusResult,
 } from '@kbn/significant-events-schema';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { FeatureNotEnabledError } from '../../../lib/errors/feature_not_enabled_error';
@@ -132,26 +132,28 @@ const discoveryStatusRoute = createServerRoute({
   },
 });
 
-const optionalCount = z.number().int().min(0).optional();
+const optionalCount = lazySchema(() => z.number().int().min(0).optional());
 
 /** Called by the discovery workflow before each exit and from its failure fallback (nightshift-program#1956). */
 const discoveryCompletedRoute = createServerRoute({
   endpoint: 'POST /internal/streams/significant_events/discovery/_completed',
-  params: z.object({
-    body: z.object({
-      discovery_execution_id: z.string().max(MAX_ID_LENGTH),
-      outcome: z.enum(['completed', 'failed']),
-      has_work: z.boolean().optional(),
-      processed_count: optionalCount,
-      skipped_count: optionalCount,
-      held_back_count: optionalCount,
-      needs_agent_count: optionalCount,
-      written_event_count: optionalCount,
-      written_rule_count: optionalCount,
-      classifier_failed: z.boolean().optional(),
-      error_message: z.string().max(1024).optional(),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        discovery_execution_id: z.string().max(MAX_ID_LENGTH),
+        outcome: z.enum(['completed', 'failed']),
+        has_work: z.boolean().optional(),
+        processed_count: optionalCount,
+        skipped_count: optionalCount,
+        held_back_count: optionalCount,
+        needs_agent_count: optionalCount,
+        written_event_count: optionalCount,
+        written_rule_count: optionalCount,
+        classifier_failed: z.boolean().optional(),
+        error_message: z.string().max(1024).optional(),
+      }),
+    })
+  ),
   options: {
     access: 'internal',
     summary: 'Report the end of a Significant Events discovery run',
