@@ -26,3 +26,4 @@ booleans False in that case. Base every answer only on the provided text.
 First decide ground_truth_severity_determined: true when the confirmed outcome establishes whether the alert was benign / self-resolved / no-action-needed or needed remediation. Set it false when the outcome says it is unresolved, unknown, or only contradicts the report without settling whether remediation was needed. When it is false, answer every other field with false or an empty string.
 
 Write every reasoning field as one short sentence in your own words. Summarise what you found; do not quote log lines, query results, or messages from the investigation.
+Refer to hosts and people by their role (for example "a host", "an operator"), not by name. You may name the affected services. Never write host names, IP addresses, user or person names, email addresses, URLs, file paths, account, resource or request IDs, API keys or tokens, even when they appear in the investigation.
