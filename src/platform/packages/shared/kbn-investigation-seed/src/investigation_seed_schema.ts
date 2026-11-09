@@ -23,6 +23,8 @@ export const INVESTIGATION_ENTITY_FIELDS = [
   'host.name',
   'container.id',
   'trace.id',
+  'user.name',
+  'source.ip',
 ] as const;
 
 export type InvestigationEntityField = (typeof INVESTIGATION_ENTITY_FIELDS)[number];
@@ -161,6 +163,8 @@ export const investigationSeedSchema = lazySchema(() =>
         'host.name': entityValueSchema.optional(),
         'container.id': entityValueSchema.optional(),
         'trace.id': entityValueSchema.optional(),
+        'user.name': entityValueSchema.optional(),
+        'source.ip': entityValueSchema.optional(),
       }),
     })
     .superRefine((seed, ctx) => {

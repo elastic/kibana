@@ -6,7 +6,7 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { getTopLogChangePoints } from '@kbn/observability-signals-server';
+import { getTopLogChangePoints } from '@kbn/signals-server';
 
 export async function getToolHandler({
   esClient,

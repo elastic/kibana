@@ -1,7 +1,0 @@
-{
-  "type": "shared-server",
-  "id": "@kbn/observability-signals-server",
-  "owner": ["@elastic/search-ml-ux"],
-  "group": "observability",
-  "visibility": "private"
-}

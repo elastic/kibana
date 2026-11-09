@@ -11,6 +11,7 @@
     "server": true,
     "configPath": ["xpack", "metrics_data_access"],
     "requiredPlugins": ["data", "observabilityShared"],
+    "optionalPlugins": ["signalInvestigation"],
     "requiredBundles": ["kibanaReact"],
     "extraPublicDirs": ["common"]
   }

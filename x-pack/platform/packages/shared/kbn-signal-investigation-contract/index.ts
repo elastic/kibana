@@ -13,6 +13,7 @@ export {
   SIGNAL_ANALYZER_AUTHZ,
   SIGNAL_ANALYZER_PIVOT_FIELDS,
 } from './src/analyzer';
+export { compareLeads } from './src/compare_leads';
 
 export type {
   AnalyzerApplicability,

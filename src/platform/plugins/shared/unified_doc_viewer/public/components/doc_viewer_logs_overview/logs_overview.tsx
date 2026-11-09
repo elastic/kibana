@@ -18,10 +18,10 @@ import {
   getLogDocumentOverview,
 } from '@kbn/discover-utils';
 import type {
-  ObservabilityInvestigationFeature,
   ObservabilityLogsAIAssistantFeature,
   ObservabilityLogsAIInsightFeature,
   ObservabilityStreamsFeature,
+  SignalInvestigationFeature,
 } from '@kbn/discover-shared-plugin/public';
 import { FieldActionsProvider } from '@kbn/unified-doc-viewer';
 import type { LogDocument, ObservabilityIndexes } from '@kbn/discover-utils/src';
@@ -52,7 +52,7 @@ export type LogsOverviewProps = DocViewRenderProps &
   RestorableStateProviderProps<TraceWaterfallRestorableState> & {
     renderAIAssistant?: ObservabilityLogsAIAssistantFeature['render'];
     renderAIInsight?: ObservabilityLogsAIInsightFeature['render'];
-    renderInvestigationAction?: ObservabilityInvestigationFeature['renderLogDocumentAction'];
+    renderInvestigationAction?: SignalInvestigationFeature['renderLogDocumentAction'];
     renderFlyoutStreamField?: ObservabilityStreamsFeature['renderFlyoutStreamField'];
     renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
     cpsHasLinkedProjects?: boolean;

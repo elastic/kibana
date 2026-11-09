@@ -111,13 +111,19 @@ describe('investigationSeedSchema', () => {
     ).toBe(false);
   });
 
-  it('rejects an unknown entity field and an inverted selection', () => {
+  it('rejects an unknown entity field and an inverted selection, and accepts user.name and source.ip', () => {
     expect(
       investigationSeedSchema.safeParse({
         ...validSeed(),
-        entities: { 'user.name': 'ada' },
+        entities: { 'process.name': 'bash' },
       }).success
     ).toBe(false);
+    expect(
+      investigationSeedSchema.safeParse({
+        ...validSeed(),
+        entities: { 'user.name': 'ada', 'source.ip': '203.0.113.10' },
+      }).success
+    ).toBe(true);
     expect(
       investigationSeedSchema.safeParse({
         ...validSeed(),

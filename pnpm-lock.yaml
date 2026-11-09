@@ -2955,9 +2955,6 @@ importers:
       '@kbn/observability-shared-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/plugins/observability_shared
-      '@kbn/observability-signals-server':
-        specifier: workspace:*
-        version: link:x-pack/solutions/observability/packages/signals-server
       '@kbn/observability-utils-browser':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/utils-browser
@@ -3746,7 +3743,10 @@ importers:
         version: link:x-pack/platform/packages/shared/kbn-signal-investigation-contract
       '@kbn/signal-investigation-plugin':
         specifier: workspace:*
-        version: link:x-pack/solutions/observability/plugins/signal_investigation
+        version: link:x-pack/platform/plugins/shared/signal_investigation
+      '@kbn/signals-server':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/signals-server
       '@kbn/significant-events-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/plugins/significant_events
@@ -9694,7 +9694,7 @@ importers:
 
   x-pack/solutions/observability/packages/nav-icons: {}
 
-  x-pack/solutions/observability/packages/signals-server: {}
+  x-pack/platform/packages/shared/signals-server: {}
 
   x-pack/solutions/observability/packages/synthetics-test-data: {}
 
@@ -9748,7 +9748,7 @@ importers:
 
   x-pack/solutions/observability/plugins/serverless_observability: {}
 
-  x-pack/solutions/observability/plugins/signal_investigation: {}
+  x-pack/platform/plugins/shared/signal_investigation: {}
 
   x-pack/solutions/observability/plugins/significant_events: {}
 

@@ -39,10 +39,14 @@ describe('extractEntitiesFromFilters', () => {
         phrase('service.name', 'checkout'),
         phrases,
         phrase('user.name', 'ada'),
+        phrase('source.ip', '203.0.113.10'),
+        phrase('process.name', 'ignored-process'),
       ])
     ).toEqual({
       'service.name': 'checkout',
       'host.name': 'web-1',
+      'user.name': 'ada',
+      'source.ip': '203.0.113.10',
     });
   });
 });

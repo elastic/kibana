@@ -296,9 +296,9 @@ describe('observabilityRootProfileProvider', () => {
       jest
         .spyOn(servicesWithFeature.discoverShared.features.registry, 'getById')
         .mockImplementation((id) => {
-          if (id === 'observability-investigation') {
+          if (id === 'signal-investigation') {
             return {
-              id: 'observability-investigation',
+              id: 'signal-investigation',
               isAvailable: () => true,
               openFromAppMenu,
               renderLogDocumentAction: () => null,

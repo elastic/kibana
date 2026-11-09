@@ -1,7 +1,0 @@
-{
-  "name": "@kbn/observability-signals-server",
-  "description": "Server-side ranking and change-point helpers for Find related changes.",
-  "private": true,
-  "version": "1.0.0",
-  "license": "Elastic License 2.0"
-}

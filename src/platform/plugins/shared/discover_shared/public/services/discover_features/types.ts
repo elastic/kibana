@@ -99,8 +99,8 @@ export interface ObservabilityInvestigationDocumentDeps {
   dataView?: DataView;
 }
 
-export interface ObservabilityInvestigationFeature {
-  id: 'observability-investigation';
+export interface SignalInvestigationFeature {
+  id: 'signal-investigation';
   isAvailable: () => boolean;
   openFromAppMenu: (params: ObservabilityInvestigationAppMenuParams) => void;
   renderLogDocumentAction: (deps: ObservabilityInvestigationDocumentDeps) => JSX.Element | null;
@@ -358,7 +358,7 @@ export type DiscoverFeature =
   | ObservabilityLogsAIAssistantFeature
   | ObservabilityLogsAIInsightFeature
   | ObservabilityCreateSLOFeature
-  | ObservabilityInvestigationFeature
+  | SignalInvestigationFeature
   | ObservabilityServiceFlyoutFeature
   | ObservabilityLogEventsFeature
   | ObservabilityTracesFeature

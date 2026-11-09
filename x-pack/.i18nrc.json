@@ -187,7 +187,7 @@
     "xpack.sessionView": "solutions/security/plugins/session_view",
     "xpack.sharedComponents": "platform/packages/shared/kbn-shared-components",
     "xpack.changeHistoryUi": "platform/packages/shared/kbn-change-history-ui",
-    "xpack.signalInvestigation": "solutions/observability/plugins/signal_investigation",
+    "xpack.signalInvestigation": "platform/plugins/shared/signal_investigation",
     "xpack.significantEvents": [
       "solutions/observability/plugins/significant_events",
       "platform/packages/shared/kbn-significant-events-schema"

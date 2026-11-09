@@ -26,7 +26,14 @@ export type AnalyzerResultStatus = (typeof ANALYZER_RESULT_STATUSES)[number];
 
 export const LEAD_SIGNAL_BANDS = ['strong', 'moderate', 'weak', 'unknown'] as const;
 export const LEAD_TIMING_BANDS = ['before', 'during', 'after', 'unknown'] as const;
-export const LEAD_RELATIONSHIPS = ['service', 'dependency', 'host', 'unknown'] as const;
+export const LEAD_RELATIONSHIPS = [
+  'service',
+  'dependency',
+  'host',
+  'user',
+  'network',
+  'unknown',
+] as const;
 
 export type LeadSignalBand = (typeof LEAD_SIGNAL_BANDS)[number];
 export type LeadTimingBand = (typeof LEAD_TIMING_BANDS)[number];
@@ -72,7 +79,12 @@ export interface SignalAnalyzerComparison {
   deviation: SignalAnalyzerWindowBounds;
 }
 
-export const SIGNAL_ANALYZER_PIVOT_FIELDS = ['service.name', 'host.name'] as const;
+export const SIGNAL_ANALYZER_PIVOT_FIELDS = [
+  'service.name',
+  'host.name',
+  'user.name',
+  'source.ip',
+] as const;
 
 export type SignalAnalyzerPivotField = (typeof SIGNAL_ANALYZER_PIVOT_FIELDS)[number];
 

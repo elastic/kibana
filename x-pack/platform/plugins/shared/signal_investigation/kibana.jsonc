@@ -1,0 +1,27 @@
+{
+  "type": "plugin",
+  "id": "@kbn/signal-investigation-plugin",
+  "owner": ["@elastic/search-ml-ux"],
+  "description": "Find related changes from an alert, a dashboard chart, or Discover.",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "signalInvestigation",
+    "browser": true,
+    "server": true,
+    "configPath": ["xpack", "signalInvestigation"],
+    "requiredPlugins": [
+      "data",
+      "discoverShared",
+      "dataViews",
+      "lens",
+      "licensing",
+      "logsDataAccess",
+      "share",
+      "uiActions"
+    ],
+    "optionalPlugins": ["agentBuilder", "logsShared", "spaces"],
+    "requiredBundles": [],
+    "extraPublicDirs": ["common"]
+  }
+}

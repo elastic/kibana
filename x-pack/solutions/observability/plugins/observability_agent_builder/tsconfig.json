@@ -50,7 +50,7 @@
     "@kbn/apm-types",
     "@kbn/slo-schema",
     "@kbn/apm-types-shared",
-    "@kbn/observability-signals-server",
+    "@kbn/signals-server",
     "@kbn/observability-utils-server",
     "@kbn/calculate-auto",
     "@kbn/search-inference-endpoints",

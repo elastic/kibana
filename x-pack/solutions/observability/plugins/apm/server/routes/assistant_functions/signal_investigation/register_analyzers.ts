@@ -11,7 +11,7 @@ import { SECURITY_EXTENSION_ID, type Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import pLimit from 'p-limit';
 import type { ApmDataAccessPluginSetup } from '@kbn/apm-data-access-plugin/server';
-import { changePointWindow } from '@kbn/observability-signals-server';
+import { changePointWindow } from '@kbn/signals-server';
 import type { SignalInvestigationServerSetup } from '@kbn/signal-investigation-plugin/server';
 import type {
   SignalAnalyzer,

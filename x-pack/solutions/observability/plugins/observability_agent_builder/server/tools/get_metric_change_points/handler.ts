@@ -5,10 +5,7 @@
  * 2.0.
  */
 import type { IScopedClusterClient } from '@kbn/core/server';
-import {
-  type MetricAggregationConfig,
-  getTopMetricChangePoints,
-} from '@kbn/observability-signals-server';
+import { type MetricAggregationConfig, getTopMetricChangePoints } from '@kbn/signals-server';
 
 export async function getToolHandler({
   esClient,

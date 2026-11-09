@@ -21,7 +21,7 @@ export type {
   ObservabilityLogsAIAssistantFeature,
   ObservabilityInvestigationAppMenuParams,
   ObservabilityInvestigationDocumentDeps,
-  ObservabilityInvestigationFeature,
+  SignalInvestigationFeature,
   ObservabilityStreamsFeatureRenderDeps,
   ObservabilityStreamsFeatureRenderByStreamNameDeps,
   ObservabilityStreamsFeature,

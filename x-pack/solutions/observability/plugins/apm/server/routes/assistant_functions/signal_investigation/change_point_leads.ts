@@ -8,18 +8,13 @@
 import { i18n } from '@kbn/i18n';
 import type { APMDownstreamDependency } from '@kbn/apm-types';
 import type { InvestigationSeed } from '@kbn/investigation-seed';
-import type {
-  AnalyzerApplicability,
-  InvestigationLead,
-  LeadRelationship,
-  LeadSignalBand,
-  LeadTimingBand,
-} from '@kbn/signal-investigation-contract';
 import {
-  anomalySignalBand,
-  changePointSignalBand,
-  timingBand,
-} from '@kbn/observability-signals-server';
+  type AnalyzerApplicability,
+  type InvestigationLead,
+  type LeadRelationship,
+  compareLeads,
+} from '@kbn/signal-investigation-contract';
+import { anomalySignalBand, changePointSignalBand, timingBand } from '@kbn/signals-server';
 import type { ApmAnomalyWithContext } from '../get_apm_service_summary/get_anomalies';
 import type { TimeseriesChangePoint } from '../get_apm_timeseries';
 
@@ -62,49 +57,6 @@ export const apmAnomalyApplicability = (
     };
   }
   return apmChangePointApplicability(seed);
-};
-
-const SIGNAL_ORDER: Record<LeadSignalBand, number> = {
-  strong: 0,
-  moderate: 1,
-  weak: 2,
-  unknown: 3,
-};
-
-const TIMING_ORDER: Record<LeadTimingBand, number> = {
-  before: 0,
-  during: 1,
-  after: 2,
-  unknown: 3,
-};
-
-const RELATIONSHIP_ORDER: Record<LeadRelationship, number> = {
-  service: 0,
-  dependency: 1,
-  host: 2,
-  unknown: 3,
-};
-
-// Must match compareLeads in the signal investigation plugin's common/rank_leads.ts, which the
-// flyout uses to order leads across analyzers. APM keeps a copy so it does not import that plugin.
-const compareLeads = (a: InvestigationLead, b: InvestigationLead): number => {
-  const relationship =
-    RELATIONSHIP_ORDER[a.ranking.relationship] - RELATIONSHIP_ORDER[b.ranking.relationship];
-  if (relationship !== 0) {
-    return relationship;
-  }
-
-  const timing = TIMING_ORDER[a.ranking.timing] - TIMING_ORDER[b.ranking.timing];
-  if (timing !== 0) {
-    return timing;
-  }
-
-  const signal = SIGNAL_ORDER[a.ranking.signal] - SIGNAL_ORDER[b.ranking.signal];
-  if (signal !== 0) {
-    return signal;
-  }
-
-  return (a.occurredAt ?? '').localeCompare(b.occurredAt ?? '');
 };
 
 const changeTypeLabel = (type: string): string => {

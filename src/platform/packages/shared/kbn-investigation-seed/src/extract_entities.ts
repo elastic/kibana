@@ -35,6 +35,8 @@ const EXTRACTABLE_ENTITY_FIELDS: ReadonlySet<InvestigationEntityField> = new Set
   'service.environment',
   'host.name',
   'container.id',
+  'user.name',
+  'source.ip',
 ]);
 
 const isExtractableEntityField = (field: string | undefined): field is InvestigationEntityField =>

@@ -186,7 +186,7 @@ dependsOn:
   - '@kbn/slo-constants'
   - '@kbn/signal-investigation-plugin'
   - '@kbn/signal-investigation-contract'
-  - '@kbn/observability-signals-server'
+  - '@kbn/signals-server'
 tags:
   - plugin
   - prod

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { computeSamplingProbability } from '@kbn/observability-signals-server';
+export { computeSamplingProbability } from '@kbn/signals-server';

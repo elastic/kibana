@@ -1206,6 +1206,7 @@ x-pack/platform/packages/shared/security/form_components @elastic/kibana-securit
 x-pack/platform/packages/shared/security/plugin_types_common @elastic/kibana-security
 x-pack/platform/packages/shared/security/plugin_types_public @elastic/kibana-security
 x-pack/platform/packages/shared/security/plugin_types_server @elastic/kibana-security
+x-pack/platform/packages/shared/signals-server @elastic/search-ml-ux
 x-pack/platform/plugins/private/ai_anonymization_settings @elastic/security-investigations
 x-pack/platform/plugins/private/banners @elastic/appex-sharedux
 x-pack/platform/plugins/private/canvas @elastic/kibana-dashboards
@@ -1325,6 +1326,7 @@ x-pack/platform/plugins/shared/search_inference_endpoints @elastic/search-ml-ux
 x-pack/platform/plugins/shared/searchprofiler @elastic/kibana-management
 x-pack/platform/plugins/shared/security @elastic/kibana-security
 x-pack/platform/plugins/shared/serverless @elastic/appex-sharedux
+x-pack/platform/plugins/shared/signal_investigation @elastic/search-ml-ux
 x-pack/platform/plugins/shared/slo_shared @elastic/nightshift-sre-agent-team
 x-pack/platform/plugins/shared/spaces @elastic/kibana-security
 x-pack/platform/plugins/shared/stack_alerts @elastic/response-ops
@@ -1393,7 +1395,6 @@ x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
 x-pack/solutions/observability/packages/kbn-synthetics-forge @elastic/obs-signals-logs-team
 x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli @elastic/observability-ui
 x-pack/solutions/observability/packages/nav-icons @elastic/obs-signals-logs-team
-x-pack/solutions/observability/packages/signals-server @elastic/search-ml-ux
 x-pack/solutions/observability/packages/synthetics-test-data @elastic/obs-signals-logs-team
 x-pack/solutions/observability/packages/utils-browser @elastic/observability-ui
 x-pack/solutions/observability/packages/utils-common @elastic/observability-ui
@@ -1420,7 +1421,6 @@ x-pack/solutions/observability/plugins/observability_shared @elastic/observabili
 x-pack/solutions/observability/plugins/profiling @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/profiling_data_access @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/serverless_observability @elastic/observability-ui
-x-pack/solutions/observability/plugins/signal_investigation @elastic/search-ml-ux
 x-pack/solutions/observability/plugins/significant_events @elastic/nightshift
 x-pack/solutions/observability/plugins/slo @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/plugins/synthetics @elastic/obs-signals-logs-team
@@ -4010,6 +4010,8 @@ pnpm-workspace.yaml @elastic/kibana-operations
 .pnpmfile.cjs @elastic/kibana-operations
 
 /knip.jsonc @elastic/kibana-security
+
+/x-pack/solutions/observability/plugins/metrics_data_access/server/signal_investigation/ @elastic/search-ml-ux
 
 # Auto-generated Scout test metadata has no owner so the automated update PRs are auto-approved.
 /**/scout/.meta/**

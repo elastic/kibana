@@ -8,10 +8,10 @@
  */
 
 import type {
-  ObservabilityInvestigationFeature,
   ObservabilityLogsAIAssistantFeature,
   ObservabilityLogsAIInsightFeature,
   ObservabilityStreamsFeature,
+  SignalInvestigationFeature,
 } from '@kbn/discover-shared-plugin/public';
 import {
   fieldConstants,
@@ -68,9 +68,8 @@ export const createGetDocViewer =
       'observability-logs-ai-insight'
     );
 
-    const investigationFeature = services.discoverShared.features.registry.getById(
-      'observability-investigation'
-    );
+    const investigationFeature =
+      services.discoverShared.features.registry.getById('signal-investigation');
 
     const streamsFeature = services.discoverShared.features.registry.getById('streams');
 
@@ -116,7 +115,7 @@ interface LogOverviewTabProps extends DocViewRenderProps {
   logOverviewContext$: BehaviorSubject<LogOverviewContext | undefined>;
   logsAIAssistantFeature: ObservabilityLogsAIAssistantFeature | undefined;
   logsAIInsightFeature: ObservabilityLogsAIInsightFeature | undefined;
-  investigationFeature?: ObservabilityInvestigationFeature;
+  investigationFeature?: SignalInvestigationFeature;
   streamsFeature: ObservabilityStreamsFeature | undefined;
   cpsManager?: ICPSManager;
   indexes: ObservabilityIndexes;

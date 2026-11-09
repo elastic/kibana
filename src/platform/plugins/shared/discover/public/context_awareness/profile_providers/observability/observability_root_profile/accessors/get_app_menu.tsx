@@ -82,9 +82,7 @@ const registerFindRelatedChangesAction = (
   { data, discoverShared, timefilter }: ProfileProviderServices,
   { dataView }: AppMenuExtensionParams
 ): void => {
-  const investigationFeature = discoverShared.features.registry.getById(
-    'observability-investigation'
-  );
+  const investigationFeature = discoverShared.features.registry.getById('signal-investigation');
   if (!investigationFeature?.isAvailable()) {
     return;
   }

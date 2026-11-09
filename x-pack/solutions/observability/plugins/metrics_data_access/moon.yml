@@ -48,7 +48,9 @@ dependsOn:
   - '@kbn/react-kibana-context-theme'
   - '@kbn/router-utils'
   - '@kbn/chart-expressions-common'
-  - '@kbn/observability-utils-common'
+  - '@kbn/investigation-seed'
+  - '@kbn/signals-server'
+  - '@kbn/signal-investigation-contract'
 tags:
   - plugin
   - prod

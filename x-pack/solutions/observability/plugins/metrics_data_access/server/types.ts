@@ -7,6 +7,11 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import type { SignalInvestigationServerSetup } from '@kbn/signal-investigation-contract';
+
+export interface MetricsDataPluginSetupDeps {
+  signalInvestigation?: SignalInvestigationServerSetup;
+}
 
 export interface MetricsDataPluginStartDeps {
   data: DataPluginStart;

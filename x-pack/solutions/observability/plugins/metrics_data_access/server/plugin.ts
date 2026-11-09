@@ -11,24 +11,34 @@ import type {
   Plugin,
   RequestHandlerContext,
 } from '@kbn/core/server';
-import type { MetricsDataPluginStartDeps } from './types';
+import type { MetricsDataPluginSetupDeps, MetricsDataPluginStartDeps } from './types';
 import { MetricsDataClient } from './client';
 import { metricsDataSourceSavedObjectType } from './saved_objects/metrics_data_source';
 import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapter';
 import { initMetricExplorerRoute } from './routes/metrics_explorer';
 import { initMetricIndicesRoute } from './routes/metric_indices';
+import { createMetricChangePointsAnalyzer } from './signal_investigation/metric_change_points_analyzer';
 
 export type MetricsDataPluginSetup = ReturnType<MetricsDataPlugin['setup']>;
 export type MetricsDataPluginStart = ReturnType<MetricsDataPlugin['start']>;
 
 export class MetricsDataPlugin
-  implements Plugin<MetricsDataPluginSetup, MetricsDataPluginStart, {}, MetricsDataPluginStartDeps>
+  implements
+    Plugin<
+      MetricsDataPluginSetup,
+      MetricsDataPluginStart,
+      MetricsDataPluginSetupDeps,
+      MetricsDataPluginStartDeps
+    >
 {
   private metricsClient: MetricsDataClient | null = null;
 
   constructor(context: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup<MetricsDataPluginStartDeps>) {
+  public setup(
+    core: CoreSetup<MetricsDataPluginStartDeps>,
+    plugins: MetricsDataPluginSetupDeps = {}
+  ) {
     const router = core.http.createRouter();
     const framework = new KibanaFramework(core, router);
 
@@ -41,6 +51,9 @@ export class MetricsDataPlugin
     core.savedObjects.registerType(metricsDataSourceSavedObjectType);
 
     this.metricsClient = new MetricsDataClient();
+    plugins.signalInvestigation?.registerAnalyzer(
+      createMetricChangePointsAnalyzer({ client: this.metricsClient })
+    );
     return {
       client: this.metricsClient,
     };

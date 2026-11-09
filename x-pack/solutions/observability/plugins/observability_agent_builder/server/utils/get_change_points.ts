@@ -10,4 +10,4 @@ export {
   type ChangePoint,
   type ChangePointDetails,
   getChangePoints,
-} from '@kbn/observability-signals-server';
+} from '@kbn/signals-server';
