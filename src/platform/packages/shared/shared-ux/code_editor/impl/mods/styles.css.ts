@@ -13,12 +13,12 @@ import { css } from '@emotion/react';
  * only specify rules that should apply to all Kibana editor instances here
  */
 export const globalMonacoStyleOverrides = css`
-  // visually center the close button for the find widget
-  .monaco-editor .find-widget > .button.codicon-widget-close {
-    top: 50% !important;
-    transform: translateY(-50%);
-  }
-
+  /*
+   * String hovers set white-space: pre-wrap inline. "Close (Escape)" then wraps
+   * onto the 16px icon and takes the click. The hover is portaled beside the
+   * editor, so this rule stays global, and !important is required to beat the
+   * inline style.
+   */
   .monaco-hover.workbench-hover.compact .hover-contents {
     white-space: nowrap !important;
   }
