@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { focusEuiToolTipTrigger } from '@elastic/eui/lib/test/rtl';
 import { AutomationUsageCell } from './usage_cell';
 
 describe('AutomationUsageCell', () => {
@@ -27,5 +28,24 @@ describe('AutomationUsageCell', () => {
 
     expect(screen.getByTestId('automationUsage')).toHaveTextContent('3 / No limit');
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+  });
+
+  it('prefers the deployment tooltip while the global limit is reached, then restores per-automation copy', async () => {
+    const { rerender } = render(
+      <AutomationUsageCell used={8} limit={10} isRateLimited isGlobalLimitReached />
+    );
+
+    expect(screen.getByTestId('automationUsage')).toHaveTextContent('8 / 10');
+    expect(screen.getByTestId('automationLimitReached')).toBeInTheDocument();
+    await focusEuiToolTipTrigger(screen.getByTestId('automationUsage'));
+    expect(await screen.findByText('Deployment daily limit reached')).toBeInTheDocument();
+
+    rerender(
+      <AutomationUsageCell used={8} limit={10} isRateLimited isGlobalLimitReached={false} />
+    );
+
+    await focusEuiToolTipTrigger(screen.getByTestId('automationUsage'));
+    expect(await screen.findByText('8 of 10 triggers used today')).toBeInTheDocument();
+    expect(screen.queryByText('Deployment daily limit reached')).not.toBeInTheDocument();
   });
 });

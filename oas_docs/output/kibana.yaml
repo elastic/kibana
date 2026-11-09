@@ -44085,6 +44085,13 @@ paths:
           schema:
             default: false
             type: boolean
+        - description: When true, include the pending restart action of each agent
+          in: query
+          name: withPendingRestart
+          required: false
+          schema:
+            default: false
+            type: boolean
         - description: When true, only return agents that are upgradeable
           in: query
           name: showUpgradeable
@@ -44368,6 +44375,19 @@ paths:
                             type: string
                           maxItems: 10000
                           type: array
+                        pending_restart:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            action_id:
+                              type: string
+                            created_at:
+                              type: string
+                            expiration:
+                              type: string
+                          required:
+                            - action_id
+                            - created_at
                         pipeline_config:
                           maxLength: 10000
                           type: string
@@ -44803,6 +44823,13 @@ paths:
           schema:
             default: false
             type: boolean
+        - description: When true, include the pending restart action of the agent
+          in: query
+          name: withPendingRestart
+          required: false
+          schema:
+            default: false
+            type: boolean
       responses:
         '200':
           content:
@@ -45037,6 +45064,19 @@ paths:
                           type: string
                         maxItems: 10000
                         type: array
+                      pending_restart:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          action_id:
+                            type: string
+                          created_at:
+                            type: string
+                          expiration:
+                            type: string
+                        required:
+                          - action_id
+                          - created_at
                       pipeline_config:
                         maxLength: 10000
                         type: string
@@ -45522,6 +45562,19 @@ paths:
                           type: string
                         maxItems: 10000
                         type: array
+                      pending_restart:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          action_id:
+                            type: string
+                          created_at:
+                            type: string
+                          expiration:
+                            type: string
+                        required:
+                          - action_id
+                          - created_at
                       pipeline_config:
                         maxLength: 10000
                         type: string
@@ -46482,7 +46535,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Restart an Elastic Agent. The request fails when the agent is inactive, on a version earlier than 9.6.0, or enrolled in a hosted agent policy.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
+        Restart an Elastic Agent. The request fails when the agent is inactive, on a version earlier than 9.6.0, or enrolled in a hosted agent policy. It also fails with a 409 when the agent already has a pending restart action, unless `force` is set.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: post-fleet-agents-agentid-restart
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -46499,6 +46552,24 @@ paths:
           schema:
             maxLength: 512
             type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              forceRestartAgentRequest:
+                value:
+                  force: true
+              restartAgentRequest:
+                value: {}
+            schema:
+              additionalProperties: false
+              default: null
+              nullable: true
+              type: object
+              properties:
+                force:
+                  description: Restart the agent even if it already has a pending restart action.
+                  type: boolean
       responses:
         '200':
           content:
@@ -46538,6 +46609,34 @@ paths:
                   - message
                   - attributes
           description: A bad request.
+        '409':
+          content:
+            application/json:
+              examples:
+                pendingRestartResponse:
+                  value:
+                    error: Conflict
+                    message: Agent agent-1 already has a pending restart action a1b2c3d4-e5f6-7890-abcd-ef1234567890. Use force to restart anyway.
+                    statusCode: 409
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: 'A conflict occurred: the agent already has a pending restart action.'
       summary: Restart an agent
       tags:
         - Elastic Agent actions
@@ -47945,7 +48044,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Restart multiple Elastic Agents. Agents that are enrolled in a hosted policy or are on a version earlier than 9.6.0 are excluded from the action and receive individual error results.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
+        Restart multiple Elastic Agents. Agents that are enrolled in a hosted policy, are on a version earlier than 9.6.0, or already have a pending restart action (unless `force` is set) are excluded from the action and receive individual error results.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: post-fleet-agents-bulk-restart
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -47982,6 +48081,9 @@ paths:
                 batchSize:
                   minimum: 1
                   type: number
+                force:
+                  description: Restart agents even if they already have a pending restart action.
+                  type: boolean
                 includeInactive:
                   default: false
                   type: boolean
@@ -50299,6 +50401,11 @@ paths:
                                   - otel
                                   - crowdstrike
                                 type: string
+                              namespace:
+                                description: Data stream namespace the stack was last launched or updated with.
+                                maxLength: 100
+                                minLength: 1
+                                type: string
                               serviceConfigs:
                                 description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
                                 items:
@@ -50417,13 +50524,13 @@ paths:
                           maxItems: 100
                           type: array
                         packagePolicyIds:
-                          description: Package policy IDs created for this deployment (managed_integration and agent_based).
+                          description: Integration policy IDs created for this deployment (managed_integration and agent_based).
                           items:
                             type: string
                           maxItems: 1000
                           type: array
                         packages:
-                          description: Packages of the deployment instance package policies with their deployed versions. Empty for ECF-only deployment instances.
+                          description: Packages of the deployment instance integration policies with their deployed versions. Empty for ECF-only deployment instances.
                           items:
                             additionalProperties: false
                             type: object
@@ -50449,6 +50556,15 @@ paths:
                             type: string
                           description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
                           type: object
+                        policySettings:
+                          additionalProperties:
+                            default: null
+                            maxLength: 1024
+                            nullable: true
+                            type: string
+                          description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
+                          type: object
+                          x-state: Experimental; added in 9.7.0
                         provider:
                           description: Cloud provider.
                           enum:
@@ -50742,6 +50858,15 @@ paths:
                     type: string
                   maxItems: 100
                   type: array
+                policySettings:
+                  additionalProperties:
+                    default: null
+                    maxLength: 1024
+                    nullable: true
+                    type: string
+                  description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
+                  type: object
+                  x-state: Experimental; added in 9.7.0
                 provider:
                   description: Cloud provider.
                   enum:
@@ -50909,6 +51034,11 @@ paths:
                                 - otel
                                 - crowdstrike
                               type: string
+                            namespace:
+                              description: Data stream namespace the stack was last launched or updated with.
+                              maxLength: 100
+                              minLength: 1
+                              type: string
                             serviceConfigs:
                               description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
                               items:
@@ -51027,7 +51157,7 @@ paths:
                         maxItems: 100
                         type: array
                       packagePolicyIds:
-                        description: Package policy IDs created for this deployment (managed_integration and agent_based).
+                        description: Integration policy IDs created for this deployment (managed_integration and agent_based).
                         items:
                           type: string
                         maxItems: 1000
@@ -51038,6 +51168,15 @@ paths:
                           type: string
                         description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
                         type: object
+                      policySettings:
+                        additionalProperties:
+                          default: null
+                          maxLength: 1024
+                          nullable: true
+                          type: string
+                        description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
+                        type: object
+                        x-state: Experimental; added in 9.7.0
                       provider:
                         description: Cloud provider.
                         enum:
@@ -51344,6 +51483,11 @@ paths:
                                 - otel
                                 - crowdstrike
                               type: string
+                            namespace:
+                              description: Data stream namespace the stack was last launched or updated with.
+                              maxLength: 100
+                              minLength: 1
+                              type: string
                             serviceConfigs:
                               description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
                               items:
@@ -51462,7 +51606,7 @@ paths:
                         maxItems: 100
                         type: array
                       packagePolicyIds:
-                        description: Package policy IDs created for this deployment (managed_integration and agent_based).
+                        description: Integration policy IDs created for this deployment (managed_integration and agent_based).
                         items:
                           type: string
                         maxItems: 1000
@@ -51473,6 +51617,15 @@ paths:
                           type: string
                         description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
                         type: object
+                      policySettings:
+                        additionalProperties:
+                          default: null
+                          maxLength: 1024
+                          nullable: true
+                          type: string
+                        description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
+                        type: object
+                        x-state: Experimental; added in 9.7.0
                       provider:
                         description: Cloud provider.
                         enum:
@@ -51674,6 +51827,11 @@ paths:
                           - otel
                           - crowdstrike
                         type: string
+                      namespace:
+                        description: Data stream namespace the stack was last launched or updated with.
+                        maxLength: 100
+                        minLength: 1
+                        type: string
                       serviceConfigs:
                         description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
                         items:
@@ -51793,7 +51951,7 @@ paths:
                   maxItems: 100
                   type: array
                 packagePolicyIds:
-                  description: Package policy IDs created for this deployment (managed_integration and agent_based).
+                  description: Integration policy IDs created for this deployment (managed_integration and agent_based).
                   items:
                     maxLength: 255
                     type: string
@@ -51804,6 +51962,15 @@ paths:
                     maxLength: 255
                     type: string
                   type: object
+                policySettings:
+                  additionalProperties:
+                    default: null
+                    maxLength: 1024
+                    nullable: true
+                    type: string
+                  description: Integration policy settings that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`). Replaces the stored settings; omit it to keep them.
+                  type: object
+                  x-state: Experimental; added in 9.7.0
                 serviceNames:
                   additionalProperties:
                     maxLength: 256
@@ -51928,6 +52095,11 @@ paths:
                                 - otel
                                 - crowdstrike
                               type: string
+                            namespace:
+                              description: Data stream namespace the stack was last launched or updated with.
+                              maxLength: 100
+                              minLength: 1
+                              type: string
                             serviceConfigs:
                               description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
                               items:
@@ -52046,7 +52218,7 @@ paths:
                         maxItems: 100
                         type: array
                       packagePolicyIds:
-                        description: Package policy IDs created for this deployment (managed_integration and agent_based).
+                        description: Integration policy IDs created for this deployment (managed_integration and agent_based).
                         items:
                           type: string
                         maxItems: 1000
@@ -52057,6 +52229,15 @@ paths:
                           type: string
                         description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
                         type: object
+                      policySettings:
+                        additionalProperties:
+                          default: null
+                          maxLength: 1024
+                          nullable: true
+                          type: string
+                        description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
+                        type: object
+                        x-state: Experimental; added in 9.7.0
                       provider:
                         description: Cloud provider.
                         enum:
@@ -52290,6 +52471,11 @@ paths:
                                   - otel
                                   - crowdstrike
                                 type: string
+                              namespace:
+                                description: Data stream namespace the stack was last launched or updated with.
+                                maxLength: 100
+                                minLength: 1
+                                type: string
                               serviceConfigs:
                                 description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
                                 items:
@@ -52408,7 +52594,7 @@ paths:
                           maxItems: 100
                           type: array
                         packagePolicyIds:
-                          description: Package policy IDs created for this deployment (managed_integration and agent_based).
+                          description: Integration policy IDs created for this deployment (managed_integration and agent_based).
                           items:
                             type: string
                           maxItems: 1000
@@ -52419,6 +52605,15 @@ paths:
                             type: string
                           description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
                           type: object
+                        policySettings:
+                          additionalProperties:
+                            default: null
+                            maxLength: 1024
+                            nullable: true
+                            type: string
+                          description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
+                          type: object
+                          x-state: Experimental; added in 9.7.0
                         provider:
                           description: Cloud provider.
                           enum:
@@ -89209,6 +89404,81 @@ paths:
             {
               "entityTypes": ["user", "host", "service", "generic"]
             }
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/security/entity_store/update_api_key:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/update_api_key</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Replace the API key of every Entity Store background task with one owned by the user making this request, for example after the user who installed the Entity Store is removed. The tasks keep their schedules and state, and no entity data is changed. The user needs the same privileges as the install endpoint. Tasks that could not be updated are listed in `failed`; call the endpoint again to retry them.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+      operationId: post-security-entity-store-update-api-key
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              updateApiKeyExample:
+                description: Re-grant the API key of every Entity Store task as the user making the request.
+                summary: Update the API key of the Entity Store tasks
+                value: {}
+            schema:
+              additionalProperties: false
+              type: object
+              properties: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updateApiKeyPartialExample:
+                  description: Call the endpoint again to retry the tasks listed in `failed`.
+                  summary: Some tasks could not be updated
+                  value:
+                    failed:
+                      - id: entity_store:v2:status_report_task:default
+                        message: Version conflict
+                        statusCode: 409
+                    ok: false
+                    updated:
+                      - entity_store:v2:history_snapshot_task:default
+                updateApiKeySuccessExample:
+                  description: Every Entity Store task now runs with an API key owned by the caller.
+                  summary: All tasks updated
+                  value:
+                    failed: []
+                    ok: true
+                    updated:
+                      - entity_store:v2:history_snapshot_task:default
+                      - entity_store:v2:status_report_task:default
+          description: Indicates that the request was processed. Check `ok` and `failed` to see whether every task was updated.
+      summary: Update the API key of the Entity Store tasks
+      tags:
+        - Security entity store
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X POST -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{}' \
+              "${KIBANA_URL}/api/security/entity_store/update_api_key"
+        - lang: Console
+          source: |
+            POST kbn://api/security/entity_store/update_api_key
+            {}
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -148266,7 +148536,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create a copy of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:create AND workflowsManagement:read.
+        Create a copy of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:create AND workflowsManagement:read. Extended privileges (optional, expand functionality when granted): workflowsManagement:managed:read.
       operationId: post-workflows-workflow-id-clone
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -149995,7 +150265,7 @@ components:
               type: text
               required: false
           error: null
-          extractObservables: true
+          extractObservables: false
           id: 856ee650-6c82-11ee-a20a-6164169afa58
           mappings: []
           observableTypes: []
@@ -150452,7 +150722,7 @@ components:
             type: text
             required: false
         error: null
-        extractObservables: true
+        extractObservables: false
         id: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
         mappings:
           - action_type: overwrite
@@ -150565,7 +150835,7 @@ components:
             type: toggle
             required: false
         error: null
-        extractObservables: true
+        extractObservables: false
         id: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
         mappings:
           - action_type: overwrite
@@ -157671,7 +157941,7 @@ components:
           type: array
         extractObservables:
           description: |
-            Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. For owners that do not support observable extraction (currently Observability), setting this to `true` has no effect on case creation; new cases for those owners always use `false`.
+            Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. Observable extraction is available only for Security cases. For Stack and Observability cases, a value that is not sent resolves to `false`, and setting it to `true` returns a 400 error.
           type: boolean
         owner:
           $ref: '#/components/schemas/Cases_owner'
@@ -157698,7 +157968,7 @@ components:
       properties:
         extractObservables:
           description: |
-            When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. For owners that do not support observable extraction (currently Observability), an omitted value resolves to `false` regardless of the space configuration.
+            When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. Observable extraction is available only for Security cases. For Stack and Observability cases, a value that is not sent resolves to `false`, even if the template or space configuration says `true`. Sending `true` returns a 400 error unless the case already stores `true`.
           example: true
           type: boolean
         syncAlerts:
@@ -157837,7 +158107,7 @@ components:
       properties:
         definition:
           description: |
-            The template definition as a YAML string: case defaults (name, severity, category, tags, assignees, connector, settings) and a `fields` array of inline field definitions or `$ref` entries pointing into the owner's field library. Stored field values appear on cases under `extended_fields` keys shaped `<field_name>_as_<storage_type>`.
+            The template definition as a YAML string: case defaults (name, severity, category, tags, assignees, connector, settings) and a `fields` array of inline field definitions or `$ref` entries pointing into the owner's field library. Stored field values appear on cases under `extended_fields` keys shaped `<field_name>_as_<storage_type>`. Observable extraction (`settings.extractObservables`) is available only for Security templates. For Stack and Observability templates, setting it to `true` returns a 400 error. An update that keeps an already stored `true` for the same owner is accepted.
           example: |
             name: Security incident
             severity: high
@@ -158271,7 +158541,7 @@ components:
           type: array
         extractObservables:
           description: |
-            Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
+            Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. Observable extraction is available only for Security cases. For Stack and Observability cases, changing it to `true` returns a 400 error. A request that keeps an already stored `true` is accepted.
           type: boolean
         templates:
           $ref: '#/components/schemas/Cases_templates'

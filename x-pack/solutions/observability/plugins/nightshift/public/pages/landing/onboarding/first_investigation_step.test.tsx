@@ -21,7 +21,10 @@ jest.mock('./use_onboarding', () => ({
   useStartOnboardingSuggestions: () => ({ mutate: mockRetry, isLoading: false }),
 }));
 jest.mock('../../../components/entities/sandbox_connector/connect_sources_grid', () => ({
-  ConnectSourcesGrid: ({ group }: { group: string }) => <div data-test-subj={`grid-${group}`} />,
+  ...jest.requireActual('../../../components/entities/sandbox_connector/connect_sources_grid'),
+  ConnectSourcesGrid: ({ filter }: { filter: (id: string) => boolean }) => (
+    <div data-test-subj={`grid-${filter.name}`} />
+  ),
 }));
 
 const suggestion = (title: string, index: number) => ({
@@ -47,7 +50,7 @@ describe('OnboardingFirstInvestigationStep', () => {
     expect(screen.getByTestId('nightshiftOnboardingAnalyzing')).toHaveTextContent(
       'Gathering and triaging signals that can be investigated'
     );
-    expect(screen.getByTestId('grid-additional')).toBeInTheDocument();
+    expect(screen.getByTestId('grid-isAdditionalType')).toBeInTheDocument();
     expect(screen.queryByTestId('nightshiftOnboardingSuggestions')).not.toBeInTheDocument();
     expect(screen.queryByTestId('nightshiftOnboardingCompose')).not.toBeInTheDocument();
   });
