@@ -8,22 +8,29 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
-import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import {
+  AgentlessAgentRestrictionError,
+  HostedAgentPolicyRestrictionRelatedError,
+} from '../../errors';
 
-import { getHostedPolicies, isHostedAgent } from './hosted_agent';
+import { getAgentPolicyRestrictions, isAgentlessAgent, isHostedAgent } from './hosted_agent';
 
 export async function filterHostedPolicies(
   soClient: SavedObjectsClientContract,
   givenAgents: Agent[],
   outgoingErrors: Record<Agent['id'], Error>,
-  errorMessage: string
+  errorMessage: string,
+  agentlessErrorMessage: string
 ): Promise<Agent[]> {
-  const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
+  const restrictions = await getAgentPolicyRestrictions(soClient, givenAgents);
 
   return givenAgents.reduce<Agent[]>((agents, agent, index) => {
-    if (isHostedAgent(hostedPolicies, agent)) {
+    if (isHostedAgent(restrictions, agent)) {
       const id = givenAgents[index].id;
       outgoingErrors[id] = new HostedAgentPolicyRestrictionRelatedError(errorMessage);
+    } else if (isAgentlessAgent(restrictions, agent)) {
+      const id = givenAgents[index].id;
+      outgoingErrors[id] = new AgentlessAgentRestrictionError(agentlessErrorMessage);
     } else {
       agents.push(agent);
     }

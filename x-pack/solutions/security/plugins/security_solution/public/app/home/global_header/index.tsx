@@ -22,10 +22,8 @@ import { useKibana } from '../../../common/lib/kibana';
 import {
   isDashboardViewPath,
   isDetectionsPath,
-  isRuleChangesHistoryPath,
-  isRulesAddPath,
-  isRulesManagementPath,
-  isSharedExceptionListsPath,
+  isOnboardingPath,
+  isPageWithAppHeaderPath,
 } from '../../../helpers';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/defaults';
@@ -64,10 +62,8 @@ export const GlobalHeader = React.memo(() => {
   const pageScope = getScopeFromPath(pathname);
   const showDataViewPicker = showDataViewPickerByPath(pathname);
   const dashboardViewPath = isDashboardViewPath(pathname);
-  const changesHistoryPath = isRuleChangesHistoryPath(pathname);
-  const rulesManagementPath = isRulesManagementPath(pathname);
-  const rulesAddPath = isRulesAddPath(pathname);
-  const sharedExceptionListsPath = isSharedExceptionListsPath(pathname);
+  const pageWithAppHeaderPath = isPageWithAppHeaderPath(pathname);
+  const onboardingPath = isOnboardingPath(pathname);
 
   const { href, onClick } = useAddIntegrationsUrl();
 
@@ -76,9 +72,10 @@ export const GlobalHeader = React.memo(() => {
       return;
     }
 
-    // The Rules, Add Elastic rules and Shared Exception Lists page app headers render their own actions
-    // (ML job settings, Add integrations), so clear the global header action menu there to avoid duplicating them.
-    if (changesHistoryPath || rulesManagementPath || rulesAddPath || sharedExceptionListsPath) {
+    // Pages with a page app header render their own actions (ML job settings, Add integrations),
+    // so clear the global header action menu there to avoid duplicating them.
+    // Onboarding is a page without the global header action menu
+    if (pageWithAppHeaderPath || onboardingPath) {
       setHeaderActionMenu(undefined);
       return;
     }
@@ -105,10 +102,8 @@ export const GlobalHeader = React.memo(() => {
     theme,
     kibanaServiceI18n,
     dashboardViewPath,
-    changesHistoryPath,
-    rulesManagementPath,
-    rulesAddPath,
-    sharedExceptionListsPath,
+    pageWithAppHeaderPath,
+    onboardingPath,
   ]);
 
   return (

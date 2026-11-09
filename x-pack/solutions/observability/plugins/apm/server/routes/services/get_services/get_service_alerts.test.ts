@@ -13,7 +13,7 @@ import {
   ALERT_UUID,
   SLO_BURN_RATE_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-constants';
 import { getServicesAlerts } from './get_service_alerts';
 import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';

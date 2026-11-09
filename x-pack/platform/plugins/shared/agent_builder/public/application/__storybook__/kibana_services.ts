@@ -32,8 +32,29 @@ const getUiSetting = (key: string) =>
 /** The user the stories act as. Matches the actor id of the user message event factory. */
 export const STORYBOOK_CURRENT_USER_ID = 'user-1';
 
+/** People that user profile lookups and suggestions return. */
+export const STORYBOOK_TEAMMATES = [
+  { uid: 'user-bran', fullName: 'Bran Castellano' },
+  { uid: 'user-brian', fullName: 'Brian Pierce' },
+  { uid: 'user-brianna', fullName: 'Brianna Thornton' },
+  { uid: 'user-phoebe', fullName: 'Phoebe Brix' },
+  { uid: 'user-julian', fullName: 'Julian Rosado' },
+  { uid: 'user-andrew', fullName: 'Andrew Kim' },
+  { uid: 'user-maria', fullName: 'Maria Lopez' },
+  { uid: 'user-samir', fullName: 'Samir Patel' },
+  { uid: 'user-olga', fullName: 'Olga Novak' },
+  { uid: 'user-tomas', fullName: 'Tomas Horak' },
+] as const;
+
+const getStorybookFullName = (uid: string): string => {
+  if (uid === STORYBOOK_CURRENT_USER_ID) {
+    return 'Test User';
+  }
+  return STORYBOOK_TEAMMATES.find((teammate) => teammate.uid === uid)?.fullName ?? uid;
+};
+
 const createStorybookUserProfile = (uid: string) => {
-  const fullName = uid === STORYBOOK_CURRENT_USER_ID ? 'Test User' : uid;
+  const fullName = getStorybookFullName(uid);
   return {
     uid,
     enabled: true,
@@ -112,6 +133,12 @@ export const createStorybookKibanaServices = (): StartServices =>
       getCurrent: () => Promise.resolve(createStorybookUserProfile(STORYBOOK_CURRENT_USER_ID)),
       bulkGet: ({ uids }: { uids: Set<string> }) =>
         Promise.resolve([...uids].map(createStorybookUserProfile)),
+      suggest: (_path: string, { name }: { name: string }) =>
+        Promise.resolve(
+          STORYBOOK_TEAMMATES.filter(({ fullName }) =>
+            fullName.toLowerCase().includes(name.toLowerCase())
+          ).map(({ uid }) => createStorybookUserProfile(uid))
+        ),
     },
     appParams: { history: {} },
     plugins: {

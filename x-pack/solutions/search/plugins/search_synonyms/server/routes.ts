@@ -328,7 +328,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
         return response.customError({
           statusCode: 409,
           body: i18n.translate(
-            'xpack.search.synonyms.api.routes.synonymsSetAlreadyExistsErrorMessage',
+            'xpack.searchSynonyms.synonyms.api.routes.synonymsSetAlreadyExistsErrorMessage',
             {
               defaultMessage: `Synonyms set {synonymsSetId} already exists. Use forceWrite=true to overwrite it.`,
               values: { synonymsSetId },

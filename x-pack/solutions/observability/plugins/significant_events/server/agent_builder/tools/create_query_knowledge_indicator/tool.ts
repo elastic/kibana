@@ -9,11 +9,7 @@ import { nightshiftSourceSlugField } from '@kbn/nightshift-shared';
 import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type {
-  BuiltinToolDefinition,
-  StaticToolRegistration,
-  ToolAvailabilityResult,
-} from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { MAX_ID_LENGTH, upsertStreamQueryRequestSchema } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
@@ -21,11 +17,13 @@ import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
+import { createSignificantEventsAvailability } from '../significant_events_availability';
+import { getSourceWriteConflictMetadata } from '../../../lib/errors/source_write_conflict_error';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import { createQueryKnowledgeIndicatorToolHandler } from './handler';
 import {
   loadSourceCatalog,
-  resolveSourcesBySlug,
+  resolveSourcesBySlugOrId,
   assertSourceEnabled,
   toSourceRef,
 } from '../../utils/resolve_source_slugs';
@@ -101,31 +99,7 @@ export function createQueryKnowledgeIndicatorTool({
         };
       },
     },
-    availability: {
-      cacheMode: 'space',
-      handler: async (): Promise<ToolAvailabilityResult> => {
-        try {
-          await assertSignificantEventsAccess({
-            server,
-            licensing: server.licensing,
-          });
-          return { status: 'available' };
-        } catch (error) {
-          if (error instanceof Error) {
-            logger.debug(error.stack ?? error.message);
-          } else {
-            logger.debug(String(error));
-          }
-          return {
-            status: 'unavailable',
-            reason:
-              error instanceof Error
-                ? error.message
-                : 'Significant events access is not available in the current context',
-          };
-        }
-      },
-    },
+    availability: createSignificantEventsAvailability({ server, logger }),
     handler: async ({ slug, ...queryInput }, context) => {
       const { request } = context;
       let sourceId = '';
@@ -142,7 +116,7 @@ export function createQueryKnowledgeIndicatorTool({
         await assertCanManageSignificantEvents({ request, server });
 
         const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
-        const [source] = resolveSourcesBySlug(catalog, [slug]);
+        const [source] = resolveSourcesBySlugOrId(catalog, [slug]);
         assertSourceEnabled(source);
         sourceId = source.id;
 
@@ -198,6 +172,7 @@ export function createQueryKnowledgeIndicatorTool({
               type: ToolResultType.error,
               data: {
                 message: `Failed to create query knowledge indicator: ${message}`,
+                metadata: getSourceWriteConflictMetadata(error),
               },
             },
           ],

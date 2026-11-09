@@ -60,7 +60,7 @@ const withInMemoryStorage = ({ userStorage }: ReturnType<typeof setup>['core']) 
 
   userStorage.get.mockImplementation(async () => stored$.getValue());
   userStorage.get$.mockReturnValue(stored$.asObservable());
-  userStorage.set.mockImplementation(async (_key, value) => {
+  userStorage.set.mockImplementation(async (_key: string, value: unknown) => {
     stored$.next(value);
     return value;
   });

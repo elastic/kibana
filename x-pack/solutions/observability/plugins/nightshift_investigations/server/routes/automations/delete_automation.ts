@@ -26,7 +26,14 @@ export const deleteAutomationRoute = createNightshiftInvestigationsServerRoute({
   params: z.object({
     path: z.object({ id: z.string().min(1).max(512) }),
   }),
-  handler: async ({ request, params, getAutomationsSoClient, getWorkflowsManagement, context }) => {
+  handler: async ({
+    request,
+    params,
+    getAutomationsSoClient,
+    getWorkflowsManagement,
+    getInvestigatorServiceAccountService,
+    context,
+  }) => {
     const workflowsManagement = getWorkflowsManagement();
 
     const spaceId =
@@ -39,17 +46,31 @@ export const deleteAutomationRoute = createNightshiftInvestigationsServerRoute({
     );
 
     // Delete the backing workflow first so it cannot fire after the SO is gone.
-    // Best-effort: if workflow deletion fails the SO is still removed; any orphaned
-    // workflow will be inert because the automation SO is the source of truth for routing.
     if (workflowsManagement && existing.attributes.workflowId) {
-      try {
-        await workflowsManagement.management.deleteWorkflows(
-          [existing.attributes.workflowId],
-          spaceId,
-          request
-        );
-      } catch {
-        // Intentionally swallowed — the SO delete below is the authoritative cleanup.
+      const { workflowId } = existing.attributes;
+      const workflow = await workflowsManagement.management
+        .getWorkflow(workflowId, spaceId, request)
+        .catch(() => null);
+      // Only a workflow read as unbound may outlive its automation. A workflow bound to a service
+      // account keeps running as that account; so may one whose binding can't be read (lookup
+      // failed, or the caller can't read it). For those, a failed delete fails the request and
+      // keeps the automation. Deleting a workflow that no longer exists succeeds.
+      const isKnownUnbound =
+        Boolean(workflow?.definition) && !workflow?.definition?.settings?.run_as;
+      if (!isKnownUnbound) {
+        // Changing a bound workflow requires manage_security; refuse before deleting anything.
+        if (workflow?.definition?.settings?.run_as) {
+          await getInvestigatorServiceAccountService().assertCanModifyBoundAutomations(request);
+        }
+        await workflowsManagement.management.deleteWorkflows([workflowId], spaceId, request);
+      } else {
+        // Best-effort: if workflow deletion fails the SO is still removed; an orphaned unbound
+        // workflow is inert because the automation SO is the source of truth for routing.
+        try {
+          await workflowsManagement.management.deleteWorkflows([workflowId], spaceId, request);
+        } catch {
+          // Intentionally swallowed — the SO delete below is the authoritative cleanup.
+        }
       }
     }
 

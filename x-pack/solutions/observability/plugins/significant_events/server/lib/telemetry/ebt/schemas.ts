@@ -7,12 +7,13 @@
 
 import type { RootSchema } from '@elastic/ebt/client';
 import type {
+  AlertCreationAttemptIdentityProps,
+  ExistingAlertIdentityProps,
   AgentBuilderKnowledgeIndicatorCreatedProps,
   AgentToolEventCreateProps,
   AgentToolEventInvestigationAttachProps,
   AgentToolEventStatusUpdateProps,
   AgentToolKnowledgeIndicatorIdentificationStartedProps,
-  CodeAnalysisGroundingProps,
   DetectionScanProps,
   KnowledgeIndicatorFeaturesIdentifiedProps,
   KnowledgeIndicatorQueriesGeneratedProps,
@@ -311,7 +312,52 @@ const agentToolKnowledgeIndicatorIdentificationStartedSchema: RootSchema<AgentTo
     },
   };
 
+const alertSourceSchema = {
+  type: 'keyword' as const,
+  _meta: {
+    description:
+      'The `.rule-events` `source` of the alert: `internal` for Elastic-configured Alerting v2 rules, an `elastic.`-prefixed value for Elastic-produced alerts, or the sender-supplied value for external alerts',
+  },
+};
+
+const alertSpaceIdSchema = {
+  type: 'keyword' as const,
+  _meta: { description: 'The Kibana space that owns the alert' },
+};
+
+const fingerprintDescription =
+  'The stable caller-visible series identity of the alert the operation addressed, before Alerting v2 hashes it with space and source into `group_hash`. The operation may have failed; filter on `success` to keep only alerts that exist in `.rule-events`';
+
+const groupHashSchema = {
+  type: 'keyword' as const,
+  _meta: {
+    description:
+      'The Alerting v2 `group_hash` series key returned by the write that created the alert. Absent when the operation did not create it',
+    optional: true as const,
+  },
+};
+
+const existingAlertIdentitySchema: RootSchema<ExistingAlertIdentityProps> = {
+  alert_source: alertSourceSchema,
+  fingerprint: { type: 'keyword', _meta: { description: fingerprintDescription } },
+  space_id: alertSpaceIdSchema,
+};
+
+const alertCreationAttemptIdentitySchema: RootSchema<AlertCreationAttemptIdentityProps> = {
+  alert_source: alertSourceSchema,
+  fingerprint: {
+    type: 'keyword',
+    _meta: {
+      description: `${fingerprintDescription}. Absent when the server generated the id for an event it did not persist`,
+      optional: true,
+    },
+  },
+  group_hash: groupHashSchema,
+  space_id: alertSpaceIdSchema,
+};
+
 const agentToolEventCreateSchema: RootSchema<AgentToolEventCreateProps> = {
+  ...alertCreationAttemptIdentitySchema,
   success: {
     type: 'boolean',
     _meta: {
@@ -340,6 +386,7 @@ const agentToolEventCreateSchema: RootSchema<AgentToolEventCreateProps> = {
 };
 
 const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdateProps> = {
+  ...existingAlertIdentitySchema,
   success: {
     type: 'boolean',
     _meta: {
@@ -357,7 +404,8 @@ const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdatePro
   event_id: {
     type: 'keyword',
     _meta: {
-      description: 'The stable event id of the updated significant event',
+      description:
+        'The stable event id of the updated significant event; the same value as `fingerprint`, kept for compatibility',
     },
   },
   status: {
@@ -371,41 +419,6 @@ const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdatePro
     _meta: {
       description: 'Error message when event status update fails',
       optional: true,
-    },
-  },
-};
-
-const codeAnalysisGroundingSchema: RootSchema<CodeAnalysisGroundingProps> = {
-  source_id: {
-    type: 'keyword',
-    _meta: {
-      description: 'The Nightshift source id the code analysis was grounded for',
-    },
-  },
-  status: {
-    type: 'keyword',
-    _meta: {
-      description:
-        'Outcome of code_analysis grounding: feature, no_match, no_candidates, no_strings, or unavailable',
-    },
-  },
-  repository: {
-    type: 'keyword',
-    _meta: {
-      description: 'The repository/index selected to ground the source against',
-      optional: true,
-    },
-  },
-  candidate_count: {
-    type: 'long',
-    _meta: {
-      description: 'The number of candidate code repositories considered',
-    },
-  },
-  verified_count: {
-    type: 'long',
-    _meta: {
-      description: 'The number of distinctive log strings verified against the selected code',
     },
   },
 };
@@ -545,6 +558,7 @@ const onboardingScheduledSchema: RootSchema<KnowledgeIndicatorOnboardingSchedule
 
 const agentToolEventInvestigationAttachSchema: RootSchema<AgentToolEventInvestigationAttachProps> =
   {
+    ...existingAlertIdentitySchema,
     success: {
       type: 'boolean',
       _meta: {
@@ -563,7 +577,7 @@ const agentToolEventInvestigationAttachSchema: RootSchema<AgentToolEventInvestig
       type: 'keyword',
       _meta: {
         description:
-          'The stable event id of the significant event the investigation was attached to',
+          'The stable event id of the significant event the investigation was attached to; the same value as `fingerprint`, kept for compatibility',
         optional: true,
       },
     },
@@ -583,6 +597,7 @@ const agentToolEventInvestigationAttachSchema: RootSchema<AgentToolEventInvestig
   };
 
 const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
+  ...alertCreationAttemptIdentitySchema,
   success: {
     type: 'boolean',
     _meta: {
@@ -592,7 +607,8 @@ const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
   event_id: {
     type: 'keyword',
     _meta: {
-      description: 'The stable event id associated with the written event',
+      description:
+        'The stable event id associated with the written event, or `unknown` when the item had none; kept for compatibility, join on `fingerprint` instead',
     },
   },
   status: {
@@ -697,7 +713,6 @@ export {
   agentToolEventStatusUpdateSchema,
   agentToolEventWriteSchema,
   agentToolKnowledgeIndicatorIdentificationStartedSchema,
-  codeAnalysisGroundingSchema,
   detectionScanSchema,
   discoveryTriggeredSchema,
   knowledgeIndicatorFeaturesIdentifiedSchema,

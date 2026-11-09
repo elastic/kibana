@@ -30,6 +30,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./mixed_reads'));
     loadTestFile(require.resolve('./validation'));
     loadTestFile(require.resolve('./entity_sub_privilege'));
+    loadTestFile(require.resolve('./cases_by_attachment_ids'));
     loadTestFile(require.resolve('./attack'));
     loadTestFile(require.resolve('./attack_status_sync'));
     loadTestFile(require.resolve('./legacy_route_compat'));

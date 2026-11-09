@@ -7,7 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewBase } from '@kbn/es-query';
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { DataSourceKind } from './types';
+
+/**
+ * The part of a field that filtering reads. A `DataViewField` satisfies it, and so does a field of
+ * any other source. The label and spec members are optional capabilities.
+ */
+export type FilterableField = DataViewFieldBase & {
+  readonly searchable?: boolean;
+  readonly aggregatable?: boolean;
+  readonly filterable?: boolean;
+  readonly customLabel?: string;
+  readonly displayName?: string;
+  toSpec?(): unknown;
+};
 
 /**
  * What filtering needs from a data source: unified search, KQL, filter pills and the helpers behind
@@ -17,6 +31,17 @@ import type { DataViewBase } from '@kbn/es-query';
  * read them (`'getFormatterForField' in indexPattern`).
  */
 export interface FilterableSource extends DataViewBase {
+  /**
+   * Set by sources that are not data views: `'esql'` for the dataset of an ES|QL query. A `DataView`
+   * has none, so its absence means the source can be loaded as a data view by its id.
+   */
+  readonly kind?: DataSourceKind;
+  readonly fields: FilterableField[];
+  readonly name?: string;
   readonly timeFieldName?: string;
+  getName?(): string;
   isTimeBased(): boolean;
 }
+
+/** Whether the source is the dataset of an ES|QL query, whose id is not the id of a data view. */
+export const isEsqlFilterableSource = (source: FilterableSource): boolean => source.kind === 'esql';

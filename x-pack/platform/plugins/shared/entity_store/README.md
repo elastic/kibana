@@ -31,7 +31,7 @@ Each process keeps its own cursor, status and error on the engine descriptor (`l
 5. Per-type overrides (`logExtractionConfig`), set with `logExtraction` on internal `PUT /internal/security/entity_store/{entityType}`
 6. Non-priority overrides (`nonPriorityLogExtractionConfig`, incl. `samplingRate`), set with `nonPriorityOverride` on the same route
 
-`null` clears a field, so it falls back to the layer below. Arrays such as `additionalIndexPatterns` replace the lower layer, they do not merge. For non-priority, layers 4 and 5 cannot set the cap behaviour (`NON_PRIORITY_EXCLUSIVE_FIELDS`); only layer 6 can. Every other field, including the volume fields (`maxLogsPerPage`, `maxTimeWindowSize`, `maxLogsPerWindow`, `docsLimit`), is shared and reaches non-priority from layers 4/5 like any other config field; layer 6 remains available as a ceiling for an operator who wants non-priority to diverge intentionally.
+`null` clears a field, so it falls back to the layer below. Arrays such as `additionalIndexPatterns` replace the lower layer, they do not merge. For non-priority, layers 4 and 5 cannot set the volume fields (`NON_PRIORITY_EXCLUSIVE_FIELDS`); only layer 6 can.
 
 Pagination, sampling, the volume cap and crash recovery are described in [server/domain/logs_extraction/PAGINATION.md](server/domain/logs_extraction/PAGINATION.md).
 
@@ -205,7 +205,7 @@ dynamic: {
 
 - Sources: 1 to 16. A source is one index pattern (no commas or whitespace, at most 256 characters); several patterns are several sources. The same pattern may appear on several sources with different filters.
 - `filter`: optional opaque ES|QL boolean expression narrowing the source to this type's documents, at most 2000 characters. It is validated for length only; where it goes in the query is the generator's job.
-- Attributes: at most 32 per source. `name` (`^[a-z][a-z0-9_]*$`, at most 64 characters) is the output column and the merge key across sources, and is unique within a source. `field` is a literal field path (dot-separated segments of letters, digits, `_`, `@` and `-`; no wildcards, expressions, quoting or whitespace; at most 512 characters).
+- Attributes: at most 32 per source. `name` is a field path such as `host.arch` or `os.type`, under the same rule as `field` but at most 64 characters, so a column can carry the OpenTelemetry semantic convention name while each source reads its own field. It is the output column and the merge key across sources, and is unique within a source. `field` is a literal field path (dot-separated segments of letters, digits, `_`, `@` and `-`; no wildcards, expressions, quoting or whitespace; at most 512 characters).
 - `valueLabels`: optional map from raw values (stringified) to canonical labels, at most 64 entries, keys and labels 1 to 256 characters. Unmapped values pass through.
 - Unknown keys are rejected on the block, each source and each attribute. Bounds are denial-of-service limits for HTTP input, not design limits.
 

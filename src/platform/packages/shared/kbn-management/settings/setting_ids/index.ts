@@ -61,6 +61,8 @@ export const AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID = 'agentBuilder:expe
 export const AGENT_BUILDER_BASH_SUPPORT_SETTING_ID = 'agentBuilder:bashSupport';
 export const AGENT_BUILDER_API_DISCOVERY_SETTING_ID = 'agentBuilder:apiDiscovery';
 export const AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS = 'agentBuilder:prePromptWorkflowIds';
+export const AGENT_BUILDER_INCLUDE_FROZEN_BY_DEFAULT_SETTING_ID =
+  'agentBuilder:includeFrozenByDefault';
 export const AGENT_BUILDER_DEDUCTIVE_ENABLED_SETTING_ID = 'agentBuilder:deductiveEnabled';
 export const AGENT_BUILDER_DEDUCTIVE_ENDPOINT_SETTING_ID = 'agentBuilder:deductiveEndpoint';
 export const AGENT_BUILDER_DEDUCTIVE_API_KEY_SETTING_ID = 'agentBuilder:deductiveApiKey';

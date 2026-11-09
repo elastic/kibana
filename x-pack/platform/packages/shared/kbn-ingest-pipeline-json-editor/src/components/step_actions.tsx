@@ -94,21 +94,27 @@ export const StepActions = memo<StepActionsProps>(
     let tooltipContent: string;
     if (!isCompleteSimulation && !isAdditiveStep) {
       tooltipContent = i18n.translate(
-        'xpack.ingestPipelineJsonEditor.stepActions.notAdditiveStep',
+        'xpack.streams.ingestPipelineJsonEditor.stepActions.notAdditiveStep',
         {
           defaultMessage:
             'Only new steps that add processing without modifying existing behavior can be simulated.',
         }
       );
     } else if (!canRunSimulation) {
-      tooltipContent = i18n.translate('xpack.ingestPipelineJsonEditor.stepActions.cannotRun', {
-        defaultMessage:
-          "Simulation can't run. Ensure the JSON is valid and changes for partial data sources are strictly additive.",
-      });
+      tooltipContent = i18n.translate(
+        'xpack.streams.ingestPipelineJsonEditor.stepActions.cannotRun',
+        {
+          defaultMessage:
+            "Simulation can't run. Ensure the JSON is valid and changes for partial data sources are strictly additive.",
+        }
+      );
     } else {
-      tooltipContent = i18n.translate('xpack.ingestPipelineJsonEditor.stepActions.runUpToStep', {
-        defaultMessage: 'Run simulation up to this step',
-      });
+      tooltipContent = i18n.translate(
+        'xpack.streams.ingestPipelineJsonEditor.stepActions.runUpToStep',
+        {
+          defaultMessage: 'Run simulation up to this step',
+        }
+      );
     }
 
     return (

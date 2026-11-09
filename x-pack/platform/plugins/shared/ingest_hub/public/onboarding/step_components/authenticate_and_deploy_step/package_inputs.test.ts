@@ -20,7 +20,6 @@ function makeService(overrides: Partial<AwsServiceMatrixEntry> = {}): AwsService
   return {
     id: 'test_service',
     name: 'Test Service',
-    category: 'compute',
     signalTypes: ['logs'],
     dataStreams: ['test_service'],
     packageName: 'aws',
@@ -415,6 +414,51 @@ describe('toSOServiceVars', () => {
     expect(result.ec2.namespace).toBe('prod');
     expect(result['ec2__dup-1'].namespace).toBe('staging');
   });
+
+  describe('typing the vars', () => {
+    // A service with a multi-value var: the raw draft is a comma-separated string.
+    const service = makeService({
+      id: 'aws_billing',
+      packageName: 'aws_billing',
+      dataStreams: ['billing'],
+      inputs: ['aws-s3'],
+      varDefsByInput: {
+        'aws-s3': {
+          tags: { name: 'tags', type: 'text', show_user: true, multi: true } as any,
+        },
+      },
+    });
+    const servicesMap = new Map([['aws_billing', service]]);
+    const vars = (tags: string): ServiceVars => ({
+      enabledDataStreams: ['billing'],
+      varsByDataStream: {
+        billing: { enabledInputs: ['aws-s3'], varsByInput: { 'aws-s3': { tags } } },
+      },
+    });
+    const tagsOf = (result: Record<string, unknown>, instanceId: string) =>
+      (result[instanceId] as ServiceVars).varsByDataStream.billing.varsByInput['aws-s3'].tags;
+
+    it('splits a multi-value var of an original', () => {
+      const result = toSOServiceVars({ aws_billing: vars('a, b') }, servicesMap);
+
+      expect(tagsOf(result, 'aws_billing')).toEqual(['a', 'b']);
+    });
+
+    it('types a duplicate like its service, which the instance id alone does not find', () => {
+      const result = toSOServiceVars(
+        { aws_billing: vars('a, b'), 'aws_billing__dup-1': vars('c, d') },
+        servicesMap
+      );
+
+      expect(tagsOf(result, 'aws_billing__dup-1')).toEqual(['c', 'd']);
+    });
+
+    it('passes the vars of an instance of an unknown service through unchanged', () => {
+      const result = toSOServiceVars({ 'other__dup-1': vars('c, d') }, servicesMap);
+
+      expect(tagsOf(result, 'other__dup-1')).toBe('c, d');
+    });
+  });
 });
 
 describe('buildPackageInputs', () => {
@@ -698,5 +742,57 @@ describe('buildPackageVars — stored secret refs', () => {
 
   it('returns undefined when nothing is sent', () => {
     expect(buildPackageVars('', undefined, PKG_VARS)).toBeUndefined();
+  });
+
+  it('adds the package vars set from the shared settings, and null to clear one', () => {
+    expect(
+      buildPackageVars('', undefined, PKG_VARS, undefined, undefined, {
+        proxy_url: 'http://proxy:3128',
+      })
+    ).toEqual({ proxy_url: 'http://proxy:3128' });
+    expect(
+      buildPackageVars('', undefined, PKG_VARS, undefined, undefined, { proxy_url: null })
+    ).toEqual({ proxy_url: null });
+  });
+});
+
+describe('buildStreamVars — package vars from the shared settings', () => {
+  const def = (name: string, extra: object = {}) =>
+    ({ name, type: 'text', title: name, show_user: false, ...extra } as any);
+  const dsVars = (vars: Record<string, string | string[]> = {}) => ({
+    enabledInputs: ['aws-s3'],
+    varsByInput: { 'aws-s3': vars },
+  });
+  const declaring = makeService({
+    inputs: ['aws-s3'],
+    varDefsByInput: { 'aws-s3': { proxy_url: def('proxy_url') } },
+  });
+  const notDeclaring = makeService({
+    inputs: ['aws-s3'],
+    varDefsByInput: { 'aws-s3': { bucket_arn: def('bucket_arn') } },
+  });
+  const policyVars = { proxy_url: 'http://proxy:3128' };
+
+  it('fills a stream var the stream declares', () => {
+    expect(buildStreamVars(declaring, dsVars(), '', 'aws-s3', policyVars).proxy_url).toBe(
+      'http://proxy:3128'
+    );
+  });
+
+  it('keeps a value set for the service', () => {
+    const out = buildStreamVars(
+      declaring,
+      dsVars({ proxy_url: 'http://own:1' }),
+      '',
+      'aws-s3',
+      policyVars
+    );
+    expect(out.proxy_url).toBe('http://own:1');
+  });
+
+  it('does not send a var the stream does not declare', () => {
+    expect(buildStreamVars(notDeclaring, dsVars(), '', 'aws-s3', policyVars)).not.toHaveProperty(
+      'proxy_url'
+    );
   });
 });

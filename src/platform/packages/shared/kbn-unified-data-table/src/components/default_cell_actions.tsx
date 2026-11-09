@@ -16,10 +16,15 @@ import type { ToastsStart } from '@kbn/core/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { shouldShowFieldFilterInOutActions } from '@kbn/unified-doc-viewer/utils/should_show_field_filter_actions';
-import { REVERSE_CATEGORIZE_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { getIgnoredReason } from '@kbn/discover-utils';
+import {
+  getDataViewFieldFromDataSource,
+  getIgnoredReason,
+  getMessageFieldWithFallbacks,
+} from '@kbn/discover-utils';
+import { useFindSimilarValues } from '../hooks/use_find_similar_values';
 import type { DataTableContext } from '../table_context';
 import { UnifiedDataTableContext } from '../table_context';
+import { SOURCE_COLUMN } from '../utils/columns';
 import { copyValueToClipboard } from '../utils/copy_value_to_clipboard';
 import type { DocumentsDisplayMode, ValueToStringConverter } from '../types';
 
@@ -66,7 +71,7 @@ export const FilterInBtn = ({
   const context = useContext(UnifiedDataTableContext);
   const buttonTitle = i18n.translate('unifiedDataTable.grid.filterForAria', {
     defaultMessage: 'Filter for this {value}',
-    values: { value: columnId },
+    values: { value: field.displayName },
   });
 
   if (isCellValueIgnored(context, rowIndex, field)) {
@@ -102,7 +107,7 @@ export const FilterOutBtn = ({
   const context = useContext(UnifiedDataTableContext);
   const buttonTitle = i18n.translate('unifiedDataTable.grid.filterOutAria', {
     defaultMessage: 'Filter out this {value}',
-    values: { value: columnId },
+    values: { value: field.displayName },
   });
 
   if (isCellValueIgnored(context, rowIndex, field)) {
@@ -133,42 +138,52 @@ export const ReverseCategorizeBtn = ({
   uiActions,
 }: {
   cellActionProps: EuiDataGridColumnCellActionProps;
-  field: DataViewField;
+  /** The field of the column. Not needed for the summary column, which uses its message field. */
+  field?: DataViewField;
   dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
   uiActions?: UiActionsStart;
 }) => {
   const context = useContext(UnifiedDataTableContext);
+  const row = context.getRowByIndex(rowIndex);
+
+  // The summary (_source) column shows the message of the document, so analyse the value of
+  // its message field rather than the column itself.
+  const { targetField, rawValue } = (() => {
+    if (columnId !== SOURCE_COLUMN) {
+      return { targetField: field, rawValue: row?.flattened[columnId] };
+    }
+    const { field: messageFieldName, value } = getMessageFieldWithFallbacks(row?.flattened ?? {});
+    return {
+      targetField: messageFieldName
+        ? getDataViewFieldFromDataSource({
+            dataView: context.dataView,
+            dataSource: context.dataSource,
+            fieldName: messageFieldName,
+          })
+        : undefined,
+      rawValue: value,
+    };
+  })();
+
+  const { isAvailable, findSimilarValues } = useFindSimilarValues({
+    uiActions,
+    dataView: context.dataView,
+    field: targetField,
+  });
   const buttonTitle = i18n.translate('unifiedDataTable.grid.reverseCategorize', {
     defaultMessage: 'Find similar values',
   });
 
-  const isTextfield = field.esTypes?.includes('text') === true;
-
-  if (!uiActions || !isTextfield || !context.dataView.isTimeBased()) {
+  if (!isAvailable) {
     return null;
   }
 
   return (
     <Component
       onClick={() => {
-        const row = context.getRowByIndex(rowIndex);
-        const rawValue = row?.flattened[columnId];
         // Use the indexed/flattened value so category regex matching is not broken by
         // field formatting or clipboard escaping from valueToStringConverter.
-        const fieldValue =
-          typeof rawValue === 'string' ? rawValue : rawValue == null ? '' : String(rawValue);
-
-        uiActions.executeTriggerActions(REVERSE_CATEGORIZE_FIELD_TRIGGER, {
-          field,
-          dataView: context.dataView,
-          originatingApp: 'discover',
-          fieldValue,
-          openInNewTab: context.onOpenInNewTab,
-          query: context.queryContext?.query,
-          filters: context.queryContext?.filters,
-          filterQuery: context.queryContext?.filterQuery,
-          timeRange: context.queryContext?.timeRange,
-        });
+        findSimilarValues(rawValue == null ? '' : String(rawValue));
         dataGridRef?.current?.closeCellPopover();
       }}
       iconType="search"
@@ -185,11 +200,12 @@ export function buildCopyValueButton(
   { Component, rowIndex, columnId }: EuiDataGridColumnCellActionProps,
   toastNotifications: ToastsStart,
   valueToStringConverter: ValueToStringConverter,
-  documentsDisplayMode: DocumentsDisplayMode
+  documentsDisplayMode: DocumentsDisplayMode,
+  columnDisplayName?: string
 ) {
   const buttonTitle = i18n.translate('unifiedDataTable.grid.copyClipboardButtonTitle', {
     defaultMessage: 'Copy value of {column}',
-    values: { column: columnId },
+    values: { column: columnDisplayName ?? columnId },
   });
 
   return (
@@ -212,6 +228,35 @@ export function buildCopyValueButton(
       })}
     </Component>
   );
+}
+
+export function buildSummaryColumnCellActions(
+  toastNotifications: ToastsStart,
+  valueToStringConverter: ValueToStringConverter,
+  documentsDisplayMode: DocumentsDisplayMode,
+  dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>,
+  uiActions?: UiActionsStart,
+  dataView?: DataView
+) {
+  const showReverseCategorize =
+    uiActions?.hasAction('ACTION_REVERSE_CATEGORIZE_FIELD') === true &&
+    dataView?.isTimeBased() === true;
+
+  return [
+    ({ Component, rowIndex, columnId }: EuiDataGridColumnCellActionProps) =>
+      buildCopyValueButton(
+        { Component, rowIndex, columnId } as EuiDataGridColumnCellActionProps,
+        toastNotifications,
+        valueToStringConverter,
+        documentsDisplayMode
+      ),
+    ...(showReverseCategorize
+      ? [
+          (cellActionProps: EuiDataGridColumnCellActionProps) =>
+            ReverseCategorizeBtn({ cellActionProps, dataGridRef, uiActions }),
+        ]
+      : []),
+  ];
 }
 
 export function buildCellActions(
@@ -258,7 +303,8 @@ export function buildCellActions(
         { Component, rowIndex, columnId } as EuiDataGridColumnCellActionProps,
         toastNotifications,
         valueToStringConverter,
-        documentsDisplayMode
+        documentsDisplayMode,
+        field.displayName
       ),
     ...(showReverseCategorize
       ? [

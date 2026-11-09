@@ -117,6 +117,7 @@ interface DefaultQueryArgs {
   initialUrlState: DiscoverAppState | undefined;
   hasGlobalState: boolean;
   defaultProfileEsqlQuery?: DefaultEsqlQueryConfig;
+  locationStateHasDataViewSpec?: boolean;
 }
 
 // URL state (_g or _a) is respected and assumed classic; this also reuses the query mode when
@@ -154,6 +155,8 @@ const getConfiguredEsqlQuery = ({ services, defaultProfileEsqlQuery }: DefaultQu
  */
 export function getConfiguredDefaultEsqlQuery(args: DefaultQueryArgs): AggregateQuery | undefined {
   if (args.persistedTab?.serializedSearchSource.query || hasUrlState(args)) return undefined;
+  // A data view passed by the locator takes precedence over the configured query
+  if (args.locationStateHasDataViewSpec) return undefined;
   if (!opensInEsqlByDefault(args)) return undefined;
   const esql = getConfiguredEsqlQuery(args);
   return esql ? { esql } : undefined;
@@ -172,6 +175,7 @@ export function getDefaultQuery(
     return initialUrlState?.query || services.data.query.queryString.getDefaultQuery();
 
   if (dataView instanceof DataView && opensInEsqlByDefault(args)) {
+    if (args.locationStateHasDataViewSpec) return { esql: getInitialESQLQuery(dataView) };
     return { esql: getConfiguredEsqlQuery(args) || getInitialESQLQuery(dataView) };
   }
 

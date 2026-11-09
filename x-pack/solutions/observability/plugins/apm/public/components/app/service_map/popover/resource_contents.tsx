@@ -10,7 +10,6 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { isEdge } from './utils';
 import type { ContentsProps } from './popover_content';
 import { isDependencyNodeData, type DependencyNodeData } from '../../../../../common/service_map';
 
@@ -25,14 +24,10 @@ export function ResourceContents({ selection }: ContentsProps) {
     color: ${euiTheme.colors.textSubdued};
   `;
 
-  if (isEdge(selection)) {
+  if (!isDependencyNodeData(selection.data)) {
     return null;
   }
-  const node = selection;
-  if (!isDependencyNodeData(node.data)) {
-    return null;
-  }
-  const data: DependencyNodeData = node.data;
+  const data: DependencyNodeData = selection.data;
 
   const listItems = [
     {

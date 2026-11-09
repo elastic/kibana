@@ -106,7 +106,7 @@ describe('useAlertingEpisodesDataView', () => {
         },
       },
     });
-    expect(mockDataView.addRuntimeField).toHaveBeenCalledTimes(5);
+    expect(mockDataView.addRuntimeField).toHaveBeenCalledTimes(6);
   });
 
   it('should add a runtime field for the rule tags column, which has no backing query field', async () => {
@@ -150,10 +150,26 @@ describe('useAlertingEpisodesDataView', () => {
       expect(mockDataView.addRuntimeField).toHaveBeenCalled();
     });
 
-    expect(mockDataView.addRuntimeField).toHaveBeenCalledWith('maintenance_windows', {
+    expect(mockDataView.addRuntimeField).toHaveBeenCalledWith('suppressed', {
       type: 'keyword',
       script: { source: "emit('')" },
-      customLabel: 'Maintenance windows',
+      customLabel: 'Suppressed',
+    });
+  });
+
+  it('should add a runtime field for the reason column, which has no backing query field', async () => {
+    const services = { dataViews, http, spaces: mockSpaces };
+
+    renderHook(() => useAlertingEpisodesDataView({ services }));
+
+    await waitFor(() => {
+      expect(mockDataView.addRuntimeField).toHaveBeenCalled();
+    });
+
+    expect(mockDataView.addRuntimeField).toHaveBeenCalledWith('reason', {
+      type: 'keyword',
+      script: { source: "emit('')" },
+      customLabel: 'Reason',
     });
   });
 

@@ -9,11 +9,21 @@ export interface TriageAlert {
   id: string;
   ruleId: string;
   ruleName: string;
+  /**
+   * Which detection fired, set only for rules that override the alert's rule name (`rule.id`, else
+   * `event.code`). All Elastic Defend alerts share one rule uuid, so the uuid alone mixes detections.
+   */
+  detection?: string;
   riskScore: number;
   /** Alert creation time, epoch milliseconds. */
   timestamp: number;
   status: string;
   tags: readonly string[];
+  /**
+   * Set on a claimed alert the Worker settings now exclude (raised severity floor, excluded rule
+   * tag, building block). Its claim is still released, but it is not planned again.
+   */
+  excludedBySettings?: boolean;
 }
 
 export interface RuleAllocation {

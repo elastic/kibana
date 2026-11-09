@@ -12,6 +12,8 @@ import {
   sendGetPackageInfoByKey,
 } from '@kbn/fleet-plugin/public';
 
+import { getEffectiveNamespace } from '../../common/effective_namespace';
+import { getDefaultEnabledDataStreams } from '../../aws_service_matrix';
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
 import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './package_inputs';
 import {
@@ -21,8 +23,17 @@ import {
 } from './secret_refs';
 import type { ExistingSecretRefs } from './secret_refs';
 import { runWithSharedSecrets } from './shared_secrets';
-import { computePolicyCleanupOps, resolveSurvivingMembers } from './policy_cleanup';
+import {
+  computePolicyCleanupOps,
+  resolveSurvivingMembers,
+  toOnboardingDeploymentQuery,
+} from './policy_cleanup';
 import type { BuildPolicyBodyOpts, PolicyCleanupOps } from './policy_cleanup';
+import {
+  getPolicySettingsUpdate,
+  getPolicyVarSettings,
+  getPolicyVarSettingsUpdate,
+} from '../../common/policy_settings';
 
 export interface CleanupManagedIntegrationsOpts extends BuildPolicyBodyOpts {
   pendingCleanupPolicyIds: Record<string, string>;
@@ -54,6 +65,7 @@ export async function cleanupManagedIntegrationsPolicies(
     hasTypedSecrets,
     addedInstanceIdsByPolicy,
     alreadyUpdatedPolicyIds,
+    onboardingDeploymentId,
   } = opts;
   const planned = computePolicyCleanupOps(pendingCleanupPolicyIds, currentPolicyIdsByInstance);
 
@@ -68,7 +80,7 @@ export async function cleanupManagedIntegrationsPolicies(
 
   const deletes = Promise.allSettled(
     planned.toDelete.map((policyId) =>
-      sendDeleteAgentlessPolicy(policyId)
+      sendDeleteAgentlessPolicy(policyId, toOnboardingDeploymentQuery(onboardingDeploymentId))
         .then(() => {
           succeededDeletes.push(policyId);
         })
@@ -127,6 +139,8 @@ export async function updateManagedIntegrationsPolicy(
     storedServiceVars,
     globalRegion,
     namespace,
+    globalNamespace,
+    policySettings,
     authenticateAndDeployStep,
     servicesMap,
   } = opts;
@@ -175,13 +189,18 @@ export async function updateManagedIntegrationsPolicy(
   const serviceVarsMap: Record<string, ServiceVars> = {};
   for (const { instance, service } of members) {
     serviceVarsMap[service.id] = storedServiceVars[instance.instanceId] ?? {
-      enabledDataStreams: service.dataStreams,
+      enabledDataStreams: getDefaultEnabledDataStreams(service),
       varsByDataStream: {},
     };
   }
 
   const services = members.map(({ service }) => service);
-  const inputs = buildPackageInputs(services, serviceVarsMap, globalRegion);
+  const inputs = buildPackageInputs(
+    services,
+    serviceVarsMap,
+    globalRegion,
+    getPolicyVarSettings(policySettings, 'managed_integration')
+  );
 
   // Explicitly disable unrelated inputs (Fleet may enable them by manifest default).
   const pkgTemplates: Array<{
@@ -203,7 +222,11 @@ export async function updateManagedIntegrationsPolicy(
   const pkgVarNames = getPackageVarNames(pkgInfo as { vars?: Array<{ name: string }> });
 
   const policyName = existingName ?? `${packageName.replace(/[^a-zA-Z0-9_-]/g, '_')}-${Date.now()}`;
-  const policyNamespace = existingNamespace ?? namespace;
+  // The namespace the instances now deploy into wins, so a change made while editing a deployed
+  // flow reaches the policy. Without one the policy keeps what it has.
+  const policyNamespace =
+    getEffectiveNamespace(members[0].instance.instanceId, storedServiceVars, globalNamespace) ||
+    (existingNamespace ?? namespace);
 
   // Use the override connector when the caller explicitly provides one (e.g. a dirty redeploy
   // that changed identity federation settings). Otherwise preserve the connector already on the
@@ -229,17 +252,23 @@ export async function updateManagedIntegrationsPolicy(
     undefined,
     cloudConnector
       ? undefined
-      : authenticateAndDeployStep.existingSecretRefs ?? detectSecretRefs(existingGetResult.item)
+      : authenticateAndDeployStep.existingSecretRefs ?? detectSecretRefs(existingGetResult.item),
+    getPolicyVarSettingsUpdate(policySettings, 'managed_integration', pkgVarNames)
   );
 
-  await sendUpdateAgentlessPolicy(policyId, {
-    name: policyName,
-    namespace: policyNamespace,
-    package: { name: packageName, version: pkgVersion },
-    ...(vars ? { vars } : {}),
-    inputs,
-    // null means "detach" (same as omitting — per Fleet schema); undefined means "preserve". Use
-    // !== undefined rather than truthiness so an intentional null reaches the wire explicitly.
-    ...(cloudConnector !== undefined ? { cloud_connector: cloudConnector } : {}),
-  });
+  await sendUpdateAgentlessPolicy(
+    policyId,
+    {
+      name: policyName,
+      namespace: policyNamespace,
+      package: { name: packageName, version: pkgVersion },
+      ...(vars ? { vars } : {}),
+      inputs,
+      ...getPolicySettingsUpdate(policySettings, 'managed_integration'),
+      // null means "detach" (same as omitting — per Fleet schema); undefined means "preserve". Use
+      // !== undefined rather than truthiness so an intentional null reaches the wire explicitly.
+      ...(cloudConnector !== undefined ? { cloud_connector: cloudConnector } : {}),
+    },
+    { query: toOnboardingDeploymentQuery(opts.onboardingDeploymentId) }
+  );
 }
