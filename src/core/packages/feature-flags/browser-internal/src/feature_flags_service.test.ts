@@ -32,7 +32,12 @@ jest.mock('@openfeature/ofrep-web-provider', () => ({
 }));
 
 jest.mock('./helper', () => ({
-  mountFeatureFlagsHelper: jest.fn(() => ({ unmount: jest.fn(), open: jest.fn() })),
+  mountFeatureFlagsHelper: jest.fn(() => ({
+    unmount: jest.fn(),
+    open: jest.fn(),
+    close: jest.fn(),
+    setCornerButtonVisible: jest.fn(),
+  })),
 }));
 
 /** Dynamic `import()` settles across more than one microtask. */
@@ -616,12 +621,10 @@ describe('FeatureFlagsService Browser', () => {
     beforeEach(() => {
       localStorage.clear();
       delete globalThis.toggleFeatureFlagsHelper;
-      delete globalThis.openFeatureFlagsHelper;
-      delete globalThis.featureFlagsHelperInToolbar;
       jest.mocked(mountFeatureFlagsHelper).mockClear();
     });
 
-    test('exposes a console toggle that mounts and unmounts the helper', async () => {
+    test('toggles the corner button and closes the flyout when hiding it', async () => {
       featureFlagsService.registerHelper(helperDeps());
       expect(globalThis.toggleFeatureFlagsHelper).toEqual(expect.any(Function));
       expect(mountFeatureFlagsHelper).not.toHaveBeenCalled();
@@ -630,32 +633,57 @@ describe('FeatureFlagsService Browser', () => {
       await flushAsyncWork();
 
       expect(localStorage.getItem('core.featureFlags.helper.enabled')).toBe('true');
-      expect(mountFeatureFlagsHelper).toHaveBeenCalledTimes(1);
-      const unmount = jest.mocked(mountFeatureFlagsHelper).mock.results[0]?.value.unmount;
+      expect(mountFeatureFlagsHelper).toHaveBeenCalledWith(
+        expect.objectContaining({ cornerButtonVisible: true })
+      );
+      const mounted = jest.mocked(mountFeatureFlagsHelper).mock.results[0]?.value;
 
       globalThis.toggleFeatureFlagsHelper?.();
+      await flushAsyncWork();
+
       expect(localStorage.getItem('core.featureFlags.helper.enabled')).toBe('false');
-      expect(unmount).toHaveBeenCalledTimes(1);
+      expect(mounted?.setCornerButtonVisible).toHaveBeenCalledWith(false);
+      expect(mounted?.close).toHaveBeenCalledTimes(1);
+      expect(mounted?.unmount).not.toHaveBeenCalled();
     });
 
-    test('opens the helper flyout from the developer toolbar', async () => {
+    test('opens the helper flyout from the developer toolbar without storing the button', async () => {
       const open = jest.fn();
-      jest.mocked(mountFeatureFlagsHelper).mockReturnValue({ unmount: jest.fn(), open });
+      const close = jest.fn();
+      const setCornerButtonVisible = jest.fn();
+      jest.mocked(mountFeatureFlagsHelper).mockReturnValue({
+        unmount: jest.fn(),
+        open,
+        close,
+        setCornerButtonVisible,
+      });
+      const { helper } = await featureFlagsService.start();
       featureFlagsService.registerHelper(helperDeps());
 
-      globalThis.openFeatureFlagsHelper?.();
+      helper.open();
+      await flushAsyncWork();
+
+      expect(localStorage.getItem('core.featureFlags.helper.enabled')).toBeNull();
+      expect(mountFeatureFlagsHelper).toHaveBeenCalledWith(
+        expect.objectContaining({ cornerButtonVisible: false })
+      );
+      expect(open).toHaveBeenCalledTimes(1);
+
+      globalThis.toggleFeatureFlagsHelper?.();
       await flushAsyncWork();
 
       expect(localStorage.getItem('core.featureFlags.helper.enabled')).toBe('true');
+      expect(setCornerButtonVisible).toHaveBeenCalledWith(true);
       expect(mountFeatureFlagsHelper).toHaveBeenCalledTimes(1);
-      expect(open).toHaveBeenCalledTimes(1);
     });
 
-    test('restores the helper when it was left enabled', async () => {
+    test('restores the corner button when it was left visible', async () => {
       localStorage.setItem('core.featureFlags.helper.enabled', 'true');
       featureFlagsService.registerHelper(helperDeps());
       await flushAsyncWork();
-      expect(mountFeatureFlagsHelper).toHaveBeenCalledTimes(1);
+      expect(mountFeatureFlagsHelper).toHaveBeenCalledWith(
+        expect.objectContaining({ cornerButtonVisible: true })
+      );
     });
 
     test('refresh asks the provider to load the current context again', async () => {

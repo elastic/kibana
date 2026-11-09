@@ -39,16 +39,6 @@ const getOrCreateGlobalStateManager = (): ToolbarStateManager => {
   return (registry.developerToolbarStateManager ??= new ToolbarStateManager());
 };
 
-/** Whether a toolbar item is enabled in the saved toolbar settings. */
-export function isDeveloperToolbarItemEnabled(itemId: string): boolean {
-  return getOrCreateGlobalStateManager().isEnabled(itemId);
-}
-
-/** Subscribes to toolbar settings and item registration changes. */
-export function subscribeToDeveloperToolbarState(listener: () => void): () => void {
-  return getOrCreateGlobalStateManager().subscribe(listener);
-}
-
 export interface DeveloperToolbarState {
   items: DeveloperToolbarItem[];
   enabledItems: DeveloperToolbarItem[];

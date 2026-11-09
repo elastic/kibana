@@ -202,10 +202,10 @@ Kibana includes a Feature flag helper that allows users to test and troubleshoot
 Superusers can see and update the flags to see their effect in Kibana. 
 Lower privileged users only can see the evaluated values without an option to upate it.
 
-The button to open the Feature flag helper can be accessed in 2 ways:
+The flyout can be opened in two ways:
 
-* When the Developer Toolbar is available, it shows the **Feature flags** pill (check the settings of the bar if it doesn't).
-* When the Developer Toolbar is not available, or the pill is disabled in its settings, a floating button will show up at the bottom-left corner of the screen. If it doesn't show up, run this in the browser console:
+* When the Developer Toolbar is available, the **Feature flags** pill opens the flyout. That does not show or hide the corner button.
+* `toggleFeatureFlagsHelper()` in the browser console shows or hides the corner button, including when the Developer Toolbar is active. Hiding the button closes the flyout. The choice is remembered for the next page load.
 
 ```js
 toggleFeatureFlagsHelper()

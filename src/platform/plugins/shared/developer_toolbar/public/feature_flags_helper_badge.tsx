@@ -11,10 +11,6 @@ import React from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-declare global {
-  var openFeatureFlagsHelper: (() => void) | undefined;
-}
-
 const badgeLabel = i18n.translate('developerToolbar.featureFlagsHelper.badgeLabel', {
   defaultMessage: 'Feature flags',
 });
@@ -24,16 +20,14 @@ const openAriaLabel = i18n.translate('developerToolbar.featureFlagsHelper.openAr
 });
 
 /** Toolbar pill that opens the feature flags helper flyout. */
-export function FeatureFlagsHelperBadge() {
+export function FeatureFlagsHelperBadge({ onClick }: { onClick: () => void }) {
   return (
     <EuiToolTip content={openAriaLabel} disableScreenReaderOutput>
       <EuiBadge
         color="#1E293B"
         iconType="tableGear"
         iconSide="left"
-        onClick={() => {
-          globalThis.openFeatureFlagsHelper?.();
-        }}
+        onClick={onClick}
         onClickAriaLabel={openAriaLabel}
         data-test-subj="featureFlagsHelperButton"
       >

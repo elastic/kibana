@@ -41,6 +41,7 @@ describe('mountFeatureFlagsHelper', () => {
         rendering: { addContext: (node: React.ReactNode) => node as React.ReactElement },
         refreshFlags: async () => undefined,
         getBrowserEvaluations: () => [],
+        cornerButtonVisible: true,
       });
     });
 
@@ -50,9 +51,69 @@ describe('mountFeatureFlagsHelper', () => {
     expect(overlays.openFlyout).toHaveBeenCalledTimes(1);
 
     act(() => {
+      helper?.close();
+    });
+    expect(close).toHaveBeenCalledTimes(1);
+
+    act(() => {
       helper?.unmount();
     });
     resolveClose();
     expect(close).toHaveBeenCalledTimes(1);
+  });
+
+  test('shows the corner button when asked, including while the flyout is already open', () => {
+    const close = jest.fn();
+    let resolveClose = () => {};
+    const overlays = {
+      openFlyout: jest.fn(
+        () =>
+          ({
+            close,
+            onClose: new Promise<void>((resolve) => {
+              resolveClose = resolve;
+            }),
+          } as OverlayRef)
+      ),
+    };
+    let helper: ReturnType<typeof mountFeatureFlagsHelper> | undefined;
+
+    act(() => {
+      helper = mountFeatureFlagsHelper({
+        http: {
+          get: jest.fn(),
+          post: jest.fn(),
+          put: jest.fn(),
+          delete: jest.fn(),
+        },
+        overlays,
+        rendering: { addContext: (node: React.ReactNode) => node as React.ReactElement },
+        refreshFlags: async () => undefined,
+        getBrowserEvaluations: () => [],
+        cornerButtonVisible: false,
+      });
+    });
+
+    expect(document.querySelector('[data-test-subj="featureFlagsHelperButton"]')).toBeNull();
+
+    act(() => {
+      helper?.open();
+    });
+    expect(overlays.openFlyout).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      helper?.setCornerButtonVisible(true);
+    });
+    expect(document.querySelector('[data-test-subj="featureFlagsHelperButton"]')).not.toBeNull();
+
+    act(() => {
+      helper?.close();
+    });
+    expect(close).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      helper?.unmount();
+    });
+    resolveClose();
   });
 });

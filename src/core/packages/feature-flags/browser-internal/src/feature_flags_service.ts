@@ -16,7 +16,7 @@ import type { Logger } from '@kbn/logging';
 import type {
   EvaluationContext,
   FeatureFlagsSetup,
-  FeatureFlagsStart,
+  InternalFeatureFlagsStart,
   MultiContextEvaluationContext,
 } from '@kbn/core-feature-flags-browser';
 import { apm } from '@elastic/apm-rum';
@@ -64,10 +64,6 @@ export interface FeatureFlagsHelperDeps {
 
 declare global {
   var toggleFeatureFlagsHelper: (() => void) | undefined;
-  /** Opens the helper flyout. The developer toolbar pill calls this. */
-  var openFeatureFlagsHelper: (() => void) | undefined;
-  /** Set when the developer toolbar owns the helper button, so the corner button stays hidden. */
-  var featureFlagsHelperInToolbar: boolean | undefined;
 }
 
 interface ReportedFlagValue {
@@ -136,6 +132,11 @@ export class FeatureFlagsService {
   private helperDeps?: FeatureFlagsHelperDeps;
   private unmountHelper?: () => void;
   private openHelper?: () => void;
+  private closeHelperFlyout?: () => void;
+  private setMountedCornerButtonVisible?: (visible: boolean) => void;
+  private mountingHelper?: Promise<void>;
+  /** Remembered in localStorage. Independent of the developer toolbar pill. */
+  private cornerButtonVisible = false;
   private isProviderReadyPromise?: Promise<void>;
   private context: MultiContextEvaluationContext = { kind: 'multi' };
   private http?: InternalHttpSetup;
@@ -167,7 +168,7 @@ export class FeatureFlagsService {
   /**
    * Start lifecycle method
    */
-  public async start(): Promise<FeatureFlagsStart> {
+  public async start(): Promise<InternalFeatureFlagsStart> {
     const featureFlagsChanged$ = new Subject<string[]>();
     this.featureFlagsClient.addHandler(ClientProviderEvents.ConfigurationChanged, (event) => {
       if (event?.flagsChanged) {
@@ -222,6 +223,11 @@ export class FeatureFlagsService {
       useStringValue,
       getNumberValue$,
       useNumberValue,
+      helper: {
+        open: () => {
+          void this.openHelperFlyout();
+        },
+      },
     };
   }
 
@@ -232,6 +238,8 @@ export class FeatureFlagsService {
     this.unmountHelper?.();
     this.unmountHelper = undefined;
     this.openHelper = undefined;
+    this.closeHelperFlyout = undefined;
+    this.setMountedCornerButtonVisible = undefined;
     await OpenFeature.close();
   }
 
@@ -244,62 +252,81 @@ export class FeatureFlagsService {
 
   /**
    * Exposes `toggleFeatureFlagsHelper()` on the page. The helper UI stays out of the
-   * page-load bundle until the first time it is turned on.
+   * page-load bundle until the corner button or the developer toolbar opens it.
    */
   public registerHelper(deps: FeatureFlagsHelperDeps): void {
     this.helperDeps = deps;
+    this.cornerButtonVisible = localStorage.getItem(HELPER_STORAGE_KEY) === 'true';
     this.logger.info(
-      globalThis.featureFlagsHelperInToolbar
-        ? 'Open the feature flags helper from the developer toolbar.'
-        : 'To inspect and override feature flags, run toggleFeatureFlagsHelper() in the browser console.'
+      'Run toggleFeatureFlagsHelper() in the browser console to show or hide the feature flags helper button.'
     );
     globalThis.toggleFeatureFlagsHelper = () => {
-      const enabled = localStorage.getItem(HELPER_STORAGE_KEY) !== 'true';
-      void this.setHelperEnabled(enabled);
+      void this.setCornerButtonVisible(!this.cornerButtonVisible);
     };
-    globalThis.openFeatureFlagsHelper = () => {
-      void this.openHelperFlyout();
-    };
-    if (localStorage.getItem(HELPER_STORAGE_KEY) === 'true') {
-      void this.setHelperEnabled(true);
+    if (this.cornerButtonVisible) {
+      void this.ensureHelperMounted();
     }
   }
 
+  /** Opens the flyout. Does not change the corner button or its localStorage value. */
   private async openHelperFlyout(): Promise<void> {
-    if (!this.unmountHelper) {
-      await this.setHelperEnabled(true);
-    }
+    await this.ensureHelperMounted();
     this.openHelper?.();
   }
 
-  private async setHelperEnabled(enabled: boolean): Promise<void> {
-    localStorage.setItem(HELPER_STORAGE_KEY, String(enabled));
-    if (!enabled) {
-      this.unmountHelper?.();
-      this.unmountHelper = undefined;
-      this.openHelper = undefined;
-      this.logger.info('Feature flags helper disabled.');
-      return;
-    }
-    if (this.unmountHelper || !this.helperDeps) {
+  /** Shows or hides the corner button. Hiding it closes an open flyout. */
+  private async setCornerButtonVisible(visible: boolean): Promise<void> {
+    this.cornerButtonVisible = visible;
+    localStorage.setItem(HELPER_STORAGE_KEY, String(visible));
+    if (visible) {
+      await this.ensureHelperMounted();
+      this.setMountedCornerButtonVisible?.(true);
+      this.logger.info('Feature flags helper button shown.');
       return;
     }
 
-    const deps = this.helperDeps;
-    const { mountFeatureFlagsHelper } = await import('./helper');
-    if (localStorage.getItem(HELPER_STORAGE_KEY) !== 'true' || this.unmountHelper) {
+    if (this.mountingHelper) {
+      await this.mountingHelper;
+    }
+    this.setMountedCornerButtonVisible?.(false);
+    this.closeHelperFlyout?.();
+    this.logger.info('Feature flags helper button hidden.');
+  }
+
+  private async ensureHelperMounted(): Promise<void> {
+    if (this.unmountHelper || !this.helperDeps) {
       return;
     }
-    const mounted = mountFeatureFlagsHelper({
-      http: deps.http,
-      overlays: deps.overlays,
-      rendering: deps.rendering,
-      refreshFlags: () => this.refresh(),
-      getBrowserEvaluations: () => this.getEvaluatedFlags(),
-    });
-    this.unmountHelper = mounted.unmount;
-    this.openHelper = mounted.open;
-    this.logger.info('Feature flags helper enabled.');
+    this.mountingHelper ??= this.mountHelper();
+    await this.mountingHelper;
+  }
+
+  private async mountHelper(): Promise<void> {
+    const deps = this.helperDeps;
+    if (!deps) {
+      return;
+    }
+    try {
+      const { mountFeatureFlagsHelper } = await import('./helper');
+      if (this.unmountHelper || !this.helperDeps) {
+        return;
+      }
+      const mounted = mountFeatureFlagsHelper({
+        http: deps.http,
+        overlays: deps.overlays,
+        rendering: deps.rendering,
+        refreshFlags: () => this.refresh(),
+        getBrowserEvaluations: () => this.getEvaluatedFlags(),
+        cornerButtonVisible: this.cornerButtonVisible,
+      });
+      this.unmountHelper = mounted.unmount;
+      this.openHelper = mounted.open;
+      this.closeHelperFlyout = mounted.close;
+      this.setMountedCornerButtonVisible = mounted.setCornerButtonVisible;
+      mounted.setCornerButtonVisible(this.cornerButtonVisible);
+    } finally {
+      this.mountingHelper = undefined;
+    }
   }
 
   /**
