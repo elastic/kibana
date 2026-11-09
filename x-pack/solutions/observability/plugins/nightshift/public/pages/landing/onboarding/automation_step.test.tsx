@@ -211,13 +211,14 @@ describe('OnboardingAutomationStep', () => {
     expect(screen.queryByTestId('createAutomationFlyout')).not.toBeInTheDocument();
   });
 
-  it('disables create when service accounts require manage_security the user lacks', () => {
+  it('disables create when service accounts require manage_security the user lacks', async () => {
     mockServiceAccount({ serviceAccountsEnabled: true, canModifyBoundWorkflows: false });
     renderStep();
 
     const create = screen.getByTestId('nightshiftOnboardingCreateAutomation');
     expect(create).toBeDisabled();
-    expect(create.closest('[class*="euiToolTip"]') ?? create.parentElement).toBeTruthy();
+    fireEvent.mouseOver(create);
+    expect(await screen.findByText(/manage_security/)).toBeInTheDocument();
   });
 
   it('opens the detail flyout read-only when the user cannot modify bound workflows', () => {

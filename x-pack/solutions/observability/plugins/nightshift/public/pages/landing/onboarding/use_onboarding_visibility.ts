@@ -56,32 +56,7 @@ export const useOnboardingVisibility = ({
   const automations = useFetchAutomations({ enabled: isEnabled && canUseAutomations });
   const hasAutomation = (automations.data?.automations.length ?? 0) > 0;
 
-  // Latch once the empty-automation onboarding UI is shown, so creating the first automation
-  // does not tear the page down before Done. Do not latch on a failed automations lookup —
-  // that error already means skip onboarding.
   const [sessionOpen, setSessionOpen] = useState(false);
-  useEffect(() => {
-    if (
-      forceOnboarding ||
-      (!isDismissed &&
-        !(canUseAutomations && automations.isInitialLoading) &&
-        canUseAutomations &&
-        !hasAutomation &&
-        !automations.isError)
-    ) {
-      setSessionOpen(true);
-    }
-  }, [
-    forceOnboarding,
-    isDismissed,
-    canUseAutomations,
-    hasAutomation,
-    automations.isInitialLoading,
-    automations.isError,
-  ]);
-  useEffect(() => {
-    if (isDismissed) setSessionOpen(false);
-  }, [isDismissed]);
 
   // Keep polling the trial investigation while onboarding is (or stays) on screen — including a
   // latched session after the first automation is saved, so the trial card can flip to ready.
@@ -98,6 +73,32 @@ export const useOnboardingVisibility = ({
   const isLoading =
     isEnabled &&
     ((canUseAutomations && automations.isInitialLoading) || investigations.isInitialLoading);
+
+  // Latch once both lookups have settled on empty automations, so creating the first automation
+  // does not tear the page down before Done. Do not latch on a failed automations lookup, and do
+  // not latch while the trial investigation is still loading (avoids a first-investigation flash).
+  useEffect(() => {
+    if (
+      forceOnboarding ||
+      (!isDismissed &&
+        !isLoading &&
+        canUseAutomations &&
+        !hasAutomation &&
+        !automations.isError)
+    ) {
+      setSessionOpen(true);
+    }
+  }, [
+    forceOnboarding,
+    isDismissed,
+    isLoading,
+    canUseAutomations,
+    hasAutomation,
+    automations.isError,
+  ]);
+  useEffect(() => {
+    if (isDismissed) setSessionOpen(false);
+  }, [isDismissed]);
 
   const isDone = canUseAutomations
     ? automations.isError || hasAutomation
