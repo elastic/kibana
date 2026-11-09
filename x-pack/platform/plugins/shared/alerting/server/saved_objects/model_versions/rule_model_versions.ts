@@ -211,9 +211,10 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     },
   },
   /**
-   * Allows the `configuration` execution failure reason and declares the already
-   * mapped `executionStatus.numberOfTriggeredActions`. Attributes are unchanged, so
-   * no backfill is needed.
+   * Stores `executionStatus.error.reason` and `lastRun.warning` as plain strings so new
+   * reasons can be added without an intermediate release, and declares the already
+   * mapped `executionStatus.numberOfTriggeredActions`. Attributes are unchanged, so no
+   * backfill is needed.
    */
   '17': {
     changes: [],
