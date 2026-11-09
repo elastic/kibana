@@ -22,6 +22,9 @@ import {
 import {
   RULE_CREATED_EVENT_TYPE,
   RULE_DELETED_EVENT_TYPE,
+  RULE_DISABLED_EVENT_TYPE,
+  RULE_ENABLED_EVENT_TYPE,
+  RULE_UPDATED_EVENT_TYPE,
   type RuleEvent,
   type RuleEventPayload,
 } from '../rule_event_publisher/events';
