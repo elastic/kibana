@@ -1731,6 +1731,9 @@ steps:
   # replace the full list. The verdict goes on the indicator with the status, so
   # a false positive the analysis determined is on record even before the
   # analyst answers the close question. Blank when no analysis ran.
+  # `refresh` waits for the write to become searchable before the run moves on, so
+  # the forensics summary, which finds the indicator by searching for `processed`,
+  # sees it as soon as this step completes.
   - name: mark_processed
     type: context-engine.updateKi
     if: >-
@@ -1747,6 +1750,7 @@ steps:
     with:
       ai_index_id: "{{ inputs.ai_index_id }}"
       ki_id: "{{ inputs.ki_id }}"
+      refresh: true
       ki:
         attributes:
           status: processed
