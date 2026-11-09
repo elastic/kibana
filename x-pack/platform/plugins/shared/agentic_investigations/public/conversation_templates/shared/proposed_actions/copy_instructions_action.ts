@@ -26,7 +26,7 @@ export const createCopyInstructionsAction = (
   proposal: Pick<ApprovalProposal, 'title' | 'comment'>
 ): ApprovalAction => ({
   label: COPY_AGENT_INSTRUCTIONS_LABEL,
-  iconType: 'copyClipboard',
+  iconType: 'copy',
   onClick: () => {
     copyAgentInstructions(core, investigationId, {
       title: proposal.title,
