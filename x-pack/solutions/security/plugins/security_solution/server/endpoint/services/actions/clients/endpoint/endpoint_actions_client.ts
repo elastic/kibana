@@ -218,7 +218,8 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
           error: new ResponseActionsClientError(
             `The following agent IDs do not support killing process descendents: ${unsupportedAgents.join(
               ', '
-            )}`
+            )}`,
+            400
           ),
         };
       }
@@ -244,7 +245,8 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
           error: new ResponseActionsClientError(
             `The following agent IDs do not support the get-file \`force\` parameter (Windows only): ${unsupportedAgents.join(
               ', '
-            )}`
+            )}`,
+            400
           ),
         };
       }

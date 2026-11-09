@@ -658,7 +658,12 @@ describe('EndpointActionsClient', () => {
               parameters: { path: 'C:\\locked.dat', force: true },
             })
           )
-        ).rejects.toThrow('The following agent IDs do not support the get-file `force` parameter');
+        ).rejects.toMatchObject({
+          message: expect.stringContaining(
+            'The following agent IDs do not support the get-file `force` parameter'
+          ),
+          statusCode: 400,
+        });
       });
 
       it('should succeed when endpoint supports the `get_file_force` capability', async () => {
@@ -749,7 +754,12 @@ describe('EndpointActionsClient', () => {
               parameters: { pid: 123, kill_descendants: true },
             })
           )
-        ).rejects.toThrow('The following agent IDs do not support killing process descendents');
+        ).rejects.toMatchObject({
+          message: expect.stringContaining(
+            'The following agent IDs do not support killing process descendents'
+          ),
+          statusCode: 400,
+        });
       });
 
       it('should succeed when feature flag is enabled and endpoint supports the capability', async () => {

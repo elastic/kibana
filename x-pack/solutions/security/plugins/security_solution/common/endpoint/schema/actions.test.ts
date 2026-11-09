@@ -1715,16 +1715,18 @@ describe('actions schemas', () => {
           }).toThrow();
         });
 
-        it.each(['sentinel_one', 'crowdstrike', 'microsoft_defender_endpoint'])(
-          'should reject `force` with agent type `%s`',
+        describe.each(['sentinel_one', 'crowdstrike', 'microsoft_defender_endpoint'])(
+          'with agent type `%s`',
           (agentType) => {
-            expect(() => {
-              EndpointActionGetFileSchema.body.validate({
-                agent_type: agentType,
-                endpoint_ids: ['endpoint_id'],
-                parameters: { path: 'C:\\locked.dat', force: true },
-              });
-            }).toThrow(`[parameters.force]: is not valid with agent type of ${agentType}`);
+            it.each([true, false])('should reject `force` set to `%s`', (force) => {
+              expect(() => {
+                EndpointActionGetFileSchema.body.validate({
+                  agent_type: agentType,
+                  endpoint_ids: ['endpoint_id'],
+                  parameters: { path: 'C:\\locked.dat', force },
+                });
+              }).toThrow(`[parameters.force]: is not valid with agent type of ${agentType}`);
+            });
           }
         );
       });
