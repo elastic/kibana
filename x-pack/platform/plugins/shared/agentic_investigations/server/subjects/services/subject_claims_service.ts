@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { setTimeout as delay } from 'timers/promises';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
@@ -30,7 +31,13 @@ import {
  */
 export const SUBJECT_CLAIM_PENDING_MS = 2 * 60 * 1000;
 
-const MAX_CLAIM_ATTEMPTS = 3;
+const MAX_CLAIM_ATTEMPTS = 5;
+/**
+ * Claims are read by search, which only sees a concurrent start's new claim after the next index
+ * refresh. Backing off between attempts gives that claim time to become searchable, so the
+ * start that lost the create follows up on it instead of failing.
+ */
+const CLAIM_RETRY_BASE_DELAY_MS = 100;
 const MAX_DELETE_PAGES = 100;
 const DELETE_PAGE_SIZE = 1000;
 
@@ -85,11 +92,19 @@ type ClaimOneOutcome = { taken: boolean } | { heldBy: string };
  */
 export class SubjectClaimsService {
   private readonly now: () => number;
+  private readonly wait: (ms: number) => Promise<unknown>;
   /** Every read of the claim index: a missing index has no hits, unallocated shards are retried. */
   private readonly search: SubjectClaimStorage['search'];
 
-  constructor(private readonly deps: { storage: SubjectClaimStorage; now?: () => number }) {
+  constructor(
+    private readonly deps: {
+      storage: SubjectClaimStorage;
+      now?: () => number;
+      wait?: (ms: number) => Promise<unknown>;
+    }
+  ) {
     this.now = deps.now ?? Date.now;
+    this.wait = deps.wait ?? delay;
     this.search = withTransientSearchRetry<SubjectClaimDocument>((...args) =>
       deps.storage.search(...args)
     );
@@ -137,6 +152,42 @@ export class SubjectClaimsService {
     return { claimed: true };
   }
 
+  /**
+   * Releases the claims a new investigation holds, its own and any handed over to it, for a start
+   * that failed before it ran. Each claim is deleted only at the version read here, so one another
+   * start has taken over since is left alone.
+   */
+  async release({
+    spaceId,
+    conversationId,
+  }: {
+    spaceId: string;
+    conversationId: string;
+  }): Promise<void> {
+    const response = await this.search({
+      track_total_hits: false,
+      size: DELETE_PAGE_SIZE,
+      seq_no_primary_term: true,
+      query: { bool: { filter: [{ term: { spaceId } }, { term: { conversationId } }] } },
+    });
+    // Concurrent, so the deletes share one index refresh wait; the storage adapter's bulk delete
+    // cannot carry the versions.
+    await Promise.all(
+      response.hits.hits.map(async ({ _id: id, _seq_no: seqNo, _primary_term: primaryTerm }) => {
+        if (id === undefined || seqNo === undefined || primaryTerm === undefined) {
+          return;
+        }
+        try {
+          await this.deps.storage.delete({ id, if_seq_no: seqNo, if_primary_term: primaryTerm });
+        } catch (error) {
+          if (!isVersionConflict(error)) {
+            throw error;
+          }
+        }
+      })
+    );
+  }
+
   /** The investigation (conversation id) holding the subject's claim in the space, open or closed. */
   async findHolder(spaceId: string, subject: InvestigationSubjectKey): Promise<string | undefined> {
     const existing = await this.findVersioned(subjectClaimId(spaceId, subject));
@@ -170,7 +221,8 @@ export class SubjectClaimsService {
       const response = await this.search({
         track_total_hits: false,
         size: DELETE_PAGE_SIZE,
-        _source: false,
+        // The storage adapter rejects hits without a source.
+        _source: ['spaceId'],
         query: { bool: { filter } },
       });
       const ids = response.hits.hits.flatMap((hit) => (hit._id !== undefined ? [hit._id] : []));
@@ -208,6 +260,9 @@ export class SubjectClaimsService {
     };
 
     for (let attempt = 0; attempt < MAX_CLAIM_ATTEMPTS; attempt++) {
+      if (attempt > 0) {
+        await this.wait(CLAIM_RETRY_BASE_DELAY_MS * 2 ** (attempt - 1));
+      }
       const existing = await this.findVersioned(id);
       try {
         if (!existing) {
