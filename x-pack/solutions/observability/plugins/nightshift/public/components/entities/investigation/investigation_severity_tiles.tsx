@@ -109,9 +109,8 @@ const getSeverityTileStyles = (
       align-items: flex-start;
       min-width: 0;
     `,
-    // Position only on the wrapper. Never pass `css` to EuiNotificationBadge — its prop
-    // replaces (does not merge) the component styles, which drops EUI's xs/medium type.
-    // Color goes through a descendant selector so badge typography stays EUI-owned.
+    // Position only — never pass `css` to EuiNotificationBadge (it replaces, not merges).
+    // Color uses the public `color` prop (`accent`); do not target `.euiNotificationBadge`.
     freshBadgeAnchor: css`
       position: absolute;
       top: 0;
@@ -119,13 +118,6 @@ const getSeverityTileStyles = (
       margin-inline-start: ${euiTheme.size.xs};
       transform: translateY(-15%);
       flex-shrink: 0;
-      /* Keep the badge on the body stack; the sibling count uses Elastic UI Numeric. */
-      font-family: ${euiTheme.font.family};
-
-      & .euiNotificationBadge {
-        background-color: ${euiTheme.colors.backgroundFilledPrimary};
-        color: ${euiTheme.colors.textInverse};
-      }
     `,
     byState: {
       // Empty tiles: border only, no panel fill; count/icon stay muted.
@@ -262,6 +254,7 @@ export const InvestigationSeverityTiles = ({
                           <span css={styles.freshBadgeAnchor}>
                             <EuiToolTip content={freshBadgeTooltip} position="top">
                               <EuiNotificationBadge
+                                color="accent"
                                 size="s"
                                 data-test-subj={`nightshiftSeverityTileFreshBadge-${severity}`}
                               >

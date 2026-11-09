@@ -35,7 +35,9 @@ import {
 import { RETRY_BUTTON_LABEL } from '../../common/messages';
 import {
   dismissManualInvestigationFresh,
+  getManualInvestigationFreshCounts,
   isManualInvestigationFresh,
+  rememberManualInvestigationSeverity,
   subscribeManualInvestigationFresh,
 } from '../../data/investigations/manual_investigation_starts';
 import { useInvestigationSections } from '../../data/investigations/use_investigation_sections';
@@ -122,20 +124,23 @@ export function NightshiftApp({
     (investigationId: string) => isManualInvestigationFresh(investigationId, spaceBasePath),
     [freshRevision, spaceBasePath]
   );
-  const freshCounts = useMemo((): SeverityCounts => {
-    const counts: SeverityCounts = { critical: 0, high: 0, medium: 0, low: 0 };
+  // Remember severity when an unread finish lands in a loaded bucket so `+N` survives pagination.
+  useEffect(() => {
     for (const section of sections) {
       if (!isSeverity(section.id)) {
         continue;
       }
       for (const { id } of section.investigations) {
-        if (isFreshInvestigation(id)) {
-          counts[section.id] += 1;
+        if (isManualInvestigationFresh(id, spaceBasePath)) {
+          rememberManualInvestigationSeverity(id, section.id, spaceBasePath);
         }
       }
     }
-    return counts;
-  }, [freshRevision, isFreshInvestigation, sections]);
+  }, [freshRevision, sections, spaceBasePath]);
+  const freshCounts = useMemo(
+    (): SeverityCounts => getManualInvestigationFreshCounts(spaceBasePath),
+    [freshRevision, spaceBasePath]
+  );
 
   // A tile scrolls to its section, so it is only actionable while the list is rendering that
   // section — which the list, not the count, decides.
@@ -181,20 +186,27 @@ export function NightshiftApp({
   );
 
   // Clear New / `+N` when the user opens a finished investigation (list click / deep link).
+  // Wait for the first sections load so a still-running id can appear under In progress first;
+  // after that, anything not in the in-progress page is treated as finished (including deep
+  // links to rows outside the current severity pages).
   useEffect(() => {
-    if (!selectedInvestigationId || !isManualInvestigationFresh(selectedInvestigationId, spaceBasePath)) {
+    if (
+      !selectedInvestigationId ||
+      isInitialLoading ||
+      !isManualInvestigationFresh(selectedInvestigationId, spaceBasePath)
+    ) {
       return;
     }
-    const isFinished = sections.some(
+    const isInProgress = sections.some(
       (section) =>
-        (isSeverity(section.id) || section.id === 'not-rated') &&
+        section.id === 'in-progress' &&
         section.investigations.some(({ id }) => id === selectedInvestigationId)
     );
-    if (!isFinished) {
+    if (isInProgress) {
       return;
     }
     dismissManualInvestigationFresh(selectedInvestigationId, spaceBasePath);
-  }, [sections, selectedInvestigationId, spaceBasePath]);
+  }, [isInitialLoading, sections, selectedInvestigationId, spaceBasePath]);
 
   const handleFlyoutClose = useCallback(() => {
     const params = new URLSearchParams(history.location.search);

@@ -9,11 +9,14 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useStartInvestigation } from '../data/investigations/use_start_investigation';
+import { useKibana } from '../hooks/use_kibana';
 import { StartInvestigationPanel } from './start_investigation_panel';
 
 jest.mock('../data/investigations/use_start_investigation');
+jest.mock('../hooks/use_kibana');
 
 const mockUseStartInvestigation = useStartInvestigation as jest.Mock;
+const mockUseKibana = useKibana as jest.Mock;
 const startInvestigation = jest.fn();
 const onClose = jest.fn();
 
@@ -30,6 +33,9 @@ const getSubmitButton = () => screen.getByTestId('nightshiftStartInvestigationSu
 describe('StartInvestigationPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseKibana.mockReturnValue({
+      services: { http: { basePath: { get: () => '/s/default' } } },
+    });
     mockUseStartInvestigation.mockReturnValue({ startInvestigation, isStarting: false });
   });
 

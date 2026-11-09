@@ -210,7 +210,9 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
       <div
         role={isInteractive ? 'button' : undefined}
         tabIndex={isInteractive ? 0 : undefined}
-        aria-label={isInteractive ? title : undefined}
+        aria-label={
+          isInteractive ? (showFreshMark ? `${title}, ${NEW_LABEL}` : title) : undefined
+        }
         aria-pressed={isInteractive ? isSelected : undefined}
         data-test-subj={isInteractive ? 'investigationCardButton' : undefined}
         onClick={isInteractive ? () => onClick(investigation) : undefined}

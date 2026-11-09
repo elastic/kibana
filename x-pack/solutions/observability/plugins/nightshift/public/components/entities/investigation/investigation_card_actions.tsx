@@ -31,6 +31,7 @@ import { getFlyoutShareUrlAriaLabel } from '../../ui/flyout_share_url_button';
 import { buildNightshiftInvestigationFlyoutShareUrl } from '../../../common/url_params';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY } from '../../../data/investigations/use_fetch_investigations';
+import { dismissManualInvestigationFresh } from '../../../data/investigations/manual_investigation_starts';
 import { useKibana } from '../../../hooks/use_kibana';
 
 /** Investigations are Agent Builder conversations; this public API deletes one. */
@@ -73,6 +74,7 @@ export const InvestigationCardActions = ({
 }: InvestigationCardActionsProps): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
   const { application, http, notifications } = useKibana().services;
+  const spaceBasePath = http.basePath.get() || 'default';
   const queryClient = useQueryClient();
   // Investigations are public conversations owned by the Nightshift service account, which Agent
   // Builder lets only its admins delete.
@@ -93,8 +95,12 @@ export const InvestigationCardActions = ({
       }
       event.preventDefault();
       openChat(investigation.id, investigation.agent_id);
+      // Open in chat bypasses the homepage flyout selection, so clear unread here when finished.
+      if (!investigation.in_progress) {
+        dismissManualInvestigationFresh(investigation.id, spaceBasePath);
+      }
     },
-    [investigation.agent_id, investigation.id, openChat]
+    [investigation.agent_id, investigation.id, investigation.in_progress, openChat, spaceBasePath]
   );
 
   const handleCopyLink = useCallback(() => {

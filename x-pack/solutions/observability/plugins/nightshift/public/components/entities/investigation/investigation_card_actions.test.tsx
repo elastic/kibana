@@ -30,7 +30,7 @@ jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       application: { capabilities: { agentBuilder: { isAdmin: isAgentBuilderAdmin } } },
-      http: { delete: httpDelete },
+      http: { basePath: { get: () => '/s/default' }, delete: httpDelete },
       notifications: { toasts: { addSuccess, addError } },
     },
   }),
