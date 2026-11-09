@@ -11,6 +11,7 @@ import { runAutomationHandler } from './handler';
 
 jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
   hasWorkflowExecutePrivilege: jest.fn().mockResolvedValue(true),
+  hasWorkflowReadPrivilege: jest.fn().mockResolvedValue(true),
   hasWorkflowUpdatePrivilege: jest.fn().mockResolvedValue(true),
   executeWorkflow: jest.fn(),
 }));
@@ -19,8 +20,12 @@ jest.mock('../../assert_context_engine_write_access', () => ({
   assertContextEngineWriteAccess: jest.fn().mockResolvedValue(undefined),
 }));
 
-const { hasWorkflowExecutePrivilege, hasWorkflowUpdatePrivilege, executeWorkflow } =
-  jest.requireMock('@kbn/agent-builder-tools-base/workflows');
+const {
+  hasWorkflowExecutePrivilege,
+  hasWorkflowReadPrivilege,
+  hasWorkflowUpdatePrivilege,
+  executeWorkflow,
+} = jest.requireMock('@kbn/agent-builder-tools-base/workflows');
 
 const { assertContextEngineWriteAccess } = jest.requireMock(
   '../../assert_context_engine_write_access'
@@ -35,6 +40,16 @@ describe('runAutomationHandler', () => {
   const getWorkflowMock = jest.fn();
   const updateWorkflowMock = jest.fn();
   const getWorkflowExecutionMock = jest.fn();
+  const validateWorkflowMock = jest.fn();
+
+  const validWorkflow = (overrides: Record<string, unknown> = {}) => ({
+    id: workflowId,
+    enabled: true,
+    valid: true,
+    yaml: 'name: wf\nenabled: true',
+    definition: { triggers: [{ type: 'manual' }] },
+    ...overrides,
+  });
 
   const getCoreStart = jest.fn().mockResolvedValue({
     http: { basePath: { serverBasePath: '' } },
@@ -52,14 +67,18 @@ describe('runAutomationHandler', () => {
         getWorkflow: getWorkflowMock,
         updateWorkflow: updateWorkflowMock,
         getWorkflowExecution: getWorkflowExecutionMock,
+        validateWorkflow: validateWorkflowMock,
       } as never),
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
     hasWorkflowExecutePrivilege.mockResolvedValue(true);
+    hasWorkflowReadPrivilege.mockResolvedValue(true);
     hasWorkflowUpdatePrivilege.mockResolvedValue(true);
     assertContextEngineWriteAccess.mockResolvedValue(undefined);
+    getWorkflowMock.mockResolvedValue(validWorkflow());
+    validateWorkflowMock.mockResolvedValue({ valid: true, diagnostics: [] });
   });
 
   it('throws when the CE write access check fails', async () => {
@@ -73,7 +92,7 @@ describe('runAutomationHandler', () => {
   });
 
   it('returns started=true with executionId and statusCheckHint when run succeeds', async () => {
-    getWorkflowMock.mockResolvedValue({ id: workflowId, enabled: true });
+    getWorkflowMock.mockResolvedValue(validWorkflow());
     executeWorkflow.mockResolvedValue({
       success: true,
       execution: { execution_id: 'exec-456' },
@@ -99,8 +118,27 @@ describe('runAutomationHandler', () => {
     expect(result.workflowUrl).toBeUndefined();
   });
 
+  it('does not read the workflow or leak validation diagnostics when execute privilege is missing', async () => {
+    hasWorkflowExecutePrivilege.mockResolvedValue(false);
+    getWorkflowMock.mockResolvedValue(validWorkflow({ valid: false, definition: null }));
+    validateWorkflowMock.mockResolvedValue({
+      valid: false,
+      diagnostics: [
+        { severity: 'error', message: 'Unknown connector id', source: 'schema', ruleId: 'x' },
+      ],
+    });
+
+    const result = await runAutomationHandler(buildDeps());
+
+    expect(getWorkflowMock).not.toHaveBeenCalled();
+    expect(validateWorkflowMock).not.toHaveBeenCalled();
+    expect(result.started).toBe(false);
+    expect(result.reason).toContain('Unauthorized');
+    expect(result.reason).not.toContain('Unknown connector id');
+  });
+
   it('returns started=false when executeWorkflow fails', async () => {
-    getWorkflowMock.mockResolvedValue({ id: workflowId, enabled: true });
+    getWorkflowMock.mockResolvedValue(validWorkflow());
     executeWorkflow.mockResolvedValue({
       success: false,
       error: 'Workflow step failed',
@@ -115,7 +153,7 @@ describe('runAutomationHandler', () => {
   });
 
   it('includes workflowUrl in non-default space', async () => {
-    getWorkflowMock.mockResolvedValue({ id: workflowId, enabled: true });
+    getWorkflowMock.mockResolvedValue(validWorkflow());
     executeWorkflow.mockResolvedValue({
       success: true,
       execution: { execution_id: 'exec-789' },
@@ -131,7 +169,7 @@ describe('runAutomationHandler', () => {
   });
 
   it('workflowUrl includes the execution tab deep link when run started', async () => {
-    getWorkflowMock.mockResolvedValue({ id: workflowId, enabled: true });
+    getWorkflowMock.mockResolvedValue(validWorkflow());
     executeWorkflow.mockResolvedValue({
       success: true,
       execution: { execution_id: 'exec-deep' },
@@ -144,7 +182,7 @@ describe('runAutomationHandler', () => {
   });
 
   it('enables a disabled workflow and returns enabledForRun=true', async () => {
-    getWorkflowMock.mockResolvedValue({ id: workflowId, enabled: false });
+    getWorkflowMock.mockResolvedValue(validWorkflow({ enabled: false }));
     updateWorkflowMock.mockResolvedValue({ id: workflowId, enabled: true });
     executeWorkflow.mockResolvedValue({
       success: true,
@@ -164,7 +202,7 @@ describe('runAutomationHandler', () => {
   });
 
   it('returns started=false when update privilege is missing for a disabled workflow', async () => {
-    getWorkflowMock.mockResolvedValue({ id: workflowId, enabled: false });
+    getWorkflowMock.mockResolvedValue(validWorkflow({ enabled: false }));
     hasWorkflowUpdatePrivilege.mockResolvedValue(false);
 
     const result = await runAutomationHandler(buildDeps());
@@ -176,7 +214,7 @@ describe('runAutomationHandler', () => {
   });
 
   it('returns started=false when updateWorkflow returns enabled=false (validation refused)', async () => {
-    getWorkflowMock.mockResolvedValue({ id: workflowId, enabled: false });
+    getWorkflowMock.mockResolvedValue(validWorkflow({ enabled: false }));
     updateWorkflowMock.mockResolvedValue({
       id: workflowId,
       enabled: false,
@@ -192,7 +230,7 @@ describe('runAutomationHandler', () => {
   });
 
   it('starts a full run without inputs and without waiting', async () => {
-    getWorkflowMock.mockResolvedValue({ id: workflowId, enabled: true });
+    getWorkflowMock.mockResolvedValue(validWorkflow());
     executeWorkflow.mockResolvedValue({ success: true, execution: { execution_id: 'exec-1' } });
 
     await runAutomationHandler(buildDeps());
@@ -202,10 +240,60 @@ describe('runAutomationHandler', () => {
     );
   });
 
+  it('refuses an invalid workflow with its diagnostics rather than running it', async () => {
+    getWorkflowMock.mockResolvedValue(validWorkflow({ valid: false, definition: null }));
+    validateWorkflowMock.mockResolvedValue({
+      valid: false,
+      diagnostics: [
+        { severity: 'error', message: 'Unknown connector id', source: 'schema', ruleId: 'x' },
+        { severity: 'warning', message: 'just a warning', source: 'schema', ruleId: 'y' },
+      ],
+    });
+
+    const result = await runAutomationHandler(buildDeps());
+
+    expect(executeWorkflow).not.toHaveBeenCalled();
+    expect(result.started).toBe(false);
+    expect(result.reason).toMatch(/invalid definition/);
+    expect(result.reason).toContain('Unknown connector id');
+    expect(result.reason).not.toContain('just a warning');
+  });
+
+  it('does not leak validation diagnostics to a caller who lacks read privilege', async () => {
+    hasWorkflowReadPrivilege.mockResolvedValue(false);
+    getWorkflowMock.mockResolvedValue(validWorkflow({ valid: false, definition: null }));
+    validateWorkflowMock.mockResolvedValue({
+      valid: false,
+      diagnostics: [
+        { severity: 'error', message: 'Unknown connector id', source: 'schema', ruleId: 'x' },
+      ],
+    });
+
+    const result = await runAutomationHandler(buildDeps());
+
+    expect(validateWorkflowMock).not.toHaveBeenCalled();
+    expect(result.started).toBe(false);
+    expect(result.reason).toMatch(/invalid definition/);
+    expect(result.reason).not.toContain('Unknown connector id');
+  });
+
+  it('still refuses an invalid workflow when diagnostics cannot be collected', async () => {
+    getWorkflowMock.mockResolvedValue(validWorkflow({ valid: false, definition: null }));
+    validateWorkflowMock.mockRejectedValue(new Error('validation service down'));
+
+    const result = await runAutomationHandler(buildDeps());
+
+    expect(executeWorkflow).not.toHaveBeenCalled();
+    expect(result.started).toBe(false);
+    expect(result.reason).toMatch(/invalid definition/);
+  });
+
   describe('pilot', () => {
     const pilotWorkflow = {
       id: workflowId,
       enabled: true,
+      valid: true,
+      yaml: 'name: wf\nenabled: true',
       definition: {
         triggers: [
           {
@@ -310,7 +398,7 @@ describe('runAutomationHandler', () => {
       });
 
       it('does not read the execution for a full run', async () => {
-        getWorkflowMock.mockResolvedValue({ id: workflowId, enabled: true });
+        getWorkflowMock.mockResolvedValue(validWorkflow());
         executeWorkflow.mockResolvedValue({ success: true, execution: { execution_id: 'e' } });
 
         const result = await runAutomationHandler(buildDeps());
@@ -390,11 +478,9 @@ describe('runAutomationHandler', () => {
     });
 
     it('refuses a pilot of a workflow that does not declare the pilot_size input', async () => {
-      getWorkflowMock.mockResolvedValue({
-        id: workflowId,
-        enabled: true,
-        definition: { triggers: [{ type: 'manual' }] },
-      });
+      getWorkflowMock.mockResolvedValue(
+        validWorkflow({ definition: { triggers: [{ type: 'manual' }] } })
+      );
 
       const result = await runAutomationHandler(buildPilotDeps());
 
@@ -407,6 +493,24 @@ describe('runAutomationHandler', () => {
       expect(result.reason).toMatch(
         /A Targeted KI writer has no pilot: run it with platform\.core\.execute_workflow/
       );
+    });
+
+    it('reports an invalid pilot workflow as invalid, not as missing the pilot_size input', async () => {
+      getWorkflowMock.mockResolvedValue(validWorkflow({ valid: false, definition: null }));
+      validateWorkflowMock.mockResolvedValue({
+        valid: false,
+        diagnostics: [
+          { severity: 'error', message: 'Unknown connector id', source: 'schema', ruleId: 'x' },
+        ],
+      });
+
+      const result = await runAutomationHandler(buildPilotDeps());
+
+      expect(executeWorkflow).not.toHaveBeenCalled();
+      expect(result.started).toBe(false);
+      expect(result.reason).toMatch(/invalid definition/);
+      expect(result.reason).toContain('Unknown connector id');
+      expect(result.reason).not.toMatch(/pilot_size/);
     });
   });
 });

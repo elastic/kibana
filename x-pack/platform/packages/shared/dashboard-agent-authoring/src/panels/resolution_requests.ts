@@ -16,12 +16,13 @@ import {
   type PanelResolutionRequest,
   type UpsertPanelContent,
 } from './registry';
-import { isEsqlLensPanel } from './vis';
+import { isEsqlLensPanel, readsDataVegaEditsCannotKeep } from './vis';
 
 /**
  * Error for content that cannot edit the existing panel: it targets another kind or is an
- * attachment, or the panel is a Lens panel not backed by ES|QL or of an unknown type, which are
- * replaced only after the user confirms. Undefined when the content can edit the panel.
+ * attachment, or the panel is a Lens panel not backed by ES|QL, a Vega panel whose data an edit
+ * cannot keep, or of an unknown type, which are replaced only after the user confirms. Undefined
+ * when the content can edit the panel.
  */
 const getPanelEditError = (
   content: UpsertPanelContent,
@@ -33,6 +34,9 @@ const getPanelEditError = (
   const renderer = findPanelRenderer(type);
   if (renderer === 'lens' && !isEsqlLensPanel(existingPanel)) {
     return `Panel "${id}" is a Lens panel that is not backed by ES|QL, so it cannot be edited. ${confirmReplaceHint}`;
+  }
+  if (renderer === 'vega' && readsDataVegaEditsCannotKeep(existingPanel)) {
+    return `Panel "${id}" is a Vega panel that reads data other than one top-level ES|QL query (such as an Elasticsearch query, a map file, inline values, or several sources), so it cannot be edited. ${confirmReplaceHint}`;
   }
   const configPanelType = findConfigPanelType(type);
   if (!renderer && !configPanelType) {
@@ -58,11 +62,24 @@ const toCreationResolutionRequest = (
   id: string
 ): ResolutionRequestResult => {
   if (content.renderer === 'custom_content') {
-    const { renderer, query, esql } = content;
-    if (query === undefined) {
-      return { error: `Panel "${id}" is new. Provide \`query\` to create it.` };
+    const { renderer, query, esql, hasData, regenerateESQL, index } = content;
+    if (query === undefined || hasData === undefined) {
+      const missing = [
+        ...(query === undefined ? ['`query`'] : []),
+        ...(hasData === undefined
+          ? ['`hasData` (true to generate its ES|QL query, false for static content with no query)']
+          : []),
+      ];
+      return { error: `Panel "${id}" is new. Provide ${missing.join(' and ')} to create it.` };
     }
-    return { request: { renderer, nlQuery: query, esql: esql ?? undefined } };
+    if (regenerateESQL) {
+      return {
+        error: `Panel "${id}" is new, so \`regenerateESQL\` does not apply. Use \`hasData\` to say whether it has a query.`,
+      };
+    }
+    return {
+      request: { renderer, nlQuery: query, esql: esql ?? undefined, hasData, index },
+    };
   }
 
   const { renderer, query, index, esql, chartType } = content;
@@ -87,13 +104,29 @@ const toEditResolutionRequest = (
   const base = { existingPanel };
 
   if (content.renderer === 'custom_content') {
-    const { renderer, query, esql } = content;
-    if (query === undefined && esql === undefined) {
+    const { renderer, query, esql, hasData, regenerateESQL, index } = content;
+    if (regenerateESQL && hasData === false) {
       return {
-        error: `Panel "${existingPanel.id}" edit needs \`query\`, \`esql\`, or both.`,
+        error: `Panel "${existingPanel.id}" cannot combine \`regenerateESQL\` with \`hasData\`: false, which removes the query.`,
       };
     }
-    return { request: { ...base, renderer, nlQuery: query, esql } };
+    if (esql === null && (hasData === true || regenerateESQL)) {
+      return {
+        error: `Panel "${existingPanel.id}" cannot combine \`esql\`: null, which removes the query, with \`hasData\`: true or \`regenerateESQL\`.`,
+      };
+    }
+    const replacesQuery = typeof esql === 'string' && esql.trim() !== '';
+    const removesQuery = esql === null || hasData === false;
+    const changesOnlyQuery =
+      !regenerateESQL && (replacesQuery || (removesQuery && hasData !== true));
+    if (query === undefined && !changesOnlyQuery) {
+      return {
+        error: `Panel "${existingPanel.id}" edit needs \`query\` unless it only replaces the ES|QL query with a non-blank \`esql\` or removes it (\`esql\`: null, or \`hasData\`: false); \`regenerateESQL\` and \`hasData\`: true need it.`,
+      };
+    }
+    return {
+      request: { ...base, renderer, nlQuery: query, esql, hasData, regenerateESQL, index },
+    };
   }
 
   const renderer = findPanelRenderer(existingPanel.type);
@@ -112,7 +145,9 @@ const toEditResolutionRequest = (
       esql,
       chartType,
       preserveESQL,
-      applyChartRules: content.renderer === 'vega' ? undefined : content.applyChartRules,
+      // Chart rules are Lens-only, so a Vega panel edited with `renderer` omitted ignores them.
+      applyChartRules:
+        renderer === 'vega' || content.renderer === 'vega' ? undefined : content.applyChartRules,
     },
   };
 };

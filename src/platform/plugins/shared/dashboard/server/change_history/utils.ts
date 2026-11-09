@@ -15,6 +15,7 @@ import { omit } from 'lodash';
 import type { ObjectChange } from '@kbn/change-history';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
+  AuthenticatedUser,
   KibanaRequest,
   KibanaResponseFactory,
   RequestHandlerContext,
@@ -126,7 +127,7 @@ export const getNextHistorySequence = async ({
     : (await getHistorySequences({ spaceId, dashboardId })).next;
 
 export const addToHistory = async ({
-  ctx,
+  user,
   spaceId = 'default',
   dashboardId,
   snapshot,
@@ -136,7 +137,8 @@ export const addToHistory = async ({
   restoredFrom,
   type = 'update',
 }: {
-  ctx: RequestHandlerContext;
+  /** Null when security is disabled; the change is then recorded without an actor. */
+  user: Pick<AuthenticatedUser, 'username' | 'profile_uid'> | null;
   spaceId: string | undefined;
   dashboardId: string;
   snapshot: DashboardState;
@@ -147,9 +149,6 @@ export const addToHistory = async ({
   restoredFrom?: number;
   type?: 'update' | 'create' | 'delete';
 }) => {
-  const core = await ctx.core;
-  // getCurrentUser() returns null when security is disabled; attribute those changes to the system actor
-  const user = core.security.authc.getCurrentUser();
   let client;
   try {
     client = await getChangeHistoryClient();

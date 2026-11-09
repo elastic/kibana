@@ -1,0 +1,123 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { encode as encodeRison } from '@kbn/rison';
+import type { KibanaLocation } from '@kbn/share-plugin/public';
+import type {
+  AlertingV2ActionPoliciesLocatorParams,
+  AlertingV2EpisodesLocatorParams,
+  AlertingV2ExecutionHistoryLocatorParams,
+  AlertingV2RuleLibraryLocatorParams,
+  AlertingV2RulesLocatorParams,
+} from './locators';
+
+/**
+ * The rules list search text that filters to the rules created from the given template. The
+ * `template` field name must match `TEMPLATE_FILTER_ID` on the rules list page.
+ */
+const buildTemplateQuery = (templateId: string): string =>
+  `template:"${templateId.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+
+export const getRulesLocation = (params: AlertingV2RulesLocatorParams): KibanaLocation => {
+  const { app, pathPrefix } = params.host;
+
+  if (params.page === 'sequence_create') {
+    return { app, path: `${pathPrefix}/sequence/create`, state: {} };
+  }
+  if (params.page === 'sequence_edit' && params.ruleId) {
+    return {
+      app,
+      path: `${pathPrefix}/sequence/${encodeURIComponent(params.ruleId)}/edit`,
+      state: {},
+    };
+  }
+  if (params.page === 'sequence_clone' && params.ruleId) {
+    const search = new URLSearchParams({ cloneFrom: params.ruleId });
+    return { app, path: `${pathPrefix}/sequence/create?${search.toString()}`, state: {} };
+  }
+  if (params.ruleId) {
+    return { app, path: `${pathPrefix}/${encodeURIComponent(params.ruleId)}`, state: {} };
+  }
+  if (params.derivedFromTemplateId) {
+    const search = new URLSearchParams({ q: buildTemplateQuery(params.derivedFromTemplateId) });
+    return { app, path: `${pathPrefix}?${search.toString()}`, state: {} };
+  }
+  return { app, path: pathPrefix, state: {} };
+};
+
+export const getRuleLibraryLocation = (
+  params: AlertingV2RuleLibraryLocatorParams
+): KibanaLocation => {
+  const { app, pathPrefix } = params.host;
+
+  if (params.templateId) {
+    return {
+      app,
+      path: `${pathPrefix}?templateId=${encodeURIComponent(params.templateId)}`,
+      state: {},
+    };
+  }
+  return { app, path: pathPrefix, state: {} };
+};
+
+export const getEpisodesLocation = (params: AlertingV2EpisodesLocatorParams): KibanaLocation => {
+  const { app, pathPrefix } = params.host;
+
+  if (params.episodeId) {
+    return { app, path: `${pathPrefix}/${encodeURIComponent(params.episodeId)}`, state: {} };
+  }
+
+  if (params.filters || params.timeRange) {
+    const alertsList = Object.fromEntries(
+      Object.entries({
+        ruleId: params.filters?.ruleId,
+        groupHash: params.filters?.groupHash,
+        status: params.filters?.status,
+        queryString: params.filters?.queryString,
+        groupingValues:
+          params.filters?.groupingValues && Object.keys(params.filters.groupingValues).length > 0
+            ? params.filters.groupingValues
+            : undefined,
+        timeFrom: params.timeRange?.from,
+        timeTo: params.timeRange?.to,
+      }).filter(([, value]) => value != null)
+    );
+
+    if (Object.keys(alertsList).length > 0) {
+      const search = new URLSearchParams();
+      search.set('_a', encodeRison({ alertsList }));
+      return { app, path: `${pathPrefix}?${search.toString()}`, state: {} };
+    }
+  }
+
+  return { app, path: pathPrefix, state: {} };
+};
+
+export const getActionPoliciesLocation = (
+  params: AlertingV2ActionPoliciesLocatorParams
+): KibanaLocation => {
+  const { app, pathPrefix } = params.host;
+
+  if (params.page === 'create') {
+    return { app, path: `${pathPrefix}/create`, state: {} };
+  }
+  if (params.page === 'edit' && params.actionPolicyId) {
+    return {
+      app,
+      path: `${pathPrefix}/edit/${encodeURIComponent(params.actionPolicyId)}`,
+      state: {},
+    };
+  }
+  return { app, path: pathPrefix, state: {} };
+};
+
+export const getExecutionHistoryLocation = (
+  params: AlertingV2ExecutionHistoryLocatorParams
+): KibanaLocation => {
+  const { app, pathPrefix } = params.host;
+  return { app, path: pathPrefix, state: {} };
+};

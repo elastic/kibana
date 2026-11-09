@@ -9,18 +9,21 @@ import { of } from 'rxjs';
 import { coreMock, httpServerMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { NIGHTSHIFT_API_PRIVILEGES, NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
-import { createSandboxToolAvailability } from './sandbox_tool_availability';
+import { checkSandboxAccess, createSandboxToolAvailability } from './sandbox_tool_availability';
 
 const setup = ({
   enabled = true,
   withSecurity = true,
   useRbac = true,
   hasManagePrivilege = true,
+  spaceId = 'default',
 }: {
   enabled?: boolean;
   withSecurity?: boolean;
   useRbac?: boolean;
   hasManagePrivilege?: boolean;
+  /** Space the request targets; the space Nightshift runs in unless a test overrides it. */
+  spaceId?: string;
 } = {}) => {
   const { featureFlags } = coreMock.createStart();
   featureFlags.getBooleanValue$.mockReturnValue(of(enabled));
@@ -40,7 +43,7 @@ const setup = ({
     handler({
       request: httpServerMock.createKibanaRequest(),
       uiSettings: uiSettingsServiceMock.createClient(),
-      spaceId: 'default',
+      spaceId,
     });
 
   return { check, featureFlags, checkPrivileges };
@@ -55,6 +58,17 @@ describe('createSandboxToolAvailability', () => {
     expect(checkPrivileges).toHaveBeenCalledWith({
       kibana: [`api:${NIGHTSHIFT_API_PRIVILEGES.manage}`],
     });
+  });
+
+  it('is unavailable outside the space Nightshift runs in', async () => {
+    const { check, featureFlags, checkPrivileges } = setup({ spaceId: 'marketing' });
+
+    await expect(check()).resolves.toEqual({
+      status: 'unavailable',
+      reason: expect.stringContaining('default'),
+    });
+    expect(featureFlags.getBooleanValue$).not.toHaveBeenCalled();
+    expect(checkPrivileges).not.toHaveBeenCalled();
   });
 
   it('is unavailable while the flag is off', async () => {
@@ -84,5 +98,37 @@ describe('createSandboxToolAvailability', () => {
 
     await expect(check()).resolves.toEqual({ status: 'available' });
     expect(checkPrivileges).not.toHaveBeenCalled();
+  });
+});
+
+describe('checkSandboxAccess', () => {
+  const request = httpServerMock.createKibanaRequest();
+  const security = (hasAllRequested: boolean) =>
+    ({
+      authz: {
+        mode: { useRbacForRequest: () => true },
+        checkPrivilegesDynamicallyWithRequest: () => async () => ({ hasAllRequested }),
+        actions: { api: { get: (operation: string) => `api:${operation}` } },
+      },
+    } as unknown as SecurityPluginStart);
+  const { featureFlags } = coreMock.createStart();
+  featureFlags.getBooleanValue$.mockReturnValue(of(true));
+
+  it('denies a user without the manage privilege, for anything that reads a workspace', async () => {
+    await expect(
+      checkSandboxAccess({ request, spaceId: 'default', featureFlags, security: security(false) })
+    ).resolves.toMatchObject({ status: 'unavailable' });
+  });
+
+  it('denies a workspace read outside the space Nightshift runs in', async () => {
+    await expect(
+      checkSandboxAccess({ request, spaceId: 'marketing', featureFlags, security: security(true) })
+    ).resolves.toMatchObject({ status: 'unavailable' });
+  });
+
+  it('allows a user with it', async () => {
+    await expect(
+      checkSandboxAccess({ request, spaceId: 'default', featureFlags, security: security(true) })
+    ).resolves.toEqual({ status: 'available' });
   });
 });

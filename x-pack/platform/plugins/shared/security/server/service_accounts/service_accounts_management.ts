@@ -99,15 +99,19 @@ interface BlockingBinding {
 const toBoundWorkload = (
   { pluginId, workloadType, workloadId }: ServiceAccountWorkloadBinding,
   typeName: string | undefined,
-  { title, href }: ResolvedServiceAccountWorkload
-): ServiceAccountBoundWorkload => ({
-  pluginId,
-  workloadType,
-  workloadId,
-  displayName: title ?? workloadId,
-  ...(typeName !== undefined && { typeName }),
-  ...(href !== undefined && { href }),
-});
+  resolved: ResolvedServiceAccountWorkload | undefined
+): ServiceAccountBoundWorkload => {
+  const { title, href } =
+    resolved?.status === 'present' ? resolved : { title: undefined, href: undefined };
+  return {
+    pluginId,
+    workloadType,
+    workloadId,
+    displayName: title ?? workloadId,
+    ...(typeName !== undefined && { typeName }),
+    ...(href !== undefined && { href }),
+  };
+};
 
 export class ServiceAccountsManagement implements ServiceAccountsManagementApi {
   private readonly logger: Logger;
@@ -238,7 +242,7 @@ export class ServiceAccountsManagement implements ServiceAccountsManagementApi {
       toBoundWorkload(
         binding,
         this.workloadTypes.getWorkloadTypeName(binding.pluginId, binding.workloadType),
-        (verified && resolved.get(binding)) || {}
+        verified ? resolved.get(binding) : undefined
       )
     );
   }
@@ -253,7 +257,9 @@ export class ServiceAccountsManagement implements ServiceAccountsManagementApi {
 
     try {
       const resolved = await this.workloadTypes.resolveBoundWorkloads(bindings);
-      return new Map(bindings.map((binding, index) => [binding, resolved[index] ?? {}]));
+      return new Map(
+        bindings.map((binding, index) => [binding, resolved[index] ?? { status: 'unknown' }])
+      );
     } catch (e) {
       this.logger.warn(
         `Unable to resolve ${bindings.length} bound workload(s): ${getDetailedErrorMessage(e)}`

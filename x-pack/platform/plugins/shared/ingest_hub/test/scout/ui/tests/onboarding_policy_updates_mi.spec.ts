@@ -74,16 +74,23 @@ test.describe(
       expect(requests.created).toHaveLength(1);
     });
 
-    test('a service with its own namespace gets its own policy', async ({ browserAuth, page }) => {
+    test('a duplicate with its own namespace gets its own policy', async ({
+      browserAuth,
+      page,
+    }) => {
       const requests = await mockManagedIntegrations(page);
       await deployElbWithTypedKeys(browserAuth, page, requests);
 
-      await backToServiceSettings(page, ['guardduty']);
-      await page.testSubj.locator('serviceSettingsStep-editButton-guardduty').click();
-      const namespace = page.testSubj.locator('serviceSettings-namespaceField').locator('input');
+      await backToServiceSettings(page);
+      await page.testSubj.locator('serviceSettingsStep-actionsButton-elb').click();
+      await page.testSubj.locator('serviceSettingsStep-duplicateAction-elb').click();
+      await page.testSubj.locator('duplicateServiceModal-nameField').fill('ELB copy');
+      const namespace = page.testSubj
+        .locator('duplicateServiceModal')
+        .locator('[data-test-subj="serviceSettings-namespaceField"] input');
       await namespace.fill('prod');
       await namespace.press('Enter');
-      await page.testSubj.locator('serviceSettingsFlyout-saveButton').click();
+      await page.testSubj.locator('duplicateServiceModal-addButton').click();
       await continueToDeploy(page);
       await page.testSubj.locator('managedIntegrationsSection-deployButton').click();
 
@@ -91,6 +98,28 @@ test.describe(
       expect(requests.created).toHaveLength(2);
       expect(requests.created[1].namespace).toBe('prod');
       expect(requests.updated).toHaveLength(0);
+    });
+
+    test('changing the global namespace of a deployed flow updates the policy', async ({
+      browserAuth,
+      page,
+    }) => {
+      const requests = await mockManagedIntegrations(page);
+      await deployElbWithTypedKeys(browserAuth, page, requests);
+
+      await backToServiceSettings(page);
+      await page.testSubj.locator('sharedSettingsAdvancedToggle').click();
+      const namespace = page.testSubj.locator('sharedSettingsNamespace').locator('input');
+      await namespace.fill('prod');
+      await namespace.press('Enter');
+      await continueToDeploy(page);
+      await page.testSubj.locator('managedIntegrationsSection-deployButton').click();
+
+      await expectDeployDone(page);
+      expect(requests.created).toHaveLength(1);
+      expect(requests.updated).toHaveLength(1);
+      expect(requests.updated[0].policyId).toBe('policy-1');
+      expect(requests.updated[0].body.namespace).toBe('prod');
     });
 
     test('a duplicated service gets its own policy', async ({ browserAuth, page }) => {

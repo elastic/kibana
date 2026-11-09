@@ -22,7 +22,7 @@ import type { SourceKnowledgeStateClient } from '../lib/knowledge_indicators/sou
 import type { SignificantEventsAlertingContext } from '../lib/significant_events/alerting/significant_events_alerting_context';
 import type { SignificantEventsServer } from '../types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
-import type { KnowledgeIndicatorClient } from '../lib/knowledge_indicators';
+import type { KnowledgeIndicatorClient, TopologySnapshotClient } from '../lib/knowledge_indicators';
 
 import type { SignificantEventsClients } from '../lib/significant_events/significant_events_clients';
 import type { ContinuousOnboardingWorkflowService } from '../lib/workflows/continuous_onboarding_workflow';
@@ -57,6 +57,7 @@ export interface RouteHandlerScopedClients extends SignificantEventsClients {
   space: string;
   getSignificantEventsAlertingContext: () => Promise<SignificantEventsAlertingContext>;
   getKnowledgeIndicatorClient: (source?: NightshiftSource) => Promise<KnowledgeIndicatorClient>;
+  getTopologySnapshotClient: () => Promise<TopologySnapshotClient>;
   sourceKnowledgeState: SourceKnowledgeStateClient;
   /**
    * Starts onboarding for a source revision; resolves to whether a run was started. Skipped for a
