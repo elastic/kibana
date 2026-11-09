@@ -24,7 +24,7 @@ concurrency:
   job-discriminator: ${{ github.run_id }}
 
 env:
-  FINDINGS_DAYS: ${{ github.event.inputs.days || '7' }}
+  FINDINGS_DAYS: ${{ github.event.inputs.days || '28' }}
   FINDINGS_ARTIFACT_NAME: &findings_artifact_name flaky-fix-curator-findings-${{ github.run_id }}
 
 imports:
@@ -91,7 +91,7 @@ jobs:
           script: |
             const { collectFlakyFixFindings } = require('./.github/scripts/flaky_fix_findings.js');
             const days = Number(process.env.FINDINGS_DAYS);
-            await collectFlakyFixFindings({ github, core, days: Number.isInteger(days) && days > 0 ? days : 7 });
+            await collectFlakyFixFindings({ github, core, days: Number.isInteger(days) && days > 0 ? days : 28 });
       - name: Upload the findings
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -196,7 +196,7 @@ Prompt bodies and the guidelines are loaded at run time, so a merged change take
 
    ### Not proposed
 
-   <one bullet per cluster you dropped and why, or "Nothing else repeated this week.">
+   <one bullet per cluster you dropped and why, or "Nothing else repeated in the window.">
 
    ### Review notes
 

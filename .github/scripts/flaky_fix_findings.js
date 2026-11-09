@@ -22,7 +22,7 @@ const REPO = 'kibana';
 const RETROSPECTIVE_LABEL = 'flaky-fix-retrospective';
 const CURATOR_LABEL = 'flaky-fix-curator';
 const DEFAULT_OUTPUT_DIR = '/tmp/flaky-fix-curator';
-const DEFAULT_DAYS = 7;
+const DEFAULT_DAYS = 28;
 const CURATOR_PR_LOOKBACK_DAYS = 90;
 const FINDING_BLOCK = /```yaml flaky-fix-finding\n([\s\S]*?)\n```/;
 // The retrospective records findings through gh-aw's add-comment with the workflow token, so
