@@ -8,14 +8,14 @@
 import { isEqual } from 'lodash';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { EvaluationResult } from '@kbn/evals';
-import { getLeafPanels, getPanelQueries, normalizeQuery } from '../dashboard_panels';
+import { getLeafPanels, getPanelDataSources, normalizeQuery } from '../dashboard_panels';
 import type { DashboardAgentEvaluator, DashboardAgentTaskOutput, EnhanceGold } from '../types';
 import { skippedResult } from '../evaluator_utils';
 import {
   GENERATE_DASHBOARD_TOOL_ID,
   findAskUserQuestionPrompt,
   findModeOptionIndex,
-  getLastWrittenDashboardId,
+  hasWrittenDashboard,
 } from '../extract_dashboard';
 import {
   SCORED_RULES,
@@ -107,7 +107,7 @@ const missingDashboardResult = (before?: DashboardAttachmentData): EvaluationRes
  * reward a run that did no enhancing; Defect Resolution scores that run 0.
  */
 const noWriteResult = (output: DashboardAgentTaskOutput): EvaluationResult | undefined =>
-  getLastWrittenDashboardId(output.steps ?? []) === undefined
+  !hasWrittenDashboard(output)
     ? {
         score: null,
         label: 'no-write',
@@ -120,7 +120,10 @@ const getPanelIds = (dashboard: DashboardAttachmentData): Set<string> =>
 
 const queriesById = (dashboard: DashboardAttachmentData): Map<string, string[]> =>
   new Map(
-    getLeafPanels(dashboard).map((panel) => [panel.id, getPanelQueries(panel).map(normalizeQuery)])
+    getLeafPanels(dashboard).map((panel) => {
+      const { queries, indices } = getPanelDataSources(panel);
+      return [panel.id, [...queries.map(normalizeQuery), ...indices]];
+    })
   );
 
 const sameList = (a: readonly string[], b: readonly string[]): boolean =>
@@ -284,13 +287,17 @@ export const enhanceDefectResolutionEvaluator: DashboardAgentEvaluator = {
 };
 
 /**
- * One key per rule and flagged panel, or per rule for dashboard-level
- * violations, so a container rule that flags fewer panels than the seed did
- * (for example one metric still after the charts, instead of four) is an
- * improvement, not a new violation.
+ * One key per rule and flagged panel, or per rule and container for
+ * dashboard-level violations, so a container rule that flags fewer panels than
+ * the seed did (for example one metric still after the charts, instead of
+ * four) is an improvement, not a new violation, while a gap in a new section is.
  */
-const violationKeys = ({ rule, panelIds }: DashboardRuleViolation): string[] =>
-  panelIds.length === 0 ? [rule] : panelIds.map((id) => `${rule}:${id}`);
+const violationKeys = ({ rule, panelIds, container }: DashboardRuleViolation): string[] => {
+  if (panelIds.length > 0) {
+    return panelIds.map((id) => `${rule}:${id}`);
+  }
+  return [container === undefined ? rule : `${rule}@${container}`];
+};
 
 /**
  * Enhancing must not break a rule the seeded dashboard already met, for
@@ -319,7 +326,7 @@ export const enhanceNoRegressionEvaluator: DashboardAgentEvaluator = {
     const seeded = new Set(findViolations(before, SCORED_RULES).flatMap(violationKeys));
     const introduced = findViolations(dashboard, SCORED_RULES).flatMap((violation) => {
       if (violation.panelIds.length === 0) {
-        return seeded.has(violation.rule) ? [] : [violation];
+        return violationKeys(violation).every((key) => seeded.has(key)) ? [] : [violation];
       }
       const newPanelIds = violation.panelIds.filter((id) => !seeded.has(`${violation.rule}:${id}`));
       return newPanelIds.length === 0 ? [] : [{ ...violation, panelIds: newPanelIds }];

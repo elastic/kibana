@@ -178,6 +178,10 @@ export type {
 export { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../common/types/rest_spec/iac_provisioner';
 export { useLink } from './hooks/use_link';
 export { NamespaceComboBox } from './components/namespace_combo_box';
+export { useOutputs } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/hooks';
+export { useGetOutputs } from './hooks/use_request/outputs';
+export { PackagePolicyOutputSelect } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_output_select';
+export type { PackagePolicyOutputSelectProps } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_output_select';
 
 // Cloud Connector Setup - lazy loaded component for external plugins
 export const LazyCloudConnectorSetup = lazy(() =>

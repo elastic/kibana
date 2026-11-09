@@ -16,6 +16,7 @@
         ] */
 
 import { runPreBuild } from './pre_build.ts';
+import { postFrequentCancellationsTip } from './frequent_cancellations_tip.ts';
 import { getEvalTriggerStep } from '../../../pipelines/evals/eval_pipeline.ts';
 import { loadBuildkiteJson } from '../../../pipeline-utils/load_buildkite_json.ts';
 import {
@@ -24,19 +25,18 @@ import {
   getAffectedPackages,
   getAgentImageConfig,
   emitPipeline,
-  getPipeline,
   getPrChangesCached,
   isScoutTestPath,
   isScoutTestsOnlyDiff,
   registerCancelKeys,
   flushCancelOnGateFailureMetadata,
-  type GetPipelineOptions,
   prHasFIPSLabel,
   doAllChangesMatch,
   isAutomatedVersionBumpPR,
 } from '#pipeline-utils';
 import {
   agentBuilderSmokeTestsSteps,
+  apiContracts,
   aiInfraGenAiSteps,
   buildFipsImage,
   buildCloudFipsImageSteps,
@@ -45,6 +45,7 @@ import {
   checkNextDocs,
   checkOasSnapshot,
   checkSavedObjects,
+  codeQuality,
   cpsTests,
   deployCloudSteps,
   deployProjectSteps,
@@ -52,9 +53,11 @@ import {
   fleetCypressSteps,
   ftrBenchSteps,
   jestBenchSteps,
+  kbnHandlebars,
   localCheck,
   pageLoadBenchSteps,
   postBuildSteps,
+  promptChanges,
   prBaseEnv,
   prBaseSteps,
   renderSteps,
@@ -63,6 +66,7 @@ import {
   responseOpsSteps,
   scoutFleetRealAgentSteps,
   storybooks,
+  syncModelLabels,
   verifyFipsEnabled,
   warmStartMemoryBenchSteps,
   workflowsOomTestingSteps,
@@ -88,7 +92,6 @@ const prConfigs =
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 const emptyStep = `steps: []`;
-const cancelable: GetPipelineOptions = { cancelOnGateFailure: true };
 const cancelOnGate = { cancelOnGateFailure: true } as const;
 
 if (!prConfig) {
@@ -159,6 +162,9 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       return;
     }
 
+    // Runs alongside the pipeline generation below, so it doesn't delay the build.
+    const frequentCancellationsTip = postFrequentCancellationsTip();
+
     // Scout-test-only diffs can't change OAS, API contracts, or Saved Objects, so skip those checks below.
     const prChanges = await getPrChangesCached();
     const scoutTestsOnly = isScoutTestsOnlyDiff(
@@ -188,6 +194,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     if (await doAllChangesMatch(/^renovate\.json$/)) {
       pipeline.push(renderSteps(renovateValidation(), { header: true }));
       console.warn('Isolated changes to renovate.json. Skipping main PR pipeline.');
+      await frequentCancellationsTip;
       emitPipeline(pipeline);
       return;
     }
@@ -199,7 +206,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     // Gated together: check_api_contracts depends_on check_oas_snapshot.
     if (!scoutTestsOnly) {
       pipeline.push(renderSteps(checkOasSnapshot(), cancelOnGate));
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/api_contracts.yml', cancelable));
+      pipeline.push(renderSteps(apiContracts(), cancelOnGate));
     }
 
     // Register steps from the base steps that should still be canceled on gate failure.
@@ -221,19 +228,17 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     if (
       await doAnySuiteRelevantChangesMatch([
         /^src\/platform\/packages\/private\/kbn-handlebars/,
-        /^\.buildkite\/pipelines\/pull_request\/kbn_handlebars\.yml/,
+        /^\.buildkite\/pipeline-utils\/step-library\/steps\/kbn_handlebars\.ts/,
       ])
     ) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/kbn_handlebars.yml', cancelable)
-      );
+      pipeline.push(renderSteps(kbnHandlebars(), cancelOnGate));
     }
 
     if (
       (await doAnySuiteRelevantChangesMatch([
         /^src\/platform\/plugins\/shared\/data/,
         /^x-pack\/platform\/plugins\/shared\/actions/,
-        /^x-pack\/platform\/plugins\/shared\/alerting/,
+        /^x-pack\/platform\/plugins\/shared\/alerting\//,
         /^x-pack\/platform\/plugins\/shared\/event_log/,
         /^x-pack\/platform\/plugins\/shared\/rule_registry/,
         /^x-pack\/platform\/plugins\/shared\/task_manager/,
@@ -438,7 +443,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^package.json/,
         /^src\/platform\/packages\/shared\/kbn-securitysolution-.*/,
         /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-.*/,
-        /^x-pack\/platform\/plugins\/shared\/alerting/,
+        /^x-pack\/platform\/plugins\/shared\/alerting\//,
         /^x-pack\/platform\/plugins\/shared\/data_views\/common/,
         /^x-pack\/solutions\/security\/plugins\/lists/,
         /^x-pack\/platform\/plugins\/shared\/rule_registry\/common/,
@@ -518,7 +523,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant/,
         /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant-common/,
         /^x-pack\/solutions\/security\/packages/,
-        /^x-pack\/platform\/plugins\/shared\/alerting/,
+        /^x-pack\/platform\/plugins\/shared\/alerting\//,
         /^x-pack\/platform\/plugins\/shared\/cases/,
         /^x-pack\/platform\/plugins\/shared\/data_views\/common/,
         /^x-pack\/solutions\/security\/plugins\/elastic_assistant/,
@@ -583,7 +588,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant/,
         /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant-common/,
         /^x-pack\/solutions\/security\/packages/,
-        /^x-pack\/platform\/plugins\/shared\/alerting/,
+        /^x-pack\/platform\/plugins\/shared\/alerting\//,
         /^x-pack\/platform\/plugins\/shared\/cases/,
         /^x-pack\/platform\/plugins\/shared\/data_views\/common/,
         /^x-pack\/solutions\/security\/plugins\/elastic_assistant/,
@@ -695,9 +700,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     }
 
     if (GITHUB_PR_LABELS.includes('ci:sync-model-labels')) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/sync_model_labels.yml', cancelable)
-      );
+      pipeline.push(renderSteps(syncModelLabels(), cancelOnGate));
     }
 
     if (
@@ -719,12 +722,10 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/tool_prompts\.ts$/,
         /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/defend_insight_prompts\.ts$/,
         /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/prompts\.ts$/,
-        /^\.buildkite\/pipelines\/pull_request\/prompt_changes\.yml/,
+        /^\.buildkite\/pipeline-utils\/step-library\/steps\/prompt_changes\.ts/,
       ])
     ) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/prompt_changes.yml', cancelable)
-      );
+      pipeline.push(renderSteps(promptChanges(), cancelOnGate));
     }
 
     // Run Saved Objects checks systematically
@@ -769,13 +770,14 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     }
 
     if (GITHUB_PR_LABELS.includes('ci:run-code-quality')) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/code_quality.yml', cancelable));
+      pipeline.push(renderSteps(codeQuality(), cancelOnGate));
     }
 
     // post_build is not cancelable — cleanup/reporting should always run
     pipeline.push(renderSteps(postBuildSteps()));
 
     flushCancelOnGateFailureMetadata();
+    await frequentCancellationsTip;
     emitPipeline(pipeline);
   } catch (ex) {
     console.error('Error while generating the pipeline steps: ' + ex.message, ex);
