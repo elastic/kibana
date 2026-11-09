@@ -12,8 +12,16 @@ import { StreamsRootRedirect } from '.';
 
 jest.mock('../../hooks/use_streams_privileges');
 jest.mock('../redirect_to', () => ({
-  RedirectTo: ({ path, params }: { path: string; params: { path: { tab: string } } }) => (
-    <div data-test-subj="redirectTo">{path.replace('{tab}', params.path.tab)}</div>
+  RedirectTo: ({
+    path,
+    params,
+  }: {
+    path: string;
+    params: { path: { unitId: string; tab: string } };
+  }) => (
+    <div data-test-subj="redirectTo">
+      {path.replace('{unitId}', params.path.unitId).replace('{tab}', params.path.tab)}
+    </div>
   ),
 }));
 jest.mock('../stream_list_view', () => ({
@@ -33,7 +41,7 @@ describe('StreamsRootRedirect', () => {
     mockAccess({ legacy: true, v2: true });
     render(<StreamsRootRedirect />);
 
-    expect(screen.getByTestId('redirectTo')).toHaveTextContent('/new-experience/map');
+    expect(screen.getByTestId('redirectTo')).toHaveTextContent('/v2/unit/default/map');
   });
 
   it('shows the stream list for a legacy-only user', () => {

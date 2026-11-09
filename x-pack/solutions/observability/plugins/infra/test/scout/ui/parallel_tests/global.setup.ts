@@ -29,6 +29,7 @@ import {
   HOST_NAME_WITH_SERVICES,
   HOSTS,
   HOSTS_WITHOUT_DATA,
+  LOGS_ML_INDEX,
   METRICS_AND_LOGS_ARCHIVE,
   POD_COUNT,
   SEMCONV_HOSTS,
@@ -205,5 +206,28 @@ globalSetupHook(
   async ({ esArchiver, log }) => {
     await esArchiver.loadIfNeeded(METRICS_AND_LOGS_ARCHIVE);
     log.info('metrics_and_logs archive loaded');
+  }
+);
+
+// The Logs ML page specs (`logs_ml/*.spec.ts`) point their space's `observability:logSources` setting
+// at this index. It only needs to exist, not hold documents: an existing empty index counts as
+// having data, so the pages show their setup screen / privilege prompts instead of the no-data page.
+globalSetupHook(
+  'Create the empty index for the Logs ML pages',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  async ({ esClient, log }) => {
+    const exists = await esClient.indices.exists({ index: LOGS_ML_INDEX });
+    if (!exists) {
+      await esClient.indices.create({
+        index: LOGS_ML_INDEX,
+        mappings: {
+          properties: {
+            '@timestamp': { type: 'date' },
+            message: { type: 'text' },
+          },
+        },
+      });
+    }
+    log.info(`${LOGS_ML_INDEX} index ready`);
   }
 );

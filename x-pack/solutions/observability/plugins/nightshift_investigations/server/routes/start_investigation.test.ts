@@ -37,7 +37,7 @@ beforeEach(() => jest.clearAllMocks());
 it('loads the alert and builds the investigation context server-side', async () => {
   await expect(
     handler({
-      request: {},
+      request: { spaceId: 'default' },
       getInvestigationsClient,
       getAlertsClient,
       getEpisodeLookup,
@@ -65,7 +65,7 @@ it('loads every alert id and stores the first as the subject', async () => {
     find,
   };
   await handler({
-    request: {},
+    request: { spaceId: 'default' },
     getInvestigationsClient,
     getAlertsClient: jest.fn().mockResolvedValue(alertsClient),
     getEpisodeLookup,
@@ -92,7 +92,7 @@ it('requires at least one alert id', () => {
 
 it('passes a caller-provided title on', async () => {
   await handler({
-    request: {},
+    request: { spaceId: 'default' },
     getInvestigationsClient,
     getAlertsClient,
     getEpisodeLookup,
@@ -115,7 +115,7 @@ it('no longer accepts a concurrency key', () => {
 
 it('forwards connector_id for an alert investigation', async () => {
   await handler({
-    request: {},
+    request: { spaceId: 'default' },
     getInvestigationsClient,
     getAlertsClient,
     getEpisodeLookup,
@@ -138,7 +138,7 @@ it('starts a manual investigation from the question alone', async () => {
   });
 
   await handler({
-    request: {},
+    request: { spaceId: 'default' },
     getInvestigationsClient,
     getAlertsClient,
     getEpisodeLookup,
@@ -164,7 +164,7 @@ it('forwards connector_id for a manual investigation', async () => {
   });
 
   await handler({
-    request: {},
+    request: { spaceId: 'default' },
     getInvestigationsClient,
     getAlertsClient,
     getEpisodeLookup,
@@ -183,7 +183,7 @@ it('passes a manual investigation title on only when the caller gives one', asyn
     message: 'Why did checkout p99 spike?',
   });
   await handler({
-    request: {},
+    request: { spaceId: 'default' },
     getInvestigationsClient,
     getAlertsClient,
     getEpisodeLookup,
@@ -201,7 +201,7 @@ it('rejects a manual investigation without a question', () => {
 it('returns service unavailable when alert lookup is not wired', async () => {
   await expect(
     handler({
-      request: {},
+      request: { spaceId: 'default' },
       getInvestigationsClient,
       getAlertsClient: () => undefined,
       params: { body: { subject: { type: 'alert', ids: ['alert-1'] } } },
@@ -220,7 +220,7 @@ it.each(['alert', 'manual'])(
     };
     const body = schema.parse(input);
     await handler({
-      request: {},
+      request: { spaceId: 'default' },
       getInvestigationsClient,
       getAlertsClient,
       getEpisodeLookup,
@@ -249,7 +249,7 @@ it('returns bad request for runtime notification validation failures', async () 
   );
   await expect(
     handler({
-      request: {},
+      request: { spaceId: 'default' },
       getInvestigationsClient,
       getAlertsClient,
       getEpisodeLookup,

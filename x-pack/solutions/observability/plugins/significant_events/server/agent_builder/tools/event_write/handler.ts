@@ -17,7 +17,6 @@ import {
   createBulkWriteItemError,
   createBulkWriteOutcomeUnknownError,
 } from '../bulk_write';
-import type { CompactBulkError } from '../bulk_write';
 import { assessMembers } from '../../../lib/significant_events/events/event_members';
 import {
   decideLifecycle,
@@ -54,6 +53,7 @@ import {
   type EventsWriteResult,
   type LoadedCandidate,
   type ResolvedWriteCandidate,
+  type WriteOutcome,
 } from './types';
 
 export type { EventsWriteBulkResult, EventsWriteInput, EventsWriteResult } from './types';
@@ -161,8 +161,8 @@ export async function eventsWriteBulkHandler({
   }
 
   const pendingWrites = changed.kept.map((fact) => buildPendingWrite({ facts: fact, timestamp }));
-  const errors = await writeVersions({ eventSearchClient, pendingWrites, logger });
-  applyWriteOutcomes({ pendingWrites, errors, results });
+  const outcomes = await writeVersions({ eventSearchClient, pendingWrites, logger });
+  applyWriteOutcomes({ pendingWrites, outcomes, results });
 
   return alignResults(results, 'Event bulk results were not aligned with every input');
 }
@@ -394,7 +394,7 @@ const keepChanged = ({
   return stage;
 };
 
-/** Writes each document (create for a new event, guarded update otherwise); one error slot per write. */
+/** Writes each document (create for a new event, guarded update otherwise); one outcome per write. */
 const writeVersions = ({
   eventSearchClient,
   pendingWrites,
@@ -403,32 +403,34 @@ const writeVersions = ({
   eventSearchClient: RuleEventsClient;
   pendingWrites: Array<ReturnType<typeof buildPendingWrite>>;
   logger?: Logger;
-}): Promise<Array<CompactBulkError | undefined>> => {
+}): Promise<WriteOutcome[]> => {
   const writeLimit = pLimit(WRITE_CONCURRENCY);
   return Promise.all(
     pendingWrites.map(({ candidate, document }) =>
-      writeLimit(async (): Promise<CompactBulkError | undefined> => {
+      writeLimit(async (): Promise<WriteOutcome> => {
         try {
           if (candidate.latest === undefined) {
-            await eventSearchClient.createEvent({ event: document });
-            return undefined;
+            const { groupHash } = await eventSearchClient.createEvent({ event: document });
+            return { created: true, groupHash };
           }
           const written = await eventSearchClient.updateEvent({
             event: document,
             prior: candidate.latest,
           });
           return written.updated
-            ? undefined
+            ? { created: false }
             : {
-                type: 'superseded_write',
-                reason: `event_id ${JSON.stringify(
-                  candidate.eventId
-                )} changed after it was read, so this write was dropped. Do not retry it in the current run; the next discovery cycle routes it again.`,
+                error: {
+                  type: 'superseded_write',
+                  reason: `event_id ${JSON.stringify(
+                    candidate.eventId
+                  )} changed after it was read, so this write was dropped. Do not retry it in the current run; the next discovery cycle routes it again.`,
+                },
               };
         } catch (err) {
           const reason = err instanceof Error ? err.message : String(err);
           logger?.error(`Failed to write to .rule-events: ${reason}`);
-          return { type: 'rule_events_write_error', reason };
+          return { error: { type: 'rule_events_write_error', reason } };
         }
       })
     )
