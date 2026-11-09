@@ -445,7 +445,7 @@ describe('Endpoint Analysis managed versions', () => {
     [
       ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW.id,
       ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW.version,
-      17,
+      18,
     ],
     [
       ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW.id,

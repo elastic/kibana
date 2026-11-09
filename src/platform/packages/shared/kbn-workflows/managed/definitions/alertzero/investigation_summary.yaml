@@ -6,7 +6,9 @@ description: >
   waits until the conversation has been quiet for 10 seconds, so a burst of notes gives one
   summary. An investigation is summarized only once a proposal is attached; an escalation always
   is. An agent execution ending, a close, or an attachment edit does not start it. The summary is
-  one direct model call on the efficient tier, so it does not append a chat round.
+  one direct model call on the efficient tier, so it does not append a chat round. On an
+  investigation whose Endpoint Analysis is processed, it then re-renders the forensics summary
+  card, with no model call, so the card shows the summary this run wrote.
 enabled: true
 tags:
   - security
@@ -31,7 +33,17 @@ steps:
     type: wait
     with:
       duration: 10s
+  # A model or connector error must not keep the forensics card below from refreshing.
   - name: summarize
     type: alertzero.investigation.summarize
+    on-failure:
+      continue: true
+    with:
+      conversation_id: "{{ event.conversationId }}"
+  # Writes nothing unless the investigation's Endpoint Analysis is processed, or when the card
+  # is already current. The Endpoint Analysis run renders the first card itself.
+  - name: forensics_summary
+    type: alertzero.forensics.renderSummary
+    if: "${{ event.templateId == 'investigation' }}"
     with:
       conversation_id: "{{ event.conversationId }}"

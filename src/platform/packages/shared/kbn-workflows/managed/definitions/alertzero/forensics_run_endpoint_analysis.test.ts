@@ -291,6 +291,35 @@ describe('Endpoint analysis run', () => {
     );
   });
 
+  // The forensics summary card finds the indicator by searching for `processed`. Nothing writes
+  // to the investigation after `mark_processed`, so no conversation event would start the first
+  // render: the run renders it itself, once the processed status is searchable.
+  describe('the first forensics summary card', () => {
+    const topLevelNames = definition.steps.map(({ name }) => name);
+    const render = stepByName('render_forensics_summary');
+
+    it('waits for the processed status to become searchable', () => {
+      expect(stepByName('mark_processed')?.with).toEqual(
+        expect.objectContaining({ refresh: true })
+      );
+    });
+
+    it('renders right after the indicator is retired as processed, on the same condition', () => {
+      expect(topLevelNames.indexOf('render_forensics_summary')).toBe(
+        topLevelNames.indexOf('mark_processed') + 1
+      );
+      expect(render?.type).toBe('alertzero.forensics.renderSummary');
+      expect(render?.if).toBe(stepByName('mark_processed')?.if);
+      expect(render?.with).toEqual({
+        conversation_id: '{{ steps.resolve_request.output.investigation_id }}',
+      });
+    });
+
+    it('does not fail the run when the card cannot be rendered', () => {
+      expect(render?.['on-failure']).toEqual({ continue: true });
+    });
+  });
+
   describe('a run that writes nothing to the investigation', () => {
     it('is retired as failed rather than processed', () => {
       const markFailed = stepByName('mark_failed');

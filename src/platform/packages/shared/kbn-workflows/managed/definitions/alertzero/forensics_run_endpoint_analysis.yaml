@@ -1756,6 +1756,24 @@ steps:
           status: processed
           forensic_verdict: "{{ steps.resolve_verdict.output.value }}"
 
+  # The first forensics summary card. Rendered here, not from a conversation event: this
+  # run's last write to the investigation lands before `mark_processed`, so an event-started
+  # render could search before the indicator reads processed and nothing would start
+  # another. The investigation summary workflow re-renders the card as the investigation
+  # changes. A failed render costs the card until then, not the run.
+  - name: render_forensics_summary
+    type: alertzero.forensics.renderSummary
+    if: >-
+      ${{ steps.resolve_request.output.has_request == true
+        and steps.verify_investigation.output.metadata != null
+        and steps.resolve_run_outcome.output.settled == true
+        and steps.resolve_run_outcome.output.outcome_unrecorded != true
+        and steps.resolve_proposals.output.proposals_lost != true }}
+    on-failure:
+      continue: true
+    with:
+      conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+
   # Findings are on the investigation, but at least one containment proposal
   # never reached the queue. Document this then retire the indicator.
   - name: journal_proposals_lost
