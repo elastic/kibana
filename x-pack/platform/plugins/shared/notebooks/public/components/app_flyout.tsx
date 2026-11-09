@@ -100,6 +100,10 @@ const EsqlPanelContent = ({ cell }: { cell: CellDefinition }) => {
   return <PanelResultGrid table={output.table} />;
 };
 
+/** Vega draws to its container's edges, so it keeps the breathing room it has on dashboards. */
+const vegaPanelStyles = ({ euiTheme }: UseEuiTheme) =>
+  css({ height: '100%', boxSizing: 'border-box', padding: euiTheme.size.s });
+
 const PanelContent = ({ panelId, cell }: { panelId: string; cell: AppCellDefinition }) => {
   switch (cell.type) {
     case 'chart':
@@ -107,7 +111,11 @@ const PanelContent = ({ panelId, cell }: { panelId: string; cell: AppCellDefinit
     case 'custom':
       return <CustomCanvas cell={cell} />;
     case 'vega':
-      return <VegaCanvas cell={cell} />;
+      return (
+        <div css={vegaPanelStyles}>
+          <VegaCanvas cell={cell} />
+        </div>
+      );
     case 'esql':
       return <EsqlPanelContent cell={cell} />;
     case 'input':
