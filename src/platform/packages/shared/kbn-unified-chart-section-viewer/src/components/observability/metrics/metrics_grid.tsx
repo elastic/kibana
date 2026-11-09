@@ -424,6 +424,7 @@ const ChartItem = React.memo(
       exemplars,
       hasError: exemplarsFetchFailed,
       errorMessage: exemplarsErrorMessage,
+      isLoading: exemplarsLoading,
     } = useFetchExemplars({
       fetchParams,
       services,
@@ -556,7 +557,7 @@ const ChartItem = React.memo(
           onFilter={onFilter}
           onExploreInDiscoverTab={actions.openInNewTab}
           onViewDetails={handleViewDetailsCallback}
-          isLoading={shouldRenderHistogram && histogramBoundsLoading}
+          isLoading={(shouldRenderHistogram && histogramBoundsLoading) || exemplarsLoading}
           error={shouldRenderHistogram ? boundsError : undefined}
           syncCursor
           syncTooltips={false}

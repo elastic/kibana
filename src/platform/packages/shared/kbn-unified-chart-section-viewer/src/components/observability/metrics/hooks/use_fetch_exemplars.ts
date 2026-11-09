@@ -22,16 +22,21 @@ import { MetricsExecutionContextName } from '../utils/execution_context_enums';
 
 export type ExemplarsResponse = Pick<ESQLSearchResponse, 'columns' | 'values'>;
 
-export interface UseFetchExemplarsResult {
+interface ExemplarsFetchState {
   /** Rows from the last successful fetch. Absent while loading, when skipped, or after a failure. */
   exemplars: ExemplarsResponse | undefined;
   /** True when the last completed fetch failed. Aborts and skipped fetches stay false. */
   hasError: boolean;
-  /** Elasticsearch error text when the fetch failed. Absent for skips and aborts. */
+  /** Error text from the rejected fetch, including aborts. Callers should read it only when `hasError` is true. */
   errorMessage?: string;
 }
 
-const IDLE_EXEMPLARS_FETCH: UseFetchExemplarsResult = { exemplars: undefined, hasError: false };
+export interface UseFetchExemplarsResult extends ExemplarsFetchState {
+  /** True until a request settles. Skipped fetches stay false once they resolve. */
+  isLoading: boolean;
+}
+
+const IDLE_EXEMPLARS_FETCH: ExemplarsFetchState = { exemplars: undefined, hasError: false };
 
 export interface UseFetchExemplarsParams {
   fetchParams: ChartSectionProps['fetchParams'];
@@ -84,7 +89,6 @@ export const useFetchExemplars = ({
     isExemplarsEnabled && isComponentVisible && dataSource && isSupported
       ? createExemplarsQuery({
           metricItem,
-          isSupported,
           whereStatements,
           metadataFields,
           originalSource,
@@ -92,7 +96,7 @@ export const useFetchExemplars = ({
         })
       : '';
 
-  const { value } = useAbortableAsync<UseFetchExemplarsResult>(
+  const { value, loading } = useAbortableAsync<ExemplarsFetchState>(
     async ({ signal }) => {
       if (!esqlQuery) {
         return IDLE_EXEMPLARS_FETCH;
@@ -119,15 +123,14 @@ export const useFetchExemplars = ({
           hasError: false,
         };
       } catch (error) {
-        if (!isSuppressedFetchError(error)) {
+        const isSuppressed = isSuppressedFetchError(error);
+        if (!isSuppressed) {
           onError(error);
         }
-        const failed = !isSuppressedFetchError(error);
-        const errorMessage = error instanceof Error ? error.message : undefined;
         return {
           exemplars: undefined,
-          hasError: failed,
-          ...(failed && errorMessage ? { errorMessage } : {}),
+          hasError: !isSuppressed,
+          errorMessage: error instanceof Error ? error.message : undefined,
         };
       }
     },
@@ -151,5 +154,5 @@ export const useFetchExemplars = ({
     { clearValueOnNext: true }
   );
 
-  return value ?? IDLE_EXEMPLARS_FETCH;
+  return { ...(value ?? IDLE_EXEMPLARS_FETCH), isLoading: loading };
 };

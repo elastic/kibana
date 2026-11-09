@@ -72,7 +72,7 @@ const TEST_COLUMNS = ['@timestamp', 'metric_name', 'value', 'trace_id', 'span_id
 const TEST_ROWS = [
   [1_700_000_000_000, 'http.server.request.duration', 0.42, 'trace-abc', 'span-xyz'],
 ];
-const IDLE_FETCH = { exemplars: undefined, hasError: false };
+const IDLE_FETCH = { exemplars: undefined, hasError: false, isLoading: false };
 
 const mockMetric: ParsedMetricItem = {
   metricName: 'metrics.http.server.request.duration',
@@ -204,6 +204,7 @@ describe('useFetchExemplars', () => {
     expect(result.current).toEqual({
       exemplars: { columns: TEST_COLUMNS, values: TEST_ROWS },
       hasError: false,
+      isLoading: false,
     });
   });
 
@@ -226,6 +227,7 @@ describe('useFetchExemplars', () => {
     expect(result.current).toEqual({
       exemplars: { columns: TEST_COLUMNS, values },
       hasError: false,
+      isLoading: false,
     });
     expect(mockCreateExemplarsQuery).toHaveBeenCalledWith(
       expect.objectContaining({ originalSource: 'remote:metrics-*' })
@@ -240,7 +242,6 @@ describe('useFetchExemplars', () => {
     await flushAsync();
     expect(mockCreateExemplarsQuery).toHaveBeenCalledWith({
       metricItem: mockMetric,
-      isSupported: true,
       whereStatements: TEST_WHERE_STATEMENTS,
       metadataFields: TEST_METADATA_FIELDS,
       originalSource: 'remote:metrics-generic.otel-default',
@@ -280,7 +281,7 @@ describe('useFetchExemplars', () => {
     await flushAsync();
 
     expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
-    expect(result.current).toEqual(IDLE_FETCH);
+    expect(result.current).toEqual({ ...IDLE_FETCH, isLoading: true });
   });
 
   it('fetches again when the Discover fetch changes', async () => {
@@ -338,13 +339,14 @@ describe('useFetchExemplars', () => {
     expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
   });
 
-  it('returns undefined while the fetch is in flight', () => {
+  it('stays loading while the request has not been fetched', async () => {
     mockExecuteEsqlQuery.mockReturnValue(new Promise(() => {}));
     const params = createParams();
 
     const { result } = renderHook(() => useFetchExemplars(params));
 
-    expect(result.current).toEqual(IDLE_FETCH);
+    await waitFor(() => expect(result.current.isLoading).toBe(true));
+    expect(result.current).toEqual({ ...IDLE_FETCH, isLoading: true });
   });
 
   describe('when the row fetch rejects', () => {
@@ -358,7 +360,12 @@ describe('useFetchExemplars', () => {
 
       await flushAsync();
       expect(mockReportError).not.toHaveBeenCalled();
-      expect(result.current).toEqual(IDLE_FETCH);
+      expect(result.current).toEqual({
+        exemplars: undefined,
+        hasError: false,
+        errorMessage: 'The operation was aborted',
+        isLoading: false,
+      });
     });
 
     it('reports other errors once and marks the fetch failed', async () => {
@@ -378,6 +385,7 @@ describe('useFetchExemplars', () => {
         exemplars: undefined,
         hasError: true,
         errorMessage: 'network failure',
+        isLoading: false,
       });
     });
   });

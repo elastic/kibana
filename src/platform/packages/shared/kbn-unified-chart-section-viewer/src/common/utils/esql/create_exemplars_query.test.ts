@@ -48,7 +48,7 @@ describe('createExemplarsQuery', () => {
   });
 
   it('prefixes SET exemplars onto the chart time-series query', () => {
-    expect(createExemplarsQuery({ metricItem: mockMetric, isSupported: true })).toBe(
+    expect(createExemplarsQuery({ metricItem: mockMetric })).toBe(
       `
 SET exemplars = TRUE;
 ${CHART_QUERY}
@@ -59,7 +59,7 @@ ${CHART_QUERY}
   it('keeps a SET command already present on the chart query', () => {
     mockCreateESQLQuery.mockReturnValue(CHART_QUERY_WITH_NULLIFY);
 
-    expect(createExemplarsQuery({ metricItem: mockMetric, isSupported: true })).toBe(
+    expect(createExemplarsQuery({ metricItem: mockMetric })).toBe(
       `
 SET unmapped_fields = "NULLIFY";
 SET exemplars = TRUE;
@@ -76,7 +76,6 @@ ${CHART_QUERY}
 
     createExemplarsQuery({
       metricItem: mockMetric,
-      isSupported: true,
       whereStatements,
       metadataFields,
       originalSource,
@@ -96,11 +95,6 @@ ${CHART_QUERY}
   it('returns an empty string when the chart query is empty', () => {
     mockCreateESQLQuery.mockReturnValue('');
 
-    expect(createExemplarsQuery({ metricItem: mockMetric, isSupported: true })).toBe('');
-  });
-
-  it('returns an empty string without building a chart query when the chart is unsupported', () => {
-    expect(createExemplarsQuery({ metricItem: mockMetric, isSupported: false })).toBe('');
-    expect(mockCreateESQLQuery).not.toHaveBeenCalled();
+    expect(createExemplarsQuery({ metricItem: mockMetric })).toBe('');
   });
 });

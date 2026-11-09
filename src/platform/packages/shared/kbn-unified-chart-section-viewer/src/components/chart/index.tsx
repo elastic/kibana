@@ -81,6 +81,9 @@ export const Chart = ({
     userMessages,
     profileId,
   });
+  // Lens copies userMessages once, when the embeddable is created. Props built
+  // while exemplars are loading omit that error, so wait until they match.
+  const messagesReady = lensProps !== undefined && lensProps.userMessages === userMessages;
 
   const handleFilter = useCallback<NonNullable<ChartProps['onFilter']>>(
     (event) => {
@@ -104,7 +107,7 @@ export const Chart = ({
       `}
       ref={chartRef}
     >
-      {lensProps && !isLoading ? (
+      {messagesReady && !isLoading ? (
         <>
           <LensWrapperMemo
             lensProps={lensProps}

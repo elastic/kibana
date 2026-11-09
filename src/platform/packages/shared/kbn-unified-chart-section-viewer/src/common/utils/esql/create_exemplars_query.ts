@@ -14,8 +14,6 @@ import { createESQLQuery } from './create_esql_query';
 
 interface CreateExemplarsQueryParams {
   metricItem: ParsedMetricItem;
-  /** False when the chart does not run a time-series query, including `unsigned_long` and heatmaps. */
-  isSupported: boolean;
   whereStatements?: string[];
   metadataFields?: string[];
   originalSource?: string;
@@ -23,22 +21,17 @@ interface CreateExemplarsQueryParams {
 }
 
 /**
- * Builds the exemplar query for one metric chart, or `''` when `isSupported` is false or the chart
- * has no time-series query. Uses the chart's `TS | STATS` query with no breakdown dimensions, so a
- * grid split does not change which exemplars are fetched.
+ * Builds the exemplar query for one metric chart, or `''` when the chart has no time-series query.
+ * Uses the chart's `TS | STATS` query with no breakdown dimensions, so a grid split does not change
+ * which exemplars are fetched. Callers skip unsupported charts before calling this.
  */
 export function createExemplarsQuery({
   metricItem,
-  isSupported,
   whereStatements,
   metadataFields,
   originalSource,
   gridSettings,
 }: CreateExemplarsQueryParams): string {
-  if (!isSupported) {
-    return '';
-  }
-
   const chartQuery = createESQLQuery({
     metricItem,
     splitAccessors: [],

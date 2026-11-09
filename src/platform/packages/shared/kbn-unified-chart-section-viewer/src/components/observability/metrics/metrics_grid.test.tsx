@@ -42,7 +42,7 @@ import { withRestorableState } from '../../../restorable_state';
 import type { FlyoutState } from '../../../restorable_state';
 
 jest.mock('./hooks/use_fetch_exemplars', () => ({
-  useFetchExemplars: jest.fn(() => ({ exemplars: undefined, hasError: false })),
+  useFetchExemplars: jest.fn(() => ({ exemplars: undefined, hasError: false, isLoading: false })),
 }));
 
 jest.mock('@kbn/discover-utils', () => {
@@ -184,7 +184,9 @@ describe('MetricsGrid', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.mocked(useFeatureFlag).mockImplementation((_flag, fallback) => fallback);
-    jest.mocked(useFetchExemplars).mockReturnValue({ exemplars: undefined, hasError: false });
+    jest
+      .mocked(useFetchExemplars)
+      .mockReturnValue({ exemplars: undefined, hasError: false, isLoading: false });
     discoverFetch$ = getFetch$Mock(fetchParams);
   });
 
@@ -316,11 +318,26 @@ describe('MetricsGrid', () => {
     expect(useFetchExemplars).toHaveBeenCalledWith(expect.objectContaining({ isSupported: false }));
   });
 
+  it('keeps the chart loading until exemplars are fetched', () => {
+    jest.mocked(useFetchExemplars).mockReturnValue({
+      exemplars: undefined,
+      hasError: false,
+      isLoading: true,
+    });
+
+    renderMetricsGrid();
+
+    expect(Chart).toHaveBeenCalledWith(
+      expect.objectContaining({ isLoading: true }),
+      expect.anything()
+    );
+  });
+
   it('adds an exemplars warning without failing the chart when the fetch fails', () => {
     const errorMessage = 'verification_exception: unknown setting [exemplars]';
     jest
       .mocked(useFetchExemplars)
-      .mockReturnValue({ exemplars: undefined, hasError: true, errorMessage });
+      .mockReturnValue({ exemplars: undefined, hasError: true, errorMessage, isLoading: false });
 
     renderMetricsGrid();
 
@@ -329,6 +346,7 @@ describe('MetricsGrid', () => {
       1,
       expect.objectContaining({
         error: undefined,
+        isLoading: false,
         userMessages: [getExemplarsFetchFailedUserMessage(errorMessage)],
         lensConfig: expect.objectContaining({
           dataset: expect.objectContaining({
@@ -344,7 +362,7 @@ describe('MetricsGrid', () => {
     const errorMessage = 'verification_exception: unknown setting [exemplars]';
     jest
       .mocked(useFetchExemplars)
-      .mockReturnValue({ exemplars: undefined, hasError: true, errorMessage });
+      .mockReturnValue({ exemplars: undefined, hasError: true, errorMessage, isLoading: false });
     const messagesForCpu = [
       {
         uniqueId: 'cpu-message',
