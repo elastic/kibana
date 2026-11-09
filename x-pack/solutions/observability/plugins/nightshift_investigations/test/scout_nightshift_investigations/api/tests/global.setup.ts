@@ -6,7 +6,7 @@
  */
 
 import { globalSetupHook, tags } from '@kbn/scout-oblt';
-import { setUpNightshiftServiceAccount } from '../fixtures';
+import { disableInvestigationRunLimits, setUpNightshiftServiceAccount } from '../fixtures';
 
 globalSetupHook(
   'Set the default space up with the Nightshift service accounts',
@@ -22,5 +22,8 @@ globalSetupHook(
       isServerless: Boolean(config.serverless),
       log,
     });
+    // The specs share one deployment, and together they start more investigations than the daily
+    // limits allow. None of them asserts on the limits.
+    await disableInvestigationRunLimits({ kbnUrl, samlAuth, log });
   }
 );
