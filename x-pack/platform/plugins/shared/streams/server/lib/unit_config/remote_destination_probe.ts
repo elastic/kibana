@@ -7,7 +7,7 @@
 
 import type { ProbeRemoteDestination, RemoteProbeResult } from './types';
 
-export const REMOTE_PROBE_TIMEOUT_MS = 10_000;
+const REMOTE_PROBE_TIMEOUT_MS = 10_000;
 
 const ELASTIC_CLOUD_HOST_SUFFIX = '.elastic.cloud';
 const PROMETHEUS_REMOTE_WRITE_PATH = '/_prometheus/api/v1/write';
@@ -21,6 +21,11 @@ const MALFORMED_API_KEY_MESSAGE =
 // Stricter than undici's Latin-1 check, so the result does not depend on the fetch implementation.
 const API_KEY_PATTERN = /^[\x21-\x7E]+$/;
 
+interface ProbeResponse {
+  status: number;
+  text: () => Promise<string>;
+}
+
 type ProbeFetch = (
   url: string,
   init: {
@@ -30,7 +35,7 @@ type ProbeFetch = (
     redirect: 'manual';
     signal: AbortSignal;
   }
-) => Promise<{ status: number; text: () => Promise<string> }>;
+) => Promise<ProbeResponse>;
 
 const parseAllowedEndpoint = (endpoint: string): URL | undefined => {
   let url: URL;
@@ -50,14 +55,8 @@ const parseAllowedEndpoint = (endpoint: string): URL | undefined => {
   return allowed ? url : undefined;
 };
 
-export const isAllowedRemoteEndpoint = (endpoint: string): boolean =>
-  parseAllowedEndpoint(endpoint) !== undefined;
-
-const getRejectionMessage = async (
-  host: string,
-  status: number,
-  readBody: () => Promise<string>
-): Promise<string> => {
+const getRejectionMessage = async (host: string, response: ProbeResponse): Promise<string> => {
+  const { status } = response;
   if (status === 401) {
     return `${host} rejected the API key (HTTP 401). Check that the key is valid and has not expired.`;
   }
@@ -67,10 +66,8 @@ const getRejectionMessage = async (
     return genericMessage;
   }
 
-  let body: string;
-  try {
-    body = await readBody();
-  } catch {
+  const body = await response.text().catch(() => undefined);
+  if (body === undefined) {
     return genericMessage;
   }
 
@@ -111,29 +108,21 @@ export const createRemoteDestinationProbe = ({
       controller.abort();
     }, timeoutMs);
 
-    const request = async () => {
-      try {
-        return await send(
-          `${url.origin}${url.pathname.replace(/\/+$/, '')}${PROMETHEUS_REMOTE_WRITE_PATH}`,
-          {
-            method: 'POST',
-            headers: {
-              Authorization: `ApiKey ${apiKey}`,
-              'Content-Type': 'application/x-protobuf',
-            },
-            body: '',
-            // A redirect could carry the key to another host.
-            redirect: 'manual',
-            signal: controller.signal,
-          }
-        );
-      } catch {
-        return undefined;
-      }
-    };
-
     try {
-      const response = await request();
+      const response = await send(
+        `${url.origin}${url.pathname.replace(/\/+$/, '')}${PROMETHEUS_REMOTE_WRITE_PATH}`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `ApiKey ${apiKey}`,
+            'Content-Type': 'application/x-protobuf',
+          },
+          body: '',
+          // A redirect could carry the key to another host.
+          redirect: 'manual',
+          signal: controller.signal,
+        }
+      ).catch(() => undefined);
       if (!response) {
         return { outcome: 'unverified', reason: timedOut ? 'timeout' : 'unreachable' };
       }
@@ -146,7 +135,7 @@ export const createRemoteDestinationProbe = ({
         return {
           outcome: 'rejected',
           status,
-          message: await getRejectionMessage(url.hostname, status, () => response.text()),
+          message: await getRejectionMessage(url.hostname, response),
         };
       }
       return { outcome: 'unverified', reason: 'unexpected_status', status };

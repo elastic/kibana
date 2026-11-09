@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createRemoteDestinationProbe, isAllowedRemoteEndpoint } from './remote_destination_probe';
+import { createRemoteDestinationProbe } from './remote_destination_probe';
 import type { RemoteProbeResult } from './types';
 
 const API_KEY = 'SECRET-KEY-VALUE';
@@ -50,23 +50,6 @@ const probe = async (
   return result;
 };
 
-describe('isAllowedRemoteEndpoint', () => {
-  it.each([
-    'https://abc.es.us-east-1.aws.elastic.cloud',
-    'https://abc.es.us-east-1.aws.elastic.cloud:443/base/',
-  ])('allows %s', (endpoint) => expect(isAllowedRemoteEndpoint(endpoint)).toBe(true));
-
-  it.each([
-    'http://abc.elastic.cloud',
-    'https://user:pass@abc.elastic.cloud',
-    'https://notelastic.cloud',
-    'https://elastic.cloud.example.com',
-    'https://abc.elastic.cloud/base/?a=1',
-    'https://abc.elastic.cloud/base/#f',
-    'not a url',
-  ])('rejects %s', (endpoint) => expect(isAllowedRemoteEndpoint(endpoint)).toBe(false));
-});
-
 describe('createRemoteDestinationProbe', () => {
   it('sends an empty protobuf POST with the key', async () => {
     const fetchImpl = respond(204);
@@ -88,10 +71,29 @@ describe('createRemoteDestinationProbe', () => {
     );
   });
 
-  it('rejects a disallowed host without sending a request', async () => {
+  it.each([
+    'https://abc.es.us-east-1.aws.elastic.cloud',
+    'https://abc.es.us-east-1.aws.elastic.cloud:443/base/',
+  ])('checks the allowed host %s', async (endpoint) => {
     const fetchImpl = respond(204);
 
-    expect(await probe(fetchImpl, { endpoint: 'https://example.com' })).toEqual({
+    expect(await probe(fetchImpl, { endpoint })).toEqual({ outcome: 'ok' });
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    'https://example.com',
+    'http://abc.elastic.cloud',
+    'https://user:pass@abc.elastic.cloud',
+    'https://notelastic.cloud',
+    'https://elastic.cloud.example.com',
+    'https://abc.elastic.cloud/base/?a=1',
+    'https://abc.elastic.cloud/base/#f',
+    'not a url',
+  ])('rejects the host %s without sending a request', async (endpoint) => {
+    const fetchImpl = respond(204);
+
+    expect(await probe(fetchImpl, { endpoint })).toEqual({
       outcome: 'rejected',
       message: HOST_COPY,
     });

@@ -92,6 +92,20 @@ describe('selectRemoteDestinationsToProbe', () => {
     ).toEqual([{ id: 'remote-1', endpoint: 'https://abc.elastic.cloud', apiKey: 'key-b' }]);
   });
 
+  it.each([
+    ['an inline string', 'raw-key'],
+    ['a reference with extra fields', { credential: 'remote-1-api-key', extra: true }],
+  ])('leaves the key undefined for %s', (_label, apiKey) => {
+    expect(
+      selectRemoteDestinationsToProbe({
+        unit: unitWith([remoteDestination({ apiKey })]),
+        secrets,
+        previousUnit: undefined,
+        previousSecrets: {},
+      })
+    ).toEqual([{ id: 'remote-1', endpoint: 'https://abc.elastic.cloud', apiKey: undefined }]);
+  });
+
   it('ignores local Elasticsearch and S3 destinations', () => {
     expect(
       selectRemoteDestinationsToProbe({

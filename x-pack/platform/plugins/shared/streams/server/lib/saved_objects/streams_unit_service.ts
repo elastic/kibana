@@ -33,7 +33,10 @@ import type {
   UnitValidationResult,
   ValidateUnitConfig,
 } from '../unit_config/types';
-import { selectRemoteDestinationsToProbe } from '../unit_config/remote_destinations_to_probe';
+import {
+  credentialReferenceName,
+  selectRemoteDestinationsToProbe,
+} from '../unit_config/remote_destinations_to_probe';
 import { invalidateUnitApiKeys } from '../unit_config/unit_api_keys';
 import type { InvalidateApiKeysAsInternalUser, UnitApiKey } from '../unit_config/unit_api_keys';
 
@@ -116,17 +119,6 @@ const mergeUnitSecrets = (
 };
 
 // A config entry references a credential only when its value is exactly `{ credential: <name> }`.
-const credentialReferenceName = (value: unknown): string | undefined => {
-  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-    return undefined;
-  }
-  const keys = Object.keys(value);
-  const { credential } = value as { credential?: unknown };
-  return keys.length === 1 && keys[0] === 'credential' && typeof credential === 'string'
-    ? credential
-    : undefined;
-};
-
 // Only top-level config entries of sources, processors, and destinations are scanned.
 const collectCredentialReferenceNames = (unit: StreamsUnit.Configuration): Set<string> => {
   const components = [unit.sources, unit.processors, unit.destinations].flatMap((list) =>

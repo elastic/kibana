@@ -27,17 +27,21 @@ const configValue = (config: unknown, name: string): unknown =>
     ? config.find((entry) => isRecord(entry) && entry.name === name)?.value
     : undefined;
 
-const resolveApiKey = (value: unknown, secrets: StreamsUnit.Secrets): string | undefined => {
-  if (typeof value === 'string') {
-    return value;
-  }
-  if (typeof value !== 'object' || value === null) {
+/** The secret name of a `{ credential: <name> }` config value, or undefined for any other value. */
+export const credentialReferenceName = (value: unknown): string | undefined => {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
     return undefined;
   }
+  const keys = Object.keys(value);
   const { credential } = value as { credential?: unknown };
-  return typeof credential === 'string' && Object.hasOwn(secrets, credential)
-    ? secrets[credential]
+  return keys.length === 1 && keys[0] === 'credential' && typeof credential === 'string'
+    ? credential
     : undefined;
+};
+
+const resolveApiKey = (value: unknown, secrets: StreamsUnit.Secrets): string | undefined => {
+  const name = credentialReferenceName(value);
+  return name !== undefined && Object.hasOwn(secrets, name) ? secrets[name] : undefined;
 };
 
 const toRemoteDestination = (
