@@ -63,18 +63,6 @@ export function TransactionDistribution({
 
   const traceSamples = traceSamplesFetchResult.data?.traceSamples;
 
-  // The sample's array position is carried in the URL (`sampleIndex`) so that
-  // samples sharing the same traceId/transactionId (e.g. paired `gen_ai.*`
-  // documents) can be navigated individually. Resolving selection by identifier
-  // alone collapses such pairs onto the first match, breaking forward
-  // pagination.
-  //
-  // Only trust the index when the sample at that position still matches the
-  // URL's traceId/transactionId. A reload after paging refetches samples with
-  // the selected ids boosted by `_score`, which can move them to the front
-  // while the URL keeps the old index; using a stale index would then point the
-  // pager at an unrelated sample. On a mismatch we fall back to identifier
-  // matching and drop the stale index entirely (see `selectedSampleIndex`).
   const selectedSampleIndex = useMemo(() => {
     if (!isValidSampleIndex(sampleIndex, traceSamples)) {
       return undefined;
