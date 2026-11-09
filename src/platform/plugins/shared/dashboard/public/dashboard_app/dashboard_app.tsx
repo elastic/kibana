@@ -220,6 +220,9 @@ export function DashboardApp({
 }
 
 const pinnedPanelActiveStyles = css({
+  // keep the wrapper out of layout so DashboardRenderer's `flex: auto` still fills the viewport
+  // height; the maximized panel (absolute, height: 100%) depends on that height
+  display: 'contents',
   '&:has(.kbnFlexPanel--active) *': {
     // disable pointer events and user select on drag + resize
     userSelect: 'none',

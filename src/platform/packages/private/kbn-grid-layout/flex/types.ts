@@ -20,6 +20,11 @@ export interface GridSettings {
   rowHeight: number;
   columnCount: number;
   keyboardDragTopLimit: number;
+  /**
+   * Optional panel widths (in pixels). When provided, a panel's width snaps to the closest
+   * breakpoint when a resize is committed. When omitted, panels keep any width they are resized to.
+   */
+  widthBreakpoints?: number[];
 }
 
 export type FlexLayoutPanel = FlexPanelData & { type: 'panel' };

@@ -147,10 +147,30 @@ export const moveAction = (
   });
 };
 
-export const commitAction = ({ activePanelEvent$, panelRefs }: FlexLayoutStateManager) => {
+const snapToBreakpoint = (width: number, breakpoints: number[]): number =>
+  breakpoints.reduce((closest, breakpoint) =>
+    Math.abs(breakpoint - width) < Math.abs(closest - width) ? breakpoint : closest
+  );
+
+export const commitAction = ({
+  activePanelEvent$,
+  gridLayout$,
+  gridSettings$,
+  panelRefs,
+}: FlexLayoutStateManager) => {
   const event = activePanelEvent$.getValue();
-  activePanelEvent$.next(undefined);
   if (!event) return;
+
+  const { widthBreakpoints } = gridSettings$.getValue();
+  const panel = gridLayout$.getValue()[event.id];
+  if (event.type === 'resize' && panel && widthBreakpoints?.length) {
+    const width = snapToBreakpoint(panel.width, widthBreakpoints);
+    if (width !== panel.width) {
+      gridLayout$.next({ ...gridLayout$.getValue(), [event.id]: { ...panel, width } });
+    }
+  }
+  // clear the event after the layout is final so only the snapped layout is emitted
+  activePanelEvent$.next(undefined);
 
   panelRefs.current[event.id]?.scrollIntoView({
     behavior: 'smooth',
@@ -164,10 +184,10 @@ export const cancelAction = ({
   panelRefs,
 }: FlexLayoutStateManager) => {
   const event = activePanelEvent$.getValue();
-  activePanelEvent$.next(undefined);
   if (startingLayout) {
     gridLayout$.next(startingLayout);
   }
+  activePanelEvent$.next(undefined);
 
   if (!event) return;
   panelRefs.current[event.id]?.scrollIntoView({

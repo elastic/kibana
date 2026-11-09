@@ -66,6 +66,10 @@ export const DragHandle = ({
     <div
       {...rest}
       ref={dragHandleRef}
+      // keyboard users need to focus the handle to start a move with Space/Enter + arrow keys;
+      // a div is used (rather than a <button>) because the handle may wrap an interactive label
+      role="button"
+      tabIndex={0}
       aria-label={i18n.translate('controls.controlGroup.ariaActions.moveControlButtonAction', {
         defaultMessage: 'Move control {controlTitle}',
         values: { controlTitle },

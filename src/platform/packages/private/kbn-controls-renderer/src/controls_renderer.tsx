@@ -21,6 +21,7 @@ import { ControlPanel } from './components/control_panel';
 import type { ControlsLayout, ControlsRendererParentApi } from './types';
 import {
   apiPublishesFocusedPanelId,
+  CONTROL_WIDTH_PIXELS,
   controlsLayoutToFlexLayout,
   flexLayoutToControlsLayout,
 } from './utils';
@@ -41,13 +42,11 @@ export const ControlsRenderer = ({
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
   const [viewMode, setViewMode] = useState(parentApi.viewMode$.getValue());
 
-  const [flexLayout, setFlexLayout] = useState<FlexLayoutData>(() =>
-    controlsLayoutToFlexLayout(controlState)
+  // derived synchronously from `controlState` so the flex layout never lags a render behind it
+  const flexLayout = useMemo<FlexLayoutData>(
+    () => controlsLayoutToFlexLayout(controlState),
+    [controlState]
   );
-
-  useEffect(() => {
-    setFlexLayout(controlsLayoutToFlexLayout(controlState));
-  }, [controlState]);
 
   const gridSettings = useMemo<GridSettings>(
     () => ({
@@ -58,6 +57,7 @@ export const ControlsRenderer = ({
           : COMPRESSED_CONTROL_HEIGHT,
       columnCount: 1,
       keyboardDragTopLimit: 0,
+      widthBreakpoints: Object.values(CONTROL_WIDTH_PIXELS),
     }),
     [parentApi]
   );
@@ -82,12 +82,6 @@ export const ControlsRenderer = ({
       // the flex layout emits its initial layout, so only propagate real changes
       if (!isEqual(newControlsLayout, controlState)) {
         onControlsChanged(newControlsLayout);
-        return;
-      }
-      // the control state is unchanged (e.g. a small resize that snaps to the same width), but the
-      // flex layout may still hold the unsnapped pixel width - force it to snap back
-      if (!isEqual(newFlexLayout, controlsLayoutToFlexLayout(controlState))) {
-        setFlexLayout(controlsLayoutToFlexLayout(controlState));
       }
     },
     [controlState, onControlsChanged]
