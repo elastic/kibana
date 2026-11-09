@@ -25,6 +25,7 @@ describe('createAttachmentPlaceholderElement', () => {
     expect(el.contentEditable).toBe('false');
     expect(el.getAttribute(ATTACHMENT_PLACEHOLDER_ATTRIBUTE)).toBe('true');
     expect(el.getAttribute('aria-label')).toBe('photo.png');
+    expect(el.title).toBe('photo.png');
     expect(el.dataset.placeholderName).toBe('photo.png');
   });
 

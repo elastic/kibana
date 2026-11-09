@@ -87,6 +87,7 @@ export const createAttachmentPlaceholderElement = (
   span.setAttribute(PLACEHOLDER_KIND_ATTRIBUTE, kind);
   span.setAttribute('role', 'img');
   span.setAttribute('aria-label', label);
+  span.title = label;
   span.dataset.placeholderName = label;
 
   span.appendChild(createKindIconSvg(kind));
