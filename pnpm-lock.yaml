@@ -2967,6 +2967,9 @@ importers:
       '@kbn/oidc-provider-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/test/security_api_integration/plugins/oidc_provider
+      '@kbn/ols':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-ols
       '@kbn/open-telemetry-instrumented-plugin':
         specifier: workspace:*
         version: link:src/platform/test/common/plugins/otel_metrics
@@ -8254,6 +8257,8 @@ importers:
   src/platform/packages/shared/kbn-object-versioning-utils: {}
 
   src/platform/packages/shared/kbn-occ: {}
+
+  src/platform/packages/shared/kbn-ols: {}
 
   src/platform/packages/shared/kbn-openapi-bundler: {}
 
