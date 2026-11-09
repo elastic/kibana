@@ -35,4 +35,12 @@ describe('isValidSampleIndex', () => {
   it('returns false for an empty samples array', () => {
     expect(isValidSampleIndex(0, [])).toBe(false);
   });
+
+  it('returns false for a fractional index', () => {
+    // The route schema coerces the URL param with `z.coerce.number()`, which
+    // accepts fractional values. `traceSamples[0.5]` is `undefined`, so a
+    // fractional index must be rejected to keep the identifier fallback.
+    expect(isValidSampleIndex(0.5, traceSamples)).toBe(false);
+    expect(isValidSampleIndex(1.1, traceSamples)).toBe(false);
+  });
 });

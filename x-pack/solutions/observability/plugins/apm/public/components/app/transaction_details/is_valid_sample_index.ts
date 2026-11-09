@@ -17,6 +17,7 @@ export function isValidSampleIndex(
 ): sampleIndex is number {
   return (
     sampleIndex !== undefined &&
+    Number.isInteger(sampleIndex) &&
     !!traceSamples &&
     sampleIndex >= 0 &&
     sampleIndex < traceSamples.length
