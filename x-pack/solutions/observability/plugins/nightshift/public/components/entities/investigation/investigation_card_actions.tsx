@@ -122,6 +122,7 @@ export const InvestigationCardActions = ({
         `${AGENT_BUILDER_CONVERSATIONS_URL}/${encodeURIComponent(investigation.id)}`,
         { version: AGENT_BUILDER_PUBLIC_API_VERSION }
       );
+      dismissManualInvestigationFresh(investigation.id, spaceBasePath);
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.nightshift.investigations.cardDeleteSuccess', {
           defaultMessage: 'Investigation deleted',
@@ -137,7 +138,7 @@ export const InvestigationCardActions = ({
       // Covers the home page sections, their severity counts, and the onboarding trial investigation.
       void queryClient.invalidateQueries({ queryKey: NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY });
     }
-  }, [http, investigation.id, notifications.toasts, queryClient]);
+  }, [http, investigation.id, notifications.toasts, queryClient, spaceBasePath]);
 
   const menuItems = useMemo(
     () => [

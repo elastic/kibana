@@ -22,8 +22,11 @@ interface FreshEntry {
 }
 
 const listeners = new Set<() => void>();
-/** Session mirror so a blocked / full localStorage still works until reload. */
-const memoryBySpace = new Map<string, FreshEntry[]>();
+/**
+ * Fallback when localStorage is blocked/unavailable. Not a write-through cache of
+ * successful reads — mutations always re-read storage first when it works.
+ */
+const memoryFallbackBySpace = new Map<string, FreshEntry[]>();
 
 const storageKey = (spaceBasePath: string): string =>
   `${STORAGE_PREFIX}${spaceBasePath || 'default'}`;
@@ -49,9 +52,8 @@ const parseEntries = (raw: string): FreshEntry[] => {
       'id' in item &&
       typeof (item as { id: unknown }).id === 'string'
     ) {
-      const { id } = item as { id: string; severity?: unknown };
       entries.push({
-        id,
+        id: (item as { id: string }).id,
         severity: isSeverity((item as { severity?: unknown }).severity)
           ? (item as { severity: Severity }).severity
           : undefined,
@@ -61,20 +63,17 @@ const parseEntries = (raw: string): FreshEntry[] => {
   return entries;
 };
 
+const copyEntries = (entries: FreshEntry[]): FreshEntry[] =>
+  entries.map((entry) => ({ ...entry }));
+
+/** Prefer live localStorage; memory only when storage cannot be read. */
 const readEntries = (spaceBasePath: string): FreshEntry[] => {
   const key = storageKey(spaceBasePath);
-  const cached = memoryBySpace.get(key);
-  if (cached) {
-    return cached.map((entry) => ({ ...entry }));
-  }
   try {
     const raw = window.localStorage.getItem(key);
-    const entries = raw ? parseEntries(raw) : [];
-    memoryBySpace.set(key, entries);
-    return entries.map((entry) => ({ ...entry }));
+    return raw ? parseEntries(raw) : [];
   } catch {
-    memoryBySpace.set(key, []);
-    return [];
+    return copyEntries(memoryFallbackBySpace.get(key) ?? []);
   }
 };
 
@@ -86,20 +85,38 @@ const notify = (): void => {
 
 const writeEntries = (spaceBasePath: string, entries: FreshEntry[]): void => {
   const key = storageKey(spaceBasePath);
-  memoryBySpace.set(
-    key,
-    entries.map((entry) => ({ ...entry }))
-  );
+  const next = copyEntries(entries);
+  memoryFallbackBySpace.set(key, next);
   try {
-    window.localStorage.setItem(key, JSON.stringify(entries));
+    window.localStorage.setItem(key, JSON.stringify(next));
   } catch {
-    // Best-effort: investigation start already succeeded; keep the session mirror.
+    // Best-effort: investigation start already succeeded; keep the session fallback.
   }
   notify();
 };
 
+const onStorageEvent = (event: StorageEvent): void => {
+  if (!event.key || !event.key.startsWith(STORAGE_PREFIX)) {
+    return;
+  }
+  // Drop stale fallback for that space; next read comes from storage.
+  memoryFallbackBySpace.delete(event.key);
+  notify();
+};
+
+let storageListenerAttached = false;
+
+const ensureStorageListener = (): void => {
+  if (storageListenerAttached || typeof window === 'undefined') {
+    return;
+  }
+  window.addEventListener('storage', onStorageEvent);
+  storageListenerAttached = true;
+};
+
 /** Subscribe to fresh-id changes (register / dismiss / severity) so the landing page can re-render. */
 export const subscribeManualInvestigationFresh = (listener: () => void): (() => void) => {
+  ensureStorageListener();
   listeners.add(listener);
   return () => {
     listeners.delete(listener);
@@ -153,6 +170,12 @@ export const isManualInvestigationFresh = (
   spaceBasePath: string
 ): boolean => readEntries(spaceBasePath).some(({ id }) => id === investigationId);
 
+export const getManualInvestigationFreshSeverity = (
+  investigationId: string,
+  spaceBasePath: string
+): Severity | undefined =>
+  readEntries(spaceBasePath).find(({ id }) => id === investigationId)?.severity;
+
 /** Tile `+N` counts from remembered severities (not only currently loaded section rows). */
 export const getManualInvestigationFreshCounts = (spaceBasePath: string): SeverityCounts => {
   const counts: SeverityCounts = { critical: 0, high: 0, medium: 0, low: 0 };
@@ -164,7 +187,7 @@ export const getManualInvestigationFreshCounts = (spaceBasePath: string): Severi
   return counts;
 };
 
-/** Clears the session mirror between unit tests. */
+/** Clears the session fallback between unit tests. */
 export const resetManualInvestigationFreshForTests = (): void => {
-  memoryBySpace.clear();
+  memoryFallbackBySpace.clear();
 };

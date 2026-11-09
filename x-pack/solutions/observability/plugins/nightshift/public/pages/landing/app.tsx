@@ -36,6 +36,7 @@ import { RETRY_BUTTON_LABEL } from '../../common/messages';
 import {
   dismissManualInvestigationFresh,
   getManualInvestigationFreshCounts,
+  getManualInvestigationFreshSeverity,
   isManualInvestigationFresh,
   rememberManualInvestigationSeverity,
   subscribeManualInvestigationFresh,
@@ -137,10 +138,24 @@ export function NightshiftApp({
       }
     }
   }, [freshRevision, sections, spaceBasePath]);
-  const freshCounts = useMemo(
-    (): SeverityCounts => getManualInvestigationFreshCounts(spaceBasePath),
-    [freshRevision, spaceBasePath]
-  );
+  // Persist unread globally; when a search is active, only badge ids visible in the filtered list.
+  const freshCounts = useMemo((): SeverityCounts => {
+    if (!(debouncedSearchQuery ?? '').trim()) {
+      return getManualInvestigationFreshCounts(spaceBasePath);
+    }
+    const counts: SeverityCounts = { critical: 0, high: 0, medium: 0, low: 0 };
+    for (const section of sections) {
+      if (!isSeverity(section.id)) {
+        continue;
+      }
+      for (const { id } of section.investigations) {
+        if (isFreshInvestigation(id)) {
+          counts[section.id] += 1;
+        }
+      }
+    }
+    return counts;
+  }, [debouncedSearchQuery, freshRevision, isFreshInvestigation, sections, spaceBasePath]);
 
   // A tile scrolls to its section, so it is only actionable while the list is rendering that
   // section — which the list, not the count, decides.
@@ -185,28 +200,30 @@ export function NightshiftApp({
     [history]
   );
 
-  // Clear New / `+N` when the user opens a finished investigation (list click / deep link).
-  // Wait for the first sections load so a still-running id can appear under In progress first;
-  // after that, anything not in the in-progress page is treated as finished (including deep
-  // links to rows outside the current severity pages).
+  // Clear New / `+N` only when we positively know the opened investigation has finished —
+  // either it is in a finished section page, or we previously remembered its severity.
+  // Do not infer "finished" from absence in In progress (search / page cap / failed fetch).
   useEffect(() => {
     if (
       !selectedInvestigationId ||
-      isInitialLoading ||
       !isManualInvestigationFresh(selectedInvestigationId, spaceBasePath)
     ) {
       return;
     }
-    const isInProgress = sections.some(
+    const rememberedSeverity = getManualInvestigationFreshSeverity(
+      selectedInvestigationId,
+      spaceBasePath
+    );
+    const seenFinishedInList = sections.some(
       (section) =>
-        section.id === 'in-progress' &&
+        (isSeverity(section.id) || section.id === 'not-rated') &&
         section.investigations.some(({ id }) => id === selectedInvestigationId)
     );
-    if (isInProgress) {
+    if (!rememberedSeverity && !seenFinishedInList) {
       return;
     }
     dismissManualInvestigationFresh(selectedInvestigationId, spaceBasePath);
-  }, [isInitialLoading, sections, selectedInvestigationId, spaceBasePath]);
+  }, [sections, selectedInvestigationId, spaceBasePath]);
 
   const handleFlyoutClose = useCallback(() => {
     const params = new URLSearchParams(history.location.search);

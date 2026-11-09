@@ -84,14 +84,33 @@ describe('manualInvestigationStarts', () => {
     expect(getManualInvestigationFreshCounts(spaceA).medium).toBe(1);
   });
 
-  it('keeps the session mirror when localStorage.setItem throws', () => {
+  it('keeps a session fallback when localStorage is fully unavailable', () => {
     const setItem = jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new Error('quota');
+    });
+    const getItem = jest.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new Error('blocked');
     });
 
     expect(() => registerManualInvestigationStart('inv-quota', spaceA)).not.toThrow();
     expect(isManualInvestigationFresh('inv-quota', spaceA)).toBe(true);
 
     setItem.mockRestore();
+    getItem.mockRestore();
+  });
+
+  it('re-reads localStorage before each write so another tab is not overwritten', () => {
+    registerManualInvestigationStart('inv-1', spaceA);
+    // Simulate another tab writing inv-2 into storage.
+    window.localStorage.setItem(
+      'nightshift.manualInvestigationFresh:/s/space-a',
+      JSON.stringify([{ id: 'inv-1' }, { id: 'inv-2' }])
+    );
+
+    registerManualInvestigationStart('inv-3', spaceA);
+
+    expect(isManualInvestigationFresh('inv-1', spaceA)).toBe(true);
+    expect(isManualInvestigationFresh('inv-2', spaceA)).toBe(true);
+    expect(isManualInvestigationFresh('inv-3', spaceA)).toBe(true);
   });
 });
