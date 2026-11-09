@@ -384,6 +384,51 @@ describe('compareCmd exit codes', () => {
       );
       expect(mockEvalsClient.getExperimentScores).not.toHaveBeenCalled();
     });
+
+    it.each([
+      ['--baseline-branch', ['bk-1', '--baseline-branch', 'main', '--suite', 'suite']],
+      ['--suite', ['bk-1', 'bk-2', '--suite', 'suite']],
+    ])('exits 1 when resolving a build ID under %s fails', async (_label, argv) => {
+      mockEvalsClient.findLatestExperimentForBuild.mockRejectedValueOnce(
+        new Error('Failed to find experiment for build bk-1 on branch undefined: 500')
+      );
+
+      const outcome = await runCompare([...argv, '--fail-on-regression']);
+
+      expect('error' in outcome && isFailError(outcome.error)).toBe(false);
+      expect('error' in outcome && outcome.error.message).toContain('500');
+      expect(mockEvalsClient.getExperimentScores).not.toHaveBeenCalled();
+    });
+
+    it('resolves every build ID strictly, including the markdown baseline lookup', async () => {
+      mockEvalsClient.findLatestExperimentForBuild.mockImplementation(
+        async ({ baseExecutionId }: { baseExecutionId: string }) => ({
+          executionId: baseExecutionId === 'bk-1' ? TARGET : BASELINE,
+          timestamp: '2026-05-01T11:00:00.000Z',
+          gitCommitSha: null,
+          gitBranch: null,
+        })
+      );
+      const write = jest.spyOn(process.stdout, 'write').mockImplementation(() => true);
+      try {
+        await runCompare([
+          'bk-1',
+          'bk-2',
+          '--suite',
+          'suite',
+          '--format',
+          'markdown',
+          '--fail-on-regression',
+        ]);
+      } finally {
+        write.mockRestore();
+      }
+
+      expect(mockEvalsClient.findLatestExperimentForBuild).toHaveBeenCalledTimes(3);
+      for (const [args] of mockEvalsClient.findLatestExperimentForBuild.mock.calls) {
+        expect(args).toEqual(expect.objectContaining({ throwOnError: true }));
+      }
+    });
   });
 
   it('reports an unreachable evals plugin as a usage error (exit 1)', async () => {

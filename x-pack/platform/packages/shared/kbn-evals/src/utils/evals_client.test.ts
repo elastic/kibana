@@ -379,6 +379,16 @@ describe('EvalsClient', () => {
       ).rejects.toThrow('exceeds MAX_SCORES_PER_QUERY');
     });
 
+    it('names a non-Error rejection in the message', async () => {
+      const kbnClient = createMockKbnClient();
+      kbnClient.request.mockRejectedValue('connection refused');
+      const client = new EvalsClient(kbnClient, createLog());
+
+      await expect(
+        client.getExperimentScores('experiment-123', undefined, { throwOnError: true })
+      ).rejects.toThrow('experiment-123: connection refused');
+    });
+
     it('still returns an empty experiment as []', async () => {
       const kbnClient = createMockKbnClient();
       kbnClient.request.mockResolvedValue(asKbnResponse({ scores: [], total: 0 }));

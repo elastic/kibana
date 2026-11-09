@@ -294,6 +294,24 @@ describe('formatRegressionGateReport', () => {
     );
   });
 
+  it('prints a lower-is-better regression with a signed positive delta', () => {
+    const decision = evaluateRegressionGate({
+      results: [
+        makeResult({
+          evaluatorName: 'Latency',
+          direction: 'minimize',
+          meanTarget: 5,
+          meanBaseline: 3,
+          pValue: 0.0004,
+        }),
+      ],
+    });
+
+    expect(formatRegressionGateReport({ decision })).toContain(
+      '  - Dataset One / Latency: delta +2.000, p=<0.001, Wilcoxon, n=20 pairs'
+    );
+  });
+
   it('warns about unchecked evaluators instead of claiming a clean pass for them', () => {
     const decision = evaluateRegressionGate({
       results: [makeResult({ sampleSize: 3 }), makeResult({ evaluatorName: 'Fine', pValue: 0.5 })],
