@@ -22,7 +22,9 @@ import {
   bulkCreateAgentActions,
   cancelAgentAction,
   createAgentAction,
+  getAgentIdsFromActions,
   getAgentsByActionsIds,
+  getAgentsWithoutActionResults,
   transformDataSecrets,
 } from './actions';
 
@@ -917,6 +919,141 @@ describe('Agent actions', () => {
           password: '$co.elastic.secret{passwordref1}',
         },
       });
+    });
+  });
+
+  describe('getAgentIdsFromActions', () => {
+    const mockHits = (agentIds: string[][]) => ({
+      hits: { hits: agentIds.map((agents) => ({ _source: { agents } })) },
+    });
+
+    it('is empty without an action id to read', async () => {
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+
+      await expect(getAgentIdsFromActions(esClientMock, [])).resolves.toEqual(new Set());
+      expect(esClientMock.search).not.toHaveBeenCalled();
+    });
+
+    it('collects the agents of every document of every action id given', async () => {
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      esClientMock.search.mockResolvedValue(
+        mockHits([['agent1', 'agent2'], ['agent2', 'agent3'], []]) as any
+      );
+
+      await expect(getAgentIdsFromActions(esClientMock, ['action1', 'child1'])).resolves.toEqual(
+        new Set(['agent1', 'agent2', 'agent3'])
+      );
+      // a missing .fleet-actions means nothing has been actioned, not a 404: Fleet Server creates
+      // the index, so a deployment whose first ever action fails early does not have it yet
+      expect(esClientMock.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ignore_unavailable: true,
+          query: { bool: { filter: [{ terms: { action_id: ['action1', 'child1'] } }] } },
+        })
+      );
+    });
+
+    it('restricts the read to recent documents when asked to', async () => {
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      esClientMock.search.mockResolvedValue(mockHits([['agent1']]) as any);
+
+      await getAgentIdsFromActions(esClientMock, ['action1'], {
+        since: '2026-11-07T10:00:00.000Z',
+      });
+
+      expect(esClientMock.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              filter: [
+                { terms: { action_id: ['action1'] } },
+                { range: { '@timestamp': { gte: '2026-11-07T10:00:00.000Z' } } },
+              ],
+            },
+          },
+        })
+      );
+    });
+
+    it('pages under a point in time rather than truncating at one page', async () => {
+      // an action run with a small batchSize writes one document per batch, so it can hold far
+      // more than a page; a truncated read would silently action those agents twice
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      const fullPage = Array.from({ length: 1000 }, (_, i) => [`agent${i}`]);
+      esClientMock.search
+        .mockResolvedValueOnce(mockHits(fullPage) as any)
+        .mockResolvedValueOnce({
+          pit_id: 'pit2',
+          hits: { hits: fullPage.map((agents, i) => ({ _source: { agents }, sort: [i] })) },
+        } as any)
+        .mockResolvedValueOnce(mockHits([['agent-last']]) as any);
+      esClientMock.openPointInTime.mockResolvedValue({ id: 'pit1' } as any);
+
+      const agentIds = await getAgentIdsFromActions(esClientMock, ['action1']);
+
+      expect(agentIds.has('agent-last')).toBe(true);
+      expect(agentIds.size).toBe(1001);
+      expect(esClientMock.openPointInTime).toHaveBeenCalled();
+      // the next page searches the point in time the last one handed back
+      expect(esClientMock.search).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          pit: expect.objectContaining({ id: 'pit2' }),
+          search_after: [999],
+        })
+      );
+      expect(esClientMock.closePointInTime).toHaveBeenCalledWith({ id: 'pit2' });
+    });
+
+    it('closes the point in time when a page fails', async () => {
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      const fullPage = Array.from({ length: 1000 }, (_, i) => [`agent${i}`]);
+      esClientMock.search
+        .mockResolvedValueOnce(mockHits(fullPage) as any)
+        .mockRejectedValueOnce(new Error('Request timed out'));
+      esClientMock.openPointInTime.mockResolvedValue({ id: 'pit1' } as any);
+
+      await expect(getAgentIdsFromActions(esClientMock, ['action1'])).rejects.toThrow(
+        'Request timed out'
+      );
+      expect(esClientMock.closePointInTime).toHaveBeenCalledWith({ id: 'pit1' });
+    });
+  });
+
+  describe('getAgentsWithoutActionResults', () => {
+    it('returns the agents that have no result for the action', async () => {
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      esClientMock.search.mockResolvedValue({
+        hits: { hits: [{ _source: { agent_id: 'agent2' } }] },
+      } as any);
+
+      await expect(
+        getAgentsWithoutActionResults(esClientMock, 'action1', ['agent1', 'agent2'])
+      ).resolves.toEqual(['agent1']);
+    });
+
+    it('does not search without an agent to look for', async () => {
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+
+      await expect(getAgentsWithoutActionResults(esClientMock, 'action1', [])).resolves.toEqual([]);
+      expect(esClientMock.search).not.toHaveBeenCalled();
+    });
+
+    it('treats a missing results index as no results at all', async () => {
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      esClientMock.search.mockRejectedValue({ statusCode: 404 });
+
+      await expect(
+        getAgentsWithoutActionResults(esClientMock, 'action1', ['agent1'])
+      ).resolves.toEqual(['agent1']);
+    });
+
+    it('throws anything else, rather than writing results twice', async () => {
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      esClientMock.search.mockRejectedValue(new Error('Request timed out'));
+
+      await expect(
+        getAgentsWithoutActionResults(esClientMock, 'action1', ['agent1'])
+      ).rejects.toThrow('Request timed out');
     });
   });
 });

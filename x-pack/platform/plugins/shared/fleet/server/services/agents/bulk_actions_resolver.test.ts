@@ -8,6 +8,7 @@
 jest.mock('timers/promises');
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -173,10 +174,39 @@ describe('BulkActionsResolver', () => {
       await expect(resolver.getTaskStatus('task1')).resolves.toEqual(TaskStatus.Idle);
     });
 
-    it('is undefined when the task cannot be read, so the caller still schedules', async () => {
-      taskManager.get.mockRejectedValue(new Error('Saved object not found'));
+    it('is undefined when there is no such task, so the caller still schedules', async () => {
+      taskManager.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
 
       await expect(resolver.getTaskStatus('task1')).resolves.toBeUndefined();
+    });
+
+    it('throws when the task cannot be read at all', async () => {
+      // read as "no retry task" this would let the watchdog resume an action whose retry is queued
+      taskManager.get.mockRejectedValue(new EsErrors.TimeoutError('Request timed out'));
+
+      await expect(resolver.getTaskStatus('task1')).rejects.toThrow('Request timed out');
+    });
+  });
+
+  describe('getCheckTaskState', () => {
+    it('returns the state of a task that exists', async () => {
+      taskManager.get.mockResolvedValue({ id: 'task1', state: { nbAgentsProcessed: 7 } } as any);
+
+      await expect(resolver.getCheckTaskState('task1')).resolves.toEqual({ nbAgentsProcessed: 7 });
+    });
+
+    it('is undefined when there is no such task', async () => {
+      taskManager.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+
+      await expect(resolver.getCheckTaskState('task1')).resolves.toBeUndefined();
+    });
+
+    it('throws when the state cannot be read at all', async () => {
+      // a transient read failure taken as "no state" looks exactly like a runner that stopped
+      // heartbeating, and would earn a live runner a second runner alongside it
+      taskManager.get.mockRejectedValue(new EsErrors.TimeoutError('Request timed out'));
+
+      await expect(resolver.getCheckTaskState('task1')).rejects.toThrow('Request timed out');
     });
   });
 });
@@ -665,10 +695,74 @@ describe('createRetryTask', () => {
         jest.fn()
       ).run();
 
-      expect(resolver.removeIfExists).toHaveBeenCalledWith(RETRY_TASK_ID);
+      // capped like the scheduling below: the default backoff sleeps past this task's 1m timeout,
+      // and an expired run has its return value — including a legacy task's schedule — discarded
+      expect(resolver.removeIfExists).toHaveBeenCalledWith(RETRY_TASK_ID, { maxRetryAttempts: 0 });
       expect(resolver.run).toHaveBeenCalled();
       expect(result).toEqual(
         expect.objectContaining({ state: expect.objectContaining({ resumeCount: 1 }) })
+      );
+    });
+
+    it('does not resume when the checkpoint cannot be read, rather than reading stale state', async () => {
+      // a heartbeat written after the claim is missed during a transient read failure, and the
+      // claimed state then reads as a runner that stopped heartbeating
+      resolver.getCheckTaskState.mockRejectedValue(new EsErrors.TimeoutError('Request timed out'));
+
+      const result = await createRetryTask(
+        createTaskInstance({ state: { searchAfter: ['lastAgent'], ...STALLED_CHECKPOINT } }),
+        getDeps,
+        jest.fn()
+      ).run();
+
+      expect(resolver.run).not.toHaveBeenCalled();
+      // the run still counts towards the ceiling and the task stays recurring
+      expect(result).toEqual({
+        state: expect.objectContaining({ runCount: 1 }),
+        schedule: CHECK_TASK_SCHEDULE,
+      });
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Request timed out'),
+        expect.anything()
+      );
+    });
+
+    it('reads the check task document once per run', async () => {
+      resolver.getCheckTaskState.mockResolvedValue({
+        searchAfter: ['lastAgent'],
+        ...STALLED_CHECKPOINT,
+      });
+
+      await createRetryTask(
+        createTaskInstance({ state: { searchAfter: ['lastAgent'], ...STALLED_CHECKPOINT } }),
+        getDeps,
+        jest.fn()
+      ).run();
+
+      expect(resolver.getCheckTaskState).toHaveBeenCalledTimes(1);
+    });
+
+    it('hands the child action ids back to the resumed runner', async () => {
+      // rollback writes its documents under generated ids, which are the only way its agents can
+      // be deduplicated once the action restarts
+      resolver.getCheckTaskState.mockResolvedValue({
+        searchAfter: ['lastAgent'],
+        childActionIds: ['child-1', 'child-2'],
+        ...STALLED_CHECKPOINT,
+      });
+
+      await createRetryTask(
+        createTaskInstance({ state: { ...STALLED_CHECKPOINT } }),
+        getDeps,
+        jest.fn()
+      ).run();
+
+      expect(resolver.run).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ childActionIds: ['child-1', 'child-2'] }),
+        BulkActionTaskType.REASSIGN_RETRY,
+        RETRY_TASK_ID,
+        expect.anything()
       );
     });
 

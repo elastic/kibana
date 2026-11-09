@@ -14,7 +14,12 @@ import { agentPolicyService } from '../agent_policy';
 
 import { ReassignActionRunner } from './reassign_action_runner';
 import { BulkActionTaskType } from './bulk_action_types';
-import { createAgentAction, createErrorActionResults, getAgentActions } from './actions';
+import {
+  createAgentAction,
+  createErrorActionResults,
+  getAgentIdsFromActions,
+  getAgentsWithoutActionResults,
+} from './actions';
 import { bulkUpdateAgents, getAgentsByKuery, openPointInTime } from './crud';
 import { getAgentPolicyRestrictions, isAgentlessAgent, isHostedAgent } from './hosted_agent';
 
@@ -30,7 +35,12 @@ jest.mock('../spaces/agent_namespaces', () => ({
 }));
 
 const mockedGetAgentsByKuery = getAgentsByKuery as jest.MockedFunction<typeof getAgentsByKuery>;
-const mockedGetAgentActions = getAgentActions as jest.MockedFunction<typeof getAgentActions>;
+const mockedGetAgentIdsFromActions = getAgentIdsFromActions as jest.MockedFunction<
+  typeof getAgentIdsFromActions
+>;
+const mockedGetAgentsWithoutActionResults = getAgentsWithoutActionResults as jest.MockedFunction<
+  typeof getAgentsWithoutActionResults
+>;
 const mockedBulkUpdateAgents = bulkUpdateAgents as jest.MockedFunction<typeof bulkUpdateAgents>;
 const mockedCreateAgentAction = createAgentAction as jest.MockedFunction<typeof createAgentAction>;
 
@@ -96,7 +106,8 @@ describe('ReassignActionRunner', () => {
     (createErrorActionResults as jest.Mock).mockResolvedValue(undefined);
     mockedBulkUpdateAgents.mockResolvedValue(undefined as never);
     mockedCreateAgentAction.mockResolvedValue({} as never);
-    mockedGetAgentActions.mockResolvedValue([]);
+    mockedGetAgentIdsFromActions.mockResolvedValue(new Set());
+    mockedGetAgentsWithoutActionResults.mockResolvedValue([]);
   });
 
   const createRunner = () =>
@@ -129,9 +140,7 @@ describe('ReassignActionRunner', () => {
   it('completes a replayed batch whose remaining agents are all already assigned', async () => {
     // the earlier run finished this batch: it reassigned agent-2 and agent-3 and wrote error
     // results for agent-0 and agent-1, which is why only the two eligible ids are in the document
-    mockedGetAgentActions.mockResolvedValue([
-      { agents: ['agent-2', 'agent-3'], type: 'POLICY_REASSIGN' },
-    ] as never);
+    mockedGetAgentIdsFromActions.mockResolvedValue(new Set(['agent-2', 'agent-3']));
 
     const runner = createRunner();
     await runner.runActionAsyncWithRetry();
@@ -151,6 +160,37 @@ describe('ReassignActionRunner', () => {
       `${BulkActionTaskType.REASSIGN_RETRY}:check:${ACTION_ID}`,
       expect.objectContaining({ nbAgentsProcessed: AGENTS.length })
     );
+  });
+
+  it('recovers the error results an earlier run may not have written for a replayed batch', async () => {
+    // the earlier run wrote the action document for agent-2 and agent-3 but timed out before the
+    // error results of the two it excluded, so nothing else will ever write them
+    mockedGetAgentIdsFromActions.mockResolvedValue(new Set(['agent-2', 'agent-3']));
+    mockedGetAgentsWithoutActionResults.mockResolvedValue(['agent-0', 'agent-1']);
+
+    await createRunner().runActionAsyncWithRetry();
+
+    expect(mockedGetAgentsWithoutActionResults).toHaveBeenCalledWith(esClient, ACTION_ID, [
+      'agent-0',
+      'agent-1',
+    ]);
+    expect(createErrorActionResults).toHaveBeenCalledWith(
+      esClient,
+      ACTION_ID,
+      expect.objectContaining({ 'agent-0': expect.anything(), 'agent-1': expect.anything() }),
+      expect.any(String)
+    );
+  });
+
+  it('does not write error results again for agents that already have one', async () => {
+    mockedGetAgentIdsFromActions.mockResolvedValue(new Set(['agent-2', 'agent-3']));
+    // the usual case: the earlier run wrote both the document and the error results, and a second
+    // result for one agent would be counted twice
+    mockedGetAgentsWithoutActionResults.mockResolvedValue([]);
+
+    await createRunner().runActionAsyncWithRetry();
+
+    expect(createErrorActionResults).not.toHaveBeenCalled();
   });
 
   it('retries a batch that was not replayed and has nothing to reassign', async () => {

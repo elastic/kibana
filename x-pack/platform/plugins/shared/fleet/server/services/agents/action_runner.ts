@@ -14,13 +14,17 @@ import { isResponseError } from '@kbn/es-errors';
 import moment from 'moment';
 
 import type { Agent } from '../../types';
-import { AgentActionNotFoundError } from '../../errors';
 import { appContextService } from '../app_context';
 import { SO_SEARCH_LIMIT } from '../../../common/constants';
 import { agentsKueryNamespaceFilter, buildFilterWithNamespace } from '../spaces/agent_namespaces';
 
-import { getAgentActions } from './actions';
+import {
+  createErrorActionResults,
+  getAgentIdsFromActions,
+  getAgentsWithoutActionResults,
+} from './actions';
 import { closePointInTime, getAgentsByKuery, openPointInTime } from './crud';
+import { BulkActionTaskType } from './bulk_action_types';
 import type { BulkActionsResolver } from './bulk_actions_resolver';
 import type { BulkActionCheckTaskState, RetryParams } from './retry_helper';
 import {
@@ -57,6 +61,26 @@ export const PIT_KEEP_ALIVE = '10m';
 export const ACTION_SORT_FIELD = 'agent.id';
 export const ACTION_SORT_ORDER = 'asc' as const;
 
+/**
+ * How far back the per-batch top-up of the deduplication set reaches, beyond the start of the
+ * previous read. Re-reading a document costs nothing but bandwidth — the ids go into a set — while
+ * missing one costs a duplicated agent, so the window has to cover any clock skew between the
+ * Kibana node that stamped a document and the one reading it back. A minute is far more than
+ * NTP-synchronised nodes drift, and keeps the top-up down to the documents of the last minute
+ * rather than re-reading most of a fast action every batch.
+ */
+const DEDUPE_REFRESH_OVERLAP_MINUTES = 1;
+
+/**
+ * Ceiling on the child action ids carried in the checkpoint. Rollback writes one action per
+ * rollback version per batch, so a large fleet paged with a small `batchSize` could otherwise grow
+ * this list without bound inside a saved object. The earliest ids are the ones kept, since an
+ * action restarting from the beginning re-pages their agents first; past the ceiling such an action
+ * deduplicates the agents it has ids for and re-actions the rest, as it did before they were
+ * recorded at all.
+ */
+const MAX_CHILD_ACTION_IDS = 1000;
+
 export interface ActionParams {
   kuery: string;
   showInactive?: boolean;
@@ -81,10 +105,17 @@ export abstract class ActionRunner {
   private nbAgentsProcessed = 0;
   private heartbeatTimer?: ReturnType<typeof setInterval>;
   /**
-   * Ids of the agents earlier runs of this action already actioned, read once per run from the
-   * action documents in `.fleet-actions`. Undefined until the first batch asks for it.
+   * Ids of the agents this action has already actioned, read from the action documents in
+   * `.fleet-actions`. Undefined until the first batch asks for it, then topped up per batch.
    */
   private actionedAgentIds?: Set<string>;
+  /** When the read that produced {@link actionedAgentIds} started, for topping it up. */
+  private actionedAgentIdsReadAt?: string;
+  /**
+   * Action ids this action's documents are written under when they are not the action's own id.
+   * Only rollback has them, and only through them can its agents be deduplicated.
+   */
+  private childActionIds: string[];
 
   constructor(
     esClient: ElasticsearchClient,
@@ -97,6 +128,32 @@ export abstract class ActionRunner {
     this.actionParams = { ...actionParams, actionId: actionParams.actionId ?? uuidv4() };
     this.retryParams = retryParams;
     this.nbAgentsProcessed = retryParams.nbAgentsProcessed ?? 0;
+    this.childActionIds = retryParams.childActionIds ?? [];
+  }
+
+  /**
+   * Record the action ids a batch wrote its documents under, for subclasses that do not write them
+   * under the action's own id. They are checkpointed with the cursor, so a later run can read them
+   * back and deduplicate against the agents they cover.
+   */
+  protected recordChildActionIds(actionIds: string[]) {
+    for (const actionId of actionIds) {
+      if (this.childActionIds.length >= MAX_CHILD_ACTION_IDS) {
+        appContextService
+          .getLogger()
+          .warn(
+            `Action ${this.actionParams.actionId} has more than ${MAX_CHILD_ACTION_IDS} child actions, the rest will not be deduplicated if it restarts`
+          );
+        return;
+      }
+      if (
+        actionId &&
+        actionId !== this.actionParams.actionId &&
+        !this.childActionIds.includes(actionId)
+      ) {
+        this.childActionIds.push(actionId);
+      }
+    }
   }
 
   protected abstract getActionType(): string;
@@ -185,6 +242,11 @@ export abstract class ActionRunner {
                 `404 error from Elasticsearch during action ${this.actionParams.actionId}, retrying without the expired point in time: ${error.message}`
               );
               this.retryParams = { ...this.retryParams, pitId: undefined };
+              // Checkpointed as well as held in memory. If scheduling the retry below fails, or
+              // Kibana exits before it runs, the watchdog resumes from the stored checkpoint — and
+              // that would hand the expired point in time straight back, 404 again, and spend a
+              // resume attempt for every pass.
+              await this.updateCheckpoint();
             }
             // Elasticsearch rejected the `search_after` value this run resumed from. The cursor
             // holds one value per sort clause, so a checkpoint taken under a different sort no
@@ -237,6 +299,9 @@ export abstract class ActionRunner {
                 ...this.retryParams,
                 retryCount: (this.retryParams.retryCount ?? 0) + 1,
                 nbAgentsProcessed: this.nbAgentsProcessed,
+                // Carried whatever else was reset: they are how the next run deduplicates, and a
+                // restart from the beginning needs them more than a resume does.
+                ...(this.childActionIds.length ? { childActionIds: this.childActionIds } : {}),
               },
               this.getTaskType(),
               taskId
@@ -287,8 +352,11 @@ export abstract class ActionRunner {
 
   /**
    * Record the latest batch checkpoint on the check task so a resumed runner continues from it.
-   * A failed checkpoint only costs re-processing one batch on resume, which processBatch already
-   * guards against, so it must never abort the action.
+   * It must never abort the action, so a failure is logged rather than thrown. What that costs
+   * depends on the caller: after a batch it is one batch re-processed on resume, which processBatch
+   * deduplicates; after the cursor was deliberately cleared — a rejected checkpoint, or a point in
+   * time that expired — it is the watchdog handing the cleared value back, which both of those
+   * paths then correct again on the following run.
    */
   private async updateCheckpoint() {
     await this.writeCheckTaskState({
@@ -297,12 +365,16 @@ export abstract class ActionRunner {
       // search, and the cursor is only meaningful against the one that produced it.
       pitId: this.retryParams.pitId,
       nbAgentsProcessed: this.nbAgentsProcessed,
+      ...(this.childActionIds.length ? { childActionIds: this.childActionIds } : {}),
     });
   }
 
   private async writeCheckTaskState(
     checkpoint: Partial<
-      Pick<BulkActionCheckTaskState, 'searchAfter' | 'pitId' | 'nbAgentsProcessed'>
+      Pick<
+        BulkActionCheckTaskState,
+        'searchAfter' | 'pitId' | 'nbAgentsProcessed' | 'childActionIds'
+      >
     >
   ) {
     if (!this.checkTaskId) {
@@ -371,42 +443,94 @@ export abstract class ActionRunner {
   }
 
   /**
-   * Agents this action has already actioned, collected once per run from the action documents
-   * written by its earlier runs.
+   * Agents this action has already actioned, from the action documents written under its own id
+   * and under any child ids a subclass recorded.
    *
-   * `UPDATE_TAGS` documents are left out. Those retries restart from scratch behind a kuery that
-   * already excludes the agents whose tags were written, so an agent still matching the kuery
-   * while appearing in such a document is one whose write did not land, and it has to run again.
+   * The set is read in full once and then topped up before every batch, rather than snapshotted
+   * for the whole run. A watchdog resume can overlap a runner that is still alive, and from that
+   * point on the two page the same range: a snapshot taken at the start of one of them cannot see
+   * what the other writes, so without the top-up every batch after the overlap begins could be
+   * actioned twice rather than only the boundary batch. The top-up only reads documents written
+   * since the previous read, so it costs one small search per batch. It narrows the window rather
+   * than closing it — the two runners can still write the same agent within one batch of each
+   * other — which needs a lease on the action, not a read.
    *
-   * Only "this action has written nothing yet" is swallowed. Any other read failure has to
-   * propagate: deduplication that fails open re-actions every agent of every earlier run, so a
-   * transient Elasticsearch timeout would be far more costly than failing the batch and retrying.
+   * No read failure is swallowed: deduplication that fails open re-actions every agent of every
+   * earlier run, so a transient Elasticsearch failure is far better paid for by failing the batch
+   * and retrying. A missing `.fleet-actions` is not a failure and comes back as an empty set.
    */
   private async getActionedAgentIds(): Promise<Set<string>> {
-    if (this.actionedAgentIds) {
-      return this.actionedAgentIds;
-    }
-    const actionedAgentIds = new Set<string>();
-    try {
-      const actions = await getAgentActions(this.esClient, this.actionParams.actionId!);
-      for (const action of actions) {
-        if (action.type === 'UPDATE_TAGS') {
-          continue;
-        }
-        for (const agentId of action.agents ?? []) {
-          actionedAgentIds.add(agentId);
-        }
+    const readStartedAt = moment()
+      .subtract(DEDUPE_REFRESH_OVERLAP_MINUTES, 'm')
+      .toDate()
+      .toISOString();
+    const actionIds = [this.actionParams.actionId!, ...this.childActionIds];
+
+    if (!this.actionedAgentIds) {
+      this.actionedAgentIds = await getAgentIdsFromActions(this.esClient, actionIds);
+    } else {
+      const since = this.actionedAgentIdsReadAt;
+      for (const agentId of await getAgentIdsFromActions(this.esClient, actionIds, { since })) {
+        this.actionedAgentIds.add(agentId);
       }
-    } catch (error) {
-      if (!(error instanceof AgentActionNotFoundError)) {
-        throw error;
-      }
-      appContextService
-        .getLogger()
-        .debug(`No action document yet for action ${this.actionParams.actionId}, nothing to skip`);
     }
-    this.actionedAgentIds = actionedAgentIds;
-    return actionedAgentIds;
+    this.actionedAgentIdsReadAt = readStartedAt;
+
+    return this.actionedAgentIds;
+  }
+
+  /**
+   * Whether a batch has to be filtered against the agents earlier runs of this action already
+   * actioned.
+   *
+   * A first attempt has no earlier run to deduplicate against. Update tags is exempt whatever the
+   * attempt: its retries restart from scratch behind a kuery that already excludes the agents whose
+   * tags were written, so an agent still matching that kuery while appearing in one of the action's
+   * documents is one whose write did not land and has to run again. Reading those documents would
+   * pay for a search per batch only to discard every id it found.
+   */
+  private shouldDeduplicate(): boolean {
+    return (
+      !!this.retryParams.retryCount &&
+      this.getTaskType() !== BulkActionTaskType.UPDATE_AGENT_TAGS_RETRY
+    );
+  }
+
+  /**
+   * Write the error results of the agents a replayed batch excluded, for those that have none.
+   *
+   * An action document proves that the run which wrote it got that far, not that it also wrote the
+   * error results of the agents it excluded: `reassignBatch` writes them after the action document,
+   * so a failure between the two leaves them missing. Treating the replay as done without them
+   * would advance past the batch and leave the action `IN_PROGRESS` with results outstanding for
+   * good, since nothing comes back to this batch afterwards.
+   *
+   * Agents that already have a result are left alone — that is the common case, the earlier run
+   * having written both — because a second result for one agent would be counted twice. The
+   * per-agent reasons the earlier run had are gone, so all of them are recorded under the error
+   * the replay raised, which names the same cause for the batch as a whole.
+   */
+  private async writeMissingErrorActionResults(agents: Agent[], error: Error) {
+    const actionId = this.actionParams.actionId!;
+    const agentIdsWithoutResults = await getAgentsWithoutActionResults(
+      this.esClient,
+      actionId,
+      agents.map(({ id }) => id)
+    );
+    if (agentIdsWithoutResults.length === 0) {
+      return;
+    }
+    appContextService
+      .getLogger()
+      .info(
+        `Writing the missing error results of ${agentIdsWithoutResults.length} agents excluded by an earlier run of action ${actionId}`
+      );
+    await createErrorActionResults(
+      this.esClient,
+      actionId,
+      Object.fromEntries(agentIdsWithoutResults.map((agentId) => [agentId, error])),
+      'no actionable agents left in a replayed batch'
+    );
   }
 
   /**
@@ -438,7 +562,7 @@ export abstract class ActionRunner {
    * without ever reaching the agents behind it.
    */
   private async processBatch(agents: Agent[]): Promise<{ actionId: string }> {
-    if (!this.retryParams.retryCount) {
+    if (!this.shouldDeduplicate()) {
       return await this.processAgents(agents);
     }
 
@@ -480,6 +604,9 @@ export abstract class ActionRunner {
       if (!this.isBatchWithoutActionableAgents(error)) {
         throw error;
       }
+      // Recover the results the earlier run may not have written for them before moving past the
+      // batch, or the action can end with results outstanding and never complete.
+      await this.writeMissingErrorActionResults(remainingAgents, error);
       appContextService
         .getLogger()
         .debug(

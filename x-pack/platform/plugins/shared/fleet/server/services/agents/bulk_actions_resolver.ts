@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, type SavedObjectsClientContract } from '@kbn/core/server';
 import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
@@ -195,13 +195,20 @@ export class BulkActionsResolver {
     return taskId;
   }
 
-  public async removeIfExists(taskId: string) {
+  /**
+   * `maxRetryAttempts` caps the backoff, for a caller with less time than the default budget takes
+   * — the default sleeps 2+4+8+16+32s, longer than a check task's 1m timeout.
+   */
+  public async removeIfExists(taskId: string, options: { maxRetryAttempts?: number } = {}) {
     const logger = appContextService.getLogger();
     if (!this.taskManager) {
       return;
     }
     logger.info('Removing task ' + taskId);
-    await retryTransientEsErrors(() => this.taskManager!.removeIfExists(taskId), { logger });
+    await retryTransientEsErrors(() => this.taskManager!.removeIfExists(taskId), {
+      logger,
+      maxAttempts: options.maxRetryAttempts,
+    });
   }
 
   /**
@@ -212,7 +219,10 @@ export class BulkActionsResolver {
   public async updateCheckTaskState(
     taskId: string,
     checkpoint: Partial<
-      Pick<BulkActionCheckTaskState, 'searchAfter' | 'pitId' | 'nbAgentsProcessed'>
+      Pick<
+        BulkActionCheckTaskState,
+        'searchAfter' | 'pitId' | 'nbAgentsProcessed' | 'childActionIds'
+      >
     >
   ) {
     const logger = appContextService.getLogger();
@@ -242,8 +252,12 @@ export class BulkActionsResolver {
   }
 
   /**
-   * Read a check task's current state. Used both to decide on the freshest checkpoint rather than
-   * on the one claimed at the start of the run, and to merge watcher metadata onto it.
+   * Read a check task's current state, or undefined when there is no such task.
+   *
+   * Only a missing task is swallowed. Any other failure is thrown, because the caller uses this to
+   * decide whether a runner is alive: a transient read failure read as "no state" looks exactly
+   * like a runner that has stopped heartbeating, and would earn a live runner a second runner
+   * alongside it. Failing the check task's run instead costs one interval and nothing else.
    */
   public async getCheckTaskState(taskId: string): Promise<BulkActionCheckTaskState | undefined> {
     if (!this.taskManager) {
@@ -253,9 +267,10 @@ export class BulkActionsResolver {
       const task = await this.taskManager.get(taskId);
       return task?.state as BulkActionCheckTaskState | undefined;
     } catch (error) {
-      appContextService
-        .getLogger()
-        .debug(`Could not read the state of task ${taskId}: ${error.message}`);
+      if (!isTaskNotFoundError(error)) {
+        throw error;
+      }
+      appContextService.getLogger().debug(`There is no task ${taskId} to read the state of`);
       return undefined;
     }
   }
@@ -265,6 +280,9 @@ export class BulkActionsResolver {
    * retry that is still going to run from one that is only taking up its id: `ensureScheduled` is
    * a no-op on an id that already exists, so a task left behind in a terminal status has to be
    * removed before a resume can be scheduled under it.
+   *
+   * As with `getCheckTaskState`, only a missing task is swallowed: a read failure taken as "no
+   * retry task" would let the watchdog resume an action whose retry is already queued.
    */
   public async getTaskStatus(taskId: string): Promise<TaskStatus | undefined> {
     if (!this.taskManager) {
@@ -273,12 +291,17 @@ export class BulkActionsResolver {
     try {
       return (await this.taskManager.get(taskId))?.status;
     } catch (error) {
-      // A missing task throws a 404 from the saved objects client; anything else is also safest
-      // read as "cannot tell", which lets the caller go ahead and schedule.
+      if (!isTaskNotFoundError(error)) {
+        throw error;
+      }
       return undefined;
     }
   }
 }
+
+/** A task that does not exist comes back as a 404 from the saved objects client. */
+const isTaskNotFoundError = (error: Error & { statusCode?: number }): boolean =>
+  SavedObjectsErrorHelpers.isNotFoundError(error) || error.statusCode === 404;
 
 /**
  * Statuses that mean a scheduled task is still going to run. These task types are registered with
@@ -353,8 +376,9 @@ const runCheckTask = async (
   /**
    * Task Manager writes the state returned here over the current task document, and its version
    * conflict resolution also prefers the returned state, so a checkpoint the runner writes
-   * between this read and that write is lost. Reading as late as possible keeps the window to
-   * the tail of this run, and the resume is handed to a separate task rather than started here
+   * between the read this builds on and that write is lost. The base state is therefore the
+   * freshest read this run has made — on the paths that re-read the document, the one taken after
+   * every other round trip — and the resume is handed to a separate task rather than started here
    * so that the window normally has no writer in it at all. A checkpoint lost this way costs one
    * re-read batch on the next resume, which processBatch deduplicates and still counts.
    *
@@ -364,11 +388,12 @@ const runCheckTask = async (
    * resumed runner cannot do it.
    */
   const runCount = (state.runCount ?? 0) + 1;
-  const withWatcherFields = async (
-    fields: Partial<BulkActionCheckTaskState>
-  ): Promise<CheckTaskRunResult> => ({
+  const withWatcherFields = (
+    fields: Partial<BulkActionCheckTaskState>,
+    baseState: BulkActionCheckTaskState = state
+  ): CheckTaskRunResult => ({
     state: {
-      ...((await resolver?.getCheckTaskState(taskInstance.id)) ?? state),
+      ...baseState,
       runCount,
       ...fields,
     },
@@ -402,7 +427,7 @@ const runCheckTask = async (
 
   if (!resolver) {
     logger.warn(`Cannot resume bulk action ${actionId}, the bulk actions resolver is unavailable`);
-    return await withWatcherFields({});
+    return withWatcherFields({});
   }
 
   const hasRecentBatch = await hasRecentActionDoc(esClient, actionId, CHECK_TASK_INTERVAL_MINUTES);
@@ -424,7 +449,7 @@ const runCheckTask = async (
 
   if (checkpointMoved || hasRecentBatch) {
     logger.debug(`Bulk action ${actionId} is still alive, not resuming`);
-    return await withWatcherFields({ lastObservedCheckpointAt: checkpointUpdatedAt });
+    return withWatcherFields({ lastObservedCheckpointAt: checkpointUpdatedAt }, freshState);
   }
 
   // Re-check completion against the fresh state: the runner may have finished during the reads
@@ -443,7 +468,7 @@ const runCheckTask = async (
     logger.debug(
       `Bulk action ${actionId} already has a retry task queued as ${retryTaskId} (${retryTaskStatus}), not resuming`
     );
-    return await withWatcherFields({ lastObservedCheckpointAt: checkpointUpdatedAt });
+    return withWatcherFields({ lastObservedCheckpointAt: checkpointUpdatedAt }, freshState);
   }
 
   const resumeCount = (freshState.resumeCount ?? 0) + 1;
@@ -467,23 +492,27 @@ const runCheckTask = async (
   // getRetryParams is applied last so action types that must restart from scratch (update tags,
   // whose kuery excludes already-tagged agents) still have the checkpoint stripped.
   const params = taskInstance.params as BulkActionTaskParams;
-  const checkpoint: Pick<RetryParams, 'searchAfter' | 'nbAgentsProcessed' | 'pitId'> =
-    checkpointUpdatedAt
-      ? {
-          searchAfter: freshState.searchAfter,
-          nbAgentsProcessed: freshState.nbAgentsProcessed,
-          // The point in time is taken from the checkpoint, not from the params: Elasticsearch
-          // may hand back a new id on any search, and only the latest one is guaranteed to be
-          // valid. It is kept rather than cleared because a stall shorter than its keep alive
-          // leaves it usable, and if it has expired the search 404s and that handler clears it so
-          // the next run opens a fresh one.
-          pitId: freshState.pitId,
-        }
-      : {
-          searchAfter: params.retryParams?.searchAfter,
-          nbAgentsProcessed: params.retryParams?.nbAgentsProcessed,
-          pitId: params.retryParams?.pitId,
-        };
+  const checkpoint: Pick<
+    RetryParams,
+    'searchAfter' | 'nbAgentsProcessed' | 'pitId' | 'childActionIds'
+  > = checkpointUpdatedAt
+    ? {
+        searchAfter: freshState.searchAfter,
+        nbAgentsProcessed: freshState.nbAgentsProcessed,
+        childActionIds: freshState.childActionIds,
+        // The point in time is taken from the checkpoint, not from the params: Elasticsearch
+        // may hand back a new id on any search, and only the latest one is guaranteed to be
+        // valid. It is kept rather than cleared because a stall shorter than its keep alive
+        // leaves it usable, and if it has expired the search 404s and that handler clears it so
+        // the next run opens a fresh one.
+        pitId: freshState.pitId,
+      }
+    : {
+        searchAfter: params.retryParams?.searchAfter,
+        nbAgentsProcessed: params.retryParams?.nbAgentsProcessed,
+        childActionIds: params.retryParams?.childActionIds,
+        pitId: params.retryParams?.pitId,
+      };
   const retryParams = getRetryParams(taskInstance.taskType, {
     ...params.retryParams,
     ...checkpoint,
@@ -501,7 +530,11 @@ const runCheckTask = async (
       logger.debug(
         `Removing the ${retryTaskStatus} retry task ${retryTaskId} of bulk action ${actionId} before resuming it`
       );
-      await resolver.removeIfExists(retryTaskId);
+      // Capped for the same reason as the scheduling below, and more urgently: the default backoff
+      // sleeps past this task's 1m timeout, and an expired run has its return value discarded —
+      // including, for a check task created before this one was recurring, the schedule that
+      // adopts it. The watchdog would then be removed as a finished one-shot task.
+      await resolver.removeIfExists(retryTaskId, { maxRetryAttempts: 0 });
     }
     await resolver.run(
       actionParams,
@@ -525,10 +558,13 @@ const runCheckTask = async (
     );
   }
 
-  return await withWatcherFields({
-    resumeCount,
-    lastObservedCheckpointAt: checkpointUpdatedAt,
-  });
+  return withWatcherFields(
+    {
+      resumeCount,
+      lastObservedCheckpointAt: checkpointUpdatedAt,
+    },
+    freshState
+  );
 };
 
 export function createRetryTask(

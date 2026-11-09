@@ -56,6 +56,12 @@ export interface RetryParams {
   taskId?: string;
   /** Agents processed by earlier runs of this action, so the count stays cumulative. */
   nbAgentsProcessed?: number;
+  /**
+   * Action ids earlier runs of this action wrote their documents under, when they are not the
+   * action's own id. Only rollback does this — it creates one action per rollback version — and
+   * without carrying them the per-agent deduplication has nothing to read for that action type.
+   */
+  childActionIds?: string[];
 }
 
 /**
@@ -72,6 +78,11 @@ export interface BulkActionCheckTaskState {
    */
   pitId?: string;
   nbAgentsProcessed?: number;
+  /**
+   * Action ids this action's documents were written under when they are not the action's own id,
+   * so a resumed run can still deduplicate against them. See `RetryParams.childActionIds`.
+   */
+  childActionIds?: string[];
   /**
    * Last time the runner wrote to this state, either by advancing past a batch or by a heartbeat
    * while one was in flight. Its only use is liveness: the check task resumes the action when it

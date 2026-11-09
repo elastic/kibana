@@ -7,6 +7,12 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  QueryDslQueryContainer,
+  SearchHit,
+  SearchResponse,
+  SortResults,
+} from '@elastic/elasticsearch/lib/api/types';
 import apm from 'elastic-apm-node';
 import pMap from 'p-map';
 
@@ -342,6 +348,152 @@ export async function getAgentActions(esClient: ElasticsearchClient, actionId: s
   }
 
   return result;
+}
+
+/**
+ * How many action documents one page of {@link getAgentIdsFromActions} holds. The first page is
+ * read without a point in time, so this also decides how often that read has to fall back to
+ * paging under one.
+ */
+const ACTION_DOCS_PAGE_SIZE = 1000;
+
+/** Keep alive for the point in time {@link getAgentIdsFromActions} pages with, when it needs one. */
+const ACTION_DOCS_PIT_KEEP_ALIVE = '1m';
+
+const collectAgentIds = (
+  hits: Array<SearchHit<Pick<FleetServerAgentAction, 'agents'>>>,
+  agentIds: Set<string>
+) => {
+  for (const hit of hits) {
+    for (const agentId of hit._source?.agents ?? []) {
+      agentIds.add(agentId);
+    }
+  }
+};
+
+/**
+ * Every agent id named by the action documents of the given action ids, for deduplicating the work
+ * of a bulk action that is being retried or resumed.
+ *
+ * Unlike {@link getAgentActions} this is a complete read: it pages rather than truncating at the
+ * first `size`, since an action run with a small `batchSize` writes one document per batch and can
+ * hold many more than a single page. A truncated read would silently action agents twice. It also
+ * tolerates a missing index — `.fleet-actions` is created by Fleet Server, so a deployment whose
+ * first ever action fails before writing a document does not have it yet — and does not audit log,
+ * being an internal read rather than a user retrieving actions.
+ *
+ * `since` restricts the read to documents written at or after that timestamp, so a caller holding
+ * the ids of an earlier read can top it up cheaply instead of re-reading everything. Action
+ * documents are only ever created, never updated, so the union of such reads is exact as long as
+ * the windows overlap.
+ */
+export async function getAgentIdsFromActions(
+  esClient: ElasticsearchClient,
+  actionIds: string[],
+  options: { since?: string } = {}
+): Promise<Set<string>> {
+  const agentIds = new Set<string>();
+  if (actionIds.length === 0) {
+    return agentIds;
+  }
+
+  const filter: QueryDslQueryContainer[] = [{ terms: { action_id: actionIds } }];
+  if (options.since) {
+    filter.push({ range: { '@timestamp': { gte: options.since } } });
+  }
+  const search = {
+    query: { bool: { filter } },
+    _source: ['agents'],
+    size: ACTION_DOCS_PAGE_SIZE,
+    track_total_hits: false,
+    sort: [{ '@timestamp': 'asc' as const }],
+  };
+
+  // One plain search covers an action whose documents fit in a page, which is the common case, and
+  // `ignore_unavailable` is what turns a missing index into zero hits rather than a 404.
+  const firstPage = await esClient.search<Pick<FleetServerAgentAction, 'agents'>>({
+    index: AGENT_ACTIONS_INDEX,
+    ignore_unavailable: true,
+    ...search,
+  });
+  collectAgentIds(firstPage.hits.hits, agentIds);
+  if (firstPage.hits.hits.length < ACTION_DOCS_PAGE_SIZE) {
+    return agentIds;
+  }
+
+  // A full page may have more behind it. Page through it all again under a point in time, which is
+  // what makes `search_after` a complete read: it pins the index and gives the non-unique
+  // `@timestamp` sort a `_shard_doc` tiebreaker, so no document is skipped at a page boundary.
+  agentIds.clear();
+  let pitId = (
+    await esClient.openPointInTime({
+      index: AGENT_ACTIONS_INDEX,
+      keep_alive: ACTION_DOCS_PIT_KEEP_ALIVE,
+    })
+  ).id;
+  try {
+    let searchAfter: SortResults | undefined;
+    for (;;) {
+      const page: SearchResponse<Pick<FleetServerAgentAction, 'agents'>> = await esClient.search({
+        ...search,
+        pit: { id: pitId, keep_alive: ACTION_DOCS_PIT_KEEP_ALIVE },
+        ...(searchAfter ? { search_after: searchAfter } : {}),
+      });
+      pitId = page.pit_id ?? pitId;
+      const { hits } = page.hits;
+      collectAgentIds(hits, agentIds);
+      if (hits.length < ACTION_DOCS_PAGE_SIZE) {
+        return agentIds;
+      }
+      searchAfter = hits[hits.length - 1].sort;
+    }
+  } finally {
+    await esClient
+      .closePointInTime({ id: pitId })
+      .catch((error) =>
+        appContextService
+          .getLogger()
+          .debug(`Could not close the point in time of an action documents read: ${error.message}`)
+      );
+  }
+}
+
+/**
+ * Which of the given agents have no result yet for an action, so that results are not written
+ * twice for an agent that already has one.
+ */
+export async function getAgentsWithoutActionResults(
+  esClient: ElasticsearchClient,
+  actionId: string,
+  agentIds: string[]
+): Promise<string[]> {
+  if (agentIds.length === 0) {
+    return [];
+  }
+  try {
+    const res = await esClient.search<{ agent_id?: string }>({
+      index: AGENT_ACTIONS_RESULTS_INDEX,
+      query: {
+        bool: {
+          must: [{ term: { action_id: actionId } }, { terms: { agent_id: agentIds } }],
+        },
+      },
+      _source: ['agent_id'],
+      size: agentIds.length,
+    });
+    const agentIdsWithResults = new Set(
+      res.hits.hits.map((hit) => hit._source?.agent_id).filter((id): id is string => !!id)
+    );
+    return agentIds.filter((agentId) => !agentIdsWithResults.has(agentId));
+  } catch (err) {
+    if (err.statusCode === 404) {
+      // .fleet-actions-results does not yet exist
+      appContextService.getLogger().debug(err);
+    } else {
+      throw err;
+    }
+  }
+  return agentIds;
 }
 
 export async function getUnenrollAgentActions(

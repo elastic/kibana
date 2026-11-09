@@ -46,6 +46,10 @@ export class RollbackActionRunner extends ActionRunner {
     );
     // Track all action IDs created across batches
     this.allActionIds.push(...result.actionIds);
+    // Rollback writes its documents under one generated action id per rollback version rather than
+    // under the action's own id, so per-agent deduplication has nothing to read unless those ids
+    // are checkpointed. Without them a restart re-sends a rollback to every agent already handled.
+    this.recordChildActionIds(result.actionIds);
     // Return the first actionId for compatibility with ActionRunner interface
     // If no actions were created, return empty string
     return {
