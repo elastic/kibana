@@ -39,6 +39,7 @@ import type { DashboardRedirect } from './types';
 import { type DashboardEmbedSettings } from './types';
 import { startSyncingExpandedPanelState } from './url';
 import type { DashboardInternalApi } from '../dashboard_api/types';
+import { css } from '@emotion/react';
 
 export interface DashboardAppProps {
   history: History;
@@ -181,7 +182,7 @@ export function DashboardApp({
   return showNoDataPage ? (
     <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
   ) : (
-    <>
+    <div css={pinnedPanelActiveStyles}>
       {dashboardApi && dashboardInternalApi && (
         <>
           <DashboardTabTitleSetter dashboardApi={dashboardApi} />
@@ -214,6 +215,14 @@ export function DashboardApp({
         showPlainSpinner={showPlainSpinner}
         getCreationOptions={getCreationOptions}
       />
-    </>
+    </div>
   );
 }
+
+const pinnedPanelActiveStyles = css({
+  '&:has(.kbnFlexPanel--active) *': {
+    // disable pointer events and user select on drag + resize
+    userSelect: 'none',
+    pointerEvents: 'none',
+  },
+});
