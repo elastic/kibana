@@ -474,6 +474,7 @@ const eventsUpdateRoute = createServerRoute({
     return (await getEventSearchClient()).updateEventStatus({
       eventId: params.path.id,
       change: StatusChange.byOperator(params.body.status),
+      actor: 'human',
       assessmentNote: params.body.assessment_note,
     });
   },

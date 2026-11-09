@@ -7,6 +7,11 @@
 
 import type { SignificantEventsToolUsage } from '@kbn/nightshift-ai';
 import type { Severity, SignificantEventStatus } from '@kbn/significant-events-schema';
+import type {
+  StatusChange,
+  StatusOutcome,
+} from '../../significant_events/events/lifecycle/lifecycle_controller';
+import type { SIGNIFICANT_EVENT_ENTITY_TYPE } from './constants';
 
 interface KnowledgeIndicatorQueriesGeneratedProps {
   count: number;
@@ -88,6 +93,23 @@ interface AgentToolEventStatusUpdateProps extends ExistingAlertIdentityProps {
   event_id: string;
   status: SignificantEventStatus;
   error_message?: string;
+}
+
+type SignificantEventActor = 'agent' | 'human' | 'system';
+
+interface EventStatusChangedProps extends ExistingAlertIdentityProps {
+  entity_type: typeof SIGNIFICANT_EVENT_ENTITY_TYPE;
+  previous_status?: SignificantEventStatus;
+  status: SignificantEventStatus;
+  actor: SignificantEventActor;
+  change_kind?: StatusChange['kind'];
+  assessment_outcome?: StatusOutcome;
+  severity: Severity;
+  confidence: number;
+  signal_count: number;
+  confirmed_signal_count: number;
+  source_ids: string[];
+  workflow_execution_id?: string;
 }
 
 interface AgentToolEventInvestigationAttachProps extends ExistingAlertIdentityProps {
@@ -181,6 +203,8 @@ export {
   type AgentToolEventWriteProps,
   type DetectionScanProps,
   type DiscoveryTriggeredProps,
+  type EventStatusChangedProps,
+  type SignificantEventActor,
   type KnowledgeIndicatorQueriesGeneratedProps,
   type KnowledgeIndicatorFeaturesIdentifiedProps,
   type KnowledgeIndicatorOnboardingScheduledProps,

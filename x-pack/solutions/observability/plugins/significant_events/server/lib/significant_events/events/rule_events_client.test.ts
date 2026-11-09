@@ -144,6 +144,7 @@ describe('RuleEventsClient', () => {
       const result = await createStatusSearchClient(existing, alertEventsClient).updateEventStatus({
         eventId: existing.event_id,
         change: DEACTIVATE_STATUS,
+        actor: 'human',
       });
 
       expect(result).toEqual({ updated: 1, ignored: 0, status: 'inactive' });
@@ -158,6 +159,7 @@ describe('RuleEventsClient', () => {
         await createStatusSearchClient(existing, alertEventsClient).updateEventStatus({
           eventId: existing.event_id,
           change: DEACTIVATE_STATUS,
+          actor: 'human',
           assessmentNote,
         });
         return lastStatusWritten(alertEventsClient).data;
@@ -183,6 +185,7 @@ describe('RuleEventsClient', () => {
         await createStatusSearchClient(existing, alertEventsClient).updateEventStatus({
           eventId: existing.event_id,
           change: StatusChange.byOperator(status),
+          actor: 'human',
         });
 
         expect(lastStatusWritten(alertEventsClient).data).toMatchObject({
@@ -202,6 +205,7 @@ describe('RuleEventsClient', () => {
         {
           eventId: 'missing-event',
           change,
+          actor: 'human',
         }
       );
 
@@ -216,6 +220,7 @@ describe('RuleEventsClient', () => {
       const result = await createStatusSearchClient(existing, alertEventsClient).updateEventStatus({
         eventId: existing.event_id,
         change: DEACTIVATE_STATUS,
+        actor: 'human',
       });
 
       expect(result).toEqual({
@@ -244,6 +249,7 @@ describe('RuleEventsClient', () => {
       const result = await eventSearchClient.updateEventStatus({
         eventId: existing.event_id,
         change: DEACTIVATE_STATUS,
+        actor: 'human',
       });
 
       expect(result).toEqual({ updated: 0, ignored: 1, status: 'active', reason: 'superseded' });
@@ -257,6 +263,7 @@ describe('RuleEventsClient', () => {
       const superseded = await createStatusSearchClient(existing, stale).updateEventStatus({
         eventId: existing.event_id,
         change: DEACTIVATE_STATUS,
+        actor: 'human',
         expectedTimestamp: '2000-01-01T00:00:00.000Z',
       });
       expect(superseded).toEqual({
@@ -273,6 +280,7 @@ describe('RuleEventsClient', () => {
       ).updateEventStatus({
         eventId: existing.event_id,
         change: DEACTIVATE_STATUS,
+        actor: 'human',
         expectedTimestamp: existing['@timestamp'],
       });
       expect(current.updated).toBe(1);
@@ -285,6 +293,7 @@ describe('RuleEventsClient', () => {
       const result = await createStatusSearchClient(existing, alertEventsClient).updateEventStatus({
         eventId: existing.event_id,
         change: StatusChange.assessed('breached'),
+        actor: 'human',
       });
 
       expect(result).toEqual({
@@ -294,6 +303,96 @@ describe('RuleEventsClient', () => {
         reason: 'already_in_state',
       });
       expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('status change telemetry', () => {
+    const telemetry = { trackEventStatusChanged: jest.fn() };
+    const withTelemetry = (latest: SignificantEvent | undefined) =>
+      asRuleEventsClient(
+        { findLatestByEventId: jest.fn().mockResolvedValue(latest) },
+        {
+          getAlertEventsClient: async () =>
+            makeStatusAlertEventsClient({
+              createAlertEvent: jest
+                .fn()
+                .mockResolvedValue({ group_hash: 'group-hash-1', alert_id: 'alert-1' }),
+            }),
+          telemetry,
+        }
+      );
+
+    beforeEach(() => telemetry.trackEventStatusChanged.mockReset());
+
+    it('reports an operator transition with the prior status, the actor and the quality fields', async () => {
+      const existing = createStatusEvent({ status: 'active', workflow_execution_id: 'exec-1' });
+
+      await withTelemetry(existing).updateEventStatus({
+        eventId: existing.event_id,
+        change: DEACTIVATE_STATUS,
+        actor: 'human',
+      });
+
+      const [[reported]] = telemetry.trackEventStatusChanged.mock.calls;
+      expect(reported).toEqual({
+        alert_source: 'elastic.significant_events',
+        fingerprint: existing.event_id,
+        space_id: 'default',
+        entity_type: 'significant_event',
+        previous_status: 'active',
+        status: 'inactive',
+        actor: 'human',
+        change_kind: 'operator',
+        severity: 'medium',
+        confidence: 0.8,
+        signal_count: 0,
+        confirmed_signal_count: 0,
+        source_ids: ['logs.test'],
+        workflow_execution_id: 'exec-1',
+      });
+    });
+
+    it('reports a created version without a prior status and keeps the assessment outcome', async () => {
+      await withTelemetry(undefined).createEvent({
+        event: createStatusEvent(),
+        origin: { actor: 'agent', change: StatusChange.assessed('breached') },
+      });
+
+      const [[reported]] = telemetry.trackEventStatusChanged.mock.calls;
+      expect(reported).toMatchObject({
+        status: 'active',
+        actor: 'agent',
+        change_kind: 'assessment',
+        assessment_outcome: 'breached',
+      });
+      expect(reported).not.toHaveProperty('previous_status');
+    });
+
+    it('stays silent when a new version keeps the status', async () => {
+      const existing = createStatusEvent();
+
+      await withTelemetry(existing).updateEvent({
+        event: { ...existing, summary: 'Refined summary' },
+        prior: existing,
+        origin: { actor: 'agent' },
+      });
+
+      expect(telemetry.trackEventStatusChanged).not.toHaveBeenCalled();
+    });
+
+    it('never fails the write when reporting throws', async () => {
+      telemetry.trackEventStatusChanged.mockImplementation(() => {
+        throw new Error('ebt down');
+      });
+      const existing = createStatusEvent({ status: 'active' });
+
+      const result = await withTelemetry(existing).updateEventStatus({
+        eventId: existing.event_id,
+        change: DEACTIVATE_STATUS,
+        actor: 'human',
+      });
+
+      expect(result).toEqual({ updated: 1, ignored: 0, status: 'inactive' });
     });
   });
 

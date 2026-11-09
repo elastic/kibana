@@ -26,6 +26,7 @@ export async function updateEventStatusToolHandler({
   const result = await eventSearchClient.updateEventStatus({
     eventId,
     change: StatusChange.byOperator(status),
+    actor: 'agent',
     assessmentNote,
   });
 
