@@ -236,6 +236,23 @@ export const getEndpointConsoleCommands = ({
     return isCancelFeatureAvailable(endpointPrivileges, featureFlags, agentType);
   };
 
+  // `get-file --force` applies only to the Elastic Defend Endpoint and is only offered when the
+  // host's Endpoint supports it (reported via the `get_file_force` capability, Windows only).
+  const isGetFileForceSupportedByEndpoint = (
+    endpointCapabilities as EndpointCapabilities[]
+  ).includes('get_file_force');
+  const getFileForceArg: Record<string, CommandArgDefinition> =
+    agentType === 'endpoint' && isGetFileForceSupportedByEndpoint
+      ? {
+          force: {
+            required: false,
+            allowMultiples: false,
+            mustHaveValue: false,
+            about: CONSOLE_COMMANDS.getFile.args.force.about,
+          },
+        }
+      : {};
+
   let consoleCommands: CommandDefinition[] = [
     {
       name: 'isolate',
@@ -401,6 +418,7 @@ export const getEndpointConsoleCommands = ({
             return emptyArgumentValidator(argData);
           },
         },
+        ...getFileForceArg,
         ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
