@@ -128,19 +128,6 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       );
     }
 
-    // Get a snapshot of the current URL state before any async work is done
-    // to avoid race conditions if the URL changes during tab initialization,
-    // e.g. if the user quickly switches tabs
-    const urlGlobalState = urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY);
-    const urlAppState = {
-      ...tabInitialAppState,
-      ...(defaultUrlState ??
-        cleanupUrlState(urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY), services.uiSettings)),
-    };
-    const urlProfileState = services.profileStateRegistry.pickStateByType({
-      profileStateMap: urlStateStorage.get<ProfileStateMap>(PROFILE_STATE_URL_KEY) ?? undefined,
-      stateTypes: [ProfileStateType.Url],
-    });
     const defaultPersistentProfileState = services.profileStateRegistry.pickStateByType({
       profileStateMap: profileState,
       stateTypes: [ProfileStateType.Persistent],
@@ -148,22 +135,57 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
 
     const { persistedDiscoverSession, defaultProfileEsqlQuery } = getState();
     const persistedTab = persistedDiscoverSession?.tabs.find((tab) => tab.id === tabId);
-    const hasGlobalState = Object.keys(urlGlobalState || {}).length > 0;
     const locationStateHasDataViewSpec = Boolean(dataViewSpec);
-    const restoredQuery = urlAppState?.query ?? persistedTab?.serializedSearchSource.query;
-    const configuredEsqlQuery = getConfiguredDefaultEsqlQuery({
-      initialUrlState: urlAppState,
-      hasGlobalState,
-      persistedTab,
-      services,
-      defaultProfileEsqlQuery,
-      locationStateHasDataViewSpec,
-    });
-    const initialQuery = restoredQuery ?? configuredEsqlQuery;
-    const isEsqlMode = isOfAggregateQueryType(initialQuery);
-    const needsDataView = !isNonEmptyEsqlQuery(initialQuery);
 
-    const { hasESData, hasDataView } = await dispatch(loadDataAvailabilityOnce({ needsDataView }));
+    const readUrlState = () => {
+      const urlGlobalState = urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY);
+      const urlAppState = {
+        ...tabInitialAppState,
+        ...(defaultUrlState ??
+          cleanupUrlState(
+            urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY),
+            services.uiSettings
+          )),
+      };
+      const hasGlobalState = Object.keys(urlGlobalState || {}).length > 0;
+      const restoredQuery = urlAppState?.query ?? persistedTab?.serializedSearchSource.query;
+      const configuredEsqlQuery = getConfiguredDefaultEsqlQuery({
+        initialUrlState: urlAppState,
+        hasGlobalState,
+        persistedTab,
+        services,
+        defaultProfileEsqlQuery,
+        locationStateHasDataViewSpec,
+      });
+
+      return {
+        urlGlobalState,
+        urlAppState,
+        urlProfileState: services.profileStateRegistry.pickStateByType({
+          profileStateMap: urlStateStorage.get<ProfileStateMap>(PROFILE_STATE_URL_KEY) ?? undefined,
+          stateTypes: [ProfileStateType.Url],
+        }),
+        hasGlobalState,
+        initialQuery: restoredQuery ?? configuredEsqlQuery,
+      };
+    };
+    const loadDataAvailability = (query: Query | AggregateQuery | undefined) =>
+      dispatch(loadDataAvailabilityOnce({ needsDataView: !isNonEmptyEsqlQuery(query) }));
+
+    // Get a snapshot of the current URL state before any async work is done
+    // to avoid race conditions if the URL changes during tab initialization,
+    // e.g. if the user quickly switches tabs
+    const tabStateBeforeAvailability = getTabState();
+    const initialUrlState = readUrlState();
+
+    await loadDataAvailability(initialUrlState.initialQuery);
+
+    // Tab operations rewrite every tab state and push the selected tab's state to the URL,
+    // so a URL changed while waiting only belongs to this tab if its state is unchanged.
+    const { urlGlobalState, urlAppState, urlProfileState, hasGlobalState, initialQuery } =
+      getTabState() === tabStateBeforeAvailability ? readUrlState() : initialUrlState;
+    const isEsqlMode = isOfAggregateQueryType(initialQuery);
+    const { hasESData, hasDataView } = await loadDataAvailability(initialQuery);
 
     if (!hasESData && !hasDataView) {
       return { showNoDataPage: true };
