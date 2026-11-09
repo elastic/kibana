@@ -10,10 +10,15 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { SYNTHETICS_INDEX_PATTERN } from '../../common/constants';
 import type { MonitorLocations } from '../../common/runtime_types';
+import { canRevealParameterValues } from '../../common/utils/can_reveal_parameter_values';
 
 export const useCanEditSynthetics = () => {
   return !!useKibana().services?.application?.capabilities.uptime.save;
 };
+
+/** Whether the current user can see monitor parameter values instead of masked placeholders. */
+export const useCanRevealParameterValues = () =>
+  canRevealParameterValues(useKibana().services?.application?.capabilities.uptime);
 
 /**
  * Whether the current user can trigger manual test runs. True when they can edit

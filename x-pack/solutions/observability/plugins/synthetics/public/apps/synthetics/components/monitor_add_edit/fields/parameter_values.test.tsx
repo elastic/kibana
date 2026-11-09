@@ -518,15 +518,6 @@ describe('ParameterValuesEditor', () => {
       expect(getByTestId('syntheticsParamsJSONEditor')).not.toHaveValue(updated);
     });
 
-    it('masks top-level arrays', () => {
-      const { getByTestId, queryByTestId } = render(
-        <ParameterValuesEditorForm defaultParams={'["first",{"nested":true}]'} />
-      );
-
-      expect(queryByTestId('keyValuePairsKey0')).not.toBeInTheDocument();
-      expect(getByTestId('syntheticsParamsJSONEditor')).toHaveValue('["********","********"]');
-    });
-
     it('masks flat params after switching to JSON', () => {
       const { getByTestId } = render(<ParameterValuesEditorForm />);
 
@@ -538,7 +529,7 @@ describe('ParameterValuesEditor', () => {
 
     it('keeps masked JSON editable but not revealable without permission', () => {
       mockCapabilities({ canReadParamValues: false });
-      const { getByTestId } = render(<ParameterValuesEditorForm defaultParams={'["********"]'} />);
+      const { getByTestId } = render(<ParameterValuesEditorForm defaultParams="********" />);
 
       expect(getByTestId('syntheticsParamValueVisibilityJson')).toBeDisabled();
       expect(getByTestId('syntheticsParamsJSONEditor')).not.toHaveAttribute('readonly');

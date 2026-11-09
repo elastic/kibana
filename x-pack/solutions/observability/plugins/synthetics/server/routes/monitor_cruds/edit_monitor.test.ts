@@ -507,7 +507,7 @@ describe('editSyntheticsMonitorRoute', () => {
 
     const { mapSavedObjectToMonitor } = jest.requireMock('./formatters/saved_object_to_monitor');
     mapSavedObjectToMonitor.mockImplementation(
-      ({ monitor }: { monitor: { attributes: Record<string, unknown> } }) => monitor.attributes
+      jest.requireActual('./formatters/saved_object_to_monitor').mapSavedObjectToMonitor
     );
 
     const { routeContext, serverMock } = getRouteContextMock();

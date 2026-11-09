@@ -156,6 +156,19 @@ describe('mergeSourceMonitor', () => {
     expect(result).not.toHaveProperty('schedule_interval_seconds');
   });
 
+  it('masks the parameter values only when asked to', () => {
+    const monitor = {
+      attributes: { ...testMonitor, [ConfigKey.PARAMS]: '{"token":"secret"}' },
+    } as any;
+
+    expect(mapSavedObjectToMonitor({ monitor, internal: true })[ConfigKey.PARAMS]).toBe(
+      '{"token":"secret"}'
+    );
+    expect(
+      mapSavedObjectToMonitor({ monitor, internal: true, maskParams: true })[ConfigKey.PARAMS]
+    ).toBe('{"token":"********"}');
+  });
+
   it('should not omit null or undefined values', () => {
     const result = mapSavedObjectToMonitor({ monitor: { attributes: testMonitor } } as any);
 

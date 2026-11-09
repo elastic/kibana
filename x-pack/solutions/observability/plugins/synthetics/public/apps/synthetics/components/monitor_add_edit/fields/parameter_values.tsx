@@ -20,8 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { countBy } from 'lodash';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { canRevealParameterValues } from '../../../../../../common/utils/can_reveal_parameter_values';
+import { useCanRevealParameterValues } from '../../../../../hooks/use_capabilities';
 import { isJsonObjectString } from '../../../../../../common/utils/is_json_object_string';
 import {
   MASKED_PARAM_VALUE,
@@ -149,11 +148,7 @@ export const ParameterValuesEditor = ({
   readOnly,
   value,
 }: ParameterValuesEditorProps): React.ReactElement => {
-  const { application } = useKibana().services;
-  const canReveal = canRevealParameterValues({
-    canSave: Boolean(application?.capabilities.uptime.save),
-    canReadParamValues: Boolean(application?.capabilities.uptime.canReadParamValues),
-  });
+  const canReveal = useCanRevealParameterValues();
   const nextRowId = useRef(0);
   const createRow = useCallback(([key, rowValue]: Pair): ParameterRow => {
     nextRowId.current += 1;

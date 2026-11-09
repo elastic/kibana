@@ -19,28 +19,24 @@ describe('maskMonitorParams', () => {
     );
   });
 
-  it.each(['{invalid JSON}', '"secret"', '42', 'false', 'null'])(
+  it.each(['{invalid JSON}', '"secret"', '42', 'false', 'null', '["secret"]'])(
     'fails closed for parameter values that cannot retain parameter names: %s',
     (params) => {
       expect(maskMonitorParams(params)).toBe(MASKED_PARAM_VALUE);
     }
   );
-
-  it('masks top-level arrays as valid JSON', () => {
-    expect(maskMonitorParams('["secret"]')).toBe(JSON.stringify([MASKED_PARAM_VALUE]));
-  });
-
-  it('restores a masked top-level parameter array', () => {
-    expect(
-      restoreMaskedMonitorParams({
-        previousParams: '["secret"]',
-        submittedParams: JSON.stringify([MASKED_PARAM_VALUE]),
-      })
-    ).toBe('["secret"]');
-  });
 });
 
 describe('restoreMaskedMonitorParams', () => {
+  it('restores a stored value that was masked whole, such as a legacy array', () => {
+    expect(
+      restoreMaskedMonitorParams({
+        previousParams: '["secret"]',
+        submittedParams: MASKED_PARAM_VALUE,
+      })
+    ).toBe('["secret"]');
+  });
+
   it('restores masked values and retains explicitly changed parameter values', () => {
     expect(
       restoreMaskedMonitorParams({
@@ -57,24 +53,6 @@ describe('restoreMaskedMonitorParams', () => {
         submittedParams: '{"password":"********"}',
       })
     ).toBe('{"password":"********"}');
-  });
-
-  it('restores masked array entries by index and retains changed entries', () => {
-    expect(
-      restoreMaskedMonitorParams({
-        previousParams: '["first","second"]',
-        submittedParams: '["updated","********"]',
-      })
-    ).toBe('["updated","second"]');
-  });
-
-  it('retains an intentionally empty array', () => {
-    expect(
-      restoreMaskedMonitorParams({
-        previousParams: '["first"]',
-        submittedParams: '[]',
-      })
-    ).toBe('[]');
   });
 
   it('keeps a masked key that only matches an inherited object property', () => {
@@ -103,15 +81,6 @@ describe('getUnrestorableMaskedParamKeys', () => {
         submittedParams: '{"token":"********"}',
       })
     ).toEqual(['token']);
-  });
-
-  it('returns masked array indexes that have no stored value', () => {
-    expect(
-      getUnrestorableMaskedParamKeys({
-        previousParams: '["first"]',
-        submittedParams: '["********","********"]',
-      })
-    ).toEqual(['1']);
   });
 
   it('returns a masked key that only matches an inherited object property', () => {

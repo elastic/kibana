@@ -74,10 +74,7 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
       capabilityPath: 'uptime.*',
     });
     const canSave = Boolean(capabilities?.uptime?.save);
-    const canRevealParams = canRevealParameterValues({
-      canSave,
-      canReadParamValues: Boolean(capabilities?.uptime?.canReadParamValues),
-    });
+    const canRevealParams = canRevealParameterValues(capabilities?.uptime);
 
     try {
       const newMonitorId = id || normalizedMonitor.config_id || uuidV4();

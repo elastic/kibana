@@ -6,12 +6,11 @@
  */
 
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SyntheticsMonitorWithId } from '../../../../../../common/runtime_types';
 import { ConfigKey } from '../../../../../../common/runtime_types';
-import { canRevealParameterValues } from '../../../../../../common/utils/can_reveal_parameter_values';
 import { fetchSyntheticsMonitor } from '../../../state/monitor_details/api';
 import { useGetUrlParams } from '../../../hooks';
+import { useCanRevealParameterValues } from '../../../../../hooks/use_capabilities';
 
 export const prepareMonitorForClone = (
   monitor: SyntheticsMonitorWithId,
@@ -26,11 +25,7 @@ export const prepareMonitorForClone = (
 
 export const useCloneMonitor = () => {
   const { cloneId } = useGetUrlParams();
-  const { application } = useKibana().services;
-  const canRevealParams = canRevealParameterValues({
-    canSave: Boolean(application?.capabilities.uptime.save),
-    canReadParamValues: Boolean(application?.capabilities.uptime.canReadParamValues),
-  });
+  const canRevealParams = useCanRevealParameterValues();
   const { data, ...cloneMonitor } = useFetcher(async () => {
     if (!cloneId) return Promise.resolve(undefined);
     const monitor = await fetchSyntheticsMonitor({ monitorId: cloneId });

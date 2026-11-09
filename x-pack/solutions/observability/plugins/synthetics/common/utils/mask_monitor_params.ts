@@ -37,24 +37,13 @@ const getOwnParamValue = (
 ): ParameterValue | undefined =>
   params !== undefined && Object.hasOwn(params, key) ? params[key] : undefined;
 
-const parseMonitorParamArray = (params: string): ParameterValue[] | undefined => {
-  try {
-    const parsedParams = JSON.parse(params) as ParameterValue;
-    return Array.isArray(parsedParams) ? parsedParams : undefined;
-  } catch {
-    return undefined;
-  }
-};
-
-/** Masks every monitor parameter value while retaining the parameter names. */
+/**
+ * Masks every monitor parameter value while retaining the parameter names. Anything that is not a
+ * JSON object (stored arrays and scalars predate the object-only validation) is masked whole.
+ */
 export const maskMonitorParams = (params?: string): string | undefined => {
   if (!params) {
     return params;
-  }
-
-  const parsedParamArray = parseMonitorParamArray(params);
-  if (parsedParamArray) {
-    return JSON.stringify(parsedParamArray.map(() => MASKED_PARAM_VALUE));
   }
 
   const parsedParams = parseMonitorParams(params);
@@ -75,22 +64,6 @@ export const getUnrestorableMaskedParamKeys = ({
   previousParams?: string;
   submittedParams?: string;
 }): string[] => {
-  const parsedSubmittedParamArray = submittedParams
-    ? parseMonitorParamArray(submittedParams)
-    : undefined;
-  if (parsedSubmittedParamArray) {
-    const parsedPreviousParamArray = previousParams
-      ? parseMonitorParamArray(previousParams)
-      : undefined;
-    return parsedSubmittedParamArray
-      .map((value, index) =>
-        value === MASKED_PARAM_VALUE && parsedPreviousParamArray?.[index] === undefined
-          ? String(index)
-          : undefined
-      )
-      .filter((index): index is string => index !== undefined);
-  }
-
   const parsedSubmittedParams = submittedParams ? parseMonitorParams(submittedParams) : undefined;
   if (!parsedSubmittedParams) {
     return [];
@@ -119,19 +92,6 @@ export const restoreMaskedMonitorParams = ({
 
   if (submittedParams === MASKED_PARAM_VALUE) {
     return previousParams;
-  }
-
-  const parsedSubmittedParamArray = parseMonitorParamArray(submittedParams);
-  if (parsedSubmittedParamArray) {
-    const parsedPreviousParamArray = previousParams
-      ? parseMonitorParamArray(previousParams)
-      : undefined;
-    return JSON.stringify(
-      parsedSubmittedParamArray.map((value, index) => {
-        const previousValue = parsedPreviousParamArray?.[index];
-        return value === MASKED_PARAM_VALUE && previousValue !== undefined ? previousValue : value;
-      })
-    );
   }
 
   const parsedSubmittedParams = parseMonitorParams(submittedParams);

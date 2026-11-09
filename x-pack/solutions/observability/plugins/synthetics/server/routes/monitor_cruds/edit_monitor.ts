@@ -51,7 +51,6 @@ import { getBrowserTimeoutWarningForMonitor } from './monitor_warnings';
 import { isSecretConnectionsEnabled } from '../../config';
 import {
   getUnrestorableMaskedParamKeys,
-  maskMonitorParams,
   restoreMaskedMonitorParams,
 } from '../../../common/utils/mask_monitor_params';
 import { canRevealParameterValues } from '../../../common/utils/can_reveal_parameter_values';
@@ -124,10 +123,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
       const capabilities = await server.coreStart?.capabilities?.resolveCapabilities(request, {
         capabilityPath: 'uptime.*',
       });
-      const shouldRestoreMaskedParams = !canRevealParameterValues({
-        canSave: Boolean(capabilities?.uptime?.save),
-        canReadParamValues: Boolean(capabilities?.uptime?.canReadParamValues),
-      });
+      const shouldRestoreMaskedParams = !canRevealParameterValues(capabilities?.uptime);
       const unrestorableParamKeys = shouldRestoreMaskedParams
         ? getUnrestorableMaskedParamKeys({
             previousParams,
@@ -278,15 +274,10 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
       // Match GET semantics so authorized API clients can safely round-trip the response.
       const monitorResponse = mapSavedObjectToMonitor({
         internal: reqQuery.internal,
+        maskParams: shouldRestoreMaskedParams,
         monitor: {
           ...(editedMonitorSavedObject as SavedObject<EncryptedSyntheticsMonitorAttributes>),
           created_at: previousMonitor.created_at,
-          attributes: {
-            ...editedMonitorSavedObject.attributes,
-            [ConfigKey.PARAMS]: shouldRestoreMaskedParams
-              ? maskMonitorParams(editedMonitorSavedObject.attributes[ConfigKey.PARAMS])
-              : editedMonitorSavedObject.attributes[ConfigKey.PARAMS],
-          },
         },
       });
       return warning ? { ...monitorResponse, warnings: [warning] } : monitorResponse;
