@@ -7,53 +7,13 @@
 
 import { errors, type Client as EsClient } from '@elastic/elasticsearch';
 import { Walker, parse, type ESQLSource } from '@elastic/esql';
-import {
-  isSection,
-  type AttachmentPanel,
-  type DashboardAttachmentData,
-} from '@kbn/agent-builder-dashboards-common';
-import { parseVegaSpec } from '@kbn/dashboard-agent-authoring';
-import { getControls, getLeafPanels, getPanelQueries, isRecord } from '../dashboard_panels';
+import { isSection, type DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
+import { getControls, getLeafPanels, isRecord, mergePanelDataSources } from '../dashboard_panels';
 import { noDashboardResult, scoreChecks, skippedResult, type Check } from '../evaluator_utils';
 import { hasWrittenDashboard } from '../extract_dashboard';
 import type { DashboardAgentEvaluator, DashboardDatasetExample } from '../types';
 
 export const DASHBOARD_UNAVAILABLE_REQUESTS_EVALUATOR_NAME = 'Dashboard Unavailable Requests';
-
-const ESQL_URL_TYPE = 'esql';
-
-interface VegaDataSources {
-  queries: string[];
-  indices: string[];
-}
-
-const mergeSources = (sources: VegaDataSources[]): VegaDataSources => ({
-  queries: sources.flatMap(({ queries }) => queries),
-  indices: sources.flatMap(({ indices }) => indices),
-});
-
-/** Every Vega `data.url`: ES|QL ones (`%type%: esql`) by query, Elasticsearch ones by `index`. */
-const collectVegaDataSources = (value: unknown): VegaDataSources => {
-  if (Array.isArray(value)) {
-    return mergeSources(value.map(collectVegaDataSources));
-  }
-  if (!isRecord(value)) {
-    return { queries: [], indices: [] };
-  }
-  const { url } = value;
-  const own: VegaDataSources = { queries: [], indices: [] };
-  if (isRecord(url) && url['%type%'] === ESQL_URL_TYPE && typeof url.query === 'string') {
-    own.queries.push(url.query);
-  } else if (isRecord(url) && typeof url.index === 'string') {
-    own.indices.push(url.index);
-  }
-  return mergeSources([own, ...Object.values(value).map(collectVegaDataSources)]);
-};
-
-const getPanelSources = (panel: AttachmentPanel): VegaDataSources =>
-  panel.type === 'vega'
-    ? collectVegaDataSources(parseVegaSpec(panel.config.spec))
-    : { queries: getPanelQueries(panel), indices: [] };
 
 const getControlQueries = (dashboard: DashboardAttachmentData): string[] =>
   getControls(dashboard).flatMap(({ config }) =>
@@ -72,7 +32,7 @@ const getEsqlSources = (query: string): string[] =>
  * Lens, Vega and control ES|QL, and the `index` of Vega Elasticsearch queries.
  */
 const getDashboardSources = (dashboard: DashboardAttachmentData): string[] => {
-  const { queries, indices } = mergeSources(getLeafPanels(dashboard).map(getPanelSources));
+  const { queries, indices } = mergePanelDataSources(getLeafPanels(dashboard));
   return [
     ...new Set([
       ...[...queries, ...getControlQueries(dashboard)].flatMap(getEsqlSources),

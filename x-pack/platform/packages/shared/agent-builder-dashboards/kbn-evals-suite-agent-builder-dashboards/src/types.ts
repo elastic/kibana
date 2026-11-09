@@ -104,8 +104,8 @@ export type PanelColorName = 'red' | 'blue';
  * no exact value can express.
  */
 export interface PanelEditGold {
-  /** Seed panel id; the edit keeps it. */
-  panel: string;
+  /** Seed panel id, which the edit keeps, or `{ added: kind }` for the first panel of that kind the edit added. */
+  panel: LayoutItem;
   /** Embeddable type (`vega`, `markdown`, …); a Lens chart is named by `config.type`. */
   type?: string;
   /** Partial panel config; a Vega `spec` is written as an object. */

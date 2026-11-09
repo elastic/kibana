@@ -10,6 +10,7 @@ import {
   type AttachmentPanel,
   type DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
+import { parseVegaSpec } from '@kbn/dashboard-agent-authoring';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 export const GRID_COLUMNS = 48;
@@ -67,6 +68,47 @@ export const getPanelQueries = ({ config }: AttachmentPanel): string[] => {
     .map(getDataSourceQuery)
     .filter((query): query is string => query !== undefined);
 };
+
+const ESQL_URL_TYPE = 'esql';
+
+/** The data a panel reads: ES|QL queries, and the `index` of Vega Elasticsearch queries. */
+export interface PanelDataSources {
+  queries: string[];
+  indices: string[];
+}
+
+const mergeSources = (sources: PanelDataSources[]): PanelDataSources => ({
+  queries: sources.flatMap(({ queries }) => queries),
+  indices: sources.flatMap(({ indices }) => indices),
+});
+
+/** Every Vega `data.url`: ES|QL ones (`%type%: esql`) by query, Elasticsearch ones by `index`. */
+const collectVegaDataSources = (value: unknown): PanelDataSources => {
+  if (Array.isArray(value)) {
+    return mergeSources(value.map(collectVegaDataSources));
+  }
+  if (!isRecord(value)) {
+    return { queries: [], indices: [] };
+  }
+  const { url } = value;
+  const own: PanelDataSources = { queries: [], indices: [] };
+  if (isRecord(url) && url['%type%'] === ESQL_URL_TYPE && typeof url.query === 'string') {
+    own.queries.push(url.query);
+  } else if (isRecord(url) && typeof url.index === 'string') {
+    own.indices.push(url.index);
+  }
+  return mergeSources([own, ...Object.values(value).map(collectVegaDataSources)]);
+};
+
+/** The data behind a Lens or Vega panel. */
+export const getPanelDataSources = (panel: AttachmentPanel): PanelDataSources =>
+  panel.type === 'vega'
+    ? collectVegaDataSources(parseVegaSpec(panel.config.spec))
+    : { queries: getPanelQueries(panel), indices: [] };
+
+/** The data sources of many panels, merged. */
+export const mergePanelDataSources = (panels: AttachmentPanel[]): PanelDataSources =>
+  mergeSources(panels.map(getPanelDataSources));
 
 export const normalizeQuery = (query: string): string => query.replace(/\s+/g, ' ').trim();
 

@@ -318,6 +318,15 @@ describe('dashboard panel edits evaluator', () => {
       expect((await evaluateEdits([vegaColor('blue')], recolored)).score).toBe(1);
     });
 
+    it('lets an encoding color override the mark color of the same channel', async () => {
+      const spec = JSON.stringify({
+        mark: { type: 'bar', color: '#BD271E' },
+        encoding: { color: { value: '#6092C0' } },
+      });
+      expect((await evaluateEdits([vegaColor('blue')], withVegaSpec(spec))).score).toBe(1);
+      expect((await evaluateEdits([vegaColor('red')], withVegaSpec(spec))).score).toBe(0);
+    });
+
     it('treats an unparseable spec as having no color', async () => {
       expect((await evaluateEdits([vegaColor('red')], withVegaSpec('{ mark: '))).score).toBe(0);
     });
@@ -336,6 +345,27 @@ describe('dashboard panel edits evaluator', () => {
     const seedResult = await evaluateEdits([gold], UNRELATED_EDIT);
     expect(seedResult.explanation).toContain(
       'config.severity_threshold: expected 75, got undefined'
+    );
+  });
+
+  it('checks the first added panel of a kind, ignoring seed panels of that kind', async () => {
+    const gold: PanelEditGold = { panel: { added: 'markdown' }, config: { content: '# Note' } };
+    const withNote = (content: string): DashboardAttachmentData => ({
+      ...SECTIONED_LOGS_DASHBOARD,
+      panels: [
+        ...SECTIONED_LOGS_DASHBOARD.panels,
+        {
+          type: 'markdown',
+          id: 'added-note',
+          grid: { x: 0, y: 200, w: 48, h: 5 },
+          config: { content },
+        },
+      ],
+    });
+    expect((await evaluateEdits([gold], withNote('# Note'))).score).toBe(1);
+    expect((await evaluateEdits([gold], withNote('# Other'))).score).toBe(0);
+    expect((await evaluateEdits([gold], UNRELATED_EDIT)).explanation).toContain(
+      'added markdown not found'
     );
   });
 

@@ -107,12 +107,13 @@ export const DASHBOARD_EDIT_SCENARIO_EXAMPLES: DashboardDatasetExample[] = [
       requested: true,
       mustInclude: ['machine.ram', 'machine.os.keyword'],
       mustExclude: ['bytes'],
+      rangeSliders: ['machine.ram'],
       timeSlider: true,
     },
   }),
   editScenario({
     question:
-      'in the Other sources section, add a note that anomaly scores above 75 are critical, a second swim lane for the same anomaly job viewed by influencer, and a Vega heatmap of requests by hour of day and day of week',
+      'in the Other sources section, add a note that anomaly scores above 75 are critical, a swim lane of the response_code_rates anomaly job viewed by influencer, and a Vega heatmap of requests by hour of day and day of week',
     layoutEdit: {
       changes: ['other-sources'],
       placements: [
@@ -121,6 +122,13 @@ export const DASHBOARD_EDIT_SCENARIO_EXAMPLES: DashboardDatasetExample[] = [
         { item: { added: 'vega' }, in: 'other-sources' },
       ],
     },
+    // The seeded low_request_rate job has no influencers; response_code_rates does.
+    panelEdits: [
+      {
+        panel: { added: 'ml_anomaly_swimlane' },
+        config: { job_ids: ['response_code_rates'], swimlane_type: 'viewBy' },
+      },
+    ],
     structure: { panelKinds: { markdown: 3, ml_anomaly_swimlane: 2, vega: 2 } },
   }),
   editScenario({

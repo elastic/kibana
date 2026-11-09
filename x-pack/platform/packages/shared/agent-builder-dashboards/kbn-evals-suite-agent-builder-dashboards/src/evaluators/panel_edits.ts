@@ -9,11 +9,18 @@ import chroma from 'chroma-js';
 import { compact } from 'lodash';
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import { parseVegaSpec } from '@kbn/dashboard-agent-authoring';
+import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import { matchConfig } from '../config_gold';
-import { getLeafPanels, isRecord } from '../dashboard_panels';
+import {
+  byReadingOrder,
+  getLeafPanels,
+  getPanelContainers,
+  getPanelKind,
+  isRecord,
+} from '../dashboard_panels';
 import { hasWrittenDashboard } from '../extract_dashboard';
 import { noDashboardResult, scoreChecks, skippedResult, type Check } from '../evaluator_utils';
-import type { DashboardAgentEvaluator, PanelColorName, PanelEditGold } from '../types';
+import type { DashboardAgentEvaluator, LayoutItem, PanelColorName, PanelEditGold } from '../types';
 
 export const DASHBOARD_PANEL_EDITS_EVALUATOR_NAME = 'Dashboard Panel Edits';
 
@@ -95,9 +102,16 @@ const channelColors = (encoding: unknown): string[] =>
       })
     : [];
 
-/** The colors a view sets on its own mark: mark properties and color encodings. */
+/**
+ * The colors a view sets on its own mark: color encodings, and mark properties
+ * for the channels no encoding sets, since an encoding overrides them.
+ */
 const ownMarkColors = ({ mark, encoding, encode }: Record<string, unknown>): string[] => [
-  ...channelColors(mark),
+  ...channelColors(
+    isRecord(mark) && isRecord(encoding)
+      ? Object.fromEntries(Object.entries(mark).filter(([key]) => encoding[key] === undefined))
+      : mark
+  ),
   ...channelColors(encoding),
   ...(isRecord(encode) ? Object.values(encode).flatMap(channelColors) : []),
 ];
@@ -247,13 +261,30 @@ const toMatchedPanel = ({ type, config }: AttachmentPanel): Record<string, unkno
   config: type === 'vega' ? { ...config, spec: parseVegaSpec(config.spec) } : config,
 });
 
+/** A seed panel by id, or the first panel of the kind, in reading order, that the seed lacks. */
+const resolvePanel = (
+  item: LayoutItem,
+  dashboard: DashboardAttachmentData,
+  before: DashboardAttachmentData | undefined
+): AttachmentPanel | undefined => {
+  if (typeof item === 'string') {
+    return getLeafPanels(dashboard).find(({ id }) => id === item);
+  }
+  const seedIds = new Set(before ? getLeafPanels(before).map(({ id }) => id) : []);
+  return getPanelContainers(dashboard)
+    .flatMap(({ panels }) => [...panels].sort(byReadingOrder))
+    .find((panel) => !seedIds.has(panel.id) && getPanelKind(panel) === item.added);
+};
+
 const checkPanelEdit = (
-  { panel: id, type, config, color, bulletList }: PanelEditGold,
+  { panel: item, type, config, color, bulletList }: PanelEditGold,
   index: number,
-  panels: Map<string, AttachmentPanel>
+  dashboard: DashboardAttachmentData,
+  before: DashboardAttachmentData | undefined
 ): Check => {
   const assertion = `panelEdits[${index}]`;
-  const panel = panels.get(id);
+  const panel = resolvePanel(item, dashboard, before);
+  const id = panel?.id ?? (typeof item === 'string' ? item : `added ${item.added}`);
   if (!panel) {
     return { assertion, passed: false, detail: `${id} not found` };
   }
@@ -277,11 +308,12 @@ const checkPanelEdit = (
 };
 
 /**
- * Checks that a panel the prompt edits in place keeps its id and ends up as the
- * gold describes it: the listed `type` and `config` values, subset-matched as
- * the visualization suite matches its config gold, plus a requested color hue
- * (in a Vega spec too) or markdown bullet list. Whether the rest of the layout
- * held is scored by Dashboard Layout Edit.
+ * Checks that a panel the prompt edits in place keeps its id, and that it, or a
+ * panel the prompt adds, ends up as the gold describes it: the listed `type`
+ * and `config` values, subset-matched as the visualization suite matches its
+ * config gold, plus a requested color hue (in a Vega spec too) or markdown
+ * bullet list. Whether the rest of the layout held is scored by Dashboard
+ * Layout Edit.
  */
 export const dashboardPanelEditsEvaluator: DashboardAgentEvaluator = {
   name: DASHBOARD_PANEL_EDITS_EVALUATOR_NAME,
@@ -292,14 +324,13 @@ export const dashboardPanelEditsEvaluator: DashboardAgentEvaluator = {
     if (!gold || gold.length === 0) {
       return skippedResult('No panel edit gold.');
     }
-    const { dashboard } = output;
+    const { dashboard, before } = output;
     // Without a write the result is the seed itself, which has none of the requested edits.
     if (!dashboard || !hasWrittenDashboard(output)) {
       return noDashboardResult;
     }
 
-    const panels = new Map(getLeafPanels(dashboard).map((panel) => [panel.id, panel]));
-    const checks = gold.map((edit, index) => checkPanelEdit(edit, index, panels));
+    const checks = gold.map((edit, index) => checkPanelEdit(edit, index, dashboard, before));
     return scoreChecks(checks, { subject: 'panel edit', passLabel: 'match' });
   },
 };

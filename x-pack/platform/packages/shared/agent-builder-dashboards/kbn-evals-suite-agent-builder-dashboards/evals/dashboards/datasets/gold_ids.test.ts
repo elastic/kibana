@@ -40,7 +40,7 @@ const goldIds = ({ output }: DashboardDatasetExample): string[] => {
       after,
       before,
     ]),
-    ...panelEdits.map(({ panel }) => panel),
+    ...panelEdits.map(({ panel }) => (typeof panel === 'string' ? panel : undefined)),
     replaceConfirmation?.panel,
   ]);
 };

@@ -8,7 +8,7 @@
 import { isEqual } from 'lodash';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { EvaluationResult } from '@kbn/evals';
-import { getLeafPanels, getPanelQueries, normalizeQuery } from '../dashboard_panels';
+import { getLeafPanels, getPanelDataSources, normalizeQuery } from '../dashboard_panels';
 import type { DashboardAgentEvaluator, DashboardAgentTaskOutput, EnhanceGold } from '../types';
 import { skippedResult } from '../evaluator_utils';
 import {
@@ -120,7 +120,10 @@ const getPanelIds = (dashboard: DashboardAttachmentData): Set<string> =>
 
 const queriesById = (dashboard: DashboardAttachmentData): Map<string, string[]> =>
   new Map(
-    getLeafPanels(dashboard).map((panel) => [panel.id, getPanelQueries(panel).map(normalizeQuery)])
+    getLeafPanels(dashboard).map((panel) => {
+      const { queries, indices } = getPanelDataSources(panel);
+      return [panel.id, [...queries.map(normalizeQuery), ...indices]];
+    })
   );
 
 const sameList = (a: readonly string[], b: readonly string[]): boolean =>
