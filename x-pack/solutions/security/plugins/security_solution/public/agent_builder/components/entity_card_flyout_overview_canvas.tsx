@@ -18,8 +18,8 @@ import { useEntityRiskScoreRecalculation } from '../../entity_analytics/api/hook
 import { useRiskScore } from '../../entity_analytics/api/hooks/use_risk_score';
 import { useQueryInspector } from '../../common/components/page/manage_query';
 import { useGlobalTime } from '../../common/containers/use_global_time';
-import type { ServiceItem } from '../../../common/search_strategy';
 import {
+  type ServiceItem,
   buildEntityNameFilter,
   buildHostNamesFilter,
   buildUserNamesFilter,
