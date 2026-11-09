@@ -10,6 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import type {
   EventAnnotationConfig,
+  EsqlEventAnnotationConfig,
   RangeEventAnnotationConfig,
   PointInTimeEventAnnotationConfig,
   QueryPointEventAnnotationConfig,
@@ -50,19 +51,25 @@ export const getPersistedAnnotationColor = (color?: string) => color ?? AUTO_ANN
 export const isRangeAnnotationConfig = (
   annotation?: EventAnnotationConfig
 ): annotation is RangeEventAnnotationConfig => {
-  return Boolean(annotation && annotation?.key.type === 'range');
+  return Boolean(annotation && annotation.type === 'manual' && annotation.key.type === 'range');
 };
 
 export const isManualPointAnnotationConfig = (
   annotation?: EventAnnotationConfig
 ): annotation is PointInTimeEventAnnotationConfig => {
-  return Boolean(annotation && 'timestamp' in annotation?.key);
+  return Boolean(annotation && annotation.type === 'manual' && 'timestamp' in annotation.key);
 };
 
 export const isQueryAnnotationConfig = (
   annotation?: EventAnnotationConfig
 ): annotation is QueryPointEventAnnotationConfig => {
   return Boolean(annotation && annotation.type === 'query');
+};
+
+export const isEsqlAnnotationConfig = (
+  annotation?: EventAnnotationConfig
+): annotation is EsqlEventAnnotationConfig => {
+  return annotation?.type === 'esql';
 };
 
 export const createCopiedAnnotation = (

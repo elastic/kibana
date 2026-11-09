@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { AnnotationEditorControls } from '@kbn/event-annotation-components';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
+import type { AggregateQuery } from '@kbn/es-query';
+import { getESQLQueryColumns, getESQLTimeField } from '@kbn/esql-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import moment from 'moment';
@@ -25,6 +27,7 @@ import { LENS_APP_NAME } from '../../../../../common/constants';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS, isEsqlChart } from '../../../../utils';
 import { updateLayer } from '../../toolbar';
 import { isDataLayer } from '../../visualization_helpers';
+import { EsqlAnnotationControls } from './esql_annotation_controls';
 
 export const AnnotationsPanel = (
   props: VisualizationDimensionEditorProps<XYVisualizationState> & {
@@ -68,12 +71,12 @@ export const AnnotationsPanel = (
     [localLayer, localState, index, setState, accessor]
   );
 
-  // ES|QL charts do not expose data views: restrict the editor to manual annotations
   const hideQueryBasedControls = isEsqlChart(frame.datasourceLayers);
 
   const [currentDataView, setCurrentDataView] = useState<DataView>();
 
   useEffect(() => {
+    if (hideQueryBasedControls) return;
     const updateDataView = async () => {
       let dataView: DataView | undefined;
       const availableIds = await props.dataViewsService.getIds();
@@ -89,9 +92,35 @@ export const AnnotationsPanel = (
     };
 
     updateDataView();
-  }, [frame.dataViews.indexPatterns, localLayer.indexPatternId, props.dataViewsService]);
+  }, [
+    hideQueryBasedControls,
+    frame.dataViews.indexPatterns,
+    localLayer.indexPatternId,
+    props.dataViewsService,
+  ]);
 
   const queryInputServices = useKibana<LensAppServices>().services;
+  const { data, http } = queryInputServices;
+  // Read through a ref: columns do not depend on the time range, so changing it must not
+  // refetch. The range is only needed to bind ?_tstart/?_tend if the query uses them.
+  const timeRangeRef = useRef({ from: frame.absDateRange.fromDate, to: frame.absDateRange.toDate });
+  timeRangeRef.current = { from: frame.absDateRange.fromDate, to: frame.absDateRange.toDate };
+  const fetchColumns = useCallback(
+    async (query: AggregateQuery, abortSignal: AbortSignal) => {
+      const [columns, timeField] = await Promise.all([
+        getESQLQueryColumns({
+          esqlQuery: query.esql,
+          search: data.search.search,
+          signal: abortSignal,
+          timeRange: timeRangeRef.current,
+          includeColumnMetadata: true,
+        }),
+        getESQLTimeField({ query: query.esql, http }),
+      ]);
+      return { columns, timeField };
+    },
+    [data.search.search, http]
+  );
 
   if (!currentAnnotation) {
     throw new Error('Annotation not found... this should never happen!');
@@ -104,6 +133,20 @@ export const AnnotationsPanel = (
         onAnnotationChange={(newAnnotation) => setAnnotation(newAnnotation)}
         dataView={currentDataView}
         hideQueryBasedControls={hideQueryBasedControls}
+        esql={
+          hideQueryBasedControls
+            ? {
+                renderControls: (annotation, onChange) => (
+                  <EsqlAnnotationControls
+                    key={annotation.id}
+                    annotation={annotation}
+                    onChange={onChange}
+                    fetchColumns={fetchColumns}
+                  />
+                ),
+              }
+            : undefined
+        }
         getDefaultRangeEnd={(rangeStart) =>
           getEndTimestamp(
             props.datatableUtilities,

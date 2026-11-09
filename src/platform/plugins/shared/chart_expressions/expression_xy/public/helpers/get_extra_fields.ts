@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
-import type { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common';
 
 export const getExtraFields = (
-  row: PointEventAnnotationRow,
+  row: DatatableRow,
   formatFactory: FormatFactory,
   columns: DatatableColumn[] | undefined
 ): Array<{

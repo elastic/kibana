@@ -8,6 +8,7 @@
  */
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { EsqlEventAnnotationArgs, EsqlEventAnnotationOutput } from './esql_event_annotation';
 import type {
   ManualEventAnnotationOutput,
   ManualPointEventAnnotationArgs,
@@ -26,9 +27,13 @@ export type KeyType = 'point_in_time' | 'range';
 export type EventAnnotationArgs =
   | ManualPointEventAnnotationArgs
   | ManualRangeEventAnnotationArgs
-  | QueryPointEventAnnotationArgs;
+  | QueryPointEventAnnotationArgs
+  | EsqlEventAnnotationArgs;
 
-export type EventAnnotationOutput = ManualEventAnnotationOutput | QueryPointEventAnnotationOutput;
+export type EventAnnotationOutput =
+  | ManualEventAnnotationOutput
+  | QueryPointEventAnnotationOutput
+  | EsqlEventAnnotationOutput;
 
 export const annotationColumns: DatatableColumn[] = [
   { id: 'id', name: 'id', meta: { type: 'string' } },
