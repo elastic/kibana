@@ -20,7 +20,8 @@ export interface RecallRead {
 const VIEW_FILE_TOOL_ID = 'nightshift_sandbox_view_file';
 const BASH_TOOL_ID = 'nightshift_sandbox_bash';
 
-const RECALL_PATH_RE = /(?:^|[\s'"=/])((wiki|memories)\/[^\s'"|;&<>)]+)/g;
+/** `wiki/` or `memories/` at token start, under `/workspace/`, or after `./`; not `repo/wiki/` URLs or nested dirs. */
+const RECALL_PATH_RE = /(?:^|[\s'"=]|\/workspace\/|\.\/)((wiki|memories)\/[^\s'"|;&<>)]+)/g;
 
 /** A recall directory the bash call ran in, such as `/workspace/memories` or `/workspace/wiki/db`. */
 const RECALL_DIRECTORY_RE = /(?:^|\/)((wiki|memories)(?:\/[^\s'"]*)?)\/?$/;

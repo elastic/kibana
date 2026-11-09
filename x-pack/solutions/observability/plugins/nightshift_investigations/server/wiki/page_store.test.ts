@@ -32,6 +32,12 @@ describe('canonicalizeSlug', () => {
     );
     expect(canonicalizeSlug('service', 'service-mesh')).toBe('service-mesh');
   });
+
+  it('keeps real slugs that merely start with wiki', () => {
+    expect(canonicalizeSlug('service', 'wiki-api')).toBe('wiki-api');
+    expect(canonicalizeSlug('service', 'wiki-search')).toBe('wiki-search');
+    expect(canonicalizeSlug('runbook', 'wiki-service-outage')).toBe('wiki-service-outage');
+  });
 });
 
 describe('toWikiKiId', () => {

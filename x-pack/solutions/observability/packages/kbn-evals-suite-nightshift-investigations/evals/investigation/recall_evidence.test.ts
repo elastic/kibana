@@ -32,6 +32,25 @@ describe('extractRecallReads', () => {
     ]);
   });
 
+  it('ignores wiki paths outside the sandbox recall directories', () => {
+    const bashCommand = (command: string) => ({
+      tool_id: 'nightshift_sandbox_bash',
+      params: { command },
+      result: '',
+    });
+    expect(
+      extractRecallReads([
+        bashCommand('curl https://github.com/org/repo/wiki/Runbook'),
+        bashCommand('gh api repos/o/r/wiki/pages'),
+        bashCommand('cat src/docs/wiki/setup.md'),
+        bashCommand('cat /workspace/wiki/db.md ./memories/a.md'),
+      ])
+    ).toEqual([
+      { kind: 'wiki', path: 'wiki/db.md', step: 4 },
+      { kind: 'memories', path: 'memories/a.md', step: 4 },
+    ]);
+  });
+
   describe('bash calls run from a wiki or memories working directory', () => {
     const bash = (command: string, workingDirectory: string, result = '') => ({
       tool_id: 'nightshift_sandbox_bash',

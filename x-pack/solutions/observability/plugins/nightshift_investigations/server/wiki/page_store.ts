@@ -91,17 +91,12 @@ const normalizeSlugText = (slug: string): string =>
  * for the same entity.
  */
 export const canonicalizeSlug = (entityType: WikiEntityType, slug: string): string => {
-  let normalized = normalizeSlugText(slug);
-  // Only strip type prefixes when the slug was copied from a document id
-  // (`wiki-service-email-service`). A real slug like `service-mesh` must stay.
-  if (normalized.startsWith('wiki-')) {
-    normalized = normalized.slice('wiki-'.length);
-    const typePrefix = `${entityType}-`;
-    if (normalized.startsWith(typePrefix)) {
-      normalized = normalized.slice(typePrefix.length);
-    }
-  }
-  return normalized.replace(/^-+|-+$/g, '').slice(0, 80);
+  // Only strip the full id-shaped prefix (`wiki-service-`), so real slugs such as
+  // `service-mesh` or `wiki-api` stay intact.
+  const idPrefix = `wiki-${entityType}-`;
+  const normalized = normalizeSlugText(slug);
+  const stripped = normalized.startsWith(idPrefix) ? normalized.slice(idPrefix.length) : normalized;
+  return stripped.replace(/^-+|-+$/g, '').slice(0, 80);
 };
 
 export const toWikiKiId = (entityType: WikiEntityType, slug: string): string => {
