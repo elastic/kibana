@@ -26,6 +26,8 @@ describe('createEventToolHandler', () => {
       event_id: 'agent-event-abcd1234',
       status: 'active',
       written: true,
+      created: true,
+      group_hash: 'hash-1',
     });
   });
 
@@ -51,13 +53,17 @@ describe('createEventToolHandler', () => {
     );
   });
 
-  it('returns event_id from the write result and acknowledged: true', async () => {
+  it('returns event_id, group_hash and acknowledged', async () => {
     const result = await createEventToolHandler({
       eventSearchClient: {} as never,
       eventInput: baseInput,
     });
 
-    expect(result).toEqual({ event_id: 'agent-event-abcd1234', acknowledged: true });
+    expect(result).toEqual({
+      event_id: 'agent-event-abcd1234',
+      group_hash: 'hash-1',
+      acknowledged: true,
+    });
   });
 
   it('passes a generated event_id so chat create is always-write snapshot', async () => {
