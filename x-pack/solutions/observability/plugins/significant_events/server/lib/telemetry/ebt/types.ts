@@ -76,13 +76,32 @@ interface AgentToolKnowledgeIndicatorIdentificationStartedProps
   error_message?: string;
 }
 
-interface AgentToolEventCreateProps extends OptionalWorkflowExecutionTelemetryProps {
+/** Identity used to join telemetry to `.rule-events`; a failed operation may have no row. */
+interface ExistingAlertIdentityProps {
+  alert_source: string;
+  fingerprint: string;
+  space_id: string;
+}
+
+/** `fingerprint` is absent for an unpersisted server-generated id; `group_hash` only on create. */
+interface AlertCreationAttemptIdentityProps {
+  alert_source: string;
+  space_id: string;
+  fingerprint?: string;
+  group_hash?: string;
+}
+
+interface AgentToolEventCreateProps
+  extends AlertCreationAttemptIdentityProps,
+    OptionalWorkflowExecutionTelemetryProps {
   success: boolean;
   source_ids: string[];
   error_message?: string;
 }
 
-interface AgentToolEventStatusUpdateProps extends OptionalWorkflowExecutionTelemetryProps {
+interface AgentToolEventStatusUpdateProps
+  extends ExistingAlertIdentityProps,
+    OptionalWorkflowExecutionTelemetryProps {
   success: boolean;
   /**
    * @deprecated Superseded by `event_id`. Kept optional for schema continuity with events sent by
@@ -94,7 +113,9 @@ interface AgentToolEventStatusUpdateProps extends OptionalWorkflowExecutionTelem
   error_message?: string;
 }
 
-interface AgentToolEventInvestigationAttachProps extends OptionalWorkflowExecutionTelemetryProps {
+interface AgentToolEventInvestigationAttachProps
+  extends ExistingAlertIdentityProps,
+    OptionalWorkflowExecutionTelemetryProps {
   success: boolean;
   /**
    * @deprecated Superseded by `event_id`. Kept optional for schema continuity with pre-#1517
@@ -152,7 +173,9 @@ interface KnowledgeIndicatorOnboardingScheduledProps extends WorkflowExecutionTe
   skip_queries: boolean;
 }
 
-interface AgentToolEventWriteProps extends OptionalWorkflowExecutionTelemetryProps {
+interface AgentToolEventWriteProps
+  extends AlertCreationAttemptIdentityProps,
+    OptionalWorkflowExecutionTelemetryProps {
   success: boolean;
   event_id: string;
   /** Absent when no status was decided for the item (it was rejected or skipped earlier). */
@@ -177,6 +200,8 @@ interface AgentToolEventSearchProps extends OptionalWorkflowExecutionTelemetryPr
 }
 
 export {
+  type AlertCreationAttemptIdentityProps,
+  type ExistingAlertIdentityProps,
   type AgentBuilderKnowledgeIndicatorCreatedProps,
   type AgentToolKnowledgeIndicatorIdentificationStartedProps,
   type AgentToolEventCreateProps,

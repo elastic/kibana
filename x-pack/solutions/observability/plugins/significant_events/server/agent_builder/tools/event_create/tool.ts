@@ -24,11 +24,12 @@ import type { GetScopedClients } from '../../../routes/types';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
+import { alertCreationAttemptIdentity } from '../alert_identity_telemetry';
+import { trackTelemetryBestEffort } from '../bulk_write';
 import { createEventToolHandler } from './handler';
 import { classifyError } from '../../utils/error_utils';
 import { loadSourceCatalog, toSourceRef } from '../../utils/resolve_source_slugs';
 import { assignStoredSourceIds, sourceSlugsSchema } from '../../utils/stored_source_fields';
-import { trackTelemetryBestEffort } from '../bulk_write';
 
 export const SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID = platformSignificantEventsTools.createEvent;
 
@@ -143,6 +144,11 @@ export function createEventTool({
               ...(context.workflowExecutionId
                 ? { workflow_execution_id: context.workflowExecutionId }
                 : {}),
+              ...alertCreationAttemptIdentity({
+                spaceId: request.spaceId,
+                eventId: data.event_id,
+                groupHash: data.group_hash,
+              }),
               success: true,
               source_ids: sourceIds,
             }),
@@ -166,6 +172,7 @@ export function createEventTool({
         const classified = classifyError(error);
         const rawMessage = error instanceof Error ? error.message : String(error);
         logger.error(`Error running event_create: ${rawMessage}`);
+        // The event id is generated inside the write, so a failed create identifies no alert.
         trackTelemetryBestEffort({
           logger,
           description: 'failed event_create telemetry',
@@ -174,6 +181,7 @@ export function createEventTool({
               ...(context.workflowExecutionId
                 ? { workflow_execution_id: context.workflowExecutionId }
                 : {}),
+              ...alertCreationAttemptIdentity({ spaceId: request.spaceId }),
               success: false,
               source_ids: sourceIds,
               error_message: rawMessage,

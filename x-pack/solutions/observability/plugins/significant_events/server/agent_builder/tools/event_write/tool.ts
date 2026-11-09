@@ -33,6 +33,10 @@ import { assertSignificantEventsAccess } from '../../../routes/utils/assert_sign
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import {
+  alertCreationAttemptIdentity,
+  eventsWriteResultEventId,
+} from '../alert_identity_telemetry';
+import {
   BulkWriteError,
   createBulkWriteValidationError,
   getBulkWriteToolErrorCode,
@@ -490,6 +494,11 @@ export function createEventsWriteTool({
                 ...(context.workflowExecutionId
                   ? { workflow_execution_id: context.workflowExecutionId }
                   : {}),
+                ...alertCreationAttemptIdentity({
+                  spaceId: request.spaceId,
+                  eventId: eventsWriteResultEventId(result, input.event_id),
+                  groupHash: result.written && result.created ? result.group_hash : undefined,
+                }),
                 success: result.written || isSkipped,
                 event_id: result.event_id ?? 'unknown',
                 status: result.status,
@@ -537,6 +546,10 @@ export function createEventsWriteTool({
                 ...(context.workflowExecutionId
                   ? { workflow_execution_id: context.workflowExecutionId }
                   : {}),
+                ...alertCreationAttemptIdentity({
+                  spaceId: request.spaceId,
+                  eventId: input.event_id,
+                }),
                 success: false,
                 event_id: input.event_id ?? 'unknown',
                 written: false,
