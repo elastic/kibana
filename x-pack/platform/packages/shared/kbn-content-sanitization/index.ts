@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { findActionPoliciesTool } from './find_action_policies';
-export type { FindActionPoliciesToolDeps } from './find_action_policies';
+export { sanitizeSvg } from './src/svg';
+export { sanitizeImageDataUrl } from './src/data_url';
