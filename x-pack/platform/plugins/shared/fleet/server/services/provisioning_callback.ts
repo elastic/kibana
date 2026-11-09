@@ -35,6 +35,13 @@ import {
 
 /** How long the stack has to call back. Also the lifetime of the token bound to the record. */
 export const PROVISIONING_CALLBACK_TTL_MS = 2 * 60 * 60 * 1000;
+/**
+ * How long a claim is trusted to still be applying its report. Past this, a retry of the same
+ * report takes the claim over, so a Kibana that died mid-report does not leave the record stuck.
+ */
+export const PROVISIONING_CALLBACK_CLAIM_STALE_MS = 60 * 1000;
+/** Expired records are swept when a new one is created, this many at a time. */
+const EXPIRED_SWEEP_SIZE = 100;
 
 export interface CreateProvisioningCallbackOptions {
   provider: 'aws';
@@ -73,6 +80,8 @@ export interface ProvisioningCallbackReceiveInput {
 export type ProvisioningCallbackReceiveResult =
   /** Stored now, or an exact replay of what is already stored. */
   | { outcome: 'received'; item: CloudConnectorCallback }
+  /** The same report is still being applied by another request; nothing is left for this one. */
+  | { outcome: 'receiving'; item: CloudConnectorCallback }
   /** No such record, or the caller's token is not the one bound to it. Indistinguishable on purpose. */
   | { outcome: 'not_found' }
   /** A different payload arrived after the record was already received. */
@@ -97,6 +106,10 @@ const toItem = (
   const { token_hash: _tokenHash, ...rest } = attributes;
   return { id, ...rest };
 };
+
+/** A claim with no write for longer than the stale window, or with no timestamp at all. */
+const isClaimStale = (updatedAt: string | undefined): boolean =>
+  !updatedAt || Date.now() - new Date(updatedAt).getTime() > PROVISIONING_CALLBACK_CLAIM_STALE_MS;
 
 const isSamePayload = (
   stored: ProvisioningCallbackSOAttributes,
@@ -159,8 +172,33 @@ class ProvisioningCallbackService {
         attributes.expires_at
       }]`
     );
+    await this.deleteExpired(soClient);
 
     return { item: toItem(so.id, so.attributes), token };
+  }
+
+  /**
+   * Deletes records past their expiry, whatever state they ended in. Nothing can act on them
+   * any more: their token is refused and the browser has stopped asking. A record whose report
+   * is being applied is left for the next sweep. Failures are logged, not raised: the sweep is
+   * housekeeping on the way out of a create.
+   */
+  private async deleteExpired(soClient: SavedObjectsClientContract): Promise<void> {
+    const type = PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE;
+    try {
+      const expired = await soClient.find<ProvisioningCallbackSOAttributes>({
+        type,
+        filter: `${type}.attributes.expires_at < "${new Date().toISOString()}" and not ${type}.attributes.status: receiving`,
+        perPage: EXPIRED_SWEEP_SIZE,
+      });
+      if (expired.saved_objects.length === 0) {
+        return;
+      }
+      await soClient.bulkDelete(expired.saved_objects.map(({ id }) => ({ type, id })));
+      this.logger.debug(`Deleted ${expired.saved_objects.length} expired provisioning callbacks`);
+    } catch (error) {
+      this.logger.warn(`Could not delete expired provisioning callbacks: ${error.message}`);
+    }
   }
 
   public async get(
@@ -206,6 +244,8 @@ class ProvisioningCallbackService {
     }
 
     let { attributes, version } = so;
+    let updatedAt = so.updated_at;
+    let claimedHere = false;
     if (attributes.status === 'pending') {
       if (new Date(attributes.expires_at).getTime() <= Date.now()) {
         return { outcome: 'gone' };
@@ -214,8 +254,7 @@ class ProvisioningCallbackService {
       if (!claimed) {
         return { outcome: 'not_found' };
       }
-      attributes = claimed.attributes;
-      version = claimed.version;
+      ({ attributes, version, updatedAt, claimedHere } = claimed);
     }
 
     if (attributes.status === 'cancelled') {
@@ -232,6 +271,23 @@ class ProvisioningCallbackService {
       return { outcome: 'received', item: toItem(so.id, attributes) };
     }
 
+    if (!claimedHere) {
+      // Someone else holds the claim. Only the holder applies the report, so a failure on one
+      // side cannot roll back what the other is doing. A claim nobody has touched for a while
+      // belongs to a request that died, and is taken over with a fresh version of its own.
+      if (!isClaimStale(updatedAt)) {
+        return { outcome: 'receiving', item: toItem(so.id, attributes) };
+      }
+      const taken = await this.claim(soClient, { ...so, attributes, version }, payload);
+      if (!taken) {
+        return { outcome: 'not_found' };
+      }
+      if (!taken.claimedHere) {
+        return { outcome: 'receiving', item: toItem(so.id, taken.attributes) };
+      }
+      ({ attributes, version } = taken);
+    }
+
     let connector: CreatedCloudConnector;
     try {
       connector = await this.ensureCloudConnector(so.id, attributes, payload);
@@ -242,7 +298,7 @@ class ProvisioningCallbackService {
       throw error;
     }
 
-    const item = await this.finish(soClient, so.id, attributes, connector);
+    const item = await this.finish(soClient, so.id, attributes, connector, version);
     this.logger.info(
       `Provisioning callback received [id=${so.id}] [cloud_connector_id=${connector.id}]`
     );
@@ -252,12 +308,15 @@ class ProvisioningCallbackService {
   /**
    * Marks the record received for the connector made from it. The token has nothing left to do
    * from here: a repeat of the same report is answered the same way, anything else is refused.
+   * With a version, the write only lands on the claim this attempt holds; when another attempt
+   * took the claim over and finished first, its result is returned instead.
    */
   private async finish(
     soClient: SavedObjectsClientContract,
     id: string,
     attributes: ProvisioningCallbackSOAttributes,
-    connector: CreatedCloudConnector
+    connector: CreatedCloudConnector,
+    version?: string
   ): Promise<CloudConnectorCallback> {
     const update: Partial<ProvisioningCallbackSOAttributes> = {
       status: 'received',
@@ -265,11 +324,22 @@ class ProvisioningCallbackService {
       connector_name: connector.name,
       cloud_connector_id: connector.id,
     };
-    await soClient.update<ProvisioningCallbackSOAttributes>(
-      PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
-      id,
-      update
-    );
+    try {
+      await soClient.update<ProvisioningCallbackSOAttributes>(
+        PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
+        id,
+        update,
+        ...(version ? [{ version }] : [])
+      );
+    } catch (error) {
+      if (!SavedObjectsErrorHelpers.isConflictError(error)) {
+        throw error;
+      }
+      const current = await this.getSavedObject(soClient, id);
+      if (current) {
+        return toItem(current.id, current.attributes);
+      }
+    }
 
     auditLoggingService.writeCustomAuditLog({
       message: `Provisioning callback received [id=${id}] [cloud_connector_id=${connector.id}] [role_arn=${attributes.role_arn}]`,
@@ -357,16 +427,22 @@ class ProvisioningCallbackService {
   }
 
   /**
-   * Moves a pending record to `receiving` with the reported values, guarded by the record's
-   * version. When another request got there first, returns what it stored instead. The version
-   * returned is the one this attempt last saw, for a guarded release later.
+   * Moves a record to `receiving` with the reported values, guarded by the record's version.
+   * When another request got there first, returns what it stored instead, with `claimedHere`
+   * false. The version returned is the one this attempt last saw, for a guarded release later.
    */
   private async claim(
     soClient: SavedObjectsClientContract,
     so: SavedObject<ProvisioningCallbackSOAttributes>,
     payload: CloudConnectorCallbackReceivedValues
   ): Promise<
-    { attributes: ProvisioningCallbackSOAttributes; version: string | undefined } | undefined
+    | {
+        attributes: ProvisioningCallbackSOAttributes;
+        version: string | undefined;
+        updatedAt: string | undefined;
+        claimedHere: boolean;
+      }
+    | undefined
   > {
     const update: Partial<ProvisioningCallbackSOAttributes> = {
       status: 'receiving',
@@ -380,13 +456,25 @@ class ProvisioningCallbackService {
         update,
         { version: so.version }
       );
-      return { attributes: { ...so.attributes, ...update }, version: updated.version };
+      return {
+        attributes: { ...so.attributes, ...update },
+        version: updated.version,
+        updatedAt: updated.updated_at,
+        claimedHere: true,
+      };
     } catch (error) {
       if (!SavedObjectsErrorHelpers.isConflictError(error)) {
         throw error;
       }
       const current = await this.getSavedObject(soClient, so.id);
-      return current ? { attributes: current.attributes, version: current.version } : undefined;
+      return current
+        ? {
+            attributes: current.attributes,
+            version: current.version,
+            updatedAt: current.updated_at,
+            claimedHere: false,
+          }
+        : undefined;
     }
   }
 

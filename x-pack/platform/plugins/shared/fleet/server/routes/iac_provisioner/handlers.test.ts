@@ -782,6 +782,17 @@ describe('Provisioning callback handlers', () => {
       expect(response.ok).toHaveBeenCalledWith({ body: { status: 'received' } });
     });
 
+    it('answers 200 with the status when the same report is still being applied', async () => {
+      mockedService.receive.mockResolvedValue({
+        outcome: 'receiving',
+        item: { ...ITEM, status: 'receiving' },
+      });
+
+      await receive(withToken);
+
+      expect(response.ok).toHaveBeenCalledWith({ body: { status: 'receiving' } });
+    });
+
     it('never logs the token', async () => {
       const logger = loggingSystemMock.createLogger();
       mockedAppContext.getLogger.mockReturnValue(logger);

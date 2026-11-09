@@ -323,6 +323,8 @@ export const receiveProvisioningCallbackHandler: FleetRequestHandler<
 
   switch (result.outcome) {
     case 'received':
+    case 'receiving':
+      // Either way the report is in Kibana's hands; the stack has nothing more to send.
       return response.ok({ body: { status: result.item.status } });
     case 'not_found':
       return response.notFound(CALLBACK_NOT_FOUND);

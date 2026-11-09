@@ -2295,6 +2295,10 @@ export const getSavedObjectTypes = (
       name: PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
       indexPattern: INGEST_SAVED_OBJECT_INDEX,
       hidden: false,
+      // Only Fleet's own routes may make or change a record: a record written through the
+      // generic saved objects APIs could name any space and carry a hash of a token its author
+      // chose, and the unauthenticated receive route would honour it.
+      hiddenFromHttpApis: true,
       // The stack's Lambda calls the receive route without a space prefix, so the record must be
       // reachable from any space; the space the launch happened in is kept in `space_id`.
       namespaceType: 'agnostic',

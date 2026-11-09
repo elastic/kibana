@@ -390,7 +390,13 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   const handleTabClick = (tab: { id: string }) => {
     setSelectedTabId(tab.id);
     if (tab.id === TABS.NEW_CONNECTION) {
-      setSelected(undefined);
+      // The New tab starts without a selection, unless it still shows the identity the stack
+      // created: that one stays selected, since the tab cannot make another until a new Launch.
+      setSelected(
+        callbackStatus === 'received' && callbackCreated
+          ? { id: callbackCreated.id, name: callbackCreated.name }
+          : undefined
+      );
     }
   };
 
@@ -406,10 +412,12 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
       content: (
         <>
           <EuiSpacer size="m" />
-          {/* A pending record holds the name typed at Launch, which the hint below shows. */}
+          {/* The record holds the name typed at Launch and the server creates the identity from
+              it, so the field is locked while the form waits and once the identity exists. */}
           <CloudConnectorNameField
             value={connectorName}
             onChange={(name) => setConnectorName(name)}
+            disabled={isManualEntryLocked}
             data-test-subj="awsIdentityFederationSetup-connectorName"
           />
           <EuiSpacer size="m" />

@@ -891,6 +891,24 @@ describe('AwsIdentityFederationSetup', () => {
       expect(clearIacConfirm).toHaveBeenCalledTimes(1);
     });
 
+    it('keeps the identity the stack created selected after a round trip through Existing Identity', async () => {
+      const user = userEvent.setup();
+      mockUseProvisioningCallback.mockReturnValue(
+        callbackState({ status: 'received', created: { id: 'cc-1', name: 'my-identity' } })
+      );
+      renderSetup({ cloud, integrations });
+      expect(onConnectorIdChange).toHaveBeenLastCalledWith('cc-1', 'my-identity');
+
+      await user.click(screen.getByRole('tab', { name: 'Existing Identity' }));
+      await user.click(screen.getByRole('tab', { name: 'New Identity' }));
+
+      // The tab still shows the created identity and cannot make another, so the selection
+      // must not be dropped: a dropped selection would leave both Create and Launch locked
+      // with nothing selected.
+      expect(onConnectorIdChange).toHaveBeenLastCalledWith('cc-1', 'my-identity');
+      expect(lastReadyValue(onReadyChange)).toBe(true);
+    });
+
     it('stays on the New Identity tab when the identity the stack created is the first one', () => {
       // A project with no identities yet: the initial tab was decided on an empty list.
       mockGetConnectors({ data: [] });
@@ -1080,7 +1098,7 @@ describe('AwsIdentityFederationSetup', () => {
       });
     });
 
-    it('keeps the name editable but disables Launch while waiting: one launch at a time', () => {
+    it('locks the name and Launch while waiting: the record already holds the name', () => {
       mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'pending' }));
       mockUseCloudConnectorTemplate.mockReturnValue(
         provisionerHookResult(mockLaunchOnClick, {
@@ -1090,9 +1108,19 @@ describe('AwsIdentityFederationSetup', () => {
       );
       renderSetup({ cloud, integrations });
 
-      expect(screen.getByTestId('awsIdentityFederationSetup-connectorName')).toBeEnabled();
+      expect(screen.getByTestId('awsIdentityFederationSetup-connectorName')).toBeDisabled();
       expect(screen.getByTestId('awsIdentityFederationSetup-launchCloudFormation')).toBeDisabled();
       expect(screen.getByTestId('awsIdentityFederationSetup-callbackSpinner')).toBeInTheDocument();
+    });
+
+    it('keeps the name editable before Launch and once the callback gave up', () => {
+      mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'idle' }));
+      const { rerender } = renderSetup({ cloud, integrations });
+      expect(screen.getByTestId('awsIdentityFederationSetup-connectorName')).toBeEnabled();
+
+      mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'expired' }));
+      rerender(setupElement({ cloud, integrations }));
+      expect(screen.getByTestId('awsIdentityFederationSetup-connectorName')).toBeEnabled();
     });
 
     it('shows the spinner while waiting on a static launch with the provisioner off', () => {
