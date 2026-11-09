@@ -325,6 +325,11 @@ export interface ResponseActionGetFileParameters {
    * Only for Endpoint that support the `get_file_multi_path` capability
    */
   paths?: string[];
+  /**
+   * Read a file that the OS has locked from a snapshot of its volume. Valid for `endpoint` agent
+   * type only, and supported on Windows only (requires the `get_file_force` capability).
+   */
+  force?: boolean;
 }
 
 export interface ResponseActionsExecuteParameters {

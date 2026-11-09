@@ -25,6 +25,8 @@ export const EndpointActionGetFileSchema = {
             maxSize: GET_FILE_MAX_PATHS,
           })
         ),
+        // `force` applies only to the Elastic Defend Endpoint on Windows (validated below)
+        force: schema.maybe(schema.boolean()),
       }),
     },
     {
@@ -45,6 +47,14 @@ export const EndpointActionGetFileSchema = {
           bodyContent.agent_type !== 'endpoint'
         ) {
           return `[parameters.paths]: is not valid with agent type of ${bodyContent.agent_type}`;
+        }
+
+        if (
+          'force' in bodyContent.parameters &&
+          bodyContent.agent_type &&
+          bodyContent.agent_type !== 'endpoint'
+        ) {
+          return `[parameters.force]: is not valid with agent type of ${bodyContent.agent_type}`;
         }
       },
     }

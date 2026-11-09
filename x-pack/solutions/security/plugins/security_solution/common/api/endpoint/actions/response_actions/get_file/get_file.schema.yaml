@@ -88,3 +88,7 @@ components:
                   example:
                     - "/var/log/syslog"
                     - "/var/log/auth.log"
+                force:
+                  type: boolean
+                  description: "Read a file locked by the OS from a volume snapshot. Endpoint on Windows only."
+                  example: true

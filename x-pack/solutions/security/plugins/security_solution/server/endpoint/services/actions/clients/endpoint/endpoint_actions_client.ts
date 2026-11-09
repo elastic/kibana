@@ -23,6 +23,7 @@ import type { HapiReadableStream } from '../../../../../types';
 import type {
   ResponseActionsApiCommandNames,
   ResponseActionAgentType,
+  EndpointCapabilities,
 } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type {
   ExecuteActionRequestBody,
@@ -179,78 +180,21 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       }
     }
 
-    // Kill Process: `kill_descendants` is gated by a feature flag and requires that the
-    // Endpoint supports it (via the `kill_process_descendants` capability).
+    // Kill Process: `kill_descendants` is gated by a feature flag. (The Endpoint capability that it
+    // requires is checked up front in `validateCommandCapabilities()`.)
     if (
       actionRequest.command === 'kill-process' &&
-      actionRequest.parameters?.kill_descendants === true
+      actionRequest.parameters?.kill_descendants === true &&
+      !this.options.endpointService.experimentalFeatures
+        .responseActionsEndpointKillProcessDescendants
     ) {
-      if (
-        !this.options.endpointService.experimentalFeatures
-          .responseActionsEndpointKillProcessDescendants
-      ) {
-        return {
-          isValid: false,
-          error: new ResponseActionsClientError(
-            'kill-process `kill_descendants` parameter is not enabled',
-            400
-          ),
-        };
-      }
-
-      const endpointMetadata = await this.options.endpointService
-        .getEndpointMetadataService(this.options.spaceId)
-        .findHostMetadataForFleetAgents(actionRequest.endpoint_ids);
-
-      const unsupportedAgents = endpointMetadata
-        .filter(
-          (endpointMeta) =>
-            !endpointMeta.Endpoint.capabilities?.includes('kill_process_descendants')
-        )
-        .map(
-          (endpointMeta) =>
-            `${endpointMeta.agent.id} / ${endpointMeta.host.hostname} (Agent v.${endpointMeta.agent.version})`
-        );
-
-      if (unsupportedAgents.length > 0) {
-        return {
-          isValid: false,
-          error: new ResponseActionsClientError(
-            `The following agent IDs do not support killing process descendents: ${unsupportedAgents.join(
-              ', '
-            )}`
-          ),
-        };
-      }
-    }
-
-    // Get File: `paths` (retrieve multiple files in one action) requires that the Endpoint supports
-    // it (via the `get_file_multi_path` capability).
-    if (actionRequest.command === 'get-file' && actionRequest.parameters?.paths !== undefined) {
-      const endpointMetadata = await this.options.endpointService
-        .getEndpointMetadataService(this.options.spaceId)
-        .findHostMetadataForFleetAgents(actionRequest.endpoint_ids);
-
-      const unsupportedAgents = endpointMetadata
-        .filter(
-          (endpointMeta) => !endpointMeta.Endpoint.capabilities?.includes('get_file_multi_path')
-        )
-        .map(
-          (endpointMeta) =>
-            `${endpointMeta.agent.id} / ${endpointMeta.host.hostname} (Agent v.${endpointMeta.agent.version})`
-        );
-
-      if (unsupportedAgents.length > 0) {
-        return {
-          isValid: false,
-          error: new ResponseActionsClientError(
-            `The following agent IDs do not support the get-file \`paths\` parameter: ${unsupportedAgents.join(
-              ', '
-            )}`,
-            400
-          ),
-        };
-      }
+      return {
+        isValid: false,
+        error: new ResponseActionsClientError(
+          'kill-process `kill_descendants` parameter is not enabled',
+          400
+        ),
+      };
     }
 
     if (actionRequest.command === 'runscript') {
@@ -334,6 +278,71 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     return super.validateRequest(actionRequest);
   }
 
+  /**
+   * Returns an error if the request uses a command parameter that requires an Endpoint capability
+   * which one or more of the target hosts do not report.
+   *
+   * This intentionally uses the host metadata that was already retrieved when the agent IDs were
+   * checked (instead of querying for it again) and is only called once per request. Re-running it
+   * from `validateRequest()` (which also runs when the action request document is written, after the
+   * action was already dispatched via Fleet) could yield a different answer if the metadata
+   * changes in between (ex. while an Endpoint is being upgraded) and leave a dispatched action
+   * without its Endpoint action request document.
+   */
+  private validateCommandCapabilities(
+    command: ResponseActionsApiCommandNames,
+    actionReq: ResponseActionsRequestBody,
+    hosts: HostMetadata[]
+  ): ResponseActionsClientError | undefined {
+    // `parameters` is a union of every command's parameters
+    const parameters = (actionReq.parameters ?? {}) as Record<string, unknown>;
+    const requirements: Array<{ capability: EndpointCapabilities; unsupportedMessage: string }> =
+      [];
+
+    if (command === 'kill-process' && parameters.kill_descendants === true) {
+      requirements.push({
+        capability: 'kill_process_descendants',
+        unsupportedMessage: 'killing process descendents',
+      });
+    }
+
+    if (command === 'get-file') {
+      if (parameters.force === true) {
+        // `force` (read a locked file from a volume snapshot) is supported on Windows only
+        requirements.push({
+          capability: 'get_file_force',
+          unsupportedMessage: 'the get-file `force` parameter (Windows only)',
+        });
+      }
+
+      // `paths` (retrieve multiple files in one action)
+      if (parameters.paths !== undefined) {
+        requirements.push({
+          capability: 'get_file_multi_path',
+          unsupportedMessage: 'the get-file `paths` parameter',
+        });
+      }
+    }
+
+    for (const { capability, unsupportedMessage } of requirements) {
+      const unsupportedAgents = hosts
+        .filter((endpointMeta) => !endpointMeta.Endpoint.capabilities?.includes(capability))
+        .map(
+          (endpointMeta) =>
+            `${endpointMeta.agent.id} / ${endpointMeta.host.hostname} (Agent v.${endpointMeta.agent.version})`
+        );
+
+      if (unsupportedAgents.length > 0) {
+        return new ResponseActionsClientError(
+          `The following agent IDs do not support ${unsupportedMessage}: ${unsupportedAgents.join(
+            ', '
+          )}`,
+          400
+        );
+      }
+    }
+  }
+
   private async handleResponseAction<
     TOptions extends ResponseActionsRequestBody = ResponseActionsRequestBody,
     TResponse extends ActionDetails = ActionDetails,
@@ -345,11 +354,14 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   ): Promise<TResponse> {
     const validatedAgents = await this.checkAgentIds(actionReq.endpoint_ids);
     const actionId = uuidv4();
-    const { error: validationError } = await this.validateRequest({
+    const { error: requestValidationError } = await this.validateRequest({
       ...actionReq,
       command,
       endpoint_ids: validatedAgents.valid || [],
     });
+    const validationError =
+      requestValidationError ??
+      this.validateCommandCapabilities(command, actionReq, validatedAgents.hosts);
     const { hosts, ruleName, ruleId, error } = this.getMethodOptions<TMethodOptions>(options);
     let actionError: string | undefined = validationError?.message || error;
     let actionRequestMeta: Record<string, unknown> | undefined;
@@ -594,10 +606,20 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     actionRequest: ResponseActionGetFileRequestBody,
     options: CommonResponseActionMethodOptions = {}
   ): Promise<ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>> {
+    let actionRequestToSend = actionRequest;
+
+    // `force` is only sent to the Endpoint when it is `true`. Omitting `force: false` avoids sending
+    // a parameter that older Endpoints (without the `get_file_force` capability) don't know about.
+    if ('force' in actionRequest.parameters && actionRequest.parameters.force !== true) {
+      const { force: _force, ...parametersWithoutForce } = actionRequest.parameters;
+
+      actionRequestToSend = { ...actionRequest, parameters: parametersWithoutForce };
+    }
+
     return this.handleResponseAction<
       ResponseActionGetFileRequestBody,
       ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>
-    >('get-file', actionRequest, options);
+    >('get-file', actionRequestToSend, options);
   }
 
   async execute(

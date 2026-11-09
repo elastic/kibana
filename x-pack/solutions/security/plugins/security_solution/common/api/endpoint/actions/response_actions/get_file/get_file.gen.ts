@@ -47,6 +47,15 @@ export const GetFileRouteRequestBody = lazySchema(() =>
           .describe(
             'The list of file paths to retrieve from the endpoint. Either `path` or `paths` must be defined, but not both. Valid for the Elastic Defend Endpoint agent type only, and requires an Endpoint that supports the `get_file_multi_path` capability.'
           ),
+        /**
+         * Read a file locked by the OS from a volume snapshot. Endpoint on Windows only.
+         */
+        force: z
+          .boolean()
+          .optional()
+          .describe(
+            'Read a file locked by the OS from a volume snapshot. Endpoint on Windows only.'
+          ),
       }),
     })
   )

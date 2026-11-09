@@ -290,6 +290,15 @@ export const CONSOLE_COMMANDS = {
             values: { maxPaths },
           }),
       },
+      force: {
+        about: i18n.translate(
+          'xpack.securitySolution.endpointConsoleCommands.getFile.force.about',
+          {
+            defaultMessage:
+              'Read a file that is locked by the operating system from a snapshot of its volume (Windows only)',
+          }
+        ),
+      },
     },
   },
   execute: {

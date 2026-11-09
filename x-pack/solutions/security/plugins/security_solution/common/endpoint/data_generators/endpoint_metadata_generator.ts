@@ -182,6 +182,11 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
       capabilities.push('get_file_multi_path');
     }
 
+    // v9.7.0 introduced `get-file --force` capability (Windows only)
+    if (gte(agentVersion, '9.7.0') && (hostOs.platform ?? '').toLowerCase() === 'windows') {
+      capabilities.push('get_file_force');
+    }
+
     const hostMetadataDoc: HostMetadataInterface = {
       '@timestamp': ts,
       event: {
