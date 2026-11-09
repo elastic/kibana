@@ -26,6 +26,7 @@ import { getScheduledReportsList } from '../apis/get_scheduled_reports_list';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { useGetUserProfileQuery } from '../hooks/use_get_user_profile_query';
 import { bulkEnableScheduledReports } from '../apis/bulk_enable_scheduled_reports';
+import { runScheduledReport } from '../apis/run_scheduled_report';
 
 jest.mock('@kbn/reporting-public', () => ({
   useKibana: jest.fn(),
@@ -47,12 +48,14 @@ jest.mock('../apis/bulk_disable_scheduled_reports');
 jest.mock('../apis/bulk_delete_scheduled_reports');
 jest.mock('../hooks/use_get_user_profile_query');
 jest.mock('../apis/bulk_enable_scheduled_reports');
+jest.mock('../apis/run_scheduled_report');
 
 const mockGetScheduledReports = jest.mocked(getScheduledReportsList);
 const mockDisableScheduledReports = jest.mocked(bulkDisableScheduledReports);
 const mockDeleteScheduledReports = jest.mocked(bulkDeleteScheduledReports);
 const mockGetUserProfileQuery = jest.mocked(useGetUserProfileQuery);
 const mockEnableScheduledReports = jest.mocked(bulkEnableScheduledReports);
+const mockRunScheduledReport = jest.mocked(runScheduledReport);
 
 const http = httpServiceMock.createSetupContract();
 const application = applicationServiceMock.createStartContract();
@@ -119,6 +122,7 @@ describe('ReportSchedulesTable', () => {
       total: 3,
       data: mockScheduledReports,
     });
+    mockRunScheduledReport.mockResolvedValue({ id: mockScheduledReports[0].id });
     queryClient.clear();
   });
 
@@ -303,6 +307,25 @@ describe('ReportSchedulesTable', () => {
         search: '',
       })
     );
+  });
+
+  it('hides run now from a user who cannot manage the schedule', async () => {
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={queryClient}>
+          <ReportSchedulesTable />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
+
+    expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(3);
+
+    expect(
+      await screen.findByTestId(`reportViewConfig-${mockScheduledReports[0].id}`)
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(`reportRunSchedule-${mockScheduledReports[0].id}`)
+    ).not.toBeInTheDocument();
   });
 
   it('should force refetch schedules when pressing refresh', async () => {
@@ -566,6 +589,60 @@ describe('ReportSchedulesTable', () => {
           })
         );
       });
+    });
+
+    it('runs an active schedule now', async () => {
+      render(
+        <IntlProvider locale="en">
+          <QueryClientProvider client={queryClient}>
+            <ReportSchedulesTable />
+          </QueryClientProvider>
+        </IntlProvider>
+      );
+
+      expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(3);
+
+      await user.click((await screen.findAllByTestId('euiCollapsedItemActionsButton'))[0]);
+
+      const runNow = await screen.findByTestId(`reportRunSchedule-${mockScheduledReports[0].id}`);
+      expect(runNow).toBeInTheDocument();
+
+      await user.click(runNow);
+
+      await waitFor(() => {
+        expect(mockRunScheduledReport).toHaveBeenCalledWith({
+          http,
+          id: mockScheduledReports[0].id,
+        });
+      });
+    });
+
+    it('hides run now when the schedule is disabled', async () => {
+      mockGetScheduledReports.mockResolvedValue({
+        page: 1,
+        size: 10,
+        total: 1,
+        data: [{ ...mockScheduledReports[0], enabled: false }],
+      });
+
+      render(
+        <IntlProvider locale="en">
+          <QueryClientProvider client={queryClient}>
+            <ReportSchedulesTable />
+          </QueryClientProvider>
+        </IntlProvider>
+      );
+
+      expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(1);
+
+      await user.click((await screen.findAllByTestId('euiCollapsedItemActionsButton'))[0]);
+
+      expect(
+        await screen.findByTestId(`reportEnableSchedule-${mockScheduledReports[0].id}`)
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId(`reportRunSchedule-${mockScheduledReports[0].id}`)
+      ).not.toBeInTheDocument();
     });
 
     it('enable schedule report correctly', async () => {

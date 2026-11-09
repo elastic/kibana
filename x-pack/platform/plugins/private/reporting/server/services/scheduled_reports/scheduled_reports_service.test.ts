@@ -23,6 +23,7 @@ import type { ReportingCore } from '../..';
 import type { ReportingUser, ScheduledReportType } from '../../types';
 import {
   Frequency,
+  TaskAlreadyRunningError,
   TaskStatus,
   type TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
@@ -2936,6 +2937,157 @@ describe('ScheduledReportsService', () => {
           "statusCode": 500,
         }
       `);
+    });
+  });
+
+  describe('runNow', () => {
+    const reportId = savedObjects[0].id;
+
+    beforeEach(() => {
+      taskManager.runSoon = jest.fn().mockResolvedValue({ id: reportId });
+    });
+
+    it('asks task manager to run the schedule immediately', async () => {
+      const result = await scheduledReportsService.runNow({
+        user: { username: 'elastic' } as ReportingUser,
+        id: reportId,
+      });
+
+      expect(result).toEqual({ id: reportId });
+      expect(taskManager.runSoon).toHaveBeenCalledWith(reportId, { requestImmediateClaim: true });
+      expect(auditLogger.log).toHaveBeenCalledWith({
+        event: {
+          action: 'scheduled_report_run',
+          category: ['database'],
+          outcome: 'success',
+          type: ['start'],
+        },
+        kibana: {
+          saved_object: {
+            id: reportId,
+            name: '[Logs] Web Traffic',
+            type: 'scheduled_report',
+          },
+        },
+        message: `User has run scheduled report [id=${reportId}] [name=[Logs] Web Traffic]`,
+      });
+    });
+
+    it('allows the owner to run a schedule without Manage Reporting', async () => {
+      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      scheduledReportsService = await ScheduledReportsService.build({
+        logger: mockLogger,
+        reportingCore: core,
+        responseFactory: mockResponseFactory,
+        request: fakeRawRequest,
+      });
+      taskManager.runSoon = jest.fn().mockResolvedValue({ id: reportId });
+
+      await scheduledReportsService.runNow({
+        user: { username: 'elastic' } as ReportingUser,
+        id: reportId,
+      });
+
+      expect(taskManager.runSoon).toHaveBeenCalledWith(reportId, { requestImmediateClaim: true });
+    });
+
+    it('does not run a schedule the user does not own', async () => {
+      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      scheduledReportsService = await ScheduledReportsService.build({
+        logger: mockLogger,
+        reportingCore: core,
+        responseFactory: mockResponseFactory,
+        request: fakeRawRequest,
+      });
+
+      await expect(
+        scheduledReportsService.runNow({
+          user: { username: 'somebody' } as ReportingUser,
+          id: reportId,
+        })
+      ).rejects.toMatchObject({
+        body: 'Not found.',
+        statusCode: 404,
+      });
+
+      expect(taskManager.runSoon).not.toHaveBeenCalled();
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        `User "somebody" attempted to run scheduled report "${reportId}" without sufficient privileges.`
+      );
+      expect(auditLogger.log).toHaveBeenCalledWith({
+        error: {
+          code: 'Error',
+          message: 'Not found.',
+        },
+        event: {
+          action: 'scheduled_report_run',
+          category: ['database'],
+          outcome: 'failure',
+          type: ['start'],
+        },
+        kibana: {
+          saved_object: {
+            id: reportId,
+            type: 'scheduled_report',
+          },
+        },
+        message: `Failed attempt to run scheduled report [id=${reportId}]`,
+      });
+    });
+
+    it('rejects a disabled schedule', async () => {
+      soClient.get = jest.fn().mockResolvedValue({
+        ...savedObjects[0],
+        attributes: { ...savedObjects[0].attributes, enabled: false },
+      });
+
+      await expect(
+        scheduledReportsService.runNow({
+          user: { username: 'elastic' } as ReportingUser,
+          id: reportId,
+        })
+      ).rejects.toEqual({ body: 'Scheduled report is disabled.' });
+
+      expect(taskManager.runSoon).not.toHaveBeenCalled();
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: {
+            code: 'Error',
+            message: 'Scheduled report is disabled.',
+          },
+          event: expect.objectContaining({
+            action: 'scheduled_report_run',
+            outcome: 'failure',
+          }),
+        })
+      );
+    });
+
+    it('returns 409 when the task is already running', async () => {
+      taskManager.runSoon = jest.fn().mockRejectedValue(new TaskAlreadyRunningError(reportId));
+
+      await expect(
+        scheduledReportsService.runNow({
+          user: { username: 'elastic' } as ReportingUser,
+          id: reportId,
+        })
+      ).rejects.toEqual({
+        statusCode: 409,
+        body: 'Scheduled report is already running.',
+      });
+    });
+
+    it('returns 409 when task manager reports a version conflict', async () => {
+      taskManager.runSoon = jest.fn().mockResolvedValue({ id: reportId, conflict: true });
+
+      await expect(
+        scheduledReportsService.runNow({
+          user: { username: 'elastic' } as ReportingUser,
+          id: reportId,
+        })
+      ).rejects.toMatchObject({
+        statusCode: 409,
+      });
     });
   });
 });

@@ -16,6 +16,7 @@ export enum ScheduledReportAuditAction {
   DELETE = 'scheduled_report_delete',
   UPDATE = 'scheduled_report_update',
   ENABLE = 'scheduled_report_enable',
+  RUN = 'scheduled_report_run',
 }
 
 type VerbsTuple = [string, string, string];
@@ -27,6 +28,7 @@ const scheduledReportEventVerbs: Record<ScheduledReportAuditAction, VerbsTuple> 
   scheduled_report_delete: ['delete', 'deleting', 'deleted'],
   scheduled_report_update: ['update', 'updating', 'updated'],
   scheduled_report_enable: ['enable', 'enabling', 'enabled'],
+  scheduled_report_run: ['run', 'running', 'run'],
 };
 
 const scheduledReportEventTypes: Record<
@@ -39,6 +41,7 @@ const scheduledReportEventTypes: Record<
   scheduled_report_delete: 'deletion',
   scheduled_report_update: 'update',
   scheduled_report_enable: 'change',
+  scheduled_report_run: 'start',
 };
 
 export interface ScheduledReportAuditEventParams {

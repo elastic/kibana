@@ -46,6 +46,7 @@ import { EditScheduledReportFlyout } from './edit_scheduled_report_flyout';
 import { useGetUserProfileQuery } from '../hooks/use_get_user_profile_query';
 import { ViewScheduledReportFlyout } from './view_scheduled_report_flyout';
 import { useBulkEnable } from '../hooks/use_bulk_enable';
+import { useRunScheduledReport } from '../hooks/use_run_scheduled_report';
 
 interface QueryParams {
   page: number;
@@ -104,6 +105,7 @@ export const ReportSchedulesTable = () => {
   const { mutateAsync: bulkDisableScheduledReports } = useBulkDisable();
   const { mutateAsync: bulkDeleteScheduledReports } = useBulkDelete();
   const { mutateAsync: bulkEnableScheduledReports } = useBulkEnable();
+  const { mutate: runScheduledReportNow } = useRunScheduledReport();
 
   const sortedList = orderBy(scheduledList?.data || [], ['created_at'], ['desc']);
 
@@ -291,6 +293,22 @@ export const ReportSchedulesTable = () => {
 
             window.open(href, '_blank');
             window.focus();
+          },
+        },
+        {
+          name: i18n.translate('xpack.reporting.schedules.table.runSchedule.title', {
+            defaultMessage: 'Run now',
+          }),
+          description: i18n.translate('xpack.reporting.schedules.table.runSchedule.description', {
+            defaultMessage:
+              'Generate this export now. Configured notifications are sent. The recurring schedule is unchanged.',
+          }),
+          'data-test-subj': (item) => `reportRunSchedule-${item.id}`,
+          available: (item) => item.enabled && canManageSchedule(item),
+          type: 'icon',
+          icon: 'play',
+          onClick: (item) => {
+            runScheduledReportNow({ id: item.id });
           },
         },
         {

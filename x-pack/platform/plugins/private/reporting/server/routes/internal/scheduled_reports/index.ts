@@ -13,6 +13,7 @@ import { registerInternalCreateScheduledReportRoute } from './create';
 import { registerInternalBulkDeleteRoute } from './bulk_delete';
 import { registerInternalUpdateScheduledReportRoute } from './update';
 import { registerInternalBulkEnableRoute } from './bulk_enable';
+import { registerInternalRunScheduledReportRoute } from './run';
 
 export function registerScheduledReportsRoutesInternal(reporting: ReportingCore, logger: Logger) {
   const setupDeps = reporting.getPluginSetupDeps();
@@ -24,4 +25,5 @@ export function registerScheduledReportsRoutesInternal(reporting: ReportingCore,
   registerInternalBulkDeleteRoute({ logger, router, reporting });
   registerInternalUpdateScheduledReportRoute({ logger, router, reporting });
   registerInternalBulkEnableRoute({ logger, router, reporting });
+  registerInternalRunScheduledReportRoute({ logger, router, reporting });
 }

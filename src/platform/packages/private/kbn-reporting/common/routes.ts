@@ -29,6 +29,8 @@ export const INTERNAL_ROUTES = {
     BULK_DISABLE: prefixInternalPath + '/scheduled/bulk_disable',
     BULK_DELETE: prefixInternalPath + '/scheduled/bulk_delete',
     BULK_ENABLE: prefixInternalPath + '/scheduled/bulk_enable',
+    // {id} is replaced with the scheduled report id
+    RUN: prefixInternalPath + '/scheduled/{id}/_run',
   },
   HEALTH: prefixInternalPath + '/_health',
   GENERATE_PREFIX: prefixInternalPath + '/generate', // exportTypeId is added to the final path

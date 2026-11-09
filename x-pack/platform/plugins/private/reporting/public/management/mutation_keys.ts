@@ -12,4 +12,5 @@ export const mutationKeys = {
   bulkDisableScheduledReports: () => [mutationKeys.root, 'bulkDisableScheduledReports'] as const,
   bulkDeleteScheduledReports: () => [mutationKeys.root, 'bulkDeleteScheduledReports'] as const,
   bulkEnableScheduledReports: () => [mutationKeys.root, 'bulkEnableScheduledReports'] as const,
+  runScheduledReport: () => [mutationKeys.root, 'runScheduledReport'] as const,
 };

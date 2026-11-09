@@ -21,7 +21,10 @@ import type {
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY } from '@kbn/reporting-server';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import {
+  TaskAlreadyRunningError,
+  type TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import type { KueryNode } from '@kbn/es-query';
 import { partition } from 'lodash';
 import type { ReportingCore } from '../..';
@@ -289,6 +292,87 @@ export class ScheduledReportsService {
       ids,
       user,
     });
+  }
+
+  /**
+   * Asks Task Manager to claim the schedule's existing task immediately.
+   * The recurring rrule is left in place; the task runner computes the following run when this one finishes.
+   * Disabled schedules are rejected because Task Manager will not claim a disabled task.
+   */
+  public async runNow({ user, id }: { user: ReportingUser; id: string }): Promise<{ id: string }> {
+    const { authorized } = await this._canUpdateReport({ id, user });
+    if (!authorized) {
+      throw await this._buildNotFoundError({
+        user,
+        id,
+        action: ScheduledReportAuditAction.RUN,
+        operation: 'run',
+      });
+    }
+
+    const scheduledReport = await this.savedObjectsClient.get<ScheduledReportType>(
+      SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
+      id
+    );
+
+    if (!scheduledReport.attributes.enabled) {
+      const error = new Error('Scheduled report is disabled.');
+      this._auditLog({
+        action: ScheduledReportAuditAction.RUN,
+        id,
+        name: scheduledReport.attributes.title,
+        error,
+      });
+      throw this.responseFactory.badRequest({ body: error.message });
+    }
+
+    let result;
+    try {
+      result = await this.taskManager.runSoon(id, { requestImmediateClaim: true });
+    } catch (error) {
+      this._auditLog({
+        action: ScheduledReportAuditAction.RUN,
+        id,
+        name: scheduledReport.attributes.title,
+        error,
+      });
+
+      if (error instanceof TaskAlreadyRunningError) {
+        throw this.responseFactory.customError({
+          statusCode: 409,
+          body: 'Scheduled report is already running.',
+        });
+      }
+
+      throw this.responseFactory.customError({
+        statusCode: 500,
+        body: `Error running scheduled report: ${error.message}`,
+      });
+    }
+
+    if (result.conflict) {
+      const error = new Error(
+        'Scheduled report could not be run because it was updated at the same time. Retry the request.'
+      );
+      this._auditLog({
+        action: ScheduledReportAuditAction.RUN,
+        id,
+        name: scheduledReport.attributes.title,
+        error,
+      });
+      throw this.responseFactory.customError({
+        statusCode: 409,
+        body: error.message,
+      });
+    }
+
+    this._auditLog({
+      action: ScheduledReportAuditAction.RUN,
+      id,
+      name: scheduledReport.attributes.title,
+    });
+
+    return { id };
   }
 
   public async bulkDelete({
@@ -766,16 +850,18 @@ export class ScheduledReportsService {
     user,
     id,
     action,
+    operation = 'update',
   }: {
     user: ReportingUser;
     id: string;
     action: ScheduledReportAuditAction;
+    operation?: string;
   }): Promise<IKibanaResponse> {
     const identity = await this._getIdentity(user);
     this.logger.warn(
       `${describePrincipal(
         identity
-      )} attempted to update scheduled report "${id}" without sufficient privileges.`
+      )} attempted to ${operation} scheduled report "${id}" without sufficient privileges.`
     );
     this._auditLog({
       action,
