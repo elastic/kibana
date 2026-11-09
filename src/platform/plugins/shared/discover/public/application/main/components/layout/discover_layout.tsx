@@ -482,7 +482,16 @@ export function DiscoverLayout() {
             mainPanel={
               <div css={styles.dscPageContentWrapper}>
                 {resultState === 'none' ? (
-                  <>
+                  // POC: empty/error state needs its own card — main resizable panel is transparent
+                  <EuiPanel
+                    role="main"
+                    paddingSize="none"
+                    hasShadow={false}
+                    hasBorder
+                    borderRadius="none"
+                    color="plain"
+                    css={styles.dscEmptyStatePanel}
+                  >
                     <div css={styles.mainPanel}>
                       <PanelsToggle omitChartButton omitTableButton dataTestSubjSuffix="InPage" />
                     </div>
@@ -510,7 +519,7 @@ export function DiscoverLayout() {
                         onDisableFilters={onDisableFilters}
                       />
                     )}
-                  </>
+                  </EuiPanel>
                 ) : (
                   <EuiPanel
                     role="main"
@@ -570,8 +579,19 @@ const componentStyles = {
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
-    // POC: border/radius live on the outer .euiResizablePanel — avoid a double border here
+    // POC: with-results chrome lives on histogram panels; empty state uses dscEmptyStatePanel
   }),
+  dscEmptyStatePanel: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flex: '1 1 auto',
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%',
+      // POC: match sidebar/chart/docs card chrome (EuiPanel hasBorder uses theme border)
+      borderRadius: euiTheme.border.radius.frame,
+      borderColor: euiTheme.colors.borderBaseSubdued,
+      overflow: 'hidden',
+    }),
   dscPageContent: css({
     position: 'relative',
     overflow: 'hidden',

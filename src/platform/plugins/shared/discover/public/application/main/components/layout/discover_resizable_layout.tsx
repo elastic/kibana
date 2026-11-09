@@ -107,24 +107,55 @@ export const DiscoverResizableLayout = withRestorableState(InternalDiscoverResiz
 
 export type DiscoverResizableLayoutProps = ComponentProps<typeof DiscoverResizableLayout>;
 
+const panelCardCss = (euiTheme: UseEuiTheme['euiTheme']) => css`
+  background-color: ${euiTheme.colors.backgroundBasePlain};
+  /* POC: bigger radius + border so panels read as cards on recessed */
+  border-radius: ${euiTheme.border.radius.frame};
+  border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+  overflow: hidden;
+`;
+
+const transparentPanelCss = css`
+  background-color: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+`;
+
 const dscPageBodyContentsStyles = {
   contents: ({ euiTheme }: UseEuiTheme) => css`
     overflow: hidden;
     height: 100%;
 
-    /* POC: open a recessed gutter between field list and results (cancel EUI button overlap) */
+    /*
+     * POC: gutter = pageBody padding (size.s).
+     * Static EuiFlexGroup (no handle): gap only.
+     * Resizable: handle size only — default handle is size.base and looked wider than top.
+     * Note: direction variants are Emotion labels, not real classes — target buttons directly.
+     */
     &.euiFlexGroup {
       gap: ${euiTheme.size.s};
     }
 
+    &.euiResizableContainer {
+      gap: 0;
+    }
+
+    [data-test-subj='unifiedHistogram'].euiFlexGroup {
+      gap: ${euiTheme.size.s};
+    }
+
+    [data-test-subj='unifiedHistogram'].euiResizableContainer {
+      gap: 0;
+    }
+
     .euiResizableButton {
-      /* POC: match outer pageBody gutter (size.s); default handle is size.base */
+      /* POC: cancel EUI overlap so recessed gutter shows; keep hit target */
       margin-inline: 0 !important; /* stylelint-disable-line declaration-no-important */
-      inline-size: ${euiTheme.size.s} !important; /* stylelint-disable-line declaration-no-important */
+      margin-block: 0 !important; /* stylelint-disable-line declaration-no-important */
 
       &::before,
       &::after {
-        /* Keep the hit target; hide the seam line so recessed shows through */
         background-color: transparent !important; /* stylelint-disable-line declaration-no-important */
       }
 
@@ -135,13 +166,55 @@ const dscPageBodyContentsStyles = {
       }
     }
 
-    .euiResizablePanel,
-    > .euiFlexItem {
-      background-color: ${euiTheme.colors.backgroundBasePlain};
-      /* POC: bigger radius + border so panels read as cards on recessed */
-      border-radius: ${euiTheme.border.radius.frame};
-      border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+    /* POC: sidebar ↔ main gutter = size.s (matches top padding) */
+    > .euiResizableButton {
+      inline-size: ${euiTheme.size.s} !important; /* stylelint-disable-line declaration-no-important */
+    }
+
+    /* POC: chart ↔ documents gutter = size.s */
+    [data-test-subj='unifiedHistogram'] > .euiResizableButton {
+      inline-size: auto !important; /* stylelint-disable-line declaration-no-important */
+      block-size: ${euiTheme.size.s} !important; /* stylelint-disable-line declaration-no-important */
+    }
+
+    /*
+     * POC: data-test-subj is on the inner .euiResizablePanel__content (EuiPanel), not the wrapper.
+     * Sidebar card — field list only.
+     */
+    > .euiResizablePanel[data-position='first'],
+    > .euiFlexItem:first-child:not(:only-child) {
       overflow: hidden;
+      border-radius: ${euiTheme.border.radius.frame};
+    }
+
+    [data-test-subj='discoverLayoutResizablePanelFixed'],
+    > .euiFlexItem:first-child:not(:only-child) {
+      ${panelCardCss(euiTheme)}
+    }
+
+    /* POC: main wrapper stays transparent so chart + documents / empty state own their cards */
+    > .euiResizablePanel[data-position='last'],
+    > .euiFlexItem:last-child {
+      ${transparentPanelCss};
+      overflow: hidden;
+    }
+
+    [data-test-subj='discoverLayoutResizablePanelFlex'] {
+      ${transparentPanelCss};
+    }
+
+    /* POC: chart + documents each get their own card (not one outer wrapper) */
+    [data-test-subj='unifiedHistogramResizablePanelFixed'],
+    [data-test-subj='unifiedHistogramResizablePanelFlex'] {
+      ${panelCardCss(euiTheme)}
+    }
+
+    /* POC: documents-only / static histogram cards — nested only, not the outer sidebar layout */
+    > .euiResizablePanel [data-test-subj='resizableLayoutSingleContainer'] > .euiFlexItem,
+    > .euiResizablePanel [data-test-subj='resizableLayoutStaticContainer'] > .euiFlexItem,
+    > .euiFlexItem:last-child [data-test-subj='resizableLayoutSingleContainer'] > .euiFlexItem,
+    > .euiFlexItem:last-child [data-test-subj='resizableLayoutStaticContainer'] > .euiFlexItem {
+      ${panelCardCss(euiTheme)}
     }
   `,
 };

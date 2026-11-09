@@ -56,6 +56,9 @@ export const esqlEditorStyles = (
       marginBottom: 0,
       borderBottomLeftRadius: 0,
       borderBottomRightRadius: 0,
+      // POC: plain footer on recessed Discover chrome; 1px subdued top edge
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+      borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
     },
     historyContainer: {
       border: 'none',

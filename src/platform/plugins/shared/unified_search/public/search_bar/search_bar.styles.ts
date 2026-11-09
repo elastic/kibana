@@ -17,6 +17,8 @@ export const searchBarStyles = ({ euiTheme }: UseEuiTheme, isESQLQuery: boolean)
       position: relative;
     `,
     detached: css`
+      /* POC: sit on plain white in light mode (and plain surface in dark) over recessed Discover */
+      background-color: ${euiTheme.colors.backgroundBasePlain};
       border-bottom: ${euiTheme.border.thin};
     `,
     inPage: css`

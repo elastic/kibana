@@ -27,7 +27,8 @@ export const buildEsqlTheme = ({
 
     // --------------------------------------------------- strings & string-like
 
-    { token: 'string', foreground: colors.accent },
+    // POC: string literals → Borealis Teal 70 (not colors.accent / Teal 40 fill)
+    { token: 'string', foreground: '#00A58B' },
 
     // ----------------------------------------------------------------- numbers
 
