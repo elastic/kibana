@@ -8,6 +8,7 @@
 import { randomUUID } from 'crypto';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type { Logger } from '@kbn/core/server';
+import type { KibanaIsomerRuntime } from '@kbn/isomer';
 import type { InvestigationNotificationDestination } from '../../../common';
 import { prepareNotificationDelivery } from './notification_delivery';
 import type {
@@ -39,6 +40,8 @@ interface DeliverInvestigationNotificationsParams {
   notificationDestinations: InvestigationNotificationDestination[];
   investigationUrl: string;
   getExecute: () => Promise<ExecuteConnector>;
+  /** Resolves the Isomer runtime that renders the messages. */
+  getRuntime: () => Promise<KibanaIsomerRuntime>;
   routingClient: NotificationRoutingClient;
   signal: AbortSignal;
   logger: Pick<Logger, 'warn'>;
@@ -123,6 +126,7 @@ const prepareDestinationDelivery = (
   }: DeliverInvestigationNotificationsParams,
   routing: NotificationRouting,
   destination: NotificationDestination,
+  runtime?: KibanaIsomerRuntime,
   setupError?: string
 ): PreparedDestinationDelivery => {
   const explicitParent = destination.params.thread_ts;
@@ -153,26 +157,29 @@ const prepareDestinationDelivery = (
     phase === 'started' ? undefined : getStartedMessageTs(routing, executionId, destination);
   let delivery: NotificationDelivery | undefined;
   try {
-    delivery = prepareNotificationDelivery({
-      investigation,
-      url: investigationUrl,
-      phase,
-      reason,
-      ...(messageTs ? { messageTs } : {}),
-      notificationDestination: {
-        type: destination.type,
-        connector_id: destination.connector_id,
-        params: {
-          ...destination.params,
-          ...(destination.thread ? { channel: destination.thread.channel } : {}),
-          ...(threadTs ? { thread_ts: threadTs } : {}),
-        },
-        automation_name: destination.automations
-          .map(({ name, id }) => name || id)
-          .filter(Boolean)
-          .join(', '),
-      },
-    });
+    delivery = runtime
+      ? prepareNotificationDelivery({
+          runtime,
+          investigation,
+          url: investigationUrl,
+          phase,
+          reason,
+          ...(messageTs ? { messageTs } : {}),
+          notificationDestination: {
+            type: destination.type,
+            connector_id: destination.connector_id,
+            params: {
+              ...destination.params,
+              ...(destination.thread ? { channel: destination.thread.channel } : {}),
+              ...(threadTs ? { thread_ts: threadTs } : {}),
+            },
+            automation_name: destination.automations
+              .map(({ name, id }) => name || id)
+              .filter(Boolean)
+              .join(', '),
+          },
+        })
+      : undefined;
   } catch (error) {
     diagnostic = error instanceof Error ? error.message : 'Notification preparation failed';
   }
@@ -254,6 +261,7 @@ const deliverToDestination = async (
   params: DeliverInvestigationNotificationsParams,
   destinationId: string,
   execute?: ExecuteConnector,
+  runtime?: KibanaIsomerRuntime,
   setupError?: string
 ): Promise<void> => {
   const { investigation, executionId, phase, routingClient, signal, logger } = params;
@@ -268,7 +276,7 @@ const deliverToDestination = async (
   if (!destination) {
     throw new Error('Notification destination disappeared');
   }
-  const delivery = prepareDestinationDelivery(params, routing, destination, setupError);
+  const delivery = prepareDestinationDelivery(params, routing, destination, runtime, setupError);
   if (signal.aborted) {
     return;
   }
@@ -327,6 +335,7 @@ export const deliverInvestigationNotifications = async (
     phase,
     notificationDestinations,
     getExecute,
+    getRuntime,
     routingClient,
     signal,
   } = params;
@@ -379,17 +388,23 @@ export const deliverInvestigationNotifications = async (
   }
 
   let execute: ExecuteConnector | undefined;
+  let runtime: KibanaIsomerRuntime | undefined;
   let setupError: string | undefined;
   try {
     execute = await getExecute();
   } catch (error) {
     setupError = error instanceof Error ? error.message : 'Actions setup failed';
   }
+  try {
+    runtime = await getRuntime();
+  } catch (error) {
+    setupError ??= error instanceof Error ? error.message : 'Isomer runtime setup failed';
+  }
   for (const destinationId of execution.destination_ids) {
     if (signal.aborted || !(await routingClient.isActive())) {
       break;
     }
-    await deliverToDestination(params, destinationId, execute, setupError);
+    await deliverToDestination(params, destinationId, execute, runtime, setupError);
   }
   return countAttempts(await routingClient.get(), executionId, phase);
 };

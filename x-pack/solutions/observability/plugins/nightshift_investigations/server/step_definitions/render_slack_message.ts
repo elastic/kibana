@@ -9,11 +9,12 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
+import type { KibanaIsomerRuntime } from '@kbn/isomer';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import type { InvestigationLocator } from '../../common/locators';
 import type { GetInvestigationsClient } from '../routes/types';
 import { notificationPhaseSchema } from '../lib/notifications/notification_routing';
-import { renderInvestigationSlackMessage } from '../lib/notifications/format_investigation_slack_message';
+import { renderInvestigationSlackMessage } from '../lib/notifications/render_investigation_slack_message';
 
 const inputSchema = z.object({
   investigation_id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
@@ -28,9 +29,11 @@ const inputSchema = z.object({
 export const renderSlackMessageStepDefinition = ({
   investigationLocator,
   getInvestigationsClient,
+  getRuntime,
 }: {
   investigationLocator: Pick<InvestigationLocator, 'getRedirectUrl'>;
   getInvestigationsClient: GetInvestigationsClient;
+  getRuntime: () => Promise<KibanaIsomerRuntime>;
 }) =>
   createServerStepDefinition({
     id: 'nightshift.renderSlackMessage',
@@ -49,12 +52,15 @@ export const renderSlackMessageStepDefinition = ({
         workflow: { spaceId },
       } = context.contextManager.getContext();
       const { investigation_id: investigationId, phase, reason } = inputSchema.parse(context.input);
-      const investigation = await getInvestigationsClient(
-        context.contextManager.getFakeRequest(),
-        spaceId
-      ).getNotifiableInvestigation(investigationId);
+      const [investigation, runtime] = await Promise.all([
+        getInvestigationsClient(
+          context.contextManager.getFakeRequest(),
+          spaceId
+        ).getNotifiableInvestigation(investigationId),
+        getRuntime(),
+      ]);
       return {
-        output: renderInvestigationSlackMessage({
+        output: renderInvestigationSlackMessage(runtime, {
           investigation,
           url: new URL(
             investigationLocator.getRedirectUrl({ investigationId }, { spaceId }),
