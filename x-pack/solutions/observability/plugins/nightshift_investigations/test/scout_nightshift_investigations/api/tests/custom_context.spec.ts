@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout-oblt/api';
 import { tags, type ApiServicesFixture } from '@kbn/scout-oblt';
-import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_ENABLED_FLAG, NIGHTSHIFT_SUPPORTED_SPACE_ID } from '@kbn/nightshift-shared';
 import {
   apiTest,
   NIGHTSHIFT_MANAGE_ROLE,
@@ -19,7 +19,8 @@ import {
   uniqueId,
 } from '../fixtures';
 
-const SPACE_ID = uniqueId('nightshift-custom-context-space');
+// Writes are refused outside the default space, which is the only space Nightshift runs in.
+const SPACE_ID = NIGHTSHIFT_SUPPORTED_SPACE_ID;
 const OTHER_SPACE_ID = uniqueId('nightshift-custom-context-other');
 const SNIPPET = 'While debugging alerts, always rule out a release and config regression.';
 
@@ -31,8 +32,10 @@ apiTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let manageCookie: Record<string, string>;
+    /** The default space's context as the suite found it; every case writes to that same space. */
+    let originalSnippets: Array<{ id?: string; text: string }> = [];
 
-    apiTest.beforeAll(async ({ apiServices, config }) => {
+    apiTest.beforeAll(async ({ apiClient, apiServices, config, samlAuth }) => {
       // The API is gated on the nightshift.enabled flag, which can only be overridden where
       // coreApp.allowDynamicConfigOverrides is set (Scout's local configs), not on Cloud.
       apiTest.skip(
@@ -43,8 +46,16 @@ apiTest.describe(
         return;
       }
       await setNightshiftEnabled(apiServices, true);
-      await apiServices.spaces.create({ id: SPACE_ID, name: SPACE_ID });
       await apiServices.spaces.create({ id: OTHER_SPACE_ID, name: OTHER_SPACE_ID });
+      const { cookieHeader } = await samlAuth.asInteractiveUser(NIGHTSHIFT_MANAGE_ROLE);
+      const existing = await getCustomContext(apiClient, cookieHeader, SPACE_ID);
+      originalSnippets = (existing.body.snippets ?? []).map(
+        ({ id, text }: { id: string; text: string }) => ({ id, text })
+      );
+      // The cases below start from an empty context, and teardown puts whatever was here back.
+      if (originalSnippets.length > 0) {
+        await replaceCustomContext(apiClient, cookieHeader, SPACE_ID, []);
+      }
     });
 
     // A worker has a single custom role slot, so log in right before use.
@@ -52,15 +63,16 @@ apiTest.describe(
       ({ cookieHeader: manageCookie } = await samlAuth.asInteractiveUser(NIGHTSHIFT_MANAGE_ROLE));
     });
 
-    apiTest.afterAll(async ({ apiServices, config }) => {
+    apiTest.afterAll(async ({ apiClient, apiServices, config, samlAuth }) => {
       if (config.isCloud) {
         return;
       }
       try {
-        await Promise.all([
-          apiServices.spaces.delete(SPACE_ID),
-          apiServices.spaces.delete(OTHER_SPACE_ID),
-        ]);
+        // The suite writes in the default space rather than one of its own, so teardown has to
+        // put that space's context back the way it found it, even after a failed assertion.
+        const { cookieHeader } = await samlAuth.asInteractiveUser(NIGHTSHIFT_MANAGE_ROLE);
+        await replaceCustomContext(apiClient, cookieHeader, SPACE_ID, originalSnippets);
+        await apiServices.spaces.delete(OTHER_SPACE_ID);
       } finally {
         await setNightshiftEnabled(apiServices, null);
       }

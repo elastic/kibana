@@ -19,6 +19,8 @@ import type { GetScopedClients } from '../../../routes/types';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
+import { existingAlertIdentity } from '../alert_identity_telemetry';
+import { trackTelemetryBestEffort } from '../bulk_write';
 import { attachEventInvestigationToolHandler } from './handler';
 
 export const SIGNIFICANT_EVENTS_EVENT_INVESTIGATION_ATTACH_TOOL_ID =
@@ -127,21 +129,33 @@ export const createEventInvestigationAttachTool = ({
           logger,
         });
 
-        telemetry.trackAgentToolEventInvestigationAttach({
-          success: true,
-          event_id: toolParams.event_id,
-          workflow_execution_id: toolParams.workflow_execution_id,
+        trackTelemetryBestEffort({
+          logger,
+          description: 'event_investigation_attach telemetry',
+          track: () =>
+            telemetry.trackAgentToolEventInvestigationAttach({
+              ...existingAlertIdentity({ eventId: toolParams.event_id, spaceId: request.spaceId }),
+              success: true,
+              event_id: toolParams.event_id,
+              workflow_execution_id: toolParams.workflow_execution_id,
+            }),
         });
 
         return { results: [{ type: ToolResultType.other, data }] };
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
         logger.error(`Error running event_investigation_attach: ${message}`);
-        telemetry.trackAgentToolEventInvestigationAttach({
-          success: false,
-          event_id: toolParams.event_id,
-          workflow_execution_id: toolParams.workflow_execution_id,
-          error_message: message,
+        trackTelemetryBestEffort({
+          logger,
+          description: 'failed event_investigation_attach telemetry',
+          track: () =>
+            telemetry.trackAgentToolEventInvestigationAttach({
+              ...existingAlertIdentity({ eventId: toolParams.event_id, spaceId: request.spaceId }),
+              success: false,
+              event_id: toolParams.event_id,
+              workflow_execution_id: toolParams.workflow_execution_id,
+              error_message: message,
+            }),
         });
         return {
           results: [

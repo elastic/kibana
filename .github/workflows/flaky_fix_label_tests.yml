@@ -9,6 +9,8 @@ on:
       - '.github/scripts/prefetch_pr_context.js'
       - '.github/scripts/flaky_fix_retrospective_context.js'
       - '.github/scripts/flaky_fix_retrospective_context.test.js'
+      - '.github/scripts/flaky_fix_findings.js'
+      - '.github/scripts/flaky_fix_findings.test.js'
       - '.github/workflows/flaky_fix_label_tests.yml'
       - '.nvmrc'
 
@@ -42,3 +44,6 @@ jobs:
 
       - name: Run retrospective context tests
         run: node --test .github/scripts/flaky_fix_retrospective_context.test.js
+
+      - name: Run curator findings tests
+        run: node --test .github/scripts/flaky_fix_findings.test.js
