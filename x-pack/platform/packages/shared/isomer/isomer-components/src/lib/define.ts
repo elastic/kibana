@@ -15,6 +15,8 @@ export interface ComponentsRenderContext extends StyledRenderContext {
    * `http.basePath.prepend`; `undefined` when it can't.
    */
   resolveKibanaPath?: (path: string) => string | undefined;
+  /** Resolves a Files plugin file id to a URL to show it from, such as its blob route; `undefined` when it can't. */
+  resolveFileUrl?: (fileId: string) => string | undefined;
 }
 
 export interface ComponentsPackTypes extends DefaultPackTypes {

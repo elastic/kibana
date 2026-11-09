@@ -19,13 +19,25 @@ import type { AttachmentServiceStart } from '../attachments';
 import { getPublicKibanaUrl } from '../../utils/get_kibana_url';
 import { buildComposition } from './composition';
 import { slackSurface } from './slack';
+import type { SlackAssetSource } from './slack_assets';
 import type { SurfaceRenderer } from './types';
 
+/** Options for {@link SurfacesService.renderPayload}. */
+export type RenderPayloadOptions = {
+  originType?: ConversationOriginType;
+  agentId: string;
+  /** Whether the poster uploads the payload's assets, such as images. Defaults to false. */
+  assets?: boolean;
+} & AttachmentFormatContext;
+
 export interface SurfacesService {
-  /** Renders the round's surface payload, or resolves to nothing when unavailable or rendering fails. */
+  /**
+   * Renders the round's surface payload, or resolves to nothing when unavailable or rendering fails.
+   * With `assets`, image nodes ship files for the poster to upload; otherwise they render as text.
+   */
   renderPayload(
     event: RoundCompleteEvent,
-    options: { originType?: ConversationOriginType; agentId: string } & AttachmentFormatContext
+    options: RenderPayloadOptions
   ): Promise<SurfacePayload | undefined>;
 }
 
@@ -35,6 +47,7 @@ export class SurfacesServiceImpl implements SurfacesService {
   private readonly isomer: IsomerPluginStart;
   private readonly basePath: IBasePath;
   private readonly cloud: CloudSetup | undefined;
+  private readonly assetSources: readonly SlackAssetSource[];
   private readonly surfaceRenderers: SurfaceRenderer[] = [slackSurface];
 
   constructor({
@@ -43,28 +56,27 @@ export class SurfacesServiceImpl implements SurfacesService {
     isomer,
     basePath,
     cloud,
+    assetSources = [],
   }: {
     attachmentsService: AttachmentServiceStart;
     logger: Logger;
     isomer: IsomerPluginStart;
     basePath: IBasePath;
     cloud: CloudSetup | undefined;
+    /** Load the files of nodes a surface shows as images, by node type. */
+    assetSources?: readonly SlackAssetSource[];
   }) {
     this.attachmentsService = attachmentsService;
     this.logger = logger;
     this.isomer = isomer;
     this.basePath = basePath;
     this.cloud = cloud;
+    this.assetSources = assetSources;
   }
 
   async renderPayload(
     { data: { round, attachments = [] } }: RoundCompleteEvent,
-    {
-      originType,
-      agentId,
-      request,
-      spaceId,
-    }: { originType?: ConversationOriginType; agentId: string } & AttachmentFormatContext
+    { originType, agentId, assets = false, request, spaceId }: RenderPayloadOptions
   ): Promise<SurfacePayload | undefined> {
     const renderer = this.surfaceRenderers.find(({ id }) => id === originType);
 
@@ -85,9 +97,18 @@ export class SurfacesServiceImpl implements SurfacesService {
         runtime,
       });
 
-      return composition.body.length > 0
-        ? renderer.render(composition, runtime, { baseUrl: kibanaUrl })
-        : undefined;
+      if (composition.body.length === 0) {
+        return undefined;
+      }
+
+      return await renderer.render(composition, {
+        runtime,
+        context: { request, spaceId, agentId, kibanaUrl },
+        assets,
+        assetSources: this.assetSources,
+        logger: this.logger,
+        baseUrl: kibanaUrl,
+      });
     } catch (error) {
       this.logger.error(`Failed to render the ${renderer.id} surface payload: ${error.message}`);
 

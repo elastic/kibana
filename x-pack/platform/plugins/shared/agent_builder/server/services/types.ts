@@ -13,6 +13,7 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { FilesStart } from '@kbn/files-plugin/server';
 import type { IsomerPluginStart } from '@kbn/isomer-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
@@ -133,6 +134,8 @@ export interface ServicesStartDeps {
   deploymentInfo: DeploymentInfo;
   isomer: IsomerPluginStart;
   cloud: CloudSetup | undefined;
+  /** Reads the files of image attachments that Slack replies upload. */
+  files: FilesStart;
   /** `xpack.agentBuilder.deductive.register` for this deployment. */
   deductiveRegister: boolean;
   getSmlTypeDefinition: GetSmlTypeDefinition;

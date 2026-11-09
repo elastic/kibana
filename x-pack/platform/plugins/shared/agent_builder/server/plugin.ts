@@ -422,6 +422,7 @@ export class AgentBuilderPlugin
       isomer,
       getSmlTypeDefinition: startDeps.agentBuilderSml.getTypeDefinition,
       cloud: this.cloudSetup,
+      files: startDeps.files,
       conversationEventBus: this.conversationEventBus,
     });
 

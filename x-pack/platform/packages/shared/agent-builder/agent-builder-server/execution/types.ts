@@ -117,6 +117,11 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
   callback?: {
     /** URL to deliver the execution result to. */
     url: string;
+    /**
+     * Whether the callback's poster uploads the files the surface payload carries on `assets`.
+     * Without it, images in the payload render as text.
+     */
+    surface_assets?: boolean;
   };
   /** Browser API tools to make available to the agent. */
   browserApiTools?: BrowserApiToolMetadata[];

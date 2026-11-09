@@ -211,7 +211,7 @@ export {
   createUserQuestionAskedEvent,
   createUserQuestionAnsweredEvent,
 } from './events';
-export type { SlackPayload, SurfacePayload } from './surface_payload';
+export type { SlackPayload, SlackPayloadAsset, SurfacePayload } from './surface_payload';
 export type { RoundState } from './round_state';
 export type { ConversationListOptions } from './conversation_list';
 export {
