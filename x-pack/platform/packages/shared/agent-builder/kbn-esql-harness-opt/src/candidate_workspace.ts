@@ -68,8 +68,21 @@ export interface CodeEdit {
   content: string;
 }
 
-export const lintCodeEdits = (edits: CodeEdit[]): string[] => {
+/**
+ * Lint an edit against its own previous content.
+ *
+ * Counting occurrences rather than matching outright: `documentation/examples.md` legitimately
+ * contains `FROM postgres-logs*` as a published ES|QL example, and a whole-file scan rejected
+ * every edit to that file. What matters is whether the edit *introduces* more benchmark
+ * leakage than was already there.
+ */
+export const lintCodeEdits = (
+  edits: CodeEdit[],
+  originalContent: (path: string) => string = () => ''
+): string[] => {
   const violations: string[] = [];
+  const count = (text: string, pattern: RegExp): number =>
+    (text.match(new RegExp(pattern.source, `${pattern.flags.replace('g', '')}g`)) ?? []).length;
 
   for (const edit of edits) {
     const normalized = edit.path.replace(/^\.\//, '');
@@ -81,9 +94,11 @@ export const lintCodeEdits = (edits: CodeEdit[]): string[] => {
       violations.push(`${edit.path} is protected (tests and trace writer are fixed)`);
       continue;
     }
+    const before = originalContent(normalized);
     for (const { pattern, reason } of FORBIDDEN_PATTERNS) {
-      if (pattern.test(edit.content)) {
-        violations.push(`${edit.path}: ${reason} (${pattern})`);
+      const added = count(edit.content, pattern) - count(before, pattern);
+      if (added > 0) {
+        violations.push(`${edit.path}: adds ${added} occurrence(s) of ${reason} (${pattern})`);
       }
     }
     if (edit.content.length > 120_000) {
@@ -180,6 +195,12 @@ export const resetCandidate = async (workspace: CandidateWorkspace): Promise<voi
   await run('git', ['clean', '-fd', TOOL_DIR], workspace.path);
 };
 
+/** Committed content of a file in the candidate worktree. */
+export const gitShow = async (workspace: CandidateWorkspace, path: string): Promise<string> => {
+  const { ok, output } = await run('git', ['show', `HEAD:${path}`], workspace.path);
+  return ok ? output : '';
+};
+
 /** Files the proposer changed, as a diff against the worktree's clean state. */
 export const collectEdits = async (workspace: CandidateWorkspace): Promise<CodeEdit[]> => {
   const { output } = await run('git', ['status', '--porcelain', '--', TOOL_DIR], workspace.path);
@@ -227,13 +248,22 @@ export const candidateDiff = async (workspace: CandidateWorkspace): Promise<stri
 export const applyAndValidateEdits = async ({
   workspace,
   edits,
+  baseline,
   log,
 }: {
   workspace: CandidateWorkspace;
   edits: CodeEdit[];
+  /** Content of each file in the incumbent, used to lint what the edit *adds*. */
+  baseline?: (path: string) => string | undefined;
   log: ToolingLog;
 }): Promise<{ ok: boolean; failures: string[] }> => {
-  const violations = lintCodeEdits(edits);
+  // The edits are already on disk by the time this runs (the proposer wrote them), so the
+  // pre-edit content comes from the incumbent's own version of the file, falling back to git.
+  const before = new Map<string, string>();
+  for (const edit of edits) {
+    before.set(edit.path, baseline?.(edit.path) ?? (await gitShow(workspace, edit.path)));
+  }
+  const violations = lintCodeEdits(edits, (path) => before.get(path) ?? '');
   if (violations.length > 0) {
     return { ok: false, failures: violations };
   }

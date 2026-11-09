@@ -162,7 +162,13 @@ export const runCampaign = async ({
       continue;
     }
 
-    const validation = await applyAndValidateEdits({ workspace, edits: codeEdits, log });
+    const incumbentContent = new Map(incumbentEdits.map((edit) => [edit.path, edit.content]));
+    const validation = await applyAndValidateEdits({
+      workspace,
+      edits: codeEdits,
+      baseline: (path) => incumbentContent.get(path),
+      log,
+    });
     if (!validation.ok) {
       log.warning(`[harness-opt] edits rejected: ${validation.failures.join(' | ').slice(0, 500)}`);
       ledger.push({
