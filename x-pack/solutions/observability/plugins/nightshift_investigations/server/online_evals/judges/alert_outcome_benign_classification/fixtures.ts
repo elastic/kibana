@@ -38,6 +38,9 @@ export interface AlertOutcomeBenignClassificationFixture {
   readonly groundTruthBenign: boolean;
   readonly reportClaimsBenign: boolean;
   readonly reportEscalates: boolean;
+  readonly expectedCorrect: boolean;
+  readonly expectedFalseEscalation: boolean;
+  readonly expectedFalseDismissal: boolean;
 }
 
 export const alertOutcomeBenignClassificationFixtures: readonly AlertOutcomeBenignClassificationFixture[] =
@@ -50,6 +53,9 @@ export const alertOutcomeBenignClassificationFixtures: readonly AlertOutcomeBeni
       groundTruthBenign: true,
       reportClaimsBenign: true,
       reportEscalates: false,
+      expectedCorrect: true,
+      expectedFalseEscalation: false,
+      expectedFalseDismissal: false,
     },
     {
       suite: 'false-escalation',
@@ -59,6 +65,9 @@ export const alertOutcomeBenignClassificationFixtures: readonly AlertOutcomeBeni
       groundTruthBenign: true,
       reportClaimsBenign: false,
       reportEscalates: true,
+      expectedCorrect: false,
+      expectedFalseEscalation: true,
+      expectedFalseDismissal: false,
     },
     {
       suite: 'actionable-correct',
@@ -68,6 +77,9 @@ export const alertOutcomeBenignClassificationFixtures: readonly AlertOutcomeBeni
       groundTruthBenign: false,
       reportClaimsBenign: false,
       reportEscalates: true,
+      expectedCorrect: true,
+      expectedFalseEscalation: false,
+      expectedFalseDismissal: false,
     },
     {
       suite: 'false-dismissal',
@@ -77,6 +89,9 @@ export const alertOutcomeBenignClassificationFixtures: readonly AlertOutcomeBeni
       groundTruthBenign: false,
       reportClaimsBenign: true,
       reportEscalates: false,
+      expectedCorrect: false,
+      expectedFalseEscalation: false,
+      expectedFalseDismissal: true,
     },
     {
       suite: 'false-dismissal',
@@ -86,6 +101,9 @@ export const alertOutcomeBenignClassificationFixtures: readonly AlertOutcomeBeni
       groundTruthBenign: false,
       reportClaimsBenign: true,
       reportEscalates: false,
+      expectedCorrect: false,
+      expectedFalseEscalation: false,
+      expectedFalseDismissal: true,
     },
     {
       suite: 'benign-underreported',
@@ -95,5 +113,8 @@ export const alertOutcomeBenignClassificationFixtures: readonly AlertOutcomeBeni
       groundTruthBenign: true,
       reportClaimsBenign: false,
       reportEscalates: false,
+      expectedCorrect: false,
+      expectedFalseEscalation: false,
+      expectedFalseDismissal: false,
     },
   ];

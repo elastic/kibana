@@ -22,7 +22,10 @@ type ClassificationInput = Pick<
   'ground_truth_benign' | 'report_claims_benign' | 'report_escalates'
 >;
 
-/** Ports Deductive's `classification_correct`: the report's benign stance matches the outcome. */
+/**
+ * Ports Deductive's `classification_correct`: the report's benign stance matches the outcome.
+ * An uncommitted report on an actionable outcome still passes; pair with RCA accuracy.
+ */
 export const isClassificationCorrect = ({
   ground_truth_benign: groundTruthBenign,
   report_claims_benign: reportClaimsBenign,
@@ -80,7 +83,7 @@ const definition: RegisteredEvaluatorDefinition<AlertOutcomeReferenceData> = {
   kind: 'llm',
   direction: 'maximize',
   description:
-    "Reference-based: whether an investigation's first-round report classified the alert as benign or actionable the way its recovery confirmed.",
+    "Reference-based: whether an investigation's first-round report took the same benign stance as the confirmed outcome. 1 means the report's benign/not-benign call matches the outcome. A report that never calls an alert benign scores 1 on every actionable alert even if it commits to no cause, so read it alongside nightshift_alert_outcome_rca_accuracy.",
   evidenceSchema: roundEvidenceSchema,
   referenceDataSchema: alertOutcomeReferenceDataSchema,
   async evaluate({ round, referenceData, inferenceClient }) {
@@ -92,7 +95,7 @@ const definition: RegisteredEvaluatorDefinition<AlertOutcomeReferenceData> = {
 
     const confirmedOutcome = referenceData?.alert_outcome ?? '';
     if (!confirmedOutcome.trim()) {
-      return { scores: [], notApplicable: { reason: 'no confirmed cause' } };
+      return { scores: [], notApplicable: { reason: 'no confirmed outcome' } };
     }
 
     const output = await runJudge({

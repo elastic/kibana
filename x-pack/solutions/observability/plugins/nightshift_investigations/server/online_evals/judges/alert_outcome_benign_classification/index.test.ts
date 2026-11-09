@@ -96,27 +96,25 @@ describe('nightshift_alert_outcome_benign_classification', () => {
         report: fixture.investigationReport,
       });
 
-      const correct = isClassificationCorrect(output);
-      const falseEscalation = isFalseEscalation(output);
-      const falseDismissal = isFalseDismissal(output);
+      const { expectedCorrect, expectedFalseEscalation, expectedFalseDismissal } = fixture;
       expect(notApplicable).toBeUndefined();
       expect(scores).toEqual([
         {
           name: 'alert_outcome_benign_classification_correct',
-          score: correct ? 1 : 0,
+          score: expectedCorrect ? 1 : 0,
           label: `gt_benign=${groundTruthBenign} report_benign=${reportClaimsBenign} report_escalates=${reportEscalates}`,
           explanation: fixture.description,
         },
         {
           name: 'alert_outcome_no_false_escalation',
-          score: falseEscalation ? 0 : 1,
-          label: `false_escalation=${falseEscalation}`,
+          score: expectedFalseEscalation ? 0 : 1,
+          label: `false_escalation=${expectedFalseEscalation}`,
           explanation: fixture.description,
         },
         {
           name: 'alert_outcome_no_false_dismissal',
-          score: falseDismissal ? 0 : 1,
-          label: `false_dismissal=${falseDismissal}`,
+          score: expectedFalseDismissal ? 0 : 1,
+          label: `false_dismissal=${expectedFalseDismissal}`,
           explanation: fixture.description,
         },
       ]);
@@ -222,7 +220,7 @@ describe('nightshift_alert_outcome_benign_classification', () => {
     const result = await evaluate(inferenceClient, { outcome: '  \n' });
 
     expect(prompt).not.toHaveBeenCalled();
-    expect(result).toEqual({ scores: [], notApplicable: { reason: 'no confirmed cause' } });
+    expect(result).toEqual({ scores: [], notApplicable: { reason: 'no confirmed outcome' } });
   });
 
   it('skips an empty report through the evidence schema, before evaluate runs', () => {
