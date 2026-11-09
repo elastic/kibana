@@ -79,10 +79,10 @@ dependsOn:
   - '@kbn/core-security-common'
   - '@kbn/eval-kql'
   - '@kbn/rrule'
-  - '@kbn/cloud-plugin'
-  - '@kbn/connector-specs'
   - '@kbn/inference-tracing'
   - '@kbn/lock-manager'
+  - '@kbn/cloud-plugin'
+  - '@kbn/connector-specs'
 tags:
   - plugin
   - prod
