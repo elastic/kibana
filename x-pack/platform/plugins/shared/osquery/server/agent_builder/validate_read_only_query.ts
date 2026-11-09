@@ -93,6 +93,9 @@ const sanitizeSql = (sql: string): string => {
  * - `carves` — `carve=1` turns the SELECT into a new carve request (file exfil)
  * - `yara`   — triggers a one-off YARA scan on the host
  */
+/** Upper bound on query size; validation is linear, this keeps the work bounded. */
+const MAX_QUERY_LENGTH = 20000;
+
 const NON_READ_ONLY_TABLES = new Set(['curl', 'carves', 'yara']);
 
 interface TableRefs {
@@ -101,79 +104,104 @@ interface TableRefs {
   unsupported: string | null;
 }
 
-const SUBQUERY_START = /^\(\s*(?:SELECT|WITH)\b/i;
+type FromState = 'none' | 'expectTable' | 'afterTable' | 'inConstraint';
 
-/** An optional alias followed by a comma, i.e. another FROM item after a sub-select. */
-const TRAILING_FROM_ITEM = /^\s*(?:(?:AS\s+)?(?:[a-zA-Z_]\w*|`[^`]*`|"[^"]*"|\[[^\]]*\]))?\s*,/i;
+const TOKEN_RE = /`[^`]*`|"[^"]*"|\[[^\]]*\]|[A-Za-z_][A-Za-z0-9_$]*|\d+(?:\.\d+)?|\S/g;
 
-/** Text after the parenthesis that closes the one at `sql[0]`; '' when unbalanced. */
-const textAfterClosingParen = (sql: string): string => {
-  const closers: Record<string, string> = { '"': '"', '`': '`', '[': ']' };
-  let depth = 0;
-
-  for (let i = 0; i < sql.length; i++) {
-    const ch = sql[i];
-    if (ch in closers) {
-      const end = sql.indexOf(closers[ch], i + 1);
-      if (end === -1) return '';
-      i = end;
-    } else if (ch === '(') {
-      depth++;
-    } else if (ch === ')') {
-      depth--;
-      if (depth === 0) return sql.slice(i + 1);
-    }
-  }
-
-  return '';
-};
+/** Keywords that end a FROM/JOIN list at the current nesting level. */
+const FROM_LIST_END = new Set([
+  'WHERE',
+  'GROUP',
+  'ORDER',
+  'LIMIT',
+  'HAVING',
+  'UNION',
+  'EXCEPT',
+  'INTERSECT',
+  'WINDOW',
+]);
 
 /**
- * Table references in a FROM/JOIN clause, including comma-separated lists.
+ * Table references in FROM / JOIN clauses, including comma-separated lists.
  *
  * `FROM processes, shell` is two table references. Matching only the first
  * identifier after FROM validates `processes` and lets `shell` through
  * unchecked.
  *
+ * One linear pass over tokens with a per-parenthesis-level state, so every
+ * nesting level is scanned exactly once. A top-level comma while a FROM list is
+ * open, including after an ON / USING constraint
+ * (`FROM a JOIN b ON a.x = b.x, curl`), starts another table item.
+ *
  * Fails closed: bracketed identifiers (`[curl]`), parenthesised references
  * (`FROM (curl)`), table-valued functions (`FROM curl('…')`) and
  * schema-qualified names are reported as unsupported instead of being skipped.
  * Parenthesised sub-selects are allowed because their own FROM clauses are
- * scanned.
+ * scanned. `x IN tablename` is a table reference too and is checked.
  */
 const extractTableRefs = (sql: string): TableRefs => {
+  const tokens = sql.match(TOKEN_RE) ?? [];
   const refs: string[] = [];
+  const parentStates: FromState[] = [];
   let unsupported: string | null = null;
-  const clauseRe =
-    /\b(?:FROM|JOIN)\s+([^()]*?)(?=\b(?:WHERE|GROUP|ORDER|LIMIT|HAVING|UNION|EXCEPT|INTERSECT|JOIN|ON|USING)\b|[()]|$)/gi;
+  let state: FromState = 'none';
 
-  for (const clause of sql.matchAll(clauseRe)) {
-    const text = clause[1];
-    const rest = sql.slice((clause.index ?? 0) + clause[0].length);
+  const flag = (reason: string): void => {
+    unsupported = unsupported ?? reason;
+  };
 
-    if (rest.startsWith('(')) {
-      const endsWithSeparator = text.trim() === '' || text.trim().endsWith(',');
-      if (!endsWithSeparator) {
-        unsupported = 'table-valued functions';
-      } else if (!SUBQUERY_START.test(rest)) {
-        unsupported = 'parenthesised table references';
-      } else if (TRAILING_FROM_ITEM.test(textAfterClosingParen(rest))) {
-        // The clause regex stops at the sub-select's parenthesis, so a table
-        // listed after it (`FROM (SELECT …) a, curl`) is never scanned.
-        unsupported = 'table lists after a sub-select';
-      }
+  const readTableRef = (index: number): void => {
+    const token = tokens[index];
+    const following = tokens[index + 1];
+    const quoted = token.match(/^[`"]([\s\S]*)[`"]$/);
+    const name = quoted ? quoted[1] : token;
+
+    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) {
+      flag('bracketed or schema-qualified table names');
+    } else if (following === '.') {
+      flag('bracketed or schema-qualified table names');
+    } else if (following === '(') {
+      flag('table-valued functions');
+    } else {
+      refs.push(name.toLowerCase());
     }
+  };
 
-    for (const item of text.split(',')) {
-      const trimmedItem = item.trim();
-      if (!trimmedItem) continue;
-      // First identifier of each item; drops any alias (`processes p`,
-      // `processes AS p`) and optional backtick/double quoting.
-      const match = trimmedItem.match(/^[`"]?([a-zA-Z_][a-zA-Z0-9_]*)[`"]?(?![.\w])/);
-      if (match) {
-        refs.push(match[1].toLowerCase());
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i];
+    const upper = token.toUpperCase();
+
+    if (token === '(') {
+      const isSubSelect = /^(?:SELECT|WITH)$/i.test(tokens[i + 1] ?? '');
+      if (state === 'expectTable' && !isSubSelect) flag('parenthesised table references');
+      parentStates.push(state);
+      state = 'none';
+    } else if (token === ')') {
+      const parent = parentStates.pop();
+      if (parent === undefined) {
+        flag('unbalanced parentheses');
       } else {
-        unsupported = unsupported ?? 'bracketed or schema-qualified table names';
+        state = parent === 'expectTable' ? 'afterTable' : parent;
+      }
+    } else if (state === 'expectTable') {
+      readTableRef(i);
+      state = 'afterTable';
+    } else if (upper === 'FROM' || upper === 'JOIN') {
+      state = 'expectTable';
+    } else if (
+      upper === 'IN' &&
+      tokens[i + 1] !== undefined &&
+      /^[A-Za-z_`"[]/.test(tokens[i + 1])
+    ) {
+      readTableRef(i + 1);
+      i++;
+    } else if (state === 'afterTable' || state === 'inConstraint') {
+      if (token === ',') {
+        state = 'expectTable';
+      } else if (upper === 'ON' || upper === 'USING') {
+        state = 'inConstraint';
+      } else if (FROM_LIST_END.has(upper)) {
+        state = 'none';
       }
     }
   }
@@ -198,6 +226,10 @@ export const validateReadOnlyQuery = (
   const trimmed = query.trim();
   if (!trimmed) {
     return 'Query must not be empty';
+  }
+
+  if (trimmed.length > MAX_QUERY_LENGTH) {
+    return `Query is too long (max ${MAX_QUERY_LENGTH} characters).`;
   }
 
   const scannable = sanitizeSql(trimmed).trim();
