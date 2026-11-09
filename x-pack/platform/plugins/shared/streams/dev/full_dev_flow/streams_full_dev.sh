@@ -853,7 +853,7 @@ send_traffic_round() {
 print_ready() {
   echo
   echo "Local Streams backend is ready. Login: $ES_USER / $ES_PASS"
-  echo "  Canvas   ${KIBANA_URL:-http://localhost:5601}/app/streams/new-experience/"
+  echo "  Canvas   ${KIBANA_URL:-http://localhost:5601}/app/streams/v2/unit/$UNIT_ID/map"
   echo "  Discover ${KIBANA_URL:-http://localhost:5601}/app/discover"
   echo "  Logs     FROM $LOGS_DEV_DS  |  FROM $LOGS_PROD_DS"
   echo "  Failures FROM $LOGS_DEV_DS::failures  |  FROM $LOGS_PROD_DS::failures"
@@ -1167,7 +1167,7 @@ reset_canvas_unit() {
     -H 'Content-Type: application/json' -d '{}' || true)"
   if ! printf '%s' "$body" | jq -e '.acknowledged == true' >/dev/null 2>&1; then
     printf '%s\n' "$body" >&2
-    warn "Canvas unit reset did not acknowledge; reload /app/streams/new-experience/ after Kibana is up"
+    warn "Canvas unit reset did not acknowledge; reload /app/streams/v2/unit/$UNIT_ID/map after Kibana is up"
   fi
 }
 

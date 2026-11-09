@@ -213,10 +213,11 @@ export type AlertingV2ErrorCode = (typeof ALERTING_ERROR_CODES)[keyof typeof ALE
  * Naming convention: `<DOMAIN>_<WHAT_HAPPENED>`.
  *
  * The domain matches the subsystem that owns the failure, so an operator can
- * filter a whole area with a prefix: `RULE_*` (rule executor / rules client),
- * `DIRECTOR_*`, `DISPATCH_*`, `POLICY_*`, `EXECUTION_HISTORY_*`, `EVENTS_*`,
- * `STORAGE_*`, `QUERY_*`, `RESOURCES_*`, `RETRY_*`, `MAINTENANCE_WINDOW_*`,
- * `SAVED_OBJECTS_*`, `AGENT_BUILDER_*`, `TASKS_*`, `TELEMETRY_*`.
+ * filter a whole area with a prefix: `ROUTES_*`, `RULE_*` (rule executor /
+ * rules client), `DIRECTOR_*`, `DISPATCH_*`, `POLICY_*` / `ACTION_POLICY_*`,
+ * `EXECUTION_HISTORY_*`, `EVENTS_*`, `STORAGE_*`, `QUERY_*`, `RESOURCES_*`,
+ * `RETRY_*`, `MAINTENANCE_WINDOW_*`, `SAVED_OBJECTS_*`, `AGENT_BUILDER_*`,
+ * `TASKS_*`, `TELEMETRY_*`.
  *
  * The suffix encodes the outcome, from a closed vocabulary:
  * - `warn` (degraded but continued): `_FAILED`, `_SKIPPED`, `_TIMED_OUT`,
@@ -709,8 +710,6 @@ export const ALERTING_LOG_CODES = {
   AGENT_BUILDER_ATTACH_RULE_FAILED: 'AGENT_BUILDER_ATTACH_RULE_FAILED',
   /** `attach_action_policy` tool failed; returns an error result. */
   AGENT_BUILDER_ATTACH_ACTION_POLICY_FAILED: 'AGENT_BUILDER_ATTACH_ACTION_POLICY_FAILED',
-  /** `find_action_policies` tool failed; returns an error result. */
-  AGENT_BUILDER_FIND_ACTION_POLICIES_FAILED: 'AGENT_BUILDER_FIND_ACTION_POLICIES_FAILED',
   /** `manage_action_policy` tool failed; returns an error result. */
   AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED: 'AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED',
   /** Workflow validation service call failed while checking a destination workflow; diagnostics for that destination are skipped. */
