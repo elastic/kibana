@@ -204,7 +204,7 @@ describe('NightshiftPage', () => {
       });
     };
 
-    it('shows the setup step instead of the app until the space is set up', () => {
+    it('shows the setup step instead of the app until the space is set up', async () => {
       withInvestigations();
       mockServiceAccount = {
         isLoading: false,
@@ -213,24 +213,24 @@ describe('NightshiftPage', () => {
       };
       renderPage();
 
-      expect(screen.getByTestId('nightshiftOnboardingStub')).toBeInTheDocument();
+      expect(await screen.findByTestId('nightshiftOnboardingStub')).toBeInTheDocument();
       expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
     });
 
-    it('shows the app once the space is set up', () => {
+    it('shows the app once the space is set up', async () => {
       withInvestigations();
       renderPage();
 
+      expect(await screen.findByTestId('nightshiftAppStub')).toBeInTheDocument();
       expect(screen.queryByTestId('nightshiftOnboardingStub')).not.toBeInTheDocument();
-      expect(screen.getByTestId('nightshiftAppStub')).toBeInTheDocument();
     });
 
-    it('does not block the app when the setup status cannot be read', () => {
+    it('does not block the app when the setup status cannot be read', async () => {
       withInvestigations();
       mockServiceAccount = { isLoading: false, isSuccess: false };
       renderPage();
 
-      expect(screen.getByTestId('nightshiftAppStub')).toBeInTheDocument();
+      expect(await screen.findByTestId('nightshiftAppStub')).toBeInTheDocument();
     });
   });
 
@@ -263,7 +263,7 @@ describe('NightshiftPage', () => {
       expect(screen.queryByTestId('startInvestigationPanelStub')).not.toBeInTheDocument();
 
       await act(async () => fireEvent.click(investigateButton));
-      expect(screen.getByTestId('startInvestigationPanelStub')).toBeInTheDocument();
+      expect(await screen.findByTestId('startInvestigationPanelStub')).toBeInTheDocument();
 
       await act(async () =>
         fireEvent.click(screen.getByRole('button', { name: 'Close start investigation' }))
@@ -311,7 +311,7 @@ describe('NightshiftPage', () => {
     await waitFor(() =>
       expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Nightshift')
     );
-    expect(screen.getByTestId('nightshiftAppStub')).toBeInTheDocument();
+    expect(await screen.findByTestId('nightshiftAppStub')).toBeInTheDocument();
   });
 
   it('hides the settings link without both Nightshift manage and configure', async () => {
@@ -381,10 +381,10 @@ describe('NightshiftPage', () => {
     expect(navigateToUrl).toHaveBeenCalledWith('/app/nightshift/settings');
   });
 
-  it('renders Settings inside Nightshift', () => {
+  it('renders Settings inside Nightshift', async () => {
     renderPage('/settings/detections');
 
-    expect(screen.getByTestId('settingsPageStub')).toBeInTheDocument();
+    expect(await screen.findByTestId('settingsPageStub')).toBeInTheDocument();
     expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
   });
 
@@ -575,12 +575,12 @@ describe('NightshiftPage', () => {
 
       unmount();
       const sameSpace = renderPage();
-      expect(screen.getByTestId('nightshiftAppStub')).toHaveTextContent('true');
+      expect(await screen.findByTestId('nightshiftAppStub')).toHaveTextContent('true');
       sameSpace.unmount();
 
       mockSpaceBasePath = '/s/another-space';
       renderPage();
-      expect(screen.getByTestId('nightshiftAppStub')).toHaveTextContent('false');
+      expect(await screen.findByTestId('nightshiftAppStub')).toHaveTextContent('false');
     });
 
     it('hides the Investigations action before the first investigation', async () => {
