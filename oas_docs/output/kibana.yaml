@@ -64,15 +64,18 @@ tags:
     x-displayName: Agent Builder
   - name: alerting
     description: |
-      Alerting enables you to define rules, which detect complex conditions within your data. When a condition is met, the rule tracks it as an alert and runs the actions that are defined in the rule. Actions typically involve the use of connectors to interact with Kibana services or third party integrations.
+      Kibana Classic Alerting enables you to define rules, which detect complex conditions within your data. When a condition is met, the rule tracks it as an alert and runs the actions that are defined in the rule. Actions typically involve the use of connectors to interact with Kibana services or third party integrations.
     externalDocs:
-      description: Alerting documentation
-      url: https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts
-    x-displayName: Alerting
+      description: Kibana Classic Alerting documentation
+      url: https://www.elastic.co/docs/explore-analyze/alerting/alerts
+    x-displayName: Kibana Classic Alerting
   - name: alerting-v2
     description: |
-      Universal Alerting is an ES|QL-first alerting API for managing rules, alert actions, and action policies. Use these endpoints to create and manage detection rules, act on alerts, and control when and how notifications are delivered.
-    x-displayName: Universal Alerting
+      Kibana Universal Alerting is an ES|QL-first alerting API for managing rules, alert actions, and action policies. Use these endpoints to create and manage detection rules, act on alerts, and control when and how notifications are delivered.
+    externalDocs:
+      description: Kibana Universal Alerting documentation
+      url: https://www.elastic.co/docs/explore-analyze/alerting/esql/system-overview
+    x-displayName: Kibana Universal Alerting
   - description: |
       Adjust APM agent configuration without need to redeploy your application.
     name: APM agent configuration
@@ -124,12 +127,24 @@ tags:
     description: |
       Data stream APIs enable you to manage data streams, which are collections of indices that share the same index template and are managed as a single unit for time-series data.
     x-displayName: Data streams
-  - description: Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
+  - description: |
+      Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
+
+      ## When to use this API
+
+      - Use this API for existing integrations and for partial updates, where you send only the properties to change.
+      - Use this API to manage individual fields and runtime fields, set the default data view, or swap references. The Data views v2 API doesn't support these tasks.
+      - To manage complete data view definitions as code, use the [Data views v2 API](../group/endpoint-data-views-v2).
     name: data views
     x-displayName: Data views
   - name: data-views-v2
     description: |
       Data view APIs enable you to manage data views, formerly known as Kibana index patterns. Use these endpoints to list, retrieve, create, replace, and delete data views with the as-code data view definition.
+
+      ## When to use this API
+
+      - Use this API to manage complete data view definitions as code. A `PUT` request creates the data view if it doesn't exist, or replaces its whole definition and removes any optional property you omit.
+      - For partial updates, or for integrations that use the existing format, use the [Data views API](../group/endpoint-data-views).
     x-displayName: Data views v2
   - name: Discover sessions
     description: |
@@ -268,7 +283,7 @@ tags:
     description: |
       Fleet cloud connectors APIs enable you to manage Fleet cloud connectors, including creating, updating, and deleting cloud connector configurations for Fleet integrations.
     x-displayName: Fleet cloud connectors
-  - name: Fleet cloud onboarding deployments
+  - name: Fleet cloud onboarding instances
   - name: Fleet enrollment API keys
     description: |
       Fleet enrollment API keys APIs enable you to manage enrollment API keys for Fleet, including creating, retrieving, and revoking API keys used for agent enrollment.
@@ -9219,7 +9234,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9379,7 +9394,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9502,7 +9517,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9625,7 +9640,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9758,7 +9773,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -9882,7 +9897,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10005,7 +10020,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10128,7 +10143,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10253,7 +10268,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10398,7 +10413,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10591,7 +10606,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10805,7 +10820,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -10973,7 +10988,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11151,7 +11166,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11330,7 +11345,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11498,7 +11513,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11666,7 +11681,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11790,7 +11805,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -11910,7 +11925,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12032,7 +12047,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12152,7 +12167,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12276,7 +12291,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12396,7 +12411,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12543,7 +12558,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12690,7 +12705,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12838,7 +12853,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -12985,7 +13000,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -13135,7 +13150,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -13282,7 +13297,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -13500,7 +13515,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -13700,7 +13715,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -13895,7 +13910,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14076,7 +14091,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14330,7 +14345,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14450,7 +14465,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14570,7 +14585,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14690,7 +14705,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14854,7 +14869,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -14974,7 +14989,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15096,7 +15111,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15218,7 +15233,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15340,7 +15355,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15462,7 +15477,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15587,7 +15602,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15750,7 +15765,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -15945,7 +15960,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -16198,7 +16213,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -16384,7 +16399,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -16566,7 +16581,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -16701,7 +16716,7 @@ paths:
             application/json:
               examples:
                 alertingDisabled:
-                  summary: Alerting V2 is disabled
+                  summary: Kibana Universal Alerting is disabled
                   value:
                     code: ALERTING_DISABLED
                     error: Service Unavailable
@@ -28711,7 +28726,7 @@ paths:
         ...
         ```
 
-        Additionally, you can set up notifications for when rules create alerts. The notifications use the [Alerting and Actions framework](https://www.elastic.co/docs/explore-analyze/alerting). Each action type requires a connector. Connectors store the information required to send notifications via external systems. The following connector types are supported for rule notifications:
+        Additionally, you can set up notifications for when rules create alerts. The notifications use [Kibana Classic Alerting](https://www.elastic.co/docs/explore-analyze/alerting/alerts). Each action type requires a connector. Connectors store the information required to send notifications via external systems. The following connector types are supported for rule notifications:
 
         * Slack
         * Email
@@ -28728,8 +28743,8 @@ paths:
 
         For detailed information on Kibana actions and alerting, and additional API calls, see:
 
-        * [Alerting API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-alerting)
-        * [Alerting and Actions framework](https://www.elastic.co/docs/explore-analyze/alerting)
+        * [Kibana Classic Alerting API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-alerting)
+        * [Kibana Classic Alerting](https://www.elastic.co/docs/explore-analyze/alerting/alerts)
         * [Connectors API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-connectors)
       operationId: CreateRule
       requestBody:
@@ -43452,6 +43467,14 @@ paths:
           required: false
           schema:
             type: boolean
+        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it. Requests that change a managed package policy without a matching ID are rejected with a 400 error, and `force` does not bypass this check. A bulk delete that includes such a package policy is rejected as a whole.
+          in: query
+          name: onboarding_deployment_id
+          required: false
+          schema:
+            maxLength: 256
+            type: string
+            x-state: Experimental; added in 9.7.0
       responses:
         '200':
           content:
@@ -43696,6 +43719,14 @@ paths:
           schema:
             maxLength: 256
             type: string
+        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it. Requests that change a managed package policy without a matching ID are rejected with a 400 error, and `force` does not bypass this check. A bulk delete that includes such a package policy is rejected as a whole.
+          in: query
+          name: onboarding_deployment_id
+          required: false
+          schema:
+            maxLength: 256
+            type: string
+            x-state: Experimental; added in 9.7.0
       requestBody:
         content:
           application/json:
@@ -44066,6 +44097,13 @@ paths:
           schema:
             default: false
             type: boolean
+        - description: When true, include the pending restart action of each agent
+          in: query
+          name: withPendingRestart
+          required: false
+          schema:
+            default: false
+            type: boolean
         - description: When true, only return agents that are upgradeable
           in: query
           name: showUpgradeable
@@ -44349,6 +44387,19 @@ paths:
                             type: string
                           maxItems: 10000
                           type: array
+                        pending_restart:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            action_id:
+                              type: string
+                            created_at:
+                              type: string
+                            expiration:
+                              type: string
+                          required:
+                            - action_id
+                            - created_at
                         pipeline_config:
                           maxLength: 10000
                           type: string
@@ -44784,6 +44835,13 @@ paths:
           schema:
             default: false
             type: boolean
+        - description: When true, include the pending restart action of the agent
+          in: query
+          name: withPendingRestart
+          required: false
+          schema:
+            default: false
+            type: boolean
       responses:
         '200':
           content:
@@ -45018,6 +45076,19 @@ paths:
                           type: string
                         maxItems: 10000
                         type: array
+                      pending_restart:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          action_id:
+                            type: string
+                          created_at:
+                            type: string
+                          expiration:
+                            type: string
+                        required:
+                          - action_id
+                          - created_at
                       pipeline_config:
                         maxLength: 10000
                         type: string
@@ -45503,6 +45574,19 @@ paths:
                           type: string
                         maxItems: 10000
                         type: array
+                      pending_restart:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          action_id:
+                            type: string
+                          created_at:
+                            type: string
+                          expiration:
+                            type: string
+                        required:
+                          - action_id
+                          - created_at
                       pipeline_config:
                         maxLength: 10000
                         type: string
@@ -46463,7 +46547,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Restart an Elastic Agent. The request fails when the agent is inactive, on a version earlier than 9.6.0, or enrolled in a hosted agent policy.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
+        Restart an Elastic Agent. The request fails when the agent is inactive, on a version earlier than 9.6.0, or enrolled in a hosted agent policy. It also fails with a 409 when the agent already has a pending restart action, unless `force` is set.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: post-fleet-agents-agentid-restart
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -46480,6 +46564,24 @@ paths:
           schema:
             maxLength: 512
             type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              forceRestartAgentRequest:
+                value:
+                  force: true
+              restartAgentRequest:
+                value: {}
+            schema:
+              additionalProperties: false
+              default: null
+              nullable: true
+              type: object
+              properties:
+                force:
+                  description: Restart the agent even if it already has a pending restart action.
+                  type: boolean
       responses:
         '200':
           content:
@@ -46519,6 +46621,34 @@ paths:
                   - message
                   - attributes
           description: A bad request.
+        '409':
+          content:
+            application/json:
+              examples:
+                pendingRestartResponse:
+                  value:
+                    error: Conflict
+                    message: Agent agent-1 already has a pending restart action a1b2c3d4-e5f6-7890-abcd-ef1234567890. Use force to restart anyway.
+                    statusCode: 409
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: 'A conflict occurred: the agent already has a pending restart action.'
       summary: Restart an agent
       tags:
         - Elastic Agent actions
@@ -47926,7 +48056,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Restart multiple Elastic Agents. Agents that are enrolled in a hosted policy or are on a version earlier than 9.6.0 are excluded from the action and receive individual error results.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
+        Restart multiple Elastic Agents. Agents that are enrolled in a hosted policy, are on a version earlier than 9.6.0, or already have a pending restart action (unless `force` is set) are excluded from the action and receive individual error results.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: post-fleet-agents-bulk-restart
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -47963,6 +48093,9 @@ paths:
                 batchSize:
                   minimum: 1
                   type: number
+                force:
+                  description: Restart agents even if they already have a pending restart action.
+                  type: boolean
                 includeInactive:
                   default: false
                   type: boolean
@@ -50131,7 +50264,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        List cloud onboarding deployment instances, newest first. Optionally filter by package name or provider.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
+        List cloud onboarding instances, newest first. Optionally filter by package name or provider.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
       operationId: get-fleet-cloud-onboarding-deployments
       parameters:
         - description: Only list deployment instances that cover this package.
@@ -50176,7 +50309,7 @@ paths:
             application/json:
               examples:
                 getCloudOnboardingDeploymentsExample:
-                  description: Page of cloud onboarding deployment instances that cover the aws package
+                  description: Page of cloud onboarding instances that cover the aws package
                   value:
                     items:
                       - agentCount: 1
@@ -50279,6 +50412,11 @@ paths:
                                   - unified
                                   - otel
                                   - crowdstrike
+                                type: string
+                              namespace:
+                                description: Data stream namespace the stack was last launched or updated with.
+                                maxLength: 100
+                                minLength: 1
                                 type: string
                               serviceConfigs:
                                 description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
@@ -50398,13 +50536,13 @@ paths:
                           maxItems: 100
                           type: array
                         packagePolicyIds:
-                          description: Package policy IDs created for this deployment (managed_integration and agent_based).
+                          description: Integration policy IDs created for this deployment (managed_integration and agent_based).
                           items:
                             type: string
                           maxItems: 1000
                           type: array
                         packages:
-                          description: Packages of the deployment instance package policies with their deployed versions. Empty for ECF-only deployment instances.
+                          description: Packages of the deployment instance integration policies with their deployed versions. Empty for ECF-only deployment instances.
                           items:
                             additionalProperties: false
                             type: object
@@ -50430,6 +50568,15 @@ paths:
                             type: string
                           description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
                           type: object
+                        policySettings:
+                          additionalProperties:
+                            default: null
+                            maxLength: 1024
+                            nullable: true
+                            type: string
+                          description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
+                          type: object
+                          x-state: Experimental; added in 9.7.0
                         provider:
                           description: Cloud provider.
                           enum:
@@ -50545,9 +50692,9 @@ paths:
                   - message
                   - attributes
           description: Bad Request
-      summary: Get cloud onboarding deployment instances
+      summary: Get cloud onboarding instances
       tags:
-        - Fleet cloud onboarding deployments
+        - Fleet cloud onboarding instances
       x-state: Experimental; added in 9.7.0
       x-metaTags:
         - content: Kibana
@@ -50560,7 +50707,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create a new Fleet cloud onboarding deployment.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
+        Create a new Fleet cloud onboarding instance.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
       operationId: post-fleet-cloud-onboarding-deployments
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -50575,7 +50722,7 @@ paths:
           application/json:
             examples:
               postCloudOnboardingDeploymentAgentBasedRequestExample:
-                description: Create a new AWS cloud onboarding deployment using an Elastic Agent (agent-based)
+                description: Create a new cloud onboarding instance for AWS using an Elastic Agent (agent-based)
                 value:
                   authMethod: assume_role
                   mechanisms:
@@ -50589,7 +50736,7 @@ paths:
                       regions:
                         - us-east-1
               postCloudOnboardingDeploymentEcfRequestExample:
-                description: Create a new AWS cloud onboarding deployment using Elastic Cloud Forwarder (ECF)
+                description: Create a new cloud onboarding instance for AWS using Elastic Cloud Forwarder (ECF)
                 value:
                   connectorId: cloud-connector-id-1
                   mechanisms:
@@ -50603,7 +50750,7 @@ paths:
                         - us-east-1
                       s3_bucket_arn: arn:aws:s3:::my-cloudfront-bucket
               postCloudOnboardingDeploymentRequestExample:
-                description: Create a new AWS cloud onboarding deployment using identity federation (managed integration)
+                description: Create a new cloud onboarding instance for AWS using identity federation (managed integration)
                 value:
                   connectorId: cloud-connector-id-1
                   mechanisms:
@@ -50723,6 +50870,15 @@ paths:
                     type: string
                   maxItems: 100
                   type: array
+                policySettings:
+                  additionalProperties:
+                    default: null
+                    maxLength: 1024
+                    nullable: true
+                    type: string
+                  description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
+                  type: object
+                  x-state: Experimental; added in 9.7.0
                 provider:
                   description: Cloud provider.
                   enum:
@@ -50890,6 +51046,11 @@ paths:
                                 - otel
                                 - crowdstrike
                               type: string
+                            namespace:
+                              description: Data stream namespace the stack was last launched or updated with.
+                              maxLength: 100
+                              minLength: 1
+                              type: string
                             serviceConfigs:
                               description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
                               items:
@@ -51008,7 +51169,7 @@ paths:
                         maxItems: 100
                         type: array
                       packagePolicyIds:
-                        description: Package policy IDs created for this deployment (managed_integration and agent_based).
+                        description: Integration policy IDs created for this deployment (managed_integration and agent_based).
                         items:
                           type: string
                         maxItems: 1000
@@ -51019,6 +51180,15 @@ paths:
                           type: string
                         description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
                         type: object
+                      policySettings:
+                        additionalProperties:
+                          default: null
+                          maxLength: 1024
+                          nullable: true
+                          type: string
+                        description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
+                        type: object
+                        x-state: Experimental; added in 9.7.0
                       provider:
                         description: Cloud provider.
                         enum:
@@ -51101,9 +51271,9 @@ paths:
                   - message
                   - attributes
           description: Bad Request
-      summary: Create cloud onboarding deployment
+      summary: Create cloud onboarding instance
       tags:
-        - Fleet cloud onboarding deployments
+        - Fleet cloud onboarding instances
       x-state: Experimental; added in 9.5.0
       x-metaTags:
         - content: Kibana
@@ -51117,7 +51287,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Delete a cloud onboarding deployment by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
+        Delete a cloud onboarding instance by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
       operationId: delete-fleet-cloud-onboarding-deployments-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -51127,7 +51297,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The saved object ID of the cloud onboarding deployment.
+        - description: The saved object ID of the cloud onboarding instance.
           in: path
           name: id
           required: true
@@ -51140,7 +51310,7 @@ paths:
             application/json:
               examples:
                 deleteCloudOnboardingDeploymentExample:
-                  description: The cloud onboarding deployment was successfully deleted
+                  description: The cloud onboarding instance was successfully deleted
                   value:
                     id: onboarding-deployment-id-1
               schema:
@@ -51186,7 +51356,7 @@ paths:
             application/json:
               examples:
                 notFoundResponseExample:
-                  description: The requested cloud onboarding deployment does not exist
+                  description: The requested cloud onboarding instance does not exist
                   value:
                     error: Not Found
                     message: Saved object [fleet-cloud-onboarding-deployment/unknown-id] not found
@@ -51200,9 +51370,9 @@ paths:
                 required:
                   - message
           description: Not Found
-      summary: Delete cloud onboarding deployment
+      summary: Delete cloud onboarding instance
       tags:
-        - Fleet cloud onboarding deployments
+        - Fleet cloud onboarding instances
       x-state: Experimental; added in 9.5.0
       x-metaTags:
         - content: Kibana
@@ -51215,10 +51385,10 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get a cloud onboarding deployment by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
+        Get a cloud onboarding instance by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
       operationId: get-fleet-cloud-onboarding-deployments-id
       parameters:
-        - description: The saved object ID of the cloud onboarding deployment.
+        - description: The saved object ID of the cloud onboarding instance.
           in: path
           name: id
           required: true
@@ -51231,7 +51401,7 @@ paths:
             application/json:
               examples:
                 getCloudOnboardingDeploymentExample:
-                  description: A cloud onboarding deployment that has succeeded
+                  description: A cloud onboarding instance that has succeeded
                   value:
                     item:
                       agentPolicyIds:
@@ -51325,6 +51495,11 @@ paths:
                                 - otel
                                 - crowdstrike
                               type: string
+                            namespace:
+                              description: Data stream namespace the stack was last launched or updated with.
+                              maxLength: 100
+                              minLength: 1
+                              type: string
                             serviceConfigs:
                               description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
                               items:
@@ -51443,7 +51618,7 @@ paths:
                         maxItems: 100
                         type: array
                       packagePolicyIds:
-                        description: Package policy IDs created for this deployment (managed_integration and agent_based).
+                        description: Integration policy IDs created for this deployment (managed_integration and agent_based).
                         items:
                           type: string
                         maxItems: 1000
@@ -51454,6 +51629,15 @@ paths:
                           type: string
                         description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
                         type: object
+                      policySettings:
+                        additionalProperties:
+                          default: null
+                          maxLength: 1024
+                          nullable: true
+                          type: string
+                        description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
+                        type: object
+                        x-state: Experimental; added in 9.7.0
                       provider:
                         description: Cloud provider.
                         enum:
@@ -51541,7 +51725,7 @@ paths:
             application/json:
               examples:
                 notFoundResponseExample:
-                  description: The requested cloud onboarding deployment does not exist
+                  description: The requested cloud onboarding instance does not exist
                   value:
                     error: Not Found
                     message: Saved object [fleet-cloud-onboarding-deployment/unknown-id] not found
@@ -51555,9 +51739,9 @@ paths:
                 required:
                   - message
           description: Not Found
-      summary: Get cloud onboarding deployment
+      summary: Get cloud onboarding instance
       tags:
-        - Fleet cloud onboarding deployments
+        - Fleet cloud onboarding instances
       x-state: Experimental; added in 9.5.0
       x-metaTags:
         - content: Kibana
@@ -51570,7 +51754,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update a cloud onboarding deployment by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
+        Update a cloud onboarding instance by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
       operationId: put-fleet-cloud-onboarding-deployments-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -51580,7 +51764,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The saved object ID of the cloud onboarding deployment.
+        - description: The saved object ID of the cloud onboarding instance.
           in: path
           name: id
           required: true
@@ -51592,7 +51776,7 @@ paths:
           application/json:
             examples:
               putCloudOnboardingDeploymentRequestExample:
-                description: Update a cloud onboarding deployment after the CFN stack has been submitted
+                description: Update a cloud onboarding instance after the CFN stack has been submitted
                 value:
                   deploymentId: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-onboarding/aaa-bbb-ccc
                   deploymentName: elastic-aws-onboarding
@@ -51654,6 +51838,11 @@ paths:
                           - unified
                           - otel
                           - crowdstrike
+                        type: string
+                      namespace:
+                        description: Data stream namespace the stack was last launched or updated with.
+                        maxLength: 100
+                        minLength: 1
                         type: string
                       serviceConfigs:
                         description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
@@ -51774,7 +51963,7 @@ paths:
                   maxItems: 100
                   type: array
                 packagePolicyIds:
-                  description: Package policy IDs created for this deployment (managed_integration and agent_based).
+                  description: Integration policy IDs created for this deployment (managed_integration and agent_based).
                   items:
                     maxLength: 255
                     type: string
@@ -51785,6 +51974,15 @@ paths:
                     maxLength: 255
                     type: string
                   type: object
+                policySettings:
+                  additionalProperties:
+                    default: null
+                    maxLength: 1024
+                    nullable: true
+                    type: string
+                  description: Integration policy settings that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`). Replaces the stored settings; omit it to keep them.
+                  type: object
+                  x-state: Experimental; added in 9.7.0
                 serviceNames:
                   additionalProperties:
                     maxLength: 256
@@ -51825,7 +52023,7 @@ paths:
             application/json:
               examples:
                 putCloudOnboardingDeploymentExample:
-                  description: The updated cloud onboarding deployment
+                  description: The updated cloud onboarding instance
                   value:
                     item:
                       agentPolicyIds:
@@ -51908,6 +52106,11 @@ paths:
                                 - unified
                                 - otel
                                 - crowdstrike
+                              type: string
+                            namespace:
+                              description: Data stream namespace the stack was last launched or updated with.
+                              maxLength: 100
+                              minLength: 1
                               type: string
                             serviceConfigs:
                               description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
@@ -52027,7 +52230,7 @@ paths:
                         maxItems: 100
                         type: array
                       packagePolicyIds:
-                        description: Package policy IDs created for this deployment (managed_integration and agent_based).
+                        description: Integration policy IDs created for this deployment (managed_integration and agent_based).
                         items:
                           type: string
                         maxItems: 1000
@@ -52038,6 +52241,15 @@ paths:
                           type: string
                         description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
                         type: object
+                      policySettings:
+                        additionalProperties:
+                          default: null
+                          maxLength: 1024
+                          nullable: true
+                          type: string
+                        description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
+                        type: object
+                        x-state: Experimental; added in 9.7.0
                       provider:
                         description: Cloud provider.
                         enum:
@@ -52125,7 +52337,7 @@ paths:
             application/json:
               examples:
                 notFoundResponseExample:
-                  description: The requested cloud onboarding deployment does not exist
+                  description: The requested cloud onboarding instance does not exist
                   value:
                     error: Not Found
                     message: Saved object [fleet-cloud-onboarding-deployment/unknown-id] not found
@@ -52139,9 +52351,9 @@ paths:
                 required:
                   - message
           description: Not Found
-      summary: Update cloud onboarding deployment
+      summary: Update cloud onboarding instance
       tags:
-        - Fleet cloud onboarding deployments
+        - Fleet cloud onboarding instances
       x-state: Experimental; added in 9.5.0
       x-metaTags:
         - content: Kibana
@@ -52155,7 +52367,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        List all cloud onboarding deployments for a given connector ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
+        List all cloud onboarding instances for a given connector ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
       operationId: get-fleet-cloud-onboarding-deployments-connector-connectorid
       parameters:
         - description: The fleet-cloud-connector ID to list deployments for.
@@ -52172,7 +52384,7 @@ paths:
             application/json:
               examples:
                 getCloudOnboardingDeploymentsByConnectorIdExample:
-                  description: List of cloud onboarding deployments for a connector
+                  description: List of cloud onboarding instances for a connector
                   value:
                     items:
                       - agentPolicyIds:
@@ -52270,6 +52482,11 @@ paths:
                                   - unified
                                   - otel
                                   - crowdstrike
+                                type: string
+                              namespace:
+                                description: Data stream namespace the stack was last launched or updated with.
+                                maxLength: 100
+                                minLength: 1
                                 type: string
                               serviceConfigs:
                                 description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
@@ -52389,7 +52606,7 @@ paths:
                           maxItems: 100
                           type: array
                         packagePolicyIds:
-                          description: Package policy IDs created for this deployment (managed_integration and agent_based).
+                          description: Integration policy IDs created for this deployment (managed_integration and agent_based).
                           items:
                             type: string
                           maxItems: 1000
@@ -52400,6 +52617,15 @@ paths:
                             type: string
                           description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
                           type: object
+                        policySettings:
+                          additionalProperties:
+                            default: null
+                            maxLength: 1024
+                            nullable: true
+                            type: string
+                          description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
+                          type: object
+                          x-state: Experimental; added in 9.7.0
                         provider:
                           description: Cloud provider.
                           enum:
@@ -52484,9 +52710,9 @@ paths:
                   - message
                   - attributes
           description: Bad Request
-      summary: Get cloud onboarding deployments by connector ID
+      summary: Get cloud onboarding instances by connector ID
       tags:
-        - Fleet cloud onboarding deployments
+        - Fleet cloud onboarding instances
       x-state: Experimental; added in 9.5.0
       x-metaTags:
         - content: Kibana
@@ -58836,6 +59062,14 @@ paths:
           required: false
           schema:
             type: boolean
+        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it. Requests that change a managed package policy without a matching ID are rejected with a 400 error, and `force` does not bypass this check. A bulk delete that includes such a package policy is rejected as a whole.
+          in: query
+          name: onboarding_deployment_id
+          required: false
+          schema:
+            maxLength: 256
+            type: string
+            x-state: Experimental; added in 9.7.0
       responses:
         '200':
           content:
@@ -59080,6 +59314,14 @@ paths:
           schema:
             maxLength: 256
             type: string
+        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it. Requests that change a managed package policy without a matching ID are rejected with a 400 error, and `force` does not bypass this check. A bulk delete that includes such a package policy is rejected as a whole.
+          in: query
+          name: onboarding_deployment_id
+          required: false
+          schema:
+            maxLength: 256
+            type: string
+            x-state: Experimental; added in 9.7.0
       requestBody:
         content:
           application/json:
@@ -60592,6 +60834,14 @@ paths:
           required: false
           schema:
             type: boolean
+        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it. Requests that change a managed package policy without a matching ID are rejected with a 400 error, and `force` does not bypass this check. A bulk delete that includes such a package policy is rejected as a whole.
+          in: query
+          name: onboarding_deployment_id
+          required: false
+          schema:
+            maxLength: 256
+            type: string
+            x-state: Experimental; added in 9.7.0
       responses:
         '200':
           content:
@@ -60785,6 +61035,14 @@ paths:
               - simplified
               - legacy
             type: string
+        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it. Requests that change a managed package policy without a matching ID are rejected with a 400 error, and `force` does not bypass this check. A bulk delete that includes such a package policy is rejected as a whole.
+          in: query
+          name: onboarding_deployment_id
+          required: false
+          schema:
+            maxLength: 256
+            type: string
+            x-state: Experimental; added in 9.7.0
       requestBody:
         content:
           application/json:
@@ -60919,6 +61177,14 @@ paths:
           schema:
             example: 'true'
             type: string
+        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it. Requests that change a managed package policy without a matching ID are rejected with a 400 error, and `force` does not bypass this check. A bulk delete that includes such a package policy is rejected as a whole.
+          in: query
+          name: onboarding_deployment_id
+          required: false
+          schema:
+            maxLength: 256
+            type: string
+            x-state: Experimental; added in 9.7.0
       requestBody:
         content:
           application/json:
@@ -89150,6 +89416,81 @@ paths:
             {
               "entityTypes": ["user", "host", "service", "generic"]
             }
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/security/entity_store/update_api_key:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/update_api_key</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Replace the API key of every Entity Store background task with one owned by the user making this request, for example after the user who installed the Entity Store is removed. The tasks keep their schedules and state, and no entity data is changed. The user needs the same privileges as the install endpoint. Tasks that could not be updated are listed in `failed`; call the endpoint again to retry them.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+      operationId: post-security-entity-store-update-api-key
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              updateApiKeyExample:
+                description: Re-grant the API key of every Entity Store task as the user making the request.
+                summary: Update the API key of the Entity Store tasks
+                value: {}
+            schema:
+              additionalProperties: false
+              type: object
+              properties: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updateApiKeyPartialExample:
+                  description: Call the endpoint again to retry the tasks listed in `failed`.
+                  summary: Some tasks could not be updated
+                  value:
+                    failed:
+                      - id: entity_store:v2:status_report_task:default
+                        message: Version conflict
+                        statusCode: 409
+                    ok: false
+                    updated:
+                      - entity_store:v2:history_snapshot_task:default
+                updateApiKeySuccessExample:
+                  description: Every Entity Store task now runs with an API key owned by the caller.
+                  summary: All tasks updated
+                  value:
+                    failed: []
+                    ok: true
+                    updated:
+                      - entity_store:v2:history_snapshot_task:default
+                      - entity_store:v2:status_report_task:default
+          description: Indicates that the request was processed. Check `ok` and `failed` to see whether every task was updated.
+      summary: Update the API key of the Entity Store tasks
+      tags:
+        - Security entity store
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X POST -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{}' \
+              "${KIBANA_URL}/api/security/entity_store/update_api_key"
+        - lang: Console
+          source: |
+            POST kbn://api/security/entity_store/update_api_key
+            {}
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -148207,7 +148548,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create a copy of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:create AND workflowsManagement:read.
+        Create a copy of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:create AND workflowsManagement:read. Extended privileges (optional, expand functionality when granted): workflowsManagement:managed:read.
       operationId: post-workflows-workflow-id-clone
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -149936,7 +150277,7 @@ components:
               type: text
               required: false
           error: null
-          extractObservables: true
+          extractObservables: false
           id: 856ee650-6c82-11ee-a20a-6164169afa58
           mappings: []
           observableTypes: []
@@ -150393,7 +150734,7 @@ components:
             type: text
             required: false
         error: null
-        extractObservables: true
+        extractObservables: false
         id: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
         mappings:
           - action_type: overwrite
@@ -150506,7 +150847,7 @@ components:
             type: toggle
             required: false
         error: null
-        extractObservables: true
+        extractObservables: false
         id: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
         mappings:
           - action_type: overwrite
@@ -157612,7 +157953,7 @@ components:
           type: array
         extractObservables:
           description: |
-            Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. For owners that do not support observable extraction (currently Observability), setting this to `true` has no effect on case creation; new cases for those owners always use `false`.
+            Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. Observable extraction is available only for Security cases. For Stack and Observability cases, a value that is not sent resolves to `false`, and setting it to `true` returns a 400 error.
           type: boolean
         owner:
           $ref: '#/components/schemas/Cases_owner'
@@ -157639,7 +157980,7 @@ components:
       properties:
         extractObservables:
           description: |
-            When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. For owners that do not support observable extraction (currently Observability), an omitted value resolves to `false` regardless of the space configuration.
+            When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. Observable extraction is available only for Security cases. For Stack and Observability cases, a value that is not sent resolves to `false`, even if the template or space configuration says `true`. Sending `true` returns a 400 error unless the case already stores `true`.
           example: true
           type: boolean
         syncAlerts:
@@ -157778,7 +158119,7 @@ components:
       properties:
         definition:
           description: |
-            The template definition as a YAML string: case defaults (name, severity, category, tags, assignees, connector, settings) and a `fields` array of inline field definitions or `$ref` entries pointing into the owner's field library. Stored field values appear on cases under `extended_fields` keys shaped `<field_name>_as_<storage_type>`.
+            The template definition as a YAML string: case defaults (name, severity, category, tags, assignees, connector, settings) and a `fields` array of inline field definitions or `$ref` entries pointing into the owner's field library. Stored field values appear on cases under `extended_fields` keys shaped `<field_name>_as_<storage_type>`. Observable extraction (`settings.extractObservables`) is available only for Security templates. For Stack and Observability templates, setting it to `true` returns a 400 error. An update that keeps an already stored `true` for the same owner is accepted.
           example: |
             name: Security incident
             severity: high
@@ -158212,7 +158553,7 @@ components:
           type: array
         extractObservables:
           description: |
-            Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
+            Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. Observable extraction is available only for Security cases. For Stack and Observability cases, changing it to `true` returns a 400 error. A request that keeps an already stored `true` is accepted.
           type: boolean
         templates:
           $ref: '#/components/schemas/Cases_templates'
@@ -165292,6 +165633,12 @@ components:
           description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
           maxLength: 100
           type: string
+        onboarding_deployment_id:
+          description: ID of the cloud onboarding instance that manages this package policy. Set by Fleet, read-only.
+          maxLength: 256
+          nullable: true
+          type: string
+          x-state: Experimental; added in 9.7.0
         output_id:
           nullable: true
           type: string
@@ -165726,6 +166073,12 @@ components:
           description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
           maxLength: 100
           type: string
+        onboarding_deployment_id:
+          description: ID of the cloud onboarding instance that manages this package policy. Set by Fleet, read-only.
+          maxLength: 256
+          nullable: true
+          type: string
+          x-state: Experimental; added in 9.7.0
         output_id:
           nullable: true
           type: string
@@ -175315,11 +175668,11 @@ components:
       properties:
         alerting:
           additionalProperties: false
-          description: Settings that control how this maintenance window affects Alerting V1 alerts, including an optional KQL filter. Always returned when scope is returned. Check `enabled` to see whether the maintenance window affects these alerts.
+          description: Settings that control how this maintenance window affects Kibana Classic Alerting alerts, including an optional KQL filter. Always returned when scope is returned. Check `enabled` to see whether the maintenance window affects these alerts.
           type: object
           properties:
             enabled:
-              description: Whether this maintenance window applies to Alerting V1 alerts. If omitted, is treated as `true`.
+              description: Whether this maintenance window applies to Kibana Classic Alerting alerts. If omitted, is treated as `true`.
               type: boolean
             query:
               additionalProperties: false
@@ -175334,18 +175687,18 @@ components:
             - query
         alerting_v2:
           additionalProperties: false
-          description: Settings that control how this maintenance window affects Alerting V2 alerts, including an optional KQL filter. If you omit `alerting_v2`, the maintenance window doesn't affect Alerting V2 alerts.
+          description: Settings that control how this maintenance window affects Kibana Universal Alerting alerts, including an optional KQL filter. If you omit `alerting_v2`, the maintenance window doesn't affect Kibana Universal Alerting alerts.
           type: object
           properties:
             enabled:
-              description: Whether the maintenance window applies to Alerting V2 alerts. If omitted, is treated as `true`.
+              description: Whether the maintenance window applies to Kibana Universal Alerting alerts. If omitted, is treated as `true`.
               type: boolean
             query:
               additionalProperties: false
               type: object
               properties:
                 kql:
-                  description: A KQL filter that limits which Alerting V2 alerts this maintenance window affects. It can filter on `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and `data.*`. Matching alerts don't send notifications while the window is active. If query isn't returned, the window affects all Alerting V2 alerts.
+                  description: A KQL filter that limits which Kibana Universal Alerting alerts this maintenance window affects. It can filter on `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and `data.*`. Matching alerts don't send notifications while the window is active. If query isn't returned, the window affects all Kibana Universal Alerting alerts.
                   maxLength: 4096
                   type: string
               required:
@@ -175359,36 +175712,36 @@ components:
       properties:
         alerting:
           additionalProperties: false
-          description: Settings that control how this maintenance window affects Alerting V1 alerts, including an optional KQL filter. If you include `scope` but omit `alerting`, the maintenance window doesn't affect these alerts.
+          description: Settings that control how this maintenance window affects Kibana Classic Alerting alerts, including an optional KQL filter. If you include `scope` but omit `alerting`, the maintenance window doesn't affect these alerts.
           type: object
           properties:
             enabled:
-              description: Whether this maintenance window applies to Alerting V1 alerts. If omitted, is treated as `true`.
+              description: Whether this maintenance window applies to Kibana Classic Alerting alerts. If omitted, is treated as `true`.
               type: boolean
             query:
               additionalProperties: false
               type: object
               properties:
                 kql:
-                  description: A KQL filter that limits which Alerting V1 alerts this maintenance window affects. Matching alerts don't run rule actions while the window is active. If you omit query, the window affects all alerts.
+                  description: A KQL filter that limits which Kibana Classic Alerting alerts this maintenance window affects. Matching alerts don't run rule actions while the window is active. If you omit query, the window affects all alerts.
                   maxLength: 10000
                   type: string
               required:
                 - kql
         alerting_v2:
           additionalProperties: false
-          description: Settings that control how this maintenance window affects Alerting V2 alerts, including an optional KQL filter. If you omit `alerting_v2`, the maintenance window doesn't affect Alerting V2 alerts.
+          description: Settings that control how this maintenance window affects Kibana Universal Alerting alerts, including an optional KQL filter. If you omit `alerting_v2`, the maintenance window doesn't affect Kibana Universal Alerting alerts.
           type: object
           properties:
             enabled:
-              description: Whether this maintenance window affects Alerting V2 alerts. Defaults to `true`.
+              description: Whether this maintenance window affects Kibana Universal Alerting alerts. Defaults to `true`.
               type: boolean
             query:
               additionalProperties: false
               type: object
               properties:
                 kql:
-                  description: A KQL filter that limits which Alerting V2 alerts this maintenance window affects. You can filter on `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and `data.*`. Matching alerts don't send notifications while the window is active. If you omit query, the window affects all Alerting V2 alerts.
+                  description: A KQL filter that limits which Kibana Universal Alerting alerts this maintenance window affects. You can filter on `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and `data.*`. Matching alerts don't send notifications while the window is active. If you omit query, the window affects all Kibana Universal Alerting alerts.
                   maxLength: 4096
                   type: string
               required:
@@ -175556,6 +175909,11 @@ components:
           description: Policy namespace. Defaults to the agent policy namespace.
           maxLength: 100
           type: string
+        onboarding_deployment_id:
+          description: ID of the cloud onboarding instance that manages this managed integration. Set by Fleet, read-only.
+          maxLength: 256
+          type: string
+          x-state: Experimental; added in 9.7.0
         package:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_managed_integration_package'
         updated_at:
@@ -183040,6 +183398,12 @@ components:
           description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
           maxLength: 100
           type: string
+        onboarding_deployment_id:
+          description: ID of the cloud onboarding instance that manages this package policy. Set by Fleet, read-only.
+          maxLength: 256
+          nullable: true
+          type: string
+          x-state: Experimental; added in 9.7.0
         output_id:
           nullable: true
           type: string
@@ -185410,7 +185774,52 @@ components:
         type:
           type: string
         value:
-          type: string
+          anyOf:
+            - type: string
+            - additionalProperties: false
+              type: object
+              properties:
+                format:
+                  maxLength: 1024
+                  type: string
+                from:
+                  anyOf:
+                    - type: number
+                    - maxLength: 1024
+                      type: string
+                gt:
+                  anyOf:
+                    - type: number
+                    - maxLength: 1024
+                      type: string
+                gte:
+                  anyOf:
+                    - type: number
+                    - maxLength: 1024
+                      type: string
+                lt:
+                  anyOf:
+                    - type: number
+                    - maxLength: 1024
+                      type: string
+                lte:
+                  anyOf:
+                    - type: number
+                    - maxLength: 1024
+                      type: string
+                to:
+                  anyOf:
+                    - type: number
+                    - maxLength: 1024
+                      type: string
+            - items:
+                anyOf:
+                  - maxLength: 1024
+                    type: string
+                  - type: number
+                  - type: boolean
+              maxItems: 1000
+              type: array
     Kibana_HTTP_APIs_SLOGroupBy:
       anyOf:
         - anyOf:

@@ -16,6 +16,7 @@
         ] */
 
 import { runPreBuild } from './pre_build.ts';
+import { postFrequentCancellationsTip } from './frequent_cancellations_tip.ts';
 import { getEvalTriggerStep } from '../../../pipelines/evals/eval_pipeline.ts';
 import { loadBuildkiteJson } from '../../../pipeline-utils/load_buildkite_json.ts';
 import {
@@ -161,6 +162,9 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       return;
     }
 
+    // Runs alongside the pipeline generation below, so it doesn't delay the build.
+    const frequentCancellationsTip = postFrequentCancellationsTip();
+
     // Scout-test-only diffs can't change OAS, API contracts, or Saved Objects, so skip those checks below.
     const prChanges = await getPrChangesCached();
     const scoutTestsOnly = isScoutTestsOnlyDiff(
@@ -190,6 +194,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     if (await doAllChangesMatch(/^renovate\.json$/)) {
       pipeline.push(renderSteps(renovateValidation(), { header: true }));
       console.warn('Isolated changes to renovate.json. Skipping main PR pipeline.');
+      await frequentCancellationsTip;
       emitPipeline(pipeline);
       return;
     }
@@ -233,7 +238,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       (await doAnySuiteRelevantChangesMatch([
         /^src\/platform\/plugins\/shared\/data/,
         /^x-pack\/platform\/plugins\/shared\/actions/,
-        /^x-pack\/platform\/plugins\/shared\/alerting/,
+        /^x-pack\/platform\/plugins\/shared\/alerting\//,
         /^x-pack\/platform\/plugins\/shared\/event_log/,
         /^x-pack\/platform\/plugins\/shared\/rule_registry/,
         /^x-pack\/platform\/plugins\/shared\/task_manager/,
@@ -438,7 +443,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^package.json/,
         /^src\/platform\/packages\/shared\/kbn-securitysolution-.*/,
         /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-.*/,
-        /^x-pack\/platform\/plugins\/shared\/alerting/,
+        /^x-pack\/platform\/plugins\/shared\/alerting\//,
         /^x-pack\/platform\/plugins\/shared\/data_views\/common/,
         /^x-pack\/solutions\/security\/plugins\/lists/,
         /^x-pack\/platform\/plugins\/shared\/rule_registry\/common/,
@@ -518,7 +523,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant/,
         /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant-common/,
         /^x-pack\/solutions\/security\/packages/,
-        /^x-pack\/platform\/plugins\/shared\/alerting/,
+        /^x-pack\/platform\/plugins\/shared\/alerting\//,
         /^x-pack\/platform\/plugins\/shared\/cases/,
         /^x-pack\/platform\/plugins\/shared\/data_views\/common/,
         /^x-pack\/solutions\/security\/plugins\/elastic_assistant/,
@@ -583,7 +588,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant/,
         /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant-common/,
         /^x-pack\/solutions\/security\/packages/,
-        /^x-pack\/platform\/plugins\/shared\/alerting/,
+        /^x-pack\/platform\/plugins\/shared\/alerting\//,
         /^x-pack\/platform\/plugins\/shared\/cases/,
         /^x-pack\/platform\/plugins\/shared\/data_views\/common/,
         /^x-pack\/solutions\/security\/plugins\/elastic_assistant/,
@@ -772,6 +777,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     pipeline.push(renderSteps(postBuildSteps()));
 
     flushCancelOnGateFailureMetadata();
+    await frequentCancellationsTip;
     emitPipeline(pipeline);
   } catch (ex) {
     console.error('Error while generating the pipeline steps: ' + ex.message, ex);

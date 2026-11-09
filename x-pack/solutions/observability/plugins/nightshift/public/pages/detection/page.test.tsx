@@ -16,7 +16,7 @@ import { useDetectionEntities } from '../../data/detection_entities/use_detectio
 import { useMaintenanceStatus } from '../../data/maintenance/use_significant_events_maintenance';
 import { useFetchSources } from '../../data/sources/use_fetch_sources';
 import { useDeveloperMode } from '../../hooks/use_developer_mode';
-import type { RecommendedSourcesCreationState } from '../../sources/recommended_sources/recommended_sources_table';
+import type { RecommendedSourcesCreationState } from '../../components/entities/source/recommended_sources/recommended_sources_table';
 import type { DetectionTabId } from './detection_tabs';
 import { DetectionPage } from './page';
 
@@ -75,7 +75,7 @@ jest.mock('./signals/signals_tab', () => ({
 }));
 jest.mock('./run_limits_banner', () => ({ RunLimitsBanner: () => null }));
 let mockRecommendedSourcesTableMountCount = 0;
-jest.mock('../../sources/recommended_sources/recommended_sources_table', () => ({
+jest.mock('../../components/entities/source/recommended_sources/recommended_sources_table', () => ({
   INITIAL_RECOMMENDED_SOURCES_CREATION_STATE: {
     isCreating: false,
     hasCreatedSources: false,
@@ -125,11 +125,14 @@ jest.mock('../../sources/recommended_sources/recommended_sources_table', () => (
   },
 }));
 let mockCanManage = true;
+let mockCanConfigure = true;
 jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       application: {
-        capabilities: { nightshift: { show: true, manage: mockCanManage } },
+        capabilities: {
+          nightshift: { show: true, manage: mockCanManage, configure: mockCanConfigure },
+        },
         getUrlForApp: () => '/app/nightshift/',
       },
     },
@@ -186,6 +189,7 @@ describe('DetectionPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockCanManage = true;
+    mockCanConfigure = true;
     mockSourcesCount = 1;
     mockSourcesError = false;
     mockSourcesIsFetching = false;
@@ -413,6 +417,15 @@ describe('DetectionPage', () => {
   it('shows the locked onboarding to a viewer with no sources or history', () => {
     mockSourcesCount = 0;
     mockCanManage = false;
+    renderPage();
+
+    expect(screen.getByTestId('nightshiftDetectionOnboardingLocked')).toBeInTheDocument();
+    expect(screen.queryByTestId('recommendedSourcesTableStub')).not.toBeInTheDocument();
+  });
+
+  it('shows the locked onboarding to a user with manage but without configure', () => {
+    mockSourcesCount = 0;
+    mockCanConfigure = false;
     renderPage();
 
     expect(screen.getByTestId('nightshiftDetectionOnboardingLocked')).toBeInTheDocument();

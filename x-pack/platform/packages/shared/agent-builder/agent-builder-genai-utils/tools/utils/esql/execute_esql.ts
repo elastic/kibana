@@ -29,6 +29,20 @@ const buildTimeoutMessage = (timeoutMs: number | undefined): string => {
   );
 };
 
+/**
+ * Thrown by `executeEsql` when a query is given up on because of its `timeoutMs` deadline or the
+ * client's request timeout. Lets callers tell "too expensive to run" apart from other failures.
+ */
+export class EsqlExecutionTimeoutError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'EsqlExecutionTimeoutError';
+  }
+}
+
+export const isEsqlExecutionTimeoutError = (err: unknown): err is EsqlExecutionTimeoutError =>
+  err instanceof EsqlExecutionTimeoutError;
+
 const isTimeoutError = (err: unknown): boolean =>
   err instanceof Error && err.name === 'TimeoutError';
 
@@ -48,10 +62,12 @@ const isTimeoutError = (err: unknown): boolean =>
  *
  * `dropNullColumns` maps to Elasticsearch `drop_null_columns` (default `true`).
  *
- * `timeoutMs` sets a wall-clock deadline for this call through an abort signal, with retries
- * disabled. It can only shorten the wait: the deployment's request timeout still applies. When
- * `timeoutMs` is set, a deadline hit or a client `TimeoutError` is rethrown as a plain error that
- * tells the agent not to re-run the query unchanged; without it, errors are rethrown unchanged.
+ * `timeoutMs` sets a wall-clock deadline for this call through an abort signal. The client keeps
+ * retrying transient transport failures (connection errors, 502/503/504) within that deadline; it
+ * never retries its own request timeout. The deadline can only shorten the wait: the deployment's
+ * request timeout still applies. When `timeoutMs` is set, a deadline hit or a client `TimeoutError`
+ * is rethrown as an `EsqlExecutionTimeoutError` that tells the agent not to re-run the query
+ * unchanged; without it, errors are rethrown unchanged.
  */
 export const executeEsql = async ({
   query,
@@ -87,7 +103,7 @@ export const executeEsql = async ({
       },
       {
         maxResponseSize: MAX_ES_RESPONSE_SIZE_BYTES,
-        ...(timeoutSignal ? { maxRetries: 0, signal: timeoutSignal } : {}),
+        ...(timeoutSignal ? { signal: timeoutSignal } : {}),
       }
     );
     return {
@@ -104,7 +120,9 @@ export const executeEsql = async ({
     if (timeoutSignal) {
       const deadlineHit = timeoutSignal.aborted && isRequestAbortedError(err);
       if (deadlineHit || isTimeoutError(err)) {
-        throw new Error(buildTimeoutMessage(deadlineHit ? timeoutMs : undefined));
+        throw new EsqlExecutionTimeoutError(
+          buildTimeoutMessage(deadlineHit ? timeoutMs : undefined)
+        );
       }
     }
     throw err;

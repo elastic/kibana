@@ -24,7 +24,7 @@ jest.mock('../utils/esql', () => ({
 }));
 
 import { resolveResourceForEsqlWithSamplingStats } from '../utils/resources';
-import { executeEsql } from '../utils/esql';
+import { executeEsql, EsqlExecutionTimeoutError } from '../utils/esql';
 import { ESQLVariableType } from '@kbn/esql-types';
 
 const mockResolveResource = resolveResourceForEsqlWithSamplingStats as jest.MockedFn<
@@ -313,5 +313,110 @@ describe('createNlToEsqlGraph — execute_query node', () => {
 
     expect(mockedExecuteEsql.mock.calls[0][0].query).toContain('TS metrics-test');
     expect(mockedExecuteEsql.mock.calls[0][0].filter).toBeUndefined();
+  });
+
+  it('passes the execution deadline down to executeEsql', async () => {
+    const { chatModel } = createMockModel();
+    const graph = buildGraph(chatModel);
+
+    await graph.invoke(
+      { ...BASE_INPUT, execute: 'data', maxRetries: 1, executionTimeoutMs: 30_000 },
+      { recursionLimit: 25 }
+    );
+
+    expect(mockedExecuteEsql.mock.calls[0][0].timeoutMs).toBe(30_000);
+  });
+
+  it('runs without a deadline when none is provided', async () => {
+    const { chatModel } = createMockModel();
+    const graph = buildGraph(chatModel);
+
+    await graph.invoke({ ...BASE_INPUT, execute: 'data', maxRetries: 1 }, { recursionLimit: 25 });
+
+    expect(mockedExecuteEsql.mock.calls[0][0].timeoutMs).toBeUndefined();
+  });
+
+  describe('execution timeout', () => {
+    const TIMEOUT_MESSAGE =
+      'Stopped waiting for the ES|QL query after 30s. Do not re-run it or a near variant; narrow the time range or use a more selective filter.';
+    const timeoutError = () => new EsqlExecutionTimeoutError(TIMEOUT_MESSAGE);
+    const DATA_INPUT = { ...BASE_INPUT, execute: 'data' as const, maxRetries: 3 };
+
+    it('regenerates once after a timeout and asks for a cheaper query rather than a fix', async () => {
+      const { chatModel, generateModelInvoke } = createMockModel();
+      const graph = buildGraph(chatModel);
+      mockedExecuteEsql
+        .mockRejectedValueOnce(timeoutError())
+        .mockResolvedValueOnce({ columns: [{ name: 'count', type: 'long' }], values: [[1]] });
+
+      const outState = await graph.invoke(DATA_INPUT, { recursionLimit: 25 });
+
+      expect(generateModelInvoke).toHaveBeenCalledTimes(2);
+      expect(mockedExecuteEsql).toHaveBeenCalledTimes(2);
+      const retryPrompt = JSON.stringify(generateModelInvoke.mock.calls[1][0]);
+      expect(retryPrompt).toContain('too expensive to run as written');
+      expect(retryPrompt).toContain(TIMEOUT_MESSAGE);
+      expect(retryPrompt).not.toContain('Can you fix the query?');
+      expect(outState.results).toEqual({
+        columns: [{ name: 'count', type: 'long' }],
+        values: [[1]],
+      });
+      expect(outState.error).toBeFalsy();
+    });
+
+    it('ends the call with the timeout error after a second timeout, even with retries left', async () => {
+      const { chatModel, generateModelInvoke } = createMockModel();
+      const graph = buildGraph(chatModel);
+      mockedExecuteEsql.mockRejectedValue(timeoutError());
+
+      const outState = await graph.invoke(DATA_INPUT, { recursionLimit: 25 });
+
+      expect(generateModelInvoke).toHaveBeenCalledTimes(2);
+      expect(mockedExecuteEsql).toHaveBeenCalledTimes(2);
+      expect(outState.query).toContain('FROM logs-test');
+      expect(outState.results).toBeUndefined();
+      expect(outState.error).toBe(TIMEOUT_MESSAGE);
+    });
+
+    it('does not regenerate after a timeout when no retries are allowed', async () => {
+      const { chatModel, generateModelInvoke } = createMockModel();
+      const graph = buildGraph(chatModel);
+      mockedExecuteEsql.mockRejectedValue(timeoutError());
+
+      const outState = await graph.invoke({ ...DATA_INPUT, maxRetries: 1 }, { recursionLimit: 25 });
+
+      expect(generateModelInvoke).toHaveBeenCalledTimes(1);
+      expect(mockedExecuteEsql).toHaveBeenCalledTimes(1);
+      expect(outState.error).toBe(TIMEOUT_MESSAGE);
+    });
+
+    it('keeps the regular fixer loop for a timeout followed by an ordinary execution error', async () => {
+      const { chatModel, generateModelInvoke } = createMockModel();
+      const graph = buildGraph(chatModel);
+      mockedExecuteEsql
+        .mockRejectedValueOnce(timeoutError())
+        .mockRejectedValueOnce(new Error('verification_exception: unknown column [missing]'))
+        .mockResolvedValueOnce({ columns: [], values: [] });
+
+      const outState = await graph.invoke(DATA_INPUT, { recursionLimit: 25 });
+
+      expect(generateModelInvoke).toHaveBeenCalledTimes(3);
+      expect(mockedExecuteEsql).toHaveBeenCalledTimes(3);
+      const fixPrompt = JSON.stringify(generateModelInvoke.mock.calls[2][0]);
+      expect(fixPrompt).toContain('Can you fix the query?');
+      expect(outState.error).toBeFalsy();
+    });
+
+    it('retries ordinary execution errors up to maxRetries', async () => {
+      const { chatModel, generateModelInvoke } = createMockModel();
+      const graph = buildGraph(chatModel);
+      mockedExecuteEsql.mockRejectedValue(new Error('verification_exception: boom'));
+
+      const outState = await graph.invoke(DATA_INPUT, { recursionLimit: 25 });
+
+      expect(generateModelInvoke).toHaveBeenCalledTimes(3);
+      expect(mockedExecuteEsql).toHaveBeenCalledTimes(3);
+      expect(outState.error).toBe('verification_exception: boom');
+    });
   });
 });

@@ -37,11 +37,19 @@ const rankingCompositionFields = (ranking: EuidRanking): string[][] =>
     )
   );
 
-/** Every field an identity reads: the single field, or every field of every ranking composition. */
-export const getIdentityFields = (identityField: EntityIdentity): string[] =>
+/**
+ * The fields of each identity composition, in ranking order: `[[field]]` for a single field, one
+ * list per ranking composition otherwise (a servable ranking has exactly one, unconditional branch).
+ */
+export const getIdentityCompositions = (identityField: EntityIdentity): string[][] =>
   'singleField' in identityField
-    ? [identityField.singleField]
-    : [...new Set(rankingCompositionFields(identityField.euidRanking).flat())];
+    ? [[identityField.singleField]]
+    : rankingCompositionFields(identityField.euidRanking);
+
+/** Every field an identity reads: the single field, or every field of every ranking composition. */
+export const getIdentityFields = (identityField: EntityIdentity): string[] => [
+  ...new Set(getIdentityCompositions(identityField).flat()),
+];
 
 const compositionPresenceFilter = (fields: readonly string[]): Condition =>
   fields.length === 1
