@@ -73,6 +73,7 @@ import type {
   SseEntityLine,
 } from './view_model';
 import {
+  filterRestatedEvidence,
   iocOfDetection,
   isExecutableHuntQuery,
   observedIocMatchFromEvents,
@@ -100,39 +101,39 @@ const EVIDENCE_BULLET_LIMIT = 5;
 const ENTITY_CHIP_LIMIT = 10;
 
 /**
- * Plain monospace value; truncates long ids and keeps the full string in a tooltip. The
- * span is a tab stop so the tooltip is reachable by keyboard, except when the caller wraps
- * it in a link: a focusable element nested in interactive content is invalid, and the link
- * already gives the tooltip its focus target (`focusable={false}`).
+ * Plain monospace value; truncates long ids and, by default, keeps the full string in a
+ * tooltip anchored on the span, which is then a tab stop so keyboard users can reveal it.
+ * A caller that wraps the value in a link passes `tooltip={false}` and puts the
+ * {@link EuiToolTip} around the link instead: the link is the one tab stop, and focusing it
+ * is what opens the tooltip (a tooltip nested inside the link would never see that focus).
  */
 const PlainValue: React.FC<{
   value: string;
   testSubj?: string;
   maxCh?: number;
-  focusable?: boolean;
-}> = ({ value, testSubj, maxCh = 32, focusable = true }) => {
+  tooltip?: boolean;
+}> = ({ value, testSubj, maxCh = 32, tooltip = true }) => {
   const { euiTheme } = useEuiTheme();
-  return (
-    <EuiToolTip content={value}>
-      <EuiText
-        tabIndex={focusable ? 0 : undefined}
-        size="xs"
-        component="span"
-        data-test-subj={testSubj}
-        css={css`
-          font-family: ${euiTheme.font.familyCode};
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          max-width: ${maxCh}ch;
-          display: inline-block;
-          vertical-align: bottom;
-        `}
-      >
-        {value}
-      </EuiText>
-    </EuiToolTip>
+  const text = (
+    <EuiText
+      tabIndex={tooltip ? 0 : undefined}
+      size="xs"
+      component="span"
+      data-test-subj={testSubj}
+      css={css`
+        font-family: ${euiTheme.font.familyCode};
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: ${maxCh}ch;
+        display: inline-block;
+        vertical-align: bottom;
+      `}
+    >
+      {value}
+    </EuiText>
   );
+  return tooltip ? <EuiToolTip content={value}>{text}</EuiToolTip> : text;
 };
 
 const TIER1_STATUS_LABELS: Record<HuntResult['tier1']['status'], string> = {
@@ -281,21 +282,23 @@ const EventRows: React.FC<{
             value={event.event_id}
             maxCh={18}
             testSubj={`alertzeroSignificantSecurityEventEventLink-${event.event_id}`}
-            focusable={!href}
+            tooltip={!href}
           />
         );
         return (
           <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
             <EuiFlexItem grow={false}>
               {href ? (
-                <EuiLink
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={openLabel}
-                >
-                  {idText}
-                </EuiLink>
+                <EuiToolTip content={event.event_id}>
+                  <EuiLink
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={openLabel}
+                  >
+                    {idText}
+                  </EuiLink>
+                </EuiToolTip>
               ) : (
                 idText
               )}
@@ -1615,7 +1618,7 @@ const RunIdLink: React.FC<{
       value={parsed.run_id}
       testSubj="alertzeroSignificantSecurityEventRunId"
       maxCh={36}
-      focusable={!runHref}
+      tooltip={!runHref}
     />
   );
 
@@ -1627,21 +1630,23 @@ const RunIdLink: React.FC<{
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           {runHref ? (
-            <EuiLink
-              href={runHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={i18n.translate(
-                'xpack.alertzero.agentBuilder.attachments.sse.openRunExecutionAria',
-                {
-                  defaultMessage: 'Open workflow execution {runId}',
-                  values: { runId: parsed.run_id },
-                }
-              )}
-              data-test-subj="alertzeroSignificantSecurityEventRunLink"
-            >
-              {runIdValue}
-            </EuiLink>
+            <EuiToolTip content={parsed.run_id}>
+              <EuiLink
+                href={runHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={i18n.translate(
+                  'xpack.alertzero.agentBuilder.attachments.sse.openRunExecutionAria',
+                  {
+                    defaultMessage: 'Open workflow execution {runId}',
+                    values: { runId: parsed.run_id },
+                  }
+                )}
+                data-test-subj="alertzeroSignificantSecurityEventRunLink"
+              >
+                {runIdValue}
+              </EuiLink>
+            </EuiToolTip>
           ) : (
             runIdValue
           )}
@@ -1692,10 +1697,10 @@ export const SignificantSecurityEventInlineContent: React.FC<
 
   const hasChromeHeader =
     buildSignificantSecurityEventActionButtons({ parsed, navigation }).length > 0;
-  // Shown as written: the mapper already withholds hit-count restatements when it writes
-  // `detections`, and an older payload's bullets are the only story it has.
+  // Display only: the stored bullets stay intact for packaging; the card hides the hit-count
+  // restatement whose tier What matched already shows.
   const storyEvidence = {
-    evidenceFor: parsed.evidence_for,
+    evidenceFor: filterRestatedEvidence(parsed.evidence_for, detections),
     evidenceAgainst: parsed.evidence_against,
   };
   const hasEvidence =

@@ -30,6 +30,9 @@ import {
   deriveDetections,
   iocOfDetection,
   type SseDetection,
+  SSE_CONFIRMED_HIT_BULLET_PREFIX,
+  SSE_TIER1_HIT_BULLET_PREFIX,
+  SSE_TIER2_HIT_BULLET_PREFIX,
 } from '../../../../../common/sse_view';
 import { splitRemoteCluster, stripBackingPrefix } from '../../../../../common/remote_cluster';
 import type { HuntCoordinatorCoreResult } from '../hunt_coordinator';
@@ -753,7 +756,6 @@ const buildChrome = ({
   huntResult,
   behavior,
   tier1RefCount,
-  hasDetections,
 }: {
   reportId: string;
   runId: string;
@@ -761,12 +763,6 @@ const buildChrome = ({
   behavior?: CoordinatorBehavior;
   /** Tier 1 refs this entry carries, which is not the report's Tier 1 total. */
   tier1RefCount: number;
-  /**
-   * Whether the entry carries `detections[]`. Then What matched already tells the hit-count
-   * story, so the restating bullets are withheld and only findings that are not on the
-   * table (the behavior's own evidence, the negative results) remain.
-   */
-  hasDetections: boolean;
 }): Pick<
   SseAttachmentData,
   | 'title'
@@ -795,8 +791,11 @@ const buildChrome = ({
     `Hunt Watch evaluated report ${reportId} against the environment.`
   ).slice(0, 4000);
 
+  // Always written, even when `detections[]` tells the same story: packaging builds its
+  // evidence lines from these bullets. A renderer that shows the detections table hides the
+  // restatement itself (`filterRestatedEvidence`), keyed on the shared prefixes below.
   const evidenceFor: string[] = [];
-  if (!hasDetections && huntResult.hit_sources.includes('tier1')) {
+  if (huntResult.hit_sources.includes('tier1')) {
     // Two things this sentence must not overstate. `counts.total_hits` spans required and
     // optional indices, while only a required-index match sets the hit bar, so the total is
     // "matched", not "confirmed" — one required event beside 99 optional alerts would
@@ -805,17 +804,17 @@ const buildChrome = ({
     // it it carries. `per_index` holds the required/optional split either way.
     evidenceFor.push(
       behavior
-        ? `IOC Hunt matched ${huntResult.tier1.counts.total_hits} event(s) for this report in the hunt window, at least one in a required index; ${tier1RefCount} are referenced here (see hunt_result.tier1.per_index for the required/optional split).`
-        : `IOC Hunt matched ${huntResult.tier1.counts.total_hits} event(s) in the hunt window, at least one in a required index (see hunt_result.tier1.per_index for the required/optional split).`
+        ? `${SSE_TIER1_HIT_BULLET_PREFIX}${huntResult.tier1.counts.total_hits} event(s) for this report in the hunt window, at least one in a required index; ${tier1RefCount} are referenced here (see hunt_result.tier1.per_index for the required/optional split).`
+        : `${SSE_TIER1_HIT_BULLET_PREFIX}${huntResult.tier1.counts.total_hits} event(s) in the hunt window, at least one in a required index (see hunt_result.tier1.per_index for the required/optional split).`
     );
   }
-  if (!hasDetections && huntResult.hit_sources.includes('tier2') && behavior?.execution?.hit) {
+  if (huntResult.hit_sources.includes('tier2') && behavior?.execution?.hit) {
     evidenceFor.push(
-      `Behavior Hunt executed ${behavior.technique_id} with ${behavior.execution.row_count} required-index row(s).`
+      `${SSE_TIER2_HIT_BULLET_PREFIX}${behavior.technique_id} with ${behavior.execution.row_count} required-index row(s).`
     );
   }
-  if (!hasDetections && evidenceFor.length === 0 && huntResult.has_confirmed_hit) {
-    evidenceFor.push('Environment hit confirmed; see hunt_result for structured detail.');
+  if (evidenceFor.length === 0 && huntResult.has_confirmed_hit) {
+    evidenceFor.push(`${SSE_CONFIRMED_HIT_BULLET_PREFIX}; see hunt_result for structured detail.`);
   }
 
   // The report-scoped entry carries every proposed behavior, including the ones that executed
@@ -962,7 +961,6 @@ const buildEntry = ({
     huntResult,
     behavior,
     tier1RefCount,
-    hasDetections: detections.length > 0,
   });
 
   return {

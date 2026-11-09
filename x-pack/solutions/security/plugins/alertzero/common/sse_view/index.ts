@@ -21,6 +21,13 @@ export { classifyBasis, type SseBasis, type ClassifyBasisIoc } from './classify_
 export { isExecutableHuntQuery } from './is_executable_hunt_query';
 
 export {
+  filterRestatedEvidence,
+  SSE_CONFIRMED_HIT_BULLET_PREFIX,
+  SSE_TIER1_HIT_BULLET_PREFIX,
+  SSE_TIER2_HIT_BULLET_PREFIX,
+} from './evidence_restatement';
+
+export {
   buildBehaviorDetectionId,
   buildIocDetectionId,
   deriveDetections,

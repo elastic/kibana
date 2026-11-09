@@ -407,7 +407,7 @@ describe('SignificantSecurityEventInlineContent', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('renders evidence bullets as written; the mapper decides what to withhold', () => {
+    it('hides only the hit-count restatement whose tier What matched already shows', () => {
       renderWithI18n(
         <SignificantSecurityEventInlineContent
           {...renderProps(
@@ -439,7 +439,9 @@ describe('SignificantSecurityEventInlineContent', () => {
       const evidence = screen.getByTestId('alertzeroSignificantSecurityEventEvidence');
       expect(evidence).toHaveTextContent('Unusual outbound curl to loopback across two hosts');
       expect(evidence).toHaveTextContent('T1059');
-      expect(evidence).toHaveTextContent('IOC Hunt matched 12 event(s)');
+      // One IOC detection, no behavior detection: the Tier 1 restatement goes, the Tier 2
+      // bullet is the only place the behavior confirmation is told, so it stays.
+      expect(evidence).not.toHaveTextContent('IOC Hunt matched');
       expect(evidence).toHaveTextContent('Behavior Hunt executed T1071');
     });
 

@@ -778,11 +778,9 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
     expect(entries).toHaveLength(1);
     expect(entries[0].attachment_id).toEqual(idFor('T1552.001'));
     expect(huntResultOf(entries[0]).hit_sources).toEqual(['tier1']);
-    // No matched IOC and no behavior hit, so there is no `detections[]` table to tell the
-    // story; the bullet stays. `counts.total_hits` is the report's total and spans optional
-    // indices, so the sentence says whose count it is, that it is a match count rather than
-    // a confirmed one, and how much of it this entry carries.
-    expect(entries[0].data.detections).toBeUndefined();
+    // `counts.total_hits` is the report's total and spans optional indices, so the
+    // sentence says whose count it is, that it is a match count rather than a
+    // confirmed one, and how much of it this entry carries.
     expect(entries[0].data.evidence_for).toContain(
       'IOC Hunt matched 1 event(s) for this report in the hunt window, at least one in a required index; 1 are referenced here (see hunt_result.tier1.per_index for the required/optional split).'
     );
@@ -1247,9 +1245,12 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
         }),
       ])
     );
-    // With `detections[]` written, no bullet restates the Tier 1 count the table shows.
-    expect(entry.data.detections?.length).toBeGreaterThan(0);
-    expect(entry.data.evidence_for).not.toContainEqual(expect.stringContaining('IOC Hunt matched'));
+    // The Tier 1 count quoted to the reader is the refs the entry carries, not the
+    // ones it was offered. Written even though `detections[]` tells the same story:
+    // packaging reads these bullets, and the card hides the restatement itself.
+    expect(entry.data.evidence_for).toContain(
+      'IOC Hunt matched 50 event(s) for this report in the hunt window, at least one in a required index; 49 are referenced here (see hunt_result.tier1.per_index for the required/optional split).'
+    );
   });
 
   it('shares the entity cap between the tiers instead of letting IOC Hunt fill it', () => {
