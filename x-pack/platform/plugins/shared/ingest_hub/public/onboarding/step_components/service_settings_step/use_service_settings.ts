@@ -17,7 +17,7 @@ import {
 import { sendGetPackagePolicies } from '@kbn/fleet-plugin/public';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import { makeDsView } from '../../aws_service_matrix';
+import { getDefaultEnabledDataStreams, makeDsView } from '../../aws_service_matrix';
 import { getOnboardingSessionKey } from '../../core/onboarding_session_storage';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { DUPLICATE_INSTANCE_ID_SEPARATOR, reconcileInstances } from './instances';
@@ -222,7 +222,7 @@ export function getIncompleteInstances(
     // An absent key means never configured: default to every data stream. An explicitly stored
     // empty array means the user disabled all inputs — respect it.
     const config: ServiceVars = serviceVars[inst.instanceId] ?? {
-      enabledDataStreams: service.dataStreams,
+      enabledDataStreams: getDefaultEnabledDataStreams(service),
       varsByDataStream: {},
     };
     return isServiceConfigIncomplete(service, config);
@@ -446,7 +446,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       const inst = instances.find((i) => i.instanceId === instanceId);
       const service = inst ? awsServicesMap?.get(inst.serviceId) : undefined;
       return {
-        enabledDataStreams: service?.dataStreams ?? [],
+        enabledDataStreams: service ? getDefaultEnabledDataStreams(service) : [],
         varsByDataStream: {},
       };
     },
