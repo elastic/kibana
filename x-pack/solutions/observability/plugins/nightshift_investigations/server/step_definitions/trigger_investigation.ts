@@ -276,7 +276,9 @@ export const triggerInvestigationStepDefinition = (
           snapshot.alert_version === 'v2' && snapshot.source === SIGNIFICANT_EVENTS_ALERT_SOURCE
             ? snapshot.data?.title
             : undefined;
-        return typeof dataTitle === 'string' && dataTitle.length > 0 ? dataTitle : [];
+        return typeof dataTitle === 'string' && dataTitle.length > 0
+          ? dataTitle.slice(0, MAX_TITLE_LENGTH)
+          : [];
       })[0];
       const title =
         input.title && input.title !== subjectId ? input.title : alertTitle ?? input.title;
