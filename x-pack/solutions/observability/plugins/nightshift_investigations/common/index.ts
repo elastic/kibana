@@ -54,6 +54,7 @@ export {
   investigationSubjectSchema,
   MAX_ALERTS_PER_INVESTIGATION,
   MAX_INVESTIGATION_NOTIFICATIONS,
+  MAX_V2_ALERT_DATA_LENGTH,
   v2AlertSnapshotSchema,
 } from './schemas';
 
