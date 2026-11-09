@@ -11,7 +11,11 @@ import moment from 'moment';
 import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
 import { getAuthenticatedPrincipal } from '@kbn/core-security-common';
-import type { CreateServiceAccountServerParams, ServiceAccount } from '@kbn/core-security-server';
+import type {
+  CreateServiceAccountServerParams,
+  ServiceAccount,
+  ServiceAccountSummary,
+} from '@kbn/core-security-server';
 import { HTTPAuthorizationHeader, UIAM_ERROR_CODES } from '@kbn/core-security-server';
 import type {
   AuditLogger,
@@ -68,7 +72,7 @@ import {
  * UIAM identifies a user by the numeric id that is also their Kibana username on serverless, so
  * the id maps straight onto the binder's `username`. That id is all the binder can say, which is
  * why the creator's own name comes along as `displayName`: nothing downstream could resolve it
- * from the id.
+ * from the id. UIAM names an API key by its description, and does not say who owns it.
  */
 const toCreatedBy = (creator: UiamServiceAccountCreator): ServiceAccountDirectoryCreator => {
   if (creator.type === 'user') {
@@ -80,7 +84,7 @@ const toCreatedBy = (creator: UiamServiceAccountCreator): ServiceAccountDirector
     type: 'api_key',
     apiKeyId: creator.id,
     variant: 'uiam',
-    ...(creator.description ? { displayName: creator.description } : {}),
+    ...(creator.description ? { apiKeyName: creator.description } : {}),
   };
 };
 
@@ -376,12 +380,16 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
 
     this.logger.debug(`Attempting to get service account ${id}`);
 
-    let account: UiamServiceAccountDetails;
+    let account: UiamServiceAccountDetails | null;
     try {
       account = await this.uiam.getServiceAccount(id);
     } catch (e) {
-      this.logger.error(`Failed to get service account: ${getDetailedErrorMessage(e)}`);
-      throw getNotFound(id, e) ?? e;
+      this.logger.error(`Failed to get service account [${id}]: ${getDetailedErrorMessage(e)}`);
+      throw e;
+    }
+
+    if (!account) {
+      throw Boom.notFound(`Service account [${id}] was not found`);
     }
 
     // UIAM keeps a revoked account around for a while, but it is gone as far as Kibana is
@@ -392,6 +400,38 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     }
 
     return toDirectoryEntry(this.cloudProjectContext, account);
+  }
+
+  /**
+   * UIAM reads are already authorized against Kibana's certificate rather than the user, so this
+   * is {@link get} without the user's privilege check.
+   */
+  async getSummary(id: string): Promise<ServiceAccountSummary | null> {
+    if (!this.license.isEnabled()) {
+      throw Boom.forbidden(
+        'Cannot get a service account: security features are disabled in Elasticsearch'
+      );
+    }
+
+    let account: UiamServiceAccountDetails | null;
+    try {
+      account = await this.uiam.getServiceAccount(id);
+    } catch (e) {
+      this.logger.error(`Failed to get service account [${id}]: ${getDetailedErrorMessage(e)}`);
+      throw e;
+    }
+
+    if (!account) {
+      return null;
+    }
+
+    if (account.revoked) {
+      this.logger.debug(`Service account [${id}] was found, but it was revoked`);
+      return null;
+    }
+
+    const { name, enabled, assumable } = toDirectoryEntry(this.cloudProjectContext, account);
+    return { id: account.id, name, enabled, assumable };
   }
 
   /**

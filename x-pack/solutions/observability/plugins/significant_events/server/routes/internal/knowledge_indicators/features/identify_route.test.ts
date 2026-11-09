@@ -91,7 +91,7 @@ const makeMaintenanceService = (state: SignificantEventsMaintenanceState = 'enab
 });
 
 const makeRequest = () => ({
-  spaceId: 'space-a',
+  spaceId: 'default',
   events: {
     aborted$: {
       subscribe: jest.fn(),
@@ -249,11 +249,24 @@ describe('feature identification route schemas', () => {
         sampleSize: 20,
         entityFilteredRatio: 0,
         diverseRatio: 1,
+        maxEntityFilters: 10,
         samplingTimeoutMs: 1_000,
       },
     };
 
     expect(prepareRoute.params.safeParse(prepareParams).success).toBe(true);
+    expect(
+      prepareRoute.params.safeParse({
+        ...prepareParams,
+        body: { ...prepareParams.body, maxEntityFilters: undefined },
+      }).success
+    ).toBe(false);
+    expect(
+      prepareRoute.params.safeParse({
+        ...prepareParams,
+        body: { ...prepareParams.body, maxEntityFilters: 51 },
+      }).success
+    ).toBe(false);
     expect(
       prepareRoute.params.safeParse({
         ...prepareParams,
@@ -306,6 +319,18 @@ describe('feature identification route schemas', () => {
       computedRoute.params.safeParse({
         path: { sourceId: 'logs.test' },
         body: { computedFeaturesTimeoutMs: 240_001 },
+      }).success
+    ).toBe(false);
+    expect(
+      computedRoute.params.safeParse({
+        path: { sourceId: 'logs.test' },
+        body: { computedFeaturesTimeoutMs: 60_000 },
+      }).success
+    ).toBe(true);
+    expect(
+      computedRoute.params.safeParse({
+        path: { sourceId: 'logs.test' },
+        body: {},
       }).success
     ).toBe(false);
   });
@@ -388,7 +413,7 @@ describe('inferred feature identification route', () => {
     const getKnowledgeIndicatorClient = jest.fn();
     const handlerParams = {
       params: { path: { sourceId: 'logs.test' }, body: null },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getKnowledgeIndicatorClient,
@@ -446,7 +471,7 @@ describe('inferred feature identification route', () => {
       })
     );
     expect(telemetry.trackFeaturesIdentified).not.toHaveBeenCalled();
-    expect(ensureEnabled).toHaveBeenCalledWith({ request, spaceId: 'space-a' });
+    expect(ensureEnabled).toHaveBeenCalledWith({ request, spaceId: 'default' });
   });
 
   it('installs the feature identification agent in the request space before identifying', async () => {
@@ -456,7 +481,7 @@ describe('inferred feature identification route', () => {
 
     expect(agentBuilder.agents.ensure).toHaveBeenCalledWith(
       expect.objectContaining({
-        spaceId: 'space-a',
+        spaceId: 'default',
         agent: expect.objectContaining({ id: FEATURE_IDENTIFICATION_AGENT_ID }),
       })
     );
@@ -522,7 +547,7 @@ describe('computed feature identification route', () => {
     const getKnowledgeIndicatorClient = jest.fn();
     const handlerParams = {
       params: { path: { sourceId: 'logs.test' }, body: null },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getKnowledgeIndicatorClient,
@@ -593,7 +618,7 @@ describe('should identify features route', () => {
         path: { sourceId: 'logs.test' },
         query: { thresholdHours: 24 },
       },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         sourcesClient: { get: jest.fn().mockResolvedValue({ source: { id: 'logs.test' } }) },

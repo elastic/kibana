@@ -11,6 +11,7 @@ import {
   MAX_ID_LENGTH,
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
+  SIGNIFICANT_EVENTS_ALERT_SOURCE,
 } from '@kbn/significant-events-schema';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
@@ -41,6 +42,7 @@ import { MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from '../../common/automation_limi
 import { createAutomationBudget } from '../lib/automations/automation_budget';
 import { AutomationDailyLimitReachedError, InvestigationQuotaDeniedError } from '../client/errors';
 import type { AutomationBudget } from '../types';
+import type { NightshiftTelemetryClient } from '../telemetry';
 
 const inputSchema = lazySchema(() =>
   z.object({
@@ -207,7 +209,8 @@ export const triggerInvestigationStepDefinition = (
   getAlertsClient: GetAlertsClient,
   getEpisodeLookup: GetEpisodeLookup,
   getActions: () => ActionsPluginStart | undefined,
-  settingsLocator: NightshiftSettingsLocator
+  settingsLocator: NightshiftSettingsLocator,
+  telemetry: NightshiftTelemetryClient
 ) =>
   createServerStepDefinition({
     id: 'nightshift.triggerInvestigation',
@@ -268,6 +271,17 @@ export const triggerInvestigationStepDefinition = (
               getEpisodeLookup,
             })
           : undefined;
+      const alertTitle = alerts?.flatMap((snapshot) => {
+        const dataTitle =
+          snapshot.alert_version === 'v2' && snapshot.source === SIGNIFICANT_EVENTS_ALERT_SOURCE
+            ? snapshot.data?.title
+            : undefined;
+        return typeof dataTitle === 'string' && dataTitle.length > 0
+          ? dataTitle.slice(0, MAX_TITLE_LENGTH)
+          : [];
+      })[0];
+      const title =
+        input.title && input.title !== subjectId ? input.title : alertTitle ?? input.title;
       try {
         const result = await client.start(
           {
@@ -276,7 +290,7 @@ export const triggerInvestigationStepDefinition = (
               id: subjectId,
               summary: input.summary,
             },
-            title: input.title,
+            title,
             trigger_type: input.trigger_type ?? 'automatic',
             message: input.message,
             instructions:
@@ -294,6 +308,7 @@ export const triggerInvestigationStepDefinition = (
           },
           {
             automationBudget,
+            automationId: input.automation_id,
             // A Slack thread subject means a Slack message started the run.
             entryPoint: input.subject_type === 'slack_thread' ? 'slack' : 'automation',
           }
@@ -304,21 +319,29 @@ export const triggerInvestigationStepDefinition = (
           context.logger.info(
             `Skipped investigation of ${input.subject_type}/${subjectId} for automation ${input.automation_id}: daily limit of ${error.limit} reached`
           );
+          telemetry.reportInvestigationSkipped({
+            trigger: 'automation',
+            origin: input.subject_type,
+            automation_id: input.automation_id,
+            skip_reason: 'automation_daily_limit',
+          });
           return { output: { skip_reason: 'daily_limit' as const, daily_limit: error.limit } };
         }
         if (error instanceof InvestigationQuotaDeniedError) {
           context.logger.info(
-            `Skipped investigation of ${input.subject_type}/${subjectId}: global investigation limit reached`
+            `Skipped investigation of ${input.subject_type}/${subjectId}: ${error.message}`
           );
           if (input.slack_thread) {
             await notifyInvestigationQuotaReached({
               getSoClient: () => getAutomationsSoClient(request, spaceId),
               getActions,
+              deniedBy: error.deniedBy,
               request,
               spaceId,
               slackThread: input.slack_thread,
               settingsLocator,
               kibanaUrl,
+              limit: error.limit,
               signal: context.abortSignal,
               logger: context.logger,
             });

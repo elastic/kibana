@@ -13,6 +13,7 @@ import {
   findNamedSubqueryForSource,
   getNamedSubqueries,
   getNamedSubqueriesAvailableTo,
+  getNextNamedSubqueryName,
   resolveNamedSubquerySources,
 } from './named_subqueries';
 
@@ -42,6 +43,17 @@ describe('getNamedSubqueries', () => {
 
   it('returns an empty list when the query has no LET header', () => {
     expect(getNamedSubqueries(parse('FROM logs-*').header)).toEqual([]);
+  });
+});
+
+describe('getNextNamedSubqueryName', () => {
+  it.each([
+    ['FROM logs-*', 'subquery0'],
+    ['LET subquery0 = (FROM logs-*); FROM subquery0', 'subquery1'],
+    ['LET subquery1 = (FROM logs-*); FROM subquery1', 'subquery0'],
+    ['LET subquery0 = (FROM a); LET subquery1 = (FROM b); FROM subquery1', 'subquery2'],
+  ])('returns the first unused name for "%s"', (query, expected) => {
+    expect(getNextNamedSubqueryName(getNamedSubqueries(parse(query).header))).toBe(expected);
   });
 });
 

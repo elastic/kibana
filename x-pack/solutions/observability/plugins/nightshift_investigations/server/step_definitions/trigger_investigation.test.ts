@@ -50,7 +50,9 @@ const createDefinition = (start: jest.Mock, soClient = savedObjectsClientMock.cr
   const getEpisodeLookup = jest.fn().mockReturnValue({ spaceId: 'test-space' });
   const getActions = jest.fn().mockReturnValue(undefined);
   const settingsLocator = { getRedirectUrl: jest.fn() } as never;
+  const telemetry = { reportInvestigationSkipped: jest.fn() };
   return {
+    telemetry,
     getAutomationsSoClient,
     getAlertsClient,
     getEpisodeLookup,
@@ -60,7 +62,8 @@ const createDefinition = (start: jest.Mock, soClient = savedObjectsClientMock.cr
       getAlertsClient,
       getEpisodeLookup,
       getActions,
-      settingsLocator
+      settingsLocator,
+      telemetry as never
     ),
     getActions,
     getInvestigationsClient,
@@ -85,6 +88,38 @@ describe('triggerInvestigationStepDefinition', () => {
       expect(start).toHaveBeenCalledWith(
         expect.objectContaining({ context: { alerts: snapshots } }),
         expect.anything()
+      );
+    });
+
+    describe('title fallback', () => {
+      it.each([
+        ['an empty title', 'elastic.significant_events', undefined, 'Checkout event'],
+        [
+          'a title equal to the alert id',
+          'elastic.significant_events',
+          'episode-1',
+          'Checkout event',
+        ],
+        ['a provided title', 'elastic.significant_events', 'Rule name', 'Rule name'],
+        ['another v2 source', 'other.source', 'episode-1', 'episode-1'],
+      ])(
+        'uses the alert data title for %s only when needed',
+        async (_name, source, title, expected) => {
+          (fetchInvestigationAlertSnapshots as jest.Mock).mockResolvedValue([
+            { alert_version: 'v2', id: 'episode-1', source, data: { title: 'Checkout event' } },
+          ]);
+          const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+          const { definition } = createDefinition(start);
+
+          await definition.handler(
+            createContext({ subject_type: 'alert', subject_id: 'episode-1', title })
+          );
+
+          expect(start).toHaveBeenCalledWith(
+            expect.objectContaining({ title: expected }),
+            expect.anything()
+          );
+        }
       );
     });
 
@@ -429,7 +464,7 @@ describe('triggerInvestigationStepDefinition', () => {
   });
 
   it('skips a start denied by the global limit without retrying', async () => {
-    const start = jest.fn().mockRejectedValue(new InvestigationQuotaDeniedError());
+    const start = jest.fn().mockRejectedValue(new InvestigationQuotaDeniedError('all'));
     const { definition } = createDefinition(start);
 
     expect(
@@ -443,7 +478,7 @@ describe('triggerInvestigationStepDefinition', () => {
     ).toEqual({ output: { skip_reason: 'investigation_limit' } });
     expect(start).toHaveBeenCalledTimes(1);
     expect(logger.info).toHaveBeenCalledWith(
-      'Skipped investigation of significant_event/event-1: global investigation limit reached'
+      'Skipped investigation of significant_event/event-1: The daily limit for all investigations has been reached'
     );
   });
 });
@@ -459,7 +494,7 @@ describe('investigation quota notice', () => {
   beforeEach(() => jest.mocked(notifyInvestigationQuotaReached).mockClear());
 
   it('tells the Slack thread when the global limit denies the start', async () => {
-    const error = new InvestigationQuotaDeniedError();
+    const error = new InvestigationQuotaDeniedError('all', 5);
     const soClient = savedObjectsClientMock.create();
     const { definition, getActions } = createDefinition(
       jest.fn().mockRejectedValue(error),
@@ -477,6 +512,8 @@ describe('investigation quota notice', () => {
         spaceId: 'test-space',
         slackThread,
         kibanaUrl: 'https://kibana.example.com',
+        deniedBy: 'all',
+        limit: 5,
       })
     );
     expect(params.getSoClient()).toBe(soClient);
@@ -486,7 +523,7 @@ describe('investigation quota notice', () => {
     ['an alert', { subject_type: 'alert', subject_id: 'alert-1', context: { alerts: [] } }],
     ['a manual question', { subject_type: 'manual', message: 'Review errors.' }],
   ])('does not post for %s', async (_name, input) => {
-    const error = new InvestigationQuotaDeniedError();
+    const error = new InvestigationQuotaDeniedError('all');
     const { definition } = createDefinition(jest.fn().mockRejectedValue(error));
 
     expect(await definition.handler(createContext(input))).toEqual({
@@ -574,7 +611,7 @@ describe('automation budget enforcement before dispatch', () => {
   it.each(['manual', 'alert', 'significant_event'])(
     'skips %s dispatches when the limit is reached',
     async (subjectType) => {
-      const { start, definition, soClient } = setup(2, 2);
+      const { start, definition, soClient, telemetry } = setup(2, 2);
       start.mockImplementation(async (_request, { automationBudget }) => {
         await automationBudget.consume();
         return { investigation_id: 'inv-1' };
@@ -586,12 +623,25 @@ describe('automation budget enforcement before dispatch', () => {
       ).toEqual({
         output: { skip_reason: 'daily_limit', daily_limit: 2 },
       });
+      expect(telemetry.reportInvestigationSkipped).toHaveBeenCalledWith({
+        trigger: 'automation',
+        origin: subjectType,
+        automation_id: 'a1',
+        skip_reason: 'automation_daily_limit',
+      });
       expect(soClient.update).not.toHaveBeenCalled();
       expect(logger.info).toHaveBeenCalledWith(
         expect.stringContaining('for automation a1: daily limit of 2 reached')
       );
     }
   );
+
+  it('leaves the deployment quota denial to the client', async () => {
+    const { start, definition, telemetry } = setup(2, 0);
+    start.mockRejectedValue(new InvestigationQuotaDeniedError('automatic'));
+    await definition.handler(createContext(input));
+    expect(telemetry.reportInvestigationSkipped).not.toHaveBeenCalled();
+  });
 
   it('charges the budget only when the client opens a new investigation', async () => {
     const { start, definition, soClient } = setup(2, 1);

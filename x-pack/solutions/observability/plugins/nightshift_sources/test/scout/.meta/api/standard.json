@@ -1,5 +1,5 @@
 {
-  "sha1": "7b0205eb94845a4a8fbf1a885697e25f3010339a",
+  "sha1": "5e1fbb3999213109ac8de3a7eb63b8e47426ef86",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -7,7 +7,7 @@
     {
       "id": "6395ba18a958586-8abd26b7d5e05b0",
       "title": "Nightshift sources authorization lets a Nightshift reader read but not write",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -16,14 +16,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_authorization.spec.ts",
-        "line": 61,
-        "column": 52
+        "line": 62,
+        "column": 50
       }
     },
     {
       "id": "6395ba18a958586-e55976c90eca97f",
       "title": "Nightshift sources authorization lets a user with manage but not configure read sources and refuses every change",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -33,13 +33,13 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_authorization.spec.ts",
         "line": 83,
-        "column": 14
+        "column": 29
       }
     },
     {
       "id": "6395ba18a958586-49190653b419991",
       "title": "Nightshift sources authorization reports ok health to a reader with only the implicit view grant",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -49,13 +49,13 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_authorization.spec.ts",
         "line": 102,
-        "column": 25
+        "column": 7
       }
     },
     {
       "id": "6395ba18a958586-fe4c40f9fcb3b61",
       "title": "Nightshift sources authorization denies a user without Nightshift privileges",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -65,13 +65,13 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_authorization.spec.ts",
         "line": 109,
-        "column": 28
+        "column": 75
       }
     },
     {
       "id": "6395ba18a958586-3e324fcdb3821e2",
       "title": "Nightshift sources authorization does not expose a source created in another space",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -80,8 +80,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_authorization.spec.ts",
-        "line": 121,
-        "column": 6
+        "line": 120,
+        "column": 16
       }
     },
     {

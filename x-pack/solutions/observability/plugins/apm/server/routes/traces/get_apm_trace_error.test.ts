@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { getApmTraceError } from './get_apm_trace_error';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
@@ -29,6 +30,7 @@ async function getSearchFilter(docId?: string): Promise<Array<Record<string, unk
 
   await getApmTraceError({
     apmEventClient,
+    logger: loggingSystemMock.createLogger(),
     traceId: 'trace-1',
     docId,
     start: 0,
@@ -70,6 +72,55 @@ describe('getApmTraceError', () => {
     });
   });
 
+  // A single OTel/partial error document missing a required field (e.g. `error.id`) used to make
+  // the whole mapping throw, turning the trace request into a 500. The malformed hit is now
+  // skipped and the valid ones returned.
+  it('skips malformed hits instead of failing the whole request', async () => {
+    const validHit = {
+      _id: 'error-1',
+      _index: 'apm-error',
+      _source: {},
+      fields: {
+        _id: ['error-1'],
+        'timestamp.us': [1000],
+        'trace.id': ['trace-1'],
+        'service.name': ['my-service'],
+        'error.id': ['error-1'],
+        'error.grouping_key': ['group-1'],
+        'processor.event': ['error'],
+      },
+    };
+
+    const malformedHit = {
+      _id: 'error-2',
+      _index: 'logs-generic.otel-default',
+      _source: {},
+      fields: {
+        _id: ['error-2'],
+        'timestamp.us': [2000],
+        'trace.id': ['trace-1'],
+        'service.name': ['my-service'],
+        // `error.id` and `error.grouping_key` are missing on this OTel-native document.
+        'processor.event': ['error'],
+      },
+    };
+
+    const apmEventClient = createApmEventClientMock([malformedHit, validHit]);
+    const logger = loggingSystemMock.createLogger();
+
+    const errors = await getApmTraceError({
+      apmEventClient,
+      logger,
+      traceId: 'trace-1',
+      start: 0,
+      end: 1,
+    });
+
+    expect(errors).toHaveLength(1);
+    expect(errors[0].id).toBe('error-1');
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('error-2'));
+  });
+
   // An error document without `error.id` (e.g. OTel-native exception/error events) must not
   // throw `Missing required fields (error.id) in event` and fail the whole trace request with a
   // 500. Such a document is skipped while valid classic APM error docs are still returned.
@@ -103,6 +154,7 @@ describe('getApmTraceError', () => {
 
     const result = await getApmTraceError({
       apmEventClient,
+      logger: loggingSystemMock.createLogger(),
       traceId: 'trace-1',
       start: 0,
       end: 1,

@@ -177,7 +177,7 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
   apiTest('POST /internal/agent_builder_sml/sml/_search autocomplete', async ({ apiClient }) => {
     const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER_SML}/sml/_search`, {
       headers: ih(),
-      body: { query: 'pacif', size: 20 },
+      body: { query: 'pacific bluefin', size: 20 },
       responseType: 'json',
     });
     expect(response).toHaveStatusCode(200);
@@ -266,7 +266,9 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
   apiTest(
     'POST /internal/agent_builder_sml/sml/_autocomplete matches a type stored as "Workflow"',
     async ({ apiClient }) => {
-      const results = await autocomplete(apiClient, 'workflo');
+      // The title half keeps the match from depending on how many other workflows (managed
+      // workflows included) are indexed: a bare "workflo" is capped at `size` results.
+      const results = await autocomplete(apiClient, 'workflo/capitalized type entry');
       expect(results.some((r) => r.id === capitalizedTypeEntryId)).toBe(true);
     }
   );

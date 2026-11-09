@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { BoolQuery } from '@kbn/es-query';
 import type { ServiceMapSpan } from '../../../common/service_map/types';
 import { type ServiceMapResponse } from '../../../common/service_map';
+import type { SavedServiceGroup } from '../../../common/service_groups';
 import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import type { APMConfig } from '../..';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
@@ -17,8 +18,11 @@ import { withApmSpan } from '../../utils/with_apm_span';
 import { getTraceSampleIds } from './get_trace_sample_ids';
 import { DEFAULT_ANOMALIES, getServiceAnomalies } from './get_service_anomalies';
 import { getServiceStats } from './get_service_stats';
+import type { EnhancedServiceStatsOptions } from './get_enhanced_service_stats';
+import { getEnhancedServiceStats } from './get_enhanced_service_stats';
 import { fetchExitSpanSamplesFromTraceIds } from './fetch_exit_span_samples';
 import { getServiceCallGraph } from './get_service_call_graph';
+import { getServiceGroupingAttributes } from './get_service_grouping_attributes';
 import { matchCallGraphToServices } from './match_service_call_graph';
 
 export interface IEnvOptions {
@@ -32,6 +36,8 @@ export interface IEnvOptions {
   start: number;
   end: number;
   serviceGroupKuery?: string;
+  /** Saved groups to match for grouping. Omitted or empty when already on a group map. */
+  savedServiceGroups?: SavedServiceGroup[];
   kuery?: string;
   /** Pre-built ES query from the client (query + filter bar + Controls API). */
   esQuery?: { bool: BoolQuery };
@@ -85,15 +91,19 @@ async function getConnectionData({
   });
 }
 
+/** Service map grouping features, only available when service map grouping is enabled */
+export type ServiceMapGrouping =
+  | { enabled: false }
+  | ({ enabled: true } & Pick<EnhancedServiceStatsOptions, 'source'>);
+
 export function getServiceMap(
   options: IEnvOptions & {
     maxNumberOfServices: number;
-    /** When off, the call graph query does not run and the map is unchanged. */
-    groupingEnabled?: boolean;
+    grouping: ServiceMapGrouping;
   }
 ): Promise<ServiceMapResponse> {
   return withApmSpan('get_service_map', async () => {
-    const { logger } = options;
+    const { logger, grouping } = options;
     const anomaliesPromise = getServiceAnomalies(
       options
 
@@ -105,21 +115,33 @@ export function getServiceMap(
 
     // A service page map stays ungrouped. A failed query leaves this map unchanged.
     const callGraphPromise =
-      options.groupingEnabled && !options.serviceName
+      grouping.enabled && !options.serviceName
         ? getServiceCallGraph(options).catch((error) => {
             logger.debug(`Unable to retrieve the call graph for service maps.`, { error });
             return undefined;
           })
         : Promise.resolve(undefined);
 
+    const groupingAttributesPromise =
+      grouping.enabled && !options.serviceName
+        ? getServiceGroupingAttributes({ ...options, source: grouping.source }).catch((error) => {
+            logger.debug(`Unable to retrieve grouping attributes for service maps.`, { error });
+            return undefined;
+          })
+        : Promise.resolve(undefined);
+
+    // groupingAttributes is fetched for group selection. It stays off the response until then.
     const [connectionData, servicesData, anomalies, callGraph] = await Promise.all([
       getConnectionData(options),
-      getServiceStats(options),
+      grouping.enabled
+        ? getEnhancedServiceStats({ ...options, source: grouping.source })
+        : getServiceStats(options),
       anomaliesPromise,
       callGraphPromise,
+      groupingAttributesPromise,
     ]);
 
-    // Group selection will use this list. It stays off the response until then.
+    // Group selection will use the call graph. It stays off the response until then.
     if (callGraph) {
       try {
         matchCallGraphToServices({
