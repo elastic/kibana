@@ -161066,53 +161066,15 @@ components:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricPercentile'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricPercentileRanks'
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
-              - discriminator:
-                  propertyName: apply_color_to
-                oneOf:
-                  - additionalProperties: false
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricDifferences'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricMovingAverage'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricCumulativeSum'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricCounterRate'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricFormula'
-              - additionalProperties: false
-                type: object
-                properties:
-                  alignment:
-                    default: right
-                    description: Alignment of the columns.
-                    enum:
-                      - left
-                      - center
-                      - right
-                    type: string
-                  apply_color_to:
-                    anyOf:
-                      - description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
-                        enum:
-                          - value
-                          - background
-                        type: string
-                      - enum:
-                          - badge
-                        type: string
-                    description: 'Column color target: `value` for cell text, `background` for cell background, or `badge` for a badge overlay.'
-                  color:
-                    anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
-                    description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
-                  summary:
-                    additionalProperties: false
-                    description: Summary row configuration
+              - discriminator:
+                  propertyName: apply_color_to
+                oneOf:
+                  - additionalProperties: false
                     type: object
                     properties:
                       alignment:
@@ -187524,53 +187486,15 @@ components:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricPercentile'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricPercentileRanks'
                   - anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDifferencesOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMovingAverageOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCumulativeSumOperation'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visCounterRateOperation'
-                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormulaOperation'
-              - discriminator:
-                  propertyName: apply_color_to
-                oneOf:
-                  - additionalProperties: false
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricDifferences'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricMovingAverage'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricCumulativeSum'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricCounterRate'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableMetricFormula'
-              - additionalProperties: false
-                type: object
-                properties:
-                  alignment:
-                    default: right
-                    description: Alignment of the columns.
-                    enum:
-                      - left
-                      - center
-                      - right
-                    type: string
-                  apply_color_to:
-                    anyOf:
-                      - description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
-                        enum:
-                          - value
-                          - background
-                        type: string
-                      - enum:
-                          - badge
-                        type: string
-                    description: 'Column color target: `value` for cell text, `background` for cell background, or `badge` for a badge overlay.'
-                  color:
-                    anyOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorByValue'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visColorMapping'
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
-                    default:
-                      type: auto
-                    description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
-                  summary:
-                    additionalProperties: false
-                    description: Summary row configuration
+              - discriminator:
+                  propertyName: apply_color_to
+                oneOf:
+                  - additionalProperties: false
                     type: object
                     properties:
                       alignment:
