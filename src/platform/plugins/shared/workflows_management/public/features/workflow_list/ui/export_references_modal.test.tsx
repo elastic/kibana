@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { WorkflowListItemDto } from '@kbn/workflows';
@@ -63,27 +62,27 @@ describe('ExportReferencesModal', () => {
     expect(screen.getByTestId('export-references-add-all')).toBeInTheDocument();
   });
 
-  it('should call onIgnore when Ignore is clicked', async () => {
+  it('should call onIgnore when Ignore is clicked', () => {
     renderWithI18n(<ExportReferencesModal {...defaultProps} />);
-    await userEvent.click(screen.getByTestId('export-references-ignore'));
+    fireEvent.click(screen.getByTestId('export-references-ignore'));
     expect(mockOnIgnore).toHaveBeenCalledTimes(1);
   });
 
-  it('should call onAddDirect when Add referenced is clicked', async () => {
+  it('should call onAddDirect when Add referenced is clicked', () => {
     renderWithI18n(<ExportReferencesModal {...defaultProps} />);
-    await userEvent.click(screen.getByTestId('export-references-add-direct'));
+    fireEvent.click(screen.getByTestId('export-references-add-direct'));
     expect(mockOnAddDirect).toHaveBeenCalledTimes(1);
   });
 
-  it('should call onAddAll when Add all referenced is clicked', async () => {
+  it('should call onAddAll when Add all referenced is clicked', () => {
     renderWithI18n(<ExportReferencesModal {...defaultProps} />);
-    await userEvent.click(screen.getByTestId('export-references-add-all'));
+    fireEvent.click(screen.getByTestId('export-references-add-all'));
     expect(mockOnAddAll).toHaveBeenCalledTimes(1);
   });
 
-  it('should call onCancel when Cancel is clicked', async () => {
+  it('should call onCancel when Cancel is clicked', () => {
     renderWithI18n(<ExportReferencesModal {...defaultProps} />);
-    await userEvent.click(screen.getByTestId('export-references-cancel'));
+    fireEvent.click(screen.getByTestId('export-references-cancel'));
     expect(mockOnCancel).toHaveBeenCalledTimes(1);
   });
 });
