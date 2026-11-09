@@ -612,3 +612,26 @@ describe('Forensics close investigation gate', () => {
     expect(gate.steps[gate.steps.length - 1].type).toBe('workflow.output');
   });
 });
+
+// The close decision is the last one the forensics summary card shows; the gate renders it itself.
+describe('forensics summary card', () => {
+  const render = stepIn('render_forensics_summary');
+  const runsWhen = (status: string | undefined) =>
+    evaluate(String(render?.if), { steps: { create_and_gate_proposal: { output: { status } } } });
+
+  it('re-renders the card once the close question is decided', () => {
+    expect(render?.type).toBe('alertzero.forensics.renderSummary');
+    expect(render?.with).toEqual({ conversation_id: '{{ inputs.investigationConversationId }}' });
+    expect(names.indexOf('render_forensics_summary')).toBeGreaterThan(
+      names.indexOf('create_and_gate_proposal')
+    );
+    expect(names.indexOf('render_forensics_summary')).toBeLessThan(names.indexOf('emit_result'));
+  });
+
+  it('only renders when the question settled, and never fails the gate', () => {
+    expect(runsWhen('succeeded')).toBe(true);
+    expect(runsWhen('expired')).toBe(true);
+    expect(runsWhen(undefined)).toBe(false);
+    expect(render?.['on-failure']).toEqual({ continue: true });
+  });
+});

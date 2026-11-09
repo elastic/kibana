@@ -249,6 +249,17 @@ steps:
       proposal_decision: "{{ steps.create_and_gate_proposal.output.decision }}"
       proposal_expired: "${{ steps.create_and_gate_proposal.output.status == 'expired' }}"
 
+  # Refreshes the forensics summary card with this decision. A decision writes nothing to the
+  # investigation, so no conversation event would. Before the close question, so the card
+  # shows every containment decision when it is asked. Writes nothing when the card is
+  # current; a failed render costs the card's refresh, not the gate.
+  - name: render_forensics_summary
+    type: alertzero.forensics.renderSummary
+    on-failure:
+      continue: true
+    with:
+      conversation_id: "{{ inputs.investigationConversationId }}"
+
   # Two calls, not a conditional retry: `!= filter chain -> comparison` in one
   # expression is illegal in this engine, so an "only requery again if the first
   # read looks stale" branch would need the same split this avoids entirely.

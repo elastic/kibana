@@ -471,3 +471,26 @@ describe('Forensics proposal gate', () => {
     });
   });
 });
+
+// A containment decision writes nothing to the investigation, so no conversation event refreshes the
+// forensics summary card: the gate renders it once the decision is in, before the close question.
+describe('forensics summary card', () => {
+  const names = gate.steps.map(({ name }) => name);
+  const render = stepIn(gate.steps, 'render_forensics_summary');
+
+  it('re-renders the card after the decision and before the close question is asked', () => {
+    expect(render?.type).toBe('alertzero.forensics.renderSummary');
+    expect(render?.with).toEqual({ conversation_id: '{{ inputs.investigationConversationId }}' });
+    expect(names.indexOf('render_forensics_summary')).toBeGreaterThan(
+      names.indexOf('create_and_gate_proposal')
+    );
+    expect(names.indexOf('render_forensics_summary')).toBeLessThan(
+      names.indexOf('dispatch_close_gate')
+    );
+  });
+
+  it('does not fail the gate when the card cannot be rendered', () => {
+    expect(render?.if).toBeUndefined();
+    expect(render?.['on-failure']).toEqual({ continue: true });
+  });
+});
