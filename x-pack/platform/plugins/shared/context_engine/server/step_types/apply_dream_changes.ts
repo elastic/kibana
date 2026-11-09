@@ -18,6 +18,7 @@ import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import { createVerifyEsql, keepVerifiedPatterns } from '../dreaming/access_patterns';
 import { applyOperations, type PlannedWrite } from '../dreaming/apply';
 import { kindOf, type DreamedKi } from '../dreaming/dreamed_ki';
+import { isVisibleInSpace } from '../dreaming/permissions';
 import { referencedIds, resolveChangeSet, vocabularyOf } from '../dreaming/resolve_change_set';
 import type { KiStepDependencies } from './helpers';
 import {
@@ -89,7 +90,12 @@ export const getApplyDreamChangesStepDefinition = ({
           abortSignal: context.abortSignal,
         });
         const ki = revision?.source as DreamedKi | undefined;
-        if (ki && !isKiDeleted(ki) && kindOf(ki) !== undefined) {
+        if (
+          ki &&
+          !isKiDeleted(ki) &&
+          kindOf(ki) !== undefined &&
+          isVisibleInSpace(ki.permissions, spaceId)
+        ) {
           existing.set(kiId, { ...ki, id: kiId });
         }
       }
@@ -115,6 +121,8 @@ export const getApplyDreamChangesStepDefinition = ({
           aiIndexId,
           dest: aiIndex.dest,
           writer: kiWriterFromContext(stepContext),
+          spaceId,
+          memoryPermissions: new Map(memories.map(({ id, permissions }) => [id, permissions])),
           abortSignal: context.abortSignal,
           dryRun: planned,
         },

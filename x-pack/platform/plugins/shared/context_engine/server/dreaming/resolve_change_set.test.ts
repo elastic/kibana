@@ -21,7 +21,7 @@ import {
 } from './resolve_change_set';
 
 const existingEntity: DreamedKi = {
-  id: 'entity-person-bob',
+  id: 'entity-person--bob',
   type: 'entity.person',
   title: 'Bob',
   references: [{ uri: 'ki://m-old', relation: 'derived_from' }],
@@ -64,12 +64,12 @@ describe('referencedIds', () => {
     expect(
       referencedIds(
         changeSet({
-          entities: [{ ref: 'entity-person-bob' }, { ref: 'new:1' }],
-          facts: [{ ref: 'fact-abc', about: ['entity-person-bob', 'new:1', 'entity-team-x'] }],
-          relationships: [{ type: 'member_of', source: 'new:1', target: 'entity-team-y' }],
+          entities: [{ ref: 'entity-person--bob' }, { ref: 'new:1' }],
+          facts: [{ ref: 'fact-abc', about: ['entity-person--bob', 'new:1', 'entity-team--x'] }],
+          relationships: [{ type: 'member_of', source: 'new:1', target: 'entity-team--y' }],
         })
       )
-    ).toEqual(['entity-person-bob', 'fact-abc', 'entity-team-x', 'entity-team-y']);
+    ).toEqual(['entity-person--bob', 'fact-abc', 'entity-team--x', 'entity-team--y']);
   });
 });
 
@@ -111,7 +111,7 @@ describe('resolveChangeSet', () => {
     expect(rejected).toEqual([]);
     expect(operations[0]).toEqual({
       op: 'upsert_entity',
-      id: 'entity-team-platform-team',
+      id: 'entity-team--platform-team',
       type: 'team',
       name: 'Platform Team',
       content: 'The team Bob is a member of.',
@@ -129,7 +129,7 @@ describe('resolveChangeSet', () => {
     expect(operations[2]).toMatchObject({
       op: 'relationship',
       sourceId: existingEntity.id,
-      targetId: 'entity-team-platform-team',
+      targetId: 'entity-team--platform-team',
       type: 'member_of',
       remove: false,
     });
@@ -348,7 +348,7 @@ describe('resolveChangeSet', () => {
     expect(operations[1]).toEqual({
       op: 'relationship',
       sourceId: existingEntity.id,
-      targetId: 'entity-team-ops',
+      targetId: 'entity-team--ops',
       type: 'member_of',
       remove: true,
       sourceMemoryIds: [],

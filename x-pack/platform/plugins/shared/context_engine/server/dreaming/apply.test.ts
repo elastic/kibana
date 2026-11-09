@@ -21,11 +21,20 @@ jest.mock('../ai_indices/ki_write', () => ({ softDeleteKi: jest.fn() }));
 
 const writer = { uri: 'workflow://dreaming', metadata: { run_id: 'exec-1' } };
 
-const context = (dest: ApplyContext['dest'] = { type: 'index', value: 'ai-index-idx-a' }) => ({
+const context = (
+  dest: ApplyContext['dest'] = { type: 'index', value: 'ai-index-idx-a' },
+  memoryPermissions: ApplyContext['memoryPermissions'] = new Map()
+): ApplyContext => ({
   esClient: elasticsearchServiceMock.createElasticsearchClient(),
   aiIndexId: 'a',
   dest,
   writer,
+  spaceId: 'team-a',
+  memoryPermissions,
+});
+
+const restrictedTo = (...groups: Array<{ space: string; name?: string[] }>) => ({
+  kibana: { privileges: groups.map((group) => ({ ...group, count: group.name?.length ?? 0 })) },
 });
 
 const revisionOf = (source: DreamedKi): KiRevision => ({
@@ -283,6 +292,8 @@ describe('applyOperations', () => {
   });
 
   it('soft-deletes, and does not count a KI that is already gone', async () => {
+    stored.set('fact-1', { id: 'fact-1', type: 'fact.note', title: 'Old' });
+    stored.set('fact-2', { id: 'fact-2', type: 'fact.note', title: 'Older' });
     jest
       .mocked(softDeleteKi)
       .mockResolvedValueOnce({ id: 'fact-1' })
@@ -291,13 +302,102 @@ describe('applyOperations', () => {
     const counts = await applyOperations(context(), [
       { op: 'delete', id: 'fact-1' },
       { op: 'delete', id: 'fact-2' },
+      { op: 'delete', id: 'fact-3' },
     ]);
 
     expect(counts).toEqual({ created: 0, updated: 0, deleted: 1 });
+    expect(softDeleteKi).toHaveBeenCalledTimes(2);
     expect(softDeleteKi).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ kiId: 'fact-1', writer, refresh: true })
     );
+  });
+
+  it('makes a KI built from restricted memories visible only in this space, to whoever can see them all', async () => {
+    const memoryPermissions = new Map([
+      ['m-1', restrictedTo({ space: 'team-a', name: ['ai_index:a/read'] }, { space: 'team-b' })],
+      ['m-2', restrictedTo({ space: '*', name: ['ai_index:b/read'] })],
+      ['m-3', undefined],
+    ]);
+
+    await applyOperations(context(undefined, memoryPermissions), [
+      {
+        op: 'upsert_fact',
+        id: 'fact-1',
+        type: 'note',
+        title: 'A',
+        content: 'A.',
+        sourceMemoryIds: ['m-1', 'm-2'],
+      },
+      {
+        op: 'upsert_fact',
+        id: 'fact-2',
+        type: 'note',
+        title: 'B',
+        content: 'B.',
+        sourceMemoryIds: ['m-3'],
+      },
+    ]);
+
+    const [restricted, open] = written();
+    expect(restricted.permissions).toEqual(
+      restrictedTo({ space: 'team-a', name: ['ai_index:a/read', 'ai_index:b/read'] })
+    );
+    expect(open).not.toHaveProperty('permissions');
+  });
+
+  it('never widens who can see an existing KI', async () => {
+    stored.set('fact-1', {
+      id: 'fact-1',
+      type: 'fact.note',
+      title: 'A',
+      permissions: restrictedTo({ space: 'team-a', name: ['ai_index:a/read'] }),
+    });
+
+    await applyOperations(context(), [
+      {
+        op: 'upsert_fact',
+        id: 'fact-1',
+        type: 'note',
+        title: 'A2',
+        content: 'A2.',
+        sourceMemoryIds: ['m-1'],
+      },
+    ]);
+
+    expect(written()[0].permissions).toEqual(
+      restrictedTo({ space: 'team-a', name: ['ai_index:a/read'] })
+    );
+  });
+
+  it('leaves alone a KI this space cannot see', async () => {
+    const hidden = restrictedTo({ space: 'team-b' });
+    stored.set('entity-team--ops', {
+      id: 'entity-team--ops',
+      type: 'entity.team',
+      title: 'Ops',
+      permissions: hidden,
+    });
+    stored.set('fact-1', { id: 'fact-1', type: 'fact.note', title: 'A', permissions: hidden });
+
+    for (const dryRun of [undefined, new Map()]) {
+      const counts = await applyOperations({ ...context(), dryRun }, [
+        {
+          op: 'upsert_entity',
+          id: 'entity-team--ops',
+          type: 'team',
+          name: 'Ops',
+          attributes: {},
+          sourceMemoryIds: ['m-1'],
+        },
+        { op: 'delete', id: 'fact-1' },
+      ]);
+
+      expect(counts).toEqual({ created: 0, updated: 0, deleted: 0 });
+      expect(dryRun?.size ?? 0).toBe(0);
+    }
+    expect(putKiRevision).not.toHaveBeenCalled();
+    expect(softDeleteKi).not.toHaveBeenCalled();
   });
 
   describe('on a dry run', () => {
@@ -358,7 +458,7 @@ describe('applyOperations', () => {
       expect(counts).toEqual(await applyOperations(context(), operations));
       expect(counts).toEqual({ created: 1, updated: 2, deleted: 1 });
       expect(jest.mocked(putKiRevision).mock.calls).toHaveLength(3);
-      expect(jest.mocked(softDeleteKi).mock.calls).toHaveLength(2);
+      expect(jest.mocked(softDeleteKi).mock.calls).toHaveLength(1);
     });
 
     it('reports each KI as it would be stored, including a relationship on a new entity', async () => {
@@ -392,6 +492,20 @@ describe('applyOperations', () => {
         }),
       });
       expect(dryRun.get('fact-1')).toEqual({ change: 'deleted' });
+    });
+
+    it('reports a KI deleted and then written again as created, as it counts it', async () => {
+      const dryRun = new Map();
+
+      const counts = await applyOperations({ ...context(), dryRun }, [
+        { op: 'delete', id: 'entity-person-bob' },
+        operations[2],
+      ]);
+
+      expect(counts).toEqual({ created: 1, updated: 0, deleted: 1 });
+      expect(dryRun.get('entity-person-bob')).toEqual(
+        expect.objectContaining({ change: 'created' })
+      );
     });
   });
 });

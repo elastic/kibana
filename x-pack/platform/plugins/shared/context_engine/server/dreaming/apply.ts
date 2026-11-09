@@ -42,6 +42,7 @@ import {
   type DreamedKiReference,
 } from './dreamed_ki';
 import { kiUri } from './ids';
+import { derivedPermissions, isVisibleInSpace, type KiPermissions } from './permissions';
 import type {
   DreamingOperation,
   RelationshipOperation,
@@ -68,6 +69,10 @@ export interface ApplyContext {
   aiIndexId: string;
   dest: AiIndexDest;
   writer: KiWriter;
+  /** The space dreaming runs in: KIs it cannot see there are left alone. */
+  spaceId: string;
+  /** The permissions of each memory the model was shown. */
+  memoryPermissions: ReadonlyMap<string, KiPermissions | undefined>;
   abortSignal?: AbortSignal;
   /** Collects the writes by KI id instead of storing them. */
   dryRun?: Map<string, PlannedWrite>;
@@ -130,24 +135,50 @@ const storedDocument = (
   } satisfies StoredKi;
 };
 
+const hiddenFrom = ({ spaceId }: ApplyContext, revision: KiRevision | undefined): boolean => {
+  const source = revision?.source as DreamedKi | undefined;
+  return source !== undefined && !isVisibleInSpace(source.permissions, spaceId);
+};
+
+const withDerivedPermissions =
+  (
+    { spaceId, memoryPermissions }: ApplyContext,
+    sourceMemoryIds: readonly string[],
+    build: BuildDocument
+  ): BuildDocument =>
+  (current) => {
+    const document = build(current);
+    if (!document) {
+      return undefined;
+    }
+    const permissions = derivedPermissions(
+      [current?.permissions, ...sourceMemoryIds.map((id) => memoryPermissions.get(id))],
+      spaceId
+    );
+    return permissions ? { ...document, permissions } : document;
+  };
+
 const planDocument = async (
-  { esClient, aiIndexId, dest, writer, abortSignal }: ApplyContext,
+  context: ApplyContext,
   planned: Map<string, PlannedWrite>,
   kiId: string,
   build: BuildDocument
 ): Promise<'created' | 'updated' | 'skipped'> => {
+  const { esClient, aiIndexId, dest, writer, abortSignal } = context;
   const previous = planned.get(kiId);
-  const current = previous
-    ? (previous.ki as DreamedKi | undefined)
-    : activeSource(
-        await findKiRevision({ esClient, aiIndexId, dest, kiId, includeSource: true, abortSignal })
-      );
+  const revision = previous
+    ? undefined
+    : await findKiRevision({ esClient, aiIndexId, dest, kiId, includeSource: true, abortSignal });
+  if (hiddenFrom(context, revision)) {
+    return 'skipped';
+  }
+  const current = previous ? (previous.ki as DreamedKi | undefined) : activeSource(revision);
   const document = build(current);
   if (!document) {
     return 'skipped';
   }
   planned.set(kiId, {
-    change: previous?.change === 'created' || (!previous && !current) ? 'created' : 'updated',
+    change: previous?.change === 'created' || !current ? 'created' : 'updated',
     ki: storedDocument(document, kiId, current, writer),
   });
   return current ? 'updated' : 'created';
@@ -156,9 +187,11 @@ const planDocument = async (
 const writeDocument = async (
   context: ApplyContext,
   kiId: string,
-  build: BuildDocument
+  sourceMemoryIds: readonly string[],
+  buildDocument: BuildDocument
 ): Promise<'created' | 'updated' | 'skipped'> => {
   const { esClient, aiIndexId, dest, writer, abortSignal, dryRun } = context;
+  const build = withDerivedPermissions(context, sourceMemoryIds, buildDocument);
   if (dryRun) {
     return planDocument(context, dryRun, kiId, build);
   }
@@ -172,6 +205,9 @@ const writeDocument = async (
         includeSource: true,
         abortSignal,
       });
+      if (hiddenFrom(context, revision)) {
+        return 'skipped' as const;
+      }
       const current = activeSource(revision);
       const document = build(current);
       if (!document) {
@@ -243,7 +279,7 @@ const withAccessPatterns = (
 };
 
 const upsertEntity = (context: ApplyContext, operation: UpsertEntityOperation) =>
-  writeDocument(context, operation.id, (current) => ({
+  writeDocument(context, operation.id, operation.sourceMemoryIds, (current) => ({
     ...current,
     id: operation.id,
     type: `${ENTITY_TYPE_PREFIX}${operation.type}`,
@@ -258,7 +294,7 @@ const upsertEntity = (context: ApplyContext, operation: UpsertEntityOperation) =
   }));
 
 const upsertFact = (context: ApplyContext, operation: UpsertFactOperation) =>
-  writeDocument(context, operation.id, (current) => {
+  writeDocument(context, operation.id, operation.sourceMemoryIds, (current) => {
     const { about } = operation;
     const kept =
       about === undefined
@@ -288,7 +324,7 @@ const upsertFact = (context: ApplyContext, operation: UpsertFactOperation) =>
   });
 
 const applyRelationship = (context: ApplyContext, operation: RelationshipOperation) =>
-  writeDocument(context, operation.sourceId, (current) => {
+  writeDocument(context, operation.sourceId, operation.sourceMemoryIds, (current) => {
     if (!current) {
       return undefined;
     }
@@ -318,14 +354,25 @@ const applyRelationship = (context: ApplyContext, operation: RelationshipOperati
     };
   });
 
+const deletable = async (context: ApplyContext, kiId: string): Promise<boolean> => {
+  const { esClient, aiIndexId, dest, abortSignal } = context;
+  const revision = await findKiRevision({
+    esClient,
+    aiIndexId,
+    dest,
+    kiId,
+    includeSource: true,
+    abortSignal,
+  });
+  return revision !== undefined && !hiddenFrom(context, revision);
+};
+
 const planDelete = async (
-  { esClient, aiIndexId, dest, abortSignal }: ApplyContext,
+  context: ApplyContext,
   planned: Map<string, PlannedWrite>,
   kiId: string
 ): Promise<boolean> => {
-  const exists =
-    planned.has(kiId) ||
-    (await findKiRevision({ esClient, aiIndexId, dest, kiId, abortSignal })) !== undefined;
+  const exists = planned.has(kiId) || (await deletable(context, kiId));
   if (exists) {
     planned.set(kiId, { change: 'deleted' });
   }
@@ -336,6 +383,9 @@ const deleteKi = async (context: ApplyContext, kiId: string): Promise<boolean> =
   const { esClient, aiIndexId, dest, writer, abortSignal, dryRun } = context;
   if (dryRun) {
     return planDelete(context, dryRun, kiId);
+  }
+  if (!(await deletable(context, kiId))) {
+    return false;
   }
   try {
     await softDeleteKi(esClient, { aiIndexId, dest, kiId, writer, refresh: true, abortSignal });

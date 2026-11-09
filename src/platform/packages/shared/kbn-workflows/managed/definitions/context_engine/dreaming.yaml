@@ -32,6 +32,8 @@ outputs:
     type: number
   - name: rejected
     type: number
+  - name: resume_from
+    type: string
 triggers:
   - type: scheduled
     with:
@@ -71,6 +73,19 @@ steps:
       default_hours: 168
       max_hours: 720
 
+  - name: resume
+    type: if
+    condition: '${{ inputs.since == blank and steps.last_run.output.last_success.execution_id != blank }}'
+    steps:
+      - name: last_output
+        type: kibana.request
+        with:
+          method: GET
+          path: '/s/{{ workflow.spaceId }}/api/workflows/executions/{{ steps.last_run.output.last_success.execution_id }}'
+          query:
+            includeOutput: true
+            omitStepExecutions: true
+
   - name: read_memories
     type: elasticsearch.search
     with:
@@ -78,17 +93,28 @@ steps:
       ignore_unavailable: true
       size: 500
       sort:
-        - updated_at: desc
+        - updated_at: asc
       collapse:
         field: id
+        inner_hits:
+          name: latest
+          size: 1
+          sort:
+            - updated_at: desc
+          _source:
+            - id
+            - type
+            - title
+            - content
+            - updated_at
+            - attributes
+            - permissions
+            - governance.lifecycle.status
+          docvalue_fields:
+            - field: expires_at
+              format: strict_date_time
       _source:
-        - id
-        - type
-        - title
-        - content
         - updated_at
-        - attributes
-        - governance.lifecycle.status
       query:
         bool:
           filter:
@@ -98,14 +124,37 @@ steps:
                   - memory.session
             - range:
                 updated_at:
-                  gte: '{{ inputs.since | default: steps.last_run.output.since }}'
+                  gte: '{{ inputs.since | default: steps.last_output.output.context.output.resume_from | default: steps.last_run.output.since }}'
+            - bool:
+                should:
+                  - bool:
+                      must_not:
+                        nested:
+                          path: permissions.kibana.privileges
+                          query:
+                            match_all: {}
+                          ignore_unmapped: true
+                  - nested:
+                      path: permissions.kibana.privileges
+                      ignore_unmapped: true
+                      query:
+                        bool:
+                          should:
+                            - term:
+                                permissions.kibana.privileges.space: '{{ workflow.spaceId }}'
+                            - term:
+                                permissions.kibana.privileges.space: '*'
+                          minimum_should_match: 1
+                minimum_should_match: 1
 
   - name: active
     type: data.set
     with:
       memories: >-
-        ${{ steps.read_memories.output.hits.hits | map: "_source"
-        | reject_exp: "memory", "memory.governance.lifecycle.status == 'deleted' or memory.governance.lifecycle.status == 'verification_failed'" }}
+        ${{ steps.read_memories.output.hits.hits | map: "inner_hits.latest.hits.hits.first"
+        | reject_exp: "memory", "memory._source.governance.lifecycle.status == 'deleted' or memory._source.governance.lifecycle.status == 'verification_failed' or memory.fields.expires_at.first <= execution.startedAt"
+        | map: "_source" }}
+      resume_from: '{% if steps.read_memories.output.hits.hits.size == 500 %}{{ steps.read_memories.output.hits.hits.last._source.updated_at }}{% endif %}'
       created: 0
       updated: 0
       deleted: 0
@@ -118,7 +167,7 @@ steps:
     steps:
       - name: batches
         type: foreach
-        foreach: '{{ variables.memories | reverse | chunk: 50 | json }}'
+        foreach: '{{ variables.memories | chunk: 50 | json }}'
         steps:
           - name: read_existing
             type: elasticsearch.search
@@ -146,6 +195,28 @@ steps:
                     - prefix:
                         type: 'entity.'
                   minimum_should_match: 1
+                  filter:
+                    - bool:
+                        should:
+                          - bool:
+                              must_not:
+                                nested:
+                                  path: permissions.kibana.privileges
+                                  query:
+                                    match_all: {}
+                                  ignore_unmapped: true
+                          - nested:
+                              path: permissions.kibana.privileges
+                              ignore_unmapped: true
+                              query:
+                                bool:
+                                  should:
+                                    - term:
+                                        permissions.kibana.privileges.space: '{{ workflow.spaceId }}'
+                                    - term:
+                                        permissions.kibana.privileges.space: '*'
+                                  minimum_should_match: 1
+                        minimum_should_match: 1
 
           - name: consolidate
             type: ai.prompt
@@ -420,3 +491,4 @@ steps:
       updated: '${{ variables.updated | default: 0 }}'
       deleted: '${{ variables.deleted | default: 0 }}'
       rejected: '${{ variables.rejected | default: 0 }}'
+      resume_from: '{{ variables.resume_from }}'

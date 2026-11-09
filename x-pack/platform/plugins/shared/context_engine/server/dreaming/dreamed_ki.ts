@@ -9,6 +9,7 @@ import { ENTITY_TYPE_PREFIX, FACT_TYPE_PREFIX, OCCURRENCES_ATTRIBUTE } from '../
 import type { KiReferenceRelation } from '../../common/step_types/ki';
 import type { StoredKi } from '../ai_indices/ki_revision';
 import { kiIdFromUri } from './ids';
+import type { KiPermissions } from './permissions';
 
 export type DreamedKiAttributes = Record<string, string | number | boolean | string[]>;
 
@@ -28,6 +29,7 @@ export interface DreamedKi extends StoredKi {
   content?: string;
   attributes?: DreamedKiAttributes;
   references?: DreamedKiReference[];
+  permissions?: KiPermissions;
 }
 
 /** The `description` of a fact's `relates_to` reference to an entity it is about. */
