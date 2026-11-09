@@ -63,9 +63,8 @@ export const Elasticsearch: ConnectorSpec = {
               }),
               helpText: i18n.translate('connectorSpecs.elasticsearch.auth.apiKey.helpText', {
                 defaultMessage:
-                  'Paste the API key as shown when you create it. Grant the key at minimum: read on the indices you search.',
+                  'Enter an API key with read access to the indices you want to search.',
               }),
-              placeholder: '{{ENCODED_API_KEY}}',
             },
           },
         },

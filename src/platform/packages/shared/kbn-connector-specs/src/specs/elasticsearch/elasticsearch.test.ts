@@ -118,9 +118,10 @@ describe('Elasticsearch connector', () => {
             type: 'string',
             label: 'API Key',
             sensitive: true,
-            helpText: expect.stringContaining('Paste the API key as shown when you create it'),
+            helpText: 'Enter an API key with read access to the indices you want to search.',
           })
         );
+        expect(properties.Authorization).not.toHaveProperty('placeholder');
       });
     });
 
