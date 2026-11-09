@@ -56,19 +56,28 @@ export function mintHitlExternalResumeToken({
 }
 
 /**
- * Writes the resume token onto step state, keeping fields already stored there
- * (the rendered timeout). An Elasticsearch doc merge drops a nested field only
- * when the update sets it to null, so invalidation uses null rather than omitting the key.
+ * Writes the resume token onto step state and onto step input.
+ * State is what this version reads. Input is what a 9.6 node reads during a rolling upgrade.
+ * An Elasticsearch doc merge drops a nested field only when the update sets it to null,
+ * so invalidation uses null rather than omitting the key.
  */
 export function persistHitlExternalResumeToken(
   stepExecutionRuntime: StepExecutionRuntime,
-  token: { tokenHash: string; expiresAt: string }
+  token: { tokenHash: string; expiresAt: string },
+  stepInput: Record<string, unknown>
 ): void {
   const state = stepExecutionRuntime.getCurrentStepState() ?? {};
-  stepExecutionRuntime.setCurrentStepState({
-    ...state,
+  const tokenFields = {
     [HITL_TOKEN_HASH_INPUT_FIELD]: token.tokenHash,
     [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: token.expiresAt,
+  };
+  stepExecutionRuntime.setCurrentStepState({
+    ...state,
+    ...tokenFields,
+  });
+  stepExecutionRuntime.setInput({
+    ...stepInput,
+    ...tokenFields,
   });
 }
 
@@ -86,10 +95,7 @@ export function removeHitlExternalResumeTokenFields(
 }
 
 const readStepInput = (stepExecutionRuntime: StepExecutionRuntime): unknown =>
-  stepExecutionRuntime.stepExecution?.input ??
-  (typeof stepExecutionRuntime.getCurrentStepResult === 'function'
-    ? stepExecutionRuntime.getCurrentStepResult()?.input
-    : undefined);
+  stepExecutionRuntime.getCurrentStepResult()?.input;
 
 export function invalidateHitlExternalResumeTokenIfPresent(
   stepExecutionRuntime: StepExecutionRuntime

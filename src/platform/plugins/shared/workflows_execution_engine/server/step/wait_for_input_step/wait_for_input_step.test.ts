@@ -302,9 +302,13 @@ describe('WaitForInputStepImpl', () => {
       expect(mockMintHitlExternalResumeToken).toHaveBeenCalledWith(
         expect.objectContaining({ timeout: '72h' })
       );
-      expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledTimes(1);
-      expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith({
+      expect(mockStepExecutionRuntime.setInput).toHaveBeenNthCalledWith(1, {
         message: 'Please approve',
+      });
+      expect(mockStepExecutionRuntime.setInput).toHaveBeenNthCalledWith(2, {
+        message: 'Please approve',
+        _hitlTokenHash: 'resume-token-hash',
+        _hitlTokenExpiresAt: '2999-01-01T00:00:00.000Z',
       });
       expect(mockStepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
         dynamicTimeout: '72h',
@@ -335,8 +339,10 @@ describe('WaitForInputStepImpl', () => {
 
       await expect(underTest.run()).rejects.toThrow('Slack connector failed');
 
-      expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith({
+      expect(mockStepExecutionRuntime.setInput).toHaveBeenLastCalledWith({
         message: 'Please approve',
+        _hitlTokenHash: 'resume-token-hash',
+        _hitlTokenExpiresAt: '2999-01-01T00:00:00.000Z',
       });
       expect(mockStepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith(
         expect.objectContaining({

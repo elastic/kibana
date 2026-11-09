@@ -10,13 +10,16 @@
 import { createServer, type Server } from 'node:http';
 import { getPlaywrightTagsFor } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows/types/latest';
-import { ExecutionStatus } from '@kbn/workflows/types/latest';
+import {
+  ExecutionStatus,
+  HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,
+  HITL_TOKEN_HASH_INPUT_FIELD,
+  type WorkflowExecutionDto,
+  type WorkflowStepExecutionDto,
+} from '@kbn/workflows';
 import type { WorkflowsApiService } from '../../../common/apis/workflows';
 import { spaceTest } from '../../fixtures';
 
-const TOKEN_HASH_FIELD = '_hitlTokenHash';
-const TOKEN_EXPIRES_FIELD = '_hitlTokenExpiresAt';
 const WAITING_TIMEOUT = 30_000;
 const TERMINAL_TIMEOUT = 30_000;
 
@@ -109,16 +112,34 @@ const findAskStep = (
 
 const expectLiveToken = (state: unknown): void => {
   const record = asRecord(state);
-  expect(typeof record?.[TOKEN_HASH_FIELD]).toBe('string');
-  expect((record?.[TOKEN_HASH_FIELD] as string).length).toBeGreaterThan(0);
-  expect(typeof record?.[TOKEN_EXPIRES_FIELD]).toBe('string');
-  expect((record?.[TOKEN_EXPIRES_FIELD] as string).length).toBeGreaterThan(0);
+  expect(typeof record?.[HITL_TOKEN_HASH_INPUT_FIELD]).toBe('string');
+  expect((record?.[HITL_TOKEN_HASH_INPUT_FIELD] as string).length).toBeGreaterThan(0);
+  expect(typeof record?.[HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]).toBe('string');
+  expect((record?.[HITL_TOKEN_EXPIRES_AT_INPUT_FIELD] as string).length).toBeGreaterThan(0);
 };
 
 const expectClearedToken = (state: unknown): void => {
   const record = asRecord(state) ?? {};
-  expect(record[TOKEN_HASH_FIELD] == null || record[TOKEN_HASH_FIELD] === '').toBe(true);
-  expect(record[TOKEN_EXPIRES_FIELD] == null || record[TOKEN_EXPIRES_FIELD] === '').toBe(true);
+  expect(record[HITL_TOKEN_HASH_INPUT_FIELD] ?? null).toBeNull();
+  expect(record[HITL_TOKEN_EXPIRES_AT_INPUT_FIELD] ?? null).toBeNull();
+};
+
+const recordedFields = (value: unknown): Record<string, unknown> => {
+  const record = { ...(asRecord(value) ?? {}) };
+  delete record[HITL_TOKEN_HASH_INPUT_FIELD];
+  delete record[HITL_TOKEN_EXPIRES_AT_INPUT_FIELD];
+  return record;
+};
+
+const expectMirroredToken = (step: WorkflowStepExecutionDto | undefined): void => {
+  expectLiveToken(step?.state);
+  expectLiveToken(step?.input);
+  expect(asRecord(step?.input)?.[HITL_TOKEN_HASH_INPUT_FIELD]).toBe(
+    asRecord(step?.state)?.[HITL_TOKEN_HASH_INPUT_FIELD]
+  );
+  expect(asRecord(step?.input)?.[HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]).toBe(
+    asRecord(step?.state)?.[HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]
+  );
 };
 
 const resumeEndpoint = (formOrActionUrl: string): string => {
@@ -245,9 +266,9 @@ spaceTest.describe('HITL recorded step input', { tag: LOCAL_DEPLOYMENTS }, () =>
         schema: INPUT_SCHEMA,
       };
 
-      expect(askStep?.input).toStrictEqual(recordedInput);
+      expect(recordedFields(askStep?.input)).toStrictEqual(recordedInput);
       expect(askStep?.output ?? null).toBeNull();
-      expectLiveToken(askStep?.state);
+      expectMirroredToken(askStep);
       const formUrl = await linkFromNotification('form');
 
       const rejected = await postExternalInput(formUrl, { approved: true });
@@ -258,8 +279,8 @@ spaceTest.describe('HITL recorded step input', { tag: LOCAL_DEPLOYMENTS }, () =>
       });
       const waitingStep = findAskStep(stillWaiting?.stepExecutions);
       expect(stillWaiting?.status).toBe(ExecutionStatus.WAITING_FOR_INPUT);
-      expect(waitingStep?.input).toStrictEqual(recordedInput);
-      expectLiveToken(waitingStep?.state);
+      expect(recordedFields(waitingStep?.input)).toStrictEqual(recordedInput);
+      expectMirroredToken(waitingStep);
 
       const accepted = await postExternalInput(formUrl, {
         approved: true,
@@ -275,13 +296,14 @@ spaceTest.describe('HITL recorded step input', { tag: LOCAL_DEPLOYMENTS }, () =>
         includeOutput: true,
       });
       const completedStep = findAskStep(completed.stepExecutions);
-      expect(completedStep?.input).toStrictEqual(recordedInput);
+      expect(recordedFields(completedStep?.input)).toStrictEqual(recordedInput);
       expect(asRecord(completedStep?.output)?.response).toStrictEqual({
         approved: true,
         source: 'external-form',
       });
       expect(typeof asRecord(completedStep?.output)?.respondedBy).toBe('string');
       expectClearedToken(completedStep?.state);
+      expectClearedToken(completedStep?.input);
 
       const second = await postExternalInput(formUrl, {
         approved: false,
@@ -293,7 +315,7 @@ spaceTest.describe('HITL recorded step input', { tag: LOCAL_DEPLOYMENTS }, () =>
         includeOutput: true,
       });
       const afterSecondStep = findAskStep(afterSecond?.stepExecutions);
-      expect(afterSecondStep?.input).toStrictEqual(recordedInput);
+      expect(recordedFields(afterSecondStep?.input)).toStrictEqual(recordedInput);
       expect(asRecord(afterSecondStep?.output)?.response).toStrictEqual({
         approved: true,
         source: 'external-form',
@@ -316,9 +338,9 @@ spaceTest.describe('HITL recorded step input', { tag: LOCAL_DEPLOYMENTS }, () =>
         schema: APPROVAL_SCHEMA,
       };
 
-      expect(askStep?.input).toStrictEqual(recordedInput);
+      expect(recordedFields(askStep?.input)).toStrictEqual(recordedInput);
       expect(askStep?.output ?? null).toBeNull();
-      expectLiveToken(askStep?.state);
+      expectMirroredToken(askStep);
       const rejectUrl = await linkFromNotification('reject');
       const approveUrl = await linkFromNotification('approve');
       const forged = new URL(rejectUrl);
@@ -330,17 +352,13 @@ spaceTest.describe('HITL recorded step input', { tag: LOCAL_DEPLOYMENTS }, () =>
         includeInput: true,
       });
       expect(stillWaiting?.status).toBe(ExecutionStatus.WAITING_FOR_INPUT);
-      expect(findAskStep(stillWaiting?.stepExecutions)?.input).toStrictEqual(recordedInput);
-      expectLiveToken(findAskStep(stillWaiting?.stepExecutions)?.state);
+      expect(recordedFields(findAskStep(stillWaiting?.stepExecutions)?.input)).toStrictEqual(
+        recordedInput
+      );
+      expectMirroredToken(findAskStep(stillWaiting?.stepExecutions));
 
       const accepted = await getExternalLink(rejectUrl);
-      const rejectToken = new URL(rejectUrl).searchParams.get('token') ?? '';
-      expect(
-        accepted.status,
-        `${accepted.text.slice(0, 400)} tokenLength=${
-          rejectToken.length
-        } escapedAmp=${rejectUrl.includes('amp;')}`
-      ).toBe(200);
+      expect(accepted.status).toBe(200);
 
       const completed = await workflowsApi.waitForStatus({
         workflowExecutionId,
@@ -350,9 +368,10 @@ spaceTest.describe('HITL recorded step input', { tag: LOCAL_DEPLOYMENTS }, () =>
         includeOutput: true,
       });
       const completedStep = findAskStep(completed.stepExecutions);
-      expect(completedStep?.input).toStrictEqual(recordedInput);
+      expect(recordedFields(completedStep?.input)).toStrictEqual(recordedInput);
       expect(asRecord(completedStep?.output)?.response).toStrictEqual({ approved: false });
       expectClearedToken(completedStep?.state);
+      expectClearedToken(completedStep?.input);
 
       const second = await getExternalLink(approveUrl);
       expect(second.status).not.toBe(200);
@@ -360,7 +379,9 @@ spaceTest.describe('HITL recorded step input', { tag: LOCAL_DEPLOYMENTS }, () =>
         includeOutput: true,
         includeInput: true,
       });
-      expect(findAskStep(afterSecond?.stepExecutions)?.input).toStrictEqual(recordedInput);
+      expect(recordedFields(findAskStep(afterSecond?.stepExecutions)?.input)).toStrictEqual(
+        recordedInput
+      );
       expect(asRecord(findAskStep(afterSecond?.stepExecutions)?.output)?.response).toStrictEqual({
         approved: false,
       });

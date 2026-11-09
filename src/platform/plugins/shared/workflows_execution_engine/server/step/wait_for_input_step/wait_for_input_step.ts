@@ -130,7 +130,7 @@ export class WaitForInputStepImpl implements NodeImplementation, CancellableNode
         execution,
         timeout: dynamicTimeout,
       });
-      persistHitlExternalResumeToken(this.stepExecutionRuntime, resumeToken);
+      persistHitlExternalResumeToken(this.stepExecutionRuntime, resumeToken, stepInput);
 
       const kibanaUrl = getKibanaUrl(this.dependencies.coreStart, this.dependencies.cloudSetup);
       const formUrl = buildExternalResumeFormUrl({

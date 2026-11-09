@@ -11,6 +11,7 @@ import type { JsonObject, JsonValue } from '@kbn/utility-types';
 import {
   type EsWorkflowStepExecution,
   ExecutionStatus,
+  hasHitlExternalResumeToken,
   HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,
   HITL_TOKEN_HASH_INPUT_FIELD,
   isHitlWaitStepType,
@@ -41,9 +42,14 @@ export interface MarkStepAsRespondedAudit {
 export interface HitlStepClaim extends MarkStepAsRespondedAudit {
   /**
    * External-resume token the claim removed. `state` is the current location.
-   * `input` is a wait started before the token moved off the step input.
+   * `input` is the copy a 9.6 node reads. `mirroredOnInput` means both copies were live.
    */
-  strippedToken?: { hash: string; expiresAt: string; source?: 'state' | 'input' };
+  strippedToken?: {
+    hash: string;
+    expiresAt: string;
+    source?: 'state' | 'input';
+    mirroredOnInput?: boolean;
+  };
 }
 
 export type MarkStepAsRespondedCurrent = Pick<
@@ -65,7 +71,7 @@ function stripHitlTokenFields(
   value: Record<string, unknown> | undefined
 ): Record<string, unknown> | undefined;
 function stripHitlTokenFields(value: unknown): JsonValue | Record<string, unknown> | undefined {
-  if (!isRecord(value) || !readHitlExternalResumeToken({ input: value, state: value })) {
+  if (!isRecord(value) || !hasHitlExternalResumeToken(value)) {
     return undefined;
   }
   return { ...value, ...nullHitlTokenFields };
@@ -122,15 +128,19 @@ export const createMarkStepAsRespondedUpdater = (
 const isJsonObject = (value: JsonValue | undefined): value is JsonObject =>
   value != null && typeof value === 'object' && !Array.isArray(value);
 
-/** Returns the external-resume token a claim removes. Step `state` wins over a legacy `input` token. */
+/** Returns the external-resume token a claim removes. Step `state` wins when both copies are live. */
 export const getStrippedHitlToken = (
   current: Pick<EsWorkflowStepExecution, 'input' | 'state'>
 ): HitlStepClaim['strippedToken'] => {
   const stateToken = readHitlExternalResumeToken({ state: current.state });
-  if (stateToken) {
-    return { ...stateToken, source: 'state' };
-  }
   const inputToken = readHitlExternalResumeToken({ input: current.input });
+  if (stateToken) {
+    return {
+      ...stateToken,
+      source: 'state',
+      ...(inputToken ? { mirroredOnInput: true } : {}),
+    };
+  }
   if (inputToken) {
     return { ...inputToken, source: 'input' };
   }
@@ -171,6 +181,19 @@ export const createReleaseHitlStepClaimUpdater = (
       ) {
         patch.state = {
           ...state,
+          [HITL_TOKEN_HASH_INPUT_FIELD]: strippedToken.hash,
+          [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: strippedToken.expiresAt,
+        };
+      }
+      const { input } = current;
+      if (
+        strippedToken.mirroredOnInput &&
+        isJsonObject(input) &&
+        input[HITL_TOKEN_HASH_INPUT_FIELD] == null &&
+        input[HITL_TOKEN_EXPIRES_AT_INPUT_FIELD] == null
+      ) {
+        patch.input = {
+          ...input,
           [HITL_TOKEN_HASH_INPUT_FIELD]: strippedToken.hash,
           [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: strippedToken.expiresAt,
         };

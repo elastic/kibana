@@ -128,7 +128,7 @@ export class WaitForApprovalStepImpl implements NodeImplementation, CancellableN
         execution,
         timeout: dynamicTimeout,
       });
-      persistHitlExternalResumeToken(this.stepExecutionRuntime, resumeToken);
+      persistHitlExternalResumeToken(this.stepExecutionRuntime, resumeToken, stepInput);
 
       await this.sendExternalNotifications({
         channels,

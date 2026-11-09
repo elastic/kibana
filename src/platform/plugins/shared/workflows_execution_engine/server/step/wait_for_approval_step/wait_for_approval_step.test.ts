@@ -210,7 +210,13 @@ describe('WaitForApprovalStepImpl', () => {
     expect(mockMintHitlExternalResumeToken).toHaveBeenCalledWith(
       expect.objectContaining({ timeout: '24h' })
     );
-    expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledTimes(1);
+    expect(mockStepExecutionRuntime.setInput).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        message: 'Approve this change?',
+        _hitlTokenHash: 'resume-token-hash',
+        _hitlTokenExpiresAt: '2999-01-01T00:00:00.000Z',
+      })
+    );
     expect(mockStepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
       dynamicTimeout: '24h',
       _hitlTokenHash: 'resume-token-hash',
@@ -236,7 +242,12 @@ describe('WaitForApprovalStepImpl', () => {
 
     await underTest.run();
 
-    expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledTimes(1);
+    expect(mockStepExecutionRuntime.setInput).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        _hitlTokenHash: 'resume-token-hash',
+        _hitlTokenExpiresAt: '2999-01-01T00:00:00.000Z',
+      })
+    );
     expect(mockStepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith(
       expect.objectContaining({
         _hitlTokenHash: 'resume-token-hash',
@@ -270,7 +281,12 @@ describe('WaitForApprovalStepImpl', () => {
         _hitlTokenExpiresAt: '2999-01-01T00:00:00.000Z',
       })
     );
-    expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledTimes(1);
+    expect(mockStepExecutionRuntime.setInput).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        _hitlTokenHash: 'resume-token-hash',
+        _hitlTokenExpiresAt: '2999-01-01T00:00:00.000Z',
+      })
+    );
   });
 
   it('finishes with approval output shape on resume', async () => {

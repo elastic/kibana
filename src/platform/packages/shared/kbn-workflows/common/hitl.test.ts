@@ -9,6 +9,7 @@
 
 import {
   getHitlChannelConnectorTypeFromPath,
+  hasHitlExternalResumeToken,
   HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,
   HITL_TOKEN_HASH_INPUT_FIELD,
   isHitlWaitStepType,
@@ -91,6 +92,17 @@ describe('readHitlExternalResumeToken', () => {
         },
       })
     ).toEqual(token);
+  });
+
+  it('detects a live token on one record', () => {
+    expect(hasHitlExternalResumeToken(tokenFields)).toBe(true);
+    expect(hasHitlExternalResumeToken({ message: 'Respond' })).toBe(false);
+    expect(
+      hasHitlExternalResumeToken({
+        [HITL_TOKEN_HASH_INPUT_FIELD]: null,
+        [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: null,
+      })
+    ).toBe(false);
   });
 
   it('ignores null token fields left by an invalidation', () => {

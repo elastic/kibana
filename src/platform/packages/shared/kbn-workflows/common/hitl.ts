@@ -45,14 +45,14 @@ export const MAX_HITL_GRAPH_NODE_ID_LENGTH = 255 as const;
 export const MAX_HITL_RESPONSE_FIELD_KEY_LENGTH = 512 as const;
 
 /**
- * External HITL resume token hash. New waits store this on step `state`.
- * Waits started by an older version stored it on step `input`.
+ * External HITL resume token hash. A new wait stores this on step `state` and on step `input`.
+ * `state` is what this version reads. `input` is what a 9.6 node reads.
  */
 export const HITL_TOKEN_HASH_INPUT_FIELD = '_hitlTokenHash' as const;
 
 /**
- * External HITL resume token expiry. New waits store this on step `state`.
- * Waits started by an older version stored it on step `input`.
+ * External HITL resume token expiry. A new wait stores this on step `state` and on step `input`.
+ * `state` is what this version reads. `input` is what a 9.6 node reads.
  */
 export const HITL_TOKEN_EXPIRES_AT_INPUT_FIELD = '_hitlTokenExpiresAt' as const;
 
@@ -77,8 +77,13 @@ const readHitlTokenRecord = (value: unknown): HitlExternalResumeTokenRecord | un
   return { hash, expiresAt };
 };
 
+/** True when `value` itself holds a live external-resume token. */
+export const hasHitlExternalResumeToken = (value: unknown): boolean =>
+  readHitlTokenRecord(value) !== undefined;
+
 /**
- * Reads the external resume token. Step `state` wins. `input` is only the legacy location.
+ * Reads the external resume token. Step `state` wins when both copies are live.
+ * `input` is the copy a 9.6 node reads, and the location older waits used.
  */
 export const readHitlExternalResumeToken = (step: {
   state?: Record<string, unknown> | null;
