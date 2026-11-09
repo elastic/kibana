@@ -179,12 +179,20 @@ export const runCampaign = async ({
 
     const diff = await candidateDiff(workspace);
     const candidateVariant = { hash: variantHash(diff), diff };
-    await restartLane({
+    const candidateReady = await restartLane({
       command: restartCommands.candidate,
       url: workspace.kibanaUrl,
       env: laneEnv,
       log,
     });
+    if (!candidateReady) {
+      // Measuring a lane that did not restart compares the incumbent against itself and reports
+      // a null result, which is worse than no round at all.
+      ledger.push({ round, rejected: 'candidate-restart-failed', manifest: proposal.manifest });
+      saveLedger();
+      await resetCandidate(workspace);
+      continue;
+    }
 
     const incumbentGate = await runVariant({
       label: `round${round}-incumbent-gate`,

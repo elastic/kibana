@@ -299,17 +299,37 @@ export const restartLane = async ({
   log.info(`[lane] restarting via ${command}${prefix ? ` (${prefix})` : ''}`);
   await run('bash', ['-lc', `${prefix} ${command}`.trim()], process.cwd(), 120_000);
 
-  const deadline = Date.now() + timeoutMs;
-  await new Promise((resolve) => setTimeout(resolve, 10_000));
-  while (Date.now() < deadline) {
+  const isUp = async (): Promise<boolean> => {
     try {
-      const response = await fetch(`${url}/api/status`);
-      if (response.ok) {
-        log.info(`[lane] ${url} is back`);
-        return true;
-      }
+      return (await fetch(`${url}/api/status`)).ok;
     } catch (e) {
-      // still starting
+      return false;
+    }
+  };
+
+  // Two phases, both required. Seeing the port go down is the only proof the *old* process is
+  // gone: without it a fast status check succeeds against the process we were trying to replace,
+  // and the round silently measures the previous code.
+  const downDeadline = Date.now() + 120_000;
+  let sawDown = false;
+  while (Date.now() < downDeadline) {
+    if (!(await isUp())) {
+      sawDown = true;
+      break;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+
+  if (!sawDown) {
+    log.error(`[lane] ${url} never went down — refusing to measure possibly stale code`);
+    return false;
+  }
+
+  const upDeadline = Date.now() + timeoutMs;
+  while (Date.now() < upDeadline) {
+    if (await isUp()) {
+      log.info(`[lane] ${url} is back with the new code`);
+      return true;
     }
     await new Promise((resolve) => setTimeout(resolve, 3000));
   }
