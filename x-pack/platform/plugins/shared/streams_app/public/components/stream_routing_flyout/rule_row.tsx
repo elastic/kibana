@@ -161,11 +161,6 @@ function RoutingRuleView({ rule: { condition, action, telemetry } }: { rule: Rou
           </EuiBadge>
         </EuiFlexItem>
       ))}
-      <EuiFlexItem grow={false}>
-        <EuiBadge color="hollow" data-test-subj="streamsRoutingRuleActionSummary">
-          {actionLabels[action]}
-        </EuiBadge>
-      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
@@ -470,6 +465,13 @@ export function RoutingRuleRow({
                 <strong>{title}</strong>
               </EuiText>
             </EuiFlexItem>
+            {action === 'copy' ? (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="neutral" data-test-subj="streamsRoutingRuleActionSummary">
+                  {actionLabels[action]}
+                </EuiBadge>
+              </EuiFlexItem>
+            ) : null}
             <EuiFlexItem />
             {editable && !isEditing ? (
               <EuiFlexItem grow={false}>
