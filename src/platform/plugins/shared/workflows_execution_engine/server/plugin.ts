@@ -69,7 +69,6 @@ import {
 } from './lib/task_recovery';
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
-import { registerPerfProfilerRoutes } from './perf_profiler/register_perf_profiler_routes';
 import {
   getExecutionForTaskRunEvent,
   mapExecutionStatusToOutcome,
@@ -77,6 +76,7 @@ import {
   stampWorkflowTaskRunEventFields,
 } from './lib/workflow_task_run_event_fields';
 import { WorkflowsMeteringService } from './metering/metering_service';
+import { registerPerfProfilerRoutes } from './perf_profiler/register_perf_profiler_routes';
 import {
   refuseDelegatedIdentityWorkflow,
   refuseStandaloneDelegatedIdentityRun,
