@@ -17,7 +17,7 @@ steps:
 - **`type`**: Must be `"waitForInput"`
 - **`with.message`**: Message displayed to the human reviewer (optional)
 - **`with.schema`**: JSON Schema describing the expected input payload (optional). When provided, the resume UI renders validation and autocomplete from the schema, and default values are pre-filled
-- **`resume-as`**: Identity the steps after the answer run as (optional, literal): `inherit` (default) keeps the execution identity, such as its service account, and `responder` runs them as the person who answered. `waitForApproval` takes it too; see [Identity after the answer](#identity-after-the-answer)
+- **`resume-as`**: Identity the steps after the answer run as (optional, literal). Unset, an execution with a service account keeps it, and one without continues as whoever answered in Kibana; `responder` runs them as the person who answered in both cases. `waitForApproval` takes it too; see [Identity after the answer](#identity-after-the-answer)
 
 ## Execution Flow
 
@@ -49,7 +49,7 @@ response gone reloads the execution instead of applying the copy it loaded.
 
 ### Identity after the answer
 
-An execution that runs as a service account is re-scoped to it on every task run, including the run that applies an answer. With `resume-as: responder`, the steps after the answer run as the person who answered instead, until the execution's next HITL wait or its end, across the resumes in between (timers, child workflows).
+Without `resume-as`, an execution that runs as a service account is re-scoped to it on every task run, including the run that applies an answer. One without a service account runs with the API key of its resume task, which an in-app answer replaces with the answerer's; an answer through an external link keeps the key it has. With `resume-as: responder`, the steps after the answer run as the person who answered in both cases, until the execution's next HITL wait or its end, across the resumes in between (timers, child workflows).
 
 - Every wait entry rewrites `context.resumeAs`: the step's choice, or `null`. That is what ends a scope.
 - An in-app answer re-keys the resume task with the responder's API key. The run that applies the answer acts as the responder only when its own identity is the answer's `resumedBy`, which is not the case for an answer through an external link, an answer that landed while the resume task was running, or an execution whose tasks run as the service account itself. The step then fails with `ResumeAsResponderError` and consumes the answer, so `on-failure` decides what happens next. Timeouts are not answers and fail as before.

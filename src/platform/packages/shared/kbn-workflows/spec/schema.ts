@@ -578,13 +578,13 @@ export const WaitForApprovalChannelsSchema = z
   .optional()
   .describe(HITL_EXTERNAL_CHANNELS_DESCRIPTION);
 
-export const HitlResumeAsSchema = lazySchema(() => z.enum(['inherit', 'responder']));
+export const HitlResumeAsSchema = lazySchema(() => z.enum(['responder']));
 export type HitlResumeAs = z.infer<typeof HitlResumeAsSchema>;
 
 export const HitlResumeAsPropSchema = lazySchema(() =>
   z.object({
     'resume-as': HitlResumeAsSchema.optional().describe(
-      'Identity the steps after the answer run as. `inherit` (default) keeps the execution identity, such as its service account. `responder` runs them as the person who answered until the next wait; an answer that cannot be tied to that person, such as one given through an external link, fails the step.'
+      'Identity the steps after the answer run as. Unset, an execution with a service account keeps it, and one without continues as whoever answered in Kibana. `responder` runs them as the person who answered in both cases, until the next wait; an answer that cannot be tied to that person, such as one given through an external link, fails the step.'
     ),
   })
 );

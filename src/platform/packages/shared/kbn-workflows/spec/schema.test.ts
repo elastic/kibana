@@ -1580,22 +1580,18 @@ describe('`resume-as` on HITL step schemas', () => {
     },
   ];
 
-  it.each(cases)(
-    'accepts `inherit`, `responder` or no value on the $name step',
-    ({ schema, step }) => {
-      expect(schema.parse({ ...step, 'resume-as': 'inherit' })['resume-as']).toBe('inherit');
-      expect(schema.parse({ ...step, 'resume-as': 'responder' })['resume-as']).toBe('responder');
-      expect(schema.parse(step)['resume-as']).toBeUndefined();
-    }
-  );
+  it.each(cases)('accepts `responder` or no value on the $name step', ({ schema, step }) => {
+    expect(schema.parse({ ...step, 'resume-as': 'responder' })['resume-as']).toBe('responder');
+    expect(schema.parse(step)['resume-as']).toBeUndefined();
+  });
 
   it.each(cases)(
-    'rejects a templated or unknown `resume-as` on the $name step',
+    'rejects a templated or unsupported `resume-as` on the $name step',
     ({ schema, step }) => {
       expect(schema.safeParse({ ...step, 'resume-as': '{{ inputs.resumeAs }}' }).success).toBe(
         false
       );
-      expect(schema.safeParse({ ...step, 'resume-as': 'owner' }).success).toBe(false);
+      expect(schema.safeParse({ ...step, 'resume-as': 'inherit' }).success).toBe(false);
     }
   );
 });
