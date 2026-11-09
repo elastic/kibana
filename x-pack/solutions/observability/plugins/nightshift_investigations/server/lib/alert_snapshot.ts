@@ -190,6 +190,12 @@ export const truncateV2AlertData = (data: Record<string, unknown>): Record<strin
     truncated[largest.key] = largest.value.slice(0, Math.floor(largest.value.length / 2));
     truncated[`${largest.key}_truncated`] = originalLengths.get(largest.key);
   }
+  while (JSON.stringify(truncated).length > MAX_V2_ALERT_DATA_LENGTH) {
+    const [largestField] = Object.entries(truncated).sort(
+      (a, b) => JSON.stringify(b[1]).length - JSON.stringify(a[1]).length
+    );
+    delete truncated[largestField[0]];
+  }
   return truncated;
 };
 

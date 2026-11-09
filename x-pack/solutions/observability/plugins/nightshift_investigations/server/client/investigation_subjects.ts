@@ -155,7 +155,6 @@ export const toStartSubjects = ({
       type: 'significant_event',
       id,
       triggerType,
-      ...(summary ? { summary } : {}),
     })
   );
   return [

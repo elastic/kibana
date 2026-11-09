@@ -251,7 +251,7 @@ describe('fetchInvestigationAlertSnapshots', () => {
     );
   });
 
-  it('omits the data of a v2 episode that is too large to store in a subject snapshot', async () => {
+  it('drops the oversize field of a v2 episode that is too large to store in a subject snapshot', async () => {
     const lookup = makeLookup({
       columns: [
         'episode.id',
@@ -270,7 +270,7 @@ describe('fetchInvestigationAlertSnapshots', () => {
     const [snapshot] = await run(makeAlertsClient({ alerts: [] }), lookup, ['ep-1']);
 
     expect(snapshot).toEqual(
-      expect.objectContaining({ id: 'ep-1', rule_name: 'V2 rule', data: undefined })
+      expect.objectContaining({ id: 'ep-1', rule_name: 'V2 rule', data: {} })
     );
   });
 
@@ -293,6 +293,24 @@ describe('fetchInvestigationAlertSnapshots', () => {
       data: { event_id: 'evt-1', rule_ids: ['rule-1'], signals_truncated: 400 },
     });
     expect(JSON.stringify(snapshot).length).toBeLessThan(33_000 + 1_000);
+  });
+
+  it('keeps the identifying fields of a v2 episode whose data is large without arrays', async () => {
+    const lookup = makeLookup({
+      columns: v2Columns,
+      rows: [v2Row('v2-rule')],
+      episodeData: {
+        'episode-1': JSON.stringify({
+          event_id: 'evt-1',
+          title: 'Checkout errors',
+          summary: 'x'.repeat(40_000),
+        }),
+      },
+    });
+
+    const [snapshot] = await run(makeAlertsClient({ alerts: [] }), lookup, ['episode-1']);
+
+    expect(snapshot).toMatchObject({ data: { event_id: 'evt-1', title: 'Checkout errors' } });
   });
 
   it('keeps the names of readable rules when another rule is inaccessible', async () => {
