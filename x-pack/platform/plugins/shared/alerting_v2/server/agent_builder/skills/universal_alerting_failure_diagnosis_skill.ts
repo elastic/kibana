@@ -12,23 +12,25 @@ import {
   ALERTING_TOOL_IDS,
   ALERTING_V2_ENABLED_SETTING_ID,
   RULE_AUTHORING_SKILL_ID,
-  RULE_FAILURE_DIAGNOSIS_SKILL_ID,
+  UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
 import type { AttachRuleToolDeps } from '../tools/attach_rule';
 import { attachRuleTool } from '../tools/attach_rule';
 import type { ManageRuleToolDeps } from '../tools/manage_rule';
 import { manageRuleTool } from '../tools/manage_rule';
 
-type RuleFailureDiagnosisSkillDeps = ManageRuleToolDeps &
+type UniversalAlertingFailureDiagnosisSkillDeps = ManageRuleToolDeps &
   AttachRuleToolDeps & { availability: AvailabilityConfig };
 
-export const createRuleFailureDiagnosisSkill = (deps: RuleFailureDiagnosisSkillDeps) =>
+export const createUniversalAlertingFailureDiagnosisSkill = (
+  deps: UniversalAlertingFailureDiagnosisSkillDeps
+) =>
   defineSkillType({
-    id: RULE_FAILURE_DIAGNOSIS_SKILL_ID,
-    name: RULE_FAILURE_DIAGNOSIS_SKILL_ID,
+    id: UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID,
+    name: UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID,
     basePath: 'skills/platform/alerting',
     description:
-      'Diagnose why a universal alerting rule execution failed and propose a fix. Use when the user asks why a rule failed, or hands over a failed rule execution (error message, timings, rule definition) from the execution history. For each error it lists the possible root causes, including missing index privileges and mapping problems. Covers ES|QL errors (unknown column, unknown index, type mismatch), authorization errors, recovery and no-data query failures, oversized query responses, and execution timeouts. Not for creating new rules (use the rule-authoring skill) and not for notification or action policy failures.',
+      'Diagnose why a universal alerting rule execution failed and propose a fix. Use when the user asks why a rule failed, or hands over a failed rule execution (error message, timings, rule definition) from the execution history. For each error it lists the possible root causes, including missing index privileges and mapping problems. Covers ES|QL errors (unknown column, unknown index, type mismatch), authorization errors, recovery and no-data query failures, oversized query responses, and execution timeouts. At this stage it only diagnoses rule failures: action policy failures, notification workflow failures and connector issues are out of scope. Not for creating new rules (use the rule-authoring skill).',
     uiSettingRequired: ALERTING_V2_ENABLED_SETTING_ID,
     availability: deps.availability,
     content: `## When to Use This Skill
@@ -39,7 +41,7 @@ Use this skill when:
 
 Do **not** use this skill for:
 - Creating a new rule from scratch — load the \`${RULE_AUTHORING_SKILL_ID}\` skill instead.
-- Notification, action policy, or workflow dispatch failures.
+- Action policy failures, notification workflow failures, or connector issues. These are out of scope for now: this skill only diagnoses **rule** failures. If the user asks about one of them, say it is outside what you can diagnose here and do not guess a cause.
 - Classic (V1) stack, Observability or Security detection rules.
 
 ---

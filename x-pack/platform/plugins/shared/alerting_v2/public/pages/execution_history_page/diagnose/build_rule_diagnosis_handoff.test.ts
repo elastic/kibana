@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getRuleFailureDiagnosisSkillBadge } from '@kbn/alerting-v2-constants';
+import { getUniversalAlertingFailureDiagnosisSkillBadge } from '@kbn/alerting-v2-constants';
 import type { RuleExecutionView, RuleResponse } from '@kbn/alerting-v2-schemas';
 import {
   DIAGNOSIS_ATTACHMENT_MAX_CHARS,
@@ -163,8 +163,8 @@ describe('buildRuleDiagnosisAttachments', () => {
 });
 
 describe('buildRuleDiagnosisPrompt', () => {
-  it('starts with the skill badge so the chat invokes the rule-failure-diagnosis skill', () => {
-    const badge = getRuleFailureDiagnosisSkillBadge();
+  it('starts with the skill badge so the chat invokes the universal-alerting-failure-diagnosis skill', () => {
+    const badge = getUniversalAlertingFailureDiagnosisSkillBadge();
 
     expect(buildRuleDiagnosisPrompt('My rule', true).startsWith(`${badge} `)).toBe(true);
     expect(buildRuleDiagnosisPrompt('My rule', false).startsWith(`${badge} `)).toBe(true);

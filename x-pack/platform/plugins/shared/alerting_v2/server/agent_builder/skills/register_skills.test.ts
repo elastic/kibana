@@ -8,14 +8,14 @@
 import {
   ACTION_POLICY_AUTHORING_SKILL_ID,
   RULE_AUTHORING_SKILL_ID,
-  RULE_FAILURE_DIAGNOSIS_SKILL_ID,
+  UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import { createActionPolicyAuthoringSkill } from './action_policy_authoring_skill';
 import { createRuleAuthoringSkill } from './rule_authoring_skill';
-import { createRuleFailureDiagnosisSkill } from './rule_failure_diagnosis_skill';
+import { createUniversalAlertingFailureDiagnosisSkill } from './universal_alerting_failure_diagnosis_skill';
 import { registerSkills } from './register_skills';
 
 jest.mock('./rule_authoring_skill', () => ({
@@ -26,8 +26,8 @@ jest.mock('./action_policy_authoring_skill', () => ({
   createActionPolicyAuthoringSkill: jest.fn(),
 }));
 
-jest.mock('./rule_failure_diagnosis_skill', () => ({
-  createRuleFailureDiagnosisSkill: jest.fn(),
+jest.mock('./universal_alerting_failure_diagnosis_skill', () => ({
+  createUniversalAlertingFailureDiagnosisSkill: jest.fn(),
 }));
 
 const createRuleAuthoringSkillMock = createRuleAuthoringSkill as jest.MockedFunction<
@@ -35,9 +35,10 @@ const createRuleAuthoringSkillMock = createRuleAuthoringSkill as jest.MockedFunc
 >;
 const createActionPolicyAuthoringSkillMock =
   createActionPolicyAuthoringSkill as jest.MockedFunction<typeof createActionPolicyAuthoringSkill>;
-const createRuleFailureDiagnosisSkillMock = createRuleFailureDiagnosisSkill as jest.MockedFunction<
-  typeof createRuleFailureDiagnosisSkill
->;
+const createUniversalAlertingFailureDiagnosisSkillMock =
+  createUniversalAlertingFailureDiagnosisSkill as jest.MockedFunction<
+    typeof createUniversalAlertingFailureDiagnosisSkill
+  >;
 
 const createLogger = (): jest.Mocked<
   Pick<LoggerServiceContract, 'debug' | 'info' | 'warn' | 'error' | 'forSubsystem'>
@@ -53,9 +54,9 @@ const ruleSkill = { id: RULE_AUTHORING_SKILL_ID } as ReturnType<typeof createRul
 const actionPolicySkill = { id: ACTION_POLICY_AUTHORING_SKILL_ID } as ReturnType<
   typeof createActionPolicyAuthoringSkill
 >;
-const ruleFailureDiagnosisSkill = { id: RULE_FAILURE_DIAGNOSIS_SKILL_ID } as ReturnType<
-  typeof createRuleFailureDiagnosisSkill
->;
+const universalAlertingFailureDiagnosisSkill = {
+  id: UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID,
+} as ReturnType<typeof createUniversalAlertingFailureDiagnosisSkill>;
 
 describe('registerSkills', () => {
   let agentBuilder: ReturnType<typeof agentBuilderMocks.createSetup>;
@@ -66,10 +67,12 @@ describe('registerSkills', () => {
     logger = createLogger();
     createRuleAuthoringSkillMock.mockReset();
     createActionPolicyAuthoringSkillMock.mockReset();
-    createRuleFailureDiagnosisSkillMock.mockReset();
+    createUniversalAlertingFailureDiagnosisSkillMock.mockReset();
     createRuleAuthoringSkillMock.mockReturnValue(ruleSkill);
     createActionPolicyAuthoringSkillMock.mockReturnValue(actionPolicySkill);
-    createRuleFailureDiagnosisSkillMock.mockReturnValue(ruleFailureDiagnosisSkill);
+    createUniversalAlertingFailureDiagnosisSkillMock.mockReturnValue(
+      universalAlertingFailureDiagnosisSkill
+    );
   });
 
   const deps = () =>
@@ -92,7 +95,10 @@ describe('registerSkills', () => {
     expect(agentBuilder.skills.register).toHaveBeenCalledTimes(3);
     expect(agentBuilder.skills.register).toHaveBeenNthCalledWith(1, ruleSkill);
     expect(agentBuilder.skills.register).toHaveBeenNthCalledWith(2, actionPolicySkill);
-    expect(agentBuilder.skills.register).toHaveBeenNthCalledWith(3, ruleFailureDiagnosisSkill);
+    expect(agentBuilder.skills.register).toHaveBeenNthCalledWith(
+      3,
+      universalAlertingFailureDiagnosisSkill
+    );
 
     expect(logger.debug).toHaveBeenNthCalledWith(1, {
       message: expect.any(Function),
@@ -104,7 +110,7 @@ describe('registerSkills', () => {
     });
     expect(logger.debug).toHaveBeenNthCalledWith(3, {
       message: expect.any(Function),
-      labels: { skill_id: RULE_FAILURE_DIAGNOSIS_SKILL_ID },
+      labels: { skill_id: UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID },
     });
     const debugMessages = (logger.debug as jest.Mock).mock.calls.map(
       ([{ message }]) => (typeof message === 'function' ? message() : message) as string
@@ -112,7 +118,7 @@ describe('registerSkills', () => {
     expect(debugMessages).toEqual([
       `${RULE_AUTHORING_SKILL_ID} agent builder skill registered`,
       `${ACTION_POLICY_AUTHORING_SKILL_ID} agent builder skill registered`,
-      `${RULE_FAILURE_DIAGNOSIS_SKILL_ID} agent builder skill registered`,
+      `${UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID} agent builder skill registered`,
       'Agent builder skills and attachments registered',
     ]);
     expect(logger.error).not.toHaveBeenCalled();
@@ -140,7 +146,7 @@ describe('registerSkills', () => {
     );
     expect(debugMessages).toEqual([
       `${RULE_AUTHORING_SKILL_ID} agent builder skill registered`,
-      `${RULE_FAILURE_DIAGNOSIS_SKILL_ID} agent builder skill registered`,
+      `${UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID} agent builder skill registered`,
       'Agent builder skills partially registered',
     ]);
     expect(logger.debug).toHaveBeenCalledWith({
@@ -156,7 +162,7 @@ describe('registerSkills', () => {
     createActionPolicyAuthoringSkillMock.mockImplementation(() => {
       throw new Error('policy failed');
     });
-    createRuleFailureDiagnosisSkillMock.mockImplementation(() => {
+    createUniversalAlertingFailureDiagnosisSkillMock.mockImplementation(() => {
       throw new Error('diagnosis failed');
     });
 
@@ -173,7 +179,7 @@ describe('registerSkills', () => {
     expect(logger.error).toHaveBeenCalledWith(
       expect.objectContaining({
         code: ALERTING_LOG_CODES.AGENT_BUILDER_SKILL_REGISTER_FAILED,
-        labels: { skill_id: RULE_FAILURE_DIAGNOSIS_SKILL_ID },
+        labels: { skill_id: UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID },
       })
     );
     expect(logger.error).toHaveBeenCalledWith(

@@ -7,7 +7,7 @@
 
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentGroup, AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import { getRuleFailureDiagnosisSkillBadge } from '@kbn/alerting-v2-constants';
+import { getUniversalAlertingFailureDiagnosisSkillBadge } from '@kbn/alerting-v2-constants';
 import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import type { RuleExecutionView, RuleResponse } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
@@ -204,7 +204,7 @@ export const buildRuleDiagnosisAttachments = (context: RuleDiagnosisContext): At
 
 /**
  * Visible first user message for the diagnosis handoff. Starts with the skill badge so the chat
- * renders a skill chip and the agent loads the `rule-failure-diagnosis` skill. Omits the rule
+ * renders a skill chip and the agent loads the `universal-alerting-failure-diagnosis` skill. Omits the rule
  * definition clause when the rule attachment is absent.
  */
 export const buildRuleDiagnosisPrompt = (
@@ -223,7 +223,7 @@ export const buildRuleDiagnosisPrompt = (
         values: { ruleName },
       });
 
-  return `${getRuleFailureDiagnosisSkillBadge()} ${message}`;
+  return `${getUniversalAlertingFailureDiagnosisSkillBadge()} ${message}`;
 };
 
 export const buildRuleDiagnosisConversationTitle = (ruleName: string, startedAt: string): string =>

@@ -9,12 +9,12 @@ import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import {
   ALERTING_TOOL_IDS,
   RULE_AUTHORING_SKILL_ID,
-  RULE_FAILURE_DIAGNOSIS_SKILL_ID,
-  getRuleFailureDiagnosisSkillBadge,
+  UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID,
+  getUniversalAlertingFailureDiagnosisSkillBadge,
 } from '@kbn/alerting-v2-constants';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import { createAlertingV2Availability } from './alerting_v2_availability';
-import { createRuleFailureDiagnosisSkill } from './rule_failure_diagnosis_skill';
+import { createUniversalAlertingFailureDiagnosisSkill } from './universal_alerting_failure_diagnosis_skill';
 
 const createDeps = () => ({
   logger: {
@@ -31,35 +31,35 @@ const createDeps = () => ({
   }),
 });
 
-describe('createRuleFailureDiagnosisSkill', () => {
-  it('registers under the stable rule-failure-diagnosis id and name', () => {
-    const skill = createRuleFailureDiagnosisSkill(createDeps());
+describe('createUniversalAlertingFailureDiagnosisSkill', () => {
+  it('registers under the stable universal-alerting-failure-diagnosis id and name', () => {
+    const skill = createUniversalAlertingFailureDiagnosisSkill(createDeps());
 
-    expect(skill.id).toBe(RULE_FAILURE_DIAGNOSIS_SKILL_ID);
-    expect(skill.name).toBe(RULE_FAILURE_DIAGNOSIS_SKILL_ID);
+    expect(skill.id).toBe(UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID);
+    expect(skill.name).toBe(UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID);
     expect(skill.basePath).toBe('skills/platform/alerting');
   });
 
   it('keeps the slash-command id in sync with the skill badge used by the UI', () => {
-    expect(getRuleFailureDiagnosisSkillBadge()).toBe(
-      `[/${RULE_FAILURE_DIAGNOSIS_SKILL_ID}](skill://${RULE_FAILURE_DIAGNOSIS_SKILL_ID})`
+    expect(getUniversalAlertingFailureDiagnosisSkillBadge()).toBe(
+      `[/${UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID}](skill://${UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID})`
     );
   });
 
   it('is not gated behind agent builder experimental features', () => {
-    const skill = createRuleFailureDiagnosisSkill(createDeps());
+    const skill = createUniversalAlertingFailureDiagnosisSkill(createDeps());
 
     expect(skill.experimental).not.toBe(true);
   });
 
   it('gates the skill on the alerting:v2:enabled advanced setting', () => {
-    const skill = createRuleFailureDiagnosisSkill(createDeps());
+    const skill = createUniversalAlertingFailureDiagnosisSkill(createDeps());
 
     expect(skill.uiSettingRequired).toBe('alerting:v2:enabled');
   });
 
   it('exposes only the rule inline tools to attach and fix rules', async () => {
-    const skill = createRuleFailureDiagnosisSkill(createDeps());
+    const skill = createUniversalAlertingFailureDiagnosisSkill(createDeps());
 
     const inlineTools = (await skill.getInlineTools?.()) ?? [];
 
@@ -70,7 +70,7 @@ describe('createRuleFailureDiagnosisSkill', () => {
   });
 
   it('tells the agent to classify from the error message, not the reason field', () => {
-    const { content } = createRuleFailureDiagnosisSkill(createDeps());
+    const { content } = createUniversalAlertingFailureDiagnosisSkill(createDeps());
 
     expect(content).toContain('Do **not** rely on the `reason` field');
   });
@@ -85,20 +85,20 @@ describe('createRuleFailureDiagnosisSkill', () => {
     'Rule execution aborted',
     'Request aborted',
   ])('covers the "%s" failure pattern', (pattern) => {
-    const { content } = createRuleFailureDiagnosisSkill(createDeps());
+    const { content } = createUniversalAlertingFailureDiagnosisSkill(createDeps());
 
     expect(content).toContain(pattern);
   });
 
   it('lists several possible root causes instead of one confirmed cause', () => {
-    const { content } = createRuleFailureDiagnosisSkill(createDeps());
+    const { content } = createUniversalAlertingFailureDiagnosisSkill(createDeps());
 
     expect(content).toContain('**several possible root causes**');
     expect(content).toContain('Do **not** present one cause as confirmed unless you verified it');
   });
 
   it('lists missing privileges as a possible cause of not-found errors and explains why', () => {
-    const { content } = createRuleFailureDiagnosisSkill(createDeps());
+    const { content } = createUniversalAlertingFailureDiagnosisSkill(createDeps());
 
     expect(content).toContain('Missing privileges: the rule owner cannot read the index');
     expect(content).toContain('exactly like an index that does not exist');
@@ -106,20 +106,20 @@ describe('createRuleFailureDiagnosisSkill', () => {
   });
 
   it('explains that a wildcard with nothing readable reports every field as an unknown column', () => {
-    const { content } = createRuleFailureDiagnosisSkill(createDeps());
+    const { content } = createUniversalAlertingFailureDiagnosisSkill(createDeps());
 
     expect(content).toContain('is reported as `Unknown column`, even though the fields are fine');
   });
 
   it('notes that the rule runs with the owner API key, not the current user privileges', () => {
-    const { content } = createRuleFailureDiagnosisSkill(createDeps());
+    const { content } = createUniversalAlertingFailureDiagnosisSkill(createDeps());
 
     expect(content).toContain("**rule owner's** API key");
     expect(content).toContain('privileges as they were when the key was created');
   });
 
   it('says the tools run with the current user privileges and the agent has none of its own', () => {
-    const { content } = createRuleFailureDiagnosisSkill(createDeps());
+    const { content } = createUniversalAlertingFailureDiagnosisSkill(createDeps());
 
     expect(content).toContain('run with the privileges of the user in this conversation');
     expect(content).toContain('you have no privileges of your own');
@@ -127,7 +127,7 @@ describe('createRuleFailureDiagnosisSkill', () => {
   });
 
   it('only treats a negative index check as conclusive for users with broad access', () => {
-    const { content } = createRuleFailureDiagnosisSkill(createDeps());
+    const { content } = createUniversalAlertingFailureDiagnosisSkill(createDeps());
 
     expect(content).toContain('say whose access it reflects');
     expect(content).toContain('conclusive only when the user clearly has broad access');
@@ -135,7 +135,7 @@ describe('createRuleFailureDiagnosisSkill', () => {
   });
 
   it('lists mapping problems as possible causes of unknown columns and type errors', () => {
-    const { content } = createRuleFailureDiagnosisSkill(createDeps());
+    const { content } = createUniversalAlertingFailureDiagnosisSkill(createDeps());
 
     expect(content).toContain('Mapping issue: the field is not mapped in any matched index');
     expect(content).toContain(
@@ -145,7 +145,7 @@ describe('createRuleFailureDiagnosisSkill', () => {
   });
 
   it('covers authorization and credential errors with their possible causes', () => {
-    const { content } = createRuleFailureDiagnosisSkill(createDeps());
+    const { content } = createUniversalAlertingFailureDiagnosisSkill(createDeps());
 
     expect(content).toContain('Authorization and credential errors');
     expect(content).toContain("The rule's API key is invalid, expired, or revoked");
@@ -153,7 +153,7 @@ describe('createRuleFailureDiagnosisSkill', () => {
   });
 
   it('tells the agent to verify with the index discovery tools before concluding', () => {
-    const { content } = createRuleFailureDiagnosisSkill(createDeps());
+    const { content } = createUniversalAlertingFailureDiagnosisSkill(createDeps());
 
     expect(content).toContain(platformCoreTools.listIndices);
     expect(content).toContain(platformCoreTools.getIndexMapping);
@@ -161,7 +161,7 @@ describe('createRuleFailureDiagnosisSkill', () => {
   });
 
   it('covers recovery and no-data queries as separate queries with the same causes', () => {
-    const { content } = createRuleFailureDiagnosisSkill(createDeps());
+    const { content } = createUniversalAlertingFailureDiagnosisSkill(createDeps());
 
     expect(content).toContain('Recovery and no-data query failures');
     expect(content).toContain('every cause in A, B, and C');
@@ -170,14 +170,14 @@ describe('createRuleFailureDiagnosisSkill', () => {
   it.each(['Too many groups', 'high-cardinality', 'A slow or overloaded cluster'])(
     'covers the "%s" cause for size and timeout failures',
     (cause) => {
-      const { content } = createRuleFailureDiagnosisSkill(createDeps());
+      const { content } = createUniversalAlertingFailureDiagnosisSkill(createDeps());
 
       expect(content).toContain(cause);
     }
   );
 
   it('does not edit the rule when the cause is privileges, mappings, or the platform', () => {
-    const { content } = createRuleFailureDiagnosisSkill(createDeps());
+    const { content } = createUniversalAlertingFailureDiagnosisSkill(createDeps());
 
     expect(content).toContain(
       '(privileges, mappings, a missing index, server limits, platform errors)'
@@ -186,14 +186,28 @@ describe('createRuleFailureDiagnosisSkill', () => {
   });
 
   it('never claims the rule was saved and points to the rendered Update Rule action', () => {
-    const { content } = createRuleFailureDiagnosisSkill(createDeps());
+    const { content } = createUniversalAlertingFailureDiagnosisSkill(createDeps());
 
     expect(content).toContain('Update Rule');
     expect(content).toContain('never claim the rule was saved');
   });
 
+  it('is scoped to rule failures only, not action policies, notification workflows, or connectors', () => {
+    const { content, description } = createUniversalAlertingFailureDiagnosisSkill(createDeps());
+
+    expect(description).toContain('only diagnoses rule failures');
+    expect(description).toContain(
+      'action policy failures, notification workflow failures and connector issues are out of scope'
+    );
+    expect(content).toContain(
+      'Action policy failures, notification workflow failures, or connector issues'
+    );
+    expect(content).toContain('this skill only diagnoses **rule** failures');
+    expect(content).toContain('do not guess a cause');
+  });
+
   it('points to the rule-authoring skill for general composition guidance', () => {
-    const { content } = createRuleFailureDiagnosisSkill(createDeps());
+    const { content } = createUniversalAlertingFailureDiagnosisSkill(createDeps());
 
     expect(content).toContain(RULE_AUTHORING_SKILL_ID);
   });

@@ -55,7 +55,7 @@ describe('openRuleFailureDiagnosisChat', () => {
     expect(args.newConversation).toBe(true);
     expect(args.autoSendInitialMessage).toBe(true);
     expect(args.sessionTag).toBe('rule-execution-diagnose:exec-1');
-    expect(args.initialMessage).toContain('skill://rule-failure-diagnosis');
+    expect(args.initialMessage).toContain('skill://universal-alerting-failure-diagnosis');
     expect(args.initialMessage).toContain('My rule');
     expect(args.initialMessage).not.toContain('nonexistent_field');
     expect(args.attachments).toHaveLength(1);
