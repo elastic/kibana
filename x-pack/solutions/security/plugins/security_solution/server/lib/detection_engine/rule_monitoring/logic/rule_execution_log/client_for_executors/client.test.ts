@@ -37,7 +37,12 @@ const ESQL_ABORT_ERROR = 'ES|QL search has been aborted due to cancelled executi
 const SEARCH_ABORT_ERROR_FROM_SINGLE_SEARCH_AFTER =
   'Error searching events\nError: Error: Search has been aborted due to cancelled execution';
 const SEARCH_ABORT_ERROR_FROM_SEARCH_AFTER_BULK_CREATE =
-  '1: Error extracting/processing events or creating alerts\nError: Error: Search has been aborted due to cancelled execution';
+  'cycle 0: Error extracting/processing events or creating alerts\nError: Error: Search has been aborted due to cancelled execution';
+const REQUEST_TIMEOUT_ERROR_FROM_SINGLE_SEARCH_AFTER =
+  'Error searching events\nError: TimeoutError: Request timed out';
+const REQUEST_TIMEOUT_ERROR_FROM_SEARCH_AFTER_BULK_CREATE =
+  'cycle 0: Error extracting/processing events or creating alerts\nError: TimeoutError: Request timed out';
+const REQUEST_TIMEOUT_ERROR_FROM_RULE_TYPE_WRAPPER = 'TimeoutError: Request timed out';
 
 describe('createRuleExecutionLogClientForExecutors', () => {
   let ruleResultService: ReturnType<typeof publicRuleResultServiceMock.create>;
@@ -139,6 +144,27 @@ describe('createRuleExecutionLogClientForExecutors', () => {
 
       expect(ruleResultService.addLastRunError).toHaveBeenCalledWith(
         'Error while performing ES|QL search: Request timed out, Request timed out',
+        true
+      );
+    });
+
+    it('reports a custom query rule run whose search hit the ES client request timeout as a user error', async () => {
+      const client = createClient();
+
+      // The complete buffer for a custom query rule whose search outlived the rule timeout:
+      // singleSearchAfter logs the exception, searchAfterAndBulkCreate logs it again with its cycle
+      // prefix, then the rule type wrapper logs the message returned by the executor.
+      client.error(REQUEST_TIMEOUT_ERROR_FROM_SINGLE_SEARCH_AFTER);
+      client.error(REQUEST_TIMEOUT_ERROR_FROM_SEARCH_AFTER_BULK_CREATE);
+      client.error(REQUEST_TIMEOUT_ERROR_FROM_RULE_TYPE_WRAPPER);
+      await client.close();
+
+      expect(ruleResultService.addLastRunError).toHaveBeenCalledWith(
+        [
+          REQUEST_TIMEOUT_ERROR_FROM_SINGLE_SEARCH_AFTER,
+          REQUEST_TIMEOUT_ERROR_FROM_SEARCH_AFTER_BULK_CREATE,
+          REQUEST_TIMEOUT_ERROR_FROM_RULE_TYPE_WRAPPER,
+        ].join(', '),
         true
       );
     });
