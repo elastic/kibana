@@ -5,69 +5,151 @@
  * 2.0.
  */
 
+import { sendCreateAgentlessPolicy, sendGetPackageInfoByKey } from '@kbn/fleet-plugin/public';
+
+import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import { deployGroup } from './deploy_groups';
+import type { DeployGroup } from './deploy_groups';
+
 jest.mock('@kbn/fleet-plugin/public', () => ({
   sendCreateAgentlessPolicy: jest.fn(),
   sendGetPackageInfoByKey: jest.fn(),
 }));
 
-import { sendCreateAgentlessPolicy, sendGetPackageInfoByKey } from '@kbn/fleet-plugin/public';
-
-import { deployGroup, type DeployGroup } from './deploy_groups';
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-
-const mockCreateAgentless = sendCreateAgentlessPolicy as jest.Mock;
+const mockCreatePolicy = sendCreateAgentlessPolicy as jest.Mock;
 const mockGetPackageInfo = sendGetPackageInfoByKey as jest.Mock;
 
-const ec2 = {
-  id: 'ec2',
-  name: 'Amazon EC2',
+/**
+ * Bedrock shape: metrics stream on by default, CloudWatch log stream off by default.
+ */
+const bedrock = {
+  id: 'bedrock',
+  name: 'Amazon Bedrock',
+  signalTypes: ['metrics', 'logs'],
+  dataStreams: ['guardrails', 'invocation'],
   packageName: 'aws',
-  dataStreams: ['ec2'],
-  inputs: ['aws-s3'],
-  showInUI: true,
   deploymentMethods: [{ method: 'managed_integration', preferred: true }],
-  varDefsByInput: {},
-  varDefsByDataStream: {},
+  inputs: ['aws/metrics', 'aws-cloudwatch'],
+  requiredConfig: [],
+  defaultEnabled: true,
+  defaultEnabledInputs: ['aws/metrics'],
+  showInUI: true,
+  isManifestLoaded: true,
+  isManifestError: false,
+  isStaticAgentBasedOnly: false,
+  varDefsByInput: { 'aws/metrics': {}, 'aws-cloudwatch': {} },
+  varDefsByDataStream: {
+    guardrails: {
+      inputs: ['aws/metrics'],
+      defaultEnabledInputs: ['aws/metrics'],
+      varDefsByInput: { 'aws/metrics': {} },
+    },
+    invocation: {
+      inputs: ['aws-cloudwatch'],
+      defaultEnabledInputs: [],
+      varDefsByInput: { 'aws-cloudwatch': {} },
+    },
+  },
 } as unknown as AwsServiceMatrixEntry;
 
 const group: DeployGroup = {
   groupId: 'aws',
-  instanceIds: ['ec2'],
+  instanceIds: ['bedrock'],
   members: [
     {
-      instance: { instanceId: 'ec2', serviceId: 'ec2', name: 'Amazon EC2', isDuplicate: false },
-      service: ec2,
+      instance: {
+        instanceId: 'bedrock',
+        serviceId: 'bedrock',
+        name: 'Amazon Bedrock',
+        isDuplicate: false,
+      },
+      service: bedrock,
     },
   ],
   isDuplicateGroup: false,
   namespace: '',
 };
 
-const deploy = async (proxyUrl: string | undefined, pkgVars: string[]) => {
-  mockGetPackageInfo.mockResolvedValue({
-    data: {
-      item: {
-        version: '1.0.0',
-        vars: pkgVars.map((name) => ({ name })),
-        policy_templates: [],
-      },
-    },
-  });
-  await deployGroup(group, {
-    namespace: 'default',
-    globalRegion: 'us-east-1',
-    storedServiceVars: {},
-    authenticateAndDeployStep: {} as never,
-    integrationName: 'aws-1',
-    policySettings: proxyUrl === undefined ? {} : { proxy_url: proxyUrl },
-  });
-  return mockCreateAgentless.mock.calls[0][0];
-};
-
-describe('deployGroup — proxy URL', () => {
+describe('deployGroup — never-configured service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockCreateAgentless.mockResolvedValue({ item: { id: 'policy-1' } });
+    mockGetPackageInfo.mockResolvedValue({
+      data: {
+        item: {
+          version: '1.0.0',
+          policy_templates: [
+            { name: 'bedrock', inputs: [{ type: 'aws/metrics' }, { type: 'aws-cloudwatch' }] },
+          ],
+        },
+      },
+    });
+    mockCreatePolicy.mockResolvedValue({ item: { id: 'policy-1' } });
+  });
+
+  it('sends only the data streams the manifest enables by default', async () => {
+    await deployGroup(group, {
+      namespace: 'default',
+      globalRegion: 'us-east-1',
+      storedServiceVars: {},
+      authenticateAndDeployStep: {},
+    } as unknown as Parameters<typeof deployGroup>[1]);
+
+    const { inputs } = mockCreatePolicy.mock.calls[0][0];
+    expect(Object.keys(inputs['bedrock-aws/metrics'].streams)).toEqual(['aws.guardrails']);
+    expect(inputs['bedrock-aws-cloudwatch']).toStrictEqual({ enabled: false, streams: {} });
+  });
+});
+
+describe('deployGroup — proxy URL', () => {
+  const ec2 = {
+    id: 'ec2',
+    name: 'Amazon EC2',
+    packageName: 'aws',
+    dataStreams: ['ec2'],
+    inputs: ['aws-s3'],
+    showInUI: true,
+    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+    varDefsByInput: {},
+    varDefsByDataStream: {},
+  } as unknown as AwsServiceMatrixEntry;
+
+  const ec2Group: DeployGroup = {
+    groupId: 'aws',
+    instanceIds: ['ec2'],
+    members: [
+      {
+        instance: { instanceId: 'ec2', serviceId: 'ec2', name: 'Amazon EC2', isDuplicate: false },
+        service: ec2,
+      },
+    ],
+    isDuplicateGroup: false,
+    namespace: '',
+  };
+
+  const deploy = async (proxyUrl: string | undefined, pkgVars: string[]) => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: {
+        item: {
+          version: '1.0.0',
+          vars: pkgVars.map((name) => ({ name })),
+          policy_templates: [],
+        },
+      },
+    });
+    await deployGroup(ec2Group, {
+      namespace: 'default',
+      globalRegion: 'us-east-1',
+      storedServiceVars: {},
+      authenticateAndDeployStep: {} as never,
+      integrationName: 'aws-1',
+      policySettings: proxyUrl === undefined ? {} : { proxy_url: proxyUrl },
+    });
+    return mockCreatePolicy.mock.calls[0][0];
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockCreatePolicy.mockResolvedValue({ item: { id: 'policy-1' } });
   });
 
   it('sends the proxy as a package var, not a top-level field', async () => {
@@ -82,10 +164,11 @@ describe('deployGroup — proxy URL', () => {
     });
   });
 
-  it('leaves it out when empty or never set', async () => {
+  it('leaves it out when empty', async () => {
     expect((await deploy('', ['proxy_url'])).vars).toBeUndefined();
-    jest.clearAllMocks();
-    mockCreateAgentless.mockResolvedValue({ item: { id: 'policy-1' } });
+  });
+
+  it('leaves it out when never set', async () => {
     expect((await deploy(undefined, ['proxy_url'])).vars).toBeUndefined();
   });
 
@@ -99,13 +182,13 @@ describe('deployGroup — proxy URL', () => {
     mockGetPackageInfo.mockResolvedValue({
       data: { item: { version: '1.0.0', vars: [], policy_templates: [] } },
     });
-    await deployGroup(group, {
+    await deployGroup(ec2Group, {
       namespace: 'default',
       globalRegion: '',
       storedServiceVars: {},
       authenticateAndDeployStep: {} as never,
       policySettings: { output_id: 'logstash-1', proxy_url: 'http://proxy:3128' },
     });
-    expect(mockCreateAgentless.mock.calls[0][0]).not.toHaveProperty('output_id');
+    expect(mockCreatePolicy.mock.calls[0][0]).not.toHaveProperty('output_id');
   });
 });

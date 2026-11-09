@@ -145,6 +145,57 @@ describe('buildGroupPackagePolicy — inputs of the service policy template', ()
       'cloudtrail-aws-s3': { enabled: false },
     });
   });
+
+  it('leaves the data streams the manifest disables by default off for a never-configured service', async () => {
+    // Bedrock shape: metrics stream on by default, CloudWatch log stream off by default.
+    const bedrock = {
+      ...guardduty,
+      id: 'bedrock',
+      dataStreams: ['guardrails', 'invocation'],
+      inputs: ['aws/metrics', 'aws-cloudwatch'],
+      defaultEnabledInputs: ['aws/metrics'],
+      varDefsByInput: { 'aws/metrics': {}, 'aws-cloudwatch': {} },
+      varDefsByDataStream: {
+        guardrails: {
+          inputs: ['aws/metrics'],
+          defaultEnabledInputs: ['aws/metrics'],
+          varDefsByInput: { 'aws/metrics': {} },
+        },
+        invocation: {
+          inputs: ['aws-cloudwatch'],
+          defaultEnabledInputs: [],
+          varDefsByInput: { 'aws-cloudwatch': {} },
+        },
+      },
+    } as unknown as AwsServiceMatrixEntry;
+    const body = await buildGroupPackagePolicy(
+      {
+        ...group,
+        members: [
+          {
+            instance: { ...group.members[0].instance, instanceId: 'bedrock', serviceId: 'bedrock' },
+            service: bedrock,
+          },
+        ],
+      },
+      {
+        version: '1.0.0',
+        policy_templates: [
+          { name: 'bedrock', inputs: [{ type: 'aws/metrics' }, { type: 'aws-cloudwatch' }] },
+        ],
+      },
+      {
+        namespace: '',
+        globalRegion: 'us-east-1',
+        storedServiceVars: {},
+        authenticateAndDeployStep: {},
+        pkgVersion: '1.0.0',
+      } as BuildPackagePolicyOpts
+    );
+
+    expect(body.inputs['bedrock-aws/metrics']).toMatchObject({ enabled: true });
+    expect(body.inputs['bedrock-aws-cloudwatch']).toStrictEqual({ enabled: false });
+  });
 });
 
 describe('buildGroupPackagePolicy — output', () => {
