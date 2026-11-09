@@ -12,7 +12,11 @@ import type {
   OverviewFilters,
   OverviewSearchParams,
 } from '../../common/overview_filters';
-import { encodeOverviewFilters, readOverviewFilters } from '../../common/overview_filters_param';
+import {
+  encodeOverviewFilters,
+  overviewFiltersParamIssue,
+  readOverviewFilters,
+} from '../../common/overview_filters_param';
 import { useDigitalExperienceParams } from './use_digital_experience_params';
 import { useUpdateUrlQuery } from './use_update_url_query';
 
@@ -36,10 +40,19 @@ export const useOverviewFilters = () => {
     return encoded ? { filters: encoded } : {};
   }, [filters]);
 
-  /** Sets the values of the filters in `patch` at once, and removes a filter given none. */
+  /**
+   * Sets the values of the filters in `patch` at once, and removes a filter given none. A selection
+   * the param cannot hold, e.g. a page URL past its limit, is left out: the router would drop the
+   * whole param, and every other filter with it.
+   */
   const setFilters = useCallback(
-    (patch: OverviewFilters) =>
-      updateUrlQuery({ filters: encodeOverviewFilters({ ...filters, ...patch }) }),
+    (patch: OverviewFilters) => {
+      const next = encodeOverviewFilters({ ...filters, ...patch });
+      if (next !== undefined && overviewFiltersParamIssue(next) !== undefined) {
+        return;
+      }
+      updateUrlQuery({ filters: next });
+    },
     [filters, updateUrlQuery]
   );
 

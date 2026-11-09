@@ -102,6 +102,32 @@ describe('useOverviewFilters', () => {
     });
   });
 
+  it('leaves the URL as it is for a selection the param cannot hold, so no other filter is lost', () => {
+    mockFilters({ browser: include('Chrome') });
+    const { result } = renderHook(() => useOverviewFilters());
+
+    // A value past the length its filter takes.
+    act(() =>
+      result.current.setFilter('pageUrl', include(`https://shop.example.com/${'a'.repeat(1100)}`))
+    );
+    expect(push).not.toHaveBeenCalled();
+
+    // Values that are each fine, and together more than the param holds.
+    const many = Array.from(
+      { length: 10 },
+      (_, index) => `https://shop.example.com/${index}${'b'.repeat(900)}`
+    );
+    act(() => result.current.setFilter('pageUrl', include(...many)));
+    expect(push).not.toHaveBeenCalled();
+
+    // A selection that fits still goes through.
+    act(() => result.current.setFilter('pageUrl', include('https://shop.example.com/')));
+    expect(pushedFilters(push.mock.calls[0][0].search)).toEqual({
+      browser: include('Chrome'),
+      pageUrl: include('https://shop.example.com/'),
+    });
+  });
+
   it('removes a filter set to no values, and the param when no filter is left', () => {
     mockFilters(
       { browser: include('Chrome') },
