@@ -66,7 +66,7 @@ describe('ops.eventLoopWatchdog config', () => {
 
   describe.each([
     ['startAfter', '2s', '4m', '1999ms', '241s', 'PT2S', 'PT4M'],
-    ['maxDuration', '1s', '10s', '999ms', '11s', 'PT1S', 'PT10S'],
+    ['maxDuration', '2s', '10s', '1999ms', '11s', 'PT2S', 'PT10S'],
     ['cooldown', '10s', '24h', '9s', '25h', 'PT10S', 'PT24H'],
   ])('profiling.%s', (setting, min, max, belowMin, aboveMax, minIso, maxIso) => {
     describe.each([
