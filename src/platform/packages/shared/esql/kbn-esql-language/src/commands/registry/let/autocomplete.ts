@@ -9,11 +9,17 @@
 
 import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import { isBinaryExpression, isSubQuery, isUnknownNode } from '@elastic/esql';
-import { endsWithWhitespace, getTrailingIdentifier } from '../../definitions/utils/regex';
 import {
-  assignCompletionItem,
+  endsWithWhitespace,
+  getTrailingIdentifier,
+  startsWithSemicolon,
+} from '../../definitions/utils/regex';
+import { getNextNamedSubqueryName } from '../../definitions/utils/named_subqueries';
+import {
   buildSubqueryCompleteItems,
-  semiColonCompleteItem,
+  getNewNamedSubquerySuggestion,
+  headerAssignCompleteItem,
+  headerSemiColonCompleteItem,
 } from '../complete_items';
 import type { ICommandCallbacks, ICommandContext, ISuggestionItem } from '../types';
 
@@ -30,30 +36,24 @@ export async function autocomplete(
   const binding = command.args[0];
   const bindingRightSide = isBinaryExpression(binding) ? binding.args[1] : null;
 
-  const hasSemicolonAtEnd = query
-    .substring(cursorPosition ?? query.length)
-    .trimStart()
-    .startsWith(';');
+  const hasSemicolonAtEnd = startsWithSemicolon(query.substring(cursorPosition ?? query.length));
 
   if (!binding) {
     // The parser does not keep the binding name until '=' is typed.
     const bindingText = innerText.slice(command.location.min + command.name.length).trim();
 
-    // LET <name> /
-    if (getTrailingIdentifier(bindingText) === bindingText && endsWithWhitespace(innerText)) {
-      return [{ ...assignCompletionItem, detail: '' }];
+    if (!endsWithWhitespace(innerText)) {
+      return [];
     }
 
     // LET /
-    if (!bindingText && endsWithWhitespace(innerText)) {
-      const existingNames = new Set(context?.namedSubqueries?.map(({ name }) => name));
-      let counter = 0;
-      while (existingNames.has(`subquery${counter}`)) {
-        counter++;
-      }
-      const name = `subquery${counter}`;
+    if (!bindingText) {
+      return [getNewNamedSubquerySuggestion(getNextNamedSubqueryName(context?.namedSubqueries))];
+    }
 
-      return [{ ...assignCompletionItem, label: name, text: `${name} = `, detail: '' }];
+    // LET <name> /
+    if (getTrailingIdentifier(bindingText) === bindingText) {
+      return [headerAssignCompleteItem];
     }
 
     return [];
@@ -81,12 +81,7 @@ export async function autocomplete(
     isSubQuery(bindingRightSide) &&
     !hasSemicolonAtEnd
   ) {
-    return [
-      {
-        ...semiColonCompleteItem,
-        text: ';\n', // Add a new line so the next instruction starts in the line below.
-      },
-    ];
+    return [headerSemiColonCompleteItem];
   }
 
   return [];

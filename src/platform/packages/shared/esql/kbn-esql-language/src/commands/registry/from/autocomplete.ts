@@ -153,25 +153,15 @@ function suggestInitialSources(
   commandStart: number,
   subquerySuggestions?: ISuggestionItem[]
 ): ISuggestionItem[] {
-  let sources = excludeNamedSubqueries(context?.sources ?? [], context);
-
-  if (context?.isCursorInSubquery) {
-    sources = sources.filter((source) => source.type !== SOURCES_TYPES.TIMESERIES);
-  }
+  const { namedSubqueries, sources, views, datasets } = getVisibleSources(context);
 
   const sourceSuggestions = getSourceSuggestions(sources, [], {
     textBeforeCursor: innerText,
     commandStart,
   });
-  const viewSuggestions = buildViewsDefinitions(
-    excludeNamedSubqueries(context?.views ?? [], context),
-    []
-  );
-  const datasetSuggestions = buildDatasetsDefinitions(
-    excludeNamedSubqueries(context?.datasets ?? [], context),
-    []
-  );
-  const namedSubquerySuggestions = buildNamedSubqueriesDefinitions(getNamedSubqueryNames(context));
+  const viewSuggestions = buildViewsDefinitions(views, []);
+  const datasetSuggestions = buildDatasetsDefinitions(datasets, []);
+  const namedSubquerySuggestions = buildNamedSubqueriesDefinitions(namedSubqueries);
   const suggestions = [
     ...namedSubquerySuggestions,
     ...sourceSuggestions,
@@ -231,12 +221,7 @@ async function suggestAdditionalSources(
   }
 
   const canRewriteFromToTs = indexes.length === 1 && isTypingIndexName;
-
-  let sources = excludeNamedSubqueries(context?.sources ?? [], context);
-
-  if (context?.isCursorInSubquery) {
-    sources = sources.filter((source) => source.type !== SOURCES_TYPES.TIMESERIES);
-  }
+  const { namedSubqueries, sources, views, datasets } = getVisibleSources(context);
 
   const recommendedQueries = await getRecommendedQueriesSuggestions(
     context?.editorExtensions ?? EMPTY_EXTENSIONS,
@@ -248,10 +233,10 @@ async function suggestAdditionalSources(
     sources,
     indexes.map(({ name }) => name),
     recommendedQueries,
-    excludeNamedSubqueries(context?.views ?? [], context),
-    excludeNamedSubqueries(context?.datasets ?? [], context),
+    views,
+    datasets,
     canRewriteFromToTs ? sourceReplacementContext : undefined,
-    getNamedSubqueryNames(context)
+    namedSubqueries
   );
 
   if (subquerySuggestions && isRestartingExpression(innerText) && shouldSuggestSubquery(context)) {
@@ -275,16 +260,18 @@ function shouldSuggestSubquery(context: ICommandContext | undefined): boolean {
   return !context?.isCursorInSubquery;
 }
 
-function getNamedSubqueryNames(context: ICommandContext | undefined): string[] {
-  return context?.namedSubqueries?.map(({ name }) => name) ?? [];
-}
+function getVisibleSources(context: ICommandContext | undefined) {
+  const namedSubqueries = context?.namedSubqueries?.map(({ name }) => name) ?? [];
+  const isVisible = ({ name }: { name: string }) => !namedSubqueries.includes(name);
 
-// A LET binding shadows the sources with the same name.
-function excludeNamedSubqueries<T extends { name: string }>(
-  items: T[],
-  context: ICommandContext | undefined
-): T[] {
-  const names = getNamedSubqueryNames(context);
-
-  return items.filter(({ name }) => !names.includes(name));
+  return {
+    namedSubqueries,
+    sources: (context?.sources ?? []).filter(
+      (source) =>
+        isVisible(source) &&
+        !(context?.isCursorInSubquery && source.type === SOURCES_TYPES.TIMESERIES)
+    ),
+    views: (context?.views ?? []).filter(isVisible),
+    datasets: (context?.datasets ?? []).filter(isVisible),
+  };
 }

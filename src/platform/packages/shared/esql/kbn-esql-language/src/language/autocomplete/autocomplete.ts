@@ -29,7 +29,10 @@ import { getQueryForFields } from '../shared/get_query_for_fields';
 import type { ColumnsMap, GetColumnMapFn } from '../shared/columns_retrieval_helpers';
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
-import { getNamedSubqueries } from '../../commands/definitions/utils/named_subqueries';
+import {
+  getNamedSubqueries,
+  type NamedSubquery,
+} from '../../commands/definitions/utils/named_subqueries';
 import { isTimeseriesSourceCommand } from '../../commands/definitions/utils/timeseries_check';
 import { attachReplacementRanges, ReplacementRangeStrategyKind } from './utils/prefix_range';
 
@@ -57,11 +60,9 @@ export async function suggest(
     return [];
   }
 
+  const completedHeader = root.header?.filter(({ location }) => location.max < offset);
   // Keep the current pipeline's fields and the outer header commands completed before the cursor.
-  const astForFields = {
-    ...astContext.astForContext,
-    header: root.header?.filter(({ location }) => location.max < offset),
-  };
+  const astForFields = { ...astContext.astForContext, header: completedHeader };
 
   const { getColumnsByType, getColumnMap } = getColumnsByTypeRetriever(
     getQueryForFields(innerText, astForFields),
@@ -86,7 +87,7 @@ export async function suggest(
     const isStartingSubquery =
       astContext.isCursorInSubquery && !astContext.astForContext.commands.length;
     const precedingCommandNames = new Set(
-      [...(astForFields.header ?? []), ...astContext.astForContext.commands].map(({ name }) => name)
+      [...(completedHeader ?? []), ...astContext.astForContext.commands].map(({ name }) => name)
     );
 
     const commands = esqlCommandRegistry
@@ -227,7 +228,9 @@ export async function suggest(
       getColumnMapOnce,
       resourceRetriever,
       offset,
-      hasMinimumLicenseRequired
+      hasMinimumLicenseRequired,
+      // Only the LET bindings completed before the cursor can be referenced.
+      getNamedSubqueries(completedHeader)
     );
 
     const lineStart = fullText.lastIndexOf('\n', offset - 1) + 1;
@@ -265,7 +268,8 @@ async function getSuggestionsWithinCommandExpression(
   getColumnMap: GetColumnMapFn,
   callbacks?: ESQLCallbacks,
   offset?: number,
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean,
+  namedSubqueries: readonly NamedSubquery[] = []
 ) {
   const innerText = fullText.substring(0, offset);
   const commandDefinition = esqlCommandRegistry.getCommandByName(astContext.command.name);
@@ -289,10 +293,6 @@ async function getSuggestionsWithinCommandExpression(
 
   const headers = commands.filter((cmd) => isHeaderCommand(cmd));
   const unmappedFieldsStrategy = getUnmappedFieldsStrategy(headers);
-  // Only the LET bindings completed before the cursor can be referenced.
-  const namedSubqueries = getNamedSubqueries(
-    headers.filter(({ location }) => location.max < innerText.length)
-  );
 
   // Get the context that might be needed by the command itself
   const additionalCommandContext = await getCommandContext(
