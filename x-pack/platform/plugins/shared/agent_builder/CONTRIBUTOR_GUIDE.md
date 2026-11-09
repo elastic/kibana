@@ -380,7 +380,7 @@ agentBuilder.agents.registerType({
 
 #### `attachment_tools`
 
-With `attachment_tools: { enabled: false }`, the agent gets none of the five generic attachment tools (`attachments.read`, `attachments.add`, `attachments.update`, `attachments.list` and `attachments.diff`). The ATTACHMENTS section of its system prompt is replaced by a one-line notice that it cannot read attachment content, and it is not taught inline attachment rendering. This saves about 1.1K to 1.3K input tokens per model call.
+With `attachment_tools: { enabled: false }`, the agent gets none of the five generic attachment tools (`attachments.read`, `attachments.add`, `attachments.update`, `attachments.list` and `attachments.diff`). The ATTACHMENTS section of its system prompt is replaced by a one-line notice that it cannot read attachment content, and it is not taught inline attachment rendering. This saves about 2K input tokens per model call in a default Kibana, and more when more attachment types are registered, because `attachments.add` lists every registered type.
 
 What the agent loses:
 
