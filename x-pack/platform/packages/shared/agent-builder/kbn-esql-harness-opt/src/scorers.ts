@@ -24,6 +24,10 @@ export const substituteBindParams = (query: string): string =>
 export interface QueryScore {
   astValid: boolean;
   executes: boolean;
+  /** Whether the candidate's columns could be matched to the gold's by content. */
+  columnsAligned?: boolean;
+  /** Columns the candidate returned beyond the ones the gold query produced. */
+  extraColumns?: number;
   /** Jaccard over normalised row multisets vs the gold query; `null` when gold is not executable. */
   resultEquivalence: number | null;
   rowCount: number | null;
@@ -33,20 +37,92 @@ export interface QueryScore {
   reward: number;
 }
 
-interface EsqlResult {
+export interface EsqlResult {
   columns?: Array<{ name: string; type: string }>;
   values?: unknown[][];
 }
 
-const normalizeRows = (result: EsqlResult): string[] => {
-  const values = result.values ?? [];
-  return values
-    .map((row) =>
-      JSON.stringify(
-        row.map((value) => (typeof value === 'number' ? Number(value.toFixed(4)) : value))
-      )
-    )
-    .sort();
+const roundValue = (value: unknown): unknown =>
+  typeof value === 'number' ? Number(value.toFixed(4)) : value;
+
+/** Signature of a column: its values as an order-independent multiset. */
+const columnSignature = (values: unknown[][], index: number): string =>
+  JSON.stringify(
+    values
+      .map((row) => roundValue(row[index]))
+      .map((value) => JSON.stringify(value))
+      .sort()
+  );
+
+/**
+ * Align the candidate's columns to the gold's by content, then compare rows.
+ *
+ * ES|QL puts the grouping key last in `STATS … BY`, so a candidate that adds a `KEEP` to control
+ * the output order produces the same data in a different column order — and under a naive
+ * positional comparison that scored zero. Column *names* differ freely too (`p95` vs
+ * `p95_distance`), so alignment is by the values a column contains, not by its name or position.
+ *
+ * A candidate that also returns extra columns still aligns: the data that was asked for is
+ * there. Extra columns are reported separately rather than silently scored as wrong.
+ */
+const alignColumns = (
+  gold: EsqlResult,
+  candidate: EsqlResult
+): { goldRows: string[]; candidateRows: string[]; aligned: boolean; extraColumns: number } => {
+  const goldValues = gold.values ?? [];
+  const candidateValues = candidate.values ?? [];
+  const goldWidth = gold.columns?.length ?? goldValues[0]?.length ?? 0;
+  const candidateWidth = candidate.columns?.length ?? candidateValues[0]?.length ?? 0;
+
+  const used = new Set<number>();
+  const mapping: number[] = [];
+  for (let goldIndex = 0; goldIndex < goldWidth; goldIndex++) {
+    const signature = columnSignature(goldValues, goldIndex);
+    let match = -1;
+    for (let candidateIndex = 0; candidateIndex < candidateWidth; candidateIndex++) {
+      if (used.has(candidateIndex)) continue;
+      if (columnSignature(candidateValues, candidateIndex) === signature) {
+        match = candidateIndex;
+        break;
+      }
+    }
+    if (match === -1) {
+      // No alignment possible: fall back to comparing each row as a multiset of values, which
+      // still rewards the right numbers in the wrong shape.
+      const asMultiset = (values: unknown[][]) =>
+        values
+          .map((row) =>
+            JSON.stringify(
+              row
+                .map(roundValue)
+                .map((value) => JSON.stringify(value))
+                .sort()
+            )
+          )
+          .sort();
+      return {
+        goldRows: asMultiset(goldValues),
+        candidateRows: asMultiset(candidateValues),
+        aligned: false,
+        extraColumns: Math.max(0, candidateWidth - goldWidth),
+      };
+    }
+    used.add(match);
+    mapping.push(match);
+  }
+
+  const project = (values: unknown[][], indices: number[]) =>
+    values.map((row) => JSON.stringify(indices.map((index) => roundValue(row[index])))).sort();
+
+  return {
+    goldRows: project(
+      goldValues,
+      Array.from({ length: goldWidth }, (unused, index) => index)
+    ),
+    candidateRows: project(candidateValues, mapping),
+    aligned: true,
+    extraColumns: Math.max(0, candidateWidth - goldWidth),
+  };
 };
 
 const jaccard = (goldRows: string[], candidateRows: string[]): number => {
@@ -79,16 +155,18 @@ const runQuery = async (
   }
 };
 
-/** Execute the gold query once per example so candidate rows have something to be compared to. */
+/**
+ * Execute the gold query once per example.
+ *
+ * The whole result is kept, not just normalised rows: column alignment needs the gold's columns
+ * to compare against each candidate.
+ */
 export const executeGold = async (
   esClient: EsClient,
   goldQuery: string
-): Promise<{ rows: string[] | null; error?: string }> => {
+): Promise<{ rows: EsqlResult | null; error?: string }> => {
   const { result, error } = await runQuery(esClient, goldQuery);
-  if (!result) {
-    return { rows: null, error };
-  }
-  return { rows: normalizeRows(result) };
+  return result ? { rows: result } : { rows: null, error };
 };
 
 export const scoreQuery = async ({
@@ -98,7 +176,7 @@ export const scoreQuery = async ({
 }: {
   esClient: EsClient;
   query: string | undefined;
-  goldRows: string[] | null;
+  goldRows: EsqlResult | null;
 }): Promise<QueryScore> => {
   if (!query || query.trim().length === 0) {
     return {
@@ -106,7 +184,7 @@ export const scoreQuery = async ({
       executes: false,
       resultEquivalence: goldRows ? 0 : null,
       rowCount: null,
-      goldRowCount: goldRows?.length ?? null,
+      goldRowCount: goldRows?.values?.length ?? null,
       error: 'No query produced',
       reward: 0,
     };
@@ -116,9 +194,18 @@ export const scoreQuery = async ({
   const astValid = errors.length === 0;
   const { result, error } = await runQuery(esClient, query);
   const executes = Boolean(result);
-  const candidateRows = result ? normalizeRows(result) : null;
-  const resultEquivalence =
-    goldRows && candidateRows ? jaccard(goldRows, candidateRows) : goldRows ? 0 : null;
+
+  let resultEquivalence: number | null = null;
+  let columnsAligned: boolean | undefined;
+  let extraColumns: number | undefined;
+  if (goldRows && result) {
+    const alignment = alignColumns(goldRows, result);
+    resultEquivalence = jaccard(alignment.goldRows, alignment.candidateRows);
+    columnsAligned = alignment.aligned;
+    extraColumns = alignment.extraColumns;
+  } else if (goldRows) {
+    resultEquivalence = 0;
+  }
 
   // When the gold query itself does not execute against the fixtures, result equivalence is
   // unmeasurable; the remaining components are renormalised rather than scored as zero, which
@@ -131,9 +218,11 @@ export const scoreQuery = async ({
   return {
     astValid,
     executes,
+    columnsAligned,
+    extraColumns,
     resultEquivalence,
-    rowCount: candidateRows?.length ?? null,
-    goldRowCount: goldRows?.length ?? null,
+    rowCount: result?.values?.length ?? null,
+    goldRowCount: goldRows?.values?.length ?? null,
     error,
     reward,
   };

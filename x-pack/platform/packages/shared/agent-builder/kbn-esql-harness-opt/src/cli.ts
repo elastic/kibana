@@ -19,6 +19,7 @@ import { createEsClient, executeGenerateEsql, resolveTarget } from './clients';
 import { setupFixtures } from './corpora/setup';
 import { buildGoldRowCache, runVariant } from './runner';
 import { executeGold, scoreQuery } from './scorers';
+import type { EsqlResult } from './scorers';
 import { runCampaign } from './campaign';
 import { restartLane, setupCandidateWorktree } from './candidate_workspace';
 import { harnessPaths } from './workspace';
@@ -100,7 +101,7 @@ Both lanes' Kibana processes must run with ESQL_HARNESS_TRACE_FILE pointing at
 
         // Difficulty probe: run each question through the current harness and compare rows to
         // gold. Cheap, and it is what keeps the corpus off both ceilings.
-        const goldCache = new Map<string, string[] | null>();
+        const goldCache = new Map<string, EsqlResult | null>();
         for (const example of raw) {
           if (!goldCache.has(example.goldQuery)) {
             goldCache.set(example.goldQuery, (await executeGold(esClient, example.goldQuery)).rows);

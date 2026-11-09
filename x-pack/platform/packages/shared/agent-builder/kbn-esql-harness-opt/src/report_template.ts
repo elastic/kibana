@@ -306,12 +306,31 @@ function viewRounds() {
   const g = round.gate;
 
   const perSeed = (round.seedDeltas || []).slice().sort((a, b) => a.delta - b.delta);
+
+  const attemptBlock = (title, attempts, colour) =>
+    '<div><div class="muted">' + title + '</div>' +
+    (attempts || []).map((attempt) =>
+      '<pre class="' + colour + '">' + esc(attempt.query || '(no query)') + '</pre>' +
+      '<div class="muted">reward ' + n(attempt.reward, 2) + ' · ' +
+      (attempt.executes ? 'executes' : 'FAILS') + ' · rows ' + (attempt.rowCount ?? '—') +
+      ' vs gold ' + (attempt.goldRowCount ?? '—') + ' · eq ' + n(attempt.resultEquivalence, 2) +
+      ' · ' + (attempt.tries ?? '—') + ' tries · ' + usd(attempt.costUsd) + '</div>' +
+      (attempt.error ? '<pre class="bad">' + esc(String(attempt.error).slice(0, 400)) + '</pre>' : '')
+    ).join('') + '</div>';
+
   const seedRows = perSeed.map((seed) =>
     '<tr><td class="' + cls(seed.delta) + '">' + sign(seed.delta, 2) + '</td>' +
     '<td>' + n(seed.incumbent, 2) + ' → ' + n(seed.candidate, 2) + '</td>' +
-    '<td>' + esc(seed.provenance) + '</td>' +
-    '<td><a ' + goAttr({ tab: 'examples', example: seed.exampleId }) + '>' +
-    esc(seed.question.slice(0, 110)) + '</a></td></tr>').join('');
+    '<td class="muted">' + esc(seed.provenance) + '</td>' +
+    '<td><details><summary>' + esc(seed.question.slice(0, 110)) + '</summary>' +
+    '<div class="muted" style="margin-top:6px">gold</div><pre>' + esc(seed.goldQuery) + '</pre>' +
+    '<div class="split">' +
+    attemptBlock('incumbent produced', seed.incumbentAttempts, 'diff-del') +
+    attemptBlock('candidate produced', seed.candidateAttempts, 'diff-add') +
+    '</div>' +
+    '<p><a ' + goAttr({ tab: 'examples', example: seed.exampleId }) +
+    '>full history for this example →</a></p></details></td></tr>'
+  ).join('');
 
   const verification = round.verification
     ? '<table><tr><th>predicted</th><th>claimed</th><th>actually happened</th></tr>' +
@@ -336,7 +355,7 @@ function viewRounds() {
     '<h3>What changed</h3>' + renderDiff(round.diff, round.filesChanged) +
     '<h3>Why (proposer rationale)</h3><pre>' + esc(round.rationale || '—') + '</pre>' +
     '<h3>Manifest verification</h3>' + verification +
-    '<h3>Per-seed effect (' + perSeed.length + ' seeds, worst first)</h3>' +
+    '<h3>Per-seed effect (' + perSeed.length + ' seeds, worst first) — expand a row to see both sides</h3>' +
     '<table><tr><th>Δ</th><th>reward</th><th>source</th><th>question</th></tr>' + seedRows + '</table>' +
     '<h3>Runs in this round</h3>' +
     (round.runs || []).map((runId) => '<p><a ' + goAttr({ tab: 'runs', run: runId }) + '>' + esc(runId) + '</a></p>').join('');

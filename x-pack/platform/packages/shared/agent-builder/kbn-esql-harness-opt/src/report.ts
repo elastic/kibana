@@ -172,6 +172,26 @@ export const buildReportPayload = () => {
       ? rewardByExample(candidateRun.results as ExampleRun[])
       : new Map();
 
+    // Each seed carries both sides of *this* round, so the round page can explain a delta
+    // without sending the reader to a global example history.
+    const attemptsFor = (
+      run: typeof incumbentRun,
+      exampleId: string
+    ): Array<Record<string, unknown>> =>
+      (run?.results ?? [])
+        .filter((result) => result.exampleId === exampleId)
+        .map((result) => ({
+          query: result.generatedQuery,
+          reward: result.score.reward,
+          executes: result.score.executes,
+          resultEquivalence: result.score.resultEquivalence,
+          rowCount: result.score.rowCount,
+          goldRowCount: result.score.goldRowCount,
+          error: result.score.error,
+          tries: result.tries,
+          costUsd: result.costUsd,
+        }));
+
     const seedDeltas = [...incumbentRewards.keys()]
       .filter((exampleId) => candidateRewards.has(exampleId))
       .map((exampleId) => {
@@ -181,10 +201,13 @@ export const buildReportPayload = () => {
         return {
           exampleId,
           question: example?.question ?? exampleId,
+          goldQuery: example?.goldQuery ?? '',
           provenance: example?.provenance ?? '',
           incumbent: incumbentRewards.get(exampleId) ?? 0,
           candidate: candidateRewards.get(exampleId) ?? 0,
           delta: (candidateRewards.get(exampleId) ?? 0) - (incumbentRewards.get(exampleId) ?? 0),
+          incumbentAttempts: attemptsFor(incumbentRun, exampleId),
+          candidateAttempts: attemptsFor(candidateRun, exampleId),
         };
       });
 

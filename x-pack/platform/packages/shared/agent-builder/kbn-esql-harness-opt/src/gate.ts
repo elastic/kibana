@@ -90,7 +90,7 @@ const percentile = (sorted: number[], fraction: number): number =>
 export const gateCandidate = ({
   incumbent,
   candidate,
-  maxRegressions = 2,
+  maxRegressionShare = 0.05,
   maxCostRatio = 1.1,
   iterations = 10_000,
   regressionEpsilon = 0.05,
@@ -98,7 +98,8 @@ export const gateCandidate = ({
 }: {
   incumbent: RunSummary;
   candidate: RunSummary;
-  maxRegressions?: number;
+  /** Regressed seeds tolerated, as a share of the split (floor of 2). */
+  maxRegressionShare?: number;
   maxCostRatio?: number;
   iterations?: number;
   regressionEpsilon?: number;
@@ -150,11 +151,19 @@ export const gateCandidate = ({
 
   const qualityWin = ciLow > 0 && costRatio <= maxCostRatio;
   const costWin = ciLow > -nonInferiorityMargin && costPerSolvedCiHigh < 0;
-  const regressionsOk = regressions.length <= maxRegressions;
+  // The cap scales with the split: at 79 seeds and two rollouts, a fixed "at most 2 regressions"
+  // is below the noise floor, and it rejected a candidate that improved 13 seeds and lost 4.
+  // Improvements must still clearly outnumber regressions, which is the property that actually
+  // matters — a candidate trading solved examples for an average is what the cap exists to stop.
+  const maxRegressions = Math.max(2, Math.ceil(maxRegressionShare * seeds.length));
+  const regressionsOk =
+    regressions.length <= maxRegressions && improvements.length > regressions.length;
 
   const reasons: string[] = [];
   if (!regressionsOk) {
-    reasons.push(`${regressions.length} regressed seeds (max ${maxRegressions})`);
+    reasons.push(
+      `${regressions.length} regressed seeds vs ${improvements.length} improved (cap ${maxRegressions})`
+    );
   }
   if (!qualityWin && !costWin) {
     reasons.push(

@@ -13,6 +13,7 @@ import type { HarnessExample } from './dataset';
 import type { HarnessTarget } from './clients';
 import { executeGenerateEsql } from './clients';
 import { executeGold, scoreQuery } from './scorers';
+import type { EsqlResult } from './scorers';
 import type { QueryScore } from './scorers';
 import { lanePaths } from './workspace';
 import type { Lane } from './workspace';
@@ -105,8 +106,8 @@ export const buildGoldRowCache = async ({
 }: {
   esClient: EsClient;
   examples: HarnessExample[];
-}): Promise<Map<string, string[] | null>> => {
-  const cache = new Map<string, string[] | null>();
+}): Promise<Map<string, EsqlResult | null>> => {
+  const cache = new Map<string, EsqlResult | null>();
   for (const example of examples) {
     const { rows } = await executeGold(esClient, example.goldQuery);
     cache.set(example.id, rows);
@@ -141,7 +142,7 @@ export const runVariant = async ({
   target: HarnessTarget;
   log: ToolingLog;
   concurrency?: number;
-  goldRows: Map<string, string[] | null>;
+  goldRows: Map<string, EsqlResult | null>;
   outputDir: string;
 }): Promise<RunSummary> => {
   const { tracePath } = lanePaths(lane);
