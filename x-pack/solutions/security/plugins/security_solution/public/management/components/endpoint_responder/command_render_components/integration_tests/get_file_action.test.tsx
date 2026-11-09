@@ -238,6 +238,7 @@ describe('When using get-file action from response actions console', () => {
     'ra_get-file_error_upload-timeout',
     'ra_get-file_error_queue-timeout',
     'ra_get-file_error_not-enough-free-space',
+    'ra_get-file_error_file-locked',
   ])('should show detailed error if get-file failure returned code: %s', async (outputCode) => {
     const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
       path: '/api/endpoint/action/a.b.c',
@@ -284,9 +285,92 @@ describe('When using get-file action from response actions console', () => {
     ).toHaveTextContent(endpointActionResponseCodes[outputCode]);
   });
 
+  describe('and the `--force` argument is used', () => {
+    beforeEach(() => {
+      mockedContext.setExperimentalFlag({ responseActionsEndpointGetFileForce: true });
+    });
+
+    it('should include `force` in the request body', async () => {
+      await render();
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two" --force');
+
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.getFile).toHaveBeenCalledWith({
+          body: '{"agent_type":"endpoint","endpoint_ids":["a.b.c"],"parameters":{"path":"one/two","force":true}}',
+          path: GET_FILE_ROUTE,
+          version: '2023-10-31',
+        });
+      });
+    });
+
+    it('should NOT include `force` in the request body when the argument is not used', async () => {
+      await render();
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
+
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.getFile).toHaveBeenCalledTimes(1);
+      });
+
+      expect(apiMocks.responseProvider.getFile).not.toHaveBeenCalledWith(
+        expect.objectContaining({ body: expect.stringContaining('force') })
+      );
+    });
+
+    it('should display the `--force` argument in the command help', async () => {
+      await render();
+      await enterConsoleCommand(renderResult, user, 'get-file --help');
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('test-helpOutput')).toHaveTextContent('--force');
+      });
+    });
+
+    it('should error if the Endpoint does not support the `get_file_force` capability', async () => {
+      await render(ENDPOINT_CAPABILITIES.filter((capability) => capability !== 'get_file_force'));
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two" --force');
+
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+        'Invalid argument value: --force. This host does not support reading locked files. It requires Windows and a version of the Endpoint that supports it. Upgrade your Agent in Fleet to use this parameter.'
+      );
+    });
+
+    it('should only accept `--force` once', async () => {
+      await render();
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two" --force --force');
+
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+        'Argument can only be used once: --force'
+      );
+    });
+  });
+
+  describe('and the `--force` feature flag is disabled', () => {
+    it('should treat `--force` as an unsupported argument', async () => {
+      mockedContext.setExperimentalFlag({ responseActionsEndpointGetFileForce: false });
+      await render();
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two" --force');
+
+      expect(renderResult.getByTestId('test-badArgument')).toHaveTextContent(
+        'Unsupported argument'
+      );
+    });
+  });
+
   describe('And agent type is SentinelOne', () => {
     beforeEach(() => {
       getConsoleCommandsOptions.agentType = 'sentinel_one';
+    });
+
+    it('should error if `--force` is used', async () => {
+      // Enable the feature flag to prove the argument is gated by agent type (endpoint) and not
+      // just by the feature flag being enabled.
+      mockedContext.setExperimentalFlag({ responseActionsEndpointGetFileForce: true });
+      await render();
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two" --force');
+
+      expect(renderResult.getByTestId('test-badArgument-message')).toHaveTextContent(
+        'The following get-file argument is not supported by this command: --force'
+      );
     });
 
     it('should call API with `agent_type` set to `sentinel_one`', async () => {

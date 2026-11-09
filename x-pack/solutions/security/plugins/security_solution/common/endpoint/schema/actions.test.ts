@@ -1685,6 +1685,71 @@ describe('actions schemas', () => {
           });
         }).not.toThrow();
       });
+
+      describe('`force` parameter', () => {
+        it('should accept `force: true` for endpoint agent type', () => {
+          expect(() => {
+            EndpointActionGetFileSchema.body.validate({
+              endpoint_ids: ['endpoint_id'],
+              agent_type: 'endpoint',
+              parameters: { path: '/some/file', force: true },
+            });
+          }).not.toThrow();
+        });
+
+        it('should accept `force: false` for endpoint agent type', () => {
+          expect(() => {
+            EndpointActionGetFileSchema.body.validate({
+              endpoint_ids: ['endpoint_id'],
+              agent_type: 'endpoint',
+              parameters: { path: '/some/file', force: false },
+            });
+          }).not.toThrow();
+        });
+
+        it('should reject a `force` value that is not a boolean', () => {
+          expect(() => {
+            EndpointActionGetFileSchema.body.validate({
+              endpoint_ids: ['endpoint_id'],
+              agent_type: 'endpoint',
+              parameters: { path: '/some/file', force: 'yes' },
+            });
+          }).toThrow();
+        });
+
+        it('should allow a request without `force`', () => {
+          const result = EndpointActionGetFileSchema.body.validate({
+            endpoint_ids: ['endpoint_id'],
+            agent_type: 'endpoint',
+            parameters: { path: '/some/file' },
+          });
+
+          expect('force' in result.parameters).toBe(false);
+        });
+
+        it.each(['sentinel_one', 'microsoft_defender_endpoint'] as const)(
+          'should reject `force` when agent_type is %s',
+          (agentType) => {
+            expect(() => {
+              EndpointActionGetFileSchema.body.validate({
+                endpoint_ids: ['endpoint_id'],
+                agent_type: agentType,
+                parameters: { path: '/some/file', force: true },
+              });
+            }).toThrow(`[parameters.force]: is not valid with agent type of ${agentType}`);
+          }
+        );
+
+        it('should allow a request without `force` for a non-endpoint agent type', () => {
+          expect(() => {
+            EndpointActionGetFileSchema.body.validate({
+              endpoint_ids: ['endpoint_id'],
+              agent_type: 'sentinel_one',
+              parameters: { path: '/some/file' },
+            });
+          }).not.toThrow();
+        });
+      });
     });
 
     describe('ExecuteActionRequestSchema', () => {

@@ -638,6 +638,90 @@ describe('EndpointActionsClient', () => {
     });
   });
 
+  describe('#getFile()', () => {
+    describe('when `force` parameter is set to `true`', () => {
+      beforeEach(() => {
+        // @ts-expect-error mocking this for testing purposes
+        classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointGetFileForce =
+          true;
+      });
+
+      it('should throw error when feature flag is disabled', async () => {
+        // @ts-expect-error mocking this for testing purposes
+        classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointGetFileForce =
+          false;
+
+        await expect(
+          endpointActionsClient.getFile(
+            responseActionsClientMock.createGetFileOptions({
+              ...getCommonResponseActionOptions(),
+              parameters: { path: '/some/file', force: true },
+            })
+          )
+        ).rejects.toThrow('get-file `force` parameter is not enabled');
+      });
+
+      it('should throw error when endpoint does not support `get_file_force` capability', async () => {
+        const generator = new EndpointMetadataGenerator('seed');
+
+        applyEsClientSearchMock({
+          esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+          index: metadataCurrentIndexPattern,
+          response: generator.toEsSearchResponse([
+            generator.toEsSearchHit(generator.generate({ Endpoint: { capabilities: [] } })),
+          ]),
+        });
+
+        await expect(
+          endpointActionsClient.getFile(
+            responseActionsClientMock.createGetFileOptions({
+              ...getCommonResponseActionOptions(),
+              parameters: { path: '/some/file', force: true },
+            })
+          )
+        ).rejects.toThrow('The following agent IDs do not support the get-file force option');
+      });
+
+      it('should succeed when feature flag is enabled and endpoint supports the capability', async () => {
+        const generator = new EndpointMetadataGenerator('seed');
+
+        applyEsClientSearchMock({
+          esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+          index: metadataCurrentIndexPattern,
+          response: generator.toEsSearchResponse([
+            generator.toEsSearchHit(
+              generator.generate({ Endpoint: { capabilities: ['get_file_force'] } })
+            ),
+          ]),
+        });
+
+        await expect(
+          endpointActionsClient.getFile(
+            responseActionsClientMock.createGetFileOptions({
+              ...getCommonResponseActionOptions(),
+              parameters: { path: '/some/file', force: true },
+            })
+          )
+        ).resolves.toBeDefined();
+      });
+
+      it('should succeed without checking capability when `force` is false', async () => {
+        // @ts-expect-error mocking this for testing purposes
+        classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointGetFileForce =
+          false;
+
+        await expect(
+          endpointActionsClient.getFile(
+            responseActionsClientMock.createGetFileOptions({
+              ...getCommonResponseActionOptions(),
+              parameters: { path: '/some/file', force: false },
+            })
+          )
+        ).resolves.toBeDefined();
+      });
+    });
+  });
+
   describe('#killProcess()', () => {
     describe('when `kill_descendants` parameter is set to `true`', () => {
       beforeEach(() => {
