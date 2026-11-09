@@ -25,15 +25,24 @@ interface ApplicationRoute {
 export const applicationRouteTestCases = ({
   route,
   getData,
+  hasFilters = false,
 }: {
   route: () => ApplicationRoute;
   /** The mocked function the handler returns the result of. */
   getData: jest.Mock;
+  /** Whether the route takes the Overview's filters too. */
+  hasFilters?: boolean;
 }) => {
   const esClient = { search: jest.fn() };
   const RESPONSE = { data: 'response' };
 
-  const runHandler = (query: { start: string; end: string; environment?: string }) => {
+  const runHandler = (query: {
+    start: string;
+    end: string;
+    environment?: string;
+    browser?: string;
+    pageUrl?: string;
+  }) => {
     return (route().handler as (resources: unknown) => Promise<unknown>)({
       params: { path: { serviceName: 'shop' }, query },
       context: {
@@ -110,4 +119,48 @@ export const applicationRouteTestCases = ({
     expect(schemaOf('path').safeParse({ serviceName: 'x'.repeat(1025) }).success).toBe(false);
     expect(schemaOf('path').safeParse({ serviceName: '' }).success).toBe(false);
   });
+
+  if (hasFilters) {
+    it('passes the selected filters, and none when they are left out', async () => {
+      await runHandler({
+        start: START,
+        end: END,
+        browser: 'Chrome',
+        pageUrl: 'https://shop.test/',
+      });
+      expect(getData).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          filters: {
+            browser: 'Chrome',
+            os: undefined,
+            device: undefined,
+            country: undefined,
+            pageUrl: 'https://shop.test/',
+          },
+        })
+      );
+
+      await runHandler({ start: START, end: END });
+      expect(getData).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          filters: {
+            browser: undefined,
+            os: undefined,
+            device: undefined,
+            country: undefined,
+            pageUrl: undefined,
+          },
+        })
+      );
+    });
+
+    it('bounds the filters like the Overview route', () => {
+      const query = (filters: Record<string, string>) => ({ start: START, end: END, ...filters });
+
+      expect(schemaOf('query').safeParse(query({ browser: 'Chrome' })).success).toBe(true);
+      expect(schemaOf('query').safeParse(query({ browser: '' })).success).toBe(false);
+      expect(schemaOf('query').safeParse(query({ country: 'x'.repeat(17) })).success).toBe(false);
+      expect(schemaOf('query').safeParse(query({ pageUrl: 'x'.repeat(1025) })).success).toBe(false);
+    });
+  }
 };

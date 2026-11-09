@@ -8,7 +8,27 @@ The plugin is disabled by default. To enable it, add the following to `kibana.ym
 xpack.entityInventory.enabled: true
 ```
 
-At start it logs the names of the entity definitions registered in the entity store. It has no routes or UI yet.
+It has no routes or UI yet.
+
+## Registered definitions
+
+`server/definitions/` holds the definitions this plugin registers with the entity store during its
+own `setup()`, grouped by family (`kubernetes/` today). `ENTITY_DEFINITIONS` is the whole list, and
+each one carries `managedBy: { kind: 'plugin', id: 'entityInventory' }`. The registry validates a
+definition when it is registered: one it rejects is logged and skipped, and Kibana keeps starting.
+It logs the types it registered at debug, or the rejected ones as an error. At start it logs the
+names of every definition the store holds, its own and the built-ins.
+
+Registered today:
+
+| type | identified by | sources |
+| --- | --- | --- |
+| `k8s.deployment` | `<namespace>/<name>` (`kubernetes.namespace`, `kubernetes.deployment.name`; the ECS<->OTel alias layer resolves them on the OTel stream), cluster as the `k8s.cluster.name` column | `metrics-kubernetes.state_deployment-*`, `metrics-k8sclusterreceiver.otel-*` |
+
+The same namespace and name in two clusters is one `k8s.deployment` entity today.
+
+The definitions under `server/inventory/__fixtures__/` are test-only and stay that way; nothing
+registers them.
 
 ## Query generation
 

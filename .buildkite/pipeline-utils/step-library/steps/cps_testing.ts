@@ -16,7 +16,7 @@ export const cpsTests = (): readonly Step[] => [
     command: '.buildkite/scripts/steps/test/scout/cps_testing.sh',
     label: 'Cross Project Search (CPS) UI Tests',
     key: 'cps-testing',
-    agents: { ...spotAgent('n2-standard-8', spotZones.centralFCA), ...pdBalanced },
+    agents: { ...spotAgent('n2-standard-8', spotZones.n2), ...pdBalanced },
     depends_on: ['build'],
     timeout_in_minutes: 30,
     retry: retry.agentLossOrAnyOnce,

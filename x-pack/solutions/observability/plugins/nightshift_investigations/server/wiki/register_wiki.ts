@@ -34,6 +34,7 @@ import { createWikiTelemetry } from '../telemetry';
 import { materializeWiki } from './materialize';
 import { createLlmProposeWikiEdits, optimizeWiki } from './optimize';
 import { createWikiPageStore, type WikiPageStore } from './page_store';
+import { classifyWikiRound, shouldOptimizeRound } from './round_kind';
 
 export const createWikiStore = ({
   esClient,
@@ -67,9 +68,6 @@ export const registerWikiAiIndex = (
     traces: [],
   });
 };
-
-/** Rounds with fewer tool calls rarely establish anything durable, e.g. chat replies or smoke tests. */
-const MIN_OPTIMIZE_TOOL_CALLS = 3;
 
 // Only sandbox calls carry the queries and files the optimizer learns from; the rest (e.g.
 // recording hypotheses) would spend its transcript budget and count towards the minimum.
@@ -192,12 +190,20 @@ export const runWikiOptimize = async ({
     return;
   }
 
+  const roundKind = classifyWikiRound({
+    roundIndex: loadedRound.roundIndex ?? roundIndex,
+  });
   const sandboxToolCalls = loadedRound.toolCalls.filter(
     ({ tool_id: toolId }) => toolId !== undefined && OPTIMIZER_TOOL_IDS.has(toolId)
   );
-  if (sandboxToolCalls.length < MIN_OPTIMIZE_TOOL_CALLS) {
+  if (
+    !shouldOptimizeRound({
+      roundKind,
+      sandboxToolCallCount: sandboxToolCalls.length,
+    })
+  ) {
     logger.debug(
-      `Wiki optimizer skipped — round made ${sandboxToolCalls.length} sandbox tool calls, below ${MIN_OPTIMIZE_TOOL_CALLS}`
+      `Wiki optimizer skipped — ${roundKind} round with ${sandboxToolCalls.length} sandbox tool calls has nothing durable to learn from`
     );
     return { openedIds, appliedWrites: [] };
   }
@@ -225,6 +231,9 @@ export const runWikiOptimize = async ({
     userMessage,
     assistantMessage,
     toolCalls: sandboxToolCalls,
+    roundKind,
+    previousUserMessage: loadedRound.previousUserMessage,
+    previousAssistantMessage: loadedRound.previousAssistantMessage,
     telemetry: createWikiTelemetry({
       analytics,
       conversationId,

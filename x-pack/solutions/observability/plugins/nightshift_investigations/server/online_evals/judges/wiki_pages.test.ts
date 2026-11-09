@@ -78,9 +78,13 @@ describe('wiki page judges', () => {
         log,
       });
 
-      const { system, messages, tools, toolChoice } = chatComplete.mock.calls[0][0];
+      const { system, messages, tools, toolChoice, metadata } = chatComplete.mock.calls[0][0];
       expect(system).toContain('Wiki pages');
       expect(toolChoice).toEqual({ function: 'score_wiki_page_influence' });
+      expect(metadata.connectorTelemetry).toMatchObject({
+        pluginId: 'nightshift_online_evals',
+        productFeature: 'nightshift',
+      });
       expect(Object.keys(tools)).toEqual(['score_wiki_page_influence']);
 
       // user task, then six tool calls each as an assistant call and a tool result, then the answer

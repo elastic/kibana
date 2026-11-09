@@ -46,6 +46,10 @@ export const getWikiEntityTypeSingularLabel = (entityType: WikiEntityType): stri
       return i18n.translate('xpack.nightshift.knowledge.wiki.entityType.glossarySingularLabel', {
         defaultMessage: 'Glossary',
       });
+    case 'ontology':
+      return i18n.translate('xpack.nightshift.knowledge.wiki.entityType.ontologySingularLabel', {
+        defaultMessage: 'Ontology',
+      });
   }
 };
 
@@ -86,6 +90,10 @@ export const getWikiEntityTypeLabel = (entityType: WikiEntityType): string => {
     case 'glossary':
       return i18n.translate('xpack.nightshift.knowledge.wiki.entityType.glossaryLabel', {
         defaultMessage: 'Glossary',
+      });
+    case 'ontology':
+      return i18n.translate('xpack.nightshift.knowledge.wiki.entityType.ontologyLabel', {
+        defaultMessage: 'Ontology',
       });
   }
 };
