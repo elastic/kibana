@@ -55,7 +55,6 @@ export const RuleSummaryFlyoutContainer = ({
     rule: sourceRule,
     ruleDetailsHref: sourceRuleDetailsHref,
     isLoading: isLoadingSourceRule,
-    isError: isSourceRuleError,
   } = useFetchSourceRule({
     ruleId: isSourceRule ? ruleId : undefined,
     http,
@@ -65,7 +64,7 @@ export const RuleSummaryFlyoutContainer = ({
   if (isSourceRule) {
     return (
       <SourceRuleSummaryFlyout
-        rule={isSourceRuleError ? undefined : sourceRule}
+        rule={sourceRule}
         isLoading={isLoadingSourceRule}
         ruleCategory={sourceRuleInfo?.category}
         ruleDetailsHref={sourceRuleDetailsHref}

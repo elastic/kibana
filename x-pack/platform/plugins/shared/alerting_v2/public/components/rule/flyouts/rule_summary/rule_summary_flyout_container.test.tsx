@@ -272,20 +272,28 @@ describe('RuleSummaryFlyoutContainer', () => {
       expect(screen.queryByTestId('mockRuleSummaryFlyout')).not.toBeInTheDocument();
     });
 
-    it('renders the source flyout without a rule when the source fetch fails', () => {
+    it('keeps showing the cached source rule when the refresh fails', () => {
       mockUseFetchRule.mockReturnValue(mockFetchRuleResult({}));
       mockUseFetchSourceRule.mockReturnValue({
         ...noSourceRule,
-        rule: { id: 'rule-1', metadata: { name: 'Stale' } } as unknown as RuleResponse,
+        rule: { id: 'rule-1', metadata: { name: 'Cached' } } as unknown as RuleResponse,
         isError: true,
       });
 
       renderContainer({ sourceRuleInfo: {} });
 
-      expect(screen.getByTestId('mockSourceRuleSummaryFlyout')).toHaveAttribute(
-        'data-has-rule',
-        'false'
-      );
+      expect(screen.getByTestId('mockSourceRuleSummaryFlyout')).toHaveTextContent('Cached');
+    });
+
+    it('renders the source flyout without a rule when the source fetch fails with no cached rule', () => {
+      mockUseFetchRule.mockReturnValue(mockFetchRuleResult({}));
+      mockUseFetchSourceRule.mockReturnValue({ ...noSourceRule, isError: true });
+
+      renderContainer({ sourceRuleInfo: {} });
+
+      const flyout = screen.getByTestId('mockSourceRuleSummaryFlyout');
+      expect(flyout).toHaveAttribute('data-loading', 'false');
+      expect(flyout).toHaveAttribute('data-has-rule', 'false');
     });
 
     it('forwards cachedRule as initialRule to the source fetch', () => {

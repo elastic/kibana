@@ -28,7 +28,6 @@ const LOADING_LABEL = i18n.translate('xpack.alertingV2.rule.summaryFlyout.loadin
 
 /** Body content shown inside a rule summary flyout while the rule is fetched. */
 export const RuleSummaryLoadingBody = () => (
-  // The skeleton has no accessible name of its own, so the wrapper announces what loads.
   <div role="progressbar" aria-label={LOADING_LABEL} data-test-subj="ruleSummaryFlyoutLoading">
     <EuiSkeletonText lines={6} />
   </div>
