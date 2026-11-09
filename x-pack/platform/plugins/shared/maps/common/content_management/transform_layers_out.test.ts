@@ -32,4 +32,24 @@ describe('transformLayersOut', () => {
       ]
     `);
   });
+
+  test('should convert camelCase style keys to snake_case', () => {
+    expect(
+      transformLayersOut([
+        {
+          style: {
+            type: 'HEATMAP',
+            colorRampName: 'Greens',
+          } as any,
+        } as any,
+      ])
+    ).toEqual([
+      {
+        style: {
+          type: 'HEATMAP',
+          color_ramp_name: 'Greens',
+        },
+      },
+    ]);
+  });
 });

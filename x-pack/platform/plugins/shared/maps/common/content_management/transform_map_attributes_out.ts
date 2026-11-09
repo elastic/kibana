@@ -33,7 +33,7 @@ export function transformMapAttributesOut(
 function parseLayerListJSON(layerListJSON?: string) {
   if (!layerListJSON) return {};
 
-  const layers = parseJSON<unknown[]>([], layerListJSON) as StoredLayer[];
+  const layers = parseJSON<StoredLayer[]>([], layerListJSON);
   return { layers: transformLayersOut(layers) };
 }
 
