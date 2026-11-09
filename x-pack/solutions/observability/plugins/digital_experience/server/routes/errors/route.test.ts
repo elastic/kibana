@@ -17,5 +17,6 @@ describe('GET /internal/digital_experience/applications/{serviceName}/errors', (
       return errorsRouteRepository[APPLICATION_ERRORS_ENDPOINT];
     },
     getData: jest.mocked(getOtelErrors),
+    hasFilters: true,
   });
 });

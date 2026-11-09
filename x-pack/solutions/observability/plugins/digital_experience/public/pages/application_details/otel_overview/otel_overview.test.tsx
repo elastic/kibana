@@ -17,6 +17,7 @@ import type { ApplicationOverviewResponse } from '../../../../common/types/overv
 import type { ApplicationUsageResponse } from '../../../../common/types/usage';
 import { useEnvironment } from '../../../hooks/use_environment';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
+import { useOverviewFilters } from '../../../hooks/use_overview_filters';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { createUiSettingsMock } from '../../../test_utils/ui_settings_mock';
 import { OtelOverview } from './otel_overview';
@@ -53,6 +54,7 @@ jest.mock('../../../hooks/use_application_links', () => {
   };
 });
 jest.mock('../../../hooks/use_environment');
+jest.mock('../../../hooks/use_overview_filters');
 jest.mock('../../../hooks/use_time_range', () => ({
   ...jest.requireActual('../../../hooks/use_time_range'),
   useTimeRange: jest.fn(),
@@ -117,10 +119,22 @@ const response = (pageLoads: number): ApplicationOverviewResponse => ({
     trend: [{ timestamp: 1_000, pageLoads, loadTimeP75Ms: 2412.5 }],
   },
   environments: ['production', 'staging'],
+  filters: {
+    browser: [
+      { key: 'Chrome', count: 1200 },
+      { key: 'Firefox', count: 333 },
+    ],
+    os: [{ key: 'macOS', count: 900 }],
+    device: [],
+    country: [],
+    pageUrl: [{ key: 'https://shop.example.com/cart', count: 40 }],
+  },
 });
 
 const fetch = jest.fn();
 const setEnvironment = jest.fn();
+const setFilter = jest.fn();
+const clearFilters = jest.fn();
 const setTimeRange = jest.fn();
 
 const timeRange = { rangeFrom: '2021-01-18T12:00:00.000Z', rangeTo: '2021-01-18T13:00:00.000Z' };
@@ -148,6 +162,14 @@ const renderOverview = (serviceName = 'shop') => {
   return render(<OtelOverview serviceName={serviceName} />, { wrapper: Providers });
 };
 
+const mockFilters = (filters: ReturnType<typeof useOverviewFilters>['filters']) =>
+  jest.mocked(useOverviewFilters).mockReturnValue({
+    filters,
+    setFilter,
+    clearFilters,
+    hasActiveFilters: Object.keys(filters).length > 0,
+  });
+
 beforeEach(() => {
   jest.clearAllMocks();
   mockBrushEndListeners.length = 0;
@@ -157,6 +179,7 @@ beforeEach(() => {
     .mockReturnValue({ fetch } as unknown as ReturnType<typeof createRepositoryClient>);
   jest.mocked(getCoreVitalsComponent).mockReturnValue(<div data-test-subj="coreVitals" />);
   jest.mocked(useEnvironment).mockReturnValue({ environment: undefined, setEnvironment });
+  mockFilters({});
   jest.mocked(useTimeRange).mockReturnValue({ timeRange, isTimeRangeInUrl: true, setTimeRange });
   jest.mocked(useKibanaServices).mockReturnValue({
     http: {},
@@ -213,6 +236,89 @@ describe('OtelOverview', () => {
     expect(
       screen.getByTestId('digitalExperienceEnvironmentFilterOption-production')
     ).toBeInTheDocument();
+  });
+
+  it('asks for the selected filters, for the Overview, the usage and the top errors', async () => {
+    mockFilters({ browser: 'Chrome', country: 'DE', pageUrl: 'https://shop.example.com/cart' });
+    renderOverview();
+
+    const query = {
+      start: timeRange.rangeFrom,
+      end: timeRange.rangeTo,
+      browser: 'Chrome',
+      country: 'DE',
+      pageUrl: 'https://shop.example.com/cart',
+    };
+    await waitFor(() => expectFetchedWith(query));
+    await waitFor(() => expectFetchedWith(query, USAGE_ENDPOINT));
+    await waitFor(() => expectFetchedWith(query, ERRORS_ENDPOINT));
+  });
+
+  it('lists the values of a filter with their page loads, and sets the one picked', async () => {
+    renderOverview();
+    await findPageLoads('1,533');
+
+    fireEvent.click(screen.getByTestId('digitalExperienceOverviewFilter-browser'));
+    expect(
+      await screen.findByTestId('digitalExperienceOverviewFilter-browserOption-Chrome')
+    ).toHaveTextContent('Chrome (1,200)');
+    fireEvent.click(screen.getByTestId('digitalExperienceOverviewFilter-browserOption-Firefox'));
+
+    expect(setFilter).toHaveBeenCalledWith('browser', 'Firefox');
+  });
+
+  it('removes a filter with its "Any" option', async () => {
+    mockFilters({ browser: 'Chrome' });
+    renderOverview();
+    await findPageLoads('1,533');
+
+    fireEvent.click(screen.getByTestId('digitalExperienceOverviewFilter-browser'));
+    fireEvent.click(await screen.findByTestId('digitalExperienceOverviewFilter-browserOption-'));
+
+    expect(setFilter).toHaveBeenCalledWith('browser', undefined);
+  });
+
+  it('hides the filters nothing reports values for', async () => {
+    renderOverview();
+    await findPageLoads('1,533');
+
+    expect(screen.getByTestId('digitalExperienceOverviewFilter-os')).toBeInTheDocument();
+    expect(screen.queryByTestId('digitalExperienceOverviewFilter-device')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('digitalExperienceOverviewFilter-country')).not.toBeInTheDocument();
+  });
+
+  it('keeps a selected filter visible although it has no values', async () => {
+    mockFilters({ country: 'DE' });
+    renderOverview();
+    await findPageLoads('1,533');
+
+    expect(screen.getByTestId('digitalExperienceOverviewFilter-country')).toHaveTextContent(
+      'Country: DE'
+    );
+  });
+
+  it('clears the filters, shown only while one is set', async () => {
+    const { unmount } = renderOverview();
+    await findPageLoads('1,533');
+    expect(screen.queryByTestId('digitalExperienceOverviewClearFilters')).not.toBeInTheDocument();
+    unmount();
+
+    mockFilters({ os: 'macOS' });
+    renderOverview();
+    await findPageLoads('1,533');
+    fireEvent.click(screen.getByTestId('digitalExperienceOverviewClearFilters'));
+
+    expect(clearFilters).toHaveBeenCalledTimes(1);
+  });
+
+  it('says which panels the page filter narrows', async () => {
+    mockFilters({ pageUrl: 'https://shop.example.com/cart' });
+    renderOverview();
+    await findPageLoads('1,533');
+
+    expect(screen.getByTestId('digitalExperienceOverviewPageFilterNote')).toHaveTextContent(
+      'applies to page loads only'
+    );
   });
 
   it('keeps the environments in the picker while the Overview loads again', async () => {

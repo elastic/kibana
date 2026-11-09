@@ -6,7 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isRunQuotaReached, type RunQuotasResponse } from '@kbn/significant-events-plugin/common';
+import {
+  isRunQuotaReached,
+  type RunQuotaGroup,
+  type RunQuotasResponse,
+} from '@kbn/significant-events-plugin/common';
 import type { Automation } from '../../../data/automations/use_automations';
 import { getTriggerDisplay } from './trigger_display';
 
@@ -62,14 +66,26 @@ export const isAutomationRateLimited = (
 ): boolean =>
   isEnabled && runtime.dailyDispatchLimit !== undefined && usedToday >= runtime.dailyDispatchLimit;
 
-export const isGlobalInvestigationLimitReached = (quotas?: RunQuotasResponse): boolean =>
-  quotas !== undefined &&
-  isRunQuotaReached({
-    group: 'investigation',
-    enabled: quotas.enabled,
-    limit: quotas.limits.investigation,
-    count: quotas.counts.investigation,
-  });
+export type AutomationBlockingLimit = Extract<
+  RunQuotaGroup,
+  'investigation' | 'total_investigation'
+>;
+
+/** The deployment-wide limit that blocks every automation today, if any. */
+export const getAutomationBlockingLimit = (
+  quotas?: RunQuotasResponse
+): AutomationBlockingLimit | undefined =>
+  quotas === undefined
+    ? undefined
+    : (['total_investigation', 'investigation'] as const).find((group) =>
+        isRunQuotaReached({
+          group,
+          enabled: quotas.enabled,
+          investigationLimitsEnabled: quotas.investigationLimitsEnabled,
+          limit: quotas.limits[group],
+          count: quotas.counts[group],
+        })
+      );
 
 export const getAutomationFacets = (
   automation: Automation,
