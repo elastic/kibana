@@ -124,7 +124,8 @@ describe('Elasticsearch connector', () => {
             type: 'string',
             label: 'API Key',
             sensitive: true,
-            helpText: 'Enter an API key with read access to the indices you want to search.',
+            helpText:
+              'Enter the base64-encoded "id:api_key" value from the Elasticsearch create API key response (POST /_security/api_key). Grant the key at minimum: read on the indices you search.',
           })
         );
         expect(properties.Authorization).not.toHaveProperty('placeholder');

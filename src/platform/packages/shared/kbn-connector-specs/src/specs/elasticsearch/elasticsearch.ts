@@ -63,7 +63,7 @@ export const Elasticsearch: ConnectorSpec = {
               }),
               helpText: i18n.translate('connectorSpecs.elasticsearch.auth.apiKey.helpText', {
                 defaultMessage:
-                  'Enter an API key with read access to the indices you want to search.',
+                  'Enter the base64-encoded "id:api_key" value from the Elasticsearch create API key response (POST /_security/api_key). Grant the key at minimum: read on the indices you search.',
               }),
             },
           },
@@ -226,7 +226,7 @@ export const Elasticsearch: ConnectorSpec = {
     '  Example: FROM logs-* | WHERE @timestamp > NOW() - 1 hour | STATS count = COUNT(*) BY service.name | SORT count DESC | LIMIT 10',
     '',
     '### Auth notes',
-    '- API key auth is recommended. Use the encoded API key value.',
+    '- API key auth is recommended. Enter the encoded value from the Elasticsearch create API key response (POST /_security/api_key).',
     '- The key must be granted read privilege on the indices you search.',
     '- For Elastic Cloud deployments, use the Elasticsearch endpoint URL shown in the Cloud console.',
   ].join('\n'),
