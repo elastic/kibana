@@ -67,7 +67,9 @@ export const runLiveQueryTool = (
   availability: agentBuilderToolsAvailability(osqueryContext),
   annotations: {
     title: 'Run Osquery live query',
-    readOnlyHint: true,
+    // The SQL is validated read-only, but the tool dispatches a Fleet action to
+    // enrolled hosts, which is a side effect.
+    readOnlyHint: false,
     destructiveHint: false,
     idempotentHint: false,
     openWorldHint: true,
