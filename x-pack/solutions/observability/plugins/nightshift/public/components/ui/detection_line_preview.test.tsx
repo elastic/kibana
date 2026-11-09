@@ -78,22 +78,38 @@ describe('DetectionLinePreview', () => {
   const originalCaf = window.cancelAnimationFrame;
   const originalResizeObserver = window.ResizeObserver;
   let rafIds = 0;
-  let pendingFrames: FrameRequestCallback[] = [];
+  let pendingFrames = new Map<number, FrameRequestCallback>();
+  let frameElapsedMs = 0;
+
+  const flushNextFrame = () => {
+    const entry = pendingFrames.entries().next().value as
+      | [number, FrameRequestCallback]
+      | undefined;
+    if (!entry) {
+      throw new Error('Expected a queued animation frame');
+    }
+    const [id, callback] = entry;
+    pendingFrames.delete(id);
+    frameElapsedMs += 16;
+    const now = performance.now() + frameElapsedMs;
+    act(() => {
+      callback(now);
+    });
+  };
 
   beforeEach(() => {
     renderDetectionLineAt.mockClear();
     rafIds = 0;
-    pendingFrames = [];
+    pendingFrames = new Map();
+    frameElapsedMs = 0;
 
     window.requestAnimationFrame = jest.fn((callback: FrameRequestCallback) => {
-      pendingFrames.push(callback);
       rafIds += 1;
+      pendingFrames.set(rafIds, callback);
       return rafIds;
     });
     window.cancelAnimationFrame = jest.fn((id: number) => {
-      if (id === rafIds) {
-        pendingFrames = [];
-      }
+      pendingFrames.delete(id);
     });
     window.ResizeObserver = jest.fn().mockImplementation(() => ({
       observe: jest.fn(),
@@ -160,7 +176,7 @@ describe('DetectionLinePreview', () => {
     expect(motion.addEventListener).toHaveBeenCalledWith('change', expect.any(Function));
   });
 
-  it('cancels the animation frame and disconnects observers on unmount', () => {
+  it('runs the animation loop, reschedules frames, and cancels the outstanding frame on unmount', () => {
     mockPrefersReducedMotion(false);
     const disconnect = jest.fn();
     window.ResizeObserver = jest.fn().mockImplementation(() => ({
@@ -177,12 +193,25 @@ describe('DetectionLinePreview', () => {
       </EuiProvider>
     );
 
-    expect(window.requestAnimationFrame).toHaveBeenCalled();
-    const scheduledId = rafIds;
+    expect(pendingFrames.size).toBe(1);
+    expect(renderDetectionLineAt).not.toHaveBeenCalled();
+
+    flushNextFrame();
+
+    expect(renderDetectionLineAt).toHaveBeenCalledTimes(1);
+    expect(renderDetectionLineAt.mock.calls[0]?.[5]).toBeGreaterThan(0);
+    expect(pendingFrames.size).toBe(1);
+
+    flushNextFrame();
+
+    expect(renderDetectionLineAt).toHaveBeenCalledTimes(2);
+    expect(pendingFrames.size).toBe(1);
+    const outstandingId = [...pendingFrames.keys()][0];
 
     unmount();
 
-    expect(window.cancelAnimationFrame).toHaveBeenCalledWith(scheduledId);
+    expect(window.cancelAnimationFrame).toHaveBeenCalledWith(outstandingId);
+    expect(pendingFrames.size).toBe(0);
     expect(disconnect).toHaveBeenCalledTimes(1);
   });
 
@@ -197,7 +226,9 @@ describe('DetectionLinePreview', () => {
       </EuiProvider>
     );
 
-    expect(window.requestAnimationFrame).toHaveBeenCalled();
+    flushNextFrame();
+    expect(renderDetectionLineAt).toHaveBeenCalledTimes(1);
+    expect(pendingFrames.size).toBe(1);
     renderDetectionLineAt.mockClear();
 
     act(() => {
@@ -205,6 +236,7 @@ describe('DetectionLinePreview', () => {
     });
 
     expect(window.cancelAnimationFrame).toHaveBeenCalled();
+    expect(pendingFrames.size).toBe(0);
     expect(renderDetectionLineAt).toHaveBeenCalledTimes(1);
     expect(renderDetectionLineAt.mock.calls[0]?.[5]).toBe(DETECTION_LINE_STATIC_FRAME_S);
   });
