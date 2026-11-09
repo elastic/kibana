@@ -405,10 +405,7 @@ export const deleteIndexedEndpointHosts = async (
 
   mergeAndAppendArrays(response, await deleteIndexedFleetAgents(esClient, indexedData));
   mergeAndAppendArrays(response, await deleteIndexedEndpointAndFleetActions(esClient, indexedData));
-  mergeAndAppendArrays(
-    response,
-    await deleteIndexedFleetEndpointPolicies(kbnClient, indexedData, esClient)
-  );
+  mergeAndAppendArrays(response, await deleteIndexedFleetEndpointPolicies(kbnClient, indexedData));
 
   return response;
 };
