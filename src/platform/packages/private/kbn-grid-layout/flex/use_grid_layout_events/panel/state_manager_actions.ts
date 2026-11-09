@@ -13,8 +13,11 @@ import type { MutableRefObject } from 'react';
 import type { ActivePanelEvent, FlexPanelData } from '../../grid_panel';
 import type { FlexLayoutData, FlexLayoutStateManager } from '../../types';
 import type { GridLayoutContextType } from '../../use_grid_layout_context';
-import { getSensorType } from '../sensors';
-import type { PointerPosition, UserInteractionEvent } from '../types';
+import { getSensorType } from '../../../grid/use_grid_layout_events/sensors';
+import type {
+  PointerPosition,
+  UserInteractionEvent,
+} from '../../../grid/use_grid_layout_events/types';
 import { getDragPreviewRect, getResizePreviewRect, getSensorOffsets } from './utils';
 
 let startingLayout: FlexLayoutData | undefined;

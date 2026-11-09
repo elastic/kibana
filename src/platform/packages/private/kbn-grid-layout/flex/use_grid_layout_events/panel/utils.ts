@@ -12,10 +12,21 @@ import { getScrollDimensions, isAtBottomOfPage } from '@kbn/core-chrome-layout-u
 
 import type { ActivePanelEvent, FlexPanelData } from '../../grid_panel';
 import type { FlexLayoutStateManager, GridSettings } from '../../types';
-import { updateClientY } from '../keyboard_utils';
-import { getSensorPosition, isKeyboardEvent, isMouseEvent, isTouchEvent } from '../sensors';
-import { KeyboardCode, type UserKeyboardEvent } from '../sensors/keyboard/types';
-import type { PointerPosition, UserInteractionEvent } from '../types';
+import { updateClientY } from '../../../grid/use_grid_layout_events/keyboard_utils';
+import {
+  getSensorPosition,
+  isKeyboardEvent,
+  isMouseEvent,
+  isTouchEvent,
+} from '../../../grid/use_grid_layout_events/sensors';
+import {
+  KeyboardCode,
+  type UserKeyboardEvent,
+} from '../../../grid/use_grid_layout_events/sensors/keyboard/types';
+import type {
+  PointerPosition,
+  UserInteractionEvent,
+} from '../../../grid/use_grid_layout_events/types';
 
 export const getDefaultResizeOptions = () => ({
   minWidth: 1,
