@@ -10,9 +10,9 @@
 const OPTION = '--diagnostic-dir';
 
 /**
- * Splits `NODE_OPTIONS` the way Node does. Kibana's start script quotes the directory. Spaces
- * separate options. A double-quoted value can hold spaces. Inside quotes, a backslash escapes the
- * next character.
+ * Tries to find the `--diagnostic-dir` passed in `NODE_OPTIONS`. Kibana's start script quotes the
+ * directory. Spaces separate options. A double-quoted value can hold spaces. Inside quotes, a
+ * backslash escapes the next character.
  */
 const splitNodeOptions = (nodeOptions: string): string[] => {
   const options: string[] = [];
