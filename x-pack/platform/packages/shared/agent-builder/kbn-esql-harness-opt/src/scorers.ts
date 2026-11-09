@@ -28,6 +28,13 @@ export interface QueryScore {
   columnsAligned?: boolean;
   /** Columns the candidate returned beyond the ones the gold query produced. */
   extraColumns?: number;
+  /** A few rows from each side, so a semantic failure can be diagnosed rather than guessed at. */
+  sample?: {
+    goldColumns: string[];
+    candidateColumns: string[];
+    goldRows: unknown[][];
+    candidateRows: unknown[][];
+  };
   /** Jaccard over normalised row multisets vs the gold query; `null` when gold is not executable. */
   resultEquivalence: number | null;
   rowCount: number | null;
@@ -215,11 +222,22 @@ export const scoreQuery = async ({
       ? (0.3 * (executes ? 1 : 0) + 0.1 * (astValid ? 1 : 0)) / 0.4
       : 0.6 * resultEquivalence + 0.3 * (executes ? 1 : 0) + 0.1 * (astValid ? 1 : 0);
 
+  const sampleOf = (source: EsqlResult | null | undefined) =>
+    (source?.values ?? []).slice(0, 5).map((row) => row.map((value) => roundValue(value)));
+
   return {
     astValid,
     executes,
     columnsAligned,
     extraColumns,
+    sample: goldRows
+      ? {
+          goldColumns: (goldRows.columns ?? []).map((column) => column.name),
+          candidateColumns: (result?.columns ?? []).map((column) => column.name),
+          goldRows: sampleOf(goldRows),
+          candidateRows: sampleOf(result),
+        }
+      : undefined,
     resultEquivalence,
     rowCount: result?.values?.length ?? null,
     goldRowCount: goldRows?.values?.length ?? null,

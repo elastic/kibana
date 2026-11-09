@@ -37,6 +37,8 @@ export interface ExampleRun {
   inputTokens?: number;
   outputTokens?: number;
   attemptErrors?: string[];
+  /** Every query the harness generated for this example, not only the one it returned. */
+  attemptedQueries?: string[];
   requestedKeywords?: string[];
   resolvedTarget?: string;
   /** Connector that served the call, which is what the run is priced against. */
@@ -209,6 +211,7 @@ export const runVariant = async ({
       outputTokens: run.outputTokens,
     });
     run.resolvedTarget = record.target as string;
+    run.attemptedQueries = (record.generatedQueries as string[]) ?? [];
     run.attemptErrors = ((record.attempts as Array<{ error?: string }>) ?? [])
       .map((attempt) => attempt.error)
       .filter((error): error is string => Boolean(error));

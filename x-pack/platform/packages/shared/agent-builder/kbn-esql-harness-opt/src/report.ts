@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { execFile } from 'child_process';
 import Fs from 'fs';
 import Http from 'http';
+import { promisify } from 'util';
 import Path from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { harnessPaths } from './workspace';
@@ -341,9 +343,15 @@ export const writeReport = (): string => {
   return outputPath;
 };
 
+const execFileAsync = promisify(execFile);
+
 /**
- * Serve the report, re-rendering on every request so a reload reflects a campaign that is still
- * running, and the same URL works from another machine.
+ * Serve the report, rendering each request in a fresh child process.
+ *
+ * A long-lived server loads this module once, so edits to the report code were invisible until
+ * someone remembered to restart it — and "I fixed it, reload" was wrong twice because of that.
+ * Spawning the CLI per request costs a second and makes the served page a function of the code
+ * and data on disk right now.
  */
 export const serveReport = ({
   host,
@@ -361,16 +369,24 @@ export const serveReport = ({
         response.end('ok');
         return;
       }
-      try {
-        response.writeHead(200, {
-          'content-type': 'text/html; charset=utf-8',
-          'cache-control': 'no-store',
-        });
-        response.end(renderReport());
-      } catch (e) {
-        response.writeHead(500, { 'content-type': 'text/plain' });
-        response.end(String((e as Error).message));
-      }
+      void (async () => {
+        try {
+          const outputPath = Path.join(harnessPaths().root, 'report.html');
+          await execFileAsync(
+            process.execPath,
+            [Path.resolve(__dirname, '../../../../../../../scripts/esql_harness_opt.js'), 'report'],
+            { cwd: Path.resolve(__dirname, '../../../../../../..'), maxBuffer: 64 * 1024 * 1024 }
+          );
+          response.writeHead(200, {
+            'content-type': 'text/html; charset=utf-8',
+            'cache-control': 'no-store',
+          });
+          response.end(Fs.readFileSync(outputPath, 'utf8'));
+        } catch (e) {
+          response.writeHead(500, { 'content-type': 'text/plain' });
+          response.end(String((e as Error).message));
+        }
+      })();
     });
 
     server.on('error', reject);

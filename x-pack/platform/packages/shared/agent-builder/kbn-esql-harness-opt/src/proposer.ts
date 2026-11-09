@@ -77,6 +77,16 @@ export const buildTraceBundle = (summary: RunSummary): string => {
       executes: run.score.executes,
       resultEquivalence: run.score.resultEquivalence,
       executionError: run.score.error?.slice(0, 600),
+      // Nearly every failure here executes fine and returns the wrong data, so the rows are the
+      // evidence: without them a proposer can only guess why a query was wrong from its text.
+      rowsReturned: run.score.rowCount,
+      goldRows: run.score.goldRowCount,
+      columnsAligned: run.score.columnsAligned,
+      extraColumns: run.score.extraColumns,
+      sampleRows: run.score.sample,
+      // Intermediate attempts show what the model tried before it settled, which is where a
+      // retry- or feedback-shaped fix would have to bite.
+      attemptedQueries: run.attemptedQueries?.slice(0, 4),
       attemptErrors: run.attemptErrors?.map((error) => error.slice(0, 400)),
       tries: run.tries,
       tokens: (run.inputTokens ?? 0) + (run.outputTokens ?? 0),
@@ -105,8 +115,12 @@ this checkout, the way a Kibana engineer would. It is then measured on held-out 
 
 \`.harness-scratch/\` contains:
 
-- \`bundle.json\` — failures from the latest measurement: the question, the query the tool
-  produced, the gold query, the Elasticsearch error the model saw, attempts and token spend.
+- \`bundle.json\` — failures from the latest measurement. For each one: the question, the query
+  the tool produced and every earlier attempt, the gold query, the Elasticsearch error the model
+  saw, and — most importantly — \`sampleRows\`, the first rows each query actually returned
+  alongside the rows the gold query returned. Compare them. Almost every failure here executes
+  without error and returns the wrong data, so the rows tell you what went wrong; the query text
+  alone usually does not.
 - \`history.json\` — every previous proposal, what it changed, and why it was accepted or not.
 - \`feedback.md\` — measured facts about the tool, and how your last attempt turned out.
 
