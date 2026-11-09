@@ -91,7 +91,7 @@ Errors that fail the request:
 | An unknown body key | 400 |
 | The definition cannot be turned into queries | 400 |
 
-The route does not cap the window length; the UI limits the time range.
+The route does not cap the window length: it checks only that `from` and `to` are instants and that `from` is earlier than `to`. The limit lives in the UI, which clamps its picker to `ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS` (3 days, `entity_inventory_app/public/application/constants.ts`). A direct caller is therefore unbounded — `{"from":"1970-01-01T00:00:00Z","to":"2200-01-01T00:00:00Z"}` is a valid request — which is acceptable while the route is internal and both plugins are off by default.
 
 ### Access control (interim)
 
@@ -99,7 +99,7 @@ Kibana checks no privilege on the inventory routes: they declare `INTERIM_AUTHZ`
 
 Errors thrown by the inventory service reach clients through `server/routes/create_server_route.ts`: `InventoryTypeNotFoundError` becomes 404, `InventoryRequestError` and `InventoryTypeDefinitionError` become 400, each with the error message only. Any other error is rethrown unchanged.
 
-There is no UI yet.
+The UI is the separate `entityInventoryApp` plugin (`x-pack/solutions/observability/plugins/entity_inventory_app`), disabled by default via `xpack.entityInventoryApp.enabled`. It still runs on static fixtures (`public/inventory_api/fixture_client.ts`) and does not call these routes yet.
 
 ## Registered definitions
 
