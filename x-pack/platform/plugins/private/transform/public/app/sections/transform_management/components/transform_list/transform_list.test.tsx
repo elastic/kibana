@@ -105,6 +105,105 @@ describe('Transform: Transform List <TransformList />', () => {
     await userEvent.click(bulkActionsButton);
 
     expect(screen.getByRole('menuitem', { name: 'Schedule now' })).toBeInTheDocument();
+
+    await userEvent.click(bulkActionsButton);
+    await waitFor(() => {
+      expect(screen.queryByRole('menuitem', { name: 'Schedule now' })).not.toBeInTheDocument();
+    });
+  });
+
+  test('clears selected transforms that disappear from the list', async () => {
+    const selectedTransform = {
+      ...transformListRow,
+      id: 'a-transform',
+      config: { ...transformListRow.config, id: 'a-transform' },
+    } as unknown as TransformListRow;
+    const remainingTransform = {
+      ...transformListRow,
+      id: 'b-transform',
+      config: { ...transformListRow.config, id: 'b-transform' },
+    } as unknown as TransformListRow;
+    const renderList = (transforms: TransformListRow[]) => (
+      <IntlProvider locale="en">
+        <QueryClientProvider client={queryClient}>
+          <TransformList
+            isLoading={false}
+            onCreateTransform={jest.fn()}
+            transformNodes={1}
+            transforms={transforms}
+            transformsLoading={false}
+            transformsStatsLoading={false}
+            pageState={{ pageSize: 10, pageIndex: 0, sortField: 'id', sortDirection: 'asc' }}
+            updatePageState={jest.fn()}
+          />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
+    const { rerender } = render(renderList([selectedTransform, remainingTransform]));
+
+    await userEvent.click(screen.getByRole('checkbox', { name: 'Select transform a-transform' }));
+    expect(screen.getByTestId('transformBulkActionsMenuButton')).toHaveTextContent('1 selected');
+
+    rerender(renderList([remainingTransform]));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('transformBulkActionsMenuButton')).not.toBeInTheDocument();
+    });
+    expect(screen.getByTestId('transformStatsBar')).toHaveTextContent('Showing 1–1 of 1 transform');
+  });
+
+  test('keeps matching transforms selected and removes hidden transforms from selection', async () => {
+    const transforms = ['a-transform', 'b-transform'].map(
+      (id) =>
+        ({
+          ...transformListRow,
+          id,
+          config: { ...transformListRow.config, id },
+        } as unknown as TransformListRow)
+    );
+
+    const TestHarness = () => {
+      const [pageState, setPageState] = useState<ListingPageUrlState>({
+        pageSize: 10,
+        pageIndex: 0,
+        sortField: 'id',
+        sortDirection: 'asc',
+      });
+
+      return (
+        <TransformList
+          isLoading={false}
+          onCreateTransform={jest.fn()}
+          transformNodes={1}
+          transforms={transforms}
+          transformsLoading={false}
+          transformsStatsLoading={false}
+          pageState={pageState}
+          updatePageState={(update) => setPageState((current) => ({ ...current, ...update }))}
+        />
+      );
+    };
+
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={queryClient}>
+          <TestHarness />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
+
+    await userEvent.click(
+      screen.getByRole('checkbox', { name: 'Select all transforms on this page' })
+    );
+    expect(screen.getByTestId('transformBulkActionsMenuButton')).toHaveTextContent('2 selected');
+
+    await userEvent.type(screen.getByRole('searchbox'), 'a-');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('transformBulkActionsMenuButton')).toHaveTextContent('1 selected');
+    });
+    expect(screen.getByRole('checkbox', { name: 'Select transform a-transform' })).toBeChecked();
+    expect(screen.queryByText('b-transform')).not.toBeInTheDocument();
   });
 
   test('filters transforms by type', async () => {

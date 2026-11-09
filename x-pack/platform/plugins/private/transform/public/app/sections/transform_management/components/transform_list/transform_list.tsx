@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback, useMemo, useRef, useState } from 'react';
+import React, { type FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { EuiSearchBarProps, EuiTableComputedColumnType } from '@elastic/eui';
@@ -147,6 +147,10 @@ export const TransformList: FC<TransformListProps> = ({
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<TransformId[]>([]);
   const [transformSelection, setTransformSelection] = useState<TransformListRow[]>([]);
   const transformSelectionRef = useRef<TransformListRow[]>([]);
+  const updateTransformSelection = useCallback((selected: TransformListRow[]) => {
+    transformSelectionRef.current = selected;
+    setTransformSelection(selected);
+  }, []);
   const selectionCheckboxId = useGeneratedHtmlId({ prefix: 'transformSelection' });
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
   const bulkStartAction = useStartAction(false, transformNodes);
@@ -197,6 +201,17 @@ export const TransformList: FC<TransformListProps> = ({
       : searchableTransforms;
   }, [searchQueryText, searchableTransforms]);
 
+  useEffect(() => {
+    const filteredTransformIds = new Set(filteredTransforms.map(({ id }) => id));
+    const visibleSelection = transformSelectionRef.current.filter(({ id }) =>
+      filteredTransformIds.has(id)
+    );
+
+    if (visibleSelection.length !== transformSelectionRef.current.length) {
+      updateTransformSelection(visibleSelection);
+    }
+  }, [filteredTransforms, updateTransformSelection]);
+
   const currentPageTransforms = useMemo(() => {
     const sortColumn = columns.find(
       (column) =>
@@ -228,11 +243,6 @@ export const TransformList: FC<TransformListProps> = ({
   const areAllFilteredTransformsSelected =
     filteredTransforms.length > 0 &&
     filteredTransforms.every(({ id }) => selectedTransformIds.has(id));
-
-  const updateTransformSelection = useCallback((selected: TransformListRow[]) => {
-    transformSelectionRef.current = selected;
-    setTransformSelection(selected);
-  }, []);
 
   const toggleTransformSelection = useCallback(
     (item: TransformListRow, checked: boolean) => {
@@ -464,7 +474,7 @@ export const TransformList: FC<TransformListProps> = ({
         iconType="chevronSingleDown"
         size="s"
         onClick={() => {
-          setIsActionsMenuOpen(true);
+          setIsActionsMenuOpen((isOpen) => !isOpen);
         }}
       >
         {i18n.translate('xpack.transform.multiTransformActionsMenu.transformsCount', {
