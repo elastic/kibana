@@ -115,10 +115,72 @@ export const buildTraceBundle = (summary: RunSummary): string => {
   );
 };
 
+/** One-line role for the files whose purpose is not obvious from the name. */
+const FILE_ROLES: Record<string, string> = {
+  'prompts/instructions.md': 'the rules the model is given, as prose',
+  'prompts/instructions_template.ts': 'renders instructions.md (placeholders, limit, named params)',
+  'documentation/examples.md': 'worked examples injected into every prompt',
+  'documentation/syntax.md': 'ES|QL reference injected into every prompt',
+  'documentation/ts_queries.md': 'time-series reference, injected when the index is a TSDS',
+  'documentation/promql_queries.md': 'PROMQL reference, injected when PROMQL is requested',
+  'documentation/load_doc.ts': 'loads and caches the documentation corpus',
+  'prompts.ts': 'assembles each prompt: what is included, in what order, and when',
+  'actions.ts': 'how previous attempts are replayed to the model after a failure',
+  'graph.ts': 'control flow: generate → autocorrect → execute/validate → finalize, and retries',
+  'nl_to_esql.ts': 'entry point: defaults, index discovery, model selection',
+  'join_errors.ts': 'deterministic heuristic: rejected LOOKUP JOIN targets',
+  'promql_keyword.ts': 'deterministic heuristic: when PROMQL docs are requested',
+  'esql_completion.ts': 'the separate completion entry point',
+  'cache_key.ts': 'prompt-cache key derivation',
+};
+
+/**
+ * List the editable files from the checkout rather than from a hand-written table.
+ *
+ * A fixed table drifts: it listed files that had been removed and missed ones that were added,
+ * and its ordering quietly advertised prose first, which is the surface every round already
+ * over-uses. Reading the directory keeps the advertisement true, shows how large each file is,
+ * and lets rounds that have never touched a file be called out.
+ */
+const describeEditableFiles = (toolDir: string, history: unknown[]): string => {
+  const touched = new Set(
+    (history as Array<{ filesChanged?: string[] }>)
+      .flatMap((entry) => entry.filesChanged ?? [])
+      .map((file) => file.split('generate_esql/').pop() ?? file)
+  );
+
+  const walk = (dir: string, prefix = ''): string[] =>
+    Fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+      const relative = prefix ? `${prefix}/${entry.name}` : entry.name;
+      if (entry.name.startsWith('.')) return [];
+      if (entry.isDirectory()) return walk(Path.join(dir, entry.name), relative);
+      if (/\.test\.ts$/.test(entry.name) || entry.name === 'harness_trace.ts') return [];
+      return [relative];
+    });
+
+  const rows = walk(toolDir)
+    .map((relative) => {
+      const lines = Fs.readFileSync(Path.join(toolDir, relative), 'utf8').split('\n').length;
+      return { relative, lines, role: FILE_ROLES[relative] ?? '' };
+    })
+    .sort((a, b) => b.lines - a.lines);
+
+  return rows
+    .map(
+      ({ relative, lines, role }) =>
+        `- \`${relative}\` (${lines} lines)${role ? ` — ${role}` : ''}${
+          touched.has(relative) ? '' : '  [never edited in any round so far]'
+        }`
+    )
+    .join('\n');
+};
+
 const PROPOSER_TASK = ({
   models,
+  editableFiles,
 }: {
   models: Array<{ alias: string; inputPrice: number; outputPrice: number }>;
+  editableFiles: string;
 }) => `You are improving the Kibana \`generate_esql\` tool: the thing that
 turns a natural-language question into an ES|QL query. You improve it by editing its source in
 this checkout, the way a Kibana engineer would. It is then measured on held-out examples.
@@ -153,21 +215,16 @@ that explains the most of them. One well-aimed change beats three speculative on
 
 ## The code you may change
 
-All paths relative to
-\`x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/generate_esql/\`:
+Everything under
+\`x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/generate_esql/\`,
+except the unit tests and \`harness_trace.ts\` — those are how your work is measured, and edits
+to them are rejected. The files, largest first:
 
-| file | what it decides | typical change |
-|---|---|---|
-| \`prompts/instructions.md\` | the rules the model is given | add, sharpen or remove a rule |
-| \`documentation/examples.md\` | the worked examples injected into every prompt | add an example of a shape that keeps failing; drop ones that mislead |
-| \`documentation/syntax.md\`, \`ts_queries.md\`, \`promql_queries.md\` | reference material | correct or prune it; it is the biggest block of tokens in the prompt |
-| \`prompts.ts\` | what goes into each prompt, in what order, and when | include the TS/PROMQL sections differently, restructure the context |
-| \`actions.ts\` | how a failed attempt is replayed to the model | change what the model is told after an error |
-| \`graph.ts\` | control flow: generate → autocorrect → execute/validate → finalize | change a branch, add a node (e.g. a check before returning) |
-| \`nl_to_esql.ts\` | entry point: defaults, index discovery, model selection | change a default, change how the target index is resolved |
-| \`join_errors.ts\`, \`promql_keyword.ts\` | deterministic middleware | sharpen a heuristic |
+${editableFiles}
 
-Read the file before you change it, and keep the style of the code around you.
+Read a file before you change it, and keep the style of the code around it. A file nobody has
+touched is not necessarily the wrong answer — it is often just harder to think about than
+editing prose.
 
 ## How to make specific kinds of change correctly
 
@@ -349,7 +406,16 @@ export const proposeCandidate = async ({
       args: [
         workingDir ?? scratchDir,
         ...(model ? ['--model', model] : []),
-        PROPOSER_TASK({ models }),
+        PROPOSER_TASK({
+          models,
+          editableFiles: describeEditableFiles(
+            Path.join(
+              workingDir ?? '',
+              'x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/generate_esql'
+            ),
+            history
+          ),
+        }),
       ],
       logPath,
       timeoutMs,
