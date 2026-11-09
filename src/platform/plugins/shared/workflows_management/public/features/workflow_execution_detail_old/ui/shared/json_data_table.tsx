@@ -17,7 +17,7 @@ import { copyToClipboard, EuiDataGrid, EuiEmptyPrompt, useResizeObserver } from 
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { usePager } from '@kbn/discover-utils';
+import { usePager } from '@kbn/discover-utils/components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { JsonValue } from '@kbn/utility-types';

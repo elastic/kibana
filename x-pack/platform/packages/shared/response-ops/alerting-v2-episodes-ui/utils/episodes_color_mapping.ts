@@ -8,11 +8,15 @@
 import type { ColorMapping } from '@kbn/coloring';
 import type { TypedLensByValueInput, XYVisualizationState } from '@kbn/lens-plugin/public';
 import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
+import { HISTOGRAM_OTHER_BREAKDOWN } from '../constants';
+
 export interface EpisodeStatusColors {
   danger: string;
   success: string;
   primary: string;
   warning: string;
+  /** Neutral color for the folded `HISTOGRAM_OTHER_BREAKDOWN` series. */
+  mediumShade: string;
 }
 
 /** Maps episode status values to their display colors. */
@@ -31,7 +35,8 @@ export const getStatusColorMap = (colors: EpisodeStatusColors): Record<string, s
  *   mapping so each status value gets its own color.
  * - When there is no breakdown: colors the whole series to match the active
  *   status filter, falling back to `danger` (red) when no filter is set.
- * - Otherwise: only strips the axis titles (base visualization adjustment).
+ * - Otherwise: strips the axis titles and colors the folded "Other" series neutrally, so the
+ *   top breakdown values stand out.
  */
 export const buildModifiedVisAttributes = (
   attributes: TypedLensByValueInput['attributes'],
@@ -125,5 +130,24 @@ export const buildModifiedVisAttributes = (
     };
   }
 
-  return { ...attributes, state: { ...attributes.state, visualization: baseVisualization } };
+  return applyColorMapping({
+    paletteId: 'default',
+    colorMode: { type: 'categorical' },
+    assignments: [
+      {
+        // matchCase keeps Lens from lowercasing the pattern, which would never match the value
+        rules: [
+          {
+            type: 'match',
+            pattern: HISTOGRAM_OTHER_BREAKDOWN,
+            matchEntireWord: true,
+            matchCase: true,
+          },
+        ],
+        color: { type: 'colorCode', colorCode: colors.mediumShade },
+        touched: true,
+      },
+    ],
+    specialAssignments: [{ rules: [{ type: 'other' }], color: { type: 'loop' }, touched: false }],
+  });
 };

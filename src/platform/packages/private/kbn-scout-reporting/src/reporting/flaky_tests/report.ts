@@ -11,6 +11,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import type { Client as ESClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
+import {
+  branchCountsWithout,
+  describeBreakage,
+  findBreakages,
+  type SetupBuilds,
+} from './breakages';
 import { ESQL_ROW_LIMIT } from './esql';
 import {
   fetchBranchCounts,
@@ -18,6 +24,7 @@ import {
   fetchFailingFiles,
   fetchFilePipelineStats,
   fetchSampleFailures,
+  fetchSetupBuilds,
   fetchTargetStats,
   fetchTestErrors,
   fetchTestMetadata,
@@ -96,6 +103,62 @@ export const flakiestQualifyingBranch = (
     }))
     .filter((row) => row.buildFailRate >= thresholds.minFailRate)
     .sort((a, b) => b.buildFailRate - a.buildFailRate || b.failedBuilds - a.failedBuilds)[0];
+
+/** What a flaky test's breakages mean for it: left out, kept without them, or nothing. */
+export type BreakageCheck =
+  | { outcome: 'none' }
+  | { outcome: 'left-out'; reason: string }
+  | {
+      outcome: 'kept';
+      /** Builds in its breakages, to take off its counts. */
+      breakageBuilds: number;
+      /** The branch it qualifies on without them. */
+      flakiestBranch: FlakyTestFlakiestBranch;
+    };
+
+/**
+ * Checks a flaky test for breakages, failed builds in a row too many to be chance, which have
+ * one cause rather than being flakiness. A test in a breakage up to its latest build is broken
+ * right now and one that clears the thresholds only with its past breakages is not flaky, so both
+ * are left out; any other test with breakages is kept, counted without them.
+ */
+export const checkBreakages = (
+  setups: readonly SetupBuilds[],
+  branchCounts: readonly BranchCountsRow[],
+  thresholds: BuildThresholds
+): BreakageCheck => {
+  const breakages = setups.flatMap(findBreakages);
+  if (breakages.length === 0) {
+    return { outcome: 'none' };
+  }
+  const ongoing = breakages.find((breakage) => breakage.ongoing);
+  if (ongoing) {
+    return { outcome: 'left-out', reason: `broken right now, ${describeBreakage(ongoing)}` };
+  }
+  const flakiestBranch = flakiestQualifyingBranch(
+    branchCountsWithout(branchCounts, breakages),
+    thresholds
+  );
+  if (flakiestBranch) {
+    const breakageBuilds = new Set(
+      breakages.flatMap(({ builds }) => builds.map(({ buildId }) => buildId))
+    ).size;
+    return { outcome: 'kept', breakageBuilds, flakiestBranch };
+  }
+  if (breakages.length === 1) {
+    return {
+      outcome: 'left-out',
+      reason: `below the thresholds without its breakage, ${describeBreakage(breakages[0])}`,
+    };
+  }
+  const longest = breakages.reduce((a, b) => (b.builds.length > a.builds.length ? b : a));
+  return {
+    outcome: 'left-out',
+    reason:
+      `below the thresholds without its ${breakages.length} breakages, ` +
+      `the longest ${describeBreakage(longest)}`,
+  };
+};
 
 /**
  * A qualifying test is flaky when it had at least one clean pass or recovered on an in-run
@@ -261,9 +324,10 @@ const buildReport = async (
   // The thresholds proper apply per branch, before ranking, so the caps are filled with tests
   // that are flaky on at least one branch rather than only in the diluted total
   const qualified: Array<{ row: TestStatsRow; flakiestBranch: FlakyTestFlakiestBranch }> = [];
+  let branchCounts = new Map<string, BranchCountsRow[]>();
   if (candidates.length > 0) {
     startedAt = performance.now();
-    const branchCounts = await fetchBranchCounts(es, scope, candidates, thresholds);
+    branchCounts = await fetchBranchCounts(es, scope, candidates, thresholds);
     let belowThresholds = 0;
     for (const row of candidates) {
       const flakiestBranch = flakiestQualifyingBranch(
@@ -292,10 +356,66 @@ const buildReport = async (
     log.info(`Fetched metadata for ${metadata.size} failing tests in ${elapsed(startedAt)}`);
   }
 
+  // Checked before ranking, like the thresholds, so the caps are filled with flaky tests
+  const flakyRows = qualified.map(({ row }) => row).filter((row) => classifyTest(row) === 'flaky');
+  const leftOut = new Set<string>();
+  const keptWithBreakages = new Map<string, Extract<BreakageCheck, { outcome: 'kept' }>>();
+  if (flakyRows.length > 0) {
+    startedAt = performance.now();
+    const { byTest, truncated } = await fetchSetupBuilds(es, scope, flakyRows);
+    if (truncated.length > 0) {
+      log.warning(
+        `Setup builds query hit the ${ESQL_ROW_LIMIT} row limit; ` +
+          `kept ${truncated.length} tests without checking them for breakages`
+      );
+    }
+    for (const row of flakyRows) {
+      const check = checkBreakages(
+        byTest.get(row.testId) ?? [],
+        branchCounts.get(row.testId) ?? [],
+        thresholds
+      );
+      const { filePath, title } = metadata.get(row.testId) ?? {};
+      const name = `${filePath ?? row.testId} › ${title ?? '(unknown)'}`;
+      if (check.outcome === 'left-out') {
+        leftOut.add(row.testId);
+        log.info(`Dropped ${name} from the report: ${check.reason}`);
+      } else if (check.outcome === 'kept') {
+        keptWithBreakages.set(row.testId, check);
+        log.info(
+          `Kept ${name}, flaky even without its breakages; ` +
+            `took the ${check.breakageBuilds} builds of its breakages off its counts`
+        );
+      }
+    }
+    const untouched = flakyRows.length - leftOut.size - keptWithBreakages.size;
+    log.info(
+      `Checked ${flakyRows.length} flaky tests for breakages (failed builds in a row, too many ` +
+        `to be chance) in ${elapsed(startedAt)}: ` +
+        `dropped ${leftOut.size} from the report, as they are broken right now or flaky only ` +
+        `because of their breakages; ` +
+        `kept ${keptWithBreakages.size} that are flaky even without their breakages, with those ` +
+        `builds taken off their counts; ` +
+        `${untouched} had no breakages`
+    );
+  }
+
   const flaky: AggregatedEntry[] = [];
   const consistentlyFailing: AggregatedEntry[] = [];
   for (const { row, flakiestBranch } of qualified) {
-    const entry = toEntry(row, flakiestBranch, metadata.get(row.testId));
+    if (leftOut.has(row.testId)) continue;
+    const kept = keptWithBreakages.get(row.testId);
+    const entry = kept
+      ? toEntry(
+          {
+            ...row,
+            builds: row.builds - kept.breakageBuilds,
+            failedBuilds: row.failedBuilds - kept.breakageBuilds,
+          },
+          kept.flakiestBranch,
+          metadata.get(row.testId)
+        )
+      : toEntry(row, flakiestBranch, metadata.get(row.testId));
     (classifyTest(row) === 'flaky' ? flaky : consistentlyFailing).push(entry);
   }
 

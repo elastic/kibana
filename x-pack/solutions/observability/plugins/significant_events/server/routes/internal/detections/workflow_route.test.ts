@@ -34,7 +34,7 @@ const setup = () => {
   const list = jest.fn().mockResolvedValue({ sources: [{ id: 'enabled-source' }], total: 1 });
   const handlerParams = {
     params: { body: { lookback: 'now-1440m', bucketInterval: '60m' } },
-    request: {},
+    request: { spaceId: 'default' },
     getScopedClients: jest.fn().mockResolvedValue({
       scopedClusterClient: { asCurrentUser: {} },
       licensing: {},
