@@ -109,10 +109,15 @@ const mockRects = () =>
       // handles sit at the left edge of their panel, so they move along with a dragged panel
       const panel = this.closest<HTMLElement>('.kbnFlexPanel');
       if (panel) {
+        // `style.order` is only applied once the layout has emitted, so fall back to DOM position
+        const domIndex = Array.from(
+          panel.parentElement?.querySelectorAll(':scope > .kbnFlexPanel') ?? []
+        ).indexOf(panel);
+        const order = panel.style.order ? parseInt(panel.style.order, 10) - 1 : domIndex;
         const left =
           panel.style.position === 'fixed'
             ? parseFloat(panel.style.left)
-            : (parseInt(panel.style.order || '1', 10) - 1) * (PANEL_WIDTH + 100);
+            : order * (PANEL_WIDTH + 100);
         return panel === this ? rect(left, PANEL_WIDTH, gridSettings.rowHeight) : rect(left, 0, 0);
       }
       return rect(0, 0, 0);
@@ -308,6 +313,38 @@ describe('FlexLayout', () => {
         await pressKey('[Enter]');
 
         expect(getLastLayout().panel1.width).toBe(180);
+      });
+
+      it('only snaps to breakpoints at or above `resizeOptions.minWidth`', async () => {
+        // preview is clamped to 180px; 160 is closer but below the minimum, so 500 is the only valid breakpoint
+        renderFlexLayout({
+          layout: getLayout({ panel1: { resizeOptions: { minWidth: 180 } } }),
+          gridSettings: { ...gridSettings, widthBreakpoints: [160, 500] },
+        });
+        onLayoutChange.mockClear();
+        getHandle('panel1', 'resize').focus();
+
+        await pressKey('[Enter]');
+        await pressKey('[ArrowRight]');
+        await pressKey('[Enter]');
+
+        expect(getLastLayout().panel1.width).toBe(500);
+      });
+
+      it('only snaps to breakpoints at or below `resizeOptions.maxWidth`', async () => {
+        // preview is 150px; 160 is closest but exceeds the maximum, so 100 is the only valid breakpoint
+        renderFlexLayout({
+          layout: getLayout({ panel1: { resizeOptions: { maxWidth: 150 } } }),
+          gridSettings: { ...gridSettings, widthBreakpoints: [100, 160] },
+        });
+        onLayoutChange.mockClear();
+        getHandle('panel1', 'resize').focus();
+
+        await pressKey('[Enter]');
+        await pressKey('[ArrowRight]');
+        await pressKey('[Enter]');
+
+        expect(getLastLayout().panel1.width).toBe(100);
       });
 
       it('does not emit if the width did not change', async () => {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon, type UseEuiTheme } from '@elastic/eui';
@@ -60,12 +60,27 @@ export const DragHandle = ({
 }: DragHandleProps) => {
   const styles = useMemoCss(dragHandleStyles);
 
+  // a pointer drag leaves the handle focused, which keeps the floating actions (shown on
+  // `:focus-within`) visible after the drop; release focus once the pointer is released.
+  // Keyboard interactions never trigger this, so they keep their focus.
+  const onPointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    const handle = event.currentTarget;
+    const release = () => {
+      window.removeEventListener('pointerup', release, true);
+      window.removeEventListener('pointercancel', release, true);
+      if (document.activeElement === handle) handle.blur();
+    };
+    window.addEventListener('pointerup', release, true);
+    window.addEventListener('pointercancel', release, true);
+  }, []);
+
   if (!isEditable) return children;
 
   return (
     <div
       {...rest}
       ref={dragHandleRef}
+      onPointerDown={onPointerDown}
       // keyboard users need to focus the handle to start a move with Space/Enter + arrow keys;
       // a div is used (rather than a <button>) because the handle may wrap an interactive label
       role="button"

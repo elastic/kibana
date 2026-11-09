@@ -18,7 +18,12 @@ import type {
   PointerPosition,
   UserInteractionEvent,
 } from '../../../grid/use_grid_layout_events/types';
-import { getDragPreviewRect, getResizePreviewRect, getSensorOffsets } from './utils';
+import {
+  getDefaultResizeOptions,
+  getDragPreviewRect,
+  getResizePreviewRect,
+  getSensorOffsets,
+} from './utils';
 
 let startingLayout: FlexLayoutData | undefined;
 
@@ -126,7 +131,12 @@ export const moveAction = (
   } else {
     const sorted = Object.entries(panelElements)
       .map(([id, panel]) => {
-        const rect = panel?.getBoundingClientRect() ?? { top: 0, bottom: 0, left: 0 };
+        // the active panel's DOM position isn't updated until `activePanelEvent$.next()` below,
+        // so use the up-to-date preview rect rather than the stale DOM measurement
+        const rect =
+          id === activePanel.id
+            ? previewRect
+            : panel?.getBoundingClientRect() ?? { top: 0, bottom: 0, left: 0 };
         const row = getRow(rect);
         return { id, sortKey: rect.left + row * (gridLayoutRect?.width ?? 1) };
       })
@@ -147,10 +157,21 @@ export const moveAction = (
   });
 };
 
-const snapToBreakpoint = (width: number, breakpoints: number[]): number =>
-  breakpoints.reduce((closest, breakpoint) =>
+const snapToBreakpoint = (
+  width: number,
+  breakpoints: number[],
+  resizeOptions: FlexPanelData['resizeOptions']
+): number => {
+  const { minWidth, maxWidth } = { ...getDefaultResizeOptions(), ...resizeOptions };
+  // only snap to breakpoints that respect the panel's resize limits
+  const allowed = breakpoints.filter(
+    (breakpoint) => breakpoint >= minWidth && breakpoint <= maxWidth
+  );
+  if (!allowed.length) return width;
+  return allowed.reduce((closest, breakpoint) =>
     Math.abs(breakpoint - width) < Math.abs(closest - width) ? breakpoint : closest
   );
+};
 
 export const commitAction = ({
   activePanelEvent$,
@@ -164,7 +185,7 @@ export const commitAction = ({
   const { widthBreakpoints } = gridSettings$.getValue();
   const panel = gridLayout$.getValue()[event.id];
   if (event.type === 'resize' && panel && widthBreakpoints?.length) {
-    const width = snapToBreakpoint(panel.width, widthBreakpoints);
+    const width = snapToBreakpoint(panel.width, widthBreakpoints, panel.resizeOptions);
     if (width !== panel.width) {
       gridLayout$.next({ ...gridLayout$.getValue(), [event.id]: { ...panel, width } });
     }

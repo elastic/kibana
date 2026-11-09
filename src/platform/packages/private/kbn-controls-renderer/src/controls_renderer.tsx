@@ -107,16 +107,18 @@ export const ControlsRenderer = ({
   }
 
   return (
-    <FlexLayout
-      layout={flexLayout}
-      gridSettings={gridSettings}
-      onLayoutChange={onLayoutChange}
-      accessMode={viewMode === 'edit' ? 'EDIT' : 'VIEW'}
-      renderPanelContents={renderPanelContents}
-      useCustomDragHandle={true}
-      className={`controlGroup ${isEditFlyoutOpen ? 'controlsGroup--editing' : ''}`}
-      css={controlsGroupStyles.controlsGroup}
-    />
+    <div data-test-subj="controls-group-wrapper">
+      <FlexLayout
+        layout={flexLayout}
+        gridSettings={gridSettings}
+        onLayoutChange={onLayoutChange}
+        accessMode={viewMode === 'edit' ? 'EDIT' : 'VIEW'}
+        renderPanelContents={renderPanelContents}
+        useCustomDragHandle={true}
+        className={`controlGroup ${isEditFlyoutOpen ? 'controlsGroup--editing' : ''}`}
+        css={controlsGroupStyles.controlsGroup}
+      />
+    </div>
   );
 };
 
