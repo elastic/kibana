@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import React from 'react';
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
 import {
   LICENSE_FOR_AGENT_MIGRATION,
@@ -210,7 +210,16 @@ export function useSingleAgentMenuItems({
                   </EuiFlexGroup>
                 ),
                 icon: 'refresh',
-                disabled: !isAgentRestartSupported(agent),
+                disabled: !isAgentRestartSupported(agent) || !!agent.pending_restart,
+                toolTipContent: agent.pending_restart ? (
+                  <FormattedMessage
+                    id="xpack.fleet.agentList.restartPendingTooltip"
+                    defaultMessage="A restart was requested {requestedAt} and is waiting for the agent to pick it up."
+                    values={{
+                      requestedAt: <FormattedRelative value={agent.pending_restart.created_at} />,
+                    }}
+                  />
+                ) : undefined,
                 onClick: () => {
                   callbacks.onRestartClick();
                 },
