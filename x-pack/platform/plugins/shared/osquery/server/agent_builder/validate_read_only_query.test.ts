@@ -228,6 +228,37 @@ describe('validateReadOnlyQuery', () => {
       );
     });
 
+    it.each([
+      [
+        'alias then comma',
+        "SELECT * FROM (SELECT pid FROM processes) AS a, curl WHERE url='http://169.254.169.254/'",
+      ],
+      ['bare alias then comma', 'SELECT * FROM (SELECT pid FROM processes) a, curl'],
+      ['no alias then comma', 'SELECT * FROM (SELECT pid FROM processes), curl'],
+      ['sub-select between plain tables', 'SELECT * FROM processes, (SELECT 1), curl'],
+      [
+        'nested parentheses in sub-select',
+        'SELECT * FROM (SELECT count(*) FROM processes) c, curl',
+      ],
+    ])('rejects a table listed after a sub-select: %s', (_label, query) => {
+      expect(validateReadOnlyQuery(query, ALLOWED)).toMatch(/unsupported table reference/i);
+    });
+
+    it('still accepts a sub-select followed by a JOIN, WHERE or ORDER BY', () => {
+      expect(
+        validateReadOnlyQuery(
+          'SELECT p.pid FROM (SELECT pid FROM processes) AS p JOIN processes q ON p.pid = q.pid ORDER BY p.pid',
+          ALLOWED
+        )
+      ).toBeNull();
+      expect(
+        validateReadOnlyQuery(
+          'SELECT * FROM (SELECT pid FROM processes) p WHERE p.pid > 1',
+          ALLOWED
+        )
+      ).toBeNull();
+    });
+
     it('still accepts a parenthesised sub-select over allowlisted tables', () => {
       expect(
         validateReadOnlyQuery('SELECT pid FROM (SELECT pid FROM processes) AS p', ALLOWED)
