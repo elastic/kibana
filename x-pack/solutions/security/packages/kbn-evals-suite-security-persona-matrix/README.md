@@ -45,9 +45,11 @@ Only the judge-facing copy is trimmed; all three judges (correctness, groundedne
 - **`minimal` (default)** - 3 sample alerts + 1 rule. Fast and cheap to seed; prompts match the published matrix runs, but the environment does NOT reproduce the published-benchmark dataset. Scores are not directly comparable.
 - **`parity`** - 98-doc snapshot of the original `chrysalis-sim` benchmark dataset (5-stage APT chain: needle/noise alerts, endpoint telemetry, Rapid7 IOCs, on-call schedule) across 8 indices, from `fixtures/chrysalis_parity_docs.ts`. Timestamps are re-stamped relative to run time. Use for apples-to-apples comparison against the original benchmark. Scores under `parity` are NOT comparable with `minimal` runs - the environment differs by design. `parity` is the intended single dataset going forward: the default remains `minimal` only until the next full matrix re-run, at which point all models are re-measured under `parity` in one pass and the default flips.
 
-### Prerequisites for `SEED_PROFILE=parity`
+### Entity store (all profiles)
 
-Entity-analytics examples call `security_search_entities` / `security.get_entity`, which are only available when the **Security entity store is installed**. The suite installs it automatically in `evaluate.beforeAll`, then calls the start endpoint so engines a previous run left stopped come back up, and waits until every engine reports `started` (idempotent on a running store), so no manual step is needed (`.entities.v2.latest.security_default`). Without it, those examples hard-fail on tool-availability checks.
+Entity-analytics examples call `security_search_entities` / `security.get_entity`, which are only available when the **Security entity store is installed**. The suite installs it automatically in `evaluate.beforeAll`, then calls the start endpoint so engines a previous run left stopped come back up, and waits until every engine reports `started` (idempotent on a running store), so no manual step is needed (`.entities.v2.latest.security_default`). If the store cannot be installed or started, setup logs a warning and continues; the tool pre-flight then fails the run only when an example selected to run needs an entity tool that is gated off.
+
+### Prerequisites for `SEED_PROFILE=parity`
 
 The parity tools are backed by Elastic Workflows, so the **workflows plugin must be enabled** on the stack.
 

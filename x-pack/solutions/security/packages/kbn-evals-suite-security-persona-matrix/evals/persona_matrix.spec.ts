@@ -41,7 +41,16 @@ evaluate.describe('Security Persona Matrix', { tag: tags.stateful.classic }, () 
     // Entity-analytics examples expect security.get_entity* built-in tools, which
     // are availability-gated on the entity store being installed; nothing installs
     // it on a fresh stack, so do it before the tool-registration pre-flight runs.
-    await ensureEntityStoreRunning({ kbnClient, log });
+    // A failure only warns: the pre-flight fails the run when an example that will
+    // actually execute needs a gated-off entity tool, and an EVAL_EXAMPLES subset
+    // without entity examples still runs.
+    try {
+      await ensureEntityStoreRunning({ kbnClient, log });
+    } catch (error) {
+      log.warning(
+        `[persona-matrix] entity store not running; entity-analytics examples will fail the tool pre-flight: ${error}`
+      );
+    }
     await seedPersonaMatrixTools({ kbnClient, log, profile: agentProfile });
     log.info(
       `[persona-matrix] seeded persona-matrix tools (seed profile: ${seedProfile}, agent: ${resolveAgentId(
