@@ -9,9 +9,9 @@
  * The Nightshift service accounts. There is one of each per deployment, shared by every space:
  * - `agent` runs investigations, their sandbox tools and their Agent Builder hooks.
  * - `automations` runs automation workflows, which start investigations.
- * - `detection` runs the detection engine. It is set up apart from the other two, through
- *   `ensureNightshiftServiceAccount`, so a deployment without its role can still set up
- *   investigations.
+ * - `detection` runs the detection engine. It is created through `ensureNightshiftServiceAccount`
+ *   rather than `ensureNightshiftServiceAccounts`, and the Nightshift setup step needs its role
+ *   as much as the other two: without it, setup fails and the prompt stays.
  */
 export type NightshiftServiceAccountKind = 'agent' | 'automations' | 'detection';
 
