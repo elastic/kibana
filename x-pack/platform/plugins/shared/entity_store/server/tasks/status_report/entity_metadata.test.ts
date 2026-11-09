@@ -83,14 +83,18 @@ describe('collectEntityMetadata', () => {
   };
 
   it('pairs sources that share a value and counts the values already linked', async () => {
+    // A source and the group of its entity, as the query's TOP lists them.
+    const sep = '\u241f';
     const esClient = clientWith((query) => {
       if (query.includes('TOP(')) {
         return {
-          columns: columnsOf(['v', 'srcs', 'groups', 'sources']),
+          columns: columnsOf(['v', 'srcs', 'sourceGroups']),
           values: [
-            ['a@x.io', 2, 1, ['okta', 'okta', 'azure']],
-            ['b@x.io', 2, 2, ['azure', 'okta']],
-            ['c@x.io', 3, 1, ['azure', 'okta', 'aws']],
+            ['a@x.io', 2, [`okta${sep}g1`, `azure${sep}g1`]],
+            ['b@x.io', 2, [`azure${sep}g1`, `okta${sep}g2`]],
+            ['c@x.io', 3, [`azure${sep}g3`, `okta${sep}g3`, `aws${sep}g3`]],
+            // azure and okta resolved together, aws still apart
+            ['d@x.io', 3, [`azure${sep}g4`, `okta${sep}g4`, `aws${sep}g5`]],
           ],
         };
       }
@@ -104,8 +108,16 @@ describe('collectEntityMetadata', () => {
       sourceA: 'azure',
       sourceB: 'okta',
       field: 'user.email',
-      sharedValues: 3,
-      alreadyLinked: 2,
+      sharedValues: 4,
+      alreadyLinked: 3,
+    });
+    // aws is linked to the others only for c@x.io; d@x.io has it in a group of its own
+    expect(pairs).toContainEqual({
+      sourceA: 'aws',
+      sourceB: 'azure',
+      field: 'user.email',
+      sharedValues: 2,
+      alreadyLinked: 1,
     });
     expect(pairs.length).toBeLessThanOrEqual(10);
     expect(esClient.esql.query.mock.calls.every(([params]) => !/VALUES\(/.test(params.query))).toBe(
