@@ -34,6 +34,15 @@ const countResponse = (total: number) => ({
 });
 
 const signal = new AbortController().signal;
+const NOW = Date.parse('2026-11-05T16:00:00.000Z');
+
+beforeEach(() => {
+  jest.spyOn(Date, 'now').mockReturnValue(NOW);
+});
+
+afterEach(() => {
+  jest.restoreAllMocks();
+});
 
 describe('computeValidationLookback', () => {
   beforeEach(() => {
@@ -53,12 +62,12 @@ describe('computeValidationLookback', () => {
 
     expect(query).toHaveBeenCalledWith(
       {
-        query: 'FROM logs-a, logs-a.* | STATS total = COUNT(*)',
-        filter: { range: { '@timestamp': { gte: 'now-10m', lte: 'now' } } },
+        query:
+          'FROM logs-a, logs-a.* | WHERE @timestamp >= "2026-11-05T15:50:00.000Z" AND @timestamp <= "2026-11-05T16:00:00.000Z" | STATS total = COUNT(*)',
       },
       { signal, requestTimeout: 5_000 }
     );
-    expect(result).toBe('now-10m');
+    expect(result).toBe(10);
   });
 
   it('widens the window for a sparse stream', async () => {
@@ -72,7 +81,7 @@ describe('computeValidationLookback', () => {
       logger,
     });
 
-    expect(result).toBe('now-10000m');
+    expect(result).toBe(10_000);
   });
 
   it('uses the max window for an empty stream', async () => {
@@ -86,7 +95,7 @@ describe('computeValidationLookback', () => {
       logger,
     });
 
-    expect(result).toBe('now-10080m');
+    expect(result).toBe(10_080);
   });
 
   it('falls back to the probe window when the probe fails', async () => {
@@ -100,7 +109,7 @@ describe('computeValidationLookback', () => {
       logger,
     });
 
-    expect(result).toBe('now-10m');
+    expect(result).toBe(10);
   });
 });
 
@@ -108,7 +117,7 @@ describe('validateKIQueries full-text argument gate', () => {
   const features = [{ id: 'feature-1', run_id: 'run-1' } as Feature];
   const context = {
     targetSources: ['logs-test'],
-    validationLookback: 'now-10m',
+    validationLookbackMinutes: 10,
     conflictingFields: new Set<string>(),
     normalizedStoredEsqls: new Set<string>(),
   };
@@ -158,6 +167,14 @@ describe('validateKIQueries full-text argument gate', () => {
     const result = await run;
 
     expect(query).toHaveBeenCalledTimes(1);
+    expect(query).toHaveBeenCalledWith(
+      {
+        query:
+          'FROM logs-test | WHERE @timestamp >= "2026-11-05T15:50:00.000Z" AND @timestamp <= "2026-11-05T16:00:00.000Z" | WHERE MATCH_PHRASE(exception.message, "i/o timeout") | STATS metric_value = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)\n| LIMIT 0',
+        format: 'json',
+      },
+      { signal, requestTimeout: 15_000 }
+    );
     expect(result.acceptedQueries).toHaveLength(1);
     expect(result.hasNonIntentFailures).toBe(false);
   });

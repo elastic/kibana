@@ -21,14 +21,14 @@ const enableRoute =
 type HandlerParams = Parameters<typeof enableRoute.handler>[0];
 
 describe('_enable route', () => {
-  const enable = jest.fn().mockResolvedValue({ spaceId: 'space-a', serviceAccountId: 'account-1' });
+  const enable = jest.fn().mockResolvedValue({ spaceId: 'default', serviceAccountId: 'account-1' });
   const setup = (state: 'enabled' | 'paused') =>
     ({
       params: { body: { serviceAccountId: 'account-1' } },
-      request: { spaceId: 'space-a' },
+      request: { spaceId: 'default' },
       server: {},
       getScopedClients: jest.fn().mockResolvedValue({ licensing: {}, uiSettingsClient: {} }),
-      getSpaceId: jest.fn().mockResolvedValue('space-a'),
+      getSpaceId: jest.fn().mockResolvedValue('default'),
       maintenanceService: { getState: jest.fn().mockResolvedValue(state) },
     } as unknown as HandlerParams);
 
@@ -46,7 +46,7 @@ describe('_enable route', () => {
 
   it('leaves them to Resume while the space is paused', async () => {
     await expect(enableRoute.handler(setup('paused'))).resolves.toEqual({
-      spaceId: 'space-a',
+      spaceId: 'default',
       serviceAccountId: 'account-1',
     });
 

@@ -27,7 +27,7 @@ type HandlerParams = Parameters<typeof resumeRoute.handler>[0];
 describe('resume route', () => {
   const resume = jest.fn().mockResolvedValue({ state: 'enabled' });
   const params = {
-    request: { spaceId: 'space-a' },
+    request: { spaceId: 'default' },
     server: { core: { security: { authc: { getCurrentUser: () => ({ username: 'marco' }) } } } },
     getScopedClients: jest.fn().mockResolvedValue({ licensing: {} }),
     maintenanceService: { resume },
@@ -68,7 +68,7 @@ describe('resume route', () => {
     expect(continuousOnboardingWorkflowService.ensureWorkflow).toHaveBeenCalledWith({
       enabled: true,
       request: params.request,
-      spaceId: 'space-a',
+      spaceId: 'default',
     });
   });
 
@@ -93,7 +93,7 @@ describe('reset route', () => {
 
     const error = await resetRoute
       .handler({
-        request: { spaceId: 'space-a' },
+        request: { spaceId: 'default' },
         server: { core: {} },
         maintenanceService: { reset },
         getScopedClients: jest.fn().mockResolvedValue({ licensing: {} }),
@@ -106,7 +106,7 @@ describe('reset route', () => {
 
   it('requires Nightshift manage and configure and delegates with the authenticated user', async () => {
     jest.mocked(getDetectionEngineAccountId).mockResolvedValue(undefined);
-    const request = {};
+    const request = { spaceId: 'default' };
     const licensing = {};
     const reset = jest.fn().mockResolvedValue({ state: 'enabled' });
     const server = {
@@ -139,7 +139,7 @@ describe('pause, resume, and status routes', () => {
     const licensing = {};
     const server = { core: { security: { authc: { getCurrentUser: jest.fn() } } } };
     const handlerParams = {
-      request: {},
+      request: { spaceId: 'default' },
       server,
       getScopedClients: jest.fn().mockResolvedValue({ licensing }),
       maintenanceService: {

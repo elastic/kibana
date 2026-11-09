@@ -130,7 +130,7 @@ describe('pause guard on rule-touching query routes', () => {
     const getKnowledgeIndicatorClient = jest.fn();
     const handlerParams = {
       params,
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         uiSettingsClient: {},
@@ -181,7 +181,7 @@ describe('demoteBackedQueriesRoute', () => {
     ]);
     const handlerParams = {
       params: { body: { queryIds: ['q1', 'q2'] } },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: { list: makeSourcesList('logs.a', 'logs.b') },
         licensing: {},
@@ -211,7 +211,7 @@ describe('bulkDeleteQueriesRoute', () => {
     const deleteQueries = jest.fn().mockResolvedValue(undefined);
     const handlerParams = {
       params: { body: { queryIds: ['q1', 'q2'] } },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: {
           list: makeSourcesList('logs.test'),
@@ -258,7 +258,7 @@ describe('bulkDeleteQueriesRoute', () => {
       .mockRejectedValueOnce(new Error('storage write failed'));
     const handlerParams = {
       params: { body: { queryIds: ['q1', 'q2'] } },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: {
           list: makeSourcesList('logs.success', 'logs.failed'),
@@ -327,7 +327,7 @@ describe('getDiscoveryQueriesRoute source resolution', () => {
   const makeDiscoveryHandlerParams = (query: Record<string, unknown>): DiscoveryHandlerParams =>
     ({
       params: { query },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: { list, assertReadable },
         licensing: {},
@@ -519,7 +519,7 @@ describe('promoteUnbackedQueriesRoute', () => {
     const list = jest.fn().mockResolvedValue({ sources: [{ id: 'enabled-source' }], total: 1 });
     const handlerParams = {
       params: { body: { queryIds: ['q1'] } },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: { list },
         licensing: {},
@@ -545,7 +545,7 @@ describe('persistQueriesRoute', () => {
   it('rejects a disabled source, which would get a live rule', async () => {
     const handlerParams = {
       params: { path: { sourceId: 'logs.test' }, body: { queries: [] } },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: {
           get: jest.fn().mockResolvedValue({
@@ -596,7 +596,7 @@ describe('generateQueriesInputRoute', () => {
   }) =>
     ({
       params: { path: { sourceId: 'logs.test' }, body },
-      request: { spaceId: 'space-a', events: { aborted$: { subscribe: jest.fn() } } },
+      request: { spaceId: 'default', events: { aborted$: { subscribe: jest.fn() } } },
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: {
           get: jest.fn().mockResolvedValue({
@@ -667,7 +667,7 @@ describe('generateQueriesInputRoute', () => {
     });
     expect(agentBuilder.agents.ensure).toHaveBeenCalledWith(
       expect.objectContaining({
-        spaceId: 'space-a',
+        spaceId: 'default',
         agent: expect.objectContaining({ id: KI_QUERY_GENERATION_AGENT_ID }),
       })
     );
@@ -724,7 +724,7 @@ describe('generateQueriesRoute', () => {
         path: { sourceId: 'logs.test' },
         body: { connectorId: 'test-connector', conversationId: 'conversation-1' },
       },
-      request: { spaceId: 'space-a' },
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: {
           get: jest.fn().mockResolvedValue({
@@ -805,7 +805,7 @@ describe('upsertQueryRoute', () => {
     const getQueryLinks = makeGetQueryLinks([]);
     const handlerParams = {
       params: { path: { queryId: 'q1' }, body: { ...upsertBody, source_id: 'logs.test' } },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: {
           list: makeSourcesList('logs.test', 'logs.other'),
@@ -834,7 +834,7 @@ describe('upsertQueryRoute', () => {
     const upsertQuery = jest.fn().mockResolvedValue(undefined);
     const handlerParams = {
       params: { path: { queryId: 'q1' }, body: { ...upsertBody, source_id: 'logs.test' } },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: {
           list: makeSourcesList('logs.test', 'logs.other'),
@@ -858,7 +858,7 @@ describe('upsertQueryRoute', () => {
     const upsertQuery = jest.fn().mockResolvedValue(undefined);
     const handlerParams = {
       params: { path: { queryId: 'q1' }, body: { ...upsertBody, source_id: 'logs.test' } },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: {
           list: makeSourcesList('logs.test', 'logs.other'),
@@ -887,7 +887,7 @@ describe('upsertQueryRoute', () => {
     const sourcesGet = jest.fn();
     const handlerParams = {
       params: { path: { queryId: 'q1' }, body: { ...upsertBody, source_id: 'logs.other' } },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: { list: makeSourcesList('logs.test', 'logs.other'), get: sourcesGet },
         licensing: {},
@@ -911,7 +911,7 @@ describe('upsertQueryRoute', () => {
     const upsertQuery = jest.fn().mockResolvedValue(undefined);
     const handlerParams = {
       params: { path: { queryId: 'q1' }, body: upsertBody },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: {
           list: makeSourcesList('logs.test', 'logs.other'),
@@ -935,7 +935,7 @@ describe('upsertQueryRoute', () => {
     const upsertQuery = jest.fn();
     const handlerParams = {
       params: { path: { queryId: 'missing' }, body: upsertBody },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: { list: makeSourcesList('logs.test'), get: jest.fn() },
         licensing: {},
@@ -958,7 +958,7 @@ describe('upsertQueryRoute', () => {
     const upsertQuery = jest.fn();
     const handlerParams = {
       params: { path: { queryId: 'q1' }, body: upsertBody },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: {
           list: makeSourcesList('logs.test'),
@@ -987,7 +987,7 @@ describe('upsertQueryRoute', () => {
         path: { queryId: 'q1' },
         body: { ...upsertBody, esql: { query: 'NOT VALID' }, source_id: 'logs.test' },
       },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: {
           list: makeSourcesList('logs.test', 'logs.other'),

@@ -92,7 +92,7 @@ const makeMaintenanceService = (state: SignificantEventsMaintenanceState = 'enab
 });
 
 const makeRequest = () => ({
-  spaceId: 'space-a',
+  spaceId: 'default',
   events: {
     aborted$: {
       subscribe: jest.fn(),
@@ -466,7 +466,7 @@ describe('inferred feature identification input route', () => {
 
     expect(agentBuilder.agents.ensure).toHaveBeenCalledWith(
       expect.objectContaining({
-        spaceId: 'space-a',
+        spaceId: 'default',
         agent: expect.objectContaining({ id: FEATURE_IDENTIFICATION_AGENT_ID }),
       })
     );
@@ -594,7 +594,7 @@ describe('computed feature identification route', () => {
     const getKnowledgeIndicatorClient = jest.fn();
     const handlerParams = {
       params: { path: { sourceId: 'logs.test' }, body: null },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getKnowledgeIndicatorClient,
@@ -665,7 +665,7 @@ describe('should identify features route', () => {
         path: { sourceId: 'logs.test' },
         query: { thresholdHours: 24 },
       },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         sourcesClient: { get: jest.fn().mockResolvedValue({ source: { id: 'logs.test' } }) },
