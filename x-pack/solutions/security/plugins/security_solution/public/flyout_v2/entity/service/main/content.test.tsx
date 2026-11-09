@@ -248,14 +248,9 @@ describe('Content — insights', () => {
     jest.clearAllMocks();
   });
 
-  it('does not render insights by default (legacy flyout)', () => {
-    render(<Content {...defaultProps} />, { wrapper: TestProviders });
-    expect(screen.queryByTestId('entityInsightMock')).not.toBeInTheDocument();
-  });
-
-  it('renders service insights covering the alias records when showInsights is set', () => {
+  it('renders service insights covering the alias records', () => {
     const aliasRecords = [{ entity: { id: 'service:alias' } }] as never;
-    render(<Content {...defaultProps} showInsights aliasRecords={aliasRecords} />, {
+    render(<Content {...defaultProps} aliasRecords={aliasRecords} />, {
       wrapper: TestProviders,
     });
     expect(screen.getByTestId('entityInsightMock')).toBeInTheDocument();

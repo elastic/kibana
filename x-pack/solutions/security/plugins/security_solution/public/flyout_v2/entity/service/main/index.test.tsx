@@ -315,7 +315,7 @@ describe('<Service />', () => {
   });
 
   describe('entity not in the store', () => {
-    it('tells the content the service is not in the store and enables insights', () => {
+    it('tells the content the service is not in the store', () => {
       render(
         <TestProviders>
           <Service {...mockProps} />
@@ -323,7 +323,7 @@ describe('<Service />', () => {
       );
 
       expect(mockContentProps).toHaveBeenLastCalledWith(
-        expect.objectContaining({ noEntityInStore: true, showInsights: true })
+        expect.objectContaining({ noEntityInStore: true })
       );
     });
 

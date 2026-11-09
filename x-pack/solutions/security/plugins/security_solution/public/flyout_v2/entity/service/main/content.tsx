@@ -89,11 +89,6 @@ export interface ContentProps {
    */
   riskScoreQueryId: string;
   /**
-   * Shows the insights section. Only set by callers whose `openDetailsPanel` can open the insight
-   * tools; the legacy left panel has no tabs for them.
-   */
-  showInsights?: boolean;
-  /**
    * True when the flyout shows a resolution group (alias records were loaded for the open target).
    * The risk summary then shows only the group's risk score. See {@link RiskSummaryProps.isGroupView}.
    */
@@ -127,7 +122,6 @@ export const Content = ({
   identityFields,
   aliasRecords,
   noEntityInStore = false,
-  showInsights = false,
 }: ContentProps) => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
   const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
@@ -206,18 +200,16 @@ export const Content = ({
           onChange={onAssetCriticalityChange}
         />
       )}
-      {showInsights && (
-        <EntityInsight
-          entityRecord={entityRecord}
-          aliasRecords={aliasRecords}
-          identityFields={identityFields}
-          isPreviewMode={isPreviewMode}
-          openDetailsPanel={openDetailsPanel}
-          entityType={EntityType.service}
-          hideHeaderIcons={hideHeaderIcons}
-          scopeId={scopeId}
-        />
-      )}
+      <EntityInsight
+        entityRecord={entityRecord}
+        aliasRecords={aliasRecords}
+        identityFields={identityFields}
+        isPreviewMode={isPreviewMode}
+        openDetailsPanel={openDetailsPanel}
+        entityType={EntityType.service}
+        hideHeaderIcons={hideHeaderIcons}
+        scopeId={scopeId}
+      />
       <ObservedDataSection
         entityType={EntityType.service}
         observedData={observedService}

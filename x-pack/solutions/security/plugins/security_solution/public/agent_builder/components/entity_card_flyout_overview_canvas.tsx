@@ -786,19 +786,19 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
 
 const useOpenServiceInvestigationInEntityAnalytics = ({
   serviceName,
-  entityId,
-  identityFields,
+  entityIdForPanels,
   scopeId,
   safeContextID,
   isRiskScoreExist,
+  hasNonClosedAlerts,
   entityStoreEntityId,
 }: {
   serviceName: string;
-  entityId: string;
-  identityFields: IdentityFields;
+  entityIdForPanels: string;
   scopeId: string;
   safeContextID: string;
   isRiskScoreExist: boolean;
+  hasNonClosedAlerts: boolean;
   entityStoreEntityId?: string;
 }): ((path: EntityDetailsPath) => void) => {
   const { telemetry } = useKibana().services;
@@ -814,13 +814,13 @@ const useOpenServiceInvestigationInEntityAnalytics = ({
         left: {
           id: ServiceDetailsPanelKey,
           params: {
-            isRiskScoreExist,
-            identityFields,
-            scopeId,
-            entityId,
+            entityId: entityIdForPanels,
             serviceName,
-            entityStoreEntityId,
+            scopeId,
+            isRiskScoreExist,
             path,
+            hasNonClosedAlerts,
+            entityStoreEntityId,
           },
         },
         right: {
@@ -828,16 +828,16 @@ const useOpenServiceInvestigationInEntityAnalytics = ({
           params: {
             contextID: safeContextID,
             scopeId,
-            entityId,
             serviceName,
+            entityId: entityIdForPanels,
           },
         },
       });
     },
     [
-      entityId,
+      entityIdForPanels,
+      hasNonClosedAlerts,
       entityStoreEntityId,
-      identityFields,
       isRiskScoreExist,
       navigateWithFlyout,
       safeContextID,
@@ -861,21 +861,25 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
   attachmentResolutionRiskStats,
   hideHeaderIcons,
 }) => {
+  const euidApi = useEntityStoreEuidApi();
+
   const safeContextID = AGENT_BUILDER_ENTITY_CARD_SCOPE;
   const scopeId = AGENT_BUILDER_ENTITY_CARD_SCOPE;
   const isPreviewMode = false;
+
+  const { to, from, setQuery, deleteQuery, isInitializing } = useGlobalTime();
+
   const serviceStoreIdentityFields = useMemo(
     () => (!entityId && serviceName ? { 'service.name': serviceName } : undefined),
     [entityId, serviceName]
   );
-  const entityFromStoreResult = useEntityFromStore<ServiceItem>({
+  const entityFromStoreResult = useEntityFromStore({
     entityId,
     identityFields: serviceStoreIdentityFields,
     entityType: 'service',
-    skip: false,
+    skip: isInitializing,
   });
 
-  const euidApi = useEntityStoreEuidApi();
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
     const legacyFields =
       serviceName != null && serviceName !== ''
@@ -893,18 +897,66 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
     () => (serviceName ? buildEntityNameFilter(EntityType.service, [serviceName]) : undefined),
     [serviceName]
   );
-  const observedService = useObservedService(serviceName, scopeId);
+  const observedService = useObservedService(serviceName, scopeId, entityFromStoreResult);
+
   const riskScoreState = useRiskScore({
     riskEntity: EntityType.service,
-    filterQuery: serviceNameFilterQuery as unknown as ESQuery | undefined,
+    filterQuery: serviceNameFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
-    skip: !!entityFromStoreResult.entityRecord,
+    skip: !!observedService?.entityRecord,
   });
 
-  const { inspect, loading, data: serviceRisk } = riskScoreState;
-  const { setQuery, deleteQuery } = useGlobalTime();
+  const { inspect, refetch, loading, data: serviceRisk } = riskScoreState;
   const serviceRiskData = serviceRisk && serviceRisk.length > 0 ? serviceRisk[0] : undefined;
+
+  const onRecalculation = useCallback(() => entityAttachmentQueryClient.invalidateQueries(), []);
+
+  const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
+    useEntityRiskScoreRecalculation({
+      entityType: EntityType.service,
+      identifier: serviceName,
+      entityId: observedService.entityRecord?.entity?.id,
+      entityStoreV2Enabled: true,
+      entityFromStoreResult,
+      riskScoreState,
+      onRecalculation,
+    });
+
+  const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('service', {
+    onSuccess: calculateEntityRiskScore,
+    refetchEntityRecord: entityFromStoreResult.refetch,
+  });
+
+  const { hasNonClosedAlerts } = useNonClosedAlerts({
+    identityFields: documentEntityIdentifiers,
+    entityType: EntityType.service,
+    to,
+    from,
+    queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}SERVICE_NAME_RIGHT`,
+  });
+
+  const panelDisplayEntityId = observedService.entityRecord?.entity?.id;
+
+  const hasEntityStoreRecord = observedService.entityRecord != null;
+
+  useQueryInspector({
+    deleteQuery,
+    inspect: hasEntityStoreRecord ? entityFromStoreResult?.inspect ?? null : inspect,
+    loading: hasEntityStoreRecord ? entityFromStoreResult?.isLoading ?? false : loading,
+    queryId: AGENT_BUILDER_SERVICE_PANEL_RISK_SCORE_QUERY_ID,
+    refetch: hasEntityStoreRecord ? entityFromStoreResult?.refetch ?? (() => {}) : refetch,
+    setQuery,
+  });
+
+  const riskScoreStateFromStore = observedService.entityRecord
+    ? buildRiskScoreStateFromEntityRecord(EntityType.service, observedService.entityRecord, {
+        refetch: observedService.refetchEntityStore ?? (() => {}),
+        isLoading: observedService.isLoading,
+        error: null,
+        inspect: entityFromStoreResult?.inspect,
+      })
+    : null;
 
   const riskScoreStateFromAttachment = useMemo(
     () =>
@@ -930,55 +982,36 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
     [attachmentResolutionRiskStats, serviceName]
   );
 
-  const effectiveRiskScoreState = riskScoreStateFromAttachment ?? riskScoreState;
-  const isRiskScoreExist = riskScoreStateFromAttachment != null || !!serviceRiskData?.service.risk;
+  const effectiveRiskScoreState =
+    riskScoreStateFromAttachment ?? riskScoreStateFromStore ?? riskScoreState;
+  const isRiskScoreExist =
+    riskScoreStateFromAttachment != null ||
+    (observedService.entityRecord
+      ? !!getRiskFromEntityRecord(observedService.entityRecord)
+      : !!serviceRiskData?.service?.risk);
 
-  const onRecalculation = useCallback(() => entityAttachmentQueryClient.invalidateQueries(), []);
+  const onCriticalitySave =
+    entityFromStoreResult.entityRecord && observedService.entityRecord
+      ? (level: CriticalityLevelWithUnassigned) =>
+          updateAssetCriticalityLevel(level, observedService.entityRecord)
+      : undefined;
 
-  const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
-    useEntityRiskScoreRecalculation({
-      entityType: EntityType.service,
-      identifier: serviceName,
-      entityId: entityFromStoreResult.entityRecord?.entity?.id,
-      entityStoreV2Enabled: true,
-      entityFromStoreResult,
-      riskScoreState,
-      onRecalculation,
-    });
-
-  const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('service', {
-    onSuccess: calculateEntityRiskScore,
-    refetchEntityRecord: entityFromStoreResult.refetch,
-  });
-
-  useQueryInspector({
-    deleteQuery,
-    inspect,
-    loading,
-    queryId: AGENT_BUILDER_SERVICE_PANEL_RISK_SCORE_QUERY_ID,
-    refetch: riskScoreState.refetch,
-    setQuery,
-  });
-
-  const entityStoreEntityId = entityFromStoreResult.entityRecord?.entity?.id;
-
-  const onCriticalitySave = entityFromStoreResult.entityRecord
-    ? (level: CriticalityLevelWithUnassigned) =>
-        updateAssetCriticalityLevel(level, entityFromStoreResult.entityRecord)
-    : undefined;
+  const entityStoreEntityId = observedService.entityRecord?.entity?.id;
 
   const openDetailsPanel = useOpenServiceInvestigationInEntityAnalytics({
     serviceName,
-    entityId,
-    identityFields: documentEntityIdentifiers,
+    entityIdForPanels: panelDisplayEntityId,
     scopeId,
     safeContextID,
     isRiskScoreExist,
+    hasNonClosedAlerts,
     entityStoreEntityId,
   });
 
+  const noEntityInStore = !entityFromStoreResult.isLoading && !observedService.entityRecord;
+
   const { tabs, selectedTabId, setSelectedTabId } = useEntityPanelTabs({
-    entityRecord: entityFromStoreResult.entityRecord ?? null,
+    entityRecord: observedService.entityRecord ?? null,
   });
 
   const tabsNode = tabs ? (
@@ -989,50 +1022,49 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
     />
   ) : undefined;
 
-  if (observedService.isLoading) {
-    return <FlyoutLoading />;
-  }
-
   return (
     <>
       <FlyoutHeader>
         <ServicePanelHeader
           serviceName={serviceName}
           lastSeen={observedService.lastSeen}
-          isEntityInStore={!!entityFromStoreResult.entityRecord}
+          entityId={panelDisplayEntityId}
+          identityFields={documentEntityIdentifiers}
+          isEntityInStore={!!observedService.entityRecord}
           riskLevel={
-            entityFromStoreResult.entityRecord
-              ? ((getRiskFromEntityRecord(entityFromStoreResult.entityRecord)?.calculated_level ??
+            observedService.entityRecord
+              ? ((getRiskFromEntityRecord(observedService.entityRecord)?.calculated_level ??
                   'Unknown') as RiskSeverity)
               : undefined
           }
         />
       </FlyoutHeader>
       <FlyoutBody>
-        {entityFromStoreResult.entityRecord && (
+        {observedService.entityRecord && (
           <EntitySummaryGrid
-            entityRecord={entityFromStoreResult.entityRecord}
+            entityRecord={observedService.entityRecord}
             criticalityLevel={entityFromStoreResult.entityRecord?.asset?.criticality}
             onCriticalitySave={onCriticalitySave}
           />
         )}
         {tabsNode}
         {tabs && <EuiSpacer size="l" />}
-        {tabs && selectedTabId === TABLE_TAB_ID && entityFromStoreResult.entityRecord ? (
-          <EntityStoreTableTab entityRecord={entityFromStoreResult.entityRecord} />
+        {tabs && selectedTabId === TABLE_TAB_ID && observedService.entityRecord ? (
+          <EntityStoreTableTab entityRecord={observedService.entityRecord} />
         ) : (
           <ServicePanelContent
-            entityRecord={entityFromStoreResult.entityRecord ?? undefined}
             identityFields={documentEntityIdentifiers}
             observedService={observedService}
             riskScoreState={effectiveRiskScoreState}
             entityRiskScores={entityRiskScores}
-            recalculatingScore={recalculatingScore}
-            onAssetCriticalityChange={calculateEntityRiskScore}
             contextID={safeContextID}
             scopeId={scopeId}
             openDetailsPanel={openDetailsPanel}
+            recalculatingScore={recalculatingScore}
+            onAssetCriticalityChange={calculateEntityRiskScore}
             isPreviewMode={isPreviewMode}
+            entityRecord={observedService.entityRecord ?? undefined}
+            noEntityInStore={noEntityInStore}
             entityStoreV2Enabled
             entityStoreEntityId={entityStoreEntityId}
             prefetchedResolutionRisk={prefetchedResolutionRisk}
