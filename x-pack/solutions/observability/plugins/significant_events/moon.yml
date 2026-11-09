@@ -85,6 +85,7 @@ dependsOn:
   - '@kbn/agentic-investigations-plugin'
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/core-http-server-mocks'
+  - '@kbn/std'
 tags:
   - plugin
   - prod
