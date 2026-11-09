@@ -122,7 +122,7 @@ export const IntegrationDetails = React.memo(() => {
 
         <AiConnectorRequiredCallout />
 
-        <EuiPanel paddingSize="none" hasShadow={false}>
+        <EuiPanel paddingSize="none" hasShadow={false} hasBorder={false}>
           <EuiFlexGroup direction="row" gutterSize="m">
             <EuiFlexItem css={styles.leftPanel}>
               <EuiPanel
