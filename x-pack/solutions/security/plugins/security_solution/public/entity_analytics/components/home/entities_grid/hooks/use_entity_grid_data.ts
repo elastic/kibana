@@ -105,7 +105,11 @@ const fetchCount = async (
   countQuery: readonly string[],
   signal?: AbortSignal
 ): Promise<number> => {
-  const [countRow] = await createEsqlRunner(searchService, signal)(countQuery);
+  const [countRow] = await createEsqlRunner(
+    searchService,
+    'entities_grid_count',
+    signal
+  )(countQuery);
   return (countRow && getNumber(countRow, 'total')) ?? 0;
 };
 
@@ -119,7 +123,7 @@ const fetchRows = async (
   if (!fetchSortPage) throw new Error(`Column ${options.sortField} is not sortable`);
   const args = getQueryArgs(context, options);
   const rowsWithLookahead = await fetchSortPage(args, {
-    runQuery: createEsqlRunner(context.searchService, signal),
+    runQuery: createEsqlRunner(context.searchService, 'entities_grid_rows', signal),
   });
   return {
     rows: rowsWithLookahead.slice(0, args.pageSize),
@@ -179,7 +183,7 @@ export const useResolvedEntityOverrides = (
           concreteEntityIndexName: ready.concreteEntityIndexName,
           ...conditions,
         },
-        createEsqlRunner(context.searchService, signal)
+        createEsqlRunner(context.searchService, 'entities_grid_resolved_entity_overrides', signal)
       );
     },
     { enabled: !!conditions && ready != null }

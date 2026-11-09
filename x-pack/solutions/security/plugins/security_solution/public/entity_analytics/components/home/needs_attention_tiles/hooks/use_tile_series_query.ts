@@ -42,7 +42,7 @@ export const useTileSeriesQuery = <T>({
     async ({ signal }) => {
       if (!query) return undefined;
       const result = await runWithTileTimeout(signal, (tileSignal) =>
-        runEsqlQuery(data.search, query, tileSignal)
+        runEsqlQuery(data.search, query, `needs_attention_tile_${tileKey}`, tileSignal)
       );
       return parse(result);
     },

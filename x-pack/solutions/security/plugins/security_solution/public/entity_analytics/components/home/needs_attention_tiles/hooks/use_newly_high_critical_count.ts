@@ -66,7 +66,7 @@ export const useNewlyHighCriticalCount = ({
     async ({ signal }) => {
       if (!query) return { count: 0, entityIds: [] };
       const response = await runWithTileTimeout(signal, (tileSignal) =>
-        runEsqlQuery(data.search, query, tileSignal)
+        runEsqlQuery(data.search, query, 'needs_attention_tile_newly_high_critical', tileSignal)
       );
       const row = response.values?.[0];
       const valueIndex = response.columns?.findIndex((c) => c.name === 'value') ?? 0;

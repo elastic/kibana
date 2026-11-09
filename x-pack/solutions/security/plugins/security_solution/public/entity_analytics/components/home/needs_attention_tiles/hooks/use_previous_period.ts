@@ -43,7 +43,7 @@ const usePreviousPeriodQuery = <T>({
     async ({ signal }) => {
       if (!query) return undefined;
       const result = await runWithTileTimeout(signal, (tileSignal) =>
-        runEsqlQuery(services.search, query, tileSignal)
+        runEsqlQuery(services.search, query, `needs_attention_tile_${queryKey}`, tileSignal)
       );
       return parse(result);
     },

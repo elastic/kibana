@@ -204,10 +204,14 @@ const toRows = ({ columns, values }: Pick<ESQLSearchResponse, 'columns' | 'value
   values.map((row) => Object.fromEntries(columns.map((col, i) => [col.name, row[i]])));
 
 export const createEsqlRunner =
-  (searchService: DataPublicPluginStart['search'], signal?: AbortSignal): EsqlRunner =>
+  (
+    searchService: DataPublicPluginStart['search'],
+    contextId: string,
+    signal?: AbortSignal
+  ): EsqlRunner =>
   async (steps) => {
     const query = steps.join('\n');
-    const rawResponse = await runEsqlQuery(searchService, query, signal);
+    const rawResponse = await runEsqlQuery(searchService, query, contextId, signal);
     return toRows(rawResponse);
   };
 

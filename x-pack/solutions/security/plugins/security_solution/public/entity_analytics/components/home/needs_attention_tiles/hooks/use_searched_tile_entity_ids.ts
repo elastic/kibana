@@ -67,7 +67,7 @@ export const useSearchedTileEntityIds = ({
     ({ signal }) => {
       if (!searchArgs) throw new Error('There is no search to apply to the tiles');
       return fetchSearchedTileEntityIds(
-        createEsqlRunner(data.search, signal),
+        createEsqlRunner(data.search, 'needs_attention_tile_search', signal),
         searchArgs,
         tileEntityIds
       );

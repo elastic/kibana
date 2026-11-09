@@ -110,7 +110,7 @@ export const useAlertBasedTiles = ({
     async ({ signal }) => {
       if (!query) return EMPTY_RESULT;
       const raw = await runWithTileTimeout(signal, (tileSignal) =>
-        runEsqlQuery(data.search, query, tileSignal)
+        runEsqlQuery(data.search, query, 'needs_attention_tile_alerts', tileSignal)
       );
       return parseAlertBasedTilesResponse(raw);
     },

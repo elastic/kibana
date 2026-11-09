@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import { lastValueFrom } from 'rxjs';
-import { ESQL_ASYNC_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
+import { getESQLResults } from '@kbn/esql-utils';
 import { PROJECT_ROUTING } from '@kbn/cps-utils';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 
 export const runEsqlQuery = async (
   searchService: DataPublicPluginStart['search'],
   query: string,
+  contextId: string,
   signal?: AbortSignal
 ): Promise<ESQLSearchResponse> => {
-  const { rawResponse } = await lastValueFrom(
-    searchService.search<
-      IKibanaSearchRequest<{ query: string }>,
-      IKibanaSearchResponse<ESQLSearchResponse>
-    >(
-      { params: { query } },
-      {
-        abortSignal: signal,
-        strategy: ESQL_ASYNC_SEARCH_STRATEGY,
-        projectRouting: PROJECT_ROUTING.ORIGIN,
-      }
-    )
-  );
-
-  return rawResponse;
+  const { response } = await getESQLResults({
+    esqlQuery: query,
+    search: searchService.search,
+    signal,
+    projectRouting: PROJECT_ROUTING.ORIGIN,
+    executionContext: {
+      ...buildExecutionContext(EA_EXECUTION_CONTEXT_NAMES.HOME_PAGE, contextId),
+      // APM labels come from the top-level `page`, never from the child context.
+      page: contextId,
+    },
+  });
+  return response;
 };
