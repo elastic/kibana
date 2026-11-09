@@ -831,7 +831,8 @@ as `nightshift-investigations`.
   runs every shard against Sonnet 5.5, the production investigation model, at 02:00 UTC on
   weekdays.
 - **Failures** are posted to `#nightshift-alerts`, resolved from `slackChannel` in the suite entry
-  (weekly) or `EVAL_SLACK_NOTIFICATION_CHANNEL` (daily).
+  (weekly) or `EVAL_SLACK_NOTIFICATION_CHANNEL` (daily). Both only post from `main`; a weekly or
+  daily build started on another branch runs the evals but skips the notification.
 - **Scores** reach the golden cluster automatically, through `EVAL_KBN_URL` in CI.
 
 ## Validation
