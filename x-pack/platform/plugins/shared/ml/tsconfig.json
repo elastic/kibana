@@ -21,6 +21,7 @@
     "@kbn/core",
     // add references to other TypeScript projects the plugin depends on
     "@kbn/actions-plugin",
+    "@kbn/core-chrome-browser-hooks",
     "@kbn/aiops-change-point-detection",
     "@kbn/aiops-common",
     "@kbn/aiops-components",
