@@ -116,9 +116,7 @@ const mockServiceAccount = ({
   pending?: boolean;
 } = {}) =>
   mockUseInvestigatorServiceAccount.mockReturnValue({
-    data: pending
-      ? undefined
-      : { serviceAccountsEnabled, canModifyBoundWorkflows },
+    data: pending ? undefined : { serviceAccountsEnabled, canModifyBoundWorkflows },
   });
 
 const renderStep = (automations: Automation[] = [], onInvestigationClick = jest.fn()) =>

@@ -80,11 +80,7 @@ export const useOnboardingVisibility = ({
   useEffect(() => {
     if (
       forceOnboarding ||
-      (!isDismissed &&
-        !isLoading &&
-        canUseAutomations &&
-        !hasAutomation &&
-        !automations.isError)
+      (!isDismissed && !isLoading && canUseAutomations && !hasAutomation && !automations.isError)
     ) {
       setSessionOpen(true);
     }
@@ -110,9 +106,7 @@ export const useOnboardingVisibility = ({
     isLoading,
     showOnboarding:
       isEnabled &&
-      (forceOnboarding ||
-        (sessionOpen && !isDismissed) ||
-        (!isDismissed && !isLoading && !isDone)),
+      (forceOnboarding || (sessionOpen && !isDismissed) || (!isDismissed && !isLoading && !isDone)),
     latestInvestigation,
     dismiss,
   };
