@@ -881,6 +881,21 @@ describe('createRetryTask', () => {
       );
     });
 
+    it('removes itself when the runner has given up, rather than granting a second budget', async () => {
+      // the runner records this before removing the tasks, and that removal can fail; resuming
+      // would restart the action under retryCount: 1 with a whole new MAX_RETRY_COUNT
+      const result = await createRetryTask(
+        createTaskInstance({
+          state: { stoppedAt: '2026-11-09T12:00:00.000Z', ...STALLED_CHECKPOINT },
+        }),
+        getDeps,
+        jest.fn()
+      ).run();
+
+      expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
+      expect(resolver.run).not.toHaveBeenCalled();
+    });
+
     it('stops watching an action that never completes, however alive it looks', async () => {
       // a runner wedged inside processAgents keeps heartbeating, so it is read as alive forever
       // and no resume limit is ever reached; without this ceiling the task recurs indefinitely

@@ -19,8 +19,8 @@ import { SO_SEARCH_LIMIT } from '../../../common/constants';
 import { agentsKueryNamespaceFilter, buildFilterWithNamespace } from '../spaces/agent_namespaces';
 
 import {
+  collectAgentIdsFromActions,
   createErrorActionResults,
-  getAgentIdsFromActions,
   getAgentsWithoutActionResults,
 } from './actions';
 import { closePointInTime, getAgentsByKuery, openPointInTime } from './crud';
@@ -170,7 +170,15 @@ export abstract class ActionRunner {
     // process's heap, and so nothing is left in flight at shutdown. The write itself merges rather
     // than replaces, so two of these overlapping cannot drop an id either way.
     if (recordedNewId) {
-      await this.writeCheckTaskState({ childActionIds: [...this.childActionIds] });
+      await this.writeCheckTaskState(
+        { childActionIds: [...this.childActionIds] },
+        // The one checkpoint write whose failure is not survivable. Every other one costs a batch
+        // re-read on resume, which deduplication handles; losing a child action id costs a second
+        // rollback dispatched to agents that already have one, and nothing downstream can tell.
+        // Failing the batch sends it back through the retry, which carries the ids in its params
+        // and writes them again.
+        { throwOnFailure: true }
+      );
     }
   }
 
@@ -295,6 +303,12 @@ export abstract class ActionRunner {
               if (this.retryParams.retryCount >= MAX_RETRY_COUNT) {
                 logger.warn(`Stopping after retry #${MAX_RETRY_COUNT}. Error: ${error.message}`);
 
+                // Recorded before the tasks are removed, because removing them is best effort: a
+                // timeout there leaves the check task in place, and it would resume the action with
+                // `retryCount: 1` and hand it a whole second retry budget. The flag is what the
+                // check task reads to remove itself instead.
+                await this.writeCheckTaskState({ stoppedAt: new Date().toISOString() });
+
                 // clean up tasks after last retry reached
                 await Promise.all(
                   [this.checkTaskId, this.retryParams.taskId]
@@ -391,16 +405,22 @@ export abstract class ActionRunner {
     checkpoint: Partial<
       Pick<
         BulkActionCheckTaskState,
-        'searchAfter' | 'pitId' | 'nbAgentsProcessed' | 'childActionIds'
+        'searchAfter' | 'pitId' | 'nbAgentsProcessed' | 'childActionIds' | 'stoppedAt'
       >
-    >
+    >,
+    options: { throwOnFailure?: boolean } = {}
   ) {
+    // Nothing to write to, and nothing watching this action either: it is already running without
+    // a check task, which `runActionAsyncWithRetry` logged when it could not schedule one.
     if (!this.checkTaskId) {
       return;
     }
     try {
       await this.bulkActionsResolver!.updateCheckTaskState(this.checkTaskId, checkpoint);
     } catch (error) {
+      if (options.throwOnFailure) {
+        throw error;
+      }
       appContextService
         .getLogger()
         .warn(
@@ -478,37 +498,39 @@ export abstract class ActionRunner {
    * and retrying. A missing `.fleet-actions` is not a failure and comes back as an empty set.
    */
   private async getActionedAgentIds(): Promise<Set<string>> {
-    const alreadyRead = this.actionedAgentIds;
-    const remainingCapacity = MAX_ACTIONED_AGENT_IDS - (alreadyRead?.size ?? 0);
-    if (remainingCapacity <= 0) {
-      return alreadyRead!;
+    const actionedAgentIds = (this.actionedAgentIds ??= new Set<string>());
+    if (actionedAgentIds.size >= MAX_ACTIONED_AGENT_IDS) {
+      return actionedAgentIds;
     }
 
     const readStartedAt = moment()
       .subtract(DEDUPE_REFRESH_OVERLAP_MINUTES, 'm')
       .toDate()
       .toISOString();
-    const actionIds = [this.actionParams.actionId!, ...this.childActionIds];
 
-    // The ceiling is pushed down into the read rather than applied to what comes back: a set this
-    // big is built from documents that have to be held in memory to produce it, so checking the
-    // size afterwards would bound how long the peak lasts but not the peak itself.
-    if (!alreadyRead) {
-      this.actionedAgentIds = await getAgentIdsFromActions(this.esClient, actionIds, {
-        limit: remainingCapacity,
-      });
-    } else {
-      const since = this.actionedAgentIdsReadAt;
-      for (const agentId of await getAgentIdsFromActions(this.esClient, actionIds, {
-        since,
-        limit: remainingCapacity,
-      })) {
-        alreadyRead.add(agentId);
+    // The read fills this set rather than building one of its own, so the ceiling bounds what is
+    // held rather than what each read returns. A top-up re-reads the overlap window by design, so
+    // most of what it sees is already here; charging those ids against a budget of their own would
+    // let a nearly full set stop paging before it reached the documents it has never seen, while
+    // the watermark moved past them anyway.
+    //
+    // The ceiling is pushed into the read for the same reason it exists: the documents naming
+    // these agents are held in memory to produce the set, so applying it afterwards would bound how
+    // long the peak lasts rather than the peak. The batch size is what one document names, which is
+    // what lets a page be sized to the ids still wanted.
+    await collectAgentIdsFromActions(
+      this.esClient,
+      [this.actionParams.actionId!, ...this.childActionIds],
+      actionedAgentIds,
+      {
+        since: this.actionedAgentIdsReadAt,
+        limit: MAX_ACTIONED_AGENT_IDS,
+        agentsPerDocument: this.actionParams.batchSize ?? SO_SEARCH_LIMIT,
       }
-    }
+    );
     this.actionedAgentIdsReadAt = readStartedAt;
 
-    if (this.actionedAgentIds!.size >= MAX_ACTIONED_AGENT_IDS) {
+    if (actionedAgentIds.size >= MAX_ACTIONED_AGENT_IDS) {
       appContextService
         .getLogger()
         .warn(
@@ -516,7 +538,7 @@ export abstract class ActionRunner {
         );
     }
 
-    return this.actionedAgentIds!;
+    return actionedAgentIds;
   }
 
   /**

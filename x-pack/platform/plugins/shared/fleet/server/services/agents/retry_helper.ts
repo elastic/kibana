@@ -105,6 +105,12 @@ export interface BulkActionCheckTaskState {
   checkpointUpdatedAt?: string;
   lastObservedCheckpointAt?: string;
   resumeCount?: number;
+  /**
+   * Set by a runner that has spent its whole retry budget. Removing the check task is what should
+   * follow, but that write is best effort, so this is what a surviving check task reads to stop
+   * rather than resuming the action and granting it a second budget.
+   */
+  stoppedAt?: string;
   /** How many times the check task has run for this action, bounded by MAX_CHECK_TASK_RUNS. */
   runCount?: number;
 }

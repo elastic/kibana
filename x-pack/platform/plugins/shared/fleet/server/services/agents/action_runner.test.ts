@@ -21,8 +21,8 @@ import {
 } from './action_runner';
 import { BulkActionTaskType } from './bulk_action_types';
 import {
+  collectAgentIdsFromActions,
   createErrorActionResults,
-  getAgentIdsFromActions,
   getAgentsWithoutActionResults,
 } from './actions';
 import { closePointInTime, getAgentsByKuery, openPointInTime } from './crud';
@@ -42,9 +42,26 @@ jest.mock('../spaces/agent_namespaces', () => ({
 const mockedGetAgentsByKuery = getAgentsByKuery as jest.MockedFunction<typeof getAgentsByKuery>;
 const mockedOpenPointInTime = openPointInTime as jest.MockedFunction<typeof openPointInTime>;
 const mockedClosePointInTime = closePointInTime as jest.MockedFunction<typeof closePointInTime>;
-const mockedGetAgentIdsFromActions = getAgentIdsFromActions as jest.MockedFunction<
-  typeof getAgentIdsFromActions
+const mockedCollectAgentIdsFromActions = collectAgentIdsFromActions as jest.MockedFunction<
+  typeof collectAgentIdsFromActions
 >;
+
+/** The read fills the set the runner owns, so a mock has to add to it rather than return one. */
+const mockActionedAgentIds = (...perCall: Array<Iterable<string>>) => {
+  mockedCollectAgentIdsFromActions.mockReset();
+  for (const agentIds of perCall) {
+    mockedCollectAgentIdsFromActions.mockImplementationOnce(async (_esClient, _actionIds, into) => {
+      for (const agentId of agentIds) {
+        into.add(agentId);
+      }
+    });
+  }
+  mockedCollectAgentIdsFromActions.mockImplementation(async (_esClient, _actionIds, into) => {
+    for (const agentId of perCall[perCall.length - 1] ?? []) {
+      into.add(agentId);
+    }
+  });
+};
 const mockedGetAgentsWithoutActionResults = getAgentsWithoutActionResults as jest.MockedFunction<
   typeof getAgentsWithoutActionResults
 >;
@@ -100,7 +117,7 @@ class TestActionRunner extends ActionRunner {
     }
     this.processedBatches.push(agents.map(({ id }) => id));
     if (this.childActionIdsPerBatch) {
-      this.recordChildActionIds(this.childActionIdsPerBatch);
+      await this.recordChildActionIds(this.childActionIdsPerBatch);
     }
     return { actionId: this.actionParams.actionId! };
   }
@@ -155,7 +172,7 @@ describe('ActionRunner', () => {
     };
     jest.spyOn(appContextService, 'getBulkActionsResolver').mockReturnValue(resolver as any);
     mockedOpenPointInTime.mockResolvedValue('fresh-pit');
-    mockedGetAgentIdsFromActions.mockResolvedValue(new Set());
+    mockActionedAgentIds([]);
     mockedGetAgentsWithoutActionResults.mockResolvedValue([]);
   });
 
@@ -466,6 +483,27 @@ describe('ActionRunner', () => {
         expect.stringContaining(`Stopping after retry #${MAX_RETRY_COUNT}`)
       );
     });
+
+    it('records that it gave up before removing the tasks, which is best effort', async () => {
+      mockAgentPages(2, 2);
+      // a timeout on the removal leaves the check task in place, and it would resume the action
+      // with retryCount: 1 and hand it a whole second retry budget
+      resolver.removeIfExists.mockRejectedValue(new EsErrors.TimeoutError('Request timed out'));
+      const runner = createRunner({}, { retryCount: MAX_RETRY_COUNT });
+      runner.processAgentsError = new Error('batch failed');
+
+      await runner.runActionAsyncWithRetry();
+
+      expect(resolver.updateCheckTaskState).toHaveBeenLastCalledWith(CHECK_TASK_ID, {
+        stoppedAt: expect.any(String),
+      });
+      expect(resolver.run).not.toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        TASK_TYPE,
+        RETRY_TASK_ID
+      );
+    });
   });
 
   describe('point in time', () => {
@@ -631,7 +669,7 @@ describe('ActionRunner', () => {
       mockAgentPages(2, 2);
       // the previous run actioned batch 1 but died before checkpointing it, so the resume starts
       // from scratch and finds its action document
-      mockedGetAgentIdsFromActions.mockResolvedValue(new Set(['agent-0', 'agent-1']));
+      mockActionedAgentIds(['agent-0', 'agent-1']);
 
       const runner = createRunner({}, { nbAgentsProcessed: 0, searchAfter: undefined });
       await runner.runActionAsyncWithRetry();
@@ -651,7 +689,7 @@ describe('ActionRunner', () => {
       mockAgentPages(2, 2);
       // after a restart from the beginning the same agents repage into different batches, so a
       // batch can share its first agent with an actioned one while holding agents that are new
-      mockedGetAgentIdsFromActions.mockResolvedValue(new Set(['agent-0', 'agent-2']));
+      mockActionedAgentIds(['agent-0', 'agent-2']);
 
       const runner = createRunner({}, { nbAgentsProcessed: 0, searchAfter: undefined });
       await runner.runActionAsyncWithRetry();
@@ -663,31 +701,36 @@ describe('ActionRunner', () => {
 
     it('tops the actioned agents up before every batch rather than snapshotting them once', async () => {
       mockAgentPages(3, 2);
-      mockedGetAgentIdsFromActions.mockResolvedValue(new Set(['agent-0']));
+      mockActionedAgentIds(['agent-0']);
 
       await createRunner({ total: 6 }).runActionAsyncWithRetry();
 
       // a watchdog resume can overlap a runner that is still alive, and from then on both page the
       // same range: a set read once cannot see what the other writes, so every later batch could be
       // actioned twice rather than only the boundary batch
-      expect(mockedGetAgentIdsFromActions).toHaveBeenCalledTimes(3);
-      // the first read is complete, the rest only ask for what has been written since, and both
-      // carry the remaining memory budget so the read itself stops there
-      expect(mockedGetAgentIdsFromActions).toHaveBeenNthCalledWith(1, esClient, [ACTION_ID], {
-        limit: MAX_ACTIONED_AGENT_IDS,
-      });
-      expect(mockedGetAgentIdsFromActions).toHaveBeenNthCalledWith(2, esClient, [ACTION_ID], {
-        since: expect.any(String),
-        limit: MAX_ACTIONED_AGENT_IDS - 1,
-      });
+      expect(mockedCollectAgentIdsFromActions).toHaveBeenCalledTimes(3);
+      // the first read is complete, the rest only ask for what has been written since, and every
+      // one fills the same set under the same ceiling
+      expect(mockedCollectAgentIdsFromActions).toHaveBeenNthCalledWith(
+        1,
+        esClient,
+        [ACTION_ID],
+        expect.any(Set),
+        { since: undefined, limit: MAX_ACTIONED_AGENT_IDS, agentsPerDocument: 2 }
+      );
+      expect(mockedCollectAgentIdsFromActions).toHaveBeenNthCalledWith(
+        2,
+        esClient,
+        [ACTION_ID],
+        expect.any(Set),
+        { since: expect.any(String), limit: MAX_ACTIONED_AGENT_IDS, agentsPerDocument: 2 }
+      );
     });
 
     it('picks up the agents an overlapping runner actioned mid-run', async () => {
       mockAgentPages(2, 2);
-      mockedGetAgentIdsFromActions
-        .mockResolvedValueOnce(new Set())
-        // the other runner reached batch 2 while this one was working through batch 1
-        .mockResolvedValueOnce(new Set(['agent-2', 'agent-3']));
+      // the other runner reached batch 2 while this one was working through batch 1
+      mockActionedAgentIds([], ['agent-2', 'agent-3']);
 
       const runner = createRunner();
       await runner.runActionAsyncWithRetry();
@@ -704,9 +747,10 @@ describe('ActionRunner', () => {
 
       await runner.runActionAsyncWithRetry();
 
-      expect(mockedGetAgentIdsFromActions).toHaveBeenLastCalledWith(
+      expect(mockedCollectAgentIdsFromActions).toHaveBeenLastCalledWith(
         esClient,
         [ACTION_ID, 'child-1'],
+        expect.any(Set),
         expect.objectContaining({ since: expect.any(String) })
       );
       expect(resolver.updateCheckTaskState).toHaveBeenLastCalledWith(
@@ -737,18 +781,57 @@ describe('ActionRunner', () => {
       // the set is one entry per agent actioned, so it is bounded by the size of the action rather
       // than by anything this code controls; the ceiling has to reach the read, since the documents
       // naming those agents are held in memory to produce it
-      mockedGetAgentIdsFromActions.mockResolvedValue(
-        new Set(Array.from({ length: MAX_ACTIONED_AGENT_IDS }, (_, i) => `other-${i}`))
-      );
+      mockActionedAgentIds(Array.from({ length: MAX_ACTIONED_AGENT_IDS }, (_, i) => `other-${i}`));
 
       await createRunner({ total: 6 }).runActionAsyncWithRetry();
 
-      expect(mockedGetAgentIdsFromActions).toHaveBeenCalledTimes(1);
-      expect(mockedGetAgentIdsFromActions).toHaveBeenCalledWith(esClient, [ACTION_ID], {
-        limit: MAX_ACTIONED_AGENT_IDS,
-      });
+      expect(mockedCollectAgentIdsFromActions).toHaveBeenCalledTimes(1);
+      expect(mockedCollectAgentIdsFromActions).toHaveBeenCalledWith(
+        esClient,
+        [ACTION_ID],
+        expect.any(Set),
+        expect.objectContaining({ limit: MAX_ACTIONED_AGENT_IDS, agentsPerDocument: 2 })
+      );
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining(`actioned more than ${MAX_ACTIONED_AGENT_IDS} agents`)
+      );
+    });
+
+    it('fails the batch when a child action id cannot be persisted', async () => {
+      mockAgentPages(1, 2);
+      // every other checkpoint write costs a batch re-read on resume; this one costs a second
+      // rollback dispatched to agents that already have one, which nothing downstream can tell
+      resolver.updateCheckTaskState.mockRejectedValue(
+        new EsErrors.TimeoutError('Request timed out')
+      );
+      const runner = createRunner({ total: 2 });
+      runner.childActionIdsPerBatch = ['child-1'];
+
+      await runner.runActionAsyncWithRetry();
+
+      expect(resolver.run).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ childActionIds: ['child-1'] }),
+        TASK_TYPE,
+        RETRY_TASK_ID
+      );
+    });
+
+    it('does not fail a batch when an ordinary checkpoint cannot be written', async () => {
+      mockAgentPages(1, 2);
+      resolver.updateCheckTaskState.mockRejectedValue(
+        new EsErrors.TimeoutError('Request timed out')
+      );
+
+      const runner = createRunner({ total: 2 });
+      await runner.runActionAsyncWithRetry();
+
+      expect(runner.processedBatches).toEqual([['agent-0', 'agent-1']]);
+      expect(resolver.run).not.toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        TASK_TYPE,
+        RETRY_TASK_ID
       );
     });
 
@@ -781,7 +864,7 @@ describe('ActionRunner', () => {
       mockAgentPages(1, 2);
       // rollback rejects an agent by writing it an error result under a child action id while
       // leaving it out of that action's `agents`, so the documents alone show it as untouched
-      mockedGetAgentIdsFromActions.mockResolvedValue(new Set());
+      mockActionedAgentIds([]);
       mockedGetAgentsWithoutActionResults.mockResolvedValue(['agent-1']);
 
       const runner = createRunner({ total: 2 });
@@ -800,7 +883,7 @@ describe('ActionRunner', () => {
 
     it('does not read error results for an action type that names every agent it handles', async () => {
       mockAgentPages(1, 2);
-      mockedGetAgentIdsFromActions.mockResolvedValue(new Set(['agent-0']));
+      mockActionedAgentIds(['agent-0']);
 
       await createRunner({ total: 2 }).runActionAsyncWithRetry();
 
@@ -809,7 +892,7 @@ describe('ActionRunner', () => {
 
     it('does not dedupe update tags, whose retries re-action agents whose write did not land', async () => {
       mockAgentPages(1, 2);
-      mockedGetAgentIdsFromActions.mockResolvedValue(new Set(['agent-0', 'agent-1']));
+      mockActionedAgentIds(['agent-0', 'agent-1']);
 
       const runner = createRunner({ total: 2 });
       runner.taskType = BulkActionTaskType.UPDATE_AGENT_TAGS_RETRY;
@@ -819,14 +902,15 @@ describe('ActionRunner', () => {
       // still matches it has to run again — and the read is skipped rather than paid for only to
       // discard every id it finds
       expect(runner.processedBatches).toEqual([['agent-0', 'agent-1']]);
-      expect(mockedGetAgentIdsFromActions).not.toHaveBeenCalled();
+      expect(mockedCollectAgentIdsFromActions).not.toHaveBeenCalled();
     });
 
     it('fails the batch when the actioned agents cannot be read, rather than deduping nothing', async () => {
       mockAgentPages(2, 2);
       // deduplication that fails open re-actions every agent of every earlier run, which is far
       // worse than failing this batch and retrying it
-      mockedGetAgentIdsFromActions.mockRejectedValue(
+      mockedCollectAgentIdsFromActions.mockReset();
+      mockedCollectAgentIdsFromActions.mockRejectedValue(
         new EsErrors.TimeoutError('Request timed out')
       );
 
@@ -844,7 +928,7 @@ describe('ActionRunner', () => {
 
     it('treats an action that has written nothing yet as nothing to skip', async () => {
       mockAgentPages(1, 2);
-      mockedGetAgentIdsFromActions.mockResolvedValue(new Set());
+      mockActionedAgentIds([]);
 
       const runner = createRunner({ total: 2 });
       await runner.runActionAsyncWithRetry();
@@ -862,7 +946,7 @@ describe('ActionRunner', () => {
       mockAgentPages(1, 2);
       // the earlier run finished this batch: it actioned agent-0 and excluded agent-1, which is
       // why only agent-0 is in the document
-      mockedGetAgentIdsFromActions.mockResolvedValue(new Set(['agent-0']));
+      mockActionedAgentIds(['agent-0']);
 
       const runner = createRunner({ total: 2 });
       runner.batchWithoutActionableAgents = true;
@@ -886,7 +970,7 @@ describe('ActionRunner', () => {
 
     it('writes the error results the earlier run may have left unwritten before skipping it', async () => {
       mockAgentPages(1, 2);
-      mockedGetAgentIdsFromActions.mockResolvedValue(new Set(['agent-0']));
+      mockActionedAgentIds(['agent-0']);
       // reassignBatch writes the error results after the action document, so a failure between the
       // two leaves the excluded agents without one and nothing else ever comes back to this batch
       mockedGetAgentsWithoutActionResults.mockResolvedValue(['agent-1']);
@@ -907,7 +991,7 @@ describe('ActionRunner', () => {
 
     it('leaves the error results alone when the excluded agents already have one', async () => {
       mockAgentPages(1, 2);
-      mockedGetAgentIdsFromActions.mockResolvedValue(new Set(['agent-0']));
+      mockActionedAgentIds(['agent-0']);
       mockedGetAgentsWithoutActionResults.mockResolvedValue([]);
 
       const runner = createRunner({ total: 2 });
@@ -922,7 +1006,7 @@ describe('ActionRunner', () => {
 
     it('retries the batch when the missing error results cannot be written', async () => {
       mockAgentPages(1, 2);
-      mockedGetAgentIdsFromActions.mockResolvedValue(new Set(['agent-0']));
+      mockActionedAgentIds(['agent-0']);
       mockedGetAgentsWithoutActionResults.mockRejectedValue(
         new EsErrors.TimeoutError('Request timed out')
       );
@@ -973,7 +1057,7 @@ describe('ActionRunner', () => {
 
       await createRunner({ total: 2 }, { retryCount: undefined }).runActionAsyncWithRetry();
 
-      expect(mockedGetAgentIdsFromActions).not.toHaveBeenCalled();
+      expect(mockedCollectAgentIdsFromActions).not.toHaveBeenCalled();
     });
 
     it('does not inflate the count when resuming, because the cursor moves with it', async () => {

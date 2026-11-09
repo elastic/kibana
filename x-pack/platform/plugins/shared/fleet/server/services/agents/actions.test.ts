@@ -22,7 +22,7 @@ import {
   bulkCreateAgentActions,
   cancelAgentAction,
   createAgentAction,
-  getAgentIdsFromActions,
+  collectAgentIdsFromActions,
   getAgentsByActionsIds,
   getAgentsWithoutActionResults,
   transformDataSecrets,
@@ -922,15 +922,26 @@ describe('Agent actions', () => {
     });
   });
 
-  describe('getAgentIdsFromActions', () => {
+  describe('collectAgentIdsFromActions', () => {
     const mockHits = (agentIds: string[][]) => ({
       hits: { hits: agentIds.map((agents) => ({ _source: { agents } })) },
     });
 
-    it('is empty without an action id to read', async () => {
+    /** Collects into a fresh set, the way a first read does. */
+    const collect = async (
+      esClientMock: ReturnType<typeof elasticsearchServiceMock.createInternalClient>,
+      actionIds: string[],
+      options?: Parameters<typeof collectAgentIdsFromActions>[3]
+    ) => {
+      const agentIds = new Set<string>();
+      await collectAgentIdsFromActions(esClientMock, actionIds, agentIds, options);
+      return agentIds;
+    };
+
+    it('reads nothing without an action id', async () => {
       const esClientMock = elasticsearchServiceMock.createInternalClient();
 
-      await expect(getAgentIdsFromActions(esClientMock, [])).resolves.toEqual(new Set());
+      await expect(collect(esClientMock, [])).resolves.toEqual(new Set());
       expect(esClientMock.search).not.toHaveBeenCalled();
     });
 
@@ -940,7 +951,7 @@ describe('Agent actions', () => {
         mockHits([['agent1', 'agent2'], ['agent2', 'agent3'], []]) as any
       );
 
-      await expect(getAgentIdsFromActions(esClientMock, ['action1', 'child1'])).resolves.toEqual(
+      await expect(collect(esClientMock, ['action1', 'child1'])).resolves.toEqual(
         new Set(['agent1', 'agent2', 'agent3'])
       );
       // a missing .fleet-actions means nothing has been actioned, not a 404: Fleet Server creates
@@ -953,13 +964,33 @@ describe('Agent actions', () => {
       );
     });
 
+    it('adds to the set it is given rather than replacing it', async () => {
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      esClientMock.search.mockResolvedValue(mockHits([['agent2']]) as any);
+      const agentIds = new Set(['agent1']);
+
+      await collectAgentIdsFromActions(esClientMock, ['action1'], agentIds);
+
+      expect(agentIds).toEqual(new Set(['agent1', 'agent2']));
+    });
+
+    it('does not spend a top-up budget on ids the caller already has', async () => {
+      // the refresh window overlaps by design, so most of what a top-up reads is already there;
+      // charging those against a budget of their own would stop the paging before the new ones
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      esClientMock.search.mockResolvedValue(mockHits([['known1', 'known2', 'new1']]) as any);
+      const agentIds = new Set(['known1', 'known2']);
+
+      await collectAgentIdsFromActions(esClientMock, ['action1'], agentIds, { limit: 3 });
+
+      expect(agentIds).toEqual(new Set(['known1', 'known2', 'new1']));
+    });
+
     it('restricts the read to recent documents when asked to', async () => {
       const esClientMock = elasticsearchServiceMock.createInternalClient();
       esClientMock.search.mockResolvedValue(mockHits([['agent1']]) as any);
 
-      await getAgentIdsFromActions(esClientMock, ['action1'], {
-        since: '2026-11-07T10:00:00.000Z',
-      });
+      await collect(esClientMock, ['action1'], { since: '2026-11-07T10:00:00.000Z' });
 
       expect(esClientMock.search).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -989,7 +1020,7 @@ describe('Agent actions', () => {
         .mockResolvedValueOnce(mockHits([['agent-last']]) as any);
       esClientMock.openPointInTime.mockResolvedValue({ id: 'pit1' } as any);
 
-      const agentIds = await getAgentIdsFromActions(esClientMock, ['action1']);
+      const agentIds = await collect(esClientMock, ['action1']);
 
       expect(agentIds.has('agent-last')).toBe(true);
       expect(agentIds.size).toBe(1001);
@@ -1011,19 +1042,31 @@ describe('Agent actions', () => {
       const fullPage = Array.from({ length: 1000 }, (_, i) => [`agent${i}`]);
       esClientMock.search.mockResolvedValue(mockHits(fullPage) as any);
 
-      const agentIds = await getAgentIdsFromActions(esClientMock, ['action1'], { limit: 10 });
+      const agentIds = await collect(esClientMock, ['action1'], { limit: 10 });
 
       expect(agentIds.size).toBe(10);
       expect(esClientMock.search).toHaveBeenCalledTimes(1);
       expect(esClientMock.openPointInTime).not.toHaveBeenCalled();
     });
 
-    it('is empty for a limit of zero', async () => {
+    it('sizes a page to the ids still wanted, not to a document count', async () => {
+      // a page of documents says nothing about how big the response is: one document names up to a
+      // whole batch of agents, so a thousand of them can carry millions of ids
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      esClientMock.search.mockResolvedValue(mockHits([['agent1']]) as any);
+
+      await collect(esClientMock, ['action1'], { limit: 200_000, agentsPerDocument: 10_000 });
+
+      expect(esClientMock.search).toHaveBeenCalledWith(expect.objectContaining({ size: 20 }));
+    });
+
+    it('reads nothing when the set is already at the limit', async () => {
       const esClientMock = elasticsearchServiceMock.createInternalClient();
 
-      await expect(
-        getAgentIdsFromActions(esClientMock, ['action1'], { limit: 0 })
-      ).resolves.toEqual(new Set());
+      await collectAgentIdsFromActions(esClientMock, ['action1'], new Set(['agent1']), {
+        limit: 1,
+      });
+
       expect(esClientMock.search).not.toHaveBeenCalled();
     });
 
@@ -1035,9 +1078,7 @@ describe('Agent actions', () => {
         .mockRejectedValueOnce(new Error('Request timed out'));
       esClientMock.openPointInTime.mockResolvedValue({ id: 'pit1' } as any);
 
-      await expect(getAgentIdsFromActions(esClientMock, ['action1'])).rejects.toThrow(
-        'Request timed out'
-      );
+      await expect(collect(esClientMock, ['action1'])).rejects.toThrow('Request timed out');
       expect(esClientMock.closePointInTime).toHaveBeenCalledWith({ id: 'pit1' });
     });
   });

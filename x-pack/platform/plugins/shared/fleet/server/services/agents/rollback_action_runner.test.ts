@@ -108,6 +108,48 @@ describe('rollbackBatch', () => {
     expect(order).toEqual(['bulkUpdateAgents', 'createAgentAction']);
   });
 
+  it('puts the upgrade state back when the action cannot be created', async () => {
+    // the agents are marked as rolling back but nothing was dispatched; a bulk action retries both
+    // writes, but sendRollbackAgentsActions also calls this directly with no retry, and the agents
+    // would be left looking like they are upgrading until that times out
+    mockedCreateAgentAction.mockRejectedValue(new Error('Request timed out'));
+    const agent = {
+      ...createAgent('agent-0', '8.18.0'),
+      upgraded_at: '2026-11-01T00:00:00.000Z',
+      upgrade_started_at: '2026-10-31T00:00:00.000Z',
+    } as Agent;
+
+    await expect(rollbackBatch(esClient, [agent], {}, {})).rejects.toThrow('Request timed out');
+
+    expect(mockedBulkUpdateAgents).toHaveBeenLastCalledWith(
+      esClient,
+      [
+        {
+          agentId: 'agent-0',
+          data: {
+            upgraded_at: '2026-11-01T00:00:00.000Z',
+            upgrade_started_at: '2026-10-31T00:00:00.000Z',
+          },
+        },
+      ],
+      {}
+    );
+  });
+
+  it('still raises the original failure when the upgrade state cannot be put back', async () => {
+    mockedCreateAgentAction.mockRejectedValue(new Error('Request timed out'));
+    mockedBulkUpdateAgents
+      .mockResolvedValueOnce(undefined as never)
+      .mockRejectedValue(new Error('restore failed'));
+
+    await expect(
+      rollbackBatch(esClient, [createAgent('agent-0', '8.18.0')], {}, {})
+    ).rejects.toThrow('Request timed out');
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Could not restore the upgrade state')
+    );
+  });
+
   it('does not create the action when the agent bookkeeping fails', async () => {
     mockedBulkUpdateAgents.mockRejectedValue(new Error('Request timed out'));
     const onActionCreated = jest.fn();

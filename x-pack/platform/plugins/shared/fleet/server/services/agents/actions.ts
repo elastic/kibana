@@ -402,21 +402,40 @@ const collectAgentIds = (
  * documents are only ever created, never updated, so the union of such reads is exact as long as
  * the windows overlap.
  *
- * `limit` stops the read — collecting and paging both — once that many ids are in hand. It is the
+ * Ids are collected into `agentIds`, which the caller owns, so that a top-up spends its budget on
+ * what it does not already have: the overlapping refresh window means most of what a top-up reads
+ * is already there, and counting those against a limit of its own would let a nearly full set stop
+ * paging before reaching the documents it has never seen.
+ *
+ * `limit` stops the read — collecting and paging both — once `agentIds` holds that many. It is the
  * caller's memory bound, so it has to be honoured here rather than applied to the result: an
  * action that has touched a million agents would otherwise be a million ids and the documents
- * naming them held at once, whatever the caller then did with them.
+ * naming them held at once, whatever the caller then did with them. `agentsPerDocument` is how the
+ * caller says how many agents one document is expected to name — the action's batch size — so that
+ * a page of documents can be sized to the ids still wanted rather than to a document count, which
+ * says nothing about how big the response will be.
  */
-export async function getAgentIdsFromActions(
+export async function collectAgentIdsFromActions(
   esClient: ElasticsearchClient,
   actionIds: string[],
-  options: { since?: string; limit?: number } = {}
-): Promise<Set<string>> {
-  const agentIds = new Set<string>();
+  agentIds: Set<string>,
+  options: { since?: string; limit?: number; agentsPerDocument?: number } = {}
+): Promise<void> {
   const limit = options.limit ?? Infinity;
-  if (actionIds.length === 0 || limit <= 0) {
-    return agentIds;
+  if (actionIds.length === 0 || agentIds.size >= limit) {
+    return;
   }
+  const agentsPerDocument = Math.max(1, options.agentsPerDocument ?? 1);
+  const pageSize = () =>
+    Math.max(
+      1,
+      Math.min(
+        ACTION_DOCS_PAGE_SIZE,
+        limit === Infinity
+          ? ACTION_DOCS_PAGE_SIZE
+          : Math.ceil((limit - agentIds.size) / agentsPerDocument)
+      )
+    );
 
   const filter: QueryDslQueryContainer[] = [{ terms: { action_id: actionIds } }];
   if (options.since) {
@@ -425,21 +444,22 @@ export async function getAgentIdsFromActions(
   const search = {
     query: { bool: { filter } },
     _source: ['agents'],
-    size: ACTION_DOCS_PAGE_SIZE,
     track_total_hits: false,
     sort: [{ '@timestamp': 'asc' as const }],
   };
 
   // One plain search covers an action whose documents fit in a page, which is the common case, and
   // `ignore_unavailable` is what turns a missing index into zero hits rather than a 404.
+  const firstPageSize = pageSize();
   const firstPage = await esClient.search<Pick<FleetServerAgentAction, 'agents'>>({
     index: AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
     ...search,
+    size: firstPageSize,
   });
   const reachedLimit = collectAgentIds(firstPage.hits.hits, agentIds, limit);
-  if (reachedLimit || firstPage.hits.hits.length < ACTION_DOCS_PAGE_SIZE) {
-    return agentIds;
+  if (reachedLimit || firstPage.hits.hits.length < firstPageSize) {
+    return;
   }
 
   // A full page may have more behind it. Page through it all again under a point in time, which is
@@ -450,7 +470,9 @@ export async function getAgentIdsFromActions(
   // caller of this is deduplicating a batch it is about to action, and failing that batch hands the
   // retry to the runner's own retry loop, which is a better place to wait than inside a read that
   // the batch is blocked on.
-  agentIds.clear();
+  //
+  // The ids the first page produced are kept rather than cleared: this pages the same query from
+  // the beginning, so re-reading them adds nothing to a set that already holds them.
   let pitId = (
     await esClient.openPointInTime({
       index: AGENT_ACTIONS_INDEX,
@@ -460,15 +482,17 @@ export async function getAgentIdsFromActions(
   try {
     let searchAfter: SortResults | undefined;
     for (;;) {
+      const size = pageSize();
       const page: SearchResponse<Pick<FleetServerAgentAction, 'agents'>> = await esClient.search({
         ...search,
+        size,
         pit: { id: pitId, keep_alive: ACTION_DOCS_PIT_KEEP_ALIVE },
         ...(searchAfter ? { search_after: searchAfter } : {}),
       });
       pitId = page.pit_id ?? pitId;
       const { hits } = page.hits;
-      if (collectAgentIds(hits, agentIds, limit) || hits.length < ACTION_DOCS_PAGE_SIZE) {
-        return agentIds;
+      if (collectAgentIds(hits, agentIds, limit) || hits.length < size) {
+        return;
       }
       searchAfter = hits[hits.length - 1].sort;
     }
@@ -508,6 +532,10 @@ export async function getAgentsWithoutActionResults(
     // conclusion this draws: "no result" means it is about to write one. A terms aggregation whose
     // size is the number of agents asked about cannot miss a bucket, since the query already
     // restricts it to those agents.
+    //
+    // This needs `agent_id` to be aggregatable. Fleet Server owns the mapping of this index, so
+    // nothing here can assert it, but `action_status.ts` already aggregates on the sibling
+    // `action_id` and `uploads.ts` runs an exact term on `agent_id`, both of which need a keyword.
     const res = await esClient.search<unknown, AgentIdsWithResultsAggregation>({
       index: AGENT_ACTIONS_RESULTS_INDEX,
       query: {

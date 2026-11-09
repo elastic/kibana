@@ -223,7 +223,7 @@ export class BulkActionsResolver {
     checkpoint: Partial<
       Pick<
         BulkActionCheckTaskState,
-        'searchAfter' | 'pitId' | 'nbAgentsProcessed' | 'childActionIds'
+        'searchAfter' | 'pitId' | 'nbAgentsProcessed' | 'childActionIds' | 'stoppedAt'
       >
     >
   ) {
@@ -431,6 +431,16 @@ const runCheckTask = async (
   if (total !== undefined && (state.nbAgentsProcessed ?? 0) >= total) {
     logger.debug(
       `Bulk action ${actionId} is complete (${state.nbAgentsProcessed}/${total} agents), removing check task ${taskInstance.id}`
+    );
+    return deleteSelf();
+  }
+
+  // A runner that has spent its whole retry budget records this before removing the tasks, and
+  // removing them can fail. Resuming here would hand the action another MAX_RETRY_COUNT attempts
+  // under a fresh `retryCount: 1`, which is the opposite of what that runner decided.
+  if (state.stoppedAt) {
+    logger.debug(
+      `Bulk action ${actionId} gave up at ${state.stoppedAt}, removing check task ${taskInstance.id}`
     );
     return deleteSelf();
   }

@@ -17,7 +17,7 @@ import { BulkActionTaskType } from './bulk_action_types';
 import {
   createAgentAction,
   createErrorActionResults,
-  getAgentIdsFromActions,
+  collectAgentIdsFromActions,
   getAgentsWithoutActionResults,
 } from './actions';
 import { bulkUpdateAgents, getAgentsByKuery, openPointInTime } from './crud';
@@ -35,9 +35,17 @@ jest.mock('../spaces/agent_namespaces', () => ({
 }));
 
 const mockedGetAgentsByKuery = getAgentsByKuery as jest.MockedFunction<typeof getAgentsByKuery>;
-const mockedGetAgentIdsFromActions = getAgentIdsFromActions as jest.MockedFunction<
-  typeof getAgentIdsFromActions
+const mockedCollectAgentIdsFromActions = collectAgentIdsFromActions as jest.MockedFunction<
+  typeof collectAgentIdsFromActions
 >;
+
+/** The read fills the set the runner owns, so a mock has to add to it rather than return one. */
+const mockActionedAgentIds = (agentIds: string[]) =>
+  mockedCollectAgentIdsFromActions.mockImplementation(async (_esClient, _actionIds, into) => {
+    for (const agentId of agentIds) {
+      into.add(agentId);
+    }
+  });
 const mockedGetAgentsWithoutActionResults = getAgentsWithoutActionResults as jest.MockedFunction<
   typeof getAgentsWithoutActionResults
 >;
@@ -106,7 +114,7 @@ describe('ReassignActionRunner', () => {
     (createErrorActionResults as jest.Mock).mockResolvedValue(undefined);
     mockedBulkUpdateAgents.mockResolvedValue(undefined as never);
     mockedCreateAgentAction.mockResolvedValue({} as never);
-    mockedGetAgentIdsFromActions.mockResolvedValue(new Set());
+    mockActionedAgentIds([]);
     mockedGetAgentsWithoutActionResults.mockResolvedValue([]);
   });
 
@@ -140,7 +148,7 @@ describe('ReassignActionRunner', () => {
   it('completes a replayed batch whose remaining agents are all already assigned', async () => {
     // the earlier run finished this batch: it reassigned agent-2 and agent-3 and wrote error
     // results for agent-0 and agent-1, which is why only the two eligible ids are in the document
-    mockedGetAgentIdsFromActions.mockResolvedValue(new Set(['agent-2', 'agent-3']));
+    mockActionedAgentIds(['agent-2', 'agent-3']);
 
     const runner = createRunner();
     await runner.runActionAsyncWithRetry();
@@ -165,7 +173,7 @@ describe('ReassignActionRunner', () => {
   it('recovers the error results an earlier run may not have written for a replayed batch', async () => {
     // the earlier run wrote the action document for agent-2 and agent-3 but timed out before the
     // error results of the two it excluded, so nothing else will ever write them
-    mockedGetAgentIdsFromActions.mockResolvedValue(new Set(['agent-2', 'agent-3']));
+    mockActionedAgentIds(['agent-2', 'agent-3']);
     mockedGetAgentsWithoutActionResults.mockResolvedValue(['agent-0', 'agent-1']);
 
     await createRunner().runActionAsyncWithRetry();
@@ -184,7 +192,7 @@ describe('ReassignActionRunner', () => {
   });
 
   it('does not write error results again for agents that already have one', async () => {
-    mockedGetAgentIdsFromActions.mockResolvedValue(new Set(['agent-2', 'agent-3']));
+    mockActionedAgentIds(['agent-2', 'agent-3']);
     // the usual case: the earlier run wrote both the document and the error results, and a second
     // result for one agent would be counted twice
     mockedGetAgentsWithoutActionResults.mockResolvedValue([]);

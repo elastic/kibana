@@ -94,6 +94,24 @@ export class RollbackActionRunner extends ActionRunner {
   }
 }
 
+/**
+ * Put back the upgrade fields `rollbackBatch` cleared, from the agent documents it read before
+ * clearing them, for when the action those agents were marked for never made it to Elasticsearch.
+ */
+const restoreUpgradeState = async (esClient: ElasticsearchClient, agents: Agent[]) => {
+  await bulkUpdateAgents(
+    esClient,
+    agents.map((agent) => ({
+      agentId: agent.id,
+      data: {
+        upgraded_at: agent.upgraded_at ?? null,
+        upgrade_started_at: agent.upgrade_started_at ?? null,
+      },
+    })),
+    {}
+  );
+};
+
 export async function rollbackBatch(
   esClient: ElasticsearchClient,
   givenAgents: Agent[],
@@ -211,16 +229,34 @@ export async function rollbackBatch(
       errorsByActionId[actionId]
     );
 
-    await createAgentAction(esClient, soClient, {
-      id: actionId,
-      created_at: now,
-      data,
-      ack_data: data,
-      type: 'UPGRADE',
-      total,
-      agents: agents.map((agent) => agent.id),
-      namespaces,
-    });
+    try {
+      await createAgentAction(esClient, soClient, {
+        id: actionId,
+        created_at: now,
+        data,
+        ack_data: data,
+        type: 'UPGRADE',
+        total,
+        agents: agents.map((agent) => agent.id),
+        namespaces,
+      });
+    } catch (error) {
+      // The agents are marked as rolling back but nothing was dispatched. A bulk action retries
+      // and both writes are idempotent, but `sendRollbackAgentsActions` also calls this directly
+      // for an id list or a small query, and that path has no retry — the agents would be left
+      // looking like they are upgrading, which blocks a single-agent rollback of them until the
+      // upgrade times out. Putting the previous values back is best effort: it runs on a path that
+      // is already failing, and if it fails too the caller is no worse off than before it was
+      // tried.
+      await restoreUpgradeState(esClient, agents).catch((restoreError) =>
+        appContextService
+          .getLogger()
+          .warn(
+            `Could not restore the upgrade state of ${agents.length} agents after a rollback action failed to be created: ${restoreError.message}`
+          )
+      );
+      throw error;
+    }
 
     actionIds.push(actionId);
     await options.onActionCreated?.(actionId);
