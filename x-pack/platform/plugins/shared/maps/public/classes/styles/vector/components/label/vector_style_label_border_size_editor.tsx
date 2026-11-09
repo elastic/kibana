@@ -18,7 +18,6 @@ import type { IStyleProperty } from '../../properties/style_property';
 
 interface Props {
   disabled?: boolean;
-  disabledBy?: VECTOR_STYLES;
   handlePropertyChange: (propertyName: VECTOR_STYLES, stylePropertyDescriptor: unknown) => void;
   styleProperty: IStyleProperty<LabelBorderSizeOptions>;
 }
@@ -52,7 +51,6 @@ const options = [
 
 export function VectorStyleLabelBorderSizeEditor({
   disabled,
-  disabledBy,
   handlePropertyChange,
   styleProperty,
 }: Props) {
@@ -83,7 +81,7 @@ export function VectorStyleLabelBorderSizeEditor({
   }
 
   return (
-    <DisabledToolTip content={getDisabledByMessage(disabledBy!)}>
+    <DisabledToolTip content={getDisabledByMessage(VECTOR_STYLES.LABEL_TEXT)}>
       {labelBorderSizeForm}
     </DisabledToolTip>
   );

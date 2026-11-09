@@ -402,7 +402,6 @@ export class VectorStyleEditor extends Component<Props, State> {
 
         <VectorStyleLabelBorderSizeEditor
           disabled={!hasLabel}
-          disabledBy={VECTOR_STYLES.LABEL_TEXT}
           handlePropertyChange={this.props.handlePropertyChange}
           styleProperty={
             this.props.styleProperties[
