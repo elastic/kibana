@@ -11,7 +11,6 @@ import { createEntityInventoryServerRoute } from '../create_server_route';
 import { INTERIM_AUTHZ } from '../interim_authz';
 import { instantParam, listLimitParam } from '../utils/request_params';
 import { typeNameSchema } from '../utils/type_name_schema';
-import { withTimeRangeGuardrail } from '../utils/time_range_guardrail';
 import { createAbortSignal } from '../utils/create_abort_signal';
 
 export const listRoute = createEntityInventoryServerRoute({
@@ -38,16 +37,14 @@ export const listRoute = createEntityInventoryServerRoute({
       'Returns one row per entity of the type seen in the window, merged across its sources, newest last_seen first.',
   },
   security: INTERIM_AUTHZ,
-  handler: withTimeRangeGuardrail(
-    async ({ request, params, getInventoryService }): Promise<ListResponse> => {
-      const { path, body } = params;
-      const inventoryService = await getInventoryService(request);
-      return inventoryService.list({
-        type: path.type,
-        window: { from: body.from, to: body.to },
-        limit: body.limit,
-        signal: createAbortSignal(request.events.aborted$),
-      });
-    }
-  ),
+  handler: async ({ request, params, getInventoryService }): Promise<ListResponse> => {
+    const { path, body } = params;
+    const inventoryService = await getInventoryService(request);
+    return inventoryService.list({
+      type: path.type,
+      window: { from: body.from, to: body.to },
+      limit: body.limit,
+      signal: createAbortSignal(request.events.aborted$),
+    });
+  },
 });

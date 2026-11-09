@@ -391,28 +391,6 @@ apiTest.describe(
       }
     );
 
-    apiTest('accepts a window of exactly 72 hours', async ({ apiClient }) => {
-      const response = await postList(apiClient, {
-        from: '2026-11-01T00:00:00.000Z',
-        to: '2026-11-04T00:00:00.000Z',
-      });
-
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.total).toBe(3);
-    });
-
-    apiTest('rejects a window over 72 hours with 400', async ({ apiClient }) => {
-      const response = await postList(apiClient, {
-        from: '2026-11-01T00:00:00.000Z',
-        to: '2026-11-04T00:00:01.000Z',
-      });
-
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.message).toBe(
-        'the time range from 2026-11-01T00:00:00.000Z to 2026-11-04T00:00:01.000Z is longer than the maximum of 72 hours'
-      );
-    });
-
     apiTest('rejects from equal to or after to with 400', async ({ apiClient }) => {
       const equal = await postList(apiClient, {
         from: '2026-11-01T09:00:00.000Z',

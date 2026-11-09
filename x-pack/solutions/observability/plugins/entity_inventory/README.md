@@ -56,7 +56,7 @@ Body, strict (an unknown key such as `documentFilter` is a 400):
 
 | key | | |
 | --- | --- | --- |
-| `from`, `to` | required | ISO 8601 instants with `Z` or a numeric offset; `from` must be earlier than `to`; at most 72 hours apart |
+| `from`, `to` | required | ISO 8601 instants with `Z` or a numeric offset; `from` must be earlier than `to` |
 | `limit` | optional | integer 1–9,999, default 9,999 |
 
 Response:
@@ -87,12 +87,11 @@ Errors that fail the request:
 | The type has no entity definition, or has no `dynamic` block | 404 |
 | `type` is not a valid type name | 400 |
 | `from` or `to` is missing or not an ISO 8601 instant, or `from >= to` | 400 |
-| The window is longer than 72 hours | 400 |
 | `limit` is not an integer in 1–9,999 | 400 |
 | An unknown body key | 400 |
 | The definition cannot be turned into queries | 400 |
 
-The 72-hour cap is interim, until the queries are measured on large clusters. It is applied by `withTimeRangeGuardrail` in `server/routes/utils/time_range_guardrail.ts`, which wraps the handler and answers with the same 400 shape as any other bad window; to lift it, remove that file and unwrap the handler.
+The route does not cap the window length; the UI limits the time range.
 
 ### Access control (interim)
 
