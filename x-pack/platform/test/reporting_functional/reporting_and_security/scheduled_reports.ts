@@ -243,6 +243,53 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
       });
     });
 
+    it('runs a schedule now from the Schedules table', async () => {
+      // Start tomorrow so the only export is the one Run now creates.
+      const startedAt = moment().add(1, 'day').toISOString();
+      const schedule = await reportingAPI.scheduleCsv(
+        {
+          browserTimezone: 'UTC',
+          title: 'Run now functional test',
+          objectType: 'search',
+          searchSource: {
+            version: true,
+            fields: [{ field: '*', include_unmapped: true }],
+            index: '5193f870-d861-11e9-a311-0fa548c5f953',
+          },
+          columns: [],
+          version: '7.13.0',
+        },
+        undefined,
+        undefined,
+        undefined,
+        startedAt
+      );
+      expect(schedule.status).to.eql(200);
+      const scheduleId: string = schedule.body.job.id;
+
+      try {
+        await retry.try(() => reportingFunctional.loginReportingManager());
+        await common.navigateToApp('reporting');
+        await testSubjects.click('reportingTabs-schedules');
+        await testSubjects.existOrFail('reportSchedulesTable');
+
+        // The newest schedule is listed first.
+        await (await testSubjects.findAll('euiCollapsedItemActionsButton'))[0].click();
+        await testSubjects.click(`reportRunSchedule-${scheduleId}`);
+
+        await retry.try(async () => {
+          const successToast = await toasts.getElementByIndex(1);
+          expect(await successToast.getVisibleText()).to.contain('Report scheduled to run now');
+        });
+
+        // Wait for the export so it can't land after the suite deletes reports.
+        await reportingAPI.waitForScheduledReportRuns(scheduleId);
+      } finally {
+        await reportingAPI.deleteScheduledReports([scheduleId]);
+        await reportingAPI.deleteTasks([scheduleId]);
+      }
+    });
+
     it('without reporting management privileges disables and hides the email recipient fields', async () => {
       // `common.navigateToApp` silently re-authenticates as the default super user (`test_user`,
       // which holds manageReporting) if the reporting_user session is transiently prompted for

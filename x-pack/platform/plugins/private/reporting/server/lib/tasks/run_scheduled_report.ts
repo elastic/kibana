@@ -7,7 +7,11 @@
 
 import type { KibanaRequest, SavedObject } from '@kbn/core/server';
 import type { TaskRunResult } from '@kbn/reporting-common/types';
-import type { ConcreteTaskInstance, TaskInstance } from '@kbn/task-manager-plugin/server';
+import type {
+  ConcreteTaskInstance,
+  TaskInstance,
+  TaskRunCreatorFunction,
+} from '@kbn/task-manager-plugin/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ScheduleType } from '@kbn/reporting-server';
@@ -25,6 +29,7 @@ import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { PrepareJobResults } from './run_report';
 import { RunReportTask } from './run_report';
 import { ScheduledReport } from '../store/scheduled_report';
+import { applyRunNowNextRunAt } from './run_now_next_run';
 import type { ScheduledReportTemplateVariables, ScheduledReportType } from '../../types';
 
 const MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024; // 10mb
@@ -105,6 +110,17 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
       report,
       task: report?.toReportTaskJSON(),
       scheduledReport,
+    };
+  }
+
+  protected getTaskRunner(): TaskRunCreatorFunction {
+    const createTaskRunner = super.getTaskRunner();
+    return (context) => {
+      const taskRunner = createTaskRunner(context);
+      return {
+        ...taskRunner,
+        run: async () => applyRunNowNextRunAt(context.taskInstance.state, await taskRunner.run()),
+      };
     };
   }
 

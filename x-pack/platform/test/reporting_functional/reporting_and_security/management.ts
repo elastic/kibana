@@ -129,18 +129,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await testSubjects.missingOrFail('editScheduledReportFlyout');
       });
 
-      it('allows user to run a schedule now', async () => {
-        await testSubjects.existOrFail('reportSchedulesTable');
-        await (await testSubjects.findAll('euiCollapsedItemActionsButton'))[0].click();
-        const runNowButton = await find.byCssSelector(`[data-test-subj*="reportRunSchedule-"]`);
-
-        await runNowButton.click();
-
-        const successToast = await toasts.getElementByIndex(1);
-        expect(await successToast.getVisibleText()).to.contain('Report scheduled to run now');
-        await toasts.dismissAll();
-      });
-
       it('allows user to disable schedule', async () => {
         await testSubjects.existOrFail('reportSchedulesTable');
         await (await testSubjects.findAll('euiCollapsedItemActionsButton'))[0].click();

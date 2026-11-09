@@ -2944,9 +2944,61 @@ describe('ScheduledReportsService', () => {
   describe('runNow', () => {
     const reportId = savedObjects[0].id;
 
+    const pendingRunAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
     beforeEach(() => {
-      taskManager.get = jest.fn().mockResolvedValue({ id: reportId, enabled: true });
+      taskManager.get = jest
+        .fn()
+        .mockResolvedValue({ id: reportId, enabled: true, runAt: pendingRunAt });
+      taskManager.bulkUpdateState = jest.fn().mockResolvedValue({ tasks: [], errors: [] });
       taskManager.runSoon = jest.fn().mockResolvedValue({ id: reportId });
+    });
+
+    it('saves the pending occurrence before asking task manager to run', async () => {
+      await scheduledReportsService.runNow({
+        user: { username: 'elastic' } as ReportingUser,
+        id: reportId,
+      });
+
+      expect(taskManager.bulkUpdateState).toHaveBeenCalledWith([reportId], expect.any(Function));
+      const stateMapFn = (taskManager.bulkUpdateState as jest.Mock).mock.calls[0][1];
+      expect(stateMapFn({ other: 'value' })).toEqual({
+        other: 'value',
+        runNowNextRunAt: pendingRunAt.toISOString(),
+      });
+      expect((taskManager.bulkUpdateState as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
+        (taskManager.runSoon as jest.Mock).mock.invocationCallOrder[0]
+      );
+    });
+
+    it('does not save an occurrence that is already due', async () => {
+      taskManager.get = jest
+        .fn()
+        .mockResolvedValue({ id: reportId, enabled: true, runAt: new Date(Date.now() - 1000) });
+
+      await scheduledReportsService.runNow({
+        user: { username: 'elastic' } as ReportingUser,
+        id: reportId,
+      });
+
+      expect(taskManager.bulkUpdateState).not.toHaveBeenCalled();
+      expect(taskManager.runSoon).toHaveBeenCalled();
+    });
+
+    it('does not run when the pending occurrence cannot be saved', async () => {
+      taskManager.bulkUpdateState = jest.fn().mockResolvedValue({
+        tasks: [],
+        errors: [{ id: reportId, type: 'task', error: { statusCode: 500, message: 'boom' } }],
+      });
+
+      await expect(
+        scheduledReportsService.runNow({
+          user: { username: 'elastic' } as ReportingUser,
+          id: reportId,
+        })
+      ).rejects.toEqual({ statusCode: 500, body: 'Error running scheduled report: boom' });
+
+      expect(taskManager.runSoon).not.toHaveBeenCalled();
     });
 
     it('asks task manager to run the schedule immediately', async () => {
@@ -3106,7 +3158,9 @@ describe('ScheduledReportsService', () => {
     });
 
     it('rejects a schedule whose task is disabled', async () => {
-      taskManager.get = jest.fn().mockResolvedValue({ id: reportId, enabled: false });
+      taskManager.get = jest
+        .fn()
+        .mockResolvedValue({ id: reportId, enabled: false, runAt: pendingRunAt });
 
       await expect(
         scheduledReportsService.runNow({

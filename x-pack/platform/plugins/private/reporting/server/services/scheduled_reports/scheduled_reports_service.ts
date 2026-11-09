@@ -49,6 +49,7 @@ import { transformSingleResponse } from './transforms';
 import type { UpdateScheduledReportParams } from './types/update';
 import { updateScheduledReportSchema } from './schemas/update';
 import { buildOwnedByFilter, isScheduledReportOwner } from './lib/ownership';
+import { setRunNowNextRunAt } from '../../lib/tasks/run_now_next_run';
 
 const SCHEDULED_REPORT_ID_FIELD = 'scheduled_report_id';
 const CREATED_AT_FIELD = 'created_at';
@@ -342,6 +343,21 @@ export class ScheduledReportsService {
       throw rejectDisabled(
         'The task for this scheduled report is disabled. Disable and enable the schedule, then retry.'
       );
+    }
+
+    // runSoon moves runAt to now, and Task Manager would compute the next occurrence from it.
+    // Saving the pending occurrence lets the run hand it back, so the cadence stays the same.
+    const pendingRunAt = task.runAt;
+    if (pendingRunAt.getTime() > Date.now()) {
+      const { errors } = await this.taskManager
+        .bulkUpdateState([id], (state) => setRunNowNextRunAt(state, pendingRunAt))
+        .catch((error) => {
+          throw reject(error, this._buildRunErrorResponse(error));
+        });
+      if (errors.length > 0) {
+        const error = new Error(errors[0].error.message);
+        throw reject(error, this._buildRunErrorResponse(error));
+      }
     }
 
     const result = await this.taskManager

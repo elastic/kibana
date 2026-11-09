@@ -12,6 +12,12 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
+  const retry = getService('retry');
+
+  const getTaskRunAt = async (taskId: string) => {
+    const { body } = await reportingAPI.getTask(taskId);
+    return { runAt: body._source.task.runAt as string, status: body._source.task.status as string };
+  };
 
   const csvJob = (title: string): JobParamsCSV => ({
     browserTimezone: 'UTC',
@@ -64,6 +70,8 @@ export default function ({ getService }: FtrProviderContext) {
         reportingAPI.REPORTING_USER_PASSWORD
       );
 
+      const { runAt: pendingRunAt } = await getTaskRunAt(reportId);
+
       const res = await reportingAPI.runScheduledReport(
         reportId,
         reportingAPI.REPORTING_USER_USERNAME,
@@ -77,9 +85,13 @@ export default function ({ getService }: FtrProviderContext) {
       const soResult = await reportingAPI.getScheduledReports(reportId);
       expect(soResult.body._source.scheduled_report.enabled).to.eql(true);
 
-      // The recurring schedule is unchanged: the next run is still the first occurrence.
-      const task = await reportingAPI.getTask(reportId);
-      expect(new Date(task.body._source.task.runAt).getTime()).to.be.greaterThan(Date.now());
+      // Task Manager writes the next run after the export finishes, so wait for the task to go idle.
+      // The recurring schedule is unchanged: the next run is the occurrence that was pending before.
+      await retry.tryForTime(30000, async () => {
+        const task = await getTaskRunAt(reportId);
+        expect(task.status).to.eql('idle');
+        expect(task.runAt).to.eql(pendingRunAt);
+      });
     });
 
     it('should not run a disabled schedule', async () => {
