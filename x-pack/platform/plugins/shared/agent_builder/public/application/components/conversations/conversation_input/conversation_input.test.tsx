@@ -574,6 +574,28 @@ describe('ConversationInput', () => {
       expect(editorController.clear).not.toHaveBeenCalled();
     });
 
+    it('marks the pasted files as sent when talking to users, so they are not deleted later', async () => {
+      renderInput(<ConversationInput />);
+
+      selectTalkToUsers();
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+      await waitFor(() => expect(editorController.clear).toHaveBeenCalledTimes(1));
+      expect(handleBinarySubmitted).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps the pasted files unsent when talking to users fails', async () => {
+      sendUserMessage.mockRejectedValue(new Error('boom'));
+
+      renderInput(<ConversationInput />);
+
+      selectTalkToUsers();
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+      await waitFor(() => expect(addErrorToast).toHaveBeenCalledWith({ title: 'boom' }));
+      expect(handleBinarySubmitted).not.toHaveBeenCalled();
+    });
+
     it('runs the agent when talking to agent and users', () => {
       renderInput(<ConversationInput />);
 

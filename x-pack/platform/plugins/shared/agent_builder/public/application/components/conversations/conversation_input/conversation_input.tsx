@@ -496,6 +496,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
       sendUserMessage(content)
         .then(() => {
           lastEditorContentRef.current = '';
+          handleUploadsSubmitted();
           clearDraft();
           messageEditorController.clear();
           markSent();
