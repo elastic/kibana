@@ -11,6 +11,7 @@ import { SPACES_EXTENSION_ID } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import {
   coreMock,
+  elasticsearchServiceMock,
   httpServerMock,
   loggingSystemMock,
   savedObjectsServiceMock,
@@ -118,6 +119,35 @@ describe('WorkflowPagesService', () => {
         'execute',
         expect.anything()
       );
+    });
+
+    it('denies page management without execute', async () => {
+      const { authz } = createAuthz([WorkflowsManagementApiActions.managePages]);
+      const { start } = setup({ authz });
+      const client = await start.getClient({ request: httpServerMock.createKibanaRequest() });
+
+      await expect(client.rotateSecret(key)).rejects.toBeInstanceOf(WorkflowPagePrivilegesError);
+      await expect(client.setEnabled(key, false)).rejects.toBeInstanceOf(
+        WorkflowPagePrivilegesError
+      );
+    });
+
+    it('publishes only with the rights to bind a service account', async () => {
+      const { authz } = createAuthz([
+        WorkflowsManagementApiActions.execute,
+        WorkflowsManagementApiActions.managePages,
+      ]);
+      const { start, core } = setup({ authz });
+      const scoped = elasticsearchServiceMock.createScopedClusterClient();
+      jest.spyOn(core.elasticsearch.client, 'asScoped').mockReturnValue(scoped);
+      const { hasPrivileges } = scoped.asCurrentUser.security;
+      hasPrivileges.mockResolvedValue({ has_all_requested: false } as never);
+      const client = await start.getClient({ request: httpServerMock.createKibanaRequest() });
+
+      await expect(client.setAccess(key, { level: 'secret_link' })).rejects.toThrow(
+        'requires manage_security'
+      );
+      expect(hasPrivileges).toHaveBeenCalledWith({ cluster: ['manage_security'] });
     });
 
     it('grants every page operation when security is off', async () => {

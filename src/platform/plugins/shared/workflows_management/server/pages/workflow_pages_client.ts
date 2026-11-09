@@ -52,9 +52,12 @@ export interface WorkflowPagesClient {
   getSecret(key: WorkflowPageKey): Promise<string>;
   /** Replaces the secret. The old link fails at once. Returns the new secret. */
   rotateSecret(key: WorkflowPageKey): Promise<string>;
-  /** Sets the access level. `null` removes it, which takes the page offline. */
+  /**
+   * Sets the access level. `null` removes it, which takes the page offline. Publishing decides
+   * who can run the workflow, so it also needs the rights to bind a service account.
+   */
   setAccess(key: WorkflowPageKey, access: WorkflowPageAccess | null): Promise<WorkflowPageDto>;
-  /** Enables or disables the page. Needs neither workflow update nor security admin. */
+  /** Enables or disables the page. A kill switch, so it needs no service account rights. */
   setEnabled(key: WorkflowPageKey, enabled: boolean): Promise<WorkflowPageDto>;
 }
 
@@ -73,6 +76,8 @@ export interface WorkflowPagesClientDeps {
   scopedClient: SavedObjectsClientContract;
   encryptedClient: EncryptedSavedObjectsClient;
   assertWorkflowAccess: AssertWorkflowAccess;
+  /** Throws unless the caller can bind a service account to a workflow. */
+  assertCanPublish: () => Promise<void>;
   audit: WorkflowPageAuditLog;
 }
 
@@ -147,8 +152,14 @@ export class WorkflowPagesClientImpl implements WorkflowPagesClient {
     access: WorkflowPageAccess | null
   ): Promise<WorkflowPageDto> {
     const ref = this.toRef(key);
-    return this.partialUpdate(ref, { access }, (error) =>
-      this.deps.audit.logPageAccessChanged(this.deps.request, { ...ref, access, error })
+    return this.partialUpdate(
+      ref,
+      { access },
+      (error) => this.deps.audit.logPageAccessChanged(this.deps.request, { ...ref, access, error }),
+      async () => {
+        await this.authorize(ref, 'managePage');
+        await this.deps.assertCanPublish();
+      }
     );
   }
 
@@ -181,11 +192,12 @@ export class WorkflowPagesClientImpl implements WorkflowPagesClient {
   private async partialUpdate(
     ref: WorkflowPageRef,
     attributes: PartiallyUpdatableWorkflowPageAttributes,
-    audit: (error?: unknown) => void
+    audit: (error?: unknown) => void,
+    authorize: () => Promise<void> = () => this.authorize(ref, 'managePage')
   ): Promise<WorkflowPageDto> {
     const { scopedClient, canEncrypt } = this.deps;
     try {
-      await this.authorize(ref, 'managePage');
+      await authorize();
       const id = getWorkflowPageSavedObjectId(ref);
       // Reads first, so an update cannot create a page that the lifecycle never made.
       const { version } = await scopedClient.get<WorkflowPageAttributes>(

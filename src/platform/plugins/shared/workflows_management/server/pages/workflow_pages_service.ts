@@ -21,6 +21,7 @@ import type { WorkflowPagesClient } from './workflow_pages_client';
 import { WorkflowPagesClientImpl } from './workflow_pages_client';
 import type { WorkflowPagesSystemClient } from './workflow_pages_system_client';
 import { WorkflowPagesSystemClientImpl } from './workflow_pages_system_client';
+import { ensureWorkflowServiceAccountMutationAuthorized } from '../services/workflow_service_account_binding';
 
 const includedHiddenTypes = [WORKFLOW_PAGE_SAVED_OBJECT_TYPE];
 
@@ -114,6 +115,10 @@ export class WorkflowPagesService {
           scopedClient: core.savedObjects.getScopedClient(request, { includedHiddenTypes }),
           encryptedClient,
           assertWorkflowAccess,
+          // Publishing has the same gate as binding the service account that runs the page.
+          assertCanPublish: async () => {
+            await ensureWorkflowServiceAccountMutationAuthorized(core, request);
+          },
           audit,
         });
       },

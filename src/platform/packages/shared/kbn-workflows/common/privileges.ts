@@ -67,9 +67,9 @@ export const WorkflowsManagementOperationPrivileges = {
   cancelExecution: [WorkflowsManagementApiActions.cancelExecution],
   // Anyone who can run the workflow can copy its page link and see the page status.
   readPage: [WorkflowsManagementApiActions.execute],
-  // Rotating the secret, setting the access level, and taking a page offline do not edit the
-  // workflow, so they need neither `update` nor security admin rights.
-  managePage: [WorkflowsManagementApiActions.managePages],
+  // Changing a page needs `execute` too, so a page manager never gets a link to a workflow that
+  // they cannot run. It does not edit the workflow, so it needs no `update`.
+  managePage: [WorkflowsManagementApiActions.execute, WorkflowsManagementApiActions.managePages],
 } as const satisfies Record<string, readonly WorkflowsManagementApiActions[]>;
 
 // The UI actions (aka capabilities) added by feature privileges, to be checked in the UI components.

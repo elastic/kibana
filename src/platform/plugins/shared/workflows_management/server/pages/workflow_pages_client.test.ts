@@ -60,6 +60,7 @@ const setup = async ({
     logPageEnabledChanged: jest.fn(),
   };
   const assertWorkflowAccess = jest.fn(async () => {});
+  const assertCanPublish = jest.fn(async () => {});
   const request: KibanaRequest = httpServerMock.createKibanaRequest();
   const client = new WorkflowPagesClientImpl({
     request,
@@ -70,6 +71,7 @@ const setup = async ({
     scopedClient,
     encryptedClient: store.encryptedClient,
     assertWorkflowAccess,
+    assertCanPublish,
     audit,
   });
   return {
@@ -81,6 +83,7 @@ const setup = async ({
     audit,
     request,
     assertWorkflowAccess,
+    assertCanPublish,
     storedPage: () => getStoredPage(store, spaceRef),
   };
 };
@@ -298,6 +301,37 @@ describe('WorkflowPagesClient', () => {
       await expect(run(client)).rejects.toThrow('acl denied');
       expect(store.encryptedClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
       expect(scopedClient.update).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['a level', { level: 'secret_link' as const }],
+      ['null', null],
+    ])(
+      'setAccess to %s fails without the publish rights and touches no page',
+      async (_, access) => {
+        const { client, scopedClient, audit, assertCanPublish } = await setup();
+        assertCanPublish.mockRejectedValue(new Error('no bind rights'));
+
+        await expect(client.setAccess(key, access)).rejects.toThrow('no bind rights');
+        expect(scopedClient.update).not.toHaveBeenCalled();
+        expect(audit.logPageAccessChanged).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({ error: expect.any(Error) })
+        );
+      }
+    );
+
+    it('checks the publish rights only for setAccess', async () => {
+      const { client, assertCanPublish } = await setup();
+
+      await client.get(key);
+      await client.getSecret(key);
+      await client.rotateSecret(key);
+      await client.setEnabled(key, false);
+      expect(assertCanPublish).not.toHaveBeenCalled();
+
+      await client.setAccess(key, null);
+      expect(assertCanPublish).toHaveBeenCalledTimes(1);
     });
 
     it('audits a denied rotation', async () => {
