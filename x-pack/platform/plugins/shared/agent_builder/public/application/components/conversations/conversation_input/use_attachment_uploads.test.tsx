@@ -39,6 +39,7 @@ jest.mock('./upload_image', () => ({
   processImageFile: jest.fn(),
 }));
 
+const addErrorToast = jest.fn();
 const chips: Record<PlaceholderKind, string[]> = { image: [], binary: [], text: [] };
 const messageEditorController = {
   getPlaceholderNames: (kind: PlaceholderKind = 'image') => chips[kind],
@@ -64,7 +65,7 @@ const renderUploads = () => {
   return renderHook(
     () => ({
       uploads: useAttachmentUploads({
-        addErrorToast: jest.fn(),
+        addErrorToast,
         messageEditorController: messageEditorController as never,
         createConversation: jest.fn(),
       }),
@@ -141,6 +142,33 @@ describe('useAttachmentUploads', () => {
       deleteChips(result, ['a.png', 'b.md']);
 
       expect(getNames(result.current.attachments)).toEqual(['c.md']);
+    });
+  });
+
+  describe('many images in one paste', () => {
+    it('accepts 10 images and rejects the rest with a toast', () => {
+      jest.mocked(processImageFile).mockReturnValue(new Promise(() => {}));
+      const { result } = renderUploads();
+      const images = Array.from({ length: 11 }, (_, i) => createFile(`${i}.png`, 'image/png'));
+
+      paste(result, images);
+
+      expect(processImageFile).toHaveBeenCalledTimes(10);
+      expect(chips.image).toHaveLength(10);
+      expect(addErrorToast).toHaveBeenCalledTimes(1);
+    });
+
+    it('gives 2 images with the same name their own names and uploads', () => {
+      jest.mocked(processImageFile).mockReturnValue(new Promise(() => {}));
+      const { result } = renderUploads();
+
+      paste(result, [createFile('a.png', 'image/png'), createFile('a.png', 'image/png')]);
+
+      expect(chips.image).toEqual(['a.png', 'a 2.png']);
+      expect(jest.mocked(processImageFile).mock.calls.map(([{ name }]) => name)).toEqual([
+        'a.png',
+        'a 2.png',
+      ]);
     });
   });
 });
