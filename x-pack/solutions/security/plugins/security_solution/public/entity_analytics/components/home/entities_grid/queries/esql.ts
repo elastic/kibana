@@ -11,8 +11,6 @@ import { getEuidSourceFields } from '@kbn/entity-store/common/domain/euid';
 import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
-import { lastValueFrom } from 'rxjs';
 import { chunk } from 'lodash';
 import pMap from 'p-map';
 import { DEFAULT_ALERTS_INDEX } from '../../../../../../common/constants';
@@ -27,6 +25,8 @@ import {
   getEntityId,
 } from '../common';
 import type { QueryArgs, Row, SortDir, SortValue, TimeRange } from '../common';
+import { runEsqlQuery } from '../../queries/run_esql_query';
+import type { EsqlContext } from '../../queries/run_esql_query';
 import type { EsqlRunner } from './types';
 
 export const getEntityAlias = (namespace: string) => getEntitiesAlias(ENTITY_LATEST, namespace);
@@ -204,26 +204,15 @@ export const buildStatsByEntityClause = (aggregations: readonly string[]): strin
 const toRows = ({ columns, values }: Pick<ESQLSearchResponse, 'columns' | 'values'>): Row[] =>
   values.map((row) => Object.fromEntries(columns.map((col, i) => [col.name, row[i]])));
 
-/** Pin ES|QL to the current project; CPS space default is often `_alias:*`. */
-const ESQL_PROJECT_ROUTING = '_alias:_origin' as const;
-
 export const createEsqlRunner =
-  (searchService: DataPublicPluginStart['search'], signal?: AbortSignal): EsqlRunner =>
+  (
+    searchService: DataPublicPluginStart['search'],
+    context: EsqlContext,
+    signal?: AbortSignal
+  ): EsqlRunner =>
   async (steps) => {
     const query = steps.join('\n');
-    const { rawResponse } = await lastValueFrom(
-      searchService.search<
-        IKibanaSearchRequest<{ query: string }>,
-        IKibanaSearchResponse<ESQLSearchResponse>
-      >(
-        { params: { query } },
-        {
-          abortSignal: signal,
-          strategy: 'esql_async',
-          projectRouting: ESQL_PROJECT_ROUTING,
-        }
-      )
-    );
+    const rawResponse = await runEsqlQuery(searchService, query, context, signal);
     return toRows(rawResponse);
   };
 
