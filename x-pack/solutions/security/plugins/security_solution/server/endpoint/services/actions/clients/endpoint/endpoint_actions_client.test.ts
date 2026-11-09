@@ -711,6 +711,54 @@ describe('EndpointActionsClient', () => {
         )
       ).resolves.toBeDefined();
     });
+
+    it('should omit `force` from the Fleet action parameters when it is `false`', async () => {
+      await endpointActionsClient.getFile(
+        responseActionsClientMock.createGetFileOptions({
+          ...getCommonResponseActionOptions(),
+          parameters: { path: 'C:\\file.txt', force: false },
+        })
+      );
+
+      expect(
+        (await classConstructorOptions.endpointService.getFleetActionsClient()).create as jest.Mock
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ parameters: { path: 'C:\\file.txt' } }),
+        })
+      );
+    });
+
+    it('should send `force` in the Fleet action parameters when it is `true`', async () => {
+      const generator = new EndpointMetadataGenerator('seed');
+
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+        index: metadataCurrentIndexPattern,
+        response: generator.toEsSearchResponse([
+          generator.toEsSearchHit(
+            generator.generate({ Endpoint: { capabilities: ['get_file_force'] } })
+          ),
+        ]),
+      });
+
+      await endpointActionsClient.getFile(
+        responseActionsClientMock.createGetFileOptions({
+          ...getCommonResponseActionOptions(),
+          parameters: { path: 'C:\\file.txt', force: true },
+        })
+      );
+
+      expect(
+        (await classConstructorOptions.endpointService.getFleetActionsClient()).create as jest.Mock
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            parameters: { path: 'C:\\file.txt', force: true },
+          }),
+        })
+      );
+    });
   });
 
   describe('#killProcess()', () => {

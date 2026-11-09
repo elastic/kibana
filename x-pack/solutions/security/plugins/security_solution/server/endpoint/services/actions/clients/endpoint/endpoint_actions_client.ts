@@ -593,10 +593,20 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     actionRequest: ResponseActionGetFileRequestBody,
     options: CommonResponseActionMethodOptions = {}
   ): Promise<ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>> {
+    let actionRequestToSend = actionRequest;
+
+    // `force` is only sent to the Endpoint when it is `true`. Omitting `force: false` avoids sending
+    // a parameter that older Endpoints (without the `get_file_force` capability) don't know about.
+    if ('force' in actionRequest.parameters && actionRequest.parameters.force !== true) {
+      const { force: _force, ...parametersWithoutForce } = actionRequest.parameters;
+
+      actionRequestToSend = { ...actionRequest, parameters: parametersWithoutForce };
+    }
+
     return this.handleResponseAction<
       ResponseActionGetFileRequestBody,
       ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>
-    >('get-file', actionRequest, options);
+    >('get-file', actionRequestToSend, options);
   }
 
   async execute(

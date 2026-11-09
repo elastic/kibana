@@ -189,12 +189,23 @@ describe('When using get-file action from response actions console', () => {
       });
     });
 
-    it('should error if the Endpoint does not support the `get_file_force` capability', async () => {
+    it('should not display the `--force` argument in the command help if the Endpoint does not support the `get_file_force` capability', async () => {
+      await render(ENDPOINT_CAPABILITIES.filter((capability) => capability !== 'get_file_force'));
+      await enterConsoleCommand(renderResult, user, 'get-file --help');
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('test-helpOutput')).toBeInTheDocument();
+      });
+
+      expect(renderResult.getByTestId('test-helpOutput')).not.toHaveTextContent('--force');
+    });
+
+    it('should error if `--force` is used and the Endpoint does not support the `get_file_force` capability', async () => {
       await render(ENDPOINT_CAPABILITIES.filter((capability) => capability !== 'get_file_force'));
       await enterConsoleCommand(renderResult, user, 'get-file --path="one/two" --force');
 
-      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-        'Invalid argument value: --force. This host does not support forced file retrieval. It is supported on Windows hosts only, with an Endpoint version that includes it. Upgrade your Agent in Fleet to use this parameter.'
+      expect(renderResult.getByTestId('test-badArgument-message')).toHaveTextContent(
+        'The following get-file argument is not supported by this command: --force'
       );
       expect(apiMocks.responseProvider.getFile).not.toHaveBeenCalled();
     });
