@@ -27,9 +27,10 @@ export const OSQUERY_TOOL_PRIVILEGES = {
   writeLiveQueries: [`${PLUGIN_ID}-writeLiveQueries`],
   /**
    * `GET /api/osquery/live_queries/{id}/results/{actionId}` — reading live query results.
-   * The route accepts `readLiveQueries`; `read` also grants results access.
+   * The route requires `readLiveQueries` alone; the base `read` privilege does not
+   * imply it for roles that deselect the Live queries sub-feature.
    */
-  readLiveQueries: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-readLiveQueries`],
+  readLiveQueries: [`${PLUGIN_ID}-readLiveQueries`],
   /** `GET /api/osquery/saved_queries` */
   readSavedQueries: [`${PLUGIN_ID}-readSavedQueries`],
   /** `GET /api/osquery/packs` */

@@ -80,7 +80,9 @@ export const pollActionResponses = async (
   }: PollActionResponsesOptions
 ): Promise<PollActionResponsesResult> => {
   const deadline = Date.now() + budgetMs;
-  const spaceFilter = buildSpaceIdFilter(spaceId);
+  // Result and action-response docs written by osquerybeat carry the space only as
+  // `action_data.space_id`; this read is bound to a single action_id.
+  const spaceFilter = buildSpaceIdFilter(spaceId, { matchActionDataSpaceId: true });
   let responded = 0;
   let rows: Array<Record<string, unknown>> = [];
 

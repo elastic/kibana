@@ -120,7 +120,7 @@ const extractTableRefs = (sql: string): TableRefs => {
   const refs: string[] = [];
   let unsupported: string | null = null;
   const clauseRe =
-    /\b(?:FROM|JOIN)\s+([^()]*?)(?=\b(?:WHERE|GROUP|ORDER|LIMIT|HAVING|UNION|JOIN|ON|USING)\b|[()]|$)/gi;
+    /\b(?:FROM|JOIN)\s+([^()]*?)(?=\b(?:WHERE|GROUP|ORDER|LIMIT|HAVING|UNION|EXCEPT|INTERSECT|JOIN|ON|USING)\b|[()]|$)/gi;
 
   for (const clause of sql.matchAll(clauseRe)) {
     const text = clause[1];
