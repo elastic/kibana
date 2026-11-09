@@ -276,7 +276,9 @@ describe('SignificantSecurityEventInlineContent', () => {
       expect(entityLine).toHaveTextContent('3 users');
 
       const whatMatched = screen.getByTestId(SSE_ATTACHMENT_WHAT_MATCHED_TEST_ID);
-      expect(whatMatched.compareDocumentPosition(entityLine)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+      expect(whatMatched.compareDocumentPosition(entityLine)).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING
+      );
     });
 
     it('widens the host and user counts to Tier 1 when it saw more than the chips', () => {
@@ -862,10 +864,7 @@ describe('SignificantSecurityEventInlineContent', () => {
         screen.getByTestId('alertzeroSignificantSecurityEventQueryCopy-0')
       ).toBeInTheDocument();
       const link = screen.getByTestId('alertzeroSignificantSecurityEventContinueInDiscover-0');
-      expect(link).toHaveAttribute(
-        'aria-label',
-        expect.stringMatching(/^Open in Discover: T101 /)
-      );
+      expect(link).toHaveAttribute('aria-label', expect.stringMatching(/^Open in Discover: T101 /));
       expect(screen.getByText('execute_failed')).toBeInTheDocument();
     });
 
@@ -1049,9 +1048,10 @@ describe('SignificantSecurityEventInlineContent', () => {
       expect(
         screen.getByTestId('alertzeroSignificantSecurityEventEventLink-evt-1')
       ).toHaveTextContent('evt-1');
-      expect(
-        screen.getByLabelText('Open event evt-1 in Discover')
-      ).toHaveAttribute('href', expectedHref);
+      expect(screen.getByLabelText('Open event evt-1 in Discover')).toHaveAttribute(
+        'href',
+        expectedHref
+      );
     });
 
     it('renders no Discover action for an event when share is undefined', async () => {
@@ -1341,15 +1341,19 @@ describe('SignificantSecurityEventInlineContent', () => {
       const events = screen.getByTestId('alertzeroSignificantSecurityEventCitedEvidence');
       const indexHits = screen.getByTestId(SSE_ATTACHMENT_INDEX_HITS_TEST_ID);
 
-      expect(within(statusRow).getByTestId('alertzeroSignificantSecurityEventHuntResultOutcome')).toBe(
-        outcome
-      );
+      expect(
+        within(statusRow).getByTestId('alertzeroSignificantSecurityEventHuntResultOutcome')
+      ).toBe(outcome);
       expect(within(statusRow).getByTestId('alertzeroSignificantSecurityEventRunProvenance')).toBe(
         audit
       );
-      expect(within(statusRow).getByTestId('alertzeroSignificantSecurityEventHuntWindow')).toBeInTheDocument();
+      expect(
+        within(statusRow).getByTestId('alertzeroSignificantSecurityEventHuntWindow')
+      ).toBeInTheDocument();
       expect(statusRow.compareDocumentPosition(hypothesis)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-      expect(hypothesis.compareDocumentPosition(searchedFor)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+      expect(hypothesis.compareDocumentPosition(searchedFor)).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING
+      );
       expect(searchedFor.compareDocumentPosition(whatMatched)).toBe(
         Node.DOCUMENT_POSITION_FOLLOWING
       );

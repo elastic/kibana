@@ -417,9 +417,7 @@ const EventRows: React.FC<{
         tableLayout="fixed"
         responsiveBreakpoint={false}
         pagination={
-          sortedEvents.length > 5
-            ? { initialPageSize: 5, pageSizeOptions: [5, 10, 25] }
-            : undefined
+          sortedEvents.length > 5 ? { initialPageSize: 5, pageSizeOptions: [5, 10, 25] } : undefined
         }
       />
     </div>
@@ -768,8 +766,7 @@ const WhatMatched: React.FC<{
       return undefined;
     }
     const observed = observedIocMatchFromEvents(events, value);
-    const indices =
-      observed && observed.indices.length > 0 ? observed.indices : fallbackIndices;
+    const indices = observed && observed.indices.length > 0 ? observed.indices : fallbackIndices;
     const esql = buildIocMatchEsql({ indices, field: detection.field, value });
     if (!esql) {
       return undefined;
@@ -1053,7 +1050,7 @@ const QueryRowActions: React.FC<{
       <EuiFlexItem grow={false}>
         <EuiCopy textToCopy={esql}>
           {(copy) => (
-            <EuiToolTip content={copyLabel}>
+            <EuiToolTip content={copyLabel} disableScreenReaderOutput>
               <EuiButtonIcon
                 size="xs"
                 iconType="copy"
@@ -1901,7 +1898,6 @@ export const SignificantSecurityEventInlineContent: React.FC<
             <QueriesRun tier2={tier2} timeRange={huntResult.time_range} navigation={navigation} />
           </DetailAccordion>
         ) : null}
-
       </SectionStack>
     </EuiPanel>
   );

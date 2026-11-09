@@ -140,9 +140,7 @@ const buildEntityLine = (
   entities: readonly SseEntityRef[],
   tier1Counts: HuntResult['tier1']['counts'] | undefined
 ): SseEntityLine => {
-  const ordered = [...entities].sort(
-    (a, b) => entityFieldRank(a.field) - entityFieldRank(b.field)
-  );
+  const ordered = [...entities].sort((a, b) => entityFieldRank(a.field) - entityFieldRank(b.field));
 
   const hostNames = uniqueNamesForField(entities, 'host.name');
   const userNames = uniqueNamesForField(entities, 'user.name');
