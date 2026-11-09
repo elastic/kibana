@@ -385,11 +385,52 @@ export const closeStillOpenAlertsAsFalsePositive = async (
   return body.updated ?? 0;
 };
 
-/** Reopens alerts, in the chunks the status route takes. Throws unless every alert was updated. */
-export const openAlerts = async (api: KibanaApi, alertIds: readonly string[]): Promise<void> => {
+/**
+ * Reopens the given alerts that are still closed as a false positive when the write runs, which is
+ * how a decision closed them. An alert an analyst has since closed for another reason, or
+ * acknowledged, is left alone. The status route cannot check the previous state for ids, so this
+ * sends the ids and the state as one query, in the chunks the route takes. Returns how many alerts
+ * were reopened, which is less than the given count when some had moved on. Throws when the update
+ * reports failures.
+ */
+export const reopenFalsePositiveClosedAlerts = async (
+  { callKibanaApi }: KibanaApi,
+  alertIds: readonly string[]
+): Promise<number> => {
+  let reopened = 0;
   for (let from = 0; from < alertIds.length; from += TAG_CHUNK_SIZE) {
-    await updateAlertStatus(api, alertIds.slice(from, from + TAG_CHUNK_SIZE), { status: 'open' });
+    const chunk = alertIds.slice(from, from + TAG_CHUNK_SIZE);
+    const { body } = await callKibanaApi<{
+      updated?: number;
+      version_conflicts?: number;
+      failures?: unknown[];
+    }>({
+      method: 'POST',
+      path: SIGNALS_STATUS_PATH,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              { ids: { values: chunk } },
+              { term: { [ALERT_FIELDS.status]: 'closed' } },
+              { term: { [ALERT_FIELDS.reason]: 'false_positive' } },
+            ],
+          },
+        },
+        status: 'open',
+      },
+    });
+    const failureCount = body.failures?.length ?? 0;
+    if (failureCount > 0) {
+      throw new Error(
+        `Reopening ${chunk.length} alert(s) was not fully applied (updated: ${
+          body.updated ?? 0
+        }, conflicts: ${body.version_conflicts ?? 0}, failures: ${failureCount})`
+      );
+    }
+    reopened += body.updated ?? 0;
   }
+  return reopened;
 };
 
 /** Which of the given alerts are still open or acknowledged. Used to undo a tag after a failed close. */
@@ -450,51 +491,21 @@ export const findAlertsNotClosedAsFalsePositive = async (
   return (body.hits?.hits ?? []).map(({ _id }) => _id);
 };
 
-/**
- * The alerts that carry a tag, up to one page, with their current status. Used by revoke to find
- * what to put back, and to tell which of them an analyst has moved on from, in one search.
- */
-export const findAlertsByTag = async (
+/** The ids of the alerts that carry a tag, up to one page. Used by revoke to find what to put back. */
+export const findAlertIdsByTag = async (
   { callKibanaApi }: KibanaApi,
   tag: string
-): Promise<Array<{ id: string; status?: string }>> => {
+): Promise<string[]> => {
   const { body } = await callKibanaApi<{ hits?: { hits?: AlertHit[] } }>({
     method: 'POST',
     path: SIGNALS_SEARCH_PATH,
     body: {
       size: ALERT_FETCH_LIMIT,
-      _source: [ALERT_FIELDS.status],
+      _source: false,
       query: { bool: { filter: [{ term: { [ALERT_FIELDS.tags]: tag } }] } },
     },
   });
-  return (body.hits?.hits ?? []).map(({ _id, _source = {} }) => {
-    const status = readField(_source, ALERT_FIELDS.status);
-    return { id: _id, ...(typeof status === 'string' ? { status } : {}) };
-  });
-};
-
-const updateAlertStatus = async (
-  { callKibanaApi }: KibanaApi,
-  alertIds: readonly string[],
-  change: { status: 'open' | 'closed'; reason?: 'false_positive' }
-): Promise<void> => {
-  const { body } = await callKibanaApi<{
-    updated?: number;
-    version_conflicts?: number;
-    failures?: unknown[];
-  }>({
-    method: 'POST',
-    path: SIGNALS_STATUS_PATH,
-    body: { signal_ids: alertIds, ...change },
-  });
-  const failureCount = body.failures?.length ?? 0;
-  if (failureCount > 0 || (body.updated ?? 0) < alertIds.length) {
-    throw new Error(
-      `Setting ${alertIds.length} alert(s) to ${change.status} was not fully applied (updated: ${
-        body.updated ?? 0
-      }, conflicts: ${body.version_conflicts ?? 0}, failures: ${failureCount})`
-    );
-  }
+  return (body.hits?.hits ?? []).map(({ _id }) => _id);
 };
 
 /**
