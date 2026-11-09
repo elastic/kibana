@@ -47,7 +47,9 @@ export async function isCacheServerAvailable(): Promise<boolean> {
   try {
     const deadline = timeoutSignal(1000);
     try {
-      await fetch(baseUrl.replace(/\/$/, ''), { signal: deadline });
+      const response = await fetch(baseUrl.replace(/\/$/, ''), { signal: deadline });
+      // Any HTTP response counts. Cancel the unread body before dispose(), which does not abort the download.
+      await response.body?.cancel().catch(() => undefined);
       return true;
     } finally {
       deadline.dispose();

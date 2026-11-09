@@ -329,8 +329,10 @@ export async function checkOtlpEndpoint(endpoint: string): Promise<boolean> {
         method: 'GET',
         signal: deadline,
       });
-      // The OTLP endpoint returns 405 for GET, which still means it's reachable
-      return res.status === 405 || res.ok;
+      // A 405 or 2xx means the endpoint is up. The body is unused, so cancel it before dispose().
+      const reachable = res.status === 405 || res.ok;
+      await res.body?.cancel().catch(() => undefined);
+      return reachable;
     } finally {
       deadline.dispose();
     }
