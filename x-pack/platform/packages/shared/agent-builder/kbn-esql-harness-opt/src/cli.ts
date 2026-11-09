@@ -20,7 +20,7 @@ import { setupFixtures } from './corpora/setup';
 import { buildGoldRowCache, runVariant } from './runner';
 import { executeGold, scoreQuery } from './scorers';
 import { runCampaign } from './campaign';
-import { setupCandidateWorktree } from './candidate_workspace';
+import { restartLane, setupCandidateWorktree } from './candidate_workspace';
 import { harnessPaths } from './workspace';
 import { serveReport, writeReport } from './report';
 import { setupModelConnectors } from './models';
@@ -60,6 +60,7 @@ export const cli = () =>
   baseline [--tiers ids]            measure this worktree's harness, per model tier
   round / campaign --rounds n       propose → validate → gate → promote, repeatedly
   sealed [--tiers id]               score the current worktree on the sealed split
+  verify-tiers --tiers a,b          score the current worktree on each model, one lane restart each
   report [--serve] [--port n]       write (or serve) the HTML report
 
 Both lanes' Kibana processes must run with ESQL_HARNESS_TRACE_FILE pointing at
@@ -238,6 +239,46 @@ Both lanes' Kibana processes must run with ESQL_HARNESS_TRACE_FILE pointing at
         return;
       }
 
+      if (command === 'verify-tiers') {
+        // Harness fixes are pathology-matched to a model, so before anything is promoted the
+        // same variant is scored on each model it might run on. Pinning a model needs a lane
+        // restart, which is why this is a separate step rather than part of every round.
+        const examples = examplesForSplit((optionalFlag(flags.split) as Split) ?? 'sealed');
+        const goldRows = await buildGoldRowCache({ esClient, examples });
+        const outputDir = Path.join(runsDir, `verify-${Date.now()}`);
+        const restart =
+          optionalFlag(flags['restart-incumbent']) ??
+          process.env.HARNESS_RESTART_INCUMBENT ??
+          'true';
+
+        for (const tier of (optionalFlag(flags.tiers) ?? '')
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean)) {
+          await restartLane({
+            command: restart,
+            url: target.kibanaUrl,
+            env: { ESQL_HARNESS_MODEL_CONNECTOR: tier },
+            log,
+          });
+          await runVariant({
+            label: `verify-${tier.slice(0, 8)}`,
+            variant: { hash: optionalFlag(flags.label) ?? 'incumbent', tier },
+            lane: 'incumbent',
+            examples,
+            rollouts,
+            esClient,
+            target,
+            log,
+            concurrency,
+            goldRows,
+            outputDir,
+          });
+        }
+        log.info(`[harness-opt] tier verification written to ${outputDir}`);
+        return;
+      }
+
       if (command === 'setup-candidate') {
         await setupCandidateWorktree({
           mainWorktree: process.cwd(),
@@ -257,10 +298,7 @@ Both lanes' Kibana processes must run with ESQL_HARNESS_TRACE_FILE pointing at
           rounds: command === 'campaign' ? Number(optionalFlag(flags.rounds) ?? 3) : 1,
           rollouts,
           concurrency,
-          tiers: (optionalFlag(flags.tiers) ?? '')
-            .split(',')
-            .map((tier) => tier.trim())
-            .filter(Boolean),
+          tier: optionalFlag(flags.tiers)?.split(',')[0]?.trim(),
           incumbentTarget: target,
           candidateTarget: { ...target, kibanaUrl: candidateUrl ?? 'http://localhost:5691' },
           candidateWorktree: candidatePath ?? `${process.cwd()}-candidate`,

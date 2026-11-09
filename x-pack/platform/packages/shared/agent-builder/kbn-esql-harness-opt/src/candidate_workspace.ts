@@ -283,15 +283,21 @@ export const restartLane = async ({
   command,
   url,
   log,
+  env = {},
   timeoutMs = 600_000,
 }: {
   command: string;
   url: string;
   log: ToolingLog;
+  /** Extra environment for the restarted process, e.g. the model tier to pin. */
+  env?: Record<string, string>;
   timeoutMs?: number;
 }): Promise<boolean> => {
-  log.info(`[lane] restarting via ${command}`);
-  await run('bash', ['-lc', command], process.cwd(), 120_000);
+  const prefix = Object.entries(env)
+    .map(([key, value]) => `${key}=${JSON.stringify(value)}`)
+    .join(' ');
+  log.info(`[lane] restarting via ${command}${prefix ? ` (${prefix})` : ''}`);
+  await run('bash', ['-lc', `${prefix} ${command}`.trim()], process.cwd(), 120_000);
 
   const deadline = Date.now() + timeoutMs;
   await new Promise((resolve) => setTimeout(resolve, 10_000));

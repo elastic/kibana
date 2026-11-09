@@ -33,8 +33,13 @@ export interface CampaignOptions {
   rounds: number;
   rollouts: number;
   concurrency: number;
-  /** Connector ids the candidate must clear the gate on. Empty = whatever the code selects. */
-  tiers: string[];
+  /**
+   * Model the whole campaign runs on, pinned per lane at restart. Cross-model verification is a
+   * separate, slower step (`verify-tiers`): pinning a model costs a restart of both lanes, so
+   * doing it inside every round would double the wall clock of the loop for a check that only
+   * matters at promotion time.
+   */
+  tier?: string;
   incumbentTarget: HarnessTarget;
   candidateTarget: HarnessTarget;
   candidateWorktree: string;
@@ -80,7 +85,7 @@ export const runCampaign = async ({
   rounds,
   rollouts,
   concurrency,
-  tiers,
+  tier,
   incumbentTarget,
   candidateTarget,
   candidateWorktree,
@@ -103,7 +108,7 @@ export const runCampaign = async ({
   const gateGold = await buildGoldRowCache({ esClient, examples: gateExamples });
 
   const workspace = { path: candidateWorktree, kibanaUrl: candidateTarget.kibanaUrl };
-  const tierList = tiers.length ? tiers : [undefined];
+  const laneEnv: Record<string, string> = tier ? { ESQL_HARNESS_MODEL_CONNECTOR: tier } : {};
 
   let incumbentEdits: CodeEdit[] = [];
   let incumbentDiff = '';
@@ -174,63 +179,50 @@ export const runCampaign = async ({
 
     const diff = await candidateDiff(workspace);
     const candidateVariant = { hash: variantHash(diff), diff };
-    await restartLane({ command: restartCommands.candidate, url: workspace.kibanaUrl, log });
+    await restartLane({
+      command: restartCommands.candidate,
+      url: workspace.kibanaUrl,
+      env: laneEnv,
+      log,
+    });
 
-    const tierResults: Array<{ tier: string; gate: GateResult }> = [];
-    let lastIncumbentGate: RunSummary | undefined;
-    let lastCandidateGate: RunSummary | undefined;
+    const incumbentGate = await runVariant({
+      label: `round${round}-incumbent-gate`,
+      variant: { ...incumbentVariant, tier },
+      lane: 'incumbent',
+      examples: gateExamples,
+      rollouts: Math.max(rollouts, 2),
+      esClient,
+      target: incumbentTarget,
+      log,
+      concurrency,
+      goldRows: gateGold,
+      outputDir,
+    });
 
-    for (const tier of tierList) {
-      const suffix = tier ? `-${tier.slice(0, 8)}` : '';
+    const candidateGate = await runVariant({
+      label: `round${round}-candidate-gate`,
+      variant: { ...candidateVariant, tier },
+      lane: 'candidate',
+      examples: gateExamples,
+      rollouts: Math.max(rollouts, 2),
+      esClient,
+      target: candidateTarget,
+      log,
+      concurrency,
+      goldRows: gateGold,
+      outputDir,
+    });
 
-      const incumbentGate = await runVariant({
-        label: `round${round}-incumbent-gate${suffix}`,
-        variant: { ...incumbentVariant, tier },
-        lane: 'incumbent',
-        examples: gateExamples,
-        rollouts: Math.max(rollouts, 2),
-        esClient,
-        target: incumbentTarget,
-        connectorId: tier,
-        log,
-        concurrency,
-        goldRows: gateGold,
-        outputDir,
-      });
+    const gateResult: GateResult = gateCandidate({
+      incumbent: incumbentGate,
+      candidate: candidateGate,
+    });
+    const lastIncumbentGate = incumbentGate;
+    const lastCandidateGate = candidateGate;
 
-      const candidateGate = await runVariant({
-        label: `round${round}-candidate-gate${suffix}`,
-        variant: { ...candidateVariant, tier },
-        lane: 'candidate',
-        examples: gateExamples,
-        rollouts: Math.max(rollouts, 2),
-        esClient,
-        target: candidateTarget,
-        connectorId: tier,
-        log,
-        concurrency,
-        goldRows: gateGold,
-        outputDir,
-      });
-
-      tierResults.push({
-        tier: tier ?? 'default',
-        gate: gateCandidate({ incumbent: incumbentGate, candidate: candidateGate }),
-      });
-      lastIncumbentGate = incumbentGate;
-      lastCandidateGate = candidateGate;
-    }
-
-    const gateResult: GateResult = {
-      ...tierResults[0].gate,
-      accepted: tierResults.every(({ gate }) => gate.accepted),
-      reasons: tierResults.flatMap(({ tier, gate }) =>
-        gate.accepted ? [] : gate.reasons.map((reason) => `[${tier.slice(0, 8)}] ${reason}`)
-      ),
-    };
-
-    const incumbentRuns = lastIncumbentGate!.runs;
-    const candidateRuns = lastCandidateGate!.runs;
+    const incumbentRuns = lastIncumbentGate.runs;
+    const candidateRuns = lastCandidateGate.runs;
     const seedDeltas = [...new Set(incumbentRuns.map((entry) => entry.exampleId))].map(
       (exampleId) => {
         const rewardFor = (entries: typeof incumbentRuns) => {
@@ -277,7 +269,7 @@ export const runCampaign = async ({
       parentHash: incumbentVariant.hash,
       variantHash: candidateVariant.hash,
       gate: gateResult,
-      tiers: tierResults,
+      tier,
       searchReward: searchRun.meanReward,
     });
     saveLedger();
@@ -293,6 +285,7 @@ export const runCampaign = async ({
       await restartLane({
         command: restartCommands.incumbent,
         url: incumbentTarget.kibanaUrl,
+        env: laneEnv,
         log,
       });
       log.info(`[harness-opt] round ${round} promoted to incumbent`);
