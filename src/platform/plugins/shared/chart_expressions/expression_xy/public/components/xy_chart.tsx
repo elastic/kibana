@@ -19,8 +19,6 @@ import type {
   XYChartElementEvent,
   XYChartSeriesIdentifier,
   SettingsProps,
-  TooltipValue,
-  PointerValue,
   AxisStyle,
   RectStyle,
   AnnotationClickListener,
@@ -59,7 +57,6 @@ import { useActiveCursor } from '@kbn/charts-plugin/public';
 import type { ChartSizeSpec } from '@kbn/chart-expressions-common';
 import type { PersistedState } from '@kbn/visualizations-common';
 import {
-  ChartTooltipFooterMessage,
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
   getLegendLayout,
@@ -131,7 +128,6 @@ import { XYCurrentTime } from './xy_current_time';
 import { TooltipHeader } from './tooltip';
 import { LegendColorPickerWrapperContext, LegendColorPickerWrapper } from './legend_color_picker';
 import { createSplitPoint, getTooltipActions, getXSeriesPoint } from './tooltip/tooltip_actions';
-import { getComputedColumnWarning } from './tooltip/computed_column_warning';
 import { GlobalXYChartStyles } from './xy_chart.styles';
 
 declare global {
@@ -394,23 +390,6 @@ export function XYChart({
     () => getLayersFormats(dataLayers, { splitColumnAccessor, splitRowAccessor }, formatFactory),
     [dataLayers, splitColumnAccessor, splitRowAccessor, formatFactory]
   );
-
-  // Compute warning message for ES|QL computed columns that cannot be filtered.
-  const warningMessage = useMemo(
-    () => (isEsqlMode ? getComputedColumnWarning(dataLayers) : undefined),
-    [isEsqlMode, dataLayers]
-  );
-
-  const TooltipFooter = useMemo<
-    | React.ComponentType<{
-        items: Array<TooltipValue<Record<string, string | number>, XYChartSeriesIdentifier>>;
-        header: PointerValue<Record<string, string | number>> | null;
-      }>
-    | 'default'
-  >(() => {
-    if (!warningMessage) return 'default';
-    return () => <ChartTooltipFooterMessage message={warningMessage} />;
-  }, [warningMessage]);
 
   const icon: IconType = getIconForSeriesType(getDataLayers(layers)?.[0]);
 
@@ -932,7 +911,6 @@ export function XYChart({
                   : undefined
               }
               type={args.showTooltip ? TooltipType.VerticalCursor : TooltipType.None}
-              footer={TooltipFooter}
             />
             <Settings
               noResults={

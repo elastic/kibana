@@ -203,7 +203,6 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
               },
             ]
           }
-          footer="default"
           type="follow"
         />
         <Settings
@@ -1164,7 +1163,6 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
               },
             ]
           }
-          footer="default"
           type="follow"
         />
         <Settings
@@ -2185,7 +2183,6 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
               },
             ]
           }
-          footer="default"
           type="follow"
         />
         <Settings
@@ -3208,7 +3205,6 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
               },
             ]
           }
-          footer="default"
           type="follow"
         />
         <Settings
@@ -4169,7 +4165,6 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
               },
             ]
           }
-          footer="default"
           type="follow"
         />
         <Settings
@@ -5085,7 +5080,6 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
               },
             ]
           }
-          footer="default"
           type="follow"
         />
         <Settings
