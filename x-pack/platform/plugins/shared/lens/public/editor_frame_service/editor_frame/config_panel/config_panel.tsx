@@ -114,22 +114,23 @@ export function ConfigPanel(
     }, 0);
   };
 
-  // Refocus the layer content when the chart type or the selected layer changes, but not on the
-  // initial render, so focus (and the screen reader announcement) stays on the page on open.
+  // Refocus the layer content when the chart type, the selected layer or the number of layers
+  // changes, but not on the initial render, so focus (and the screen reader announcement) stays
+  // on the page on open.
   const previousFocusKey = useRef<string | null>(null);
   useEffect(() => {
     // A chart switch can briefly leave no selected layer: wait for it to settle.
     if (!selectedLayerId) {
       return;
     }
-    const focusKey = `${activeVisualization.id}:${selectedLayerId}`;
+    const focusKey = `${activeVisualization.id}:${selectedLayerId}:${layerIds.length}`;
     const previous = previousFocusKey.current;
     previousFocusKey.current = focusKey;
     // Do not trigger in ES|QL mode, as the focus should remain in the editor.
     if (previous && previous !== focusKey && !canEditTextBasedQuery) {
       focusLayerTabsContent();
     }
-  }, [activeVisualization.id, canEditTextBasedQuery, selectedLayerId]);
+  }, [activeVisualization.id, canEditTextBasedQuery, selectedLayerId, layerIds.length]);
 
   const setVisualizationState = useMemo(
     () => (newState: unknown) => {
