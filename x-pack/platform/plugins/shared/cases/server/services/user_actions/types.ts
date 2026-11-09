@@ -274,6 +274,7 @@ export interface ConnectorFieldsBeforePushAggsResult {
 
 export interface UserActionsStatsAggsResult {
   total: number;
+  replies?: { doc_count: number; creations: { doc_count: number } };
   totals: {
     buckets: Array<{
       key: string;

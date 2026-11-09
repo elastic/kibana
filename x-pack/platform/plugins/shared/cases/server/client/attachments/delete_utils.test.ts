@@ -97,6 +97,9 @@ describe('deleteCaseAttachments', () => {
     clientArgs.services.attachmentService.bulkDelete.mockImplementation(
       async ({ savedObjectIds }) => savedObjectIds
     );
+    clientArgs.services.attachmentService.getter.getCaseAttachmentsForDeletion.mockResolvedValue(
+      []
+    );
   });
 
   it('deletes every attachment in a single call and refreshes', async () => {

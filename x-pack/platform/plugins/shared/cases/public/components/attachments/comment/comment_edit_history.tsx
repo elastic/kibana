@@ -24,7 +24,9 @@ import type { UserActionUI } from '../../../../common/ui/types';
 import { useGetAttachmentHistory } from '../../../containers/use_get_attachment_history';
 import { FormattedRelativePreferenceDate } from '../../formatted_date';
 import { MarkdownRenderer } from '../../markdown_editor';
+import type { CaseUser } from '../../../containers/types';
 import { ContentDiff } from './content_diff';
+import { useIsAuthor } from './use_is_author';
 import {
   CURRENT_VERSION,
   EDIT_HISTORY_ARIA_LABEL,
@@ -37,6 +39,7 @@ import {
 interface CommentEditHistoryProps {
   caseId: string;
   commentId: string;
+  createdBy: CaseUser;
   editedBy: string;
 }
 
@@ -71,9 +74,11 @@ const popoverCss = css`
 export const CommentEditHistory: React.FC<CommentEditHistoryProps> = ({
   caseId,
   commentId,
+  createdBy,
   editedBy,
 }) => {
   const titleId = useGeneratedHtmlId();
+  const isAuthor = useIsAuthor(createdBy);
   const [isOpen, setIsOpen] = useState(false);
   const toggle = useCallback(() => setIsOpen((open) => !open), []);
   const close = useCallback(() => setIsOpen(false), []);
@@ -81,11 +86,20 @@ export const CommentEditHistory: React.FC<CommentEditHistoryProps> = ({
   const { data: history, isLoading } = useGetAttachmentHistory({
     caseId,
     attachmentId: commentId,
-    isEnabled: isOpen,
+    isEnabled: isAuthor && isOpen,
   });
 
   // Newest first, so the current text is on top.
   const versions = [...(history ?? [])].reverse();
+  const label = editedBy ? getLastEditedBy(editedBy) : LAST_EDITED;
+
+  if (!isAuthor) {
+    return (
+      <EuiText size="xs" color="subdued" data-test-subj={`comment-edit-history-label-${commentId}`}>
+        {label}
+      </EuiText>
+    );
+  }
 
   return (
     <EuiPopover
@@ -103,7 +117,7 @@ export const CommentEditHistory: React.FC<CommentEditHistoryProps> = ({
           aria-label={EDIT_HISTORY_ARIA_LABEL}
           data-test-subj={`comment-edit-history-button-${commentId}`}
         >
-          {editedBy ? getLastEditedBy(editedBy) : LAST_EDITED}
+          {label}
         </EuiButtonEmpty>
       }
     >

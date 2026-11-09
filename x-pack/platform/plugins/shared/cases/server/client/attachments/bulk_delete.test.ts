@@ -63,6 +63,9 @@ describe('bulk_delete', () => {
       clientArgs.services.attachmentService.bulkDelete.mockImplementation(
         async ({ savedObjectIds }) => savedObjectIds
       );
+      clientArgs.services.attachmentService.getter.getCaseAttachmentsForDeletion.mockResolvedValue(
+        []
+      );
       clientArgs.services.caseService.getCase.mockResolvedValue(mockCases[0]);
     });
 

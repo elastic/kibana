@@ -14,6 +14,7 @@ import type { CaseUserActionsStats } from '../../../../containers/types';
 import * as activityBarI18n from '../../../user_actions_activity_bar/translations';
 import { TYPE } from '../translations';
 import type { UserActivityFilter } from '../../../user_actions_activity_bar/types';
+import { getVisibleUserActionCounts } from '../../../user_actions_activity_bar/utils';
 
 const TYPE_FILTER_ID = 'userActionsType';
 
@@ -38,14 +39,11 @@ export const TypeFilter = React.memo<TypeFilterProps>(
     const togglePopover = useCallback(() => setIsPopoverOpen((prevValue) => !prevValue), []);
     const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
-    // Comment edits are hidden from the feed, so All = Comments + History once they're subtracted.
-    const total = Math.max(
-      (userActionsStats?.total ?? 0) - (userActionsStats?.totalCommentUpdates ?? 0),
-      0
-    );
-    const commentsCount = userActionsStats?.totalCommentCreations ?? 0;
-    const allCount = total;
-    const historyCount = Math.max(total - commentsCount, 0);
+    const {
+      total: allCount,
+      comments: commentsCount,
+      history: historyCount,
+    } = getVisibleUserActionCounts(userActionsStats);
 
     const options = useMemo<TypeOption[]>(
       () => [

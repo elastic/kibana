@@ -81,6 +81,7 @@ export const createUnifiedAttachmentUserActionBuilder = ({
         metadata: attachment.metadata,
         ...addedReferences,
         createdBy: attachment.createdBy,
+        createdAt: attachment.createdAt,
         updatedAt: attachment.updatedAt,
         updatedBy: attachment.updatedBy,
         version: attachment.version,

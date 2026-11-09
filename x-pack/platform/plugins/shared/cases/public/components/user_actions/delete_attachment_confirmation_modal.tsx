@@ -13,7 +13,7 @@ import { useFocusButtonTrap } from '../use_focus_button';
 
 type Props = Pick<
   EuiConfirmModalProps,
-  'title' | 'confirmButtonText' | 'onConfirm' | 'onCancel'
+  'title' | 'confirmButtonText' | 'onConfirm' | 'onCancel' | 'children'
 > & {
   /**
    * The ref of the button to focus when the modal is closed
@@ -27,6 +27,7 @@ const DeleteAttachmentConfirmationModalComponent: React.FC<Props> = ({
   onConfirm,
   onCancel,
   focusButtonRef,
+  children,
 }) => {
   const modalTitleId = useGeneratedHtmlId();
   const focusTrapProps = useFocusButtonTrap(focusButtonRef);
@@ -46,7 +47,9 @@ const DeleteAttachmentConfirmationModalComponent: React.FC<Props> = ({
       data-test-subj="property-actions-confirm-modal"
       aria-labelledby={modalTitleId}
       focusTrapProps={focusTrapProps}
-    />
+    >
+      {children}
+    </EuiConfirmModal>
   );
 };
 

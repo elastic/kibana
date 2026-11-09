@@ -33,6 +33,7 @@
     "@kbn/i18n-react",
     "@kbn/management-plugin",
     "@kbn/core-http-browser",
+    "@kbn/core-user-profile-common",
     "@kbn/data-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/home-plugin",

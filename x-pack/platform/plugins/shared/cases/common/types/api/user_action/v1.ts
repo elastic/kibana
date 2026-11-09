@@ -62,6 +62,9 @@ export const CaseUserActionStatsSchema = lazySchema(() =>
     total_comment_creations: z.number(),
     total_hidden_comment_updates: z.number(),
     total_comment_updates: z.number(),
+    /** Create and delete rows of thread replies; edits are in `total_comment_updates`. */
+    total_replies: z.number().optional(),
+    total_reply_creations: z.number().optional(),
     total_other_actions: z.number(),
     total_other_action_deletions: z.number(),
   })
@@ -124,6 +127,12 @@ export const UserActionInternalFindRequestSchema = UserActionFindRequestSchema.e
   }).optional(),
   /** Leaves out user-comment edit rows; the UI shows them in the comment's edit history instead. */
   hideCommentEdits: lazySchema(() =>
+    z
+      .union([z.boolean(), z.enum(['true', 'false']).transform((value) => value === 'true')])
+      .optional()
+  ),
+  /** Leaves out thread replies; the UI shows them in the thread panel of their comment. */
+  hideReplies: lazySchema(() =>
     z
       .union([z.boolean(), z.enum(['true', 'false']).transform((value) => value === 'true')])
       .optional()

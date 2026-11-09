@@ -26,7 +26,8 @@ import { emitAttachmentsAddedEvent } from './trigger_utils';
 
 const createAttachment = async (
   addArgs: AddArgs,
-  clientArgs: CasesClientArgs
+  clientArgs: CasesClientArgs,
+  { parentId }: { parentId?: string } = {}
 ): Promise<{
   model: CaseCommentModel;
   createdAttachment?: AttachmentSavedObjectTransformedV2;
@@ -68,6 +69,7 @@ const createAttachment = async (
       createdDate,
       commentReq: query,
       id: savedObjectID,
+      parentId,
     });
 
     if (createdAttachment == null) {
@@ -116,6 +118,20 @@ export const addComment = async (
 
   if (createdAttachment == null) {
     throw Boom.conflict(`Every id in the request is already attached to case ${addArgs.caseId}.`);
+  }
+
+  return toUnifiedAttachment(flattenAttachmentSavedObject(createdAttachment));
+};
+
+/** Creates a reply in the thread of `parentId`; the caller validates the parent. */
+export const addThreadReply = async (
+  { parentId, ...addArgs }: AddArgs & { parentId: string },
+  clientArgs: CasesClientArgs
+): Promise<UnifiedAttachment> => {
+  const { createdAttachment } = await createAttachment(addArgs, clientArgs, { parentId });
+
+  if (createdAttachment == null) {
+    throw Boom.conflict(`The reply could not be added to case ${addArgs.caseId}.`);
   }
 
   return toUnifiedAttachment(flattenAttachmentSavedObject(createdAttachment));

@@ -12,11 +12,14 @@ import userEvent from '@testing-library/user-event';
 import { renderWithTestingProviders } from '../../../common/mock';
 import { useGetAttachmentHistory } from '../../../containers/use_get_attachment_history';
 import { CommentEditHistory } from './comment_edit_history';
+import { useIsAuthor } from './use_is_author';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../containers/use_get_attachment_history');
+jest.mock('./use_is_author');
 
 const useGetAttachmentHistoryMock = useGetAttachmentHistory as jest.Mock;
+const useIsAuthorMock = useIsAuthor as jest.Mock;
 
 const createdBy = { username: 'elastic', fullName: 'Elastic User', email: null };
 
@@ -41,13 +44,32 @@ const history = [
 
 const renderHistory = (editedBy = 'Elastic User') =>
   renderWithTestingProviders(
-    <CommentEditHistory caseId="case-1" commentId="comment-1" editedBy={editedBy} />
+    <CommentEditHistory
+      caseId="case-1"
+      commentId="comment-1"
+      createdBy={createdBy}
+      editedBy={editedBy}
+    />
   );
 
 describe('CommentEditHistory', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useGetAttachmentHistoryMock.mockReturnValue({ data: history, isLoading: false });
+    useIsAuthorMock.mockReturnValue(true);
+  });
+
+  it('only shows the last edited label to users who did not write the comment', () => {
+    useIsAuthorMock.mockReturnValue(false);
+    renderHistory();
+
+    expect(screen.getByTestId('comment-edit-history-label-comment-1')).toHaveTextContent(
+      'Last edited by Elastic User'
+    );
+    expect(screen.queryByTestId('comment-edit-history-button-comment-1')).not.toBeInTheDocument();
+    expect(useGetAttachmentHistoryMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ isEnabled: false })
+    );
   });
 
   it('shows who last edited the comment', () => {

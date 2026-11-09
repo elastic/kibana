@@ -185,6 +185,13 @@ export class UserActionFinder {
     );
   }
 
+  /** Excludes the create and delete rows of thread replies; the thread panel shows them. */
+  public static buildHideRepliesFilter(): KueryNode {
+    return fromKueryExpression(
+      `not ${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.parent_id: *`
+    );
+  }
+
   /**
    * Returns the create and update user actions of a single attachment, oldest first.
    */
@@ -385,6 +392,57 @@ export class UserActionFinder {
       operator: 'or',
       type: CASE_USER_ACTION_SAVED_OBJECT,
     });
+  }
+
+  /** Returns the newest user actions that assigned the user to a case, across all cases. */
+  public async findAssignments({
+    uid,
+    filter,
+    perPage,
+  }: {
+    uid: string;
+    filter?: KueryNode;
+    perPage: number;
+  }): Promise<UserActionSavedObjectTransformed[]> {
+    try {
+      this.context.log.debug('Attempting to find the assignments of a user');
+
+      const response =
+        await this.context.unsecuredSavedObjectsClient.find<UserActionPersistedAttributes>({
+          type: CASE_USER_ACTION_SAVED_OBJECT,
+          filter: combineFilters([
+            filter,
+            UserActionFinder.buildGenericTypeFilter(UserActionTypes.assignees),
+            buildFilter({
+              filters: UserActionActions.add,
+              field: 'action',
+              operator: 'or',
+              type: CASE_USER_ACTION_SAVED_OBJECT,
+            }),
+            buildFilter({
+              filters: uid,
+              field: 'payload.assignees.uid',
+              operator: 'or',
+              type: CASE_USER_ACTION_SAVED_OBJECT,
+            }),
+          ]),
+          sortField: defaultSortField,
+          sortOrder: 'desc',
+          page: 1,
+          perPage,
+        });
+
+      const { saved_objects: savedObjects } = transformFindResponseToExternalModel(response);
+      const decoded = bulkDecodeSOAttributes(savedObjects, UserActionTransformedAttributesSchema);
+
+      return savedObjects.map((so) => ({
+        ...so,
+        attributes: decoded.get(so.id) as UserActionTransformedAttributes,
+      }));
+    } catch (error) {
+      this.context.log.error(`Error finding the assignments of a user: ${error}`);
+      throw error;
+    }
   }
 
   public async findStatusChanges({

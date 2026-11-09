@@ -23,15 +23,31 @@ import { createCommentActionCss, hasDraftComment } from './utils';
 type CommentViewProps = UnifiedValueAttachmentViewProps<CommentAttachmentData>;
 
 const CommentAttachmentChildrenLazy = React.lazy(async () => {
-  const { CommentChildren } = await import('./comment_children');
+  const [{ CommentChildren }, { CommentThread }] = await Promise.all([
+    import('./comment_children'),
+    import('./comment_thread'),
+  ]);
 
   const CommentAttachmentChildren: React.FC<CommentViewProps> = (props) => (
-    <CommentChildren
-      commentId={props.savedObjectId}
-      content={props.data.content}
-      caseId={props.caseData.id}
-      version={props.version}
-    />
+    <>
+      <CommentChildren
+        commentId={props.savedObjectId}
+        content={props.data.content}
+        caseId={props.caseData.id}
+        version={props.version}
+      />
+      {props.isDeleted ? null : (
+        <CommentThread
+          caseId={props.caseData.id}
+          parent={{
+            id: props.savedObjectId,
+            content: props.data.content,
+            createdBy: props.createdBy,
+            createdAt: props.createdAt ?? '',
+          }}
+        />
+      )}
+    </>
   );
   CommentAttachmentChildren.displayName = 'CommentAttachmentChildren';
 
@@ -59,13 +75,23 @@ const CommentActionsLazy = React.lazy(() =>
   }))
 );
 
+const ReplyButtonLazy = React.lazy(() =>
+  import('./comment_thread').then(({ ReplyButton }) => ({ default: ReplyButton }))
+);
+
 const CommentEditHistoryLazy = React.lazy(() =>
   import('./comment_edit_history').then(({ CommentEditHistory }) => ({
     default: CommentEditHistory,
   }))
 );
 
-const getEditHistory = ({ updatedAt, updatedBy, savedObjectId, caseData }: CommentViewProps) => {
+const getEditHistory = ({
+  updatedAt,
+  updatedBy,
+  createdBy,
+  savedObjectId,
+  caseData,
+}: CommentViewProps) => {
   if (updatedAt == null) {
     return undefined;
   }
@@ -75,6 +101,7 @@ const getEditHistory = ({ updatedAt, updatedBy, savedObjectId, caseData }: Comme
       <CommentEditHistoryLazy
         caseId={caseData.id}
         commentId={savedObjectId}
+        createdBy={createdBy}
         editedBy={updatedBy?.fullName || updatedBy?.username || ''}
       />
     </React.Suspense>
@@ -103,31 +130,46 @@ const getCommentClassName = (props: CommentViewProps): string | undefined => {
 
 const getCommentCreationActivity = (props: CommentViewProps) => {
   const className = getCommentClassName(props);
-  const css = createCommentActionCss(props.rowContext.euiTheme);
+  const actionCss = createCommentActionCss(props.rowContext.euiTheme);
 
   return {
     event: ADDED_COMMENT,
     actionsPrefix: getEditHistory(props),
     children: CommentAttachmentChildrenLazy,
     hideDefaultActions: true,
-    getActions: (viewProps: CommentViewProps) => [
-      {
-        type: AttachmentActionType.CUSTOM as const,
-        isPrimary: true,
-        render: () => {
-          return (
-            <React.Suspense fallback={null}>
-              <CommentActionsLazy
-                commentId={viewProps.savedObjectId}
-                content={viewProps.data.content}
-              />
-            </React.Suspense>
-          );
-        },
-      },
-    ],
+    hideCopyLinkAction: true,
+    getActions: (viewProps: CommentViewProps) =>
+      viewProps.isDeleted
+        ? []
+        : [
+            {
+              type: AttachmentActionType.CUSTOM as const,
+              isPrimary: true,
+              render: () => (
+                <React.Suspense fallback={null}>
+                  <ReplyButtonLazy commentId={viewProps.savedObjectId} />
+                </React.Suspense>
+              ),
+            },
+            {
+              type: AttachmentActionType.CUSTOM as const,
+              isPrimary: true,
+              render: () => {
+                return (
+                  <React.Suspense fallback={null}>
+                    <CommentActionsLazy
+                      caseId={viewProps.caseData.id}
+                      commentId={viewProps.savedObjectId}
+                      content={viewProps.data.content}
+                      createdBy={viewProps.createdBy}
+                    />
+                  </React.Suspense>
+                );
+              },
+            },
+          ],
     className,
-    css,
+    css: actionCss,
   };
 };
 

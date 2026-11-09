@@ -35,7 +35,7 @@ import { UserActionFinder } from '../../services/user_actions/operations/find';
 interface FindWithSearchParams {
   caseId: string;
   search: string;
-  queryParams: Omit<UserActionInternalFindRequest, 'search' | 'hideCommentEdits'>;
+  queryParams: Omit<UserActionInternalFindRequest, 'search' | 'hideCommentEdits' | 'hideReplies'>;
   authorizationFilter?: KueryNode;
   ensureSavedObjectsAreAuthorized: (entities: Array<{ owner: string; id: string }>) => void;
   userActionService: CasesClientArgs['services']['userActionService'];
@@ -70,11 +70,12 @@ export const find = async (
       casesClient.cases.resolve({ id: caseId, includeComments: false }),
     ]);
 
-    const { hideCommentEdits, ...findParams } = queryParams;
+    const { hideCommentEdits, hideReplies, ...findParams } = queryParams;
     const { ensureSavedObjectsAreAuthorized } = authorizationFilterRes;
     const authorizationFilter = combineFilters([
       authorizationFilterRes.filter,
       hideCommentEdits ? UserActionFinder.buildHideCommentEditsFilter() : undefined,
+      hideReplies ? UserActionFinder.buildHideRepliesFilter() : undefined,
     ]);
 
     if (findParams.search) {

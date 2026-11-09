@@ -10,7 +10,10 @@ import { useMemo } from 'react';
 
 import type { CaseUserActionsStats } from '../../containers/types';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
-import { hasNonTypeActivityFilter } from '../user_actions_activity_bar/utils';
+import {
+  getVisibleUserActionCounts,
+  hasNonTypeActivityFilter,
+} from '../user_actions_activity_bar/utils';
 
 export const useLastPage = ({
   userActivityQueryParams,
@@ -35,20 +38,19 @@ export const useLastPage = ({
     }
 
     const perPage = userActivityQueryParams.perPage;
-    // The feed hides comment edits (`hideCommentEdits`), so they don't count toward any page.
-    const visibleTotal = userActionsStats.total - userActionsStats.totalCommentUpdates;
+    const { total, comments, history } = getVisibleUserActionCounts(userActionsStats);
     let lastPageType = 1;
 
     switch (userActivityQueryParams.type) {
       case 'action':
         // Must match the server `buildActionFilter`.
-        lastPageType = Math.ceil((visibleTotal - userActionsStats.totalCommentCreations) / perPage);
+        lastPageType = Math.ceil(history / perPage);
         break;
       case 'user':
-        lastPageType = Math.ceil(userActionsStats.totalCommentCreations / perPage || 1);
+        lastPageType = Math.ceil(comments / perPage || 1);
         break;
       case 'all':
-        lastPageType = Math.ceil(visibleTotal / perPage);
+        lastPageType = Math.ceil(total / perPage);
         break;
       default:
         return assertNever(userActivityQueryParams.type);

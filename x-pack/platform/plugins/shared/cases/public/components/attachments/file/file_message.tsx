@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { UnifiedReferenceAttachmentViewProps } from '../../../client/attachment_framework/types';
 import type { FileAttachmentMetadata } from '../../../../common/types/domain/attachment/file/v2';
-import { MarkdownRenderer } from '../../markdown_editor/renderer';
+import { ScrollableMarkdown } from '../../markdown_editor/scrollable_markdown_renderer';
 import { FileThumbnail } from './file_thumbnail';
 import {
   getFileFromReferenceMetadata,
@@ -32,7 +32,7 @@ export const FileMessage = React.memo((props: FileMessageProps) => {
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="cases-file-message">
       {content && (
         <EuiFlexItem grow={false}>
-          <MarkdownRenderer>{content}</MarkdownRenderer>
+          <ScrollableMarkdown content={content} />
         </EuiFlexItem>
       )}
       {showThumbnail && (

@@ -48,6 +48,8 @@ export interface AttachmentCreationActivity<Props = {}> {
   actionsPrefix?: React.ReactNode;
   children?: React.LazyExoticComponent<React.FC<Props>>;
   hideDefaultActions?: boolean;
+  /** Hides the copy link icon of the row; the attachment offers it in its own actions. */
+  hideCopyLinkAction?: boolean;
   deleteSuccessToast?: string;
   className?: string;
   css?: EuiCommentProps['css'];
@@ -104,6 +106,7 @@ type HybridData = ValueData | ReferenceData;
 
 interface UnifiedAttachmentViewPropsBase extends CommonAttachmentViewProps {
   createdBy: CaseUser;
+  createdAt?: string;
   /** Set once the attachment has been edited. */
   updatedAt?: string | null;
   updatedBy?: CaseUser | null;

@@ -124,9 +124,6 @@ export const createCaseAttachmentSavedObjectType = (): SavedObjectsType => ({
         type: 'keyword',
         ignore_above: 1024,
       },
-      deleted: {
-        type: 'boolean',
-      },
     },
   },
   migrations: () => ({}),

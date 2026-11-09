@@ -43,6 +43,7 @@ import { MarkdownEditorForm } from '../markdown_editor';
 import { FileTray, useFileTray } from '../markdown_editor/file_tray';
 import type { TrayFile } from '../markdown_editor/file_tray';
 import { DROP_FILE_HERE } from '../markdown_editor/file_tray/translations';
+import { MentionAutocomplete } from '../markdown_editor/mention';
 import { getMarkdownEditorStorageKey, isOwner } from '../markdown_editor/utils';
 import { removeItemFromSessionStorage } from '../utils';
 
@@ -151,6 +152,8 @@ export const AddComment = React.memo(
         },
         [setFieldValue]
       );
+
+      const getTextarea = useCallback(() => editorRef.current?.textarea, []);
 
       useImperativeHandle(ref, () => ({
         addQuote,
@@ -336,70 +339,76 @@ export const AddComment = React.memo(
           )}
           {permissions.createComment && (
             <Form form={form} data-test-subj="add-comment-form-wrapper">
-              <div
-                onPaste={onPaste}
-                onDragOver={onDragOver}
-                onDragLeave={onDragLeave}
-                onDrop={onDrop}
-                css={
-                  isDraggingFile &&
-                  css`
-                    outline: ${euiTheme.border.width.thick} dashed ${euiTheme.colors.primary};
-                    outline-offset: ${euiTheme.size.xs};
-                    border-radius: ${euiTheme.border.radius.medium};
-                  `
-                }
-                data-test-subj="add-comment-drop-zone"
+              <MentionAutocomplete
+                value={comment ?? ''}
+                onChange={setComment}
+                getTextarea={getTextarea}
               >
-                <UseField
-                  path={fieldName}
-                  component={MarkdownEditorForm}
-                  componentProps={{
-                    ref: editorRef,
-                    id,
-                    draftStorageKey,
-                    caseId,
-                    idAria: 'caseComment',
-                    isDisabled: isLoading,
-                    dataTestSubj: 'add-comment',
-                    placeholder: i18n.ADD_COMMENT_HELP_TEXT,
-                    disablePasteUpload: fileTray.isEnabled,
-                    belowEditorContent: isDraggingFile ? (
-                      <EuiText size="xs" color="subdued" data-test-subj="add-comment-drop-hint">
-                        {DROP_FILE_HERE}
-                      </EuiText>
-                    ) : (
-                      <FileTray
-                        trayFile={trayFile}
-                        trayError={fileTray.trayError}
-                        onRemove={fileTray.removeFile}
-                      />
-                    ),
-                    bottomRightContent: (
-                      <EuiFlexGroup gutterSize="s" alignItems="flexEnd" responsive={false} wrap>
-                        {statusActionButton && (
-                          <EuiFlexItem grow={false}>{statusActionButton}</EuiFlexItem>
-                        )}
-                        {attachActionButton && (
-                          <EuiFlexItem grow={false}>{attachActionButton}</EuiFlexItem>
-                        )}
-                        <EuiFlexItem grow={false}>
-                          <EuiButton
-                            data-test-subj="submit-comment"
-                            fill
-                            iconType="plusCircle"
-                            isDisabled={isDisabled}
-                            isLoading={isLoading}
-                            onClick={onSubmit}
-                          >
-                            {i18n.ADD_COMMENT}
-                          </EuiButton>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    ),
-                  }}
-                />
-              </div>
+                <div
+                  onPaste={onPaste}
+                  onDragOver={onDragOver}
+                  onDragLeave={onDragLeave}
+                  onDrop={onDrop}
+                  css={
+                    isDraggingFile &&
+                    css`
+                      outline: ${euiTheme.border.width.thick} dashed ${euiTheme.colors.primary};
+                      outline-offset: ${euiTheme.size.xs};
+                      border-radius: ${euiTheme.border.radius.medium};
+                    `
+                  }
+                  data-test-subj="add-comment-drop-zone"
+                >
+                  <UseField
+                    path={fieldName}
+                    component={MarkdownEditorForm}
+                    componentProps={{
+                      ref: editorRef,
+                      id,
+                      draftStorageKey,
+                      caseId,
+                      idAria: 'caseComment',
+                      isDisabled: isLoading,
+                      dataTestSubj: 'add-comment',
+                      placeholder: i18n.ADD_COMMENT_HELP_TEXT,
+                      disablePasteUpload: fileTray.isEnabled,
+                      belowEditorContent: isDraggingFile ? (
+                        <EuiText size="xs" color="subdued" data-test-subj="add-comment-drop-hint">
+                          {DROP_FILE_HERE}
+                        </EuiText>
+                      ) : (
+                        <FileTray
+                          trayFile={trayFile}
+                          trayError={fileTray.trayError}
+                          onRemove={fileTray.removeFile}
+                        />
+                      ),
+                      bottomRightContent: (
+                        <EuiFlexGroup gutterSize="s" alignItems="flexEnd" responsive={false} wrap>
+                          {statusActionButton && (
+                            <EuiFlexItem grow={false}>{statusActionButton}</EuiFlexItem>
+                          )}
+                          {attachActionButton && (
+                            <EuiFlexItem grow={false}>{attachActionButton}</EuiFlexItem>
+                          )}
+                          <EuiFlexItem grow={false}>
+                            <EuiButton
+                              data-test-subj="submit-comment"
+                              fill
+                              iconType="plusCircle"
+                              isDisabled={isDisabled}
+                              isLoading={isLoading}
+                              onClick={onSubmit}
+                            >
+                              {i18n.ADD_COMMENT}
+                            </EuiButton>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      ),
+                    }}
+                  />
+                </div>
+              </MentionAutocomplete>
               <InsertTimeline fieldName="comment" />
             </Form>
           )}

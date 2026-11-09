@@ -100,6 +100,24 @@ describe('Update profile routes', () => {
       });
     });
 
+    it('accepts only ISO dates for casesInboxLastReadAt.', () => {
+      const bodySchema = (routeConfig.validate as any).body as ObjectType;
+      const lastReadAt = '2026-11-10T19:00:00.000Z';
+
+      expect(bodySchema.validate({ userSettings: { casesInboxLastReadAt: lastReadAt } })).toEqual({
+        userSettings: { casesInboxLastReadAt: lastReadAt },
+      });
+      expect(() =>
+        bodySchema.validate({ userSettings: { casesInboxLastReadAt: 'not-a-date' } })
+      ).toThrow('must be an ISO 8601 date');
+      expect(() =>
+        bodySchema.validate({ userSettings: { casesInboxLastReadAt: 'Nov 10 2026' } })
+      ).toThrow('must be an ISO 8601 date');
+      expect(() =>
+        bodySchema.validate({ userSettings: { casesInboxLastReadAt: 'x'.repeat(65) } })
+      ).toThrow();
+    });
+
     it('rejects invalid darkMode enum values.', () => {
       const bodySchema = (routeConfig.validate as any).body as ObjectType;
 
@@ -309,6 +327,7 @@ describe('Update profile routes', () => {
           darkMode: 'dark',
           contrastMode: 'high',
           rememberSelectedSpace: true,
+          casesInboxLastReadAt: '2026-11-10T19:00:00.000Z',
         },
       };
 

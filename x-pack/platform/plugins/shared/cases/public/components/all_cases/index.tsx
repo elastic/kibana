@@ -5,23 +5,55 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
+import { EuiNotificationBadge, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { CasesDeepLinkId } from '../../common/navigation';
 import { CaseCallouts } from '../callouts/case_callouts';
 import { useCasesBreadcrumbs } from '../use_breadcrumbs';
 import { CasesPageBody } from '../app/cases_page_body';
 import { AllCasesList } from './all_cases_list';
 import { CasesListAppHeader } from './components/cases_list_app_header';
+import { Inbox } from '../inbox/inbox';
+import { useInbox } from '../../containers/inbox/hooks';
+import * as inboxI18n from '../inbox/translations';
+
+type AllCasesTab = 'cases' | 'inbox';
 
 export const AllCases: React.FC = () => {
   useCasesBreadcrumbs(CasesDeepLinkId.cases);
+  const [selectedTab, setSelectedTab] = useState<AllCasesTab>('cases');
+  const { unreadCount } = useInbox();
 
   return (
     <>
       <CasesListAppHeader />
       <CasesPageBody>
         <CaseCallouts />
-        <AllCasesList />
+        <EuiTabs size="s" data-test-subj="all-cases-tabs">
+          <EuiTab
+            isSelected={selectedTab === 'cases'}
+            onClick={() => setSelectedTab('cases')}
+            data-test-subj="all-cases-tab-cases"
+          >
+            {inboxI18n.CASES_TAB}
+          </EuiTab>
+          <EuiTab
+            isSelected={selectedTab === 'inbox'}
+            onClick={() => setSelectedTab('inbox')}
+            append={
+              unreadCount > 0 ? (
+                <EuiNotificationBadge aria-label={inboxI18n.getUnreadCount(unreadCount)}>
+                  {unreadCount}
+                </EuiNotificationBadge>
+              ) : undefined
+            }
+            data-test-subj="all-cases-tab-inbox"
+          >
+            {inboxI18n.INBOX_TAB}
+          </EuiTab>
+        </EuiTabs>
+        <EuiSpacer size="m" />
+        {selectedTab === 'cases' ? <AllCasesList /> : <Inbox />}
       </CasesPageBody>
     </>
   );

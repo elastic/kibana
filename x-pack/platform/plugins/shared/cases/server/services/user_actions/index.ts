@@ -719,6 +719,8 @@ export class CaseUserActionService {
       total_comment_creations: 0,
       total_hidden_comment_updates: 0,
       total_comment_updates: 0,
+      total_replies: response.aggregations?.replies?.doc_count ?? 0,
+      total_reply_creations: response.aggregations?.replies?.creations.doc_count ?? 0,
       total_other_actions: 0,
       total_other_action_deletions: 0,
     };
@@ -783,6 +785,22 @@ export class CaseUserActionService {
         terms: {
           field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type`,
           size: 100,
+        },
+      },
+      replies: {
+        filter: {
+          exists: {
+            field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.parent_id`,
+          },
+        },
+        aggs: {
+          creations: {
+            filter: {
+              term: {
+                [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.action`]: UserActionActions.create,
+              },
+            },
+          },
         },
       },
       deletions: {

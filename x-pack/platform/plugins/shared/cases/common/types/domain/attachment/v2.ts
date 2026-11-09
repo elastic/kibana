@@ -57,14 +57,13 @@ export const UnifiedAttachmentPayloadSchema = z.union([
 ]);
 
 /**
- * Thread and mention attributes. Only stored on `cases-attachments`.
+ * Thread and mention attributes. Only stored on `cases-attachments`, and only for comments.
  */
 export const UnifiedAttachmentCollabAttributesSchema = lazySchema(() =>
   z
     .object({
       parent_id: z.string().nullable(),
       mentions: z.array(z.string()),
-      deleted: z.boolean(),
     })
     .partial()
 );
@@ -99,12 +98,15 @@ const UnifiedValueAttachmentPayloadPartialSchema = UnifiedValueAttachmentPayload
   owner: true,
 }).partial();
 
-export const UnifiedAttachmentPatchAttributesSchema = z
-  .union([
-    UnifiedReferenceAttachmentPayloadPartialSchema,
-    UnifiedValueAttachmentPayloadPartialSchema,
-  ])
-  .and(AttachmentAttributesBasicSchema.partial());
+export const UnifiedAttachmentPatchAttributesSchema = lazySchema(() =>
+  z
+    .union([
+      UnifiedReferenceAttachmentPayloadPartialSchema,
+      UnifiedValueAttachmentPayloadPartialSchema,
+    ])
+    .and(AttachmentAttributesBasicSchema.partial())
+    .and(UnifiedAttachmentCollabAttributesSchema)
+);
 
 export type UnifiedReferenceAttachmentPayload = z.infer<
   typeof UnifiedReferenceAttachmentPayloadSchema

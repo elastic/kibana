@@ -249,6 +249,7 @@ export const findCaseUserActions = async (
     ...(params.authors?.length ? { authors: params.authors } : {}),
     ...(params.sources?.length ? { sources: params.sources } : {}),
     hideCommentEdits: true,
+    hideReplies: true,
   };
 
   const response = await KibanaServices.get().http.fetch<UserActionInternalFindResponse>(

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MAX_MENTIONS_PER_ATTACHMENT } from '../../../../common/constants';
+import { MAX_MENTIONS_PER_COMMENT } from '../../../../common/constants';
 import { modelVersion1 } from './model_version_1';
 import { modelVersion2 } from './model_version_2';
 
@@ -32,14 +32,13 @@ describe('cases-attachments model versions', () => {
       created_by: { username: 'elastic' },
     };
 
-    it('adds the parent_id, mentions and deleted mappings', () => {
+    it('adds the parent_id and mentions mappings', () => {
       expect(modelVersion2.changes).toEqual([
         {
           type: 'mappings_addition',
           addedMappings: {
             parent_id: { type: 'keyword', ignore_above: 1024 },
             mentions: { type: 'keyword', ignore_above: 1024 },
-            deleted: { type: 'boolean' },
           },
         },
       ]);
@@ -47,12 +46,12 @@ describe('cases-attachments model versions', () => {
 
     it('accepts the new fields', () => {
       expect(() =>
-        getCreateSchema().validate({ ...base, parent_id: 'p1', mentions: ['u1'], deleted: true })
+        getCreateSchema().validate({ ...base, parent_id: 'p1', mentions: ['u1'] })
       ).not.toThrow();
     });
 
     it('rejects too many mentions', () => {
-      const mentions = Array.from({ length: MAX_MENTIONS_PER_ATTACHMENT + 1 }, (_, i) => `u${i}`);
+      const mentions = Array.from({ length: MAX_MENTIONS_PER_COMMENT + 1 }, (_, i) => `u${i}`);
       expect(() => getCreateSchema().validate({ ...base, mentions })).toThrow();
     });
   });

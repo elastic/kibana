@@ -11,8 +11,8 @@ import { isCommentUserAction } from '../../../../common/utils/user_actions';
 import { toUnifiedAttachmentPayload } from '../../../common/attachments';
 
 /**
- * Comment user actions are stored legacy-shaped, but the UI only renders unified.
- * Public routes stay legacy.
+ * Converts legacy-shaped comment user actions to the unified shape the UI renders.
+ * Public routes keep the legacy shape.
  */
 export const projectCommentUserActionsToUnified = (
   userActions: UserActions,

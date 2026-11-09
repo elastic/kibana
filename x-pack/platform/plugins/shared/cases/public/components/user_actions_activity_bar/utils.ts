@@ -5,7 +5,27 @@
  * 2.0.
  */
 
+import type { CaseUserActionsStats } from '../../containers/types';
 import type { UserActivityParams } from './types';
+
+/**
+ * Counts of the rows the feed shows. Comment edits and thread replies are left out of the feed,
+ * so they are left out of the counts too.
+ */
+export const getVisibleUserActionCounts = (
+  stats?: CaseUserActionsStats
+): { total: number; comments: number; history: number } => {
+  const total = Math.max(
+    (stats?.total ?? 0) - (stats?.totalCommentUpdates ?? 0) - (stats?.totalReplies ?? 0),
+    0
+  );
+  const comments = Math.max(
+    (stats?.totalCommentCreations ?? 0) - (stats?.totalReplyCreations ?? 0),
+    0
+  );
+
+  return { total, comments, history: Math.max(total - comments, 0) };
+};
 
 /**
  * True when type, author, search, or source is applied. Uses committed params.

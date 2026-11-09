@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
 import {
   MAX_ATTACHMENT_ID_LENGTH,
-  MAX_MENTIONS_PER_ATTACHMENT,
+  MAX_MENTIONS_PER_COMMENT,
   MAX_USERNAME_LENGTH,
 } from '../../../../common/constants';
 import { createSchema as createSchemaV1 } from './model_version_1';
@@ -18,15 +18,14 @@ const createSchema = createSchemaV1.extends({
   parent_id: schema.maybe(schema.nullable(schema.string({ maxLength: MAX_ATTACHMENT_ID_LENGTH }))),
   mentions: schema.maybe(
     schema.arrayOf(schema.string({ maxLength: MAX_USERNAME_LENGTH }), {
-      maxSize: MAX_MENTIONS_PER_ATTACHMENT,
+      maxSize: MAX_MENTIONS_PER_COMMENT,
     })
   ),
-  deleted: schema.maybe(schema.boolean()),
 });
 
 /**
- * Indexes `parent_id` (threaded replies), `mentions` (profile uids referenced in the content)
- * and `deleted` (soft-deleted thread parents).
+ * Indexes `parent_id` (threaded replies) and `mentions` (profile uids referenced in the content).
+ * Both are only written for comments.
  */
 export const modelVersion2: SavedObjectsFullModelVersion = {
   changes: [
@@ -35,7 +34,6 @@ export const modelVersion2: SavedObjectsFullModelVersion = {
       addedMappings: {
         parent_id: { type: 'keyword', ignore_above: 1024 },
         mentions: { type: 'keyword', ignore_above: 1024 },
-        deleted: { type: 'boolean' },
       },
     },
   ],

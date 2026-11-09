@@ -10,6 +10,7 @@ import type { userActionApiV1 } from '../../../../common/types/api';
 import {
   INTERNAL_GET_ATTACHMENT_HISTORY_URL,
   MAX_ATTACHMENT_ID_LENGTH,
+  MAX_CASE_ID_LENGTH,
 } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
@@ -22,7 +23,7 @@ export const getAttachmentHistoryRoute = createCasesRoute({
   security: DEFAULT_CASES_ROUTE_SECURITY,
   params: {
     params: schema.object({
-      case_id: schema.string({ maxLength: MAX_ATTACHMENT_ID_LENGTH }),
+      case_id: schema.string({ maxLength: MAX_CASE_ID_LENGTH }),
       attachment_id: schema.string({ maxLength: MAX_ATTACHMENT_ID_LENGTH }),
     }),
   },

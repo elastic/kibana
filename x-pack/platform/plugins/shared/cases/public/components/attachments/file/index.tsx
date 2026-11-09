@@ -27,6 +27,7 @@ import {
 } from './utils';
 
 export type FileViewProps = UnifiedReferenceAttachmentViewProps<FileAttachmentMetadata>;
+
 const FileAttachmentEvent = lazy(() =>
   import('./file_attachment_event').then((module) => ({ default: module.FileAttachmentEvent }))
 );

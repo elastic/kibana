@@ -111,6 +111,11 @@ export const INTERNAL_GET_ATTACHMENT_HISTORY_URL =
   `${CASES_INTERNAL_URL}/{case_id}/attachments/{attachment_id}/_history` as const;
 export const INTERNAL_BULK_DELETE_ATTACHMENTS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/attachments/_bulk_delete` as const;
+export const INTERNAL_ATTACHMENT_REPLIES_URL =
+  `${CASES_INTERNAL_URL}/{case_id}/attachments/{attachment_id}/_replies` as const;
+export const INTERNAL_ATTACHMENT_REPLY_COUNTS_URL =
+  `${CASES_INTERNAL_URL}/{case_id}/attachments/_reply_counts` as const;
+export const INTERNAL_INBOX_URL = `${CASES_INTERNAL_URL}/_inbox` as const;
 export const INTERNAL_SUGGEST_USER_PROFILES_URL =
   `${CASES_INTERNAL_URL}/_suggest_user_profiles` as const;
 export const INTERNAL_CONNECTORS_URL = `${CASES_INTERNAL_URL}/{case_id}/_connectors` as const;
@@ -172,6 +177,8 @@ export const MAX_CONCURRENT_SEARCHES = 10 as const;
 export const MAX_BULK_GET_CASES = 1000 as const;
 export const MAX_ATTACHMENT_IDS_PER_CASES_LOOKUP = 1000 as const;
 export const MAX_COMMENTS_PER_PAGE = 100 as const;
+export const MAX_REPLIES_PER_THREAD = 1000 as const;
+export const MAX_INBOX_ITEMS = 50 as const;
 export const MAX_CASES_PER_PAGE = 100 as const;
 export const MAX_USER_ACTIONS_PER_PAGE = 100 as const;
 /**
@@ -211,7 +218,7 @@ export const MAX_SUFFIX_LENGTH = 60 as const;
 export const MAX_CATEGORY_LENGTH = 50 as const;
 export const MAX_DESCRIPTION_LENGTH = 30000 as const;
 export const MAX_COMMENT_LENGTH = 30000 as const;
-export const MAX_MENTIONS_PER_ATTACHMENT = 100 as const;
+export const MAX_MENTIONS_PER_COMMENT = 50 as const;
 export const MAX_LENGTH_PER_TAG = 256 as const;
 export const MAX_TAGS_PER_CASE = 200 as const;
 export const MAX_DELETE_IDS_LENGTH = 100 as const;

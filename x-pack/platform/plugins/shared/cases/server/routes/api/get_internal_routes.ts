@@ -31,6 +31,12 @@ import { bulkDeleteObservablesRoute } from './observables/bulk_delete_observable
 import { deleteObservableRoute } from './observables/delete_observable';
 import { findUserActionsRoute } from './internal/find_user_actions';
 import { getAttachmentHistoryRoute } from './internal/get_attachment_history';
+import {
+  getAttachmentRepliesRoute,
+  getAttachmentReplyCountsRoute,
+  postAttachmentReplyRoute,
+} from './internal/comment_threads';
+import { findInboxRoute } from './internal/inbox';
 import { findCasesContainingAllDocumentsRoute } from './internal/find_cases_containing_all_documents';
 import type { ConfigType } from '../../config';
 import { getTemplateRoutes } from './templates';
@@ -68,6 +74,10 @@ export const getInternalRoutes = (
     similarCaseRoute,
     findUserActionsRoute,
     getAttachmentHistoryRoute,
+    postAttachmentReplyRoute,
+    getAttachmentRepliesRoute,
+    getAttachmentReplyCountsRoute,
+    findInboxRoute,
     findCasesContainingAllDocumentsRoute,
     ...getTemplateRoutes(config),
     ...getFieldDefinitionRoutes(config),

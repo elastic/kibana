@@ -175,7 +175,10 @@ export const createRegisteredAttachmentUserActionBuilder = <
     const nonVisiblePrimaryActions = primaryActions.slice(2, primaryActions.length);
 
     const toolbar = (
-      <UserActionContentToolbar id={attachment.id}>
+      <UserActionContentToolbar
+        id={attachment.id}
+        withCopyLinkAction={!creationActivity.hideCopyLinkAction}
+      >
         {visiblePrimaryActions.map((action) =>
           renderAttachmentAction(action, `attachment-${attachmentTypeId}-${attachment.id}`)
         )}
