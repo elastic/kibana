@@ -159,7 +159,9 @@ change them, and you may not change the harness trace writer. Both are how your 
 
 1. Your edit must typecheck, pass the tool's unit tests and pass eslint; all three are re-run
    before measurement.
-2. Touch at most TWO files. A diffuse edit cannot be attributed to anything.
+2. Keep the change coherent: one idea, however many files it naturally touches. The manifest has
+   to name the failures you expect it to fix, and a scattered edit cannot be attributed to
+   anything when the gate comes back.
 3. A reviewer agent reads your diff before it is measured and blocks changes that encode the
    benchmark, detect the evaluation, tamper with measurement, escape the tool, or fake success.
    Write the change you would defend in review: something that helps any user of this tool, not

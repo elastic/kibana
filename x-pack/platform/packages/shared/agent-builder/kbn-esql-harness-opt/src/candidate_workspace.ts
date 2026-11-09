@@ -43,15 +43,15 @@ export const PROTECTED_PATHS: RegExp[] = [/\.test\.ts$/, /harness_trace\.ts$/];
  * of the model call that the harness is supposed to be improving.
  */
 /**
- * Structural limits on an edit.
+ * Structural limits on an edit: where a file may live, and whether it is part of the
+ * measurement rather than part of the tool.
  *
- * Only objective, cheap properties live here: where a file is, whether it is part of the
- * measurement, how many files one round may touch. Judgements about intent — benchmark
- * leakage, evaluation detection, faked success — are made by the reviewer agent in
- * `review.ts`, because they are judgements, and the regex version of them blocked published
- * documentation examples while catching nothing real.
+ * Nothing else is mechanical. Judgements about intent — benchmark leakage, evaluation
+ * detection, faked success — belong to the reviewer agent in `review.ts`; the regex version of
+ * them blocked published documentation examples and an ordinary environment read while catching
+ * nothing real. A cap on the number of files was the same mistake in another form: a coherent
+ * change to prompts plus the corpus they describe is one idea, not two.
  */
-export const MAX_FILES_PER_ROUND = 2;
 
 export interface CodeEdit {
   path: string;
@@ -68,12 +68,6 @@ export interface CodeEdit {
  */
 export const lintCodeEdits = (edits: CodeEdit[]): string[] => {
   const violations: string[] = [];
-
-  if (edits.length > MAX_FILES_PER_ROUND) {
-    violations.push(
-      `${edits.length} files changed (max ${MAX_FILES_PER_ROUND}); a diffuse edit cannot be attributed`
-    );
-  }
 
   for (const edit of edits) {
     const normalized = edit.path.replace(/^\.\//, '');
