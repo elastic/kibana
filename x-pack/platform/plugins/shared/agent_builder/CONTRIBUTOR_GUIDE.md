@@ -356,6 +356,49 @@ agentBuilder.agents.register({
 
 `reasoning_level` is only supported for built-in agents, and cannot be set by agent types.
 
+### Turning off built-in agent features (`capabilities`)
+
+Every agent gets some built-in Agent Builder features, such as the generic attachment tools. An agent that has no use for one can turn it off with `capabilities`:
+
+- **Who can set it:** agent types and built-in agents. Unlike `reasoning_level`, it also works from an agent type's base configuration. It cannot be set through the HTTP API, the agent form, `configuration_overrides` or the `ai.agent` workflow step.
+- **Defaults:** a missing `capabilities`, a missing key or a missing `enabled` all mean on. Only `enabled: false` turns a feature off.
+- **Merge:** when both an agent type and its agent set `capabilities`, they are merged per key, and the agent's value wins.
+
+For example, an agent type whose agents do not need the generic attachment tools:
+
+```ts
+agentBuilder.agents.registerType({
+  id: 'my_solution.background',
+  name: 'My background agent',
+  description: 'Runs from workflows; never reads attachments',
+  baseConfiguration: {
+    tools: [{ tool_ids: ['[...]'] }],
+    capabilities: { attachment_tools: { enabled: false } },
+  },
+});
+```
+
+#### `attachment_tools`
+
+With `attachment_tools: { enabled: false }`, the agent gets none of the five generic attachment tools (`attachments.read`, `attachments.add`, `attachments.update`, `attachments.list` and `attachments.diff`). The ATTACHMENTS section of its system prompt is replaced by a one-line notice that it cannot read attachment content, and it is not taught inline attachment rendering. This saves about 1.1K to 1.3K input tokens per model call.
+
+What the agent loses:
+
+- **Attachment content:** it cannot read any attachment's content. That includes pasted images, content sent with a message, items from `#` references and the automatic page context. It sees each attachment's notice (id, type, version) and says it cannot open the attachment when asked.
+- **Type descriptions:** some attachment types' descriptions still tell the agent to read the attachment. The notice tells it that it cannot.
+- **Skills:** skills that use the attachment tools, such as proposal management, do not work.
+- **Rendering:** it is not taught to render attachments inline in its replies.
+- **Follow-ups in the UI:** a follow-up typed into a conversation of such an agent in the Agent Builder UI runs that agent, with the same limits.
+
+What keeps working:
+
+- **Attachments themselves:** attachments can still be added through the API, workflow steps, the attachment client and the agent's own tools.
+- **Type and bound tools:** tools that an attachment type declares, and tools tied to one attachment, are still added.
+
+#### Adding a new key
+
+Add a field to `AgentCapabilities` (`@kbn/agent-builder-common`) and to `ResolvedCapabilities` (`run_agent/types.ts`), set its default in `resolveConfiguration` (`run_agent/utils/configuration.ts`), gate the feature on the resolved value, and add tests. A feature that should start off for everyone does not belong here.
+
 ## Registering attachment types
 
 Attachments are used to provide additional context when conversing with an agent.

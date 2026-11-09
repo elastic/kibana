@@ -38,7 +38,7 @@ describe('getResearchAgentPrompt', () => {
             } as any),
         }),
       },
-      configuration: { instructions: '', aiIndices: [] },
+      configuration: { instructions: '', aiIndices: [], capabilities: { attachmentTools: true } },
       spaceId: 'default',
       deployment: { environment: 'self_managed', version: '9.3.0', airgapped: false },
       skills: [],
@@ -230,6 +230,7 @@ describe('getResearchAgentPrompt', () => {
         configuration: {
           instructions: '',
           aiIndices: ['elastic'],
+          capabilities: { attachmentTools: true },
           aiIndexCatalog: [
             { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
           ],
@@ -247,6 +248,7 @@ describe('getResearchAgentPrompt', () => {
         configuration: {
           instructions: '',
           aiIndices: ['elastic'],
+          capabilities: { attachmentTools: true },
           aiIndexCatalog: [
             { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
           ],
@@ -325,6 +327,7 @@ describe('getResearchAgentPrompt', () => {
         configuration: {
           instructions: '',
           aiIndices: ['elastic'],
+          capabilities: { attachmentTools: true },
           aiIndexCatalog: [
             { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
           ],
@@ -350,6 +353,7 @@ describe('getResearchAgentPrompt', () => {
         configuration: {
           instructions: '',
           aiIndices: ['elastic', 'my-custom'],
+          capabilities: { attachmentTools: true },
           aiIndexCatalog: [
             { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
             { id: 'my-custom', esqlTarget: 'ai-index-idx-custom', description: 'Support tickets' },
@@ -386,6 +390,7 @@ describe('getResearchAgentPrompt', () => {
       configuration: {
         instructions: '',
         aiIndices: [],
+        capabilities: { attachmentTools: true },
       },
       spaceId: 'default',
       deployment: { environment: 'self_managed', version: '9.3.0', airgapped: false },

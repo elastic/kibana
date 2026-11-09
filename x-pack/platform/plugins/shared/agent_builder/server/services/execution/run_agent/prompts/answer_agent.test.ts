@@ -36,6 +36,7 @@ describe('getStructuredAnswerPrompt', () => {
       },
       configuration: {
         instructions: '',
+        capabilities: { attachmentTools: true },
       },
       skills: [],
       run: {
@@ -78,6 +79,7 @@ describe('getStructuredAnswerPrompt', () => {
       },
       configuration: {
         instructions: '',
+        capabilities: { attachmentTools: true },
       },
       skills: [],
       run: {
