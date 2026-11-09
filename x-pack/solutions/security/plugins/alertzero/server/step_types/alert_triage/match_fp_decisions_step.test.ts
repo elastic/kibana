@@ -568,6 +568,36 @@ describe('triage match decisions step in on mode', () => {
     expect(notes().map(({ eventId }) => eventId)).toEqual(['a']);
   });
 
+  it('takes the tag off an alert an analyst closed for another reason, not only off one still open', async () => {
+    const { run, callKibanaApi, tags, notes } = setup({
+      mode: 'on',
+      movedOn: ['b'],
+      alerts: [
+        ['a', source('C:\\x.exe')],
+        ['b', source('C:\\x.exe')],
+      ],
+      decisions: approved('C:\\x.exe'),
+    });
+
+    await run();
+
+    const lookup = callKibanaApi.mock.calls
+      .map(([call]) => call.body)
+      .find((body) => body?.query?.bool?.filter?.[0]?.ids && body.query.bool.must_not);
+    expect(lookup?.query.bool.must_not).toEqual([
+      {
+        bool: {
+          filter: [
+            { term: { 'kibana.alert.workflow_status': 'closed' } },
+            { term: { 'kibana.alert.workflow_reason': 'false_positive' } },
+          ],
+        },
+      },
+    ]);
+    expect(tags().at(-1)?.ids).toEqual(['b']);
+    expect(notes().map(({ eventId }) => eventId)).toEqual(['a']);
+  });
+
   it('counts a close that failed against the daily allowance, so a later page cannot close another full allowance', async () => {
     const { run, callKibanaApi, closes } = setup({
       mode: 'on',

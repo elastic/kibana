@@ -417,6 +417,40 @@ export const findOpenAlertIds = async (
 };
 
 /**
+ * Which of the given alerts are not closed as a false positive: still open or acknowledged, or
+ * closed by an analyst for another reason. Used to take a tag off alerts the close did not close.
+ */
+export const findAlertsNotClosedAsFalsePositive = async (
+  { callKibanaApi }: KibanaApi,
+  alertIds: readonly string[]
+): Promise<string[]> => {
+  const { body } = await callKibanaApi<{ hits?: { hits?: AlertHit[] } }>({
+    method: 'POST',
+    path: SIGNALS_SEARCH_PATH,
+    body: {
+      size: alertIds.length,
+      _source: false,
+      query: {
+        bool: {
+          filter: [{ ids: { values: [...alertIds] } }],
+          must_not: [
+            {
+              bool: {
+                filter: [
+                  { term: { [ALERT_FIELDS.status]: 'closed' } },
+                  { term: { [ALERT_FIELDS.reason]: 'false_positive' } },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    },
+  });
+  return (body.hits?.hits ?? []).map(({ _id }) => _id);
+};
+
+/**
  * The alerts that carry a tag, up to one page, with their current status. Used by revoke to find
  * what to put back, and to tell which of them an analyst has moved on from, in one search.
  */
