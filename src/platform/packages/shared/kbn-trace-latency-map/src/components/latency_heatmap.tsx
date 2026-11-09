@@ -140,7 +140,8 @@ export const LatencyHeatmap = React.memo(function LatencyHeatmap({
         },
         xAxisLabel: { visible: true, fontSize: 10 },
         yAxisLabel: { visible: true, fontSize: 10, width: LAYOUT.yAxisLabelWidth },
-        // The region is tinted and outlined; the rest of the map is not covered.
+        // The region is tinted and outlined; the rest of the map is veiled by the overlay, as the
+        // chart's own mask does not leave the selection out of it.
         brushMask: { visible: false },
         brushArea: {
           visible: true,

@@ -504,6 +504,14 @@ describe('LatencyMap', () => {
       expect(screen.getByTestId('traceLatencyMapOverlay')).toBeInTheDocument();
     });
 
+    it('veils the plot around the selection with four rectangles around it', async () => {
+      renderMap({ selection });
+      await waitForChart();
+      hover(4, 5);
+      const mask = screen.getByTestId('traceLatencyMapOutsideMask');
+      expect(mask.querySelectorAll('rect')).toHaveLength(4);
+    });
+
     it('forgets the plot when the columns change', async () => {
       const view = renderMap({ selection });
       await waitForChart();
