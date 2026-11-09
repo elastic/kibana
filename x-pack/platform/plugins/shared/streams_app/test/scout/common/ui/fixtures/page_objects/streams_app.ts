@@ -188,7 +188,9 @@ export class StreamsApp {
   }
 
   async gotoStreamMainPage() {
-    await this.page.gotoApp(`streams`);
+    await this.page.gotoApp(`streams`, {
+      readyWhen: this.page.testSubj.locator('streamsTable'),
+    });
   }
 
   async gotoStreamManagementTab(
@@ -228,11 +230,11 @@ export class StreamsApp {
   }
 
   async gotoStreamsLayout() {
-    await this.page.gotoApp('streams/new-experience');
+    await this.page.gotoApp('streams/v2');
   }
 
   async gotoStreamsLayoutTab(tabName: string) {
-    await this.page.gotoApp(`streams/new-experience/${tabName}`);
+    await this.page.gotoApp(`streams/v2/unit/default/${tabName}`);
   }
 
   getStreamsLayoutTab(tabName: string) {
@@ -245,7 +247,7 @@ export class StreamsApp {
 
   /** Opens the map with its search pre-filled from the URL. */
   async gotoCanvasSearch(query: string) {
-    await this.page.gotoApp('streams/new-experience/map', {
+    await this.page.gotoApp('streams/v2/unit/default/map', {
       params: { mapState: `(flyoutName:!n,flyoutTab:!n,query:'${query}')` },
     });
   }
