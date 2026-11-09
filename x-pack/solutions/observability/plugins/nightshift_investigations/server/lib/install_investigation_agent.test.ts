@@ -31,13 +31,12 @@ describe('installInvestigationAgent', () => {
           type: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
           name: 'Nightshift Investigator',
           description: expect.any(String),
-          labels: ['observability', 'significant-events', 'investigation', 'cortex', 'sandbox'],
+          labels: ['observability', 'significant-events', 'investigation', 'wiki', 'sandbox'],
           avatar_symbol: 'NI',
           access_control: { access_mode: AgentAccessControlMode.Public },
           configuration: {
             tools: [],
             skill_ids: [],
-            connector_ids: [],
           },
         },
       });

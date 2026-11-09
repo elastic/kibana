@@ -24,6 +24,8 @@
     "@kbn/deeplinks-observability",
     "@kbn/share-plugin",
     "@kbn/ebt-click",
-    "@kbn/i18n-react"
+    "@kbn/i18n-react",
+    "@kbn/react-hooks",
+    "@kbn/ui-callout"
   ]
 }

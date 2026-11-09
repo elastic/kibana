@@ -44,7 +44,7 @@ The Investigate/Ask selector does not select a different execution path.
 Attempts that continue an open investigation and starts with the `manual` trigger type do not count
 and are never blocked, even when the limit is reached. For an automatic attempt that would open a new
 investigation, the investigation client charges the automation budget, then the global
-automatic-investigation quota. Each charge is the check: the budget slot is reserved atomically, so
+investigation quota (see "Daily investigation limits" below). Each charge is the check: the budget slot is reserved atomically, so
 overlapping runs across Kibana instances cannot exceed the limit. An attempt denied by either limit
 creates no investigation and appears as skipped in automation history: with reason `daily_limit`
 when the automation limit denies it, and with reason `investigation_limit` when the global quota
@@ -149,14 +149,14 @@ Every space does that: the account directory is the one source of which account 
 `_enable`:
 
 1. Refuses with 400 when service accounts are off, 403 without `manage_security` or the Nightshift Manage engines privilege, and 404 when the space does not exist, before writing anything.
-2. Installs the investigation agent if the space does not have it yet, and binds it to the agent account, so every run of it - a workflow's, a hook's or a user's chat - executes as that account. This happens before any workflow is installed, since installing the entry point is what makes the space read as set up: a failed binding cannot leave a setup that looks done. The decision-tree reinforcement agent stays unbound - only `nightshift.decisionTreeReinforce` runs it, through `agents.runAgent`, which runs it as that step's workflow and never consults a binding.
+2. Installs the investigation agent, and the assistant agent where it is enabled, if the space does not have them yet, and binds both to the agent account, so every run of them - a workflow's, a hook's or a user's chat - executes as that account. The assistant is bound too because it is the agent users pick in the Agent Builder UI and it runs the investigator's tools, connectors and sandbox, which an unbound one would run as the caller. This happens before any workflow is installed, since installing the entry point is what makes the space read as set up: a failed binding cannot leave a setup that looks done. The decision-tree reinforcement agent stays unbound - only `nightshift.decisionTreeReinforce` runs it, through `agents.runAgent`, which runs it as that step's workflow and never consults a binding.
 3. Installs the space's bound workflows with `settings.run_as` set to the agent account, the entry point `system-nightshift-investigation-bound-<space>` last. The entry point also keeps the automations account's id, as its `automationsServiceAccountId` template value. A setup that fails part-way leaves the space reading as not set up. A failed install names the workflow.
 4. Turns bound workflows an admin disabled back on.
 5. Checks that every installed workflow is bound to the agent account and that the entry point is enabled, and fails otherwise.
 
 Setups of one space run one after another. `_enable` is idempotent: running it again repairs a space whose workflows were removed, disabled, or bound to another account. A workflow can only be bound from an authenticated request with `manage_security`, so setup cannot happen at startup. On later boots, the dynamic-workflow upgrade reuses the existing bindings.
 
-A space counts as set up when its entry point is installed, enabled and bound to an account; that account is the space's agent account, and every other bound workflow has to run as it too. Each space keeps its own ids, so spaces are set up independently. `_disable` unbinds the investigation agent and uninstalls the space's bound workflows, and keeps the accounts, which other spaces share. The agent goes first, so a space never reads as removed while its agent still runs as the account. Because Agent Builder refuses every binding change while service accounts are off, `_disable` refuses with 400 in that state whenever the agent is installed, and uninstalls nothing; a space whose agent was never installed is torn down normally.
+A space counts as set up when its entry point is installed, enabled and bound to an account; that account is the space's agent account, and every other bound workflow has to run as it too. Each space keeps its own ids, so spaces are set up independently. `_disable` unbinds the investigation and assistant agents and uninstalls the space's bound workflows, and keeps the accounts, which other spaces share. The agents go first, so a space never reads as removed while its agents still run as the account. Because Agent Builder refuses every binding change while service accounts are off, `_disable` refuses with 400 in that state whenever the agent is installed, and uninstalls nothing; a space whose agent was never installed is torn down normally.
 
 ### What setup changes
 
@@ -202,7 +202,17 @@ If any of those subjects is part of an open investigation that the caller owns, 
 
 If none match, the start claims the subjects for a new investigation id. That way, of two concurrent starts for one subject, the second continues the first. Closed investigations never match. One start always lands on exactly one investigation.
 
-The daily quota for automatic starts (`trigger_type: automatic`) only counts starts that open a new investigation. It is checked after the subject matching and before the claim, so a follow-up on an open investigation is never denied, and a denied start claims nothing.
+#### Daily investigation limits
+
+The global investigation quota is registered by Significant Events and set on the Nightshift settings page. It has three deployment-wide limits per UTC day, each of which can be turned off:
+
+- automatic investigations (`trigger_type: automatic`, all automations combined), default 5;
+- manual investigations (`trigger_type: manual`: the start API behind the homepage and the CLI, and Slack mentions), default 5;
+- all investigations, default 10. It can be lower than the other two added up.
+
+A start is charged to the limit for its trigger type and to the limit for all investigations. A start denied by either limit leaves both counts unchanged and fails with 429, with a message naming the limit that was reached. The quota only counts starts that open a new investigation. It is checked after the subject matching and before the claim, so a follow-up on an open investigation is never denied, and a denied start claims nothing.
+
+A Slack mention of the Nightshift assistant or investigation agent that opens a new Agent Builder conversation is charged as a manual start, through an Agent Builder on-before-new-conversation hook (`registerOnBeforeNewConversation`). The hook runs after the caller is authorized to run the agent and before the conversation is written, and never for a replayed delivery. The slot is given back when the turn is refused before it writes anything (a failed or duplicate execution record, or a busy or conflicting conversation write); after any other failure it stays taken. A mention in a thread that already has a conversation is not charged. A denied mention is refused with 429, or with 503 when the quota check is unavailable, and leaves nothing behind.
 
 The start then runs the `system-nightshift-investigation` workflow with `investigation_id` and the new subjects, and returns `{ investigation_id }`. It does not write to the investigation itself. The workflow's `_ensure` step does all of that:
 
@@ -278,10 +288,10 @@ The `nightshift.sendNotifications` step validates the persisted workflow executi
 
 When the global investigation quota denies an automatic start from a Slack trigger,
 `nightshift.triggerInvestigation` skips the start with `investigation_limit` and replies in the
-triggering Slack thread, once per Slack channel and UTC day. The reply says the limit was reached
-and links the Nightshift settings in the workflow's space for an admin to raise it, or omits the
-link when no Kibana URL is known. The once-a-day marker is claimed before posting, so a failed post is not
-retried. Alert, schedule, and manual runs post nothing.
+triggering Slack thread, once per Slack channel and UTC day. The reply names today's deployment-wide
+limit, says new investigations resume at 00:00 UTC, and links settings in the workflow's space for an
+admin to raise it, or says "settings" without a link when no Kibana URL is known. The once-a-day marker
+is claimed before posting, so a failed post is not retried. Alert, schedule, and manual runs post nothing.
 
 ### Workflow failures
 

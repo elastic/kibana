@@ -43,6 +43,7 @@ import {
   enhanceNoRegressionEvaluator,
 } from './evaluators/enhance_evaluators';
 import { enhanceScopeEvaluator } from './evaluators/enhance_scope_evaluator';
+import { dashboardLayoutEditEvaluator } from './evaluators/layout_edit';
 import {
   combineTurnSteps,
   findAskUserQuestionPrompt,
@@ -295,6 +296,7 @@ export function createEvaluateDataset({
     enhanceDefectResolutionEvaluator,
     enhanceNoRegressionEvaluator,
     enhanceScopeEvaluator,
+    dashboardLayoutEditEvaluator,
     positiveOnly(trajectoryEvaluator),
   ].map((evaluator) => withLowScoreLogging(evaluator, log));
 

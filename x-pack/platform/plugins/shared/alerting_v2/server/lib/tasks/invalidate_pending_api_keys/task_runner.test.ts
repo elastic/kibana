@@ -12,9 +12,9 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 
-import type { PluginInitializerContext } from '@kbn/core/server';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '../../../saved_objects';
 import type { PluginConfig } from '../../../config';
+import { createConfigServiceMock } from '../../services/config_service/config_service.mock';
 import { ApiKeyInvalidationTaskRunner } from './task_runner';
 
 jest.mock('@kbn/task-manager-plugin/server', () => ({
@@ -24,8 +24,8 @@ jest.mock('@kbn/task-manager-plugin/server', () => ({
 const { runInvalidate } = jest.requireMock('@kbn/task-manager-plugin/server');
 
 const config = {
-  get: jest.fn().mockReturnValue({ invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' } }),
-} as unknown as PluginInitializerContext<PluginConfig>['config'];
+  invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' },
+} as unknown as PluginConfig;
 
 describe('ApiKeyInvalidationTaskRunner', () => {
   const coreLogger = loggingSystemMock.createLogger();
@@ -45,7 +45,7 @@ describe('ApiKeyInvalidationTaskRunner', () => {
       savedObjectsClient,
       securityCore,
       securityStart,
-      config
+      createConfigServiceMock(config)
     );
   });
 

@@ -36,8 +36,14 @@ describe('ExitIfNodeImpl', () => {
     expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({ conditionResult: true });
   });
 
-  it('should finish step with empty object when conditionResult is false', () => {
+  it('should finish step with conditionResult false when the condition is false', () => {
     mockStepExecutionRuntime.getCurrentStepState.mockReturnValue({ conditionResult: false });
+    impl.run();
+    expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({ conditionResult: false });
+  });
+
+  it('should finish step with empty object when step state has no conditionResult', () => {
+    mockStepExecutionRuntime.getCurrentStepState.mockReturnValue({});
     impl.run();
     expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({});
   });
