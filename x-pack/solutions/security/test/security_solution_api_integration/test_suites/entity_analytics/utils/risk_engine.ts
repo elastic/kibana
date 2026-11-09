@@ -718,7 +718,7 @@ const addDefaultPipelineToIndex = async ({
   }
 };
 
-const removeDefaultPipelineFromAssetCriticalityIndex = async ({
+export const removeDefaultPipelineFromAssetCriticalityIndex = async ({
   es,
   log,
   space = 'default',

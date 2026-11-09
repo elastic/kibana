@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout-security';
 import { evaluate } from '../../src/evaluate';
 import { lmdJobIds, padJobIds } from '../../src/ml_helpers';
+import { deleteEntityEngines, installEntityStoreV2AndWait } from '../../src/setup_helpers';
 
 /**
  * Multi-skill routing prompts (P-MS1, P-MS2, and new cross-domain prompts).
@@ -15,12 +16,21 @@ import { lmdJobIds, padJobIds } from '../../src/ml_helpers';
  * Unlike partial_feasibility.spec.ts which asserts a single tool, these examples
  * assert that BOTH tools are called (all toolCalls entries must pass).
  *
- * No ES seeding required; tool routing works without pre-seeded data.
+ * Entity documents are not required. The entity store is installed because
+ * security.search_entities stays unavailable until the latest-entities index exists.
  */
 evaluate.describe(
   'SIEM Entity Analytics - Multi-Skill Routing',
   { tag: tags.serverless.security.complete },
   () => {
+    evaluate.beforeAll(async ({ log, supertest }) => {
+      await installEntityStoreV2AndWait({ supertest, log });
+    });
+
+    evaluate.afterAll(async ({ log, supertest }) => {
+      await deleteEntityEngines({ supertest, log });
+    });
+
     evaluate('entity analytics multi-skill routing questions', async ({ evaluateDataset }) => {
       await evaluateDataset({
         dataset: {

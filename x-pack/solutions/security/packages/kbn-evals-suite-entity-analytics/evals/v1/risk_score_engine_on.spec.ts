@@ -10,6 +10,8 @@ import { evaluate } from '../../src/evaluate';
 import {
   bulkIndexEntities,
   deleteEntityEngines,
+  deleteRiskScoreHistoryIndex,
+  ensureRiskScoreDataStream,
   indexRiskScoreHistory,
   installEntityStoreV2AndWait,
 } from '../../src/setup_helpers';
@@ -20,6 +22,7 @@ evaluate.describe(
   () => {
     evaluate.beforeAll(async ({ log, esClient, supertest }) => {
       await installEntityStoreV2AndWait({ supertest, log });
+      await ensureRiskScoreDataStream({ supertest });
       await bulkIndexEntities({
         esClient,
         entities: Array.from({ length: 15 }, (_, index) => ({
@@ -41,10 +44,7 @@ evaluate.describe(
     });
 
     evaluate.afterAll(async ({ esClient, log, supertest }) => {
-      await esClient.indices.deleteDataStream(
-        { name: 'risk-score.risk-score-default' },
-        { ignore: [404] }
-      );
+      await deleteRiskScoreHistoryIndex({ esClient });
       await deleteEntityEngines({ supertest, log });
     });
 

@@ -95,6 +95,10 @@ export const riskScorePreviewRoute = (
           const result = await runWithSpan({
             name: ENTITY_ANALYTICS_SPAN_NAMES.riskScoreOndemandCalculate,
             namespace,
+            attributes: {
+              'entity_analytics.operation': 'preview',
+              ...(identifierType ? { 'entity_analytics.entity_type': identifierType } : {}),
+            },
             cb: () =>
               calculateScoresWithESQLV2({
                 afterKeys,

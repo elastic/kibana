@@ -8,15 +8,26 @@
 import { tags } from '@kbn/scout-security';
 import { evaluate } from '../../src/evaluate';
 import { padJobIds, lmdJobIds } from '../../src/ml_helpers';
+import { deleteEntityEngines, installEntityStoreV2AndWait } from '../../src/setup_helpers';
 
 /**
  * Tier 2b partial-feasibility prompts. The system may produce a reasonable answer;
  * criteria use looser assertions (e.g. query structure, tool usage). Some may need data seeding.
+ * The entity store is installed because security.search_entities stays unavailable
+ * until the latest-entities index exists.
  */
 evaluate.describe(
   'SIEM Entity Analytics - Partial Feasibility',
   { tag: tags.serverless.security.complete },
   () => {
+    evaluate.beforeAll(async ({ log, supertest }) => {
+      await installEntityStoreV2AndWait({ supertest, log });
+    });
+
+    evaluate.afterAll(async ({ log, supertest }) => {
+      await deleteEntityEngines({ supertest, log });
+    });
+
     evaluate('entity analytics partial feasibility questions', async ({ evaluateDataset }) => {
       await evaluateDataset({
         dataset: {

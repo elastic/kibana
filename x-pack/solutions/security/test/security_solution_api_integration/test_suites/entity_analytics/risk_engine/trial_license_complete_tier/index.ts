@@ -11,6 +11,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Entity Analytics - Risk Engine', function () {
     loadTestFile(require.resolve('./risk_engine_privileges'));
     loadTestFile(require.resolve('./asset_criticality'));
+    loadTestFile(require.resolve('./asset_criticality_migrations'));
     loadTestFile(require.resolve('./asset_criticality_privileges'));
     loadTestFile(require.resolve('./asset_criticality_csv_upload'));
   });
