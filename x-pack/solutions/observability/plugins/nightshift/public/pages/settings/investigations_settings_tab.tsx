@@ -10,6 +10,7 @@ import { EuiButton, EuiHorizontalRule } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { INVESTIGATION_RUN_QUOTA_GROUPS } from '@kbn/significant-events-plugin/common';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
 import { useKibana } from '../../hooks/use_kibana';
 import { InvestigationIdentitySection } from './components/investigation_identity_section';
@@ -19,7 +20,7 @@ import { SettingsSection, SettingsSectionRow } from './components/settings_secti
 import { useRunLimitsForm } from './components/use_run_limits_form';
 import { SandboxAllowlistSection } from './components/sandbox_allowlist/sandbox_allowlist_section';
 
-const INVESTIGATION_RUN_LIMIT_GROUPS = ['investigation'] as const;
+const INVESTIGATION_RUN_LIMIT_GROUPS = INVESTIGATION_RUN_QUOTA_GROUPS;
 
 export const InvestigationsSettingsTab = ({
   onCustomContextClick,
@@ -31,7 +32,10 @@ export const InvestigationsSettingsTab = ({
   canManageSandboxAllowlist?: boolean;
 }) => {
   const { appParams, application, http, overlays } = useKibana().services;
-  const runLimits = useRunLimitsForm({ groups: INVESTIGATION_RUN_LIMIT_GROUPS });
+  const runLimits = useRunLimitsForm({
+    groups: INVESTIGATION_RUN_LIMIT_GROUPS,
+    sharedSwitch: true,
+  });
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: runLimits.isDirty,
@@ -66,7 +70,7 @@ export const InvestigationsSettingsTab = ({
             'xpack.nightshift.settings.investigationRunLimitsDescription',
             {
               defaultMessage:
-                'These limits apply only to automatic investigations; manual runs are not limited. When a limit is reached, new automatic investigations are blocked until it resets.',
+                'Daily limits on new investigations. When a limit is reached, the investigations it covers are blocked until it resets. Follow-ups on open investigations are never blocked.',
             }
           )}
           onSave={saveRunLimits}

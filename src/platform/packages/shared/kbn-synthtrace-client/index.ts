@@ -60,7 +60,11 @@ export {
   type EdotBrowserClientOptions,
   type EdotBrowserDocument,
   type EdotBrowserEvent,
+  type EdotBrowserExceptionTemplate,
+  type EdotBrowserPage,
+  type EdotBrowserResource,
   type EdotBrowserSite,
+  type EdotBrowserStackFrame,
   type EdotBrowserSpanDocument,
   type HealthProfileName,
 } from './src/lib/edot_browser';

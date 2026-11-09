@@ -59,6 +59,15 @@ const EcfStackSchema = schema.object({
       },
     })
   ),
+  namespace: schema.maybe(
+    schema.string({
+      minLength: 1,
+      maxLength: 100,
+      meta: {
+        description: 'Data stream namespace the stack was last launched or updated with.',
+      },
+    })
+  ),
 });
 
 const CloudOnboardingDeploymentProviderSchema = schema.oneOf(

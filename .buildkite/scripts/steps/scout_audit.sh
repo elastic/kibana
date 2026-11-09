@@ -60,6 +60,7 @@ notify_file="$(mktemp -t scout-audit-notify.XXXXXX.yml)"
   echo '      provider: gcp'
   echo '      machineType: n2-standard-2'
   echo '      preemptible: true'
+  echo '      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c'
   echo '    notify:'
   echo '      - slack:'
   echo '          channels:'

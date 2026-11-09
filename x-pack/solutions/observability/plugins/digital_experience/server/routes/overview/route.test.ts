@@ -30,7 +30,9 @@ const runHandler = ({
   query = { start: START, end: END },
 }: {
   serviceName?: string;
-  query?: { start: string; end: string; environment?: string };
+  query?: { start: string; end: string; environment?: string } & Partial<
+    Record<'browser' | 'os' | 'device' | 'country' | 'pageUrl', string>
+  >;
 } = {}) => {
   const handler = overviewRouteRepository[APPLICATION_OVERVIEW_ENDPOINT].handler as unknown as (
     resources: unknown
@@ -102,6 +104,46 @@ describe('GET /internal/digital_experience/applications/{serviceName}/overview',
     );
   });
 
+  it('passes the selected filters, and none when they are left out', async () => {
+    await runHandler({
+      query: {
+        start: START,
+        end: END,
+        browser: 'Chrome',
+        os: 'macOS',
+        device: 'iPhone',
+        country: 'DE',
+        pageUrl: 'https://shop.example.com/',
+      },
+    });
+
+    expect(mockedOtel).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filters: {
+          browser: 'Chrome',
+          os: 'macOS',
+          device: 'iPhone',
+          country: 'DE',
+          pageUrl: 'https://shop.example.com/',
+        },
+      })
+    );
+
+    await runHandler();
+
+    expect(mockedOtel).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        filters: {
+          browser: undefined,
+          os: undefined,
+          device: undefined,
+          country: undefined,
+          pageUrl: undefined,
+        },
+      })
+    );
+  });
+
   it('answers a failed search without the Elasticsearch details', async () => {
     mockedOtel.mockRejectedValue(new Error('no such index [logs-generic.otel-default]'));
 
@@ -137,6 +179,25 @@ describe('GET /internal/digital_experience/applications/{serviceName}/overview',
     expect(withEnvironment(1024).success).toBe(true);
     expect(withEnvironment(1025).success).toBe(false);
     expect(withEnvironment(0).success).toBe(false);
+  });
+
+  it('accepts each filter up to its length, and rejects an empty or longer one', () => {
+    const withFilter = (name: string, length: number) =>
+      querySchema().safeParse({ start: START, end: END, [name]: 'x'.repeat(length) }).success;
+
+    expect(withFilter('browser', 256)).toBe(true);
+    expect(withFilter('browser', 257)).toBe(false);
+    expect(withFilter('os', 256)).toBe(true);
+    expect(withFilter('os', 257)).toBe(false);
+    expect(withFilter('device', 256)).toBe(true);
+    expect(withFilter('device', 257)).toBe(false);
+    expect(withFilter('country', 16)).toBe(true);
+    expect(withFilter('country', 17)).toBe(false);
+    expect(withFilter('pageUrl', 1024)).toBe(true);
+    expect(withFilter('pageUrl', 1025)).toBe(false);
+    ['browser', 'os', 'device', 'country', 'pageUrl'].forEach((name) =>
+      expect(withFilter(name, 0)).toBe(false)
+    );
   });
 
   it('requires an application name of up to 1024 characters', () => {

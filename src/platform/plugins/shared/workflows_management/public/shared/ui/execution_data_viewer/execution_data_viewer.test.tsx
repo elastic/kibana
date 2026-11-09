@@ -8,7 +8,6 @@
  */
 
 import { fireEvent, render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { ExecutionDataViewer } from './execution_data_viewer';
 
@@ -104,31 +103,24 @@ describe('ExecutionDataViewer', () => {
       expect(screen.queryByPlaceholderText(SEARCH_PLACEHOLDER)).not.toBeInTheDocument();
     });
 
-    it('should update search term and pass it to JSONDataTable', async () => {
-      const user = userEvent.setup();
+    it('should update search term and pass it to JSONDataTable', () => {
       render(<ExecutionDataViewer data={mockData} />);
 
       const searchInput = screen.getByPlaceholderText(SEARCH_PLACEHOLDER);
-      await user.type(searchInput, 'test');
+      fireEvent.change(searchInput, { target: { value: 'test' } });
 
       expect(searchInput).toHaveValue('test');
       const lastCall = mockJSONDataTable.mock.calls[mockJSONDataTable.mock.calls.length - 1][0];
       expect(lastCall.searchTerm).toBe('test');
     });
 
-    it('should clear search term when clear button is clicked', async () => {
-      const user = userEvent.setup();
+    it('should clear search term when clear button is clicked', () => {
       render(<ExecutionDataViewer data={mockData} />);
 
       const searchInput = screen.getByPlaceholderText(SEARCH_PLACEHOLDER);
-      await user.type(searchInput, 'test query');
+      fireEvent.change(searchInput, { target: { value: 'test query' } });
 
-      const clearButton = searchInput.parentElement?.querySelector(
-        '[data-test-subj*="clearSearchButton"]'
-      );
-      if (clearButton) {
-        await user.click(clearButton);
-      }
+      fireEvent.click(screen.getByTestId('clearSearchButton'));
 
       expect(searchInput).toHaveValue('');
     });
