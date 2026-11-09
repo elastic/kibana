@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-module.exports = {
-  icon: () => null,
-};
+export const icon = () => null;

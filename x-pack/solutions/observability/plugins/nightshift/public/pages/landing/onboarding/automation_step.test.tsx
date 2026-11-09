@@ -100,6 +100,7 @@ const automation = {
   runtime: {},
   createdAt: '2026-11-05T00:00:00.000Z',
   updatedAt: '2026-11-05T00:00:00.000Z',
+  author: 'elastic',
 } as Automation;
 
 const mockUseDeleteAutomation = useDeleteAutomation as jest.Mock;
