@@ -19,6 +19,7 @@ export const jestOverrides: OxlintOverride[] = [
     files: ['**/*.{test,test.mocks,mock}.{js,mjs,ts,tsx}', '**/__mocks__/**/*.{js,mjs,ts,tsx}'],
     rules: {
       'jest/no-identical-title': 'error',
+      '@kbn/compat/import-order': 'off',
     },
   },
 ];

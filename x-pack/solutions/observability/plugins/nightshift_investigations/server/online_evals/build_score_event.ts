@@ -18,6 +18,12 @@ export type EvaluateResult = Awaited<ReturnType<EvaluateFn>>[number];
 export type OnlineEvalScoreMetadata = Omit<
   OnlineEvalScoreEvent,
   | 'judge_model'
+  | 'judge_input_tokens'
+  | 'judge_cached_input_tokens'
+  | 'judge_output_tokens'
+  | 'judge_reasoning_tokens'
+  | 'judge_llm_calls'
+  | 'judge_llm_calls_without_usage'
   | 'scores'
   | 'evaluator_count'
   | 'failed_count'
@@ -62,8 +68,41 @@ const toErrors = (results: EvaluateResult[]): OnlineEvalError[] =>
     .map(({ evaluator, error }) => ({
       evaluator_name: evaluator.name,
       evaluator_version: evaluator.version,
-      code: error?.code === 'evidence_unmet' ? 'evidence_unmet' : 'evaluator_error',
+      code: error?.code ?? 'evaluator_error',
     }));
+
+type JudgeUsage = Pick<
+  OnlineEvalScoreEvent,
+  | 'judge_input_tokens'
+  | 'judge_cached_input_tokens'
+  | 'judge_output_tokens'
+  | 'judge_reasoning_tokens'
+  | 'judge_llm_calls'
+  | 'judge_llm_calls_without_usage'
+>;
+
+/** Sums the judges' token usage, or nothing when no judge made a model call. */
+const toJudgeUsage = (results: EvaluateResult[]): JudgeUsage => {
+  const usages = results.flatMap(({ usage }) => (usage ? [usage] : []));
+  if (usages.length === 0) {
+    return {};
+  }
+  const sum = (read: (usage: (typeof usages)[number]) => number | undefined) =>
+    usages.reduce((total, usage) => total + (read(usage) ?? 0), 0);
+  const sumReported = (read: (usage: (typeof usages)[number]) => number | undefined) =>
+    usages.some((usage) => read(usage) !== undefined) ? sum(read) : undefined;
+  const cached = sumReported(({ cached_input_tokens: tokens }) => tokens);
+  const reasoning = sumReported(({ reasoning_tokens: tokens }) => tokens);
+
+  return {
+    judge_input_tokens: sum(({ input_tokens: tokens }) => tokens),
+    ...(cached === undefined ? {} : { judge_cached_input_tokens: cached }),
+    judge_output_tokens: sum(({ output_tokens: tokens }) => tokens),
+    ...(reasoning === undefined ? {} : { judge_reasoning_tokens: reasoning }),
+    judge_llm_calls: sum(({ llm_calls: calls }) => calls),
+    judge_llm_calls_without_usage: sum(({ llm_calls_without_usage: calls }) => calls),
+  };
+};
 
 const withDropCounts = (
   event: OnlineEvalScoreEvent,
@@ -129,13 +168,16 @@ export const buildOnlineEvalScoreEvent = ({
       code: 'evaluation_failed' as const,
     })),
   ];
-  const skippedCount = errors.filter(({ code }) => code === 'evidence_unmet').length;
+  const skippedCount = errors.filter(
+    ({ code }) => code === 'evidence_unmet' || code === 'not_applicable'
+  ).length;
   // Online evals run every judge on one fixed model, so one value covers the event.
   const judgeModel = results.find(({ evaluator }) => evaluator.model)?.evaluator.model?.id;
 
   return fitToSizeLimit({
     ...metadata,
     ...(judgeModel ? { judge_model: judgeModel } : {}),
+    ...toJudgeUsage(results),
     scores: toScores(results, includeExplanations),
     evaluator_count: results.length + failedEvaluators.length,
     failed_count: errors.length - skippedCount,

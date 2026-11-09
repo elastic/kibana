@@ -143,12 +143,12 @@ export const createSourceUpdateTool = ({
   availability: createSignificantEventsAvailability({
     server,
     logger,
-    requireManagePrivilege: true,
+    requireSourceChangePrivilege: true,
   }),
   handler: async ({ source: slugOrId, enabled, ...changes }, { request }) =>
     runSourceTool({
       action: 'update source',
-      privilege: 'manage',
+      privilege: 'changeSources',
       request,
       getScopedClients,
       server,

@@ -7,55 +7,10 @@
 
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { CoreWebVital, VitalRating } from '../../common/core_web_vitals';
+import type { CoreWebVital } from '../../common/core_web_vitals';
 import { CORE_WEB_VITALS, getVitalRating } from '../../common/core_web_vitals';
 import type { SessionWebVitals } from '../../common/sessions';
-import { formatDurationMs } from '../utils/format_duration';
-
-const RATING_COLORS: Record<VitalRating, 'success' | 'warning' | 'danger'> = {
-  good: 'success',
-  needsImprovement: 'warning',
-  poor: 'danger',
-};
-
-const RATING_LABELS: Record<VitalRating, string> = {
-  good: i18n.translate('xpack.digitalExperience.sessionDetail.vitals.goodLabel', {
-    defaultMessage: 'Good',
-  }),
-  needsImprovement: i18n.translate(
-    'xpack.digitalExperience.sessionDetail.vitals.needsImprovementLabel',
-    { defaultMessage: 'Needs improvement' }
-  ),
-  poor: i18n.translate('xpack.digitalExperience.sessionDetail.vitals.poorLabel', {
-    defaultMessage: 'Poor',
-  }),
-};
-
-export const VITAL_LABELS: Record<CoreWebVital, string> = {
-  lcp: i18n.translate('xpack.digitalExperience.sessionDetail.vitals.lcpLabel', {
-    defaultMessage: 'LCP',
-  }),
-  inp: i18n.translate('xpack.digitalExperience.sessionDetail.vitals.inpLabel', {
-    defaultMessage: 'INP',
-  }),
-  cls: i18n.translate('xpack.digitalExperience.sessionDetail.vitals.clsLabel', {
-    defaultMessage: 'CLS',
-  }),
-  fcp: i18n.translate('xpack.digitalExperience.sessionDetail.vitals.fcpLabel', {
-    defaultMessage: 'FCP',
-  }),
-  ttfb: i18n.translate('xpack.digitalExperience.sessionDetail.vitals.ttfbLabel', {
-    defaultMessage: 'TTFB',
-  }),
-};
-
-/**
- * A vital's value with its unit, as the Overview formats it: CLS is unitless (3 decimals, like the
- * applications list), the others are times.
- */
-export const formatVital = (vital: CoreWebVital, value: number): string =>
-  vital === 'cls' ? value.toFixed(3) : formatDurationMs(value);
+import { formatVital, RATING_COLORS, RATING_LABELS, VITAL_LABELS } from '../utils/web_vitals';
 
 /** One vital's value, colored by its rating, with the rating in a tooltip. */
 export function WebVitalBadge({

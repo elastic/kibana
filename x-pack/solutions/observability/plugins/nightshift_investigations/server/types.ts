@@ -7,9 +7,16 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type {
+  PluginSetupContract as ActionsPluginSetup,
+  PluginStartContract as ActionsPluginStart,
+} from '@kbn/actions-plugin/server';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
-import type { AlertingServerStart as AlertingV2ServerStart } from '@kbn/alerting-v2-plugin/server';
+import type {
+  AlertingServerSetup as AlertingV2ServerSetup,
+  AlertingServerStart as AlertingV2ServerStart,
+} from '@kbn/alerting-v2-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type {
@@ -35,13 +42,24 @@ import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import type { NightshiftInvestigationsClient } from './client/investigations_client';
 import type { TriggerEmitter } from './workflows/triggers/emit';
 
+export type InvestigationQuotaTrigger = 'automatic' | 'manual';
+
+/** The daily limit that denied a start: the trigger's own limit, or the one for all investigations. */
+export type InvestigationQuotaLimit = InvestigationQuotaTrigger | 'all';
+
 export interface InvestigationQuotaResult {
   allowed: boolean;
+  deniedBy?: InvestigationQuotaLimit;
+  /** The configured value of the limit that denied the start, when the callback knows it. */
+  limit?: number;
   /** Gives back the slot an allowed start took, when the start does not open a new investigation. */
   release?: () => Promise<void>;
 }
 
-export type InvestigationQuotaCallback = () => Promise<InvestigationQuotaResult>;
+/** Charges a start that opens a new investigation to the daily limits for its trigger. */
+export type InvestigationQuotaCallback = (
+  trigger: InvestigationQuotaTrigger
+) => Promise<InvestigationQuotaResult>;
 
 export interface AutomationBudget {
   consume: () => Promise<void>;
@@ -61,12 +79,15 @@ export interface NightshiftInvestigationsServerStart {
 
 export interface NightshiftInvestigationsSetupDeps {
   share: SharePluginSetup;
+  actions?: ActionsPluginSetup;
   agentBuilder?: AgentBuilderPluginSetup;
   alerting?: AlertingServerSetup;
+  alertingVTwo?: AlertingV2ServerSetup;
   /**
    * Stores investigations as conversations. Without it investigations are unavailable.
    */
   agenticInvestigations?: AgenticInvestigationsPluginSetup;
+  cloud?: CloudSetup;
   /** Provides the `proposals.create` tool the investigation agent proposes actions with. */
   proposals?: ProposalsPluginSetup;
   contextEngine?: ContextEnginePluginSetup;
