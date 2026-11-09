@@ -184756,6 +184756,7 @@ components:
                     - read
                     - decrypt
                     - execute
+                    - configuration
                     - unknown
                     - license
                     - timeout
@@ -184856,6 +184857,7 @@ components:
                 - read
                 - decrypt
                 - execute
+                - configuration
                 - unknown
                 - license
                 - timeout
