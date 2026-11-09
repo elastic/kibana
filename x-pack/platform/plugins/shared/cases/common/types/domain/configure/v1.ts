@@ -64,7 +64,15 @@ export const CustomFieldsConfigurationSchema = z.array(CustomFieldConfigurationS
 export const ObservableTypesConfigurationSchema = lazySchema(() =>
   z.array(
     CaseObservableTypeSchema.extend({
-      paths: z.array(z.object({ path: z.string(), enabled: z.boolean() })).optional(),
+      paths: z
+        .array(
+          z.object({
+            path: z.string(),
+            enabled: z.boolean(),
+            excludedValues: z.array(z.string()).optional(),
+          })
+        )
+        .optional(),
       valuePattern: z.string().optional(),
     })
   )

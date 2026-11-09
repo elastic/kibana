@@ -48,6 +48,12 @@ export const resolveObservableTypes = (
   return resolvedTypes;
 };
 
+const hasSameExcludedValues = (
+  first: readonly string[] = [],
+  second: readonly string[] = []
+): boolean =>
+  first.length === second.length && first.every((value, index) => value === second[index]);
+
 /**
  * Returns the override that stores only the paths that differ from the defaults of a built-in type.
  */
@@ -55,12 +61,16 @@ export const toBuiltinOverride = (
   defaultType: DefaultObservableType,
   paths: readonly ObservableTypePath[]
 ): StoredObservableType | undefined => {
-  const defaultEnabledByPath = new Map(
-    defaultType.paths.map(({ path, enabled }) => [path, enabled])
-  );
-  const changedPaths = paths.filter(
-    ({ path, enabled }) => defaultEnabledByPath.get(path) !== enabled
-  );
+  const defaultsByPath = new Map(defaultType.paths.map((entry) => [entry.path, entry]));
+  const changedPaths = paths.filter(({ path, enabled, excludedValues }) => {
+    const defaultEntry = defaultsByPath.get(path);
+
+    return (
+      defaultEntry === undefined ||
+      defaultEntry.enabled !== enabled ||
+      !hasSameExcludedValues(defaultEntry.excludedValues, excludedValues)
+    );
+  });
 
   return changedPaths.length > 0 ? { key: defaultType.key, paths: changedPaths } : undefined;
 };

@@ -12,6 +12,7 @@ import {
   EuiBasicTable,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiComboBox,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,6 +21,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import {
+  MAX_OBSERVABLE_TYPE_EXCLUDED_VALUES,
+  MAX_OBSERVABLE_TYPE_EXCLUDED_VALUE_LENGTH,
   MAX_OBSERVABLE_TYPE_PATHS,
   MAX_OBSERVABLE_TYPE_PATH_LENGTH,
 } from '../../../common/constants';
@@ -60,12 +63,59 @@ const ObservableTypePathsTableComponent: React.FC<ObservableTypePathsTableProps>
     setNewPath('');
   }, [onChange, paths, trimmedNewPath]);
 
+  const updateExcludedValues = useCallback(
+    (path: string, excludedValues: string[]) =>
+      onChange(
+        paths.map((entry) => {
+          if (entry.path !== path) {
+            return entry;
+          }
+          const { excludedValues: previousValues, ...rest } = entry;
+          return excludedValues.length > 0 ? { ...rest, excludedValues } : rest;
+        })
+      ),
+    [onChange, paths]
+  );
+
   const columns: Array<EuiBasicTableColumn<ObservableTypePath>> = useMemo(
     () => [
       {
         field: 'path',
         name: i18n.FIELD_NAME_ARIA_LABEL,
         'data-test-subj': 'observable-type-path-name',
+      },
+      {
+        name: i18n.EXCLUDED_VALUES_COLUMN,
+        render: ({ path, excludedValues = [] }: ObservableTypePath) => (
+          <EuiComboBox
+            aria-label={i18n.EXCLUDED_VALUES_FOR_FIELD(path)}
+            placeholder={i18n.EXCLUDED_VALUES_PLACEHOLDER}
+            noSuggestions
+            compressed
+            fullWidth
+            isDisabled={disabled}
+            selectedOptions={excludedValues.map((value) => ({ label: value }))}
+            onChange={(options) =>
+              updateExcludedValues(
+                path,
+                options.map(({ label }) => label)
+              )
+            }
+            onCreateOption={(searchValue) => {
+              const value = searchValue.trim();
+              if (
+                value.length === 0 ||
+                value.length > MAX_OBSERVABLE_TYPE_EXCLUDED_VALUE_LENGTH ||
+                excludedValues.length >= MAX_OBSERVABLE_TYPE_EXCLUDED_VALUES ||
+                excludedValues.includes(value)
+              ) {
+                return false;
+              }
+              updateExcludedValues(path, [...excludedValues, value]);
+            }}
+            data-test-subj={`observable-type-path-excluded-values-${typeKey}-${path}`}
+          />
+        ),
       },
       {
         name: i18n.EXTRACT_COLUMN,
@@ -106,7 +156,7 @@ const ObservableTypePathsTableComponent: React.FC<ObservableTypePathsTableProps>
           ),
       },
     ],
-    [defaultPaths, disabled, onChange, paths, typeKey]
+    [defaultPaths, disabled, onChange, paths, typeKey, updateExcludedValues]
   );
 
   return (

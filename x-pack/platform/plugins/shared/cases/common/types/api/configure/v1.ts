@@ -11,6 +11,8 @@ import {
   MAX_CUSTOM_FIELD_KEY_LENGTH,
   MAX_CUSTOM_FIELD_LABEL_LENGTH,
   MAX_OBSERVABLE_TYPE_ENTRIES,
+  MAX_OBSERVABLE_TYPE_EXCLUDED_VALUES,
+  MAX_OBSERVABLE_TYPE_EXCLUDED_VALUE_LENGTH,
   MAX_OBSERVABLE_TYPE_KEY_LENGTH,
   MAX_OBSERVABLE_TYPE_LABEL_LENGTH,
   MAX_OBSERVABLE_TYPE_PATHS,
@@ -97,6 +99,16 @@ export const ObservableTypePathConfigurationSchema = lazySchema(() =>
   z.object({
     path: limitedStringSchema({ fieldName: 'path', min: 1, max: MAX_OBSERVABLE_TYPE_PATH_LENGTH }),
     enabled: z.boolean(),
+    excludedValues: limitedArraySchema({
+      min: 0,
+      max: MAX_OBSERVABLE_TYPE_EXCLUDED_VALUES,
+      fieldName: 'excludedValues',
+      codec: limitedStringSchema({
+        fieldName: 'excluded value',
+        min: 1,
+        max: MAX_OBSERVABLE_TYPE_EXCLUDED_VALUE_LENGTH,
+      }),
+    }).optional(),
   })
 );
 

@@ -17,6 +17,8 @@ import {
   MAX_LENGTH_PER_TAG,
   MAX_LENGTH_PER_WORKFLOW_TAG,
   MAX_OBSERVABLE_TYPE_ENTRIES,
+  MAX_OBSERVABLE_TYPE_EXCLUDED_VALUES,
+  MAX_OBSERVABLE_TYPE_EXCLUDED_VALUE_LENGTH,
   MAX_OBSERVABLE_TYPE_KEY_LENGTH,
   MAX_OBSERVABLE_TYPE_LABEL_LENGTH,
   MAX_OBSERVABLE_TYPE_PATHS,
@@ -723,6 +725,36 @@ describe('configure', () => {
           key: 'observable_key_1',
           label: 'label',
           paths: [{ path: 'a'.repeat(MAX_OBSERVABLE_TYPE_PATH_LENGTH + 1), enabled: true }],
+        },
+      ]);
+      expect(result.success).toBe(false);
+    });
+
+    it('should accept excluded values on a path', () => {
+      const result = ObservableTypesConfigurationSchema.safeParse([
+        {
+          key: 'observable-type-ipv4',
+          paths: [{ path: 'source.ip', enabled: true, excludedValues: ['127.0.0.1'] }],
+        },
+      ]);
+      expect(result.success).toBe(true);
+    });
+
+    it.each([
+      [
+        'too many excluded values',
+        Array.from({ length: MAX_OBSERVABLE_TYPE_EXCLUDED_VALUES + 1 }, (_, index) => `v${index}`),
+      ],
+      [
+        'an excluded value exceeding max length',
+        ['a'.repeat(MAX_OBSERVABLE_TYPE_EXCLUDED_VALUE_LENGTH + 1)],
+      ],
+      ['an empty excluded value', ['']],
+    ])('should invalidate %s', (_, excludedValues) => {
+      const result = ObservableTypesConfigurationSchema.safeParse([
+        {
+          key: 'observable-type-ipv4',
+          paths: [{ path: 'source.ip', enabled: true, excludedValues }],
         },
       ]);
       expect(result.success).toBe(false);

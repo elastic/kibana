@@ -160,7 +160,7 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
       },
     },
     '4': {
-      // observableTypes entries gain paths and a valuePattern, and the label becomes optional
+      // observableTypes entries gain paths (with optional excluded values) and a valuePattern, and the label becomes optional
       // (an entry without a label overrides a built-in type). Not indexed, so no mapping change.
       changes: [],
       schemas: {
@@ -175,7 +175,11 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
                     label: schema.maybe(schema.string()),
                     paths: schema.maybe(
                       schema.arrayOf(
-                        schema.object({ path: schema.string(), enabled: schema.boolean() })
+                        schema.object({
+                          path: schema.string(),
+                          enabled: schema.boolean(),
+                          excludedValues: schema.maybe(schema.arrayOf(schema.string())),
+                        })
                       )
                     ),
                     valuePattern: schema.maybe(schema.string()),
@@ -198,7 +202,11 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
                     label: schema.maybe(schema.string()),
                     paths: schema.maybe(
                       schema.arrayOf(
-                        schema.object({ path: schema.string(), enabled: schema.boolean() })
+                        schema.object({
+                          path: schema.string(),
+                          enabled: schema.boolean(),
+                          excludedValues: schema.maybe(schema.arrayOf(schema.string())),
+                        })
                       )
                     ),
                     valuePattern: schema.maybe(schema.string()),

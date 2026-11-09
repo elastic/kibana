@@ -49,7 +49,7 @@ export interface ConfigurationPersistedAttributes {
 type PersistedObservableTypesConfiguration = Array<{
   key: string;
   label?: string;
-  paths?: Array<{ path: string; enabled: boolean }>;
+  paths?: Array<{ path: string; enabled: boolean; excludedValues?: string[] }>;
   valuePattern?: string;
 }>;
 
@@ -99,7 +99,15 @@ const PersistedObservableTypesSchema = lazySchema(() =>
     z.object({
       key: z.string(),
       label: z.string().optional(),
-      paths: z.array(z.object({ path: z.string(), enabled: z.boolean() })).optional(),
+      paths: z
+        .array(
+          z.object({
+            path: z.string(),
+            enabled: z.boolean(),
+            excludedValues: z.array(z.string()).optional(),
+          })
+        )
+        .optional(),
       valuePattern: z.string().optional(),
     })
   )

@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { renderWithTestingProviders } from '../../common/mock';
 import type { ObservableTypesTableProps } from './observable_types_table';
@@ -154,6 +155,47 @@ describe('ObservableTypesTable', () => {
       customType,
       { key: 'observable-type-url', label: 'URL', paths: [{ path: 'url.full', enabled: true }] },
     ]);
+  });
+
+  it('adds an excluded value to a default field', async () => {
+    renderWithTestingProviders(<ObservableTypesTable {...props} />);
+
+    await expandRow('observable-type-ipv4');
+    const excludedValues = await screen.findByTestId(
+      'observable-type-path-excluded-values-observable-type-ipv4-source.ip'
+    );
+    await userEvent.type(
+      within(excludedValues).getByTestId('comboBoxSearchInput'),
+      ' 127.0.0.1 {enter}'
+    );
+
+    expect(props.onChange).toHaveBeenCalledWith([
+      customType,
+      {
+        key: 'observable-type-ipv4',
+        label: 'IPv4',
+        paths: [{ path: 'source.ip', enabled: true, excludedValues: ['127.0.0.1'] }],
+      },
+    ]);
+  });
+
+  it('removes the last excluded value of a default field and its override', async () => {
+    const ipv4Override = {
+      key: 'observable-type-ipv4',
+      label: 'IPv4',
+      paths: [{ path: 'source.ip', enabled: true, excludedValues: ['127.0.0.1'] }],
+    };
+    renderWithTestingProviders(
+      <ObservableTypesTable {...props} observableTypes={[customType, ipv4Override]} />
+    );
+
+    await expandRow('observable-type-ipv4');
+    const excludedValues = await screen.findByTestId(
+      'observable-type-path-excluded-values-observable-type-ipv4-source.ip'
+    );
+    await userEvent.click(within(excludedValues).getByTestId('comboBoxClearButton'));
+
+    expect(props.onChange).toHaveBeenCalledWith([customType]);
   });
 
   it('deletes a field of a custom type and keeps the overrides', async () => {

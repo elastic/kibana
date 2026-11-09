@@ -56,6 +56,20 @@ describe('resolveObservableTypes', () => {
     );
   });
 
+  it('keeps the excluded values of a default path', () => {
+    const resolved = resolveObservableTypes(DEFAULT_OBSERVABLE_TYPES, [
+      {
+        key: 'observable-type-ipv4',
+        paths: [{ path: 'source.ip', enabled: true, excludedValues: ['127.0.0.1'] }],
+      },
+    ]);
+
+    expect(resolved['observable-type-ipv4'].paths).toEqual([
+      { path: 'source.ip', enabled: true, excludedValues: ['127.0.0.1'] },
+      { path: 'destination.ip', enabled: true },
+    ]);
+  });
+
   it('ignores a stored label or pattern on a default type', () => {
     const resolved = resolveObservableTypes(DEFAULT_OBSERVABLE_TYPES, [
       { key: 'observable-type-hostname', label: 'Renamed', valuePattern: '.*' },
@@ -114,6 +128,27 @@ describe('toBuiltinOverride', () => {
         { path: 'zscaler.client_ip', enabled: true },
       ],
     });
+  });
+
+  it('stores a default path that has excluded values', () => {
+    expect(
+      toBuiltinOverride(ipv4, [
+        { path: 'source.ip', enabled: true, excludedValues: ['127.0.0.1'] },
+        { path: 'destination.ip', enabled: true },
+      ])
+    ).toEqual({
+      key: 'observable-type-ipv4',
+      paths: [{ path: 'source.ip', enabled: true, excludedValues: ['127.0.0.1'] }],
+    });
+  });
+
+  it('returns no override when a default path has an empty list of excluded values', () => {
+    expect(
+      toBuiltinOverride(ipv4, [
+        { path: 'source.ip', enabled: true, excludedValues: [] },
+        { path: 'destination.ip', enabled: true },
+      ])
+    ).toBeUndefined();
   });
 });
 

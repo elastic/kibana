@@ -27,6 +27,7 @@ export interface FlattedEcsData {
 interface ExtractionRule {
   typeKey: string;
   valuePattern?: RegExp;
+  excludedValues: ReadonlySet<string>;
 }
 
 export const processObservable = (
@@ -63,9 +64,12 @@ const getRulesByPath = (
     const compiledPattern = valuePattern === undefined ? undefined : compilePattern(valuePattern);
 
     if (compiledPattern !== null) {
-      const rule: ExtractionRule = { typeKey: key, valuePattern: compiledPattern };
-
-      for (const { path } of paths.filter(({ enabled }) => enabled)) {
+      for (const { path, excludedValues = [] } of paths.filter(({ enabled }) => enabled)) {
+        const rule: ExtractionRule = {
+          typeKey: key,
+          valuePattern: compiledPattern,
+          excludedValues: new Set(excludedValues),
+        };
         rulesByPath.set(path, [...(rulesByPath.get(path) ?? []), rule]);
       }
     }
@@ -92,8 +96,8 @@ export const getObservablesFromEcs = (
       const items = value ? castArray(value).filter(Boolean) : [];
 
       for (const item of items) {
-        for (const { typeKey, valuePattern } of rules) {
-          if (!valuePattern || valuePattern.test(item)) {
+        for (const { typeKey, valuePattern, excludedValues } of rules) {
+          if (!excludedValues.has(item) && (!valuePattern || valuePattern.test(item))) {
             processObservable(observablesMap, item, typeKey, description);
           }
         }

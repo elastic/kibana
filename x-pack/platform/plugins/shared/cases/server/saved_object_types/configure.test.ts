@@ -144,6 +144,19 @@ describe('caseConfigureSavedObjectType model version transformations', () => {
       ).not.toThrow();
     });
 
+    it('accepts excluded values on a path', () => {
+      expect(() =>
+        create.validate({
+          observableTypes: [
+            {
+              key: 'observable-type-ipv4',
+              paths: [{ path: 'source.ip', enabled: true, excludedValues: ['127.0.0.1'] }],
+            },
+          ],
+        })
+      ).not.toThrow();
+    });
+
     it('rejects a path without the enabled flag', () => {
       expect(() =>
         create.validate({

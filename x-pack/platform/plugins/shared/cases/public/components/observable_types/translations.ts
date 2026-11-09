@@ -97,6 +97,26 @@ export const ADD_FIELD = i18n.translate('xpack.cases.observableTypes.addField', 
   defaultMessage: 'Add field',
 });
 
+export const EXCLUDED_VALUES_COLUMN = i18n.translate(
+  'xpack.cases.observableTypes.excludedValuesColumn',
+  {
+    defaultMessage: 'Excluded values',
+  }
+);
+
+export const EXCLUDED_VALUES_PLACEHOLDER = i18n.translate(
+  'xpack.cases.observableTypes.excludedValuesPlaceholder',
+  {
+    defaultMessage: 'Type a value and press Enter',
+  }
+);
+
+export const EXCLUDED_VALUES_FOR_FIELD = (fieldName: string) =>
+  i18n.translate('xpack.cases.observableTypes.excludedValuesForField', {
+    values: { fieldName },
+    defaultMessage: 'Values to skip in {fieldName}',
+  });
+
 export const VALUE_PATTERN_LABEL = i18n.translate('xpack.cases.observableTypes.valuePatternLabel', {
   defaultMessage: 'Value pattern',
 });

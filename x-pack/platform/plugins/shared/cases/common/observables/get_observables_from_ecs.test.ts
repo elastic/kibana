@@ -297,6 +297,54 @@ describe('getObservablesFromEcsDataArray', () => {
     ]);
   });
 
+  it('should skip an excluded value only on the field that excludes it', () => {
+    const observableTypes = resolveObservableTypes(DEFAULT_OBSERVABLE_TYPES, [
+      {
+        key: 'observable-type-ipv4',
+        paths: [{ path: 'source.ip', enabled: true, excludedValues: ['127.0.0.1'] }],
+      },
+    ]);
+
+    expect(
+      getObservablesFromEcs(
+        [
+          [
+            { field: 'source.ip', value: ['127.0.0.1', '10.0.0.1'] },
+            { field: 'destination.ip', value: ['127.0.0.1'] },
+          ],
+        ],
+        observableTypes
+      )
+    ).toEqual([
+      {
+        typeKey: 'observable-type-ipv4',
+        value: '10.0.0.1',
+        description: 'Auto extracted observable',
+      },
+      {
+        typeKey: 'observable-type-ipv4',
+        value: '127.0.0.1',
+        description: 'Auto extracted observable',
+      },
+    ]);
+  });
+
+  it('should compare excluded values exactly and with case', () => {
+    const observableTypes = resolveObservableTypes(DEFAULT_OBSERVABLE_TYPES, [
+      {
+        key: 'observable-type-hostname',
+        paths: [{ path: 'host.name', enabled: true, excludedValues: ['localhost'] }],
+      },
+    ]);
+
+    expect(
+      getObservablesFromEcs(
+        [[{ field: 'host.name', value: ['localhost', 'LocalHost', 'localhost.lan'] }]],
+        observableTypes
+      ).map(({ value }) => value)
+    ).toEqual(['LocalHost', 'localhost.lan']);
+  });
+
   it('should ignore fields that no default type reads', () => {
     expect(getObservablesFromEcs([[{ field: 'user.name', value: ['alice'] }]])).toEqual([]);
   });
