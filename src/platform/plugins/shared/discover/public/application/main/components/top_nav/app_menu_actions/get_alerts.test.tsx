@@ -281,6 +281,7 @@ describe('getAlertsAppMenuItem', () => {
         RulesPage: jest.fn(() => null),
         RuleLibraryPage: jest.fn(() => null),
         EpisodesPage: jest.fn(() => null),
+        AlertsProvider: jest.fn(({ children }) => children ?? null),
         ActionPoliciesPage: jest.fn(() => null),
         ExecutionHistoryPage: jest.fn(() => null),
         createAlertingV2HostApp: jest.fn(),

@@ -86,6 +86,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { NightshiftInvestigationsPublicStart } from '@kbn/nightshift-investigations-plugin/public';
 import type { EntityInventoryAppPublicStart } from '@kbn/entity-inventory-app-plugin/public';
 import { isAlertingV2Enabled, shouldShowV1ObservabilityAlertsTable } from '@kbn/alerting-v2-utils';
+import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import { getObservabilityAlertType } from './cases/attachments/alert';
 import {
@@ -152,6 +153,7 @@ export interface ObservabilityPublicPluginsSetup {
 }
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
+  alertingVTwo?: AlertingV2PublicStart;
   cases?: CasesPublicStart;
   charts: ChartsPluginStart;
   contentManagement: ContentManagementPublicStart;

@@ -174,7 +174,11 @@
     "@kbn/alerting-v2-constants",
     "@kbn/agentic-investigations-plugin",
     "@kbn/shared-ux-ai-components",
-    "@kbn/slo-constants"
+    "@kbn/slo-constants",
+    "@kbn/alerting-v2-schemas",
+    "@kbn/alerting-v2-plugin",
+    "@kbn/alerting-v2-common-queries",
+    "@kbn/alerting-v2-episodes-ui"
   ],
   "exclude": ["target/**/*"]
 }

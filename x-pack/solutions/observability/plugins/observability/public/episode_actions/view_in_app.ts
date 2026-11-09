@@ -8,7 +8,8 @@
 import { castArray } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
-import { getAlertViewInAppUrl, type AlertFormatter } from '@kbn/alerts-ui-shared';
+import { getAlertViewInAppUrl } from '@kbn/alerts-ui-shared/src/common/utils/get_alert_view_in_app_url';
+import type { AlertFormatter } from '@kbn/alerts-ui-shared/src/common/types/alert_formatter_types';
 import { ALERT_GROUP, ALERT_GROUP_FIELD, ALERT_GROUP_VALUE } from '@kbn/rule-data-utils';
 import type { EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import type { AlertEpisode } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
@@ -20,17 +21,17 @@ import { getErrorMessage } from '@kbn/alerting-v2-episodes-ui/actions/helpers';
 export const VIEW_V1_ALERT_IN_APP_ACTION_ID = 'VIEW_V1_ALERT_IN_APP';
 
 export const VIEW_IN_APP = i18n.translate(
-  'xpack.observabilityAlerting.actions.viewInAppDisplayName',
+  'xpack.observability.episodeActions.viewInAppDisplayName',
   { defaultMessage: 'View in app' }
 );
 
 export const VIEW_IN_APP_NO_LINK = i18n.translate(
-  'xpack.observabilityAlerting.actions.viewInAppNoLinkTitle',
+  'xpack.observability.episodeActions.viewInAppNoLinkTitle',
   { defaultMessage: 'No app view is available for this alert' }
 );
 
 export const VIEW_IN_APP_ERROR = i18n.translate(
-  'xpack.observabilityAlerting.actions.viewInAppErrorTitle',
+  'xpack.observability.episodeActions.viewInAppErrorTitle',
   { defaultMessage: 'Unable to open the alert in its app' }
 );
 

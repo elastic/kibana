@@ -10,6 +10,8 @@ import React, { createContext, useEffect, useState } from 'react';
 import { asyncForEach } from '@kbn/std';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
+import type { CoreStart } from '@kbn/core/public';
+import { hasAlertingV2Capability, isAlertingV2Enabled } from '@kbn/alerting-v2-utils';
 import { useKibana } from '../../utils/kibana_react';
 import {
   ALERT_APP,
@@ -23,6 +25,7 @@ import {
 import { getDataHandler } from './data_handler';
 import { useDatePickerContext } from '../../hooks/use_date_picker_context';
 import { getObservabilityAlerts } from './get_observability_alerts';
+import { hasUniversalAlertingRules } from './get_universal_alerting_rules';
 import type { ObservabilityFetchDataPlugins } from '../../typings/fetch_overview_data';
 import type { ApmIndicesConfig } from '../../../common/typings';
 
@@ -83,9 +86,16 @@ export const appLabels: Record<DataContextApps, string> = {
 };
 
 export function HasDataContextProvider({ children }: { children: React.ReactNode }) {
-  const { http } = useKibana().services;
+  const services = useKibana().services;
+  const { http } = services;
   const [forceUpdate, setForceUpdate] = useState('');
   const { absoluteStart, absoluteEnd } = useDatePickerContext();
+
+  const shouldCheckUniversalRules =
+    !!services.settings &&
+    isAlertingV2Enabled(services as CoreStart) &&
+    services.alertingVTwo != null &&
+    hasAlertingV2Capability(services as CoreStart, 'rules', 'read');
 
   const [hasDataMap, setHasDataMap] = useState<HasDataContextValue['hasDataMap']>({});
 
@@ -168,16 +178,14 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
 
   useEffect(() => {
     async function fetchAlerts() {
-      try {
-        const alerts = await getObservabilityAlerts({ http });
-        setHasDataMap((prevState) => ({
-          ...prevState,
-          [ALERT_APP]: {
-            hasData: alerts.length > 0,
-            status: FETCH_STATUS.SUCCESS,
-          },
-        }));
-      } catch (e) {
+      const [classicAlerts, hasUniversalRules] = await Promise.all([
+        getObservabilityAlerts({ http }).catch(() => undefined),
+        shouldCheckUniversalRules
+          ? hasUniversalAlertingRules({ http }).catch(() => false)
+          : Promise.resolve(false),
+      ]);
+
+      if (!classicAlerts && !hasUniversalRules) {
         setHasDataMap((prevState) => ({
           ...prevState,
           [ALERT_APP]: {
@@ -185,11 +193,20 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
             status: FETCH_STATUS.FAILURE,
           },
         }));
+        return;
       }
+
+      setHasDataMap((prevState) => ({
+        ...prevState,
+        [ALERT_APP]: {
+          hasData: (classicAlerts?.length ?? 0) > 0 || hasUniversalRules,
+          status: FETCH_STATUS.SUCCESS,
+        },
+      }));
     }
 
     fetchAlerts();
-  }, [forceUpdate, http]);
+  }, [forceUpdate, http, shouldCheckUniversalRules]);
 
   const isAllRequestsComplete = apps.every((app) => {
     const appStatus = hasDataMap[app]?.status;

@@ -15,7 +15,7 @@ import type {
 } from '@kbn/alerting-v2-episodes-ui/actions';
 import type { AlertEpisode } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import type { ClassicAlertActionContext } from '@kbn/alerting-v2-episodes-ui/classic_alerts/utils/map_alert';
-import { useInvestigateAlert } from '@kbn/observability-plugin/public';
+import { useInvestigateAlert } from '../hooks/use_investigate_alert';
 
 export const INVESTIGATE_EPISODE_ACTION_ID = 'OBSERVABILITY_ALERTING_INVESTIGATE_EPISODE';
 
@@ -112,7 +112,7 @@ export const createInvestigateEpisodeAction = (): EpisodeAction => ({
   id: INVESTIGATE_EPISODE_ACTION_ID,
   order: 35,
   isWorkflowAction: true,
-  displayName: i18n.translate('xpack.observabilityAlerting.actions.investigateDisplayName', {
+  displayName: i18n.translate('xpack.observability.episodeActions.investigateDisplayName', {
     defaultMessage: 'Investigate',
   }),
   iconType: 'inspect',
