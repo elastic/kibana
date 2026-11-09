@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import type { SourceApiKeyServicesDeps } from './source_api_keys';
 import { createSourceApiKeyServices } from './source_api_keys';
 
@@ -12,6 +13,7 @@ const createDeps = (canManage?: boolean) => {
   const fetch = jest.fn();
   const deps = {
     streamsRepositoryClient: { fetch },
+    unitId: STREAMS_DEFAULT_UNIT_ID,
     canManage,
   } as unknown as SourceApiKeyServicesDeps;
   return { deps, fetch };

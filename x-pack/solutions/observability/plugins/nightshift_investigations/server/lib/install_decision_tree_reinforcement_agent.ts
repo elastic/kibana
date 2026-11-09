@@ -14,6 +14,7 @@ import {
   NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
   NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_TYPE_ID,
 } from '../agents/decision_tree_reinforcement';
+import { assertNightshiftSpace } from './assert_nightshift_space';
 
 export const installDecisionTreeReinforcementAgent = async ({
   agentBuilder,
@@ -24,6 +25,9 @@ export const installDecisionTreeReinforcementAgent = async ({
   spaceId: string;
   availability?: AgentAvailabilityConfig;
 }): Promise<void> => {
+  // Nightshift runs in the default space only, so the reinforcement agent must not show up in
+  // another space's Agent Builder.
+  assertNightshiftSpace(spaceId);
   await agentBuilder.agents.ensure({
     spaceId,
     availability,

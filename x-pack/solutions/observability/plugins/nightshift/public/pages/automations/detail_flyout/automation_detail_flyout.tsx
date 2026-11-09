@@ -35,9 +35,11 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useHistory, useLocation } from 'react-router-dom';
+import { cloneActionIcon, deleteActionIcon } from '../action_menu_icons';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { NIGHTSHIFT_APP_ROUTE } from '../../../../common/constants';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useRuleCatalog } from '../../../data/rules/use_rule_catalog';
 import { AutomationFormBody } from '../flyouts/form/automation_form_body';
 import {
   toAutomationFormValues,
@@ -140,6 +142,10 @@ export const AutomationDetailFlyout = ({
   onClose,
   onClone,
   onDelete,
+  onSelectAutomation,
+  embedded = false,
+  embeddedRunsTab = false,
+  onEmbeddedRunsTabChange,
 }: {
   automations: Automation[];
   automation: Automation;
@@ -150,8 +156,21 @@ export const AutomationDetailFlyout = ({
   runRange: RunRange;
   rangeLabel: string;
   onClose: () => void;
-  onClone: (automation: Automation) => void;
+  /** When omitted, Actions → Clone is hidden. */
+  onClone?: (automation: Automation) => void;
   onDelete: (automation: Automation) => void;
+  /**
+   * Embedded (onboarding) hosts select another automation without routing. When set, prev/next
+   * and keyboard shortcuts call this instead of `history.push`.
+   */
+  onSelectAutomation?: (automation: Automation) => void;
+  /**
+   * Keep Overview / Run history off `/automations/:id[/runs]` routes, so the flyout can sit on a
+   * page that is not the Automations list. Tab state is owned by the host so prev/next keep it.
+   */
+  embedded?: boolean;
+  embeddedRunsTab?: boolean;
+  onEmbeddedRunsTabChange?: (isRunsTab: boolean) => void;
 }) => {
   const titleId = useGeneratedHtmlId();
   const { euiTheme } = useEuiTheme();
@@ -176,10 +195,12 @@ export const AutomationDetailFlyout = ({
   const [values, setValues] = useState<AutomationFormValues>(originalValues);
   const updateAutomation = useUpdateAutomation();
   const toggleAutomation = useToggleAutomation();
-  const isRunsTab = pathname.endsWith('/runs');
+  const isRunsTab = embedded ? embeddedRunsTab : pathname.endsWith('/runs');
   const isDirty = JSON.stringify(values) !== JSON.stringify(originalValues);
-  const blocker = getSaveBlocker(values);
-  const valid = canSaveAutomation(values);
+  const { data: catalog, isComplete } = useRuleCatalog();
+  const completeCatalog = isComplete ? catalog : undefined;
+  const blocker = getSaveBlocker(values, completeCatalog);
+  const valid = canSaveAutomation(values, completeCatalog);
   const runsQuery = useAutomationRunsInRange(
     automation.id,
     runRange.startedAfter,
@@ -221,7 +242,13 @@ export const AutomationDetailFlyout = ({
     },
   });
 
-  const navigate = (path: string) => history.push(path);
+  const navigate = (path: string) => {
+    if (embedded) {
+      onEmbeddedRunsTabChange?.(path.endsWith('/runs'));
+      return;
+    }
+    history.push(path);
+  };
   const hasUnsavedChanges = isEditing && isDirty;
   const requestClose = () => {
     if (hasUnsavedChanges) {
@@ -252,10 +279,15 @@ export const AutomationDetailFlyout = ({
     }
     void application.navigateToUrl(basePath.prepend(exit.path));
   }, [exit, isEditing, history, onClose, application, basePath]);
-  const selectAutomation = (selected: Automation) =>
+  const selectAutomation = (selected: Automation) => {
+    if (onSelectAutomation) {
+      onSelectAutomation(selected);
+      return;
+    }
     navigate(`/automations/${selected.id}${isRunsTab ? '/runs' : ''}`);
+  };
   useEffect(() => {
-    if (isEditing || selectedRun) return;
+    if (isEditing || selectedRun || !isInList) return;
     const onKeyDown = (event: KeyboardEvent) => {
       const target = event.target;
       if (
@@ -269,16 +301,18 @@ export const AutomationDetailFlyout = ({
       }
       if (event.key === 'ArrowUp' && previous) {
         event.preventDefault();
-        history.push(`/automations/${previous.id}${isRunsTab ? '/runs' : ''}`);
+        selectAutomation(previous);
       }
       if (event.key === 'ArrowDown' && next) {
         event.preventDefault();
-        history.push(`/automations/${next.id}${isRunsTab ? '/runs' : ''}`);
+        selectAutomation(next);
       }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [history, isEditing, next, previous, selectedRun, isRunsTab]);
+    // selectAutomation closes over stable callbacks for the current automation list.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditing, next, previous, selectedRun, isRunsTab, isInList, onSelectAutomation]);
   const startEditing = (changes: Partial<AutomationFormValues> = {}) => {
     setValues({ ...originalValues, ...changes });
     setIsNameInvalid(false);
@@ -293,7 +327,7 @@ export const AutomationDetailFlyout = ({
     padding: ${euiTheme.size.base};
   `;
   const save = () => {
-    if (!values.trigger || !isTriggerValid(values.trigger)) return;
+    if (!values.trigger || !isTriggerValid(values.trigger) || blocker) return;
     setShowValidationErrors(true);
     const isNameMissing = !values.name.trim();
     setIsNameInvalid(isNameMissing);
@@ -675,23 +709,28 @@ export const AutomationDetailFlyout = ({
                               id: 0,
                               width: 240,
                               items: [
-                                {
-                                  name: labels.clone,
-                                  icon: 'copy',
-                                  'data-test-subj': 'automationCloneButton',
-                                  ...getEbtProps({
-                                    action: NIGHTSHIFT_EBT_ACTIONS.CLONE_AUTOMATION,
-                                    element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_DETAIL_FLYOUT,
-                                  }),
-                                  onClick: () => {
-                                    onClone(automation);
-                                    setIsActionsOpen(false);
-                                  },
-                                },
-                                { isSeparator: true, key: 'divider' },
+                                ...(onClone
+                                  ? [
+                                      {
+                                        name: labels.clone,
+                                        icon: cloneActionIcon,
+                                        'data-test-subj': 'automationCloneButton',
+                                        ...getEbtProps({
+                                          action: NIGHTSHIFT_EBT_ACTIONS.CLONE_AUTOMATION,
+                                          element:
+                                            NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_DETAIL_FLYOUT,
+                                        }),
+                                        onClick: () => {
+                                          onClone(automation);
+                                          setIsActionsOpen(false);
+                                        },
+                                      },
+                                      { isSeparator: true as const, key: 'divider' },
+                                    ]
+                                  : []),
                                 {
                                   name: labels.delete,
-                                  icon: 'trash',
+                                  icon: deleteActionIcon,
                                   color: 'danger',
                                   'data-test-subj': 'automationDeleteButton',
                                   ...getEbtProps({
