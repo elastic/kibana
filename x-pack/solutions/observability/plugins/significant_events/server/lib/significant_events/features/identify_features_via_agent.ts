@@ -65,6 +65,11 @@ export function readFeatureIdentificationResult({
   tokensUsed: ChatCompletionTokenCount;
 } {
   const round = conversation.rounds.at(-1);
+  // A failed or aborted run leaves its round `completed` with the steps it finished, so a
+  // finalize call alone does not mean the run succeeded.
+  if (round?.interruption) {
+    throw new Error('Feature identification agent run was interrupted');
+  }
   const finalizeStep = round?.steps
     .filter(isToolCallStep)
     .findLast(

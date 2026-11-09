@@ -24,11 +24,12 @@ const finalizeStep = (
   results,
 });
 
-const conversationOf = (steps: unknown[]) =>
+const conversationOf = (steps: unknown[], interruption?: unknown) =>
   ({
     rounds: [
       {
         steps,
+        interruption,
         time_to_last_token: 4321,
         model_usage: { input_tokens: 10, output_tokens: 5, cached_input_tokens: 2 },
       },
@@ -63,5 +64,20 @@ describe('readFeatureIdentificationResult', () => {
     expect(() =>
       readFeatureIdentificationResult({ conversation, logger: loggerMock.create() })
     ).toThrow('did not successfully call finalize_features');
+  });
+
+  it('throws when the run was interrupted after a successful finalize', () => {
+    const conversation = conversationOf(
+      [
+        finalizeStep('successful-finalize', { features: [], ignored_features: [] }, [
+          { type: ToolResultType.other, data: { finalized: true } },
+        ]),
+      ],
+      { type: 'failed' }
+    );
+
+    expect(() =>
+      readFeatureIdentificationResult({ conversation, logger: loggerMock.create() })
+    ).toThrow('was interrupted');
   });
 });
