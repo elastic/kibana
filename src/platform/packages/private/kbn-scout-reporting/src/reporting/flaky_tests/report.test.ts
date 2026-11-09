@@ -773,7 +773,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       expect.objectContaining({ testId: 'never-passed' }),
     ]);
     expect(info).toHaveBeenCalledWith(
-      'Left out a.test.ts › breaks: broken right now, 20 failed builds in a row on main ' +
+      'Dropped a.test.ts › breaks from the report: broken right now, 20 failed builds in a row on main ' +
         '(#81 to #100) in kibana-on-merge a.config.ts stateful-classic local'
     );
   });
@@ -832,7 +832,13 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       flakiestBranch: { branch: 'main', builds: 88, failedBuilds: 8, buildFailRate: 8 / 88 },
     });
     expect(info).toHaveBeenCalledWith(
-      'Counted past-breakage › (unknown) without the 12 builds of its breakages'
+      'Kept past-breakage › (unknown), flaky even without its breakages; ' +
+        'took the 12 builds of its breakages off its counts'
+    );
+    expect(info).toHaveBeenCalledWith(
+      expect.stringMatching(
+        /^Checked 2 flaky tests for breakages \(failed builds in a row, too many to be chance\) in .+: dropped 0 from the report, as they are broken right now or flaky only because of their breakages; kept 1 that are flaky even without their breakages, with those builds taken off their counts; 1 had no breakages$/
+      )
     );
   });
 

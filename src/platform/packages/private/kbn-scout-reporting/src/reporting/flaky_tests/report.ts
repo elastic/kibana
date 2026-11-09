@@ -379,15 +379,24 @@ const buildReport = async (
       const name = `${filePath ?? row.testId} › ${title ?? '(unknown)'}`;
       if (check.outcome === 'left-out') {
         leftOut.add(row.testId);
-        log.info(`Left out ${name}: ${check.reason}`);
+        log.info(`Dropped ${name} from the report: ${check.reason}`);
       } else if (check.outcome === 'kept') {
         keptWithBreakages.set(row.testId, check);
-        log.info(`Counted ${name} without the ${check.breakageBuilds} builds of its breakages`);
+        log.info(
+          `Kept ${name}, flaky even without its breakages; ` +
+            `took the ${check.breakageBuilds} builds of its breakages off its counts`
+        );
       }
     }
+    const untouched = flakyRows.length - leftOut.size - keptWithBreakages.size;
     log.info(
-      `Checked ${flakyRows.length} flaky tests for breakages in ${elapsed(startedAt)}: ` +
-        `left out ${leftOut.size}, counted ${keptWithBreakages.size} without their breakages`
+      `Checked ${flakyRows.length} flaky tests for breakages (failed builds in a row, too many ` +
+        `to be chance) in ${elapsed(startedAt)}: ` +
+        `dropped ${leftOut.size} from the report, as they are broken right now or flaky only ` +
+        `because of their breakages; ` +
+        `kept ${keptWithBreakages.size} that are flaky even without their breakages, with those ` +
+        `builds taken off their counts; ` +
+        `${untouched} had no breakages`
     );
   }
 
