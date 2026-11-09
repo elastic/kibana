@@ -6,6 +6,7 @@
  */
 
 import { groupBy } from 'lodash';
+import { HUNT_CASE_INSENSITIVE_IOC_TYPES } from '@kbn/alertzero-common';
 
 export const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts' as const;
 export const THREAT_REPORTS_INDEX_PATTERN = '.kibana-threat-reports*' as const;
@@ -139,25 +140,32 @@ export const buildEntityLookupEsql = ({
 };
 
 /**
- * Discover exit for an IOC detection: the caller-supplied indices
- * (cited-event sources first, else Tier 1 per_index), filtered to the ECS field
- * and value that matched. Absent when field/value/indices are empty.
+ * Discover exit for an IOC detection: the caller-supplied indices (Tier 1 `per_index`,
+ * else the cited events' sources), filtered to the ECS field and value that matched.
+ * Hash and domain IOCs compare case-folded, matching Tier 1's case-insensitive clauses,
+ * so a mixed-case digest in the report still finds the lowercase indexed one. Absent
+ * when field/value/indices are empty.
  */
 export const buildIocMatchEsql = ({
   indices,
   field,
   value,
+  iocType,
 }: {
   indices: readonly string[];
   field: string;
   value: string;
+  /** IOC type of `value`; decides whether the predicate folds case. */
+  iocType?: string;
 }): string | undefined => {
   const cleanedIndices = uniqueNonEmpty([...indices]);
   if (cleanedIndices.length === 0 || !field.trim() || !value.trim()) {
     return undefined;
   }
 
-  return `FROM ${cleanedIndices
-    .map(quoteEsqlIdentifier)
-    .join(', ')} | WHERE ${field} == "${escapeEsqlString(value)}"`;
+  const predicate =
+    iocType && HUNT_CASE_INSENSITIVE_IOC_TYPES.has(iocType)
+      ? `TO_LOWER(${field}) == "${escapeEsqlString(value.toLowerCase())}"`
+      : `${field} == "${escapeEsqlString(value)}"`;
+  return `FROM ${cleanedIndices.map(quoteEsqlIdentifier).join(', ')} | WHERE ${predicate}`;
 };

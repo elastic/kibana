@@ -41,6 +41,8 @@ const detectionSchema = lazySchema(() =>
     .object({
       id: z.string().min(1).max(256),
       kind: z.enum(['ioc', 'behavior']),
+      /** IOC type when `kind` is `ioc`; readers prefer it over parsing the id. */
+      ioc_type: HuntIocType.optional(),
       technique_id: z.string().min(1).max(32).optional(),
       technique_name: z.string().min(1).max(256).optional(),
       /** ECS field the matching clause hit; required when `kind` is `ioc`. */

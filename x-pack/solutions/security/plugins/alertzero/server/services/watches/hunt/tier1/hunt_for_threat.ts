@@ -253,6 +253,7 @@ interface PerIocBucket {
 interface HuntAggregations {
   per_index?: { buckets: Array<{ key: string; doc_count: number }> };
   per_ioc?: { buckets: Record<string, PerIocBucket> };
+  per_clause?: { buckets: Record<string, { doc_count: number }> };
   affected_hosts?: {
     buckets: Array<{
       key: string;
@@ -274,6 +275,23 @@ interface HuntAggregations {
 }
 
 const perIocFilterKey = (iocIndex: number): string => `ioc_${iocIndex}`;
+
+/**
+ * One bucket per named clause (`ioc_<i>|<field>`), a sibling of `per_ioc`. The per-IOC
+ * bucket says how many documents an IOC hit but not on which searched field; this agg
+ * does, at the cost of one filter per clause (the same clauses the query already runs).
+ */
+const buildPerClauseFiltersAgg = (
+  searchableIocs: HuntIoc[],
+  namedClauses: NamedIocClause[]
+): Record<string, unknown> | undefined => {
+  const limit = Math.min(searchableIocs.length, PER_IOC_FILTER_MAX);
+  const filters: Record<string, unknown> = {};
+  for (const clause of namedClauses) {
+    if (clause.iocIndex < limit) filters[clause.name] = clause.clause;
+  }
+  return Object.keys(filters).length > 0 ? { filters: { filters } } : undefined;
+};
 
 const buildPerIocFiltersAgg = (
   searchableIocs: HuntIoc[],
@@ -303,18 +321,34 @@ const buildPerIocFiltersAgg = (
   };
 };
 
+/**
+ * The searched field with the most matching documents for IOC `iocIndex`, read from the
+ * `per_clause` buckets; falls back to the first searched field when no clause bucket
+ * reports a match (older responses, or an agg the search dropped).
+ */
+const observedFieldForIoc = (
+  iocIndex: number,
+  namedClauses: NamedIocClause[],
+  clauseBuckets: Record<string, { doc_count: number }> | undefined
+): string | undefined => {
+  let best: { field: string; count: number } | undefined;
+  let first: string | undefined;
+  for (const clause of namedClauses) {
+    if (clause.iocIndex !== iocIndex) continue;
+    first ??= clause.field;
+    const count = clauseBuckets?.[clause.name]?.doc_count ?? 0;
+    if (count > 0 && (!best || count > best.count)) best = { field: clause.field, count };
+  }
+  return best?.field ?? first;
+};
+
 const buildPerIocResult = (
   searchableIocs: HuntIoc[],
   namedClauses: NamedIocClause[],
-  buckets: Record<string, PerIocBucket> | undefined
+  buckets: Record<string, PerIocBucket> | undefined,
+  clauseBuckets: Record<string, { doc_count: number }> | undefined
 ): { per_ioc?: HuntForThreatPerIoc[]; per_ioc_truncated?: boolean } => {
   if (!buckets) return {};
-  const firstFieldByIoc = new Map<number, string>();
-  for (const clause of namedClauses) {
-    if (!firstFieldByIoc.has(clause.iocIndex)) {
-      firstFieldByIoc.set(clause.iocIndex, clause.field);
-    }
-  }
   const entries: HuntForThreatPerIoc[] = [];
   for (const [key, bucket] of Object.entries(buckets)) {
     if (bucket.doc_count <= 0) continue;
@@ -322,7 +356,7 @@ const buildPerIocResult = (
     if (!match) continue;
     const iocIndex = Number(match[1]);
     const ioc = searchableIocs[iocIndex];
-    const field = firstFieldByIoc.get(iocIndex);
+    const field = observedFieldForIoc(iocIndex, namedClauses, clauseBuckets);
     if (!ioc || !field) continue;
     const entry: HuntForThreatPerIoc = {
       type: ioc.type,
@@ -452,7 +486,6 @@ export const huntForThreat = async (
   // the caller passed (including unsearchable hashes), so older readers keep seeing
   // the full input list.
   const searchableIocs = dedupeSearchableIocs(trimmedIocs);
-  const iocs = trimmedIocs;
 
   const from = time_range?.from ?? scope.window.from;
   const to = time_range?.to ?? scope.window.to;
@@ -465,7 +498,7 @@ export const huntForThreat = async (
   if (!scope.search_patterns.some((pattern) => !isIndexExclusion(pattern))) {
     return emptyHuntForThreatResult(
       'scope_blocked',
-      iocs,
+      trimmedIocs,
       techniques,
       { from, to },
       'The hunt has no index pattern to search, so nothing was searched.'
@@ -479,7 +512,7 @@ export const huntForThreat = async (
   if (should.length === 0) {
     return emptyHuntForThreatResult(
       'no_searchable_terms',
-      iocs,
+      trimmedIocs,
       techniques,
       { from, to },
       'IOCs and/or ATT&CK technique IDs were passed but none mapped to a known ECS field ' +
@@ -506,6 +539,7 @@ export const huntForThreat = async (
   };
 
   const perIocAgg = buildPerIocFiltersAgg(searchableIocs, namedIocClauses);
+  const perClauseAgg = buildPerClauseFiltersAgg(searchableIocs, namedIocClauses);
 
   const response = await esClient.search({
     index: searchIndices,
@@ -521,6 +555,7 @@ export const huntForThreat = async (
         terms: { field: '_index', size: PER_INDEX_MAX_BUCKETS },
       },
       ...(perIocAgg ? { per_ioc: perIocAgg } : {}),
+      ...(perClauseAgg ? { per_clause: perClauseAgg } : {}),
       affected_hosts: {
         terms: { field: 'host.name', size: maxAssets, show_term_doc_count_error: true },
         aggs: {
@@ -566,7 +601,12 @@ export const huntForThreat = async (
     summarizeHit({ id: doc.id, index: doc.index, source: doc.source })
   );
   const hits = attributeHits(docs, searchableIocs, techniques);
-  const perIocResult = buildPerIocResult(searchableIocs, namedIocClauses, aggs?.per_ioc?.buckets);
+  const perIocResult = buildPerIocResult(
+    searchableIocs,
+    namedIocClauses,
+    aggs?.per_ioc?.buckets,
+    aggs?.per_clause?.buckets
+  );
 
   const hosts: AffectedAsset[] = (aggs?.affected_hosts?.buckets ?? []).map((b) => {
     const origin = b.by_index
@@ -619,9 +659,9 @@ export const huntForThreat = async (
   return {
     status: total === 0 ? 'no_environment_hits' : 'environment_hits_found',
     has_confirmed_hit: hasConfirmedHit,
-    searched_iocs: iocs.length,
+    searched_iocs: trimmedIocs.length,
     searched_techniques: techniques.length,
-    resolved_iocs: iocs,
+    resolved_iocs: trimmedIocs,
     resolved_techniques: techniques,
     time_range: { from, to },
     counts: {

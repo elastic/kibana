@@ -72,7 +72,11 @@ import type {
   SignificantSecurityEventRef,
   SseEntityLine,
 } from './view_model';
-import { isExecutableHuntQuery, observedIocMatchFromEvents } from '../../../../common/sse_view';
+import {
+  iocOfDetection,
+  isExecutableHuntQuery,
+  observedIocMatchFromEvents,
+} from '../../../../common/sse_view';
 import type { SseDetection, SseEventGroup } from '../../../../common/sse_view';
 
 export interface SignificantSecurityEventInlineContentProps
@@ -404,10 +408,6 @@ const EventRows: React.FC<{
       css={css`
         min-width: 0;
         overflow: hidden;
-
-        .euiTableCellContent {
-          min-width: 0;
-        }
       `}
     >
       <EuiInMemoryTable<SignificantSecurityEventRef>
@@ -747,10 +747,11 @@ const DetectionDiscoverPivot: React.FC<{ href: string; testSubj?: string }> = ({
 );
 
 /**
- * The IOCs and behaviors that matched. IOC rows pivot to Discover over the indices
- * cited events came from (else every Tier 1 index) for the exact field and value; behavior
- * rows reuse the behavior's stored query. A pivot is withheld when the detection has no
- * field, or there are no indices to search.
+ * The IOCs and behaviors that matched. IOC rows pivot to Discover over every Tier 1 index
+ * (`per_index`, the full set the hunt searched) for the field and value that matched; only
+ * an old payload without `per_index` falls back to the indices its cited events came from,
+ * which are a sample and can miss hits. Behavior rows reuse the behavior's stored query. A
+ * pivot is withheld when the detection has no field, or there are no indices to search.
  */
 const WhatMatched: React.FC<{
   detections: SseDetection[];
@@ -758,20 +759,23 @@ const WhatMatched: React.FC<{
   huntResult?: HuntResult;
   navigation: AttachmentNavigationDeps;
 }> = ({ detections, events, huntResult, navigation }) => {
-  const fallbackIndices = huntResult?.tier1.per_index.map((row) => row.index) ?? [];
+  const huntIndices = huntResult?.tier1.per_index.map((row) => row.index) ?? [];
   const timeRange = huntResult?.time_range;
 
   const iocPivotHref = (detection: SseDetection): string | undefined => {
     if (!navigation.share || !timeRange || !detection.field) {
       return undefined;
     }
-    const value = detection.matched_on[0]?.value;
+    const ioc = iocOfDetection(detection);
+    const value = ioc?.value ?? detection.matched_on[0]?.value;
     if (!value) {
       return undefined;
     }
-    const observed = observedIocMatchFromEvents(events, value);
-    const indices = observed && observed.indices.length > 0 ? observed.indices : fallbackIndices;
-    const esql = buildIocMatchEsql({ indices, field: detection.field, value });
+    const indices =
+      huntIndices.length > 0
+        ? huntIndices
+        : observedIocMatchFromEvents(events, value)?.indices ?? [];
+    const esql = buildIocMatchEsql({ indices, field: detection.field, value, iocType: ioc?.type });
     if (!esql) {
       return undefined;
     }

@@ -175,6 +175,8 @@ export {
   HUNT_EVIDENCE_FIELDS_MAX_KEYS,
   HUNT_EVIDENCE_FIELD_VALUE_MAX,
   HUNT_MATCHED_IOCS_MAX,
+  HUNT_HIT_NAME_MAX,
+  HUNT_CASE_INSENSITIVE_IOC_TYPES,
   huntEvidenceFieldsSchema,
   huntResultSchema,
   isoDatetimeSchema,

@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { HuntForThreatHit, HuntForThreatPerIoc, HuntResult } from '@kbn/alertzero-common';
+import {
+  HuntIocType,
+  type HuntForThreatHit,
+  type HuntForThreatPerIoc,
+  type HuntResult,
+} from '@kbn/alertzero-common';
 import type { SignificantSecurityEventAttachmentData } from '../significant_security_event_schema';
 import { classifyBasis, type ClassifyBasisIoc } from './classify_basis';
 
@@ -79,19 +84,25 @@ export const buildIocDetectionId = (type: string, value: string): string => {
 /** Id of a behavior detection: `behavior:{technique_id}`. */
 export const buildBehaviorDetectionId = (techniqueId: string): string => `behavior:${techniqueId}`;
 
+/** Narrows a matched-record type string to the IOC type enum, else `undefined`. */
+const asHuntIocType = (type: string): HuntIocType | undefined =>
+  HuntIocType.options.includes(type as HuntIocType) ? (type as HuntIocType) : undefined;
+
 /**
- * The IOC (type, value) an IOC detection stands for. Type comes from the id prefix,
- * value from `matched_on[0].value` (the id tail may be a hash). `undefined` for a
- * behavior detection or an id not built by {@link buildIocDetectionId}.
+ * The IOC (type, value) an IOC detection stands for. Type is the stored `ioc_type`, else
+ * (payloads written before that field) the id prefix; value is `matched_on[0].value`
+ * (the id tail may be a hash). `undefined` for a behavior detection, or for an id not
+ * built by {@link buildIocDetectionId} on a payload without `ioc_type`.
  */
 export const iocOfDetection = (
-  detection: Pick<SseDetection, 'id' | 'kind' | 'matched_on'>
+  detection: Pick<SseDetection, 'id' | 'kind' | 'matched_on' | 'ioc_type'>
 ): { type: string; value: string } | undefined => {
   if (detection.kind !== 'ioc') return undefined;
   const match = /^ioc:([^:]+):(.*)$/.exec(detection.id);
-  if (!match) return undefined;
-  const value = detection.matched_on[0]?.value ?? match[2];
-  return value ? { type: match[1], value } : undefined;
+  const type = detection.ioc_type ?? match?.[1];
+  if (!type) return undefined;
+  const value = detection.matched_on[0]?.value ?? match?.[2];
+  return value ? { type, value } : undefined;
 };
 
 const dedupeDefined = (values: ReadonlyArray<string | undefined>): string[] => [
@@ -273,9 +284,11 @@ const detectionsFromPerIoc = (
     // Prefer the ECS field cited events actually matched; `per_ioc.field` is only the
     // first searched slot for the IOC type and can miss the hit (see observedIocMatchFromEvents).
     const field = observedIocMatchFromEvents(events, entry.value)?.field ?? entry.field;
+    const iocType = asHuntIocType(entry.type);
     return {
       id: buildIocDetectionId(entry.type, entry.value),
       kind: 'ioc',
+      ...(iocType ? { ioc_type: iocType } : {}),
       field,
       basis: classifyBasis([{ type: entry.type, value: entry.value }], hasBehaviorHit),
       matched_on: [{ field, value: entry.value }],
@@ -297,9 +310,11 @@ const detectionFromIocGroup = <T extends { host?: string; user?: string; timesta
   const { first, last } = firstAndLastTimestamp(group.items.map((item) => item.timestamp));
   const hosts = dedupeDefined(group.items.map((item) => item.host)).slice(0, MAX_NAMES);
   const users = dedupeDefined(group.items.map((item) => item.user)).slice(0, MAX_NAMES);
+  const iocType = asHuntIocType(group.type);
   return {
     id: buildIocDetectionId(group.type, group.value),
     kind: 'ioc',
+    ...(iocType ? { ioc_type: iocType } : {}),
     field: group.field,
     basis: classifyBasis([{ type: group.type, value: group.value }], hasBehaviorHit),
     matched_on: [{ field: group.field, value: group.value }],

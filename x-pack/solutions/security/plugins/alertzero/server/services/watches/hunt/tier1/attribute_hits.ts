@@ -9,6 +9,8 @@ import {
   HUNT_EVIDENCE_FIELD_KEYS,
   HUNT_EVIDENCE_FIELDS_MAX_KEYS,
   HUNT_EVIDENCE_FIELD_VALUE_MAX,
+  HUNT_CASE_INSENSITIVE_IOC_TYPES,
+  HUNT_HIT_NAME_MAX,
   HUNT_MATCHED_IOCS_MAX,
   type HuntForThreatHit,
   type HuntIoc,
@@ -77,7 +79,7 @@ const NAMED_CLAUSE_RE = /^ioc_(\d+)\|(.+)$/;
  * here: a hit the search found and a hit attribution cannot explain is worse than
  * either behaviour on its own.
  */
-export const CASE_INSENSITIVE_IOC_TYPES: ReadonlySet<string> = new Set(['hash', 'domain']);
+export const CASE_INSENSITIVE_IOC_TYPES = HUNT_CASE_INSENSITIVE_IOC_TYPES;
 
 /** Canonical form of an IOC value for comparison, applied to both sides of it. */
 export const normalizeIocValue = (type: string, value: string): string =>
@@ -264,8 +266,9 @@ export const attributeHits = (
     ).slice(0, HUNT_MATCHED_IOCS_MAX);
     const techniqueMatch = matchTechnique(fieldValues, techniques);
 
-    const host = fieldValues.get('host.name')?.[0];
-    const user = fieldValues.get('user.name')?.[0];
+    // The wire schema caps both names; a longer value would fail the whole result envelope.
+    const host = fieldValues.get('host.name')?.[0]?.slice(0, HUNT_HIT_NAME_MAX);
+    const user = fieldValues.get('user.name')?.[0]?.slice(0, HUNT_HIT_NAME_MAX);
     const evidence = copyEvidenceFields(source);
 
     const hit: HuntForThreatHit = {

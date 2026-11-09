@@ -41,16 +41,17 @@ describe('buildSummary', () => {
     );
   });
 
-  it('builds an IOC summary with count and the wide Tier 1 affected-host count', () => {
-    const summary = buildSummary([iocDetection()], { tier1Counts: { affected_hosts: 3 } });
+  it("builds an IOC summary with count and the IOC's own host count", () => {
+    const summary = buildSummary([iocDetection({ host_count: 3 })]);
     expect(summary).toBe('ip 203.0.113.5 seen 8x on 3 hosts');
   });
 
-  it('ignores a per-IOC host count and uses only tier1Counts.affected_hosts', () => {
-    const summary = buildSummary([iocDetection({ host_count: 99 })], {
-      tier1Counts: { affected_hosts: 3 },
-    });
-    expect(summary).toBe('ip 203.0.113.5 seen 8x on 3 hosts');
+  it('never credits one IOC with hosts another IOC matched', () => {
+    const summary = buildSummary([
+      iocDetection({ host_count: 1, total: 1 }),
+      iocDetection({ id: 'ioc:ip:203.0.113.6', host_count: 99, total: 0 }),
+    ]);
+    expect(summary).toBe('ip 203.0.113.5 seen 1x on 1 host and 1 more');
   });
 
   it('falls back to just the technique id when technique_name is absent', () => {
@@ -65,8 +66,10 @@ describe('buildSummary', () => {
     expect(buildSummary([detection])).toBe('T1059 Command and Scripting Interpreter: 5 events');
   });
 
-  it('omits the host clause when tier1Counts.affected_hosts is unset', () => {
-    expect(buildSummary([iocDetection()])).toBe('ip 203.0.113.5 seen 8x');
+  it('omits the host clause when the IOC host_count is unset', () => {
+    const detection = iocDetection();
+    delete detection.host_count;
+    expect(buildSummary([detection])).toBe('ip 203.0.113.5 seen 8x');
   });
 
   it('leads with the scoped behavior detection when techniqueId is set, regardless of total', () => {

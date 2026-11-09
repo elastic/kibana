@@ -1059,7 +1059,7 @@ describe('huntForThreat', () => {
       ]);
     });
 
-    it('maps non-zero per_ioc buckets count-descending with field, host_count, and time span', async () => {
+    it('maps non-zero per_ioc buckets count-descending with the observed field, host_count, and time span', async () => {
       const esClient = buildEsClient({
         hits: { total: { value: 100 }, hits: [] },
         aggregations: {
@@ -1085,6 +1085,16 @@ describe('huntForThreat', () => {
               ioc_2: { doc_count: 0 },
             },
           },
+          // The ip matched only on destination.ip; the domain hit two fields, the second
+          // more often. Neither is the first searched field.
+          per_clause: {
+            buckets: {
+              'ioc_0|source.ip': { doc_count: 0 },
+              'ioc_0|destination.ip': { doc_count: 10 },
+              'ioc_1|dns.question.name': { doc_count: 20 },
+              'ioc_1|destination.domain': { doc_count: 30 },
+            },
+          },
         },
       });
 
@@ -1097,11 +1107,15 @@ describe('huntForThreat', () => {
         ],
       });
 
+      const [{ aggs }] = (esClient.search as jest.Mock).mock.calls[0];
+      expect(aggs.per_clause.filters.filters['ioc_0|destination.ip']).toEqual({
+        term: { 'destination.ip': { value: '10.0.0.1', _name: 'ioc_0|destination.ip' } },
+      });
       expect(result.per_ioc).toEqual([
         {
           type: 'domain',
           value: 'evil.test',
-          field: 'dns.question.name',
+          field: 'destination.domain',
           count: 50,
           host_count: 4,
           user_count: 3,
@@ -1111,7 +1125,7 @@ describe('huntForThreat', () => {
         {
           type: 'ip',
           value: '10.0.0.1',
-          field: 'source.ip',
+          field: 'destination.ip',
           count: 10,
           host_count: 2,
           user_count: 1,

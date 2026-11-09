@@ -158,7 +158,8 @@ describe('toSseViewModel', () => {
     );
     expect(viewModel.summary).toContain('203.0.113.5');
     expect(viewModel.summary).toContain('seen 2x');
-    expect(viewModel.summary).toContain('on 5 hosts');
+    // host-1 and host-2 on the cited events, not the report-wide 5 affected hosts.
+    expect(viewModel.summary).toContain('on 2 hosts');
   });
 
   it('classifies a loopback IOC event as ioc_weak', () => {
@@ -178,6 +179,16 @@ describe('toSseViewModel', () => {
     });
 
     expect(toSseViewModel(parsed).basis).toBe('ioc_weak');
+  });
+
+  it('omits the basis for a Tier 1 hit whose IOC strength is unknown, instead of grading it weak', () => {
+    const parsed = parseOrThrow({
+      ...baseParsed,
+      events: [],
+      hunt_result: { ...tier1OnlyHunt, tier1: { ...tier1OnlyHunt.tier1, per_ioc: undefined } },
+    });
+
+    expect(toSseViewModel(parsed).basis).toBeUndefined();
   });
 
   it('falls back to hit_sources when no IOC event exists', () => {

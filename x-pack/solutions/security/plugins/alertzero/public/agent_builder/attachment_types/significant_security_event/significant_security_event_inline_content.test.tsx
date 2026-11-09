@@ -481,13 +481,15 @@ describe('SignificantSecurityEventInlineContent', () => {
       ...overrides,
     });
 
-    it('pivots an IOC row over cited-event indices for the observed matched field and value', () => {
+    it('pivots an IOC row over every Tier 1 index for the observed matched field and value', () => {
       const { share, getRedirectUrl } = shareReturning('https://example.test/pivot');
       const eventIndex = '.ds-logs-endpoint.events.process-default-2026.09.22-000001';
+      // Every index the hunt searched, not only the one the sampled event came from.
       const expectedEsql = buildIocMatchEsql({
-        indices: [eventIndex],
+        indices: huntResult.tier1.per_index.map((row) => row.index),
         field: 'destination.ip',
         value: '203.0.113.5',
+        iocType: 'ip',
       });
 
       renderWithI18n(
@@ -559,7 +561,47 @@ describe('SignificantSecurityEventInlineContent', () => {
       });
     });
 
-    it('withholds the IOC pivot when the hunt carried no per-index rows to search', () => {
+    it('falls back to cited-event indices only when the hunt carried no per-index rows', () => {
+      const { share, getRedirectUrl } = shareReturning('https://example.test/pivot');
+      const eventIndex = '.ds-logs-endpoint.events.process-default-2026.09.22-000001';
+      const expectedEsql = buildIocMatchEsql({
+        indices: [eventIndex],
+        field: 'destination.ip',
+        value: '203.0.113.5',
+        iocType: 'ip',
+      });
+
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              detections: [iocDetection()],
+              events: [
+                {
+                  event_id: 'evt-1',
+                  source_index: eventIndex,
+                  matched: {
+                    field: 'destination.ip',
+                    iocs: [{ type: 'ip', value: '203.0.113.5', field: 'destination.ip' }],
+                  },
+                },
+              ],
+              hunt_result: { ...huntResult, tier1: { ...huntResult.tier1, per_index: [] } },
+            }),
+            { ...defaultNavigation, share }
+          )}
+        />
+      );
+
+      expect(getRedirectUrl).toHaveBeenCalledWith({
+        query: { esql: expectedEsql },
+        timeRange: huntResult.time_range,
+        useHash: true,
+      });
+    });
+
+    it('withholds the IOC pivot when neither the hunt nor the cited events name an index', () => {
       const { share, getRedirectUrl } = shareReturning('https://example.test/pivot');
 
       renderWithI18n(
@@ -568,6 +610,7 @@ describe('SignificantSecurityEventInlineContent', () => {
             buildAttachment({
               ...baseData,
               detections: [iocDetection()],
+              events: [],
               hunt_result: { ...huntResult, tier1: { ...huntResult.tier1, per_index: [] } },
             }),
             { ...defaultNavigation, share }

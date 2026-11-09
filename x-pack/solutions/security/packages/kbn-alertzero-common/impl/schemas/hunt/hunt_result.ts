@@ -54,6 +54,18 @@ export const HUNT_EVIDENCE_FIELD_VALUE_MAX = 256;
 export const HUNT_MATCHED_IOCS_MAX = 10;
 
 /**
+ * Max length of a hit's `host` / `user` on the wire and on an SSE event ref. Mirrors the
+ * generated `HuntForThreatHit` schema, so producers truncate before the envelope validates.
+ */
+export const HUNT_HIT_NAME_MAX = 512;
+
+/**
+ * IOC types Tier 1 matches case-insensitively (the clause folds case, attribution folds both
+ * sides). Readers building a pivot for one of these must fold case the same way.
+ */
+export const HUNT_CASE_INSENSITIVE_IOC_TYPES: ReadonlySet<string> = new Set(['hash', 'domain']);
+
+/**
  * Bounded evidence map: allowlisted keys only, at most
  * {@link HUNT_EVIDENCE_FIELDS_MAX_KEYS}, values at most
  * {@link HUNT_EVIDENCE_FIELD_VALUE_MAX} characters.

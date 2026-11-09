@@ -424,6 +424,23 @@ const behaviorMatchedField = (
 };
 
 /**
+ * Tier 1 hits in scope for an entry: every hit for the report-wide entry; for a
+ * technique-scoped one, hits attributed to that technique plus IOC-only / unscoped hits,
+ * never a hit attributed to a different technique.
+ */
+const scopedTier1Hits = (
+  result: HuntCoordinatorCoreResult,
+  onlyTechniqueId?: string
+): HuntCoordinatorCoreResult['tier1']['hits'] => {
+  if (!onlyTechniqueId) return result.tier1.hits;
+  const scopedTechnique = onlyTechniqueId.toUpperCase();
+  return result.tier1.hits.filter((hit) => {
+    const attributedTechnique = hit.matched?.technique_id?.toUpperCase();
+    return !attributedTechnique || attributedTechnique === scopedTechnique;
+  });
+};
+
+/**
  * Tier 1 hits become event/alert refs. When `onlyTechniqueId` is set:
  * - include hits with `matched.technique_id === onlyTechniqueId`
  * - include IOC-only / unscoped hits (no technique_id) as shared context
@@ -439,15 +456,7 @@ const splitHits = (
   const events: SseEventRef[] = [];
   const alerts: SseAlertRef[] = [];
   let unlinkedCount = 0;
-  for (const hit of result.tier1.hits) {
-    const attributedTechnique = hit.matched?.technique_id?.toUpperCase();
-    if (
-      onlyTechniqueId &&
-      attributedTechnique &&
-      attributedTechnique !== onlyTechniqueId.toUpperCase()
-    ) {
-      continue;
-    }
+  for (const hit of scopedTier1Hits(result, onlyTechniqueId)) {
     if (isRemoteAlertsIndex(hit.index)) {
       unlinkedCount += 1;
       continue;
@@ -915,12 +924,17 @@ const buildEntry = ({
   // Derive from the normalized SSE copy, not the raw coordinator output: `per_ioc`
   // first/last_seen and hit timestamps are only ISO after `buildHuntResult` /
   // `toIsoInstant`, and `detections[]` carries them under the same datetime schema.
+  //
+  // `per_ioc` is aggregated over the whole report. A technique-scoped entry derives its
+  // IOC detections from the hits in its own scope instead (sampled, `from_sample`), so an
+  // IOC matched only by another technique's alert cannot appear under this technique or
+  // upgrade its basis.
   const detections = deriveDetections(
     {
       tier1: {
         counts: result.tier1.counts,
-        per_ioc: huntResult.tier1.per_ioc,
-        hits: result.tier1.hits.map((hit) => {
+        ...(techniqueId ? {} : { per_ioc: huntResult.tier1.per_ioc }),
+        hits: scopedTier1Hits(result, techniqueId).map((hit) => {
           const timestamp = toIsoInstant(hit.timestamp);
           return timestamp ? { ...hit, timestamp } : { ...hit, timestamp: undefined };
         }),
@@ -932,15 +946,16 @@ const buildEntry = ({
     { techniqueId }
   );
   const stampedEvents = stampMatchedDetection(events, detections);
-  const hasBehaviorHit = detections.some((d) => d.kind === 'behavior');
+  // From the scoped behaviors themselves, not from `detections`: the 30-detection cap
+  // must never turn a behavior hit into an IOC-only basis.
+  const hasBehaviorHit = scopedBehaviors(result, techniqueId).some(
+    (scopedBehavior) => scopedBehavior.execution?.hit === true
+  );
   const basisIocs = detections
     .map(iocOfDetection)
     .filter((ioc): ioc is NonNullable<typeof ioc> => ioc !== undefined);
   const basis = classifyBasis(basisIocs, hasBehaviorHit);
-  const summary = buildSummary(detections, {
-    techniqueId,
-    tier1Counts: { affected_hosts: result.tier1.counts.affected_hosts },
-  });
+  const summary = buildSummary(detections, { techniqueId });
 
   return {
     attachment_id: buildSseAttachmentId({ spaceId, reportId, techniqueId }),

@@ -21,6 +21,7 @@ import {
   HUNT_EVIDENCE_FIELD_KEYS,
   HUNT_EVIDENCE_FIELDS_MAX_KEYS,
   HUNT_EVIDENCE_FIELD_VALUE_MAX,
+  HUNT_HIT_NAME_MAX,
 } from '@kbn/alertzero-common';
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import type { HuntBehaviorModels } from '../types';
@@ -405,8 +406,11 @@ const executeValidatedEsql = async ({
         if (typeof id !== 'string' || id.length === 0) continue;
         if (typeof index !== 'string' || index.length === 0) continue;
         const timestamp = tsCol >= 0 ? row[tsCol] : undefined;
-        const hostRaw = hostCol >= 0 ? cellAsString(row[hostCol]) : undefined;
-        const userRaw = userCol >= 0 ? cellAsString(row[userCol]) : undefined;
+        // The wire schema caps both names; a longer computed value would fail the envelope.
+        const hostRaw =
+          hostCol >= 0 ? cellAsString(row[hostCol])?.slice(0, HUNT_HIT_NAME_MAX) : undefined;
+        const userRaw =
+          userCol >= 0 ? cellAsString(row[userCol])?.slice(0, HUNT_HIT_NAME_MAX) : undefined;
         const fields = evidenceFieldsFromRow(row, columns);
         hits.push({
           id,

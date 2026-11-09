@@ -18,6 +18,7 @@ import {
   classifyBasis,
   deriveDetections,
   groupEventsByDetection,
+  iocOfDetection,
   reconcileIocDetectionFields,
   type SseBasis,
   type SseDetection,
@@ -157,44 +158,30 @@ const buildEntityLine = (
  * values on the cited events; only when no IOC event exists does it fall back
  * to `hit_sources` for `behavior_only` / `ioc_and_behavior`.
  */
-const classifyBasisFromPayload = (
-  events: readonly SignificantSecurityEventRef[],
+/**
+ * Grades an old payload (no stored `basis`) the way the mapper grades a new one: from the
+ * derived detections' IOCs plus whether a Tier 2 behavior hit. Without any IOC detection
+ * the IOC strength is unknown: a behavior hit still grades (`hit_sources` says whether
+ * Tier 1 hit too), but a Tier 1 hit alone gets no badge rather than a misleading "weak" one.
+ */
+const classifyBasisFromDetections = (
+  detections: readonly SseDetection[],
   huntResult: HuntResult | undefined
 ): SseBasis | undefined => {
   if (!huntResult) {
     return undefined;
   }
-
-  const iocs = events.flatMap((event) => {
-    if (event.matched?.iocs && event.matched.iocs.length > 0) {
-      return event.matched.iocs.map((ioc) => ({ type: ioc.type, value: ioc.value }));
-    }
-    if (event.matched?.ioc) {
-      return [{ type: event.matched.ioc.type, value: event.matched.ioc.value }];
-    }
-    return [];
-  });
-
+  const iocs = detections
+    .map(iocOfDetection)
+    .filter((ioc): ioc is NonNullable<typeof ioc> => ioc !== undefined);
   const hasBehaviorHit =
     huntResult.hit_sources.includes('tier2') ||
     (huntResult.tier2?.behaviors ?? []).some((behavior) => behavior.execution?.hit === true);
-
   if (iocs.length > 0) {
     return classifyBasis(iocs, hasBehaviorHit);
   }
-
-  const hasTier1 = huntResult.hit_sources.includes('tier1');
-  const hasTier2 = huntResult.hit_sources.includes('tier2');
-  if (hasTier1 && hasTier2) {
-    return 'ioc_and_behavior';
-  }
-  if (hasTier2) {
-    return 'behavior_only';
-  }
-  // Tier 1 hit with no IOC event on the attachment is still graded as an IOC
-  // hit of unknown strength; classifyBasis with an empty list yields ioc_weak.
-  if (hasTier1) {
-    return classifyBasis([], false);
+  if (hasBehaviorHit) {
+    return huntResult.hit_sources.includes('tier1') ? 'ioc_and_behavior' : 'behavior_only';
   }
   return undefined;
 };
@@ -218,13 +205,9 @@ export const toSseViewModel = (parsed: SignificantSecurityEventAttachmentData): 
   const detections = reconcileIocDetectionFields(rawDetections, events);
 
   const summary =
-    parsed.summary ??
-    buildSummary(detections, {
-      techniqueId: parsed.corroborated_technique_id,
-      tier1Counts: huntResult?.tier1.counts,
-    });
+    parsed.summary ?? buildSummary(detections, { techniqueId: parsed.corroborated_technique_id });
 
-  const basis = parsed.basis ?? classifyBasisFromPayload(events, huntResult);
+  const basis = parsed.basis ?? classifyBasisFromDetections(detections, huntResult);
 
   const eventGroups = groupEventsByDetection(events, detections, huntResult);
 
