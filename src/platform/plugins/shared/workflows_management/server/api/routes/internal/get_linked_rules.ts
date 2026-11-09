@@ -10,7 +10,7 @@
 import { systemConnectorActionRefPrefix } from '@kbn/alerting-plugin/common';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { schema } from '@kbn/config-schema';
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
 import { escapeQuotes } from '@kbn/es-query';
 import { ConnectorTypeId } from '../../../connectors/workflows';
 import type { RouteDependencies } from '../types';
