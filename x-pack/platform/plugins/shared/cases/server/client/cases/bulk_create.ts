@@ -563,17 +563,21 @@ const createBulkCreateCaseRequest = async ({
 
   const extractObservablesSource = extractObservablesSourceByCaseId?.get(id);
 
-  // Default extractObservables when the caller omitted it.
+  // Resolve the final extractObservables value.
   // Precedence: caller-explicit > space config > owner default > false.
-  if (caseWithoutId.settings.extractObservables === undefined) {
-    caseWithoutId = {
-      ...caseWithoutId,
-      settings: {
-        ...caseWithoutId.settings,
-        extractObservables: resolveExtractObservables(caseWithoutId.owner, spaceExtractObservables),
-      },
-    };
-  }
+  // bulkCreate has no HTTP route and its only caller (the cases connector) inherits every value
+  // from a template, the space configuration or the owner default. So a value for an owner that
+  // cannot store true is coerced to false, not rejected: stored data must not fail the rule.
+  caseWithoutId = {
+    ...caseWithoutId,
+    settings: {
+      ...caseWithoutId.settings,
+      extractObservables: resolveExtractObservables(
+        caseWithoutId.owner,
+        caseWithoutId.settings.extractObservables ?? spaceExtractObservables
+      ),
+    },
+  };
 
   const normalizedCase = normalizeCreateCaseRequest(caseWithoutId, customFieldsConfiguration);
 

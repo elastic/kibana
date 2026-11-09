@@ -13,6 +13,7 @@ import {
 } from '@kbn/fleet-plugin/public';
 
 import { getEffectiveNamespace } from '../../common/effective_namespace';
+import { getDefaultEnabledDataStreams } from '../../aws_service_matrix';
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
 import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './package_inputs';
 import {
@@ -28,6 +29,7 @@ import {
   toOnboardingDeploymentQuery,
 } from './policy_cleanup';
 import type { BuildPolicyBodyOpts, PolicyCleanupOps } from './policy_cleanup';
+import { getPolicySettingsUpdate } from '../../common/policy_settings';
 
 export interface CleanupManagedIntegrationsOpts extends BuildPolicyBodyOpts {
   pendingCleanupPolicyIds: Record<string, string>;
@@ -134,6 +136,7 @@ export async function updateManagedIntegrationsPolicy(
     globalRegion,
     namespace,
     globalNamespace,
+    policySettings,
     authenticateAndDeployStep,
     servicesMap,
   } = opts;
@@ -182,7 +185,7 @@ export async function updateManagedIntegrationsPolicy(
   const serviceVarsMap: Record<string, ServiceVars> = {};
   for (const { instance, service } of members) {
     serviceVarsMap[service.id] = storedServiceVars[instance.instanceId] ?? {
-      enabledDataStreams: service.dataStreams,
+      enabledDataStreams: getDefaultEnabledDataStreams(service),
       varsByDataStream: {},
     };
   }
@@ -251,6 +254,7 @@ export async function updateManagedIntegrationsPolicy(
       package: { name: packageName, version: pkgVersion },
       ...(vars ? { vars } : {}),
       inputs,
+      ...getPolicySettingsUpdate(policySettings, 'managed_integration'),
       // null means "detach" (same as omitting — per Fleet schema); undefined means "preserve". Use
       // !== undefined rather than truthiness so an intentional null reaches the wire explicitly.
       ...(cloudConnector !== undefined ? { cloud_connector: cloudConnector } : {}),

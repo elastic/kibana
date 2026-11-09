@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import {
   ConsoleStepInputSchema,
   DataSetStepInputSchema,
   ForEachStepConfigSchema,
   HitlResumeAsPropSchema,
   IfStepConfigSchema,
+  IfStepOutputSchema,
   ParallelStepConfigSchema,
+  ParallelStepOutputSchema,
   SwitchStepConfigSchema,
   WaitForApprovalStepInputSchema,
   WaitForInputStepInputSchema,
@@ -22,6 +24,9 @@ import {
   WhileStepConfigSchema,
   WorkflowExecuteAsyncStepOutputSchema,
   WorkflowExecuteStepInputSchema,
+  WorkflowFailStepInputSchema,
+  WorkflowOutputStepConfigSchema,
+  WorkflowOutputStepInputSchema,
 } from './schema';
 import { type BaseStepDefinition, StepCategory } from './step_definition_types';
 import {
@@ -72,7 +77,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
       'Conditional execution. Runs steps when condition is true, with optional else block for the false branch',
     category: StepCategory.FlowControl,
     inputSchema: EmptyObjectSchema,
-    outputSchema: EmptyObjectSchema,
+    outputSchema: IfStepOutputSchema,
     configSchema: IfStepConfigSchema,
     documentation: {
       examples: [
@@ -180,7 +185,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     category: StepCategory.FlowControl,
     stability: 'tech_preview',
     inputSchema: EmptyObjectSchema,
-    outputSchema: EmptyObjectSchema,
+    outputSchema: ParallelStepOutputSchema,
     configSchema: ParallelStepConfigSchema,
     documentation: {
       examples: [
@@ -255,7 +260,8 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     description: 'Set variables in the workflow context',
     category: StepCategory.Data,
     inputSchema: DataSetStepInputSchema,
-    outputSchema: EmptyObjectSchema,
+    // The engine returns the rendered `with` object as the step output.
+    outputSchema: lazySchema(() => z.record(z.string(), z.unknown())),
     documentation: {
       examples: [
         `- name: set_variables
@@ -442,6 +448,44 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     workflow-id: "child_workflow"
     inputs:
       alertId: "{{ workflow.event.id }}"`,
+      ],
+    },
+  },
+  {
+    id: 'workflow.output',
+    label: 'Workflow Output',
+    description:
+      'Set the workflow outputs and stop the workflow with the given status (completed by default)',
+    category: StepCategory.FlowControl,
+    inputSchema: WorkflowOutputStepInputSchema,
+    // The workflow stops after this step, so no later step reads its output.
+    outputSchema: EmptyObjectSchema,
+    configSchema: WorkflowOutputStepConfigSchema,
+    documentation: {
+      examples: [
+        `- name: return_result
+  type: workflow.output
+  with:
+    alert_id: "{{ workflow.event.id }}"
+    severity: "{{ steps.classify.output.severity }}"`,
+      ],
+    },
+  },
+  {
+    id: 'workflow.fail',
+    label: 'Fail Workflow',
+    description: 'Stop the workflow with a failed status and an optional error message',
+    category: StepCategory.FlowControl,
+    inputSchema: WorkflowFailStepInputSchema,
+    // The workflow stops after this step, so no later step reads its output.
+    outputSchema: EmptyObjectSchema,
+    documentation: {
+      examples: [
+        `- name: fail_on_missing_alert
+  type: workflow.fail
+  with:
+    message: "Alert {{ workflow.event.id }} not found"
+    reason: "missing_alert"`,
       ],
     },
   },

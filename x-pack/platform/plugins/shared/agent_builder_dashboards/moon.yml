@@ -27,7 +27,6 @@ dependsOn:
   - '@kbn/agent-builder-visualizations-server'
   - '@kbn/agent-builder-visualizations-common'
   - '@kbn/custom-content-common'
-  - '@kbn/custom-content-server'
   - '@kbn/esql-types'
   - '@kbn/agent-builder-server'
   - '@kbn/as-code-dashboard-schema'
