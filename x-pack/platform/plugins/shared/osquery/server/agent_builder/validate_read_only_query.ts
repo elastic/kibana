@@ -108,7 +108,12 @@ type FromState = 'none' | 'expectTable' | 'afterTable' | 'inConstraint';
 
 const TOKEN_RE = /`[^`]*`|"[^"]*"|\[[^\]]*\]|[A-Za-z_][A-Za-z0-9_$]*|\d+(?:\.\d+)?|\S/g;
 
-/** Keywords that end a FROM/JOIN list at the current nesting level. */
+/**
+ * Reserved keywords that end a FROM/JOIN list at the current nesting level.
+ * `WINDOW` is deliberately absent: SQLite accepts it as an unquoted alias
+ * (`FROM processes AS window, curl`), so treating it as a boundary would let a
+ * following table through.
+ */
 const FROM_LIST_END = new Set([
   'WHERE',
   'GROUP',
@@ -118,7 +123,6 @@ const FROM_LIST_END = new Set([
   'UNION',
   'EXCEPT',
   'INTERSECT',
-  'WINDOW',
 ]);
 
 /**

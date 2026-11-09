@@ -229,14 +229,24 @@ export const resolveAgentIdsTool = (
         let matches = exact.agents.filter(isExactHost);
         let inconclusive = false;
 
-        if (matches.length === 0) {
-          // Fall back to the case-insensitive substring search the Osquery agent
-          // picker uses: alert `host.name` casing often differs from the Fleet
-          // agent's hostname. Hostname-only (not agent id / policy / platform).
+        const hasLiveMatch = matches.some(
+          (agent) => agent.status === 'online' || agent.status === 'degraded'
+        );
+
+        if (!hasLiveMatch) {
+          // No online agent among the exact-keyword matches: also search the
+          // case-insensitive substring way the Osquery agent picker does, since
+          // alert `host.name` casing often differs from the Fleet agent's hostname
+          // and a stale enrollment must not hide the current one. Hostname-only
+          // (not agent id / policy / platform).
           const candidates = await listAllMatchingAgents(
             `(${buildHostSearchKuery(hostname)}) and (${policyKuery})`
           );
-          matches = candidates.agents.filter(isExactHost);
+          const known = new Set(matches.map((agent) => agent.id));
+          matches = [
+            ...matches,
+            ...candidates.agents.filter((agent) => isExactHost(agent) && !known.has(agent.id)),
+          ];
           inconclusive = matches.length === 0 && candidates.truncated;
         }
 

@@ -238,8 +238,37 @@ describe('resolveAgentIdsTool', () => {
     const tool = resolveAgentIdsTool(context, loggerMock.create());
     await tool.handler({ hostnames: ['SRV-DC01'] }, { request: {}, spaceId: 'default' } as any);
 
-    expect(listAgents.mock.calls.length).toBeLessThanOrEqual(10);
+    // Exact pass + substring fallback, each capped at 10 pages.
+    expect(listAgents.mock.calls.length).toBeLessThanOrEqual(20);
     expect(listAgents.mock.calls.length).toBeGreaterThan(1);
+  });
+
+  it('prefers a current online agent over a stale exact-casing enrollment', async () => {
+    const { context, listAgents } = buildContext([]);
+    const stale = buildAgent({
+      id: 'stale',
+      status: 'offline',
+      local_metadata: { host: { hostname: 'SRV-DC01' } },
+    });
+    const current = buildAgent({
+      id: 'current',
+      status: 'online',
+      local_metadata: { host: { hostname: 'srv-dc01.corp.local', name: 'Srv-Dc01' } },
+    });
+    listAgents.mockImplementation(async ({ kuery }) => ({
+      agents: kuery.includes('.keyword:*') ? [stale, current] : [stale],
+    }));
+
+    const tool = resolveAgentIdsTool(context, loggerMock.create());
+    const result = await tool.handler({ hostnames: ['SRV-DC01'] }, {
+      request: {},
+      spaceId: 'default',
+    } as any);
+
+    expect(getResultData(result).resolved[0]).toMatchObject({
+      agent_id: 'current',
+      status: 'online',
+    });
   });
 
   describe('hostnames that are a prefix of many other hosts', () => {
