@@ -52,9 +52,8 @@ const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTR
 // Indicates whether the config is used on CI or locally.
 const isRunOnCI = process.env.CI;
 
-// Ports are env-overridable so two Scout stacks can run side by side when
-// another stack already holds the default ports. Same variables as
-// @kbn/test-es-server and @kbn/test read.
+// Env-overridable (same variables @kbn/test-es-server and @kbn/test read) so a
+// second stack can run while another holds the default ports.
 const servers = {
   elasticsearch: {
     protocol: 'https',
