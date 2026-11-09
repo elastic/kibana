@@ -14,7 +14,13 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import { CASE_OBSERVABLE_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 import { deleteObservablesOfCases } from '../../services/observables/delete_for_cases';
-import { CASES_OBSERVABLES_DELETE_TASK_TYPE } from './constants';
+import {
+  CASES_OBSERVABLES_DEDUPE_OVERLAP_MS,
+  CASES_OBSERVABLES_DEDUPE_TASK_ID,
+  CASES_OBSERVABLES_DEDUPE_TASK_TYPE,
+  CASES_OBSERVABLES_DELETE_TASK_TYPE,
+} from './constants';
+import { removeRepeatedObservables } from './remove_repeats';
 
 export interface CaseObservablesDeletionParams {
   caseIds: string[];
@@ -30,9 +36,13 @@ const isDeletionParams = (params: unknown): params is CaseObservablesDeletionPar
   );
 };
 
+interface DedupeTaskState {
+  lastRunAt?: string;
+}
+
 /**
  * Registers and schedules the background tasks of `cases-observables`: deleting the observables
- * of deleted cases.
+ * of deleted cases, and the daily removal of observables added twice at the same moment.
  */
 export class ObservablesTaskManager {
   private readonly logger: Logger;
@@ -90,6 +100,46 @@ export class ObservablesTaskManager {
           },
         }),
       },
+      [CASES_OBSERVABLES_DEDUPE_TASK_TYPE]: {
+        title: 'Cases observables repeat cleanup',
+        description:
+          'Removes observables added to a case twice at the same moment and recounts case totals',
+        timeout: '30m',
+        createTaskRunner: ({ taskInstance }) => ({
+          run: async () => {
+            const savedObjectsClient = this.getInternalSavedObjectsClient();
+            const startedAt = new Date().toISOString();
+            const { lastRunAt } = (taskInstance.state ?? {}) as DedupeTaskState;
+            const since =
+              lastRunAt != null
+                ? new Date(
+                    Date.parse(lastRunAt) - CASES_OBSERVABLES_DEDUPE_OVERLAP_MS
+                  ).toISOString()
+                : undefined;
+
+            try {
+              const { casesChecked, removed, totalsSet } = await removeRepeatedObservables({
+                savedObjectsClient,
+                logger: this.logger,
+                since,
+              });
+              this.logger.info(
+                `Checked ${casesChecked} case(s) for repeated observables: removed ${removed}, set ${totalsSet} case total(s)`
+              );
+              this.usageCounter?.incrementCounter({ counterName: 'observablesDedupeTaskSuccess' });
+              return { state: { lastRunAt: startedAt } };
+            } catch (error) {
+              this.logger.error(
+                `Failed to remove repeated observables: ${
+                  error instanceof Error ? error.message : String(error)
+                }`
+              );
+              this.usageCounter?.incrementCounter({ counterName: 'observablesDedupeTaskError' });
+              throw error;
+            }
+          },
+        }),
+      },
     });
   }
 
@@ -105,6 +155,23 @@ export class ObservablesTaskManager {
     this.internalSavedObjectsClient = new SavedObjectsClient(
       core.savedObjects.createInternalRepository([CASE_OBSERVABLE_SAVED_OBJECT, CASE_SAVED_OBJECT])
     );
+
+    taskManager
+      .ensureScheduled({
+        id: CASES_OBSERVABLES_DEDUPE_TASK_ID,
+        taskType: CASES_OBSERVABLES_DEDUPE_TASK_TYPE,
+        schedule: { interval: '1d' },
+        params: {},
+        state: {},
+        scope: ['cases'],
+      })
+      .catch((error: unknown) =>
+        this.logger.error(
+          `Error scheduling task ${CASES_OBSERVABLES_DEDUPE_TASK_ID}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        )
+      );
   }
 
   /** Schedules the deletion of the observables of deleted cases. */

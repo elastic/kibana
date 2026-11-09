@@ -10,9 +10,19 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { deleteObservablesOfCases } from '../../services/observables/delete_for_cases';
 import { ObservablesTaskManager } from './observables_task_manager';
-import { CASES_OBSERVABLES_DELETE_TASK_TYPE } from './constants';
+import {
+  CASES_OBSERVABLES_DEDUPE_TASK_ID,
+  CASES_OBSERVABLES_DEDUPE_TASK_TYPE,
+  CASES_OBSERVABLES_DELETE_TASK_TYPE,
+} from './constants';
+import { removeRepeatedObservables } from './remove_repeats';
 
 jest.mock('../../services/observables/delete_for_cases');
+jest.mock('./remove_repeats');
+
+const removeRepeatedObservablesMock = removeRepeatedObservables as jest.MockedFunction<
+  typeof removeRepeatedObservables
+>;
 
 const deleteObservablesOfCasesMock = deleteObservablesOfCases as jest.MockedFunction<
   typeof deleteObservablesOfCases
@@ -28,17 +38,61 @@ describe('ObservablesTaskManager', () => {
     manager.start(taskManagerStart, coreMock.createStart());
 
     const [[definitions]] = taskManagerSetup.registerTaskDefinitions.mock.calls;
+    type RunnerContext = Parameters<
+      (typeof definitions)[typeof CASES_OBSERVABLES_DELETE_TASK_TYPE]['createTaskRunner']
+    >[0];
     const runTask = (params: unknown) =>
       definitions[CASES_OBSERVABLES_DELETE_TASK_TYPE].createTaskRunner({
         taskInstance: { id: 'task-1', params } as unknown as ConcreteTaskInstance,
-      } as Parameters<(typeof definitions)[typeof CASES_OBSERVABLES_DELETE_TASK_TYPE]['createTaskRunner']>[0]).run();
+      } as RunnerContext).run();
+    const runDedupe = (state: Record<string, unknown>) =>
+      definitions[CASES_OBSERVABLES_DEDUPE_TASK_TYPE].createTaskRunner({
+        taskInstance: {
+          id: CASES_OBSERVABLES_DEDUPE_TASK_ID,
+          state,
+        } as unknown as ConcreteTaskInstance,
+      } as RunnerContext).run();
 
-    return { manager, taskManagerStart, runTask };
+    return { manager, taskManagerStart, runTask, runDedupe };
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
     deleteObservablesOfCasesMock.mockResolvedValue(3);
+    removeRepeatedObservablesMock.mockResolvedValue({ casesChecked: 2, removed: 1, totalsSet: 1 });
+  });
+
+  it('schedules the repeat cleanup once a day', () => {
+    const { taskManagerStart } = setup();
+
+    expect(taskManagerStart.ensureScheduled).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: CASES_OBSERVABLES_DEDUPE_TASK_ID,
+        taskType: CASES_OBSERVABLES_DEDUPE_TASK_TYPE,
+        schedule: { interval: '1d' },
+      })
+    );
+  });
+
+  it('checks every case on the first cleanup and records when it ran', async () => {
+    const { runDedupe } = setup();
+
+    const result = await runDedupe({});
+
+    expect(removeRepeatedObservablesMock).toHaveBeenCalledWith(
+      expect.objectContaining({ since: undefined })
+    );
+    expect(result).toEqual({ state: { lastRunAt: expect.any(String) } });
+  });
+
+  it('looks back an hour before the previous cleanup', async () => {
+    const { runDedupe } = setup();
+
+    await runDedupe({ lastRunAt: '2026-11-08T12:00:00.000Z' });
+
+    expect(removeRepeatedObservablesMock).toHaveBeenCalledWith(
+      expect.objectContaining({ since: '2026-11-08T11:00:00.000Z' })
+    );
   });
 
   it('schedules a delete with the cases and their namespace', async () => {

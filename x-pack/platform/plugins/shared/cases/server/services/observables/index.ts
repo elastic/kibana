@@ -168,7 +168,8 @@ export const groupValuesByTypeKey = (keys: ObservableKey[]): Map<string, string[
   return new Map([...byType].map(([typeKey, values]) => [typeKey, [...values]]));
 };
 
-const caseReferenceQuery = (caseIds: string[]): estypes.QueryDslQueryContainer => ({
+/** Matches the observables that reference any of the cases. */
+export const caseReferenceQuery = (caseIds: string[]): estypes.QueryDslQueryContainer => ({
   nested: {
     path: 'references',
     query: {
@@ -186,7 +187,7 @@ const caseReferenceQuery = (caseIds: string[]): estypes.QueryDslQueryContainer =
  * One clause per type key holding its values as a set, so the clause count follows the number of
  * types, not the number of observables, and stays far below Elasticsearch's clause limit.
  */
-const keysQuery = (keys: ObservableKey[]): estypes.QueryDslQueryContainer => ({
+export const keysQuery = (keys: ObservableKey[]): estypes.QueryDslQueryContainer => ({
   bool: {
     should: [...groupValuesByTypeKey(keys)].map(([typeKey, values]) => ({
       bool: {
