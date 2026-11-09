@@ -18,6 +18,34 @@ const USER_ERRORS_EXCEPTIONS = [
   'security_exception',
 ];
 
+// A rule run that exceeds its timeout is almost always caused by the rule's own workload (an
+// expensive query, a large time range, a cluster too small for the rule schedule), which the rule
+// owner can fix and Kibana cannot. These messages identify an Elasticsearch request from the rule
+// executor that did not complete before the rule timed out, so they are classified as user errors.
+//
+// The abort messages are produced by the Alerting Framework's scoped cluster client wrappers
+// (x-pack/platform/plugins/shared/alerting/server/lib/wrap_scoped_cluster_client.ts and
+// wrap_search_source_client.ts) when Task Manager cancels the run while a request is in flight.
+// They are plain strings there rather than exported constants, so the tests in
+// check_error_details.test.ts pin the exact text and will fail if the framework changes it.
+//
+// `Request timed out` comes from the Elasticsearch client itself and is deliberately NOT matched
+// on its own: clients other than the rule's scoped cluster client (e.g. the rule registry client
+// writing alerts) use the global `elasticsearch.requestTimeout` and a timeout there can indicate a
+// platform problem. It is only matched with the prefixes the rule executors add when logging a
+// failed rule search (esql/esql_request.ts and utils/single_search_after.ts).
+const TIMEOUT_REASON_SUBSTRINGS = [
+  // wrap_scoped_cluster_client.ts, esql / eql / search wrappers
+  'ES|QL search has been aborted due to cancelled execution',
+  'EQL search has been aborted due to cancelled execution',
+  'Search has been aborted due to cancelled execution',
+  // esql/esql_request.ts, executor noticed the cancellation between two poll requests
+  'Rule execution cancelled due to timeout',
+  // ES client request timeout on a rule search
+  'Error while performing ES|QL search: Request timed out',
+  'Error searching events\nError: TimeoutError: Request timed out',
+];
+
 // illegal_argument_exception and query_shard_exception are too broad to classify as user
 // errors globally (ES itself can produce them from framework-generated queries). These reason
 // substrings identify cases that ES only produces when evaluating user-supplied query text
@@ -29,6 +57,7 @@ const USER_ERRORS_EXCEPTIONS = [
 const USER_ERROR_REASON_SUBSTRINGS = [
   'is not an IP string literal',
   'Can only use prefix queries on keyword, text and wildcard fields',
+  ...TIMEOUT_REASON_SUBSTRINGS,
 ];
 
 // Fielddata errors can also be emitted for framework-generated aggregations and sorts, so they

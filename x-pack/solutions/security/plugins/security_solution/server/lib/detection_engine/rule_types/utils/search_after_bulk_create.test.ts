@@ -1162,6 +1162,27 @@ describe('searchAfterAndBulkCreate', () => {
     });
   });
 
+  test('should log the error message when the search fails so the run can be classified', async () => {
+    // The Alerting Framework throws this when Task Manager cancels the run while a search is open
+    ruleServices.scopedClusterClient.asCurrentUser.search.mockRejectedValue(
+      new Error('Search has been aborted due to cancelled execution')
+    );
+
+    const { success, errors } = await searchAfterAndBulkCreate({
+      sharedParams,
+      services: ruleServices,
+      eventsTelemetry: undefined,
+      filter: defaultFilter,
+      buildReasonMessage,
+    });
+
+    expect(success).toEqual(false);
+    expect(errors).toEqual(['Error: Search has been aborted due to cancelled execution']);
+    expect(sharedParams.ruleExecutionLogger.error).toHaveBeenCalledWith(
+      'cycle 0: Error extracting/processing events or creating alerts\nError: Error: Search has been aborted due to cancelled execution'
+    );
+  });
+
   test('should warn and stop when the search resolved to no shards', async () => {
     ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce({
       ...sampleEmptyDocSearchResults(),
