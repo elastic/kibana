@@ -16,7 +16,9 @@ export { useEntitiesWithAnomaliesDelta } from './use_entities_with_anomalies_del
 export { useNewEntityCount } from './use_new_entity_count';
 export { useNewEntityDelta } from './use_new_entity_delta';
 export { useRiskMoversCount } from './use_risk_movers_count';
+export { useSearchedTileEntityIds } from './use_searched_tile_entity_ids';
 export { useNewlyHighCriticalCount } from './use_newly_high_critical_count';
 export { useNewlyHighCriticalDelta, useRiskMoversDelta } from './use_risk_tiles_delta';
 export { useTilesLoadTelemetry } from './use_tiles_load_telemetry';
-export { TILE_TIMEOUT_MESSAGE, useTilesTimeoutNotice } from './use_tiles_timeout_notice';
+export { useTilesTimeoutNotice } from './use_tiles_timeout_notice';
+export { useTilesErrorNotice } from './use_tiles_error_notice';

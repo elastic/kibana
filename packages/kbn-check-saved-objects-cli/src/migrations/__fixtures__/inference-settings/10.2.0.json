@@ -1,0 +1,28 @@
+{
+  "10.1.0": [
+    {
+      "features": [
+        {
+          "feature_id": "agent_builder",
+          "endpoints": [{ "id": ".anthropic-claude-3.7-sonnet" }]
+        }
+      ]
+    },
+    {
+      "features": []
+    }
+  ],
+  "10.2.0": [
+    {
+      "features": [
+        {
+          "feature_id": "agent_builder",
+          "endpoints": [{ "id": ".anthropic-claude-3.7-sonnet" }]
+        }
+      ]
+    },
+    {
+      "features": []
+    }
+  ]
+}

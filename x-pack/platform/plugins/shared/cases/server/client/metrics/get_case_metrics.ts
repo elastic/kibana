@@ -7,8 +7,11 @@
 import { merge } from 'lodash';
 
 import type { SingleCaseMetricsResponse } from '../../../common/types/api';
-import { SingleCaseMetricsResponseRt, SingleCaseMetricsRequestRt } from '../../../common/types/api';
-import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
+import {
+  SingleCaseMetricsResponseSchema,
+  SingleCaseMetricsRequestSchema,
+} from '../../../common/types/api';
+import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import type { CasesClient } from '../client';
@@ -24,7 +27,7 @@ export const getCaseMetrics = async (
   const { logger } = clientArgs;
 
   try {
-    const queryParams = decodeWithExcessOrThrow(SingleCaseMetricsRequestRt)({ features });
+    const queryParams = decodeWithExcessOrThrowZod(SingleCaseMetricsRequestSchema)({ features });
 
     await checkAuthorization(caseId, clientArgs);
     const handlers = buildHandlers(
@@ -43,7 +46,9 @@ export const getCaseMetrics = async (
       return merge(acc, metric);
     }, {}) as SingleCaseMetricsResponse;
 
-    return decodeOrThrow(SingleCaseMetricsResponseRt)(mergedResults);
+    return decodeOrThrowZod(SingleCaseMetricsResponseSchema)(
+      mergedResults
+    ) as SingleCaseMetricsResponse;
   } catch (error) {
     throw createCaseError({
       logger,

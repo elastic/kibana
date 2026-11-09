@@ -8,9 +8,9 @@
 export { useGetAppUrl, useNavigateTo, useNavigation } from './src/navigation';
 export type { GetAppUrl, NavigateTo } from './src/navigation';
 export { NavigationProvider } from './src/context';
+export { AlertZeroIcon } from './src/alertzero_icon';
 export {
   ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
-  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
   LinkCategoryType,
   SECURITY_UI_APP_ID,
   SecurityGroupName,

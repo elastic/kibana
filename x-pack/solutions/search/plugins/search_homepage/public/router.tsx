@@ -8,14 +8,20 @@
 import React from 'react';
 import { Route, Routes } from '@kbn/shared-ux-router';
 
+import {
+  GettingStartedRedirect,
+  hasVisitedGettingStarted,
+} from './components/getting_started_redirect';
 import { SearchHomepagePage } from './components/search_homepage/search_homepage';
 
 export const HomepageRouter = () => {
   return (
     <Routes>
-      <Route>
-        <SearchHomepagePage />
-      </Route>
+      <Route
+        render={() =>
+          hasVisitedGettingStarted() ? <SearchHomepagePage /> : <GettingStartedRedirect />
+        }
+      />
     </Routes>
   );
 };

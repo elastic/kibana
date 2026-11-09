@@ -228,11 +228,10 @@ export class SavedQueryManagementComponentService extends FtrService {
   }
 
   async closeSavedQueryManagementComponent() {
-    const isOpenAlready = await this.testSubjects.exists('queryBarMenuPanel');
-    if (!isOpenAlready) return;
-
     await this.retry.try(async () => {
-      await this.testSubjects.click('showQueryBarMenu');
+      if (await this.testSubjects.exists('queryBarMenuPanel')) {
+        await this.testSubjects.click('showQueryBarMenu');
+      }
       await this.testSubjects.missingOrFail('queryBarMenuPanel');
     });
   }

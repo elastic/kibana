@@ -13,6 +13,21 @@ import type { AdapterRunContext, SourceHit } from '../types';
 const FIXED_NOW = new Date('2024-03-01T10:00:00.000Z');
 const FEED_URL =
   'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json';
+const CATALOGUED_SOURCE_ID = 'kev:cisa-known-exploited-vulnerabilities';
+
+// KEV is not in the MVP catalog, so the adapter is only reachable through a catalog
+// entry a later change adds back. Stand that entry in here so the parsing and report
+// shape stay covered; the real catalog is asserted in seed_default_sources.test.ts.
+jest.mock('../../../../common/threat_intel', () => {
+  const actual = jest.requireActual('../../../../common/threat_intel');
+  return {
+    ...actual,
+    resolveCatalogSourceUrl: (sourceId: string) =>
+      sourceId === 'kev:cisa-known-exploited-vulnerabilities'
+        ? 'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json'
+        : actual.resolveCatalogSourceUrl(sourceId),
+  };
+});
 
 const VULN_1 = {
   cveID: 'CVE-2021-44228',
@@ -68,8 +83,11 @@ const makeContext = (body: string, status = 200): AdapterRunContext => {
   };
 };
 
-const makeSource = (name = 'CISA Known Exploited Vulnerabilities'): SourceHit => ({
-  _id: 'kev:cisa-known-exploited-vulnerabilities',
+const makeSource = (
+  name = 'CISA Known Exploited Vulnerabilities',
+  id = CATALOGUED_SOURCE_ID
+): SourceHit => ({
+  _id: id,
   _source: {
     adapter_type: 'kev',
     name,
@@ -80,6 +98,20 @@ const makeSource = (name = 'CISA Known Exploited Vulnerabilities'): SourceHit =>
 describe('kevAdapter', () => {
   it('adapterType is kev', () => {
     expect(kevAdapter.adapterType).toBe('kev');
+  });
+
+  // A KEV row that reconciliation has not disabled yet must not keep fetching through
+  // a hardcoded URL once the id is out of the catalog.
+  it('returns [] without fetching when the source id has no catalog URL', async () => {
+    const context = makeContext(makeEnvelope());
+
+    const reports = await kevAdapter.run(
+      makeSource('CISA Known Exploited Vulnerabilities', 'kev:not-in-catalog'),
+      context
+    );
+
+    expect(reports).toEqual([]);
+    expect(context.fetchFn).not.toHaveBeenCalled();
   });
 
   it('produces one report per CVE entry', async () => {
@@ -157,6 +189,27 @@ describe('kevAdapter', () => {
       due_date: '2021-12-24',
       ransomware_use: 'Known',
     });
+  });
+
+  it('stamps content.published_at from dateAdded', async () => {
+    const reports = await kevAdapter.run(makeSource(), makeContext(makeEnvelope()));
+    expect(reports.map((r) => r.content.published_at)).toEqual([
+      '2021-12-10T00:00:00.000Z',
+      '2022-06-01T00:00:00.000Z',
+    ]);
+  });
+
+  it('omits content.published_at when dateAdded does not parse', async () => {
+    const [report] = await kevAdapter.run(
+      makeSource(),
+      makeContext(makeEnvelope([{ ...VULN_1, dateAdded: 'not-a-date' }]))
+    );
+    expect(report.content).not.toHaveProperty('published_at');
+  });
+
+  it('does not drop entries by age', async () => {
+    const reports = await kevAdapter.run(makeSource(), makeContext(makeEnvelope()));
+    expect(reports).toHaveLength(2);
   });
 
   it('extracted.categories is ["vulnerability"]', async () => {

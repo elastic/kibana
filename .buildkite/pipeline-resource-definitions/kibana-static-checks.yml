@@ -1,0 +1,59 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: bk-kibana-static-checks
+  description: 'Runs the static code checks for a PR, without the Kibana build and test suites'
+  links:
+    - url: 'https://buildkite.com/elastic/kibana-static-checks'
+      title: Pipeline link
+spec:
+  type: buildkite-pipeline
+  system: buildkite
+  owner: 'group:kibana-operations'
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / static checks
+      description: 'Runs the static code checks (linting, type checks and other validations) for a PR, without the Kibana build and test suites.'
+    spec:
+      env:
+        ELASTIC_PR_COMMENTS_ENABLED: 'true'
+        ELASTIC_GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
+        GITHUB_BUILD_COMMIT_STATUS_CONTEXT: kibana-static-checks
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'false'
+      allow_rebuilds: true
+      branch_configuration: ''
+      cancel_intermediate_builds: true
+      default_branch: main
+      repository: elastic/kibana
+      pipeline_file: .buildkite/scripts/pipelines/static_checks/pipeline.sh
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            no_cone: true
+            paths:
+              - .buildkite
+              - .nvmrc
+              - package.json
+              - tsconfig.base.json
+              - versions.json
+              - kibana.jsonc
+              - '**/kibana.jsonc'
+              - '**/tsconfig.json'
+            cleanup_sparse_state: true
+      provider_settings:
+        build_branches: false
+        build_pull_requests: true
+        publish_commit_status: false
+        trigger_mode: none
+        build_tags: false
+        prefix_pull_request_fork_branch_names: false
+        skip_pull_request_builds_for_existing_commits: false
+      teams:
+        everyone:
+          access_level: BUILD_AND_READ
+        kibana-operations:
+          access_level: MANAGE_BUILD_AND_READ
+      tags:
+        - kibana

@@ -10,8 +10,16 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ExecutionStatus, isTerminalStatus, type WorkflowDetailDto } from '@kbn/workflows';
+import {
+  hasWorkflowExecutePrivilege,
+  hasWorkflowReadPrivilege,
+} from '@kbn/agent-builder-tools-base/workflows';
 import { CREATE_KI_STEP_ID } from '@kbn/context-engine-plugin/common/step_types/create_ki';
-import { runSavedAutomation, type RunAutomationResult } from '../save_automation/handler';
+import {
+  collectWorkflowValidationErrors,
+  runSavedAutomation,
+  type RunAutomationResult,
+} from '../save_automation/handler';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
 
 export type { RunAutomationResult };
@@ -29,8 +37,10 @@ export interface RunAutomationParams {
 export interface RunAutomationHandlerResult extends RunAutomationResult {
   /** Items the run was limited to, present for a pilot. */
   pilotSize?: number;
-  /** KIs the run wrote, present when the call waited and the run completed. */
+  /** Active KIs the run wrote, present when the call waited and the run completed. */
   kisWritten?: number;
+  /** KIs the run wrote as `verification_failed`. */
+  kisFailedVerification?: number;
   /** Deep link to the workflow execution in the Workflows app, when the run started. */
   workflowUrl?: string;
   /** Canned instruction for the agent to tell the user how to check execution progress. */
@@ -48,11 +58,17 @@ const declaresPilotInput = (workflow: WorkflowDetailDto | null | undefined): boo
       trigger.inputs.properties?.[PILOT_SIZE_INPUT] !== undefined
   );
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const failedVerification = (output: Record<string, unknown>): boolean =>
+  isRecord(output.verification) && output.verification.passed === false;
+
 /**
- * KIs a finished run wrote: completed createKi steps that returned an id. A KI that fails
- * verification also completes its step, but with no id, because nothing was written.
+ * KIs a finished run wrote: completed createKi steps that returned an id, split by whether they
+ * passed verification.
  */
-const countKisWritten = async ({
+const countCreateKiOutputs = async ({
   workflowsManagement,
   executionId,
   spaceId,
@@ -64,21 +80,27 @@ const countKisWritten = async ({
   spaceId: string;
   request: KibanaRequest;
   logger: Logger;
-}): Promise<number | undefined> => {
+}): Promise<{ kisWritten: number; kisFailedVerification: number } | undefined> => {
   try {
     const execution = await workflowsManagement.getWorkflowExecution(executionId, spaceId, {
       includeOutput: true,
       request,
     });
-    return execution?.stepExecutions.filter(
-      ({ stepType, status, output }) =>
-        stepType === CREATE_KI_STEP_ID &&
-        status === ExecutionStatus.COMPLETED &&
-        typeof output === 'object' &&
-        output !== null &&
-        !Array.isArray(output) &&
-        typeof output.id === 'string'
-    ).length;
+    if (!execution) {
+      return undefined;
+    }
+    const outputs = execution.stepExecutions
+      .filter(
+        ({ stepType, status }) =>
+          stepType === CREATE_KI_STEP_ID && status === ExecutionStatus.COMPLETED
+      )
+      .flatMap(({ output }) => (isRecord(output) ? [output] : []));
+    return {
+      kisWritten: outputs.filter(
+        (output) => typeof output.id === 'string' && !failedVerification(output)
+      ).length,
+      kisFailedVerification: outputs.filter(failedVerification).length,
+    };
   } catch (error) {
     logger.warn(`Could not count the KIs written by execution '${executionId}': ${error}`);
     return undefined;
@@ -107,24 +129,50 @@ export const runAutomationHandler = async ({
   const workflowsManagement = getWorkflowsManagement();
   const { workflowId, pilotSize } = params;
 
+  const security = await getSecurityStart();
+  const canExecute = await hasWorkflowExecutePrivilege({ security, request, spaceId });
+  if (!canExecute) {
+    return {
+      started: false,
+      reason: `Unauthorized to execute workflow '${workflowId}'. The workflowsManagement execute privilege is required.`,
+    };
+  }
+
+  const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId, request);
+  if (!workflow) {
+    return {
+      started: false,
+      reason: `Workflow '${workflowId}' was not found in this space.`,
+    };
+  }
+
+  if (!workflow.valid || !workflow.definition) {
+    const canRead = await hasWorkflowReadPrivilege({ security, request, spaceId });
+    const errors = canRead
+      ? await collectWorkflowValidationErrors({
+          yaml: workflow.yaml,
+          workflowsManagement,
+          spaceId,
+          request,
+          logger,
+        })
+      : [];
+    const details = errors.length > 0 ? ` ${errors.join('; ')}` : '';
+    return {
+      started: false,
+      reason: `Workflow '${workflowId}' has an invalid definition, so it cannot run.${details}`,
+    };
+  }
+
   // A workflow without the input would ignore it and run over the full corpus.
-  if (pilotSize !== undefined) {
-    const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId, request);
-    if (!workflow) {
-      return {
-        started: false,
-        reason: `Workflow '${workflowId}' was not found in this space.`,
-      };
-    }
-    if (!declaresPilotInput(workflow)) {
-      return {
-        started: false,
-        reason:
-          `Workflow '${workflowId}' does not declare the ${PILOT_SIZE_INPUT} input, so it cannot ` +
-          `run as a pilot. Document, unit-profile and index-metadata automations can. ` +
-          `A Targeted KI writer has no pilot: run it with platform.core.execute_workflow.`,
-      };
-    }
+  if (pilotSize !== undefined && !declaresPilotInput(workflow)) {
+    return {
+      started: false,
+      reason:
+        `Workflow '${workflowId}' does not declare the ${PILOT_SIZE_INPUT} input, so it cannot ` +
+        `run as a pilot. Document, unit-profile and index-metadata automations can. ` +
+        `A Targeted KI writer has no pilot: run it with platform.core.execute_workflow.`,
+    };
   }
 
   const runResult = await runSavedAutomation({
@@ -154,9 +202,9 @@ export const runAutomationHandler = async ({
     runResult.executionId ?? ''
   )}`;
   const finished = runResult.status !== undefined && isTerminalStatus(runResult.status);
-  const kisWritten =
+  const kiCounts =
     runResult.status === ExecutionStatus.COMPLETED && runResult.executionId
-      ? await countKisWritten({
+      ? await countCreateKiOutputs({
           workflowsManagement,
           executionId: runResult.executionId,
           spaceId,
@@ -168,7 +216,7 @@ export const runAutomationHandler = async ({
   return {
     ...runResult,
     ...(pilotSize !== undefined && { pilotSize }),
-    ...(kisWritten !== undefined && { kisWritten }),
+    ...kiCounts,
     workflowUrl,
     ...(!finished && {
       statusCheckHint: `Use platform.core.get_workflow_execution_status with executionId "${runResult.executionId}" to check progress. The user can ask you for a status update at any time.`,

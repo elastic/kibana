@@ -52,9 +52,17 @@ const renderTour = ({
   return { ...utils, onNext, onEnd };
 };
 
+/** Reports how much of the observed anchor is in view, as the browser would on scroll. */
+let reportAnchorInView: (intersectionRatio: number) => void;
+
 describe('ProductTour', () => {
   beforeAll(() => {
     Element.prototype.scrollIntoView = jest.fn();
+    window.IntersectionObserver = jest.fn((callback: IntersectionObserverCallback) => {
+      reportAnchorInView = (intersectionRatio) =>
+        callback([{ intersectionRatio } as IntersectionObserverEntry], {} as IntersectionObserver);
+      return { observe: jest.fn(), disconnect: jest.fn() };
+    }) as unknown as typeof IntersectionObserver;
   });
 
   afterEach(() => {
@@ -126,5 +134,17 @@ describe('ProductTour', () => {
     });
 
     expect(onNext).toHaveBeenCalledTimes(1);
+  });
+
+  it('hides the step while its anchor is not wholly in view', async () => {
+    renderTour({ currentStep: 1 });
+    const stepTestId = getProductTourStepTestId('attention');
+    expect(await screen.findByTestId(stepTestId)).toBeInTheDocument();
+
+    act(() => reportAnchorInView(0.5));
+    expect(screen.queryByTestId(stepTestId)).not.toBeInTheDocument();
+
+    act(() => reportAnchorInView(1));
+    expect(await screen.findByTestId(stepTestId)).toBeInTheDocument();
   });
 });

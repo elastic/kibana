@@ -13,8 +13,14 @@ export const QUEUE_POLL_INTERVAL_MS = 60_000;
 
 const isLeadingPage = <TPage>(_page: TPage, index: number) => index === 0;
 
-/** Refetches the page's active queries together once a minute, first page only, while the tab is visible. */
-export const useQueuePolling = (queryKeys: readonly QueryKey[]): void => {
+/**
+ * Refetches the page's active queries together once a minute while the tab is visible: first page
+ * only for `queryKeys`, every loaded page for `allPagesKeys`.
+ */
+export const useQueuePolling = (
+  queryKeys: readonly QueryKey[],
+  allPagesKeys: readonly QueryKey[] = []
+): void => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -25,7 +31,10 @@ export const useQueuePolling = (queryKeys: readonly QueryKey[]): void => {
       queryKeys.forEach((queryKey) => {
         void queryClient.refetchQueries({ queryKey, type: 'active', refetchPage: isLeadingPage });
       });
+      allPagesKeys.forEach((queryKey) => {
+        void queryClient.refetchQueries({ queryKey, type: 'active' });
+      });
     }, QUEUE_POLL_INTERVAL_MS);
     return () => clearInterval(poll);
-  }, [queryClient, queryKeys]);
+  }, [queryClient, queryKeys, allPagesKeys]);
 };

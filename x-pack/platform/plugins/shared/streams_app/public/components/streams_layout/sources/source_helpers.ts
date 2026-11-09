@@ -79,9 +79,12 @@ export const createSourceId = ({
   return candidate;
 };
 
+const OTLP_ENDPOINT_SIGNALS = ['logs', 'metrics', 'traces'] as const;
+
 export const resolveSourceCapabilities = ({
   type,
   sourceId,
+  signals,
   managedInputBaseUrl,
   elasticsearchBaseUrl,
   isServerless = false,
@@ -89,6 +92,7 @@ export const resolveSourceCapabilities = ({
 }: {
   type: SourceType;
   sourceId: string;
+  signals?: readonly (typeof OTLP_ENDPOINT_SIGNALS)[number][];
 } & SourceEnvironment): SourceCapabilities => {
   const managedInputUrl = normalizeEndpointUrl(managedInputBaseUrl);
   const elasticsearchUrl = normalizeEndpointUrl(elasticsearchBaseUrl);
@@ -105,10 +109,20 @@ export const resolveSourceCapabilities = ({
   } else if (type === 'es_prometheus_remote_write') {
     endpoint = elasticsearchUrl ? `${elasticsearchUrl}/_prometheus/api/v1/write` : undefined;
   } else if (type === 'async_bulk' && managedInputUrl) {
-    endpoint = `${managedInputUrl}/_es/_bulk`;
+    const sourceInputUrl = `${managedInputUrl}/inputs/elasticsearch/${sourceId}`;
+    endpoint = `${sourceInputUrl}/_bulk`;
+    // `<target>` is a literal placeholder for the fallback index.
+    endpoints = [
+      { id: 'bulk', url: endpoint },
+      { id: 'bulkTarget', url: `${sourceInputUrl}/<target>/_bulk` },
+    ];
   } else if (type === 'otlp' && managedInputUrl) {
     endpoint = `${managedInputUrl}/inputs/otlp/${sourceId}`;
-    endpoints = (['logs', 'metrics', 'traces'] as const).map((signal) => ({
+    const selectedSignals =
+      signals && signals.length > 0
+        ? OTLP_ENDPOINT_SIGNALS.filter((signal) => signals.includes(signal))
+        : OTLP_ENDPOINT_SIGNALS;
+    endpoints = selectedSignals.map((signal) => ({
       id: signal,
       url: `${endpoint}/v1/${signal}`,
     }));
@@ -132,7 +146,7 @@ export const resolveSourceCapabilities = ({
   };
 };
 
-const V1_SOURCE_TYPES: SourceType[] = ['async_bulk', 'otlp', 'prometheus_remote_write', 'bulk'];
+const V1_SOURCE_TYPES: SourceType[] = ['async_bulk', 'otlp', 'prometheus_remote_write'];
 
 export const getAvailableSourceTypes = (environment: SourceEnvironment): SourceType[] =>
   V1_SOURCE_TYPES.filter(

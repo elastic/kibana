@@ -63,6 +63,7 @@ export const getRunningProcessesTool = (
               hostName: toolParams.hostName as string | undefined,
               agentId: toolParams.agentId as string | undefined,
             },
+            args: { comment: toolParams.comment as string | undefined },
             context,
             endpointAppContextService,
             requiredPrivilege: 'canGetRunningProcesses',
@@ -89,6 +90,7 @@ export const getRunningProcessesTool = (
         const prepared = await prepareDispatch({
           action: 'running-processes',
           params: { hostName: requestedHostName, agentId: requestedAgentId },
+          args: { comment },
           context,
           endpointAppContextService,
           requiredPrivilege: 'canGetRunningProcesses',

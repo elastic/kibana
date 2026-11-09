@@ -7,7 +7,7 @@
 
 import { assign, fromPromise, sendTo, setup } from 'xstate';
 import type { CoreStart } from '@kbn/core/public';
-import type { SourceRuntimeMetadata, SourceStatus, SourceType } from '../types';
+import type { SourceRuntimeMetadata, SourceType } from '../types';
 import {
   createSourcesMachineImplementations,
   sourcesStateMachine,
@@ -52,7 +52,6 @@ export interface SourcesTableStateContext {
   query: string;
   selectedSourceIds: string[];
   selectedTypes: SourceType[];
-  selectedStatuses: SourceStatus[];
   sortingColumns: SourcesTableSortingColumn[];
   pagination: SourcesTablePagination;
   visibleColumnIds: string[];
@@ -79,7 +78,6 @@ export type SourcesTableStateEvent =
   | { type: 'search.change'; query: string }
   | { type: 'selection.change'; sourceIds: string[] }
   | { type: 'filters.types.change'; sourceTypes: SourceType[] }
-  | { type: 'filters.statuses.change'; statuses: SourceStatus[] }
   | { type: 'sorting.change'; columns: SourcesTableSortingColumn[] }
   | { type: 'pagination.change'; pagination: SourcesTablePagination }
   | { type: 'visibleColumns.change'; columnIds: string[] };
@@ -212,14 +210,6 @@ export const sourcesTableStateMachine = setup({
           ? { ...context.pagination, pageIndex: 0 }
           : context.pagination,
     }),
-    updateStatusFilters: assign({
-      selectedStatuses: ({ context, event }) =>
-        event.type === 'filters.statuses.change' ? event.statuses : context.selectedStatuses,
-      pagination: ({ context, event }) =>
-        event.type === 'filters.statuses.change'
-          ? { ...context.pagination, pageIndex: 0 }
-          : context.pagination,
-    }),
     updateSorting: assign({
       sortingColumns: ({ context, event }) =>
         event.type === 'sorting.change' ? event.columns : context.sortingColumns,
@@ -253,10 +243,9 @@ export const sourcesTableStateMachine = setup({
       query: '',
       selectedSourceIds: [],
       selectedTypes: [],
-      selectedStatuses: [],
       sortingColumns: [{ id: 'name', direction: 'asc' }],
       pagination: { pageIndex: 0, pageSize: 10 },
-      visibleColumnIds: ['name', 'type', 'status', 'throughput', 'lastEvent', 'destinations'],
+      visibleColumnIds: ['name', 'type', 'destinations'],
       loadUnitDefinition: input.loadUnitDefinition,
       persistUnitDefinition: input.persistUnitDefinition,
       error: undefined,
@@ -272,7 +261,6 @@ export const sourcesTableStateMachine = setup({
           input: {
             unitDefinition,
             metadataBySourceId: input.metadataBySourceId ?? {},
-            includeUnconfiguredNodeOnCreate: false,
             parentRef: self,
           },
         }
@@ -283,7 +271,6 @@ export const sourcesTableStateMachine = setup({
     'search.change': { actions: ['updateQuery'] },
     'selection.change': { actions: ['updateSelection'] },
     'filters.types.change': { actions: ['updateTypeFilters'] },
-    'filters.statuses.change': { actions: ['updateStatusFilters'] },
     'sorting.change': { actions: ['updateSorting'] },
     'pagination.change': { actions: ['updatePagination'] },
     'visibleColumns.change': { actions: ['updateVisibleColumns'] },
