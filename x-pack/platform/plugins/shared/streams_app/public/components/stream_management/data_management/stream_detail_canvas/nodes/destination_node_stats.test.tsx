@@ -86,10 +86,10 @@ describe('DestinationNodeStats', () => {
     it.each<[string, StatsEntry<DestinationStatsView>]>([
       ['a result with no data', { status: 'noData', stats: statsWith({}) }],
       ['a value that went stale', { status: 'stale', stats: statsWith({}) }],
-    ])('shows Waiting for data..., and no numbers, for %s', (_description, entry) => {
+    ])('shows Data not flowing in, and no numbers, for %s', (_description, entry) => {
       renderFooter(entry);
 
-      expect(text('streamsCanvasDestinationWaiting')).toBe('Waiting for data...');
+      expect(text('streamsCanvasDestinationNotFlowing')).toBe('Data not flowing in');
       expect(isShown('streamsCanvasDestinationRate')).toBe(false);
       expect(isShown('streamsCanvasDestinationLatency')).toBe(false);
     });
@@ -100,10 +100,10 @@ describe('DestinationNodeStats', () => {
       expect(isShown('streamsCanvasDestinationStale')).toBe(true);
     });
 
-    it('shows no waiting message once there is a value to show', () => {
+    it('shows no not-flowing message once there is a value to show', () => {
       renderFooter({ status: 'ready', stats: statsWith({ eventsRate: 3700 }) });
 
-      expect(isShown('streamsCanvasDestinationWaiting')).toBe(false);
+      expect(isShown('streamsCanvasDestinationNotFlowing')).toBe(false);
     });
   });
 
@@ -143,7 +143,7 @@ describe('DestinationNodeStats', () => {
       renderFooter(entry);
 
       expect(isShown('streamsCanvasDestinationStats')).toBe(true);
-      expect(isShown('streamsCanvasDestinationWaiting')).toBe(false);
+      expect(isShown('streamsCanvasDestinationNotFlowing')).toBe(false);
       expect(isShown('streamsCanvasDestinationRate')).toBe(false);
       expect(isShown('streamsCanvasDestinationLatency')).toBe(false);
       expect(isShown('streamsCanvasDestinationError')).toBe(false);
@@ -161,7 +161,7 @@ describe('DestinationNodeStats', () => {
 
       expect(isShown('streamsCanvasDestinationStats')).toBe(true);
       expect(isShown('streamsCanvasDestinationError')).toBe(true);
-      expect(isShown('streamsCanvasDestinationWaiting')).toBe(false);
+      expect(isShown('streamsCanvasDestinationNotFlowing')).toBe(false);
       expect(isShown('streamsCanvasDestinationRate')).toBe(false);
       expect(isShown('streamsCanvasDestinationLatency')).toBe(false);
     });

@@ -24,7 +24,7 @@ interface DestinationNodeStatsProps {
 /**
  * The footer of a destination node: the rate and the latency, for example `8.1k/s | 175ms`. A value
  * that is missing shows a dash, and a rate of exactly 0 shows `0/s`. A destination with neither a
- * rate nor a latency shows `Waiting for data...` instead. It is its own component, so a stats
+ * rate nor a latency shows `Data not flowing in` instead. It is its own component, so a stats
  * update re-renders only this row, and never the node or the graph. It always reserves its row, so
  * the card does not change size when the first result arrives. Until then, and when the stats could
  * not be loaded, it shows no numbers, so a load or a failure never looks like a measured value.
@@ -36,7 +36,7 @@ export function DestinationNodeStats({ destinationId, indexCount }: DestinationN
     entry?.status === 'ready' || entry?.status === 'noData' || entry?.status === 'stale';
   const eventsRate = entry?.stats?.eventsRate ?? null;
   const latencyAverage = entry?.stats?.latencyAverage ?? null;
-  const isWaiting = hasValues && eventsRate === null && latencyAverage === null;
+  const isNotFlowing = hasValues && eventsRate === null && latencyAverage === null;
 
   return (
     <div
@@ -50,14 +50,14 @@ export function DestinationNodeStats({ destinationId, indexCount }: DestinationN
         min-height: ${euiTheme.size.l};
       `}
     >
-      {isWaiting && (
-        <EuiText size="xs" color="subdued" data-test-subj="streamsCanvasDestinationWaiting">
-          {i18n.translate('xpack.streams.canvas.destinationNode.waitingStatus', {
-            defaultMessage: 'Waiting for data...',
+      {isNotFlowing && (
+        <EuiText size="xs" color="subdued" data-test-subj="streamsCanvasDestinationNotFlowing">
+          {i18n.translate('xpack.streams.canvas.destinationNode.notFlowingStatus', {
+            defaultMessage: 'Data not flowing in',
           })}
         </EuiText>
       )}
-      {hasValues && !isWaiting && (
+      {hasValues && !isNotFlowing && (
         <>
           <EuiText size="xs" data-test-subj="streamsCanvasDestinationRate">
             {formatEventsRate(eventsRate)}
