@@ -35,6 +35,12 @@ export const TROUBLESHOOTING_AGENT_ID_PREFIX = 'eval-agent-ts-';
 export const FORENSIC_AGENT_ID_PREFIX = 'eval-agent-forensic-';
 export const POLICY_MANAGEMENT_AGENT_ID_PREFIX = 'eval-agent-pm-';
 export const RESPONSE_ACTIONS_AGENT_ID_PREFIX = 'eval-agent-era-';
+export const DEFEND_INSIGHTS_AGENT_ID_PREFIX = 'eval-agent-di-';
+
+/** Workflow insights (written by the POST route's post-create callback) target the seeded agent ids. */
+const WORKFLOW_INSIGHTS_INDEX = '.edr-workflow-insights-default';
+/** The persisted generation documents of the Defend Insights route (one data stream per space). */
+const DEFEND_INSIGHTS_INDEX = '.kibana-elastic-ai-assistant-defend-insights-*';
 
 interface CleanupClients {
   esClient: Client;
@@ -78,4 +84,34 @@ export async function cleanupPolicyManagementSeededData(clients: CleanupClients)
 
 export async function cleanupResponseActionsData(clients: CleanupClients): Promise<void> {
   return cleanupSeededData({ ...clients, agentIdPrefix: RESPONSE_ACTIONS_AGENT_ID_PREFIX });
+}
+
+export async function cleanupDefendInsightsData({
+  esClient,
+  internalEsClient,
+}: CleanupClients): Promise<void> {
+  await cleanupSeededData({
+    esClient,
+    internalEsClient,
+    agentIdPrefix: DEFEND_INSIGHTS_AGENT_ID_PREFIX,
+  });
+
+  await Promise.all([
+    internalEsClient
+      .deleteByQuery({
+        index: WORKFLOW_INSIGHTS_INDEX,
+        query: { prefix: { 'target.ids': DEFEND_INSIGHTS_AGENT_ID_PREFIX } },
+        refresh: true,
+        ignore_unavailable: true,
+      })
+      .catch(() => {}),
+    internalEsClient
+      .deleteByQuery({
+        index: DEFEND_INSIGHTS_INDEX,
+        query: { prefix: { endpoint_ids: DEFEND_INSIGHTS_AGENT_ID_PREFIX } },
+        refresh: true,
+        ignore_unavailable: true,
+      })
+      .catch(() => {}),
+  ]);
 }

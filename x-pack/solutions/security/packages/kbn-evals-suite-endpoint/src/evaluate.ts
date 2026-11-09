@@ -6,8 +6,11 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { evaluate as base } from '@kbn/evals';
+import { evaluate as base, getConnectorActionTypeId } from '@kbn/evals';
 import { createEsClientForTesting, systemIndicesSuperuser } from '@kbn/test';
+import { DefendInsightsApiClient } from './defend_insights/defend_insights_api_client';
+import type { EvaluateDefendInsightsDataset } from './evaluate_defend_insights_dataset';
+import { createEvaluateDefendInsightsDataset } from './evaluate_defend_insights_dataset';
 import type { EvaluateForensicDataset } from './evaluate_forensic_dataset';
 import { createEvaluateForensicDataset } from './evaluate_forensic_dataset';
 import type { EvaluatePolicyManagementDataset } from './evaluate_policy_management_dataset';
@@ -21,6 +24,8 @@ export const evaluate = base.extend<
   {},
   {
     evaluateDataset: EvaluateSecurityDataset;
+    defendInsightsApiClient: DefendInsightsApiClient;
+    evaluateDefendInsightsDataset: EvaluateDefendInsightsDataset;
     evaluateForensicDataset: EvaluateForensicDataset;
     evaluatePolicyManagementDataset: EvaluatePolicyManagementDataset;
     evaluateResponseActionsDataset: EvaluateResponseActionsDataset;
@@ -34,6 +39,25 @@ export const evaluate = base.extend<
           agentBuilderClient,
           evaluators,
           executorClient,
+        })
+      );
+    },
+    { scope: 'worker' },
+  ],
+  defendInsightsApiClient: [
+    async ({ fetch, log }, use) => {
+      await use(new DefendInsightsApiClient(fetch, log));
+    },
+    { scope: 'worker' },
+  ],
+  evaluateDefendInsightsDataset: [
+    ({ executorClient, defendInsightsApiClient, connector }, use) => {
+      use(
+        createEvaluateDefendInsightsDataset({
+          executorClient,
+          apiClient: defendInsightsApiClient,
+          connectorId: connector.id,
+          actionTypeId: getConnectorActionTypeId(connector),
         })
       );
     },
