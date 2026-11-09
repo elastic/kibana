@@ -21,6 +21,7 @@ import {
   getElasticsearchErrorMessage,
   isElasticsearchQueryError,
   isIndexNotFoundError,
+  isResultWindowTooLargeError,
 } from './es_error_helpers';
 
 interface SearchWorkflowExecutionsParams {
@@ -47,6 +48,7 @@ export const WORKFLOW_EXECUTION_LIST_SOURCE_INCLUDES = [
   'finishedAt',
   'duration',
   'workflowId',
+  'runName',
   'triggeredBy',
   'executedBy',
   'effectiveIdentity',
@@ -99,6 +101,10 @@ export const searchWorkflowExecutions = async ({
       };
     }
 
+    if (isResultWindowTooLargeError(error)) {
+      throw error;
+    }
+
     if (isElasticsearchQueryError(error)) {
       const message = getElasticsearchErrorMessage(error) ?? 'Invalid search query';
       throw Object.assign(new Error(message), { statusCode: 400 });
@@ -136,6 +142,7 @@ function transformToWorkflowExecutionListModel(
         finishedAt: source.finishedAt,
         duration: source.duration,
         workflowId: source.workflowId,
+        runName: source.runName,
         workflowName: source.workflowDefinition?.name,
         tags: source.workflowDefinition?.tags,
         triggeredBy: source.triggeredBy,

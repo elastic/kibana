@@ -296,11 +296,11 @@ Emitted by Hunt packaging for one threat report, once packaging has run.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | envelope | | | See above |
-| `hunt_status` | keyword | yes | The hunt child's result status: `success`, `partial`, `failed` or `unknown` |
+| `hunt_status` | keyword | yes | The hunt child's result status: `success`, `partial`, `retired_incomplete` (a settled run that left a gap no rerun can close), `failed` or `unknown` |
 | `has_confirmed_hit` | boolean | yes | Whether the hunt cleared the confirmed-hit bar |
 | `tier2_invoked` | boolean | no | Whether the hunt ran Tier 2 (behavioral queries). Absent when the Worker did not pass it |
 | `package_status` | keyword | yes | Packaging's own status: `success` or `run_incomplete` |
-| `closed_clean` | boolean | yes | Whether a clean run closed the Investigation as benign |
+| `closed_clean` | boolean | yes | Whether a run with no confirmed hit closed the Investigation: as benign, or as `other` for `retired_incomplete`, which is true too |
 | `proposals_prepared` | long | yes | Proposals packaging prepared and launched a gate for |
 | `proposals_dispatch_failed` | long | yes | Proposal gates that failed to launch |
 | `mint_suppression` | keyword | yes | Why packaging held back its Proposals: `none`, `existing_proposals` or `check_failed` |

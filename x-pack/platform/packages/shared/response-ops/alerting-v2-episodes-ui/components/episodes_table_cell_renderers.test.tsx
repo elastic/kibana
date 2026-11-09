@@ -17,6 +17,7 @@ import { EpisodeDataSourceProvider } from '../context/episode_data_source_contex
 import { createTestEpisodeSource } from '../types/episode_data_source.mock';
 import {
   EpisodeDurationCell,
+  EpisodeReasonCell,
   EpisodeSuppressedCell,
   EpisodeSourceCell,
   EpisodeStatusCell,
@@ -895,5 +896,31 @@ describe('EpisodeSuppressedCell', () => {
 
     expect(container).toHaveTextContent(EMPTY_VALUE);
     expect(screen.queryByText('Suppressed by maintenance window')).not.toBeInTheDocument();
+  });
+});
+
+describe('EpisodeReasonCell', () => {
+  const renderCell = (reason: unknown) =>
+    renderWithI18n(
+      <EpisodeReasonCell {...baseCellProps} columnId="reason" row={makeRow({ reason })} />
+    );
+
+  it('renders the full reason text without truncating it', () => {
+    const reason = `Error count is 1200 in the last 5 minutes for service ${'checkout-'.repeat(
+      40
+    )}api, above the threshold of 25`;
+    renderCell(reason);
+
+    expect(screen.getByTestId('episodeReasonCell')).toHaveTextContent(reason);
+  });
+
+  it.each([
+    ['the field is absent (v2 episodes)', undefined],
+    ['the field is empty', ''],
+  ])('renders the empty value when %s', (_name, reason) => {
+    const { container } = renderCell(reason);
+
+    expect(container).toHaveTextContent(EMPTY_VALUE);
+    expect(screen.queryByTestId('episodeReasonCell')).not.toBeInTheDocument();
   });
 });

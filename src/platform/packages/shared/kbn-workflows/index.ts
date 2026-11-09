@@ -64,6 +64,7 @@ export * from './common/utils';
 export * from './common/step_types';
 export * from './common/execution_labels';
 export * from './common/hitl';
+export * from './common/hitl_slack_interactive';
 export * from './common/wait_for_approval';
 export {
   getManagedWorkflowSelectorVisibilityContext,

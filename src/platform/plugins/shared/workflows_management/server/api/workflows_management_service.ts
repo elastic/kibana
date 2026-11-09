@@ -140,6 +140,7 @@ export interface SearchWorkflowExecutionsParams {
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];
+  runName?: string;
   concurrencyGroupKey?: string;
   /** Exact-match filter on stored execution labels; every entry must match. */
   labels?: Readonly<Record<string, string>>;
@@ -793,6 +794,15 @@ export class WorkflowsService {
       registeredPluginId,
       request
     );
+  }
+
+  public async disableManagedWorkflow(
+    id: ManagedWorkflowId,
+    options: ManagedWorkflowOperationOptions,
+    registeredPluginId: string
+  ): Promise<boolean> {
+    await this.ensureInitialized();
+    return this.managedWorkflowsService.disableManagedWorkflow(id, options, registeredPluginId);
   }
 
   public async getManagedWorkflowStatus(

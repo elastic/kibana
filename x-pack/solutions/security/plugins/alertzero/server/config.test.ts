@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { configSchema } from './config';
+import { config, configSchema } from './config';
 
 const KEY_A = 'a'.repeat(32);
 const KEY_B = 'b'.repeat(32);
@@ -34,5 +34,15 @@ describe('alertzero config huntLibrary keys', () => {
 
   it('rejects a profile token key shorter than 32 characters', () => {
     expect(() => configSchema.validate({ huntLibrary: { profileTokenKey: 'short' } })).toThrow();
+  });
+});
+
+describe('alertzero config', () => {
+  it('turns the plugin on by default in traditional deployments', () => {
+    expect(config.schema.validate({}, { serverless: false })).toMatchObject({ enabled: true });
+  });
+
+  it('keeps the plugin off by default in serverless', () => {
+    expect(config.schema.validate({}, { serverless: true })).toMatchObject({ enabled: false });
   });
 });

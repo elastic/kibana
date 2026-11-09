@@ -9,9 +9,15 @@
 
 import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { coreMock, loggingSystemMock, securityServiceMock } from '@kbn/core/server/mocks';
+import {
+  coreMock,
+  elasticsearchServiceMock,
+  loggingSystemMock,
+  securityServiceMock,
+} from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import {
   ExecutionStatus,
   type WorkflowDetailDto,
@@ -33,6 +39,7 @@ import {
 } from './external_resume/external_resume_service';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
+import { ManagedWorkflowReadForbiddenError } from './managed_workflow_read_error';
 import { preprocessTriggerInputs } from './routes/executions/utils/preprocess_trigger_inputs';
 import { WorkflowForbiddenError } from './workflow_forbidden_error';
 import { WorkflowRequiresDelegatedIdentityError } from './workflow_requires_delegated_identity_error';
@@ -265,6 +272,29 @@ describe('WorkflowsManagementApi', () => {
       ).rejects.toBeInstanceOf(WorkflowNotFoundError);
 
       expect(mockWorkflowsService.getHistoryForWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('rejects managed workflow history without managed workflow read access', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue({ ...workflow, managed: true });
+
+      await expect(
+        api.getHistoryForWorkflow(workflow.id, 'default', { request: mockRequest })
+      ).rejects.toBeInstanceOf(ManagedWorkflowReadForbiddenError);
+
+      expect(mockWorkflowsService.getHistoryForWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('returns managed workflow history with managed workflow read access', async () => {
+      const historyResponse = { page: 1, perPage: 20, total: 0, items: [] };
+      mockWorkflowsService.getWorkflow.mockResolvedValue({ ...workflow, managed: true });
+      mockWorkflowsService.getHistoryForWorkflow.mockResolvedValue(historyResponse);
+
+      await expect(
+        api.getHistoryForWorkflow(workflow.id, 'default', {
+          request: mockRequest,
+          allowManagedWorkflowRead: true,
+        })
+      ).resolves.toBe(historyResponse);
     });
 
     it.each(['edit', 'execute'] as const)(
@@ -1339,6 +1369,60 @@ steps:
         {},
         mockRequest
       );
+    });
+  });
+
+  describe('loadAlertDocuments', () => {
+    const index = '.alerts-security.alerts-default';
+    let elasticsearch: ReturnType<typeof elasticsearchServiceMock.createStart>;
+    let scopedClusterClient: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
+
+    beforeEach(() => {
+      scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      scopedClusterClient.asCurrentUser.search.mockResponseOnce({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { hits: [{ _id: 'a1', _index: index, _source: { 'kibana.alert.uuid': 'a1' } }] },
+      });
+      elasticsearch = elasticsearchServiceMock.createStart();
+      elasticsearch.client.asScoped.mockReturnValue(scopedClusterClient);
+      mockWorkflowsService.getCoreStart = jest
+        .fn()
+        .mockResolvedValue({ ...coreMock.createStart(), elasticsearch });
+    });
+
+    it('reads as the user behind the request and formats with the registered rule types', async () => {
+      const formatAlert = jest.fn((alert: Record<string, unknown>) => ({ ...alert, signal: {} }));
+      mockWorkflowsService.getPluginsStart = jest.fn().mockResolvedValue({
+        alerting: { listTypes: () => new Map([[QUERY_RULE_TYPE_ID, { alerts: { formatAlert } }]]) },
+      });
+
+      const result = await api.loadAlertDocuments({
+        alerts: { ids: ['a1'], index },
+        request: mockRequest,
+      });
+
+      expect(elasticsearch.client.asScoped).toHaveBeenCalledWith(mockRequest);
+      expect(scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
+      expect(formatAlert).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({
+        alerts: [{ _id: 'a1', _index: index, kibana: { alert: { uuid: 'a1' } }, signal: {} }],
+        missingIds: [],
+      });
+    });
+
+    it('loads unformatted documents when the alerting plugin is unavailable', async () => {
+      mockWorkflowsService.getPluginsStart = jest.fn().mockResolvedValue({});
+
+      const result = await api.loadAlertDocuments({
+        alerts: { ids: ['a1'], index },
+        request: mockRequest,
+      });
+
+      expect(result.alerts).toEqual([
+        { _id: 'a1', _index: index, kibana: { alert: { uuid: 'a1' } } },
+      ]);
     });
   });
 

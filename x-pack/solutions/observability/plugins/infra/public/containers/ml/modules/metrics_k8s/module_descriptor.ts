@@ -69,7 +69,7 @@ const setUpModule = async (setUpModuleArgs: SetUpModuleArgs, fetch: HttpHandler)
   const jobOverrides = jobIds.map((id) => {
     const { job: defaultJobConfig } = getDefaultJobConfigs(id);
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+    // eslint-disable-next-line @kbn/compat/typescript-naming-convention
     const analysis_config: any = {
       ...defaultJobConfig.analysis_config,
     };

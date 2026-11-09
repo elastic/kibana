@@ -96,7 +96,10 @@ export const FlakyTestLatestRunSchema = FlakyTestBranchLatestRunSchema.extend({
 });
 export type FlakyTestLatestRun = z.infer<typeof FlakyTestLatestRunSchema>;
 
-/** Build counts of one test on one branch; the entry-level counts are the sum over branches. */
+/**
+ * Build counts of one test on one branch, breakages included; the entry-level counts are the sum
+ * over branches less the builds of its breakages.
+ */
 export const FlakyTestBranchStatsSchema = z.object({
   branch: z.string(),
   builds: z.int(),
@@ -156,60 +159,66 @@ export type FlakyTestFlakiestBranch = z.infer<typeof FlakyTestFlakiestBranchSche
  * One test aggregated over the report window. Counts are per execution (one per test run;
  * Playwright in-run retries collapse into a single execution) and per Buildkite build.
  */
-export const FlakyTestEntrySchema = z.object({
-  testId: z.string(),
-  framework: TestFrameworkSchema,
-  title: z.string(),
-  /** Title of the enclosing suite (describe blocks), when the framework reports one. */
-  suiteTitle: z.optional(z.string()),
-  filePath: z.string(),
-  configPath: z.optional(z.string()),
-  /**
-   * What the config runs: `ui-test`, `api-test`, `unit-test`, `unit-integration-test` or
-   * `unknown`. Absent in reports written before the field existed.
-   */
-  configCategory: z.optional(z.string()),
-  owners: z.array(z.string()),
-  areas: z.array(z.string()),
-  /** Executions that were not skipped. */
-  runs: z.int(),
-  /** Executions with at least one failed attempt. */
-  fails: z.int(),
-  /** Executions that passed on the first attempt. */
-  passes: z.int(),
-  /** Executions that failed and then passed within the same run (Playwright retries only). */
-  retryFlakes: z.int(),
-  /** Distinct Buildkite builds the test ran in. */
-  builds: z.int(),
-  /** Distinct Buildkite builds with at least one failed execution. */
-  failedBuilds: z.int(),
-  /** `failedBuilds / builds`. */
-  buildFailRate: z.number(),
-  /** Distinct branches with at least one failed execution. */
-  failedBranches: z.int(),
-  /** Per-branch breakdown of `builds` / `failedBuilds`, most failed builds first. */
-  byBranch: z.array(FlakyTestBranchStatsSchema),
-  /**
-   * Per-target breakdown of `builds` / `failedBuilds`, most failed builds first. Defaults so
-   * that reports written before the field existed still parse.
-   */
-  byTarget: z.array(FlakyTestTargetStatsSchema).default([]),
-  firstFailedAt: z.coerce.date(),
-  lastFailedAt: z.coerce.date(),
-  /**
-   * The branch on which the test cleared the thresholds; the top-level rate above is diluted
-   * by the other branches. Absent in reports written before thresholds applied per branch.
-   */
-  flakiestBranch: z.optional(FlakyTestFlakiestBranchSchema),
-  /** Absent only if the test emitted no execution events in the window (should not happen). */
-  latestRun: z.optional(FlakyTestLatestRunSchema),
-  sampleFailures: z.array(FlakyTestSampleFailureSchema),
-  /**
-   * The test's distinct errors over the window, most failures first. Defaults so that reports
-   * written before the field existed still parse.
-   */
-  errors: z.array(FlakyTestErrorSchema).default([]),
-});
+export const FlakyTestEntrySchema = lazySchema(() =>
+  z.object({
+    testId: z.string(),
+    framework: TestFrameworkSchema,
+    title: z.string(),
+    /** Title of the enclosing suite (describe blocks), when the framework reports one. */
+    suiteTitle: z.optional(z.string()),
+    filePath: z.string(),
+    configPath: z.optional(z.string()),
+    /**
+     * What the config runs: `ui-test`, `api-test`, `unit-test`, `unit-integration-test` or
+     * `unknown`. Absent in reports written before the field existed.
+     */
+    configCategory: z.optional(z.string()),
+    owners: z.array(z.string()),
+    areas: z.array(z.string()),
+    /** Executions that were not skipped. */
+    runs: z.int(),
+    /** Executions with at least one failed attempt. */
+    fails: z.int(),
+    /** Executions that passed on the first attempt. */
+    passes: z.int(),
+    /** Executions that failed and then passed within the same run (Playwright retries only). */
+    retryFlakes: z.int(),
+    /**
+     * Distinct Buildkite builds the test ran in, less the builds of its breakages: failed builds in
+     * a row, too many to be chance, that a flaky test is kept despite.
+     */
+    builds: z.int(),
+    /** Distinct Buildkite builds with at least one failed execution, less those of its breakages. */
+    failedBuilds: z.int(),
+    /** `failedBuilds / builds`. */
+    buildFailRate: z.number(),
+    /** Distinct branches with at least one failed execution. */
+    failedBranches: z.int(),
+    /** Per-branch breakdown of `builds` / `failedBuilds`, most failed builds first. */
+    byBranch: z.array(FlakyTestBranchStatsSchema),
+    /**
+     * Per-target breakdown of `builds` / `failedBuilds`, most failed builds first. Defaults so
+     * that reports written before the field existed still parse.
+     */
+    byTarget: z.array(FlakyTestTargetStatsSchema).default([]),
+    firstFailedAt: z.coerce.date(),
+    lastFailedAt: z.coerce.date(),
+    /**
+     * The branch on which the test cleared the thresholds, counted without its breakages; the
+     * top-level rate above is diluted by the other branches. Absent in reports written before
+     * thresholds applied per branch.
+     */
+    flakiestBranch: z.optional(FlakyTestFlakiestBranchSchema),
+    /** Absent only if the test emitted no execution events in the window (should not happen). */
+    latestRun: z.optional(FlakyTestLatestRunSchema),
+    sampleFailures: z.array(FlakyTestSampleFailureSchema),
+    /**
+     * The test's distinct errors over the window, most failures first. Defaults so that reports
+     * written before the field existed still parse.
+     */
+    errors: z.array(FlakyTestErrorSchema).default([]),
+  })
+);
 export type FlakyTestEntry = z.infer<typeof FlakyTestEntrySchema>;
 
 /** Build counts on one Buildkite pipeline, any branch, for the tests of one file. */
