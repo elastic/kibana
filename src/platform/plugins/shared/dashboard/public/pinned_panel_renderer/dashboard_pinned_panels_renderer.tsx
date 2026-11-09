@@ -63,9 +63,8 @@ export const DashboardPinnedPanelsRenderer = () => {
     },
     [dashboardApi.layout$, viewMode]
   );
-
   return (
-    <span css={styles}>
+    <span css={[styles, Object.keys(flexLayout).length === 0 ? emptyStyles : undefined]}>
       <FlexLayout
         layout={flexLayout}
         gridSettings={{
@@ -82,6 +81,10 @@ export const DashboardPinnedPanelsRenderer = () => {
     </span>
   );
 };
+
+const emptyStyles = css`
+  display: none;
+`;
 
 const styles = ({ euiTheme }: UseEuiTheme) => css`
   --dashboardActivePanelBorderStyle: ${euiTheme.border.width.thick} solid
