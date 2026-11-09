@@ -97,6 +97,7 @@ import {
   getLayersTitles,
   isReferenceLineDecorationConfig,
   getFilteredLayers,
+  sortLayerRowsByXRange,
   getReferenceLayers,
   isDataLayer,
   getAxesConfiguration,
@@ -257,7 +258,10 @@ export function XYChart({
   const darkMode = useKibanaIsDarkMode();
   const palettes = useKbnPalettes();
   const appFixedViewport = useAppFixedViewport();
-  const filteredLayers = useMemo(() => getFilteredLayers(layers), [layers]);
+  const filteredLayers = useMemo(
+    () => getFilteredLayers(layers).map(sortLayerRowsByXRange),
+    [layers]
+  );
   const layersById = filteredLayers.reduce<Record<string, CommonXYLayerConfig>>(
     (hashMap, layer) => ({ ...hashMap, [layer.layerId]: layer }),
     {}
