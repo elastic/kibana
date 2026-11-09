@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
-import { PluginInitializer } from '@kbn/core-di-server';
 import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
 import { inject, injectable } from 'inversify';
-import type { PluginConfig } from '../../config';
+import { ConfigService } from '../services/config_service/config_service';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -32,11 +30,10 @@ export class DispatcherTaskRunner {
   constructor(
     @inject(DispatcherServiceInternalToken)
     private readonly dispatcherService: DispatcherServiceContract,
-    @inject(PluginInitializer('config'))
-    pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config'],
+    @inject(ConfigService) configService: ConfigService,
     @inject(LoggerServiceToken) logger: LoggerServiceContract
   ) {
-    this.paused = pluginConfigAccessor.get<PluginConfig>().dispatcher.paused;
+    this.paused = configService.get('dispatcher.paused');
     this.logger = logger.forSubsystem('dispatcher');
   }
 

@@ -339,34 +339,30 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       [installSingleRule, isSiemMigrationAgentBuilderEnabled, isRulesLoading]
     );
 
-    const getMigrationRuleData = useCallback(
-      (ruleId: string) => {
-        if (!isRulesLoading && migrationRules.length) {
-          const migrationRule = migrationRules.find((item) => item.id === ruleId);
-          let matchedPrebuiltRule: RuleResponse | undefined;
-          let relatedIntegrations: RelatedIntegration[] = [];
-          if (migrationRule) {
-            // Find matched prebuilt rule if any and prioritize its installed version
-            const prebuiltRuleId = migrationRule.elastic_rule?.prebuilt_rule_id;
-            const prebuiltRuleVersions = prebuiltRuleId ? prebuiltRules[prebuiltRuleId] : undefined;
-            matchedPrebuiltRule = prebuiltRuleVersions?.current ?? prebuiltRuleVersions?.target;
+    const getMatchedPrebuiltRule = useCallback(
+      (migrationRule: RuleMigrationRule): RuleResponse | undefined => {
+        // Prioritize the installed version of the matched prebuilt rule
+        const prebuiltRuleId = migrationRule.elastic_rule?.prebuilt_rule_id;
+        const prebuiltRuleVersions = prebuiltRuleId ? prebuiltRules[prebuiltRuleId] : undefined;
+        return prebuiltRuleVersions?.current ?? prebuiltRuleVersions?.target;
+      },
+      [prebuiltRules]
+    );
 
-            const integrationIds = migrationRule.elastic_rule?.integration_ids;
-            if (integrations && integrationIds) {
-              relatedIntegrations = integrationIds
-                .map((integrationId) => integrations[integrationId])
-                .filter((integration) => integration != null);
-            }
+    const getRuleIntegrations = useCallback(
+      (migrationRule: RuleMigrationRule) => {
+        if (!isRulesLoading) {
+          let relatedIntegrations: RelatedIntegration[] = [];
+          const integrationIds = migrationRule.elastic_rule?.integration_ids;
+          if (integrations && integrationIds) {
+            relatedIntegrations = integrationIds
+              .map((integrationId) => integrations[integrationId])
+              .filter((integration) => integration != null);
           }
-          return {
-            migrationRule,
-            matchedPrebuiltRule,
-            relatedIntegrations,
-            isIntegrationsLoading,
-          };
+          return { relatedIntegrations, isIntegrationsLoading };
         }
       },
-      [integrations, isIntegrationsLoading, isRulesLoading, prebuiltRules, migrationRules]
+      [integrations, isIntegrationsLoading, isRulesLoading]
     );
 
     const {
@@ -374,9 +370,10 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       openMigrationRuleDetails: openRulePreview,
       openedMigrationRuleId,
     } = useMigrationRuleDetailsFlyout({
+      migrationId,
       isLoading: isRulesLoading,
       migrationRules,
-      getMigrationRuleData,
+      getMatchedPrebuiltRule,
       ruleActionsFactory,
     });
 
@@ -415,7 +412,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       disableActions: isTableLoading,
       openMigrationRuleDetails: openRulePreview,
       installMigrationRule: installSingleRule,
-      getMigrationRuleData,
+      getRuleIntegrations,
     });
 
     return (

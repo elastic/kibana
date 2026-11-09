@@ -159,12 +159,11 @@ export class UnifiedFieldList {
       .locator(`li[data-attr-field="${field}"] [data-test-subj="domDragDrop-keyboardHandler"]`)
       .focus();
     await this.page.keyboard.press('Enter'); // start dragging
-    // the other selected fields become drop targets once the drag has started
-    await selectedSection
-      .locator(
-        `li[data-attr-field="${targetField}"] [data-test-subj="domDragDrop-reorderableDropLayer"]`
-      )
-      .waitFor({ state: 'attached' });
+    // arrow keys are ignored until the reorder group is armed, one render after the drop targets appear
+    await expect(selectedSection.getByTestId('domDragDrop-reorderableGroup')).toHaveAttribute(
+      'data-dnd-reorder-active',
+      'true'
+    );
 
     for (let step = 0; step < steps; step++) {
       await this.page.keyboard.press(direction === 'down' ? 'ArrowDown' : 'ArrowUp');

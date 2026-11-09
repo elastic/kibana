@@ -29,6 +29,7 @@ dependsOn:
   - '@kbn/core-http-server-internal'
   - '@kbn/core-http-server-mocks'
   - '@kbn/core-http-router-server-mocks'
+  - '@kbn/core-http-server'
 tags:
   - shared-server
   - package

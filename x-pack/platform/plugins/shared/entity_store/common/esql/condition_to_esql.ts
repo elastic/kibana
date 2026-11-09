@@ -15,7 +15,8 @@ import {
   type Condition,
   type FilterCondition,
 } from '@kbn/streamlang';
-import { castField } from './cast';
+import { referenceField } from './cast';
+import type { CastFieldOptions } from './cast';
 import { escapeEsqlStringLiteral, esqlIsNotNullOrEmpty } from './strings';
 
 /**
@@ -33,7 +34,10 @@ import { escapeEsqlStringLiteral, esqlIsNotNullOrEmpty } from './strings';
  * is wrapped with the appropriate cast from the singleton field type registry — this prevents
  * ES|QL errors caused by ambiguous mappings across source indices.
  */
-export function entityStoreConditionToESQL(condition: Condition): string {
+export function entityStoreConditionToESQL(
+  condition: Condition,
+  options?: CastFieldOptions
+): string {
   if (isAlwaysCondition(condition)) {
     return 'TRUE';
   }
@@ -41,25 +45,25 @@ export function entityStoreConditionToESQL(condition: Condition): string {
     return 'FALSE';
   }
   if (isOrCondition(condition)) {
-    const inClause = buildInClauseOrNull(condition.or);
+    const inClause = buildInClauseOrNull(condition.or, options);
     if (inClause !== null) {
       return inClause;
     }
-    return condition.or.map((c) => entityStoreConditionToESQL(c)).join(' OR ');
+    return condition.or.map((c) => entityStoreConditionToESQL(c, options)).join(' OR ');
   }
   if (isNotCondition(condition)) {
-    return `NOT (${entityStoreConditionToESQL(condition.not)})`;
+    return `NOT (${entityStoreConditionToESQL(condition.not, options)})`;
   }
   if (isAndCondition(condition)) {
     const notEmptyField = getNotEmptyField(condition);
     if (notEmptyField !== null) {
-      return esqlIsNotNullOrEmpty(notEmptyField);
+      return esqlIsNotNullOrEmpty(notEmptyField, options);
     }
     return condition.and
       .map((c) => {
-        const s = entityStoreConditionToESQL(c);
+        const s = entityStoreConditionToESQL(c, options);
         // OR (non-IN) inside AND needs parens: AND binds tighter than OR in ES|QL
-        if (isOrCondition(c) && buildInClauseOrNull(c.or) === null) {
+        if (isOrCondition(c) && buildInClauseOrNull(c.or, options) === null) {
           return `(${s})`;
         }
         return s;
@@ -67,7 +71,7 @@ export function entityStoreConditionToESQL(condition: Condition): string {
       .join(' AND ');
   }
   if (isFilterCondition(condition)) {
-    return renderLeafCondition(condition as FilterCondition);
+    return renderLeafCondition(condition as FilterCondition, options);
   }
   throw new Error(
     `[entityStoreConditionToESQL] Unrecognised condition shape: ${JSON.stringify(condition)}`
@@ -94,7 +98,7 @@ function getNotEmptyField(condition: Condition): string | null {
 /**
  * Returns null when IN optimization is not possible
  */
-function buildInClauseOrNull(conditions: Condition[]): string | null {
+function buildInClauseOrNull(conditions: Condition[], options?: CastFieldOptions): string | null {
   if (conditions.length < 2) {
     // only 1 condition, let it fall through to the leaf emitter
     return null;
@@ -119,7 +123,7 @@ function buildInClauseOrNull(conditions: Condition[]): string | null {
 
   const [field] = fieldSet;
   const inList = (values as string[]).map((v) => `"${escapeEsqlStringLiteral(v)}"`).join(', ');
-  return `${castField(field)} IN (${inList})`;
+  return `${referenceField(field, options)} IN (${inList})`;
 }
 
 function valueToEsql(v: string | number | boolean): string {
@@ -132,9 +136,9 @@ function valueToEsql(v: string | number | boolean): string {
   return String(v);
 }
 
-function renderLeafCondition(condition: FilterCondition): string {
+function renderLeafCondition(condition: FilterCondition, options?: CastFieldOptions): string {
   const { field } = condition;
-  const casted = castField(field);
+  const casted = referenceField(field, options);
 
   if ('exists' in condition && condition.exists !== undefined) {
     return condition.exists ? `${casted} IS NOT NULL` : `${casted} IS NULL`;

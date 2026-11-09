@@ -600,21 +600,6 @@
     }
   },
   {
-    "id": "obs-onboarding",
-    "name": "Obs UX: Obs Onboarding",
-    "areas": [
-      "observability"
-    ],
-    "github": {
-      "team": "elastic/obs-onboarding-team",
-      "label": "Team:obs-onboarding"
-    },
-    "responsibilities": [
-      "Observability onboarding",
-      "Streams"
-    ]
-  },
-  {
     "id": "obs-signals-metrics",
     "name": "Observability signals: Metrics",
     "areas": ["observability"],

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { ElasticsearchServiceStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
@@ -21,8 +23,13 @@ import type {
   StartOnboardingSuggestionsResponse,
 } from '../../common/onboarding';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../common';
+import { installAssistantAgent } from '../lib/install_assistant_agent';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import { OnboardingUnavailableError } from './errors';
+import {
+  createLocalElasticsearchConnector,
+  resolveLocalElasticsearchUrl,
+} from './local_elasticsearch_connector';
 import { parseSuggestions } from './parse_suggestions';
 
 export { OnboardingUnavailableError };
@@ -32,6 +39,12 @@ export interface OnboardingClientDeps {
   spaces?: SpacesPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
   agentAvailability?: AgentAvailabilityConfig;
+  /** The investigator is hidden from the picker while the assistant is enabled. */
+  assistantEnabled?: boolean;
+  actions?: ActionsPluginStart;
+  elasticsearch?: ElasticsearchServiceStart;
+  cloud?: CloudSetup;
+  esHosts?: string[];
 }
 
 /**
@@ -41,7 +54,7 @@ export interface OnboardingClientDeps {
  */
 export interface OnboardingClient {
   get: (request: KibanaRequest) => Promise<GetOnboardingResponse>;
-  /** Enables Nightshift in the space: installs the investigation agent there. */
+  /** Enables Nightshift in the space: installs the investigation agent, and the assistant when enabled, there. */
   enable: (request: KibanaRequest) => Promise<EnableOnboardingResponse>;
   /** Starts an exploration run of the investigation agent. */
   start: (request: KibanaRequest) => Promise<StartOnboardingSuggestionsResponse>;
@@ -78,9 +91,11 @@ const toExecutionResponse = (execution: WorkflowExecutionDto): OnboardingSuggest
 export const createOnboardingClient = ({
   getDeps,
   logger,
+  ensureFailureSweep,
 }: {
   getDeps: () => OnboardingClientDeps;
   logger: Logger;
+  ensureFailureSweep?: (request: KibanaRequest, spaceId: string) => Promise<void>;
 }): OnboardingClient => {
   const getSpaceId = (request: KibanaRequest): string =>
     getDeps().spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
@@ -136,17 +151,77 @@ export const createOnboardingClient = ({
     },
 
     enable: async (request) => {
-      const { agentBuilder, agentAvailability } = getDeps();
+      const {
+        agentBuilder,
+        agentAvailability,
+        assistantEnabled,
+        actions,
+        elasticsearch,
+        cloud,
+        esHosts,
+      } = getDeps();
       if (!agentBuilder || !agentAvailability) {
         throw new OnboardingUnavailableError('Agent Builder is not available');
       }
+
       const spaceId = getSpaceId(request);
       await installInvestigationAgent({
         agentBuilder,
         spaceId,
         availability: agentAvailability,
       });
+      if (assistantEnabled) {
+        await installAssistantAgent({ agentBuilder, spaceId, availability: agentAvailability });
+      }
+      await ensureFailureSweep?.(request, spaceId);
       logger.info(`Enabled Nightshift in space "${spaceId}": investigation agent installed`);
+
+      try {
+        if (!actions || !elasticsearch) {
+          throw new OnboardingUnavailableError('Connectors are not available');
+        }
+        const url = resolveLocalElasticsearchUrl({ cloud, elasticsearch, esHosts });
+        const actionsClient = await actions.getActionsClientWithRequest(request);
+        const connectorId = await createLocalElasticsearchConnector({
+          esClient: elasticsearch.client.asScoped(request).asCurrentUser,
+          actionsClient,
+          spaceId,
+          url,
+          logger,
+        });
+        try {
+          const registry = await agentBuilder.agents.getRegistry({ request });
+          const agent = await registry.get(NIGHTSHIFT_INVESTIGATION_AGENT_ID);
+          const currentConnectorIds = agent.configuration.connector_ids ?? [];
+          if (!currentConnectorIds.includes(connectorId)) {
+            await registry.update(NIGHTSHIFT_INVESTIGATION_AGENT_ID, {
+              configuration: { connector_ids: [...currentConnectorIds, connectorId] },
+            });
+          }
+        } catch (error) {
+          // A connector nothing uses would keep its key alive; deleting it invalidates the key
+          // through the connector lifecycle listener.
+          try {
+            await actionsClient.delete({ id: connectorId });
+          } catch (deleteError) {
+            logger.warn(
+              `Could not delete unattached local Elasticsearch connector "${connectorId}": ${
+                (deleteError as Error).message
+              }`
+            );
+          }
+          throw error;
+        }
+        logger.info(
+          `Added local Elasticsearch connector "${connectorId}" to the investigation agent in space "${spaceId}"`
+        );
+      } catch (error) {
+        logger.error(
+          `Could not add the local Elasticsearch connector to the investigation agent in space "${spaceId}": ` +
+            `connector: ${(error as Error).message}`
+        );
+      }
+
       return { agent_installed: true };
     },
 

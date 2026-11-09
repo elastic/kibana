@@ -144,12 +144,14 @@ dependsOn:
   - '@kbn/app-menu'
   - '@kbn/config'
   - '@kbn/slo-constants'
+  - '@kbn/core-test-helpers-model-versions'
 tags:
   - plugin
   - prod
   - group-observability
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - __mocks__/**/*
