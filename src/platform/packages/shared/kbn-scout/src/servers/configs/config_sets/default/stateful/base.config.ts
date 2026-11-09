@@ -28,6 +28,7 @@ import {
 } from '@kbn/test-docker-servers';
 import type { ScoutServerConfig } from '../../../../../types';
 import { SAML_IDP_PLUGIN_PATH, STATEFUL_IDP_METADATA_PATH } from '../../../constants';
+import { getPortFromEnv } from '../../../utils/common';
 
 const packageRegistryConfig = join(__dirname, './package_registry_config.yml');
 // EPR_REQUIRE_PACKAGE_SIGNATURES=false: the `:lite` distribution ships some
@@ -48,18 +49,21 @@ const dockerArgs: string[] = [
  */
 const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
+// Ports are env-overridable so two Scout stacks can run side by side when
+// another stack already holds the default ports. Same variables as
+// @kbn/test-es-server and @kbn/test read.
 const servers = {
   elasticsearch: {
     protocol: 'http',
     hostname: 'localhost',
-    port: 9220,
+    port: getPortFromEnv('TEST_ES_PORT', 9220),
     username: 'kibana_system',
     password: 'changeme',
   },
   kibana: {
     protocol: 'http',
     hostname: 'localhost',
-    port: 5620,
+    port: getPortFromEnv('TEST_KIBANA_PORT', 5620),
     username: 'elastic',
     password: 'changeme',
   },

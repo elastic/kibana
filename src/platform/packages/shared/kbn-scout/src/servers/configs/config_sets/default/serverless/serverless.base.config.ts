@@ -28,6 +28,7 @@ import {
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ScoutServerConfig } from '../../../../../types';
 import { SAML_IDP_PLUGIN_PATH, SERVERLESS_IDP_METADATA_PATH, JWKS_PATH } from '../../../constants';
+import { getPortFromEnv } from '../../../utils/common';
 
 const packageRegistryConfig = join(__dirname, './package_registry_config.yml');
 // EPR_REQUIRE_PACKAGE_SIGNATURES=false: the `:lite` distribution ships some
@@ -51,11 +52,14 @@ const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTR
 // Indicates whether the config is used on CI or locally.
 const isRunOnCI = process.env.CI;
 
+// Ports are env-overridable so two Scout stacks can run side by side when
+// another stack already holds the default ports. Same variables as
+// @kbn/test-es-server and @kbn/test read.
 const servers = {
   elasticsearch: {
     protocol: 'https',
     hostname: 'localhost',
-    port: 9220,
+    port: getPortFromEnv('TEST_ES_PORT', 9220),
     username: 'elastic_serverless',
     password: 'changeme',
     certificateAuthorities: [Fs.readFileSync(CA_CERT_PATH)],
@@ -63,7 +67,7 @@ const servers = {
   kibana: {
     protocol: 'http',
     hostname: 'localhost',
-    port: 5620,
+    port: getPortFromEnv('TEST_KIBANA_PORT', 5620),
     username: 'elastic_serverless',
     password: 'changeme',
   },

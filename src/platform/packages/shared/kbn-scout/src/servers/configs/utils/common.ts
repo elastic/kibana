@@ -21,6 +21,21 @@ export const formatCurrentDate = () => {
   );
 };
 
+/**
+ * Reads a port from `envVar`, falling back to `defaultPort` when it is unset.
+ * Throws on a value that is not a valid port, the same as @kbn/test-es-server.
+ */
+export const getPortFromEnv = (envVar: string, defaultPort: number): number => {
+  const value = process.env[envVar];
+  if (!value) return defaultPort;
+
+  const port = Number(value);
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    throw new Error(`process.env.${envVar} must contain a valid port. given: ${value}`);
+  }
+  return port;
+};
+
 export const getOrganizationId = (kbnServerArgs: string[]) => {
   return getopts(kbnServerArgs)['xpack.cloud.organization_id'] as string | undefined;
 };
