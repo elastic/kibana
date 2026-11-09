@@ -16,7 +16,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
 import { AbortReason, SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { FilterStateStore } from '@kbn/es-query';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, skip } from 'rxjs';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import {
@@ -859,6 +859,39 @@ describe('vegaEmbeddableFactory', () => {
           expect.objectContaining({ visParams: { spec: '{ mark: line }' } })
         )
       );
+    });
+
+    it('previews a query change right away with one fetch, without parsing the spec again', async () => {
+      const { api } = await buildByReference();
+      await waitFor(() => expect(mockVegaRequestHandler).toHaveBeenCalledTimes(1));
+      let fetchStarts = 0;
+      let specParses = 0;
+      const subscriptions = [
+        api.dataLoading$.pipe(skip(1)).subscribe((loading) => {
+          if (loading) fetchStarts++;
+        }),
+        api.esql$.pipe(skip(1)).subscribe(() => specParses++),
+      ];
+      mockOpenVegaLibraryEditor.mockImplementationOnce(async ({ panel }) => {
+        panel?.onPreview({
+          spec: libraryItem.spec,
+          query: { language: 'kql', expression: 'bytes > 10' },
+          filters: libraryItem.filters,
+        });
+        await waitFor(() =>
+          expect(mockVegaRequestHandler).toHaveBeenLastCalledWith(
+            expect.objectContaining({
+              visParams: { spec: '{ mark: bar }' },
+              query: expect.arrayContaining([expect.objectContaining({ query: 'bytes > 10' })]),
+            })
+          )
+        );
+        expect(fetchStarts).toBe(1);
+        expect(specParses).toBe(0);
+      });
+
+      await api.onEdit();
+      subscriptions.forEach((subscription) => subscription.unsubscribe());
     });
 
     it('previews library item edits in the panel and reverts them when not saved', async () => {

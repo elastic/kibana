@@ -24,7 +24,9 @@ import type {
 import {
   BehaviorSubject,
   combineLatest,
+  distinctUntilChanged,
   EMPTY,
+  filter,
   firstValueFrom,
   map,
   merge,
@@ -34,6 +36,7 @@ import {
 } from 'rxjs';
 import { isOfQueryType, type AggregateQuery, type Filter, type Query } from '@kbn/es-query';
 import { parse } from 'hjson';
+import { isEqual } from 'lodash';
 import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
   apiHasExecutionContext,
@@ -74,7 +77,7 @@ import type { VegaEvent } from '../types';
 import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from '../plugin';
 import type { VegaRenderDescriptor } from '../data_model/types';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
-import { toPanelFilters } from '../lib/library_draft';
+import { toPanelFilters, type VegaEditableState } from '../lib/library_draft';
 import {
   createVegaLibraryClient,
   hasVegaLibraryItemWithTitle,
@@ -186,9 +189,18 @@ export const vegaEmbeddableFactory = (
     const titleManager = initializeTitleManager(initialState);
     const timeRangeManager = initializeTimeRangeManager(initialState);
     const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
+    // The spec of a by-value panel. A by-reference panel renders `libraryItem$` instead.
     const spec$ = new BehaviorSubject(
       initialLibraryItem ? initialLibraryItem.spec : (initialState as VegaByValueState).spec
     );
+    // What the panel renders, as one stream so each change starts one fetch. Only a by-reference
+    // panel's content has a query and filters: the library item's.
+    const content$ = isByReference
+      ? libraryItem$.pipe(
+          filter((item): item is NonNullable<typeof item> => item !== undefined),
+          map(({ spec, query, filters }): VegaEditableState => ({ spec, query, filters }))
+        )
+      : spec$.pipe(map((spec): VegaEditableState => ({ spec })));
     const defaultTitle$ = new BehaviorSubject(initialLibraryItem?.title);
     const defaultDescription$ = new BehaviorSubject(initialLibraryItem?.description);
     const panelSearchStateManager = initializeStateManager<{
@@ -212,8 +224,11 @@ export const vegaEmbeddableFactory = (
 
     // A spec change is parsed once for all derived subjects. `switchMap` is used instead
     // of `tap` for dataSources$ because `extractIndexPatternsFromSpec` is async.
-    const specSubscription = spec$
+    const specSubscription = content$
       .pipe(
+        map(({ spec }) => spec),
+        // Query and filter previews keep the spec, so it isn't parsed again.
+        distinctUntilChanged(isEqual),
         map((spec) => {
           if (spec.format === 'json') return spec.value;
           try {
@@ -308,7 +323,6 @@ export const vegaEmbeddableFactory = (
         const { data } = await libraryClient.get(refId);
         defaultTitle$.next(data.title);
         defaultDescription$.next(data.description);
-        spec$.next(data.spec);
         libraryItem$.next(data);
         blockingError$.next(undefined);
       } catch (error) {
@@ -408,8 +422,7 @@ export const vegaEmbeddableFactory = (
               onPreview: ({ spec, query, filters }) => {
                 const libraryItem = libraryItem$.getValue();
                 if (!libraryItem) return;
-                spec$.next(spec);
-                libraryItem$.next({ ...libraryItem, query, filters });
+                libraryItem$.next({ ...libraryItem, spec, query, filters });
               },
             },
           });
@@ -464,14 +477,14 @@ export const vegaEmbeddableFactory = (
     };
 
     const fetchSubscription = combineLatest([
-      spec$,
+      content$,
       fetch$(api),
       panelSearchStateManager.api.query$,
       panelSearchStateManager.api.filters$,
-      libraryItem$,
     ])
       .pipe(
-        switchMap(async ([spec, data, panelQuery, panelFilters, libraryItem]) => {
+        switchMap(async ([content, data, panelQuery, panelFilters]) => {
+          const { spec, query: libraryQuery, filters: libraryFilters } = content;
           abortController.abort();
           abortController = new AbortController();
           const { signal } = abortController;
@@ -507,12 +520,10 @@ export const vegaEmbeddableFactory = (
             const visData = await requestHandler({
               timeRange,
               // buildEsQuery ANDs these and ignores empty and ES|QL queries.
-              query: [data.query, toStoredQuery(libraryItem?.query), panelQuery].filter(
-                isOfQueryType
-              ),
+              query: [data.query, toStoredQuery(libraryQuery), panelQuery].filter(isOfQueryType),
               filters: [
                 ...(data.filters ?? []),
-                ...(toPanelFilters(libraryItem?.filters) ?? []),
+                ...(toPanelFilters(libraryFilters) ?? []),
                 ...(panelFilters ?? []),
               ],
               visParams: {
