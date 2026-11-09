@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID } from '@kbn/management-settings-ids';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { spaceTest } from '../../fixtures';
-import { LOGS_ML_INDEX } from '../../fixtures/constants';
+import { resetLogsMlLogSources, setLogsMlLogSources } from '../../fixtures/logs_ml/log_sources';
 
 spaceTest.describe(
   'Logs ML pages - ML read privileges',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
-      await scoutSpace.uiSettings.set({
-        [OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID]: [LOGS_ML_INDEX],
-      });
+      await setLogsMlLogSources(scoutSpace);
     });
 
     // `viewer` gets ML read (but not ML all) from the Kibana `read` base privilege, so it can see
@@ -28,7 +25,7 @@ spaceTest.describe(
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
-      await scoutSpace.uiSettings.unset(OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID);
+      await resetLogsMlLogSources(scoutSpace);
     });
 
     spaceTest(

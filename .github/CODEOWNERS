@@ -1949,6 +1949,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/plugins/infra/server/services/rules @elastic/obs-signals-metrics-team @elastic/obs-signals-logs-team
 /x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/logs_ml @elastic/obs-signals-logs-team
 /x-pack/solutions/observability/plugins/infra/test/scout/ui/fixtures/page_objects/logs_ml @elastic/obs-signals-logs-team
+/x-pack/solutions/observability/plugins/infra/test/scout/ui/fixtures/logs_ml @elastic/obs-signals-logs-team
 /x-pack/platform/test/common/utils/server_route_repository @elastic/streams-ui @elastic/nightshift-sre-agent-team
 
 ## Streams parts owned by Streams UI

@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID } from '@kbn/management-settings-ids';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { spaceTest } from '../../fixtures';
-import { LOGS_ML_INDEX } from '../../fixtures/constants';
+import { resetLogsMlLogSources, setLogsMlLogSources } from '../../fixtures/logs_ml/log_sources';
 
 // The setup screen only shows while no Logs ML job exists for the space. Job IDs include the
 // space ID, so the per-worker space guarantees that regardless of what other suites left behind.
@@ -18,9 +17,7 @@ spaceTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
-      await scoutSpace.uiSettings.set({
-        [OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID]: [LOGS_ML_INDEX],
-      });
+      await setLogsMlLogSources(scoutSpace);
     });
 
     // Setting up ML jobs needs the ML `all` privilege, which `editor` gets from the Kibana `all`
@@ -30,7 +27,7 @@ spaceTest.describe(
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
-      await scoutSpace.uiSettings.unset(OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID);
+      await resetLogsMlLogSources(scoutSpace);
     });
 
     spaceTest('shows the setup screen on the anomalies page', async ({ pageObjects }) => {
