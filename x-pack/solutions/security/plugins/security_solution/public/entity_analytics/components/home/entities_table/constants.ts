@@ -57,6 +57,9 @@ export const ENTITY_GROUPING_OPTIONS = {
   ENTITY_TYPE: ENTITY_FIELDS.ENTITY_TYPE,
 };
 
+/** Most nested group levels the grid's Group by can hold. */
+export const MAX_GROUPING_LEVELS = 3;
+
 export const ALLOWED_ENTITY_TYPES = ['user', 'host', 'service'] as const;
 
 /**

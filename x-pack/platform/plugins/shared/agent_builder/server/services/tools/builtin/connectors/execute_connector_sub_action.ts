@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { asAgentBuilderExecutionSource } from '@kbn/actions-plugin/server';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { AuthorizationStatus, isAuthorizationMethod } from '@kbn/agent-builder-common/agents';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -63,6 +64,16 @@ const invalidRequestHint =
 const getNumber = (value: unknown): number | undefined =>
   typeof value === 'number' && Number.isFinite(value) ? value : undefined;
 
+// The connector's retry date (from the service's Retry-After or rate-limit reset) as the seconds
+// left to wait.
+const getRetryAfterSeconds = (retry: unknown): number | undefined =>
+  retry instanceof Date && !Number.isNaN(retry.getTime())
+    ? Math.max(0, Math.ceil((retry.getTime() - Date.now()) / 1000))
+    : undefined;
+
+const waitHint = (retryAfterSeconds: number) =>
+  `Wait ${retryAfterSeconds} seconds before retrying this sub-action.`;
+
 const getErrorHint = ({
   statusCode,
   retryAfterSeconds,
@@ -70,25 +81,30 @@ const getErrorHint = ({
   statusCode?: number;
   retryAfterSeconds?: number;
 }): string => {
-  if (statusCode === 401 || statusCode === 403) {
-    return (
-      "The service rejected the connector's credentials or they lack the required permissions or scopes. " +
-      "Do not retry or change the parameters; tell the user to check the connector's credentials."
-    );
-  }
-  if (statusCode === 429) {
+  // A 403 with a retry delay is a rate limit (GitHub sends those), not a credentials problem.
+  if (statusCode === 429 || (statusCode === 403 && retryAfterSeconds !== undefined)) {
     const retry =
       retryAfterSeconds !== undefined
-        ? `Wait ${retryAfterSeconds} seconds before retrying this sub-action.`
+        ? waitHint(retryAfterSeconds)
         : 'Retry at most once after a short wait.';
     return (
       `The service is rate limiting this connector. ${retry} ` +
       'Do not change the parameters or switch to other sub-actions; if it still fails, tell the user.'
     );
   }
-  if (statusCode !== undefined && statusCode >= 500) {
+  if (statusCode === 401 || statusCode === 403) {
     return (
-      'The service failed to handle the request. Retry at most once; if it still fails, tell the user the service is unavailable. ' +
+      "The service rejected the connector's credentials or they lack the required permissions or scopes. " +
+      "Do not retry or change the parameters; tell the user to check the connector's credentials."
+    );
+  }
+  if (statusCode !== undefined && statusCode >= 500) {
+    const retry =
+      retryAfterSeconds !== undefined
+        ? `${waitHint(retryAfterSeconds)} Retry at most once`
+        : 'Retry at most once';
+    return (
+      `The service failed to handle the request. ${retry}; if it still fails, tell the user the service is unavailable. ` +
       'Do not change the parameters or switch to other sub-actions.'
     );
   }
@@ -252,6 +268,7 @@ export const createExecuteConnectorSubActionTool = ({
           subAction,
           subActionParams: params ?? {},
         },
+        source: asAgentBuilderExecutionSource({ toolId: context.callContext.toolId }),
       });
     } catch (error) {
       return {
@@ -282,7 +299,7 @@ export const createExecuteConnectorSubActionTool = ({
         }
       }
       const statusCode = getNumber(errorMeta?.statusCode);
-      const retryAfterSeconds = getNumber(errorMeta?.retryAfterSeconds);
+      const retryAfterSeconds = getRetryAfterSeconds(executeResult.retry);
       return {
         results: [
           createErrorResult({

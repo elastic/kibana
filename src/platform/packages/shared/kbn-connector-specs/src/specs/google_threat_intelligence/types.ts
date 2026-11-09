@@ -9,6 +9,11 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+// GTI documents no URL length limit; URLs beyond 2048 characters are legal.
+const MAX_URL_LENGTH = 8192;
+// GTI documents no query length limit; a query must fit a url: clause around any accepted URL.
+const MAX_QUERY_LENGTH = 10_000;
+
 const pagingLimitSchema = (noun: string) =>
   z
     .number()
@@ -89,7 +94,7 @@ const QUERY_SCHEMA = lazySchema(() =>
   z
     .string()
     .min(1)
-    .max(2000)
+    .max(MAX_QUERY_LENGTH)
     .describe(
       'GTI intelligence query. Use GTI search modifiers, for example "entity:domain positives:5+".'
     )
@@ -137,7 +142,7 @@ export const DOMAIN_SCHEMA = lazySchema(() =>
 export const URL_SCHEMA = lazySchema(() =>
   z
     .url()
-    .max(2048)
+    .max(MAX_URL_LENGTH)
     .describe('URL to look up, e.g. "https://example.com/path" or "ftp://example.com/file"')
 );
 

@@ -46,6 +46,7 @@ export type {
   ServiceAccountWorkloadCoordinates,
   ServiceAccountWorkloadRequestParams,
   ServiceAccountBoundWorkload,
+  ServiceAccountSummary,
 } from '@kbn/core-security-common';
 export type {
   CoreSecurityDelegateContract,
@@ -55,6 +56,7 @@ export type {
   CoreSecurityDelegateHandle,
   CoreSecurityDelegateServiceAccounts,
   ResolvedServiceAccountWorkload,
+  ResolveBoundWorkloadsOptions,
   ServiceAccountBoundWorkloadRef,
 } from './src/api_provider';
 export type {
@@ -84,6 +86,7 @@ export {
   isUiamBearerCredential,
   isMissingApiKey,
   isRevokedApiKey,
+  UIAM_ERROR_CODES,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
   ES_CLIENT_AUTHENTICATION_HEADER,
   deriveInternalCallerAttestation,

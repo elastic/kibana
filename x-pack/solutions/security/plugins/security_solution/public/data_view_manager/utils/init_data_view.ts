@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { BrowserFields } from '@kbn/timelines-plugin/common';
-import { EMPTY_BROWSER_FIELDS } from '@kbn/timelines-plugin/common';
+import type { BrowserFields } from '@kbn/securitysolution-timeline-common';
+import { EMPTY_BROWSER_FIELDS } from '@kbn/securitysolution-timeline-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 
 /**

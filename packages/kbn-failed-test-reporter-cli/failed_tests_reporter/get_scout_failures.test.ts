@@ -21,6 +21,12 @@ const CONNECTION_CLOSED_CONSOLE_ERRORS = [
   '[2026-10-09T09:44:51.916Z] Failed to load resource: net::ERR_CONNECTION_CLOSED',
 ].join('\n');
 
+const ADDRESS_UNREACHABLE = `Error: page.goto: net::ERR_ADDRESS_UNREACHABLE at https://bk-serverless-scout-2666-observabilitycomplete-pla-d1a958.kb.eu-west-1.aws.qa.elastic.cloud/app/streams/new-experience/destinations
+Call log:
+  - navigating to "https://bk-serverless-scout-2666-observabilitycomplete-pla-d1a958.kb.eu-west-1.aws.qa.elastic.cloud/app/streams/new-experience/destinations", waiting until "load"
+
+    at _Page.gotoStreamsLayoutTab (src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/test/scout_page/single_thread.ts:159:22)`;
+
 const createEntry = (overrides: Record<string, unknown> = {}) => ({
   id: 'test-id',
   suite: 'Stream data processing - simulation preview',
@@ -28,7 +34,7 @@ const createEntry = (overrides: Record<string, unknown> = {}) => ({
   target: 'cloud-serverless-observability_complete',
   command: 'node scripts/scout run-tests',
   location: 'x-pack/platform/plugins/shared/streams_app/test/scout/processing/ui/tests/x.spec.ts',
-  owner: ['@elastic/obs-onboarding-team'],
+  owner: ['@elastic/streams-ui'],
   duration: 60000,
   error: { message: LOCATOR_TIMEOUT, stack_trace: LOCATOR_TIMEOUT },
   attachments: [],
@@ -129,6 +135,49 @@ describe('getScoutFailures', () => {
     expect(failure.likelyIrrelevant).toBe(true);
     expect(failure.infraReason?.category).toBe('cdn');
   });
+
+  it('attributes a Cloud navigation that never reached the deployment to the network', async () => {
+    const [failure] = await getScoutFailures(
+      writeReport([
+        createEntry({
+          error: { message: ADDRESS_UNREACHABLE, stack_trace: ADDRESS_UNREACHABLE },
+        }),
+      ])
+    );
+    expect(failure.likelyIrrelevant).toBe(true);
+    expect(failure.infraReason?.category).toBe('network');
+  });
+
+  it('keeps a local navigation failure relevant', async () => {
+    const [failure] = await getScoutFailures(
+      writeReport([
+        createEntry({
+          target: 'local-serverless-observability_complete',
+          error: { message: ADDRESS_UNREACHABLE, stack_trace: ADDRESS_UNREACHABLE },
+        }),
+      ])
+    );
+    expect(failure.likelyIrrelevant).toBe(false);
+  });
+
+  it.each([
+    ['[2026-10-19T00:22:18.599Z] Failed to load resource: net::ERR_QUIC_PROTOCOL_ERROR', 'network'],
+    [
+      '[2026-10-12T05:40:58.623Z] Failed to load resource: net::ERR_INTERNET_DISCONNECTED',
+      'network',
+    ],
+    [
+      '[2026-10-18T21:26:19.751Z] [@kbn/rspack-optimizer] Failed to load plugins: ReferenceError: __kbnSharedDeps__ is not defined\n    at 275008 (https://kibana.estccdn.com/4135878c7aa5/bundles/kibana.bundle.js:1:43727)',
+      'cdn',
+    ],
+  ])(
+    'attributes the Cloud console error "%s" to infrastructure (%s)',
+    async (consoleErrors, category) => {
+      const [failure] = await getScoutFailures(writeReport([createEntry({ consoleErrors })]));
+      expect(failure.likelyIrrelevant).toBe(true);
+      expect(failure.infraReason?.category).toBe(category);
+    }
+  );
 
   it('keeps local failures with connection-level browser console errors relevant', async () => {
     const [failure] = await getScoutFailures(

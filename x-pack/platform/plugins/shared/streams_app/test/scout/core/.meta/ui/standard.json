@@ -1,5 +1,5 @@
 {
-  "sha1": "c0adbbe5bf791a929a6cd7670ab16a87525b7590",
+  "sha1": "fdb46163b03cb155fc2a905350d0762e159516eb",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -80,198 +80,6 @@
       }
     },
     {
-      "id": "03f5a8c29bdbfde-bd62876d14d3d25",
-      "title": "Stream map - search pivots from a destination row into a pre-filled map search",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas_search.spec.ts",
-        "line": 116,
-        "column": 21
-      }
-    },
-    {
-      "id": "03f5a8c29bdbfde-ebf0b792d31c21e",
-      "title": "Stream map - search filters the map while typing",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas_search.spec.ts",
-        "line": 138,
-        "column": 70
-      }
-    },
-    {
-      "id": "03f5a8c29bdbfde-d51a0fb33f299aa",
-      "title": "Stream map - search applies a search from the URL",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas_search.spec.ts",
-        "line": 148,
-        "column": 13
-      }
-    },
-    {
-      "id": "03f5a8c29bdbfde-13659ba98724575",
-      "title": "Stream map - search explains when nothing matches the search",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas_search.spec.ts",
-        "line": 152,
-        "column": 75
-      }
-    },
-    {
-      "id": "63983bc249d77f4-4236bbb07ccd991",
-      "title": "Stream map renders unit sources and destinations without a Data streams hub",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 103,
-        "column": 13
-      }
-    },
-    {
-      "id": "63983bc249d77f4-e4da54983b60575",
-      "title": "Stream map renders a minimap that collapses and reopens",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 108,
-        "column": 90
-      }
-    },
-    {
-      "id": "63983bc249d77f4-86dfce50815fde8",
-      "title": "Stream map tidies up the whole graph from the pane menu and enables undo",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 117,
-        "column": 7
-      }
-    },
-    {
-      "id": "63983bc249d77f4-e37ea574ca0e64e",
-      "title": "Stream map keeps the viewport where the user left it when tidying up",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 128,
-        "column": 13
-      }
-    },
-    {
-      "id": "63983bc249d77f4-a142ece1eba0cf6",
-      "title": "Stream map keeps the viewport where the user left it when opening a node flyout",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 137,
-        "column": 22
-      }
-    },
-    {
-      "id": "63983bc249d77f4-7ce96a081b5863e",
-      "title": "Stream map renders the canvas toolbar with undo/redo and add-node placeholders",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 146,
-        "column": 14
-      }
-    },
-    {
-      "id": "63983bc249d77f4-c11d1e508e4f597",
-      "title": "Stream map exposes accessible node labels and keyboard controls",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 153,
-        "column": 21
-      }
-    },
-    {
-      "id": "63983bc249d77f4-e2a237adb3fbf63",
-      "title": "Stream map undoes a keyboard-driven node reposition",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 171,
-        "column": 13
-      }
-    },
-    {
       "id": "2525c9be5f05faa-15fd0e803c090f9",
       "title": "Enable Wired Streams - Permissions should prevent editor users from enabling wired streams",
       "expectedStatus": "passed",
@@ -347,8 +155,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/enable_wired_streams_flow.spec.ts",
-        "line": 49,
-        "column": 10
+        "line": 51,
+        "column": 7
       }
     },
     {
@@ -363,7 +171,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/enable_wired_streams_flow.spec.ts",
-        "line": 87,
+        "line": 89,
         "column": 20
       }
     },
@@ -380,7 +188,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/enable_wired_streams_flow.spec.ts",
         "line": 109,
-        "column": 18
+        "column": 25
       }
     },
     {
@@ -429,70 +237,6 @@
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_header.spec.ts",
         "line": 57,
         "column": 26
-      }
-    },
-    {
-      "id": "6697d27925b9def-e78b5bb02dd2c12",
-      "title": "Streams layout renders every tab and lands on map",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_layout.spec.ts",
-        "line": 32,
-        "column": 9
-      }
-    },
-    {
-      "id": "6697d27925b9def-a7b7220c5a14d4a",
-      "title": "Streams layout falls back to the map tab for an unknown tab",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_layout.spec.ts",
-        "line": 36,
-        "column": 21
-      }
-    },
-    {
-      "id": "6697d27925b9def-2d929861841bf1e",
-      "title": "Streams layout renders the sources table",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_layout.spec.ts",
-        "line": 42,
-        "column": 13
-      }
-    },
-    {
-      "id": "6697d27925b9def-ea242490a272e1b",
-      "title": "Streams layout renders the destinations table",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_layout.spec.ts",
-        "line": 45,
-        "column": 98
       }
     },
     {

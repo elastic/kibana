@@ -35,6 +35,11 @@ type UnknownAttachmentWithLabel = Attachment<
   { attachmentLabel?: string } & Record<string, unknown>
 >;
 
+type AlertsBatchAttachment = Attachment<
+  string,
+  { alertIds?: unknown[]; tags?: unknown[]; attachmentLabel?: string }
+>;
+
 interface AttachmentTypeConfig {
   type: SecurityAgentBuilderAttachments;
   label: string;
@@ -80,21 +85,22 @@ export const registerAttachmentUiDefinitions = ({
     ...createAttachmentTypeConfig(ALERT_ATTACHMENT_CONFIG.label, ALERT_ATTACHMENT_CONFIG.icon),
   });
 
-  attachments.addAttachmentType<Attachment<string, { alertIds?: unknown[] }>>(
-    SecurityAgentBuilderAttachments.alerts,
-    {
-      getLabel: (attachment) => {
-        const count = attachment.data?.alertIds?.length ?? 0;
-        return count > 0
-          ? i18n.translate('xpack.securitySolution.agentBuilder.attachments.alerts.countLabel', {
-              defaultMessage: '{count} {count, plural, one {alert} other {alerts}}',
-              values: { count },
-            })
-          : ALERTS_DEFAULT_LABEL;
-      },
-      getIcon: () => 'bell',
-    }
-  );
+  attachments.addAttachmentType<AlertsBatchAttachment>(SecurityAgentBuilderAttachments.alerts, {
+    getLabel: (attachment) => {
+      // The label renders synchronously, so a batch referenced by tag cannot count its alerts.
+      if (attachment.data?.tags?.length) {
+        return attachment.data.attachmentLabel ?? ALERTS_DEFAULT_LABEL;
+      }
+      const count = attachment.data?.alertIds?.length ?? 0;
+      return count > 0
+        ? i18n.translate('xpack.securitySolution.agentBuilder.attachments.alerts.countLabel', {
+            defaultMessage: '{count} {count, plural, one {alert} other {alerts}}',
+            values: { count },
+          })
+        : ALERTS_DEFAULT_LABEL;
+    },
+    getIcon: () => 'bell',
+  });
 };
 
 /**
@@ -174,7 +180,6 @@ export const registerEntityAttachment = ({
   experimentalFeatures,
   resolveSecurityCanvasContext,
   searchSession,
-  uiSettings,
   rendering,
   spaces,
   registerImpactEntityOpener,
@@ -186,7 +191,6 @@ export const registerEntityAttachment = ({
   experimentalFeatures: ExperimentalFeatures;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
   searchSession?: ISessionService;
-  uiSettings: IUiSettingsClient;
   rendering: CoreStart['rendering'];
   spaces?: SpacesPluginStart;
   registerImpactEntityOpener?: AgenticInvestigationsPublicPluginStart['registerImpactEntityOpener'];
@@ -220,7 +224,6 @@ export const registerEntityAttachment = ({
         chrome,
         resolveSecurityCanvasContext,
         searchSession,
-        uiSettings,
       })
     );
   });
@@ -302,17 +305,13 @@ export const registerEntityAnalyticsDashboardAttachment = ({
   application,
   agentBuilder,
   chrome,
-  experimentalFeatures,
   searchSession,
-  uiSettings,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
-  experimentalFeatures: ExperimentalFeatures;
   searchSession?: ISessionService;
-  uiSettings: IUiSettingsClient;
 }): void => {
   void import(
     /* webpackChunkName: "security_entity_analytics_dashboard_attachment" */
@@ -323,9 +322,7 @@ export const registerEntityAnalyticsDashboardAttachment = ({
       application,
       agentBuilder,
       chrome,
-      experimentalFeatures,
       searchSession,
-      uiSettings,
     });
   });
 };
@@ -348,8 +345,6 @@ export const registerEntityGraphAttachment = ({
   agentBuilder,
   chrome,
   searchSession,
-  experimentalFeatures,
-  uiSettings,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
@@ -357,8 +352,6 @@ export const registerEntityGraphAttachment = ({
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
   searchSession?: ISessionService;
-  experimentalFeatures: ExperimentalFeatures;
-  uiSettings: IUiSettingsClient;
 }): void => {
   void import(
     /* webpackChunkName: "security_entity_graph_attachment" */
@@ -372,8 +365,6 @@ export const registerEntityGraphAttachment = ({
         agentBuilder,
         chrome,
         searchSession,
-        experimentalFeatures,
-        uiSettings,
       })
     );
   });
@@ -390,17 +381,13 @@ export const registerEntityRiskScoreHistoryAttachment = ({
   application,
   agentBuilder,
   chrome,
-  experimentalFeatures,
   searchSession,
-  uiSettings,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
-  experimentalFeatures: ExperimentalFeatures;
   searchSession?: ISessionService;
-  uiSettings: IUiSettingsClient;
 }): void => {
   void import(
     /* webpackChunkName: "security_entity_risk_score_history_attachment" */
@@ -412,9 +399,7 @@ export const registerEntityRiskScoreHistoryAttachment = ({
         application,
         agentBuilder,
         chrome,
-        experimentalFeatures,
         searchSession,
-        uiSettings,
       })
     );
   });

@@ -132,6 +132,80 @@ describe('useServiceSettings — incompleteInstances', () => {
     expect(result.current.isReady).toBe(true);
   });
 
+  it('keeps the stream-level var_group option chosen in the flyout when the fields are saved', () => {
+    const varDefsByInput = {
+      'aws-cloudwatch': {
+        log_group_arn: makeTextVarDef('log_group_arn'),
+        log_group_name: makeTextVarDef('log_group_name'),
+        region_name: makeTextVarDef('region_name'),
+      },
+    };
+    const optionalConfig = ['log_group_arn', 'log_group_name', 'region_name'];
+    const varGroupsByInput = {
+      'aws-cloudwatch': [
+        {
+          name: 'log_group_source',
+          title: 'Log group',
+          selector_title: 'Identify the log group by',
+          required: true,
+          options: [
+            { name: 'log_group_arn', title: 'Log Group ARN', vars: ['log_group_arn'] },
+            {
+              name: 'log_group_name',
+              title: 'Log Group Name',
+              vars: ['log_group_name', 'region_name'],
+            },
+          ],
+        },
+      ],
+    };
+    const svcWithGroup = makeEntry('svc_a', {
+      signalTypes: ['logs'],
+      dataStreams: ['svc_a'],
+      inputs: ['aws-cloudwatch'],
+      defaultEnabledInputs: ['aws-cloudwatch'],
+      optionalConfig,
+      varDefsByInput,
+      varGroupsByInput,
+      varDefsByDataStream: {
+        svc_a: {
+          inputs: ['aws-cloudwatch'],
+          defaultEnabledInputs: ['aws-cloudwatch'],
+          optionalConfig,
+          varDefsByInput,
+          varGroupsByInput,
+        },
+      },
+    });
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: ['svc_a'] },
+      removeDeployInstance: jest.fn(),
+      awsServicesMap: new Map([['svc_a', svcWithGroup]]),
+    } as unknown as ReturnType<typeof useOnboardingFlow>);
+
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    act(() => result.current.setGlobalRegion('us-east-1'));
+    act(() => result.current.setIntegrationName('my-aws'));
+    // The default option (ARN) is unfilled.
+    expect(result.current.incompleteInstances.map((i) => i.instanceId)).toContain('svc_a');
+
+    // Saving the "Log Group Name" option with its field filled must not fall back to the ARN.
+    act(() =>
+      result.current.setServiceFieldsAndInputs(
+        'svc_a',
+        {
+          svc_a: {
+            enabledInputs: ['aws-cloudwatch'],
+            varsByInput: { 'aws-cloudwatch': { log_group_name: '/aws/x' } },
+            varGroupSelectionsByInput: { 'aws-cloudwatch': { log_group_source: 'log_group_name' } },
+          },
+        },
+        ['svc_a']
+      )
+    );
+    expect(result.current.incompleteInstances).toHaveLength(0);
+  });
+
   it('duplicate instance also appears in incompleteInstances when its required var is empty', () => {
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
     act(() => result.current.addDuplicate('svc_a', 'svc_a [Duplicate]', {}, []));
@@ -702,6 +776,39 @@ describe('getIncompleteInstances — required set follows the matrix view', () =
     }
   );
 
+  it('does not require a source for a never-configured data stream the manifest disables by default', () => {
+    // Bedrock: metrics streams on by default, the CloudWatch log stream off. Before the flyout is
+    // ever saved, the log stream must not count as active.
+    const optionalVar = (name: string) => ({
+      name,
+      type: 'text',
+      required: false,
+      show_user: true,
+    });
+    const logVars = {
+      'aws-cloudwatch': {
+        log_group_arn: optionalVar('log_group_arn'),
+        log_group_name: optionalVar('log_group_name'),
+      },
+    };
+    const bedrock = {
+      ...base,
+      dataStreams: ['guardrails', 'invocation'],
+      inputs: ['aws-cloudwatch'],
+      varDefsByInput: logVars,
+      varDefsByDataStream: {
+        guardrails: { inputs: ['aws-cloudwatch'], defaultEnabledInputs: ['aws-cloudwatch'] },
+        invocation: {
+          inputs: ['aws-cloudwatch'],
+          defaultEnabledInputs: [],
+          varDefsByInput: logVars,
+        },
+      },
+    } as unknown as AwsServiceMatrixEntry;
+
+    expect(getIncompleteInstances(instances, {}, new Map([['cloudtrail', bedrock]]))).toEqual([]);
+  });
+
   it('under ECF, ignores a stored input ECF cannot route and requires a supported one', () => {
     // WAF: agent-based allows CloudWatch, ECF routes S3 only (ecfInputs). A CloudWatch-only
     // selection left over from agent-based must not count as a complete ECF config.
@@ -1037,6 +1144,22 @@ describe('useServiceSettings — integration name and description', () => {
         description: 'Production',
       });
       expect(onContinue).toHaveBeenCalled();
+    });
+
+    it('does not save the instances, which describe the last deploy and are saved only with one', async () => {
+      withDeployment('dep-1');
+      const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+      await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+      // A duplicate added in this step is not deployed yet: it must not come back on resume.
+      act(() => result.current.addDuplicate(policyService.id, 'svc_p [Duplicate]', {}, []));
+      expect(result.current.instances).toHaveLength(2);
+
+      act(() => result.current.handleNext());
+
+      expect(mockUpdateDeployment).toHaveBeenCalledWith('dep-1', {
+        integrationName: 'aws-1',
+        description: null,
+      });
     });
 
     it('leaves the namespace to the deploy, so a change is still detected as drift', async () => {

@@ -71,6 +71,9 @@ export const getCreateProposalStepDefinition = ({
             expiresAt: resolveExpiresAt(input.expiresIn),
             id: input.proposalId,
             workflowExecutionId,
+            // Always gated, including a to-do: a Worker that waits on the
+            // analyst has an execution parked on the decision.
+            gate: 'workflow',
           },
           {
             spaceId,
