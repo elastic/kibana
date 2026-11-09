@@ -41,7 +41,7 @@ import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { flattenCaseSavedObject } from '../../common/utils';
 import { withCaseObservablesPreview } from '../../common/observables_preview';
 import { LICENSING_CASE_OBSERVABLES_FEATURE } from '../../common/constants';
-import { toObservable } from '../../services/observables';
+import { observableKey, toObservable } from '../../services/observables';
 import type { ObservableToCreate } from '../../services/observables';
 import {
   validateChangedObservableLengths,
@@ -66,9 +66,7 @@ const ensureUpdateAuthorized = async (
   });
 };
 
-/** Repeat key of an observable. JSON keeps type keys that contain a dash from colliding. */
-export const observableKey = ({ typeKey, value }: Pick<Observable, 'typeKey' | 'value'>): string =>
-  JSON.stringify([typeKey, value]);
+export { observableKey };
 
 const MAX_OBSERVABLES_WRITE_ATTEMPTS = 3;
 
