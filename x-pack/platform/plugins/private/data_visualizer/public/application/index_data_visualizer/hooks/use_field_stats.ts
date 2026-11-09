@@ -208,10 +208,18 @@ export function useFieldStatsSearchStrategy(
       .map((batch) => getFieldsStats(data.search, params, batch, searchOptions))
       .filter((obs) => obs !== undefined) as Array<Observable<FieldStats[] | FieldStatsError>>;
 
+    // Batch fetchers catch search failures, including aborts, and emit them as
+    // FieldStatsError values. An abort before an async-search id therefore never
+    // reaches onError, and the table keeps loading unless we read the signal.
+    const requestWasCancelled = () => searchOptions.abortSignal?.aborted === true;
+
+    const markCancelled = () => {
+      setFetchState({ isRunning: false, cancelled: true });
+    };
+
     const onError = (error: any) => {
-      // Cancelled requests are not errors
-      if (error?.name === 'AbortError') {
-        setFetchState({ isRunning: false, cancelled: true });
+      if (requestWasCancelled() || error?.name === 'AbortError') {
+        markCancelled();
         return;
       }
 
@@ -229,6 +237,11 @@ export function useFieldStatsSearchStrategy(
     };
 
     const onComplete = () => {
+      if (requestWasCancelled()) {
+        markCancelled();
+        return;
+      }
+
       setFetchState({
         isRunning: false,
       });
@@ -241,6 +254,11 @@ export function useFieldStatsSearchStrategy(
       .pipe(mergeMap((observable) => observable, MAX_CONCURRENT_REQUESTS))
       .subscribe({
         next: (batchResponse) => {
+          if (requestWasCancelled()) {
+            markCancelled();
+            return;
+          }
+
           setFetchState({
             ...getInitialProgress(),
             error: undefined,
@@ -292,6 +310,11 @@ export function useFieldStatsSearchStrategy(
       ),
     ]).subscribe({
       next: (resp) => {
+        if (requestWasCancelled()) {
+          markCancelled();
+          return;
+        }
+
         const statsMap = cloneDeep(resp[0]) as Map<string, FieldStats>;
         const fieldBatches = resp[1];
 
