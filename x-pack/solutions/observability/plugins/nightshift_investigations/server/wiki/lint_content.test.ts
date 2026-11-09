@@ -5,6 +5,24 @@
  * 2.0.
  */
 
+/*
+  it('reads the text around a shared link, not the link itself', () => {
+    const link =
+      'https://kibana.example.com/app/r/s/Ab3dE?_g=(time:(from:%272026-08-18T07:20:00Z%27))';
+    const issue = 'https://github.com/acme/widgets/issues/4821';
+
+    expect(lintWikiContent(`Saved search: ${link} and issue ${issue}.`)).toEqual([]);
+    expect(
+      lintWikiContent(`Saved search (${link}) failed on 2026-08-18.`).map(({ rule }) => rule)
+    ).toEqual(['iso_timestamp']);
+  });
+
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import { lintWikiContent } from './lint_content';
 
 const rulesOf = (text: string) => lintWikiContent(text).map(({ rule }) => rule);

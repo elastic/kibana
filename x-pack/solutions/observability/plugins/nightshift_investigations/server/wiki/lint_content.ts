@@ -79,11 +79,16 @@ const RULES: ReadonlyArray<{ rule: WikiLintRule; blocking: boolean; pattern: Reg
 
 const MAX_MATCH_LENGTH = 60;
 
+// A link a person shared is a pointer to be followed, not a claim about one occurrence, and its slug or
+// query string may hold an id or a time range, so the rules read the text around links only.
+const URL_PATTERN = /https?:\/\/[^\s)>\]]+/gi;
+
 /** Returns every place the text carries a single-occurrence detail; an empty list means it is clean. */
 export const lintWikiContent = (text: string): WikiLintViolation[] => {
   const violations: WikiLintViolation[] = [];
+  const prose = text.replace(URL_PATTERN, ' ');
   for (const { rule, blocking, pattern } of RULES) {
-    for (const found of text.matchAll(pattern)) {
+    for (const found of prose.matchAll(pattern)) {
       violations.push({ rule, blocking, match: found[0].trim().slice(0, MAX_MATCH_LENGTH) });
     }
   }
