@@ -45665,6 +45665,13 @@ paths:
           schema:
             default: false
             type: boolean
+        - description: When true, include the pending restart action of each agent
+          in: query
+          name: withPendingRestart
+          required: false
+          schema:
+            default: false
+            type: boolean
         - description: When true, only return agents that are upgradeable
           in: query
           name: showUpgradeable
@@ -45948,6 +45955,19 @@ paths:
                             type: string
                           maxItems: 10000
                           type: array
+                        pending_restart:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            action_id:
+                              type: string
+                            created_at:
+                              type: string
+                            expiration:
+                              type: string
+                          required:
+                            - action_id
+                            - created_at
                         pipeline_config:
                           maxLength: 10000
                           type: string
@@ -46383,6 +46403,13 @@ paths:
           schema:
             default: false
             type: boolean
+        - description: When true, include the pending restart action of the agent
+          in: query
+          name: withPendingRestart
+          required: false
+          schema:
+            default: false
+            type: boolean
       responses:
         '200':
           content:
@@ -46617,6 +46644,19 @@ paths:
                           type: string
                         maxItems: 10000
                         type: array
+                      pending_restart:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          action_id:
+                            type: string
+                          created_at:
+                            type: string
+                          expiration:
+                            type: string
+                        required:
+                          - action_id
+                          - created_at
                       pipeline_config:
                         maxLength: 10000
                         type: string
@@ -47102,6 +47142,19 @@ paths:
                           type: string
                         maxItems: 10000
                         type: array
+                      pending_restart:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          action_id:
+                            type: string
+                          created_at:
+                            type: string
+                          expiration:
+                            type: string
+                        required:
+                          - action_id
+                          - created_at
                       pipeline_config:
                         maxLength: 10000
                         type: string
@@ -48062,7 +48115,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Restart an Elastic Agent. The request fails when the agent is inactive, on a version earlier than 9.6.0, or enrolled in a hosted agent policy.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
+        Restart an Elastic Agent. The request fails when the agent is inactive, on a version earlier than 9.6.0, or enrolled in a hosted agent policy. It also fails with a 409 when the agent already has a pending restart action, unless `force` is set.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: post-fleet-agents-agentid-restart
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -48079,6 +48132,24 @@ paths:
           schema:
             maxLength: 512
             type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              forceRestartAgentRequest:
+                value:
+                  force: true
+              restartAgentRequest:
+                value: {}
+            schema:
+              additionalProperties: false
+              default: null
+              nullable: true
+              type: object
+              properties:
+                force:
+                  description: Restart the agent even if it already has a pending restart action.
+                  type: boolean
       responses:
         '200':
           content:
@@ -48118,6 +48189,34 @@ paths:
                   - message
                   - attributes
           description: A bad request.
+        '409':
+          content:
+            application/json:
+              examples:
+                pendingRestartResponse:
+                  value:
+                    error: Conflict
+                    message: Agent agent-1 already has a pending restart action a1b2c3d4-e5f6-7890-abcd-ef1234567890. Use force to restart anyway.
+                    statusCode: 409
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: 'A conflict occurred: the agent already has a pending restart action.'
       summary: Restart an agent
       tags:
         - Elastic Agent actions
@@ -49525,7 +49624,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Restart multiple Elastic Agents. Agents that are enrolled in a hosted policy or are on a version earlier than 9.6.0 are excluded from the action and receive individual error results.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
+        Restart multiple Elastic Agents. Agents that are enrolled in a hosted policy, are on a version earlier than 9.6.0, or already have a pending restart action (unless `force` is set) are excluded from the action and receive individual error results.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: post-fleet-agents-bulk-restart
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -49562,6 +49661,9 @@ paths:
                 batchSize:
                   minimum: 1
                   type: number
+                force:
+                  description: Restart agents even if they already have a pending restart action.
+                  type: boolean
                 includeInactive:
                   default: false
                   type: boolean
