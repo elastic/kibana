@@ -526,6 +526,20 @@ export const readGenerationFault = async ({
 const EXECUTION_UUID_FIELD = 'kibana.alert.rule.execution.uuid';
 
 /**
+ * The generation uuids a runner step reported: a comma-separated string (`emit_result`) or an
+ * array (`run_generation`). Undefined when the output carried neither form.
+ */
+const executionUuidList = (value: unknown): string[] | undefined => {
+  const raw =
+    typeof value === 'string'
+      ? value.split(',')
+      : Array.isArray(value)
+      ? strings(value)
+      : undefined;
+  return raw?.map((uuid) => uuid.trim()).filter((uuid) => uuid !== '');
+};
+
+/**
  * Counts the persisted discoveries that carry this run's generation uuids: the same scope the
  * batched generation reads back, but a separate read from the runner's own output, so a count
  * the runner reports can be checked against the index. A missing index is an honest zero;
@@ -542,17 +556,7 @@ export const countIndexedAttacks = async ({
   executionUuids: unknown;
   log: ToolingLog;
 }): Promise<number | undefined> => {
-  const uuids =
-    typeof executionUuids === 'string'
-      ? executionUuids
-          .split(',')
-          .map((uuid) => uuid.trim())
-          .filter((uuid) => uuid !== '')
-      : Array.isArray(executionUuids)
-      ? strings(executionUuids)
-          .map((uuid) => uuid.trim())
-          .filter((uuid) => uuid !== '')
-      : undefined;
+  const uuids = executionUuidList(executionUuids);
   if (uuids === undefined) return undefined;
   if (uuids.length === 0) return 0;
   try {
@@ -607,7 +611,7 @@ const readPersistedAttacks = async ({
   executionUuids: unknown;
   log: ToolingLog;
 }): Promise<Record<string, unknown>[]> => {
-  const uuids = strings(executionUuids);
+  const uuids = executionUuidList(executionUuids) ?? [];
   const filters = [
     ...(attackIds.length > 0 ? [{ ids: { values: [...attackIds] } }] : []),
     ...(uuids.length > 0 ? [{ terms: { [EXECUTION_UUID_FIELD]: uuids } }] : []),

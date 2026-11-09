@@ -445,36 +445,37 @@ describe('collectWorkerArtifacts', () => {
     expect(search).toHaveBeenCalledTimes(1);
   });
 
-  const evictedRun = (extra: unknown[]) =>
+  const evictedRun = (extra: unknown[], reviews: unknown[] = [{ attack_discovery_id: 'a' }]) =>
     ({
       id: 'run-3',
       status: 'completed',
       stepExecutions: [
         { id: 'g', stepId: 'run_generation', status: 'completed' },
-        step('match_fingerprints', 'completed', {
-          reviews: [{ attack_discovery_id: 'a' }],
-          attachments: [],
-        }),
+        step('match_fingerprints', 'completed', { reviews, attachments: [] }),
         ...extra,
       ],
     } as unknown as WorkflowExecutionDto);
 
-  const collectEvicted = async (run: WorkflowExecutionDto, count: jest.Mock) =>
+  const collectEvicted = async (
+    run: WorkflowExecutionDto,
+    count: jest.Mock,
+    search: jest.Mock = jest.fn().mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _source: {
+              'kibana.alert.uuid': 'a',
+              'kibana.alert.rule.execution.uuid': 'u-doc',
+            },
+          },
+        ],
+      },
+    })
+  ) =>
     collectWorkerArtifacts({
       client: { track: jest.fn() } as unknown as AttackDiscoveryWorkerClient,
       esClient: {
-        search: jest.fn().mockResolvedValue({
-          hits: {
-            hits: [
-              {
-                _source: {
-                  'kibana.alert.uuid': 'a',
-                  'kibana.alert.rule.execution.uuid': 'u-doc',
-                },
-              },
-            ],
-          },
-        }),
+        search,
         count,
       } as unknown as Client,
       run,
@@ -503,6 +504,39 @@ describe('collectWorkerArtifacts', () => {
         query: { terms: { 'kibana.alert.rule.execution.uuid': ['u1', 'u2'] } },
       })
     );
+  });
+
+  it('reads the persisted attacks by the emit_result uuids when the matcher returned no attack ids', async () => {
+    const search = jest.fn().mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _source: {
+              'kibana.alert.uuid': 'a',
+              'kibana.alert.rule.execution.uuid': 'u1',
+            },
+          },
+        ],
+      },
+    });
+    const artifacts = await collectEvicted(
+      evictedRun([step('emit_result', 'completed', { execution_uuids: 'u1, u2' })], []),
+      jest.fn().mockResolvedValue({ count: 1 }),
+      search
+    );
+    expect(search).toHaveBeenCalledTimes(1);
+    expect(search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            should: [{ terms: { 'kibana.alert.rule.execution.uuid': ['u1', 'u2'] } }],
+            minimum_should_match: 1,
+          },
+        },
+      })
+    );
+    expect(artifacts.insights).toHaveLength(1);
+    expect(artifacts.insights[0]).toMatchObject({ id: 'a' });
   });
 
   it('falls back to the uuids the persisted documents carry when no runner output has them', async () => {

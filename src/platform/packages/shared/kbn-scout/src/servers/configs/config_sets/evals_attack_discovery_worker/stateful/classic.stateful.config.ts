@@ -16,8 +16,9 @@ import { serviceAccountsServerArgs } from '../../service_accounts/shared';
  * Discovery runner, which in turn runs batched generation and per-attack review workflows. The
  * review's `ai.agent` step runs the `alertzero-thin-agent`, and both stages resolve their
  * connector from the `alertzero_frontier` inference feature; those exist only when alertzero is
- * enabled. The workflows additionally require the Workflows UI and agent settings, and the
- * `ai.conversation.*` steps require Agent Builder experimental features.
+ * enabled. The workflows additionally require the Workflows UI and agent settings. Agent Builder
+ * experimental features stay off: the `ai.conversation.*` steps no longer need them, and enabling
+ * them registers `write_todos` and `search_relevant_skills` on the tool-less FP/TP analysis agent.
  *
  * `agenticInvestigations` and `proposals` are both **required** plugins of alertzero and both
  * default to `enabled: false`. Without either flag Kibana cascade-disables alertzero entirely,
@@ -40,7 +41,6 @@ export const servers: ScoutServerConfig = {
       '--xpack.proposals.enabled=true',
       '--uiSettings.overrides.workflows:ui:enabled=true',
       '--uiSettings.overrides.workflows:aiAgent:enabled=true',
-      '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
     ],
   },
 };

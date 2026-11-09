@@ -241,13 +241,14 @@ AD_WORKER_EVAL_COHORT=whole \
 - The per-space `securitySolution:enableAlertZero` setting is set by the preflight spec.
 - Specs run with one Playwright worker: the runner's concurrency key is per space with
   cancel-in-progress.
-- Timeouts: runner 40 min, review settle 20 min, Playwright rows x (runner + review settle +
-  10 min overhead) per test, plus one review settle for the seeded row's floor-parent review (510 min
-  for 7 rows), so the suite's own timeouts fire first. Wall time
+- Timeouts: runner 40 min, review settle 20 min, floor idle wait 2 min. Playwright rows x (runner +
+  review settle + 10 min overhead + floor idle wait) per test, plus one review settle for the seeded
+  row's floor-parent review and two more floor idle waits (528 min for 7 rows: 7 x 72 + 20 + 4), so
+  the suite's own timeouts fire first. Wall time
   per row is dominated by one generation batch plus one review per unmatched attack (review
   concurrency 2).
 - CI step timeout: `stepTimeoutInMinutes` in `.buildkite/pipelines/evals/evals.suites.json` is 555
-  min, the 510 min Playwright timeout plus 45 min for bootstrap, Scout boot and report upload.
+  min, the 528 min Playwright timeout plus 27 min for bootstrap, Scout boot and report upload.
   Without it the step falls back to the 120 min default and Buildkite kills it before the suite's own
   timeouts fire, losing every score. `src/ci_step_timeout.test.ts` fails if the step timeout drops
   below the Playwright timeout (for example when a dataset row is added).
