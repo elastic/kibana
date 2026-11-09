@@ -44,6 +44,16 @@ describe('filterRestatedEvidence', () => {
     ]);
   });
 
+  it('keeps the Tier 1 total when every IOC row was derived from sampled events', () => {
+    const sampled: SseDetection = { ...ioc, from_sample: true, total: 1 };
+    expect(filterRestatedEvidence([tier1, tier2, confirmed, finding], [sampled])).toEqual([
+      tier1,
+      tier2,
+      finding,
+    ]);
+    expect(filterRestatedEvidence([tier1, finding], [sampled, ioc])).toEqual([finding]);
+  });
+
   it('hides only the bullet whose tier a detection row already tells', () => {
     expect(filterRestatedEvidence([tier1, tier2, confirmed, finding], [ioc])).toEqual([
       tier2,

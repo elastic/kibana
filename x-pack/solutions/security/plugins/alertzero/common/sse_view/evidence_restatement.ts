@@ -19,17 +19,21 @@ export const SSE_CONFIRMED_HIT_BULLET_PREFIX = 'Environment hit confirmed';
 
 /**
  * Hides the hit-count restatements that `detections` already covers, for display only: the
- * Tier 1 bullet when an IOC detection exists, the Tier 2 bullet when a behavior detection
- * exists, the generic confirmation when there is any detection. A bullet whose tier has no
- * detection row stays, since nothing else on the card tells that part. The stored payload is
- * untouched; packaging and summaries keep reading every bullet.
+ * Tier 1 bullet when an aggregate-backed IOC detection exists, the Tier 2 bullet when a
+ * behavior detection exists, the generic confirmation when there is any detection. A bullet
+ * whose tier has no detection row stays, since nothing else on the card tells that part. So
+ * does the Tier 1 bullet when every IOC row is `from_sample`: such a row counts only the
+ * cited events, not `tier1.counts.total_hits`, and would otherwise leave the run's total off
+ * the card. The stored payload is untouched; packaging and summaries keep reading every bullet.
  */
 export const filterRestatedEvidence = (
   evidenceFor: readonly string[],
   detections: readonly SseDetection[]
 ): string[] => {
   if (detections.length === 0) return [...evidenceFor];
-  const hasIoc = detections.some((detection) => detection.kind === 'ioc');
+  const hasIoc = detections.some(
+    (detection) => detection.kind === 'ioc' && detection.from_sample !== true
+  );
   const hasBehavior = detections.some((detection) => detection.kind === 'behavior');
   return evidenceFor.filter((item) => {
     if (item.startsWith(SSE_TIER1_HIT_BULLET_PREFIX)) return !hasIoc;
