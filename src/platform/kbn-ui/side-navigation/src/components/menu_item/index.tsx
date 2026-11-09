@@ -16,6 +16,7 @@ import { css } from '@emotion/react';
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 import { NewItemIndicator } from '../new_item_indicator';
+import { ProductAgentMotionIcon } from './product_agent_motion_icon';
 
 interface MenuItemBaseProps {
   children: ReactNode;
@@ -162,7 +163,11 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
       <>
         <div className={iconWrapperClassName}>
           <Suspense fallback={<EuiIcon aria-hidden color="currentColor" type="empty" />}>
-            <EuiIcon aria-hidden color="currentColor" type={iconType || 'empty'} />
+            {iconType === 'productAgent' ? (
+              <ProductAgentMotionIcon />
+            ) : (
+              <EuiIcon aria-hidden color="currentColor" type={iconType || 'empty'} />
+            )}
           </Suspense>
           {isNew && <NewItemIndicator isHighlighted={isHighlighted} />}
         </div>

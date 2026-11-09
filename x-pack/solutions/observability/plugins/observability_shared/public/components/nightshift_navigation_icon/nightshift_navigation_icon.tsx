@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
+import type { Interpolation, Theme } from '@emotion/react';
+import { css, keyframes } from '@emotion/react';
 import type { EuiIconProps } from '@elastic/eui';
-import { EuiIcon } from '@elastic/eui';
+import { euiCanAnimate, EuiIcon, useEuiTheme } from '@elastic/eui';
 import type { SVGProps } from 'react';
 import React from 'react';
 
@@ -48,9 +49,89 @@ export function NightshiftMarkIcon({
   );
 }
 
+// POC: productNightshift from the motion reference. Hover only, and only while the sidenav item is not selected.
+const nightshiftTilt = keyframes`
+  0% { transform: rotate(0deg); }
+  50% { transform: rotate(-15deg); }
+  100% { transform: rotate(0deg); }
+`;
+
+const nightshiftSparkle = keyframes`
+  0% { opacity: 1; transform: scale(1); }
+  25% { opacity: 0.15; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1); }
+  100% { opacity: 1; transform: scale(1); }
+`;
+
+const MotionNightshiftIcon = ({
+  css: iconCss,
+  ...props
+}: SVGProps<SVGSVGElement> & { css?: Interpolation<Theme> }) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={16}
+    height={16}
+    viewBox="0 0 16 16"
+    fill="none"
+    {...props}
+    css={[
+      iconCss,
+      css`
+        .moon {
+          transform-origin: 8px 8px;
+        }
+
+        .sparkle {
+          transform-box: fill-box;
+          transform-origin: center;
+        }
+
+        ${euiCanAnimate} {
+          [data-menu-item][data-highlighted='false']:hover & .moon {
+            animation: ${nightshiftTilt} 1000ms linear infinite;
+          }
+
+          [data-menu-item][data-highlighted='false']:hover & .sparkle {
+            animation: ${nightshiftSparkle} 1000ms ${euiTheme.animation.resistance} infinite;
+          }
+
+          [data-menu-item][data-highlighted='false']:hover & .sparkle.second {
+            animation-delay: -750ms;
+          }
+        }
+      `,
+    ]}
+  >
+      <path
+        className="sparkle first"
+        d="M9.69369 3.93141C9.62871 4.1123 9.37119 4.1123 9.30621 3.93141C9.02584 3.15094 8.84909 2.97418 8.06861 2.69381C7.88773 2.62883 7.88773 2.37131 8.06861 2.30633C8.84909 2.02596 9.02585 1.84921 9.30626 1.06876C9.37124 0.88788 9.62875 0.88789 9.69373 1.06877C9.97407 1.84921 10.1508 2.02597 10.9313 2.30633C11.1122 2.37131 11.1122 2.62883 10.9313 2.69381C10.1508 2.97418 9.97406 3.15094 9.69369 3.93141Z"
+        fill="currentColor"
+      />
+      <g className="sparkle second">
+        <path
+          d="M12.2859 7.63056C12.3439 7.83619 12.6545 7.83557 12.7117 7.62972C13.0466 6.42405 13.4219 6.04787 14.6257 5.71281C14.8318 5.65547 14.8318 5.34446 14.6258 5.28706C13.4235 4.95207 13.0476 4.57697 12.7127 3.37534C12.6553 3.16928 12.3441 3.16934 12.2868 3.37542C11.952 4.57873 11.5756 4.95377 10.3697 5.28869C10.1639 5.34585 10.1633 5.6571 10.3687 5.71563C11.5734 6.0589 11.9526 6.4485 12.2859 7.63056Z"
+          fill="currentColor"
+        />
+        <path
+          d="M12.2868 3.37542C12.3441 3.16934 12.6553 3.16928 12.7127 3.37534C13.0476 4.57697 13.4235 4.95207 14.6258 5.28706C14.8318 5.34446 14.8318 5.65547 14.6257 5.71281L14.4952 5.75244C13.3947 6.07898 13.0341 6.46927 12.7117 7.62972L12.6797 7.69775C12.5952 7.81361 12.4032 7.81351 12.3184 7.69775L12.2859 7.63056C11.9735 6.52245 11.6205 6.11073 10.585 5.78076L10.3687 5.71563C10.1633 5.6571 10.1639 5.34585 10.3697 5.28869C11.5756 4.95377 11.952 4.57873 12.2868 3.37542Z"
+          fill="currentColor"
+        />
+      </g>
+      <path
+        className="moon"
+        d="M4.96279 1.69761C5.41238 1.48201 5.7996 1.23725 6.02663 1.4099C6.25365 1.58255 6.21066 2.07972 6.19976 2.52253L6.20024 2.86963C6.24298 4.60223 6.92477 6.32189 8.24704 7.64429C9.65416 9.05142 11.5111 9.73383 13.3549 9.69218C13.8503 9.68098 14.2771 9.58213 14.5295 9.80915C14.7818 10.0362 14.5514 10.5094 14.327 10.9881L14.1954 11.2534C13.875 11.8672 13.4576 12.4437 12.942 12.9593L12.6807 13.2075C10.0215 15.6101 5.96297 15.6101 3.30375 13.2075L3.04248 12.9593C0.39439 10.3111 0.311311 6.06861 2.79399 3.3208L3.04248 3.05984C3.5459 2.55642 4.10668 2.14541 4.70414 1.82764L4.96279 1.69761ZM5.20024 2.69775C4.67937 2.97149 4.18974 3.32743 3.75004 3.76709C1.4069 6.11024 1.4069 9.9093 3.75004 12.2524C6.0931 14.5951 9.89135 14.5951 12.2344 12.2524C12.7048 11.7821 13.0782 11.2533 13.3584 10.6909C11.2593 10.7334 9.14336 9.95436 7.54008 8.35107C5.97886 6.78971 5.20075 4.74238 5.20024 2.69775Z"
+        fill="currentColor"
+      />
+  </svg>
+  );
+};
+
 export const NightshiftNavigationIcon = ({
   size = 'm',
   ...rest
 }: Omit<EuiIconProps, 'type'>): React.ReactElement => (
-  <EuiIcon type={NightshiftIconType} size={size} {...rest} />
+  <EuiIcon type={MotionNightshiftIcon} size={size} {...rest} />
 );

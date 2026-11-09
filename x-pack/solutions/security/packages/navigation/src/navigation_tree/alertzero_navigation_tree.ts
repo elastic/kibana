@@ -9,6 +9,7 @@ import type { NodeDefinition } from '@kbn/core-chrome-browser';
 import { SecurityPageName } from '../constants';
 import { i18nStrings } from '../i18n_strings';
 import { alertZeroLink } from '../links';
+import { AlertZeroNavigationIcon } from './alert_zero_navigation_icon';
 
 /**
  * Solution navigation for the AlertZero app, shared by ESS and serverless so the two cannot drift.
@@ -29,7 +30,7 @@ export const createAlertZeroNavigationTree = (): NodeDefinition[] => [
     link: alertZeroLink(),
     // Note the sidebar sentence-cases every label, so "AlertZero" is also registered in the `@kbn/shared-ux-label-formatter` title case glossary.
     title: i18nStrings.alertZero.title,
-    icon: 'sun',
+    icon: AlertZeroNavigationIcon,
   },
   {
     link: alertZeroLink(SecurityPageName.alertZeroEscalations),
