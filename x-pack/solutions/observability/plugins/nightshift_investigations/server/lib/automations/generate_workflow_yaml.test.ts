@@ -10,6 +10,7 @@ import { evaluateKql } from '@kbn/eval-kql';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { WorkflowSchemaBase } from '@kbn/workflows';
 import { generateWorkflowYaml, SLACK_MESSAGE_TEXT_LIMIT } from './generate_workflow_yaml';
+import { MAX_ALERT_SOURCE_LENGTH, MAX_ALERT_SOURCES } from '../../../common/automation_limits';
 import { MAX_PROMPT_TEMPLATE_LENGTH } from './schemas';
 import type { NightshiftAutomationAttributes, NightshiftTriggerRow } from './types';
 
@@ -382,6 +383,139 @@ describe('generateWorkflowYaml', () => {
         const event = v2Event({ status: 'active', previousStatus: null }, rule);
         expect(v2Matches({ kind: 'alert', tags: ['k8s'] }, event)).toBe(true);
         expect(v2Matches({ kind: 'alert', tags: ['prod'] }, event)).toBe(false);
+      });
+
+      describe('alert source filter', () => {
+        const sourceEvent = (source: string) => {
+          const base = v2Event({ status: 'active', previousStatus: null }, rule);
+          return { event: { ...base.event, source } };
+        };
+
+        it('keeps only the included sources', () => {
+          const row: AlertRow = {
+            kind: 'alert',
+            alertSources: ['elastic.significant_events'],
+            alertSourceMode: 'include',
+          };
+          expect(v2Matches(row, sourceEvent('elastic.significant_events'))).toBe(true);
+          expect(v2Matches(row, sourceEvent('internal'))).toBe(false);
+          expect(v2Matches(row, sourceEvent('pagerduty'))).toBe(false);
+        });
+
+        it('drops the excluded sources and keeps the rest', () => {
+          const row: AlertRow = {
+            kind: 'alert',
+            alertSources: ['internal', 'elastic.significant_events'],
+            alertSourceMode: 'exclude',
+          };
+          expect(v2Matches(row, sourceEvent('internal'))).toBe(false);
+          expect(v2Matches(row, sourceEvent('elastic.significant_events'))).toBe(false);
+          expect(v2Matches(row, sourceEvent('pagerduty'))).toBe(true);
+        });
+
+        it('matches every source outside the first-party ones for external', () => {
+          const row: AlertRow = { kind: 'alert', alertSources: ['external'] };
+          expect(v2Matches(row, sourceEvent('pagerduty'))).toBe(true);
+          expect(v2Matches(row, sourceEvent('internal'))).toBe(false);
+          expect(v2Matches(row, sourceEvent('elastic.significant_events'))).toBe(false);
+          expect(v2Matches(row, sourceEvent('elastic.future_producer'))).toBe(false);
+        });
+
+        it('keeps only the first-party sources when external is excluded', () => {
+          const row: AlertRow = {
+            kind: 'alert',
+            alertSources: ['external'],
+            alertSourceMode: 'exclude',
+          };
+          expect(v2Matches(row, sourceEvent('internal'))).toBe(true);
+          expect(v2Matches(row, sourceEvent('elastic.significant_events'))).toBe(true);
+          expect(v2Matches(row, sourceEvent('pagerduty'))).toBe(false);
+        });
+
+        it('combines external with a first-party source, and excludes both together', () => {
+          const include: AlertRow = { kind: 'alert', alertSources: ['external', 'internal'] };
+          expect(v2Matches(include, sourceEvent('pagerduty'))).toBe(true);
+          expect(v2Matches(include, sourceEvent('internal'))).toBe(true);
+          expect(v2Matches(include, sourceEvent('elastic.significant_events'))).toBe(false);
+          const exclude: AlertRow = { ...include, alertSourceMode: 'exclude' };
+          expect(v2Matches(exclude, sourceEvent('pagerduty'))).toBe(false);
+          expect(v2Matches(exclude, sourceEvent('elastic.significant_events'))).toBe(true);
+        });
+
+        it('combines the source filter with the rule filters', () => {
+          const row: AlertRow = { kind: 'alert', tags: ['k8s'], alertSources: ['internal'] };
+          expect(v2Matches(row, sourceEvent('internal'))).toBe(true);
+          expect(v2Matches(row, sourceEvent('pagerduty'))).toBe(false);
+        });
+
+        const triggerTypes = (row: AlertRow) => {
+          const automation = baseAutomation();
+          automation.trigger.rows = [row];
+          return parse(generateWorkflowYaml({ automationId: 'auto-123', automation })).triggers.map(
+            (t: { type: string }) => t.type
+          );
+        };
+
+        it('emits the classic trigger only when classic passes the filter', () => {
+          const both = ['alerting.v1.alertStatusChanged', 'alerting.alertStatusChanged'];
+          expect(triggerTypes({ kind: 'alert' })).toEqual(both);
+          expect(triggerTypes({ kind: 'alert', alertSources: ['classic', 'internal'] })).toEqual(
+            both
+          );
+          expect(
+            triggerTypes({ kind: 'alert', alertSources: ['internal'], alertSourceMode: 'include' })
+          ).toEqual(['alerting.alertStatusChanged']);
+          expect(
+            triggerTypes({ kind: 'alert', alertSources: ['classic'], alertSourceMode: 'exclude' })
+          ).toEqual(['alerting.alertStatusChanged']);
+        });
+
+        it('rejects a source filter that leaves no trigger when universal alerting is off', () => {
+          const automation = baseAutomation();
+          automation.trigger.rows = [{ kind: 'alert', alertSources: ['internal'] }];
+          expect(() =>
+            generateWorkflowYaml({ automationId: 'auto-123', automation, universalAlerts: false })
+          ).toThrow('no available trigger');
+        });
+
+        it('accepts the largest source filter the request schema allows', () => {
+          const alertSources = Array.from({ length: MAX_ALERT_SOURCES }, (_, i) =>
+            `${i}`.padEnd(MAX_ALERT_SOURCE_LENGTH, 'x')
+          );
+          const automation = baseAutomation();
+          automation.trigger.rows = [{ kind: 'alert', alertSources }];
+          expect(() =>
+            generateWorkflowYaml({ automationId: 'auto-123', automation })
+          ).not.toThrow();
+        });
+
+        it('rejects source filters longer than a trigger condition allows', () => {
+          const alertSources = Array.from(
+            { length: 30 },
+            (_, i) => `source-${i}-${'x'.repeat(90)}`
+          );
+          const automation = baseAutomation();
+          automation.trigger.rows = [{ kind: 'alert', alertSources }];
+          expect(() => generateWorkflowYaml({ automationId: 'auto-123', automation })).toThrow(
+            'too long'
+          );
+        });
+
+        it('emits the universal trigger only when a universal source passes the filter', () => {
+          expect(triggerTypes({ kind: 'alert', alertSources: ['classic'] })).toEqual([
+            'alerting.v1.alertStatusChanged',
+          ]);
+        });
+
+        it('ignores blank and padded sources instead of dropping every alert trigger', () => {
+          expect(triggerTypes({ kind: 'alert', alertSources: [' classic '] })).toEqual([
+            'alerting.v1.alertStatusChanged',
+          ]);
+          expect(triggerTypes({ kind: 'alert', alertSources: [''] })).toEqual([
+            'alerting.v1.alertStatusChanged',
+            'alerting.alertStatusChanged',
+          ]);
+        });
       });
 
       it('keys the investigation on the alert id and sends no context, so the alert is looked up', () => {
