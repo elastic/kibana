@@ -91,6 +91,38 @@ describe('triggerInvestigationStepDefinition', () => {
       );
     });
 
+    describe('title fallback', () => {
+      it.each([
+        ['an empty title', 'elastic.significant_events', undefined, 'Checkout event'],
+        [
+          'a title equal to the alert id',
+          'elastic.significant_events',
+          'episode-1',
+          'Checkout event',
+        ],
+        ['a provided title', 'elastic.significant_events', 'Rule name', 'Rule name'],
+        ['another v2 source', 'other.source', 'episode-1', 'episode-1'],
+      ])(
+        'uses the alert data title for %s only when needed',
+        async (_name, source, title, expected) => {
+          (fetchInvestigationAlertSnapshots as jest.Mock).mockResolvedValue([
+            { alert_version: 'v2', id: 'episode-1', source, data: { title: 'Checkout event' } },
+          ]);
+          const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+          const { definition } = createDefinition(start);
+
+          await definition.handler(
+            createContext({ subject_type: 'alert', subject_id: 'episode-1', title })
+          );
+
+          expect(start).toHaveBeenCalledWith(
+            expect.objectContaining({ title: expected }),
+            expect.anything()
+          );
+        }
+      );
+    });
+
     it('retries the lookup while the episode is not searchable yet', async () => {
       (fetchInvestigationAlertSnapshots as jest.Mock)
         .mockRejectedValueOnce(Boom.notFound('Alert with id episode-1 not found'))

@@ -6,10 +6,11 @@
  */
 
 import type { RegisteredEvaluatorDefinition } from '@kbn/evals-plugin/server';
+import { alertOutcomeBenignClassificationJudge } from './alert_outcome_benign_classification';
 import { alertOutcomeRcaAccuracyJudge } from './alert_outcome_rca_accuracy';
 import { conclusionQualityJudge } from './conclusion_quality';
-import { cortexPageInfluenceJudge } from './cortex_page_influence';
-import { cortexPagesReadJudge } from './cortex_pages_read';
+import { wikiPageInfluenceJudge } from './wiki_page_influence';
+import { wikiPagesReadJudge } from './wiki_pages_read';
 import { investigationProcessJudge } from './investigation_process';
 import { rcaRewardJudge } from './rca_reward';
 
@@ -23,10 +24,11 @@ export const referenceFreeJudges: readonly RegisteredEvaluatorDefinition[] = [
 /** Reference-based judges ported from Deductive's alert-outcome scoring. */
 export const alertOutcomeJudges: readonly RegisteredEvaluatorDefinition[] = [
   alertOutcomeRcaAccuracyJudge,
+  alertOutcomeBenignClassificationJudge,
 ];
 
-/** Judges of how an investigation used the Cortex pages it read. */
-export const cortexJudges: readonly RegisteredEvaluatorDefinition[] = [
-  cortexPagesReadJudge,
-  cortexPageInfluenceJudge,
+/** Judges of how an investigation used the Wiki pages it read. */
+export const wikiJudges: readonly RegisteredEvaluatorDefinition[] = [
+  wikiPagesReadJudge,
+  wikiPageInfluenceJudge,
 ];
