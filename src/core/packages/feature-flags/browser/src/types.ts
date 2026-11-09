@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Provider } from '@openfeature/web-sdk';
 import { type EvaluationContext as OpenFeatureEvaluationContext } from '@openfeature/core';
 import type { Observable } from 'rxjs';
 
@@ -92,14 +91,6 @@ export interface FeatureFlagsSetup {
    * @remarks It shouldn't be used to evaluate the feature flags because it won't report usage.
    */
   getInitialFeatureFlags: () => Record<string, unknown>;
-
-  /**
-   * Registers an OpenFeature provider to talk to the
-   * 3rd-party service that manages the Feature Flags.
-   * @param provider The {@link Provider | OpenFeature Provider} to handle the communication with the feature flags management system.
-   * @public
-   */
-  setProvider(provider: Provider): void;
 
   /**
    * Appends new keys to the evaluation context.

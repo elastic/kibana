@@ -9,10 +9,15 @@
 
 import React, { type PropsWithChildren } from 'react';
 import { renderHook, act } from '@testing-library/react';
-import type { Row } from '@tanstack/react-table';
 import type { GroupNode } from '../../../store_provider';
 import { DataCascadeProvider, useDataCascadeState } from '../../../store_provider';
-import { useCascadeTable, useAdaptedTableRows, type TableProps } from '.';
+import {
+  getAdaptedTableRows,
+  useCascadeTable,
+  useAdaptedTableRows,
+  type CascadeTableRow,
+  type TableProps,
+} from '.';
 
 describe('table', () => {
   const createHookWrapper = ({
@@ -72,6 +77,45 @@ describe('table', () => {
       });
 
       expect(result.current.rows.length).toBe(data.length);
+    });
+
+    it('preserves independent row selection through the adapted v9 row methods', () => {
+      const data = Array.from(new Array(3)).map((_, index) => ({
+        id: String(index),
+        name: `Item ${index}`,
+      }));
+
+      const { result } = renderHook(useCascadeTable, {
+        wrapper: ({ children }) =>
+          createHookWrapper({
+            children,
+            data,
+            helper: TestHelper,
+          }),
+        initialProps: {
+          allowMultipleRowToggle: false,
+          enableRowSelection: true,
+          header: jest.fn(),
+          rowCell: jest.fn(),
+        } satisfies TableProps<GroupNode, unknown>,
+      });
+
+      const firstRow = getAdaptedTableRows<GroupNode, GroupNode>({
+        rowInstance: result.current.rows[0],
+      });
+      const thirdRow = getAdaptedTableRows<GroupNode, GroupNode>({
+        rowInstance: result.current.rows[2],
+      });
+
+      expect(firstRow.rowCanSelect()).toBe(true);
+      expect(firstRow.isRowSelected()).toBe(false);
+
+      act(() => firstRow.rowSelectionFn({ target: { checked: true }, shiftKey: false }));
+      act(() => thirdRow.rowSelectionFn({ target: { checked: true }, shiftKey: true }));
+
+      expect(firstRow.isRowSelected()).toBe(true);
+      expect(firstRow.rowHasSelectedChildren()).toBe(false);
+      expect(cascadeState.table.rowSelection).toEqual({ 0: true, 2: true });
     });
 
     describe('row expansion', () => {
@@ -191,7 +235,7 @@ describe('table', () => {
 
   describe('useTableRowAdapter', () => {
     it('should return only known properties', () => {
-      const mockedRowInstance = new Proxy({} as Row<GroupNode>, {
+      const mockedRowInstance = new Proxy({} as CascadeTableRow<GroupNode>, {
         get: (target, prop) => {
           if (prop === 'id') return 'mocked-id';
           if (prop === 'parentId') return 'mocked-parent-id';
