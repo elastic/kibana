@@ -22,8 +22,6 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { AvailabilityConfig } from '@kbn/agent-builder-server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
-import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/managed';
-import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigations-plugin/server';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import type { NightshiftInvestigationsConfig } from './config';
@@ -37,11 +35,7 @@ import { createGatedSandboxStart } from './sandbox_gate';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
 import { createEnsureFailureSweep } from './lib/managed_workflows/ensure_failure_sweep';
 import { sweepInvestigationFailuresStepDefinition } from './step_definitions/sweep_investigation_failures';
-import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
-import { installOnlineEvalsWorkflow } from './lib/managed_workflows/install_online_evals_workflow';
-import { installDecisionTreeWorkflows } from './lib/managed_workflows/install_decision_tree_workflows';
-import { installSandboxMaterializeWorkspaceWorkflow } from './lib/managed_workflows/install_sandbox_materialize_workspace';
-import { installAgentOptimizationsWorkflow } from './lib/managed_workflows/install_agent_optimizations';
+import { installStaticWorkflows } from './lib/managed_workflows/install_static_workflows';
 import { installInvestigationAgent } from './lib/install_investigation_agent';
 import {
   createInvestigatorServiceAccountService,
@@ -1059,24 +1053,15 @@ export class NightshiftInvestigationsPlugin
   private async installManagedWorkflows(
     managedWorkflowsClient: Promise<ManagedWorkflowsClient>
   ): Promise<void> {
-    const client = await managedWorkflowsClient;
     // Each space reaches the global investigation through an entry point bound to the Nightshift
     // service account, installed with the bound Slack thread workflow when an admin sets the space
     // up (see lib/service_account). Not installing the Slack thread's global copy here lets
     // ready() remove any left from earlier versions.
-    await installInvestigationWorkflow({ client });
-    await installOnlineEvalsWorkflow({ client });
-    await client.install(NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID, {
-      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    await installStaticWorkflows({
+      client: await managedWorkflowsClient,
+      wikiOrMemoryEnabled: this.wikiEnabled || this.memoryEnabled,
+      decisionTreesEnabled: this.decisionTreesEnabled,
     });
-    if (this.wikiEnabled || this.memoryEnabled) {
-      await installSandboxMaterializeWorkspaceWorkflow({ client });
-      await installAgentOptimizationsWorkflow({ client });
-    }
-    if (this.decisionTreesEnabled) {
-      await installDecisionTreeWorkflows({ client });
-    }
-    await client.ready();
   }
 
   stop(): void {}

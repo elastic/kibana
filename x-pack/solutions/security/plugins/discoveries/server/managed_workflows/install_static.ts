@@ -37,14 +37,14 @@ export const installStatic = async ({
   if (!enabled) return { failedIds: [] };
 
   const client = await workflowsExtensions.initManagedWorkflowsClient('discoveries');
-  const failedIds: string[] = [];
-
-  for (const id of AD_WORKFLOW_IDS) {
-    try {
-      await client.install(id, { spaceId: GLOBAL_WORKFLOW_SPACE_ID });
-    } catch {
-      failedIds.push(id);
-    }
+  let failedIds: string[];
+  try {
+    const { failed } = await client.installMany(
+      AD_WORKFLOW_IDS.map((id) => ({ id, spaceId: GLOBAL_WORKFLOW_SPACE_ID }))
+    );
+    failedIds = failed.map(({ id }) => id);
+  } catch {
+    failedIds = [...AD_WORKFLOW_IDS];
   }
 
   await client.ready();
