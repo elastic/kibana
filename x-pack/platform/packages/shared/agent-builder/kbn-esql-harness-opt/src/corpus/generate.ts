@@ -28,8 +28,24 @@ export interface GeneratedExample {
   difficulty?: 'trivial' | 'easy' | 'hard' | 'unsolved';
 }
 
-const FAMILY_CAP = 10;
+const FAMILY_CAP = 6;
 const PER_INDEX_CAP = 110;
+
+/**
+ * Families the first corpus proved the harness already solves on the first attempt.
+ *
+ * They stay in the pool as regression ballast but get a much smaller share: a corpus made of
+ * single-stage filters and counts cannot show an improvement or a regression.
+ */
+const SATURATED_FAMILIES = new Set([
+  'filter-keep',
+  'count-filtered',
+  'distinct-count',
+  'single-stat',
+  'top-n',
+  'range-filter',
+]);
+const SATURATED_FAMILY_CAP = 2;
 
 const isDegenerate = (values: unknown[][]): boolean => {
   if (values.length === 0) return true;
@@ -69,7 +85,8 @@ export const synthesizeQueries = async ({
 
     for (const candidate of candidates) {
       if (keptForIndex >= PER_INDEX_CAP) break;
-      if ((perFamily.get(candidate.family) ?? 0) >= FAMILY_CAP) continue;
+      const cap = SATURATED_FAMILIES.has(candidate.family) ? SATURATED_FAMILY_CAP : FAMILY_CAP;
+      if ((perFamily.get(candidate.family) ?? 0) >= cap) continue;
 
       try {
         const result = (await esClient.esql.query({ query: candidate.query })) as {
@@ -154,7 +171,7 @@ export const backTranslate = async ({
   batchSize = 10,
   timeoutMs = 600_000,
 }: {
-  queries: Array<CandidateQuery & { rowCount: number }>;
+  queries: Array<CandidateQuery & { rowCount: number; intent?: string }>;
   command: string;
   commandArgs?: string[];
   log: ToolingLog;

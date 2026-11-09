@@ -6,6 +6,7 @@
  */
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { esqlFixtureDocumentRequests } from './documents';
 import { esqlFixtureIndicesCreateRequests } from './indices';
@@ -62,6 +63,89 @@ export const installSampleData = async ({
   }
 };
 
+/**
+ * Enrich policies two of the anchor gold queries depend on.
+ *
+ * Without them those examples could never execute, so they scored on syntax alone and silently
+ * stopped testing the thing they were written to test — ENRICH is a surface the harness has no
+ * other coverage for.
+ */
+const setupEnrichPolicies = async ({
+  esClient,
+  log,
+}: {
+  esClient: EsClient;
+  log: ToolingLog;
+}): Promise<void> => {
+  const policies: Array<{
+    name: string;
+    index: string;
+    matchField: string;
+    enrichFields: string[];
+    mappings: MappingTypeMapping;
+    documents: Array<Record<string, unknown>>;
+  }> = [
+    {
+      name: 'win_events',
+      index: 'win_events_lookup',
+      matchField: 'event.code',
+      enrichFields: ['EVENT_DESCRIPTION'],
+      mappings: {
+        properties: {
+          'event.code': { type: 'long' },
+          EVENT_DESCRIPTION: { type: 'keyword' },
+        },
+      },
+      documents: [
+        { 'event.code': 4624, EVENT_DESCRIPTION: 'An account was successfully logged on' },
+        { 'event.code': 4625, EVENT_DESCRIPTION: 'An account failed to log on' },
+        { 'event.code': 4688, EVENT_DESCRIPTION: 'A new process has been created' },
+      ],
+    },
+    {
+      name: 'ldap_lookup_new',
+      index: 'ldap_lookup',
+      matchField: 'user.name',
+      enrichFields: ['group.name'],
+      mappings: {
+        properties: {
+          'user.name': { type: 'keyword' },
+          'group.name': { type: 'keyword' },
+        },
+      },
+      documents: [
+        { 'user.name': 'alice', 'group.name': 'admins' },
+        { 'user.name': 'bob', 'group.name': 'devs' },
+        { 'user.name': 'carol', 'group.name': 'ops' },
+        { 'user.name': 'dan', 'group.name': 'devs' },
+      ],
+    },
+  ];
+
+  for (const policy of policies) {
+    await esClient.indices.delete({ index: policy.index }, { ignore: [404] });
+    await esClient.indices.create({ index: policy.index, mappings: policy.mappings });
+    await esClient.bulk({
+      operations: policy.documents.flatMap((document) => [
+        { index: { _index: policy.index } },
+        document,
+      ]),
+      refresh: true,
+    });
+    await esClient.enrich.deletePolicy({ name: policy.name }).catch(() => undefined);
+    await esClient.enrich.putPolicy({
+      name: policy.name,
+      match: {
+        indices: policy.index,
+        match_field: policy.matchField,
+        enrich_fields: policy.enrichFields,
+      },
+    });
+    await esClient.enrich.executePolicy({ name: policy.name, wait_for_completion: true });
+    log.info(`[harness-opt] enrich policy ${policy.name} ready`);
+  }
+};
+
 export const setupFixtures = async ({
   esClient,
   log,
@@ -114,4 +198,6 @@ export const setupFixtures = async ({
   await esClient.indices.refresh({
     index: [...new Set([...createRequests, ...documents].map((request) => request.index))],
   });
+
+  await setupEnrichPolicies({ esClient, log });
 };

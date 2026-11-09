@@ -1,7 +1,17 @@
 [
   {
-    "question": "Classify each record as small if its network bytes are under 1,383,098 and large otherwise, then show the 10 combinations of size class and destination address with the most records, most first.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| EVAL size_class = CASE(network.bytes < 1383098, \"small\", \"large\")\n| STATS documents = COUNT(*) BY size_class, destination.address\n| SORT documents DESC\n| LIMIT 10",
+    "question": "For events where normalized total CPU usage is above zero, what is the average ratio of bytes transferred to that CPU usage? Return it as a single value.",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE system.cpu.total.norm.pct > 0\n| EVAL ratio = bytes_transferred::double / system.cpu.total.norm.pct::double\n| STATS average_ratio = AVG(ratio)",
+    "index": "logs-production.evaluations.2025.01.01",
+    "family": "ratio",
+    "rowCount": 1,
+    "solvedBy": 2,
+    "attempts": 3,
+    "difficulty": "easy"
+  },
+  {
+    "question": "Label each event \"small\" if its network bytes are below 1,607,339.5 and \"large\" otherwise. How many events fall into each label and destination address pair? Show the 10 pairs with the most events, most first.",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| EVAL size_class = CASE(network.bytes < 1607339.5, \"small\", \"large\")\n| STATS documents = COUNT(*) BY size_class, destination.address\n| SORT documents DESC\n| LIMIT 10",
     "index": "logs-production.evaluations.2025.01.01",
     "family": "case-bucketing",
     "rowCount": 10,
@@ -10,47 +20,17 @@
     "difficulty": "easy"
   },
   {
-    "question": "For each event category, what are the 95th percentile and the median of bytes transferred? Keep only categories whose 95th percentile is above 976,737.5, and show the top 5 by 95th percentile, highest first.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS p95 = PERCENTILE(bytes_transferred, 95), median = MEDIAN(bytes_transferred) BY event.category.keyword\n| WHERE p95 > 976737.5\n| SORT p95 DESC\n| LIMIT 5",
+    "question": "Looking only at events that record bytes transferred, what are the total bytes, the number of events and the average bytes per event for each event category? Keep only categories with more than one event, and show the top 5 by average bytes per event, highest first.",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE bytes_transferred IS NOT NULL\n| STATS total = SUM(bytes_transferred), events = COUNT(*) BY event.category.keyword\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
     "index": "logs-production.evaluations.2025.01.01",
-    "family": "percentile-by-dimension",
+    "family": "multi-stage",
     "rowCount": 4,
     "solvedBy": 2,
     "attempts": 3,
     "difficulty": "easy"
   },
   {
-    "question": "Which 15 combinations of day and event category had the most events? Show the event count for each, highest first.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS events = COUNT(*) BY day = BUCKET(@timestamp, 1 day), event.category.keyword\n| SORT events DESC\n| LIMIT 15",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "time-bucket-by-dimension",
-    "rowCount": 4,
-    "solvedBy": 2,
-    "attempts": 3,
-    "difficulty": "easy"
-  },
-  {
-    "question": "How many events went to destination dst-5 and how many went to dst-2, and what fraction of those two combined went to dst-5?",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| EVAL is_first = CASE(destination.address == \"dst-5\", 1, 0), is_second = CASE(destination.address == \"dst-2\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "filtered-ratio",
-    "rowCount": 1,
-    "solvedBy": 2,
-    "attempts": 3,
-    "difficulty": "easy"
-  },
-  {
-    "question": "Which 5 destination addresses have the highest 95th-percentile normalized total CPU, counting only those above 0.49? Show the 95th percentile and the median CPU for each, highest 95th percentile first.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS p95 = PERCENTILE(system.cpu.total.norm.pct, 95), median = MEDIAN(system.cpu.total.norm.pct) BY destination.address\n| WHERE p95 > 0.49\n| SORT p95 DESC\n| LIMIT 5",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "percentile-by-dimension",
-    "rowCount": 5,
-    "solvedBy": 1,
-    "attempts": 3,
-    "difficulty": "hard"
-  },
-  {
-    "question": "How many events came from host-a and how many from host-c, and what fraction of those two combined came from host-a?",
+    "question": "Across the evaluation logs, how many events came from host-a and how many from host-c, and what fraction of those two combined came from host-a?",
     "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| EVAL is_first = CASE(host.name == \"host-a\", 1, 0), is_second = CASE(host.name == \"host-c\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
     "index": "logs-production.evaluations.2025.01.01",
     "family": "filtered-ratio",
@@ -60,107 +40,67 @@
     "difficulty": "hard"
   },
   {
-    "question": "For each group, what are the 95th percentile and median of normalized total CPU usage? Show only groups whose 95th percentile is above 0.49, and return the top 5 sorted by 95th percentile, highest first.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS p95 = PERCENTILE(system.cpu.total.norm.pct, 95), median = MEDIAN(system.cpu.total.norm.pct) BY group.name\n| WHERE p95 > 0.49\n| SORT p95 DESC\n| LIMIT 5",
+    "question": "Broken down by hour, what are the 10 hours with the highest bytes transferred per event? For each hour show the total number of events, the total bytes transferred, and the bytes divided by the number of events, highest ratio first.",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| EVAL hour = DATE_TRUNC(1 hour, @timestamp)\n| STATS events = COUNT(*), measured = SUM(bytes_transferred) BY hour\n| EVAL per_event = measured::double / events::double\n| SORT per_event DESC\n| LIMIT 10",
     "index": "logs-production.evaluations.2025.01.01",
-    "family": "percentile-by-dimension",
-    "rowCount": 3,
+    "family": "bucketed-ratio",
+    "rowCount": 6,
     "solvedBy": 2,
     "attempts": 3,
     "difficulty": "easy"
   },
   {
-    "question": "How many documents come from host-a and how many from host-c, and what fraction of those two counts combined comes from host-a?",
-    "goldQuery": "FROM metricbeat-production.evaluations-2025.01.01\n| EVAL is_first = CASE(host.name == \"host-a\", 1, 0), is_second = CASE(host.name == \"host-c\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
+    "question": "For taxi trips with a total amount above zero, what is the average number of passengers per dollar of total amount?",
+    "goldQuery": "FROM nyc_taxis-production.evaluations.2025.01.01\n| WHERE total_amount > 0\n| EVAL ratio = passenger_count::double / total_amount::double\n| STATS average_ratio = AVG(ratio)",
+    "index": "nyc_taxis-production.evaluations.2025.01.01",
+    "family": "ratio",
+    "rowCount": 1,
+    "solvedBy": 2,
+    "attempts": 3,
+    "difficulty": "easy"
+  },
+  {
+    "question": "What are the average, highest and lowest system CPU usage percentages across all the metric events?",
+    "goldQuery": "FROM metricbeat-production.evaluations-2025.01.01\n| STATS average = AVG(system.cpu.system.pct), maximum = MAX(system.cpu.system.pct), minimum = MIN(system.cpu.system.pct)",
     "index": "metricbeat-production.evaluations-2025.01.01",
-    "family": "filtered-ratio",
+    "family": "single-stat",
     "rowCount": 1,
     "solvedBy": 2,
     "attempts": 3,
     "difficulty": "easy"
   },
   {
-    "question": "Count the employees by day of hire and country, and show the 15 day-and-country pairs with the most hires, highest count first.",
-    "goldQuery": "FROM employees-production.evaluations.2025.01.01\n| STATS events = COUNT(*) BY day = BUCKET(hire_date, 1 day), country.keyword\n| SORT events DESC\n| LIMIT 15",
-    "index": "employees-production.evaluations.2025.01.01",
-    "family": "time-bucket-by-dimension",
-    "rowCount": 15,
-    "solvedBy": 2,
-    "attempts": 3,
-    "difficulty": "easy"
-  },
-  {
-    "question": "How many employee records are from FR and how many are from DE, and what fraction of those two combined is FR? Return the two counts and the share as a single row.",
-    "goldQuery": "FROM employees-production.evaluations.2025.01.01\n| EVAL is_first = CASE(country.keyword == \"FR\", 1, 0), is_second = CASE(country.keyword == \"DE\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
-    "index": "employees-production.evaluations.2025.01.01",
-    "family": "filtered-ratio",
-    "rowCount": 1,
-    "solvedBy": 2,
-    "attempts": 3,
-    "difficulty": "easy"
-  },
-  {
-    "question": "Which 15 combinations of country and employee number have the highest total salary? Show the country, the employee number and the total salary, highest first.",
-    "goldQuery": "FROM employees-production.evaluations.2025.01.01\n| STATS subtotal = SUM(salary) BY country.keyword, emp_no\n| SORT subtotal DESC\n| LIMIT 15",
-    "index": "employees-production.evaluations.2025.01.01",
-    "family": "grouped-share",
-    "rowCount": 15,
+    "question": "For each host, what are the 95th percentile and the median of system CPU percentage? Show only hosts whose 95th percentile is above 0.26, and list the top 5 by 95th percentile, highest first.",
+    "goldQuery": "FROM metricbeat-production.evaluations-2025.01.01\n| STATS p95 = PERCENTILE(system.cpu.system.pct, 95), median = MEDIAN(system.cpu.system.pct) BY host.name\n| WHERE p95 > 0.26\n| SORT p95 DESC\n| LIMIT 5",
+    "index": "metricbeat-production.evaluations-2025.01.01",
+    "family": "percentile-by-dimension",
+    "rowCount": 4,
     "solvedBy": 1,
     "attempts": 3,
     "difficulty": "hard"
   },
   {
-    "question": "How many user records are named \"ken jackson\" and how many are named \"tina tanaka\"? Also show what fraction of those two names combined is \"ken jackson\".",
-    "goldQuery": "FROM users\n| EVAL is_first = CASE(name == \"ken jackson\", 1, 0), is_second = CASE(name == \"tina tanaka\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
+    "question": "Grouping employee records by the hour of their hire date, which 10 hours have the highest average salary per record? For each hour, show the number of records, the total salary and the average per record, highest average first.",
+    "goldQuery": "FROM employees-production.evaluations.2025.01.01\n| EVAL hour = DATE_TRUNC(1 hour, hire_date)\n| STATS events = COUNT(*), measured = SUM(salary) BY hour\n| EVAL per_event = measured::double / events::double\n| SORT per_event DESC\n| LIMIT 10",
+    "index": "employees-production.evaluations.2025.01.01",
+    "family": "bucketed-ratio",
+    "rowCount": 10,
+    "solvedBy": 1,
+    "attempts": 3,
+    "difficulty": "hard"
+  },
+  {
+    "question": "For each day and user name, how many user records were created? Show the 15 day-and-name pairs with the most records, highest count first.",
+    "goldQuery": "FROM users\n| STATS events = COUNT(*) BY day = BUCKET(created_at, 1 day), name\n| SORT events DESC\n| LIMIT 15",
     "index": "users",
-    "family": "filtered-ratio",
-    "rowCount": 1,
+    "family": "time-bucket-by-dimension",
+    "rowCount": 15,
     "solvedBy": 1,
     "attempts": 3,
     "difficulty": "hard"
   },
   {
-    "question": "Which 15 combinations of calendar day and owner ID had the most projects created? Count projects per day and owner, and list the highest counts first.",
-    "goldQuery": "FROM projects\n| STATS events = COUNT(*) BY day = BUCKET(created_at, 1 day), owner_id\n| SORT events DESC\n| LIMIT 15",
-    "index": "projects",
-    "family": "time-bucket-by-dimension",
-    "rowCount": 15,
-    "solvedBy": 2,
-    "attempts": 3,
-    "difficulty": "easy"
-  },
-  {
-    "question": "Which 15 combinations of calendar day and project name had the most project records created? Count records per day and name, and list the highest counts first.",
-    "goldQuery": "FROM projects\n| STATS events = COUNT(*) BY day = BUCKET(created_at, 1 day), name\n| SORT events DESC\n| LIMIT 15",
-    "index": "projects",
-    "family": "time-bucket-by-dimension",
-    "rowCount": 15,
-    "solvedBy": 2,
-    "attempts": 3,
-    "difficulty": "easy"
-  },
-  {
-    "question": "How many project records are named project-1 and how many are named project-2, and what share of their combined total is project-1?",
-    "goldQuery": "FROM projects\n| EVAL is_first = CASE(name == \"project-1\", 1, 0), is_second = CASE(name == \"project-2\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
-    "index": "projects",
-    "family": "filtered-ratio",
-    "rowCount": 1,
-    "solvedBy": 1,
-    "attempts": 3,
-    "difficulty": "hard"
-  },
-  {
-    "question": "Which projects have more than one daily error record? Show the top 10 by number of records, most first, with ties broken by project ID in alphabetical order.",
-    "goldQuery": "FROM error_rate_daily\n| STATS events = COUNT(*) BY project_id\n| WHERE events > 1\n| SORT events DESC, project_id ASC\n| LIMIT 10",
-    "index": "error_rate_daily",
-    "family": "having-filter",
-    "rowCount": 8,
-    "solvedBy": 2,
-    "attempts": 3,
-    "difficulty": "easy"
-  },
-  {
-    "question": "How many user records have the ID \"user-0\" and how many have the ID \"user-1\"? Also show what fraction of those two IDs combined is \"user-0\".",
+    "question": "How many user records have id \"user-0\" and how many have id \"user-1\"? Also show what fraction of those two combined belongs to \"user-0\".",
     "goldQuery": "FROM users\n| EVAL is_first = CASE(id == \"user-0\", 1, 0), is_second = CASE(id == \"user-1\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
     "index": "users",
     "family": "filtered-ratio",
@@ -170,49 +110,169 @@
     "difficulty": "easy"
   },
   {
-    "question": "What are the 10 SKUs that appear in the most ecommerce orders? List each SKU with its order count, most first.",
-    "goldQuery": "FROM kibana_sample_data_ecommerce\n| STATS events = COUNT(*) BY sku\n| SORT events DESC\n| LIMIT 10",
-    "index": "kibana_sample_data_ecommerce",
-    "family": "stat-by-dimension",
-    "rowCount": 10,
+    "question": "Which 15 combinations of creation day and owner have the most projects, and how many does each have, most first?",
+    "goldQuery": "FROM projects\n| STATS events = COUNT(*) BY day = BUCKET(created_at, 1 day), owner_id\n| SORT events DESC\n| LIMIT 15",
+    "index": "projects",
+    "family": "time-bucket-by-dimension",
+    "rowCount": 15,
     "solvedBy": 1,
     "attempts": 3,
     "difficulty": "hard"
   },
   {
-    "question": "How many ecommerce orders have a product discount amount greater than 0?",
-    "goldQuery": "FROM kibana_sample_data_ecommerce\n| WHERE products.discount_amount > 0\n| STATS above_median = COUNT(*)",
-    "index": "kibana_sample_data_ecommerce",
-    "family": "range-filter",
+    "question": "How many projects do owners user-18 and user-6 each have, and what fraction of their combined total belongs to user-18?",
+    "goldQuery": "FROM projects\n| EVAL is_first = CASE(owner_id == \"user-18\", 1, 0), is_second = CASE(owner_id == \"user-6\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
+    "index": "projects",
+    "family": "filtered-ratio",
     "rowCount": 1,
     "solvedBy": 1,
     "attempts": 3,
     "difficulty": "hard"
   },
   {
-    "question": "What are the 5 largest order total quantities? Show only the total quantity, largest first.",
-    "goldQuery": "FROM kibana_sample_data_ecommerce\n| SORT total_quantity DESC\n| KEEP total_quantity\n| LIMIT 5",
+    "question": "How many error-rate records are there per day? Show the first 30 days, earliest first.",
+    "goldQuery": "FROM error_rate_daily\n| STATS events = COUNT(*) BY day = BUCKET(date, 1 day)\n| SORT day ASC\n| LIMIT 30",
+    "index": "error_rate_daily",
+    "family": "time-bucket",
+    "rowCount": 30,
+    "solvedBy": 1,
+    "attempts": 3,
+    "difficulty": "hard"
+  },
+  {
+    "question": "Across all error-rate records, how many belong to project-1 and how many to project-2? What fraction of the combined total belongs to project-1?",
+    "goldQuery": "FROM error_rate_daily\n| EVAL is_first = CASE(project_id == \"project-1\", 1, 0), is_second = CASE(project_id == \"project-2\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
+    "index": "error_rate_daily",
+    "family": "filtered-ratio",
+    "rowCount": 1,
+    "solvedBy": 1,
+    "attempts": 3,
+    "difficulty": "hard"
+  },
+  {
+    "question": "Label each order 'small' if its product discount amount is below 0 and 'large' otherwise, then count orders for each combination of that label and order type. Show the 10 largest combinations, highest count first.",
+    "goldQuery": "FROM kibana_sample_data_ecommerce\n| EVAL size_class = CASE(products.discount_amount < 0, \"small\", \"large\")\n| STATS documents = COUNT(*) BY size_class, type\n| SORT documents DESC\n| LIMIT 10",
     "index": "kibana_sample_data_ecommerce",
-    "family": "top-n",
-    "rowCount": 5,
+    "family": "case-bucketing",
+    "rowCount": 1,
     "solvedBy": 2,
     "attempts": 3,
     "difficulty": "easy"
   },
   {
-    "question": "Label each e-commerce order 'small' if its product discount amount is below 0 and 'large' otherwise. How many orders fall into each label and SKU pair? Show the 10 largest pairs, most orders first.",
-    "goldQuery": "FROM kibana_sample_data_ecommerce\n| EVAL size_class = CASE(products.discount_amount < 0, \"small\", \"large\")\n| STATS documents = COUNT(*) BY size_class, sku\n| SORT documents DESC\n| LIMIT 10",
+    "question": "For each product ID in the ecommerce orders, what are the total and the average product discount amount? Show the 10 product IDs with the highest total, highest first.",
+    "goldQuery": "FROM kibana_sample_data_ecommerce\n| STATS total = SUM(products.discount_amount), average = AVG(products.discount_amount) BY products._id.keyword\n| SORT total DESC\n| LIMIT 10",
     "index": "kibana_sample_data_ecommerce",
-    "family": "case-bucketing",
+    "family": "stat-numeric-by-dimension",
     "rowCount": 10,
     "solvedBy": 1,
     "attempts": 3,
     "difficulty": "hard"
   },
   {
-    "question": "Across all orders, how many come from Asia and how many from North America, and what share of those two counts combined comes from Asia?",
-    "goldQuery": "FROM kibana_sample_data_ecommerce\n| EVAL is_first = CASE(geoip.continent_name == \"Asia\", 1, 0), is_second = CASE(geoip.continent_name == \"North America\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
+    "question": "In the ecommerce orders, label each record \"small\" if its product discount amount is below 0 and \"large\" otherwise. How many records fall into each combination of that discount label and customer continent? Show the 10 most common combinations, highest count first.",
+    "goldQuery": "FROM kibana_sample_data_ecommerce\n| EVAL size_class = CASE(products.discount_amount < 0, \"small\", \"large\")\n| STATS documents = COUNT(*) BY size_class, geoip.continent_name\n| SORT documents DESC\n| LIMIT 10",
     "index": "kibana_sample_data_ecommerce",
+    "family": "case-bucketing",
+    "rowCount": 5,
+    "solvedBy": 1,
+    "attempts": 3,
+    "difficulty": "hard"
+  },
+  {
+    "question": "In the ecommerce orders, label each record \"small\" if its product base unit price is under 25.98 and \"large\" otherwise. How many records fall into each combination of that price label and customer continent? Show the 10 most common combinations, highest count first.",
+    "goldQuery": "FROM kibana_sample_data_ecommerce\n| EVAL size_class = CASE(products.base_unit_price < 25.98, \"small\", \"large\")\n| STATS documents = COUNT(*) BY size_class, geoip.continent_name\n| SORT documents DESC\n| LIMIT 10",
+    "index": "kibana_sample_data_ecommerce",
+    "family": "case-bucketing",
+    "rowCount": 7,
+    "solvedBy": 1,
+    "attempts": 3,
+    "difficulty": "hard"
+  },
+  {
+    "question": "What is the average product discount amount for each day of customer birth date in the ecommerce orders? Show the 30 earliest days, oldest first.",
+    "goldQuery": "FROM kibana_sample_data_ecommerce\n| STATS average = AVG(products.discount_amount) BY day = BUCKET(customer_birth_date, 1 day)\n| SORT day ASC\n| LIMIT 30",
+    "index": "kibana_sample_data_ecommerce",
+    "family": "time-series-stat",
+    "rowCount": 1,
+    "solvedBy": 2,
+    "attempts": 3,
+    "difficulty": "easy"
+  },
+  {
+    "question": "For each order type, counting only records that have a product discount amount, what are the total discount, the number of records and the average discount per record? Keep only types with more than one record and show the top 5 by discount per record, highest first.",
+    "goldQuery": "FROM kibana_sample_data_ecommerce\n| WHERE products.discount_amount IS NOT NULL\n| STATS total = SUM(products.discount_amount), events = COUNT(*) BY type\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
+    "index": "kibana_sample_data_ecommerce",
+    "family": "multi-stage",
+    "rowCount": 1,
+    "solvedBy": 2,
+    "attempts": 3,
+    "difficulty": "easy"
+  },
+  {
+    "question": "For each order type, counting only records that have a product base unit price, what are the total base unit price, the number of records and the average base unit price per record? Keep only types with more than one record and show the top 5 by price per record, highest first.",
+    "goldQuery": "FROM kibana_sample_data_ecommerce\n| WHERE products.base_unit_price IS NOT NULL\n| STATS total = SUM(products.base_unit_price), events = COUNT(*) BY type\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
+    "index": "kibana_sample_data_ecommerce",
+    "family": "multi-stage",
+    "rowCount": 1,
+    "solvedBy": 1,
+    "attempts": 3,
+    "difficulty": "hard"
+  },
+  {
+    "question": "For each product ID, what are the 95th-percentile and median base unit prices? Show only products whose 95th-percentile price is above 25.98, and return the top 5, highest 95th percentile first.",
+    "goldQuery": "FROM kibana_sample_data_ecommerce\n| STATS p95 = PERCENTILE(products.base_unit_price, 95), median = MEDIAN(products.base_unit_price) BY products._id.keyword\n| WHERE p95 > 25.98\n| SORT p95 DESC\n| LIMIT 5",
+    "index": "kibana_sample_data_ecommerce",
+    "family": "percentile-by-dimension",
+    "rowCount": 5,
+    "solvedBy": 1,
+    "attempts": 3,
+    "difficulty": "hard"
+  },
+  {
+    "question": "For orders that have a discount amount, give each continent's total discount, its order count and its average discount per order. Keep only continents with more than one order and return the top 5 by average discount per order, highest first.",
+    "goldQuery": "FROM kibana_sample_data_ecommerce\n| WHERE products.discount_amount IS NOT NULL\n| STATS total = SUM(products.discount_amount), events = COUNT(*) BY geoip.continent_name\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
+    "index": "kibana_sample_data_ecommerce",
+    "family": "multi-stage",
+    "rowCount": 5,
+    "solvedBy": 2,
+    "attempts": 3,
+    "difficulty": "easy"
+  },
+  {
+    "question": "For each SKU, what are the 95th-percentile and median discount amounts? Show only SKUs whose 95th-percentile discount is above 0, and return the top 5, highest 95th percentile first.",
+    "goldQuery": "FROM kibana_sample_data_ecommerce\n| STATS p95 = PERCENTILE(products.discount_amount, 95), median = MEDIAN(products.discount_amount) BY sku\n| WHERE p95 > 0\n| SORT p95 DESC\n| LIMIT 5",
+    "index": "kibana_sample_data_ecommerce",
+    "family": "percentile-by-dimension",
+    "rowCount": 5,
+    "solvedBy": 1,
+    "attempts": 3,
+    "difficulty": "hard"
+  },
+  {
+    "question": "What is the total product discount amount for each combination of order type and product ID in the ecommerce orders? Show the 15 combinations with the largest totals, highest first.",
+    "goldQuery": "FROM kibana_sample_data_ecommerce\n| STATS subtotal = SUM(products.discount_amount) BY type, products._id.keyword\n| SORT subtotal DESC\n| LIMIT 15",
+    "index": "kibana_sample_data_ecommerce",
+    "family": "grouped-share",
+    "rowCount": 15,
+    "solvedBy": 1,
+    "attempts": 3,
+    "difficulty": "hard"
+  },
+  {
+    "question": "How many flights departed from Mariscal Sucre International Airport?",
+    "goldQuery": "FROM kibana_sample_data_flights\n| WHERE Origin == \"Mariscal Sucre International Airport\"\n| STATS matches = COUNT(*)",
+    "index": "kibana_sample_data_flights",
+    "family": "count-filtered",
+    "rowCount": 1,
+    "solvedBy": 2,
+    "attempts": 3,
+    "difficulty": "easy"
+  },
+  {
+    "question": "How many flights departed from Mariscal Sucre International Airport and how many from Ministro Pistarini International Airport? Also show what share of the two airports' combined flights came from Mariscal Sucre, as a fraction.",
+    "goldQuery": "FROM kibana_sample_data_flights\n| EVAL is_first = CASE(Origin == \"Mariscal Sucre International Airport\", 1, 0), is_second = CASE(Origin == \"Ministro Pistarini International Airport\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
+    "index": "kibana_sample_data_flights",
     "family": "filtered-ratio",
     "rowCount": 1,
     "solvedBy": 2,
@@ -220,87 +280,17 @@
     "difficulty": "easy"
   },
   {
-    "question": "Group the orders by the hour of the customer's birth date and give me the number of orders, the total product discount amount, and the discount per order for each hour. Show the 10 hours with the highest discount per order, highest first.",
-    "goldQuery": "FROM kibana_sample_data_ecommerce\n| EVAL hour = DATE_TRUNC(1 hour, customer_birth_date)\n| STATS events = COUNT(*), measured = SUM(products.discount_amount) BY hour\n| EVAL per_event = measured::double / events::double\n| SORT per_event DESC\n| LIMIT 10",
-    "index": "kibana_sample_data_ecommerce",
+    "question": "Which 10 hours of flights had the longest average distance in miles per flight? For each hour, show the number of flights, the total miles flown and the average miles per flight, highest average first.",
+    "goldQuery": "FROM kibana_sample_data_flights\n| EVAL hour = DATE_TRUNC(1 hour, timestamp)\n| STATS events = COUNT(*), measured = SUM(DistanceMiles) BY hour\n| EVAL per_event = measured::double / events::double\n| SORT per_event DESC\n| LIMIT 10",
+    "index": "kibana_sample_data_flights",
     "family": "bucketed-ratio",
-    "rowCount": 1,
-    "solvedBy": 2,
-    "attempts": 3,
-    "difficulty": "easy"
-  },
-  {
-    "question": "What are the 5 highest average ticket prices among all flights, highest first? Show only the ticket price.",
-    "goldQuery": "FROM kibana_sample_data_flights\n| SORT AvgTicketPrice DESC\n| KEEP AvgTicketPrice\n| LIMIT 5",
-    "index": "kibana_sample_data_flights",
-    "family": "top-n",
-    "rowCount": 5,
-    "solvedBy": 1,
-    "attempts": 3,
-    "difficulty": "hard"
-  },
-  {
-    "question": "Label each flight \"small\" if its day-of-week value is below 3 and \"large\" otherwise. How many flights fall into each combination of that label and origin weather condition? Show the 10 combinations with the most flights, most first.",
-    "goldQuery": "FROM kibana_sample_data_flights\n| EVAL size_class = CASE(dayOfWeek < 3, \"small\", \"large\")\n| STATS documents = COUNT(*) BY size_class, OriginWeather\n| SORT documents DESC\n| LIMIT 10",
-    "index": "kibana_sample_data_flights",
-    "family": "case-bucketing",
     "rowCount": 10,
-    "solvedBy": 2,
-    "attempts": 3,
-    "difficulty": "easy"
-  },
-  {
-    "question": "Which 5 flight numbers have a 95th-percentile flight time above 503.19 minutes? Show the 95th-percentile and median flight time in minutes for each, highest 95th percentile first.",
-    "goldQuery": "FROM kibana_sample_data_flights\n| STATS p95 = PERCENTILE(FlightTimeMin, 95), median = MEDIAN(FlightTimeMin) BY FlightNum\n| WHERE p95 > 503.19\n| SORT p95 DESC\n| LIMIT 5",
-    "index": "kibana_sample_data_flights",
-    "family": "percentile-by-dimension",
-    "rowCount": 5,
-    "solvedBy": 2,
-    "attempts": 3,
-    "difficulty": "easy"
-  },
-  {
-    "question": "For each origin weather condition with a 95th-percentile flight distance above 4728.4 miles, what are the 95th-percentile and median distances in miles? Show the top 5, highest 95th percentile first.",
-    "goldQuery": "FROM kibana_sample_data_flights\n| STATS p95 = PERCENTILE(DistanceMiles, 95), median = MEDIAN(DistanceMiles) BY OriginWeather\n| WHERE p95 > 4728.4\n| SORT p95 DESC\n| LIMIT 5",
-    "index": "kibana_sample_data_flights",
-    "family": "percentile-by-dimension",
-    "rowCount": 5,
-    "solvedBy": 2,
-    "attempts": 3,
-    "difficulty": "easy"
-  },
-  {
-    "question": "How many flights were operated by Logstash Airways, how many by JetBeats, and what fraction of those two carriers' combined flights belongs to Logstash Airways?",
-    "goldQuery": "FROM kibana_sample_data_flights\n| EVAL is_first = CASE(Carrier == \"Logstash Airways\", 1, 0), is_second = CASE(Carrier == \"JetBeats\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
-    "index": "kibana_sample_data_flights",
-    "family": "filtered-ratio",
-    "rowCount": 1,
     "solvedBy": 1,
     "attempts": 3,
     "difficulty": "hard"
   },
   {
-    "question": "For each origin airport, how many flights departed on its busiest single calendar day? Show the 5 airports with the highest busiest-day count, highest first.",
-    "goldQuery": "FROM kibana_sample_data_flights\n| EVAL day = DATE_TRUNC(1 day, timestamp)\n| STATS events = COUNT(*) BY day, Origin\n| STATS busiest_day_events = MAX(events) BY Origin\n| SORT busiest_day_events DESC\n| LIMIT 5",
-    "index": "kibana_sample_data_flights",
-    "family": "period-comparison",
-    "rowCount": 5,
-    "solvedBy": 2,
-    "attempts": 3,
-    "difficulty": "easy"
-  },
-  {
-    "question": "How many different log messages are there in the web logs?",
-    "goldQuery": "FROM kibana_sample_data_logs\n| STATS unique_values = COUNT_DISTINCT(message.keyword)",
-    "index": "kibana_sample_data_logs",
-    "family": "distinct-count",
-    "rowCount": 1,
-    "solvedBy": 1,
-    "attempts": 3,
-    "difficulty": "hard"
-  },
-  {
-    "question": "For each referrer in the web logs, what are the total and average bytes counter? Show the 10 referrers with the highest total, highest first.",
+    "question": "For each referrer in the web logs, what are the total and the average of the bytes counter? Show the 10 referrers with the highest total, highest first.",
     "goldQuery": "FROM kibana_sample_data_logs\n| STATS total = SUM(bytes_counter), average = AVG(bytes_counter) BY referer\n| SORT total DESC\n| LIMIT 10",
     "index": "kibana_sample_data_logs",
     "family": "stat-numeric-by-dimension",
@@ -310,7 +300,7 @@
     "difficulty": "easy"
   },
   {
-    "question": "For each destination country in the web logs, what are the total and average bytes counter? Show the 10 destinations with the highest total bytes counter, highest first.",
+    "question": "For each destination country in the web logs, what are the total and the average of the bytes counter? Show the 10 destinations with the highest total, highest first.",
     "goldQuery": "FROM kibana_sample_data_logs\n| STATS total = SUM(bytes_counter), average = AVG(bytes_counter) BY geo.dest\n| SORT total DESC\n| LIMIT 10",
     "index": "kibana_sample_data_logs",
     "family": "stat-numeric-by-dimension",
@@ -320,277 +310,37 @@
     "difficulty": "easy"
   },
   {
-    "question": "For each response code, what are the total and the average of the bytes counter? Show the top 10 response codes by total, highest first.",
-    "goldQuery": "FROM kibana_sample_data_logs\n| STATS total = SUM(bytes_counter), average = AVG(bytes_counter) BY response.keyword\n| SORT total DESC\n| LIMIT 10",
-    "index": "kibana_sample_data_logs",
-    "family": "stat-numeric-by-dimension",
-    "rowCount": 3,
-    "solvedBy": 2,
-    "attempts": 3,
-    "difficulty": "easy"
-  },
-  {
-    "question": "Label each log entry as \"small\" if its bytes counter is below 40174476.5 and \"large\" otherwise, then count entries for each combination of that label and response code. Show the 10 most common combinations, highest count first.",
-    "goldQuery": "FROM kibana_sample_data_logs\n| EVAL size_class = CASE(bytes_counter < 40174476.5, \"small\", \"large\")\n| STATS documents = COUNT(*) BY size_class, response.keyword\n| SORT documents DESC\n| LIMIT 10",
+    "question": "In the web logs, call an event small if its byte counter is below 40,174,476.5 and large otherwise. Which 10 combinations of size class and destination country have the most events? Show the event count for each, highest first.",
+    "goldQuery": "FROM kibana_sample_data_logs\n| EVAL size_class = CASE(bytes_counter < 40174476.5, \"small\", \"large\")\n| STATS documents = COUNT(*) BY size_class, geo.dest\n| SORT documents DESC\n| LIMIT 10",
     "index": "kibana_sample_data_logs",
     "family": "case-bucketing",
-    "rowCount": 6,
+    "rowCount": 10,
     "solvedBy": 2,
     "attempts": 3,
     "difficulty": "easy"
   },
   {
-    "question": "Looking only at log entries with PHP memory above zero, what is the average ratio of machine RAM to PHP memory?",
-    "goldQuery": "FROM kibana_sample_data_logs\n| WHERE phpmemory > 0\n| EVAL ratio = machine.ram::double / phpmemory::double\n| STATS average_ratio = AVG(ratio)",
-    "index": "kibana_sample_data_logs",
-    "family": "ratio",
-    "rowCount": 1,
-    "solvedBy": 1,
-    "attempts": 3,
-    "difficulty": "hard"
-  },
-  {
-    "question": "Across all the web logs, how many requests returned a 200 response and how many returned a 404, and what fraction of those two counts combined were 200s?",
-    "goldQuery": "FROM kibana_sample_data_logs\n| EVAL is_first = CASE(response.keyword == \"200\", 1, 0), is_second = CASE(response.keyword == \"404\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
-    "index": "kibana_sample_data_logs",
-    "family": "filtered-ratio",
-    "rowCount": 1,
-    "solvedBy": 2,
-    "attempts": 3,
-    "difficulty": "easy"
-  },
-  {
-    "question": "Across all the web logs, how many requests went to the host artifacts.elastic.co and how many went to www.elastic.co, and what fraction of those two counts combined went to artifacts.elastic.co?",
-    "goldQuery": "FROM kibana_sample_data_logs\n| EVAL is_first = CASE(host.keyword == \"artifacts.elastic.co\", 1, 0), is_second = CASE(host.keyword == \"www.elastic.co\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
-    "index": "kibana_sample_data_logs",
-    "family": "filtered-ratio",
-    "rowCount": 1,
-    "solvedBy": 1,
-    "attempts": 3,
-    "difficulty": "hard"
-  },
-  {
-    "question": "Among events that have a normalized total CPU value, which 5 event categories with more than one such event have the highest average CPU per event? Show each category's summed CPU, event count and per-event average, highest average first.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE system.cpu.total.norm.pct IS NOT NULL\n| STATS total = SUM(system.cpu.total.norm.pct), events = COUNT(*) BY event.category.keyword\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "multi-stage",
-    "rowCount": 4,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "Looking only at events that have a bytes-transferred value, show each event category's total bytes, event count, and average bytes per event. Keep only categories with more than one such event, and show the top 5 by average bytes per event, highest first.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE bytes_transferred IS NOT NULL\n| STATS total = SUM(bytes_transferred), events = COUNT(*) BY event.category.keyword\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "multi-stage",
-    "rowCount": 4,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "Which 5 destination addresses have the highest 95th-percentile bytes transferred, counting only those above 976,737.5 bytes? Show the 95th percentile and the median bytes for each, highest 95th percentile first.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS p95 = PERCENTILE(bytes_transferred, 95), median = MEDIAN(bytes_transferred) BY destination.address\n| WHERE p95 > 976737.5\n| SORT p95 DESC\n| LIMIT 5",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "percentile-by-dimension",
-    "rowCount": 5,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "Among events with a bytes-transferred value, which 5 destination addresses with more than one such event have the highest average bytes per event? Show total bytes, event count and per-event average, highest average first.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE bytes_transferred IS NOT NULL\n| STATS total = SUM(bytes_transferred), events = COUNT(*) BY destination.address\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "multi-stage",
-    "rowCount": 5,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "Which 5 hosts have the highest 95th-percentile bytes transferred, counting only those above 976,737.5 bytes? Show the 95th percentile and the median bytes for each, highest 95th percentile first.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS p95 = PERCENTILE(bytes_transferred, 95), median = MEDIAN(bytes_transferred) BY host.name\n| WHERE p95 > 976737.5\n| SORT p95 DESC\n| LIMIT 5",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "percentile-by-dimension",
-    "rowCount": 4,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "Among events with a normalized total CPU value, which 5 destination addresses with more than one such event have the highest average CPU per event? Show summed CPU, event count and per-event average, highest average first.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE system.cpu.total.norm.pct IS NOT NULL\n| STATS total = SUM(system.cpu.total.norm.pct), events = COUNT(*) BY destination.address\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "multi-stage",
-    "rowCount": 5,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "Among events with a bytes-transferred value, which 5 hosts with more than one such event have the highest average bytes per event? Show total bytes, event count and per-event average, highest average first.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE bytes_transferred IS NOT NULL\n| STATS total = SUM(bytes_transferred), events = COUNT(*) BY host.name\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "multi-stage",
-    "rowCount": 4,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "Using only events that have a normalized total CPU value, show each host's total CPU, its event count, and its average CPU per event. Keep only hosts with more than one event and return the 5 hosts with the highest per-event average, highest first.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE system.cpu.total.norm.pct IS NOT NULL\n| STATS total = SUM(system.cpu.total.norm.pct), events = COUNT(*) BY host.name\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "multi-stage",
-    "rowCount": 4,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "Using only events that have a bytes-transferred value, show each group's total bytes transferred, its event count, and its average bytes per event. Keep only groups with more than one event and return the 5 groups with the highest per-event average, highest first.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE bytes_transferred IS NOT NULL\n| STATS total = SUM(bytes_transferred), events = COUNT(*) BY group.name\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "multi-stage",
-    "rowCount": 3,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "Using only events that have a normalized total CPU value, show each group's total CPU, its event count, and its average CPU per event. Keep only groups with more than one event and return the 5 groups with the highest per-event average, highest first.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE system.cpu.total.norm.pct IS NOT NULL\n| STATS total = SUM(system.cpu.total.norm.pct), events = COUNT(*) BY group.name\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "multi-stage",
-    "rowCount": 3,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "How many events belong to the \"admins\" group and how many to the \"ops\" group, and what share of the two groups' combined events comes from \"admins\"?",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| EVAL is_first = CASE(group.name == \"admins\", 1, 0), is_second = CASE(group.name == \"ops\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "filtered-ratio",
-    "rowCount": 1,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "For each hour, show the number of events, the total bytes transferred, and the average bytes per event. Return the 10 hours with the highest bytes per event, highest first.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| EVAL hour = DATE_TRUNC(1 hour, @timestamp)\n| STATS events = COUNT(*), measured = SUM(bytes_transferred) BY hour\n| EVAL per_event = measured::double / events::double\n| SORT per_event DESC\n| LIMIT 10",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "bucketed-ratio",
-    "rowCount": 6,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "How many network events went to paypa1-login.com and how many went to cdn.io, and what share of those two counts combined went to paypa1-login.com?",
-    "goldQuery": "FROM packetbeat-production.evaluations.2025.01.01\n| EVAL is_first = CASE(destination.domain == \"paypa1-login.com\", 1, 0), is_second = CASE(destination.domain == \"cdn.io\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
-    "index": "packetbeat-production.evaluations.2025.01.01",
-    "family": "filtered-ratio",
-    "rowCount": 1,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "What was the average total fare per day, by drop-off time? Show the first 30 days, earliest day first.",
-    "goldQuery": "FROM nyc_taxis-production.evaluations.2025.01.01\n| STATS average = AVG(total_amount) BY day = BUCKET(drop_off_time, 1 day)\n| SORT day ASC\n| LIMIT 30",
-    "index": "nyc_taxis-production.evaluations.2025.01.01",
-    "family": "time-series-stat",
-    "rowCount": 10,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "How many events did each host record on each day? Show the 15 day-and-host pairs with the most events, most first.",
-    "goldQuery": "FROM metricbeat-production.evaluations-2025.01.01\n| STATS events = COUNT(*) BY day = BUCKET(@timestamp, 1 day), host.name\n| SORT events DESC\n| LIMIT 15",
-    "index": "metricbeat-production.evaluations-2025.01.01",
-    "family": "time-bucket-by-dimension",
-    "rowCount": 4,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "Among hosts with more than one reading of system CPU percentage, which 5 hosts have the highest average system CPU percentage per reading? For each host, show the total system CPU percentage, the number of readings and the per-reading average, highest average first.",
-    "goldQuery": "FROM metricbeat-production.evaluations-2025.01.01\n| WHERE system.cpu.system.pct IS NOT NULL\n| STATS total = SUM(system.cpu.system.pct), events = COUNT(*) BY host.name\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
-    "index": "metricbeat-production.evaluations-2025.01.01",
-    "family": "multi-stage",
-    "rowCount": 4,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "Among hosts with more than one reading of CPU core count, which 5 hosts have the highest average core count per reading? For each host, show the total core count, the number of readings and the per-reading average, highest average first.",
-    "goldQuery": "FROM metricbeat-production.evaluations-2025.01.01\n| WHERE system.cpu.cores IS NOT NULL\n| STATS total = SUM(system.cpu.cores), events = COUNT(*) BY host.name\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
-    "index": "metricbeat-production.evaluations-2025.01.01",
-    "family": "multi-stage",
-    "rowCount": 4,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "Looking only at employees with a recorded salary, show each country's total salary, number of employees and average salary per employee. Keep countries with more than one such employee and show the top 5 by average salary, highest first.",
-    "goldQuery": "FROM employees-production.evaluations.2025.01.01\n| WHERE salary IS NOT NULL\n| STATS total = SUM(salary), events = COUNT(*) BY country.keyword\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
+    "question": "Of the evaluation records for employee numbers 10001 and 10002, how many belong to each, and what fraction of the combined total belongs to 10001?",
+    "goldQuery": "FROM employees-production.evaluations.2025.01.01\n| EVAL is_first = CASE(emp_no == \"10001\", 1, 0), is_second = CASE(emp_no == \"10002\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
     "index": "employees-production.evaluations.2025.01.01",
-    "family": "multi-stage",
-    "rowCount": 4,
+    "family": "filtered-ratio",
+    "rowCount": 1,
     "solvedBy": 0,
     "attempts": 3,
     "difficulty": "unsolved"
   },
   {
-    "question": "For each hour of hire date, how many employees were hired, what was their combined salary, and what was the average salary per hire? Show the 10 hours with the highest average salary per hire, highest first.",
-    "goldQuery": "FROM employees-production.evaluations.2025.01.01\n| EVAL hour = DATE_TRUNC(1 hour, hire_date)\n| STATS events = COUNT(*), measured = SUM(salary) BY hour\n| EVAL per_event = measured::double / events::double\n| SORT per_event DESC\n| LIMIT 10",
+    "question": "Among employee evaluation records from France (FR) and Germany (DE), how many are there for each country, and what fraction of the combined total is from France?",
+    "goldQuery": "FROM employees-production.evaluations.2025.01.01\n| EVAL is_first = CASE(country.keyword == \"FR\", 1, 0), is_second = CASE(country.keyword == \"DE\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
     "index": "employees-production.evaluations.2025.01.01",
-    "family": "bucketed-ratio",
-    "rowCount": 10,
+    "family": "filtered-ratio",
+    "rowCount": 1,
     "solvedBy": 0,
     "attempts": 3,
     "difficulty": "unsolved"
   },
   {
-    "question": "Which 15 combinations of creation day and user name have the most user records? Show the record count for each, highest first.",
-    "goldQuery": "FROM users\n| STATS events = COUNT(*) BY day = BUCKET(created_at, 1 day), name\n| SORT events DESC\n| LIMIT 15",
-    "index": "users",
-    "family": "time-bucket-by-dimension",
-    "rowCount": 15,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "Which 15 combinations of creation day and user ID have the most user records? Show the record count for each, highest first.",
-    "goldQuery": "FROM users\n| STATS events = COUNT(*) BY day = BUCKET(created_at, 1 day), id\n| SORT events DESC\n| LIMIT 15",
-    "index": "users",
-    "family": "time-bucket-by-dimension",
-    "rowCount": 15,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "How many daily error records are there for each day? Show the first 30 days, oldest first.",
-    "goldQuery": "FROM error_rate_daily\n| STATS events = COUNT(*) BY day = BUCKET(date, 1 day)\n| SORT day ASC\n| LIMIT 30",
-    "index": "error_rate_daily",
-    "family": "time-bucket",
-    "rowCount": 30,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "Which 15 combinations of day and project have the most daily error records, most records first?",
+    "question": "Which 15 combinations of day and project have the most error-rate records? Show the record count for each, highest first.",
     "goldQuery": "FROM error_rate_daily\n| STATS events = COUNT(*) BY day = BUCKET(date, 1 day), project_id\n| SORT events DESC\n| LIMIT 15",
     "index": "error_rate_daily",
     "family": "time-bucket-by-dimension",
@@ -600,27 +350,7 @@
     "difficulty": "unsolved"
   },
   {
-    "question": "How many daily error records do project-1 and project-2 each have, and what fraction of their combined total belongs to project-1?",
-    "goldQuery": "FROM error_rate_daily\n| EVAL is_first = CASE(project_id == \"project-1\", 1, 0), is_second = CASE(project_id == \"project-2\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
-    "index": "error_rate_daily",
-    "family": "filtered-ratio",
-    "rowCount": 1,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "Leaving out records with no error count, what is each project's total error count, its number of records, and its average errors per record? Only include projects with more than one record, and show the 5 with the highest errors per record, highest first.",
-    "goldQuery": "FROM error_rate_daily\n| WHERE error_count IS NOT NULL\n| STATS total = SUM(error_count), events = COUNT(*) BY project_id\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
-    "index": "error_rate_daily",
-    "family": "multi-stage",
-    "rowCount": 5,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "For each project in the daily error-rate data, what is the largest number of records it had on any single calendar day? Show the 5 projects with the highest single-day peak, highest first.",
+    "question": "For each project, what is the largest number of error-rate records it had on any single day? Show the 5 projects with the highest peak-day count, highest first.",
     "goldQuery": "FROM error_rate_daily\n| EVAL day = DATE_TRUNC(1 day, date)\n| STATS events = COUNT(*) BY day, project_id\n| STATS busiest_day_events = MAX(events) BY project_id\n| SORT busiest_day_events DESC\n| LIMIT 5",
     "index": "error_rate_daily",
     "family": "period-comparison",
@@ -630,17 +360,7 @@
     "difficulty": "unsolved"
   },
   {
-    "question": "Broken down by hour, what are the number of records, the total error count, and the average errors per record in the daily error-rate data? Show the 10 hours with the highest errors per record, highest first.",
-    "goldQuery": "FROM error_rate_daily\n| EVAL hour = DATE_TRUNC(1 hour, date)\n| STATS events = COUNT(*), measured = SUM(error_count) BY hour\n| EVAL per_event = measured::double / events::double\n| SORT per_event DESC\n| LIMIT 10",
-    "index": "error_rate_daily",
-    "family": "bucketed-ratio",
-    "rowCount": 10,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "How many distinct product IDs appear across all the ecommerce orders?",
+    "question": "How many distinct product IDs appear across all ecommerce orders?",
     "goldQuery": "FROM kibana_sample_data_ecommerce\n| STATS unique_values = COUNT_DISTINCT(products._id.keyword)",
     "index": "kibana_sample_data_ecommerce",
     "family": "distinct-count",
@@ -650,7 +370,7 @@
     "difficulty": "unsolved"
   },
   {
-    "question": "Which 10 product IDs appear in the most ecommerce records, and how many records does each have? Most records first.",
+    "question": "Which 10 product IDs appear in the most ecommerce orders, and how many orders is each in? Sort by order count, highest first.",
     "goldQuery": "FROM kibana_sample_data_ecommerce\n| STATS events = COUNT(*) BY products._id.keyword\n| SORT events DESC\n| LIMIT 10",
     "index": "kibana_sample_data_ecommerce",
     "family": "stat-by-dimension",
@@ -660,17 +380,17 @@
     "difficulty": "unsolved"
   },
   {
-    "question": "What are the 5 highest product base unit prices in the ecommerce orders, highest first, showing only the base unit price?",
-    "goldQuery": "FROM kibana_sample_data_ecommerce\n| SORT products.base_unit_price DESC\n| KEEP products.base_unit_price\n| LIMIT 5",
+    "question": "Which 10 SKUs appear in the most ecommerce orders, and how many orders is each in? Sort by order count, highest first.",
+    "goldQuery": "FROM kibana_sample_data_ecommerce\n| STATS events = COUNT(*) BY sku\n| SORT events DESC\n| LIMIT 10",
     "index": "kibana_sample_data_ecommerce",
-    "family": "top-n",
-    "rowCount": 5,
+    "family": "stat-by-dimension",
+    "rowCount": 10,
     "solvedBy": 0,
     "attempts": 3,
     "difficulty": "unsolved"
   },
   {
-    "question": "How many ecommerce orders have a product base unit price above 25.98?",
+    "question": "How many orders have a product base unit price above 25.98?",
     "goldQuery": "FROM kibana_sample_data_ecommerce\n| WHERE products.base_unit_price > 25.98\n| STATS above_median = COUNT(*)",
     "index": "kibana_sample_data_ecommerce",
     "family": "range-filter",
@@ -680,17 +400,27 @@
     "difficulty": "unsolved"
   },
   {
-    "question": "Label each order 'small' if its product discount amount is below 0 and 'large' otherwise. How many orders fall into each label and order type combination? Show the top 10 combinations, most orders first.",
-    "goldQuery": "FROM kibana_sample_data_ecommerce\n| EVAL size_class = CASE(products.discount_amount < 0, \"small\", \"large\")\n| STATS documents = COUNT(*) BY size_class, type\n| SORT documents DESC\n| LIMIT 10",
+    "question": "How many orders include a product discount amount greater than 0?",
+    "goldQuery": "FROM kibana_sample_data_ecommerce\n| WHERE products.discount_amount > 0\n| STATS above_median = COUNT(*)",
     "index": "kibana_sample_data_ecommerce",
-    "family": "case-bucketing",
+    "family": "range-filter",
     "rowCount": 1,
     "solvedBy": 0,
     "attempts": 3,
     "difficulty": "unsolved"
   },
   {
-    "question": "Label each order 'small' if its product base unit price is below 25.98 and 'large' otherwise. How many orders fall into each label and order type combination? Show the top 10 combinations, most orders first.",
+    "question": "Show only the product base unit price for the 5 orders with the highest base unit prices, highest first.",
+    "goldQuery": "FROM kibana_sample_data_ecommerce\n| SORT products.base_unit_price DESC\n| KEEP products.base_unit_price\n| LIMIT 5",
+    "index": "kibana_sample_data_ecommerce",
+    "family": "top-n",
+    "rowCount": 5,
+    "solvedBy": 0,
+    "attempts": 3,
+    "difficulty": "unsolved"
+  },
+  {
+    "question": "In the ecommerce orders, label each record \"small\" if its product base unit price is under 25.98 and \"large\" otherwise. How many records fall into each combination of that price label and record type? Show the 10 most common combinations, highest count first.",
     "goldQuery": "FROM kibana_sample_data_ecommerce\n| EVAL size_class = CASE(products.base_unit_price < 25.98, \"small\", \"large\")\n| STATS documents = COUNT(*) BY size_class, type\n| SORT documents DESC\n| LIMIT 10",
     "index": "kibana_sample_data_ecommerce",
     "family": "case-bucketing",
@@ -700,17 +430,7 @@
     "difficulty": "unsolved"
   },
   {
-    "question": "For each product ID, what are the total and average discount amounts? Show the 10 product IDs with the highest total discount, highest first.",
-    "goldQuery": "FROM kibana_sample_data_ecommerce\n| STATS total = SUM(products.discount_amount), average = AVG(products.discount_amount) BY products._id.keyword\n| SORT total DESC\n| LIMIT 10",
-    "index": "kibana_sample_data_ecommerce",
-    "family": "stat-numeric-by-dimension",
-    "rowCount": 10,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "Which 10 product IDs have the highest combined base unit price across the e-commerce orders? Show the total and the average base unit price for each, highest total first.",
+    "question": "For each product ID in the ecommerce orders, what are the total and the average product base unit price? Show the 10 product IDs with the highest total, highest first.",
     "goldQuery": "FROM kibana_sample_data_ecommerce\n| STATS total = SUM(products.base_unit_price), average = AVG(products.base_unit_price) BY products._id.keyword\n| SORT total DESC\n| LIMIT 10",
     "index": "kibana_sample_data_ecommerce",
     "family": "stat-numeric-by-dimension",
@@ -720,17 +440,7 @@
     "difficulty": "unsolved"
   },
   {
-    "question": "Which 10 product IDs have the highest combined discount percentage across the e-commerce orders? Show the total and the average discount percentage for each, highest total first.",
-    "goldQuery": "FROM kibana_sample_data_ecommerce\n| STATS total = SUM(products.discount_percentage), average = AVG(products.discount_percentage) BY products._id.keyword\n| SORT total DESC\n| LIMIT 10",
-    "index": "kibana_sample_data_ecommerce",
-    "family": "stat-numeric-by-dimension",
-    "rowCount": 10,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "Label each order 'small' if its product discount amount is below 0 and 'large' otherwise. How many orders fall into each label and product ID combination? Show the top 10 combinations, most orders first.",
+    "question": "In the ecommerce orders, label each record \"small\" if its product discount amount is below 0 and \"large\" otherwise. How many records fall into each combination of that discount label and product ID? Show the 10 most common combinations, highest count first.",
     "goldQuery": "FROM kibana_sample_data_ecommerce\n| EVAL size_class = CASE(products.discount_amount < 0, \"small\", \"large\")\n| STATS documents = COUNT(*) BY size_class, products._id.keyword\n| SORT documents DESC\n| LIMIT 10",
     "index": "kibana_sample_data_ecommerce",
     "family": "case-bucketing",
@@ -740,18 +450,8 @@
     "difficulty": "unsolved"
   },
   {
-    "question": "Label each e-commerce order 'small' if its product base unit price is below 25.98 and 'large' otherwise. How many orders fall into each label and customer continent pair? Show the 10 largest pairs, most orders first.",
-    "goldQuery": "FROM kibana_sample_data_ecommerce\n| EVAL size_class = CASE(products.base_unit_price < 25.98, \"small\", \"large\")\n| STATS documents = COUNT(*) BY size_class, geoip.continent_name\n| SORT documents DESC\n| LIMIT 10",
-    "index": "kibana_sample_data_ecommerce",
-    "family": "case-bucketing",
-    "rowCount": 7,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "Which 10 SKUs have the highest total product discount amount in the e-commerce orders? Show the total and the average discount amount for each, highest total first.",
-    "goldQuery": "FROM kibana_sample_data_ecommerce\n| STATS total = SUM(products.discount_amount), average = AVG(products.discount_amount) BY sku\n| SORT total DESC\n| LIMIT 10",
+    "question": "For each product ID in the ecommerce orders, what are the total and the average product discount percentage? Show the 10 product IDs with the highest total, highest first.",
+    "goldQuery": "FROM kibana_sample_data_ecommerce\n| STATS total = SUM(products.discount_percentage), average = AVG(products.discount_percentage) BY products._id.keyword\n| SORT total DESC\n| LIMIT 10",
     "index": "kibana_sample_data_ecommerce",
     "family": "stat-numeric-by-dimension",
     "rowCount": 10,
@@ -760,7 +460,7 @@
     "difficulty": "unsolved"
   },
   {
-    "question": "How many e-commerce records are there for each pair of record type and product ID? Show the 10 most frequent pairs, highest count first.",
+    "question": "In the ecommerce orders, how many records are there for each combination of record type and product ID? Show the 10 most common combinations, highest count first.",
     "goldQuery": "FROM kibana_sample_data_ecommerce\n| STATS events = COUNT(*) BY type, products._id.keyword\n| SORT events DESC\n| LIMIT 10",
     "index": "kibana_sample_data_ecommerce",
     "family": "two-dimension",
@@ -770,7 +470,17 @@
     "difficulty": "unsolved"
   },
   {
-    "question": "Across orders with a product base unit price above 0, what is the average ratio of product discount amount to base unit price, as a single value?",
+    "question": "In the ecommerce orders, label each record \"small\" if its product discount amount is below 0 and \"large\" otherwise. How many records fall into each combination of that discount label and SKU? Show the 10 most common combinations, highest count first.",
+    "goldQuery": "FROM kibana_sample_data_ecommerce\n| EVAL size_class = CASE(products.discount_amount < 0, \"small\", \"large\")\n| STATS documents = COUNT(*) BY size_class, sku\n| SORT documents DESC\n| LIMIT 10",
+    "index": "kibana_sample_data_ecommerce",
+    "family": "case-bucketing",
+    "rowCount": 10,
+    "solvedBy": 0,
+    "attempts": 3,
+    "difficulty": "unsolved"
+  },
+  {
+    "question": "Across the ecommerce orders, what is the average ratio of a product's discount amount to its base unit price, counting only products whose base unit price is above zero? Return that single average.",
     "goldQuery": "FROM kibana_sample_data_ecommerce\n| WHERE products.base_unit_price > 0\n| EVAL ratio = products.discount_amount::double / products.base_unit_price::double\n| STATS average_ratio = AVG(ratio)",
     "index": "kibana_sample_data_ecommerce",
     "family": "ratio",
@@ -780,37 +490,7 @@
     "difficulty": "unsolved"
   },
   {
-    "question": "For each order type, using only orders that have a product discount amount, show the total discount, the number of orders and the average discount per order. Keep types with more than 1 order and return the top 5 by discount per order, highest first.",
-    "goldQuery": "FROM kibana_sample_data_ecommerce\n| WHERE products.discount_amount IS NOT NULL\n| STATS total = SUM(products.discount_amount), events = COUNT(*) BY type\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
-    "index": "kibana_sample_data_ecommerce",
-    "family": "multi-stage",
-    "rowCount": 1,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "Which 15 combinations of customer birth date (by day) and product ID have the most orders? Show the order count for each, highest first.",
-    "goldQuery": "FROM kibana_sample_data_ecommerce\n| STATS events = COUNT(*) BY day = BUCKET(customer_birth_date, 1 day), products._id.keyword\n| SORT events DESC\n| LIMIT 15",
-    "index": "kibana_sample_data_ecommerce",
-    "family": "time-bucket-by-dimension",
-    "rowCount": 15,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "For each order type, using only orders that have a product base unit price, show the total base unit price, the number of orders and the average base unit price per order. Keep types with more than 1 order and return the top 5 by price per order, highest first.",
-    "goldQuery": "FROM kibana_sample_data_ecommerce\n| WHERE products.base_unit_price IS NOT NULL\n| STATS total = SUM(products.base_unit_price), events = COUNT(*) BY type\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
-    "index": "kibana_sample_data_ecommerce",
-    "family": "multi-stage",
-    "rowCount": 1,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "Which 5 product IDs have the highest 95th-percentile discount amount, counting only products where that 95th percentile is above 0? For each, show the 95th percentile and the median discount amount, highest 95th percentile first.",
+    "question": "For each product ID, what are the 95th-percentile and median discount amounts? Show only products whose 95th-percentile discount is above 0, and return the top 5, highest 95th percentile first.",
     "goldQuery": "FROM kibana_sample_data_ecommerce\n| STATS p95 = PERCENTILE(products.discount_amount, 95), median = MEDIAN(products.discount_amount) BY products._id.keyword\n| WHERE p95 > 0\n| SORT p95 DESC\n| LIMIT 5",
     "index": "kibana_sample_data_ecommerce",
     "family": "percentile-by-dimension",
@@ -820,87 +500,7 @@
     "difficulty": "unsolved"
   },
   {
-    "question": "Using only orders that have a discount amount, which 5 continents have the highest average discount per order, counting only continents with more than one such order? Show each continent's total discount, its order count and its average discount per order, highest average first.",
-    "goldQuery": "FROM kibana_sample_data_ecommerce\n| WHERE products.discount_amount IS NOT NULL\n| STATS total = SUM(products.discount_amount), events = COUNT(*) BY geoip.continent_name\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
-    "index": "kibana_sample_data_ecommerce",
-    "family": "multi-stage",
-    "rowCount": 5,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "Which 5 product IDs have the highest 95th-percentile base unit price, counting only products where that 95th percentile is above 25.98? For each, show the 95th percentile and the median base unit price, highest 95th percentile first.",
-    "goldQuery": "FROM kibana_sample_data_ecommerce\n| STATS p95 = PERCENTILE(products.base_unit_price, 95), median = MEDIAN(products.base_unit_price) BY products._id.keyword\n| WHERE p95 > 25.98\n| SORT p95 DESC\n| LIMIT 5",
-    "index": "kibana_sample_data_ecommerce",
-    "family": "percentile-by-dimension",
-    "rowCount": 5,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "How many orders contain product ID sold_product_550375_23771, and how many contain sold_product_550385_18345? What share of their combined count belongs to the first one?",
-    "goldQuery": "FROM kibana_sample_data_ecommerce\n| EVAL is_first = CASE(products._id.keyword == \"sold_product_550375_23771\", 1, 0), is_second = CASE(products._id.keyword == \"sold_product_550385_18345\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
-    "index": "kibana_sample_data_ecommerce",
-    "family": "filtered-ratio",
-    "rowCount": 1,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "Using only orders that have a base unit price, which 5 continents have the highest average base unit price per order, counting only continents with more than one such order? Show each continent's total base unit price, its order count and its average per order, highest average first.",
-    "goldQuery": "FROM kibana_sample_data_ecommerce\n| WHERE products.base_unit_price IS NOT NULL\n| STATS total = SUM(products.base_unit_price), events = COUNT(*) BY geoip.continent_name\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
-    "index": "kibana_sample_data_ecommerce",
-    "family": "multi-stage",
-    "rowCount": 5,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "Which 5 SKUs have the highest 95th-percentile discount amount, counting only SKUs where that 95th percentile is above 0? For each, show the 95th percentile and the median discount amount, highest 95th percentile first.",
-    "goldQuery": "FROM kibana_sample_data_ecommerce\n| STATS p95 = PERCENTILE(products.discount_amount, 95), median = MEDIAN(products.discount_amount) BY sku\n| WHERE p95 > 0\n| SORT p95 DESC\n| LIMIT 5",
-    "index": "kibana_sample_data_ecommerce",
-    "family": "percentile-by-dimension",
-    "rowCount": 5,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "Using only orders that have a discount amount, which 5 SKUs have the highest average discount per order, counting only SKUs with more than one such order? Show each SKU's total discount, its order count and its average discount per order, highest average first.",
-    "goldQuery": "FROM kibana_sample_data_ecommerce\n| WHERE products.discount_amount IS NOT NULL\n| STATS total = SUM(products.discount_amount), events = COUNT(*) BY sku\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
-    "index": "kibana_sample_data_ecommerce",
-    "family": "multi-stage",
-    "rowCount": 5,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "What is the total product discount amount for each combination of order type and product ID? Show the 15 highest totals, largest first.",
-    "goldQuery": "FROM kibana_sample_data_ecommerce\n| STATS subtotal = SUM(products.discount_amount) BY type, products._id.keyword\n| SORT subtotal DESC\n| LIMIT 15",
-    "index": "kibana_sample_data_ecommerce",
-    "family": "grouped-share",
-    "rowCount": 15,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "Counting only orders that have a product base unit price, give me each SKU's total base unit price, its number of orders, and its average base unit price per order. Keep only SKUs with more than one order and show the top 5 by that per-order average, highest first.",
-    "goldQuery": "FROM kibana_sample_data_ecommerce\n| WHERE products.base_unit_price IS NOT NULL\n| STATS total = SUM(products.base_unit_price), events = COUNT(*) BY sku\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
-    "index": "kibana_sample_data_ecommerce",
-    "family": "multi-stage",
-    "rowCount": 5,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "How many orders include SKU ZO0403504035 and how many include SKU ZO0263002630, and what share of those two counts combined belongs to ZO0403504035?",
+    "question": "How many orders include SKU ZO0403504035 and how many include SKU ZO0263002630, and what share of those two combined belongs to ZO0403504035?",
     "goldQuery": "FROM kibana_sample_data_ecommerce\n| EVAL is_first = CASE(sku == \"ZO0403504035\", 1, 0), is_second = CASE(sku == \"ZO0263002630\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
     "index": "kibana_sample_data_ecommerce",
     "family": "filtered-ratio",
@@ -910,17 +510,27 @@
     "difficulty": "unsolved"
   },
   {
-    "question": "Which 15 combinations of day and flight number had the most flights? Show the day, the flight number and the flight count, most flights first.",
-    "goldQuery": "FROM kibana_sample_data_flights\n| STATS events = COUNT(*) BY day = BUCKET(timestamp, 1 day), FlightNum\n| SORT events DESC\n| LIMIT 15",
-    "index": "kibana_sample_data_flights",
-    "family": "time-bucket-by-dimension",
-    "rowCount": 15,
+    "question": "Looking only at ecommerce orders that have a product base unit price, what is each SKU's total base unit price, its number of orders, and its average base unit price per order? Keep only SKUs with more than one order, and show the top 5 by that per-order average, highest first.",
+    "goldQuery": "FROM kibana_sample_data_ecommerce\n| WHERE products.base_unit_price IS NOT NULL\n| STATS total = SUM(products.base_unit_price), events = COUNT(*) BY sku\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
+    "index": "kibana_sample_data_ecommerce",
+    "family": "multi-stage",
+    "rowCount": 5,
     "solvedBy": 0,
     "attempts": 3,
     "difficulty": "unsolved"
   },
   {
-    "question": "Which 15 combinations of day and origin airport had the most flights? Show the day, the origin airport and the flight count, most flights first.",
+    "question": "For orders that have a discount amount, give each SKU's total discount, its order count and its average discount per order. Keep only SKUs with more than one order and return the top 5 by average discount per order, highest first.",
+    "goldQuery": "FROM kibana_sample_data_ecommerce\n| WHERE products.discount_amount IS NOT NULL\n| STATS total = SUM(products.discount_amount), events = COUNT(*) BY sku\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
+    "index": "kibana_sample_data_ecommerce",
+    "family": "multi-stage",
+    "rowCount": 5,
+    "solvedBy": 0,
+    "attempts": 3,
+    "difficulty": "unsolved"
+  },
+  {
+    "question": "Which 15 pairs of day and origin airport had the most flights? Show the flight count for each pair, highest first.",
     "goldQuery": "FROM kibana_sample_data_flights\n| STATS events = COUNT(*) BY day = BUCKET(timestamp, 1 day), Origin\n| SORT events DESC\n| LIMIT 15",
     "index": "kibana_sample_data_flights",
     "family": "time-bucket-by-dimension",
@@ -930,28 +540,18 @@
     "difficulty": "unsolved"
   },
   {
-    "question": "Among origin airports with more than one flight that has a recorded distance, which 5 have the highest average distance per flight? Show the total distance in miles, the flight count and the average per flight, highest average first.",
-    "goldQuery": "FROM kibana_sample_data_flights\n| WHERE DistanceMiles IS NOT NULL\n| STATS total = SUM(DistanceMiles), events = COUNT(*) BY Origin\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
+    "question": "Which 15 combinations of calendar day and flight number have the most flight records? For each, show the day, the flight number and the record count, highest count first.",
+    "goldQuery": "FROM kibana_sample_data_flights\n| STATS events = COUNT(*) BY day = BUCKET(timestamp, 1 day), FlightNum\n| SORT events DESC\n| LIMIT 15",
     "index": "kibana_sample_data_flights",
-    "family": "multi-stage",
-    "rowCount": 5,
+    "family": "time-bucket-by-dimension",
+    "rowCount": 15,
     "solvedBy": 0,
     "attempts": 3,
     "difficulty": "unsolved"
   },
   {
-    "question": "Among origin airports with more than one flight that has a recorded flight time, which 5 have the highest average flight time per flight? Show the total flight time in minutes, the flight count and the average per flight, highest average first.",
-    "goldQuery": "FROM kibana_sample_data_flights\n| WHERE FlightTimeMin IS NOT NULL\n| STATS total = SUM(FlightTimeMin), events = COUNT(*) BY Origin\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
-    "index": "kibana_sample_data_flights",
-    "family": "multi-stage",
-    "rowCount": 5,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "How many flights are there for flight number X98CCZO and how many for UFK2WIZ? What share of the two numbers' combined flights is X98CCZO?",
-    "goldQuery": "FROM kibana_sample_data_flights\n| EVAL is_first = CASE(FlightNum == \"X98CCZO\", 1, 0), is_second = CASE(FlightNum == \"UFK2WIZ\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
+    "question": "Considering only flights by Logstash Airways and JetBeats, how many flights does each carrier have, and what share of the combined total belongs to Logstash Airways?",
+    "goldQuery": "FROM kibana_sample_data_flights\n| EVAL is_first = CASE(Carrier == \"Logstash Airways\", 1, 0), is_second = CASE(Carrier == \"JetBeats\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
     "index": "kibana_sample_data_flights",
     "family": "filtered-ratio",
     "rowCount": 1,
@@ -960,87 +560,17 @@
     "difficulty": "unsolved"
   },
   {
-    "question": "How many flights departed from Mariscal Sucre International Airport and how many from Ministro Pistarini International Airport? What share of the two airports' combined flights came from Mariscal Sucre?",
-    "goldQuery": "FROM kibana_sample_data_flights\n| EVAL is_first = CASE(Origin == \"Mariscal Sucre International Airport\", 1, 0), is_second = CASE(Origin == \"Ministro Pistarini International Airport\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
-    "index": "kibana_sample_data_flights",
-    "family": "filtered-ratio",
-    "rowCount": 1,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "For each origin weather condition with more than one flight that has a recorded distance, show the total miles flown, the number of flights, and the average miles per flight. Return the top 5 by average distance, highest first.",
-    "goldQuery": "FROM kibana_sample_data_flights\n| WHERE DistanceMiles IS NOT NULL\n| STATS total = SUM(DistanceMiles), events = COUNT(*) BY OriginWeather\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
-    "index": "kibana_sample_data_flights",
-    "family": "multi-stage",
-    "rowCount": 5,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "How many flights departed in Clear origin weather, how many in Cloudy origin weather, and what fraction of those two groups combined was Clear?",
-    "goldQuery": "FROM kibana_sample_data_flights\n| EVAL is_first = CASE(OriginWeather == \"Clear\", 1, 0), is_second = CASE(OriginWeather == \"Cloudy\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
-    "index": "kibana_sample_data_flights",
-    "family": "filtered-ratio",
-    "rowCount": 1,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "For each origin weather condition with more than one flight that has a recorded flight time, show the total flight minutes, the number of flights, and the average minutes per flight. Return the top 5 by average flight time, longest first.",
-    "goldQuery": "FROM kibana_sample_data_flights\n| WHERE FlightTimeMin IS NOT NULL\n| STATS total = SUM(FlightTimeMin), events = COUNT(*) BY OriginWeather\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
-    "index": "kibana_sample_data_flights",
-    "family": "multi-stage",
-    "rowCount": 5,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "For each carrier with more than one flight that has a recorded distance, show the total miles flown, the number of flights, and the average miles per flight. Return the top 5 carriers by average distance, highest first.",
-    "goldQuery": "FROM kibana_sample_data_flights\n| WHERE DistanceMiles IS NOT NULL\n| STATS total = SUM(DistanceMiles), events = COUNT(*) BY Carrier\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
-    "index": "kibana_sample_data_flights",
-    "family": "multi-stage",
-    "rowCount": 4,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "Looking only at flights that have a recorded flight time, give each carrier's total flight minutes, number of flights and average minutes per flight. Keep only carriers with more than one flight and show the 5 with the highest average, highest first.",
-    "goldQuery": "FROM kibana_sample_data_flights\n| WHERE FlightTimeMin IS NOT NULL\n| STATS total = SUM(FlightTimeMin), events = COUNT(*) BY Carrier\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
-    "index": "kibana_sample_data_flights",
-    "family": "multi-stage",
-    "rowCount": 4,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "For each hour of flight data, give the number of flights, the total distance in miles and the average distance per flight. Show the 10 hours with the highest average distance per flight, highest first.",
-    "goldQuery": "FROM kibana_sample_data_flights\n| EVAL hour = DATE_TRUNC(1 hour, timestamp)\n| STATS events = COUNT(*), measured = SUM(DistanceMiles) BY hour\n| EVAL per_event = measured::double / events::double\n| SORT per_event DESC\n| LIMIT 10",
-    "index": "kibana_sample_data_flights",
-    "family": "bucketed-ratio",
-    "rowCount": 10,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "What are the 10 most frequent log messages in the web logs, with how many times each one appears, most frequent first?",
-    "goldQuery": "FROM kibana_sample_data_logs\n| STATS events = COUNT(*) BY message.keyword\n| SORT events DESC\n| LIMIT 10",
+    "question": "In the web logs, label each request small if its bytes counter is under 40174476.5 and large otherwise. Show the 10 combinations of that size label and referrer with the most requests, with their request counts, most requests first.",
+    "goldQuery": "FROM kibana_sample_data_logs\n| EVAL size_class = CASE(bytes_counter < 40174476.5, \"small\", \"large\")\n| STATS documents = COUNT(*) BY size_class, referer\n| SORT documents DESC\n| LIMIT 10",
     "index": "kibana_sample_data_logs",
-    "family": "stat-by-dimension",
+    "family": "case-bucketing",
     "rowCount": 10,
     "solvedBy": 0,
     "attempts": 3,
     "difficulty": "unsolved"
   },
   {
-    "question": "Which day-and-referrer combinations had the most web log events? Count events per calendar day and referrer, and show the top 15 combinations, highest count first.",
+    "question": "Which 15 combinations of day and referrer have the most web log events? Show the event count for each, highest first.",
     "goldQuery": "FROM kibana_sample_data_logs\n| STATS events = COUNT(*) BY day = BUCKET(utc_time, 1 day), referer\n| SORT events DESC\n| LIMIT 15",
     "index": "kibana_sample_data_logs",
     "family": "time-bucket-by-dimension",
@@ -1050,104 +580,14 @@
     "difficulty": "unsolved"
   },
   {
-    "question": "Looking only at web log events that record machine RAM, show the total RAM, the event count and the average RAM per event for each referrer. Keep referrers with more than one event and return the 5 with the highest average RAM per event, highest first.",
-    "goldQuery": "FROM kibana_sample_data_logs\n| WHERE machine.ram IS NOT NULL\n| STATS total = SUM(machine.ram), events = COUNT(*) BY referer\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
+    "question": "For each referrer in the web logs, how many events did it get on its busiest single day (counting events per calendar day)? Show the 5 referrers with the highest busiest-day count, highest first.",
+    "goldQuery": "FROM kibana_sample_data_logs\n| EVAL day = DATE_TRUNC(1 day, utc_time)\n| STATS events = COUNT(*) BY day, referer\n| STATS busiest_day_events = MAX(events) BY referer\n| SORT busiest_day_events DESC\n| LIMIT 5",
     "index": "kibana_sample_data_logs",
-    "family": "multi-stage",
+    "family": "period-comparison",
     "rowCount": 5,
     "solvedBy": 0,
     "attempts": 3,
     "difficulty": "unsolved"
-  },
-  {
-    "question": "In the web logs, how many events came from the referrer http://www.elastic-elastic-elastic.com/success/timothy-l-kopra and how many came from http://www.elastic-elastic-elastic.com/success/karen-nyberg? What fraction of the two counts combined belongs to the timothy-l-kopra referrer?",
-    "goldQuery": "FROM kibana_sample_data_logs\n| EVAL is_first = CASE(referer == \"http://www.elastic-elastic-elastic.com/success/timothy-l-kopra\", 1, 0), is_second = CASE(referer == \"http://www.elastic-elastic-elastic.com/success/karen-nyberg\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
-    "index": "kibana_sample_data_logs",
-    "family": "filtered-ratio",
-    "rowCount": 1,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "Looking only at web log events that record PHP memory, show the total PHP memory, the event count and the average PHP memory per event for each referrer. Keep referrers with more than one event and return the 5 with the highest average per event, highest first.",
-    "goldQuery": "FROM kibana_sample_data_logs\n| WHERE phpmemory IS NOT NULL\n| STATS total = SUM(phpmemory), events = COUNT(*) BY referer\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
-    "index": "kibana_sample_data_logs",
-    "family": "multi-stage",
-    "rowCount": 5,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "Looking only at web log events that have a machine RAM value, which 5 destination countries with more than one event have the highest average machine RAM per event? Show the total RAM, the number of events and the per-event average for each, highest average first.",
-    "goldQuery": "FROM kibana_sample_data_logs\n| WHERE machine.ram IS NOT NULL\n| STATS total = SUM(machine.ram), events = COUNT(*) BY geo.dest\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
-    "index": "kibana_sample_data_logs",
-    "family": "multi-stage",
-    "rowCount": 5,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "In the web logs, how many events had China (CN) as the destination country and how many had India (IN)? What fraction of the two counts combined went to China?",
-    "goldQuery": "FROM kibana_sample_data_logs\n| EVAL is_first = CASE(geo.dest == \"CN\", 1, 0), is_second = CASE(geo.dest == \"IN\", 1, 0)\n| STATS first_count = SUM(is_first), second_count = SUM(is_second)\n| EVAL share = first_count::double / (first_count + second_count)::double",
-    "index": "kibana_sample_data_logs",
-    "family": "filtered-ratio",
-    "rowCount": 1,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "Looking only at web log events that have a PHP memory value, which 5 destination countries with more than one event have the highest average PHP memory per event? Show the total PHP memory, the number of events and the per-event average for each, highest average first.",
-    "goldQuery": "FROM kibana_sample_data_logs\n| WHERE phpmemory IS NOT NULL\n| STATS total = SUM(phpmemory), events = COUNT(*) BY geo.dest\n| EVAL per_event = total::double / events::double\n| WHERE events > 1\n| SORT per_event DESC\n| LIMIT 5",
-    "index": "kibana_sample_data_logs",
-    "family": "multi-stage",
-    "rowCount": 5,
-    "solvedBy": 0,
-    "attempts": 3,
-    "difficulty": "unsolved"
-  },
-  {
-    "question": "How many events in the evaluation logs have the destination address \"dst-5\"?",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE destination.address == \"dst-5\"\n| STATS matches = COUNT(*)",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "count-filtered",
-    "rowCount": 1,
-    "solvedBy": 3,
-    "attempts": 3,
-    "difficulty": "trivial"
-  },
-  {
-    "question": "Show me 20 events from the evaluation logs where the event category is \"network\".",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE event.category.keyword == \"network\"\n| LIMIT 20",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "filter-keep",
-    "rowCount": 20,
-    "solvedBy": 3,
-    "attempts": 3,
-    "difficulty": "trivial"
-  },
-  {
-    "question": "How many events in the evaluation logs have the event category \"network\"?",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE event.category.keyword == \"network\"\n| STATS matches = COUNT(*)",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "count-filtered",
-    "rowCount": 1,
-    "solvedBy": 3,
-    "attempts": 3,
-    "difficulty": "trivial"
-  },
-  {
-    "question": "Show me 20 events from the evaluation logs where the destination address is \"dst-5\".",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE destination.address == \"dst-5\"\n| LIMIT 20",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "filter-keep",
-    "rowCount": 20,
-    "solvedBy": 3,
-    "attempts": 3,
-    "difficulty": "trivial"
   },
   {
     "question": "How many different event categories appear in the evaluation logs?",
@@ -1155,6 +595,16 @@
     "index": "logs-production.evaluations.2025.01.01",
     "family": "distinct-count",
     "rowCount": 1,
+    "solvedBy": 3,
+    "attempts": 3,
+    "difficulty": "trivial"
+  },
+  {
+    "question": "Show me 20 of the evaluation log events whose event category is \"process\".",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE event.category.keyword == \"process\"\n| LIMIT 20",
+    "index": "logs-production.evaluations.2025.01.01",
+    "family": "filter-keep",
+    "rowCount": 20,
     "solvedBy": 3,
     "attempts": 3,
     "difficulty": "trivial"
@@ -1170,17 +620,7 @@
     "difficulty": "trivial"
   },
   {
-    "question": "Which 10 destination addresses have the most events in the evaluation logs, and how many events does each have, most events first?",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS events = COUNT(*) BY destination.address\n| SORT events DESC\n| LIMIT 10",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "stat-by-dimension",
-    "rowCount": 10,
-    "solvedBy": 3,
-    "attempts": 3,
-    "difficulty": "trivial"
-  },
-  {
-    "question": "What are the 10 most common event categories in the evaluation logs, with how many events each has, most events first?",
+    "question": "What are the 10 most common event categories in the evaluation logs, and how many events does each have, most events first?",
     "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS events = COUNT(*) BY event.category.keyword\n| SORT events DESC\n| LIMIT 10",
     "index": "logs-production.evaluations.2025.01.01",
     "family": "stat-by-dimension",
@@ -1190,18 +630,28 @@
     "difficulty": "trivial"
   },
   {
-    "question": "Which 10 hosts have the most events, and how many events does each have, listed from most to fewest?",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS events = COUNT(*) BY host.name\n| SORT events DESC\n| LIMIT 10",
+    "question": "How many evaluation log events have the event category \"process\"?",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE event.category.keyword == \"process\"\n| STATS matches = COUNT(*)",
+    "index": "logs-production.evaluations.2025.01.01",
+    "family": "count-filtered",
+    "rowCount": 1,
+    "solvedBy": 3,
+    "attempts": 3,
+    "difficulty": "trivial"
+  },
+  {
+    "question": "Which 10 destination addresses show up most often in the evaluation logs, and how many events does each have, most events first?",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS events = COUNT(*) BY destination.address\n| SORT events DESC\n| LIMIT 10",
     "index": "logs-production.evaluations.2025.01.01",
     "family": "stat-by-dimension",
-    "rowCount": 4,
+    "rowCount": 10,
     "solvedBy": 3,
     "attempts": 3,
     "difficulty": "trivial"
   },
   {
-    "question": "Show me any 20 records where the group name is \"admins\".",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE group.name == \"admins\"\n| LIMIT 20",
+    "question": "Show me 20 of the evaluation log events whose destination address is \"dst-10\".",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE destination.address == \"dst-10\"\n| LIMIT 20",
     "index": "logs-production.evaluations.2025.01.01",
     "family": "filter-keep",
     "rowCount": 20,
@@ -1210,8 +660,8 @@
     "difficulty": "trivial"
   },
   {
-    "question": "How many events in the evaluation logs come from the host named \"host-a\"?",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE host.name == \"host-a\"\n| STATS matches = COUNT(*)",
+    "question": "How many evaluation log events have the destination address \"dst-10\"?",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE destination.address == \"dst-10\"\n| STATS matches = COUNT(*)",
     "index": "logs-production.evaluations.2025.01.01",
     "family": "count-filtered",
     "rowCount": 1,
@@ -1220,47 +670,7 @@
     "difficulty": "trivial"
   },
   {
-    "question": "How many different group names appear in these logs?",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS unique_values = COUNT_DISTINCT(group.name)",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "distinct-count",
-    "rowCount": 1,
-    "solvedBy": 3,
-    "attempts": 3,
-    "difficulty": "trivial"
-  },
-  {
-    "question": "Show me 20 events from the evaluation logs where the host name is \"host-a\".",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE host.name == \"host-a\"\n| LIMIT 20",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "filter-keep",
-    "rowCount": 20,
-    "solvedBy": 3,
-    "attempts": 3,
-    "difficulty": "trivial"
-  },
-  {
-    "question": "How many records have the group name \"admins\"?",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE group.name == \"admins\"\n| STATS matches = COUNT(*)",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "count-filtered",
-    "rowCount": 1,
-    "solvedBy": 3,
-    "attempts": 3,
-    "difficulty": "trivial"
-  },
-  {
-    "question": "Show me any 20 records where the process name is \"backup.sh\".",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE process.name == \"backup.sh\"\n| LIMIT 20",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "filter-keep",
-    "rowCount": 20,
-    "solvedBy": 3,
-    "attempts": 3,
-    "difficulty": "trivial"
-  },
-  {
-    "question": "Which 10 group names have the most events, and how many events does each have, listed from most to fewest?",
+    "question": "Which 10 groups have the most evaluation log events, and how many events does each have, most events first?",
     "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS events = COUNT(*) BY group.name\n| SORT events DESC\n| LIMIT 10",
     "index": "logs-production.evaluations.2025.01.01",
     "family": "stat-by-dimension",
@@ -1270,47 +680,27 @@
     "difficulty": "trivial"
   },
   {
-    "question": "Show me any 20 records where the error code is \"404\".",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE error_code == \"404\"\n| LIMIT 20",
+    "question": "Which 10 file paths show up in the most events in the evaluation logs, and how many events does each have, most events first?",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS events = COUNT(*) BY file.path.keyword\n| SORT events DESC\n| LIMIT 10",
     "index": "logs-production.evaluations.2025.01.01",
-    "family": "filter-keep",
-    "rowCount": 20,
+    "family": "stat-by-dimension",
+    "rowCount": 10,
     "solvedBy": 3,
     "attempts": 3,
     "difficulty": "trivial"
   },
   {
-    "question": "How many different process names appear in these logs?",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS unique_values = COUNT_DISTINCT(process.name)",
+    "question": "Which 10 hosts produced the most evaluation log events, and how many events does each have, most events first?",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS events = COUNT(*) BY host.name\n| SORT events DESC\n| LIMIT 10",
     "index": "logs-production.evaluations.2025.01.01",
-    "family": "distinct-count",
-    "rowCount": 1,
+    "family": "stat-by-dimension",
+    "rowCount": 4,
     "solvedBy": 3,
     "attempts": 3,
     "difficulty": "trivial"
   },
   {
-    "question": "How many records have the process name \"backup.sh\"?",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE process.name == \"backup.sh\"\n| STATS matches = COUNT(*)",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "count-filtered",
-    "rowCount": 1,
-    "solvedBy": 3,
-    "attempts": 3,
-    "difficulty": "trivial"
-  },
-  {
-    "question": "How many log entries in the evaluation logs have error code 404?",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE error_code == \"404\"\n| STATS matches = COUNT(*)",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "count-filtered",
-    "rowCount": 1,
-    "solvedBy": 3,
-    "attempts": 3,
-    "difficulty": "trivial"
-  },
-  {
-    "question": "Which 10 process names have the most events, and how many events does each have, listed from most to fewest?",
+    "question": "Which 10 process names appear in the most events in the evaluation logs, with each one's event count, most events first?",
     "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS events = COUNT(*) BY process.name\n| SORT events DESC\n| LIMIT 10",
     "index": "logs-production.evaluations.2025.01.01",
     "family": "stat-by-dimension",
@@ -1320,67 +710,7 @@
     "difficulty": "trivial"
   },
   {
-    "question": "What are the 10 most frequent error codes in the evaluation logs, with how many events each has, most events first?",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS events = COUNT(*) BY error_code\n| SORT events DESC\n| LIMIT 10",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "stat-by-dimension",
-    "rowCount": 3,
-    "solvedBy": 3,
-    "attempts": 3,
-    "difficulty": "trivial"
-  },
-  {
-    "question": "Show me up to 20 log entries from the evaluation logs where the user name is bob.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE user.name == \"bob\"\n| LIMIT 20",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "filter-keep",
-    "rowCount": 20,
-    "solvedBy": 3,
-    "attempts": 3,
-    "difficulty": "trivial"
-  },
-  {
-    "question": "How many log entries in the evaluation logs belong to the user bob?",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE user.name == \"bob\"\n| STATS matches = COUNT(*)",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "count-filtered",
-    "rowCount": 1,
-    "solvedBy": 3,
-    "attempts": 3,
-    "difficulty": "trivial"
-  },
-  {
-    "question": "How many log entries in the evaluation logs have a process working directory of /usr/local/bin?",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE process.working_directory == \"/usr/local/bin\"\n| STATS matches = COUNT(*)",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "count-filtered",
-    "rowCount": 1,
-    "solvedBy": 3,
-    "attempts": 3,
-    "difficulty": "trivial"
-  },
-  {
-    "question": "Which 10 users have the most events in the evaluation logs, with the event count for each, most events first?",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS events = COUNT(*) BY user.name\n| SORT events DESC\n| LIMIT 10",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "stat-by-dimension",
-    "rowCount": 4,
-    "solvedBy": 3,
-    "attempts": 3,
-    "difficulty": "trivial"
-  },
-  {
-    "question": "Show me up to 20 log entries from the evaluation logs where the process working directory is /usr/local/bin.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE process.working_directory == \"/usr/local/bin\"\n| LIMIT 20",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "filter-keep",
-    "rowCount": 20,
-    "solvedBy": 3,
-    "attempts": 3,
-    "difficulty": "trivial"
-  },
-  {
-    "question": "Across all the evaluation logs, what are the average, maximum and minimum bytes transferred?",
+    "question": "Across all evaluation log events, what are the mean, highest and lowest bytes transferred?",
     "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS average = AVG(bytes_transferred), maximum = MAX(bytes_transferred), minimum = MIN(bytes_transferred)",
     "index": "logs-production.evaluations.2025.01.01",
     "family": "single-stat",
@@ -1390,17 +720,7 @@
     "difficulty": "trivial"
   },
   {
-    "question": "How many different process working directories appear in the evaluation logs?",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS unique_values = COUNT_DISTINCT(process.working_directory)",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "distinct-count",
-    "rowCount": 1,
-    "solvedBy": 3,
-    "attempts": 3,
-    "difficulty": "trivial"
-  },
-  {
-    "question": "What are the 5 largest bytes-transferred values in the evaluation logs, largest first? Return only the bytes_transferred field.",
+    "question": "What are the 5 largest bytes-transferred values in the evaluation logs, largest first? Show only that value.",
     "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| SORT bytes_transferred DESC\n| KEEP bytes_transferred\n| LIMIT 5",
     "index": "logs-production.evaluations.2025.01.01",
     "family": "top-n",
@@ -1410,18 +730,8 @@
     "difficulty": "trivial"
   },
   {
-    "question": "What are the 10 most common process working directories in the evaluation logs, with the event count for each, most events first?",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS events = COUNT(*) BY process.working_directory\n| SORT events DESC\n| LIMIT 10",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "stat-by-dimension",
-    "rowCount": 2,
-    "solvedBy": 3,
-    "attempts": 3,
-    "difficulty": "trivial"
-  },
-  {
-    "question": "How many evaluation log entries have more than 976737.5 bytes transferred? Return the result as a single number named above_median.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE bytes_transferred > 976737.5\n| STATS above_median = COUNT(*)",
+    "question": "How many evaluation log events transferred more than 975,751.5 bytes?",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE bytes_transferred > 975751.5\n| STATS above_median = COUNT(*)",
     "index": "logs-production.evaluations.2025.01.01",
     "family": "range-filter",
     "rowCount": 1,
@@ -1430,37 +740,7 @@
     "difficulty": "trivial"
   },
   {
-    "question": "What are the 5 highest normalized total CPU usage values in the evaluation logs, highest first? Return only that CPU field.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| SORT system.cpu.total.norm.pct DESC\n| KEEP system.cpu.total.norm.pct\n| LIMIT 5",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "top-n",
-    "rowCount": 5,
-    "solvedBy": 3,
-    "attempts": 3,
-    "difficulty": "trivial"
-  },
-  {
-    "question": "What are the 5 largest network bytes values in the evaluation logs, largest first? Return only the network bytes field.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| SORT network.bytes DESC\n| KEEP network.bytes\n| LIMIT 5",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "top-n",
-    "rowCount": 5,
-    "solvedBy": 3,
-    "attempts": 3,
-    "difficulty": "trivial"
-  },
-  {
-    "question": "Across all evaluation log entries, what are the average, highest and lowest network bytes? Return them as average, maximum and minimum.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS average = AVG(network.bytes), maximum = MAX(network.bytes), minimum = MIN(network.bytes)",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "single-stat",
-    "rowCount": 1,
-    "solvedBy": 3,
-    "attempts": 3,
-    "difficulty": "trivial"
-  },
-  {
-    "question": "Across all evaluation log entries, what are the average, highest and lowest normalized total CPU usage? Return them as average, maximum and minimum.",
+    "question": "Across all evaluation log events, what are the mean, highest and lowest normalized total CPU usage percentages?",
     "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS average = AVG(system.cpu.total.norm.pct), maximum = MAX(system.cpu.total.norm.pct), minimum = MIN(system.cpu.total.norm.pct)",
     "index": "logs-production.evaluations.2025.01.01",
     "family": "single-stat",
@@ -1470,18 +750,8 @@
     "difficulty": "trivial"
   },
   {
-    "question": "How many evaluation log entries have a normalized total CPU usage above 0.49? Return the result as a single number named above_median.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE system.cpu.total.norm.pct > 0.49\n| STATS above_median = COUNT(*)",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "range-filter",
-    "rowCount": 1,
-    "solvedBy": 3,
-    "attempts": 3,
-    "difficulty": "trivial"
-  },
-  {
-    "question": "What are the 5 largest source bytes values in the evaluation logs, largest first? Return only the source bytes field.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| SORT source.bytes DESC\n| KEEP source.bytes\n| LIMIT 5",
+    "question": "What are the 5 highest normalized total CPU usage values in the evaluation logs, highest first? Show only that value.",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| SORT system.cpu.total.norm.pct DESC\n| KEEP system.cpu.total.norm.pct\n| LIMIT 5",
     "index": "logs-production.evaluations.2025.01.01",
     "family": "top-n",
     "rowCount": 5,
@@ -1490,17 +760,7 @@
     "difficulty": "trivial"
   },
   {
-    "question": "Across all evaluation log entries, what are the average, highest and lowest source bytes? Return them as average, maximum and minimum.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS average = AVG(source.bytes), maximum = MAX(source.bytes), minimum = MIN(source.bytes)",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "single-stat",
-    "rowCount": 1,
-    "solvedBy": 3,
-    "attempts": 3,
-    "difficulty": "trivial"
-  },
-  {
-    "question": "For each event category keyword, what are the total and average bytes transferred in the evaluation logs? Show the 10 categories with the highest total, highest first, with columns named total and average.",
+    "question": "For each event category in the evaluation logs, what are the total and the mean bytes transferred? Show the 10 categories with the highest total, highest first.",
     "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS total = SUM(bytes_transferred), average = AVG(bytes_transferred) BY event.category.keyword\n| SORT total DESC\n| LIMIT 10",
     "index": "logs-production.evaluations.2025.01.01",
     "family": "stat-numeric-by-dimension",
@@ -1510,17 +770,17 @@
     "difficulty": "trivial"
   },
   {
-    "question": "In the evaluation logs, split events into small transfers (under 976737.5 bytes transferred) and large ones (976737.5 or more). How many events fall into each size class and event category combination? Show the top 10 combinations, most events first.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| EVAL size_class = CASE(bytes_transferred < 976737.5, \"small\", \"large\")\n| STATS documents = COUNT(*) BY size_class, event.category.keyword\n| SORT documents DESC\n| LIMIT 10",
+    "question": "How many evaluation log events have a normalized total CPU usage above 0.49?",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| WHERE system.cpu.total.norm.pct > 0.49\n| STATS above_median = COUNT(*)",
     "index": "logs-production.evaluations.2025.01.01",
-    "family": "case-bucketing",
-    "rowCount": 8,
+    "family": "range-filter",
+    "rowCount": 1,
     "solvedBy": 3,
     "attempts": 3,
     "difficulty": "trivial"
   },
   {
-    "question": "For each event category in the evaluation logs, what are the total and the mean network bytes? Show the 10 categories with the highest total, highest first.",
+    "question": "For each event category, what are the total and the average network bytes? Show the 10 categories with the highest total, highest first.",
     "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS total = SUM(network.bytes), average = AVG(network.bytes) BY event.category.keyword\n| SORT total DESC\n| LIMIT 10",
     "index": "logs-production.evaluations.2025.01.01",
     "family": "stat-numeric-by-dimension",
@@ -1530,37 +790,7 @@
     "difficulty": "trivial"
   },
   {
-    "question": "In the evaluation logs, label events as small if their normalized total CPU usage is under 0.49 and large otherwise. How many events are there per size class and event category? Show the top 10 combinations, most events first.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| EVAL size_class = CASE(system.cpu.total.norm.pct < 0.49, \"small\", \"large\")\n| STATS documents = COUNT(*) BY size_class, event.category.keyword\n| SORT documents DESC\n| LIMIT 10",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "case-bucketing",
-    "rowCount": 8,
-    "solvedBy": 3,
-    "attempts": 3,
-    "difficulty": "trivial"
-  },
-  {
-    "question": "In the evaluation logs, split events into small transfers (under 976737.5 bytes transferred) and large ones (976737.5 or more). How many events fall into each size class and destination address combination? Show the top 10 combinations, most events first.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| EVAL size_class = CASE(bytes_transferred < 976737.5, \"small\", \"large\")\n| STATS documents = COUNT(*) BY size_class, destination.address\n| SORT documents DESC\n| LIMIT 10",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "case-bucketing",
-    "rowCount": 10,
-    "solvedBy": 3,
-    "attempts": 3,
-    "difficulty": "trivial"
-  },
-  {
-    "question": "In the evaluation logs, label events as small if their network bytes are under 1383098 and large otherwise. How many events are there per size class and event category? Show the top 10 combinations, most events first.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| EVAL size_class = CASE(network.bytes < 1383098, \"small\", \"large\")\n| STATS documents = COUNT(*) BY size_class, event.category.keyword\n| SORT documents DESC\n| LIMIT 10",
-    "index": "logs-production.evaluations.2025.01.01",
-    "family": "case-bucketing",
-    "rowCount": 8,
-    "solvedBy": 3,
-    "attempts": 3,
-    "difficulty": "trivial"
-  },
-  {
-    "question": "For each event category in the evaluation logs, what are the total and the mean normalized total CPU usage? Show the 10 categories with the highest total, highest first.",
+    "question": "For each event category, what are the total and the average normalized total CPU usage? Show the 10 categories with the highest total, highest first.",
     "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS total = SUM(system.cpu.total.norm.pct), average = AVG(system.cpu.total.norm.pct) BY event.category.keyword\n| SORT total DESC\n| LIMIT 10",
     "index": "logs-production.evaluations.2025.01.01",
     "family": "stat-numeric-by-dimension",
@@ -1570,18 +800,38 @@
     "difficulty": "trivial"
   },
   {
-    "question": "For each destination address in the evaluation logs, what are the total and the mean bytes transferred? Show the 10 destinations with the highest total, highest first.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS total = SUM(bytes_transferred), average = AVG(bytes_transferred) BY destination.address\n| SORT total DESC\n| LIMIT 10",
+    "question": "Label each evaluation log event \"small\" if it transferred fewer than 975,751.5 bytes and \"large\" otherwise, then count events for each size label and event category pair. Show the 10 pairs with the most events, most first.",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| EVAL size_class = CASE(bytes_transferred < 975751.5, \"small\", \"large\")\n| STATS documents = COUNT(*) BY size_class, event.category.keyword\n| SORT documents DESC\n| LIMIT 10",
     "index": "logs-production.evaluations.2025.01.01",
-    "family": "stat-numeric-by-dimension",
-    "rowCount": 10,
+    "family": "case-bucketing",
+    "rowCount": 8,
     "solvedBy": 3,
     "attempts": 3,
     "difficulty": "trivial"
   },
   {
-    "question": "For each destination address in the evaluation logs, what are the total and the mean normalized total CPU usage? Show the 10 destinations with the highest total, highest first.",
-    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS total = SUM(system.cpu.total.norm.pct), average = AVG(system.cpu.total.norm.pct) BY destination.address\n| SORT total DESC\n| LIMIT 10",
+    "question": "Label each event \"small\" if its normalized total CPU usage is below 0.49 and \"large\" otherwise. How many events fall into each label and event category pair? Show the 10 pairs with the most events, most first.",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| EVAL size_class = CASE(system.cpu.total.norm.pct < 0.49, \"small\", \"large\")\n| STATS documents = COUNT(*) BY size_class, event.category.keyword\n| SORT documents DESC\n| LIMIT 10",
+    "index": "logs-production.evaluations.2025.01.01",
+    "family": "case-bucketing",
+    "rowCount": 8,
+    "solvedBy": 3,
+    "attempts": 3,
+    "difficulty": "trivial"
+  },
+  {
+    "question": "Label each event \"small\" if its network bytes are below 1,607,339.5 and \"large\" otherwise. How many events fall into each label and event category pair? Show the 10 pairs with the most events, most first.",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| EVAL size_class = CASE(network.bytes < 1607339.5, \"small\", \"large\")\n| STATS documents = COUNT(*) BY size_class, event.category.keyword\n| SORT documents DESC\n| LIMIT 10",
+    "index": "logs-production.evaluations.2025.01.01",
+    "family": "case-bucketing",
+    "rowCount": 8,
+    "solvedBy": 3,
+    "attempts": 3,
+    "difficulty": "trivial"
+  },
+  {
+    "question": "For each destination address, what are the total and the average bytes transferred? Show the 10 addresses with the highest total, highest first.",
+    "goldQuery": "FROM logs-production.evaluations.2025.01.01\n| STATS total = SUM(bytes_transferred), average = AVG(bytes_transferred) BY destination.address\n| SORT total DESC\n| LIMIT 10",
     "index": "logs-production.evaluations.2025.01.01",
     "family": "stat-numeric-by-dimension",
     "rowCount": 10,

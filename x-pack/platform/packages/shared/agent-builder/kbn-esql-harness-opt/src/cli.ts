@@ -37,6 +37,12 @@ import {
 } from './corpus/generate';
 import type { GeneratedExample } from './corpus/generate';
 import { corpusIndices, installSampleData } from './corpora/setup';
+import { loadEsTestData } from './corpora/es_test_data';
+import {
+  collectDetectionRuleCandidates,
+  collectEsSpecCandidates,
+  filterExecutable,
+} from './corpus/expert';
 
 /** `@kbn/dev-cli-runner` hands back `''` for declared-but-unpassed string flags. */
 const optionalFlag = (value: unknown): string | undefined =>
@@ -59,6 +65,8 @@ export const cli = () =>
   setup-fixtures [--sample-data]    create and seed the fixture indices (and sample data sets)
   setup-models                      create the inference connectors used as gate tiers
   setup-candidate                   create + bootstrap the candidate worktree (second lane)
+  load-es-test-data [--es-repo p]   load Elasticsearch's ES|QL test dataset as a corpus index
+  mine-expert [--limit n]           mine human-written queries (ES spec tests, detection rules)
   generate-corpus [--probes n]      synthesize, back-translate and difficulty-label a corpus
   baseline [--tiers ids]            measure this worktree's harness, per model tier
   round / campaign --rounds n       propose → validate → gate → promote, repeatedly
@@ -87,6 +95,56 @@ Both lanes' Kibana processes must run with ESQL_HARNESS_TRACE_FILE pointing at
 
       if (command === 'setup-models') {
         await setupModelConnectors({ target, log });
+        return;
+      }
+
+      if (command === 'load-es-test-data') {
+        await loadEsTestData({
+          esClient,
+          esRepo: optionalFlag(flags['es-repo']) ?? `${process.env.HOME}/elasticsearch`,
+          log,
+        });
+        return;
+      }
+
+      if (command === 'mine-expert') {
+        const limit = Number(optionalFlag(flags.limit) ?? 40);
+        // Each source gets its own budget: the spec tests are far more numerous and would
+        // otherwise fill the list before a single detection rule is considered.
+        const perSource = Math.max(limit * 2, 60);
+        const candidates = [
+          ...collectDetectionRuleCandidates({
+            rulesRepo: optionalFlag(flags['rules-repo']) ?? '/tmp/dr',
+            limit: perSource,
+          }),
+          ...collectEsSpecCandidates({
+            esRepo: optionalFlag(flags['es-repo']) ?? `${process.env.HOME}/elasticsearch`,
+            limit: perSource,
+          }),
+        ];
+        log.info(`[expert] ${candidates.length} human-written candidate queries found`);
+
+        const executable = await filterExecutable({ esClient, candidates, limit, log });
+        const backTranslateCommand =
+          process.env.HARNESS_BACKTRANSLATE_CMD ?? 'claude -p --permission-mode plan';
+        const [cmd, ...cmdArgs] = backTranslateCommand.split(' ');
+
+        const examples = await backTranslate({
+          queries: executable.map((candidate) => ({
+            index: candidate.index,
+            family: candidate.source,
+            query: candidate.query,
+            rowCount: candidate.rowCount,
+            intent: candidate.intent,
+          })),
+          command: cmd,
+          commandArgs: cmdArgs,
+          log,
+        });
+
+        const path = GENERATED_CORPUS_PATH.replace('generated_corpus', 'expert_corpus');
+        writeCorpus(path, examples);
+        log.info(`[expert] wrote ${examples.length} expert-authored examples to ${path}`);
         return;
       }
 
@@ -377,6 +435,9 @@ Both lanes' Kibana processes must run with ESQL_HARNESS_TRACE_FILE pointing at
           'restart-candidate',
           'baseline',
           'repeats',
+          'es-repo',
+          'rules-repo',
+          'limit',
         ],
         boolean: ['serve', 'sample-data'],
         help: `

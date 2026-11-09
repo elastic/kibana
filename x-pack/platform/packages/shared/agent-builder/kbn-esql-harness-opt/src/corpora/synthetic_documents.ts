@@ -72,11 +72,16 @@ const buildLogs = (): IndexRequest[] => {
         event: {
           category: random.pick(['file', 'network', 'process', 'authentication']),
           action: random.pick(EVENT_ACTIONS),
+          type: random.pick(['start', 'end', 'info', 'creation']),
           code: random.pick([4624, 4625, 4688]),
         },
-        file: { name: `file-${random.int(40)}.txt` },
+        // ECS fields the published detection rules rely on most; without them their queries
+        // cannot run here, and those rules are the most realistic analytic intent available.
+        host: {
+          name: random.pick(HOSTS),
+          os: { type: random.pick(['windows', 'linux', 'macos']) },
+        },
         group: { name: random.pick(['admins', 'devs', 'ops']) },
-        host: { name: random.pick(HOSTS) },
         ip: `192.168.${random.int(10)}.${random.int(255)}`,
         log: { message: random.float() < 0.1 ? 'evilpayload detected' : `routine message ${i}` },
         network: {
@@ -85,8 +90,14 @@ const buildLogs = (): IndexRequest[] => {
         },
         process: {
           name: process,
+          executable: `/usr/bin/${process}`,
+          args: [process, random.pick(['--quiet', '-f', '--recursive'])],
+          command_line:
+            process === 'powershell.exe' ? 'powershell -EncodedCommand ZQBj' : `${process} --run`,
+          parent: { name: random.pick(['bash', 'explorer.exe', 'systemd']) },
           working_directory: random.float() < 0.2 ? '/tmp/stage' : '/usr/local/bin',
         },
+        file: { name: `file-${random.int(40)}.txt`, path: `/var/data/file-${random.int(40)}.txt` },
         source: {
           ip: `172.16.${random.int(10)}.${random.int(255)}`,
           bytes: Math.round(random.float() * 500_000),

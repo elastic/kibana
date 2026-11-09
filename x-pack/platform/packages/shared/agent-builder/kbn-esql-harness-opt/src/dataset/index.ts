@@ -27,6 +27,12 @@ export interface HarnessExample {
   family?: string;
   /** How many probe attempts reproduced the gold result when the corpus was built. */
   difficulty?: string;
+  /**
+   * The question cannot be answered with a single ES|QL query, so the correct behaviour is to
+   * say so. Scored separately: a confident wrong answer must not look like a success, and an
+   * abstention must not be averaged into query quality.
+   */
+  abstention?: boolean;
 }
 
 const hashToUnitInterval = (value: string): number => {
@@ -52,14 +58,25 @@ const toExample = ({
   goldQuery,
   provenance,
   index,
+  abstention,
 }: {
   question: string;
   goldQuery: string;
   provenance: string;
   index?: string;
+  abstention?: boolean;
 }): HarnessExample => {
   const id = Crypto.createHash('sha256').update(question).digest('hex').slice(0, 12);
-  return { id, seedId: id, question, goldQuery, provenance, index, split: assignSplit(id) };
+  return {
+    id,
+    seedId: id,
+    question,
+    goldQuery,
+    provenance,
+    index,
+    split: assignSplit(id),
+    ...(abstention ? { abstention: true } : {}),
+  };
 };
 
 /**
@@ -69,12 +86,17 @@ const toExample = ({
  * (see the plan in the tracking issue) is meant to be the search substrate later; until it
  * exists, every number out of this loop is a smoke test, not a promotion signal.
  */
+/** Gold entries that are prose rather than a query mark questions the tool should decline. */
+const isAbstention = (goldQuery: string): boolean =>
+  !/^\s*(FROM|TS|PROMQL|ROW|SHOW)\b/i.test(goldQuery);
+
 export const anchorExamples: HarnessExample[] = [
   ...securityRegressionExamples.map(({ input, output }) =>
     toExample({
       question: input.question,
       goldQuery: output.query,
       provenance: 'security-esql-generation-regression',
+      abstention: isAbstention(output.query),
     })
   ),
   ...agentBuilderEsqlExamples.map(({ question, goldQuery, index }) =>
@@ -114,7 +136,25 @@ export const generatedExamples = (): HarnessExample[] => {
   }));
 };
 
-export const allExamples = (): HarnessExample[] => [...anchorExamples, ...generatedExamples()];
+/** Human-written queries mined from Elasticsearch's own ES|QL spec suite. */
+export const EXPERT_CORPUS_PATH = Path.resolve(__dirname, 'expert_corpus.json');
+
+export const expertExamples = (): HarnessExample[] => {
+  if (!Fs.existsSync(EXPERT_CORPUS_PATH)) {
+    return [];
+  }
+  const entries = JSON.parse(Fs.readFileSync(EXPERT_CORPUS_PATH, 'utf8')) as GeneratedCorpusEntry[];
+  return entries.map(({ question, goldQuery, index, family }) => ({
+    ...toExample({ question, goldQuery, index, provenance: 'expert-authored' }),
+    family,
+  }));
+};
+
+export const allExamples = (): HarnessExample[] => [
+  ...anchorExamples,
+  ...expertExamples(),
+  ...generatedExamples(),
+];
 
 export const examplesForSplit = (split: Split): HarnessExample[] =>
   allExamples().filter((example) => example.split === split);

@@ -1,0 +1,317 @@
+[
+  {
+    "question": "How many employees were hired in each calendar year between February 18, 1985 and October 18, 1988 (inclusive)? List the years in chronological order.",
+    "goldQuery": "FROM employees_test\n| WHERE hire_date >= \"1985-02-18T00:00:00.000Z\" AND hire_date <= \"1988-10-18T00:00:00.000Z\"\n| STATS c = COUNT(*) BY b = BUCKET(hire_date, 3, \"1985-02-18T00:00:00.000Z\", \"1988-10-18T00:00:00.000Z\")\n| SORT b",
+    "index": "employees_test",
+    "family": "es-spec",
+    "rowCount": 4
+  },
+  {
+    "question": "What is the average salary of employees who are still hired compared with those who aren't? List the 'not still hired' group first.",
+    "goldQuery": "FROM employees_test | stats avg(salary) by still_hired | sort still_hired",
+    "index": "employees_test",
+    "family": "es-spec",
+    "rowCount": 2
+  },
+  {
+    "question": "For employees who have a first name, what is the average salary split by a flag that is true when the first name starts with an empty string (true for every name)?",
+    "goldQuery": "FROM employees_test | where first_name is not null | eval always_true = starts_with(first_name, \"\") | stats avg(salary) by always_true",
+    "index": "employees_test",
+    "family": "es-spec",
+    "rowCount": 1
+  },
+  {
+    "question": "For employees who have a first name, what is the average salary split by a flag that is true when the first name starts with \"nonestartwiththis\" (false for every name)?",
+    "goldQuery": "FROM employees_test | where first_name is not null | eval always_false = starts_with(first_name, \"nonestartwiththis\") | stats avg(salary) by always_false",
+    "index": "employees_test",
+    "family": "es-spec",
+    "rowCount": 1
+  },
+  {
+    "question": "For the first 5 employees by employee number, show the employee number, the is_rehired value, that value written as text (rehired_str), that text turned back into a true/false value (rehired_bool), and the first name read as a true/false value (all_false). Don't include the first name.",
+    "goldQuery": "FROM employees_test | sort emp_no | keep emp_no, is_rehired, first_name | eval rehired_str = to_string(is_rehired) | eval rehired_bool = to_boolean(rehired_str) | eval all_false = to_boolean(first_name) | drop first_name | limit 5",
+    "index": "employees_test",
+    "family": "es-spec",
+    "rowCount": 5
+  },
+  {
+    "question": "For employees 10036, 10037 and 10038, show the employee number, the height, and a true/false value (double2bool) that says whether the height minus 2 is nonzero.",
+    "goldQuery": "FROM employees_test | eval h_2 = height - 2.0, double2bool = to_boolean(h_2) | where emp_no in (10036, 10037, 10038) | keep emp_no, height, *2bool",
+    "index": "employees_test",
+    "family": "es-spec",
+    "rowCount": 3
+  },
+  {
+    "question": "For employees hired during 1985, list the hire dates for each month in a sorted list. Order the months by those hire dates.",
+    "goldQuery": "FROM employees_test\n| WHERE hire_date >= \"1985-01-01T00:00:00Z\" AND hire_date < \"1986-01-01T00:00:00Z\"\n| STATS hd = MV_SORT(VALUES(hire_date)) BY b = BUCKET(hire_date, 20, \"1985-01-01T00:00:00Z\", \"1986-01-01T00:00:00Z\")\n| SORT hd",
+    "index": "employees_test",
+    "family": "es-spec",
+    "rowCount": 6
+  },
+  {
+    "question": "For employees hired during 1985, list the hire dates for each week in a sorted list. Order the weeks by those hire dates.",
+    "goldQuery": "FROM employees_test\n| where hire_date >= \"1985-01-01T00:00:00Z\" and hire_date < \"1986-01-01T00:00:00Z\"\n| stats hire_date = mv_sort(values(hire_date)) by hd = bucket(hire_date, 55, \"1985-01-01T00:00:00Z\", \"1986-01-01T00:00:00Z\")\n| sort hire_date",
+    "index": "employees_test",
+    "family": "es-spec",
+    "rowCount": 6
+  },
+  {
+    "question": "How many employees have been hired each year from January 1, 1999 until now? List the years in chronological order.",
+    "goldQuery": "FROM employees_test\n| WHERE hire_date >= \"1999-01-01T00:00:00Z\"\n| STATS COUNT(*) by bucket = BUCKET(hire_date, 5, \"1999-01-01T00:00:00Z\", NOW())\n| sort bucket",
+    "index": "employees_test",
+    "family": "es-spec",
+    "rowCount": 1
+  },
+  {
+    "question": "What was the average salary of employees hired in each month of 1985? List the months in chronological order.",
+    "goldQuery": "FROM employees_test\n| WHERE hire_date >= \"1985-01-01T00:00:00Z\" AND hire_date < \"1986-01-01T00:00:00Z\"\n| STATS AVG(salary) BY bucket = BUCKET(hire_date, 20, \"1985-01-01T00:00:00Z\", \"1986-01-01T00:00:00Z\")\n| SORT bucket",
+    "index": "employees_test",
+    "family": "es-spec",
+    "rowCount": 6
+  },
+  {
+    "question": "Group the employees' birth dates by calendar year and, for each year, list that year's birth dates in ascending order along with how many there are. Return the 3 years with the fewest birth dates, breaking ties by the earliest year.",
+    "goldQuery": "FROM employees_test\n| STATS dates = MV_SORT(VALUES(birth_date)) BY b = BUCKET(birth_date + 1 HOUR, 1 YEAR) - 1 HOUR\n| EVAL d_count = MV_COUNT(dates)\n| SORT d_count, b\n| LIMIT 3",
+    "index": "employees_test",
+    "family": "es-spec",
+    "rowCount": 3
+  },
+  {
+    "question": "How many employees were hired in each month of 1985? List the months in chronological order.",
+    "goldQuery": "FROM employees_test\n| WHERE hire_date >= \"1985-01-01T00:00:00Z\" AND hire_date < \"1986-01-01T00:00:00Z\"\n| STATS hires_per_month = COUNT(*) BY month = BUCKET(hire_date, 20, \"1985-01-01T00:00:00Z\", \"1986-01-01T00:00:00Z\")\n| SORT month",
+    "index": "employees_test",
+    "family": "es-spec",
+    "rowCount": 6
+  },
+  {
+    "question": "How many employees were hired in each week of 1985? List the weeks in chronological order.",
+    "goldQuery": "FROM employees_test\n| WHERE hire_date >= \"1985-01-01T00:00:00Z\" AND hire_date < \"1986-01-01T00:00:00Z\"\n| STATS hires_per_week = COUNT(*) BY week = BUCKET(hire_date, 100, \"1985-01-01T00:00:00Z\", \"1986-01-01T00:00:00Z\")\n| SORT week",
+    "index": "employees_test",
+    "family": "es-spec",
+    "rowCount": 6
+  },
+  {
+    "question": "For airports in India, show the first 3 city names in alphabetical order, with each name's length in characters and in bits.",
+    "goldQuery": "FROM airports_test\n| WHERE country == \"India\"\n| KEEP city\n| EVAL fn_length = LENGTH(city), fn_bit_length = BIT_LENGTH(city)\n| SORT city\n| LIMIT 3",
+    "index": "airports_test",
+    "family": "es-spec",
+    "rowCount": 3
+  },
+  {
+    "question": "For airports in India, show the first 3 city names in alphabetical order, with each name's length in characters.",
+    "goldQuery": "FROM airports_test\n| WHERE country == \"India\"\n| KEEP city\n| EVAL fn_length = LENGTH(city)\n| SORT city\n| LIMIT 3",
+    "index": "airports_test",
+    "family": "es-spec",
+    "rowCount": 3
+  },
+  {
+    "question": "For airports in India, show the first 3 city names in alphabetical order, with each name's length in characters and in bytes.",
+    "goldQuery": "FROM airports_test\n| WHERE country == \"India\"\n| KEEP city\n| EVAL fn_length = LENGTH(city), fn_byte_length = BYTE_LENGTH(city)\n| SORT city\n| LIMIT 3",
+    "index": "airports_test",
+    "family": "es-spec",
+    "rowCount": 3
+  },
+  {
+    "question": "For each distinct ip0 address in the host records, how many records have it? Show the address as a column named ip and sort by address, lowest first.",
+    "goldQuery": "FROM hosts_test | stats c=count(ip0) by ip0 | sort ip0 | rename ip0 as ip",
+    "index": "hosts_test",
+    "family": "es-spec",
+    "rowCount": 8
+  },
+  {
+    "question": "Show the 2 highest ip0 addresses in the host records, with each one's original value next to the value converted to an IP, highest first.",
+    "goldQuery": "FROM hosts_test | keep ip0 | eval ip0ip = to_ip(ip0) | sort ip0ip desc | limit 2",
+    "index": "hosts_test",
+    "family": "es-spec",
+    "rowCount": 2
+  },
+  {
+    "question": "For the host named alpha, show card, ip0, and the network prefix of ip0 (/24 for IPv4 addresses, /120 for IPv6), ordered by card ascending.",
+    "goldQuery": "FROM hosts_test\n| where host == \"alpha\"\n| sort card\n| eval prefix = ip_prefix(ip0, 24, 120)\n| keep card, ip0, prefix",
+    "index": "hosts_test",
+    "family": "es-spec",
+    "rowCount": 2
+  },
+  {
+    "question": "How many host records fall into each network prefix of ip1, using /24 for IPv4 and /120 for IPv6? Sort by prefix, lowest first.",
+    "goldQuery": "FROM hosts_test\n| stats count(*) by ip_prefix(ip1, 24, 120)\n| sort `ip_prefix(ip1, 24, 120)`",
+    "index": "hosts_test",
+    "family": "es-spec",
+    "rowCount": 6
+  },
+  {
+    "question": "For each ip0 address in the hosts data, how many host records include it? List every address with its count, sorted by ip0 ascending.",
+    "goldQuery": "FROM hosts_test\n| STATS COUNT(*) BY ip0=ip0\n| SORT ip0 ASC",
+    "index": "hosts_test",
+    "family": "es-spec",
+    "rowCount": 8
+  },
+  {
+    "question": "Group the host records by the lowest ip0 address each one has, and count the records in each group. Sort by that address ascending.",
+    "goldQuery": "FROM hosts_test\n| STATS COUNT(*) BY ip0=MV_MIN(ip0)\n| SORT ip0 ASC",
+    "index": "hosts_test",
+    "family": "es-spec",
+    "rowCount": 5
+  },
+  {
+    "question": "Group the host records by the highest ip0 address each one has, and count the records in each group. Sort by that address ascending.",
+    "goldQuery": "FROM hosts_test\n| STATS COUNT(*) BY ip0=MV_MAX(ip0)\n| SORT ip0 ASC",
+    "index": "hosts_test",
+    "family": "es-spec",
+    "rowCount": 6
+  },
+  {
+    "question": "For every scale rank, how many airports have a country matching \"United States\"? Include ranks with zero matches, name the count c, and sort from highest scale rank to lowest.",
+    "goldQuery": "FROM airports_test \n| STATS c = COUNT(*) where kql(\"country: United States\") BY scalerank\n| SORT scalerank desc",
+    "index": "airports_test",
+    "family": "es-spec",
+    "rowCount": 8
+  },
+  {
+    "question": "For hosts whose name sorts alphabetically after \"alpha\", return one row with four columns. Three give the highest ip0 address (unlabeled, a, and b). The fourth, c, gives the highest address when you take ip0 for host \"beta\" and ip1 for every other host.",
+    "goldQuery": "FROM hosts_test\n| eval x = ip0\n| where host > \"alpha\"\n| stats max(ip0), a = max(ip0), b = max(x), c = max(case(host == \"beta\", ip0, ip1))",
+    "index": "hosts_test",
+    "family": "es-spec",
+    "rowCount": 1
+  },
+  {
+    "question": "For each host whose name sorts alphabetically after \"alpha\", return the highest ip0 address three times (unlabeled, a, and b). Add a column c with the highest address when you take ip0 for host \"beta\" and ip1 for other hosts. Sort by host name A to Z.",
+    "goldQuery": "FROM hosts_test\n| eval x = ip0\n| where host > \"alpha\"\n| stats max(ip0), a = max(ip0), b = max(x), c = max(case(host == \"beta\", ip0, ip1)) by host\n| sort host asc",
+    "index": "hosts_test",
+    "family": "es-spec",
+    "rowCount": 3
+  },
+  {
+    "question": "For airports with scale rank 9 or higher, return one row with four columns. Three give the alphabetically last abbreviation (unlabeled, a, and b). The fourth, c, gives the alphabetically last abbreviation after replacing it with \"___\" for airports whose first listed type is \"small\".",
+    "goldQuery": "FROM airports_test\n| eval x = abbrev\n| where scalerank >= 9\n| stats max(abbrev), a = max(abbrev), b = max(x), c = max(case(mv_first(type) == \"small\", \"___\"::keyword, abbrev))",
+    "index": "airports_test",
+    "family": "es-spec",
+    "rowCount": 1
+  },
+  {
+    "question": "For airports with scale rank 9 or higher, group by airport type and return the alphabetically last abbreviation three times (unlabeled, a, and b). Add a column c with the same value after replacing the abbreviation with \"___\" for airports whose first listed type is \"small\". Sort by type A to Z and show only the first 4 types.",
+    "goldQuery": "FROM airports_test\n| eval x = abbrev\n| where scalerank >= 9\n| stats max(abbrev), a = max(abbrev), b = max(x), c = max(case(mv_first(type) == \"small\", \"___\"::keyword, abbrev)) by type\n| sort type asc\n| limit 4",
+    "index": "airports_test",
+    "family": "es-spec",
+    "rowCount": 4
+  },
+  {
+    "question": "Among airports with scale rank 9 or higher, which name comes last alphabetically? Return it in three columns: unlabeled, a, and b.",
+    "goldQuery": "FROM airports_test\n| eval x = name\n| where scalerank >= 9\n| stats max(name), a = max(name), b = max(x)",
+    "index": "airports_test",
+    "family": "es-spec",
+    "rowCount": 1
+  },
+  {
+    "question": "For airports with scale rank 9 or higher, which name comes last alphabetically within each airport type? Return it in three columns (unlabeled, a, and b), sort by type A to Z, and show only the first 4 types.",
+    "goldQuery": "FROM airports_test\n| eval x = name\n| where scalerank >= 9\n| stats max(name), a = max(name), b = max(x) by type\n| sort type asc\n| limit 4",
+    "index": "airports_test",
+    "family": "es-spec",
+    "rowCount": 4
+  },
+  {
+    "question": "For airports with a scale rank of 9 or higher, what is the alphabetically first airport abbreviation (as an unnamed column and again as a and b)? Also give c, the alphabetically last abbreviation when every airport whose first listed type is \"small\" counts as \"___\".",
+    "goldQuery": "FROM airports_test\n| eval x = abbrev\n| where scalerank >= 9\n| stats min(abbrev), a = min(abbrev), b = min(x), c = max(case(mv_first(type) == \"small\", \"___\"::keyword, abbrev))",
+    "index": "airports_test",
+    "family": "es-spec",
+    "rowCount": 1
+  },
+  {
+    "question": "For airports with a scale rank of 9 or higher, grouped by airport type, give the alphabetically first abbreviation (as an unnamed column and again as a and b). Also give c, the alphabetically first abbreviation when airports whose first listed type is \"small\" count as \"___\". Show only the first 4 types in ascending alphabetical order.",
+    "goldQuery": "FROM airports_test\n| eval x = abbrev\n| where scalerank >= 9\n| stats min(abbrev), a = min(abbrev), b = min(x), c = min(case(mv_first(type) == \"small\", \"___\"::keyword, abbrev)) by type\n| sort type asc\n| limit 4",
+    "index": "airports_test",
+    "family": "es-spec",
+    "rowCount": 4
+  },
+  {
+    "question": "For airports with a scale rank of 9 or higher, what is the alphabetically first airport name, returned three times: once unnamed and once each as a and b?",
+    "goldQuery": "FROM airports_test\n| eval x = name\n| where scalerank >= 9\n| stats min(name), a = min(name), b = min(x)",
+    "index": "airports_test",
+    "family": "es-spec",
+    "rowCount": 1
+  },
+  {
+    "question": "For airports with a scale rank of 9 or higher, give the alphabetically first airport name for each airport type, returned three times: once unnamed and once each as a and b. Show only the first 4 types in ascending alphabetical order.",
+    "goldQuery": "FROM airports_test\n| eval x = name\n| where scalerank >= 9\n| stats min(name), a = min(name), b = min(x) by type\n| sort type asc\n| limit 4",
+    "index": "airports_test",
+    "family": "es-spec",
+    "rowCount": 4
+  },
+  {
+    "question": "Across host records whose host name sorts after \"alpha\", what is the lowest ip0 address (as an unnamed column and again as a and b)? Also give c, the lowest address when you take ip0 for host \"beta\" and ip1 for every other host.",
+    "goldQuery": "FROM hosts_test\n| eval x = ip0\n| where host > \"alpha\"\n| stats min(ip0), a = min(ip0), b = min(x), c = min(case(host == \"beta\", ip0, ip1))",
+    "index": "hosts_test",
+    "family": "es-spec",
+    "rowCount": 1
+  },
+  {
+    "question": "For each host whose name sorts after \"alpha\", give the lowest ip0 address (as an unnamed column and again as a and b). Also give c, the lowest address when you take ip0 for host \"beta\" and ip1 for every other host. Sort by host name ascending.",
+    "goldQuery": "FROM hosts_test\n| eval x = ip0\n| where host > \"alpha\"\n| stats min(ip0), a = min(ip0), b = min(x), c = min(case(host == \"beta\", ip0, ip1)) by host\n| sort host asc",
+    "index": "hosts_test",
+    "family": "es-spec",
+    "rowCount": 3
+  },
+  {
+    "question": "Among airport records with no name, how many name values are present, returned as c?",
+    "goldQuery": "FROM airports_test\n| EVAL s = name, x = name\n| WHERE s IS NULL\n| STATS c = COUNT(x)",
+    "index": "airports_test",
+    "family": "es-spec",
+    "rowCount": 1
+  },
+  {
+    "question": "How many airport records have a name, returned as c?",
+    "goldQuery": "FROM airports_test\n| EVAL s = name, x = name\n| WHERE s IS NOT NULL\n| STATS c = COUNT(x)",
+    "index": "airports_test",
+    "family": "es-spec",
+    "rowCount": 1
+  },
+  {
+    "question": "For each host, how many distinct ip0 addresses (h0) and how many distinct ip1 addresses (h1) does it have? Sort by host name ascending.",
+    "goldQuery": "FROM hosts_test | stats h0 = count_distinct(ip0), h1 = count_distinct(ip1)  by host | sort host",
+    "index": "hosts_test",
+    "family": "es-spec",
+    "rowCount": 4
+  },
+  {
+    "question": "Across host records whose host name sorts after \"alpha\", what are the two highest ip0 addresses, highest first (as a and again as b)? Also give c, the two highest addresses when you take ip0 for host \"beta\" and ip1 for every other host.",
+    "goldQuery": "FROM hosts_test\n| eval x = ip0\n| where host > \"alpha\"\n| stats\n    a = TOP(ip0, 2, \"desc\"),\n    b = TOP(x, 2, \"desc\"),\n    c = TOP(case(host == \"beta\", ip0, ip1), 2, \"desc\")",
+    "index": "hosts_test",
+    "family": "es-spec",
+    "rowCount": 1
+  },
+  {
+    "question": "For each host whose name comes alphabetically after \"alpha\", list the two highest ip0 addresses in column a and again in column b. In column c, show the two highest ip0 addresses for host beta and the two highest ip1 addresses for every other host, with hosts sorted alphabetically.",
+    "goldQuery": "FROM hosts_test\n| eval x = ip0\n| where host > \"alpha\"\n| stats\n    a = TOP(ip0, 2, \"desc\"),\n    b = TOP(x, 2, \"desc\"),\n    c = TOP(case(host == \"beta\", ip0, ip1), 2, \"desc\")\n    by host\n| sort host asc",
+    "index": "hosts_test",
+    "family": "es-spec",
+    "rowCount": 3
+  },
+  {
+    "question": "For the host epsilon, show each ip0 address both as plain text (as str0) and as the original ip0 value, returning only those two columns.",
+    "goldQuery": "FROM hosts_test | where host==\"epsilon\" | eval str0 = to_string(ip0) | keep str0, ip0",
+    "index": "hosts_test",
+    "family": "es-spec",
+    "rowCount": 3
+  },
+  {
+    "question": "For the host epsilon, split the host group into its first word (l1) and second word (l2), return only those two columns, and sort by the first word in ascending order.",
+    "goldQuery": "FROM hosts_test | where host == \"epsilon\" | grok host_group \"%{WORD:l1} %{WORD:l2}\"| sort l1 |  keep l1, l2",
+    "index": "hosts_test",
+    "family": "es-spec",
+    "rowCount": 3
+  },
+  {
+    "question": "Take a single record for the host epsilon and show its host name with every \"ep\" removed, returned as one column called name.",
+    "goldQuery": "FROM hosts_test | where host == \"epsilon\" | limit 1 | eval name = replace(host, \"ep\", \"\") | keep name",
+    "index": "hosts_test",
+    "family": "es-spec",
+    "rowCount": 1
+  },
+  {
+    "question": "For the host epsilon, show the host group next to a copy with all whitespace removed (as l1), sorted by that whitespace-free value in ascending order.",
+    "goldQuery": "FROM hosts_test | where host == \"epsilon\" | eval l1=replace(host_group, \"\\\\s+\", \"\") | sort l1 | keep l1, host_group",
+    "index": "hosts_test",
+    "family": "es-spec",
+    "rowCount": 3
+  }
+]
