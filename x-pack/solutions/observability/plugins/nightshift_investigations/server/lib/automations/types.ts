@@ -6,6 +6,7 @@
  */
 
 import type { PresetSchedule } from '../../../common/automation_schedule';
+import type { AlertSourceMode } from '../../../common/automation_limits';
 
 export type AutomationType = 'custom' | 'managed';
 
@@ -23,6 +24,8 @@ export type NightshiftTriggerRow =
       ruleNames?: string[];
       ruleNameMatchMode?: RuleNameMatchMode;
       tags?: string[];
+      alertSources?: string[];
+      alertSourceMode?: AlertSourceMode;
     }
   | (PresetSchedule & { kind: 'schedule'; scopeQuery?: string })
   | {
