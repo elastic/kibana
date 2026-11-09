@@ -114,9 +114,6 @@ export function WaterfallWithSummary<TSample extends {}>({
     onSampleClick(sample, index);
   };
 
-  // Prefer the explicit index when the parent provides one: two samples that
-  // share the same identifiers would otherwise both resolve to the first match
-  // via `indexOf`, making forward navigation a no-op.
   const hasSelectedSampleIndex = isValidSampleIndex(selectedSampleIndex, traceSamples);
 
   const samplePageIndex = isControlled
