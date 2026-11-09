@@ -9,7 +9,7 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import { errors } from '@elastic/elasticsearch';
 import type { ConversationPublicClient } from '@kbn/agent-builder-server';
 import { MEMORY_INDEX } from '../../common/memory';
-import { CORTEX_AI_INDEX_DEST } from '../../common/cortex';
+import { WIKI_AI_INDEX_DEST } from '../../common/wiki';
 import { DECISION_TREE_AI_INDEX_DEST } from '../../common/decision_trees';
 import { createKnowledgePurgeClient } from './purge_client';
 
@@ -68,7 +68,7 @@ describe('createKnowledgePurgeClient', () => {
         since: SINCE,
         counts: {
           memory_pages: 3,
-          cortex_pages: 3,
+          wiki_pages: 3,
           decision_trees: 3,
           investigations: 1,
         },
@@ -79,7 +79,7 @@ describe('createKnowledgePurgeClient', () => {
       });
 
       // Every store is filtered by space and by the cutoff, so another space is never counted.
-      for (const index of [MEMORY_INDEX, CORTEX_AI_INDEX_DEST, DECISION_TREE_AI_INDEX_DEST]) {
+      for (const index of [MEMORY_INDEX, WIKI_AI_INDEX_DEST, DECISION_TREE_AI_INDEX_DEST]) {
         expect(esClient.count).toHaveBeenCalledWith(
           {
             index,
@@ -105,7 +105,7 @@ describe('createKnowledgePurgeClient', () => {
 
       expect(preview.counts).toEqual({
         memory_pages: 0,
-        cortex_pages: 0,
+        wiki_pages: 0,
         decision_trees: 0,
         investigations: 0,
       });
@@ -136,7 +136,7 @@ describe('createKnowledgePurgeClient', () => {
         since: SINCE,
         deleted: {
           memory_pages: 2,
-          cortex_pages: 2,
+          wiki_pages: 2,
           decision_trees: 2,
           investigations: 1,
         },
@@ -161,7 +161,7 @@ describe('createKnowledgePurgeClient', () => {
 
       expect(result.deleted).toEqual({
         memory_pages: 0,
-        cortex_pages: 1,
+        wiki_pages: 1,
         decision_trees: 1,
         investigations: 0,
       });
