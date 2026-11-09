@@ -62,7 +62,7 @@ yarn start                         # Kibana on localhost:5601
 
 Either way the profile also supplies this suite's `GCS_CREDENTIALS`, read from `gcsDatasetAccessCredentials` in the profile's config — from Vault for `dev-vault`, from `config.<profile>.json` otherwise, and `node scripts/evals init` can fill it in. Export the variable by hand only when running outside a profile, as [publishing](#publishing-the-synthetic-snapshot) does.
 
-For model and judge selection, `--grep` and repetitions, see [running evals locally](../../../../platform/packages/shared/kbn-evals/README.md#11-getting-started-locally). This suite does not override any of those flags.
+For model and judge selection, `--grep` and repetitions, see [running evals locally](../../../../platform/packages/shared/kbn-evals/README.md#11-getting-started-locally). In CI, Customer-0's judge is pinned to `eis-openai-gpt-6-sol`, the model the online evals judges use; a `models:judge:` label doesn't change it. A run filtered with `EVAL_GREP` drops the shards, so pass `EVAL_CONNECTOR_ID=eis-openai-gpt-6-sol` with it. Pass it locally with `--judge`. The suite overrides no other flags.
 
 ## Trace-only investigations
 
@@ -74,7 +74,7 @@ Vault, so run with `--profile dev-vault` and there is nothing to configure:
 node scripts/evals start \
   --suite nightshift-investigations --profile dev-vault \
   --model eis-anthropic-claude-5-5-sonnet \
-  --judge eis-anthropic-claude-4-6-sonnet
+  --judge eis-openai-gpt-6-sol
 ```
 
 The suite owns its sandbox wiring through the `scoutHook` in its
@@ -182,7 +182,7 @@ The `evals_nightshift_investigations` server config extends `evals_tracing` when
 exports sandbox credentials. Otherwise it is plain `evals_tracing`, so the smoke eval needs no
 sandbox credentials. It enables the investigation engine, its `nightshift.enabled` feature flag
 and sandbox, pauses online evals (`nightshift.onlineEvals.paused`) so investigations are judged
-only by the suite, disables Cortex, and exports full Agent Builder payloads (user messages, system
+only by the suite, disables Wiki, and exports full Agent Builder payloads (user messages, system
 instructions, responses, tool arguments/results and conversation IDs) to the profile's configured
 destination. Trace-exporter headers and connector credentials reach Kibana through
 environment references in committed YAML, without generated secret files or credential arguments.
@@ -194,7 +194,7 @@ To run another file with the same loader and task:
 ```bash
 NIGHTSHIFT_DATASETS=trace-only NIGHTSHIFT_EXAMPLES_FILE=/absolute/path/examples.json \
   node scripts/evals run --suite nightshift-investigations --profile dev-vault \
-  --model eis-anthropic-claude-5-5-sonnet --judge eis-anthropic-claude-4-6-sonnet
+  --model eis-anthropic-claude-5-5-sonnet --judge eis-openai-gpt-6-sol
 ```
 
 ```json
@@ -246,7 +246,7 @@ Select an existing evaluations dataset by its exact name in the evaluations UI:
 NIGHTSHIFT_DATASET_NAME='<dataset-name>' \
   node scripts/evals start --suite nightshift-investigations --profile dev-vault --repetitions 1 \
   --model eis-anthropic-claude-5-5-sonnet \
-  --judge eis-anthropic-claude-4-6-sonnet
+  --judge eis-openai-gpt-6-sol
 ```
 
 `NIGHTSHIFT_DATASET_NAME` selects trace-only investigations when `NIGHTSHIFT_DATASETS` is unset.
@@ -320,7 +320,7 @@ allow-list, and exposes the API key only to the requesting sandbox command.
 ```bash
 NIGHTSHIFT_DATASETS=trace-only NIGHTSHIFT_EXAMPLES_FILE=/private/path/examples.json \
   node scripts/evals start --suite nightshift-investigations --profile dev-vault \
-  --model eis-anthropic-claude-5-5-sonnet --judge eis-anthropic-claude-4-6-sonnet
+  --model eis-anthropic-claude-5-5-sonnet --judge eis-openai-gpt-6-sol
 ```
 
 For connectivity acceptance, inspect the persisted agent trace's command and actual Elasticsearch
@@ -336,10 +336,10 @@ workflow.
 
 `NIGHTSHIFT_DATASETS=connector-probe` asks the hidden **Nightshift Assistant** agent
 (`nightshift.assistant`) each question in one `POST /api/agent_builder/converse` call. The
-assistant has the investigator's tools, connectors, Cortex and Semantic Memory hooks, but a short
+assistant has the investigator's tools, connectors, Wiki and Semantic Memory hooks, but a short
 direct-answer prompt that reads the workspace `.md` files only when needed, and no decision trees,
 so a probe takes a few model turns instead of a full investigation. Use it to iterate quickly on
-how the agent queries Elasticsearch. Cortex and memory optimize still run after each reply, so
+how the agent queries Elasticsearch. Wiki and memory optimize still run after each reply, so
 probes update the space's wiki and memories like investigations do.
 
 It is opt-in: unset and `all` never select it, because it needs a
@@ -349,7 +349,7 @@ investigator too, since the assistant uses the investigator's connectors.
 ```bash
 NIGHTSHIFT_DATASETS=connector-probe NIGHTSHIFT_PROBE_EXAMPLES_FILE=/path/to/probes.json \
   node scripts/evals start --suite nightshift-investigations --profile dev-vault --repetitions 1 \
-  --model eis-anthropic-claude-5-5-sonnet --judge eis-anthropic-claude-4-6-sonnet
+  --model eis-anthropic-claude-5-5-sonnet --judge eis-openai-gpt-6-sol
 ```
 
 Probes are not bundled: they name a real cluster's remotes and data streams, so they live outside
@@ -368,6 +368,50 @@ a subset its own `dataset` name so it does not replace the stored full set.
 Set `SELECTED_EVALUATORS=connector_used,within_time_budget` to skip the judge. Each run logs its
 case, duration, tool-call count, conversation and trace ids and scores. A failed `converse` call
 fails the test; low scores do not.
+
+## Wiki optimizer replay
+
+`NIGHTSHIFT_DATASETS=wiki-optimize` replays saved investigation rounds through the real Wiki
+optimizer with a real model and scores the wiki pages it writes. No investigation runs and no
+sandbox is needed, so a run takes a few model calls per example and isolates what the optimizer
+learns from a round: recurring tool failures and a correction in a follow-up message. The
+optimizer's own page store runs unchanged on an in-memory Elasticsearch fake, so page ids, statuses, corroboration counts and provenance behave as in production.
+
+It is opt-in: unset and `all` never select it. It still needs a model endpoint, so start it the same
+way as the other evals:
+
+```bash
+NIGHTSHIFT_DATASETS=wiki-optimize \
+  node scripts/evals start --suite nightshift-investigations --profile dev-vault --repetitions 3 \
+  --model eis-anthropic-claude-5-5-sonnet --judge eis-anthropic-claude-4-6-sonnet
+```
+
+The model is not deterministic, so use several repetitions and read the per-evaluator pass rates.
+The bundled `evals/wiki_optimize/synthetic.json` uses made-up services. Replays built from real
+traces name real infrastructure, so they live outside the repository: point
+`NIGHTSHIFT_WIKI_REPLAY_FILE` at a file in the same format.
+
+Each example replays one or more `rounds` against one store, optionally starting from `seed_pages`:
+
+| Round `kind`     | What the optimizer is told                                                                        |
+| ---------------- | ------------------------------------------------------------------------------------------------- |
+| `initial`        | An investigation: learn the durable structure and tool behaviour it established.                  |
+| `follow_up`      | A user turn after an answer (`previous_assistant_message`) that may correct or extend it.         |
+
+An example's `output` states what must happen. Terms in `must_capture` may list alternatives with
+`|`.
+
+| Evaluator             | Kind | Scores                                                                                         |
+| --------------------- | ---- | ---------------------------------------------------------------------------------------------- |
+| `capture_recall`      | CODE | The share of `must_capture` items found on a page of the right type and section.               |
+| `non_temporal`        | CODE | The share of written pages free of dates, ids and counts of one run.                           |
+| `must_not_absent`     | CODE | No page holds a case-specific detail listed in `must_not`.                                     |
+| `effects_met`         | CODE | Each round created, corroborated, rewrote, archived or left untouched the pages `effects` name. |
+| `page_bounds`         | CODE | No more pages written than `max_pages_written`, and no near-duplicates of a described page.    |
+| `new_pages_tentative` | CODE | A page created in a round starts tentative.                                                    |
+
+An evaluator that does not apply to an example scores `null` rather than 1, so pass rates are not
+diluted.
 
 ## Deferred sandbox session isolation
 
@@ -532,8 +576,9 @@ against.
 
 | Variable                         | Effect                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NIGHTSHIFT_DATASETS`            | Comma-separated dataset ids (whitespace trimmed). Smoke dataset ids such as `synthetic-smoke` select seeded evals; `trace-only` selects the file-driven investigations; they can be combined, e.g. `synthetic-smoke,trace-only`. Unset or `all` runs every eval when sandbox credentials are present, except that a stored `NIGHTSHIFT_DATASET_NAME` defaults to trace-only when selection is unset. Without them, unset runs only smoke with a warning, while an explicit `all` or `trace-only` fails before any test runs, even when Scout is reused. `connector-probe` selects the [connector probes](#connector-probes), which unset and `all` never include. `orcabench` selects the isolated ORCA dataset and cannot be combined with other ids; it requires an ORCA-configured Scout server. Unknown ids fail early. |
+| `NIGHTSHIFT_DATASETS`            | Comma-separated dataset ids (whitespace trimmed). Smoke dataset ids such as `synthetic-smoke` select seeded evals; `trace-only` selects the file-driven investigations; they can be combined, e.g. `synthetic-smoke,trace-only`. Unset or `all` runs every eval when sandbox credentials are present, except that a stored `NIGHTSHIFT_DATASET_NAME` defaults to trace-only when selection is unset. Without them, unset runs only smoke with a warning, while an explicit `all` or `trace-only` fails before any test runs, even when Scout is reused. `connector-probe` selects the [connector probes](#connector-probes), which unset and `all` never include. `wiki-optimize` selects the [Wiki optimizer replay](#wiki-optimizer-replay), which unset and `all` never include and which needs no sandbox credentials. `orcabench` selects the isolated ORCA dataset and cannot be combined with other ids; it requires an ORCA-configured Scout server. Unknown ids fail early. |
 | `NIGHTSHIFT_PROBE_EXAMPLES_FILE` | Examples file for `connector-probe`; required when it is selected. See [connector probes](#connector-probes).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `NIGHTSHIFT_WIKI_REPLAY_FILE` | Replay file for `wiki-optimize`; the bundled synthetic examples when unset. Same `nightshift/` dataset-file format as the investigation examples, with the round and expectation fields in [Wiki optimizer replay](#wiki-optimizer-replay). |
 | `NIGHTSHIFT_PROBE_TIME_BUDGET_S` | Seconds a probe may take before `within_time_budget` scores 0 (default 30).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | `SELECTED_EVALUATORS`            | Standard `@kbn/evals` filter, by evaluator name (`documents_restored`, `timestamps_replayed`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | `GCS_CREDENTIALS`                | Service account JSON Elasticsearch uses to reach the seed-data bucket. Read access is enough to run the suite.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
@@ -566,8 +611,8 @@ The bound is planned in Elasticsearch, not in the investigation: one read key pe
 whose role filters `@timestamp` with document-level security, set on the `orcabench-es` connector,
 so the agent investigates unchanged and cannot see past its snapshot.
 
-ORCA's judges bind to `eis-openai-gpt-5-4`, not the agent connector. Customer-0 keeps the suite's
-evaluation connector. The model is the paper's judge model, but not its settings: the paper runs
+ORCA's judges bind to `eis-openai-gpt-5-4`, not the agent connector; Customer-0's bind to
+`eis-openai-gpt-6-sol`. ORCA's model is the paper's judge model, but not its settings: the paper runs
 GPT-5.4 at reasoning effort "high", temperature 1, and 128,000 max tokens. Our judges answer
 through a forced `score` tool call, so the inference adapter sends reasoning effort "none" to
 gpt-5 models, and temperature falls back to the provider default of 1. Until the judges can set

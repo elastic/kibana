@@ -22,7 +22,7 @@ jest.mock('@kbn/embeddable-plugin/public', () => ({
 }));
 
 // Import after the mock so the component picks up the mocked EmbeddableRenderer
-// eslint-disable-next-line import/order
+// eslint-disable-next-line @kbn/compat/import-order
 import { LensRenderer } from './lens_custom_renderer_component';
 
 describe('LensRenderer interactivity inheritance', () => {

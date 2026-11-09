@@ -105,6 +105,7 @@ export const AutomationsPage = (): React.ReactElement => {
   } = useAutomationFilters(automations, getFacets);
   const {
     isReached: isGlobalLimitReached,
+    blockingLimit,
     limit: globalLimit,
     settingsHref: globalLimitSettingsHref,
     refetch: refetchQuotas,
@@ -196,9 +197,13 @@ export const AutomationsPage = (): React.ReactElement => {
       )}
       {!isEmpty && (
         <>
-          {isGlobalLimitReached && globalLimit !== undefined && (
+          {blockingLimit && globalLimit !== undefined && (
             <>
-              <GlobalLimitCallout limit={globalLimit} settingsHref={globalLimitSettingsHref} />
+              <GlobalLimitCallout
+                group={blockingLimit}
+                limit={globalLimit}
+                settingsHref={globalLimitSettingsHref}
+              />
               <EuiSpacer size="m" />
             </>
           )}
