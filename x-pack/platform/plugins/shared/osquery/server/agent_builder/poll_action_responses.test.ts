@@ -13,6 +13,43 @@ const responsesSearchResult = (distinctAgents: number) => ({
 });
 
 describe('pollActionResponses', () => {
+  it('matches action_data.space_id for a named space in both the responses and results searches', async () => {
+    const search = jest
+      .fn()
+      .mockResolvedValueOnce(responsesSearchResult(1))
+      .mockResolvedValueOnce({ hits: { hits: [{ _source: { osquery: { pid: 1 } } }] } });
+
+    await pollActionResponses({ search } as any, 'query-action-1', {
+      budgetMs: 10,
+      intervalMs: 1,
+      spaceId: 'sec-team',
+      expectedAgentCount: 1,
+    });
+
+    const indices = search.mock.calls.map(([params]) => params.index);
+    expect(indices).toEqual(
+      expect.arrayContaining([
+        'logs-osquery_manager.action.responses*',
+        'logs-osquery_manager.result*',
+      ])
+    );
+    for (const [params] of search.mock.calls) {
+      expect(params.query.bool.filter).toContainEqual({
+        bool: {
+          should: [
+            { term: { space_id: 'sec-team' } },
+            {
+              bool: {
+                filter: { term: { 'action_data.space_id': 'sec-team' } },
+                must_not: { exists: { field: 'space_id' } },
+              },
+            },
+          ],
+        },
+      });
+    }
+  });
+
   it('polls action responses for completion metadata and result index for SQL rows', async () => {
     const search = jest
       .fn()

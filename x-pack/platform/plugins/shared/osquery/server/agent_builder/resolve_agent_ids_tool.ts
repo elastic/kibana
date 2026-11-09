@@ -18,7 +18,7 @@ import {
   buildOsqueryPolicyKuery,
   getOsqueryAgentPolicyIds,
 } from '../lib/get_osquery_agent_policy_ids';
-import { buildAgentSearchKuery } from '../../common/utils/build_agent_search_kuery';
+import { buildHostSearchKuery } from '../../common/utils/build_agent_search_kuery';
 import { hasOsqueryToolPrivilege, unauthorizedToolResult } from './tool_authz';
 
 export const RESOLVE_AGENT_IDS_TOOL_ID = osqueryTool('resolve_agent_ids');
@@ -41,6 +41,8 @@ interface ResolvedAgent {
   status: string | null;
   osquery_capable: boolean;
 }
+
+const MAX_AGENT_PAGES_PER_HOSTNAME = 10;
 
 interface FleetAgentLike {
   id: string;
@@ -181,7 +183,10 @@ export const resolveAgentIdsTool = (
         const perPage = 50;
         const agents: FleetAgentLike[] = [];
 
-        for (let page = 1; ; page++) {
+        // Bounded: the host kuery is a substring match, so a short hostname can
+        // match a large share of the fleet. Enrollment history for one host is
+        // far smaller than this cap.
+        for (let page = 1; page <= MAX_AGENT_PAGES_PER_HOSTNAME; page++) {
           const response = await scopedAgentClient.listAgents({
             kuery,
             page,
@@ -192,17 +197,19 @@ export const resolveAgentIdsTool = (
           agents.push(...pageAgents);
 
           if (pageAgents.length < perPage) {
-            return agents;
+            break;
           }
         }
+
+        return agents;
       };
 
       const resolveHostname = async (hostname: string): Promise<ResolvedAgent> => {
         // Same case-insensitive host.name / host.hostname search the Osquery
         // agent picker uses: alert `host.name` casing often differs from the
-        // Fleet agent's hostname. The kuery is a broad candidate filter; the
-        // exact (case-insensitive) match is applied below.
-        const hostKuery = buildAgentSearchKuery(hostname);
+        // Fleet agent's hostname. The kuery is a hostname-only candidate filter
+        // (not agent id / policy / platform); the exact match is applied below.
+        const hostKuery = buildHostSearchKuery(hostname);
         const wanted = hostname.toLowerCase();
 
         const agents = await listAllMatchingAgents(`(${hostKuery}) and (${policyKuery})`);

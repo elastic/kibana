@@ -103,6 +103,31 @@ interface TableRefs {
 
 const SUBQUERY_START = /^\(\s*(?:SELECT|WITH)\b/i;
 
+/** An optional alias followed by a comma, i.e. another FROM item after a sub-select. */
+const TRAILING_FROM_ITEM = /^\s*(?:(?:AS\s+)?(?:[a-zA-Z_]\w*|`[^`]*`|"[^"]*"|\[[^\]]*\]))?\s*,/i;
+
+/** Text after the parenthesis that closes the one at `sql[0]`; '' when unbalanced. */
+const textAfterClosingParen = (sql: string): string => {
+  const closers: Record<string, string> = { '"': '"', '`': '`', '[': ']' };
+  let depth = 0;
+
+  for (let i = 0; i < sql.length; i++) {
+    const ch = sql[i];
+    if (ch in closers) {
+      const end = sql.indexOf(closers[ch], i + 1);
+      if (end === -1) return '';
+      i = end;
+    } else if (ch === '(') {
+      depth++;
+    } else if (ch === ')') {
+      depth--;
+      if (depth === 0) return sql.slice(i + 1);
+    }
+  }
+
+  return '';
+};
+
 /**
  * Table references in a FROM/JOIN clause, including comma-separated lists.
  *
@@ -132,6 +157,10 @@ const extractTableRefs = (sql: string): TableRefs => {
         unsupported = 'table-valued functions';
       } else if (!SUBQUERY_START.test(rest)) {
         unsupported = 'parenthesised table references';
+      } else if (TRAILING_FROM_ITEM.test(textAfterClosingParen(rest))) {
+        // The clause regex stops at the sub-select's parenthesis, so a table
+        // listed after it (`FROM (SELECT …) a, curl`) is never scanned.
+        unsupported = 'table lists after a sub-select';
       }
     }
 

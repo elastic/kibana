@@ -205,4 +205,30 @@ describe('resolveAgentIdsTool', () => {
     expect(listAgents).toHaveBeenCalledWith(expect.objectContaining({ page: 1, perPage: 50 }));
     expect(listAgents).toHaveBeenCalledWith(expect.objectContaining({ page: 2, perPage: 50 }));
   });
+
+  it('uses a hostname-only kuery that does not match agent id, policy or platform', async () => {
+    const { context, listAgents } = buildContext([buildAgent({ id: 'a1' })]);
+
+    const tool = resolveAgentIdsTool(context, loggerMock.create());
+    await tool.handler({ hostnames: ['linux'] }, { request: {}, spaceId: 'default' } as any);
+
+    const { kuery } = listAgents.mock.calls[0][0];
+    expect(kuery).toContain('local_metadata.host.hostname');
+    expect(kuery).not.toContain('local_metadata.elastic.agent.id');
+    expect(kuery).not.toContain('local_metadata.os.platform');
+    expect(kuery).not.toContain('policy_name');
+  });
+
+  it('stops paging after a bounded number of pages per hostname', async () => {
+    const fullPage = Array.from({ length: 50 }, (_, index) =>
+      buildAgent({ id: `stale-${index}`, status: 'offline' })
+    );
+    const { context, listAgents } = buildContext(Array.from({ length: 40 }, () => fullPage));
+
+    const tool = resolveAgentIdsTool(context, loggerMock.create());
+    await tool.handler({ hostnames: ['SRV-DC01'] }, { request: {}, spaceId: 'default' } as any);
+
+    expect(listAgents.mock.calls.length).toBeLessThanOrEqual(10);
+    expect(listAgents.mock.calls.length).toBeGreaterThan(1);
+  });
 });
