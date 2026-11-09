@@ -84,6 +84,25 @@ export const pollActionResponses = async (
   let responded = 0;
   let rows: Array<Record<string, unknown>> = [];
 
+  const readResultRows = async (): Promise<Array<Record<string, unknown>> | undefined> => {
+    const resultsResult = await esClient.search({
+      index: RESULTS_INDEX_PATTERN,
+      size: maxRows,
+      ignore_unavailable: true,
+      query: {
+        bool: {
+          filter: [{ term: { action_id: actionId } }, spaceFilter],
+        },
+      },
+    });
+
+    const hits = resultsResult.hits.hits;
+
+    return hits.length > 0
+      ? hits.map((hit) => extractRowFromHit((hit._source ?? {}) as Record<string, unknown>))
+      : undefined;
+  };
+
   const allAgentsResponded = () =>
     expectedAgentCount !== undefined && expectedAgentCount > 0 && responded >= expectedAgentCount;
 
@@ -116,21 +135,7 @@ export const pollActionResponses = async (
         (responsesResult.aggregations?.distinct_agents as { value: number } | undefined)?.value ??
         0;
 
-      const resultsResult = await esClient.search({
-        index: RESULTS_INDEX_PATTERN,
-        size: maxRows,
-        ignore_unavailable: true,
-        query: {
-          bool: {
-            filter: [{ term: { action_id: actionId } }, spaceFilter],
-          },
-        },
-      });
-
-      const hits = resultsResult.hits.hits;
-      if (hits.length > 0) {
-        rows = hits.map((hit) => extractRowFromHit((hit._source ?? {}) as Record<string, unknown>));
-      }
+      rows = (await readResultRows()) ?? rows;
 
       // Only stop early once every dispatched agent has reported. Stopping at
       // the first response reports a multi-agent query as complete while other
@@ -144,6 +149,19 @@ export const pollActionResponses = async (
       }
     } catch (pollErr) {
       logger?.debug(`Live-query poll error (will retry): ${pollErr}`);
+    }
+  }
+
+  // The response doc and the result rows are indexed independently, so the
+  // last rows can still be unsearchable when the final response is counted.
+  // Read results once more after completion so a `completed` status is not
+  // returned with a truncated row set.
+  if (allAgentsResponded()) {
+    try {
+      await sleep(intervalMs);
+      rows = (await readResultRows()) ?? rows;
+    } catch (finalReadErr) {
+      logger?.debug(`Live-query final results read failed: ${finalReadErr}`);
     }
   }
 

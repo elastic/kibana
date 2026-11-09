@@ -18,6 +18,7 @@ import {
   buildOsqueryPolicyKuery,
   getOsqueryAgentPolicyIds,
 } from '../lib/get_osquery_agent_policy_ids';
+import { buildAgentSearchKuery } from '../../common/utils/build_agent_search_kuery';
 import { hasOsqueryToolPrivilege, unauthorizedToolResult } from './tool_authz';
 
 export const RESOLVE_AGENT_IDS_TOOL_ID = osqueryTool('resolve_agent_ids');
@@ -197,15 +198,19 @@ export const resolveAgentIdsTool = (
       };
 
       const resolveHostname = async (hostname: string): Promise<ResolvedAgent> => {
-        const escaped = escapeKueryValue(hostname);
-        const hostKuery = `(local_metadata.host.hostname:"${escaped}" or local_metadata.host.name:"${escaped}")`;
+        // Same case-insensitive host.name / host.hostname search the Osquery
+        // agent picker uses: alert `host.name` casing often differs from the
+        // Fleet agent's hostname. The kuery is a broad candidate filter; the
+        // exact (case-insensitive) match is applied below.
+        const hostKuery = buildAgentSearchKuery(hostname);
+        const wanted = hostname.toLowerCase();
 
-        const agents = await listAllMatchingAgents(`${hostKuery} and (${policyKuery})`);
+        const agents = await listAllMatchingAgents(`(${hostKuery}) and (${policyKuery})`);
 
         const matches = (agents as FleetAgentLike[]).filter(
           (agent) =>
-            agent.local_metadata?.host?.hostname === hostname ||
-            agent.local_metadata?.host?.name === hostname
+            agent.local_metadata?.host?.hostname?.toLowerCase() === wanted ||
+            agent.local_metadata?.host?.name?.toLowerCase() === wanted
         );
 
         const best = [...matches].sort((a, b) => {

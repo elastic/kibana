@@ -104,4 +104,29 @@ describe('pollActionResponses', () => {
     expect(result.responded).toBe(3);
     expect(result.status).toBe('completed');
   });
+
+  it('re-reads result rows after completion so late-indexed rows are not dropped', async () => {
+    // Responses are counted complete while the results index has not yet made
+    // the final rows searchable; the post-completion read picks them up.
+    const search = jest
+      .fn()
+      .mockResolvedValueOnce(responsesSearchResult(1))
+      .mockResolvedValueOnce({ hits: { hits: [{ _source: { osquery: { pid: 1 } } }] } })
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [{ _source: { osquery: { pid: 1 } } }, { _source: { osquery: { pid: 2 } } }],
+        },
+      });
+
+    const result = await pollActionResponses({ search } as any, 'query-action-1', {
+      budgetMs: 50,
+      intervalMs: 1,
+      spaceId: 'default',
+      expectedAgentCount: 1,
+    });
+
+    expect(search).toHaveBeenCalledTimes(3);
+    expect(result.status).toBe('completed');
+    expect(result.rows).toEqual([{ pid: 1 }, { pid: 2 }]);
+  });
 });

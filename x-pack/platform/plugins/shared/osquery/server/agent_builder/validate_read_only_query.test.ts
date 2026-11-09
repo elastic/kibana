@@ -165,4 +165,65 @@ describe('validateReadOnlyQuery', () => {
       ).toBeNull();
     });
   });
+
+  describe('comment and literal tokenization', () => {
+    it('does not treat -- inside a string literal as a comment start', () => {
+      expect(
+        validateReadOnlyQuery(
+          "SELECT pid FROM processes WHERE name = '-- ' UNION SELECT 1 FROM curl WHERE url = 'http://internal/'",
+          ALLOWED
+        )
+      ).toMatch(/not read-only/i);
+    });
+
+    it('does not treat /* inside a string literal as a comment start', () => {
+      expect(
+        validateReadOnlyQuery(
+          "SELECT pid FROM processes WHERE name = '/*' UNION SELECT 1 FROM curl WHERE url = '*/'",
+          ALLOWED
+        )
+      ).toMatch(/not read-only/i);
+    });
+
+    it('does not let a quote inside a comment swallow real SQL', () => {
+      expect(validateReadOnlyQuery("SELECT pid FROM processes -- it's\n, curl", ALLOWED)).toMatch(
+        /not read-only/i
+      );
+    });
+
+    it('handles doubled quotes inside a literal', () => {
+      expect(
+        validateReadOnlyQuery("SELECT pid FROM processes WHERE name = 'it''s -- ok'", ALLOWED)
+      ).toBeNull();
+    });
+  });
+
+  describe('fail-closed table reference forms', () => {
+    it.each([
+      ['bracketed identifier', 'SELECT * FROM [curl]'],
+      ['bracketed identifier after comma', 'SELECT * FROM processes, [curl]'],
+      ['parenthesised reference', 'SELECT * FROM (curl)'],
+      ['parenthesised reference after comma', 'SELECT * FROM processes, (curl)'],
+      ['parenthesised reference after JOIN', 'SELECT * FROM processes JOIN (curl) ON 1=1'],
+      ['table-valued function', "SELECT * FROM curl('http://internal/')"],
+      ['table-valued function after JOIN', "SELECT * FROM processes JOIN yara('x') ON 1=1"],
+      ['schema-qualified name', 'SELECT * FROM main.curl'],
+    ])('rejects %s', (_label, query) => {
+      expect(validateReadOnlyQuery(query, ALLOWED)).toMatch(
+        /unsupported table reference|not read-only/i
+      );
+    });
+
+    it('still accepts a parenthesised sub-select over allowlisted tables', () => {
+      expect(
+        validateReadOnlyQuery('SELECT pid FROM (SELECT pid FROM processes) AS p', ALLOWED)
+      ).toBeNull();
+    });
+
+    it('checks tables inside a parenthesised sub-select', () => {
+      expect(validateReadOnlyQuery('SELECT pid FROM (SELECT pid FROM curl) AS p', ALLOWED)).toMatch(
+        /not read-only/i
+      );
+    });
+  });
 });
