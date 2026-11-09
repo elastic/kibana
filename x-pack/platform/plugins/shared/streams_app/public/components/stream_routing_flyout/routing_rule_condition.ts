@@ -25,7 +25,11 @@ const OTTL_OPERATORS: Readonly<Record<RoutingConditionOperator, string>> = {
   notEquals: '!=',
 };
 
-const QUOTED = '"((?:[^"\\\\]|\\\\.)*)"';
+/**
+ * A string literal whose only escapes are `\\` and `\"`, the ones the form writes.
+ * Any other escape (such as `\t`) keeps the condition raw, so it is never rewritten.
+ */
+const QUOTED = '"((?:[^"\\\\]|\\\\["\\\\])*)"';
 
 const COMPARISON_CONDITION = new RegExp(
   `^\\s*resource\\.attributes\\[${QUOTED}\\]\\s*(==|!=)\\s*${QUOTED}\\s*$`
@@ -33,7 +37,7 @@ const COMPARISON_CONDITION = new RegExp(
 
 const escapeString = (value: string): string => value.replace(/[\\"]/g, (char) => `\\${char}`);
 
-const unescapeString = (value: string): string => value.replace(/\\(.)/g, '$1');
+const unescapeString = (value: string): string => value.replace(/\\(["\\])/g, '$1');
 
 /** The OTTL path of a resource attribute. */
 const attributePath = (field: string): string => `resource.attributes["${escapeString(field)}"]`;

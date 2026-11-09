@@ -38,6 +38,17 @@ describe('routing rule conditions', () => {
     expect(parseWhen(when)).toEqual(condition);
   });
 
+  it('keeps comparisons with other escapes as written', () => {
+    for (const when of [
+      'resource.attributes["env"] == "a\\tb"',
+      'resource.attributes["a\\nb"] != "x"',
+      'resource.attributes["env"] == "\\u00e9"',
+    ]) {
+      expect(parseWhen(when)).toEqual({ raw: when });
+      expect(serializeCondition(parseWhen(when))).toBe(when);
+    }
+  });
+
   it('keeps other OTTL conditions as written', () => {
     for (const when of [
       'severity_number >= 17 and IsMatch(body, "error")',
