@@ -16,7 +16,7 @@ export const checkSavedObjects = (): readonly Step[] => [
     command: '.buildkite/scripts/steps/check_saved_objects.sh',
     label: 'Check changes in Saved Objects',
     key: 'check_saved_objects',
-    agents: spotAgent('n2-standard-2', spotZones.centralFCA),
+    agents: spotAgent('n2-standard-2', spotZones.n2),
     depends_on: [
       'linting',
       'linting_with_types',

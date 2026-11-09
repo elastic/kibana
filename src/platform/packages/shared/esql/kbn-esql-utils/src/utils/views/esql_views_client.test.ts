@@ -98,6 +98,30 @@ describe('createEsqlViewsManagementClient', () => {
     });
   });
 
+  it('requests validation and returns the warnings', async () => {
+    const { http, get, put } = createHttpMock();
+    get.mockRejectedValue(createHttpError(404, 'Not found'));
+    const response = {
+      acknowledged: true,
+      warnings: ['view [my-view] query is not valid: Unknown index [missing]'],
+    };
+    put.mockResolvedValue(response);
+
+    await expect(
+      createEsqlViewsManagementClient(http).createView({
+        name: 'my-view',
+        query: 'FROM missing',
+        validate: true,
+      })
+    ).resolves.toEqual(response);
+    expect(put).toHaveBeenCalledWith('/internal/esql/views/my-view', {
+      body: JSON.stringify({
+        query: 'FROM missing',
+      }),
+      query: { validate: true },
+    });
+  });
+
   it('rejects create when the view already exists', async () => {
     const { http, get, put } = createHttpMock();
     get.mockResolvedValue({ name: 'my-view', query: 'FROM logs-*' });
