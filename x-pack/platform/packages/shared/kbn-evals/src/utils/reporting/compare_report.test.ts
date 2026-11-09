@@ -154,6 +154,33 @@ describe('formatCompareReport', () => {
     expect(rowFor('Agreeing')).not.toContain('(mixed)');
   });
 
+  it('does not flag a non-significant disagreement as mixed', () => {
+    const { tableOutput } = formatCompareReport({
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
+      results: [
+        { ...makeResult({ evaluatorName: 'Noise', meanTarget: 0.6, pValue: 0.4 }), effectSign: 1 },
+      ],
+    });
+
+    const row = tableOutput.split('\n').find((line) => line.includes('Noise'));
+    expect(row).toContain('-0.10');
+    expect(row).not.toContain('(mixed)');
+  });
+
+  it('labels a NaN p-value as n/a, not as not significant', () => {
+    const { tableOutput, significantCount } = formatCompareReport({
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
+      results: [makeResult({ evaluatorName: 'Degenerate', pValue: NaN })],
+    });
+
+    const row = tableOutput.split('\n').find((line) => line.includes('Degenerate'));
+    expect(row).toContain('n/a');
+    expect(row).not.toMatch(/\bno\b/);
+    expect(significantCount).toBe(0);
+  });
+
   it('handles empty results gracefully', () => {
     const { header, summary, tableOutput, significantCount } = formatCompareReport({
       targetExperimentId: 'experiment-1',

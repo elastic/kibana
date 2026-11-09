@@ -34,13 +34,15 @@ const DIFFERENCE_STYLES: Record<EffectDirection, (formatted: string) => string> 
   mixed: (formatted) => chalk.yellow(`${formatted} (mixed)`),
 };
 
-function formatDifference(value: number, effect: EffectDirection): string {
+function formatDifference(value: number, effect: EffectDirection, significant: boolean): string {
   if (!Number.isFinite(value)) {
     return chalk.gray('-');
   }
 
   const formatted = value > 0 ? `+${value.toFixed(2)}` : value.toFixed(2);
-  return DIFFERENCE_STYLES[effect](formatted);
+  // A disagreement between test and mean only matters once the test calls the row significant.
+  const style = effect === 'mixed' && !significant ? 'unchanged' : effect;
+  return DIFFERENCE_STYLES[style](formatted);
 }
 
 function buildTableConfig(columnCount: number): {
@@ -79,6 +81,10 @@ export function formatCompareReport({
       a.datasetName.localeCompare(b.datasetName) || a.evaluatorName.localeCompare(b.evaluatorName)
   );
 
+  const hasPValue = (result: CorrectableComparisonResult): boolean => {
+    const pValue = getEffectivePValue(result);
+    return pValue !== null && Number.isFinite(pValue);
+  };
   const isSignificant = (result: CorrectableComparisonResult): boolean => {
     const pValue = getEffectivePValue(result);
     return pValue !== null && pValue < significanceThreshold;
@@ -102,12 +108,12 @@ export function formatCompareReport({
 
   sortedResults.forEach((result) => {
     const delta = result.meanTarget - result.meanBaseline;
-    const significanceLabel =
-      getEffectivePValue(result) === null
-        ? chalk.gray('n/a')
-        : isSignificant(result)
-        ? chalk.bold.green('yes')
-        : chalk.gray('no');
+    const significant = isSignificant(result);
+    const significanceLabel = !hasPValue(result)
+      ? chalk.gray('n/a')
+      : significant
+      ? chalk.bold.green('yes')
+      : chalk.gray('no');
 
     const rows = rowsByDataset.get(result.datasetName) ?? [];
     rows.push([
@@ -115,7 +121,7 @@ export function formatCompareReport({
       result.sampleSize.toString(),
       formatNumber(result.meanTarget),
       formatNumber(result.meanBaseline),
-      formatDifference(delta, getEffectDirection(result)) +
+      formatDifference(delta, getEffectDirection(result), significant) +
         formatDiscordantPairs(result.hypothesisTest),
       getTestLabel(result.hypothesisTest.id),
       formatPValue(result.pValue),

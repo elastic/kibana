@@ -337,6 +337,8 @@ EVAL_SLACK_NOTIFICATION_CHANNEL=#my-test-channel
 
 `node scripts/evals compare <target> <baseline>` (or `<target> --baseline-branch main --suite <suite-id>`) pairs the scores of two experiments and runs one paired test per dataset and evaluator: McNemar for pass/fail scores, Wilcoxon signed-rank otherwise, and a paired t-test for continuous scores once there are enough pairs. Each evaluator's direction (higher-is-better, lower-is-better or neutral) decides whether a change counts as an improvement or a regression.
 
+Pairs are formed per example. When a suite runs with `repetitions > 1`, each example's scores are first averaged across its repetitions, because repetitions of one example are not independent samples: 5 examples × 3 repetitions are 5 pairs, not 15. `N` in the report and `--min-pairs` count examples.
+
 **Multiplicity correction (default).** A comparison tests many evaluators at once, so at α = 0.05 a few false "significant" flags are expected by chance. By default the p-values of all comparisons in the run (every dataset × evaluator with a p-value) are adjusted with the Holm-Bonferroni step-down procedure. Reports show both the raw `p-value` and the `Adj. p-value`; the `Sig` / `Significant` column, the outcome and the regression gate use the adjusted value. The family is always every comparison in the run: `--regression-evaluators` and `--min-pairs` narrow what the gate can trip on, not the number of hypotheses the adjustment accounts for, so the gate and the report judge the same adjusted p-values. Pass `--no-multiplicity-correction` to judge on raw p-values (the adjusted column is then omitted).
 
 **Regression gate.** `compare` never fails on its own. Add `--fail-on-regression` to make it exit non-zero when any gated evaluator shows a statistically significant change in the worse direction:
@@ -345,7 +347,7 @@ EVAL_SLACK_NOTIFICATION_CHANNEL=#my-test-channel
 | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `--fail-on-regression`         | Exit with a failure if an evaluator is significantly worse (adjusted p < 0.05, unless `--no-multiplicity-correction`). Improvements, non-significant drops and neutral evaluators never trip. |
 | `--regression-evaluators a,b`  | Comma-separated evaluator names that can trip the gate (default: all). Names absent from the comparison log a warning; if none match, the run fails rather than pass vacuously.              |
-| `--min-pairs <n>`              | Minimum paired scores for an evaluator to be gated (default: 10). Evaluators below it are listed as `insufficient pairs`, can't trip the gate, and are called out in a warning: they were not checked. |
+| `--min-pairs <n>`              | Minimum paired examples for an evaluator to be gated (default: 10). Evaluators below it are listed as `insufficient pairs`, can't trip the gate, and are called out in a warning: they were not checked. |
 | `--no-multiplicity-correction` | Use raw p-values instead of Holm-Bonferroni adjusted ones.                                                                                                                                   |
 
 Exit codes (with `--fail-on-regression`):
@@ -359,7 +361,14 @@ The direction of a change is the one the row's test measured: the mean differenc
 
 With `--fail-on-regression`, a significant regression the gate cannot trip on (fewer than `--min-pairs` pairs, or outside `--regression-evaluators`) shows `Regression (not gated)` in the markdown Outcome column.
 
-Without `--fail-on-regression`, `compare` keeps its old behavior: a missing baseline or empty comparison logs a warning and exits 0, and missing scores, datasets or pairs remain plain errors (exit 1).
+Without `--fail-on-regression`, `compare` keeps its old behavior: a failed lookup or score read is logged and treated as empty, a missing baseline or empty comparison logs a warning and exits 0, and missing scores, datasets or pairs remain plain errors (exit 1).
+
+Things to know before wiring the gate into CI:
+
+- **Handle exit 2 and exit 3 separately.** Exit 3 is a regression verdict; exit 2 means nothing was proven either way (often a missing baseline or a too-small dataset). Treating both as "regressed", or both as "ignore", loses that distinction.
+- **The baseline is the latest run on `--baseline-branch`.** Anything that changed on that branch since (a model update, a dataset edit, another merged change) is attributed to the run under test.
+- **The default scope is every evaluator, including trace-based lower-is-better ones** such as latency and token counts, which vary with infrastructure load. For a CI gate, pass `--regression-evaluators` with the quality evaluators that should block a merge.
+- **"passed" can rest on one checked comparison.** The `Regression gate passed` line reports how many comparisons were checked; read it before trusting a pass on a small suite.
 
 The gate decision is a pure function (`evaluateRegressionGate` in `src/utils/reporting/regression_gate.ts`); the Holm adjustment is in `holm_correction.ts`.
 

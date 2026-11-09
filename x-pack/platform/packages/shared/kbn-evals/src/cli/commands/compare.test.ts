@@ -36,7 +36,7 @@ const scoreDoc = (
   experimentId: string,
   exampleIndex: number,
   score: number,
-  { datasetId = 'ds-1', evaluatorName = 'correctness' } = {}
+  { datasetId = 'ds-1', evaluatorName = 'correctness', repetition = 0, totalRepetitions = 1 } = {}
 ): EvaluationScoreDocument => ({
   '@timestamp': '2026-05-01T11:00:00.000Z',
   experiment_id: experimentId,
@@ -48,7 +48,7 @@ const scoreDoc = (
   },
   task: {
     trace_id: null,
-    repetition_index: 0,
+    repetition_index: repetition,
     output: {},
     model: { id: 'gpt-4', family: 'gpt', provider: 'openai' },
   },
@@ -58,7 +58,7 @@ const scoreDoc = (
     direction: 'maximize',
     model: { id: 'gpt-4o-mini', family: 'gpt', provider: 'openai' },
   },
-  metadata: { execution_id: experimentId, total_repetitions: 1 },
+  metadata: { execution_id: experimentId, total_repetitions: totalRepetitions },
 });
 
 const experiment = (experimentId: string, scoreAt: (index: number) => number) =>
@@ -203,6 +203,25 @@ describe('compareCmd exit codes', () => {
     expect((await runCompare([...argv, '--no-multiplicity-correction'])).exitCode).toBe(
       GATE_REGRESSION_EXIT_CODE
     );
+  });
+
+  it('counts examples, not repetitions, towards --min-pairs', async () => {
+    // 5 examples x 3 repetitions: 15 docs per side, but only 5 independent pairs.
+    const repeated = (experimentId: string, scoreAt: (example: number) => number) =>
+      [0, 1, 2, 3, 4].flatMap((example) =>
+        [0, 1, 2].map((repetition) =>
+          scoreDoc(experimentId, example, scoreAt(example), { repetition, totalRepetitions: 3 })
+        )
+      );
+    stubScores(
+      repeated(TARGET, (example) => 0.4 - 0.01 * example),
+      repeated(BASELINE, () => 0.8)
+    );
+
+    const outcome = await runCompare([...GATE, '--min-pairs', '10']);
+
+    expect(outcome.exitCode).toBe(GATE_INCONCLUSIVE_EXIT_CODE);
+    expect('error' in outcome && outcome.error.message).toContain('inconclusive');
   });
 
   describe('nothing to compare', () => {
@@ -400,7 +419,7 @@ describe('compareCmd exit codes', () => {
       expect(mockEvalsClient.getExperimentScores).not.toHaveBeenCalled();
     });
 
-    it('resolves every build ID strictly, including the markdown baseline lookup', async () => {
+    const resolveBuildIds = () =>
       mockEvalsClient.findLatestExperimentForBuild.mockImplementation(
         async ({ baseExecutionId }: { baseExecutionId: string }) => ({
           executionId: baseExecutionId === 'bk-1' ? TARGET : BASELINE,
@@ -409,24 +428,59 @@ describe('compareCmd exit codes', () => {
           gitBranch: null,
         })
       );
+
+    const runMarkdown = async (argv: string[]) => {
       const write = jest.spyOn(process.stdout, 'write').mockImplementation(() => true);
       try {
-        await runCompare([
-          'bk-1',
-          'bk-2',
-          '--suite',
-          'suite',
-          '--format',
-          'markdown',
-          '--fail-on-regression',
-        ]);
+        const outcome = await runCompare([...argv, '--format', 'markdown']);
+        return { outcome, markdown: write.mock.calls.map(([chunk]) => String(chunk)).join('') };
       } finally {
         write.mockRestore();
       }
+    };
 
-      expect(mockEvalsClient.findLatestExperimentForBuild).toHaveBeenCalledTimes(3);
+    it('resolves build IDs strictly under the gate, but not the report-only baseline lookup', async () => {
+      resolveBuildIds();
+
+      await runMarkdown(['bk-1', 'bk-2', '--suite', 'suite', '--fail-on-regression']);
+
+      const calls = mockEvalsClient.findLatestExperimentForBuild.mock.calls.map(([args]) => args);
+      expect(calls).toHaveLength(3);
+      const [target, baseline, reportOnly] = calls;
+      expect(target).toEqual(expect.objectContaining({ throwOnError: true }));
+      expect(baseline).toEqual(expect.objectContaining({ throwOnError: true }));
+      expect(reportOnly.throwOnError).toBeUndefined();
+    });
+
+    it('still writes the markdown report when the report-only baseline lookup finds nothing', async () => {
+      // The real client logs a failed lookup and returns undefined when throwOnError is off.
+      mockEvalsClient.findLatestExperimentForBuild
+        .mockImplementationOnce(async () => ({ executionId: TARGET }))
+        .mockImplementationOnce(async () => ({ executionId: BASELINE }))
+        .mockImplementationOnce(async () => undefined);
+
+      const { outcome, markdown } = await runMarkdown([
+        'bk-1',
+        'bk-2',
+        '--suite',
+        'suite',
+        '--fail-on-regression',
+      ]);
+
+      expect(outcome).toEqual({ exitCode: 0 });
+      expect(markdown).toContain(TARGET);
+    });
+
+    it('keeps the lenient reads without --fail-on-regression', async () => {
+      resolveBuildIds();
+
+      expect(await runCompare(['bk-1', 'bk-2', '--suite', 'suite'])).toEqual({ exitCode: 0 });
+
       for (const [args] of mockEvalsClient.findLatestExperimentForBuild.mock.calls) {
-        expect(args).toEqual(expect.objectContaining({ throwOnError: true }));
+        expect(args.throwOnError).toBeFalsy();
+      }
+      for (const call of mockEvalsClient.getExperimentScores.mock.calls) {
+        expect(call[2]).toEqual({ throwOnError: false });
       }
     });
   });

@@ -18,6 +18,7 @@ import { buildExecutionCompareUrl } from '../../utils/evals_ui_url';
 import { readSpaceIdsFlag } from '../run_helpers';
 import { formatCompareReport } from '../../utils/reporting/compare_report';
 import { formatMarkdownCompareReport } from '../../utils/reporting/compare_markdown_report';
+import { averageRepetitions } from '../../utils/reporting/average_repetitions';
 import { attachEffectSigns } from '../../utils/reporting/effect_direction';
 import { applyHolmCorrection } from '../../utils/reporting/holm_correction';
 import {
@@ -65,7 +66,7 @@ export const compareCmd = {
     --regression-evaluators         Comma-separated evaluator names that can trip the gate
                                     (default: all). Names absent from the
                                     comparison warn; if none match, the run fails.
-    --min-pairs                     Minimum paired scores for an evaluator to be gated
+    --min-pairs                     Minimum paired examples for an evaluator to be gated
                                     (default: ${DEFAULT_REGRESSION_MIN_PAIRS}). Fewer pairs are reported as
                                     "insufficient pairs" and cannot trip the gate.
     --no-multiplicity-correction    Judge significance on raw p-values. By default p-values are
@@ -101,7 +102,7 @@ export const compareCmd = {
       --space-ids        Spaces the experiments were run in
       --fail-on-regression            Exit 3 if any evaluator got significantly worse, 2 if the gate was inconclusive or not evaluated
       --regression-evaluators         Comma-separated evaluator names that can trip the gate (default: all)
-      --min-pairs                     Minimum paired scores for an evaluator to be gated (default: ${DEFAULT_REGRESSION_MIN_PAIRS})
+      --min-pairs                     Minimum paired examples for an evaluator to be gated (default: ${DEFAULT_REGRESSION_MIN_PAIRS})
       --no-multiplicity-correction    Use raw p-values instead of Holm-Bonferroni adjusted ones
     `,
   },
@@ -207,7 +208,7 @@ export const compareCmd = {
         const resolved = await evalsClient.findLatestExperimentForBuild({
           suiteId,
           baseExecutionId: targetExperimentId,
-          throwOnError: true,
+          throwOnError: failOnRegression,
         });
         if (resolved) {
           log.info(`Resolved PR experiment: ${targetExperimentId} → ${resolved.executionId}`);
@@ -234,7 +235,7 @@ export const compareCmd = {
         branch: baselineBranch,
         taskModelId,
         excludeExecutionId: targetExperimentId,
-        throwOnError: true,
+        throwOnError: failOnRegression,
       });
 
       if (!baselineMetadata) {
@@ -269,7 +270,7 @@ export const compareCmd = {
           const resolved = await evalsClient.findLatestExperimentForBuild({
             suiteId,
             baseExecutionId: id,
-            throwOnError: true,
+            throwOnError: failOnRegression,
           });
           if (resolved) {
             log.info(`Resolved experiment ${id} → ${resolved.executionId}`);
@@ -288,10 +289,10 @@ export const compareCmd = {
           const baselineBaseId = baselineExperimentId.includes('::')
             ? baselineExperimentId.split('::')[0]
             : baselineExperimentId;
+          // Only feeds the report header, so a failed lookup is logged by the client and skipped.
           baselineMetadata = await evalsClient.findLatestExperimentForBuild({
             suiteId,
             baseExecutionId: baselineBaseId,
-            throwOnError: true,
           });
         }
       }
@@ -300,11 +301,13 @@ export const compareCmd = {
     const targetFilter = suiteId ? { suiteId, executionId: targetExperimentId } : undefined;
     const baselineFilter = suiteId ? { suiteId, executionId: baselineExperimentId } : undefined;
 
-    // A failed request has to stay an error (exit 1): read as "no baseline" or "no scores" it
-    // would turn an outage into an inconclusive gate.
+    // Under the gate a failed request has to stay an error (exit 1): read as "no baseline" or "no
+    // scores" it would turn an outage into an inconclusive gate. Without the gate the lookups keep
+    // their log-and-continue behaviour.
+    const readOptions = { throwOnError: failOnRegression };
     const [targetExperimentScores, baselineExperimentScores] = await Promise.all([
-      evalsClient.getExperimentScores(targetExperimentId, targetFilter, { throwOnError: true }),
-      evalsClient.getExperimentScores(baselineExperimentId, baselineFilter, { throwOnError: true }),
+      evalsClient.getExperimentScores(targetExperimentId, targetFilter, readOptions),
+      evalsClient.getExperimentScores(baselineExperimentId, baselineFilter, readOptions),
     ]);
 
     if (targetExperimentScores.length === 0) {
@@ -342,9 +345,11 @@ export const compareCmd = {
       overlappingDatasetSet.has(score.example.dataset.id)
     );
 
+    // Pair per example, not per repetition: repetitions of one example are not independent, and
+    // counting them as pairs would inflate n for --min-pairs and shrink every p-value.
     const { pairs, skippedMissingPairs, skippedNullScores } = pairScores(
-      filteredTargetScores,
-      filteredBaselineScores
+      averageRepetitions(filteredTargetScores),
+      averageRepetitions(filteredBaselineScores)
     );
 
     if (pairs.length === 0) {
@@ -352,7 +357,7 @@ export const compareCmd = {
     }
 
     log.info(
-      `Paired ${pairs.length} scores (skipped ${skippedMissingPairs} missing pairs, ${skippedNullScores} null scores).`
+      `Paired ${pairs.length} example scores, repetitions averaged (skipped ${skippedMissingPairs} missing pairs, ${skippedNullScores} null scores).`
     );
 
     const comparisonResults = compareScores(pairs);
