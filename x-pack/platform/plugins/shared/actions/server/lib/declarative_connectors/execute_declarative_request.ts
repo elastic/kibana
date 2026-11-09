@@ -6,7 +6,7 @@
  */
 
 import type { ActionContext } from '@kbn/connector-specs';
-import type { DeclarativeRequest } from './types';
+import type { DeclarativeRequest, DeclarativeResponseMapping, DeclarativeRetry } from './types';
 import { renderTemplateValue, renderUrlTemplate, type TemplateContext } from './render_template';
 
 export interface ExecuteDeclarativeRequestOptions {
@@ -14,7 +14,37 @@ export interface ExecuteDeclarativeRequestOptions {
   request: DeclarativeRequest;
   input: Record<string, unknown>;
   config?: Record<string, unknown>;
+  sleep?: (ms: number) => Promise<void>;
 }
+
+interface ClientResponse {
+  status: number;
+  headers: Record<string, unknown> & { get?: (name: string) => unknown };
+  data: unknown;
+}
+
+interface RequestConfig {
+  method: string;
+  url: string;
+  params?: unknown;
+  headers?: Record<string, string>;
+  data?: unknown;
+}
+
+interface HttpError extends Error {
+  response?: {
+    status: number;
+    headers: Record<string, unknown>;
+    data: unknown;
+  };
+}
+
+const DEFAULT_INITIAL_DELAY_MS = 200;
+const DEFAULT_MAX_DELAY_MS = 5000;
+
+const defaultSleep = async (milliseconds: number): Promise<void> => {
+  await new Promise((resolve) => setTimeout(resolve, milliseconds));
+};
 
 const toHeaderRecord = (value: unknown): Record<string, string> => {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
@@ -99,6 +129,132 @@ const buildUrl = (request: DeclarativeRequest, context: TemplateContext): string
   );
 };
 
+const plainHeaders = (headers: ClientResponse['headers'] | undefined): Record<string, unknown> => {
+  if (!headers || typeof headers !== 'object') {
+    return {};
+  }
+  const toJson = (headers as { toJSON?: () => unknown }).toJSON;
+  if (typeof toJson === 'function') {
+    const json = toJson.call(headers);
+    if (json && typeof json === 'object' && !Array.isArray(json)) {
+      return json as Record<string, unknown>;
+    }
+  }
+  return { ...headers };
+};
+
+const getHeader = (
+  headers: ClientResponse['headers'] | undefined,
+  name: string
+): string | undefined => {
+  if (!headers) {
+    return undefined;
+  }
+  const getter = headers.get;
+  const direct = typeof getter === 'function' ? getter.call(headers, name) : undefined;
+  const value =
+    direct ??
+    Object.entries(plainHeaders(headers)).find(
+      ([key]) => key.toLowerCase() === name.toLowerCase()
+    )?.[1];
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (Array.isArray(value) && typeof value[0] === 'string') {
+    return value[0];
+  }
+  return undefined;
+};
+
+const toHttpError = (response: ClientResponse): HttpError => {
+  const error = new Error(`Request failed with status code ${response.status}`) as HttpError;
+  error.response = {
+    status: response.status,
+    headers: plainHeaders(response.headers),
+    data: response.data,
+  };
+  return error;
+};
+
+const readStatus = (error: unknown): number | undefined => {
+  const status = (error as HttpError | undefined)?.response?.status;
+  return typeof status === 'number' ? status : undefined;
+};
+
+const getRetryDelay = (error: unknown, attempt: number, retry: DeclarativeRetry): number => {
+  const maxDelayMs = retry.maxDelayMs ?? DEFAULT_MAX_DELAY_MS;
+  const initialDelayMs = retry.initialDelayMs ?? DEFAULT_INITIAL_DELAY_MS;
+  const retryAfter = getHeader((error as HttpError).response?.headers, 'retry-after');
+  if (retryAfter !== undefined) {
+    const seconds = Number(retryAfter);
+    if (Number.isFinite(seconds) && seconds >= 0) {
+      return Math.min(seconds * 1000, maxDelayMs);
+    }
+    const date = Date.parse(retryAfter);
+    if (Number.isFinite(date)) {
+      return Math.min(Math.max(date - Date.now(), 0), maxDelayMs);
+    }
+  }
+  return Math.min(initialDelayMs * 2 ** Math.max(attempt - 1, 0), maxDelayMs);
+};
+
+const requestWithRetry = async (
+  client: ActionContext['client'],
+  config: RequestConfig,
+  retry: DeclarativeRetry | undefined,
+  sleep: (ms: number) => Promise<void>
+): Promise<ClientResponse> => {
+  const maxAttempts = retry?.maxAttempts ?? 1;
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const response = (await client.request(config)) as ClientResponse;
+      if (response.status >= 400) {
+        throw toHttpError(response);
+      }
+      return response;
+    } catch (error) {
+      lastError = error;
+      const status = readStatus(error);
+      const shouldRetry =
+        retry !== undefined &&
+        attempt < maxAttempts &&
+        status !== undefined &&
+        retry.statusCodes.includes(status);
+      if (!shouldRetry) {
+        throw error;
+      }
+      await sleep(getRetryDelay(error, attempt, retry));
+    }
+  }
+  throw lastError;
+};
+
+const getPath = (value: unknown, path: string): { found: boolean; value: unknown } => {
+  let current = value;
+  for (const segment of path.split('.')) {
+    if (current === null || typeof current !== 'object' || !(segment in (current as object))) {
+      return { found: false, value: undefined };
+    }
+    current = (current as Record<string, unknown>)[segment];
+  }
+  return { found: true, value: current };
+};
+
+const applyResponseMapping = (
+  data: unknown,
+  mapping: DeclarativeResponseMapping | undefined
+): unknown => {
+  if (!mapping?.dataPath) {
+    return mapping?.outputKey ? { [mapping.outputKey]: data } : data;
+  }
+  const selected = getPath(data, mapping.dataPath);
+  if (!selected.found) {
+    throw new Error(`Response path "${mapping.dataPath}" not found`);
+  }
+  return mapping.outputKey ? { [mapping.outputKey]: selected.value } : selected.value;
+};
+
 const toFormBody = (value: unknown): URLSearchParams => {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
     throw new Error('Declarative form request bodies must be objects.');
@@ -147,30 +303,31 @@ const toResult = (data: unknown): Record<string, unknown> => {
   return { data };
 };
 
-/** Runs one declarative HTTP request and returns the response body. */
+/** Runs a declarative HTTP request, including retry and response mapping. */
 export const executeDeclarativeRequest = async ({
   client,
   request,
   input,
   config,
+  sleep = defaultSleep,
 }: ExecuteDeclarativeRequestOptions): Promise<Record<string, unknown>> => {
   const context: TemplateContext = { input, config: config ?? {} };
-  const url = buildUrl(request, context);
+  const firstUrl = buildUrl(request, context);
   const renderedHeaders = toHeaderRecord(renderTemplateValue(request.headers ?? {}, context));
-  const query = renderTemplateValue(request.query ?? {}, context);
+  const renderedQuery = renderTemplateValue(request.query ?? {}, context);
   const renderedBody =
     request.body === undefined ? undefined : renderTemplateValue(request.body, context);
   const data =
     renderedBody === undefined ? undefined : toRequestBody(renderedBody, request.bodyType);
   const headers = withContentType(renderedHeaders, request.bodyType, data !== undefined);
-
-  const response = await client.request({
+  const firstConfig: RequestConfig = {
     method: request.method,
-    url,
-    params: query,
+    url: firstUrl,
+    params: renderedQuery,
     headers,
     ...(data !== undefined ? { data } : {}),
-  });
+  };
 
-  return toResult(response.data);
+  const response = await requestWithRetry(client, firstConfig, request.retry, sleep);
+  return toResult(applyResponseMapping(response.data, request.response));
 };

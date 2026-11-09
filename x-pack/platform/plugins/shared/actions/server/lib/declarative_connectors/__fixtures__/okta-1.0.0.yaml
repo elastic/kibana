@@ -63,6 +63,13 @@ actions:
       query:
         limit: "{{ input.limit }}"
         after: "{{ input.after }}"
+      retry:
+        statusCodes:
+          - 429
+          - 503
+        maxAttempts: 3
+        initialDelayMs: 200
+        maxDelayMs: 5000
   getLogs:
     description: Read recent Okta System Log events with bounded Link-header pagination.
     isTool: true
@@ -99,6 +106,13 @@ actions:
         q: "{{ input.q }}"
         limit: "{{ input.limit }}"
         after: "{{ input.after }}"
+      retry:
+        statusCodes:
+          - 429
+          - 503
+        maxAttempts: 3
+        initialDelayMs: 200
+        maxDelayMs: 5000
 test:
   description: Verify connectivity by listing one user.
   request:

@@ -52,6 +52,18 @@ export type DeclarativeTemplateRoot = 'input' | 'config';
 
 export type DeclarativeHttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
+export interface DeclarativeRetry {
+  statusCodes: number[];
+  maxAttempts: number;
+  initialDelayMs?: number;
+  maxDelayMs?: number;
+}
+
+export interface DeclarativeResponseMapping {
+  dataPath?: string;
+  outputKey?: string;
+}
+
 export interface DeclarativeRequest {
   method: DeclarativeHttpMethod;
   url?: string;
@@ -61,6 +73,8 @@ export interface DeclarativeRequest {
   headers?: Record<string, unknown>;
   body?: unknown;
   bodyType?: 'json' | 'form' | 'text';
+  retry?: DeclarativeRetry;
+  response?: DeclarativeResponseMapping;
 }
 
 export interface DeclarativeAction {

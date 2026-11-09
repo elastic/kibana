@@ -76,6 +76,15 @@ actions:
         maxAgeInDays: "{{ input.maxAgeInDays }}"
         verbose: "{{ input.verbose }}"
         someOtherParam: "{{ input.someOtherParam? }}"
+      retry:
+        statusCodes:
+          - 429
+          - 503
+        maxAttempts: 3
+        initialDelayMs: 200
+        maxDelayMs: 5000
+      response:
+        dataPath: data
   reportIp:
     description: Report an IPv4 address with one or more abuse categories.
     isTool: true
@@ -106,6 +115,8 @@ actions:
         ip: "{{ input.ip }}"
         categories: "{{ input.categories }}"
         comment: "{{ input.comment }}"
+      response:
+        dataPath: data
 test:
   description: Verify the API key with a bounded IP check.
   request:
@@ -116,3 +127,5 @@ test:
       ipAddress: 8.8.8.8
       maxAgeInDays: 1
       verbose: false
+    response:
+      dataPath: data
