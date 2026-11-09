@@ -26,7 +26,13 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { Redirect, useLocation } from 'react-router-dom';
 import type { EpisodeAction, EpisodeActionsDeps } from '@kbn/alerting-v2-episodes-ui/actions';
 import { closeAddToCaseModal, createAddToCaseAction } from '@kbn/alerting-v2-episodes-ui/actions';
-import { EuiPageSection } from '@elastic/eui';
+import { EuiPageSection, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
+import {
+  KBN_RECESSED_GLASS_CLASS,
+  kbnRecessedGlassCss,
+} from '@kbn/css-utils/public/recessed_glass_css';
 import { ALERTING_V2_RULES_TAB_ID } from '@kbn/alerting-v2-constants';
 import { OBSERVABILITY_OWNER } from '@kbn/cases-plugin/common';
 import { AlertingNavPromo } from '@kbn/observability-plugin/public';
@@ -180,6 +186,9 @@ export const ObservabilityAlertingApp = ({
   const rulesTabVisibility = getObservabilityRulesTabVisibility(coreStart.application.capabilities);
   const { showV2: hasV2Rules } = rulesTabVisibility;
   const isUniversalSelected = pathname.includes(OBSERVABILITY_ALERTING_RULES_V2_PATH);
+  const euiThemeContext = useEuiTheme();
+  const isGlassAlerts =
+    useChromeStyle() !== 'classic' && pathname.startsWith(OBSERVABILITY_ALERTING_ALERTS_PATH);
   // Stable host shell: persist on leave/unmount of Observability Alerting, not list-header churn.
   const v2RulesTabNewBadge = useV2RulesTabNewBadge(isUniversalSelected, {
     persistOnUnmount: true,
@@ -222,7 +231,14 @@ export const ObservabilityAlertingApp = ({
 
   // The template adds no padding: each route's EuiPageSection supplies the 16px that AppHeader `bleed` needs.
   return (
-    <ObservabilityPageTemplate pageSectionProps={{ paddingSize: 'none' }}>
+    <ObservabilityPageTemplate
+      pageSectionProps={{ paddingSize: 'none' }}
+      // POC: outside classic chrome, the alerts route sits on the recessed glass surface.
+      className={isGlassAlerts ? KBN_RECESSED_GLASS_CLASS : undefined}
+      panelled={isGlassAlerts ? false : undefined}
+      minHeight={isGlassAlerts ? 'var(--kbn-application--content-height, 0)' : undefined}
+      css={isGlassAlerts ? css(kbnRecessedGlassCss(euiThemeContext)) : undefined}
+    >
       <Routes>
         <Route exact path="/">
           <Redirect to={OBSERVABILITY_ALERTING_ALERTS_PATH} />
