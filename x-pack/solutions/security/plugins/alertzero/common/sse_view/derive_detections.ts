@@ -57,20 +57,106 @@ const dedupeDefined = (values: ReadonlyArray<string | undefined>): string[] => [
   ),
 ];
 
+/** Matched IOC entries on one event that name `value` (prefer `matched.iocs`). */
+const matchedIocsForValue = (
+  event: SseEventRef,
+  value: string
+): Array<{ type: string; value: string; field: string }> => {
+  if (event.matched?.iocs && event.matched.iocs.length > 0) {
+    return event.matched.iocs.filter((ioc) => ioc.value === value && Boolean(ioc.field));
+  }
+  if (event.matched?.ioc?.value === value && event.matched.field) {
+    return [
+      {
+        type: event.matched.ioc.type,
+        value: event.matched.ioc.value,
+        field: event.matched.field,
+      },
+    ];
+  }
+  return [];
+};
+
 /** Every event whose `matched.ioc`/`matched.iocs` names `value`, for borrowing host/user names. */
 const hostsAndUsersForIocValue = (
   events: readonly SseEventRef[],
   value: string
 ): { hosts: string[]; users: string[] } => {
-  const matching = events.filter(
-    (event) =>
-      event.matched?.ioc?.value === value ||
-      (event.matched?.iocs ?? []).some((ioc) => ioc.value === value)
-  );
+  const matching = events.filter((event) => matchedIocsForValue(event, value).length > 0);
   return {
     hosts: dedupeDefined(matching.map((event) => event.host)).slice(0, MAX_NAMES),
     users: dedupeDefined(matching.map((event) => event.user)).slice(0, MAX_NAMES),
   };
+};
+
+/**
+ * Field (and source indices) observed on cited events for an IOC value. Tier 1's
+ * `per_ioc.field` is the first searched slot for that IOC type, which can disagree
+ * with the ECS field that actually matched (`source.ip` vs `destination.ip`,
+ * `file.hash.sha256` vs `process.hash.sha256`). Discover pivots need the observed
+ * field or they return empty / Unknown column.
+ */
+export const observedIocMatchFromEvents = (
+  events: readonly SseEventRef[],
+  value: string
+): { field: string; indices: string[] } | undefined => {
+  const fieldCounts = new Map<string, number>();
+  const indices: string[] = [];
+  for (const event of events) {
+    const matched = matchedIocsForValue(event, value);
+    if (matched.length === 0) {
+      continue;
+    }
+    for (const ioc of matched) {
+      fieldCounts.set(ioc.field, (fieldCounts.get(ioc.field) ?? 0) + 1);
+    }
+    if (event.source_index) {
+      indices.push(event.source_index);
+    }
+  }
+  if (fieldCounts.size === 0) {
+    return undefined;
+  }
+  let field = '';
+  let bestCount = -1;
+  for (const [candidate, count] of fieldCounts) {
+    if (count > bestCount) {
+      field = candidate;
+      bestCount = count;
+    }
+  }
+  return { field, indices: dedupeDefined(indices) };
+};
+
+/**
+ * Prefer cited-event matched fields over Tier 1 `per_ioc.field` when they disagree,
+ * so stored and freshly derived detections pivot Discover on a real hit field.
+ */
+export const reconcileIocDetectionFields = (
+  detections: readonly SseDetection[],
+  events: readonly SseEventRef[]
+): SseDetection[] => {
+  if (events.length === 0) {
+    return [...detections];
+  }
+  return detections.map((detection) => {
+    if (detection.kind !== 'ioc') {
+      return detection;
+    }
+    const value = detection.matched_on[0]?.value;
+    if (!value) {
+      return detection;
+    }
+    const observed = observedIocMatchFromEvents(events, value);
+    if (!observed || observed.field === detection.field) {
+      return detection;
+    }
+    return {
+      ...detection,
+      field: observed.field,
+      matched_on: [{ field: observed.field, value }],
+    };
+  });
 };
 
 interface IocHitGroup {
@@ -132,12 +218,15 @@ const detectionsFromPerIoc = (
     const { hosts, users } = hostsAndUsersForIocValue(events, entry.value);
     const hostCount = entry.host_count ?? (hosts.length > 0 ? hosts.length : undefined);
     const userCount = entry.user_count ?? (users.length > 0 ? users.length : undefined);
+    // Prefer the ECS field cited events actually matched; `per_ioc.field` is only the
+    // first searched slot for the IOC type and can miss the hit (see observedIocMatchFromEvents).
+    const field = observedIocMatchFromEvents(events, entry.value)?.field ?? entry.field;
     return {
       id: `ioc:${entry.type}:${entry.value}`,
       kind: 'ioc',
-      field: entry.field,
+      field,
       basis: classifyBasis([{ type: entry.type, value: entry.value }], hasBehaviorHit),
-      matched_on: [{ field: entry.field, value: entry.value }],
+      matched_on: [{ field, value: entry.value }],
       ...(hosts.length > 0 ? { hosts } : {}),
       ...(users.length > 0 ? { users } : {}),
       ...(hostCount !== undefined ? { host_count: hostCount } : {}),
@@ -147,6 +236,60 @@ const detectionsFromPerIoc = (
       ...(entry.last_seen ? { last_seen: entry.last_seen } : {}),
     };
   });
+
+interface IocEventGroup {
+  type: string;
+  value: string;
+  field: string;
+  events: SseEventRef[];
+}
+
+/**
+ * Groups cited SSE events by every IOC each one matched (`matched.iocs`, else
+ * the single `matched.ioc`/`matched.field` pair). Used for old stored SSEs that
+ * carry neither `per_ioc` nor Tier 1 `hits` on the persisted hunt_result (D13).
+ */
+const groupEventsByIoc = (events: readonly SseEventRef[]): IocEventGroup[] => {
+  const groups = new Map<string, IocEventGroup>();
+  for (const event of events) {
+    const matchedIocs =
+      event.matched?.iocs && event.matched.iocs.length > 0
+        ? event.matched.iocs
+        : event.matched?.ioc?.type && event.matched.ioc.value
+        ? [
+            {
+              type: event.matched.ioc.type,
+              value: event.matched.ioc.value,
+              field: event.matched.field ?? '',
+            },
+          ]
+        : [];
+    for (const ioc of matchedIocs) {
+      const key = `${ioc.type}:${ioc.value}`;
+      const group = groups.get(key);
+      if (group) {
+        group.events.push(event);
+      } else {
+        groups.set(key, {
+          type: ioc.type,
+          value: ioc.value,
+          field: ioc.field,
+          events: [event],
+        });
+      }
+    }
+  }
+  return [...groups.values()];
+};
+
+const firstAndLastEventTimestamp = (
+  events: readonly SseEventRef[]
+): { first?: string; last?: string } => {
+  const timestamps = dedupeDefined(events.map((event) => event.timestamp)).sort();
+  return timestamps.length > 0
+    ? { first: timestamps[0], last: timestamps[timestamps.length - 1] }
+    : {};
+};
 
 /** One IOC detection built from a group of sampled Tier 1 hits sharing an IOC. */
 const detectionFromHitGroup = (group: IocHitGroup, hasBehaviorHit: boolean): SseDetection => {
@@ -168,6 +311,26 @@ const detectionFromHitGroup = (group: IocHitGroup, hasBehaviorHit: boolean): Sse
   };
 };
 
+/** One IOC detection built from cited SSE events sharing an IOC (old-payload path). */
+const detectionFromEventGroup = (group: IocEventGroup, hasBehaviorHit: boolean): SseDetection => {
+  const { first, last } = firstAndLastEventTimestamp(group.events);
+  const hosts = dedupeDefined(group.events.map((event) => event.host)).slice(0, MAX_NAMES);
+  const users = dedupeDefined(group.events.map((event) => event.user)).slice(0, MAX_NAMES);
+  return {
+    id: `ioc:${group.type}:${group.value}`,
+    kind: 'ioc',
+    field: group.field,
+    basis: classifyBasis([{ type: group.type, value: group.value }], hasBehaviorHit),
+    matched_on: [{ field: group.field, value: group.value }],
+    ...(hosts.length > 0 ? { hosts, host_count: hosts.length } : {}),
+    ...(users.length > 0 ? { users, user_count: users.length } : {}),
+    total: group.events.length,
+    ...(first ? { first_seen: first } : {}),
+    ...(last ? { last_seen: last } : {}),
+    from_sample: true,
+  };
+};
+
 interface IocDetectionsResult {
   detections: SseDetection[];
   /** The (type, value) pairs behind every IOC detection, for grading a behavior's basis. */
@@ -176,9 +339,11 @@ interface IocDetectionsResult {
 
 /**
  * IOC detections from Tier 1's `per_ioc` aggregation when present, else from
- * grouping sampled hits by matched IOC. Returns the underlying (type, value)
- * pairs alongside the detections so a behavior detection can be graded
- * against "was any IOC seen at all" without re-deriving them.
+ * grouping sampled hits by matched IOC, else from grouping cited SSE events
+ * (old payloads with neither `per_ioc` nor `hits` on the stored hunt_result).
+ * Returns the underlying (type, value) pairs alongside the detections so a
+ * behavior detection can be graded against "was any IOC seen at all" without
+ * re-deriving them.
  */
 const buildIocDetections = (
   huntResult: DeriveDetectionsHuntResult,
@@ -192,10 +357,18 @@ const buildIocDetections = (
       iocPairs: perIoc.map((entry) => ({ type: entry.type, value: entry.value })),
     };
   }
-  const groups = groupHitsByIoc(huntResult.tier1.hits ?? []);
+  const hits = huntResult.tier1.hits ?? [];
+  if (hits.length > 0) {
+    const groups = groupHitsByIoc(hits);
+    return {
+      detections: groups.map((group) => detectionFromHitGroup(group, hasBehaviorHit)),
+      iocPairs: groups.map((group) => ({ type: group.type, value: group.value })),
+    };
+  }
+  const eventGroups = groupEventsByIoc(events);
   return {
-    detections: groups.map((group) => detectionFromHitGroup(group, hasBehaviorHit)),
-    iocPairs: groups.map((group) => ({ type: group.type, value: group.value })),
+    detections: eventGroups.map((group) => detectionFromEventGroup(group, hasBehaviorHit)),
+    iocPairs: eventGroups.map((group) => ({ type: group.type, value: group.value })),
   };
 };
 

@@ -22,6 +22,8 @@ export { isExecutableHuntQuery } from './is_executable_hunt_query';
 
 export {
   deriveDetections,
+  observedIocMatchFromEvents,
+  reconcileIocDetectionFields,
   type SseDetection,
   type SseEventRef,
   type SseTier2Behavior,

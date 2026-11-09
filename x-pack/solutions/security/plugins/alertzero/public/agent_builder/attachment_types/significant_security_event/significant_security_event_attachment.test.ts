@@ -8,6 +8,11 @@
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { createSignificantSecurityEventAttachmentDefinition } from './significant_security_event_attachment';
 import type { SignificantSecurityEventAttachment } from './view_model';
+import {
+  buildSignificantSecurityEventHeadline,
+  parseSignificantSecurityEventData,
+  toSseViewModel,
+} from './view_model';
 import { createMockShare, createMockNavigation } from '../test_utils';
 
 describe('createSignificantSecurityEventAttachmentDefinition', () => {
@@ -32,7 +37,7 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
     evaluation_record_ref: 'eval-1',
   };
 
-  it('renders the default shape from title and subtitle, without header badges', () => {
+  it('renders the default shape from subtitle, without severity badges in the chrome header', () => {
     const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
     const attachment = { data: baseData } as unknown as SignificantSecurityEventAttachment;
 
@@ -45,67 +50,86 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
     expect(definition.renderInlineContent).toBeDefined();
   });
 
-  it('overrides the label and leads with the confirmed hit count when hunt_result has hits', () => {
+  it('uses the hit-centric summary as the chrome title so it matches the inline headline', () => {
     const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
-    const withOverride = {
-      data: { ...baseData, attachmentLabel: 'Custom label' },
-    } as unknown as SignificantSecurityEventAttachment;
-    expect(definition.getLabel(withOverride)).toBe('Custom label');
-
-    const withHits = {
+    const withSummary = {
       data: {
         ...baseData,
+        summary: 'ip 127.0.0.1 seen 4912x on 8 hosts',
+        basis: 'ioc_weak',
         hunt_result: {
           has_confirmed_hit: true,
           hit_sources: ['tier1'],
           time_range: { from: '2024-01-01T00:00:00Z', to: '2024-01-02T00:00:00Z' },
           tier1: {
             status: 'environment_hits_found',
-            counts: { total_hits: 3, returned_hits: 3, affected_hosts: 1, affected_users: 1 },
+            counts: { total_hits: 4912, returned_hits: 100, affected_hosts: 8, affected_users: 5 },
             per_index: [],
-            resolved_iocs: [],
+            resolved_iocs: [{ type: 'ip', value: '127.0.0.1' }],
           },
         },
       },
     } as unknown as SignificantSecurityEventAttachment;
-    expect(definition.getLabel(withHits)).toBe('3 hits confirm: Suspicious lateral movement');
+
+    const parsed = parseSignificantSecurityEventData(withSummary.data);
+    expect(parsed).toBeDefined();
+    const headline = buildSignificantSecurityEventHeadline(parsed, withSummary.data);
+    expect(definition.getLabel(withSummary)).toBe(headline.title);
+    expect(definition.getLabel(withSummary)).toBe('ip 127.0.0.1 seen 4912x on 8 hosts');
+
+    const header = definition.getHeader?.({ attachment: withSummary } as never);
+    expect(header?.badges).toEqual([{ label: 'Weak IOC', color: 'hollow' }]);
   });
 
-  it('credits the behavior, not the hit count, when only Behavior Hunt confirmed the finding', () => {
+  it('falls back to attachmentLabel / title when the payload does not parse', () => {
     const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
-    // The entry carries its report's Tier 1 counts, and a clean Tier 1 leaves them at zero.
-    const tier2Only = {
+    const withOverride = {
+      data: { ...baseData, attachmentLabel: 'Custom label', title: { bad: 'object' } },
+    } as unknown as SignificantSecurityEventAttachment;
+    // title is invalid so the whole payload fails schema parse; attachmentLabel is read unparsed.
+    expect(definition.getLabel(withOverride)).toBe('Custom label');
+  });
+
+  it('derives the chrome title from an old payload the same way the inline card does', () => {
+    const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
+    const oldPayload = {
       data: {
         ...baseData,
+        events: [
+          {
+            event_id: 'evt-1',
+            source_index: '.ds-logs-endpoint.events.process-default-2026.09.22-000001',
+            matched: {
+              ioc: { type: 'ip', value: '127.0.0.1' },
+              field: 'source.ip',
+            },
+          },
+        ],
         hunt_result: {
           has_confirmed_hit: true,
-          hit_sources: ['tier2'],
+          hit_sources: ['tier1'],
           time_range: { from: '2024-01-01T00:00:00Z', to: '2024-01-02T00:00:00Z' },
           tier1: {
-            status: 'no_environment_hits',
-            counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
-            per_index: [],
-            resolved_iocs: [],
-          },
-          tier2: {
-            status: 'behaviors_proposed',
-            behaviors: [
+            status: 'environment_hits_found',
+            counts: { total_hits: 12, returned_hits: 12, affected_hosts: 2, affected_users: 1 },
+            per_index: [
               {
-                technique_id: 'T1021',
-                tactic_ids: ['TA0008'],
-                confidence: 0.7,
-                title: 'Lateral movement via RDP',
-                execution: { executed: true, row_count: 4, hit: true },
+                index: '.ds-logs-endpoint.events.process-default-2026.09.22-000001',
+                hit_count: 12,
+                required: true,
               },
             ],
+            resolved_iocs: [{ type: 'ip', value: '127.0.0.1' }],
           },
         },
       },
     } as unknown as SignificantSecurityEventAttachment;
 
-    expect(definition.getLabel(tier2Only)).toBe(
-      'Behavior match confirms: Suspicious lateral movement'
-    );
+    const parsed = parseSignificantSecurityEventData(oldPayload.data);
+    expect(parsed).toBeDefined();
+    const viewModel = toSseViewModel(parsed!);
+    expect(definition.getLabel(oldPayload)).toBe(viewModel.summary);
+    expect(viewModel.basis).toBe('ioc_weak');
   });
 
   it('ignores captured label fields that are not strings', () => {

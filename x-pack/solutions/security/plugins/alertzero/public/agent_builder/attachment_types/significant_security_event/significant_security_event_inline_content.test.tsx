@@ -14,9 +14,17 @@ import {
   SignificantSecurityEventInlineContent,
   SSE_ATTACHMENT_TEST_ID,
   SSE_ATTACHMENT_EMPTY_TEST_ID,
+  SSE_ATTACHMENT_HEADLINE_TEST_ID,
+  SSE_ATTACHMENT_BASIS_TEST_ID,
+  SSE_ATTACHMENT_ENTITY_LINE_TEST_ID,
+  SSE_ATTACHMENT_WHAT_MATCHED_TEST_ID,
+  SSE_ATTACHMENT_INDEX_HITS_TEST_ID,
+  SSE_ATTACHMENT_QUERIES_RUN_TEST_ID,
+  SSE_ATTACHMENT_SEARCHED_FOR_TEST_ID,
 } from './significant_security_event_inline_content';
 import type { SignificantSecurityEventAttachment } from './view_model';
-import { buildEntityLookupEsql, buildEventLookupEsql } from '../navigation';
+import { buildEntityLookupEsql, buildEventLookupEsql, buildIocMatchEsql } from '../navigation';
+import { isExecutableHuntQuery } from '../../../../common/sse_view';
 import {
   buildAttachment as buildAttachmentGeneric,
   createMockShare,
@@ -24,9 +32,12 @@ import {
   renderProps as renderPropsGeneric,
 } from '../test_utils';
 
-const buildAttachment = (
-  data: SignificantSecurityEventAttachment['data']
-): SignificantSecurityEventAttachment =>
+type SseData = SignificantSecurityEventAttachment['data'];
+type HuntResultData = NonNullable<SseData['hunt_result']>;
+type Tier2Behavior = NonNullable<HuntResultData['tier2']>['behaviors'][number];
+type DetectionData = NonNullable<SseData['detections']>[number];
+
+const buildAttachment = (data: SseData): SignificantSecurityEventAttachment =>
   buildAttachmentGeneric('security.significant_security_event', data);
 
 const mockShare = createMockShare();
@@ -35,24 +46,32 @@ const defaultNavigation = createMockNavigation();
 
 const renderProps = (
   attachment: SignificantSecurityEventAttachment,
-  navigation: typeof defaultNavigation & { share?: SharePluginStart } = defaultNavigation
+  navigation: typeof defaultNavigation & {
+    share?: SharePluginStart;
+    getUrlForApp?: (appId: string, options?: { path?: string }) => string;
+  } = defaultNavigation
 ) => renderPropsGeneric(attachment, navigation);
 
-const baseData = {
+/** A real, runnable ES|QL query (first command is FROM), so it earns a query row. */
+const EXECUTABLE_ESQL = 'FROM logs-endpoint.events.process-* | WHERE process.name == "psexec.exe"';
+/** A comment-only placeholder a model left behind: parses, but has no command to run. */
+const PLACEHOLDER_ESQL = '// Behavior title / technique';
+
+const baseData: SseData = {
   title: 'Suspicious lateral movement',
-  severity: 'high' as const,
+  severity: 'high',
   confidence: 0.8,
-  status: 'open' as const,
+  status: 'open',
   source_watch: 'watch-1',
   capability: 'lateral-movement-detector',
   run_id: 'run-1',
   security_knowledge_indicators: [
-    { type: 'technique' as const, value: 'T1021', confidence: 0.9, technique_id: 'T1021' },
+    { type: 'technique', value: 'T1021', confidence: 0.9, technique_id: 'T1021' },
   ],
   report_id: 'ti-report-1',
   entities: [
-    { field: 'host.name' as const, value: 'host-1' },
-    { field: 'user.name' as const, value: 'user-1' },
+    { field: 'host.name', value: 'host-1' },
+    { field: 'user.name', value: 'user-1' },
   ],
   hypothesis_tested: 'Attacker pivoted via RDP',
   evidence_for: ['e1', 'e2'],
@@ -60,14 +79,13 @@ const baseData = {
   evaluation_record_ref: 'eval-1',
 };
 
-const huntResult = {
+const huntResult: HuntResultData = {
   has_confirmed_hit: true,
-  // Tier 1 alone: the schema only accepts `tier2` here when a behavior carries
-  // `execution.hit`, and these behaviors are proposals that never executed.
-  hit_sources: ['tier1' as const],
+  // Tier 1 alone: the base behavior is a proposal that never executed.
+  hit_sources: ['tier1'],
   time_range: { from: '2024-01-01T00:00:00Z', to: '2024-01-02T00:00:00Z' },
   tier1: {
-    status: 'environment_hits_found' as const,
+    status: 'environment_hits_found',
     counts: { total_hits: 12, returned_hits: 12, affected_hosts: 2, affected_users: 3 },
     per_index: [
       {
@@ -84,7 +102,7 @@ const huntResult = {
     resolved_iocs: [],
   },
   tier2: {
-    status: 'behaviors_proposed' as const,
+    status: 'behaviors_proposed',
     behaviors: [
       {
         technique_id: 'T1021',
@@ -96,25 +114,32 @@ const huntResult = {
   },
 };
 
+/** A share whose redirect always resolves to `url`, for asserting the exact locator params. */
+const shareReturning = (url: string) => {
+  const getRedirectUrl = jest.fn().mockReturnValue(url);
+  const share = {
+    url: { locators: { get: () => ({ getRedirectUrl }) } },
+  } as unknown as SharePluginStart;
+  return { share, getRedirectUrl };
+};
+
 describe('SignificantSecurityEventInlineContent', () => {
   it('renders the empty state for malformed data', () => {
     renderWithI18n(
-      <SignificantSecurityEventInlineContent
-        {...renderProps(buildAttachment({} as SignificantSecurityEventAttachment['data']))}
-      />
+      <SignificantSecurityEventInlineContent {...renderProps(buildAttachment({} as SseData))} />
     );
     expect(screen.getByTestId(SSE_ATTACHMENT_EMPTY_TEST_ID)).toBeInTheDocument();
   });
 
-  it('renders the run_id and report link, hypothesis, and entities from a valid payload', () => {
+  it('renders the run_id, hypothesis, and entities from a valid payload', () => {
     renderWithI18n(
       <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />
     );
     expect(screen.getByTestId(SSE_ATTACHMENT_TEST_ID)).toBeInTheDocument();
     expect(screen.getByTestId('alertzeroSignificantSecurityEventRunId')).toHaveTextContent('run-1');
-    expect(screen.getByTestId('alertzeroSignificantSecurityEventReportLink')).toHaveTextContent(
-      'ti-report-1'
-    );
+    expect(
+      screen.queryByTestId('alertzeroSignificantSecurityEventReportLink')
+    ).not.toBeInTheDocument();
     expect(screen.getByText('Attacker pivoted via RDP')).toBeInTheDocument();
     expect(screen.getByText('host-1')).toBeInTheDocument();
     expect(screen.getByText('user-1')).toBeInTheDocument();
@@ -132,584 +157,492 @@ describe('SignificantSecurityEventInlineContent', () => {
         )}
       />
     );
-    expect(screen.queryByTestId('alertzeroSignificantSecurityEventHeadline')).toBeNull();
-    expect(screen.queryByText('high (0.8)')).not.toBeInTheDocument();
+    expect(screen.queryByTestId(SSE_ATTACHMENT_HEADLINE_TEST_ID)).toBeNull();
   });
 
-  const emptySectionCases: Array<{
-    name: string;
-    data: Partial<SignificantSecurityEventAttachment['data']>;
-    assert: () => void;
-  }> = [
-    {
-      name: 'entities',
-      data: { entities: [] },
-      assert: () => expect(screen.queryByText('Entities')).not.toBeInTheDocument(),
-    },
-    {
-      name: 'indicators',
-      data: { security_knowledge_indicators: [] },
-      assert: () =>
-        expect(
-          screen.queryByTestId('alertzeroSignificantSecurityEventIndicators')
-        ).not.toBeInTheDocument(),
-    },
-    {
-      name: 'cited evidence accordion',
-      data: { events: [], alerts: [] },
-      assert: () =>
-        expect(
-          screen.queryByTestId('alertzeroSignificantSecurityEventCitedEvidence')
-        ).not.toBeInTheDocument(),
-    },
-    {
-      name: 'alerts',
-      data: { alerts: [], events: [], evidence_for: [] },
-      assert: () => expect(screen.queryByRole('list')).not.toBeInTheDocument(),
-    },
-    {
-      name: 'evidence',
-      data: { evidence_for: [], evidence_against: [] },
-      assert: () => {
-        expect(screen.queryByText('Evidence for')).not.toBeInTheDocument();
-        expect(screen.queryByText('Evidence against')).not.toBeInTheDocument();
-      },
-    },
-    {
-      name: 'hunt_result',
-      data: {},
-      assert: () => {
-        expect(screen.queryByTestId('alertzeroSignificantSecurityEventHuntWindow')).toBeNull();
-        expect(
-          screen.queryByTestId('alertzeroSignificantSecurityEventBehaviorValidation')
-        ).toBeNull();
-      },
-    },
-    {
-      name: 'tier2',
-      data: {
-        hunt_result: (() => {
-          const { tier2, ...tier1Only } = huntResult;
-          return tier1Only;
-        })(),
-      },
-      assert: () =>
-        expect(
-          screen.queryByTestId('alertzeroSignificantSecurityEventBehaviorValidation')
-        ).not.toBeInTheDocument(),
-    },
-  ];
-
-  it.each(emptySectionCases)(
-    'renders nothing for the $name section when empty',
-    ({ data, assert }) => {
+  describe('headline fallback when Agent Builder omits its chrome header', () => {
+    it('renders title, severity, status and confidence when there is no action button', () => {
+      // No events and no alerts means no Discover action, so the platform header is absent.
       renderWithI18n(
-        <SignificantSecurityEventInlineContent
-          {...renderProps(buildAttachment({ ...baseData, ...data }))}
-        />
+        <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />
       );
-      assert();
-    }
-  );
 
-  it('renders entity refs as Discover links on the exact ECS field', () => {
-    const entities = [
-      { field: 'user.name' as const, value: 'dev-user' },
-      { field: 'user.name' as const, value: 'escalated-role' },
-      { field: 'host.name' as const, value: 'ci-deploy-runner-07' },
-    ];
-    const userEsql = buildEntityLookupEsql({ field: 'user.name', value: 'dev-user' });
-    const roleEsql = buildEntityLookupEsql({ field: 'user.name', value: 'escalated-role' });
-    const hostEsql = buildEntityLookupEsql({ field: 'host.name', value: 'ci-deploy-runner-07' });
-
-    renderWithI18n(
-      <SignificantSecurityEventInlineContent
-        {...renderProps(buildAttachment({ ...baseData, entities }), {
-          ...defaultNavigation,
-          share: mockShare,
-        })}
-      />
-    );
-
-    const userLink = screen.getByTestId('alertzeroSignificantSecurityEventEntity-0');
-    expect(userLink).toHaveTextContent('dev-user');
-    let badge = userLink.querySelector('.euiBadge');
-    fireEvent.mouseEnter(badge as Element);
-    let openWindowSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
-    fireEvent.click(screen.getByLabelText('Open in Discover'));
-    expect(openWindowSpy).toHaveBeenCalledWith(
-      `https://example.test/discover?esql=${encodeURIComponent(userEsql as string)}`,
-      '_blank',
-      'noopener,noreferrer'
-    );
-    openWindowSpy.mockRestore();
-    fireEvent.mouseLeave(badge as Element);
-
-    const roleLink = screen.getByTestId('alertzeroSignificantSecurityEventEntity-1');
-    expect(roleLink).toHaveTextContent('escalated-role');
-    badge = roleLink.querySelector('.euiBadge');
-    fireEvent.mouseEnter(badge as Element);
-    openWindowSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
-    fireEvent.click(screen.getByLabelText('Open in Discover'));
-    expect(openWindowSpy).toHaveBeenCalledWith(
-      `https://example.test/discover?esql=${encodeURIComponent(roleEsql as string)}`,
-      '_blank',
-      'noopener,noreferrer'
-    );
-    openWindowSpy.mockRestore();
-    fireEvent.mouseLeave(badge as Element);
-
-    const hostLink = screen.getByTestId('alertzeroSignificantSecurityEventEntity-2');
-    expect(hostLink).toHaveTextContent('ci-deploy-runner-07');
-    badge = hostLink.querySelector('.euiBadge');
-    fireEvent.mouseEnter(badge as Element);
-    openWindowSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
-    fireEvent.click(screen.getByLabelText('Open in Discover'));
-    expect(openWindowSpy).toHaveBeenCalledWith(
-      `https://example.test/discover?esql=${encodeURIComponent(hostEsql as string)}`,
-      '_blank',
-      'noopener,noreferrer'
-    );
-    openWindowSpy.mockRestore();
-  });
-
-  it('renders knowledge indicators grouped by type as an IocBadge in the LabeledBadgeTable', () => {
-    const data = {
-      ...baseData,
-      security_knowledge_indicators: [
-        ...baseData.security_knowledge_indicators,
-        {
-          type: 'ioc' as const,
-          value: '203.0.113.4',
-          ioc: { type: 'ip' as const, value: '203.0.113.4' },
-        },
-      ],
-    };
-    renderWithI18n(
-      <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(data))} />
-    );
-
-    expect(
-      screen.getByTestId('alertzeroSignificantSecurityEventIndicator-technique-0')
-    ).toHaveTextContent('T1021 (90%)');
-    expect(screen.getByTestId('alertzeroSignificantSecurityEventIndicators')).toHaveTextContent(
-      '203.0.113.4'
-    );
-    expect(
-      screen.getByTestId('alertzeroSignificantSecurityEventIndicator-ioc-0')
-    ).toBeInTheDocument();
-  });
-
-  it('renders the structured ioc value, not the generic label, when they differ', () => {
-    const data = {
-      ...baseData,
-      security_knowledge_indicators: [
-        {
-          type: 'ioc' as const,
-          value: 'Known malicious infrastructure',
-          ioc: { type: 'ip' as const, value: '203.0.113.5' },
-        },
-      ],
-    };
-    renderWithI18n(
-      <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(data))} />
-    );
-
-    expect(screen.getByTestId('alertzeroSignificantSecurityEventIndicators')).toHaveTextContent(
-      '203.0.113.5'
-    );
-    expect(screen.getByTestId('alertzeroSignificantSecurityEventIndicators')).not.toHaveTextContent(
-      'Known malicious infrastructure'
-    );
-  });
-
-  it('names the technique id when the label does not contain it', () => {
-    // `value` is free text and need not mention the technique, but the badge links to
-    // `technique_id`, so a label-only badge sends the analyst somewhere it never named.
-    renderWithI18n(
-      <SignificantSecurityEventInlineContent
-        {...renderProps(
-          buildAttachment({
-            ...baseData,
-            security_knowledge_indicators: [
-              { type: 'technique' as const, value: 'Credential abuse', technique_id: 'T1078' },
-            ],
-          })
-        )}
-      />
-    );
-
-    const badge = screen.getByTestId('alertzeroSignificantSecurityEventIndicator-technique-0');
-    expect(badge).toHaveTextContent('T1078');
-    expect(badge).toHaveTextContent('Credential abuse');
-    expect(badge).toHaveAttribute('href', 'https://attack.mitre.org/techniques/T1078/');
-  });
-
-  it('links a technique indicator to its MITRE ATT&CK reference', () => {
-    renderWithI18n(
-      <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />
-    );
-
-    const mitreBadge = screen.getByTestId('alertzeroSignificantSecurityEventIndicator-technique-0');
-    expect(mitreBadge).toHaveAttribute('href', 'https://attack.mitre.org/techniques/T1021/');
-    expect(mitreBadge).toHaveAttribute('target', '_blank');
-  });
-
-  it('renders a Discover link for an event when share returns a URL, inside the collapsed cited evidence accordion', async () => {
-    const user = userEvent.setup();
-    const event = {
-      event_id: 'evt-1',
-      source_index: '.ds-logs-endpoint.events.process-default-2026.09.22-000001',
-    };
-    const expectedEsql = buildEventLookupEsql({
-      index: event.source_index,
-      eventId: event.event_id,
-    });
-    const expectedHref = `https://example.test/discover?esql=${encodeURIComponent(expectedEsql)}`;
-
-    renderWithI18n(
-      <SignificantSecurityEventInlineContent
-        {...renderProps(buildAttachment({ ...baseData, events: [event] }), {
-          ...defaultNavigation,
-          share: mockShare,
-        })}
-      />
-    );
-
-    const accordionButton = screen.getByTestId('alertzeroSignificantSecurityEventCitedEvidence');
-    expect(within(accordionButton).getByRole('button', { name: '1 event' })).toHaveAttribute(
-      'aria-expanded',
-      'false'
-    );
-    await user.click(within(accordionButton).getByRole('button', { name: '1 event' }));
-
-    const badgeWrapper = screen.getByTestId('alertzeroSignificantSecurityEventEventLink-evt-1');
-    const badge = badgeWrapper.querySelector('.euiBadge');
-    expect(badge).not.toBeNull();
-    fireEvent.mouseEnter(badge as Element);
-    const discoverAction = screen.getByLabelText('Open in Discover');
-    const openWindowSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
-    fireEvent.click(discoverAction);
-    expect(openWindowSpy).toHaveBeenCalledWith(expectedHref, '_blank', 'noopener,noreferrer');
-    openWindowSpy.mockRestore();
-  });
-
-  it('renders no Discover action for an event when share is undefined', async () => {
-    const user = userEvent.setup();
-    const event = {
-      event_id: 'evt-plain',
-      source_index: '.ds-logs-endpoint.events.process-default-2026.09.22-000001',
-    };
-
-    renderWithI18n(
-      <SignificantSecurityEventInlineContent
-        {...renderProps(buildAttachment({ ...baseData, events: [event] }))}
-      />
-    );
-
-    const accordionButton = screen.getByTestId('alertzeroSignificantSecurityEventCitedEvidence');
-    await user.click(within(accordionButton).getByRole('button', { name: '1 event' }));
-
-    const badgeWrapper = screen.getByTestId('alertzeroSignificantSecurityEventEventLink-evt-plain');
-    expect(badgeWrapper).toHaveTextContent('evt-plain');
-    const badge = badgeWrapper.querySelector('.euiBadge');
-    fireEvent.mouseEnter(badge as Element);
-    expect(screen.queryByLabelText('Open in Discover')).not.toBeInTheDocument();
-  });
-
-  it('renders the evidence for section when populated', () => {
-    renderWithI18n(
-      <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />
-    );
-    expect(screen.getByText('Evidence for')).toBeInTheDocument();
-    expect(screen.getByText('e1')).toBeInTheDocument();
-    expect(screen.getByText('e2')).toBeInTheDocument();
-  });
-
-  it('reveals the evidence past the visible limit on request', async () => {
-    // The schema accepts 50 items a side, and the hidden ones are the hunt's own reasoning.
-    const user = userEvent.setup();
-    renderWithI18n(
-      <SignificantSecurityEventInlineContent
-        {...renderProps(
-          buildAttachment({
-            ...baseData,
-            evidence_for: ['e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'e7'],
-          })
-        )}
-      />
-    );
-
-    expect(screen.queryByText('e6')).not.toBeInTheDocument();
-    const overflow = screen.getByTestId('alertzeroSignificantSecurityEventEvidenceOverflow');
-    expect(overflow).toHaveTextContent('+2 more');
-
-    await user.click(overflow);
-    expect(screen.getByText('e6')).toBeInTheDocument();
-    expect(screen.getByText('e7')).toBeInTheDocument();
-    expect(overflow).toHaveTextContent('Show fewer');
-
-    await user.click(overflow);
-    expect(screen.queryByText('e6')).not.toBeInTheDocument();
-  });
-
-  describe('hunt result', () => {
-    it('renders environment hits, affected hosts/users stats, and the hunt window', () => {
-      renderWithI18n(
-        <SignificantSecurityEventInlineContent
-          {...renderProps(buildAttachment({ ...baseData, hunt_result: huntResult }))}
-        />
-      );
-      expect(screen.getByText('12')).toBeInTheDocument();
-      expect(screen.getByText('2')).toBeInTheDocument();
-      expect(screen.getByText('3')).toBeInTheDocument();
-      expect(screen.getByTestId('alertzeroSignificantSecurityEventHuntWindow')).toHaveTextContent(
-        '2024'
-      );
+      const headline = screen.getByTestId(SSE_ATTACHMENT_HEADLINE_TEST_ID);
+      expect(headline).toHaveTextContent('Suspicious lateral movement');
+      expect(headline).toHaveTextContent('high');
+      expect(headline).toHaveTextContent('open');
+      expect(headline).toHaveTextContent('80%');
     });
 
-    it('renders a distribution bar row per index with an events-across-indices summary', () => {
-      renderWithI18n(
-        <SignificantSecurityEventInlineContent
-          {...renderProps(buildAttachment({ ...baseData, hunt_result: huntResult }))}
-        />
-      );
-      expect(screen.getByText('12 events across 2 indices')).toBeInTheDocument();
-    });
-
-    it('renders the tier2 behaviors table with technique, rule, tactics, and confidence', () => {
-      renderWithI18n(
-        <SignificantSecurityEventInlineContent
-          {...renderProps(buildAttachment({ ...baseData, hunt_result: huntResult }))}
-        />
-      );
-      expect(screen.getByText('Lateral movement via RDP')).toBeInTheDocument();
-      expect(screen.getByText('TA0008')).toBeInTheDocument();
-      expect(screen.getAllByText('75%').length).toBeGreaterThan(0);
-    });
-
-    it('names the tier that confirmed the finding alongside the report-wide tier statuses', () => {
-      // The worst case the statuses alone cannot express: the report's Tier 1 found hits,
-      // but this finding was corroborated by Tier 2. Without the sources, "Tier 1
-      // Environment hits found" reads as this finding's confirmation.
-      renderWithI18n(
-        <SignificantSecurityEventInlineContent
-          {...renderProps(
-            buildAttachment({
-              ...baseData,
-              hunt_result: {
-                ...huntResult,
-                hit_sources: ['tier2' as const],
-                tier2: {
-                  status: 'behaviors_proposed' as const,
-                  behaviors: [
-                    {
-                      ...huntResult.tier2.behaviors[0],
-                      execution: { executed: true, row_count: 2, hit: true },
-                    },
-                  ],
-                },
-              },
-            })
-          )}
-        />
-      );
-
-      const outcome = screen.getByTestId('alertzeroSignificantSecurityEventHuntResultOutcome');
-      expect(
-        screen.getByTestId('alertzeroSignificantSecurityEventHuntResultHitSources')
-      ).toHaveTextContent('Confirmed by Behavior Hunt');
-      expect(outcome).toHaveTextContent('Environment hits found');
-    });
-
-    it('marks optional indices in the distribution legend', () => {
-      // Tier 1's hit bar is computed from required indices only, so an unlabeled optional
-      // segment reads as part of the corroborating total.
-      renderWithI18n(
-        <SignificantSecurityEventInlineContent
-          {...renderProps(buildAttachment({ ...baseData, hunt_result: huntResult }))}
-        />
-      );
-
-      const huntSection = screen.getByTestId(
-        'alertzeroSignificantSecurityEventTechnicalRunDetails'
-      );
-      expect(huntSection).toHaveTextContent('logs-endpoint.events.network-default (4) optional');
-      expect(screen.getAllByText('optional')).toHaveLength(1);
-    });
-
-    it('tells the four behavior outcomes apart, and leaves an unreported one blank', () => {
-      const behavior = {
-        technique_id: 'T1021',
-        tactic_ids: ['TA0008'],
-        confidence: 0.75,
-        title: 'Lateral movement via RDP',
-      };
-      renderWithI18n(
-        <SignificantSecurityEventInlineContent
-          {...renderProps(
-            buildAttachment({
-              ...baseData,
-              hunt_result: {
-                ...huntResult,
-                tier2: {
-                  status: 'behaviors_proposed' as const,
-                  behaviors: [
-                    { ...behavior, execution: { executed: true, row_count: 4, hit: true } },
-                    { ...behavior, execution: { executed: true, row_count: 0, hit: false } },
-                    {
-                      ...behavior,
-                      execution: {
-                        executed: true,
-                        row_count: 4,
-                        hit: false,
-                        inconclusive_reason: 'rows_unclassifiable' as const,
-                      },
-                    },
-                    { ...behavior, execution: { executed: false, row_count: 0, hit: false } },
-                    behavior,
-                  ],
-                },
-              },
-            })
-          )}
-        />
-      );
-
-      expect(screen.getByText('Hit: 4 rows')).toBeInTheDocument();
-      expect(screen.getByText('No rows')).toBeInTheDocument();
-      expect(screen.getByText('Inconclusive')).toBeInTheDocument();
-      expect(screen.getByText('rows_unclassifiable')).toBeInTheDocument();
-      expect(screen.getByText('Not executed')).toBeInTheDocument();
-    });
-
-    it('marks the lists the producer truncated', () => {
-      const truncatedIds = [
-        'alertzeroSignificantSecurityEventHuntResultPerIndexTruncated',
-        'alertzeroSignificantSecurityEventHuntResultResolvedIocsTruncated',
-        'alertzeroSignificantSecurityEventHuntResultBehaviorsTruncated',
-      ];
-
-      const { unmount } = renderWithI18n(
-        <SignificantSecurityEventInlineContent
-          {...renderProps(
-            buildAttachment({
-              ...baseData,
-              hunt_result: {
-                ...huntResult,
-                tier1: {
-                  ...huntResult.tier1,
-                  resolved_iocs: [{ type: 'ip' as const, value: '203.0.113.5' }],
-                  per_index_truncated: true,
-                  resolved_iocs_truncated: true,
-                },
-                tier2: { ...huntResult.tier2, behaviors_truncated: true },
-              },
-            })
-          )}
-        />
-      );
-      for (const testId of truncatedIds) {
-        expect(screen.getByTestId(testId)).toBeInTheDocument();
-      }
-      unmount();
-
-      renderWithI18n(
-        <SignificantSecurityEventInlineContent
-          {...renderProps(
-            buildAttachment({
-              ...baseData,
-              hunt_result: {
-                ...huntResult,
-                tier1: {
-                  ...huntResult.tier1,
-                  resolved_iocs: [{ type: 'ip' as const, value: '203.0.113.5' }],
-                },
-              },
-            })
-          )}
-        />
-      );
-      for (const testId of truncatedIds) {
-        expect(screen.queryByTestId(testId)).not.toBeInTheDocument();
-      }
-    });
-  });
-
-  describe('layout', () => {
-    const behavior = {
-      technique_id: 'T1021',
-      tactic_ids: ['TA0008'],
-      confidence: 0.75,
-      title: 'Lateral movement via RDP',
-    };
-
-    const detailSections = [
-      ['alertzeroSignificantSecurityEventCitedEvidence', '1 event'],
-      ['alertzeroSignificantSecurityEventBehaviorValidation', 'Behavior validation (1)'],
-      ['alertzeroSignificantSecurityEventTechnicalRunDetails', 'Technical run details'],
-    ] as const;
-
-    const renderWithDetails = () =>
+    it('omits the headline when an action button gives the attachment a header', () => {
       renderWithI18n(
         <SignificantSecurityEventInlineContent
           {...renderProps(
             buildAttachment({
               ...baseData,
               events: [{ event_id: 'evt-1', source_index: '.ds-logs-default-2026.09.22-000001' }],
-              hunt_result: huntResult,
-            })
+            }),
+            { ...defaultNavigation, share: createMockShare() }
           )}
         />
       );
 
-    it('starts with all three detail sections collapsed', () => {
-      renderWithDetails();
-
-      for (const [testId, name] of detailSections) {
-        expect(within(screen.getByTestId(testId)).getByRole('button', { name })).toHaveAttribute(
-          'aria-expanded',
-          'false'
-        );
-      }
+      expect(screen.queryByTestId(SSE_ATTACHMENT_HEADLINE_TEST_ID)).toBeNull();
     });
+  });
 
-    it('expands each detail section independently', async () => {
-      const user = userEvent.setup();
-      renderWithDetails();
+  describe('empty sections', () => {
+    const cases: Array<{
+      name: string;
+      data: Partial<SseData>;
+      assert: () => void;
+    }> = [
+      {
+        name: 'entity line',
+        data: { entities: [] },
+        assert: () =>
+          expect(screen.queryByTestId(SSE_ATTACHMENT_ENTITY_LINE_TEST_ID)).not.toBeInTheDocument(),
+      },
+      {
+        name: 'cited evidence accordion',
+        data: { events: [], alerts: [] },
+        assert: () =>
+          expect(
+            screen.queryByTestId('alertzeroSignificantSecurityEventCitedEvidence')
+          ).not.toBeInTheDocument(),
+      },
+      {
+        name: 'evidence',
+        data: { evidence_for: [], evidence_against: [] },
+        assert: () => {
+          expect(screen.queryByText('Evidence for')).not.toBeInTheDocument();
+          expect(screen.queryByText('Evidence against')).not.toBeInTheDocument();
+        },
+      },
+      {
+        name: 'what matched',
+        data: { detections: [] },
+        assert: () =>
+          expect(screen.queryByTestId(SSE_ATTACHMENT_WHAT_MATCHED_TEST_ID)).not.toBeInTheDocument(),
+      },
+      {
+        name: 'hunt result',
+        data: {},
+        assert: () => {
+          expect(screen.queryByTestId('alertzeroSignificantSecurityEventHuntWindow')).toBeNull();
+          expect(screen.queryByTestId(SSE_ATTACHMENT_QUERIES_RUN_TEST_ID)).toBeNull();
+        },
+      },
+    ];
 
-      const buttonFor = (index: number) => {
-        const [testId, name] = detailSections[index];
-        return within(screen.getByTestId(testId)).getByRole('button', { name });
-      };
-
-      await user.click(buttonFor(1));
-      expect(buttonFor(0)).toHaveAttribute('aria-expanded', 'false');
-      expect(buttonFor(1)).toHaveAttribute('aria-expanded', 'true');
-      expect(buttonFor(2)).toHaveAttribute('aria-expanded', 'false');
-
-      await user.click(buttonFor(2));
-      expect(buttonFor(1)).toHaveAttribute('aria-expanded', 'true');
-      expect(buttonFor(2)).toHaveAttribute('aria-expanded', 'true');
-
-      await user.click(buttonFor(1));
-      expect(buttonFor(1)).toHaveAttribute('aria-expanded', 'false');
-      expect(buttonFor(2)).toHaveAttribute('aria-expanded', 'true');
+    it.each(cases)('renders nothing for the $name section when empty', ({ data, assert }) => {
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(buildAttachment({ ...baseData, ...data }))}
+        />
+      );
+      assert();
     });
+  });
 
-    it('labels the cited evidence section with its event and alert counts', () => {
+  describe('entity line', () => {
+    it('frames host/user chips as Involved after what matched', () => {
       renderWithI18n(
         <SignificantSecurityEventInlineContent
           {...renderProps(
             buildAttachment({
               ...baseData,
-              events: Array.from({ length: 5 }, (_, index) => ({
-                event_id: `evt-${index}`,
-                source_index: '.ds-logs-default-2026.09.22-000001',
+              hunt_result: huntResult,
+              detections: [
+                {
+                  id: 'ioc:ip:203.0.113.5',
+                  kind: 'ioc',
+                  field: 'destination.ip',
+                  basis: 'ioc_strong',
+                  matched_on: [{ field: 'destination.ip', value: '203.0.113.5' }],
+                  total: 4,
+                },
+              ],
+            })
+          )}
+        />
+      );
+
+      const entityLine = screen.getByTestId(SSE_ATTACHMENT_ENTITY_LINE_TEST_ID);
+      expect(entityLine).toHaveTextContent('Involved');
+      expect(entityLine).toHaveTextContent('host-1');
+      expect(entityLine).toHaveTextContent('user-1');
+      expect(entityLine).toHaveTextContent('2 hosts');
+      expect(entityLine).toHaveTextContent('3 users');
+
+      const whatMatched = screen.getByTestId(SSE_ATTACHMENT_WHAT_MATCHED_TEST_ID);
+      expect(whatMatched.compareDocumentPosition(entityLine)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+
+    it('widens the host and user counts to Tier 1 when it saw more than the chips', () => {
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(buildAttachment({ ...baseData, hunt_result: huntResult }))}
+        />
+      );
+
+      const entityLine = screen.getByTestId(SSE_ATTACHMENT_ENTITY_LINE_TEST_ID);
+      expect(entityLine).toHaveTextContent('2 hosts');
+      expect(entityLine).toHaveTextContent('3 users');
+    });
+
+    it('renders entity refs as Discover links on the exact ECS field, ordered host then user', () => {
+      const entities: SseData['entities'] = [
+        { field: 'user.name', value: 'dev-user' },
+        { field: 'user.name', value: 'escalated-role' },
+        { field: 'host.name', value: 'ci-deploy-runner-07' },
+      ];
+      const hostEsql = buildEntityLookupEsql({ field: 'host.name', value: 'ci-deploy-runner-07' });
+      const userEsql = buildEntityLookupEsql({ field: 'user.name', value: 'dev-user' });
+      const roleEsql = buildEntityLookupEsql({ field: 'user.name', value: 'escalated-role' });
+
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(buildAttachment({ ...baseData, entities }), {
+            ...defaultNavigation,
+            share: mockShare,
+          })}
+        />
+      );
+
+      // Ordered host → user → user, so the host chip leads regardless of input order.
+      const expectations: Array<[string, string, string]> = [
+        ['alertzeroSignificantSecurityEventEntity-0', 'ci-deploy-runner-07', hostEsql as string],
+        ['alertzeroSignificantSecurityEventEntity-1', 'dev-user', userEsql as string],
+        ['alertzeroSignificantSecurityEventEntity-2', 'escalated-role', roleEsql as string],
+      ];
+
+      for (const [testId, value, esql] of expectations) {
+        const chip = screen.getByTestId(testId);
+        expect(chip).toHaveTextContent(value);
+        const badge = chip.querySelector('.euiBadge');
+        fireEvent.mouseEnter(badge as Element);
+        const openWindowSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
+        fireEvent.click(screen.getByLabelText('Open in Discover'));
+        expect(openWindowSpy).toHaveBeenCalledWith(
+          `https://example.test/discover?esql=${encodeURIComponent(esql)}`,
+          '_blank',
+          'noopener,noreferrer'
+        );
+        openWindowSpy.mockRestore();
+        fireEvent.mouseLeave(badge as Element);
+      }
+    });
+
+    it('caps the entity chips at ten and reveals the rest on request', async () => {
+      const user = userEvent.setup();
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              entities: Array.from({ length: 12 }, (_, index) => ({
+                field: 'host.name' as const,
+                value: `host-${index}`,
               })),
-              alerts: [
-                { alert_id: 'alert-1', index: '.alerts-security.alerts-default' },
-                { alert_id: 'alert-2', index: '.alerts-security.alerts-default' },
+            })
+          )}
+        />
+      );
+
+      expect(screen.getByTestId('alertzeroSignificantSecurityEventEntity-9')).toBeInTheDocument();
+      expect(screen.queryByTestId('alertzeroSignificantSecurityEventEntity-10')).toBeNull();
+      const overflow = screen.getByTestId('alertzeroSignificantSecurityEventEntitiesOverflow');
+      expect(overflow).toHaveTextContent('+2 more');
+
+      await user.click(overflow);
+      expect(screen.getByTestId('alertzeroSignificantSecurityEventEntity-11')).toBeInTheDocument();
+      expect(overflow).toHaveTextContent('Show fewer');
+
+      await user.click(overflow);
+      expect(screen.queryByTestId('alertzeroSignificantSecurityEventEntity-10')).toBeNull();
+    });
+  });
+
+  describe('evidence', () => {
+    it('renders the evidence for section when populated', () => {
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />
+      );
+      expect(screen.getByText('Evidence for')).toBeInTheDocument();
+      expect(screen.getByText('e1')).toBeInTheDocument();
+      expect(screen.getByText('e2')).toBeInTheDocument();
+    });
+
+    it('renders evidence after what matched in the attack story', () => {
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              evidence_against: ['counter'],
+              hunt_result: huntResult,
+              detections: [
+                {
+                  id: 'ioc:ip:203.0.113.5',
+                  kind: 'ioc',
+                  field: 'destination.ip',
+                  basis: 'ioc_strong',
+                  matched_on: [{ field: 'destination.ip', value: '203.0.113.5' }],
+                  total: 4,
+                },
+              ],
+            })
+          )}
+        />
+      );
+
+      const whatMatched = screen.getByTestId(SSE_ATTACHMENT_WHAT_MATCHED_TEST_ID);
+      const evidence = screen.getByTestId('alertzeroSignificantSecurityEventEvidence');
+      expect(whatMatched.compareDocumentPosition(evidence)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+      expect(
+        screen.queryByTestId('alertzeroSignificantSecurityEventTechnicalRunDetails')
+      ).not.toBeInTheDocument();
+    });
+
+    it('drops producer Tier 1/Tier 2 count restatements when What matched already tells that story', () => {
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              evidence_for: [
+                'IOC Hunt matched 12 event(s) in the hunt window, at least one in a required index (see hunt_result.tier1.per_index for the required/optional split).',
+                'Behavior Hunt executed T1071 with 3 required-index row(s).',
+                'Unusual outbound curl to loopback across two hosts',
+              ],
+              evidence_against: [
+                'Behavior Hunt executed 1 proposed technique(s) with no required-index rows: T1059.',
+              ],
+              detections: [
+                {
+                  id: 'ioc:ip:203.0.113.5',
+                  kind: 'ioc',
+                  field: 'destination.ip',
+                  basis: 'ioc_strong',
+                  matched_on: [{ field: 'destination.ip', value: '203.0.113.5' }],
+                  total: 4,
+                },
+              ],
+            })
+          )}
+        />
+      );
+
+      const evidence = screen.getByTestId('alertzeroSignificantSecurityEventEvidence');
+      expect(evidence).toHaveTextContent('Unusual outbound curl to loopback across two hosts');
+      expect(evidence).toHaveTextContent('T1059');
+      expect(evidence).not.toHaveTextContent('IOC Hunt matched');
+      expect(evidence).not.toHaveTextContent('Behavior Hunt executed T1071');
+    });
+
+    it('reveals the evidence past the visible limit on request', async () => {
+      const user = userEvent.setup();
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              evidence_for: ['e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'e7'],
+            })
+          )}
+        />
+      );
+
+      expect(screen.queryByText('e6')).not.toBeInTheDocument();
+      const overflow = screen.getByTestId('alertzeroSignificantSecurityEventEvidenceOverflow');
+      expect(overflow).toHaveTextContent('+2 more');
+
+      await user.click(overflow);
+      expect(screen.getByText('e6')).toBeInTheDocument();
+      expect(screen.getByText('e7')).toBeInTheDocument();
+      expect(overflow).toHaveTextContent('Show fewer');
+
+      await user.click(overflow);
+      expect(screen.queryByText('e6')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('what matched', () => {
+    const iocDetection = (overrides: Partial<DetectionData> = {}): DetectionData => ({
+      id: 'ioc:ip:203.0.113.5',
+      kind: 'ioc',
+      field: 'destination.ip',
+      basis: 'ioc_strong',
+      matched_on: [{ field: 'destination.ip', value: '203.0.113.5' }],
+      total: 3,
+      ...overrides,
+    });
+
+    it('pivots an IOC row over cited-event indices for the observed matched field and value', () => {
+      const { share, getRedirectUrl } = shareReturning('https://example.test/pivot');
+      const eventIndex = '.ds-logs-endpoint.events.process-default-2026.09.22-000001';
+      const expectedEsql = buildIocMatchEsql({
+        indices: [eventIndex],
+        field: 'destination.ip',
+        value: '203.0.113.5',
+      });
+
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              // Stored per_ioc field can be the wrong first-searched slot; cited events win.
+              detections: [
+                iocDetection({
+                  field: 'source.ip',
+                  matched_on: [{ field: 'source.ip', value: '203.0.113.5' }],
+                }),
+              ],
+              events: [
+                {
+                  event_id: 'evt-1',
+                  source_index: eventIndex,
+                  matched: {
+                    field: 'destination.ip',
+                    iocs: [{ type: 'ip', value: '203.0.113.5', field: 'destination.ip' }],
+                  },
+                },
+              ],
+              hunt_result: huntResult,
+            }),
+            { ...defaultNavigation, share }
+          )}
+        />
+      );
+
+      expect(getRedirectUrl).toHaveBeenCalledWith({
+        query: { esql: expectedEsql },
+        timeRange: huntResult.time_range,
+        useHash: true,
+      });
+      expect(
+        within(screen.getByTestId(SSE_ATTACHMENT_WHAT_MATCHED_TEST_ID)).getByText('destination.ip')
+      ).toBeInTheDocument();
+    });
+
+    it('falls back to every Tier 1 index when no cited events observe the IOC', () => {
+      const { share, getRedirectUrl } = shareReturning('https://example.test/pivot');
+      const indices = huntResult.tier1.per_index.map((row) => row.index);
+      const expectedEsql = buildIocMatchEsql({
+        indices,
+        field: 'destination.ip',
+        value: '203.0.113.5',
+      });
+
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              detections: [iocDetection()],
+              events: [],
+              hunt_result: huntResult,
+            }),
+            { ...defaultNavigation, share }
+          )}
+        />
+      );
+
+      expect(getRedirectUrl).toHaveBeenCalledWith({
+        query: { esql: expectedEsql },
+        timeRange: huntResult.time_range,
+        useHash: true,
+      });
+    });
+
+    it('withholds the IOC pivot when the hunt carried no per-index rows to search', () => {
+      const { share, getRedirectUrl } = shareReturning('https://example.test/pivot');
+
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              detections: [iocDetection()],
+              hunt_result: { ...huntResult, tier1: { ...huntResult.tier1, per_index: [] } },
+            }),
+            { ...defaultNavigation, share }
+          )}
+        />
+      );
+
+      const whatMatched = screen.getByTestId(SSE_ATTACHMENT_WHAT_MATCHED_TEST_ID);
+      expect(whatMatched).toHaveTextContent('203.0.113.5');
+      // The entity chips still resolve their own Discover links through share; the one call
+      // that must never happen is the IOC pivot over the matched value.
+      expect(getRedirectUrl).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({ esql: expect.stringContaining('203.0.113.5') }),
+        })
+      );
+    });
+
+    it('notes a detection whose scope came from the sampled hits', () => {
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({ ...baseData, detections: [iocDetection({ from_sample: true })] })
+          )}
+        />
+      );
+
+      expect(
+        within(screen.getByTestId(SSE_ATTACHMENT_WHAT_MATCHED_TEST_ID)).getByText(
+          'From sampled hits'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('lists sample hosts under Scope when the detection carries them', () => {
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              detections: [
+                iocDetection({
+                  host_count: 4,
+                  hosts: ['host-a', 'host-b', 'host-c', 'host-d'],
+                  user_count: 2,
+                  users: ['alice', 'bob'],
+                }),
+              ],
+            })
+          )}
+        />
+      );
+
+      const whatMatched = screen.getByTestId(SSE_ATTACHMENT_WHAT_MATCHED_TEST_ID);
+      expect(whatMatched).toHaveTextContent('3 events');
+      expect(whatMatched).toHaveTextContent('4 hosts');
+      expect(whatMatched).toHaveTextContent('host-a, host-b, host-c +1 more');
+      expect(whatMatched).toHaveTextContent('alice, bob');
+    });
+
+    it('falls back to the behavior title when technique_name is absent', () => {
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              hunt_result: huntResult,
+              detections: [
+                {
+                  id: 'behavior:T1021',
+                  kind: 'behavior',
+                  technique_id: 'T1021',
+                  basis: 'behavior_only',
+                  matched_on: [],
+                  total: 2,
+                  host_count: 1,
+                },
               ],
             })
           )}
@@ -717,11 +650,498 @@ describe('SignificantSecurityEventInlineContent', () => {
       );
 
       expect(
-        within(screen.getByTestId('alertzeroSignificantSecurityEventCitedEvidence')).getByRole(
-          'button',
-          { name: '5 events, 2 alerts' }
+        within(screen.getByTestId(SSE_ATTACHMENT_WHAT_MATCHED_TEST_ID)).getByText(
+          'Lateral movement via RDP'
         )
       ).toBeInTheDocument();
+    });
+
+    it('omits the Seen column when no detection carries first/last seen', () => {
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(buildAttachment({ ...baseData, detections: [iocDetection()] }))}
+        />
+      );
+
+      expect(
+        within(screen.getByTestId(SSE_ATTACHMENT_WHAT_MATCHED_TEST_ID)).queryByText('Seen')
+      ).not.toBeInTheDocument();
+    });
+
+    it('shows the Seen column when a detection carries timestamps', () => {
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              detections: [
+                iocDetection({
+                  first_seen: '2024-01-01T00:00:00.000Z',
+                  last_seen: '2024-01-01T12:00:00.000Z',
+                }),
+              ],
+            })
+          )}
+        />
+      );
+
+      expect(
+        within(screen.getByTestId(SSE_ATTACHMENT_WHAT_MATCHED_TEST_ID)).getByText('Seen')
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('labels the hypothesis section "Hypothesis"', () => {
+    renderWithI18n(
+      <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />
+    );
+    expect(screen.getByText('Hypothesis')).toBeInTheDocument();
+    expect(screen.getByTestId('alertzeroSignificantSecurityEventHypothesis')).toHaveTextContent(
+      'Attacker pivoted via RDP'
+    );
+    expect(screen.queryByText('Hypothesis tested')).not.toBeInTheDocument();
+    expect(screen.queryByText('Why this matters')).not.toBeInTheDocument();
+  });
+
+  describe('queries run', () => {
+    const behaviorAt = (
+      index: number,
+      extras: {
+        technique_id?: string;
+        confidence?: number;
+        validated_esql?: string;
+        execution?: {
+          executed: boolean;
+          row_count: number;
+          hit: boolean;
+          inconclusive_reason?: 'rows_unclassifiable' | 'execute_failed';
+        };
+      } = {}
+    ): Tier2Behavior => ({
+      technique_id: `T10${index}`,
+      tactic_ids: ['TA0008'],
+      confidence: 0.75,
+      title: `Behavior ${index}`,
+      ...extras,
+    });
+
+    const huntWithBehaviors = (behaviors: Tier2Behavior[]): HuntResultData => ({
+      ...huntResult,
+      // The schema ties Tier 2 as a confirming source to an executed hit.
+      hit_sources: behaviors.some((behavior) => behavior.execution?.hit)
+        ? ['tier1', 'tier2']
+        : ['tier1'],
+      tier2: { status: 'behaviors_proposed', behaviors },
+    });
+
+    const executableCount = (behaviors: Tier2Behavior[]): number =>
+      behaviors.filter(
+        (behavior) =>
+          behavior.validated_esql != null && isExecutableHuntQuery(behavior.validated_esql)
+      ).length;
+
+    const renderOpen = async (
+      behaviors: Tier2Behavior[],
+      navigation: Parameters<typeof renderProps>[1] = defaultNavigation
+    ) => {
+      const user = userEvent.setup();
+      const result = renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({ ...baseData, hunt_result: huntWithBehaviors(behaviors) }),
+            navigation
+          )}
+        />
+      );
+      const accordion = screen.getByTestId(SSE_ATTACHMENT_QUERIES_RUN_TEST_ID);
+      await user.click(
+        within(accordion).getByRole('button', {
+          name: `Queries run (${executableCount(behaviors)})`,
+        })
+      );
+      return { user, accordion, ...result };
+    };
+
+    const techniqueLinks = () =>
+      screen.queryAllByTestId(/^alertzeroSignificantSecurityEventHuntResultTechniqueLink-/);
+
+    it('titles the accordion with the executable query count, excluding placeholders', () => {
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              hunt_result: huntWithBehaviors([
+                behaviorAt(1, { validated_esql: EXECUTABLE_ESQL }),
+                behaviorAt(2, { validated_esql: PLACEHOLDER_ESQL }),
+              ]),
+            })
+          )}
+        />
+      );
+
+      expect(
+        within(screen.getByTestId(SSE_ATTACHMENT_QUERIES_RUN_TEST_ID)).getByRole('button', {
+          name: 'Queries run (1)',
+        })
+      ).toBeInTheDocument();
+    });
+
+    it('keeps a non-executable placeholder out of the query rows and only in the summary line', async () => {
+      await renderOpen([
+        behaviorAt(1, { validated_esql: EXECUTABLE_ESQL }),
+        behaviorAt(2, { validated_esql: PLACEHOLDER_ESQL }),
+      ]);
+
+      expect(techniqueLinks()).toHaveLength(1);
+      expect(screen.getByText('T101')).toBeInTheDocument();
+      expect(screen.queryByText('T102')).not.toBeInTheDocument();
+      expect(
+        screen.getByTestId('alertzeroSignificantSecurityEventQueriesRunNonExecutable')
+      ).toHaveTextContent('1 behavior not run: 1 with an unrunnable query');
+    });
+
+    it('tells the behavior outcomes apart and surfaces their reasons', async () => {
+      await renderOpen([
+        behaviorAt(1, {
+          validated_esql: EXECUTABLE_ESQL,
+          execution: { executed: true, row_count: 4, hit: true },
+        }),
+        behaviorAt(2, {
+          validated_esql: EXECUTABLE_ESQL,
+          execution: { executed: true, row_count: 0, hit: false },
+        }),
+        behaviorAt(3, {
+          validated_esql: EXECUTABLE_ESQL,
+          execution: {
+            executed: true,
+            row_count: 4,
+            hit: false,
+            inconclusive_reason: 'rows_unclassifiable',
+          },
+        }),
+        behaviorAt(4, {
+          validated_esql: EXECUTABLE_ESQL,
+          execution: {
+            executed: false,
+            row_count: 0,
+            hit: false,
+            inconclusive_reason: 'execute_failed',
+          },
+        }),
+        behaviorAt(5, { validated_esql: EXECUTABLE_ESQL }),
+      ]);
+
+      expect(screen.getByText('Hit: 4 rows')).toBeInTheDocument();
+      expect(screen.getByText('No rows')).toBeInTheDocument();
+      expect(screen.getByText('Inconclusive')).toBeInTheDocument();
+      expect(screen.getByText('rows_unclassifiable')).toBeInTheDocument();
+      expect(screen.getByText('Not executed')).toBeInTheDocument();
+      expect(screen.getByText('execute_failed')).toBeInTheDocument();
+      expect(screen.getByText('Unreported')).toBeInTheDocument();
+    });
+
+    it('offers Copy and Open in Discover on a failed execution, with its reason', async () => {
+      const { share } = shareReturning('https://example.test/open');
+      await renderOpen(
+        [
+          behaviorAt(1, {
+            validated_esql: EXECUTABLE_ESQL,
+            execution: {
+              executed: false,
+              row_count: 0,
+              hit: false,
+              inconclusive_reason: 'execute_failed',
+            },
+          }),
+        ],
+        { ...defaultNavigation, share }
+      );
+
+      expect(
+        screen.getByTestId('alertzeroSignificantSecurityEventQueryCopy-0')
+      ).toBeInTheDocument();
+      const link = screen.getByTestId('alertzeroSignificantSecurityEventContinueInDiscover-0');
+      expect(link).toHaveAttribute(
+        'aria-label',
+        expect.stringMatching(/^Open in Discover: T101 /)
+      );
+      expect(screen.getByText('execute_failed')).toBeInTheDocument();
+    });
+
+    it('offers Open in Discover for a reported-but-unexecuted behavior', async () => {
+      const { share } = shareReturning('https://example.test/open');
+      await renderOpen([behaviorAt(1, { validated_esql: EXECUTABLE_ESQL })], {
+        ...defaultNavigation,
+        share,
+      });
+
+      expect(screen.getByText('Unreported')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('alertzeroSignificantSecurityEventContinueInDiscover-0')
+      ).toHaveAttribute('aria-label', expect.stringMatching(/^Open in Discover: T101 /));
+    });
+
+    it('says Continue in Discover over the absolute hunt window for an executed row', async () => {
+      const { share, getRedirectUrl } = shareReturning('https://example.test/continue');
+      await renderOpen(
+        [
+          behaviorAt(1, {
+            validated_esql: EXECUTABLE_ESQL,
+            execution: { executed: true, row_count: 3, hit: true },
+          }),
+        ],
+        { ...defaultNavigation, share }
+      );
+
+      const link = screen.getByTestId('alertzeroSignificantSecurityEventContinueInDiscover-0');
+      expect(link).toHaveAttribute(
+        'aria-label',
+        expect.stringMatching(/^Continue in Discover: T101 /)
+      );
+      expect(link).toHaveAttribute('href', 'https://example.test/continue');
+      expect(link).toHaveAttribute('target', '_blank');
+      expect(getRedirectUrl).toHaveBeenCalledWith({
+        query: { esql: EXECUTABLE_ESQL },
+        timeRange: huntResult.time_range,
+        useHash: true,
+      });
+    });
+
+    it('falls back to Copy plus a hint when the redirect exceeds the length cap', async () => {
+      const { share } = shareReturning(`https://example.test/${'x'.repeat(9000)}`);
+      await renderOpen(
+        [
+          behaviorAt(1, {
+            validated_esql: EXECUTABLE_ESQL,
+            execution: { executed: true, row_count: 1, hit: true },
+          }),
+        ],
+        { ...defaultNavigation, share }
+      );
+
+      expect(
+        screen.getByTestId('alertzeroSignificantSecurityEventQueryCopy-0')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId('alertzeroSignificantSecurityEventQueryTooLong-0')
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('alertzeroSignificantSecurityEventContinueInDiscover-0')
+      ).not.toBeInTheDocument();
+    });
+
+    it('shows a report match percent on query rows but not on the non-executable summary', async () => {
+      await renderOpen([
+        behaviorAt(1, { validated_esql: EXECUTABLE_ESQL }),
+        behaviorAt(2, { validated_esql: PLACEHOLDER_ESQL }),
+      ]);
+
+      expect(screen.getByText('Match')).toBeInTheDocument();
+      expect(screen.getAllByText('75%').length).toBeGreaterThan(0);
+      expect(
+        screen.getByTestId('alertzeroSignificantSecurityEventQueriesRunNonExecutable')
+      ).not.toHaveTextContent('%');
+    });
+
+    it('pages executable behaviors five at a time and offers 5, 10 and 25 rows', async () => {
+      const { user } = await renderOpen(
+        Array.from({ length: 7 }, (_, index) =>
+          behaviorAt(index + 1, { validated_esql: EXECUTABLE_ESQL })
+        )
+      );
+
+      expect(techniqueLinks()).toHaveLength(5);
+      expect(screen.queryByText('Behavior 6')).not.toBeInTheDocument();
+
+      await user.click(screen.getByTestId('tablePaginationPopoverButton'));
+      for (const size of [5, 10, 25]) {
+        expect(screen.getByTestId(`tablePagination-${size}-rows`)).toBeInTheDocument();
+      }
+      await user.click(screen.getByTestId('tablePagination-10-rows'));
+      expect(techniqueLinks()).toHaveLength(7);
+    });
+
+    it('keeps the producer order', async () => {
+      await renderOpen([
+        behaviorAt(3, { validated_esql: EXECUTABLE_ESQL }),
+        behaviorAt(1, { validated_esql: EXECUTABLE_ESQL }),
+        behaviorAt(2, { validated_esql: EXECUTABLE_ESQL }),
+      ]);
+
+      expect(
+        techniqueLinks().map((link) => link.getAttribute('data-test-subj')?.split('-').pop())
+      ).toEqual(['T103', 'T101', 'T102']);
+    });
+
+    it('notes a truncated behavior list inside the section', async () => {
+      const user = userEvent.setup();
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              hunt_result: {
+                ...huntResult,
+                tier2: { ...huntResult.tier2!, behaviors_truncated: true },
+              },
+            })
+          )}
+        />
+      );
+
+      const accordion = screen.getByTestId(SSE_ATTACHMENT_QUERIES_RUN_TEST_ID);
+      await user.click(within(accordion).getByRole('button', { name: 'Queries run (0)' }));
+      expect(
+        within(accordion).getByTestId(
+          'alertzeroSignificantSecurityEventHuntResultBehaviorsTruncated'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('never shows the raw ES|QL anywhere on the card', async () => {
+      const { share } = shareReturning('https://example.test/continue');
+      await renderOpen(
+        [
+          behaviorAt(1, {
+            validated_esql: EXECUTABLE_ESQL,
+            execution: { executed: true, row_count: 1, hit: true },
+          }),
+        ],
+        { ...defaultNavigation, share }
+      );
+
+      const card = screen.getByTestId(SSE_ATTACHMENT_TEST_ID);
+      expect(card).not.toHaveTextContent('psexec.exe');
+      expect(card).not.toHaveTextContent('FROM logs-endpoint');
+    });
+  });
+
+  describe('cited evidence', () => {
+    it('renders a Discover link for an event when share returns a URL, inside the collapsed accordion', async () => {
+      const user = userEvent.setup();
+      const event = {
+        event_id: 'evt-1',
+        source_index: '.ds-logs-endpoint.events.process-default-2026.09.22-000001',
+      };
+      const expectedEsql = buildEventLookupEsql({
+        index: event.source_index,
+        eventId: event.event_id,
+      });
+      const expectedHref = `https://example.test/discover?esql=${encodeURIComponent(expectedEsql)}`;
+
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(buildAttachment({ ...baseData, events: [event] }), {
+            ...defaultNavigation,
+            share: mockShare,
+          })}
+        />
+      );
+
+      const accordion = screen.getByTestId('alertzeroSignificantSecurityEventCitedEvidence');
+      expect(within(accordion).getByRole('button', { name: '1 event' })).toHaveAttribute(
+        'aria-expanded',
+        'false'
+      );
+      await user.click(within(accordion).getByRole('button', { name: '1 event' }));
+
+      expect(
+        screen.getByTestId('alertzeroSignificantSecurityEventEventLink-evt-1')
+      ).toHaveTextContent('evt-1');
+      expect(
+        screen.getByLabelText('Open event evt-1 in Discover')
+      ).toHaveAttribute('href', expectedHref);
+    });
+
+    it('renders no Discover action for an event when share is undefined', async () => {
+      const user = userEvent.setup();
+      const event = {
+        event_id: 'evt-plain',
+        source_index: '.ds-logs-endpoint.events.process-default-2026.09.22-000001',
+      };
+
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(buildAttachment({ ...baseData, events: [event] }))}
+        />
+      );
+
+      const accordion = screen.getByTestId('alertzeroSignificantSecurityEventCitedEvidence');
+      await user.click(within(accordion).getByRole('button', { name: '1 event' }));
+
+      expect(
+        screen.getByTestId('alertzeroSignificantSecurityEventEventLink-evt-plain')
+      ).toHaveTextContent('evt-plain');
+      expect(screen.queryByLabelText(/Open event .* in Discover/)).not.toBeInTheDocument();
+    });
+
+    it('groups events under their detection with fields and a shown-of-total footer', async () => {
+      const user = userEvent.setup();
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              detections: [
+                {
+                  id: 'ioc:ip:203.0.113.5',
+                  kind: 'ioc',
+                  field: 'destination.ip',
+                  basis: 'ioc_strong',
+                  matched_on: [{ field: 'destination.ip', value: '203.0.113.5' }],
+                  total: 10,
+                },
+              ],
+              events: [
+                {
+                  event_id: 'evt-grp',
+                  source_index: '.ds-logs-endpoint.events.process-default-2026.09.22-000001',
+                  fields: { 'process.name': 'psexec.exe' },
+                  matched: {
+                    field: 'destination.ip',
+                    detection: 'ioc:ip:203.0.113.5',
+                    ioc: { type: 'ip', value: '203.0.113.5' },
+                  },
+                },
+              ],
+            })
+          )}
+        />
+      );
+
+      const accordion = screen.getByTestId('alertzeroSignificantSecurityEventCitedEvidence');
+      await user.click(within(accordion).getByRole('button', { name: '1 event' }));
+
+      expect(within(accordion).getByText('ip 203.0.113.5')).toBeInTheDocument();
+      expect(within(accordion).getByText('process.name')).toBeInTheDocument();
+      expect(within(accordion).getByText('psexec.exe', { exact: false })).toBeInTheDocument();
+      expect(
+        screen.getByTestId('alertzeroSignificantSecurityEventEventsGroupFooter')
+      ).toHaveTextContent('1 shown of 10');
+    });
+
+    it('shows the cited events before the cited alerts', async () => {
+      const user = userEvent.setup();
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              events: [{ event_id: 'evt-1', source_index: '.ds-logs-default-2026.09.22-000001' }],
+              alerts: [{ alert_id: 'alert-1', index: '.alerts-security.alerts-default' }],
+            })
+          )}
+        />
+      );
+
+      const accordion = screen.getByTestId('alertzeroSignificantSecurityEventCitedEvidence');
+      await user.click(within(accordion).getByRole('button', { name: '1 event, 1 alert' }));
+      const event = within(accordion).getByTestId(
+        'alertzeroSignificantSecurityEventEventLink-evt-1'
+      );
+      const alert = within(accordion).getByTestId('alertzeroSignificantSecurityEventAlerts');
+      expect(event.compareDocumentPosition(alert)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     });
 
     it.each([
@@ -760,108 +1180,183 @@ describe('SignificantSecurityEventInlineContent', () => {
         )
       ).toBeInTheDocument();
     });
+  });
 
-    it('shows the cited events before the cited alerts', async () => {
-      const user = userEvent.setup();
+  describe('layout', () => {
+    const detailSections = [
+      ['alertzeroSignificantSecurityEventCitedEvidence', '1 event'],
+      [SSE_ATTACHMENT_QUERIES_RUN_TEST_ID, 'Queries run (0)'],
+    ] as const;
+
+    const renderWithDetails = () =>
       renderWithI18n(
         <SignificantSecurityEventInlineContent
           {...renderProps(
             buildAttachment({
               ...baseData,
               events: [{ event_id: 'evt-1', source_index: '.ds-logs-default-2026.09.22-000001' }],
-              alerts: [{ alert_id: 'alert-1', index: '.alerts-security.alerts-default' }],
+              hunt_result: huntResult,
             })
           )}
         />
       );
 
-      const accordion = screen.getByTestId('alertzeroSignificantSecurityEventCitedEvidence');
-      await user.click(within(accordion).getByRole('button', { name: '1 event, 1 alert' }));
-      const event = within(accordion).getByTestId(
-        'alertzeroSignificantSecurityEventEventLink-evt-1'
-      );
-      const alert = within(accordion).getByTestId('alertzeroSignificantSecurityEventAlerts');
-      expect(event.compareDocumentPosition(alert)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    });
-
-    it('renders the provenance cards in order inside technical run details', () => {
+    it('starts with the detail sections collapsed', () => {
       renderWithDetails();
 
-      const details = screen.getByTestId('alertzeroSignificantSecurityEventTechnicalRunDetails');
-      expect(
-        within(details)
-          .getAllByTestId(
-            /^alertzeroSignificantSecurityEvent(RunId|ReportLink|SourceWatch|Capability)$/
-          )
-          .map((element) => element.getAttribute('data-test-subj'))
-      ).toEqual([
-        'alertzeroSignificantSecurityEventRunId',
-        'alertzeroSignificantSecurityEventReportLink',
-        'alertzeroSignificantSecurityEventSourceWatch',
-        'alertzeroSignificantSecurityEventCapability',
-      ]);
-      expect(screen.getByTestId('alertzeroSignificantSecurityEventSourceWatch')).toHaveTextContent(
-        'watch-1'
-      );
-      expect(screen.getByTestId('alertzeroSignificantSecurityEventCapability')).toHaveTextContent(
-        'lateral-movement-detector'
-      );
+      for (const [testId, name] of detailSections) {
+        expect(within(screen.getByTestId(testId)).getByRole('button', { name })).toHaveAttribute(
+          'aria-expanded',
+          'false'
+        );
+      }
     });
 
-    it('keeps evidence for and against inside technical run details only', () => {
+    it('expands each detail section independently', async () => {
+      const user = userEvent.setup();
+      renderWithDetails();
+
+      const buttonFor = (index: number) => {
+        const [testId, name] = detailSections[index];
+        return within(screen.getByTestId(testId)).getByRole('button', { name });
+      };
+
+      await user.click(buttonFor(1));
+      expect(buttonFor(0)).toHaveAttribute('aria-expanded', 'false');
+      expect(buttonFor(1)).toHaveAttribute('aria-expanded', 'true');
+
+      await user.click(buttonFor(0));
+      expect(buttonFor(0)).toHaveAttribute('aria-expanded', 'true');
+      expect(buttonFor(1)).toHaveAttribute('aria-expanded', 'true');
+
+      await user.click(buttonFor(1));
+      expect(buttonFor(1)).toHaveAttribute('aria-expanded', 'false');
+      expect(buttonFor(0)).toHaveAttribute('aria-expanded', 'true');
+    });
+
+    it('renders the run id in the status row, without a source report row', () => {
+      renderWithDetails();
+
+      expect(
+        screen.queryByTestId('alertzeroSignificantSecurityEventTechnicalRunDetails')
+      ).not.toBeInTheDocument();
+
+      const statusRow = screen.getByTestId('alertzeroSignificantSecurityEventStatusRow');
+      const audit = within(statusRow).getByTestId('alertzeroSignificantSecurityEventRunProvenance');
+      expect(within(audit).getByTestId('alertzeroSignificantSecurityEventRunId')).toHaveTextContent(
+        'run-1'
+      );
+      expect(
+        within(audit).queryByTestId('alertzeroSignificantSecurityEventReportLink')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('alertzeroSignificantSecurityEventSourceWatch')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('alertzeroSignificantSecurityEventCapability')
+      ).not.toBeInTheDocument();
+
+      const hypothesis = screen.getByTestId('alertzeroSignificantSecurityEventHypothesis');
+      expect(statusRow.compareDocumentPosition(hypothesis)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+
+    it('links the run id to the managed workflow execution when getUrlForApp is available', () => {
+      const getUrlForApp = jest
+        .fn()
+        .mockReturnValue(
+          '/app/workflows/system-security-hunt-continuous-threat-hunt-default?tab=executions&executionId=run-1'
+        );
+
       renderWithI18n(
         <SignificantSecurityEventInlineContent
-          {...renderProps(buildAttachment({ ...baseData, evidence_against: ['counter'] }))}
+          {...renderProps(buildAttachment(baseData), {
+            ...createMockNavigation(),
+            getUrlForApp,
+          })}
         />
       );
 
-      const details = screen.getByTestId('alertzeroSignificantSecurityEventTechnicalRunDetails');
-      expect(details).toContainElement(screen.getByText('Evidence for'));
-      expect(details).toContainElement(screen.getByText('Evidence against'));
-      expect(details).toContainElement(screen.getByText('counter'));
+      const link = screen.getByTestId('alertzeroSignificantSecurityEventRunLink');
+      expect(link).toHaveAttribute(
+        'href',
+        '/app/workflows/system-security-hunt-continuous-threat-hunt-default?tab=executions&executionId=run-1'
+      );
+      expect(getUrlForApp).toHaveBeenCalledWith('workflows', {
+        path: '/watch-1-default?tab=executions&executionId=run-1',
+      });
     });
 
-    it('renders technical run details even without a hunt result', () => {
+    it('renders the run id in the status row even without a hunt result', () => {
       renderWithI18n(
         <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />
       );
 
-      const details = screen.getByTestId('alertzeroSignificantSecurityEventTechnicalRunDetails');
       expect(
-        within(details).getByTestId('alertzeroSignificantSecurityEventRunId')
+        within(screen.getByTestId('alertzeroSignificantSecurityEventStatusRow')).getByTestId(
+          'alertzeroSignificantSecurityEventRunId'
+        )
       ).toBeInTheDocument();
       expect(
         screen.queryByTestId('alertzeroSignificantSecurityEventHuntResultOutcome')
       ).not.toBeInTheDocument();
     });
 
-    it('caps the entity chips at ten and reveals the rest on request', async () => {
-      const user = userEvent.setup();
+    it('orders the story as status row, hypothesis, searched for, what matched, involved, hits, events, queries', () => {
       renderWithI18n(
         <SignificantSecurityEventInlineContent
           {...renderProps(
             buildAttachment({
               ...baseData,
-              entities: Array.from({ length: 12 }, (_, index) => ({
-                field: 'host.name' as const,
-                value: `host-${index}`,
-              })),
+              events: [{ event_id: 'evt-1', source_index: '.ds-logs-default-2026.09.22-000001' }],
+              hunt_result: {
+                ...huntResult,
+                tier1: {
+                  ...huntResult.tier1,
+                  resolved_iocs: [{ type: 'ip', value: '203.0.113.5' }],
+                },
+              },
+              detections: [
+                {
+                  id: 'ioc:ip:203.0.113.5',
+                  kind: 'ioc',
+                  field: 'destination.ip',
+                  basis: 'ioc_strong',
+                  matched_on: [{ field: 'destination.ip', value: '203.0.113.5' }],
+                  total: 4,
+                },
+              ],
             })
           )}
         />
       );
 
-      expect(screen.getByTestId('alertzeroSignificantSecurityEventEntity-9')).toBeInTheDocument();
-      expect(screen.queryByTestId('alertzeroSignificantSecurityEventEntity-10')).toBeNull();
-      const overflow = screen.getByTestId('alertzeroSignificantSecurityEventEntitiesOverflow');
-      expect(overflow).toHaveTextContent('+2 more');
+      const statusRow = screen.getByTestId('alertzeroSignificantSecurityEventStatusRow');
+      const outcome = screen.getByTestId('alertzeroSignificantSecurityEventHuntResultOutcome');
+      const audit = screen.getByTestId('alertzeroSignificantSecurityEventRunProvenance');
+      const hypothesis = screen.getByTestId('alertzeroSignificantSecurityEventHypothesis');
+      const searchedFor = screen.getByTestId(SSE_ATTACHMENT_SEARCHED_FOR_TEST_ID);
+      const whatMatched = screen.getByTestId(SSE_ATTACHMENT_WHAT_MATCHED_TEST_ID);
+      const entities = screen.getByTestId(SSE_ATTACHMENT_ENTITY_LINE_TEST_ID);
+      const queries = screen.getByTestId(SSE_ATTACHMENT_QUERIES_RUN_TEST_ID);
+      const events = screen.getByTestId('alertzeroSignificantSecurityEventCitedEvidence');
+      const indexHits = screen.getByTestId(SSE_ATTACHMENT_INDEX_HITS_TEST_ID);
 
-      await user.click(overflow);
-      expect(screen.getByTestId('alertzeroSignificantSecurityEventEntity-11')).toBeInTheDocument();
-      expect(overflow).toHaveTextContent('Show fewer');
-
-      await user.click(overflow);
-      expect(screen.queryByTestId('alertzeroSignificantSecurityEventEntity-10')).toBeNull();
+      expect(within(statusRow).getByTestId('alertzeroSignificantSecurityEventHuntResultOutcome')).toBe(
+        outcome
+      );
+      expect(within(statusRow).getByTestId('alertzeroSignificantSecurityEventRunProvenance')).toBe(
+        audit
+      );
+      expect(within(statusRow).getByTestId('alertzeroSignificantSecurityEventHuntWindow')).toBeInTheDocument();
+      expect(statusRow.compareDocumentPosition(hypothesis)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+      expect(hypothesis.compareDocumentPosition(searchedFor)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+      expect(searchedFor.compareDocumentPosition(whatMatched)).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING
+      );
+      expect(whatMatched.compareDocumentPosition(entities)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+      expect(entities.compareDocumentPosition(indexHits)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+      expect(indexHits.compareDocumentPosition(events)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+      expect(events.compareDocumentPosition(queries)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     });
 
     it('does not render a legacy timeline or proposal, or prompt for a case', () => {
@@ -900,283 +1395,87 @@ describe('SignificantSecurityEventInlineContent', () => {
       expect(screen.queryByTestId('alertzeroSignificantSecurityEventTimeline')).toBeNull();
       expect(screen.queryByTestId('alertzeroSignificantSecurityEventProposal')).toBeNull();
     });
-
-    describe('outcome counts', () => {
-      const tileFor = (label: string) => {
-        const outcome = screen.getByTestId('alertzeroSignificantSecurityEventOutcome');
-        const tile = within(outcome).getByText(label).closest('.euiFlexItem');
-        expect(tile).not.toBeNull();
-        return tile as HTMLElement;
-      };
-
-      const executedHit = (extras: Record<string, unknown> = {}) => ({
-        ...behavior,
-        execution: { executed: true, row_count: 2, hit: true },
-        ...extras,
-      });
-
-      const clean = (
-        tier1: { status?: 'no_environment_hits' | 'scope_blocked' | 'no_searchable_terms' } = {}
-      ) => ({
-        has_confirmed_hit: false,
-        hit_sources: [] as never[],
-        time_range: huntResult.time_range,
-        tier1: {
-          status: 'no_environment_hits' as const,
-          counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
-          per_index: [],
-          resolved_iocs: [],
-          ...tier1,
-        },
-      });
-
-      const tier2OnlyHit = (behaviors: Array<ReturnType<typeof executedHit>>) => ({
-        ...clean({}),
-        has_confirmed_hit: true,
-        hit_sources: ['tier2' as const],
-        tier2: { status: 'behaviors_proposed' as const, behaviors },
-      });
-
-      const render = (hunt: unknown, extra: Record<string, unknown> = {}) =>
-        renderWithI18n(
-          <SignificantSecurityEventInlineContent
-            {...renderProps(
-              buildAttachment({
-                ...baseData,
-                ...extra,
-                hunt_result: hunt as typeof huntResult,
-              })
-            )}
-          />
-        );
-
-      it('reports Tier 1 counts, with Tier 2 names and behavior hits alongside rather than summed', () => {
-        render({
-          ...huntResult,
-          hit_sources: ['tier1' as const, 'tier2' as const],
-          tier2: {
-            status: 'behaviors_proposed' as const,
-            behaviors: [
-              executedHit({ affected_hosts: ['a', 'b', 'c'], affected_hosts_truncated: true }),
-              executedHit({ technique_id: 'T1078', affected_hosts: ['a'] }),
-            ],
-          },
-        });
-
-        expect(tileFor('Environment hits')).toHaveTextContent(
-          /^Environment hits\+ 2 behavior hits12$/
-        );
-        expect(tileFor('Affected hosts')).toHaveTextContent(
-          /^Affected hostsTier 2 also reports 3\+2$/
-        );
-        expect(tileFor('Affected users')).toHaveTextContent(/^Affected users3$/);
-      });
-
-      it('words the single behavior hit caption in the singular', () => {
-        render({
-          ...huntResult,
-          hit_sources: ['tier1' as const, 'tier2' as const],
-          tier2: { status: 'behaviors_proposed' as const, behaviors: [executedHit()] },
-        });
-
-        expect(tileFor('Environment hits')).toHaveTextContent('+ 1 behavior hit');
-      });
-
-      it('counts Tier 2 hosts and users when Tier 1 found nothing, marking a truncated list', () => {
-        render(
-          tier2OnlyHit([
-            executedHit({ affected_hosts: ['h1', 'h2'], affected_users: ['u1'] }),
-            executedHit({
-              technique_id: 'T1078',
-              affected_hosts: ['h2', 'h3'],
-              affected_hosts_truncated: true,
-            }),
-          ])
-        );
-
-        expect(tileFor('Environment hits')).toHaveTextContent(
-          /^Environment hits\+ 2 behavior hits0$/
-        );
-        expect(tileFor('Affected hosts')).toHaveTextContent(/^Affected hosts3\+$/);
-        expect(tileFor('Affected users')).toHaveTextContent(/^Affected users1$/);
-      });
-
-      it('shows a dash, never zero, when hit behaviors list no names', () => {
-        render(tier2OnlyHit([executedHit()]));
-
-        expect(tileFor('Affected hosts')).toHaveTextContent(/^Affected hosts–$/);
-        expect(tileFor('Affected users')).toHaveTextContent(/^Affected users–$/);
-      });
-
-      it('shows a real zero when the hunt ran and found nothing', () => {
-        render(clean({}));
-
-        expect(tileFor('Environment hits')).toHaveTextContent(/^Environment hits0$/);
-        expect(tileFor('Affected hosts')).toHaveTextContent(/^Affected hosts0$/);
-        expect(tileFor('Affected users')).toHaveTextContent(/^Affected users0$/);
-      });
-
-      it.each([
-        ['scope_blocked' as const, 'Hunt did not run: scope blocked'],
-        ['no_searchable_terms' as const, 'No searchable terms'],
-      ])('shows dashes, never zeros, for a %s Tier 1', (status, statusLabel) => {
-        render(clean({ status }));
-
-        expect(tileFor(statusLabel)).toHaveTextContent(new RegExp(`^${statusLabel}–$`));
-        expect(tileFor('Affected hosts')).toHaveTextContent(/^Affected hosts–$/);
-        expect(tileFor('Affected users')).toHaveTextContent(/^Affected users–$/);
-      });
-
-      it('keeps the behavior hit caption under a Tier 1 that did not run', () => {
-        render({
-          ...tier2OnlyHit([executedHit({ affected_hosts: ['h1'] })]),
-          tier1: { ...clean({}).tier1, status: 'no_searchable_terms' as const },
-        });
-
-        expect(tileFor('No searchable terms')).toHaveTextContent(
-          /^No searchable terms\+ 1 behavior hit–$/
-        );
-        expect(tileFor('Affected hosts')).toHaveTextContent(/^Affected hosts1$/);
-      });
-
-      it('counts cited references as event rows plus alert rows', () => {
-        render(huntResult, {
-          events: [
-            { event_id: 'evt-1', source_index: '.ds-logs-default-2026.09.22-000001' },
-            { event_id: 'evt-2', source_index: '.ds-logs-default-2026.09.22-000001' },
-            { event_id: 'evt-3', source_index: '.ds-logs-default-2026.09.22-000001' },
-          ],
-          alerts: [
-            { alert_id: 'alert-1', index: '.alerts-security.alerts-default' },
-            { alert_id: 'alert-2', index: '.alerts-security.alerts-default' },
-          ],
-        });
-
-        expect(tileFor('Cited references')).toHaveTextContent(/^Cited references5$/);
-      });
-
-      it('hides the window, hit, host and user counts without a hunt result', () => {
-        renderWithI18n(
-          <SignificantSecurityEventInlineContent
-            {...renderProps(
-              buildAttachment({
-                ...baseData,
-                alerts: [{ alert_id: 'alert-1', index: '.alerts-security.alerts-default' }],
-              })
-            )}
-          />
-        );
-
-        const outcome = screen.getByTestId('alertzeroSignificantSecurityEventOutcome');
-        expect(outcome).toHaveTextContent(/^Cited references1$/);
-        expect(
-          screen.queryByTestId('alertzeroSignificantSecurityEventHuntWindow')
-        ).not.toBeInTheDocument();
-        expect(
-          screen.queryByTestId('alertzeroSignificantSecurityEventConfirmedHit')
-        ).not.toBeInTheDocument();
-        expect(
-          screen.queryByTestId('alertzeroSignificantSecurityEventBehaviorValidation')
-        ).not.toBeInTheDocument();
-      });
-    });
   });
 
-  describe('behavior validation', () => {
-    const esql = 'FROM logs-endpoint.events.process-* | WHERE process.name == "psexec.exe"';
-
-    const behaviorAt = (
-      index: number,
-      extras: {
-        technique_id?: string;
-        validated_esql?: string;
-        execution?: {
-          executed: boolean;
-          row_count: number;
-          hit: boolean;
-          inconclusive_reason?: 'rows_unclassifiable';
-        };
-      } = {}
-    ) => ({
-      technique_id: `T10${index}`,
-      tactic_ids: ['TA0008'],
-      confidence: 0.75,
-      title: `Behavior ${index}`,
-      ...extras,
-    });
-
-    const hunt = (behaviors: Array<ReturnType<typeof behaviorAt>>) => ({
-      ...huntResult,
-      // The schema ties Tier 2 as a confirming source to an executed hit.
-      hit_sources: behaviors.some((behavior) => behavior.execution?.hit)
-        ? ['tier1' as const, 'tier2' as const]
-        : ['tier1' as const],
-      tier2: { status: 'behaviors_proposed' as const, behaviors },
-    });
-
-    const shareReturning = (url: string) => {
-      const getRedirectUrl = jest.fn().mockReturnValue(url);
-      const share = {
-        url: { locators: { get: () => ({ getRedirectUrl }) } },
-      } as unknown as SharePluginStart;
-      return { share, getRedirectUrl };
-    };
-
-    const renderOpen = async (
-      behaviors: Array<ReturnType<typeof behaviorAt>>,
-      navigation: Parameters<typeof renderProps>[1] = defaultNavigation
-    ) => {
-      const user = userEvent.setup();
-      const result = renderWithI18n(
+  describe('hits by index', () => {
+    it('surfaces the per-index distribution above the events table', () => {
+      renderWithI18n(
         <SignificantSecurityEventInlineContent
           {...renderProps(
-            buildAttachment({ ...baseData, hunt_result: hunt(behaviors) }),
-            navigation
+            buildAttachment({
+              ...baseData,
+              events: [{ event_id: 'evt-1', source_index: '.ds-logs-default-2026.09.22-000001' }],
+              hunt_result: huntResult,
+            })
           )}
         />
       );
-      const accordion = screen.getByTestId('alertzeroSignificantSecurityEventBehaviorValidation');
-      await user.click(
-        within(accordion).getByRole('button', { name: `Behavior validation (${behaviors.length})` })
-      );
-      return { user, ...result };
-    };
 
-    const techniqueLinks = () =>
-      screen.queryAllByTestId(/^alertzeroSignificantSecurityEventHuntResultTechniqueLink-/);
+      const indexHits = screen.getByTestId(SSE_ATTACHMENT_INDEX_HITS_TEST_ID);
+      expect(indexHits).toHaveTextContent('12 events across 2 indices');
+      expect(indexHits).toHaveTextContent('logs-endpoint.events.network-default (4) optional');
+      expect(screen.getAllByText('optional')).toHaveLength(1);
 
-    it('pages behaviors five at a time and offers 5, 10 and 25 rows', async () => {
-      const { user } = await renderOpen(
-        Array.from({ length: 7 }, (_, index) => behaviorAt(index + 1))
-      );
-
-      expect(techniqueLinks()).toHaveLength(5);
-      expect(screen.queryByText('Behavior 6')).not.toBeInTheDocument();
-
-      await user.click(screen.getByTestId('tablePaginationPopoverButton'));
-      for (const size of [5, 10, 25]) {
-        expect(screen.getByTestId(`tablePagination-${size}-rows`)).toBeInTheDocument();
-      }
-      await user.click(screen.getByTestId('tablePagination-10-rows'));
-      expect(techniqueLinks()).toHaveLength(7);
+      const events = screen.getByTestId('alertzeroSignificantSecurityEventCitedEvidence');
+      const entities = screen.getByTestId(SSE_ATTACHMENT_ENTITY_LINE_TEST_ID);
+      expect(entities.compareDocumentPosition(indexHits)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+      expect(indexHits.compareDocumentPosition(events)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+      expect(
+        screen.queryByTestId('alertzeroSignificantSecurityEventTechnicalRunDetails')
+      ).not.toBeInTheDocument();
     });
 
-    it('keeps the producer order', async () => {
-      await renderOpen([behaviorAt(3), behaviorAt(1), behaviorAt(2)]);
+    it('omits the section when the hunt carried no per-index rows', () => {
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              hunt_result: { ...huntResult, tier1: { ...huntResult.tier1, per_index: [] } },
+            })
+          )}
+        />
+      );
+
+      expect(screen.queryByTestId(SSE_ATTACHMENT_INDEX_HITS_TEST_ID)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('run provenance and hunt outcome', () => {
+    it('renders the hunt window on the status row', () => {
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(buildAttachment({ ...baseData, hunt_result: huntResult }))}
+        />
+      );
+      expect(screen.getByTestId('alertzeroSignificantSecurityEventHuntWindow')).toHaveTextContent(
+        '2024'
+      );
+    });
+
+    it('hides the window, confirmed-hit badge and queries run without a hunt result', () => {
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              alerts: [{ alert_id: 'alert-1', index: '.alerts-security.alerts-default' }],
+            })
+          )}
+        />
+      );
 
       expect(
-        techniqueLinks().map((link) => link.getAttribute('data-test-subj')?.split('-').pop())
-      ).toEqual(['T103', 'T101', 'T102']);
+        screen.queryByTestId('alertzeroSignificantSecurityEventHuntWindow')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('alertzeroSignificantSecurityEventConfirmedHit')
+      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId(SSE_ATTACHMENT_QUERIES_RUN_TEST_ID)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(SSE_ATTACHMENT_INDEX_HITS_TEST_ID)).not.toBeInTheDocument();
     });
 
-    it('shows no pagination controls for five behaviors or fewer', async () => {
-      await renderOpen(Array.from({ length: 5 }, (_, index) => behaviorAt(index + 1)));
-
-      expect(screen.queryByTestId('tablePaginationPopoverButton')).not.toBeInTheDocument();
-    });
-
-    it('notes a truncated behavior list inside the section', async () => {
-      const user = userEvent.setup();
+    it('names the tier that confirmed the finding alongside the report-wide tier statuses', () => {
       renderWithI18n(
         <SignificantSecurityEventInlineContent
           {...renderProps(
@@ -1184,320 +1483,296 @@ describe('SignificantSecurityEventInlineContent', () => {
               ...baseData,
               hunt_result: {
                 ...huntResult,
-                tier2: { ...huntResult.tier2, behaviors_truncated: true },
+                hit_sources: ['tier2'],
+                tier2: {
+                  status: 'behaviors_proposed',
+                  behaviors: [
+                    {
+                      technique_id: 'T1021',
+                      tactic_ids: ['TA0008'],
+                      confidence: 0.75,
+                      title: 'Lateral movement via RDP',
+                      execution: { executed: true, row_count: 2, hit: true },
+                    },
+                  ],
+                },
               },
             })
           )}
         />
       );
 
-      const accordion = screen.getByTestId('alertzeroSignificantSecurityEventBehaviorValidation');
-      await user.click(within(accordion).getByRole('button', { name: 'Behavior validation (1)' }));
+      const statusRow = screen.getByTestId('alertzeroSignificantSecurityEventStatusRow');
+      const outcome = within(statusRow).getByTestId(
+        'alertzeroSignificantSecurityEventHuntResultOutcome'
+      );
       expect(
-        within(accordion).getByTestId(
-          'alertzeroSignificantSecurityEventHuntResultBehaviorsTruncated'
-        )
+        within(outcome).getByTestId('alertzeroSignificantSecurityEventHuntResultHitSources')
+      ).toHaveTextContent('Confirmed by Behavior Hunt');
+      expect(outcome).toHaveTextContent('Environment hits found');
+      expect(
+        within(statusRow).getByTestId('alertzeroSignificantSecurityEventHuntWindow')
       ).toBeInTheDocument();
     });
 
-    describe('Continue in Discover', () => {
-      const continueLink = (rowIndex: number) =>
-        screen.queryByTestId(`alertzeroSignificantSecurityEventContinueInDiscover-${rowIndex}`);
-
-      it('opens the exact query over the absolute hunt window in a new tab', async () => {
-        const { share, getRedirectUrl } = shareReturning('https://example.test/continue');
-        await renderOpen(
-          [
-            behaviorAt(1, {
-              validated_esql: esql,
-              execution: { executed: true, row_count: 3, hit: true },
-            }),
-          ],
-          { ...defaultNavigation, share }
-        );
-
-        const link = continueLink(0);
-        expect(link).toHaveAttribute('href', 'https://example.test/continue');
-        expect(link).toHaveAttribute('target', '_blank');
-        expect(link?.getAttribute('rel')).toContain('noopener');
-        expect(link).toHaveAttribute('aria-label', 'Continue in Discover: T101 (behavior 1)');
-        expect(getRedirectUrl).toHaveBeenCalledWith({
-          query: { esql },
-          timeRange: huntResult.time_range,
-          useHash: true,
-        });
-      });
-
-      it('numbers the behaviors one-based so a shared technique id stays distinguishable', async () => {
-        const { share } = shareReturning('https://example.test/continue');
-        const executed = { executed: true, row_count: 1, hit: true };
-        await renderOpen(
-          [
-            behaviorAt(1, { technique_id: 'T1021', validated_esql: esql, execution: executed }),
-            behaviorAt(2, { technique_id: 'T1021', validated_esql: esql, execution: executed }),
-          ],
-          { ...defaultNavigation, share }
-        );
-
-        expect(continueLink(0)).toHaveAttribute(
-          'aria-label',
-          'Continue in Discover: T1021 (behavior 1)'
-        );
-        expect(continueLink(1)).toHaveAttribute(
-          'aria-label',
-          'Continue in Discover: T1021 (behavior 2)'
-        );
-      });
-
-      it('is offered for executed zero-row and unclassifiable runs too', async () => {
-        const { share } = shareReturning('https://example.test/continue');
-        await renderOpen(
-          [
-            behaviorAt(1, {
-              validated_esql: esql,
-              execution: { executed: true, row_count: 0, hit: false },
-            }),
-            behaviorAt(2, {
-              validated_esql: esql,
-              execution: {
-                executed: true,
-                row_count: 4,
-                hit: false,
-                inconclusive_reason: 'rows_unclassifiable' as const,
-              },
-            }),
-          ],
-          { ...defaultNavigation, share }
-        );
-
-        expect(continueLink(0)).toBeInTheDocument();
-        expect(continueLink(1)).toBeInTheDocument();
-      });
-
-      it('is withheld for unexecuted, unreported and queryless behaviors', async () => {
-        const { share } = shareReturning('https://example.test/continue');
-        await renderOpen(
-          [
-            behaviorAt(1, {
-              validated_esql: esql,
-              execution: { executed: false, row_count: 0, hit: false },
-            }),
-            behaviorAt(2, { validated_esql: esql }),
-            behaviorAt(3, { execution: { executed: true, row_count: 1, hit: true } }),
-          ],
-          { ...defaultNavigation, share }
-        );
-
-        for (const rowIndex of [0, 1, 2]) {
-          expect(continueLink(rowIndex)).not.toBeInTheDocument();
-        }
-      });
-
-      it('is withheld when Discover is unavailable or the redirect is too long', async () => {
-        const executed = { executed: true, row_count: 1, hit: true };
-        const { unmount } = await renderOpen(
-          [behaviorAt(1, { validated_esql: esql, execution: executed })],
-          defaultNavigation
-        );
-        expect(continueLink(0)).not.toBeInTheDocument();
-        unmount();
-
-        const { share } = shareReturning(`https://example.test/${'x'.repeat(9000)}`);
-        await renderOpen([behaviorAt(1, { validated_esql: esql, execution: executed })], {
-          ...defaultNavigation,
-          share,
-        });
-        expect(continueLink(0)).not.toBeInTheDocument();
-      });
-
-      it('says which hunt window it opens with', async () => {
-        const { share } = shareReturning('https://example.test/continue');
-        const { user } = await renderOpen(
-          [
-            behaviorAt(1, {
-              validated_esql: esql,
-              execution: { executed: true, row_count: 1, hit: true },
-            }),
-          ],
-          { ...defaultNavigation, share }
-        );
-
-        await user.hover(continueLink(0) as HTMLElement);
-        expect(
-          await screen.findByText(
-            'Opens with the hunt window 2024-01-01T00:00:00Z to 2024-01-02T00:00:00Z'
-          )
-        ).toBeInTheDocument();
-      });
-
-      it('never shows the raw ES|QL anywhere on the card', async () => {
-        const { share } = shareReturning('https://example.test/continue');
-        await renderOpen(
-          [
-            behaviorAt(1, {
-              validated_esql: esql,
-              execution: { executed: true, row_count: 1, hit: true },
-            }),
-          ],
-          { ...defaultNavigation, share }
-        );
-
-        const card = screen.getByTestId(SSE_ATTACHMENT_TEST_ID);
-        expect(card).not.toHaveTextContent('psexec.exe');
-        expect(card).not.toHaveTextContent('FROM logs-endpoint');
-      });
-    });
-  });
-
-  it('renders resolved_iocs from the hunt result', () => {
-    renderWithI18n(
-      <SignificantSecurityEventInlineContent
-        {...renderProps(
-          buildAttachment({
-            ...baseData,
-            hunt_result: {
-              ...huntResult,
-              tier1: {
-                ...huntResult.tier1,
-                resolved_iocs: [
-                  { type: 'ip' as const, value: '203.0.113.5' },
-                  { type: 'hash' as const, value: 'deadbeef' },
-                ],
-              },
-            },
-          })
-        )}
-      />
-    );
-    expect(
-      screen.getByTestId('alertzeroSignificantSecurityEventHuntResultResolvedIocs')
-    ).toBeInTheDocument();
-    expect(screen.getByText('203.0.113.5')).toBeInTheDocument();
-    expect(screen.getByText('deadbeef')).toBeInTheDocument();
-  });
-
-  it('renders when resolved_iocs is absent on the hunt result', () => {
-    const { resolved_iocs: _omit, ...tier1WithoutResolved } = huntResult.tier1;
-    renderWithI18n(
-      <SignificantSecurityEventInlineContent
-        {...renderProps(
-          buildAttachment({
-            ...baseData,
-            hunt_result: {
-              ...huntResult,
-              tier1: {
-                ...tier1WithoutResolved,
-                searched_ioc_count: 2,
-              },
-            },
-          })
-        )}
-      />
-    );
-
-    expect(screen.getByTestId(SSE_ATTACHMENT_TEST_ID)).toBeInTheDocument();
-    expect(
-      screen.queryByTestId('alertzeroSignificantSecurityEventHuntResultResolvedIocs')
-    ).not.toBeInTheDocument();
-  });
-
-  it('distinguishes a hunt that could not run from one that ran and found nothing', () => {
-    // `no_searchable_terms` and `no_environment_hits` both render as zero counts, so the
-    // outcome badges are the only thing that tells an analyst which one happened.
-    renderWithI18n(
-      <SignificantSecurityEventInlineContent
-        {...renderProps(
-          buildAttachment({
-            ...baseData,
-            hunt_result: {
-              ...huntResult,
-              has_confirmed_hit: false,
-              // Cleared alongside the boolean: the schema only accepts an empty source list
-              // for a run that confirmed nothing.
-              hit_sources: [],
-              tier1: {
-                ...huntResult.tier1,
-                status: 'no_searchable_terms' as const,
-                // The schema now ties status to counts, so a hunt that found nothing must
-                // carry zero counts to be a valid payload — and an empty breakdown with them,
-                // since the per-index hit counts cannot sum past the total.
-                counts: {
-                  ...huntResult.tier1.counts,
-                  total_hits: 0,
-                  returned_hits: 0,
-                  affected_hosts: 0,
-                  affected_users: 0,
-                },
-                per_index: [],
-              },
-            },
-          })
-        )}
-      />
-    );
-
-    expect(screen.getByTestId('alertzeroSignificantSecurityEventStatusRow')).toHaveTextContent(
-      'No confirmed hit'
-    );
-    expect(
-      screen.getByTestId('alertzeroSignificantSecurityEventHuntResultOutcome')
-    ).toHaveTextContent('No searchable terms');
-  });
-
-  it('shows returned hits when the result set is a capped sample', () => {
-    renderWithI18n(
-      <SignificantSecurityEventInlineContent
-        {...renderProps(
-          buildAttachment({
-            ...baseData,
-            hunt_result: {
-              ...huntResult,
-              tier1: {
-                ...huntResult.tier1,
-                counts: {
-                  ...huntResult.tier1.counts,
-                  total_hits: 10000,
-                  returned_hits: 100,
-                },
-              },
-            },
-          })
-        )}
-      />
-    );
-
-    expect(screen.getByText('100 of 10000')).toBeInTheDocument();
-    expect(screen.getByText('Environment hits (sampled)')).toBeInTheDocument();
-  });
-
-  describe('headline fallback when Agent Builder omits its chrome header', () => {
-    it('renders title, severity, status and confidence when there is no action button', () => {
-      // No events and no alerts means no Discover action, so the platform header is absent.
-      renderWithI18n(
-        <SignificantSecurityEventInlineContent {...renderProps(buildAttachment(baseData))} />
-      );
-
-      const headline = screen.getByTestId('alertzeroSignificantSecurityEventHeadline');
-      expect(headline).toHaveTextContent('Suspicious lateral movement');
-      expect(headline).toHaveTextContent('high');
-      expect(headline).toHaveTextContent('open');
-      expect(headline).toHaveTextContent('80%');
-    });
-
-    it('omits the headline when an action button gives the attachment a header', () => {
+    it('distinguishes a hunt that could not run from one that ran and found nothing', () => {
       renderWithI18n(
         <SignificantSecurityEventInlineContent
           {...renderProps(
             buildAttachment({
               ...baseData,
-              events: [{ event_id: 'evt-1', source_index: '.ds-logs-default-2026.09.22-000001' }],
-            }),
-            { ...defaultNavigation, share: createMockShare() }
+              hunt_result: {
+                ...huntResult,
+                has_confirmed_hit: false,
+                hit_sources: [],
+                tier1: {
+                  ...huntResult.tier1,
+                  status: 'no_searchable_terms',
+                  counts: {
+                    total_hits: 0,
+                    returned_hits: 0,
+                    affected_hosts: 0,
+                    affected_users: 0,
+                  },
+                  per_index: [],
+                },
+              },
+            })
           )}
         />
       );
 
-      expect(screen.queryByTestId('alertzeroSignificantSecurityEventHeadline')).toBeNull();
+      expect(screen.getByTestId('alertzeroSignificantSecurityEventStatusRow')).toHaveTextContent(
+        'No confirmed hit'
+      );
+      expect(
+        screen.getByTestId('alertzeroSignificantSecurityEventHuntResultOutcome')
+      ).toHaveTextContent('No searchable terms');
+    });
+
+    it('renders resolved_iocs from the hunt result', () => {
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              hunt_result: {
+                ...huntResult,
+                tier1: {
+                  ...huntResult.tier1,
+                  resolved_iocs: [
+                    { type: 'ip', value: '203.0.113.5' },
+                    { type: 'hash', value: 'deadbeef' },
+                  ],
+                },
+              },
+            })
+          )}
+        />
+      );
+      expect(
+        screen.getByTestId('alertzeroSignificantSecurityEventHuntResultResolvedIocs')
+      ).toBeInTheDocument();
+      expect(screen.getByText('203.0.113.5')).toBeInTheDocument();
+      expect(screen.getByText('deadbeef')).toBeInTheDocument();
+    });
+
+    it('falls back to a searched IOC count when the resolved list was dropped', () => {
+      const { resolved_iocs: _omit, ...tier1WithoutResolved } = huntResult.tier1;
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              hunt_result: {
+                ...huntResult,
+                tier1: { ...tier1WithoutResolved, searched_ioc_count: 2 },
+              },
+            })
+          )}
+        />
+      );
+
+      expect(
+        screen.queryByTestId('alertzeroSignificantSecurityEventHuntResultResolvedIocs')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByTestId('alertzeroSignificantSecurityEventSearchedIocCount')
+      ).toHaveTextContent('Searched 2 IOCs');
+    });
+
+    it('marks the lists the producer truncated, and leaves them unmarked otherwise', () => {
+      const truncatedIds = [
+        'alertzeroSignificantSecurityEventHuntResultPerIndexTruncated',
+        'alertzeroSignificantSecurityEventHuntResultResolvedIocsTruncated',
+        'alertzeroSignificantSecurityEventHuntResultBehaviorsTruncated',
+      ];
+
+      const { unmount } = renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              hunt_result: {
+                ...huntResult,
+                tier1: {
+                  ...huntResult.tier1,
+                  resolved_iocs: [{ type: 'ip', value: '203.0.113.5' }],
+                  per_index_truncated: true,
+                  resolved_iocs_truncated: true,
+                },
+                tier2: { ...huntResult.tier2!, behaviors_truncated: true },
+              },
+            })
+          )}
+        />
+      );
+      for (const testId of truncatedIds) {
+        expect(screen.getByTestId(testId)).toBeInTheDocument();
+      }
+      unmount();
+
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              hunt_result: {
+                ...huntResult,
+                tier1: {
+                  ...huntResult.tier1,
+                  resolved_iocs: [{ type: 'ip', value: '203.0.113.5' }],
+                },
+              },
+            })
+          )}
+        />
+      );
+      for (const testId of truncatedIds) {
+        expect(screen.queryByTestId(testId)).not.toBeInTheDocument();
+      }
+    });
+  });
+
+  describe('old-payload adapter', () => {
+    const { tier2: _baseTier2, ...tier1OnlyHunt } = huntResult;
+
+    it('derives IOC detections for a v1 Tier-1-only payload', () => {
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              hunt_result: { ...tier1OnlyHunt, hit_sources: ['tier1'] },
+              events: [
+                {
+                  event_id: 'evt-ioc',
+                  source_index: '.ds-logs-endpoint.events.process-default-2026.09.22-000001',
+                  matched: { field: 'destination.ip', ioc: { type: 'ip', value: '198.51.100.7' } },
+                },
+              ],
+            })
+          )}
+        />
+      );
+
+      expect(screen.getByTestId(SSE_ATTACHMENT_WHAT_MATCHED_TEST_ID)).toHaveTextContent(
+        '198.51.100.7'
+      );
+    });
+
+    it('renders every derived IOC detection when a payload matched several', () => {
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              hunt_result: { ...tier1OnlyHunt, hit_sources: ['tier1'] },
+              events: [
+                {
+                  event_id: 'evt-a',
+                  source_index: '.ds-logs-endpoint.events.process-default-2026.09.22-000001',
+                  matched: { field: 'destination.ip', ioc: { type: 'ip', value: '198.51.100.7' } },
+                },
+                {
+                  event_id: 'evt-b',
+                  source_index: '.ds-logs-endpoint.events.process-default-2026.09.22-000001',
+                  matched: { field: 'file.hash.sha256', ioc: { type: 'hash', value: 'deadbeef' } },
+                },
+              ],
+            })
+          )}
+        />
+      );
+
+      const whatMatched = screen.getByTestId(SSE_ATTACHMENT_WHAT_MATCHED_TEST_ID);
+      expect(whatMatched).toHaveTextContent('198.51.100.7');
+      expect(whatMatched).toHaveTextContent('deadbeef');
+    });
+
+    it('derives a technique-scoped behavior detection', () => {
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              corroborated_technique_id: 'T1021',
+              hunt_result: {
+                ...huntResult,
+                hit_sources: ['tier1', 'tier2'],
+                tier2: {
+                  status: 'behaviors_proposed',
+                  behaviors: [
+                    {
+                      technique_id: 'T1021',
+                      tactic_ids: ['TA0008'],
+                      confidence: 0.75,
+                      title: 'Lateral movement via RDP',
+                      execution: { executed: true, row_count: 2, hit: true },
+                    },
+                    {
+                      technique_id: 'T1078',
+                      tactic_ids: ['TA0008'],
+                      confidence: 0.6,
+                      title: 'Valid accounts',
+                      execution: { executed: true, row_count: 1, hit: true },
+                    },
+                  ],
+                },
+              },
+            })
+          )}
+        />
+      );
+
+      expect(
+        screen.getByTestId('alertzeroSignificantSecurityEventDetectionTechnique-T1021')
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('alertzeroSignificantSecurityEventDetectionTechnique-T1078')
+      ).not.toBeInTheDocument();
+    });
+
+    it('grades a loopback IOC event as a weak IOC basis', () => {
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              hunt_result: { ...tier1OnlyHunt, hit_sources: ['tier1'] },
+              events: [
+                {
+                  event_id: 'evt-loopback',
+                  source_index: '.ds-logs-endpoint.events.process-default-2026.09.22-000001',
+                  matched: { field: 'destination.ip', ioc: { type: 'ip', value: '127.0.0.1' } },
+                },
+              ],
+            })
+          )}
+        />
+      );
+
+      expect(screen.getByTestId(SSE_ATTACHMENT_BASIS_TEST_ID)).toHaveTextContent('Weak IOC');
     });
   });
 });

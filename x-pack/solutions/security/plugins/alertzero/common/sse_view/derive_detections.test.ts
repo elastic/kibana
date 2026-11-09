@@ -8,7 +8,10 @@
 import type { HuntForThreatHit } from '@kbn/alertzero-common';
 import {
   deriveDetections,
+  observedIocMatchFromEvents,
+  reconcileIocDetectionFields,
   type DeriveDetectionsHuntResult,
+  type SseDetection,
   type SseEventRef,
 } from './derive_detections';
 
@@ -82,6 +85,62 @@ describe('deriveDetections', () => {
     expect(detections[0].user_count).toBe(1);
   });
 
+  it('prefers the cited-event matched field over a disagreeing per_ioc.field', () => {
+    // Tier 1 records the first searched slot (source.ip / file.hash.sha256) even when
+    // the hit landed on destination.ip / process.hash.sha256.
+    const huntResult: DeriveDetectionsHuntResult = {
+      tier1: {
+        per_ioc: [
+          { type: 'ip', value: '203.0.113.77', field: 'source.ip', count: 2 },
+          {
+            type: 'hash',
+            value: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+            field: 'file.hash.sha256',
+            count: 2,
+          },
+        ],
+      },
+    };
+    const events: SseEventRef[] = [
+      buildEvent({
+        source_index: '.ds-logs-endpoint.events.network-default-000001',
+        matched: {
+          iocs: [{ type: 'ip', value: '203.0.113.77', field: 'destination.ip' }],
+        },
+      }),
+      buildEvent({
+        source_index: '.ds-logs-endpoint.events.process-default-000001',
+        matched: {
+          iocs: [
+            {
+              type: 'hash',
+              value: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+              field: 'process.hash.sha256',
+            },
+          ],
+        },
+      }),
+    ];
+
+    const detections = deriveDetections(huntResult, events);
+
+    expect(detections[0]).toMatchObject({
+      id: 'ioc:ip:203.0.113.77',
+      field: 'destination.ip',
+      matched_on: [{ field: 'destination.ip', value: '203.0.113.77' }],
+    });
+    expect(detections[1]).toMatchObject({
+      id: 'ioc:hash:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+      field: 'process.hash.sha256',
+      matched_on: [
+        {
+          field: 'process.hash.sha256',
+          value: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        },
+      ],
+    });
+  });
+
   it('groups sampled hits by matched.iocs when tier1.per_ioc is absent', () => {
     const hits: HuntForThreatHit[] = [
       {
@@ -134,6 +193,41 @@ describe('deriveDetections', () => {
       field: 'dns.question.name',
       from_sample: true,
       total: 1,
+    });
+  });
+
+  it('groups cited SSE events by matched IOC when per_ioc and hits are both absent', () => {
+    // Old stored SSEs carry matched.ioc on events[] but neither per_ioc nor
+    // the coordinator-side hits array on the persisted hunt_result.
+    const huntResult: DeriveDetectionsHuntResult = { tier1: {} };
+    const events: SseEventRef[] = [
+      buildEvent({
+        event_id: 'evt-1',
+        host: 'host-a',
+        timestamp: '2026-01-01T00:00:00.000Z',
+        matched: { ioc: { type: 'ip', value: '127.0.0.1' }, field: 'source.ip' },
+      }),
+      buildEvent({
+        event_id: 'evt-2',
+        host: 'host-b',
+        timestamp: '2026-01-01T01:00:00.000Z',
+        matched: { ioc: { type: 'ip', value: '127.0.0.1' }, field: 'source.ip' },
+      }),
+    ];
+
+    const detections = deriveDetections(huntResult, events);
+
+    expect(detections).toHaveLength(1);
+    expect(detections[0]).toMatchObject({
+      id: 'ioc:ip:127.0.0.1',
+      kind: 'ioc',
+      field: 'source.ip',
+      basis: 'ioc_weak',
+      from_sample: true,
+      total: 2,
+      hosts: ['host-a', 'host-b'],
+      first_seen: '2026-01-01T00:00:00.000Z',
+      last_seen: '2026-01-01T01:00:00.000Z',
     });
   });
 
@@ -252,5 +346,80 @@ describe('deriveDetections', () => {
     const huntResult: DeriveDetectionsHuntResult = { tier1: { per_ioc: perIoc } };
 
     expect(deriveDetections(huntResult, [])).toHaveLength(30);
+  });
+});
+
+describe('observedIocMatchFromEvents', () => {
+  it('returns the most common matched field and unique source indices for a value', () => {
+    const events: SseEventRef[] = [
+      buildEvent({
+        source_index: 'logs-network',
+        matched: {
+          iocs: [{ type: 'ip', value: '203.0.113.77', field: 'destination.ip' }],
+        },
+      }),
+      buildEvent({
+        event_id: 'evt-2',
+        source_index: 'logs-network',
+        matched: {
+          iocs: [{ type: 'ip', value: '203.0.113.77', field: 'destination.ip' }],
+        },
+      }),
+      buildEvent({
+        event_id: 'evt-3',
+        source_index: 'logs-process',
+        matched: {
+          ioc: { type: 'ip', value: '203.0.113.77' },
+          field: 'source.ip',
+        },
+      }),
+    ];
+
+    expect(observedIocMatchFromEvents(events, '203.0.113.77')).toEqual({
+      field: 'destination.ip',
+      indices: ['logs-network', 'logs-process'],
+    });
+  });
+});
+
+describe('reconcileIocDetectionFields', () => {
+  it('rewrites stored IOC detections whose field disagrees with cited events', () => {
+    const detections: SseDetection[] = [
+      {
+        id: 'ioc:ip:203.0.113.77',
+        kind: 'ioc',
+        field: 'source.ip',
+        basis: 'ioc_strong',
+        matched_on: [{ field: 'source.ip', value: '203.0.113.77' }],
+        total: 2,
+      },
+    ];
+    const events: SseEventRef[] = [
+      buildEvent({
+        matched: {
+          iocs: [{ type: 'ip', value: '203.0.113.77', field: 'destination.ip' }],
+        },
+      }),
+    ];
+
+    expect(reconcileIocDetectionFields(detections, events)[0]).toMatchObject({
+      field: 'destination.ip',
+      matched_on: [{ field: 'destination.ip', value: '203.0.113.77' }],
+    });
+  });
+
+  it('leaves detections alone when events do not observe a different field', () => {
+    const detections: SseDetection[] = [
+      {
+        id: 'ioc:ip:203.0.113.77',
+        kind: 'ioc',
+        field: 'destination.ip',
+        basis: 'ioc_strong',
+        matched_on: [{ field: 'destination.ip', value: '203.0.113.77' }],
+        total: 1,
+      },
+    ];
+
+    expect(reconcileIocDetectionFields(detections, [])).toEqual(detections);
   });
 });
