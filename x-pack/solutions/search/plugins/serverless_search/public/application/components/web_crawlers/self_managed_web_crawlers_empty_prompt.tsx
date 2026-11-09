@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { SearchEmptyPrompt } from '@kbn/search-shared-ui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DecorativeHorizontalStepper } from '@kbn/search-connectors';
+import { DecorativeHorizontalStepper } from '@kbn/search-connectors/components';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 
 export const SelfManagedWebCrawlersEmptyPrompt = () => {

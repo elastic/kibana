@@ -7,16 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Row } from '@tanstack/react-table';
 import type { GroupNode, LeafNode } from '../store_provider';
-import { getAdaptedTableRows } from './core/table';
+import { getAdaptedTableRows, type CascadeTableRow } from './core/table';
 
 /**
  * @description This function determines if the provided row is a group node or a leaf node.
  */
 export function isCascadeGroupRowNode<G extends GroupNode, L extends LeafNode>(
   currentGroupByColumns: string[],
-  row: Row<G>
+  row: CascadeTableRow<G>
 ): boolean {
   const { rowDepth } = getAdaptedTableRows<G, L>({ rowInstance: row });
   // for any selection of group by columns the inner most column is always a leaf node, hence the -1
@@ -28,7 +27,7 @@ export function isCascadeGroupRowNode<G extends GroupNode, L extends LeafNode>(
  */
 export function getCascadeRowNodePath<G extends GroupNode, L extends LeafNode>(
   currentGroupByColumns: string[],
-  row: Row<G>
+  row: CascadeTableRow<G>
 ) {
   const { rowDepth } = getAdaptedTableRows<G, L>({ rowInstance: row });
   // rowDepth is a zero based index, so we need to add 1 to get the correct slice
@@ -40,7 +39,7 @@ export function getCascadeRowNodePath<G extends GroupNode, L extends LeafNode>(
  */
 export function getCascadeRowNodePathValueRecord<G extends GroupNode, L extends LeafNode>(
   currentGroupByColumns: string[],
-  row: Row<G>
+  row: CascadeTableRow<G>
 ) {
   const { rowDepth, rowData } = getAdaptedTableRows<G, L>({ rowInstance: row });
   const nodePath = getCascadeRowNodePath(currentGroupByColumns, row);

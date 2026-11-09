@@ -29,16 +29,24 @@ apiTest.describe(
   () => {
     let llmProxy: LlmProxy;
     let connectorId: string;
+    // Claude models from Sonnet 5.5 / Opus 5.5 reject forced tool choice, so the inference
+    // plugin sends `auto` for them instead.
+    let claudeConnectorId: string;
 
     apiTest.beforeAll(async ({ log, kbnClient }) => {
       llmProxy = await createLlmProxy(log);
       const { id } = await createGenAiConnectorForProxy(kbnClient, llmProxy);
       connectorId = id;
+      const claudeConnector = await createGenAiConnectorForProxy(kbnClient, llmProxy, {
+        defaultModel: 'claude-sonnet-5-5',
+      });
+      claudeConnectorId = claudeConnector.id;
     });
 
     apiTest.afterAll(async ({ kbnClient, esClient }) => {
       llmProxy.close();
       await deleteConnectorById(kbnClient, connectorId);
+      await deleteConnectorById(kbnClient, claudeConnectorId);
       await esClient.deleteByQuery({
         index: CHAT_CONVERSATIONS_INDEX,
         query: { match_all: {} },
@@ -465,5 +473,47 @@ apiTest.describe(
       );
       expect(get404).toHaveStatusCode(404);
     });
+
+    // Title generation forces the `set_title` tool; returns the `tool_choice` the proxy received.
+    async function getTitleRequestToolChoice(
+      asAdmin: AuthedApiClient,
+      connector: string,
+      title: string
+    ) {
+      const requestsBefore = llmProxy.interceptedRequests.length;
+
+      await setupAgentDirectAnswer({ proxy: llmProxy, title, response: 'Response' });
+      const res = await asAdmin.post(`${API_AGENT_BUILDER}/converse`, {
+        body: { input: 'generate a title', connector_id: connector, _execution_mode: 'local' },
+        responseType: 'json',
+      });
+      expect(res).toHaveStatusCode(200);
+      await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+      const titleRequest = llmProxy.interceptedRequests
+        .slice(requestsBefore)
+        .find(({ matchingInterceptorName }) => matchingInterceptorName === 'set_title');
+      expect(titleRequest).toBeDefined();
+      return titleRequest!.requestBody.tool_choice;
+    }
+
+    apiTest('forces the set_title tool for a model that supports it', async ({ asAdmin }) => {
+      const toolChoice = await getTitleRequestToolChoice(asAdmin, connectorId, 'Forced Title');
+
+      expect(toolChoice).toStrictEqual({ type: 'function', function: { name: 'set_title' } });
+    });
+
+    apiTest(
+      'sends tool_choice auto for a Claude model that rejects forced tool choice',
+      async ({ asAdmin }) => {
+        const toolChoice = await getTitleRequestToolChoice(
+          asAdmin,
+          claudeConnectorId,
+          'Auto Title'
+        );
+
+        expect(toolChoice).toBe('auto');
+      }
+    );
   }
 );

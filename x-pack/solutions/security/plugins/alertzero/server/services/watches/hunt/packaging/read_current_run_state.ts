@@ -8,7 +8,9 @@
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
 import type { significantSecurityEventAttachmentDataSchema } from '../../../../../common/significant_security_event_schema';
 import { significantSecurityEventAttachmentReadSchema } from '../../../../../common/significant_security_event_schema';
+import { splitRemoteCluster } from '../../../../../common/remote_cluster';
 import type { ResolveHostEnrollment } from '../../../fleet/resolve_host_enrollment';
+import { HostOrigins, toEntityOrigin } from '../common/host_origin';
 import { buildMatchesRequired } from '../common/matches_required';
 import type { RehydrateProcessSelectors } from './rehydrate_process_selectors';
 import type {
@@ -250,9 +252,59 @@ export const readCurrentRunState = async ({
     )
   );
 
+  const alertRefs = currentRun.flatMap((sse) => sse.alerts ?? []);
+  const eventRefs = currentRun.flatMap((sse) => sse.events ?? []);
+
+  // Enrollment is resolved by host name against this deployment's Fleet, so a remote host
+  // sharing a name with a local agent (`ubuntu`, `ip-10-0-0-12`) would resolve to that
+  // unrelated agent. The run-wide cut resolves only on positive local evidence: an alert ref
+  // (always local), a local hit index, or a truncated `per_index` that may hide one. A run
+  // with no hit index has nothing to back an action. A host's own origin only narrows that
+  // cut, never widens it: whoever writes an SSE can set `local` (and `hunt_result`, so Tier
+  // 2's origins can't be trusted either). A host the hunt saw locally almost always comes
+  // with local evidence; the exception, Tier 2 rows whose `_id` was dropped in a run whose
+  // Tier 1 hits were all remote, fails closed. A host seen only on remote clusters is
+  // never resolved; one with no origin (an older SSE, an agent-written entity, a source
+  // breakdown that was cut off) follows the run-wide cut.
+  //
+  // Origins are read off `host.name` only, which is the field the mapper writes them on. A
+  // `host.hostname` entity of the same value would otherwise merge in as an unknown
+  // sighting and undo a known one.
+  const hostOrigins = new HostOrigins();
+  for (const sse of currentRun) {
+    for (const entity of sse.entities) {
+      if (entity.field === 'host.name') hostOrigins.add(entity.value, toEntityOrigin(entity));
+    }
+  }
+
+  const hitIndices = [
+    ...currentRun.flatMap((sse) =>
+      (sse.hunt_result?.tier1.per_index ?? [])
+        .filter((entry) => entry.hit_count > 0)
+        .map((entry) => entry.index)
+    ),
+    ...eventRefs.map((e) => e.source_index),
+  ];
+  const hasLocalEvidence =
+    alertRefs.length > 0 ||
+    currentRun.some((sse) => sse.hunt_result?.tier1.per_index_truncated === true) ||
+    hitIndices.some((index) => splitRemoteCluster(index).cluster === undefined);
+
   const hosts: CurrentRunHost[] = [];
   for (const name of hostNames) {
-    const enrollment = await resolveHostEnrollment(name);
+    const origin = hostOrigins.originOf(name);
+    if (origin && !origin.local) {
+      hosts.push({
+        name,
+        enrolled: false,
+        capabilities: [],
+        remoteClusters: origin.remote_clusters,
+      });
+      continue;
+    }
+    const enrollment = hasLocalEvidence
+      ? await resolveHostEnrollment(name)
+      : { enrolled: false as const };
     if (enrollment.enrolled) {
       hosts.push({
         name,
@@ -266,8 +318,6 @@ export const readCurrentRunState = async ({
     }
   }
 
-  const alertRefs = currentRun.flatMap((sse) => sse.alerts ?? []);
-  const eventRefs = currentRun.flatMap((sse) => sse.events ?? []);
   const processSelectors = await rehydrateProcessSelectors({
     alerts: alertRefs.map((a) => ({ alert_id: a.alert_id, index: a.index })),
     events: eventRefs.map((e) => {
@@ -290,9 +340,15 @@ export const readCurrentRunState = async ({
   // that carry `process.entity_id` or `process.pid`) on each SSE, so packaging reads the
   // evidence against what the customer's mappings say rather than a seed list. An empty
   // list means nothing in this run is host-scoped, which is the right reading when the
-  // customer has no process telemetry.
+  // customer has no process telemetry. Remote (`<cluster>:`) patterns are left out: a
+  // remote host has no local Fleet agent to act on, so its evidence is never host-scoped
+  // here, even though Tier 2 still hunts those streams.
   const matchesActionable = buildMatchesRequired([
-    ...new Set(currentRun.flatMap((sse) => sse.hunt_result?.actionable_indices ?? [])),
+    ...new Set(
+      currentRun
+        .flatMap((sse) => sse.hunt_result?.actionable_indices ?? [])
+        .filter((pattern) => splitRemoteCluster(pattern).cluster === undefined)
+    ),
   ]);
   const allEventsActionable = eventRefs.every((e) => matchesActionable(e.source_index));
   const hasProcessBearingEvent = eventRefs.some((e) => matchesActionable(e.source_index));

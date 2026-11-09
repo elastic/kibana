@@ -70,6 +70,17 @@ pnpm kbn bootstrap
 
 Docker Desktop must be running. Collector pods reach ES via `host.docker.internal`.
 
+- Give Docker Desktop at least 16 GB of memory (Settings -> Resources). At 8 GB
+  the kind API server stops responding and ES can be killed mid-write.
+- Always pass `--context kind-streams` to `tilt up` and `tilt down`. If Docker
+  Desktop's own Kubernetes is on, every Docker restart switches the current kube
+  context to `docker-desktop`.
+- Use kind v0.27.0 or newer (`kind version`) if you create the cluster from
+  `streams-config-distributor`. Older releases default to a Kubernetes version
+  that cert-manager rejects (see Troubleshooting). `make kind` in
+  `streams-controller` runs its own pinned kind, so your installed version does
+  not matter there.
+
 ## 1. Create the kind cluster
 
 From **either** `streams-controller` or `streams-config-distributor`:
@@ -118,7 +129,7 @@ recreate.
 
 ```sh
 cd /path/to/streams-controller
-tilt up --port 10351
+tilt up --context kind-streams --port 10351
 ```
 
 Open http://localhost:10351 and wait until the controller and WarpStream are ready.
@@ -199,7 +210,7 @@ non-interactive.
 
 ## 7. Use it
 
-- Map: http://localhost:5601/app/streams/new-experience/map
+- Map: http://localhost:5601/app/streams/v2/unit/default/map
 - Discover / ES|QL as `elastic_serverless`:
 
 ```esql
@@ -214,6 +225,38 @@ FROM metrics-streams.otel-default
 include `streams.step.*` and `streams.destination.*` with `target_id=dev` and
 `unit_id=default`.
 
+## Keep stats flowing
+
+The collector only writes metrics (`metrics-streams.otel-default`) while logs are going
+through it, and an idle collector writes nothing. To keep a steady stream going, for
+example while trying the unit stats API, run:
+
+```sh
+./x-pack/platform/plugins/shared/streams/dev/full_dev_flow/streams_full_dev.sh traffic
+```
+
+By default it sends 30 logs per env every 5 seconds until Ctrl-C, then prints how many
+rounds and logs it sent. `env=prod` logs route to `es-prod` (and the `uppercase-message`
+processor), `env=dev` logs route to `es-dev`.
+
+| Flag | Default | Meaning |
+| --- | --- | --- |
+| `--count N` | 30 | logs per env per round |
+| `--batch N` | 10 | records per OTLP request |
+| `--env prod\|dev\|both` | both | which envs to send |
+| `--every SECONDS` | 5 | pause between rounds |
+| `--once` | off | send one round and stop |
+| `--url URL` | the motel port-forward | OTLP logs endpoint |
+
+`STREAMS_TRAFFIC_COUNT`, `STREAMS_TRAFFIC_BATCH` and `STREAMS_TRAFFIC_EVERY` change the
+defaults (and what `seed` sends). The collector exports every 10 seconds, so allow
+about 10 to 40 seconds before new stats show up. Read them with, for example:
+
+```
+POST kbn:/internal/streams/unit/default/_stats
+{}
+```
+
 ## Try a different unit
 
 Edit `unit.yaml` in this directory, then re-run the script. `seed` / the default
@@ -223,7 +266,7 @@ Map and the collector pick up the new graph.
 Keep `__API_KEY__` on any `elasticsearch` destination that needs a key. The
 document still needs `sources`, `destinations`, and `pipelines`. The
 transpiler currently wants a static `index` (no templates, no
-`index_patterns`).
+`write_patterns`).
 
 The motel demo traffic is OTLP logs with `resource.attributes.env` of `dev` or
 `prod`. `wait`, Discover examples, and `reset` data-stream deletes still assume
@@ -238,7 +281,7 @@ Leave the four processes running. When you want a fresh unit and traffic:
 ./x-pack/platform/plugins/shared/streams/dev/full_dev_flow/streams_full_dev.sh seed
 ```
 
-`status` / `setup` / `seed` / `test_ui_flow` / `reset` are listed in
+`status` / `setup` / `seed` / `test_ui_flow` / `traffic` / `reset` are listed in
 `./x-pack/platform/plugins/shared/streams/dev/full_dev_flow/streams_full_dev.sh --help`.
 
 ```sh
@@ -260,7 +303,7 @@ reset.
 # Ctrl-C the ES and Kibana terminals
 # Ctrl-C both Tilt UIs, then:
 cd /path/to/streams-config-distributor && tilt down --context kind-streams
-cd /path/to/streams-controller && tilt down
+cd /path/to/streams-controller && tilt down --context kind-streams
 make kind-delete    # from either repo
 ```
 
@@ -277,10 +320,18 @@ make kind-delete    # from either repo
 | Unit PUT 503 | Distributor Tilt is down, or `kibana.dev.yml` snippet is missing. |
 | Script sits on `PUT .../unit/default` | The PUT itself is usually done in a few seconds. The script then waits for `spec.artifact` (not Ready). Ctrl-C and re-run if it exceeds ~90s. |
 | `es serverless` bind error on 8443 | Distributor must use `-- --port 18443`. |
+| `es serverless` bind error on 8081 | Another process holds 8081, which local serverless ES needs. Stop it. |
+| ES red, logs show `failed to recover from translog` / `EOFException` | ES data was corrupted when the container was killed (often out of memory). Restart ES with `--clean`, then run `reset` followed by `seed` to discard cached credentials and mint new keys. |
+| Tilt: `containerd image snapshotter is disabled` | Tilt is pointed at Docker Desktop's Kubernetes. Start both Tilts with `--context kind-streams`. Do not change the containerd setting. |
+| cert-manager: `selectableFields: field not declared in schema` | kind is older than v0.27.0. Upgrade kind (or create the cluster from `streams-controller`), then `make kind-delete && make kind`. |
+| kind API server TLS handshake timeouts, `streamunit-watch` dies | Docker Desktop is out of memory. Raise it to 16 GB. |
+| Map: "Unable to get streams-configuration" | You logged in with a role that cannot read the Map saved objects. Log in as `elastic_serverless`. |
+| Map: add-source form lists no source types | `xpack.cloud.managed_otlp.url` is missing. Run `setup`, add the printed `xpack.cloud.managed_otlp.url` to `config/kibana.dev.yml`, and restart Kibana. |
 | Collector `unknown type: "otlp_http"` | Collector image is too old for user-facing telemetry. Use a newer `STREAMS_COLLECTOR_TAG` from `streams-controller` helm values. |
 | Motel `ImagePullBackOff` / `:latest: not found` | These CI images have no `latest` tag. Re-run this script (it now keeps the motel image already on the cluster). |
 | Collector `x509` / unknown authority | Saving Map republishes the unit and drops the local TLS patch. Re-run `seed` or `test_ui_flow` (they re-apply it). |
+| Stats are `null` / no new documents in `metrics-streams.otel-default` | An idle collector writes no documents. Run `streams_full_dev.sh traffic`. |
 | No `telemetry.yaml` on the unit ConfigMap | Controller patch did not land; check `STREAMS_CONTROLLER` and Tilt rebuild. |
 | Motel `502` / TLS handshake | Motel ingress must stay `scheme: http`. |
-| Empty data after ~2 minutes | `kubectl --context kind-streams -n project-dev logs deploy/default --since=10m` |
+| Empty data after ~2 minutes | `kubectl --context kind-streams -n project-dev logs -l app.kubernetes.io/instance=default --since=10m` |
 | Logs in, `metrics-streams.otel-default` empty | Index collector is missing or cannot reach ES. Re-run `setup` / `seed`. Logs: `kubectl --context kind-streams -n motel-index-collector logs deploy/motel-index-collector --since=10m` |
