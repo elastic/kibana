@@ -69103,11 +69103,11 @@ paths:
                             initial: 0.01
                             isEstimated: false
                             remaining: -0.88
-                          fiveMinuteBurnRate: 0
-                          oneDayBurnRate: 0
-                          oneHourBurnRate: 0
+                          fiveMinuteBurnRate: 2.1
+                          oneDayBurnRate: 1.88
+                          oneHourBurnRate: 1.9
                           sliValue: 0.9812
-                          status: DEGRADING
+                          status: VIOLATED
                           summaryUpdatedAt: '2025-01-12T10:05:00.000Z'
                         tags: []
                         timeWindow:
@@ -69225,12 +69225,59 @@ paths:
                         updatedAt: '2025-01-12T10:03:19.000Z'
                         updatedBy: elastic
                         version: 2
+                      - artifacts:
+                          dashboards: []
+                        budgetingMethod: occurrences
+                        createdAt: '2025-01-12T10:03:19.000Z'
+                        createdBy: elastic
+                        description: Availability of each host, reported as one SLO instance per host.name
+                        enabled: true
+                        groupBy:
+                          - host.name
+                        groupings:
+                          host.name: web-02
+                        id: 1620783d-cacd-4c40-a56e-8f25fd9ecda1
+                        indicator:
+                          params:
+                            good: 'event.outcome : "success"'
+                            index: logs-*
+                            timestampField: '@timestamp'
+                            total: 'event.outcome : *'
+                          type: sli.kql.custom
+                        instanceId: web-02
+                        name: Host Availability
+                        objective:
+                          target: 0.99
+                        revision: 1
+                        settings:
+                          frequency: 1m
+                          preventInitialBackfill: false
+                          syncDelay: 1m
+                        summary:
+                          errorBudget:
+                            consumed: 1.88
+                            initial: 0.01
+                            isEstimated: false
+                            remaining: -0.88
+                          fiveMinuteBurnRate: 2.1
+                          oneDayBurnRate: 1.88
+                          oneHourBurnRate: 1.9
+                          sliValue: 0.9812
+                          status: VIOLATED
+                          summaryUpdatedAt: '2025-01-12T10:05:00.000Z'
+                        tags: []
+                        timeWindow:
+                          duration: 30d
+                          type: rolling
+                        updatedAt: '2025-01-12T10:03:19.000Z'
+                        updatedBy: elastic
+                        version: 2
                     searchAfter:
                       - 0
-                      - HEALTHY
+                      - VIOLATED
                       - 1620783d-cacd-4c40-a56e-8f25fd9ecda1
-                      - web-01
-                    size: 1
+                      - web-02
+                    size: 25
                     total: 2
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOFindResponse'
@@ -69826,7 +69873,7 @@ paths:
                       ]
                     statusCode: 400
                 badRequestObjectiveExample:
-                  summary: Objective target out of range
+                  summary: Objective target out of range (domain validation, for example a target of 1.5)
                   value:
                     error: Bad Request
                     message: Invalid objective.target
