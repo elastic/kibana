@@ -60,7 +60,12 @@ describe('SandboxApiClient over a real grpc-js channel', () => {
           responseDeserialize: identity,
         },
       },
-      { mkdirs: (call, callback) => handler(call, callback) }
+      {
+        mkdirs: (
+          call: grpc.ServerUnaryCall<Buffer, Buffer>,
+          callback: grpc.sendUnaryData<Buffer>
+        ) => handler(call, callback),
+      }
     );
     const port = await new Promise<number>((resolve, reject) => {
       server.bindAsync('127.0.0.1:0', grpc.ServerCredentials.createInsecure(), (err, bound) =>
