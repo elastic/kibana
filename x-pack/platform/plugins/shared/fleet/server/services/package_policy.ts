@@ -974,6 +974,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       user?: AuthenticatedUser;
       removeProtectionFn?: (policyId: string) => undefined | boolean;
       agentVersionConditionsUnchanged?: boolean;
+      updatedPackageNames?: string[];
       asyncDeploy?: boolean;
     } = {}
   ) {
@@ -988,6 +989,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               ? options.removeProtectionFn(policyId)
               : undefined,
             agentVersionConditionsUnchanged: options.agentVersionConditionsUnchanged,
+            updatedPackageNames: options.updatedPackageNames,
           }),
         {
           concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10,
@@ -2135,6 +2137,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             pkgInfo,
             assetsMap,
           }),
+          updatedPackageNames: newPolicy.package ? [newPolicy.package.name] : [],
           removeProtectionFn: (policyId) => {
             const isEndpointPolicy = newPolicy.package?.name === 'endpoint';
 
@@ -2644,6 +2647,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             user: options?.user,
             asyncDeploy: options?.asyncDeploy,
             agentVersionConditionsUnchanged,
+            updatedPackageNames: packagePolicyUpdates.flatMap(({ package: pkg }) =>
+              pkg ? [pkg.name] : []
+            ),
             removeProtectionFn: (agentPolicyId) => {
               // Check if the agent policy is in both old and updated package policies
               const assignedInOldPolicies = endpointOldPackagePoliciesIds.has(agentPolicyId);

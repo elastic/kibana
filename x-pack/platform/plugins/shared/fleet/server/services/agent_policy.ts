@@ -246,9 +246,11 @@ class AgentPolicyService {
       asyncDeploy?: boolean;
       /**
        * `recompute` derives the agent version condition fields from the package policies. `keep`
-       * leaves the stored ones, unless the agent policy has never stored them.
+       * leaves the stored ones, unless the agent policy has never stored them or they list one of
+       * `updatedPackageNames`.
        */
       agentVersionConditions?: 'recompute' | 'keep';
+      updatedPackageNames?: string[];
     } = {
       bumpRevision: true,
       removeProtection: false,
@@ -308,10 +310,16 @@ class AgentPolicyService {
     }
     // Every recompute writes `min_agent_version` (null when there is no condition), so a missing
     // one means the fields were never fully stored, e.g. last updated before it was introduced.
+    // Callers only keep for updated packages without a condition, so a stored entry for one is
+    // stale, e.g. its package policy was saved but the bump that should have recomputed failed.
+    const keepsStoredConditions =
+      existingAgentPolicy.min_agent_version !== undefined &&
+      !existingAgentPolicy.package_agent_version_conditions?.some(({ name }) =>
+        options.updatedPackageNames?.includes(name)
+      );
     const agentVersionData =
       options.agentVersionConditions === 'recompute' ||
-      (options.agentVersionConditions === 'keep' &&
-        existingAgentPolicy.min_agent_version === undefined)
+      (options.agentVersionConditions === 'keep' && !keepsStoredConditions)
         ? await this.computeMinAgentVersionData(soClient, id)
         : undefined;
 
@@ -1326,6 +1334,8 @@ class AgentPolicyService {
        * that affects its agent version conditions, so the stored ones can be kept as is.
        */
       agentVersionConditionsUnchanged?: boolean;
+      /** Packages of the updated package policies; stored conditions listing one are recomputed. */
+      updatedPackageNames?: string[];
     }
   ): Promise<void> {
     return withSpan('bump_agent_policy_revision', async () => {
@@ -1336,6 +1346,7 @@ class AgentPolicyService {
         returnUpdatedPolicy: false,
         asyncDeploy: options?.asyncDeploy,
         agentVersionConditions: options?.agentVersionConditionsUnchanged ? 'keep' : 'recompute',
+        updatedPackageNames: options?.updatedPackageNames,
       });
     });
   }

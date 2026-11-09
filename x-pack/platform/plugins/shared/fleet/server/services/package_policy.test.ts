@@ -5731,7 +5731,10 @@ describe('Package policy service', () => {
             savedObjectsClient,
             elasticsearchClient,
             policyId,
-            expect.objectContaining({ agentVersionConditionsUnchanged: false })
+            expect.objectContaining({
+              agentVersionConditionsUnchanged: false,
+              updatedPackageNames: ['test'],
+            })
           );
         });
       });
@@ -7530,6 +7533,17 @@ describe('Package policy service', () => {
           expect(flags).toEqual([expected]);
         }
       );
+
+      it('passes the updated package names to bumpRevision', async () => {
+        await bulkUpdateAndGetUnchangedFlags([{}]);
+
+        expect(mockAgentPolicyService.bumpRevision).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.any(String),
+          expect.objectContaining({ updatedPackageNames: ['endpoint'] })
+        );
+      });
 
       const versionChange = {
         package: { name: 'endpoint', title: 'Elastic Endpoint', version: '1.0.0' },

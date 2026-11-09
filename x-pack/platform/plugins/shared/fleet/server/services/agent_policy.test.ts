@@ -57,6 +57,7 @@ import { scheduleDeployAgentPoliciesTask } from './agent_policies/deploy_agent_p
 import { scheduleBumpAgentPoliciesByIdTask } from './agent_policies/bump_agent_policies_by_id_task';
 import { createAgentPolicyWithPackages } from './agent_policy_create';
 import { reassignAgentsFromVersionSpecificPolicies } from './utils/version_specific_policies';
+import type { ExperimentalFeatures } from '../../common/experimental_features';
 import { agentlessAgentService } from './agents/agentless_agent';
 import { unenrollForAgentPolicyId } from './agents';
 import { getPackageInfo } from './epm/packages';
@@ -1545,9 +1546,11 @@ describe('Agent policy', () => {
           { name: 'nginx-1', package: { name: 'nginx', title: 'Nginx', version: '1.0.0' } },
         ]);
 
+        // The updated package is not in the stored conditions, e.g. editing an unrelated integration.
         await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy', {
           asyncDeploy: true,
           agentVersionConditionsUnchanged: true,
+          updatedPackageNames: ['nginx'],
         });
 
         expect(soClient.find).not.toHaveBeenCalledWith(
@@ -1561,6 +1564,51 @@ describe('Agent policy', () => {
         expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledTimes(1);
       }
     );
+
+    it('should recompute unchanged version conditions when they list an updated package', async () => {
+      mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+        enableVersionSpecificPolicies: true,
+      } as ExperimentalFeatures);
+      // An update cleared apache's condition and saved, but the bump that should have recomputed
+      // failed. The retry keeps the conditions, since the package policy no longer changes them.
+      const soClient = getSavedObjectMock({
+        revision: 1,
+        monitoring_enabled: [],
+        has_agent_version_conditions: true,
+        min_agent_version: '9.3.0',
+        package_agent_version_conditions: [
+          { name: 'apache', title: 'Apache', version_condition: '>=9.3.0' },
+        ],
+      });
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      mockPackagePolicySOs(soClient, [
+        {
+          name: 'apache-1',
+          package: { name: 'apache', title: 'Apache', version: '1.3.2' },
+          package_agent_version_condition: '',
+        },
+      ]);
+
+      await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy', {
+        agentVersionConditionsUnchanged: true,
+        updatedPackageNames: ['apache'],
+      });
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        expect.anything(),
+        'agent-policy',
+        expect.objectContaining({
+          has_agent_version_conditions: false,
+          min_agent_version: null,
+          package_agent_version_conditions: null,
+        })
+      );
+      expect(reassignAgentsFromVersionSpecificPolicies).toHaveBeenCalledWith(
+        soClient,
+        esClient,
+        'agent-policy'
+      );
+    });
 
     it.each([
       { stored: 'never stored', storedFields: {} },
