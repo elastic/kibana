@@ -380,7 +380,8 @@ function viewRounds() {
     '<h3>What changed</h3>' + renderDiff(round.diff, round.filesChanged) +
     '<h3>Why (proposer rationale)</h3><pre>' + esc(round.rationale || '—') + '</pre>' +
     (reachedGate
-      ? '<h3>Manifest verification</h3>' + verification +
+      ? '<h3>Manifest verification <span class="muted">— checked on the search split the ' +
+        'proposal read, not on the gate split</span></h3>' + verification +
         '<h3>Per-seed effect (' + perSeed.length +
         ' seeds, worst first) — expand a row to see both sides</h3>' +
         '<table><tr><th>Δ</th><th>reward</th><th>source</th><th>question</th></tr>' + seedRows +

@@ -310,7 +310,7 @@ export const runCampaign = async ({
 
     const incumbentRuns = lastIncumbentGate.runs;
     const candidateRuns = lastCandidateGate.runs;
-    const seedDeltas = [...new Set(incumbentRuns.map((entry) => entry.exampleId))].map(
+    const gateDeltas = [...new Set(incumbentRuns.map((entry) => entry.exampleId))].map(
       (exampleId) => {
         const rewardFor = (entries: typeof incumbentRuns) => {
           const subset = entries.filter((entry) => entry.exampleId === exampleId);
@@ -330,7 +330,45 @@ export const runCampaign = async ({
       }
     );
 
-    const verification = verifyManifest({ manifest: proposal.manifest, seedDeltas });
+    // The proposal predicts fixes for failures it read in the bundle, and the bundle is the
+    // search split — so the predictions have to be checked there. Verifying them against gate
+    // seeds (a disjoint set) made confirmation impossible by construction and reported every
+    // proposal as 0/5, including the two that genuinely improved the harness.
+    const candidateSearch = await runVariant({
+      label: `round${round}-candidate-search`,
+      variant: candidateVariant,
+      lane: 'candidate',
+      examples: searchExamples,
+      rollouts,
+      esClient,
+      target: candidateTarget,
+      log,
+      concurrency,
+      goldRows: searchGold,
+      outputDir,
+    });
+
+    const searchDeltas = [...new Set(searchRun.runs.map((entry) => entry.exampleId))].map(
+      (exampleId) => {
+        const rewardFor = (entries: typeof searchRun.runs) => {
+          const subset = entries.filter((entry) => entry.exampleId === exampleId);
+          return subset.length
+            ? subset.reduce((total, entry) => total + entry.score.reward, 0) / subset.length
+            : 0;
+        };
+        const example = searchRun.runs.find((entry) => entry.exampleId === exampleId);
+        return {
+          exampleId,
+          question: example?.question ?? exampleId,
+          provenance: example?.provenance ?? '',
+          incumbent: rewardFor(searchRun.runs),
+          candidate: rewardFor(candidateSearch.runs),
+          delta: rewardFor(candidateSearch.runs) - rewardFor(searchRun.runs),
+        };
+      }
+    );
+
+    const verification = verifyManifest({ manifest: proposal.manifest, seedDeltas: searchDeltas });
     lastFeedback = `${verificationSummary(verification)} The edit was ${
       gateResult.accepted ? 'accepted' : `rejected because: ${gateResult.reasons.join('; ')}`
     }.`;
@@ -357,8 +395,11 @@ export const runCampaign = async ({
       parentHash: incumbentVariant.hash,
       variantHash: candidateVariant.hash,
       gate: gateResult,
+      gateDeltas,
       tier,
       searchReward: searchRun.meanReward,
+      candidateSearchReward: candidateSearch.meanReward,
+      searchDeltas,
     });
     saveLedger();
 

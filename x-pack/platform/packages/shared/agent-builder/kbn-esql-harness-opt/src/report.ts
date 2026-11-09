@@ -34,6 +34,7 @@ interface LedgerEntry {
     predictedRegressions?: string[];
   };
   gate?: Record<string, unknown>;
+  searchDeltas?: Array<Record<string, unknown>>;
   failures?: string[];
   violations?: string[];
   error?: string;
@@ -243,6 +244,7 @@ export const buildReportPayload = () => {
       rationale: entry.manifest?.rationale ?? '',
       gate: entry.gate,
       seedDeltas,
+      searchDeltas: entry.searchDeltas ?? [],
       verification: entry.manifest
         ? verifyManifest({ manifest: entry.manifest, seedDeltas })
         : undefined,
