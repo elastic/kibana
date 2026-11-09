@@ -52,6 +52,7 @@ export interface DocLinks {
     readonly transactionSampling: string;
     readonly indexLifecycleManagement: string;
     readonly metricsUi: string;
+    readonly troubleshootingTooManyServices: string;
     readonly troubleshootingTooManyTransactions: string;
   };
   readonly canvas: {
@@ -368,6 +369,7 @@ export interface DocLinks {
     readonly trustedDevices: string;
     readonly elasticAiFeatures: string;
     readonly eventFilters: string;
+    readonly kubernetesDashboard: string;
     readonly eventMerging: string;
     readonly blocklist: string;
     readonly hostIsolationExceptions: string;

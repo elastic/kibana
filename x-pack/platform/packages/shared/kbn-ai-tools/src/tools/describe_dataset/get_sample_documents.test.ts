@@ -32,12 +32,15 @@ const createResponse = ({
   values?: unknown[][];
 } = {}) => ({ columns, values });
 
+const TIME_RANGE =
+  '@timestamp >= "1970-01-01T00:00:00.100Z" AND @timestamp <= "1970-01-01T00:00:00.200Z"';
+
 describe('getSampleDocumentsEsql', () => {
   beforeEach(() => {
     jest.restoreAllMocks();
   });
 
-  it('builds a simple ES|QL sample query with a time range filter', async () => {
+  it('builds a simple ES|QL sample query with an inline time range', async () => {
     const { esClient, query } = createEsClient();
     query.mockResolvedValueOnce(createResponse());
 
@@ -53,22 +56,7 @@ describe('getSampleDocumentsEsql', () => {
     expect(query).toHaveBeenCalledTimes(1);
     expect(query).toHaveBeenCalledWith(
       {
-        query: 'FROM logs-a, logs-b METADATA _id, _source | LIMIT 2',
-        filter: {
-          bool: {
-            filter: [
-              {
-                range: {
-                  '@timestamp': {
-                    gte: 100,
-                    lte: 200,
-                    format: 'epoch_millis',
-                  },
-                },
-              },
-            ],
-          },
-        },
+        query: `FROM logs-a, logs-b METADATA _id, _source | WHERE ${TIME_RANGE} | LIMIT 2`,
         drop_null_columns: true,
       },
       { signal: expect.any(AbortSignal) }
@@ -177,7 +165,7 @@ describe('getSampleDocumentsEsql', () => {
     });
 
     expect(query.mock.calls[0][0].query).toBe(
-      'SET unmapped_fields = "LOAD"; FROM logs-* METADATA _id, _source | WHERE KQL("log.level:\\"error\\"") AND NOT service.name == "checkout" | LIMIT 5'
+      `SET unmapped_fields = "LOAD"; FROM logs-* METADATA _id, _source | WHERE ${TIME_RANGE} AND KQL("log.level:\\"error\\"") AND NOT service.name == "checkout" | LIMIT 5`
     );
   });
 
@@ -205,13 +193,38 @@ describe('getSampleDocumentsEsql', () => {
       sampleSize: 2,
     });
 
-    expect(query.mock.calls[0][0].query).toBe('FROM logs-* | STATS total = COUNT(*)');
-    expect(query.mock.calls[1][0].query).toBe(
-      'FROM logs-* METADATA _id, _source | SAMPLE 0.06 | LIMIT 20'
+    expect(query.mock.calls[0][0].query).toBe(
+      `FROM logs-* | WHERE ${TIME_RANGE} | STATS total = COUNT(*)`
     );
-    expect(query.mock.calls[0][0].filter).toEqual(query.mock.calls[1][0].filter);
+    expect(query.mock.calls[1][0].query).toBe(
+      `FROM logs-* METADATA _id, _source | WHERE ${TIME_RANGE} | SAMPLE 0.06 | LIMIT 20`
+    );
+    expect(query.mock.calls[0][0]).not.toHaveProperty('filter');
     expect(result.hits).toHaveLength(2);
     expect(result.total).toBe(3);
+  });
+
+  it('sends dslFilter as the request filter while keeping the time range inline', async () => {
+    const { esClient, query } = createEsClient();
+    query
+      .mockResolvedValueOnce({ columns: [{ name: 'total', type: 'long' }], values: [[10]] })
+      .mockResolvedValueOnce(createResponse());
+
+    const dslFilter = { term: { 'service.name': 'checkout' } };
+    await getSampleDocumentsEsql({
+      esClient,
+      abortSignal: AbortSignal.timeout(30_000),
+      index: 'logs-*',
+      start: 100,
+      end: 200,
+      sampleSize: 2,
+      dslFilter,
+    });
+
+    expect(query.mock.calls[0][0].query).toBe(
+      `FROM logs-* | WHERE ${TIME_RANGE} | STATS total = COUNT(*)`
+    );
+    expect(query.mock.calls[0][0].filter).toEqual({ bool: { filter: [dslFilter] } });
   });
 
   it('uses the same KQL, where condition, LOAD, and time filter for random count and sample queries', async () => {
@@ -233,12 +246,32 @@ describe('getSampleDocumentsEsql', () => {
     });
 
     expect(query.mock.calls[0][0].query).toBe(
-      'SET unmapped_fields = "LOAD"; FROM logs-* | WHERE KQL("log.level:\\"error\\"") AND service.name == "checkout" | STATS total = COUNT(*)'
+      `SET unmapped_fields = "LOAD"; FROM logs-* | WHERE ${TIME_RANGE} AND KQL("log.level:\\"error\\"") AND service.name == "checkout" | STATS total = COUNT(*)`
     );
     expect(query.mock.calls[1][0].query).toBe(
-      'SET unmapped_fields = "LOAD"; FROM logs-* METADATA _id, _source | WHERE KQL("log.level:\\"error\\"") AND service.name == "checkout" | SAMPLE 0.6 | LIMIT 20'
+      `SET unmapped_fields = "LOAD"; FROM logs-* METADATA _id, _source | WHERE ${TIME_RANGE} AND KQL("log.level:\\"error\\"") AND service.name == "checkout" | SAMPLE 0.6 | LIMIT 20`
     );
-    expect(query.mock.calls[0][0].filter).toEqual(query.mock.calls[1][0].filter);
+  });
+
+  it('omits METADATA when any index is an ES|QL view', async () => {
+    const { esClient, query } = createEsClient();
+    query.mockResolvedValueOnce(
+      createResponse({ columns: [{ name: 'message', type: 'text' }], values: [['boom']] })
+    );
+
+    await getSampleDocumentsEsql({
+      esClient,
+      abortSignal: AbortSignal.timeout(30_000),
+      index: ['$.logs', 'logs-*'],
+      start: 100,
+      end: 200,
+      whereCondition: esql.exp`QSTR(${esql.str('log.level:error')})`,
+      size: 2,
+    });
+
+    expect(query.mock.calls[0][0].query).toBe(
+      `FROM $.logs, logs-* | WHERE ${TIME_RANGE} AND QSTR("log.level:error") | LIMIT 2`
+    );
   });
 
   it('emits SET unmapped_fields = "NULLIFY" when unmappedFields is NULLIFY', async () => {
@@ -257,7 +290,7 @@ describe('getSampleDocumentsEsql', () => {
     });
 
     expect(query.mock.calls[0][0].query).toBe(
-      'SET unmapped_fields = "NULLIFY"; FROM logs-* METADATA _id, _source | WHERE MATCH_PHRASE(message, "error") | LIMIT 5'
+      `SET unmapped_fields = "NULLIFY"; FROM logs-* METADATA _id, _source | WHERE ${TIME_RANGE} AND MATCH_PHRASE(message, "error") | LIMIT 5`
     );
   });
 
@@ -276,7 +309,9 @@ describe('getSampleDocumentsEsql', () => {
       sampleSize: 2,
     });
 
-    expect(query.mock.calls[1][0].query).toBe('FROM logs-* METADATA _id, _source | LIMIT 20');
+    expect(query.mock.calls[1][0].query).toBe(
+      `FROM logs-* METADATA _id, _source | WHERE ${TIME_RANGE} | LIMIT 20`
+    );
   });
 
   it('short-circuits random sampling when the count query returns zero', async () => {

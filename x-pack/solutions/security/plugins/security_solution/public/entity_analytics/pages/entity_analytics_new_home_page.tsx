@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
+  EuiCallOut,
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
@@ -580,14 +581,38 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
     ]
   );
 
-  const { filterQuery: esFilter } = useGlobalFilterQuery({ dataView });
   const {
     searchExpression,
     searchOverrides,
     isSearchOverridesPending,
     mainEntityOnlySearch,
+    applicableFilters,
+    ignoredFields: ignoredFilterFields,
     rawSearchExpression,
-  } = useSearchBarExpression(rowsMode);
+  } = useSearchBarExpression(rowsMode, isDataViewLoading ? undefined : dataView);
+  // The DSL query takes the same filters as the ES|QL one: a filter on a field the entity docs lack
+  // matches nothing in DSL, which would empty the counts and the grouped views.
+  const { filterQuery: esFilter } = useGlobalFilterQuery({
+    dataView,
+    filtersOverride: applicableFilters,
+  });
+  // The callout stays hidden until a field it did not list is ignored.
+  const [dismissedFields, setDismissedFields] = useState<string[]>([]);
+  useEffect(() => {
+    // Forget the fields no longer ignored, so they show again if they come back.
+    setDismissedFields((prev) => {
+      const stillIgnored = prev.filter((field) => ignoredFilterFields.includes(field));
+      return stillIgnored.length === prev.length ? prev : stillIgnored;
+    });
+  }, [ignoredFilterFields]);
+  const isIgnoredFiltersCalloutVisible = ignoredFilterFields.some(
+    (field) => !dismissedFields.includes(field)
+  );
+  const dismissIgnoredFiltersCallout = useCallback(
+    () => setDismissedFields(ignoredFilterFields),
+    [ignoredFilterFields]
+  );
+
   useEffect(() => {
     if (!mainEntityOnlySearch) return;
 
@@ -1545,6 +1570,28 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
             onTimeRangeChange={setTimeRange}
           />
 
+          {isIgnoredFiltersCalloutVisible && (
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              color="warning"
+              iconType="warning"
+              onDismiss={dismissIgnoredFiltersCallout}
+              data-test-subj="entity-analytics-ignored-filters-callout"
+              title={i18n.translate(
+                'xpack.securitySolution.entityAnalytics.home.filters.ignoredTitle',
+                {
+                  defaultMessage:
+                    'Entities have no {count, plural, one {field} other {fields}} {fields}, so the filters with {count, plural, one {it} other {them}} were ignored.',
+                  values: {
+                    count: ignoredFilterFields.length,
+                    fields: ignoredFilterFields.join(', '),
+                  },
+                }
+              )}
+            />
+          )}
+
           <EuiSpacer size="s" />
 
           <EntityFiltersBar
@@ -1553,6 +1600,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
             spaceId={spaceId}
             rowsMode={rowsMode}
             esFilter={searchDsl}
+            searchExpression={searchExpression}
+            isSearchOverridesPending={isSearchOverridesPending}
             watchlistNames={watchlistNames}
           />
 

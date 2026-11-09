@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { createWorkflowLiquidEngine } from '@kbn/workflows';
+import type { InlineActionStepDefinition } from '../registry';
 import { getInlineActionStepDefinition } from '../registry';
 import { parseInlineParams } from './parse_inline_params';
 
@@ -43,25 +45,120 @@ describe('parseInlineParams', () => {
   });
 
   describe('default templates', () => {
+    const STANDARD_ALERT_FIELDS = [
+      'inputs.payload.rules[alert.rule_id].name | default: "Unnamed rule"',
+      'alert.alert_status | capitalize',
+      'alert.severity | capitalize',
+      'alert.last_event_timestamp',
+      '{{ alert.alert_url }}',
+      '{{ alert.alert_id }}',
+    ];
+    const emailParams = email.paramsTemplate
+      .replace('- ""', '- ops@example.com')
+      .replace('subject: ""', 'subject: Alert');
+    const slackParams = slack.paramsTemplate.replace('channel: ""', 'channel: C123');
+
     it.each([
-      [
-        'email',
-        email,
-        email.paramsTemplate
-          .replace('- ""', '- ops@example.com')
-          .replace('subject: ""', 'subject: Alert'),
-        'message',
-      ],
-      ['slack', slack, slack.paramsTemplate.replace('channel: ""', 'channel: C123'), 'text'],
+      ['email', email, emailParams, 'message'],
+      ['slack', slack, slackParams, 'text'],
     ])(
       'accepts the %s template once the user-supplied fields are filled in',
       (_, definition, params, bodyField) => {
         const result = parseInlineParams(definition, params);
 
         expect(result.errors).toEqual([]);
-        expect(result.params?.[bodyField]).toContain('{{ alert.alert_url }}');
+        STANDARD_ALERT_FIELDS.forEach((field) => {
+          expect(result.params?.[bodyField]).toContain(field);
+        });
       }
     );
+
+    describe('rendering', () => {
+      // Same options as the templating engine of the workflows execution engine.
+      const engine = createWorkflowLiquidEngine({ strictFilters: true, strictVariables: false });
+      const alertUrl = (alertId: string): string =>
+        `https://kibana.example.com/app/observability/alerting/alerts/${alertId}`;
+      const rules = { 'rule-1': { name: 'High error count' } };
+      const namedAlert = {
+        alert_id: 'alert-1',
+        alert_url: alertUrl('alert-1'),
+        alert_status: 'active',
+        severity: 'high',
+        rule_id: 'rule-1',
+        last_event_timestamp: '2026-10-30T13:42:00.000Z',
+      };
+      // Its rule is not in the payload and it has no severity.
+      const unnamedAlert = {
+        alert_id: 'alert-2',
+        alert_url: alertUrl('alert-2'),
+        alert_status: 'recovering',
+        rule_id: null,
+        last_event_timestamp: '2026-10-30T13:42:00.000Z',
+      };
+
+      const renderBody = (
+        definition: InlineActionStepDefinition,
+        params: string,
+        bodyField: string,
+        alerts: object[]
+      ): string => {
+        const body = String(parseInlineParams(definition, params).params?.[bodyField]);
+        return engine.parseAndRenderSync(body, { inputs: { payload: { alerts, rules } } });
+      };
+
+      // Email lines end with `\`, a Markdown line break; Slack mrkdwn keeps plain newlines.
+      describe.each([
+        {
+          name: 'email',
+          definition: email,
+          params: emailParams,
+          bodyField: 'message',
+          namedBlock: [
+            '**High error count** — Active · High\\',
+            `Last event 2026-10-30 13:42 UTC · [View in app](${alertUrl('alert-1')})\\`,
+            'Alert id: alert-1',
+          ],
+          unnamedBlock: [
+            '**Unnamed rule** — Recovering\\',
+            `Last event 2026-10-30 13:42 UTC · [View in app](${alertUrl('alert-2')})\\`,
+            'Alert id: alert-2',
+          ],
+          countHeader: '**2 alerts**',
+        },
+        {
+          name: 'slack',
+          definition: slack,
+          params: slackParams,
+          bodyField: 'text',
+          namedBlock: [
+            '*High error count* — Active · High',
+            `Last event 2026-10-30 13:42 UTC · <${alertUrl('alert-1')}|View in app>`,
+            'Alert id: alert-1',
+          ],
+          unnamedBlock: [
+            '*Unnamed rule* — Recovering',
+            `Last event 2026-10-30 13:42 UTC · <${alertUrl('alert-2')}|View in app>`,
+            'Alert id: alert-2',
+          ],
+          countHeader: '*2 alerts*',
+        },
+      ])(
+        'the $name template',
+        ({ definition, params, bodyField, namedBlock, unnamedBlock, countHeader }) => {
+          it('renders a single alert as one block without a count header', () => {
+            expect(renderBody(definition, params, bodyField, [namedAlert])).toBe(
+              [...namedBlock, ''].join('\n')
+            );
+          });
+
+          it('renders grouped alerts under a count header, one block each', () => {
+            expect(renderBody(definition, params, bodyField, [namedAlert, unnamedAlert])).toBe(
+              [countHeader, '', ...namedBlock, '', ...unnamedBlock, ''].join('\n')
+            );
+          });
+        }
+      );
+    });
   });
 
   describe('yaml errors', () => {

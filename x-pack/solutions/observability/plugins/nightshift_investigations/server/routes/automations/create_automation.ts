@@ -67,6 +67,7 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
     params,
     getAutomationsSoClient,
     getWorkflowsManagement,
+    isUniversalAlertingAvailable,
     getInvestigatorServiceAccountService,
     context,
   }) => {
@@ -113,6 +114,7 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
         automationId: created.id,
         automation: attributes,
         serviceAccountId,
+        universalAlerts: isUniversalAlertingAvailable(),
       });
       const workflow = await workflowsManagement.management.createWorkflow(
         { yaml },

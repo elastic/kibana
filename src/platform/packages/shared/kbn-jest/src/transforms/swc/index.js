@@ -63,15 +63,32 @@ const TYPE_ONLY_KEYS = new Set([
   'implements',
 ]);
 
-const swcTransformers = new Map(
-  ['.js', '.mjs', '.ts', '.tsx'].map((extension) => [
-    extension,
-    createTransformer(getJestSwcConfig(`/__kbn_jest_transformer__${extension}`)),
-  ])
-);
+// The Emotion plugin only changes files that use Emotion and costs about twice the rest of the
+// SWC transform, so files that can't use it skip it.
+const EMOTION_USAGE = /@emotion|\bcss\b|styled|keyframes/;
 
-function getSwcTransformer(sourcePath) {
-  return swcTransformers.get(Path.extname(sourcePath)) ?? swcTransformers.get('.js');
+const createSwcTransformers = (withEmotion) =>
+  new Map(
+    ['.js', '.mjs', '.ts', '.tsx'].map((extension) => {
+      const config = getJestSwcConfig(`/__kbn_jest_transformer__${extension}`);
+      const { experimental } = config.jsc;
+      return [
+        extension,
+        createTransformer(
+          withEmotion
+            ? config
+            : { ...config, jsc: { ...config.jsc, experimental: { ...experimental, plugins: [] } } }
+        ),
+      ];
+    })
+  );
+
+const swcTransformers = createSwcTransformers(true);
+const swcTransformersWithoutEmotion = createSwcTransformers(false);
+
+function getSwcTransformer(sourcePath, code) {
+  const transformers = EMOTION_USAGE.test(code) ? swcTransformers : swcTransformersWithoutEmotion;
+  return transformers.get(Path.extname(sourcePath)) ?? transformers.get('.js');
 }
 
 // --- AST helpers -------------------------------------------------------------------------------
@@ -932,7 +949,9 @@ const LAZY_OBJECT_CALL = /\blazyObject\s*\(/;
 const DEFAULT_EXPORT = /\bexport\s+default\b|\bas\s+default\b|\bexport\s*\{[^}]*\bdefault\b/;
 
 function prepareSource(sourceText, sourcePath) {
-  const normalizeJsx = JSX_MULTILINE_STRING_ATTRIBUTE.test(sourceText);
+  // .ts files can't contain JSX
+  const normalizeJsx =
+    Path.extname(sourcePath) !== '.ts' && JSX_MULTILINE_STRING_ATTRIBUTE.test(sourceText);
   const inlineEnums = ENUM_KEYWORD.test(sourceText);
   const rewriteMocks = JEST_MOCK_CALL.test(sourceText);
   const rewriteLazy = sourceText.includes(LAZY_OBJECT_MODULE) && LAZY_OBJECT_CALL.test(sourceText);
@@ -1199,10 +1218,6 @@ function getExportName(rawName) {
   return rawName.startsWith('"') ? JSON.parse(rawName) : rawName;
 }
 
-function escapeRegExp(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
 function republishMutableLocalExports(code, mutableLocalExports) {
   if (mutableLocalExports.length === 0) {
     return { code };
@@ -1368,10 +1383,13 @@ function makeExportsReplaceable(code) {
   // Babel exposed local bindings as data properties. Materialize the immutable ones once the
   // module has initialized so Sinon can wrap them, keeping `let`/`var` exports as live getters.
   // SWC prints class declarations as `let Name = class Name`, which are still immutable.
-  const isMutableBinding = (binding) =>
-    new RegExp(String.raw`^(?:let|var) ${escapeRegExp(binding)}(?![\w$])(?! = class\b)`, 'm').test(
-      rewritten
-    );
+  const mutableBindings = new Set(
+    Array.from(
+      rewritten.matchAll(/^(?:let|var) ([\w$]+)(?![\w$])(?! = class\b)/gm),
+      (match) => match[1]
+    )
+  );
+  const isMutableBinding = (binding) => mutableBindings.has(binding);
   const mutableLocalExports = localExports.filter(({ binding }) => isMutableBinding(binding));
   const localExportNames = localExports
     .filter(({ name, binding }) => name !== 'default' && !isMutableBinding(binding))
@@ -1507,7 +1525,7 @@ const transformer = {
 
   process(sourceText, sourcePath, transformOptions) {
     const prepared = prepareSource(sourceText, sourcePath);
-    const result = getSwcTransformer(sourcePath).process(
+    const result = getSwcTransformer(sourcePath, prepared.code).process(
       prepared.code,
       sourcePath,
       transformOptions
@@ -1518,7 +1536,7 @@ const transformer = {
 
   async processAsync(sourceText, sourcePath, transformOptions) {
     const prepared = prepareSource(sourceText, sourcePath);
-    const swcTransformer = getSwcTransformer(sourcePath);
+    const swcTransformer = getSwcTransformer(sourcePath, prepared.code);
     // @swc/jest's async transform always emits ESM, so only use it when Jest asked for ESM.
     const result = transformOptions?.supportsStaticESM
       ? await swcTransformer.processAsync(prepared.code, sourcePath, transformOptions)

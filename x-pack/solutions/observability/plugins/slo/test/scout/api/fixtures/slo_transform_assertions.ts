@@ -42,7 +42,6 @@ export function createSloTransformAssertions(
         },
         {
           timeoutMs: 90_000,
-          intervalMs: 4000,
           label: `Wait for transform ${transformId} to be deleted`,
         }
       );
@@ -69,7 +68,6 @@ export function createSloTransformAssertions(
         },
         {
           timeoutMs: 90_000,
-          intervalMs: 4000,
           label: `Wait for transform ${transformId} to exist`,
         }
       );
@@ -91,7 +89,6 @@ export function createSloTransformAssertions(
         },
         {
           timeoutMs: 150_000,
-          intervalMs: 4000,
           label: `Wait for transform ${transformId} to be started`,
         }
       );
@@ -113,7 +110,6 @@ export function createSloTransformAssertions(
         },
         {
           timeoutMs: 150_000,
-          intervalMs: 4000,
           label: `Wait for transform ${transformId} to be stopped`,
         }
       );

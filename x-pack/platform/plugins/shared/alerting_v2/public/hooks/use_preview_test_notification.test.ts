@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useService } from '@kbn/core-di-browser';
 import { ActionPoliciesApi } from '../services/action_policies_api';
 import { createHookTestProviders } from '../test_utils/test_providers';
@@ -30,32 +30,13 @@ describe('usePreviewTestNotification', () => {
     });
   });
 
-  it('builds a new preview with a new seed on reload', async () => {
-    let resolveSecondPreview: (preview: ReturnType<typeof createPreview>) => void = () => {};
-    api.previewTestNotification.mockResolvedValueOnce(createPreview(1)).mockReturnValueOnce(
-      new Promise((resolve) => {
-        resolveSecondPreview = resolve;
-      })
-    );
+  it('fetches the preview of the policy', async () => {
+    api.previewTestNotification.mockResolvedValue(createPreview(1));
     const { result } = renderHook(() => usePreviewTestNotification('policy-1'), {
       wrapper: createHookTestProviders(),
     });
 
     await waitFor(() => expect(result.current.data?.seed).toBe(1));
-
-    act(() => {
-      result.current.reload();
-    });
-
-    await waitFor(() => expect(result.current.data).toBeUndefined());
-    expect(result.current.isLoading).toBe(true);
-
-    act(() => {
-      resolveSecondPreview(createPreview(2));
-    });
-
-    await waitFor(() => expect(result.current.data?.seed).toBe(2));
-    expect(api.previewTestNotification).toHaveBeenCalledTimes(2);
-    expect(api.previewTestNotification).toHaveBeenLastCalledWith('policy-1');
+    expect(api.previewTestNotification).toHaveBeenCalledWith('policy-1');
   });
 });

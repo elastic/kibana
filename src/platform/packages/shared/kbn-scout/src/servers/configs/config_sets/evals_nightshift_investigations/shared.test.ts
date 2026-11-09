@@ -55,7 +55,7 @@ describe.each([
   beforeEach(() => {
     process.env = { ...originalEnv };
     delete process.env.NIGHTSHIFT_DATASETS;
-    delete process.env.NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG;
+    delete process.env.NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG;
     for (const key of Object.keys(process.env)) {
       if (key.startsWith('SANDBOX_')) delete process.env[key];
     }
@@ -127,8 +127,8 @@ describe.each([
     expect(servers.kbnTestServer.serverArgs).toContain('--xpack.task_manager.capacity=21');
   });
 
-  it('loads the optional telemetry YAML and keeps tracing exporter headers in the environment', () => {
-    const telemetryConfig = join(SANDBOX_KIBANA_CONFIG, '../kibana.telemetry.yml');
+  it('loads the optional connector set YAML and keeps tracing exporter headers in the environment', () => {
+    const connectorsConfig = join(SANDBOX_KIBANA_CONFIG, '../connector_sets/orcabench.yml');
     const exporters = JSON.stringify([
       {
         http: {
@@ -139,10 +139,10 @@ describe.each([
     ]);
     const servers = loadServers(configPath, {
       SANDBOX_KIBANA_CONFIG,
-      NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG: telemetryConfig,
+      NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG: connectorsConfig,
       TRACING_EXPORTERS: exporters,
     });
-    expect(servers.kbnTestServer.serverArgs).toContain(`--config=${telemetryConfig}`);
+    expect(servers.kbnTestServer.serverArgs).toContain(`--config=${connectorsConfig}`);
     expect(servers.kbnTestServer.serverArgs.join(' ')).not.toContain('trace-test-key');
     expect(servers.kbnTestServer.env?.NIGHTSHIFT_TRACING_EXPORTERS).toBe(exporters);
   });
@@ -159,12 +159,12 @@ describe.each([
     );
   });
 
-  it('fails fast when the telemetry YAML is missing', () => {
+  it('fails fast when the connector set YAML is missing', () => {
     expect(() =>
       loadServers(configPath, {
         SANDBOX_KIBANA_CONFIG,
-        NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG: '/missing.yml',
+        NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG: '/missing.yml',
       })
-    ).toThrow('NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG references a missing file');
+    ).toThrow('NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG references a missing file');
   });
 });

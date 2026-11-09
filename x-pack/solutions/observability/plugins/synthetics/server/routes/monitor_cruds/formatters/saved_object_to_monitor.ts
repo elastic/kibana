@@ -13,6 +13,7 @@ import type {
   MonitorFieldsResult,
 } from '../../../../common/runtime_types';
 import { ConfigKey } from '../../../../common/runtime_types';
+import { SCHEDULE_INTERVAL_FIELD } from '../../../../common/lib/schedule_to_time';
 
 const keysToOmit = [
   ConfigKey.URLS,
@@ -72,7 +73,7 @@ export function mapSavedObjectToMonitor({
   internal?: boolean;
 }) {
   let result = {
-    ...monitor.attributes,
+    ...omit(monitor.attributes, SCHEDULE_INTERVAL_FIELD),
     created_at: monitor.created_at,
     updated_at: monitor.updated_at,
   } as Result;

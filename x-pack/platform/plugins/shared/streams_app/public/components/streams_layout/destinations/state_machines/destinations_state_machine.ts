@@ -8,13 +8,13 @@
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { isHttpFetchError } from '@kbn/server-route-repository-client';
 import {
   and,
   assign,
   enqueueActions,
   fromEventObservable,
   fromPromise,
-  not,
   sendTo,
   setup,
   stateIn,
@@ -24,7 +24,6 @@ import type { TimeState } from '@kbn/es-query';
 import { filter, map, startWith } from 'rxjs';
 import type { ActorRefFrom, AnyActorRef, MachineImplementationsFrom } from 'xstate';
 import {
-  STREAMS_DEFAULT_UNIT_ID,
   type ResolveUnitIndicesResponse,
   type ResolvedDestinationIndex,
 } from '@kbn/streams-plugin/common';
@@ -42,9 +41,14 @@ import {
   getDestinationCreateSpec,
   getUnitDestinations,
   toDestinationViewModel,
+  toRemoteElasticsearchDestinationViewModel,
   toS3DestinationViewModel,
   withUnitDestinations,
 } from '../destination_models';
+import {
+  createRemoteElasticsearchUnitDestination,
+  remoteElasticsearchCredentialName,
+} from '../remote_elasticsearch_destination_models';
 import { createS3UnitDestination, s3CredentialNames } from '../s3_destination_models';
 import {
   createDestinationApiKeyServices,
@@ -96,10 +100,18 @@ export interface PendingDestination extends DestinationSignalTargets {
 export interface DestinationCreationContext {
   formData: DestinationCreationFormData;
   pendingDestination?: PendingDestination;
+  /** Id of the key minted for the pending destination, revoked if the save fails. */
+  pendingApiKeyId?: string;
   createdDestination?: DestinationViewModel;
 }
 
 export type ResolvedIndicesStatus = 'loading' | 'ready' | 'unavailable';
+
+export interface ResolvedIndicesError {
+  message: string;
+  /** Elasticsearch refused the lookup because the user lacks index privileges on the targets. */
+  forbidden: boolean;
+}
 
 export interface DestinationsStateContext {
   unitDefinition: Unit;
@@ -110,7 +122,7 @@ export interface DestinationsStateContext {
   hasReceivedUnit: boolean;
   parentRef: AnyActorRef;
   resolvedIndicesByDestination: ReadonlyMap<string, ResolvedDestinationIndex[]>;
-  resolvedIndicesError?: string;
+  resolvedIndicesError?: ResolvedIndicesError;
   /** Spawned when a destination's details are first shown, stopped once nothing shows them. */
   destinationDetailRefs: ReadonlyMap<string, DestinationDetailActorRef>;
   /** Components showing each destination's details. */
@@ -146,6 +158,29 @@ export type DestinationsStateEvent =
   | { type: 'destinationDetail.show'; destinationId: string; viewerId: string }
   | { type: 'timefilter.changed'; timeRange: DestinationIndexStatsTimeRange }
   | { type: 'destinationDetail.hide'; destinationId: string; viewerId: string };
+
+/** Values for the unit PUT `secrets`. The created node references them by credential name. */
+const getCreateSecrets = (
+  formData: DestinationCreationFormData,
+  destinationId: string
+): StreamsUnit.Secrets | undefined => {
+  switch (formData.storageKind) {
+    case 'external_storage': {
+      const names = s3CredentialNames(destinationId);
+      return {
+        [names.accessKeyId]: formData.s3.accessKeyId.trim(),
+        [names.secretAccessKey]: formData.s3.secretAccessKey.trim(),
+      };
+    }
+    case 'remote_elasticsearch':
+      return {
+        [remoteElasticsearchCredentialName(destinationId)]:
+          formData.remoteElasticsearch.apiKey.trim(),
+      };
+    case 'local_elasticsearch':
+      return undefined;
+  }
+};
 
 const removeDestinationsFromContext = (
   context: Pick<DestinationsStateContext, 'unitDefinition' | 'selectedDestinationId'>,
@@ -327,7 +362,12 @@ export const destinationsStateMachine = setup({
     }),
     storeResolvedIndicesError: assign(({ event }) =>
       event.type === 'xstate.error.actor.loadResolvedIndices'
-        ? { resolvedIndicesError: getFormattedError(event.error).message }
+        ? {
+            resolvedIndicesError: {
+              message: getFormattedError(event.error).message,
+              forbidden: isHttpFetchError(event.error) && event.error.body?.statusCode === 403,
+            },
+          }
         : {}
     ),
     syncLoadedUnit: assign(({ context, event }) => {
@@ -388,6 +428,36 @@ export const destinationsStateMachine = setup({
         apiKeyError: undefined,
       };
     }),
+    stageCreatedRemoteElasticsearchDestination: assign(({ context }) => {
+      if (!context.creationContext) {
+        return {};
+      }
+      const { destinationName, description, remoteElasticsearch } =
+        context.creationContext.formData;
+      const name = destinationName.trim();
+      const id = createDestinationId({
+        name,
+        existingIds: collectUnitComponentIds(context.unitDefinition.unit),
+      });
+      const node = createRemoteElasticsearchUnitDestination({
+        id,
+        name,
+        description,
+        ...remoteElasticsearch,
+      });
+      return {
+        creationContext: {
+          ...context.creationContext,
+          createdDestination: toRemoteElasticsearchDestinationViewModel(node),
+        },
+        unitDefinition: withUnitDestinations(context.unitDefinition, [
+          ...getUnitDestinations(context.unitDefinition),
+          node,
+        ]),
+        persistenceError: undefined,
+        apiKeyError: undefined,
+      };
+    }),
     assignPendingDestination: assign(({ context }) => {
       if (!context.creationContext) {
         return {};
@@ -436,7 +506,11 @@ export const destinationsStateMachine = setup({
         unitDestination,
       ]);
       return {
-        creationContext: { ...context.creationContext, createdDestination },
+        creationContext: {
+          ...context.creationContext,
+          pendingApiKeyId: event.output.id,
+          createdDestination,
+        },
         unitDefinition,
         persistenceError: undefined,
         apiKeyError: undefined,
@@ -454,20 +528,12 @@ export const destinationsStateMachine = setup({
         if (!context.creationContext || !createdDestination) {
           throw new Error('Expected a created destination');
         }
-        const { storageKind, s3 } = context.creationContext.formData;
-        const names = s3CredentialNames(createdDestination.id);
         return {
           type: 'unit.changed',
           unitDefinition: context.unitDefinition,
           destinationIds: [createdDestination.id],
           intent: 'create',
-          secrets:
-            storageKind === 'external_storage'
-              ? {
-                  [names.accessKeyId]: s3.accessKeyId.trim(),
-                  [names.secretAccessKey]: s3.secretAccessKey.trim(),
-                }
-              : undefined,
+          secrets: getCreateSecrets(context.creationContext.formData, createdDestination.id),
         };
       }
     ),
@@ -535,6 +601,10 @@ export const destinationsStateMachine = setup({
                       accessKeyId: '',
                       secretAccessKey: '',
                     },
+                    remoteElasticsearch: {
+                      ...context.creationContext.formData.remoteElasticsearch,
+                      apiKey: '',
+                    },
                   },
                 }
               : undefined,
@@ -581,6 +651,10 @@ export const destinationsStateMachine = setup({
       event.type === 'unit.loaded' && context.hasReceivedUnit,
     isExternalStorage: ({ event }) =>
       event.type === 'destination.create' && event.formData.storageKind === 'external_storage',
+    isRemoteElasticsearch: ({ event }) =>
+      event.type === 'destination.create' && event.formData.storageKind === 'remote_elasticsearch',
+    isLocalElasticsearch: ({ event }) =>
+      event.type === 'destination.create' && event.formData.storageKind === 'local_elasticsearch',
     isDeletePersistenceFailure: ({ event }) =>
       event.type === 'unit.persistenceFailed' && event.intent === 'delete',
     unitSaveIsIdle: stateIn('#destinationsUnitSaveIdle'),
@@ -636,8 +710,17 @@ export const destinationsStateMachine = setup({
                 actions: ['storeCreationForm', 'stageCreatedS3Destination', 'notifyParentCreate'],
               },
               {
+                target: 'persisting',
+                guard: and(['isRemoteElasticsearch', 'canCreateDestination', 'unitSaveIsIdle']),
+                actions: [
+                  'storeCreationForm',
+                  'stageCreatedRemoteElasticsearchDestination',
+                  'notifyParentCreate',
+                ],
+              },
+              {
                 target: 'mintingApiKey',
-                guard: and(['canCreateDestination', 'unitSaveIsIdle', not('isExternalStorage')]),
+                guard: and(['isLocalElasticsearch', 'canCreateDestination', 'unitSaveIsIdle']),
                 actions: ['storeCreationForm', 'assignPendingDestination'],
               },
             ],
@@ -871,13 +954,15 @@ const revokeDestinationApiKey = async ({
   services,
   toasts,
   destinationId,
+  apiKeyId,
 }: {
   services: DestinationApiKeyServices;
   toasts: Toasts;
   destinationId: string;
+  apiKeyId: string;
 }): Promise<void> => {
   try {
-    await services.delete(destinationId);
+    await services.delete(destinationId, apiKeyId);
   } catch {
     toasts.addWarning({
       title: i18n.translate('xpack.streams.destinations.unusedApiKeyRevokeFailedTitle', {
@@ -911,18 +996,20 @@ function createRevokePendingDestinationApiKeyAction({
 }) {
   return ({ context }: { context: DestinationsStateContext }) => {
     const destinationId = context.creationContext?.pendingDestination?.id;
-    if (destinationId) {
-      void revokeDestinationApiKey({ services, toasts, destinationId });
+    const apiKeyId = context.creationContext?.pendingApiKeyId;
+    if (destinationId && apiKeyId) {
+      void revokeDestinationApiKey({ services, toasts, destinationId, apiKeyId });
     }
   };
 }
 
 function createLoadResolvedIndicesActor({
   streamsRepositoryClient,
+  unitId,
 }: DestinationApiKeyGenerationDeps) {
   return fromPromise(async ({ signal }): Promise<ResolveUnitIndicesResponse> => {
     return streamsRepositoryClient.fetch('GET /internal/streams/unit/{id}/_resolve_indices', {
-      params: { path: { id: STREAMS_DEFAULT_UNIT_ID } },
+      params: { path: { id: unitId } },
       signal,
     });
   });

@@ -154,6 +154,7 @@ describe('POST /internal/evals/evaluators/_test', () => {
     expect(getClient).toHaveBeenCalledWith({
       request: expect.any(Object),
       bindTo: { connectorId: 'connector-1' },
+      callbacks: expect.any(Object),
     });
   });
 
