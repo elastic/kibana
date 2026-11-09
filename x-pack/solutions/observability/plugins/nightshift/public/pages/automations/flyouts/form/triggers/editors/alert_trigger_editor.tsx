@@ -10,8 +10,9 @@ import { EuiBadge, EuiText } from '@elastic/eui';
 import type { TriggerFormValues } from '../../automation_form_values';
 import { PillPopover } from '../pills/pill_popover';
 import { Sentence, SentenceIcon } from '../pills/sentence';
-import { triggerLabels } from '../translations';
+import { alertSourceLabels, triggerLabels } from '../translations';
 import { useRuleCatalog } from '../../../../../../data/rules/use_rule_catalog';
+import { AlertSourcePicker, alertSourcePillLabel } from './alert_source_picker';
 import { RulePicker } from './rule_picker';
 import { rulePillLabel } from './rule_selection';
 
@@ -47,6 +48,18 @@ export const AlertTriggerEditor = ({
           testSubject="automationRulePicker"
         >
           {() => <RulePicker trigger={trigger} onChange={onChange} />}
+        </PillPopover>
+      )}
+      <EuiText size="s">{triggerLabels.from}</EuiText>
+      {readOnly ? (
+        <EuiBadge>{alertSourcePillLabel(trigger)}</EuiBadge>
+      ) : (
+        <PillPopover
+          ariaLabel={alertSourceLabels.title}
+          label={alertSourcePillLabel(trigger)}
+          testSubject="automationAlertSources"
+        >
+          {() => <AlertSourcePicker trigger={trigger} onChange={onChange} />}
         </PillPopover>
       )}
       <EuiText size="s">{triggerLabels.changesTo}</EuiText>
