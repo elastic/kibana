@@ -64,7 +64,7 @@ export function TransactionDistribution({
   const traceSamples = traceSamplesFetchResult.data?.traceSamples;
 
   const selectedSampleIndex = useMemo(() => {
-    if (!isValidSampleIndex(sampleIndex, traceSamples)) {
+    if (!traceSamples || !isValidSampleIndex(sampleIndex, traceSamples)) {
       return undefined;
     }
     const sampleAtIndex = traceSamples[sampleIndex];
@@ -80,7 +80,7 @@ export function TransactionDistribution({
   // Prefer the validated index when present so paired samples are kept distinct;
   // fall back to matching by identifier for URLs without a usable `sampleIndex`.
   const selectedSample = useMemo(() => {
-    if (isValidSampleIndex(selectedSampleIndex, traceSamples)) {
+    if (traceSamples && isValidSampleIndex(selectedSampleIndex, traceSamples)) {
       return traceSamples[selectedSampleIndex];
     }
     return (
