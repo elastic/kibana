@@ -120,6 +120,7 @@ tags:
       ## When to use this API
 
       - Use this API for existing integrations and for partial updates, where you send only the properties to change.
+      - Use this API to manage individual fields and runtime fields, set the default data view, or swap references. The Data views v2 API doesn't support these tasks.
       - To manage complete data view definitions as code, use the [Data views v2 API](../group/endpoint-data-views-v2).
     name: data views
     x-displayName: Data views
@@ -129,7 +130,7 @@ tags:
 
       ## When to use this API
 
-      - Use this API to manage complete data view definitions as code. A `PUT` request replaces the whole definition and removes any optional property you omit.
+      - Use this API to manage complete data view definitions as code. A `PUT` request creates the data view if it doesn't exist, or replaces its whole definition and removes any optional property you omit.
       - For partial updates, or for integrations that use the existing format, use the [Data views API](../group/endpoint-data-views).
     x-displayName: Data views v2
   - name: Discover sessions
