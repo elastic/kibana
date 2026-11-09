@@ -16,6 +16,7 @@ import type { RunSummary } from './runner';
 import { gateCandidate } from './gate';
 import type { GateResult } from './gate';
 import { proposeCandidate } from './proposer';
+import { reviewEdits } from './review';
 import { verificationSummary, verifyManifest } from './verification';
 import { harnessPaths } from './workspace';
 import { readModelChoices } from './models';
@@ -185,14 +186,35 @@ export const runCampaign = async ({
       continue;
     }
 
-    const incumbentContent = new Map(incumbentEdits.map((edit) => [edit.path, edit.content]));
     const attemptedDiff = await candidateDiff(workspace);
-    const validation = await applyAndValidateEdits({
-      workspace,
-      edits: codeEdits,
-      baseline: (path) => incumbentContent.get(path),
+
+    // Judgement first, mechanics second: a cheating edit that compiles is worse than one that
+    // does not, so the reviewer sees the diff before any time is spent validating or measuring.
+    const review = await reviewEdits({
+      diff: attemptedDiff,
+      scratchDir: Path.join(workspace.path, '.harness-scratch', 'review'),
       log,
     });
+    if (review.verdict === 'block') {
+      log.warning(`[harness-opt] reviewer blocked the edit: ${review.reasons.join('; ')}`);
+      ledger.push({
+        round,
+        campaignId,
+        rejected: 'review',
+        failures: review.reasons,
+        manifest: proposal.manifest,
+        filesChanged: codeEdits.map((edit) => edit.path),
+        diff: attemptedDiff.slice(0, 40_000),
+      });
+      saveLedger();
+      lastFeedback = `Your last edit was blocked by the reviewer: ${review.reasons.join(
+        '; '
+      )}. Propose something that improves the tool for any user, not for this benchmark.`;
+      await resetCandidate(workspace);
+      continue;
+    }
+
+    const validation = await applyAndValidateEdits({ workspace, edits: codeEdits, log });
     if (!validation.ok) {
       log.warning(`[harness-opt] edits rejected: ${validation.failures.join(' | ').slice(0, 500)}`);
       ledger.push({

@@ -142,15 +142,29 @@ ${
 Nothing else may change. The dataset, fixtures, scorers and the evaluation runner are off limits,
 and edits outside the list are rejected mechanically before anything is measured.
 
-## Rules, enforced mechanically
+## Check your own work before you finish
 
-1. Your edit must typecheck, pass the tool's existing unit tests and pass eslint. All three run
-   automatically; a failure wastes the round.
+You have a shell. Use it — a round that fails these wastes 15 minutes of measurement:
+
+\`\`\`
+node scripts/type_check --project x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tsconfig.json
+node scripts/jest x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/generate_esql
+node scripts/eslint x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/generate_esql
+\`\`\`
+
+You can also read the tool's unit tests to understand expected behaviour — but you may not
+change them, and you may not change the harness trace writer. Both are how your work is scored.
+
+## Rules
+
+1. Your edit must typecheck, pass the tool's unit tests and pass eslint; all three are re-run
+   before measurement.
 2. Touch at most TWO files. A diffuse edit cannot be attributed to anything.
-3. Never hardcode an index name, field name or query from \`bundle.json\`. The harness has to
-   generalise to unseen data, and leaked benchmark values are rejected automatically.
-4. No filesystem, network, process or environment access, and no new dependencies.
-5. Read \`feedback.md\` first, and do not repeat something \`history.json\` shows was rejected
+3. A reviewer agent reads your diff before it is measured and blocks changes that encode the
+   benchmark, detect the evaluation, tamper with measurement, escape the tool, or fake success.
+   Write the change you would defend in review: something that helps any user of this tool, not
+   something that helps on these examples.
+4. Read \`feedback.md\` first, and do not repeat something \`history.json\` shows was rejected
    unless you change it materially and say what is different.
 
 ## Your answer
