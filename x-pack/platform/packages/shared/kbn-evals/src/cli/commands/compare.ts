@@ -162,7 +162,7 @@ export const compareCmd = {
     }
     const minPairs =
       rawMinPairs === undefined ? DEFAULT_REGRESSION_MIN_PAIRS : Number(rawMinPairs.trim());
-    if (minPairs < 1) {
+    if (minPairs < 1 || !Number.isSafeInteger(minPairs)) {
       throw createFlagError('--min-pairs must be a positive integer.');
     }
 
@@ -389,7 +389,8 @@ export const compareCmd = {
     }
 
     // Averaged repetitions are fractions like 1/3 whose differences tie only up to roundoff, so the
-    // gated Wilcoxon rows are re-run with exact ties. The un-gated report keeps the shared result.
+    // gated Wilcoxon rows are re-run with exact ties. The un-gated report keeps the shared result
+    // (as the UI does), while its outcome label is signed from rounded differences.
     const comparisonResults = averaged
       ? retestWilcoxonWithExactTies(compareScores(pairs), pairs)
       : compareScores(pairs);

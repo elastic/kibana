@@ -365,6 +365,7 @@ describe('compareCmd exit codes', () => {
     it.each([
       ['--min-pairs', '0'],
       ['--min-pairs', '10abc'],
+      ['--min-pairs', '99999999999999999999'],
       ['--min-pairs', '2.5'],
       ['--regression-evaluators', ','],
     ])('rejects %s %j as a usage error before contacting Kibana', async (flag, value) => {

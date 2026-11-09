@@ -100,6 +100,9 @@ const bestReachableEffectivePValue = (
 
   const family = results.filter((row) => toFinite(row.pValue) !== null);
   const index = family.indexOf(result);
+  // Without the row in its family no floor is substituted and an underpowered row would count as
+  // checked, so a caller passing a copy must fail loudly.
+  if (index === -1) throw new Error('Comparison row is not part of the results it was judged in.');
   const pValues = family.map((row, i) => (i === index ? floor : (row.pValue as number)));
   return holmBonferroniAdjust(pValues)[index];
 };
