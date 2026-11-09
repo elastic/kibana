@@ -7,7 +7,8 @@
 
 import type { KbnClient } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { ensureEntityStoreRunning } from './entity_store';
+import { personaMatrixDataset } from '../datasets';
+import { ensureEntityStoreRunning, examplesNeedEntityStore } from './entity_store';
 
 interface Req {
   method: string;
@@ -206,5 +207,34 @@ describe('entity_store', () => {
       'timed out after 10ms waiting for Entity Store status=running'
     );
     expect((error as Error).message).toContain('last status error: socket hang up');
+  });
+});
+
+describe('examplesNeedEntityStore', () => {
+  const example = (expectedTools?: string[]) => ({ metadata: { expectedTools } });
+
+  it('flags examples that expect an entity tool', () => {
+    expect(examplesNeedEntityStore([example(['security.alerts', 'security.get_entity'])])).toBe(
+      true
+    );
+    expect(examplesNeedEntityStore([example(['security.search_entities'])])).toBe(true);
+    expect(examplesNeedEntityStore([example(['security.get_entity_risk_score_history'])])).toBe(
+      true
+    );
+  });
+
+  it('ignores examples without entity tools', () => {
+    expect(examplesNeedEntityStore([example(['security.alerts']), example(), {}])).toBe(false);
+  });
+
+  it('covers every dataset example whose tools the entity store gates', () => {
+    const entityExamples = personaMatrixDataset.filter((ex) => examplesNeedEntityStore([ex]));
+    expect(entityExamples.length).toBeGreaterThan(0);
+    for (const ex of personaMatrixDataset) {
+      const usesEntityTool = (ex.metadata.expectedTools ?? []).some((toolId) =>
+        toolId.includes('entit')
+      );
+      expect(examplesNeedEntityStore([ex])).toBe(usesEntityTool);
+    }
   });
 });

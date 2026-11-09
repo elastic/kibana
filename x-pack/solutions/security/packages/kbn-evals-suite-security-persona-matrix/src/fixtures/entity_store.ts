@@ -83,6 +83,20 @@ const requestOrWarn = async (
   }
 };
 
+const ENTITY_TOOL_PATTERN = /^security\.(get_entity|search_entities)/;
+
+/**
+ * Whether any example expects an entity tool. Those tools are gated only on the store's index
+ * existing, so after a successful install a failed start passes the tool pre-flight and would
+ * score the examples against stopped engines; callers use this to fail the run instead.
+ */
+export const examplesNeedEntityStore = (
+  examples: ReadonlyArray<{ metadata?: { expectedTools?: string[] } }>
+): boolean =>
+  examples.some(({ metadata }) =>
+    (metadata?.expectedTools ?? []).some((toolId) => ENTITY_TOOL_PATTERN.test(toolId))
+  );
+
 /**
  * Ensures the Entity Store V2 engines are installed and started. The entity
  * analytics examples expect `security.get_entity` / `security.get_entity_*`

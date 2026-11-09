@@ -20,13 +20,22 @@ import {
   seedPersonaMatrixTools,
   cleanupPersonaMatrixTools,
 } from '../src/fixtures/persona_matrix_tools_seed';
-import { ensureEntityStoreRunning } from '../src/fixtures/entity_store';
+import { ensureEntityStoreRunning, examplesNeedEntityStore } from '../src/fixtures/entity_store';
 import { assertPersonaMatrixToolsRegistered } from '../src/fixtures/tool_registration_check';
 import { agentProfile, resolveAgentId } from '../src/agent_profile';
 
 const DATASET_NAME = 'security: security-persona-matrix';
 const DATASET_DESCRIPTION =
   'Breadth-first persona matrix: 21 prompts across 7 security skill categories.';
+
+const examplesFilter = process.env.EVAL_EXAMPLES?.split(',')
+  .map((id) => id.trim())
+  .filter(Boolean);
+const examples = examplesFilter
+  ? personaMatrixDataset.filter((ex) => examplesFilter.includes(ex.id))
+  : personaMatrixDataset;
+// EVAL_EXAMPLES and the shard slice (re-applied inside evaluateDataset) both narrow what runs.
+const selectRunExamples = () => selectShard(examples, process.env.PERSONA_MATRIX_SHARD);
 
 evaluate.describe('Security Persona Matrix', { tag: tags.stateful.classic }, () => {
   evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
@@ -40,15 +49,18 @@ evaluate.describe('Security Persona Matrix', { tag: tags.stateful.classic }, () 
     }
     // Entity-analytics examples expect security.get_entity* built-in tools, which
     // are availability-gated on the entity store being installed; nothing installs
-    // it on a fresh stack, so do it before the tool-registration pre-flight runs.
-    // A failure only warns: the pre-flight fails the run when an example that will
-    // actually execute needs a gated-off entity tool, and an EVAL_EXAMPLES subset
-    // without entity examples still runs.
+    // it on a fresh stack, so do it here. The gate only checks that the store's index
+    // exists, so a store that installed but did not start still passes the tool
+    // pre-flight: fail the run when an example that will execute needs entity tools,
+    // and only warn for an EVAL_EXAMPLES subset or shard without them.
     try {
       await ensureEntityStoreRunning({ kbnClient, log });
     } catch (error) {
+      if (examplesNeedEntityStore(selectRunExamples())) {
+        throw error;
+      }
       log.warning(
-        `[persona-matrix] entity store not running; entity-analytics examples will fail the tool pre-flight: ${error}`
+        `[persona-matrix] entity store not running; no selected example needs entity tools: ${error}`
       );
     }
     await seedPersonaMatrixTools({ kbnClient, log, profile: agentProfile });
@@ -65,12 +77,6 @@ evaluate.describe('Security Persona Matrix', { tag: tags.stateful.classic }, () 
   });
 
   evaluate('all 21 examples', async ({ evaluateDataset, kbnClient, log }) => {
-    const examplesFilter = process.env.EVAL_EXAMPLES?.split(',')
-      .map((id) => id.trim())
-      .filter(Boolean);
-    const examples = examplesFilter
-      ? personaMatrixDataset.filter((ex) => examplesFilter.includes(ex.id))
-      : personaMatrixDataset;
     if (examples.length === 0) {
       throw new Error(`EVAL_EXAMPLES matched no examples: ${examplesFilter?.join(',')}`);
     }
@@ -83,12 +89,11 @@ evaluate.describe('Security Persona Matrix', { tag: tags.stateful.classic }, () 
 
     // Pre-flight: fail fast if an expected custom tool isn't registered, rather
     // than silently scoring a tool that doesn't exist.
-    // Only require the tools of examples this run will execute: EVAL_EXAMPLES and the
-    // shard slice (re-applied inside evaluateDataset) both narrow the dataset.
+    // Only require the tools of examples this run will execute.
     await assertPersonaMatrixToolsRegistered({
       kbnClient,
       log,
-      examples: selectShard(examples, process.env.PERSONA_MATRIX_SHARD),
+      examples: selectRunExamples(),
       agentId: resolveAgentId(agentProfile),
       profile: agentProfile,
     });

@@ -47,7 +47,7 @@ Only the judge-facing copy is trimmed; all three judges (correctness, groundedne
 
 ### Entity store (all profiles)
 
-Entity-analytics examples call `security_search_entities` / `security.get_entity`, which are only available when the **Security entity store is installed**. The suite installs it automatically in `evaluate.beforeAll`, then calls the start endpoint so engines a previous run left stopped come back up, and waits until every engine reports `started` (idempotent on a running store), so no manual step is needed (`.entities.v2.latest.security_default`). If the store cannot be installed or started, setup logs a warning and continues; the tool pre-flight then fails the run only when an example selected to run needs an entity tool that is gated off.
+Entity-analytics examples call `security_search_entities` / `security.get_entity`, which are only available when the **Security entity store is installed**. The suite installs it automatically in `evaluate.beforeAll`, then calls the start endpoint so engines a previous run left stopped come back up, and waits until every engine reports `started` (idempotent on a running store), so no manual step is needed (`.entities.v2.latest.security_default`). If the store cannot be installed or started, setup fails the run when an example selected to run (after `EVAL_EXAMPLES` and the shard) expects a `security.get_entity*` or `security.search_entities` tool; otherwise it logs a warning and continues. The tool gate only checks that the store's index exists, so the tool pre-flight alone would not catch a store that installed but did not start.
 
 ### Prerequisites for `SEED_PROFILE=parity`
 
