@@ -570,8 +570,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       alertZero: {
         overview: `${ELASTIC_DOCS}solutions/security/alertzero`,
         setUp: `${ELASTIC_DOCS}solutions/security/alertzero/set-up-alertzero`,
-        proposedActions: `${ELASTIC_DOCS}solutions/security/alertzero/use-alertzero`,
-        escalations: `${ELASTIC_DOCS}solutions/security/alertzero/track-escalations`,
+        proposedActions: `${ELASTIC_DOCS}solutions/security/alertzero/work-in-alertzero`,
+        escalations: `${ELASTIC_DOCS}solutions/security/alertzero/manage-escalations`,
         watches: `${ELASTIC_DOCS}solutions/security/alertzero/watches-and-workers`,
         continuousThreatHunt: `${ELASTIC_DOCS}solutions/security/alertzero/watches-and-workers#alertzero-hunt-watch`,
       },
