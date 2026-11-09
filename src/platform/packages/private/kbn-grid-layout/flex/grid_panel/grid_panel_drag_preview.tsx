@@ -52,7 +52,9 @@ export const GridPanelDragPreview = React.memo(() => {
     []
   );
 
-  return <div ref={dragPreviewRef} className={'kbnFlexPanel--dragPreview'} css={styles} />;
+  return (
+    <div ref={dragPreviewRef} className={'kbnFlexPanel--dragPreview'} css={styles} aria-hidden />
+  );
 });
 
 const styles = css({

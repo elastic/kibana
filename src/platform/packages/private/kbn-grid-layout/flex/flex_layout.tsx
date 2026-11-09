@@ -123,6 +123,7 @@ export const FlexLayout = ({
     <GridLayoutContext.Provider value={memoizedContext}>
       <div
         data-test-subj="kbnFlexLayout"
+        role="list"
         ref={(divElement) => {
           layoutRef.current = divElement;
           setDimensionsRef(divElement);
@@ -134,12 +135,13 @@ export const FlexLayout = ({
           return <GridPanel key={element.id} panelId={element.id} />;
         })}
         <GridPanelDragPreview />
-        <EuiScreenReaderOnly>
-          <div role="status" aria-live="assertive" data-test-subj="kbnFlexLayout--announcements">
-            {keyboardAnnouncement}
-          </div>
-        </EuiScreenReaderOnly>
       </div>
+      {/* rendered outside the list so that the list only contains list items */}
+      <EuiScreenReaderOnly>
+        <div role="status" aria-live="assertive" data-test-subj="kbnFlexLayout--announcements">
+          {keyboardAnnouncement}
+        </div>
+      </EuiScreenReaderOnly>
     </GridLayoutContext.Provider>
   );
 };
