@@ -21,6 +21,7 @@ import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
 import {
   isCloudSecurityPosturePath,
+  isConfigurationsPath,
   isDashboardViewPath,
   isDetectionsPath,
   isRuleChangesHistoryPath,
@@ -73,6 +74,8 @@ export const GlobalHeader = React.memo(() => {
   const onboardingPath = isOnboardingPath(pathname);
   // Cloud Security Posture pages own "Add integrations" in their own app header.
   const cloudSecurityPosturePath = isCloudSecurityPosturePath(pathname);
+  // The Configurations page owns its actions in its own app header.
+  const configurationsPath = isConfigurationsPath(pathname);
 
   const { href, onClick } = useAddIntegrationsUrl();
 
@@ -91,7 +94,8 @@ export const GlobalHeader = React.memo(() => {
       rulesAddPath ||
       exceptionsPath ||
       onboardingPath ||
-      cloudSecurityPosturePath
+      cloudSecurityPosturePath ||
+      configurationsPath
     ) {
       setHeaderActionMenu(undefined);
       return;
@@ -125,6 +129,7 @@ export const GlobalHeader = React.memo(() => {
     exceptionsPath,
     onboardingPath,
     cloudSecurityPosturePath,
+    configurationsPath,
   ]);
 
   return (
