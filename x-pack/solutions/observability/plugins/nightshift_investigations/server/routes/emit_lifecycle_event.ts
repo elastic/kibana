@@ -64,7 +64,8 @@ export const emitLifecycleEventRoute = createNightshiftInvestigationsServerRoute
       : {};
     const base = {
       investigation_id: params.path.id,
-      ...(executionId ? { workflow_execution_id: executionId, execution_id: executionId } : {}),
+      workflow_execution_id: executionId,
+      execution_id: executionId,
       ...correlation,
       subject: lifecycleSubject.subject,
       trigger_type: lifecycleSubject.triggerType,

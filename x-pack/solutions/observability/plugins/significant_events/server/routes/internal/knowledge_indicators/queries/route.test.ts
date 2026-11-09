@@ -12,6 +12,10 @@ import {
 } from '@kbn/significant-events-schema';
 import { forbidden } from '@hapi/boom';
 import { DeepStrict } from '@kbn/zod-helpers';
+import {
+  EVENT_CHAIN_DEPTH_HEADER,
+  EVENT_CHAIN_SOURCE_EXECUTION_HEADER,
+} from '@kbn/workflows-extensions/server';
 import type { SignificantEventsMaintenanceState } from '../../../../../common/maintenance/state_machine';
 import { KI_QUERY_GENERATION_AGENT_ID } from '../../../../agent_builder/agents/ki_query_generation';
 import { internalKIQueriesRoutes } from './route';
@@ -599,7 +603,10 @@ describe('generateQueriesRoute', () => {
         events: { aborted$: { subscribe: jest.fn() } },
         isInternalApiRequest,
         headers: workflowExecutionId
-          ? { 'x-kibana-workflow-execution-id': workflowExecutionId }
+          ? {
+              [EVENT_CHAIN_DEPTH_HEADER]: '0',
+              [EVENT_CHAIN_SOURCE_EXECUTION_HEADER]: workflowExecutionId,
+            }
           : {},
       },
       getScopedClients: jest.fn().mockResolvedValue({

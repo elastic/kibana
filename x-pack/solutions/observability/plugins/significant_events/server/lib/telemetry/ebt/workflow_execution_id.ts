@@ -6,7 +6,8 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { getEmitterWorkflowExecutionIdFromRequest } from '@kbn/workflows-extensions/server';
+import { getEventChainContext } from '@kbn/workflows-extensions/server';
 
+/** Workflow run that invoked the current code, read from the engine's in-process request stamp or its `kibana.request` headers. */
 export const getWorkflowExecutionIdFromRequest = (request: KibanaRequest): string | undefined =>
-  request.isInternalApiRequest ? getEmitterWorkflowExecutionIdFromRequest(request) : undefined;
+  getEventChainContext(request)?.sourceExecutionId;

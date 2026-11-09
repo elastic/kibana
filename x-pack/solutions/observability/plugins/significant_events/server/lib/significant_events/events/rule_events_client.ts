@@ -1051,12 +1051,10 @@ export class RuleEventsClient {
       return { updated: 0, ignored: 1, status: decision.status, reason: decision.reason };
     }
 
-    const event = { ...decision.event };
-    delete event.workflow_execution_id;
-    if (workflowExecutionId) {
-      event.workflow_execution_id = workflowExecutionId;
-    }
-    const written = await this.updateEvent({ event, prior: latest });
+    const written = await this.updateEvent({
+      event: { ...decision.event, workflow_execution_id: workflowExecutionId },
+      prior: latest,
+    });
     if (!written.updated) {
       return {
         updated: 0,

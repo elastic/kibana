@@ -20,6 +20,7 @@ import {
 import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
+import { getWorkflowExecutionIdFromRequest } from '../../../lib/telemetry/ebt/workflow_execution_id';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
@@ -114,6 +115,7 @@ export function createEventTool({
     availability: createSignificantEventsAvailability({ server, logger }),
     handler: async (toolParams, context) => {
       const { request } = context;
+      const workflowExecutionId = getWorkflowExecutionIdFromRequest(request);
       let sourceIds: string[] = [];
       try {
         const { getEventSearchClient, licensing, sourcesClient } = await getScopedClients({
@@ -124,9 +126,7 @@ export function createEventTool({
         const catalog = await loadSourceCatalog(sourcesClient);
         const eventInput = {
           ...assignStoredSourceIds(catalog, toolParams),
-          ...(context.workflowExecutionId
-            ? { workflow_execution_id: context.workflowExecutionId }
-            : {}),
+          workflow_execution_id: workflowExecutionId,
         };
         sourceIds = eventInput.source_ids;
 
@@ -141,9 +141,7 @@ export function createEventTool({
           description: 'event_create telemetry',
           track: () =>
             telemetry.trackAgentToolEventCreate({
-              ...(context.workflowExecutionId
-                ? { workflow_execution_id: context.workflowExecutionId }
-                : {}),
+              workflow_execution_id: workflowExecutionId,
               ...alertCreationAttemptIdentity({
                 spaceId: request.spaceId,
                 eventId: data.event_id,
@@ -178,9 +176,7 @@ export function createEventTool({
           description: 'failed event_create telemetry',
           track: () =>
             telemetry.trackAgentToolEventCreate({
-              ...(context.workflowExecutionId
-                ? { workflow_execution_id: context.workflowExecutionId }
-                : {}),
+              workflow_execution_id: workflowExecutionId,
               ...alertCreationAttemptIdentity({ spaceId: request.spaceId }),
               success: false,
               source_ids: sourceIds,

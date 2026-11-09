@@ -62,11 +62,12 @@ export const attachInvestigationToEvent = async ({
   }
 
   const now = new Date().toISOString();
-  const updatedEvent = { ...latest, '@timestamp': now, investigations };
-  delete updatedEvent.workflow_execution_id;
-  if (workflowExecutionId) {
-    updatedEvent.workflow_execution_id = workflowExecutionId;
-  }
+  const updatedEvent = {
+    ...latest,
+    '@timestamp': now,
+    investigations,
+    workflow_execution_id: workflowExecutionId,
+  };
 
   await alertEventsClient.createAlertEvent(toRuleEvent(updatedEvent));
 

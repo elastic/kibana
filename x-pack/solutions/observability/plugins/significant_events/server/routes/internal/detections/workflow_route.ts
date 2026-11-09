@@ -210,7 +210,7 @@ const changePointScanRoute = createServerRoute({
 
     const workflowExecutionId = getWorkflowExecutionIdFromRequest(request);
     telemetry.trackSignificantEventsDetectionScan({
-      ...(workflowExecutionId ? { workflow_execution_id: workflowExecutionId } : {}),
+      workflow_execution_id: workflowExecutionId,
       took_ms: took,
       duration_ms: durationMs,
       rules_requested: queryLinks.length,

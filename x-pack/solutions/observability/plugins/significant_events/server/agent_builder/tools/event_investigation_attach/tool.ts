@@ -15,6 +15,7 @@ import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
+import { getWorkflowExecutionIdFromRequest } from '../../../lib/telemetry/ebt/workflow_execution_id';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
@@ -110,6 +111,7 @@ export const createEventInvestigationAttachTool = ({
     availability: createSignificantEventsAvailability({ server, logger }),
     handler: async (toolParams, context) => {
       const { request } = context;
+      const workflowExecutionId = getWorkflowExecutionIdFromRequest(request);
       try {
         const { getEventSearchClient, getAlertEventsClient, emitTrigger, licensing } =
           await getScopedClients({
@@ -124,7 +126,7 @@ export const createEventInvestigationAttachTool = ({
           investigationWorkflowExecutionId: toolParams.workflow_execution_id,
           startedAt: toolParams.started_at,
           completedAt: toolParams.completed_at,
-          workflowExecutionId: context.workflowExecutionId,
+          workflowExecutionId,
           alertEventsClient: await getAlertEventsClient(),
           emitTrigger,
           logger,
@@ -135,9 +137,7 @@ export const createEventInvestigationAttachTool = ({
           description: 'event_investigation_attach telemetry',
           track: () =>
             telemetry.trackAgentToolEventInvestigationAttach({
-              ...(context.workflowExecutionId
-                ? { workflow_execution_id: context.workflowExecutionId }
-                : {}),
+              workflow_execution_id: workflowExecutionId,
               ...existingAlertIdentity({ eventId: toolParams.event_id, spaceId: request.spaceId }),
               success: true,
               event_id: toolParams.event_id,
@@ -154,9 +154,7 @@ export const createEventInvestigationAttachTool = ({
           description: 'failed event_investigation_attach telemetry',
           track: () =>
             telemetry.trackAgentToolEventInvestigationAttach({
-              ...(context.workflowExecutionId
-                ? { workflow_execution_id: context.workflowExecutionId }
-                : {}),
+              workflow_execution_id: workflowExecutionId,
               ...existingAlertIdentity({ eventId: toolParams.event_id, spaceId: request.spaceId }),
               success: false,
               event_id: toolParams.event_id,

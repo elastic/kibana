@@ -123,13 +123,9 @@ function asLifecycleCorrelationId(v: unknown): string | undefined {
 
 const correlationFromContext = (context: unknown): LifecycleCorrelation => {
   if (!isPlainObject(context)) return {};
-  const eventId = asLifecycleCorrelationId(context.event_id);
-  const sourceWorkflowExecutionId = asLifecycleCorrelationId(context.source_workflow_execution_id);
   return {
-    ...(eventId ? { event_id: eventId } : {}),
-    ...(sourceWorkflowExecutionId
-      ? { source_workflow_execution_id: sourceWorkflowExecutionId }
-      : {}),
+    event_id: asLifecycleCorrelationId(context.event_id),
+    source_workflow_execution_id: asLifecycleCorrelationId(context.source_workflow_execution_id),
   };
 };
 
@@ -694,7 +690,7 @@ export class NightshiftInvestigationsClient {
       entry_point: entryPoint,
       subject_type: resolvedSubject.type,
       is_follow_up: isFollowUp,
-      ...(automationId ? { automation_id: automationId } : {}),
+      automation_id: automationId,
       ...correlationFromContext(prepared.context),
     });
 

@@ -181,7 +181,7 @@ describe('RuleEventsClient', () => {
         change: DEACTIVATE_STATUS,
       });
 
-      expect(lastStatusWritten(alertEventsClient).data).not.toHaveProperty('workflow_execution_id');
+      expect(lastStatusWritten(alertEventsClient).data.workflow_execution_id).toBeUndefined();
     });
 
     it('records the given note, and falls back to the operator note when it is omitted or blank', async () => {

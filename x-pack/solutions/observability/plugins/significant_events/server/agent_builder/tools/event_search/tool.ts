@@ -19,6 +19,7 @@ import type { GetScopedClients } from '../../../routes/types';
 import { assertCanReadSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
+import { getWorkflowExecutionIdFromRequest } from '../../../lib/telemetry/ebt/workflow_execution_id';
 import {
   DEFAULT_EVENTS_SEARCH_FROM,
   DEFAULT_EVENTS_SEARCH_TO,
@@ -259,6 +260,7 @@ export function createSearchEventsTool({
     availability: createSignificantEventsAvailability({ server, logger }),
     handler: async (toolParams, context) => {
       const { request } = context;
+      const workflowExecutionId = getWorkflowExecutionIdFromRequest(request);
       const query = normalizeEventSearchQuery(toolParams.query);
 
       try {
@@ -281,9 +283,7 @@ export function createSearchEventsTool({
         });
 
         telemetry.trackAgentToolEventSearch({
-          ...(context.workflowExecutionId
-            ? { workflow_execution_id: context.workflowExecutionId }
-            : {}),
+          workflow_execution_id: workflowExecutionId,
           success: true,
           result_count: data.total,
           has_query: query !== undefined,
@@ -316,9 +316,7 @@ export function createSearchEventsTool({
         logger.error(`Error running event_search: ${message}`);
 
         telemetry.trackAgentToolEventSearch({
-          ...(context.workflowExecutionId
-            ? { workflow_execution_id: context.workflowExecutionId }
-            : {}),
+          workflow_execution_id: workflowExecutionId,
           success: false,
           result_count: 0,
           has_query: query !== undefined,

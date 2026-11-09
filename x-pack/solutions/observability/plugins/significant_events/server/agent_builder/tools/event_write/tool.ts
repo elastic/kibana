@@ -28,6 +28,7 @@ import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
+import { getWorkflowExecutionIdFromRequest } from '../../../lib/telemetry/ebt/workflow_execution_id';
 import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
@@ -421,6 +422,7 @@ export function createEventsWriteTool({
     availability: createSignificantEventsAvailability({ server, logger }),
     handler: async (toolParams, context) => {
       const { request } = context;
+      const workflowExecutionId = getWorkflowExecutionIdFromRequest(request);
       let storedItems: EventsWriteInput[] | undefined;
       const runByDetectionId = new Map<string, string>();
       const detectionRunsOf = ({ signals }: { signals?: EventsWriteInput['signals'] }) => {
@@ -460,9 +462,7 @@ export function createEventsWriteTool({
         });
         const resolvedItems = identifiedItems.map((item) => ({
           ...assignStoredSourceIds(catalog, item),
-          ...(context.workflowExecutionId
-            ? { workflow_execution_id: context.workflowExecutionId }
-            : {}),
+          workflow_execution_id: workflowExecutionId,
         }));
         storedItems = resolvedItems;
         const items = await enrichCausalFeatures(
@@ -491,9 +491,7 @@ export function createEventsWriteTool({
             description: 'events_write telemetry',
             track: () =>
               telemetry.trackAgentToolEventsWrite({
-                ...(context.workflowExecutionId
-                  ? { workflow_execution_id: context.workflowExecutionId }
-                  : {}),
+                workflow_execution_id: workflowExecutionId,
                 ...alertCreationAttemptIdentity({
                   spaceId: request.spaceId,
                   eventId: eventsWriteResultEventId(result, input.event_id),
@@ -543,9 +541,7 @@ export function createEventsWriteTool({
             description: 'failed events_write telemetry',
             track: () =>
               telemetry.trackAgentToolEventsWrite({
-                ...(context.workflowExecutionId
-                  ? { workflow_execution_id: context.workflowExecutionId }
-                  : {}),
+                workflow_execution_id: workflowExecutionId,
                 ...alertCreationAttemptIdentity({
                   spaceId: request.spaceId,
                   eventId: input.event_id,

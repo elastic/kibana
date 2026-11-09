@@ -353,7 +353,6 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     executionMode: manager.deps.executionMode,
     interactivity: manager.deps.interactivity,
     parentExecutionId: manager.deps.parentExecutionId,
-    workflowExecutionId: manager.deps.workflowExecutionId,
     agentConfiguration: manager.deps.agentConfiguration,
     experimentalFeatures,
   };

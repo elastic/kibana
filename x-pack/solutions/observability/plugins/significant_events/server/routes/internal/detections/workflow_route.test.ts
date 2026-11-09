@@ -6,6 +6,10 @@
  */
 
 import type { QueryLink } from '@kbn/significant-events-schema';
+import {
+  EVENT_CHAIN_DEPTH_HEADER,
+  EVENT_CHAIN_SOURCE_EXECUTION_HEADER,
+} from '@kbn/workflows-extensions/server';
 import { internalDetectionsWorkflowRoutes } from './workflow_route';
 
 jest.mock('../../utils/assert_significant_events_access', () => ({
@@ -37,7 +41,10 @@ const setup = () => {
     request: {
       spaceId: 'default',
       isInternalApiRequest: true,
-      headers: { 'x-kibana-workflow-execution-id': 'detection-run-1' },
+      headers: {
+        [EVENT_CHAIN_DEPTH_HEADER]: '0',
+        [EVENT_CHAIN_SOURCE_EXECUTION_HEADER]: 'detection-run-1',
+      },
     },
     getScopedClients: jest.fn().mockResolvedValue({
       scopedClusterClient: { asCurrentUser: {} },

@@ -300,9 +300,7 @@ export const triggerInvestigationStepDefinition = (
             context: alerts
               ? {
                   alerts,
-                  ...(input.context?.source_workflow_execution_id !== undefined
-                    ? { source_workflow_execution_id: input.context.source_workflow_execution_id }
-                    : {}),
+                  source_workflow_execution_id: input.context?.source_workflow_execution_id,
                 }
               : input.scope_query && input.subject_type === 'manual'
               ? { ...input.context, scope_query: input.scope_query }

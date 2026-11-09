@@ -229,7 +229,7 @@ export class AlertEventsClient {
         {
           spaceId: this.spaceId,
           source,
-          ...(producerWorkflowExecutionId ? { producerWorkflowExecutionId } : {}),
+          producerWorkflowExecutionId,
           alert: { id: episodeId, groupHash, status, previousStatus, severity },
           rule: null,
           execution: null,

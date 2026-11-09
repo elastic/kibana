@@ -3,12 +3,14 @@
 ## Workflow execution identity
 
 `workflow_execution_id` is the canonical run field on Significant Events EBT events. It is the
-Workflow Engine execution ID of the workflow whose stage emitted the event. The value comes from the
-`x-kibana-workflow-execution-id` header that a `kibana.request` step injects, or from the Agent
-Builder execution context that an `ai.agent` step sets; route bodies and tool parameters cannot set
-it. The header is trusted only on internal-origin requests, and `x-elastic-internal-origin` is not
-an authenticated boundary: an authorized caller of these routes who sets both headers by hand can
-choose the value. Treat the field as provenance for analytics, not as an audit trail.
+Workflow Engine execution ID of the workflow whose stage emitted the event. The value is read from
+the request's event-chain context (`getEventChainContext` in `@kbn/workflows-extensions`): the engine
+stamps it on the in-process request that an `ai.agent` step hands to tool handlers, and a
+`kibana.request` step carries it in the `x-kibana-event-chain-*` headers; route bodies and tool
+parameters cannot set it. The headers are trusted only on internal-origin requests, and
+`x-elastic-internal-origin` is not an authenticated boundary: an authorized caller of these routes
+who sets the headers by hand can choose the value. Treat the field as provenance for analytics, not
+as an audit trail.
 
 Events carry the field when a managed workflow produced them and omit it for interactive or direct
 invocations. Standalone operations continue to emit telemetry. `execution_id` on

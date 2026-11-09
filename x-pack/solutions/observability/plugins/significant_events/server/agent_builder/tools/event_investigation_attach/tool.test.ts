@@ -7,6 +7,7 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { setWorkflowEventChainContext } from '@kbn/workflows-extensions/server';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
@@ -50,7 +51,10 @@ describe('event_investigation_attach tool', () => {
     });
 
     const context = createMockToolContext();
-    context.workflowExecutionId = 'attaching-workflow-id';
+    setWorkflowEventChainContext(context.request, {
+      depth: 0,
+      sourceExecutionId: 'attaching-workflow-id',
+    });
     await invokeHandler(
       tool as never,
       {

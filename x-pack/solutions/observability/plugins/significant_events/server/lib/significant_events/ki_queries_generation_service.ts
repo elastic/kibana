@@ -75,10 +75,8 @@ export async function generateKIQueries(
   const durationMs = Date.now() - startedAt;
 
   telemetry.trackSignificantEventsQueriesGenerated({
-    ...(workflowExecutionId ? { workflow_execution_id: workflowExecutionId } : {}),
-    ...(parentWorkflowExecutionId
-      ? { parent_workflow_execution_id: parentWorkflowExecutionId }
-      : {}),
+    workflow_execution_id: workflowExecutionId,
+    parent_workflow_execution_id: parentWorkflowExecutionId,
     count: queries.length,
     connector_id: connectorId,
     source_id: source.id,

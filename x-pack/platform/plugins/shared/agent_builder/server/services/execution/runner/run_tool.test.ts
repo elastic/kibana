@@ -129,26 +129,6 @@ describe('runTool', () => {
     expect(toolHandler).toHaveBeenCalledWith(params.toolParams, expect.any(Object));
   });
 
-  it('passes the trusted workflow execution ID to the tool handler context', async () => {
-    const manager = new RunnerManager({
-      ...runnerDeps,
-      workflowExecutionId: 'workflow-run-1',
-    });
-
-    await runTool({
-      toolExecutionParams: {
-        toolId: 'test-tool',
-        toolParams: { foo: 'bar' },
-      },
-      parentManager: manager,
-    });
-
-    expect(toolHandler).toHaveBeenCalledWith(
-      { foo: 'bar' },
-      expect.objectContaining({ workflowExecutionId: 'workflow-run-1' })
-    );
-  });
-
   it('truncates the parameters not defined on the schema', async () => {
     const params: ScopedRunnerRunToolsParams = {
       toolId: 'test-tool',

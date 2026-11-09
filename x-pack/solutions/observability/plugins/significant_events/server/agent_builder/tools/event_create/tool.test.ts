@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { setWorkflowEventChainContext } from '@kbn/workflows-extensions/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { createMockToolContext, invokeHandler, mockSourcesClient } from '../../utils/test_helpers';
 import type { GetScopedClients } from '../../../routes/types';
@@ -78,7 +79,10 @@ describe('event_create tool', () => {
     });
 
     const context = createMockToolContext();
-    context.workflowExecutionId = 'workflow-run-1';
+    setWorkflowEventChainContext(context.request, {
+      depth: 0,
+      sourceExecutionId: 'workflow-run-1',
+    });
     const result = await invokeHandler(
       tool as never,
       {

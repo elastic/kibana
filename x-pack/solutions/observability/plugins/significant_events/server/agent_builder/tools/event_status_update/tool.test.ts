@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { setWorkflowEventChainContext } from '@kbn/workflows-extensions/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SignificantEventsServer } from '../../../types';
 import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
@@ -75,7 +76,10 @@ describe('event_status_update tool', () => {
     });
 
     const context = createMockToolContext();
-    context.workflowExecutionId = 'workflow-run-1';
+    setWorkflowEventChainContext(context.request, {
+      depth: 0,
+      sourceExecutionId: 'workflow-run-1',
+    });
     const result = await invokeHandler(
       tool as never,
       { event_id: 'e1', status: 'inactive', assessment_note: 'Recovered after rollback' },

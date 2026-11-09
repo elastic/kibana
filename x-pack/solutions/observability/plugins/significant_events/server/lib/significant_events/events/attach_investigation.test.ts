@@ -91,7 +91,7 @@ describe('attachInvestigationToEvent', () => {
       investigation: createInvestigation({ workflow_execution_id: 'inv-1' }),
     });
 
-    expect(getWritten(alertEventsClient)).not.toHaveProperty('workflow_execution_id');
+    expect(getWritten(alertEventsClient).workflow_execution_id).toBeUndefined();
   });
 
   it('attaches an investigation to a legacy event with longer narratives', async () => {

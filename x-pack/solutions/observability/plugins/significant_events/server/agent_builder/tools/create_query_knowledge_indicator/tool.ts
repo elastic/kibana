@@ -20,6 +20,7 @@ import { assertSignificantEventsAccess } from '../../../routes/utils/assert_sign
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import { getSourceWriteConflictMetadata } from '../../../lib/errors/source_write_conflict_error';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
+import { getWorkflowExecutionIdFromRequest } from '../../../lib/telemetry/ebt/workflow_execution_id';
 import { createQueryKnowledgeIndicatorToolHandler } from './handler';
 import {
   loadSourceCatalog,
@@ -102,6 +103,7 @@ export function createQueryKnowledgeIndicatorTool({
     availability: createSignificantEventsAvailability({ server, logger }),
     handler: async ({ slug, ...queryInput }, context) => {
       const { request } = context;
+      const workflowExecutionId = getWorkflowExecutionIdFromRequest(request);
       let sourceId = '';
 
       try {
@@ -129,9 +131,7 @@ export function createQueryKnowledgeIndicatorTool({
         });
 
         telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
-          ...(context.workflowExecutionId
-            ? { workflow_execution_id: context.workflowExecutionId }
-            : {}),
+          workflow_execution_id: workflowExecutionId,
           ki_kind: 'query',
           tool_id: 'ki_query_create',
           success: true,
@@ -162,9 +162,7 @@ export function createQueryKnowledgeIndicatorTool({
         }
 
         telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
-          ...(context.workflowExecutionId
-            ? { workflow_execution_id: context.workflowExecutionId }
-            : {}),
+          workflow_execution_id: workflowExecutionId,
           ki_kind: 'query',
           tool_id: 'ki_query_create',
           success: false,

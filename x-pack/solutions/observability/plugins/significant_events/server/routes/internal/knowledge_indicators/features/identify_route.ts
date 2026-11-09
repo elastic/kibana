@@ -229,10 +229,8 @@ const identifyInferredFeaturesRoute = createServerRoute({
     const workflowExecutionId = getWorkflowExecutionIdFromRequest(request);
     const parentWorkflowExecutionId = params.body.parentWorkflowExecutionId?.trim();
     const workflowProvenance = {
-      ...(workflowExecutionId ? { workflow_execution_id: workflowExecutionId } : {}),
-      ...(parentWorkflowExecutionId
-        ? { parent_workflow_execution_id: parentWorkflowExecutionId }
-        : {}),
+      workflow_execution_id: workflowExecutionId,
+      parent_workflow_execution_id: parentWorkflowExecutionId,
     };
     const resolvedRunId = runId?.trim() || uuidv4();
     const { totalFilters, filtersCapped, hasFilteredDocuments } = samplingTelemetry;
