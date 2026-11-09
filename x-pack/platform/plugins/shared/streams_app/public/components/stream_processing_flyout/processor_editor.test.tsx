@@ -73,6 +73,20 @@ const commitPath = (value: string) => {
   fireEvent.keyDown(input, { key: 'Enter' });
 };
 
+/** Removes a signal pill in one synchronous event; `userEvent` rechecks the editor tree per click. */
+const removeSignal = (signal: string, picker?: HTMLElement) =>
+  fireEvent.click(
+    (picker ? within(picker) : screen).getByLabelText(
+      `Remove ${signal} from selection in this group`
+    )
+  );
+
+/** Opens a signals combo box and picks one of its options, in two synchronous events. */
+const pickSignal = (signal: string, picker: HTMLElement) => {
+  fireEvent.focusIn(within(picker).getByTestId('comboBoxSearchInput'));
+  fireEvent.click(screen.getByRole('option', { name: signal }));
+};
+
 /** Fills the one `add_fields` operation the editor starts with. */
 const fillOperation = () => {
   commitPath('team');
@@ -92,6 +106,9 @@ const httpError = (status: number | undefined, message: string) =>
 beforeEach(() => {
   mockOpenConfirm.mockReset();
 });
+
+// Every case mounts the whole editor, a cost that parallel CI load pushes past the default 5s.
+jest.setTimeout(30_000);
 
 describe('ProcessorEditor', () => {
   it('preselects the only processor and commits its configuration', async () => {
@@ -257,7 +274,7 @@ describe('ProcessorEditor', () => {
     it('narrows a new processor to the signals left after removing one', async () => {
       const { onCommit } = renderEditor({ telemetry: ['logs', 'metrics', 'traces'] });
 
-      await userEvent.click(screen.getByLabelText('Remove Metrics from selection in this group'));
+      removeSignal('Metrics');
       commitPath('team');
       fireEvent.change(screen.getByTestId('componentDefinitionFormLiteral-value'), {
         target: { value: 'core' },
@@ -271,7 +288,7 @@ describe('ProcessorEditor', () => {
       );
     });
 
-    it('keeps offering the signals an existing processor enables after they are all removed', async () => {
+    it('keeps offering the signals an existing processor enables after they are all removed', () => {
       renderEditor({
         telemetry: ['logs'],
         step: {
@@ -280,27 +297,26 @@ describe('ProcessorEditor', () => {
         },
       });
 
-      await userEvent.click(screen.getByLabelText('Remove Logs from selection in this group'));
-      await userEvent.click(screen.getByLabelText('Remove Metrics from selection in this group'));
+      removeSignal('Logs');
+      removeSignal('Metrics');
 
       expect(screen.getByText('Choose at least one signal')).toBeTruthy();
       expect(screen.getByTestId('streamsProcessingFlyoutEditorSubmit')).toBeDisabled();
 
       const picker = screen.getByTestId('streamsProcessingFlyoutEditorSignals');
-      await userEvent.click(within(picker).getByRole('combobox'));
-      await userEvent.click(screen.getByRole('option', { name: 'Metrics' }));
+      pickSignal('Metrics', picker);
       expect(within(picker).getByText('Metrics')).toBeTruthy();
       expect(screen.queryByText('Choose at least one signal')).toBeNull();
     });
 
-    it('offers item scopes only while the processor applies to more than one signal', async () => {
+    it('offers item scopes only while the processor applies to more than one signal', () => {
       renderEditor({ telemetry: ['logs', 'metrics'] });
       expect(screen.getByTestId('componentDefinitionFormItemTelemetry')).toBeTruthy();
 
-      await userEvent.click(screen.getByLabelText('Remove Logs from selection in this group'));
+      removeSignal('Logs');
       expect(screen.queryByTestId('componentDefinitionFormItemTelemetry')).toBeNull();
 
-      await userEvent.click(screen.getByLabelText('Remove Metrics from selection in this group'));
+      removeSignal('Metrics');
       expect(screen.queryByTestId('componentDefinitionFormItemTelemetry')).toBeNull();
     });
 
@@ -326,11 +342,7 @@ describe('ProcessorEditor', () => {
         },
       });
 
-      await userEvent.click(
-        within(screen.getByTestId('streamsProcessingFlyoutEditorSignals')).getByLabelText(
-          'Remove Metrics from selection in this group'
-        )
-      );
+      removeSignal('Metrics', screen.getByTestId('streamsProcessingFlyoutEditorSignals'));
 
       expect(
         screen.getByText(
@@ -340,7 +352,7 @@ describe('ProcessorEditor', () => {
       await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));
       expect(onCommit).not.toHaveBeenCalled();
 
-      await userEvent.click(screen.getAllByTestId('componentDefinitionFormArrayRemove')[1]);
+      fireEvent.click(screen.getAllByTestId('componentDefinitionFormArrayRemove')[1]);
       await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));
 
       await waitFor(() => expect(onCommit).toHaveBeenCalled());
@@ -364,12 +376,7 @@ describe('ProcessorEditor', () => {
       fireEvent.change(screen.getByTestId('componentDefinitionFormLiteral-value'), {
         target: { value: 'core' },
       });
-      await userEvent.click(
-        within(screen.getByTestId('streamsProcessingFlyoutEditorSignals')).getByTestId(
-          'comboBoxSearchInput'
-        )
-      );
-      await userEvent.click(screen.getByRole('option', { name: 'Metrics' }));
+      pickSignal('Metrics', screen.getByTestId('streamsProcessingFlyoutEditorSignals'));
       await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));
 
       await waitFor(() => expect(onCommit).toHaveBeenCalled());
