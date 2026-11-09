@@ -88,10 +88,12 @@ export const updateScoutHtmlReport = ({
   fs.writeFileSync(htmlReportPath, updatedContent, 'utf-8');
 };
 
+/** Returns the failures considered for an issue: those not attributed to infrastructure. */
 export async function processScoutReports(
   reportPaths: string[],
   params: ProcessReportsParams
-): Promise<void> {
+): Promise<ScoutTestFailureExtended[]> {
+  const considered: ScoutTestFailureExtended[] = [];
   const {
     log,
     existingIssues,
@@ -101,6 +103,7 @@ export async function processScoutReports(
     pipeline,
     prependTitle,
     updateGithub,
+    perTestIssues,
     indexInEs,
     reportUpdate,
   } = params;
@@ -143,6 +146,7 @@ export async function processScoutReports(
         updateScoutHtmlReport({ log, reportDir, failure, reportUpdate });
         continue;
       }
+      considered.push(failure);
 
       // a test tracked by a flaky suite issue gets its failures recorded there, not on an issue of its own
       const suiteIssue = existingIssues.getSuiteIssueForFailure(failure);
@@ -194,6 +198,15 @@ export async function processScoutReports(
         continue;
       }
 
+      if (!perTestIssues) {
+        log.info(
+          `No failed-test issue tracks this test yet: ${failure.classname} - ${failure.name}`
+        );
+        failure.failureCount = 0;
+        updateScoutHtmlReport({ log, reportDir, failure, reportUpdate });
+        continue;
+      }
+
       const newIssue = await createFailureIssue(
         buildUrl,
         failure,
@@ -220,4 +233,6 @@ export async function processScoutReports(
       );
     }
   }
+
+  return considered;
 }

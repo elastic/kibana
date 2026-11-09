@@ -1,0 +1,71 @@
+overlay: 1.0.0
+info:
+  title: Bitbucket Cloud REST API corrections
+  version: 1.0.0
+actions:
+  - target: $.components.schemas.object.required[?@ == 'type']
+    description: >-
+      The base `object` schema requires `type` on every request body and nested object, but
+      Bitbucket's own request examples omit it: creating a pull request with only `title` and
+      `source.branch.name`, reviewers as `{ "uuid": ... }`
+      (https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pullrequests/#api-repositories-workspace-repo-slug-pullrequests-post),
+      and a build status with only `key`, `state`, `description` and `url`
+      (https://developer.atlassian.com/cloud/bitbucket/rest/api-group-commit-statuses/#api-repositories-workspace-repo-slug-commit-commit-statuses-build-post).
+    remove: true
+
+  - target: >-
+      $.paths['/repositories/{workspace}'].get.parameters
+    description: &pagination >-
+      https://developer.atlassian.com/cloud/bitbucket/rest/intro/#pagination: paginated
+      collections take a `page` query parameter, and `pagelen` is "Globally ... the maximum is
+      100". The spec leaves both out of the paginated operations.
+    update:
+      - name: page
+        in: query
+        schema:
+          type: integer
+      - name: pagelen
+        in: query
+        schema:
+          type: integer
+          maximum: 100
+  - target: >-
+      $.paths['/repositories/{workspace}/{repo_slug}/commit/{commit}/statuses'].get.parameters
+    description: *pagination
+    update:
+      - name: page
+        in: query
+        schema:
+          type: integer
+      - name: pagelen
+        in: query
+        schema:
+          type: integer
+          maximum: 100
+  - target: >-
+      $.paths['/repositories/{workspace}/{repo_slug}/pullrequests'].get.parameters
+    description: >-
+      The operation's description says it "supports filtering and sorting", and
+      https://developer.atlassian.com/cloud/bitbucket/rest/intro/#filtering adds them with the
+      `q` and `sort` query parameters, listing /2.0/repositories/{username}/{slug}/pullrequests
+      among the supported endpoints; it pages with `page` and `pagelen` (max 100) as
+      https://developer.atlassian.com/cloud/bitbucket/rest/intro/#pagination describes. The spec
+      only declares `state`.
+    update:
+      - name: q
+        in: query
+        schema:
+          type: string
+      - name: sort
+        in: query
+        schema:
+          type: string
+      - name: page
+        in: query
+        schema:
+          type: integer
+      - name: pagelen
+        in: query
+        schema:
+          type: integer
+          maximum: 100

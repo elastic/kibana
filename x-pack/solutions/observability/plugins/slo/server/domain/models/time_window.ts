@@ -11,12 +11,12 @@ import type {
   timeWindowSchema,
 } from '@kbn/slo-schema';
 import type moment from 'moment';
-import type * as t from 'io-ts';
+import type { z } from '@kbn/zod';
 import { Duration, toDurationUnit } from '@kbn/slo-schema';
 
-type TimeWindow = t.TypeOf<typeof timeWindowSchema>;
-type RollingTimeWindow = t.TypeOf<typeof rollingTimeWindowSchema>;
-type CalendarAlignedTimeWindow = t.TypeOf<typeof calendarAlignedTimeWindowSchema>;
+type TimeWindow = z.output<typeof timeWindowSchema>;
+type RollingTimeWindow = z.output<typeof rollingTimeWindowSchema>;
+type CalendarAlignedTimeWindow = z.output<typeof calendarAlignedTimeWindowSchema>;
 
 export type { RollingTimeWindow, TimeWindow, CalendarAlignedTimeWindow };
 

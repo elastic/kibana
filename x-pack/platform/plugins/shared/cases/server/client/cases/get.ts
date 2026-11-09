@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { chunk, uniqBy } from 'lodash';
 import pMap from 'p-map';
 import type {
@@ -30,17 +30,17 @@ import type {
   GetRelatedCasesByAlertResponse,
 } from '../../../common/types/api';
 import {
-  AllCategoriesFindRequestRt,
-  AllReportersFindRequestRt,
-  AllTagsFindRequestRt,
-  CaseResolveResponseRt,
-  CasesByAlertIDRequestRt,
-  GetCategoriesResponseRt,
-  GetRelatedCasesByAlertResponseRt,
-  GetReportersResponseRt,
-  GetTagsResponseRt,
+  AllCategoriesFindRequestSchema,
+  AllReportersFindRequestSchema,
+  AllTagsFindRequestSchema,
+  CaseResolveResponseSchema,
+  CasesByAlertIDRequestSchema,
+  GetCategoriesResponseSchema,
+  GetRelatedCasesByAlertResponseSchema,
+  GetReportersResponseSchema,
+  GetTagsResponseSchema,
 } from '../../../common/types/api';
-import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
+import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
 import { createCaseError, isSOError } from '../../common/error';
 import {
   asArray,
@@ -72,53 +72,47 @@ import type {
   CaseSavedObjectTransformed,
   CaseTransformedAttributes,
 } from '../../common/types/case';
-import { CaseRt, CaseStatusRt } from '../../../common/types/domain';
+import { CaseSchema, CaseStatusSchema } from '../../../common/types/domain';
 
-export const CasesByAttachmentIDsRequestRt = rt.intersection([
-  rt.strict({
-    /**
-     * Only the cases of this owner. One owner per call, as a user may read one solution's cases
-     * and not another's.
-     */
-    owner: limitedStringSchema({ fieldName: 'owner', min: 1, max: MAX_OWNER_LENGTH }),
-    /**
-     * The attachment type, e.g. `security.entity`.
-     */
-    type: limitedStringSchema({ fieldName: 'type', min: 1, max: MAX_ATTACHMENT_TYPE_LENGTH }),
-    /**
-     * The ids the attachments point at (their `attachmentId`), not the attachment saved object ids.
-     */
-    attachmentIds: limitedArraySchema({
-      codec: limitedStringSchema({
-        fieldName: 'attachmentIds',
-        min: 1,
-        max: MAX_ATTACHMENT_ID_LENGTH,
-      }),
-      min: 1,
-      max: MAX_ATTACHMENT_IDS_PER_CASES_LOOKUP,
+export const CasesByAttachmentIDsRequestSchema = z.object({
+  /**
+   * Only the cases of this owner. One owner per call, as a user may read one solution's cases
+   * and not another's.
+   */
+  owner: limitedStringSchema({ fieldName: 'owner', min: 1, max: MAX_OWNER_LENGTH }),
+  /**
+   * The attachment type, e.g. `security.entity`.
+   */
+  type: limitedStringSchema({ fieldName: 'type', min: 1, max: MAX_ATTACHMENT_TYPE_LENGTH }),
+  /**
+   * The ids the attachments point at (their `attachmentId`), not the attachment saved object ids.
+   */
+  attachmentIds: limitedArraySchema({
+    codec: limitedStringSchema({
       fieldName: 'attachmentIds',
+      min: 1,
+      max: MAX_ATTACHMENT_ID_LENGTH,
     }),
+    min: 1,
+    max: MAX_ATTACHMENT_IDS_PER_CASES_LOOKUP,
+    fieldName: 'attachmentIds',
   }),
-  rt.exact(
-    rt.partial({
-      /**
-       * Only the cases with one of these statuses.
-       */
-      status: rt.union([CaseStatusRt, rt.array(CaseStatusRt)]),
-    })
-  ),
-]);
+  /**
+   * Only the cases with one of these statuses.
+   */
+  status: z.union([CaseStatusSchema, z.array(CaseStatusSchema)]).optional(),
+});
 
-export const GetCaseIDsByAttachmentIDsResponseRt = rt.array(
-  rt.strict({
-    attachmentId: rt.string,
-    caseIds: rt.array(rt.string),
+export const GetCaseIDsByAttachmentIDsResponseSchema = z.array(
+  z.object({
+    attachmentId: z.string().max(MAX_ATTACHMENT_ID_LENGTH),
+    caseIds: z.array(z.string().max(MAX_ATTACHMENT_ID_LENGTH)),
   })
 );
 
-export type CasesByAttachmentIDsRequest = rt.TypeOf<typeof CasesByAttachmentIDsRequestRt>;
-export type GetCaseIDsByAttachmentIDsResponse = rt.TypeOf<
-  typeof GetCaseIDsByAttachmentIDsResponseRt
+export type CasesByAttachmentIDsRequest = z.infer<typeof CasesByAttachmentIDsRequestSchema>;
+export type GetCaseIDsByAttachmentIDsResponse = z.infer<
+  typeof GetCaseIDsByAttachmentIDsResponseSchema
 >;
 
 /**
@@ -152,7 +146,7 @@ export const getCasesByAlertID = async (
   } = clientArgs;
 
   try {
-    const queryParams = decodeWithExcessOrThrow(CasesByAlertIDRequestRt)(options);
+    const queryParams = decodeWithExcessOrThrowZod(CasesByAlertIDRequestSchema)(options);
 
     const {
       filter: authorizationFilter,
@@ -234,7 +228,7 @@ export const getCasesByAlertID = async (
       totals: getAttachmentTotalsForCaseId(caseInfo.id, commentStats),
     }));
 
-    return decodeOrThrow(GetRelatedCasesByAlertResponseRt)(res);
+    return decodeOrThrowZod(GetRelatedCasesByAlertResponseSchema)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to get case IDs using alert ID: ${alertID} options: ${JSON.stringify(
@@ -264,8 +258,8 @@ export const getCasesByAttachmentIDs = async (
   } = clientArgs;
 
   try {
-    const { type, owner, attachmentIds, status } = decodeWithExcessOrThrow(
-      CasesByAttachmentIDsRequestRt
+    const { type, owner, attachmentIds, status } = decodeWithExcessOrThrowZod(
+      CasesByAttachmentIDsRequestSchema
     )(params);
 
     const { authorizedOwners, ensureSavedObjectsAreAuthorized } =
@@ -305,7 +299,7 @@ export const getCasesByAttachmentIDs = async (
       caseIds: cases.map(({ id }) => id),
     }));
 
-    return decodeOrThrow(GetCaseIDsByAttachmentIDsResponseRt)(res);
+    return decodeOrThrowZod(GetCaseIDsByAttachmentIDsResponseSchema)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to get case IDs using attachment IDs: ${JSON.stringify(params)}: ${error}`,
@@ -454,7 +448,9 @@ export const get = async (
             }
           : {}),
       });
-      return decodeOrThrow(CaseRt)(await enrichCaseWithFieldLabels(flattenedCase, clientArgs));
+      return decodeOrThrowZod(CaseSchema)(
+        await enrichCaseWithFieldLabels(flattenedCase, clientArgs)
+      );
     }
 
     const theComments = (await caseService.getAllCaseComments({
@@ -473,7 +469,7 @@ export const get = async (
       totalEvents: countEventsForID({ comments: theComments }),
     });
 
-    return decodeOrThrow(CaseRt)(await enrichCaseWithFieldLabels(res, clientArgs));
+    return decodeOrThrowZod(CaseSchema)(await enrichCaseWithFieldLabels(res, clientArgs));
   } catch (error) {
     throw createCaseError({ message: `Failed to get case id: ${id}: ${error}`, error, logger });
   }
@@ -518,7 +514,7 @@ export const resolve = async (
 
     if (!includeComments) {
       const flattenedCase = flattenCaseSavedObject({ savedObject: resolvedSavedObject });
-      return decodeOrThrow(CaseResolveResponseRt)({
+      return decodeOrThrowZod(CaseResolveResponseSchema)({
         ...resolveData,
         case: await enrichCaseWithFieldLabels(flattenedCase, clientArgs),
       });
@@ -545,7 +541,7 @@ export const resolve = async (
       case: await enrichCaseWithFieldLabels(flattenedCase, clientArgs),
     };
 
-    return decodeOrThrow(CaseResolveResponseRt)(res);
+    return decodeOrThrowZod(CaseResolveResponseSchema)(res);
   } catch (error) {
     throw createCaseError({ message: `Failed to resolve case id: ${id}: ${error}`, error, logger });
   }
@@ -567,7 +563,7 @@ export async function getTags(
   } = clientArgs;
 
   try {
-    const queryParams = decodeWithExcessOrThrow(AllTagsFindRequestRt)(params);
+    const queryParams = decodeWithExcessOrThrowZod(AllTagsFindRequestSchema)(params);
 
     const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
       Operations.getTags
@@ -580,7 +576,7 @@ export async function getTags(
       filter,
     });
 
-    return decodeOrThrow(GetTagsResponseRt)(tags);
+    return decodeOrThrowZod(GetTagsResponseSchema)(tags);
   } catch (error) {
     throw createCaseError({ message: `Failed to get tags: ${error}`, error, logger });
   }
@@ -601,7 +597,7 @@ export async function getReporters(
   } = clientArgs;
 
   try {
-    const queryParams = decodeWithExcessOrThrow(AllReportersFindRequestRt)(params);
+    const queryParams = decodeWithExcessOrThrowZod(AllReportersFindRequestSchema)(params);
 
     const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
       Operations.getReporters
@@ -614,7 +610,7 @@ export async function getReporters(
       filter,
     });
 
-    return decodeOrThrow(GetReportersResponseRt)(reporters);
+    return decodeOrThrowZod(GetReportersResponseSchema)(reporters);
   } catch (error) {
     throw createCaseError({ message: `Failed to get reporters: ${error}`, error, logger });
   }
@@ -635,7 +631,7 @@ export async function getCategories(
   } = clientArgs;
 
   try {
-    const queryParams = decodeWithExcessOrThrow(AllCategoriesFindRequestRt)(params);
+    const queryParams = decodeWithExcessOrThrowZod(AllCategoriesFindRequestSchema)(params);
 
     const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
       Operations.getCategories
@@ -648,7 +644,7 @@ export async function getCategories(
       filter,
     });
 
-    return decodeOrThrow(GetCategoriesResponseRt)(categories);
+    return decodeOrThrowZod(GetCategoriesResponseSchema)(categories);
   } catch (error) {
     throw createCaseError({ message: `Failed to get categories: ${error}`, error, logger });
   }

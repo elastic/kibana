@@ -18,6 +18,8 @@ import type { Environment } from '../../../../common/environment_rt';
 import { transformToReactFlow } from '../../../../common/service_map';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { usePreferredServicesDataSource } from '../../../hooks/use_preferred_services_data_source';
+import { useServiceMapGroupingEnabled } from '../../../hooks/use_service_map_grouping_enabled';
 import { filterServiceMapSpansByEnvironment } from './filter_service_map_spans_by_environment';
 
 const INITIAL_STATE: ReactFlowServiceMapResponse = {
@@ -71,6 +73,14 @@ export const useServiceMap = ({
 }): UseServiceMapResult => {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
+  const isGroupingEnabled = useServiceMapGroupingEnabled();
+
+  // With grouping enabled, the service stats are read from the same source as the service
+  // inventory, and like the inventory, the map isn't fetched until there is one. The source comes
+  // from the nearest time range metadata provider, not from these arguments, so the provider must
+  // be set up with the same range and kuery as the map.
+  const preferred = usePreferredServicesDataSource({ start, end, kuery });
+  const source = isGroupingEnabled ? preferred?.source : undefined;
 
   const fetcherResult = useFetcher(
     (callApmApi) => {
@@ -79,6 +89,9 @@ export const useServiceMap = ({
       }
       // esQuery === null means search bar hasn't computed yet — wait.
       if (esQuery === null) {
+        return;
+      }
+      if (isGroupingEnabled && !source) {
         return;
       }
 
@@ -92,6 +105,13 @@ export const useServiceMap = ({
             serviceGroup: serviceGroupId,
             kuery,
             ...(esQuery ? { esQuery: JSON.stringify(esQuery) } : {}),
+            ...(source
+              ? {
+                  documentType: source.documentType,
+                  rollupInterval: source.rollupInterval,
+                  useDurationSummary: source.hasDurationSummaryField,
+                }
+              : {}),
           },
         },
       });
@@ -106,6 +126,8 @@ export const useServiceMap = ({
       kuery,
       esQuery,
       config.serviceMapEnabled,
+      isGroupingEnabled,
+      source,
     ],
     { preservePreviousData: false }
   );

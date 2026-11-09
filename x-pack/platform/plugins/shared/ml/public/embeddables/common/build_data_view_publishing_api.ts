@@ -18,7 +18,7 @@ export const buildDataViewPublishingApi = (
   api: Pick<AnomalySwimLaneEmbeddableApi, 'jobIds'>,
   subscription: Subscription
 ): PublishingSubject<DataView[] | undefined> => {
-  const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
+  const dataSources$ = new BehaviorSubject<DataView[] | undefined>(undefined);
 
   subscription.add(
     api.jobIds
@@ -46,8 +46,8 @@ export const buildDataViewPublishingApi = (
           return results.flat().filter((dView) => dView !== undefined) as DataView[];
         })
       )
-      .subscribe(dataViews$)
+      .subscribe(dataSources$)
   );
 
-  return dataViews$;
+  return dataSources$;
 };

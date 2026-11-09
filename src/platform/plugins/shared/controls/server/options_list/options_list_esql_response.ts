@@ -48,6 +48,7 @@ export function esqlColumnValuesToOptionsListResponse(
   }
 ): OptionsListSuccessResponse {
   const uniqueValues = Array.from(new Set(result.values as ReadonlyArray<string | number>));
+  // TODO Remove when we're able to get accurate document counts for ES|QL-source controls
   const sortConfig =
     sort?.by === '_count'
       ? {

@@ -19,6 +19,8 @@ import type { WorkflowListItemDto } from '@kbn/workflows';
 import { ExportReferencesModal } from './export_references_modal';
 import { useExportWithReferences } from './use_export_with_references';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
+import { useDisableWorkflowsConfirmation } from '../../linked_rules/model/use_disable_workflows_confirmation';
+import { LinkedRulesWarning } from '../../linked_rules/ui/linked_rules_warning';
 
 interface UseWorkflowBulkActionsProps {
   selectedWorkflows: WorkflowListItemDto[];
@@ -44,6 +46,7 @@ export const useWorkflowBulkActions = ({
 }: UseWorkflowBulkActionsProps): UseWorkflowBulkActionsReturn => {
   const { application, notifications } = useKibana().services;
   const { deleteWorkflows, updateWorkflow } = useWorkflowActions();
+  const { confirmDisable, confirmModal: disableConfirmModal } = useDisableWorkflowsConfirmation();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const modalTitleId = useGeneratedHtmlId();
 
@@ -191,10 +194,14 @@ export const useWorkflowBulkActions = ({
     bulkUpdateWorkflows(disabledWorkflows, { enabled: true });
   }, [selectedWorkflows, bulkUpdateWorkflows]);
 
-  const handleDisableWorkflows = useCallback(() => {
+  const handleDisableWorkflows = useCallback(async () => {
     const enabledWorkflows = selectedWorkflows.filter((workflow) => workflow.enabled);
+    onAction();
+    if (!(await confirmDisable(enabledWorkflows.map(({ id }) => id)))) {
+      return;
+    }
     bulkUpdateWorkflows(enabledWorkflows, { enabled: false });
-  }, [selectedWorkflows, bulkUpdateWorkflows]);
+  }, [selectedWorkflows, onAction, confirmDisable, bulkUpdateWorkflows]);
 
   const handleExportWorkflows = useCallback(() => {
     onAction();
@@ -324,8 +331,10 @@ export const useWorkflowBulkActions = ({
                 values: { count: selectedWorkflows.length },
               })}
             </p>
+            <LinkedRulesWarning workflowIds={selectedWorkflows.map(({ id }) => id)} />
           </EuiConfirmModal>
         )}
+        {disableConfirmModal}
         {exportModalState && (
           <ExportReferencesModal
             missingWorkflows={exportModalState.missingWorkflows}
@@ -339,7 +348,8 @@ export const useWorkflowBulkActions = ({
     );
   }, [
     showDeleteModal,
-    selectedWorkflows.length,
+    selectedWorkflows,
+    disableConfirmModal,
     cancelDelete,
     confirmDelete,
     modalTitleId,

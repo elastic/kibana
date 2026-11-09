@@ -9,7 +9,10 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
 import type { SearchItems } from '../../../../../hooks/use_search_items';
-import type { TransformPivotConfig } from '../../../../../../../common/types/transform';
+import type {
+  TransformLatestConfig,
+  TransformPivotConfig,
+} from '../../../../../../../common/types/transform';
 import {
   applyTransformConfigToDefineState,
   getDefaultStepDefineState,
@@ -41,6 +44,82 @@ describe('Transform: Define Pivot Common', () => {
     );
 
     expect(state.projectRouting).toBe('_alias:*');
+  });
+
+  test('applyTransformConfigToDefineState() pre-fills a cloned pivot transform', () => {
+    const transformConfig = {
+      id: 'the-transform-id',
+      source: { index: ['the-source-index'], query: { term: { day_of_week: 'Saturday' } } },
+      dest: { index: 'the-destination-index' },
+      pivot: {
+        group_by: { category: { terms: { field: 'category.keyword' } } },
+        aggregations: {
+          'products.base_price.avg': { avg: { field: 'products.base_price' } },
+          Saturday: {
+            filter: { term: { day_of_week: 'Saturday' } },
+            aggs: { 'saturday.max': { max: { field: 'products.base_price' } } },
+          },
+        },
+      },
+    } as TransformPivotConfig;
+
+    const state = applyTransformConfigToDefineState(
+      getDefaultStepDefineState({} as SearchItems),
+      transformConfig
+    );
+
+    expect(state.transformFunction).toBe('pivot');
+    expect(state.groupByList).toEqual({
+      category: {
+        agg: 'terms',
+        aggName: 'category',
+        dropDownName: 'category',
+        field: 'category.keyword',
+      },
+    });
+    expect(Object.keys(state.aggList)).toEqual(['products.base_price.avg', 'Saturday']);
+    expect(state.aggList['products.base_price.avg']).toEqual(
+      expect.objectContaining({ agg: 'avg', field: 'products.base_price' })
+    );
+    expect(state.aggList.Saturday).toEqual(
+      expect.objectContaining({
+        agg: 'filter',
+        subAggs: { 'saturday.max': expect.objectContaining({ agg: 'max' }) },
+      })
+    );
+    expect(state.isAdvancedSourceEditorEnabled).toBe(true);
+    expect(state.searchQuery).toEqual({ term: { day_of_week: 'Saturday' } });
+    expect(state.valid).toBe(true);
+  });
+
+  test('applyTransformConfigToDefineState() pre-fills a cloned latest transform', () => {
+    const transformConfig = {
+      id: 'the-transform-id',
+      source: { index: ['the-source-index'] },
+      dest: { index: 'the-destination-index' },
+      latest: { unique_key: ['customer_id', 'day_of_week'], sort: 'order_date' },
+    } as TransformLatestConfig;
+    const dataView = {
+      fields: [{ name: 'customer_id', displayName: 'Customer ID' }],
+      getComputedFields: () => ({}),
+    } as unknown as DataView;
+
+    const state = applyTransformConfigToDefineState(
+      getDefaultStepDefineState({} as SearchItems),
+      transformConfig,
+      dataView
+    );
+
+    expect(state.transformFunction).toBe('latest');
+    expect(state.latestConfig).toEqual({
+      unique_key: [
+        { value: 'customer_id', label: 'Customer ID' },
+        { value: 'day_of_week', label: 'day_of_week' },
+      ],
+      sort: { value: 'order_date', label: 'order_date' },
+    });
+    expect(state.isAdvancedSourceEditorEnabled).toBe(false);
+    expect(state.valid).toBe(true);
   });
 
   test('getPivotDropdownOptions()', () => {

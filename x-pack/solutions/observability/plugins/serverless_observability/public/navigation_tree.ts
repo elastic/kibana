@@ -39,6 +39,7 @@ export const createNavigationTree = ({
   genAiSettingsAvailable = true,
   isCasesAvailable = true,
   showAiAssistant = true,
+  entityInventoryNavGroup,
 }: {
   core: CoreStart;
   significantEventsAvailable?: boolean;
@@ -47,6 +48,7 @@ export const createNavigationTree = ({
   genAiSettingsAvailable?: boolean;
   isCasesAvailable?: boolean;
   showAiAssistant?: boolean;
+  entityInventoryNavGroup?: PanelOpenerChildDefinition;
 }): NavigationTreeDefinition => {
   return {
     body: [
@@ -229,6 +231,7 @@ export const createNavigationTree = ({
               { link: 'metrics:settings', sideNavStatus: 'hidden' },
             ],
           },
+          ...(entityInventoryNavGroup ? [entityInventoryNavGroup] : []),
           {
             id: 'profiling',
             title: i18n.translate('xpack.serverlessObservability.nav.profiling', {

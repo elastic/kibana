@@ -6,7 +6,7 @@
  */
 
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
-import type { BrowserFields } from '@kbn/timelines-plugin/common';
+import type { BrowserFields } from '@kbn/securitysolution-timeline-common';
 import { initDataView } from '../utils/init_data_view';
 import { mockBrowserFields, mockIndexFields } from '../../common/containers/source/mock';
 import {

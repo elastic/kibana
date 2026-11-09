@@ -1,0 +1,436 @@
+{
+  "sha1": "fa6b08526c86d4fabc9ed3a78b91731e87351150",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "178f731a93474c0-744ce32675c025c",
+      "title": "Setup environment for streams tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "64dc8ff7252e2ed-e06a7848fd31c3d",
+      "title": "Stream canvas - processing adds a processing node between a source and a destination",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas_processing.spec.ts",
+        "line": 140,
+        "column": 26
+      }
+    },
+    {
+      "id": "64dc8ff7252e2ed-e5ec5164283ca8c",
+      "title": "Stream canvas - processing processes one fan-out line on a pipeline of its own",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas_processing.spec.ts",
+        "line": 179,
+        "column": 41
+      }
+    },
+    {
+      "id": "64dc8ff7252e2ed-8717f8c74a90eaf",
+      "title": "Stream canvas - processing keeps the editor open when the distributor rejects the processor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas_processing.spec.ts",
+        "line": 239,
+        "column": 11
+      }
+    },
+    {
+      "id": "64dc8ff7252e2ed-e7590a8c2febb60",
+      "title": "Stream canvas - processing shows processing read-only when the catalogue shape is newer than Kibana",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas_processing.spec.ts",
+        "line": 285,
+        "column": 24
+      }
+    },
+    {
+      "id": "0535f77aa2cb4bc-bd62876d14d3d25",
+      "title": "Stream map - search pivots from a destination row into a pre-filled map search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas_search.spec.ts",
+        "line": 120,
+        "column": 9
+      }
+    },
+    {
+      "id": "0535f77aa2cb4bc-ebf0b792d31c21e",
+      "title": "Stream map - search filters the map while typing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas_search.spec.ts",
+        "line": 144,
+        "column": 5
+      }
+    },
+    {
+      "id": "0535f77aa2cb4bc-d51a0fb33f299aa",
+      "title": "Stream map - search applies a search from the URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas_search.spec.ts",
+        "line": 153,
+        "column": 11
+      }
+    },
+    {
+      "id": "0535f77aa2cb4bc-13659ba98724575",
+      "title": "Stream map - search explains when nothing matches the search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas_search.spec.ts",
+        "line": 160,
+        "column": 8
+      }
+    },
+    {
+      "id": "a570088069a2c16-4236bbb07ccd991",
+      "title": "Stream map renders unit sources and destinations without a Data streams hub",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas.spec.ts",
+        "line": 108,
+        "column": 9
+      }
+    },
+    {
+      "id": "a570088069a2c16-e4da54983b60575",
+      "title": "Stream map renders a minimap that collapses and reopens",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas.spec.ts",
+        "line": 116,
+        "column": 8
+      }
+    },
+    {
+      "id": "a570088069a2c16-86dfce50815fde8",
+      "title": "Stream map tidies up the whole graph from the pane menu and enables undo",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas.spec.ts",
+        "line": 121,
+        "column": 11
+      }
+    },
+    {
+      "id": "a570088069a2c16-e37ea574ca0e64e",
+      "title": "Stream map keeps the viewport where the user left it when tidying up",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas.spec.ts",
+        "line": 150,
+        "column": 24
+      }
+    },
+    {
+      "id": "a570088069a2c16-a142ece1eba0cf6",
+      "title": "Stream map keeps the viewport where the user left it when opening a node flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas.spec.ts",
+        "line": 142,
+        "column": 5
+      }
+    },
+    {
+      "id": "a570088069a2c16-7ce96a081b5863e",
+      "title": "Stream map renders the canvas toolbar with undo/redo and add-node placeholders",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas.spec.ts",
+        "line": 150,
+        "column": 5
+      }
+    },
+    {
+      "id": "a570088069a2c16-c11d1e508e4f597",
+      "title": "Stream map exposes accessible node labels and keyboard controls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas.spec.ts",
+        "line": 159,
+        "column": 20
+      }
+    },
+    {
+      "id": "a570088069a2c16-e2a237adb3fbf63",
+      "title": "Stream map undoes a keyboard-driven node reposition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas.spec.ts",
+        "line": 193,
+        "column": 24
+      }
+    },
+    {
+      "id": "d88e0be806f054e-e78b5bb02dd2c12",
+      "title": "Streams layout renders every tab and lands on map",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/streams_layout.spec.ts",
+        "line": 26,
+        "column": 42
+      }
+    },
+    {
+      "id": "d88e0be806f054e-a7b7220c5a14d4a",
+      "title": "Streams layout falls back to the map tab for an unknown tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/streams_layout.spec.ts",
+        "line": 32,
+        "column": 70
+      }
+    },
+    {
+      "id": "d88e0be806f054e-2d929861841bf1e",
+      "title": "Streams layout renders the sources table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/streams_layout.spec.ts",
+        "line": 35,
+        "column": 23
+      }
+    },
+    {
+      "id": "d88e0be806f054e-ea242490a272e1b",
+      "title": "Streams layout renders the destinations table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/streams_layout.spec.ts",
+        "line": 42,
+        "column": 78
+      }
+    },
+    {
+      "id": "a025d065f59fba9-74cbf5f2ba7234e",
+      "title": "Streams V2 privileges a V2-only read user gets the nav entry and lands on the map",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/v2_privileges.spec.ts",
+        "line": 179,
+        "column": 20
+      }
+    },
+    {
+      "id": "a025d065f59fba9-8be6e265f7ebd40",
+      "title": "Streams V2 privileges a legacy-only read user is sent back from V2",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/v2_privileges.spec.ts",
+        "line": 186,
+        "column": 11
+      }
+    },
+    {
+      "id": "a025d065f59fba9-08761f4a09e031c",
+      "title": "Streams V2 privileges V2 read: the map has no toolbar, context menus or line menus",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/v2_privileges.spec.ts",
+        "line": 193,
+        "column": 11
+      }
+    },
+    {
+      "id": "a025d065f59fba9-9bd64aa60a606b7",
+      "title": "Streams V2 privileges V2 read: map flyouts hide API keys and deletion",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/v2_privileges.spec.ts",
+        "line": 207,
+        "column": 11
+      }
+    },
+    {
+      "id": "a025d065f59fba9-8a18db583245526",
+      "title": "Streams V2 privileges V2 read: the tables hide add and delete actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/v2_privileges.spec.ts",
+        "line": 229,
+        "column": 20
+      }
+    },
+    {
+      "id": "a025d065f59fba9-92e786fe5adf9d8",
+      "title": "Streams V2 privileges V2 all: the map, flyouts and tables are editable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/v2_privileges.spec.ts",
+        "line": 247,
+        "column": 11
+      }
+    },
+    {
+      "id": "a025d065f59fba9-1c8881cbfc7a90d",
+      "title": "Streams V2 privileges V2 all without manage_own_api_key: key generation is disabled and says why",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/v2_privileges.spec.ts",
+        "line": 278,
+        "column": 11
+      }
+    },
+    {
+      "id": "a025d065f59fba9-53de30ebf13c935",
+      "title": "Streams V2 privileges V2 all without the streams application privilege: key generation is disabled and says why",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/v2_privileges.spec.ts",
+        "line": 288,
+        "column": 23
+      }
+    },
+    {
+      "id": "a025d065f59fba9-5a8a387fe886b06",
+      "title": "Streams V2 privileges V2 manager: the map is editable and key generation shows no privilege hint",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/v2_privileges.spec.ts",
+        "line": 300,
+        "column": 16
+      }
+    },
+    {
+      "id": "046c426736cb1f4-7132d4e40af07dc",
+      "title": "Teardown environment for streams tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
+      }
+    }
+  ]
+}
