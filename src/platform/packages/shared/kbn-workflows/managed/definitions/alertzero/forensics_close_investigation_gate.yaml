@@ -276,18 +276,6 @@ steps:
       dismissed: "${{ steps.create_and_gate_proposal.output.decision == 'dismissed' }}"
       expired: "${{ steps.create_and_gate_proposal.output.status == 'expired' }}"
 
-  # Refreshes the forensics summary card with the close decision, the last one it shows, so
-  # the card is posted again with nothing left to decide. Skipped when the wrap didn't
-  # settle, like the journal below. Writes nothing when the card is current; a failed render
-  # costs the card's refresh, not the gate.
-  - name: render_forensics_summary
-    type: alertzero.forensics.renderSummary
-    if: "${{ steps.create_and_gate_proposal.output.status != blank }}"
-    on-failure:
-      continue: true
-    with:
-      conversation_id: "{{ inputs.investigationConversationId }}"
-
   # Reported here, not in the action: the report step verifies that every ancestor
   # is an AlertZero-managed execution, and the action's chain passes through the
   # platform's proposal workflow. `succeeded` means the action's status-route close

@@ -249,16 +249,36 @@ steps:
       proposal_decision: "{{ steps.create_and_gate_proposal.output.decision }}"
       proposal_expired: "${{ steps.create_and_gate_proposal.output.status == 'expired' }}"
 
-  # Refreshes the forensics summary card with this decision. A decision writes nothing to the
-  # investigation, so no conversation event would. Before the close question, so the card
-  # shows every containment decision when it is asked. Writes nothing when the card is
-  # current; a failed render costs the card's refresh, not the gate.
-  - name: render_forensics_summary
-    type: alertzero.forensics.renderSummary
+  # Records how this Proposal settled. A decision writes nothing to the Investigation on
+  # its own, so this note is also what starts the investigation summary, which refreshes
+  # the summary and the forensics summary card with it. Skipped when the wrap didn't
+  # settle: a lost race and a failed wrap have their own notes above. It does not name
+  # who decided, like the close gate's note. Best-effort.
+  - name: journal_decision
+    type: workflow.execute
+    if: "${{ steps.create_and_gate_proposal.output.status != blank }}"
+    with:
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
+      inputs:
+        author_name: "{{ consts.author_name }}"
+        conversation_id: "{{ inputs.investigationConversationId }}"
+        message: >-
+          {%- assign title = inputs.title | default: 'the proposed action' -%}
+          {%- assign status = steps.create_and_gate_proposal.output.status -%}
+          {%- if status == 'succeeded' -%}
+          Containment proposal "{{ title }}" was approved and the action succeeded.
+          {%- elsif status == 'failed' -%}
+          Containment proposal "{{ title }}" was approved, but the action failed.
+          {%- elsif status == 'expired' -%}
+          Containment proposal "{{ title }}" expired with no decision. Nothing was changed.
+          {%- elsif steps.create_and_gate_proposal.output.decision == 'dismissed' -%}
+          Containment proposal "{{ title }}" was dismissed. Nothing was changed.
+          {%- else -%}
+          Containment proposal "{{ title }}" ended as `{{ status }}`.
+          {%- endif -%}
     on-failure:
       continue: true
-    with:
-      conversation_id: "{{ inputs.investigationConversationId }}"
 
   # Two calls, not a conditional retry: `!= filter chain -> comparison` in one
   # expression is illegal in this engine, so an "only requery again if the first

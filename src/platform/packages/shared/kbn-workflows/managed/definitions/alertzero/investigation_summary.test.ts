@@ -9,13 +9,19 @@
 
 import { parse } from 'yaml';
 import { ALERTZERO_INVESTIGATION_SUMMARY_WORKFLOW } from './investigation_summary';
+import { createWorkflowLiquidEngine } from '../../../common/utils';
 
 describe('AlertZero investigation summary workflow', () => {
   const definition = parse(ALERTZERO_INVESTIGATION_SUMMARY_WORKFLOW.yaml) as {
     enabled: boolean;
     triggers: Array<{ type: string; on: { condition: string } }>;
     settings: { concurrency: { key: string; strategy: string; max: number } };
-    steps: Array<{ type: string; with?: Record<string, unknown> }>;
+    steps: Array<{
+      type: string;
+      if?: string;
+      'on-failure'?: Record<string, unknown>;
+      with?: Record<string, unknown>;
+    }>;
   };
 
   it('ships enabled and only matches journal notes, comments, and new attachments', () => {
@@ -40,7 +46,27 @@ describe('AlertZero investigation summary workflow', () => {
     expect(definition.steps.map((step) => step.type)).toEqual([
       'wait',
       'alertzero.investigation.summarize',
+      'alertzero.forensics.renderSummary',
     ]);
     expect(definition.steps[0].with).toEqual({ duration: '10s' });
+  });
+
+  // The card shows the summary, so it renders after it, from the same run.
+  it('then re-renders the forensics summary card on investigations', () => {
+    const [, summarize, forensicsSummary] = definition.steps;
+    const liquid = createWorkflowLiquidEngine();
+    const runsOn = (templateId: string) =>
+      liquid.evalValueSync(
+        String(forensicsSummary.if)
+          .replace(/^\$\{\{/, '')
+          .replace(/\}\}$/, '')
+          .trim(),
+        { event: { templateId } }
+      );
+    expect(runsOn('investigation')).toBe(true);
+    expect(runsOn('escalation')).toBe(false);
+    expect(forensicsSummary.with).toEqual({ conversation_id: '{{ event.conversationId }}' });
+    // A failed summary must not keep the card from refreshing.
+    expect(summarize['on-failure']).toEqual({ continue: true });
   });
 });

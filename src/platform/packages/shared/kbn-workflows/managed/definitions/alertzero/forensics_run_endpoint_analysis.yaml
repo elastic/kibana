@@ -1756,12 +1756,13 @@ steps:
           status: processed
           forensic_verdict: "{{ steps.resolve_verdict.output.value }}"
 
-  # The forensics summary card, once the analysis is done. After `mark_processed`, whose
-  # `refresh` makes the verdict searchable, so the card shows it rather than "in progress".
-  # The proposal and close gates re-render it after each decision. A failed render costs
-  # the card until then, not the run.
-  - name: render_forensics_summary
-    type: alertzero.forensics.renderSummary
+  # Marks the end of the analysis on the Investigation. `mark_processed` writes to the
+  # indicator, not the Investigation, so without a note nothing would start the
+  # investigation summary, which renders the forensics summary card with the verdict.
+  # After `mark_processed`, whose `refresh` makes the verdict searchable by then, and on
+  # the same condition. Best-effort: a failed note costs the card's refresh, not the run.
+  - name: journal_analysis_complete
+    type: workflow.execute
     if: >-
       ${{ steps.resolve_request.output.has_request == true
         and steps.verify_investigation.output.metadata != null
@@ -1771,7 +1772,18 @@ steps:
     on-failure:
       continue: true
     with:
-      conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
+      inputs:
+        author_name: "{{ consts.author_name }}"
+        conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+        message: >-
+          {%- case steps.resolve_verdict.output.value -%}
+          {%- when 'confirmed_incident' -%}Endpoint analysis is complete. Verdict: confirmed incident.
+          {%- when 'not_an_incident' -%}Endpoint analysis is complete. Verdict: not an incident.
+          {%- when 'unclear' -%}Endpoint analysis is complete. Verdict: unclear.
+          {%- else -%}Endpoint analysis is complete. No endpoint activity was analyzed, so it reached no verdict.
+          {%- endcase -%}
 
   # Findings are on the investigation, but at least one containment proposal
   # never reached the queue. Document this then retire the indicator.
