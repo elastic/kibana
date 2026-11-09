@@ -22,28 +22,18 @@ No body and no parameters. It returns one entry per registered definition that h
     {
       "type": "k8s.deployment",
       "name": "K8s Deployment",
-      "description": "A Kubernetes deployment, identified by cluster/namespace/name. Read from the Elastic Agent Kubernetes integration (state_deployment) and the OpenTelemetry k8sclusterreceiver.",
-      "identityFields": [
-        "k8s.cluster.name",
-        "k8s.namespace.name",
-        "k8s.deployment.name",
-        "orchestrator.cluster.name",
-        "kubernetes.namespace",
-        "kubernetes.deployment.name"
-      ],
+      "description": "A Kubernetes deployment, identified by namespace/name. Read from the Elastic Agent Kubernetes integration (state_deployment) and the OpenTelemetry k8sclusterreceiver. The same namespace/name in two clusters is one entity; the cluster is shown as a column.",
+      "identityFields": ["kubernetes.namespace", "kubernetes.deployment.name"],
       "columns": [
         { "name": "entity.id", "kind": "id" },
-        { "name": "k8s.cluster.name", "kind": "identity" },
-        { "name": "k8s.namespace.name", "kind": "identity" },
-        { "name": "k8s.deployment.name", "kind": "identity" },
-        { "name": "orchestrator.cluster.name", "kind": "identity" },
         { "name": "kubernetes.namespace", "kind": "identity" },
         { "name": "kubernetes.deployment.name", "kind": "identity" },
-        { "name": "available_replicas", "kind": "attribute" },
-        { "name": "desired_replicas", "kind": "attribute" },
-        { "name": "paused", "kind": "attribute" },
-        { "name": "app", "kind": "attribute" },
-        { "name": "resource_id", "kind": "attribute" },
+        { "name": "k8s.cluster.name", "kind": "attribute" },
+        { "name": "k8s.deployment.available", "kind": "attribute" },
+        { "name": "k8s.deployment.desired", "kind": "attribute" },
+        { "name": "k8s.deployment.paused", "kind": "attribute" },
+        { "name": "k8s.deployment.label.app", "kind": "attribute" },
+        { "name": "k8s.deployment.uid", "kind": "attribute" },
         { "name": "last_seen", "kind": "last_seen" }
       ],
       "sources": [
