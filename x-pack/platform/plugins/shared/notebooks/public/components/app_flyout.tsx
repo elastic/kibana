@@ -21,6 +21,7 @@ import {
   EuiToolTip,
   copyToClipboard,
   euiShadow,
+  euiTextTruncate,
   useEuiTheme,
   type UseEuiTheme,
 } from '@elastic/eui';
@@ -135,6 +136,14 @@ const MOVE_PANEL_LABEL = i18n.translate('xpack.notebook.app.movePanel', {
   defaultMessage: 'Move panel',
 });
 
+const SHOW_TITLE_LABEL = i18n.translate('xpack.notebook.app.showPanelTitle', {
+  defaultMessage: 'Show title',
+});
+
+const HIDE_TITLE_LABEL = i18n.translate('xpack.notebook.app.hidePanelTitle', {
+  defaultMessage: 'Hide title',
+});
+
 /**
  * Dashboard-style panel chrome. While editing: a dashed outline and floating move, reveal and
  * remove actions on hover.
@@ -189,13 +198,28 @@ const getPanelStyles = (euiThemeContext: UseEuiTheme, inset: number, isEditable:
       cursor: move;
     `,
     content: css`
+      display: flex;
+      flex-direction: column;
       height: 100%;
       min-width: 0;
-      overflow: auto;
+      overflow: hidden;
       border-radius: ${euiTheme.border.radius.small};
       ${isEditable &&
       `outline: ${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBaseProminent};`}
       background-color: ${euiTheme.colors.backgroundBasePlain};
+    `,
+    title: css`
+      flex-shrink: 0;
+      height: ${euiTheme.size.xl};
+      line-height: ${euiTheme.size.xl};
+      padding: 0 ${euiTheme.size.s};
+      font-weight: ${euiTheme.font.weight.medium};
+      ${euiTextTruncate()};
+    `,
+    body: css`
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: auto;
     `,
   };
 };
@@ -235,6 +259,17 @@ const AppGridPanel = ({
       ...current,
       panels: current.panels.filter(({ id }) => id !== panel.id),
     }));
+  const showTitle = panel.showTitle ?? false;
+  const toggleTitle = () =>
+    store.updateApp(app.id, (current) => ({
+      ...current,
+      panels: current.panels.map((candidate) => {
+        if (candidate.id !== panel.id) return candidate;
+        const { showTitle: _previous, ...rest } = candidate;
+        return showTitle ? rest : { ...rest, showTitle: true };
+      }),
+    }));
+  const titleLabel = showTitle ? HIDE_TITLE_LABEL : SHOW_TITLE_LABEL;
 
   return (
     <div css={styles.container} data-test-subj={`notebookAppPanel-${cell.name}`}>
@@ -252,6 +287,16 @@ const AppGridPanel = ({
             </button>
           </span>
           <span>
+            <EuiToolTip content={titleLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="textHeading"
+                color="text"
+                isSelected={showTitle}
+                aria-label={titleLabel}
+                onClick={toggleTitle}
+                data-test-subj="notebookAppPanelToggleTitle"
+              />
+            </EuiToolTip>
             <EuiToolTip content={REVEAL_PANEL_LABEL} disableScreenReaderOutput>
               <EuiButtonIcon
                 iconType="symlink"
@@ -274,18 +319,25 @@ const AppGridPanel = ({
         </div>
       )}
       <div css={styles.content}>
-        <PanelContent panelId={panel.id} cell={cell} />
+        {showTitle && (
+          <div css={styles.title} data-test-subj="notebookAppPanelTitle">
+            {cell.label || cell.name}
+          </div>
+        )}
+        <div css={styles.body}>
+          <PanelContent panelId={panel.id} cell={cell} />
+        </div>
       </div>
     </div>
   );
 };
 
-/** The app's title and description from its settings, with the global time picker on the right. */
 const getGridGap = ({ gridGap }: NotebookApp) => gridGap ?? DEFAULT_GRID_GAP;
 
 /** Without snapping the grid has no gutter, so panels keep half a gap clear around themselves. */
 const getPanelInset = (app: NotebookApp) => (app.snapToGrid ?? true ? 0 : getGridGap(app) / 2);
 
+/** The app's title and description from its settings, with the global time picker on the right. */
 const AppHeader = ({ app }: { app: NotebookApp }) => {
   const { store } = useNotebook();
   const cells = useStateFromPublishingSubject(store.cells$);

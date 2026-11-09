@@ -147,6 +147,8 @@ export interface AppPanel {
   y: number;
   width: number;
   height: number;
+  /** Shows a header with the cell's label, like a dashboard panel title. */
+  showTitle?: boolean;
 }
 
 /** A dashboard-style view of some of a notebook's cells. */

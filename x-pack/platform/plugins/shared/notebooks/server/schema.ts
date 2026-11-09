@@ -170,6 +170,7 @@ const appSchema = schema.object({
       y: gridUnitSchema,
       width: panelSizeSchema,
       height: panelSizeSchema,
+      showTitle: schema.maybe(schema.boolean()),
     }),
     { maxSize: MAX_CELLS }
   ),

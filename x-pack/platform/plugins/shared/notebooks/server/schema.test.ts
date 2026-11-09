@@ -171,6 +171,7 @@ describe('notebookAttributesSchema', () => {
       ...notebook,
       panels: notebook.panels.map((app) => ({
         ...app,
+        panels: app.panels.map((panel) => ({ ...panel, showTitle: true })),
         hideTimePicker: true,
         freePlacement: true,
         snapToGrid: false,
