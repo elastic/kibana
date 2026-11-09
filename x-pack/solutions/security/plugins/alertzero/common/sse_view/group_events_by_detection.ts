@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SseDetection, SseEventRef } from './derive_detections';
+import { iocOfDetection, type SseDetection, type SseEventRef } from './derive_detections';
 
 /** One bucket of events sharing a detection, or the "Other events" catch-all. */
 export interface SseEventGroup {
@@ -26,24 +26,18 @@ export interface GroupEventsHuntResult {
 
 const OTHER_EVENTS_LABEL = 'Other events';
 
-/** Recovers the IOC's (type, value) from a `deriveDetections`-built `ioc:{type}:{value}` id. */
-const parseIocDetectionId = (id: string): { type: string; value: string } | undefined => {
-  const match = /^ioc:([^:]+):(.+)$/.exec(id);
-  return match ? { type: match[1], value: match[2] } : undefined;
-};
-
 const labelForDetection = (detection: SseDetection): string => {
   if (detection.kind === 'behavior') {
     const techniqueId = detection.technique_id ?? '';
     return detection.technique_name ? `${techniqueId} ${detection.technique_name}` : techniqueId;
   }
-  const parsed = parseIocDetectionId(detection.id);
+  const parsed = iocOfDetection(detection);
   return parsed ? `${parsed.type} ${parsed.value}` : detection.matched_on[0]?.value ?? '';
 };
 
 /**
  * Buckets `events[]` under the detection each one belongs to, so the UI can
- * render one event list per detection (plan D13) instead of one flat list.
+ * render one event list per detection instead of one flat list.
  * Attribution prefers, in order: an explicit `matched.detection` id, an IOC
  * detection sharing the matched IOC's value, a behavior detection sharing the
  * matched technique id, else the "Other events" bucket.

@@ -21,18 +21,19 @@
 
 import { createHash } from 'crypto';
 import dateMath from '@kbn/datemath';
-import { HuntIoc } from '@kbn/alertzero-common';
+import { HUNT_MATCHED_IOCS_MAX, HuntIoc } from '@kbn/alertzero-common';
 import type { SignificantSecurityEventAttachmentData } from '../../../../../common/significant_security_event_schema';
 import type { SeverityLevel } from '../../../../../common/attachment_enums';
 import {
   buildSummary,
   classifyBasis,
   deriveDetections,
+  iocOfDetection,
   type SseDetection,
 } from '../../../../../common/sse_view';
 import { splitRemoteCluster, stripBackingPrefix } from '../../../../../common/remote_cluster';
 import type { HuntCoordinatorCoreResult } from '../hunt_coordinator';
-import { clausesOf } from '../tier2/report_grounding';
+import { clausesOf, type HuntFilterClause } from '../tier2/report_grounding';
 import { HostOrigins, toEntityOrigin } from './host_origin';
 
 /**
@@ -378,7 +379,9 @@ const toEventMatched = (
         ? { type: parsed.data.type, value: parsed.data.value, field: entry.field }
         : undefined;
     })
-    .filter((entry): entry is NonNullable<typeof entry> => entry !== undefined);
+    .filter((entry): entry is NonNullable<typeof entry> => entry !== undefined)
+    // Tier 1 already caps the list; hold the SSE copy to the same bound regardless.
+    .slice(0, HUNT_MATCHED_IOCS_MAX);
   return {
     field: matched.field,
     ...(ioc?.success ? { ioc: ioc.data } : {}),
@@ -387,14 +390,15 @@ const toEventMatched = (
   };
 };
 
-/** Resolve Tier 2 `matched.field` from the query's first comparable clause (never `_id`). */
+/**
+ * Resolve Tier 2 `matched.field` from the query's first comparable clause (never `_id`).
+ * `clauses` is the behavior's parsed query, computed once per behavior (not per hit).
+ */
 const behaviorMatchedField = (
-  behavior: CoordinatorBehavior,
+  clauses: HuntFilterClause[] | undefined,
   fields: Record<string, string> | undefined
 ): string => {
-  const query = behavior.validated_esql;
-  if (!query) return Object.keys(fields ?? {})[0] ?? 'host.name';
-  const clauses = clausesOf(query);
+  if (!clauses) return Object.keys(fields ?? {})[0] ?? 'host.name';
   if (clauses.length === 0) {
     return Object.keys(fields ?? {})[0] ?? 'host.name';
   }
@@ -478,6 +482,7 @@ const behaviorHitRefs = (
   const events: SseEventRef[] = [];
   const alerts: SseAlertRef[] = [];
   for (const behavior of behaviors) {
+    const clauses = behavior.validated_esql ? clausesOf(behavior.validated_esql) : undefined;
     for (const ref of behavior.hits ?? []) {
       if (isRemoteAlertsIndex(ref.index)) continue;
       const timestamp = hitTimestamp(ref);
@@ -498,7 +503,7 @@ const behaviorHitRefs = (
           ...(fields ? { fields } : {}),
           matched: {
             technique_id: behavior.technique_id,
-            field: behaviorMatchedField(behavior, fields),
+            field: behaviorMatchedField(clauses, fields),
           },
         });
       }
@@ -682,6 +687,10 @@ const buildHuntResult = (
             per_ioc: tier1.per_ioc.slice(0, 30).flatMap((entry) => {
               const parsed = HuntIoc.safeParse({ type: entry.type, value: entry.value });
               if (!parsed.success) return [];
+              // Aggregation `value_as_string` follows the index's date format; normalize
+              // like a document timestamp so an epoch digit string never reaches the schema.
+              const firstSeen = toIsoInstant(entry.first_seen);
+              const lastSeen = toIsoInstant(entry.last_seen);
               return [
                 {
                   type: parsed.data.type,
@@ -690,8 +699,8 @@ const buildHuntResult = (
                   count: entry.count,
                   ...(entry.host_count !== undefined ? { host_count: entry.host_count } : {}),
                   ...(entry.user_count !== undefined ? { user_count: entry.user_count } : {}),
-                  ...(entry.first_seen ? { first_seen: entry.first_seen } : {}),
-                  ...(entry.last_seen ? { last_seen: entry.last_seen } : {}),
+                  ...(firstSeen ? { first_seen: firstSeen } : {}),
+                  ...(lastSeen ? { last_seen: lastSeen } : {}),
                 },
               ];
             }),
@@ -903,12 +912,18 @@ const buildEntry = ({
     tier1RefCount,
   });
 
+  // Derive from the normalized SSE copy, not the raw coordinator output: `per_ioc`
+  // first/last_seen and hit timestamps are only ISO after `buildHuntResult` /
+  // `toIsoInstant`, and `detections[]` carries them under the same datetime schema.
   const detections = deriveDetections(
     {
       tier1: {
         counts: result.tier1.counts,
-        per_ioc: result.tier1.per_ioc,
-        hits: result.tier1.hits,
+        per_ioc: huntResult.tier1.per_ioc,
+        hits: result.tier1.hits.map((hit) => {
+          const timestamp = toIsoInstant(hit.timestamp);
+          return timestamp ? { ...hit, timestamp } : { ...hit, timestamp: undefined };
+        }),
         resolved_iocs: result.tier1.resolved_iocs,
       },
       tier2: result.tier2 ? { behaviors: scopedBehaviors(result, techniqueId) } : undefined,
@@ -919,13 +934,8 @@ const buildEntry = ({
   const stampedEvents = stampMatchedDetection(events, detections);
   const hasBehaviorHit = detections.some((d) => d.kind === 'behavior');
   const basisIocs = detections
-    .filter((d) => d.kind === 'ioc')
-    .map((d) => {
-      const match = /^ioc:([^:]+):(.+)$/.exec(d.id);
-      return match
-        ? { type: match[1], value: match[2] }
-        : { type: 'ip', value: d.matched_on[0]?.value ?? d.id };
-    });
+    .map(iocOfDetection)
+    .filter((ioc): ioc is NonNullable<typeof ioc> => ioc !== undefined);
   const basis = classifyBasis(basisIocs, hasBehaviorHit);
   const summary = buildSummary(detections, {
     techniqueId,
@@ -956,7 +966,7 @@ const buildEntry = ({
   };
 };
 
-/** Attach `matched.detection` pointing at an existing detection id (D13 write-side). */
+/** Attach `matched.detection` pointing at an existing detection id, so readers group by it. */
 const stampMatchedDetection = (
   events: SseEventRef[],
   detections: SseDetection[]
@@ -966,8 +976,8 @@ const stampMatchedDetection = (
   const byTechnique = new Map<string, string>();
   for (const detection of detections) {
     if (detection.kind === 'ioc') {
-      const match = /^ioc:[^:]+:(.+)$/.exec(detection.id);
-      if (match) byIocValue.set(match[1], detection.id);
+      const ioc = iocOfDetection(detection);
+      if (ioc) byIocValue.set(ioc.value, detection.id);
     } else if (detection.technique_id) {
       byTechnique.set(detection.technique_id.toUpperCase(), detection.id);
     }

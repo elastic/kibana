@@ -498,7 +498,7 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
     });
   });
 
-  describe('hit-centric optional fields (Layer 1)', () => {
+  describe('hit-centric optional fields', () => {
     const tier1OnlyFixture = {
       ...validPayload,
       hunt_result: {

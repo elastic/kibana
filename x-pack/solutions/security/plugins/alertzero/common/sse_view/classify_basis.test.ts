@@ -96,3 +96,33 @@ describe('classifyBasis', () => {
     });
   });
 });
+
+describe('classifyBasis shared and non-routable ip ranges', () => {
+  it.each([
+    ['0.0.0.0', 'this network'],
+    ['100.64.0.1', 'carrier-grade NAT'],
+    ['100.127.255.254', 'carrier-grade NAT upper bound'],
+    ['224.0.0.251', 'multicast'],
+    ['239.255.255.250', 'multicast upper'],
+    ['255.255.255.255', 'broadcast'],
+    ['::1', 'IPv6 loopback'],
+    ['::', 'IPv6 unspecified'],
+    ['fd12:3456:789a::1', 'IPv6 unique-local'],
+    ['FC00::1', 'IPv6 unique-local upper-case'],
+    ['fe80::1', 'IPv6 link-local'],
+    ['[fe80::1]', 'bracketed IPv6 link-local'],
+    ['::ffff:10.0.0.1', 'IPv4-mapped private'],
+  ])('grades %s (%s) as weak', (value) => {
+    expect(classifyBasis([{ type: 'ip', value }], false)).toBe('ioc_weak');
+  });
+
+  it.each([
+    ['100.63.255.255', 'just below carrier-grade NAT'],
+    ['100.128.0.1', 'just above carrier-grade NAT'],
+    ['223.255.255.255', 'last unicast address'],
+    ['2001:db8::1', 'public IPv6'],
+    ['::ffff:203.0.113.5', 'IPv4-mapped public'],
+  ])('grades %s (%s) as strong', (value) => {
+    expect(classifyBasis([{ type: 'ip', value }], false)).toBe('ioc_strong');
+  });
+});

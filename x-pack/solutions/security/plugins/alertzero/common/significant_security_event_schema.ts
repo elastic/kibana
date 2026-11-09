@@ -18,7 +18,7 @@ import { alertZeroAttachmentDataSchema } from './attachment_data_schema';
 import { SEVERITY_LEVELS } from './attachment_enums';
 import { EVENT_SOURCE_INDEX_ERROR, isAllowedEventSourceIndex } from './event_source_index';
 
-/** Graded basis for why the SSE is a hit (D7). */
+/** Graded basis for why the SSE is a hit. */
 const SSE_BASIS_LEVELS = ['ioc_strong', 'ioc_weak', 'behavior_only', 'ioc_and_behavior'] as const;
 
 const matchedIocRefSchema = lazySchema(() =>
@@ -224,11 +224,11 @@ export const significantSecurityEventAttachmentDataSchema = lazySchema(() =>
   alertZeroAttachmentDataSchema.extend({
     title: z.string().trim().min(1).max(512),
     /**
-     * Hit-centric headline (D1). Optional so old stored payloads still parse; the reader
+     * Hit-centric headline. Optional so old stored payloads still parse; the reader
      * adapter derives it when absent. Never the report id.
      */
     summary: z.string().trim().min(1).max(512).optional(),
-    /** Graded basis for the hit (D7). Optional on old payloads; adapter classifies. */
+    /** Graded basis for the hit. Optional on old payloads; adapter classifies. */
     basis: z.enum(SSE_BASIS_LEVELS).optional(),
     severity: z.enum(SEVERITY_LEVELS),
     confidence: z.number().min(0).max(1),
@@ -265,7 +265,7 @@ export const significantSecurityEventAttachmentDataSchema = lazySchema(() =>
     evidence_for: z.array(evidenceItemSchema).max(50),
     evidence_against: z.array(evidenceItemSchema).max(50),
     maps_to_proposal: mapsToProposalSchema,
-    // Optional from Layer 1: Layer 5 stops writing it. Print only when present.
+    // Optional: the hunt mapper still writes it, other producers may not. Print only when present.
     evaluation_record_ref: z.string().min(1).max(512).optional(),
     truncated: z.boolean().optional(),
     truncated_original_count: z.number().int().min(0).optional(),

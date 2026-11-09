@@ -48,6 +48,51 @@ const MAX_DETECTIONS = 30;
 const MAX_NAMES = 50;
 /** Matches the SSE schema's per-host/user string max. */
 const MAX_NAME_LENGTH = 512;
+/** Matches `detectionSchema.id` and `eventRefSchema.matched.detection` max. */
+const MAX_DETECTION_ID_LENGTH = 256;
+
+/**
+ * Stable, dependency-free digest for an over-long id tail: a base-31 polynomial hash
+ * reduced modulo 2^32, rendered as 8 hex characters. Only ids within one SSE compete,
+ * so a 32-bit space is plenty.
+ */
+const HASH_MODULUS = 2 ** 32;
+const shortHash = (value: string): string => {
+  let hash = 7;
+  for (let index = 0; index < value.length; index++) {
+    hash = (hash * 31 + value.charCodeAt(index)) % HASH_MODULUS;
+  }
+  return hash.toString(16).padStart(8, '0');
+};
+
+/**
+ * Id of an IOC detection: `ioc:{type}:{value}` when that fits the schema's 256-char
+ * cap, else `ioc:{type}:{fnv1a(value)}` so a long URL IOC (values run to 2048) still
+ * gets a valid, stable id. Readers take the value from `matched_on[0].value`, never by
+ * parsing the id, so the hashed form loses nothing.
+ */
+export const buildIocDetectionId = (type: string, value: string): string => {
+  const plain = `ioc:${type}:${value}`;
+  return plain.length <= MAX_DETECTION_ID_LENGTH ? plain : `ioc:${type}:${shortHash(value)}`;
+};
+
+/** Id of a behavior detection: `behavior:{technique_id}`. */
+export const buildBehaviorDetectionId = (techniqueId: string): string => `behavior:${techniqueId}`;
+
+/**
+ * The IOC (type, value) an IOC detection stands for. Type comes from the id prefix,
+ * value from `matched_on[0].value` (the id tail may be a hash). `undefined` for a
+ * behavior detection or an id not built by {@link buildIocDetectionId}.
+ */
+export const iocOfDetection = (
+  detection: Pick<SseDetection, 'id' | 'kind' | 'matched_on'>
+): { type: string; value: string } | undefined => {
+  if (detection.kind !== 'ioc') return undefined;
+  const match = /^ioc:([^:]+):(.*)$/.exec(detection.id);
+  if (!match) return undefined;
+  const value = detection.matched_on[0]?.value ?? match[2];
+  return value ? { type: match[1], value } : undefined;
+};
 
 const dedupeDefined = (values: ReadonlyArray<string | undefined>): string[] => [
   ...new Set(
@@ -229,7 +274,7 @@ const detectionsFromPerIoc = (
     // first searched slot for the IOC type and can miss the hit (see observedIocMatchFromEvents).
     const field = observedIocMatchFromEvents(events, entry.value)?.field ?? entry.field;
     return {
-      id: `ioc:${entry.type}:${entry.value}`,
+      id: buildIocDetectionId(entry.type, entry.value),
       kind: 'ioc',
       field,
       basis: classifyBasis([{ type: entry.type, value: entry.value }], hasBehaviorHit),
@@ -253,7 +298,7 @@ const detectionFromIocGroup = <T extends { host?: string; user?: string; timesta
   const hosts = dedupeDefined(group.items.map((item) => item.host)).slice(0, MAX_NAMES);
   const users = dedupeDefined(group.items.map((item) => item.user)).slice(0, MAX_NAMES);
   return {
-    id: `ioc:${group.type}:${group.value}`,
+    id: buildIocDetectionId(group.type, group.value),
     kind: 'ioc',
     field: group.field,
     basis: classifyBasis([{ type: group.type, value: group.value }], hasBehaviorHit),
@@ -321,7 +366,7 @@ const detectionsFromBehaviors = (
       const hosts = dedupeDefined(behavior.affected_hosts ?? []).slice(0, MAX_NAMES);
       const users = dedupeDefined(behavior.affected_users ?? []).slice(0, MAX_NAMES);
       return {
-        id: `behavior:${behavior.technique_id}`,
+        id: buildBehaviorDetectionId(behavior.technique_id),
         kind: 'behavior',
         technique_id: behavior.technique_id,
         ...(behavior.technique_name ? { technique_name: behavior.technique_name } : {}),
@@ -335,11 +380,13 @@ const detectionsFromBehaviors = (
 };
 
 /**
- * Builds the SSE's `detections[]` from a hunt result and its event refs
- * (plan D9): one IOC detection per `tier1.per_ioc` bucket, falling back to
- * grouping sampled hits by matched IOC when Tier 1 has no aggregation, plus
- * one behavior detection per Tier 2 behavior whose execution hit. Capped at
- * {@link MAX_DETECTIONS}, matching `detectionSchema`'s own cap.
+ * Builds the SSE's `detections[]` from a hunt result and its event refs:
+ * one IOC detection per `tier1.per_ioc` bucket, falling back to grouping
+ * sampled hits by matched IOC when Tier 1 has no aggregation, plus one
+ * behavior detection per Tier 2 behavior whose execution hit. Capped at
+ * {@link MAX_DETECTIONS}, matching `detectionSchema`'s own cap. Behavior
+ * detections go first so the cap trims IOC buckets (which Tier 1 already caps
+ * at 30 and can fill on its own), never the technique this entry exists for.
  */
 export const deriveDetections = (
   huntResult: DeriveDetectionsHuntResult | undefined,
@@ -364,5 +411,5 @@ export const deriveDetections = (
     options.techniqueId
   );
 
-  return [...iocDetections, ...behaviorDetections].slice(0, MAX_DETECTIONS);
+  return [...behaviorDetections, ...iocDetections].slice(0, MAX_DETECTIONS);
 };

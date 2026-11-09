@@ -283,3 +283,34 @@ describe('isTier1SearchableIoc', () => {
     }
   );
 });
+
+describe('attributeHits matched.iocs cap', () => {
+  it('caps matched.iocs at 10 on the matched_queries path, primary first', () => {
+    const iocs = Array.from({ length: 6 }, (_, i) => ({
+      type: 'ip' as const,
+      value: `198.51.100.${i}`,
+    }));
+    const matchedQueries = iocs.flatMap((_, i) => [
+      `ioc_${i}|source.ip`,
+      `ioc_${i}|destination.ip`,
+    ]);
+    const [hit] = attributeHits([baseDoc({}, { matched_queries: matchedQueries })], iocs, []);
+    expect(hit.matched?.iocs).toHaveLength(10);
+    expect(hit.matched?.iocs?.[0]).toEqual({
+      type: 'ip',
+      value: '198.51.100.0',
+      field: 'source.ip',
+    });
+    expect(hit.matched?.ioc).toEqual({ type: 'ip', value: '198.51.100.0' });
+  });
+
+  it('caps matched.iocs at 10 on the _source fallback path', () => {
+    const values = Array.from({ length: 12 }, (_, i) => `198.51.100.${i}`);
+    const [hit] = attributeHits(
+      [baseDoc({ 'source.ip': values })],
+      values.map((value) => ({ type: 'ip' as const, value })),
+      []
+    );
+    expect(hit.matched?.iocs).toHaveLength(10);
+  });
+});

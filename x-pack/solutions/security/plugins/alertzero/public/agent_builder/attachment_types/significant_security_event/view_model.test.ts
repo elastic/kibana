@@ -245,7 +245,7 @@ describe('toSseViewModel', () => {
     expect(toSseViewModel(mixed).basis).toBe('ioc_and_behavior');
   });
 
-  it('builds D3 entity counts from entities versus tier1.counts, whichever is larger', () => {
+  it('builds entity counts from entities versus tier1.counts, whichever is larger', () => {
     const parsed = parseOrThrow({
       ...baseParsed,
       hunt_result: tier1OnlyHunt,
@@ -264,7 +264,7 @@ describe('toSseViewModel', () => {
     ]);
   });
 
-  it('groups events per D13, including an Other events bucket with old-payload M', () => {
+  it('groups events by detection, including an Other events bucket with old-payload M', () => {
     const parsed = parseOrThrow({
       ...baseParsed,
       events: [

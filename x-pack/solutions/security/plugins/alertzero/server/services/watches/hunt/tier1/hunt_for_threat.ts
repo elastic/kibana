@@ -50,7 +50,7 @@ interface NamedIocClause {
  * `keyword` field compares bytes. So the clause itself matches case-insensitively
  * and `normalizeIocValue` folds both sides during attribution.
  *
- * Always the object form so each clause can carry `_name` (D12).
+ * Always the object form so each clause can carry `_name`.
  */
 const termClause = (
   field: string,
@@ -150,8 +150,8 @@ const HOST_INDEX_MAX_BUCKETS = 20;
 
 /**
  * Fields the wire hit, the entity chips and the Tier 2 digest read, independent
- * of what was searched. Includes the D8 evidence allowlist so sampled hits carry
- * values `attributeHits` copies onto `fields` (D11).
+ * of what was searched. Includes the evidence allowlist so sampled hits carry
+ * values `attributeHits` copies onto `fields`.
  */
 const DISPLAY_SOURCE_FIELDS = [
   '@timestamp',
@@ -295,8 +295,10 @@ const buildPerIocFiltersAgg = (
     aggs: {
       host_count: { cardinality: { field: 'host.name' } },
       user_count: { cardinality: { field: 'user.name' } },
-      first_seen: { min: { field: '@timestamp' } },
-      last_seen: { max: { field: '@timestamp' } },
+      // `value_as_string` follows the field's mapped format, which is `epoch_millis` digits
+      // on some indices; the SSE schema needs ISO 8601, so pin the output format here.
+      first_seen: { min: { field: '@timestamp', format: 'strict_date_optional_time' } },
+      last_seen: { max: { field: '@timestamp', format: 'strict_date_optional_time' } },
     },
   };
 };

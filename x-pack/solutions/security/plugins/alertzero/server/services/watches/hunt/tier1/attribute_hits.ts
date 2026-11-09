@@ -9,6 +9,7 @@ import {
   HUNT_EVIDENCE_FIELD_KEYS,
   HUNT_EVIDENCE_FIELDS_MAX_KEYS,
   HUNT_EVIDENCE_FIELD_VALUE_MAX,
+  HUNT_MATCHED_IOCS_MAX,
   type HuntForThreatHit,
   type HuntIoc,
 } from '@kbn/alertzero-common';
@@ -57,7 +58,7 @@ export const IOC_FIELDS_BY_TYPE: Record<string, string[]> = {
 };
 
 /**
- * Bounded evidence keys copied onto wire hits (D8). Order is the priority when
+ * Bounded evidence keys copied onto wire hits. Order is the priority when
  * capping at 8 keys per event. Host and user are separate top-level fields.
  */
 export const EVIDENCE_SOURCE_FIELDS = HUNT_EVIDENCE_FIELD_KEYS;
@@ -155,7 +156,7 @@ interface IocFieldMatch {
 
 /**
  * Every IOC that matches in `_source`. Used only when a hit has no
- * `matched_queries` (D12); named clauses are authoritative when present.
+ * `matched_queries`; named clauses are authoritative when present.
  */
 const matchIocs = (fields: Map<string, string[]>, iocs: HuntIoc[]): IocFieldMatch[] => {
   const matches: IocFieldMatch[] = [];
@@ -245,8 +246,9 @@ const matchTechnique = (
  * and event attribution.
  *
  * When ES returns `matched_queries` for named Tier 1 clauses (`ioc_<i>|<field>`),
- * those are authoritative for `matched.iocs` / `matched.field` (D12). Otherwise
- * every `_source` match is collected as a fallback.
+ * those are authoritative for `matched.iocs` / `matched.field`. Otherwise
+ * every `_source` match is collected as a fallback. Either way the list is
+ * capped at {@link HUNT_MATCHED_IOCS_MAX}, which is what both wire schemas allow.
  */
 export const attributeHits = (
   docs: HitDocument[],
@@ -255,10 +257,11 @@ export const attributeHits = (
 ): HuntForThreatHit[] =>
   docs.map(({ id, index, timestamp, source, matched_queries }) => {
     const fieldValues = collectFieldValues(source);
-    const iocMatches =
+    const iocMatches = (
       matched_queries && matched_queries.length > 0
         ? iocsFromMatchedQueries(matched_queries, iocs)
-        : matchIocs(fieldValues, iocs);
+        : matchIocs(fieldValues, iocs)
+    ).slice(0, HUNT_MATCHED_IOCS_MAX);
     const techniqueMatch = matchTechnique(fieldValues, techniques);
 
     const host = fieldValues.get('host.name')?.[0];

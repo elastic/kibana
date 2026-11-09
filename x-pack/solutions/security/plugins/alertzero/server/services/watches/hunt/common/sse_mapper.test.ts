@@ -1532,3 +1532,83 @@ describe('buildSseData hit-centric summary, basis and detections', () => {
     expect(significantSecurityEventAttachmentDataSchema.safeParse(entry.data).success).toBe(true);
   });
 });
+
+describe('buildSseData holds hit-centric fields to the SSE schema', () => {
+  it('normalizes epoch-digit per_ioc first_seen/last_seen to ISO and keeps the entry', () => {
+    const result = tier1Result({
+      resolved_iocs: [{ type: 'ip', value: '203.0.113.10' }],
+      counts: { total_hits: 3, returned_hits: 0, affected_hosts: 1, affected_users: 0 },
+      per_ioc: [
+        {
+          type: 'ip',
+          value: '203.0.113.10',
+          field: 'destination.ip',
+          count: 3,
+          first_seen: '1753880700000',
+          last_seen: '1753884300000',
+        },
+      ],
+    });
+
+    const [entry] = buildSseData(result, 'tr-epoch', { spaceId: 'default' });
+    expect(entry.data.hunt_result?.tier1.per_ioc).toEqual([
+      expect.objectContaining({
+        first_seen: '2025-07-30T13:05:00.000Z',
+        last_seen: '2025-07-30T14:05:00.000Z',
+      }),
+    ]);
+    expect(significantSecurityEventAttachmentDataSchema.safeParse(entry.data).success).toBe(true);
+  });
+
+  it('caps matched.iocs on an event ref at the schema bound', () => {
+    const iocs = Array.from({ length: 12 }, (_, i) => ({
+      type: 'ip' as const,
+      value: `203.0.113.${i}`,
+      field: i % 2 === 0 ? 'source.ip' : 'destination.ip',
+    }));
+    const result = tier1Result({
+      resolved_iocs: iocs.map(({ type, value }) => ({ type, value })),
+      hits: [
+        {
+          id: 'evt-many',
+          index: '.ds-logs-aws.cloudtrail-default-2026.07.30-000001',
+          timestamp: '2026-07-30T13:05:00.000Z',
+          matched: { ioc: { type: 'ip', value: '203.0.113.0' }, field: 'source.ip', iocs },
+        },
+      ],
+    });
+
+    const [entry] = buildSseData(result, 'tr-many', { spaceId: 'default' });
+    expect(entry.data.events?.[0].matched?.iocs).toHaveLength(10);
+    expect(significantSecurityEventAttachmentDataSchema.safeParse(entry.data).success).toBe(true);
+  });
+
+  it('gives a long URL IOC a detection id and matched.detection the schema accepts', () => {
+    const longUrl = `https://evil.example.com/${'a'.repeat(300)}`;
+    const result = tier1Result({
+      resolved_iocs: [{ type: 'url', value: longUrl }],
+      counts: { total_hits: 2, returned_hits: 1, affected_hosts: 1, affected_users: 0 },
+      per_ioc: [{ type: 'url', value: longUrl, field: 'url.full', count: 2 }],
+      hits: [
+        {
+          id: 'evt-url',
+          index: '.ds-logs-proxy-default-2026.07.30-000001',
+          timestamp: '2026-07-30T13:05:00.000Z',
+          matched: {
+            ioc: { type: 'url', value: longUrl },
+            field: 'url.full',
+            iocs: [{ type: 'url', value: longUrl, field: 'url.full' }],
+          },
+        },
+      ],
+    });
+
+    const [entry] = buildSseData(result, 'tr-url', { spaceId: 'default' });
+    const [detection] = entry.data.detections ?? [];
+    expect(detection.id.length).toBeLessThanOrEqual(256);
+    expect(detection.matched_on[0].value).toBe(longUrl);
+    expect(entry.data.events?.[0].matched?.detection).toBe(detection.id);
+    expect(entry.data.summary?.startsWith('url https://evil.example.com/')).toBe(true);
+    expect(significantSecurityEventAttachmentDataSchema.safeParse(entry.data).success).toBe(true);
+  });
+});

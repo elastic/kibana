@@ -7,12 +7,15 @@
 
 import type { HuntForThreatHit } from '@kbn/alertzero-common';
 import {
+  buildIocDetectionId,
   deriveDetections,
+  iocOfDetection,
   observedIocMatchFromEvents,
   reconcileIocDetectionFields,
   type DeriveDetectionsHuntResult,
   type SseDetection,
   type SseEventRef,
+  type SseTier2Behavior,
 } from './derive_detections';
 
 const buildEvent = (overrides: Partial<SseEventRef> = {}): SseEventRef => ({
@@ -105,12 +108,14 @@ describe('deriveDetections', () => {
       buildEvent({
         source_index: '.ds-logs-endpoint.events.network-default-000001',
         matched: {
+          field: 'destination.ip',
           iocs: [{ type: 'ip', value: '203.0.113.77', field: 'destination.ip' }],
         },
       }),
       buildEvent({
         source_index: '.ds-logs-endpoint.events.process-default-000001',
         matched: {
+          field: 'process.hash.sha256',
           iocs: [
             {
               type: 'hash',
@@ -355,6 +360,7 @@ describe('observedIocMatchFromEvents', () => {
       buildEvent({
         source_index: 'logs-network',
         matched: {
+          field: 'destination.ip',
           iocs: [{ type: 'ip', value: '203.0.113.77', field: 'destination.ip' }],
         },
       }),
@@ -362,6 +368,7 @@ describe('observedIocMatchFromEvents', () => {
         event_id: 'evt-2',
         source_index: 'logs-network',
         matched: {
+          field: 'destination.ip',
           iocs: [{ type: 'ip', value: '203.0.113.77', field: 'destination.ip' }],
         },
       }),
@@ -397,6 +404,7 @@ describe('reconcileIocDetectionFields', () => {
     const events: SseEventRef[] = [
       buildEvent({
         matched: {
+          field: 'destination.ip',
           iocs: [{ type: 'ip', value: '203.0.113.77', field: 'destination.ip' }],
         },
       }),
@@ -421,5 +429,69 @@ describe('reconcileIocDetectionFields', () => {
     ];
 
     expect(reconcileIocDetectionFields(detections, [])).toEqual(detections);
+  });
+});
+
+describe('detection ids', () => {
+  const longUrl = `https://evil.example.com/${'a'.repeat(300)}`;
+
+  it('hashes an over-long IOC value so the id fits the schema cap and stays stable', () => {
+    const id = buildIocDetectionId('url', longUrl);
+    expect(id.length).toBeLessThanOrEqual(256);
+    expect(id.startsWith('ioc:url:')).toBe(true);
+    expect(id).not.toContain('aaaa');
+    expect(buildIocDetectionId('url', longUrl)).toBe(id);
+    expect(buildIocDetectionId('url', `${longUrl}b`)).not.toBe(id);
+  });
+
+  it('keeps the plain ioc:{type}:{value} id when it fits', () => {
+    expect(buildIocDetectionId('ip', '203.0.113.5')).toBe('ioc:ip:203.0.113.5');
+  });
+
+  it('recovers type from the id and value from matched_on for a hashed id', () => {
+    const [detection] = deriveDetections(
+      { tier1: { per_ioc: [{ type: 'url', value: longUrl, field: 'url.full', count: 2 }] } },
+      []
+    );
+    expect(detection.id.length).toBeLessThanOrEqual(256);
+    expect(iocOfDetection(detection)).toEqual({ type: 'url', value: longUrl });
+  });
+
+  it('returns undefined for a behavior detection', () => {
+    expect(
+      iocOfDetection({ id: 'behavior:T1078', kind: 'behavior', matched_on: [] })
+    ).toBeUndefined();
+  });
+});
+
+describe('deriveDetections cap ordering', () => {
+  it('keeps the scoped behavior detection ahead of a full set of IOC buckets', () => {
+    const perIoc = Array.from({ length: 30 }, (_, i) => ({
+      type: 'ip' as const,
+      value: `203.0.113.${i}`,
+      field: 'destination.ip',
+      count: 30 - i,
+    }));
+    const huntResult: DeriveDetectionsHuntResult = {
+      tier1: { per_ioc: perIoc },
+      tier2: {
+        behaviors: [
+          {
+            technique_id: 'T1078',
+            technique_name: 'Valid Accounts',
+            title: 'Assumed role from new ASN',
+            tactic_ids: ['TA0001'],
+            confidence: 0.9,
+            execution: { executed: true, hit: true, row_count: 4 },
+          } as SseTier2Behavior,
+        ],
+      },
+    };
+
+    const detections = deriveDetections(huntResult, [], { techniqueId: 'T1078' });
+
+    expect(detections).toHaveLength(30);
+    expect(detections[0]).toMatchObject({ id: 'behavior:T1078', kind: 'behavior' });
+    expect(detections.filter((detection) => detection.kind === 'ioc')).toHaveLength(29);
   });
 });

@@ -105,6 +105,7 @@ const PlainValue: React.FC<{ value: string; testSubj?: string; maxCh?: number }>
   return (
     <EuiToolTip content={value}>
       <EuiText
+        tabIndex={0}
         size="xs"
         component="span"
         data-test-subj={testSubj}
@@ -232,6 +233,7 @@ const EventRows: React.FC<{
         timestamp ? (
           <EuiToolTip content={<DateTime value={timestamp} />}>
             <EuiText
+              tabIndex={0}
               size="xs"
               css={css`
                 min-width: 0;
@@ -291,6 +293,7 @@ const EventRows: React.FC<{
               <EuiFlexItem grow={false}>
                 <EuiToolTip content={event.source_index}>
                   <EuiText
+                    tabIndex={0}
                     size="xs"
                     color="subdued"
                     css={css`
@@ -371,6 +374,7 @@ const EventRows: React.FC<{
             {matched.field ? (
               <EuiToolTip content={matched.field}>
                 <EuiText
+                  tabIndex={0}
                   size="xs"
                   color="subdued"
                   component="div"
@@ -425,7 +429,7 @@ const EventRows: React.FC<{
 };
 
 /**
- * Cited events bucketed by the detection each belongs to (D13), one list per group with a
+ * Cited events bucketed by the detection each belongs to, one list per group with a
  * `N shown of M` footer so a sampled group does not read as the whole set.
  */
 const GroupedEvents: React.FC<{
@@ -743,7 +747,7 @@ const DetectionDiscoverPivot: React.FC<{ href: string; testSubj?: string }> = ({
 );
 
 /**
- * The IOCs and behaviors that matched (D10). IOC rows pivot to Discover over the indices
+ * The IOCs and behaviors that matched. IOC rows pivot to Discover over the indices
  * cited events came from (else every Tier 1 index) for the exact field and value; behavior
  * rows reuse the behavior's stored query. A pivot is withheld when the detection has no
  * field, or there are no indices to search.
@@ -1368,7 +1372,7 @@ const IndexHits: React.FC<{ huntResult?: HuntResult }> = ({ huntResult }) => {
 };
 
 /**
- * Who/what was involved (D3): host/user/service chips plus wide host and user counts.
+ * Who/what was involved: host/user/service chips plus wide host and user counts.
  * Framed as part of the attack story so chips read as incident actors, not inventory.
  */
 const EntityLine: React.FC<{
@@ -1516,7 +1520,7 @@ const HuntConfirmation: React.FC<{ huntResult: HuntResult }> = ({ huntResult }) 
 };
 
 /**
- * IOCs Tier 1 queried (hits or not). Optional on the SSE copy (D5): when the producer
+ * IOCs Tier 1 queried (hits or not). Optional on the SSE copy: when the producer
  * dropped the list, `searched_ioc_count` stands in for how many were searched.
  */
 const SearchedFor: React.FC<{ huntResult: HuntResult | undefined }> = ({ huntResult }) => {

@@ -95,7 +95,7 @@ export const basisHeaderBadge = (basis: SseBasis): HeaderBadge => ({
   color: 'hollow',
 });
 
-/** Entity-line chips ordered host → user → service (plan D3). */
+/** Entity-line chips ordered host → user → service. */
 const ENTITY_FIELD_ORDER = ['host.name', 'user.name', 'service.name'] as const;
 
 const entityFieldRank = (field: string): number => {
@@ -115,7 +115,7 @@ export interface SseEntityLine {
 /**
  * Hit-centric fields the renderer reads after parse. Old payloads without
  * `summary` / `basis` / `detections` are derived here via `alertzero/common/sse_view/`
- * (plan D9), never from `resolved_iocs` or knowledge indicators.
+ * never from `resolved_iocs` or knowledge indicators.
  */
 export interface SseViewModel {
   summary: string;
@@ -131,7 +131,7 @@ const uniqueNamesForField = (entities: readonly SseEntityRef[], field: string): 
   new Set(entities.filter((entity) => entity.field === field).map((entity) => entity.value)).size;
 
 /**
- * Entity line under the headline (D3): chips from the stored `entities` array
+ * Entity line under the headline: chips from the stored `entities` array
  * (already the cross-tier union), ordered host → user → service, with host/user
  * counts as the larger of the unique names in that array and Tier 1's wide counts.
  * No second rollup from `detections[]`.
@@ -153,7 +153,7 @@ const buildEntityLine = (
 };
 
 /**
- * Grades an old payload that has no stored `basis` (D7 / Phase 4). Prefers IOC
+ * Grades an old payload that has no stored `basis`. Prefers IOC
  * values on the cited events; only when no IOC event exists does it fall back
  * to `hit_sources` for `behavior_only` / `ioc_and_behavior`.
  */

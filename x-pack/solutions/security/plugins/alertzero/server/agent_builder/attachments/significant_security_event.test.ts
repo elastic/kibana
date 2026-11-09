@@ -115,8 +115,56 @@ describe('createSignificantSecurityEventAttachmentType', () => {
         },
       });
 
-      expect(value).toContain('Tier 1: environment_hits_found');
+      expect(value).toContain('IOC Hunt: environment_hits_found');
       expect(value).not.toContain('Resolved IOCs');
+    });
+
+    it('surfaces summary, basis and detections so the agent sees what the card leads with', async () => {
+      const value = await formatToText(attachmentType, formatContext, {
+        ...validPayload,
+        summary: 'ip 203.0.113.10 seen 12x on 3 hosts',
+        basis: 'ioc_and_behavior',
+        detections: [
+          {
+            id: 'ioc:ip:203.0.113.10',
+            kind: 'ioc',
+            field: 'destination.ip',
+            basis: 'ioc_strong',
+            matched_on: [{ field: 'destination.ip', value: '203.0.113.10' }],
+            total: 12,
+            host_count: 3,
+            user_count: 1,
+          },
+          {
+            id: 'behavior:T1078.004',
+            kind: 'behavior',
+            technique_id: 'T1078.004',
+            technique_name: 'Cloud Accounts',
+            basis: 'ioc_and_behavior',
+            matched_on: [],
+            total: 4,
+            host_count: 2,
+            from_sample: true,
+          },
+        ],
+      });
+
+      expect(value).toContain('Summary: ip 203.0.113.10 seen 12x on 3 hosts');
+      expect(value).toContain('Basis: ioc_and_behavior');
+      expect(value).toContain(
+        '  - ioc 203.0.113.10 on destination.ip [ioc_strong]: 12 event(s), 3 host(s), 1 user(s)'
+      );
+      expect(value).toContain(
+        '  - behavior T1078.004 Cloud Accounts [ioc_and_behavior]: 4 event(s), 2 host(s), from sampled hits'
+      );
+    });
+
+    it('omits the hit-centric lines on an old payload without them', async () => {
+      const value = await formatToText(attachmentType, formatContext, validPayload);
+
+      expect(value).not.toContain('Summary:');
+      expect(value).not.toContain('Basis:');
+      expect(value).not.toContain('Detections');
     });
 
     it('includes the report_id so the agent can tie the event back to its threat report', async () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SseDetection } from './derive_detections';
+import { iocOfDetection, type SseDetection } from './derive_detections';
 
 /** Characters a summary may spend, matching `summary`'s own cap on the SSE schema. */
 const MAX_SUMMARY_LENGTH = 512;
@@ -19,12 +19,6 @@ export interface BuildSummaryOptions {
 
 const plural = (count: number, singular: string): string =>
   `${count} ${singular}${count === 1 ? '' : 's'}`;
-
-/** Recovers the IOC's (type, value) from a `deriveDetections`-built `ioc:{type}:{value}` id. */
-const parseIocDetectionId = (id: string): { type: string; value: string } | undefined => {
-  const match = /^ioc:([^:]+):(.+)$/.exec(id);
-  return match ? { type: match[1], value: match[2] } : undefined;
-};
 
 /** `{technique_id} {technique_name}: {total} event(s) on {host_count} host(s)`, or just the id when the name is absent. */
 const summarizeBehavior = (detection: SseDetection): string => {
@@ -45,7 +39,7 @@ const summarizeIoc = (
   detection: SseDetection,
   tier1Counts: BuildSummaryOptions['tier1Counts']
 ): string => {
-  const parsed = parseIocDetectionId(detection.id);
+  const parsed = iocOfDetection(detection);
   const type = parsed?.type ?? detection.field ?? 'indicator';
   const value = parsed?.value ?? detection.matched_on[0]?.value ?? '';
   const hostsPart =
@@ -74,7 +68,7 @@ const compareDetections = (a: SseDetection, b: SseDetection): number => {
 };
 
 /**
- * Builds the SSE's hit-centric `summary` headline (plan D1) from its
+ * Builds the SSE's hit-centric `summary` headline from its
  * `detections[]`: one leader line plus "and N more" when there is more than
  * one detection. When `techniqueId` is set, the scoped behavior detection for
  * that technique always leads (this entry is about that technique); otherwise

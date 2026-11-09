@@ -7,7 +7,7 @@
 
 /**
  * Shared, pure view helpers for the Significant Security Event's hit-centric
- * fields (plan D1/D7/D9/D13): the headline `summary`, the `basis` grading, a
+ * fields: the headline `summary`, the `basis` grading, a
  * check for whether a Tier 2 ES|QL proposal is an executable query, deriving
  * `detections[]` from a hunt result, and bucketing `events[]` by detection.
  * The SSE mapper and any renderer that needs the same text call these instead
@@ -21,7 +21,10 @@ export { classifyBasis, type SseBasis, type ClassifyBasisIoc } from './classify_
 export { isExecutableHuntQuery } from './is_executable_hunt_query';
 
 export {
+  buildBehaviorDetectionId,
+  buildIocDetectionId,
   deriveDetections,
+  iocOfDetection,
   observedIocMatchFromEvents,
   reconcileIocDetectionFields,
   type SseDetection,

@@ -215,7 +215,7 @@ const cellAsString = (value: unknown): string | undefined => {
   return undefined;
 };
 
-/** Allowlisted evidence columns present on a row (D8 / D11). Empty when none kept. */
+/** Allowlisted evidence columns present on a row. Empty when none kept. */
 const evidenceFieldsFromRow = (
   row: unknown[],
   columns: Array<{ name: string }>

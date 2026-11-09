@@ -714,7 +714,7 @@ describe('huntForThreat', () => {
       }
     );
 
-    it('keeps the display and D8 evidence fields and skips hash-only IOC fields when hashes were not searched', async () => {
+    it('keeps the display and evidence fields and skips hash-only IOC fields when hashes were not searched', async () => {
       const esClient = buildEsClient(emptySearchResponse);
 
       await huntForThreat(esClient, { scope, iocs: [{ type: 'ip', value: '10.0.0.1' }] });
@@ -729,7 +729,7 @@ describe('huntForThreat', () => {
           'event.action',
         ])
       );
-      // D8 always projects `file.hash.sha256`; other hash slots stay scoped to hash hunts.
+      // The evidence allowlist always projects `file.hash.sha256`; other hash slots stay scoped to hash hunts.
       expect(searchBody._source).not.toContain('process.hash.sha256');
       expect(searchBody._source).not.toContain('dll.hash.sha256');
     });
@@ -1026,8 +1026,8 @@ describe('huntForThreat', () => {
       expect(aggs.per_ioc.aggs).toEqual({
         host_count: { cardinality: { field: 'host.name' } },
         user_count: { cardinality: { field: 'user.name' } },
-        first_seen: { min: { field: '@timestamp' } },
-        last_seen: { max: { field: '@timestamp' } },
+        first_seen: { min: { field: '@timestamp', format: 'strict_date_optional_time' } },
+        last_seen: { max: { field: '@timestamp', format: 'strict_date_optional_time' } },
       });
     });
 

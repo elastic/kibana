@@ -804,7 +804,7 @@ const collectFilterClauses = (node: ESQLAstNode | ESQLAstNode[], out: HuntFilter
     for (const arg of fn.args) collectFilterClauses(arg, out);
     return;
   }
-  // rlike / match / : intentionally yield no literals (D12 companion for Tier 2).
+  // rlike / match / : intentionally yield no literals; attribution cannot compare them to a value.
   if (operator === '==' || operator === 'like') {
     const column = columnArgOf(fn);
     const literals = literalsOf(fn.args);

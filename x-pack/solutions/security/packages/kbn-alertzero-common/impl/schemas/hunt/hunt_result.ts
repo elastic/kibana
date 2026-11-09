@@ -47,6 +47,13 @@ export const HUNT_EVIDENCE_FIELDS_MAX_KEYS = 8;
 export const HUNT_EVIDENCE_FIELD_VALUE_MAX = 256;
 
 /**
+ * Max entries in `matched.iocs` on a hit or SSE event (`HuntForThreatHit` and the SSE
+ * `eventRefSchema` both cap the array here). One IOC can match several ECS fields on one
+ * document, so producers cap the list to this before it reaches either schema.
+ */
+export const HUNT_MATCHED_IOCS_MAX = 10;
+
+/**
  * Bounded evidence map: allowlisted keys only, at most
  * {@link HUNT_EVIDENCE_FIELDS_MAX_KEYS}, values at most
  * {@link HUNT_EVIDENCE_FIELD_VALUE_MAX} characters.
@@ -121,8 +128,8 @@ const huntResultTier1Schema = lazySchema(() =>
           path: ['returned_hits'],
         }),
       per_index: z.array(huntResultPerIndexSchema).max(20),
-      // Optional on the SSE copy only (D5): Tier 1 keeps writing it on HuntForThreatResult;
-      // Layer 5 stops copying it onto the attachment. Readers must treat absence as [].
+      // Optional on the SSE copy only: Tier 1 always writes it on HuntForThreatResult, and
+      // the SSE mapper may omit it (`searched_ioc_count` stands in). Readers treat absence as [].
       resolved_iocs: z.array(HuntIoc).max(50).optional(),
       // Tier 1 can produce more rows than either array holds (500 `_index` buckets, 100
       // request IOCs). Same contract as the Tier 2 `affected_*_truncated` flags: set when the
