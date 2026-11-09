@@ -17,6 +17,8 @@ import {
 } from '@kbn/alerting-v2-constants';
 import type { AttachRuleToolDeps } from '../tools/attach_rule';
 import { attachRuleTool } from '../tools/attach_rule';
+import type { LinkRuleAndActionPolicyToolDeps } from '../tools/link_rule_and_action_policy';
+import { linkRuleAndActionPolicyTool } from '../tools/link_rule_and_action_policy';
 import type { ManageRuleToolDeps } from '../tools/manage_rule';
 import { manageRuleTool } from '../tools/manage_rule';
 import {
@@ -30,7 +32,8 @@ import {
 } from './schema_to_skill_docs';
 
 type RuleAuthoringSkillDeps = ManageRuleToolDeps &
-  AttachRuleToolDeps & { availability: AvailabilityConfig };
+  AttachRuleToolDeps &
+  LinkRuleAndActionPolicyToolDeps & { availability: AvailabilityConfig };
 
 export const createRuleAuthoringSkill = (deps: RuleAuthoringSkillDeps) =>
   defineSkillType({
@@ -215,6 +218,10 @@ When the user wants alerts to recover only when a condition is met, to never rec
 When the user asks what happens if data stops arriving (missing metrics, heartbeat, "keep the last status", "alert me when the data stops"), use \`set_no_data\`. Consult the [no-data-strategy reference](./references/no-data-strategy.md).
 
 ### Notifications
-When the user asks for email, Slack, PagerDuty, or how rules send notifications, consult the [notifications-overview reference](./references/notifications-overview.md).`,
-    getInlineTools: () => [manageRuleTool(deps), attachRuleTool(deps)],
+When the user asks for email, Slack, PagerDuty, or how rules send notifications, consult the [notifications-overview reference](./references/notifications-overview.md). To make an existing action policy attachment notify on this rule, call \`${ALERTING_TOOL_IDS.linkRuleAndActionPolicy}\`; never set \`routing_tags\` by hand for that.`,
+    getInlineTools: () => [
+      manageRuleTool(deps),
+      attachRuleTool(deps),
+      linkRuleAndActionPolicyTool(deps),
+    ],
   });

@@ -14,6 +14,7 @@ import {
 import type { AttachActionPolicyToolDeps } from '../tools/attach_action_policy';
 import type { AttachRuleToolDeps } from '../tools/attach_rule';
 import type { FindActionPoliciesToolDeps } from '../tools/find_action_policies';
+import type { LinkRuleAndActionPolicyToolDeps } from '../tools/link_rule_and_action_policy';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
 import type { ManageRuleToolDeps } from '../tools/manage_rule';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
@@ -24,7 +25,8 @@ export type RegisterSkillsDeps = ManageRuleToolDeps &
   AttachRuleToolDeps &
   ManageActionPolicyToolDeps &
   FindActionPoliciesToolDeps &
-  AttachActionPolicyToolDeps & {
+  AttachActionPolicyToolDeps &
+  LinkRuleAndActionPolicyToolDeps & {
     availability: AvailabilityConfig;
   };
 
