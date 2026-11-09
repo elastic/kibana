@@ -9,6 +9,7 @@
 
 import React, { createContext, useContext, useId, useMemo, type ReactNode } from 'react';
 import type { EuiPageHeaderProps } from '@elastic/eui';
+import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { KibanaContentListPageActiveTab } from './active_tab';
 
@@ -191,10 +192,16 @@ const KibanaContentListPageRoot = ({
     () => ({ headingId, dataTestSubj }),
     [headingId, dataTestSubj]
   );
+  // POC: unpanelled in project chrome so the recessed glass frame shows through.
+  const isClassicChrome = useChromeStyle() === 'classic';
 
   return (
     <KibanaContentListPageContext.Provider value={contextValue}>
-      <KibanaPageTemplate panelled restrictWidth={restrictWidth} data-test-subj={dataTestSubj}>
+      <KibanaPageTemplate
+        panelled={isClassicChrome}
+        restrictWidth={restrictWidth}
+        data-test-subj={dataTestSubj}
+      >
         {children}
       </KibanaPageTemplate>
     </KibanaContentListPageContext.Provider>
