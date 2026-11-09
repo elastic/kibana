@@ -21,10 +21,16 @@ import type { AlertData } from '../../types';
 export function parseAlertDataForMatching(json: string): AlertData {
   const result: AlertData = {};
 
-  for (const [key, value] of Object.entries(parseDataJson(json))) {
-    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-      set(result, key.split('.'), value);
+  try {
+    for (const [key, value] of Object.entries(parseDataJson(json))) {
+      if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+        set(result, key.split('.'), value);
+      }
     }
+  } catch {
+    // Dotted keys that collide with array semantics (e.g. `a.length`) make
+    // `set` throw. Degrade to empty data rather than failing the dispatcher tick.
+    return {};
   }
 
   return result;

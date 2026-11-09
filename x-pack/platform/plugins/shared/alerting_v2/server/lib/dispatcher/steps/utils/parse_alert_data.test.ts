@@ -52,4 +52,11 @@ describe('parseAlertDataForMatching', () => {
       a: { b: { c: 'deep' } },
     });
   });
+
+  it('returns empty object when unflattening throws (dotted key collides with array semantics)', () => {
+    // `a.0` makes `set` create an array for `a`, then `a.length` assigns an
+    // invalid length and throws RangeError. Valid JSON, so it clears the JSON
+    // parse guard and exercises the unflattening boundary.
+    expect(parseAlertDataForMatching('{"a.0":"x","a.length":-1}')).toEqual({});
+  });
 });
