@@ -174,11 +174,14 @@ function SessionsList({
   serviceName,
   source,
   rebuilding,
+  updating,
   onRefreshStatus,
 }: {
   serviceName: string;
   source: ApplicationSource;
   rebuilding: boolean;
+  /** Whether a rebuild or an automatic update is still pending. */
+  updating: boolean;
   onRefreshStatus: () => void;
 }) {
   const apiClient = useApiClient();
@@ -260,14 +263,15 @@ function SessionsList({
     refresh();
     onRefreshStatus();
   }, [refresh, onRefreshStatus]);
-  // A finished rebuild has sessions the empty list was fetched without.
-  const wasRebuilding = useRef(rebuilding);
+  // A finished rebuild or update has sessions the list was fetched without. Watched as one, as an
+  // update can apply and finish its rebuild between two status checks.
+  const wasUpdating = useRef(updating);
   useEffect(() => {
-    if (wasRebuilding.current && !rebuilding) {
+    if (wasUpdating.current && !updating) {
       refresh();
     }
-    wasRebuilding.current = rebuilding;
-  }, [rebuilding, refresh]);
+    wasUpdating.current = updating;
+  }, [updating, refresh]);
   // Nothing has been fetched before the first request starts.
   const isLoading = loading || (!response && !error);
 
@@ -452,6 +456,7 @@ export function SessionsTab({
         serviceName={serviceName}
         source={source}
         rebuilding={status.rebuilding}
+        updating={pending}
         onRefreshStatus={refresh}
       />
     </>

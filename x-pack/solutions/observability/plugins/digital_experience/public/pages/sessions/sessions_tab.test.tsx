@@ -360,6 +360,25 @@ describe('SessionsTab', () => {
     setIntervalSpy.mockRestore();
   });
 
+  it('lists the sessions again once an automatic update finishes, even if its rebuild went unseen', async () => {
+    const setIntervalSpy = jest.spyOn(window, 'setInterval');
+    respondWith({ sessionsStatus: status({ needsUpdate: true, autoUpdate: true }) });
+    renderTab();
+    expect(await screen.findByTestId('digitalExperienceSessionRow-session-1')).toBeInTheDocument();
+    const listFetches = () =>
+      mockFetch.mock.calls.filter(([endpoint]) => endpoint === LIST_ENDPOINT).length;
+    const fetchedBefore = listFetches();
+    const [poll] = setIntervalSpy.mock.calls.find(([, delay]) => delay === 30_000) ?? [];
+    expect(poll).toBeDefined();
+
+    // The update and its first checkpoint both finished since the last check.
+    respondWith({ sessionsStatus: status() });
+    await act(async () => (poll as () => void)());
+
+    await waitFor(() => expect(listFetches()).toBe(fetchedBefore + 1));
+    setIntervalSpy.mockRestore();
+  });
+
   it('shows a failing transform with its reason', async () => {
     respondWith({
       sessionsStatus: status({ health: 'degraded', reason: 'Transform failed: out of memory' }),
